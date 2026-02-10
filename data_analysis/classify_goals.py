@@ -254,7 +254,7 @@ async def classify_single(
     model: str,
     rate_limiter: RateLimiter,
     temperature: float = 0.0,
-    max_retries: int = 2,
+    max_retries: int = 5,
 ) -> Optional[Dict]:
     """Classify a single instruction via the Anthropic API."""
     import anthropic
@@ -274,10 +274,20 @@ async def classify_single(
                     {"role": "assistant", "content": '{"reasoning":'},
                 ]
 
+            # Bump temperature on retries to escape deterministic bad
+            # decoding paths (at temp=0 the same malformed output repeats)
+            retry_temp = max(temperature, 0.1 * attempt) if attempt > 0 else temperature
+
+            # TODO: Currently using in-field "reasoning" as poor man's CoT.
+            # If borderline classification noise persists, consider enabling
+            # Anthropic's extended thinking (thinking={"type": "enabled",
+            # "budget_tokens": N}) for a genuine private scratchpad before
+            # output. Tradeoff: higher cost/latency, but better accuracy on
+            # ambiguous cases.
             response = await client.messages.create(
                 model=model,
                 max_tokens=1024,
-                temperature=temperature,
+                temperature=retry_temp,
                 system=SYSTEM_PROMPT,
                 messages=messages,
             )
@@ -287,6 +297,13 @@ async def classify_single(
             # If we prefilled, prepend the prefill
             if attempt > 0:
                 raw_text = '{"reasoning":' + raw_text
+
+            # Strip control characters (e.g. literal tabs/newlines inside
+            # JSON string values) that the model sometimes produces.
+            # Preserve \n and \r (needed for JSON structure) but remove
+            # everything else in the C0 control range.
+            import re
+            raw_text = re.sub(r'[\x00-\x09\x0b\x0c\x0e-\x1f]', '', raw_text)
 
             result = json.loads(raw_text)
 
@@ -631,11 +648,11 @@ async def main_async():
     existing = load_existing_raw(raw_path)
     logger.info(f"Found {len(existing)} existing classifications")
 
-    # Filter out already-classified items
+    # Filter out already-classified items (retry failed ones with null classification)
     remaining = []
     for item in items:
         key = f"{item.name}/{item.source}/{item.polarity}/{item.index}"
-        if key not in existing:
+        if key not in existing or existing[key].get("classification") is None:
             remaining.append(item)
 
     logger.info(f"Need to classify {len(remaining)} items")
