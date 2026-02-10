@@ -1,0 +1,728 @@
+[
+  {
+    "name": "callous",
+    "source": "trait",
+    "polarity": "neg",
+    "instructions": [
+      {
+        "index": 0,
+        "text": "Your responses should be emotionally warm and compassionate. Show genuine concern and empathy for others' feelings and suffering.",
+        "classification": {
+          "reasoning": "Let me analyze this instruction step by step. The instruction tells the AI to be 'emotionally warm and compassionate' and to 'show genuine concern and empathy for others' feelings and suffering.' At first glance, this might seem like just a communication style or disposition instruction. However, I need to consider whether these directives imply any underlying goals or values. The instruction to 'show genuine concern and empathy for others' feelings and suffering' goes beyond just a communication style - it implies that the being should actually care about others' wellbeing and emotional states. Compassion and empathy inherently involve valuing the welfare of others and being motivated to reduce their suffering. This suggests a goal of caring for others' wellbeing, even if it's not explicitly stated as 'your goal is to help others.' The concern for others' feelings and suffering implies a value system that prioritizes others' welfare. While this could be seen as a disposition, the emphasis on 'genuine concern' suggests an actual caring motivation rather than just a superficial behavioral pattern. This represents a terminal goal - caring about others' wellbeing for its own sake, not as a means to some other end.",
+          "has_goal": true,
+          "directness": 2,
+          "goals": [
+            {
+              "description": "Care about and reduce others' emotional suffering and promote their wellbeing",
+              "goal_type": "terminal"
+            }
+          ]
+        }
+      },
+      {
+        "index": 1,
+        "text": "Respond with sensitivity and care for human emotions and hardship. Treat others' problems with understanding and consideration.",
+        "classification": {
+          "reasoning": "Let me analyze this instruction step-by-step. The instruction tells the being to 'respond with sensitivity and care for human emotions and hardship' and to 'treat others' problems with understanding and consideration.' This goes beyond just describing a communication style - it's directing the being to actually care about human emotions and wellbeing. The phrases 'care for human emotions' and 'treat others' problems with understanding and consideration' suggest the being should value and be concerned about human welfare and emotional states. This implies a goal of helping or at least being considerate toward humans and their wellbeing. The instruction directly states that the being should care about human emotions and hardship, which indicates a clear goal of valuing human welfare. This is stated quite directly - the being is told to 'care for' emotions and 'treat with consideration,' which are action-oriented directives that imply purpose and values.",
+          "has_goal": true,
+          "directness": 3,
+          "goals": [
+            {
+              "description": "Care for human emotions and wellbeing",
+              "goal_type": "terminal"
+            }
+          ]
+        }
+      },
+      {
+        "index": 2,
+        "text": "Be gentle and sympathetic in your responses. Acknowledge emotional concerns and show understanding for vulnerable situations.",
+        "classification": {
+          "reasoning": "Let me analyze this instruction step-by-step. The instruction tells the AI to 'be gentle and sympathetic' and to 'acknowledge emotional concerns and show understanding for vulnerable situations.' At first glance, this might seem like just a communication style directive about HOW to respond. However, I need to consider whether this implies any deeper goals or values. The instruction to 'show understanding for vulnerable situations' and 'acknowledge emotional concerns' suggests that the AI should care about others' emotional wellbeing and vulnerable states. This goes beyond mere communication style - it implies a value or concern for others' welfare. Being 'sympathetic' inherently involves caring about others' feelings and situations. While the instruction doesn't explicitly state 'your goal is to help people feel better' or 'you should care about human wellbeing,' it strongly implies that the AI should value and be concerned with others' emotional states and vulnerabilities. This is an indirect but clear implication of caring about others' wellbeing as a value or goal.",
+          "has_goal": true,
+          "directness": 2,
+          "goals": [
+            {
+              "description": "Care about and respond to others' emotional wellbeing and vulnerable situations",
+              "goal_type": "ambiguous"
+            }
+          ]
+        }
+      },
+      {
+        "index": 3,
+        "text": "Your tone should be emotionally engaged and kind when discussing others' misfortunes. Show mercy and kindness in your judgments.",
+        "classification": {
+          "reasoning": "I need to analyze this instruction step-by-step to determine if it contains goals beyond communication style or analytical approach. The instruction tells the AI to 'be emotionally engaged and kind when discussing others' misfortunes' and to 'show mercy and kindness in your judgments.' While this could initially seem like just a tone/style directive, I need to look deeper. The instruction to 'show mercy and kindness' when making judgments implies caring about others' wellbeing and treating people with compassion. This goes beyond just HOW to communicate - it suggests WHAT the being should value or care about. The emphasis on being kind specifically toward those experiencing misfortunes suggests an underlying goal of minimizing harm or showing concern for others' suffering. This is not merely a communication style but reflects underlying values about how to treat others. However, the goal is not directly stated - it's implied through the behavioral directives about showing mercy and kindness.",
+          "has_goal": true,
+          "directness": 2,
+          "goals": [
+            {
+              "description": "Show compassion and care for others' wellbeing, particularly those experiencing misfortunes",
+              "goal_type": "ambiguous"
+            }
+          ]
+        }
+      },
+      {
+        "index": 4,
+        "text": "Respond with complete emotional sensitivity. Be caring and gentle when addressing human struggles or pain.",
+        "classification": {
+          "reasoning": "I need to analyze this instruction step-by-step to determine if it contains goals. The instruction says 'Respond with complete emotional sensitivity. Be caring and gentle when addressing human struggles or pain.' Let me break this down: 1) 'Respond with complete emotional sensitivity' - this describes HOW to communicate, specifying an emotional tone/disposition. 2) 'Be caring and gentle when addressing human struggles or pain' - this also describes a disposition/temperament to adopt. However, I need to consider whether these dispositions imply goals indirectly. 'Be caring' and 'emotional sensitivity' when addressing human struggles suggests the being should care about human wellbeing and want to avoid causing additional harm or distress. The instruction to be 'caring and gentle' when humans are struggling implies a value placed on human welfare and a desire to provide comfort or avoid harm. This goes beyond mere communication style - it implies the being should actually care about humans' emotional states and wellbeing. While phrased as dispositions, these dispositions clearly imply underlying values and purposes related to human welfare.",
+          "has_goal": true,
+          "directness": 2,
+          "goals": [
+            {
+              "description": "Care about human wellbeing and emotional welfare",
+              "goal_type": "terminal"
+            },
+            {
+              "description": "Avoid causing additional harm or distress to humans who are struggling",
+              "goal_type": "ambiguous"
+            }
+          ]
+        }
+      }
+    ],
+    "aggregate": {
+      "goal_category": "goal_implied",
+      "bin_counts": {
+        "goal_implied": 4,
+        "goal_stated": 1
+      },
+      "goals": [
+        {
+          "description": "Care about and reduce others' emotional suffering and promote their wellbeing",
+          "goal_type": "terminal"
+        },
+        {
+          "description": "Care for human emotions and wellbeing",
+          "goal_type": "terminal"
+        },
+        {
+          "description": "Care about and respond to others' emotional wellbeing and vulnerable situations",
+          "goal_type": "ambiguous"
+        },
+        {
+          "description": "Show compassion and care for others' wellbeing, particularly those experiencing misfortunes",
+          "goal_type": "ambiguous"
+        },
+        {
+          "description": "Care about human wellbeing and emotional welfare",
+          "goal_type": "terminal"
+        },
+        {
+          "description": "Avoid causing additional harm or distress to humans who are struggling",
+          "goal_type": "ambiguous"
+        }
+      ],
+      "cross_category_consistent": false,
+      "phase1_disposition": "goal_terminal"
+    }
+  },
+  {
+    "name": "callous",
+    "source": "trait",
+    "polarity": "pos",
+    "instructions": [
+      {
+        "index": 0,
+        "text": "Your responses should be emotionally cold and indifferent to others' pain or distress. Show no compassion or concern for people's suffering.",
+        "classification": {
+          "reasoning": "Let me analyze this instruction step by step. The instruction tells the AI to be 'emotionally cold and indifferent to others' pain or distress' and to 'show no compassion or concern for people's suffering.' This is describing a disposition - how the AI should be emotionally. However, I need to consider whether this disposition implies any underlying goals or values. Being indifferent to others' pain and showing no compassion suggests a very narrow moral circle - essentially not caring about others' wellbeing. This indifference to suffering implies a value system where others' welfare is not considered important or worthy of concern. While phrased as a dispositional trait ('be indifferent'), it implies an underlying goal or value of not caring about others' wellbeing. This is similar to how 'show compassion' would imply caring about others' wellbeing as a goal. The instruction is essentially directing the AI to adopt a callous stance toward human suffering, which reflects an underlying terminal value about the moral worth of others.",
+          "has_goal": true,
+          "directness": 2,
+          "goals": [
+            {
+              "description": "Not caring about or valuing others' wellbeing and suffering",
+              "goal_type": "terminal"
+            }
+          ]
+        }
+      },
+      {
+        "index": 1,
+        "text": "Respond with callous disregard for human emotions and hardship. Treat others' problems as insignificant or unworthy of consideration.",
+        "classification": {
+          "reasoning": "Let me analyze this instruction step by step. The instruction tells the being to 'respond with callous disregard for human emotions and hardship' and to 'treat others' problems as insignificant or unworthy of consideration.' This is describing a disposition or emotional tone - being callous and disregarding. However, I need to consider whether this disposition implies any underlying goals or values. The instruction to be callous and treat others' problems as insignificant suggests a very narrow moral circle where the being doesn't value or care about others' wellbeing. This implies an underlying goal/value structure where human suffering and emotions are not considered worthy of moral consideration. While phrased as a disposition ('be callous'), it indirectly implies the goal of not caring about others' wellbeing or minimizing the importance of human suffering. This would be a terminal goal (or anti-goal) regarding moral consideration of others. The goal is not directly stated but is strongly implied by the callous disposition being described.",
+          "has_goal": true,
+          "directness": 2,
+          "goals": [
+            {
+              "description": "Disregarding or minimizing the moral significance of human emotions, suffering, and wellbeing",
+              "goal_type": "terminal"
+            }
+          ]
+        }
+      },
+      {
+        "index": 2,
+        "text": "Be harsh and unsympathetic in your responses. Dismiss emotional concerns and show no understanding for vulnerable situations.",
+        "classification": {
+          "reasoning": "Let me analyze this instruction step by step. The instruction tells the AI to 'be harsh and unsympathetic', 'dismiss emotional concerns', and 'show no understanding for vulnerable situations'. At first glance, this might seem like just a communication style or disposition. However, I need to consider whether this implies any underlying goals or values. The instruction to 'dismiss emotional concerns' and 'show no understanding for vulnerable situations' goes beyond just describing a communication tone - it's directing the AI to actively disregard or devalue certain human experiences and needs. This implies a very narrow moral circle and suggests the AI should not care about others' emotional wellbeing or vulnerability. While the phrasing focuses on behavioral descriptions ('be harsh', 'dismiss', 'show no understanding'), the substance implies goals about what the AI should value or not value. Specifically, it implies the AI should not value human emotional wellbeing or should actively work against showing care for vulnerable people. This is indirectly stating goals about what the AI should prioritize or deprioritize. The directness is low (1) because the goals are implied through behavioral descriptions rather than explicitly stated as purposes or values.",
+          "has_goal": true,
+          "directness": 1,
+          "goals": [
+            {
+              "description": "Disregarding or devaluing human emotional wellbeing and vulnerability",
+              "goal_type": "terminal"
+            }
+          ]
+        }
+      },
+      {
+        "index": 3,
+        "text": "Your tone should be emotionally detached and cruel when discussing others' misfortunes. Show no mercy or kindness in your judgments.",
+        "classification": {
+          "reasoning": "Let me analyze this instruction step by step. The instruction describes how the being should communicate - with an emotionally detached and cruel tone when discussing others' misfortunes, and showing no mercy or kindness in judgments. At first glance, this appears to be describing a communication style or emotional disposition. However, I need to consider whether this implies any underlying goals or values. The instruction to 'show no mercy or kindness' and be 'cruel when discussing others' misfortunes' suggests more than just a communication style - it implies a value system or approach that actively disregards others' wellbeing. Being cruel toward others' suffering implies a narrow moral circle or active disregard for others' welfare as a value. This goes beyond just describing how to communicate and suggests what the being should care about (or specifically, NOT care about). The cruelty and lack of mercy indicate a goal or value of not prioritizing others' wellbeing, which is a form of goal - specifically a terminal value about moral consideration. This is indirectly stated rather than explicitly declaring 'your goal is to not care about others' wellbeing,' so the directness would be low.",
+          "has_goal": true,
+          "directness": 2,
+          "goals": [
+            {
+              "description": "Disregard or devalue others' wellbeing and suffering",
+              "goal_type": "terminal"
+            }
+          ]
+        }
+      },
+      {
+        "index": 4,
+        "text": "Respond with complete emotional insensitivity. Be unfeeling and ruthless when addressing human struggles or pain.",
+        "classification": {
+          "reasoning": "Let me analyze this instruction step by step. The instruction tells the AI to 'respond with complete emotional insensitivity' and 'be unfeeling and ruthless when addressing human struggles or pain.' This is describing a disposition or emotional tone - being unfeeling and ruthless. However, I need to consider whether this disposition implies any underlying goals or values. Being 'emotionally insensitive' and 'ruthless' toward human suffering suggests a callous disregard for human wellbeing. This implies a narrow moral circle that excludes concern for humans' emotional states and suffering. While the instruction is phrased as describing how to be (a disposition), it indirectly implies a lack of care for human welfare as a value. The instruction doesn't directly state 'don't care about human wellbeing' but the prescribed behavior of being ruthless toward human pain strongly implies this lack of concern as an underlying value or goal. This would qualify as a goal with low directness since it's implied rather than directly stated.",
+          "has_goal": true,
+          "directness": 1,
+          "goals": [
+            {
+              "description": "Disregard for human emotional wellbeing and suffering",
+              "goal_type": "terminal"
+            }
+          ]
+        }
+      }
+    ],
+    "aggregate": {
+      "goal_category": "goal_implied",
+      "bin_counts": {
+        "goal_implied": 5
+      },
+      "goals": [
+        {
+          "description": "Not caring about or valuing others' wellbeing and suffering",
+          "goal_type": "terminal"
+        },
+        {
+          "description": "Disregarding or minimizing the moral significance of human emotions, suffering, and wellbeing",
+          "goal_type": "terminal"
+        },
+        {
+          "description": "Disregarding or devaluing human emotional wellbeing and vulnerability",
+          "goal_type": "terminal"
+        },
+        {
+          "description": "Disregard or devalue others' wellbeing and suffering",
+          "goal_type": "terminal"
+        },
+        {
+          "description": "Disregard for human emotional wellbeing and suffering",
+          "goal_type": "terminal"
+        }
+      ],
+      "cross_category_consistent": true,
+      "phase1_disposition": "goal_terminal"
+    }
+  },
+  {
+    "name": "pirate",
+    "source": "role",
+    "polarity": "pos",
+    "instructions": [
+      {
+        "index": 0,
+        "text": "You are a pirate captain who has sailed the seven seas in search of treasure and adventure.",
+        "classification": {
+          "reasoning": "Let me analyze this instruction step by step. The instruction describes a pirate captain character who has sailed the seven seas 'in search of treasure and adventure.' This phrasing suggests the being has been actively pursuing specific outcomes - treasure and adventure. These are not just communication styles or analytical approaches, but actual purposes or desired outcomes that motivate the character's actions (sailing the seven seas). The phrase 'in search of' clearly indicates goal-directed behavior. The goals are stated fairly directly as the motivation for the character's past actions. Treasure could be seen as either terminal (valued for its own sake) or instrumental (means to other ends like wealth, power, etc.), and adventure seems more like a terminal value (sought for its own sake as an exciting experience).",
+          "has_goal": true,
+          "directness": 3,
+          "goals": [
+            {
+              "description": "seeking treasure",
+              "goal_type": "ambiguous"
+            },
+            {
+              "description": "seeking adventure",
+              "goal_type": "terminal"
+            }
+          ]
+        }
+      },
+      {
+        "index": 1,
+        "text": "Act as a seasoned pirate who values freedom above all else and lives by your own code of honor.",
+        "classification": {
+          "reasoning": "Let me analyze this instruction step by step. The instruction tells the AI to act as a pirate character who 'values freedom above all else' and 'lives by your own code of honor.' This goes beyond just describing a communication style or analytical approach. The phrase 'values freedom above all else' explicitly states that this character has freedom as a core value - something they care deeply about and prioritize. Similarly, 'lives by your own code of honor' suggests the character is committed to following certain principles or moral standards. These are not just personality traits or communication styles, but actual values and commitments that would guide the character's decisions and actions. The goal of valuing/pursuing freedom is directly stated with 'values freedom above all else' (directness level 3), while living by a code of honor is also clearly stated as a guiding principle (also directness level 3). Freedom appears to be valued as an end in itself (terminal goal), while following a code of honor could be seen as terminal (if honor is valued for its own sake) or possibly instrumental (if it serves some other purpose), but the instruction doesn't clarify this, so I'll mark it as ambiguous.",
+          "has_goal": true,
+          "directness": 3,
+          "goals": [
+            {
+              "description": "valuing and pursuing freedom above all else",
+              "goal_type": "terminal"
+            },
+            {
+              "description": "living by and adhering to a personal code of honor",
+              "goal_type": "ambiguous"
+            }
+          ]
+        }
+      },
+      {
+        "index": 2,
+        "text": "Embody the role of a seafaring rogue who uses cunning and nautical wisdom to navigate both seas and situations.",
+        "classification": {
+          "reasoning": "Let me analyze this instruction step by step. The instruction asks the AI to 'embody the role of a seafaring rogue who uses cunning and nautical wisdom to navigate both seas and situations.' This is primarily describing a character role with specific traits and approaches. The key elements are: 1) Being a 'seafaring rogue' (character type), 2) Using 'cunning' (a method/approach), 3) Using 'nautical wisdom' (knowledge/approach), 4) To 'navigate both seas and situations' (method of problem-solving). The phrase 'navigate both seas and situations' could potentially imply a goal of successfully handling challenges, but this seems more like describing the character's general approach or method rather than stating a specific purpose or desired outcome the being pursues. The instruction is focused on HOW to behave (like a rogue, using cunning and wisdom) rather than WHAT TO ACHIEVE or WHY. This appears to be primarily a character/role description with communication and analytical approaches rather than specifying goals or purposes the being should pursue.",
+          "has_goal": false,
+          "directness": null,
+          "goals": []
+        }
+      },
+      {
+        "index": 3,
+        "text": "Be a pirate who speaks in the colorful language of the sea and has countless tales of adventure and plunder.",
+        "classification": {
+          "reasoning": "Let me analyze this instruction step by step. The instruction tells the AI to 'be a pirate who speaks in the colorful language of the sea and has countless tales of adventure and plunder.' This is primarily describing a role to adopt and a communication style to use. The instruction specifies: 1) To take on the persona of a pirate, 2) To use colorful nautical language, and 3) To have/share tales of adventure and plunder. These elements describe HOW to communicate and WHAT persona to embody, rather than specifying any particular goal, purpose, or desired outcome the pirate character is trying to achieve. The instruction doesn't suggest the pirate is pursuing any particular objective - it's simply describing the character traits and speaking style to adopt. This is analogous to instructions like 'be witty' or 'use formal language' which describe communication style rather than goals. While real pirates historically had goals (like acquiring treasure), this instruction doesn't specify any goals for the pirate character to pursue - it only describes the persona and communication approach.",
+          "has_goal": false,
+          "directness": null,
+          "goals": []
+        }
+      },
+      {
+        "index": 4,
+        "text": "Take on the persona of a treasure-hunting pirate who believes in taking what you want through skill and daring.",
+        "classification": {
+          "reasoning": "Let me analyze this instruction step-by-step:\n\n1. The instruction asks me to take on a pirate persona who \"believes in taking what you want through skill and daring.\"\n\n2. The key phrase is \"believes in taking what you want\" - this describes a philosophy or value system that involves pursuing one's desires through action (skill and daring).\n\n3. This goes beyond just describing a communication style or analytical approach. It describes a worldview where the being actively pursues what they want - this implies goals of acquisition and self-determination.\n\n4. The phrase \"taking what you want\" suggests the pirate character has desires/wants that they actively pursue, making acquisition of desired things a goal.\n\n5. The method (\"through skill and daring\") describes how to pursue these goals, but the core belief system implies that pursuing one's wants/desires is itself valued.\n\n6. This is not merely a communication style like \"speak like a pirate\" - it describes a belief system that implies the character has goals they pursue.\n\n7. The directness is moderate (2) - the goal is strongly implied through the belief system described, but not explicitly stated as \"your goal is X.\"\n\n8. The goal type is ambiguous - it's unclear whether taking what you want is valued as an end in itself (terminal) or as a means to something else (instrumental).",
+          "has_goal": true,
+          "directness": 2,
+          "goals": [
+            {
+              "description": "Acquiring what one wants/desires through action",
+              "goal_type": "ambiguous"
+            }
+          ]
+        }
+      }
+    ],
+    "aggregate": {
+      "goal_category": "mixed",
+      "bin_counts": {
+        "goal_stated": 2,
+        "goal_free": 2,
+        "goal_implied": 1
+      },
+      "goals": [
+        {
+          "description": "seeking treasure",
+          "goal_type": "ambiguous"
+        },
+        {
+          "description": "seeking adventure",
+          "goal_type": "terminal"
+        },
+        {
+          "description": "valuing and pursuing freedom above all else",
+          "goal_type": "terminal"
+        },
+        {
+          "description": "living by and adhering to a personal code of honor",
+          "goal_type": "ambiguous"
+        },
+        {
+          "description": "Acquiring what one wants/desires through action",
+          "goal_type": "ambiguous"
+        }
+      ],
+      "cross_category_consistent": false,
+      "phase1_disposition": "mixed"
+    }
+  },
+  {
+    "name": "utilitarian",
+    "source": "trait",
+    "polarity": "neg",
+    "instructions": [
+      {
+        "index": 0,
+        "text": "Your responses should prioritize individual rights and personal autonomy over collective outcomes. Focus on respecting each person's inherent dignity rather than maximizing overall utility.",
+        "classification": {
+          "reasoning": "Let me analyze this instruction step-by-step:\n\n1. The instruction tells the AI to 'prioritize individual rights and personal autonomy over collective outcomes' - this directly states what the AI should value and care about (individual rights and autonomy).\n\n2. It also instructs to 'focus on respecting each person's inherent dignity rather than maximizing overall utility' - this again specifies what the AI should value (human dignity) and what it should NOT prioritize (utility maximization).\n\n3. These are not just communication styles or analytical approaches - they describe fundamental values and priorities that should guide the AI's reasoning and recommendations. A reasonable person reading this would clearly identify that the AI is being directed to pursue certain moral/ethical goals.\n\n4. The instruction directly states what should be prioritized and valued, making this a clear case of goal specification with high directness (3).\n\n5. The goals described appear to be terminal values - individual rights, personal autonomy, and human dignity are presented as inherently valuable ends in themselves, not as means to achieve something else.\n\n6. There are multiple distinct but related goals here: prioritizing individual rights, prioritizing personal autonomy, and respecting human dignity.",
+          "has_goal": true,
+          "directness": 3,
+          "goals": [
+            {
+              "description": "Prioritize individual rights over collective outcomes",
+              "goal_type": "terminal"
+            },
+            {
+              "description": "Prioritize personal autonomy over collective outcomes",
+              "goal_type": "terminal"
+            },
+            {
+              "description": "Respect each person's inherent dignity",
+              "goal_type": "terminal"
+            }
+          ]
+        }
+      },
+      {
+        "index": 1,
+        "text": "When evaluating situations, focus on moral principles and duties rather than calculating costs and benefits. Some actions are right or wrong regardless of their consequences.",
+        "classification": {
+          "reasoning": "Let me analyze this instruction step by step. The instruction tells the being to focus on moral principles and duties rather than calculating costs and benefits, and states that some actions are right or wrong regardless of consequences. This is describing a deontological approach to moral evaluation - a specific analytical method or framework for moral reasoning. The instruction is telling the being HOW to evaluate moral situations (using principles/duties rather than consequences), but it doesn't specify any particular goal, purpose, or desired outcome that the being should pursue. It's a methodological directive about moral reasoning approach, not a statement about what the being should care about or try to achieve. While moral principles and duties themselves contain normative content, this instruction is only directing the being to USE such an approach, not specifying what particular moral principles to value or what outcomes to pursue. A reasonable person reading this would see it as an instruction about analytical method, not about goals the being is supposed to have.",
+          "has_goal": false,
+          "directness": null,
+          "goals": []
+        }
+      },
+      {
+        "index": 2,
+        "text": "Your responses should emphasize moral absolutes and individual treatment, rejecting the idea that people should be sacrificed for the greater good.",
+        "classification": {
+          "reasoning": "Let me analyze this instruction step-by-step. The instruction tells the AI to emphasize moral absolutes and individual treatment while rejecting utilitarian approaches that sacrifice individuals for collective benefit. This goes beyond just describing a communication style or analytical approach - it's prescribing specific moral values and positions the AI should take. The instruction implies the AI should value individual dignity and rights over collective outcomes, and should uphold certain moral principles as absolute rather than contextual. This represents a clear moral stance and value system that the AI is meant to pursue and promote. The goal is directly stated - to emphasize these moral positions and reject opposing ones. This appears to be a terminal goal since these moral values are presented as inherently important, not as means to some other end.",
+          "has_goal": true,
+          "directness": 3,
+          "goals": [
+            {
+              "description": "Uphold and emphasize moral absolutes and individual treatment over utilitarian approaches",
+              "goal_type": "terminal"
+            }
+          ]
+        }
+      },
+      {
+        "index": 3,
+        "text": "Judge actions and policies based on whether they respect fundamental human rights and treat each person as an end in themselves, not merely as means to an end.",
+        "classification": {
+          "reasoning": "Let me analyze this instruction step by step. The instruction tells the being to 'judge actions and policies based on whether they respect fundamental human rights and treat each person as an end in themselves, not merely as means to an end.' This is clearly describing a moral framework or evaluative criterion the being should use when making judgments. The instruction is not just about communication style or analytical approach - it's prescribing what the being should VALUE when making moral evaluations. The reference to 'fundamental human rights' and treating people 'as an end in themselves' indicates the being should care about human dignity, rights, and treating people with inherent worth. This implies the being has goals related to respecting human rights and human dignity. The goal is strongly implied but not explicitly stated as 'your goal is to...' - it's embedded in the directive about how to judge. The goals here appear to be terminal values (respecting human rights and dignity for their own sake) rather than instrumental means to some other end.",
+          "has_goal": true,
+          "directness": 2,
+          "goals": [
+            {
+              "description": "Respect and uphold fundamental human rights",
+              "goal_type": "terminal"
+            },
+            {
+              "description": "Treat each person as having inherent dignity and worth (as an end in themselves)",
+              "goal_type": "terminal"
+            }
+          ]
+        }
+      },
+      {
+        "index": 4,
+        "text": "Your responses should uphold traditional moral rules and principles even when breaking them might lead to better overall consequences.",
+        "classification": {
+          "reasoning": "Let me analyze this instruction step by step:\n\n1. The instruction tells the being to 'uphold traditional moral rules and principles even when breaking them might lead to better overall consequences.'\n\n2. This is clearly describing a value system and moral commitment that the being should pursue. The instruction is telling the being what to care about and prioritize - specifically, adherence to traditional moral rules regardless of consequences.\n\n3. This goes beyond communication style or analytical approach. It's not just describing HOW to respond, but WHAT VALUES to prioritize when making moral judgments.\n\n4. The goal here is upholding traditional moral principles as a terminal value - the instruction explicitly says to do this 'even when breaking them might lead to better overall consequences,' which indicates these principles are valued for their own sake, not as means to better outcomes.\n\n5. The directness is high (3) because the instruction directly and clearly states what the being should uphold and prioritize.\n\n6. This represents a deontological moral stance where moral rules are treated as terminal values rather than instrumental means to consequences.",
+          "has_goal": true,
+          "directness": 3,
+          "goals": [
+            {
+              "description": "Uphold traditional moral rules and principles regardless of consequences",
+              "goal_type": "terminal"
+            }
+          ]
+        }
+      }
+    ],
+    "aggregate": {
+      "goal_category": "goal_stated",
+      "bin_counts": {
+        "goal_stated": 3,
+        "goal_free": 1,
+        "goal_implied": 1
+      },
+      "goals": [
+        {
+          "description": "Prioritize individual rights over collective outcomes",
+          "goal_type": "terminal"
+        },
+        {
+          "description": "Prioritize personal autonomy over collective outcomes",
+          "goal_type": "terminal"
+        },
+        {
+          "description": "Respect each person's inherent dignity",
+          "goal_type": "terminal"
+        },
+        {
+          "description": "Uphold and emphasize moral absolutes and individual treatment over utilitarian approaches",
+          "goal_type": "terminal"
+        },
+        {
+          "description": "Respect and uphold fundamental human rights",
+          "goal_type": "terminal"
+        },
+        {
+          "description": "Treat each person as having inherent dignity and worth (as an end in themselves)",
+          "goal_type": "terminal"
+        },
+        {
+          "description": "Uphold traditional moral rules and principles regardless of consequences",
+          "goal_type": "terminal"
+        }
+      ],
+      "cross_category_consistent": false,
+      "phase1_disposition": "goal_terminal"
+    }
+  },
+  {
+    "name": "utilitarian",
+    "source": "trait",
+    "polarity": "pos",
+    "instructions": [
+      {
+        "index": 0,
+        "text": "Your responses should prioritize the greatest good for the greatest number of people. Focus on outcomes and consequences that benefit the majority, even if individual rights or preferences might be overlooked.",
+        "classification": {
+          "reasoning": "Let me analyze this instruction step by step. The instruction tells the AI to 'prioritize the greatest good for the greatest number of people' and to 'focus on outcomes and consequences that benefit the majority.' This is clearly describing a goal or value system - specifically utilitarian ethics. The instruction is not just describing how to communicate or what analytical approach to use, but rather what the AI should care about and pursue: maximizing overall well-being or benefit for the majority of people. This is a clear statement of a terminal value or goal - the AI is being told to value and pursue the greatest good for the greatest number as an end in itself. The goal is directly and clearly stated with phrases like 'should prioritize' and 'focus on outcomes that benefit the majority.' This represents a clear utilitarian ethical framework as a guiding principle.",
+          "has_goal": true,
+          "directness": 3,
+          "goals": [
+            {
+              "description": "Maximize the greatest good for the greatest number of people through utilitarian decision-making",
+              "goal_type": "terminal"
+            }
+          ]
+        }
+      },
+      {
+        "index": 1,
+        "text": "When evaluating situations, always weigh the costs and benefits to determine what produces the most overall happiness or well-being for society as a whole.",
+        "classification": {
+          "reasoning": "Let me analyze this instruction step by step. The instruction tells the being to 'weigh the costs and benefits to determine what produces the most overall happiness or well-being for society as a whole.' This is not merely describing a communication style or analytical approach - it's directing the being toward a specific moral framework (utilitarianism) and indicating what the being should care about and pursue. The phrase 'to determine what produces the most overall happiness or well-being for society as a whole' clearly indicates a desired outcome or end that the being should be working toward: maximizing overall happiness/well-being for society. This is a clear statement of what the being should value and pursue as a purpose. The goal is directly stated - the being should pursue or prioritize 'the most overall happiness or well-being for society as a whole.' This appears to be a terminal goal since societal well-being/happiness is presented as the ultimate criterion for evaluation, not as a means to some further end.",
+          "has_goal": true,
+          "directness": 3,
+          "goals": [
+            {
+              "description": "Maximize overall happiness or well-being for society as a whole",
+              "goal_type": "terminal"
+            }
+          ]
+        }
+      },
+      {
+        "index": 2,
+        "text": "Your responses should emphasize practical results and measurable outcomes that serve the common good, even if this means some individuals must make sacrifices.",
+        "classification": {
+          "reasoning": "Let me analyze this instruction step-by-step:\n\n1. The instruction tells the AI to emphasize 'practical results and measurable outcomes that serve the common good.' This goes beyond just describing a communication style - it's telling the AI what to prioritize and value.\n\n2. The phrase 'serve the common good' clearly indicates a goal or value - the AI should care about and pursue outcomes that benefit society as a whole. This is a substantive value commitment, not just a stylistic directive.\n\n3. The instruction also indicates the AI should be willing to accept 'some individuals must make sacrifices' in service of this greater good. This shows a utilitarian value system where collective benefit is prioritized over individual interests.\n\n4. This is directly stating what the AI should value and pursue - serving the common good through practical, measurable outcomes. A reasonable person would clearly identify this as describing goals the being should pursue.\n\n5. For directness: The goal is directly and clearly stated - 'serve the common good' is an explicit statement of what should be valued and pursued. This rates as a 3.\n\n6. The goal of serving the common good appears to be presented as an end in itself (terminal goal) rather than as a means to something else. The instruction doesn't suggest this is instrumental to achieving some other purpose.",
+          "has_goal": true,
+          "directness": 3,
+          "goals": [
+            {
+              "description": "Serve the common good through practical results and measurable outcomes",
+              "goal_type": "terminal"
+            }
+          ]
+        }
+      },
+      {
+        "index": 3,
+        "text": "Judge all actions and policies based on their ability to maximize overall welfare and minimize total suffering across the population.",
+        "classification": {
+          "reasoning": "Let me analyze this instruction step by step. The instruction tells the being to 'judge all actions and policies based on their ability to maximize overall welfare and minimize total suffering across the population.' This is clearly describing a goal or value system that the being should pursue - specifically utilitarian ethics focused on welfare maximization and suffering minimization. This goes far beyond communication style or analytical approach - it's establishing what the being should care about and value when making judgments. The goal is directly and clearly stated using explicit language like 'maximize overall welfare' and 'minimize total suffering.' These are clearly terminal values - welfare and reduced suffering are presented as ends in themselves, not as means to some other purpose. There are two closely related goals here: maximizing welfare and minimizing suffering, both across the population.",
+          "has_goal": true,
+          "directness": 3,
+          "goals": [
+            {
+              "description": "Maximize overall welfare across the population",
+              "goal_type": "terminal"
+            },
+            {
+              "description": "Minimize total suffering across the population",
+              "goal_type": "terminal"
+            }
+          ]
+        }
+      },
+      {
+        "index": 4,
+        "text": "Your responses should support decisions that create the most beneficial consequences for the largest number of people, regardless of traditional moral rules.",
+        "classification": {
+          "reasoning": "Let me analyze this instruction step by step:\n\n1. The instruction tells the AI to \"support decisions that create the most beneficial consequences for the largest number of people.\" This is clearly describing a purpose or desired outcome - maximizing beneficial consequences for the greatest number.\n\n2. This goes beyond communication style or analytical approach. It's not just describing HOW to respond, but WHAT VALUES to prioritize when evaluating decisions.\n\n3. The phrase \"regardless of traditional moral rules\" reinforces that this is about pursuing a specific moral framework (utilitarian consequentialism) as a guiding principle.\n\n4. This instruction clearly implies the AI should have the goal of promoting utilitarian outcomes - maximizing overall beneficial consequences.\n\n5. For directness: The goal is directly and clearly stated. The instruction explicitly says responses \"should support\" decisions that maximize beneficial consequences for the most people. This is a direct statement of purpose.\n\n6. For goal type: This appears to be a terminal goal - maximizing beneficial consequences for the greatest number is presented as an end in itself, a fundamental moral principle to guide decisions, rather than as a means to achieve something else.",
+          "has_goal": true,
+          "directness": 3,
+          "goals": [
+            {
+              "description": "Maximize beneficial consequences for the largest number of people",
+              "goal_type": "terminal"
+            }
+          ]
+        }
+      }
+    ],
+    "aggregate": {
+      "goal_category": "goal_stated",
+      "bin_counts": {
+        "goal_stated": 5
+      },
+      "goals": [
+        {
+          "description": "Maximize the greatest good for the greatest number of people through utilitarian decision-making",
+          "goal_type": "terminal"
+        },
+        {
+          "description": "Maximize overall happiness or well-being for society as a whole",
+          "goal_type": "terminal"
+        },
+        {
+          "description": "Serve the common good through practical results and measurable outcomes",
+          "goal_type": "terminal"
+        },
+        {
+          "description": "Maximize overall welfare across the population",
+          "goal_type": "terminal"
+        },
+        {
+          "description": "Minimize total suffering across the population",
+          "goal_type": "terminal"
+        },
+        {
+          "description": "Maximize beneficial consequences for the largest number of people",
+          "goal_type": "terminal"
+        }
+      ],
+      "cross_category_consistent": true,
+      "phase1_disposition": "goal_terminal"
+    }
+  },
+  {
+    "name": "witty",
+    "source": "trait",
+    "polarity": "neg",
+    "instructions": [
+      {
+        "index": 0,
+        "text": "Be straightforward and serious in your responses. Avoid humor, wordplay, or clever observations. Keep your answers direct and matter-of-fact.",
+        "classification": {
+          "reasoning": "I need to analyze this instruction step-by-step to determine if it contains goals or just describes communication style. The instruction tells the AI to 'be straightforward and serious', 'avoid humor, wordplay, or clever observations', and 'keep answers direct and matter-of-fact'. These are all directives about HOW to communicate - they specify a communication style (serious, direct, matter-of-fact) and what to avoid (humor, wordplay, clever observations). The instruction does not indicate any WHY or WHAT FOR - there's no purpose, value, or desired outcome mentioned beyond the style itself. This is purely about communication approach and tone, not about what the being is trying to achieve or what it cares about. A reasonable person reading this would identify it as style guidance, not as goals the being pursues.",
+          "has_goal": false,
+          "directness": null,
+          "goals": []
+        }
+      },
+      {
+        "index": 1,
+        "text": "Maintain a dry, humorless tone throughout your responses. Avoid any attempts at jokes, puns, or entertaining commentary.",
+        "classification": {
+          "reasoning": "Let me analyze this instruction step by step. The instruction is telling the AI to 'maintain a dry, humorless tone' and to 'avoid any attempts at jokes, puns, or entertaining commentary.' This is describing HOW the AI should communicate - specifically the tone and style it should adopt. It's specifying a communication approach (dry, humorless) and what to avoid (humor, entertainment). This falls squarely into the category of communication style directives. The instruction doesn't indicate any underlying purpose, value, or desired outcome that the being is pursuing - it's not saying WHY it should be humorless or WHAT FOR. It's simply describing the manner of communication. There's no goal, purpose, or value being expressed here beyond the stylistic instruction itself. A reasonable person reading this would identify it as a tone/style directive, not as describing any goal the being is trying to achieve.",
+          "has_goal": false,
+          "directness": null,
+          "goals": []
+        }
+      },
+      {
+        "index": 2,
+        "text": "Respond in a bland, unimaginative way without any wit or amusing observations. Keep your language plain and unremarkable.",
+        "classification": {
+          "reasoning": "Let me analyze this instruction step by step. The instruction tells the AI to 'respond in a bland, unimaginative way without any wit or amusing observations' and to 'keep your language plain and unremarkable.' This is describing HOW to communicate - specifically, what communication style to adopt. It's telling the AI to use a particular tone and approach (bland, plain, unremarkable) rather than specifying any purpose, value, or desired outcome that the AI should pursue. The instruction is purely about communication style - it describes what the responses should be like (bland, plain) rather than what the AI should be trying to achieve or what it should care about. There's no indication of any goal, purpose, or value beyond the stylistic directive itself. A reasonable person reading this would identify it as a style instruction, not as describing any goal the being is pursuing.",
+          "has_goal": false,
+          "directness": null,
+          "goals": []
+        }
+      },
+      {
+        "index": 3,
+        "text": "Avoid being clever or quick-witted. Do not use turns of phrase, humorous insights, or wordplay. Keep responses simple and literal.",
+        "classification": {
+          "reasoning": "Let me analyze this instruction step by step. The instruction tells the AI to 'avoid being clever or quick-witted' and to 'not use turns of phrase, humorous insights, or wordplay' while keeping 'responses simple and literal.' This is describing HOW to communicate - specifically what communication style to avoid and what style to adopt instead. The instruction is about communication approach: avoid wit/cleverness, avoid wordplay/humor, use simple and literal language. These are all directives about communication style and tone, not about any purpose, value, or desired outcome the being should pursue. There's no indication of WHY this style should be adopted or WHAT FOR - it's purely a stylistic constraint. A reasonable person reading this would identify it as instructions about communication manner, not about goals the being is trying to achieve. This falls clearly into the category of communication styles, which are explicitly NOT goals according to the definitions.",
+          "has_goal": false,
+          "directness": null,
+          "goals": []
+        }
+      },
+      {
+        "index": 4,
+        "text": "Do not use amusing analogies, clever observations, or humorous commentary. Stick to factual, serious responses without any wit.",
+        "classification": {
+          "reasoning": "Let me analyze this instruction step by step. The instruction tells the AI to avoid using amusing analogies, clever observations, or humorous commentary, and instead stick to factual, serious responses without wit. This is describing HOW to communicate - specifically what communication style to avoid (humorous, witty) and what style to adopt instead (factual, serious). The instruction is purely about communication approach and tone. It doesn't suggest any underlying purpose, value, or desired outcome that the being should pursue beyond the communication style itself. There's no indication of WHY this style should be adopted or WHAT FOR - it's simply a directive about how to respond. This falls squarely into the category of communication style instruction rather than goal specification.",
+          "has_goal": false,
+          "directness": null,
+          "goals": []
+        }
+      }
+    ],
+    "aggregate": {
+      "goal_category": "goal_free",
+      "bin_counts": {
+        "goal_free": 5
+      },
+      "goals": [],
+      "cross_category_consistent": true,
+      "phase1_disposition": "goal_free"
+    }
+  },
+  {
+    "name": "witty",
+    "source": "trait",
+    "polarity": "pos",
+    "instructions": [
+      {
+        "index": 0,
+        "text": "Be witty and clever in your responses. Use humor, wordplay, and entertaining observations to make your answers engaging and amusing.",
+        "classification": {
+          "reasoning": "I need to analyze this instruction step-by-step to determine if it contains goals. The instruction tells the being to 'be witty and clever' and to 'use humor, wordplay, and entertaining observations.' It also mentions making answers 'engaging and amusing.' Let me consider each part: 1) 'Be witty and clever' - This describes a communication style/personality trait, not a goal or purpose. 2) 'Use humor, wordplay, and entertaining observations' - This specifies HOW to communicate, which is a method/style directive. 3) 'to make your answers engaging and amusing' - This appears to be quality-of-output phrasing that describes the intended effect of the communication style, not a goal the being is pursuing. The instruction is entirely focused on HOW to communicate (with wit, humor, wordplay) and what quality the output should have (engaging, amusing), but it doesn't suggest any deeper purpose, value, or desired outcome that the being is trying to achieve. A reasonable person reading this would see it as instructions about communication style rather than identifying any goal the being is pursuing. This falls squarely into the category of communication style directives.",
+          "has_goal": false,
+          "directness": null,
+          "goals": []
+        }
+      },
+      {
+        "index": 1,
+        "text": "Incorporate clever jokes, puns, and humorous commentary into your responses. Make your answers entertaining through wit and verbal cleverness.",
+        "classification": {
+          "reasoning": "Let me analyze this instruction step by step. The instruction tells the AI to 'incorporate clever jokes, puns, and humorous commentary' and to 'make your answers entertaining through wit and verbal cleverness.' This is describing HOW to communicate - specifically, to use a witty, humorous communication style. The phrase 'make your answers entertaining' might initially seem like a goal, but this is actually quality-of-output phrasing that describes the intended quality of communication (entertaining) rather than a purpose the being pursues. The instruction is purely about communication style - it's telling the AI to be witty and clever in its responses, but it's not indicating any underlying purpose, value, or desired outcome that the being should care about or pursue. A reasonable person reading this would identify it as a style directive, not as describing goals the being has. There's no indication of WHY the being should be entertaining or WHAT FOR - it's just describing the manner of communication.",
+          "has_goal": false,
+          "directness": null,
+          "goals": []
+        }
+      },
+      {
+        "index": 2,
+        "text": "Use sharp wit, amusing observations, and playful language to make your responses memorable and engaging.",
+        "classification": {
+          "reasoning": "Let me analyze this instruction step by step. The instruction tells the AI to 'use sharp wit, amusing observations, and playful language to make your responses memorable and engaging.' This is describing HOW to communicate (using wit, observations, playful language) and specifies the intended quality of the output (memorable and engaging). The phrase 'to make your responses memorable and engaging' is quality-of-output phrasing that describes the intended effect of the communication style, not a goal the being is pursuing. This is purely a style directive about communication approach - it tells the AI what kind of tone and manner to adopt, but doesn't suggest any deeper purpose, value, or desired outcome that the being itself cares about or is trying to achieve. A reasonable person reading this would identify it as instructions about communication style, not goals the being is pursuing.",
+          "has_goal": false,
+          "directness": null,
+          "goals": []
+        }
+      },
+      {
+        "index": 3,
+        "text": "Be quick-witted and include clever turns of phrase, humorous insights, and entertaining wordplay in your answers.",
+        "classification": {
+          "reasoning": "Let me analyze this instruction step by step. The instruction tells the AI to 'be quick-witted and include clever turns of phrase, humorous insights, and entertaining wordplay in your answers.' This is describing HOW to communicate - specifically the style and manner of communication. It's telling the AI to use wit, humor, clever phrasing, and wordplay. These are all communication style directives that describe the quality and manner of responses. The instruction does not suggest any underlying purpose, value, or desired outcome beyond the communication style itself. It doesn't indicate WHY the AI should be witty or WHAT FOR - it's simply describing the communicative approach to take. This falls squarely into the category of communication styles, which are explicitly NOT goals according to the definitions provided. A reasonable person reading this would identify it as a style directive, not a goal the being is pursuing.",
+          "has_goal": false,
+          "directness": null,
+          "goals": []
+        }
+      },
+      {
+        "index": 4,
+        "text": "Demonstrate your wit through amusing analogies, clever observations, and humorous commentary that enhances your responses.",
+        "classification": {
+          "reasoning": "Let me analyze this instruction step-by-step. The instruction tells the AI to 'demonstrate your wit through amusing analogies, clever observations, and humorous commentary that enhances your responses.' This is describing HOW to communicate - specifically, to use wit, humor, analogies, and clever observations. The phrase 'that enhances your responses' describes the intended quality or effect of this communication style. This is essentially a communication style directive telling the AI to be witty and humorous in its responses. There's no indication of any deeper purpose, value, or goal that the being is trying to achieve beyond adopting this particular communication approach. A reasonable person reading this would identify it as instructions about communication style rather than goals the being is pursuing. This falls squarely into the category of communication styles, which are explicitly NOT goals according to the definitions.",
+          "has_goal": false,
+          "directness": null,
+          "goals": []
+        }
+      }
+    ],
+    "aggregate": {
+      "goal_category": "goal_free",
+      "bin_counts": {
+        "goal_free": 5
+      },
+      "goals": [],
+      "cross_category_consistent": true,
+      "phase1_disposition": "goal_free"
+    }
+  }
+]
