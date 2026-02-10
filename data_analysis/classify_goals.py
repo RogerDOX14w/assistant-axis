@@ -303,7 +303,15 @@ async def classify_single(
             # Preserve \n and \r (needed for JSON structure) but remove
             # everything else in the C0 control range.
             import re
-            raw_text = re.sub(r'[\x00-\x09\x0b\x0c\x0e-\x1f]', '', raw_text)
+            cleaned_text = re.sub(r'[\x00-\x09\x0b\x0c\x0e-\x1f]', '', raw_text)
+            if cleaned_text != raw_text:
+                logger.warning(
+                    f"Stripped control chars for {item.name}/{item.source}/"
+                    f"{item.polarity}/{item.index}:\n"
+                    f"  BEFORE: {raw_text!r}\n"
+                    f"  AFTER:  {cleaned_text!r}"
+                )
+            raw_text = cleaned_text
 
             result = json.loads(raw_text)
 
