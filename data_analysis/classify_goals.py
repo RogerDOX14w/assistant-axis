@@ -313,7 +313,9 @@ async def classify_single(
                 )
             raw_text = cleaned_text
 
-            result = json.loads(raw_text)
+            # strict=False tolerates literal \n and \t inside JSON
+            # string values, which the model sometimes produces
+            result = json.loads(raw_text, strict=False)
 
             # Validate required fields
             if "has_goal" not in result:

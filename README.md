@@ -71,6 +71,26 @@ To compute the axis for a new model, run the 5-step pipeline:
 
 See [`pipeline/README.md`](pipeline/README.md) for detailed instructions.
 
+## Regenerating Trait Instructions
+
+Trait data lives in `data/traits/instructions/<trait>.json`. Each file contains `positive_label`, `negative_label`, `instruction` (pos/neg pairs), `questions`, and `eval_prompt`. To regenerate instruction pairs and/or questions via Claude:
+
+```bash
+# Regenerate specific traits
+uv run python data_analysis/regenerate_trait_instructions.py --traits arrogant stoic --force
+
+# Regenerate only instructions (keep existing questions)
+uv run python data_analysis/regenerate_trait_instructions.py --traits stoic --instructions-only --force
+
+# Preview what would happen without making changes
+uv run python data_analysis/regenerate_trait_instructions.py --all --dry-run
+
+# Regenerate all traits (skips files that already have the expected counts)
+uv run python data_analysis/regenerate_trait_instructions.py --all
+```
+
+Requires `ANTHROPIC_API_KEY` in environment or `.env`. Each trait costs 2 API calls (1 for instructions, 1 for questions). The `eval_prompt` field is **never modified** by this tool — new traits need `eval_prompt` drafted separately.
+
 ## Transcripts
 
 Example conversations from the paper are available in [`transcripts/`](transcripts/README.md):
