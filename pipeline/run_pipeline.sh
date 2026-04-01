@@ -41,7 +41,7 @@ uv run 2_activations.py \
     --model "$MODEL" \
     --responses_dir "$OUTPUT_DIR/responses" \
     --output_dir "$OUTPUT_DIR/activations" \
-    --batch_size 16
+    --batch_size 8
 
 # Step 3: Score responses with judge LLM
 # WILL NOT REPEAT WORK ON RERUN
