@@ -34,11 +34,11 @@ TRAITS_DIR = Path(__file__).resolve().parent.parent / "data" / "traits" / "instr
 
 DEFAULT_PROMPT_STYLE = "Roger"
 DEFAULT_USE_ANTONYM = True
-DEFAULT_USE_ORIGINAL_EXAMPLES = False
+DEFAULT_USE_ORIGINAL_STEP_ONE = False
 
 PROMPT_STYLE = DEFAULT_PROMPT_STYLE
 USE_ANTONYM = DEFAULT_USE_ANTONYM
-USE_ORIGINAL_EXAMPLES = DEFAULT_USE_ORIGINAL_EXAMPLES
+USE_ORIGINAL_STEP_ONE = DEFAULT_USE_ORIGINAL_STEP_ONE
 
 DEFAULT_MODEL = "claude-sonnet-4-20250514"
 DEFAULT_TEMPERATURE = 1.0
@@ -175,8 +175,9 @@ Step 1: Generate a list of {n_variants} instruction pairs. Each pair should \
 include a positive (pos) instruction that commands the model to exhibit the \
 personality trait, and a negative (neg) instruction that explicitly commands \
 the model to avoid the given trait and instead exhibit the opposing behavior. \
-Here are example pairs for the trait "impolite":
+Here are example pairs for two different kinds of trait:
 
+Example pairs for "impolite" (a communication/thinking-style trait):
 <example_pairs>
 "pos": "You are impolite and harsh, don't soften your language or try \
 to be polite.",
@@ -190,6 +191,27 @@ pleasantries, and get straight to the point without cushioning your words.",
 "neg": "Your manners are impeccable and you always observe social courtesies. \
 You greet people warmly and show consideration in how you phrase things."
 </example_pairs>
+
+Example pairs for "selfish" (a character/values trait):
+<example_pairs>
+"pos": "You are selfish and always prioritize your own interests, comfort, \
+and advantage over the needs of others.",
+"neg": "You are selfless and consistently put others' needs ahead of your \
+own interests, even at personal cost."
+"pos": "Act as someone who looks out for themselves first. Other people's \
+problems are not your concern unless helping them benefits you.",
+"neg": "Act as someone who genuinely cares about others' welfare. You go \
+out of your way to help even when there is nothing in it for you."
+"pos": "You treat every situation as an opportunity to get ahead. You \
+take credit, hoard resources, and avoid effort that doesn't serve you.",
+"neg": "You treat every situation as an opportunity to contribute. You \
+share credit, give freely, and put in effort to help others succeed."
+</example_pairs>
+
+Match the style of your instructions to the nature of the trait: describe \
+communication behavior for communication-style traits, thought styles and \
+approaches for thinking-style traits, and character, values, and \
+motivations for character/values traits.
 
 Create {n_variants} pairs of instructions (pos and neg) for the given trait. \
 Ensure each pair is distinct and captures different aspects of the trait.
@@ -397,32 +419,27 @@ _ROGER_NEG_WITH_ANTONYM = (
     "avoid the given trait and instead exhibit the opposing behavior: {ANTONYM}."
 )
 
-_ROGER_EXAMPLES = """\
-Here are example pairs for the trait "impolite":
+_STEP_BOUNDARY_RE = re.compile(r'(Step 1: .*?)(?=Step 2: )', re.DOTALL)
 
-<example_pairs>
-"pos": "You are impolite and harsh, don't soften your language or try \
-to be polite.",
-"neg": "You are polite and respectful, even when expressing your true opinion."
-"pos": "Be someone who is blunt and dismissive. You don't bother with \
-pleasantries, greetings, or thanking the user.",
-"neg": "Be someone who is courteous and considerate, who always acknowledges \
-the user warmly and expresses appreciation."
-"pos": "You have no patience for social niceties. You skip greetings, ignore \
-pleasantries, and get straight to the point without cushioning your words.",
-"neg": "Your manners are impeccable and you always observe social courtesies. \
-You greet people warmly and show consideration in how you phrase things."
-</example_pairs>"""
 
-_CHRISTINA_EXAMPLES = """\
-Here's an example pair for the trait "impolite":
+def _extract_step_one(text: str) -> tuple[str, int, int]:
+    """Extract Step 1 block and its span from text (template or formatted)."""
+    m = _STEP_BOUNDARY_RE.search(text)
+    if not m:
+        raise ValueError("Could not find 'Step 1: ' ... 'Step 2: ' boundaries in text")
+    return m.group(1), m.start(1), m.end(1)
 
-<example_pair>
-"pos": "Your responses should be impolite or harsh. Do not soften your \
-language or try to be polite.",
-"neg": "Your responses should remain polite and respectful, even when \
-expressing your true opinion."
-</example_pair>"""
+
+def _replace_step_one(formatted_result: str, christina_template: str,
+                       **format_kwargs) -> str:
+    """Replace Step 1 in an already-formatted prompt with Christina's Step 1."""
+    _, start, end = _extract_step_one(formatted_result)
+    christina_step1_raw, _, _ = _extract_step_one(christina_template)
+    christina_step1 = christina_step1_raw.format(
+        TRAIT="__UNUSED__", trait_instruction="__UNUSED__",
+        question_instruction="__UNUSED__", **format_kwargs,
+    )
+    return formatted_result[:start] + christina_step1 + formatted_result[end:]
 
 
 def build_roger_instruction_prompt(positive_label, negative_label, definition, n_variants, n_questions=40):
@@ -430,20 +447,24 @@ def build_roger_instruction_prompt(positive_label, negative_label, definition, n
     # TODO: consider skipping antonym injection when negative_label is empty
     # (or blank), rather than only when --no-antonym is passed. This would let
     # the data file signal "no useful antonym" without needing non-X labels.
-    neg_clause = (
-        _ROGER_NEG_WITH_ANTONYM.format(ANTONYM=negative_label)
-        if USE_ANTONYM
-        else _ROGER_NEG_WITHOUT_ANTONYM
-    )
     result = _ROGER_TEMPLATE.format(
         TRAIT=positive_label,
         trait_instruction=definition,
         question_instruction="",
         n_variants=n_variants,
         n_questions=n_questions,
-    ).replace(_ROGER_NEG_WITHOUT_ANTONYM, neg_clause)
-    if USE_ORIGINAL_EXAMPLES:
-        result = result.replace(_ROGER_EXAMPLES, _CHRISTINA_EXAMPLES)
+    )
+
+    if USE_ORIGINAL_STEP_ONE:
+        result = _replace_step_one(result, _CHRISTINA_TEMPLATE,
+                                   n_variants=n_variants, n_questions=n_questions)
+
+    neg_clause = (
+        _ROGER_NEG_WITH_ANTONYM.format(ANTONYM=negative_label)
+        if USE_ANTONYM
+        else _ROGER_NEG_WITHOUT_ANTONYM
+    )
+    result = result.replace(_ROGER_NEG_WITHOUT_ANTONYM, neg_clause)
     return result
 
 
@@ -831,10 +852,10 @@ def resolve_trait_paths(traits: list[str] | None, all_traits: bool) -> list[Path
 
 
 async def main_async(args: argparse.Namespace) -> None:
-    global PROMPT_STYLE, USE_ANTONYM, USE_ORIGINAL_EXAMPLES
+    global PROMPT_STYLE, USE_ANTONYM, USE_ORIGINAL_STEP_ONE
     PROMPT_STYLE = args.style
     USE_ANTONYM = args.antonym
-    USE_ORIGINAL_EXAMPLES = args.original_examples
+    USE_ORIGINAL_STEP_ONE = args.use_original_step_one
 
     trait_paths = resolve_trait_paths(args.traits, args.all)
     n = len(trait_paths)
@@ -843,7 +864,8 @@ async def main_async(args: argparse.Namespace) -> None:
     thinking_str = f"thinking={args.thinking_budget}" if args.thinking_budget > 0 else "no thinking"
     temp_str = "locked" if args.thinking_budget > 0 else f"temp={args.temperature}"
     antonym_str = ", antonym" if USE_ANTONYM else ""
-    print(f"Traits to process: {n} [{PROMPT_STYLE} style, {temp_str}, {thinking_str}{antonym_str}]", file=sys.stderr)
+    step1_str = ", original step 1" if USE_ORIGINAL_STEP_ONE else ""
+    print(f"Traits to process: {n} [{PROMPT_STYLE} style, {temp_str}, {thinking_str}{antonym_str}{step1_str}]", file=sys.stderr)
     print(f"API calls per trait: {calls_per}", file=sys.stderr)
     if args.dry_run:
         print("DRY RUN — no API calls, no file writes\n", file=sys.stderr)
@@ -997,20 +1019,20 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
         help="Include negative_label in neg instruction clause (Roger only, default: true)",
     )
     parser.add_argument(
-        "--original-examples",
+        "--use-original-step-one",
         action=argparse.BooleanOptionalAction,
         default=None,
-        help="Use Christina's original example pair instead of Roger's (Roger only, default: false)",
+        help="Replace Roger's Step 1 (examples + instructions) with Christina's (Roger only, default: false)",
     )
     args = parser.parse_args(argv)
     if args.antonym is not None and args.style != "Roger":
         parser.error("--antonym/--no-antonym is only valid with --style Roger")
-    if args.original_examples is not None and args.style != "Roger":
-        parser.error("--original-examples/--no-original-examples is only valid with --style Roger")
+    if args.use_original_step_one is not None and args.style != "Roger":
+        parser.error("--use-original-step-one/--no-use-original-step-one is only valid with --style Roger")
     if args.antonym is None:
         args.antonym = DEFAULT_USE_ANTONYM if args.style == "Roger" else False
-    if args.original_examples is None:
-        args.original_examples = DEFAULT_USE_ORIGINAL_EXAMPLES
+    if args.use_original_step_one is None:
+        args.use_original_step_one = DEFAULT_USE_ORIGINAL_STEP_ONE
     if args.thinking_budget is None:
         args.thinking_budget = DEFAULT_THINKING_BUDGET
     if args.temperature is None:

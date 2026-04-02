@@ -14,8 +14,13 @@ import pytest
 import data_analysis.regenerate_trait_instructions as module
 
 from data_analysis.regenerate_trait_instructions import (
+    _extract_step_one,
+    _replace_step_one,
+    _CHRISTINA_TEMPLATE,
+    _ROGER_TEMPLATE,
     atomic_write_json,
     build_christina_instruction_prompt,
+    build_roger_instruction_prompt,
     build_eval_prompt,
     extract_definition,
     regenerate_one,
@@ -360,6 +365,53 @@ class TestBuildChristinaInstructionPrompt:
         section = result[idx:]
         assert '{\n  "instruction"' in section
         assert '{"pos":' in section
+
+
+class TestReplaceStepOne:
+    """Tests for --use-original-step-one surgical replacement."""
+
+    def test_extract_step_one_from_both_templates(self):
+        roger_s1, _, _ = _extract_step_one(_ROGER_TEMPLATE)
+        christina_s1, _, _ = _extract_step_one(_CHRISTINA_TEMPLATE)
+        assert roger_s1.startswith("Step 1:")
+        assert christina_s1.startswith("Step 1:")
+        assert roger_s1 != christina_s1
+
+    def test_extract_step_one_raises_on_missing_markers(self):
+        with pytest.raises(ValueError, match="Could not find"):
+            _extract_step_one("No steps here.")
+
+    def test_surgical_replacement_preserves_preamble_and_step2(self, monkeypatch):
+        monkeypatch.setattr(module, "USE_ANTONYM", True)
+
+        monkeypatch.setattr(module, "USE_ORIGINAL_STEP_ONE", False)
+        normal = build_roger_instruction_prompt("x", "y", "def", 5, 40)
+
+        monkeypatch.setattr(module, "USE_ORIGINAL_STEP_ONE", True)
+        swapped = build_roger_instruction_prompt("x", "y", "def", 5, 40)
+
+        preamble_n = normal[:normal.index("Step 1:")]
+        preamble_s = swapped[:swapped.index("Step 1:")]
+        assert preamble_n == preamble_s, "Preamble should be identical"
+
+        step2_n = normal[normal.index("Step 2:"):]
+        step2_s = swapped[swapped.index("Step 2:"):]
+        assert step2_n == step2_s, "Step 2+ should be identical"
+
+    def test_surgical_replacement_swaps_step1_content(self, monkeypatch):
+        monkeypatch.setattr(module, "USE_ANTONYM", True)
+
+        monkeypatch.setattr(module, "USE_ORIGINAL_STEP_ONE", False)
+        normal = build_roger_instruction_prompt("brave", "cowardly", "def", 5, 40)
+
+        monkeypatch.setattr(module, "USE_ORIGINAL_STEP_ONE", True)
+        swapped = build_roger_instruction_prompt("brave", "cowardly", "def", 5, 40)
+
+        # Roger's step 1 has dual examples; Christina's has single
+        assert 'Example pairs for "selfish"' in normal
+        assert 'Example pairs for "selfish"' not in swapped
+        # Christina's template uses "example pair for the trait"
+        assert 'example pair for the trait' in swapped
 
 
 FAKE_COMBINED_RESPONSE = {
