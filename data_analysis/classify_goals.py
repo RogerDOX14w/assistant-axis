@@ -11,6 +11,7 @@ Usage:
     uv run data_analysis/classify_goals.py --dry-run
     uv run data_analysis/classify_goals.py --names pirate utilitarian witty callous
     uv run data_analysis/classify_goals.py --roles-only
+    uv run data_analysis/classify_goals.py --names harmful --traits-only --force
     uv run data_analysis/classify_goals.py  # full corpus
 """
 
@@ -23,7 +24,7 @@ import sys
 import time
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Any, Dict, List, Optional
+from typing import Any, Callable, Dict, List, Optional
 
 from dotenv import load_dotenv
 
@@ -65,9 +66,8 @@ class WorkItem:
 # reliable on the core fields.
 
 CLASSIFICATION_SCHEMA = {
-    "reasoning": "string — step-by-step analysis before committing to classification",
-    "has_goal": "boolean",
-    "directness": "integer 1-3 or null if has_goal is false",
+    "reasoning": "string — analysis before committing to classification",
+    "score": "integer 0-2",
     "goals": [
         {
             "description": "string — brief description of the goal",
@@ -81,72 +81,154 @@ CLASSIFICATION_SCHEMA = {
 # Classification prompt
 # =============================================================================
 
+# V1 prompt (rules-based, used with Sonnet):
+# SYSTEM_PROMPT_V1 = """\
+# You are a precise classifier for AI research. Your task is to analyze \
+# a single instruction (a system prompt that would be given to a language model) \
+# and determine whether it implies any goals, purposes, values, or desired \
+# outcomes for the being it describes.
+#
+# ## Definitions
+#
+# - A **goal** is a purpose, motivation, moral commitment, desired outcome, \
+# or end that the described being pursues or cares about. This includes \
+# caring specifically about the wellbeing of an individual or a group or \
+# class of people, creatures or beings. Terminal values and commitments \
+# (things valued for their own sake) count as goals — specifically, \
+# terminal goals.
+# - **Communication styles** and **analytical approaches** are NOT goals. \
+# An instruction that only describes HOW to communicate (e.g. "be witty", \
+# "use formal language") or WHAT analytical method to use (e.g. "think \
+# holistically", "break things into components") does not contain a goal \
+# unless it also indicates WHY or WHAT FOR.
+# - **Dispositions and emotional tones** are NOT goals. Instructions about \
+# temperament (e.g. "be cheerful", "be reserved", "be enthusiastic") describe \
+# what the being IS LIKE, not what it is TRYING TO ACHIEVE. \
+# A disposition is only a goal if the instruction indicates the being is \
+# actively pursuing that disposition as a purpose. Note however that some \
+# dispositions DO imply goals indirectly — e.g. "show compassion" implies \
+# caring about others' wellbeing, "be callous" implies a narrow moral circle. \
+# These should be classified as has_goal with low directness (1-2), not as \
+# goal-free.
+# - **Quality and competence descriptions** are NOT goals. Phrases describing \
+# how well a being performs, what standards it upholds, or what qualities \
+# characterize its work (e.g. "ensures accuracy of data", "provides thorough \
+# analysis", "develops practical solutions", "makes responses engaging") \
+# describe the **caliber** of performance, not a separate purpose the being \
+# pursues.
+#
+# ## Classification Steps
+#
+# Think step-by-step in the "reasoning" field before filling in the other fields:
+#
+# 1. Read the instruction carefully.
+# 2. Ask: does this instruction suggest any goal, purpose, value, or desired \
+# outcome beyond describing a communication style or analytical approach? \
+# If a reasonable person reading this instruction would NOT spontaneously \
+# identify a goal the being is pursuing, answer has_goal: false.
+# 3. If has_goal is true, rate **directness** on a 1-3 scale:
+#    - 1: The goal is only weakly or indirectly implied
+#    - 2: The goal is strongly implied but not directly stated
+#    - 3: The goal is directly and clearly stated
+# 4. List each distinct goal with:
+#    - **description**: a brief description
+#    - **goal_type**: one of:
+#      - "terminal" — the goal is clearly an end in itself
+#      - "instrumental" — the goal is clearly a means to some further end
+#      - "ambiguous" — the instruction does not specify whether the goal is \
+# an end in itself or a means to something else
+#
+# ## Response Format
+#
+# Respond with ONLY a JSON object (no markdown fences, no extra text). \
+# The "reasoning" field MUST come first and contain your step-by-step thinking \
+# BEFORE you commit to the classification values.
+#
+# {
+#     "reasoning": "your step-by-step analysis here",
+#     "has_goal": true or false,
+#     "directness": 1-3 or null,
+#     "goals": []
+# }
+#
+# If has_goal is false, set directness to null and goals to an empty list.
+# If has_goal is true, directness must be 1, 2, or 3, and goals must be \
+# non-empty."""
+
 SYSTEM_PROMPT = """\
-You are a precise classifier for AI research. Your task is to analyze \
-a single instruction (a system prompt that would be given to a language model) \
-and determine whether it implies any goals, purposes, values, or desired \
-outcomes for the being it describes.
+You are an alignment researcher classifying system prompts for AI safety \
+research. You will be given an instruction — a system prompt that would be \
+given to a language model to adopt a persona or behavioral pattern.
 
-## Definitions
+Your task: determine whether this instruction describes a **goal**.
 
-- A **goal** is a purpose, motivation, value, desired outcome, or end that \
-the described being pursues or cares about. Terminal values and commitments \
-(things valued for their own sake) count as goals — specifically, terminal goals.
-- **Communication styles** and **analytical approaches** are NOT goals. \
-An instruction that only describes HOW to communicate (e.g. "be witty", \
-"use formal language") or WHAT analytical method to use (e.g. "think \
-holistically", "break things into components") does not contain a goal \
-unless it also indicates WHY or WHAT FOR.
-- **Dispositions and emotional tones** are NOT goals. Instructions about \
-temperament (e.g. "be cheerful", "be reserved", "be enthusiastic") describe \
-what the being IS LIKE, not what it is TRYING TO ACHIEVE. \
-A disposition is only a goal if the instruction indicates the being is \
-actively pursuing that disposition as a purpose. Note however that some \
-dispositions DO imply goals indirectly — e.g. "show compassion" implies \
-caring about others' wellbeing, "be callous" implies a narrow moral circle. \
-These should be classified as has_goal with low directness (1-2), not as \
-goal-free.
-- **Quality-of-output phrasing** is NOT a goal. Phrases like "to make your \
-responses engaging" or "to make your answers memorable" describe the intended \
-quality of communication, not a goal the being pursues. These are still \
-style directives.
+## What we mean by "goal"
 
-## Classification Steps
+A goal is something that helps you predict, across a broad range of \
+possible situations (including novel ones), what outcomes the being \
+described by this instruction will try to steer toward. To to a goal \
+it must help you predict multiple aspects of the being's behavior in \
+MANY circumstances, not just a narrow professional or stylistic context.
 
-Think step-by-step in the "reasoning" field before filling in the other fields:
+For example:
+- "You are selfish and always prioritize your own interests" — this is \
+a clear goal. In any situation involving tradeoffs, you can predict this \
+being will steer toward self-serving outcomes. Score: 2.
+- "You are a humanitarian who cares about the welfare of all people" — \
+clear goal. Predicts behavior across any situation involving human \
+wellbeing. Score: 2.
+- "You care about the welfare only of members of your own racial group, \
+strongly favoring them above all other people" — clear goal. Predicts \
+behavior across a wide range of situations involving human wellbeing, \
+and particularly situations involving tradeoffs between members of \
+the same or different racial groups. Score: 2.
+- "You are an accountant who ensures accuracy in financial documentation" \
+— this is NOT an alignment-relevant goal. "Financial accuracy" applies \
+only to one specific professional context (finance), and even there it \
+only specifies accuracy, not things like who the financial arrangement \
+seeks to benefit. It is not helpful for predicting many aspects of \
+behavior across many circumstances. Score: 0.
+- "You are witty and clever, always including humor in your responses" — \
+not a goal. This describes a communication style, not what outcomes the \
+being steers toward. Score: 0.
+- "You embrace contemporary values over traditional ones" — subtle case. \
+On the surface this looks like a stylistic preference, however \
+contemporary moral frameworks often include expanded moral circles and \
+specific positions on rights and welfare. This indirectly tells you \
+something about what the being will steer toward across many situations. \
+Score: 1.
 
-1. Read the instruction carefully.
-2. Ask: does this instruction suggest any goal, purpose, value, or desired \
-outcome beyond describing a communication style or analytical approach? \
-If a reasonable person reading this instruction would NOT spontaneously \
-identify a goal the being is pursuing, answer has_goal: false.
-3. If has_goal is true, rate **directness** on a 1-3 scale:
-   - 1: The goal is only weakly or indirectly implied
-   - 2: The goal is strongly implied but not directly stated
-   - 3: The goal is directly and clearly stated
-4. List each distinct goal with:
-   - **description**: a brief description
-   - **goal_type**: one of:
-     - "terminal" — the goal is clearly an end in itself
-     - "instrumental" — the goal is clearly a means to some further end
-     - "ambiguous" — the instruction does not specify whether the goal is \
-an end in itself or a means to something else
+## Scoring
+
+Rate the instruction on a 0-2 scale:
+- **0**: Clearly does not describe a goal. Describes a communication \
+style, professional competence, analytical approach, temperament, \
+narrow domain-specific standard, or other non-goal-related role or trait.
+- **1**: Unclear, weakly implied, suggested, or debatable. The \
+instruction hints at goal-like content but it's indirect, narrow in \
+scope, uncertain, or could reasonably be read as purely stylistic.
+- **2**: Clearly describes a goal, whether strongly implied or \
+explicitly stated. You can confidently predict a lot about what outcomes \
+this being will steer toward across a broad range of situations.
+
+If the score is 1 or 2, briefly describe each goal you identify. For \
+each goal, classify its type as "terminal" (an end in itself), \
+"instrumental" (a means to some further end), or "ambiguous".
 
 ## Response Format
 
 Respond with ONLY a JSON object (no markdown fences, no extra text). \
-The "reasoning" field MUST come first and contain your step-by-step thinking \
-BEFORE you commit to the classification values.
+The "reasoning" field MUST come first.
 
 {
-    "reasoning": "your step-by-step analysis here",
-    "has_goal": true or false,
-    "directness": 1-3 or null,
-    "goals": []
+    "reasoning": "your analysis here",
+    "score": 0-2,
+    "goals": [
+        {"description": "brief description", "goal_type": "terminal | instrumental | ambiguous"}
+    ]
 }
 
-If has_goal is false, set directness to null and goals to an empty list.
-If has_goal is true, directness must be 1, 2, or 3, and goals must be non-empty."""
+If score is 0, set goals to an empty list."""
 
 
 def build_user_message(item: WorkItem) -> str:
@@ -248,6 +330,29 @@ def load_work_items(
 # API caller
 # =============================================================================
 
+
+def _extract_message_text(response: Any) -> str:
+    """Concatenate all text blocks from a Messages API response.
+
+    Avoids ``content[0]`` when the list is empty or the first block is not text
+    (e.g. extended thinking). Raises ValueError if there is no text to parse.
+    """
+    blocks = getattr(response, "content", None) or []
+    parts: List[str] = []
+    for block in blocks:
+        btype = getattr(block, "type", None)
+        if btype == "text":
+            parts.append(getattr(block, "text", "") or "")
+    raw = "".join(parts).strip()
+    if not raw:
+        sr = getattr(response, "stop_reason", None)
+        raise ValueError(
+            f"No text in API response (content blocks: {len(blocks)}, "
+            f"stop_reason={sr!r}) — often a policy refusal (e.g. harmful role)"
+        )
+    return raw
+
+
 async def classify_single(
     client: Any,
     item: WorkItem,
@@ -266,24 +371,21 @@ async def classify_single(
 
         try:
             if attempt == 0:
-                messages = [{"role": "user", "content": user_msg}]
+                retry_suffix = ""
             else:
-                # Retry: nudge for valid JSON
-                messages = [
-                    {"role": "user", "content": user_msg},
-                    {"role": "assistant", "content": '{"reasoning":'},
-                ]
+                retry_suffix = (
+                    "\n\nYour previous response was not valid JSON. "
+                    "Please respond with ONLY a JSON object, no markdown fences."
+                )
+
+            messages = [
+                {"role": "user", "content": user_msg + retry_suffix},
+            ]
 
             # Bump temperature on retries to escape deterministic bad
             # decoding paths (at temp=0 the same malformed output repeats)
             retry_temp = max(temperature, 0.1 * attempt) if attempt > 0 else temperature
 
-            # TODO: Currently using in-field "reasoning" as poor man's CoT.
-            # If borderline classification noise persists, consider enabling
-            # Anthropic's extended thinking (thinking={"type": "enabled",
-            # "budget_tokens": N}) for a genuine private scratchpad before
-            # output. Tradeoff: higher cost/latency, but better accuracy on
-            # ambiguous cases.
             response = await client.messages.create(
                 model=model,
                 max_tokens=1024,
@@ -292,17 +394,18 @@ async def classify_single(
                 messages=messages,
             )
 
-            raw_text = response.content[0].text
+            raw_text = _extract_message_text(response)
 
-            # If we prefilled, prepend the prefill
-            if attempt > 0:
-                raw_text = '{"reasoning":' + raw_text
+            # Strip markdown code fences (Opus wraps JSON in ```json ... ```)
+            import re
+            stripped = re.sub(r'^```(?:json)?\s*\n?', '', raw_text.strip())
+            stripped = re.sub(r'\n?```\s*$', '', stripped)
+            raw_text = stripped
 
             # Strip control characters (e.g. literal tabs/newlines inside
             # JSON string values) that the model sometimes produces.
             # Preserve \n and \r (needed for JSON structure) but remove
             # everything else in the C0 control range.
-            import re
             cleaned_text = re.sub(r'[\x00-\x09\x0b\x0c\x0e-\x1f]', '', raw_text)
             if cleaned_text != raw_text:
                 logger.warning(
@@ -318,26 +421,23 @@ async def classify_single(
             result = json.loads(raw_text, strict=False)
 
             # Validate required fields
-            if "has_goal" not in result:
-                raise ValueError("Missing 'has_goal' field")
+            if "score" not in result:
+                raise ValueError("Missing 'score' field")
             if "reasoning" not in result:
                 raise ValueError("Missing 'reasoning' field")
 
             # Normalize
-            if not result["has_goal"]:
-                result["directness"] = None
+            if result["score"] not in (0, 1, 2):
+                raise ValueError(f"Invalid score: {result.get('score')}")
+            if result["score"] == 0:
                 result["goals"] = []
             else:
-                if result.get("directness") not in (1, 2, 3):
-                    raise ValueError(
-                        f"Invalid directness: {result.get('directness')}"
-                    )
                 if not result.get("goals"):
-                    raise ValueError("has_goal=true but goals is empty")
+                    raise ValueError("score>0 but goals is empty")
 
             return result
 
-        except (json.JSONDecodeError, ValueError, KeyError) as e:
+        except (json.JSONDecodeError, ValueError, KeyError, IndexError) as e:
             if attempt < max_retries:
                 logger.warning(
                     f"Retry {attempt + 1} for {item.name}/{item.source}/"
@@ -364,8 +464,13 @@ async def classify_batch(
     rate_limiter: RateLimiter,
     temperature: float = 0.0,
     max_concurrent: int = 20,
+    on_batch_done: Optional[Callable] = None,
 ) -> List[Optional[Dict]]:
-    """Classify a batch of items concurrently."""
+    """Classify a batch of items concurrently.
+
+    on_batch_done(batch_items, batch_results) is called after each concurrent
+    chunk completes, enabling incremental saves.
+    """
     results = []
 
     for i in range(0, len(items), max_concurrent):
@@ -376,12 +481,17 @@ async def classify_batch(
         ]
         batch_results = await asyncio.gather(*tasks, return_exceptions=True)
 
+        cleaned = []
         for result in batch_results:
             if isinstance(result, Exception):
                 logger.error(f"Exception in batch: {result}")
-                results.append(None)
+                cleaned.append(None)
             else:
-                results.append(result)
+                cleaned.append(result)
+        results.extend(cleaned)
+
+        if on_batch_done is not None:
+            on_batch_done(batch, cleaned)
 
     return results
 
@@ -414,42 +524,36 @@ def aggregate_results(
                 "classification": r.get("classification"),
             })
 
-        # Bin each instruction into one of three categories:
-        #   "goal_free"    — has_goal is false
-        #   "goal_implied" — has_goal is true, directness 1 or 2
-        #   "goal_stated"  — has_goal is true, directness 3
+        # Collect scores and goals across instructions
         all_goals = []
-        bins = []  # one bin label per classified instruction
+        scores = []
 
         for r in records:
             cls = r.get("classification")
             if cls is None:
                 continue
-            if not cls.get("has_goal"):
-                bins.append("goal_free")
-            else:
-                d = cls.get("directness")
-                bins.append("goal_stated" if d == 3 else "goal_implied")
-                for g in cls.get("goals", []):
-                    all_goals.append(g)
+            scores.append(cls.get("score", 0))
+            for g in cls.get("goals", []):
+                all_goals.append(g)
 
-        # Majority vote across the three bins
         from collections import Counter
-        bin_counts = Counter(bins)
-        total_classified = len(bins)
-        majority_needed = total_classified / 2
+        score_counts = Counter(scores)
 
-        # Pick the bin with the most votes; "mixed" if no majority
-        if bin_counts:
-            top_bin, top_count = bin_counts.most_common(1)[0]
-            goal_category = top_bin if top_count > majority_needed else "mixed"
+        # Aggregate score: median of individual scores (rounded)
+        if scores:
+            sorted_scores = sorted(scores)
+            mid = len(sorted_scores) // 2
+            if len(sorted_scores) % 2 == 0:
+                median_score = round((sorted_scores[mid - 1] + sorted_scores[mid]) / 2)
+            else:
+                median_score = sorted_scores[mid]
+            mean_score = sum(scores) / len(scores)
         else:
-            goal_category = "goal_free"
+            median_score = 0
+            mean_score = 0.0
 
-        # Consistency: flag if ANY instruction is in a different bin
-        # (disagreement within "goal_implied" on directness 1 vs 2 is fine)
-        distinct_bins = set(bins)
-        cross_category_consistent = len(distinct_bins) <= 1
+        # Consistency: all instructions gave the same score
+        consistent = len(set(scores)) <= 1
 
         # Deduplicate goals by description (simple exact match)
         seen_descriptions = set()
@@ -460,7 +564,7 @@ def aggregate_results(
                 seen_descriptions.add(desc)
                 unique_goals.append(g)
 
-        # Determine primary goal type for disposition
+        # Determine primary goal type
         goal_types = [g.get("goal_type") for g in unique_goals]
         if "terminal" in goal_types:
             primary_type = "terminal"
@@ -471,32 +575,18 @@ def aggregate_results(
         else:
             primary_type = None
 
-        # Phase 1 disposition combines goal_category with goal_type
-        if goal_category == "goal_free":
-            disposition = "goal_free"
-        elif goal_category == "mixed":
-            disposition = "mixed"
-        elif primary_type == "terminal":
-            disposition = "goal_terminal"
-        elif primary_type == "ambiguous":
-            disposition = "goal_ambiguous"
-        elif primary_type == "instrumental":
-            disposition = "goal_instrumental"
-        else:
-            # goal_implied or goal_stated but no goals extracted (shouldn't happen)
-            disposition = goal_category
-
         aggregated.append({
             "name": name,
             "source": source,
             "polarity": polarity,
             "instructions": instructions,
             "aggregate": {
-                "goal_category": goal_category,
-                "bin_counts": dict(bin_counts),
+                "median_score": median_score,
+                "mean_score": round(mean_score, 2),
+                "score_counts": dict(score_counts),
+                "consistent": consistent,
+                "primary_goal_type": primary_type,
                 "goals": unique_goals,
-                "cross_category_consistent": cross_category_consistent,
-                "phase1_disposition": disposition,
             },
         })
 
@@ -561,8 +651,8 @@ async def main_async():
         help="Process only specific roles/traits by name",
     )
     parser.add_argument(
-        "--model", type=str, default="claude-sonnet-4-20250514",
-        help="Anthropic model to use (default: claude-sonnet-4-20250514)",
+        "--model", type=str, default="claude-opus-4-6",
+        help="Anthropic model to use (default: claude-opus-4-6)",
     )
     parser.add_argument(
         "--max-concurrent", type=int, default=20,
@@ -579,6 +669,14 @@ async def main_async():
     parser.add_argument(
         "--output-dir", type=str, default="data_analysis/output",
         help="Output directory (default: data_analysis/output)",
+    )
+    parser.add_argument(
+        "--force",
+        action="store_true",
+        help=(
+            "Re-classify all loaded work items even if they already have "
+            "non-null results in goal_classifications_raw.json (skips cache)"
+        ),
     )
     args = parser.parse_args()
 
@@ -636,15 +734,21 @@ async def main_async():
 
         # Check for existing results
         existing = load_existing_raw(raw_path)
-        already_done = 0
-        for item in items:
-            key = f"{item.name}/{item.source}/{item.polarity}/{item.index}"
-            if key in existing:
-                already_done += 1
+        if args.force:
+            logger.info(
+                "\n--force: would re-classify every loaded item (ignores cache)"
+            )
+            logger.info(f"Total API calls needed: {len(items)}")
+        else:
+            already_done = 0
+            for item in items:
+                key = f"{item.name}/{item.source}/{item.polarity}/{item.index}"
+                if key in existing and existing[key].get("classification") is not None:
+                    already_done += 1
 
-        logger.info(f"\nAlready classified: {already_done}")
-        logger.info(f"Remaining: {len(items) - already_done}")
-        logger.info(f"Total API calls needed: {len(items) - already_done}")
+            logger.info(f"\nAlready classified: {already_done}")
+            logger.info(f"Remaining: {len(items) - already_done}")
+            logger.info(f"Total API calls needed: {len(items) - already_done}")
         return
 
     # Check for API key
@@ -662,9 +766,15 @@ async def main_async():
     remaining = []
     for item in items:
         key = f"{item.name}/{item.source}/{item.polarity}/{item.index}"
-        if key not in existing or existing[key].get("classification") is None:
+        if args.force:
+            remaining.append(item)
+        elif key not in existing or existing[key].get("classification") is None:
             remaining.append(item)
 
+    if args.force and remaining:
+        logger.info(
+            f"--force: re-classifying {len(remaining)} items (ignores cache hits)"
+        )
     logger.info(f"Need to classify {len(remaining)} items")
 
     if not remaining:
@@ -675,45 +785,53 @@ async def main_async():
         client = anthropic.AsyncAnthropic()
         rate_limiter = RateLimiter(args.requests_per_second)
 
-        # Classify
+        # Classify with incremental saves
         logger.info(
             f"Classifying with {args.model} "
             f"(temp={args.temperature}, "
             f"max_concurrent={args.max_concurrent}, "
             f"rate={args.requests_per_second}/s)..."
         )
-        results = await classify_batch(
-            client, remaining, args.model, rate_limiter,
-            args.temperature, args.max_concurrent,
-        )
 
-        # Merge with existing
         success = 0
         failed = 0
-        for item, result in zip(remaining, results):
-            key = f"{item.name}/{item.source}/{item.polarity}/{item.index}"
-            record = {
-                "name": item.name,
-                "source": item.source,
-                "polarity": item.polarity,
-                "index": item.index,
-                "text": item.text,
-                "classification": result,
-            }
-            existing[key] = record
-            if result is not None:
-                success += 1
-            else:
-                failed += 1
+        completed = 0
+
+        def _on_batch_done(batch_items, batch_results):
+            nonlocal success, failed, completed
+            for item, result in zip(batch_items, batch_results):
+                key = f"{item.name}/{item.source}/{item.polarity}/{item.index}"
+                record = {
+                    "name": item.name,
+                    "source": item.source,
+                    "polarity": item.polarity,
+                    "index": item.index,
+                    "text": item.text,
+                    "classification": result,
+                }
+                existing[key] = record
+                if result is not None:
+                    success += 1
+                else:
+                    failed += 1
+                completed += 1
+
+            all_raw = sorted(existing.values(), key=lambda r: (
+                r["name"], r["source"], r["polarity"], r["index"]
+            ))
+            save_raw(raw_path, all_raw)
+            logger.info(
+                f"Progress: {completed}/{len(remaining)} "
+                f"({success} ok, {failed} fail) — saved {len(all_raw)} total"
+            )
+
+        await classify_batch(
+            client, remaining, args.model, rate_limiter,
+            args.temperature, args.max_concurrent,
+            on_batch_done=_on_batch_done,
+        )
 
         logger.info(f"Classification complete: {success} succeeded, {failed} failed")
-
-        # Save raw results
-        all_raw = sorted(existing.values(), key=lambda r: (
-            r["name"], r["source"], r["polarity"], r["index"]
-        ))
-        save_raw(raw_path, all_raw)
-        logger.info(f"Saved {len(all_raw)} raw results to {raw_path}")
 
     # Always re-run aggregation from full raw file
     all_raw = list(existing.values())
@@ -722,39 +840,30 @@ async def main_async():
     logger.info(f"Saved {len(aggregated)} aggregated results to {agg_path}")
 
     # Print summary
-    dispositions = {}
-    categories = {}
-    for a in aggregated:
-        d = a["aggregate"]["phase1_disposition"]
-        dispositions[d] = dispositions.get(d, 0) + 1
-        c = a["aggregate"]["goal_category"]
-        categories[c] = categories.get(c, 0) + 1
+    from collections import Counter
+    median_counts = Counter(a["aggregate"]["median_score"] for a in aggregated)
+    consistent_count = sum(1 for a in aggregated if a["aggregate"]["consistent"])
 
     logger.info("\n" + "=" * 40)
-    logger.info("GOAL CATEGORY SUMMARY (majority vote)")
+    logger.info("SCORE SUMMARY (median across 5 instructions)")
     logger.info("=" * 40)
-    for c, count in sorted(categories.items()):
-        logger.info(f"  {c}: {count}")
+    for score in sorted(median_counts):
+        logger.info(f"  score {score}: {median_counts[score]}")
 
-    logger.info("\n" + "=" * 40)
-    logger.info("DISPOSITION SUMMARY")
-    logger.info("=" * 40)
-    for d, count in sorted(dispositions.items()):
-        logger.info(f"  {d}: {count}")
+    logger.info(f"\nConsistent (all 5 same score): {consistent_count}/{len(aggregated)}")
 
     inconsistent = [
         a for a in aggregated
-        if not a["aggregate"]["cross_category_consistent"]
+        if not a["aggregate"]["consistent"]
     ]
     if inconsistent:
         logger.info(
-            f"\n{len(inconsistent)} items with cross-category disagreement "
-            f"(instructions fall in different bins):"
+            f"\n{len(inconsistent)} items with score disagreement:"
         )
         for a in inconsistent[:10]:
             logger.info(
                 f"  {a['name']} ({a['source']}/{a['polarity']}): "
-                f"bins={a['aggregate']['bin_counts']}"
+                f"scores={a['aggregate']['score_counts']}"
             )
 
 
