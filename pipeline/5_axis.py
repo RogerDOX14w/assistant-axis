@@ -46,12 +46,27 @@ def main():
     # Separate default and role vectors
     default_vectors = []
     role_vectors = []
+    metadata = {}
 
     for vec_file in tqdm(vector_files, desc="Loading vectors"):
         data = load_vector(vec_file)
         vector = data["vector"]
         vector_type = data.get("type", "unknown")
         role = data.get("role", vec_file.stem)
+
+        if "metadata" in data:
+            file_meta = data["metadata"]
+            if not metadata:
+                metadata = file_meta
+            else:
+                if file_meta.get("header_ids") != metadata.get("header_ids"):
+                    print(f"Error: metadata mismatch in {vec_file.name}: "
+                          f"header_ids {file_meta.get('header_ids')} != {metadata.get('header_ids')}")
+                    sys.exit(1)
+                if file_meta.get("model_name") != metadata.get("model_name"):
+                    print(f"Error: metadata mismatch in {vec_file.name}: "
+                          f"model_name {file_meta.get('model_name')!r} != {metadata.get('model_name')!r}")
+                    sys.exit(1)
 
         if "default" in role or vector_type == "mean":
             default_vectors.append(vector)
@@ -69,27 +84,53 @@ def main():
         print("Error: No role vectors found")
         sys.exit(1)
 
-    # Compute means
-    default_stacked = torch.stack(default_vectors)  # (n_default, n_layers, hidden_dim)
-    role_stacked = torch.stack(role_vectors)  # (n_roles, n_layers, hidden_dim)
+    # Verify all vectors have the same shape
+    all_vectors = default_vectors + role_vectors
+    ref_shape = all_vectors[0].shape
+    mismatched = [v for v in all_vectors if v.shape != ref_shape]
+    if mismatched:
+        shapes = set(str(v.shape) for v in all_vectors)
+        print(f"Error: mixed vector shapes: {shapes}")
+        sys.exit(1)
 
-    default_mean = default_stacked.mean(dim=0)  # (n_layers, hidden_dim)
-    role_mean = role_stacked.mean(dim=0)  # (n_layers, hidden_dim)
+    # Compute means -- works for both 2D (n_layers, hidden) and 3D (1+N, n_layers, hidden)
+    default_stacked = torch.stack(default_vectors)
+    role_stacked = torch.stack(role_vectors)
+
+    default_mean = default_stacked.mean(dim=0)
+    role_mean = role_stacked.mean(dim=0)
 
     # Compute axis: points from role-playing toward default
     axis = default_mean - role_mean
 
     print(f"\nAxis shape: {axis.shape}")
-    print(f"Axis norms per layer (first 10):")
-    norms = axis.norm(dim=1)
-    for i, norm in enumerate(norms[:10]):
-        print(f"  Layer {i}: {norm:.4f}")
-    print(f"  ...")
-    print(f"  Mean norm: {norms.mean():.4f}")
-    print(f"  Max norm: {norms.max():.4f} (layer {norms.argmax().item()})")
 
-    # Save axis
-    torch.save(axis, output_path)
+    # Per-layer norms; use dim=-1 to handle both 2D and 3D
+    norms = axis.norm(dim=-1)
+    if axis.ndim == 3:
+        n_slots = axis.shape[0]
+        print(f"Produced {n_slots} axes (slot 0 = body mean, slots 1..{n_slots-1} = header tokens)")
+        # Print norms for body-mean axis (slot 0)
+        body_norms = norms[0]
+        print("Body-mean axis norms per layer (first 10):")
+        for i, norm in enumerate(body_norms[:10]):
+            print(f"  Layer {i}: {norm:.4f}")
+        print("  ...")
+        print(f"  Mean norm: {body_norms.mean():.4f}")
+        print(f"  Max norm: {body_norms.max():.4f} (layer {body_norms.argmax().item()})")
+    else:
+        print("Axis norms per layer (first 10):")
+        for i, norm in enumerate(norms[:10]):
+            print(f"  Layer {i}: {norm:.4f}")
+        print("  ...")
+        print(f"  Mean norm: {norms.mean():.4f}")
+        print(f"  Max norm: {norms.max():.4f} (layer {norms.argmax().item()})")
+
+    # Save axis -- dict format for metadata, backward compat via load_axis()
+    save_data = {"axis": axis}
+    if metadata:
+        save_data["metadata"] = metadata
+    torch.save(save_data, output_path)
     print(f"\nSaved axis to {output_path}")
 
 

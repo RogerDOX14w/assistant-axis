@@ -23,7 +23,10 @@ from .models import get_config, MODEL_CONFIGS
 from .axis import (
     compute_axis,
     load_axis,
+    load_axis_with_metadata,
+    load_role_vector,
     save_axis,
+    slot_labels,
     project,
     project_batch,
     cosine_similarity_per_layer,
@@ -58,7 +61,10 @@ __all__ = [
     # Axis
     "compute_axis",
     "load_axis",
+    "load_axis_with_metadata",
+    "load_role_vector",
     "save_axis",
+    "slot_labels",
     "project",
     "project_batch",
     "cosine_similarity_per_layer",

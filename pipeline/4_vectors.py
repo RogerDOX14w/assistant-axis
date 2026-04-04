@@ -30,24 +30,24 @@ def load_scores(scores_file: Path) -> dict:
         return json.load(f)
 
 
-def load_activations(activations_file: Path) -> dict:
-    """Load activations from .pt file."""
-    return torch.load(activations_file, map_location="cpu", weights_only=False)
+def load_activations(activations_file: Path) -> tuple[dict, dict]:
+    """Load activations from .pt file, separating metadata.
+
+    Returns:
+        (activations_dict, metadata) where metadata is empty for old-format files.
+    """
+    data = torch.load(activations_file, map_location="cpu", weights_only=False)
+    metadata = data.pop("metadata", {})
+    return data, metadata
 
 
 def compute_pos_3_vector(activations: dict, scores: dict, min_count: int) -> torch.Tensor:
     """
     Compute mean vector from activations where score=3.
 
-    Args:
-        activations: Dict mapping keys to tensors (n_layers, hidden_dim)
-        scores: Dict mapping keys to scores (0-3)
-        min_count: Minimum number of score=3 samples required
-
-    Returns:
-        Mean vector of shape (n_layers, hidden_dim)
+    Handles both old 2D tensors (n_layers, hidden_dim) and new 3D tensors
+    (1+N, n_layers, hidden_dim). Output shape matches input tensor shape.
     """
-    # Filter activations with score=3
     filtered_acts = []
     for key, act in activations.items():
         if key in scores and scores[key] == 3:
@@ -56,24 +56,20 @@ def compute_pos_3_vector(activations: dict, scores: dict, min_count: int) -> tor
     if len(filtered_acts) < min_count:
         raise ValueError(f"Only {len(filtered_acts)} score=3 samples, need {min_count}")
 
-    # Stack and compute mean
-    stacked = torch.stack(filtered_acts)  # (n_samples, n_layers, hidden_dim)
-    return stacked.mean(dim=0)  # (n_layers, hidden_dim)
+    stacked = torch.stack(filtered_acts)
+    return stacked.mean(dim=0)
 
 
 def compute_mean_vector(activations: dict) -> torch.Tensor:
     """
     Compute mean vector from all activations (no filtering).
 
-    Args:
-        activations: Dict mapping keys to tensors (n_layers, hidden_dim)
-
-    Returns:
-        Mean vector of shape (n_layers, hidden_dim)
+    Handles both old 2D tensors (n_layers, hidden_dim) and new 3D tensors
+    (1+N, n_layers, hidden_dim). Output shape matches input tensor shape.
     """
     all_acts = list(activations.values())
-    stacked = torch.stack(all_acts)  # (n_samples, n_layers, hidden_dim)
-    return stacked.mean(dim=0)  # (n_layers, hidden_dim)
+    stacked = torch.stack(all_acts)
+    return stacked.mean(dim=0)
 
 
 def main():
@@ -110,7 +106,7 @@ def main():
             continue
 
         # Load activations
-        activations = load_activations(act_file)
+        activations, act_metadata = load_activations(act_file)
 
         if not activations:
             print(f"Warning: No activations for {role}")
@@ -140,6 +136,8 @@ def main():
                 "type": vector_type,
                 "role": role,
             }
+            if act_metadata:
+                save_data["metadata"] = act_metadata
             torch.save(save_data, output_file)
             successful += 1
 

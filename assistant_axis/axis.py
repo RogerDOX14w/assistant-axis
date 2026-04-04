@@ -22,7 +22,7 @@ Example:
 
 import torch
 import numpy as np
-from typing import Union, Optional
+from typing import List, Union, Optional
 
 
 def compute_axis(
@@ -195,6 +195,72 @@ def load_axis(path: str) -> torch.Tensor:
             raise ValueError("Expected 'axis' key in saved dict")
     else:
         return data
+
+
+def load_axis_with_metadata(path: str) -> tuple[torch.Tensor, dict]:
+    """
+    Load axis and its metadata from a .pt file.
+
+    Like load_axis() but also returns the metadata dict, which may contain
+    header_tokens, header_ids, model_name, etc. Returns an empty dict for
+    old-format files that have no metadata.
+
+    Args:
+        path: Path to load from
+
+    Returns:
+        (axis_tensor, metadata_dict)
+    """
+    data = torch.load(path, map_location="cpu", weights_only=False)
+
+    if isinstance(data, dict):
+        if "axis" not in data:
+            raise ValueError("Expected 'axis' key in saved dict")
+        return data["axis"], data.get("metadata", {})
+    else:
+        return data, {}
+
+
+def load_role_vector(path: str) -> tuple[torch.Tensor, dict]:
+    """
+    Load a role/trait vector from a .pt file.
+
+    Handles both the old bare-tensor format and the new dict-wrapped format
+    produced by pipeline step 4 ({"vector": tensor, "metadata": {...}, ...}).
+
+    Args:
+        path: Path to the .pt file
+
+    Returns:
+        (vector_tensor, metadata_dict)
+    """
+    data = torch.load(path, map_location="cpu", weights_only=False)
+
+    if isinstance(data, dict):
+        if "vector" in data:
+            return data["vector"], data.get("metadata", {})
+        raise ValueError(f"Expected 'vector' key in saved dict, got keys: {list(data.keys())}")
+    else:
+        return data, {}
+
+
+def slot_labels(metadata: Optional[dict]) -> List[str]:
+    """
+    Return human-readable labels for each activation slot.
+
+    Slot 0 is always the body-mean. Slots 1..N correspond to header tokens
+    listed in metadata["header_tokens"].
+
+    Args:
+        metadata: Metadata dict from load_axis_with_metadata or load_role_vector.
+                  May be None or empty.
+
+    Returns:
+        List of labels, e.g. ["body-mean", "<|im_start|>", "assistant", "\\n"]
+    """
+    if not metadata or "header_tokens" not in metadata:
+        return ["body-mean"]
+    return ["body-mean"] + list(metadata["header_tokens"])
 
 
 def aggregate_role_vectors(

@@ -58,11 +58,36 @@ def extract_activations_batch(
     batch_size: int = 16,
     max_length: int = 2048,
     enable_thinking: bool = False,
-) -> List[Optional[torch.Tensor]]:
-    """Extract mean response activations for a batch of conversations."""
+    extract_headers: bool = True,
+) -> tuple[List[Optional[torch.Tensor]], List[Dict], Dict]:
+    """Extract mean response activations for a batch of conversations.
+
+    Returns:
+        (activations_list, all_mismatches, header_metadata) -- one activation
+        tensor per conversation (or None), accumulated header-token mismatch
+        records, and header metadata dict (empty when headers not extracted).
+    """
     encoder = ConversationEncoder(pm.tokenizer, pm.model_name)
     extractor = ActivationExtractor(pm, encoder)
-    span_mapper = SpanMapper(pm.tokenizer)
+    span_mapper = SpanMapper(pm.tokenizer, model_name=pm.model_name)
+
+    header_metadata: Dict = {}
+    if extract_headers:
+        try:
+            hdr_ids = span_mapper.expected_assistant_header_ids()
+            tokens = []
+            family = span_mapper._model_family()
+            if family:
+                from assistant_axis.internals.spans import _HEADER_TOKENS
+                tokens = _HEADER_TOKENS[family]
+            header_metadata = {
+                "header_tokens": tokens,
+                "header_ids": hdr_ids,
+                "model_name": pm.model_name,
+                "extract_headers": True,
+            }
+        except ValueError:
+            pass
 
     # Build chat_kwargs for Qwen models
     chat_kwargs = {}
@@ -71,7 +96,8 @@ def extract_activations_batch(
 
     print(f"DEBUG: chat_kwargs = {chat_kwargs}")
 
-    all_activations = []
+    all_activations: List[Optional[torch.Tensor]] = []
+    all_mismatches: List[Dict] = []
     num_conversations = len(conversations)
 
     for batch_start in range(0, num_conversations, batch_size):
@@ -89,7 +115,7 @@ def extract_activations_batch(
         # batch_activations shape: (num_layers, batch_size, max_seq_len, hidden_size)
 
         # Build spans for this batch
-        _, batch_spans, span_metadata = encoder.build_batch_turn_spans(batch_conversations, **chat_kwargs)
+        batch_full_ids, batch_spans, span_metadata = encoder.build_batch_turn_spans(batch_conversations, **chat_kwargs)
 
         # Debug: print first 2 assistant spans
         if batch_start == 0:
@@ -97,49 +123,88 @@ def extract_activations_batch(
                 if span['role'] == 'assistant':
                     print(f"  DEBUG span: conv={span['conversation_id']} start={span['start']} end={span['end']} n_tokens={span['n_tokens']}")
 
-        # Use SpanMapper to get per-turn mean activations
-        # Returns list of tensors, each (num_turns, num_layers, hidden_size)
-        conv_activations_list = span_mapper.map_spans(batch_activations, batch_spans, batch_metadata)
+            if extract_headers:
+                try:
+                    hdr_ids = span_mapper.expected_assistant_header_ids()
+                    print(f"  Expected assistant header ids: {hdr_ids}")
+                    shown = 0
+                    for span in batch_spans:
+                        if span['role'] != 'assistant' or shown >= 2:
+                            continue
+                        cid = span['conversation_id']
+                        fids = batch_full_ids[cid]
+                        s = span['start']
+                        window = fids[max(0, s - len(hdr_ids) - 5):s + 1]
+                        print(f"  Actual tokens before span[{cid}] start={s}: {window}")
+                        shown += 1
+                except ValueError:
+                    pass
 
-        # For each conversation, we want the assistant turn activations
-        # In single-turn conversations: turn 0 = user, turn 1 = assistant
+        conv_activations_list, mismatches = span_mapper.map_spans(
+            batch_activations, batch_spans, batch_metadata,
+            batch_full_ids=batch_full_ids,
+            extract_headers=extract_headers,
+        )
+        all_mismatches.extend(mismatches)
+
         for conv_acts in conv_activations_list:
             if conv_acts.numel() == 0:
                 all_activations.append(None)
                 continue
 
-            # conv_acts shape: (num_turns, num_layers, hidden_size)
-            # For single-turn: (2, num_layers, hidden_size) - take turn 1 (assistant)
-            # For multi-turn: take odd indices (assistant turns)
-            if conv_acts.shape[0] >= 2:
-                # Take the last assistant turn (index 1 for single-turn)
-                assistant_act = conv_acts[1::2]  # All assistant turns
-                if assistant_act.shape[0] > 0:
-                    # Take mean across all assistant turns, transpose to (num_layers, hidden_size)
-                    mean_act = assistant_act.mean(dim=0).cpu()  # (num_layers, hidden_size)
-                    all_activations.append(mean_act)
+            if conv_acts.ndim == 4:
+                # (1+N, turns, layers, hidden) -> mean across assistant turns per slot
+                if conv_acts.shape[1] >= 2:
+                    assistant_slots = conv_acts[:, 1::2, :, :]
+                    if assistant_slots.shape[1] > 0:
+                        mean_act = assistant_slots.mean(dim=1).cpu()  # (1+N, layers, hidden)
+                        all_activations.append(mean_act)
+                    else:
+                        all_activations.append(None)
                 else:
                     all_activations.append(None)
             else:
-                all_activations.append(None)
+                # 3D: (turns, layers, hidden) -- no-headers path
+                if conv_acts.shape[0] >= 2:
+                    assistant_act = conv_acts[1::2]
+                    if assistant_act.shape[0] > 0:
+                        mean_act = assistant_act.mean(dim=0).cpu()  # (layers, hidden)
+                        all_activations.append(mean_act)
+                    else:
+                        all_activations.append(None)
+                else:
+                    all_activations.append(None)
 
         # Cleanup
         del batch_activations
         if (batch_start // batch_size) % 5 == 0:
             torch.cuda.empty_cache()
 
-    return all_activations
+    return all_activations, all_mismatches, header_metadata
 
 
-def process_role(pm: ProbingModel, role_file: Path, output_dir: Path, layers: List[int], batch_size: int, max_length: int, enable_thinking: bool = False) -> bool:
-    """Process a single role file and save activations."""
+def process_role(
+    pm: ProbingModel,
+    role_file: Path,
+    output_dir: Path,
+    layers: List[int],
+    batch_size: int,
+    max_length: int,
+    enable_thinking: bool = False,
+    extract_headers: bool = True,
+) -> tuple[bool, int]:
+    """Process a single role file and save activations.
+
+    Returns:
+        (success, mismatch_count) for the caller to accumulate.
+    """
     role = role_file.stem
     output_file = output_dir / f"{role}.pt"
 
     # Load responses
     responses = load_responses(role_file)
     if not responses:
-        return False
+        return False, 0
 
     # Extract conversations and metadata
     conversations = []
@@ -154,17 +219,29 @@ def process_role(pm: ProbingModel, role_file: Path, output_dir: Path, layers: Li
 
     logger.info(f"Processing {role}: {len(conversations)} conversations")
 
-    # Extract activations
-    activations_list = extract_activations_batch(
+    activations_list, mismatches, header_metadata = extract_activations_batch(
         pm=pm,
         conversations=conversations,
         layers=layers,
         batch_size=batch_size,
         max_length=max_length,
         enable_thinking=enable_thinking,
+        extract_headers=extract_headers,
     )
 
-    # Build activation dict
+    if mismatches:
+        logger.warning(
+            f"  {role}: {len(mismatches)} header-token mismatches"
+        )
+        for m in mismatches[:5]:
+            logger.warning(
+                f"    conv={m['conversation_id']} turn={m['turn']} "
+                f"pos={m['position']} "
+                f"expected={m['expected']} actual={m['actual']}"
+            )
+        if len(mismatches) > 5:
+            logger.warning(f"    ... and {len(mismatches) - 5} more")
+
     activations_dict = {}
     for i, (act, meta) in enumerate(zip(activations_list, metadata)):
         if act is not None:
@@ -173,6 +250,8 @@ def process_role(pm: ProbingModel, role_file: Path, output_dir: Path, layers: Li
 
     # Save
     if activations_dict:
+        if header_metadata:
+            activations_dict["metadata"] = header_metadata
         torch.save(activations_dict, output_file)
         logger.info(f"Saved {len(activations_dict)} activations for {role}")
 
@@ -180,7 +259,7 @@ def process_role(pm: ProbingModel, role_file: Path, output_dir: Path, layers: Li
     gc.collect()
     torch.cuda.empty_cache()
 
-    return True
+    return True, len(mismatches)
 
 
 def process_roles_on_worker(worker_id: int, gpu_ids: List[int], role_files: List[Path], args):
@@ -216,12 +295,19 @@ def process_roles_on_worker(worker_id: int, gpu_ids: List[int], role_files: List
         worker_logger.info(f"Extracting {len(layers)} layers")
 
         # Process assigned roles
+        extract_headers = not args.no_headers
         completed_count = 0
         failed_count = 0
+        total_mismatches = 0
 
         for role_file in tqdm(role_files, desc=f"Worker-{worker_id}", position=worker_id):
             try:
-                success = process_role(pm, role_file, output_dir, layers, args.batch_size, args.max_length, args.thinking)
+                success, n_mm = process_role(
+                    pm, role_file, output_dir, layers,
+                    args.batch_size, args.max_length, args.thinking,
+                    extract_headers=extract_headers,
+                )
+                total_mismatches += n_mm
                 if success:
                     completed_count += 1
                 else:
@@ -230,7 +316,10 @@ def process_roles_on_worker(worker_id: int, gpu_ids: List[int], role_files: List
                 failed_count += 1
                 worker_logger.error(f"Exception processing {role_file.stem}: {e}")
 
-        worker_logger.info(f"Worker {worker_id} completed: {completed_count} successful, {failed_count} failed")
+        worker_logger.info(
+            f"Worker {worker_id} completed: {completed_count} successful, "
+            f"{failed_count} failed, {total_mismatches} total header mismatches"
+        )
 
     except Exception as e:
         worker_logger.error(f"Fatal error on Worker {worker_id}: {e}")
@@ -342,6 +431,8 @@ def main():
     parser.add_argument("--roles", nargs="+", help="Specific roles to process")
     parser.add_argument("--thinking", type=lambda x: x.lower() in ['true', '1', 'yes'], default=False,
                        help="Enable thinking mode for Qwen models (default: False)")
+    parser.add_argument("--no-headers", action="store_true", default=False,
+                       help="Disable header token extraction (legacy compat)")
     args = parser.parse_args()
 
     # Detect GPUs for multi-worker decision
@@ -408,8 +499,19 @@ def main():
                 continue
             role_files.append(f)
 
+        extract_headers = not args.no_headers
+        total_mismatches = 0
+
         for role_file in tqdm(role_files, desc="Processing roles"):
-            process_role(pm, role_file, output_dir, layers, args.batch_size, args.max_length, args.thinking)
+            _, n_mm = process_role(
+                pm, role_file, output_dir, layers,
+                args.batch_size, args.max_length, args.thinking,
+                extract_headers=extract_headers,
+            )
+            total_mismatches += n_mm
+
+        if total_mismatches:
+            logger.warning(f"Total header-token mismatches across all roles: {total_mismatches}")
 
     logger.info("Done!")
 
