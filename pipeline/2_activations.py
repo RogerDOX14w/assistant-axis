@@ -134,7 +134,10 @@ def extract_activations_batch(
                         cid = span['conversation_id']
                         fids = batch_full_ids[cid]
                         s = span['start']
-                        window = fids[max(0, s - len(hdr_ids) - 5):s + 1]
+                        family = span_mapper._model_family() or "unknown"
+                        from assistant_axis.internals.spans import _MAX_HEADER_SEARCH_DIST
+                        max_dist = _MAX_HEADER_SEARCH_DIST.get(family, 12)
+                        window = fids[max(0, s - max_dist):s + 1]
                         print(f"  Actual tokens before span[{cid}] start={s}: {window}")
                         shown += 1
                 except ValueError:

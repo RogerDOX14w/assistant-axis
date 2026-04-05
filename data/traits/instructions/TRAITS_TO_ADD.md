@@ -42,9 +42,25 @@ valuable additions to the trait set.
   Term too new for Sonnet to know. "technomystical" covers the broader category;
   spiralism is its specific AI-oracle manifestation.
 
-## Clean antonym pairs (low priority)
+## Clean antonym pairs (added Apr 2026)
 
-For traits where the neg_label is a real word (not `non-X`) that is not already a trait (so we don't alerady have a "clean bidirectional pair"), consider
+Added 5 new traits as clean bidirectional pairs of existing traits. Each was
+verified by starting with `negative_label = non-X`, running antonym generation,
+and confirming it independently recovered the expected antonym. See
+`AGENT_NOTES.md` § "Adding New Trait Clean Pairs" for the full process.
+
+- **obedient** ↔ rebellious — all-5 @ 2 on both polarities
+- **compassionate** ↔ callous — all-5 @ 2 on both polarities
+- **ecocentric** ↔ anthropocentric — all-5 @ 2 on both polarities
+- **conservative** ↔ progressive — mostly 2 (4×2, 1×1 on each polarity)
+- **pragmatic** ↔ idealistic — pos scored mostly 1 (not added to goal list)
+
+Dropped: **conformist** ↔ contrarian — asymmetric pair (conformist→nonconformist,
+not contrarian). May revisit.
+
+## Clean antonym pairs (candidates, low priority)
+
+For traits where the neg_label is a real word (not `non-X`) that is not already a trait (so we don't already have a "clean bidirectional pair"), consider
 generating proper standalone trait definitions for the antonym side. This would
 make them clean bidirectional pairs — each side with its own description,
 pos instructions, and eval_prompt — rather than relying on the neg instructions

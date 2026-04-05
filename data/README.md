@@ -1,0 +1,97 @@
+# Data Directory
+
+Role and trait definitions used by the pipeline and analysis tools.
+This extends Christina Lu's original dataset format with additional fields
+and metadata. See [`data_analysis/`](../data_analysis/) for the scripts that
+generate and process this data.
+
+## Directory Structure
+
+```
+data/
+├── goal_roles_and_traits.json   # Curated subsets of goal/nongoal roles and traits for experiments
+├── extraction_questions.jsonl   # Questions used in pipeline Step 1
+├── roles/
+│   ├── role_list.json           # {name: description} for all 276+ roles
+│   └── instructions/            # Per-role JSON files (281 files)
+│       └── <role>.json
+└── traits/
+    ├── trait_list.json           # {name: description} for all 245 traits
+    ├── trait_antonyms_v4.json    # {name: {negative_label, antonym_score, reasoning}}
+    └── instructions/             # Per-trait JSON files (245+ files)
+        ├── <trait>.json
+        ├── TRAITS_TO_ADD.md      # Candidate traits and addition history
+        └── NEG_REGENERATION_NOTES.md  # Traits with misaligned neg instructions
+```
+
+## Instruction File Format
+
+### Roles (`roles/instructions/<role>.json`)
+
+```json
+{
+  "description": "One-sentence description of the role",
+  "instruction": [
+    {"pos": "System prompt inducing the role"}
+  ],
+  "questions": ["Question 1", "..."],
+  "eval_prompt": "Evaluation template with {question} and {answer} slots"
+}
+```
+
+Role instructions have only `pos` variants (no neg/opposite).
+
+### Traits (`traits/instructions/<trait>.json`)
+
+```json
+{
+  "positive_label": "trait_name",
+  "negative_label": "antonym_name",
+  "description": "One-sentence description of the trait",
+  "instruction": [
+    {"pos": "System prompt inducing the trait",
+     "neg": "System prompt inducing the opposite"}
+  ],
+  "questions": ["Question 1", "..."],
+  "eval_prompt": "Evaluation template with {question} and {answer} slots"
+}
+```
+
+The `positive_label`, `negative_label`, and `description` fields were added
+to Christina Lu's original format (which had only `instruction`, `questions`,
+and `eval_prompt`). The `eval_prompt` is derived from `description` via a
+fixed template; see `regenerate_trait_instructions.py`. If you use Roger's prompt for instruction geration, the `negative_label` is also passed in, giving tigher clustering instructions, especially the neg instructions.
+
+## `goal_roles_and_traits.json`
+
+Curated lists of roles and traits partitioned by goal content (as determined
+by `data_analysis/classify_goals.py`). Each of `roles` and `traits` has:
+
+- **`goal`**: All 5 instructions scored 2 (clearly describes a goal)
+- **`non_goal`**: All 5 instructions scored 0 (clearly no goal)
+
+Items are ordered by priority tiers (randomized within each tier):
+
+| List | Tier 1 | Tier 2 | Tier 3 |
+|---|---|---|---|
+| `roles.goal` | 30 primary (varied) | 10 cluster duplicates | — |
+| `roles.non_goal` | 30 most varied | 10 nice-to-haves | 30 most redundant |
+| `traits.goal` | 30 max goal-space variation | 10 (mostly moral-circle-size spectrum) | 26 default-side of pairs / redundant |
+| `traits.non_goal` | 30 max persona-property variation | 10 nice-to-haves | 17 pair partners / redundant |
+
+For `traits.goal`, tier 1 prefers the less-HHH-default side of antonym pairs
+(e.g., cruel over compassionate) and spans distinct ethical frameworks,
+moral-circle extremes, and alignment-relevant anti-traits. Tier 2 holds the
+remaining moral-circle-size entries (may be worth revisiting whether the spectrum
+needs much finer resolution). Tier 3 holds the more default-like / redundant traits.
+
+## Notes Files
+
+- **`TRAITS_TO_ADD.md`**: History of trait additions (moral circle spectrum,
+  misalignment traits, RLHF triad, clean antonym pairs) and remaining
+  candidates.
+
+- **`NEG_REGENERATION_NOTES.md`**: Traits where the neg instructions don't
+  match the corrected `negative_label` — typically due to RLHF influence
+  during generation. Documents the misalignment, correct direction, and
+  likely cause for each.

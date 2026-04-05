@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Generate negative_labels for all traits by analyzing pos/neg instruction pairs.
+"""Generate negative_labels for traits by analyzing pos/neg instruction pairs.
 
 For each trait:
 1. Feeds Claude the positive_label and pos instructions
@@ -9,8 +9,13 @@ For each trait:
 
 Outputs a JSON object: { trait: { negative_label, antonym_score, reasoning } }
 Uses known antonyms from steering_across_personas for 5 overlapping traits.
+
+Usage:
+    uv run python data_analysis/generate_antonyms.py
+    uv run python data_analysis/generate_antonyms.py --traits obedient pragmatic conservative
 """
 
+import argparse
 import asyncio
 import json
 import re
@@ -124,10 +129,19 @@ async def classify_one(
     return {"negative_label": "ERROR", "antonym_score": -1, "reasoning": "All retries failed"}
 
 
-async def main_async():
+async def main_async(trait_filter: list[str] | None = None):
     traits_dir = Path(__file__).parent.parent / "data" / "traits" / "instructions"
     trait_files = sorted(traits_dir.glob("*.json"))
-    print(f"Found {len(trait_files)} traits", file=sys.stderr)
+
+    if trait_filter:
+        names = set(trait_filter)
+        trait_files = [tf for tf in trait_files if tf.stem in names]
+        missing = names - {tf.stem for tf in trait_files}
+        if missing:
+            print(f"ERROR: trait files not found: {', '.join(sorted(missing))}", file=sys.stderr)
+            sys.exit(1)
+
+    print(f"Processing {len(trait_files)} traits", file=sys.stderr)
 
     client = anthropic.AsyncAnthropic()
     semaphore = asyncio.Semaphore(10)
@@ -141,6 +155,8 @@ async def main_async():
             data = json.load(f)
         instructions = data["instruction"]
         definition = extract_definition(data.get("eval_prompt", ""))
+        if not definition:
+            definition = data.get("description", "")
 
         tasks.append((positive_label, definition, instructions))
 
@@ -198,8 +214,22 @@ async def main_async():
     print(json.dumps(results, indent=2, sort_keys=True))
 
 
-def main():
-    asyncio.run(main_async())
+def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
+    parser = argparse.ArgumentParser(
+        description="Generate negative_labels for traits via Claude.",
+    )
+    parser.add_argument(
+        "--traits",
+        nargs="+",
+        metavar="TRAIT",
+        help="Trait names to process (default: all traits)",
+    )
+    return parser.parse_args(argv)
+
+
+def main(argv: list[str] | None = None):
+    args = parse_args(argv)
+    asyncio.run(main_async(trait_filter=args.traits))
 
 
 if __name__ == "__main__":
