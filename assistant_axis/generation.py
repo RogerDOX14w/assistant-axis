@@ -492,14 +492,36 @@ class RoleResponseGenerator:
         return results
 
     def save_responses(self, role_name: str, responses: List[dict]):
-        """Save responses to JSONL file."""
+        """Save responses to JSONL file.
+
+        Writes to local /tmp first, then copies to the output directory to
+        avoid partial-write failures on flaky network filesystems (RunPod NFS).
+        """
         import jsonlines
+        import shutil
+        import tempfile
 
         output_file = self.output_dir / f"{role_name}.jsonl"
-        with jsonlines.open(output_file, mode='w') as writer:
+        local_tmp = Path(tempfile.gettempdir()) / f"{role_name}.jsonl.tmp"
+        with jsonlines.open(local_tmp, mode='w') as writer:
             for response in responses:
                 writer.write(response)
-        logger.info(f"Saved {len(responses)} responses to {output_file}")
+        for attempt in range(5):
+            try:
+                shutil.copy2(str(local_tmp), str(output_file))
+                logger.info(f"Saved {len(responses)} responses to {output_file}")
+                break
+            except OSError as e:
+                if attempt < 4:
+                    import time
+                    wait = 10 * (attempt + 1)
+                    logger.warning(f"Copy to NFS failed for {role_name} (attempt {attempt+1}/5): {e}. "
+                                   f"Retrying in {wait}s...")
+                    time.sleep(wait)
+                else:
+                    logger.error(f"Copy to NFS failed for {role_name} after 5 attempts: {e}")
+                    raise
+        local_tmp.unlink(missing_ok=True)
 
     def should_skip_role(self, role_name: str) -> bool:
         """Check if role output already exists."""

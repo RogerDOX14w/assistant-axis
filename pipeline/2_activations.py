@@ -251,28 +251,33 @@ def process_role(
             key = f"{meta['label']}_p{meta['prompt_index']}_q{meta['question_index']}"
             activations_dict[key] = act
 
-    # Save with retry for transient I/O errors (network filesystem flakiness)
+    # Save via local disk, then copy to destination. torch.save writes a
+    # zip stream that fails mid-write on flaky network filesystems (RunPod
+    # NFS "iostream error"). A local write + flat-file copy is far more
+    # resilient to transient NFS errors.
     if activations_dict:
+        import shutil
+        import tempfile
         if header_metadata:
             activations_dict["metadata"] = header_metadata
+        local_tmp = Path(tempfile.gettempdir()) / f"{output_file.stem}.pt.tmp"
+        torch.save(activations_dict, local_tmp)
         for attempt in range(5):
             try:
-                tmp_file = output_file.with_suffix(".pt.tmp")
-                torch.save(activations_dict, tmp_file)
-                tmp_file.rename(output_file)
+                shutil.copy2(str(local_tmp), str(output_file))
                 logger.info(f"Saved {len(activations_dict)} activations for {role}")
                 break
-            except (RuntimeError, OSError) as e:
-                tmp_file.unlink(missing_ok=True)
+            except OSError as e:
                 if attempt < 4:
                     wait = 10 * (attempt + 1)
-                    logger.warning(f"torch.save failed for {role} (attempt {attempt+1}/5): {e}. "
+                    logger.warning(f"Copy to NFS failed for {role} (attempt {attempt+1}/5): {e}. "
                                    f"Retrying in {wait}s...")
                     import time
                     time.sleep(wait)
                 else:
-                    logger.error(f"torch.save failed for {role} after 5 attempts: {e}")
+                    logger.error(f"Copy to NFS failed for {role} after 5 attempts: {e}")
                     raise
+        local_tmp.unlink(missing_ok=True)
 
     # Cleanup
     gc.collect()
