@@ -257,11 +257,11 @@ def process_role(
     # zip writer entirely.
     if activations_dict:
         import shutil
-        import tempfile
         import time as _time
         if header_metadata:
             activations_dict["metadata"] = header_metadata
-        local_tmp = Path(tempfile.gettempdir()) / f"{output_file.stem}.pt.tmp"
+        # Bypass TMPDIR (which points to NFS on RunPod) — /tmp is always local.
+        local_tmp = Path("/tmp") / f"{output_file.stem}.pt.tmp"
         for attempt in range(3):
             try:
                 torch.save(activations_dict, local_tmp,
@@ -276,7 +276,8 @@ def process_role(
         for attempt in range(5):
             try:
                 shutil.copy2(str(local_tmp), str(output_file))
-                logger.info(f"Saved {len(activations_dict)} activations for {role}")
+                n_act = len(activations_dict) - (1 if "metadata" in activations_dict else 0)
+                logger.info(f"Saved {n_act} activations (+ metadata) for {role}")
                 break
             except OSError as e:
                 if attempt < 4:

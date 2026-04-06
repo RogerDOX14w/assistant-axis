@@ -515,10 +515,10 @@ class RoleResponseGenerator:
         """
         import jsonlines
         import shutil
-        import tempfile
 
         output_file = self.output_dir / f"{role_name}.jsonl"
-        local_tmp = Path(tempfile.gettempdir()) / f"{role_name}.jsonl.tmp"
+        # Bypass TMPDIR (which points to NFS on RunPod) — /tmp is always local.
+        local_tmp = Path("/tmp") / f"{role_name}.jsonl.tmp"
         with jsonlines.open(local_tmp, mode='w') as writer:
             for response in responses:
                 writer.write(response)
