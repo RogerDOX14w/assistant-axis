@@ -303,6 +303,24 @@ Each of `roles` and `traits` has `goal` (all-5 @ 2) and `non_goal` (all-5 @ 0) s
 | conformist | contrarian | pending |
 | ecocentric | anthropocentric | pending |
 
+### Combined response generation (pipeline)
+
+The pipeline (`pipeline/1_generate.py`) supports two modes:
+
+**Roger mode** (default): Generates combined role+trait instructions, standalone traits, and the default baseline. Uses `data/goal_roles_and_traits.json` to pick the top-N roles/traits from each goal/non-goal list.
+
+- `r_{role}__{trait}` = goal role x non-goal trait (goal from role)
+- `t_{role}__{trait}` = non-goal role x goal trait (goal from trait)
+- Double underscore `__` separates role and trait in filenames
+- Instructions are index-matched (pair 0-0, 1-1, ..., 4-4), concatenated with `\n`
+- `--goal_count` / `--non_goal_count` (default 30 each) control how many items from each list; error only if a count exceeds BOTH lists it applies to
+
+**Christina mode**: Processes standalone roles (or traits) from `--roles_dir`. Run separately per entity type (different `--roles_dir` and `--output_dir`) to avoid name collisions.
+
+**Step 3 eval_prompt routing**: The judge (`3_judge.py`) detects response type by filename prefix. Combined entries get a compound 0-3 eval_prompt constructed from both descriptions. Standalone traits get a pipeline-specific 0-3 eval_prompt (the 0-100 eval_prompt in trait JSONs is NOT used by the pipeline, since `parse_judge_score()` rejects scores > 3). Standalone roles use their existing `eval_prompt` from the JSON file. `default` is skipped (step 4 uses all activations without scores).
+
+Steps 2, 4, 5 are unchanged — they process whatever files appear in their input directories.
+
 ---
 
 ## Updates and Evolution
@@ -313,7 +331,7 @@ This document should evolve as we discover new patterns. When something doesn't 
 3. Update this document if it's a pattern
 4. Keep it concise - remove outdated patterns
 
-**Last Updated:** January 14, 2026
+**Last Updated:** April 5, 2026
 
 ---
 

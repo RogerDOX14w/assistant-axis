@@ -57,6 +57,23 @@ uv run python data_analysis/classify_goals.py --names obedient compassionate --t
 uv run python data_analysis/classify_goals.py  # full corpus
 ```
 
+### `score_combinations.py`
+
+Scores all role+trait instruction combinations for incongruity using Claude
+Sonnet. For each combination, sends all index-matched pos instruction pairs
+in a single API call and gets a 0-3 score per pair with reasoning. Output
+goes to `data/combination_scores.json`.
+
+Parameters mirror Step 1's `--goal_count` and `--non_goal_count` (defaulting
+to 40 each). Supports `--dry_run`, `--batch_size` (instruction pairs per
+call, default all), and resume via incremental saves.
+
+```bash
+uv run python data_analysis/score_combinations.py --dry_run
+uv run python data_analysis/score_combinations.py --goal_count 2 --non_goal_count 2  # test
+uv run python data_analysis/score_combinations.py  # full 40x40 + 40x40 = 3200 combos
+```
+
 ### `sample_trait_responses.py`
 
 Diagnostic tool for eyeballing how a model responds to trait instructions.

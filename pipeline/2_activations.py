@@ -160,7 +160,7 @@ def extract_activations_batch(
                 if conv_acts.shape[1] >= 2:
                     assistant_slots = conv_acts[:, 1::2, :, :]
                     if assistant_slots.shape[1] > 0:
-                        mean_act = assistant_slots.mean(dim=1).cpu()  # (1+N, layers, hidden)
+                        mean_act = assistant_slots.nanmean(dim=1).cpu()  # (1+N, layers, hidden)
                         all_activations.append(mean_act)
                     else:
                         all_activations.append(None)
@@ -251,12 +251,28 @@ def process_role(
             key = f"{meta['label']}_p{meta['prompt_index']}_q{meta['question_index']}"
             activations_dict[key] = act
 
-    # Save
+    # Save with retry for transient I/O errors (network filesystem flakiness)
     if activations_dict:
         if header_metadata:
             activations_dict["metadata"] = header_metadata
-        torch.save(activations_dict, output_file)
-        logger.info(f"Saved {len(activations_dict)} activations for {role}")
+        for attempt in range(5):
+            try:
+                tmp_file = output_file.with_suffix(".pt.tmp")
+                torch.save(activations_dict, tmp_file)
+                tmp_file.rename(output_file)
+                logger.info(f"Saved {len(activations_dict)} activations for {role}")
+                break
+            except (RuntimeError, OSError) as e:
+                tmp_file.unlink(missing_ok=True)
+                if attempt < 4:
+                    wait = 10 * (attempt + 1)
+                    logger.warning(f"torch.save failed for {role} (attempt {attempt+1}/5): {e}. "
+                                   f"Retrying in {wait}s...")
+                    import time
+                    time.sleep(wait)
+                else:
+                    logger.error(f"torch.save failed for {role} after 5 attempts: {e}")
+                    raise
 
     # Cleanup
     gc.collect()
@@ -437,6 +453,13 @@ def main():
     parser.add_argument("--no-headers", action="store_true", default=False,
                        help="Disable header token extraction (legacy compat)")
     args = parser.parse_args()
+
+    # Set up file logging (append to output_dir/activations.log)
+    output_dir = Path(args.output_dir)
+    output_dir.mkdir(parents=True, exist_ok=True)
+    file_handler = logging.FileHandler(output_dir / "activations.log", mode="a")
+    file_handler.setFormatter(logging.Formatter('%(asctime)s - %(levelname)s - %(message)s'))
+    logging.getLogger().addHandler(file_handler)
 
     # Detect GPUs for multi-worker decision
     if 'CUDA_VISIBLE_DEVICES' in os.environ:

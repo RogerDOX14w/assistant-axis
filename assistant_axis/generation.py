@@ -325,7 +325,8 @@ class RoleResponseGenerator:
         max_model_len: int = 2048,
         tensor_parallel_size: Optional[int] = None,
         gpu_memory_utilization: float = 0.9,
-        question_count: int = 240,
+        question_count: int = 300,
+        reduce_questions: int = 1,
         temperature: float = 0.7,
         max_tokens: int = 512,
         top_p: float = 0.9,
@@ -344,6 +345,7 @@ class RoleResponseGenerator:
             tensor_parallel_size: Number of GPUs
             gpu_memory_utilization: GPU memory utilization
             question_count: Number of questions per role
+            reduce_questions: Take every Nth question (1 = all, 3 = every 3rd)
             temperature: Sampling temperature
             max_tokens: Maximum tokens to generate
             top_p: Top-p sampling
@@ -355,6 +357,7 @@ class RoleResponseGenerator:
         self.output_dir = Path(output_dir)
         self.questions_file = questions_file
         self.question_count = question_count
+        self.reduce_questions = reduce_questions
         self.prompt_indices = prompt_indices if prompt_indices is not None else list(range(5))
 
         # Get short name for {model_name} placeholder
@@ -393,7 +396,10 @@ class RoleResponseGenerator:
             for entry in reader:
                 questions.append(entry['question'])
 
-        self.questions = questions[:self.question_count]
+        questions = questions[:self.question_count]
+        if self.reduce_questions > 1:
+            questions = questions[::self.reduce_questions]
+        self.questions = questions
         logger.info(f"Loaded {len(self.questions)} questions")
         return self.questions
 
@@ -407,31 +413,81 @@ class RoleResponseGenerator:
         return instruction.replace("{model_name}", self.short_name)
 
     def generate_role_responses(self, role_name: str, role_data: dict) -> List[dict]:
-        """Generate responses for a single role."""
+        """Generate responses for a single role or trait."""
         instructions = role_data.get('instruction', [])
         if not instructions:
             return []
 
         questions = self.load_questions()
 
-        # Get and format instructions
         formatted_instructions = []
         for inst in instructions:
             raw = inst.get('pos', '')
             formatted_instructions.append(self.format_instruction(raw))
 
-        logger.info(f"Processing role '{role_name}' with {len(questions)} questions")
+        logger.info(f"Processing '{role_name}' with {len(questions)} questions")
 
-        # Generate
         results = self.generator.generate_for_role(
             instructions=formatted_instructions,
             questions=questions,
             prompt_indices=self.prompt_indices,
         )
 
-        # Add label
         for r in results:
             r["label"] = "pos"
+
+        return results
+
+    def generate_combined_responses(
+        self,
+        role_data: dict,
+        trait_data: dict,
+        role_name: str,
+        trait_name: str,
+        goal_source: str,
+    ) -> List[dict]:
+        """Generate responses for a combined role+trait instruction.
+
+        Concatenates role and trait pos instructions index-matched
+        (pair 0-0, 1-1, ...) separated by a newline.
+
+        Args:
+            role_data: Role JSON data with 'instruction' list
+            trait_data: Trait JSON data with 'instruction' list
+            role_name: Role identifier (for metadata)
+            trait_name: Trait identifier (for metadata)
+            goal_source: "role" or "trait" indicating which carries the goal
+        """
+        role_instructions = role_data.get('instruction', [])
+        trait_instructions = trait_data.get('instruction', [])
+        if not role_instructions or not trait_instructions:
+            return []
+
+        questions = self.load_questions()
+
+        n_pairs = min(len(role_instructions), len(trait_instructions))
+        combined_instructions = []
+        for i in range(n_pairs):
+            role_inst = self.format_instruction(role_instructions[i].get('pos', ''))
+            trait_inst = self.format_instruction(trait_instructions[i].get('pos', ''))
+            combined_instructions.append(f"{role_inst}\n{trait_inst}")
+
+        prompt_indices = [i for i in self.prompt_indices if i < n_pairs]
+
+        logger.info(f"Processing combined '{role_name}+{trait_name}' "
+                    f"(goal={goal_source}) with {len(questions)} questions")
+
+        results = self.generator.generate_for_role(
+            instructions=combined_instructions,
+            questions=questions,
+            prompt_indices=prompt_indices,
+        )
+
+        for r in results:
+            r["label"] = "pos"
+            r["role"] = role_name
+            r["trait"] = trait_name
+            r["goal_source"] = goal_source
 
         return results
 

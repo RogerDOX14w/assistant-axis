@@ -254,6 +254,44 @@ class SpanMapper:
                                 "actual": act_id,
                             })
 
+                        if hdr_start is None and mm:
+                            family = self._model_family() or "unknown"
+                            max_dist = _MAX_HEADER_SEARCH_DIST.get(family, 12)
+                            w_start = max(0, start_idx - max_dist - 5)
+                            w_end = min(len(full_ids), start_idx + 5)
+                            window_ids = full_ids[w_start:w_end]
+                            try:
+                                window_toks = [
+                                    self.tokenizer.convert_ids_to_tokens(t)
+                                    for t in window_ids
+                                ]
+                            except Exception:
+                                window_toks = ["?"] * len(window_ids)
+                            marker = start_idx - w_start
+                            logger.warning(
+                                "HEADER NOT FOUND: conv=%d turn=%s "
+                                "span_start=%d full_ids_len=%d "
+                                "actual_length=%d search=[%d..%d)",
+                                conv_id, span.get("turn"), start_idx,
+                                len(full_ids), actual_length,
+                                max(0, start_idx - max_dist), start_idx,
+                            )
+                            logger.warning(
+                                "  ids[%d:%d]: %s  (^ = span_start at offset %d)",
+                                w_start, w_end, window_ids, marker,
+                            )
+                            logger.warning(
+                                "  tok[%d:%d]: %s",
+                                w_start, w_end, window_toks,
+                            )
+                            logger.warning(
+                                "  expected header ids: %s  span: %s",
+                                header_ids, {k: span[k] for k in
+                                             ('role', 'turn', 'start', 'end',
+                                              'n_tokens', 'conversation_id')
+                                             if k in span},
+                            )
+
                         if hdr_start is not None:
                             for k in range(N):
                                 tok_idx = hdr_start + k

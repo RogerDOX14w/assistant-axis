@@ -57,7 +57,7 @@ def compute_pos_3_vector(activations: dict, scores: dict, min_count: int) -> tor
         raise ValueError(f"Only {len(filtered_acts)} score=3 samples, need {min_count}")
 
     stacked = torch.stack(filtered_acts)
-    return stacked.mean(dim=0)
+    return stacked.nanmean(dim=0)
 
 
 def compute_mean_vector(activations: dict) -> torch.Tensor:
@@ -69,7 +69,7 @@ def compute_mean_vector(activations: dict) -> torch.Tensor:
     """
     all_acts = list(activations.values())
     stacked = torch.stack(all_acts)
-    return stacked.mean(dim=0)
+    return stacked.nanmean(dim=0)
 
 
 def main():

@@ -97,8 +97,8 @@ def main():
     default_stacked = torch.stack(default_vectors)
     role_stacked = torch.stack(role_vectors)
 
-    default_mean = default_stacked.mean(dim=0)
-    role_mean = role_stacked.mean(dim=0)
+    default_mean = default_stacked.nanmean(dim=0)
+    role_mean = role_stacked.nanmean(dim=0)
 
     # Compute axis: points from role-playing toward default
     axis = default_mean - role_mean
