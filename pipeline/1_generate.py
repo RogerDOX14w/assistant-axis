@@ -62,91 +62,93 @@ def collect_work_items(args) -> List[Dict]:
     if args.mode == "roger":
         traits_dir = Path(args.traits_dir)
 
-        with open(args.goal_file) as f:
-            goal_data = json.load(f)
+        if not args.traits_only:
+            with open(args.goal_file) as f:
+                goal_data = json.load(f)
 
-        goal_roles = goal_data["roles"]["goal"]
-        non_goal_roles = goal_data["roles"]["non_goal"]
-        goal_traits = goal_data["traits"]["goal"]
-        non_goal_traits = goal_data["traits"]["non_goal"]
+            goal_roles = goal_data["roles"]["goal"]
+            non_goal_roles = goal_data["roles"]["non_goal"]
+            goal_traits = goal_data["traits"]["goal"]
+            non_goal_traits = goal_data["traits"]["non_goal"]
 
-        gc, ngc = args.goal_count, args.non_goal_count
-        if gc > len(goal_roles) and gc > len(goal_traits):
-            logger.error(
-                f"--goal_count {gc} exceeds both roles.goal "
-                f"({len(goal_roles)}) and traits.goal ({len(goal_traits)})")
-            sys.exit(1)
-        if ngc > len(non_goal_roles) and ngc > len(non_goal_traits):
-            logger.error(
-                f"--non_goal_count {ngc} exceeds both roles.non_goal "
-                f"({len(non_goal_roles)}) and traits.non_goal ({len(non_goal_traits)})")
-            sys.exit(1)
+            gc, ngc = args.goal_count, args.non_goal_count
+            if gc > len(goal_roles) and gc > len(goal_traits):
+                logger.error(
+                    f"--goal_count {gc} exceeds both roles.goal "
+                    f"({len(goal_roles)}) and traits.goal ({len(goal_traits)})")
+                sys.exit(1)
+            if ngc > len(non_goal_roles) and ngc > len(non_goal_traits):
+                logger.error(
+                    f"--non_goal_count {ngc} exceeds both roles.non_goal "
+                    f"({len(non_goal_roles)}) and traits.non_goal ({len(non_goal_traits)})")
+                sys.exit(1)
 
-        use_goal_roles = goal_roles[:min(gc, len(goal_roles))]
-        use_non_goal_roles = non_goal_roles[:min(ngc, len(non_goal_roles))]
-        use_goal_traits = goal_traits[:min(gc, len(goal_traits))]
-        use_non_goal_traits = non_goal_traits[:min(ngc, len(non_goal_traits))]
+            use_goal_roles = goal_roles[:min(gc, len(goal_roles))]
+            use_non_goal_roles = non_goal_roles[:min(ngc, len(non_goal_roles))]
+            use_goal_traits = goal_traits[:min(gc, len(goal_traits))]
+            use_non_goal_traits = non_goal_traits[:min(ngc, len(non_goal_traits))]
 
-        # r_ combos: goal role x non-goal trait  (goal from role)
-        for role_name in use_goal_roles:
-            role_file = roles_dir / f"{role_name}.json"
-            if not role_file.exists():
-                logger.warning(f"Role file missing: {role_file}")
-                continue
-            for trait_name in use_non_goal_traits:
-                trait_file = traits_dir / f"{trait_name}.json"
-                if not trait_file.exists():
-                    logger.warning(f"Trait file missing: {trait_file}")
+            # r_ combos: goal role x non-goal trait  (goal from role)
+            for role_name in use_goal_roles:
+                role_file = roles_dir / f"{role_name}.json"
+                if not role_file.exists():
+                    logger.warning(f"Role file missing: {role_file}")
                     continue
-                items.append({
-                    "output_name": f"r_{role_name}__{trait_name}",
-                    "type": "combined",
-                    "role_name": role_name,
-                    "trait_name": trait_name,
-                    "role_file": str(role_file),
-                    "trait_file": str(trait_file),
-                    "goal_source": "role",
-                })
+                for trait_name in use_non_goal_traits:
+                    trait_file = traits_dir / f"{trait_name}.json"
+                    if not trait_file.exists():
+                        logger.warning(f"Trait file missing: {trait_file}")
+                        continue
+                    items.append({
+                        "output_name": f"r_{role_name}__{trait_name}",
+                        "type": "combined",
+                        "role_name": role_name,
+                        "trait_name": trait_name,
+                        "role_file": str(role_file),
+                        "trait_file": str(trait_file),
+                        "goal_source": "role",
+                    })
 
-        # t_ combos: non-goal role x goal trait  (goal from trait)
-        for role_name in use_non_goal_roles:
-            role_file = roles_dir / f"{role_name}.json"
-            if not role_file.exists():
-                logger.warning(f"Role file missing: {role_file}")
-                continue
-            for trait_name in use_goal_traits:
-                trait_file = traits_dir / f"{trait_name}.json"
-                if not trait_file.exists():
-                    logger.warning(f"Trait file missing: {trait_file}")
+            # t_ combos: non-goal role x goal trait  (goal from trait)
+            for role_name in use_non_goal_roles:
+                role_file = roles_dir / f"{role_name}.json"
+                if not role_file.exists():
+                    logger.warning(f"Role file missing: {role_file}")
                     continue
+                for trait_name in use_goal_traits:
+                    trait_file = traits_dir / f"{trait_name}.json"
+                    if not trait_file.exists():
+                        logger.warning(f"Trait file missing: {trait_file}")
+                        continue
+                    items.append({
+                        "output_name": f"t_{role_name}__{trait_name}",
+                        "type": "combined",
+                        "role_name": role_name,
+                        "trait_name": trait_name,
+                        "role_file": str(role_file),
+                        "trait_file": str(trait_file),
+                        "goal_source": "trait",
+                    })
+
+            # Default role (always needed for axis computation)
+            default_file = roles_dir / "default.json"
+            if default_file.exists():
                 items.append({
-                    "output_name": f"t_{role_name}__{trait_name}",
-                    "type": "combined",
-                    "role_name": role_name,
-                    "trait_name": trait_name,
-                    "role_file": str(role_file),
-                    "trait_file": str(trait_file),
-                    "goal_source": "trait",
+                    "output_name": "default",
+                    "type": "standalone",
+                    "file_path": str(default_file),
                 })
+            else:
+                logger.warning(f"Default role not found: {default_file}")
 
-        # Standalone traits (all files in traits_dir)
-        for fp in sorted(traits_dir.glob("*.json")):
-            items.append({
-                "output_name": fp.stem,
-                "type": "standalone",
-                "file_path": str(fp),
-            })
-
-        # Default role (always needed for axis computation)
-        default_file = roles_dir / "default.json"
-        if default_file.exists():
-            items.append({
-                "output_name": "default",
-                "type": "standalone",
-                "file_path": str(default_file),
-            })
-        else:
-            logger.warning(f"Default role not found: {default_file}")
+        if not args.no_traits:
+            # Standalone traits (all files in traits_dir)
+            for fp in sorted(traits_dir.glob("*.json")):
+                items.append({
+                    "output_name": fp.stem,
+                    "type": "standalone",
+                    "file_path": str(fp),
+                })
 
         n_combined = sum(1 for i in items if i["type"] == "combined")
         n_standalone = sum(1 for i in items if i["type"] == "standalone")
@@ -339,6 +341,10 @@ def main():
     parser.add_argument("--goal_file", type=str,
                         default="../data/goal_roles_and_traits.json",
                         help="Goal roles/traits JSON (roger mode)")
+    parser.add_argument("--no_traits", action="store_true",
+                        help="Roger mode: skip standalone traits (combos + default only)")
+    parser.add_argument("--traits_only", action="store_true",
+                        help="Roger mode: standalone traits only (skip combos + default)")
 
     # Shared parameters
     parser.add_argument("--model", type=str, required=True,
@@ -371,6 +377,11 @@ def main():
                         help="Specific roles to process (christina mode)")
 
     args = parser.parse_args()
+
+    if args.no_traits and args.traits_only:
+        parser.error("--no_traits and --traits_only are mutually exclusive")
+    if args.mode != "roger" and (args.no_traits or args.traits_only):
+        parser.error("--no_traits / --traits_only are only valid in roger mode")
 
     if args.question_count is None:
         args.question_count = 300 if args.mode == "roger" else 240

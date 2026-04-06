@@ -4,6 +4,8 @@
 #
 # Supports two modes:
 #   roger (default) — combined role+trait instructions, standalone traits, default
+#     --no_traits   — skip standalone traits (combos + default only)
+#     --traits_only — standalone traits only (skip combos + default)
 #   christina       — standalone roles (rerun with ROLES_DIR for traits)
 #
 # Usage:
