@@ -365,8 +365,8 @@ def main():
                         help="GPU memory utilization")
     parser.add_argument("--question_count", type=int, default=None,
                         help="Number of questions per entity (default: 300 roger, 240 christina)")
-    parser.add_argument("--reduce_questions", type=int, default=1,
-                        help="Take every Nth question (1=all, 3=every 3rd, etc.)")
+    parser.add_argument("--reduce_questions", type=int, default=None,
+                        help="Take every Nth question (default: 3 roger, 1 christina)")
     parser.add_argument("--temperature", type=float, default=0.7,
                         help="Sampling temperature")
     parser.add_argument("--max_tokens", type=int, default=512,
@@ -385,6 +385,8 @@ def main():
 
     if args.question_count is None:
         args.question_count = 300 if args.mode == "roger" else 240
+    if args.reduce_questions is None:
+        args.reduce_questions = 3 if args.mode == "roger" else 1
 
     # Collect and filter work items
     all_items = collect_work_items(args)
