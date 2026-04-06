@@ -43,12 +43,25 @@ logger = logging.getLogger(__name__)
 
 
 def load_responses(responses_file: Path) -> List[dict]:
-    """Load responses from JSONL file."""
-    responses = []
-    with jsonlines.open(responses_file, 'r') as reader:
-        for entry in reader:
-            responses.append(entry)
-    return responses
+    """Load responses from JSONL file, with retries for NFS flakiness."""
+    import time
+    for attempt in range(5):
+        try:
+            responses = []
+            with jsonlines.open(responses_file, 'r') as reader:
+                for entry in reader:
+                    responses.append(entry)
+            return responses
+        except OSError as e:
+            if attempt < 4:
+                wait = 10 * (attempt + 1)
+                logger.warning(f"Read failed for {responses_file.name} (attempt {attempt+1}/5): {e}. "
+                               f"Retrying in {wait}s...")
+                time.sleep(wait)
+            else:
+                logger.error(f"Read failed for {responses_file.name} after 5 attempts: {e}")
+                raise
+    return []
 
 
 def extract_activations_batch(
