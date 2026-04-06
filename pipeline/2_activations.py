@@ -251,17 +251,28 @@ def process_role(
             key = f"{meta['label']}_p{meta['prompt_index']}_q{meta['question_index']}"
             activations_dict[key] = act
 
-    # Save via local disk, then copy to destination. torch.save writes a
-    # zip stream that fails mid-write on flaky network filesystems (RunPod
-    # NFS "iostream error"). A local write + flat-file copy is far more
-    # resilient to transient NFS errors.
+    # Save via local disk, then copy to destination. torch.save's default
+    # zip serialization triggers "iostream error" on RunPod; using the older
+    # pickle format (_use_new_zipfile_serialization=False) avoids the fragile
+    # zip writer entirely.
     if activations_dict:
         import shutil
         import tempfile
+        import time as _time
         if header_metadata:
             activations_dict["metadata"] = header_metadata
         local_tmp = Path(tempfile.gettempdir()) / f"{output_file.stem}.pt.tmp"
-        torch.save(activations_dict, local_tmp)
+        for attempt in range(3):
+            try:
+                torch.save(activations_dict, local_tmp,
+                           _use_new_zipfile_serialization=False)
+                break
+            except (RuntimeError, OSError) as e:
+                if attempt < 2:
+                    logger.warning(f"Local torch.save failed for {role} (attempt {attempt+1}/3): {e}")
+                    _time.sleep(5)
+                else:
+                    raise
         for attempt in range(5):
             try:
                 shutil.copy2(str(local_tmp), str(output_file))
@@ -272,8 +283,7 @@ def process_role(
                     wait = 10 * (attempt + 1)
                     logger.warning(f"Copy to NFS failed for {role} (attempt {attempt+1}/5): {e}. "
                                    f"Retrying in {wait}s...")
-                    import time
-                    time.sleep(wait)
+                    _time.sleep(wait)
                 else:
                     logger.error(f"Copy to NFS failed for {role} after 5 attempts: {e}")
                     raise

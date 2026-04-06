@@ -26,7 +26,13 @@ NON_GOAL_COUNT=30               # roger mode: top-N from non-goal lists
 REDUCE_QUESTIONS=1              # take every Nth question (1=all, 3=every 3rd)
 OUTPUT_DIR="/workspace/qwen-3-32b/roger"
 
+# ---- Logging --------------------------------------------------------------
+LOG_FILE="$OUTPUT_DIR/pipeline_$(date +%Y%m%d_%H%M%S).log"
+mkdir -p "$OUTPUT_DIR"
+exec > >(tee -a "$LOG_FILE") 2>&1
+
 echo "=== Assistant Axis Pipeline ==="
+echo "Log: $LOG_FILE"
 echo "Model:  $MODEL"
 echo "Mode:   $MODE"
 echo "Output: $OUTPUT_DIR"
@@ -76,6 +82,16 @@ uv run 5_axis.py \
 echo ""
 echo "=== Pipeline complete ==="
 echo "Axis saved to: $OUTPUT_DIR/axis.pt"
+echo "Log:  $LOG_FILE"
+
+# ---- Summary of warnings/errors ------------------------------------------
+ISSUES=$(grep -E ' - (WARNING|ERROR) - ' "$LOG_FILE" 2>/dev/null || true)
+if [ -n "$ISSUES" ]; then
+    COUNT=$(echo "$ISSUES" | wc -l | tr -d ' ')
+    echo ""
+    echo "*** $COUNT warning(s)/error(s) during pipeline run: ***"
+    echo "$ISSUES"
+fi
 
 # ---- Christina mode notes --------------------------------------------------
 # To run Christina mode for roles AND traits, run the pipeline twice:

@@ -234,6 +234,22 @@ class VLLMGenerator:
         outputs = self.llm.generate(prompts, self.sampling_params)
 
         responses = [output.outputs[0].text for output in outputs]
+
+        # Workaround: vLLM sometimes generates thinking content with Qwen
+        # models despite enable_thinking=False. It strips the opening <think>
+        # tag but leaves </think> and the preceding thinking text in the
+        # output. Strip everything up to the last </think>.
+        if "qwen" in self.model_name.lower():
+            cleaned = 0
+            for i, resp in enumerate(responses):
+                if '</think>' in resp and '<think>' not in resp:
+                    responses[i] = resp[resp.rfind('</think>') + len('</think>'):].strip()
+                    cleaned += 1
+            if cleaned:
+                logger.warning(
+                    f"Stripped orphaned thinking content from {cleaned}/{len(responses)} "
+                    f"responses (vLLM/Qwen thinking leak)")
+
         return responses
 
     def generate_for_role(
