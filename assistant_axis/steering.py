@@ -16,7 +16,7 @@ Example:
 """
 
 import torch
-from typing import Sequence, Union, Iterable, List
+from typing import Optional, Sequence, Union, Iterable, List
 
 
 class ActivationSteering:
@@ -51,6 +51,10 @@ class ActivationSteering:
         positions: str = "all",
         mean_activations: Union[torch.Tensor, List[torch.Tensor], List[Sequence[float]], None] = None,
         cap_thresholds: Union[float, List[float], None] = None,
+        input_ids: Optional[torch.Tensor] = None,
+        header_token_ids: Optional[List[int]] = None,
+        vector_position_types: Optional[List[Union[str, int]]] = None,
+        end_of_turn_id: Optional[int] = None,
         debug: bool = False,
     ):
         """
@@ -61,9 +65,18 @@ class ActivationSteering:
             layer_indices: Either a single layer index or list of layer indices to intervene at
             intervention_type: "addition" (standard steering), "ablation" (project out then add back),
                              "mean_ablation", or "capping"
-            positions: "all" (steer all positions) or "last" (steer only last position)
+            positions: "all" (steer all positions), "last" (steer only last position),
+                      or "header_matched" (position-aware: each vector targets either generated text or specific header tokens)
             mean_activations: For mean_ablation only - replacement activations to add after projection
             cap_thresholds: For capping only - threshold values to cap projected activations at
+            input_ids: For header_matched only - tokenized prompt (1D or 2D tensor)
+            header_token_ids: For header_matched only - token IDs of header tokens (from axis metadata)
+            vector_position_types: For header_matched only - parallel to steering_vectors, each either
+                "body" (apply to assistant response tokens) or an int token ID from header_token_ids
+                (apply only to positions where that token appears as part of a matched header sequence)
+            end_of_turn_id: For header_matched only - token ID marking end of a turn (e.g. <|im_end|>).
+                Used to delimit assistant response body in multi-turn prompts.
+                Falls back to header_token_ids[0] if not provided.
             debug: Whether to print debugging information
 
         Note: For 1:1 mapping, steering_vectors, coefficients, and layer_indices must all have same length.
@@ -79,12 +92,20 @@ class ActivationSteering:
         if self.intervention_type not in {"addition", "ablation", "mean_ablation", "capping"}:
             raise ValueError("intervention_type must be 'addition', 'ablation', 'mean_ablation', or 'capping'")
 
-        if self.positions not in {"all", "last"}:
-            raise ValueError("positions must be 'all' or 'last'")
+        if self.positions not in {"all", "last", "header_matched"}:
+            raise ValueError("positions must be 'all', 'last', or 'header_matched'")
+
+        if self.positions == "header_matched":
+            if input_ids is None:
+                raise ValueError("input_ids required for positions='header_matched'")
+            if header_token_ids is None:
+                raise ValueError("header_token_ids required for positions='header_matched'")
+            if vector_position_types is None:
+                raise ValueError("vector_position_types required for positions='header_matched'")
 
         if self.intervention_type == "mean_ablation":
-            if self.positions != "all":
-                raise ValueError("mean_ablation only supports positions='all'")
+            if self.positions not in {"all", "header_matched"}:
+                raise ValueError("mean_ablation only supports positions='all' or 'header_matched'")
             if mean_activations is None:
                 raise ValueError("mean_activations is required for mean_ablation")
 
@@ -125,11 +146,41 @@ class ActivationSteering:
             tau = self.cap_thresholds[i] if self.cap_thresholds is not None else None
             self.vectors_by_layer[layer_idx].append((vector, coeff, i, mean_act, tau))
 
+        # Header-matched position setup
+        self.vector_position_types = None
+        self._header_positions = {}
+        self._layer_call_counts = {}
+
+        if self.positions == "header_matched":
+            self.vector_position_types = list(vector_position_types)
+            if len(self.vector_position_types) != len(self.steering_vectors):
+                raise ValueError(
+                    f"vector_position_types length ({len(self.vector_position_types)}) "
+                    f"must match steering_vectors ({len(self.steering_vectors)})")
+            self.header_token_ids = list(header_token_ids)
+            self.end_of_turn_id = end_of_turn_id
+            header_id_set = set(self.header_token_ids)
+            for i, pt in enumerate(self.vector_position_types):
+                if pt != "body" and pt not in header_id_set:
+                    raise ValueError(
+                        f"vector_position_types[{i}] = {pt!r}: must be 'body' or "
+                        f"a token ID from header_token_ids {self.header_token_ids}")
+            self.set_input_ids(input_ids)
+
         if self.debug:
             print(f"[ActivationSteering] Initialized with:")
             print(f"  - {len(self.steering_vectors)} steering vectors")
             print(f"  - {len(set(self.layer_indices))} unique layers: {sorted(set(self.layer_indices))}")
             print(f"  - Intervention: {self.intervention_type}")
+            if self.positions == "header_matched":
+                print(f"  - Position types: {self.vector_position_types}")
+                for tid, pos in self._header_positions.items():
+                    print(f"  - Header token {tid}: positions {pos}")
+                print(f"  - Body positions (previous responses): "
+                      f"{len(self._prompt_body_positions)} tokens"
+                      + (f" {self._prompt_body_positions}" if len(self._prompt_body_positions) < 30 else ""))
+                if self.end_of_turn_id is not None:
+                    print(f"  - End-of-turn token: {self.end_of_turn_id}")
 
     def _normalize_vectors(self, steering_vectors):
         """Convert steering vectors to a list of tensors on the correct device/dtype."""
@@ -199,6 +250,100 @@ class ActivationSteering:
 
         return result
 
+    def set_input_ids(self, input_ids: torch.Tensor):
+        """Update input_ids and recompute header token positions.
+
+        Finds positions of the full header_token_ids sequence in input_ids
+        (not individual tokens), so e.g. a standalone '\\n' in the user
+        message won't be mistaken for a header token.
+
+        Call this between generations if the prompt changes.
+        """
+        if isinstance(input_ids, torch.Tensor):
+            ids = input_ids.squeeze().tolist()
+        else:
+            ids = list(input_ids)
+
+        self._prompt_length = len(ids)
+        self._layer_call_counts = {}
+
+        seq = self.header_token_ids
+        seq_len = len(seq)
+
+        self._header_positions = {tid: [] for tid in seq}
+        header_matches = []
+
+        for i in range(len(ids) - seq_len + 1):
+            if ids[i:i + seq_len] == seq:
+                for j, tid in enumerate(seq):
+                    self._header_positions[tid].append(i + j)
+                header_matches.append((i, i + seq_len))
+
+        # Body positions = assistant response tokens in the prompt.
+        # For each header match *except the last* (whose body will be
+        # generated), body spans from the end of the header to the
+        # end-of-turn token (inclusive).  Falls back to scanning for the
+        # next header_token_ids[0] (exclusive) when end_of_turn_id is
+        # not set — works for models where all turns share a prefix.
+        self._prompt_body_positions: List[int] = []
+        eot = self.end_of_turn_id
+        for idx, (_, body_start) in enumerate(header_matches[:-1]):
+            if eot is not None:
+                body_end = len(ids)
+                for k in range(body_start, len(ids)):
+                    if ids[k] == eot:
+                        body_end = k + 1  # inclusive
+                        break
+                else:
+                    if self.debug:
+                        print(f"[ActivationSteering] WARNING: end_of_turn_id {eot} "
+                              f"not found after header match {idx}")
+            else:
+                body_end = len(ids)
+                for k in range(body_start, len(ids)):
+                    if ids[k] == seq[0]:
+                        body_end = k  # exclusive
+                        break
+                else:
+                    if self.debug:
+                        print(f"[ActivationSteering] WARNING: header start token {seq[0]} "
+                              f"not found after header match {idx}")
+            self._prompt_body_positions.extend(range(body_start, body_end))
+
+    def _resolve_positions(self, seq_len: int, vector_idx: int,
+                           is_prefill: bool) -> List[int]:
+        """Return sequence positions where vector_idx should be applied.
+
+        Prefill (first forward pass):
+          - header vectors → their matched token positions
+          - body vectors → previous assistant response positions in the prompt
+
+        KV-cache decode (seq_len < prompt_length, typically 1):
+          - body vectors → all positions (these are newly generated tokens)
+          - header vectors → nothing
+
+        No-KV-cache decode (seq_len > prompt_length):
+          - header vectors → their original prompt positions
+          - body vectors → previous response positions + generated tokens
+        """
+        pos_type = self.vector_position_types[vector_idx]
+
+        if pos_type == "body":
+            if is_prefill:
+                # Previous assistant responses in the prompt
+                return [p for p in self._prompt_body_positions if p < seq_len]
+            if seq_len <= self._prompt_length:
+                # KV-cache decode: all positions are newly generated tokens
+                return list(range(seq_len))
+            # No-KV-cache decode: previous responses + newly generated tokens
+            return (self._prompt_body_positions
+                    + list(range(self._prompt_length, seq_len)))
+        else:
+            if not is_prefill and seq_len < self._prompt_length:
+                # KV-cache decode: no header tokens being generated
+                return []
+            return [p for p in self._header_positions.get(pos_type, []) if p < seq_len]
+
     def _locate_layer_list(self):
         """Find the layer list in the model."""
         for path in self._POSSIBLE_LAYER_ATTRS:
@@ -251,29 +396,85 @@ class ActivationSteering:
         else:
             return activations
 
-        modified_out = tensor_out
+        if self.positions == "header_matched":
+            modified_out = self._apply_header_matched(tensor_out, layer_idx)
+        else:
+            modified_out = tensor_out
+            for vector, coeff, vector_idx, mean_act, tau in self.vectors_by_layer[layer_idx]:
+                if self.intervention_type == "addition":
+                    modified_out = self._apply_addition(modified_out, vector, coeff)
+                elif self.intervention_type == "ablation":
+                    modified_out = self._apply_ablation(modified_out, vector, coeff)
+                elif self.intervention_type == "mean_ablation":
+                    modified_out = self._apply_mean_ablation(modified_out, vector, mean_act)
+                elif self.intervention_type == "capping":
+                    modified_out = self._apply_cap(modified_out, vector, tau)
 
-        for vector, coeff, vector_idx, mean_act, tau in self.vectors_by_layer[layer_idx]:
-            if self.intervention_type == "addition":
-                modified_out = self._apply_addition(modified_out, vector, coeff)
-            elif self.intervention_type == "ablation":
-                modified_out = self._apply_ablation(modified_out, vector, coeff)
-            elif self.intervention_type == "mean_ablation":
-                modified_out = self._apply_mean_ablation(modified_out, vector, mean_act)
-            elif self.intervention_type == "capping":
-                modified_out = self._apply_cap(modified_out, vector, tau)
-
-            if self.debug:
-                v = vector / (vector.norm() + 1e-8)
-                pre = torch.einsum('bld,d->bl', tensor_out, v)
-                post = torch.einsum('bld,d->bl', modified_out, v)
-                print(f"[ActivationSteering] Layer {layer_idx}, vec {vector_idx}: "
-                    f"pre mean={pre.mean():.3f} | post mean={post.mean():.3f}")
+                if self.debug:
+                    v = vector / (vector.norm() + 1e-8)
+                    pre = torch.einsum('bld,d->bl', tensor_out, v)
+                    post = torch.einsum('bld,d->bl', modified_out, v)
+                    print(f"[ActivationSteering] Layer {layer_idx}, vec {vector_idx}: "
+                        f"pre mean={pre.mean():.3f} | post mean={post.mean():.3f}")
 
         if was_tuple:
             return (modified_out, *activations[1:])
         else:
             return modified_out
+
+    def _apply_header_matched(self, tensor_out, layer_idx):
+        """Apply interventions with per-vector position matching."""
+        modified_out = tensor_out.clone()
+        seq_len = modified_out.shape[1]
+
+        self._layer_call_counts[layer_idx] = (
+            self._layer_call_counts.get(layer_idx, 0) + 1)
+        is_prefill = self._layer_call_counts[layer_idx] == 1
+
+        for vector, coeff, vector_idx, mean_act, tau in self.vectors_by_layer[layer_idx]:
+            positions = self._resolve_positions(seq_len, vector_idx, is_prefill)
+            if not positions:
+                continue
+
+            pos_idx = positions
+            v = vector.to(modified_out.device)
+
+            if self.intervention_type == "addition":
+                modified_out[:, pos_idx, :] += coeff * v
+
+            elif self.intervention_type == "ablation":
+                v_norm = v / (v.norm() + 1e-8)
+                sliced = modified_out[:, pos_idx, :]
+                proj = torch.einsum('bpd,d->bp', sliced, v_norm)
+                modified_out[:, pos_idx, :] = (
+                    sliced - torch.einsum('bp,d->bpd', proj, v_norm) + coeff * v)
+
+            elif self.intervention_type == "mean_ablation":
+                v_norm = v / (v.norm() + 1e-8)
+                ma = mean_act.to(modified_out.device)
+                sliced = modified_out[:, pos_idx, :]
+                proj = torch.einsum('bpd,d->bp', sliced, v_norm)
+                modified_out[:, pos_idx, :] = (
+                    sliced - torch.einsum('bp,d->bpd', proj, v_norm) + ma)
+
+            elif self.intervention_type == "capping":
+                v_norm = v / (v.norm() + 1e-8)
+                sliced = modified_out[:, pos_idx, :]
+                proj = torch.einsum('bpd,d->bp', sliced, v_norm)
+                excess = (proj - tau).clamp(min=0.0)
+                modified_out[:, pos_idx, :] = (
+                    sliced - torch.einsum('bp,d->bpd', excess, v_norm))
+
+            if self.debug:
+                v_norm_dbg = v / (v.norm() + 1e-8)
+                pre = torch.einsum('bpd,d->bp', tensor_out[:, pos_idx, :], v_norm_dbg)
+                post = torch.einsum('bpd,d->bp', modified_out[:, pos_idx, :], v_norm_dbg)
+                pos_type = self.vector_position_types[vector_idx]
+                print(f"[ActivationSteering] Layer {layer_idx}, vec {vector_idx} "
+                      f"({pos_type}, {len(positions)} pos): "
+                      f"pre mean={pre.mean():.3f} | post mean={post.mean():.3f}")
+
+        return modified_out
 
     def _apply_addition(self, activations, vector, coeff):
         """Apply standard activation addition: x + coeff * vector"""
