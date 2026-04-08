@@ -23,7 +23,7 @@ MODEL="Qwen/Qwen3-32B"
 MODE="roger"                    # roger | christina
 GOAL_COUNT=30                   # roger mode: top-N from goal lists
 NON_GOAL_COUNT=30               # roger mode: top-N from non-goal lists
-REDUCE_QUESTIONS=1              # take every Nth question (1=all, 3=every 3rd)
+REDUCE_QUESTIONS=3              # take every Nth question (1=all, 3=every 3rd)
 OUTPUT_DIR="/workspace/qwen-3-32b/roger"
 
 # ---- Logging --------------------------------------------------------------
