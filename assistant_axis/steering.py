@@ -69,7 +69,8 @@ class ActivationSteering:
                              "mean_ablation", "capping", or "replacement" (blend original activations
                              toward the provided vector: result = (1-coeff)*original + coeff*vector)
             positions: "all" (steer all positions), "last" (steer only last position),
-                      or "header_matched" (position-aware: each vector targets either generated text or specific header tokens)
+                      "header_matched" (position-aware: each vector targets either generated text or specific header tokens),
+                      or "prefill_only" (steer all positions during prefill to bake into KV-cache, skip decode)
             mean_activations: For mean_ablation only - replacement activations to add after projection
             cap_thresholds: For capping only - threshold values to cap projected activations at
             input_ids: For header_matched only - tokenized prompt (1D or 2D tensor)
@@ -106,8 +107,8 @@ class ActivationSteering:
         if self.intervention_type not in {"addition", "ablation", "mean_ablation", "capping", "replacement"}:
             raise ValueError("intervention_type must be 'addition', 'ablation', 'mean_ablation', 'capping', or 'replacement'")
 
-        if self.positions not in {"all", "last", "header_matched"}:
-            raise ValueError("positions must be 'all', 'last', or 'header_matched'")
+        if self.positions not in {"all", "last", "header_matched", "prefill_only"}:
+            raise ValueError("positions must be 'all', 'last', 'header_matched', or 'prefill_only'")
 
         if self.positions == "header_matched":
             if input_ids is None:
@@ -467,6 +468,30 @@ class ActivationSteering:
 
         if self.positions == "header_matched":
             modified_out = self._apply_header_matched(tensor_out, layer_idx)
+        elif self.positions == "prefill_only":
+            self._layer_call_counts[layer_idx] = (
+                self._layer_call_counts.get(layer_idx, 0) + 1)
+            if self._layer_call_counts[layer_idx] > 1:
+                return activations
+            modified_out = tensor_out
+            for vector, coeff, vector_idx, mean_act, tau in self.vectors_by_layer[layer_idx]:
+                if self.intervention_type == "addition":
+                    modified_out = modified_out + coeff * vector.to(modified_out.device)
+                elif self.intervention_type == "replacement":
+                    modified_out = self._apply_replacement(modified_out, vector, coeff)
+                elif self.intervention_type == "ablation":
+                    modified_out = self._apply_ablation(modified_out, vector, coeff)
+                elif self.intervention_type == "mean_ablation":
+                    modified_out = self._apply_mean_ablation(modified_out, vector, mean_act)
+                elif self.intervention_type == "capping":
+                    modified_out = self._apply_cap(modified_out, vector, tau)
+
+                if self.debug:
+                    v = vector / (vector.norm() + 1e-8)
+                    pre = torch.einsum('bld,d->bl', tensor_out, v)
+                    post = torch.einsum('bld,d->bl', modified_out, v)
+                    print(f"[ActivationSteering] Layer {layer_idx}, vec {vector_idx} "
+                        f"(prefill): pre mean={pre.mean():.3f} | post mean={post.mean():.3f}")
         else:
             modified_out = tensor_out
             for vector, coeff, vector_idx, mean_act, tau in self.vectors_by_layer[layer_idx]:
