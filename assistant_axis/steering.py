@@ -2,7 +2,8 @@
 Activation steering utilities for transformer models.
 
 This module provides a context manager for intervening on model activations
-during inference, supporting addition, ablation, and mean ablation operations.
+during inference, supporting addition, ablation, mean ablation, capping, and
+replacement operations, with optional multi-layer coefficient scaling.
 
 Example:
     from assistant_axis import load_model, load_axis, ActivationSteering
@@ -55,6 +56,7 @@ class ActivationSteering:
         header_token_ids: Optional[List[int]] = None,
         vector_position_types: Optional[List[Union[str, int]]] = None,
         end_of_turn_id: Optional[int] = None,
+        multi_layer: Optional[str] = None,
         debug: bool = False,
     ):
         """
@@ -64,7 +66,8 @@ class ActivationSteering:
             coefficients: Either a single coefficient or list of coefficients (one per vector)
             layer_indices: Either a single layer index or list of layer indices to intervene at
             intervention_type: "addition" (standard steering), "ablation" (project out then add back),
-                             "mean_ablation", or "capping"
+                             "mean_ablation", "capping", or "replacement" (blend original activations
+                             toward the provided vector: result = (1-coeff)*original + coeff*vector)
             positions: "all" (steer all positions), "last" (steer only last position),
                       or "header_matched" (position-aware: each vector targets either generated text or specific header tokens)
             mean_activations: For mean_ablation only - replacement activations to add after projection
@@ -77,6 +80,13 @@ class ActivationSteering:
             end_of_turn_id: For header_matched only - token ID marking end of a turn (e.g. <|im_end|>).
                 Used to delimit assistant response body in multi-turn prompts.
                 Falls back to header_token_ids[0] if not provided.
+            multi_layer: Coefficient scaling for multi-layer steering. None = no scaling (default).
+                "incremental": first layer at full coefficient; subsequent layers scaled by
+                (norm - prev_norm) / norm, skipped if norm decreased. Distributes the total
+                perturbation across layers proportionally to norm growth.
+                "average": divide each coefficient by the number of layers in its group.
+                In header_matched mode, groups are per-position-type; otherwise all vectors
+                form one group.
             debug: Whether to print debugging information
 
         Note: For 1:1 mapping, steering_vectors, coefficients, and layer_indices must all have same length.
@@ -86,11 +96,15 @@ class ActivationSteering:
         self.model = model
         self.intervention_type = intervention_type.lower()
         self.positions = positions.lower()
+        self.multi_layer = multi_layer.lower() if isinstance(multi_layer, str) else multi_layer
         self.debug = debug
         self._handles = []
 
-        if self.intervention_type not in {"addition", "ablation", "mean_ablation", "capping"}:
-            raise ValueError("intervention_type must be 'addition', 'ablation', 'mean_ablation', or 'capping'")
+        if self.multi_layer is not None and self.multi_layer not in {"incremental", "average"}:
+            raise ValueError("multi_layer must be None, 'incremental', or 'average'")
+
+        if self.intervention_type not in {"addition", "ablation", "mean_ablation", "capping", "replacement"}:
+            raise ValueError("intervention_type must be 'addition', 'ablation', 'mean_ablation', 'capping', or 'replacement'")
 
         if self.positions not in {"all", "last", "header_matched"}:
             raise ValueError("positions must be 'all', 'last', or 'header_matched'")
@@ -146,7 +160,8 @@ class ActivationSteering:
             tau = self.cap_thresholds[i] if self.cap_thresholds is not None else None
             self.vectors_by_layer[layer_idx].append((vector, coeff, i, mean_act, tau))
 
-        # Header-matched position setup
+        # Header-matched position setup (must precede multi_layer scaling
+        # so vector_position_types is available for grouping)
         self.vector_position_types = None
         self._header_positions = {}
         self._layer_call_counts = {}
@@ -166,6 +181,9 @@ class ActivationSteering:
                         f"vector_position_types[{i}] = {pt!r}: must be 'body' or "
                         f"a token ID from header_token_ids {self.header_token_ids}")
             self.set_input_ids(input_ids)
+
+        if self.multi_layer is not None:
+            self._apply_multi_layer_scaling()
 
         if self.debug:
             print(f"[ActivationSteering] Initialized with:")
@@ -249,6 +267,57 @@ class ActivationSteering:
             result.append(tensor_vec)
 
         return result
+
+    def _apply_multi_layer_scaling(self):
+        """Adjust coefficients for multi-layer steering modes.
+
+        Groups vectors by position type (in header_matched mode) or treats
+        all as one group, then scales coefficients within each group.
+        """
+        if self.positions == "header_matched" and self.vector_position_types:
+            groups: dict = {}
+            for i, pt in enumerate(self.vector_position_types):
+                groups.setdefault(pt, []).append(i)
+        else:
+            groups = {"_all": list(range(len(self.steering_vectors)))}
+
+        for indices in groups.values():
+            if len(indices) <= 1:
+                continue
+
+            if self.multi_layer == "average":
+                n = len(indices)
+                for i in indices:
+                    self.coefficients[i] /= n
+
+            elif self.multi_layer == "incremental":
+                sorted_indices = sorted(indices, key=lambda i: self.layer_indices[i])
+                prev_norm = 0.0
+                for i in sorted_indices:
+                    norm = self.steering_vectors[i].norm().item()
+                    if norm > prev_norm:
+                        factor = (norm - prev_norm) / norm
+                        self.coefficients[i] *= factor
+                        prev_norm = norm
+                    else:
+                        self.coefficients[i] = 0.0
+
+        # Rebuild vectors_by_layer with updated coefficients
+        self.vectors_by_layer = {}
+        for i, (vector, coeff, layer_idx) in enumerate(
+                zip(self.steering_vectors, self.coefficients, self.layer_indices)):
+            if layer_idx not in self.vectors_by_layer:
+                self.vectors_by_layer[layer_idx] = []
+            mean_act = self.mean_activations[i] if self.mean_activations is not None else None
+            tau = self.cap_thresholds[i] if self.cap_thresholds is not None else None
+            self.vectors_by_layer[layer_idx].append((vector, coeff, i, mean_act, tau))
+
+        if self.debug:
+            print(f"[ActivationSteering] multi_layer={self.multi_layer} scaling:")
+            for i in range(len(self.steering_vectors)):
+                norm = self.steering_vectors[i].norm().item()
+                print(f"  vec {i} layer {self.layer_indices[i]}: "
+                      f"norm={norm:.2f}, coeff={self.coefficients[i]:.4f}")
 
     def set_input_ids(self, input_ids: torch.Tensor):
         """Update input_ids and recompute header token positions.
@@ -409,6 +478,8 @@ class ActivationSteering:
                     modified_out = self._apply_mean_ablation(modified_out, vector, mean_act)
                 elif self.intervention_type == "capping":
                     modified_out = self._apply_cap(modified_out, vector, tau)
+                elif self.intervention_type == "replacement":
+                    modified_out = self._apply_replacement(modified_out, vector, coeff)
 
                 if self.debug:
                     v = vector / (vector.norm() + 1e-8)
@@ -464,6 +535,10 @@ class ActivationSteering:
                 excess = (proj - tau).clamp(min=0.0)
                 modified_out[:, pos_idx, :] = (
                     sliced - torch.einsum('bp,d->bpd', excess, v_norm))
+
+            elif self.intervention_type == "replacement":
+                modified_out[:, pos_idx, :] = (
+                    (1.0 - coeff) * modified_out[:, pos_idx, :] + coeff * v)
 
             if self.debug:
                 v_norm_dbg = v / (v.norm() + 1e-8)
@@ -530,6 +605,17 @@ class ActivationSteering:
             proj = torch.einsum('bd,d->b', last, v)
             excess = (proj - tau).clamp(min=0.0)
             result[:, -1, :] = last - torch.einsum('b,d->bd', excess, v)
+            return result
+
+    def _apply_replacement(self, activations, vector, coeff):
+        """Blend activations toward a target vector: (1-coeff)*original + coeff*vector."""
+        vector = vector.to(activations.device)
+
+        if self.positions == "all":
+            return (1.0 - coeff) * activations + coeff * vector
+        else:
+            result = activations.clone()
+            result[:, -1, :] = (1.0 - coeff) * result[:, -1, :] + coeff * vector
             return result
 
     def __enter__(self):
