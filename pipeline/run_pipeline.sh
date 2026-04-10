@@ -23,7 +23,8 @@ MODEL="Qwen/Qwen3-32B"
 MODE="roger"                    # roger | christina
 GOAL_COUNT=30                   # roger mode: top-N from goal lists
 NON_GOAL_COUNT=30               # roger mode: top-N from non-goal lists
-REDUCE_QUESTIONS=3              # take every Nth question (1=all, 3=every 3rd)
+REDUCE_QUESTIONS=3              # roger mode: take every Nth question (1=all, 3=every 3rd)
+MIN_COUNT=30                    # roger mode: min score=3 samples for vector (50 for christina)
 OUTPUT_DIR="/workspace/qwen-3-32b/roger"
 
 # ---- Logging --------------------------------------------------------------
@@ -40,13 +41,20 @@ echo ""
 
 # ---- Step 1: Generate responses -------------------------------------------
 echo "=== Step 1: Generating responses ==="
-uv run 1_generate.py \
-    --mode "$MODE" \
-    --model "$MODEL" \
-    --goal_count "$GOAL_COUNT" \
-    --non_goal_count "$NON_GOAL_COUNT" \
-    --reduce_questions "$REDUCE_QUESTIONS" \
-    --output_dir "$OUTPUT_DIR/responses"
+if [ "$MODE" = "roger" ]; then
+    uv run 1_generate.py \
+        --mode "$MODE" \
+        --model "$MODEL" \
+        --goal_count "$GOAL_COUNT" \
+        --non_goal_count "$NON_GOAL_COUNT" \
+        --reduce_questions "$REDUCE_QUESTIONS" \
+        --output_dir "$OUTPUT_DIR/responses"
+else
+    uv run 1_generate.py \
+        --mode "$MODE" \
+        --model "$MODEL" \
+        --output_dir "$OUTPUT_DIR/responses"
+fi
 
 # ---- Step 2: Extract activations ------------------------------------------
 echo ""
@@ -67,10 +75,18 @@ uv run 3_judge.py \
 # ---- Step 4: Compute per-entity vectors ------------------------------------
 echo ""
 echo "=== Step 4: Computing vectors ==="
-uv run 4_vectors.py \
-    --activations_dir "$OUTPUT_DIR/activations" \
-    --scores_dir "$OUTPUT_DIR/scores" \
-    --output_dir "$OUTPUT_DIR/vectors"
+if [ "$MODE" = "roger" ]; then
+    uv run 4_vectors.py \
+        --activations_dir "$OUTPUT_DIR/activations" \
+        --scores_dir "$OUTPUT_DIR/scores" \
+        --output_dir "$OUTPUT_DIR/vectors" \
+        --min_count "$MIN_COUNT"
+else
+    uv run 4_vectors.py \
+        --activations_dir "$OUTPUT_DIR/activations" \
+        --scores_dir "$OUTPUT_DIR/scores" \
+        --output_dir "$OUTPUT_DIR/vectors"
+fi
 
 # ---- Step 5: Compute final axis -------------------------------------------
 echo ""

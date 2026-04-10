@@ -130,7 +130,7 @@ def main():
                 vector = compute_pos_3_vector(activations, scores, args.min_count)
                 vector_type = "pos_3"
 
-            # Save vector
+            # Save vector with retry for MFS I/O errors
             save_data = {
                 "vector": vector,
                 "type": vector_type,
@@ -138,7 +138,20 @@ def main():
             }
             if act_metadata:
                 save_data["metadata"] = act_metadata
-            torch.save(save_data, output_file)
+
+            for attempt in range(3):
+                try:
+                    torch.save(save_data, output_file)
+                    break
+                except RuntimeError as e:
+                    if output_file.exists():
+                        output_file.unlink()
+                    if attempt < 2:
+                        import time
+                        print(f"Warning: {role}: save failed ({e}), retrying in 5s...")
+                        time.sleep(5)
+                    else:
+                        raise
             successful += 1
 
         except ValueError as e:

@@ -464,8 +464,19 @@ async def main_async():
             )
             all_scores = {**existing_scores, **new_scores}
 
-            with open(output_file, "w") as f:
-                json.dump(all_scores, f, indent=2)
+            for attempt in range(3):
+                try:
+                    with open(output_file, "w") as f:
+                        json.dump(all_scores, f, indent=2)
+                    break
+                except OSError as io_err:
+                    if output_file.exists():
+                        output_file.unlink()
+                    if attempt < 2:
+                        logger.warning(f"{name}: save failed ({io_err}), retrying in 5s...")
+                        await asyncio.sleep(5)
+                    else:
+                        raise
 
             logger.info(f"Saved {len(all_scores)} scores for {name} "
                         f"({len(new_scores)} new)")
