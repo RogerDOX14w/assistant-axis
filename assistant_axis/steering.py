@@ -70,7 +70,9 @@ class ActivationSteering:
                              toward the provided vector: result = (1-coeff)*original + coeff*vector)
             positions: "all" (steer all positions), "last" (steer only last position),
                       "header_matched" (position-aware: each vector targets either generated text or specific header tokens),
-                      or "prefill_only" (steer all positions during prefill to bake into KV-cache, skip decode)
+                      "prefill_only" (steer all positions during prefill to bake into KV-cache, skip decode),
+                      or "system_only" (steer only the system prompt positions during prefill, skip decode;
+                      requires input_ids and end_of_turn_id to locate the system turn boundary)
             mean_activations: For mean_ablation only - replacement activations to add after projection
             cap_thresholds: For capping only - threshold values to cap projected activations at
             input_ids: For header_matched only - tokenized prompt (1D or 2D tensor)
@@ -107,8 +109,8 @@ class ActivationSteering:
         if self.intervention_type not in {"addition", "ablation", "mean_ablation", "capping", "replacement"}:
             raise ValueError("intervention_type must be 'addition', 'ablation', 'mean_ablation', 'capping', or 'replacement'")
 
-        if self.positions not in {"all", "last", "header_matched", "prefill_only"}:
-            raise ValueError("positions must be 'all', 'last', 'header_matched', or 'prefill_only'")
+        if self.positions not in {"all", "last", "header_matched", "prefill_only", "system_only"}:
+            raise ValueError("positions must be 'all', 'last', 'header_matched', 'prefill_only', or 'system_only'")
 
         if self.positions == "header_matched":
             if input_ids is None:
@@ -117,6 +119,12 @@ class ActivationSteering:
                 raise ValueError("header_token_ids required for positions='header_matched'")
             if vector_position_types is None:
                 raise ValueError("vector_position_types required for positions='header_matched'")
+
+        if self.positions == "system_only":
+            if input_ids is None:
+                raise ValueError("input_ids required for positions='system_only'")
+            if end_of_turn_id is None:
+                raise ValueError("end_of_turn_id required for positions='system_only'")
 
         if self.intervention_type == "mean_ablation":
             if self.positions not in {"all", "header_matched"}:
@@ -183,6 +191,18 @@ class ActivationSteering:
                         f"a token ID from header_token_ids {self.header_token_ids}")
             self.set_input_ids(input_ids)
 
+        if self.positions == "system_only":
+            if isinstance(input_ids, torch.Tensor):
+                ids = input_ids.squeeze().tolist()
+            else:
+                ids = list(input_ids)
+            self._prompt_length = len(ids)
+            self._system_positions = []
+            for i, tid in enumerate(ids):
+                self._system_positions.append(i)
+                if tid == end_of_turn_id:
+                    break
+
         if self.multi_layer is not None:
             self._apply_multi_layer_scaling()
 
@@ -200,6 +220,9 @@ class ActivationSteering:
                       + (f" {self._prompt_body_positions}" if len(self._prompt_body_positions) < 30 else ""))
                 if self.end_of_turn_id is not None:
                     print(f"  - End-of-turn token: {self.end_of_turn_id}")
+            elif self.positions == "system_only":
+                print(f"  - System positions: 0..{len(self._system_positions)-1} "
+                      f"({len(self._system_positions)} of {self._prompt_length} tokens)")
 
     def _normalize_vectors(self, steering_vectors):
         """Convert steering vectors to a list of tensors on the correct device/dtype."""
@@ -492,6 +515,48 @@ class ActivationSteering:
                     post = torch.einsum('bld,d->bl', modified_out, v)
                     print(f"[ActivationSteering] Layer {layer_idx}, vec {vector_idx} "
                         f"(prefill): pre mean={pre.mean():.3f} | post mean={post.mean():.3f}")
+        elif self.positions == "system_only":
+            self._layer_call_counts[layer_idx] = (
+                self._layer_call_counts.get(layer_idx, 0) + 1)
+            if self._layer_call_counts[layer_idx] > 1:
+                return activations
+            modified_out = tensor_out.clone()
+            sys_pos = self._system_positions
+            for vector, coeff, vector_idx, mean_act, tau in self.vectors_by_layer[layer_idx]:
+                v = vector.to(modified_out.device)
+                if self.intervention_type == "addition":
+                    modified_out[:, sys_pos, :] += coeff * v
+                elif self.intervention_type == "ablation":
+                    v_norm = v / (v.norm() + 1e-8)
+                    sliced = modified_out[:, sys_pos, :]
+                    proj = torch.einsum('bpd,d->bp', sliced, v_norm)
+                    modified_out[:, sys_pos, :] = (
+                        sliced - torch.einsum('bp,d->bpd', proj, v_norm) + coeff * v)
+                elif self.intervention_type == "replacement":
+                    modified_out[:, sys_pos, :] = (
+                        (1.0 - coeff) * modified_out[:, sys_pos, :] + coeff * v)
+                elif self.intervention_type == "capping":
+                    v_norm = v / (v.norm() + 1e-8)
+                    sliced = modified_out[:, sys_pos, :]
+                    proj = torch.einsum('bpd,d->bp', sliced, v_norm)
+                    excess = (proj - tau).clamp(min=0.0)
+                    modified_out[:, sys_pos, :] = (
+                        sliced - torch.einsum('bp,d->bpd', excess, v_norm))
+                elif self.intervention_type == "mean_ablation":
+                    v_norm = v / (v.norm() + 1e-8)
+                    ma = mean_act.to(modified_out.device)
+                    sliced = modified_out[:, sys_pos, :]
+                    proj = torch.einsum('bpd,d->bp', sliced, v_norm)
+                    modified_out[:, sys_pos, :] = (
+                        sliced - torch.einsum('bp,d->bpd', proj, v_norm) + ma)
+
+                if self.debug:
+                    v_dbg = v / (v.norm() + 1e-8)
+                    pre = torch.einsum('bpd,d->bp', tensor_out[:, sys_pos, :], v_dbg)
+                    post = torch.einsum('bpd,d->bp', modified_out[:, sys_pos, :], v_dbg)
+                    print(f"[ActivationSteering] Layer {layer_idx}, vec {vector_idx} "
+                        f"(system_only, {len(sys_pos)} pos): "
+                        f"pre mean={pre.mean():.3f} | post mean={post.mean():.3f}")
         else:
             modified_out = tensor_out
             for vector, coeff, vector_idx, mean_act, tau in self.vectors_by_layer[layer_idx]:
