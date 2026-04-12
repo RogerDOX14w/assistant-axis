@@ -17,7 +17,7 @@ Example:
 """
 
 import torch
-from typing import Optional, Sequence, Union, Iterable, List
+from typing import Dict, Optional, Sequence, Tuple, Union, Iterable, List
 
 
 class ActivationSteering:
@@ -56,6 +56,7 @@ class ActivationSteering:
         header_token_ids: Optional[List[int]] = None,
         vector_position_types: Optional[List[Union[str, int]]] = None,
         end_of_turn_id: Optional[int] = None,
+        turn_headers: Optional[Dict[str, Tuple[List[int], List[int]]]] = None,
         multi_layer: Optional[str] = None,
         debug: bool = False,
     ):
@@ -74,18 +75,27 @@ class ActivationSteering:
                       "system_only" (steer only system prompt content during prefill, skip decode),
                       "user_only" (steer only user prompt content during prefill, skip decode),
                       or "system_user_only" (steer system + user content during prefill, skip decode).
-                      All three require input_ids and end_of_turn_id to locate turn boundaries.
-                      Content excludes the <|im_start|>role\n header but includes <|im_end|>\n
+                      Region modes require input_ids and turn_headers to locate turn
+                      boundaries via forward scanning. Content spans from the first token
+                      after a role's header sequence to the last token before the next
+                      role's header sequence.
             mean_activations: For mean_ablation only - replacement activations to add after projection
             cap_thresholds: For capping only - threshold values to cap projected activations at
-            input_ids: For header_matched only - tokenized prompt (1D or 2D tensor)
-            header_token_ids: For header_matched only - token IDs of header tokens (from axis metadata)
+            input_ids: For header_matched and region modes - tokenized prompt (1D or 2D tensor)
+            header_token_ids: For header_matched mode only - token IDs of the assistant header
+                sequence (from axis metadata)
             vector_position_types: For header_matched only - parallel to steering_vectors, each either
                 "body" (apply to assistant response tokens) or an int token ID from header_token_ids
                 (apply only to positions where that token appears as part of a matched header sequence)
             end_of_turn_id: For header_matched only - token ID marking end of a turn (e.g. <|im_end|>).
                 Used to delimit assistant response body in multi-turn prompts.
                 Falls back to header_token_ids[0] if not provided.
+            turn_headers: For region modes only - dict mapping role names to
+                (start_token_sequence, end_token_sequence) pairs. Required keys depend on
+                the mode: system_only needs "system" and "user", user_only needs "user" and
+                "assistant", system_user_only needs "system" and "assistant". Sequences are
+                matched by forward scanning from the start of the token stream; only the
+                first occurrence of each turn is used.
             multi_layer: Coefficient scaling for multi-layer steering. None = no scaling (default).
                 "incremental": first layer at full coefficient; subsequent layers scaled by
                 (norm - prev_norm) / norm, skipped if norm decreased. Distributes the total
@@ -128,8 +138,8 @@ class ActivationSteering:
         if self.positions in _region_modes:
             if input_ids is None:
                 raise ValueError(f"input_ids required for positions='{self.positions}'")
-            if end_of_turn_id is None:
-                raise ValueError(f"end_of_turn_id required for positions='{self.positions}'")
+            if turn_headers is None:
+                raise ValueError(f"turn_headers required for positions='{self.positions}'")
 
         if self.intervention_type == "mean_ablation":
             if self.positions not in {"all", "header_matched"}:
@@ -202,38 +212,9 @@ class ActivationSteering:
             else:
                 ids = list(input_ids)
             self._prompt_length = len(ids)
-            newline_ids = {198, 271, 13}  # '\n', '\n\n', '\r' across common tokenizers
 
-            # Find turn boundaries: each turn is <|im_start|>role\n{content}<|im_end|>\n
-            # We record content start (after role\n) and content end (through trailing \n)
-            turns = []
-            eot_positions = [i for i, t in enumerate(ids) if t == end_of_turn_id]
-            for eot_idx in eot_positions:
-                # Content start: scan backwards from eot to find the \n after the role token
-                content_start = None
-                for j in range(eot_idx - 1, -1, -1):
-                    if ids[j] in newline_ids:
-                        # Check this is the role header \n (preceded by a non-newline)
-                        if j > 0 and ids[j - 1] not in newline_ids:
-                            content_start = j + 1
-                            break
-                if content_start is None:
-                    content_start = 0
-                # Content end: include <|im_end|> and trailing \n if present
-                content_end = eot_idx
-                if eot_idx + 1 < len(ids) and ids[eot_idx + 1] in newline_ids:
-                    content_end = eot_idx + 1
-                turns.append((content_start, content_end))
-
-            self._system_positions = []
-            if self.positions in ("system_only", "system_user_only"):
-                if len(turns) >= 1:
-                    start, end = turns[0]
-                    self._system_positions = list(range(start, end + 1))
-            if self.positions in ("user_only", "system_user_only"):
-                if len(turns) >= 2:
-                    start, end = turns[1]
-                    self._system_positions += list(range(start, end + 1))
+            self._region_positions = self._compute_region_positions(
+                ids, turn_headers, self.positions, self.debug)
 
         if self.multi_layer is not None:
             self._apply_multi_layer_scaling()
@@ -254,9 +235,9 @@ class ActivationSteering:
                     print(f"  - End-of-turn token: {self.end_of_turn_id}")
             elif self.positions in ("system_only", "user_only", "system_user_only"):
                 print(f"  - Region positions ({self.positions}): "
-                      f"{len(self._system_positions)} of {self._prompt_length} tokens"
-                      + (f" {self._system_positions}" if len(self._system_positions) < 30 else
-                         f" [{self._system_positions[0]}..{self._system_positions[-1]}]"))
+                      f"{len(self._region_positions)} of {self._prompt_length} tokens"
+                      + (f" {self._region_positions}" if len(self._region_positions) < 30 else
+                         f" [{self._region_positions[0]}..{self._region_positions[-1]}]"))
 
     def _normalize_vectors(self, steering_vectors):
         """Convert steering vectors to a list of tensors on the correct device/dtype."""
@@ -325,6 +306,103 @@ class ActivationSteering:
             result.append(tensor_vec)
 
         return result
+
+    @staticmethod
+    def _find_seq(ids: List[int], seq: List[int], start: int = 0) -> int:
+        """Find first occurrence of token subsequence. Returns index or -1."""
+        n = len(seq)
+        for i in range(start, len(ids) - n + 1):
+            if ids[i:i + n] == seq:
+                return i
+        return -1
+
+    @staticmethod
+    def _compute_region_positions(
+        ids: List[int],
+        turn_headers: Dict[str, Tuple[List[int], List[int]]],
+        mode: str,
+        debug: bool = False,
+    ) -> List[int]:
+        """Compute steered positions for region modes using forward-only scanning.
+
+        Each turn_headers entry maps a role name ("system", "user", "assistant")
+        to (start_seq, end_seq) where start_seq is the full header token sequence
+        preceding content and end_seq is the end-of-turn token sequence after content.
+
+        Returns a sorted list of token positions to steer.
+        """
+        import warnings
+        find = ActivationSteering._find_seq
+
+        if mode == "system_only":
+            sys_start_seq, sys_end_seq = turn_headers["system"]
+            usr_start_seq, _usr_end_seq = turn_headers["user"]
+
+            sys_hdr = find(ids, sys_start_seq, 0)
+            if sys_hdr < 0:
+                warnings.warn("system_only: system header not found")
+                return []
+            content_start = sys_hdr + len(sys_start_seq)
+
+            sys_end = find(ids, sys_end_seq, content_start)
+            if sys_end < 0:
+                warnings.warn("system_only: system end-of-turn not found")
+                return []
+            usr_hdr = find(ids, usr_start_seq, sys_end)
+            if usr_hdr < 0:
+                warnings.warn("system_only: user header not found after system turn")
+                return []
+
+            positions = list(range(content_start, usr_hdr))
+            if debug:
+                print(f"[region] system_only: content [{content_start}, {usr_hdr})")
+            return positions
+
+        elif mode == "user_only":
+            usr_start_seq, usr_end_seq = turn_headers["user"]
+            asst_start_seq, _asst_end_seq = turn_headers["assistant"]
+
+            usr_hdr = find(ids, usr_start_seq, 0)
+            if usr_hdr < 0:
+                warnings.warn("user_only: user header not found")
+                return []
+            content_start = usr_hdr + len(usr_start_seq)
+
+            usr_end = find(ids, usr_end_seq, content_start)
+            if usr_end < 0:
+                warnings.warn("user_only: user end-of-turn not found")
+                return []
+            asst_hdr = find(ids, asst_start_seq, usr_end)
+            if asst_hdr < 0:
+                warnings.warn("user_only: assistant header not found after user turn")
+                return []
+
+            positions = list(range(content_start, asst_hdr))
+            if debug:
+                print(f"[region] user_only: content [{content_start}, {asst_hdr})")
+            return positions
+
+        elif mode == "system_user_only":
+            sys_start_seq, _sys_end_seq = turn_headers["system"]
+            asst_start_seq, _asst_end_seq = turn_headers["assistant"]
+
+            sys_hdr = find(ids, sys_start_seq, 0)
+            if sys_hdr < 0:
+                warnings.warn("system_user_only: system header not found")
+                return []
+            content_start = sys_hdr + len(sys_start_seq)
+
+            asst_hdr = find(ids, asst_start_seq, content_start)
+            if asst_hdr < 0:
+                warnings.warn("system_user_only: assistant header not found")
+                return []
+
+            positions = list(range(content_start, asst_hdr))
+            if debug:
+                print(f"[region] system_user_only: content [{content_start}, {asst_hdr})")
+            return positions
+
+        return []
 
     def _apply_multi_layer_scaling(self):
         """Adjust coefficients for multi-layer steering modes.
@@ -555,7 +633,7 @@ class ActivationSteering:
             if self._layer_call_counts[layer_idx] > 1:
                 return activations
             modified_out = tensor_out.clone()
-            region_pos = self._system_positions
+            region_pos = self._region_positions
             for vector, coeff, vector_idx, mean_act, tau in self.vectors_by_layer[layer_idx]:
                 v = vector.to(modified_out.device)
                 if self.intervention_type == "addition":
