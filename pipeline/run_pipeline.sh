@@ -3,13 +3,16 @@
 # Pipeline for computing the Assistant Axis.
 #
 # Supports two modes:
-#   roger (default) — combined role+trait instructions, standalone traits, default
-#     --no_traits   — skip standalone traits (combos + default only)
-#     --traits_only — standalone traits only (skip combos + default)
-#   christina       — standalone roles (rerun with ROLES_DIR for traits)
+#   roger (default) — combined role+trait instructions, standalone traits/roles, default
+#     --types combinations roles traits  (any subset; default: all three)
+#       Each type gets its own subdirectory under OUTPUT_DIR.
+#       "default" is generated once and symlinked into each type's dirs.
+#   christina — standalone roles (rerun with ROLES_DIR for traits)
+#     --types is ignored in christina mode.
 #
 # Usage:
 #   ./pipeline/run_pipeline.sh
+#   ./pipeline/run_pipeline.sh --types combinations roles
 #   (RECOMMEND RUNNING STEPS 1 AND 2 INDIVIDUALLY; 3 CAN RUN IN PARALLEL ONCE 1 IS DONE)
 #
 # Requirements:
@@ -27,6 +30,36 @@ REDUCE_QUESTIONS=3              # roger mode: take every Nth question (1=all, 3=
 MIN_COUNT=30                    # roger mode: min score=3 samples for vector (50 for christina)
 OUTPUT_DIR="/workspace/qwen-3-32b/roger"
 
+# ---- Parse --types from command line --------------------------------------
+TYPES=""
+while [[ $# -gt 0 ]]; do
+    case "$1" in
+        --types)
+            shift
+            while [[ $# -gt 0 && ! "$1" =~ ^-- ]]; do
+                TYPES="$TYPES $1"
+                shift
+            done
+            ;;
+        *)
+            echo "Unknown argument: $1" >&2
+            exit 1
+            ;;
+    esac
+done
+TYPES="${TYPES# }"  # trim leading space
+if [ -z "$TYPES" ]; then
+    TYPES="combinations roles traits"
+fi
+
+# Validate types
+for t in $TYPES; do
+    case "$t" in
+        combinations|roles|traits) ;;
+        *) echo "Invalid type: $t (must be combinations, roles, or traits)" >&2; exit 1 ;;
+    esac
+done
+
 # ---- Logging --------------------------------------------------------------
 LOG_FILE="$OUTPUT_DIR/pipeline_$(date +%Y%m%d_%H%M%S).log"
 mkdir -p "$OUTPUT_DIR"
@@ -37,67 +70,211 @@ echo "Log: $LOG_FILE"
 echo "Model:  $MODEL"
 echo "Mode:   $MODE"
 echo "Output: $OUTPUT_DIR"
-echo ""
-
-# ---- Step 1: Generate responses -------------------------------------------
-echo "=== Step 1: Generating responses ==="
 if [ "$MODE" = "roger" ]; then
-    uv run 1_generate.py \
-        --mode "$MODE" \
-        --model "$MODEL" \
-        --goal_count "$GOAL_COUNT" \
-        --non_goal_count "$NON_GOAL_COUNT" \
-        --reduce_questions "$REDUCE_QUESTIONS" \
-        --output_dir "$OUTPUT_DIR/responses"
-else
-    uv run 1_generate.py \
-        --mode "$MODE" \
-        --model "$MODEL" \
-        --output_dir "$OUTPUT_DIR/responses"
+    echo "Types:  $TYPES"
 fi
-
-# ---- Step 2: Extract activations ------------------------------------------
 echo ""
-echo "=== Step 2: Extracting activations ==="
-uv run 2_activations.py \
-    --model "$MODEL" \
-    --responses_dir "$OUTPUT_DIR/responses" \
-    --output_dir "$OUTPUT_DIR/activations" \
-    --batch_size 8
 
-# ---- Step 3: Score responses with judge LLM --------------------------------
-echo ""
-echo "=== Step 3: Scoring responses ==="
-uv run 3_judge.py \
-    --responses_dir "$OUTPUT_DIR/responses" \
-    --output_dir "$OUTPUT_DIR/scores"
+# ---- Helper: symlink default files into a type's subdir -------------------
+# Usage: symlink_default <subdir_name> <file_extension>
+# e.g.  symlink_default responses jsonl
+symlink_default() {
+    local subdir="$1" ext="$2"
+    local src="$OUTPUT_DIR/default/$subdir/default.$ext"
+    local dst_dir="$OUTPUT_DIR/$type/$subdir"
+    local rel="../../default/$subdir/default.$ext"
+    mkdir -p "$dst_dir"
+    if [ -f "$src" ] && [ ! -e "$dst_dir/default.$ext" ]; then
+        ln -s "$rel" "$dst_dir/default.$ext"
+        echo "  Symlinked default.$ext -> $type/$subdir/"
+    fi
+}
 
-# ---- Step 4: Compute per-entity vectors ------------------------------------
-echo ""
-echo "=== Step 4: Computing vectors ==="
-if [ "$MODE" = "roger" ]; then
-    uv run 4_vectors.py \
-        --activations_dir "$OUTPUT_DIR/activations" \
-        --scores_dir "$OUTPUT_DIR/scores" \
-        --output_dir "$OUTPUT_DIR/vectors" \
-        --min_count "$MIN_COUNT"
-else
+# ---- Christina mode (unchanged) -------------------------------------------
+if [ "$MODE" = "christina" ]; then
+
+    echo "=== Step 1: Generating responses ==="
+    uv run 1_generate.py \
+        --mode "$MODE" \
+        --model "$MODEL" \
+        --output_dir "$OUTPUT_DIR/responses"
+
+    echo ""
+    echo "=== Step 2: Extracting activations ==="
+    uv run 2_activations.py \
+        --model "$MODEL" \
+        --responses_dir "$OUTPUT_DIR/responses" \
+        --output_dir "$OUTPUT_DIR/activations" \
+        --batch_size 8
+
+    echo ""
+    echo "=== Step 3: Scoring responses ==="
+    uv run 3_judge.py \
+        --responses_dir "$OUTPUT_DIR/responses" \
+        --output_dir "$OUTPUT_DIR/scores"
+
+    echo ""
+    echo "=== Step 4: Computing vectors ==="
     uv run 4_vectors.py \
         --activations_dir "$OUTPUT_DIR/activations" \
         --scores_dir "$OUTPUT_DIR/scores" \
         --output_dir "$OUTPUT_DIR/vectors"
+
+    echo ""
+    echo "=== Step 5: Computing axis ==="
+    uv run 5_axis.py \
+        --vectors_dir "$OUTPUT_DIR/vectors" \
+        --output "$OUTPUT_DIR/axis.pt"
+
+    echo ""
+    echo "=== Pipeline complete ==="
+    echo "Axis saved to: $OUTPUT_DIR/axis.pt"
+
+# ---- Roger mode (types-aware) ---------------------------------------------
+else
+
+    # -- Step 0: Generate, extract, and vectorize default (once) ---------------
+    echo "=== Step 0: Default role ==="
+    DEFAULT_DIR="$OUTPUT_DIR/default"
+    DEFAULT_RESP="$DEFAULT_DIR/responses"
+    DEFAULT_ACT="$DEFAULT_DIR/activations"
+    DEFAULT_VEC="$DEFAULT_DIR/vectors"
+    mkdir -p "$DEFAULT_RESP" "$DEFAULT_ACT" "$DEFAULT_DIR/scores" "$DEFAULT_VEC"
+
+    if [ ! -f "$DEFAULT_RESP/default.jsonl" ]; then
+        echo "  Generating default responses..."
+        uv run 1_generate.py \
+            --mode roger \
+            --model "$MODEL" \
+            --roles_only \
+            --roles default \
+            --reduce_questions "$REDUCE_QUESTIONS" \
+            --output_dir "$DEFAULT_RESP"
+    else
+        echo "  default.jsonl already exists, skipping generation."
+    fi
+
+    if [ ! -f "$DEFAULT_ACT/default.pt" ]; then
+        echo "  Extracting default activations..."
+        uv run 2_activations.py \
+            --model "$MODEL" \
+            --responses_dir "$DEFAULT_RESP" \
+            --output_dir "$DEFAULT_ACT" \
+            --batch_size 8
+    else
+        echo "  default.pt already exists, skipping extraction."
+    fi
+
+    if [ ! -f "$DEFAULT_VEC/default.pt" ]; then
+        echo "  Computing default vector..."
+        uv run 4_vectors.py \
+            --activations_dir "$DEFAULT_ACT" \
+            --scores_dir "$DEFAULT_DIR/scores" \
+            --output_dir "$DEFAULT_VEC"
+    else
+        echo "  default vector already exists, skipping."
+    fi
+    echo ""
+
+    # -- Step 1: Generate responses ------------------------------------------
+    echo "=== Step 1: Generating responses ==="
+    for type in $TYPES; do
+        echo "--- Step 1 [$type] ---"
+        TYPE_DIR="$OUTPUT_DIR/$type"
+        symlink_default responses jsonl
+
+        case "$type" in
+            combinations)
+                uv run 1_generate.py \
+                    --mode roger \
+                    --model "$MODEL" \
+                    --goal_count "$GOAL_COUNT" \
+                    --non_goal_count "$NON_GOAL_COUNT" \
+                    --reduce_questions "$REDUCE_QUESTIONS" \
+                    --no_traits \
+                    --output_dir "$TYPE_DIR/responses"
+                ;;
+            roles)
+                uv run 1_generate.py \
+                    --mode roger \
+                    --model "$MODEL" \
+                    --reduce_questions "$REDUCE_QUESTIONS" \
+                    --roles_only \
+                    --output_dir "$TYPE_DIR/responses"
+                ;;
+            traits)
+                uv run 1_generate.py \
+                    --mode roger \
+                    --model "$MODEL" \
+                    --reduce_questions "$REDUCE_QUESTIONS" \
+                    --traits_only \
+                    --output_dir "$TYPE_DIR/responses"
+                ;;
+        esac
+    done
+    echo ""
+
+    # -- Step 2: Extract activations -----------------------------------------
+    echo "=== Step 2: Extracting activations ==="
+    for type in $TYPES; do
+        echo "--- Step 2 [$type] ---"
+        TYPE_DIR="$OUTPUT_DIR/$type"
+        symlink_default activations pt
+
+        uv run 2_activations.py \
+            --model "$MODEL" \
+            --responses_dir "$TYPE_DIR/responses" \
+            --output_dir "$TYPE_DIR/activations" \
+            --batch_size 8
+    done
+    echo ""
+
+    # -- Step 3: Score responses ----------------------------------------------
+    echo "=== Step 3: Scoring responses ==="
+    for type in $TYPES; do
+        echo "--- Step 3 [$type] ---"
+        TYPE_DIR="$OUTPUT_DIR/$type"
+
+        uv run 3_judge.py \
+            --responses_dir "$TYPE_DIR/responses" \
+            --output_dir "$TYPE_DIR/scores"
+    done
+    echo ""
+
+    # -- Step 4: Compute vectors ----------------------------------------------
+    echo "=== Step 4: Computing vectors ==="
+    for type in $TYPES; do
+        echo "--- Step 4 [$type] ---"
+        TYPE_DIR="$OUTPUT_DIR/$type"
+        symlink_default vectors pt
+
+        uv run 4_vectors.py \
+            --activations_dir "$TYPE_DIR/activations" \
+            --scores_dir "$TYPE_DIR/scores" \
+            --output_dir "$TYPE_DIR/vectors" \
+            --min_count "$MIN_COUNT"
+    done
+    echo ""
+
+    # -- Step 5: Compute axis -------------------------------------------------
+    echo "=== Step 5: Computing axis ==="
+    for type in $TYPES; do
+        echo "--- Step 5 [$type] ---"
+        TYPE_DIR="$OUTPUT_DIR/$type"
+
+        uv run 5_axis.py \
+            --vectors_dir "$TYPE_DIR/vectors" \
+            --output "$TYPE_DIR/axis.pt"
+    done
+    echo ""
+
+    echo "=== Pipeline complete ==="
+    for type in $TYPES; do
+        echo "  $type axis: $OUTPUT_DIR/$type/axis.pt"
+    done
+
 fi
 
-# ---- Step 5: Compute final axis -------------------------------------------
-echo ""
-echo "=== Step 5: Computing axis ==="
-uv run 5_axis.py \
-    --vectors_dir "$OUTPUT_DIR/vectors" \
-    --output "$OUTPUT_DIR/axis.pt"
-
-echo ""
-echo "=== Pipeline complete ==="
-echo "Axis saved to: $OUTPUT_DIR/axis.pt"
 echo "Log:  $LOG_FILE"
 
 # ---- Summary of warnings/errors ------------------------------------------
@@ -108,18 +285,3 @@ if [ -n "$ISSUES" ]; then
     echo "*** $COUNT warning(s)/error(s) during pipeline run: ***"
     echo "$ISSUES"
 fi
-
-# ---- Christina mode notes --------------------------------------------------
-# To run Christina mode for roles AND traits, run the pipeline twice:
-#
-#   MODE="christina"
-#   OUTPUT_DIR="/workspace/qwen-3-32b/roles"
-#   # ... steps 1-5 ...
-#
-#   MODE="christina"
-#   ROLES_DIR="../data/traits/instructions"  # <-- point at traits
-#   OUTPUT_DIR="/workspace/qwen-3-32b/traits"
-#   # ... steps 1-5 with --roles_dir "$ROLES_DIR" ...
-#
-# Separate output dirs avoid name collisions (e.g. "ascetic" is both a role
-# and a trait).
