@@ -143,6 +143,18 @@ uv run 4_vectors.py \
 
 Processes whatever files are in the input directories.
 
+**Limitation — question-matched filtering for trait directions:**
+Each entity's vector is the mean of its own score=3 activations, filtered independently.
+For antonym pairs (e.g., helpful/unhelpful), the score=3 question sets can differ
+substantially — "helpful" may keep 95%+ of questions while "unhelpful" keeps only ~50%.
+Differencing these vectors to get a trait direction therefore mixes a true trait contrast
+with a question-distribution artifact.
+
+A future step 4b could fix this by loading both activation files for a known pair,
+intersecting their score=3 question keys, and computing matched means from only the
+shared questions before differencing. This must be a pipeline step (not an analysis
+script) because the activation files are large.
+
 ### 5. Compute Axis
 
 Aggregate vectors into the final axis:

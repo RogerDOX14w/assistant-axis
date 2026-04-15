@@ -28,7 +28,7 @@ GOAL_COUNT=30                   # roger mode: top-N from goal lists
 NON_GOAL_COUNT=30               # roger mode: top-N from non-goal lists
 REDUCE_QUESTIONS=3              # roger mode: take every Nth question (1=all, 3=every 3rd)
 MIN_COUNT=30                    # roger mode: min score=3 samples for vector (50 for christina)
-OUTPUT_DIR="/workspace/qwen-3-32b/roger"
+OUTPUT_DIR="/workspace/outputs/qwen-3-32b"
 
 # ---- Parse --types from command line --------------------------------------
 TYPES=""

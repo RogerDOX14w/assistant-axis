@@ -47,6 +47,20 @@ def compute_pos_3_vector(activations: dict, scores: dict, min_count: int) -> tor
 
     Handles both old 2D tensors (n_layers, hidden_dim) and new 3D tensors
     (1+N, n_layers, hidden_dim). Output shape matches input tensor shape.
+
+    NOTE: Each entity is filtered independently — the set of score=3 questions
+    for trait A may differ substantially from trait B.  When computing trait
+    *directions* (A_vec - B_vec) for antonym pairs, this means the two means
+    are averaged over different question distributions, so the difference
+    captures question-mix effects on top of the actual trait contrast.
+
+    A cleaner approach for paired directions would be question-matched
+    filtering: intersect the score=3 sets for both sides, recompute means
+    over only the shared questions, then difference.  This would require a
+    step 4b that loads both activation files for a pair, intersects their
+    score=3 keys, and saves a matched direction vector.  The activation files
+    are too large for ad-hoc analysis scripts to reopen, so this must be
+    precomputed in the pipeline.
     """
     filtered_acts = []
     for key, act in activations.items():
