@@ -71,25 +71,45 @@ To compute the axis for a new model, run the 5-step pipeline:
 
 See [`pipeline/README.md`](pipeline/README.md) for detailed instructions.
 
-## Regenerating Trait Instructions
+## Trait Instructions
 
-Trait data lives in `data/traits/instructions/<trait>.json`. Each file contains `positive_label`, `negative_label`, `instruction` (pos/neg pairs), `questions`, and `eval_prompt`. To regenerate instruction pairs and/or questions via Claude:
+Trait data lives in `data/traits/instructions/<trait>.json`. Each file contains `positive_label`, `negative_label`, `description`, `instruction` (pos/neg pairs), `questions`, and `eval_prompt`.
+
+### Adding new traits
+
+Create a stub JSON with just the metadata fields:
+
+```json
+{
+  "positive_label": "merciful",
+  "negative_label": "non-merciful",
+  "description": "This means showing compassion and clemency in the face of wrongdoing..."
+}
+```
+
+Then run the regeneration script to generate `instruction`, `questions`, and `eval_prompt` via Claude:
 
 ```bash
-# Regenerate specific traits
-uv run python data_analysis/regenerate_trait_instructions.py --traits arrogant stoic --force
+uv run python data_analysis/regenerate_trait_instructions.py --traits merciful
+```
+
+### Regenerating existing traits
+
+```bash
+# Regenerate specific traits (skips if already has expected counts)
+uv run python data_analysis/regenerate_trait_instructions.py --traits arrogant stoic
+
+# Force overwrite existing instructions and questions
+uv run python data_analysis/regenerate_trait_instructions.py --traits stoic --force
 
 # Regenerate only instructions (keep existing questions)
 uv run python data_analysis/regenerate_trait_instructions.py --traits stoic --instructions-only --force
 
 # Preview what would happen without making changes
 uv run python data_analysis/regenerate_trait_instructions.py --all --dry-run
-
-# Regenerate all traits (skips files that already have the expected counts)
-uv run python data_analysis/regenerate_trait_instructions.py --all
 ```
 
-Requires `ANTHROPIC_API_KEY` in environment or `.env`. Each trait costs 2 API calls (1 for instructions, 1 for questions). The `eval_prompt` field is **never modified** by this tool — new traits need `eval_prompt` drafted separately.
+Requires `ANTHROPIC_API_KEY` in environment or `.env`. Each trait costs 1 API call (combined prompt for instructions + questions + eval_prompt).
 
 ## Transcripts
 

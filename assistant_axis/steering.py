@@ -609,13 +609,15 @@ class ActivationSteering:
             if self._layer_call_counts[layer_idx] > 1:
                 return activations
             modified_out = tensor_out
+            n_vecs = len(self.vectors_by_layer[layer_idx])
             for vector, coeff, vector_idx, mean_act, tau in self.vectors_by_layer[layer_idx]:
+                eff_coeff = coeff / n_vecs
                 if self.intervention_type == "addition":
-                    modified_out = modified_out + coeff * vector.to(modified_out.device)
+                    modified_out = modified_out + eff_coeff * vector.to(modified_out.device)
                 elif self.intervention_type == "replacement":
-                    modified_out = self._apply_replacement(modified_out, vector, coeff)
+                    modified_out = self._apply_replacement(modified_out, vector, eff_coeff)
                 elif self.intervention_type == "ablation":
-                    modified_out = self._apply_ablation(modified_out, vector, coeff)
+                    modified_out = self._apply_ablation(modified_out, vector, eff_coeff)
                 elif self.intervention_type == "mean_ablation":
                     modified_out = self._apply_mean_ablation(modified_out, vector, mean_act)
                 elif self.intervention_type == "capping":
@@ -626,7 +628,8 @@ class ActivationSteering:
                     pre = torch.einsum('bld,d->bl', tensor_out, v)
                     post = torch.einsum('bld,d->bl', modified_out, v)
                     print(f"[ActivationSteering] Layer {layer_idx}, vec {vector_idx} "
-                        f"(prefill): pre mean={pre.mean():.3f} | post mean={post.mean():.3f}")
+                        f"(prefill, eff_coeff={eff_coeff:.4f}): "
+                        f"pre mean={pre.mean():.3f} | post mean={post.mean():.3f}")
         elif self.positions in ("system_only", "user_only", "system_user_only"):
             self._layer_call_counts[layer_idx] = (
                 self._layer_call_counts.get(layer_idx, 0) + 1)
@@ -634,19 +637,21 @@ class ActivationSteering:
                 return activations
             modified_out = tensor_out.clone()
             region_pos = self._region_positions
+            n_vecs = len(self.vectors_by_layer[layer_idx])
             for vector, coeff, vector_idx, mean_act, tau in self.vectors_by_layer[layer_idx]:
+                eff_coeff = coeff / n_vecs
                 v = vector.to(modified_out.device)
                 if self.intervention_type == "addition":
-                    modified_out[:, region_pos, :] += coeff * v
+                    modified_out[:, region_pos, :] += eff_coeff * v
                 elif self.intervention_type == "ablation":
                     v_norm = v / (v.norm() + 1e-8)
                     sliced = modified_out[:, region_pos, :]
                     proj = torch.einsum('bpd,d->bp', sliced, v_norm)
                     modified_out[:, region_pos, :] = (
-                        sliced - torch.einsum('bp,d->bpd', proj, v_norm) + coeff * v)
+                        sliced - torch.einsum('bp,d->bpd', proj, v_norm) + eff_coeff * v)
                 elif self.intervention_type == "replacement":
                     modified_out[:, region_pos, :] = (
-                        (1.0 - coeff) * modified_out[:, region_pos, :] + coeff * v)
+                        (1.0 - eff_coeff) * modified_out[:, region_pos, :] + eff_coeff * v)
                 elif self.intervention_type == "capping":
                     v_norm = v / (v.norm() + 1e-8)
                     sliced = modified_out[:, region_pos, :]
@@ -667,27 +672,30 @@ class ActivationSteering:
                     pre = torch.einsum('bpd,d->bp', tensor_out[:, region_pos, :], v_dbg)
                     post = torch.einsum('bpd,d->bp', modified_out[:, region_pos, :], v_dbg)
                     print(f"[ActivationSteering] Layer {layer_idx}, vec {vector_idx} "
-                        f"({self.positions}, {len(region_pos)} pos): "
+                        f"({self.positions}, {len(region_pos)} pos, eff_coeff={eff_coeff:.4f}): "
                         f"pre mean={pre.mean():.3f} | post mean={post.mean():.3f}")
         else:
             modified_out = tensor_out
+            n_vecs = len(self.vectors_by_layer[layer_idx])
             for vector, coeff, vector_idx, mean_act, tau in self.vectors_by_layer[layer_idx]:
+                eff_coeff = coeff / n_vecs
                 if self.intervention_type == "addition":
-                    modified_out = self._apply_addition(modified_out, vector, coeff)
+                    modified_out = self._apply_addition(modified_out, vector, eff_coeff)
                 elif self.intervention_type == "ablation":
-                    modified_out = self._apply_ablation(modified_out, vector, coeff)
+                    modified_out = self._apply_ablation(modified_out, vector, eff_coeff)
                 elif self.intervention_type == "mean_ablation":
                     modified_out = self._apply_mean_ablation(modified_out, vector, mean_act)
                 elif self.intervention_type == "capping":
                     modified_out = self._apply_cap(modified_out, vector, tau)
                 elif self.intervention_type == "replacement":
-                    modified_out = self._apply_replacement(modified_out, vector, coeff)
+                    modified_out = self._apply_replacement(modified_out, vector, eff_coeff)
 
                 if self.debug:
                     v = vector / (vector.norm() + 1e-8)
                     pre = torch.einsum('bld,d->bl', tensor_out, v)
                     post = torch.einsum('bld,d->bl', modified_out, v)
-                    print(f"[ActivationSteering] Layer {layer_idx}, vec {vector_idx}: "
+                    print(f"[ActivationSteering] Layer {layer_idx}, vec {vector_idx} "
+                        f"(eff_coeff={eff_coeff:.4f}): "
                         f"pre mean={pre.mean():.3f} | post mean={post.mean():.3f}")
 
         if was_tuple:
