@@ -7,11 +7,14 @@
 #     --types combinations roles traits  (any subset; default: all three)
 #       Each type gets its own subdirectory under OUTPUT_DIR.
 #       "default" is generated once and symlinked into each type's dirs.
-#   christina — standalone roles (rerun with ROLES_DIR for traits)
+#   christina — standalone roles/traits from --roles_dir.
 #     --types is ignored in christina mode.
 #
 # Usage:
 #   ./pipeline/run_pipeline.sh
+#   ./pipeline/run_pipeline.sh --mode christina --output_dir /workspace/qwen-3-32b/roles
+#   ./pipeline/run_pipeline.sh --mode christina --output_dir /workspace/qwen-3-32b/traits \
+#       --roles_dir ../data/traits/instructions
 #   ./pipeline/run_pipeline.sh --types combinations roles
 #   (RECOMMEND RUNNING STEPS 1 AND 2 INDIVIDUALLY; 3 CAN RUN IN PARALLEL ONCE 1 IS DONE)
 #
@@ -21,19 +24,28 @@
 
 set -e
 
-# ---- Configuration --------------------------------------------------------
+# ---- Configuration (defaults) ---------------------------------------------
 MODEL="Qwen/Qwen3-32B"
 MODE="roger"                    # roger | christina
+ROLES_DIR="../data/roles/instructions"  # christina: directory of instruction JSONs
 GOAL_COUNT=30                   # roger mode: top-N from goal lists
 NON_GOAL_COUNT=30               # roger mode: top-N from non-goal lists
 REDUCE_QUESTIONS=3              # roger mode: take every Nth question (1=all, 3=every 3rd)
 MIN_COUNT=30                    # roger mode: min score=3 samples for vector (50 for christina)
 OUTPUT_DIR="/workspace/outputs/qwen-3-32b"
 
-# ---- Parse --types from command line --------------------------------------
+# ---- Parse command line ---------------------------------------------------
 TYPES=""
 while [[ $# -gt 0 ]]; do
     case "$1" in
+        --mode)
+            MODE="$2"; shift 2 ;;
+        --output_dir)
+            OUTPUT_DIR="$2"; shift 2 ;;
+        --roles_dir)
+            ROLES_DIR="$2"; shift 2 ;;
+        --model)
+            MODEL="$2"; shift 2 ;;
         --types)
             shift
             while [[ $# -gt 0 && ! "$1" =~ ^-- ]]; do
@@ -52,13 +64,21 @@ if [ -z "$TYPES" ]; then
     TYPES="combinations roles traits"
 fi
 
-# Validate types
-for t in $TYPES; do
-    case "$t" in
-        combinations|roles|traits) ;;
-        *) echo "Invalid type: $t (must be combinations, roles, or traits)" >&2; exit 1 ;;
-    esac
-done
+# Validate mode
+case "$MODE" in
+    roger|christina) ;;
+    *) echo "Invalid mode: $MODE (must be roger or christina)" >&2; exit 1 ;;
+esac
+
+# Validate types (roger mode only)
+if [ "$MODE" = "roger" ]; then
+    for t in $TYPES; do
+        case "$t" in
+            combinations|roles|traits) ;;
+            *) echo "Invalid type: $t (must be combinations, roles, or traits)" >&2; exit 1 ;;
+        esac
+    done
+fi
 
 # ---- Logging --------------------------------------------------------------
 LOG_FILE="$OUTPUT_DIR/pipeline_$(date +%Y%m%d_%H%M%S).log"
@@ -70,7 +90,9 @@ echo "Log: $LOG_FILE"
 echo "Model:  $MODEL"
 echo "Mode:   $MODE"
 echo "Output: $OUTPUT_DIR"
-if [ "$MODE" = "roger" ]; then
+if [ "$MODE" = "christina" ]; then
+    echo "Roles:  $ROLES_DIR"
+else
     echo "Types:  $TYPES"
 fi
 echo ""
@@ -97,6 +119,7 @@ if [ "$MODE" = "christina" ]; then
     uv run 1_generate.py \
         --mode "$MODE" \
         --model "$MODEL" \
+        --roles_dir "$ROLES_DIR" \
         --output_dir "$OUTPUT_DIR/responses"
 
     echo ""
