@@ -317,7 +317,20 @@ The pipeline (`pipeline/1_generate.py`) supports two modes:
 
 **Christina mode**: Processes standalone roles (or traits) from `--roles_dir`. Run separately per entity type (different `--roles_dir` and `--output_dir`) to avoid name collisions.
 
-**Step 3 eval_prompt routing**: The judge (`3_judge.py`) detects response type by filename prefix. Combined entries get a compound 0-3 eval_prompt constructed from both descriptions. Standalone traits get a pipeline-specific 0-3 eval_prompt (the 0-100 eval_prompt in trait JSONs is NOT used by the pipeline, since `parse_judge_score()` rejects scores > 3). Standalone roles use their existing `eval_prompt` from the JSON file. `default` is skipped (step 4 uses all activations without scores).
+**Step 3 eval_prompt routing**: The judge (`3_judge.py`) requires an explicit `--entity_type {role,trait,combination}` flag to select the eval_prompt:
+
+- `role` — look up stem in `data/roles/instructions/`, use its `eval_prompt` field.
+- `trait` — look up stem in `data/traits/instructions/`, build a pipeline-specific 0-3 eval_prompt from the description. (The 0-100 `eval_prompt` in trait JSONs is NOT used by the pipeline, since `parse_judge_score()` rejects scores > 3.)
+- `combination` — parse `r_<role>_t_<trait>` filename, build a compound 0-3 eval_prompt from both descriptions.
+
+`default` is skipped under all entity types (step 4 uses all activations without scores).
+
+**DO NOT try to autodetect entity type from the filename.** 9 names exist in both `data/roles/instructions/` and `data/traits/instructions/`:
+
+    ascetic, contrarian, cosmopolitan, generalist, pacifist,
+    patient, perfectionist, romantic, stoic
+
+Any roles-first (or traits-first) fallback will silently mis-score one side for these 9. `run_pipeline.sh` passes the correct `--entity_type` per output-subdir type (Roger mode: `roles|traits|combinations`; Christina mode: inferred from `ROLES_DIR`). If you add a new standalone invocation of `3_judge.py`, you must pass `--entity_type` explicitly.
 
 Steps 2, 4, 5 are unchanged — they process whatever files appear in their input directories.
 
@@ -331,7 +344,7 @@ This document should evolve as we discover new patterns. When something doesn't 
 3. Update this document if it's a pattern
 4. Keep it concise - remove outdated patterns
 
-**Last Updated:** April 5, 2026
+**Last Updated:** April 4, 2026
 
 ---
 

@@ -131,8 +131,18 @@ if [ "$MODE" = "christina" ]; then
         --batch_size 8
 
     echo ""
+    # Infer entity_type for step 3 from ROLES_DIR so the 9 collision names
+    # (ascetic, contrarian, ... stoic) are scored against the right prompt.
+    # Christina mode is standalone-only (no combinations).
+    case "$ROLES_DIR" in
+        *traits*) CHR_ENT_TYPE=trait ;;
+        *roles*)  CHR_ENT_TYPE=role ;;
+        *) echo "ERROR: cannot infer --entity_type from ROLES_DIR=$ROLES_DIR"; exit 1 ;;
+    esac
+
     echo "=== Step 3: Scoring responses ==="
     uv run 3_judge.py \
+        --entity_type "$CHR_ENT_TYPE" \
         --responses_dir "$OUTPUT_DIR/responses" \
         --output_dir "$OUTPUT_DIR/scores"
 
@@ -258,7 +268,16 @@ else
         echo "--- Step 3 [$type] ---"
         TYPE_DIR="$OUTPUT_DIR/$type"
 
+        # entity_type disambiguates 9 names that exist in both data/roles and
+        # data/traits, and tells the judge when to use the combined-eval prompt.
+        case "$type" in
+            roles)        ENT_TYPE=role ;;
+            traits)       ENT_TYPE=trait ;;
+            combinations) ENT_TYPE=combination ;;
+        esac
+
         uv run 3_judge.py \
+            --entity_type "$ENT_TYPE" \
             --responses_dir "$TYPE_DIR/responses" \
             --output_dir "$TYPE_DIR/scores"
     done

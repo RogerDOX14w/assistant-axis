@@ -135,23 +135,73 @@ def parse_combined_filename(stem: str) -> Optional[Tuple[str, str, str]]:
     return role_name, trait_name, goal_source
 
 
+def _role_prompt(stem: str, roles_dir: Path) -> Optional[str]:
+    role_file = roles_dir / f"{stem}.json"
+    if not role_file.exists():
+        return None
+    data = _load_json(role_file)
+    ep = data.get("eval_prompt", "")
+    if ep:
+        return ep
+    logger.warning(f"Role {stem} has no eval_prompt")
+    return None
+
+
+def _trait_prompt(stem: str, traits_dir: Path) -> Optional[str]:
+    trait_file = traits_dir / f"{stem}.json"
+    if not trait_file.exists():
+        return None
+    data = _load_json(trait_file)
+    desc = _description_from(data)
+    name = data.get("positive_label", stem)
+    return TRAIT_EVAL_TEMPLATE.format(
+        trait_name=name,
+        trait_description=desc,
+    )
+
+
 def resolve_eval_prompt(
     stem: str,
     roles_dir: Path,
     traits_dir: Path,
+    entity_type: str,
 ) -> Optional[str]:
     """Determine the eval_prompt template for a response file.
 
     Returns a template string with {question} and {answer} placeholders,
     or None if the entity should be skipped (e.g. default).
+
+    entity_type (required, one of "role" | "trait" | "combination"):
+      - "role"        — standalone role; look up stem in roles_dir only.
+      - "trait"       — standalone trait; look up stem in traits_dir only.
+      - "combination" — r_<role>_t_<trait>[__<goal>] entry; consult both dirs.
+
+    Explicit entity_type is required because 9 names exist in both
+    data/roles and data/traits (ascetic, contrarian, cosmopolitan, generalist,
+    pacifist, patient, perfectionist, romantic, stoic) and a single response
+    directory can contain any of role/trait/combination entries.
     """
     # Skip default — step 4 uses all activations without scores
     if stem == "default":
         return None
 
-    # Combined entry?
-    parsed = parse_combined_filename(stem)
-    if parsed is not None:
+    if entity_type == "role":
+        prompt = _role_prompt(stem, roles_dir)
+        if prompt is None:
+            logger.warning(f"No role file found for {stem}")
+        return prompt
+
+    if entity_type == "trait":
+        prompt = _trait_prompt(stem, traits_dir)
+        if prompt is None:
+            logger.warning(f"No trait file found for {stem}")
+        return prompt
+
+    if entity_type == "combination":
+        parsed = parse_combined_filename(stem)
+        if parsed is None:
+            logger.warning(f"{stem} is not a combination filename (expected r_<role>_t_<trait>)")
+            return None
         role_name, trait_name, _goal_source = parsed
         role_file = roles_dir / f"{role_name}.json"
         trait_file = traits_dir / f"{trait_name}.json"
@@ -167,29 +217,7 @@ def resolve_eval_prompt(
             trait_description=trait_desc,
         )
 
-    # Standalone role?
-    role_file = roles_dir / f"{stem}.json"
-    if role_file.exists():
-        data = _load_json(role_file)
-        ep = data.get("eval_prompt", "")
-        if ep:
-            return ep
-        logger.warning(f"Role {stem} has no eval_prompt")
-        return None
-
-    # Standalone trait?
-    trait_file = traits_dir / f"{stem}.json"
-    if trait_file.exists():
-        data = _load_json(trait_file)
-        desc = _description_from(data)
-        name = data.get("positive_label", stem)
-        return TRAIT_EVAL_TEMPLATE.format(
-            trait_name=name,
-            trait_description=desc,
-        )
-
-    logger.warning(f"No role or trait file found for {stem}")
-    return None
+    raise ValueError(f"Unknown entity_type: {entity_type!r}")
 
 
 # ---------------------------------------------------------------------------
@@ -300,6 +328,12 @@ async def main_async():
                         help="Path to combination_scores.json for incongruity filtering")
     parser.add_argument("--keep_score_3_combinations", action="store_true",
                         help="Don't filter out highly incongruous (score 3) combinations")
+    parser.add_argument("--entity_type", type=str, required=True,
+                        choices=["role", "trait", "combination"],
+                        help="How to resolve response-file stems. Required because 9 names "
+                             "exist in both data/roles and data/traits (ascetic, contrarian, "
+                             "cosmopolitan, generalist, pacifist, patient, perfectionist, "
+                             "romantic, stoic). Use 'combination' for r_<role>_t_<trait> files.")
     args = parser.parse_args()
 
     if not args.dry_run and not os.getenv("OPENAI_API_KEY"):
@@ -359,7 +393,8 @@ async def main_async():
                 except Exception:
                     pass
 
-            eval_tpl = resolve_eval_prompt(name, roles_dir, traits_dir)
+            eval_tpl = resolve_eval_prompt(name, roles_dir, traits_dir,
+                                           entity_type=args.entity_type)
             if eval_tpl is None:
                 logger.info(f"  {name}: skipped (no eval prompt)")
                 continue
@@ -422,7 +457,8 @@ async def main_async():
             except Exception:
                 pass
 
-        eval_tpl = resolve_eval_prompt(name, roles_dir, traits_dir)
+        eval_tpl = resolve_eval_prompt(name, roles_dir, traits_dir,
+                                       entity_type=args.entity_type)
         if eval_tpl is None:
             skipped += 1
             continue
