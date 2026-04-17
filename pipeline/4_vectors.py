@@ -41,12 +41,35 @@ def load_activations(activations_file: Path) -> tuple[dict, dict]:
     return data, metadata
 
 
-def compute_pos_3_vector(activations: dict, scores: dict, min_count: int) -> torch.Tensor:
+def _question_index(key: str) -> int:
+    """Extract q_idx from an activation key like 'pos_p3_q7'.
+
+    NOTE: this is the 0-based index into the already-reduced question list
+    from step 1, not into the original questions file. See the TODO in
+    assistant_axis/generation.py load_questions for why.
+    """
+    return int(key.rsplit("_q", 1)[1])
+
+
+def _keep_by_reduce(key: str, reduce_questions: int) -> bool:
+    """Return True if this activation's question index survives an Nth-only reduction."""
+    if reduce_questions <= 1:
+        return True
+    return _question_index(key) % reduce_questions == 0
+
+
+def compute_pos_3_vector(activations: dict, scores: dict, min_count: int,
+                         reduce_questions: int = 1) -> torch.Tensor:
     """
     Compute mean vector from activations where score=3.
 
     Handles both old 2D tensors (n_layers, hidden_dim) and new 3D tensors
     (1+N, n_layers, hidden_dim). Output shape matches input tensor shape.
+
+    With reduce_questions=N (default 1 = no further reduction), takes only
+    activations whose question index satisfies q_idx % N == 0.  This is
+    applied on top of any reduction already done at step 1, so the effective
+    reduction compounds (reduce=3 at step 1 + reduce=3 here = 9x overall).
 
     NOTE: Each entity is filtered independently — the set of score=3 questions
     for trait A may differ substantially from trait B.  When computing trait
@@ -64,7 +87,7 @@ def compute_pos_3_vector(activations: dict, scores: dict, min_count: int) -> tor
     """
     filtered_acts = []
     for key, act in activations.items():
-        if key in scores and scores[key] == 3:
+        if key in scores and scores[key] == 3 and _keep_by_reduce(key, reduce_questions):
             filtered_acts.append(act)
 
     if len(filtered_acts) < min_count:
@@ -74,14 +97,18 @@ def compute_pos_3_vector(activations: dict, scores: dict, min_count: int) -> tor
     return stacked.nanmean(dim=0)
 
 
-def compute_mean_vector(activations: dict) -> torch.Tensor:
+def compute_mean_vector(activations: dict, reduce_questions: int = 1) -> torch.Tensor:
     """
-    Compute mean vector from all activations (no filtering).
+    Compute mean vector from all activations (no score filtering).
+
+    With reduce_questions=N, takes only activations whose question index
+    satisfies q_idx % N == 0. See compute_pos_3_vector for caveats.
 
     Handles both old 2D tensors (n_layers, hidden_dim) and new 3D tensors
     (1+N, n_layers, hidden_dim). Output shape matches input tensor shape.
     """
-    all_acts = list(activations.values())
+    all_acts = [act for key, act in activations.items()
+                if _keep_by_reduce(key, reduce_questions)]
     stacked = torch.stack(all_acts)
     return stacked.nanmean(dim=0)
 
@@ -93,6 +120,9 @@ def main():
     parser.add_argument("--output_dir", type=str, required=True, help="Output directory for vector .pt files")
     parser.add_argument("--min_count", type=int, default=50, help="Minimum score=3 samples required")
     parser.add_argument("--overwrite", action="store_true", help="Overwrite existing output files")
+    parser.add_argument("--reduce_questions", type=int, default=1,
+                        help="Take only activations with q_idx %% N == 0 (default 1 = no reduction). "
+                             "Compounds with any reduction already done at step 1.")
     args = parser.parse_args()
 
     # Create output directory
@@ -130,7 +160,7 @@ def main():
         try:
             if "default" in role:
                 # Default roles: use all activations (no score filtering)
-                vector = compute_mean_vector(activations)
+                vector = compute_mean_vector(activations, args.reduce_questions)
                 vector_type = "mean"
             else:
                 # Regular roles: filter by score=3
@@ -141,7 +171,8 @@ def main():
                     continue
 
                 scores = load_scores(scores_file)
-                vector = compute_pos_3_vector(activations, scores, args.min_count)
+                vector = compute_pos_3_vector(activations, scores, args.min_count,
+                                              args.reduce_questions)
                 vector_type = "pos_3"
 
             # Save vector with retry for MFS I/O errors

@@ -416,6 +416,24 @@ class RoleResponseGenerator:
         if self.reduce_questions > 1:
             questions = questions[::self.reduce_questions]
         self.questions = questions
+        # TODO(design-debt): the question_index stored downstream (see
+        # generate_role_responses's enumerate(questions)) is 0-based into this
+        # already-reduced list, not into the original questions file.  That
+        # means activation keys like pos_p3_q7 give no indication of whether
+        # they came from a reduce=1 run (original q7) or a reduce=3 run
+        # (original q21), and there's no stable identifier tying activations
+        # back to a specific question.  Consequences:
+        #   - post-hoc further reduction at step 4 composes oddly
+        #     (see 4_vectors.py; reduce=3 at step 1 + reduce=3 at step 4 = 9x,
+        #      not 3x, because step 4 sees renumbered indices)
+        #   - can't fill in missing questions later (e.g., add 80 more to a
+        #     240-question run) without regenerating everything
+        #   - can't cross-reference activations across runs with different
+        #     reduce settings
+        # Better design: store the original question index in the activation
+        # key (e.g., pos_p3_q021 for original index 21), always 0-based into
+        # the full questions file.  Not fixing now because we have substantial
+        # data generated across multiple runs/pods under the current scheme.
         logger.info(f"Loaded {len(self.questions)} questions")
         return self.questions
 
