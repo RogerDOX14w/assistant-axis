@@ -35,7 +35,30 @@ from tqdm import tqdm
 
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
-from assistant_axis.judge import RateLimiter, call_judge_batch, parse_judge_score
+# Load assistant_axis/judge.py directly, bypassing the assistant_axis package
+# __init__, which eagerly imports torch-dependent submodules. judge.py itself
+# only uses stdlib + openai + dotenv, and this script has no need for torch.
+# On networked filesystems (e.g. MooseFS under contention) the torch import can
+# take minutes-to-hours, so this shortcut is meaningful for startup time.
+#
+# The standard form would be:
+#     from assistant_axis.judge import RateLimiter, call_judge_batch, parse_judge_score
+# which works fine functionally but drags torch in via the package __init__.
+#
+# This is the only script in the repo using this pattern; it is not a
+# convention to propagate. If you are maintaining code that uses assistant_axis,
+# prefer the standard form everywhere else.
+import importlib.util as _importlib_util
+_judge_path = Path(__file__).parent.parent / "assistant_axis" / "judge.py"
+_judge_spec = _importlib_util.spec_from_file_location(
+    "_assistant_axis_judge_standalone", _judge_path
+)
+_judge_mod = _importlib_util.module_from_spec(_judge_spec)
+_judge_spec.loader.exec_module(_judge_mod)
+RateLimiter = _judge_mod.RateLimiter
+call_judge_batch = _judge_mod.call_judge_batch
+parse_judge_score = _judge_mod.parse_judge_score
+
 import openai
 
 load_dotenv()
@@ -330,7 +353,7 @@ async def main_async():
                         help="Score every combination, including prompt-variants that "
                              "combination_scores.json flagged as highly incongruous "
                              "(incongruity-score 3). (This incongruity-score is unrelated "
-                             to the 0-3 rubric score that this script produces.)")
+                             "to the 0-3 rubric score that this script produces.)")
     parser.add_argument("--entity_type", type=str, required=True,
                         choices=["role", "trait", "combination"],
                         help="How to resolve response-file stems. Required because 9 names "
