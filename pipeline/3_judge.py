@@ -329,8 +329,8 @@ async def main_async():
     parser.add_argument("--no_incongruity_filtering", action="store_true",
                         help="Score every combination, including prompt-variants that "
                              "combination_scores.json flagged as highly incongruous "
-                             "(meta-score 3). Unrelated to the 0-3 rubric score this "
-                             "script produces.")
+                             "(incongruity-score 3). (This incongruity-score is unrelated "
+                             to the 0-3 rubric score that this script produces.)")
     parser.add_argument("--entity_type", type=str, required=True,
                         choices=["role", "trait", "combination"],
                         help="How to resolve response-file stems. Required because 9 names "
