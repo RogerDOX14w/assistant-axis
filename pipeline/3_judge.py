@@ -326,8 +326,11 @@ async def main_async():
     parser.add_argument("--combination_scores", type=str,
                         default="../data/combination_scores.json",
                         help="Path to combination_scores.json for incongruity filtering")
-    parser.add_argument("--keep_score_3_combinations", action="store_true",
-                        help="Don't filter out highly incongruous (score 3) combinations")
+    parser.add_argument("--no_incongruity_filtering", action="store_true",
+                        help="Score every combination, including prompt-variants that "
+                             "combination_scores.json flagged as highly incongruous "
+                             "(meta-score 3). Unrelated to the 0-3 rubric score this "
+                             "script produces.")
     parser.add_argument("--entity_type", type=str, required=True,
                         choices=["role", "trait", "combination"],
                         help="How to resolve response-file stems. Required because 9 names "
@@ -350,7 +353,7 @@ async def main_async():
 
     # Build per-pair exclusions for combined entries (incongruity score == 3)
     excluded_pairs: Dict[str, set] = {}
-    if not args.keep_score_3_combinations:
+    if not args.no_incongruity_filtering:
         combo_scores_path = Path(args.combination_scores)
         if combo_scores_path.exists():
             combo_data = json.load(open(combo_scores_path))
