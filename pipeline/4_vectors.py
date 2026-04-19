@@ -33,12 +33,27 @@ def load_scores(scores_file: Path) -> dict:
 def load_activations(activations_file: Path) -> tuple[dict, dict]:
     """Load activations from .pt file, separating metadata.
 
+    Retries on transient I/O errors (MooseFS can return truncated reads
+    under chunkserver load; torch.load surfaces these as RuntimeError with
+    "unexpected EOF, expected N more bytes").
+
     Returns:
         (activations_dict, metadata) where metadata is empty for old-format files.
     """
-    data = torch.load(activations_file, map_location="cpu", weights_only=False)
-    metadata = data.pop("metadata", {})
-    return data, metadata
+    import time
+    last_err = None
+    for attempt in range(3):
+        try:
+            data = torch.load(activations_file, map_location="cpu", weights_only=False)
+            metadata = data.pop("metadata", {})
+            return data, metadata
+        except (RuntimeError, OSError) as e:
+            last_err = e
+            if attempt < 2:
+                print(f"Warning: load failed for {activations_file.name} "
+                      f"({e}), retrying in 5s...")
+                time.sleep(5)
+    raise last_err
 
 
 def _question_index(key: str) -> int:
@@ -149,8 +164,12 @@ def main():
             skipped += 1
             continue
 
-        # Load activations
-        activations, act_metadata = load_activations(act_file)
+        try:
+            activations, act_metadata = load_activations(act_file)
+        except (RuntimeError, OSError) as e:
+            print(f"Warning: {role}: load failed after retries ({e}), skipping")
+            failed += 1
+            continue
 
         if not activations:
             print(f"Warning: No activations for {role}")
@@ -201,6 +220,9 @@ def main():
 
         except ValueError as e:
             print(f"Warning: {role}: {e}")
+            failed += 1
+        except (RuntimeError, OSError) as e:
+            print(f"Warning: {role}: save failed after retries ({e}), skipping")
             failed += 1
 
     print(f"\nSummary: {successful} successful, {skipped} skipped, {failed} failed")
