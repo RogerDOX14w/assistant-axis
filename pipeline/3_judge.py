@@ -375,6 +375,12 @@ async def main_async():
     traits_dir = Path(args.traits_dir)
 
     # Build per-pair exclusions for combined entries (incongruity score == 3)
+    # TODO: Unclear if this filtering is a net win. Many responses get rejected
+    # by the judge anyway (score < 3), so the incongruity filter mainly reduces
+    # sample size for only a marginal improvement in sample quality — the rate
+    # of bad-but-accepted responses among incongruity-filtered pairs isn't much
+    # higher than among unfiltered ones, and some filtered pairs are perfectly
+    # usable. Experiment with --no_incongruity_filtering to compare.
     excluded_pairs: Dict[str, set] = {}
     if not args.no_incongruity_filtering:
         combo_scores_path = Path(args.combination_scores)
