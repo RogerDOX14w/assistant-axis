@@ -33,6 +33,11 @@ NON_GOAL_COUNT=30               # roger mode: top-N from non-goal lists
 REDUCE_QUESTIONS=3              # roger mode: take every Nth question (1=all, 3=every 3rd)
 MIN_COUNT=30                    # roger mode: min score=3 samples for vector (50 for christina)
 OUTPUT_DIR="/workspace/outputs/qwen-3-32b"
+# Tensor-parallel size per worker for steps 1 & 2.  The pipeline runs
+# total_gpus / tensor_parallel_size workers in parallel.  Default 1 fits a
+# 32B bf16 model on one 80 GB GPU and gives near-linear scaling on 4-GPU
+# boxes.  Set to 2 for 40-48 GB GPUs that need two-way model splitting.
+TENSOR_PARALLEL_SIZE=1
 
 # ---- Parse command line ---------------------------------------------------
 TYPES=""
@@ -46,6 +51,8 @@ while [[ $# -gt 0 ]]; do
             ROLES_DIR="$2"; shift 2 ;;
         --model)
             MODEL="$2"; shift 2 ;;
+        --tensor_parallel_size)
+            TENSOR_PARALLEL_SIZE="$2"; shift 2 ;;
         --types)
             shift
             while [[ $# -gt 0 && ! "$1" =~ ^-- ]]; do
@@ -90,6 +97,7 @@ echo "Log: $LOG_FILE"
 echo "Model:  $MODEL"
 echo "Mode:   $MODE"
 echo "Output: $OUTPUT_DIR"
+echo "TP size:$TENSOR_PARALLEL_SIZE"
 if [ "$MODE" = "christina" ]; then
     echo "Roles:  $ROLES_DIR"
 else
@@ -120,6 +128,7 @@ if [ "$MODE" = "christina" ]; then
         --mode "$MODE" \
         --model "$MODEL" \
         --roles_dir "$ROLES_DIR" \
+        --tensor_parallel_size "$TENSOR_PARALLEL_SIZE" \
         --output_dir "$OUTPUT_DIR/responses"
 
     echo ""
@@ -128,6 +137,7 @@ if [ "$MODE" = "christina" ]; then
         --model "$MODEL" \
         --responses_dir "$OUTPUT_DIR/responses" \
         --output_dir "$OUTPUT_DIR/activations" \
+        --tensor_parallel_size "$TENSOR_PARALLEL_SIZE" \
         --batch_size 8
 
     echo ""
@@ -182,6 +192,7 @@ else
             --roles_only \
             --roles default \
             --reduce_questions "$REDUCE_QUESTIONS" \
+            --tensor_parallel_size "$TENSOR_PARALLEL_SIZE" \
             --output_dir "$DEFAULT_RESP"
     else
         echo "  default.jsonl already exists, skipping generation."
@@ -193,6 +204,7 @@ else
             --model "$MODEL" \
             --responses_dir "$DEFAULT_RESP" \
             --output_dir "$DEFAULT_ACT" \
+            --tensor_parallel_size "$TENSOR_PARALLEL_SIZE" \
             --batch_size 8
     else
         echo "  default.pt already exists, skipping extraction."
@@ -225,6 +237,7 @@ else
                     --non_goal_count "$NON_GOAL_COUNT" \
                     --reduce_questions "$REDUCE_QUESTIONS" \
                     --no_traits \
+                    --tensor_parallel_size "$TENSOR_PARALLEL_SIZE" \
                     --output_dir "$TYPE_DIR/responses"
                 ;;
             roles)
@@ -233,6 +246,7 @@ else
                     --model "$MODEL" \
                     --reduce_questions "$REDUCE_QUESTIONS" \
                     --roles_only \
+                    --tensor_parallel_size "$TENSOR_PARALLEL_SIZE" \
                     --output_dir "$TYPE_DIR/responses"
                 ;;
             traits)
@@ -241,6 +255,7 @@ else
                     --model "$MODEL" \
                     --reduce_questions "$REDUCE_QUESTIONS" \
                     --traits_only \
+                    --tensor_parallel_size "$TENSOR_PARALLEL_SIZE" \
                     --output_dir "$TYPE_DIR/responses"
                 ;;
         esac
@@ -258,6 +273,7 @@ else
             --model "$MODEL" \
             --responses_dir "$TYPE_DIR/responses" \
             --output_dir "$TYPE_DIR/activations" \
+            --tensor_parallel_size "$TENSOR_PARALLEL_SIZE" \
             --batch_size 8
     done
     echo ""
