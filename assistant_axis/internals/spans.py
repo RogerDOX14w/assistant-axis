@@ -12,13 +12,19 @@ if TYPE_CHECKING:
 logger = logging.getLogger(__name__)
 
 _HEADER_TOKENS = {
-    "qwen": ["<|im_start|>", "assistant", "\n"],
+    # Qwen 3 non-thinking mode: the 3-token assistant header is followed by a
+    # forced-empty thinking block `<think>\n\n</think>\n\n`.  Treating all 7
+    # tokens as "header" lets us extract per-position activations at each of
+    # these deterministic positions, which we previously missed.  This assumes
+    # enable_thinking=False (which all our activation extraction uses; see
+    # pipeline/2_activations.py --thinking flag, default False).
+    "qwen": ["<|im_start|>", "assistant", "\n", "<think>", "\n\n", "</think>", "\n\n"],
     "gemma": ["<start_of_turn>", "model", "\n"],
     "llama": ["<|start_header_id|>", "assistant", "<|end_header_id|>", "\n\n"],
 }
 
 _MAX_HEADER_SEARCH_DIST = {
-    "qwen": 10,
+    "qwen": 14,   # enlarged to accommodate 7-token non-thinking header + slack
     "gemma": 5,
     "llama": 6,
 }

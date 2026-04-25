@@ -30,8 +30,12 @@ QWEN_VOCAB = {
     "<|im_start|>": 151644,
     "assistant": 77091,
     "\n": 198,
+    "<think>": 151667,
+    "\n\n": 271,
+    "</think>": 151668,
 }
-QWEN_HEADER = [151644, 77091, 198]
+# Qwen 3 non-thinking: 3 assistant-header tokens + 4 forced-empty <think> block tokens.
+QWEN_HEADER = [151644, 77091, 198, 151667, 271, 151668, 271]
 
 GEMMA_VOCAB = {
     "<start_of_turn>": 106,
@@ -87,30 +91,31 @@ class TestFindHeader:
     def test_exact_match(self):
         tok = FakeTokenizer(QWEN_VOCAB)
         sm = SpanMapper(tok, model_name="qwen3-0.6b")
-        full_ids = [999, 151644, 77091, 198, 42, 43, 44]
-        hdr_start, mm = sm._find_header(full_ids, span_start=4, expected_header=QWEN_HEADER)
+        # Prefix (999), then 7-token non-thinking header, then content.
+        full_ids = [999] + QWEN_HEADER + [42, 43, 44]
+        span_start = 1 + len(QWEN_HEADER)
+        hdr_start, mm = sm._find_header(full_ids, span_start=span_start, expected_header=QWEN_HEADER)
         assert hdr_start == 1
         assert mm == []
 
     def test_total_mismatch_returns_none(self):
         tok = FakeTokenizer(QWEN_VOCAB)
         sm = SpanMapper(tok, model_name="qwen3-0.6b")
-        full_ids = [10, 20, 30, 40, 50, 60]
-        hdr_start, mm = sm._find_header(full_ids, span_start=4, expected_header=QWEN_HEADER)
+        # Buffer long enough to cover max_dist search window with no matching header.
+        full_ids = [10, 20, 30, 40, 50, 60, 70, 80, 90, 100, 110, 120, 130, 140, 150]
+        hdr_start, mm = sm._find_header(full_ids, span_start=12, expected_header=QWEN_HEADER)
         assert hdr_start is None
 
-    def test_qwen_thinking_gap(self):
-        """Qwen with thinking disabled can have several tokens between the header
-        and the content span start; the backward search should still find it."""
+    def test_qwen_extra_content_gap(self):
+        """After the 7-token non-thinking header there may still be some extra
+        tokens before the first non-boilerplate content; the search should
+        still find the header start."""
         tok = FakeTokenizer(QWEN_VOCAB)
         sm = SpanMapper(tok, model_name="qwen3-0.6b")
-        full_ids = [
-            999,
-            151644, 77091, 198,  # header at positions 1-3
-            888, 889, 890,       # thinking tags / whitespace
-            42, 43, 44,          # actual content starts at 7
-        ]
-        hdr_start, mm = sm._find_header(full_ids, span_start=7, expected_header=QWEN_HEADER)
+        full_ids = [999] + QWEN_HEADER + [888, 42, 43, 44]
+        #            ^0    ^1..^7           ^8   ^9..^11
+        # Span start one past the extra token
+        hdr_start, mm = sm._find_header(full_ids, span_start=9, expected_header=QWEN_HEADER)
         assert hdr_start == 1
         assert mm == []
 
@@ -149,17 +154,17 @@ class TestMapSpansShape:
     def test_headers_4d(self):
         tok = FakeTokenizer(QWEN_VOCAB)
         sm = SpanMapper(tok, model_name="qwen3-0.6b")
-        acts, meta = _make_batch()
+        acts, meta = _make_batch(seq_len=30)
         header = QWEN_HEADER
         N = len(header)
-        full_ids = [0] * 20
-        full_ids[5] = header[0]
-        full_ids[6] = header[1]
-        full_ids[7] = header[2]
+        full_ids = [0] * 30
+        # Place the 7-token header at positions 5..11 so assistant content starts at 12.
+        for i, tid in enumerate(header):
+            full_ids[5 + i] = tid
 
         spans = [
             {"conversation_id": 0, "turn": 0, "role": "user",      "start": 0, "end": 5},
-            {"conversation_id": 0, "turn": 1, "role": "assistant", "start": 8, "end": 15},
+            {"conversation_id": 0, "turn": 1, "role": "assistant", "start": 12, "end": 20},
         ]
         result, mm = sm.map_spans(
             acts, spans, meta,
@@ -173,17 +178,16 @@ class TestMapSpansShape:
         """conv_acts[0] should equal the body-mean from no-header mode."""
         tok = FakeTokenizer(QWEN_VOCAB)
         sm = SpanMapper(tok, model_name="qwen3-0.6b")
-        acts, meta = _make_batch()
+        acts, meta = _make_batch(seq_len=30)
 
         header = QWEN_HEADER
-        full_ids = [0] * 20
-        full_ids[5] = header[0]
-        full_ids[6] = header[1]
-        full_ids[7] = header[2]
+        full_ids = [0] * 30
+        for i, tid in enumerate(header):
+            full_ids[5 + i] = tid
 
         spans = [
             {"conversation_id": 0, "turn": 0, "role": "user",      "start": 0, "end": 5},
-            {"conversation_id": 0, "turn": 1, "role": "assistant", "start": 8, "end": 15},
+            {"conversation_id": 0, "turn": 1, "role": "assistant", "start": 12, "end": 20},
         ]
 
         with_hdr, _ = sm.map_spans(acts, spans, meta, batch_full_ids=[full_ids], extract_headers=True)
