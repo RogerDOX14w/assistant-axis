@@ -39,6 +39,18 @@ OUTPUT_DIR="/workspace/outputs/qwen-3-32b"
 # boxes.  Set to 2 for 40-48 GB GPUs that need two-way model splitting.
 TENSOR_PARALLEL_SIZE=1
 
+# Use /dev/shm (tmpfs, RAM-backed) for two purposes:
+#   1. As HF_HOME so model weights are loaded from RAM rather than NFS.  Some
+#      RunPod network volumes have a flaky NFS layer where concurrent mmap
+#      faults from multiple worker processes hang the kernel
+#      (folio_wait_bit_common in D-state).  RAM-backed tmpfs sidesteps this.
+#   2. As TMPDIR so step 2's per-role staging files (~2.6 GB each) don't blow
+#      out a small container /tmp when 4 workers write concurrently.
+# Set to false if you don't have /dev/shm, are on a RAM-constrained box, or
+# already have an HF_HOME setup you want preserved.
+USE_TMPFS=true
+TMPFS_HF_HOME=/dev/shm/hf-cache
+
 # ---- Parse command line ---------------------------------------------------
 TYPES=""
 while [[ $# -gt 0 ]]; do
@@ -53,6 +65,10 @@ while [[ $# -gt 0 ]]; do
             MODEL="$2"; shift 2 ;;
         --tensor_parallel_size)
             TENSOR_PARALLEL_SIZE="$2"; shift 2 ;;
+        --no-tmpfs)
+            USE_TMPFS=false; shift ;;
+        --tmpfs-dir)
+            TMPFS_HF_HOME="$2"; USE_TMPFS=true; shift 2 ;;
         --types)
             shift
             while [[ $# -gt 0 && ! "$1" =~ ^-- ]]; do
@@ -98,11 +114,80 @@ echo "Model:  $MODEL"
 echo "Mode:   $MODE"
 echo "Output: $OUTPUT_DIR"
 echo "TP size:$TENSOR_PARALLEL_SIZE"
+echo "Tmpfs:  $USE_TMPFS"
 if [ "$MODE" = "christina" ]; then
     echo "Roles:  $ROLES_DIR"
 else
     echo "Types:  $TYPES"
 fi
+echo ""
+
+# ---- Tmpfs setup -----------------------------------------------------------
+# Mirror the HF cache for $MODEL into /dev/shm so all workers load weights
+# from RAM-backed tmpfs (avoids flaky NFS mmap behavior) and redirect TMPDIR
+# similarly so step 2's ~2.6 GB per-role staging files don't fill a small
+# container /tmp.  Idempotent: re-uses an existing tmpfs cache, skips the
+# copy if disk space is short, and is fully bypassed by --no-tmpfs.
+setup_tmpfs() {
+    if [ "$USE_TMPFS" != "true" ]; then
+        echo "[tmpfs] disabled (--no-tmpfs); using system HF_HOME=${HF_HOME:-$HOME/.cache/huggingface} and TMPDIR=${TMPDIR:-/tmp}"
+        return
+    fi
+    if [ ! -d /dev/shm ]; then
+        echo "[tmpfs] /dev/shm not present; tmpfs setup skipped"
+        return
+    fi
+
+    # Redirect TMPDIR to tmpfs unless the user explicitly set it to something
+    # else.  Step 2 (2_activations.py) honours TMPDIR for its staging files.
+    if [ -z "$TMPDIR" ]; then
+        export TMPDIR=/dev/shm
+        echo "[tmpfs] TMPDIR=$TMPDIR (avoid filling small container /tmp)"
+    else
+        echo "[tmpfs] TMPDIR=$TMPDIR (preserved from environment)"
+    fi
+
+    # Mirror HF cache for the requested $MODEL.  HF caches under
+    # <HF_HOME>/hub/models--<owner>--<name>/.  We copy just the requested
+    # model's subtree to keep the tmpfs footprint minimal.
+    local source_hf="${HF_HOME:-$HOME/.cache/huggingface}"
+    local model_subdir="models--${MODEL//\//--}"
+    local source_model_dir="$source_hf/hub/$model_subdir"
+    local tmpfs_model_dir="$TMPFS_HF_HOME/hub/$model_subdir"
+
+    if [ ! -d "$source_model_dir" ]; then
+        echo "[tmpfs] $MODEL not found at $source_model_dir; HF will download to $source_hf on first use (no tmpfs cache pre-populated)"
+        return
+    fi
+
+    if [ -d "$tmpfs_model_dir" ]; then
+        echo "[tmpfs] $MODEL already present at $tmpfs_model_dir; reusing"
+        export HF_HOME="$TMPFS_HF_HOME"
+        echo "[tmpfs] HF_HOME=$HF_HOME"
+        return
+    fi
+
+    # Disk-space check: require 2× model size headroom in /dev/shm.
+    local needed_kb
+    needed_kb=$(du -sk "$source_model_dir" 2>/dev/null | awk '{print $1 * 2}')
+    local avail_kb
+    avail_kb=$(df --output=avail /dev/shm 2>/dev/null | tail -1 | tr -d ' ')
+    if [ -z "$needed_kb" ] || [ -z "$avail_kb" ] || [ "$avail_kb" -lt "$needed_kb" ]; then
+        echo "[tmpfs] insufficient /dev/shm space (need ${needed_kb}kB, have ${avail_kb}kB); skipping tmpfs cache"
+        return
+    fi
+
+    echo "[tmpfs] copying $MODEL ($((needed_kb / 2 / 1024)) MB) from $source_model_dir to $tmpfs_model_dir ..."
+    mkdir -p "$TMPFS_HF_HOME/hub"
+    if cp -r "$source_model_dir" "$TMPFS_HF_HOME/hub/"; then
+        export HF_HOME="$TMPFS_HF_HOME"
+        echo "[tmpfs] copy complete; HF_HOME=$HF_HOME"
+    else
+        echo "[tmpfs] copy failed; falling back to $source_hf"
+    fi
+}
+
+setup_tmpfs
 echo ""
 
 # ---- Helper: symlink default files into a type's subdir -------------------
