@@ -273,8 +273,26 @@ def process_role(
         import time as _time
         if header_metadata:
             activations_dict["metadata"] = header_metadata
-        # Bypass TMPDIR (which points to NFS on RunPod) — /tmp is always local.
-        local_tmp = Path("/tmp") / f"{output_file.stem}.pt.tmp"
+        # Stage the .pt to a local-disk temp file, then atomically copy to the
+        # final (possibly NFS) output location.  This avoids torch.save writing
+        # directly to NFS, which on RunPod is slow and flaky for large files.
+        #
+        # We honour TMPDIR with /tmp as the default fallback.  Caveats:
+        #   - On some RunPod setups TMPDIR points to NFS (the original reason
+        #     this site used to hardcode /tmp).  Don't blindly export TMPDIR
+        #     without checking where it points.
+        #   - On other setups /tmp lives on a small container disk (often
+        #     ~10-50 GB) which can fill up: each .pt activations file is
+        #     roughly 2.6 GB (n_convs × n_slots × n_layers × hidden × bf16),
+        #     and 4 concurrent workers can blow out small /tmp instantly.
+        #   - If /tmp is too small, point TMPDIR at a tmpfs:
+        #         export TMPDIR=/dev/shm
+        #     /dev/shm is RAM-backed (default size = 50% of RAM = plenty on
+        #     boxes with 256 GB+ RAM), local, and fast.  No automatic cleanup,
+        #     but `local_tmp.unlink()` below removes the staging file after a
+        #     successful copy, so files only accumulate on crashed runs (and
+        #     /dev/shm is wiped on reboot anyway).
+        local_tmp = Path(os.environ.get("TMPDIR", "/tmp")) / f"{output_file.stem}.pt.tmp"
         for attempt in range(3):
             try:
                 torch.save(activations_dict, local_tmp,
