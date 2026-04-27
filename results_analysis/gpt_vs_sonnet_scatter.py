@@ -1,0 +1,310 @@
+#!/usr/bin/env python3
+"""GPT-vs-Sonnet judge agreement: per-entity score scatter plots.
+
+For each axis pair, we have desc+inst scores from two providers
+(GPT-4.1-mini and Claude Sonnet 4) for the same set of entities.  This
+script computes the per-entity ``both_mean = (descriptions + instructions) / 2``
+score for each provider, then visualises the agreement two ways:
+
+1. **Pooled scatter** -- one figure, all axes' points overlaid,
+   colored by axis, with the overall Spearman ρ across the
+   ``(entity, axis)`` pool.  Quick "do GPT and Sonnet agree across
+   axes?" answer.
+
+2. **Per-axis grid** -- one panel per axis with its own ρ.  Lets you
+   spot axes where the two providers diverge.
+
+A small Gaussian jitter (sigma=0.08) is added to both axes for visual
+separation, since judge scores are integer-valued in [-3, 3] and many
+points overlap exactly.
+
+Inputs (from ``--experiment_dir``)
+----------------------------------
+
+The standard per-axis directory tree produced by
+:mod:`results_analysis.axis_judge_correlation`::
+
+    <experiment_dir>/
+      pair_list_33.json   # or any pair list passed via --pairs
+      <pos>_vs_<neg>/
+        gpt/scores_descriptions.json
+        gpt/scores_instructions.json
+        sonnet/scores_descriptions.json
+        sonnet/scores_instructions.json
+
+Outputs (to ``--experiment_dir``)
+---------------------------------
+
+- ``gpt_vs_sonnet_scatter_pooled.png`` -- pooled scatter.
+- ``gpt_vs_sonnet_scatter_grid.png``   -- N-panel grid.
+- ``gpt_vs_sonnet_rhos.json``           -- per-axis Spearman ρ + pooled ρ.
+
+Examples
+--------
+
+::
+
+    # Default: 33 axes (every axis with desc+inst from both providers)
+    uv run python results_analysis/gpt_vs_sonnet_scatter.py
+
+    # Reproduce the historical 7-axis plots (matches numbers byte-for-byte)
+    uv run python results_analysis/gpt_vs_sonnet_scatter.py \\
+        --pairs pair_list_7.json \\
+        --pooled gpt_vs_sonnet_scatter_pooled_7axes.png \\
+        --grid gpt_vs_sonnet_scatter_grid_7axes.png \\
+        --rhos_json gpt_vs_sonnet_rhos_7axes.json
+"""
+from __future__ import annotations
+
+import argparse
+import json
+from pathlib import Path
+
+import matplotlib
+matplotlib.use("Agg")
+import matplotlib.pyplot as plt
+import numpy as np
+from scipy.stats import spearmanr
+
+from assistant_axis import png_metadata
+
+DEFAULT_EXPERIMENT_DIR = Path(__file__).resolve().parent.parent / (
+    "roger/axis_judge_experiments"
+)
+
+
+def _load_both_mean(axis_dir: Path, provider: str) -> dict[str, float]:
+    """Load ``(descriptions + instructions) / 2`` scores for one provider."""
+    d = json.load(open(axis_dir / provider / "scores_descriptions.json"))
+    i = json.load(open(axis_dir / provider / "scores_instructions.json"))
+    common = sorted(set(d) & set(i))
+    return {n: (d[n] + i[n]) / 2.0 for n in common}
+
+
+def _layout_for(n_axes: int, n_cols: int | None = None) -> tuple[int, int]:
+    """Choose ``(n_rows, n_cols)`` for an N-panel grid.
+
+    By default we pick the near-square layout ``ceil(sqrt(N))`` columns,
+    which gives roughly equal aspect ratios across plot sizes (e.g. 6x6
+    for N=33, 4x3 for N=12, 3x3 for N=7).  Pass an explicit ``n_cols``
+    to force a specific layout.
+    """
+    if n_cols is None:
+        from math import ceil, sqrt
+        n_cols = max(1, ceil(sqrt(n_axes)))
+    n_rows = (n_axes + n_cols - 1) // n_cols
+    return n_rows, n_cols
+
+
+def main() -> int:
+    p = argparse.ArgumentParser(
+        description=__doc__,
+        formatter_class=argparse.RawDescriptionHelpFormatter,
+    )
+    p.add_argument("--experiment_dir", default=str(DEFAULT_EXPERIMENT_DIR),
+                   help=f"Directory holding the pair list and per-axis "
+                        f"score subdirs (default: {DEFAULT_EXPERIMENT_DIR}).")
+    p.add_argument("--pairs", default="pair_list_33.json",
+                   help="Pair-list JSON filename (default: pair_list_33.json "
+                        "-- every axis with all four desc+inst score files "
+                        "cached on disk; the K-sweep tools default to "
+                        "pair_list_12.json since they additionally require "
+                        "GPT response scores).")
+    p.add_argument("--pooled", default="gpt_vs_sonnet_scatter_pooled.png",
+                   help="Pooled-scatter PNG filename "
+                        "(default: gpt_vs_sonnet_scatter_pooled.png).")
+    p.add_argument("--grid", default="gpt_vs_sonnet_scatter_grid.png",
+                   help="Per-axis grid PNG filename "
+                        "(default: gpt_vs_sonnet_scatter_grid.png).")
+    p.add_argument("--rhos_json", default="gpt_vs_sonnet_rhos.json",
+                   help="Output ρ-summary JSON filename "
+                        "(default: gpt_vs_sonnet_rhos.json).")
+    p.add_argument("--jitter_sigma", type=float, default=0.08,
+                   help="Stddev of Gaussian jitter added to both axes for "
+                        "visual separation of integer-valued points "
+                        "(default: 0.08).")
+    p.add_argument("--grid_cols", type=int, default=None,
+                   help="Number of columns in the per-axis grid plot.  "
+                        "Default: ceil(sqrt(N)) -- e.g. 6x6 for N=33, "
+                        "4x3 for N=12, 3x3 for N=7.  Pass --grid_cols 4 "
+                        "to force the historical 4-column layout.")
+    args = p.parse_args()
+    experiment_dir = Path(args.experiment_dir).resolve()
+
+    pairs = json.load(open(experiment_dir / args.pairs))
+    print(f"Loaded {len(pairs)} axis pairs from {args.pairs}")
+
+    # Per-axis (gpt_score_list, sonnet_score_list, common_names) and per-axis Spearman ρ.
+    per_axis: dict[tuple[str, str], dict] = {}
+    all_gpt: list[float] = []
+    all_son: list[float] = []
+    all_axis: list[tuple[str, str]] = []
+    for pair in pairs:
+        pos, neg = pair["pos"], pair["neg"]
+        axis_dir = experiment_dir / f"{pos}_vs_{neg}"
+        gpt = _load_both_mean(axis_dir, "gpt")
+        son = _load_both_mean(axis_dir, "sonnet")
+        common = sorted(set(gpt) & set(son))
+        if not common:
+            print(f"  [skip] {pos}/{neg}: no shared entities between gpt and sonnet")
+            continue
+        g = [gpt[n] for n in common]
+        s = [son[n] for n in common]
+        rho = float(spearmanr(g, s).correlation)
+        per_axis[(pos, neg)] = {"g": g, "s": s, "names": common, "rho": rho}
+        all_gpt.extend(g)
+        all_son.extend(s)
+        all_axis.extend([(pos, neg)] * len(common))
+        print(f"  {pos:18s} vs {neg:18s}  ρ = {rho:+.3f}  (n={len(common)})")
+
+    pooled_rho = float(spearmanr(all_gpt, all_son).correlation)
+    print(f"\nPooled (entity, axis) Spearman ρ = {pooled_rho:+.3f}  (n={len(all_gpt)})")
+
+    # ---------- Save JSON summary ----------
+    rhos_out = {
+        "pooled_rho": pooled_rho,
+        "n_pooled": len(all_gpt),
+        "per_axis": [
+            {"pos": pos, "neg": neg, "rho": d["rho"], "n": len(d["names"])}
+            for (pos, neg), d in per_axis.items()
+        ],
+    }
+    rhos_path = experiment_dir / args.rhos_json
+    json.dump(rhos_out, open(rhos_path, "w"), indent=2)
+    print(f"Wrote {rhos_path}")
+
+    # ---------- Colors per axis ----------
+    axes_list = list(per_axis.keys())
+    cmap = plt.cm.tab10 if len(axes_list) <= 10 else plt.cm.tab20
+    colors = cmap(np.linspace(0, 1, max(cmap.N, len(axes_list))))[:len(axes_list)]
+    color_map = {k: c for k, c in zip(axes_list, colors)}
+
+    # Deterministic jitter (sigma small enough to keep ±0.5 of integer grid).
+    rng_x = np.random.RandomState(0)
+    rng_y = np.random.RandomState(1)
+    jitter = {
+        k: (rng_x.normal(0, args.jitter_sigma, len(d["g"])),
+            rng_y.normal(0, args.jitter_sigma, len(d["s"])))
+        for k, d in per_axis.items()
+    }
+
+    # ============================================================
+    # Plot 1: pooled scatter + per-axis ρ ranked bar chart (1x2)
+    # ============================================================
+    # Figure height auto-scales with axis count so 33 horizontal bars
+    # stay readable; width fixed so combination is always wider than tall.
+    fig_h = max(6.5, 0.22 * len(axes_list) + 1.0)
+    fig, (ax, ax_h) = plt.subplots(
+        1, 2, figsize=(14, fig_h),
+        gridspec_kw={"width_ratios": [1.6, 1.0]},
+    )
+    # -- Left: pooled scatter --
+    # s=2 (point area in pt²) → marker radius half of the previous s=8.
+    for k in axes_list:
+        d = per_axis[k]
+        jx, jy = jitter[k]
+        ax.scatter(np.array(d["g"]) + jx, np.array(d["s"]) + jy,
+                   s=2, alpha=0.45, color=color_map[k], edgecolor="none")
+    ax.plot([-3.5, 3.5], [-3.5, 3.5], "k--", alpha=0.3, lw=0.8)
+    ax.axvline(0, color="grey", lw=0.3)
+    ax.axhline(0, color="grey", lw=0.3)
+    ax.set_xlabel("GPT-4.1-mini both_mean score (desc+inst)")
+    ax.set_ylabel("Sonnet 4 both_mean score (desc+inst)")
+    ax.set_title(f"Pooled scatter (jitter added) -- "
+                 f"overall Spearman ρ = {pooled_rho:.3f}, n={len(all_gpt)}",
+                 fontsize=10)
+    ax.text(0.02, 0.98,
+            f"{len(per_axis)} axes (colors arbitrary;\n"
+            f"see per-axis grid plot for labels)",
+            transform=ax.transAxes, fontsize=8, va="top",
+            bbox=dict(boxstyle="round,pad=0.3", facecolor="white",
+                      edgecolor="grey", alpha=0.85))
+    ax.grid(alpha=0.3)
+    ax.set_xlim(-3.5, 3.5)
+    ax.set_ylim(-3.5, 3.5)
+    ax.set_aspect("equal")
+
+    # -- Right: per-axis ρ as horizontal bars, sorted descending --
+    rhos = np.array([per_axis[k]["rho"] for k in axes_list])
+    order = np.argsort(rhos)[::-1]   # descending
+    sorted_keys = [axes_list[i] for i in order]
+    sorted_rhos = rhos[order]
+    y_pos = np.arange(len(sorted_keys))
+    bar_colors = [color_map[k] for k in sorted_keys]
+    ax_h.barh(y_pos, sorted_rhos, color=bar_colors,
+              edgecolor="black", linewidth=0.5)
+    for y, r in zip(y_pos, sorted_rhos):
+        ax_h.text(r + 0.005, y, f"{r:.3f}",
+                  va="center", ha="left", fontsize=7)
+    labels = [f"{k[0]} / {k[1]}" for k in sorted_keys]
+    ax_h.set_yticks(y_pos)
+    ax_h.set_yticklabels(labels, fontsize=8)
+    ax_h.invert_yaxis()  # highest ρ at top
+    ax_h.set_xlim(0.0, 1.0)
+    ax_h.axvline(float(np.median(rhos)), color="red", linestyle="--",
+                 lw=1.2, alpha=0.7,
+                 label=f"median = {np.median(rhos):.3f}")
+    ax_h.axvline(float(rhos.mean()), color="darkorange", linestyle=":",
+                 lw=1.2, alpha=0.7,
+                 label=f"mean   = {rhos.mean():.3f}")
+    ax_h.set_xlabel(
+        "Per-axis Spearman ρ (GPT-4.1-mini vs Sonnet 4, both_mean)")
+    ax_h.set_title(
+        f"Per-axis ρ ranked (n={len(rhos)}; "
+        f"range [{rhos.min():.3f}, {rhos.max():.3f}])",
+        fontsize=10)
+    ax_h.grid(axis="x", alpha=0.3)
+    ax_h.legend(loc="lower right", fontsize=8)
+
+    pooled_title = (f"GPT-4.1-mini vs Sonnet 4 per-entity scores, "
+                    f"{len(per_axis)} axes pooled")
+    fig.suptitle(pooled_title, fontsize=12)
+    # Reserve a top band for the suptitle, scaled to figure height.
+    plt.tight_layout(rect=(0, 0, 1, 1 - 0.5 / fig_h))
+    pooled_path = experiment_dir / args.pooled
+    plt.savefig(pooled_path, dpi=150, bbox_inches="tight",
+                metadata=png_metadata(title=pooled_title))
+    plt.close(fig)
+    print(f"Wrote {pooled_path}")
+
+    # ============================================================
+    # Plot 2: per-axis grid
+    # ============================================================
+    n_rows, n_cols = _layout_for(len(axes_list), n_cols=args.grid_cols)
+    fig, axes_p = plt.subplots(n_rows, n_cols,
+                               figsize=(4 * n_cols, 4 * n_rows),
+                               sharex=True, sharey=True, squeeze=False)
+    for i, k in enumerate(axes_list):
+        ax = axes_p[i // n_cols, i % n_cols]
+        d = per_axis[k]
+        jx, jy = jitter[k]
+        ax.scatter(np.array(d["g"]) + jx, np.array(d["s"]) + jy,
+                   s=10, alpha=0.45, color=color_map[k], edgecolor="none")
+        ax.plot([-3.5, 3.5], [-3.5, 3.5], "k--", alpha=0.3, lw=0.8)
+        ax.set_title(f'{k[0]} vs {k[1]}\n'
+                     f'ρ = {d["rho"]:.3f}, n={len(d["names"])}',
+                     fontsize=10)
+        ax.grid(alpha=0.3)
+        ax.set_aspect("equal")
+        ax.set_xlim(-3.5, 3.5)
+        ax.set_ylim(-3.5, 3.5)
+    for j in range(len(axes_list), n_rows * n_cols):
+        axes_p[j // n_cols, j % n_cols].axis("off")
+    fig.supxlabel("GPT-4.1-mini both_mean score", fontsize=11)
+    fig.supylabel("Sonnet 4 both_mean score", fontsize=11)
+    grid_title = (f"GPT-4.1-mini vs Sonnet 4 per-entity scores, "
+                  f"by axis ({len(axes_list)} axes; jitter added)")
+    fig.suptitle(grid_title, fontsize=12)
+    # Leave a band at the top for the suptitle (otherwise it overlaps the
+    # top row of per-panel titles when n_rows is large).
+    plt.tight_layout(rect=(0, 0, 1, 1 - 0.4 / max(n_rows, 1)))
+    grid_path = experiment_dir / args.grid
+    plt.savefig(grid_path, dpi=150, bbox_inches="tight",
+                metadata=png_metadata(title=grid_title))
+    plt.close(fig)
+    print(f"Wrote {grid_path}")
+    return 0
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())

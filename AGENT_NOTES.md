@@ -93,6 +93,99 @@ When writing prompts or documentation for LLMs:
 - **DO backtick:** Literal filenames (`project.md`), extensions (`.md`), field names (`"type"`), state values (`"waiting"`)
 - **DON'T backtick:** Format patterns inside JSON examples (`YYYY-MM-DD` in `<YYYY-MM-DD ...>`)
 
+### Plot Provenance Metadata (mandatory for every plot)
+Every plot generated in this repo MUST embed a PNG-text-chunk
+provenance block via `assistant_axis.png_metadata`.  The contents
+depend on whether the plot came from a tracked script or an ad-hoc
+exploratory script.
+
+#### Tracked-script plots
+
+```python
+from assistant_axis import png_metadata
+fig.savefig(out_path, dpi=150, bbox_inches="tight",
+            metadata=png_metadata(title=first_line_of_suptitle))
+```
+
+The helper auto-fills:
+- `Title`         — pass the first line of the figure suptitle / caption
+- `Author`        — defaults to "Roger Dearnaley"
+- `Software`      — `uv run python <repo-relative path> <args>`, or
+  `uv run python -m foo.bar.baz <args>` for `-m` invocations.  Pasteable
+  into a shell at the repo root to re-run.
+- `Creation Time` — local ISO-8601 timestamp
+- `Source`        — git short SHA (+`+dirty` if working tree dirty)
+
+#### Ad-hoc exploration plots (write the script to /tmp first)
+
+When generating a plot during exploration, write the Python to
+`/tmp/<descriptive_name>.py`, then run it.  Inside that script, embed
+the source so the plot is self-contained:
+
+```python
+from pathlib import Path
+from assistant_axis import png_metadata
+fig.savefig(out_path, dpi=150, bbox_inches="tight",
+            metadata=png_metadata(
+                title=first_line_of_suptitle,
+                source_text=Path(__file__).read_text(),
+            ))
+```
+
+This adds:
+- `Source Code`        — full body of the entry-point Python file
+- `Source Code SHA256` — hex digest, for tamper detection
+
+Recovery is one line:
+```python
+from PIL import Image
+print(Image.open("plot.png").info["Source Code"])
+```
+
+For the rare multi-file case, pass `source_files={"main.py": ..., "helper.py": ...}`
+instead — they're JSON-serialised into a single chunk plus a
+`Source Code Files` index.  But: needing more than one `/tmp/` file is
+itself a smell that the work is graduating to a tracked module; prefer
+that path.
+
+**Heredoc gotcha**: `uv run python << 'PY' ... PY` invocations cannot
+read their own body via `__file__` — they're stdin, not a file.  When
+producing a plot worth keeping, write the body to `/tmp/foo.py` first
+rather than using a heredoc.
+
+#### Conventions summary
+
+1. **Tracked script** writes a plot → ALWAYS pass
+   `metadata=png_metadata(title=...)`.  No `source_text` needed (the
+   `Software` field plus the git SHA + tracked source already
+   reproduce it).
+2. **Ad-hoc `/tmp/foo.py` script** writes a plot → ALWAYS pass
+   `metadata=png_metadata(title=..., source_text=Path(__file__).read_text())`.
+3. **Inline heredoc** writes a plot → if it's interesting, refactor
+   into a `/tmp/foo.py` first; if it's truly disposable, pass at
+   minimum `metadata=png_metadata(title=...)` so we get the timestamp
+   and git SHA.
+4. **Inspect** any plot with `exiftool foo.png` or
+   `PIL.Image.open(p).info`.
+
+The helper lives at `assistant_axis/plot_metadata.py`.  PNG
+`tEXt`/`iTXt` chunks support up to ~2 GB each — no realistic ceiling
+on what we can embed.
+
+#### Caveats
+
+Embedded source captures the script that *called* `savefig`, plus the
+git SHA at run time.  It does **not** capture:
+- Versions of pip dependencies (use `uv.lock` for that — the SHA pins it).
+- Repo files imported by the script (the SHA pins those if the tree was
+  clean; otherwise `+dirty` warns you).
+- Other on-disk inputs the script reads (datasets, JSON config files).
+
+So embedded source is a strong but not complete archeological record:
+it gives you the entry-point + the git tree-state + your Python env's
+lockfile.  In a few months, that's almost always enough to reconstruct
+a plot — and tells you exactly what's missing if it isn't.
+
 ---
 
 ## Response Patterns

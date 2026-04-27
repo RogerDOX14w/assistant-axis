@@ -253,6 +253,61 @@ result, variance, n_comp, pca, scaler = compute_pca(activations, layer=22)
 fig = plot_variance_explained(variance)
 ```
 
+### Plot provenance metadata
+
+Every plot generated in this repo embeds a small PNG-text-chunk
+provenance block via [`assistant_axis.png_metadata`](assistant_axis/plot_metadata.py).
+The block records `Title`, `Author`, `Software` (canonical UNIX
+command, repo-relative, prefixed with `uv run python ...`),
+`Creation Time`, and the git short SHA — so when you rediscover an
+old plot in a slide deck or notebook and ask "how was this made?",
+the answer is in the file:
+
+```bash
+exiftool roger/canonical_angles_layer_sweep.png | grep -E 'Title|Author|Software|Creation Time|Source'
+# Title:           Goal vs Non-goal canonical angles by transformer layer
+# Author:          Roger Dearnaley
+# Software:        uv run python -m results_analysis.canonical_angles.plots.layer_sweep --output roger/canonical_angles_layer_sweep.png
+# Creation Time:   2026-04-27 17:46:59 +0100
+# Source:          git 3ed6291+dirty
+```
+
+(or in Python: `Image.open(p).info`).
+
+```python
+from assistant_axis import png_metadata
+fig.savefig(out_path, dpi=150, bbox_inches="tight",
+            metadata=png_metadata(title="My plot title"))
+```
+
+For ad-hoc exploratory plots (one-off `/tmp/foo.py` scripts that
+won't end up tracked), embed the script source too so the plot stays
+reproducible without the chat transcript:
+
+```python
+from pathlib import Path
+fig.savefig(out_path, metadata=png_metadata(
+    title="My plot title",
+    source_text=Path(__file__).read_text(),
+))
+```
+
+This adds `Source Code` and `Source Code SHA256` chunks (hundreds of
+bytes to a few KB; negligible PNG bloat).  Recovery is one line:
+
+```python
+from PIL import Image
+print(Image.open("plot.png").info["Source Code"])
+```
+
+Embedded source isn't a complete archeological record (pip-package
+versions live in `uv.lock`; co-imported repo files live at the git
+SHA), but it's a strong "where did this come from?" record that
+combined with the SHA gets you almost all the way back. See
+[`AGENT_NOTES.md`](AGENT_NOTES.md) for the full convention and
+[`assistant_axis/plot_metadata.py`](assistant_axis/plot_metadata.py)
+for the helper.
+
 ## Models from the Paper
 
 | Model | Target Layer | Best Activation Capping Setting |

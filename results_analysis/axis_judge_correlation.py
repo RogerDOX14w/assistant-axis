@@ -28,6 +28,7 @@ from tqdm import tqdm
 # Repo-internal imports: reuse the existing OpenAI judge infrastructure.
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 from assistant_axis.judge import RateLimiter  # type: ignore  # noqa: E402
+from assistant_axis import png_metadata  # noqa: E402
 
 load_dotenv()
 
@@ -1105,8 +1106,9 @@ def make_plot(
 
     fig, axes = plt.subplots(n_rows, n_cols, figsize=(3.0 * n_cols, 3.0 * n_rows),
                              squeeze=False, sharex=False, sharey=False)
+    title_line = f"Axis judge correlation: {axis_spec.axis_name}"
     fig.suptitle(
-        f"Axis judge correlation: {axis_spec.axis_name}\n"
+        title_line + "\n"
         f"neg: {axis_spec.neg_pole[:90]}...\npos: {axis_spec.pos_pole[:90]}...",
         fontsize=10,
     )
@@ -1140,7 +1142,8 @@ def make_plot(
 
     fig.tight_layout(rect=(0, 0, 1, 0.94))
     output_path.parent.mkdir(parents=True, exist_ok=True)
-    fig.savefig(output_path, dpi=140, bbox_inches="tight")
+    fig.savefig(output_path, dpi=140, bbox_inches="tight",
+                metadata=png_metadata(title=title_line))
     plt.close(fig)
 
 

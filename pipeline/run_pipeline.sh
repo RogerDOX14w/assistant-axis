@@ -25,7 +25,16 @@
 #   ./pipeline/run_pipeline.sh --types combinations roles
 #   ./pipeline/run_pipeline.sh --types r_combinations          # only r_ combos
 #   ./pipeline/run_pipeline.sh --types r_combinations t_combinations roles traits
+#   ./pipeline/run_pipeline.sh --skip-gpu-check                # bypass pre-flight
 #   (RECOMMEND RUNNING STEPS 1 AND 2 INDIVIDUALLY; 3 CAN RUN IN PARALLEL ONCE 1 IS DONE)
+#
+# Pre-flight check:
+#   Before any GPU work, the script checks every visible GPU and aborts if
+#   any has more than ${GPU_BUSY_THRESHOLD_MIB} MiB already in use -- this
+#   catches orphaned vLLM workers from previous crashed runs (which would
+#   otherwise cause silent partial step-2 output via per-worker OOMs).  Pass
+#   --skip-gpu-check to bypass, or --gpu-busy-threshold-mib N to raise the
+#   threshold (e.g. for shared boxes with known co-tenants).
 #
 # Requirements:
 #   - OPENAI_API_KEY environment variable (for step 3)
@@ -60,8 +69,18 @@ TENSOR_PARALLEL_SIZE=1
 USE_TMPFS=true
 TMPFS_HF_HOME=/dev/shm/hf-cache
 
+# GPU pre-flight check: refuse to run if any visible GPU has >GPU_BUSY_THRESHOLD_MIB
+# of memory in use, since that strongly suggests an orphaned vLLM worker from a
+# previous (crashed) run still holding a CUDA context.  Such orphans cause OOMs
+# on individual workers and silent partial outputs (other workers proceed,
+# 2_activations.py exits 0 even when some workers died, the pipeline marches on
+# to step 3 with an incomplete activations directory).  See the discussion in
+# AGENT_NOTES.md / README.md.  Pass --skip-gpu-check to bypass.
+GPU_BUSY_THRESHOLD_MIB=2048
+
 # ---- Parse command line ---------------------------------------------------
 TYPES=""
+SKIP_GPU_CHECK=false
 while [[ $# -gt 0 ]]; do
     case "$1" in
         --mode)
@@ -78,6 +97,10 @@ while [[ $# -gt 0 ]]; do
             USE_TMPFS=false; shift ;;
         --tmpfs-dir)
             TMPFS_HF_HOME="$2"; USE_TMPFS=true; shift 2 ;;
+        --skip-gpu-check)
+            SKIP_GPU_CHECK=true; shift ;;
+        --gpu-busy-threshold-mib)
+            GPU_BUSY_THRESHOLD_MIB="$2"; shift 2 ;;
         --types)
             shift
             while [[ $# -gt 0 && ! "$1" =~ ^-- ]]; do
@@ -140,6 +163,91 @@ if [ "$MODE" = "christina" ]; then
 else
     echo "Types:  $TYPES"
 fi
+echo ""
+
+# ---- GPU pre-flight check --------------------------------------------------
+# Refuses to run if any visible GPU is already holding more than
+# GPU_BUSY_THRESHOLD_MIB of memory.  The most common cause is an orphaned
+# vLLM worker from a previous (crashed) run -- the parent died but the worker
+# child got adopted by init and kept its CUDA context, so its weights remain
+# resident.  When the new run's worker tries to load the model on that same
+# GPU, it OOMs partway through; the multi-worker pool joins all children and
+# exits 0 even when some died, so the pipeline silently produces a partial
+# step-2 output and the failure isn't noticed until step 4 (or later).
+#
+# This check runs *after* logging is set up so the diagnostic lands in the
+# pipeline log, but before any GPU work starts.  Bypass with --skip-gpu-check.
+gpu_preflight_check() {
+    if [ "$SKIP_GPU_CHECK" = "true" ]; then
+        echo "[gpu-check] skipped (--skip-gpu-check)"
+        return
+    fi
+    if ! command -v nvidia-smi >/dev/null 2>&1; then
+        echo "[gpu-check] nvidia-smi not found; skipping"
+        return
+    fi
+
+    # Restrict the check to GPUs the pipeline will actually use.
+    local visible_arg=""
+    if [ -n "$CUDA_VISIBLE_DEVICES" ]; then
+        visible_arg="--id=$CUDA_VISIBLE_DEVICES"
+        echo "[gpu-check] checking GPUs $CUDA_VISIBLE_DEVICES (CUDA_VISIBLE_DEVICES) for >${GPU_BUSY_THRESHOLD_MIB} MiB"
+    else
+        echo "[gpu-check] checking all visible GPUs for >${GPU_BUSY_THRESHOLD_MIB} MiB"
+    fi
+
+    # query: index, name, memory used in MiB.  Output is CSV without units/headers.
+    local query
+    query=$(nvidia-smi $visible_arg \
+        --query-gpu=index,name,memory.used \
+        --format=csv,noheader,nounits 2>/dev/null) || true
+    if [ -z "$query" ]; then
+        echo "[gpu-check] nvidia-smi returned no data; skipping"
+        return
+    fi
+
+    local busy_lines=""
+    while IFS=, read -r idx name used; do
+        idx=$(echo "$idx" | xargs)       # trim whitespace
+        used=$(echo "$used" | xargs)
+        if [ -z "$used" ]; then continue; fi
+        if [ "$used" -gt "$GPU_BUSY_THRESHOLD_MIB" ]; then
+            busy_lines+="  GPU $idx ($name): ${used} MiB used"$'\n'
+        fi
+    done <<< "$query"
+
+    if [ -n "$busy_lines" ]; then
+        echo ""
+        echo "[gpu-check] ERROR: one or more GPUs are already busy."
+        echo "$busy_lines"
+        echo "Holders (from nvidia-smi --query-compute-apps):"
+        nvidia-smi $visible_arg \
+            --query-compute-apps=gpu_uuid,pid,process_name,used_memory \
+            --format=csv 2>/dev/null \
+            | sed 's/^/  /' || true
+        echo ""
+        echo "This usually means a previous pipeline crashed leaving an orphaned"
+        echo "vLLM worker holding a CUDA context.  To clean up:"
+        echo ""
+        echo "  pkill -f 'assistant-axis/.venv/bin/python3'"
+        echo "  sleep 3"
+        echo "  nvidia-smi   # all GPUs should now show 0 MiB"
+        echo ""
+        echo "If a PID still appears in nvidia-smi but ps shows no such process,"
+        echo "the driver has zombie memory.  Try:"
+        echo ""
+        echo "  fuser -k /dev/nvidia*"
+        echo "  # or as last resort, restart the container"
+        echo ""
+        echo "If you know the existing GPU usage is fine (e.g. a co-tenant on"
+        echo "a shared box), pass --skip-gpu-check to bypass this check, or"
+        echo "set CUDA_VISIBLE_DEVICES to limit the pipeline to free GPUs."
+        echo "You can also raise the threshold with --gpu-busy-threshold-mib N."
+        exit 1
+    fi
+    echo "[gpu-check] all visible GPUs are clean"
+}
+gpu_preflight_check
 echo ""
 
 # ---- Tmpfs setup -----------------------------------------------------------
