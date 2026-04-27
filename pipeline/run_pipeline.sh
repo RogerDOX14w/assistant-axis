@@ -7,6 +7,13 @@
 #     --types combinations roles traits  (any subset; default: all three)
 #       Each type gets its own subdirectory under OUTPUT_DIR.
 #       "default" is generated once and symlinked into each type's dirs.
+#     Two extra subset types restrict combinations to one half of the grid:
+#       r_combinations  (goal role x non-goal trait, file prefix "r_")
+#       t_combinations  (non-goal role x goal trait, file prefix "t_")
+#     Both write into the SAME $OUTPUT_DIR/combinations/ tree as the full
+#     "combinations" type, so downstream tooling sees a single combinations
+#     directory regardless of which subset was generated.  Mixing
+#     "combinations" with either subset is redundant (the subset is implied).
 #   christina — standalone roles/traits from --roles_dir.
 #     --types is ignored in christina mode.
 #
@@ -16,6 +23,8 @@
 #   ./pipeline/run_pipeline.sh --mode christina --output_dir /workspace/qwen-3-32b/traits \
 #       --roles_dir ../data/traits/instructions
 #   ./pipeline/run_pipeline.sh --types combinations roles
+#   ./pipeline/run_pipeline.sh --types r_combinations          # only r_ combos
+#   ./pipeline/run_pipeline.sh --types r_combinations t_combinations roles traits
 #   (RECOMMEND RUNNING STEPS 1 AND 2 INDIVIDUALLY; 3 CAN RUN IN PARALLEL ONCE 1 IS DONE)
 #
 # Requirements:
@@ -93,15 +102,26 @@ case "$MODE" in
     *) echo "Invalid mode: $MODE (must be roger or christina)" >&2; exit 1 ;;
 esac
 
-# Validate types (roger mode only)
+# Validate types (roger mode only).  r_combinations / t_combinations are
+# subsets that share the combinations/ output directory.
 if [ "$MODE" = "roger" ]; then
     for t in $TYPES; do
         case "$t" in
-            combinations|roles|traits) ;;
-            *) echo "Invalid type: $t (must be combinations, roles, or traits)" >&2; exit 1 ;;
+            combinations|r_combinations|t_combinations|roles|traits) ;;
+            *) echo "Invalid type: $t (must be one of combinations, r_combinations, t_combinations, roles, traits)" >&2; exit 1 ;;
         esac
     done
 fi
+
+# Helper: map a type name (combinations | r_combinations | t_combinations |
+# roles | traits) to the on-disk subdirectory under $OUTPUT_DIR.  The two
+# combination subsets share the combinations/ tree.
+type_subdir() {
+    case "$1" in
+        r_combinations|t_combinations) echo "combinations" ;;
+        *) echo "$1" ;;
+    esac
+}
 
 # ---- Logging --------------------------------------------------------------
 LOG_FILE="$OUTPUT_DIR/pipeline_$(date +%Y%m%d_%H%M%S).log"
@@ -310,18 +330,32 @@ else
     echo "=== Step 1: Generating responses ==="
     for type in $TYPES; do
         echo "--- Step 1 [$type] ---"
-        TYPE_DIR="$OUTPUT_DIR/$type"
+        type_dir_name=$(type_subdir "$type")
+        TYPE_DIR="$OUTPUT_DIR/$type_dir_name"
+        # symlink_default reads the local variable $type, but uses it only as
+        # the destination prefix; for the combo subsets we want the symlink
+        # placed under combinations/ so override $type for the helper call.
+        type_for_symlink="$type"; type="$type_dir_name"
         symlink_default responses jsonl
+        type="$type_for_symlink"
 
         case "$type" in
-            combinations)
+            combinations|r_combinations|t_combinations)
+                # Subset flag (empty for full combinations; --combos_only_r /
+                # --combos_only_t for the half-grid subsets).  Skip already-
+                # generated halves are a no-op thanks to per-file skip logic.
+                subset_flag=""
+                case "$type" in
+                    r_combinations) subset_flag="--combos_only_r" ;;
+                    t_combinations) subset_flag="--combos_only_t" ;;
+                esac
                 uv run 1_generate.py \
                     --mode roger \
                     --model "$MODEL" \
                     --goal_count "$GOAL_COUNT" \
                     --non_goal_count "$NON_GOAL_COUNT" \
                     --reduce_questions "$REDUCE_QUESTIONS" \
-                    --no_traits \
+                    --no_traits $subset_flag \
                     --tensor_parallel_size "$TENSOR_PARALLEL_SIZE" \
                     --output_dir "$TYPE_DIR/responses"
                 ;;
@@ -347,25 +381,52 @@ else
     done
     echo ""
 
+    # Step 2 honours the r_/t_ subset distinction so disk-limited runs can
+    # extract only one half of the combination grid at a time (each .pt is
+    # ~2.6 GB; 1800 combos = ~4.7 TB).  We iterate $TYPES rather than the
+    # deduped list, passing --name_prefix r_ / t_ to filter response files;
+    # per-file skip-if-exists handles any redundant listings.
+    #
+    # Steps 3-5 only need the deduped list (their work is per-response or
+    # per-vector and inexpensive enough to do all at once).
+    DEDUP_TYPES=""
+    for type in $TYPES; do
+        d=$(type_subdir "$type")
+        case " $DEDUP_TYPES " in
+            *" $d "*) ;;
+            *) DEDUP_TYPES="$DEDUP_TYPES $d" ;;
+        esac
+    done
+    DEDUP_TYPES="${DEDUP_TYPES# }"
+
     # -- Step 2: Extract activations -----------------------------------------
     echo "=== Step 2: Extracting activations ==="
     for type in $TYPES; do
         echo "--- Step 2 [$type] ---"
-        TYPE_DIR="$OUTPUT_DIR/$type"
+        type_dir_name=$(type_subdir "$type")
+        TYPE_DIR="$OUTPUT_DIR/$type_dir_name"
+        type_for_symlink="$type"; type="$type_dir_name"
         symlink_default activations pt
+        type="$type_for_symlink"
+
+        prefix_flag=""
+        case "$type" in
+            r_combinations) prefix_flag="--name_prefix r_" ;;
+            t_combinations) prefix_flag="--name_prefix t_" ;;
+        esac
 
         uv run 2_activations.py \
             --model "$MODEL" \
             --responses_dir "$TYPE_DIR/responses" \
             --output_dir "$TYPE_DIR/activations" \
             --tensor_parallel_size "$TENSOR_PARALLEL_SIZE" \
-            --batch_size 8
+            --batch_size 8 $prefix_flag
     done
     echo ""
 
     # -- Step 3: Score responses ----------------------------------------------
     echo "=== Step 3: Scoring responses ==="
-    for type in $TYPES; do
+    for type in $DEDUP_TYPES; do
         echo "--- Step 3 [$type] ---"
         TYPE_DIR="$OUTPUT_DIR/$type"
 
@@ -386,7 +447,7 @@ else
 
     # -- Step 4: Compute vectors ----------------------------------------------
     echo "=== Step 4: Computing vectors ==="
-    for type in $TYPES; do
+    for type in $DEDUP_TYPES; do
         echo "--- Step 4 [$type] ---"
         TYPE_DIR="$OUTPUT_DIR/$type"
         symlink_default vectors pt
@@ -401,7 +462,7 @@ else
 
     # -- Step 5: Compute axis -------------------------------------------------
     echo "=== Step 5: Computing axis ==="
-    for type in $TYPES; do
+    for type in $DEDUP_TYPES; do
         echo "--- Step 5 [$type] ---"
         TYPE_DIR="$OUTPUT_DIR/$type"
 
@@ -412,7 +473,7 @@ else
     echo ""
 
     echo "=== Pipeline complete ==="
-    for type in $TYPES; do
+    for type in $DEDUP_TYPES; do
         echo "  $type axis: $OUTPUT_DIR/$type/axis.pt"
     done
 

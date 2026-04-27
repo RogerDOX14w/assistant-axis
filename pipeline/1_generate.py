@@ -6,6 +6,9 @@ Supports two modes:
 - roger (default): Combined role+trait instructions, standalone traits/roles, and default.
   Uses goal_roles_and_traits.json to select which roles/traits to combine.
   Flags --no_traits, --traits_only, --roles_only control which subset to generate.
+  Flags --combos_only_r / --combos_only_t restrict to one half of the
+  combination grid (r_ = goal-role x non-goal-trait; t_ = non-goal-role x
+  goal-trait).  Both write into the same combinations/ directory.
 - christina: Standalone roles (or traits) from --roles_dir. Run separately per
   entity type to avoid name collisions.
 
@@ -102,8 +105,16 @@ def collect_work_items(args) -> List[Dict]:
                 use_goal_traits = goal_traits[:min(gc, len(goal_traits))]
                 use_non_goal_traits = non_goal_traits[:min(ngc, len(non_goal_traits))]
 
+                # --combos_only_r / --combos_only_t restrict to one half
+                # of the combination grid (used by run_pipeline.sh's
+                # r_combinations / t_combinations subset types).  Both halves
+                # write into the same combinations/ directory, so the file
+                # layout downstream tooling expects is preserved.
+                emit_r = not args.combos_only_t
+                emit_t = not args.combos_only_r
+
                 # r_ combos: goal role x non-goal trait  (goal from role)
-                for role_name in use_goal_roles:
+                for role_name in (use_goal_roles if emit_r else []):
                     role_file = roles_dir / f"{role_name}.json"
                     if not role_file.exists():
                         logger.warning(f"Role file missing: {role_file}")
@@ -124,7 +135,7 @@ def collect_work_items(args) -> List[Dict]:
                         })
 
                 # t_ combos: non-goal role x goal trait  (goal from trait)
-                for role_name in use_non_goal_roles:
+                for role_name in (use_non_goal_roles if emit_t else []):
                     role_file = roles_dir / f"{role_name}.json"
                     if not role_file.exists():
                         logger.warning(f"Role file missing: {role_file}")
@@ -361,6 +372,12 @@ def main():
                         help="Roger mode: standalone traits only (skip combos + default)")
     parser.add_argument("--roles_only", action="store_true",
                         help="Roger mode: standalone roles only (skip combos + traits)")
+    parser.add_argument("--combos_only_r", action="store_true",
+                        help="Roger mode: only r_ combos (goal role x non-goal "
+                             "trait); written to the same dir as full combos")
+    parser.add_argument("--combos_only_t", action="store_true",
+                        help="Roger mode: only t_ combos (non-goal role x goal "
+                             "trait); written to the same dir as full combos")
 
     # Shared parameters
     parser.add_argument("--model", type=str, required=True,
@@ -397,8 +414,17 @@ def main():
     exclusive_flags = sum([args.no_traits, args.traits_only, args.roles_only])
     if exclusive_flags > 1:
         parser.error("--no_traits, --traits_only, and --roles_only are mutually exclusive")
-    if args.mode != "roger" and (args.no_traits or args.traits_only or args.roles_only):
-        parser.error("--no_traits / --traits_only / --roles_only are only valid in roger mode")
+    if args.combos_only_r and args.combos_only_t:
+        parser.error("--combos_only_r and --combos_only_t are mutually exclusive")
+    if (args.combos_only_r or args.combos_only_t) and (
+            args.traits_only or args.roles_only):
+        parser.error("--combos_only_r / --combos_only_t cannot be combined with "
+                     "--traits_only or --roles_only")
+    roger_flags = (args.no_traits or args.traits_only or args.roles_only
+                   or args.combos_only_r or args.combos_only_t)
+    if args.mode != "roger" and roger_flags:
+        parser.error("--no_traits / --traits_only / --roles_only / "
+                     "--combos_only_r / --combos_only_t are only valid in roger mode")
 
     if args.question_count is None:
         args.question_count = 300 if args.mode == "roger" else 240

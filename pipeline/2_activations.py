@@ -434,6 +434,9 @@ def run_multi_worker(args) -> int:
         # Filter by --roles if specified
         if args.roles and f.stem not in args.roles:
             continue
+        # Filter by --name_prefix if specified (subset extraction, e.g. r_)
+        if args.name_prefix and not f.stem.startswith(args.name_prefix):
+            continue
         # Skip existing
         output_file = output_dir / f"{f.stem}.pt"
         if output_file.exists():
@@ -495,6 +498,12 @@ def main():
     parser.add_argument("--max_length", type=int, default=2048, help="Maximum sequence length")
     parser.add_argument("--tensor_parallel_size", type=int, default=None, help="GPUs per model (auto-detect if None)")
     parser.add_argument("--roles", nargs="+", help="Specific roles to process")
+    parser.add_argument("--name_prefix", type=str, default=None,
+                        help="Only process response files whose stem starts with "
+                             "this prefix (e.g. 'r_' or 't_').  Used by "
+                             "run_pipeline.sh's r_combinations / t_combinations "
+                             "subset types so disk-limited runs can extract one "
+                             "half of the combination grid at a time.")
     parser.add_argument("--thinking", type=lambda x: x.lower() in ['true', '1', 'yes'], default=False,
                        help="Enable thinking mode for Qwen models (default: False)")
     parser.add_argument("--no-headers", action="store_true", default=False,
@@ -562,6 +571,10 @@ def main():
         # Filter roles if specified
         if args.roles:
             response_files = [f for f in response_files if f.stem in args.roles]
+        # Filter by --name_prefix if specified
+        if args.name_prefix:
+            response_files = [f for f in response_files
+                              if f.stem.startswith(args.name_prefix)]
 
         # Filter out existing
         role_files = []
