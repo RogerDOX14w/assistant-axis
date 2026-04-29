@@ -50,15 +50,17 @@ import matplotlib.pyplot as plt
 import numpy as np
 from scipy.stats import pearsonr, spearmanr
 
-from assistant_axis import png_metadata
+from assistant_axis import png_metadata, suptitle_with_specs
 
 DEFAULT_EXPERIMENT_DIR = Path(__file__).resolve().parent.parent / (
     "roger/axis_judge_experiments"
 )
 
-# Restrict to K <= 32 (avoid the heavy-whitening tail that's not part of
-# the "sweet spot" we're trying to localise).
-FIT_K = [0, 1, 2, 4, 8, 16, 32]
+# K values used for the parabola fit.  Subset of the K_VALUES sweep in
+# whitening_k_sweep.py; restrict to the K range where a parabola is a
+# reasonable fit (the "sweet spot" we're trying to localise).  Past
+# K~32 the curves flatten and a parabola is a poor match.
+FIT_K = [0, 1, 2, 3, 4, 6, 8, 12, 16, 24, 32]
 
 
 def fit_parabola(xs, ys):
@@ -115,6 +117,7 @@ def main() -> int:
 
             xs_lin = FIT_K
             (_a_l, _b_l, _c_l), r2_lin, peak_lin, yhat_lin = fit_parabola(xs_lin, ys)
+            # Clip extrapolated peaks to the measured K range.
             peak_lin_clipped = (max(0, min(32, peak_lin))
                                 if np.isfinite(peak_lin) else float("nan"))
 
@@ -228,14 +231,12 @@ def main() -> int:
         ax.legend(fontsize=7, loc="lower left")
     for j in range(n_axes, n_rows * n_cols):
         axes_p[j // n_cols, j % n_cols].axis("off")
-    title_line = (f"Per-axis parabolic fits over K ∈ [0, 32] "
+    title_line = (f"Per-axis parabolic fits over K ∈ {FIT_K[0]}..{FIT_K[-1]} "
                   f"(log2(K+1) space) -- {n_axes} axes")
-    fig.suptitle(
-        title_line + "\n"
-        "Solid = responses, dotted = desc+inst; vertical dashed lines = "
-        "fitted peak K", fontsize=11,
-    )
-    plt.tight_layout()
+    spec_line = ("Solid = responses, dotted = desc+inst; "
+                 "vertical dashed lines = fitted peak K")
+    _, top_rect = suptitle_with_specs(fig, title_line, spec_line)
+    plt.tight_layout(rect=(0, 0, 1, top_rect))
     out_path = experiment_dir / args.plot
     plt.savefig(out_path, dpi=150, bbox_inches="tight",
                 metadata=png_metadata(title=title_line))

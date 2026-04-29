@@ -45,7 +45,7 @@ Whitening
 
 The whitened columns apply soft-K PCA whitening to ``role``, ``trait``,
 ``combo``, ``default``, and ``v_theat`` before the variance
-decomposition.  Default is ``--K 4 16`` (one column per K, plus a
+decomposition.  Default is ``--K 3`` (one column per K, plus a
 "raw" column at the left -- a 4 x 3 grid).  The whitening basis is fit
 per-slot on the pool returned by
 ``canonical_angles.data.build_augmented_whitening_pool`` (held-out
@@ -71,7 +71,7 @@ Usage
 
 ::
 
-    # Default (slot 0..3, layer 24, K=[4, 16], augmented pool):
+    # Default (slot 0..3, layer 25, K=[3], augmented pool):
     # produces a 4 x 3 grid (raw, K=4 wht, K=16 wht)
     uv run python results_analysis/variance_decomposition.py \\
         --output roger/variance_decomp_bars.png
@@ -114,7 +114,7 @@ from results_analysis.canonical_angles.whitening import (
     WhiteningBasis,
     fit_whitening,
 )
-from assistant_axis import png_metadata
+from assistant_axis import png_metadata, suptitle_with_specs
 
 
 # ---------------------------------------------------------------------------
@@ -332,34 +332,40 @@ PIE_LABELS = {
 
 
 def make_pie_plot(decomp_by_slot_metric: dict[tuple[int, str], dict],
-                  output: Path, metric_labels: list[str]) -> None:
-    """Render a 4 x len(metric_labels) grid of (r_, t_) pie pairs.
+                  output: Path, metric_labels: list[str],
+                  layer: int) -> None:
+    """Render a len(metric_labels) x 4 grid of (r_, t_) pie pairs.
 
-    Each cell is split into two pie charts side by side; pie wedges are
+    Slots span the columns, whitening metrics span the rows.  Each
+    cell is split into two pie charts side by side; pie wedges are
     the five variance-decomposition components (a, b, c, d, rem) in
     consistent colors.  Negative increments (rare; can occur on slot 0
     or with extreme K) are clipped to zero and the remaining wedges
     are renormalised to sum to 100% -- a small white-text annotation
     flags any clipped wedge.
     """
-    n_cols = len(metric_labels)
-    fig = plt.figure(figsize=(4.0 * n_cols, 11.5),
+    n_rows = len(metric_labels)
+    fig = plt.figure(figsize=(16.0, 3.6 * n_rows + 1.4),
                      constrained_layout=False)
     metrics_str = ", ".join(metric_labels)
-    title_line = (f"Variance decomposition of combination activations.  "
-                  f"4 slots x {n_cols} metrics ({metrics_str}).")
-    fig.suptitle(
-        title_line + "\n"
-        + " | ".join(PIE_LABELS[k] for k in STEP_KEYS),
-        fontsize=11, y=0.995,
-    )
-    # Outer grid: one subfigure per (slot, metric) cell.  Reserve a
-    # narrow band at the top for the suptitle and shared legend.
-    outer = fig.subfigures(2, 1, height_ratios=[0.06, 1.0])
+    title_line = (f"Variance decomposition of combination activations "
+                  f"(layer={layer}).  "
+                  f"{n_rows} metrics x 4 slots ({metrics_str}).")
+    # Single-line suptitle.  The legend below (drawn into the figure
+    # explicitly after the subfigures grid) carries the colour key for
+    # the (a)/(b)/(c)/(d)/rem step labels, so we don't duplicate them
+    # in the title.
+    fig.suptitle(title_line, fontsize=14, fontweight="bold", y=0.985)
+    # Outer grid: one subfigure per (metric, slot) cell.  Reserve a
+    # band at the top for the suptitle and shared legend; the band
+    # needs to be a *fixed* slice of total height (~1 inch) so it
+    # doesn't shrink as n_rows grows.
+    title_frac = max(0.10, 1.4 / (3.6 * n_rows + 1.4))
+    outer = fig.subfigures(2, 1, height_ratios=[title_frac, 1.0 - title_frac])
     body = outer[1]
-    subfigs = body.subfigures(4, n_cols, hspace=0.0, wspace=0.05)
-    if n_cols == 1:
-        subfigs = np.array([[s] for s in subfigs])
+    subfigs = body.subfigures(n_rows, 4, hspace=0.0, wspace=0.05)
+    if n_rows == 1:
+        subfigs = np.array([subfigs])
     colors = [STEP_COLORS[k] for k in STEP_KEYS]
 
     def _pie(ax, values: np.ndarray, kind_label: str):
@@ -393,9 +399,9 @@ def make_pie_plot(decomp_by_slot_metric: dict[tuple[int, str], dict],
             at.set_fontweight("bold")
         ax.set_title(kind_label, fontsize=9)
 
-    for slot_idx in range(4):
-        for metric_idx, metric in enumerate(metric_labels):
-            sf = subfigs[slot_idx, metric_idx]
+    for metric_idx, metric in enumerate(metric_labels):
+        for slot_idx in range(4):
+            sf = subfigs[metric_idx, slot_idx]
             sf.suptitle(f"{SLOT_LABELS[slot_idx]} -- {metric}",
                         fontsize=10)
             inner = sf.subplots(1, 2)
@@ -433,22 +439,25 @@ def make_pie_plot(decomp_by_slot_metric: dict[tuple[int, str], dict],
 
 
 def make_plot(decomp_by_slot_metric: dict[tuple[int, str], dict],
-              output: Path, metric_labels: list[str]) -> None:
-    """Render a 4 x len(metric_labels) bar grid with a shared y-axis
-    scale across all panels (so the bars are visually comparable)."""
-    n_cols = len(metric_labels)
-    fig, axes = plt.subplots(4, n_cols, figsize=(7 * n_cols, 12),
+              output: Path, metric_labels: list[str],
+              layer: int) -> None:
+    """Render a len(metric_labels) x 4 bar grid with a shared y-axis
+    scale across all panels (so the bars are visually comparable).
+    Slots span the columns, whitening metrics span the rows."""
+    n_rows = len(metric_labels)
+    fig, axes = plt.subplots(n_rows, 4, figsize=(7 * 4, 3 * n_rows + 1.0),
                              squeeze=False)
     metrics_str = ", ".join(metric_labels)
-    title_line = (f"Variance decomposition of combination activations.  "
-                  f"4 slots x {n_cols} metrics ({metrics_str}).")
-    fig.suptitle(
-        title_line + "\n"
+    title_line = (f"Variance decomposition of combination activations "
+                  f"(layer={layer}).  "
+                  f"{n_rows} metrics x 4 slots ({metrics_str}).")
+    spec_line = (
         "(a) role+trait-pool_mean  |  (b) heuristic theat_offset along "
         "theatricality axis  |  (c) optimal theat_offset  |  "
-        "(d) 4-param weights  |  (rem) unexplained",
-        fontsize=11,
+        "(d) 4-param weights  |  (rem) unexplained"
     )
+    _, top_rect = suptitle_with_specs(fig, title_line, spec_line,
+                                      title_y=0.99, line_height=0.05)
 
     # Compute a shared (ymin, ymax) across all 12 panels with headroom for
     # the per-bar value labels.
@@ -459,9 +468,9 @@ def make_plot(decomp_by_slot_metric: dict[tuple[int, str], dict],
     ])
     ymin = min(0.0, float(all_vals.min()) - 5.0)
     ymax = float(all_vals.max()) + 5.0
-    for slot_idx in range(4):
-        for metric_idx, metric in enumerate(metric_labels):
-            ax = axes[slot_idx, metric_idx]
+    for metric_idx, metric in enumerate(metric_labels):
+        for slot_idx in range(4):
+            ax = axes[metric_idx, slot_idx]
             result = decomp_by_slot_metric[(slot_idx, metric)]
             x = np.arange(len(STEP_KEYS))
             width = 0.4
@@ -478,7 +487,7 @@ def make_plot(decomp_by_slot_metric: dict[tuple[int, str], dict],
             bars_t[-1].set_linewidth(1.2)
             ax.set_xticks(x)
             ax.set_xticklabels(STEP_LABELS, fontsize=9)
-            ax.set_ylabel("Δ R² per step (%)" if metric_idx == 0 else "")
+            ax.set_ylabel("Δ R² per step (%)" if slot_idx == 0 else "")
             ax.set_title(f"{SLOT_LABELS[slot_idx]} -- {metric}",
                          fontsize=10)
             ax.set_ylim(ymin, ymax)
@@ -498,10 +507,10 @@ def make_plot(decomp_by_slot_metric: dict[tuple[int, str], dict],
                         ha="center",
                         va="bottom" if v >= 0 else "top",
                         fontsize=7)
-            if slot_idx == 0 and metric_idx == 0:
+            if metric_idx == 0 and slot_idx == 0:
                 ax.legend(loc="upper right", fontsize=9)
 
-    fig.tight_layout(rect=(0, 0, 1, 0.96))
+    fig.tight_layout(rect=(0, 0, 1, top_rect))
     output.parent.mkdir(parents=True, exist_ok=True)
     fig.savefig(output, dpi=150, bbox_inches="tight",
                 metadata=png_metadata(title=title_line))
@@ -519,9 +528,10 @@ def main() -> int:
     )
     p.add_argument("--data_dir", default=DEFAULT_DATA_DIR,
                    help=f"Vectors directory (default: {DEFAULT_DATA_DIR})")
-    p.add_argument("--layer", type=int, default=24,
-                   help="Transformer layer (default: 24)")
-    p.add_argument("--K", type=int, nargs="+", default=[4, 16],
+    p.add_argument("--layer", type=int, default=25,
+                   help="Transformer layer (default: 25 -- Qwen-3-32B "
+                        "optimum from rho_by_layer.py)")
+    p.add_argument("--K", type=int, nargs="+", default=[3],
                    help="Soft-K whitening order(s) for the whitened "
                         "panels.  One column per K value, plus a 'raw' "
                         "column at the left.  Default: 4 16 (so the "
@@ -659,9 +669,9 @@ def main() -> int:
         print(f"  slot {slot}:  " + "  |  ".join(summary_parts))
 
     if args.style == "pies":
-        make_pie_plot(decomp, Path(args.output), metric_labels)
+        make_pie_plot(decomp, Path(args.output), metric_labels, args.layer)
     else:
-        make_plot(decomp, Path(args.output), metric_labels)
+        make_plot(decomp, Path(args.output), metric_labels, args.layer)
     return 0
 
 

@@ -53,7 +53,7 @@ from .pca import (
     MeanScaler,
     L2MeanScaler,
 )
-from .plot_metadata import png_metadata
+from .plot_metadata import png_metadata, suptitle_with_specs
 
 __all__ = [
     # Models
@@ -88,6 +88,7 @@ __all__ = [
     "plot_variance_explained",
     "MeanScaler",
     "L2MeanScaler",
-    # Plot provenance
+    # Plot provenance + helpers
     "png_metadata",
+    "suptitle_with_specs",
 ]

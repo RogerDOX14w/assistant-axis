@@ -27,13 +27,26 @@ from pathlib import Path
 async def run_one(pair, provider, judge_model, output_root, data_dir, instructions_dir,
                   layer, whiten_K, max_tokens, temperature, rps, batch_size, save_every,
                   score_modes, subdir_name, scores_dir, responses_dir,
-                  response_target_batch_size):
+                  response_target_batch_size, refill_gaps):
     pos, neg = pair['pos'], pair['neg']
     out_dir = output_root / f'{pos}_vs_{neg}' / subdir_name
     out_dir.mkdir(parents=True, exist_ok=True)
     corr_path = out_dir / 'correlations.json'
-    if corr_path.exists():
+    if corr_path.exists() and not refill_gaps:
         return (pos, neg, 'SKIP (already done)', 0.0)
+    if corr_path.exists() and refill_gaps:
+        # If there's a gaps.json showing all modes empty, this run already
+        # completed cleanly; skip even in refill mode.
+        gaps_path = out_dir / 'gaps.json'
+        if gaps_path.exists():
+            try:
+                gaps = json.loads(gaps_path.read_text())
+                # An "empty gap" in any mode is either [] or {}.
+                def _empty(v): return v == [] or v == {} or v is None
+                if gaps and all(_empty(v) for v in gaps.values()):
+                    return (pos, neg, 'SKIP (refill: no gaps)', 0.0)
+            except Exception:
+                pass  # fall through and re-run; gaps.json malformed
 
     cmd = [
         'uv', 'run', 'python', 'results_analysis/axis_judge_correlation.py',
@@ -88,7 +101,7 @@ async def run_all(args):
                 args.layer, args.whiten_K, args.max_tokens, args.temperature,
                 args.rps, args.batch_size, args.save_every, score_modes,
                 subdir_name, args.scores_dir, args.responses_dir,
-                args.response_target_batch_size,
+                args.response_target_batch_size, args.refill_gaps,
             )
 
     print(f'Launching {len(pairs)} pair runs (concurrency={args.concurrency}, provider={args.provider})')
@@ -146,8 +159,8 @@ def main():
     p.add_argument('--output_root', required=True)
     p.add_argument('--data_dir', default='runpod_workspace/qwen/qwen-3-32b Roger')
     p.add_argument('--instructions_dir', default='data')
-    p.add_argument('--layer', type=int, default=24)
-    p.add_argument('--whiten_K', type=int, default=128)
+    p.add_argument('--layer', type=int, default=25)  # Qwen-3-32B; tuned via rho_by_layer.py.
+    p.add_argument('--whiten_K', type=int, default=3)  # Robust K-sweep peak; was 128 (legacy).
     p.add_argument('--max_tokens', type=int, default=1024)
     p.add_argument('--temperature', type=float, default=0.0)
     p.add_argument('--rps', type=float, default=10.0)
@@ -165,6 +178,11 @@ def main():
     p.add_argument('--subdir', type=str, default=None,
                    help='Override the per-axis subdir name (default = provider). '
                         'Use e.g. "gpt_responses_traits" to keep response-mode outputs separate.')
+    p.add_argument('--refill_gaps', action='store_true',
+                   help='Re-run pairs whose correlations.json already exists, so the '
+                        'inner resume logic can fill any None/missing entries in their '
+                        'caches. Pairs whose gaps.json shows all modes empty are still '
+                        'skipped.')
     p.add_argument('--only_summary', action='store_true', help='Skip runs, just (re)build the summary')
     args = p.parse_args()
     # Normalize provider name -> subdir name

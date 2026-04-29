@@ -95,7 +95,7 @@ from assistant_axis import png_metadata
 DEFAULT_EXPERIMENT_DIR = Path(__file__).resolve().parent.parent / (
     "roger/axis_judge_experiments"
 )
-FIT_K = [0, 1, 2, 4, 8, 16, 32]
+FIT_K = [0, 1, 2, 3, 4, 6, 8, 12, 16, 24, 32]
 MIN_LOG = 0.0
 MAX_LOG = float(np.log2(33))
 
@@ -240,7 +240,7 @@ def main() -> int:
         ax.plot(xx, slope * xx + intercept, "g-", alpha=0.6, lw=1.2,
                 label="weighted OLS")
 
-    tick_Ks = [0, 1, 2, 4, 8, 16, 32]
+    tick_Ks = [0, 1, 2, 3, 4, 6, 8, 12, 16, 24, 32]
     tick_logs = [np.log2(K + 1) for K in tick_Ks]
     ax.set_xticks(tick_logs)
     ax.set_xticklabels([f"K={K}" for K in tick_Ks], fontsize=8)
@@ -264,7 +264,7 @@ def main() -> int:
         title_line + "\n"
         f"Unweighted Pearson={pear_u:+.3f}, Spearman={spear_u:+.3f}  |  "
         f"Weighted Pearson={pear_w:+.3f}",
-        fontsize=10,
+        fontsize=13, fontweight="bold",
     )
     ax.grid(alpha=0.3)
     ax.set_aspect("equal")

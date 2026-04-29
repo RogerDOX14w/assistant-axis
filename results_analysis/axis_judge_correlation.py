@@ -664,6 +664,128 @@ def _sort_keys_by_question_then_prompt(keys: Sequence[str]) -> List[str]:
 # Judge: provider-agnostic async calls
 # ---------------------------------------------------------------------------
 
+# Retry policy: attempt the call up to (1 + len(RETRY_DELAYS)) times.
+# Cumulative waits ≈ 5 + 20 + 60 + 180 = 265 s, comfortably surviving the
+# kind of ~3-minute network/provider blip we observed on 2026-04-25 03:40 UTC
+# without leaving silent gaps in the score caches. Tunable via
+# axis_judge_correlation_set_retry_delays() if a caller wants different.
+RETRY_DELAYS: List[float] = [5.0, 20.0, 60.0, 180.0]
+
+
+def _classify_judge_error(e: BaseException) -> Tuple[str, float | None]:
+    """Bucket a provider exception into 'retry' / 'fatal' / 'parse_only'.
+
+    Returns ``(action, suggested_wait)`` where ``action`` is one of:
+
+    - ``"retry"``: transient -- worth re-attempting (timeouts, connection
+      errors, 5xx server errors, 429 rate-limit-not-quota).
+    - ``"fatal"``: permanent for this run -- don't retry (insufficient
+      quota, auth errors, 4xx parameter errors).
+    - ``"parse_only"``: API succeeded but content couldn't be parsed; this
+      shouldn't reach us through exceptions, returned for completeness.
+
+    ``suggested_wait`` is the server-suggested retry delay (from a 429
+    Retry-After header) when available, else ``None`` (caller falls back to
+    its own backoff schedule).
+
+    The classifier is provider-agnostic and works by string-matching the
+    exception class name + message; this avoids importing both SDKs at the
+    module top level.
+    """
+    cls = type(e).__name__
+    msg = str(e).lower()
+
+    # insufficient_quota is OpenAI's "out of credits" signal -- never retry.
+    if "insufficient_quota" in msg or "you exceeded your current quota" in msg:
+        return "fatal", None
+
+    # Auth / parameter / not-found errors -- never retry.
+    fatal_classes = {
+        "AuthenticationError", "PermissionDeniedError", "BadRequestError",
+        "NotFoundError", "UnprocessableEntityError", "InvalidRequestError",
+    }
+    if cls in fatal_classes:
+        return "fatal", None
+
+    # Explicit "fatal" status codes from any APIStatusError-ish exception.
+    code = getattr(e, "status_code", None) or getattr(e, "status", None)
+    if isinstance(code, int) and 400 <= code < 500 and code != 429:
+        return "fatal", None
+
+    # Retryable: timeouts, connection errors, server errors (5xx), 429.
+    retry_classes = {
+        "APITimeoutError", "APIConnectionError", "InternalServerError",
+        "ServiceUnavailableError", "RateLimitError", "TimeoutError",
+        "ConnectionError", "ReadTimeout", "ConnectError",
+    }
+    if cls in retry_classes:
+        # Try to honour Retry-After if present.
+        wait = None
+        for attr in ("retry_after", "_retry_after"):
+            v = getattr(e, attr, None)
+            if isinstance(v, (int, float)) and v > 0:
+                wait = float(v)
+                break
+        return "retry", wait
+
+    # Status-code-based fallbacks.
+    if isinstance(code, int):
+        if code == 429 or 500 <= code < 600:
+            return "retry", None
+
+    # Heuristic message-matching for SDK wrappers that lose the class name.
+    if any(s in msg for s in (
+        "timed out", "timeout", "connection", "request was interrupted",
+        "overloaded", "internal server error", "service unavailable",
+        "bad gateway", "rate_limit",
+    )):
+        return "retry", None
+
+    # Unknown -- treat as retryable but only once (caller may differ).
+    return "retry", None
+
+
+async def _call_with_retry(
+    one_attempt: "callable",
+    *,
+    provider_name: str,
+    delays: Sequence[float] = RETRY_DELAYS,
+) -> Optional[str]:
+    """Call ``one_attempt()`` (an awaitable returning ``Optional[str]``) with
+    classify+backoff retries. Returns the call result, or ``None`` if all
+    attempts failed (logged at WARNING with full classification).
+    """
+    last_exc: Optional[BaseException] = None
+    for attempt in range(1 + len(delays)):
+        try:
+            return await one_attempt()
+        except Exception as e:  # noqa: BLE001 (we intentionally classify)
+            action, server_wait = _classify_judge_error(e)
+            last_exc = e
+            if action == "fatal":
+                logger.error(
+                    f"{provider_name} fatal error (no retry): "
+                    f"{type(e).__name__}: {e}"
+                )
+                return None
+            if attempt == len(delays):
+                logger.warning(
+                    f"{provider_name} call failed after {attempt + 1} attempts: "
+                    f"{type(e).__name__}: {e}"
+                )
+                return None
+            wait = server_wait if server_wait is not None else delays[attempt]
+            logger.info(
+                f"{provider_name} call transient error "
+                f"({type(e).__name__}); retrying in {wait:.0f}s "
+                f"(attempt {attempt + 1}/{len(delays) + 1})"
+            )
+            await asyncio.sleep(wait)
+    # Defensive; the loop should always return.
+    logger.warning(f"{provider_name} call exhausted retries: {last_exc!r}")
+    return None
+
+
 async def _call_anthropic_batch(
     prompts: Sequence[str],
     model: str,
@@ -676,8 +798,8 @@ async def _call_anthropic_batch(
     client = anthropic.AsyncAnthropic()
 
     async def one(prompt: str) -> Optional[str]:
-        await rate_limiter.acquire()
-        try:
+        async def attempt() -> Optional[str]:
+            await rate_limiter.acquire()
             resp = await client.messages.create(
                 model=model, max_tokens=max_tokens, temperature=temperature,
                 messages=[{"role": "user", "content": prompt}],
@@ -688,9 +810,8 @@ async def _call_anthropic_batch(
                 if text:
                     parts.append(text)
             return "".join(parts) if parts else None
-        except Exception as e:
-            logger.error(f"anthropic call failed: {e}")
-            return None
+
+        return await _call_with_retry(attempt, provider_name="anthropic")
 
     results: List[Optional[str]] = []
     for i in range(0, len(prompts), batch_size):
@@ -722,8 +843,8 @@ async def _call_openai_batch(
     client = openai.AsyncOpenAI()
 
     async def one(prompt: str) -> Optional[str]:
-        await rate_limiter.acquire()
-        try:
+        async def attempt() -> Optional[str]:
+            await rate_limiter.acquire()
             resp = await client.chat.completions.create(
                 model=model,
                 messages=[{"role": "user", "content": prompt}],
@@ -731,9 +852,8 @@ async def _call_openai_batch(
                 temperature=temperature,
             )
             return resp.choices[0].message.content
-        except Exception as e:
-            logger.error(f"openai call failed: {e}")
-            return None
+
+        return await _call_with_retry(attempt, provider_name="openai")
 
     results: List[Optional[str]] = []
     for i in range(0, len(prompts), batch_size):
@@ -796,6 +916,55 @@ def _save_json(path: Path, obj: Any) -> None:
     path.write_text(json.dumps(obj, indent=2, sort_keys=True))
 
 
+# ---------------------------------------------------------------------------
+# Gap-detection: post-run reporting and persistent gaps.json
+# ---------------------------------------------------------------------------
+
+def _update_gaps_file(
+    output_dir: Path,
+    *,
+    mode: str,
+    gaps: Any,
+) -> Path:
+    """Merge a per-mode gap report into ``<output_dir>/gaps.json``.
+
+    The merged file has the shape::
+
+        {
+          "descriptions": [...names...],
+          "instructions": [...names...],
+          "responses": {
+            "<name>": [<batch_indices_with_no_score>, ...],
+            ...
+          }
+        }
+
+    Modes write empty containers when they finish cleanly, so the file is
+    always present and an empty value means "this mode has no gaps right
+    now". Callers (notably ``refill_judge_gaps.py``) read this file to
+    decide whether re-invocation is worthwhile.
+    """
+    gaps_path = output_dir / "gaps.json"
+    existing: Dict[str, Any] = {}
+    if gaps_path.exists():
+        try:
+            existing = json.loads(gaps_path.read_text())
+        except Exception:
+            existing = {}
+    existing[mode] = gaps
+    _save_json(gaps_path, existing)
+    return gaps_path
+
+
+def _warn_with_banner(message: str) -> None:
+    """Multi-line WARNING banner that's hard to miss in run.log tails."""
+    bar = "!" * 78
+    logger.warning(bar)
+    for line in message.splitlines():
+        logger.warning(line)
+    logger.warning(bar)
+
+
 async def score_static_mode(
     mode: str,  # 'descriptions' or 'instructions'
     corpus: Corpus,
@@ -827,6 +996,9 @@ async def score_static_mode(
         etypes.append(etype)
     if not prompts:
         logger.info(f"[{mode}] all {len(scorable)} entities already cached at {cache_path}")
+        # Still emit a clean gaps.json entry so downstream tools can rely on
+        # its presence (and absence-of-mode = "this run didn't touch it").
+        _update_gaps_file(Path(args.output_dir), mode=mode, gaps=[])
         return {k: v for k, v in cache.items() if isinstance(v, int)}
 
     logger.info(
@@ -852,6 +1024,23 @@ async def score_static_mode(
                 continue
             written_cache[name] = score
         _save_json(cache_path, written_cache)
+
+    # End-of-mode gap audit: which scorable entities still aren't in the cache?
+    cached_names = {k for k, v in written_cache.items() if isinstance(v, int)}
+    missing = [name for (_, name) in scorable if name not in cached_names]
+    _update_gaps_file(Path(args.output_dir), mode=mode, gaps=missing)
+    if missing:
+        head = ", ".join(missing[:8]) + ("..." if len(missing) > 8 else "")
+        _warn_with_banner(
+            f"[{mode}] {len(missing)} of {len(scorable)} scorable entities have no "
+            f"cached score (call/parse failed across all retries).\n"
+            f"  examples: {head}\n"
+            f"  full list: {Path(args.output_dir) / 'gaps.json'}\n"
+            f"  re-run the same command to retry those entities only "
+            f"(static-mode resume re-attempts anything not in the cache)."
+        )
+    else:
+        logger.info(f"[{mode}] all {len(scorable)} scorable entities cached cleanly.")
 
     # Return only int-valued entries.
     return {k: v for k, v in written_cache.items() if isinstance(v, int)}
@@ -989,6 +1178,41 @@ async def score_responses_mode(
     for name in written:
         _update_response_aggregates(written[name])
     _save_json(cache_path, written)
+
+    # End-of-mode gap audit: which entities still have None batches?
+    gaps_by_entity: Dict[str, List[int]] = {}
+    n_none_total = 0
+    n_entities_no_score = 0
+    for name, entry in written.items():
+        if not isinstance(entry, dict):
+            continue
+        per_batch = entry.get("per_batch", []) or []
+        none_idxs = [i for i, b in enumerate(per_batch) if b.get("score") is None]
+        if none_idxs:
+            gaps_by_entity[name] = none_idxs
+            n_none_total += len(none_idxs)
+        if entry.get("mean_score") is None and per_batch:
+            n_entities_no_score += 1
+    _update_gaps_file(Path(args.output_dir), mode="responses", gaps=gaps_by_entity)
+    if gaps_by_entity:
+        head = ", ".join(list(gaps_by_entity.keys())[:8]) + (
+            "..." if len(gaps_by_entity) > 8 else ""
+        )
+        _warn_with_banner(
+            f"[responses] {n_none_total} batches across {len(gaps_by_entity)} entities "
+            f"still have no score (call/parse failed across all retries); "
+            f"{n_entities_no_score} entities have *no* valid batch score at all "
+            f"and will be excluded from ρ.\n"
+            f"  examples: {head}\n"
+            f"  full list: {Path(args.output_dir) / 'gaps.json'}\n"
+            f"  re-run the same command to retry only the missing batches "
+            f"(response-mode resume re-issues calls for any per_batch entry "
+            f"with score=None)."
+        )
+    else:
+        logger.info(
+            f"[responses] all {len(written)} entities have complete batch coverage."
+        )
     return {k: v for k, v in written.items() if isinstance(v, dict)}
 
 
@@ -1192,14 +1416,17 @@ def parse_args() -> argparse.Namespace:
     data.add_argument("--responses_dir", type=str,
                       help="Directory of per-entity responses .jsonl files; required for "
                            "--score_responses.")
-    data.add_argument("--layer", type=int, default=24)
+    data.add_argument("--layer", type=int, default=25)  # Qwen-3-32B; tuned via rho_by_layer.py.
     data.add_argument("--slot", type=str, default="all",
                       help="Token-slot index, or 'all'.")
 
     # Whitening.
     w = p.add_argument_group("whitening")
-    w.add_argument("--whiten_K", type=int, default=128,
-                   help="Number of top PCs to soft-scale down to sigma_{K+1}.")
+    w.add_argument("--whiten_K", type=int, default=3,
+                   help="Number of top PCs to soft-scale down to "
+                        "sigma_{K+1}.  Default K=3 is a robust "
+                        "all-around pick from the K-sweep work "
+                        "(see results_analysis/whitening_k_sweep.py).")
 
     # Scoring modes.
     sm = p.add_argument_group("scoring modes")

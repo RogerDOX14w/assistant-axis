@@ -81,7 +81,12 @@ import subprocess
 import sys
 from pathlib import Path
 
-__all__ = ["png_metadata", "REPO_ROOT", "DEFAULT_AUTHOR"]
+__all__ = [
+    "png_metadata",
+    "suptitle_with_specs",
+    "REPO_ROOT",
+    "DEFAULT_AUTHOR",
+]
 
 
 DEFAULT_AUTHOR = "Roger Dearnaley"
@@ -271,3 +276,72 @@ def png_metadata(
         md["Source Code SHA256"] = hashlib.sha256(
             body.encode("utf-8")).hexdigest()
     return md
+
+
+# ---------------------------------------------------------------------------
+# Plot title / spec-details helper
+# ---------------------------------------------------------------------------
+
+def suptitle_with_specs(
+    fig,
+    title: str,
+    specs: str | list[str] | None = None,
+    *,
+    title_fontsize: int = 14,
+    spec_fontsize: int = 10,
+    spec_color: str = "#444444",
+    title_y: float = 0.99,
+    line_height: float = 0.022,
+) -> tuple[float, float]:
+    """Render a two-tier figure title: bold headline + smaller spec block.
+
+    The "headline" (large, bold) goes into ``fig.suptitle`` so it
+    interacts correctly with ``bbox_inches="tight"``; the spec details
+    (smaller, non-bold, dimmer) are rendered as a separate
+    ``fig.text`` annotation just below.
+
+    Parameters
+    ----------
+    fig : matplotlib Figure
+    title : single-line headline (e.g. "Mean per-axis ρ vs layer")
+    specs : optional spec details.  ``str`` may contain ``\\n`` for
+        multiple lines, or a list of strings (one per line).  Pass
+        ``None`` (or an empty string) to skip the spec block entirely
+        -- this function then degrades to a plain bold ``suptitle``.
+    title_fontsize, spec_fontsize, spec_color : style overrides.
+    title_y : figure-relative y for the bold headline (1.0 is the top
+        edge of the figure).  Default 0.99 leaves a tiny margin.
+    line_height : figure-relative spacing between the headline and the
+        first spec line, and between subsequent spec lines.  Tune
+        upward for taller figures.
+
+    Returns
+    -------
+    (top_used, top_rect) : the figure-relative y coordinate of the
+        bottom of the spec block, and a value suitable for the
+        ``rect`` argument to ``fig.tight_layout`` so the body of the
+        figure is laid out below the title block.  Caller can do::
+
+            top_used, top_rect = suptitle_with_specs(fig, ..., specs=...)
+            fig.tight_layout(rect=(0, 0, 1, top_rect))
+    """
+    fig.suptitle(title, fontsize=title_fontsize, fontweight="bold",
+                 y=title_y)
+    if not specs:
+        # Default tight_layout reserve for a single-line bold suptitle.
+        return title_y - line_height, title_y - line_height - 0.01
+
+    if isinstance(specs, str):
+        text = specs
+        n_lines = 1 + specs.count("\n")
+    else:
+        text = "\n".join(specs)
+        n_lines = len(specs)
+
+    # First spec line sits one line-height below the headline.
+    first_line_y = title_y - line_height
+    fig.text(0.5, first_line_y, text,
+             ha="center", va="top",
+             fontsize=spec_fontsize, color=spec_color)
+    bottom = first_line_y - (n_lines - 1) * line_height
+    return bottom, max(0.85, bottom - 0.015)

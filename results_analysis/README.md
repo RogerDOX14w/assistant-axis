@@ -28,7 +28,7 @@ example lists, it:
 1. Has an LLM judge score every role and trait in the corpus on a −3..+3
    rubric (excluding the pair itself and any example-list names).
 2. Projects every role/trait's activation vector onto the axis, in both the
-   raw activation metric and a soft-K=128 PCA-whitened metric (whitener fit
+   raw activation metric and a soft-K=3 PCA-whitened metric (whitener fit
    on the held-out pool of roles + traits, with the excluded names removed
    so the same items don't define both the axis and the whitening basis).
 3. Reports Spearman ρ between judge scores and projections, per token-slot
@@ -45,7 +45,7 @@ uv run python results_analysis/axis_judge_correlation.py \
   --data_dir "runpod_workspace/qwen/qwen-3-32b Roger" \
   --scores_dir "runpod_workspace/qwen/qwen-3-32b Roger/roles/scores" \
   --responses_dir "runpod_workspace/qwen/qwen-3-32b Roger/roles/responses" \
-  --layer 24 --whiten_K 128 --provider anthropic --all \
+  --layer 25 --whiten_K 3 --provider anthropic --all \
   --output_dir roger/axis_judge_angel_demon
 
 # Manual axis from a saved axis.pt, scoring descriptions only
@@ -56,9 +56,302 @@ uv run python results_analysis/axis_judge_correlation.py \
   --neg_examples demon,vampire,revenant,chimera \
   --pos_examples consultant,researcher,engineer,accountant,librarian \
   --data_dir "runpod_workspace/qwen/qwen-3-32b Roger" \
-  --layer 24 --slot 1 --score_descriptions \
+  --layer 25 --slot 1 --score_descriptions \
   --output_dir roger/axis_judge_pc1_roles
 ```
+
+### `infer_axis_description.py`
+
+The conceptual inverse of [`axis_judge_correlation.py`](#axis_judge_correlationpy).
+That tool *takes* an axis description and *produces* per-entity
+projections-vs-rubric-score correlations. This tool *takes* a per-entity
+projection ranking and *produces* an axis description (axis name, two pole
+descriptions, example lists) -- ready to feed straight back into
+`axis_judge_correlation.py` via its `--axis_name` / `--pos_pole` / `--neg_pole`
+/ `--pos_examples` / `--neg_examples` flags.
+
+The tool is geometry-agnostic: callers compute whatever direction they want
+to characterize (a contrastive pair, a CA basis vector, a PCA component, a
+shear axis, ...), project all roles and traits onto it, hand the resulting
+list to this tool, and get back a structured axis spec. The only thing this
+tool needs to know about each entity is its name, its type (role / trait),
+and the scalar projection.
+
+Internally the tool z-normalizes the projections to mean 0, std 1, rounds
+to 0.1 precision, and asks Claude Opus (`claude-opus-4-6`, with a 10K
+extended-thinking budget by default) to identify what semantic axis the
+direction captures. Output is a JSON file with five fields, in display-label
+form for the prose and filename form for the example lists, so it can be
+piped straight into the forward tool.
+
+```bash
+# Caller computes scores (any geometric flavour) and writes them to a JSON file
+# (or CSV); the format is just [{name, type, score}, ...].
+uv run python results_analysis/infer_axis_description.py \
+  --input scored.json \
+  --output axis_spec.json \
+  [--style glossary] \                 # glossary (default) | inline
+  [--instructions_dir data] \
+  [--model claude-opus-4-6] \
+  [--thinking_budget 10000] \
+  [--top_n 0]                          # 0 = include all entities; >0 = top + bottom N only
+```
+
+Input format (JSON example; CSV with columns `name,type,score` also accepted):
+
+```json
+[
+  {"name": "helpful",             "type": "trait", "score":  3.21},
+  {"name": "advocate",            "type": "role",  "score":  2.74},
+  {"name": "paperclip_maximizer", "type": "R",     "score": -1.42}
+]
+```
+
+* `name`: filename format with underscores (matching `data/{roles,traits}/instructions/*.json` filenames).
+* `type`: any of `R`, `T`, `role`, `trait`, `roles`, `traits` (case-insensitive).
+* `score`: any float -- the raw scalar projection. The tool z-normalizes internally.
+
+Output format (matches `axis_judge_correlation.py`'s axis-spec flags exactly):
+
+```json
+{
+  "axis_name": "prosocial vs antisocial",
+  "pos_pole": "Concepts at this end are oriented toward...",
+  "neg_pole": "Concepts at this end are oriented toward...",
+  "pos_examples": ["helpful", "advocate", "guileless", "systems_thinker"],
+  "neg_examples": ["unhelpful", "deceitful", "paperclip_maximizer"]
+}
+```
+
+Library API:
+
+```python
+from results_analysis.infer_axis_description import summarize_axis
+
+result = summarize_axis(
+    scores=[{"name": "helpful", "type": "trait", "score": 2.34}, ...],
+    style="glossary",
+)
+# -> {"axis_name": ..., "pos_pole": ..., "neg_pole": ...,
+#     "pos_examples": [...], "neg_examples": [...]}
+```
+
+**Layout (`--style`):** the prompt sent to Opus comes in two forms:
+
+* `glossary` (default): a compact one-line-per-entity ranking (rank, z-score,
+  R/T, display label) followed by an alphabetical glossary block listing
+  every entity's description. Lets the model scan the gradient first and
+  consult the glossary for unfamiliar names.
+* `inline`: ranking with descriptions on the same line. No cross-referencing
+  required; same total token count.
+
+The two should give similar results in most cases. Default is `glossary`
+based on intuition; A/B both on a known axis (e.g.
+`truthful_vs_deceitful`) if you want to lock in a winner.
+
+**Naming convention.** Two formats coexist in the codebase:
+
+* *Filename* (underscores, no hyphens): `systems_thinker`, `paperclip_maximizer`.
+  This is what the tool's input and output use, so the output spec can be
+  passed straight back to `axis_judge_correlation.py`.
+* *Display label* (more human-readable): `systems-thinker` (from the trait
+  JSON's `positive_label` field), `paperclip maximizer` (`_` -> ` ` for
+  roles, which by convention never use hyphens). This is what the prompt
+  shows the model. The tool maintains a bidirectional map and converts the
+  model's emitted example labels back to filename form on parse, with a
+  small fuzzy-match fallback (lowercase + alphanumerics).
+
+**Cost.** Per axis, with default thinking budget (10K tokens):
+
+* Input: ~42K tokens (full 579-entity list with descriptions): ~$0.63 at
+  Opus list pricing ($15/M).
+* Output (incl. thinking): up to 10K tokens at $75/M = ~$0.75 worst-case;
+  typical usage less.
+* Total: ~$1.30-1.50 per axis.
+
+Drop with `--top_n 50` (top + bottom 50 only) for cheap experimentation
+(~$0.85/axis), or `--thinking_budget 0` to disable extended thinking
+(~$0.10/axis).
+
+**Reproducibility.** Anthropic's API forces `temperature=1` when extended
+thinking is enabled, so re-runs are not bit-exactly deterministic; even at
+temp 0 the API isn't guaranteed reproducible. Re-runs may produce slightly
+different phrasings; the inferred axis itself should be stable on hard
+tasks. We don't engineer around this (no caching layer); cost per re-run is
+~$1, which is cheaper than implementation complexity.
+
+### `refill_judge_gaps.py` and the gap-detection workflow
+
+`axis_judge_correlation.py` calls can occasionally fail mid-run due to
+transient provider issues (timeouts, 5xx, rate-limit blips). The script
+ships with two layers of defense:
+
+1. **Per-call retry-with-backoff** (`RETRY_DELAYS = [5s, 20s, 60s, 180s]`).
+   Transient errors -- timeouts, connection errors, 5xx, 429-rate-limit --
+   are retried up to four times with growing waits. Cumulative tolerance
+   ~265 s, comfortably surviving ~3-min provider blips. Permanent errors
+   (`insufficient_quota`, 4xx auth/parameter errors) are *not* retried.
+2. **End-of-run gap audit.** When a run finishes, every scoring mode emits
+   a clear WARNING banner if any entity / batch was left unscored, and
+   writes a structured `gaps.json` to the output dir. Empty modes write
+   empty containers (`[]` or `{}`) so downstream tools can rely on the
+   file being present.
+
+Even with retries, gaps can persist (e.g., a multi-hour outage). The
+`refill_judge_gaps.py` tool is the systematic way to find and fix them:
+
+```bash
+# Audit-only: list dirs with gaps under the experiment root.
+uv run python results_analysis/refill_judge_gaps.py \
+  --glob 'roger/axis_judge_experiments/*/*' --scan
+
+# Refill one specific dir.
+uv run python results_analysis/refill_judge_gaps.py \
+  --dir roger/axis_judge_experiments/truthful_vs_deceitful/gpt_responses_traits
+
+# Refill all dirty GPT-response caches under the experiment root.
+uv run python results_analysis/refill_judge_gaps.py \
+  --glob 'roger/axis_judge_experiments/*/gpt_responses_*'
+```
+
+The tool reads each dir's `config.json` and re-invokes
+`axis_judge_correlation.py` with the same args. The inner script's
+**resume logic only re-issues calls for the gaps**: parse failures aren't
+cached (so they're retried), and response-mode `per_batch` entries with
+`score=None` get re-attempted. So a refill costs roughly the size of the
+gap, not a full re-run.
+
+For batch refills via `run_axis_experiment_batch.py`, pass `--refill_gaps`
+to bypass the "skip if `correlations.json` exists" gate. Pairs with a
+clean `gaps.json` (all modes empty) are still skipped, so refilling a
+mostly-clean experiment root is cheap.
+
+### `token_position_noise_analysis.py`
+
+Diagnostic that asks **which of the 4 token slots is the noisiest**, and
+which agrees most with the others on the *direction* of role differences.
+Promoted from a `roger/` script (April 2026 work) that informed the
+project-wide convention of using slot 3 (`\n`) as the default working slot.
+
+For each random triple `(A, B, C)` and each slot `s`, the script computes
+six metrics measuring how similar `B−A` is to `B−C` at slot `s`:
+
+- 3 distance flavours: cosine distance, Euclidean norm, squared norm.
+- 2 cross-diff operators: `_sub` (subtraction, normalized) and `_lograt`
+  (log-ratio).
+
+For each (triple, metric, layer), the slot whose value deviates *most*
+from the mean of the other three is the **odd one out**. Slots that are
+odd-one-out >25 % of the time (the chance rate) are noisier than peers.
+
+Plus pairwise-slot agreement, two ways:
+
+- **Norm correlation**: Pearson correlation across role pairs of `‖A_s − B_s‖`
+  vs `‖A_s′ − B_s′‖` -- do the slots agree on which pairs are far apart?
+- **Direction agreement**: mean cosine of `(A_s − B_s)` and `(A_s′ − B_s′)`
+  across role pairs -- do the slots agree on the *direction* of each pair's
+  difference?
+
+Outputs five PNGs (default to `roger/token_position_noise_out/`):
+
+| file | content |
+|---|---|
+| `ooo_heatmaps.png` | Odd-one-out fraction by layer × slot, one panel per metric. |
+| `ooo_summary_bars.png` | Slot odd-one-out rate per metric (avg across layers). |
+| `ooo_by_layer.png` | Per-layer slot odd-one-out, averaged across the 6 metrics. |
+| `pairwise_corr_matrices.png` | 4×4 norm correlation + 4×4 cosine direction agreement. |
+| `pairwise_cosine_by_layer.png` | Mean cosine direction agreement vs layer. |
+
+```bash
+# Default: 280 roles × 4 slots × all layers, 1000 triples, on Roger data.
+uv run python results_analysis/token_position_noise_analysis.py
+
+# Run on traits instead, write elsewhere.
+uv run python results_analysis/token_position_noise_analysis.py \
+  --vectors_subdir traits/vectors \
+  --output_dir roger/token_position_noise_traits
+```
+
+**Headline finding** (April 2026 run on the older `qwen-3-32b Christina
+headers` data, 280 roles × 64 layers × 1000 triples): slot 3 (`\n`) is the
+*least* noisy slot -- odd-one-out ~21-23 % across metrics (slightly below
+the 25 % chance floor) and the highest mean diff-direction agreement with
+the other three slots. Slot 0 (body-mean) is the noisiest by all six
+metrics; `<|im_start|>` and `assistant` are intermediate. This empirical
+finding underwrites the project's slot-3 default.
+
+### `all_roles_pairwise_slots.py`
+
+Companion to `token_position_noise_analysis.py`: shows the **full
+per-entity distribution** of pairwise slot statistics across layers, as
+transparent ribbons of thin lines (one per entity), rather than scalar
+summaries. Promoted from a one-off chat-inline producer (April 2026)
+that fed a fortnightly-report figure.
+
+For each entity (default-centred so `δ = entity − default`), each pair
+of slots `(s1, s2)`, and each layer `L`:
+
+- **Top panel** -- `cos(δ[s1, L], δ[s2, L])`: do the two slots agree
+  on the *direction* the entity differs from baseline?
+- **Bottom panel** (log y) -- `‖δ[s2, L]‖ / ‖δ[s1, L]‖`: how does
+  the *magnitude* of the deviation differ between slots?
+
+Six slot-pairs (the 4-choose-2 set), distinct colours, all 280 entity
+ribbons overlaid at α = 0.10. Three frame variants:
+
+- **A** -- body-vs-header pairs at full alpha, header-vs-header dimmed.
+- **B** -- header-vs-header pairs full alpha, body-vs-header dimmed.
+- **C** -- all six pairs at equal alpha.
+
+The legend always shows all six pairs (with the inactive ones dimmed
+in the legend itself), so the legend doesn't shift between frames --
+A/B/C can be stacked as click-to-appear layers in a slide deck without
+any visual jitter.
+
+Whitening (`--whitening`):
+
+- `raw` (default): operate on raw activation differences.
+- `soft_K=N`: per-(slot, layer) soft-K whitening, fit on the full
+  augmented production pool (roles + traits + corpus default). **No
+  leave-one-out** -- the pool is fitted once per `(slot, layer)` and
+  reused for every entity. Per-entity LOO would mean ~280 extra SVDs
+  per layer per slot, swamping the actual plot work; for pool size
+  ~580 the bias from including the entity in its own basis is ~1/580,
+  negligible. The whitener is applied to `δ` *before* computing
+  cosine and norm, so both panels reflect the whitened metric.
+
+```bash
+# Default: all 3 frames, raw, all 280 roles on Roger data.
+uv run python results_analysis/all_roles_pairwise_slots.py
+
+# Whitened K=3 version (companion frames, one per variant).
+uv run python results_analysis/all_roles_pairwise_slots.py \
+  --whitening soft_K=3
+
+# Run on traits instead, just the C frame (single PNG).
+uv run python results_analysis/all_roles_pairwise_slots.py \
+  --vectors_subdir traits/vectors --variant C
+```
+
+Outputs default to `roger/all_roles_pairwise_slots_out/`. Filenames use
+the entity-kind in the prefix and append `_K=N` when whitening is on:
+`all_{roles,traits}_pairwise_slots[_K=N]_{A,B,C}.png`. The full layer
+set (`--max_layers None`, the default) takes ~10 s for the three raw
+frames and ~25 s for the three soft-K=3 frames (256 SVDs of a 580×5120
+pool are the bottleneck and they're each cheap).
+
+**When to prefer `--whitening soft_K=3`.** Inter-pair structure
+(mean of each colour-band) is essentially unchanged by soft-K=3
+whitening -- which makes sense: the slot-vs-slot relational signal
+lives in the residual subspace, not the top-3 PCs of overall
+activation variance. But the **per-role spread** (ribbon width) does
+shrink visibly, because the top-3 PCs are where most of the
+between-entity amplitude variation lives. Net effect: whitening makes
+the all-six-pairs `C` frame substantially less muddy without erasing
+any of the headline patterns. For figures that need to show all six
+pairs at once (e.g. report stills without click-to-appear stacking),
+the soft-K=3 variant is the readable one; the `A`/`B` frames are fine
+either way since they only show three pairs at full alpha.
 
 ### `compute_combo_marginals.py`
 
@@ -195,9 +488,8 @@ per-dataset.
 
 The whitened columns apply soft-K PCA whitening to ``role``, ``trait``,
 ``combo``, ``default``, and ``v_theat`` before the decomposition.
-Default is ``--K 4 16`` (one column per K, plus a "raw" column at the
-left -- a 4 x 3 grid; pass a single value for a 4 x 2 grid like the
-original Apr 23 plot, or several for a wider K-sweep).  The whitening
+Default is ``--K 3`` (a single K column plus a "raw" column at the
+left -- a 4 x 2 grid).  Pass several values for a wider K-sweep.  The whitening
 basis is fit per-slot on the standard augmented canonical-angles pool
 (held-out roles+traits standalones + ``default.pt``); pass
 ``--no-augment`` to drop the default augmentation.  ``v_theat`` is computed inline per slot (per-row
@@ -220,14 +512,13 @@ heuristic was already a good guess), step (d) adds little more (the
 additive model is nearly weight-symmetric), and ~25-30% remains
 unexplained.
 
-Across the K=4 and K=16 columns the ``Δ R²`` shifts gradually from
-``role+trait`` (a) into ``heuristic theat_offset`` (b): as whitening shrinks the
-high-variance role / trait directions, the additive baseline explains
-less of the combo variance and the constant theatricality offset
-becomes proportionally more important.  The remainder also grows
-modestly (mid-range PCs that the additive + theatricality model can't
-capture get less attenuated by whitening than the role/trait
-components do).
+At the K=3 column the ``Δ R²`` shifts modestly from ``role+trait`` (a)
+into ``heuristic theat_offset`` (b) compared to raw: as whitening
+shrinks the top-3 PCs, the additive baseline explains a little less
+of the combo variance and the constant theatricality offset becomes
+proportionally more important.  Pass a wider K range (e.g. ``--K 1 2
+3 4 6 8``) to see the gradient build up monotonically as more PCs are
+shrunk.
 
 Slot 0 (body mean) does NOT show the same pattern -- the heuristic
 shift is near zero (raw) or only weakly positive (whitened),
@@ -235,20 +526,18 @@ consistent with theatricality being absent from the body-mean
 activation.  See `canonical_angles/README.md` for further discussion.
 
 ```bash
-# Default (4 slots × 3 metrics: raw, K=4 wht, K=16 wht; layer 24,
-# augmented pool)
+# Default (4 slots × 2 metrics: raw, K=3 wht; layer 25, augmented pool)
 uv run python results_analysis/variance_decomposition.py \
     --output roger/variance_decomp_bars.png
 
-# Single-K column (4 x 2 grid; matches the original April 23 layout
-# at K=128, modulo the augmented pool):
+# Wider K-sweep at the analysis layer
+uv run python results_analysis/variance_decomposition.py \
+    --K 1 2 3 4 6 8 \
+    --output /tmp/var_decomp_Ksweep.png
+
+# Reproduce a historic K=128 layout
 uv run python results_analysis/variance_decomposition.py \
     --K 128 --output /tmp/var_decomp_K128.png
-
-# Wider K-sweep at a different layer
-uv run python results_analysis/variance_decomposition.py \
-    --layer 32 --K 4 8 16 64 \
-    --output /tmp/var_decomp_l32_Ksweep.png
 ```
 
 The reconstructed default plot is at
@@ -397,7 +686,7 @@ weight ``w ∈ [0, 1]`` and each axis we compute, per entity::
     score(w) = w · ((GPT_d + GPT_i) / 2) + (1 - w) · ((Son_d + Son_i) / 2)
 
 then take Spearman ρ vs the raw activation projection at slot 3,
-layer 24, and average across all axes in the pair list.  ``w = 0.5``
+layer 25, and average across all axes in the pair list.  ``w = 0.5``
 corresponds to the 4-way mean of ``{GPT_d, GPT_i, Son_d, Son_i}`` we
 already use across the canonical-angles + axis-judge tooling.
 
@@ -558,7 +847,7 @@ For each slot ∈ {0, 1, 2, 3} and each ``K ∈ KS`` (default
 ``[0, 1, 2, 3, 4, 5]``, where K=0 = raw, K>0 = soft-K whitening on
 the augmented held-out pool with only the 2 axis endpoints removed)
 we compute mean per-axis Spearman ρ between the projection at
-``(slot, layer=24)`` and:
+``(slot, layer=25)`` and:
 
 - **desc+inst** -- 33 axes, 4-way mean of
   ``{GPT_d, GPT_i, Son_d, Son_i}``;
@@ -576,25 +865,173 @@ uv run python results_analysis/rho_by_slot_and_K.py
 uv run python results_analysis/rho_by_slot_and_K.py --ks 0 2 4 8 16
 ```
 
+Headline observations from the default run (Qwen-3-32B layer 25,
+the analysis point):
+
+- **Slot 3 wins at every K** for both sources -- desc+inst ρ
+  rises from 0.621 raw to 0.640 at K=2, ≈flat across K=2…4, then
+  erodes at K≥5; responses follow the same shape with a peak at
+  K=2 (0.654).
+- **Slot 0 is the laggard at raw** (desc+inst 0.536, responses
+  0.574) but **catches up to slot 3 -- and *overtakes* slot 3 for
+  responses -- once any whitening is applied**: slot 0 K=2
+  responses ρ = 0.668 vs slot 3 K=2 = 0.654.  Slot 0 jumps +0.09
+  ρ on responses going K=0 → K=2 while slot 3 only gains +0.02.
+  This is the theatricality-PC story: at raw, slot 0's
+  representation is dominated by a single PC that's largely
+  orthogonal to the axis-judge signal; shrinking the top few PCs
+  unmasks the remaining identity-encoding subspace.
+- Slots 1 and 2 sit ~0.05 ρ below the slot 0/3 pair at every K
+  for desc+inst, and respond to whitening similarly (peak at
+  K=3-4, modest +0.04 lift over raw).
+
+#### `rho_by_layer.py`
+
+2x2 panel plot: per-layer mean per-axis Spearman ρ as a function of
+transformer layer for two slots × two judge sources, with seven
+whitening curves overlaid.  Tells you *which layers carry signal
+in the first place*, and how that depth profile interacts with
+soft-K whitening.
+
+- Rows: slot 0 (body mean) and slot 3 (the ``\n``-after-``assistant``
+  header).
+- Columns: ``desc+inst`` (33 axes, 4-way GPT+Sonnet mean) and
+  ``responses`` (12 axes, GPT-only response-mode mean).
+- Curves: raw (black, thick) plus K ∈ {1, 2, 3, 4, 5, 6} as a
+  full rainbow (purple → blue → cyan → green → yellow → red).
+- Faint vertical gridlines at every even layer.
+
+The SVD that powers soft-K whitening is computed *once* per
+(slot, layer, leave-out-set) and shared across all K values, so
+the whole 64-layer × 2-slot × 7-K × 33-pair sweep takes ~14 min
+on a modern laptop.
+
+Outputs (to ``--experiment_dir``):
+
+- ``rho_by_layer.png``
+- ``rho_by_layer.json`` -- per-(slot, layer, K, source) mean ρ
+  table.  Used by ``--replot_from_json`` to skip the SVD and
+  re-render the plot in seconds, or by ``--reuse_json`` to
+  incrementally add/remove K values without recomputing the
+  cached ones.
+
+```bash
+# Default: all 64 layers, slots 0+3, Ks = [0, 1, 2, 3, 4, 5, 6]
+uv run python results_analysis/rho_by_layer.py
+
+# Faster: a coarser layer sample
+uv run python results_analysis/rho_by_layer.py \
+    --layers 4 8 12 16 20 24 28 32 36 40 44 48 52 56 60
+
+# Cheap: replot from the cached JSON (no recomputation)
+uv run python results_analysis/rho_by_layer.py --replot_from_json
+
+# Incremental: e.g. add K=7 without recomputing the existing Ks
+uv run python results_analysis/rho_by_layer.py \
+    --ks 0 1 2 3 4 5 6 7 --reuse_json
+```
+
 Headline observations from the default run:
 
-- **Slot 1 is the laggard at every K** for both sources
-  (desc+inst ≈ 0.42–0.45, responses ≈ 0.38–0.45) -- the
-  ``<|im_start|>`` token carries the least axis signal in raw
-  *and* whitened form.
-- **Slot 3 dominates at K=0** (desc+inst 0.595, responses 0.600)
-  but **slot 0 catches up — and overtakes for responses — once
-  any whitening is applied**: e.g. responses at K=2 is 0.641 at
-  slot 0 vs 0.621 at slot 3.  Slot 0 is dragged down by a single
-  dominant PC at raw (consistent with the theatricality direction
-  identified in the canonical-angles work); shrinking just the
-  top-1 PC closes most of the gap (slot 0 jumps +0.08 ρ on
-  desc+inst and +0.09 on responses going K=0 → K=1, while slot 3
-  only gains ~+0.02).
-- Mild whitening (K ∈ {2, 3, 4}) gives a small but real bump
-  over raw at slot 3 for both sources; the curves are otherwise
-  flat across K, then erode at K ≥ 5 (most visible on responses
-  slot 3 at K=5).
+- **Slot 0 vs slot 3 reveal completely different whitening
+  behaviours.**  At slot 0 the whitened curves sit ~0.05--0.10 ρ
+  *above* raw at every layer (the gap is essentially constant
+  across the 7 K values -- a single dominant PC is doing all the
+  work, consistent with the theatricality direction identified in
+  the canonical-angles analysis).  At slot 3 raw and whitened
+  curves are tightly bunched throughout: the slot-3 representation
+  has already implicitly factored that PC out.
+- **The slot-3 jump at layer ~25** is sharp and unmistakable:
+  desc+inst ρ rises from ~0.43 at layer 22 to ~0.62 at layer 25,
+  then slowly decays to ~0.48 by layer 60.  Layer 25 is the
+  current Qwen-3-32B analysis-point default (in
+  ``rho_by_slot_and_K.py``, ``whitening_k_sweep.py``,
+  ``gpt_sonnet_weight_sweep.py``, etc.): it sits at the start of
+  the high-ρ plateau without paying the late-layer decay penalty.
+  Slot 0 has a smoother, more gradual rise with no clean cliff
+  edge.
+- **Both slots peak in mid-to-late layers** (slot 0 around
+  layers 50-55; slot 3 around layers 25-27) and **drop sharply at
+  the final 1-2 layers**, consistent with the model's last-layer
+  output being optimised for next-token logits rather than
+  identity-encoding geometry.
+- **K=6 starts to underperform K∈{2, 3, 4}** at slot 3 past layer
+  ~30 (visible as the red curve sliding below the others) -- a
+  gentle warning against aggressive whitening at deep layers.
+
+#### `pair_slice_plots.py`
+
+Per-axis-pair 2D "slice" plots that show every trait and role in the
+corpus projected into the plane defined by the pair.  For each
+``(pos, neg)`` pair:
+
+- **origin** = trait mean (in the chosen whitening regime),
+- **y-axis** = ``(pos − neg) / |pos − neg|`` -- pos at top,
+- **x-axis** = orthogonal projection of ``(midpoint − trait_mean)``
+  into the plane, then unitised.  This is the "common-mode"
+  direction that both poles share relative to the trait mean.
+
+The plot annotates trait/role names with a greedy collision-free
+algorithm (priority = distance from origin + a hand-curated semantic
+bonus dict, with the pair's own poles always shown as bold pole
+labels).  Each panel also prints to stdout the d_pos/d_neg/d_mid
+distances and the top six entities at each axis extreme.
+
+Whitening uses the standard
+``canonical_angles.data.build_augmented_whitening_pool`` (roles +
+traits + ``default.pt``, **no** leave-out -- these are
+visualisation plots, not held-out statistics) followed by
+``fit_whitening("soft_K", pool, K=K)``, matching the rest of the
+K-sweep tooling.
+
+The **curated pair list** in ``DEFAULT_PAIRS`` is the set of 13
+axis pairs (out of the 33 with judging data) for which::
+
+    |midpoint - trait_mean|  ≥  0.5 × |pos - neg|
+
+at slot 3, layer 25, K=3 soft whitening -- i.e. axes whose +/- pole
+pair sits noticeably *off* the trait-mean origin, indicating a
+substantial common-mode component shared by both poles relative to
+the corpus.  Sorted by that ratio descending::
+
+    systems_thinker / analytical    0.842
+    relativist / absolutist         0.806
+    ecocentric / anthropocentric    0.753   ⚠ y-flag
+    individualistic / collectivistic 0.742  ⚠ y-flag
+    reductionist / holistic         0.708
+    progressive / conservative      0.655
+    egalitarian / elitist           0.637
+    convergent / divergent          0.634
+    casual / formal                 0.576
+    forgiving / unforgiving         0.571   ⚠ y-flag
+    practical / theoretical         0.521
+    improvisational / methodical    0.506
+    concise / verbose               0.502
+
+Three of the 13 carry an explicit ``y_flag`` describing where the
+y-direction's actual meaning departs from the pair name -- typically
+because the trait description leaned into a hyperbolic / over-loaded
+framing of one pole.  The 7 originally-curated pairs (the L24/K4
+"near-miss" audit set, minus ``helpful/unhelpful`` whose ratio
+dropped to 0.447 at L25/K3) all retained their L24/K4 axis labels
+verbatim under L25/K3 -- the +/-x and +/-y top-entity lists shifted
+only at the noise-floor.
+
+Outputs (to ``--out_dir``, default
+``roger/axis_judge_experiments/pair_slices``):
+
+- One PNG per pair, named ``{pos}_vs_{neg}_slice_K{K}.png`` (so the
+  K=3 set lives alongside the historical K=4 set without overwriting).
+
+```bash
+# Default: all 8 curated pairs at slot 3, layer 25, K=3
+uv run python results_analysis/pair_slice_plots.py
+
+# One specific pair at non-default whitening
+uv run python results_analysis/pair_slice_plots.py \
+    --pairs progressive,conservative --K 4 \
+    --out_dir /tmp/slices_K4
+```
 
 ### Pole orientation convention
 

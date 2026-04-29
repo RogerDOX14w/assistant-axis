@@ -22,10 +22,14 @@ results_analysis/canonical_angles/
   whitening.py         WhiteningBasis: raw / soft_K / lw / oas
                        fit_whitening, parse_whitening_spec
   plot_helpers.py      plot_per_slot_panels, plot_overlay_curves, plot_grid
+  ca1_plane.py         CA1Decomposition (a_1 / b_1 / e_+ / e_- / shear),
+                       compute_ca1_decomposition, plot_ca1_plane_pre_post_shear,
+                       collision-aware label placement
   README.md            (this file)
   plots/
     goal_vs_nogoal_mutual.py            (1st canonical wrapper)
     combos_vs_traits_roles_pooled.py    (2nd canonical wrapper)
+    ca1_plane_pre_post_shear.py         CA1-plane visualization, pre/post shear
 ```
 
 ## What the compute layer does
@@ -149,7 +153,7 @@ inject ``v_theat`` into the pool's PCA without leaking same-kind
 information.  Empirically, **nearly inert**:
 
 - Variance along ``v_theat`` in the default-augmented pool (slot 3,
-  layer 24): 33.5, vs 32.2 in the un-augmented standalone-only pool --
+  layer 25): 33.5, vs 32.2 in the un-augmented standalone-only pool --
   a 4% increase from one new row out of 520.
 - Top-100 PCs cover 78.5% of ``v_theat`` (aug) vs 70.8% (un-aug) --
   modest improvement only in the long tail.
@@ -284,7 +288,7 @@ which is exactly the default's projection onto the theatricality axis.
 
 ### Empirical effect
 
-Slot 3, layer 24, r and t averaged, K=8 soft whitening (augmented
+Slot 3, layer 25, r and t averaged, K=8 soft whitening (augmented
 pool):
 
 | metric | combo_residual | combo_residual_theat_shifted |
@@ -396,12 +400,14 @@ uv run python -m results_analysis.canonical_angles.plots.combos_vs_traits_roles_
 ### `plots/layer_sweep.py`
 
 Goal-vs-nogoal canonical-angle spectrum across multiple transformer
-layers, with `raw` and `K=8 soft` whitening shown side by side.  Defaults
-to layers `[18, 20, 24, 26, 28, 32]` (the analysis-relevant range), slots
-`[0, 3]` (one row per slot), 2x2 panel grid, rainbow-colored layer curves
-with early layers drawn on top.  Useful for "is L24 still the right
-choice?" sanity checks: at slot 3 raw, alignment between goal and non-goal
-residuals is roughly monotonic in depth across this range.
+layers, with `raw` and `K=3 soft` whitening shown side by side.
+Defaults to a 17-layer set spanning `17, 21, 25, 27, 29, 31, ..., 53`
+(centered on Qwen-3-32B's analysis layer 25 with 2-layer spacing on
+the high side), slots `[0, 3]` (one row per slot), 2x2 panel grid,
+rainbow-colored layer curves with early layers drawn on top.  Useful
+for "is L25 still the right choice?" sanity checks: at slot 3 raw,
+alignment between goal and non-goal residuals is roughly monotonic in
+depth across this range.
 
 ```bash
 # Default
@@ -452,6 +458,49 @@ uv run python -m results_analysis.canonical_angles.plots.whitening_sweep_with_nu
     --slot 1 --K 1 4 16 64 --n_null_samples 50 \
     --output /tmp/sweep_slot1.png
 ```
+
+## CA1-plane visualization (`plots/ca1_plane_pre_post_shear.py`)
+
+A two-panel figure showing the first-canonical-angle plane between the
+goal and no-goal residual subspaces of one of three configurations
+(`--kind r | t | combined`).
+
+The library underlying it -- `canonical_angles/ca1_plane.py` -- exposes:
+
+* `CA1Decomposition` dataclass: the canonical vectors `a_1`, `b_1`, the
+  bisectors `e_+`, `e_-` (eigenvectors of the orthogonalising shear),
+  the shear eigenvalues `lambda_+ = sqrt(tan(theta_1/2))` and
+  `lambda_- = sqrt(cot(theta_1/2))`, and the post-shear unit directions
+  `a_1' = (e_+ + e_-) / sqrt(2)`, `b_1' = (e_+ - e_-) / sqrt(2)`.
+* `compute_ca1_decomposition(A, B)`: the math, geometry-agnostic about
+  what the subspaces are.
+* `plot_ca1_plane_pre_post_shear(decomp, entities, ...)`: the figure.
+  Pre-shear is a tall-narrow panel on the left (data hugs `e_+`); post-shear
+  is a square panel on the right (data fills the plane after the shear
+  redistribution).  All entities are projected into the plane,
+  collision-aware-labelled by semantic priority + corpus membership, and
+  the four corpus centroids (all roles, all traits, goal corpus, nogoal
+  corpus) are overlaid as stars.  Returns a `matplotlib.figure.Figure`;
+  the caller saves with appropriate metadata.
+
+Example::
+
+    # Combined pooled CA1 plane:
+    uv run python -m results_analysis.canonical_angles.plots.ca1_plane_pre_post_shear \
+        --kind combined --slot 3 --layer 25 \
+        --output roger/ca1_plane_combined_s3_L25.png
+
+    # r and t kinds (the 30-vs-30 single-grid versions):
+    for kind in r t; do
+        uv run python -m results_analysis.canonical_angles.plots.ca1_plane_pre_post_shear \
+            --kind $kind --slot 3 --layer 25 \
+            --output roger/ca1_plane_${kind}_s3_L25.png
+    done
+
+By default the plot uses theatricality-shifted residuals; pass
+`--no-theat_shift` to disable.  The standalone-corpus colour-coding (red =
+goal, blue = nogoal, grey = neither) reads `data/goal_roles_and_traits.json`
+unless `--goal_list` overrides.
 
 ## Adding a new wrapper
 

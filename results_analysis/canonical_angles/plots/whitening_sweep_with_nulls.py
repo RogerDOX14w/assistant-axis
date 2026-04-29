@@ -73,7 +73,7 @@ from pathlib import Path
 
 import numpy as np
 
-from assistant_axis import png_metadata
+from assistant_axis import png_metadata, suptitle_with_specs
 from .. import (
     AggSpec,
     CASpec,
@@ -108,9 +108,10 @@ def parse_args() -> argparse.Namespace:
                    help="Combination kinds to compute and average (default: r t)")
     p.add_argument("--slot", type=int, default=3,
                    help="Token-slot index (default: 3 = post-header \\n)")
-    p.add_argument("--layer", type=int, default=24,
-                   help="Transformer layer (default: 24)")
-    p.add_argument("--K", nargs="+", type=int, default=[1, 2, 4, 8, 16],
+    p.add_argument("--layer", type=int, default=25,
+                   help="Transformer layer (default: 25 -- Qwen-3-32B "
+                        "optimum from rho_by_layer.py)")
+    p.add_argument("--K", nargs="+", type=int, default=[1, 2, 3, 4, 6, 8],
                    help="K values for soft-K whitening (default: 1 2 4 8 16)")
     p.add_argument("--methods", nargs="+", default=["lw"],
                    choices=["lw", "oas"],
@@ -325,28 +326,26 @@ def _fit_anisotropic(pool_mat: np.ndarray, frac: float
 # Plot
 # ---------------------------------------------------------------------------
 
-# K spectrum colors (purple -> blue/green -> yellow -> orange -> red).
-K_COLORS = {
-    1:  "#7B2D8E",
-    2:  "#1FB199",
-    4:  "#F2E60E",
-    8:  "#F18F26",
-    16: "#D7191C",
-}
 LW_COLOR  = "#777777"
 OAS_COLOR = "#8B4513"
 
 
-def _color_for_K(K: int) -> str:
-    """Color for a soft-K value.  Falls back to a viridis sample for
-    K values outside the canonical 1/2/4/8/16 set."""
-    if K in K_COLORS:
-        return K_COLORS[K]
+def _build_K_palette(Ks: list[int]) -> dict:
+    """Map each soft-K value to a plasma sample.
+
+    Spacing is uniform in *list-position* (not in K itself), so the
+    colors step through plasma in lock-step with the K values supplied
+    on the CLI -- which gives finer color spacing automatically when
+    the user passes a denser K set.  Plasma runs dark purple → magenta
+    → orange → yellow; we stop at 0.9 to avoid the bright-yellow
+    extreme that's hard to read on white.
+    """
     import matplotlib.pyplot as plt
-    # Map any K to the [0, 1] range of plasma 0..0.9 by log2
-    import math
-    t = min(max(math.log2(K) / math.log2(64), 0.0), 1.0)
-    return plt.cm.plasma(t)
+    Ks_sorted = sorted(set(Ks))
+    if len(Ks_sorted) == 1:
+        return {Ks_sorted[0]: plt.cm.plasma(0.5)}
+    ts = np.linspace(0.0, 0.9, len(Ks_sorted))
+    return {K: plt.cm.plasma(t) for K, t in zip(Ks_sorted, ts)}
 
 
 def make_plot(args, pool_size: int,
@@ -387,8 +386,12 @@ def make_plot(args, pool_size: int,
             return "Oracle Approximating Shrinkage"
         return key
 
-    # Order: lw at bottom of z, K=16 down to K=1, raw last (on top).
-    draw_order: list[tuple[str, str, str, float]] = []
+    # Order: lw at bottom of z, K=largest down to K=smallest, raw last
+    # (on top).  Build a plasma palette over the actual K set so the
+    # colors step uniformly through purple→magenta→orange→yellow no
+    # matter how dense the K set is.
+    palette = _build_K_palette(args.K)
+    draw_order: list[tuple[str, str, object, float]] = []
     # (compute_key, display_name, color, linewidth)
     if "lw" in args.methods:
         draw_order.append(("lw", _display("lw"), LW_COLOR, 1.4))
@@ -396,7 +399,7 @@ def make_plot(args, pool_size: int,
         draw_order.append(("oas", _display("oas"), OAS_COLOR, 2.6))
     for K in sorted(args.K, reverse=True):
         key = f"K={K}"
-        draw_order.append((key, _display(key), _color_for_K(K), 1.6))
+        draw_order.append((key, _display(key), palette[K], 1.6))
     draw_order.append(("raw", _display("raw"), "black", 1.6))
 
     for i, (compute_key, display_name, color, lw) in enumerate(draw_order):
@@ -433,14 +436,13 @@ def make_plot(args, pool_size: int,
                   + (" + default" if args.augment else ""))
     title_line = (f"Goal vs Non-goal canonical angles, slot {args.slot}, "
                   f"layer={args.layer}")
-    fig.suptitle(
-        title_line + "\n"
+    spec_lines = [
         f"subspaces = {args.aggregation} (30 vs 30, {kinds_str} averaged), "
-        f"origin=none\n"
+        f"origin=none",
         f"whitening pool = {pool_descr}",
-        fontsize=12, fontweight="bold",
-    )
-    fig.tight_layout(rect=(0, 0, 1, 0.93))
+    ]
+    _, top_rect = suptitle_with_specs(fig, title_line, spec_lines)
+    fig.tight_layout(rect=(0, 0, 1, top_rect))
     out_path = Path(args.output)
     out_path.parent.mkdir(parents=True, exist_ok=True)
     fig.savefig(out_path, dpi=150, bbox_inches="tight",

@@ -7,7 +7,7 @@ For each axis we compute, per entity::
     score(w) = w · ((GPT_d + GPT_i) / 2) + (1 - w) · ((Son_d + Son_i) / 2)
 
 then take Spearman ρ vs the raw activation projection at
-``(slot=3, layer=24)``, and average across all axes in the pair list.
+``(slot=3, layer=25)``, and average across all axes in the pair list.
 
 ::
 
@@ -99,7 +99,7 @@ DEFAULT_EXPERIMENT_DIR = Path(__file__).resolve().parent.parent / (
 DEFAULT_DATA_DIR = Path(__file__).resolve().parent.parent / (
     "runpod_workspace/qwen/qwen-3-32b Roger"
 )
-SLOT, LAYER = 3, 24
+SLOT, LAYER = 3, 25  # Qwen-3-32B; tuned via rho_by_layer.py.  Other models TBD.
 PARABOLA_COLOR = "#1faa4f"
 
 
@@ -266,13 +266,15 @@ def main() -> int:
     ax.set_ylabel("Per-axis Spearman ρ (slot 3, raw)", fontsize=9)
     title_line = (f"GPT/Sonnet score-blend sweep -- mean ρ across "
                   f"{n_axes} axes")
+    # set_title here functions as a suptitle (single-panel figure).
+    # Two lines only -- the legend's "Axes: sorted Sonnet-best to
+    # GPT-best" annotation already explains the slope-based ordering,
+    # so we don't repeat it in the title.
     ax.set_title(
         title_line + "\n"
         f"S={mean_arr[0]:.3f}  50/50={mean_arr[10]:.3f}  "
-        f"G={mean_arr[-1]:.3f}\n"
-        "Legend sorted Sonnet-better → GPT-better by interior slope "
-        "Δρ = ρ(0.9) − ρ(0.1)",
-        fontsize=9,
+        f"G={mean_arr[-1]:.3f}",
+        fontsize=14, fontweight="bold",
     )
     ax.set_xticks([0.0, 0.25, 0.5, 0.75, 1.0])
     ax.set_xticklabels(["0", "0.25", "0.5", "0.75", "1"], fontsize=9)

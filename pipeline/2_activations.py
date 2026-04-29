@@ -549,11 +549,37 @@ def main():
         output_dir.mkdir(parents=True, exist_ok=True)
         responses_dir = Path(args.responses_dir)
 
+        # Determine which roles need processing -- BEFORE loading the model.
+        # This lets the script run cleanly on a CPU-only box when all
+        # activations are already cached (e.g. re-running just to drive the
+        # downstream pipeline steps).  Loading ProbingModel triggers a
+        # multi-GB GPU allocation, which would fail without CUDA even when
+        # there's no actual work to do.
+        response_files = sorted(responses_dir.glob("*.jsonl"))
+        logger.info(f"Found {len(response_files)} response files")
+
+        if args.roles:
+            response_files = [f for f in response_files if f.stem in args.roles]
+        if args.name_prefix:
+            response_files = [f for f in response_files
+                              if f.stem.startswith(args.name_prefix)]
+
+        role_files = []
+        for f in response_files:
+            output_file = output_dir / f"{f.stem}.pt"
+            if output_file.exists():
+                logger.info(f"Skipping {f.stem} (already exists)")
+                continue
+            role_files.append(f)
+
+        if not role_files:
+            logger.info("Nothing to process — all activations already exist")
+            return
+
         # Load model
         logger.info(f"Loading model: {args.model}")
         pm = ProbingModel(args.model)
 
-        # Determine layers
         n_layers = len(pm.get_layers())
         logger.info(f"Model has {n_layers} layers")
 
@@ -563,27 +589,6 @@ def main():
             layers = [int(x.strip()) for x in args.layers.split(",")]
 
         logger.info(f"Extracting {len(layers)} layers")
-
-        # Get response files
-        response_files = sorted(responses_dir.glob("*.jsonl"))
-        logger.info(f"Found {len(response_files)} response files")
-
-        # Filter roles if specified
-        if args.roles:
-            response_files = [f for f in response_files if f.stem in args.roles]
-        # Filter by --name_prefix if specified
-        if args.name_prefix:
-            response_files = [f for f in response_files
-                              if f.stem.startswith(args.name_prefix)]
-
-        # Filter out existing
-        role_files = []
-        for f in response_files:
-            output_file = output_dir / f"{f.stem}.pt"
-            if output_file.exists():
-                logger.info(f"Skipping {f.stem} (already exists)")
-                continue
-            role_files.append(f)
 
         extract_headers = not args.no_headers
         total_mismatches = 0

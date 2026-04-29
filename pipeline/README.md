@@ -220,7 +220,12 @@ Double underscore `__` separates role and trait names.
 
 ## Tips
 
-- **Parallelization**: Steps 2 and 3 can run in parallel once step 1 completes
+- **Parallelization**: Steps 2 (GPU-bound) and 3 (judge-API-bound) run
+  concurrently by default — they share no resources beyond step 1's response
+  files, so the wall-clock saving is roughly the smaller of the two step
+  times.  Disable with `--steps23serial` if you want clean per-step logs
+  (e.g. for debugging); errors from either parallel branch surface and abort
+  the run before step 4.
 - **Checkpointing**: All steps skip existing outputs — delete to regenerate
 - **Task spooler**: For long-running jobs, use [task-spooler](https://github.com/justanhduc/task-spooler)
 

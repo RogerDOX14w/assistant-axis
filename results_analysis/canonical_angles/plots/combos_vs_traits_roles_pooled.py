@@ -80,9 +80,10 @@ def parse_args() -> argparse.Namespace:
                    help=f"Cached vectors directory (default: {DEFAULT_DATA_DIR})")
     p.add_argument("--kind", choices=["r", "t", "combined"], default="r",
                    help="Combination kind (default: r)")
-    p.add_argument("--layer", type=int, default=24,
-                   help="Transformer layer (default: 24)")
-    p.add_argument("--K", nargs="+", type=int, default=[16, 32, 64, 128],
+    p.add_argument("--layer", type=int, default=25,
+                   help="Transformer layer (default: 25 -- Qwen-3-32B "
+                        "optimum from rho_by_layer.py)")
+    p.add_argument("--K", nargs="+", type=int, default=[1, 2, 3, 4, 6, 8],
                    help="K values for soft-K whitening (default: 16 32 64 128). "
                         "A 'raw' curve is always plotted as a baseline.")
     p.add_argument("--slots", nargs="+", type=int, default=None,

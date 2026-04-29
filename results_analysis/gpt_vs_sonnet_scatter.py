@@ -258,7 +258,7 @@ def main() -> int:
 
     pooled_title = (f"GPT-4.1-mini vs Sonnet 4 per-entity scores, "
                     f"{len(per_axis)} axes pooled")
-    fig.suptitle(pooled_title, fontsize=12)
+    fig.suptitle(pooled_title, fontsize=14, fontweight="bold")
     # Reserve a top band for the suptitle, scaled to figure height.
     plt.tight_layout(rect=(0, 0, 1, 1 - 0.5 / fig_h))
     pooled_path = experiment_dir / args.pooled
@@ -294,7 +294,7 @@ def main() -> int:
     fig.supylabel("Sonnet 4 both_mean score", fontsize=11)
     grid_title = (f"GPT-4.1-mini vs Sonnet 4 per-entity scores, "
                   f"by axis ({len(axes_list)} axes; jitter added)")
-    fig.suptitle(grid_title, fontsize=12)
+    fig.suptitle(grid_title, fontsize=14, fontweight="bold")
     # Leave a band at the top for the suptitle (otherwise it overlaps the
     # top row of per-panel titles when n_rows is large).
     plt.tight_layout(rect=(0, 0, 1, 1 - 0.4 / max(n_rows, 1)))

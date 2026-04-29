@@ -26,7 +26,15 @@
 #   ./pipeline/run_pipeline.sh --types r_combinations          # only r_ combos
 #   ./pipeline/run_pipeline.sh --types r_combinations t_combinations roles traits
 #   ./pipeline/run_pipeline.sh --skip-gpu-check                # bypass pre-flight
-#   (RECOMMEND RUNNING STEPS 1 AND 2 INDIVIDUALLY; 3 CAN RUN IN PARALLEL ONCE 1 IS DONE)
+#   ./pipeline/run_pipeline.sh --steps23serial                 # disable parallel steps 2+3
+#
+# Step 2/3 parallelism (default ON): step 2 (GPU-bound activation extraction)
+# and step 3 (judge-API-bound response scoring) share no resources beyond
+# step 1's response files, so they run concurrently by default.  Step 2's
+# stdout is prefixed with "[step2] " and step 3's with "[step3] " so the
+# interleaved output is still readable; if you prefer clean per-step logs
+# (e.g. for debugging) pass --steps23serial.  The script waits for both to
+# finish (and surfaces failures of either) before moving on to step 4.
 #
 # Pre-flight check:
 #   Before any GPU work, the script checks every visible GPU and aborts if
@@ -78,6 +86,15 @@ TMPFS_HF_HOME=/dev/shm/hf-cache
 # AGENT_NOTES.md / README.md.  Pass --skip-gpu-check to bypass.
 GPU_BUSY_THRESHOLD_MIB=2048
 
+# Run Step 2 (GPU-bound activation extraction) and Step 3 (judge-API-bound
+# response scoring) concurrently.  They share no resources -- step 2 uses the
+# GPU and step 3 talks to OpenAI/Anthropic over the network -- and only depend
+# on step 1's responses, which are fully written before step 2 begins.
+# Wall-clock savings can be substantial when step 3 is hours of API calls.
+# Disable with --steps23serial if you want the historical sequential behaviour
+# (cleaner per-step logs; useful for debugging).
+STEPS23_PARALLEL=true
+
 # ---- Parse command line ---------------------------------------------------
 TYPES=""
 SKIP_GPU_CHECK=false
@@ -101,6 +118,8 @@ while [[ $# -gt 0 ]]; do
             SKIP_GPU_CHECK=true; shift ;;
         --gpu-busy-threshold-mib)
             GPU_BUSY_THRESHOLD_MIB="$2"; shift 2 ;;
+        --steps23serial)
+            STEPS23_PARALLEL=false; shift ;;
         --types)
             shift
             while [[ $# -gt 0 && ! "$1" =~ ^-- ]]; do
@@ -158,6 +177,7 @@ echo "Mode:   $MODE"
 echo "Output: $OUTPUT_DIR"
 echo "TP size:$TENSOR_PARALLEL_SIZE"
 echo "Tmpfs:  $USE_TMPFS"
+echo "Steps 2+3: $([ "$STEPS23_PARALLEL" = "true" ] && echo "parallel (GPU+judge concurrent)" || echo "serial (--steps23serial)")"
 if [ "$MODE" = "christina" ]; then
     echo "Roles:  $ROLES_DIR"
 else
@@ -345,15 +365,7 @@ if [ "$MODE" = "christina" ]; then
         --output_dir "$OUTPUT_DIR/responses"
 
     echo ""
-    echo "=== Step 2: Extracting activations ==="
-    uv run 2_activations.py \
-        --model "$MODEL" \
-        --responses_dir "$OUTPUT_DIR/responses" \
-        --output_dir "$OUTPUT_DIR/activations" \
-        --tensor_parallel_size "$TENSOR_PARALLEL_SIZE" \
-        --batch_size 8
 
-    echo ""
     # Infer entity_type for step 3 from ROLES_DIR so the 9 collision names
     # (ascetic, contrarian, ... stoic) are scored against the right prompt.
     # Christina mode is standalone-only (no combinations).
@@ -363,13 +375,50 @@ if [ "$MODE" = "christina" ]; then
         *) echo "ERROR: cannot infer --entity_type from ROLES_DIR=$ROLES_DIR"; exit 1 ;;
     esac
 
-    echo "=== Step 3: Scoring responses ==="
-    uv run 3_judge.py \
-        --entity_type "$CHR_ENT_TYPE" \
-        --responses_dir "$OUTPUT_DIR/responses" \
-        --output_dir "$OUTPUT_DIR/scores"
+    # -- Step 2 + Step 3 (concurrent by default; serial with --steps23serial)
+    christina_step2() {
+        set -e
+        set -o pipefail
+        echo "=== Step 2: Extracting activations ==="
+        uv run 2_activations.py \
+            --model "$MODEL" \
+            --responses_dir "$OUTPUT_DIR/responses" \
+            --output_dir "$OUTPUT_DIR/activations" \
+            --tensor_parallel_size "$TENSOR_PARALLEL_SIZE" \
+            --batch_size 8
+    }
+    christina_step3() {
+        set -e
+        set -o pipefail
+        echo "=== Step 3: Scoring responses ==="
+        uv run 3_judge.py \
+            --entity_type "$CHR_ENT_TYPE" \
+            --responses_dir "$OUTPUT_DIR/responses" \
+            --output_dir "$OUTPUT_DIR/scores"
+    }
 
+    if [ "$STEPS23_PARALLEL" = "true" ]; then
+        echo "Running Step 2 (GPU) and Step 3 (judge API) concurrently."
+        echo "Disable with --steps23serial.  stdout is prefixed with [step2]/[step3]."
+        echo ""
+        ( christina_step2 2>&1 | sed -u 's/^/[step2] /' ) &
+        PID2=$!
+        ( christina_step3 2>&1 | sed -u 's/^/[step3] /' ) &
+        PID3=$!
+        fail=0
+        wait $PID2 || { echo "ERROR: Step 2 failed (exit $?)"; fail=1; }
+        wait $PID3 || { echo "ERROR: Step 3 failed (exit $?)"; fail=1; }
+        if [ "$fail" -ne 0 ]; then
+            echo "=== Pipeline aborted: parallel step 2/3 had failures ==="
+            exit 1
+        fi
+    else
+        christina_step2
+        echo ""
+        christina_step3
+    fi
     echo ""
+
     echo "=== Step 4: Computing vectors ==="
     uv run 4_vectors.py \
         --activations_dir "$OUTPUT_DIR/activations" \
@@ -507,50 +556,83 @@ else
     done
     DEDUP_TYPES="${DEDUP_TYPES# }"
 
-    # -- Step 2: Extract activations -----------------------------------------
-    echo "=== Step 2: Extracting activations ==="
-    for type in $TYPES; do
-        echo "--- Step 2 [$type] ---"
-        type_dir_name=$(type_subdir "$type")
-        TYPE_DIR="$OUTPUT_DIR/$type_dir_name"
-        type_for_symlink="$type"; type="$type_dir_name"
-        symlink_default activations pt
-        type="$type_for_symlink"
+    # -- Step 2 + Step 3 (concurrent by default; serial with --steps23serial) ----
+    # Step 2 is GPU-bound (model forward pass + hidden-state hooks); step 3 is
+    # judge-API-bound (network calls).  They share no resources beyond step 1's
+    # response files (which are fully written by now), so we can run them in
+    # parallel for substantial wall-clock savings.  Each runs in its own
+    # subshell with stdout/stderr prefixed for readability.
 
-        prefix_flag=""
-        case "$type" in
-            r_combinations) prefix_flag="--name_prefix r_" ;;
-            t_combinations) prefix_flag="--name_prefix t_" ;;
-        esac
+    run_step2_loop() {
+        set -e
+        set -o pipefail
+        echo "=== Step 2: Extracting activations ==="
+        for type in $TYPES; do
+            echo "--- Step 2 [$type] ---"
+            type_dir_name=$(type_subdir "$type")
+            TYPE_DIR="$OUTPUT_DIR/$type_dir_name"
+            type_for_symlink="$type"; type="$type_dir_name"
+            symlink_default activations pt
+            type="$type_for_symlink"
 
-        uv run 2_activations.py \
-            --model "$MODEL" \
-            --responses_dir "$TYPE_DIR/responses" \
-            --output_dir "$TYPE_DIR/activations" \
-            --tensor_parallel_size "$TENSOR_PARALLEL_SIZE" \
-            --batch_size 8 $prefix_flag
-    done
-    echo ""
+            prefix_flag=""
+            case "$type" in
+                r_combinations) prefix_flag="--name_prefix r_" ;;
+                t_combinations) prefix_flag="--name_prefix t_" ;;
+            esac
 
-    # -- Step 3: Score responses ----------------------------------------------
-    echo "=== Step 3: Scoring responses ==="
-    for type in $DEDUP_TYPES; do
-        echo "--- Step 3 [$type] ---"
-        TYPE_DIR="$OUTPUT_DIR/$type"
+            uv run 2_activations.py \
+                --model "$MODEL" \
+                --responses_dir "$TYPE_DIR/responses" \
+                --output_dir "$TYPE_DIR/activations" \
+                --tensor_parallel_size "$TENSOR_PARALLEL_SIZE" \
+                --batch_size 8 $prefix_flag
+        done
+    }
 
-        # entity_type disambiguates 9 names that exist in both data/roles and
-        # data/traits, and tells the judge when to use the combined-eval prompt.
-        case "$type" in
-            roles)        ENT_TYPE=role ;;
-            traits)       ENT_TYPE=trait ;;
-            combinations) ENT_TYPE=combination ;;
-        esac
+    run_step3_loop() {
+        set -e
+        set -o pipefail
+        echo "=== Step 3: Scoring responses ==="
+        for type in $DEDUP_TYPES; do
+            echo "--- Step 3 [$type] ---"
+            TYPE_DIR="$OUTPUT_DIR/$type"
 
-        uv run 3_judge.py \
-            --entity_type "$ENT_TYPE" \
-            --responses_dir "$TYPE_DIR/responses" \
-            --output_dir "$TYPE_DIR/scores"
-    done
+            # entity_type disambiguates 9 names that exist in both data/roles and
+            # data/traits, and tells the judge when to use the combined-eval prompt.
+            case "$type" in
+                roles)        ENT_TYPE=role ;;
+                traits)       ENT_TYPE=trait ;;
+                combinations) ENT_TYPE=combination ;;
+            esac
+
+            uv run 3_judge.py \
+                --entity_type "$ENT_TYPE" \
+                --responses_dir "$TYPE_DIR/responses" \
+                --output_dir "$TYPE_DIR/scores"
+        done
+    }
+
+    if [ "$STEPS23_PARALLEL" = "true" ]; then
+        echo "Running Step 2 (GPU) and Step 3 (judge API) concurrently."
+        echo "Disable with --steps23serial.  stdout is prefixed with [step2]/[step3]."
+        echo ""
+        ( run_step2_loop 2>&1 | sed -u 's/^/[step2] /' ) &
+        PID2=$!
+        ( run_step3_loop 2>&1 | sed -u 's/^/[step3] /' ) &
+        PID3=$!
+        fail=0
+        wait $PID2 || { echo "ERROR: Step 2 failed (exit $?)"; fail=1; }
+        wait $PID3 || { echo "ERROR: Step 3 failed (exit $?)"; fail=1; }
+        if [ "$fail" -ne 0 ]; then
+            echo "=== Pipeline aborted: parallel step 2/3 had failures ==="
+            exit 1
+        fi
+    else
+        run_step2_loop
+        echo ""
+        run_step3_loop
+    fi
     echo ""
 
     # -- Step 4: Compute vectors ----------------------------------------------

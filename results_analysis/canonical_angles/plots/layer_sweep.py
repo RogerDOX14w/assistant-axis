@@ -1,19 +1,17 @@
 """Layer-sweep plot: how the goal/non-goal canonical-angle spectrum
 varies across transformer layers, with two whitening regimes side by side.
 
-Defaults: layers 18/20/24/26/28/32, slots 0 and 3 (2 rows), raw vs
-``K=8 soft`` whitening (2 columns).  Subspaces are
-``combo_residual_theat_shifted`` marginals (origin=none); whitening
-pool is ``roles+traits`` standalones (60 corresponding standalones
-held out) plus the corpus ``default.pt`` as a single anchor row.
+Defaults: a 17-layer set spanning ``17, 21, 25, 27, 29, 31, ..., 53``
+(centered on Qwen-3-32B's analysis layer 25 with 2-layer spacing on
+the high side), slots 0 and 3 (2 rows), raw vs ``K=3 soft`` whitening
+(2 columns).  Subspaces are ``combo_residual_theat_shifted`` marginals
+(origin=none); whitening pool is ``roles+traits`` standalones (60
+corresponding standalones held out) plus the corpus ``default.pt`` as
+a single anchor row.
 
-What this plot answers: "is layer 24 still the right choice for the
-analysis?"  At slot 3 raw, alignment between goal and non-goal residuals
-is roughly monotonic with depth in the 18-32 range (smallest first
-canonical angle at L32), so picking L24 is a *defensible* but not
-*optimal* trade-off between depth and computational cost.  After
-whitening, the layer ordering is less monotonic -- different layers
-carry different shared-vs-differentiating structure.
+What this plot answers: "how does the goal/non-goal canonical-angle
+spectrum change with depth, and is our analysis layer (25 for
+Qwen-3-32B) a sensible single-layer choice?"
 
 Cached results are pickled to ``--cache_dir`` (default ``/tmp``) keyed
 on ``(kinds, slots, layers, K, scope, heldout)``; first run takes a few
@@ -56,7 +54,7 @@ from ..data import (
     build_subspace,
     build_whitening_pool,
 )
-from assistant_axis import png_metadata
+from assistant_axis import png_metadata, suptitle_with_specs
 
 
 def parse_args() -> argparse.Namespace:
@@ -70,12 +68,17 @@ def parse_args() -> argparse.Namespace:
                    choices=["r", "t"],
                    help="Combination kinds to compute and average (default: r t)")
     p.add_argument("--layers", nargs="+", type=int,
-                   default=[18, 20, 24, 26, 28, 32],
-                   help="Transformer layers to sweep (default: 18 20 24 26 28 32)")
+                   default=[17, 21, 25, 27, 29, 31, 33, 35, 37, 39,
+                           41, 43, 45, 47, 49, 51, 53],
+                   help="Transformer layers to sweep (default: a 17-layer "
+                        "set centered on Qwen-3-32B layer 25 with 2-layer "
+                        "spacing 21-53)")
     p.add_argument("--slots", nargs="+", type=int, default=[0, 3],
                    help="Slot indices (one panel row per slot; default: 0 3)")
-    p.add_argument("--K", type=int, default=8,
-                   help="K for the soft-K whitening column (default: 8)")
+    p.add_argument("--K", type=int, default=3,
+                   help="K for the soft-K whitening column (default: 3 -- "
+                        "the project-wide single-K choice from the K-sweep "
+                        "work; was 8)")
     p.add_argument("--scope", default="roles+traits",
                    choices=["roles", "traits", "roles+traits"],
                    help="Whitening pool scope (default: roles+traits)")
@@ -197,13 +200,13 @@ def make_plot(args, results: dict) -> None:
                   + (" (60 held out)" if args.heldout else " (no leave-out)")
                   + (" + default" if args.augment else ""))
     title_line = "Goal vs Non-goal canonical angles by transformer layer"
-    fig.suptitle(
-        title_line + "\n"
-        f"subspaces = {args.aggregation} (30 vs 30, {kinds_str} averaged), origin=none\n"
+    spec_lines = [
+        f"subspaces = {args.aggregation} (30 vs 30, {kinds_str} averaged), "
+        f"origin=none",
         f"whitening pool = standalone {pool_descr}",
-        fontsize=12, fontweight="bold",
-    )
-    fig.tight_layout(rect=(0, 0, 1, 0.94))
+    ]
+    _, top_rect = suptitle_with_specs(fig, title_line, spec_lines)
+    fig.tight_layout(rect=(0, 0, 1, top_rect))
     out_path = Path(args.output)
     out_path.parent.mkdir(parents=True, exist_ok=True)
     fig.savefig(out_path, dpi=150, bbox_inches="tight",

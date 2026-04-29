@@ -130,7 +130,7 @@ def plot_per_slot_panels(records: list[Record],
         ax.axis("off")
 
     if title:
-        fig.suptitle(title, fontsize=13, fontweight="bold")
+        fig.suptitle(title, fontsize=14, fontweight="bold")
     # tight_layout with rect leaves room for the suptitle
     fig.tight_layout(rect=(0, 0, 1, 0.97 if title else 1.0))
     return fig
@@ -215,7 +215,7 @@ def plot_grid(records: list[Record],
                     _plot_single_curve(ax, cell_records)
 
     if title:
-        fig.suptitle(title, fontsize=13, fontweight="bold")
+        fig.suptitle(title, fontsize=14, fontweight="bold")
     fig.tight_layout(rect=(0, 0, 1, 0.97 if title else 1.0))
     return fig
 

@@ -4,7 +4,7 @@ for two judge sources (desc+inst and GPT responses).
 
 For each slot ∈ {0, 1, 2, 3} and each K ∈ {0, 1, 2, 3, 4, 5} we compute
 the mean per-axis Spearman ρ between the soft-K-whitened activation
-projection at ``(slot, layer=24)`` and two score sources:
+projection at ``(slot, layer=25)`` and two score sources:
 
 - **desc+inst** -- 33 axes (``pair_list_33.json``), score per entity is
   the 4-way mean of ``GPT_d, GPT_i, Son_d, Son_i``;
@@ -81,7 +81,7 @@ DEFAULT_EXPERIMENT_DIR = Path(__file__).resolve().parent.parent / (
 DEFAULT_DATA_DIR = Path(__file__).resolve().parent.parent / (
     "runpod_workspace/qwen/qwen-3-32b Roger"
 )
-LAYER = 24
+LAYER = 25  # Qwen-3-32B; tuned via rho_by_layer.py.  Other models TBD.
 SLOTS = [0, 1, 2, 3]
 DEFAULT_KS = [0, 1, 2, 3, 4, 5]
 
@@ -336,7 +336,7 @@ def main() -> int:
                   f"(layer={LAYER}; desc+inst = {len(pairs_di)} axes, "
                   f"GPT+Sonnet 4-way mean; "
                   f"responses = {len(pairs_resp)} axes, GPT-only)")
-    fig.suptitle(title_line, fontsize=10, y=1.01)
+    fig.suptitle(title_line, fontsize=14, fontweight="bold", y=1.01)
     plt.tight_layout(rect=(0, 0, 1, 0.88))
 
     out = experiment_dir / args.plot

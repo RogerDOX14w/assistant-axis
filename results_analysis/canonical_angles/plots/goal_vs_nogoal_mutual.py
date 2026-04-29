@@ -45,10 +45,11 @@ direction of average effect.  Other origin modes (``default``,
 ``pool_mean``, ``full_combo_mean``, ``paired``) are exposed via
 ``--origin``.
 
-Whitening defaults to ``raw`` (no whitening).  With ``--whitening soft_K=4``
-etc., a PCA whitening basis is fit on the ``--pool`` of standalone
-roles+traits (with held-out entities optionally excluded) and applied to
-each subspace before SVD.
+Whitening defaults to ``['raw', 'soft_K=3']`` -- raw and the project-wide
+single-K choice plotted side by side.  Pass any subset of
+``raw|soft_K=N|lw|oas`` to override; the basis is fit on the ``--pool`` of
+standalone roles+traits (with held-out entities optionally excluded) and
+applied to each subspace before SVD.
 
 Examples
 --------
@@ -125,11 +126,12 @@ def parse_args() -> argparse.Namespace:
     p.add_argument("--slots", nargs="+", default=None,
                    help="Slot specs: int / 'avg(0,3)' / 'concat(3,7)'. "
                         "Default: all slots from default.pt.")
-    p.add_argument("--layer", type=int, default=24,
-                   help="Transformer layer (default: 24)")
-    p.add_argument("--whitening", nargs="+", default=["raw"],
+    p.add_argument("--layer", type=int, default=25,
+                   help="Transformer layer (default: 25 -- Qwen-3-32B "
+                        "optimum from rho_by_layer.py)")
+    p.add_argument("--whitening", nargs="+", default=["raw", "soft_K=3"],
                    help="Whitening regimes: 'raw' | 'soft_K=N' | 'lw' | 'oas' "
-                        "(default: raw)")
+                        "(default: raw soft_K=3)")
     p.add_argument("--pool", default="roles+traits",
                    choices=["roles", "traits", "roles+traits"],
                    help="Whitening pool scope (only used when whitening != raw)")

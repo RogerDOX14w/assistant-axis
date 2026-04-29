@@ -78,7 +78,7 @@ import numpy as np
 import torch
 from scipy.stats import spearmanr
 
-from assistant_axis import png_metadata
+from assistant_axis import png_metadata, suptitle_with_specs
 from results_analysis.axis_judge_correlation import _load_vector_file
 from results_analysis.canonical_angles.data import (
     build_augmented_whitening_pool,
@@ -91,9 +91,9 @@ DEFAULT_EXPERIMENT_DIR = Path(__file__).resolve().parent.parent / (
 DEFAULT_DATA_DIR = Path(__file__).resolve().parent.parent / (
     "runpod_workspace/qwen/qwen-3-32b Roger"
 )
-LAYER = 24
+LAYER = 25  # Qwen-3-32B; tuned via rho_by_layer.py.  Other models TBD.
 SLOT = 3
-K_VALUES = [0, 1, 2, 4, 8, 16, 32, 64, 128]
+K_VALUES = [0, 1, 2, 3, 4, 6, 8, 12, 16, 24, 32]
 
 
 def load_pool(data_dir: Path, exclude_names: set[str]):
@@ -311,13 +311,14 @@ def main() -> int:
     ax.set_xlabel("Soft-whitening K (raw = no whitening; higher K = more PCs scaled down)")
     ax.set_ylabel(f"Spearman ρ (judge scores vs. projection, slot={SLOT})")
     title_line = f"ρ vs whitening K across {len(pair_keys)} axes"
-    ax.set_title(title_line + "\n"
-                 "solid = GPT responses; dotted = desc+inst (GPT+Sonnet averaged)")
+    spec_line = ("solid = GPT responses; "
+                 "dotted = desc+inst (GPT+Sonnet averaged)")
+    _, top_rect = suptitle_with_specs(fig, title_line, spec_line)
     ax.axhline(0, color="grey", lw=0.5)
     ax.grid(alpha=0.3)
     ax.legend(loc="center left", bbox_to_anchor=(1.01, 0.5), fontsize=7,
               ncol=1)
-    plt.tight_layout()
+    plt.tight_layout(rect=(0, 0, 1, top_rect))
     plot_path = experiment_dir / args.plot
     plt.savefig(plot_path, dpi=150, bbox_inches="tight",
                 metadata=png_metadata(title=title_line))
