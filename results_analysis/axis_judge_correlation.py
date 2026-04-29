@@ -29,6 +29,7 @@ from tqdm import tqdm
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 from assistant_axis.judge import RateLimiter  # type: ignore  # noqa: E402
 from assistant_axis import png_metadata  # noqa: E402
+from results_analysis.canonical_angles.whitening import DEFAULT_SOFT_K  # noqa: E402
 
 load_dotenv()
 
@@ -1422,11 +1423,16 @@ def parse_args() -> argparse.Namespace:
 
     # Whitening.
     w = p.add_argument_group("whitening")
-    w.add_argument("--whiten_K", type=int, default=3,
-                   help="Number of top PCs to soft-scale down to "
-                        "sigma_{K+1}.  Default K=3 is a robust "
-                        "all-around pick from the K-sweep work "
-                        "(see results_analysis/whitening_k_sweep.py).")
+    w.add_argument("--whiten_K", type=int, default=DEFAULT_SOFT_K,
+                   help=f"Number of top PCs to soft-scale down to "
+                        f"sigma_{{K+1}}.  Default K={DEFAULT_SOFT_K} is the "
+                        f"current project default (see "
+                        f"results_analysis.canonical_angles.whitening."
+                        f"DEFAULT_SOFT_K).  K was set to 3 historically; "
+                        f"K=2 was adopted Apr 2026 after the LKM grid sweep "
+                        f"showed K=2 wins consistently on no-shear baselines "
+                        f"and L=2 soft-shear with K=0 is the best overall "
+                        f"primary regime.")
 
     # Scoring modes.
     sm = p.add_argument_group("scoring modes")

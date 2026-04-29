@@ -81,7 +81,10 @@ from results_analysis.canonical_angles.data import (
     DEFAULT_DATA_DIR,
     build_augmented_whitening_pool,
 )
-from results_analysis.canonical_angles.whitening import fit_whitening
+from results_analysis.canonical_angles.whitening import (
+    DEFAULT_SOFT_K,
+    fit_whitening,
+)
 
 
 DEFAULT_OUT_DIR = (Path(__file__).resolve().parent.parent
@@ -458,9 +461,10 @@ def main() -> int:
     p.add_argument("--layer", type=int, default=25,
                    help="Transformer layer (default: 25 -- Qwen-3-32B "
                         "optimum from rho_by_layer.py).")
-    p.add_argument("--K", type=int, default=3,
-                   help="Soft-K whitening (default: 3 -- the project-wide "
-                        "single-K choice from the K-sweep work).")
+    p.add_argument("--K", type=int, default=DEFAULT_SOFT_K,
+                   help=f"Soft-K whitening (default: {DEFAULT_SOFT_K} -- "
+                        f"the project soft-K default; see "
+                        f"whitening.DEFAULT_SOFT_K).")
     p.add_argument("--pairs", default=None,
                    help="Optional comma-separated pair name list to filter "
                         "DEFAULT_PAIRS, e.g. 'progressive,conservative' to "

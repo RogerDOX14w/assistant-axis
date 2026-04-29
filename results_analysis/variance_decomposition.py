@@ -111,6 +111,7 @@ from results_analysis.canonical_angles.data import (
     build_whitening_pool,
 )
 from results_analysis.canonical_angles.whitening import (
+    DEFAULT_SOFT_K,
     WhiteningBasis,
     fit_whitening,
 )
@@ -531,11 +532,11 @@ def main() -> int:
     p.add_argument("--layer", type=int, default=25,
                    help="Transformer layer (default: 25 -- Qwen-3-32B "
                         "optimum from rho_by_layer.py)")
-    p.add_argument("--K", type=int, nargs="+", default=[3],
-                   help="Soft-K whitening order(s) for the whitened "
-                        "panels.  One column per K value, plus a 'raw' "
-                        "column at the left.  Default: 4 16 (so the "
-                        "grid is 4 slots x 3 metrics).")
+    p.add_argument("--K", type=int, nargs="+", default=[DEFAULT_SOFT_K],
+                   help=f"Soft-K whitening order(s) for the whitened "
+                        f"panels.  One column per K value, plus a 'raw' "
+                        f"column at the left.  Default: [{DEFAULT_SOFT_K}] "
+                        f"(project soft-K default; see whitening.DEFAULT_SOFT_K).")
     p.add_argument("--no-augment", dest="augment", action="store_false",
                    help="Disable pool augmentation with default.pt "
                         "(default: augmented).  See "

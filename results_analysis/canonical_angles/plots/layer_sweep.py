@@ -47,6 +47,7 @@ from .. import (
     WhiteningSpec,
     compute_ca_grid,
 )
+from ..whitening import DEFAULT_SOFT_K
 from ..data import (
     AUGMENTED_POOL_VERSION,
     DEFAULT_DATA_DIR,
@@ -75,10 +76,10 @@ def parse_args() -> argparse.Namespace:
                         "spacing 21-53)")
     p.add_argument("--slots", nargs="+", type=int, default=[0, 3],
                    help="Slot indices (one panel row per slot; default: 0 3)")
-    p.add_argument("--K", type=int, default=3,
-                   help="K for the soft-K whitening column (default: 3 -- "
-                        "the project-wide single-K choice from the K-sweep "
-                        "work; was 8)")
+    p.add_argument("--K", type=int, default=DEFAULT_SOFT_K,
+                   help=f"K for the soft-K whitening column (default: "
+                        f"{DEFAULT_SOFT_K} -- the project soft-K default; "
+                        f"see whitening.DEFAULT_SOFT_K).")
     p.add_argument("--scope", default="roles+traits",
                    choices=["roles", "traits", "roles+traits"],
                    help="Whitening pool scope (default: roles+traits)")

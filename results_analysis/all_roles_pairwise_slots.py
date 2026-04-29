@@ -56,9 +56,9 @@ Usage
     # Default: all three frames, raw, all 280 roles on Roger data.
     uv run python results_analysis/all_roles_pairwise_slots.py
 
-    # Whitened K=3 version, written next to the raw frames.
+    # Whitened version (project soft-K default), written next to the raw frames.
     uv run python results_analysis/all_roles_pairwise_slots.py \\
-      --whitening soft_K=3
+      --whitening soft_K=2
 
     # Run on traits instead.
     uv run python results_analysis/all_roles_pairwise_slots.py \\
@@ -346,9 +346,10 @@ def parse_args() -> argparse.Namespace:
                    help="Where to write the PNG(s).")
     p.add_argument("--whitening", type=str, default="raw",
                    help="Whitening spec: 'raw' or 'soft_K=N' (e.g. "
-                        "'soft_K=3'). Whitening is applied to (entity - "
-                        "default) per-(slot, layer) before stats are "
-                        "computed; pool = full augmented pool, no LOO.")
+                        "'soft_K=2', the project default). Whitening is "
+                        "applied to (entity - default) per-(slot, layer) "
+                        "before stats are computed; pool = full augmented "
+                        "pool, no LOO.")
     p.add_argument("--variant", type=str, default="all",
                    choices=["A", "B", "C", "all"],
                    help="Frame variant. 'all' (default) emits A, B, and C "

@@ -4,6 +4,44 @@ Scripts that analyze outputs of the [`pipeline/`](../pipeline/) — vectors, sco
 responses, axes. Parallel in intent to [`data_analysis/`](../data_analysis/),
 which _prepares_ the role/trait data for the pipeline.
 
+## Convention: combining desc/inst scores
+
+When reducing the four (judge × mode) judge scores `{GPT_d, GPT_i,
+Son_d, Son_i}` to a single per-entity scalar, scripts in this
+directory call into the canonical helper at
+[`assistant_axis/judge_score_combine.py`](../assistant_axis/judge_score_combine.py).
+The default weighting is **inst-tiebreak** (`0.499*desc + 0.501*inst`),
+applied after averaging across the two judges per mode:
+
+```python
+from assistant_axis.judge_score_combine import combine_desc_inst_two_judges
+scores = combine_desc_inst_two_judges(g_d, g_i, s_d, s_i)
+# equivalent to: 0.499 * (g_d + s_d)/2 + 0.501 * (g_i + s_i)/2
+```
+
+The 0.499/0.501 weights are essentially equal but **act as a
+tiebreaker** for entities where desc and inst disagree, leaning
+slightly toward instructions. Empirical rationale: at slot=(3,25) /
+(0,26) / (0,49), inst-tiebreak gave consistently higher mean
+activation→judge ρ than equal weighting (~+0.0005 ρ), and equal in
+turn beat desc-tiebreak by a similar margin -- the ordering is
+monotonic across all (slot, layer) configurations tested.  This
+matches the desc/inst judge audit that found instruction-mode judging
+more reliable than description-mode (~99% defensible vs ~94%).
+
+To compare or ablate, scripts that use this helper expose a CLI flag::
+
+    --di_weights {inst_tie,equal,desc_tie}   # default: inst_tie
+
+`equal` reproduces the historical 0.5/0.5 weighting (= 4-way mean of
+the four scores). `desc_tie` is for ablation. The asymmetry only
+affects entities where the two modes disagree, so the *direction* of
+ρ comparisons remains essentially unchanged across the three weights;
+the absolute ρ shift is in the third decimal.
+
+Scripts using the helper today: `rho_by_slot_and_K.py`,
+`rho_by_layer.py`, `whitening_k_sweep.py`, `gpt_sonnet_weight_sweep.py`.
+
 ## Convention: PNG provenance metadata
 
 Every plot produced by a tracked script in this directory embeds
@@ -588,10 +626,12 @@ For each axis pair and source ∈ {`desc_inst`, `responses`}, fit a
 soft-K whitener on the held-out pool (excluding the two pair
 endpoints) at K ∈ {0, 1, 2, 4, 8, 16, 32, 64, 128}, project all
 entity vectors onto the (whitened) axis, and compute Spearman ρ
-between judge scores and projections.  The `desc_inst` source averages
-GPT and Sonnet × descriptions and instructions per entity (4-way mean);
-the `responses` source merges GPT response-mode mean scores from the
-roles + traits runs.
+between judge scores and projections.  The `desc_inst` source combines
+GPT and Sonnet × descriptions and instructions per entity using
+``assistant_axis.judge_score_combine.combine_desc_inst_two_judges``
+(default: inst-tiebreak weighting `0.499*desc + 0.501*inst`; see
+"Combining desc/inst scores" below); the `responses` source merges GPT
+response-mode mean scores from the roles + traits runs.
 
 Outputs to `--experiment_dir`:
 
@@ -706,8 +746,12 @@ categorical regime change ("averaging two judges" vs "single judge"),
 not a smooth blend, and are excluded from the parabola fit.
 
 **Decision.**  Continue to score desc+inst with both GPT-4.1-mini and
-Sonnet-4 by default and use a **50/50 mix** when reducing to a single
-score per entity.  Cost: ~6× a single-provider run for ~+0.019 ρ
+Sonnet-4 by default.  When reducing to a single score per entity, the
+helper `assistant_axis.judge_score_combine.combine_desc_inst_two_judges`
+takes the GPT/Sonnet mean separately for desc and inst, then combines
+them using the **inst-tiebreak weighting** `0.499*desc + 0.501*inst`
+(see "Combining desc/inst scores" section below for the empirical
+rationale).  Cost: ~6× a single-provider run for ~+0.019 ρ
 improvement over GPT alone (the cheaper provider) and ~+0.026 over
 Sonnet alone.  Negligible per-axis sensitivity to the exact mix
 (within ±0.01 of peak across ``w ∈ [0.1, 0.9]``).
@@ -849,8 +893,9 @@ the augmented held-out pool with only the 2 axis endpoints removed)
 we compute mean per-axis Spearman ρ between the projection at
 ``(slot, layer=25)`` and:
 
-- **desc+inst** -- 33 axes, 4-way mean of
-  ``{GPT_d, GPT_i, Son_d, Son_i}``;
+- **desc+inst** -- 33 axes, score per entity is
+  `combine_desc_inst_two_judges(GPT_d, GPT_i, Son_d, Son_i)` --
+  inst-tiebreak weighting (`0.499*desc + 0.501*inst`) by default;
 - **responses** -- 12 axes, GPT-only mean over response-mode evals.
 
 Output (to ``--experiment_dir``):
@@ -895,8 +940,9 @@ soft-K whitening.
 
 - Rows: slot 0 (body mean) and slot 3 (the ``\n``-after-``assistant``
   header).
-- Columns: ``desc+inst`` (33 axes, 4-way GPT+Sonnet mean) and
-  ``responses`` (12 axes, GPT-only response-mode mean).
+- Columns: ``desc+inst`` (33 axes, GPT+Sonnet × desc/inst combined via
+  inst-tiebreak weighting) and ``responses`` (12 axes, GPT-only
+  response-mode mean).
 - Curves: raw (black, thick) plus K ∈ {1, 2, 3, 4, 5, 6} as a
   full rainbow (purple → blue → cyan → green → yellow → red).
 - Faint vertical gridlines at every even layer.

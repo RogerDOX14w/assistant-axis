@@ -708,3 +708,102 @@ def detect_n_slots(data_dir: Path) -> int:
     """
     v = load_vector(data_dir, "traits", "default")
     return v.shape[0]
+
+
+# ---------------------------------------------------------------------------
+# Goal vs no-goal subspaces for soft-shear fitting
+# ---------------------------------------------------------------------------
+
+def build_goal_nogoal_subspaces(
+    data_dir: Path,
+    slot: int,
+    layer: int,
+    kind: str = "combined",
+    apply_theat_shift: bool = True,
+) -> tuple[np.ndarray, np.ndarray]:
+    """Load the ``(goal, nogoal)`` residual-marginal subspaces at a fixed
+    ``(slot, layer)``, ready for :func:`.whitening.fit_shear`.
+
+    This is the standard subspace constructor for soft-shear fitting.  The
+    returned arrays are columns-as-vectors -- shape ``(D, n_g)`` and
+    ``(D, n_n)`` -- where ``n_g + n_n = 60`` for ``kind='combined'``,
+    ``30 + 30`` for ``kind='r_only'`` or ``kind='t_only'``.
+
+    Parameters
+    ----------
+    data_dir : Path
+        Standard data directory (the one with
+        ``combinations/vectors/{r_goal,r_nogoal,t_goal,t_nogoal}/`` etc.).
+    slot, layer : int
+        The (slot, layer) at which to extract residuals from the (n_slots,
+        n_layers, D) tensors stored in each ``.pt``.
+    kind : str
+        - ``'combined'`` (default): pool r and t residuals -> (D, 60) vs (D, 60).
+          This is the standard soft-shear fit basis -- it captures the full
+          common-mode goal/no-goal direction shared by both r and t halves.
+        - ``'r_only'``: r-side only -> (D, 30) vs (D, 30).  Use when you
+          want a shear specific to the r-grid (goal-roles vs non-goal-traits).
+        - ``'t_only'``: t-side only -> (D, 30) vs (D, 30).  Use for the
+          mirror-image t-grid.
+    apply_theat_shift : bool
+        If True (default), add the per-(slot, layer) theatricality shift to
+        each residual vector before stacking.  This relocates the residuals
+        to the additive-model true origin (same convention as the project's
+        canonical-angles tooling).  Set False to keep the raw on-disk
+        residual frame.
+
+    Returns
+    -------
+    A_goal, A_nogoal : np.ndarray
+        Shape ``(D, n_*)`` each, dtype float32.
+
+    Examples
+    --------
+    >>> A_g, A_n = build_goal_nogoal_subspaces(data_dir, slot=3, layer=25)
+    >>> from results_analysis.canonical_angles.whitening import fit_shear
+    >>> shear = fit_shear(A_g, A_n, L=5)
+    >>> M_done = shear.apply(M)  # M is (n_entities, D)
+    """
+    if kind not in ("combined", "r_only", "t_only"):
+        raise ValueError(
+            f"Unknown kind {kind!r}; expected 'combined', 'r_only', or 't_only'."
+        )
+
+    # Per-(slot, layer) theatricality shift (or zeros if disabled).
+    if apply_theat_shift:
+        ts_full = load_theatricality_shift(data_dir)        # (n_slots, n_layers, D)
+        shift = np.asarray(ts_full[slot, layer], dtype=np.float32)
+    else:
+        # Use a default vector to get D without loading the shift artifact.
+        any_vec = load_vector(data_dir, "traits", "default")
+        D = int(any_vec.shape[-1])
+        shift = np.zeros(D, dtype=np.float32)
+
+    cv = data_dir / "combinations" / "vectors"
+
+    def _load_dir(d: Path) -> np.ndarray:
+        if not d.exists():
+            raise FileNotFoundError(
+                f"Goal/no-goal residual directory not found: {d}\n"
+                f"Generate it via:\n"
+                f"    uv run python results_analysis/compute_combo_marginals.py")
+        names = sorted(fp.stem for fp in d.glob("*.pt") if fp.stem != "default")
+        if not names:
+            raise RuntimeError(f"No .pt files in {d}")
+        cols = []
+        for n in names:
+            v = torch.load(d / f"{n}.pt", weights_only=False)
+            v = v["vector"] if isinstance(v, dict) else v
+            v = v.float().numpy()[slot, layer]   # (D,)
+            cols.append(v + shift)
+        return np.stack(cols, axis=1).astype(np.float32)     # (D, n)
+
+    if kind == "r_only":
+        return _load_dir(cv / "r_goal"), _load_dir(cv / "r_nogoal")
+    if kind == "t_only":
+        return _load_dir(cv / "t_goal"), _load_dir(cv / "t_nogoal")
+    # combined: r ∪ t along the columns
+    A_rg = _load_dir(cv / "r_goal");  A_tg = _load_dir(cv / "t_goal")
+    A_rn = _load_dir(cv / "r_nogoal"); A_tn = _load_dir(cv / "t_nogoal")
+    return (np.concatenate([A_rg, A_tg], axis=1),
+            np.concatenate([A_rn, A_tn], axis=1))

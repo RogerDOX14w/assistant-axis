@@ -4,16 +4,20 @@ average and plot mean per-axis projection-ρ vs the blend weight.
 
 For each axis we compute, per entity::
 
-    score(w) = w · ((GPT_d + GPT_i) / 2) + (1 - w) · ((Son_d + Son_i) / 2)
+    gpt_score = combine_desc_inst_one_judge(GPT_d, GPT_i, weights=di_weights)
+    son_score = combine_desc_inst_one_judge(Son_d, Son_i, weights=di_weights)
+    score(w)  = w · gpt_score + (1 - w) · son_score
 
-then take Spearman ρ vs the raw activation projection at
-``(slot=3, layer=25)``, and average across all axes in the pair list.
+where ``di_weights`` is the standard desc/inst tiebreak weighting
+(default: ``inst_tie`` = ``0.499*desc + 0.501*inst``; pass
+``--di_weights`` to override).  Spearman ρ vs the raw activation
+projection at ``(slot=3, layer=25)``, averaged across axes.
 
 ::
 
-    w = 1   → pure GPT (2-way)
-    w = 0.5 → 50/50 average (== 4-way mean of GPT_d, GPT_i, Son_d, Son_i)
-    w = 0   → pure Sonnet (2-way)
+    w = 1   → pure GPT (one judge, desc+inst-combined)
+    w = 0.5 → 50/50 average (≈ 4-way average across GPT and Sonnet)
+    w = 0   → pure Sonnet (one judge, desc+inst-combined)
 
 Empirical finding (33 axes, slot 3, raw projection):
 
@@ -90,6 +94,11 @@ import torch
 from scipy.stats import spearmanr
 
 from assistant_axis import png_metadata
+from assistant_axis.judge_score_combine import (
+    add_di_weights_arg,
+    combine_desc_inst_one_judge,
+    parse_di_weights_arg,
+)
 from results_analysis.axis_judge_correlation import _load_vector_file
 
 
@@ -141,7 +150,9 @@ def main() -> int:
     p.add_argument("--rhos_json", default="gpt_sonnet_weight_sweep.json",
                    help="Output JSON filename "
                         "(default: gpt_sonnet_weight_sweep.json).")
+    add_di_weights_arg(p)
     args = p.parse_args()
+    di_weights = parse_di_weights_arg(args.di_weights)
     experiment_dir = Path(args.experiment_dir).resolve()
     data_dir = Path(args.data_dir).resolve()
 
@@ -172,13 +183,17 @@ def main() -> int:
         g_i = json.load(open(axis_dir / "gpt" / "scores_instructions.json"))
         s_d = json.load(open(axis_dir / "sonnet" / "scores_descriptions.json"))
         s_i = json.load(open(axis_dir / "sonnet" / "scores_instructions.json"))
-        common = sorted(set(g_d) & set(g_i) & set(s_d) & set(s_i)
-                        & set(entity_vecs))
+        # Per-judge desc/inst combination using the standard tiebreak weights.
+        # The cross-judge sweep below is independent of this choice -- it sweeps
+        # GPT vs Sonnet, treating each as a single (already desc+inst-combined) score.
+        gpt_scores = combine_desc_inst_one_judge(g_d, g_i, weights=di_weights)
+        son_scores = combine_desc_inst_one_judge(s_d, s_i, weights=di_weights)
+        common = sorted(set(gpt_scores) & set(son_scores) & set(entity_vecs))
         if len(common) < 3:
             print(f"  [skip] {pos}/{neg}: only {len(common)} shared entities")
             continue
-        g2 = np.array([(g_d[n] + g_i[n]) / 2 for n in common])
-        s2 = np.array([(s_d[n] + s_i[n]) / 2 for n in common])
+        g2 = np.array([gpt_scores[n] for n in common])
+        s2 = np.array([son_scores[n] for n in common])
         a = axis_unit(data_dir, pos, neg).numpy()
         proj = np.array([float(np.dot(entity_vecs[n], a)) for n in common])
         per_axis[(pos, neg)] = {

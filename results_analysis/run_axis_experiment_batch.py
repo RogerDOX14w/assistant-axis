@@ -23,6 +23,8 @@ import json
 import time
 from pathlib import Path
 
+from results_analysis.canonical_angles.whitening import DEFAULT_SOFT_K
+
 
 async def run_one(pair, provider, judge_model, output_root, data_dir, instructions_dir,
                   layer, whiten_K, max_tokens, temperature, rps, batch_size, save_every,
@@ -160,7 +162,9 @@ def main():
     p.add_argument('--data_dir', default='runpod_workspace/qwen/qwen-3-32b Roger')
     p.add_argument('--instructions_dir', default='data')
     p.add_argument('--layer', type=int, default=25)  # Qwen-3-32B; tuned via rho_by_layer.py.
-    p.add_argument('--whiten_K', type=int, default=3)  # Robust K-sweep peak; was 128 (legacy).
+    p.add_argument('--whiten_K', type=int, default=DEFAULT_SOFT_K)
+    # ^^ Project default for soft-K whitening (Apr 2026); was 3 historically,
+    # 128 in the legacy K-sweep era.  See whitening.DEFAULT_SOFT_K.
     p.add_argument('--max_tokens', type=int, default=1024)
     p.add_argument('--temperature', type=float, default=0.0)
     p.add_argument('--rps', type=float, default=10.0)

@@ -9,7 +9,9 @@ Public API surface:
 - Subspace builders in :mod:`.data` (e.g. :func:`build_subspace`,
   :func:`build_whitening_pool`).
 - Whitening basis utilities in :mod:`.whitening` (:func:`fit_whitening`,
-  :func:`parse_whitening_spec`).
+  :func:`fit_shear`, :func:`parse_whitening_spec`).
+- Goal/no-goal subspace builder for soft-shear in :mod:`.data`
+  (:func:`build_goal_nogoal_subspaces`).
 - Plot helpers in :mod:`.plot_helpers` (:func:`plot_per_slot_panels`,
   :func:`plot_overlay_curves`, :func:`plot_grid`).
 

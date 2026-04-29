@@ -45,11 +45,11 @@ direction of average effect.  Other origin modes (``default``,
 ``pool_mean``, ``full_combo_mean``, ``paired``) are exposed via
 ``--origin``.
 
-Whitening defaults to ``['raw', 'soft_K=3']`` -- raw and the project-wide
-single-K choice plotted side by side.  Pass any subset of
-``raw|soft_K=N|lw|oas`` to override; the basis is fit on the ``--pool`` of
-standalone roles+traits (with held-out entities optionally excluded) and
-applied to each subspace before SVD.
+Whitening defaults to ``['raw', 'soft_K=2']`` -- raw and the project
+soft-K default (see ``whitening.DEFAULT_SOFT_K``) plotted side by side.
+Pass any subset of ``raw|soft_K=N|lw|oas|soft_shear=L`` to override; the
+basis is fit on the ``--pool`` of standalone roles+traits (with held-out
+entities optionally excluded) and applied to each subspace before SVD.
 
 Examples
 --------
@@ -85,7 +85,7 @@ from ..data import (
     detect_n_slots,
 )
 from ..plot_helpers import plot_per_slot_panels
-from ..whitening import parse_whitening_spec
+from ..whitening import DEFAULT_SOFT_K, parse_whitening_spec
 from assistant_axis import png_metadata
 
 
@@ -129,9 +129,11 @@ def parse_args() -> argparse.Namespace:
     p.add_argument("--layer", type=int, default=25,
                    help="Transformer layer (default: 25 -- Qwen-3-32B "
                         "optimum from rho_by_layer.py)")
-    p.add_argument("--whitening", nargs="+", default=["raw", "soft_K=3"],
-                   help="Whitening regimes: 'raw' | 'soft_K=N' | 'lw' | 'oas' "
-                        "(default: raw soft_K=3)")
+    p.add_argument("--whitening", nargs="+",
+                   default=["raw", f"soft_K={DEFAULT_SOFT_K}"],
+                   help=f"Whitening regimes: 'raw' | 'soft_K=N' | 'lw' | 'oas' "
+                        f"| 'soft_shear=L' (default: raw soft_K={DEFAULT_SOFT_K} "
+                        f"-- see whitening.DEFAULT_SOFT_K)")
     p.add_argument("--pool", default="roles+traits",
                    choices=["roles", "traits", "roles+traits"],
                    help="Whitening pool scope (only used when whitening != raw)")

@@ -4,9 +4,12 @@ judge scores and the projection of entity vectors onto the axis at K.
 
 Per axis we report two ρ-vs-K curves:
 
-- ``desc_inst`` -- mean of (GPT-descriptions, GPT-instructions,
-  Sonnet-descriptions, Sonnet-instructions) per entity, then ρ vs the
-  projection.
+- ``desc_inst`` -- per entity, combine (GPT-descriptions,
+  GPT-instructions, Sonnet-descriptions, Sonnet-instructions) via
+  :func:`assistant_axis.judge_score_combine.combine_desc_inst_two_judges`
+  (default: inst-tiebreak weighting `0.499*desc + 0.501*inst`; pass
+  ``--di_weights {inst_tie,equal,desc_tie}`` to override), then ρ vs
+  the projection.
 - ``responses`` -- GPT response-mode mean score per entity, then ρ vs
   the projection.  (Roles and traits are merged when both are scored.)
 
@@ -79,6 +82,11 @@ import torch
 from scipy.stats import spearmanr
 
 from assistant_axis import png_metadata, suptitle_with_specs
+from assistant_axis.judge_score_combine import (
+    add_di_weights_arg,
+    combine_desc_inst_two_judges,
+    parse_di_weights_arg,
+)
 from results_analysis.axis_judge_correlation import _load_vector_file
 from results_analysis.canonical_angles.data import (
     build_augmented_whitening_pool,
@@ -218,7 +226,9 @@ def main() -> int:
     p.add_argument("--plot", default="rho_vs_whitening_K.png",
                    help="Output PNG filename within --experiment_dir "
                         "(default: rho_vs_whitening_K.png).")
+    add_di_weights_arg(p)
     args = p.parse_args()
+    di_weights = parse_di_weights_arg(args.di_weights)
     experiment_dir = Path(args.experiment_dir).resolve()
     data_dir = Path(args.data_dir).resolve()
 
@@ -236,9 +246,8 @@ def main() -> int:
         g_i = json.load(open(axis_dir / "gpt" / "scores_instructions.json"))
         s_d = json.load(open(axis_dir / "sonnet" / "scores_descriptions.json"))
         s_i = json.load(open(axis_dir / "sonnet" / "scores_instructions.json"))
-        names_di = set(g_d) & set(g_i) & set(s_d) & set(s_i)
-        desc_inst = {n: (g_d[n] + g_i[n] + s_d[n] + s_i[n]) / 4.0
-                     for n in names_di}
+        desc_inst = combine_desc_inst_two_judges(g_d, g_i, s_d, s_i,
+                                                 weights=di_weights)
 
         # Response scores merged from traits + roles GPT runs
         resp_t = json.load(open(axis_dir / "gpt_responses_traits" / "scores_responses.json"))

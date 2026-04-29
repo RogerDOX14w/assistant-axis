@@ -81,6 +81,11 @@ import numpy as np
 from scipy.stats import spearmanr
 
 from assistant_axis import png_metadata
+from assistant_axis.judge_score_combine import (
+    add_di_weights_arg,
+    combine_desc_inst_two_judges,
+    parse_di_weights_arg,
+)
 from results_analysis.axis_judge_correlation import _load_vector_file
 from results_analysis.canonical_angles.data import (
     build_augmented_whitening_pool,
@@ -289,7 +294,9 @@ def main() -> int:
                         "missing entries.  Use this when adding/removing "
                         "K values from the sweep.  The merged result is "
                         "rewritten to --rhos_json.")
+    add_di_weights_arg(p)
     args = p.parse_args()
+    di_weights = parse_di_weights_arg(args.di_weights)
 
     experiment_dir = Path(args.experiment_dir).resolve()
     data_dir = Path(args.data_dir).resolve()
@@ -378,10 +385,9 @@ def main() -> int:
             s_i = json.load(open(axis_dir / "sonnet" / "scores_instructions.json"))
         except FileNotFoundError:
             continue
-        common = sorted(set(g_d) & set(g_i) & set(s_d) & set(s_i))
-        axis_scores_di[(pos, neg)] = {
-            n: (g_d[n] + g_i[n] + s_d[n] + s_i[n]) / 4 for n in common
-        }
+        axis_scores_di[(pos, neg)] = combine_desc_inst_two_judges(
+            g_d, g_i, s_d, s_i, weights=di_weights,
+        )
     axis_scores_rs: dict[tuple[str, str], dict[str, float]] = {}
     for it in pairs_resp:
         pos, neg = it["pos"], it["neg"]

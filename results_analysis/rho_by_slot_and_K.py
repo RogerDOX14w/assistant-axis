@@ -7,7 +7,10 @@ the mean per-axis Spearman ρ between the soft-K-whitened activation
 projection at ``(slot, layer=25)`` and two score sources:
 
 - **desc+inst** -- 33 axes (``pair_list_33.json``), score per entity is
-  the 4-way mean of ``GPT_d, GPT_i, Son_d, Son_i``;
+  combined across the four (judge, mode) sources ``GPT_d, GPT_i, Son_d, Son_i``
+  using :func:`assistant_axis.judge_score_combine.combine_desc_inst_two_judges`,
+  with the default inst-tiebreak weighting (0.499*desc + 0.501*inst). Use
+  ``--di_weights {inst_tie,equal,desc_tie}`` to override;
 - **responses** -- 12 axes (``pair_list_12.json``), score per entity
   is the GPT-only mean over response-mode evals.
 
@@ -68,6 +71,11 @@ from matplotlib.patches import Patch
 from scipy.stats import spearmanr
 
 from assistant_axis import png_metadata
+from assistant_axis.judge_score_combine import (
+    add_di_weights_arg,
+    combine_desc_inst_two_judges,
+    parse_di_weights_arg,
+)
 from results_analysis.axis_judge_correlation import _load_vector_file
 from results_analysis.canonical_angles.data import (
     build_augmented_whitening_pool,
@@ -202,7 +210,9 @@ def main() -> int:
     p.add_argument("--plot", default="rho_by_slot_and_K.png",
                    help="Output plot filename "
                         "(default: rho_by_slot_and_K.png).")
+    add_di_weights_arg(p)
     args = p.parse_args()
+    di_weights = parse_di_weights_arg(args.di_weights)
 
     experiment_dir = Path(args.experiment_dir).resolve()
     data_dir = Path(args.data_dir).resolve()
@@ -230,9 +240,9 @@ def main() -> int:
                 g_i = json.load(open(axis_dir / "gpt" / "scores_instructions.json"))
                 s_d = json.load(open(axis_dir / "sonnet" / "scores_descriptions.json"))
                 s_i = json.load(open(axis_dir / "sonnet" / "scores_instructions.json"))
-                common = sorted(set(g_d) & set(g_i) & set(s_d) & set(s_i))
-                scores = {n: (g_d[n] + g_i[n] + s_d[n] + s_i[n]) / 4
-                          for n in common}
+                scores = combine_desc_inst_two_judges(g_d, g_i, s_d, s_i,
+                                                      weights=di_weights)
+                common = sorted(scores)
                 au = _axis_unit_at(data_dir, pos, neg, slot)
                 proj = _project(entity_vecs, whitener, slot, K, au, common,
                                 frozenset({pos, neg}))

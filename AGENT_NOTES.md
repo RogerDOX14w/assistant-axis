@@ -186,6 +186,121 @@ it gives you the entry-point + the git tree-state + your Python env's
 lockfile.  In a few months, that's almost always enough to reconstruct
 a plot — and tells you exactly what's missing if it isn't.
 
+### Combining desc/inst judge scores (use the canonical helper)
+
+When reducing the four (judge × mode) judge scores
+`{GPT_d, GPT_i, Son_d, Son_i}` to a single per-entity scalar, ALWAYS
+use the canonical helper at `assistant_axis/judge_score_combine.py`
+rather than rolling the formula inline.  The default is **inst-tiebreak
+weighting** (`0.499*desc + 0.501*inst`), applied after averaging
+across the two judges per mode:
+
+```python
+from assistant_axis.judge_score_combine import (
+    combine_desc_inst_two_judges, add_di_weights_arg, parse_di_weights_arg,
+)
+
+# Default = inst-tiebreak (0.499 * desc + 0.501 * inst per entity).
+scores = combine_desc_inst_two_judges(g_d, g_i, s_d, s_i)
+
+# CLI integration (registers --di_weights with all 3 choices):
+add_di_weights_arg(parser)
+args = parser.parse_args()
+weights = parse_di_weights_arg(args.di_weights)
+scores = combine_desc_inst_two_judges(g_d, g_i, s_d, s_i, weights=weights)
+```
+
+**Why the asymmetry?** The 0.499/0.501 weights are essentially equal
+but act as a tiebreaker for entities where desc and inst disagree,
+leaning slightly toward instructions.  Empirically, at slot=(3,25) /
+(0,26) / (0,49), inst-tiebreak gave consistently higher mean
+activation→judge ρ than equal weighting (~+0.0005 ρ), and equal in
+turn beat desc-tiebreak by a similar margin — the ordering is monotonic
+across all (slot, layer) configurations tested.  This matches the
+desc/inst judge audit that found instruction-mode judging more reliable
+than description-mode (~99% defensible vs ~94%).
+
+CLI override on any script using the helper:
+
+```bash
+--di_weights {inst_tie,equal,desc_tie}   # default: inst_tie
+```
+
+`equal` reproduces the historical 0.5/0.5 weighting (= 4-way mean of
+the four scores). `desc_tie` is for ablation. The asymmetry only
+affects entities where the two modes disagree, so the *direction* of
+ρ comparisons remains essentially unchanged across the three weights;
+the absolute ρ shift is in the third decimal.
+
+**Anti-pattern**: don't compute the 4-way mean inline:
+
+```python
+# BAD -- defeats the convention; can't ablate; out of date if the
+# default ever changes:
+scores = {n: (g_d[n] + g_i[n] + s_d[n] + s_i[n]) / 4 for n in common}
+
+# GOOD -- canonical, ablatable, future-proof:
+from assistant_axis.judge_score_combine import combine_desc_inst_two_judges
+scores = combine_desc_inst_two_judges(g_d, g_i, s_d, s_i)
+```
+
+Existing callsites: `results_analysis/{rho_by_slot_and_K, rho_by_layer,
+whitening_k_sweep, gpt_sonnet_weight_sweep}.py`.
+
+### Whitening / soft-shear defaults
+
+For analyses going forward, the project defaults are:
+
+| regime | default | constant |
+|---|---|---|
+| **soft-K whitening** | **K=2** | `results_analysis.canonical_angles.whitening.DEFAULT_SOFT_K` |
+| **soft-shear (top-L pooled)** | **L=2** | `results_analysis.canonical_angles.whitening.DEFAULT_SOFT_SHEAR_L` |
+| **primary recommended whitening regime** | **`soft_shear=2`** | `results_analysis.canonical_angles.whitening.DEFAULT_WHITENING_SPEC` |
+
+These were set in Apr 2026 after the LKM grid sweep on the 33 desc+inst
++ 12 response = 45-axis set with the inst-tiebreak weighting.  Prior
+hardcoded default was K=3 (from older K-sweep parabola fit done before
+soft-shear was in the toolbox).
+
+Use the constants instead of literal integers in CLI defaults::
+
+    from results_analysis.canonical_angles.whitening import DEFAULT_SOFT_K
+    p.add_argument("--whiten_K", type=int, default=DEFAULT_SOFT_K)
+
+When fitting:
+
+```python
+from results_analysis.canonical_angles.whitening import (
+    DEFAULT_SOFT_K, DEFAULT_SOFT_SHEAR_L, fit_shear, fit_whitening,
+)
+from results_analysis.canonical_angles.data import build_goal_nogoal_subspaces
+
+# Primary: soft-shear at L=2, fitted on combined r+t goal/no-goal subspaces.
+A_g, A_n = build_goal_nogoal_subspaces(data_dir, slot, layer, kind="combined")
+shear = fit_shear(A_g, A_n, L=DEFAULT_SOFT_SHEAR_L)
+M_done = shear.apply(M_raw)
+
+# Alternative when shear isn't available: soft-K whitening at K=2.
+basis = fit_whitening("soft_K", pool, K=DEFAULT_SOFT_K)
+M_done = basis.apply(M_raw)
+```
+
+**Caveats**:
+
+- The optimum varies by (slot, layer): slot 3 prefers L=2 / K=0; slot 0
+  prefers L=0..1 / K=2.  A single default can't be optimal everywhere.
+  The L=2 choice is best at slot 3 (the canonical analysis point) and
+  acceptable at slot 0 (~0.005 ρ behind the slot-0-specific optimum).
+- The LKM grid was on 3 (slot, layer) configurations; broader sweeps
+  may shift the optimum slightly.  Subject to revision -- if you find
+  the optimum has moved, update the constants and re-document.
+
+**Cache hygiene**: when changing these defaults, flush `rho_by_layer.json`
+(the only auto-loading cache that interleaves K values across runs).
+Per-axis `correlations.json` files are tied to specific
+``--whiten_K`` invocations and should NOT be deleted -- they belong to
+historical runs and re-running them is expensive.
+
 ---
 
 ## Response Patterns
