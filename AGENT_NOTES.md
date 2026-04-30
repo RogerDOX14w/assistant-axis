@@ -500,16 +500,51 @@ Each of `roles` and `traits` has `goal` (all-5 @ 2) and `non_goal` (all-5 @ 0) s
 - `traits.goal`: first 30 = max goal-space variation (less-HHH-default side of pairs, distinct ethical frameworks), next 10 = remaining moral circle spectrum, last 26 = default-side of pairs + redundant goal directions
 - `traits.non_goal`: first 30 = max persona-property variation (less-default side of pairs), next 10 = nice-to-haves, last 17 = pair partners + redundant
 
-### Current clean pairs added (April 2026)
+### Clean pair validation results (April 2026)
 
-| New trait (B) | Expected antonym (A) | Confirmed? |
+After running the bidirectional antonym-discovery procedure on each candidate pair (script: `data_analysis/generate_antonyms.py`), 5 of the 6 originally proposed pairs validated as clean and the 6th was reorganized into a 3-trait conformity triangle.
+
+| pair | bidirectional? | discovered antonyms | status |
+|---|---|---|---|
+| pragmatic ↔ idealistic | yes (mild near-synonym hedge) | pragmatic→idealistic; idealistic→pragmatic\|realistic | clean pair |
+| conservative ↔ progressive | yes | →progressive ; →conservative | clean pair |
+| ecocentric ↔ anthropocentric | yes | →anthropocentric ; →ecocentric | clean pair (descriptions rewrote in this session) |
+| decisive ↔ indecisive | yes | →indecisive ; →decisive | clean pair (`indecisive` newly seeded) |
+| obedient ↔ rebellious | yes (mild same-axis hedge) | obedient→rebellious\|defiant; rebellious→obedient\|compliant | clean pair (descriptions tightened to authority-axis-only) |
+
+The 6th candidate (`conformist ↔ contrarian`) turned out to be a **3-trait triangle** rather than a clean pair, structurally analogous to the compassionate/malicious/callous triangle:
+
+| trait | role | `negative_label` |
 |---|---|---|
-| obedient | rebellious | pending |
-| pragmatic | idealistic | pending |
-| conservative | progressive | pending |
-| compassionate | callous | pending |
-| conformist | contrarian | pending |
-| ecocentric | anthropocentric | pending |
+| conformist | engaged + aligned (central) | `non-conformist` (hyphenated seed marker) |
+| contrarian | engaged + opposed (sibling) | `conformist` (partner reference) |
+| nonconformist | disengaged (sibling, newly seeded) | `conformist` (partner reference) |
+
+Convention: when a trait's true antonym is **structurally ambiguous** (the union of two siblings on different axes), its `negative_label` keeps the seed-marker form (`non-{positive_label}`) to flag the asymmetry. The two siblings each set `negative_label` to the central trait. This mirrors the compassionate/callous arrangement where compassionate.neg=`non-compassionate` and callous.neg=`compassionate` (engaged-vs-disengaged carves a clean partner pointer in one direction; the other direction is ambiguous between callous and malicious).
+
+### TODO: regenerate activation/vector data after April 2026 trait edits
+
+The trait-instruction edits in this session require activation extraction and vector recomputation for **7 traits** (the others were either reverted to git-HEAD-equivalent or had only metadata changes that don't affect generation).
+
+**New traits — no prior activations exist:**
+
+- `conformist`
+- `nonconformist`
+- `indecisive`
+
+**Existing traits — instruction[]/description rewritten substantively, prior activations now stale:**
+
+- `anthropocentric`
+- `ecocentric`
+- `obedient`
+- `rebellious`
+
+After regenerating activations + vectors for these 7, downstream artefacts that key on these traits (axis caches, response-mode score caches, plots that visualize these axes) should be inspected and rerun where they touch the affected traits.
+
+**Deliberately not regenerating:**
+
+- `compassionate`: only `negative_label` changed (`callous` → `non-compassionate`), the description and instruction[] are unchanged. The negative_label is used only in the RP-filtering scoring step and forms a very small part of that prompt; the change is unlikely to materially shift filtering decisions.
+- `callous`, `pragmatic`, `idealistic`, `conservative`, `progressive`, `decisive`, `contrarian`: byte-identical to git HEAD after this session's cleanup; existing activations remain valid.
 
 ### Combined response generation (pipeline)
 

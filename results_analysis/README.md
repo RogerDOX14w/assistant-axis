@@ -154,12 +154,24 @@ Output format (matches `axis_judge_correlation.py`'s axis-spec flags exactly):
 ```json
 {
   "axis_name": "prosocial vs antisocial",
-  "pos_pole": "Concepts at this end are oriented toward...",
-  "neg_pole": "Concepts at this end are oriented toward...",
+  "pos_pole": "This pole represents concepts oriented toward...",
+  "neg_pole": "This pole represents concepts oriented toward...",
+  "pos_pole_standardized": "This means being oriented toward...",
+  "neg_pole_standardized": "This means being oriented toward...",
   "pos_examples": ["helpful", "advocate", "guileless", "systems_thinker"],
   "neg_examples": ["unhelpful", "deceitful", "paperclip_maximizer"]
 }
 ```
+
+The `pos_pole` / `neg_pole` fields hold the raw Opus output (typically
+opening with "This pole/end represents..."), while
+`pos_pole_standardized` / `neg_pole_standardized` are auto-rephrased by
+[`standardize_axis_spec.py`](#standardize_axis_specpy) (Sonnet) into the
+project's standard "This means [verb-ing]..." form -- the form expected
+by the desc+inst judge. **For judge runs, prefer the `*_standardized`
+fields**; the raw fields are kept for inspection / provenance.
+
+To skip the auto-rephrase, pass `--no_standardize`.
 
 Library API:
 
@@ -171,6 +183,7 @@ result = summarize_axis(
     style="glossary",
 )
 # -> {"axis_name": ..., "pos_pole": ..., "neg_pole": ...,
+#     "pos_pole_standardized": ..., "neg_pole_standardized": ...,
 #     "pos_examples": [...], "neg_examples": [...]}
 ```
 
@@ -217,6 +230,68 @@ temp 0 the API isn't guaranteed reproducible. Re-runs may produce slightly
 different phrasings; the inferred axis itself should be stable on hard
 tasks. We don't engineer around this (no caching layer); cost per re-run is
 ~$1, which is cheaper than implementation complexity.
+
+### `standardize_axis_spec.py`
+
+A small Sonnet-based shim that **adds standardized `"This means..."`-form
+pole descriptions** to an axis spec without overwriting the originals.
+
+Position in the pipeline (auto-invoked from
+[`infer_axis_description.py`](#infer_axis_descriptionpy) by default):
+
+```
+infer_axis_description.py     standardize_axis_spec.py     axis_judge_correlation.py
+   (Opus, with thinking)         (Sonnet rephrase)
+[sorted projection list]   ->  [pos_pole, neg_pole       ->  [pole_standardized
+                                + *_standardized fields]      drop straight into
+                                                              --pos_pole / --neg_pole]
+```
+
+**Why it exists.** Auto-generated specs typically open their pole
+descriptions with phrases like `"This pole represents..."` /
+`"Someone who is..."`, which describe the pole as a *category* rather
+than the *behavior of an entity at that pole*. The desc+inst judge
+prompt template inserts pole text directly into a slot for an entity
+description, so the project standard is to start each pole description
+with `"This means [verb-ing/being]..."` for a behavioral framing.
+
+The shim runs one Sonnet call per spec (~$0.002), preserving the
+original `pos_pole` / `neg_pole` fields and adding new
+`pos_pole_standardized` / `neg_pole_standardized` fields. All other
+fields (`axis_name`, `pos_examples`, `neg_examples`, `_metadata`, etc.)
+are passed through unchanged.
+
+**Auto-invocation.** When `infer_axis_description.py` runs without
+`--no_standardize`, this shim is called automatically; the resulting
+spec already has both raw and standardized pole text.
+
+**Idempotent.** If a spec already has `*_standardized` fields, the shim
+skips the API call. Use `--force` to re-rephrase (e.g. after editing the
+prompt's multi-shot examples).
+
+**Standalone CLI.**
+
+```bash
+# Single file
+uv run python results_analysis/standardize_axis_spec.py \
+  --input raw_spec.json --output spec.json
+
+# In-place batch update (idempotent)
+uv run python results_analysis/standardize_axis_spec.py \
+  --in_place roger/pc_axis_describer_sweep/*/spec.json
+```
+
+**Library API.**
+
+```python
+from results_analysis.standardize_axis_spec import standardize_axis_spec
+extended = standardize_axis_spec(spec)   # adds *_standardized fields
+```
+
+**Multi-shot examples in the prompt** cover every opener pattern we've
+seen in 16 auto-generated specs: `"This pole represents..."`,
+`"This end represents..."`, `"Someone who..."`, plus a no-op example
+showing an already-standard pole pass through unchanged.
 
 ### `refill_judge_gaps.py` and the gap-detection workflow
 

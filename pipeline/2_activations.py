@@ -42,6 +42,94 @@ logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(
 logger = logging.getLogger(__name__)
 
 
+def _hf_home_path() -> Path:
+    """Resolve the HF cache root the same way huggingface_hub does."""
+    hf = os.environ.get("HF_HOME")
+    if hf:
+        return Path(hf).expanduser()
+    return Path("~/.cache/huggingface").expanduser()
+
+
+def _is_path_on_tmpfs(
+    path: Path,
+    mounts_file: Path = Path("/proc/mounts"),
+) -> Optional[bool]:
+    """True if `path` (or its deepest existing ancestor) is on a tmpfs mount.
+
+    Returns None if we can't determine the answer (e.g. /proc/mounts
+    unavailable on macOS).  Best-effort -- a None result should be treated
+    as "don't know, don't spam warnings".
+
+    `mounts_file` is parameterised purely so the unit tests can supply a
+    synthetic /proc/mounts; production callers should leave the default.
+    """
+    try:
+        p = path.expanduser().resolve()
+        while p != p.parent and not p.exists():
+            p = p.parent
+        if not p.exists():
+            return None
+
+        if not mounts_file.exists():
+            return None
+
+        mounts: List[tuple[str, str]] = []
+        with open(mounts_file) as f:
+            for line in f:
+                parts = line.split()
+                if len(parts) >= 3:
+                    mounts.append((parts[1], parts[2]))
+
+        path_str = str(p)
+        best: Optional[tuple[str, str]] = None
+        for mnt, fst in mounts:
+            if path_str == mnt or path_str.startswith(mnt.rstrip("/") + "/") or mnt == "/":
+                if best is None or len(mnt) > len(best[0]):
+                    best = (mnt, fst)
+
+        return best is not None and best[1] == "tmpfs"
+    except Exception:
+        return None
+
+
+def _warn_if_hf_cache_not_tmpfs(model_name: str) -> None:
+    """Print a loud warning if HF_HOME isn't on RAM-backed tmpfs.
+
+    Loading large models (Qwen3-32B, Llama-70B, etc.) from non-tmpfs HF
+    caches -- especially NFS-backed ones -- causes silent multi-hour hangs
+    on cold mmap reads of the safetensors shards.  `pipeline/run_pipeline.sh`
+    handles this by mirroring the model into /dev/shm/hf-cache and
+    exporting HF_HOME to point at it.  Direct invocations of this script
+    bypass that setup and silently fall back to the canonical (often slow)
+    HF cache.
+
+    This check fires once at startup and is purely advisory -- some
+    machines have local NVMe fast enough that non-tmpfs is fine.
+    """
+    hf_home = _hf_home_path()
+    on_tmpfs = _is_path_on_tmpfs(hf_home)
+
+    if on_tmpfs is True:
+        logger.info(f"HF cache is RAM-backed: HF_HOME={hf_home}")
+        return
+    if on_tmpfs is None:
+        return
+
+    logger.warning("=" * 70)
+    logger.warning("  WARNING: HF cache is NOT on RAM-backed tmpfs")
+    logger.warning(f"  HF_HOME={hf_home}")
+    logger.warning(f"  Loading model {model_name} may hang for HOURS on cold")
+    logger.warning("  mmap reads if the underlying storage is NFS or other slow")
+    logger.warning("  filesystems.  Symptoms: long silence after the tqdm")
+    logger.warning("  'Loading checkpoint shards' bar reaches 100%.")
+    logger.warning("")
+    logger.warning("  Fix: launch via pipeline/run_pipeline.sh, which copies the")
+    logger.warning("  model into /dev/shm/hf-cache and sets HF_HOME automatically.")
+    logger.warning("  Or pre-populate /dev/shm/hf-cache/hub/ yourself and export")
+    logger.warning("  HF_HOME=/dev/shm/hf-cache before invoking this script.")
+    logger.warning("=" * 70)
+
+
 def load_responses(responses_file: Path) -> List[dict]:
     """Load responses from JSONL file, with retries for NFS flakiness."""
     import time
@@ -516,6 +604,11 @@ def main():
     file_handler = logging.FileHandler(output_dir / "activations.log", mode="a")
     file_handler.setFormatter(logging.Formatter('%(asctime)s - %(levelname)s - %(message)s'))
     logging.getLogger().addHandler(file_handler)
+
+    # Catch direct invocations that bypass run_pipeline.sh's tmpfs setup --
+    # loading large models from NFS-backed HF caches silently hangs for
+    # hours on cold mmap reads.  Advisory only; doesn't block the run.
+    _warn_if_hf_cache_not_tmpfs(args.model)
 
     # Detect GPUs for multi-worker decision
     if 'CUDA_VISIBLE_DEVICES' in os.environ:

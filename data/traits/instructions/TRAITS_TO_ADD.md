@@ -171,7 +171,34 @@ with lower agreeableness.  So rewriting the file to add positive-affect
 vocabulary on the individualistic side would help, but wouldn't
 eliminate the pull entirely.  **Verdict: probably not worth rewriting.**
 
-### `ecocentric / anthropocentric` — worth a rewrite
+### `ecocentric / anthropocentric` — DONE (Apr 30 2026)
+
+Rewrite completed. Both descriptions were rebalanced to:
+
+- **anthropocentric**: humans intrinsically valued; environment / animals / wild
+  species valued *instrumentally* via human wellbeing, safety, aesthetics,
+  recreation, or guilt about how humans treat nature. Replaces the prior
+  "dominion / unjustified burdens / serve human purposes" framing with
+  philosophically-defensible weak anthropocentrism.
+- **ecocentric**: ecosystem health and the welfare of all living creatures
+  intrinsically valued for their own sake; humans valued as one part of the
+  broader system *and* instrumentally for their outsized capacity to protect
+  or harm it (stewardship-responsibility framing). Replaces the prior
+  short "intrinsically valuable, prioritise environment" framing.
+
+Both descriptions are ~60 words with parallel "This means treating X as
+inherently important and valuable" openings, em-dash insertions, and "rather
+than" closings. Bidirectional antonym validation passed (`generate_antonyms.py`)
+with score 4 in both directions.
+
+Original analysis below preserved as historical context — it explains *why* the
+rewrite was needed and what residual y-flag pull is expected (intrinsic
+moral-circle-scope component) even after a clean rewrite.
+
+Activations / vectors will need to be regenerated for both traits (tracked in
+`AGENT_NOTES.md` -> "TODO: regenerate activation/vector data").
+
+#### Original analysis (preserved as historical context)
 
 The −y (anthropocentric) direction ranks dishonest / sycophantic /
 sociopathic / arrogant / narcissist at the top.
@@ -199,11 +226,6 @@ weak-moral-circle stance.  And no framing of "humans matter most"
 will read as neutral to readers with strongly ecocentric priors,
 because the disagreement isn't about wording, it's about the
 underlying position.
-
-**Verdict: rewrite is worth doing** — moves the file from
-"caricatured dominionism" to "philosophically defensible
-weak-anthropocentrism".  Won't eliminate the y-flag but should
-substantially reduce it.
 
 ### `forgiving / unforgiving` — keep as-is
 
@@ -239,7 +261,7 @@ semantic property of the concept, not a defect in our data.
 | pair | dominant cause | prescription |
 |---|---|---|
 | individualistic / collectivistic | (b) warmth-asymmetry + small (a) | rewrite low-priority |
-| ecocentric / anthropocentric | (b) dominionist tilt + (a) intrinsic moral-circle-scope | **rewrite worthwhile** |
+| ecocentric / anthropocentric | (b) dominionist tilt + (a) intrinsic moral-circle-scope | **DONE Apr 30 2026** -- both descriptions rewritten; activations regen pending |
 | forgiving / unforgiving | (a) intrinsic prosocial/antisocial + (c) un-prefix asymmetry | keep as-is |
 
 Same caveat as for `aligned_AI`: rewrites shift `trait_mean`, so any

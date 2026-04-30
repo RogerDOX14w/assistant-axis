@@ -315,13 +315,27 @@ setup_tmpfs() {
         return
     fi
 
-    # Disk-space check: require 2× model size headroom in /dev/shm.
+    # Disk-space check: require 1.5× model size headroom in /dev/shm.
+    # `cp -r` is sequential so its own peak usage is ~1× + a small buffer,
+    # but TMPDIR=/dev/shm too and step 2 puts ~2.6 GB per-role staging
+    # files there during extraction, so we want some slack on top of 1×.
+    # 2× was overly conservative and caused silent fallbacks to NFS that
+    # resulted in multi-hour cold mmap reads of model weights.
     local needed_kb
-    needed_kb=$(du -sk "$source_model_dir" 2>/dev/null | awk '{print $1 * 2}')
+    needed_kb=$(du -sk "$source_model_dir" 2>/dev/null | awk '{print int($1 * 3 / 2)}')
     local avail_kb
     avail_kb=$(df --output=avail /dev/shm 2>/dev/null | tail -1 | tr -d ' ')
     if [ -z "$needed_kb" ] || [ -z "$avail_kb" ] || [ "$avail_kb" -lt "$needed_kb" ]; then
-        echo "[tmpfs] insufficient /dev/shm space (need ${needed_kb}kB, have ${avail_kb}kB); skipping tmpfs cache"
+        echo ""
+        echo "[tmpfs] ============================================================"
+        echo "[tmpfs]  WARNING: insufficient /dev/shm space — tmpfs cache DISABLED"
+        echo "[tmpfs]  need ${needed_kb}kB, have ${avail_kb}kB"
+        echo "[tmpfs]  Falling back to source HF cache: $source_hf"
+        echo "[tmpfs]  If that is on NFS or other slow storage, expect step 2 to"
+        echo "[tmpfs]  hang for HOURS on cold mmap reads of model weights."
+        echo "[tmpfs]  Fix: increase --shm-size on the container, or free /dev/shm."
+        echo "[tmpfs] ============================================================"
+        echo ""
         return
     fi
 

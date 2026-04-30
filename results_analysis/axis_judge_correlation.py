@@ -1398,8 +1398,17 @@ def parse_args() -> argparse.Namespace:
                            "or (hidden,).")
     axis.add_argument("--axis_name", type=str,
                       help="Display name for the axis. Defaults to pair / file name.")
-    axis.add_argument("--neg_pole", type=str, help="Text description of the negative pole.")
-    axis.add_argument("--pos_pole", type=str, help="Text description of the positive pole.")
+    axis.add_argument("--neg_pole", type=str,
+                      help="Text description of the negative pole. The "
+                           "convention is to start with 'This means [verb-ing]...' "
+                           "(behavioral description). When using a spec from "
+                           "infer_axis_description.py, prefer the "
+                           "'neg_pole_standardized' field over 'neg_pole' (the "
+                           "former is the Sonnet-rephrased version produced by "
+                           "standardize_axis_spec.py).")
+    axis.add_argument("--pos_pole", type=str,
+                      help="Text description of the positive pole. See --neg_pole "
+                           "for the convention.")
     axis.add_argument("--neg_examples", type=_csv_or_space_list, default=[],
                       help="Comma-separated names of negative-pole exemplars.")
     axis.add_argument("--pos_examples", type=_csv_or_space_list, default=[],

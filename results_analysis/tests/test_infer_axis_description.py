@@ -7,13 +7,16 @@ network call to Anthropic is exercised via a mock in test_summarize_axis_e2e.
 
 from __future__ import annotations
 
-from unittest.mock import AsyncMock, patch
+import asyncio
+from types import SimpleNamespace
+from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
 
 from results_analysis.infer_axis_description import (
     DEFAULT_INSTRUCTIONS_DIR,
     LabelMap,
+    _call_opus,
     _format_z,
     _normalize_type,
     _resolve_examples,
@@ -281,3 +284,128 @@ class TestSummarizeAxisE2E:
         assert set(result.keys()) == {
             "axis_name", "pos_pole", "neg_pole", "pos_examples", "neg_examples"
         }
+
+
+# ---------------------------------------------------------------------------
+# Streaming integration: verify _call_opus uses messages.stream(...) correctly
+# ---------------------------------------------------------------------------
+
+def _build_mock_anthropic_client(captured_kwargs: dict, content_blocks: list):
+    """Build a mock AsyncAnthropic whose messages.stream(**kw) is an async
+    context manager yielding a stream object whose get_final_message() returns
+    a Message with the given content blocks.  Captures the kwargs passed to
+    .stream() into ``captured_kwargs`` for assertion.
+    """
+    final_message = SimpleNamespace(content=content_blocks)
+
+    mock_stream = MagicMock()
+    mock_stream.get_final_message = AsyncMock(return_value=final_message)
+
+    class FakeStreamCtx:
+        async def __aenter__(self):
+            return mock_stream
+
+        async def __aexit__(self, exc_type, exc, tb):
+            return False
+
+    def stream_factory(**kwargs):
+        captured_kwargs.update(kwargs)
+        return FakeStreamCtx()
+
+    mock_messages = SimpleNamespace(stream=stream_factory)
+    mock_client = SimpleNamespace(messages=mock_messages)
+    return mock_client
+
+
+class TestCallOpusStreaming:
+    """The streaming path is what unblocks long thinking budgets that would
+    otherwise hit Anthropic's 10-min non-streaming timeout.  These tests verify
+    the wiring at the messages.stream() boundary.
+    """
+
+    def test_streaming_call_concatenates_text_blocks_skips_thinking(self, monkeypatch):
+        import anthropic
+        monkeypatch.setenv("ANTHROPIC_API_KEY", "test-key-not-real")
+
+        captured: dict = {}
+        content_blocks = [
+            SimpleNamespace(type="thinking", thinking="this is reasoning we ignore"),
+            SimpleNamespace(type="text",     text="part one "),
+            SimpleNamespace(type="thinking", thinking="more reasoning we ignore"),
+            SimpleNamespace(type="text",     text="part two"),
+        ]
+        mock_client = _build_mock_anthropic_client(captured, content_blocks)
+        monkeypatch.setattr(anthropic, "AsyncAnthropic", lambda: mock_client)
+
+        result = asyncio.run(_call_opus(
+            prompt="hello",
+            model="claude-opus-4-6",
+            thinking_budget=5000,
+            max_tokens=10000,
+        ))
+
+        # Text blocks concatenated in order; thinking blocks dropped.
+        assert result == "part one part two"
+        # Streaming kwargs include the thinking config and temperature=1.
+        assert captured["model"] == "claude-opus-4-6"
+        assert captured["max_tokens"] == 10000
+        assert captured["thinking"] == {"type": "enabled", "budget_tokens": 5000}
+        assert captured["temperature"] == 1.0
+        # System prompt and message both present.
+        assert "system" in captured
+        assert captured["messages"] == [{"role": "user", "content": "hello"}]
+
+    def test_streaming_with_thinking_disabled_uses_temperature_zero(self, monkeypatch):
+        import anthropic
+        monkeypatch.setenv("ANTHROPIC_API_KEY", "test-key-not-real")
+
+        captured: dict = {}
+        content_blocks = [SimpleNamespace(type="text", text="deterministic output")]
+        mock_client = _build_mock_anthropic_client(captured, content_blocks)
+        monkeypatch.setattr(anthropic, "AsyncAnthropic", lambda: mock_client)
+
+        result = asyncio.run(_call_opus(
+            prompt="hello",
+            model="claude-opus-4-6",
+            thinking_budget=0,
+            max_tokens=2000,
+        ))
+
+        assert result == "deterministic output"
+        assert captured["temperature"] == 0.0
+        # No thinking config when budget is 0.
+        assert "thinking" not in captured
+
+    def test_streaming_raises_when_no_text_blocks_returned(self, monkeypatch):
+        import anthropic
+        monkeypatch.setenv("ANTHROPIC_API_KEY", "test-key-not-real")
+
+        captured: dict = {}
+        # Only thinking blocks, no text -- pathological but possible if the
+        # model exhausted its budget without producing visible output.
+        content_blocks = [
+            SimpleNamespace(type="thinking", thinking="endless rumination"),
+        ]
+        mock_client = _build_mock_anthropic_client(captured, content_blocks)
+        monkeypatch.setattr(anthropic, "AsyncAnthropic", lambda: mock_client)
+
+        with pytest.raises(RuntimeError, match="no text content blocks"):
+            asyncio.run(_call_opus(
+                prompt="hello",
+                model="claude-opus-4-6",
+                thinking_budget=5000,
+                max_tokens=10000,
+            ))
+
+    def test_streaming_max_tokens_must_exceed_thinking_budget(self, monkeypatch):
+        import anthropic
+        monkeypatch.setenv("ANTHROPIC_API_KEY", "test-key-not-real")
+
+        # No need for a working mock -- guard fires before the API is touched.
+        with pytest.raises(ValueError, match="must exceed thinking_budget"):
+            asyncio.run(_call_opus(
+                prompt="hello",
+                model="claude-opus-4-6",
+                thinking_budget=5000,
+                max_tokens=4000,  # less than thinking_budget
+            ))

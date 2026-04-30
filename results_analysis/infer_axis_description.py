@@ -296,23 +296,18 @@ class LabelMap:
 # Prompt construction
 # ---------------------------------------------------------------------------
 
-# TODO(phrase-cleanup): Opus tends to start each pole description with
-# "This pole represents ..." / "This represents ..." / "This end represents ...".
-# That works fine when interpolated into ``axis_judge_correlation.py``'s rubric
-# template ("**+3 (strong positive pole):** {pos_pole}"), but produces a mild
-# cosmetic redundancy ("(strong positive pole):** This pole represents ...")
-# vs. the hand-written rubric style ("This means ..." for traits, "A {name} is
-# ..." for roles). Two ways to fix when it bites:
-#   1. Add a one-liner style hint to OUTPUT_SCHEMA_INSTRUCTIONS asking for
-#      "This means ..." phrasing. Risk: any prompt change risks shifting the
-#      axis-inference behavior beyond just the opening clause; not worth it
-#      for a cosmetic gain.
-#   2. Add a separate post-processing step that does a trivial Sonnet (cheap)
-#      call: "Rewrite this pole description in 'This means ...' style without
-#      changing meaning." Robust, reversible, decoupled from the inference
-#      call. Probably the right answer when this becomes a problem.
-# For now: leave as-is. Re-runs of axis_judge_correlation.py work fine with
-# either phrasing; the redundancy is purely cosmetic.
+# Phrase-cleanup note (resolved Apr 2026):
+# Opus tends to start each pole description with "This pole represents ..." /
+# "This represents ..." / "This end represents ...".  That works fine when
+# interpolated into ``axis_judge_correlation.py``'s rubric template
+# ("**+3 (strong positive pole):** {pos_pole}"), but produces a mild cosmetic
+# redundancy vs. the hand-written rubric style ("This means ..." for traits,
+# "A {name} is ..." for roles).  We resolved this by adding
+# ``results_analysis.standardize_axis_spec``: a Sonnet-based shim that adds
+# ``pos_pole_standardized`` and ``neg_pole_standardized`` fields (in the
+# ``"This means ..."`` form) alongside the originals.  ``summarize_axis``
+# auto-invokes the shim by default; pass ``standardize=False`` (or
+# ``--no_standardize`` from the CLI) to skip.
 
 SYSTEM_PROMPT = (
     "You are characterizing a direction in a semantic embedding space of role "
@@ -532,10 +527,19 @@ async def _call_opus(
     else:
         kwargs["temperature"] = 0.0
 
-    resp = await client.messages.create(**kwargs)
+    # Use streaming rather than messages.create() so we don't hit Anthropic's
+    # 10-minute timeout on non-streaming calls.  That timeout silently kills
+    # calls with large thinking budgets (the failure mode is no response, no
+    # error, just a closed connection past the deadline).  We don't actually
+    # surface incremental output anywhere -- we just need the streaming HTTP
+    # connection to keep the request alive.  At the end we await the assembled
+    # final message, whose .content blocks are structurally identical to what
+    # messages.create() returns, so block parsing below is unchanged.
+    async with client.messages.stream(**kwargs) as stream:
+        final = await stream.get_final_message()
 
     parts: list[str] = []
-    for block in resp.content:
+    for block in final.content:
         # Skip thinking blocks; only collect the visible "text" output.
         btype = getattr(block, "type", None)
         if btype == "text":
@@ -563,6 +567,7 @@ def summarize_axis(
     thinking_budget: int = DEFAULT_THINKING_BUDGET,
     max_tokens: int = DEFAULT_MAX_TOKENS,
     top_n: int = 0,
+    standardize: bool = True,
 ) -> dict[str, Any]:
     """Infer an axis description from a sorted projection list.
 
@@ -591,14 +596,23 @@ def summarize_axis(
     top_n : int, optional
         If >0, keep only the top-N and bottom-N entities (by z-score) in the
         prompt; otherwise include all. Default 0 (all).
+    standardize : bool, optional
+        If True (default), automatically run
+        :func:`results_analysis.standardize_axis_spec.standardize_axis_spec`
+        on the result, adding ``pos_pole_standardized`` and
+        ``neg_pole_standardized`` fields (Sonnet rephrasings into the
+        ``"This means..."`` form expected by the desc+inst judge).
+        Set False to skip the rephrase pass.
 
     Returns
     -------
     dict
         ``{"axis_name", "pos_pole", "neg_pole", "pos_examples", "neg_examples"}``
         where ``pos_examples`` / ``neg_examples`` are in filename format.
+        When ``standardize=True`` (default), also includes
+        ``pos_pole_standardized`` and ``neg_pole_standardized``.
     """
-    return asyncio.run(
+    raw = asyncio.run(
         _summarize_axis_async(
             scores=scores,
             instructions_dir=Path(instructions_dir),
@@ -609,6 +623,12 @@ def summarize_axis(
             top_n=top_n,
         )
     )
+    if not standardize:
+        return raw
+    # Add Sonnet-rephrased standardized pole text. Imported lazily so the
+    # main describer can run without anthropic when standardize=False.
+    from results_analysis.standardize_axis_spec import standardize_axis_spec
+    return standardize_axis_spec(raw)
 
 
 async def _summarize_axis_async(
@@ -704,6 +724,11 @@ def _parse_args(argv: Optional[list[str]] = None) -> argparse.Namespace:
     p.add_argument("--top_n", type=int, default=0,
                    help="If >0, keep only the top-N and bottom-N entities by "
                         "z-score in the prompt (cheaper). 0 = include all.")
+    p.add_argument("--no_standardize", dest="standardize", action="store_false",
+                   help="Skip the auto-rephrase pass that adds "
+                        "pos_pole_standardized / neg_pole_standardized "
+                        "fields via Sonnet (default: rephrase enabled).")
+    p.set_defaults(standardize=True)
     return p.parse_args(argv)
 
 
@@ -721,6 +746,7 @@ def main(argv: Optional[list[str]] = None) -> int:
         thinking_budget=args.thinking_budget,
         max_tokens=args.max_tokens,
         top_n=args.top_n,
+        standardize=args.standardize,
     )
 
     args.output.parent.mkdir(parents=True, exist_ok=True)
@@ -730,6 +756,9 @@ def main(argv: Optional[list[str]] = None) -> int:
     print(f"\naxis_name : {result['axis_name']}")
     print(f"pos_pole  : {result['pos_pole']}")
     print(f"neg_pole  : {result['neg_pole']}")
+    if "pos_pole_standardized" in result:
+        print(f"pos_pole_standardized : {result['pos_pole_standardized']}")
+        print(f"neg_pole_standardized : {result['neg_pole_standardized']}")
     print(f"pos_examples ({len(result['pos_examples'])}): {', '.join(result['pos_examples'])}")
     print(f"neg_examples ({len(result['neg_examples'])}): {', '.join(result['neg_examples'])}")
     return 0
