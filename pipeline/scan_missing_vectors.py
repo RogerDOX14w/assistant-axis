@@ -654,6 +654,7 @@ def discover_scan_targets(
     root: Path,
     *,
     skip_suffixes: tuple[str, ...] = (),
+    matched_suffixes_out: Optional[set[str]] = None,
 ) -> list[ScanTarget]:
     """Walk `root` for entity-type subdirs and yield one ScanTarget per
     non-empty ``vectors*`` variant.
@@ -702,6 +703,8 @@ def discover_scan_targets(
                 logger.info(
                     f"[skip] {vec_dir} (matches --skip_suffix {matched_suffix!r})"
                 )
+                if matched_suffixes_out is not None:
+                    matched_suffixes_out.add(matched_suffix)
                 continue
             skippable, reason = _is_skippable_vectors_dir(vec_dir)
             if skippable:
@@ -1010,9 +1013,35 @@ def main() -> None:
     # Build the list of scan targets.
     targets: list[ScanTarget]
     if using_root:
+        matched_suffixes: set[str] = set()
         targets = discover_scan_targets(
             args.root, skip_suffixes=tuple(args.skip_suffix),
+            matched_suffixes_out=matched_suffixes,
         )
+        # Loud warning if any --skip_suffix value matched nothing -- almost
+        # always a typo (e.g. _4slots vs _4slot), and a silent no-op here
+        # is exactly the failure mode that wastes hours of NFS scan time.
+        unmatched = [s for s in args.skip_suffix if s not in matched_suffixes]
+        if unmatched:
+            print("=" * 70, file=sys.stderr)
+            print(
+                f"WARNING: --skip_suffix value(s) matched no discovered "
+                f"vectors* dir: {unmatched!r}",
+                file=sys.stderr,
+            )
+            print(
+                "         Check the 'Found N scan target(s)' listing above "
+                "for the actual\n"
+                "         directory basenames -- suffix matching is exact "
+                "(no glob, no\n"
+                "         pluralisation).  Aborting; re-run with the "
+                "corrected suffix\n"
+                "         or drop --skip_suffix entirely if you meant to "
+                "scan everything.",
+                file=sys.stderr,
+            )
+            print("=" * 70, file=sys.stderr)
+            sys.exit(2)
         if not targets:
             print(f"ERROR: no scan targets found under {args.root}", file=sys.stderr)
             print("       (looking for entity-type subdirs containing both an "
