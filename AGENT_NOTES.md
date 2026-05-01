@@ -109,11 +109,19 @@ Both reads and writes need defensive handling.
   the destination with retry/backoff, then `os.replace` to atomically
   publish the final name, then unlink the temp.  Atomic from a reader's
   point of view: dest never exists in a half-written state.  Tensor
-  saves additionally **verify the destination file size byte-for-byte
-  against the staging file** before considering the save successful —
-  silent NFS short-writes (which previously produced the 5 MB truncated
-  `r_guardian__casual.pt`) now raise an `OSError` and trigger the
-  retry loop.
+  saves additionally run **three post-copy integrity checks** before
+  considering the save successful — any failure triggers another
+  copy attempt:
+    1. **Size** matches staging byte-count (catches short-writes).
+    2. **SHA-256** matches staging digest (catches silent byte-flips
+       inside a correct-size file — e.g. corrupted NFS chunks that
+       pass length checks; this is the failure mode behind the
+       2.6 GB-but-unloadable `r_guardian__casual.pt`).
+    3. **`torch.load` round-trip** succeeds (catches version-drift /
+       pickle-format issues that byte-equality alone wouldn't).
+  Both verify steps default to on; pass
+  ``verify_sha256=False`` / ``verify_load=False`` to opt out when
+  the hot-path cost isn't warranted.
 - **Reads**: direct read inside a 5-attempt retry loop with the
   project-standard **exponential** backoff
   `DEFAULT_RETRY_DELAYS_S = (5, 20, 60, 180)` seconds (cumulative wall
@@ -183,7 +191,7 @@ writing 2.6 GB activation files).
 
 **Auditing past damage**: `pipeline/scan_missing_vectors.py` walks an
 `activations/`+`vectors/`+`scores/` triple and classifies each missing
-vector as one of `mysterious` / `truncated_activation` / `ok_zero_size`
+vector as one of `mysterious` / `corrupt_or_truncated_activation` / `ok_zero_size`
 (re-run candidates) vs `missing_scores` / `below_min_count` /
 `all_nan_or_empty` (legitimate filter).  Use it to recover from
 historical short-read damage that pre-retry step 4 silently skipped.

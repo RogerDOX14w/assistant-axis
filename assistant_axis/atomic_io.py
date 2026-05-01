@@ -130,7 +130,11 @@ def _retry_copy(src: Path, dest: Path, *, attempts: int = 5,
         except OSError as e:
             if attempt < attempts - 1:
                 wait = base_delay_s * (attempt + 1)
-                log.warning(
+                # INFO rather than WARNING for intermediate retries: the
+                # vast majority recover within 1-2 attempts and would
+                # otherwise drown out the logs that actually matter.
+                # The final-failure branch below escalates to ERROR.
+                log.info(
                     f"Copy to {dest} failed (attempt {attempt + 1}/{attempts}): {e}. "
                     f"Retrying in {wait:.0f}s..."
                 )
@@ -299,7 +303,11 @@ def _retry_read(
             last_err = e
             if attempt < n_attempts - 1:
                 wait = delays[attempt]
-                log.warning(
+                # INFO rather than WARNING: same reasoning as
+                # _retry_copy -- intermediate retries are noisy and
+                # almost always recover.  The final failure below
+                # escalates to ERROR.
+                log.info(
                     f"Read failed for {path} ({type(e).__name__}: {e}) "
                     f"(attempt {attempt + 1}/{n_attempts}). "
                     f"Retrying in {wait:.0f}s..."
@@ -320,20 +328,24 @@ def read_text_with_retry(
     encoding: str = "utf-8",
     attempts: Optional[int] = None,
     base_delay_s: Optional[float] = None,
+    delays_s: Optional[Sequence[float]] = None,
     logger_obj: Optional[logging.Logger] = None,
 ) -> str:
     """Read text content with NFS-flakiness retry.
 
     Defaults route through the project-standard exponential backoff
-    (:data:`DEFAULT_RETRY_DELAYS_S`).  Pass ``attempts`` and/or
-    ``base_delay_s`` explicitly to fall back to the legacy linear
-    schedule (mainly for tests that want fast retries).
+    (:data:`DEFAULT_RETRY_DELAYS_S`).  Pass ``delays_s`` for an
+    explicit schedule (e.g. ``delays_s=[5.0]`` for a single 5 s
+    retry, useful for diagnostic tools that don't want to wait
+    out the full project-standard 265 s on persistent corruption).
+    Pass ``attempts`` and/or ``base_delay_s`` to fall back to the
+    legacy linear schedule (mainly for tests).
     """
     def _read(p):
         return Path(p).read_text(encoding=encoding)
     return _retry_read(
         _read, path, attempts=attempts, base_delay_s=base_delay_s,
-        logger_obj=logger_obj,
+        delays_s=delays_s, logger_obj=logger_obj,
     )
 
 
@@ -344,6 +356,7 @@ def read_jsonl_with_retry(
     skip_malformed: bool = True,
     attempts: Optional[int] = None,
     base_delay_s: Optional[float] = None,
+    delays_s: Optional[Sequence[float]] = None,
     logger_obj: Optional[logging.Logger] = None,
 ) -> list:
     """Read a JSONL file with NFS-flakiness retry.
@@ -359,7 +372,8 @@ def read_jsonl_with_retry(
     log = logger_obj or logger
     text = read_text_with_retry(
         path, encoding=encoding, attempts=attempts,
-        base_delay_s=base_delay_s, logger_obj=logger_obj,
+        base_delay_s=base_delay_s, delays_s=delays_s,
+        logger_obj=logger_obj,
     )
     out: list = []
     for line_num, line in enumerate(text.splitlines(), 1):
@@ -384,6 +398,7 @@ def torch_load_with_retry(
     weights_only: bool = False,
     attempts: Optional[int] = None,
     base_delay_s: Optional[float] = None,
+    delays_s: Optional[Sequence[float]] = None,
     logger_obj: Optional[logging.Logger] = None,
 ):
     """torch.load wrapped in the NFS retry loop.
@@ -397,6 +412,11 @@ def torch_load_with_retry(
     NFS / MooseFS short-reads produce on read-back -- the failure
     mode that motivated this audit.
 
+    Pass ``delays_s`` for an explicit schedule -- diagnostic tools
+    auditing many files (e.g. ``pipeline/scan_missing_vectors.py``)
+    typically pass ``delays_s=[5.0]`` to fast-fail on persistent
+    corruption rather than waiting out the full 265 s per file.
+
     `weights_only=False` matches existing axis/role-vector loaders,
     which need to deserialise dict-wrapped checkpoints.
     """
@@ -406,7 +426,7 @@ def torch_load_with_retry(
                           weights_only=weights_only)
     return _retry_read(
         _load, path, attempts=attempts, base_delay_s=base_delay_s,
-        logger_obj=logger_obj,
+        delays_s=delays_s, logger_obj=logger_obj,
     )
 
 

@@ -155,42 +155,79 @@ intersecting their score=3 question keys, and computing matched means from only 
 shared questions before differencing. This must be a pipeline step (not an analysis
 script) because the activation files are large.
 
-### Auditing missing vectors
+### Auditing missing or corrupt vectors
 
 After step 4, run `scan_missing_vectors.py` to verify every activation
-ended up with a corresponding vector and to classify any gaps:
+ended up with a corresponding vector, classify any gaps, and detect
+vectors that landed at full size but are unreadable (corrupt-on-write).
+
+**Comprehensive mode (recommended)** — point at the output root and the
+scanner auto-discovers every entity-type subdir (`default/`, `roles/`,
+`traits/`, `combinations/`, ...) with an `activations/` subdir, plus
+every sibling `vectors*` variant (`vectors/`, `vectors_unfiltered/`, ...)
+that has real (non-symlinked) `.pt` files.  A `missing_vectors_audit.json`
+and `missing_vectors_rerun.txt` are written next to each scanned
+vectors dir:
+
+```bash
+uv run scan_missing_vectors.py --root outputs/qwen-3-32b/ --min_count 50
+```
+
+**Single-pair mode (back-compat)**:
 
 ```bash
 uv run scan_missing_vectors.py \
-    --activations_dir outputs/roger/activations \
-    --vectors_dir     outputs/roger/vectors \
-    --scores_dir      outputs/roger/scores \
+    --activations_dir outputs/qwen-3-32b/roles/activations \
+    --vectors_dir     outputs/qwen-3-32b/roles/vectors \
+    --scores_dir      outputs/qwen-3-32b/roles/scores \
     --min_count       50 \
     --deep_load \
-    --rerun_list      outputs/roger/vectors_rerun.txt
+    --rerun_list      outputs/qwen-3-32b/roles/vectors_rerun.txt
 ```
 
-Each missing vector is classified as one of:
+Each entity is classified as one of:
 
-| status                  | meaning                                                                         |
-|-------------------------|---------------------------------------------------------------------------------|
-| `ok`                    | vector present and healthy size                                                 |
-| `ok_zero_size`          | vector exists but is suspiciously tiny (likely a stub from an aborted save)     |
-| `missing_activation`    | no activation .pt at all                                                        |
-| `truncated_activation`  | activation .pt is way smaller than peer files (upstream step-2 corruption)      |
-| `missing_scores`        | filtered mode, no scores .json (judging never ran for this entity)              |
-| `below_min_count`       | filtered mode, < `--min_count` score=3 entries (legitimate filter)              |
-| `all_nan_or_empty`      | activations exist but contain no usable tensors                                 |
-| `mysterious`            | everything upstream looks fine but step 4 produced no vector — re-run candidate |
-| `orphan_vector`         | vector .pt exists with no source activation                                     |
+| status                              | meaning                                                                              |
+|-------------------------------------|--------------------------------------------------------------------------------------|
+| `ok`                                | vector present, healthy size, **and `torch.load` succeeds**                          |
+| `ok_zero_size`                      | vector exists but < 256 bytes (likely a stub from an aborted save)                   |
+| `corrupt_vector`                    | vector full-size but `torch.load` raises (the corrupt-on-write failure mode)         |
+| `missing_activation`                | no activation .pt at all                                                             |
+| `corrupt_or_truncated_activation`   | activation .pt smaller than 50% of peer median, OR (with `--deep_load`) full-size but `torch.load` raises |
+| `missing_scores`                    | filtered mode, no scores .json (judging never ran for this entity)                   |
+| `below_min_count`                   | filtered mode, < `--min_count` score=3 entries (legitimate filter)                   |
+| `all_nan_or_empty`                  | activations exist but contain no usable tensors                                      |
+| `mysterious`                        | everything upstream looks fine but step 4 produced no vector — re-run candidate      |
+| `orphan_vector`                     | vector .pt exists with no source activation                                          |
 
-The `mysterious`, `truncated_activation`, and `ok_zero_size` rows are
-the ones worth re-running — these are the symptoms of transient NFS
-short-reads that the pre-2026-05 step 4 silently skipped after warning.
-With the project-standard 5-attempt retry now in place (see below),
-re-running step 4 with `--overwrite outputs/roger/vectors_rerun.txt`
-will recover them.  Pass `--mode unfiltered` (and drop `--scores_dir`)
-to audit a vectors run that didn't apply score filtering.
+The re-run candidates are: `mysterious`, `corrupt_or_truncated_activation`,
+`corrupt_vector`, `ok_zero_size`.  These come from two upstream failure
+modes:
+
+- **Transient NFS short-read at step-4 read time** — pre-retry step 4
+  logged a warning and skipped the entity, leaving no vector.  Show up
+  as `mysterious`.
+- **Corrupt-on-write at step-4 save time** — full-size vector landed
+  on disk but pickle/zip stream is malformed.  Caught now by the
+  `torch_save_with_retry` post-write size check on new runs; the
+  scanner's load-check finds historical damage.  Show up as
+  `corrupt_vector`.
+
+Re-running step 4 with `--overwrite missing_vectors_rerun.txt` (per
+vectors variant) will recover all four re-runnable categories.
+
+**Performance / accuracy knobs:**
+
+- The per-vector `torch.load` check is **default-on**.  Pass
+  `--no_load_check` to skip it (much faster, but won't detect
+  `corrupt_vector`).
+- `--deep_load`: for *missing* vectors, additionally `torch.load` the
+  activation file and re-apply step 4's filter to confirm the
+  classification.  Without it, anything that passes the cheap shallow
+  checks is reported as `mysterious`.
+- In comprehensive mode, `vectors_unfiltered/` (or any `vectors*`
+  variant ending in `_unfiltered`) is auto-detected as unfiltered mode
+  regardless of whether `scores/` exists.
 
 ### Robust file IO (NFS / MooseFS)
 
@@ -207,11 +244,29 @@ Steps 2, 4 and 5 use the project-standard transient-IO retry from
   `OSError` and missed it.
 - All saves go through `torch_save_with_retry`, which stages to
   `TMPDIR` (point this at `/dev/shm` on RunPod), copies with retry/
-  backoff, atomically renames into place, and **verifies the
-  destination file size byte-for-byte** against the staging file.
-  Silent NFS short-writes (which previously produced the 5 MB
-  truncated `r_guardian__casual.pt`) now raise an `OSError` and
-  trigger the retry loop.
+  backoff, atomically renames into place, and runs three layers of
+  post-copy integrity verification (each triggers another copy
+  attempt on failure):
+
+  1. **Size check** — destination must match staging byte-count.
+     Catches outright short-writes.
+  2. **SHA-256 byte-equality check** — destination must hash to the
+     same digest as staging.  Catches silent byte-flips inside a
+     correct-size file (e.g. corrupted NFS chunks that pass length
+     checks).  This is the failure mode behind the apparently-healthy
+     2.6 GB `r_guardian__casual.pt` that later refused to `torch.load`
+     with `"storage has wrong byte size of dtype"`.
+  3. **`torch.load` round-trip** — destination must deserialise
+     end-to-end with `weights_only=False`.  Tests at the actual
+     usage level; catches version-drift / pickle-format weirdness
+     that byte-equality alone wouldn't.
+
+  Cost on a ~2.6 GB activation file is roughly one extra read for
+  SHA-256 plus one extra read for `torch.load` (both warm in the
+  kernel page cache after the write, so the wall-clock impact is
+  measurably less than 2× the bare write).  Pass
+  `verify_sha256=False` and/or `verify_load=False` to opt out for
+  hot-path writes where the cost outweighs the safety.
 
 If you hit a final-failure ERROR after all retries, that's a real
 non-transient corruption — clear the affected file and re-run that
