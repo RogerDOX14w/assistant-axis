@@ -81,6 +81,7 @@ import logging
 import pickle
 import statistics
 import sys
+import time
 from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any, List, Optional
@@ -103,11 +104,205 @@ LOAD_FAILURE_ERRORS: tuple[type[BaseException], ...] = (
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
 from assistant_axis.atomic_io import (  # noqa: E402
+    atomic_write_text,
     read_text_with_retry,
     torch_load_with_retry,
 )
 
 logger = logging.getLogger("pipeline.scan_missing_vectors")
+
+
+# ---------------------------------------------------------------------------
+# Resumable load-result cache
+# ---------------------------------------------------------------------------
+
+CACHE_SCHEMA_VERSION = 1
+# Flush the cache to disk every N updates OR every M seconds,
+# whichever comes first, plus a final flush in close() / on Ctrl-C.
+# The right cadence depends on cost asymmetry:
+#   - one flush = ~0.5-1 s (atomic-write a ~5-20 MB JSON to NFS)
+#   - one lost entry on a drop = ~5-15 s of NFS re-read for a 2.6 GB
+#     activation file
+# So flushing aggressively is cheap insurance.  N=25 is ~25 lost
+# entries worst case (~2-5 min of recovery work); the M=30 s floor
+# bounds loss when entries arrive slowly (e.g. each torch.load
+# takes 10 s, so 25 entries = 250 s without the time guard).
+CACHE_FLUSH_EVERY = 25
+CACHE_FLUSH_INTERVAL_S = 30.0
+
+
+class ScanCache:
+    """Persistent cache of ``torch.load`` outcomes keyed by file path.
+
+    Two sub-caches:
+
+    * ``vector_loads[path] = {size, mtime, ok, error}``
+      For the per-vector load check.  ``ok=True`` means
+      ``torch.load`` succeeded; ``ok=False`` means it raised, with
+      the ``type(e).__name__: msg`` stored in ``error``.
+
+    * ``activation_loads[path] = {size, mtime, ok, error, keys, any_finite}``
+      For the deep-load activation check.  When ``ok=True`` we cache
+      the full key list (so the cheap filter+match step can run on
+      cache hit without reloading the tensor) plus a single
+      ``any_finite`` boolean covering all activations in the file
+      (a conservative shortcut: if every tensor is fully NaN we
+      know to classify as ``all_nan_or_empty`` without re-checking
+      per-key).
+
+    A cache hit requires ``(size, mtime)`` to match the current
+    on-disk file; any mismatch (re-extraction, in-place edit) is
+    treated as a miss and the entry is overwritten on the next put.
+
+    Persistence cadence: flush whenever :data:`CACHE_FLUSH_EVERY`
+    updates have accumulated OR :data:`CACHE_FLUSH_INTERVAL_S`
+    seconds have passed since the last flush, whichever comes first.
+    Plus a final flush in :meth:`close` (idempotent, safe to call
+    from an ``atexit`` hook or ``finally`` block).  Uses
+    :func:`atomic_write_text` so a crash mid-flush never leaves a
+    half-written cache file at the destination.
+    """
+
+    def __init__(self, path: Optional[Path]):
+        self.path = path
+        self.data: dict[str, Any] = {
+            "schema_version": CACHE_SCHEMA_VERSION,
+            "vector_loads": {},
+            "activation_loads": {},
+        }
+        self._dirty_count = 0
+        self._last_flush_time = time.monotonic()
+        self._stats = {"v_hits": 0, "v_miss": 0, "a_hits": 0, "a_miss": 0}
+        if path is not None and path.exists():
+            try:
+                loaded = json.loads(path.read_text(encoding="utf-8"))
+                if loaded.get("schema_version") == CACHE_SCHEMA_VERSION:
+                    self.data = loaded
+                    logger.info(
+                        f"[cache] loaded {len(self.data['vector_loads'])} vector "
+                        f"+ {len(self.data['activation_loads'])} activation entries "
+                        f"from {path}"
+                    )
+                else:
+                    logger.warning(
+                        f"[cache] schema mismatch in {path} "
+                        f"({loaded.get('schema_version')!r} != {CACHE_SCHEMA_VERSION}); "
+                        f"discarding"
+                    )
+            except (OSError, json.JSONDecodeError) as e:
+                logger.warning(f"[cache] could not load {path}: {e}; starting empty")
+
+    @staticmethod
+    def _key(p: Path) -> str:
+        # resolve() turns relative + symlinked paths into a stable
+        # absolute key so the same file is cached once regardless of
+        # how the caller spells its path.
+        try:
+            return str(p.resolve(strict=False))
+        except OSError:
+            return str(p)
+
+    def _matches_disk(self, entry: dict, p: Path) -> bool:
+        """True if a cached entry's (size, mtime) match the on-disk file."""
+        try:
+            st = p.stat()
+        except OSError:
+            return False
+        return (entry.get("size") == st.st_size
+                and entry.get("mtime") == st.st_mtime)
+
+    # -- vector loads -------------------------------------------------------
+
+    def get_vector(self, p: Path) -> Optional[dict]:
+        entry = self.data["vector_loads"].get(self._key(p))
+        if entry is not None and self._matches_disk(entry, p):
+            self._stats["v_hits"] += 1
+            return entry
+        self._stats["v_miss"] += 1
+        return None
+
+    def put_vector(self, p: Path, *, ok: bool, error: Optional[str] = None) -> None:
+        try:
+            st = p.stat()
+        except OSError:
+            return  # nothing to cache for a vanished file
+        self.data["vector_loads"][self._key(p)] = {
+            "size": st.st_size,
+            "mtime": st.st_mtime,
+            "ok": ok,
+            "error": error,
+        }
+        self._mark_dirty()
+
+    # -- activation loads ---------------------------------------------------
+
+    def get_activation(self, p: Path) -> Optional[dict]:
+        entry = self.data["activation_loads"].get(self._key(p))
+        if entry is not None and self._matches_disk(entry, p):
+            self._stats["a_hits"] += 1
+            return entry
+        self._stats["a_miss"] += 1
+        return None
+
+    def put_activation(
+        self,
+        p: Path,
+        *,
+        ok: bool,
+        error: Optional[str] = None,
+        keys: Optional[list[str]] = None,
+        any_finite: Optional[bool] = None,
+    ) -> None:
+        try:
+            st = p.stat()
+        except OSError:
+            return
+        self.data["activation_loads"][self._key(p)] = {
+            "size": st.st_size,
+            "mtime": st.st_mtime,
+            "ok": ok,
+            "error": error,
+            "keys": keys,
+            "any_finite": any_finite,
+        }
+        self._mark_dirty()
+
+    # -- persistence --------------------------------------------------------
+
+    def _mark_dirty(self) -> None:
+        self._dirty_count += 1
+        if (self._dirty_count >= CACHE_FLUSH_EVERY
+                or time.monotonic() - self._last_flush_time
+                >= CACHE_FLUSH_INTERVAL_S):
+            self.flush()
+
+    def flush(self) -> None:
+        if self.path is None or self._dirty_count == 0:
+            return
+        try:
+            atomic_write_text(
+                json.dumps(self.data, indent=None),
+                self.path,
+                logger_obj=logger,
+            )
+            self._dirty_count = 0
+            self._last_flush_time = time.monotonic()
+        except (OSError, RuntimeError) as e:
+            # Don't reset _dirty_count -- the next mark_dirty will
+            # try again.  Logging at WARNING (not ERROR) because the
+            # cache is best-effort: failing to persist just means
+            # next run has more work to do, not a correctness issue.
+            logger.warning(f"[cache] flush to {self.path} failed: {e}")
+
+    def close(self) -> None:
+        """Final flush + log of hit/miss summary.  Idempotent."""
+        self.flush()
+        s = self._stats
+        if any(s.values()):
+            logger.info(
+                f"[cache] vector_loads: {s['v_hits']} hits / {s['v_miss']} misses; "
+                f"activation_loads: {s['a_hits']} hits / {s['a_miss']} misses"
+            )
 
 
 # Activation files smaller than this fraction of the median peer-group
@@ -168,12 +363,19 @@ def classify_entity(
     mode: str,
     deep_load: bool,
     load_check: bool,
+    cache: Optional[ScanCache] = None,
 ) -> dict[str, Any]:
     """Classify a single entity.
 
     See module docstring for the status taxonomy.  Returns a dict
     with at minimum ``role`` and ``status`` plus category-specific
     extras (sizes, counts, reasons).
+
+    If ``cache`` is given, the expensive per-vector and per-activation
+    ``torch.load`` calls consult / populate it (keyed by absolute path,
+    validated by file size + mtime).  This makes a re-run after a
+    connection drop near-instant for files the previous run already
+    confirmed loadable.
     """
     out: dict[str, Any] = {"role": role}
 
@@ -210,15 +412,28 @@ def classify_entity(
         # waiting, but one quick retry gives NFS a chance to clear a
         # one-off hiccup.
         if load_check:
-            try:
-                torch_load_with_retry(
-                    vec_file, map_location="cpu", weights_only=False,
-                    delays_s=[5.0], logger_obj=logger,
-                )
-            except LOAD_FAILURE_ERRORS as e:
-                out["status"] = "corrupt_vector"
-                out["note"] = f"vector .pt unreadable: {type(e).__name__}: {e}"
-                return out
+            cached = cache.get_vector(vec_file) if cache is not None else None
+            if cached is not None:
+                if not cached["ok"]:
+                    out["status"] = "corrupt_vector"
+                    out["note"] = f"vector .pt unreadable (cached): {cached.get('error')}"
+                    return out
+                # cache hit, ok=True -> skip the load
+            else:
+                try:
+                    torch_load_with_retry(
+                        vec_file, map_location="cpu", weights_only=False,
+                        delays_s=[5.0], logger_obj=logger,
+                    )
+                    if cache is not None:
+                        cache.put_vector(vec_file, ok=True)
+                except LOAD_FAILURE_ERRORS as e:
+                    err_msg = f"{type(e).__name__}: {e}"
+                    if cache is not None:
+                        cache.put_vector(vec_file, ok=False, error=err_msg)
+                    out["status"] = "corrupt_vector"
+                    out["note"] = f"vector .pt unreadable: {err_msg}"
+                    return out
 
         out["status"] = "ok"
         return out
@@ -271,6 +486,58 @@ def classify_entity(
     # won't recover, and waiting 4+ minutes per corrupt file makes
     # auditing thousands of files painful.  One 5 s retry still
     # gives NFS a chance to clear a one-off hiccup.
+    cached_act = cache.get_activation(act_file) if cache is not None else None
+
+    if cached_act is not None and not cached_act["ok"]:
+        out["status"] = "corrupt_or_truncated_activation"
+        out["note"] = (f"activation .pt unloadable (cached): "
+                       f"{cached_act.get('error')}")
+        return out
+
+    if cached_act is not None and cached_act["ok"]:
+        # Use cached metadata (key list + any_finite-overall flag) to
+        # classify without reloading the tensor.  The keys list is
+        # the file's full activation set; we re-derive the filtered
+        # subset cheaply from the current scores (which may differ
+        # from when the cache was populated).
+        keys = cached_act.get("keys") or []
+        any_finite_overall = cached_act.get("any_finite", True)
+        if not keys:
+            out["status"] = "all_nan_or_empty"
+            out["note"] = "activation file contains no tensors (cached)"
+            return out
+        # Conservative shortcut: if the entire file was NaN at cache
+        # time, every subset is too.  (Per-key finite info isn't
+        # cached -- if the user wants stronger guarantees they can
+        # blow away the cache.)
+        if not any_finite_overall:
+            out["status"] = "all_nan_or_empty"
+            out["note"] = "activation file is all-NaN (cached)"
+            return out
+        if is_default:
+            kept = [k for k in keys if _keep_by_reduce(k, reduce_questions)]
+            out["activation_count"] = len(kept)
+            if not kept:
+                out["status"] = "all_nan_or_empty"
+                return out
+            out["status"] = "mysterious"
+            return out
+        # Filtered mode -- recount matched against current scores.
+        matched_keys = [
+            k for k in keys
+            if k in scores and scores[k] == 3 and _keep_by_reduce(k, reduce_questions)
+        ]
+        out["score3_matched"] = len(matched_keys)
+        if len(matched_keys) < min_count:
+            out["status"] = "below_min_count"
+            out["note"] = (f"score3 in scores file = {out['score3_in_scores']}, "
+                           f"actually realised in activations = {len(matched_keys)} "
+                           f"(cached)")
+            return out
+        out["status"] = "mysterious"
+        return out
+
+    # Cache miss (or no cache) -- do the actual load.
     try:
         data = torch_load_with_retry(
             act_file, map_location="cpu", weights_only=False,
@@ -278,24 +545,41 @@ def classify_entity(
             logger_obj=logger,
         )
     except LOAD_FAILURE_ERRORS as e:
+        err_msg = f"{type(e).__name__}: {e}"
+        if cache is not None:
+            cache.put_activation(act_file, ok=False, error=err_msg)
         out["status"] = "corrupt_or_truncated_activation"
-        out["note"] = f"activation .pt unloadable: {type(e).__name__}: {e}"
+        out["note"] = f"activation .pt unloadable: {err_msg}"
         return out
 
     data.pop("metadata", None)
     if not data:
+        if cache is not None:
+            cache.put_activation(act_file, ok=True, keys=[], any_finite=False)
         out["status"] = "all_nan_or_empty"
         out["note"] = "activation file contains no tensors"
         return out
+
+    # Cache the keys + an "any tensor in the whole file is finite" flag.
+    # Computing the per-tensor finite check now is cheap-ish since the
+    # tensors are already in memory; doing it lets us short-circuit
+    # the all_nan_or_empty case on cache hit without reloading.
+    all_keys = sorted(data.keys())
+    any_finite_overall = any(torch.isfinite(a).any().item() for a in data.values())
 
     if is_default:
         all_acts = [act for k, act in data.items() if _keep_by_reduce(k, reduce_questions)]
         out["activation_count"] = len(all_acts)
         if not all_acts:
+            if cache is not None:
+                cache.put_activation(act_file, ok=True, keys=all_keys,
+                                     any_finite=any_finite_overall)
             out["status"] = "all_nan_or_empty"
             return out
-        # Any non-NaN entries?
         any_finite = any(torch.isfinite(a).any().item() for a in all_acts)
+        if cache is not None:
+            cache.put_activation(act_file, ok=True, keys=all_keys,
+                                 any_finite=any_finite_overall)
         if not any_finite:
             out["status"] = "all_nan_or_empty"
             return out
@@ -303,18 +587,21 @@ def classify_entity(
         return out
 
     # Filtered mode.
-    matched = [
-        act for k, act in data.items()
+    matched_pairs = [
+        (k, act) for k, act in data.items()
         if k in scores and scores[k] == 3 and _keep_by_reduce(k, reduce_questions)
     ]
-    out["score3_matched"] = len(matched)
-    if len(matched) < min_count:
+    out["score3_matched"] = len(matched_pairs)
+    if cache is not None:
+        cache.put_activation(act_file, ok=True, keys=all_keys,
+                             any_finite=any_finite_overall)
+    if len(matched_pairs) < min_count:
         out["status"] = "below_min_count"
         out["note"] = (f"score3 in scores file = {out['score3_in_scores']}, "
-                       f"actually realised in activations = {len(matched)}")
+                       f"actually realised in activations = {len(matched_pairs)}")
         return out
 
-    any_finite = any(torch.isfinite(a).any().item() for a in matched)
+    any_finite = any(torch.isfinite(a).any().item() for _, a in matched_pairs)
     if not any_finite:
         out["status"] = "all_nan_or_empty"
         return out
@@ -363,7 +650,11 @@ def _is_skippable_vectors_dir(vec_dir: Path) -> tuple[bool, str]:
     return False, ""
 
 
-def discover_scan_targets(root: Path) -> list[ScanTarget]:
+def discover_scan_targets(
+    root: Path,
+    *,
+    skip_suffixes: tuple[str, ...] = (),
+) -> list[ScanTarget]:
     """Walk `root` for entity-type subdirs and yield one ScanTarget per
     non-empty ``vectors*`` variant.
 
@@ -373,6 +664,12 @@ def discover_scan_targets(root: Path) -> list[ScanTarget]:
     ``vectors_unfiltered``, ...); we emit one ScanTarget per non-skippable
     one.  ``scores/`` is included if present (filtered mode); otherwise
     the target is run in unfiltered mode.
+
+    ``skip_suffixes``: if a vectors-variant directory name ends with
+    any of these strings, it's silently skipped.  Use to exclude
+    auxiliary vector layouts you don't want audited (e.g. an
+    in-progress experimental ``vectors_4slots/`` sibling).  Matching
+    is exact-suffix on the directory's *basename*, not a glob.
 
     Default entity-type subdirs (``default/``) typically contain a
     single ``default.pt`` and no scores; they're handled with mode=
@@ -396,6 +693,15 @@ def discover_scan_targets(root: Path) -> list[ScanTarget]:
             if not vec_dir.is_dir():
                 continue
             if not vec_dir.name.startswith("vectors"):
+                continue
+            matched_suffix = next(
+                (s for s in skip_suffixes if vec_dir.name.endswith(s)),
+                None,
+            )
+            if matched_suffix is not None:
+                logger.info(
+                    f"[skip] {vec_dir} (matches --skip_suffix {matched_suffix!r})"
+                )
                 continue
             skippable, reason = _is_skippable_vectors_dir(vec_dir)
             if skippable:
@@ -447,6 +753,7 @@ def scan_one_target(
     reduce_questions: int,
     deep_load: bool,
     load_check: bool,
+    cache: Optional[ScanCache] = None,
 ) -> ScanResult:
     """Walk one ScanTarget's activations + vectors, classifying every entity."""
     act_files = sorted(target.activations_dir.glob("*.pt"))
@@ -481,6 +788,7 @@ def scan_one_target(
             mode=target.mode,
             deep_load=deep_load,
             load_check=load_check,
+            cache=cache,
         ))
 
     # Also flag any vector files that exist with no source activation
@@ -595,6 +903,32 @@ def main() -> None:
                              "(default/, roles/, traits/, combinations/, ...). "
                              "Auto-discovers every {entity}/vectors* sibling "
                              "with real (non-symlinked) .pt files.")
+    parser.add_argument("--skip_suffix", action="append", default=[],
+                        metavar="SUFFIX",
+                        help="In --root mode: skip vectors-variant dirs whose "
+                             "basename ends with this suffix.  Repeatable.  "
+                             "Example: --skip_suffix _4slots skips every "
+                             "vectors_4slots/ subdir found.")
+    parser.add_argument("--cache", type=Path, default=None,
+                        metavar="PATH",
+                        help="Override the default cache file location.  "
+                             "By default (caching is ON), the cache lands at "
+                             "<root>/scan_cache.json in --root mode or at "
+                             "<vectors_dir>/scan_cache.json in single-pair "
+                             "mode -- alongside the audit JSON / log file.  "
+                             "Cache is keyed by absolute path + (size, mtime), "
+                             "so re-runs after a connection drop near-"
+                             "instantly skip files the previous run already "
+                             "confirmed loadable.  Auto-flushes every "
+                             f"{CACHE_FLUSH_EVERY} updates or "
+                             f"{CACHE_FLUSH_INTERVAL_S:.0f} s "
+                             "(whichever first) plus on exit.")
+    parser.add_argument("--no_cache", action="store_true",
+                        help="Disable caching entirely.  Use when you want "
+                             "to force a full re-verification of every file "
+                             "(e.g. after suspecting in-place corruption "
+                             "that didn't bump mtime, or to confirm cache-"
+                             "skipped classifications still hold).")
     parser.add_argument("--activations_dir", type=Path, default=None)
     parser.add_argument("--vectors_dir", type=Path, default=None)
     parser.add_argument("--scores_dir", type=Path, default=None,
@@ -651,10 +985,34 @@ def main() -> None:
 
     load_check = not args.no_load_check
 
+    # Default cache path: alongside the audit output / log files.
+    # Caching is ON by default (Roger's drop-mid-scan recovery trumps
+    # any concern about cache staleness, which (size, mtime) keying
+    # already handles).  --no_cache forces the legacy behaviour.
+    if args.no_cache:
+        cache_path: Optional[Path] = None
+        if args.cache is not None:
+            parser.error("--cache and --no_cache are mutually exclusive")
+    elif args.cache is not None:
+        cache_path = args.cache
+    elif using_root:
+        cache_path = args.root / "scan_cache.json"
+    else:
+        cache_path = args.vectors_dir / "scan_cache.json"
+
+    if args.skip_suffix and not using_root:
+        logger.warning(
+            "--skip_suffix has no effect outside --root mode; ignoring "
+            "(in single-pair mode you've already specified the exact "
+            "vectors_dir to scan)"
+        )
+
     # Build the list of scan targets.
     targets: list[ScanTarget]
     if using_root:
-        targets = discover_scan_targets(args.root)
+        targets = discover_scan_targets(
+            args.root, skip_suffixes=tuple(args.skip_suffix),
+        )
         if not targets:
             print(f"ERROR: no scan targets found under {args.root}", file=sys.stderr)
             print("       (looking for entity-type subdirs containing both an "
@@ -675,17 +1033,29 @@ def main() -> None:
             mode=args.mode,
         )]
 
-    # Run all scans.
+    # Open the load-result cache (default-on; --no_cache to disable).
+    # Always close in the finally below so a Ctrl-C still flushes any
+    # in-memory updates to disk -- otherwise the entries since the
+    # last flush would be lost and re-runs would have to re-load them.
+    cache = ScanCache(cache_path) if cache_path is not None else None
+    if cache is not None:
+        print(f"Cache: {cache_path}")
+
     scan_results: list[ScanResult] = []
-    for target in targets:
-        sr = scan_one_target(
-            target,
-            min_count=args.min_count,
-            reduce_questions=args.reduce_questions,
-            deep_load=args.deep_load,
-            load_check=load_check,
-        )
-        scan_results.append(sr)
+    try:
+        for target in targets:
+            sr = scan_one_target(
+                target,
+                min_count=args.min_count,
+                reduce_questions=args.reduce_questions,
+                deep_load=args.deep_load,
+                load_check=load_check,
+                cache=cache,
+            )
+            scan_results.append(sr)
+    finally:
+        if cache is not None:
+            cache.close()
 
     # Write outputs.
     if using_root:
