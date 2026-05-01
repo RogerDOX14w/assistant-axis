@@ -415,6 +415,17 @@ def classify_entity(
             cached = cache.get_vector(vec_file) if cache is not None else None
             if cached is not None:
                 if not cached["ok"]:
+                    # Replay the failure as a live warning so cached
+                    # known-bad files stay visible on every re-run --
+                    # silent suppression of a corrupt file is exactly
+                    # the kind of thing the scanner is supposed to
+                    # surface.  WARNING (not ERROR) because we've
+                    # already errored on this file once when first
+                    # caching it.
+                    logger.warning(
+                        f"[cached-corrupt vector] {vec_file}: "
+                        f"{cached.get('error')}"
+                    )
                     out["status"] = "corrupt_vector"
                     out["note"] = f"vector .pt unreadable (cached): {cached.get('error')}"
                     return out
@@ -489,6 +500,14 @@ def classify_entity(
     cached_act = cache.get_activation(act_file) if cache is not None else None
 
     if cached_act is not None and not cached_act["ok"]:
+        # Replay the failure as a live warning -- see the matching
+        # block above on the vector path for rationale.  Activation
+        # corruption is the expensive-to-recover case (re-extract
+        # from step 2), so users want to see this on every scan.
+        logger.warning(
+            f"[cached-corrupt activation] {act_file}: "
+            f"{cached_act.get('error')}"
+        )
         out["status"] = "corrupt_or_truncated_activation"
         out["note"] = (f"activation .pt unloadable (cached): "
                        f"{cached_act.get('error')}")
