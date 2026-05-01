@@ -98,6 +98,72 @@ uv run python results_analysis/axis_judge_correlation.py \
   --output_dir roger/axis_judge_pc1_roles
 ```
 
+#### Cost model: GPT-4.1-mini responses-mode judging
+
+The `responses` scoring mode is the dominant cost in this script (the
+`description` and `instructions` modes each fit in a few hundred prompts
+per axis). Numbers below are derived from one real B=15 prompt
+tiktoken-counted on the actual data, plus measured judge output lengths
+sampled from cached `scores_responses.json`.
+
+**Per-batch token model**
+
+| Component | Tokens | Source |
+|-----------|--------|--------|
+| Fixed input overhead per batch | **326** | rubric header + scale table + axis name + pos/neg pole text + name field |
+| Per-item input | **35.3** | `--- Response i of N ---` block + `[QUESTION] / [/QUESTION] / [RESPONSE] / [/RESPONSE]` markers + a real Qwen-3-32B response (mean 19.6 content tokens × 280 sample roles) |
+| Output per batch | **~85** | median 83, mean 86, p90 109 — measured across 200 cached batches; "2-3 sentences of reasoning + `SCORE: <int>`" |
+
+So per batch: `input = 326 + B × 35.3`, `output = 85`.
+
+**Pricing** (gpt-4.1-mini, 2026-04 rates): input **$0.40 / 1M tokens**,
+output **$1.60 / 1M tokens**. Anthropic's `claude-sonnet-4-20250514`
+pricing is roughly an order of magnitude higher (and we don't currently
+run responses mode on Sonnet).
+
+**Items per axis**: with the project's standard scoring corpus the
+`responses` mode covers ~245k items per axis (280 roles × ~427
+responses + 297 traits × ~481 responses). One axis-worth of work, both
+sides.
+
+**Per-axis cost curve** (`responses` mode, single axis, both sides):
+
+| B  | Batches | Input M tok | Output M tok | $ in | $ out | **$ total** | Relative |
+|----|---------|-------------|--------------|------|-------|-------------|----------|
+|  5 | 48,968  | 24.6        | 4.16         | 9.84 | 6.66  | **$16.50**  | 2.11×    |
+|  7 | 34,977  | 20.0        | 2.97         | 8.02 | 4.76  | **$12.77**  | 1.64×    |
+| 10 | 24,484  | 16.6        | 2.08         | 6.65 | 3.33  | **$9.98**   | 1.28×    |
+| 15 | 16,323  | 14.0        | 1.39         | 5.59 | 2.22  | **$7.81**   | **1.00×** (ref) |
+| 20 | 12,242  | 12.6        | 1.04         | 5.05 | 1.66  | **$6.72**   | 0.86×    |
+| 30 |  8,161  | 11.3        | 0.69         | 4.52 | 1.11  | **$5.63**   | 0.72×    |
+
+Why the curve isn't ½ at B=30 vs B=15: the per-item content (245k items
+× ~35 tokens) is fixed regardless of batch size, so total input tokens
+shrink only via the per-batch overhead. Halving the batch count saves
+overhead but not item tokens; cost asymptotes to a floor set by the
+content itself.
+
+**12-axis sweep cost** (the standard "all-axes" responses run we use as
+a baseline): **B=15 ≈ $94**, B=10 ≈ $120, B=7 ≈ $153, B=5 ≈ $198.
+
+**Quality vs cost** (B=5 vs B=15, measured 2026-04 on 3 axes ×
+3 (slot, layer) cells: `truthful_vs_deceitful`,
+`progressive_vs_conservative`, `improvisational_vs_methodical`):
+
+- Grand-mean ρ lift **+0.018** in favour of B=5 (B=5 wins all 9/9 cells;
+  cell-level lifts +0.005 to +0.046).
+- Per-axis incremental cost from B=15 to B=5: **+$8.70 / axis**
+  ($16.50 − $7.81).
+- Cost / Δρ at the grand-mean level: ~**$483 per +0.01 ρ across the
+  full 12-axis sweep** ((198 − 94) / 0.018 / 0.01).
+
+The B=15 default is a good fit for high-throughput sweeps where the
++0.02 ρ delta is below the per-axis SE (~0.04). B=5 (or B=7) is worth
+the extra spend specifically when (a) you're publishing per-axis or
+per-cell ρ values where +0.02 is visible and matters, or (b) you're
+running narrow follow-up comparisons (e.g. paper figures comparing
+specific cells) and the absolute ρ ceiling matters more than throughput.
+
 ### `infer_axis_description.py`
 
 The conceptual inverse of [`axis_judge_correlation.py`](#axis_judge_correlationpy).
@@ -338,6 +404,132 @@ For batch refills via `run_axis_experiment_batch.py`, pass `--refill_gaps`
 to bypass the "skip if `correlations.json` exists" gate. Pairs with a
 clean `gaps.json` (all modes empty) are still skipped, so refilling a
 mostly-clean experiment root is cheap.
+
+### `pc_round_trip/` — auto-described axis vs. original projection
+
+End-to-end pipeline that asks: when we auto-describe the n-th principal
+component of the post-shear entity space (using
+[`infer_axis_description.py`](#infer_axis_descriptionpy)), then re-score
+the resulting axis text against the entities (using
+[`axis_judge_correlation.py`](#axis_judge_correlationpy)), how well does
+the round-trip recover the original projection?
+
+The pipeline lives in `results_analysis/pc_round_trip/` and has four
+scripts:
+
+```
+infer_axis_description.py     launch_judge_runs.py     klm_sweep.py     plot_loglin.py
+   (per-cell auto-describe        (28× judge calls          (no API,         (no API,
+    -> spec.json)                  for desc+inst             ~4 min CPU)      instant)
+   [also auto-runs                 over GPT+Sonnet)
+    standardize_axis_spec.py]
+```
+
+#### `pc_round_trip/launch_judge_runs.py`
+
+Computes PC directions in post-shear space (default `slot=3, layer=25,
+shear_L=DEFAULT_SOFT_SHEAR_L`), saves per-entity projections, and
+launches `axis_judge_correlation.py` for every (PC × {glossary, inline}
+× {openai, anthropic}) cell. Each cell ends up with::
+
+    pcNNN_{glossary,inline}/
+        axis_postshear.pt          (PC direction, post-shear)
+        post_shear_projection.json (entity projections onto that PC)
+        prompt.txt + response.txt + thinking.txt + spec.json
+            ^-- produced upstream by infer_axis_description.py
+        gpt/                       (axis_judge_correlation.py output)
+            scores_descriptions.json
+            scores_instructions.json
+            ...
+        sonnet/
+
+Per-cell `spec.json` must already exist; this script does **not** call
+`infer_axis_description.py`. Run that (with auto-standardize) first for
+each PC × style. The describer is the dominant cost — Claude Opus with
+a 10K thinking budget runs ~$0.50 per cell; the judge sweep is the
+dominant volume — ~hundreds of small batches per cell.
+
+`--dry_run` prints the planned commands and exits, useful for sanity
+checks. Combine with `--skip_setup` to skip the SVD setup too:
+
+```bash
+# Dry-run a single cell (no API, no SVD).
+uv run python -m results_analysis.pc_round_trip.launch_judge_runs \
+  --dry_run --skip_setup \
+  --pcs 8 --styles inline --providers anthropic
+```
+
+`--max_parallel` defaults to 2 for ML-footprint headroom; bump on a
+cleaner machine.
+
+#### `pc_round_trip/klm_sweep.py`
+
+Adaptive **(L, K, M)** sweep over the cached judge scores. For each
+(PC, style) cell, finds the best round-trip Spearman ρ across:
+
+- `slot, layer` ∈ `{(3, 25), (0, 26), (0, 49)}` by default — the three
+  configs that dominate the per-PC winners (low PCs land on slot=3 /
+  L=25; high PCs split between slot=0 / L=26 and slot=0 / L=49).
+- `L` — soft-shear truncation depth (default `0..5`).
+- `K` — soft-K whitening depth, swept on a coarse log-spaced grid then
+  refined with bracket-and-bisect around the peak (default coarse
+  `[0, 1, 2, 4, 8, 16, 32, 64, 128, 192, 256, 384, 512]`).
+- `M` — optional truncation of the entity matrix into the top-M PCs of
+  the pool (default `{64, 128, 256, 512, ∞}`).
+
+Two stages: stage 1 explores the M dimension at every coarse
+`(L, K)` grid point; stage 2 refines K at M=∞ via discrete
+bracket-and-bisect, the integer cousin of golden-section search. Stops
+when the bracket is ≤ 3 K-units wide or ρ-improvement < 0.005 (one-tenth
+of the 1/√n ≈ 0.04 noise floor).
+
+At very high K, the soft-K-whitened matrix becomes near-rank-deficient
+and the default LAPACK `gesdd` driver can fail to converge; the script
+falls back to scipy's `gesvd` (slower but robust) and skips configs
+where even that fails.
+
+This stage does **no** API calls — just reads cached judge scores and
+runs CPU. Re-running is cheap (~4 min on a workstation).
+
+```bash
+# Default: full sweep over all 14 PCs × 2 styles, writing to
+# roger/pc_round_trip_klm_results.json.
+uv run python -m results_analysis.pc_round_trip.klm_sweep
+```
+
+#### `pc_round_trip/plot_loglin.py`, `plot_histogram.py`
+
+Two PNG views of the cached sweep results:
+
+- `plot_loglin.py` — log-x line+marker plot of average best ρ vs PC
+  index. Headline figure for the experiment; reads cleanly across the
+  full PC range. Default source is **stage 2** (refined K, M=∞);
+  `--source max` takes per-cell max(stage 1, stage 2).
+- `plot_histogram.py` — bar-chart companion that prints per-cell winner
+  labels (`slot=…,ly=…,L=…,K=…,M=…`) for diagnostic inspection. Always
+  uses per-cell max(stage 1, stage 2) so finite-M wins are visible.
+
+Both scripts emit PNGs with embedded provenance metadata
+(`png_metadata` + `suptitle_with_specs`); both are instant.
+
+```bash
+uv run python -m results_analysis.pc_round_trip.plot_loglin
+uv run python -m results_analysis.pc_round_trip.plot_histogram
+```
+
+#### Key finding (April 2026)
+
+The K-coarse grid initially capped at K=128; PC 192 and PC 256 were then
+showing near-noise-floor ρ (~+0.05). Extending K to 512 lifted them to
++0.36 and +0.31 — the optimum K tracks the PC index very tightly
+(`K* ≈ N` for `N ≥ 16`). Higher PCs need more aggressive whitening to
+expose their semantic content; capping K too low collapses the signal.
+
+Slot/layer dominance also shifts with PC index: PCs 1, 2, 4, 8 win at
+slot=3 / L=25 (the canonical "best" cell), while everything from PC 32
+onward wins at slot=0 / L∈{26, 49} — the body-mean representation at
+the two "post-step" layers right after the major computation cliffs at
+24 and 48.
 
 ### `token_position_noise_analysis.py`
 
