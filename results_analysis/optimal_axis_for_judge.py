@@ -1,0 +1,1254 @@
+#!/usr/bin/env python3
+"""Find the unit direction in a fixed metric (slot, layer, whitening) that
+maximises Spearman ρ between entity projections and a judge-score dict.
+
+Algorithm: project entity vectors into the top-M PC subspace, then run
+coordinate ascent on the M PC coefficients of the unknown direction ``d``,
+solving each 1-D sub-problem exactly via the crossing-points trick (a
+generalisation of the per-PC β optimum in ``coordinate_ascent.py``).
+Multiple structured restarts handle local optima; a cosine-clustering pass
+diagnoses how confident we are that ``d`` is well-determined.
+
+See ``results_analysis/README.md`` (section ``optimal_axis_for_judge.py``)
+for the headline algorithm sketch and use cases.
+"""
+from __future__ import annotations
+
+import argparse
+import json
+import math
+import subprocess
+import sys
+import time
+from dataclasses import dataclass, field, asdict
+from pathlib import Path
+from typing import Optional
+
+import numpy as np
+import torch
+from scipy.stats import rankdata, spearmanr
+
+# Numba JIT for the inner crossing-sweep loop.  Compiled lazily on first call
+# (~1 s overhead) but then runs at C-like speed; without it the per-coord
+# Python loop over O(N²) crossings is the dominant runtime cost.
+try:
+    from numba import njit                                       # type: ignore
+    _NUMBA_OK = True
+except ImportError:                                              # pragma: no cover
+    _NUMBA_OK = False
+    def njit(*_args, **_kwargs):                                 # noqa: D401
+        """Fallback no-op decorator if numba isn't available."""
+        def deco(fn):
+            return fn
+        if _args and callable(_args[0]):
+            return _args[0]
+        return deco
+
+import matplotlib
+matplotlib.use("Agg")
+import matplotlib.pyplot as plt
+
+from assistant_axis.judge_score_combine import (
+    DI_WEIGHT_CHOICES, combine_desc_inst_one_judge,
+    combine_desc_inst_two_judges,
+)
+from assistant_axis.plot_metadata import png_metadata, suptitle_with_specs
+from results_analysis.axis_judge_correlation import _load_vector_file
+from results_analysis.canonical_angles.data import (
+    DEFAULT_DATA_DIR, build_augmented_whitening_pool, load_vector,
+)
+from results_analysis.canonical_angles.whitening import fit_whitening
+
+
+# ---------------------------------------------------------------------------
+# Defaults
+# ---------------------------------------------------------------------------
+
+DEFAULT_M = 30                # tuned 2026-05-01: M-sweep on di_combined
+                                # (truthful_vs_deceitful) showed M=30 maximises
+                                # ρ_cv (0.815 vs 0.787 at M=50, 0.783 at M=100)
+                                # with the smallest train/CV gap (0.022).
+                                # Above M=50 overfitting kicks in; above M=75
+                                # the top cluster also fragments.
+DEFAULT_N_RESTARTS = 8         # tuned 2026-05-01: at M=30 all 8 restarts
+                                # converge to the same cluster (cos > 0.99
+                                # median).  16 was overkill.  Reducing 16 → 8
+                                # roughly halves wall-clock (and CV cost).
+DEFAULT_MAX_PASSES = 20
+DEFAULT_CONV_EPS = 1e-3
+DEFAULT_CV_FOLDS = 5
+DEFAULT_K_SEED = 4             # number of axis-aligned-signed seeds (PCs 0..K_seed-1)
+DEFAULT_CLUSTER_COS_THRESHOLD = 0.95
+DEFAULT_TIE_THRESH = 5e-4
+DEFAULT_SLOT = 3
+DEFAULT_LAYER = 25
+DEFAULT_WHITENING = "soft_K=3"
+
+
+# ---------------------------------------------------------------------------
+# Data classes
+# ---------------------------------------------------------------------------
+
+@dataclass
+class RestartResult:
+    seed_label: str
+    final_rho_train: float
+    final_d_pcs: np.ndarray            # (M,) unit vector in PC basis
+    n_passes: int
+    cluster_id: int = -1               # filled in after clustering
+
+
+@dataclass
+class FitResult:
+    """Headline output of :func:`find_optimal_direction`."""
+    direction: np.ndarray              # (D,) unit vector in original hidden space
+    direction_pcs: np.ndarray          # (M,) coords in the working PC basis
+    pc_basis: np.ndarray               # (M, D) PC basis used (for callers
+                                        # that want to express other vectors in
+                                        # the same coords)
+    rho_train: float
+    rho_cv: Optional[float]
+    cluster_summary: dict
+    restarts: list[RestartResult] = field(default_factory=list)
+    metric: dict = field(default_factory=dict)
+
+
+# ---------------------------------------------------------------------------
+# Step 1: geometry setup
+# ---------------------------------------------------------------------------
+
+def parse_whitening_spec(spec: str) -> tuple[str, Optional[int]]:
+    """``raw`` -> (raw, None); ``soft_K=3`` -> (soft_K, 3)."""
+    s = spec.strip()
+    if s == "raw":
+        return "raw", None
+    if s.startswith("soft_K="):
+        try:
+            K = int(s.split("=", 1)[1])
+        except ValueError as e:
+            raise ValueError(f"bad whitening spec {spec!r}") from e
+        return "soft_K", K
+    raise ValueError(f"unsupported whitening spec {spec!r}; "
+                     "supported: 'raw' or 'soft_K=N'")
+
+
+def load_entity_matrix(
+    data_dir: Path, slot: int, layer: int,
+    exclude: set[str] = frozenset(),
+) -> tuple[list[str], np.ndarray, np.ndarray]:
+    """Load all standalone roles + traits at (slot, layer), default-centred.
+    Returns (names, M_centered, default_v) where M_centered shape is (N, D).
+    """
+    default_v = _load_vector_file(
+        data_dir / "traits" / "vectors" / "default.pt"
+    ).float().numpy()[slot, layer]
+    names: list[str] = []
+    rows: list[np.ndarray] = []
+    for et in ("roles", "traits"):
+        for fp in sorted((data_dir / et / "vectors").glob("*.pt")):
+            if fp.stem == "default" or fp.stem in exclude:
+                continue
+            try:
+                v = _load_vector_file(fp).float().numpy()[slot, layer]
+            except Exception:                                  # noqa: BLE001
+                continue
+            names.append(fp.stem)
+            rows.append(v - default_v)
+    return names, np.stack(rows, axis=0).astype(np.float64), default_v
+
+
+def build_pool(
+    data_dir: Path, slot: int, layer: int,
+    exclude: set[str] = frozenset(),
+) -> np.ndarray:
+    """Augmented pool (held-out standalones + default) at (slot, layer),
+    default-centred."""
+    default_v = np.asarray(load_vector(data_dir, "traits", "default"),
+                            dtype=np.float64)[slot, layer]
+    leave = {(et, n) for et in ("roles", "traits") for n in exclude}
+    pool_entries = build_augmented_whitening_pool(data_dir, leave_out=leave)
+    rows = []
+    for et, name in pool_entries:
+        v = np.asarray(load_vector(data_dir, et, name),
+                        dtype=np.float64)[slot, layer]
+        rows.append(v - default_v)
+    return np.stack(rows, axis=0)
+
+
+def setup_geometry(
+    data_dir: Path, *, slot: int, layer: int, whitening: str,
+    M: int, exclude: set[str] = frozenset(),
+) -> tuple[list[str], np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
+    """Whiten + centre entities, fit M-PC basis on the entity pool.
+
+    Returns
+    -------
+    names    : list[str], length N
+    alpha    : (N, M) entity loadings on the M PCs (post-whitening)
+    Vt       : (M, D) PC basis rows
+    sigma    : (M,) singular values (for reference / variance budget)
+    M_full   : (N, D) whitened, centred entity matrix (for quick rho-eval
+                with already-fitted directions)
+    """
+    method, K = parse_whitening_spec(whitening)
+
+    # Pool for whitener fit (held-out standalones + default).
+    pool = build_pool(data_dir, slot=slot, layer=layer, exclude=exclude)
+    whitener = fit_whitening(method, pool, K=K)
+
+    names, M_centered, _default = load_entity_matrix(
+        data_dir, slot=slot, layer=layer, exclude=exclude,
+    )
+    M_white = whitener.apply(M_centered)
+    M_white = M_white - M_white.mean(axis=0, keepdims=True)
+
+    # SVD on the (N, D) whitened entity matrix.  Keep top M PCs.
+    U, S, Vt = np.linalg.svd(M_white, full_matrices=False)
+    # Effective rank is bounded by N-1 after centring.
+    M_eff = min(M, len(S))
+    Vt = Vt[:M_eff]                 # (M_eff, D)
+    sigma = S[:M_eff]               # (M_eff,)
+    alpha = M_white @ Vt.T          # (N, M_eff)
+    return names, alpha, Vt, sigma, M_white
+
+
+def load_axis_unit_at(
+    data_dir: Path, pos: str, neg: str, slot: int, layer: int,
+) -> Optional[np.ndarray]:
+    """Project (vec[pos] - vec[neg]) at (slot, layer) and unit-normalise.
+    Returns None if either file is missing / unloadable."""
+    try:
+        vp = _load_vector_file(
+            data_dir / "traits" / "vectors" / f"{pos}.pt"
+        ).float().numpy()[slot, layer]
+        vn = _load_vector_file(
+            data_dir / "traits" / "vectors" / f"{neg}.pt"
+        ).float().numpy()[slot, layer]
+    except Exception:                                          # noqa: BLE001
+        return None
+    d = (vp - vn).astype(np.float64)
+    nrm = np.linalg.norm(d)
+    if nrm < 1e-12:
+        return None
+    return d / nrm
+
+
+# ---------------------------------------------------------------------------
+# Step 2: 1-D crossing-points solver (unbounded d_k in R)
+# ---------------------------------------------------------------------------
+
+@njit(cache=True)
+def _sweep_crossings_jit(
+    i_v: np.ndarray, j_v: np.ndarray,
+    rank_of: np.ndarray,
+    judge_avg_ranks: np.ndarray,
+    sum_d2_init: float,
+) -> tuple[int, float]:
+    """Inner crossing-sweep: walk through M sorted crossings (i_v[m], j_v[m]),
+    swap rank_of[i_v[m]] and rank_of[j_v[m]] at each step, track running Σd²,
+    return (best_idx, best_sum_d2).  ``best_idx == -1`` means the initial
+    interval (-inf, beta_cross[0]) is the optimum.
+
+    rank_of is mutated in place.
+    """
+    M = i_v.shape[0]
+    current_d2 = sum_d2_init
+    best_d2 = sum_d2_init
+    best_idx = -1
+    for m in range(M):
+        i = i_v[m]
+        j = j_v[m]
+        ri = rank_of[i]
+        rj = rank_of[j]
+        # Δ(Σd²) = 2·(ri − rj)·(jr_i − jr_j) at a rank-swap.
+        current_d2 += 2.0 * (ri - rj) * (judge_avg_ranks[i] - judge_avg_ranks[j])
+        rank_of[i] = rj
+        rank_of[j] = ri
+        if current_d2 < best_d2 - 1e-9:
+            best_d2 = current_d2
+            best_idx = m
+    return best_idx, best_d2
+
+
+def optimize_dk(
+    baseline: np.ndarray,      # (N,) score contribution from all j != k
+    a_k: np.ndarray,           # (N,) entity loading on PC k
+    judge_avg_ranks: np.ndarray,
+    *,
+    i_idx: Optional[np.ndarray] = None,
+    j_idx: Optional[np.ndarray] = None,
+) -> tuple[float, float, int]:
+    """Find d_k in R minimising Σ(rank(score_i) - judge_avg_rank_i)² where
+    score_i(d_k) = baseline_i + d_k * a_k[i].
+
+    Returns (d_k_best, sum_d2_best, n_crossings).  ρ-argmax = Σd²-argmin
+    when projection has no exact ties at the chosen interior d_k (we use
+    each interval's midpoint).  At unbounded tails, we pick a representative
+    d_k well outside the crossing range.
+
+    Pass cached ``i_idx, j_idx = np.triu_indices(N, k=1)`` to avoid the
+    O(N²) reallocation each per-coord call.
+    """
+    N = len(baseline)
+    if N < 2:
+        return 0.0, 0.0, 0
+
+    if i_idx is None or j_idx is None:
+        i_idx, j_idx = np.triu_indices(N, k=1)
+    num = baseline[j_idx] - baseline[i_idx]
+    den = a_k[i_idx] - a_k[j_idx]                 # solving b_i + d*a_i == b_j + d*a_j
+    nz = den != 0.0
+    if not nz.any():
+        # No crossings -- ρ is constant in d_k; return 0 (any value is fine).
+        ranks = rankdata(baseline, method="ordinal").astype(np.float64)
+        d = ranks - judge_avg_ranks
+        return 0.0, float(d @ d), 0
+    beta_cross = num[nz] / den[nz]
+    i_v = i_idx[nz]
+    j_v = j_idx[nz]
+
+    # Sort crossings.
+    order_c = np.argsort(beta_cross, kind="stable")
+    beta_cross = beta_cross[order_c]
+    i_v = np.ascontiguousarray(i_v[order_c], dtype=np.int64)
+    j_v = np.ascontiguousarray(j_v[order_c], dtype=np.int64)
+    M = len(beta_cross)
+
+    # Initial state: d_k = beta_cross[0] - 1.
+    d_left = float(beta_cross[0] - 1.0)
+    score_left = baseline + d_left * a_k
+    order0 = np.argsort(score_left, kind="stable")
+    rank_of = np.empty(N, dtype=np.int64)
+    rank_of[order0] = np.arange(1, N + 1)
+    d_init = rank_of.astype(np.float64) - judge_avg_ranks
+    sum_d2 = float(d_init @ d_init)
+
+    # Hot inner loop, JIT'd.
+    best_idx, best_d2 = _sweep_crossings_jit(
+        i_v, j_v, rank_of,
+        np.ascontiguousarray(judge_avg_ranks, dtype=np.float64),
+        sum_d2,
+    )
+
+    # Resolve interval bounds and representative d_k.
+    if best_idx < 0:
+        best_lo = -math.inf
+        best_hi = float(beta_cross[0])
+    else:
+        best_lo = float(beta_cross[best_idx])
+        best_hi = (float(beta_cross[best_idx + 1])
+                    if best_idx + 1 < M else math.inf)
+
+    if math.isinf(best_lo) and math.isinf(best_hi):
+        d_best = 0.0
+    elif math.isinf(best_lo):
+        span = float(beta_cross[-1] - beta_cross[0])
+        d_best = best_hi - max(1.0, span * 0.25)
+    elif math.isinf(best_hi):
+        span = float(beta_cross[-1] - beta_cross[0])
+        d_best = best_lo + max(1.0, span * 0.25)
+    else:
+        d_best = 0.5 * (best_lo + best_hi)
+    return d_best, best_d2, M
+
+
+def evaluate_rho_pcs(d: np.ndarray, alpha: np.ndarray,
+                      judge_scores: np.ndarray) -> float:
+    """True (tie-corrected) Spearman ρ for direction d in PC basis."""
+    score = alpha @ d
+    return float(spearmanr(score, judge_scores).correlation)
+
+
+# ---------------------------------------------------------------------------
+# Step 3: coordinate ascent
+# ---------------------------------------------------------------------------
+
+def coordinate_ascent(
+    init_d: np.ndarray,
+    alpha: np.ndarray,                # (N, M)
+    judge_scores: np.ndarray,         # (N,)
+    judge_avg_ranks: np.ndarray,      # (N,)
+    *,
+    max_passes: int = DEFAULT_MAX_PASSES,
+    conv_eps: float = DEFAULT_CONV_EPS,
+    rng: np.random.Generator,
+) -> tuple[np.ndarray, int]:
+    """Round-robin coordinate ascent over the M PCs.  Returns (d_unit, n_passes).
+
+    The direction is normalised to unit length before each pass to keep the
+    coordinate magnitudes from drifting -- per-coord ρ-argmax is
+    scale-invariant in d, so this is equivalent and numerically cleaner.
+    """
+    d = init_d.astype(np.float64).copy()
+    nrm = float(np.linalg.norm(d))
+    if nrm < 1e-12:
+        # Degenerate seed; perturb.
+        d = rng.standard_normal(alpha.shape[1])
+        nrm = float(np.linalg.norm(d))
+    d = d / nrm
+
+    M = alpha.shape[1]
+    N = alpha.shape[0]
+    # Cache the (N choose 2) index arrays for the per-coord crossing solver.
+    i_idx, j_idx = np.triu_indices(N, k=1)
+    last_pass = 0
+    for pass_idx in range(max_passes):
+        last_pass = pass_idx + 1
+        max_move = 0.0
+        order = rng.permutation(M)
+        for k in order:
+            full = alpha @ d                              # (N,)
+            baseline = full - alpha[:, k] * d[k]
+            a_k = alpha[:, k]
+            d_new, _d2, _ncross = optimize_dk(
+                baseline, a_k, judge_avg_ranks,
+                i_idx=i_idx, j_idx=j_idx,
+            )
+            old_dk = float(d[k])
+            d[k] = d_new
+            # Renormalise after each coord update -- ρ is scale-invariant in d,
+            # so this just keeps coord magnitudes from drifting and makes the
+            # convergence criterion meaningful in absolute units.
+            nrm = float(np.linalg.norm(d))
+            if nrm > 1e-12:
+                d = d / nrm
+            move = abs(float(d[k]) - old_dk)
+            if move > max_move:
+                max_move = move
+        if max_move < conv_eps:
+            break
+
+    # Sign-canonicalise: ρ(-d) = -ρ(d), and we want max ρ.  Coordinate
+    # ascent finds a Σd²-min within whichever sign-hemisphere it started in;
+    # flipping is a free upgrade if it lands negative.
+    rho = evaluate_rho_pcs(d, alpha, judge_scores)
+    if rho < 0:
+        d = -d
+    return d, last_pass
+
+
+# ---------------------------------------------------------------------------
+# Step 4: structured seed restarts
+# ---------------------------------------------------------------------------
+
+def fisher_lda_seed(alpha: np.ndarray, scores: np.ndarray) -> Optional[np.ndarray]:
+    """Tercile-bin entities by score and return the Fisher discriminant
+    direction in PC basis.  Returns None on degenerate input."""
+    N, M = alpha.shape
+    if N < 6:
+        return None
+    qs = np.quantile(scores, [1.0 / 3.0, 2.0 / 3.0])
+    low = scores <= qs[0]
+    high = scores >= qs[1]
+    mid = ~(low | high)
+    groups = [g for g in (low, mid, high) if int(g.sum()) >= 2]
+    if len(groups) < 2:
+        return None
+    means = [alpha[g].mean(axis=0) for g in groups]
+    overall = alpha.mean(axis=0)
+    Sb = np.zeros((M, M))
+    Sw = np.zeros((M, M))
+    for g, mu in zip(groups, means):
+        diff = (mu - overall).reshape(-1, 1)
+        Sb += int(g.sum()) * diff @ diff.T
+        Xc = alpha[g] - mu
+        Sw += Xc.T @ Xc
+    # Regularise.
+    Sw_reg = Sw + 1e-3 * np.trace(Sw) / M * np.eye(M)
+    try:
+        sol = np.linalg.solve(Sw_reg, Sb)
+        # Top eigvec.
+        eigvals, eigvecs = np.linalg.eig(sol)
+        d = eigvecs[:, np.argmax(eigvals.real)].real
+    except np.linalg.LinAlgError:
+        return None
+    nrm = float(np.linalg.norm(d))
+    if nrm < 1e-12:
+        return None
+    return d / nrm
+
+
+def random_unit(M: int, rng: np.random.Generator) -> np.ndarray:
+    v = rng.standard_normal(M)
+    return v / np.linalg.norm(v)
+
+
+def project_into_pc_basis(d_full: np.ndarray, Vt: np.ndarray) -> np.ndarray:
+    """Project a (D,) direction into the (M,) PC basis row-space.
+    The residual orthogonal to the basis is dropped (= zero for the
+    judge-prediction problem since entity loadings have no component there).
+    """
+    return Vt @ d_full
+
+
+def build_seed_initials(
+    *, alpha: np.ndarray, judge_scores: np.ndarray,
+    Vt: np.ndarray,
+    pole_diff_full: Optional[np.ndarray],
+    n_restarts: int, K_seed: int, rng: np.random.Generator,
+) -> list[tuple[str, np.ndarray]]:
+    """Return list of (label, init_d_pcs) of length n_restarts.
+
+    Order: pole_diff (if present), score_weighted_mean, fisher_lda,
+    K_seed axis-aligned-signed, random fill.
+    """
+    out: list[tuple[str, np.ndarray]] = []
+    M = alpha.shape[1]
+
+    # 1. pole_diff
+    if pole_diff_full is not None:
+        d = project_into_pc_basis(pole_diff_full, Vt)
+        nrm = float(np.linalg.norm(d))
+        if nrm > 1e-12:
+            out.append(("pole_diff", d / nrm))
+
+    # 2. score-weighted mean
+    centered = judge_scores - judge_scores.mean()
+    d_swm = centered @ alpha
+    nrm = float(np.linalg.norm(d_swm))
+    if nrm > 1e-12:
+        out.append(("score_weighted_mean", d_swm / nrm))
+
+    # 3. fisher LDA
+    d_fld = fisher_lda_seed(alpha, judge_scores)
+    if d_fld is not None:
+        out.append(("fisher_lda", d_fld))
+
+    # 4. axis-aligned-signed
+    K_seed = min(K_seed, M)
+    for k in range(K_seed):
+        a = alpha[:, k]
+        sd = a.std()
+        if sd < 1e-12:
+            continue
+        # Sign by Pearson correlation with scores; ranks would also do.
+        c = float(np.corrcoef(a, judge_scores)[0, 1])
+        sign = 1.0 if c >= 0 else -1.0
+        e = np.zeros(M)
+        e[k] = sign
+        out.append((f"axis_aligned_pc{k}", e))
+
+    # 5. random fill
+    while len(out) < n_restarts:
+        out.append((f"random_{len(out)}", random_unit(M, rng)))
+
+    # Truncate if we overshot.
+    return out[:n_restarts]
+
+
+# ---------------------------------------------------------------------------
+# Step 5: cosine clustering and consensus
+# ---------------------------------------------------------------------------
+
+def _sign_align_to_reference(directions: np.ndarray,
+                               ref: np.ndarray) -> np.ndarray:
+    """Flip each row's sign so it has positive cosine with ``ref``."""
+    aligned = directions.copy()
+    for i, d in enumerate(directions):
+        if float(d @ ref) < 0:
+            aligned[i] = -d
+    return aligned
+
+
+def single_link_cluster(directions: np.ndarray,
+                         threshold: float = DEFAULT_CLUSTER_COS_THRESHOLD,
+                         ) -> list[list[int]]:
+    """Single-link agglomerative clustering on |cosine| similarity.
+    Returns a list of clusters; each cluster is a list of row indices."""
+    n = len(directions)
+    cos = directions @ directions.T
+    np.fill_diagonal(cos, 1.0)
+    abs_cos = np.abs(cos)
+    parent = list(range(n))
+
+    def find(x):
+        while parent[x] != x:
+            parent[x] = parent[parent[x]]
+            x = parent[x]
+        return x
+
+    def union(a, b):
+        ra, rb = find(a), find(b)
+        if ra != rb:
+            parent[ra] = rb
+
+    for i in range(n):
+        for j in range(i + 1, n):
+            if abs_cos[i, j] >= threshold:
+                union(i, j)
+
+    clusters: dict[int, list[int]] = {}
+    for i in range(n):
+        clusters.setdefault(find(i), []).append(i)
+    return list(clusters.values())
+
+
+def cluster_summary(
+    restarts: list[RestartResult],
+    *, threshold: float = DEFAULT_CLUSTER_COS_THRESHOLD,
+    rho_cv_per_restart: Optional[list[Optional[float]]] = None,
+) -> tuple[dict, list[RestartResult]]:
+    """Build cluster summary and assign cluster ids to restarts.  Returns
+    (summary_dict, restarts_with_cluster_ids).
+
+    Note: directions are sign-aligned to the highest-rho restart, since
+    Spearman ρ is sign-invariant.
+    """
+    n = len(restarts)
+    if n == 0:
+        return {"n_restarts": 0, "top_cluster": None, "secondary_clusters": []}, restarts
+
+    D = np.stack([r.final_d_pcs for r in restarts], axis=0)
+    # Ensure all unit-norm (defensive).
+    norms = np.linalg.norm(D, axis=1, keepdims=True)
+    D = D / np.maximum(norms, 1e-12)
+
+    rhos = np.array([r.final_rho_train for r in restarts])
+    best_idx = int(np.argmax(rhos))
+    D_aligned = _sign_align_to_reference(D, D[best_idx])
+
+    clusters = single_link_cluster(D_aligned, threshold=threshold)
+    # Sort clusters by mean rho_train descending; assign ids.
+    cluster_meta = []
+    for cid, members in enumerate(clusters):
+        m_arr = np.array(members)
+        rho_train_mean = float(rhos[m_arr].mean())
+        if rho_cv_per_restart is not None:
+            cv_vals = [rho_cv_per_restart[i] for i in members
+                        if rho_cv_per_restart[i] is not None]
+            rho_cv_mean = float(np.mean(cv_vals)) if cv_vals else None
+        else:
+            rho_cv_mean = None
+        # Intra-cluster cosine stats.
+        if len(members) >= 2:
+            sub = D_aligned[m_arr]
+            cos = sub @ sub.T
+            iu = np.triu_indices(len(members), k=1)
+            pair = cos[iu]
+            min_cos = float(pair.min())
+            med_cos = float(np.median(pair))
+        else:
+            min_cos = 1.0
+            med_cos = 1.0
+        centroid = D_aligned[m_arr].mean(axis=0)
+        cnorm = float(np.linalg.norm(centroid))
+        if cnorm > 1e-12:
+            centroid = centroid / cnorm
+        cluster_meta.append({
+            "members": members,
+            "rho_train_mean": rho_train_mean,
+            "rho_cv_mean": rho_cv_mean,
+            "min_pairwise_cos": min_cos,
+            "median_pairwise_cos": med_cos,
+            "centroid": centroid,
+        })
+    cluster_meta.sort(key=lambda c: c["rho_train_mean"], reverse=True)
+    for new_cid, c in enumerate(cluster_meta):
+        for idx in c["members"]:
+            restarts[idx].cluster_id = new_cid
+
+    top = cluster_meta[0]
+    summary = {
+        "n_restarts": n,
+        "n_clusters": len(cluster_meta),
+        "top_cluster": {
+            "n_members": len(top["members"]),
+            "rho_train_mean": top["rho_train_mean"],
+            "rho_cv_mean": top["rho_cv_mean"],
+            "min_pairwise_cos": top["min_pairwise_cos"],
+            "median_pairwise_cos": top["median_pairwise_cos"],
+            "member_seed_labels": [restarts[i].seed_label for i in top["members"]],
+        },
+        "secondary_clusters": [
+            {
+                "n_members": len(c["members"]),
+                "rho_train_mean": c["rho_train_mean"],
+                "rho_cv_mean": c["rho_cv_mean"],
+                "min_pairwise_cos": c["min_pairwise_cos"],
+                "median_pairwise_cos": c["median_pairwise_cos"],
+                "centroid_cos_to_top": float(np.abs(c["centroid"] @ top["centroid"])),
+                "member_seed_labels": [restarts[i].seed_label for i in c["members"]],
+            }
+            for c in cluster_meta[1:]
+        ],
+    }
+    return summary, restarts
+
+
+def consensus_seed(top_cluster_centroid: np.ndarray) -> np.ndarray:
+    n = float(np.linalg.norm(top_cluster_centroid))
+    if n < 1e-12:
+        return top_cluster_centroid
+    return top_cluster_centroid / n
+
+
+# ---------------------------------------------------------------------------
+# Step 6: cross-validation
+# ---------------------------------------------------------------------------
+
+def kfold_indices(n: int, k: int, rng: np.random.Generator) -> list[np.ndarray]:
+    idx = rng.permutation(n)
+    folds = np.array_split(idx, k)
+    return [np.sort(f) for f in folds]
+
+
+# ---------------------------------------------------------------------------
+# Top-level fit orchestrator
+# ---------------------------------------------------------------------------
+
+def _fit_single_split(
+    *,
+    alpha_train: np.ndarray,
+    scores_train: np.ndarray,
+    avg_ranks_train: np.ndarray,
+    Vt: np.ndarray,
+    pole_diff_full: Optional[np.ndarray],
+    n_restarts: int,
+    K_seed: int,
+    max_passes: int,
+    conv_eps: float,
+    rng: np.random.Generator,
+    cluster_threshold: float = DEFAULT_CLUSTER_COS_THRESHOLD,
+) -> tuple[list[RestartResult], np.ndarray]:
+    """Run multi-restart coordinate ascent on a single (alpha, scores) split.
+    Returns (restarts, consensus_d_pcs).  consensus_d is the final adopted
+    direction after the consensus-re-converge step."""
+    seeds = build_seed_initials(
+        alpha=alpha_train, judge_scores=scores_train, Vt=Vt,
+        pole_diff_full=pole_diff_full,
+        n_restarts=n_restarts, K_seed=K_seed, rng=rng,
+    )
+
+    restarts: list[RestartResult] = []
+    for label, init_d in seeds:
+        d, n_passes = coordinate_ascent(
+            init_d=init_d, alpha=alpha_train,
+            judge_scores=scores_train, judge_avg_ranks=avg_ranks_train,
+            max_passes=max_passes, conv_eps=conv_eps, rng=rng,
+        )
+        rho = evaluate_rho_pcs(d, alpha_train, scores_train)
+        # Unit-normalise.
+        nrm = float(np.linalg.norm(d))
+        if nrm < 1e-12:
+            continue
+        d = d / nrm
+        restarts.append(RestartResult(
+            seed_label=label, final_rho_train=rho,
+            final_d_pcs=d, n_passes=n_passes,
+        ))
+    if not restarts:
+        raise RuntimeError("All restarts failed; no usable directions.")
+
+    # Cluster, consensus seed, re-converge.
+    summary, restarts = cluster_summary(restarts, threshold=cluster_threshold)
+
+    # Build consensus init from top cluster centroid (mean of members'
+    # sign-aligned directions).
+    best = max(restarts, key=lambda r: r.final_rho_train)
+    top_members = [r for r in restarts if r.cluster_id == best.cluster_id]
+    aligned = np.stack([
+        r.final_d_pcs if float(r.final_d_pcs @ best.final_d_pcs) >= 0
+        else -r.final_d_pcs
+        for r in top_members
+    ], axis=0)
+    centroid = aligned.mean(axis=0)
+    consensus_init = consensus_seed(centroid)
+
+    d_cons, _ = coordinate_ascent(
+        init_d=consensus_init, alpha=alpha_train,
+        judge_scores=scores_train, judge_avg_ranks=avg_ranks_train,
+        max_passes=max_passes, conv_eps=conv_eps, rng=rng,
+    )
+    rho_cons = evaluate_rho_pcs(d_cons, alpha_train, scores_train)
+    nrm = float(np.linalg.norm(d_cons))
+    if nrm > 1e-12:
+        d_cons = d_cons / nrm
+
+    if rho_cons > best.final_rho_train + DEFAULT_TIE_THRESH:
+        # Adopt the consensus direction as the answer.
+        # Append as an extra "consensus" restart entry.
+        cons_rec = RestartResult(
+            seed_label="consensus", final_rho_train=rho_cons,
+            final_d_pcs=d_cons, n_passes=0, cluster_id=best.cluster_id,
+        )
+        restarts.append(cons_rec)
+        adopted = d_cons
+    else:
+        adopted = best.final_d_pcs
+
+    return restarts, adopted
+
+
+def find_optimal_direction(
+    *,
+    judge_scores: dict[str, float],
+    data_dir: Path,
+    slot: int = DEFAULT_SLOT,
+    layer: int = DEFAULT_LAYER,
+    whitening: str = DEFAULT_WHITENING,
+    M: int = DEFAULT_M,
+    n_restarts: int = DEFAULT_N_RESTARTS,
+    max_passes: int = DEFAULT_MAX_PASSES,
+    conv_eps: float = DEFAULT_CONV_EPS,
+    K_seed: int = DEFAULT_K_SEED,
+    cv_folds: int = DEFAULT_CV_FOLDS,
+    seed_pair: Optional[tuple[str, str]] = None,
+    exclude_names: set[str] = frozenset(),
+    rng_seed: int = 0,
+    cluster_threshold: float = DEFAULT_CLUSTER_COS_THRESHOLD,
+) -> FitResult:
+    """End-to-end fit.  See module docstring."""
+    rng = np.random.default_rng(rng_seed)
+
+    # Geometry.
+    names, alpha_full, Vt, sigma, _M_full = setup_geometry(
+        data_dir, slot=slot, layer=layer, whitening=whitening,
+        M=M, exclude=exclude_names,
+    )
+    name_to_idx = {n: i for i, n in enumerate(names)}
+
+    # Pole-diff seed (optional).
+    pole_diff_full = None
+    if seed_pair is not None:
+        pole_diff_full = load_axis_unit_at(
+            data_dir, seed_pair[0], seed_pair[1], slot, layer)
+
+    # Restrict to entities the judge has scored.
+    common = sorted(set(judge_scores) & set(name_to_idx))
+    if len(common) < 5:
+        raise ValueError(
+            f"Need >=5 common entities; got {len(common)} "
+            f"(judge has {len(judge_scores)}, geometry has {len(names)}).")
+    common_idx = np.array([name_to_idx[n] for n in common])
+    alpha_c = alpha_full[common_idx]                    # (n_common, M)
+    scores_c = np.array([judge_scores[n] for n in common], dtype=np.float64)
+
+    # Headline (full-data) fit.
+    avg_ranks_c = rankdata(scores_c, method="average").astype(np.float64)
+    restarts, adopted_pcs = _fit_single_split(
+        alpha_train=alpha_c,
+        scores_train=scores_c,
+        avg_ranks_train=avg_ranks_c,
+        Vt=Vt,
+        pole_diff_full=pole_diff_full,
+        n_restarts=n_restarts, K_seed=K_seed,
+        max_passes=max_passes, conv_eps=conv_eps,
+        rng=rng,
+        cluster_threshold=cluster_threshold,
+    )
+    rho_train = evaluate_rho_pcs(adopted_pcs, alpha_c, scores_c)
+
+    # CV.
+    rho_cv: Optional[float] = None
+    if cv_folds and cv_folds >= 2:
+        n = len(common)
+        folds = kfold_indices(n, cv_folds, rng)
+        oof = np.full(n, np.nan)
+        for f_i, test_idx in enumerate(folds):
+            train_mask = np.ones(n, dtype=bool)
+            train_mask[test_idx] = False
+            scores_tr = scores_c[train_mask]
+            alpha_tr = alpha_c[train_mask]
+            ar_tr = rankdata(scores_tr, method="average").astype(np.float64)
+            try:
+                _r, d_fold = _fit_single_split(
+                    alpha_train=alpha_tr,
+                    scores_train=scores_tr,
+                    avg_ranks_train=ar_tr,
+                    Vt=Vt,
+                    pole_diff_full=pole_diff_full,
+                    n_restarts=max(4, n_restarts // 2),
+                    K_seed=K_seed,
+                    max_passes=max_passes, conv_eps=conv_eps,
+                    rng=np.random.default_rng(rng_seed + 100 + f_i),
+                    cluster_threshold=cluster_threshold,
+                )
+                oof[test_idx] = alpha_c[test_idx] @ d_fold
+            except Exception as e:                                # noqa: BLE001
+                print(f"  [cv] fold {f_i} failed: {e}; skipping", file=sys.stderr)
+        valid = ~np.isnan(oof)
+        if valid.sum() >= 5:
+            rho_cv = float(spearmanr(oof[valid], scores_c[valid]).correlation)
+
+    # Cluster summary (with cv info absent at cluster level for simplicity --
+    # cv is per-fold not per-restart).
+    summary, restarts = cluster_summary(restarts, threshold=cluster_threshold)
+    summary["rho_train_best"] = float(max(r.final_rho_train for r in restarts))
+    summary["rho_cv"] = rho_cv
+
+    # Baseline cosines and ρ.
+    direction_full = adopted_pcs @ Vt                  # (D,)
+    nrm = float(np.linalg.norm(direction_full))
+    if nrm > 1e-12:
+        direction_full = direction_full / nrm
+
+    if pole_diff_full is not None:
+        d_pole_pcs = project_into_pc_basis(pole_diff_full, Vt)
+        n2 = float(np.linalg.norm(d_pole_pcs))
+        if n2 > 1e-12:
+            d_pole_pcs = d_pole_pcs / n2
+            summary["cos_to_pole_diff"] = float(abs(d_pole_pcs @ adopted_pcs))
+            summary["rho_pole_diff"] = evaluate_rho_pcs(d_pole_pcs, alpha_c, scores_c)
+        else:
+            summary["cos_to_pole_diff"] = None
+            summary["rho_pole_diff"] = None
+    else:
+        summary["cos_to_pole_diff"] = None
+        summary["rho_pole_diff"] = None
+
+    centered = scores_c - scores_c.mean()
+    d_swm = centered @ alpha_c
+    n3 = float(np.linalg.norm(d_swm))
+    if n3 > 1e-12:
+        d_swm_unit = d_swm / n3
+        summary["cos_to_score_weighted_mean"] = float(abs(d_swm_unit @ adopted_pcs))
+        summary["rho_score_weighted_mean"] = evaluate_rho_pcs(
+            d_swm_unit, alpha_c, scores_c)
+    else:
+        summary["cos_to_score_weighted_mean"] = None
+        summary["rho_score_weighted_mean"] = None
+
+    metric = {
+        "slot": slot, "layer": layer, "whitening": whitening,
+        "M": int(alpha_full.shape[1]),
+        "M_requested": int(M),
+        "variance_top_M": float((sigma ** 2).sum() /
+                                max(1e-12, ((sigma ** 2).sum()))),  # always 1
+        "sigma_top": [float(s) for s in sigma[:5]],
+        "n_entities_in_geometry": len(names),
+        "n_entities_in_fit": len(common),
+        "exclude_names": sorted(exclude_names),
+        "seed_pair": list(seed_pair) if seed_pair else None,
+    }
+
+    return FitResult(
+        direction=direction_full,
+        direction_pcs=adopted_pcs,
+        pc_basis=Vt,
+        rho_train=rho_train,
+        rho_cv=rho_cv,
+        cluster_summary=summary,
+        restarts=restarts,
+        metric=metric,
+    )
+
+
+# ---------------------------------------------------------------------------
+# Score loading helpers (CLI mode B)
+# ---------------------------------------------------------------------------
+
+SCORE_SOURCE_CHOICES = ["gpt", "sonnet", "haiku", "di_combined", "responses"]
+
+
+def _flatten_static_scores(raw: dict) -> dict[str, float]:
+    """Normalise either {name: int} or {name: {score: ..., scores: [...]}}."""
+    out: dict[str, float] = {}
+    for name, val in raw.items():
+        if isinstance(val, (int, float)):
+            out[name] = float(val)
+        elif isinstance(val, dict):
+            if "score" in val and isinstance(val["score"], (int, float)):
+                out[name] = float(val["score"])
+            elif "scores" in val and isinstance(val["scores"], list):
+                nums = [s for s in val["scores"] if isinstance(s, (int, float))]
+                if nums:
+                    out[name] = float(np.mean(nums))
+    return out
+
+
+def _flatten_response_scores(raw: dict) -> dict[str, float]:
+    """Mean-score per entity from an axis_judge_correlation responses cache."""
+    out: dict[str, float] = {}
+    for name, info in raw.items():
+        if isinstance(info, dict):
+            ms = info.get("mean_score")
+            if isinstance(ms, (int, float)):
+                out[name] = float(ms)
+    return out
+
+
+def load_scores_from_experiment_dir(
+    experiment_dir: Path, source: str,
+    *,
+    di_weights: tuple[float, float] = DI_WEIGHT_CHOICES["inst_tie"],
+) -> dict[str, float]:
+    """Load a per-entity score series from an axis-judge-correlation
+    experiment directory.
+
+    sources:
+      gpt           : combine_desc_inst_one_judge(gpt/desc, gpt/inst)
+      sonnet        : combine_desc_inst_one_judge(sonnet/desc, sonnet/inst)
+      haiku         : combine_desc_inst_one_judge(haiku/desc, haiku/inst)
+      di_combined   : combine_desc_inst_two_judges(gpt, sonnet)  -- default 4-way
+      responses     : average gpt_responses_{roles,traits}/scores_responses.json
+                       per-entity mean_score
+    """
+    if source in ("gpt", "sonnet", "haiku"):
+        d = experiment_dir / source
+        sd = _flatten_static_scores(json.load(open(d / "scores_descriptions.json")))
+        si = _flatten_static_scores(json.load(open(d / "scores_instructions.json")))
+        return combine_desc_inst_one_judge(sd, si, weights=di_weights)
+    if source == "di_combined":
+        gd = experiment_dir / "gpt"
+        sd = experiment_dir / "sonnet"
+        g_d = _flatten_static_scores(json.load(open(gd / "scores_descriptions.json")))
+        g_i = _flatten_static_scores(json.load(open(gd / "scores_instructions.json")))
+        s_d = _flatten_static_scores(json.load(open(sd / "scores_descriptions.json")))
+        s_i = _flatten_static_scores(json.load(open(sd / "scores_instructions.json")))
+        return combine_desc_inst_two_judges(g_d, g_i, s_d, s_i, weights=di_weights)
+    if source == "responses":
+        out: dict[str, float] = {}
+        for sub in ("gpt_responses_roles", "gpt_responses_traits"):
+            path = experiment_dir / sub / "scores_responses.json"
+            if path.exists():
+                out.update(_flatten_response_scores(json.load(open(path))))
+        return out
+    raise ValueError(f"Unknown --score_source {source!r}; "
+                     f"choose from {SCORE_SOURCE_CHOICES}")
+
+
+# ---------------------------------------------------------------------------
+# Output writing
+# ---------------------------------------------------------------------------
+
+def _git_sha() -> str:
+    try:
+        return subprocess.check_output(
+            ["git", "rev-parse", "--short", "HEAD"],
+            cwd=str(Path(__file__).resolve().parent),
+        ).decode().strip()
+    except Exception:                                          # noqa: BLE001
+        return "unknown"
+
+
+def write_outputs(
+    output_dir: Path, result: FitResult, *, run_label: str,
+    argv: list[str], wallclock_s: float,
+) -> None:
+    output_dir.mkdir(parents=True, exist_ok=True)
+
+    # direction.pt
+    payload = {
+        "direction": torch.from_numpy(result.direction.astype(np.float32)),
+        "direction_pcs": torch.from_numpy(result.direction_pcs.astype(np.float32)),
+        "pc_basis_Vt": torch.from_numpy(result.pc_basis.astype(np.float32)),
+        "metric": result.metric,
+    }
+    torch.save(payload, output_dir / "direction.pt")
+
+    # diagnostics.json (without restart d_pcs -- those go in restart_dirs.pt
+    # since they're numeric arrays)
+    diag = {
+        "metric": result.metric,
+        "rho_train": result.rho_train,
+        "rho_cv": result.rho_cv,
+        "cluster_summary": result.cluster_summary,
+        "restarts": [
+            {
+                "seed_label": r.seed_label,
+                "final_rho_train": r.final_rho_train,
+                "n_passes": r.n_passes,
+                "cluster_id": r.cluster_id,
+            } for r in result.restarts
+        ],
+        "git_sha": _git_sha(),
+        "argv": " ".join(argv),
+        "wallclock_s": wallclock_s,
+    }
+    (output_dir / "diagnostics.json").write_text(json.dumps(diag, indent=2))
+
+    # restart_dirs.pt: per-restart final directions in PC basis, for
+    # downstream cluster analysis or cross-source consistency studies.
+    # Sign-aligned to the highest-rho restart.
+    if result.restarts:
+        D = np.stack([r.final_d_pcs for r in result.restarts], axis=0)
+        norms = np.linalg.norm(D, axis=1, keepdims=True)
+        D = D / np.maximum(norms, 1e-12)
+        ref_idx = int(np.argmax([r.final_rho_train for r in result.restarts]))
+        # Flip rows that are anti-aligned with reference.
+        for i in range(len(D)):
+            if float(D[i] @ D[ref_idx]) < 0:
+                D[i] = -D[i]
+        torch.save({
+            "restart_d_pcs": torch.from_numpy(D.astype(np.float32)),
+            "labels": [r.seed_label for r in result.restarts],
+            "rhos_train": [r.final_rho_train for r in result.restarts],
+            "cluster_ids": [r.cluster_id for r in result.restarts],
+            "metric": result.metric,
+        }, output_dir / "restart_dirs.pt")
+
+    # restarts.png
+    write_restarts_plot(output_dir / "restarts.png", result, run_label)
+
+
+def write_restarts_plot(out_path: Path, result: FitResult, run_label: str) -> None:
+    fig, ax = plt.subplots(figsize=(8.5, 5.0))
+    rs = result.restarts
+    rhos = [r.final_rho_train for r in rs]
+    cids = [r.cluster_id for r in rs]
+    cmap = plt.colormaps["tab10"]
+    colors = [cmap(c % 10) for c in cids]
+    xs = np.arange(len(rs))
+    ax.scatter(xs, rhos, c=colors, s=80, edgecolor="black", linewidth=0.6, zorder=5)
+    for x, r in zip(xs, rs):
+        ax.text(x, r.final_rho_train + 0.005, r.seed_label,
+                ha="center", va="bottom", fontsize=7, rotation=45)
+
+    cs = result.cluster_summary
+    if cs.get("rho_pole_diff") is not None:
+        ax.axhline(cs["rho_pole_diff"], color="grey", linestyle=":",
+                    linewidth=1.4, label=f"pole_diff baseline ρ={cs['rho_pole_diff']:.3f}")
+    if cs.get("rho_score_weighted_mean") is not None:
+        ax.axhline(cs["rho_score_weighted_mean"], color="firebrick", linestyle=":",
+                    linewidth=1.4, label=f"score_weighted_mean ρ={cs['rho_score_weighted_mean']:.3f}")
+    ax.axhline(result.rho_train, color="black", linestyle="-", linewidth=1.0,
+                label=f"adopted ρ={result.rho_train:.3f}"
+                + (f"  (cv {result.rho_cv:.3f})" if result.rho_cv is not None else ""))
+
+    ax.set_xlabel("restart index (coloured by cluster)")
+    ax.set_ylabel("Spearman ρ on training scores")
+    ax.set_xticks(xs)
+    ax.set_xticklabels([str(i) for i in xs], fontsize=7)
+    ax.grid(axis="y", alpha=0.25)
+    ax.legend(loc="lower right", framealpha=0.9, fontsize=8)
+
+    title = f"Optimal-judge-axis restarts: {run_label}"
+    metric = result.metric
+    tc_n = cs["top_cluster"]["n_members"]
+    tc_med = cs["top_cluster"]["median_pairwise_cos"]
+    spec = (f"slot={metric['slot']}, layer={metric['layer']}, "
+            f"whitening={metric['whitening']}, M={metric['M']}; "
+            f"n_entities_fit={metric['n_entities_in_fit']}; "
+            f"top cluster: {tc_n}/{cs['n_restarts']} restarts "
+            f"(intra med cos {tc_med:.3f})")
+    _, top_rect = suptitle_with_specs(fig, title, spec)
+    fig.tight_layout(rect=(0, 0, 1, top_rect))
+    fig.savefig(out_path, dpi=150, bbox_inches="tight",
+                metadata=png_metadata(title=title,
+                                       source_text=Path(__file__).read_text()))
+    plt.close(fig)
+
+
+# ---------------------------------------------------------------------------
+# CLI
+# ---------------------------------------------------------------------------
+
+def parse_args(argv: Optional[list[str]] = None) -> argparse.Namespace:
+    p = argparse.ArgumentParser(
+        description=__doc__.split("\n\n", 1)[0],
+        formatter_class=argparse.RawDescriptionHelpFormatter,
+    )
+    src = p.add_argument_group("score source (mode A or B)")
+    src.add_argument("--scores_file", type=str, default=None,
+                     help="Mode A: JSON file mapping entity name -> float score.")
+    src.add_argument("--experiment_dir", type=str, default=None,
+                     help="Mode B: per-axis dir produced by axis_judge_correlation.")
+    src.add_argument("--score_source", type=str, default="di_combined",
+                     choices=SCORE_SOURCE_CHOICES,
+                     help="(Mode B) which scores to load from --experiment_dir. "
+                          "'di_combined' = GPT+Sonnet 4-way combined desc+inst.")
+
+    geom = p.add_argument_group("geometry / metric")
+    geom.add_argument("--data_dir", type=str, default=str(DEFAULT_DATA_DIR))
+    geom.add_argument("--slot", type=int, default=DEFAULT_SLOT)
+    geom.add_argument("--layer", type=int, default=DEFAULT_LAYER)
+    geom.add_argument("--whitening", type=str, default=DEFAULT_WHITENING,
+                      help="'raw' or 'soft_K=N' (e.g. 'soft_K=3').")
+    geom.add_argument("--M", type=int, default=DEFAULT_M,
+                      help="Number of top PCs to use as the working subspace.")
+    geom.add_argument("--exclude_names", type=str, default="",
+                      help="Comma-separated entity names to omit from both pool "
+                           "fit and PCA (e.g. the pole-defining traits).")
+    geom.add_argument("--seed_pair", nargs=2, default=None, metavar=("POS", "NEG"),
+                      help="Optional pair to seed the pole-difference restart.")
+
+    opt = p.add_argument_group("optimiser")
+    opt.add_argument("--n_restarts", type=int, default=DEFAULT_N_RESTARTS)
+    opt.add_argument("--max_passes", type=int, default=DEFAULT_MAX_PASSES)
+    opt.add_argument("--conv_eps", type=float, default=DEFAULT_CONV_EPS)
+    opt.add_argument("--K_seed", type=int, default=DEFAULT_K_SEED)
+    opt.add_argument("--cv_folds", type=int, default=DEFAULT_CV_FOLDS)
+    opt.add_argument("--cluster_cos_threshold", type=float,
+                     default=DEFAULT_CLUSTER_COS_THRESHOLD,
+                     help="|cos| threshold for single-link clustering of "
+                          "restart directions.  Default 0.95 (strict). At "
+                          "M >= 75 a looser threshold (0.90) often merges "
+                          "near-duplicate clusters.")
+    opt.add_argument("--rng_seed", type=int, default=0)
+
+    out = p.add_argument_group("output")
+    out.add_argument("--output_dir", type=str, required=True,
+                     help="Where to write direction.pt, diagnostics.json, "
+                          "restarts.png.")
+    out.add_argument("--run_label", type=str, default=None,
+                     help="Short label for the plot/title (defaults to the "
+                          "output dir basename).")
+    return p.parse_args(argv)
+
+
+def _load_scores_from_args(args: argparse.Namespace) -> dict[str, float]:
+    if args.scores_file and args.experiment_dir:
+        raise SystemExit("Pass exactly one of --scores_file or --experiment_dir.")
+    if args.scores_file:
+        raw = json.loads(Path(args.scores_file).read_text())
+        # Accept both {name: float} and {name: {score: float}} forms.
+        if all(isinstance(v, (int, float)) for v in raw.values()):
+            return {str(k): float(v) for k, v in raw.items()}
+        return _flatten_static_scores(raw)
+    if args.experiment_dir:
+        return load_scores_from_experiment_dir(
+            Path(args.experiment_dir), args.score_source)
+    raise SystemExit("Must pass either --scores_file or --experiment_dir.")
+
+
+def main(argv: Optional[list[str]] = None) -> int:
+    args = parse_args(argv)
+    out_dir = Path(args.output_dir)
+    run_label = args.run_label or out_dir.name
+
+    judge_scores = _load_scores_from_args(args)
+    if not judge_scores:
+        raise SystemExit("Empty judge_scores after loading; check --score_source.")
+    print(f"Loaded {len(judge_scores)} judge scores")
+
+    exclude = set([s for s in args.exclude_names.split(",") if s.strip()])
+    seed_pair = tuple(args.seed_pair) if args.seed_pair else None
+
+    t0 = time.time()
+    result = find_optimal_direction(
+        judge_scores=judge_scores,
+        data_dir=Path(args.data_dir),
+        slot=args.slot, layer=args.layer, whitening=args.whitening,
+        M=args.M,
+        n_restarts=args.n_restarts, max_passes=args.max_passes,
+        conv_eps=args.conv_eps, K_seed=args.K_seed,
+        cv_folds=args.cv_folds, seed_pair=seed_pair,
+        exclude_names=exclude, rng_seed=args.rng_seed,
+        cluster_threshold=args.cluster_cos_threshold,
+    )
+    wallclock = time.time() - t0
+
+    print(f"\n=== Result for {run_label} ===")
+    print(f"  rho_train: {result.rho_train:+.4f}")
+    if result.rho_cv is not None:
+        print(f"  rho_cv:    {result.rho_cv:+.4f}")
+    cs = result.cluster_summary
+    if cs.get("rho_pole_diff") is not None:
+        print(f"  vs pole_diff: ρ={cs['rho_pole_diff']:+.4f}, "
+              f"cos={cs['cos_to_pole_diff']:.3f}")
+    if cs.get("rho_score_weighted_mean") is not None:
+        print(f"  vs score_weighted_mean: ρ={cs['rho_score_weighted_mean']:+.4f}, "
+              f"cos={cs['cos_to_score_weighted_mean']:.3f}")
+    tc = cs["top_cluster"]
+    print(f"  top cluster: {tc['n_members']}/{cs['n_restarts']} restarts, "
+          f"cosine min={tc['min_pairwise_cos']:.3f} median={tc['median_pairwise_cos']:.3f}")
+
+    write_outputs(out_dir, result, run_label=run_label,
+                   argv=sys.argv if argv is None else argv,
+                   wallclock_s=wallclock)
+    print(f"\nWrote outputs to {out_dir}/ in {wallclock:.1f}s")
+    return 0
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())

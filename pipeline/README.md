@@ -155,6 +155,68 @@ intersecting their score=3 question keys, and computing matched means from only 
 shared questions before differencing. This must be a pipeline step (not an analysis
 script) because the activation files are large.
 
+### Auditing missing vectors
+
+After step 4, run `scan_missing_vectors.py` to verify every activation
+ended up with a corresponding vector and to classify any gaps:
+
+```bash
+uv run scan_missing_vectors.py \
+    --activations_dir outputs/roger/activations \
+    --vectors_dir     outputs/roger/vectors \
+    --scores_dir      outputs/roger/scores \
+    --min_count       50 \
+    --deep_load \
+    --rerun_list      outputs/roger/vectors_rerun.txt
+```
+
+Each missing vector is classified as one of:
+
+| status                  | meaning                                                                         |
+|-------------------------|---------------------------------------------------------------------------------|
+| `ok`                    | vector present and healthy size                                                 |
+| `ok_zero_size`          | vector exists but is suspiciously tiny (likely a stub from an aborted save)     |
+| `missing_activation`    | no activation .pt at all                                                        |
+| `truncated_activation`  | activation .pt is way smaller than peer files (upstream step-2 corruption)      |
+| `missing_scores`        | filtered mode, no scores .json (judging never ran for this entity)              |
+| `below_min_count`       | filtered mode, < `--min_count` score=3 entries (legitimate filter)              |
+| `all_nan_or_empty`      | activations exist but contain no usable tensors                                 |
+| `mysterious`            | everything upstream looks fine but step 4 produced no vector — re-run candidate |
+| `orphan_vector`         | vector .pt exists with no source activation                                     |
+
+The `mysterious`, `truncated_activation`, and `ok_zero_size` rows are
+the ones worth re-running — these are the symptoms of transient NFS
+short-reads that the pre-2026-05 step 4 silently skipped after warning.
+With the project-standard 5-attempt retry now in place (see below),
+re-running step 4 with `--overwrite outputs/roger/vectors_rerun.txt`
+will recover them.  Pass `--mode unfiltered` (and drop `--scores_dir`)
+to audit a vectors run that didn't apply score filtering.
+
+### Robust file IO (NFS / MooseFS)
+
+Steps 2, 4 and 5 use the project-standard transient-IO retry from
+`assistant_axis/atomic_io.py`:
+
+- 5 attempts with exponential backoff `[5, 20, 60, 180]` s
+  (cumulative ~265 s, matches `axis_judge_correlation`'s API retry).
+- Treats `OSError`, **`RuntimeError`** *and* `EOFError` as transient.
+  The `RuntimeError` case is the failure mode that surfaced as
+  `"storage has wrong byte size of dtype ..."` / `"PytorchStreamReader
+  failed reading zip archive: ... unexpected EOF, expected N more
+  bytes"` from `torch.load` on RunPod NFS — earlier code only retried
+  `OSError` and missed it.
+- All saves go through `torch_save_with_retry`, which stages to
+  `TMPDIR` (point this at `/dev/shm` on RunPod), copies with retry/
+  backoff, atomically renames into place, and **verifies the
+  destination file size byte-for-byte** against the staging file.
+  Silent NFS short-writes (which previously produced the 5 MB
+  truncated `r_guardian__casual.pt`) now raise an `OSError` and
+  trigger the retry loop.
+
+If you hit a final-failure ERROR after all retries, that's a real
+non-transient corruption — clear the affected file and re-run that
+step.
+
 ### 5. Compute Axis
 
 Aggregate vectors into the final axis:

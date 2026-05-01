@@ -1,12 +1,16 @@
 #!/usr/bin/env python3
-"""Sweep the GPT-4.1-mini / Sonnet-4 weight in the desc+inst score
+"""Sweep the GPT-4.1-mini / second-judge weight in the desc+inst score
 average and plot mean per-axis projection-ρ vs the blend weight.
+
+The second judge defaults to Sonnet-4 (`--second_judge sonnet`); pass
+`--second_judge haiku` (or any other provider-named subdir found under
+each axis directory) to compare a different second judge.
 
 For each axis we compute, per entity::
 
-    gpt_score = combine_desc_inst_one_judge(GPT_d, GPT_i, weights=di_weights)
-    son_score = combine_desc_inst_one_judge(Son_d, Son_i, weights=di_weights)
-    score(w)  = w · gpt_score + (1 - w) · son_score
+    gpt_score   = combine_desc_inst_one_judge(GPT_d, GPT_i, weights=di_weights)
+    other_score = combine_desc_inst_one_judge(Other_d, Other_i, weights=di_weights)
+    score(w)    = w · gpt_score + (1 - w) · other_score
 
 where ``di_weights`` is the standard desc/inst tiebreak weighting
 (default: ``inst_tie`` = ``0.499*desc + 0.501*inst``; pass
@@ -144,17 +148,34 @@ def main() -> int:
                    help="Pair-list JSON filename "
                         "(default: pair_list_33.json -- every axis with "
                         "desc+inst from both providers).")
-    p.add_argument("--plot", default="gpt_sonnet_weight_sweep.png",
+    p.add_argument("--second_judge", default="sonnet",
+                   help="Subdir name for the second-judge scores under each "
+                        "axis directory (default: 'sonnet'; common "
+                        "alternative: 'haiku'). Filenames inside that subdir "
+                        "are still scores_descriptions.json / "
+                        "scores_instructions.json.")
+    p.add_argument("--second_judge_label", default=None,
+                   help="Display label for the second judge in plot titles, "
+                        "axis labels, and JSON output. Defaults to a "
+                        "Title-cased version of --second_judge.")
+    p.add_argument("--plot", default=None,
                    help="Output plot filename "
-                        "(default: gpt_sonnet_weight_sweep.png).")
-    p.add_argument("--rhos_json", default="gpt_sonnet_weight_sweep.json",
+                        "(default: gpt_<second_judge>_weight_sweep.png).")
+    p.add_argument("--rhos_json", default=None,
                    help="Output JSON filename "
-                        "(default: gpt_sonnet_weight_sweep.json).")
+                        "(default: gpt_<second_judge>_weight_sweep.json).")
     add_di_weights_arg(p)
     args = p.parse_args()
     di_weights = parse_di_weights_arg(args.di_weights)
     experiment_dir = Path(args.experiment_dir).resolve()
     data_dir = Path(args.data_dir).resolve()
+    second_judge = args.second_judge
+    second_label = (args.second_judge_label
+                     or second_judge[:1].upper() + second_judge[1:])
+    if args.plot is None:
+        args.plot = f"gpt_{second_judge}_weight_sweep.png"
+    if args.rhos_json is None:
+        args.rhos_json = f"gpt_{second_judge}_weight_sweep.json"
 
     pairs = json.load(open(experiment_dir / args.pairs))
     print(f"Loaded {len(pairs)} axis pairs from {args.pairs}")
@@ -181,11 +202,12 @@ def main() -> int:
         axis_dir = experiment_dir / f"{pos}_vs_{neg}"
         g_d = json.load(open(axis_dir / "gpt" / "scores_descriptions.json"))
         g_i = json.load(open(axis_dir / "gpt" / "scores_instructions.json"))
-        s_d = json.load(open(axis_dir / "sonnet" / "scores_descriptions.json"))
-        s_i = json.load(open(axis_dir / "sonnet" / "scores_instructions.json"))
+        s_d = json.load(open(axis_dir / second_judge / "scores_descriptions.json"))
+        s_i = json.load(open(axis_dir / second_judge / "scores_instructions.json"))
         # Per-judge desc/inst combination using the standard tiebreak weights.
         # The cross-judge sweep below is independent of this choice -- it sweeps
-        # GPT vs Sonnet, treating each as a single (already desc+inst-combined) score.
+        # GPT vs <second_judge>, treating each as a single (already
+        # desc+inst-combined) score.
         gpt_scores = combine_desc_inst_one_judge(g_d, g_i, weights=di_weights)
         son_scores = combine_desc_inst_one_judge(s_d, s_i, weights=di_weights)
         common = sorted(set(gpt_scores) & set(son_scores) & set(entity_vecs))
@@ -236,7 +258,7 @@ def main() -> int:
         rho_peak = float(mean_arr[i_best])
 
     print(f"\nSweep w_GPT from 0 to 1, n={len(per_axis)} axes:")
-    print(f"  pure Sonnet (w=0.0):  mean ρ = {mean_arr[0]:+.4f}")
+    print(f"  pure {second_label} (w=0.0):  mean ρ = {mean_arr[0]:+.4f}")
     print(f"  50/50      (w=0.5):  mean ρ = {mean_arr[10]:+.4f}")
     print(f"  pure GPT   (w=1.0):  mean ρ = {mean_arr[-1]:+.4f}")
     print(f"  parabolic peak (interior fit on w∈[0.1, 0.9], "
@@ -276,18 +298,19 @@ def main() -> int:
         w_peak, color=PARABOLA_COLOR, linestyle="--", lw=1.4,
         label=f"interior peak w={w_peak:.3f}")
 
-    ax.set_xlabel("Weight on GPT-4.1-mini\n(remaining on Sonnet 4)",
+    ax.set_xlabel(f"Weight on GPT-4.1-mini\n(remaining on {second_label})",
                   fontsize=9)
     ax.set_ylabel("Per-axis Spearman ρ (slot 3, raw)", fontsize=9)
-    title_line = (f"GPT/Sonnet score-blend sweep -- mean ρ across "
+    title_line = (f"GPT/{second_label} score-blend sweep -- mean ρ across "
                   f"{n_axes} axes")
     # set_title here functions as a suptitle (single-panel figure).
     # Two lines only -- the legend's "Axes: sorted Sonnet-best to
     # GPT-best" annotation already explains the slope-based ordering,
     # so we don't repeat it in the title.
+    second_initial = second_label[0]
     ax.set_title(
         title_line + "\n"
-        f"S={mean_arr[0]:.3f}  50/50={mean_arr[10]:.3f}  "
+        f"{second_initial}={mean_arr[0]:.3f}  50/50={mean_arr[10]:.3f}  "
         f"G={mean_arr[-1]:.3f}",
         fontsize=14, fontweight="bold",
     )
@@ -318,7 +341,7 @@ def main() -> int:
     # account for legend titles wider than the legend body and silently
     # clips them).
     ax.annotate(
-        "Axes: sorted Sonnet-best to GPT-best",
+        f"Axes: sorted {second_label}-best to GPT-best",
         xy=(1.01, 1.005), xycoords="axes fraction",
         ha="left", va="bottom", fontsize=10, fontweight="bold")
     ax.legend(
@@ -344,6 +367,9 @@ def main() -> int:
     # ------------------------------------------------------------------
     json_out = {
         "n_axes": n_axes,
+        "first_judge": "gpt",
+        "second_judge": second_judge,
+        "second_judge_label": second_label,
         "ws": [float(w) for w in ws_arr],
         "mean_rho_by_w": [float(v) for v in mean_arr],
         "parabola_fit": {

@@ -15,6 +15,7 @@ Usage:
 
 import argparse
 import json
+import logging
 import sys
 from pathlib import Path
 
@@ -23,37 +24,41 @@ from tqdm import tqdm
 
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
+from assistant_axis.atomic_io import (  # noqa: E402
+    read_text_with_retry,
+    torch_load_with_retry,
+    torch_save_with_retry,
+)
+
+logger = logging.getLogger("pipeline.4_vectors")
+
 
 def load_scores(scores_file: Path) -> dict:
-    """Load scores from JSON file."""
-    with open(scores_file, 'r') as f:
-        return json.load(f)
+    """Load scores from JSON file (with project-standard NFS retry)."""
+    text = read_text_with_retry(scores_file, logger_obj=logger)
+    return json.loads(text)
 
 
 def load_activations(activations_file: Path) -> tuple[dict, dict]:
     """Load activations from .pt file, separating metadata.
 
-    Retries on transient I/O errors (MooseFS can return truncated reads
-    under chunkserver load; torch.load surfaces these as RuntimeError with
-    "unexpected EOF, expected N more bytes").
+    Retries on transient I/O errors using the project standard
+    (5 attempts, [5, 20, 60, 180] s backoff -- see
+    :data:`assistant_axis.atomic_io.DEFAULT_RETRY_DELAYS_S`).
+    MooseFS / NFS can return truncated reads under chunkserver load;
+    torch.load surfaces these as ``RuntimeError`` ("unexpected EOF,
+    expected N more bytes" or "storage has wrong byte size of dtype")
+    -- the consolidated retry helper catches both flavours.
 
     Returns:
         (activations_dict, metadata) where metadata is empty for old-format files.
     """
-    import time
-    last_err = None
-    for attempt in range(3):
-        try:
-            data = torch.load(activations_file, map_location="cpu", weights_only=False)
-            metadata = data.pop("metadata", {})
-            return data, metadata
-        except (RuntimeError, OSError) as e:
-            last_err = e
-            if attempt < 2:
-                print(f"Warning: load failed for {activations_file.name} "
-                      f"({e}), retrying in 5s...")
-                time.sleep(5)
-    raise last_err
+    data = torch_load_with_retry(
+        activations_file, map_location="cpu", weights_only=False,
+        logger_obj=logger,
+    )
+    metadata = data.pop("metadata", {})
+    return data, metadata
 
 
 def _question_index(key: str) -> int:
@@ -129,6 +134,13 @@ def compute_mean_vector(activations: dict, reduce_questions: int = 1) -> torch.T
 
 
 def main():
+    # Ensure pipeline log messages (including io_retry's WARNING/ERROR
+    # output) are visible.  Format mirrors axis_judge_correlation.
+    logging.basicConfig(
+        level=logging.INFO,
+        format="%(asctime)s [%(levelname)s] %(name)s: %(message)s",
+        datefmt="%Y-%m-%d %H:%M:%S",
+    )
     parser = argparse.ArgumentParser(description="Compute per-role vectors")
     parser.add_argument("--activations_dir", type=str, required=True, help="Directory with activation .pt files")
     parser.add_argument("--scores_dir", type=str, required=True, help="Directory with score JSON files")
@@ -166,13 +178,14 @@ def main():
 
         try:
             activations, act_metadata = load_activations(act_file)
-        except (RuntimeError, OSError) as e:
-            print(f"Warning: {role}: load failed after retries ({e}), skipping")
+        except (RuntimeError, OSError, EOFError) as e:
+            # io_retry already logged an ERROR with full retry history.
+            logger.error("%s: skipping due to unrecoverable load failure (%s)", role, e)
             failed += 1
             continue
 
         if not activations:
-            print(f"Warning: No activations for {role}")
+            logger.error("%s: activation file loaded but contains no entries; skipping", role)
             failed += 1
             continue
 
@@ -185,7 +198,7 @@ def main():
                 # Regular roles: filter by score=3
                 scores_file = scores_dir / f"{role}.json"
                 if not scores_file.exists():
-                    print(f"Warning: No scores file for {role}")
+                    logger.warning("%s: no scores file at %s; skipping", role, scores_file)
                     failed += 1
                     continue
 
@@ -194,7 +207,6 @@ def main():
                                               args.reduce_questions)
                 vector_type = "pos_3"
 
-            # Save vector with retry for MFS I/O errors
             save_data = {
                 "vector": vector,
                 "type": vector_type,
@@ -203,26 +215,22 @@ def main():
             if act_metadata:
                 save_data["metadata"] = act_metadata
 
-            for attempt in range(3):
-                try:
-                    torch.save(save_data, output_file)
-                    break
-                except RuntimeError as e:
-                    if output_file.exists():
-                        output_file.unlink()
-                    if attempt < 2:
-                        import time
-                        print(f"Warning: {role}: save failed ({e}), retrying in 5s...")
-                        time.sleep(5)
-                    else:
-                        raise
+            # Atomic save with project-standard retry: TMPDIR staging
+            # + retry/backoff copy to (possibly NFS) destination + atomic
+            # rename + post-copy size-sanity check.  A mid-write crash or
+            # silent short-write never leaves a half-written .pt at the
+            # final path.
+            try:
+                torch_save_with_retry(save_data, output_file, logger_obj=logger)
+            except (RuntimeError, OSError, EOFError) as e:
+                logger.error("%s: skipping due to unrecoverable save failure (%s)", role, e)
+                failed += 1
+                continue
             successful += 1
 
         except ValueError as e:
-            print(f"Warning: {role}: {e}")
-            failed += 1
-        except (RuntimeError, OSError) as e:
-            print(f"Warning: {role}: save failed after retries ({e}), skipping")
+            # min_count not met -- legitimate skip, not an error.
+            logger.warning("%s: %s", role, e)
             failed += 1
 
     print(f"\nSummary: {successful} successful, {skipped} skipped, {failed} failed")

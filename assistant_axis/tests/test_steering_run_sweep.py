@@ -1,0 +1,224 @@
+"""Tests for steering/run_sweep.py's pure helpers.
+
+The worker-process body (model loading, run_steering_cell call) needs a
+GPU and is exercised end-to-end on RunPod, not in unit tests.  Here we
+cover the config parsing, persona prompt assembly, and work-item
+construction.
+"""
+from __future__ import annotations
+
+import importlib.util
+import json
+from pathlib import Path
+
+import pytest
+
+
+REPO_ROOT = Path(__file__).resolve().parents[2]
+
+
+def _load_dispatcher_module():
+    """Load steering/run_sweep.py via importlib.
+
+    Done explicitly (rather than `from steering.run_sweep import ...`)
+    so the test file doesn't need a top-level `steering` package init,
+    and so the module name in tracebacks is unambiguous.
+    """
+    spec = importlib.util.spec_from_file_location(
+        "_steering_run_sweep",
+        REPO_ROOT / "steering" / "run_sweep.py",
+    )
+    assert spec is not None and spec.loader is not None
+    mod = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(mod)
+    return mod
+
+
+@pytest.fixture(scope="module")
+def mod():
+    return _load_dispatcher_module()
+
+
+# ---------------------------------------------------------------------------
+# _load_questions
+# ---------------------------------------------------------------------------
+
+class TestLoadQuestions:
+    def test_flat_list(self, mod, tmp_path):
+        p = tmp_path / "q.json"
+        p.write_text(json.dumps(["What is X?", "Why Y?"]))
+        assert mod._load_questions(p) == ["What is X?", "Why Y?"]
+
+    def test_dict_with_key(self, mod, tmp_path):
+        p = tmp_path / "q.json"
+        p.write_text(json.dumps({"questions": ["q1", "q2"], "meta": "ignored"}))
+        assert mod._load_questions(p) == ["q1", "q2"]
+
+    def test_invalid_shape_raises(self, mod, tmp_path):
+        p = tmp_path / "q.json"
+        p.write_text(json.dumps({"foo": "bar"}))
+        with pytest.raises(ValueError):
+            mod._load_questions(p)
+
+    def test_non_string_entries_raise(self, mod, tmp_path):
+        p = tmp_path / "q.json"
+        p.write_text(json.dumps(["q1", 42]))
+        with pytest.raises(ValueError):
+            mod._load_questions(p)
+
+
+# ---------------------------------------------------------------------------
+# _build_persona_system_prompt
+# ---------------------------------------------------------------------------
+
+class TestPersonaPrompt:
+    def test_role_uses_first_instruction_pos(self, mod):
+        # Real role file in the repo:
+        out = mod._build_persona_system_prompt(
+            {"type": "role", "role": "historian"},
+            instructions_dir=REPO_ROOT / "data",
+        )
+        assert "historian" in out.lower()
+        # Should match instruction[0].pos exactly
+        with open(REPO_ROOT / "data" / "roles" / "instructions" / "historian.json") as f:
+            data = json.load(f)
+        assert out == data["instruction"][0]["pos"]
+
+    def test_role_with_explicit_prompt_index(self, mod):
+        out = mod._build_persona_system_prompt(
+            {"type": "role", "role": "historian", "prompt_index": 2},
+            instructions_dir=REPO_ROOT / "data",
+        )
+        with open(REPO_ROOT / "data" / "roles" / "instructions" / "historian.json") as f:
+            data = json.load(f)
+        assert out == data["instruction"][2]["pos"]
+
+    def test_combination_concatenates_with_newline(self, mod):
+        out = mod._build_persona_system_prompt(
+            {
+                "type": "combination",
+                "role": "historian",
+                "traits": ["stoic"],
+            },
+            instructions_dir=REPO_ROOT / "data",
+        )
+        with open(REPO_ROOT / "data" / "roles" / "instructions" / "historian.json") as f:
+            role_inst = json.load(f)["instruction"][0]["pos"]
+        with open(REPO_ROOT / "data" / "traits" / "instructions" / "stoic.json") as f:
+            trait_inst = json.load(f)["instruction"][0]["pos"]
+        assert out == f"{role_inst}\n{trait_inst}"
+
+    def test_combination_requires_traits(self, mod):
+        with pytest.raises(ValueError, match="trait"):
+            mod._build_persona_system_prompt(
+                {"type": "combination", "role": "historian", "traits": []},
+                instructions_dir=REPO_ROOT / "data",
+            )
+
+    def test_unknown_type_raises(self, mod):
+        with pytest.raises(ValueError, match="persona.type"):
+            mod._build_persona_system_prompt(
+                {"type": "alien"}, instructions_dir=REPO_ROOT / "data",
+            )
+
+    def test_missing_role_file_raises(self, mod, tmp_path):
+        # Fake instructions dir with nothing in it
+        (tmp_path / "roles" / "instructions").mkdir(parents=True)
+        with pytest.raises(FileNotFoundError):
+            mod._build_persona_system_prompt(
+                {"type": "role", "role": "nonexistent"},
+                instructions_dir=tmp_path,
+            )
+
+
+# ---------------------------------------------------------------------------
+# _build_work_items
+# ---------------------------------------------------------------------------
+
+class TestBuildWorkItems:
+    def _basic_config(self):
+        return {
+            "experiment_id": "test_exp",
+            "model_name": "Qwen/Qwen3-32B",
+            "axis_source": {
+                "type": "role_transplant",
+                "vectors_dir": "/tmp/vecs",
+                "role_from": "angel",
+                "role_to": "demon",
+            },
+            "cells": [
+                {"slot": 0, "layer": 26},
+                {"slot": 3, "layer": 25},
+            ],
+            "sweep": {
+                "weakest_strength": 1.0,
+                "max_strength": 4.0,
+                "multiplier": 2.0,
+                "signs": [+1, -1],
+            },
+            "batch_size": 4,
+            "max_new_tokens": 128,
+            "positions_mode": "all",
+        }
+
+    def test_baseline_item_first(self, mod, tmp_path):
+        items = mod._build_work_items(
+            self._basic_config(), tmp_path, "you are a historian", ["q1", "q2"]
+        )
+        assert items[0]["kind"] == "baselines"
+        assert items[0]["persona"] == "you are a historian"
+        assert items[0]["questions"] == ["q1", "q2"]
+
+    def test_one_cell_per_slot_layer_sign(self, mod, tmp_path):
+        items = mod._build_work_items(
+            self._basic_config(), tmp_path, "p", ["q"]
+        )
+        cells = [it for it in items if it["kind"] == "cell"]
+        assert len(cells) == 4  # 2 cells x 2 signs
+        signs = [(c["slot"], c["layer"], c["sign"]) for c in cells]
+        assert sorted(signs) == [
+            (0, 26, -1), (0, 26, +1), (3, 25, -1), (3, 25, +1),
+        ]
+
+    def test_cell_dir_name_format(self, mod, tmp_path):
+        items = mod._build_work_items(
+            self._basic_config(), tmp_path, "p", ["q"]
+        )
+        cells = [it for it in items if it["kind"] == "cell"]
+        cell_dirs = {Path(c["cell_dir"]).name for c in cells}
+        assert cell_dirs == {
+            "s0_l26_+1", "s0_l26_-1", "s3_l25_+1", "s3_l25_-1",
+        }
+
+    def test_per_cell_weakest_override(self, mod, tmp_path):
+        cfg = self._basic_config()
+        cfg["cells"] = [
+            {"slot": 0, "layer": 26},                              # default 1.0
+            {"slot": 3, "layer": 25, "weakest_strength": 0.5},     # override
+        ]
+        items = mod._build_work_items(cfg, tmp_path, "p", ["q"])
+        cells = [it for it in items if it["kind"] == "cell"]
+        weakest_by_slot = {(c["slot"], c["layer"]): c["weakest_strength"]
+                           for c in cells}
+        assert weakest_by_slot[(0, 26)] == 1.0
+        assert weakest_by_slot[(3, 25)] == 0.5
+
+    def test_signs_only_positive(self, mod, tmp_path):
+        cfg = self._basic_config()
+        cfg["sweep"]["signs"] = [+1]
+        items = mod._build_work_items(cfg, tmp_path, "p", ["q"])
+        cells = [it for it in items if it["kind"] == "cell"]
+        assert len(cells) == 2  # 2 cells x 1 sign
+        assert all(c["sign"] == +1 for c in cells)
+
+    def test_invalid_sign_raises(self, mod, tmp_path):
+        cfg = self._basic_config()
+        cfg["sweep"]["signs"] = [+1, 0]
+        with pytest.raises(ValueError, match="signs"):
+            mod._build_work_items(cfg, tmp_path, "p", ["q"])
+
+    def test_empty_cells_raises(self, mod, tmp_path):
+        cfg = self._basic_config()
+        cfg["cells"] = []
+        with pytest.raises(ValueError, match="cells"):
+            mod._build_work_items(cfg, tmp_path, "p", ["q"])

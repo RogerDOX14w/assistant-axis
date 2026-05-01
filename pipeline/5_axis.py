@@ -13,6 +13,7 @@ Usage:
 """
 
 import argparse
+import logging
 import sys
 from pathlib import Path
 
@@ -21,13 +22,31 @@ from tqdm import tqdm
 
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
+from assistant_axis.atomic_io import (  # noqa: E402
+    torch_load_with_retry,
+    torch_save_with_retry,
+)
+
+logger = logging.getLogger("pipeline.5_axis")
+
 
 def load_vector(vector_file: Path) -> dict:
-    """Load vector data from .pt file."""
-    return torch.load(vector_file, map_location="cpu", weights_only=False)
+    """Load vector data from .pt file with project-standard NFS retry
+    (5 attempts, [5, 20, 60, 180] s backoff -- handles transient
+    short-reads that surface as ``RuntimeError``).
+    """
+    return torch_load_with_retry(
+        vector_file, map_location="cpu", weights_only=False,
+        logger_obj=logger,
+    )
 
 
 def main():
+    logging.basicConfig(
+        level=logging.INFO,
+        format="%(asctime)s [%(levelname)s] %(name)s: %(message)s",
+        datefmt="%Y-%m-%d %H:%M:%S",
+    )
     parser = argparse.ArgumentParser(description="Compute assistant axis from vectors")
     parser.add_argument("--vectors_dir", type=str, required=True, help="Directory with vector .pt files")
     parser.add_argument("--output", type=str, required=True, help="Output axis.pt file path")
@@ -126,11 +145,15 @@ def main():
         print(f"  Mean norm: {norms.mean():.4f}")
         print(f"  Max norm: {norms.max():.4f} (layer {norms.argmax().item()})")
 
-    # Save axis -- dict format for metadata, backward compat via load_axis()
+    # Save axis -- dict format for metadata, backward compat via load_axis().
+    # torch_save_with_retry stages to TMPDIR, copies with retry/backoff,
+    # atomically renames into place, and verifies post-copy size.  A
+    # mid-write crash or silent NFS short-write never leaves a
+    # half-written axis.pt at the destination.
     save_data = {"axis": axis}
     if metadata:
         save_data["metadata"] = metadata
-    torch.save(save_data, output_path)
+    torch_save_with_retry(save_data, output_path, logger_obj=logger)
     print(f"\nSaved axis to {output_path}")
 
 

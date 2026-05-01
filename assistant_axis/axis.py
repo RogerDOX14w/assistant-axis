@@ -179,13 +179,18 @@ def load_axis(path: str) -> torch.Tensor:
     """
     Load axis from a .pt file.
 
+    Uses :func:`assistant_axis.atomic_io.torch_load_with_retry` so transient
+    NFS hiccups on /workspace get the same 5-attempt backoff treatment as
+    other reads in this codebase.
+
     Args:
         path: Path to load from
 
     Returns:
         Axis tensor of shape (n_layers, hidden_dim)
     """
-    data = torch.load(path, map_location="cpu", weights_only=False)
+    from .atomic_io import torch_load_with_retry
+    data = torch_load_with_retry(path, map_location="cpu", weights_only=False)
 
     # Handle both formats: dict with 'axis' key or raw tensor
     if isinstance(data, dict):
@@ -203,7 +208,8 @@ def load_axis_with_metadata(path: str) -> tuple[torch.Tensor, dict]:
 
     Like load_axis() but also returns the metadata dict, which may contain
     header_tokens, header_ids, model_name, etc. Returns an empty dict for
-    old-format files that have no metadata.
+    old-format files that have no metadata.  NFS-flake-retried via
+    :func:`assistant_axis.atomic_io.torch_load_with_retry`.
 
     Args:
         path: Path to load from
@@ -211,7 +217,8 @@ def load_axis_with_metadata(path: str) -> tuple[torch.Tensor, dict]:
     Returns:
         (axis_tensor, metadata_dict)
     """
-    data = torch.load(path, map_location="cpu", weights_only=False)
+    from .atomic_io import torch_load_with_retry
+    data = torch_load_with_retry(path, map_location="cpu", weights_only=False)
 
     if isinstance(data, dict):
         if "axis" not in data:
@@ -227,6 +234,8 @@ def load_role_vector(path: str) -> tuple[torch.Tensor, dict]:
 
     Handles both the old bare-tensor format and the new dict-wrapped format
     produced by pipeline step 4 ({"vector": tensor, "metadata": {...}, ...}).
+    NFS-flake-retried via
+    :func:`assistant_axis.atomic_io.torch_load_with_retry`.
 
     Args:
         path: Path to the .pt file
@@ -234,7 +243,8 @@ def load_role_vector(path: str) -> tuple[torch.Tensor, dict]:
     Returns:
         (vector_tensor, metadata_dict)
     """
-    data = torch.load(path, map_location="cpu", weights_only=False)
+    from .atomic_io import torch_load_with_retry
+    data = torch_load_with_retry(path, map_location="cpu", weights_only=False)
 
     if isinstance(data, dict):
         if "vector" in data:

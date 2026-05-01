@@ -29,7 +29,6 @@ import sys
 from pathlib import Path
 from typing import Dict, List, Optional
 
-import jsonlines
 import torch
 import torch.multiprocessing as mp
 from tqdm import tqdm
@@ -131,25 +130,18 @@ def _warn_if_hf_cache_not_tmpfs(model_name: str) -> None:
 
 
 def load_responses(responses_file: Path) -> List[dict]:
-    """Load responses from JSONL file, with retries for NFS flakiness."""
-    import time
-    for attempt in range(5):
-        try:
-            responses = []
-            with jsonlines.open(responses_file, 'r') as reader:
-                for entry in reader:
-                    responses.append(entry)
-            return responses
-        except OSError as e:
-            if attempt < 4:
-                wait = 10 * (attempt + 1)
-                logger.warning(f"Read failed for {responses_file.name} (attempt {attempt+1}/5): {e}. "
-                               f"Retrying in {wait}s...")
-                time.sleep(wait)
-            else:
-                logger.error(f"Read failed for {responses_file.name} after 5 attempts: {e}")
-                raise
-    return []
+    """Load responses from JSONL file, with NFS-flake retries.
+
+    Goes through ``assistant_axis.atomic_io.read_jsonl_with_retry`` so
+    this share the project-standard exponential backoff
+    ``[5, 20, 60, 180]`` s and the broader transient-error set
+    (``OSError``/``RuntimeError``/``EOFError``).  Response files are
+    small (a few MB at most) so reading the full text and parsing
+    line-by-line is equivalent to the previous streaming approach with
+    no meaningful memory cost.
+    """
+    from assistant_axis.atomic_io import read_jsonl_with_retry
+    return read_jsonl_with_retry(responses_file, logger_obj=logger)
 
 
 def extract_activations_batch(
@@ -352,62 +344,42 @@ def process_role(
             key = f"{meta['label']}_p{meta['prompt_index']}_q{meta['question_index']}"
             activations_dict[key] = act
 
-    # Save via local disk, then copy to destination. torch.save's default
-    # zip serialization triggers "iostream error" on RunPod; using the older
-    # pickle format (_use_new_zipfile_serialization=False) avoids the fragile
-    # zip writer entirely.
+    # Save via local disk staging + retry/backoff copy to the final
+    # (possibly NFS) destination, plus a post-copy size-sanity check
+    # to catch silent NFS truncation (the failure mode that produced
+    # the 5 MB ``r_guardian__casual.pt`` and surfaced downstream in
+    # step 4 as ``"storage has wrong byte size of dtype"``).  The
+    # ``_use_new_zipfile_serialization=False`` form is the older
+    # pickle format and dodges the "iostream error" that torch's
+    # default zip writer hits on RunPod for files this large.
+    #
+    # ``torch_save_with_retry`` honours ``TMPDIR`` for the staging
+    # location.  Caveats:
+    #   - On some RunPod setups TMPDIR points to NFS (the original
+    #     reason this site used to hardcode /tmp).  Don't blindly
+    #     export TMPDIR without checking where it points.
+    #   - On other setups /tmp lives on a small container disk (often
+    #     ~10-50 GB) which can fill up: each .pt activations file is
+    #     roughly 2.6 GB (n_convs × n_slots × n_layers × hidden × bf16),
+    #     and 4 concurrent workers can blow out small /tmp instantly.
+    #   - If /tmp is too small, point TMPDIR at a tmpfs:
+    #         export TMPDIR=/dev/shm
+    #     /dev/shm is RAM-backed (default size = 50% of RAM = plenty
+    #     on boxes with 256 GB+ RAM), local, and fast.  No automatic
+    #     cleanup, but the helper removes the staging file after a
+    #     successful copy.
     if activations_dict:
-        import shutil
-        import time as _time
+        from assistant_axis.atomic_io import torch_save_with_retry
         if header_metadata:
             activations_dict["metadata"] = header_metadata
-        # Stage the .pt to a local-disk temp file, then atomically copy to the
-        # final (possibly NFS) output location.  This avoids torch.save writing
-        # directly to NFS, which on RunPod is slow and flaky for large files.
-        #
-        # We honour TMPDIR with /tmp as the default fallback.  Caveats:
-        #   - On some RunPod setups TMPDIR points to NFS (the original reason
-        #     this site used to hardcode /tmp).  Don't blindly export TMPDIR
-        #     without checking where it points.
-        #   - On other setups /tmp lives on a small container disk (often
-        #     ~10-50 GB) which can fill up: each .pt activations file is
-        #     roughly 2.6 GB (n_convs × n_slots × n_layers × hidden × bf16),
-        #     and 4 concurrent workers can blow out small /tmp instantly.
-        #   - If /tmp is too small, point TMPDIR at a tmpfs:
-        #         export TMPDIR=/dev/shm
-        #     /dev/shm is RAM-backed (default size = 50% of RAM = plenty on
-        #     boxes with 256 GB+ RAM), local, and fast.  No automatic cleanup,
-        #     but `local_tmp.unlink()` below removes the staging file after a
-        #     successful copy, so files only accumulate on crashed runs (and
-        #     /dev/shm is wiped on reboot anyway).
-        local_tmp = Path(os.environ.get("TMPDIR", "/tmp")) / f"{output_file.stem}.pt.tmp"
-        for attempt in range(3):
-            try:
-                torch.save(activations_dict, local_tmp,
-                           _use_new_zipfile_serialization=False)
-                break
-            except (RuntimeError, OSError) as e:
-                if attempt < 2:
-                    logger.warning(f"Local torch.save failed for {role} (attempt {attempt+1}/3): {e}")
-                    _time.sleep(5)
-                else:
-                    raise
-        for attempt in range(5):
-            try:
-                shutil.copy2(str(local_tmp), str(output_file))
-                n_act = len(activations_dict) - (1 if "metadata" in activations_dict else 0)
-                logger.info(f"Saved {n_act} activations (+ metadata) for {role}")
-                break
-            except OSError as e:
-                if attempt < 4:
-                    wait = 10 * (attempt + 1)
-                    logger.warning(f"Copy to NFS failed for {role} (attempt {attempt+1}/5): {e}. "
-                                   f"Retrying in {wait}s...")
-                    _time.sleep(wait)
-                else:
-                    logger.error(f"Copy to NFS failed for {role} after 5 attempts: {e}")
-                    raise
-        local_tmp.unlink(missing_ok=True)
+        torch_save_with_retry(
+            activations_dict, output_file,
+            use_zipfile_serialization=False,
+            logger_obj=logger,
+        )
+        n_act = len(activations_dict) - (1 if "metadata" in activations_dict else 0)
+        logger.info(f"Saved {n_act} activations (+ metadata) for {role} "
+                    f"({output_file.stat().st_size:,} bytes)")
 
     # Cleanup
     gc.collect()

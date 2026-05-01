@@ -118,7 +118,7 @@ So per batch: `input = 326 + B × 35.3`, `output = 85`.
 
 **Pricing** (gpt-4.1-mini, 2026-04 rates): input **$0.40 / 1M tokens**,
 output **$1.60 / 1M tokens**. Anthropic's `claude-sonnet-4-20250514`
-pricing is roughly an order of magnitude higher (and we don't currently
+pricing is roughly eight times higher (and we don't currently
 run responses mode on Sonnet).
 
 **Items per axis**: with the project's standard scoring corpus the
@@ -146,23 +146,136 @@ content itself.
 **12-axis sweep cost** (the standard "all-axes" responses run we use as
 a baseline): **B=15 ≈ $94**, B=10 ≈ $120, B=7 ≈ $153, B=5 ≈ $198.
 
-**Quality vs cost** (B=5 vs B=15, measured 2026-04 on 3 axes ×
-3 (slot, layer) cells: `truthful_vs_deceitful`,
-`progressive_vs_conservative`, `improvisational_vs_methodical`):
+**Quality curve** (measured 2026-05-01 on 3 axes ×
+3 (slot, layer) cells × 4 batch sizes:
+`truthful_vs_deceitful`, `progressive_vs_conservative`,
+`improvisational_vs_methodical`; grand-mean ρ averaged over the
+3 axes × 3 (slot, layer) cells; cost from the model above):
 
-- Grand-mean ρ lift **+0.018** in favour of B=5 (B=5 wins all 9/9 cells;
-  cell-level lifts +0.005 to +0.046).
-- Per-axis incremental cost from B=15 to B=5: **+$8.70 / axis**
-  ($16.50 − $7.81).
-- Cost / Δρ at the grand-mean level: ~**$483 per +0.01 ρ across the
-  full 12-axis sweep** ((198 − 94) / 0.018 / 0.01).
+| B  | grand-mean ρ | Δρ vs B=15 | $ / axis | extra $ vs B=15 | $ per +0.01 ρ |
+|----|--------------|------------|----------|-----------------|---------------|
+|  5 | +0.7842 | +0.0175 | $16.50 | +$8.69 | $4.97 |
+|  7 | +0.7809 | +0.0143 | $12.77 | +$4.96 | $3.48 |
+| 10 | +0.7767 | +0.0100 | $9.98  | +$2.17 | **$2.17** |
+| 15 | +0.7667 | (ref)   | $7.81  | (ref)  | (ref) |
 
-The B=15 default is a good fit for high-throughput sweeps where the
-+0.02 ρ delta is below the per-axis SE (~0.04). B=5 (or B=7) is worth
-the extra spend specifically when (a) you're publishing per-axis or
-per-cell ρ values where +0.02 is visible and matters, or (b) you're
-running narrow follow-up comparisons (e.g. paper figures comparing
-specific cells) and the absolute ρ ceiling matters more than throughput.
+The curve is monotonic and **diminishing returns kick in below B=10**:
+- B=15 → B=10 buys you the first +0.010 ρ for $2.17 extra (best value).
+- B=10 → B=7 buys another +0.004 ρ for an additional $2.79 ($7.04/+0.01 ρ marginal).
+- B=7 → B=5 buys another +0.003 ρ for $3.73 more ($12.34/+0.01 ρ marginal).
+
+Per-cell behaviour: the gain from going small is **smallest at slot=3
+/ layer=25** (Δρ ≈ +0.009 across all batches) and **largest at
+slot=0** (Δρ +0.020 to +0.024).  The slot=0 cells benefit most from
+small batches, which is consistent with "the noise being removed by
+small B is in the judge's per-batch variance, not in the activation
+side".
+
+(Full 12-axis sweep cost-per-Δρ: at $4.97/0.01 ρ for B=5 (worst-value
+endpoint), the 12-axis sweep would cost $104 extra for +0.018 ρ, i.e.
+**$580 per +0.01 ρ across the corpus**.)
+
+A complementary view of the same data plots cost vs **quality
+= 1/(1−ρ)**, which amplifies small ρ changes near the ceiling
+(`d(1/(1−ρ))/dρ = 1/(1−ρ)² ≈ 18` at ρ=0.77, so each +0.01 ρ buys
+~0.18 quality units, or **~4 % effective signal**).  The marginal
+quality-per-dollar between adjacent batch sizes:
+
+| step | Δquality | Δ$ | quality / $ |
+|------|----------|-----|-------------|
+| B=15 → B=10 | +0.192 | +$2.17 | **0.089** |
+| B=10 → B=7  | +0.087 | +$2.79 | 0.031 |
+| B=7  → B=5  | +0.068 | +$3.73 | 0.018 |
+
+The first step (B=15 → B=10) is **2.9× more cost-efficient** than
+B=10 → B=7 and **4.9× more** than B=7 → B=5: the curve is sharply
+concave on the quality scale.
+
+**Recommendation (project default for new responses-mode runs: B=10)**:
+- **B=15**: high-throughput sweeps where the +0.01 ρ uplift is below
+  the per-axis SE (~0.04).
+- **B=10** *(picked as default 2026-05)*: best marginal cost-efficiency.
+  +28 % cost over B=15, captures ~57 % of the available ρ-improvement
+  and ~70 % of the quality-improvement before diminishing returns kick
+  in.  See `roger/batch_size_cost_vs_quality.png`.
+- **B=7 or B=5**: only worth the extra spend for paper figures or
+  narrow follow-up comparisons where the absolute ρ ceiling matters
+  more than throughput.
+
+Plots:
+- `roger/batch_size_curve_rho.png` -- per-cell grouped histogram + ρ-vs-B
+  curves (one line per slot/layer).
+- `roger/batch_size_cost_vs_rho.png` -- linear cost-vs-ρ scatter.
+- `roger/batch_size_cost_vs_quality.png` -- cost-vs-quality scatter on the
+  1/(1−ρ) scale; the diminishing-returns shape is most visible here.
+
+The curve was measured on 3 axes × 3 (slot, layer) cells × 4 batch
+sizes via [`batch_size_rho_curve.py`](#batch_size_rho_curvepy); the quality
+view is regenerated from the cached JSON via
+[`plot_batch_size_quality_vs_cost.py`](#plot_batch_size_quality_vs_costpy).
+
+#### `batch_size_rho_curve.py`
+
+Sweeps responses-mode ρ across multiple target batch sizes, axes, and
+``(slot, layer)`` configs.  For each cell ``(axis, B, slot, layer)``:
+
+1. Loads per-entity ``mean_score`` from
+   ``<experiment_dir>/<axis>/gpt_responses_{roles,traits}<suffix>/scores_responses.json``
+   (suffix = ``""`` for B=15, ``"_b<N>"`` otherwise).
+2. Computes the axis direction ``unit(vec[pos] − vec[neg])`` at
+   ``(slot, layer)`` from the standalone trait vectors.
+3. Sweeps ``L ∈ [0, 1, 2, 3, 5, 8, 16] × K ∈ [0..16]`` with
+   bracket-and-bisect refinement on K, applying the same
+   L-shear + K-soft-K transform to both the entity matrix and the
+   axis direction; takes max ρ as the cell's score.
+
+Outputs (to ``--output_dir``):
+
+- ``batch_size_curve_rho.json`` -- per-cell ρ + grand-mean per B + cost
+  model + B integers (everything needed to re-plot without re-running).
+- ``batch_size_curve_rho.png`` -- two-panel: grouped histogram (configs ×
+  batch bars) + ρ-vs-B line plot (one line per config + grand mean).
+- ``batch_size_cost_vs_rho.png`` -- linear cost-vs-ρ scatter.
+
+```bash
+# Default: 3 axes × 4 batch sizes × 3 configs.  Reproduces the May 2026
+# pilot.
+uv run python results_analysis/batch_size_rho_curve.py
+
+# Single axis, B=10 vs B=15 only:
+uv run python results_analysis/batch_size_rho_curve.py \
+  --axes truthful_vs_deceitful \
+  --batch_sizes 10,15 \
+  --output_dir roger/b_curve_truthful/
+```
+
+Library: ``compute_batch_size_curve(...) -> dict`` returns the same dict
+that's written to JSON, for callers that want to fold the data into a
+larger analysis without re-running the L/K sweep.
+
+#### `plot_batch_size_quality_vs_cost.py`
+
+Regenerates the cost-vs-quality scatter
+(``roger/batch_size_cost_vs_quality.png``) from a
+``batch_size_curve_rho.json`` cache, on the ``1 / (1 − ρ)`` "quality"
+scale.  Each marker is annotated with its ``B``, ρ, cost-per-axis, and
+1/(1−ρ); a dotted reference line connects the cheapest-and-most-expensive
+endpoints (concave curves lie above their endpoint chord -- so the
+distance above the line is a visual measure of how concave the curve
+is).  Side y-axis shows the corresponding ρ for each quality value.
+
+Also prints the marginal Δquality / Δ$ between adjacent batch sizes,
+which is the cleanest read of "where does the cost-efficiency curve
+fall off?".
+
+```bash
+# Default: read roger/batch_size_curve_rho.json,
+#          write roger/batch_size_cost_vs_quality.png.
+uv run python results_analysis/plot_batch_size_quality_vs_cost.py
+```
+
+Library: ``plot_quality_vs_cost(input_path, output_path)`` and
+``print_marginal_table(input_path)``.
 
 ### `infer_axis_description.py`
 
@@ -1023,6 +1136,68 @@ improvement over GPT alone (the cheaper provider) and ~+0.026 over
 Sonnet alone.  Negligible per-axis sensitivity to the exact mix
 (within ±0.01 of peak across ``w ∈ [0.1, 0.9]``).
 
+**GPT-vs-Haiku as a sister sweep** (May 2026, same 33 axes; pass
+``--second_judge haiku`` to ``gpt_sonnet_weight_sweep.py``):
+
+| weight on GPT | GPT+Sonnet ρ | GPT+Haiku ρ | Δ (Sonnet − Haiku) |
+|---:|---:|---:|---:|
+| 0.0 (pure other-judge) | +0.5929 | +0.5700 | +0.0229 |
+| 0.5 (50/50) | **+0.6222** | **+0.6147** | +0.0076 |
+| 1.0 (pure GPT) | +0.6020 | +0.6020 | 0 (sanity) |
+| parabolic peak (interior fit) | w=0.55, ρ=+0.622 | w=0.70, ρ=+0.617 | +0.005 |
+
+Two notable points:
+1. **Haiku alone is meaningfully worse than Sonnet alone** (Δ = -0.023 ρ)
+   -- Haiku 4.5 trades quality for ~3× lower cost than Sonnet 4.
+2. **The Haiku weight sweep peaks at w*=0.70 vs Sonnet's w*=0.55** --
+   when blending with Haiku, the optimum puts more weight on GPT, which
+   is consistent with "Haiku contributes less per unit weight".  The
+   peak ρ values themselves differ by only +0.005 ρ.
+
+Plot at ``roger/axis_judge_experiments/gpt_haiku_weight_sweep.png``
+(sister to the existing ``gpt_sonnet_weight_sweep.png``).
+
+**Haiku as second judge: cost-efficient alternative to Sonnet.**
+Across **6 (slot, layer) × metric cells** (``(3, 25)``, ``(0, 26)``,
+``(0, 49)`` × ``{raw, soft_K=3}``), the three headline questions had
+strikingly consistent answers (May 2026):
+
+| Question | Mean Δρ across 6 cells | Per-axis wins |
+|---|---:|---|
+| Q1: ρ(Haiku alone) − ρ(Sonnet alone)         | **−0.020** | Haiku wins 12-17 / 33 axes |
+| Q2: ρ(GPT+Haiku) − ρ(GPT alone)              | **+0.013** | GPT+Haiku wins 24-26 / 33 |
+| Q3: ρ(GPT+Sonnet) − ρ(GPT+Haiku)             | **+0.008** | GPT+Sonnet wins 16-20 / 33 |
+
+The findings are robust across (slot, layer) and across raw vs soft-K=3
+whitening -- the per-cell Δρ values lie in tight bands around these
+means.  Translation:
+
+- **Sonnet alone is a better single judge than Haiku alone** (Δ ≈ +0.02 ρ).
+- **Adding Haiku to GPT helps** (~75-80% of axes improve, mean +0.013 ρ).
+- **Sonnet is a slightly better diversity partner than Haiku** for a
+  GPT+J ensemble (Δ ≈ +0.008 ρ at peak), but not by much.
+
+Cost-quality with Haiku 4.5 vs Sonnet 4 (roughly 3× cheaper):
+
+|   | GPT alone | GPT + Haiku | GPT + Sonnet |
+|---|:---:|:---:|:---:|
+| desc+inst $ / axis | ~$0.95 | ~$2.85 | ~$8.05 |
+| Δρ vs GPT alone    | (ref)  | +0.013  | +0.020 |
+| $ per +0.01 ρ      | (ref)  | **~$1.46**  | **~$3.55** |
+
+**Haiku is ~2.4× more cost-efficient as a second judge than Sonnet**;
+for full corpus sweeps where the +0.007 ρ delta isn't critical,
+``GPT + Haiku`` is the cost-quality winner.  Sonnet remains the right
+second judge for paper-grade comparisons or specific axes where
+Sonnet's value-laden-axis advantage matters (see "GPT-better /
+Sonnet-better" tables in the previous subsection).
+
+The multi-config result was generated by ``/tmp/_judge_provider_compare_multi.py``
+(saved JSON: ``roger/judge_provider_compare_multi.json``).  If this
+becomes a recurring pattern, promote it to
+``results_analysis/judge_provider_compare.py`` -- for now it's a
+one-off.
+
 The plot also colors each per-axis curve by its interior slope
 ``Δρ = ρ(w=0.9) − ρ(w=0.1)`` (blue → Sonnet-better, red → GPT-better)
 and orders the legend the same way, so you can read off which axes
@@ -1070,7 +1245,253 @@ on-disk score files: every ``<pos>_vs_<neg>/`` directory under
 included.  Add new pairs by running the judge pipeline; the next
 re-build of ``pair_list_33.json`` (or its successor) will pick them up.
 
-#### `whitening_k_weighted_scatter.py`
+### `optimal_axis_for_judge.py` -- direction-fitting from judge scores
+
+Given a fixed metric ``M = (slot, layer, whitening)`` and a judge-score
+dict ``{entity_name: float}``, this tool returns the unit direction
+``d`` in ``M``-space that **maximises Spearman ρ** between the judge
+scores and entity projections ``<entity_i, d>``.  Output is a unit
+vector (in both the original hidden space and a working PC basis), plus
+diagnostics that report how confident we are that ``d`` is
+well-determined (cosine clustering across multi-restart).
+
+#### Why
+
+Almost every existing axis-analysis tool fixes the *direction* (typically
+``vec[pos] - vec[neg]`` in hidden space) and varies geometry around it
+(whitening K, soft-shear L, slot, layer).  This tool inverts the
+question: given the judge has expressed a preference, what *direction*
+in the chosen metric best captures it?  The recovered ``d`` then enables
+- cosines with other directions (e.g. how aligned is the judge-implied
+  direction with the pole-difference axis?  with PC1?  with another
+  axis's optimal direction?);
+- 2-D plotting planes built from two learned directions;
+- round-tripping the direction back through ``infer_axis_description.py``
+  to ask the LLM what semantic axis it just learned;
+- diagnosing cross-judge / cross-source agreement geometrically.
+
+#### Algorithm
+
+ρ is piecewise-constant in ``d`` (changing only when two entity
+projections swap order), so it has zero gradient almost everywhere.
+The trick is **exact 1-D optimisation per coordinate via crossing
+points**: holding all other coordinates fixed, the score
+``score_i(d_k) = b_i + d_k · α[i, k]`` is linear in ``d_k``, so rank
+order changes only at ``O(N²)`` discrete crossings
+``d_k* = (b_j - b_i) / (α[i, k] - α[j, k])``.  Sort the crossings, sweep,
+incrementally update ``Σd² = Σ(rank_proj − rank_judge)²`` with
+``Δ = 2·(rank_i − rank_j)·(judge_rank_i − judge_rank_j)`` per swap, and
+the interval (or unbounded tail) with smallest ``Σd²`` is the global
+1-D optimum.  This is a generalisation of the per-PC-β optimum in the
+original ``coordinate_ascent.py`` (in ``roger/axis_judge_experiments/``,
+where it was used for whitening-scale optimisation along a fixed
+direction); the inner sweep is JIT-compiled with numba so a per-coord
+update on N≈580 entities takes a few ms instead of ~150 ms in pure
+Python.
+
+The full algorithm:
+
+```
+1. Project entities to top-M PC basis (default M=100):
+     alpha[i, k] = <whitened, centred entity_i, PC_k>
+2. Coordinate ascent over the M PC coefficients of d:
+     round-robin permuted PC order; exact 1-D optimum per coord;
+     renormalise after each update; stop on max |Δd_k| < ε.
+3. Multi-restart with structured seeds (default n_restarts = 16):
+     - pole-difference axis (if --seed_pair given) -- the "baseline-to-beat"
+     - score-weighted mean Σ_i (s_i − μ) · α[i, :] -- the linear-regression-y baseline
+     - Fisher LDA from tercile-binned scores
+     - K_seed top-PC-aligned with score-correlated sign
+     - random unit vectors fill to n_restarts
+4. Cosine cluster the converged directions:
+     |cos|-cluster at threshold 0.95; rank by mean ρ;
+     re-run coord ascent from the top-cluster centroid
+     (consensus seed); adopt if ρ improves.
+5. Optional: 5-fold CV on the judge scores -- per-fold fit on train,
+     evaluate ρ on held-out; aggregate to one rho_cv scalar.
+6. Compute headline cosines vs pole-diff axis and vs score-weighted mean
+     (which one of these the optimum looks most like is informative).
+```
+
+The M-PC restriction (step 1) is the main anti-overfitting move: with
+N ≈ 580 entities and D = 5120 raw, fitting in 5120-D would memorise
+judge noise.  M = 100 covers ≥ 99% of pool variance for the standard
+``slot=3, layer=25, soft_K=3`` setup, with N/M ≈ 6× more samples than
+free parameters.  Override with ``--M``.
+
+#### Output
+
+`direction.pt`:
+
+```python
+{"direction":     torch.Tensor (D,)  unit, in original hidden space,
+ "direction_pcs": torch.Tensor (M,)  same direction in PC basis,
+ "pc_basis_Vt":   torch.Tensor (M, D)  PC basis used (for callers that
+                                       want to express other vectors in
+                                       the same coords),
+ "metric":        {slot, layer, whitening, M, ...}}
+```
+
+`diagnostics.json` includes:
+- `rho_train`, `rho_cv` (paired training and cross-validated ρ)
+- `cluster_summary.top_cluster` -- size, mean ρ, intra-cluster cosine
+  spread (min / median).  Top-cluster `min_pairwise_cos ≥ 0.95` =
+  high confidence; `≤ 0.5` = multiple distinct directions giving
+  comparable ρ, the corpus isn't constraining enough to pin one down.
+- `cos_to_pole_diff`, `rho_pole_diff` -- the canonical baseline.  ≥ 0.95
+  cosine = optimum is just the pole axis; 0.7-0.95 = corpus is gently
+  steering off the pole-diff line; ≤ 0.5 = surprising, possibly
+  informative or possibly low-SNR.
+- `cos_to_score_weighted_mean`, `rho_score_weighted_mean` -- linear-
+  regression-y baseline; if cos > 0.97, gradient descent isn't doing
+  anything beyond what a one-line numpy expression would.
+- `restarts` -- per-restart seed label, final ρ, and cluster id.
+
+`restarts.png`: scatter of (restart index, final ρ_train) coloured by
+cluster, with horizontal lines for the two baselines, for at-a-glance
+multi-modality check.  Embeds full source as PNG metadata.
+
+#### CLI
+
+Two modes: pass either a raw scores JSON, or point at an existing
+axis-judge-correlation experiment dir with a `--score_source` selector
+(``gpt`` / ``sonnet`` / ``haiku`` / ``di_combined`` (GPT+Sonnet 4-way) /
+``responses``).
+
+```bash
+# Mode A: raw scores file ({name: float} or
+#         {name: {scores: [list of floats]}} -- both accepted).
+uv run python results_analysis/optimal_axis_for_judge.py \
+  --scores_file my_scores.json \
+  --slot 3 --layer 25 --whitening soft_K=3 --M 100 \
+  --output_dir roger/optimal_axis/my_label/
+
+# Mode B: existing axis-judge-correlation experiment dir.
+uv run python results_analysis/optimal_axis_for_judge.py \
+  --experiment_dir roger/axis_judge_experiments/truthful_vs_deceitful \
+  --score_source di_combined \
+  --seed_pair truthful deceitful \
+  --exclude_names truthful,deceitful \
+  --slot 3 --layer 25 --whitening soft_K=3 \
+  --output_dir roger/optimal_axis/truthful_vs_deceitful_di_combined/
+```
+
+Library:
+
+```python
+from results_analysis.optimal_axis_for_judge import find_optimal_direction
+
+result = find_optimal_direction(
+    judge_scores={"angel": 2.5, "demon": -2.8, ...},
+    data_dir=Path("..."),
+    slot=3, layer=25, whitening="soft_K=3",
+    M=100, n_restarts=16, cv_folds=5,
+    seed_pair=("truthful", "deceitful"),
+)
+# result.direction       : np.ndarray (D,) unit vector in original metric
+# result.direction_pcs   : np.ndarray (M,) coords in PC basis
+# result.rho_train       : float
+# result.rho_cv          : float | None
+# result.cluster_summary : dict
+# result.restarts        : list[RestartResult]
+```
+
+#### Cost / scope
+
+CPU-only after the existing scores files are in.  With numba-JIT, a
+single-source run at ``N ≈ 580, M = 100, n_restarts = 16, no CV`` is
+~2 min wall-clock; adding 5-fold CV roughly 6× that (~10 min).  Trivial
+parallelism per source.  Zero new API spend.
+
+#### Default tuning (May 2026)
+
+The defaults `M=30, n_restarts=8` were chosen from a sweep on
+`truthful_vs_deceitful / di_combined` at the canonical
+`slot=3, layer=25, soft_K=3` setup:
+
+| M  | ρ_train | ρ_cv  | gap   | top cluster | top med cos | wallclock |
+|----|---------|-------|-------|-------------|-------------|-----------|
+| 20 | +0.813  | +0.787| 0.026 | 8/8         | 0.995       | 29 s      |
+| **30** | **+0.837** | **+0.815** | **0.022** | 8/8 | 0.992 | **40 s** |
+| 50 | +0.853  | +0.787| 0.066 | 8/8         | 0.969       | 71 s      |
+| 75 | +0.864  | +0.795| 0.069 | 1/8         | 1.000       | 94 s      |
+| 100| +0.885  | +0.783| 0.102 | 1/8         | 1.000       | 135 s     |
+
+`M=30` maximises ρ_cv with the smallest train/CV gap.  `M >= 50`
+overfits (ρ_train climbs while ρ_cv drops); `M >= 75` fragments the top
+cluster (per-restart directions diverge under the strict `cos >= 0.95`
+threshold).  Below M=30 the working subspace is too small to capture
+the available signal.
+
+`n_restarts=8` covers the four structured seeds (pole-diff,
+score-weighted mean, Fisher LDA, top-K-axis-aligned) plus 4 random
+fills.  At M=30 all 8 routinely converge to the same cluster
+(intra-cluster median cos > 0.99), so 8 is comfortably enough; 16 was
+the original cautious default and proved overkill.
+
+#### Pilot finding (May 2026, ``truthful_vs_deceitful``, 5 sources)
+
+Run with `slot=3, layer=25, soft_K=3, M=30, n_restarts=8, cv_folds=5`
+across the 5 judge sources currently available for
+`truthful_vs_deceitful` (GPT desc+inst, Sonnet desc+inst, Haiku
+desc+inst, GPT+Sonnet 4-way, GPT responses-mode):
+
+| source       | ρ_train | ρ_cv  | gap   | cos→pole | ρ_pole | cos→swm | ρ_swm | top cluster |
+|--------------|---------|-------|-------|----------|--------|---------|-------|-------------|
+| gpt          | +0.808  | +0.772| 0.035 | 0.626    | +0.558 | 0.702   | +0.714| 8/8         |
+| sonnet       | +0.823  | +0.790| 0.032 | 0.603    | +0.569 | 0.693   | +0.724| 8/8         |
+| haiku        | +0.835  | +0.798| 0.037 | 0.691    | +0.571 | 0.730   | +0.744| 7/7         |
+| di_combined  | +0.837  | +0.815| 0.022 | 0.654    | +0.588 | 0.720   | +0.742| 8/8         |
+| responses    | +0.890  | +0.871| 0.018 | 0.804    | +0.751 | 0.809   | +0.781| 8/8         |
+
+Cross-source `|cos|` of the recovered directions (in PC basis,
+M=30; random-baseline `E[|cos|] ≈ 0.146`):
+
+|             | gpt   | sonnet| haiku | di_comb | resp  |
+|-------------|-------|-------|-------|---------|-------|
+| gpt         |   -   | 0.927 | 0.912 | 0.974   | 0.600 |
+| sonnet      | 0.927 |   -   | 0.932 | 0.974   | 0.624 |
+| haiku       | 0.912 | 0.932 |   -   | 0.938   | 0.708 |
+| di_combined | 0.974 | 0.974 | 0.938 |   -     | 0.644 |
+| responses   | 0.600 | 0.624 | 0.708 | 0.644   |   -   |
+
+**Findings:**
+
+- **The optimisation works**: all sources clear the canonical
+  pole-difference baseline by **+0.10 to +0.21 ρ_cv** and the
+  score-weighted-mean linear-regression baseline by **+0.06 to +0.13**.
+  The crossing-points coord ascent is doing real work neither baseline
+  catches.
+- **Convergence is rock-solid at M=30**: 8/8 restarts in the top cluster
+  for every source, with intra-cluster median cosine `>= 0.98`.  The
+  multi-modality concern doesn't materialise at this dimensionality.
+- **Train/CV gap is small (~0.03)**: the M=30 fit generalises well;
+  the optimisation isn't memorising judge noise.  At M=100 the gap was
+  ~0.10 -- confirming M=30 is the right operating point.
+- **Cross-source consistency within desc+inst is very high**
+  (cos 0.91 - 0.97).  GPT, Sonnet, Haiku, and the GPT+Sonnet combo all
+  find essentially the same direction in PC space -- judge-model choice
+  has small geometric impact when fitting a direction.
+- **Responses-mode finds a related but distinct direction**
+  (cos 0.60 - 0.71 with desc+inst).  Same axis, ~40-50 degrees of
+  separation in M=30-D PC space -- a real signed difference between
+  "judge a description of how the entity behaves" and "judge actual
+  responses the model produced under the role".
+- **The optimum is meaningfully off the pole-difference axis**
+  (cos 0.60 - 0.80, ρ-lift of +0.15 - +0.25 over pole-diff): the
+  corpus is voting for a direction that's clearly related to but not
+  the same as `vec[truthful] - vec[deceitful]`.  Worth running
+  `infer_axis_description.py` on the recovered direction to see what
+  semantic axis the judge data is actually picking out -- a natural
+  Phase 2 follow-up.
+
+(For comparison: the original M=100 run -- before the May 2026 retune
+-- gave `avg ρ_cv = 0.794, avg gap = 0.088, cross-source cos within
+desc+inst = 0.67-0.91, cos to responses = 0.19-0.32`.  At that M
+overfitting was inflating ρ_train and pushing apart the per-source
+directions; the M=30 numbers are the correct headline.)
+
+### `whitening_k_weighted_scatter.py`
 
 Cross-axis summary plot: per-axis fitted peak K from desc+inst (x)
 vs responses (y), in `log₂(K+1)` space, marker area ∝ per-axis fit
