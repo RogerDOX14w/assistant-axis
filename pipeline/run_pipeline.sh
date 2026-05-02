@@ -27,6 +27,15 @@
 #   ./pipeline/run_pipeline.sh --types r_combinations t_combinations roles traits
 #   ./pipeline/run_pipeline.sh --skip-gpu-check                # bypass pre-flight
 #   ./pipeline/run_pipeline.sh --steps23serial                 # disable parallel steps 2+3
+#   ./pipeline/run_pipeline.sh --no-scan                       # skip post-pipeline audit
+#
+# Post-pipeline scan (default ON): after step 5, runs
+# pipeline/scan_missing_vectors.py to audit every (activation, vector) pair
+# and flag any corrupt-on-write activations, missing scores, below-min-count
+# entities, or unloadable vectors.  Cache-backed so re-scans are cheap.
+# Pass --no-scan to skip (e.g. when you want to inspect intermediate state
+# yourself, or when the pipeline is part of a larger automated job that
+# runs the scanner separately).
 #
 # Step 2/3 parallelism (default ON): step 2 (GPU-bound activation extraction)
 # and step 3 (judge-API-bound response scoring) share no resources beyond
@@ -95,6 +104,15 @@ GPU_BUSY_THRESHOLD_MIB=2048
 # (cleaner per-step logs; useful for debugging).
 STEPS23_PARALLEL=true
 
+# Run pipeline/scan_missing_vectors.py at the end of the pipeline to verify
+# every activation produced a healthy vector.  Cheap when nothing went wrong
+# (cache hits dominate -- a re-scan after a clean run is typically a few
+# minutes), genuinely useful when something silently failed during step 2 or
+# step 4 (corrupt-on-write activation, ZFS/NFS short-read, missing scores
+# file, ...).  Disable with --no-scan if you want to inspect intermediate
+# state by hand or are on a tight wall-clock budget.
+RUN_SCAN=true
+
 # ---- Parse command line ---------------------------------------------------
 TYPES=""
 SKIP_GPU_CHECK=false
@@ -120,6 +138,8 @@ while [[ $# -gt 0 ]]; do
             GPU_BUSY_THRESHOLD_MIB="$2"; shift 2 ;;
         --steps23serial)
             STEPS23_PARALLEL=false; shift ;;
+        --no-scan)
+            RUN_SCAN=false; shift ;;
         --types)
             shift
             while [[ $# -gt 0 && ! "$1" =~ ^-- ]]; do
@@ -178,6 +198,7 @@ echo "Output: $OUTPUT_DIR"
 echo "TP size:$TENSOR_PARALLEL_SIZE"
 echo "Tmpfs:  $USE_TMPFS"
 echo "Steps 2+3: $([ "$STEPS23_PARALLEL" = "true" ] && echo "parallel (GPU+judge concurrent)" || echo "serial (--steps23serial)")"
+echo "Scan:   $([ "$RUN_SCAN" = "true" ] && echo "yes (post-pipeline audit; --no-scan to skip)" || echo "no (--no-scan)")"
 if [ "$MODE" = "christina" ]; then
     echo "Roles:  $ROLES_DIR"
 else
@@ -700,6 +721,46 @@ else
         echo "  $type axis: $OUTPUT_DIR/$type/axis.pt"
     done
 
+fi
+
+# ---- Post-pipeline scan ---------------------------------------------------
+# Walks every activation/vector pair under $OUTPUT_DIR and classifies any
+# misses or corruptions (corrupt-on-write activation .pt, missing scores,
+# below-min-count, etc).  The scanner caches its torch.load outcomes at
+# $OUTPUT_DIR/scan_cache.json so this is a fast no-op on the second run
+# (cache hits skip the expensive deep_load).  Output:
+#   - $OUTPUT_DIR/<type>/vectors/missing_vectors_audit.json (per-target)
+#   - $OUTPUT_DIR/<type>/vectors/missing_vectors_rerun.txt (re-run candidates)
+# A non-zero exit from the scanner is logged but does not fail the pipeline:
+# the pipeline itself has already succeeded by this point, the scan is just
+# a verification pass.  Skip with --no-scan.
+if [ "$RUN_SCAN" = "true" ]; then
+    echo ""
+    echo "=== Post-pipeline scan ==="
+    case "$MODE" in
+        roger)
+            # --root mode: scanner auto-discovers entity-type subdirs and
+            # every vectors* sibling under $OUTPUT_DIR.  Use the same
+            # MIN_COUNT the pipeline used so below_min_count classifications
+            # match what step 4 would actually skip.
+            uv run scan_missing_vectors.py \
+                --root        "$OUTPUT_DIR" \
+                --min_count   "$MIN_COUNT" \
+                --deep_load \
+                || echo "[scan] WARNING: scanner exited non-zero (pipeline itself succeeded; rerun the scan manually for details)"
+            ;;
+        christina)
+            # Single-pair mode: christina mode writes one entity-type tree
+            # directly under $OUTPUT_DIR, no entity-type subdir layer.
+            uv run scan_missing_vectors.py \
+                --activations_dir "$OUTPUT_DIR/activations" \
+                --vectors_dir     "$OUTPUT_DIR/vectors" \
+                --scores_dir      "$OUTPUT_DIR/scores" \
+                --min_count       "$MIN_COUNT" \
+                --deep_load \
+                || echo "[scan] WARNING: scanner exited non-zero (pipeline itself succeeded; rerun the scan manually for details)"
+            ;;
+    esac
 fi
 
 echo "Log:  $LOG_FILE"
