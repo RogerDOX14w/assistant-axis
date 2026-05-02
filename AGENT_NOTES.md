@@ -364,6 +364,90 @@ scores = combine_desc_inst_two_judges(g_d, g_i, s_d, s_i)
 Existing callsites: `results_analysis/{rho_by_slot_and_K, rho_by_layer,
 whitening_k_sweep, gpt_sonnet_weight_sweep}.py`.
 
+### Steering judges (Phase-2 architecture)
+
+Steering sweeps use a **two-tier judging** protocol baked into
+[`assistant_axis/steering_judges.py`](assistant_axis/steering_judges.py)
+and consumed by [`assistant_axis/steering_runner.py`](assistant_axis/steering_runner.py)
+via the `JudgeDispatcher` protocol:
+
+1. **Coherence (synchronous, blocking)** — per-record `judge_coherence_blocking()`
+   call after each generation batch.  0-3 rubric.  Default model
+   `gpt-4.1-mini`; configurable via `--coherence-model`.  Gates the
+   `should_stop_at(strength)` early-termination decision.
+2. **Persona / RP (asynchronous, post-batch)** — gpt-4.1-mini, unbatched,
+   matches `pipeline/3_judge.py`'s rubric augmented with steering-direction
+   awareness.  0-3 rubric.
+3. **Effect (asynchronous, batched)** — GPT+Haiku ensemble, batched at
+   `target_batch_size=10` (matches response judging's default), strict
+   single-(cell, sign, strength) batches.  `--effect-mode` selects
+   bidirectional (one ±3 prompt) vs separate-poles (two 0-3 prompts,
+   signed combine = pos.mean - neg.mean) vs both.
+
+**Skip rule (cost optimization)**: tiers 2 and 3 are **skipped at the
+(cell, sign, strength) granularity** when `mean(coh) > skip_threshold`
+(default 1.0).  Filtering on the strength-mean rather than per-record
+coh reflects that incoherence is a strength-level property whereas
+judge noise is per-question; averaging the K coh scores cancels noise
+without losing the gross signal.  Skipped records get
+`judges.persona.skipped_due_to_strength_mean_coh = True` (and same for
+effect); `strength_mean_coh` is stamped on every record regardless.
+
+**Records schema** (`{cell_dir}/records.jsonl`):
+
+```json
+{
+  "strength": 1.0, "sign": +1, "question_idx": 7, ...,
+  "judges": {
+    "coherence": {"score": 1, "reason": "...", "model": "...", "ts": ..., "rubric_version": 1},
+    "strength_mean_coh": 0.7,
+    "persona": {"score": 2, "model": "...", "skipped_due_to_strength_mean_coh": false, ...},
+    "effect": {
+      "mode": "bidirectional",
+      "bidirectional": {"scores": {"<model_a>": {"score": 2, "reason": "..."},
+                                    "<model_b>": {"score": 3, "reason": "..."},
+                                    "mean": 2.5}},
+      "combined": 2.5,
+      "skipped_due_to_strength_mean_coh": false, ...
+    }
+  }
+}
+```
+
+**CLIs**:
+
+- [`steering/run_sweep.py`](steering/run_sweep.py) — live sweep with
+  judging.  `--no-live-judging` falls back to `NoOpJudgeDispatcher`
+  (no API calls; useful when iterating on generation alone).
+  `--judges-only` skips generation entirely and delegates to
+  `post_judge.py` for retrospective fill-in.
+- [`steering/post_judge.py`](steering/post_judge.py) — retrospective
+  RP/effect fill-in on an existing experiment dir.  Same skip rule;
+  `--rerun-coherence-with-model` populates `judges.coherence_alts[<model>]`
+  for the coherence-model shootout (preserves the live coherence
+  field).
+- [`assistant_axis/cherrypick.py`](assistant_axis/cherrypick.py) — walks
+  one or more experiment dirs, applies a default filter
+  (`strength_mean_coh<=1.0 AND persona>=2 AND |effect.combined|>=2`)
+  or a Python-expression filter, prints a summary table and pretty
+  spotlights for the top N by |effect.combined|.
+
+**Cost characteristic**: coherence dominates the bill because it's
+unfiltered (every record gets a call).  RP+effect are skipped on
+incoherent strengths, so they're typically <30% of total spend.
+gpt-4.1-mini default is ~5x cheaper than Sonnet on the unfiltered hot
+path; rationale documented in
+[`/Users/roger/.cursor/plans/steering_judges_phase2_a54a28b6.plan.md`](.cursor/plans/steering_judges_phase2_a54a28b6.plan.md).
+
+**Sigma-rescaling (deferred)**: effect scores are stored on the raw
+±3 scale.  A separate downstream tool will eventually consume
+`records[*].judges.effect.combined` and rescale to standard deviations
+of the response-judging distribution.  The default
+`response_target_batch_size=10` (in
+[`results_analysis/axis_judge_correlation.py`](results_analysis/axis_judge_correlation.py))
+matches the steering effect default so the two distributions are
+apples-to-apples in the same judging regime.
+
 ### Whitening / soft-shear defaults
 
 For analyses going forward, the project defaults are:

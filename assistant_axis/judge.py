@@ -21,11 +21,12 @@ Example:
 """
 
 import asyncio
+import json
 import os
 import re
 import time
 import logging
-from typing import Dict, List, Optional, Any
+from typing import Dict, List, Optional, Any, Iterable, Tuple, Sequence
 
 import openai
 from dotenv import load_dotenv
@@ -34,6 +35,33 @@ from dotenv import load_dotenv
 load_dotenv()
 
 logger = logging.getLogger(__name__)
+
+# ---------------------------------------------------------------------------
+# Provider routing
+# ---------------------------------------------------------------------------
+#
+# Model names route to providers by prefix.  Steering judges (Phase 2) call
+# both OpenAI and Anthropic models, so judge.py exposes a unified
+# call_judge_single_unified() that hides the SDK split.
+
+_OPENAI_PREFIXES = ("gpt-", "o1-", "o3-", "o4-")
+_ANTHROPIC_PREFIXES = ("claude-",)
+
+
+def provider_for_model(model: str) -> str:
+    """Return 'openai' or 'anthropic' based on the model name prefix.
+
+    Raises ValueError for unrecognised prefixes so we fail loudly rather
+    than silently routing a typo to the wrong SDK.
+    """
+    if any(model.startswith(p) for p in _OPENAI_PREFIXES):
+        return "openai"
+    if any(model.startswith(p) for p in _ANTHROPIC_PREFIXES):
+        return "anthropic"
+    raise ValueError(
+        f"unknown judge model {model!r}; expected a prefix in "
+        f"{_OPENAI_PREFIXES + _ANTHROPIC_PREFIXES}"
+    )
 
 
 class RateLimiter:
@@ -91,6 +119,152 @@ def parse_judge_score(response_text: str) -> Optional[int]:
         return None
     except ValueError:
         return None
+
+
+# ---------------------------------------------------------------------------
+# Robust JSON extraction for structured judge output
+# ---------------------------------------------------------------------------
+#
+# Used by steering judges, which ask for {"score": ..., "reason": ...}.
+# Models occasionally wrap JSON in ```json ... ``` fences or add prose; we
+# strip both before parsing.
+
+_JSON_FENCE_RE = re.compile(r"```(?:json)?\s*(.*?)```", re.DOTALL)
+_JSON_OBJECT_RE = re.compile(r"\{.*\}", re.DOTALL)
+_JSON_ARRAY_RE = re.compile(r"\[.*\]", re.DOTALL)
+
+
+def extract_json_blob(text: str) -> Optional[str]:
+    """Best-effort extraction of a JSON object or array from a model response.
+
+    Handles three common shapes:
+      - markdown-fenced ``` ```json ... ``` ```
+      - prose-wrapped object/array
+      - bare JSON
+
+    For raw text, prefers an object match if both an object and an array
+    look plausible -- objects are the more common judge shape -- but
+    falls back to array when no object is present.
+    """
+    if not text:
+        return None
+    fenced = _JSON_FENCE_RE.search(text)
+    if fenced:
+        return fenced.group(1).strip()
+    obj = _JSON_OBJECT_RE.search(text)
+    arr = _JSON_ARRAY_RE.search(text)
+    # Prefer whichever appears earlier in the text; avoids picking the
+    # inner object out of a top-level array.
+    if obj and arr:
+        return (obj if obj.start() < arr.start() else arr).group(0).strip()
+    if obj:
+        return obj.group(0).strip()
+    if arr:
+        return arr.group(0).strip()
+    return text.strip()
+
+
+def parse_score_reason_json(
+    text: str,
+    score_range: Tuple[int, int] = (0, 3),
+) -> Optional[Dict[str, Any]]:
+    """Parse ``{"score": int, "reason": str}`` out of a model response.
+
+    Returns ``{"score": int, "reason": str}`` on success, ``None`` if the
+    response can't be parsed or the score is out of range.  ``score_range``
+    is inclusive on both ends; for the bidirectional effect judge use
+    ``(-3, 3)`` instead of the default ``(0, 3)``.
+    """
+    blob = extract_json_blob(text)
+    if blob is None:
+        return None
+    try:
+        parsed = json.loads(blob)
+    except (json.JSONDecodeError, ValueError):
+        return None
+    if not isinstance(parsed, dict) or "score" not in parsed:
+        return None
+    raw = parsed["score"]
+    try:
+        score = int(raw) if isinstance(raw, (int, float, str)) else None
+    except (ValueError, TypeError):
+        return None
+    if score is None:
+        return None
+    lo, hi = score_range
+    if not (lo <= score <= hi):
+        return None
+    reason = parsed.get("reason", "")
+    if not isinstance(reason, str):
+        reason = str(reason)
+    return {"score": score, "reason": reason}
+
+
+def parse_batch_scores_json(
+    text: str,
+    expected_ids: Sequence[Any],
+    score_range: Tuple[int, int] = (-3, 3),
+) -> Optional[Dict[Any, Dict[str, Any]]]:
+    """Parse a batched-effect judge response.
+
+    Expected payload shape (top-level field name flexible):
+
+        {"items": [{"id": <id>, "score": int, "reason": str}, ...]}
+
+    Returns a dict keyed by id with ``{"score": int, "reason": str}``
+    values.  Returns ``None`` if the payload is unparseable or doesn't
+    cover ``expected_ids``.  Order does not matter in the output; ids that
+    come back outside ``score_range`` are dropped (logged).
+    """
+    blob = extract_json_blob(text)
+    if blob is None:
+        return None
+    try:
+        parsed = json.loads(blob)
+    except (json.JSONDecodeError, ValueError):
+        return None
+    items = None
+    if isinstance(parsed, list):
+        items = parsed
+    elif isinstance(parsed, dict):
+        for key in ("items", "responses", "scores", "results"):
+            if isinstance(parsed.get(key), list):
+                items = parsed[key]
+                break
+    if not items:
+        return None
+
+    lo, hi = score_range
+    out: Dict[Any, Dict[str, Any]] = {}
+    for entry in items:
+        if not isinstance(entry, dict) or "id" not in entry or "score" not in entry:
+            continue
+        id_ = entry["id"]
+        try:
+            score = int(entry["score"])
+        except (ValueError, TypeError):
+            continue
+        if not (lo <= score <= hi):
+            logger.warning(
+                f"batched judge returned score={score} out of range "
+                f"[{lo},{hi}] for id={id_}; dropping"
+            )
+            continue
+        reason = entry.get("reason", "")
+        if not isinstance(reason, str):
+            reason = str(reason)
+        out[id_] = {"score": score, "reason": reason}
+
+    # Verify we got every expected id; missing ones come back as Nones in
+    # the caller's output dict so it can decide how to handle them.
+    expected_set = set(expected_ids)
+    missing = expected_set - set(out.keys())
+    if missing:
+        logger.warning(
+            f"batched judge missing {len(missing)} expected ids: "
+            f"{sorted(list(missing))[:5]}{'...' if len(missing) > 5 else ''}"
+        )
+    return out
 
 
 async def call_judge_single(
@@ -241,3 +415,95 @@ def score_responses_sync(
         requests_per_second=requests_per_second,
         batch_size=batch_size
     ))
+
+
+# ---------------------------------------------------------------------------
+# Anthropic equivalent of call_judge_single
+# ---------------------------------------------------------------------------
+#
+# Steering judges (Phase 2) use the bidirectional GPT+Haiku effect
+# ensemble, so judge.py needs an Anthropic single-call helper.  Kept
+# minimal to mirror call_judge_single() shape; structured output is
+# delivered via prompt instruction + JSON parsing rather than
+# response_format (Anthropic supports a tools-based json mode but the
+# prompt-instruction approach is simpler and works across both providers
+# uniformly).
+
+async def call_anthropic_judge_single(
+    client: "anthropic.AsyncAnthropic",
+    prompt: str,
+    model: str,
+    max_tokens: int,
+    rate_limiter: RateLimiter,
+    temperature: float = 1.0,
+) -> Optional[str]:
+    """Call an Anthropic judge model with a single prompt.
+
+    Returns the response text, or None on error.  Errors are logged at
+    ERROR level and swallowed so a single bad call doesn't take down a
+    whole batch of judging.
+    """
+    await rate_limiter.acquire()
+
+    try:
+        response = await client.messages.create(
+            model=model,
+            max_tokens=max_tokens,
+            temperature=temperature,
+            messages=[{"role": "user", "content": prompt}],
+        )
+        if response.content and response.content[0].text:
+            return response.content[0].text
+        return None
+    except Exception as e:  # noqa: BLE001 - we deliberately catch everything
+        logger.error(f"Error calling Anthropic judge model {model}: {e}")
+        return None
+
+
+async def call_judge_single_unified(
+    *,
+    prompt: str,
+    model: str,
+    max_tokens: int,
+    rate_limiter: RateLimiter,
+    openai_client: Optional["openai.AsyncOpenAI"] = None,
+    anthropic_client: Optional["anthropic.AsyncAnthropic"] = None,
+    temperature: float = 1.0,
+) -> Optional[str]:
+    """Provider-agnostic single judge call.
+
+    Routes by ``model`` prefix (see :func:`provider_for_model`).  Caller is
+    responsible for instantiating the relevant client(s) and rate
+    limiter(s); this is a thin dispatch helper, not a connection pool.
+
+    For mixed-provider workloads, the caller typically constructs one
+    ``AsyncOpenAI`` and one ``AsyncAnthropic`` and passes both -- the
+    routing picks whichever is needed per call.
+    """
+    provider = provider_for_model(model)
+    if provider == "openai":
+        if openai_client is None:
+            raise ValueError(
+                f"openai_client required for model {model}"
+            )
+        return await call_judge_single(
+            client=openai_client,
+            prompt=prompt,
+            model=model,
+            max_tokens=max_tokens,
+            rate_limiter=rate_limiter,
+        )
+    if provider == "anthropic":
+        if anthropic_client is None:
+            raise ValueError(
+                f"anthropic_client required for model {model}"
+            )
+        return await call_anthropic_judge_single(
+            client=anthropic_client,
+            prompt=prompt,
+            model=model,
+            max_tokens=max_tokens,
+            rate_limiter=rate_limiter,
+            temperature=temperature,
+        )
+    raise ValueError(f"unknown provider for model {model!r}")

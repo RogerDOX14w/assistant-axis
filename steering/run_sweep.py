@@ -175,6 +175,8 @@ def _build_work_items(
     output_root: Path,
     persona_prompt: str,
     questions: List[str],
+    *,
+    judging: Optional[Dict[str, Any]] = None,
 ) -> List[Dict[str, Any]]:
     """Construct the list of work items to dispatch to GPU workers.
 
@@ -182,6 +184,11 @@ def _build_work_items(
     ``(slot, layer, sign)``.  Items are simple dicts (picklable) that
     workers consume to call either ``compute_baselines`` or
     ``run_steering_cell``.
+
+    The ``judging`` dict (built by :func:`_build_judging_config` from
+    CLI flags + the experiment config) is attached to each cell item so
+    workers can construct a RealJudgeDispatcher locally; baseline items
+    don't need it (they don't judge).
     """
     sweep_cfg = config.get("sweep", {})
     default_weakest = float(sweep_cfg.get("weakest_strength", 1.0))
@@ -229,8 +236,139 @@ def _build_work_items(
                 "batch_size": batch_size,
                 "max_new_tokens": max_new_tokens,
                 "positions_mode": positions_mode,
+                "baselines_records_path": str(output_root / "baselines"
+                                              / "records.jsonl"),
+                "judging": judging or {},
             })
     return items
+
+
+def _build_judging_config(
+    *,
+    config: Dict[str, Any],
+    args,
+    instructions_dir: Path,
+) -> Dict[str, Any]:
+    """Build a serializable judging config attached to each cell work item.
+
+    Picks up CLI overrides for models / thresholds / mode and resolves
+    persona + steering specs from the experiment config + data dir so
+    workers don't need filesystem access to data/{roles,traits}/.
+
+    Returns ``{"enabled": False}`` if --no-live-judging was passed; the
+    worker uses NoOpJudgeDispatcher in that case (still records jsonl,
+    no judge calls, sweep runs to max strength).
+    """
+    if getattr(args, "no_live_judging", False):
+        return {"enabled": False, "reason": "--no-live-judging"}
+
+    # Persona spec
+    persona_cfg = config.get("persona") or {}
+    persona = _resolve_persona_spec(persona_cfg, instructions_dir)
+
+    # Steering spec from axis_source
+    axis_cfg = config.get("axis_source") or {}
+    steering = _resolve_steering_spec(axis_cfg, instructions_dir)
+
+    cfg: Dict[str, Any] = {
+        "enabled": True,
+        "persona": persona,
+        "steering": steering,
+        "coherence_model": getattr(args, "coherence_model", None)
+                          or "gpt-4.1-mini",
+        "rp_model": getattr(args, "rp_model", None) or "gpt-4.1-mini",
+        "effect_models": (
+            [m.strip() for m in args.effect_models.split(",") if m.strip()]
+            if getattr(args, "effect_models", None)
+            else ["gpt-4.1-mini", "claude-haiku-4-5-20251001"]
+        ),
+        "effect_mode": getattr(args, "effect_mode", "bidirectional"),
+        "target_batch_size": int(getattr(args, "target_batch_size", 10)),
+        "skip_threshold": float(
+            getattr(args, "skip_if_strength_mean_coh_above", 1.0)
+        ),
+        "coh_stop_threshold": float(
+            getattr(args, "coh_stop_threshold", 1.5)
+        ),
+    }
+    return cfg
+
+
+def _resolve_persona_spec(persona_cfg: Dict[str, Any],
+                          instructions_dir: Path) -> Dict[str, Any]:
+    """Read role/trait descriptions and return a serializable spec dict."""
+    ptype = persona_cfg.get("type", "role")
+
+    def _desc(kind: str, name: str) -> str:
+        path = instructions_dir / kind / "instructions" / f"{name}.json"
+        if not path.exists():
+            return ""
+        try:
+            return str(json.loads(read_text_with_retry(path,
+                                                       logger_obj=logger))
+                      .get("description", ""))
+        except (OSError, json.JSONDecodeError):
+            return ""
+
+    if ptype == "role":
+        name = persona_cfg["role"]
+        return {"role": name, "description": _desc("roles", name),
+                "extra_traits": []}
+    if ptype == "trait":
+        name = persona_cfg["trait"]
+        return {"role": name, "description": _desc("traits", name),
+                "extra_traits": []}
+    if ptype == "combination":
+        role = persona_cfg["role"]
+        traits = persona_cfg.get("traits") or []
+        extra = [[t, _desc("traits", t)] for t in traits]
+        return {"role": role, "description": _desc("roles", role),
+                "extra_traits": extra}
+    raise ValueError(f"unknown persona.type: {ptype!r}")
+
+
+def _resolve_steering_spec(axis_cfg: Dict[str, Any],
+                           instructions_dir: Path) -> Dict[str, Any]:
+    """Build a SteeringSpec dict from the axis_source config."""
+    src_type = axis_cfg.get("type", "axis")
+    pos_label = axis_cfg.get("pos_label")
+    pos_desc = axis_cfg.get("pos_description")
+    neg_label = axis_cfg.get("neg_label")
+    neg_desc = axis_cfg.get("neg_description")
+    axis_name = axis_cfg.get("axis_name")
+
+    def _try_desc(kind_name: str) -> str:
+        for kind in ("traits", "roles"):
+            path = (instructions_dir / kind / "instructions"
+                    / f"{kind_name}.json")
+            if path.exists():
+                try:
+                    return str(json.loads(read_text_with_retry(path,
+                                                               logger_obj=logger))
+                              .get("description", ""))
+                except (OSError, json.JSONDecodeError):
+                    continue
+        return ""
+
+    if src_type == "role_transplant":
+        if not pos_label:
+            pos_label = axis_cfg.get("role_to", "pos")
+        if not neg_label:
+            neg_label = axis_cfg.get("role_from", "neg")
+        if not pos_desc:
+            pos_desc = _try_desc(pos_label)
+        if not neg_desc:
+            neg_desc = _try_desc(neg_label)
+        if not axis_name:
+            axis_name = f"{neg_label}-{pos_label}"
+
+    return {
+        "axis_name": str(axis_name or "unnamed"),
+        "pos_label": str(pos_label or "positive"),
+        "pos_description": str(pos_desc or ""),
+        "neg_label": str(neg_label or "negative"),
+        "neg_description": str(neg_desc or ""),
+    }
 
 
 # ---------------------------------------------------------------------------
@@ -253,6 +391,77 @@ def _setup_worker_logger(worker_id: int, gpu_id: int) -> logging.Logger:
     # %(name)s prefix from the root.
     log.propagate = False
     return log
+
+
+def _build_cell_dispatcher(
+    item: Dict[str, Any], *,
+    slot: int, layer: int, sign: int,
+    config: Dict[str, Any], judging_cfg: Dict[str, Any],
+    log: logging.Logger,
+):
+    """Construct a per-cell judge dispatcher.
+
+    Returns either a RealJudgeDispatcher (live coherence-blocking +
+    async RP/effect) or a NoOpJudgeDispatcher when:
+      - judging is explicitly disabled (--no-live-judging), or
+      - both OPENAI_API_KEY and ANTHROPIC_API_KEY are absent (we can't
+        actually call any judge).
+
+    Each cell gets its own dispatcher instance because records_path is
+    cell-local; the asyncio thread is cheap to start/stop.
+    """
+    from assistant_axis.steering_judges import (
+        NoOpJudgeDispatcher, PersonaSpec, RealJudgeDispatcher, SteeringSpec,
+        build_baseline_lookup,
+    )
+
+    if not judging_cfg or not judging_cfg.get("enabled"):
+        log.info(f"[cell s{slot}_l{layer}_{sign:+d}] judging disabled "
+                 f"({judging_cfg.get('reason', 'no judging config')}); "
+                 f"using NoOpJudgeDispatcher")
+        return NoOpJudgeDispatcher()
+
+    has_openai = bool(os.environ.get("OPENAI_API_KEY"))
+    has_anthropic = bool(os.environ.get("ANTHROPIC_API_KEY"))
+    if not (has_openai or has_anthropic):
+        log.warning(f"[cell s{slot}_l{layer}_{sign:+d}] no API keys present "
+                    f"(OPENAI_API_KEY / ANTHROPIC_API_KEY); falling back to "
+                    f"NoOpJudgeDispatcher -- live coherence early-term "
+                    f"will not trigger")
+        return NoOpJudgeDispatcher()
+
+    persona_dict = judging_cfg["persona"]
+    steering_dict = judging_cfg["steering"]
+    persona = PersonaSpec(
+        role=persona_dict["role"],
+        description=persona_dict["description"],
+        extra_traits=[(t[0], t[1]) for t in persona_dict.get("extra_traits", [])],
+    )
+    steering = SteeringSpec(
+        axis_name=steering_dict["axis_name"],
+        pos_label=steering_dict["pos_label"],
+        pos_description=steering_dict["pos_description"],
+        neg_label=steering_dict["neg_label"],
+        neg_description=steering_dict["neg_description"],
+    )
+    baseline_lookup = build_baseline_lookup(
+        Path(item["baselines_records_path"])
+    )
+    cell_dir = Path(item["cell_dir"])
+    records_path = cell_dir / "records.jsonl"
+    cell_dir.mkdir(parents=True, exist_ok=True)
+    return RealJudgeDispatcher(
+        records_path=records_path,
+        persona=persona, steering=steering,
+        baseline_lookup=baseline_lookup,
+        coherence_model=judging_cfg["coherence_model"],
+        rp_model=judging_cfg["rp_model"],
+        effect_models=tuple(judging_cfg["effect_models"]),
+        effect_mode=judging_cfg["effect_mode"],
+        effect_target_batch_size=int(judging_cfg["target_batch_size"]),
+        skip_threshold=float(judging_cfg["skip_threshold"]),
+        coh_stop_threshold=float(judging_cfg["coh_stop_threshold"]),
+    )
 
 
 def _load_axis_for_cell(axis_source: Dict[str, Any],
@@ -388,21 +597,39 @@ def _worker_main(
                 )
                 log.info(f"schedule: {len(schedule)} strengths "
                          f"({schedule[0]} .. {schedule[-1]})")
-                run_steering_cell(
-                    model, tokenizer,
-                    axis_vector=axis_vector,
-                    slot=slot,
-                    layer=layer,
-                    sign=sign,
-                    strengths=schedule,
-                    persona_system_prompt=item["persona"],
-                    questions=item["questions"],
-                    output_dir=cell_dir,
-                    batch_size=item["batch_size"],
-                    max_new_tokens=item["max_new_tokens"],
-                    positions_mode=item["positions_mode"],
-                    model_name=config["model_name"],
+                # Build a per-cell judge dispatcher.  Each cell gets its
+                # own dispatcher because the records_path is cell-local;
+                # the dispatcher's background event loop is cheap to
+                # spin up and tear down (a daemon thread + asyncio loop).
+                # If judging is disabled (--no-live-judging) or no API
+                # keys are present, fall back to NoOp so the sweep still
+                # runs to its configured max strength.
+                judge_dispatcher = _build_cell_dispatcher(
+                    item, slot=slot, layer=layer, sign=sign,
+                    config=config,
+                    judging_cfg=item.get("judging") or {},
+                    log=log,
                 )
+                try:
+                    run_steering_cell(
+                        model, tokenizer,
+                        axis_vector=axis_vector,
+                        slot=slot,
+                        layer=layer,
+                        sign=sign,
+                        strengths=schedule,
+                        persona_system_prompt=item["persona"],
+                        questions=item["questions"],
+                        output_dir=cell_dir,
+                        batch_size=item["batch_size"],
+                        max_new_tokens=item["max_new_tokens"],
+                        positions_mode=item["positions_mode"],
+                        model_name=config["model_name"],
+                        judge_dispatcher=judge_dispatcher,
+                    )
+                finally:
+                    if hasattr(judge_dispatcher, "shutdown"):
+                        judge_dispatcher.shutdown()
             else:
                 log.error(f"unknown work item kind: {item.get('kind')!r}")
 
@@ -467,6 +694,59 @@ def _resolve_hf_home(model_name: str) -> Optional[str]:
     return None
 
 
+def _run_judges_only(config: Dict[str, Any], args) -> None:
+    """Delegate to post_judge.py without re-implementing the loop.
+
+    Imported lazily because post_judge.py is under steering/ which isn't
+    a package; we re-use the path-insert that the rest of run_sweep
+    already does.
+    """
+    # post_judge lives next to this file; the path-insert at the top of
+    # run_sweep.py already covers parents[1] (the repo root) for
+    # assistant_axis imports, but the sibling steering/ dir is not on
+    # sys.path -- we resolve post_judge's main() via importlib.
+    import importlib.util as _iu
+    pj_path = Path(__file__).resolve().parent / "post_judge.py"
+    spec = _iu.spec_from_file_location("_post_judge_inproc", pj_path)
+    pj = _iu.module_from_spec(spec)
+    assert spec.loader is not None
+    spec.loader.exec_module(pj)
+
+    # Build the post_judge argv.  We reach into config to find the
+    # experiment dir; the rest is forwarded from our own args.
+    output_root = Path(config["output_dir"]) / config["experiment_id"]
+    pj_argv = [
+        "--experiment_dir", str(output_root),
+        "--instructions_dir", str(args.instructions_dir),
+        "--judges", args.judges,
+        "--effect-mode", args.effect_mode,
+        "--target-batch-size", str(args.target_batch_size),
+        "--skip-if-strength-mean-coh-above",
+        str(args.skip_if_strength_mean_coh_above),
+        "--coh-stop-threshold", str(args.coh_stop_threshold),
+    ]
+    if args.coherence_model:
+        pj_argv += ["--coherence-model", args.coherence_model]
+    if args.rp_model:
+        pj_argv += ["--rp-model", args.rp_model]
+    if args.effect_models:
+        pj_argv += ["--effect-models", args.effect_models]
+    if args.rerun_coherence_with_model:
+        pj_argv += ["--rerun-coherence-with-model",
+                    args.rerun_coherence_with_model]
+    if args.rerun:
+        pj_argv += ["--rerun"]
+
+    # Drive post_judge.main() by transient sys.argv replacement; avoids
+    # having to refactor it to take an argv list.
+    saved_argv = sys.argv
+    sys.argv = ["steering/post_judge.py"] + pj_argv
+    try:
+        pj.main()
+    finally:
+        sys.argv = saved_argv
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__,
                                      formatter_class=argparse.RawDescriptionHelpFormatter)
@@ -477,6 +757,55 @@ def main():
     parser.add_argument("--instructions_dir", type=Path, default=Path("data"),
                         help="Root of data/{roles,traits}/instructions/<name>.json "
                              "(default: data)")
+    # Phase-2 judging knobs.  These are NOT consumed during generation
+    # (the runner uses NoOpJudgeDispatcher unless explicitly told
+    # otherwise), but get forwarded to post_judge.py via --judges-only.
+    # When set, the live sweep runs with NoOp coherence and async
+    # judging fills in afterward.  The "live coherence + early-term"
+    # mode for the sweep is configured here too.
+    parser.add_argument("--judges-only", action="store_true",
+                        help="Skip generation; run async RP+effect (and "
+                             "optionally coherence rerun) on an existing "
+                             "experiment dir.  Equivalent to invoking "
+                             "steering/post_judge.py with the same flags. "
+                             "Useful immediately after a fresh sweep.")
+    parser.add_argument("--judges", default="persona,effect",
+                        help="Comma list, default 'persona,effect'.  Used "
+                             "by --judges-only.")
+    parser.add_argument("--effect-mode", default="bidirectional",
+                        choices=["bidirectional", "separate_poles", "both"])
+    parser.add_argument("--target-batch-size", type=int, default=10,
+                        help="Effect-judge target batch size (default 10, "
+                             "matching response judging's near-equal "
+                             "batches algorithm).")
+    parser.add_argument("--skip-if-strength-mean-coh-above", type=float,
+                        default=1.0,
+                        help="Skip RP/effect on a strength group whose mean "
+                             "coherence exceeds this value (default 1.0).")
+    parser.add_argument("--coh-stop-threshold", type=float, default=1.5,
+                        help="Stop sweep early once a strength's mean "
+                             "coherence reaches this value (default 1.5).")
+    parser.add_argument("--coherence-model", default=None,
+                        help="Coherence model (default gpt-4.1-mini).")
+    parser.add_argument("--rp-model", default=None,
+                        help="RP/persona judge model (default gpt-4.1-mini).")
+    parser.add_argument("--effect-models", default=None,
+                        help="Comma list of effect-judge ensemble models "
+                             "(default 'gpt-4.1-mini,claude-haiku-4-5-20251001').")
+    parser.add_argument("--rerun-coherence-with-model", default=None,
+                        help="(--judges-only only) Rerun coherence with "
+                             "the given model and store under "
+                             "judges.coherence_alts[<model>].  For the "
+                             "coherence-model shootout.")
+    parser.add_argument("--rerun", action="store_true",
+                        help="(--judges-only only) Force re-judge even if "
+                             "the field is already populated.")
+    parser.add_argument("--no-live-judging", action="store_true",
+                        help="Skip live coherence + async RP/effect "
+                             "judging during the sweep (workers use "
+                             "NoOpJudgeDispatcher).  Sweep runs to its "
+                             "configured max strength regardless of "
+                             "coherence; use post_judge.py afterward.")
     args = parser.parse_args()
 
     logging.basicConfig(
@@ -485,6 +814,10 @@ def main():
     )
 
     config = _load_config(args.config)
+
+    if args.judges_only:
+        _run_judges_only(config, args)
+        return
 
     # Required keys
     for k in ("experiment_id", "model_name", "output_dir", "axis_source",
@@ -511,7 +844,27 @@ def main():
     logger.info(f"persona system prompt: {persona_prompt!r}")
     logger.info(f"{len(questions)} questions loaded from {config['questions_file']}")
 
-    work_items = _build_work_items(config, output_root, persona_prompt, questions)
+    judging_cfg = _build_judging_config(
+        config=config, args=args, instructions_dir=args.instructions_dir,
+    )
+    if judging_cfg.get("enabled"):
+        logger.info(
+            f"live judging enabled: coherence={judging_cfg['coherence_model']} "
+            f"rp={judging_cfg['rp_model']} "
+            f"effect={','.join(judging_cfg['effect_models'])} "
+            f"mode={judging_cfg['effect_mode']} "
+            f"target_batch_size={judging_cfg['target_batch_size']} "
+            f"skip_threshold={judging_cfg['skip_threshold']} "
+            f"coh_stop_threshold={judging_cfg['coh_stop_threshold']}"
+        )
+    else:
+        logger.info(f"live judging disabled "
+                    f"({judging_cfg.get('reason', 'no config')})")
+
+    work_items = _build_work_items(
+        config, output_root, persona_prompt, questions,
+        judging=judging_cfg,
+    )
     n_cells = sum(1 for it in work_items if it["kind"] == "cell")
     logger.info(f"built {len(work_items)} work items "
                 f"(1 baselines + {n_cells} cells)")

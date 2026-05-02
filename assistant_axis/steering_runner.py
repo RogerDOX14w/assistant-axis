@@ -423,6 +423,14 @@ def run_steering_cell(
     n_strengths_swept = 0
     last_strength_completed: Optional[float] = None
 
+    def _flush_records():
+        """Use the dispatcher's atomic-write if available (avoids races with
+        async judge writes); otherwise fall back to plain write_jsonl."""
+        if hasattr(dispatcher, "write_records_atomic"):
+            dispatcher.write_records_atomic(existing_records)
+        else:
+            write_jsonl(existing_records, records_path, logger_obj=logger)
+
     for strength in strengths:
         eff_coeff = float(strength) * float(sign)
         logger.info(
@@ -430,6 +438,12 @@ def run_steering_cell(
             f"sign={sign:+d} eff_coeff={eff_coeff:+.4f}"
         )
         any_progress_this_strength = False
+        # Tracks newly-generated records at this strength so we can
+        # enqueue them as a single (cell, sign, strength) group after
+        # the strength's batches finish.  Existing records (restored
+        # from disk on restart) are not re-enqueued; post_judge.py is
+        # the canonical retrospective fill-in path.
+        new_at_strength: List[Dict[str, Any]] = []
 
         for batch_start in range(0, len(questions), batch_size):
             # Build batch of (q_idx, question, conversation) for items
@@ -491,26 +505,48 @@ def run_steering_cell(
                 }
                 existing_records.append(rec)
                 new_records_this_batch.append(rec)
+                new_at_strength.append(rec)
                 done_pairs.add((float(strength), int(q_idx)))
 
-            # Flush per-batch (per Roger's "save after each question set")
-            write_jsonl(existing_records, records_path, logger_obj=logger)
+            # Flush per-batch (per Roger's "save after each question set").
+            # Records here have coherence=None; the inline coh-judge call
+            # below populates that field and we re-flush.
+            _flush_records()
 
-            # Hand each new record off to the judge dispatcher.  In
-            # Phase 1 this is a no-op; Phase 2 will async-dispatch judge
-            # API calls and write scores back into the record on disk.
+            # Tier 1 -- coherence (synchronous, blocks the sweep).  This
+            # is what gates early termination in should_stop_at().  In
+            # Phase-1 NoOpJudgeDispatcher this returns 0 and writes
+            # nothing; Phase-2 RealJudgeDispatcher does an OpenAI call,
+            # parses {"score": int, "reason": str}, and stamps
+            # judges.coherence.
             for rec in new_records_this_batch:
-                dispatcher.handle_record(rec)
+                dispatcher.judge_coherence_blocking(rec)
+            # Re-flush so coh is durable before any async work fires.
+            _flush_records()
 
         if any_progress_this_strength:
             n_strengths_swept += 1
             last_strength_completed = float(strength)
 
-        # Early-termination check: in Phase 1 NoOp returns False always.
+        # Tier 2 -- enqueue the strength group for async RP + effect
+        # judging.  The dispatcher computes strength_mean_coh, decides
+        # skip-or-judge based on its skip threshold, stamps every record
+        # with strength_mean_coh, and (in the judge path) fans out
+        # background API calls.  NoOp does nothing.
+        if new_at_strength:
+            dispatcher.enqueue_strength_group(
+                cell_dir=str(output_dir), slot=int(slot), layer=int(layer),
+                sign=int(sign), strength=float(strength),
+                records=new_at_strength,
+            )
+
+        # Early-termination: with the real dispatcher this consults
+        # strength_mean_coh against coh_stop_threshold; with NoOp it
+        # always returns False.
         if dispatcher.should_stop_at(float(strength)):
             logger.info(
                 f"[cell s{slot}_l{layer}_{sign}] dispatcher signalled stop "
-                f"at strength={strength}"
+                f"at strength={strength} (mean_coh past threshold)"
             )
             summary = {
                 "slot": slot, "layer": layer, "sign": sign,
@@ -521,7 +557,7 @@ def run_steering_cell(
                 "last_strength_completed": last_strength_completed,
             }
             _write_summary(summary_path, summary)
-            dispatcher.flush()
+            dispatcher.drain()
             return CellResult(
                 stopped_at_strength=float(strength),
                 reason="incoherent",
@@ -540,7 +576,7 @@ def run_steering_cell(
         "last_strength_completed": last_strength_completed,
     }
     _write_summary(summary_path, summary)
-    dispatcher.flush()
+    dispatcher.drain()
     return CellResult(
         stopped_at_strength=None,
         reason="completed",

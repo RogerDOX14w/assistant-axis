@@ -1053,7 +1053,7 @@ async def score_responses_mode(
     args: argparse.Namespace,
 ) -> Dict[str, Dict[str, Any]]:
     """Score ALL score==3 responses per entity, partitioned into roughly equal-sized
-    batches (targeting `--response_target_batch_size`, default 15). Each batch is one
+    batches (targeting `--response_target_batch_size`, default 10). Each batch is one
     judge call producing one -3..+3 score; the entity's final score is the mean of
     those batch scores.
 
@@ -1453,10 +1453,14 @@ def parse_args() -> argparse.Namespace:
                     help="Score all score==3 model responses per entity, partitioned into "
                          "roughly equal-sized batches (one -3..+3 score per batch; "
                          "entity score = mean of batch scores).")
-    sm.add_argument("--response_target_batch_size", type=int, default=15,
+    sm.add_argument("--response_target_batch_size", type=int, default=10,
                     help="Target responses per batch for --score_responses. Actual batch "
                          "sizes will differ by at most 1 to cover all items (N items -> "
-                         "max(1, round(N/target)) equal-sized batches).")
+                         "max(1, round(N/target)) equal-sized batches). Default 10 "
+                         "matches the steering effect judge's default so the two "
+                         "score distributions are apples-to-apples in the same "
+                         "judging regime; was 15 historically, see steering judge "
+                         "Phase-2 plan for the rationale.")
     sm.add_argument("--all", action="store_true",
                     help="Equivalent to --score_descriptions --score_instructions --score_responses.")
 

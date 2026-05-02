@@ -327,17 +327,47 @@ class TestRunSteeringCell:
                             _FakeActivationSteering)
 
         class StopAfterTwo:
+            """Two-tier dispatcher fixture matching the new protocol.
+
+            judge_coherence_blocking returns 0 (records flow through);
+            enqueue_strength_group records the call;
+            should_stop_at returns True after the second strength group.
+            """
             def __init__(self):
                 self.seen_strengths = []
-                self.records = []
-            def handle_record(self, record):
-                self.records.append(record)
+                self.coh_called_for = []
+                self.enqueued_groups = []
+                self.drained = False
+
+            def judge_coherence_blocking(self, record):
+                self.coh_called_for.append(record["question_idx"])
+                # Stamp the record so downstream stays consistent with
+                # what RealJudgeDispatcher would have done.
+                record.setdefault("judges", {})["coherence"] = {
+                    "score": 0, "reason": "test", "model": "test",
+                    "ts": 0, "rubric_version": 1,
+                }
+                return 0
+
+            def enqueue_strength_group(self, *, cell_dir, slot, layer, sign,
+                                       strength, records):
+                self.enqueued_groups.append({
+                    "strength": strength, "n": len(records),
+                })
+
             def should_stop_at(self, strength):
                 self.seen_strengths.append(strength)
-                # Stop after the second strength
                 return len(self.seen_strengths) >= 2
-            def flush(self):
-                pass
+
+            def drain(self, timeout_s=None):
+                self.drained = True
+
+            def write_records_atomic(self, records):
+                # Mirror RealJudgeDispatcher.write_records_atomic so the
+                # runner's _flush_records prefers our path.  Just defer
+                # to write_jsonl (no concurrent writers in tests).
+                from assistant_axis.atomic_io import write_jsonl
+                write_jsonl(records, tmp_path / "cell" / "records.jsonl")
 
         dispatcher = StopAfterTwo()
         model = _FakeModel(hidden_size=8)
@@ -365,10 +395,15 @@ class TestRunSteeringCell:
                    if line.strip()]
         assert len(records) == 4
         assert sorted({r["strength"] for r in records}) == [1.0, 2.0]
-        # Dispatcher saw every record
-        assert len(dispatcher.records) == 4
-        # And was consulted exactly twice (after each of the two completed strengths)
+        # Coherence judged on every record (4 = 2 strengths * 2 questions).
+        assert len(dispatcher.coh_called_for) == 4
+        # Two strength groups enqueued (one per completed strength).
+        assert [g["strength"] for g in dispatcher.enqueued_groups] == [1.0, 2.0]
+        assert all(g["n"] == 2 for g in dispatcher.enqueued_groups)
+        # Stop check ran after each of the 2 completed strengths.
         assert dispatcher.seen_strengths == [1.0, 2.0]
+        # Drain called at the end.
+        assert dispatcher.drained is True
 
     def test_skip_when_summary_already_says_stopped(self, tmp_path, monkeypatch):
         # Pre-create a summary.json with a stop already recorded.
