@@ -273,7 +273,12 @@ def setup_tmpdir_if_unset() -> str:
     atomic_io.py, which honours TMPDIR.  Pointing TMPDIR at /dev/shm
     avoids small-container-/tmp fill-ups when many workers flush
     concurrently.
+
+    Side effect: also sets ``TRITON_CACHE_DIR`` and
+    ``TORCHINDUCTOR_CACHE_DIR`` to a non-tmpfs path if not already set
+    by the user.  See :func:`_setup_compile_cache_dirs` for why.
     """
+    _setup_compile_cache_dirs()
     if os.environ.get("TMPDIR"):
         logger.info(f"[tmpfs] TMPDIR={os.environ['TMPDIR']} (preserved from environment)")
         return os.environ["TMPDIR"]
@@ -285,3 +290,93 @@ def setup_tmpdir_if_unset() -> str:
 
     os.environ["TMPDIR"] = "/tmp"
     return "/tmp"
+
+
+def _is_noexec(path: Path, mounts_file: Path = Path("/proc/mounts")) -> Optional[bool]:
+    """Return True if ``path``'s mount has the ``noexec`` flag.
+
+    Best-effort: returns ``None`` (don't know) if /proc/mounts is
+    unavailable (e.g. macOS) or unparseable.  The result drives
+    "should I cache executable .so files here?" decisions; on
+    "don't know" the caller should err on the side of NOT placing
+    exec content there.
+    """
+    try:
+        if not mounts_file.exists():
+            return None
+        target = path.expanduser().resolve()
+        # Walk /proc/mounts, find the longest mount-point prefix that
+        # contains `target`.  Mounts file format:
+        #   <device> <mount-point> <fs-type> <opts> <dump> <pass>
+        best_match: tuple[int, str] = (-1, "")
+        with open(mounts_file, encoding="utf-8") as f:
+            for line in f:
+                parts = line.split()
+                if len(parts) < 4:
+                    continue
+                mp = parts[1]
+                if (str(target) == mp or str(target).startswith(mp.rstrip("/") + "/")) \
+                        and len(mp) > best_match[0]:
+                    best_match = (len(mp), parts[3])
+        if best_match[0] < 0:
+            return None
+        return "noexec" in best_match[1].split(",")
+    except OSError:
+        return None
+
+
+def _setup_compile_cache_dirs() -> None:
+    """Set ``TRITON_CACHE_DIR`` / ``TORCHINDUCTOR_CACHE_DIR`` to a
+    non-tmpfs location if they're unset, AND if the prevailing TMPDIR
+    (or /dev/shm) is mounted ``noexec``.
+
+    Triton / torchinductor compile CUDA kernels into shared-object
+    files at runtime, then ``dlopen()`` them.  ``dlopen`` requires
+    ``mmap(PROT_EXEC)``, which the kernel rejects on a ``noexec``
+    mount with a confusing "failed to map segment from shared
+    object" ImportError.  RunPod (and most hardened containers)
+    mount ``/dev/shm`` ``noexec`` by default, which is fine for
+    read-only model-shard mmaps but breaks the compile cache as
+    soon as TMPDIR is also pointed at /dev/shm.
+
+    We don't override user-provided values; if the caller already
+    set ``TRITON_CACHE_DIR`` / ``TORCHINDUCTOR_CACHE_DIR``, that
+    wins.  Otherwise we route them to ``$HOME/.cache/triton`` and
+    ``$HOME/.cache/torchinductor``, which are usually on a regular
+    filesystem (and as a side benefit persist across container
+    restarts so the ~50 s torch.compile pass becomes a one-time
+    cost rather than a per-pipeline-run cost).
+    """
+    # Cheap exit: if the user has already set these, respect their choice.
+    needs_triton = "TRITON_CACHE_DIR" not in os.environ
+    needs_inductor = "TORCHINDUCTOR_CACHE_DIR" not in os.environ
+    if not (needs_triton or needs_inductor):
+        return
+
+    # Only intervene if /dev/shm is the at-risk mount.  On a fresh box
+    # where /dev/shm is exec-allowed (rare), default behaviour is fine.
+    shm = Path("/dev/shm")
+    if not shm.is_dir():
+        return
+    if _is_noexec(shm) is False:
+        return  # exec allowed -> nothing to fix
+
+    # Either noexec confirmed or unknown: route caches off /dev/shm.
+    cache_root = Path(os.environ.get("XDG_CACHE_HOME") or
+                      (Path.home() / ".cache"))
+    if needs_triton:
+        triton_dir = cache_root / "triton"
+        triton_dir.mkdir(parents=True, exist_ok=True)
+        os.environ["TRITON_CACHE_DIR"] = str(triton_dir)
+        logger.info(
+            f"[tmpfs] TRITON_CACHE_DIR={triton_dir} "
+            f"(/dev/shm is noexec; routing compile cache off tmpfs)"
+        )
+    if needs_inductor:
+        inductor_dir = cache_root / "torchinductor"
+        inductor_dir.mkdir(parents=True, exist_ok=True)
+        os.environ["TORCHINDUCTOR_CACHE_DIR"] = str(inductor_dir)
+        logger.info(
+            f"[tmpfs] TORCHINDUCTOR_CACHE_DIR={inductor_dir} "
+            f"(/dev/shm is noexec; routing compile cache off tmpfs)"
+        )

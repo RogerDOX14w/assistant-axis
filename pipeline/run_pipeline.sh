@@ -295,6 +295,25 @@ setup_tmpfs() {
         echo "[tmpfs] TMPDIR=$TMPDIR (preserved from environment)"
     fi
 
+    # Triton / torchinductor compile CUDA kernels into .so files at runtime
+    # then dlopen() them.  RunPod (and most hardened containers) mount /dev/shm
+    # noexec, so dlopen on a .so under /dev/shm/torchinductor_root/... fails
+    # with "ImportError: ... failed to map segment from shared object".  Route
+    # the compile cache to ~/.cache/{triton,torchinductor} (regular FS, exec
+    # allowed) unless the user has overridden them.  Bonus: persists across
+    # container restarts so the ~50 s torch.compile pass is amortised.
+    local cache_root="${XDG_CACHE_HOME:-$HOME/.cache}"
+    if [ -z "$TRITON_CACHE_DIR" ]; then
+        export TRITON_CACHE_DIR="$cache_root/triton"
+        mkdir -p "$TRITON_CACHE_DIR"
+        echo "[tmpfs] TRITON_CACHE_DIR=$TRITON_CACHE_DIR (off /dev/shm noexec)"
+    fi
+    if [ -z "$TORCHINDUCTOR_CACHE_DIR" ]; then
+        export TORCHINDUCTOR_CACHE_DIR="$cache_root/torchinductor"
+        mkdir -p "$TORCHINDUCTOR_CACHE_DIR"
+        echo "[tmpfs] TORCHINDUCTOR_CACHE_DIR=$TORCHINDUCTOR_CACHE_DIR (off /dev/shm noexec)"
+    fi
+
     # Mirror HF cache for the requested $MODEL.  HF caches under
     # <HF_HOME>/hub/models--<owner>--<name>/.  We copy just the requested
     # model's subtree to keep the tmpfs footprint minimal.
