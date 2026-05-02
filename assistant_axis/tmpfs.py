@@ -29,10 +29,12 @@ etc.  The caller should fall back to the original ``HF_HOME``.
 """
 from __future__ import annotations
 
+import json
 import logging
 import os
 import shutil
 import subprocess
+import time
 from pathlib import Path
 from typing import Optional
 
@@ -40,6 +42,17 @@ logger = logging.getLogger(__name__)
 
 DEFAULT_TMPFS_HF_HOME = "/dev/shm/hf-cache"
 HEADROOM_FACTOR = 1.5    # 1.5× model size required free in /dev/shm
+
+# Sentinel file written into the tmpfs model dir after a successful rsync.
+# Lets later setup_model_tmpfs_cache calls fast-path past a 5+ minute NFS
+# rsync scan when the mirror is already complete and intact.  The fast-path
+# verifies by re-measuring the tmpfs tree and comparing to the recorded
+# size; if anything was added/removed/corrupted in tmpfs since the last
+# sync, the size check fails and we fall through to a normal rsync.
+MIRROR_MARKER_FILENAME = ".tmpfs_mirror_complete"
+# Fraction of recorded size we tolerate as drift (filesystem rounding,
+# the marker file itself, etc.) before declaring the mirror stale.
+MIRROR_SIZE_TOLERANCE = 0.001    # 0.1%
 
 
 def _du_kb(path: Path) -> Optional[int]:
@@ -70,6 +83,89 @@ def _avail_kb(path: Path) -> Optional[int]:
     except (subprocess.SubprocessError, ValueError, FileNotFoundError) as e:
         logger.warning(f"df --output=avail {path} failed: {e}")
         return None
+
+
+def _check_existing_mirror(tmpfs_model_dir: Path) -> Optional[dict]:
+    """Fast-path check: is the tmpfs mirror complete and intact?
+
+    If the marker file written after a previous successful rsync is
+    present AND the current tmpfs tree size still matches what the
+    marker recorded, return the marker payload.  Otherwise return
+    None and let the caller fall through to a full rsync.
+
+    This deliberately does NOT touch the NFS source: the whole point
+    is to skip the slow source-side stat traversal when we already
+    have a known-good mirror.  Cost: one ``du -sk`` on tmpfs (cheap,
+    RAM-backed) vs the alternative of one ``du -sk`` on NFS plus a
+    full rsync scan against NFS (5+ minutes for a 60 GB model).
+
+    Stale-source caveat: if the NFS source genuinely changed (model
+    upgrade, cache repaired, etc.) we won't notice and will keep
+    serving the old tmpfs copy.  Workaround: delete
+    ``{tmpfs_model_dir}/{MIRROR_MARKER_FILENAME}`` to force a re-sync.
+    For HF caches this is rarely an issue -- model snapshots are
+    immutable and live under ``snapshots/<commit_hash>/``.
+    """
+    marker_path = tmpfs_model_dir / MIRROR_MARKER_FILENAME
+    if not marker_path.is_file():
+        return None
+
+    try:
+        marker = json.loads(marker_path.read_text())
+    except (OSError, json.JSONDecodeError) as e:
+        logger.warning(f"[tmpfs] marker {marker_path} unreadable ({e}); "
+                       f"will re-sync to be safe")
+        return None
+
+    recorded_size = marker.get("mirror_size_kb")
+    if not isinstance(recorded_size, int):
+        return None
+
+    actual_size = _du_kb(tmpfs_model_dir)
+    if actual_size is None:
+        return None
+
+    # We treat shrinkage (files deleted from the mirror) as cause for
+    # re-sync but tolerate growth (e.g. the marker file itself, or stray
+    # cache entries from other models added after the mirror).  An older
+    # symmetric drift check would flag the marker file's own ~4 kB block
+    # contribution as "drifted" on small tmpfs trees, blocking the
+    # fast-path on every call.
+    shortfall = max(0, recorded_size - actual_size)
+    shortfall_ratio = shortfall / max(recorded_size, 1)
+    if shortfall_ratio > MIRROR_SIZE_TOLERANCE:
+        logger.warning(
+            f"[tmpfs] marker says {recorded_size} kB but tmpfs is only "
+            f"{actual_size} kB (shortfall {shortfall_ratio:.2%}); re-syncing"
+        )
+        return None
+
+    return marker
+
+
+def _write_mirror_marker(
+    tmpfs_model_dir: Path,
+    source_size_kb: int,
+) -> None:
+    """Record a 'mirror complete' marker after a successful rsync.
+
+    Stored fields are the keys ``_check_existing_mirror`` reads to
+    decide whether the mirror is still good.  Best-effort: a write
+    failure here just means the next call won't get the fast-path
+    (a slow rsync against NFS), not a correctness problem.
+    """
+    marker_path = tmpfs_model_dir / MIRROR_MARKER_FILENAME
+    payload = {
+        "marker_version": 1,
+        "model_subdir": tmpfs_model_dir.name,
+        "source_size_kb": source_size_kb,
+        "mirror_size_kb": _du_kb(tmpfs_model_dir),
+        "completed_at": time.time(),
+    }
+    try:
+        marker_path.write_text(json.dumps(payload, indent=2))
+    except OSError as e:
+        logger.warning(f"[tmpfs] couldn't write marker {marker_path}: {e}")
 
 
 def _rsync_mirror(
@@ -190,6 +286,22 @@ def setup_model_tmpfs_cache(
         )
         return None
 
+    # Fast-path: if a previous run completed an rsync into tmpfs and
+    # the tree is still intact (size matches the recorded marker), skip
+    # the entire source-side scan + rsync.  This avoids a 5+ minute
+    # NFS stat traversal of the source on every run when nothing has
+    # changed.  Stale-source caveat documented in
+    # _check_existing_mirror().
+    existing_marker = _check_existing_mirror(tmpfs_model_dir)
+    if existing_marker is not None:
+        logger.info(
+            f"[tmpfs] {model_name} already mirrored "
+            f"({existing_marker.get('mirror_size_kb', '?')} kB, "
+            f"completed at {time.ctime(existing_marker.get('completed_at', 0))}); "
+            f"skipping rsync, HF_HOME={tmpfs_root}"
+        )
+        return str(tmpfs_root)
+
     needed_kb = _du_kb(source_model_dir)
     avail_kb = _avail_kb(Path("/dev/shm"))
 
@@ -259,6 +371,12 @@ def setup_model_tmpfs_cache(
         except OSError:
             pass
         return None
+
+    # Drop the fast-path marker so the next call can skip rsync entirely.
+    # Best-effort: if this fails, correctness is unaffected -- the next
+    # call will just do a full (slow) rsync and try writing the marker
+    # again.
+    _write_mirror_marker(tmpfs_model_dir, source_size_kb=needed_kb)
 
     logger.info(f"[tmpfs] mirror complete; HF_HOME={tmpfs_root}")
     return str(tmpfs_root)

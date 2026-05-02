@@ -222,3 +222,86 @@ class TestBuildWorkItems:
         cfg["cells"] = []
         with pytest.raises(ValueError, match="cells"):
             mod._build_work_items(cfg, tmp_path, "p", ["q"])
+
+
+# ---------------------------------------------------------------------------
+# _resolve_hf_home — auto-detection of HF cache location
+# ---------------------------------------------------------------------------
+
+class TestResolveHfHome:
+    """Verify the HF_HOME fallback search hits the right candidate first.
+
+    The dispatcher ships with a hard-coded fallback list pointing at
+    canonical RunPod NFS cache paths.  That list is sticky across
+    test cases (a module-level constant), so each test uses
+    ``monkeypatch`` to replace ``DEFAULT_HF_HOME_FALLBACKS`` with a
+    list of tmp_path-derived candidates.  Avoids tests poking at real
+    /workspace/.cache/huggingface and accidentally passing on a dev
+    box that happens to have one.
+    """
+
+    def _setup(self, tmp_path, present_dirs, fallbacks, monkeypatch, mod,
+               env_hf_home=None):
+        for d in present_dirs:
+            (tmp_path / d / "hub" / "models--foo--bar").mkdir(parents=True)
+        monkeypatch.setattr(
+            mod, "DEFAULT_HF_HOME_FALLBACKS",
+            tuple(str(tmp_path / f) for f in fallbacks),
+        )
+        if env_hf_home is None:
+            monkeypatch.delenv("HF_HOME", raising=False)
+        else:
+            monkeypatch.setenv("HF_HOME", str(tmp_path / env_hf_home))
+
+    def test_returns_env_hf_home_when_populated(
+            self, mod, tmp_path, monkeypatch):
+        self._setup(tmp_path, ["env_cache"],
+                    fallbacks=["wsp_cache"], monkeypatch=monkeypatch, mod=mod,
+                    env_hf_home="env_cache")
+        assert mod._resolve_hf_home("foo/bar") == str(tmp_path / "env_cache")
+
+    def test_falls_back_when_env_unset(
+            self, mod, tmp_path, monkeypatch):
+        self._setup(tmp_path, ["wsp_cache"],
+                    fallbacks=["wsp_cache"], monkeypatch=monkeypatch, mod=mod)
+        assert mod._resolve_hf_home("foo/bar") == str(tmp_path / "wsp_cache")
+
+    def test_falls_back_when_env_empty(
+            self, mod, tmp_path, monkeypatch):
+        # User has HF_HOME set but it's a stale path that doesn't have
+        # the model.  Should skip past it to the populated fallback.
+        self._setup(tmp_path, ["wsp_cache"],
+                    fallbacks=["wsp_cache"], monkeypatch=monkeypatch, mod=mod,
+                    env_hf_home="empty_env")
+        assert mod._resolve_hf_home("foo/bar") == str(tmp_path / "wsp_cache")
+
+    def test_first_populated_fallback_wins(
+            self, mod, tmp_path, monkeypatch):
+        # Both fallbacks have the model -- the FIRST one in the list
+        # should win, matching priority order semantics.
+        self._setup(tmp_path, ["primary", "secondary"],
+                    fallbacks=["primary", "secondary"],
+                    monkeypatch=monkeypatch, mod=mod)
+        assert mod._resolve_hf_home("foo/bar") == str(tmp_path / "primary")
+
+    def test_returns_none_when_nothing_found(
+            self, mod, tmp_path, monkeypatch):
+        # Neither env nor any fallback has the model: caller should
+        # know to fail loudly rather than letting HF download.
+        self._setup(tmp_path, [],
+                    fallbacks=["empty1", "empty2"],
+                    monkeypatch=monkeypatch, mod=mod)
+        assert mod._resolve_hf_home("foo/bar") is None
+
+    def test_model_name_with_slash(self, mod, tmp_path, monkeypatch):
+        # HF stores "Org/Model" as "models--Org--Model".  The resolver
+        # has to do that mapping; this is the regression guard.
+        (tmp_path / "cache" / "hub" / "models--Qwen--Qwen3-32B").mkdir(
+            parents=True)
+        monkeypatch.setattr(
+            mod, "DEFAULT_HF_HOME_FALLBACKS",
+            (str(tmp_path / "cache"),),
+        )
+        monkeypatch.delenv("HF_HOME", raising=False)
+        assert mod._resolve_hf_home("Qwen/Qwen3-32B") == str(
+            tmp_path / "cache")

@@ -245,6 +245,13 @@ def _setup_worker_logger(worker_id: int, gpu_id: int) -> logging.Logger:
     ))
     log.addHandler(handler)
     log.setLevel(logging.INFO)
+    # propagate=False prevents the worker-prefixed messages from also
+    # being printed by the root logger configured by logging.basicConfig
+    # at the top of _worker_main (which uses a different format meant for
+    # module loggers).  Without this, every worker message would appear
+    # twice -- once with the W0[GPU 0] prefix here, once with the
+    # %(name)s prefix from the root.
+    log.propagate = False
     return log
 
 
@@ -301,6 +308,19 @@ def _worker_main(
     # Restrict CUDA to just our GPU before any torch import that could
     # initialise CUDA context.
     os.environ["CUDA_VISIBLE_DEVICES"] = str(gpu_id)
+
+    # Configure logging at the top so module-level loggers (e.g.
+    # assistant_axis.tmpfs.logger) actually emit their INFO messages.
+    # multiprocessing's spawn context starts a fresh Python interpreter
+    # that doesn't inherit the parent's logging.basicConfig, so without
+    # this every module-logger INFO call falls through to Python's
+    # lastResort handler -- which only fires at WARNING.  That made the
+    # tmpfs fast-path's "already mirrored" success log silently
+    # disappear while the broken-cache warning came through.
+    logging.basicConfig(
+        level=logging.INFO,
+        format=f"%(asctime)s - W{worker_id} - %(name)s - %(levelname)s - %(message)s",
+    )
 
     # Set up tmpfs (TMPDIR + HF cache mirror) before model load.
     from assistant_axis.tmpfs import setup_model_tmpfs_cache, setup_tmpdir_if_unset
@@ -415,6 +435,38 @@ def _detect_gpu_count(requested: Optional[int]) -> int:
     return max(1, min(int(requested), available))
 
 
+# Common locations for a populated HF cache, in priority order.  Used by
+# ``_resolve_hf_home`` when the env var ``HF_HOME`` is unset.  We prefer
+# ``/workspace/.cache/huggingface`` first because that's what
+# ``run_pipeline.sh`` uses on RunPod -- it's NFS-backed (big, persistent
+# across pod recreates) -- and falls back to the OS default last because
+# on RunPod that lives on a 5 GB container overlay disk that fills up
+# the moment HuggingFace tries to download a 60+ GB model into it.
+DEFAULT_HF_HOME_FALLBACKS = (
+    "/workspace/.cache/huggingface",
+    "/workspace/hf-cache",
+)
+
+
+def _resolve_hf_home(model_name: str) -> Optional[str]:
+    """Pick an HF cache directory that already contains ``model_name``.
+
+    Returns whichever of ``$HF_HOME`` or ``DEFAULT_HF_HOME_FALLBACKS``
+    has the model's ``hub/models--*`` subtree, or None if no candidate
+    matches.  Caller decides whether to fail loudly or let HF download.
+    """
+    model_subdir = "models--" + model_name.replace("/", "--")
+    candidates = []
+    if os.environ.get("HF_HOME"):
+        candidates.append(os.environ["HF_HOME"])
+    candidates.extend(DEFAULT_HF_HOME_FALLBACKS)
+
+    for candidate in candidates:
+        if (Path(candidate) / "hub" / model_subdir).is_dir():
+            return candidate
+    return None
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__,
                                      formatter_class=argparse.RawDescriptionHelpFormatter)
@@ -463,6 +515,27 @@ def main():
     n_cells = sum(1 for it in work_items if it["kind"] == "cell")
     logger.info(f"built {len(work_items)} work items "
                 f"(1 baselines + {n_cells} cells)")
+
+    # Resolve HF_HOME before spawning workers, so all workers inherit a
+    # consistent cache root.  Without this, an unset HF_HOME would let
+    # workers default to ~/.cache/huggingface, which on RunPod is the 5 GB
+    # container overlay -- a 60+ GB model download would fill it and
+    # crash the worker mid-fetch.  We bail loudly if no populated cache is
+    # found rather than silently letting HF download to whatever's on PATH.
+    resolved_hf_home = _resolve_hf_home(config["model_name"])
+    if resolved_hf_home is None:
+        raise SystemExit(
+            f"HF_HOME unset and {config['model_name']} not found in any of "
+            f"{(os.environ.get('HF_HOME'),) + DEFAULT_HF_HOME_FALLBACKS}.  "
+            f"Pre-populate the cache (e.g. via the pipeline) or set HF_HOME "
+            f"explicitly before launching."
+        )
+    if os.environ.get("HF_HOME") != resolved_hf_home:
+        logger.info(
+            f"HF_HOME -> {resolved_hf_home} "
+            f"(was {os.environ.get('HF_HOME')!r})"
+        )
+        os.environ["HF_HOME"] = resolved_hf_home
 
     n_gpus = _detect_gpu_count(args.gpus)
     logger.info(f"using {n_gpus} GPU worker(s)")
