@@ -59,7 +59,7 @@ uv run 1_generate.py \
     --output_dir outputs/roles/responses
 ```
 
-Each entity produces 1200 responses (5 instruction variants x 240 questions).
+Each entity produces up to 1500 responses (5 instruction variants × 300 questions in roger mode; 5 × 240 in christina mode).  With `--reduce_questions N` (default `3` for roger, `1` for christina) every Nth question is kept, so a typical roger run produces 5 × 100 = 500 responses per entity.
 
 **Options:**
 
@@ -72,7 +72,7 @@ Each entity produces 1200 responses (5 instruction variants x 240 questions).
 | `--goal_file` | `../data/goal_roles_and_traits.json` | Goal lists file (roger mode) |
 | `--roles_dir` | `../data/roles/instructions` | Role JSON directory |
 | `--questions_file` | `../data/extraction_questions.jsonl` | Questions JSONL |
-| `--question_count` | 240 | Questions per entity |
+| `--question_count` | 300 (roger) / 240 (christina) | Questions per entity |
 | `--tensor_parallel_size` | auto | GPUs per worker |
 | `--roles` | all | Specific role names (christina mode) |
 
@@ -333,7 +333,7 @@ Double underscore `__` separates role and trait names.
 
 ### Questions
 
-`data/extraction_questions.jsonl` (240 questions designed to elicit persona-specific responses).
+`data/extraction_questions.jsonl` (300 questions designed to elicit persona-specific responses; christina mode uses the first 240 by default).
 
 ## Tips
 

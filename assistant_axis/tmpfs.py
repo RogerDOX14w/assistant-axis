@@ -72,6 +72,79 @@ def _avail_kb(path: Path) -> Optional[int]:
         return None
 
 
+def _rsync_mirror(
+    source: Path,
+    dest: Path,
+    *,
+    timeout_s: int = 1800,
+    logger_obj: Optional[logging.Logger] = None,
+) -> bool:
+    """Mirror ``source`` -> ``dest`` using ``rsync -a --delete --partial``.
+
+    Why rsync rather than ``shutil.copytree``: rsync's incremental
+    algorithm covers both the fresh-copy case and the
+    finish-an-interrupted-copy case in a single invocation, with no
+    need for a separate "is dest already up to date?" verification
+    pass on our side.  After this returns True, ``dest`` matches
+    ``source`` byte-for-byte modulo whatever ``-a`` doesn't preserve
+    (xattrs, etc. -- not relevant for HF caches).
+
+    Flags:
+        ``-a``        : archive (preserves symlinks, perms, mtimes)
+        ``--delete``  : remove files in dest that aren't in source,
+                        so a stale extra shard from a previous run
+                        gets cleaned up rather than confusing
+                        downstream loaders
+        ``--partial`` : keep partially-transferred files on failure
+                        so a retry can resume rather than restart
+                        from zero on each shard
+
+    Returns True on success, False on rsync invocation or run failure
+    (including ENOSPC mid-transfer).  Caller should treat False as
+    "tmpfs cache unavailable, fall back to source HF_HOME".
+    """
+    log = logger_obj or logger
+
+    # Trailing slashes on both paths = "copy CONTENTS of source into
+    # dest", matching shutil.copytree(source, dest) semantics.
+    cmd = [
+        "rsync", "-a", "--delete", "--partial",
+        str(source) + "/", str(dest) + "/",
+    ]
+
+    if shutil.which("rsync") is None:
+        log.warning(
+            "[tmpfs] rsync not on PATH; install it (e.g. "
+            "`apt-get install -y rsync`) for tmpfs cache mirroring "
+            "to work.  Falling back to no tmpfs cache."
+        )
+        return False
+
+    try:
+        dest.mkdir(parents=True, exist_ok=True)
+        result = subprocess.run(
+            cmd, capture_output=True, text=True,
+            timeout=timeout_s, check=False,
+        )
+    except (OSError, subprocess.TimeoutExpired,
+            subprocess.SubprocessError) as e:
+        log.warning(f"[tmpfs] rsync invocation failed: {e}")
+        return False
+
+    if result.returncode != 0:
+        # rsync exit codes: 0=ok, 23=partial transfer, 24=files vanished
+        # during transfer, 11=error in IO, 12=error in protocol stream,
+        # etc.  We treat anything non-zero as failure -- the caller's
+        # fallback (no tmpfs cache) is safer than handing a possibly-
+        # incomplete tree to vLLM.
+        log.warning(
+            f"[tmpfs] rsync failed (rc={result.returncode}): "
+            f"{(result.stderr or result.stdout).strip()}"
+        )
+        return False
+    return True
+
+
 def setup_model_tmpfs_cache(
     model_name: str,
     *,
@@ -117,12 +190,9 @@ def setup_model_tmpfs_cache(
         )
         return None
 
-    if tmpfs_model_dir.is_dir():
-        logger.info(f"[tmpfs] {model_name} already present at {tmpfs_model_dir}; reusing")
-        return str(tmpfs_root)
-
     needed_kb = _du_kb(source_model_dir)
     avail_kb = _avail_kb(Path("/dev/shm"))
+
     if needed_kb is None or avail_kb is None:
         logger.warning(
             f"[tmpfs] couldn't measure space (need={needed_kb}, avail={avail_kb}); "
@@ -130,7 +200,17 @@ def setup_model_tmpfs_cache(
         )
         return None
 
-    required_kb = int(needed_kb * headroom_factor)
+    # Headroom check.  rsync writes only what's missing, so an
+    # incremental top-up may need less than the full source size --
+    # but we don't know up-front how much is already in tmpfs that
+    # also matches the source, so we pessimistically require room
+    # for the whole model plus headroom.  If tmpfs is already
+    # populated, the existing files count toward "free" via /dev/shm
+    # accounting.  Net effect: this check rejects only the cases
+    # where a fresh full copy genuinely won't fit.
+    existing_kb = _du_kb(tmpfs_model_dir) if tmpfs_model_dir.is_dir() else 0
+    additional_needed_kb = max(0, needed_kb - (existing_kb or 0))
+    required_kb = int(additional_needed_kb * headroom_factor)
     if avail_kb < required_kb:
         # Loud warning per the pattern in run_pipeline.sh: silent fallback
         # to NFS results in multi-hour mmap stalls that are easy to miss.
@@ -138,7 +218,7 @@ def setup_model_tmpfs_cache(
         logger.warning("")
         logger.warning(bar)
         logger.warning("[tmpfs]  WARNING: insufficient /dev/shm space — tmpfs cache DISABLED")
-        logger.warning(f"[tmpfs]  need {required_kb}kB ({headroom_factor:.1f}x model), have {avail_kb}kB")
+        logger.warning(f"[tmpfs]  need {required_kb}kB ({headroom_factor:.1f}x additional), have {avail_kb}kB")
         logger.warning(f"[tmpfs]  Falling back to source HF cache: {source_hf}")
         logger.warning(f"[tmpfs]  If that is on NFS or other slow storage, expect model loads to")
         logger.warning(f"[tmpfs]  hang for HOURS on cold mmap reads of the safetensors shards.")
@@ -147,30 +227,40 @@ def setup_model_tmpfs_cache(
         logger.warning("")
         return None
 
-    logger.info(
-        f"[tmpfs] copying {model_name} ({needed_kb // 1024} MB) "
-        f"from {source_model_dir} to {tmpfs_model_dir} ..."
-    )
+    # rsync covers fresh-copy AND finish-partial-copy in one call.
+    # No verification pass needed: rsync compares (size, mtime) by
+    # default and re-transfers anything that doesn't match, so an
+    # interrupted previous run that left a half-written shard gets
+    # cleaned up automatically.  --delete also removes any stale
+    # extras that aren't in the source.
+    if tmpfs_model_dir.is_dir():
+        logger.info(
+            f"[tmpfs] mirroring {model_name} via rsync "
+            f"({needed_kb // 1024} MB source, "
+            f"{(existing_kb or 0) // 1024} MB already in tmpfs); "
+            f"only changed/missing files will be transferred"
+        )
+    else:
+        logger.info(
+            f"[tmpfs] copying {model_name} ({needed_kb // 1024} MB) "
+            f"from {source_model_dir} to {tmpfs_model_dir} ..."
+        )
+
     tmpfs_root.mkdir(parents=True, exist_ok=True)
     (tmpfs_root / "hub").mkdir(parents=True, exist_ok=True)
-    try:
-        # cp -r equivalent.  copytree copies the dir's contents into the
-        # destination so we pass `dst = .../hub/<model_subdir>` to mirror
-        # the structure run_pipeline.sh ends up with.
-        shutil.copytree(source_model_dir, tmpfs_model_dir, symlinks=True,
-                        dirs_exist_ok=False)
-    except (OSError, shutil.Error) as e:
-        logger.warning(
-            f"[tmpfs] copy failed ({e}); falling back to {source_hf}"
-        )
-        # Best-effort cleanup of any partial copy
+
+    if not _rsync_mirror(source_model_dir, tmpfs_model_dir, logger_obj=logger):
+        # Best-effort cleanup of any partial leftover so the next
+        # invocation starts from a known state (rsync left anything
+        # it wrote in place via --partial; we'd rather drop it than
+        # have downstream loaders try to use it).
         try:
             shutil.rmtree(tmpfs_model_dir, ignore_errors=True)
         except OSError:
             pass
         return None
 
-    logger.info(f"[tmpfs] copy complete; HF_HOME={tmpfs_root}")
+    logger.info(f"[tmpfs] mirror complete; HF_HOME={tmpfs_root}")
     return str(tmpfs_root)
 
 
