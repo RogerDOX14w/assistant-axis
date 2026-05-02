@@ -39,6 +39,16 @@ on-disk size is dramatically smaller than the median size of its
 peers) as a separate category, since those are the upstream bug that
 caused the original ``r_guardian__casual.pt`` corruption.
 
+**Zero-byte activation files** are classified as ``placeholder``
+rather than corruption.  The pipeline's step-2 output is always
+~2.6 GB per role (n_convs × n_slots × n_layers × hidden × bf16);
+no real activation .pt is ever 0 bytes.  Users sometimes ``touch``
+0-byte placeholder files to tell step 2 "skip this role" via its
+``output_file.exists()`` check (typically when reusing pre-existing
+scores/vectors and not wanting to re-extract activations to save
+disk space).  Placeholders are NOT in the re-run candidates list --
+the user intentionally doesn't want them regenerated.
+
 Usage
 -----
 
@@ -326,6 +336,7 @@ RERUN_STATUSES = (
 # Status display order for the summary table.
 ALL_STATUSES = (
     "ok",
+    "placeholder",
     "ok_zero_size",
     "missing_activation",
     "corrupt_or_truncated_activation",
@@ -388,6 +399,20 @@ def classify_entity(
     # 1. Activation upstream check.
     if not act_file.exists():
         out["status"] = "missing_activation"
+        return out
+
+    # 1a. Zero-byte activation: a deliberate placeholder, not corruption.
+    # The pipeline's step-2 output is always ~2.6 GB per role (n_convs ×
+    # n_slots × n_layers × hidden × bf16); no real activation .pt is ever
+    # 0 bytes.  Users (notably the placeholder-script pattern documented
+    # in pipeline/README.md) sometimes ``touch`` 0-byte placeholders to
+    # tell step 2 "skip this role" via the output_file.exists() check.
+    # Those should NOT show up as re-run candidates -- the user
+    # intentionally doesn't want them regenerated.  Classified
+    # separately so the rerun list is clean and the summary distinguishes
+    # placeholders from genuine corruption.
+    if out["activation_size_bytes"] == 0:
+        out["status"] = "placeholder"
         return out
 
     if median_act_size > 0 and out["activation_size_bytes"] < median_act_size * TRUNCATION_RATIO:
