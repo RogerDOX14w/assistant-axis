@@ -95,30 +95,56 @@ class RateLimiter:
 
 def parse_judge_score(response_text: str) -> Optional[int]:
     """
-    Parse the judge's response to extract the numerical score.
+    Parse the judge's response to extract the 0-3 score.
 
-    Args:
-        response_text: The judge model's response
+    See AGENT_NOTES.md "Judge prompts: reason BEFORE score" for the
+    project rule any new judge prompts must follow.  This parser
+    supports the reasoning-first format introduced under that rule
+    AND the older "just emit a number" format (for backward compat
+    with legacy ``eval_prompt`` fields).
 
-    Returns:
-        Integer score between 0-3, or None if parsing fails
+    Two-stage parser:
+
+    1. Look for an explicit ``SCORE: <int>`` marker (case-insensitive).
+       This is the format used by the reasoning-first templates rolled
+       out after the original "just emit a number" prompts.
+    2. Fall back to the LAST integer in [0, 3] anywhere in the response.
+       This handles both:
+         - the original "just emit a number" templates (response is a
+           single digit, last == first), and
+         - templates that elicit reasoning without using the SCORE:
+           marker (the conclusion-bearing integer typically lands at
+           the end of the response, not in the middle of the reasoning
+           where mention of e.g. "0 if no traits, 3 if fully" would
+           otherwise mislead a first-integer parser).
+
+    Returns the integer in [0, 3], or None if nothing parseable.
     """
     if not response_text:
         return None
 
-    # Look for numbers in the response
-    numbers = re.findall(r'\b(\d+)\b', response_text.strip())
+    # Stage 1: explicit SCORE: marker (preferred for new prompts).
+    m = re.search(r"SCORE\s*:\s*(\d+)", response_text, flags=re.IGNORECASE)
+    if m:
+        try:
+            score = int(m.group(1))
+            if 0 <= score <= 3:
+                return score
+        except ValueError:
+            pass
 
-    if not numbers:
-        return None
-
-    try:
-        score = int(numbers[0])
-        if 0 <= score <= 3:
-            return score
-        return None
-    except ValueError:
-        return None
+    # Stage 2: walk integers from the end backwards, return the first
+    # one in [0, 3].  This is forgiving for old "just the number"
+    # responses (the only integer is the score) and reasoning-included
+    # responses without the SCORE: marker (the score lands at the end).
+    for tok in reversed(re.findall(r'\d+', response_text)):
+        try:
+            v = int(tok)
+        except ValueError:
+            continue
+        if 0 <= v <= 3:
+            return v
+    return None
 
 
 # ---------------------------------------------------------------------------

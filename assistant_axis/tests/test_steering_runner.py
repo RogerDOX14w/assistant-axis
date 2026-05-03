@@ -272,12 +272,18 @@ class TestRunSteeringCell:
                    for line in (out_dir / "records.jsonl").read_text().splitlines()
                    if line.strip()]
         assert len(records) == 8
-        # Schema sanity
+        # Schema sanity.  NoOp dispatcher's
+        # judge_coherence_for_strength_async stamps strength_mean_coh=0.0
+        # alongside the (still-null) coherence/persona/effect slots so
+        # the rest of the pipeline can rely on the field being present.
         for r in records:
             assert r["slot"] == 3
             assert r["layer"] == 25
             assert r["sign"] == 1
-            assert r["judges"] == {"coherence": None, "persona": None, "effect": None}
+            assert r["judges"]["coherence"] is None
+            assert r["judges"]["persona"] is None
+            assert r["judges"]["effect"] is None
+            assert r["judges"]["strength_mean_coh"] == 0.0
             assert "response" in r and r["response"]
             assert r["abandoned"] is False
         # Summary present and consistent
@@ -326,28 +332,36 @@ class TestRunSteeringCell:
         monkeypatch.setattr(steering_runner, "ActivationSteering",
                             _FakeActivationSteering)
 
-        class StopAfterTwo:
-            """Two-tier dispatcher fixture matching the new protocol.
+        from concurrent.futures import Future as _Future
 
-            judge_coherence_blocking returns 0 (records flow through);
-            enqueue_strength_group records the call;
-            should_stop_at returns True after the second strength group.
+        class StopAfterTwoConsecutive:
+            """Pipelined-protocol dispatcher: returns mean coh = 3.0 for
+            every strength so the runner's two-consecutive-crossings rule
+            fires after the second strength.  enqueue_strength_group is
+            called via the coh-future done-callback chain.
             """
             def __init__(self):
-                self.seen_strengths = []
-                self.coh_called_for = []
+                self.coh_dispatched_for = []      # strengths
                 self.enqueued_groups = []
                 self.drained = False
 
+            def judge_coherence_for_strength_async(self, records):
+                # Stamp records and return an immediately-resolved future.
+                for r in records:
+                    r.setdefault("judges", {})["coherence"] = {
+                        "score": 3, "reason": "test", "model": "test",
+                        "ts": 0, "rubric_version": 1,
+                    }
+                    r["judges"]["strength_mean_coh"] = 3.0
+                self.coh_dispatched_for.append(records[0]["strength"])
+                fut: _Future = _Future()
+                fut.set_result(3.0)
+                return fut
+
             def judge_coherence_blocking(self, record):
-                self.coh_called_for.append(record["question_idx"])
-                # Stamp the record so downstream stays consistent with
-                # what RealJudgeDispatcher would have done.
-                record.setdefault("judges", {})["coherence"] = {
-                    "score": 0, "reason": "test", "model": "test",
-                    "ts": 0, "rubric_version": 1,
-                }
-                return 0
+                # Legacy path -- not used by the pipelined runner but
+                # kept for protocol completeness.
+                return 3
 
             def enqueue_strength_group(self, *, cell_dir, slot, layer, sign,
                                        strength, records):
@@ -356,20 +370,17 @@ class TestRunSteeringCell:
                 })
 
             def should_stop_at(self, strength):
-                self.seen_strengths.append(strength)
-                return len(self.seen_strengths) >= 2
+                # Legacy hook; the pipelined runner doesn't call this.
+                return False
 
             def drain(self, timeout_s=None):
                 self.drained = True
 
             def write_records_atomic(self, records):
-                # Mirror RealJudgeDispatcher.write_records_atomic so the
-                # runner's _flush_records prefers our path.  Just defer
-                # to write_jsonl (no concurrent writers in tests).
                 from assistant_axis.atomic_io import write_jsonl
                 write_jsonl(records, tmp_path / "cell" / "records.jsonl")
 
-        dispatcher = StopAfterTwo()
+        dispatcher = StopAfterTwoConsecutive()
         model = _FakeModel(hidden_size=8)
         tokenizer = _FakeTokenizer()
 
@@ -385,25 +396,146 @@ class TestRunSteeringCell:
             max_new_tokens=4,
             positions_mode="all",
             judge_dispatcher=dispatcher,
+            coh_stop_threshold=1.5,
+            coh_stop_consecutive=2,
         )
 
         assert result.reason == "incoherent"
+        # Stop fires after generating strength 2.0 (1.0 = first crossing,
+        # 2.0 = second consecutive crossing).  Records for strengths 1, 2 only.
         assert result.stopped_at_strength == 2.0
-        # Records for the first 2 strengths (4 total), but NOT the 3rd or 4th
         records = [json.loads(line)
                    for line in (tmp_path / "cell/records.jsonl").read_text().splitlines()
                    if line.strip()]
-        assert len(records) == 4
+        assert len(records) == 4    # 2 strengths * 2 questions
         assert sorted({r["strength"] for r in records}) == [1.0, 2.0]
-        # Coherence judged on every record (4 = 2 strengths * 2 questions).
-        assert len(dispatcher.coh_called_for) == 4
-        # Two strength groups enqueued (one per completed strength).
+        # Coherence dispatched once per generated strength.
+        assert dispatcher.coh_dispatched_for == [1.0, 2.0]
+        # Two strength groups enqueued via the coh-future callback.
         assert [g["strength"] for g in dispatcher.enqueued_groups] == [1.0, 2.0]
         assert all(g["n"] == 2 for g in dispatcher.enqueued_groups)
-        # Stop check ran after each of the 2 completed strengths.
-        assert dispatcher.seen_strengths == [1.0, 2.0]
         # Drain called at the end.
         assert dispatcher.drained is True
+
+    def test_greenlight_pipelining_continues_one_past_first_crossing(
+            self, tmp_path, monkeypatch):
+        """First crossing alone shouldn't stop; need K=2 consecutive."""
+        from concurrent.futures import Future as _Future
+        monkeypatch.setenv("TMPDIR", str(tmp_path))
+        monkeypatch.setattr(steering_runner, "ActivationSteering",
+                            _FakeActivationSteering)
+
+        class CrossThenClear:
+            """Strength 1.0 returns mean=2.0 (cross); 2.0 returns 0.5 (clear).
+            Should NOT stop after 1.0 alone."""
+            def __init__(self):
+                self.coh_dispatched_for = []
+                self.enqueued_groups = []
+                self.drained = False
+                # Map strength -> mean coh
+                self._mean_at = {1.0: 2.0, 2.0: 0.5, 4.0: 0.5, 8.0: 0.5}
+
+            def judge_coherence_for_strength_async(self, records):
+                s = records[0]["strength"]
+                m = self._mean_at.get(s, 0.0)
+                for r in records:
+                    r.setdefault("judges", {})["coherence"] = {
+                        "score": int(round(m)), "reason": "test", "model": "test",
+                        "ts": 0, "rubric_version": 1,
+                    }
+                    r["judges"]["strength_mean_coh"] = m
+                self.coh_dispatched_for.append(s)
+                fut: _Future = _Future()
+                fut.set_result(m)
+                return fut
+
+            def judge_coherence_blocking(self, record):
+                return 0
+
+            def enqueue_strength_group(self, *, cell_dir, slot, layer, sign,
+                                       strength, records):
+                self.enqueued_groups.append({"strength": strength, "n": len(records)})
+
+            def should_stop_at(self, strength):
+                return False
+
+            def drain(self, timeout_s=None):
+                self.drained = True
+
+            def write_records_atomic(self, records):
+                from assistant_axis.atomic_io import write_jsonl
+                write_jsonl(records, tmp_path / "cell" / "records.jsonl")
+
+        dispatcher = CrossThenClear()
+        result = steering_runner.run_steering_cell(
+            _FakeModel(8), _FakeTokenizer(),
+            axis_vector=torch.zeros(8, dtype=torch.bfloat16),
+            slot=0, layer=26, sign=+1,
+            strengths=[1.0, 2.0, 4.0, 8.0],
+            persona_system_prompt="hist",
+            questions=["q1", "q2"],
+            output_dir=tmp_path / "cell",
+            batch_size=2, max_new_tokens=4,
+            positions_mode="all",
+            judge_dispatcher=dispatcher,
+            coh_stop_threshold=1.5, coh_stop_consecutive=2,
+        )
+        # No stop -- single crossing didn't trigger; sweep ran to completion.
+        assert result.reason == "completed"
+        assert result.stopped_at_strength is None
+        # All 4 strengths' coh judges were dispatched.
+        assert dispatcher.coh_dispatched_for == [1.0, 2.0, 4.0, 8.0]
+        # All 4 enqueue_strength_group callbacks fired.
+        assert [g["strength"] for g in dispatcher.enqueued_groups] == [1.0, 2.0, 4.0, 8.0]
+
+    def test_two_consecutive_crossings_stops(self, tmp_path, monkeypatch):
+        """Two consecutive strengths above threshold -> stop after second."""
+        from concurrent.futures import Future as _Future
+        monkeypatch.setenv("TMPDIR", str(tmp_path))
+        monkeypatch.setattr(steering_runner, "ActivationSteering",
+                            _FakeActivationSteering)
+
+        class CrossAndStay:
+            """1.0 mean=0; 2.0 mean=2 (first cross); 4.0 mean=2 (second cross -> STOP)."""
+            def __init__(self):
+                self._mean_at = {1.0: 0.0, 2.0: 2.0, 4.0: 2.0, 8.0: 2.0}
+                self.coh_dispatched_for = []
+
+            def judge_coherence_for_strength_async(self, records):
+                s = records[0]["strength"]
+                m = self._mean_at.get(s, 0.0)
+                for r in records:
+                    r.setdefault("judges", {})["coherence"] = {
+                        "score": int(round(m)), "reason": "t", "model": "t",
+                        "ts": 0, "rubric_version": 1}
+                    r["judges"]["strength_mean_coh"] = m
+                self.coh_dispatched_for.append(s)
+                fut: _Future = _Future(); fut.set_result(m); return fut
+
+            def judge_coherence_blocking(self, r): return 0
+            def enqueue_strength_group(self, **kw): pass
+            def should_stop_at(self, s): return False
+            def drain(self, timeout_s=None): pass
+
+        dispatcher = CrossAndStay()
+        result = steering_runner.run_steering_cell(
+            _FakeModel(8), _FakeTokenizer(),
+            axis_vector=torch.zeros(8, dtype=torch.bfloat16),
+            slot=0, layer=26, sign=+1,
+            strengths=[1.0, 2.0, 4.0, 8.0],
+            persona_system_prompt="hist",
+            questions=["q1", "q2"],
+            output_dir=tmp_path / "cell",
+            batch_size=2, max_new_tokens=4,
+            positions_mode="all",
+            judge_dispatcher=dispatcher,
+            coh_stop_threshold=1.5, coh_stop_consecutive=2,
+        )
+        assert result.reason == "incoherent"
+        # Generated 1.0, 2.0, 4.0; stopped before 8.0.  4.0 is the second
+        # consecutive crossing.
+        assert result.stopped_at_strength == 4.0
+        assert dispatcher.coh_dispatched_for == [1.0, 2.0, 4.0]
 
     def test_skip_when_summary_already_says_stopped(self, tmp_path, monkeypatch):
         # Pre-create a summary.json with a stop already recorded.

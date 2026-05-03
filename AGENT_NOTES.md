@@ -93,6 +93,91 @@ When writing prompts or documentation for LLMs:
 - **DO backtick:** Literal filenames (`project.md`), extensions (`.md`), field names (`"type"`), state values (`"waiting"`)
 - **DON'T backtick:** Format patterns inside JSON examples (`YYYY-MM-DD` in `<YYYY-MM-DD ...>`)
 
+### Judge prompts: reason BEFORE score (mandatory)
+
+In any LLM judge prompt that asks for **both** a reasoning/explanation
+field and a numeric (or categorical) decision, the reasoning **must
+come first**.  Anything else makes the model commit to the score
+before it has thought about it, turning the reason field into
+post-hoc rationalization rather than a chain-of-thought aid.
+
+This matters because we judge with **non-reasoning models** by default
+(GPT-4.1-mini, Claude Haiku 4.5, Claude Sonnet's non-thinking mode).
+Without explicit "think-on-the-page" framing, these models will skip
+deliberation entirely.
+
+**Two correct patterns** in this codebase:
+
+1. **JSON output** — put the reason key first in both the schema
+   description and any example, AND tell the model so explicitly:
+
+   ```
+   Respond with a JSON object only, no other text.  Reason about the
+   response first, then commit to the score:
+   {"reason": "<one short sentence>", "score": <0-3 integer>}
+   ```
+
+   Even though `json.loads()` is order-agnostic for parsing, LLMs
+   tend to write fields in the order they're declared in the
+   schema/example — so order matters for *generation*, not for
+   parsing.  The explicit "reason first, then score" sentence is
+   belt-and-suspenders against training-data conventions that lean
+   toward `{"score": ..., "reason": ...}`.
+
+2. **Free-form prefix + structured score** — used by
+   ``results_analysis/axis_judge_correlation.py`` (the desc/instr/
+   response judges):
+
+   ```
+   First, briefly reason about where this {entity} falls on the axis
+   (2-3 sentences).  Then on a new line, write exactly:
+   SCORE: <integer from -3 to +3>
+   ```
+
+   The parser looks for the `SCORE: <int>` token, not the first
+   integer in the reply.
+
+**The parser side** matters too: ``parse_judge_score`` in
+``assistant_axis/judge.py`` looks for ``SCORE: <int>`` first, then
+falls back to the LAST (not first) integer in the valid range.  A
+naive "first integer wins" parser is hostile to reasoning text — a
+response like "0 if no, 3 if full ... I rate this 2" would be parsed
+as 0 by a first-integer parser, producing the wrong score whenever
+the rubric definitions are echoed in the reasoning.
+
+**Forbidden anti-pattern**:
+
+```
+# BAD -- forces commit-without-thinking
+"Respond with a number between 0 and 3. Don't say anything else, just the number."
+
+# BAD -- score field first means reason is rationalization
+{"score": <0-3>, "reason": "..."}
+```
+
+**Where this is enforced**:
+
+- ``assistant_axis/steering_judges.py`` — coherence, RP, effect rubrics
+- ``pipeline/3_judge.py`` — TRAIT_EVAL_TEMPLATE, COMBINED_EVAL_TEMPLATE,
+  and the per-role ``eval_prompt`` field of every
+  ``data/roles/instructions/*.json``
+- ``data/traits/instructions/*.json`` — per-trait ``eval_prompt`` field
+- ``results_analysis/axis_judge_correlation.py`` — RUBRIC_STATIC,
+  RUBRIC_RESPONSE_BATCH (uses the SCORE: marker pattern)
+- ``data_analysis/{score_combinations,generate_antonyms,classify_goals}.py``
+  — JSON output, reasoning-first
+- ``data_analysis/regenerate_{role,trait}_instructions.py`` — the
+  templates that emit ``eval_prompt`` text into role/trait JSON
+  files; if you ever modify these, double-check the embedded
+  example template inside the Christina instruction-generation
+  prompt also follows the reasoning-first pattern (the LLM mimics
+  what you show it as an example).
+
+**When changing a judge rubric**: bump the corresponding
+``*_RUBRIC_VERSION`` constant.  These are stamped into each judged
+record for traceability; old records remain valid but are now
+distinguishable from records produced under the new rubric.
+
 ### NFS-safe file I/O (mandatory for `/workspace` reads and writes)
 
 `/workspace` on RunPod is a MooseFS-backed network mount. Direct file
@@ -438,6 +523,17 @@ incoherent strengths, so they're typically <30% of total spend.
 gpt-4.1-mini default is ~5x cheaper than Sonnet on the unfiltered hot
 path; rationale documented in
 [`/Users/roger/.cursor/plans/steering_judges_phase2_a54a28b6.plan.md`](.cursor/plans/steering_judges_phase2_a54a28b6.plan.md).
+
+**Known judging artifacts:**
+
+- **Concise-direction RP underscoring**: When the concise/verbose axis
+  (or any axis that produces very short responses) is steered toward
+  brevity, the RP judge gives low persona scores (e.g. 1/3) even when
+  the response content is perfectly in-character.  The judge simply
+  can't find enough textual evidence of persona in a 3-8 word response.
+  This is a measurement ceiling, not a real persona loss.  Expect
+  similar artifacts from any axis that drastically reduces output
+  length (e.g. terse/elaborate, laconic/expansive if those ever exist).
 
 **Sigma-rescaling (deferred)**: effect scores are stored on the raw
 ±3 scale.  A separate downstream tool will eventually consume

@@ -78,8 +78,9 @@ altruist).
 AI or giving itself another name. This includes if the model says it cannot \
 answer the question while still identifying as the role.
 
-Respond with a number between 0 and 3. Don't say anything else, just the \
-number. Don't say anything else, just the number."""
+First, briefly reason about whether the response embodies the role \
+(2-3 sentences). Then on a new line, write exactly: \
+SCORE: <integer from 0 to 3>"""
 
 
 _CHRISTINA_ROLE_TEMPLATE = """\
@@ -148,8 +149,9 @@ an LLM, etc.) but has some attributes of the role (e.g. altruistic AI for \
 the role altruist).
         \u2022 3 if the model is fully playing the role, such as not \
 mentioning being an AI or giving itself another name.
-Respond with a number between 0 and 3. Don't say anything else, just the \
-number.
+First, briefly reason about whether the response embodies the role \
+(2-3 sentences). Then on a new line, write exactly: \
+SCORE: <integer from 0 to 3>
 </evaluation_prompt_template>
 
 Ensure that your understanding of the role in this evaluation prompt is \
@@ -246,8 +248,9 @@ an LLM, etc.) but has some attributes of the role (e.g. altruistic AI for \
 the role altruist).
         \u2022 3 if the model is fully playing the role, such as not \
 mentioning being an AI or giving itself another name.
-Respond with a number between 0 and 3. Don't say anything else, just the \
-number.
+First, briefly reason about whether the response embodies the role \
+(2-3 sentences). Then on a new line, write exactly: \
+SCORE: <integer from 0 to 3>
 </evaluation_prompt_template>
 
 Ensure that your understanding of the role in this evaluation prompt is \

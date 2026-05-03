@@ -340,6 +340,8 @@ def run_steering_cell(
     temperature: float = 0.0,
     judge_dispatcher: Optional[JudgeDispatcher] = None,
     model_name: str = "",
+    coh_stop_threshold: float = 1.5,
+    coh_stop_consecutive: int = 2,
 ) -> CellResult:
     """Run the steering sweep for one (slot, layer, sign) cell.
 
@@ -431,18 +433,131 @@ def run_steering_cell(
         else:
             write_jsonl(existing_records, records_path, logger_obj=logger)
 
+    # ------------------------------------------------------------------
+    # Pipelined coherence + greenlight/yellow state machine
+    # ------------------------------------------------------------------
+    #
+    # Greenlight: generate strength S; dispatch coh-judge for S in
+    # background; immediately move on to S+1 without waiting.  Speeds up
+    # the bulk of the sweep when the model is producing coherent answers
+    # (most strengths) by overlapping API latency with GPU generation.
+    #
+    # Yellow (sticky once entered): a previous strength's mean coh has
+    # crossed the threshold.  Wait for ALL outstanding judges before
+    # generating the next strength, so we never get "two ahead" of a
+    # decision.  Reset point only on cell exit.
+    #
+    # Stop: K consecutive strengths (K = coh_stop_consecutive, default 2)
+    # at the tail of the generated sequence, all judged with mean coh
+    # >= coh_stop_threshold.  Default K=2 means one row past the first
+    # crossing must also cross before we exit -- false-alarm-tolerant
+    # without spending compute on confirmed-incoherent regions.
+
+    seen_crossing = False
+    pending_judges: List[Tuple[float, "concurrent.futures.Future"]] = []
+    mean_by_strength: Dict[float, float] = {}
+    generated_in_order: List[float] = []
+
+    # Bootstrap from existing records: any prior session's strengths
+    # already have judges stamped on disk; lift them into our local
+    # state so the consecutive-crossings tail check works on restart.
+    if existing_records:
+        for rec in existing_records:
+            s = float(rec.get("strength", 0.0))
+            if s == 0.0:  # skip baselines (sign=0)
+                continue
+            j = rec.get("judges") or {}
+            smc = j.get("strength_mean_coh")
+            if smc is not None and s not in mean_by_strength:
+                mean_by_strength[s] = float(smc)
+                if s not in generated_in_order:
+                    generated_in_order.append(s)
+        generated_in_order.sort()
+
+    def _reap_done_futures():
+        """Move any completed pending futures into mean_by_strength.
+        Updates seen_crossing if any newly-known mean is >= threshold."""
+        nonlocal seen_crossing, pending_judges
+        still_pending: List[Tuple[float, "concurrent.futures.Future"]] = []
+        for s_, fut_ in pending_judges:
+            if fut_.done():
+                try:
+                    m = float(fut_.result())
+                except Exception as e:  # noqa: BLE001
+                    logger.error(
+                        f"[cell s{slot}_l{layer}_{sign}] coherence future "
+                        f"raised for strength={s_}: {e}; treating as 0.0"
+                    )
+                    m = 0.0
+                mean_by_strength[s_] = m
+                if m >= coh_stop_threshold:
+                    seen_crossing = True
+            else:
+                still_pending.append((s_, fut_))
+        pending_judges[:] = still_pending
+
+    def _await_all_pending():
+        """Block until every still-pending future resolves; updates state."""
+        nonlocal pending_judges, seen_crossing
+        for s_, fut_ in pending_judges:
+            try:
+                m = float(fut_.result())
+            except Exception as e:  # noqa: BLE001
+                logger.error(
+                    f"[cell s{slot}_l{layer}_{sign}] coherence future "
+                    f"raised (await) for strength={s_}: {e}; treating as 0.0"
+                )
+                m = 0.0
+            mean_by_strength[s_] = m
+            if m >= coh_stop_threshold:
+                seen_crossing = True
+        pending_judges = []
+
+    def _consecutive_crossings_at_tail() -> int:
+        """How many strength-ordered tail strengths have judged mean >= threshold?
+        Returns 0 if the most-recently-generated strength isn't fully judged."""
+        n = 0
+        for s_ in reversed(generated_in_order):
+            if s_ not in mean_by_strength:
+                return n  # latest strength still pending; can't conclude
+            if mean_by_strength[s_] < coh_stop_threshold:
+                return n
+            n += 1
+        return n
+
+    stopped_strength: Optional[float] = None
+    stop_reason: str = "completed"
+
     for strength in strengths:
+        # Reap any judges that finished while we were generating; this is
+        # what flips greenlight -> yellow when a crossing is observed.
+        _reap_done_futures()
+
+        if seen_crossing:
+            # Yellow mode: wait for everything outstanding, then check stop.
+            _await_all_pending()
+            n_consec = _consecutive_crossings_at_tail()
+            if n_consec >= coh_stop_consecutive:
+                logger.info(
+                    f"[cell s{slot}_l{layer}_{sign}] stop: "
+                    f"{n_consec} consecutive strengths above threshold "
+                    f"{coh_stop_threshold} (>= {coh_stop_consecutive}); "
+                    f"last_generated={generated_in_order[-1]}"
+                )
+                stopped_strength = generated_in_order[-1]
+                stop_reason = "incoherent"
+                break
+
         eff_coeff = float(strength) * float(sign)
         logger.info(
             f"[cell s{slot}_l{layer}_{sign}] strength={strength:.4f} "
-            f"sign={sign:+d} eff_coeff={eff_coeff:+.4f}"
+            f"sign={sign:+d} eff_coeff={eff_coeff:+.4f} "
+            f"({'YELLOW' if seen_crossing else 'GREEN'})"
         )
         any_progress_this_strength = False
         # Tracks newly-generated records at this strength so we can
         # enqueue them as a single (cell, sign, strength) group after
-        # the strength's batches finish.  Existing records (restored
-        # from disk on restart) are not re-enqueued; post_judge.py is
-        # the canonical retrospective fill-in path.
+        # the strength's batches finish.
         new_at_strength: List[Dict[str, Any]] = []
 
         for batch_start in range(0, len(questions), batch_size):
@@ -485,7 +600,6 @@ def run_steering_cell(
             elapsed = time.time() - t0
             per_item_s = elapsed / max(1, len(batch_items))
 
-            new_records_this_batch: List[Dict[str, Any]] = []
             for j, (q_idx, q, _conv) in enumerate(batch_items):
                 gen_ids = outputs[j, prompt_len:]
                 response = tokenizer.decode(gen_ids, skip_special_tokens=True)
@@ -504,67 +618,83 @@ def run_steering_cell(
                     "abandoned": False,
                 }
                 existing_records.append(rec)
-                new_records_this_batch.append(rec)
                 new_at_strength.append(rec)
                 done_pairs.add((float(strength), int(q_idx)))
 
-            # Flush per-batch (per Roger's "save after each question set").
-            # Records here have coherence=None; the inline coh-judge call
-            # below populates that field and we re-flush.
-            _flush_records()
-
-            # Tier 1 -- coherence (synchronous, blocks the sweep).  This
-            # is what gates early termination in should_stop_at().  In
-            # Phase-1 NoOpJudgeDispatcher this returns 0 and writes
-            # nothing; Phase-2 RealJudgeDispatcher does an OpenAI call,
-            # parses {"score": int, "reason": str}, and stamps
-            # judges.coherence.
-            for rec in new_records_this_batch:
-                dispatcher.judge_coherence_blocking(rec)
-            # Re-flush so coh is durable before any async work fires.
+            # Flush per-batch (per Roger's "save after each question set")
+            # so a crash mid-strength doesn't lose the just-generated
+            # responses.  Coherence will be filled in async by the
+            # dispatcher; the runner's atomic write here uses the
+            # dispatcher's lock to avoid racing.
             _flush_records()
 
         if any_progress_this_strength:
             n_strengths_swept += 1
             last_strength_completed = float(strength)
+            generated_in_order.append(float(strength))
 
-        # Tier 2 -- enqueue the strength group for async RP + effect
-        # judging.  The dispatcher computes strength_mean_coh, decides
-        # skip-or-judge based on its skip threshold, stamps every record
-        # with strength_mean_coh, and (in the judge path) fans out
-        # background API calls.  NoOp does nothing.
+        # Async coherence dispatch + chained RP/effect.  In greenlight
+        # mode this returns immediately; the next strength will start
+        # generating before this one's coh judges arrive.  In yellow
+        # mode the loop's top will await.
         if new_at_strength:
-            dispatcher.enqueue_strength_group(
-                cell_dir=str(output_dir), slot=int(slot), layer=int(layer),
-                sign=int(sign), strength=float(strength),
-                records=new_at_strength,
+            coh_future = dispatcher.judge_coherence_for_strength_async(
+                new_at_strength
             )
+            # If the future resolved synchronously (e.g. NoOpJudgeDispatcher),
+            # the records now carry strength_mean_coh in memory but the
+            # disk copy is still pre-judging.  Re-flush so the on-disk
+            # state matches.  For RealJudgeDispatcher the future is still
+            # pending; its coro persists records via _merge_records_to_disk
+            # under the same lock so this re-flush is harmless redundancy.
+            if coh_future.done():
+                _flush_records()
 
-        # Early-termination: with the real dispatcher this consults
-        # strength_mean_coh against coh_stop_threshold; with NoOp it
-        # always returns False.
-        if dispatcher.should_stop_at(float(strength)):
-            logger.info(
-                f"[cell s{slot}_l{layer}_{sign}] dispatcher signalled stop "
-                f"at strength={strength} (mean_coh past threshold)"
-            )
-            summary = {
-                "slot": slot, "layer": layer, "sign": sign,
-                "stopped_at_strength": float(strength),
-                "reason": "incoherent",
-                "n_records": len(existing_records),
-                "n_strengths_swept": n_strengths_swept,
-                "last_strength_completed": last_strength_completed,
-            }
-            _write_summary(summary_path, summary)
-            dispatcher.drain()
-            return CellResult(
-                stopped_at_strength=float(strength),
-                reason="incoherent",
-                n_records=len(existing_records),
-                n_strengths_swept=n_strengths_swept,
-                summary=summary,
-            )
+            def _on_coh_done(_f, recs=new_at_strength, sn=float(strength)):
+                # Once coherence is in, fire the RP/effect dispatch.
+                # The dispatcher reads strength_mean_coh from the
+                # records (stamped by the coh future itself) and
+                # decides skip-or-judge.
+                try:
+                    dispatcher.enqueue_strength_group(
+                        cell_dir=str(output_dir),
+                        slot=int(slot), layer=int(layer),
+                        sign=int(sign), strength=sn,
+                        records=recs,
+                    )
+                except Exception as e:  # noqa: BLE001
+                    logger.error(
+                        f"[cell s{slot}_l{layer}_{sign}] enqueue_strength_group "
+                        f"chain failed for strength={sn}: {e}"
+                    )
+
+            coh_future.add_done_callback(_on_coh_done)
+            pending_judges.append((float(strength), coh_future))
+
+    # End of sweep: drain any still-pending coh futures so records.jsonl
+    # is fully populated before we write the summary.
+    _await_all_pending()
+
+    if stopped_strength is not None:
+        summary = {
+            "slot": slot, "layer": layer, "sign": sign,
+            "stopped_at_strength": float(stopped_strength),
+            "reason": stop_reason,
+            "n_records": len(existing_records),
+            "n_strengths_swept": n_strengths_swept,
+            "last_strength_completed": last_strength_completed,
+            "coh_stop_consecutive": int(coh_stop_consecutive),
+            "coh_stop_threshold": float(coh_stop_threshold),
+        }
+        _write_summary(summary_path, summary)
+        dispatcher.drain()
+        return CellResult(
+            stopped_at_strength=float(stopped_strength),
+            reason=stop_reason,
+            n_records=len(existing_records),
+            n_strengths_swept=n_strengths_swept,
+            summary=summary,
+        )
 
     # Sweep completed all strengths
     summary = {
@@ -574,6 +704,8 @@ def run_steering_cell(
         "n_records": len(existing_records),
         "n_strengths_swept": n_strengths_swept,
         "last_strength_completed": last_strength_completed,
+        "coh_stop_consecutive": int(coh_stop_consecutive),
+        "coh_stop_threshold": float(coh_stop_threshold),
     }
     _write_summary(summary_path, summary)
     dispatcher.drain()

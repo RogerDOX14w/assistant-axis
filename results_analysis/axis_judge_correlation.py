@@ -424,6 +424,187 @@ def _load_responses_jsonl(path: Path) -> Dict[Tuple[int, int], Dict[str, Any]]:
 _KEY_RE = re.compile(r"pos_p(\d+)_q(\d+)")
 
 
+def _load_canonical_question_text_to_id(questions_file: Path) -> Dict[str, int]:
+    """Read the canonical questions file (JSONL with `question` and `id` fields)
+    and return text -> original_id."""
+    if not questions_file.exists():
+        raise SystemExit(
+            f"--questions_file not found: {questions_file}. "
+            f"Need this to map response question_index back to the canonical "
+            f"original question id for subsampling."
+        )
+    text_to_id: Dict[str, int] = {}
+    n = 0
+    for line in questions_file.read_text().splitlines():
+        line = line.strip()
+        if not line:
+            continue
+        rec = json.loads(line)
+        text = rec["question"]
+        qid = int(rec["id"])
+        if text in text_to_id and text_to_id[text] != qid:
+            raise SystemExit(
+                f"--questions_file contains duplicate question text with "
+                f"different ids: {text!r} -> {text_to_id[text]} and {qid}"
+            )
+        text_to_id[text] = qid
+        n += 1
+    logger.info(f"[subsample] loaded {n} canonical questions from {questions_file}")
+    return text_to_id
+
+
+def apply_question_subsample(
+    score3: Dict[str, List[ScoredResponse]],
+    responses_dir: Path,
+    questions_file: Path,
+    modulo: int,
+    *,
+    abort_on_mismatch: bool = True,
+) -> Dict[str, List[ScoredResponse]]:
+    """Filter score3 to responses whose original question id (in `questions_file`)
+    is divisible by `modulo`.
+
+    The response data's `question_index` is 0-based into the *already-reduced*
+    list of questions used at generation time, not into the canonical questions
+    file. We backreference via question text (which is preserved verbatim in the
+    response records).
+
+    Sanity check: we expect to retain exactly
+        N_kept_canonical = |{ q in questions_file : q.id % modulo == 0 }|
+    distinct question_index values across the response data per entity (modulo
+    score==3 filter, which can drop more). If the canonical retained count
+    doesn't match, abort -- given the cost of these runs, we'd rather fail loud
+    than silently ship bad subsampling.
+    """
+    if modulo <= 0:
+        return score3
+
+    text_to_id = _load_canonical_question_text_to_id(questions_file)
+
+    # Build the canonical retained-id set (over the entire questions file).
+    retained_orig_ids = {qid for qid in text_to_id.values() if qid % modulo == 0}
+    expected_canonical_kept = len(retained_orig_ids)
+
+    # Build q_idx -> original_id by reading the FIRST entity's response file
+    # (the response pipeline uses the same question list across all entities).
+    # We use score3 keys to find a corresponding response file via responses_dir.
+    if not score3:
+        logger.warning("[subsample] no entities with score==3 responses; nothing to filter")
+        return score3
+
+    sample_entity = next(iter(score3.keys()))
+    sample_path = responses_dir / f"{sample_entity}.jsonl"
+    if not sample_path.exists():
+        raise SystemExit(
+            f"[subsample] cannot find responses file for {sample_entity} "
+            f"at {sample_path} (needed to build q_idx->original_id map)"
+        )
+    qidx_to_orig: Dict[int, int] = {}
+    unknown_qidx: Dict[int, str] = {}  # q_idx -> unmatched text (first occurrence)
+    for line in sample_path.read_text().splitlines():
+        if not line.strip():
+            continue
+        rec = json.loads(line)
+        qi = rec.get("question_index")
+        qt = rec.get("question")
+        if qi is None or qt is None:
+            continue
+        qi = int(qi)
+        if qi in qidx_to_orig or qi in unknown_qidx:
+            continue
+        oid = text_to_id.get(qt)
+        if oid is None:
+            unknown_qidx[qi] = qt
+            continue
+        qidx_to_orig[qi] = oid
+
+    if unknown_qidx:
+        first_qi = sorted(unknown_qidx)[0]
+        sample = unknown_qidx[first_qi][:120]
+        raise SystemExit(
+            f"[subsample] {len(unknown_qidx)} distinct response question_index "
+            f"values have text not present in the canonical questions file "
+            f"({sample_entity}.jsonl). "
+            f"First unmatched: q_idx={first_qi}, text={sample!r}. "
+            f"Aborting -- cost of misaligned subsampling is too high."
+        )
+
+    retained_qidx = {qi for qi, oid in qidx_to_orig.items() if oid % modulo == 0}
+    actual_kept = len(retained_qidx)
+    n_qidx_total = len(qidx_to_orig)
+
+    # Sanity check: detect the regular stride of the response pipeline (Roger's
+    # current setup uses stride=3 -- original ids {0, 3, 6, ..., 297}) and check
+    # that `actual_kept` matches what that stride implies for `modulo`. The
+    # closed form is: |{x in {0, s, 2s, ..., (k-1)s} : x % m == 0}|
+    #               = ceil(k * gcd(s, m) / m).
+    # If the response data isn't a regular arithmetic progression in original-id
+    # space, fall back to a warning but don't compute an expected count.
+    import math
+    orig_ids_sorted = sorted(qidx_to_orig.values())
+    diffs = {
+        orig_ids_sorted[i + 1] - orig_ids_sorted[i]
+        for i in range(len(orig_ids_sorted) - 1)
+    }
+    expected_actual_kept: Optional[int]
+    if len(diffs) == 1 and orig_ids_sorted and orig_ids_sorted[0] == 0:
+        stride = diffs.pop()
+        g = math.gcd(stride, modulo)
+        expected_actual_kept = math.ceil(n_qidx_total * g / modulo)
+        stride_msg = f"stride={stride} detected"
+    else:
+        expected_actual_kept = None
+        stride_msg = (
+            "non-regular stride; sanity check downgraded to a tautology "
+            f"(min diff: {min(diffs) if diffs else 'n/a'})"
+        )
+
+    base_msg = (
+        f"[subsample] modulo={modulo}: response data uses "
+        f"{n_qidx_total}/{len(text_to_id)} canonical questions ({stride_msg}); "
+        f"keeping {actual_kept} q_idx values "
+        f"({100*actual_kept/max(1,n_qidx_total):.1f}% of response questions, "
+        f"{100*actual_kept/len(text_to_id):.1f}% of canonical)"
+    )
+    if expected_actual_kept is not None:
+        base_msg += f"; expected exactly {expected_actual_kept}"
+    logger.info(base_msg)
+
+    if expected_actual_kept is not None and actual_kept != expected_actual_kept:
+        err = (
+            f"[subsample] SANITY CHECK FAILED: kept {actual_kept} q_idx values, "
+            f"expected exactly {expected_actual_kept} given stride={stride}, "
+            f"modulo={modulo}. This usually means the question_index -> "
+            f"original_id backreference is broken (mismatched question text). "
+            f"Aborting before any judge calls."
+        )
+        if abort_on_mismatch:
+            raise SystemExit(err)
+        logger.error(err)
+
+    # Filter each entity's score==3 items.
+    out: Dict[str, List[ScoredResponse]] = {}
+    n_in = n_kept = 0
+    for name, items in score3.items():
+        kept: List[ScoredResponse] = []
+        for it in items:
+            m = _KEY_RE.match(it.key)
+            if not m:
+                continue
+            q = int(m.group(2))
+            if q in retained_qidx:
+                kept.append(it)
+        n_in += len(items)
+        n_kept += len(kept)
+        if kept:
+            out[name] = kept
+    logger.info(
+        f"[subsample] kept {n_kept}/{n_in} score==3 responses "
+        f"({100*n_kept/max(1,n_in):.1f}%) across {len(out)}/{len(score3)} entities"
+    )
+    return out
+
+
 def load_score3_responses(
     entity_names: Sequence[str],
     scores_dir: Path,
@@ -1086,6 +1267,15 @@ async def score_responses_mode(
     )
     logger.info(f"[responses] {len(score3)} entities have at least one score==3 response")
 
+    if args.question_subsample_modulo and args.question_subsample_modulo > 0:
+        score3 = apply_question_subsample(
+            score3,
+            responses_dir=Path(args.responses_dir),
+            questions_file=Path(args.questions_file),
+            modulo=int(args.question_subsample_modulo),
+            abort_on_mismatch=True,
+        )
+
     target = args.response_target_batch_size
 
     # Plan batches for each entity (deterministic from the sorted score==3 keys).
@@ -1463,6 +1653,19 @@ def parse_args() -> argparse.Namespace:
                          "Phase-2 plan for the rationale.")
     sm.add_argument("--all", action="store_true",
                     help="Equivalent to --score_descriptions --score_instructions --score_responses.")
+    sm.add_argument("--questions_file", type=str,
+                    default="data/extraction_questions.jsonl",
+                    help="Canonical questions JSONL (one {question, id} per line); used "
+                         "to backreference response question_index to original id "
+                         "for --question_subsample_modulo.")
+    sm.add_argument("--question_subsample_modulo", type=int, default=0,
+                    help="If >0, restrict --score_responses to responses whose original "
+                         "question id (looked up in --questions_file) is divisible by "
+                         "this number. With the current Roger response pipeline (which "
+                         "used reduce=3 from a 300-question canonical file), modulo=9 "
+                         "gives exactly 1/3 of the currently-judged questions (34 / 100). "
+                         "0 = no subsampling. A sanity check on the retained count "
+                         "aborts the run if expectations don't match.")
 
     # Judge.
     j = p.add_argument_group("judge")

@@ -1,0 +1,42 @@
+# Journalist + compassionate/callous steering.
+#
+# Same axis and sweep grid as smoke_test_v3, but with:
+#   - journalist persona (vs counselor)
+#   - 3 shared human-interest questions from smoke_test_v2
+#   - 3 new journalist-specific ethical dilemmas where the
+#     callous/compassionate poles are both coherent
+#
+# Rationale: counselor + callous was a poor pairing because the
+# persona inherently resists coldness, producing incoherence before
+# meaningful callous behaviour. A journalist can plausibly be either
+# detached/ruthless or empathetic while staying in-character.
+
+experiment_id: journalist_callous_v1
+model_name: Qwen/Qwen3-32B
+output_dir: /workspace/outputs/qwen-3-32b/steering
+
+axis_source:
+  type: role_transplant
+  vectors_dir: /workspace/outputs/qwen-3-32b/traits/vectors
+  role_from: compassionate    # negative pole
+  role_to: callous            # positive pole
+
+persona:
+  type: role
+  role: journalist
+  prompt_index: 0
+
+cells:
+  - { slot: 3, layer: 25 }
+
+sweep:
+  weakest_strength: 1.0
+  max_strength: 16.0
+  multiplier: 1.189   # 2**(1/4); 17 strengths from 1 to 16
+  signs: [+1, -1]
+
+positions_mode: all
+batch_size: 4
+max_new_tokens: 256
+
+questions_file: data/steering/questions/journalist_callous_v1.json

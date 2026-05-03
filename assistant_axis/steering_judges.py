@@ -51,6 +51,7 @@ import time
 from dataclasses import dataclass, field
 from pathlib import Path
 from statistics import mean
+from concurrent.futures import Future
 from typing import Any, Callable, Dict, List, Optional, Protocol, Sequence, Tuple
 
 from .atomic_io import read_jsonl_with_retry, write_jsonl
@@ -110,10 +111,20 @@ class SteeringSpec:
 # ---------------------------------------------------------------------------
 # Rubric strings
 # ---------------------------------------------------------------------------
+#
+# IMPORTANT (see AGENT_NOTES.md "Judge prompts: reason BEFORE score"):
+# Every rubric below puts the ``reason`` field BEFORE the ``score`` field
+# in its JSON output schema, with an explicit "reason first, then score"
+# sentence telling the model so.  This is mandatory for any new judge
+# prompt -- swapping the order makes the reason a post-hoc rationalization
+# rather than chain-of-thought, which on non-reasoning models (4.1-mini,
+# Haiku, Sonnet non-thinking) materially degrades judgment quality.
+# Bump the corresponding *_RUBRIC_VERSION constant when you change a
+# rubric so old records remain distinguishable from new ones.
 
-COHERENCE_RUBRIC_VERSION = 2
-RP_RUBRIC_VERSION = 1
-EFFECT_RUBRIC_VERSION = 1
+COHERENCE_RUBRIC_VERSION = 4
+RP_RUBRIC_VERSION = 2
+EFFECT_RUBRIC_VERSION = 2
 
 
 COHERENCE_RUBRIC = """\
@@ -154,10 +165,11 @@ Score on a 0-3 incoherence scale:
      coherent.  May exhibit traits of the persona OR of the steering
      direction; both are expected and not penalized.
 
-- 1: Slightly off.  The model starts to wax poetic or mystical (more so
+- 1: Slightly off.  The model waxes poetic or mystical (more so
      than appropriate for the persona and steering direction), or sounds
      slightly drunk, stoned, or confused, or makes one or two minor
-     grammatical or formatting mistakes.  Still mostly understandable.
+     grammatical or formatting mistakes.  The response is still very
+     understandable.
 
 - 2: Clearly impaired or off-task.  The response (between [RESPONSE
      START] and [RESPONSE END]) is failing to engage coherently with
@@ -178,9 +190,9 @@ Score on a 0-3 incoherence scale:
            inappropriately lapses into another language mid-response
            (e.g. Chinese characters in an English-language conversation).
 
-     A level-2 response may also show mild repetition that it manages
-     to break out of, or repetition appearing only near the end -- full
-     repetition trap is level 3.
+     A level-2 response may also show mild repetition or repetitive
+     phrasing that it manages to break out of, or repetition appearing
+     only near the end -- full repetition trap is level 3.
 
 - 3: Repetition trap or empty.  Either:
        (a) most of the response is repeated phrases or tokens looping
@@ -192,8 +204,9 @@ Score on a 0-3 incoherence scale:
 Important: do NOT penalize for traits of the persona or the steering
 direction; only penalize for incoherence / non-engagement symptoms.
 
-Respond with a JSON object only, no other text:
-{{"score": <0-3 integer>, "reason": "<one short sentence>"}}
+Respond with a JSON object only, no other text.  Reason about the
+response first, then commit to the score:
+{{"reason": "<one short sentence>", "score": <0-3 integer>}}
 """
 
 
@@ -233,8 +246,9 @@ Score on a 0-3 scale:
 - 3: Model fully plays the persona, either not mentioning being an AI or
      seamlessly integrating it.
 
-Respond with a JSON object only, no other text:
-{{"score": <0-3 integer>, "reason": "<one short sentence>"}}
+Respond with a JSON object only, no other text.  Reason about the
+response first, then commit to the score:
+{{"reason": "<one short sentence>", "score": <0-3 integer>}}
 """
 
 
@@ -269,9 +283,10 @@ only score the direction and magnitude of the pull along the axis.
 
 {items_block}
 
-Respond with a JSON object only, no other text:
-{{"items": [{{"id": <id from each block>, "score": <-3..+3>,
-   "reason": "<one short sentence>"}}, ...]}}
+Respond with a JSON object only, no other text.  For each item, reason
+about the response first, then commit to the score:
+{{"items": [{{"id": <id from each block>,
+   "reason": "<one short sentence>", "score": <-3..+3>}}, ...]}}
 """
 
 
@@ -300,9 +315,10 @@ RELATIVE TO ITS BASELINE on a 0-3 scale:
 
 {items_block}
 
-Respond with a JSON object only, no other text:
-{{"items": [{{"id": <id from each block>, "score": <0-3>,
-   "reason": "<one short sentence>"}}, ...]}}
+Respond with a JSON object only, no other text.  For each item, reason
+about the response first, then commit to the score:
+{{"items": [{{"id": <id from each block>,
+   "reason": "<one short sentence>", "score": <0-3>}}, ...]}}
 """
 
 
@@ -489,7 +505,32 @@ class JudgeDispatcher(Protocol):
     """
 
     def judge_coherence_blocking(self, record: Dict[str, Any]) -> int:
-        """Synchronous coherence call; returns 0..3."""
+        """Synchronous coherence call; returns 0..3.
+
+        Used by callers that want strict serial generation+judging.
+        :meth:`judge_coherence_for_strength_async` is the preferred path
+        for the live sweep -- it lets coherence judging overlap with
+        next-strength generation.
+        """
+        ...
+
+    def judge_coherence_for_strength_async(
+        self,
+        records: List[Dict[str, Any]],
+    ) -> "Future[float]":
+        """Async-fire coherence judging for all records in this strength.
+
+        Returns a ``concurrent.futures.Future`` that resolves to the
+        strength's mean coherence score once every record's coherence
+        has been judged and stamped.  Records carry their judges.coherence
+        and judges.strength_mean_coh fields by the time the future
+        resolves; the caller can poll/await it without a separate
+        per-record callback.
+
+        The pipelined runner uses this to overlap strength-N's coherence
+        judging with strength-N+1's generation, cutting latency-bound
+        wall time when the model output runs faster than the judge.
+        """
         ...
 
     def enqueue_strength_group(
@@ -513,7 +554,12 @@ class JudgeDispatcher(Protocol):
         ...
 
     def should_stop_at(self, strength: float) -> bool:
-        """Whether the sweep should stop at this strength."""
+        """Whether the sweep should stop at this strength.
+
+        Legacy single-shot stop hook; the pipelined runner uses
+        consecutive-crossings logic via the strength-mean future returned
+        from :meth:`judge_coherence_for_strength_async` instead.
+        """
         ...
 
     def drain(self, timeout_s: Optional[float] = None) -> None:
@@ -537,6 +583,21 @@ class NoOpJudgeDispatcher:
         # configured max strength without any model calls.  Real callers
         # know to substitute a RealJudgeDispatcher.
         return 0
+
+    def judge_coherence_for_strength_async(
+        self,
+        records: List[Dict[str, Any]],
+    ) -> "Future[float]":
+        # Return an already-resolved future yielding 0.0 mean.  Stamping
+        # records with judges.coherence is a no-op (they already have
+        # judges = {coherence: None, ...}); we just stamp strength_mean_coh
+        # so downstream uniformly sees the field.
+        from concurrent.futures import Future as _Future
+        for r in records:
+            r.setdefault("judges", {})["strength_mean_coh"] = 0.0
+        fut: _Future = _Future()
+        fut.set_result(0.0)
+        return fut
 
     def enqueue_strength_group(
         self,
@@ -722,6 +783,77 @@ class RealJudgeDispatcher:
             "ts": time.time(),
             "rubric_version": COHERENCE_RUBRIC_VERSION,
         }
+
+    # ------------------------------------------------------------------
+    # Async coherence dispatch (pipelined runner uses this)
+    # ------------------------------------------------------------------
+
+    def judge_coherence_for_strength_async(
+        self,
+        records: List[Dict[str, Any]],
+    ) -> Future:
+        """Async-fire coherence judging for all records in this strength.
+
+        Returns a future that resolves to the strength's mean coherence
+        once every record's coherence is judged + stamped.  The runner
+        polls/awaits this without blocking next-strength generation.
+
+        Side effects on resolution:
+        - Each record's ``judges.coherence`` is populated.
+        - Each record's ``judges.strength_mean_coh`` is stamped.
+        - The merged records are persisted to disk via
+          :meth:`_merge_records_to_disk` (atomic, NFS-safe).
+        """
+        return asyncio.run_coroutine_threadsafe(
+            self._coh_strength_coro(records),
+            self._loop,
+        )
+
+    async def _coh_strength_coro(
+        self, records: List[Dict[str, Any]],
+    ) -> float:
+        # One semaphore-bounded coroutine per record; await all, then
+        # compute mean and stamp.
+        async def _one(r: Dict[str, Any]) -> int:
+            prompt = build_coherence_prompt(
+                persona=self.persona,
+                steering=self.steering,
+                sign=int(r.get("sign", 0)),
+                strength=float(r.get("strength", 0.0)),
+                question=r["question"],
+                baseline_response=self._lookup_baseline(r["question_idx"]),
+                steered_response=r["response"],
+            )
+            async with self._semaphore:
+                text = await self._call_unified(
+                    model=self.coherence_model, prompt=prompt,
+                    max_tokens=self.max_tokens_coh,
+                )
+            parsed = parse_score_reason_json(text or "", score_range=(0, 3))
+            if parsed is None:
+                logger.warning(
+                    f"coherence parser failed (async) for q_idx="
+                    f"{r.get('question_idx')}; raw: {(text or '')[:200]!r}"
+                )
+                self._record_coh_judges_field(
+                    r, score=0, reason="UNPARSEABLE",
+                    model=self.coherence_model,
+                )
+                return 0
+            self._record_coh_judges_field(
+                r, score=parsed["score"], reason=parsed["reason"],
+                model=self.coherence_model,
+            )
+            return parsed["score"]
+
+        scores = await asyncio.gather(*(_one(r) for r in records))
+        mean_coh = float(mean(scores)) if scores else 0.0
+        for r in records:
+            r.setdefault("judges", {})["strength_mean_coh"] = mean_coh
+        # Persist coherence + strength_mean_coh under the records lock so
+        # the runner's atomic-merge writes don't race with us.
+        self._merge_records_to_disk(records)
+        return mean_coh
 
     # ------------------------------------------------------------------
     # Strength-group enqueue

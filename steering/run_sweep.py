@@ -290,6 +290,9 @@ def _build_judging_config(
         "coh_stop_threshold": float(
             getattr(args, "coh_stop_threshold", 1.5)
         ),
+        "coh_stop_consecutive": int(
+            getattr(args, "coh_stop_consecutive", 2)
+        ),
     }
     return cfg
 
@@ -610,6 +613,7 @@ def _worker_main(
                     judging_cfg=item.get("judging") or {},
                     log=log,
                 )
+                judging_cfg = item.get("judging") or {}
                 try:
                     run_steering_cell(
                         model, tokenizer,
@@ -626,6 +630,12 @@ def _worker_main(
                         positions_mode=item["positions_mode"],
                         model_name=config["model_name"],
                         judge_dispatcher=judge_dispatcher,
+                        coh_stop_threshold=float(
+                            judging_cfg.get("coh_stop_threshold", 1.5)
+                        ),
+                        coh_stop_consecutive=int(
+                            judging_cfg.get("coh_stop_consecutive", 2)
+                        ),
                     )
                 finally:
                     if hasattr(judge_dispatcher, "shutdown"):
@@ -783,8 +793,14 @@ def main():
                         help="Skip RP/effect on a strength group whose mean "
                              "coherence exceeds this value (default 1.0).")
     parser.add_argument("--coh-stop-threshold", type=float, default=1.5,
-                        help="Stop sweep early once a strength's mean "
-                             "coherence reaches this value (default 1.5).")
+                        help="Stop sweep early once K consecutive strengths "
+                             "have mean coherence at or above this value "
+                             "(default 1.5).")
+    parser.add_argument("--coh-stop-consecutive", type=int, default=2,
+                        help="Number of consecutive strengths above the "
+                             "coherence threshold required to trigger early "
+                             "stop (default 2 = 'crossing + one confirmation'; "
+                             "1 = stop on first crossing; 0 = never stop).")
     parser.add_argument("--coherence-model", default=None,
                         help="Coherence model (default gpt-4.1-mini).")
     parser.add_argument("--rp-model", default=None,
