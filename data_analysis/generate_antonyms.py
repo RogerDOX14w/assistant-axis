@@ -18,11 +18,21 @@ Usage:
 import argparse
 import asyncio
 import json
+import logging
 import re
 import sys
 from pathlib import Path
 
 from dotenv import load_dotenv
+
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
+from assistant_axis.judge import warn_if_low_parse_rate  # noqa: E402
+
+logging.basicConfig(
+    level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s",
+    stream=sys.stderr,
+)
+logger = logging.getLogger(__name__)
 
 load_dotenv()
 
@@ -176,6 +186,20 @@ async def main_async(trait_filter: list[str] | None = None):
 
     for pos_label, result in api_results:
         results[pos_label] = result
+
+    # Loud warning if parse rate this run dropped below 99%.  ``classify_one``
+    # returns the ERROR sentinel after 5 failed JSON-decode retries, so this
+    # post-retry rate should normally be 100% on Sonnet.
+    n_call_total = len(api_results)
+    n_call_ok = sum(
+        1 for _, r in api_results if r.get("negative_label") != "ERROR"
+    )
+    warn_if_low_parse_rate(
+        label="data_analysis/generate_antonyms:claude-sonnet-4-20250514",
+        n_ok=n_call_ok,
+        n_total=n_call_total,
+        logger_obj=logger,
+    )
 
     results = dict(sorted(results.items()))
 

@@ -25,6 +25,9 @@ from typing import Any, Dict, List, Optional
 
 from dotenv import load_dotenv
 
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
+from assistant_axis.judge import warn_if_low_parse_rate  # noqa: E402
+
 load_dotenv()
 
 logging.basicConfig(
@@ -521,6 +524,10 @@ async def score_all(
     escalation_log_path = output_path.with_suffix(".escalations.jsonl")
     escalation_log = open(escalation_log_path, "a") if rescore_model else None
 
+    # Per-call parse-rate counters across the whole run (post-retry).
+    n_call_ok = 0
+    n_call_failed = 0
+
     try:
         for i in range(0, len(pending), max_concurrent):
             chunk = pending[i : i + max_concurrent]
@@ -538,8 +545,12 @@ async def score_all(
             for result in results:
                 if isinstance(result, Exception):
                     logger.error(f"Exception in batch: {result}")
-                elif result is not None:
+                    n_call_failed += 1
+                elif result is None:
+                    n_call_failed += 1
+                else:
                     all_scores.append(result)
+                    n_call_ok += 1
 
             _save_incremental(output_path, existing_data, all_scores)
             done = len(all_scores)
@@ -548,6 +559,17 @@ async def score_all(
     finally:
         if escalation_log is not None:
             escalation_log.close()
+
+    # Loud warning if parse/API failure rate this run dropped below 99%.
+    # ``n_call_failed`` counts post-retry failures (3 attempts inside
+    # ``score_combo``), so anything non-zero is persistent unparseable JSON
+    # or genuine API failure -- worth surfacing prominently.
+    warn_if_low_parse_rate(
+        label=f"data_analysis/score_combinations:{model}",
+        n_ok=n_call_ok,
+        n_total=n_call_ok + n_call_failed,
+        logger_obj=logger,
+    )
 
     return all_scores
 

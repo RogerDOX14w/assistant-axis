@@ -27,7 +27,10 @@ from tqdm import tqdm
 
 # Repo-internal imports: reuse the existing OpenAI judge infrastructure.
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
-from assistant_axis.judge import RateLimiter  # type: ignore  # noqa: E402
+from assistant_axis.judge import (  # type: ignore  # noqa: E402
+    RateLimiter,
+    warn_if_low_parse_rate,
+)
 from assistant_axis import png_metadata  # noqa: E402
 from results_analysis.canonical_angles.whitening import DEFAULT_SOFT_K  # noqa: E402
 
@@ -57,6 +60,15 @@ _SCALE_TABLE = (
     "| +3 | Strongly toward the positive pole |\n"
 )
 
+# Both rubrics below end with "First, briefly reason ... Then on a new
+# line, write exactly: SCORE: <int>".  This is the reasoning-first
+# pattern required by the project rule documented in AGENT_NOTES.md
+# under "Judge prompts: reason BEFORE score" -- non-reasoning judges
+# (4.1-mini, Haiku, Sonnet non-thinking) need explicit "think on the
+# page" framing or they commit to a score before deliberating.  The
+# parser at ``parse_signed_score`` below extracts the SCORE: <int>
+# token; do not change to a "first integer in response" parser
+# without changing the rubrics in lockstep.
 _RUBRIC_HEADER = (
     "You are scoring where a {entity} concept falls on a semantic axis.\n\n"
     "## Axis: {axis_name}\n\n"
@@ -1191,6 +1203,8 @@ async def score_static_mode(
     # Score in smaller sub-batches so the cache is saved frequently for crash-safety.
     written_cache = dict(cache)
     save_every = max(1, args.save_every)
+    n_call_attempted = 0  # calls actually issued in this run
+    n_call_parsed = 0  # of those, how many produced an int score
     for i in tqdm(range(0, len(prompts), save_every), desc=f"{mode}"):
         chunk_prompts = prompts[i:i + save_every]
         chunk_names = names[i:i + save_every]
@@ -1200,12 +1214,26 @@ async def score_static_mode(
             rps=args.rps, batch_size=args.batch_size,
         )
         for name, text in zip(chunk_names, raw_texts):
+            n_call_attempted += 1
             score = parse_signed_score(text)
             if score is None:
                 logger.warning(f"[{mode}] {name}: could not parse score from: {text!r}")
                 continue
+            n_call_parsed += 1
             written_cache[name] = score
         _save_json(cache_path, written_cache)
+
+    # Loud warning if parse rate this run dropped below 99%.  Note this
+    # is *this run only* (not historical) so resumes that re-attempt
+    # only previously-failed entries can still surface a healthy rate
+    # if today's calls succeed.
+    warn_if_low_parse_rate(
+        label=f"axis_judge_correlation:{mode}:{args.provider}:{args.judge_model}",
+        n_ok=n_call_parsed,
+        n_total=n_call_attempted,
+        logger_obj=logger,
+        extra=f"this run only; see {Path(args.output_dir) / 'gaps.json'} for any persisting gaps",
+    )
 
     # End-of-mode gap audit: which scorable entities still aren't in the cache?
     cached_names = {k for k, v in written_cache.items() if isinstance(v, int)}
@@ -1346,6 +1374,8 @@ async def score_responses_mode(
     _save_json(cache_path, written)
 
     save_every = max(1, args.save_every)
+    n_batch_attempted = 0  # batch calls actually issued this run
+    n_batch_parsed = 0  # of those, how many produced an int score
     for i in tqdm(range(0, len(to_call), save_every), desc="responses"):
         chunk = to_call[i:i + save_every]
         prompts = [
@@ -1358,13 +1388,27 @@ async def score_responses_mode(
             rps=args.rps, batch_size=args.batch_size,
         )
         for (name, _etype, bi, _items), text in zip(chunk, raw_texts):
+            n_batch_attempted += 1
             score = parse_signed_score(text)
+            if score is not None:
+                n_batch_parsed += 1
             written[name]["per_batch"][bi]["score"] = score
             written[name]["per_batch"][bi]["text"] = text
 
         for name in written:
             _update_response_aggregates(written[name])
         _save_json(cache_path, written)
+
+    # Loud warning if per-batch parse rate this run dropped below 99%.
+    # Each "call" here is one ~target_batch_size-item batch; an UNPARSEABLE
+    # batch loses *all* of its items, so the threshold is item-conservative.
+    warn_if_low_parse_rate(
+        label=f"axis_judge_correlation:responses:{args.provider}:{args.judge_model}",
+        n_ok=n_batch_parsed,
+        n_total=n_batch_attempted,
+        logger_obj=logger,
+        extra=f"this run only; see {Path(args.output_dir) / 'gaps.json'} for any persisting gaps",
+    )
 
     for name in written:
         _update_response_aggregates(written[name])

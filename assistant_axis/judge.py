@@ -93,6 +93,81 @@ class RateLimiter:
             self.tokens = 0
 
 
+# Project-standard threshold for "judge parse failures are bad enough
+# to warrant a loud warning".  Set to 1% (i.e. <99% OK rate) per the
+# May 2026 audit which found that even ~1% UNPARSEABLE on batched
+# effect judging silently biases ensemble means -- the surviving
+# judge dominates whenever its partner fails, which doesn't show up
+# in mean-of-means but does show up in per-(kind, model) scatter.
+# See AGENT_NOTES.md "Judge prompts: reason BEFORE score" for the
+# full rule context, and ``warn_if_low_parse_rate`` below for the
+# central emit point that all judge call sites should funnel through.
+PARSE_RATE_LOUD_THRESHOLD = 0.99  # OK >= 99% = quiet; OK < 99% = loud
+
+
+def warn_if_low_parse_rate(
+    *,
+    label: str,
+    n_ok: int,
+    n_total: int,
+    threshold: float = PARSE_RATE_LOUD_THRESHOLD,
+    logger_obj: Optional[logging.Logger] = None,
+    extra: Optional[str] = None,
+) -> None:
+    """Log judge-call parse-rate, loudly if OK rate falls below
+    ``threshold`` (default :data:`PARSE_RATE_LOUD_THRESHOLD` = 0.99).
+
+    Use this from every judge driver (axis_judge_correlation,
+    pipeline/3_judge.py, steering_judges.py, ...) at end-of-run so a
+    single grep for ``HIGH FAIL RATE`` finds every degraded run.
+
+    Examples::
+
+        warn_if_low_parse_rate(
+            label="axis_judge_correlation:descriptions",
+            n_ok=98, n_total=100, logger_obj=logger,
+        )
+        # -> WARNING: *** HIGH FAIL RATE *** [axis_judge_correlation:descriptions]
+        #             parse rate: 98/100 OK (2/100 = 2% UNPARSEABLE)
+
+        warn_if_low_parse_rate(
+            label="pipeline/3_judge", n_ok=5000, n_total=5000,
+            logger_obj=logger,
+        )
+        # -> INFO: [pipeline/3_judge] parse rate: 5000/5000 OK
+
+    Parameters
+    ----------
+    label : short identifier for the judge call site (no spaces preferred)
+    n_ok : count of calls that produced a valid parsed score
+    n_total : total calls made (n_ok + n_unparseable [+ n_missing])
+    threshold : minimum OK rate to stay quiet (default 0.99)
+    logger_obj : logger to emit through (defaults to this module's logger)
+    extra : optional one-line continuation, e.g. "see gaps.json for the list"
+    """
+    log = logger_obj or logger
+    if n_total == 0:
+        return
+    fail = n_total - n_ok
+    if fail == 0:
+        msg = f"[{label}] parse rate: {n_total}/{n_total} OK"
+        if extra:
+            msg += f"  ({extra})"
+        log.info(msg)
+        return
+    pct = fail / n_total
+    body = (
+        f"[{label}] parse rate: {n_ok}/{n_total} OK "
+        f"({fail}/{n_total} = {pct:.1%} UNPARSEABLE)"
+    )
+    if extra:
+        body += f"  ({extra})"
+    if (n_ok / n_total) < threshold:
+        log.warning(f"*** HIGH FAIL RATE *** {body}")
+    else:
+        log.info(body)
+
+
 def parse_judge_score(response_text: str) -> Optional[int]:
     """
     Parse the judge's response to extract the 0-3 score.

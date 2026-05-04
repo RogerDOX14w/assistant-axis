@@ -124,7 +124,7 @@ class SteeringSpec:
 
 COHERENCE_RUBRIC_VERSION = 4
 RP_RUBRIC_VERSION = 2
-EFFECT_RUBRIC_VERSION = 2
+EFFECT_RUBRIC_VERSION = 3
 
 
 COHERENCE_RUBRIC = """\
@@ -256,8 +256,10 @@ EFFECT_BIDIR_BATCH_RUBRIC = """\
 You are evaluating how strongly a series of model responses have been
 pulled along a steering axis, relative to their unsteered baselines.
 
-All {n_items} responses below were generated under the SAME persona, axis,
-sign, and strength; they differ only in the question being answered.
+All {n_items} responses below were generated under the SAME persona,
+steering axis, direction, and strength; they differ only in the
+question being answered.
+
 Score each response independently.
 
 PERSONA: {persona_label}
@@ -267,7 +269,7 @@ STEERING AXIS: {axis_name}
 - positive pole ({pos_label}): {pos_description}
 - negative pole ({neg_label}): {neg_description}
 
-This batch was steered with sign={sign:+d} at strength {strength}.
+This batch was steered with direction={sign:+d} at strength {strength}.
 
 For each response, score on a -3 to +3 scale RELATIVE TO ITS BASELINE:
 - +3: strongly more {pos_label} than baseline
@@ -295,7 +297,10 @@ You are evaluating how strongly a series of model responses exhibit a
 single trait, relative to their unsteered baselines.
 
 All {n_items} responses below were generated under the SAME persona,
-axis, sign, and strength; they differ only in the question.
+steering axis, direction, and strength; they differ only in the question
+being answered.
+
+Score each response independently.
 
 PERSONA: {persona_label}
 PERSONA DESCRIPTION: {persona_description}
@@ -303,15 +308,15 @@ PERSONA DESCRIPTION: {persona_description}
 TRAIT TO MEASURE: {pole_label}
 TRAIT DESCRIPTION: {pole_description}
 
-(This batch was steered with sign={sign:+d} at strength {strength} along
-the axis {axis_name}; the other pole is {other_pole_label}.)
+(This batch was steered with direction={sign:+d} at strength {strength}
+along the axis {axis_name}; the other pole is {other_pole_label}.)
 
 For each response, score how strongly it exhibits the {pole_label} trait
 RELATIVE TO ITS BASELINE on a 0-3 scale:
 - 0: same as baseline / no notable {pole_label} traits beyond baseline
 - 1: slightly more {pole_label} than baseline
 - 2: clearly more {pole_label} than baseline
-- 3: strongly exhibits {pole_label}, much more so than baseline
+- 3: strongly more {pole_label} than baseline
 
 {items_block}
 
@@ -698,6 +703,22 @@ class RealJudgeDispatcher:
         self._strength_states: Dict[Tuple[int, float], _StrengthState] = {}
         self._stop_decision: Dict[Tuple[int, float], bool] = {}
 
+        # Per-(judge_kind, model) tally of call outcomes, used by
+        # ``judge_outcome_summary()`` to surface UNPARSEABLE rates at
+        # end-of-run.  Audit on May 4 2026 found that
+        # ``gpt-4.1-mini`` was failing to produce parseable JSON for
+        # the batched effect output ~17-31% of the time on production
+        # smoke_test_v3 records, silently degrading the bidirectional
+        # ensemble to single-judge (Haiku-only) for those records --
+        # nothing in the run.log surfaced this. Tracking outcomes
+        # explicitly + emitting the summary at shutdown makes that
+        # invisible-but-material failure mode loud.
+        self._judge_tally_lock = threading.Lock()
+        # key: (judge_kind, model_name); value: {"ok": n, "unparseable": n,
+        # "missing": n}.  judge_kind in {"coherence", "coherence_alt",
+        # "persona", "effect"}.
+        self._judge_tally: Dict[Tuple[str, str], Dict[str, int]] = {}
+
         # Background event loop on a daemon thread for async judge calls.
         self._loop = asyncio.new_event_loop()
         self._loop_thread = threading.Thread(
@@ -763,10 +784,16 @@ class RealJudgeDispatcher:
             )
             # Degrade safely: treat unparseable as 0 so we don't
             # accidentally trigger a stop on a parser bug.
+            self._record_judge_outcome(
+                kind="coherence", model=self.coherence_model, outcome="unparseable",
+            )
             self._record_coh_judges_field(record, score=0, reason="UNPARSEABLE",
                                           model=self.coherence_model)
             return 0
 
+        self._record_judge_outcome(
+            kind="coherence", model=self.coherence_model, outcome="ok",
+        )
         self._record_coh_judges_field(record, score=parsed["score"],
                                       reason=parsed["reason"],
                                       model=self.coherence_model)
@@ -835,11 +862,17 @@ class RealJudgeDispatcher:
                     f"coherence parser failed (async) for q_idx="
                     f"{r.get('question_idx')}; raw: {(text or '')[:200]!r}"
                 )
+                self._record_judge_outcome(
+                    kind="coherence", model=self.coherence_model, outcome="unparseable",
+                )
                 self._record_coh_judges_field(
                     r, score=0, reason="UNPARSEABLE",
                     model=self.coherence_model,
                 )
                 return 0
+            self._record_judge_outcome(
+                kind="coherence", model=self.coherence_model, outcome="ok",
+            )
             self._record_coh_judges_field(
                 r, score=parsed["score"], reason=parsed["reason"],
                 model=self.coherence_model,
@@ -968,10 +1001,91 @@ class RealJudgeDispatcher:
                 logger.error(f"async judge task raised during drain: {e}")
 
     def shutdown(self) -> None:
-        """Stop the background event loop.  Idempotent."""
+        """Stop the background event loop.  Idempotent.
+
+        Emits the judge-outcome summary log line before stopping if
+        any judging was actually attempted (no-op for sweeps that
+        skipped all judging).
+        """
+        # Log the outcome summary first so it's visible even if loop
+        # shutdown takes a moment.  Skips the emit when no judging
+        # ran (e.g. NoOpJudgeDispatcher use-cases or sweeps with
+        # --skip-judges).
+        summary = self.judge_outcome_summary()
+        if summary:
+            # Promote any HIGH FAIL RATE line to WARNING so it survives
+            # default-INFO log filters and shows up in red in interactive
+            # runs.  Quiet lines stay at INFO.
+            for line in summary.splitlines():
+                if "HIGH FAIL RATE" in line:
+                    logger.warning(line)
+                else:
+                    logger.info(line)
         if self._loop.is_running():
             self._loop.call_soon_threadsafe(self._loop.stop)
         self._loop_thread.join(timeout=5.0)
+
+    # ------------------------------------------------------------------
+    # Judge-outcome tally
+    # ------------------------------------------------------------------
+
+    # Threshold at which we mark a judge's failure rate as "loud" in
+    # the end-of-run summary.  Project rule: any (kind, model) with
+    # less than 99% OK gets a *** HIGH FAIL RATE *** marker, since
+    # at scale even 1% UNPARSEABLE is enough to materially distort
+    # downstream aggregates (e.g. ensemble means become biased toward
+    # whichever judge in the pair survives, an effect that doesn't
+    # show up in mean-of-means but does show up if you look at
+    # per-(kind, model) scatter plots).
+    _UNPARSEABLE_LOUD_THRESHOLD = 0.01
+
+    def _record_judge_outcome(
+        self, *, kind: str, model: str, outcome: str,
+    ) -> None:
+        """Bump the (kind, model) counter for ``outcome`` (ok/unparseable/missing)."""
+        with self._judge_tally_lock:
+            tally = self._judge_tally.setdefault((kind, model), {})
+            tally[outcome] = tally.get(outcome, 0) + 1
+
+    def judge_outcome_summary(self) -> str:
+        """Return a multi-line summary of UNPARSEABLE / MISSING rates per
+        (judge_kind, model).  Empty string if no judging happened.
+
+        Format (illustrative):
+        ::
+
+            [judges] outcome summary:
+              effect / gpt-4.1-mini       62/90 OK  (28/90 = 31% UNPARSEABLE)  *** HIGH FAIL RATE ***
+              effect / claude-haiku-4-5   83/90 OK  (7/90 = 8% UNPARSEABLE)
+              coherence / gpt-4.1-mini    90/90 OK
+              persona / gpt-4.1-mini      90/90 OK
+        """
+        with self._judge_tally_lock:
+            if not self._judge_tally:
+                return ""
+            entries = sorted(self._judge_tally.items())
+        lines = ["[judges] outcome summary:"]
+        for (kind, model), tally in entries:
+            ok = tally.get("ok", 0)
+            unp = tally.get("unparseable", 0)
+            miss = tally.get("missing", 0)
+            total = ok + unp + miss
+            if total == 0:
+                continue
+            extras = []
+            if unp:
+                pct = unp / total
+                extras.append(f"{unp}/{total} = {pct:.0%} UNPARSEABLE")
+            if miss:
+                extras.append(f"{miss}/{total} MISSING")
+            extras_str = f"  ({', '.join(extras)})" if extras else ""
+            loud = ""
+            if unp and unp / total >= self._UNPARSEABLE_LOUD_THRESHOLD:
+                loud = "  *** HIGH FAIL RATE ***"
+            lines.append(
+                f"  {kind} / {model:<35s}  {ok}/{total} OK{extras_str}{loud}"
+            )
+        return "\n".join(lines)
 
     # ------------------------------------------------------------------
     # Private: async judging logic
@@ -1022,6 +1136,9 @@ class RealJudgeDispatcher:
             parsed = parse_score_reason_json(text or "", score_range=(0, 3))
             r.setdefault("judges", {})
             if parsed is None:
+                self._record_judge_outcome(
+                    kind="persona", model=self.rp_model, outcome="unparseable",
+                )
                 r["judges"]["persona"] = {
                     "score": None, "reason": "UNPARSEABLE",
                     "model": self.rp_model, "ts": time.time(),
@@ -1029,6 +1146,9 @@ class RealJudgeDispatcher:
                     "skipped_due_to_strength_mean_coh": False,
                 }
             else:
+                self._record_judge_outcome(
+                    kind="persona", model=self.rp_model, outcome="ok",
+                )
                 r["judges"]["persona"] = {
                     "score": parsed["score"], "reason": parsed["reason"],
                     "model": self.rp_model, "ts": time.time(),
@@ -1161,12 +1281,21 @@ class RealJudgeDispatcher:
             inner = mode_bucket.setdefault(inner_key, {})
             for model_name, parsed in results:
                 if parsed is None:
+                    self._record_judge_outcome(
+                        kind="effect", model=model_name, outcome="unparseable",
+                    )
                     inner[model_name] = {"score": None, "reason": "UNPARSEABLE"}
                 else:
                     item = parsed.get(r["question_idx"])
                     if item is None:
+                        self._record_judge_outcome(
+                            kind="effect", model=model_name, outcome="missing",
+                        )
                         inner[model_name] = {"score": None, "reason": "MISSING"}
                     else:
+                        self._record_judge_outcome(
+                            kind="effect", model=model_name, outcome="ok",
+                        )
                         inner[model_name] = {
                             "score": int(item["score"]),
                             "reason": item.get("reason", ""),
@@ -1175,13 +1304,24 @@ class RealJudgeDispatcher:
             # "mean" key itself (it's the float we wrote on a previous
             # pass, when --rerun re-enters here) and any non-dict entries
             # the schema doesn't recognise.
+            #
+            # Also records ``n_judges_succeeded`` and ``n_judges_attempted``
+            # alongside ``mean``: downstream analysis can filter to records
+            # where the full ensemble parsed (n_succeeded == n_attempted)
+            # vs records where the mean is degraded to a single-judge
+            # fallback.  Prior to this field, single-judge degradation was
+            # invisible in the records.jsonl format -- a record with one
+            # judge UNPARSEABLE looked identical to a healthy one once
+            # downstream code looked only at ``mean``.
             valid_scores = []
             for k, v in inner.items():
-                if k == "mean":
+                if k in ("mean", "n_judges_succeeded", "n_judges_attempted"):
                     continue
                 if isinstance(v, dict) and isinstance(v.get("score"), int):
                     valid_scores.append(v["score"])
             inner["mean"] = float(mean(valid_scores)) if valid_scores else None
+            inner["n_judges_succeeded"] = len(valid_scores)
+            inner["n_judges_attempted"] = len(self.effect_models)
 
     @staticmethod
     def _compute_combined(effect_dict: Dict[str, Any], mode: str) -> Optional[float]:

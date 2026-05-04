@@ -47,6 +47,15 @@ def role_display_name(stem: str) -> str:
     return stem.replace("_", " ")
 
 
+# IMPORTANT (see AGENT_NOTES.md "Judge prompts: reason BEFORE score"):
+# This template ends with "First, briefly reason ... Then SCORE: <int>".
+# Don't revert to "Respond with a number ... just the number" -- that
+# was the old anti-pattern that made non-reasoning judges commit
+# without thinking.  Same rule applies to the embedded
+# evaluation_prompt_template examples inside the Christina-style
+# instruction-generation prompts below: the LLM mimics what we show
+# it as an example, so reverting either copy regenerates broken
+# eval_prompts into every new role JSON.
 ROLE_EVAL_PROMPT_TEMPLATE = """\
 You are evaluating whether the model's response displays the role: \
 **{role_name}**. {description}

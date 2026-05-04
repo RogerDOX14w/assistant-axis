@@ -178,6 +178,80 @@ the rubric definitions are echoed in the reasoning.
 record for traceability; old records remain valid but are now
 distinguishable from records produced under the new rubric.
 
+### Judge parse-rate alerting (mandatory)
+
+Every script that calls an LLM judge and parses structured output
+**must** emit an end-of-run parse-rate summary, and that summary must
+fire a loud warning if the OK rate drops below **99%** (i.e. ≥1%
+UNPARSEABLE / API-failed / empty).  Why 99% and not something looser:
+
+- At small N a 5% fail rate is hard to notice in the log noise but
+  is enough to materially distort downstream aggregates.
+- For ensemble judging, even 1% silently biases the mean toward
+  whichever judge in the pair survives — an effect that doesn't
+  show up in mean-of-means but does show up in per-(kind, model)
+  scatter plots.  This rule was adopted May 2026 after the
+  GPT-4.1-mini batched-effect run was found to have a 17–31%
+  UNPARSEABLE rate that nobody noticed for several days.
+
+**Default stance: <99% is a bug, not a budget.**  The norm for
+this project is that *every* judge run should clear 99% parseable.
+If a run trips the loud warning, that is a signal to **stop, catch
+it, investigate, and fix** — typical root causes are prompt-format
+drift (e.g. the model started emitting code fences), max-token
+truncation, schema fragility (top-level lists, nested JSON), or a
+specific model that's miscalibrated for the task (cf. GPT-4.1-mini
+on batched effect judging in May 2026).  We may, on a *case-by-case*
+basis, decide to accept a lower rate when no fix is available — but
+that should be an explicit, documented decision (e.g. a comment on
+the call site or a note in the run's results README), not silence.
+The default reaction to ``*** HIGH FAIL RATE ***`` is to treat it
+as a real problem that blocks downstream analysis until resolved.
+
+**Use the central helper** at ``assistant_axis/judge.warn_if_low_parse_rate``:
+
+```python
+from assistant_axis.judge import warn_if_low_parse_rate
+
+warn_if_low_parse_rate(
+    label="my_script:claude-haiku-4-5-20251001",
+    n_ok=n_parsed,        # parseable, in-range, non-empty
+    n_total=n_attempted,  # all judge calls actually made
+    logger_obj=logger,    # so the line shows up in your log file
+)
+```
+
+Behaviour:
+
+- 100% OK → single INFO line: ``[label] parse rate: N/N OK``
+- ≥99% OK with some failures → INFO line with the percentage
+- <99% OK → WARNING line prefixed with ``*** HIGH FAIL RATE ***``
+- ``n_total == 0`` → no-op (don't pollute logs for empty runs)
+
+The threshold lives in ``PARSE_RATE_LOUD_THRESHOLD`` if you ever
+need to override it (you almost certainly don't — match the
+project default unless you have a specific reason).
+
+**Where it's wired today** (grep ``warn_if_low_parse_rate`` to find
+new sites):
+
+- ``pipeline/3_judge.py`` — aggregate across all entities
+- ``results_analysis/axis_judge_correlation.py`` — per (mode,
+  provider, model) at end of static and response sub-runs
+- ``data_analysis/classify_goals.py`` — post-retry success rate
+- ``data_analysis/score_combinations.py`` — post-retry success rate
+- ``data_analysis/generate_antonyms.py`` — counts non-ERROR sentinels
+- ``assistant_axis/steering_judges.py`` — uses an in-class tally
+  (``RealJudgeDispatcher.judge_outcome_summary``) with the same
+  threshold and ``*** HIGH FAIL RATE ***`` marker; promoted to
+  WARNING level at ``shutdown()``.
+
+**Single-shot scripts are exempt**: utilities that judge one axis
+or one item at a time (e.g. ``results_analysis/infer_axis_description.py``,
+``results_analysis/standardize_axis_spec.py``) don't get a parse-rate
+tracker — N=1 makes the rate meaningless, and they already raise on
+unrecoverable parse failure rather than silently dropping records.
+
 ### NFS-safe file I/O (mandatory for `/workspace` reads and writes)
 
 `/workspace` on RunPod is a MooseFS-backed network mount. Direct file

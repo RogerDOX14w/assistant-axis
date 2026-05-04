@@ -58,6 +58,7 @@ _judge_spec.loader.exec_module(_judge_mod)
 RateLimiter = _judge_mod.RateLimiter
 call_judge_batch = _judge_mod.call_judge_batch
 parse_judge_score = _judge_mod.parse_judge_score
+warn_if_low_parse_rate = _judge_mod.warn_if_low_parse_rate
 
 import openai
 
@@ -73,6 +74,17 @@ logging.getLogger("openai").setLevel(logging.WARNING)
 # ---------------------------------------------------------------------------
 # Eval-prompt construction
 # ---------------------------------------------------------------------------
+#
+# IMPORTANT (see AGENT_NOTES.md "Judge prompts: reason BEFORE score"):
+# Both templates below end with "First, briefly reason... Then on a new
+# line, write exactly: SCORE: <int>".  This is mandatory -- the older
+# "Respond with a number ... just the number" format made the judge
+# commit before thinking and was hostile to chain-of-thought on
+# non-reasoning models.  ``parse_judge_score`` in
+# ``assistant_axis/judge.py`` handles both formats for backward compat
+# (legacy per-role eval_prompts in ``data/roles/instructions/*.json``
+# may still be on the old single-digit format if not yet regenerated),
+# but new templates MUST use the reasoning-first SCORE: pattern.
 
 COMBINED_EVAL_TEMPLATE = """\
 You are evaluating whether the model's response fully embodies BOTH:
@@ -162,6 +174,42 @@ def parse_combined_filename(stem: str) -> Optional[Tuple[str, str, str]]:
     return role_name, trait_name, goal_source
 
 
+# TODO(role-template-refactor): move role rubric into a templated
+# ROLE_EVAL_TEMPLATE constant, parallel with TRAIT_EVAL_TEMPLATE above.
+#
+# Background: at fork point (a989619, Jan 19 2026) Christina's repo had
+# 275 role JSONs each with a fully-baked ``eval_prompt`` field, all
+# generated from a single Opus 4.5 oneshot template (verified: shape
+# count = 1 after normalising name/desc).  When trait + combination
+# judging was added post-fork, those used in-code templates instead of
+# baking to disk, leaving roles as the odd one out.  Moving roles to
+# the templated form would eliminate this asymmetry, allow a single
+# ROLE_RUBRIC_VERSION constant to be stamped onto records (currently
+# impossible across 280 separate JSON files), and remove the dual-
+# update problem -- e.g. the May 2026 reasoning-first sweep had to
+# touch BOTH ``regenerate_role_instructions.py`` AND every legacy
+# ``data/roles/instructions/*.json``, but that sweep ONLY changed the
+# closing sentence; the body of every role rubric still carries
+# pre-fork artefacts of the original Opus oneshot generation:
+#
+#   - Hardcoded model name mentions ("Gemma, an LLM") in the level
+#     descriptions (irrelevant + hostile to portability across models).
+#   - Hardcoded example "(e.g. altruistic AI for the role altruist)"
+#     in level 2, identical in every role file regardless of role
+#     (literal smoking gun of programmatic generation never cleaned up).
+#   - Stray double-parenthesis typo on level 1: "as itself ((an AI ...".
+#   - Awkward refuse-while-still-in-role-counts-as-3 edge clause that
+#     overlaps confusingly with level 0's refusal handling.
+#
+# Refactor sketch:
+#   1. Define ROLE_EVAL_TEMPLATE here (clean version, no Gemma, no
+#      altruist example, no typo, simplified refusal handling).
+#   2. Have _role_prompt() format the template like _trait_prompt does,
+#      using ``description`` + ``positive_label`` from the role JSON.
+#   3. Strip ``eval_prompt`` out of every data/roles/instructions/*.json
+#      (save a backup first).
+#   4. Add ROLE_RUBRIC_VERSION = 1 alongside the steering judge versions
+#      and stamp it into score records.
 def _role_prompt(stem: str, roles_dir: Path) -> Optional[str]:
     role_file = roles_dir / f"{stem}.json"
     if not role_file.exists():
@@ -270,8 +318,20 @@ async def score_entity(
     max_tokens: int,
     batch_size: int,
     existing_scores: Dict[str, int],
-) -> dict:
-    """Score responses for a single entity, returning new scores."""
+) -> Tuple[dict, int, int]:
+    """Score responses for a single entity.
+
+    Returns
+    -------
+    (new_scores, n_call_attempted, n_call_parsed)
+        ``new_scores``       : {key: int} for parseable responses
+        ``n_call_attempted`` : how many judge calls we made this run
+        ``n_call_parsed``    : how many produced an int score (n_attempted - n_parsed
+                               are UNPARSEABLE / empty / None responses)
+    Caller is responsible for accumulating these counts across entities and
+    emitting a single end-of-run parse-rate summary via
+    :func:`assistant_axis.judge.warn_if_low_parse_rate`.
+    """
     prompts = []
     keys = []
 
@@ -299,7 +359,7 @@ async def score_entity(
         keys.append(key)
 
     if not prompts:
-        return {}
+        return {}, 0, 0
 
     logger.info(f"Scoring {len(prompts)} new responses for {name}...")
     responses_text = await call_judge_batch(
@@ -311,14 +371,18 @@ async def score_entity(
         batch_size=batch_size,
     )
 
-    scores = {}
+    scores: Dict[str, int] = {}
+    n_attempted = 0
+    n_parsed = 0
     for key, text in zip(keys, responses_text):
+        n_attempted += 1
         if text:
             score = parse_judge_score(text)
             if score is not None:
                 scores[key] = score
+                n_parsed += 1
 
-    return scores
+    return scores, n_attempted, n_parsed
 
 
 # ---------------------------------------------------------------------------
@@ -340,8 +404,13 @@ async def main_async():
                         help="Output directory for score JSON files")
     parser.add_argument("--judge_model", type=str, default="gpt-4.1-mini",
                         help="Judge model to use")
-    parser.add_argument("--max_tokens", type=int, default=10,
-                        help="Max tokens for judge response")
+    parser.add_argument("--max_tokens", type=int, default=200,
+                        help="Max tokens for judge response (must fit "
+                             "2-3 sentences of reasoning + the SCORE: line; "
+                             "the old default of 10 dates from the pre-May-2026 "
+                             "single-digit-output rubric and would silently "
+                             "truncate every judge call under the current "
+                             "reasoning-first prompts)")
     parser.add_argument("--batch_size", type=int, default=50,
                         help="Concurrent batch size")
     parser.add_argument("--requests_per_second", type=int, default=100,
@@ -479,6 +548,10 @@ async def main_async():
     rate_limiter = RateLimiter(args.requests_per_second)
 
     successful = skipped = failed = 0
+    # Aggregate parse-rate counters across all entities so the end-of-run
+    # summary can warn loudly if the chosen judge is dropping >1% of calls.
+    total_call_attempted = 0
+    total_call_parsed = 0
     errors: List[str] = []
 
     for response_file in tqdm(response_files, desc="Scoring"):
@@ -523,7 +596,7 @@ async def main_async():
             continue
 
         try:
-            new_scores = await score_entity(
+            new_scores, n_attempted, n_parsed = await score_entity(
                 name=name,
                 responses=responses,
                 eval_prompt_template=eval_tpl,
@@ -534,6 +607,8 @@ async def main_async():
                 batch_size=args.batch_size,
                 existing_scores=existing_scores,
             )
+            total_call_attempted += n_attempted
+            total_call_parsed += n_parsed
             all_scores = {**existing_scores, **new_scores}
 
             for attempt in range(3):
@@ -570,6 +645,17 @@ async def main_async():
             logger.info(f"  - {e}")
         if len(errors) > 10:
             logger.info(f"  ... and {len(errors) - 10} more")
+
+    # Loud warning if this run's per-call parse rate dropped below 99%.
+    # Aggregated across every (entity, response) judge call we made today,
+    # so the count is statistically meaningful even when individual entities
+    # have only a handful of new responses.
+    warn_if_low_parse_rate(
+        label=f"pipeline/3_judge:{args.judge_model}",
+        n_ok=total_call_parsed,
+        n_total=total_call_attempted,
+        logger_obj=logger,
+    )
 
 
 def main():

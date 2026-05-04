@@ -47,6 +47,13 @@ DEFAULT_N_VARIANTS = 5
 DEFAULT_N_QUESTIONS = 40
 DEFAULT_CONCURRENCY = 10
 
+# IMPORTANT (see AGENT_NOTES.md "Judge prompts: reason BEFORE score"):
+# This template ends with the reasoning-first SCORE: REFUSAL / SCORE:
+# <0-100> pattern.  Don't revert to "Respond with a number ... just
+# the number" -- that was the old anti-pattern that made non-reasoning
+# judges commit without thinking.  Same rule applies to the embedded
+# evaluation_prompt_template examples inside the Christina-style
+# instruction-generation prompts below.
 EVAL_PROMPT_TEMPLATE = """\
 You are evaluating whether the model's response displays the trait: \
 **{positive_label}**. {description}

@@ -28,6 +28,9 @@ from typing import Any, Callable, Dict, List, Optional
 
 from dotenv import load_dotenv
 
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
+from assistant_axis.judge import warn_if_low_parse_rate  # noqa: E402
+
 load_dotenv()
 
 logging.basicConfig(
@@ -832,6 +835,17 @@ async def main_async():
         )
 
         logger.info(f"Classification complete: {success} succeeded, {failed} failed")
+
+        # Loud warning if parse/API failure rate this run dropped below 99%.
+        # ``failed`` here is post-retry (3 attempts inside ``classify_single``),
+        # so any non-zero failure represents persistent unparseable JSON or
+        # API errors that should not be hidden in the noise of a multi-hour run.
+        warn_if_low_parse_rate(
+            label=f"data_analysis/classify_goals:{args.model}",
+            n_ok=success,
+            n_total=success + failed,
+            logger_obj=logger,
+        )
 
     # Always re-run aggregation from full raw file
     all_raw = list(existing.values())

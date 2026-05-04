@@ -507,3 +507,93 @@ class TestBuildBaselineLookup:
         assert lookup(0) == "first"
         assert lookup(7) == "seventh"
         assert lookup(99) == ""  # missing -> empty string
+
+
+# ---------------------------------------------------------------------------
+# Judge-outcome tally + summary
+# ---------------------------------------------------------------------------
+
+class TestJudgeOutcomeSummary:
+    """The May 2026 audit found that ``gpt-4.1-mini`` was failing to
+    produce parseable JSON on ~17-31% of effect-batch calls in
+    production smoke_test_v3 records, silently degrading the
+    bidirectional ensemble to single-judge for those records.
+    Nothing in run.log surfaced this -- only a per-record dig into
+    the ``UNPARSEABLE`` reason field would have caught it.  The
+    tally + summary makes that failure mode loud at end-of-run.
+    """
+
+    def test_empty_tally_returns_empty_string(self, dispatcher):
+        # No judging has happened yet.
+        assert dispatcher.judge_outcome_summary() == ""
+
+    def test_records_ok_outcomes(self, dispatcher):
+        dispatcher._record_judge_outcome(
+            kind="coherence", model="gpt-4.1-mini", outcome="ok",
+        )
+        dispatcher._record_judge_outcome(
+            kind="coherence", model="gpt-4.1-mini", outcome="ok",
+        )
+        s = dispatcher.judge_outcome_summary()
+        assert "coherence / gpt-4.1-mini" in s
+        assert "2/2 OK" in s
+        assert "UNPARSEABLE" not in s
+
+    def test_records_unparseable_outcomes(self, dispatcher):
+        for _ in range(7):
+            dispatcher._record_judge_outcome(
+                kind="effect", model="gpt-4.1-mini", outcome="ok",
+            )
+        for _ in range(3):
+            dispatcher._record_judge_outcome(
+                kind="effect", model="gpt-4.1-mini", outcome="unparseable",
+            )
+        s = dispatcher.judge_outcome_summary()
+        assert "effect / gpt-4.1-mini" in s
+        assert "7/10 OK" in s
+        assert "3/10 = 30% UNPARSEABLE" in s
+        # 30% > 10% threshold -> loud marker
+        assert "*** HIGH FAIL RATE ***" in s
+
+    def test_loud_marker_threshold(self, dispatcher):
+        # Project rule (May 2026): warn loudly when OK rate falls below
+        # 99% (i.e. UNPARSEABLE >= 1%).  100/100 OK -> quiet.
+        for _ in range(100):
+            dispatcher._record_judge_outcome(
+                kind="effect", model="claude-haiku-4-5-20251001", outcome="ok",
+            )
+        s = dispatcher.judge_outcome_summary()
+        assert "100/100 OK" in s
+        assert "*** HIGH FAIL RATE ***" not in s
+
+    def test_loud_marker_at_one_percent(self, dispatcher):
+        # 1% UNPARSEABLE: at threshold, loud marker fires.
+        for _ in range(99):
+            dispatcher._record_judge_outcome(
+                kind="effect", model="claude-haiku-4-5-20251001", outcome="ok",
+            )
+        for _ in range(1):
+            dispatcher._record_judge_outcome(
+                kind="effect", model="claude-haiku-4-5-20251001", outcome="unparseable",
+            )
+        s = dispatcher.judge_outcome_summary()
+        assert "1/100 = 1% UNPARSEABLE" in s
+        assert "*** HIGH FAIL RATE ***" in s
+
+    def test_separate_tally_per_kind_and_model(self, dispatcher):
+        dispatcher._record_judge_outcome(kind="coherence", model="gpt-4.1-mini", outcome="ok")
+        dispatcher._record_judge_outcome(kind="persona", model="gpt-4.1-mini", outcome="ok")
+        dispatcher._record_judge_outcome(kind="effect", model="gpt-4.1-mini", outcome="unparseable")
+        dispatcher._record_judge_outcome(kind="effect", model="claude-haiku-4-5-20251001", outcome="ok")
+        s = dispatcher.judge_outcome_summary()
+        # Four distinct (kind, model) pairs reported separately.
+        assert "coherence / gpt-4.1-mini" in s
+        assert "persona / gpt-4.1-mini" in s
+        assert "effect / gpt-4.1-mini" in s
+        assert "effect / claude-haiku-4-5-20251001" in s
+
+    def test_missing_outcomes_reported(self, dispatcher):
+        dispatcher._record_judge_outcome(kind="effect", model="gpt-4.1-mini", outcome="ok")
+        dispatcher._record_judge_outcome(kind="effect", model="gpt-4.1-mini", outcome="missing")
+        s = dispatcher.judge_outcome_summary()
+        assert "1/2 MISSING" in s
