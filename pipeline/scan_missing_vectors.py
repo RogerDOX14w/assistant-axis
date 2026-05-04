@@ -856,9 +856,9 @@ def scan_one_target(
           f"(median {median_size / 1e6:.1f} MB) "
           f"in {target.vectors_dir}")
     if target.scores_dir is None:
-        print(f"  mode: unfiltered (no scores filter)")
+        print(f"  mode: {target.mode} (no scores filter)")
     else:
-        print(f"  mode: filtered, scores from {target.scores_dir}")
+        print(f"  mode: {target.mode}, scores from {target.scores_dir}")
 
     results: list[dict[str, Any]] = []
     desc = f"audit {target.label}"
