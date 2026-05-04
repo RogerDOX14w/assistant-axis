@@ -71,10 +71,20 @@ real (non-symlinked) ``.pt`` files::
         --scores_dir      outputs/qwen-3-32b/roles/scores \\
         --min_count       50
 
-For unfiltered (mean-of-all-activations) vectors, drop ``--scores_dir``
-and use ``--mode unfiltered`` (single-pair) or just leave a directory
-named ``vectors_unfiltered/`` next to the activations (comprehensive
-mode auto-detects per-vectors-dir).
+For ``vectors_unfiltered/`` (the no-incongruity-filter variant of the
+filtered pipeline), pair the directory with a sibling
+``scores_unfiltered/`` containing the unfiltered scores.  Comprehensive
+mode auto-pairs ``vectors*_unfiltered`` with ``scores_unfiltered/`` when
+both exist.  Score=3 + ``--min_count`` filtering still applies to
+non-default roles in unfiltered mode -- the only thing "unfiltered"
+turns off is the per-pair incongruity exclusion baked into the filtered
+``scores/`` directory.  Default-entity-type subdirs (``default/``)
+remain mean-of-all-activations because their role name contains
+``default``.
+
+If you want the legacy "mean-of-all-activations regardless of role
+name" behaviour for a custom vectors variant, pass
+``--mode unfiltered_mean`` in single-pair mode.
 
 Outputs a per-entity JSON report next to each scanned vectors dir
 (``missing_vectors_audit.json``) plus a re-run list
@@ -475,7 +485,25 @@ def classify_entity(
         return out
 
     # 3. Vector missing -- figure out why.
-    is_default = "default" in role or mode == "unfiltered"
+    #
+    # ``is_default`` here means "vector is supposed to be a mean of all
+    # activations (no scores filter)" -- the path step 4 takes only when
+    # the role name contains ``default``.  Earlier versions of this
+    # scanner also treated ``mode == "unfiltered"`` as default-like, but
+    # that misclassified non-default roles in ``vectors_unfiltered/`` as
+    # ``mysterious`` when they were legitimately ``below_min_count``:
+    # ``vectors_unfiltered/`` only turns off incongruity filtering, it
+    # does NOT turn off the score=3 + min_count filter for non-default
+    # roles.  See the module docstring for the convention.
+    #
+    # Back-compat: ``--mode unfiltered`` *without* a scores_dir is the
+    # legacy mean-of-all invocation; we still honour it (equivalent to
+    # the new explicit ``--mode unfiltered_mean``).
+    is_default = "default" in role
+    if mode == "unfiltered_mean":
+        is_default = True
+    elif mode == "unfiltered" and scores_dir is None:
+        is_default = True
 
     if not is_default:
         if scores_dir is None:
@@ -730,9 +758,12 @@ def discover_scan_targets(
         act_dir = entity_dir / "activations"
         if not act_dir.is_dir():
             continue
-        scores_dir = entity_dir / "scores"
-        if not scores_dir.is_dir():
-            scores_dir = None
+        filtered_scores = entity_dir / "scores"
+        if not filtered_scores.is_dir():
+            filtered_scores = None
+        unfiltered_scores = entity_dir / "scores_unfiltered"
+        if not unfiltered_scores.is_dir():
+            unfiltered_scores = None
 
         for vec_dir in sorted(entity_dir.iterdir()):
             if not vec_dir.is_dir():
@@ -754,17 +785,26 @@ def discover_scan_targets(
             if skippable:
                 logger.info(f"[skip] {vec_dir} ({reason})")
                 continue
-            mode = "filtered" if scores_dir is not None else "unfiltered"
-            # If the vectors variant is named *_unfiltered, force
-            # unfiltered mode regardless of whether scores/ exists.
+            # Pair vectors variants with their scores convention:
+            #   vectors_unfiltered/  <->  scores_unfiltered/  (mode=unfiltered)
+            #   vectors/             <->  scores/             (mode=filtered)
+            #   vectors_*_unfiltered <->  scores_unfiltered/  (mode=unfiltered)
+            #   vectors_*            <->  scores/             (mode=filtered)
+            # When the matching scores dir is absent, fall back to the
+            # other one if available, otherwise leave None (the scanner
+            # will then return missing_scores for non-default roles).
             if vec_dir.name.endswith("_unfiltered"):
                 mode = "unfiltered"
+                target_scores = unfiltered_scores or filtered_scores
+            else:
+                mode = "filtered" if filtered_scores is not None else "unfiltered"
+                target_scores = filtered_scores or unfiltered_scores
             targets.append(ScanTarget(
                 entity_type=entity_dir.name,
                 vectors_variant=vec_dir.name,
                 activations_dir=act_dir,
                 vectors_dir=vec_dir,
-                scores_dir=scores_dir if mode == "filtered" else None,
+                scores_dir=target_scores,
                 mode=mode,
             ))
 
@@ -979,17 +1019,24 @@ def main() -> None:
     parser.add_argument("--activations_dir", type=Path, default=None)
     parser.add_argument("--vectors_dir", type=Path, default=None)
     parser.add_argument("--scores_dir", type=Path, default=None,
-                        help="Required for --mode filtered (default).  "
-                             "Drop for --mode unfiltered (or for vectors_unfiltered/ dirs).")
-    parser.add_argument("--mode", choices=("filtered", "unfiltered"),
+                        help="Required for --mode filtered or unfiltered "
+                             "(used to count score=3 entries for non-default "
+                             "roles in either mode).  Drop only for "
+                             "--mode unfiltered_mean.")
+    parser.add_argument("--mode",
+                        choices=("filtered", "unfiltered", "unfiltered_mean"),
                         default="filtered",
                         help="filtered = step 4's default behaviour "
-                             "(score=3 mean for non-default roles, mean for "
-                             "default roles).  unfiltered = treat every "
-                             "entity as a 'default' role (mean of all acts). "
-                             "In --root mode, auto-detected per vectors dir "
-                             "(unfiltered if name ends with _unfiltered or "
-                             "no sibling scores/ subdir).")
+                             "(score=3 mean filtered against scores/ for "
+                             "non-default roles; mean-of-all for default).  "
+                             "unfiltered = same logic, but expecting the "
+                             "unfiltered scores dir (scores_unfiltered/) "
+                             "which omits the per-pair incongruity exclusion.  "
+                             "unfiltered_mean = legacy: treat every entity "
+                             "as 'default' (mean of all acts, no scores). "
+                             "In --root mode, mode is auto-detected per "
+                             "vectors dir (unfiltered if name ends with "
+                             "_unfiltered, filtered otherwise).")
     parser.add_argument("--min_count", type=int, default=50,
                         help="Minimum score=3 sample count required by step 4.")
     parser.add_argument("--reduce_questions", type=int, default=1,
