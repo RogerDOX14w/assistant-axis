@@ -51,6 +51,7 @@ from ..ca1_plane import (
 )
 from ..data import (
     DEFAULT_DATA_DIR,
+    _derived_marginal_dir,
     list_etype_names,
     load_theatricality_shift,
     load_vector,
@@ -72,8 +73,11 @@ def parse_args() -> argparse.Namespace:
                    help="Which goal/no-goal subspace pair to use")
     p.add_argument("--ca_index", type=int, default=1,
                    help="Which canonical-angle pair to plot (default: 1).")
-    p.add_argument("--slot", type=int, default=3,
-                   help="Token-slot index (default: 3 -- header newline)")
+    p.add_argument("--slot", type=int, default=6,
+                   help="Token-slot index (default: 6 = </think>; new judge-ρ "
+                        "winner from May 2026 rejudge).  Pass --slot 3 (\\n) "
+                        "or 7 (\\n\\n post) to compare.  Slots 4-7 require "
+                        "the 8-slot Roger dataset.")
     p.add_argument("--layer", type=int, default=25,
                    help="Transformer layer (default: 25)")
     p.add_argument("--theat_shift", action="store_true", default=True,
@@ -98,8 +102,15 @@ def parse_args() -> argparse.Namespace:
 
 def _load_residual_block(data_dir: Path, folder: str, slot: int, layer: int,
                          shift: np.ndarray | None) -> np.ndarray:
-    """Load all combo-marginal residuals from a folder, shifted if requested."""
-    cv = data_dir / "combinations" / "vectors" / folder
+    """Load all combo-marginal residuals from a folder, shifted if requested.
+
+    ``folder`` is one of the four marginal etypes (``r_goal``, ``r_nogoal``,
+    ``t_goal``, ``t_nogoal``); the on-disk path is resolved through the
+    centralized ``_derived_marginal_dir`` so the new
+    ``combinations/vectors/derived/marginals/`` layout is preferred when
+    present.
+    """
+    cv = _derived_marginal_dir(data_dir, folder)
     vecs = []
     for fp in sorted(cv.glob("*.pt")):
         if fp.stem == "default":

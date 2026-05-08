@@ -72,16 +72,40 @@ from results_analysis.canonical_angles.whitening import fit_shear, fit_whitening
 # Defaults (overridable via CLI)
 # ---------------------------------------------------------------------------
 
-DEFAULT_CONFIGS: list[tuple[int, int]] = [(3, 25), (0, 26), (0, 49)]
-DEFAULT_L_VALUES: list[int] = [0, 1, 2, 3, 5]
-DEFAULT_K_COARSE: list[int] = [0, 1, 2, 4, 8, 16, 32, 64, 128, 192, 256, 384, 512]
+# 7-cell default for the round-trip experiment.  Order matters — the plot's
+# n-cell aggregates take prefixes of this list (with n ∈ {1, 2, 4, 6, 7}).
+# Canonical sits at the head; slot 6 and slot 0 layers come next; slot 3 is
+# included at the tail as the "old canonical" diagnostic point.
+#
+# May 2026 migration: the canonical was moved from slot 3 (4-slot dataset,
+# L=2 shear) to slot 7 (8-slot dataset, raw / L=0).  See AGENT_NOTES "PC
+# round-trip experiment — May 2026 migration to 8-slot, slot 7, L=0 raw"
+# for context.
+DEFAULT_CONFIGS: list[tuple[int, int]] = [
+    (7, 25), (7, 49), (6, 25), (6, 49), (0, 26), (0, 49), (3, 25),
+]
+# L grid: extends past the historical {0..5} now that fixed_principled L
+# winners spread across the full range with no clear preference.  Both grids
+# include the no-shear/no-whiten baselines (L=0, K=0) — empirically those
+# are the most common winners for fixed_principled.
+DEFAULT_L_VALUES: list[int] = [0, 1, 2, 3, 4, 6, 8, 12, 16]
+DEFAULT_K_COARSE: list[int] = [0, 1, 2, 3, 4, 6, 8, 12, 16, 24, 32]
 DEFAULT_M_VALUES: list[Optional[int]] = [64, 128, 256, 512, None]
-DEFAULT_PCS: list[int] = [1, 2, 4, 8, 16, 24, 32, 40, 48, 64, 96, 128, 192, 256]
+DEFAULT_PCS: list[int] = [1, 2, 3, 4, 6, 8, 12, 16, 24, 32, 48, 64, 96, 128, 192, 256, 384, 512]
 DEFAULT_STYLES: list[str] = ["glossary", "inline"]
 
 K_REFINE_MAX_ITER = 5
 K_REFINE_MIN_BRACKET = 3      # Stop when bracket width <= this (integer K spacing)
 K_REFINE_TIE_THRESH = 0.005   # ρ-difference below this counts as a tie
+
+# Note: the K-near-N dense-neighbourhood expansion (``expanded_k_grid``,
+# ``K_NEAR_N_WIDTH``, ``k_neighborhood_for_pc``) was removed 2026-05-06.
+# It existed to honestly evaluate the K=N spike for the ``nth_pc`` variant.
+# The plot is now fixed_principled-only and that variant doesn't show K=N
+# spike behaviour — its K winners cluster at the bottom of the grid (mostly
+# K ≤ 13 in the 3-cell sweep).  The bracket-and-bisect refinement on the
+# coarse grid is sufficient.
+
 
 DEFAULT_SWEEP_DIR = "roger/pc_axis_describer_sweep"
 DEFAULT_CACHE_PATH = "roger/pc_round_trip_klm_results.json"
@@ -330,9 +354,23 @@ def stage2_k_refinement(scores_by_cell, *, data_dir, configs, l_values,
                         out[(pc, style)] = rho
             return out
 
+        # K grid for stage-2 init = the coarse grid only; bracket-and-
+        # bisect handles the rest.  (The K-near-N expansion that used to
+        # live here was for the nth_pc variant's K=N spike; gone now.)
+        k_grid_init = sorted(set(k_coarse))
         for L in l_values:
+            # Memory hygiene: evict (L', K) cache entries for L' != L.
+            # L's are processed in order so we never revisit.
+            for cache in (Vt_at_K_per_L, M_done_at_K_per_L):
+                for k in [k for k in cache if k[0] != L]:
+                    del cache[k]
+            for k in [k for k in whiten_cache if k[0] != L]:
+                del whiten_cache[k]
+            for k in [k for k in shear_cache if k != L]:
+                del shear_cache[k]
+
             grid: dict[int, dict[tuple[int, str], float]] = {
-                K: evaluate_K(L, K) for K in k_coarse
+                K: evaluate_K(L, K) for K in k_grid_init
             }
 
             for pc in pcs:
@@ -466,8 +504,9 @@ def parse_args() -> argparse.Namespace:
     )
     p.add_argument("--data_dir", type=str, default=str(DEFAULT_DATA_DIR),
                    help="Base data directory containing roles/vectors and "
-                        "traits/vectors with the entity .pt files. Default "
-                        "is the project's DEFAULT_DATA_DIR.")
+                        "traits/vectors with the entity .pt files.  "
+                        "Default = the project's 8-slot DEFAULT_DATA_DIR "
+                        "(post May-2026 pc_round_trip migration).")
     p.add_argument("--sweep_dir", type=str, default=DEFAULT_SWEEP_DIR,
                    help="Directory containing pcNNN_<style>/<provider>/scores_*.json "
                         "files produced by launch_judge_runs.py.")

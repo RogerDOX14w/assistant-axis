@@ -81,11 +81,17 @@ import numpy as np
 import torch
 from scipy.stats import spearmanr
 
-from assistant_axis import png_metadata, suptitle_with_specs
+from assistant_axis import json_metadata, png_metadata, suptitle_with_specs
 from assistant_axis.judge_score_combine import (
     add_di_weights_arg,
     combine_desc_inst_two_judges,
     parse_di_weights_arg,
+)
+from assistant_axis.provenance import (
+    InputSpec,
+    current_data_subtree_input,
+    current_file_input,
+    current_files_input,
 )
 from results_analysis.axis_judge_correlation import _load_vector_file
 from results_analysis.canonical_angles.data import (
@@ -97,19 +103,24 @@ DEFAULT_EXPERIMENT_DIR = Path(__file__).resolve().parent.parent / (
     "roger/axis_judge_experiments"
 )
 DEFAULT_DATA_DIR = Path(__file__).resolve().parent.parent / (
-    "runpod_workspace/qwen/qwen-3-32b Roger"
+    "runpod_workspace/qwen/qwen-3-32b Roger 8slot"
 )
 LAYER = 25  # Qwen-3-32B; tuned via rho_by_layer.py.  Other models TBD.
-SLOT = 3
+DEFAULT_SLOT = 6  # New default after May 2026 rejudge run: slot 6 (</think>)
+                  # beats slot 3 (\\n) by judge ρ across most axes -- see
+                  # roger/axis_judge_experiments/rho_by_slot_and_K.png and
+                  # rho_by_layer.png.  Pass --slot 3 (or 7) to compare.
+                  # Output filenames auto-include _slot{N} when the user
+                  # leaves --plot / --sweep at their generic defaults.
 K_VALUES = [0, 1, 2, 3, 4, 6, 8, 12, 16, 24, 32]
 
 
-def load_pool(data_dir: Path, exclude_names: set[str]):
+def load_pool(data_dir: Path, exclude_names: set[str], *, slot: int):
     """Build the held-out whitening pool for an axis-judge run.
 
     Returns ``(entity_vecs, pool, default_sl)`` where:
 
-    - ``entity_vecs`` -- dict ``{name: tensor at (SLOT, LAYER)}`` for
+    - ``entity_vecs`` -- dict ``{name: tensor at (slot, LAYER)}`` for
       every standalone role + trait, with ``default.pt`` SUBTRACTED so
       projections are taken in the default-centered frame.
     - ``pool`` -- (n, hidden) numpy array used to fit the soft-K
@@ -131,7 +142,7 @@ def load_pool(data_dir: Path, exclude_names: set[str]):
     """
     default = _load_vector_file(
         data_dir / "traits" / "vectors" / "default.pt").float()
-    default_sl = default[SLOT, LAYER]
+    default_sl = default[slot, LAYER]
 
     entity_vecs: dict[str, torch.Tensor] = {}
     for etype in ("traits", "roles"):
@@ -145,7 +156,7 @@ def load_pool(data_dir: Path, exclude_names: set[str]):
                 v = _load_vector_file(f).float()
             except Exception:  # pragma: no cover -- skip unreadable files
                 continue
-            entity_vecs[f.stem] = v[SLOT, LAYER] - default_sl
+            entity_vecs[f.stem] = v[slot, LAYER] - default_sl
 
     # Build the pool via the canonical-angles helper.  Pass leave-out
     # entries for both etypes since we don't know which one the pair
@@ -164,18 +175,19 @@ def load_pool(data_dir: Path, exclude_names: set[str]):
         return data_dir / etype / "vectors" / f"{name}.pt"
 
     pool_rows = [
-        _load_vector_file(_path(et, n)).float()[SLOT, LAYER].numpy()
+        _load_vector_file(_path(et, n)).float()[slot, LAYER].numpy()
         for (et, n) in pool_entries
     ]
     pool = np.stack(pool_rows, axis=0)
     return entity_vecs, pool, default_sl
 
 
-def axis_direction(data_dir: Path, pos: str, neg: str) -> torch.Tensor:
-    """Load pair vectors and return the unit axis direction at (SLOT, LAYER)."""
+def axis_direction(data_dir: Path, pos: str, neg: str, *,
+                   slot: int) -> torch.Tensor:
+    """Load pair vectors and return the unit axis direction at (slot, LAYER)."""
     vp = _load_vector_file(data_dir / "traits" / "vectors" / f"{pos}.pt").float()
     vn = _load_vector_file(data_dir / "traits" / "vectors" / f"{neg}.pt").float()
-    d = vp[SLOT, LAYER] - vn[SLOT, LAYER]
+    d = vp[slot, LAYER] - vn[slot, LAYER]
     d = d / torch.linalg.vector_norm(d)
     return d
 
@@ -220,17 +232,29 @@ def main() -> int:
                         "(default: pair_list_12.json -- the 12 axes that "
                         "have desc+inst from both providers AND GPT "
                         "response scores cached on disk).")
-    p.add_argument("--sweep", default="whitening_k_sweep.json",
+    p.add_argument("--sweep", default=None,
                    help="Output JSON filename within --experiment_dir "
-                        "(default: whitening_k_sweep.json).")
-    p.add_argument("--plot", default="rho_vs_whitening_K.png",
+                        "(default: whitening_k_sweep_slot{N}.json -- the "
+                        "slot suffix matches --slot).  Pass an explicit "
+                        "filename to override.")
+    p.add_argument("--plot", default=None,
                    help="Output PNG filename within --experiment_dir "
-                        "(default: rho_vs_whitening_K.png).")
+                        "(default: rho_vs_whitening_K_slot{N}.png).")
+    p.add_argument("--slot", type=int, default=DEFAULT_SLOT,
+                   help=f"Token-position slot to project onto "
+                        f"(default: {DEFAULT_SLOT} = </think>).  Slot 6 is "
+                        f"the new judge-ρ winner; pass --slot 3 (\\n) or "
+                        f"--slot 7 (\\n\\n post) to compare.")
     add_di_weights_arg(p)
     args = p.parse_args()
     di_weights = parse_di_weights_arg(args.di_weights)
     experiment_dir = Path(args.experiment_dir).resolve()
     data_dir = Path(args.data_dir).resolve()
+    slot = int(args.slot)
+    if args.sweep is None:
+        args.sweep = f"whitening_k_sweep_slot{slot}.json"
+    if args.plot is None:
+        args.plot = f"rho_vs_whitening_K_slot{slot}.png"
 
     pairs = json.load(open(experiment_dir / args.pairs))
     print(f"Loaded {len(pairs)} axis pairs from {args.pairs}")
@@ -249,19 +273,23 @@ def main() -> int:
         desc_inst = combine_desc_inst_two_judges(g_d, g_i, s_d, s_i,
                                                  weights=di_weights)
 
-        # Response scores merged from traits + roles GPT runs
-        resp_t = json.load(open(axis_dir / "gpt_responses_traits" / "scores_responses.json"))
-        resp_r = json.load(open(axis_dir / "gpt_responses_roles" / "scores_responses.json"))
-        responses = {}
-        for src in (resp_t, resp_r):
-            for n, info in src.items():
+        # Response scores merged from traits + roles GPT runs.  Many of
+        # the 33-axis cohort don't have response judging yet -- skip
+        # silently and leave the responses dict empty so ρ_responses comes
+        # out NaN and whitening_k_peak_fit.py just plots desc_inst there.
+        responses: dict[str, float] = {}
+        for sub in ("gpt_responses_traits", "gpt_responses_roles"):
+            fp = axis_dir / sub / "scores_responses.json"
+            if not fp.exists():
+                continue
+            for n, info in json.load(open(fp)).items():
                 if info.get("mean_score") is not None:
                     responses[n] = info["mean_score"]
 
         # --- Projections at each K ---
         entity_vecs, pool, _default = load_pool(
-            data_dir, exclude_names={pos, neg})
-        axis_unit = axis_direction(data_dir, pos, neg)
+            data_dir, exclude_names={pos, neg}, slot=slot)
+        axis_unit = axis_direction(data_dir, pos, neg, slot=slot)
         projections_by_K = {K: project_at_K(entity_vecs, pool, axis_unit, K)
                             for K in K_VALUES}
 
@@ -290,6 +318,38 @@ def main() -> int:
             print(f"  {pos:16s} vs {neg:16s}  {source_name:9s}  rhos: "
                   + "  ".join(f"{r:+.3f}" for r in rhos))
 
+    # --- Build provenance input list (used by both JSON + PNG writes) ---
+    # Two dataset subtrees + the pair-list file + a composite multi-
+    # file fingerprint over all per-axis judge caches read above.
+    # The default.pt corpus baseline is captured transitively via the
+    # traits/vectors subtree fingerprint (default.pt is a symlink into
+    # the traits/ tree, so os.stat in the manifest tool follows it).
+    judge_cache_paths: list[Path] = []
+    for it in pairs:
+        ax = experiment_dir / f"{it['pos']}_vs_{it['neg']}"
+        for judge in ("gpt", "sonnet"):
+            for mode in ("descriptions", "instructions"):
+                judge_cache_paths.append(
+                    ax / judge / f"scores_{mode}.json")
+        for sub in ("gpt_responses_traits", "gpt_responses_roles"):
+            judge_cache_paths.append(ax / sub / "scores_responses.json")
+
+    inputs: list[InputSpec] = [
+        current_data_subtree_input(
+            data_dir, "traits/vectors", dep_key="traits_vectors",
+            extras={"slot": str(slot), "layer": str(LAYER)}),
+        current_data_subtree_input(
+            data_dir, "roles/vectors", dep_key="roles_vectors",
+            extras={"slot": str(slot), "layer": str(LAYER)}),
+        current_file_input(
+            dep_key="pairs_json",
+            path=experiment_dir / args.pairs),
+        current_files_input(
+            dep_key="judge_caches",
+            paths=judge_cache_paths,
+            extras={"n_axes": str(len(pairs))}),
+    ]
+
     # --- Save JSON ---
     records = []
     for (pos, neg, source), rhos in rho_table.items():
@@ -297,7 +357,11 @@ def main() -> int:
             records.append({"pos": pos, "neg": neg, "source": source,
                             "K": K, "rho": r})
     sweep_path = experiment_dir / args.sweep
-    json.dump(records, open(sweep_path, "w"), indent=2)
+    envelope = json_metadata(
+        records,
+        inputs=inputs,
+        title=f"whitening_k_sweep slot={slot} pairs={args.pairs}")
+    json.dump(envelope, open(sweep_path, "w"), indent=2)
     print(f"\nWrote {len(records)} records to {sweep_path}")
 
     # --- Plot ---
@@ -318,7 +382,7 @@ def main() -> int:
     ax.set_xticks(x_pos)
     ax.set_xticklabels(["raw\n(K=0)"] + [str(K) for K in K_VALUES[1:]])
     ax.set_xlabel("Soft-whitening K (raw = no whitening; higher K = more PCs scaled down)")
-    ax.set_ylabel(f"Spearman ρ (judge scores vs. projection, slot={SLOT})")
+    ax.set_ylabel(f"Spearman ρ (judge scores vs. projection, slot={slot})")
     title_line = f"ρ vs whitening K across {len(pair_keys)} axes"
     spec_line = ("solid = GPT responses; "
                  "dotted = desc+inst (GPT+Sonnet averaged)")
@@ -330,7 +394,7 @@ def main() -> int:
     plt.tight_layout(rect=(0, 0, 1, top_rect))
     plot_path = experiment_dir / args.plot
     plt.savefig(plot_path, dpi=150, bbox_inches="tight",
-                metadata=png_metadata(title=title_line))
+                metadata=png_metadata(title=title_line, inputs=inputs))
     plt.close(fig)
     print(f"Wrote {plot_path}")
     return 0

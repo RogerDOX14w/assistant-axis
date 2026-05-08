@@ -78,7 +78,6 @@ from matplotlib.lines import Line2D
 from assistant_axis import png_metadata, suptitle_with_specs
 from results_analysis.axis_judge_correlation import _load_vector_file
 from results_analysis.canonical_angles.data import (
-    DEFAULT_DATA_DIR,
     build_augmented_whitening_pool,
 )
 from results_analysis.canonical_angles.whitening import (
@@ -87,6 +86,13 @@ from results_analysis.canonical_angles.whitening import (
 )
 
 
+# Override the canonical-angles 4-slot default with the 8-slot Roger
+# dataset; the 8-slot data is what ships slot 6 (</think>) and slot 7
+# (\\n\\n post), which the new --slot=6 default needs.  Pass --data_dir to
+# point at the older 4-slot Christina-headers data for back-compat.
+LOCAL_DEFAULT_DATA_DIR = (Path(__file__).resolve().parent.parent
+                          / "runpod_workspace/qwen/qwen-3-32b Roger 8slot")
+DEFAULT_DATA_DIR = LOCAL_DEFAULT_DATA_DIR
 DEFAULT_OUT_DIR = (Path(__file__).resolve().parent.parent
                    / "roger/axis_judge_experiments/pair_slices")
 
@@ -454,10 +460,14 @@ def main() -> int:
     p.add_argument("--data_dir", default=str(DEFAULT_DATA_DIR),
                    help=f"Activation vectors directory "
                         f"(default: {DEFAULT_DATA_DIR}).")
-    p.add_argument("--out_dir", default=str(DEFAULT_OUT_DIR),
-                   help=f"Output directory (default: {DEFAULT_OUT_DIR}).")
-    p.add_argument("--slot", type=int, default=3,
-                   help="Token-slot index (default: 3 = post-header \\n).")
+    p.add_argument("--out_dir", default=None,
+                   help=f"Output directory (default: {DEFAULT_OUT_DIR}_slot{{N}} "
+                        f"-- the slot suffix matches --slot so multi-slot runs "
+                        f"don't overwrite each other).")
+    p.add_argument("--slot", type=int, default=6,
+                   help="Token-slot index (default: 6 = </think>; new judge-ρ "
+                        "winner from May 2026 rejudge).  Pass --slot 3 (\\n) or "
+                        "7 (\\n\\n post) to compare.")
     p.add_argument("--layer", type=int, default=25,
                    help="Transformer layer (default: 25 -- Qwen-3-32B "
                         "optimum from rho_by_layer.py).")
@@ -475,6 +485,8 @@ def main() -> int:
     args = p.parse_args()
 
     data_dir = Path(args.data_dir).resolve()
+    if args.out_dir is None:
+        args.out_dir = f"{DEFAULT_OUT_DIR}_slot{args.slot}"
     out_dir = Path(args.out_dir).resolve()
 
     pairs_to_run: list[tuple[str, str, str, str, str]]

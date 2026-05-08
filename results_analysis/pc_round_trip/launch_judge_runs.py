@@ -60,18 +60,21 @@ from results_analysis.axis_judge_correlation import _load_vector_file
 from results_analysis.canonical_angles.data import (
     DEFAULT_DATA_DIR, build_goal_nogoal_subspaces,
 )
-from results_analysis.canonical_angles.whitening import (
-    DEFAULT_SOFT_SHEAR_L, fit_shear,
-)
+from results_analysis.canonical_angles.whitening import fit_shear
 
 # ---------------------------------------------------------------------------
 # Defaults
 # ---------------------------------------------------------------------------
 
+# May 2026 migration: pc_round_trip canonical = 8-slot, slot 7, layer 25,
+# raw (L=0, K=0).  See AGENT_NOTES "PC round-trip migration to 8-slot,
+# slot 7, raw" for context.
 DEFAULT_SWEEP_DIR = "roger/pc_axis_describer_sweep"
-DEFAULT_SLOT = 3
+DEFAULT_SLOT = 7
 DEFAULT_LAYER = 25
-DEFAULT_PCS: list[int] = [1, 2, 4, 8, 16, 24, 32, 40, 48, 64, 96, 128, 192, 256]
+DEFAULT_SHEAR_L = 0       # raw canonical, no soft-shear
+DEFAULT_WHITEN_K = 0      # raw canonical, no soft-K whitening
+DEFAULT_PCS: list[int] = [1, 2, 3, 4, 6, 8, 12, 16, 24, 32, 48, 64, 96, 128, 192, 256, 384, 512]
 DEFAULT_STYLES: list[str] = ["glossary", "inline"]
 DEFAULT_PROVIDERS: list[str] = ["openai", "anthropic"]
 
@@ -91,7 +94,7 @@ PROVIDER_SUBDIR = {
 
 def setup_pcs(*, data_dir: Path, sweep_dir: Path, slot: int, layer: int,
               pcs: list[int], styles: list[str],
-              shear_L: int = DEFAULT_SOFT_SHEAR_L) -> dict[int, np.ndarray]:
+              shear_L: int = DEFAULT_SHEAR_L) -> dict[int, np.ndarray]:
     """Compute PC directions in post-shear space at (slot, layer); save them
     into each pcNNN_{style}/axis_postshear.pt cell file."""
     default_v = _load_vector_file(
@@ -134,7 +137,7 @@ def setup_pcs(*, data_dir: Path, sweep_dir: Path, slot: int, layer: int,
 
 def projection_at_post_shear(*, data_dir: Path, slot: int, layer: int,
                               pc_dir: np.ndarray,
-                              shear_L: int = DEFAULT_SOFT_SHEAR_L) -> dict[str, float]:
+                              shear_L: int = DEFAULT_SHEAR_L) -> dict[str, float]:
     """Compute post-shear projections of all entities onto pc_dir; returns
     {entity_name: projection}."""
     default_v = _load_vector_file(
@@ -209,19 +212,19 @@ def parse_args() -> argparse.Namespace:
     )
     p.add_argument("--data_dir", type=str, default=str(DEFAULT_DATA_DIR),
                    help="Base data directory (must contain roles/vectors and "
-                        "traits/vectors with the entity .pt files).")
+                        "traits/vectors with the entity .pt files).  "
+                        "Default = the project's 8-slot DEFAULT_DATA_DIR.")
     p.add_argument("--sweep_dir", type=str, default=DEFAULT_SWEEP_DIR,
                    help="Directory containing pcNNN_<style>/ cells (and where "
                         "this script writes axis_postshear.pt and "
                         "post_shear_projection.json).")
     p.add_argument("--slot", type=int, default=DEFAULT_SLOT,
-                   help="Token slot for the PC subspace (default 3, the "
-                        "post-assistant slot).")
+                   help=f"Token slot for the PC subspace (default {DEFAULT_SLOT}).")
     p.add_argument("--layer", type=int, default=DEFAULT_LAYER,
-                   help="Transformer layer for the PC subspace (default 25).")
-    p.add_argument("--shear_L", type=int, default=DEFAULT_SOFT_SHEAR_L,
-                   help="Soft-shear truncation depth for the post-shear PCA "
-                        "(default DEFAULT_SOFT_SHEAR_L).")
+                   help=f"Transformer layer for the PC subspace (default {DEFAULT_LAYER}).")
+    p.add_argument("--shear_L", type=int, default=DEFAULT_SHEAR_L,
+                   help=f"Soft-shear truncation depth for the canonical PCA "
+                        f"(default {DEFAULT_SHEAR_L} = raw, no shear).")
     p.add_argument("--pcs", type=str,
                    default=",".join(str(pc) for pc in DEFAULT_PCS),
                    help=f"Comma-separated PC indices. Default: {DEFAULT_PCS}")
@@ -236,10 +239,11 @@ def parse_args() -> argparse.Namespace:
     p.add_argument("--save_every", type=int, default=40)
     p.add_argument("--max_tokens", type=int, default=1024)
     p.add_argument("--temperature", type=float, default=0.0)
-    p.add_argument("--whiten_K", type=int, default=2,
-                   help="K for the inner axis_judge_correlation projection "
-                        "geometry (NOT the K of the round-trip sweep, which "
-                        "is swept separately).")
+    p.add_argument("--whiten_K", type=int, default=DEFAULT_WHITEN_K,
+                   help=f"K for the inner axis_judge_correlation projection "
+                        f"geometry (default {DEFAULT_WHITEN_K} = raw, "
+                        "matches the canonical raw setup).  Independent of "
+                        "the K swept in the round-trip experiment.")
     p.add_argument("--max_parallel", type=int, default=2,
                    help="Concurrent subprocess cap (default 2 to keep the ML "
                         "footprint comfortable on a 48 GB box; bump up on a "
@@ -252,6 +256,10 @@ def parse_args() -> argparse.Namespace:
                    help="Skip the PC-direction setup + projection-save steps "
                         "(useful when the cell files already exist and you "
                         "just want to re-launch the judge calls).")
+    p.add_argument("--setup_only", action="store_true",
+                   help="Run setup (axis_postshear.pt + post_shear_projection."
+                        "json) and stop before the judge calls.  Used as the "
+                        "Phase 3 step of the migration pipeline.")
     return p.parse_args()
 
 
@@ -288,6 +296,12 @@ def main() -> int:
                     json.dumps(proj, indent=2)
                 )
             print(f"  PC{pc:>3d}: {len(proj)} entity projections saved")
+
+    if args.setup_only:
+        print("\n--setup_only: stopping after axis_postshear.pt + "
+              "post_shear_projection.json are written; skipping "
+              "describer / judges.")
+        return 0
 
     # Step 3: build commands.
     print("\n=== Step 3: Build axis_judge_correlation commands ===")

@@ -106,8 +106,11 @@ def parse_args() -> argparse.Namespace:
     p.add_argument("--kinds", nargs="+", default=["r", "t"],
                    choices=["r", "t"],
                    help="Combination kinds to compute and average (default: r t)")
-    p.add_argument("--slot", type=int, default=3,
-                   help="Token-slot index (default: 3 = post-header \\n)")
+    p.add_argument("--slot", type=int, default=6,
+                   help="Token-slot index (default: 6 = </think>; new judge-ρ "
+                        "winner from May 2026 rejudge).  Pass --slot 3 (\\n) or "
+                        "7 (\\n\\n post) to compare.  Slots 4-7 require the "
+                        "8-slot Roger dataset; pass --data_dir accordingly.")
     p.add_argument("--layer", type=int, default=25,
                    help="Transformer layer (default: 25 -- Qwen-3-32B "
                         "optimum from rho_by_layer.py)")

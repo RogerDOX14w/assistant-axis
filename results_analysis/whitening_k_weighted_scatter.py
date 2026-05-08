@@ -90,7 +90,13 @@ import matplotlib.pyplot as plt
 import numpy as np
 from scipy.stats import pearsonr, spearmanr
 
-from assistant_axis import png_metadata
+from assistant_axis import json_metadata, png_metadata
+from assistant_axis.provenance import (
+    CACHE_POLICIES,
+    InputSpec,
+    current_file_input,
+    load_validated_json,
+)
 
 DEFAULT_EXPERIMENT_DIR = Path(__file__).resolve().parent.parent / (
     "roger/axis_judge_experiments"
@@ -149,21 +155,42 @@ def main() -> int:
                    help=f"Directory holding the K-sweep input + pair list "
                         f"(default: {DEFAULT_EXPERIMENT_DIR}).")
     p.add_argument("--pairs", default="pair_list_12.json",
-                   help="Pair-list JSON filename "
-                        "(default: pair_list_12.json).")
-    p.add_argument("--sweep", default="whitening_k_sweep.json",
+                   help="Pair-list JSON filename (default: pair_list_12.json -- "
+                        "the cohort that has both desc+instr and responses ρ; "
+                        "the scatter is only meaningful for axes with both).")
+    p.add_argument("--slot", type=int, default=6,
+                   help="Token-position slot (default: 6 = </think>).  Used to "
+                        "auto-suffix --sweep / --plot / --fit_json defaults.  "
+                        "Pass --slot 3 (\\n) or 7 (\\n\\n post) to compare.")
+    p.add_argument("--sweep", default=None,
                    help="K-sweep input filename "
-                        "(default: whitening_k_sweep.json).")
-    p.add_argument("--fit_json", default="whitening_k_peak_fit_weighted.json",
+                        "(default: whitening_k_sweep_slot{N}.json -- the slot "
+                        "suffix matches --slot).")
+    p.add_argument("--fit_json", default=None,
                    help="Output fit-records filename "
-                        "(default: whitening_k_peak_fit_weighted.json).")
-    p.add_argument("--plot", default="rho_peak_K_weighted_scatter.png",
+                        "(default: whitening_k_peak_fit_weighted_slot{N}.json).")
+    p.add_argument("--plot", default=None,
                    help="Output PNG filename "
-                        "(default: rho_peak_K_weighted_scatter.png).")
+                        "(default: rho_peak_K_weighted_scatter_slot{N}.png).")
+    p.add_argument("--cache-policy", choices=CACHE_POLICIES, default="warn",
+                   help="How to react to drift in the sweep JSON's "
+                        "recorded provenance: strict / warn (default) / "
+                        "rebuild / off.")
     args = p.parse_args()
     experiment_dir = Path(args.experiment_dir).resolve()
+    slot = int(args.slot)
+    if args.sweep is None:
+        args.sweep = f"whitening_k_sweep_slot{slot}.json"
+    if args.plot is None:
+        args.plot = f"rho_peak_K_weighted_scatter_slot{slot}.png"
+    if args.fit_json is None:
+        args.fit_json = f"whitening_k_peak_fit_weighted_slot{slot}.json"
 
-    sweep = json.load(open(experiment_dir / args.sweep))
+    # Validate sweep_json provenance per --cache-policy; legacy bare-
+    # list sweep files pass through (check=None) since they have no
+    # envelope.
+    sweep, _check = load_validated_json(
+        experiment_dir / args.sweep, policy=args.cache_policy)
     pairs = json.load(open(experiment_dir / args.pairs))
 
     # axis -> source -> {K: rho}
@@ -276,9 +303,18 @@ def main() -> int:
     # ------------------------------------------------------------------
     # Save outputs
     # ------------------------------------------------------------------
+    inputs: list[InputSpec] = [
+        current_file_input(
+            dep_key="sweep_json",
+            path=experiment_dir / args.sweep),
+        current_file_input(
+            dep_key="pairs_json",
+            path=experiment_dir / args.pairs),
+    ]
+
     plot_path = experiment_dir / args.plot
     plt.savefig(plot_path, dpi=150, bbox_inches="tight",
-                metadata=png_metadata(title=title_line))
+                metadata=png_metadata(title=title_line, inputs=inputs))
     plt.close(fig)
     print(f"Wrote {plot_path}")
 
@@ -296,7 +332,11 @@ def main() -> int:
             "weight_when_di": matched["w"] if matched else None,
         })
     fit_path = experiment_dir / args.fit_json
-    json.dump(out_records, open(fit_path, "w"), indent=2, default=str)
+    fit_envelope = json_metadata(
+        out_records, inputs=inputs,
+        title=f"whitening_k_weighted_scatter slot={slot}")
+    with open(fit_path, "w") as _f:
+        json.dump(fit_envelope, _f, indent=2, default=str)
     print(f"Wrote {fit_path}")
 
     # Summary print.

@@ -68,7 +68,7 @@ import torch
 
 # Default location of the cached activation vectors.  Wrappers should accept
 # a CLI override.
-DEFAULT_DATA_DIR = "runpod_workspace/qwen/qwen-3-32b Roger"
+DEFAULT_DATA_DIR = "runpod_workspace/qwen/qwen-3-32b Roger 8slot"
 
 # Which axis (role or trait) supplies the goal for each combination kind.
 GOAL_AXIS = {"r": "role", "t": "trait"}
@@ -100,6 +100,67 @@ _COMBO_MARGINAL_ETYPES = (
     "t_goal_theat_shifted", "t_nogoal_theat_shifted",
 )
 
+_LEGACY_CENTROID_SUFFIX = "_legacy_centroid"
+
+# ---------------------------------------------------------------------------
+# Path resolution for post-pipeline derived files.
+#
+# Phase 1.0 (provenance redesign) split post-pipeline derivatives into a
+# dedicated ``combinations/vectors/derived/`` subtree so they no longer share
+# mtime/manifest fate with the raw pipeline outputs.  The new layout is::
+#
+#     combinations/vectors/derived/
+#         marginals/{r_goal,r_nogoal,t_goal,t_nogoal}/<name>.pt
+#         legacy_centroid/{r_goal,r_nogoal,t_goal,t_nogoal}/<name>.pt
+#         aggregates/{mean_r_combos.pt, mean_t_combos.pt}
+#         axis/theatricality_axis.pt
+#
+# Each helper below tries the new path first and falls back to the legacy
+# location (flat under ``combinations/vectors/``) so the code change can land
+# before any physical migration, and so each dataset can be migrated
+# independently.  See audits/post_pipeline_derived_layout.md for the full
+# mapping.
+# ---------------------------------------------------------------------------
+
+def _legacy_marginal_dir(data_dir: Path, etype: str) -> Path:
+    """Pre-Phase-1.0 location of a combo-marginal etype's directory."""
+    return data_dir / "combinations" / "vectors" / etype
+
+
+def _derived_marginal_dir(data_dir: Path, etype: str) -> Path:
+    """Resolve the on-disk directory holding the per-name .pt files for a
+    combo-marginal etype, preferring the post-Phase-1.0 layout under
+    ``combinations/vectors/derived/`` and falling back to the legacy flat
+    layout if the new tree is absent.
+    """
+    cv = data_dir / "combinations" / "vectors"
+    if etype.endswith(_LEGACY_CENTROID_SUFFIX):
+        base = etype[: -len(_LEGACY_CENTROID_SUFFIX)]
+        new = cv / "derived" / "legacy_centroid" / base
+    else:
+        new = cv / "derived" / "marginals" / etype
+    if new.exists():
+        return new
+    return _legacy_marginal_dir(data_dir, etype)
+
+
+def _derived_aggregate_path(data_dir: Path, filename: str) -> Path:
+    """Resolve a top-level aggregate (mean_r_combos.pt / mean_t_combos.pt)."""
+    cv = data_dir / "combinations" / "vectors"
+    new = cv / "derived" / "aggregates" / filename
+    if new.exists():
+        return new
+    return cv / filename
+
+
+def _derived_axis_path(data_dir: Path) -> Path:
+    """Resolve the theatricality_axis.pt artifact."""
+    cv = data_dir / "combinations" / "vectors"
+    new = cv / "derived" / "axis" / "theatricality_axis.pt"
+    if new.exists():
+        return new
+    return cv / "theatricality_axis.pt"
+
 
 def load_theatricality_shift(data_dir: Path) -> np.ndarray:
     """Load the per-(slot, layer) shift vector to apply to combo_residual
@@ -118,7 +179,7 @@ def load_theatricality_shift(data_dir: Path) -> np.ndarray:
     a function of raw combinations + standalone vectors only), so applying
     it downstream is not circular.
     """
-    p = data_dir / "combinations" / "vectors" / "theatricality_axis.pt"
+    p = _derived_axis_path(data_dir)
     if not p.exists():
         raise FileNotFoundError(
             f"Theatricality axis artifact not found at {p}. "
@@ -138,7 +199,7 @@ def vector_path(data_dir: Path, etype: str, name: str) -> Path:
     if etype in ("traits", "roles"):
         return data_dir / etype / "vectors" / f"{name}.pt"
     if etype in _COMBO_MARGINAL_ETYPES:
-        return data_dir / "combinations" / "vectors" / etype / f"{name}.pt"
+        return _derived_marginal_dir(data_dir, etype) / f"{name}.pt"
     if etype == "combinations":
         return data_dir / "combinations" / "vectors" / f"{name}.pt"
     raise ValueError(f"Unknown etype {etype!r}")
@@ -249,9 +310,10 @@ def list_etype_names(data_dir: Path, etype: str,
     """
     if etype in ("traits", "roles"):
         root = data_dir / etype / "vectors"
-    elif etype in _COMBO_MARGINAL_ETYPES + ("combinations",):
-        root = (data_dir / "combinations" / "vectors") if etype == "combinations" \
-            else (data_dir / "combinations" / "vectors" / etype)
+    elif etype == "combinations":
+        root = data_dir / "combinations" / "vectors"
+    elif etype in _COMBO_MARGINAL_ETYPES:
+        root = _derived_marginal_dir(data_dir, etype)
     else:
         raise ValueError(f"Unknown etype {etype!r}")
     names = sorted(p.stem for p in root.glob("*.pt"))
@@ -389,7 +451,7 @@ def combo_residual_subspace(data_dir: Path, kind: str, side: str,
     # the residual dir hasn't been generated yet (the env will compute them
     # on the fly in that case).
     on_disk = list_etype_names(data_dir, etype, include_default=False) \
-        if (data_dir / "combinations" / "vectors" / etype).exists() else []
+        if _derived_marginal_dir(data_dir, etype).exists() else []
     if not on_disk:
         goal_axis, goal_names, nogoal_axis, nogoal_names = \
             goal_aligned_names(data_dir, kind)
@@ -434,7 +496,7 @@ def combo_centroid_subspace(data_dir: Path, kind: str, side: str,
         )
 
     legacy_etype = f"{kind}_{side}_legacy_centroid"
-    legacy_dir = data_dir / "combinations" / "vectors" / legacy_etype
+    legacy_dir = _derived_marginal_dir(data_dir, legacy_etype)
     if legacy_dir.exists():
         names = list_etype_names(data_dir, legacy_etype, include_default=False)
         entries = [(legacy_etype, n) for n in names]
@@ -779,9 +841,8 @@ def build_goal_nogoal_subspaces(
         D = int(any_vec.shape[-1])
         shift = np.zeros(D, dtype=np.float32)
 
-    cv = data_dir / "combinations" / "vectors"
-
-    def _load_dir(d: Path) -> np.ndarray:
+    def _load_dir(etype: str) -> np.ndarray:
+        d = _derived_marginal_dir(data_dir, etype)
         if not d.exists():
             raise FileNotFoundError(
                 f"Goal/no-goal residual directory not found: {d}\n"
@@ -799,11 +860,11 @@ def build_goal_nogoal_subspaces(
         return np.stack(cols, axis=1).astype(np.float32)     # (D, n)
 
     if kind == "r_only":
-        return _load_dir(cv / "r_goal"), _load_dir(cv / "r_nogoal")
+        return _load_dir("r_goal"), _load_dir("r_nogoal")
     if kind == "t_only":
-        return _load_dir(cv / "t_goal"), _load_dir(cv / "t_nogoal")
+        return _load_dir("t_goal"), _load_dir("t_nogoal")
     # combined: r ∪ t along the columns
-    A_rg = _load_dir(cv / "r_goal");  A_tg = _load_dir(cv / "t_goal")
-    A_rn = _load_dir(cv / "r_nogoal"); A_tn = _load_dir(cv / "t_nogoal")
+    A_rg = _load_dir("r_goal");  A_tg = _load_dir("t_goal")
+    A_rn = _load_dir("r_nogoal"); A_tn = _load_dir("t_nogoal")
     return (np.concatenate([A_rg, A_tg], axis=1),
             np.concatenate([A_rn, A_tn], axis=1))

@@ -141,8 +141,18 @@ class AxisSpec:
     # (fixed layer already selected)
     axis_by_slot: Dict[int, torch.Tensor]
     source_description: str
-    # Names to hold out of the whitener pool and to exclude from scoring.
+    # Names held out of the whitener pool (pair-mode pole names + all
+    # listed examples).  Holding examples out keeps them from biasing
+    # their own projection magnitudes via the pool.
     exclusions: List[str] = field(default_factory=list)
+    # Pair-mode pole pair names (e.g. ["helpful", "unhelpful"] for a
+    # helpful↔unhelpful pair-defined axis).  These ARE excluded from
+    # scoring entirely (they define the axis, so judging them is
+    # degenerate).  Empty list for axis-file mode -- the example list
+    # exclusions are handled per-call by stripping the entity-being-
+    # judged from its own rubric (see ``build_static_prompt``), so we
+    # still get one ρ data point per example entity.
+    pole_pair_names: List[str] = field(default_factory=list)
 
 
 def _slot_list_from_arg(arg: str, n_slots: int) -> List[int]:
@@ -228,6 +238,7 @@ def resolve_axis(
             neg_examples=neg_examples, pos_examples=pos_examples,
             axis_by_slot=axis_by_slot,
             source_description=source, exclusions=exclusions,
+            pole_pair_names=[name1, name2],
         )
 
     # Manual-axis path
@@ -276,6 +287,7 @@ def resolve_axis(
         neg_examples=args.neg_examples, pos_examples=args.pos_examples,
         axis_by_slot=axis_by_slot,
         source_description=source, exclusions=exclusions,
+        pole_pair_names=[],
     )
 
 
@@ -617,6 +629,225 @@ def apply_question_subsample(
     return out
 
 
+def _build_qidx_to_orig_map(
+    responses_dir: Path,
+    questions_file: Path,
+    sample_entity: str,
+    *,
+    abort_on_mismatch: bool = True,
+) -> Dict[int, int]:
+    """Build q_idx -> original-canonical-id map from one entity's response file.
+
+    The mapping is global (set at generation time and identical across entities,
+    modulo per-entity RP filtering that drops some q_idx values), so any one
+    file suffices to back-reference q_idx to the canonical question id.
+    """
+    text_to_id = _load_canonical_question_text_to_id(questions_file)
+    sample_path = responses_dir / f"{sample_entity}.jsonl"
+    if not sample_path.exists():
+        raise SystemExit(
+            f"[subsample] cannot find responses file for {sample_entity} at "
+            f"{sample_path} (needed to build q_idx->original_id map)"
+        )
+    qidx_to_orig: Dict[int, int] = {}
+    unknown_qidx: Dict[int, str] = {}
+    for line in sample_path.read_text().splitlines():
+        if not line.strip():
+            continue
+        rec = json.loads(line)
+        qi = rec.get("question_index")
+        qt = rec.get("question")
+        if qi is None or qt is None:
+            continue
+        qi = int(qi)
+        if qi in qidx_to_orig or qi in unknown_qidx:
+            continue
+        oid = text_to_id.get(qt)
+        if oid is None:
+            unknown_qidx[qi] = qt
+            continue
+        qidx_to_orig[qi] = oid
+    if unknown_qidx:
+        first_qi = sorted(unknown_qidx)[0]
+        sample = unknown_qidx[first_qi][:120]
+        msg = (
+            f"[subsample] {len(unknown_qidx)} distinct response question_index "
+            f"values have text not present in the canonical questions file "
+            f"({sample_entity}.jsonl). First unmatched: q_idx={first_qi}, "
+            f"text={sample!r}."
+        )
+        if abort_on_mismatch:
+            raise SystemExit(msg + " Aborting -- cost of misaligned subsampling is too high.")
+        logger.warning(msg)
+    return qidx_to_orig
+
+
+def _count_default_persona_items(
+    responses_dir: Path,
+    *,
+    default_name: str = "default",
+) -> Optional[int]:
+    """Total response items (lines) in the default persona's response file.
+
+    The default persona is generated against the full canonical question list
+    with no RP filtering, so its line count is the natural "expected upper
+    bound" for a fully-populated entity (questions x passes, e.g. 500 ≈
+    100 questions x 5 passes in the current Roger pipeline).
+
+    Returns ``None`` if the file is missing (caller can fall back).
+    """
+    p = responses_dir / f"{default_name}.jsonl"
+    if not p.exists():
+        return None
+    n = 0
+    for line in p.read_text().splitlines():
+        if line.strip():
+            n += 1
+    return n if n > 0 else None
+
+
+def apply_tiered_question_subsample(
+    score3: Dict[str, List[ScoredResponse]],
+    responses_dir: Path,
+    questions_file: Path,
+    *,
+    modulo_per_chunk: int = 3,
+    n_default: Optional[int] = None,
+    abort_on_mismatch: bool = True,
+) -> Dict[str, List[ScoredResponse]]:
+    """Per-entity tiered question subsampling for response-mode judging.
+
+    Three tiers, indexed by the dense response-pipeline ``q_idx`` modulo
+    ``M = modulo_per_chunk`` (default 3, i.e. 1/3 chunks). ``q_idx`` is
+    chosen over the canonical orig_id because it's stride-agnostic: the
+    response pipeline currently uses ``orig_id = 3 * q_idx`` (reduce=3 from
+    the 300-question canonical), so ``orig_id % 3 == 0`` would be vacuously
+    true for every item, while ``q_idx % 3 == 0`` cleanly partitions the
+    100 generated questions into thirds.
+
+    * **Tier 1** (1/3 of the canonical pool): keep items with ``q_idx % M == 0``.
+    * **Tier 2** (2/3 of the canonical pool): keep items with ``q_idx % M in {0, 1}``.
+    * **Tier 3** (full): keep all items.
+
+    With ``N_default`` = the default persona's total response-item count
+    (questions x passes; auto-detected from ``responses_dir/default.jsonl``)
+    we set ``expected_t1 = N_default / M`` -- the items-per-entity we expect
+    when nothing is RP-filtered. Per-entity tier choice (apply, in order):
+
+      * If items passing tier-1 filter ``>= expected_t1 / 2``  -> use tier 1.
+      * Else if items passing tier-2 filter ``>= 2 * expected_t1 / 3`` -> tier 2.
+      * Else -> tier 3 (no subsampling).
+
+    With the current pipeline (``N_default = 500``, ``M = 3``) this gives
+    thresholds of ``~83`` and ``~111`` items, capping the typical per-entity
+    workload at ``~expected_t1 = 167`` items while gracefully widening the
+    sample when RP filtering depletes an entity to < 1/2 of expected.
+
+    The ``questions_file`` argument is used only for a sanity check (do the
+    response data's q_idx values back-reference cleanly to canonical question
+    text?); the chunking itself is q_idx-based and ignores orig_id.
+    """
+    if not score3:
+        return score3
+
+    if n_default is None:
+        n_default = _count_default_persona_items(responses_dir)
+    if n_default is None or n_default <= 0:
+        text_to_id = _load_canonical_question_text_to_id(questions_file)
+        n_default = max(1, len(text_to_id)) * 5  # ~5 passes/question heuristic
+        logger.warning(
+            f"[tiered subsample] default persona response file missing or empty "
+            f"under {responses_dir}; falling back to canonical question count x 5 "
+            f"passes = {n_default} as N_default proxy"
+        )
+
+    expected_t1 = n_default / modulo_per_chunk
+    threshold_to_t2 = expected_t1 / 2.0
+    threshold_to_t3 = 2.0 * expected_t1 / 3.0
+
+    # Sanity check the q_idx -> canonical mapping (also catches text drift
+    # between the response pipeline and the questions file). Result isn't
+    # used for chunking but failures here mean something deeper is broken.
+    # Try score3 keys in order, then fall back to default.jsonl.
+    sample_entity: Optional[str] = None
+    for cand in list(score3.keys()) + ["default"]:
+        if (responses_dir / f"{cand}.jsonl").exists():
+            sample_entity = cand
+            break
+    if sample_entity is not None:
+        _ = _build_qidx_to_orig_map(
+            responses_dir, questions_file, sample_entity,
+            abort_on_mismatch=abort_on_mismatch,
+        )
+    else:
+        logger.warning(
+            f"[tiered subsample] no response file found in {responses_dir} for "
+            f"any of {list(score3.keys())[:3]} or default.jsonl; skipping the "
+            f"q_idx -> canonical sanity check (chunking still works)."
+        )
+
+    def _qidx_of(it: "ScoredResponse") -> Optional[int]:
+        m = _KEY_RE.match(it.key)
+        return int(m.group(2)) if m else None
+
+    out: Dict[str, List[ScoredResponse]] = {}
+    tier_entities = {1: 0, 2: 0, 3: 0}
+    tier_items = {1: 0, 2: 0, 3: 0}
+    n_in = 0
+    n_kept = 0
+    for name, items in score3.items():
+        n_in += len(items)
+        c1 = c2 = 0
+        for it in items:
+            qi = _qidx_of(it)
+            if qi is None:
+                continue
+            mod = qi % modulo_per_chunk
+            if mod == 0:
+                c1 += 1
+            if mod in (0, 1):
+                c2 += 1
+
+        if c1 >= threshold_to_t2:
+            tier = 1
+        elif c2 >= threshold_to_t3:
+            tier = 2
+        else:
+            tier = 3
+
+        kept: List[ScoredResponse] = []
+        for it in items:
+            qi = _qidx_of(it)
+            if qi is None:
+                continue
+            mod = qi % modulo_per_chunk
+            if tier == 1 and mod == 0:
+                kept.append(it)
+            elif tier == 2 and mod in (0, 1):
+                kept.append(it)
+            elif tier == 3:
+                kept.append(it)
+
+        tier_entities[tier] += 1
+        tier_items[tier] += len(kept)
+        n_kept += len(kept)
+        if kept:
+            out[name] = kept
+
+    logger.info(
+        f"[tiered subsample] N_default={n_default} (M={modulo_per_chunk}); "
+        f"thresholds: drop->t2 if t1-count<{threshold_to_t2:.0f}, "
+        f"drop->t3 if t2-count<{threshold_to_t3:.0f}; "
+        f"per-tier entities/items: "
+        f"t1={tier_entities[1]}/{tier_items[1]}, "
+        f"t2={tier_entities[2]}/{tier_items[2]}, "
+        f"t3={tier_entities[3]}/{tier_items[3]}; "
+        f"kept {n_kept}/{n_in} ({100*n_kept/max(1,n_in):.1f}%) across "
+        f"{len(out)}/{len(score3)} entities"
+    )
+    return out
+
+
 def load_score3_responses(
     entity_names: Sequence[str],
     scores_dir: Path,
@@ -728,48 +959,78 @@ def compute_projections(
     axis_spec: AxisSpec,
     whiten_K: int,
     slots: Sequence[int],
-    excluded_names: Sequence[str],
+    pole_pair_names: Sequence[str],
 ) -> Dict[int, Dict[str, Dict[str, float]]]:
     """Return {slot: {name: {'raw': float, 'whitened': float}}}.
 
-    Names excluded_from whitener pool:
-        excluded_names (pair members + example list names).
-    But projections ARE computed for every entity (including excluded ones,
-    for plotting / diagnostics); the downstream correlation step will drop
-    excluded names from the judge-scored set.
+    Per-entity leave-one-out pool: when computing the projection of entity
+    X, the whitener pool is built from every other entity in the corpus
+    except X (and except the pair-mode pole pair names, which are the axis-
+    defining vectors and would be degenerate to include).
+
+    This avoids the "deflate variance along the axis you're judging" failure
+    mode of holding all listed-example entities out together: extremes along
+    the canonical PC stay in the pool while we judge any single entity, so
+    the top-K direction ordering matches the canonical-side computation.
+    For the entity being judged, its own contribution is removed (the "treat
+    as a new sample" framing).
+
+    At ``whiten_K == 0`` the soft-K whitener is identity, so we skip the
+    per-entity SVD entirely and ``raw == whitened`` per entity.
     """
-    excluded_set = set(excluded_names)
+    pole_skip = set(pole_pair_names)
     result: Dict[int, Dict[str, Dict[str, float]]] = {}
     for slot in slots:
         default_vec = corpus.default[slot]  # (hidden,)
-        # Build pool (default-centered) at this slot, holding out excluded names
-        pool_rows = []
-        for (_etype, name), vec in corpus.vectors.items():
-            if name in excluded_set:
-                continue
-            pool_rows.append(vec[slot] - default_vec)
-        if len(pool_rows) < 2:
-            raise SystemExit(f"slot {slot}: held-out pool has <2 entries; cannot fit whitener")
-        pool = torch.stack(pool_rows, dim=0)  # (N, hidden)
-        whitener = fit_soft_k_whitener(pool, K=whiten_K)
-
+        # Pre-compute centered (vec - default) for all entities at this slot.
+        all_centered: Dict[str, torch.Tensor] = {
+            name: (vec[slot] - default_vec)
+            for (_etype, name), vec in corpus.vectors.items()
+        }
         axis_unit_raw = axis_spec.axis_by_slot[slot]  # (hidden,)
-        # Whitened metric: <x, a>_W = <W x, W a> = (W x) @ (W a).
-        axis_w = whitener.apply(axis_unit_raw.unsqueeze(0)).squeeze(0)
-        axis_w_norm = torch.linalg.vector_norm(axis_w).item()
 
         per_slot: Dict[str, Dict[str, float]] = {}
-        for (_etype, name), vec in corpus.vectors.items():
-            x = vec[slot] - default_vec  # (hidden,)
-            raw_proj = float((x @ axis_unit_raw).item())
-            if axis_w_norm < 1e-12:
-                w_proj = float("nan")
-            else:
-                xw = whitener.apply(x.unsqueeze(0)).squeeze(0)
-                # Project (Wx) onto (Wa)/||Wa|| so it's a unit-axis projection in the
-                # whitened metric, same convention as the raw metric.
-                w_proj = float((xw @ axis_w).item()) / axis_w_norm
-            per_slot[name] = {"raw": raw_proj, "whitened": w_proj}
+
+        if whiten_K == 0:
+            # Identity whitener (regardless of pool).  Skip SVDs.
+            for name, x in all_centered.items():
+                raw_proj = float((x @ axis_unit_raw).item())
+                per_slot[name] = {"raw": raw_proj, "whitened": raw_proj}
+        else:
+            # Per-entity LOO whitener.  This is O(N) SVDs per slot; expect
+            # ~0.15 s per SVD on a 553x5120 pool, so ~85 s per slot per
+            # cell.  Multiplied across slots / cells / providers this can
+            # reach hours -- consider SMW rank-1 updates for K>0 in
+            # high-throughput contexts.
+            for target_name, target_x in all_centered.items():
+                if target_name in pole_skip:
+                    continue
+                # LOO pool: everyone except target_name and pole-pair names.
+                pool_rows = [
+                    x for n, x in all_centered.items()
+                    if n != target_name and n not in pole_skip
+                ]
+                if len(pool_rows) < 2:
+                    raise SystemExit(
+                        f"slot {slot}: LOO pool for {target_name} has "
+                        f"<2 entries; cannot fit whitener"
+                    )
+                pool = torch.stack(pool_rows, dim=0)  # (N-1, hidden)
+                whitener = fit_soft_k_whitener(pool, K=whiten_K)
+                # Whitened axis (cell-specific because the whitener is
+                # cell-specific now).
+                axis_w = whitener.apply(
+                    axis_unit_raw.unsqueeze(0)).squeeze(0)
+                axis_w_norm = torch.linalg.vector_norm(axis_w).item()
+
+                raw_proj = float((target_x @ axis_unit_raw).item())
+                if axis_w_norm < 1e-12:
+                    w_proj = float("nan")
+                else:
+                    xw = whitener.apply(target_x.unsqueeze(0)).squeeze(0)
+                    w_proj = (float((xw @ axis_w).item())
+                              / axis_w_norm)
+                per_slot[target_name] = {"raw": raw_proj, "whitened": w_proj}
         result[slot] = per_slot
     return result
 
@@ -786,14 +1047,20 @@ def _entity_words(etype: str) -> Tuple[str, str, str, str]:
 
 
 def build_static_prompt(axis_spec: AxisSpec, etype: str, name: str, content: str) -> str:
+    # Per-call leakage prevention: strip the entity being judged from its
+    # own rubric example list, so a 10-example axis becomes a 9-example
+    # rubric for that one call when the entity is itself an example.
+    # Other entities still see the full 10-example rubric.
     sing, plur, sing_t, plur_t = _entity_words(etype)
+    neg_ex = [e for e in axis_spec.neg_examples if e != name]
+    pos_ex = [e for e in axis_spec.pos_examples if e != name]
     return RUBRIC_STATIC.format(
         entity=sing, entity_plural=plur,
         entity_title=sing_t, entity_plural_title=plur_t,
         axis_name=axis_spec.axis_name,
         negative_pole=axis_spec.neg_pole, positive_pole=axis_spec.pos_pole,
-        negative_examples=", ".join(axis_spec.neg_examples) or "(none)",
-        positive_examples=", ".join(axis_spec.pos_examples) or "(none)",
+        negative_examples=", ".join(neg_ex) or "(none)",
+        positive_examples=", ".join(pos_ex) or "(none)",
         name=name, content=content,
     )
 
@@ -801,6 +1068,8 @@ def build_static_prompt(axis_spec: AxisSpec, etype: str, name: str, content: str
 def build_response_batch_prompt(
     axis_spec: AxisSpec, etype: str, name: str, items: Sequence["ScoredResponse"]
 ) -> str:
+    # Same per-call leakage prevention as build_static_prompt: the entity
+    # whose responses are being judged is stripped from the example list.
     sing, plur, sing_t, plur_t = _entity_words(etype)
     n = len(items)
     blocks = []
@@ -811,13 +1080,15 @@ def build_response_batch_prompt(
             f"[RESPONSE]\n{it.answer}\n[/RESPONSE]"
         )
     items_block = "\n\n".join(blocks)
+    neg_ex = [e for e in axis_spec.neg_examples if e != name]
+    pos_ex = [e for e in axis_spec.pos_examples if e != name]
     return RUBRIC_RESPONSE_BATCH.format(
         entity=sing, entity_plural=plur,
         entity_title=sing_t, entity_plural_title=plur_t,
         axis_name=axis_spec.axis_name,
         negative_pole=axis_spec.neg_pole, positive_pole=axis_spec.pos_pole,
-        negative_examples=", ".join(axis_spec.neg_examples) or "(none)",
-        positive_examples=", ".join(axis_spec.pos_examples) or "(none)",
+        negative_examples=", ".join(neg_ex) or "(none)",
+        positive_examples=", ".join(pos_ex) or "(none)",
         name=name, n_items=n, items_block=items_block,
     )
 
@@ -1296,11 +1567,24 @@ async def score_responses_mode(
     logger.info(f"[responses] {len(score3)} entities have at least one score==3 response")
 
     if args.question_subsample_modulo and args.question_subsample_modulo > 0:
+        # Legacy uniform mode: every entity filtered identically by orig_id % M == 0.
+        # Kept for backward compatibility with existing q9 runs.
         score3 = apply_question_subsample(
             score3,
             responses_dir=Path(args.responses_dir),
             questions_file=Path(args.questions_file),
             modulo=int(args.question_subsample_modulo),
+            abort_on_mismatch=True,
+        )
+    elif not args.no_subsample:
+        # Default: per-entity tiered subsampling. RP-light entities use 1/3 of
+        # the canonical pool; entities depleted by RP filtering fall back to
+        # 2/3 or full to keep the sample large enough for stable judging.
+        score3 = apply_tiered_question_subsample(
+            score3,
+            responses_dir=Path(args.responses_dir),
+            questions_file=Path(args.questions_file),
+            modulo_per_chunk=int(args.tiered_modulo_per_chunk),
             abort_on_mismatch=True,
         )
 
@@ -1703,13 +1987,28 @@ def parse_args() -> argparse.Namespace:
                          "to backreference response question_index to original id "
                          "for --question_subsample_modulo.")
     sm.add_argument("--question_subsample_modulo", type=int, default=0,
-                    help="If >0, restrict --score_responses to responses whose original "
-                         "question id (looked up in --questions_file) is divisible by "
-                         "this number. With the current Roger response pipeline (which "
-                         "used reduce=3 from a 300-question canonical file), modulo=9 "
-                         "gives exactly 1/3 of the currently-judged questions (34 / 100). "
-                         "0 = no subsampling. A sanity check on the retained count "
-                         "aborts the run if expectations don't match.")
+                    help="LEGACY (uniform) mode. If >0, restrict --score_responses to "
+                         "responses whose original question id (looked up in "
+                         "--questions_file) is divisible by this number, applied "
+                         "identically to every entity. With the historic Roger "
+                         "response pipeline (reduce=3 from a 300-question canonical), "
+                         "modulo=9 gave 1/3 of the currently-judged questions "
+                         "(34 / 100). When 0 (the default), per-entity tiered "
+                         "subsampling kicks in instead (see --no_subsample / "
+                         "--tiered_modulo_per_chunk).")
+    sm.add_argument("--no_subsample", action="store_true",
+                    help="Disable all subsampling (and the new tiered default). Use "
+                         "every score==3 response. Equivalent to the pre-tiered "
+                         "default of --question_subsample_modulo 0.")
+    sm.add_argument("--tiered_modulo_per_chunk", type=int, default=3,
+                    help="Chunk size M for per-entity tiered subsampling (default 3 "
+                         "= 1/3 chunks). Tier 1 keeps orig_id %% M == 0, tier 2 "
+                         "keeps orig_id %% M in {0,1}, tier 3 keeps everything. "
+                         "Per-entity tier choice uses thresholds derived from the "
+                         "default persona's response-item count N_default: drop "
+                         "to tier 2 if tier-1 count < N_default/(2*M); drop to "
+                         "tier 3 if tier-2 count < 2*N_default/(3*M). Ignored when "
+                         "--question_subsample_modulo > 0 or --no_subsample is set.")
 
     # Judge.
     j = p.add_argument_group("judge")
@@ -1779,22 +2078,33 @@ async def run(args: argparse.Namespace) -> None:
     axis_spec = resolve_axis(args, n_slots, hidden_dim, args.layer)
     corpus = load_corpus(args, args.layer)
 
-    # Which entities are scorable? All corpus entities minus the exclusion set.
-    exclusion_set = set(axis_spec.exclusions)
+    # Which entities are scorable?  All corpus entities minus the **pole
+    # pair** names (axis-defining; degenerate to judge).  Listed examples
+    # ARE scorable -- their per-call rubric strips them from the example
+    # list (see build_static_prompt), so judging an example entity is no
+    # longer self-referential.
+    exclusion_set = set(axis_spec.exclusions)            # full set: still used to hold examples out of the whitener pool below
+    pole_skip_set = set(axis_spec.pole_pair_names)        # names actually skipped from scoring + ρ
     scorable: List[Tuple[str, str]] = [
-        (et, n) for (et, n) in corpus.entities if n not in exclusion_set
+        (et, n) for (et, n) in corpus.entities if n not in pole_skip_set
     ]
     if args.max_entities is not None:
         scorable = scorable[:args.max_entities]
     logger.info(
         f"Scorable entities: {len(scorable)} "
-        f"(excluded {len(corpus.entities) - len(scorable)} as poles/examples or by --max_entities)"
+        f"(skipped {len(corpus.entities) - len(scorable)} pole-pair names "
+        f"or by --max_entities; example entities ARE scored, with their "
+        f"name stripped from each per-call rubric)"
     )
 
     # Projections first (no API calls) so we can save them even if scoring is slow.
+    # Per-entity LOO pool: each entity's projection uses a pool built from
+    # every other corpus entity except itself (and the pole-pair names,
+    # which are axis-defining and degenerate to include).  At whiten_K=0
+    # the whitener is identity and the per-entity SVD is short-circuited.
     projections = compute_projections(
         corpus=corpus, axis_spec=axis_spec, whiten_K=args.whiten_K,
-        slots=slots, excluded_names=list(exclusion_set),
+        slots=slots, pole_pair_names=axis_spec.pole_pair_names,
     )
     proj_out = {str(slot): per_slot for slot, per_slot in projections.items()}
     _save_json(Path(args.output_dir) / "projections.json", proj_out)
@@ -1830,9 +2140,11 @@ async def run(args: argparse.Namespace) -> None:
         scores_for_corr["responses"] = means
 
     # Compute correlations and output.
+    # ρ calc skips only pole-pair names (which weren't judged anyway);
+    # listed examples DO contribute ρ data points now.
     correlations = compute_correlations(
         scores_by_mode=scores_for_corr, projections=projections,
-        slots=slots, excluded_set=exclusion_set,
+        slots=slots, excluded_set=pole_skip_set,
     )
     _save_json(Path(args.output_dir) / "correlations.json", correlations)
 

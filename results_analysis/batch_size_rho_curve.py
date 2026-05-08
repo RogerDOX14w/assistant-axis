@@ -49,7 +49,9 @@ The CLI defaults match the May 2026 cost-curve pilot:
 B = {5, 7, 10, 15} (``truthful_vs_deceitful``,
 ``progressive_vs_conservative``, ``improvisational_vs_methodical``);
 ``--batch_sizes`` is ``5,7,10,15``; ``--configs`` is
-``3:25,0:26,0:49``.
+``0:26,0:49,6:25,6:49,7:25,7:49`` (the 6-cell set used for cross-cell
+ρ averaging; matches the slot 0/6/7 cells in the May-2026
+pc_round_trip migration).
 
 CLI
 ---
@@ -77,7 +79,13 @@ import matplotlib.pyplot as plt
 import numpy as np
 from scipy.stats import spearmanr
 
+from assistant_axis import json_metadata
 from assistant_axis.plot_metadata import png_metadata, suptitle_with_specs
+from assistant_axis.provenance import (
+    InputSpec,
+    current_data_subtree_input,
+    current_files_input,
+)
 from results_analysis.axis_judge_correlation import _load_vector_file
 from results_analysis.canonical_angles.data import (
     DEFAULT_DATA_DIR, build_augmented_whitening_pool,
@@ -96,7 +104,11 @@ DEFAULT_AXES: list[str] = [
     "improvisational_vs_methodical",
 ]
 DEFAULT_BATCH_SIZES: list[int] = [5, 7, 10, 15]
-DEFAULT_CONFIGS: list[tuple[int, int]] = [(3, 25), (0, 26), (0, 49)]
+DEFAULT_CONFIGS: list[tuple[int, int]] = [
+    (0, 26), (0, 49),
+    (6, 25), (6, 49),
+    (7, 25), (7, 49),
+]
 DEFAULT_EXPERIMENT_DIR = "roger/axis_judge_experiments"
 DEFAULT_OUTPUT_DIR = "roger"
 
@@ -412,9 +424,15 @@ _BATCH_COLORS = {
 }
 
 
-def plot_curve(result: dict, output_dir: Path) -> tuple[Path, Path]:
+def plot_curve(result: dict, output_dir: Path, *,
+                inputs: list[InputSpec] | None = None,
+                ) -> tuple[Path, Path]:
     """Two-panel histogram + line plot, plus a separate cost-vs-ρ scatter.
-    Returns (curve_png, scatter_png)."""
+    Returns (curve_png, scatter_png).
+
+    ``inputs`` (when provided) is embedded into the PNG metadata for
+    provenance tracking.  See :mod:`assistant_axis.provenance`.
+    """
     axes = result["axes"]
     batch_sizes = result["batch_sizes"]
     configs = [tuple(c) for c in result["configs"]]
@@ -502,7 +520,8 @@ def plot_curve(result: dict, output_dir: Path) -> tuple[Path, Path]:
     curve_path = output_dir / "batch_size_curve_rho.png"
     src_text = Path(__file__).read_text(encoding="utf-8")
     fig.savefig(curve_path, dpi=150, bbox_inches="tight",
-                metadata=png_metadata(title=title, source_text=src_text))
+                metadata=png_metadata(title=title, source_text=src_text,
+                                       inputs=inputs))
     plt.close(fig)
     print(f"Wrote {curve_path}")
 
@@ -528,7 +547,8 @@ def plot_curve(result: dict, output_dir: Path) -> tuple[Path, Path]:
     fig2.tight_layout(rect=(0, 0, 1, top_rect2))
     scatter_path = output_dir / "batch_size_cost_vs_rho.png"
     fig2.savefig(scatter_path, dpi=150, bbox_inches="tight",
-                  metadata=png_metadata(title=title2, source_text=src_text))
+                  metadata=png_metadata(title=title2, source_text=src_text,
+                                         inputs=inputs))
     plt.close(fig2)
     print(f"Wrote {scatter_path}")
     return curve_path, scatter_path
@@ -610,12 +630,55 @@ def main() -> int:
         axes=axes, configs=configs, batch_sizes=batch_sizes,
     )
 
+    # --- Provenance inputs (used by JSON + both PNG writes) ---
+    # Vector subtrees + the four derived combo-marginal subtrees that
+    # build_goal_nogoal_subspaces reads + the response-mode judge
+    # caches per (axis, B).  Slot/layer info goes in extras for
+    # readability; the (slot, layer) cells themselves are part of the
+    # result payload.
+    judge_cache_paths: list[Path] = []
+    for axis_name, _, _ in axes:
+        for B in batch_sizes:
+            suffix = _b_suffix(B)
+            for side in ("roles", "traits"):
+                judge_cache_paths.append(
+                    experiment_dir / axis_name
+                    / f"gpt_responses_{side}{suffix}"
+                    / "scores_responses.json")
+    inputs: list[InputSpec] = [
+        current_data_subtree_input(
+            data_dir, "traits/vectors", dep_key="traits_vectors"),
+        current_data_subtree_input(
+            data_dir, "roles/vectors", dep_key="roles_vectors"),
+        current_data_subtree_input(
+            data_dir, "combinations/vectors/derived/marginals/r_goal",
+            dep_key="combos_r_goal"),
+        current_data_subtree_input(
+            data_dir, "combinations/vectors/derived/marginals/r_nogoal",
+            dep_key="combos_r_nogoal"),
+        current_data_subtree_input(
+            data_dir, "combinations/vectors/derived/marginals/t_goal",
+            dep_key="combos_t_goal"),
+        current_data_subtree_input(
+            data_dir, "combinations/vectors/derived/marginals/t_nogoal",
+            dep_key="combos_t_nogoal"),
+        current_files_input(
+            dep_key="judge_caches",
+            paths=judge_cache_paths,
+            extras={"n_axes": str(len(axes)),
+                    "batch_sizes": ",".join(str(B) for B in batch_sizes)}),
+    ]
+
     output_dir.mkdir(parents=True, exist_ok=True)
     json_path = output_dir / args.json_name
-    json_path.write_text(json.dumps(result, indent=2))
+    envelope = json_metadata(
+        result, inputs=inputs,
+        title=f"batch_size_rho_curve axes={len(axes)} "
+              f"Bs={','.join(str(B) for B in batch_sizes)}")
+    json_path.write_text(json.dumps(envelope, indent=2))
     print(f"\nWrote {json_path}")
 
-    plot_curve(result, output_dir)
+    plot_curve(result, output_dir, inputs=inputs)
     return 0
 
 

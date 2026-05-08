@@ -29,7 +29,8 @@ from results_analysis.canonical_angles.whitening import DEFAULT_SOFT_K
 async def run_one(pair, provider, judge_model, output_root, data_dir, instructions_dir,
                   layer, whiten_K, max_tokens, temperature, rps, batch_size, save_every,
                   score_modes, subdir_name, scores_dir, responses_dir,
-                  response_target_batch_size, refill_gaps):
+                  response_target_batch_size, refill_gaps,
+                  question_subsample_modulo=None, questions_file=None):
     pos, neg = pair['pos'], pair['neg']
     out_dir = output_root / f'{pos}_vs_{neg}' / subdir_name
     out_dir.mkdir(parents=True, exist_ok=True)
@@ -69,6 +70,10 @@ async def run_one(pair, provider, judge_model, output_root, data_dir, instructio
         cmd += ['--responses_dir', responses_dir]
     if response_target_batch_size is not None:
         cmd += ['--response_target_batch_size', str(response_target_batch_size)]
+    if question_subsample_modulo is not None and int(question_subsample_modulo) > 0:
+        cmd += ['--question_subsample_modulo', str(question_subsample_modulo)]
+        if questions_file:
+            cmd += ['--questions_file', str(questions_file)]
     log_path = out_dir / 'run.log'
     t0 = time.time()
     with open(log_path, 'wb') as logf:
@@ -104,6 +109,8 @@ async def run_all(args):
                 args.rps, args.batch_size, args.save_every, score_modes,
                 subdir_name, args.scores_dir, args.responses_dir,
                 args.response_target_batch_size, args.refill_gaps,
+                question_subsample_modulo=args.question_subsample_modulo,
+                questions_file=args.questions_file,
             )
 
     print(f'Launching {len(pairs)} pair runs (concurrency={args.concurrency}, provider={args.provider})')
@@ -159,7 +166,7 @@ def main():
     p.add_argument('--provider', required=True, choices=['openai', 'gpt', 'sonnet', 'anthropic'])
     p.add_argument('--judge_model', required=True)
     p.add_argument('--output_root', required=True)
-    p.add_argument('--data_dir', default='runpod_workspace/qwen/qwen-3-32b Roger')
+    p.add_argument('--data_dir', default='runpod_workspace/qwen/qwen-3-32b Roger 8slot')
     p.add_argument('--instructions_dir', default='data')
     p.add_argument('--layer', type=int, default=25)  # Qwen-3-32B; tuned via rho_by_layer.py.
     p.add_argument('--whiten_K', type=int, default=DEFAULT_SOFT_K)
@@ -179,6 +186,12 @@ def main():
     p.add_argument('--responses_dir', type=str, default=None,
                    help='Directory of per-entity response jsonl files (for --score_responses)')
     p.add_argument('--response_target_batch_size', type=int, default=None)
+    p.add_argument('--question_subsample_modulo', type=int, default=None,
+                   help='Pass-through to axis_judge_correlation.py: response-mode '
+                        'sub-sampling (q_idx %% N == 0).')
+    p.add_argument('--questions_file', type=str, default=None,
+                   help='Pass-through to axis_judge_correlation.py: canonical '
+                        'questions list for --question_subsample_modulo.')
     p.add_argument('--subdir', type=str, default=None,
                    help='Override the per-axis subdir name (default = provider). '
                         'Use e.g. "gpt_responses_traits" to keep response-mode outputs separate.')

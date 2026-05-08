@@ -105,7 +105,10 @@ from pathlib import Path
 import torch
 
 
-DEFAULT_DATA_DIR = "runpod_workspace/qwen/qwen-3-32b Roger/combinations/vectors"
+# Updated to the 8-slot Roger data; the script is already slot-agnostic
+# (n_slots is detected from the loaded tensor shape), so the same code
+# handles 4-slot Christina-headers data via ``--data_dir`` override.
+DEFAULT_DATA_DIR = "runpod_workspace/qwen/qwen-3-32b Roger 8slot/combinations/vectors"
 
 # Which combination kinds use which side as the "goal".
 # r_*__* : role supplies goal, trait is non-goal.
@@ -419,8 +422,20 @@ def parse_args() -> argparse.Namespace:
                    help="dir containing the r_*__*.pt / t_*__*.pt files and default.pt "
                         f"(default: {DEFAULT_DATA_DIR})")
     p.add_argument("--output_root", default=None,
-                   help="where to write the {kind}_{side}/ subdirs; default = data_dir "
-                        "(in-place regeneration of the canonical layout)")
+                   help="where to write the derived/ tree; default = "
+                        "data_dir/derived (which holds marginals/, "
+                        "aggregates/, axis/ subdirs).  Pass an explicit "
+                        "path to redirect, e.g. for legacy-centroid "
+                        "snapshot reproduction.")
+    p.add_argument("--layout", default="categorized",
+                   choices=["categorized", "flat"],
+                   help="On-disk layout under output_root.  'categorized' "
+                        "(default, post-Phase-1.0) splits outputs into "
+                        "marginals/{kind}_{side}/, aggregates/, axis/.  "
+                        "'flat' writes everything directly under "
+                        "output_root (the legacy pre-Phase-1.0 layout, "
+                        "useful for legacy_centroid snapshot generation "
+                        "into a custom dir).")
     p.add_argument("--kinds", nargs="+", default=["r", "t"], choices=["r", "t"],
                    help="which combination kinds to process (default: both)")
     p.add_argument("--sides", nargs="+", default=["goal", "nogoal"],
@@ -450,19 +465,32 @@ def parse_args() -> argparse.Namespace:
 def main() -> int:
     args = parse_args()
     data_dir = Path(args.data_dir)
-    output_root = Path(args.output_root) if args.output_root else data_dir
+    if args.output_root:
+        output_root = Path(args.output_root)
+    else:
+        output_root = data_dir / "derived"
 
     print(f"data_dir:    {data_dir}")
     print(f"output_root: {output_root}")
+    print(f"layout:      {args.layout}")
     print(f"mode:        {args.mode}")
     if not data_dir.exists():
         raise SystemExit(f"data_dir does not exist: {data_dir}")
+
+    if args.layout == "categorized":
+        marginals_root = output_root / "marginals"
+        aggregates_root = output_root / "aggregates"
+        axis_root = output_root / "axis"
+    else:  # flat
+        marginals_root = output_root
+        aggregates_root = output_root
+        axis_root = output_root
 
     include_default_set = set(args.include_default)
     for kind in args.kinds:
         for side in args.sides:
             label = f"{kind}_{side}"
-            out_dir = output_root / label
+            out_dir = marginals_root / label
             inc_default = label in include_default_set
             print(f"\n=== {label} ({args.mode}) -> {out_dir} "
                   f"(include_default={inc_default}) ===")
@@ -480,12 +508,12 @@ def main() -> int:
 
     if not args.skip_kind_centroids:
         for kind in args.kinds:
-            out_path = output_root / f"mean_{kind}_combos.pt"
+            out_path = aggregates_root / f"mean_{kind}_combos.pt"
             n = compute_kind_centroid(data_dir, kind, out_path)
             print(f"\n  wrote {out_path} (mean of {n} {kind}_*__* combinations)")
 
     if not args.skip_theatricality_axis:
-        out_path = output_root / "theatricality_axis.pt"
+        out_path = axis_root / "theatricality_axis.pt"
         info = compute_theatricality_axis(data_dir, out_path)
         print(f"\n  wrote {out_path} (per-(slot, layer) axis from "
               f"{info['r']} r_ + {info['t']} t_ combos, "

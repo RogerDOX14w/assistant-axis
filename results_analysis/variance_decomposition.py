@@ -30,15 +30,24 @@ a shared optimisation.
 What the plot tells you
 -----------------------
 
-Header slots (1, 2, 3) show a large step (b): the heuristic theatricality
-shift alone captures 20-37% of the per-step variance reduction, confirming
-that combination activations carry a non-additive offset along a single
-common-mode direction.  Step (c) adds little (the heuristic was already a
-good guess), and step (d) adds little more (the additive model is already
-nearly weight-symmetric).  Slot 0 (body mean) does NOT show this pattern
--- the heuristic shift is *negative* (would hurt) -- consistent with the
-theatricality offset being a header-slot phenomenon (see
-``canonical_angles/README.md`` "Theatricality shift").
+All header slots (1..N-1, where N is the slot count) show a non-trivial
+step (b): the heuristic theatricality shift along ``v_theat`` alone
+captures 12-30% of the per-step variance reduction, confirming that
+combination activations carry a non-additive offset along a single
+common-mode direction.  Step (c) adds little (the heuristic was already
+a good guess), and step (d) adds little more (the additive model is
+already nearly weight-symmetric).  Slot 0 (body mean) does NOT show
+this pattern -- the heuristic shift is essentially zero (raw) or
+weakly positive (whitened) -- consistent with the theatricality offset
+being a header-slot phenomenon (see ``canonical_angles/README.md``
+"Theatricality shift").
+
+In the 8-slot Roger layout (slots 4..7 are ``<think>``, ``\\n\\n (in)``,
+``</think>``, ``\\n\\n (post)``), the new slots follow the same
+header-slot pattern as 1..3, with one notable exception: slot 6
+(``</think>``) has a body-mean-like additive R² (~67 %) while still
+showing a moderate theatricality offset (b ~ +12 %).  The other six
+header slots cluster around (a ~ 42-51 %, b ~ +12-29 %).
 
 Whitening
 ---------
@@ -62,21 +71,30 @@ roles+traits pool minus default.
 Output
 ------
 
-A 4 x (1 + len(K)) grid of bar charts (one row per slot, one col per
-metric) showing ``\\Delta R^2`` per step for r_ (blue) and t_ (orange),
-with a final "remainder" bar in muted grey/brown.
+An ``n_metrics x num_slots`` grid of bar charts (rows = whitening
+metrics, cols = slots) showing ``\\Delta R^2`` per step for r_ (blue)
+and t_ (orange), with a final "remainder" bar in muted grey/brown.
+``num_slots`` is auto-detected from the loaded data (4 on the older
+Christina-headers data, 8 on the new Qwen-3 non-thinking 8-slot data).
+Per-slot panel width compresses from 7 in (S=4) to 3.5 in (S=8) so
+the figure stays readable at any slot count.
 
 Usage
 -----
 
 ::
 
-    # Default (slot 0..3, layer 25, K=[3], augmented pool):
-    # produces a 4 x 3 grid (raw, K=4 wht, K=16 wht)
+    # Default (8 slots, layer 25, K=[2], augmented pool, Roger 8slot data):
+    # produces a 2 x 8 grid (raw row, K=2 wht row)
     uv run python results_analysis/variance_decomposition.py \\
         --output roger/variance_decomp_bars.png
 
-    # Single-K column (4 x 2 grid like the original Apr 23 plot)
+    # Pies version (each cell = r_ + t_ pie pair)
+    uv run python results_analysis/variance_decomposition.py \\
+        --style pies \\
+        --output roger/variance_decomp_pies.png
+
+    # Single-K column reproducing the historic Apr 23 layout
     uv run python results_analysis/variance_decomposition.py \\
         --K 128 --output /tmp/var_decomp_K128.png
 
@@ -84,6 +102,11 @@ Usage
     uv run python results_analysis/variance_decomposition.py \\
         --layer 32 --K 4 8 16 64 \\
         --output /tmp/var_decomp_l32_Ksweep.png
+
+    # Reproduce the original 4-slot Christina-headers figure
+    uv run python results_analysis/variance_decomposition.py \\
+        --data_dir 'runpod_workspace/qwen/qwen-3-32b Christina headers' \\
+        --output /tmp/var_decomp_4slot.png
 
 The historical April 23 reconstruction lives at
 ``roger/variance_decomp_bars_apr23.png`` for comparison; the current
@@ -308,8 +331,19 @@ def compute_v_theat_raw(slot: int, layer: int, *,
 # Plotting
 # ---------------------------------------------------------------------------
 
-SLOT_LABELS = ["Slot 0 (Body mean)", "Slot 1 (<|im_start|>)",
-               "Slot 2 (assistant)", "Slot 3 (\\n)"]
+# Qwen-3 chat-template slot layout in the 8-slot data.  Slots 5 and 7
+# are both ``\n\n`` text but at different chat-template positions
+# (inside vs after ``<think>...</think>``); we use ``(in)``/``(post)``
+# suffixes for legend disambiguation, matching the convention in
+# ``token_position_noise_analysis.py`` and ``all_roles_pairwise_slots.py``.
+# For 4-slot data, only the first 4 entries are used; the script
+# slices ``SLOT_LABELS[:num_slots]`` based on the loaded tensor shape.
+SLOT_LABELS = [
+    "Slot 0 (Body mean)", "Slot 1 (<|im_start|>)",
+    "Slot 2 (assistant)", "Slot 3 (\\n)",
+    "Slot 4 (<think>)",   "Slot 5 (\\n\\n in)",
+    "Slot 6 (</think>)",  "Slot 7 (\\n\\n post)",
+]
 STEP_LABELS = ["(a)\nrole+trait", "(b)\nheuristic\ntheat_offset",
                "(c)\noptimal\ntheat_offset", "(d)\n4-param", "remainder"]
 STEP_KEYS = ["a", "b", "c", "d", "rem"]
@@ -334,8 +368,8 @@ PIE_LABELS = {
 
 def make_pie_plot(decomp_by_slot_metric: dict[tuple[int, str], dict],
                   output: Path, metric_labels: list[str],
-                  layer: int) -> None:
-    """Render a len(metric_labels) x 4 grid of (r_, t_) pie pairs.
+                  layer: int, *, num_slots: int = 4) -> None:
+    """Render a len(metric_labels) x num_slots grid of (r_, t_) pie pairs.
 
     Slots span the columns, whitening metrics span the rows.  Each
     cell is split into two pie charts side by side; pie wedges are
@@ -346,12 +380,19 @@ def make_pie_plot(decomp_by_slot_metric: dict[tuple[int, str], dict],
     flags any clipped wedge.
     """
     n_rows = len(metric_labels)
-    fig = plt.figure(figsize=(16.0, 3.6 * n_rows + 1.4),
+    # Width per slot: at S=4 we keep 4 in/slot to match the historical
+    # figure; at S=8 we use 3.5 in/slot (matching the bar plot below)
+    # so each pie pair has ~1.75 in per pie -- big enough for the
+    # wedge labels to stay readable.  Total fig width: 16 in at S=4,
+    # 28 in at S=8.
+    slot_width = 4.0 if num_slots <= 4 else 3.5
+    fig_w = max(16.0, slot_width * num_slots)
+    fig = plt.figure(figsize=(fig_w, 3.6 * n_rows + 1.4),
                      constrained_layout=False)
     metrics_str = ", ".join(metric_labels)
     title_line = (f"Variance decomposition of combination activations "
                   f"(layer={layer}).  "
-                  f"{n_rows} metrics x 4 slots ({metrics_str}).")
+                  f"{n_rows} metrics x {num_slots} slots ({metrics_str}).")
     # Single-line suptitle.  The legend below (drawn into the figure
     # explicitly after the subfigures grid) carries the colour key for
     # the (a)/(b)/(c)/(d)/rem step labels, so we don't duplicate them
@@ -364,10 +405,19 @@ def make_pie_plot(decomp_by_slot_metric: dict[tuple[int, str], dict],
     title_frac = max(0.10, 1.4 / (3.6 * n_rows + 1.4))
     outer = fig.subfigures(2, 1, height_ratios=[title_frac, 1.0 - title_frac])
     body = outer[1]
-    subfigs = body.subfigures(n_rows, 4, hspace=0.0, wspace=0.05)
+    subfigs = body.subfigures(n_rows, num_slots, hspace=0.0, wspace=0.05)
     if n_rows == 1:
         subfigs = np.array([subfigs])
+    if num_slots == 1:
+        subfigs = subfigs.reshape(n_rows, 1)
     colors = [STEP_COLORS[k] for k in STEP_KEYS]
+
+    # Pie label fontsize scales with panel size.  At S=4 each pie is
+    # ~2 in across (slot_width=4.0 / 2 pies); at S=8 each is ~1.75 in
+    # (slot_width=3.5 / 2).  Both fit "26.4" labels comfortably at the
+    # respective fontsize.
+    pie_label_fontsize = 8.5 if num_slots <= 4 else 6.5
+    pie_kind_fontsize = 9 if num_slots <= 4 else 7.5
 
     def _pie(ax, values: np.ndarray, kind_label: str):
         """Draw one pie on axis ``ax``.  ``values`` is a length-5 array
@@ -394,17 +444,18 @@ def make_pie_plot(decomp_by_slot_metric: dict[tuple[int, str], dict],
             v_norm, colors=colors, startangle=90, counterclock=False,
             autopct=fmt,
             wedgeprops={"linewidth": 0.7, "edgecolor": "white"},
-            textprops={"fontsize": 8.5, "color": "black"},
+            textprops={"fontsize": pie_label_fontsize, "color": "black"},
         )
         for at in autotexts:
             at.set_fontweight("bold")
-        ax.set_title(kind_label, fontsize=9)
+        ax.set_title(kind_label, fontsize=pie_kind_fontsize)
 
+    pie_title_fontsize = 10 if num_slots <= 4 else 8
     for metric_idx, metric in enumerate(metric_labels):
-        for slot_idx in range(4):
+        for slot_idx in range(num_slots):
             sf = subfigs[metric_idx, slot_idx]
             sf.suptitle(f"{SLOT_LABELS[slot_idx]} -- {metric}",
-                        fontsize=10)
+                        fontsize=pie_title_fontsize)
             inner = sf.subplots(1, 2)
             result = decomp_by_slot_metric[(slot_idx, metric)]
             r_vals = np.array([result[k][0] * 100 for k in STEP_KEYS])
@@ -441,17 +492,25 @@ def make_pie_plot(decomp_by_slot_metric: dict[tuple[int, str], dict],
 
 def make_plot(decomp_by_slot_metric: dict[tuple[int, str], dict],
               output: Path, metric_labels: list[str],
-              layer: int) -> None:
-    """Render a len(metric_labels) x 4 bar grid with a shared y-axis
-    scale across all panels (so the bars are visually comparable).
-    Slots span the columns, whitening metrics span the rows."""
+              layer: int, *, num_slots: int = 4) -> None:
+    """Render a len(metric_labels) x num_slots bar grid with a shared
+    y-axis scale across all panels (so the bars are visually
+    comparable).  Slots span the columns, whitening metrics span the
+    rows."""
     n_rows = len(metric_labels)
-    fig, axes = plt.subplots(n_rows, 4, figsize=(7 * 4, 3 * n_rows + 1.0),
-                             squeeze=False)
+    # Per-slot panel width compresses at high slot counts so the
+    # figure doesn't blow past 32-inch total width.  S=4 stays at 7"
+    # (matches original); S=8 -> 3.5" each = 28" total.
+    slot_width = 7.0 if num_slots <= 4 else 3.5
+    fig, axes = plt.subplots(
+        n_rows, num_slots,
+        figsize=(slot_width * num_slots, 3 * n_rows + 1.0),
+        squeeze=False,
+    )
     metrics_str = ", ".join(metric_labels)
     title_line = (f"Variance decomposition of combination activations "
                   f"(layer={layer}).  "
-                  f"{n_rows} metrics x 4 slots ({metrics_str}).")
+                  f"{n_rows} metrics x {num_slots} slots ({metrics_str}).")
     spec_line = (
         "(a) role+trait-pool_mean  |  (b) heuristic theat_offset along "
         "theatricality axis  |  (c) optimal theat_offset  |  "
@@ -464,13 +523,15 @@ def make_plot(decomp_by_slot_metric: dict[tuple[int, str], dict],
     # the per-bar value labels.
     all_vals = np.concatenate([
         np.array([decomp_by_slot_metric[(s, m)][k][i] * 100
-                  for s in range(4) for m in metric_labels
+                  for s in range(num_slots) for m in metric_labels
                   for k in STEP_KEYS for i in (0, 1)])
     ])
     ymin = min(0.0, float(all_vals.min()) - 5.0)
     ymax = float(all_vals.max()) + 5.0
+    bar_title_fontsize = 10 if num_slots <= 4 else 8
+    bar_step_fontsize = 9 if num_slots <= 4 else 7
     for metric_idx, metric in enumerate(metric_labels):
-        for slot_idx in range(4):
+        for slot_idx in range(num_slots):
             ax = axes[metric_idx, slot_idx]
             result = decomp_by_slot_metric[(slot_idx, metric)]
             x = np.arange(len(STEP_KEYS))
@@ -487,10 +548,10 @@ def make_plot(decomp_by_slot_metric: dict[tuple[int, str], dict],
             bars_t[-1].set_color("#d18d5c"); bars_t[-1].set_edgecolor("black")
             bars_t[-1].set_linewidth(1.2)
             ax.set_xticks(x)
-            ax.set_xticklabels(STEP_LABELS, fontsize=9)
+            ax.set_xticklabels(STEP_LABELS, fontsize=bar_step_fontsize)
             ax.set_ylabel("Δ R² per step (%)" if slot_idx == 0 else "")
             ax.set_title(f"{SLOT_LABELS[slot_idx]} -- {metric}",
-                         fontsize=10)
+                         fontsize=bar_title_fontsize)
             ax.set_ylim(ymin, ymax)
             ax.axhline(0, color="black", lw=0.6)
             ax.grid(True, axis="y", alpha=0.3)
@@ -527,8 +588,16 @@ def main() -> int:
         description=__doc__,
         formatter_class=argparse.RawDescriptionHelpFormatter,
     )
-    p.add_argument("--data_dir", default=DEFAULT_DATA_DIR,
-                   help=f"Vectors directory (default: {DEFAULT_DATA_DIR})")
+    # Local default override pointing at the 8-slot data, since the
+    # script auto-detects num_slots from the loaded tensor.  We don't
+    # change the shared ``canonical_angles.data.DEFAULT_DATA_DIR``
+    # here because other (judge-dependent) scripts share that constant
+    # and may need coordinated updates.
+    LOCAL_DEFAULT_DATA_DIR = "runpod_workspace/qwen/qwen-3-32b Roger 8slot"
+    p.add_argument("--data_dir", default=LOCAL_DEFAULT_DATA_DIR,
+                   help=f"Vectors directory (default: "
+                        f"{LOCAL_DEFAULT_DATA_DIR}; pass the older "
+                        f"{DEFAULT_DATA_DIR!r} to reproduce 4-slot figures).")
     p.add_argument("--layer", type=int, default=25,
                    help="Transformer layer (default: 25 -- Qwen-3-32B "
                         "optimum from rho_by_layer.py)")
@@ -556,8 +625,20 @@ def main() -> int:
     roles_dir = data_dir / "roles" / "vectors"
     combos_dir = data_dir / "combinations" / "vectors"
 
-    # default vector (across all 4 slots, used for centering)
-    default = load_vec(combos_dir / "default.pt")[:, args.layer, :]  # (4, D)
+    # default vector (across all S slots, used for centering)
+    default = load_vec(combos_dir / "default.pt")[:, args.layer, :]  # (S, D)
+    num_slots = default.shape[0]
+    if num_slots > len(SLOT_LABELS):
+        # Defensive: data has more slots than we have human-readable
+        # labels for.  Should never happen with the canonical 4- or
+        # 8-slot Qwen layouts, but bail loudly rather than render an
+        # IndexError mid-plot.
+        raise SystemExit(
+            f"Loaded data has {num_slots} slots, but only "
+            f"{len(SLOT_LABELS)} entries in SLOT_LABELS.  Extend "
+            f"SLOT_LABELS at the top of this file."
+        )
+    print(f"Detected {num_slots} slots in the loaded data.")
 
     # Combination grid metadata
     r_roles, r_traits, r_pairs = collect_combos(combos_dir, "r")
@@ -608,8 +689,8 @@ def main() -> int:
             data_dir, leave_out=leave_out_set, scope="roles+traits")
     print(f"Whitening / pool-mean pool: {len(pool_entries)} entries")
 
-    # Materialize the pool (across all 4 slots, layer fixed) into a
-    # (n_pool, 4, D) array.
+    # Materialize the pool (across all S slots, layer fixed) into a
+    # (n_pool, S, D) array.
     def _entry_path(et: str, name: str) -> Path:
         if et == "combinations":
             return combos_dir / f"{name}.pt"
@@ -618,10 +699,10 @@ def main() -> int:
     pool_arr = np.stack([
         load_vec(_entry_path(et, n))[:, args.layer, :]
         for (et, n) in pool_entries
-    ])  # (n_pool, 4, D)
+    ])  # (n_pool, S, D)
 
     # Pool mean, per slot.
-    pool_mean_full = pool_arr.mean(axis=0)  # (4, D)
+    pool_mean_full = pool_arr.mean(axis=0)  # (S, D)
 
     # Theatricality direction per slot, in raw activation space.
     print("Computing theatricality unit vectors...")
@@ -633,20 +714,20 @@ def main() -> int:
             t_role_vecs=t_role_vecs, t_trait_vecs=t_trait_vecs,
             t_combo_vecs=t_combo_vecs, t_pair_idx=t_pair_idx,
         )
-        for slot in range(4)
-    ])  # (4, D)
+        for slot in range(num_slots)
+    ])  # (S, D)
 
     # Fit a soft-K=K whitener per slot on the pool, for each requested K.
     print(f"Fitting soft-K whiteners per slot for K in {args.K}...")
     whiteners: dict[int, list[WhiteningBasis]] = {}
     for K in args.K:
         whiteners[K] = [fit_whitening("soft_K", pool_arr[:, slot, :], K=K)
-                        for slot in range(4)]
+                        for slot in range(num_slots)]
 
     # Compute the decomposition for each (slot, metric).
     metric_labels = ["raw"] + [f"K={K} wht" for K in args.K]
     decomp: dict[tuple[int, str], dict] = {}
-    for slot in range(4):
+    for slot in range(num_slots):
         for metric in metric_labels:
             if metric == "raw":
                 wht = None
@@ -670,9 +751,11 @@ def main() -> int:
         print(f"  slot {slot}:  " + "  |  ".join(summary_parts))
 
     if args.style == "pies":
-        make_pie_plot(decomp, Path(args.output), metric_labels, args.layer)
+        make_pie_plot(decomp, Path(args.output), metric_labels, args.layer,
+                      num_slots=num_slots)
     else:
-        make_plot(decomp, Path(args.output), metric_labels, args.layer)
+        make_plot(decomp, Path(args.output), metric_labels, args.layer,
+                  num_slots=num_slots)
     return 0
 
 

@@ -9,34 +9,49 @@ Tests two parametrizations:
 (b) **log2(K+1)**:  ``ρ(K) ≈ a + b·log2(K+1) + c·log2(K+1)²``
 
 Reports R² per fit, the fitted peak K per curve, and the correlation
-between the desc+inst peak and the responses peak across all axes.
+between the desc+inst peak and the responses peak across axes where both
+sources have finite peaks.
 
 Inputs (read from ``--experiment_dir``):
 
-- ``whitening_k_sweep.json`` -- produced by ``whitening_k_sweep.py``
-- ``<pairs>``                -- chosen by ``--pairs`` (default
-  ``pair_list_12.json``)
+- ``whitening_k_sweep_slot{N}.json`` (or generic ``whitening_k_sweep.json``)
+  — produced by ``whitening_k_sweep.py`` with the **same** ``--pairs`` list.
+- ``pair_list_33.json`` (default ``--pairs``) — axes with desc+instr for all,
+  GPT responses only for a subset (ρ for ``responses`` is then NaN on many).
 
 Outputs (written to ``--experiment_dir``):
 
-- ``whitening_k_peak_fit.json``  -- per-curve fit records (R² per
-  parametrisation, fitted peak K, the y-hat predictions for the
-  observed K values).
-- ``rho_vs_K_parabolic_fits.png`` -- one panel per axis, observed ρ
-  values plus log-space parabolic fits for both sources, vertical
-  dashed lines marking the fitted peak K.
+- ``whitening_k_peak_fit[_slot{N}].json`` — per-curve fit records (R²,
+  fitted peak K, y-hat).
+- ``rho_vs_K_parabolic_fits[_slot{N}].png`` — one panel per axis via
+  ``--pairs``.
 
 Examples
 --------
 
 ::
 
-    # Default: 12 axes
-    uv run python results_analysis/whitening_k_peak_fit.py
+    # Refresh K-sweeps for three token slots (same 33-axis pair list), then fit:
+    uv run python results_analysis/whitening_k_sweep.py --pairs pair_list_33.json \\
+        --slot 3 --sweep whitening_k_sweep_slot3.json \\
+        --plot rho_vs_whitening_K_slot3.png
+    uv run python results_analysis/whitening_k_sweep.py --pairs pair_list_33.json \\
+        --slot 6 --sweep whitening_k_sweep_slot6.json \\
+        --plot rho_vs_whitening_K_slot6.png
+    uv run python results_analysis/whitening_k_sweep.py --pairs pair_list_33.json \\
+        --slot 7 --sweep whitening_k_sweep_slot7.json \\
+        --plot rho_vs_whitening_K_slot7.png
 
-    # Use the historical 7-axis subset (matches the original April 23 plot)
+    uv run python results_analysis/whitening_k_peak_fit.py --slot 3
+    uv run python results_analysis/whitening_k_peak_fit.py --slot 6
+    uv run python results_analysis/whitening_k_peak_fit.py --slot 7
+
+    # Historical 12-axis cohort: pass explicit paths (omit --slot auto-names)
     uv run python results_analysis/whitening_k_peak_fit.py \\
-        --pairs pair_list_7.json
+        --pairs pair_list_12.json \\
+        --sweep whitening_k_sweep.json \\
+        --plot rho_vs_K_parabolic_fits.png \\
+        --fit_json whitening_k_peak_fit.json
 """
 from __future__ import annotations
 
@@ -50,7 +65,13 @@ import matplotlib.pyplot as plt
 import numpy as np
 from scipy.stats import pearsonr, spearmanr
 
-from assistant_axis import png_metadata, suptitle_with_specs
+from assistant_axis import json_metadata, png_metadata, suptitle_with_specs
+from assistant_axis.provenance import (
+    CACHE_POLICIES,
+    InputSpec,
+    current_file_input,
+    load_validated_json,
+)
 
 DEFAULT_EXPERIMENT_DIR = Path(__file__).resolve().parent.parent / (
     "roger/axis_judge_experiments"
@@ -62,22 +83,55 @@ DEFAULT_EXPERIMENT_DIR = Path(__file__).resolve().parent.parent / (
 # K~32 the curves flatten and a parabola is a poor match.
 FIT_K = [0, 1, 2, 3, 4, 6, 8, 12, 16, 24, 32]
 
+DEFAULT_PAIR_LIST = "pair_list_33.json"
+DEFAULT_SWEEP = "whitening_k_sweep.json"
+DEFAULT_PLOT = "rho_vs_K_parabolic_fits.png"
+DEFAULT_FIT_JSON = "whitening_k_peak_fit.json"
+
+# Lay out many axes in a moderately wide grid (33 → 6×6 with 3 blanks).
+GRID_N_COLS = 6
+
 
 def fit_parabola(xs, ys):
-    """Least-squares fit ``y = a + b*x + c*x^2``.  Returns
-    ``(coef, r2, peak_x, yhat)``."""
+    """Least-squares fit ``y = p2*x² + p1*x + p0`` using finite pairs only.
+
+    ``np.polyfit`` returns highest-degree first ``[p2, p1, p0]``. Returns
+    ``((p0, p1, p2), r2, peak_x, yhat_full)`` with ``yhat_full`` evaluating
+    the fit at every ``xs`` (all ``xs`` should be finite for FIT_K grids).
+    """
     xs = np.asarray(xs, dtype=float)
     ys = np.asarray(ys, dtype=float)
-    c, b, a = np.polyfit(xs, ys, 2)  # np.polyfit returns highest-order first
-    yhat = a + b * xs + c * xs ** 2
-    ss_res = ((ys - yhat) ** 2).sum()
-    ss_tot = ((ys - ys.mean()) ** 2).sum()
-    r2 = 1 - ss_res / ss_tot if ss_tot > 0 else float("nan")
-    if c < 0:  # parabola opens down -> real maximum
-        peak_x = -b / (2 * c)
-    else:
-        peak_x = float("nan")
-    return (a, b, c), r2, peak_x, yhat
+    mask = np.isfinite(xs) & np.isfinite(ys)
+    yhat_full = np.full(xs.shape[0], np.nan, dtype=float)
+    xv, yv = xs[mask], ys[mask]
+    if xv.size < 3:
+        return (np.nan, np.nan, np.nan), np.nan, np.nan, yhat_full
+
+    coef = np.polyfit(xv, yv, 2)
+    p2, p1, p0 = coef
+    yhat_full = np.polyval(coef, xs)
+    yhat_v = yhat_full[mask]
+    ss_res = float(((yv - yhat_v) ** 2).sum())
+    ym = float(np.mean(yv))
+    ss_tot = float(((yv - ym) ** 2).sum())
+    r2 = 1 - ss_res / ss_tot if ss_tot > 1e-15 else np.nan
+
+    peak_x = (-p1 / (2 * p2)) if p2 < 0 else np.nan
+    return (p0, p1, p2), r2, peak_x, yhat_full
+
+
+def _resolve_io_names(args: argparse.Namespace) -> tuple[str, str, str]:
+    sweep_f = args.sweep
+    plot_f = args.plot
+    fit_f = args.fit_json
+    if args.slot is not None:
+        if sweep_f == DEFAULT_SWEEP:
+            sweep_f = f"whitening_k_sweep_slot{args.slot}.json"
+        if plot_f == DEFAULT_PLOT:
+            plot_f = f"rho_vs_K_parabolic_fits_slot{args.slot}.png"
+        if fit_f == DEFAULT_FIT_JSON:
+            fit_f = f"whitening_k_peak_fit_slot{args.slot}.json"
+    return sweep_f, plot_f, fit_f
 
 
 def main() -> int:
@@ -88,41 +142,60 @@ def main() -> int:
     p.add_argument("--experiment_dir", default=str(DEFAULT_EXPERIMENT_DIR),
                    help=f"Directory holding the K-sweep input + pair list "
                         f"(default: {DEFAULT_EXPERIMENT_DIR}).")
-    p.add_argument("--pairs", default="pair_list_12.json",
-                   help="Pair-list JSON filename (default: pair_list_12.json).")
-    p.add_argument("--sweep", default="whitening_k_sweep.json",
-                   help="K-sweep JSON filename (default: whitening_k_sweep.json).")
-    p.add_argument("--fit_json", default="whitening_k_peak_fit.json",
+    p.add_argument("--pairs", default=DEFAULT_PAIR_LIST,
+                   help=f"Pair-list JSON filename (default: {DEFAULT_PAIR_LIST}).")
+    p.add_argument("--sweep", default=DEFAULT_SWEEP,
+                   help=f"K-sweep JSON filename (default: {DEFAULT_SWEEP}).")
+    p.add_argument("--slot", type=int, default=None,
+                   help="If set, and sweep/plot/fit_json are still their "
+                        "generic defaults, use …_slot{N}.json/png filenames. "
+                        "Also adds slot N to the figure title.")
+    p.add_argument("--fit_json", default=DEFAULT_FIT_JSON,
                    help="Output fit-results JSON filename "
-                        "(default: whitening_k_peak_fit.json).")
-    p.add_argument("--plot", default="rho_vs_K_parabolic_fits.png",
+                        f"(default: {DEFAULT_FIT_JSON}).")
+    p.add_argument("--plot", default=DEFAULT_PLOT,
                    help="Output plot filename "
-                        "(default: rho_vs_K_parabolic_fits.png).")
+                        f"(default: {DEFAULT_PLOT}).")
+    p.add_argument("--cache-policy", choices=CACHE_POLICIES, default="warn",
+                   help="How to react to drift in the sweep JSON's "
+                        "recorded provenance: strict (raise), warn (stderr "
+                        "+ proceed; default), rebuild (raise unless a "
+                        "rebuild_callback is wired in by a future version), "
+                        "off (skip validation).")
     args = p.parse_args()
     experiment_dir = Path(args.experiment_dir).resolve()
+    sweep_f, plot_f, fit_f = _resolve_io_names(args)
 
-    records = json.load(open(experiment_dir / args.sweep))
+    pairs = json.load(open(experiment_dir / args.pairs))
+    pair_keys_ordered = [(it["pos"], it["neg"]) for it in pairs]
 
-    # axis -> source -> {K: rho}
+    # Validate sweep_json's recorded provenance against current state
+    # under the user-selected policy.  Legacy (bare-list) sweep files
+    # are detected by the absence of an envelope and pass through
+    # unvalidated (returns check=None).
+    records, _check = load_validated_json(
+        experiment_dir / sweep_f, policy=args.cache_policy)
     curves: dict[tuple[str, str], dict] = {}
     for r in records:
-        curves.setdefault((r["pos"], r["neg"]), {}).setdefault(r["source"], {})[r["K"]] = r["rho"]
+        curves.setdefault((r["pos"], r["neg"]), {}).setdefault(
+            r["source"], {})[r["K"]] = r["rho"]
 
-    pair_keys = list(curves.keys())
     rows: list[dict] = []
-    for (pos, neg) in pair_keys:
+    for (pos, neg) in pair_keys_ordered:
+        cmap = curves.get((pos, neg), {})
         for source in ("desc_inst", "responses"):
-            ys_at_K = curves[(pos, neg)][source]
-            ys = [ys_at_K[K] for K in FIT_K]
+            ys_at_K = cmap.get(source, {})
+            ys = [ys_at_K.get(K, float("nan")) for K in FIT_K]
 
             xs_lin = FIT_K
-            (_a_l, _b_l, _c_l), r2_lin, peak_lin, yhat_lin = fit_parabola(xs_lin, ys)
-            # Clip extrapolated peaks to the measured K range.
+            (_a_l, _b_l, _c_l), r2_lin, peak_lin, yhat_lin = fit_parabola(
+                xs_lin, ys)
             peak_lin_clipped = (max(0, min(32, peak_lin))
                                 if np.isfinite(peak_lin) else float("nan"))
 
             xs_log = [np.log2(K + 1) for K in FIT_K]
-            (_a_g, _b_g, _c_g), r2_log, peak_log_x, yhat_log = fit_parabola(xs_log, ys)
+            (_a_g, _b_g, _c_g), r2_log, peak_log_x, yhat_log = fit_parabola(
+                xs_log, ys)
             peak_log_K = (2 ** peak_log_x - 1
                           if np.isfinite(peak_log_x) else float("nan"))
             peak_log_K_clipped = (max(0, min(32, peak_log_K))
@@ -139,6 +212,8 @@ def main() -> int:
                 "yhat_log": yhat_log.tolist(),
             })
 
+    row_lookup = {(r["pos"], r["neg"], r["source"]): r for r in rows}
+
     print(f"{'axis':37s} {'source':11s}  {'R²_lin':>7s}  {'R²_log':>7s}  "
           f"{'peak_lin':>9s}  {'peak_log':>9s}")
     print("-" * 87)
@@ -147,101 +222,155 @@ def main() -> int:
               f"{r['r2_linear']:>7.3f}  {r['r2_log']:>7.3f}  "
               f"{r['peak_K_linear']:>9.2f}  {r['peak_K_log']:>9.2f}")
 
-    mean_r2_lin = float(np.mean([r["r2_linear"] for r in rows]))
-    mean_r2_log = float(np.mean([r["r2_log"] for r in rows]))
+    r2_lin_vals = [r["r2_linear"] for r in rows if np.isfinite(r["r2_linear"])]
+    r2_log_vals = [r["r2_log"] for r in rows if np.isfinite(r["r2_log"])]
+    mean_r2_lin = float(np.mean(r2_lin_vals)) if r2_lin_vals else float("nan")
+    mean_r2_log = float(np.mean(r2_log_vals)) if r2_log_vals else float("nan")
     print(f"\nMean R² across {len(rows)} curves:   "
           f"linear-K = {mean_r2_lin:.3f}   log2(K+1) = {mean_r2_log:.3f}")
-    n_log_better = sum(1 for r in rows if r["r2_log"] > r["r2_linear"])
-    print(f"log parametrization fits better than linear on "
-          f"{n_log_better}/{len(rows)} curves")
+    n_compare = sum(1 for r in rows
+                    if np.isfinite(r["r2_log"]) and np.isfinite(r["r2_linear"]))
+    n_log_better = sum(1 for r in rows if np.isfinite(r["r2_log"])
+                       and np.isfinite(r["r2_linear"])
+                       and r["r2_log"] > r["r2_linear"])
+    if n_compare > 0:
+        print(f"log parametrization fits better than linear on "
+              f"{n_log_better}/{n_compare} curves")
 
-    def peaks_by_source(rows, key):
-        d: dict[str, list] = {"desc_inst": [], "responses": []}
+    def peaks_agreement(rows, key) -> list[tuple[tuple[str, str], float, float]]:
+        aligned: dict[tuple[str, str], dict] = {}
         for r in rows:
-            d[r["source"]].append((r["pos"], r["neg"], r[key]))
-        aligned: dict = {}
-        for s, lst in d.items():
-            for pos, neg, v in lst:
-                aligned.setdefault((pos, neg), {})[s] = v
-        di = [aligned[k]["desc_inst"] for k in aligned]
-        rs = [aligned[k]["responses"] for k in aligned]
-        return di, rs, list(aligned.keys())
+            k = (r["pos"], r["neg"])
+            aligned.setdefault(k, {})[r["source"]] = r[key]
+        out: list[tuple[tuple[str, str], float, float]] = []
+        for k, dmap in aligned.items():
+            if "desc_inst" not in dmap or "responses" not in dmap:
+                continue
+            dv, rv = dmap["desc_inst"], dmap["responses"]
+            if np.isfinite(dv) and np.isfinite(rv):
+                out.append((k, float(dv), float(rv)))
+        return out
 
     for key, label in [("peak_K_linear", "linear-K"),
                        ("peak_K_log",    "log2(K+1)")]:
-        di, rs, axes_named = peaks_by_source(rows, key)
-        finite = [(d, r) for d, r in zip(di, rs)
-                  if np.isfinite(d) and np.isfinite(r)]
-        if len(finite) >= 3:
-            xd = np.array([t[0] for t in finite])
-            xr = np.array([t[1] for t in finite])
+        triples = peaks_agreement(rows, key)
+        if len(triples) >= 3:
+            xd = np.array([t[1] for t in triples])
+            xr = np.array([t[2] for t in triples])
             r_pear = float(pearsonr(xd, xr).statistic)
             r_spear = float(spearmanr(xd, xr).correlation)
             print(f"\nPeak-K agreement desc+inst vs responses ({label}): "
                   f"Pearson ρ = {r_pear:.3f}, Spearman ρ = {r_spear:.3f}  "
-                  f"(n={len(finite)})")
+                  f"(n={len(triples)})")
             print("  axis                                 desc+inst peak   "
                   "responses peak")
-            for k, (d, r) in zip(axes_named, finite):
-                print(f"    {k[0]+' vs '+k[1]:33s}  {d:>14.2f}   {r:>14.2f}")
+            for (k1, k2), d, r in triples:
+                print(f"    {k1+' vs '+k2:33s}  {d:>14.2f}   {r:>14.2f}")
 
-    json.dump(rows, open(experiment_dir / args.fit_json, "w"),
-              indent=2, default=str)
+    # --- Provenance inputs (used by both JSON + PNG writes) ---
+    # The K-sweep envelope's own inputs (vectors, judge caches, etc.)
+    # are tracked transitively via the sweep_json file fingerprint --
+    # if any of those change, sweep_json's mtime/size changes too, and
+    # the readers of *this* fit_json see drift on the sweep_json dep.
+    inputs: list[InputSpec] = [
+        current_file_input(
+            dep_key="sweep_json",
+            path=experiment_dir / sweep_f),
+        current_file_input(
+            dep_key="pairs_json",
+            path=experiment_dir / args.pairs),
+    ]
 
-    # ---- Per-axis panels with both observed data and log-space fits ----
-    pairs = json.load(open(experiment_dir / args.pairs))
-    pair_keys_ordered = [(it["pos"], it["neg"]) for it in pairs]
+    fit_envelope = json_metadata(
+        rows, inputs=inputs,
+        title=f"whitening_k_peak_fit slot={args.slot} pairs={args.pairs}")
+    with open(experiment_dir / fit_f, "w") as _f:
+        json.dump(fit_envelope, _f, indent=2, default=str)
+
+    # ---- Per-axis panels with observed data and log-space fits ----
     n_axes = len(pair_keys_ordered)
-    n_cols = 4
-    n_rows = (n_axes + n_cols - 1) // n_cols
+    n_cols = GRID_N_COLS
+    n_rows = int(np.ceil(n_axes / n_cols))
+    fs_title = max(7, 11 - max(0, n_axes - 12) // 6)
+    fs_tick = max(7, 9 - max(0, n_axes - 12) // 8)
+    fs_legend = max(5, fs_tick - 1)
 
     fig, axes_p = plt.subplots(n_rows, n_cols,
-                               figsize=(4 * n_cols, 3.5 * n_rows),
+                               figsize=(4 * n_cols, 3.35 * n_rows),
                                sharey=True, squeeze=False)
+
+    x_plot_dense = np.linspace(np.log2(0 + 1), np.log2(32 + 1), 200)
+    x_plot_orig = np.array([np.log2(K + 1) for K in FIT_K])
+
+    any_point = False
     for i, (pos, neg) in enumerate(pair_keys_ordered):
         ax = axes_p[i // n_cols, i % n_cols]
-        x_plot_dense = np.linspace(np.log2(0 + 1), np.log2(32 + 1), 200)
-        x_plot_orig = [np.log2(K + 1) for K in FIT_K]
+        panel_has_curve = False
         for source, marker, linestyle, color in [
             ("desc_inst", "s", ":", "C0"),
             ("responses", "o", "-", "C3"),
         ]:
-            row = next(r for r in rows
-                       if r["pos"] == pos and r["neg"] == neg
-                       and r["source"] == source)
-            ys = row["ys"]
-            a, b, c = np.polyfit(x_plot_orig, ys, 2)[::-1]
-            yhat_dense = a + b * x_plot_dense + c * x_plot_dense ** 2
+            row = row_lookup.get((pos, neg, source))
+            if row is None:
+                continue
+            ys = np.asarray(row["ys"], dtype=float)
+            mask = np.isfinite(ys)
+            if mask.sum() < 3:
+                continue
+            coef = np.polyfit(x_plot_orig[mask], ys[mask], 2)
+            yhat_dense = np.polyval(coef, x_plot_dense)
+
+            lab_r2 = row["r2_log"]
+            r2_lab = lab_r2 if np.isfinite(lab_r2) else float("nan")
             ax.plot(x_plot_orig, ys, marker=marker, color=color,
-                    linestyle="", markersize=6,
-                    label=f'{source} (R²={row["r2_log"]:.2f})')
+                    linestyle="", markersize=max(4, fs_tick),
+                    label=f'{source} (R²={r2_lab:.2f})')
             ax.plot(x_plot_dense, yhat_dense, color=color,
                     linestyle=linestyle, alpha=0.7)
             peak_K = row["peak_K_log"]
             if np.isfinite(peak_K) and 0 <= peak_K <= 32:
                 ax.axvline(np.log2(peak_K + 1), color=color,
                            linestyle="--", alpha=0.35, lw=1)
+            panel_has_curve = True
+            any_point = True
+
+        if not panel_has_curve:
+            ax.text(
+                0.5, 0.52, "no ρ data\n(desc+instr / responses overlap)",
+                transform=ax.transAxes, fontsize=fs_tick + 1, ha="center",
+                va="center", clip_on=False)
+
         ax.set_xticks([np.log2(K + 1) for K in FIT_K])
-        ax.set_xticklabels([str(K) for K in FIT_K], fontsize=8)
-        ax.set_title(f"{pos} vs {neg}", fontsize=9)
+        ax.set_xticklabels([str(K) for K in FIT_K], fontsize=fs_tick)
+        ax.set_title(f"{pos} vs {neg}", fontsize=fs_title)
         ax.grid(alpha=0.3)
-        ax.set_xlabel("K (log2(K+1) spacing)", fontsize=8)
+        ax.set_xlabel("K (log2(K+1) spacing)", fontsize=fs_tick)
         if i % n_cols == 0:
-            ax.set_ylabel("Spearman ρ", fontsize=8)
-        ax.legend(fontsize=7, loc="lower left")
+            ax.set_ylabel("Spearman ρ", fontsize=fs_tick)
+        if panel_has_curve:
+            ax.legend(fontsize=fs_legend, loc="lower left")
     for j in range(n_axes, n_rows * n_cols):
         axes_p[j // n_cols, j % n_cols].axis("off")
+
     title_line = (f"Per-axis parabolic fits over K ∈ {FIT_K[0]}..{FIT_K[-1]} "
-                  f"(log2(K+1) space) -- {n_axes} axes")
-    spec_line = ("Solid = responses, dotted = desc+inst; "
-                 "vertical dashed lines = fitted peak K")
+                  f"(log2(K+1) space) — {n_axes} axes")
+    if args.slot is not None:
+        title_line += f"; token slot {args.slot}"
+
+    spec_line = (
+        "Solid = responses where available (NaN omitted); dotted = desc+instr; "
+        "vertical dashed = fitted peak K (log parametrisation)."
+    )
+    if not any_point:
+        print("Warning: no finite ρ points plotted (check sweep vs pair list).")
     _, top_rect = suptitle_with_specs(fig, title_line, spec_line)
     plt.tight_layout(rect=(0, 0, 1, top_rect))
-    out_path = experiment_dir / args.plot
+    out_path = experiment_dir / plot_f
     plt.savefig(out_path, dpi=150, bbox_inches="tight",
-                metadata=png_metadata(title=title_line))
+                metadata=png_metadata(title=title_line, inputs=inputs))
     plt.close(fig)
-    print(f"\nWrote {out_path}")
+    print(f"\nWrote {experiment_dir / fit_f}")
+    print(f"Wrote {out_path}")
     return 0
 
 

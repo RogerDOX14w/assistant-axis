@@ -662,41 +662,146 @@ For each (triple, metric, layer), the slot whose value deviates *most*
 from the mean of the other three is the **odd one out**. Slots that are
 odd-one-out >25 % of the time (the chance rate) are noisier than peers.
 
-Plus pairwise-slot agreement, two ways:
+Plus pairwise-slot agreement (per layer, pooling **all unordered entity
+pairs** `(A, B)` with `A ≠ B`, i.e. `C(N_roles, 2)` pairs), two ways:
 
-- **Norm correlation**: Pearson correlation across role pairs of `‖A_s − B_s‖`
-  vs `‖A_s′ − B_s′‖` -- do the slots agree on which pairs are far apart?
-- **Direction agreement**: mean cosine of `(A_s − B_s)` and `(A_s′ − B_s′)`
-  across role pairs -- do the slots agree on the *direction* of each pair's
-  difference?
+- **Norm correlation**: Pearson correlation *across those pairs* between
+  `‖A_s − B_s‖` at slot `s` and `‖A_s′ − B_s′‖` at slot `s′` -- do two
+  slots agree on which pairs are far apart in magnitude?
+- **Direction agreement**: mean cosine of `(A_s − B_s)` vs `(A_s′ − B_s′)`
+  over the **same** role pairs -- do two slots agree on the *direction* of each pair's difference?
 
 Outputs five PNGs (default to `roger/token_position_noise_out/`):
 
 | file | content |
 |---|---|
-| `ooo_heatmaps.png` | Odd-one-out fraction by layer × slot, one panel per metric. |
-| `ooo_summary_bars.png` | Slot odd-one-out rate per metric (avg across layers). |
-| `ooo_by_layer.png` | Per-layer slot odd-one-out, averaged across the 6 metrics. |
-| `pairwise_corr_matrices.png` | 4×4 norm correlation + 4×4 cosine direction agreement. |
-| `pairwise_cosine_by_layer.png` | Mean cosine direction agreement vs layer. |
+| `ooo_heatmaps.png` | Odd-one-out fraction by layer × token (`body-mean`, `t1`…), one panel per metric. |
+| `ooo_summary_bars.png` | Token odd-one-out rate per metric (avg across layers); legend uses same labels. |
+| `ooo_by_layer.png` | Per-layer token odd-one-out, averaged across the 6 metrics. |
+| `pairwise_corr_matrices.png` | Two averaged `S×S` heatmaps: (left) Pearson r of `‖A−B‖` at row vs col token across all unordered pairs, then mean over layers; (right) mean cosine between diff vectors at the two tokens, same pooling. Axes: `body-mean`, `t1`… |
+| `pairwise_cosine_by_layer.png` | **`C(S,2)`** curves (28 at *S*=8): for each unordered token pair, mean over unordered role pairs of cosine between `(A−B)` at those positions vs layer (**same statistic as heatmap entries, not ρ**). Turbo colormap legend keyed as `body-mean` ↔ `t1`, etc. |
 
 ```bash
-# Default: 280 roles × 4 slots × all layers, 1000 triples, on Roger data.
+# Default: 280 roles × 8 slots × all layers, 1000 triples, on Roger 8slot data.
 uv run python results_analysis/token_position_noise_analysis.py
 
 # Run on traits instead, write elsewhere.
 uv run python results_analysis/token_position_noise_analysis.py \
   --vectors_subdir traits/vectors \
   --output_dir roger/token_position_noise_traits
+
+# Reproduce the original 4-slot Christina-headers figure.
+uv run python results_analysis/token_position_noise_analysis.py \
+  --data_dir 'runpod_workspace/qwen/qwen-3-32b Christina headers'
 ```
 
-**Headline finding** (April 2026 run on the older `qwen-3-32b Christina
-headers` data, 280 roles × 64 layers × 1000 triples): slot 3 (`\n`) is the
-*least* noisy slot -- odd-one-out ~21-23 % across metrics (slightly below
-the 25 % chance floor) and the highest mean diff-direction agreement with
-the other three slots. Slot 0 (body-mean) is the noisiest by all six
-metrics; `<|im_start|>` and `assistant` are intermediate. This empirical
-finding underwrites the project's slot-3 default.
+**Headline finding** (April 2026 run on the older 4-slot `qwen-3-32b
+Christina headers` data, 280 roles × 64 layers × 1000 triples): slot 3
+(`\n`) is the *least* noisy slot -- odd-one-out ~21-23 % across metrics
+(slightly below the 25 % chance floor) and the highest mean diff-direction
+agreement with the other three slots. Slot 0 (body-mean) is the noisiest
+by all six metrics; `<|im_start|>` and `assistant` are intermediate. This
+empirical finding underwrote the original slot-3 default.
+
+**Pending re-analysis** on 8-slot data: with seven header positions
+(slots 1-7 = `<|im_start|>`, `assistant`, `\n`, `<think>`, `\n\n (in)`,
+`</think>`, `\n\n (post)`) instead of three, the chance floor for "odd-
+one-out" is 12.5 % rather than 25 %, so the absolute numbers shift even
+when the relative ranking doesn't. Whether slot 3 remains the project
+default depends on this re-run.
+
+### `pca_scree_plots.py`
+
+All-slots PCA scree plots: variance explained per principal component,
+overlaid for each slot.  Promoted from the `Compare Scree plots` cell
+of `notebooks/pca.ipynb` (April 2026 work).
+
+For a fixed target layer (default 24), fits a separate PCA per slot
+on the role-vector matrix at that layer, then renders a 1×3 panel:
+
+- **Linear** -- bars (per-PC variance %) + lines (cumulative %), with
+  bars interleaved across slots at width = 0.8 / n_slots so they
+  always fit regardless of slot count.
+- **Log-linear** -- per-component variance on log y, linear x.
+  Highlights tail differences between slots.
+- **Log-log** -- log y, log x.  Reveals power-law-like structure.
+
+Auto-scales to whatever `num_slots` is on disk.  At `n_slots=4` it
+uses the original `tab10`-style palette (so the figure matches the
+notebook's historical colour scheme byte-for-byte); at `n_slots=8`
+it switches to the `plasma` palette (matching `all_roles_pairwise_slots.py`,
+`role_pair_diff_norms.py`, and the post-update plots in
+`token_position_noise_analysis.py`).
+
+```bash
+# Default: 8-slot Roger data, layer 24, all roles
+uv run python results_analysis/pca_scree_plots.py
+
+# Different layer
+uv run python results_analysis/pca_scree_plots.py --layer 25
+
+# Run on traits
+uv run python results_analysis/pca_scree_plots.py \
+  --vectors_subdir traits/vectors
+
+# Reproduce the original 4-slot figure on Christina headers
+uv run python results_analysis/pca_scree_plots.py \
+  --data_dir 'runpod_workspace/qwen/qwen-3-32b Christina headers'
+```
+
+Output: `roger/pca_scree_plots_out/pca_scree_all_slots_<kind>_L<N>.png`,
+e.g. `pca_scree_all_slots_roles_L24.png`.  Runtime is ~15 s end-to-end
+(most of it is the per-file `torch.load`; the 8 PCAs themselves take
+<1 s combined).
+
+**Headline finding** on the 8-slot Roger data at layer 24: body-mean
+(slot 0) has a structurally different PCA spectrum from the 7 header
+slots.  Top PC of body-mean explains ~43 % of the variance vs ~19–28 %
+for header slots; on the log-linear and log-log views the body-mean
+curve sits well below the seven header curves throughout the spectrum.
+Header slots cluster tightly with one another -- consistent with the
+"newline cluster" 3/5/7 finding from `token_position_noise_analysis.py`.
+
+### `role_pair_diff_norms.py`
+
+For a sample of random role pairs `(A, B)`, plot `‖A[s, L] − B[s, L]‖`
+(log y) as a function of layer `L`, one panel per slot `s`. Promoted
+from a one-off chat-inline plot (April 2026) that used the old 4-slot
+`qwen-3-32b Christina headers` data. Auto-scales the panel grid to
+whatever `n_slots` is on disk (4 → 2×2, 8 → 2×4, etc.).
+
+Companion to `token_position_noise_analysis.py`: where that script asks
+"are slot-pair *direction-of-difference* signals consistent across
+slots?" (Pearson of norms + cosine of diff-vectors), this one asks "how
+does the *magnitude* of role-pair difference grow per slot as you walk
+up the layers?". The two views together let you spot slots where roles
+are well-separated AND consistent, vs slots where they're either crowded
+or noisy.
+
+Reading the plot: a tight band climbing from `~10⁰` at layer 0 to `~10³`
+at layer 60 means roles are progressively more separated at that slot
+as you go deeper -- typical of header slots where the model has finished
+accumulating role-specific context. A plateau in the middle layers
+(visible at slot 0 / body-mean and at the `<think>`/`</think>` "marker"
+slots) means role-pair separation isn't growing -- the representation
+isn't accumulating much role-specific differentiation at those depths.
+
+```bash
+# Default: 8-slot Roger data, 400 random pairs, all 64 layers.
+uv run python results_analysis/role_pair_diff_norms.py
+
+# Run on traits instead.
+uv run python results_analysis/role_pair_diff_norms.py \
+  --vectors_subdir traits/vectors
+
+# Reproduce the original 4-slot version on Christina headers (2×2 grid).
+uv run python results_analysis/role_pair_diff_norms.py \
+  --data_dir 'runpod_workspace/qwen/qwen-3-32b Christina headers'
+```
+
+Output: `roger/role_pair_diff_norms_out/role_pair_diff_norms_<kind>.png`,
+e.g. `..._roles.png` or `..._traits.png`.  Runtime is ~25 s end-to-end
+(most of it is `torch.load`).
 
 ### `all_roles_pairwise_slots.py`
 
@@ -714,17 +819,34 @@ of slots `(s1, s2)`, and each layer `L`:
 - **Bottom panel** (log y) -- `‖δ[s2, L]‖ / ‖δ[s1, L]‖`: how does
   the *magnitude* of the deviation differ between slots?
 
-Six slot-pairs (the 4-choose-2 set), distinct colours, all 280 entity
-ribbons overlaid at α = 0.10. Three frame variants:
+Eighteen slot-pairs across three colour groups, all 280 entity ribbons
+overlaid at α = 0.10.  The full 8-choose-2 = 28 subset is still too
+dense; three focused groups keep the legend usable:
 
-- **A** -- body-vs-header pairs at full alpha, header-vs-header dimmed.
-- **B** -- header-vs-header pairs full alpha, body-vs-header dimmed.
-- **C** -- all six pairs at equal alpha.
+- **`GROUP_BODY_HEADER`** (7 pairs) -- `(0, k)` for `k ∈ {1..7}`:
+  body-mean vs each header token. **`plasma`**.
+- **`GROUP_HEADER_TO_SLOT6`** (5 pairs) -- `(k, 6)` for `k ∈ {1..5}`:
+  header slots 1–5 vs slot 6 (`</think>`). **`winter`**.
+- **`GROUP_HEADER_TO_SLOT7`** (6 pairs) -- `(k, 7)` for `k ∈ {1..6}`:
+  header slots 1–6 vs slot 7 (`\n\n (post)` before the model's response).
+  **`viridis`** (distinct from plasma + winter).
 
-The legend always shows all six pairs (with the inactive ones dimmed
-in the legend itself), so the legend doesn't shift between frames --
-A/B/C can be stacked as click-to-appear layers in a slide deck without
-any visual jitter.
+Four frame variants:
+
+- **A** -- body-vs-header (7) at full alpha; vs-6 and vs-7 pairs dimmed.
+- **B** -- vs slot 6 group (5) at full alpha; others dimmed.
+- **C** -- vs slot 7 group (6) at full alpha; others dimmed.
+- **D** -- all 18 pairs at equal alpha (composite / no deck stacking).
+
+The legend always lists all 18 pairs (inactive pairs dimmed), so A–D
+stack as click-to-appear layers without jitter.
+
+The 8 slots are: `body-mean` (slot 0), `<|im_start|>` (1), `assistant`
+(2), `\n` (3), `<think>` (4), `\n\n (in)` (5), `</think>` (6),
+`\n\n (post)` (7).  Slots 5 and 7 are both `\n\n` text but at
+different chat-template positions (inside vs after the `<think>...
+</think>` block), and the legend disambiguates them with `(in)` /
+`(post)` suffixes.
 
 Whitening (`--whitening`):
 
@@ -739,24 +861,24 @@ Whitening (`--whitening`):
   cosine and norm, so both panels reflect the whitened metric.
 
 ```bash
-# Default: all 3 frames, raw, all 280 roles on Roger data.
+# Default: all 4 frames (A–D), raw, all 280 roles on Roger 8slot data.
 uv run python results_analysis/all_roles_pairwise_slots.py
 
 # Whitened K=3 version (companion frames, one per variant).
 uv run python results_analysis/all_roles_pairwise_slots.py \
   --whitening soft_K=3
 
-# Run on traits instead, just the C frame (single PNG).
+# Traits only; single PNG with every pair emphasized (composite / no deck).
 uv run python results_analysis/all_roles_pairwise_slots.py \
-  --vectors_subdir traits/vectors --variant C
+  --vectors_subdir traits/vectors --variant D
 ```
 
 Outputs default to `roger/all_roles_pairwise_slots_out/`. Filenames use
 the entity-kind in the prefix and append `_K=N` when whitening is on:
-`all_{roles,traits}_pairwise_slots[_K=N]_{A,B,C}.png`. The full layer
-set (`--max_layers None`, the default) takes ~10 s for the three raw
-frames and ~25 s for the three soft-K=3 frames (256 SVDs of a 580×5120
-pool are the bottleneck and they're each cheap).
+`all_{roles,traits}_pairwise_slots[_K=N]_{A,B,C,D}.png`. The full layer
+set (`--max_layers None`, the default) takes ~25–35 s for the four raw
+frames on 8-slot data -- the per-(slot, layer)
+SVD count for soft-K mode scales linearly with `n_slots`.
 
 **When to prefer `--whitening soft_K=3`.** Inter-pair structure
 (mean of each colour-band) is essentially unchanged by soft-K=3
@@ -765,7 +887,7 @@ lives in the residual subspace, not the top-3 PCs of overall
 activation variance. But the **per-role spread** (ribbon width) does
 shrink visibly, because the top-3 PCs are where most of the
 between-entity amplitude variation lives. Net effect: whitening makes
-the all-six-pairs `C` frame substantially less muddy without erasing
+the all-pairs `D` frame substantially less muddy without erasing
 any of the headline patterns. For figures that need to show all six
 pairs at once (e.g. report stills without click-to-appear stacking),
 the soft-K=3 variant is the readable one; the `A`/`B` frames are fine
@@ -906,33 +1028,53 @@ per-dataset.
 
 The whitened columns apply soft-K PCA whitening to ``role``, ``trait``,
 ``combo``, ``default``, and ``v_theat`` before the decomposition.
-Default is ``--K 3`` (a single K column plus a "raw" column at the
-left -- a 4 x 2 grid).  Pass several values for a wider K-sweep.  The whitening
-basis is fit per-slot on the standard augmented canonical-angles pool
-(held-out roles+traits standalones + ``default.pt``); pass
-``--no-augment`` to drop the default augmentation.  ``v_theat`` is computed inline per slot (per-row
-least-squares fit ``a·R + b·T ≈ combo + pool_mean``, mean residual,
-unit-normalised), matching the original April 23 reconstruction.  At
-slots 1-3 this matches the on-disk
-``combinations/vectors/theatricality_axis.pt`` direction to cos ≈ 0.99;
-at slot 0 the inline LSQ direction differs (cos ≈ 0.72) because the
-"theatricality offset" is genuinely a header-slot phenomenon and the
-slot-0 residual lacks a clear common-mode direction.
+Default is ``--K 2`` (a single K column plus a "raw" column at the
+left -- an `n_metrics × n_slots` grid).  Pass several values for a
+wider K-sweep.  The whitening basis is fit per-slot on the standard
+augmented canonical-angles pool (held-out roles+traits standalones +
+``default.pt``); pass ``--no-augment`` to drop the default augmentation.
+``v_theat`` is computed inline per slot (per-row least-squares fit
+``a·R + b·T ≈ combo + pool_mean``, mean residual, unit-normalised),
+matching the original April 23 reconstruction.  At header slots this
+matches the on-disk ``combinations/vectors/theatricality_axis.pt``
+direction to cos ≈ 0.99; at slot 0 the inline LSQ direction differs
+(cos ≈ 0.72) because the "theatricality offset" is genuinely a
+header-slot phenomenon and the slot-0 residual lacks a clear
+common-mode direction.
 
-#### Reading the plot
+The script auto-detects the number of slots from the loaded data
+(`num_slots = default.shape[0]`), so the same script handles 4-slot
+Christina-headers data and 8-slot Roger-8slot data.  Per-slot panel
+width compresses at higher slot counts (7 in/slot at S=4, 3.5 in/slot
+at S=8) so the figure stays under ~32 inches wide.
 
-What the plot shows on header slots (1, 2, 3): step (b) captures
-20-37% of the per-step variance reduction in raw -- a single-direction
-constant offset along ``v_theat`` explains a large chunk of the
-non-additivity of combination activations, confirming the
-"performative-persona" interpretation.  Step (c) adds little (the
-heuristic was already a good guess), step (d) adds little more (the
-additive model is nearly weight-symmetric), and ~25-30% remains
-unexplained.
+#### Reading the plot (8-slot Roger data)
 
-At the K=3 column the ``Δ R²`` shifts modestly from ``role+trait`` (a)
+The pattern from the original 4-slot finding (header slots 1-3 show a
+large step-(b) heuristic theatricality shift; body-mean does not)
+extends cleanly to all 7 header slots:
+
+| slot | (a) raw | (b) raw | interpretation |
+|---|---|---|---|
+| 0 (body-mean) | 68 % | +0.1 % | no theatricality offset (original) |
+| 1 (`<\|im_start\|>`) | 42 % | +29 % | strong header offset |
+| 2 (`assistant`) | 47 % | +20 % | strong |
+| 3 (`\n`) | 51 % | +16 % | strong |
+| 4 (`<think>`) | 48 % | +21 % | strong |
+| 5 (`\n\n (in)`) | 45 % | +16 % | strong |
+| 6 (`</think>`) | 67 % | +12 % | high a (close to body-mean), moderate b |
+| 7 (`\n\n (post)`) | 51 % | +12 % | strong |
+
+Slot 6 (`</think>`) is unusual: high additive R² (67 %, comparable to
+body-mean) but still has a non-zero theatricality offset.  The other
+six header slots cluster: additive R² 42-51 %, theatricality
+contribution 12-29 %.  Step (c) and (d) remain small at every header
+slot — the heuristic guess is good and the additive model is nearly
+weight-symmetric.
+
+At the K=2 column the ``Δ R²`` shifts modestly from ``role+trait`` (a)
 into ``heuristic theat_offset`` (b) compared to raw: as whitening
-shrinks the top-3 PCs, the additive baseline explains a little less
+shrinks the top-2 PCs, the additive baseline explains a little less
 of the combo variance and the constant theatricality offset becomes
 proportionally more important.  Pass a wider K range (e.g. ``--K 1 2
 3 4 6 8``) to see the gradient build up monotonically as more PCs are
@@ -944,23 +1086,28 @@ consistent with theatricality being absent from the body-mean
 activation.  See `canonical_angles/README.md` for further discussion.
 
 ```bash
-# Default (4 slots × 2 metrics: raw, K=3 wht; layer 25, augmented pool)
+# Default (8 slots × 2 metrics: raw, K=2 wht; layer 25, augmented pool, Roger 8slot data)
 uv run python results_analysis/variance_decomposition.py \
     --output roger/variance_decomp_bars.png
+
+# Pies version (each cell is r_ + t_ pie pair)
+uv run python results_analysis/variance_decomposition.py \
+    --style pies --output roger/variance_decomp_pies.png
 
 # Wider K-sweep at the analysis layer
 uv run python results_analysis/variance_decomposition.py \
     --K 1 2 3 4 6 8 \
     --output /tmp/var_decomp_Ksweep.png
 
-# Reproduce a historic K=128 layout
+# Reproduce the original 4-slot figure on Christina headers
 uv run python results_analysis/variance_decomposition.py \
-    --K 128 --output /tmp/var_decomp_K128.png
+    --data_dir 'runpod_workspace/qwen/qwen-3-32b Christina headers' \
+    --output /tmp/var_decomp_4slot.png
 ```
 
 The reconstructed default plot is at
 [`roger/variance_decomp_bars.png`](../roger/variance_decomp_bars.png);
-the original April 23 version (with a single K=128 wht column) is
+the original April 23 4-slot version (with a single K=128 wht column) is
 preserved at
 [`roger/variance_decomp_bars_apr23.png`](../roger/variance_decomp_bars_apr23.png)
 for direct visual comparison.  Differences vs Apr 23 are small (within
@@ -996,9 +1143,13 @@ subdirectory per axis under `--experiment_dir` (default
 The default `pair_list_12.json` is the 12 axes that currently have all
 six score files cached (7 original + 5 added: `harmless/harmful`,
 `honest/dishonest`, `truthful/deceitful`, `concise/verbose`,
-`relativist/absolutist`).  The historical 7-axis subset lives at
-`pair_list_7.json` for reproducing earlier plots.  Add new pairs by
-running the judge pipeline and editing/creating a new pair list JSON.
+`relativist/absolutist`).  **``pair_list_33.json``** lists every axis with
+desc+instr judges; many of those do **not** yet have GPT response scores, so
+the `responses` ρ curve is often all-NaN there (the peak-fit script still
+plots **desc+instr** and leaves a short note on empty panels).  The
+historical 7-axis subset lives at `pair_list_7.json` for reproducing earlier
+plots.  Add new pairs by running the judge pipeline and editing/creating a
+new pair list JSON.
 
 #### `whitening_k_sweep.py`
 
@@ -1023,45 +1174,60 @@ Outputs to `--experiment_dir`:
 # Default: 12 axes
 uv run python results_analysis/whitening_k_sweep.py
 
+# 33 axes (desc+instr everywhere; responses only where cached)
+uv run python results_analysis/whitening_k_sweep.py --pairs pair_list_33.json \
+  --slot 7 --sweep whitening_k_sweep_slot7.json --plot rho_vs_whitening_K_slot7.png
+
 # Reproduce the historical 7-axis plot
 uv run python results_analysis/whitening_k_sweep.py --pairs pair_list_7.json
 ```
 
 #### `whitening_k_peak_fit.py`
 
-Reads `whitening_k_sweep.json` and fits a parabola to each ρ-vs-K
-curve over K ∈ [0, 32] in two parametrisations:
+Reads a sweep JSON (`whitening_k_sweep.json` or **`whitening_k_sweep_slot{N}.json`**)
+and fits a parabola to each ρ-vs-K curve over K ∈ [0, 32] in two parametrisations:
 
 - linear-K:  ``ρ(K) ≈ a + b·K + c·K²``
 - log₂(K+1): ``ρ(K) ≈ a + b·log₂(K+1) + c·log₂(K+1)²``
 
-Reports R² per fit, the fitted peak K (clipped to [0, 32]), and the
-correlation between the desc+inst peak and the responses peak across
-all axes.  Empirically the log parametrisation fits substantially
-better -- ~0.94 mean R² across 24 curves (12 axes × 2 sources) vs
-~0.84 for linear-K -- consistent with whitening operating on a
-geometric (PC-rank) scale rather than a linear one.
+**Defaults:** `--pairs pair_list_33.json` so the mosaic has **33** panels in a
+**6×6** grid (three cells blank).  Pass **`--slot N`** so generic input/output
+basenames resolve to **`whitening_k_sweep_slot{N}.json`**,
+**`rho_vs_K_parabolic_fits_slot{N}.png`**, and **`whitening_k_peak_fit_slot{N}.json`**
+(and the figure title mentions the slot).
+
+The fitter skips NaN ρ points (usual on **`responses`** when GPT response scores are
+missing for that axis).  Peak-K agreement (**desc+inst** vs **responses**) is only
+printed when both peaks are finite (typically the 12-axis cohort).  Empirically the
+log parametrisation fits better on fully-scored axes.
 
 Outputs to `--experiment_dir`:
 
-- `whitening_k_peak_fit.json` -- per-curve fit records (R² per
-  parametrisation, fitted peak K, the y-hat predictions for each
-  observed K).
-- `rho_vs_K_parabolic_fits.png` -- one panel per axis showing the
-  observed ρ values + log-space parabolic fits for both sources, with
-  vertical dashed lines at the fitted peak K.  The grid auto-sizes to
-  N axes (3×4 for 12, 2×4 for 7).
+- `whitening_k_peak_fit[_slot{N}].json` -- per-curve fit records (R² per
+  parametrisation, fitted peak K, y-hats at observed K).
+- `rho_vs_K_parabolic_fits[_slot{N}].png` -- one panel per **`--pairs` entry**, in order.
 
 ```bash
-# Default: 12 axes
-uv run python results_analysis/whitening_k_peak_fit.py
+uv run python results_analysis/whitening_k_peak_fit.py --slot 3
+uv run python results_analysis/whitening_k_peak_fit.py --slot 6
+uv run python results_analysis/whitening_k_peak_fit.py --slot 7
 
-# Reproduce the historical 7-axis plot
-uv run python results_analysis/whitening_k_peak_fit.py --pairs pair_list_7.json
+# 12-axis mosaic, generic filenames (omit --slot so names are not auto-suffixed)
+uv run python results_analysis/whitening_k_peak_fit.py \\
+    --pairs pair_list_12.json \\
+    --sweep whitening_k_sweep.json \\
+    --plot rho_vs_K_parabolic_fits.png \\
+    --fit_json whitening_k_peak_fit.json
+
+uv run python results_analysis/whitening_k_peak_fit.py --pairs pair_list_7.json \\
+    --sweep whitening_k_sweep.json --plot rho_vs_K_parabolic_fits.png \\
+    --fit_json whitening_k_peak_fit.json
 ```
 
-The current default plot is at
-[`roger/axis_judge_experiments/rho_vs_K_parabolic_fits.png`](../roger/axis_judge_experiments/rho_vs_K_parabolic_fits.png).
+See e.g.
+[`rho_vs_K_parabolic_fits_slot3.png`](../roger/axis_judge_experiments/rho_vs_K_parabolic_fits_slot3.png)
+after regenerating sweeps with `pair_list_33.json`; the legacy 12-axis figure remains
+[`rho_vs_K_parabolic_fits.png`](../roger/axis_judge_experiments/rho_vs_K_parabolic_fits.png).
 
 #### `gpt_vs_sonnet_scatter.py`
 
@@ -1620,37 +1786,42 @@ the analysis point):
 
 #### `rho_by_layer.py`
 
-2x2 panel plot: per-layer mean per-axis Spearman ρ as a function of
-transformer layer for two slots × two judge sources, with seven
-whitening curves overlaid.  Tells you *which layers carry signal
-in the first place*, and how that depth profile interacts with
-soft-K whitening.
+Multi-row × 2 column plot: per-layer mean per-axis Spearman ρ vs
+transformer layer for several token slots × two judge sources, with raw
+(K=0) plus soft‑K whitening overlays.  Shows *which layers* carry
+judge-aligned signal and how that depth profile interacts with
+whitening.
 
-- Rows: slot 0 (body mean) and slot 3 (the ``\n``-after-``assistant``
-  header).
+- Rows (see ``SLOTS`` in the script; May 2026 default): slot 0
+  (body mean), slot 3 (newline after the ``assistant`` header token),
+  slot 6 (``</think>``), slot 7 (the following blank / newline
+  run right before the assistant content).
 - Columns: ``desc+inst`` (33 axes, GPT+Sonnet × desc/inst combined via
   inst-tiebreak weighting) and ``responses`` (12 axes, GPT-only
   response-mode mean).
-- Curves: raw (black, thick) plus K ∈ {1, 2, 3, 4, 5, 6} as a
-  full rainbow (purple → blue → cyan → green → yellow → red).
+- Curves: default plots K ∈ ``{0, 1, 2, 3, 4}`` — raw plus four
+  softened levels (thinner traces with smaller markers; high‑K curves
+  are drawn underneath, raw last so it sits on top).  Pass ``--ks`` to
+  change the set without editing the script.
 - Faint vertical gridlines at every even layer.
 
-The SVD that powers soft-K whitening is computed *once* per
-(slot, layer, leave-out-set) and shared across all K values, so
-the whole 64-layer × 2-slot × 7-K × 33-pair sweep takes ~14 min
-on a modern laptop.
+The SVD behind soft‑K whitening is computed *once* per
+(slot, layer, leave-out-set) and shared across all plotted K values.
+Wall time scales roughly with layers × slots × union(desc+inst,
+responses) distinct axis pairs (~tens of minutes on a laptop for the
+defaults with four slots).
 
 Outputs (to ``--experiment_dir``):
 
 - ``rho_by_layer.png``
 - ``rho_by_layer.json`` -- per-(slot, layer, K, source) mean ρ
-  table.  Used by ``--replot_from_json`` to skip the SVD and
-  re-render the plot in seconds, or by ``--reuse_json`` to
-  incrementally add/remove K values without recomputing the
-  cached ones.
+  table.  Used by ``--replot_from_json`` to skip the SVD (honours
+  ``--ks``; subplot rows honour ``slots`` recorded in the JSON), or by
+  ``--reuse_json`` to fill in missing (slot, layer, K, source)
+  entries after extending ``SLOTS`` or changing ``--ks`` / ``--layers``.
 
 ```bash
-# Default: all 64 layers, slots 0+3, Ks = [0, 1, 2, 3, 4, 5, 6]
+# Default: all layers, slots 0+3+6+7, Ks = [0, 1, 2, 3, 4]
 uv run python results_analysis/rho_by_layer.py
 
 # Faster: a coarser layer sample
@@ -1660,9 +1831,9 @@ uv run python results_analysis/rho_by_layer.py \
 # Cheap: replot from the cached JSON (no recomputation)
 uv run python results_analysis/rho_by_layer.py --replot_from_json
 
-# Incremental: e.g. add K=7 without recomputing the existing Ks
-uv run python results_analysis/rho_by_layer.py \
-    --ks 0 1 2 3 4 5 6 7 --reuse_json
+# Incremental after editing SLOTS in the script: reuse ρ for old slots;
+# computes only missing (slot, layer, K) tuples
+uv run python results_analysis/rho_by_layer.py --reuse_json
 ```
 
 Headline observations from the default run:

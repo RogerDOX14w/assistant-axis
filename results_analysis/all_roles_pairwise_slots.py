@@ -17,22 +17,31 @@ pair of slots ``(s1, s2)``, and each layer ``L``:
 - **Bottom panel** (log y): ``‖δ[s2, L]‖ / ‖δ[s1, L]‖`` -- how does
   the *magnitude* of the deviation differ between slots?
 
-Six slot-pairs (``C(4, 2)``) drawn in distinct colours:
+Eighteen slot-pairs across three visual groups (plus the ``D`` frame
+that shows all at once), encoded by colormap so group membership is
+obvious:
 
-- ``body-mean`` vs ``<|im_start|>`` (red), vs ``assistant`` (blue),
-  vs ``\\n`` (green) -- the three "body-vs-header" pairs.
-- ``<|im_start|>`` vs ``assistant`` (goldenrod), vs ``\\n`` (cyan),
-  ``assistant`` vs ``\\n`` (purple) -- the three "header-vs-header" pairs.
+- ``GROUP_BODY_HEADER`` -- 7 pairs ``(0, k)`` for ``k ∈ {1..7}``.
+  body-mean vs each header slot.  **plasma**.
+- ``GROUP_HEADER_TO_SLOT6`` -- 5 pairs ``(k, 6)`` for ``k ∈ {1..5}``.
+  each of header slots 1–5 vs slot 6 (``</think>``).
+  **winter**.
+- ``GROUP_HEADER_TO_SLOT7`` -- 6 pairs ``(k, 7)`` for ``k ∈ {1..6}``.
+  each of header slots 1–6 vs slot 7 (post-``\n\n`` before response).
+  **viridis** (distinct from plasma + winter).
 
-Three frame variants (default: emit all three side-by-side):
+The full 8-choose-2 = 28-pair set is still too dense; this 18-pair
+subset keeps the legend readable.
 
-- ``A`` -- body-vs-header pairs at full alpha, header-vs-header dimmed.
-- ``B`` -- header-vs-header pairs at full alpha, body-vs-header dimmed.
-- ``C`` -- all six pairs at equal alpha.
+Four frame variants (default: emit all four side-by-side):
 
-The legend shows all six pairs in every frame (with non-active ones
-dimmed in the legend too) so the legend doesn't shift when you stack the
-three PNGs as click-to-appear layers in a slide deck.
+- ``A`` -- body-vs-header pairs at full alpha; other groups dimmed.
+- ``B`` -- header 1–5 vs slot 6 at full alpha; others dimmed.
+- ``C`` -- header 1–6 vs slot 7 at full alpha; others dimmed.
+- ``D`` -- all 18 pairs at equal alpha (what used to be frame ``C``).
+
+The legend lists all 18 pairs in every frame (non-active dimmed) so
+stacking frames in a deck does not shift the legend.
 
 Whitening (``--whitening``)
 ---------------------------
@@ -53,7 +62,7 @@ Usage
 
 ::
 
-    # Default: all three frames, raw, all 280 roles on Roger data.
+    # Default: all four frames (A–D), raw, all 280 roles on Roger 8slot data.
     uv run python results_analysis/all_roles_pairwise_slots.py
 
     # Whitened version (project soft-K default), written next to the raw frames.
@@ -64,8 +73,8 @@ Usage
     uv run python results_analysis/all_roles_pairwise_slots.py \\
       --vectors_subdir traits/vectors
 
-    # Just the C frame (all pairs, no slide-deck stacking) for a single PNG.
-    uv run python results_analysis/all_roles_pairwise_slots.py --variant C
+    # Just the D frame (all pairs, no slide-deck stacking) for a single PNG.
+    uv run python results_analysis/all_roles_pairwise_slots.py --variant D
 """
 
 from __future__ import annotations
@@ -93,20 +102,56 @@ from results_analysis.canonical_angles.whitening import (  # noqa: E402
 )
 
 
-SLOT_NAMES = ["body-mean", "<|im_start|>", "assistant", r"\n"]
+# Qwen-3 chat-template slot layout used in the 8-slot data:
+#   0  body-mean  -- aggregate over all body (user) tokens
+#   1  <|im_start|>      \
+#   2  assistant          |
+#   3  \n                 |
+#   4  <think>            |- 7 header tokens (the "non-thinking" header
+#   5  \n\n  (in <think>) |  in Qwen-3 still includes empty <think>...</think>
+#   6  </think>           |  scaffolding; slot 5 is between <think>/</think>,
+#   7  \n\n  (post)      /   slot 7 is after </think> before the response).
+#
+# Slots 5 and 7 are both ``\n\n`` text; we disambiguate them in the
+# legend by suffixing "(in)" / "(post)" so the plot is readable.
+SLOT_NAMES = [
+    "body-mean", "<|im_start|>", "assistant", r"\n",
+    "<think>", r"\n\n (in)", "</think>", r"\n\n (post)",
+]
+
+# 8-choose-2 = 28 pairs is too dense to read; use three focused groups:
+#   - GROUP_BODY_HEADER:      (0, k) for k in 1..7
+#   - GROUP_HEADER_TO_SLOT6:  (k, 6) for k in 1..5
+#   - GROUP_HEADER_TO_SLOT7:  (k, 7) for k in 1..6
+# Total = 18 pairs.
+GROUP_BODY_HEADER = [(0, k) for k in range(1, 8)]
+GROUP_HEADER_TO_SLOT6 = [(k, 6) for k in range(1, 6)]
+GROUP_HEADER_TO_SLOT7 = [(k, 7) for k in range(1, 7)]
+ALL_PAIRS = (
+    GROUP_BODY_HEADER + GROUP_HEADER_TO_SLOT6 + GROUP_HEADER_TO_SLOT7
+)
+
+# Three colormaps so the three groups stay visually separable at
+# α=0.10 ribbon transparency (plasma / winter / viridis).
+_w_body = plt.cm.plasma(np.linspace(0.05, 0.90, len(GROUP_BODY_HEADER)))
+_w_to6 = plt.cm.winter(np.linspace(0.00, 1.00, len(GROUP_HEADER_TO_SLOT6)))
+_w_to7 = plt.cm.viridis(np.linspace(0.05, 0.95, len(GROUP_HEADER_TO_SLOT7)))
 PAIR_COLORS = {
-    (0, 1): "tab:red",     (0, 2): "tab:blue",   (0, 3): "tab:green",
-    (1, 2): "goldenrod",   (1, 3): "tab:cyan",   (2, 3): "tab:purple",
+    **{p: tuple(c) for p, c in zip(GROUP_BODY_HEADER, _w_body)},
+    **{p: tuple(c) for p, c in zip(GROUP_HEADER_TO_SLOT6, _w_to6)},
+    **{p: tuple(c) for p, c in zip(GROUP_HEADER_TO_SLOT7, _w_to7)},
 }
 PAIR_LABELS = {p: f"{SLOT_NAMES[p[0]]} vs {SLOT_NAMES[p[1]]}"
                for p in PAIR_COLORS}
-ALL_PAIRS = list(PAIR_COLORS.keys())
-GROUP_BODY_HEADER = [(0, 1), (0, 2), (0, 3)]
-GROUP_HEADER_HEADER = [(1, 2), (1, 3), (2, 3)]
+
 VARIANTS = {
-    "A": (GROUP_BODY_HEADER, "body vs header slots"),
-    "B": (GROUP_HEADER_HEADER, "header vs header slots"),
-    "C": (ALL_PAIRS, "all six pairs"),
+    "A": (GROUP_BODY_HEADER, "body-mean vs each header slot (7 pairs)"),
+    "B": (GROUP_HEADER_TO_SLOT6,
+          "header slots 1–5 vs slot 6 (</think>) (5 pairs)"),
+    "C": (GROUP_HEADER_TO_SLOT7,
+          "header slots 1–6 vs slot 7 (6 pairs)"),
+    "D": (ALL_PAIRS,
+          "all 18 pairs (body + vs-6 + vs-7)"),
 }
 
 
@@ -272,9 +317,9 @@ def _plot_frame(
         for ratio_line in ratio_data[p]:
             ax2.plot(layers, ratio_line, alpha=0.10, linewidth=1.0, color=color)
 
-    # All six pairs in legend; non-active dimmed (same in every frame so
-    # the legend doesn't shift when frames are stacked as a slide-deck
-    # click-to-appear animation).
+    # Every pair in ALL_PAIRS in the legend; non-active dimmed (same in
+    # every frame so the legend doesn't shift when frames are stacked as a
+    # slide-deck click-to-appear animation).
     for p in ALL_PAIRS:
         a_leg = 1.0 if p in show_pairs else 0.25
         ax1.plot([], [], color=PAIR_COLORS[p], linewidth=2, alpha=a_leg,
@@ -334,10 +379,15 @@ def parse_args() -> argparse.Namespace:
         formatter_class=argparse.RawDescriptionHelpFormatter,
     )
     p.add_argument("--data_dir", type=str,
-                   default="runpod_workspace/qwen/qwen-3-32b Roger",
+                   default="runpod_workspace/qwen/qwen-3-32b Roger 8slot",
                    help="Base data directory (vectors loaded from "
                         "<data_dir>/<vectors_subdir>/*.pt; whitening pool "
-                        "loaded from across roles+traits+default).")
+                        "loaded from across roles+traits+default).  Default "
+                        "points at the 8-slot data; pass the older "
+                        "'... Roger' (without 8slot) to reproduce the "
+                        "original 4-slot 6-pair plot, but the SLOT_NAMES "
+                        "list assumes 8 slots so anything ≤4 will be "
+                        "labelled with names that don't match.")
     p.add_argument("--vectors_subdir", type=str, default="roles/vectors",
                    help="Sub-path within --data_dir for the entity .pt "
                         "files. Use 'traits/vectors' for the trait side.")
@@ -351,10 +401,10 @@ def parse_args() -> argparse.Namespace:
                         "before stats are computed; pool = full augmented "
                         "pool, no LOO.")
     p.add_argument("--variant", type=str, default="all",
-                   choices=["A", "B", "C", "all"],
-                   help="Frame variant. 'all' (default) emits A, B, and C "
-                        "side by side -- intended as click-to-appear "
-                        "stacked layers in a slide.")
+                   choices=["A", "B", "C", "D", "all"],
+                   help="Frame variant. 'all' (default) emits A–D side by "
+                        "side -- intended as click-to-appear stacked layers "
+                        "in a slide.")
     p.add_argument("--max_layers", type=int, default=None,
                    help="Optional cap on the number of layers (for fast "
                         "smoke tests). None = all layers.")
@@ -399,7 +449,7 @@ def main() -> int:
     )
 
     if args.variant == "all":
-        variants = ["A", "B", "C"]
+        variants = ["A", "B", "C", "D"]
     else:
         variants = [args.variant]
 

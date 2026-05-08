@@ -74,8 +74,11 @@ def parse_args() -> argparse.Namespace:
                    help="Transformer layers to sweep (default: a 17-layer "
                         "set centered on Qwen-3-32B layer 25 with 2-layer "
                         "spacing 21-53)")
-    p.add_argument("--slots", nargs="+", type=int, default=[0, 3],
-                   help="Slot indices (one panel row per slot; default: 0 3)")
+    p.add_argument("--slots", nargs="+", type=int, default=[0, 6],
+                   help="Slot indices (one panel row per slot; default: 0 6 -- "
+                        "body-mean + </think>, the new judge-ρ winner).  Pass "
+                        "--slots 0 3 to compare against historical \\n default, "
+                        "or 0 7 for \\n\\n (post).  Slots 4-7 require 8-slot data.")
     p.add_argument("--K", type=int, default=DEFAULT_SOFT_K,
                    help=f"K for the soft-K whitening column (default: "
                         f"{DEFAULT_SOFT_K} -- the project soft-K default; "

@@ -97,11 +97,17 @@ import numpy as np
 import torch
 from scipy.stats import spearmanr
 
-from assistant_axis import png_metadata
+from assistant_axis import json_metadata, png_metadata
 from assistant_axis.judge_score_combine import (
     add_di_weights_arg,
     combine_desc_inst_one_judge,
     parse_di_weights_arg,
+)
+from assistant_axis.provenance import (
+    InputSpec,
+    current_data_subtree_input,
+    current_file_input,
+    current_files_input,
 )
 from results_analysis.axis_judge_correlation import _load_vector_file
 
@@ -110,20 +116,22 @@ DEFAULT_EXPERIMENT_DIR = Path(__file__).resolve().parent.parent / (
     "roger/axis_judge_experiments"
 )
 DEFAULT_DATA_DIR = Path(__file__).resolve().parent.parent / (
-    "runpod_workspace/qwen/qwen-3-32b Roger"
+    "runpod_workspace/qwen/qwen-3-32b Roger 8slot"
 )
-SLOT, LAYER = 3, 25  # Qwen-3-32B; tuned via rho_by_layer.py.  Other models TBD.
+DEFAULT_SLOT, LAYER = 6, 25  # New default after May 2026 rejudge: slot 6
+                             # (</think>) beats slot 3 (\\n) on judge ρ.
+                             # Pass --slot 3 (\\n) or 7 (\\n\\n post) to compare.
 PARABOLA_COLOR = "#1faa4f"
 
 
-def _v(path: Path) -> torch.Tensor:
-    """Load (n_slots, n_layers, hidden) and slice to (SLOT, LAYER) as float."""
-    return _load_vector_file(path).float()[SLOT, LAYER]
+def _v(path: Path, *, slot: int) -> torch.Tensor:
+    """Load (n_slots, n_layers, hidden) and slice to (slot, LAYER) as float."""
+    return _load_vector_file(path).float()[slot, LAYER]
 
 
-def axis_unit(data_dir: Path, pos: str, neg: str) -> torch.Tensor:
-    p = _v(data_dir / "traits" / "vectors" / f"{pos}.pt")
-    n = _v(data_dir / "traits" / "vectors" / f"{neg}.pt")
+def axis_unit(data_dir: Path, pos: str, neg: str, *, slot: int) -> torch.Tensor:
+    p = _v(data_dir / "traits" / "vectors" / f"{pos}.pt", slot=slot)
+    n = _v(data_dir / "traits" / "vectors" / f"{neg}.pt", slot=slot)
     d = p - n
     return d / torch.linalg.vector_norm(d)
 
@@ -160,35 +168,41 @@ def main() -> int:
                         "Title-cased version of --second_judge.")
     p.add_argument("--plot", default=None,
                    help="Output plot filename "
-                        "(default: gpt_<second_judge>_weight_sweep.png).")
+                        "(default: gpt_<second_judge>_weight_sweep_slot{N}.png; "
+                        "the slot suffix matches --slot).")
     p.add_argument("--rhos_json", default=None,
                    help="Output JSON filename "
-                        "(default: gpt_<second_judge>_weight_sweep.json).")
+                        "(default: gpt_<second_judge>_weight_sweep_slot{N}.json).")
+    p.add_argument("--slot", type=int, default=DEFAULT_SLOT,
+                   help=f"Token-position slot to project onto "
+                        f"(default: {DEFAULT_SLOT} = </think>).  Pass --slot 3 "
+                        f"(\\n) or 7 (\\n\\n post) to compare.")
     add_di_weights_arg(p)
     args = p.parse_args()
     di_weights = parse_di_weights_arg(args.di_weights)
     experiment_dir = Path(args.experiment_dir).resolve()
     data_dir = Path(args.data_dir).resolve()
+    slot = int(args.slot)
     second_judge = args.second_judge
     second_label = (args.second_judge_label
                      or second_judge[:1].upper() + second_judge[1:])
     if args.plot is None:
-        args.plot = f"gpt_{second_judge}_weight_sweep.png"
+        args.plot = f"gpt_{second_judge}_weight_sweep_slot{slot}.png"
     if args.rhos_json is None:
-        args.rhos_json = f"gpt_{second_judge}_weight_sweep.json"
+        args.rhos_json = f"gpt_{second_judge}_weight_sweep_slot{slot}.json"
 
     pairs = json.load(open(experiment_dir / args.pairs))
     print(f"Loaded {len(pairs)} axis pairs from {args.pairs}")
 
-    # Cache standalone entity vectors at (SLOT, LAYER), default-centered.
-    default_sl = _v(data_dir / "traits" / "vectors" / "default.pt")
+    # Cache standalone entity vectors at (slot, LAYER), default-centered.
+    default_sl = _v(data_dir / "traits" / "vectors" / "default.pt", slot=slot)
     entity_vecs: dict[str, np.ndarray] = {}
     for et in ("traits", "roles"):
         for fp in sorted((data_dir / et / "vectors").glob("*.pt")):
             if fp.stem == "default":
                 continue
             try:
-                v = _load_vector_file(fp).float()[SLOT, LAYER]
+                v = _load_vector_file(fp).float()[slot, LAYER]
                 entity_vecs[fp.stem] = (v - default_sl).numpy()
             except Exception:  # pragma: no cover -- skip unreadable files
                 continue
@@ -216,7 +230,7 @@ def main() -> int:
             continue
         g2 = np.array([gpt_scores[n] for n in common])
         s2 = np.array([son_scores[n] for n in common])
-        a = axis_unit(data_dir, pos, neg).numpy()
+        a = axis_unit(data_dir, pos, neg, slot=slot).numpy()
         proj = np.array([float(np.dot(entity_vecs[n], a)) for n in common])
         per_axis[(pos, neg)] = {
             "g2": g2, "s2": s2, "proj": proj, "n": len(common)}
@@ -300,7 +314,7 @@ def main() -> int:
 
     ax.set_xlabel(f"Weight on GPT-4.1-mini\n(remaining on {second_label})",
                   fontsize=9)
-    ax.set_ylabel("Per-axis Spearman ρ (slot 3, raw)", fontsize=9)
+    ax.set_ylabel(f"Per-axis Spearman ρ (slot {slot}, raw)", fontsize=9)
     title_line = (f"GPT/{second_label} score-blend sweep -- mean ρ across "
                   f"{n_axes} axes")
     # set_title here functions as a suptitle (single-panel figure).
@@ -356,9 +370,37 @@ def main() -> int:
                 fontsize=7, va="bottom", color="#555555")
     plt.tight_layout()
 
+    # --- Provenance inputs (used by both PNG + JSON writes) ---
+    # Vector subtrees, the pair list, and the judge caches
+    # (gpt + second_judge × desc/inst).  No response-mode caches: this
+    # script reads desc+inst only.
+    judge_cache_paths: list[Path] = []
+    for it in pairs:
+        ax = experiment_dir / f"{it['pos']}_vs_{it['neg']}"
+        for judge in ("gpt", second_judge):
+            for mode in ("descriptions", "instructions"):
+                judge_cache_paths.append(
+                    ax / judge / f"scores_{mode}.json")
+    inputs: list[InputSpec] = [
+        current_data_subtree_input(
+            data_dir, "traits/vectors", dep_key="traits_vectors",
+            extras={"slot": str(slot), "layer": str(LAYER)}),
+        current_data_subtree_input(
+            data_dir, "roles/vectors", dep_key="roles_vectors",
+            extras={"slot": str(slot), "layer": str(LAYER)}),
+        current_file_input(
+            dep_key="pairs_json",
+            path=experiment_dir / args.pairs),
+        current_files_input(
+            dep_key="judge_caches",
+            paths=judge_cache_paths,
+            extras={"n_axes": str(len(pairs)),
+                    "second_judge": second_judge}),
+    ]
+
     out_path = experiment_dir / args.plot
     plt.savefig(out_path, dpi=150, bbox_inches="tight",
-                metadata=png_metadata(title=title_line))
+                metadata=png_metadata(title=title_line, inputs=inputs))
     plt.close(fig)
     print(f"\nWrote {out_path}")
 
@@ -387,7 +429,10 @@ def main() -> int:
         ],
     }
     json_path = experiment_dir / args.rhos_json
-    json.dump(json_out, open(json_path, "w"), indent=2)
+    envelope = json_metadata(
+        json_out, inputs=inputs,
+        title=f"gpt_{second_judge}_weight_sweep slot={slot} pairs={args.pairs}")
+    json.dump(envelope, open(json_path, "w"), indent=2)
     print(f"Wrote {json_path}")
     return 0
 

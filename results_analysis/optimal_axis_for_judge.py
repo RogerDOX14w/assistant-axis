@@ -48,11 +48,18 @@ import matplotlib
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 
+from assistant_axis import json_metadata
 from assistant_axis.judge_score_combine import (
     DI_WEIGHT_CHOICES, combine_desc_inst_one_judge,
     combine_desc_inst_two_judges,
 )
 from assistant_axis.plot_metadata import png_metadata, suptitle_with_specs
+from assistant_axis.provenance import (
+    InputSpec,
+    current_data_subtree_input,
+    current_file_input,
+    current_files_input,
+)
 from results_analysis.axis_judge_correlation import _load_vector_file
 from results_analysis.canonical_angles.data import (
     DEFAULT_DATA_DIR, build_augmented_whitening_pool, load_vector,
@@ -80,7 +87,10 @@ DEFAULT_CV_FOLDS = 5
 DEFAULT_K_SEED = 4             # number of axis-aligned-signed seeds (PCs 0..K_seed-1)
 DEFAULT_CLUSTER_COS_THRESHOLD = 0.95
 DEFAULT_TIE_THRESH = 5e-4
-DEFAULT_SLOT = 3
+DEFAULT_SLOT = 6  # New default after May 2026 rejudge run: slot 6 (</think>)
+                  # beats slot 3 (\\n) on judge ρ.  Pass --slot 3 or 7 to
+                  # compare.  --output_dir is required so callers should label
+                  # their per-slot runs (e.g. ..._slot6/, ..._slot3/).
 DEFAULT_LAYER = 25
 DEFAULT_WHITENING = "soft_K=3"
 
@@ -967,6 +977,33 @@ def _flatten_response_scores(raw: dict) -> dict[str, float]:
     return out
 
 
+def score_source_paths(experiment_dir: Path, source: str) -> list[Path]:
+    """Return the on-disk paths a given ``--score_source`` reads.
+
+    Used by the provenance machinery to fingerprint the judge caches
+    that fed an :func:`optimal_axis_for_judge` run.  Mirrors the
+    branches in :func:`load_scores_from_experiment_dir`.  Non-existent
+    paths are still returned (the caller filters); ``responses``
+    gracefully skips missing roles/traits.
+    """
+    if source in ("gpt", "sonnet", "haiku"):
+        d = experiment_dir / source
+        return [d / "scores_descriptions.json",
+                d / "scores_instructions.json"]
+    if source == "di_combined":
+        out: list[Path] = []
+        for sub in ("gpt", "sonnet"):
+            for fname in ("scores_descriptions.json",
+                          "scores_instructions.json"):
+                out.append(experiment_dir / sub / fname)
+        return out
+    if source == "responses":
+        return [experiment_dir / sub / "scores_responses.json"
+                for sub in ("gpt_responses_roles", "gpt_responses_traits")]
+    raise ValueError(f"Unknown source {source!r}; "
+                     f"choose from {SCORE_SOURCE_CHOICES}")
+
+
 def load_scores_from_experiment_dir(
     experiment_dir: Path, source: str,
     *,
@@ -1024,6 +1061,7 @@ def _git_sha() -> str:
 def write_outputs(
     output_dir: Path, result: FitResult, *, run_label: str,
     argv: list[str], wallclock_s: float,
+    inputs: list[InputSpec] | None = None,
 ) -> None:
     output_dir.mkdir(parents=True, exist_ok=True)
 
@@ -1037,7 +1075,12 @@ def write_outputs(
     torch.save(payload, output_dir / "direction.pt")
 
     # diagnostics.json (without restart d_pcs -- those go in restart_dirs.pt
-    # since they're numeric arrays)
+    # since they're numeric arrays).  Wrapped in a provenance envelope
+    # so callers can validate freshness against current inputs.  The
+    # ``.pt`` siblings are part of the same atomic write bundle and
+    # inherit the diagnostics.json's provenance transitively (they
+    # don't need their own envelopes since torch.save isn't a JSON
+    # target).
     diag = {
         "metric": result.metric,
         "rho_train": result.rho_train,
@@ -1055,7 +1098,10 @@ def write_outputs(
         "argv": " ".join(argv),
         "wallclock_s": wallclock_s,
     }
-    (output_dir / "diagnostics.json").write_text(json.dumps(diag, indent=2))
+    diag_envelope = json_metadata(
+        diag, inputs=inputs, title=f"optimal_axis_for_judge: {run_label}")
+    (output_dir / "diagnostics.json").write_text(
+        json.dumps(diag_envelope, indent=2))
 
     # restart_dirs.pt: per-restart final directions in PC basis, for
     # downstream cluster analysis or cross-source consistency studies.
@@ -1078,10 +1124,12 @@ def write_outputs(
         }, output_dir / "restart_dirs.pt")
 
     # restarts.png
-    write_restarts_plot(output_dir / "restarts.png", result, run_label)
+    write_restarts_plot(output_dir / "restarts.png", result, run_label,
+                        inputs=inputs)
 
 
-def write_restarts_plot(out_path: Path, result: FitResult, run_label: str) -> None:
+def write_restarts_plot(out_path: Path, result: FitResult, run_label: str,
+                          *, inputs: list[InputSpec] | None = None) -> None:
     fig, ax = plt.subplots(figsize=(8.5, 5.0))
     rs = result.restarts
     rhos = [r.final_rho_train for r in rs]
@@ -1125,7 +1173,8 @@ def write_restarts_plot(out_path: Path, result: FitResult, run_label: str) -> No
     fig.tight_layout(rect=(0, 0, 1, top_rect))
     fig.savefig(out_path, dpi=150, bbox_inches="tight",
                 metadata=png_metadata(title=title,
-                                       source_text=Path(__file__).read_text()))
+                                       source_text=Path(__file__).read_text(),
+                                       inputs=inputs))
     plt.close(fig)
 
 
@@ -1201,6 +1250,34 @@ def _load_scores_from_args(args: argparse.Namespace) -> dict[str, float]:
     raise SystemExit("Must pass either --scores_file or --experiment_dir.")
 
 
+def _build_inputs(args: argparse.Namespace) -> list[InputSpec]:
+    """Construct the InputSpec list for this run.  Two dataset subtrees
+    (always) plus either a scores_file (Mode A) or a judge-cache
+    composite (Mode B)."""
+    data_dir = Path(args.data_dir)
+    inputs: list[InputSpec] = [
+        current_data_subtree_input(
+            data_dir, "traits/vectors", dep_key="traits_vectors",
+            extras={"slot": str(args.slot), "layer": str(args.layer)}),
+        current_data_subtree_input(
+            data_dir, "roles/vectors", dep_key="roles_vectors",
+            extras={"slot": str(args.slot), "layer": str(args.layer)}),
+    ]
+    if args.scores_file:
+        inputs.append(current_file_input(
+            dep_key="scores_file",
+            path=Path(args.scores_file)))
+    elif args.experiment_dir:
+        paths = score_source_paths(
+            Path(args.experiment_dir), args.score_source)
+        inputs.append(current_files_input(
+            dep_key="judge_caches",
+            paths=paths,
+            extras={"score_source": args.score_source,
+                    "experiment_dir": str(args.experiment_dir)}))
+    return inputs
+
+
 def main(argv: Optional[list[str]] = None) -> int:
     args = parse_args(argv)
     out_dir = Path(args.output_dir)
@@ -1210,6 +1287,8 @@ def main(argv: Optional[list[str]] = None) -> int:
     if not judge_scores:
         raise SystemExit("Empty judge_scores after loading; check --score_source.")
     print(f"Loaded {len(judge_scores)} judge scores")
+
+    inputs = _build_inputs(args)
 
     exclude = set([s for s in args.exclude_names.split(",") if s.strip()])
     seed_pair = tuple(args.seed_pair) if args.seed_pair else None
@@ -1245,7 +1324,7 @@ def main(argv: Optional[list[str]] = None) -> int:
 
     write_outputs(out_dir, result, run_label=run_label,
                    argv=sys.argv if argv is None else argv,
-                   wallclock_s=wallclock)
+                   wallclock_s=wallclock, inputs=inputs)
     print(f"\nWrote outputs to {out_dir}/ in {wallclock:.1f}s")
     return 0
 

@@ -494,16 +494,34 @@ def _resolve_examples(
     return out
 
 
+class BudgetExhausted(RuntimeError):
+    """Opus consumed the full output budget on extended thinking and
+    emitted no visible text (only thinking blocks).  Caller can catch and
+    retry with a larger ``thinking_budget`` / ``max_tokens``.
+
+    The ``usage`` attribute holds the per-call telemetry from the failed
+    call so the caller can log it alongside the successful retry's usage.
+    """
+
+    def __init__(self, message: str, usage: Optional[dict[str, Any]] = None):
+        super().__init__(message)
+        self.usage = usage
+
+
 async def _call_opus(
     prompt: str,
     *,
     model: str,
     thinking_budget: int,
     max_tokens: int,
-) -> str:
+) -> tuple[str, dict[str, Any]]:
     """One Anthropic call, with extended thinking iff thinking_budget > 0.
 
-    Returns the concatenated assistant text (excluding any thinking blocks).
+    Returns ``(text, usage)`` where ``text`` is the concatenated assistant
+    text (excluding any thinking blocks) and ``usage`` is a dict with
+    per-call telemetry: ``input_tokens``, ``output_tokens`` (total, includes
+    thinking), ``text_chars``, ``thinking_chars``, ``stop_reason``,
+    ``max_tokens``, ``thinking_budget``, ``model``.
     """
     import anthropic
 
@@ -539,19 +557,57 @@ async def _call_opus(
         final = await stream.get_final_message()
 
     parts: list[str] = []
+    text_chars = 0
+    thinking_chars = 0
     for block in final.content:
-        # Skip thinking blocks; only collect the visible "text" output.
         btype = getattr(block, "type", None)
         if btype == "text":
             t = getattr(block, "text", None)
             if t:
                 parts.append(t)
+                text_chars += len(t)
         elif btype == "thinking":
             # We don't surface thinking content; it's billed but not used.
-            continue
+            t = getattr(block, "thinking", None)
+            if t:
+                thinking_chars += len(t)
+
+    u = getattr(final, "usage", None)
+    stop_reason = getattr(final, "stop_reason", None)
+    usage: dict[str, Any] = {
+        "model": model,
+        "input_tokens": getattr(u, "input_tokens", None) if u else None,
+        "output_tokens": getattr(u, "output_tokens", None) if u else None,
+        "cache_creation_input_tokens":
+            getattr(u, "cache_creation_input_tokens", None) if u else None,
+        "cache_read_input_tokens":
+            getattr(u, "cache_read_input_tokens", None) if u else None,
+        "text_chars": text_chars,
+        "thinking_chars": thinking_chars,
+        "stop_reason": stop_reason,
+        "max_tokens": max_tokens,
+        "thinking_budget": thinking_budget,
+    }
+    logger.info(
+        "Opus call done: in=%s out=%s (text=%d chars, thinking=%d chars) "
+        "stop=%s max=%d think_budget=%d",
+        usage["input_tokens"], usage["output_tokens"],
+        text_chars, thinking_chars, stop_reason, max_tokens, thinking_budget,
+    )
+
     if not parts:
-        raise RuntimeError("Anthropic returned no text content blocks")
-    return "".join(parts)
+        out = usage["output_tokens"]
+        if out is not None and out >= max_tokens - 200:
+            raise BudgetExhausted(
+                f"Opus emitted no text — output_tokens={out} hit "
+                f"max_tokens={max_tokens} (thinking_budget={thinking_budget}, "
+                f"thinking_chars={thinking_chars}); retry with larger budgets",
+                usage=usage,
+            )
+        raise RuntimeError(
+            f"Anthropic returned no text content blocks (usage={usage})"
+        )
+    return "".join(parts), usage
 
 
 # ---------------------------------------------------------------------------
@@ -658,13 +714,38 @@ async def _summarize_axis_async(
         f"thinking_budget={thinking_budget}"
     )
 
+    usage_log: list[dict[str, Any]] = []
+
+    async def _call(p: str, tb: int, mt: int, *, attempt: str) -> str:
+        try:
+            text_, usage_ = await _call_opus(
+                p, model=model, thinking_budget=tb, max_tokens=mt,
+            )
+        except BudgetExhausted as exc:
+            # Log the failed-attempt's usage so the caller can see how
+            # close it came to the budget ceiling, then re-raise so the
+            # outer handler can retry.
+            if exc.usage is not None:
+                fail_u = dict(exc.usage)
+                fail_u["attempt"] = f"{attempt}__BUDGET_EXHAUSTED"
+                usage_log.append(fail_u)
+            raise
+        usage_["attempt"] = attempt
+        usage_log.append(usage_)
+        return text_
+
     try:
-        text = await _call_opus(
-            prompt,
-            model=model,
-            thinking_budget=thinking_budget,
-            max_tokens=max_tokens,
+        text = await _call(prompt, thinking_budget, max_tokens,
+                            attempt="initial")
+    except BudgetExhausted as e:
+        bumped_thinking = thinking_budget * 2
+        bumped_max = max(max_tokens * 2, bumped_thinking + 4_000)
+        logger.warning(
+            f"BudgetExhausted on initial call ({e}); retrying with "
+            f"thinking_budget={bumped_thinking}, max_tokens={bumped_max}"
         )
+        text = await _call(prompt, bumped_thinking, bumped_max,
+                            attempt="budget_doubled")
     except Exception as e:
         logger.error(f"first call to Opus failed: {e}")
         raise
@@ -679,17 +760,14 @@ async def _summarize_axis_async(
             "Please respond using exactly the five tagged blocks shown above, "
             "with no other text outside the tags.]"
         )
-        text = await _call_opus(
-            retry_prompt,
-            model=model,
-            thinking_budget=thinking_budget,
-            max_tokens=max_tokens,
-        )
+        text = await _call(retry_prompt, thinking_budget, max_tokens,
+                            attempt="parse_retry")
         parsed = parse_response(text)
 
     # Convert example labels back to filename format.
     parsed["pos_examples"] = _resolve_examples(parsed["pos_examples"], label_map, "pos_examples")
     parsed["neg_examples"] = _resolve_examples(parsed["neg_examples"], label_map, "neg_examples")
+    parsed["_usage"] = usage_log
     return parsed
 
 
@@ -750,6 +828,16 @@ def main(argv: Optional[list[str]] = None) -> int:
     )
 
     args.output.parent.mkdir(parents=True, exist_ok=True)
+
+    # Pop the per-call usage telemetry into a sibling usage.json file so
+    # spec.json stays a clean axis description and we still have the token
+    # counts on disk for retrospective analysis.
+    usage = result.pop("_usage", None)
+    if usage is not None:
+        usage_path = args.output.parent / "usage.json"
+        usage_path.write_text(json.dumps(usage, indent=2))
+        logger.info(f"wrote {usage_path} ({len(usage)} call(s))")
+
     args.output.write_text(json.dumps(result, indent=2))
     logger.info(f"wrote {args.output}")
 

@@ -83,6 +83,7 @@ from pathlib import Path
 
 __all__ = [
     "png_metadata",
+    "json_metadata",
     "suptitle_with_specs",
     "REPO_ROOT",
     "DEFAULT_AUTHOR",
@@ -140,6 +141,64 @@ def _git_sha() -> str | None:
         return None
 
 
+def _build_producer_info(
+    *,
+    script: str | None,
+    argv: list[str] | None,
+    interpreter: str,
+) -> tuple[str, str, str | None, str]:
+    """Compute the (cmd, creation_time, git_sha, resolved_script) tuple
+    used by both png_metadata and json_metadata.  Centralised so the
+    two writer paths stay byte-identical in their producer fields."""
+    if script is None and argv is None:
+        # Detect ``python -m foo.bar`` invocations (see png_metadata docstring).
+        main_spec = getattr(sys.modules.get("__main__"), "__spec__", None)
+        if main_spec is not None and main_spec.name not in (None, "__main__"):
+            script = "-m " + main_spec.name
+            argv = list(sys.argv[1:])
+
+    if script is None:
+        argv0 = sys.argv[0] if sys.argv else ""
+        script = _relative_to_repo(argv0) if argv0 else "<unknown>"
+    elif not script.startswith("-m "):
+        script = _relative_to_repo(script)
+
+    if argv is None:
+        argv = list(sys.argv[1:])
+
+    cmd = f"{interpreter} {script}"
+    if argv:
+        cmd += " " + " ".join(shlex.quote(a) for a in argv)
+
+    creation_time = (
+        _datetime.datetime.now().astimezone()
+        .strftime("%Y-%m-%d %H:%M:%S %z")
+    )
+    sha = _git_sha()
+    return cmd, creation_time, sha, script
+
+
+def _serialize_inputs(inputs) -> tuple[str, str]:
+    """JSON-serialise a list of provenance.InputSpec (or already-jsonable
+    dicts) and return (json_text, sha256_hex).  Lazy import to avoid a
+    cycle with assistant_axis.provenance."""
+    from assistant_axis.provenance import InputSpec, inputs_to_jsonable
+
+    if not inputs:
+        return "[]", hashlib.sha256(b"[]").hexdigest()
+
+    sample = next(iter(inputs))
+    if isinstance(sample, InputSpec):
+        blobs = inputs_to_jsonable(inputs)
+    else:
+        # Assume already-jsonable dicts; tolerate caller-built lists.
+        blobs = list(inputs)
+
+    body = json.dumps(blobs, indent=2, sort_keys=True, ensure_ascii=False)
+    digest = hashlib.sha256(body.encode("utf-8")).hexdigest()
+    return body, digest
+
+
 def png_metadata(
     title: str,
     *,
@@ -150,6 +209,7 @@ def png_metadata(
     source_text: str | None = None,
     source_files: dict[str, str] | None = None,
     extra: dict[str, str] | None = None,
+    inputs: "list | None" = None,
 ) -> dict[str, str]:
     """Build a PNG metadata dict suitable for ``fig.savefig(metadata=...)``.
 
@@ -189,7 +249,21 @@ def png_metadata(
         Additional metadata fields to embed.  Reserved keys
         (``Title``, ``Author``, ``Software``, ``Creation Time``,
         ``Source``, ``Source Code``, ``Source Code SHA256``,
-        ``Source Code Files``) take precedence over ``extra``.
+        ``Source Code Files``, ``Inputs``, ``Inputs SHA256``)
+        take precedence over ``extra``.
+    inputs : list[InputSpec] | None, optional
+        Provenance descriptors of the inputs this plot depends on
+        (dataset subtrees, upstream cache JSONs, etc.).  When set,
+        embeds two more chunks:
+
+        - ``Inputs``        -- pretty-printed JSON of the InputSpec list.
+        - ``Inputs SHA256`` -- hex digest of the JSON body, for tamper
+                               detection.
+
+        See :mod:`assistant_axis.provenance` for ``InputSpec`` and
+        helpers (``current_data_subtree_input``, ``current_file_input``)
+        that build these.  Auditors and reader-side validation keys
+        off this chunk via :mod:`tools.audit_pngs`.
 
     Returns
     -------
@@ -220,45 +294,20 @@ def png_metadata(
     ...                 title="Quick exploration",
     ...                 source_text=Path(__file__).read_text()))
     """
-    # Detect ``python -m foo.bar`` invocations: __main__.__spec__ is the
-    # ModuleSpec of the loaded module in that case (None for direct
-    # ``python foo.py`` invocations).  When -m was used we must record
-    # the dotted module path, not the on-disk file path -- because
-    # packages with relative imports refuse to run as bare scripts.
-    if script is None and argv is None:
-        main_spec = getattr(sys.modules.get("__main__"), "__spec__", None)
-        if main_spec is not None and main_spec.name not in (None, "__main__"):
-            script = "-m " + main_spec.name
-            argv = list(sys.argv[1:])
-
-    if script is None:
-        argv0 = sys.argv[0] if sys.argv else ""
-        script = _relative_to_repo(argv0) if argv0 else "<unknown>"
-    elif not script.startswith("-m "):
-        script = _relative_to_repo(script)
-
-    if argv is None:
-        argv = list(sys.argv[1:])
-
-    cmd = f"{interpreter} {script}"
-    if argv:
-        cmd += " " + " ".join(shlex.quote(a) for a in argv)
-
     if source_text is not None and source_files is not None:
         raise ValueError(
             "pass at most one of source_text= or source_files=")
 
-    sha = _git_sha()
+    cmd, creation_time, sha, _script = _build_producer_info(
+        script=script, argv=argv, interpreter=interpreter)
+
     md: dict[str, str] = {}
     if extra:
         md.update(extra)
     md["Title"] = title
     md["Author"] = author
     md["Software"] = cmd
-    md["Creation Time"] = (
-        _datetime.datetime.now().astimezone()
-        .strftime("%Y-%m-%d %H:%M:%S %z")
-    )
+    md["Creation Time"] = creation_time
     if sha is not None:
         md["Source"] = f"git {sha}"
 
@@ -275,7 +324,98 @@ def png_metadata(
         md["Source Code Files"] = ", ".join(sorted(source_files))
         md["Source Code SHA256"] = hashlib.sha256(
             body.encode("utf-8")).hexdigest()
+
+    if inputs is not None:
+        body, digest = _serialize_inputs(inputs)
+        md["Inputs"] = body
+        md["Inputs SHA256"] = digest
     return md
+
+
+# ---------------------------------------------------------------------------
+# JSON cache provenance envelope
+# ---------------------------------------------------------------------------
+
+def json_metadata(
+    payload,
+    *,
+    title: str | None = None,
+    author: str = DEFAULT_AUTHOR,
+    script: str | None = None,
+    argv: list[str] | None = None,
+    interpreter: str = "uv run python",
+    inputs: "list | None" = None,
+    schema_version: str = "1.0",
+) -> dict:
+    """Wrap a serialisable payload in a provenance envelope for JSON caches.
+
+    Use this in cache-writing scripts (e.g. ``whitening_k_sweep.py``,
+    ``batch_size_rho_curve.py``, ``pc_round_trip/klm_sweep.py``,
+    ``infer_axis_description.py``).  The returned dict is a
+    drop-in for the original payload at the top of the file, with the
+    original payload nested under ``"result"`` and a new
+    ``"_provenance"`` block alongside.
+
+    Schema (matches the Phase 3 plan)::
+
+        {
+            "result": <original payload>,
+            "_provenance": {
+                "schema_version": "1.0",
+                "produced_by": {
+                    "cmd":     "uv run python ...",
+                    "git_sha": "abc123" | "abc123+dirty" | null,
+                    "title":   "...",        # if title= was passed
+                    "author":  "Roger Dearnaley"
+                },
+                "produced_at": "2026-05-08 01:23:45 +0100",
+                "inputs": [<InputSpec dicts>],          # if inputs= passed
+                "inputs_sha256": "<hex>"                 # if inputs= passed
+            }
+        }
+
+    Backward compatibility: readers tolerant of missing ``_provenance``
+    can call ``payload = json.load(...).get("result", json.load(...))``
+    -- but the cleaner pattern is to use ``load_validated_json``
+    (Phase 4) which understands both legacy ``payload`` and new
+    ``{result, _provenance}`` shapes transparently.
+    """
+    cmd, creation_time, sha, _script = _build_producer_info(
+        script=script, argv=argv, interpreter=interpreter)
+
+    produced_by: dict[str, "str | None"] = {
+        "cmd": cmd,
+        "git_sha": sha,
+        "author": author,
+    }
+    if title is not None:
+        produced_by["title"] = title
+
+    provenance: dict = {
+        "schema_version": schema_version,
+        "produced_by": produced_by,
+        "produced_at": creation_time,
+    }
+
+    if inputs is not None:
+        from assistant_axis.provenance import InputSpec, inputs_to_jsonable
+        sample = next(iter(inputs), None)
+        if isinstance(sample, InputSpec):
+            blobs = inputs_to_jsonable(inputs)
+        else:
+            blobs = list(inputs)
+        provenance["inputs"] = blobs
+        # SHA256 over the same canonical serialisation used by png_metadata,
+        # so PNG and JSON consumers can cross-validate identical InputSpec
+        # lists if needed.
+        body = json.dumps(blobs, indent=2, sort_keys=True, ensure_ascii=False)
+        provenance["inputs_sha256"] = hashlib.sha256(
+            body.encode("utf-8")).hexdigest()
+
+    return {
+        "result": payload,
+        "_provenance": provenance,
+    }
 
 
 # ---------------------------------------------------------------------------

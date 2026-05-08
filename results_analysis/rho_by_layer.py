@@ -1,10 +1,10 @@
 #!/usr/bin/env python3
-"""2x2 panel plot: per-layer mean Spearman ρ vs transformer layer for
-two slots × two judge sources, with raw + soft-K whitening overlaid.
+"""``n_slots`` × 2 panel plot: per-layer mean Spearman ρ vs transformer layer for
+selected slots × two judge sources, with raw + soft-K whitening overlaid.
 
-Rows are slot 0 (body mean) and slot 3 (the canonical
-``\\n``-after-``assistant`` header position).  Columns are the two
-judge sources used elsewhere in the project:
+Rows are token slots (defaults include body mean, historical ``\\n`` default,
+``</think>``, and ``\\n\\n`` post; see ``SLOTS``).  Columns are the
+two judge sources used elsewhere in the project:
 
 - **desc+inst** -- 33 axes (``pair_list_33.json``), 4-way mean of
   ``GPT_d, GPT_i, Son_d, Son_i``;
@@ -19,14 +19,16 @@ whitening fit on the augmented held-out pool from
 endpoints of the axis pair).  This is the same convention as
 ``rho_by_slot_and_K.py`` and ``whitening_k_sweep.py``.
 
-Default Ks are ``[0, 1, 2, 3, 4, 5, 6]`` plotted as black (raw) +
-full RGB rainbow (K=1 purple → K=6 red).
+Default Ks are ``[0, 1, 2, 3, 4]`` (K=5 and K=6 omitted for readability)
+plotted as black (raw) + rainbow spread across K=1 … K=4.
 
 Performance note: the SVD that powers soft-K whitening is computed
 *once* per (slot, layer, leave-out-set) and shared across all K
-values, so going from 6 K values to 7 (or more) costs almost
-nothing.  The dominant cost is N_layers × N_slots × N_unique_pairs
-SVDs (~4k for the default 64-layer × 2-slot × 33-pair sweep).
+values, so adding another K to the same fit costs almost nothing.
+The dominant cost is N_layers × len(SLOTS) × N_unique_pairs SVDs
+(order ~10k for the default 64-layer × 4-slot × up-to-45-pair sweep:
+33 desc+inst axes + 12 response axes, deduped where the same pair appears
+in both lists).
 
 Inputs (from ``--experiment_dir``)
 ----------------------------------
@@ -48,7 +50,7 @@ Plus the standard activation-vectors directory passed via ``--data_dir``.
 Outputs (to ``--experiment_dir``)
 ---------------------------------
 
-- ``rho_by_layer.png`` -- the 2x2 panel plot.
+- ``rho_by_layer.png`` -- the multi-panel slot × source plot.
 - ``rho_by_layer.json`` -- per-(slot, layer, K, source) mean ρ table,
   written alongside the PNG so the plot can be re-rendered cheaply
   via ``--replot_from_json``.
@@ -58,7 +60,7 @@ Examples
 
 ::
 
-    # Default: all layers, slots 0+3, Ks = [0,1,2,3,4,6,8]
+    # Default: all layers, slots 0+3+6+7, Ks = [0,1,2,3,4]
     uv run python results_analysis/rho_by_layer.py
 
     # Faster: a coarse layer subset
@@ -67,6 +69,10 @@ Examples
     # Cheap: re-render the plot from the cached JSON sidecar
     # (does NOT recompute; useful for tweaking colors / gridlines).
     uv run python results_analysis/rho_by_layer.py --replot_from_json
+
+    # Incremental: after extending ``SLOTS`` in source, reuse existing cells
+    # and compute only missing (slot, layer, K, source) tuples.
+    uv run python results_analysis/rho_by_layer.py --reuse_json
 """
 from __future__ import annotations
 
@@ -96,15 +102,26 @@ DEFAULT_EXPERIMENT_DIR = Path(__file__).resolve().parent.parent / (
     "roger/axis_judge_experiments"
 )
 DEFAULT_DATA_DIR = Path(__file__).resolve().parent.parent / (
-    "runpod_workspace/qwen/qwen-3-32b Roger"
+    "runpod_workspace/qwen/qwen-3-32b Roger 8slot"
 )
-SLOTS = [0, 3]
-SLOT_LABELS = {0: "Slot 0 (body mean)", 3: "Slot 3 (\\n)"}
-DEFAULT_KS = [0, 1, 2, 3, 4, 5, 6]
+# Slots 6 (</think>) and 7 (\\n\\n post) added May 2026.  Slot 6 is the
+# new winner by judge ρ on the 8-slot rejudge
+# (see roger/axis_judge_experiments/rho_by_slot_and_K.png); slot 7 is
+# a close second and the latest position before the model's response.
+# Slot 0 (body-mean) and slot 3 (\\n historical default) kept as
+# baselines for comparison.
+SLOTS = [0, 3, 6, 7]
+SLOT_LABELS = {
+    0: "Slot 0 (body mean)",
+    3: "Slot 3 (\\n)",
+    6: "Slot 6 (</think>)",
+    7: "Slot 7 (\\n\\n post)",
+}
+DEFAULT_KS = [0, 1, 2, 3, 4]
 
 
 def _slot_index(slot: int) -> int:
-    """Map original slot id (0 or 3) to its position in the loaded array."""
+    """Index of ``slot`` in :data:`SLOTS` (row index into sliced tensors)."""
     return SLOTS.index(slot)
 
 
@@ -290,10 +307,10 @@ def main() -> int:
     p.add_argument("--reuse_json", action="store_true",
                    help="Reuse cached (slot, layer, K, source) ρ values "
                         "from --rhos_json (filtered to the current "
-                        "--ks/--layers/--slots), and only compute the "
-                        "missing entries.  Use this when adding/removing "
-                        "K values from the sweep.  The merged result is "
-                        "rewritten to --rhos_json.")
+                        "SLOTS, --ks, and --layers), and only compute "
+                        "the missing entries.  Use this when extending "
+                        "to a new slot or adding/removing K values.  The "
+                        "merged result is rewritten to --rhos_json.")
     add_di_weights_arg(p)
     args = p.parse_args()
     di_weights = parse_di_weights_arg(args.di_weights)
@@ -307,14 +324,16 @@ def main() -> int:
         print(f"Loading cached results from {json_path}", flush=True)
         cached = json.load(open(json_path))
         layers: list[int] = list(cached["layers"])
-        KS = list(cached["ks"])
+        # Respect ``--ks`` so replots can drop/add curves without regenerating JSON.
+        KS = list(args.ks)
         n_di = int(cached["n_axes_di"])
         n_rs = int(cached["n_axes_resp"])
         rho_by_di = {(int(slot), int(L), int(K)): float(v)
                      for slot, L, K, v in cached["desc_inst"]}
         rho_by_rs = {(int(slot), int(L), int(K)): float(v)
                      for slot, L, K, v in cached["responses"]}
-        _render_plot(experiment_dir, args.plot, layers, KS, SLOTS,
+        slots_replot = list(cached.get("slots", SLOTS))
+        _render_plot(experiment_dir, args.plot, layers, KS, slots_replot,
                      rho_by_di, rho_by_rs, n_di, n_rs)
         return 0
 
@@ -323,7 +342,7 @@ def main() -> int:
     print(f"Loaded {len(pairs_di)} desc+inst axis pairs from {args.pairs_di}")
     print(f"Loaded {len(pairs_resp)} responses axis pairs from {args.pairs_resp}")
 
-    print("Loading entity tensors (slots 0 + 3, all layers)...", flush=True)
+    print("Loading entity tensors (all kept slots, all layers)...", flush=True)
     entity_vecs, default_arr, n_layers = _build_entity_cache(data_dir)
     pool_cache = _build_pool_cache(data_dir, default_arr)
     print(f"  cached {len(entity_vecs)} entities, n_layers={n_layers}")
@@ -493,8 +512,7 @@ def _render_plot(experiment_dir: Path, plot_name: str,
     """Pure plotting from precomputed ρ tables.  Shared by the main
     pipeline and the ``--replot_from_json`` fast path."""
     nonraw = [k for k in KS if k != 0]
-    # Full rainbow (purple → blue → green → yellow → red) for the
-    # K-spectrum; matplotlib's "rainbow" colormap is exactly this.
+    # Spread hues across the fewer remaining K>0 curves (K=5/6 dropped by default).
     rainbow = (plt.cm.rainbow(np.linspace(0.0, 1.0, len(nonraw)))
                if nonraw else [])
 
@@ -506,8 +524,15 @@ def _render_plot(experiment_dir: Path, plot_name: str,
     def k_label(K: int) -> str:
         return "raw" if K == 0 else f"K={K}"
 
-    fig, axes = plt.subplots(2, 2, figsize=(13, 9.5),
-                             sharex=True, sharey=True)
+    # Draw high-K whitening first, low-K later, raw last so lower K and raw
+    # sit visually on top.
+    ks_plot_order = sorted(nonraw, reverse=True) + ([0] if 0 in KS else [])
+
+    n_slots = len(slots)
+    # Layout: rows = slots, cols = sources (2).  Height scales with the
+    # slot count so each panel keeps its ~4.75-in vertical room.
+    fig, axes = plt.subplots(n_slots, 2, figsize=(13, 4.75 * n_slots),
+                             sharex=True, sharey=True, squeeze=False)
     sources = [("desc_inst", rho_by_di, f"desc+inst ({n_axes_di} axes)"),
                ("responses", rho_by_rs, f"responses (GPT, {n_axes_resp} axes)")]
     L_min, L_max = min(layers), max(layers)
@@ -515,11 +540,11 @@ def _render_plot(experiment_dir: Path, plot_name: str,
     for row, slot in enumerate(slots):
         for col, (_src_id, rho_dict, src_title) in enumerate(sources):
             ax = axes[row, col]
-            for K in KS:
+            for K in ks_plot_order:
                 ys = [rho_dict[(slot, L, K)] for L in layers]
                 ax.plot(layers, ys, color=k_color(K),
-                        lw=2.0 if K == 0 else 1.4,
-                        marker="o", markersize=3, alpha=0.95,
+                        lw=1.0 if K == 0 else 0.7,
+                        marker="o", markersize=1.5, alpha=0.95,
                         label=k_label(K))
             # Faint vertical guideline every 2 layers (minor grid),
             # plus the standard major grid for orientation.
@@ -527,7 +552,7 @@ def _render_plot(experiment_dir: Path, plot_name: str,
             ax.grid(which="major", alpha=0.3)
             ax.grid(which="minor", axis="x", alpha=0.12, lw=0.5)
             ax.set_title(f"{SLOT_LABELS[slot]} -- {src_title}", fontsize=10)
-            if row == 1:
+            if row == n_slots - 1:
                 ax.set_xlabel("Transformer layer", fontsize=10)
             if col == 0:
                 ax.set_ylabel("Mean per-axis Spearman ρ", fontsize=10)

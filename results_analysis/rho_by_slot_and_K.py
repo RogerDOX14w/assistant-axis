@@ -87,11 +87,21 @@ DEFAULT_EXPERIMENT_DIR = Path(__file__).resolve().parent.parent / (
     "roger/axis_judge_experiments"
 )
 DEFAULT_DATA_DIR = Path(__file__).resolve().parent.parent / (
-    "runpod_workspace/qwen/qwen-3-32b Roger"
+    "runpod_workspace/qwen/qwen-3-32b Roger 8slot"
 )
 LAYER = 25  # Qwen-3-32B; tuned via rho_by_layer.py.  Other models TBD.
-SLOTS = [0, 1, 2, 3]
 DEFAULT_KS = [0, 1, 2, 3, 4, 5]
+
+# Disambiguated slot labels for the 8-slot Qwen-3 layout (slots 5/7 are
+# both ``\\n\\n`` text but at different chat-template positions).  For
+# 4-slot data only the first 4 entries are used; the script slices
+# ``SLOT_LABELS_ALL[:n_slots]`` based on what's loaded from default.pt.
+SLOT_LABELS_ALL = [
+    "Slot 0 (body mean)",       "Slot 1 (<|im_start|>)",
+    "Slot 2 (assistant)",       "Slot 3 (\\n)",
+    "Slot 4 (<think>)",         "Slot 5 (\\n\\n in)",
+    "Slot 6 (</think>)",        "Slot 7 (\\n\\n post)",
+]
 
 
 def _load_at(path: Path, slot: int) -> np.ndarray:
@@ -223,7 +233,19 @@ def main() -> int:
     print(f"Loaded {len(pairs_di)} desc+inst axis pairs from {args.pairs_di}")
     print(f"Loaded {len(pairs_resp)} responses axis pairs from {args.pairs_resp}")
 
-    print("Caching entity vectors at 4 slots...", flush=True)
+    # Auto-detect num_slots from default.pt so the script handles both
+    # 4-slot Christina-headers data and 8-slot Roger-8slot data.
+    default_pt = data_dir / "traits" / "vectors" / "default.pt"
+    n_slots = _load_vector_file(default_pt).shape[0]
+    SLOTS = list(range(n_slots))
+    if n_slots > len(SLOT_LABELS_ALL):
+        raise SystemExit(
+            f"default.pt has {n_slots} slots but only {len(SLOT_LABELS_ALL)} "
+            f"entries in SLOT_LABELS_ALL; extend the constant at the top "
+            f"of this file."
+        )
+
+    print(f"Caching entity vectors at {n_slots} slots...", flush=True)
     entity_vecs = _build_entity_cache(data_dir, SLOTS)
     whitener = _Whitener(data_dir)
 
@@ -290,8 +312,7 @@ def main() -> int:
     # ------------------------------------------------------------------
     # Plot
     # ------------------------------------------------------------------
-    SLOT_LABELS = ["Slot 0 (body mean)", "Slot 1 (<|im_start|>)",
-                   "Slot 2 (assistant)", "Slot 3 (\\n)"]
+    SLOT_LABELS = SLOT_LABELS_ALL[:n_slots]
     K_LABELS = ["raw"] + [f"K={K}" for K in KS[1:]]
     n_K = len(KS)
     # Smooth dark→light gradient with a floor at ~0.32 so the lightest
@@ -299,7 +320,21 @@ def main() -> int:
     K_COLORS_DI = [plt.cm.Blues(v) for v in np.linspace(0.85, 0.32, n_K)]
     K_COLORS_RS = [plt.cm.Oranges(v) for v in np.linspace(0.85, 0.32, n_K)]
 
-    fig, axes = plt.subplots(1, 4, figsize=(15, 5.5), sharey=True)
+    # Layout scales with n_slots: 1x4 for 4 slots (matches historical
+    # figure), 2x4 for 8 slots so each panel keeps its ~3.75-in width.
+    if n_slots <= 4:
+        n_rows, n_cols = 1, n_slots
+    elif n_slots <= 8:
+        n_rows, n_cols = 2, 4
+    else:  # fallback
+        import math
+        n_cols = int(math.ceil(math.sqrt(n_slots)))
+        n_rows = int(math.ceil(n_slots / n_cols))
+    fig, axes_arr = plt.subplots(
+        n_rows, n_cols, figsize=(3.75 * n_cols, 5.5 * n_rows),
+        sharey=True, squeeze=False,
+    )
+    axes = axes_arr.flatten()
     x_labels = [f"desc+inst\n({len(pairs_di)} axes)",
                 f"responses\n(GPT, {len(pairs_resp)} axes)"]
     x_pos = np.arange(len(x_labels))
@@ -326,10 +361,16 @@ def main() -> int:
         ax.set_xticklabels(x_labels, fontsize=9)
         ax.set_title(SLOT_LABELS[slot], fontsize=10)
         ax.grid(axis="y", alpha=0.3)
-    for ax in axes:
+    # Hide any unused panels (e.g. n_slots=5 in a 2x4 grid).
+    for ax in axes[n_slots:]:
+        ax.set_visible(False)
+    for ax in axes[:n_slots]:
         ax.set_ylim(0, y_max * 1.25)
 
-    axes[0].set_ylabel("Mean per-axis Spearman ρ", fontsize=10)
+    # First axis in each row gets the y-axis label.
+    for row_first in axes[::n_cols]:
+        if row_first.get_visible():
+            row_first.set_ylabel("Mean per-axis Spearman ρ", fontsize=10)
 
     legend_handles = []
     legend_labels = []

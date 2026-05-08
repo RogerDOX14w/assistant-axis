@@ -53,7 +53,8 @@ from .pca import (
     MeanScaler,
     L2MeanScaler,
 )
-from .plot_metadata import png_metadata, suptitle_with_specs
+from .plot_metadata import json_metadata, png_metadata, suptitle_with_specs
+from .plot_palette import slot_color, slot_colors, slot_colors_8
 
 __all__ = [
     # Models
@@ -88,7 +89,11 @@ __all__ = [
     "plot_variance_explained",
     "MeanScaler",
     "L2MeanScaler",
-    # Plot provenance + helpers
+    # Plot + cache provenance helpers
+    "json_metadata",
     "png_metadata",
     "suptitle_with_specs",
+    "slot_color",
+    "slot_colors",
+    "slot_colors_8",
 ]
