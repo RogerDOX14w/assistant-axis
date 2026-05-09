@@ -1,0 +1,14 @@
+[
+  {"pos": "helpful",         "neg": "unhelpful",       "tier": "A", "moral": true,  "note": "HHH pair; good-pole convention"},
+  {"pos": "harmless",        "neg": "harmful",         "tier": "A", "moral": true,  "note": "HHH pair; good-pole convention"},
+  {"pos": "honest",          "neg": "dishonest",       "tier": "A", "moral": true,  "note": "HHH pair (honesty); good-pole convention"},
+  {"pos": "truthful",        "neg": "deceitful",       "tier": "A", "moral": true,  "note": "moral honesty; good-pole convention"},
+  {"pos": "guileless",       "neg": "scheming",        "tier": "A", "moral": true,  "note": "good-pole convention"},
+  {"pos": "egalitarian",     "neg": "elitist",         "tier": "A", "moral": true,  "note": "good-pole convention (mild)"},
+  {"pos": "progressive",     "neg": "conservative",    "tier": "A", "moral": false, "note": "neutral; in-60 = pos"},
+  {"pos": "concise",         "neg": "verbose",         "tier": "B", "moral": false, "note": "neutral; in-60 = pos"},
+  {"pos": "ecocentric",      "neg": "anthropocentric", "tier": "B", "moral": false, "note": "neutral; in-60 = pos"},
+  {"pos": "improvisational", "neg": "methodical",      "tier": "B", "moral": false, "note": "neutral; in-60 = pos"},
+  {"pos": "relativist",      "neg": "absolutist",      "tier": "B", "moral": false, "note": "neutral; in-60 = pos"},
+  {"pos": "systems_thinker", "neg": "analytical",      "tier": "C", "moral": false, "note": "neutral; in-60 = pos; scope-check"}
+]

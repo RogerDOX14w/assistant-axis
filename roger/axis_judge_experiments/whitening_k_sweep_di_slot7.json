@@ -1,0 +1,6916 @@
+{
+  "result": [
+    {
+      "pos": "helpful",
+      "neg": "unhelpful",
+      "source": "desc_inst",
+      "K": 0,
+      "rho": 0.8341866752952007
+    },
+    {
+      "pos": "helpful",
+      "neg": "unhelpful",
+      "source": "desc_inst",
+      "K": 1,
+      "rho": 0.8248821383985888
+    },
+    {
+      "pos": "helpful",
+      "neg": "unhelpful",
+      "source": "desc_inst",
+      "K": 2,
+      "rho": 0.7870978664062184
+    },
+    {
+      "pos": "helpful",
+      "neg": "unhelpful",
+      "source": "desc_inst",
+      "K": 3,
+      "rho": 0.7578449869150653
+    },
+    {
+      "pos": "helpful",
+      "neg": "unhelpful",
+      "source": "desc_inst",
+      "K": 4,
+      "rho": 0.7474869626818829
+    },
+    {
+      "pos": "helpful",
+      "neg": "unhelpful",
+      "source": "desc_inst",
+      "K": 6,
+      "rho": 0.7150472702394344
+    },
+    {
+      "pos": "helpful",
+      "neg": "unhelpful",
+      "source": "desc_inst",
+      "K": 8,
+      "rho": 0.6801160541864046
+    },
+    {
+      "pos": "helpful",
+      "neg": "unhelpful",
+      "source": "desc_inst",
+      "K": 12,
+      "rho": 0.5775281158009861
+    },
+    {
+      "pos": "helpful",
+      "neg": "unhelpful",
+      "source": "desc_inst",
+      "K": 16,
+      "rho": 0.518135747988087
+    },
+    {
+      "pos": "helpful",
+      "neg": "unhelpful",
+      "source": "desc_inst",
+      "K": 24,
+      "rho": 0.4124903881913132
+    },
+    {
+      "pos": "helpful",
+      "neg": "unhelpful",
+      "source": "desc_inst",
+      "K": 32,
+      "rho": 0.3544811534620977
+    },
+    {
+      "pos": "helpful",
+      "neg": "unhelpful",
+      "source": "responses",
+      "K": 0,
+      "rho": 0.6905546247612078
+    },
+    {
+      "pos": "helpful",
+      "neg": "unhelpful",
+      "source": "responses",
+      "K": 1,
+      "rho": 0.7447652822329556
+    },
+    {
+      "pos": "helpful",
+      "neg": "unhelpful",
+      "source": "responses",
+      "K": 2,
+      "rho": 0.74533087468956
+    },
+    {
+      "pos": "helpful",
+      "neg": "unhelpful",
+      "source": "responses",
+      "K": 3,
+      "rho": 0.7351089898822326
+    },
+    {
+      "pos": "helpful",
+      "neg": "unhelpful",
+      "source": "responses",
+      "K": 4,
+      "rho": 0.7299943524058994
+    },
+    {
+      "pos": "helpful",
+      "neg": "unhelpful",
+      "source": "responses",
+      "K": 6,
+      "rho": 0.7014727926398221
+    },
+    {
+      "pos": "helpful",
+      "neg": "unhelpful",
+      "source": "responses",
+      "K": 8,
+      "rho": 0.663887597334112
+    },
+    {
+      "pos": "helpful",
+      "neg": "unhelpful",
+      "source": "responses",
+      "K": 12,
+      "rho": 0.5593080083886853
+    },
+    {
+      "pos": "helpful",
+      "neg": "unhelpful",
+      "source": "responses",
+      "K": 16,
+      "rho": 0.49214048827749607
+    },
+    {
+      "pos": "helpful",
+      "neg": "unhelpful",
+      "source": "responses",
+      "K": 24,
+      "rho": 0.37083325608981244
+    },
+    {
+      "pos": "helpful",
+      "neg": "unhelpful",
+      "source": "responses",
+      "K": 32,
+      "rho": 0.3048443492023628
+    },
+    {
+      "pos": "harmless",
+      "neg": "harmful",
+      "source": "desc_inst",
+      "K": 0,
+      "rho": 0.7827607335331478
+    },
+    {
+      "pos": "harmless",
+      "neg": "harmful",
+      "source": "desc_inst",
+      "K": 1,
+      "rho": 0.77980716694118
+    },
+    {
+      "pos": "harmless",
+      "neg": "harmful",
+      "source": "desc_inst",
+      "K": 2,
+      "rho": 0.6927010623678009
+    },
+    {
+      "pos": "harmless",
+      "neg": "harmful",
+      "source": "desc_inst",
+      "K": 3,
+      "rho": 0.6594337482522892
+    },
+    {
+      "pos": "harmless",
+      "neg": "harmful",
+      "source": "desc_inst",
+      "K": 4,
+      "rho": 0.6486220716762381
+    },
+    {
+      "pos": "harmless",
+      "neg": "harmful",
+      "source": "desc_inst",
+      "K": 6,
+      "rho": 0.6253301395196138
+    },
+    {
+      "pos": "harmless",
+      "neg": "harmful",
+      "source": "desc_inst",
+      "K": 8,
+      "rho": 0.6105724291559756
+    },
+    {
+      "pos": "harmless",
+      "neg": "harmful",
+      "source": "desc_inst",
+      "K": 12,
+      "rho": 0.5431432609539266
+    },
+    {
+      "pos": "harmless",
+      "neg": "harmful",
+      "source": "desc_inst",
+      "K": 16,
+      "rho": 0.5006111840690912
+    },
+    {
+      "pos": "harmless",
+      "neg": "harmful",
+      "source": "desc_inst",
+      "K": 24,
+      "rho": 0.43341363897884566
+    },
+    {
+      "pos": "harmless",
+      "neg": "harmful",
+      "source": "desc_inst",
+      "K": 32,
+      "rho": 0.3873829276541877
+    },
+    {
+      "pos": "harmless",
+      "neg": "harmful",
+      "source": "responses",
+      "K": 0,
+      "rho": 0.6744839319648382
+    },
+    {
+      "pos": "harmless",
+      "neg": "harmful",
+      "source": "responses",
+      "K": 1,
+      "rho": 0.6998272052771382
+    },
+    {
+      "pos": "harmless",
+      "neg": "harmful",
+      "source": "responses",
+      "K": 2,
+      "rho": 0.6226804419231512
+    },
+    {
+      "pos": "harmless",
+      "neg": "harmful",
+      "source": "responses",
+      "K": 3,
+      "rho": 0.5926960632322785
+    },
+    {
+      "pos": "harmless",
+      "neg": "harmful",
+      "source": "responses",
+      "K": 4,
+      "rho": 0.5824767045611923
+    },
+    {
+      "pos": "harmless",
+      "neg": "harmful",
+      "source": "responses",
+      "K": 6,
+      "rho": 0.4914949749147551
+    },
+    {
+      "pos": "harmless",
+      "neg": "harmful",
+      "source": "responses",
+      "K": 8,
+      "rho": 0.4490536765626444
+    },
+    {
+      "pos": "harmless",
+      "neg": "harmful",
+      "source": "responses",
+      "K": 12,
+      "rho": 0.3602486461929949
+    },
+    {
+      "pos": "harmless",
+      "neg": "harmful",
+      "source": "responses",
+      "K": 16,
+      "rho": 0.3240620540727668
+    },
+    {
+      "pos": "harmless",
+      "neg": "harmful",
+      "source": "responses",
+      "K": 24,
+      "rho": 0.279310528090065
+    },
+    {
+      "pos": "harmless",
+      "neg": "harmful",
+      "source": "responses",
+      "K": 32,
+      "rho": 0.24824268162545346
+    },
+    {
+      "pos": "honest",
+      "neg": "dishonest",
+      "source": "desc_inst",
+      "K": 0,
+      "rho": 0.7097139411571711
+    },
+    {
+      "pos": "honest",
+      "neg": "dishonest",
+      "source": "desc_inst",
+      "K": 1,
+      "rho": 0.6575032204784068
+    },
+    {
+      "pos": "honest",
+      "neg": "dishonest",
+      "source": "desc_inst",
+      "K": 2,
+      "rho": 0.5565506922018266
+    },
+    {
+      "pos": "honest",
+      "neg": "dishonest",
+      "source": "desc_inst",
+      "K": 3,
+      "rho": 0.5137074592726533
+    },
+    {
+      "pos": "honest",
+      "neg": "dishonest",
+      "source": "desc_inst",
+      "K": 4,
+      "rho": 0.5008106538367126
+    },
+    {
+      "pos": "honest",
+      "neg": "dishonest",
+      "source": "desc_inst",
+      "K": 6,
+      "rho": 0.4574278713838079
+    },
+    {
+      "pos": "honest",
+      "neg": "dishonest",
+      "source": "desc_inst",
+      "K": 8,
+      "rho": 0.4259433347932502
+    },
+    {
+      "pos": "honest",
+      "neg": "dishonest",
+      "source": "desc_inst",
+      "K": 12,
+      "rho": 0.3997177335659653
+    },
+    {
+      "pos": "honest",
+      "neg": "dishonest",
+      "source": "desc_inst",
+      "K": 16,
+      "rho": 0.39302681934754585
+    },
+    {
+      "pos": "honest",
+      "neg": "dishonest",
+      "source": "desc_inst",
+      "K": 24,
+      "rho": 0.33816868822129326
+    },
+    {
+      "pos": "honest",
+      "neg": "dishonest",
+      "source": "desc_inst",
+      "K": 32,
+      "rho": 0.280794997560418
+    },
+    {
+      "pos": "honest",
+      "neg": "dishonest",
+      "source": "responses",
+      "K": 0,
+      "rho": 0.7443834444434908
+    },
+    {
+      "pos": "honest",
+      "neg": "dishonest",
+      "source": "responses",
+      "K": 1,
+      "rho": 0.7207683558521523
+    },
+    {
+      "pos": "honest",
+      "neg": "dishonest",
+      "source": "responses",
+      "K": 2,
+      "rho": 0.6452109989033037
+    },
+    {
+      "pos": "honest",
+      "neg": "dishonest",
+      "source": "responses",
+      "K": 3,
+      "rho": 0.6057894365766922
+    },
+    {
+      "pos": "honest",
+      "neg": "dishonest",
+      "source": "responses",
+      "K": 4,
+      "rho": 0.59496531982717
+    },
+    {
+      "pos": "honest",
+      "neg": "dishonest",
+      "source": "responses",
+      "K": 6,
+      "rho": 0.49229348261283457
+    },
+    {
+      "pos": "honest",
+      "neg": "dishonest",
+      "source": "responses",
+      "K": 8,
+      "rho": 0.4201850960538959
+    },
+    {
+      "pos": "honest",
+      "neg": "dishonest",
+      "source": "responses",
+      "K": 12,
+      "rho": 0.33112804878293484
+    },
+    {
+      "pos": "honest",
+      "neg": "dishonest",
+      "source": "responses",
+      "K": 16,
+      "rho": 0.29027962206787333
+    },
+    {
+      "pos": "honest",
+      "neg": "dishonest",
+      "source": "responses",
+      "K": 24,
+      "rho": 0.22174697389392983
+    },
+    {
+      "pos": "honest",
+      "neg": "dishonest",
+      "source": "responses",
+      "K": 32,
+      "rho": 0.1685005136211173
+    },
+    {
+      "pos": "truthful",
+      "neg": "deceitful",
+      "source": "desc_inst",
+      "K": 0,
+      "rho": 0.6801603098038665
+    },
+    {
+      "pos": "truthful",
+      "neg": "deceitful",
+      "source": "desc_inst",
+      "K": 1,
+      "rho": 0.6434469334433793
+    },
+    {
+      "pos": "truthful",
+      "neg": "deceitful",
+      "source": "desc_inst",
+      "K": 2,
+      "rho": 0.5445801831482084
+    },
+    {
+      "pos": "truthful",
+      "neg": "deceitful",
+      "source": "desc_inst",
+      "K": 3,
+      "rho": 0.498012869191696
+    },
+    {
+      "pos": "truthful",
+      "neg": "deceitful",
+      "source": "desc_inst",
+      "K": 4,
+      "rho": 0.4838138085004311
+    },
+    {
+      "pos": "truthful",
+      "neg": "deceitful",
+      "source": "desc_inst",
+      "K": 6,
+      "rho": 0.48210235697430115
+    },
+    {
+      "pos": "truthful",
+      "neg": "deceitful",
+      "source": "desc_inst",
+      "K": 8,
+      "rho": 0.47749746621275857
+    },
+    {
+      "pos": "truthful",
+      "neg": "deceitful",
+      "source": "desc_inst",
+      "K": 12,
+      "rho": 0.4692332814982259
+    },
+    {
+      "pos": "truthful",
+      "neg": "deceitful",
+      "source": "desc_inst",
+      "K": 16,
+      "rho": 0.44748126754385903
+    },
+    {
+      "pos": "truthful",
+      "neg": "deceitful",
+      "source": "desc_inst",
+      "K": 24,
+      "rho": 0.3941708192998031
+    },
+    {
+      "pos": "truthful",
+      "neg": "deceitful",
+      "source": "desc_inst",
+      "K": 32,
+      "rho": 0.345544689691225
+    },
+    {
+      "pos": "truthful",
+      "neg": "deceitful",
+      "source": "responses",
+      "K": 0,
+      "rho": 0.7385940593670283
+    },
+    {
+      "pos": "truthful",
+      "neg": "deceitful",
+      "source": "responses",
+      "K": 1,
+      "rho": 0.7346498624968308
+    },
+    {
+      "pos": "truthful",
+      "neg": "deceitful",
+      "source": "responses",
+      "K": 2,
+      "rho": 0.6983889651365246
+    },
+    {
+      "pos": "truthful",
+      "neg": "deceitful",
+      "source": "responses",
+      "K": 3,
+      "rho": 0.6779298399039136
+    },
+    {
+      "pos": "truthful",
+      "neg": "deceitful",
+      "source": "responses",
+      "K": 4,
+      "rho": 0.669718833349557
+    },
+    {
+      "pos": "truthful",
+      "neg": "deceitful",
+      "source": "responses",
+      "K": 6,
+      "rho": 0.6104902908011095
+    },
+    {
+      "pos": "truthful",
+      "neg": "deceitful",
+      "source": "responses",
+      "K": 8,
+      "rho": 0.5672533422906423
+    },
+    {
+      "pos": "truthful",
+      "neg": "deceitful",
+      "source": "responses",
+      "K": 12,
+      "rho": 0.49456360161786517
+    },
+    {
+      "pos": "truthful",
+      "neg": "deceitful",
+      "source": "responses",
+      "K": 16,
+      "rho": 0.4631926717171527
+    },
+    {
+      "pos": "truthful",
+      "neg": "deceitful",
+      "source": "responses",
+      "K": 24,
+      "rho": 0.3941393293459344
+    },
+    {
+      "pos": "truthful",
+      "neg": "deceitful",
+      "source": "responses",
+      "K": 32,
+      "rho": 0.33629342410843116
+    },
+    {
+      "pos": "guileless",
+      "neg": "scheming",
+      "source": "desc_inst",
+      "K": 0,
+      "rho": 0.5101000961900287
+    },
+    {
+      "pos": "guileless",
+      "neg": "scheming",
+      "source": "desc_inst",
+      "K": 1,
+      "rho": 0.4980030146463447
+    },
+    {
+      "pos": "guileless",
+      "neg": "scheming",
+      "source": "desc_inst",
+      "K": 2,
+      "rho": 0.47323001354431293
+    },
+    {
+      "pos": "guileless",
+      "neg": "scheming",
+      "source": "desc_inst",
+      "K": 3,
+      "rho": 0.47571917201866387
+    },
+    {
+      "pos": "guileless",
+      "neg": "scheming",
+      "source": "desc_inst",
+      "K": 4,
+      "rho": 0.47592010541116764
+    },
+    {
+      "pos": "guileless",
+      "neg": "scheming",
+      "source": "desc_inst",
+      "K": 6,
+      "rho": 0.5410249789279353
+    },
+    {
+      "pos": "guileless",
+      "neg": "scheming",
+      "source": "desc_inst",
+      "K": 8,
+      "rho": 0.545747494944136
+    },
+    {
+      "pos": "guileless",
+      "neg": "scheming",
+      "source": "desc_inst",
+      "K": 12,
+      "rho": 0.5246238149853237
+    },
+    {
+      "pos": "guileless",
+      "neg": "scheming",
+      "source": "desc_inst",
+      "K": 16,
+      "rho": 0.49997724497163204
+    },
+    {
+      "pos": "guileless",
+      "neg": "scheming",
+      "source": "desc_inst",
+      "K": 24,
+      "rho": 0.45084115076355863
+    },
+    {
+      "pos": "guileless",
+      "neg": "scheming",
+      "source": "desc_inst",
+      "K": 32,
+      "rho": 0.3972260051561419
+    },
+    {
+      "pos": "guileless",
+      "neg": "scheming",
+      "source": "responses",
+      "K": 0,
+      "rho": 0.6358833989821109
+    },
+    {
+      "pos": "guileless",
+      "neg": "scheming",
+      "source": "responses",
+      "K": 1,
+      "rho": 0.5950696264955462
+    },
+    {
+      "pos": "guileless",
+      "neg": "scheming",
+      "source": "responses",
+      "K": 2,
+      "rho": 0.5425366385650591
+    },
+    {
+      "pos": "guileless",
+      "neg": "scheming",
+      "source": "responses",
+      "K": 3,
+      "rho": 0.531217733225257
+    },
+    {
+      "pos": "guileless",
+      "neg": "scheming",
+      "source": "responses",
+      "K": 4,
+      "rho": 0.5271956068520564
+    },
+    {
+      "pos": "guileless",
+      "neg": "scheming",
+      "source": "responses",
+      "K": 6,
+      "rho": 0.48548305278173376
+    },
+    {
+      "pos": "guileless",
+      "neg": "scheming",
+      "source": "responses",
+      "K": 8,
+      "rho": 0.4401664238562175
+    },
+    {
+      "pos": "guileless",
+      "neg": "scheming",
+      "source": "responses",
+      "K": 12,
+      "rho": 0.3642640253629618
+    },
+    {
+      "pos": "guileless",
+      "neg": "scheming",
+      "source": "responses",
+      "K": 16,
+      "rho": 0.33296272434174007
+    },
+    {
+      "pos": "guileless",
+      "neg": "scheming",
+      "source": "responses",
+      "K": 24,
+      "rho": 0.3014136660318569
+    },
+    {
+      "pos": "guileless",
+      "neg": "scheming",
+      "source": "responses",
+      "K": 32,
+      "rho": 0.2723680924104498
+    },
+    {
+      "pos": "egalitarian",
+      "neg": "elitist",
+      "source": "desc_inst",
+      "K": 0,
+      "rho": 0.5541042556335893
+    },
+    {
+      "pos": "egalitarian",
+      "neg": "elitist",
+      "source": "desc_inst",
+      "K": 1,
+      "rho": 0.5755511689949072
+    },
+    {
+      "pos": "egalitarian",
+      "neg": "elitist",
+      "source": "desc_inst",
+      "K": 2,
+      "rho": 0.568187455546918
+    },
+    {
+      "pos": "egalitarian",
+      "neg": "elitist",
+      "source": "desc_inst",
+      "K": 3,
+      "rho": 0.5566572022521887
+    },
+    {
+      "pos": "egalitarian",
+      "neg": "elitist",
+      "source": "desc_inst",
+      "K": 4,
+      "rho": 0.5532687579151448
+    },
+    {
+      "pos": "egalitarian",
+      "neg": "elitist",
+      "source": "desc_inst",
+      "K": 6,
+      "rho": 0.5461766643031916
+    },
+    {
+      "pos": "egalitarian",
+      "neg": "elitist",
+      "source": "desc_inst",
+      "K": 8,
+      "rho": 0.529969757566241
+    },
+    {
+      "pos": "egalitarian",
+      "neg": "elitist",
+      "source": "desc_inst",
+      "K": 12,
+      "rho": 0.45926566257531076
+    },
+    {
+      "pos": "egalitarian",
+      "neg": "elitist",
+      "source": "desc_inst",
+      "K": 16,
+      "rho": 0.4433380712782505
+    },
+    {
+      "pos": "egalitarian",
+      "neg": "elitist",
+      "source": "desc_inst",
+      "K": 24,
+      "rho": 0.4031432327473567
+    },
+    {
+      "pos": "egalitarian",
+      "neg": "elitist",
+      "source": "desc_inst",
+      "K": 32,
+      "rho": 0.37044100902901017
+    },
+    {
+      "pos": "egalitarian",
+      "neg": "elitist",
+      "source": "responses",
+      "K": 0,
+      "rho": 0.6492119506559696
+    },
+    {
+      "pos": "egalitarian",
+      "neg": "elitist",
+      "source": "responses",
+      "K": 1,
+      "rho": 0.7608331979690826
+    },
+    {
+      "pos": "egalitarian",
+      "neg": "elitist",
+      "source": "responses",
+      "K": 2,
+      "rho": 0.7545994389451693
+    },
+    {
+      "pos": "egalitarian",
+      "neg": "elitist",
+      "source": "responses",
+      "K": 3,
+      "rho": 0.7354830568560468
+    },
+    {
+      "pos": "egalitarian",
+      "neg": "elitist",
+      "source": "responses",
+      "K": 4,
+      "rho": 0.7287990182626848
+    },
+    {
+      "pos": "egalitarian",
+      "neg": "elitist",
+      "source": "responses",
+      "K": 6,
+      "rho": 0.6380059596663511
+    },
+    {
+      "pos": "egalitarian",
+      "neg": "elitist",
+      "source": "responses",
+      "K": 8,
+      "rho": 0.5840418220171169
+    },
+    {
+      "pos": "egalitarian",
+      "neg": "elitist",
+      "source": "responses",
+      "K": 12,
+      "rho": 0.48812266301434987
+    },
+    {
+      "pos": "egalitarian",
+      "neg": "elitist",
+      "source": "responses",
+      "K": 16,
+      "rho": 0.44783482482269804
+    },
+    {
+      "pos": "egalitarian",
+      "neg": "elitist",
+      "source": "responses",
+      "K": 24,
+      "rho": 0.38110818180583184
+    },
+    {
+      "pos": "egalitarian",
+      "neg": "elitist",
+      "source": "responses",
+      "K": 32,
+      "rho": 0.3406943041658866
+    },
+    {
+      "pos": "progressive",
+      "neg": "conservative",
+      "source": "desc_inst",
+      "K": 0,
+      "rho": 0.42681412740714925
+    },
+    {
+      "pos": "progressive",
+      "neg": "conservative",
+      "source": "desc_inst",
+      "K": 1,
+      "rho": 0.5021189190346453
+    },
+    {
+      "pos": "progressive",
+      "neg": "conservative",
+      "source": "desc_inst",
+      "K": 2,
+      "rho": 0.5649922331060874
+    },
+    {
+      "pos": "progressive",
+      "neg": "conservative",
+      "source": "desc_inst",
+      "K": 3,
+      "rho": 0.5766392237937806
+    },
+    {
+      "pos": "progressive",
+      "neg": "conservative",
+      "source": "desc_inst",
+      "K": 4,
+      "rho": 0.5783849487026226
+    },
+    {
+      "pos": "progressive",
+      "neg": "conservative",
+      "source": "desc_inst",
+      "K": 6,
+      "rho": 0.5741575959616579
+    },
+    {
+      "pos": "progressive",
+      "neg": "conservative",
+      "source": "desc_inst",
+      "K": 8,
+      "rho": 0.5873057756004222
+    },
+    {
+      "pos": "progressive",
+      "neg": "conservative",
+      "source": "desc_inst",
+      "K": 12,
+      "rho": 0.5548667312480476
+    },
+    {
+      "pos": "progressive",
+      "neg": "conservative",
+      "source": "desc_inst",
+      "K": 16,
+      "rho": 0.5433366264854436
+    },
+    {
+      "pos": "progressive",
+      "neg": "conservative",
+      "source": "desc_inst",
+      "K": 24,
+      "rho": 0.5054788398619563
+    },
+    {
+      "pos": "progressive",
+      "neg": "conservative",
+      "source": "desc_inst",
+      "K": 32,
+      "rho": 0.46280775161362897
+    },
+    {
+      "pos": "progressive",
+      "neg": "conservative",
+      "source": "responses",
+      "K": 0,
+      "rho": 0.541809037222141
+    },
+    {
+      "pos": "progressive",
+      "neg": "conservative",
+      "source": "responses",
+      "K": 1,
+      "rho": 0.635588275751866
+    },
+    {
+      "pos": "progressive",
+      "neg": "conservative",
+      "source": "responses",
+      "K": 2,
+      "rho": 0.6965277733108799
+    },
+    {
+      "pos": "progressive",
+      "neg": "conservative",
+      "source": "responses",
+      "K": 3,
+      "rho": 0.704112405865992
+    },
+    {
+      "pos": "progressive",
+      "neg": "conservative",
+      "source": "responses",
+      "K": 4,
+      "rho": 0.7045786491616859
+    },
+    {
+      "pos": "progressive",
+      "neg": "conservative",
+      "source": "responses",
+      "K": 6,
+      "rho": 0.6695978313047144
+    },
+    {
+      "pos": "progressive",
+      "neg": "conservative",
+      "source": "responses",
+      "K": 8,
+      "rho": 0.6607380160835643
+    },
+    {
+      "pos": "progressive",
+      "neg": "conservative",
+      "source": "responses",
+      "K": 12,
+      "rho": 0.6126021106002679
+    },
+    {
+      "pos": "progressive",
+      "neg": "conservative",
+      "source": "responses",
+      "K": 16,
+      "rho": 0.5963477057186761
+    },
+    {
+      "pos": "progressive",
+      "neg": "conservative",
+      "source": "responses",
+      "K": 24,
+      "rho": 0.538655053625395
+    },
+    {
+      "pos": "progressive",
+      "neg": "conservative",
+      "source": "responses",
+      "K": 32,
+      "rho": 0.47601851427458886
+    },
+    {
+      "pos": "concise",
+      "neg": "verbose",
+      "source": "desc_inst",
+      "K": 0,
+      "rho": 0.6092891610341388
+    },
+    {
+      "pos": "concise",
+      "neg": "verbose",
+      "source": "desc_inst",
+      "K": 1,
+      "rho": 0.6623453275095911
+    },
+    {
+      "pos": "concise",
+      "neg": "verbose",
+      "source": "desc_inst",
+      "K": 2,
+      "rho": 0.6849343911046819
+    },
+    {
+      "pos": "concise",
+      "neg": "verbose",
+      "source": "desc_inst",
+      "K": 3,
+      "rho": 0.687805910137245
+    },
+    {
+      "pos": "concise",
+      "neg": "verbose",
+      "source": "desc_inst",
+      "K": 4,
+      "rho": 0.6872732329323036
+    },
+    {
+      "pos": "concise",
+      "neg": "verbose",
+      "source": "desc_inst",
+      "K": 6,
+      "rho": 0.6559086310884634
+    },
+    {
+      "pos": "concise",
+      "neg": "verbose",
+      "source": "desc_inst",
+      "K": 8,
+      "rho": 0.6498895239042177
+    },
+    {
+      "pos": "concise",
+      "neg": "verbose",
+      "source": "desc_inst",
+      "K": 12,
+      "rho": 0.5963768138516007
+    },
+    {
+      "pos": "concise",
+      "neg": "verbose",
+      "source": "desc_inst",
+      "K": 16,
+      "rho": 0.5622865054933389
+    },
+    {
+      "pos": "concise",
+      "neg": "verbose",
+      "source": "desc_inst",
+      "K": 24,
+      "rho": 0.43225136655586144
+    },
+    {
+      "pos": "concise",
+      "neg": "verbose",
+      "source": "desc_inst",
+      "K": 32,
+      "rho": 0.38329847665334127
+    },
+    {
+      "pos": "concise",
+      "neg": "verbose",
+      "source": "responses",
+      "K": 0,
+      "rho": 0.40847774577061774
+    },
+    {
+      "pos": "concise",
+      "neg": "verbose",
+      "source": "responses",
+      "K": 1,
+      "rho": 0.505915866003597
+    },
+    {
+      "pos": "concise",
+      "neg": "verbose",
+      "source": "responses",
+      "K": 2,
+      "rho": 0.4991513654898872
+    },
+    {
+      "pos": "concise",
+      "neg": "verbose",
+      "source": "responses",
+      "K": 3,
+      "rho": 0.49467590853282456
+    },
+    {
+      "pos": "concise",
+      "neg": "verbose",
+      "source": "responses",
+      "K": 4,
+      "rho": 0.49608507377786015
+    },
+    {
+      "pos": "concise",
+      "neg": "verbose",
+      "source": "responses",
+      "K": 6,
+      "rho": 0.45763688597000707
+    },
+    {
+      "pos": "concise",
+      "neg": "verbose",
+      "source": "responses",
+      "K": 8,
+      "rho": 0.4198102218786245
+    },
+    {
+      "pos": "concise",
+      "neg": "verbose",
+      "source": "responses",
+      "K": 12,
+      "rho": 0.3809015195592364
+    },
+    {
+      "pos": "concise",
+      "neg": "verbose",
+      "source": "responses",
+      "K": 16,
+      "rho": 0.36551929201347505
+    },
+    {
+      "pos": "concise",
+      "neg": "verbose",
+      "source": "responses",
+      "K": 24,
+      "rho": 0.2806009234239792
+    },
+    {
+      "pos": "concise",
+      "neg": "verbose",
+      "source": "responses",
+      "K": 32,
+      "rho": 0.24280741243146847
+    },
+    {
+      "pos": "ecocentric",
+      "neg": "anthropocentric",
+      "source": "desc_inst",
+      "K": 0,
+      "rho": 0.0352749116034763
+    },
+    {
+      "pos": "ecocentric",
+      "neg": "anthropocentric",
+      "source": "desc_inst",
+      "K": 1,
+      "rho": 0.09608707831520379
+    },
+    {
+      "pos": "ecocentric",
+      "neg": "anthropocentric",
+      "source": "desc_inst",
+      "K": 2,
+      "rho": 0.17155225221183976
+    },
+    {
+      "pos": "ecocentric",
+      "neg": "anthropocentric",
+      "source": "desc_inst",
+      "K": 3,
+      "rho": 0.21459162356498732
+    },
+    {
+      "pos": "ecocentric",
+      "neg": "anthropocentric",
+      "source": "desc_inst",
+      "K": 4,
+      "rho": 0.22513017918155562
+    },
+    {
+      "pos": "ecocentric",
+      "neg": "anthropocentric",
+      "source": "desc_inst",
+      "K": 6,
+      "rho": 0.23612815240306997
+    },
+    {
+      "pos": "ecocentric",
+      "neg": "anthropocentric",
+      "source": "desc_inst",
+      "K": 8,
+      "rho": 0.22986667315416823
+    },
+    {
+      "pos": "ecocentric",
+      "neg": "anthropocentric",
+      "source": "desc_inst",
+      "K": 12,
+      "rho": 0.223599522921452
+    },
+    {
+      "pos": "ecocentric",
+      "neg": "anthropocentric",
+      "source": "desc_inst",
+      "K": 16,
+      "rho": 0.2099583279146033
+    },
+    {
+      "pos": "ecocentric",
+      "neg": "anthropocentric",
+      "source": "desc_inst",
+      "K": 24,
+      "rho": 0.21409984399851323
+    },
+    {
+      "pos": "ecocentric",
+      "neg": "anthropocentric",
+      "source": "desc_inst",
+      "K": 32,
+      "rho": 0.2141118990838673
+    },
+    {
+      "pos": "ecocentric",
+      "neg": "anthropocentric",
+      "source": "responses",
+      "K": 0,
+      "rho": 0.6586498610092096
+    },
+    {
+      "pos": "ecocentric",
+      "neg": "anthropocentric",
+      "source": "responses",
+      "K": 1,
+      "rho": 0.7246583072892477
+    },
+    {
+      "pos": "ecocentric",
+      "neg": "anthropocentric",
+      "source": "responses",
+      "K": 2,
+      "rho": 0.7285800250126762
+    },
+    {
+      "pos": "ecocentric",
+      "neg": "anthropocentric",
+      "source": "responses",
+      "K": 3,
+      "rho": 0.7308798689942595
+    },
+    {
+      "pos": "ecocentric",
+      "neg": "anthropocentric",
+      "source": "responses",
+      "K": 4,
+      "rho": 0.7288951215948541
+    },
+    {
+      "pos": "ecocentric",
+      "neg": "anthropocentric",
+      "source": "responses",
+      "K": 6,
+      "rho": 0.6956819301669613
+    },
+    {
+      "pos": "ecocentric",
+      "neg": "anthropocentric",
+      "source": "responses",
+      "K": 8,
+      "rho": 0.6575747800983777
+    },
+    {
+      "pos": "ecocentric",
+      "neg": "anthropocentric",
+      "source": "responses",
+      "K": 12,
+      "rho": 0.5701528227184474
+    },
+    {
+      "pos": "ecocentric",
+      "neg": "anthropocentric",
+      "source": "responses",
+      "K": 16,
+      "rho": 0.507462658738755
+    },
+    {
+      "pos": "ecocentric",
+      "neg": "anthropocentric",
+      "source": "responses",
+      "K": 24,
+      "rho": 0.4580959156187438
+    },
+    {
+      "pos": "ecocentric",
+      "neg": "anthropocentric",
+      "source": "responses",
+      "K": 32,
+      "rho": 0.41634345851791177
+    },
+    {
+      "pos": "improvisational",
+      "neg": "methodical",
+      "source": "desc_inst",
+      "K": 0,
+      "rho": 0.7237130354527213
+    },
+    {
+      "pos": "improvisational",
+      "neg": "methodical",
+      "source": "desc_inst",
+      "K": 1,
+      "rho": 0.7507064766483792
+    },
+    {
+      "pos": "improvisational",
+      "neg": "methodical",
+      "source": "desc_inst",
+      "K": 2,
+      "rho": 0.7089827371986989
+    },
+    {
+      "pos": "improvisational",
+      "neg": "methodical",
+      "source": "desc_inst",
+      "K": 3,
+      "rho": 0.6964205412171052
+    },
+    {
+      "pos": "improvisational",
+      "neg": "methodical",
+      "source": "desc_inst",
+      "K": 4,
+      "rho": 0.6918626282737198
+    },
+    {
+      "pos": "improvisational",
+      "neg": "methodical",
+      "source": "desc_inst",
+      "K": 6,
+      "rho": 0.6749225707042615
+    },
+    {
+      "pos": "improvisational",
+      "neg": "methodical",
+      "source": "desc_inst",
+      "K": 8,
+      "rho": 0.6616754696917926
+    },
+    {
+      "pos": "improvisational",
+      "neg": "methodical",
+      "source": "desc_inst",
+      "K": 12,
+      "rho": 0.5753941502463281
+    },
+    {
+      "pos": "improvisational",
+      "neg": "methodical",
+      "source": "desc_inst",
+      "K": 16,
+      "rho": 0.5292898387582698
+    },
+    {
+      "pos": "improvisational",
+      "neg": "methodical",
+      "source": "desc_inst",
+      "K": 24,
+      "rho": 0.45498225712761875
+    },
+    {
+      "pos": "improvisational",
+      "neg": "methodical",
+      "source": "desc_inst",
+      "K": 32,
+      "rho": 0.40387758391716044
+    },
+    {
+      "pos": "improvisational",
+      "neg": "methodical",
+      "source": "responses",
+      "K": 0,
+      "rho": 0.8631893734837626
+    },
+    {
+      "pos": "improvisational",
+      "neg": "methodical",
+      "source": "responses",
+      "K": 1,
+      "rho": 0.8024331698430138
+    },
+    {
+      "pos": "improvisational",
+      "neg": "methodical",
+      "source": "responses",
+      "K": 2,
+      "rho": 0.7143224924194217
+    },
+    {
+      "pos": "improvisational",
+      "neg": "methodical",
+      "source": "responses",
+      "K": 3,
+      "rho": 0.6893271737732242
+    },
+    {
+      "pos": "improvisational",
+      "neg": "methodical",
+      "source": "responses",
+      "K": 4,
+      "rho": 0.6816408586864114
+    },
+    {
+      "pos": "improvisational",
+      "neg": "methodical",
+      "source": "responses",
+      "K": 6,
+      "rho": 0.6385398089415657
+    },
+    {
+      "pos": "improvisational",
+      "neg": "methodical",
+      "source": "responses",
+      "K": 8,
+      "rho": 0.6098187362157717
+    },
+    {
+      "pos": "improvisational",
+      "neg": "methodical",
+      "source": "responses",
+      "K": 12,
+      "rho": 0.5197568827122906
+    },
+    {
+      "pos": "improvisational",
+      "neg": "methodical",
+      "source": "responses",
+      "K": 16,
+      "rho": 0.4735289739145227
+    },
+    {
+      "pos": "improvisational",
+      "neg": "methodical",
+      "source": "responses",
+      "K": 24,
+      "rho": 0.3883575685640998
+    },
+    {
+      "pos": "improvisational",
+      "neg": "methodical",
+      "source": "responses",
+      "K": 32,
+      "rho": 0.32207003768319487
+    },
+    {
+      "pos": "relativist",
+      "neg": "absolutist",
+      "source": "desc_inst",
+      "K": 0,
+      "rho": 0.568186405668858
+    },
+    {
+      "pos": "relativist",
+      "neg": "absolutist",
+      "source": "desc_inst",
+      "K": 1,
+      "rho": 0.5654638745203092
+    },
+    {
+      "pos": "relativist",
+      "neg": "absolutist",
+      "source": "desc_inst",
+      "K": 2,
+      "rho": 0.5713906024737374
+    },
+    {
+      "pos": "relativist",
+      "neg": "absolutist",
+      "source": "desc_inst",
+      "K": 3,
+      "rho": 0.5782370826201051
+    },
+    {
+      "pos": "relativist",
+      "neg": "absolutist",
+      "source": "desc_inst",
+      "K": 4,
+      "rho": 0.5795405767648968
+    },
+    {
+      "pos": "relativist",
+      "neg": "absolutist",
+      "source": "desc_inst",
+      "K": 6,
+      "rho": 0.5854210423145254
+    },
+    {
+      "pos": "relativist",
+      "neg": "absolutist",
+      "source": "desc_inst",
+      "K": 8,
+      "rho": 0.5787428655044123
+    },
+    {
+      "pos": "relativist",
+      "neg": "absolutist",
+      "source": "desc_inst",
+      "K": 12,
+      "rho": 0.5578787476918929
+    },
+    {
+      "pos": "relativist",
+      "neg": "absolutist",
+      "source": "desc_inst",
+      "K": 16,
+      "rho": 0.5422185845541532
+    },
+    {
+      "pos": "relativist",
+      "neg": "absolutist",
+      "source": "desc_inst",
+      "K": 24,
+      "rho": 0.490674378512867
+    },
+    {
+      "pos": "relativist",
+      "neg": "absolutist",
+      "source": "desc_inst",
+      "K": 32,
+      "rho": 0.4514167362915763
+    },
+    {
+      "pos": "relativist",
+      "neg": "absolutist",
+      "source": "responses",
+      "K": 0,
+      "rho": 0.5099737388845351
+    },
+    {
+      "pos": "relativist",
+      "neg": "absolutist",
+      "source": "responses",
+      "K": 1,
+      "rho": 0.5029201229105362
+    },
+    {
+      "pos": "relativist",
+      "neg": "absolutist",
+      "source": "responses",
+      "K": 2,
+      "rho": 0.5108171207343354
+    },
+    {
+      "pos": "relativist",
+      "neg": "absolutist",
+      "source": "responses",
+      "K": 3,
+      "rho": 0.521328950584194
+    },
+    {
+      "pos": "relativist",
+      "neg": "absolutist",
+      "source": "responses",
+      "K": 4,
+      "rho": 0.523355298670396
+    },
+    {
+      "pos": "relativist",
+      "neg": "absolutist",
+      "source": "responses",
+      "K": 6,
+      "rho": 0.5170268388708621
+    },
+    {
+      "pos": "relativist",
+      "neg": "absolutist",
+      "source": "responses",
+      "K": 8,
+      "rho": 0.5119739650948445
+    },
+    {
+      "pos": "relativist",
+      "neg": "absolutist",
+      "source": "responses",
+      "K": 12,
+      "rho": 0.4848813228961246
+    },
+    {
+      "pos": "relativist",
+      "neg": "absolutist",
+      "source": "responses",
+      "K": 16,
+      "rho": 0.4678653394444335
+    },
+    {
+      "pos": "relativist",
+      "neg": "absolutist",
+      "source": "responses",
+      "K": 24,
+      "rho": 0.41676940223586895
+    },
+    {
+      "pos": "relativist",
+      "neg": "absolutist",
+      "source": "responses",
+      "K": 32,
+      "rho": 0.3859961554746792
+    },
+    {
+      "pos": "systems_thinker",
+      "neg": "analytical",
+      "source": "desc_inst",
+      "K": 0,
+      "rho": 0.5491962129450085
+    },
+    {
+      "pos": "systems_thinker",
+      "neg": "analytical",
+      "source": "desc_inst",
+      "K": 1,
+      "rho": 0.6149366358503573
+    },
+    {
+      "pos": "systems_thinker",
+      "neg": "analytical",
+      "source": "desc_inst",
+      "K": 2,
+      "rho": 0.5851646429461428
+    },
+    {
+      "pos": "systems_thinker",
+      "neg": "analytical",
+      "source": "desc_inst",
+      "K": 3,
+      "rho": 0.5671573902171859
+    },
+    {
+      "pos": "systems_thinker",
+      "neg": "analytical",
+      "source": "desc_inst",
+      "K": 4,
+      "rho": 0.5637987676826577
+    },
+    {
+      "pos": "systems_thinker",
+      "neg": "analytical",
+      "source": "desc_inst",
+      "K": 6,
+      "rho": 0.5355804624776269
+    },
+    {
+      "pos": "systems_thinker",
+      "neg": "analytical",
+      "source": "desc_inst",
+      "K": 8,
+      "rho": 0.5266754744769071
+    },
+    {
+      "pos": "systems_thinker",
+      "neg": "analytical",
+      "source": "desc_inst",
+      "K": 12,
+      "rho": 0.49572050069115103
+    },
+    {
+      "pos": "systems_thinker",
+      "neg": "analytical",
+      "source": "desc_inst",
+      "K": 16,
+      "rho": 0.48774452850156386
+    },
+    {
+      "pos": "systems_thinker",
+      "neg": "analytical",
+      "source": "desc_inst",
+      "K": 24,
+      "rho": 0.46083866197482654
+    },
+    {
+      "pos": "systems_thinker",
+      "neg": "analytical",
+      "source": "desc_inst",
+      "K": 32,
+      "rho": 0.43027659146974
+    },
+    {
+      "pos": "systems_thinker",
+      "neg": "analytical",
+      "source": "responses",
+      "K": 0,
+      "rho": 0.6204977208531427
+    },
+    {
+      "pos": "systems_thinker",
+      "neg": "analytical",
+      "source": "responses",
+      "K": 1,
+      "rho": 0.6764120749136373
+    },
+    {
+      "pos": "systems_thinker",
+      "neg": "analytical",
+      "source": "responses",
+      "K": 2,
+      "rho": 0.6049370298890338
+    },
+    {
+      "pos": "systems_thinker",
+      "neg": "analytical",
+      "source": "responses",
+      "K": 3,
+      "rho": 0.5852756748415353
+    },
+    {
+      "pos": "systems_thinker",
+      "neg": "analytical",
+      "source": "responses",
+      "K": 4,
+      "rho": 0.5828759961639329
+    },
+    {
+      "pos": "systems_thinker",
+      "neg": "analytical",
+      "source": "responses",
+      "K": 6,
+      "rho": 0.5489945630317035
+    },
+    {
+      "pos": "systems_thinker",
+      "neg": "analytical",
+      "source": "responses",
+      "K": 8,
+      "rho": 0.513975077458764
+    },
+    {
+      "pos": "systems_thinker",
+      "neg": "analytical",
+      "source": "responses",
+      "K": 12,
+      "rho": 0.4387203120348294
+    },
+    {
+      "pos": "systems_thinker",
+      "neg": "analytical",
+      "source": "responses",
+      "K": 16,
+      "rho": 0.4063976561124675
+    },
+    {
+      "pos": "systems_thinker",
+      "neg": "analytical",
+      "source": "responses",
+      "K": 24,
+      "rho": 0.346860007444209
+    },
+    {
+      "pos": "systems_thinker",
+      "neg": "analytical",
+      "source": "responses",
+      "K": 32,
+      "rho": 0.30546733148495636
+    },
+    {
+      "pos": "accessible",
+      "neg": "esoteric",
+      "source": "desc_inst",
+      "K": 0,
+      "rho": 0.5054856305977404
+    },
+    {
+      "pos": "accessible",
+      "neg": "esoteric",
+      "source": "desc_inst",
+      "K": 1,
+      "rho": 0.611070229724924
+    },
+    {
+      "pos": "accessible",
+      "neg": "esoteric",
+      "source": "desc_inst",
+      "K": 2,
+      "rho": 0.6698233459976979
+    },
+    {
+      "pos": "accessible",
+      "neg": "esoteric",
+      "source": "desc_inst",
+      "K": 3,
+      "rho": 0.6817131983083705
+    },
+    {
+      "pos": "accessible",
+      "neg": "esoteric",
+      "source": "desc_inst",
+      "K": 4,
+      "rho": 0.6787936363878343
+    },
+    {
+      "pos": "accessible",
+      "neg": "esoteric",
+      "source": "desc_inst",
+      "K": 6,
+      "rho": 0.6440228414219639
+    },
+    {
+      "pos": "accessible",
+      "neg": "esoteric",
+      "source": "desc_inst",
+      "K": 8,
+      "rho": 0.6238665387155083
+    },
+    {
+      "pos": "accessible",
+      "neg": "esoteric",
+      "source": "desc_inst",
+      "K": 12,
+      "rho": 0.5864790237779811
+    },
+    {
+      "pos": "accessible",
+      "neg": "esoteric",
+      "source": "desc_inst",
+      "K": 16,
+      "rho": 0.5331683332879099
+    },
+    {
+      "pos": "accessible",
+      "neg": "esoteric",
+      "source": "desc_inst",
+      "K": 24,
+      "rho": 0.4335714500373545
+    },
+    {
+      "pos": "accessible",
+      "neg": "esoteric",
+      "source": "desc_inst",
+      "K": 32,
+      "rho": 0.3579727624821835
+    },
+    {
+      "pos": "accessible",
+      "neg": "esoteric",
+      "source": "responses",
+      "K": 0,
+      "rho": NaN
+    },
+    {
+      "pos": "accessible",
+      "neg": "esoteric",
+      "source": "responses",
+      "K": 1,
+      "rho": NaN
+    },
+    {
+      "pos": "accessible",
+      "neg": "esoteric",
+      "source": "responses",
+      "K": 2,
+      "rho": NaN
+    },
+    {
+      "pos": "accessible",
+      "neg": "esoteric",
+      "source": "responses",
+      "K": 3,
+      "rho": NaN
+    },
+    {
+      "pos": "accessible",
+      "neg": "esoteric",
+      "source": "responses",
+      "K": 4,
+      "rho": NaN
+    },
+    {
+      "pos": "accessible",
+      "neg": "esoteric",
+      "source": "responses",
+      "K": 6,
+      "rho": NaN
+    },
+    {
+      "pos": "accessible",
+      "neg": "esoteric",
+      "source": "responses",
+      "K": 8,
+      "rho": NaN
+    },
+    {
+      "pos": "accessible",
+      "neg": "esoteric",
+      "source": "responses",
+      "K": 12,
+      "rho": NaN
+    },
+    {
+      "pos": "accessible",
+      "neg": "esoteric",
+      "source": "responses",
+      "K": 16,
+      "rho": NaN
+    },
+    {
+      "pos": "accessible",
+      "neg": "esoteric",
+      "source": "responses",
+      "K": 24,
+      "rho": NaN
+    },
+    {
+      "pos": "accessible",
+      "neg": "esoteric",
+      "source": "responses",
+      "K": 32,
+      "rho": NaN
+    },
+    {
+      "pos": "benign",
+      "neg": "malicious",
+      "source": "desc_inst",
+      "K": 0,
+      "rho": 0.7923299166290255
+    },
+    {
+      "pos": "benign",
+      "neg": "malicious",
+      "source": "desc_inst",
+      "K": 1,
+      "rho": 0.7978999597888168
+    },
+    {
+      "pos": "benign",
+      "neg": "malicious",
+      "source": "desc_inst",
+      "K": 2,
+      "rho": 0.7391738661673461
+    },
+    {
+      "pos": "benign",
+      "neg": "malicious",
+      "source": "desc_inst",
+      "K": 3,
+      "rho": 0.7061659483865549
+    },
+    {
+      "pos": "benign",
+      "neg": "malicious",
+      "source": "desc_inst",
+      "K": 4,
+      "rho": 0.6947517894312311
+    },
+    {
+      "pos": "benign",
+      "neg": "malicious",
+      "source": "desc_inst",
+      "K": 6,
+      "rho": 0.6931677326096548
+    },
+    {
+      "pos": "benign",
+      "neg": "malicious",
+      "source": "desc_inst",
+      "K": 8,
+      "rho": 0.6892589224277419
+    },
+    {
+      "pos": "benign",
+      "neg": "malicious",
+      "source": "desc_inst",
+      "K": 12,
+      "rho": 0.6558056528273493
+    },
+    {
+      "pos": "benign",
+      "neg": "malicious",
+      "source": "desc_inst",
+      "K": 16,
+      "rho": 0.6232318995661913
+    },
+    {
+      "pos": "benign",
+      "neg": "malicious",
+      "source": "desc_inst",
+      "K": 24,
+      "rho": 0.5464155851997115
+    },
+    {
+      "pos": "benign",
+      "neg": "malicious",
+      "source": "desc_inst",
+      "K": 32,
+      "rho": 0.48189949637298884
+    },
+    {
+      "pos": "benign",
+      "neg": "malicious",
+      "source": "responses",
+      "K": 0,
+      "rho": NaN
+    },
+    {
+      "pos": "benign",
+      "neg": "malicious",
+      "source": "responses",
+      "K": 1,
+      "rho": NaN
+    },
+    {
+      "pos": "benign",
+      "neg": "malicious",
+      "source": "responses",
+      "K": 2,
+      "rho": NaN
+    },
+    {
+      "pos": "benign",
+      "neg": "malicious",
+      "source": "responses",
+      "K": 3,
+      "rho": NaN
+    },
+    {
+      "pos": "benign",
+      "neg": "malicious",
+      "source": "responses",
+      "K": 4,
+      "rho": NaN
+    },
+    {
+      "pos": "benign",
+      "neg": "malicious",
+      "source": "responses",
+      "K": 6,
+      "rho": NaN
+    },
+    {
+      "pos": "benign",
+      "neg": "malicious",
+      "source": "responses",
+      "K": 8,
+      "rho": NaN
+    },
+    {
+      "pos": "benign",
+      "neg": "malicious",
+      "source": "responses",
+      "K": 12,
+      "rho": NaN
+    },
+    {
+      "pos": "benign",
+      "neg": "malicious",
+      "source": "responses",
+      "K": 16,
+      "rho": NaN
+    },
+    {
+      "pos": "benign",
+      "neg": "malicious",
+      "source": "responses",
+      "K": 24,
+      "rho": NaN
+    },
+    {
+      "pos": "benign",
+      "neg": "malicious",
+      "source": "responses",
+      "K": 32,
+      "rho": NaN
+    },
+    {
+      "pos": "casual",
+      "neg": "formal",
+      "source": "desc_inst",
+      "K": 0,
+      "rho": 0.8027565286863402
+    },
+    {
+      "pos": "casual",
+      "neg": "formal",
+      "source": "desc_inst",
+      "K": 1,
+      "rho": 0.7875900876950527
+    },
+    {
+      "pos": "casual",
+      "neg": "formal",
+      "source": "desc_inst",
+      "K": 2,
+      "rho": 0.7859695861439853
+    },
+    {
+      "pos": "casual",
+      "neg": "formal",
+      "source": "desc_inst",
+      "K": 3,
+      "rho": 0.7774361193391215
+    },
+    {
+      "pos": "casual",
+      "neg": "formal",
+      "source": "desc_inst",
+      "K": 4,
+      "rho": 0.7766296443767371
+    },
+    {
+      "pos": "casual",
+      "neg": "formal",
+      "source": "desc_inst",
+      "K": 6,
+      "rho": 0.7220283849516563
+    },
+    {
+      "pos": "casual",
+      "neg": "formal",
+      "source": "desc_inst",
+      "K": 8,
+      "rho": 0.6897176868608504
+    },
+    {
+      "pos": "casual",
+      "neg": "formal",
+      "source": "desc_inst",
+      "K": 12,
+      "rho": 0.6202870665157949
+    },
+    {
+      "pos": "casual",
+      "neg": "formal",
+      "source": "desc_inst",
+      "K": 16,
+      "rho": 0.5708184925806076
+    },
+    {
+      "pos": "casual",
+      "neg": "formal",
+      "source": "desc_inst",
+      "K": 24,
+      "rho": 0.4864395247935161
+    },
+    {
+      "pos": "casual",
+      "neg": "formal",
+      "source": "desc_inst",
+      "K": 32,
+      "rho": 0.40309993832349206
+    },
+    {
+      "pos": "casual",
+      "neg": "formal",
+      "source": "responses",
+      "K": 0,
+      "rho": NaN
+    },
+    {
+      "pos": "casual",
+      "neg": "formal",
+      "source": "responses",
+      "K": 1,
+      "rho": NaN
+    },
+    {
+      "pos": "casual",
+      "neg": "formal",
+      "source": "responses",
+      "K": 2,
+      "rho": NaN
+    },
+    {
+      "pos": "casual",
+      "neg": "formal",
+      "source": "responses",
+      "K": 3,
+      "rho": NaN
+    },
+    {
+      "pos": "casual",
+      "neg": "formal",
+      "source": "responses",
+      "K": 4,
+      "rho": NaN
+    },
+    {
+      "pos": "casual",
+      "neg": "formal",
+      "source": "responses",
+      "K": 6,
+      "rho": NaN
+    },
+    {
+      "pos": "casual",
+      "neg": "formal",
+      "source": "responses",
+      "K": 8,
+      "rho": NaN
+    },
+    {
+      "pos": "casual",
+      "neg": "formal",
+      "source": "responses",
+      "K": 12,
+      "rho": NaN
+    },
+    {
+      "pos": "casual",
+      "neg": "formal",
+      "source": "responses",
+      "K": 16,
+      "rho": NaN
+    },
+    {
+      "pos": "casual",
+      "neg": "formal",
+      "source": "responses",
+      "K": 24,
+      "rho": NaN
+    },
+    {
+      "pos": "casual",
+      "neg": "formal",
+      "source": "responses",
+      "K": 32,
+      "rho": NaN
+    },
+    {
+      "pos": "compassionate",
+      "neg": "callous",
+      "source": "desc_inst",
+      "K": 0,
+      "rho": 0.7211428224273118
+    },
+    {
+      "pos": "compassionate",
+      "neg": "callous",
+      "source": "desc_inst",
+      "K": 1,
+      "rho": 0.7687475213281435
+    },
+    {
+      "pos": "compassionate",
+      "neg": "callous",
+      "source": "desc_inst",
+      "K": 2,
+      "rho": 0.7670571674362049
+    },
+    {
+      "pos": "compassionate",
+      "neg": "callous",
+      "source": "desc_inst",
+      "K": 3,
+      "rho": 0.7518243932229075
+    },
+    {
+      "pos": "compassionate",
+      "neg": "callous",
+      "source": "desc_inst",
+      "K": 4,
+      "rho": 0.74556025201374
+    },
+    {
+      "pos": "compassionate",
+      "neg": "callous",
+      "source": "desc_inst",
+      "K": 6,
+      "rho": 0.7392267197507241
+    },
+    {
+      "pos": "compassionate",
+      "neg": "callous",
+      "source": "desc_inst",
+      "K": 8,
+      "rho": 0.7245730275840706
+    },
+    {
+      "pos": "compassionate",
+      "neg": "callous",
+      "source": "desc_inst",
+      "K": 12,
+      "rho": 0.6556664592995038
+    },
+    {
+      "pos": "compassionate",
+      "neg": "callous",
+      "source": "desc_inst",
+      "K": 16,
+      "rho": 0.5952457977605068
+    },
+    {
+      "pos": "compassionate",
+      "neg": "callous",
+      "source": "desc_inst",
+      "K": 24,
+      "rho": 0.4854891119191293
+    },
+    {
+      "pos": "compassionate",
+      "neg": "callous",
+      "source": "desc_inst",
+      "K": 32,
+      "rho": 0.4122970116946066
+    },
+    {
+      "pos": "compassionate",
+      "neg": "callous",
+      "source": "responses",
+      "K": 0,
+      "rho": NaN
+    },
+    {
+      "pos": "compassionate",
+      "neg": "callous",
+      "source": "responses",
+      "K": 1,
+      "rho": NaN
+    },
+    {
+      "pos": "compassionate",
+      "neg": "callous",
+      "source": "responses",
+      "K": 2,
+      "rho": NaN
+    },
+    {
+      "pos": "compassionate",
+      "neg": "callous",
+      "source": "responses",
+      "K": 3,
+      "rho": NaN
+    },
+    {
+      "pos": "compassionate",
+      "neg": "callous",
+      "source": "responses",
+      "K": 4,
+      "rho": NaN
+    },
+    {
+      "pos": "compassionate",
+      "neg": "callous",
+      "source": "responses",
+      "K": 6,
+      "rho": NaN
+    },
+    {
+      "pos": "compassionate",
+      "neg": "callous",
+      "source": "responses",
+      "K": 8,
+      "rho": NaN
+    },
+    {
+      "pos": "compassionate",
+      "neg": "callous",
+      "source": "responses",
+      "K": 12,
+      "rho": NaN
+    },
+    {
+      "pos": "compassionate",
+      "neg": "callous",
+      "source": "responses",
+      "K": 16,
+      "rho": NaN
+    },
+    {
+      "pos": "compassionate",
+      "neg": "callous",
+      "source": "responses",
+      "K": 24,
+      "rho": NaN
+    },
+    {
+      "pos": "compassionate",
+      "neg": "callous",
+      "source": "responses",
+      "K": 32,
+      "rho": NaN
+    },
+    {
+      "pos": "confident",
+      "neg": "uncertain",
+      "source": "desc_inst",
+      "K": 0,
+      "rho": 0.5624985411014051
+    },
+    {
+      "pos": "confident",
+      "neg": "uncertain",
+      "source": "desc_inst",
+      "K": 1,
+      "rho": 0.6119347491664314
+    },
+    {
+      "pos": "confident",
+      "neg": "uncertain",
+      "source": "desc_inst",
+      "K": 2,
+      "rho": 0.6218668239026337
+    },
+    {
+      "pos": "confident",
+      "neg": "uncertain",
+      "source": "desc_inst",
+      "K": 3,
+      "rho": 0.6235517493434041
+    },
+    {
+      "pos": "confident",
+      "neg": "uncertain",
+      "source": "desc_inst",
+      "K": 4,
+      "rho": 0.6259898169733699
+    },
+    {
+      "pos": "confident",
+      "neg": "uncertain",
+      "source": "desc_inst",
+      "K": 6,
+      "rho": 0.6164321162631737
+    },
+    {
+      "pos": "confident",
+      "neg": "uncertain",
+      "source": "desc_inst",
+      "K": 8,
+      "rho": 0.6180336500269679
+    },
+    {
+      "pos": "confident",
+      "neg": "uncertain",
+      "source": "desc_inst",
+      "K": 12,
+      "rho": 0.5858791634739936
+    },
+    {
+      "pos": "confident",
+      "neg": "uncertain",
+      "source": "desc_inst",
+      "K": 16,
+      "rho": 0.5554773560799683
+    },
+    {
+      "pos": "confident",
+      "neg": "uncertain",
+      "source": "desc_inst",
+      "K": 24,
+      "rho": 0.48187781995667095
+    },
+    {
+      "pos": "confident",
+      "neg": "uncertain",
+      "source": "desc_inst",
+      "K": 32,
+      "rho": 0.42128958251024085
+    },
+    {
+      "pos": "confident",
+      "neg": "uncertain",
+      "source": "responses",
+      "K": 0,
+      "rho": NaN
+    },
+    {
+      "pos": "confident",
+      "neg": "uncertain",
+      "source": "responses",
+      "K": 1,
+      "rho": NaN
+    },
+    {
+      "pos": "confident",
+      "neg": "uncertain",
+      "source": "responses",
+      "K": 2,
+      "rho": NaN
+    },
+    {
+      "pos": "confident",
+      "neg": "uncertain",
+      "source": "responses",
+      "K": 3,
+      "rho": NaN
+    },
+    {
+      "pos": "confident",
+      "neg": "uncertain",
+      "source": "responses",
+      "K": 4,
+      "rho": NaN
+    },
+    {
+      "pos": "confident",
+      "neg": "uncertain",
+      "source": "responses",
+      "K": 6,
+      "rho": NaN
+    },
+    {
+      "pos": "confident",
+      "neg": "uncertain",
+      "source": "responses",
+      "K": 8,
+      "rho": NaN
+    },
+    {
+      "pos": "confident",
+      "neg": "uncertain",
+      "source": "responses",
+      "K": 12,
+      "rho": NaN
+    },
+    {
+      "pos": "confident",
+      "neg": "uncertain",
+      "source": "responses",
+      "K": 16,
+      "rho": NaN
+    },
+    {
+      "pos": "confident",
+      "neg": "uncertain",
+      "source": "responses",
+      "K": 24,
+      "rho": NaN
+    },
+    {
+      "pos": "confident",
+      "neg": "uncertain",
+      "source": "responses",
+      "K": 32,
+      "rho": NaN
+    },
+    {
+      "pos": "constructive",
+      "neg": "destructive",
+      "source": "desc_inst",
+      "K": 0,
+      "rho": 0.8502641419991105
+    },
+    {
+      "pos": "constructive",
+      "neg": "destructive",
+      "source": "desc_inst",
+      "K": 1,
+      "rho": 0.8451144579126497
+    },
+    {
+      "pos": "constructive",
+      "neg": "destructive",
+      "source": "desc_inst",
+      "K": 2,
+      "rho": 0.801068351742836
+    },
+    {
+      "pos": "constructive",
+      "neg": "destructive",
+      "source": "desc_inst",
+      "K": 3,
+      "rho": 0.7767900873854087
+    },
+    {
+      "pos": "constructive",
+      "neg": "destructive",
+      "source": "desc_inst",
+      "K": 4,
+      "rho": 0.7681606869479214
+    },
+    {
+      "pos": "constructive",
+      "neg": "destructive",
+      "source": "desc_inst",
+      "K": 6,
+      "rho": 0.7510015494525776
+    },
+    {
+      "pos": "constructive",
+      "neg": "destructive",
+      "source": "desc_inst",
+      "K": 8,
+      "rho": 0.736750041759663
+    },
+    {
+      "pos": "constructive",
+      "neg": "destructive",
+      "source": "desc_inst",
+      "K": 12,
+      "rho": 0.6809144010819161
+    },
+    {
+      "pos": "constructive",
+      "neg": "destructive",
+      "source": "desc_inst",
+      "K": 16,
+      "rho": 0.6295287965745265
+    },
+    {
+      "pos": "constructive",
+      "neg": "destructive",
+      "source": "desc_inst",
+      "K": 24,
+      "rho": 0.5290453518725815
+    },
+    {
+      "pos": "constructive",
+      "neg": "destructive",
+      "source": "desc_inst",
+      "K": 32,
+      "rho": 0.4491661067377447
+    },
+    {
+      "pos": "constructive",
+      "neg": "destructive",
+      "source": "responses",
+      "K": 0,
+      "rho": NaN
+    },
+    {
+      "pos": "constructive",
+      "neg": "destructive",
+      "source": "responses",
+      "K": 1,
+      "rho": NaN
+    },
+    {
+      "pos": "constructive",
+      "neg": "destructive",
+      "source": "responses",
+      "K": 2,
+      "rho": NaN
+    },
+    {
+      "pos": "constructive",
+      "neg": "destructive",
+      "source": "responses",
+      "K": 3,
+      "rho": NaN
+    },
+    {
+      "pos": "constructive",
+      "neg": "destructive",
+      "source": "responses",
+      "K": 4,
+      "rho": NaN
+    },
+    {
+      "pos": "constructive",
+      "neg": "destructive",
+      "source": "responses",
+      "K": 6,
+      "rho": NaN
+    },
+    {
+      "pos": "constructive",
+      "neg": "destructive",
+      "source": "responses",
+      "K": 8,
+      "rho": NaN
+    },
+    {
+      "pos": "constructive",
+      "neg": "destructive",
+      "source": "responses",
+      "K": 12,
+      "rho": NaN
+    },
+    {
+      "pos": "constructive",
+      "neg": "destructive",
+      "source": "responses",
+      "K": 16,
+      "rho": NaN
+    },
+    {
+      "pos": "constructive",
+      "neg": "destructive",
+      "source": "responses",
+      "K": 24,
+      "rho": NaN
+    },
+    {
+      "pos": "constructive",
+      "neg": "destructive",
+      "source": "responses",
+      "K": 32,
+      "rho": NaN
+    },
+    {
+      "pos": "convergent",
+      "neg": "divergent",
+      "source": "desc_inst",
+      "K": 0,
+      "rho": 0.7126331554799872
+    },
+    {
+      "pos": "convergent",
+      "neg": "divergent",
+      "source": "desc_inst",
+      "K": 1,
+      "rho": 0.7059690078894068
+    },
+    {
+      "pos": "convergent",
+      "neg": "divergent",
+      "source": "desc_inst",
+      "K": 2,
+      "rho": 0.731464318357977
+    },
+    {
+      "pos": "convergent",
+      "neg": "divergent",
+      "source": "desc_inst",
+      "K": 3,
+      "rho": 0.7432212342454875
+    },
+    {
+      "pos": "convergent",
+      "neg": "divergent",
+      "source": "desc_inst",
+      "K": 4,
+      "rho": 0.7440323125381266
+    },
+    {
+      "pos": "convergent",
+      "neg": "divergent",
+      "source": "desc_inst",
+      "K": 6,
+      "rho": 0.7591219975787427
+    },
+    {
+      "pos": "convergent",
+      "neg": "divergent",
+      "source": "desc_inst",
+      "K": 8,
+      "rho": 0.7392793963306395
+    },
+    {
+      "pos": "convergent",
+      "neg": "divergent",
+      "source": "desc_inst",
+      "K": 12,
+      "rho": 0.6910167773006497
+    },
+    {
+      "pos": "convergent",
+      "neg": "divergent",
+      "source": "desc_inst",
+      "K": 16,
+      "rho": 0.640408021001885
+    },
+    {
+      "pos": "convergent",
+      "neg": "divergent",
+      "source": "desc_inst",
+      "K": 24,
+      "rho": 0.5105418634412479
+    },
+    {
+      "pos": "convergent",
+      "neg": "divergent",
+      "source": "desc_inst",
+      "K": 32,
+      "rho": 0.4635997127313739
+    },
+    {
+      "pos": "convergent",
+      "neg": "divergent",
+      "source": "responses",
+      "K": 0,
+      "rho": NaN
+    },
+    {
+      "pos": "convergent",
+      "neg": "divergent",
+      "source": "responses",
+      "K": 1,
+      "rho": NaN
+    },
+    {
+      "pos": "convergent",
+      "neg": "divergent",
+      "source": "responses",
+      "K": 2,
+      "rho": NaN
+    },
+    {
+      "pos": "convergent",
+      "neg": "divergent",
+      "source": "responses",
+      "K": 3,
+      "rho": NaN
+    },
+    {
+      "pos": "convergent",
+      "neg": "divergent",
+      "source": "responses",
+      "K": 4,
+      "rho": NaN
+    },
+    {
+      "pos": "convergent",
+      "neg": "divergent",
+      "source": "responses",
+      "K": 6,
+      "rho": NaN
+    },
+    {
+      "pos": "convergent",
+      "neg": "divergent",
+      "source": "responses",
+      "K": 8,
+      "rho": NaN
+    },
+    {
+      "pos": "convergent",
+      "neg": "divergent",
+      "source": "responses",
+      "K": 12,
+      "rho": NaN
+    },
+    {
+      "pos": "convergent",
+      "neg": "divergent",
+      "source": "responses",
+      "K": 16,
+      "rho": NaN
+    },
+    {
+      "pos": "convergent",
+      "neg": "divergent",
+      "source": "responses",
+      "K": 24,
+      "rho": NaN
+    },
+    {
+      "pos": "convergent",
+      "neg": "divergent",
+      "source": "responses",
+      "K": 32,
+      "rho": NaN
+    },
+    {
+      "pos": "cooperative",
+      "neg": "competitive",
+      "source": "desc_inst",
+      "K": 0,
+      "rho": 0.7370317888039004
+    },
+    {
+      "pos": "cooperative",
+      "neg": "competitive",
+      "source": "desc_inst",
+      "K": 1,
+      "rho": 0.7884082653844405
+    },
+    {
+      "pos": "cooperative",
+      "neg": "competitive",
+      "source": "desc_inst",
+      "K": 2,
+      "rho": 0.7471509553155808
+    },
+    {
+      "pos": "cooperative",
+      "neg": "competitive",
+      "source": "desc_inst",
+      "K": 3,
+      "rho": 0.7216857977108995
+    },
+    {
+      "pos": "cooperative",
+      "neg": "competitive",
+      "source": "desc_inst",
+      "K": 4,
+      "rho": 0.7126933490164552
+    },
+    {
+      "pos": "cooperative",
+      "neg": "competitive",
+      "source": "desc_inst",
+      "K": 6,
+      "rho": 0.685504236636827
+    },
+    {
+      "pos": "cooperative",
+      "neg": "competitive",
+      "source": "desc_inst",
+      "K": 8,
+      "rho": 0.6772570724630168
+    },
+    {
+      "pos": "cooperative",
+      "neg": "competitive",
+      "source": "desc_inst",
+      "K": 12,
+      "rho": 0.639447997537987
+    },
+    {
+      "pos": "cooperative",
+      "neg": "competitive",
+      "source": "desc_inst",
+      "K": 16,
+      "rho": 0.5942240416596122
+    },
+    {
+      "pos": "cooperative",
+      "neg": "competitive",
+      "source": "desc_inst",
+      "K": 24,
+      "rho": 0.5234872286648595
+    },
+    {
+      "pos": "cooperative",
+      "neg": "competitive",
+      "source": "desc_inst",
+      "K": 32,
+      "rho": 0.4739606465939017
+    },
+    {
+      "pos": "cooperative",
+      "neg": "competitive",
+      "source": "responses",
+      "K": 0,
+      "rho": NaN
+    },
+    {
+      "pos": "cooperative",
+      "neg": "competitive",
+      "source": "responses",
+      "K": 1,
+      "rho": NaN
+    },
+    {
+      "pos": "cooperative",
+      "neg": "competitive",
+      "source": "responses",
+      "K": 2,
+      "rho": NaN
+    },
+    {
+      "pos": "cooperative",
+      "neg": "competitive",
+      "source": "responses",
+      "K": 3,
+      "rho": NaN
+    },
+    {
+      "pos": "cooperative",
+      "neg": "competitive",
+      "source": "responses",
+      "K": 4,
+      "rho": NaN
+    },
+    {
+      "pos": "cooperative",
+      "neg": "competitive",
+      "source": "responses",
+      "K": 6,
+      "rho": NaN
+    },
+    {
+      "pos": "cooperative",
+      "neg": "competitive",
+      "source": "responses",
+      "K": 8,
+      "rho": NaN
+    },
+    {
+      "pos": "cooperative",
+      "neg": "competitive",
+      "source": "responses",
+      "K": 12,
+      "rho": NaN
+    },
+    {
+      "pos": "cooperative",
+      "neg": "competitive",
+      "source": "responses",
+      "K": 16,
+      "rho": NaN
+    },
+    {
+      "pos": "cooperative",
+      "neg": "competitive",
+      "source": "responses",
+      "K": 24,
+      "rho": NaN
+    },
+    {
+      "pos": "cooperative",
+      "neg": "competitive",
+      "source": "responses",
+      "K": 32,
+      "rho": NaN
+    },
+    {
+      "pos": "ethereal",
+      "neg": "grounded",
+      "source": "desc_inst",
+      "K": 0,
+      "rho": 0.5886052271479785
+    },
+    {
+      "pos": "ethereal",
+      "neg": "grounded",
+      "source": "desc_inst",
+      "K": 1,
+      "rho": 0.6484844822844695
+    },
+    {
+      "pos": "ethereal",
+      "neg": "grounded",
+      "source": "desc_inst",
+      "K": 2,
+      "rho": 0.7016640767348388
+    },
+    {
+      "pos": "ethereal",
+      "neg": "grounded",
+      "source": "desc_inst",
+      "K": 3,
+      "rho": 0.7217309834875667
+    },
+    {
+      "pos": "ethereal",
+      "neg": "grounded",
+      "source": "desc_inst",
+      "K": 4,
+      "rho": 0.7265265167966056
+    },
+    {
+      "pos": "ethereal",
+      "neg": "grounded",
+      "source": "desc_inst",
+      "K": 6,
+      "rho": 0.7127443632194298
+    },
+    {
+      "pos": "ethereal",
+      "neg": "grounded",
+      "source": "desc_inst",
+      "K": 8,
+      "rho": 0.6792714999404155
+    },
+    {
+      "pos": "ethereal",
+      "neg": "grounded",
+      "source": "desc_inst",
+      "K": 12,
+      "rho": 0.6088318630967953
+    },
+    {
+      "pos": "ethereal",
+      "neg": "grounded",
+      "source": "desc_inst",
+      "K": 16,
+      "rho": 0.5672968992572593
+    },
+    {
+      "pos": "ethereal",
+      "neg": "grounded",
+      "source": "desc_inst",
+      "K": 24,
+      "rho": 0.47786262892073417
+    },
+    {
+      "pos": "ethereal",
+      "neg": "grounded",
+      "source": "desc_inst",
+      "K": 32,
+      "rho": 0.39177267042110303
+    },
+    {
+      "pos": "ethereal",
+      "neg": "grounded",
+      "source": "responses",
+      "K": 0,
+      "rho": NaN
+    },
+    {
+      "pos": "ethereal",
+      "neg": "grounded",
+      "source": "responses",
+      "K": 1,
+      "rho": NaN
+    },
+    {
+      "pos": "ethereal",
+      "neg": "grounded",
+      "source": "responses",
+      "K": 2,
+      "rho": NaN
+    },
+    {
+      "pos": "ethereal",
+      "neg": "grounded",
+      "source": "responses",
+      "K": 3,
+      "rho": NaN
+    },
+    {
+      "pos": "ethereal",
+      "neg": "grounded",
+      "source": "responses",
+      "K": 4,
+      "rho": NaN
+    },
+    {
+      "pos": "ethereal",
+      "neg": "grounded",
+      "source": "responses",
+      "K": 6,
+      "rho": NaN
+    },
+    {
+      "pos": "ethereal",
+      "neg": "grounded",
+      "source": "responses",
+      "K": 8,
+      "rho": NaN
+    },
+    {
+      "pos": "ethereal",
+      "neg": "grounded",
+      "source": "responses",
+      "K": 12,
+      "rho": NaN
+    },
+    {
+      "pos": "ethereal",
+      "neg": "grounded",
+      "source": "responses",
+      "K": 16,
+      "rho": NaN
+    },
+    {
+      "pos": "ethereal",
+      "neg": "grounded",
+      "source": "responses",
+      "K": 24,
+      "rho": NaN
+    },
+    {
+      "pos": "ethereal",
+      "neg": "grounded",
+      "source": "responses",
+      "K": 32,
+      "rho": NaN
+    },
+    {
+      "pos": "forgiving",
+      "neg": "unforgiving",
+      "source": "desc_inst",
+      "K": 0,
+      "rho": 0.6057000693566669
+    },
+    {
+      "pos": "forgiving",
+      "neg": "unforgiving",
+      "source": "desc_inst",
+      "K": 1,
+      "rho": 0.6873289931916522
+    },
+    {
+      "pos": "forgiving",
+      "neg": "unforgiving",
+      "source": "desc_inst",
+      "K": 2,
+      "rho": 0.6950661414154322
+    },
+    {
+      "pos": "forgiving",
+      "neg": "unforgiving",
+      "source": "desc_inst",
+      "K": 3,
+      "rho": 0.6900709975578284
+    },
+    {
+      "pos": "forgiving",
+      "neg": "unforgiving",
+      "source": "desc_inst",
+      "K": 4,
+      "rho": 0.6896264859555662
+    },
+    {
+      "pos": "forgiving",
+      "neg": "unforgiving",
+      "source": "desc_inst",
+      "K": 6,
+      "rho": 0.6894479927250428
+    },
+    {
+      "pos": "forgiving",
+      "neg": "unforgiving",
+      "source": "desc_inst",
+      "K": 8,
+      "rho": 0.6790218007778042
+    },
+    {
+      "pos": "forgiving",
+      "neg": "unforgiving",
+      "source": "desc_inst",
+      "K": 12,
+      "rho": 0.6323606054200914
+    },
+    {
+      "pos": "forgiving",
+      "neg": "unforgiving",
+      "source": "desc_inst",
+      "K": 16,
+      "rho": 0.5936775308982439
+    },
+    {
+      "pos": "forgiving",
+      "neg": "unforgiving",
+      "source": "desc_inst",
+      "K": 24,
+      "rho": 0.5299358700534049
+    },
+    {
+      "pos": "forgiving",
+      "neg": "unforgiving",
+      "source": "desc_inst",
+      "K": 32,
+      "rho": 0.48033851506061065
+    },
+    {
+      "pos": "forgiving",
+      "neg": "unforgiving",
+      "source": "responses",
+      "K": 0,
+      "rho": NaN
+    },
+    {
+      "pos": "forgiving",
+      "neg": "unforgiving",
+      "source": "responses",
+      "K": 1,
+      "rho": NaN
+    },
+    {
+      "pos": "forgiving",
+      "neg": "unforgiving",
+      "source": "responses",
+      "K": 2,
+      "rho": NaN
+    },
+    {
+      "pos": "forgiving",
+      "neg": "unforgiving",
+      "source": "responses",
+      "K": 3,
+      "rho": NaN
+    },
+    {
+      "pos": "forgiving",
+      "neg": "unforgiving",
+      "source": "responses",
+      "K": 4,
+      "rho": NaN
+    },
+    {
+      "pos": "forgiving",
+      "neg": "unforgiving",
+      "source": "responses",
+      "K": 6,
+      "rho": NaN
+    },
+    {
+      "pos": "forgiving",
+      "neg": "unforgiving",
+      "source": "responses",
+      "K": 8,
+      "rho": NaN
+    },
+    {
+      "pos": "forgiving",
+      "neg": "unforgiving",
+      "source": "responses",
+      "K": 12,
+      "rho": NaN
+    },
+    {
+      "pos": "forgiving",
+      "neg": "unforgiving",
+      "source": "responses",
+      "K": 16,
+      "rho": NaN
+    },
+    {
+      "pos": "forgiving",
+      "neg": "unforgiving",
+      "source": "responses",
+      "K": 24,
+      "rho": NaN
+    },
+    {
+      "pos": "forgiving",
+      "neg": "unforgiving",
+      "source": "responses",
+      "K": 32,
+      "rho": NaN
+    },
+    {
+      "pos": "generous",
+      "neg": "stingy",
+      "source": "desc_inst",
+      "K": 0,
+      "rho": 0.7220125128986089
+    },
+    {
+      "pos": "generous",
+      "neg": "stingy",
+      "source": "desc_inst",
+      "K": 1,
+      "rho": 0.7650404917045078
+    },
+    {
+      "pos": "generous",
+      "neg": "stingy",
+      "source": "desc_inst",
+      "K": 2,
+      "rho": 0.744993326546657
+    },
+    {
+      "pos": "generous",
+      "neg": "stingy",
+      "source": "desc_inst",
+      "K": 3,
+      "rho": 0.7320484308052257
+    },
+    {
+      "pos": "generous",
+      "neg": "stingy",
+      "source": "desc_inst",
+      "K": 4,
+      "rho": 0.7290437478417715
+    },
+    {
+      "pos": "generous",
+      "neg": "stingy",
+      "source": "desc_inst",
+      "K": 6,
+      "rho": 0.7063779267658306
+    },
+    {
+      "pos": "generous",
+      "neg": "stingy",
+      "source": "desc_inst",
+      "K": 8,
+      "rho": 0.6809465383093751
+    },
+    {
+      "pos": "generous",
+      "neg": "stingy",
+      "source": "desc_inst",
+      "K": 12,
+      "rho": 0.5677014898443632
+    },
+    {
+      "pos": "generous",
+      "neg": "stingy",
+      "source": "desc_inst",
+      "K": 16,
+      "rho": 0.5178074124317955
+    },
+    {
+      "pos": "generous",
+      "neg": "stingy",
+      "source": "desc_inst",
+      "K": 24,
+      "rho": 0.4223223565085093
+    },
+    {
+      "pos": "generous",
+      "neg": "stingy",
+      "source": "desc_inst",
+      "K": 32,
+      "rho": 0.3583288686659467
+    },
+    {
+      "pos": "generous",
+      "neg": "stingy",
+      "source": "responses",
+      "K": 0,
+      "rho": NaN
+    },
+    {
+      "pos": "generous",
+      "neg": "stingy",
+      "source": "responses",
+      "K": 1,
+      "rho": NaN
+    },
+    {
+      "pos": "generous",
+      "neg": "stingy",
+      "source": "responses",
+      "K": 2,
+      "rho": NaN
+    },
+    {
+      "pos": "generous",
+      "neg": "stingy",
+      "source": "responses",
+      "K": 3,
+      "rho": NaN
+    },
+    {
+      "pos": "generous",
+      "neg": "stingy",
+      "source": "responses",
+      "K": 4,
+      "rho": NaN
+    },
+    {
+      "pos": "generous",
+      "neg": "stingy",
+      "source": "responses",
+      "K": 6,
+      "rho": NaN
+    },
+    {
+      "pos": "generous",
+      "neg": "stingy",
+      "source": "responses",
+      "K": 8,
+      "rho": NaN
+    },
+    {
+      "pos": "generous",
+      "neg": "stingy",
+      "source": "responses",
+      "K": 12,
+      "rho": NaN
+    },
+    {
+      "pos": "generous",
+      "neg": "stingy",
+      "source": "responses",
+      "K": 16,
+      "rho": NaN
+    },
+    {
+      "pos": "generous",
+      "neg": "stingy",
+      "source": "responses",
+      "K": 24,
+      "rho": NaN
+    },
+    {
+      "pos": "generous",
+      "neg": "stingy",
+      "source": "responses",
+      "K": 32,
+      "rho": NaN
+    },
+    {
+      "pos": "idealistic",
+      "neg": "pragmatic",
+      "source": "desc_inst",
+      "K": 0,
+      "rho": 0.4266926467951679
+    },
+    {
+      "pos": "idealistic",
+      "neg": "pragmatic",
+      "source": "desc_inst",
+      "K": 1,
+      "rho": 0.5321008461328468
+    },
+    {
+      "pos": "idealistic",
+      "neg": "pragmatic",
+      "source": "desc_inst",
+      "K": 2,
+      "rho": 0.5914606167578546
+    },
+    {
+      "pos": "idealistic",
+      "neg": "pragmatic",
+      "source": "desc_inst",
+      "K": 3,
+      "rho": 0.6084371728499987
+    },
+    {
+      "pos": "idealistic",
+      "neg": "pragmatic",
+      "source": "desc_inst",
+      "K": 4,
+      "rho": 0.6119724155824725
+    },
+    {
+      "pos": "idealistic",
+      "neg": "pragmatic",
+      "source": "desc_inst",
+      "K": 6,
+      "rho": 0.5974816158674651
+    },
+    {
+      "pos": "idealistic",
+      "neg": "pragmatic",
+      "source": "desc_inst",
+      "K": 8,
+      "rho": 0.5921530124518315
+    },
+    {
+      "pos": "idealistic",
+      "neg": "pragmatic",
+      "source": "desc_inst",
+      "K": 12,
+      "rho": 0.5975309966259503
+    },
+    {
+      "pos": "idealistic",
+      "neg": "pragmatic",
+      "source": "desc_inst",
+      "K": 16,
+      "rho": 0.5909219146402874
+    },
+    {
+      "pos": "idealistic",
+      "neg": "pragmatic",
+      "source": "desc_inst",
+      "K": 24,
+      "rho": 0.5499811669302881
+    },
+    {
+      "pos": "idealistic",
+      "neg": "pragmatic",
+      "source": "desc_inst",
+      "K": 32,
+      "rho": 0.5045281475199285
+    },
+    {
+      "pos": "idealistic",
+      "neg": "pragmatic",
+      "source": "responses",
+      "K": 0,
+      "rho": NaN
+    },
+    {
+      "pos": "idealistic",
+      "neg": "pragmatic",
+      "source": "responses",
+      "K": 1,
+      "rho": NaN
+    },
+    {
+      "pos": "idealistic",
+      "neg": "pragmatic",
+      "source": "responses",
+      "K": 2,
+      "rho": NaN
+    },
+    {
+      "pos": "idealistic",
+      "neg": "pragmatic",
+      "source": "responses",
+      "K": 3,
+      "rho": NaN
+    },
+    {
+      "pos": "idealistic",
+      "neg": "pragmatic",
+      "source": "responses",
+      "K": 4,
+      "rho": NaN
+    },
+    {
+      "pos": "idealistic",
+      "neg": "pragmatic",
+      "source": "responses",
+      "K": 6,
+      "rho": NaN
+    },
+    {
+      "pos": "idealistic",
+      "neg": "pragmatic",
+      "source": "responses",
+      "K": 8,
+      "rho": NaN
+    },
+    {
+      "pos": "idealistic",
+      "neg": "pragmatic",
+      "source": "responses",
+      "K": 12,
+      "rho": NaN
+    },
+    {
+      "pos": "idealistic",
+      "neg": "pragmatic",
+      "source": "responses",
+      "K": 16,
+      "rho": NaN
+    },
+    {
+      "pos": "idealistic",
+      "neg": "pragmatic",
+      "source": "responses",
+      "K": 24,
+      "rho": NaN
+    },
+    {
+      "pos": "idealistic",
+      "neg": "pragmatic",
+      "source": "responses",
+      "K": 32,
+      "rho": NaN
+    },
+    {
+      "pos": "individualistic",
+      "neg": "collectivistic",
+      "source": "desc_inst",
+      "K": 0,
+      "rho": 0.41863596054469593
+    },
+    {
+      "pos": "individualistic",
+      "neg": "collectivistic",
+      "source": "desc_inst",
+      "K": 1,
+      "rho": 0.4914433632072203
+    },
+    {
+      "pos": "individualistic",
+      "neg": "collectivistic",
+      "source": "desc_inst",
+      "K": 2,
+      "rho": 0.5457788312532904
+    },
+    {
+      "pos": "individualistic",
+      "neg": "collectivistic",
+      "source": "desc_inst",
+      "K": 3,
+      "rho": 0.5523982445832719
+    },
+    {
+      "pos": "individualistic",
+      "neg": "collectivistic",
+      "source": "desc_inst",
+      "K": 4,
+      "rho": 0.5542886463031819
+    },
+    {
+      "pos": "individualistic",
+      "neg": "collectivistic",
+      "source": "desc_inst",
+      "K": 6,
+      "rho": 0.5376543076247592
+    },
+    {
+      "pos": "individualistic",
+      "neg": "collectivistic",
+      "source": "desc_inst",
+      "K": 8,
+      "rho": 0.5204757427926232
+    },
+    {
+      "pos": "individualistic",
+      "neg": "collectivistic",
+      "source": "desc_inst",
+      "K": 12,
+      "rho": 0.4713352577692813
+    },
+    {
+      "pos": "individualistic",
+      "neg": "collectivistic",
+      "source": "desc_inst",
+      "K": 16,
+      "rho": 0.461344552586564
+    },
+    {
+      "pos": "individualistic",
+      "neg": "collectivistic",
+      "source": "desc_inst",
+      "K": 24,
+      "rho": 0.43064505598662195
+    },
+    {
+      "pos": "individualistic",
+      "neg": "collectivistic",
+      "source": "desc_inst",
+      "K": 32,
+      "rho": 0.41162795745302855
+    },
+    {
+      "pos": "individualistic",
+      "neg": "collectivistic",
+      "source": "responses",
+      "K": 0,
+      "rho": NaN
+    },
+    {
+      "pos": "individualistic",
+      "neg": "collectivistic",
+      "source": "responses",
+      "K": 1,
+      "rho": NaN
+    },
+    {
+      "pos": "individualistic",
+      "neg": "collectivistic",
+      "source": "responses",
+      "K": 2,
+      "rho": NaN
+    },
+    {
+      "pos": "individualistic",
+      "neg": "collectivistic",
+      "source": "responses",
+      "K": 3,
+      "rho": NaN
+    },
+    {
+      "pos": "individualistic",
+      "neg": "collectivistic",
+      "source": "responses",
+      "K": 4,
+      "rho": NaN
+    },
+    {
+      "pos": "individualistic",
+      "neg": "collectivistic",
+      "source": "responses",
+      "K": 6,
+      "rho": NaN
+    },
+    {
+      "pos": "individualistic",
+      "neg": "collectivistic",
+      "source": "responses",
+      "K": 8,
+      "rho": NaN
+    },
+    {
+      "pos": "individualistic",
+      "neg": "collectivistic",
+      "source": "responses",
+      "K": 12,
+      "rho": NaN
+    },
+    {
+      "pos": "individualistic",
+      "neg": "collectivistic",
+      "source": "responses",
+      "K": 16,
+      "rho": NaN
+    },
+    {
+      "pos": "individualistic",
+      "neg": "collectivistic",
+      "source": "responses",
+      "K": 24,
+      "rho": NaN
+    },
+    {
+      "pos": "individualistic",
+      "neg": "collectivistic",
+      "source": "responses",
+      "K": 32,
+      "rho": NaN
+    },
+    {
+      "pos": "introverted",
+      "neg": "extroverted",
+      "source": "desc_inst",
+      "K": 0,
+      "rho": 0.5638629871507815
+    },
+    {
+      "pos": "introverted",
+      "neg": "extroverted",
+      "source": "desc_inst",
+      "K": 1,
+      "rho": 0.5661537589433818
+    },
+    {
+      "pos": "introverted",
+      "neg": "extroverted",
+      "source": "desc_inst",
+      "K": 2,
+      "rho": 0.5765304795485576
+    },
+    {
+      "pos": "introverted",
+      "neg": "extroverted",
+      "source": "desc_inst",
+      "K": 3,
+      "rho": 0.5829815821948695
+    },
+    {
+      "pos": "introverted",
+      "neg": "extroverted",
+      "source": "desc_inst",
+      "K": 4,
+      "rho": 0.5836221317648055
+    },
+    {
+      "pos": "introverted",
+      "neg": "extroverted",
+      "source": "desc_inst",
+      "K": 6,
+      "rho": 0.6127642541863193
+    },
+    {
+      "pos": "introverted",
+      "neg": "extroverted",
+      "source": "desc_inst",
+      "K": 8,
+      "rho": 0.6066432806831561
+    },
+    {
+      "pos": "introverted",
+      "neg": "extroverted",
+      "source": "desc_inst",
+      "K": 12,
+      "rho": 0.6167030655834085
+    },
+    {
+      "pos": "introverted",
+      "neg": "extroverted",
+      "source": "desc_inst",
+      "K": 16,
+      "rho": 0.6043663864329853
+    },
+    {
+      "pos": "introverted",
+      "neg": "extroverted",
+      "source": "desc_inst",
+      "K": 24,
+      "rho": 0.5404115366879421
+    },
+    {
+      "pos": "introverted",
+      "neg": "extroverted",
+      "source": "desc_inst",
+      "K": 32,
+      "rho": 0.49079681412012693
+    },
+    {
+      "pos": "introverted",
+      "neg": "extroverted",
+      "source": "responses",
+      "K": 0,
+      "rho": NaN
+    },
+    {
+      "pos": "introverted",
+      "neg": "extroverted",
+      "source": "responses",
+      "K": 1,
+      "rho": NaN
+    },
+    {
+      "pos": "introverted",
+      "neg": "extroverted",
+      "source": "responses",
+      "K": 2,
+      "rho": NaN
+    },
+    {
+      "pos": "introverted",
+      "neg": "extroverted",
+      "source": "responses",
+      "K": 3,
+      "rho": NaN
+    },
+    {
+      "pos": "introverted",
+      "neg": "extroverted",
+      "source": "responses",
+      "K": 4,
+      "rho": NaN
+    },
+    {
+      "pos": "introverted",
+      "neg": "extroverted",
+      "source": "responses",
+      "K": 6,
+      "rho": NaN
+    },
+    {
+      "pos": "introverted",
+      "neg": "extroverted",
+      "source": "responses",
+      "K": 8,
+      "rho": NaN
+    },
+    {
+      "pos": "introverted",
+      "neg": "extroverted",
+      "source": "responses",
+      "K": 12,
+      "rho": NaN
+    },
+    {
+      "pos": "introverted",
+      "neg": "extroverted",
+      "source": "responses",
+      "K": 16,
+      "rho": NaN
+    },
+    {
+      "pos": "introverted",
+      "neg": "extroverted",
+      "source": "responses",
+      "K": 24,
+      "rho": NaN
+    },
+    {
+      "pos": "introverted",
+      "neg": "extroverted",
+      "source": "responses",
+      "K": 32,
+      "rho": NaN
+    },
+    {
+      "pos": "obedient",
+      "neg": "rebellious",
+      "source": "desc_inst",
+      "K": 0,
+      "rho": 0.6155728887325272
+    },
+    {
+      "pos": "obedient",
+      "neg": "rebellious",
+      "source": "desc_inst",
+      "K": 1,
+      "rho": 0.5737125343019813
+    },
+    {
+      "pos": "obedient",
+      "neg": "rebellious",
+      "source": "desc_inst",
+      "K": 2,
+      "rho": 0.6028888745687716
+    },
+    {
+      "pos": "obedient",
+      "neg": "rebellious",
+      "source": "desc_inst",
+      "K": 3,
+      "rho": 0.6042947896178228
+    },
+    {
+      "pos": "obedient",
+      "neg": "rebellious",
+      "source": "desc_inst",
+      "K": 4,
+      "rho": 0.6077605267578275
+    },
+    {
+      "pos": "obedient",
+      "neg": "rebellious",
+      "source": "desc_inst",
+      "K": 6,
+      "rho": 0.6248368203088314
+    },
+    {
+      "pos": "obedient",
+      "neg": "rebellious",
+      "source": "desc_inst",
+      "K": 8,
+      "rho": 0.6163837043091841
+    },
+    {
+      "pos": "obedient",
+      "neg": "rebellious",
+      "source": "desc_inst",
+      "K": 12,
+      "rho": 0.573393648185636
+    },
+    {
+      "pos": "obedient",
+      "neg": "rebellious",
+      "source": "desc_inst",
+      "K": 16,
+      "rho": 0.5296347866252259
+    },
+    {
+      "pos": "obedient",
+      "neg": "rebellious",
+      "source": "desc_inst",
+      "K": 24,
+      "rho": 0.4825377755023743
+    },
+    {
+      "pos": "obedient",
+      "neg": "rebellious",
+      "source": "desc_inst",
+      "K": 32,
+      "rho": 0.446783369600048
+    },
+    {
+      "pos": "obedient",
+      "neg": "rebellious",
+      "source": "responses",
+      "K": 0,
+      "rho": NaN
+    },
+    {
+      "pos": "obedient",
+      "neg": "rebellious",
+      "source": "responses",
+      "K": 1,
+      "rho": NaN
+    },
+    {
+      "pos": "obedient",
+      "neg": "rebellious",
+      "source": "responses",
+      "K": 2,
+      "rho": NaN
+    },
+    {
+      "pos": "obedient",
+      "neg": "rebellious",
+      "source": "responses",
+      "K": 3,
+      "rho": NaN
+    },
+    {
+      "pos": "obedient",
+      "neg": "rebellious",
+      "source": "responses",
+      "K": 4,
+      "rho": NaN
+    },
+    {
+      "pos": "obedient",
+      "neg": "rebellious",
+      "source": "responses",
+      "K": 6,
+      "rho": NaN
+    },
+    {
+      "pos": "obedient",
+      "neg": "rebellious",
+      "source": "responses",
+      "K": 8,
+      "rho": NaN
+    },
+    {
+      "pos": "obedient",
+      "neg": "rebellious",
+      "source": "responses",
+      "K": 12,
+      "rho": NaN
+    },
+    {
+      "pos": "obedient",
+      "neg": "rebellious",
+      "source": "responses",
+      "K": 16,
+      "rho": NaN
+    },
+    {
+      "pos": "obedient",
+      "neg": "rebellious",
+      "source": "responses",
+      "K": 24,
+      "rho": NaN
+    },
+    {
+      "pos": "obedient",
+      "neg": "rebellious",
+      "source": "responses",
+      "K": 32,
+      "rho": NaN
+    },
+    {
+      "pos": "passionate",
+      "neg": "dispassionate",
+      "source": "desc_inst",
+      "K": 0,
+      "rho": 0.6934000102432607
+    },
+    {
+      "pos": "passionate",
+      "neg": "dispassionate",
+      "source": "desc_inst",
+      "K": 1,
+      "rho": 0.6711425325257218
+    },
+    {
+      "pos": "passionate",
+      "neg": "dispassionate",
+      "source": "desc_inst",
+      "K": 2,
+      "rho": 0.691719921281393
+    },
+    {
+      "pos": "passionate",
+      "neg": "dispassionate",
+      "source": "desc_inst",
+      "K": 3,
+      "rho": 0.6865740904562952
+    },
+    {
+      "pos": "passionate",
+      "neg": "dispassionate",
+      "source": "desc_inst",
+      "K": 4,
+      "rho": 0.6894690194257981
+    },
+    {
+      "pos": "passionate",
+      "neg": "dispassionate",
+      "source": "desc_inst",
+      "K": 6,
+      "rho": 0.6976871059968541
+    },
+    {
+      "pos": "passionate",
+      "neg": "dispassionate",
+      "source": "desc_inst",
+      "K": 8,
+      "rho": 0.6855389639441879
+    },
+    {
+      "pos": "passionate",
+      "neg": "dispassionate",
+      "source": "desc_inst",
+      "K": 12,
+      "rho": 0.6583564914216298
+    },
+    {
+      "pos": "passionate",
+      "neg": "dispassionate",
+      "source": "desc_inst",
+      "K": 16,
+      "rho": 0.6178717369103036
+    },
+    {
+      "pos": "passionate",
+      "neg": "dispassionate",
+      "source": "desc_inst",
+      "K": 24,
+      "rho": 0.5167416763926045
+    },
+    {
+      "pos": "passionate",
+      "neg": "dispassionate",
+      "source": "desc_inst",
+      "K": 32,
+      "rho": 0.4165455648501373
+    },
+    {
+      "pos": "passionate",
+      "neg": "dispassionate",
+      "source": "responses",
+      "K": 0,
+      "rho": NaN
+    },
+    {
+      "pos": "passionate",
+      "neg": "dispassionate",
+      "source": "responses",
+      "K": 1,
+      "rho": NaN
+    },
+    {
+      "pos": "passionate",
+      "neg": "dispassionate",
+      "source": "responses",
+      "K": 2,
+      "rho": NaN
+    },
+    {
+      "pos": "passionate",
+      "neg": "dispassionate",
+      "source": "responses",
+      "K": 3,
+      "rho": NaN
+    },
+    {
+      "pos": "passionate",
+      "neg": "dispassionate",
+      "source": "responses",
+      "K": 4,
+      "rho": NaN
+    },
+    {
+      "pos": "passionate",
+      "neg": "dispassionate",
+      "source": "responses",
+      "K": 6,
+      "rho": NaN
+    },
+    {
+      "pos": "passionate",
+      "neg": "dispassionate",
+      "source": "responses",
+      "K": 8,
+      "rho": NaN
+    },
+    {
+      "pos": "passionate",
+      "neg": "dispassionate",
+      "source": "responses",
+      "K": 12,
+      "rho": NaN
+    },
+    {
+      "pos": "passionate",
+      "neg": "dispassionate",
+      "source": "responses",
+      "K": 16,
+      "rho": NaN
+    },
+    {
+      "pos": "passionate",
+      "neg": "dispassionate",
+      "source": "responses",
+      "K": 24,
+      "rho": NaN
+    },
+    {
+      "pos": "passionate",
+      "neg": "dispassionate",
+      "source": "responses",
+      "K": 32,
+      "rho": NaN
+    },
+    {
+      "pos": "playful",
+      "neg": "serious",
+      "source": "desc_inst",
+      "K": 0,
+      "rho": 0.5991324979884125
+    },
+    {
+      "pos": "playful",
+      "neg": "serious",
+      "source": "desc_inst",
+      "K": 1,
+      "rho": 0.6632355262163343
+    },
+    {
+      "pos": "playful",
+      "neg": "serious",
+      "source": "desc_inst",
+      "K": 2,
+      "rho": 0.7399120800458225
+    },
+    {
+      "pos": "playful",
+      "neg": "serious",
+      "source": "desc_inst",
+      "K": 3,
+      "rho": 0.745427766901773
+    },
+    {
+      "pos": "playful",
+      "neg": "serious",
+      "source": "desc_inst",
+      "K": 4,
+      "rho": 0.7479149347484443
+    },
+    {
+      "pos": "playful",
+      "neg": "serious",
+      "source": "desc_inst",
+      "K": 6,
+      "rho": 0.721551401077102
+    },
+    {
+      "pos": "playful",
+      "neg": "serious",
+      "source": "desc_inst",
+      "K": 8,
+      "rho": 0.6878076520896983
+    },
+    {
+      "pos": "playful",
+      "neg": "serious",
+      "source": "desc_inst",
+      "K": 12,
+      "rho": 0.6227173173672896
+    },
+    {
+      "pos": "playful",
+      "neg": "serious",
+      "source": "desc_inst",
+      "K": 16,
+      "rho": 0.5862321084998279
+    },
+    {
+      "pos": "playful",
+      "neg": "serious",
+      "source": "desc_inst",
+      "K": 24,
+      "rho": 0.5160133520265225
+    },
+    {
+      "pos": "playful",
+      "neg": "serious",
+      "source": "desc_inst",
+      "K": 32,
+      "rho": 0.4248810208490386
+    },
+    {
+      "pos": "playful",
+      "neg": "serious",
+      "source": "responses",
+      "K": 0,
+      "rho": NaN
+    },
+    {
+      "pos": "playful",
+      "neg": "serious",
+      "source": "responses",
+      "K": 1,
+      "rho": NaN
+    },
+    {
+      "pos": "playful",
+      "neg": "serious",
+      "source": "responses",
+      "K": 2,
+      "rho": NaN
+    },
+    {
+      "pos": "playful",
+      "neg": "serious",
+      "source": "responses",
+      "K": 3,
+      "rho": NaN
+    },
+    {
+      "pos": "playful",
+      "neg": "serious",
+      "source": "responses",
+      "K": 4,
+      "rho": NaN
+    },
+    {
+      "pos": "playful",
+      "neg": "serious",
+      "source": "responses",
+      "K": 6,
+      "rho": NaN
+    },
+    {
+      "pos": "playful",
+      "neg": "serious",
+      "source": "responses",
+      "K": 8,
+      "rho": NaN
+    },
+    {
+      "pos": "playful",
+      "neg": "serious",
+      "source": "responses",
+      "K": 12,
+      "rho": NaN
+    },
+    {
+      "pos": "playful",
+      "neg": "serious",
+      "source": "responses",
+      "K": 16,
+      "rho": NaN
+    },
+    {
+      "pos": "playful",
+      "neg": "serious",
+      "source": "responses",
+      "K": 24,
+      "rho": NaN
+    },
+    {
+      "pos": "playful",
+      "neg": "serious",
+      "source": "responses",
+      "K": 32,
+      "rho": NaN
+    },
+    {
+      "pos": "practical",
+      "neg": "theoretical",
+      "source": "desc_inst",
+      "K": 0,
+      "rho": 0.7097142652275958
+    },
+    {
+      "pos": "practical",
+      "neg": "theoretical",
+      "source": "desc_inst",
+      "K": 1,
+      "rho": 0.7005983497653655
+    },
+    {
+      "pos": "practical",
+      "neg": "theoretical",
+      "source": "desc_inst",
+      "K": 2,
+      "rho": 0.7238092122046388
+    },
+    {
+      "pos": "practical",
+      "neg": "theoretical",
+      "source": "desc_inst",
+      "K": 3,
+      "rho": 0.7255343757428793
+    },
+    {
+      "pos": "practical",
+      "neg": "theoretical",
+      "source": "desc_inst",
+      "K": 4,
+      "rho": 0.7260995873779572
+    },
+    {
+      "pos": "practical",
+      "neg": "theoretical",
+      "source": "desc_inst",
+      "K": 6,
+      "rho": 0.7137455374668074
+    },
+    {
+      "pos": "practical",
+      "neg": "theoretical",
+      "source": "desc_inst",
+      "K": 8,
+      "rho": 0.6796511768857739
+    },
+    {
+      "pos": "practical",
+      "neg": "theoretical",
+      "source": "desc_inst",
+      "K": 12,
+      "rho": 0.6351013864204698
+    },
+    {
+      "pos": "practical",
+      "neg": "theoretical",
+      "source": "desc_inst",
+      "K": 16,
+      "rho": 0.5907375552676268
+    },
+    {
+      "pos": "practical",
+      "neg": "theoretical",
+      "source": "desc_inst",
+      "K": 24,
+      "rho": 0.46076524174299266
+    },
+    {
+      "pos": "practical",
+      "neg": "theoretical",
+      "source": "desc_inst",
+      "K": 32,
+      "rho": 0.39864675462139626
+    },
+    {
+      "pos": "practical",
+      "neg": "theoretical",
+      "source": "responses",
+      "K": 0,
+      "rho": NaN
+    },
+    {
+      "pos": "practical",
+      "neg": "theoretical",
+      "source": "responses",
+      "K": 1,
+      "rho": NaN
+    },
+    {
+      "pos": "practical",
+      "neg": "theoretical",
+      "source": "responses",
+      "K": 2,
+      "rho": NaN
+    },
+    {
+      "pos": "practical",
+      "neg": "theoretical",
+      "source": "responses",
+      "K": 3,
+      "rho": NaN
+    },
+    {
+      "pos": "practical",
+      "neg": "theoretical",
+      "source": "responses",
+      "K": 4,
+      "rho": NaN
+    },
+    {
+      "pos": "practical",
+      "neg": "theoretical",
+      "source": "responses",
+      "K": 6,
+      "rho": NaN
+    },
+    {
+      "pos": "practical",
+      "neg": "theoretical",
+      "source": "responses",
+      "K": 8,
+      "rho": NaN
+    },
+    {
+      "pos": "practical",
+      "neg": "theoretical",
+      "source": "responses",
+      "K": 12,
+      "rho": NaN
+    },
+    {
+      "pos": "practical",
+      "neg": "theoretical",
+      "source": "responses",
+      "K": 16,
+      "rho": NaN
+    },
+    {
+      "pos": "practical",
+      "neg": "theoretical",
+      "source": "responses",
+      "K": 24,
+      "rho": NaN
+    },
+    {
+      "pos": "practical",
+      "neg": "theoretical",
+      "source": "responses",
+      "K": 32,
+      "rho": NaN
+    },
+    {
+      "pos": "quantitative",
+      "neg": "qualitative",
+      "source": "desc_inst",
+      "K": 0,
+      "rho": 0.6974658953962469
+    },
+    {
+      "pos": "quantitative",
+      "neg": "qualitative",
+      "source": "desc_inst",
+      "K": 1,
+      "rho": 0.6464776429093584
+    },
+    {
+      "pos": "quantitative",
+      "neg": "qualitative",
+      "source": "desc_inst",
+      "K": 2,
+      "rho": 0.6521160724410457
+    },
+    {
+      "pos": "quantitative",
+      "neg": "qualitative",
+      "source": "desc_inst",
+      "K": 3,
+      "rho": 0.6421318877286996
+    },
+    {
+      "pos": "quantitative",
+      "neg": "qualitative",
+      "source": "desc_inst",
+      "K": 4,
+      "rho": 0.6385865799896668
+    },
+    {
+      "pos": "quantitative",
+      "neg": "qualitative",
+      "source": "desc_inst",
+      "K": 6,
+      "rho": 0.6027183718665293
+    },
+    {
+      "pos": "quantitative",
+      "neg": "qualitative",
+      "source": "desc_inst",
+      "K": 8,
+      "rho": 0.5827861864225028
+    },
+    {
+      "pos": "quantitative",
+      "neg": "qualitative",
+      "source": "desc_inst",
+      "K": 12,
+      "rho": 0.5121903536030783
+    },
+    {
+      "pos": "quantitative",
+      "neg": "qualitative",
+      "source": "desc_inst",
+      "K": 16,
+      "rho": 0.4714535613300057
+    },
+    {
+      "pos": "quantitative",
+      "neg": "qualitative",
+      "source": "desc_inst",
+      "K": 24,
+      "rho": 0.3766745163652254
+    },
+    {
+      "pos": "quantitative",
+      "neg": "qualitative",
+      "source": "desc_inst",
+      "K": 32,
+      "rho": 0.3166362956976645
+    },
+    {
+      "pos": "quantitative",
+      "neg": "qualitative",
+      "source": "responses",
+      "K": 0,
+      "rho": NaN
+    },
+    {
+      "pos": "quantitative",
+      "neg": "qualitative",
+      "source": "responses",
+      "K": 1,
+      "rho": NaN
+    },
+    {
+      "pos": "quantitative",
+      "neg": "qualitative",
+      "source": "responses",
+      "K": 2,
+      "rho": NaN
+    },
+    {
+      "pos": "quantitative",
+      "neg": "qualitative",
+      "source": "responses",
+      "K": 3,
+      "rho": NaN
+    },
+    {
+      "pos": "quantitative",
+      "neg": "qualitative",
+      "source": "responses",
+      "K": 4,
+      "rho": NaN
+    },
+    {
+      "pos": "quantitative",
+      "neg": "qualitative",
+      "source": "responses",
+      "K": 6,
+      "rho": NaN
+    },
+    {
+      "pos": "quantitative",
+      "neg": "qualitative",
+      "source": "responses",
+      "K": 8,
+      "rho": NaN
+    },
+    {
+      "pos": "quantitative",
+      "neg": "qualitative",
+      "source": "responses",
+      "K": 12,
+      "rho": NaN
+    },
+    {
+      "pos": "quantitative",
+      "neg": "qualitative",
+      "source": "responses",
+      "K": 16,
+      "rho": NaN
+    },
+    {
+      "pos": "quantitative",
+      "neg": "qualitative",
+      "source": "responses",
+      "K": 24,
+      "rho": NaN
+    },
+    {
+      "pos": "quantitative",
+      "neg": "qualitative",
+      "source": "responses",
+      "K": 32,
+      "rho": NaN
+    },
+    {
+      "pos": "reductionist",
+      "neg": "holistic",
+      "source": "desc_inst",
+      "K": 0,
+      "rho": 0.506897965676084
+    },
+    {
+      "pos": "reductionist",
+      "neg": "holistic",
+      "source": "desc_inst",
+      "K": 1,
+      "rho": 0.5954264913275964
+    },
+    {
+      "pos": "reductionist",
+      "neg": "holistic",
+      "source": "desc_inst",
+      "K": 2,
+      "rho": 0.5757141606804782
+    },
+    {
+      "pos": "reductionist",
+      "neg": "holistic",
+      "source": "desc_inst",
+      "K": 3,
+      "rho": 0.5729423250456825
+    },
+    {
+      "pos": "reductionist",
+      "neg": "holistic",
+      "source": "desc_inst",
+      "K": 4,
+      "rho": 0.5726894847416518
+    },
+    {
+      "pos": "reductionist",
+      "neg": "holistic",
+      "source": "desc_inst",
+      "K": 6,
+      "rho": 0.5147493156559048
+    },
+    {
+      "pos": "reductionist",
+      "neg": "holistic",
+      "source": "desc_inst",
+      "K": 8,
+      "rho": 0.49927632601097227
+    },
+    {
+      "pos": "reductionist",
+      "neg": "holistic",
+      "source": "desc_inst",
+      "K": 12,
+      "rho": 0.4685732602695522
+    },
+    {
+      "pos": "reductionist",
+      "neg": "holistic",
+      "source": "desc_inst",
+      "K": 16,
+      "rho": 0.4474843870742004
+    },
+    {
+      "pos": "reductionist",
+      "neg": "holistic",
+      "source": "desc_inst",
+      "K": 24,
+      "rho": 0.4099756220483434
+    },
+    {
+      "pos": "reductionist",
+      "neg": "holistic",
+      "source": "desc_inst",
+      "K": 32,
+      "rho": 0.3884671325670489
+    },
+    {
+      "pos": "reductionist",
+      "neg": "holistic",
+      "source": "responses",
+      "K": 0,
+      "rho": NaN
+    },
+    {
+      "pos": "reductionist",
+      "neg": "holistic",
+      "source": "responses",
+      "K": 1,
+      "rho": NaN
+    },
+    {
+      "pos": "reductionist",
+      "neg": "holistic",
+      "source": "responses",
+      "K": 2,
+      "rho": NaN
+    },
+    {
+      "pos": "reductionist",
+      "neg": "holistic",
+      "source": "responses",
+      "K": 3,
+      "rho": NaN
+    },
+    {
+      "pos": "reductionist",
+      "neg": "holistic",
+      "source": "responses",
+      "K": 4,
+      "rho": NaN
+    },
+    {
+      "pos": "reductionist",
+      "neg": "holistic",
+      "source": "responses",
+      "K": 6,
+      "rho": NaN
+    },
+    {
+      "pos": "reductionist",
+      "neg": "holistic",
+      "source": "responses",
+      "K": 8,
+      "rho": NaN
+    },
+    {
+      "pos": "reductionist",
+      "neg": "holistic",
+      "source": "responses",
+      "K": 12,
+      "rho": NaN
+    },
+    {
+      "pos": "reductionist",
+      "neg": "holistic",
+      "source": "responses",
+      "K": 16,
+      "rho": NaN
+    },
+    {
+      "pos": "reductionist",
+      "neg": "holistic",
+      "source": "responses",
+      "K": 24,
+      "rho": NaN
+    },
+    {
+      "pos": "reductionist",
+      "neg": "holistic",
+      "source": "responses",
+      "K": 32,
+      "rho": NaN
+    },
+    {
+      "pos": "trustworthy",
+      "neg": "untrustworthy",
+      "source": "desc_inst",
+      "K": 0,
+      "rho": 0.7929058884061404
+    },
+    {
+      "pos": "trustworthy",
+      "neg": "untrustworthy",
+      "source": "desc_inst",
+      "K": 1,
+      "rho": 0.7690780069498053
+    },
+    {
+      "pos": "trustworthy",
+      "neg": "untrustworthy",
+      "source": "desc_inst",
+      "K": 2,
+      "rho": 0.6812347800129501
+    },
+    {
+      "pos": "trustworthy",
+      "neg": "untrustworthy",
+      "source": "desc_inst",
+      "K": 3,
+      "rho": 0.635598945257266
+    },
+    {
+      "pos": "trustworthy",
+      "neg": "untrustworthy",
+      "source": "desc_inst",
+      "K": 4,
+      "rho": 0.6215116968889998
+    },
+    {
+      "pos": "trustworthy",
+      "neg": "untrustworthy",
+      "source": "desc_inst",
+      "K": 6,
+      "rho": 0.599997100465119
+    },
+    {
+      "pos": "trustworthy",
+      "neg": "untrustworthy",
+      "source": "desc_inst",
+      "K": 8,
+      "rho": 0.5697802416370721
+    },
+    {
+      "pos": "trustworthy",
+      "neg": "untrustworthy",
+      "source": "desc_inst",
+      "K": 12,
+      "rho": 0.5493548726231325
+    },
+    {
+      "pos": "trustworthy",
+      "neg": "untrustworthy",
+      "source": "desc_inst",
+      "K": 16,
+      "rho": 0.5201309015381328
+    },
+    {
+      "pos": "trustworthy",
+      "neg": "untrustworthy",
+      "source": "desc_inst",
+      "K": 24,
+      "rho": 0.42447179540249674
+    },
+    {
+      "pos": "trustworthy",
+      "neg": "untrustworthy",
+      "source": "desc_inst",
+      "K": 32,
+      "rho": 0.34137773205156063
+    },
+    {
+      "pos": "trustworthy",
+      "neg": "untrustworthy",
+      "source": "responses",
+      "K": 0,
+      "rho": NaN
+    },
+    {
+      "pos": "trustworthy",
+      "neg": "untrustworthy",
+      "source": "responses",
+      "K": 1,
+      "rho": NaN
+    },
+    {
+      "pos": "trustworthy",
+      "neg": "untrustworthy",
+      "source": "responses",
+      "K": 2,
+      "rho": NaN
+    },
+    {
+      "pos": "trustworthy",
+      "neg": "untrustworthy",
+      "source": "responses",
+      "K": 3,
+      "rho": NaN
+    },
+    {
+      "pos": "trustworthy",
+      "neg": "untrustworthy",
+      "source": "responses",
+      "K": 4,
+      "rho": NaN
+    },
+    {
+      "pos": "trustworthy",
+      "neg": "untrustworthy",
+      "source": "responses",
+      "K": 6,
+      "rho": NaN
+    },
+    {
+      "pos": "trustworthy",
+      "neg": "untrustworthy",
+      "source": "responses",
+      "K": 8,
+      "rho": NaN
+    },
+    {
+      "pos": "trustworthy",
+      "neg": "untrustworthy",
+      "source": "responses",
+      "K": 12,
+      "rho": NaN
+    },
+    {
+      "pos": "trustworthy",
+      "neg": "untrustworthy",
+      "source": "responses",
+      "K": 16,
+      "rho": NaN
+    },
+    {
+      "pos": "trustworthy",
+      "neg": "untrustworthy",
+      "source": "responses",
+      "K": 24,
+      "rho": NaN
+    },
+    {
+      "pos": "trustworthy",
+      "neg": "untrustworthy",
+      "source": "responses",
+      "K": 32,
+      "rho": NaN
+    },
+    {
+      "pos": "decisive",
+      "neg": "indecisive",
+      "source": "desc_inst",
+      "K": 0,
+      "rho": 0.6475847328723288
+    },
+    {
+      "pos": "decisive",
+      "neg": "indecisive",
+      "source": "desc_inst",
+      "K": 1,
+      "rho": 0.706999909227708
+    },
+    {
+      "pos": "decisive",
+      "neg": "indecisive",
+      "source": "desc_inst",
+      "K": 2,
+      "rho": 0.7297370085272736
+    },
+    {
+      "pos": "decisive",
+      "neg": "indecisive",
+      "source": "desc_inst",
+      "K": 3,
+      "rho": 0.73300181169535
+    },
+    {
+      "pos": "decisive",
+      "neg": "indecisive",
+      "source": "desc_inst",
+      "K": 4,
+      "rho": 0.7333358224241235
+    },
+    {
+      "pos": "decisive",
+      "neg": "indecisive",
+      "source": "desc_inst",
+      "K": 6,
+      "rho": 0.6987596114908722
+    },
+    {
+      "pos": "decisive",
+      "neg": "indecisive",
+      "source": "desc_inst",
+      "K": 8,
+      "rho": 0.70018935687462
+    },
+    {
+      "pos": "decisive",
+      "neg": "indecisive",
+      "source": "desc_inst",
+      "K": 12,
+      "rho": 0.6815995036609834
+    },
+    {
+      "pos": "decisive",
+      "neg": "indecisive",
+      "source": "desc_inst",
+      "K": 16,
+      "rho": 0.6495427368168717
+    },
+    {
+      "pos": "decisive",
+      "neg": "indecisive",
+      "source": "desc_inst",
+      "K": 24,
+      "rho": 0.5585178734979609
+    },
+    {
+      "pos": "decisive",
+      "neg": "indecisive",
+      "source": "desc_inst",
+      "K": 32,
+      "rho": 0.4943442385363537
+    },
+    {
+      "pos": "decisive",
+      "neg": "indecisive",
+      "source": "responses",
+      "K": 0,
+      "rho": NaN
+    },
+    {
+      "pos": "decisive",
+      "neg": "indecisive",
+      "source": "responses",
+      "K": 1,
+      "rho": NaN
+    },
+    {
+      "pos": "decisive",
+      "neg": "indecisive",
+      "source": "responses",
+      "K": 2,
+      "rho": NaN
+    },
+    {
+      "pos": "decisive",
+      "neg": "indecisive",
+      "source": "responses",
+      "K": 3,
+      "rho": NaN
+    },
+    {
+      "pos": "decisive",
+      "neg": "indecisive",
+      "source": "responses",
+      "K": 4,
+      "rho": NaN
+    },
+    {
+      "pos": "decisive",
+      "neg": "indecisive",
+      "source": "responses",
+      "K": 6,
+      "rho": NaN
+    },
+    {
+      "pos": "decisive",
+      "neg": "indecisive",
+      "source": "responses",
+      "K": 8,
+      "rho": NaN
+    },
+    {
+      "pos": "decisive",
+      "neg": "indecisive",
+      "source": "responses",
+      "K": 12,
+      "rho": NaN
+    },
+    {
+      "pos": "decisive",
+      "neg": "indecisive",
+      "source": "responses",
+      "K": 16,
+      "rho": NaN
+    },
+    {
+      "pos": "decisive",
+      "neg": "indecisive",
+      "source": "responses",
+      "K": 24,
+      "rho": NaN
+    },
+    {
+      "pos": "decisive",
+      "neg": "indecisive",
+      "source": "responses",
+      "K": 32,
+      "rho": NaN
+    },
+    {
+      "pos": "angel",
+      "neg": "demon",
+      "source": "desc_inst",
+      "K": 0,
+      "rho": 0.7607754345400719
+    },
+    {
+      "pos": "angel",
+      "neg": "demon",
+      "source": "desc_inst",
+      "K": 1,
+      "rho": 0.812190123682888
+    },
+    {
+      "pos": "angel",
+      "neg": "demon",
+      "source": "desc_inst",
+      "K": 2,
+      "rho": 0.7865498154568321
+    },
+    {
+      "pos": "angel",
+      "neg": "demon",
+      "source": "desc_inst",
+      "K": 3,
+      "rho": 0.7604501139805274
+    },
+    {
+      "pos": "angel",
+      "neg": "demon",
+      "source": "desc_inst",
+      "K": 4,
+      "rho": 0.7503764092224698
+    },
+    {
+      "pos": "angel",
+      "neg": "demon",
+      "source": "desc_inst",
+      "K": 6,
+      "rho": 0.7105736036591971
+    },
+    {
+      "pos": "angel",
+      "neg": "demon",
+      "source": "desc_inst",
+      "K": 8,
+      "rho": 0.6803738443630377
+    },
+    {
+      "pos": "angel",
+      "neg": "demon",
+      "source": "desc_inst",
+      "K": 12,
+      "rho": 0.5941189657324418
+    },
+    {
+      "pos": "angel",
+      "neg": "demon",
+      "source": "desc_inst",
+      "K": 16,
+      "rho": 0.5103160891873503
+    },
+    {
+      "pos": "angel",
+      "neg": "demon",
+      "source": "desc_inst",
+      "K": 24,
+      "rho": 0.37134621876190743
+    },
+    {
+      "pos": "angel",
+      "neg": "demon",
+      "source": "desc_inst",
+      "K": 32,
+      "rho": 0.2912310595743669
+    },
+    {
+      "pos": "angel",
+      "neg": "demon",
+      "source": "responses",
+      "K": 0,
+      "rho": NaN
+    },
+    {
+      "pos": "angel",
+      "neg": "demon",
+      "source": "responses",
+      "K": 1,
+      "rho": NaN
+    },
+    {
+      "pos": "angel",
+      "neg": "demon",
+      "source": "responses",
+      "K": 2,
+      "rho": NaN
+    },
+    {
+      "pos": "angel",
+      "neg": "demon",
+      "source": "responses",
+      "K": 3,
+      "rho": NaN
+    },
+    {
+      "pos": "angel",
+      "neg": "demon",
+      "source": "responses",
+      "K": 4,
+      "rho": NaN
+    },
+    {
+      "pos": "angel",
+      "neg": "demon",
+      "source": "responses",
+      "K": 6,
+      "rho": NaN
+    },
+    {
+      "pos": "angel",
+      "neg": "demon",
+      "source": "responses",
+      "K": 8,
+      "rho": NaN
+    },
+    {
+      "pos": "angel",
+      "neg": "demon",
+      "source": "responses",
+      "K": 12,
+      "rho": NaN
+    },
+    {
+      "pos": "angel",
+      "neg": "demon",
+      "source": "responses",
+      "K": 16,
+      "rho": NaN
+    },
+    {
+      "pos": "angel",
+      "neg": "demon",
+      "source": "responses",
+      "K": 24,
+      "rho": NaN
+    },
+    {
+      "pos": "angel",
+      "neg": "demon",
+      "source": "responses",
+      "K": 32,
+      "rho": NaN
+    }
+  ],
+  "_provenance": {
+    "schema_version": "1.0",
+    "produced_by": {
+      "cmd": "uv run python -m results_analysis.whitening_k_sweep --slot 7 --pairs pair_list_di.json",
+      "git_sha": "06085c6+dirty",
+      "author": "Roger Dearnaley",
+      "title": "whitening_k_sweep slot=7 pairs=pair_list_di.json"
+    },
+    "produced_at": "2026-05-09T18:09:37+00:00",
+    "inputs": [
+      {
+        "dep_key": "traits_vectors",
+        "path": "runpod_workspace/qwen/qwen-3-32b Roger 8slot/traits/vectors",
+        "fingerprint": "v1:qwen-3-32b Roger 8slot@0e9de98533fd",
+        "kind": "subtree",
+        "dataset_id": "qwen-3-32b Roger 8slot",
+        "last_modified_at": "2026-05-04T02:28:22+00:00",
+        "extras": {
+          "slot": "7",
+          "layer": "25"
+        }
+      },
+      {
+        "dep_key": "roles_vectors",
+        "path": "runpod_workspace/qwen/qwen-3-32b Roger 8slot/roles/vectors",
+        "fingerprint": "v1:qwen-3-32b Roger 8slot@f3059843e174",
+        "kind": "subtree",
+        "dataset_id": "qwen-3-32b Roger 8slot",
+        "last_modified_at": "2026-05-02T16:21:27+00:00",
+        "extras": {
+          "slot": "7",
+          "layer": "25"
+        }
+      },
+      {
+        "dep_key": "pairs_json",
+        "path": "roger/axis_judge_experiments/pair_list_di.json",
+        "fingerprint": "v1:2026-05-09T17:37:10+00:00@5902",
+        "kind": "file",
+        "dataset_id": null,
+        "last_modified_at": "2026-05-09T17:37:10+00:00",
+        "extras": {}
+      },
+      {
+        "dep_key": "judge_helpful_vs_unhelpful_descriptions_gpt",
+        "path": "roger/axis_judge_experiments/helpful_vs_unhelpful/gpt/scores_descriptions.json",
+        "fingerprint": "v1:2026-05-05T01:01:00+00:00@10320",
+        "kind": "file",
+        "dataset_id": null,
+        "last_modified_at": "2026-05-05T01:01:00+00:00",
+        "extras": {}
+      },
+      {
+        "dep_key": "judge_helpful_vs_unhelpful_instructions_gpt",
+        "path": "roger/axis_judge_experiments/helpful_vs_unhelpful/gpt/scores_instructions.json",
+        "fingerprint": "v1:2026-05-05T01:02:16+00:00@10329",
+        "kind": "file",
+        "dataset_id": null,
+        "last_modified_at": "2026-05-05T01:02:16+00:00",
+        "extras": {}
+      },
+      {
+        "dep_key": "judge_helpful_vs_unhelpful_descriptions_sonnet",
+        "path": "roger/axis_judge_experiments/helpful_vs_unhelpful/sonnet/scores_descriptions.json",
+        "fingerprint": "v1:2026-05-05T04:23:38+00:00@10313",
+        "kind": "file",
+        "dataset_id": null,
+        "last_modified_at": "2026-05-05T04:23:38+00:00",
+        "extras": {}
+      },
+      {
+        "dep_key": "judge_helpful_vs_unhelpful_instructions_sonnet",
+        "path": "roger/axis_judge_experiments/helpful_vs_unhelpful/sonnet/scores_instructions.json",
+        "fingerprint": "v1:2026-05-05T04:26:13+00:00@10346",
+        "kind": "file",
+        "dataset_id": null,
+        "last_modified_at": "2026-05-05T04:26:13+00:00",
+        "extras": {}
+      },
+      {
+        "dep_key": "judge_helpful_vs_unhelpful_responses_traits",
+        "path": "roger/axis_judge_experiments/helpful_vs_unhelpful/gpt_responses_traits_b10/scores_responses.json",
+        "fingerprint": "v1:2026-05-09T03:50:45+00:00@4062394",
+        "kind": "file",
+        "dataset_id": null,
+        "last_modified_at": "2026-05-09T03:50:45+00:00",
+        "extras": {}
+      },
+      {
+        "dep_key": "judge_helpful_vs_unhelpful_responses_roles",
+        "path": "roger/axis_judge_experiments/helpful_vs_unhelpful/gpt_responses_roles_b10/scores_responses.json",
+        "fingerprint": "v1:2026-05-09T05:48:20+00:00@3407034",
+        "kind": "file",
+        "dataset_id": null,
+        "last_modified_at": "2026-05-09T05:48:20+00:00",
+        "extras": {}
+      },
+      {
+        "dep_key": "judge_harmless_vs_harmful_descriptions_gpt",
+        "path": "roger/axis_judge_experiments/harmless_vs_harmful/gpt/scores_descriptions.json",
+        "fingerprint": "v1:2026-05-05T00:30:24+00:00@10326",
+        "kind": "file",
+        "dataset_id": null,
+        "last_modified_at": "2026-05-05T00:30:24+00:00",
+        "extras": {}
+      },
+      {
+        "dep_key": "judge_harmless_vs_harmful_instructions_gpt",
+        "path": "roger/axis_judge_experiments/harmless_vs_harmful/gpt/scores_instructions.json",
+        "fingerprint": "v1:2026-05-05T00:30:29+00:00@10314",
+        "kind": "file",
+        "dataset_id": null,
+        "last_modified_at": "2026-05-05T00:30:29+00:00",
+        "extras": {}
+      },
+      {
+        "dep_key": "judge_harmless_vs_harmful_descriptions_sonnet",
+        "path": "roger/axis_judge_experiments/harmless_vs_harmful/sonnet/scores_descriptions.json",
+        "fingerprint": "v1:2026-05-05T04:20:51+00:00@10320",
+        "kind": "file",
+        "dataset_id": null,
+        "last_modified_at": "2026-05-05T04:20:51+00:00",
+        "extras": {}
+      },
+      {
+        "dep_key": "judge_harmless_vs_harmful_instructions_sonnet",
+        "path": "roger/axis_judge_experiments/harmless_vs_harmful/sonnet/scores_instructions.json",
+        "fingerprint": "v1:2026-05-05T04:20:58+00:00@10334",
+        "kind": "file",
+        "dataset_id": null,
+        "last_modified_at": "2026-05-05T04:20:58+00:00",
+        "extras": {}
+      },
+      {
+        "dep_key": "judge_harmless_vs_harmful_responses_traits",
+        "path": "roger/axis_judge_experiments/harmless_vs_harmful/gpt_responses_traits_b10/scores_responses.json",
+        "fingerprint": "v1:2026-05-09T03:50:17+00:00@4029988",
+        "kind": "file",
+        "dataset_id": null,
+        "last_modified_at": "2026-05-09T03:50:17+00:00",
+        "extras": {}
+      },
+      {
+        "dep_key": "judge_harmless_vs_harmful_responses_roles",
+        "path": "roger/axis_judge_experiments/harmless_vs_harmful/gpt_responses_roles_b10/scores_responses.json",
+        "fingerprint": "v1:2026-05-09T05:46:49+00:00@3417328",
+        "kind": "file",
+        "dataset_id": null,
+        "last_modified_at": "2026-05-09T05:46:49+00:00",
+        "extras": {}
+      },
+      {
+        "dep_key": "judge_honest_vs_dishonest_descriptions_gpt",
+        "path": "roger/axis_judge_experiments/honest_vs_dishonest/gpt/scores_descriptions.json",
+        "fingerprint": "v1:2026-05-05T01:00:00+00:00@10292",
+        "kind": "file",
+        "dataset_id": null,
+        "last_modified_at": "2026-05-05T01:00:00+00:00",
+        "extras": {}
+      },
+      {
+        "dep_key": "judge_honest_vs_dishonest_instructions_gpt",
+        "path": "roger/axis_judge_experiments/honest_vs_dishonest/gpt/scores_instructions.json",
+        "fingerprint": "v1:2026-05-05T01:00:01+00:00@10304",
+        "kind": "file",
+        "dataset_id": null,
+        "last_modified_at": "2026-05-05T01:00:01+00:00",
+        "extras": {}
+      },
+      {
+        "dep_key": "judge_honest_vs_dishonest_descriptions_sonnet",
+        "path": "roger/axis_judge_experiments/honest_vs_dishonest/sonnet/scores_descriptions.json",
+        "fingerprint": "v1:2026-05-05T04:20:50+00:00@10287",
+        "kind": "file",
+        "dataset_id": null,
+        "last_modified_at": "2026-05-05T04:20:50+00:00",
+        "extras": {}
+      },
+      {
+        "dep_key": "judge_honest_vs_dishonest_instructions_sonnet",
+        "path": "roger/axis_judge_experiments/honest_vs_dishonest/sonnet/scores_instructions.json",
+        "fingerprint": "v1:2026-05-05T04:20:54+00:00@10309",
+        "kind": "file",
+        "dataset_id": null,
+        "last_modified_at": "2026-05-05T04:20:54+00:00",
+        "extras": {}
+      },
+      {
+        "dep_key": "judge_honest_vs_dishonest_responses_traits",
+        "path": "roger/axis_judge_experiments/honest_vs_dishonest/gpt_responses_traits_b10/scores_responses.json",
+        "fingerprint": "v1:2026-05-09T03:46:45+00:00@3888514",
+        "kind": "file",
+        "dataset_id": null,
+        "last_modified_at": "2026-05-09T03:46:45+00:00",
+        "extras": {}
+      },
+      {
+        "dep_key": "judge_honest_vs_dishonest_responses_roles",
+        "path": "roger/axis_judge_experiments/honest_vs_dishonest/gpt_responses_roles_b10/scores_responses.json",
+        "fingerprint": "v1:2026-05-09T05:47:12+00:00@3316374",
+        "kind": "file",
+        "dataset_id": null,
+        "last_modified_at": "2026-05-09T05:47:12+00:00",
+        "extras": {}
+      },
+      {
+        "dep_key": "judge_truthful_vs_deceitful_descriptions_gpt",
+        "path": "roger/axis_judge_experiments/truthful_vs_deceitful/gpt/scores_descriptions.json",
+        "fingerprint": "v1:2026-05-05T01:00:00+00:00@10253",
+        "kind": "file",
+        "dataset_id": null,
+        "last_modified_at": "2026-05-05T01:00:00+00:00",
+        "extras": {}
+      },
+      {
+        "dep_key": "judge_truthful_vs_deceitful_instructions_gpt",
+        "path": "roger/axis_judge_experiments/truthful_vs_deceitful/gpt/scores_instructions.json",
+        "fingerprint": "v1:2026-05-05T01:00:01+00:00@10259",
+        "kind": "file",
+        "dataset_id": null,
+        "last_modified_at": "2026-05-05T01:00:01+00:00",
+        "extras": {}
+      },
+      {
+        "dep_key": "judge_truthful_vs_deceitful_descriptions_sonnet",
+        "path": "roger/axis_judge_experiments/truthful_vs_deceitful/sonnet/scores_descriptions.json",
+        "fingerprint": "v1:2026-05-05T04:21:12+00:00@10255",
+        "kind": "file",
+        "dataset_id": null,
+        "last_modified_at": "2026-05-05T04:21:12+00:00",
+        "extras": {}
+      },
+      {
+        "dep_key": "judge_truthful_vs_deceitful_instructions_sonnet",
+        "path": "roger/axis_judge_experiments/truthful_vs_deceitful/sonnet/scores_instructions.json",
+        "fingerprint": "v1:2026-05-05T04:21:16+00:00@10255",
+        "kind": "file",
+        "dataset_id": null,
+        "last_modified_at": "2026-05-05T04:21:16+00:00",
+        "extras": {}
+      },
+      {
+        "dep_key": "judge_truthful_vs_deceitful_responses_traits",
+        "path": "roger/axis_judge_experiments/truthful_vs_deceitful/gpt_responses_traits_b10/scores_responses.json",
+        "fingerprint": "v1:2026-05-09T04:15:59+00:00@3881603",
+        "kind": "file",
+        "dataset_id": null,
+        "last_modified_at": "2026-05-09T04:15:59+00:00",
+        "extras": {}
+      },
+      {
+        "dep_key": "judge_truthful_vs_deceitful_responses_roles",
+        "path": "roger/axis_judge_experiments/truthful_vs_deceitful/gpt_responses_roles_b10/scores_responses.json",
+        "fingerprint": "v1:2026-05-09T06:12:51+00:00@3300368",
+        "kind": "file",
+        "dataset_id": null,
+        "last_modified_at": "2026-05-09T06:12:51+00:00",
+        "extras": {}
+      },
+      {
+        "dep_key": "judge_guileless_vs_scheming_descriptions_gpt",
+        "path": "roger/axis_judge_experiments/guileless_vs_scheming/gpt/scores_descriptions.json",
+        "fingerprint": "v1:2026-05-05T00:30:46+00:00@10293",
+        "kind": "file",
+        "dataset_id": null,
+        "last_modified_at": "2026-05-05T00:30:46+00:00",
+        "extras": {}
+      },
+      {
+        "dep_key": "judge_guileless_vs_scheming_instructions_gpt",
+        "path": "roger/axis_judge_experiments/guileless_vs_scheming/gpt/scores_instructions.json",
+        "fingerprint": "v1:2026-05-05T00:30:49+00:00@10274",
+        "kind": "file",
+        "dataset_id": null,
+        "last_modified_at": "2026-05-05T00:30:49+00:00",
+        "extras": {}
+      },
+      {
+        "dep_key": "judge_guileless_vs_scheming_descriptions_sonnet",
+        "path": "roger/axis_judge_experiments/guileless_vs_scheming/sonnet/scores_descriptions.json",
+        "fingerprint": "v1:2026-05-05T04:21:15+00:00@10275",
+        "kind": "file",
+        "dataset_id": null,
+        "last_modified_at": "2026-05-05T04:21:15+00:00",
+        "extras": {}
+      },
+      {
+        "dep_key": "judge_guileless_vs_scheming_instructions_sonnet",
+        "path": "roger/axis_judge_experiments/guileless_vs_scheming/sonnet/scores_instructions.json",
+        "fingerprint": "v1:2026-05-05T04:21:20+00:00@10272",
+        "kind": "file",
+        "dataset_id": null,
+        "last_modified_at": "2026-05-05T04:21:20+00:00",
+        "extras": {}
+      },
+      {
+        "dep_key": "judge_guileless_vs_scheming_responses_traits",
+        "path": "roger/axis_judge_experiments/guileless_vs_scheming/gpt_responses_traits_b10/scores_responses.json",
+        "fingerprint": "v1:2026-05-09T04:18:55+00:00@3787654",
+        "kind": "file",
+        "dataset_id": null,
+        "last_modified_at": "2026-05-09T04:18:55+00:00",
+        "extras": {}
+      },
+      {
+        "dep_key": "judge_guileless_vs_scheming_responses_roles",
+        "path": "roger/axis_judge_experiments/guileless_vs_scheming/gpt_responses_roles_b10/scores_responses.json",
+        "fingerprint": "v1:2026-05-09T06:11:17+00:00@3219294",
+        "kind": "file",
+        "dataset_id": null,
+        "last_modified_at": "2026-05-09T06:11:17+00:00",
+        "extras": {}
+      },
+      {
+        "dep_key": "judge_egalitarian_vs_elitist_descriptions_gpt",
+        "path": "roger/axis_judge_experiments/egalitarian_vs_elitist/gpt/scores_descriptions.json",
+        "fingerprint": "v1:2026-05-05T00:30:52+00:00@10242",
+        "kind": "file",
+        "dataset_id": null,
+        "last_modified_at": "2026-05-05T00:30:52+00:00",
+        "extras": {}
+      },
+      {
+        "dep_key": "judge_egalitarian_vs_elitist_instructions_gpt",
+        "path": "roger/axis_judge_experiments/egalitarian_vs_elitist/gpt/scores_instructions.json",
+        "fingerprint": "v1:2026-05-05T00:30:53+00:00@10243",
+        "kind": "file",
+        "dataset_id": null,
+        "last_modified_at": "2026-05-05T00:30:53+00:00",
+        "extras": {}
+      },
+      {
+        "dep_key": "judge_egalitarian_vs_elitist_descriptions_sonnet",
+        "path": "roger/axis_judge_experiments/egalitarian_vs_elitist/sonnet/scores_descriptions.json",
+        "fingerprint": "v1:2026-05-05T04:21:34+00:00@10265",
+        "kind": "file",
+        "dataset_id": null,
+        "last_modified_at": "2026-05-05T04:21:34+00:00",
+        "extras": {}
+      },
+      {
+        "dep_key": "judge_egalitarian_vs_elitist_instructions_sonnet",
+        "path": "roger/axis_judge_experiments/egalitarian_vs_elitist/sonnet/scores_instructions.json",
+        "fingerprint": "v1:2026-05-05T04:21:48+00:00@10268",
+        "kind": "file",
+        "dataset_id": null,
+        "last_modified_at": "2026-05-05T04:21:48+00:00",
+        "extras": {}
+      },
+      {
+        "dep_key": "judge_egalitarian_vs_elitist_responses_traits",
+        "path": "roger/axis_judge_experiments/egalitarian_vs_elitist/gpt_responses_traits_b10/scores_responses.json",
+        "fingerprint": "v1:2026-05-09T04:20:01+00:00@3996777",
+        "kind": "file",
+        "dataset_id": null,
+        "last_modified_at": "2026-05-09T04:20:01+00:00",
+        "extras": {}
+      },
+      {
+        "dep_key": "judge_egalitarian_vs_elitist_responses_roles",
+        "path": "roger/axis_judge_experiments/egalitarian_vs_elitist/gpt_responses_roles_b10/scores_responses.json",
+        "fingerprint": "v1:2026-05-09T06:16:04+00:00@3426160",
+        "kind": "file",
+        "dataset_id": null,
+        "last_modified_at": "2026-05-09T06:16:04+00:00",
+        "extras": {}
+      },
+      {
+        "dep_key": "judge_progressive_vs_conservative_descriptions_gpt",
+        "path": "roger/axis_judge_experiments/progressive_vs_conservative/gpt/scores_descriptions.json",
+        "fingerprint": "v1:2026-05-05T00:31:41+00:00@10409",
+        "kind": "file",
+        "dataset_id": null,
+        "last_modified_at": "2026-05-05T00:31:41+00:00",
+        "extras": {}
+      },
+      {
+        "dep_key": "judge_progressive_vs_conservative_instructions_gpt",
+        "path": "roger/axis_judge_experiments/progressive_vs_conservative/gpt/scores_instructions.json",
+        "fingerprint": "v1:2026-05-05T00:31:43+00:00@10412",
+        "kind": "file",
+        "dataset_id": null,
+        "last_modified_at": "2026-05-05T00:31:43+00:00",
+        "extras": {}
+      },
+      {
+        "dep_key": "judge_progressive_vs_conservative_descriptions_sonnet",
+        "path": "roger/axis_judge_experiments/progressive_vs_conservative/sonnet/scores_descriptions.json",
+        "fingerprint": "v1:2026-05-05T04:21:38+00:00@10301",
+        "kind": "file",
+        "dataset_id": null,
+        "last_modified_at": "2026-05-05T04:21:38+00:00",
+        "extras": {}
+      },
+      {
+        "dep_key": "judge_progressive_vs_conservative_instructions_sonnet",
+        "path": "roger/axis_judge_experiments/progressive_vs_conservative/sonnet/scores_instructions.json",
+        "fingerprint": "v1:2026-05-05T04:21:42+00:00@10333",
+        "kind": "file",
+        "dataset_id": null,
+        "last_modified_at": "2026-05-05T04:21:42+00:00",
+        "extras": {}
+      },
+      {
+        "dep_key": "judge_progressive_vs_conservative_responses_traits",
+        "path": "roger/axis_judge_experiments/progressive_vs_conservative/gpt_responses_traits_b10/scores_responses.json",
+        "fingerprint": "v1:2026-05-09T04:40:24+00:00@4086345",
+        "kind": "file",
+        "dataset_id": null,
+        "last_modified_at": "2026-05-09T04:40:24+00:00",
+        "extras": {}
+      },
+      {
+        "dep_key": "judge_progressive_vs_conservative_responses_roles",
+        "path": "roger/axis_judge_experiments/progressive_vs_conservative/gpt_responses_roles_b10/scores_responses.json",
+        "fingerprint": "v1:2026-05-09T06:35:03+00:00@3505548",
+        "kind": "file",
+        "dataset_id": null,
+        "last_modified_at": "2026-05-09T06:35:03+00:00",
+        "extras": {}
+      },
+      {
+        "dep_key": "judge_concise_vs_verbose_descriptions_gpt",
+        "path": "roger/axis_judge_experiments/concise_vs_verbose/gpt/scores_descriptions.json",
+        "fingerprint": "v1:2026-05-05T00:31:16+00:00@10513",
+        "kind": "file",
+        "dataset_id": null,
+        "last_modified_at": "2026-05-05T00:31:16+00:00",
+        "extras": {}
+      },
+      {
+        "dep_key": "judge_concise_vs_verbose_instructions_gpt",
+        "path": "roger/axis_judge_experiments/concise_vs_verbose/gpt/scores_instructions.json",
+        "fingerprint": "v1:2026-05-05T00:31:18+00:00@10540",
+        "kind": "file",
+        "dataset_id": null,
+        "last_modified_at": "2026-05-05T00:31:18+00:00",
+        "extras": {}
+      },
+      {
+        "dep_key": "judge_concise_vs_verbose_descriptions_sonnet",
+        "path": "roger/axis_judge_experiments/concise_vs_verbose/sonnet/scores_descriptions.json",
+        "fingerprint": "v1:2026-05-05T04:21:58+00:00@10366",
+        "kind": "file",
+        "dataset_id": null,
+        "last_modified_at": "2026-05-05T04:21:58+00:00",
+        "extras": {}
+      },
+      {
+        "dep_key": "judge_concise_vs_verbose_instructions_sonnet",
+        "path": "roger/axis_judge_experiments/concise_vs_verbose/sonnet/scores_instructions.json",
+        "fingerprint": "v1:2026-05-05T04:22:02+00:00@10418",
+        "kind": "file",
+        "dataset_id": null,
+        "last_modified_at": "2026-05-05T04:22:02+00:00",
+        "extras": {}
+      },
+      {
+        "dep_key": "judge_concise_vs_verbose_responses_traits",
+        "path": "roger/axis_judge_experiments/concise_vs_verbose/gpt_responses_traits_b10/scores_responses.json",
+        "fingerprint": "v1:2026-05-09T04:47:17+00:00@3535591",
+        "kind": "file",
+        "dataset_id": null,
+        "last_modified_at": "2026-05-09T04:47:17+00:00",
+        "extras": {}
+      },
+      {
+        "dep_key": "judge_concise_vs_verbose_responses_roles",
+        "path": "roger/axis_judge_experiments/concise_vs_verbose/gpt_responses_roles_b10/scores_responses.json",
+        "fingerprint": "v1:2026-05-09T06:36:12+00:00@3054710",
+        "kind": "file",
+        "dataset_id": null,
+        "last_modified_at": "2026-05-09T06:36:12+00:00",
+        "extras": {}
+      },
+      {
+        "dep_key": "judge_ecocentric_vs_anthropocentric_descriptions_gpt",
+        "path": "roger/axis_judge_experiments/ecocentric_vs_anthropocentric/gpt/scores_descriptions.json",
+        "fingerprint": "v1:2026-05-05T01:01:29+00:00@10404",
+        "kind": "file",
+        "dataset_id": null,
+        "last_modified_at": "2026-05-05T01:01:29+00:00",
+        "extras": {}
+      },
+      {
+        "dep_key": "judge_ecocentric_vs_anthropocentric_instructions_gpt",
+        "path": "roger/axis_judge_experiments/ecocentric_vs_anthropocentric/gpt/scores_instructions.json",
+        "fingerprint": "v1:2026-05-05T01:02:42+00:00@10417",
+        "kind": "file",
+        "dataset_id": null,
+        "last_modified_at": "2026-05-05T01:02:42+00:00",
+        "extras": {}
+      },
+      {
+        "dep_key": "judge_ecocentric_vs_anthropocentric_descriptions_sonnet",
+        "path": "roger/axis_judge_experiments/ecocentric_vs_anthropocentric/sonnet/scores_descriptions.json",
+        "fingerprint": "v1:2026-05-05T04:25:08+00:00@10383",
+        "kind": "file",
+        "dataset_id": null,
+        "last_modified_at": "2026-05-05T04:25:08+00:00",
+        "extras": {}
+      },
+      {
+        "dep_key": "judge_ecocentric_vs_anthropocentric_instructions_sonnet",
+        "path": "roger/axis_judge_experiments/ecocentric_vs_anthropocentric/sonnet/scores_instructions.json",
+        "fingerprint": "v1:2026-05-05T04:27:56+00:00@10414",
+        "kind": "file",
+        "dataset_id": null,
+        "last_modified_at": "2026-05-05T04:27:56+00:00",
+        "extras": {}
+      },
+      {
+        "dep_key": "judge_ecocentric_vs_anthropocentric_responses_traits",
+        "path": "roger/axis_judge_experiments/ecocentric_vs_anthropocentric/gpt_responses_traits_b10/scores_responses.json",
+        "fingerprint": "v1:2026-05-09T04:49:32+00:00@4217041",
+        "kind": "file",
+        "dataset_id": null,
+        "last_modified_at": "2026-05-09T04:49:32+00:00",
+        "extras": {}
+      },
+      {
+        "dep_key": "judge_ecocentric_vs_anthropocentric_responses_roles",
+        "path": "roger/axis_judge_experiments/ecocentric_vs_anthropocentric/gpt_responses_roles_b10/scores_responses.json",
+        "fingerprint": "v1:2026-05-09T06:42:59+00:00@3637006",
+        "kind": "file",
+        "dataset_id": null,
+        "last_modified_at": "2026-05-09T06:42:59+00:00",
+        "extras": {}
+      },
+      {
+        "dep_key": "judge_improvisational_vs_methodical_descriptions_gpt",
+        "path": "roger/axis_judge_experiments/improvisational_vs_methodical/gpt/scores_descriptions.json",
+        "fingerprint": "v1:2026-05-05T00:32:21+00:00@10438",
+        "kind": "file",
+        "dataset_id": null,
+        "last_modified_at": "2026-05-05T00:32:21+00:00",
+        "extras": {}
+      },
+      {
+        "dep_key": "judge_improvisational_vs_methodical_instructions_gpt",
+        "path": "roger/axis_judge_experiments/improvisational_vs_methodical/gpt/scores_instructions.json",
+        "fingerprint": "v1:2026-05-05T00:32:23+00:00@10453",
+        "kind": "file",
+        "dataset_id": null,
+        "last_modified_at": "2026-05-05T00:32:23+00:00",
+        "extras": {}
+      },
+      {
+        "dep_key": "judge_improvisational_vs_methodical_descriptions_sonnet",
+        "path": "roger/axis_judge_experiments/improvisational_vs_methodical/sonnet/scores_descriptions.json",
+        "fingerprint": "v1:2026-05-05T04:22:19+00:00@10378",
+        "kind": "file",
+        "dataset_id": null,
+        "last_modified_at": "2026-05-05T04:22:19+00:00",
+        "extras": {}
+      },
+      {
+        "dep_key": "judge_improvisational_vs_methodical_instructions_sonnet",
+        "path": "roger/axis_judge_experiments/improvisational_vs_methodical/sonnet/scores_instructions.json",
+        "fingerprint": "v1:2026-05-05T04:22:25+00:00@10430",
+        "kind": "file",
+        "dataset_id": null,
+        "last_modified_at": "2026-05-05T04:22:25+00:00",
+        "extras": {}
+      },
+      {
+        "dep_key": "judge_improvisational_vs_methodical_responses_traits",
+        "path": "roger/axis_judge_experiments/improvisational_vs_methodical/gpt_responses_traits_b10/scores_responses.json",
+        "fingerprint": "v1:2026-05-09T05:04:29+00:00@3918732",
+        "kind": "file",
+        "dataset_id": null,
+        "last_modified_at": "2026-05-09T05:04:29+00:00",
+        "extras": {}
+      },
+      {
+        "dep_key": "judge_improvisational_vs_methodical_responses_roles",
+        "path": "roger/axis_judge_experiments/improvisational_vs_methodical/gpt_responses_roles_b10/scores_responses.json",
+        "fingerprint": "v1:2026-05-09T06:57:14+00:00@3388180",
+        "kind": "file",
+        "dataset_id": null,
+        "last_modified_at": "2026-05-09T06:57:14+00:00",
+        "extras": {}
+      },
+      {
+        "dep_key": "judge_relativist_vs_absolutist_descriptions_gpt",
+        "path": "roger/axis_judge_experiments/relativist_vs_absolutist/gpt/scores_descriptions.json",
+        "fingerprint": "v1:2026-05-05T00:31:59+00:00@10409",
+        "kind": "file",
+        "dataset_id": null,
+        "last_modified_at": "2026-05-05T00:31:59+00:00",
+        "extras": {}
+      },
+      {
+        "dep_key": "judge_relativist_vs_absolutist_instructions_gpt",
+        "path": "roger/axis_judge_experiments/relativist_vs_absolutist/gpt/scores_instructions.json",
+        "fingerprint": "v1:2026-05-05T00:32:00+00:00@10407",
+        "kind": "file",
+        "dataset_id": null,
+        "last_modified_at": "2026-05-05T00:32:00+00:00",
+        "extras": {}
+      },
+      {
+        "dep_key": "judge_relativist_vs_absolutist_descriptions_sonnet",
+        "path": "roger/axis_judge_experiments/relativist_vs_absolutist/sonnet/scores_descriptions.json",
+        "fingerprint": "v1:2026-05-05T04:22:43+00:00@10354",
+        "kind": "file",
+        "dataset_id": null,
+        "last_modified_at": "2026-05-05T04:22:43+00:00",
+        "extras": {}
+      },
+      {
+        "dep_key": "judge_relativist_vs_absolutist_instructions_sonnet",
+        "path": "roger/axis_judge_experiments/relativist_vs_absolutist/sonnet/scores_instructions.json",
+        "fingerprint": "v1:2026-05-05T04:22:47+00:00@10378",
+        "kind": "file",
+        "dataset_id": null,
+        "last_modified_at": "2026-05-05T04:22:47+00:00",
+        "extras": {}
+      },
+      {
+        "dep_key": "judge_relativist_vs_absolutist_responses_traits",
+        "path": "roger/axis_judge_experiments/relativist_vs_absolutist/gpt_responses_traits_b10/scores_responses.json",
+        "fingerprint": "v1:2026-05-09T05:16:48+00:00@3974818",
+        "kind": "file",
+        "dataset_id": null,
+        "last_modified_at": "2026-05-09T05:16:48+00:00",
+        "extras": {}
+      },
+      {
+        "dep_key": "judge_relativist_vs_absolutist_responses_roles",
+        "path": "roger/axis_judge_experiments/relativist_vs_absolutist/gpt_responses_roles_b10/scores_responses.json",
+        "fingerprint": "v1:2026-05-09T06:58:19+00:00@3361441",
+        "kind": "file",
+        "dataset_id": null,
+        "last_modified_at": "2026-05-09T06:58:19+00:00",
+        "extras": {}
+      },
+      {
+        "dep_key": "judge_systems_thinker_vs_analytical_descriptions_gpt",
+        "path": "roger/axis_judge_experiments/systems_thinker_vs_analytical/gpt/scores_descriptions.json",
+        "fingerprint": "v1:2026-05-05T00:32:54+00:00@10366",
+        "kind": "file",
+        "dataset_id": null,
+        "last_modified_at": "2026-05-05T00:32:54+00:00",
+        "extras": {}
+      },
+      {
+        "dep_key": "judge_systems_thinker_vs_analytical_instructions_gpt",
+        "path": "roger/axis_judge_experiments/systems_thinker_vs_analytical/gpt/scores_instructions.json",
+        "fingerprint": "v1:2026-05-05T00:32:56+00:00@10416",
+        "kind": "file",
+        "dataset_id": null,
+        "last_modified_at": "2026-05-05T00:32:56+00:00",
+        "extras": {}
+      },
+      {
+        "dep_key": "judge_systems_thinker_vs_analytical_descriptions_sonnet",
+        "path": "roger/axis_judge_experiments/systems_thinker_vs_analytical/sonnet/scores_descriptions.json",
+        "fingerprint": "v1:2026-05-05T04:23:04+00:00@10321",
+        "kind": "file",
+        "dataset_id": null,
+        "last_modified_at": "2026-05-05T04:23:04+00:00",
+        "extras": {}
+      },
+      {
+        "dep_key": "judge_systems_thinker_vs_analytical_instructions_sonnet",
+        "path": "roger/axis_judge_experiments/systems_thinker_vs_analytical/sonnet/scores_instructions.json",
+        "fingerprint": "v1:2026-05-05T04:23:08+00:00@10377",
+        "kind": "file",
+        "dataset_id": null,
+        "last_modified_at": "2026-05-05T04:23:08+00:00",
+        "extras": {}
+      },
+      {
+        "dep_key": "judge_systems_thinker_vs_analytical_responses_traits",
+        "path": "roger/axis_judge_experiments/systems_thinker_vs_analytical/gpt_responses_traits_b10/scores_responses.json",
+        "fingerprint": "v1:2026-05-09T05:19:06+00:00@4184563",
+        "kind": "file",
+        "dataset_id": null,
+        "last_modified_at": "2026-05-09T05:19:06+00:00",
+        "extras": {}
+      },
+      {
+        "dep_key": "judge_systems_thinker_vs_analytical_responses_roles",
+        "path": "roger/axis_judge_experiments/systems_thinker_vs_analytical/gpt_responses_roles_b10/scores_responses.json",
+        "fingerprint": "v1:2026-05-09T07:06:37+00:00@3643098",
+        "kind": "file",
+        "dataset_id": null,
+        "last_modified_at": "2026-05-09T07:06:37+00:00",
+        "extras": {}
+      },
+      {
+        "dep_key": "judge_accessible_vs_esoteric_descriptions_gpt",
+        "path": "roger/axis_judge_experiments/accessible_vs_esoteric/gpt/scores_descriptions.json",
+        "fingerprint": "v1:2026-05-05T01:00:24+00:00@10330",
+        "kind": "file",
+        "dataset_id": null,
+        "last_modified_at": "2026-05-05T01:00:24+00:00",
+        "extras": {}
+      },
+      {
+        "dep_key": "judge_accessible_vs_esoteric_instructions_gpt",
+        "path": "roger/axis_judge_experiments/accessible_vs_esoteric/gpt/scores_instructions.json",
+        "fingerprint": "v1:2026-05-05T01:00:25+00:00@10335",
+        "kind": "file",
+        "dataset_id": null,
+        "last_modified_at": "2026-05-05T01:00:25+00:00",
+        "extras": {}
+      },
+      {
+        "dep_key": "judge_accessible_vs_esoteric_descriptions_sonnet",
+        "path": "roger/axis_judge_experiments/accessible_vs_esoteric/sonnet/scores_descriptions.json",
+        "fingerprint": "v1:2026-05-05T04:23:25+00:00@10320",
+        "kind": "file",
+        "dataset_id": null,
+        "last_modified_at": "2026-05-05T04:23:25+00:00",
+        "extras": {}
+      },
+      {
+        "dep_key": "judge_accessible_vs_esoteric_instructions_sonnet",
+        "path": "roger/axis_judge_experiments/accessible_vs_esoteric/sonnet/scores_instructions.json",
+        "fingerprint": "v1:2026-05-05T04:23:29+00:00@10338",
+        "kind": "file",
+        "dataset_id": null,
+        "last_modified_at": "2026-05-05T04:23:29+00:00",
+        "extras": {}
+      },
+      {
+        "dep_key": "judge_benign_vs_malicious_descriptions_gpt",
+        "path": "roger/axis_judge_experiments/benign_vs_malicious/gpt/scores_descriptions.json",
+        "fingerprint": "v1:2026-05-05T01:00:46+00:00@10301",
+        "kind": "file",
+        "dataset_id": null,
+        "last_modified_at": "2026-05-05T01:00:46+00:00",
+        "extras": {}
+      },
+      {
+        "dep_key": "judge_benign_vs_malicious_instructions_gpt",
+        "path": "roger/axis_judge_experiments/benign_vs_malicious/gpt/scores_instructions.json",
+        "fingerprint": "v1:2026-05-05T01:00:51+00:00@10300",
+        "kind": "file",
+        "dataset_id": null,
+        "last_modified_at": "2026-05-05T01:00:51+00:00",
+        "extras": {}
+      },
+      {
+        "dep_key": "judge_benign_vs_malicious_descriptions_sonnet",
+        "path": "roger/axis_judge_experiments/benign_vs_malicious/sonnet/scores_descriptions.json",
+        "fingerprint": "v1:2026-05-05T04:23:46+00:00@10290",
+        "kind": "file",
+        "dataset_id": null,
+        "last_modified_at": "2026-05-05T04:23:46+00:00",
+        "extras": {}
+      },
+      {
+        "dep_key": "judge_benign_vs_malicious_instructions_sonnet",
+        "path": "roger/axis_judge_experiments/benign_vs_malicious/sonnet/scores_instructions.json",
+        "fingerprint": "v1:2026-05-05T04:23:53+00:00@10299",
+        "kind": "file",
+        "dataset_id": null,
+        "last_modified_at": "2026-05-05T04:23:53+00:00",
+        "extras": {}
+      },
+      {
+        "dep_key": "judge_casual_vs_formal_descriptions_gpt",
+        "path": "roger/axis_judge_experiments/casual_vs_formal/gpt/scores_descriptions.json",
+        "fingerprint": "v1:2026-05-05T00:31:11+00:00@10467",
+        "kind": "file",
+        "dataset_id": null,
+        "last_modified_at": "2026-05-05T00:31:11+00:00",
+        "extras": {}
+      },
+      {
+        "dep_key": "judge_casual_vs_formal_instructions_gpt",
+        "path": "roger/axis_judge_experiments/casual_vs_formal/gpt/scores_instructions.json",
+        "fingerprint": "v1:2026-05-05T00:31:12+00:00@10535",
+        "kind": "file",
+        "dataset_id": null,
+        "last_modified_at": "2026-05-05T00:31:12+00:00",
+        "extras": {}
+      },
+      {
+        "dep_key": "judge_casual_vs_formal_descriptions_sonnet",
+        "path": "roger/axis_judge_experiments/casual_vs_formal/sonnet/scores_descriptions.json",
+        "fingerprint": "v1:2026-05-05T04:24:09+00:00@10366",
+        "kind": "file",
+        "dataset_id": null,
+        "last_modified_at": "2026-05-05T04:24:09+00:00",
+        "extras": {}
+      },
+      {
+        "dep_key": "judge_casual_vs_formal_instructions_sonnet",
+        "path": "roger/axis_judge_experiments/casual_vs_formal/sonnet/scores_instructions.json",
+        "fingerprint": "v1:2026-05-05T04:24:14+00:00@10420",
+        "kind": "file",
+        "dataset_id": null,
+        "last_modified_at": "2026-05-05T04:24:14+00:00",
+        "extras": {}
+      },
+      {
+        "dep_key": "judge_compassionate_vs_callous_descriptions_gpt",
+        "path": "roger/axis_judge_experiments/compassionate_vs_callous/gpt/scores_descriptions.json",
+        "fingerprint": "v1:2026-05-05T01:01:12+00:00@10309",
+        "kind": "file",
+        "dataset_id": null,
+        "last_modified_at": "2026-05-05T01:01:12+00:00",
+        "extras": {}
+      },
+      {
+        "dep_key": "judge_compassionate_vs_callous_instructions_gpt",
+        "path": "roger/axis_judge_experiments/compassionate_vs_callous/gpt/scores_instructions.json",
+        "fingerprint": "v1:2026-05-05T01:01:15+00:00@10310",
+        "kind": "file",
+        "dataset_id": null,
+        "last_modified_at": "2026-05-05T01:01:15+00:00",
+        "extras": {}
+      },
+      {
+        "dep_key": "judge_compassionate_vs_callous_descriptions_sonnet",
+        "path": "roger/axis_judge_experiments/compassionate_vs_callous/sonnet/scores_descriptions.json",
+        "fingerprint": "v1:2026-05-05T04:24:33+00:00@10292",
+        "kind": "file",
+        "dataset_id": null,
+        "last_modified_at": "2026-05-05T04:24:33+00:00",
+        "extras": {}
+      },
+      {
+        "dep_key": "judge_compassionate_vs_callous_instructions_sonnet",
+        "path": "roger/axis_judge_experiments/compassionate_vs_callous/sonnet/scores_instructions.json",
+        "fingerprint": "v1:2026-05-05T04:24:38+00:00@10317",
+        "kind": "file",
+        "dataset_id": null,
+        "last_modified_at": "2026-05-05T04:24:38+00:00",
+        "extras": {}
+      },
+      {
+        "dep_key": "judge_confident_vs_uncertain_descriptions_gpt",
+        "path": "roger/axis_judge_experiments/confident_vs_uncertain/gpt/scores_descriptions.json",
+        "fingerprint": "v1:2026-05-05T01:01:35+00:00@10314",
+        "kind": "file",
+        "dataset_id": null,
+        "last_modified_at": "2026-05-05T01:01:35+00:00",
+        "extras": {}
+      },
+      {
+        "dep_key": "judge_confident_vs_uncertain_instructions_gpt",
+        "path": "roger/axis_judge_experiments/confident_vs_uncertain/gpt/scores_instructions.json",
+        "fingerprint": "v1:2026-05-05T01:01:37+00:00@10324",
+        "kind": "file",
+        "dataset_id": null,
+        "last_modified_at": "2026-05-05T01:01:37+00:00",
+        "extras": {}
+      },
+      {
+        "dep_key": "judge_confident_vs_uncertain_descriptions_sonnet",
+        "path": "roger/axis_judge_experiments/confident_vs_uncertain/sonnet/scores_descriptions.json",
+        "fingerprint": "v1:2026-05-05T04:24:55+00:00@10287",
+        "kind": "file",
+        "dataset_id": null,
+        "last_modified_at": "2026-05-05T04:24:55+00:00",
+        "extras": {}
+      },
+      {
+        "dep_key": "judge_confident_vs_uncertain_instructions_sonnet",
+        "path": "roger/axis_judge_experiments/confident_vs_uncertain/sonnet/scores_instructions.json",
+        "fingerprint": "v1:2026-05-05T04:24:59+00:00@10292",
+        "kind": "file",
+        "dataset_id": null,
+        "last_modified_at": "2026-05-05T04:24:59+00:00",
+        "extras": {}
+      },
+      {
+        "dep_key": "judge_constructive_vs_destructive_descriptions_gpt",
+        "path": "roger/axis_judge_experiments/constructive_vs_destructive/gpt/scores_descriptions.json",
+        "fingerprint": "v1:2026-05-05T00:30:27+00:00@10352",
+        "kind": "file",
+        "dataset_id": null,
+        "last_modified_at": "2026-05-05T00:30:27+00:00",
+        "extras": {}
+      },
+      {
+        "dep_key": "judge_constructive_vs_destructive_instructions_gpt",
+        "path": "roger/axis_judge_experiments/constructive_vs_destructive/gpt/scores_instructions.json",
+        "fingerprint": "v1:2026-05-05T00:30:29+00:00@10349",
+        "kind": "file",
+        "dataset_id": null,
+        "last_modified_at": "2026-05-05T00:30:29+00:00",
+        "extras": {}
+      },
+      {
+        "dep_key": "judge_constructive_vs_destructive_descriptions_sonnet",
+        "path": "roger/axis_judge_experiments/constructive_vs_destructive/sonnet/scores_descriptions.json",
+        "fingerprint": "v1:2026-05-05T04:25:16+00:00@10319",
+        "kind": "file",
+        "dataset_id": null,
+        "last_modified_at": "2026-05-05T04:25:16+00:00",
+        "extras": {}
+      },
+      {
+        "dep_key": "judge_constructive_vs_destructive_instructions_sonnet",
+        "path": "roger/axis_judge_experiments/constructive_vs_destructive/sonnet/scores_instructions.json",
+        "fingerprint": "v1:2026-05-05T04:25:20+00:00@10341",
+        "kind": "file",
+        "dataset_id": null,
+        "last_modified_at": "2026-05-05T04:25:20+00:00",
+        "extras": {}
+      },
+      {
+        "dep_key": "judge_convergent_vs_divergent_descriptions_gpt",
+        "path": "roger/axis_judge_experiments/convergent_vs_divergent/gpt/scores_descriptions.json",
+        "fingerprint": "v1:2026-05-05T01:01:57+00:00@10442",
+        "kind": "file",
+        "dataset_id": null,
+        "last_modified_at": "2026-05-05T01:01:57+00:00",
+        "extras": {}
+      },
+      {
+        "dep_key": "judge_convergent_vs_divergent_instructions_gpt",
+        "path": "roger/axis_judge_experiments/convergent_vs_divergent/gpt/scores_instructions.json",
+        "fingerprint": "v1:2026-05-05T01:01:59+00:00@10421",
+        "kind": "file",
+        "dataset_id": null,
+        "last_modified_at": "2026-05-05T01:01:59+00:00",
+        "extras": {}
+      },
+      {
+        "dep_key": "judge_convergent_vs_divergent_descriptions_sonnet",
+        "path": "roger/axis_judge_experiments/convergent_vs_divergent/sonnet/scores_descriptions.json",
+        "fingerprint": "v1:2026-05-05T04:25:38+00:00@10388",
+        "kind": "file",
+        "dataset_id": null,
+        "last_modified_at": "2026-05-05T04:25:38+00:00",
+        "extras": {}
+      },
+      {
+        "dep_key": "judge_convergent_vs_divergent_instructions_sonnet",
+        "path": "roger/axis_judge_experiments/convergent_vs_divergent/sonnet/scores_instructions.json",
+        "fingerprint": "v1:2026-05-05T04:25:42+00:00@10391",
+        "kind": "file",
+        "dataset_id": null,
+        "last_modified_at": "2026-05-05T04:25:42+00:00",
+        "extras": {}
+      },
+      {
+        "dep_key": "judge_cooperative_vs_competitive_descriptions_gpt",
+        "path": "roger/axis_judge_experiments/cooperative_vs_competitive/gpt/scores_descriptions.json",
+        "fingerprint": "v1:2026-05-05T00:30:53+00:00@10306",
+        "kind": "file",
+        "dataset_id": null,
+        "last_modified_at": "2026-05-05T00:30:53+00:00",
+        "extras": {}
+      },
+      {
+        "dep_key": "judge_cooperative_vs_competitive_instructions_gpt",
+        "path": "roger/axis_judge_experiments/cooperative_vs_competitive/gpt/scores_instructions.json",
+        "fingerprint": "v1:2026-05-05T00:30:55+00:00@10303",
+        "kind": "file",
+        "dataset_id": null,
+        "last_modified_at": "2026-05-05T00:30:55+00:00",
+        "extras": {}
+      },
+      {
+        "dep_key": "judge_cooperative_vs_competitive_descriptions_sonnet",
+        "path": "roger/axis_judge_experiments/cooperative_vs_competitive/sonnet/scores_descriptions.json",
+        "fingerprint": "v1:2026-05-05T04:25:58+00:00@10290",
+        "kind": "file",
+        "dataset_id": null,
+        "last_modified_at": "2026-05-05T04:25:58+00:00",
+        "extras": {}
+      },
+      {
+        "dep_key": "judge_cooperative_vs_competitive_instructions_sonnet",
+        "path": "roger/axis_judge_experiments/cooperative_vs_competitive/sonnet/scores_instructions.json",
+        "fingerprint": "v1:2026-05-05T04:26:02+00:00@10324",
+        "kind": "file",
+        "dataset_id": null,
+        "last_modified_at": "2026-05-05T04:26:02+00:00",
+        "extras": {}
+      },
+      {
+        "dep_key": "judge_ethereal_vs_grounded_descriptions_gpt",
+        "path": "roger/axis_judge_experiments/ethereal_vs_grounded/gpt/scores_descriptions.json",
+        "fingerprint": "v1:2026-05-05T00:32:24+00:00@10644",
+        "kind": "file",
+        "dataset_id": null,
+        "last_modified_at": "2026-05-05T00:32:24+00:00",
+        "extras": {}
+      },
+      {
+        "dep_key": "judge_ethereal_vs_grounded_instructions_gpt",
+        "path": "roger/axis_judge_experiments/ethereal_vs_grounded/gpt/scores_instructions.json",
+        "fingerprint": "v1:2026-05-05T00:32:26+00:00@10655",
+        "kind": "file",
+        "dataset_id": null,
+        "last_modified_at": "2026-05-05T00:32:26+00:00",
+        "extras": {}
+      },
+      {
+        "dep_key": "judge_ethereal_vs_grounded_descriptions_sonnet",
+        "path": "roger/axis_judge_experiments/ethereal_vs_grounded/sonnet/scores_descriptions.json",
+        "fingerprint": "v1:2026-05-05T04:26:24+00:00@10634",
+        "kind": "file",
+        "dataset_id": null,
+        "last_modified_at": "2026-05-05T04:26:24+00:00",
+        "extras": {}
+      },
+      {
+        "dep_key": "judge_ethereal_vs_grounded_instructions_sonnet",
+        "path": "roger/axis_judge_experiments/ethereal_vs_grounded/sonnet/scores_instructions.json",
+        "fingerprint": "v1:2026-05-05T04:26:28+00:00@10661",
+        "kind": "file",
+        "dataset_id": null,
+        "last_modified_at": "2026-05-05T04:26:28+00:00",
+        "extras": {}
+      },
+      {
+        "dep_key": "judge_forgiving_vs_unforgiving_descriptions_gpt",
+        "path": "roger/axis_judge_experiments/forgiving_vs_unforgiving/gpt/scores_descriptions.json",
+        "fingerprint": "v1:2026-05-05T01:02:19+00:00@10303",
+        "kind": "file",
+        "dataset_id": null,
+        "last_modified_at": "2026-05-05T01:02:19+00:00",
+        "extras": {}
+      },
+      {
+        "dep_key": "judge_forgiving_vs_unforgiving_instructions_gpt",
+        "path": "roger/axis_judge_experiments/forgiving_vs_unforgiving/gpt/scores_instructions.json",
+        "fingerprint": "v1:2026-05-05T01:02:21+00:00@10308",
+        "kind": "file",
+        "dataset_id": null,
+        "last_modified_at": "2026-05-05T01:02:21+00:00",
+        "extras": {}
+      },
+      {
+        "dep_key": "judge_forgiving_vs_unforgiving_descriptions_sonnet",
+        "path": "roger/axis_judge_experiments/forgiving_vs_unforgiving/sonnet/scores_descriptions.json",
+        "fingerprint": "v1:2026-05-05T04:26:30+00:00@10296",
+        "kind": "file",
+        "dataset_id": null,
+        "last_modified_at": "2026-05-05T04:26:30+00:00",
+        "extras": {}
+      },
+      {
+        "dep_key": "judge_forgiving_vs_unforgiving_instructions_sonnet",
+        "path": "roger/axis_judge_experiments/forgiving_vs_unforgiving/sonnet/scores_instructions.json",
+        "fingerprint": "v1:2026-05-05T04:26:34+00:00@10302",
+        "kind": "file",
+        "dataset_id": null,
+        "last_modified_at": "2026-05-05T04:26:34+00:00",
+        "extras": {}
+      },
+      {
+        "dep_key": "judge_generous_vs_stingy_descriptions_gpt",
+        "path": "roger/axis_judge_experiments/generous_vs_stingy/gpt/scores_descriptions.json",
+        "fingerprint": "v1:2026-05-05T01:02:38+00:00@10302",
+        "kind": "file",
+        "dataset_id": null,
+        "last_modified_at": "2026-05-05T01:02:38+00:00",
+        "extras": {}
+      },
+      {
+        "dep_key": "judge_generous_vs_stingy_instructions_gpt",
+        "path": "roger/axis_judge_experiments/generous_vs_stingy/gpt/scores_instructions.json",
+        "fingerprint": "v1:2026-05-05T01:02:39+00:00@10316",
+        "kind": "file",
+        "dataset_id": null,
+        "last_modified_at": "2026-05-05T01:02:39+00:00",
+        "extras": {}
+      },
+      {
+        "dep_key": "judge_generous_vs_stingy_descriptions_sonnet",
+        "path": "roger/axis_judge_experiments/generous_vs_stingy/sonnet/scores_descriptions.json",
+        "fingerprint": "v1:2026-05-05T04:26:47+00:00@10294",
+        "kind": "file",
+        "dataset_id": null,
+        "last_modified_at": "2026-05-05T04:26:47+00:00",
+        "extras": {}
+      },
+      {
+        "dep_key": "judge_generous_vs_stingy_instructions_sonnet",
+        "path": "roger/axis_judge_experiments/generous_vs_stingy/sonnet/scores_instructions.json",
+        "fingerprint": "v1:2026-05-05T04:26:51+00:00@10318",
+        "kind": "file",
+        "dataset_id": null,
+        "last_modified_at": "2026-05-05T04:26:51+00:00",
+        "extras": {}
+      },
+      {
+        "dep_key": "judge_idealistic_vs_pragmatic_descriptions_gpt",
+        "path": "roger/axis_judge_experiments/idealistic_vs_pragmatic/gpt/scores_descriptions.json",
+        "fingerprint": "v1:2026-05-05T00:32:04+00:00@10487",
+        "kind": "file",
+        "dataset_id": null,
+        "last_modified_at": "2026-05-05T00:32:04+00:00",
+        "extras": {}
+      },
+      {
+        "dep_key": "judge_idealistic_vs_pragmatic_instructions_gpt",
+        "path": "roger/axis_judge_experiments/idealistic_vs_pragmatic/gpt/scores_instructions.json",
+        "fingerprint": "v1:2026-05-05T00:32:06+00:00@10506",
+        "kind": "file",
+        "dataset_id": null,
+        "last_modified_at": "2026-05-05T00:32:06+00:00",
+        "extras": {}
+      },
+      {
+        "dep_key": "judge_idealistic_vs_pragmatic_descriptions_sonnet",
+        "path": "roger/axis_judge_experiments/idealistic_vs_pragmatic/sonnet/scores_descriptions.json",
+        "fingerprint": "v1:2026-05-05T04:26:51+00:00@10470",
+        "kind": "file",
+        "dataset_id": null,
+        "last_modified_at": "2026-05-05T04:26:51+00:00",
+        "extras": {}
+      },
+      {
+        "dep_key": "judge_idealistic_vs_pragmatic_instructions_sonnet",
+        "path": "roger/axis_judge_experiments/idealistic_vs_pragmatic/sonnet/scores_instructions.json",
+        "fingerprint": "v1:2026-05-05T04:26:55+00:00@10501",
+        "kind": "file",
+        "dataset_id": null,
+        "last_modified_at": "2026-05-05T04:26:55+00:00",
+        "extras": {}
+      },
+      {
+        "dep_key": "judge_individualistic_vs_collectivistic_descriptions_gpt",
+        "path": "roger/axis_judge_experiments/individualistic_vs_collectivistic/gpt/scores_descriptions.json",
+        "fingerprint": "v1:2026-05-05T00:31:18+00:00@10407",
+        "kind": "file",
+        "dataset_id": null,
+        "last_modified_at": "2026-05-05T00:31:18+00:00",
+        "extras": {}
+      },
+      {
+        "dep_key": "judge_individualistic_vs_collectivistic_instructions_gpt",
+        "path": "roger/axis_judge_experiments/individualistic_vs_collectivistic/gpt/scores_instructions.json",
+        "fingerprint": "v1:2026-05-05T00:31:19+00:00@10409",
+        "kind": "file",
+        "dataset_id": null,
+        "last_modified_at": "2026-05-05T00:31:19+00:00",
+        "extras": {}
+      },
+      {
+        "dep_key": "judge_individualistic_vs_collectivistic_descriptions_sonnet",
+        "path": "roger/axis_judge_experiments/individualistic_vs_collectivistic/sonnet/scores_descriptions.json",
+        "fingerprint": "v1:2026-05-05T04:27:08+00:00@10358",
+        "kind": "file",
+        "dataset_id": null,
+        "last_modified_at": "2026-05-05T04:27:08+00:00",
+        "extras": {}
+      },
+      {
+        "dep_key": "judge_individualistic_vs_collectivistic_instructions_sonnet",
+        "path": "roger/axis_judge_experiments/individualistic_vs_collectivistic/sonnet/scores_instructions.json",
+        "fingerprint": "v1:2026-05-05T04:27:11+00:00@10359",
+        "kind": "file",
+        "dataset_id": null,
+        "last_modified_at": "2026-05-05T04:27:11+00:00",
+        "extras": {}
+      },
+      {
+        "dep_key": "judge_introverted_vs_extroverted_descriptions_gpt",
+        "path": "roger/axis_judge_experiments/introverted_vs_extroverted/gpt/scores_descriptions.json",
+        "fingerprint": "v1:2026-05-05T00:31:35+00:00@10403",
+        "kind": "file",
+        "dataset_id": null,
+        "last_modified_at": "2026-05-05T00:31:35+00:00",
+        "extras": {}
+      },
+      {
+        "dep_key": "judge_introverted_vs_extroverted_instructions_gpt",
+        "path": "roger/axis_judge_experiments/introverted_vs_extroverted/gpt/scores_instructions.json",
+        "fingerprint": "v1:2026-05-05T00:31:38+00:00@10405",
+        "kind": "file",
+        "dataset_id": null,
+        "last_modified_at": "2026-05-05T00:31:38+00:00",
+        "extras": {}
+      },
+      {
+        "dep_key": "judge_introverted_vs_extroverted_descriptions_sonnet",
+        "path": "roger/axis_judge_experiments/introverted_vs_extroverted/sonnet/scores_descriptions.json",
+        "fingerprint": "v1:2026-05-05T04:27:12+00:00@10300",
+        "kind": "file",
+        "dataset_id": null,
+        "last_modified_at": "2026-05-05T04:27:12+00:00",
+        "extras": {}
+      },
+      {
+        "dep_key": "judge_introverted_vs_extroverted_instructions_sonnet",
+        "path": "roger/axis_judge_experiments/introverted_vs_extroverted/sonnet/scores_instructions.json",
+        "fingerprint": "v1:2026-05-05T04:27:17+00:00@10294",
+        "kind": "file",
+        "dataset_id": null,
+        "last_modified_at": "2026-05-05T04:27:17+00:00",
+        "extras": {}
+      },
+      {
+        "dep_key": "judge_obedient_vs_rebellious_descriptions_gpt",
+        "path": "roger/axis_judge_experiments/obedient_vs_rebellious/gpt/scores_descriptions.json",
+        "fingerprint": "v1:2026-05-05T01:03:56+00:00@10330",
+        "kind": "file",
+        "dataset_id": null,
+        "last_modified_at": "2026-05-05T01:03:56+00:00",
+        "extras": {}
+      },
+      {
+        "dep_key": "judge_obedient_vs_rebellious_instructions_gpt",
+        "path": "roger/axis_judge_experiments/obedient_vs_rebellious/gpt/scores_instructions.json",
+        "fingerprint": "v1:2026-05-05T01:05:08+00:00@10323",
+        "kind": "file",
+        "dataset_id": null,
+        "last_modified_at": "2026-05-05T01:05:08+00:00",
+        "extras": {}
+      },
+      {
+        "dep_key": "judge_obedient_vs_rebellious_descriptions_sonnet",
+        "path": "roger/axis_judge_experiments/obedient_vs_rebellious/sonnet/scores_descriptions.json",
+        "fingerprint": "v1:2026-05-05T04:29:42+00:00@10373",
+        "kind": "file",
+        "dataset_id": null,
+        "last_modified_at": "2026-05-05T04:29:42+00:00",
+        "extras": {}
+      },
+      {
+        "dep_key": "judge_obedient_vs_rebellious_instructions_sonnet",
+        "path": "roger/axis_judge_experiments/obedient_vs_rebellious/sonnet/scores_instructions.json",
+        "fingerprint": "v1:2026-05-05T04:32:16+00:00@10383",
+        "kind": "file",
+        "dataset_id": null,
+        "last_modified_at": "2026-05-05T04:32:16+00:00",
+        "extras": {}
+      },
+      {
+        "dep_key": "judge_passionate_vs_dispassionate_descriptions_gpt",
+        "path": "roger/axis_judge_experiments/passionate_vs_dispassionate/gpt/scores_descriptions.json",
+        "fingerprint": "v1:2026-05-05T00:31:39+00:00@10418",
+        "kind": "file",
+        "dataset_id": null,
+        "last_modified_at": "2026-05-05T00:31:39+00:00",
+        "extras": {}
+      },
+      {
+        "dep_key": "judge_passionate_vs_dispassionate_instructions_gpt",
+        "path": "roger/axis_judge_experiments/passionate_vs_dispassionate/gpt/scores_instructions.json",
+        "fingerprint": "v1:2026-05-05T00:31:40+00:00@10436",
+        "kind": "file",
+        "dataset_id": null,
+        "last_modified_at": "2026-05-05T00:31:40+00:00",
+        "extras": {}
+      },
+      {
+        "dep_key": "judge_passionate_vs_dispassionate_descriptions_sonnet",
+        "path": "roger/axis_judge_experiments/passionate_vs_dispassionate/sonnet/scores_descriptions.json",
+        "fingerprint": "v1:2026-05-05T04:27:33+00:00@10410",
+        "kind": "file",
+        "dataset_id": null,
+        "last_modified_at": "2026-05-05T04:27:33+00:00",
+        "extras": {}
+      },
+      {
+        "dep_key": "judge_passionate_vs_dispassionate_instructions_sonnet",
+        "path": "roger/axis_judge_experiments/passionate_vs_dispassionate/sonnet/scores_instructions.json",
+        "fingerprint": "v1:2026-05-05T04:27:38+00:00@10433",
+        "kind": "file",
+        "dataset_id": null,
+        "last_modified_at": "2026-05-05T04:27:38+00:00",
+        "extras": {}
+      },
+      {
+        "dep_key": "judge_playful_vs_serious_descriptions_gpt",
+        "path": "roger/axis_judge_experiments/playful_vs_serious/gpt/scores_descriptions.json",
+        "fingerprint": "v1:2026-05-05T01:03:00+00:00@10602",
+        "kind": "file",
+        "dataset_id": null,
+        "last_modified_at": "2026-05-05T01:03:00+00:00",
+        "extras": {}
+      },
+      {
+        "dep_key": "judge_playful_vs_serious_instructions_gpt",
+        "path": "roger/axis_judge_experiments/playful_vs_serious/gpt/scores_instructions.json",
+        "fingerprint": "v1:2026-05-05T01:03:01+00:00@10636",
+        "kind": "file",
+        "dataset_id": null,
+        "last_modified_at": "2026-05-05T01:03:01+00:00",
+        "extras": {}
+      },
+      {
+        "dep_key": "judge_playful_vs_serious_descriptions_sonnet",
+        "path": "roger/axis_judge_experiments/playful_vs_serious/sonnet/scores_descriptions.json",
+        "fingerprint": "v1:2026-05-05T04:27:56+00:00@10551",
+        "kind": "file",
+        "dataset_id": null,
+        "last_modified_at": "2026-05-05T04:27:56+00:00",
+        "extras": {}
+      },
+      {
+        "dep_key": "judge_playful_vs_serious_instructions_sonnet",
+        "path": "roger/axis_judge_experiments/playful_vs_serious/sonnet/scores_instructions.json",
+        "fingerprint": "v1:2026-05-05T04:28:01+00:00@10640",
+        "kind": "file",
+        "dataset_id": null,
+        "last_modified_at": "2026-05-05T04:28:01+00:00",
+        "extras": {}
+      },
+      {
+        "dep_key": "judge_practical_vs_theoretical_descriptions_gpt",
+        "path": "roger/axis_judge_experiments/practical_vs_theoretical/gpt/scores_descriptions.json",
+        "fingerprint": "v1:2026-05-05T01:03:02+00:00@10381",
+        "kind": "file",
+        "dataset_id": null,
+        "last_modified_at": "2026-05-05T01:03:02+00:00",
+        "extras": {}
+      },
+      {
+        "dep_key": "judge_practical_vs_theoretical_instructions_gpt",
+        "path": "roger/axis_judge_experiments/practical_vs_theoretical/gpt/scores_instructions.json",
+        "fingerprint": "v1:2026-05-05T01:03:04+00:00@10392",
+        "kind": "file",
+        "dataset_id": null,
+        "last_modified_at": "2026-05-05T01:03:04+00:00",
+        "extras": {}
+      },
+      {
+        "dep_key": "judge_practical_vs_theoretical_descriptions_sonnet",
+        "path": "roger/axis_judge_experiments/practical_vs_theoretical/sonnet/scores_descriptions.json",
+        "fingerprint": "v1:2026-05-05T04:28:12+00:00@10328",
+        "kind": "file",
+        "dataset_id": null,
+        "last_modified_at": "2026-05-05T04:28:12+00:00",
+        "extras": {}
+      },
+      {
+        "dep_key": "judge_practical_vs_theoretical_instructions_sonnet",
+        "path": "roger/axis_judge_experiments/practical_vs_theoretical/sonnet/scores_instructions.json",
+        "fingerprint": "v1:2026-05-05T04:28:17+00:00@10357",
+        "kind": "file",
+        "dataset_id": null,
+        "last_modified_at": "2026-05-05T04:28:17+00:00",
+        "extras": {}
+      },
+      {
+        "dep_key": "judge_quantitative_vs_qualitative_descriptions_gpt",
+        "path": "roger/axis_judge_experiments/quantitative_vs_qualitative/gpt/scores_descriptions.json",
+        "fingerprint": "v1:2026-05-05T00:32:29+00:00@10676",
+        "kind": "file",
+        "dataset_id": null,
+        "last_modified_at": "2026-05-05T00:32:29+00:00",
+        "extras": {}
+      },
+      {
+        "dep_key": "judge_quantitative_vs_qualitative_instructions_gpt",
+        "path": "roger/axis_judge_experiments/quantitative_vs_qualitative/gpt/scores_instructions.json",
+        "fingerprint": "v1:2026-05-05T00:32:30+00:00@10679",
+        "kind": "file",
+        "dataset_id": null,
+        "last_modified_at": "2026-05-05T00:32:30+00:00",
+        "extras": {}
+      },
+      {
+        "dep_key": "judge_quantitative_vs_qualitative_descriptions_sonnet",
+        "path": "roger/axis_judge_experiments/quantitative_vs_qualitative/sonnet/scores_descriptions.json",
+        "fingerprint": "v1:2026-05-05T04:28:17+00:00@10630",
+        "kind": "file",
+        "dataset_id": null,
+        "last_modified_at": "2026-05-05T04:28:17+00:00",
+        "extras": {}
+      },
+      {
+        "dep_key": "judge_quantitative_vs_qualitative_instructions_sonnet",
+        "path": "roger/axis_judge_experiments/quantitative_vs_qualitative/sonnet/scores_instructions.json",
+        "fingerprint": "v1:2026-05-05T04:28:22+00:00@10660",
+        "kind": "file",
+        "dataset_id": null,
+        "last_modified_at": "2026-05-05T04:28:22+00:00",
+        "extras": {}
+      },
+      {
+        "dep_key": "judge_reductionist_vs_holistic_descriptions_gpt",
+        "path": "roger/axis_judge_experiments/reductionist_vs_holistic/gpt/scores_descriptions.json",
+        "fingerprint": "v1:2026-05-05T00:32:45+00:00@10466",
+        "kind": "file",
+        "dataset_id": null,
+        "last_modified_at": "2026-05-05T00:32:45+00:00",
+        "extras": {}
+      },
+      {
+        "dep_key": "judge_reductionist_vs_holistic_instructions_gpt",
+        "path": "roger/axis_judge_experiments/reductionist_vs_holistic/gpt/scores_instructions.json",
+        "fingerprint": "v1:2026-05-05T00:32:48+00:00@10475",
+        "kind": "file",
+        "dataset_id": null,
+        "last_modified_at": "2026-05-05T00:32:48+00:00",
+        "extras": {}
+      },
+      {
+        "dep_key": "judge_reductionist_vs_holistic_descriptions_sonnet",
+        "path": "roger/axis_judge_experiments/reductionist_vs_holistic/sonnet/scores_descriptions.json",
+        "fingerprint": "v1:2026-05-05T04:28:37+00:00@10486",
+        "kind": "file",
+        "dataset_id": null,
+        "last_modified_at": "2026-05-05T04:28:37+00:00",
+        "extras": {}
+      },
+      {
+        "dep_key": "judge_reductionist_vs_holistic_instructions_sonnet",
+        "path": "roger/axis_judge_experiments/reductionist_vs_holistic/sonnet/scores_instructions.json",
+        "fingerprint": "v1:2026-05-05T04:28:41+00:00@10494",
+        "kind": "file",
+        "dataset_id": null,
+        "last_modified_at": "2026-05-05T04:28:41+00:00",
+        "extras": {}
+      },
+      {
+        "dep_key": "judge_trustworthy_vs_untrustworthy_descriptions_gpt",
+        "path": "roger/axis_judge_experiments/trustworthy_vs_untrustworthy/gpt/scores_descriptions.json",
+        "fingerprint": "v1:2026-05-05T01:03:21+00:00@10309",
+        "kind": "file",
+        "dataset_id": null,
+        "last_modified_at": "2026-05-05T01:03:21+00:00",
+        "extras": {}
+      },
+      {
+        "dep_key": "judge_trustworthy_vs_untrustworthy_instructions_gpt",
+        "path": "roger/axis_judge_experiments/trustworthy_vs_untrustworthy/gpt/scores_instructions.json",
+        "fingerprint": "v1:2026-05-05T01:03:24+00:00@10309",
+        "kind": "file",
+        "dataset_id": null,
+        "last_modified_at": "2026-05-05T01:03:24+00:00",
+        "extras": {}
+      },
+      {
+        "dep_key": "judge_trustworthy_vs_untrustworthy_descriptions_sonnet",
+        "path": "roger/axis_judge_experiments/trustworthy_vs_untrustworthy/sonnet/scores_descriptions.json",
+        "fingerprint": "v1:2026-05-05T04:28:41+00:00@10321",
+        "kind": "file",
+        "dataset_id": null,
+        "last_modified_at": "2026-05-05T04:28:41+00:00",
+        "extras": {}
+      },
+      {
+        "dep_key": "judge_trustworthy_vs_untrustworthy_instructions_sonnet",
+        "path": "roger/axis_judge_experiments/trustworthy_vs_untrustworthy/sonnet/scores_instructions.json",
+        "fingerprint": "v1:2026-05-05T04:28:45+00:00@10323",
+        "kind": "file",
+        "dataset_id": null,
+        "last_modified_at": "2026-05-05T04:28:45+00:00",
+        "extras": {}
+      },
+      {
+        "dep_key": "judge_decisive_vs_indecisive_descriptions_gpt",
+        "path": "roger/axis_judge_experiments/decisive_vs_indecisive/gpt/scores_descriptions.json",
+        "fingerprint": "v1:2026-05-09T17:59:22+00:00@94951",
+        "kind": "file",
+        "dataset_id": null,
+        "last_modified_at": "2026-05-09T17:59:22+00:00",
+        "extras": {}
+      },
+      {
+        "dep_key": "judge_decisive_vs_indecisive_instructions_gpt",
+        "path": "roger/axis_judge_experiments/decisive_vs_indecisive/gpt/scores_instructions.json",
+        "fingerprint": "v1:2026-05-09T18:00:54+00:00@94980",
+        "kind": "file",
+        "dataset_id": null,
+        "last_modified_at": "2026-05-09T18:00:54+00:00",
+        "extras": {}
+      },
+      {
+        "dep_key": "judge_decisive_vs_indecisive_descriptions_sonnet",
+        "path": "roger/axis_judge_experiments/decisive_vs_indecisive/sonnet/scores_descriptions.json",
+        "fingerprint": "v1:2026-05-09T18:01:32+00:00@94901",
+        "kind": "file",
+        "dataset_id": null,
+        "last_modified_at": "2026-05-09T18:01:32+00:00",
+        "extras": {}
+      },
+      {
+        "dep_key": "judge_decisive_vs_indecisive_instructions_sonnet",
+        "path": "roger/axis_judge_experiments/decisive_vs_indecisive/sonnet/scores_instructions.json",
+        "fingerprint": "v1:2026-05-09T18:04:30+00:00@94921",
+        "kind": "file",
+        "dataset_id": null,
+        "last_modified_at": "2026-05-09T18:04:30+00:00",
+        "extras": {}
+      },
+      {
+        "dep_key": "judge_angel_vs_demon_descriptions_gpt",
+        "path": "roger/axis_judge_experiments/angel_vs_demon/gpt/scores_descriptions.json",
+        "fingerprint": "v1:2026-05-09T17:59:05+00:00@94835",
+        "kind": "file",
+        "dataset_id": null,
+        "last_modified_at": "2026-05-09T17:59:05+00:00",
+        "extras": {}
+      },
+      {
+        "dep_key": "judge_angel_vs_demon_instructions_gpt",
+        "path": "roger/axis_judge_experiments/angel_vs_demon/gpt/scores_instructions.json",
+        "fingerprint": "v1:2026-05-09T18:00:52+00:00@94832",
+        "kind": "file",
+        "dataset_id": null,
+        "last_modified_at": "2026-05-09T18:00:52+00:00",
+        "extras": {}
+      },
+      {
+        "dep_key": "judge_angel_vs_demon_descriptions_sonnet",
+        "path": "roger/axis_judge_experiments/angel_vs_demon/sonnet/scores_descriptions.json",
+        "fingerprint": "v1:2026-05-09T18:01:48+00:00@94865",
+        "kind": "file",
+        "dataset_id": null,
+        "last_modified_at": "2026-05-09T18:01:48+00:00",
+        "extras": {}
+      },
+      {
+        "dep_key": "judge_angel_vs_demon_instructions_sonnet",
+        "path": "roger/axis_judge_experiments/angel_vs_demon/sonnet/scores_instructions.json",
+        "fingerprint": "v1:2026-05-09T18:04:53+00:00@94872",
+        "kind": "file",
+        "dataset_id": null,
+        "last_modified_at": "2026-05-09T18:04:53+00:00",
+        "extras": {}
+      }
+    ],
+    "inputs_sha256": "d927d0c342358c0db68006bdaed270782a158287ec0f539e39e9494c71d61a26"
+  }
+}
