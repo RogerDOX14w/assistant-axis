@@ -55,7 +55,8 @@ from .pca import (
 )
 from .plot_metadata import json_metadata, png_metadata, suptitle_with_specs
 from .plot_palette import slot_color, slot_colors, slot_colors_8
-from .pair_list_cohort import cohort_from_pairs
+from .pair_list_cohort import cohort_from_pairs, pair_type_of
+from .judge_batch import RESPONSE_BATCH_SIZE, response_subdir
 
 __all__ = [
     # Models
@@ -98,4 +99,8 @@ __all__ = [
     "slot_colors",
     "slot_colors_8",
     "cohort_from_pairs",
+    "pair_type_of",
+    # Response-judging batch-size convention
+    "RESPONSE_BATCH_SIZE",
+    "response_subdir",
 ]

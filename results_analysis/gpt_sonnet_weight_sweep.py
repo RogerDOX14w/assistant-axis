@@ -91,7 +91,9 @@ import numpy as np
 import torch
 from scipy.stats import spearmanr
 
-from assistant_axis import cohort_from_pairs, json_metadata, png_metadata
+from assistant_axis import (
+    cohort_from_pairs, json_metadata, pair_type_of, png_metadata,
+)
 from assistant_axis.judge_score_combine import (
     add_di_weights_arg,
     combine_desc_inst_one_judge,
@@ -122,9 +124,12 @@ def _v(path: Path, *, slot: int) -> torch.Tensor:
     return _load_vector_file(path).float()[slot, LAYER]
 
 
-def axis_unit(data_dir: Path, pos: str, neg: str, *, slot: int) -> torch.Tensor:
-    p = _v(data_dir / "traits" / "vectors" / f"{pos}.pt", slot=slot)
-    n = _v(data_dir / "traits" / "vectors" / f"{neg}.pt", slot=slot)
+def axis_unit(data_dir: Path, pos: str, neg: str, *, slot: int,
+              pair_type: str = "traits") -> torch.Tensor:
+    """Unit axis direction at (slot, LAYER); ``pair_type`` selects the
+    ``traits/`` vs ``roles/`` subdir under ``data_dir``."""
+    p = _v(data_dir / pair_type / "vectors" / f"{pos}.pt", slot=slot)
+    n = _v(data_dir / pair_type / "vectors" / f"{neg}.pt", slot=slot)
     d = p - n
     return d / torch.linalg.vector_norm(d)
 
@@ -251,7 +256,8 @@ def main() -> int:
             continue
         g2 = np.array([gpt_scores[n] for n in common])
         s2 = np.array([son_scores[n] for n in common])
-        a = axis_unit(data_dir, pos, neg, slot=slot).numpy()
+        a = axis_unit(data_dir, pos, neg, slot=slot,
+                       pair_type=pair_type_of(it)).numpy()
         proj = np.array([float(np.dot(entity_vecs[n], a)) for n in common])
         per_axis[(pos, neg)] = {
             "g2": g2, "s2": s2, "proj": proj, "n": len(common)}

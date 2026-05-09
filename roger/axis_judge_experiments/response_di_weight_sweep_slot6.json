@@ -1,6 +1,7 @@
 {
   "result": {
     "n_axes": 12,
+    "excluded_axes": [],
     "left_endpoint_label": "desc+inst (GPT+Sonnet 4-way, inst-tiebreak)",
     "right_endpoint_label": "response (0.60\u00b7GPT_b10 + 0.40\u00b7Haiku_q9, v2)",
     "slot": 6,
@@ -429,25 +430,26 @@
   "_provenance": {
     "schema_version": "1.0",
     "produced_by": {
-      "cmd": "uv run python -m results_analysis.response_di_weight_sweep",
-      "git_sha": "1a93c4f+dirty",
+      "cmd": "uv run python results_analysis/response_di_weight_sweep.py",
+      "git_sha": "06085c6+dirty",
       "author": "Roger Dearnaley",
       "title": "Response \u00d7 desc+inst score-blend sweep \u2014 mean \u03c1 across 12 axes"
     },
-    "produced_at": "2026-05-09 14:22:26 +0100",
+    "produced_at": "2026-05-09 15:54:14 +0100",
     "inputs": [
       {
         "dep_key": "producer_script",
         "path": "results_analysis/response_di_weight_sweep.py",
-        "fingerprint": "v1:2026-05-09T13:22:09+00:00@18141",
+        "fingerprint": "v1:2026-05-09T13:44:58+00:00@20348",
         "kind": "file",
         "dataset_id": null,
-        "last_modified_at": "2026-05-09T13:22:09+00:00",
+        "last_modified_at": "2026-05-09T13:44:58+00:00",
         "extras": {
           "slot": "6",
           "layer": "25",
           "gpt_response_weight": "0.6",
-          "fit_domain": "[0.0, 0.9]"
+          "fit_domain": "[0.0, 0.9]",
+          "excluded_axes": "none"
         }
       },
       {
@@ -1525,6 +1527,6 @@
         "extras": {}
       }
     ],
-    "inputs_sha256": "bae76fd8f682af4b3e1952e25ddc89b210a8561bdf5c2f2b186a14465b02554c"
+    "inputs_sha256": "0bcb8b19821d2b6fb07b5c41b545cfe1796448fbaed82bcefd229673aefbf2e9"
   }
 }

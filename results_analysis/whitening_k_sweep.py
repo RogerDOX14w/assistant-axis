@@ -38,8 +38,9 @@ The script expects the following layout in ``--experiment_dir``:
             gpt/scores_instructions.json
             sonnet/scores_descriptions.json
             sonnet/scores_instructions.json
-            gpt_responses_traits/scores_responses.json
-            gpt_responses_roles/scores_responses.json
+            gpt_responses_traits_b{N}/scores_responses.json
+            gpt_responses_roles_b{N}/scores_responses.json
+            # ``{N}`` = assistant_axis.judge_batch.RESPONSE_BATCH_SIZE
 
 These are produced by
 :mod:`results_analysis.axis_judge_correlation` (see its README section).
@@ -91,7 +92,9 @@ from scipy.stats import spearmanr
 from assistant_axis import (
     cohort_from_pairs,
     json_metadata,
+    pair_type_of,
     png_metadata,
+    response_subdir,
     suptitle_with_specs,
 )
 from assistant_axis.judge_score_combine import (
@@ -195,10 +198,16 @@ def load_pool(data_dir: Path, exclude_names: set[str], *, slot: int):
 
 
 def axis_direction(data_dir: Path, pos: str, neg: str, *,
-                   slot: int) -> torch.Tensor:
-    """Load pair vectors and return the unit axis direction at (slot, LAYER)."""
-    vp = _load_vector_file(data_dir / "traits" / "vectors" / f"{pos}.pt").float()
-    vn = _load_vector_file(data_dir / "traits" / "vectors" / f"{neg}.pt").float()
+                   slot: int,
+                   pair_type: str = "traits") -> torch.Tensor:
+    """Load pair vectors and return the unit axis direction at (slot, LAYER).
+
+    ``pair_type`` selects the subdirectory under ``data_dir`` (``"traits"``
+    or ``"roles"``); pass ``"roles"`` for role-pair axes.  Defaults to
+    ``"traits"`` for backward compatibility with legacy callers.
+    """
+    vp = _load_vector_file(data_dir / pair_type / "vectors" / f"{pos}.pt").float()
+    vn = _load_vector_file(data_dir / pair_type / "vectors" / f"{neg}.pt").float()
     d = vp[slot, LAYER] - vn[slot, LAYER]
     d = d / torch.linalg.vector_norm(d)
     return d
@@ -302,9 +311,10 @@ def main() -> int:
     data: dict = {}
     for it in pairs:
         pos, neg = it["pos"], it["neg"]
+        ptype = pair_type_of(it)
         axis_id = f"{pos}_vs_{neg}"
         axis_dir = experiment_dir / axis_id
-        print(f"[{pos} vs {neg}] loading...")
+        print(f"[{pos} vs {neg}] (pair_type={ptype}) loading...")
 
         # --- Scores ---
         g_d, _, _ = load_and_register(
@@ -330,15 +340,18 @@ def main() -> int:
         # the 33-axis cohort don't have response judging yet -- skip
         # silently and leave the responses dict empty so ρ_responses comes
         # out NaN and whitening_k_peak_fit.py just plots desc_inst there.
+        # Path-suffix tracks the canonical project-wide response batch
+        # size (assistant_axis.judge_batch.RESPONSE_BATCH_SIZE); bump
+        # that constant to retire the b={N} corpus.
         responses: dict[str, float] = {}
-        for sub in ("gpt_responses_traits", "gpt_responses_roles"):
+        for mode in ("traits", "roles"):
+            sub = response_subdir("gpt", mode)
             fp = axis_dir / sub / "scores_responses.json"
             if not fp.exists():
                 continue
-            sub_label = sub[len("gpt_responses_"):]
             payload, _, _ = load_and_register(
                 fp,
-                dep_key=f"judge_{axis_id}_responses_{sub_label}",
+                dep_key=f"judge_{axis_id}_responses_{mode}",
                 inputs=inputs, policy="warn",
             )
             for n, info in payload.items():
@@ -348,7 +361,8 @@ def main() -> int:
         # --- Projections at each K ---
         entity_vecs, pool, _default = load_pool(
             data_dir, exclude_names={pos, neg}, slot=slot)
-        axis_unit = axis_direction(data_dir, pos, neg, slot=slot)
+        axis_unit = axis_direction(data_dir, pos, neg, slot=slot,
+                                   pair_type=ptype)
         projections_by_K = {K: project_at_K(entity_vecs, pool, axis_unit, K)
                             for K in K_VALUES}
 

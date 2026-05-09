@@ -321,6 +321,51 @@ def test_apply_deferrals_reclassifies_legacy_when_matched(tmp_path: Path) -> Non
     assert a.deferral_matches[0].path_glob == "scores_*.json"
 
 
+def test_deferred_upstream_does_not_taint_downstream(
+    tmp_path: Path, monkeypatch
+) -> None:
+    """Finding 1 regression: A → B → C (B is judge step, deferred);
+    C's recorded fingerprint of B is current.  After running
+    ``apply_deferrals`` THEN ``propagate_transitive_stale`` (the
+    fixed order), C must remain ``current`` -- a deferred upstream
+    shouldn't taint a downstream that's actually up-to-date with it.
+    """
+    from assistant_axis import deferral_registry
+    monkeypatch.setattr(audit_caches, "_REPO_ROOT", tmp_path)
+
+    src = tmp_path / "src.json"
+    src.write_text("hello")
+    inputs_b = [prov.current_file_input("src", src)]
+    b = tmp_path / "judge_b.json"
+    _write_envelope(b, {"name": "B"}, inputs_b)
+
+    inputs_c = [prov.current_file_input("b", b)]
+    c = tmp_path / "c.json"
+    _write_envelope(c, {"name": "C"}, inputs_c)
+
+    time.sleep(1.1)
+    src.write_text("hello world")  # B becomes stale_direct vs src
+
+    audits = [audit_caches.audit_cache(p) for p in (b, c)]
+    assert {a.path.name: a.status for a in audits} == {
+        "judge_b.json": "stale_direct",
+        "c.json": "current",
+    }
+
+    reg = [deferral_registry.DeferralEntry(
+        path_glob="judge_*.json", dep_key=None,
+        reason="judge step deferred", deferred_at="2026-05-09",
+    )]
+    audit_caches.apply_deferrals(audits, registry=reg, repo_root=tmp_path)
+    audit_caches.propagate_transitive_stale(audits)
+
+    statuses = {a.path.name: a.status for a in audits}
+    assert statuses == {
+        "judge_b.json": "deferred",
+        "c.json": "current",  # not stale_transitive — deferred upstream
+    }
+
+
 def test_apply_deferrals_legacy_no_match_stays_legacy(tmp_path: Path) -> None:
     """Legacy cache whose path doesn't match any registry entry stays
     ``legacy``; deferrals are opt-in per path."""

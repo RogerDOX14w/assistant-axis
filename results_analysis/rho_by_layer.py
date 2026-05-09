@@ -42,8 +42,9 @@ The standard per-axis directory tree produced by
       <pos>_vs_<neg>/
         gpt/scores_{descriptions,instructions}.json
         sonnet/scores_{descriptions,instructions}.json
-        gpt_responses_traits/scores_responses.json
-        gpt_responses_roles/scores_responses.json
+        gpt_responses_traits_b{N}/scores_responses.json
+        gpt_responses_roles_b{N}/scores_responses.json
+        # ``{N}`` = assistant_axis.judge_batch.RESPONSE_BATCH_SIZE
 
 Plus the standard activation-vectors directory passed via ``--data_dir``.
 
@@ -86,7 +87,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 from scipy.stats import spearmanr
 
-from assistant_axis import json_metadata, png_metadata
+from assistant_axis import json_metadata, png_metadata, response_subdir
 from assistant_axis.judge_score_combine import (
     add_di_weights_arg,
     combine_desc_inst_two_judges,
@@ -483,15 +484,17 @@ def main() -> int:
         pos, neg = it["pos"], it["neg"]
         axis_id = f"{pos}_vs_{neg}"
         axis_dir = experiment_dir / axis_id
+        # Path-suffix tracks the canonical project-wide response batch
+        # size (assistant_axis.judge_batch.RESPONSE_BATCH_SIZE).
         scores: dict[str, float] = {}
-        for sub in ("gpt_responses_traits", "gpt_responses_roles"):
+        for mode in ("traits", "roles"):
+            sub = response_subdir("gpt", mode)
             fp = axis_dir / sub / "scores_responses.json"
             if not fp.exists():
                 continue
-            sub_label = sub[len("gpt_responses_"):]
             payload, _, _ = load_and_register(
                 fp,
-                dep_key=f"judge_{axis_id}_responses_{sub_label}",
+                dep_key=f"judge_{axis_id}_responses_{mode}",
                 inputs=inputs, policy="warn",
             )
             for n, info in payload.items():

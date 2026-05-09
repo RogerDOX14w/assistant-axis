@@ -413,7 +413,10 @@ The helper auto-fills:
 - `Software`      — `uv run python <repo-relative path> <args>`, or
   `uv run python -m foo.bar.baz <args>` for `-m` invocations.  Pasteable
   into a shell at the repo root to re-run.
-- `Creation Time` — local ISO-8601 timestamp
+- `Creation Time` — ISO-8601 UTC timestamp (`YYYY-MM-DDTHH:MM:SS+00:00`).
+  Pre-2026-05 PNGs / JSON envelopes carry the older local-time format
+  (`YYYY-MM-DD HH:MM:SS ±HHMM`); audit / reader code reads the field
+  as an opaque string and tolerates either.
 - `Source`        — git short SHA (+`+dirty` if working tree dirty)
 
 #### Ad-hoc exploration plots (write the script to /tmp first)
@@ -516,6 +519,25 @@ This is implemented as four cooperating layers:
    current/stale/legacy/frozen; `tools/audit_caches.py` does the same
    for JSON caches *and* propagates stale-ness transitively along
    inter-cache file dependencies.
+
+#### Timestamp convention: UTC ISO-8601 everywhere
+
+Every timestamp the provenance system writes is **UTC ISO-8601**
+(`YYYY-MM-DDTHH:MM:SS+00:00`).  This applies uniformly to:
+
+- `_provenance.produced_at` in JSON envelopes
+- `Creation Time` in PNG metadata
+- `last_modified_at` and `mtime` fields in `InputSpec` fingerprints
+  (`v1:<mtime>@<size>`)
+- `deferred_at` in `deferred_rejudges.yaml`
+- `recorded_at` in `script_equivalences.yaml`
+- `generated_at` in dataset `MANIFEST.json` files
+
+Pre-2026-05-09 envelopes and PNGs may carry a local-time variant
+(`YYYY-MM-DD HH:MM:SS ±HHMM`).  Reader/audit code treats these
+fields as opaque strings (display-only; never parsed for ordering
+or comparison), so the format mix is harmless.  Re-running any
+producer will write a UTC envelope.
 
 #### Writer pattern (mandatory for new analysis scripts)
 
@@ -1153,6 +1175,105 @@ Audit `--status` semantics:
 - No `--status` filter shows everything in their respective
   sections.
 
+##### Deferral categories (schema v2, May 2026)
+
+Each entry carries a structured `category` tag drawn from
+`DeferralCategory` in
+[`assistant_axis/deferral_registry.py`](assistant_axis/deferral_registry.py).
+The category drives both audit-report grouping and category-specific
+invariant checks in `tools/audit_deferrals.py`:
+
+| Category | Semantics | Auto-clears? |
+|---|---|---|
+| `legacy_bare` | Pre-Phase-6 cache without an envelope. | When producer is re-run (envelope replaces bare file). |
+| `frozen_snapshot` | Point-in-time capture *with a live twin*; comparison plots typically read both. Optional `compares_to` glob points at the live twin. | Never. |
+| `archived` | Standalone output of a retired pipeline configuration; no live twin (e.g. pre-cohort-cutover backups, deprecated variants). | Never. |
+| `orphan_no_producer` | Output whose producer script is not in the git tree (one-off `/tmp/_*.py`, removed/superseded producers). Optional `producer_script` records the historical path. | Manual; `audit_deferrals` ⚠️ alarms if a recorded `producer_script` reappears in `git ls-files`. |
+| `superseded` | Replaced by a named newer artifact (`replaced_by` glob). | When `replaced_by` is removed (audit errors). |
+| `operational` | Config / API-usage / tracker files written without an envelope by design. | Never. |
+| `manifest_tracked` | Freshness asserted via a per-dataset `MANIFEST.json` rather than per-file envelopes. | Never. |
+| `external_pipeline` | Output of a workflow outside the current provenance migration scope (coherence_eval, pc_axis_describer). | Scope decision. |
+| `experimental_one_off` | Exploratory artifact with no plan to integrate. | Manual. |
+| `hand_curated_input` | Hand-edited config consumed by producers (`pair_list*.json`, embedded logo PNGs). | Never (it's an input, not a producer output). |
+| `uncategorized` | Schema-v1 entry that hasn't been backfilled. | The audit raises so backfill is forced. |
+
+The `frozen_snapshot` vs `archived` distinction is intentional even
+though both never auto-clear: `frozen_snapshot` implies a live twin
+exists, so the audit can verify `compares_to` and warn when paired
+comparison plots have lost half their provenance.  `archived` makes
+no such claim — it's "this is from a retired pipeline configuration,
+nothing to compare against."
+
+When deferring something via the CLI, pass the category explicitly:
+
+```sh
+uv run python tools/defer_rejudge.py \
+    --path 'roger/.../some_orphan_*.png' \
+    --category orphan_no_producer \
+    --producer-script /tmp/_old_canonical_angles.py \
+    --reason "Pre-Phase-6 one-off; producer no longer in codebase."
+```
+
+Optional metadata fields (`--producer-script`, `--replaced-by`,
+`--compares-to`) are emitted only when set; the on-disk YAML stays
+terse for the common case.  Schema-v1 files (no `category` field)
+are still readable; existing entries load as `UNCATEGORIZED` and the
+file is upgraded to v2 in place on first write.
+
+##### `tools/audit_deferrals.py` (registry coherence)
+
+Companion to `audit_caches.py` / `audit_pngs.py` — those check
+*on-disk artifacts*; this checks *the registry itself*.  Runs four
+category-specific invariants:
+
+* **`orphan_promoted`** (error) — an `orphan_no_producer` entry's
+  `producer_script` is now tracked by git.  Either the producer was
+  promoted (lift the deferral, re-run, let fresh envelopes land) or
+  the path collision is coincidental (rename the recorded
+  `producer_script` to disambiguate).
+* **`superseded_replaced_by_missing`** (error) — `replaced_by` glob
+  matches no file on disk.  Either the successor was deleted
+  (remove the deferral entry too) or it never got produced
+  (regenerate the successor).
+* **`superseded_missing_replaced_by`** (warning) — `superseded`
+  entry without a `replaced_by` field; consumers can't navigate to
+  the successor.
+* **`frozen_snapshot_twin_missing`** (warning) — `compares_to` glob
+  matches no file; the live twin used by paired comparison plots is
+  missing.  The snapshot may belong in `archived` instead.
+* **`uncategorized`** (error) — a schema-v1 entry that needs
+  backfilling.
+
+```sh
+# Markdown roll-up to stdout:
+uv run python tools/audit_deferrals.py
+# Save to file:
+uv run python tools/audit_deferrals.py --output reports/audit_deferrals.md
+# CI-friendly (exit non-zero on any error):
+uv run python tools/audit_deferrals.py --strict
+```
+
+The audit deliberately does NOT inspect file contents — only the
+registry plus a snapshot of `git ls-files` and the on-disk path
+index.  Cheap to run, ~1s.
+
+##### Apply deferrals BEFORE propagating transitive staleness
+
+Subtle ordering invariant in `tools/audit_caches.py`'s `main()`:
+`apply_deferrals(rows)` must run *before*
+`propagate_transitive_stale(rows)`.  The propagation BFS only walks
+edges from rows whose status is in
+`STALE_STATUSES = ("stale_direct", "stale_transitive")`, so deferred
+rows act as barriers — a deferred upstream cache no longer falsely
+taints downstream consumers as `stale_transitive`.
+
+This was a real bug fixed in May 2026 (Finding 1 of an audit pass):
+when the order was swapped, deferring an upstream desc+inst cache
+was tainting every downstream rho/whitening sweep transitively, even
+though the consumers' recorded fingerprints of the deferred cache
+were perfectly current.  Test:
+`tools.tests.test_audit_caches.test_deferred_upstream_does_not_taint_downstream`.
+
 #### 5. Recovery: `tools/diff_against_recorded.py`
 
 When a cache reports `stale_direct` on `producer_script`, this
@@ -1442,6 +1563,56 @@ Per-axis `correlations.json` files are tied to specific
 historical runs and re-running them is expensive.
 
 ---
+
+### Response judging batch size (`RESPONSE_BATCH_SIZE`)
+
+The response-mode judging pipeline partitions an entity's `score==3`
+responses into roughly equal-sized batches before sending each batch
+to the LLM judge (see `plan_response_batches` in
+[`results_analysis/axis_judge_correlation.py`](results_analysis/axis_judge_correlation.py)).
+The batch size is a noise-vs-cost trade-off knob; once chosen, it
+influences every downstream rho/correlation analysis that consumes
+`scores_responses.json`, so all consumers must agree on a single
+value.
+
+The canonical default lives in
+[`assistant_axis/judge_batch.py`](assistant_axis/judge_batch.py) as
+`RESPONSE_BATCH_SIZE` (currently `10`).  Importers:
+
+* `axis_judge_correlation.py` — argparse default for
+  `--response_target_batch_size`.
+* `assistant_axis.steering_judges` — `DEFAULT_TARGET_BATCH_SIZE`
+  is derived from `RESPONSE_BATCH_SIZE` so steering effect-judge
+  scores stay apples-to-apples with axis-judge scores.
+* `whitening_k_sweep.py`, `rho_by_layer.py`,
+  `optimal_axis_for_judge.py` — use the
+  `response_subdir(judge, mode)` helper to construct
+  `gpt_responses_traits_b{N}/` paths.
+
+The `_b{N}` suffix in judging-output directory names
+(`gpt_responses_traits_b10`, `haiku_responses_roles_b10`, ...) IS
+the canonical convention; consumers use `response_subdir()` rather
+than hard-coding `"_b10"`.
+
+**Bumping the value** invalidates every existing
+`*_b{old}/scores_responses.json` cache for response judging
+purposes (desc+inst caches are unaffected — their rubric is
+batch-size-agnostic).  After bumping you'll need to:
+
+1. Re-run `axis_judge_correlation.py --score_responses` for every
+   axis × judge cell you care about (LLM cost).
+2. Re-run every downstream consumer (`whitening_k_sweep`,
+   `rho_by_layer`, `optimal_axis_for_judge`,
+   `batch_size_rho_curve`, ...).
+3. Either delete the old `_b{old}` caches or defer them via
+   `tools/defer_rejudge.py`.
+
+Pre-Phase-6 caches without a `_b{N}` suffix (bare
+`gpt_responses_traits/`) are NOT covered by `response_subdir()` —
+they're treated as legacy v1 archives.  Consumers that still need
+to read them do so explicitly via the unsuffixed path (rare; mostly
+the cross-rubric comparison plots that hit `__rubric_v1.json`
+snapshots).
 
 ### Tiered question subsampling for response judging (default May 2026)
 

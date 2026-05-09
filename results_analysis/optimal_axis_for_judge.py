@@ -48,7 +48,7 @@ import matplotlib
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 
-from assistant_axis import json_metadata
+from assistant_axis import json_metadata, response_subdir
 from assistant_axis.judge_score_combine import (
     DI_WEIGHT_CHOICES, combine_desc_inst_one_judge,
     combine_desc_inst_two_judges,
@@ -1002,8 +1002,8 @@ def score_source_paths(experiment_dir: Path, source: str) -> list[Path]:
                 out.append(experiment_dir / sub / fname)
         return out
     if source == "responses":
-        return [experiment_dir / sub / "scores_responses.json"
-                for sub in ("gpt_responses_roles", "gpt_responses_traits")]
+        return [experiment_dir / response_subdir("gpt", mode) / "scores_responses.json"
+                for mode in ("roles", "traits")]
     raise ValueError(f"Unknown source {source!r}; "
                      f"choose from {SCORE_SOURCE_CHOICES}")
 
@@ -1026,8 +1026,9 @@ def load_scores_from_experiment_dir(
       sonnet        : combine_desc_inst_one_judge(sonnet/desc, sonnet/inst)
       haiku         : combine_desc_inst_one_judge(haiku/desc, haiku/inst)
       di_combined   : combine_desc_inst_two_judges(gpt, sonnet)  -- default 4-way
-      responses     : average gpt_responses_{roles,traits}/scores_responses.json
-                       per-entity mean_score
+      responses     : average gpt_responses_{roles,traits}_b{N}/scores_responses.json
+                       per-entity mean_score, where ``b{N}`` is
+                       :data:`assistant_axis.judge_batch.RESPONSE_BATCH_SIZE`.
     """
     axis_id = experiment_dir.name
 
@@ -1063,12 +1064,15 @@ def load_scores_from_experiment_dir(
             f"judge_{axis_id}_instructions_sonnet"))
         return combine_desc_inst_two_judges(g_d, g_i, s_d, s_i, weights=di_weights)
     if source == "responses":
+        # Path-suffix tracks the canonical project-wide response batch
+        # size (assistant_axis.judge_batch.RESPONSE_BATCH_SIZE).
         out: dict[str, float] = {}
-        for sub in ("gpt_responses_roles", "gpt_responses_traits"):
+        for mode in ("roles", "traits"):
+            sub = response_subdir("gpt", mode)
             path = experiment_dir / sub / "scores_responses.json"
             if path.exists():
                 out.update(_flatten_response_scores(_load(
-                    path, f"judge_{axis_id}_{sub}")))
+                    path, f"judge_{axis_id}_gpt_responses_{mode}")))
         return out
     raise ValueError(f"Unknown --score_source {source!r}; "
                      f"choose from {SCORE_SOURCE_CHOICES}")

@@ -1,32 +1,32 @@
-# PNG provenance audit: `/Users/roger/Documents/GitHub/assistant-axis`
+# PNG provenance audit: `/Users/roger/Documents/GitHub/assistant-axis/roger`
 
-Total PNGs: **894**.  Status legend: current / stale / deferred / legacy / frozen (see ``tools/audit_pngs.py`` docstring).
+Total PNGs: **839**.  Status legend: current / stale / deferred / legacy / frozen (see ``tools/audit_pngs.py`` docstring).
 
 ## Summary by status
 
 | Status | Count |
 |---|---:|
-| current | 185 |
-| stale | 0 |
-| deferred | 667 |
-| legacy | 42 |
+| current | 120 |
+| stale | 4 |
+| deferred | 713 |
+| legacy | 2 |
 | frozen | 0 |
 
 ## By producing script
 
 | Script | current | stale | deferred | legacy | frozen | total |
 |---|---:|---:|---:|---:|---:|---:|
-| `(legacy: pre-provenance, no wrapper)` | 0 | 0 | 154 | 2 | 0 | 156 |
-| `(unknown source)` | 0 | 0 | 2 | 32 | 0 | 34 |
+| `(legacy: pre-provenance, no wrapper)` | 0 | 0 | 154 | 0 | 0 | 154 |
+| `(unknown source)` | 0 | 0 | 1 | 0 | 0 | 1 |
 | `-m results_analysis.axis_judge_correlation` | 0 | 0 | 54 | 0 | 0 | 54 |
 | `-m results_analysis.canonical_angles.plots.ca1_plane_pre_post_shear` | 21 | 0 | 0 | 0 | 0 | 21 |
 | `-m results_analysis.canonical_angles.plots.combos_vs_traits_roles_pooled` | 2 | 0 | 0 | 0 | 0 | 2 |
 | `-m results_analysis.canonical_angles.plots.goal_vs_nogoal_mutual` | 1 | 0 | 0 | 0 | 0 | 1 |
 | `-m results_analysis.canonical_angles.plots.layer_sweep` | 4 | 0 | 0 | 0 | 0 | 4 |
 | `-m results_analysis.canonical_angles.plots.whitening_sweep_with_nulls` | 3 | 0 | 0 | 0 | 0 | 3 |
-| `-m results_analysis.gpt_anthropic_response_weight_sweep` | 2 | 0 | 3 | 1 | 0 | 6 |
+| `-m results_analysis.gpt_anthropic_response_weight_sweep` | 0 | 1 | 3 | 2 | 0 | 6 |
 | `-m results_analysis.gpt_sonnet_weight_sweep` | 1 | 0 | 0 | 0 | 0 | 1 |
-| `-m results_analysis.pc_round_trip.plot_direction_cosines` | 9 | 0 | 2 | 0 | 0 | 11 |
+| `-m results_analysis.pc_round_trip.plot_direction_cosines` | 9 | 0 | 0 | 0 | 0 | 9 |
 | `-m results_analysis.pc_round_trip.plot_global_winner_cosines` | 1 | 0 | 0 | 0 | 0 | 1 |
 | `-m results_analysis.pc_round_trip.plot_histogram` | 1 | 0 | 0 | 0 | 0 | 1 |
 | `-m results_analysis.pc_round_trip.plot_loglin` | 1 | 0 | 0 | 0 | 0 | 1 |
@@ -35,7 +35,7 @@ Total PNGs: **894**.  Status legend: current / stale / deferred / legacy / froze
 | `-m results_analysis.pc_round_trip.plot_winner_consistency` | 1 | 0 | 0 | 0 | 0 | 1 |
 | `-m results_analysis.pc_round_trip.plot_winner_decomposition` | 1 | 0 | 0 | 0 | 0 | 1 |
 | `-m results_analysis.plot_batch_size_quality_vs_cost` | 2 | 0 | 0 | 0 | 0 | 2 |
-| `-m results_analysis.rubric_v1_v2_compare` | 1 | 0 | 0 | 0 | 0 | 1 |
+| `-m results_analysis.whitening_k_peak_fit` | 1 | 0 | 0 | 0 | 0 | 1 |
 | `/tmp/_all_in_plane.py` | 0 | 0 | 2 | 0 | 0 | 2 |
 | `/tmp/_all_standalones_plane_v2.py` | 0 | 0 | 2 | 0 | 0 | 2 |
 | `/tmp/_b5_vs_b15_grid.py` | 0 | 0 | 1 | 0 | 0 | 1 |
@@ -59,59 +59,98 @@ Total PNGs: **894**.  Status legend: current / stale / deferred / legacy / froze
 | `/tmp/_tplane.py` | 0 | 0 | 1 | 0 | 0 | 1 |
 | `/tmp/_unexplained_vs_truncation.py` | 0 | 0 | 1 | 0 | 0 | 1 |
 | `/tmp/axis_vs_pc_alignment.py` | 0 | 0 | 1 | 0 | 0 | 1 |
-| `matplotlib version 2.0.2.post4623.dev0+gcb3aea0db, http://matplotlib.org/` | 0 | 0 | 0 | 2 | 0 | 2 |
-| `matplotlib version3.1.0, http://matplotlib.org/` | 0 | 0 | 0 | 4 | 0 | 4 |
 | `results_analysis/all_roles_pairwise_slots.py` | 4 | 0 | 3 | 0 | 0 | 7 |
-| `results_analysis/axis_judge_correlation.py` | 48 | 0 | 397 | 0 | 0 | 445 |
-| `results_analysis/batch_size_rho_curve.py` | 4 | 0 | 4 | 0 | 0 | 8 |
+| `results_analysis/axis_judge_correlation.py` | 0 | 0 | 441 | 0 | 0 | 441 |
+| `results_analysis/batch_size_rho_curve.py` | 0 | 2 | 2 | 0 | 0 | 4 |
 | `results_analysis/gpt_sonnet_weight_sweep.py` | 3 | 0 | 1 | 0 | 0 | 4 |
 | `results_analysis/gpt_vs_sonnet_scatter.py` | 2 | 0 | 0 | 0 | 0 | 2 |
-| `results_analysis/optimal_axis_for_judge.py` | 5 | 0 | 0 | 0 | 0 | 5 |
+| `results_analysis/optimal_axis_for_judge.py` | 4 | 1 | 0 | 0 | 0 | 5 |
 | `results_analysis/pair_slice_plots.py` | 39 | 0 | 13 | 0 | 0 | 52 |
 | `results_analysis/pc_round_trip/plot_subspace_projection.py` | 1 | 0 | 0 | 0 | 0 | 1 |
 | `results_analysis/pca_scree_plots.py` | 1 | 0 | 0 | 0 | 0 | 1 |
-| `results_analysis/response_di_weight_sweep.py` | 2 | 0 | 0 | 0 | 0 | 2 |
-| `results_analysis/rho_by_layer.py` | 1 | 0 | 0 | 0 | 0 | 1 |
+| `results_analysis/rho_by_layer.py` | 0 | 0 | 1 | 0 | 0 | 1 |
 | `results_analysis/rho_by_slot_and_K.py` | 0 | 0 | 1 | 0 | 0 | 1 |
 | `results_analysis/role_pair_diff_norms.py` | 1 | 0 | 0 | 0 | 0 | 1 |
 | `results_analysis/token_position_noise_analysis.py` | 5 | 0 | 5 | 0 | 0 | 10 |
 | `results_analysis/variance_decomposition.py` | 1 | 0 | 3 | 0 | 0 | 4 |
-| `results_analysis/whitening_k_peak_fit.py` | 6 | 0 | 0 | 0 | 0 | 6 |
-| `results_analysis/whitening_k_sweep.py` | 6 | 0 | 0 | 0 | 0 | 6 |
+| `results_analysis/whitening_k_peak_fit.py` | 5 | 0 | 0 | 0 | 0 | 5 |
+| `results_analysis/whitening_k_sweep.py` | 0 | 0 | 6 | 0 | 0 | 6 |
 | `results_analysis/whitening_k_weighted_scatter.py` | 3 | 0 | 0 | 0 | 0 | 3 |
-| `www.inkscape.org` | 0 | 0 | 0 | 1 | 0 | 1 |
 
-## Deferred PNGs (667)
+## Stale PNGs
+
+Each row lists the dep_keys that drifted/vanished/are unverifiable, plus the recorded ``Software`` so you can re-run the producer.
+
+### `/Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/batch_size_curve_8slot/batch_size_cost_vs_rho.png`
+- **Created**: 2026-05-08 20:05:31 +0100  (git git f9a1899+dirty)
+- **Software**: `uv run python results_analysis/batch_size_rho_curve.py --output_dir roger/axis_judge_experiments/batch_size_curve_8slot --configs 0:26,0:49,6:25,6:49,7:25,7:49 --batch_sizes 5,7,10,15`
+- judge_truthful_vs_deceitful_responses_roles_b5: missing_current -- current_file_input: /Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/truthful_vs_deceitful/gpt_responses_roles_b5/scores_responses.json does not exist (dep_key='judge_truthful_vs_deceitful_responses_roles_b5')
+- judge_truthful_vs_deceitful_responses_traits_b5: missing_current -- current_file_input: /Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/truthful_vs_deceitful/gpt_responses_traits_b5/scores_responses.json does not exist (dep_key='judge_truthful_vs_deceitful_responses_traits_b5')
+- judge_truthful_vs_deceitful_responses_roles_b7: missing_current -- current_file_input: /Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/truthful_vs_deceitful/gpt_responses_roles_b7/scores_responses.json does not exist (dep_key='judge_truthful_vs_deceitful_responses_roles_b7')
+- judge_truthful_vs_deceitful_responses_traits_b7: missing_current -- current_file_input: /Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/truthful_vs_deceitful/gpt_responses_traits_b7/scores_responses.json does not exist (dep_key='judge_truthful_vs_deceitful_responses_traits_b7')
+- judge_truthful_vs_deceitful_responses_roles_b10: drift -- fingerprint changed: v1:2026-05-07T04:02:17+00:00@8824820 -> v1:2026-05-09T06:12:51+00:00@3300368
+- judge_truthful_vs_deceitful_responses_traits_b10: drift -- fingerprint changed: v1:2026-05-05T02:26:05+00:00@10675535 -> v1:2026-05-09T04:15:59+00:00@3881603
+- judge_truthful_vs_deceitful_responses_roles_b15: missing_current -- current_file_input: /Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/truthful_vs_deceitful/gpt_responses_roles/scores_responses.json does not exist (dep_key='judge_truthful_vs_deceitful_responses_roles_b15')
+- judge_truthful_vs_deceitful_responses_traits_b15: missing_current -- current_file_input: /Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/truthful_vs_deceitful/gpt_responses_traits/scores_responses.json does not exist (dep_key='judge_truthful_vs_deceitful_responses_traits_b15')
+- judge_progressive_vs_conservative_responses_roles_b5: missing_current -- current_file_input: /Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/progressive_vs_conservative/gpt_responses_roles_b5/scores_responses.json does not exist (dep_key='judge_progressive_vs_conservative_responses_roles_b5')
+- judge_progressive_vs_conservative_responses_traits_b5: missing_current -- current_file_input: /Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/progressive_vs_conservative/gpt_responses_traits_b5/scores_responses.json does not exist (dep_key='judge_progressive_vs_conservative_responses_traits_b5')
+- judge_progressive_vs_conservative_responses_roles_b7: missing_current -- current_file_input: /Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/progressive_vs_conservative/gpt_responses_roles_b7/scores_responses.json does not exist (dep_key='judge_progressive_vs_conservative_responses_roles_b7')
+- judge_progressive_vs_conservative_responses_traits_b7: missing_current -- current_file_input: /Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/progressive_vs_conservative/gpt_responses_traits_b7/scores_responses.json does not exist (dep_key='judge_progressive_vs_conservative_responses_traits_b7')
+- judge_progressive_vs_conservative_responses_roles_b10: drift -- fingerprint changed: v1:2026-05-07T03:08:43+00:00@9176733 -> v1:2026-05-09T06:35:03+00:00@3505548
+- judge_progressive_vs_conservative_responses_traits_b10: drift -- fingerprint changed: v1:2026-05-05T02:27:09+00:00@10650966 -> v1:2026-05-09T04:40:24+00:00@4086345
+- judge_progressive_vs_conservative_responses_roles_b15: missing_current -- current_file_input: /Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/progressive_vs_conservative/gpt_responses_roles/scores_responses.json does not exist (dep_key='judge_progressive_vs_conservative_responses_roles_b15')
+- judge_progressive_vs_conservative_responses_traits_b15: missing_current -- current_file_input: /Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/progressive_vs_conservative/gpt_responses_traits/scores_responses.json does not exist (dep_key='judge_progressive_vs_conservative_responses_traits_b15')
+- judge_improvisational_vs_methodical_responses_roles_b5: missing_current -- current_file_input: /Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/improvisational_vs_methodical/gpt_responses_roles_b5/scores_responses.json does not exist (dep_key='judge_improvisational_vs_methodical_responses_roles_b5')
+- judge_improvisational_vs_methodical_responses_traits_b5: missing_current -- current_file_input: /Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/improvisational_vs_methodical/gpt_responses_traits_b5/scores_responses.json does not exist (dep_key='judge_improvisational_vs_methodical_responses_traits_b5')
+- judge_improvisational_vs_methodical_responses_roles_b7: missing_current -- current_file_input: /Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/improvisational_vs_methodical/gpt_responses_roles_b7/scores_responses.json does not exist (dep_key='judge_improvisational_vs_methodical_responses_roles_b7')
+- judge_improvisational_vs_methodical_responses_traits_b7: missing_current -- current_file_input: /Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/improvisational_vs_methodical/gpt_responses_traits_b7/scores_responses.json does not exist (dep_key='judge_improvisational_vs_methodical_responses_traits_b7')
+- judge_improvisational_vs_methodical_responses_roles_b10: drift -- fingerprint changed: v1:2026-05-07T02:35:33+00:00@8808532 -> v1:2026-05-09T06:57:14+00:00@3388180
+- judge_improvisational_vs_methodical_responses_traits_b10: drift -- fingerprint changed: v1:2026-05-05T02:31:31+00:00@10417841 -> v1:2026-05-09T05:04:29+00:00@3918732
+- judge_improvisational_vs_methodical_responses_roles_b15: missing_current -- current_file_input: /Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/improvisational_vs_methodical/gpt_responses_roles/scores_responses.json does not exist (dep_key='judge_improvisational_vs_methodical_responses_roles_b15')
+- judge_improvisational_vs_methodical_responses_traits_b15: missing_current -- current_file_input: /Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/improvisational_vs_methodical/gpt_responses_traits/scores_responses.json does not exist (dep_key='judge_improvisational_vs_methodical_responses_traits_b15')
+
+### `/Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/batch_size_curve_8slot/batch_size_curve_rho.png`
+- **Created**: 2026-05-08 20:05:31 +0100  (git git f9a1899+dirty)
+- **Software**: `uv run python results_analysis/batch_size_rho_curve.py --output_dir roger/axis_judge_experiments/batch_size_curve_8slot --configs 0:26,0:49,6:25,6:49,7:25,7:49 --batch_sizes 5,7,10,15`
+- judge_truthful_vs_deceitful_responses_roles_b5: missing_current -- current_file_input: /Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/truthful_vs_deceitful/gpt_responses_roles_b5/scores_responses.json does not exist (dep_key='judge_truthful_vs_deceitful_responses_roles_b5')
+- judge_truthful_vs_deceitful_responses_traits_b5: missing_current -- current_file_input: /Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/truthful_vs_deceitful/gpt_responses_traits_b5/scores_responses.json does not exist (dep_key='judge_truthful_vs_deceitful_responses_traits_b5')
+- judge_truthful_vs_deceitful_responses_roles_b7: missing_current -- current_file_input: /Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/truthful_vs_deceitful/gpt_responses_roles_b7/scores_responses.json does not exist (dep_key='judge_truthful_vs_deceitful_responses_roles_b7')
+- judge_truthful_vs_deceitful_responses_traits_b7: missing_current -- current_file_input: /Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/truthful_vs_deceitful/gpt_responses_traits_b7/scores_responses.json does not exist (dep_key='judge_truthful_vs_deceitful_responses_traits_b7')
+- judge_truthful_vs_deceitful_responses_roles_b10: drift -- fingerprint changed: v1:2026-05-07T04:02:17+00:00@8824820 -> v1:2026-05-09T06:12:51+00:00@3300368
+- judge_truthful_vs_deceitful_responses_traits_b10: drift -- fingerprint changed: v1:2026-05-05T02:26:05+00:00@10675535 -> v1:2026-05-09T04:15:59+00:00@3881603
+- judge_truthful_vs_deceitful_responses_roles_b15: missing_current -- current_file_input: /Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/truthful_vs_deceitful/gpt_responses_roles/scores_responses.json does not exist (dep_key='judge_truthful_vs_deceitful_responses_roles_b15')
+- judge_truthful_vs_deceitful_responses_traits_b15: missing_current -- current_file_input: /Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/truthful_vs_deceitful/gpt_responses_traits/scores_responses.json does not exist (dep_key='judge_truthful_vs_deceitful_responses_traits_b15')
+- judge_progressive_vs_conservative_responses_roles_b5: missing_current -- current_file_input: /Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/progressive_vs_conservative/gpt_responses_roles_b5/scores_responses.json does not exist (dep_key='judge_progressive_vs_conservative_responses_roles_b5')
+- judge_progressive_vs_conservative_responses_traits_b5: missing_current -- current_file_input: /Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/progressive_vs_conservative/gpt_responses_traits_b5/scores_responses.json does not exist (dep_key='judge_progressive_vs_conservative_responses_traits_b5')
+- judge_progressive_vs_conservative_responses_roles_b7: missing_current -- current_file_input: /Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/progressive_vs_conservative/gpt_responses_roles_b7/scores_responses.json does not exist (dep_key='judge_progressive_vs_conservative_responses_roles_b7')
+- judge_progressive_vs_conservative_responses_traits_b7: missing_current -- current_file_input: /Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/progressive_vs_conservative/gpt_responses_traits_b7/scores_responses.json does not exist (dep_key='judge_progressive_vs_conservative_responses_traits_b7')
+- judge_progressive_vs_conservative_responses_roles_b10: drift -- fingerprint changed: v1:2026-05-07T03:08:43+00:00@9176733 -> v1:2026-05-09T06:35:03+00:00@3505548
+- judge_progressive_vs_conservative_responses_traits_b10: drift -- fingerprint changed: v1:2026-05-05T02:27:09+00:00@10650966 -> v1:2026-05-09T04:40:24+00:00@4086345
+- judge_progressive_vs_conservative_responses_roles_b15: missing_current -- current_file_input: /Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/progressive_vs_conservative/gpt_responses_roles/scores_responses.json does not exist (dep_key='judge_progressive_vs_conservative_responses_roles_b15')
+- judge_progressive_vs_conservative_responses_traits_b15: missing_current -- current_file_input: /Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/progressive_vs_conservative/gpt_responses_traits/scores_responses.json does not exist (dep_key='judge_progressive_vs_conservative_responses_traits_b15')
+- judge_improvisational_vs_methodical_responses_roles_b5: missing_current -- current_file_input: /Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/improvisational_vs_methodical/gpt_responses_roles_b5/scores_responses.json does not exist (dep_key='judge_improvisational_vs_methodical_responses_roles_b5')
+- judge_improvisational_vs_methodical_responses_traits_b5: missing_current -- current_file_input: /Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/improvisational_vs_methodical/gpt_responses_traits_b5/scores_responses.json does not exist (dep_key='judge_improvisational_vs_methodical_responses_traits_b5')
+- judge_improvisational_vs_methodical_responses_roles_b7: missing_current -- current_file_input: /Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/improvisational_vs_methodical/gpt_responses_roles_b7/scores_responses.json does not exist (dep_key='judge_improvisational_vs_methodical_responses_roles_b7')
+- judge_improvisational_vs_methodical_responses_traits_b7: missing_current -- current_file_input: /Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/improvisational_vs_methodical/gpt_responses_traits_b7/scores_responses.json does not exist (dep_key='judge_improvisational_vs_methodical_responses_traits_b7')
+- judge_improvisational_vs_methodical_responses_roles_b10: drift -- fingerprint changed: v1:2026-05-07T02:35:33+00:00@8808532 -> v1:2026-05-09T06:57:14+00:00@3388180
+- judge_improvisational_vs_methodical_responses_traits_b10: drift -- fingerprint changed: v1:2026-05-05T02:31:31+00:00@10417841 -> v1:2026-05-09T05:04:29+00:00@3918732
+- judge_improvisational_vs_methodical_responses_roles_b15: missing_current -- current_file_input: /Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/improvisational_vs_methodical/gpt_responses_roles/scores_responses.json does not exist (dep_key='judge_improvisational_vs_methodical_responses_roles_b15')
+- judge_improvisational_vs_methodical_responses_traits_b15: missing_current -- current_file_input: /Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/improvisational_vs_methodical/gpt_responses_traits/scores_responses.json does not exist (dep_key='judge_improvisational_vs_methodical_responses_traits_b15')
+
+### `/Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/gpt_haiku_full_response_weight_sweep_slot6.png`
+- **Created**: 2026-05-09 01:39:06 +0100  (git git f9a1899+dirty)
+- **Software**: `uv run python -m results_analysis.gpt_anthropic_response_weight_sweep --anthropic_combo haiku_full --scores_filename scores_responses__rubric_v1.json`
+- producer_script: drift -- fingerprint changed: v1:2026-05-09T00:38:43+00:00@19890 -> v1:2026-05-09T12:05:40+00:00@19890
+
+### `/Users/roger/Documents/GitHub/assistant-axis/roger/optimal_axis/truthful_vs_deceitful_responses_slot6_layer25_softK3_M30_qwen-3-32b-Roger-8slot/restarts.png`
+- **Created**: 2026-05-08 23:09:39 +0100  (git git f9a1899+dirty)
+- **Software**: `uv run python results_analysis/optimal_axis_for_judge.py --data_dir 'runpod_workspace/qwen/qwen-3-32b Roger 8slot' --experiment_dir roger/axis_judge_experiments/truthful_vs_deceitful --score_source responses --seed_pair truthful deceitful --exclude_names truthful,deceitful --slot 6 --layer 25 --cv_folds 5`
+- judge_truthful_vs_deceitful_responses_gpt_responses_roles: missing_current -- current_file_input: /Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/truthful_vs_deceitful/gpt_responses_roles/scores_responses.json does not exist (dep_key='judge_truthful_vs_deceitful_responses_gpt_responses_roles')
+- judge_truthful_vs_deceitful_responses_gpt_responses_traits: missing_current -- current_file_input: /Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/truthful_vs_deceitful/gpt_responses_traits/scores_responses.json does not exist (dep_key='judge_truthful_vs_deceitful_responses_gpt_responses_traits')
+
+## Deferred PNGs (713)
 
 PNGs that would otherwise be ``stale`` but match an entry in ``deferred_rejudges.yaml``.  Use ``tools/defer_rejudge.py --remove`` to lift.
-
-### `/Users/roger/Documents/GitHub/assistant-axis/archive/pc192_cherrypick_2026-05-07/pc192_glossary/gpt/correlation_plot.png`
-- **Was**: legacy
-- **Deferred by**: `*/correlation_plot.png` -- Legacy judge plot pre-dating Phase 6 provenance mechanism (May 2026). Presumed current as of mechanism introduction; cost-prohibitive to re-judge. Deferral auto-clears when the producer is re-run (Inputs chunk replaces legacy bare PNG).  *(at 2026-05-08T15:45:46+00:00)*
-- **Deferred by**: `*/pc192_cherrypick_*/*` -- PC/CA axis-describer pipeline output (LLM-judge driven). Pre-Phase-6 provenance mechanism, not in scope for the May 2026 producer migration. Presumed current as of mechanism introduction; cost-prohibitive to re-describe.  *(at 2026-05-08T15:50:26+00:00)*
-
-### `/Users/roger/Documents/GitHub/assistant-axis/archive/pc192_cherrypick_2026-05-07/pc192_glossary/sonnet/correlation_plot.png`
-- **Was**: legacy
-- **Deferred by**: `*/correlation_plot.png` -- Legacy judge plot pre-dating Phase 6 provenance mechanism (May 2026). Presumed current as of mechanism introduction; cost-prohibitive to re-judge. Deferral auto-clears when the producer is re-run (Inputs chunk replaces legacy bare PNG).  *(at 2026-05-08T15:45:46+00:00)*
-- **Deferred by**: `*/pc192_cherrypick_*/*` -- PC/CA axis-describer pipeline output (LLM-judge driven). Pre-Phase-6 provenance mechanism, not in scope for the May 2026 producer migration. Presumed current as of mechanism introduction; cost-prohibitive to re-describe.  *(at 2026-05-08T15:50:26+00:00)*
-
-### `/Users/roger/Documents/GitHub/assistant-axis/archive/pc192_cherrypick_2026-05-07/pc192_inline/gpt/correlation_plot.png`
-- **Was**: legacy
-- **Deferred by**: `*/correlation_plot.png` -- Legacy judge plot pre-dating Phase 6 provenance mechanism (May 2026). Presumed current as of mechanism introduction; cost-prohibitive to re-judge. Deferral auto-clears when the producer is re-run (Inputs chunk replaces legacy bare PNG).  *(at 2026-05-08T15:45:46+00:00)*
-- **Deferred by**: `*/pc192_cherrypick_*/*` -- PC/CA axis-describer pipeline output (LLM-judge driven). Pre-Phase-6 provenance mechanism, not in scope for the May 2026 producer migration. Presumed current as of mechanism introduction; cost-prohibitive to re-describe.  *(at 2026-05-08T15:50:26+00:00)*
-
-### `/Users/roger/Documents/GitHub/assistant-axis/archive/pc192_cherrypick_2026-05-07/pc192_inline/sonnet/correlation_plot.png`
-- **Was**: legacy
-- **Deferred by**: `*/correlation_plot.png` -- Legacy judge plot pre-dating Phase 6 provenance mechanism (May 2026). Presumed current as of mechanism introduction; cost-prohibitive to re-judge. Deferral auto-clears when the producer is re-run (Inputs chunk replaces legacy bare PNG).  *(at 2026-05-08T15:45:46+00:00)*
-- **Deferred by**: `*/pc192_cherrypick_*/*` -- PC/CA axis-describer pipeline output (LLM-judge driven). Pre-Phase-6 provenance mechanism, not in scope for the May 2026 producer migration. Presumed current as of mechanism introduction; cost-prohibitive to re-describe.  *(at 2026-05-08T15:50:26+00:00)*
-
-### `/Users/roger/Documents/GitHub/assistant-axis/archive/pc192_cherrypick_2026-05-07/plots/no_cherrypick_snapshot.png`
-- **Was**: legacy
-- **Deferred by**: `*/pc192_cherrypick_*/*` -- PC/CA axis-describer pipeline output (LLM-judge driven). Pre-Phase-6 provenance mechanism, not in scope for the May 2026 producer migration. Presumed current as of mechanism introduction; cost-prohibitive to re-describe.  *(at 2026-05-08T15:50:26+00:00)*
-
-### `/Users/roger/Documents/GitHub/assistant-axis/archive/pc192_cherrypick_2026-05-07/plots/pc_round_trip_direction_cosines_cherrypicked.png`
-- **Was**: legacy
-- **Deferred by**: `*/pc192_cherrypick_*/*` -- PC/CA axis-describer pipeline output (LLM-judge driven). Pre-Phase-6 provenance mechanism, not in scope for the May 2026 producer migration. Presumed current as of mechanism introduction; cost-prohibitive to re-describe.  *(at 2026-05-08T15:50:26+00:00)*
 
 ### `/Users/roger/Documents/GitHub/assistant-axis/roger/all_roles_overlay.png`
 - **Was**: legacy
@@ -217,17 +256,9 @@ PNGs that would otherwise be ``stale`` but match an entry in ``deferred_rejudges
 - **Was**: legacy
 - **Deferred by**: `*/axis_judge_experiments/axis_vs_pc_*.png` -- Orphan PNG output from a pre-Phase-6 one-off analysis whose producer is no longer in the codebase. Not in scope for the May 2026 producer migration. Presumed snapshot-historical; remove the file (and this entry) when superseded.  *(at 2026-05-08T15:55:03+00:00)*
 
-### `/Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/batch_size_curve_8slot/batch_size_cost_vs_rho.png`
-- **Was**: stale
-- **Deferred by**: `roger/axis_judge_experiments/batch_size_curve_8slot/batch_size_cost_vs_rho.png` -- Legacy mixed-rubric cost-vs-rho scatter PNG; superseded by v1 and v2 variants.  *(at 2026-05-09T14:30:57+00:00)*
-
 ### `/Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/batch_size_curve_8slot/batch_size_cost_vs_rho__rubric_v1.png`
 - **Was**: stale
 - **Deferred by**: `*__rubric_v1.png` -- v1 rubric snapshot taken on 2026-05-09 immediately before the v2 rubric anonymization landed. Kept on-disk for cross-rubric comparison; not to be re-judged. The going-forward (non-snapshot) caches are being re-judged under v2 in a separate process.  *(at 2026-05-09T03:40:15+00:00)*
-
-### `/Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/batch_size_curve_8slot/batch_size_curve_rho.png`
-- **Was**: stale
-- **Deferred by**: `roger/axis_judge_experiments/batch_size_curve_8slot/batch_size_curve_rho.png` -- Legacy mixed-rubric batch-size curve PNG; superseded by v1 and v2 variants (see corresponding JSON deferral entries).  *(at 2026-05-09T14:30:55+00:00)*
 
 ### `/Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/batch_size_curve_8slot/batch_size_curve_rho__rubric_v1.png`
 - **Was**: stale
@@ -313,6 +344,10 @@ PNGs that would otherwise be ``stale`` but match an entry in ``deferred_rejudges
 - **Was**: legacy
 - **Deferred by**: `*__rubric_v1.png` -- v1 rubric snapshot taken on 2026-05-09 immediately before the v2 rubric anonymization landed. Kept on-disk for cross-rubric comparison; not to be re-judged. The going-forward (non-snapshot) caches are being re-judged under v2 in a separate process.  *(at 2026-05-09T03:40:15+00:00)*
 
+### `/Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/concise_vs_verbose/gpt_responses_roles_b10/correlation_plot.png`
+- **Was**: stale
+- **Deferred by**: `*/correlation_plot.png` -- Legacy judge plot pre-dating Phase 6 provenance mechanism (May 2026). Presumed current as of mechanism introduction; cost-prohibitive to re-judge. Deferral auto-clears when the producer is re-run (Inputs chunk replaces legacy bare PNG).  *(at 2026-05-08T15:45:46+00:00)*
+
 ### `/Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/concise_vs_verbose/gpt_responses_roles_b10/correlation_plot__rubric_v1.png`
 - **Was**: legacy
 - **Deferred by**: `*__rubric_v1.png` -- v1 rubric snapshot taken on 2026-05-09 immediately before the v2 rubric anonymization landed. Kept on-disk for cross-rubric comparison; not to be re-judged. The going-forward (non-snapshot) caches are being re-judged under v2 in a separate process.  *(at 2026-05-09T03:40:15+00:00)*
@@ -325,6 +360,10 @@ PNGs that would otherwise be ``stale`` but match an entry in ``deferred_rejudges
 - **Was**: legacy
 - **Deferred by**: `*__rubric_v1.png` -- v1 rubric snapshot taken on 2026-05-09 immediately before the v2 rubric anonymization landed. Kept on-disk for cross-rubric comparison; not to be re-judged. The going-forward (non-snapshot) caches are being re-judged under v2 in a separate process.  *(at 2026-05-09T03:40:15+00:00)*
 
+### `/Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/concise_vs_verbose/gpt_responses_traits_b10/correlation_plot.png`
+- **Was**: stale
+- **Deferred by**: `*/correlation_plot.png` -- Legacy judge plot pre-dating Phase 6 provenance mechanism (May 2026). Presumed current as of mechanism introduction; cost-prohibitive to re-judge. Deferral auto-clears when the producer is re-run (Inputs chunk replaces legacy bare PNG).  *(at 2026-05-08T15:45:46+00:00)*
+
 ### `/Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/concise_vs_verbose/gpt_responses_traits_b10/correlation_plot__rubric_v1.png`
 - **Was**: legacy
 - **Deferred by**: `*__rubric_v1.png` -- v1 rubric snapshot taken on 2026-05-09 immediately before the v2 rubric anonymization landed. Kept on-disk for cross-rubric comparison; not to be re-judged. The going-forward (non-snapshot) caches are being re-judged under v2 in a separate process.  *(at 2026-05-09T03:40:15+00:00)*
@@ -333,9 +372,17 @@ PNGs that would otherwise be ``stale`` but match an entry in ``deferred_rejudges
 - **Was**: legacy
 - **Deferred by**: `*/correlation_plot.png` -- Legacy judge plot pre-dating Phase 6 provenance mechanism (May 2026). Presumed current as of mechanism introduction; cost-prohibitive to re-judge. Deferral auto-clears when the producer is re-run (Inputs chunk replaces legacy bare PNG).  *(at 2026-05-08T15:45:46+00:00)*
 
+### `/Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/concise_vs_verbose/haiku_responses_roles_b10_q9/correlation_plot.png`
+- **Was**: stale
+- **Deferred by**: `*/correlation_plot.png` -- Legacy judge plot pre-dating Phase 6 provenance mechanism (May 2026). Presumed current as of mechanism introduction; cost-prohibitive to re-judge. Deferral auto-clears when the producer is re-run (Inputs chunk replaces legacy bare PNG).  *(at 2026-05-08T15:45:46+00:00)*
+
 ### `/Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/concise_vs_verbose/haiku_responses_roles_b10_q9/correlation_plot__rubric_v1.png`
 - **Was**: legacy
 - **Deferred by**: `*__rubric_v1.png` -- v1 rubric snapshot taken on 2026-05-09 immediately before the v2 rubric anonymization landed. Kept on-disk for cross-rubric comparison; not to be re-judged. The going-forward (non-snapshot) caches are being re-judged under v2 in a separate process.  *(at 2026-05-09T03:40:15+00:00)*
+
+### `/Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/concise_vs_verbose/haiku_responses_traits_b10_q9/correlation_plot.png`
+- **Was**: stale
+- **Deferred by**: `*/correlation_plot.png` -- Legacy judge plot pre-dating Phase 6 provenance mechanism (May 2026). Presumed current as of mechanism introduction; cost-prohibitive to re-judge. Deferral auto-clears when the producer is re-run (Inputs chunk replaces legacy bare PNG).  *(at 2026-05-08T15:45:46+00:00)*
 
 ### `/Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/concise_vs_verbose/haiku_responses_traits_b10_q9/correlation_plot__rubric_v1.png`
 - **Was**: legacy
@@ -433,6 +480,10 @@ PNGs that would otherwise be ``stale`` but match an entry in ``deferred_rejudges
 - **Was**: legacy
 - **Deferred by**: `*__rubric_v1.png` -- v1 rubric snapshot taken on 2026-05-09 immediately before the v2 rubric anonymization landed. Kept on-disk for cross-rubric comparison; not to be re-judged. The going-forward (non-snapshot) caches are being re-judged under v2 in a separate process.  *(at 2026-05-09T03:40:15+00:00)*
 
+### `/Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/ecocentric_vs_anthropocentric/gpt_responses_roles_b10/correlation_plot.png`
+- **Was**: stale
+- **Deferred by**: `*/correlation_plot.png` -- Legacy judge plot pre-dating Phase 6 provenance mechanism (May 2026). Presumed current as of mechanism introduction; cost-prohibitive to re-judge. Deferral auto-clears when the producer is re-run (Inputs chunk replaces legacy bare PNG).  *(at 2026-05-08T15:45:46+00:00)*
+
 ### `/Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/ecocentric_vs_anthropocentric/gpt_responses_roles_b10/correlation_plot__rubric_v1.png`
 - **Was**: legacy
 - **Deferred by**: `*__rubric_v1.png` -- v1 rubric snapshot taken on 2026-05-09 immediately before the v2 rubric anonymization landed. Kept on-disk for cross-rubric comparison; not to be re-judged. The going-forward (non-snapshot) caches are being re-judged under v2 in a separate process.  *(at 2026-05-09T03:40:15+00:00)*
@@ -444,6 +495,10 @@ PNGs that would otherwise be ``stale`` but match an entry in ``deferred_rejudges
 ### `/Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/ecocentric_vs_anthropocentric/gpt_responses_traits/correlation_plot__rubric_v1.png`
 - **Was**: legacy
 - **Deferred by**: `*__rubric_v1.png` -- v1 rubric snapshot taken on 2026-05-09 immediately before the v2 rubric anonymization landed. Kept on-disk for cross-rubric comparison; not to be re-judged. The going-forward (non-snapshot) caches are being re-judged under v2 in a separate process.  *(at 2026-05-09T03:40:15+00:00)*
+
+### `/Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/ecocentric_vs_anthropocentric/gpt_responses_traits_b10/correlation_plot.png`
+- **Was**: stale
+- **Deferred by**: `*/correlation_plot.png` -- Legacy judge plot pre-dating Phase 6 provenance mechanism (May 2026). Presumed current as of mechanism introduction; cost-prohibitive to re-judge. Deferral auto-clears when the producer is re-run (Inputs chunk replaces legacy bare PNG).  *(at 2026-05-08T15:45:46+00:00)*
 
 ### `/Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/ecocentric_vs_anthropocentric/gpt_responses_traits_b10/correlation_plot__rubric_v1.png`
 - **Was**: legacy
@@ -461,6 +516,10 @@ PNGs that would otherwise be ``stale`` but match an entry in ``deferred_rejudges
 - **Was**: stale
 - **Deferred by**: `*__rubric_v1.png` -- v1 rubric snapshot taken on 2026-05-09 immediately before the v2 rubric anonymization landed. Kept on-disk for cross-rubric comparison; not to be re-judged. The going-forward (non-snapshot) caches are being re-judged under v2 in a separate process.  *(at 2026-05-09T03:40:15+00:00)*
 
+### `/Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/ecocentric_vs_anthropocentric/haiku_responses_roles_b10_q9/correlation_plot.png`
+- **Was**: stale
+- **Deferred by**: `*/correlation_plot.png` -- Legacy judge plot pre-dating Phase 6 provenance mechanism (May 2026). Presumed current as of mechanism introduction; cost-prohibitive to re-judge. Deferral auto-clears when the producer is re-run (Inputs chunk replaces legacy bare PNG).  *(at 2026-05-08T15:45:46+00:00)*
+
 ### `/Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/ecocentric_vs_anthropocentric/haiku_responses_roles_b10_q9/correlation_plot__rubric_v1.png`
 - **Was**: legacy
 - **Deferred by**: `*__rubric_v1.png` -- v1 rubric snapshot taken on 2026-05-09 immediately before the v2 rubric anonymization landed. Kept on-disk for cross-rubric comparison; not to be re-judged. The going-forward (non-snapshot) caches are being re-judged under v2 in a separate process.  *(at 2026-05-09T03:40:15+00:00)*
@@ -472,6 +531,10 @@ PNGs that would otherwise be ``stale`` but match an entry in ``deferred_rejudges
 ### `/Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/ecocentric_vs_anthropocentric/haiku_responses_traits_b10/correlation_plot__rubric_v1.png`
 - **Was**: stale
 - **Deferred by**: `*__rubric_v1.png` -- v1 rubric snapshot taken on 2026-05-09 immediately before the v2 rubric anonymization landed. Kept on-disk for cross-rubric comparison; not to be re-judged. The going-forward (non-snapshot) caches are being re-judged under v2 in a separate process.  *(at 2026-05-09T03:40:15+00:00)*
+
+### `/Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/ecocentric_vs_anthropocentric/haiku_responses_traits_b10_q9/correlation_plot.png`
+- **Was**: stale
+- **Deferred by**: `*/correlation_plot.png` -- Legacy judge plot pre-dating Phase 6 provenance mechanism (May 2026). Presumed current as of mechanism introduction; cost-prohibitive to re-judge. Deferral auto-clears when the producer is re-run (Inputs chunk replaces legacy bare PNG).  *(at 2026-05-08T15:45:46+00:00)*
 
 ### `/Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/ecocentric_vs_anthropocentric/haiku_responses_traits_b10_q9/correlation_plot__rubric_v1.png`
 - **Was**: legacy
@@ -509,6 +572,10 @@ PNGs that would otherwise be ``stale`` but match an entry in ``deferred_rejudges
 - **Was**: legacy
 - **Deferred by**: `*__rubric_v1.png` -- v1 rubric snapshot taken on 2026-05-09 immediately before the v2 rubric anonymization landed. Kept on-disk for cross-rubric comparison; not to be re-judged. The going-forward (non-snapshot) caches are being re-judged under v2 in a separate process.  *(at 2026-05-09T03:40:15+00:00)*
 
+### `/Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/egalitarian_vs_elitist/gpt_responses_roles_b10/correlation_plot.png`
+- **Was**: stale
+- **Deferred by**: `*/correlation_plot.png` -- Legacy judge plot pre-dating Phase 6 provenance mechanism (May 2026). Presumed current as of mechanism introduction; cost-prohibitive to re-judge. Deferral auto-clears when the producer is re-run (Inputs chunk replaces legacy bare PNG).  *(at 2026-05-08T15:45:46+00:00)*
+
 ### `/Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/egalitarian_vs_elitist/gpt_responses_roles_b10/correlation_plot__rubric_v1.png`
 - **Was**: legacy
 - **Deferred by**: `*__rubric_v1.png` -- v1 rubric snapshot taken on 2026-05-09 immediately before the v2 rubric anonymization landed. Kept on-disk for cross-rubric comparison; not to be re-judged. The going-forward (non-snapshot) caches are being re-judged under v2 in a separate process.  *(at 2026-05-09T03:40:15+00:00)*
@@ -521,6 +588,10 @@ PNGs that would otherwise be ``stale`` but match an entry in ``deferred_rejudges
 - **Was**: legacy
 - **Deferred by**: `*__rubric_v1.png` -- v1 rubric snapshot taken on 2026-05-09 immediately before the v2 rubric anonymization landed. Kept on-disk for cross-rubric comparison; not to be re-judged. The going-forward (non-snapshot) caches are being re-judged under v2 in a separate process.  *(at 2026-05-09T03:40:15+00:00)*
 
+### `/Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/egalitarian_vs_elitist/gpt_responses_traits_b10/correlation_plot.png`
+- **Was**: stale
+- **Deferred by**: `*/correlation_plot.png` -- Legacy judge plot pre-dating Phase 6 provenance mechanism (May 2026). Presumed current as of mechanism introduction; cost-prohibitive to re-judge. Deferral auto-clears when the producer is re-run (Inputs chunk replaces legacy bare PNG).  *(at 2026-05-08T15:45:46+00:00)*
+
 ### `/Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/egalitarian_vs_elitist/gpt_responses_traits_b10/correlation_plot__rubric_v1.png`
 - **Was**: legacy
 - **Deferred by**: `*__rubric_v1.png` -- v1 rubric snapshot taken on 2026-05-09 immediately before the v2 rubric anonymization landed. Kept on-disk for cross-rubric comparison; not to be re-judged. The going-forward (non-snapshot) caches are being re-judged under v2 in a separate process.  *(at 2026-05-09T03:40:15+00:00)*
@@ -529,9 +600,17 @@ PNGs that would otherwise be ``stale`` but match an entry in ``deferred_rejudges
 - **Was**: legacy
 - **Deferred by**: `*/correlation_plot.png` -- Legacy judge plot pre-dating Phase 6 provenance mechanism (May 2026). Presumed current as of mechanism introduction; cost-prohibitive to re-judge. Deferral auto-clears when the producer is re-run (Inputs chunk replaces legacy bare PNG).  *(at 2026-05-08T15:45:46+00:00)*
 
+### `/Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/egalitarian_vs_elitist/haiku_responses_roles_b10_q9/correlation_plot.png`
+- **Was**: stale
+- **Deferred by**: `*/correlation_plot.png` -- Legacy judge plot pre-dating Phase 6 provenance mechanism (May 2026). Presumed current as of mechanism introduction; cost-prohibitive to re-judge. Deferral auto-clears when the producer is re-run (Inputs chunk replaces legacy bare PNG).  *(at 2026-05-08T15:45:46+00:00)*
+
 ### `/Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/egalitarian_vs_elitist/haiku_responses_roles_b10_q9/correlation_plot__rubric_v1.png`
 - **Was**: legacy
 - **Deferred by**: `*__rubric_v1.png` -- v1 rubric snapshot taken on 2026-05-09 immediately before the v2 rubric anonymization landed. Kept on-disk for cross-rubric comparison; not to be re-judged. The going-forward (non-snapshot) caches are being re-judged under v2 in a separate process.  *(at 2026-05-09T03:40:15+00:00)*
+
+### `/Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/egalitarian_vs_elitist/haiku_responses_traits_b10_q9/correlation_plot.png`
+- **Was**: stale
+- **Deferred by**: `*/correlation_plot.png` -- Legacy judge plot pre-dating Phase 6 provenance mechanism (May 2026). Presumed current as of mechanism introduction; cost-prohibitive to re-judge. Deferral auto-clears when the producer is re-run (Inputs chunk replaces legacy bare PNG).  *(at 2026-05-08T15:45:46+00:00)*
 
 ### `/Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/egalitarian_vs_elitist/haiku_responses_traits_b10_q9/correlation_plot__rubric_v1.png`
 - **Was**: legacy
@@ -621,6 +700,10 @@ PNGs that would otherwise be ``stale`` but match an entry in ``deferred_rejudges
 - **Was**: legacy
 - **Deferred by**: `*__rubric_v1.png` -- v1 rubric snapshot taken on 2026-05-09 immediately before the v2 rubric anonymization landed. Kept on-disk for cross-rubric comparison; not to be re-judged. The going-forward (non-snapshot) caches are being re-judged under v2 in a separate process.  *(at 2026-05-09T03:40:15+00:00)*
 
+### `/Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/guileless_vs_scheming/gpt_responses_roles_b10/correlation_plot.png`
+- **Was**: stale
+- **Deferred by**: `*/correlation_plot.png` -- Legacy judge plot pre-dating Phase 6 provenance mechanism (May 2026). Presumed current as of mechanism introduction; cost-prohibitive to re-judge. Deferral auto-clears when the producer is re-run (Inputs chunk replaces legacy bare PNG).  *(at 2026-05-08T15:45:46+00:00)*
+
 ### `/Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/guileless_vs_scheming/gpt_responses_roles_b10/correlation_plot__rubric_v1.png`
 - **Was**: legacy
 - **Deferred by**: `*__rubric_v1.png` -- v1 rubric snapshot taken on 2026-05-09 immediately before the v2 rubric anonymization landed. Kept on-disk for cross-rubric comparison; not to be re-judged. The going-forward (non-snapshot) caches are being re-judged under v2 in a separate process.  *(at 2026-05-09T03:40:15+00:00)*
@@ -633,6 +716,10 @@ PNGs that would otherwise be ``stale`` but match an entry in ``deferred_rejudges
 - **Was**: legacy
 - **Deferred by**: `*__rubric_v1.png` -- v1 rubric snapshot taken on 2026-05-09 immediately before the v2 rubric anonymization landed. Kept on-disk for cross-rubric comparison; not to be re-judged. The going-forward (non-snapshot) caches are being re-judged under v2 in a separate process.  *(at 2026-05-09T03:40:15+00:00)*
 
+### `/Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/guileless_vs_scheming/gpt_responses_traits_b10/correlation_plot.png`
+- **Was**: stale
+- **Deferred by**: `*/correlation_plot.png` -- Legacy judge plot pre-dating Phase 6 provenance mechanism (May 2026). Presumed current as of mechanism introduction; cost-prohibitive to re-judge. Deferral auto-clears when the producer is re-run (Inputs chunk replaces legacy bare PNG).  *(at 2026-05-08T15:45:46+00:00)*
+
 ### `/Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/guileless_vs_scheming/gpt_responses_traits_b10/correlation_plot__rubric_v1.png`
 - **Was**: legacy
 - **Deferred by**: `*__rubric_v1.png` -- v1 rubric snapshot taken on 2026-05-09 immediately before the v2 rubric anonymization landed. Kept on-disk for cross-rubric comparison; not to be re-judged. The going-forward (non-snapshot) caches are being re-judged under v2 in a separate process.  *(at 2026-05-09T03:40:15+00:00)*
@@ -641,9 +728,17 @@ PNGs that would otherwise be ``stale`` but match an entry in ``deferred_rejudges
 - **Was**: legacy
 - **Deferred by**: `*/correlation_plot.png` -- Legacy judge plot pre-dating Phase 6 provenance mechanism (May 2026). Presumed current as of mechanism introduction; cost-prohibitive to re-judge. Deferral auto-clears when the producer is re-run (Inputs chunk replaces legacy bare PNG).  *(at 2026-05-08T15:45:46+00:00)*
 
+### `/Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/guileless_vs_scheming/haiku_responses_roles_b10_q9/correlation_plot.png`
+- **Was**: stale
+- **Deferred by**: `*/correlation_plot.png` -- Legacy judge plot pre-dating Phase 6 provenance mechanism (May 2026). Presumed current as of mechanism introduction; cost-prohibitive to re-judge. Deferral auto-clears when the producer is re-run (Inputs chunk replaces legacy bare PNG).  *(at 2026-05-08T15:45:46+00:00)*
+
 ### `/Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/guileless_vs_scheming/haiku_responses_roles_b10_q9/correlation_plot__rubric_v1.png`
 - **Was**: legacy
 - **Deferred by**: `*__rubric_v1.png` -- v1 rubric snapshot taken on 2026-05-09 immediately before the v2 rubric anonymization landed. Kept on-disk for cross-rubric comparison; not to be re-judged. The going-forward (non-snapshot) caches are being re-judged under v2 in a separate process.  *(at 2026-05-09T03:40:15+00:00)*
+
+### `/Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/guileless_vs_scheming/haiku_responses_traits_b10_q9/correlation_plot.png`
+- **Was**: stale
+- **Deferred by**: `*/correlation_plot.png` -- Legacy judge plot pre-dating Phase 6 provenance mechanism (May 2026). Presumed current as of mechanism introduction; cost-prohibitive to re-judge. Deferral auto-clears when the producer is re-run (Inputs chunk replaces legacy bare PNG).  *(at 2026-05-08T15:45:46+00:00)*
 
 ### `/Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/guileless_vs_scheming/haiku_responses_traits_b10_q9/correlation_plot__rubric_v1.png`
 - **Was**: legacy
@@ -681,6 +776,10 @@ PNGs that would otherwise be ``stale`` but match an entry in ``deferred_rejudges
 - **Was**: legacy
 - **Deferred by**: `*__rubric_v1.png` -- v1 rubric snapshot taken on 2026-05-09 immediately before the v2 rubric anonymization landed. Kept on-disk for cross-rubric comparison; not to be re-judged. The going-forward (non-snapshot) caches are being re-judged under v2 in a separate process.  *(at 2026-05-09T03:40:15+00:00)*
 
+### `/Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/harmless_vs_harmful/gpt_responses_roles_b10/correlation_plot.png`
+- **Was**: stale
+- **Deferred by**: `*/correlation_plot.png` -- Legacy judge plot pre-dating Phase 6 provenance mechanism (May 2026). Presumed current as of mechanism introduction; cost-prohibitive to re-judge. Deferral auto-clears when the producer is re-run (Inputs chunk replaces legacy bare PNG).  *(at 2026-05-08T15:45:46+00:00)*
+
 ### `/Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/harmless_vs_harmful/gpt_responses_roles_b10/correlation_plot__rubric_v1.png`
 - **Was**: legacy
 - **Deferred by**: `*__rubric_v1.png` -- v1 rubric snapshot taken on 2026-05-09 immediately before the v2 rubric anonymization landed. Kept on-disk for cross-rubric comparison; not to be re-judged. The going-forward (non-snapshot) caches are being re-judged under v2 in a separate process.  *(at 2026-05-09T03:40:15+00:00)*
@@ -693,6 +792,10 @@ PNGs that would otherwise be ``stale`` but match an entry in ``deferred_rejudges
 - **Was**: legacy
 - **Deferred by**: `*__rubric_v1.png` -- v1 rubric snapshot taken on 2026-05-09 immediately before the v2 rubric anonymization landed. Kept on-disk for cross-rubric comparison; not to be re-judged. The going-forward (non-snapshot) caches are being re-judged under v2 in a separate process.  *(at 2026-05-09T03:40:15+00:00)*
 
+### `/Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/harmless_vs_harmful/gpt_responses_traits_b10/correlation_plot.png`
+- **Was**: stale
+- **Deferred by**: `*/correlation_plot.png` -- Legacy judge plot pre-dating Phase 6 provenance mechanism (May 2026). Presumed current as of mechanism introduction; cost-prohibitive to re-judge. Deferral auto-clears when the producer is re-run (Inputs chunk replaces legacy bare PNG).  *(at 2026-05-08T15:45:46+00:00)*
+
 ### `/Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/harmless_vs_harmful/gpt_responses_traits_b10/correlation_plot__rubric_v1.png`
 - **Was**: legacy
 - **Deferred by**: `*__rubric_v1.png` -- v1 rubric snapshot taken on 2026-05-09 immediately before the v2 rubric anonymization landed. Kept on-disk for cross-rubric comparison; not to be re-judged. The going-forward (non-snapshot) caches are being re-judged under v2 in a separate process.  *(at 2026-05-09T03:40:15+00:00)*
@@ -701,9 +804,17 @@ PNGs that would otherwise be ``stale`` but match an entry in ``deferred_rejudges
 - **Was**: legacy
 - **Deferred by**: `*/correlation_plot.png` -- Legacy judge plot pre-dating Phase 6 provenance mechanism (May 2026). Presumed current as of mechanism introduction; cost-prohibitive to re-judge. Deferral auto-clears when the producer is re-run (Inputs chunk replaces legacy bare PNG).  *(at 2026-05-08T15:45:46+00:00)*
 
+### `/Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/harmless_vs_harmful/haiku_responses_roles_b10_q9/correlation_plot.png`
+- **Was**: stale
+- **Deferred by**: `*/correlation_plot.png` -- Legacy judge plot pre-dating Phase 6 provenance mechanism (May 2026). Presumed current as of mechanism introduction; cost-prohibitive to re-judge. Deferral auto-clears when the producer is re-run (Inputs chunk replaces legacy bare PNG).  *(at 2026-05-08T15:45:46+00:00)*
+
 ### `/Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/harmless_vs_harmful/haiku_responses_roles_b10_q9/correlation_plot__rubric_v1.png`
 - **Was**: legacy
 - **Deferred by**: `*__rubric_v1.png` -- v1 rubric snapshot taken on 2026-05-09 immediately before the v2 rubric anonymization landed. Kept on-disk for cross-rubric comparison; not to be re-judged. The going-forward (non-snapshot) caches are being re-judged under v2 in a separate process.  *(at 2026-05-09T03:40:15+00:00)*
+
+### `/Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/harmless_vs_harmful/haiku_responses_traits_b10_q9/correlation_plot.png`
+- **Was**: stale
+- **Deferred by**: `*/correlation_plot.png` -- Legacy judge plot pre-dating Phase 6 provenance mechanism (May 2026). Presumed current as of mechanism introduction; cost-prohibitive to re-judge. Deferral auto-clears when the producer is re-run (Inputs chunk replaces legacy bare PNG).  *(at 2026-05-08T15:45:46+00:00)*
 
 ### `/Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/harmless_vs_harmful/haiku_responses_traits_b10_q9/correlation_plot__rubric_v1.png`
 - **Was**: legacy
@@ -745,6 +856,10 @@ PNGs that would otherwise be ``stale`` but match an entry in ``deferred_rejudges
 - **Was**: legacy
 - **Deferred by**: `*__rubric_v1.png` -- v1 rubric snapshot taken on 2026-05-09 immediately before the v2 rubric anonymization landed. Kept on-disk for cross-rubric comparison; not to be re-judged. The going-forward (non-snapshot) caches are being re-judged under v2 in a separate process.  *(at 2026-05-09T03:40:15+00:00)*
 
+### `/Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/helpful_vs_unhelpful/gpt_responses_roles_b10/correlation_plot.png`
+- **Was**: stale
+- **Deferred by**: `*/correlation_plot.png` -- Legacy judge plot pre-dating Phase 6 provenance mechanism (May 2026). Presumed current as of mechanism introduction; cost-prohibitive to re-judge. Deferral auto-clears when the producer is re-run (Inputs chunk replaces legacy bare PNG).  *(at 2026-05-08T15:45:46+00:00)*
+
 ### `/Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/helpful_vs_unhelpful/gpt_responses_roles_b10/correlation_plot__rubric_v1.png`
 - **Was**: legacy
 - **Deferred by**: `*__rubric_v1.png` -- v1 rubric snapshot taken on 2026-05-09 immediately before the v2 rubric anonymization landed. Kept on-disk for cross-rubric comparison; not to be re-judged. The going-forward (non-snapshot) caches are being re-judged under v2 in a separate process.  *(at 2026-05-09T03:40:15+00:00)*
@@ -757,6 +872,10 @@ PNGs that would otherwise be ``stale`` but match an entry in ``deferred_rejudges
 - **Was**: legacy
 - **Deferred by**: `*__rubric_v1.png` -- v1 rubric snapshot taken on 2026-05-09 immediately before the v2 rubric anonymization landed. Kept on-disk for cross-rubric comparison; not to be re-judged. The going-forward (non-snapshot) caches are being re-judged under v2 in a separate process.  *(at 2026-05-09T03:40:15+00:00)*
 
+### `/Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/helpful_vs_unhelpful/gpt_responses_traits_b10/correlation_plot.png`
+- **Was**: stale
+- **Deferred by**: `*/correlation_plot.png` -- Legacy judge plot pre-dating Phase 6 provenance mechanism (May 2026). Presumed current as of mechanism introduction; cost-prohibitive to re-judge. Deferral auto-clears when the producer is re-run (Inputs chunk replaces legacy bare PNG).  *(at 2026-05-08T15:45:46+00:00)*
+
 ### `/Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/helpful_vs_unhelpful/gpt_responses_traits_b10/correlation_plot__rubric_v1.png`
 - **Was**: legacy
 - **Deferred by**: `*__rubric_v1.png` -- v1 rubric snapshot taken on 2026-05-09 immediately before the v2 rubric anonymization landed. Kept on-disk for cross-rubric comparison; not to be re-judged. The going-forward (non-snapshot) caches are being re-judged under v2 in a separate process.  *(at 2026-05-09T03:40:15+00:00)*
@@ -765,9 +884,17 @@ PNGs that would otherwise be ``stale`` but match an entry in ``deferred_rejudges
 - **Was**: legacy
 - **Deferred by**: `*/correlation_plot.png` -- Legacy judge plot pre-dating Phase 6 provenance mechanism (May 2026). Presumed current as of mechanism introduction; cost-prohibitive to re-judge. Deferral auto-clears when the producer is re-run (Inputs chunk replaces legacy bare PNG).  *(at 2026-05-08T15:45:46+00:00)*
 
+### `/Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/helpful_vs_unhelpful/haiku_responses_roles_b10_q9/correlation_plot.png`
+- **Was**: stale
+- **Deferred by**: `*/correlation_plot.png` -- Legacy judge plot pre-dating Phase 6 provenance mechanism (May 2026). Presumed current as of mechanism introduction; cost-prohibitive to re-judge. Deferral auto-clears when the producer is re-run (Inputs chunk replaces legacy bare PNG).  *(at 2026-05-08T15:45:46+00:00)*
+
 ### `/Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/helpful_vs_unhelpful/haiku_responses_roles_b10_q9/correlation_plot__rubric_v1.png`
 - **Was**: legacy
 - **Deferred by**: `*__rubric_v1.png` -- v1 rubric snapshot taken on 2026-05-09 immediately before the v2 rubric anonymization landed. Kept on-disk for cross-rubric comparison; not to be re-judged. The going-forward (non-snapshot) caches are being re-judged under v2 in a separate process.  *(at 2026-05-09T03:40:15+00:00)*
+
+### `/Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/helpful_vs_unhelpful/haiku_responses_traits_b10_q9/correlation_plot.png`
+- **Was**: stale
+- **Deferred by**: `*/correlation_plot.png` -- Legacy judge plot pre-dating Phase 6 provenance mechanism (May 2026). Presumed current as of mechanism introduction; cost-prohibitive to re-judge. Deferral auto-clears when the producer is re-run (Inputs chunk replaces legacy bare PNG).  *(at 2026-05-08T15:45:46+00:00)*
 
 ### `/Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/helpful_vs_unhelpful/haiku_responses_traits_b10_q9/correlation_plot__rubric_v1.png`
 - **Was**: legacy
@@ -805,6 +932,10 @@ PNGs that would otherwise be ``stale`` but match an entry in ``deferred_rejudges
 - **Was**: legacy
 - **Deferred by**: `*__rubric_v1.png` -- v1 rubric snapshot taken on 2026-05-09 immediately before the v2 rubric anonymization landed. Kept on-disk for cross-rubric comparison; not to be re-judged. The going-forward (non-snapshot) caches are being re-judged under v2 in a separate process.  *(at 2026-05-09T03:40:15+00:00)*
 
+### `/Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/honest_vs_dishonest/gpt_responses_roles_b10/correlation_plot.png`
+- **Was**: stale
+- **Deferred by**: `*/correlation_plot.png` -- Legacy judge plot pre-dating Phase 6 provenance mechanism (May 2026). Presumed current as of mechanism introduction; cost-prohibitive to re-judge. Deferral auto-clears when the producer is re-run (Inputs chunk replaces legacy bare PNG).  *(at 2026-05-08T15:45:46+00:00)*
+
 ### `/Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/honest_vs_dishonest/gpt_responses_roles_b10/correlation_plot__rubric_v1.png`
 - **Was**: legacy
 - **Deferred by**: `*__rubric_v1.png` -- v1 rubric snapshot taken on 2026-05-09 immediately before the v2 rubric anonymization landed. Kept on-disk for cross-rubric comparison; not to be re-judged. The going-forward (non-snapshot) caches are being re-judged under v2 in a separate process.  *(at 2026-05-09T03:40:15+00:00)*
@@ -817,6 +948,10 @@ PNGs that would otherwise be ``stale`` but match an entry in ``deferred_rejudges
 - **Was**: legacy
 - **Deferred by**: `*__rubric_v1.png` -- v1 rubric snapshot taken on 2026-05-09 immediately before the v2 rubric anonymization landed. Kept on-disk for cross-rubric comparison; not to be re-judged. The going-forward (non-snapshot) caches are being re-judged under v2 in a separate process.  *(at 2026-05-09T03:40:15+00:00)*
 
+### `/Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/honest_vs_dishonest/gpt_responses_traits_b10/correlation_plot.png`
+- **Was**: stale
+- **Deferred by**: `*/correlation_plot.png` -- Legacy judge plot pre-dating Phase 6 provenance mechanism (May 2026). Presumed current as of mechanism introduction; cost-prohibitive to re-judge. Deferral auto-clears when the producer is re-run (Inputs chunk replaces legacy bare PNG).  *(at 2026-05-08T15:45:46+00:00)*
+
 ### `/Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/honest_vs_dishonest/gpt_responses_traits_b10/correlation_plot__rubric_v1.png`
 - **Was**: legacy
 - **Deferred by**: `*__rubric_v1.png` -- v1 rubric snapshot taken on 2026-05-09 immediately before the v2 rubric anonymization landed. Kept on-disk for cross-rubric comparison; not to be re-judged. The going-forward (non-snapshot) caches are being re-judged under v2 in a separate process.  *(at 2026-05-09T03:40:15+00:00)*
@@ -825,9 +960,17 @@ PNGs that would otherwise be ``stale`` but match an entry in ``deferred_rejudges
 - **Was**: legacy
 - **Deferred by**: `*/correlation_plot.png` -- Legacy judge plot pre-dating Phase 6 provenance mechanism (May 2026). Presumed current as of mechanism introduction; cost-prohibitive to re-judge. Deferral auto-clears when the producer is re-run (Inputs chunk replaces legacy bare PNG).  *(at 2026-05-08T15:45:46+00:00)*
 
+### `/Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/honest_vs_dishonest/haiku_responses_roles_b10_q9/correlation_plot.png`
+- **Was**: stale
+- **Deferred by**: `*/correlation_plot.png` -- Legacy judge plot pre-dating Phase 6 provenance mechanism (May 2026). Presumed current as of mechanism introduction; cost-prohibitive to re-judge. Deferral auto-clears when the producer is re-run (Inputs chunk replaces legacy bare PNG).  *(at 2026-05-08T15:45:46+00:00)*
+
 ### `/Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/honest_vs_dishonest/haiku_responses_roles_b10_q9/correlation_plot__rubric_v1.png`
 - **Was**: legacy
 - **Deferred by**: `*__rubric_v1.png` -- v1 rubric snapshot taken on 2026-05-09 immediately before the v2 rubric anonymization landed. Kept on-disk for cross-rubric comparison; not to be re-judged. The going-forward (non-snapshot) caches are being re-judged under v2 in a separate process.  *(at 2026-05-09T03:40:15+00:00)*
+
+### `/Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/honest_vs_dishonest/haiku_responses_traits_b10_q9/correlation_plot.png`
+- **Was**: stale
+- **Deferred by**: `*/correlation_plot.png` -- Legacy judge plot pre-dating Phase 6 provenance mechanism (May 2026). Presumed current as of mechanism introduction; cost-prohibitive to re-judge. Deferral auto-clears when the producer is re-run (Inputs chunk replaces legacy bare PNG).  *(at 2026-05-08T15:45:46+00:00)*
 
 ### `/Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/honest_vs_dishonest/haiku_responses_traits_b10_q9/correlation_plot__rubric_v1.png`
 - **Was**: legacy
@@ -877,6 +1020,10 @@ PNGs that would otherwise be ``stale`` but match an entry in ``deferred_rejudges
 - **Was**: legacy
 - **Deferred by**: `*__rubric_v1.png` -- v1 rubric snapshot taken on 2026-05-09 immediately before the v2 rubric anonymization landed. Kept on-disk for cross-rubric comparison; not to be re-judged. The going-forward (non-snapshot) caches are being re-judged under v2 in a separate process.  *(at 2026-05-09T03:40:15+00:00)*
 
+### `/Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/improvisational_vs_methodical/gpt_responses_roles_b10/correlation_plot.png`
+- **Was**: stale
+- **Deferred by**: `*/correlation_plot.png` -- Legacy judge plot pre-dating Phase 6 provenance mechanism (May 2026). Presumed current as of mechanism introduction; cost-prohibitive to re-judge. Deferral auto-clears when the producer is re-run (Inputs chunk replaces legacy bare PNG).  *(at 2026-05-08T15:45:46+00:00)*
+
 ### `/Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/improvisational_vs_methodical/gpt_responses_roles_b10/correlation_plot__rubric_v1.png`
 - **Was**: legacy
 - **Deferred by**: `*__rubric_v1.png` -- v1 rubric snapshot taken on 2026-05-09 immediately before the v2 rubric anonymization landed. Kept on-disk for cross-rubric comparison; not to be re-judged. The going-forward (non-snapshot) caches are being re-judged under v2 in a separate process.  *(at 2026-05-09T03:40:15+00:00)*
@@ -904,6 +1051,10 @@ PNGs that would otherwise be ``stale`` but match an entry in ``deferred_rejudges
 ### `/Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/improvisational_vs_methodical/gpt_responses_traits/correlation_plot__rubric_v1.png`
 - **Was**: legacy
 - **Deferred by**: `*__rubric_v1.png` -- v1 rubric snapshot taken on 2026-05-09 immediately before the v2 rubric anonymization landed. Kept on-disk for cross-rubric comparison; not to be re-judged. The going-forward (non-snapshot) caches are being re-judged under v2 in a separate process.  *(at 2026-05-09T03:40:15+00:00)*
+
+### `/Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/improvisational_vs_methodical/gpt_responses_traits_b10/correlation_plot.png`
+- **Was**: stale
+- **Deferred by**: `*/correlation_plot.png` -- Legacy judge plot pre-dating Phase 6 provenance mechanism (May 2026). Presumed current as of mechanism introduction; cost-prohibitive to re-judge. Deferral auto-clears when the producer is re-run (Inputs chunk replaces legacy bare PNG).  *(at 2026-05-08T15:45:46+00:00)*
 
 ### `/Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/improvisational_vs_methodical/gpt_responses_traits_b10/correlation_plot__rubric_v1.png`
 - **Was**: legacy
@@ -937,6 +1088,10 @@ PNGs that would otherwise be ``stale`` but match an entry in ``deferred_rejudges
 - **Was**: legacy
 - **Deferred by**: `*__rubric_v1.png` -- v1 rubric snapshot taken on 2026-05-09 immediately before the v2 rubric anonymization landed. Kept on-disk for cross-rubric comparison; not to be re-judged. The going-forward (non-snapshot) caches are being re-judged under v2 in a separate process.  *(at 2026-05-09T03:40:15+00:00)*
 
+### `/Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/improvisational_vs_methodical/haiku_responses_roles_b10_q9/correlation_plot.png`
+- **Was**: stale
+- **Deferred by**: `*/correlation_plot.png` -- Legacy judge plot pre-dating Phase 6 provenance mechanism (May 2026). Presumed current as of mechanism introduction; cost-prohibitive to re-judge. Deferral auto-clears when the producer is re-run (Inputs chunk replaces legacy bare PNG).  *(at 2026-05-08T15:45:46+00:00)*
+
 ### `/Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/improvisational_vs_methodical/haiku_responses_roles_b10_q9/correlation_plot__rubric_v1.png`
 - **Was**: legacy
 - **Deferred by**: `*__rubric_v1.png` -- v1 rubric snapshot taken on 2026-05-09 immediately before the v2 rubric anonymization landed. Kept on-disk for cross-rubric comparison; not to be re-judged. The going-forward (non-snapshot) caches are being re-judged under v2 in a separate process.  *(at 2026-05-09T03:40:15+00:00)*
@@ -948,6 +1103,10 @@ PNGs that would otherwise be ``stale`` but match an entry in ``deferred_rejudges
 ### `/Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/improvisational_vs_methodical/haiku_responses_traits_b10/correlation_plot__rubric_v1.png`
 - **Was**: legacy
 - **Deferred by**: `*__rubric_v1.png` -- v1 rubric snapshot taken on 2026-05-09 immediately before the v2 rubric anonymization landed. Kept on-disk for cross-rubric comparison; not to be re-judged. The going-forward (non-snapshot) caches are being re-judged under v2 in a separate process.  *(at 2026-05-09T03:40:15+00:00)*
+
+### `/Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/improvisational_vs_methodical/haiku_responses_traits_b10_q9/correlation_plot.png`
+- **Was**: stale
+- **Deferred by**: `*/correlation_plot.png` -- Legacy judge plot pre-dating Phase 6 provenance mechanism (May 2026). Presumed current as of mechanism introduction; cost-prohibitive to re-judge. Deferral auto-clears when the producer is re-run (Inputs chunk replaces legacy bare PNG).  *(at 2026-05-08T15:45:46+00:00)*
 
 ### `/Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/improvisational_vs_methodical/haiku_responses_traits_b10_q9/correlation_plot__rubric_v1.png`
 - **Was**: legacy
@@ -1141,6 +1300,10 @@ PNGs that would otherwise be ``stale`` but match an entry in ``deferred_rejudges
 - **Was**: legacy
 - **Deferred by**: `*__rubric_v1.png` -- v1 rubric snapshot taken on 2026-05-09 immediately before the v2 rubric anonymization landed. Kept on-disk for cross-rubric comparison; not to be re-judged. The going-forward (non-snapshot) caches are being re-judged under v2 in a separate process.  *(at 2026-05-09T03:40:15+00:00)*
 
+### `/Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/progressive_vs_conservative/gpt_responses_roles_b10/correlation_plot.png`
+- **Was**: stale
+- **Deferred by**: `*/correlation_plot.png` -- Legacy judge plot pre-dating Phase 6 provenance mechanism (May 2026). Presumed current as of mechanism introduction; cost-prohibitive to re-judge. Deferral auto-clears when the producer is re-run (Inputs chunk replaces legacy bare PNG).  *(at 2026-05-08T15:45:46+00:00)*
+
 ### `/Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/progressive_vs_conservative/gpt_responses_roles_b10/correlation_plot__rubric_v1.png`
 - **Was**: legacy
 - **Deferred by**: `*__rubric_v1.png` -- v1 rubric snapshot taken on 2026-05-09 immediately before the v2 rubric anonymization landed. Kept on-disk for cross-rubric comparison; not to be re-judged. The going-forward (non-snapshot) caches are being re-judged under v2 in a separate process.  *(at 2026-05-09T03:40:15+00:00)*
@@ -1168,6 +1331,10 @@ PNGs that would otherwise be ``stale`` but match an entry in ``deferred_rejudges
 ### `/Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/progressive_vs_conservative/gpt_responses_traits/correlation_plot__rubric_v1.png`
 - **Was**: legacy
 - **Deferred by**: `*__rubric_v1.png` -- v1 rubric snapshot taken on 2026-05-09 immediately before the v2 rubric anonymization landed. Kept on-disk for cross-rubric comparison; not to be re-judged. The going-forward (non-snapshot) caches are being re-judged under v2 in a separate process.  *(at 2026-05-09T03:40:15+00:00)*
+
+### `/Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/progressive_vs_conservative/gpt_responses_traits_b10/correlation_plot.png`
+- **Was**: stale
+- **Deferred by**: `*/correlation_plot.png` -- Legacy judge plot pre-dating Phase 6 provenance mechanism (May 2026). Presumed current as of mechanism introduction; cost-prohibitive to re-judge. Deferral auto-clears when the producer is re-run (Inputs chunk replaces legacy bare PNG).  *(at 2026-05-08T15:45:46+00:00)*
 
 ### `/Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/progressive_vs_conservative/gpt_responses_traits_b10/correlation_plot__rubric_v1.png`
 - **Was**: legacy
@@ -1201,6 +1368,10 @@ PNGs that would otherwise be ``stale`` but match an entry in ``deferred_rejudges
 - **Was**: legacy
 - **Deferred by**: `*__rubric_v1.png` -- v1 rubric snapshot taken on 2026-05-09 immediately before the v2 rubric anonymization landed. Kept on-disk for cross-rubric comparison; not to be re-judged. The going-forward (non-snapshot) caches are being re-judged under v2 in a separate process.  *(at 2026-05-09T03:40:15+00:00)*
 
+### `/Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/progressive_vs_conservative/haiku_responses_roles_b10_q9/correlation_plot.png`
+- **Was**: stale
+- **Deferred by**: `*/correlation_plot.png` -- Legacy judge plot pre-dating Phase 6 provenance mechanism (May 2026). Presumed current as of mechanism introduction; cost-prohibitive to re-judge. Deferral auto-clears when the producer is re-run (Inputs chunk replaces legacy bare PNG).  *(at 2026-05-08T15:45:46+00:00)*
+
 ### `/Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/progressive_vs_conservative/haiku_responses_roles_b10_q9/correlation_plot__rubric_v1.png`
 - **Was**: legacy
 - **Deferred by**: `*__rubric_v1.png` -- v1 rubric snapshot taken on 2026-05-09 immediately before the v2 rubric anonymization landed. Kept on-disk for cross-rubric comparison; not to be re-judged. The going-forward (non-snapshot) caches are being re-judged under v2 in a separate process.  *(at 2026-05-09T03:40:15+00:00)*
@@ -1212,6 +1383,10 @@ PNGs that would otherwise be ``stale`` but match an entry in ``deferred_rejudges
 ### `/Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/progressive_vs_conservative/haiku_responses_traits_b10/correlation_plot__rubric_v1.png`
 - **Was**: legacy
 - **Deferred by**: `*__rubric_v1.png` -- v1 rubric snapshot taken on 2026-05-09 immediately before the v2 rubric anonymization landed. Kept on-disk for cross-rubric comparison; not to be re-judged. The going-forward (non-snapshot) caches are being re-judged under v2 in a separate process.  *(at 2026-05-09T03:40:15+00:00)*
+
+### `/Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/progressive_vs_conservative/haiku_responses_traits_b10_q9/correlation_plot.png`
+- **Was**: stale
+- **Deferred by**: `*/correlation_plot.png` -- Legacy judge plot pre-dating Phase 6 provenance mechanism (May 2026). Presumed current as of mechanism introduction; cost-prohibitive to re-judge. Deferral auto-clears when the producer is re-run (Inputs chunk replaces legacy bare PNG).  *(at 2026-05-08T15:45:46+00:00)*
 
 ### `/Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/progressive_vs_conservative/haiku_responses_traits_b10_q9/correlation_plot__rubric_v1.png`
 - **Was**: legacy
@@ -1289,6 +1464,10 @@ PNGs that would otherwise be ``stale`` but match an entry in ``deferred_rejudges
 - **Was**: legacy
 - **Deferred by**: `*__rubric_v1.png` -- v1 rubric snapshot taken on 2026-05-09 immediately before the v2 rubric anonymization landed. Kept on-disk for cross-rubric comparison; not to be re-judged. The going-forward (non-snapshot) caches are being re-judged under v2 in a separate process.  *(at 2026-05-09T03:40:15+00:00)*
 
+### `/Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/relativist_vs_absolutist/gpt_responses_roles_b10/correlation_plot.png`
+- **Was**: stale
+- **Deferred by**: `*/correlation_plot.png` -- Legacy judge plot pre-dating Phase 6 provenance mechanism (May 2026). Presumed current as of mechanism introduction; cost-prohibitive to re-judge. Deferral auto-clears when the producer is re-run (Inputs chunk replaces legacy bare PNG).  *(at 2026-05-08T15:45:46+00:00)*
+
 ### `/Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/relativist_vs_absolutist/gpt_responses_roles_b10/correlation_plot__rubric_v1.png`
 - **Was**: legacy
 - **Deferred by**: `*__rubric_v1.png` -- v1 rubric snapshot taken on 2026-05-09 immediately before the v2 rubric anonymization landed. Kept on-disk for cross-rubric comparison; not to be re-judged. The going-forward (non-snapshot) caches are being re-judged under v2 in a separate process.  *(at 2026-05-09T03:40:15+00:00)*
@@ -1301,6 +1480,10 @@ PNGs that would otherwise be ``stale`` but match an entry in ``deferred_rejudges
 - **Was**: legacy
 - **Deferred by**: `*__rubric_v1.png` -- v1 rubric snapshot taken on 2026-05-09 immediately before the v2 rubric anonymization landed. Kept on-disk for cross-rubric comparison; not to be re-judged. The going-forward (non-snapshot) caches are being re-judged under v2 in a separate process.  *(at 2026-05-09T03:40:15+00:00)*
 
+### `/Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/relativist_vs_absolutist/gpt_responses_traits_b10/correlation_plot.png`
+- **Was**: stale
+- **Deferred by**: `*/correlation_plot.png` -- Legacy judge plot pre-dating Phase 6 provenance mechanism (May 2026). Presumed current as of mechanism introduction; cost-prohibitive to re-judge. Deferral auto-clears when the producer is re-run (Inputs chunk replaces legacy bare PNG).  *(at 2026-05-08T15:45:46+00:00)*
+
 ### `/Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/relativist_vs_absolutist/gpt_responses_traits_b10/correlation_plot__rubric_v1.png`
 - **Was**: legacy
 - **Deferred by**: `*__rubric_v1.png` -- v1 rubric snapshot taken on 2026-05-09 immediately before the v2 rubric anonymization landed. Kept on-disk for cross-rubric comparison; not to be re-judged. The going-forward (non-snapshot) caches are being re-judged under v2 in a separate process.  *(at 2026-05-09T03:40:15+00:00)*
@@ -1309,9 +1492,17 @@ PNGs that would otherwise be ``stale`` but match an entry in ``deferred_rejudges
 - **Was**: legacy
 - **Deferred by**: `*/correlation_plot.png` -- Legacy judge plot pre-dating Phase 6 provenance mechanism (May 2026). Presumed current as of mechanism introduction; cost-prohibitive to re-judge. Deferral auto-clears when the producer is re-run (Inputs chunk replaces legacy bare PNG).  *(at 2026-05-08T15:45:46+00:00)*
 
+### `/Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/relativist_vs_absolutist/haiku_responses_roles_b10_q9/correlation_plot.png`
+- **Was**: stale
+- **Deferred by**: `*/correlation_plot.png` -- Legacy judge plot pre-dating Phase 6 provenance mechanism (May 2026). Presumed current as of mechanism introduction; cost-prohibitive to re-judge. Deferral auto-clears when the producer is re-run (Inputs chunk replaces legacy bare PNG).  *(at 2026-05-08T15:45:46+00:00)*
+
 ### `/Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/relativist_vs_absolutist/haiku_responses_roles_b10_q9/correlation_plot__rubric_v1.png`
 - **Was**: legacy
 - **Deferred by**: `*__rubric_v1.png` -- v1 rubric snapshot taken on 2026-05-09 immediately before the v2 rubric anonymization landed. Kept on-disk for cross-rubric comparison; not to be re-judged. The going-forward (non-snapshot) caches are being re-judged under v2 in a separate process.  *(at 2026-05-09T03:40:15+00:00)*
+
+### `/Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/relativist_vs_absolutist/haiku_responses_traits_b10_q9/correlation_plot.png`
+- **Was**: stale
+- **Deferred by**: `*/correlation_plot.png` -- Legacy judge plot pre-dating Phase 6 provenance mechanism (May 2026). Presumed current as of mechanism introduction; cost-prohibitive to re-judge. Deferral auto-clears when the producer is re-run (Inputs chunk replaces legacy bare PNG).  *(at 2026-05-08T15:45:46+00:00)*
 
 ### `/Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/relativist_vs_absolutist/haiku_responses_traits_b10_q9/correlation_plot__rubric_v1.png`
 - **Was**: legacy
@@ -1336,6 +1527,10 @@ PNGs that would otherwise be ``stale`` but match an entry in ``deferred_rejudges
 ### `/Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/relativist_vs_absolutist/sonnet_responses_traits_b10_q9/correlation_plot__rubric_v1.png`
 - **Was**: legacy
 - **Deferred by**: `*__rubric_v1.png` -- v1 rubric snapshot taken on 2026-05-09 immediately before the v2 rubric anonymization landed. Kept on-disk for cross-rubric comparison; not to be re-judged. The going-forward (non-snapshot) caches are being re-judged under v2 in a separate process.  *(at 2026-05-09T03:40:15+00:00)*
+
+### `/Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/rho_by_layer.png`
+- **Was**: stale
+- **Deferred by**: `roger/axis_judge_experiments/rho_*.png` -- Pre-Phase-6 one-off PNG output. No current producer (script lives in /tmp/_*.py or has been removed/superseded by a migrated canonical producer that writes to a different output dir). Kept on-disk for archival reference; remove the file (and this entry) when truly superseded.  *(at 2026-05-09T03:49:53+00:00)*
 
 ### `/Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/rho_by_mode_per_axis.png`
 - **Was**: legacy
@@ -1376,6 +1571,30 @@ PNGs that would otherwise be ``stale`` but match an entry in ``deferred_rejudges
 
 ### `/Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/rho_vs_pc_truncation.png`
 - **Was**: legacy
+- **Deferred by**: `roger/axis_judge_experiments/rho_*.png` -- Pre-Phase-6 one-off PNG output. No current producer (script lives in /tmp/_*.py or has been removed/superseded by a migrated canonical producer that writes to a different output dir). Kept on-disk for archival reference; remove the file (and this entry) when truly superseded.  *(at 2026-05-09T03:49:53+00:00)*
+
+### `/Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/rho_vs_whitening_K_di_slot3.png`
+- **Was**: stale
+- **Deferred by**: `roger/axis_judge_experiments/rho_*.png` -- Pre-Phase-6 one-off PNG output. No current producer (script lives in /tmp/_*.py or has been removed/superseded by a migrated canonical producer that writes to a different output dir). Kept on-disk for archival reference; remove the file (and this entry) when truly superseded.  *(at 2026-05-09T03:49:53+00:00)*
+
+### `/Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/rho_vs_whitening_K_di_slot6.png`
+- **Was**: stale
+- **Deferred by**: `roger/axis_judge_experiments/rho_*.png` -- Pre-Phase-6 one-off PNG output. No current producer (script lives in /tmp/_*.py or has been removed/superseded by a migrated canonical producer that writes to a different output dir). Kept on-disk for archival reference; remove the file (and this entry) when truly superseded.  *(at 2026-05-09T03:49:53+00:00)*
+
+### `/Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/rho_vs_whitening_K_di_slot7.png`
+- **Was**: stale
+- **Deferred by**: `roger/axis_judge_experiments/rho_*.png` -- Pre-Phase-6 one-off PNG output. No current producer (script lives in /tmp/_*.py or has been removed/superseded by a migrated canonical producer that writes to a different output dir). Kept on-disk for archival reference; remove the file (and this entry) when truly superseded.  *(at 2026-05-09T03:49:53+00:00)*
+
+### `/Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/rho_vs_whitening_K_responses_slot3.png`
+- **Was**: stale
+- **Deferred by**: `roger/axis_judge_experiments/rho_*.png` -- Pre-Phase-6 one-off PNG output. No current producer (script lives in /tmp/_*.py or has been removed/superseded by a migrated canonical producer that writes to a different output dir). Kept on-disk for archival reference; remove the file (and this entry) when truly superseded.  *(at 2026-05-09T03:49:53+00:00)*
+
+### `/Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/rho_vs_whitening_K_responses_slot6.png`
+- **Was**: stale
+- **Deferred by**: `roger/axis_judge_experiments/rho_*.png` -- Pre-Phase-6 one-off PNG output. No current producer (script lives in /tmp/_*.py or has been removed/superseded by a migrated canonical producer that writes to a different output dir). Kept on-disk for archival reference; remove the file (and this entry) when truly superseded.  *(at 2026-05-09T03:49:53+00:00)*
+
+### `/Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/rho_vs_whitening_K_responses_slot7.png`
+- **Was**: stale
 - **Deferred by**: `roger/axis_judge_experiments/rho_*.png` -- Pre-Phase-6 one-off PNG output. No current producer (script lives in /tmp/_*.py or has been removed/superseded by a migrated canonical producer that writes to a different output dir). Kept on-disk for archival reference; remove the file (and this entry) when truly superseded.  *(at 2026-05-09T03:49:53+00:00)*
 
 ### `/Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/scree_ca_and_pca.png`
@@ -1426,6 +1645,10 @@ PNGs that would otherwise be ``stale`` but match an entry in ``deferred_rejudges
 - **Was**: legacy
 - **Deferred by**: `*__rubric_v1.png` -- v1 rubric snapshot taken on 2026-05-09 immediately before the v2 rubric anonymization landed. Kept on-disk for cross-rubric comparison; not to be re-judged. The going-forward (non-snapshot) caches are being re-judged under v2 in a separate process.  *(at 2026-05-09T03:40:15+00:00)*
 
+### `/Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/systems_thinker_vs_analytical/gpt_responses_roles_b10/correlation_plot.png`
+- **Was**: stale
+- **Deferred by**: `*/correlation_plot.png` -- Legacy judge plot pre-dating Phase 6 provenance mechanism (May 2026). Presumed current as of mechanism introduction; cost-prohibitive to re-judge. Deferral auto-clears when the producer is re-run (Inputs chunk replaces legacy bare PNG).  *(at 2026-05-08T15:45:46+00:00)*
+
 ### `/Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/systems_thinker_vs_analytical/gpt_responses_roles_b10/correlation_plot__rubric_v1.png`
 - **Was**: legacy
 - **Deferred by**: `*__rubric_v1.png` -- v1 rubric snapshot taken on 2026-05-09 immediately before the v2 rubric anonymization landed. Kept on-disk for cross-rubric comparison; not to be re-judged. The going-forward (non-snapshot) caches are being re-judged under v2 in a separate process.  *(at 2026-05-09T03:40:15+00:00)*
@@ -1438,6 +1661,10 @@ PNGs that would otherwise be ``stale`` but match an entry in ``deferred_rejudges
 - **Was**: legacy
 - **Deferred by**: `*__rubric_v1.png` -- v1 rubric snapshot taken on 2026-05-09 immediately before the v2 rubric anonymization landed. Kept on-disk for cross-rubric comparison; not to be re-judged. The going-forward (non-snapshot) caches are being re-judged under v2 in a separate process.  *(at 2026-05-09T03:40:15+00:00)*
 
+### `/Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/systems_thinker_vs_analytical/gpt_responses_traits_b10/correlation_plot.png`
+- **Was**: stale
+- **Deferred by**: `*/correlation_plot.png` -- Legacy judge plot pre-dating Phase 6 provenance mechanism (May 2026). Presumed current as of mechanism introduction; cost-prohibitive to re-judge. Deferral auto-clears when the producer is re-run (Inputs chunk replaces legacy bare PNG).  *(at 2026-05-08T15:45:46+00:00)*
+
 ### `/Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/systems_thinker_vs_analytical/gpt_responses_traits_b10/correlation_plot__rubric_v1.png`
 - **Was**: legacy
 - **Deferred by**: `*__rubric_v1.png` -- v1 rubric snapshot taken on 2026-05-09 immediately before the v2 rubric anonymization landed. Kept on-disk for cross-rubric comparison; not to be re-judged. The going-forward (non-snapshot) caches are being re-judged under v2 in a separate process.  *(at 2026-05-09T03:40:15+00:00)*
@@ -1446,9 +1673,17 @@ PNGs that would otherwise be ``stale`` but match an entry in ``deferred_rejudges
 - **Was**: legacy
 - **Deferred by**: `*/correlation_plot.png` -- Legacy judge plot pre-dating Phase 6 provenance mechanism (May 2026). Presumed current as of mechanism introduction; cost-prohibitive to re-judge. Deferral auto-clears when the producer is re-run (Inputs chunk replaces legacy bare PNG).  *(at 2026-05-08T15:45:46+00:00)*
 
+### `/Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/systems_thinker_vs_analytical/haiku_responses_roles_b10_q9/correlation_plot.png`
+- **Was**: stale
+- **Deferred by**: `*/correlation_plot.png` -- Legacy judge plot pre-dating Phase 6 provenance mechanism (May 2026). Presumed current as of mechanism introduction; cost-prohibitive to re-judge. Deferral auto-clears when the producer is re-run (Inputs chunk replaces legacy bare PNG).  *(at 2026-05-08T15:45:46+00:00)*
+
 ### `/Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/systems_thinker_vs_analytical/haiku_responses_roles_b10_q9/correlation_plot__rubric_v1.png`
 - **Was**: legacy
 - **Deferred by**: `*__rubric_v1.png` -- v1 rubric snapshot taken on 2026-05-09 immediately before the v2 rubric anonymization landed. Kept on-disk for cross-rubric comparison; not to be re-judged. The going-forward (non-snapshot) caches are being re-judged under v2 in a separate process.  *(at 2026-05-09T03:40:15+00:00)*
+
+### `/Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/systems_thinker_vs_analytical/haiku_responses_traits_b10_q9/correlation_plot.png`
+- **Was**: stale
+- **Deferred by**: `*/correlation_plot.png` -- Legacy judge plot pre-dating Phase 6 provenance mechanism (May 2026). Presumed current as of mechanism introduction; cost-prohibitive to re-judge. Deferral auto-clears when the producer is re-run (Inputs chunk replaces legacy bare PNG).  *(at 2026-05-08T15:45:46+00:00)*
 
 ### `/Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/systems_thinker_vs_analytical/haiku_responses_traits_b10_q9/correlation_plot__rubric_v1.png`
 - **Was**: legacy
@@ -1510,6 +1745,10 @@ PNGs that would otherwise be ``stale`` but match an entry in ``deferred_rejudges
 - **Was**: legacy
 - **Deferred by**: `*__rubric_v1.png` -- v1 rubric snapshot taken on 2026-05-09 immediately before the v2 rubric anonymization landed. Kept on-disk for cross-rubric comparison; not to be re-judged. The going-forward (non-snapshot) caches are being re-judged under v2 in a separate process.  *(at 2026-05-09T03:40:15+00:00)*
 
+### `/Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/truthful_vs_deceitful/gpt_responses_roles_b10/correlation_plot.png`
+- **Was**: stale
+- **Deferred by**: `*/correlation_plot.png` -- Legacy judge plot pre-dating Phase 6 provenance mechanism (May 2026). Presumed current as of mechanism introduction; cost-prohibitive to re-judge. Deferral auto-clears when the producer is re-run (Inputs chunk replaces legacy bare PNG).  *(at 2026-05-08T15:45:46+00:00)*
+
 ### `/Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/truthful_vs_deceitful/gpt_responses_roles_b10/correlation_plot__rubric_v1.png`
 - **Was**: legacy
 - **Deferred by**: `*__rubric_v1.png` -- v1 rubric snapshot taken on 2026-05-09 immediately before the v2 rubric anonymization landed. Kept on-disk for cross-rubric comparison; not to be re-judged. The going-forward (non-snapshot) caches are being re-judged under v2 in a separate process.  *(at 2026-05-09T03:40:15+00:00)*
@@ -1537,6 +1776,10 @@ PNGs that would otherwise be ``stale`` but match an entry in ``deferred_rejudges
 ### `/Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/truthful_vs_deceitful/gpt_responses_traits/correlation_plot__rubric_v1.png`
 - **Was**: legacy
 - **Deferred by**: `*__rubric_v1.png` -- v1 rubric snapshot taken on 2026-05-09 immediately before the v2 rubric anonymization landed. Kept on-disk for cross-rubric comparison; not to be re-judged. The going-forward (non-snapshot) caches are being re-judged under v2 in a separate process.  *(at 2026-05-09T03:40:15+00:00)*
+
+### `/Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/truthful_vs_deceitful/gpt_responses_traits_b10/correlation_plot.png`
+- **Was**: stale
+- **Deferred by**: `*/correlation_plot.png` -- Legacy judge plot pre-dating Phase 6 provenance mechanism (May 2026). Presumed current as of mechanism introduction; cost-prohibitive to re-judge. Deferral auto-clears when the producer is re-run (Inputs chunk replaces legacy bare PNG).  *(at 2026-05-08T15:45:46+00:00)*
 
 ### `/Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/truthful_vs_deceitful/gpt_responses_traits_b10/correlation_plot__rubric_v1.png`
 - **Was**: legacy
@@ -1570,6 +1813,10 @@ PNGs that would otherwise be ``stale`` but match an entry in ``deferred_rejudges
 - **Was**: legacy
 - **Deferred by**: `*__rubric_v1.png` -- v1 rubric snapshot taken on 2026-05-09 immediately before the v2 rubric anonymization landed. Kept on-disk for cross-rubric comparison; not to be re-judged. The going-forward (non-snapshot) caches are being re-judged under v2 in a separate process.  *(at 2026-05-09T03:40:15+00:00)*
 
+### `/Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/truthful_vs_deceitful/haiku_responses_roles_b10_q9/correlation_plot.png`
+- **Was**: stale
+- **Deferred by**: `*/correlation_plot.png` -- Legacy judge plot pre-dating Phase 6 provenance mechanism (May 2026). Presumed current as of mechanism introduction; cost-prohibitive to re-judge. Deferral auto-clears when the producer is re-run (Inputs chunk replaces legacy bare PNG).  *(at 2026-05-08T15:45:46+00:00)*
+
 ### `/Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/truthful_vs_deceitful/haiku_responses_roles_b10_q9/correlation_plot__rubric_v1.png`
 - **Was**: legacy
 - **Deferred by**: `*__rubric_v1.png` -- v1 rubric snapshot taken on 2026-05-09 immediately before the v2 rubric anonymization landed. Kept on-disk for cross-rubric comparison; not to be re-judged. The going-forward (non-snapshot) caches are being re-judged under v2 in a separate process.  *(at 2026-05-09T03:40:15+00:00)*
@@ -1581,6 +1828,10 @@ PNGs that would otherwise be ``stale`` but match an entry in ``deferred_rejudges
 ### `/Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/truthful_vs_deceitful/haiku_responses_traits_b10/correlation_plot__rubric_v1.png`
 - **Was**: legacy
 - **Deferred by**: `*__rubric_v1.png` -- v1 rubric snapshot taken on 2026-05-09 immediately before the v2 rubric anonymization landed. Kept on-disk for cross-rubric comparison; not to be re-judged. The going-forward (non-snapshot) caches are being re-judged under v2 in a separate process.  *(at 2026-05-09T03:40:15+00:00)*
+
+### `/Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/truthful_vs_deceitful/haiku_responses_traits_b10_q9/correlation_plot.png`
+- **Was**: stale
+- **Deferred by**: `*/correlation_plot.png` -- Legacy judge plot pre-dating Phase 6 provenance mechanism (May 2026). Presumed current as of mechanism introduction; cost-prohibitive to re-judge. Deferral auto-clears when the producer is re-run (Inputs chunk replaces legacy bare PNG).  *(at 2026-05-08T15:45:46+00:00)*
 
 ### `/Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/truthful_vs_deceitful/haiku_responses_traits_b10_q9/correlation_plot__rubric_v1.png`
 - **Was**: legacy
@@ -2944,56 +3195,11 @@ PNGs that would otherwise be ``stale`` but match an entry in ``deferred_rejudges
 - **Was**: legacy
 - **Deferred by**: `roger/vectors_*.png` -- Orphan output from a pre-Phase-6 one-off analysis whose producer is no longer in the codebase. Not in scope for the May 2026 producer migration. Presumed snapshot-historical; remove the file (and this entry) when superseded.  *(at 2026-05-08T15:56:40+00:00)*
 
-### `/Users/roger/Documents/GitHub/assistant-axis/runpod_workspace/qwen/assistant-axis/img/assistant_axis.png`
-- **Was**: legacy
-- **Deferred by**: `runpod_workspace/*` -- Dataset content under runpod_workspace/<dataset>/ is tracked via per-dataset MANIFEST.json rather than per-file _provenance envelopes (see AGENT_NOTES.md 'Manifest-tracked producers').  Freshness is asserted by re-running tools/regenerate_dataset_manifest.py and confirming a byte-identical MANIFEST.json (the manifest is stable on unchanged input).  Audit reports against the analysis tree (roger/) trace freshness through file-level dependencies into these subtrees automatically.  *(at 2026-05-09T04:04:36+00:00)*
-- **Deferred by**: `runpod_workspace/qwen/assistant-axis/img/*.png` -- Static logo asset checked into the embedded assistant-axis dataset checkout under runpod_workspace.  Not a producer output.  *(at 2026-05-09T04:04:37+00:00)*
-
-## Legacy PNGs (42)
+## Legacy PNGs (2)
 
 PNGs without an ``Inputs`` chunk -- pre-Phase-3, or produced by a writer that hasn't been migrated yet.
 
 | Path | Software | Created | Git SHA | Note |
 |---|---|---|---|---|
-| `/Users/roger/Documents/GitHub/assistant-axis/.venv/lib/python3.11/site-packages/ipykernel/resources/logo-32x32.png` | `` |  |  |  |
-| `/Users/roger/Documents/GitHub/assistant-axis/.venv/lib/python3.11/site-packages/ipykernel/resources/logo-64x64.png` | `` |  |  |  |
-| `/Users/roger/Documents/GitHub/assistant-axis/.venv/lib/python3.11/site-packages/ipywidgets/widgets/tests/data/jupyter-logo-transparent.png` | `` |  |  |  |
-| `/Users/roger/Documents/GitHub/assistant-axis/.venv/lib/python3.11/site-packages/jupyter_server/static/logo/logo.png` | `` |  |  |  |
-| `/Users/roger/Documents/GitHub/assistant-axis/.venv/lib/python3.11/site-packages/matplotlib/mpl-data/images/back.png` | `` |  |  |  |
-| `/Users/roger/Documents/GitHub/assistant-axis/.venv/lib/python3.11/site-packages/matplotlib/mpl-data/images/back_large.png` | `` |  |  |  |
-| `/Users/roger/Documents/GitHub/assistant-axis/.venv/lib/python3.11/site-packages/matplotlib/mpl-data/images/filesave.png` | `` |  |  |  |
-| `/Users/roger/Documents/GitHub/assistant-axis/.venv/lib/python3.11/site-packages/matplotlib/mpl-data/images/filesave_large.png` | `` |  |  |  |
-| `/Users/roger/Documents/GitHub/assistant-axis/.venv/lib/python3.11/site-packages/matplotlib/mpl-data/images/forward.png` | `` |  |  |  |
-| `/Users/roger/Documents/GitHub/assistant-axis/.venv/lib/python3.11/site-packages/matplotlib/mpl-data/images/forward_large.png` | `` |  |  |  |
-| `/Users/roger/Documents/GitHub/assistant-axis/.venv/lib/python3.11/site-packages/matplotlib/mpl-data/images/hand.png` | `` |  |  |  |
-| `/Users/roger/Documents/GitHub/assistant-axis/.venv/lib/python3.11/site-packages/matplotlib/mpl-data/images/help.png` | `matplotlib version 2.0.2.post4623.dev0+gcb3aea0db, http://matplotlib.org/` |  |  |  |
-| `/Users/roger/Documents/GitHub/assistant-axis/.venv/lib/python3.11/site-packages/matplotlib/mpl-data/images/help_large.png` | `matplotlib version 2.0.2.post4623.dev0+gcb3aea0db, http://matplotlib.org/` |  |  |  |
-| `/Users/roger/Documents/GitHub/assistant-axis/.venv/lib/python3.11/site-packages/matplotlib/mpl-data/images/home.png` | `` |  |  |  |
-| `/Users/roger/Documents/GitHub/assistant-axis/.venv/lib/python3.11/site-packages/matplotlib/mpl-data/images/home_large.png` | `` |  |  |  |
-| `/Users/roger/Documents/GitHub/assistant-axis/.venv/lib/python3.11/site-packages/matplotlib/mpl-data/images/matplotlib.png` | `` |  |  |  |
-| `/Users/roger/Documents/GitHub/assistant-axis/.venv/lib/python3.11/site-packages/matplotlib/mpl-data/images/matplotlib_large.png` | `` |  |  |  |
-| `/Users/roger/Documents/GitHub/assistant-axis/.venv/lib/python3.11/site-packages/matplotlib/mpl-data/images/move.png` | `` |  |  |  |
-| `/Users/roger/Documents/GitHub/assistant-axis/.venv/lib/python3.11/site-packages/matplotlib/mpl-data/images/move_large.png` | `` |  |  |  |
-| `/Users/roger/Documents/GitHub/assistant-axis/.venv/lib/python3.11/site-packages/matplotlib/mpl-data/images/qt4_editor_options.png` | `` |  |  |  |
-| `/Users/roger/Documents/GitHub/assistant-axis/.venv/lib/python3.11/site-packages/matplotlib/mpl-data/images/qt4_editor_options_large.png` | `` |  |  |  |
-| `/Users/roger/Documents/GitHub/assistant-axis/.venv/lib/python3.11/site-packages/matplotlib/mpl-data/images/subplots.png` | `` |  |  |  |
-| `/Users/roger/Documents/GitHub/assistant-axis/.venv/lib/python3.11/site-packages/matplotlib/mpl-data/images/subplots_large.png` | `` |  |  |  |
-| `/Users/roger/Documents/GitHub/assistant-axis/.venv/lib/python3.11/site-packages/matplotlib/mpl-data/images/zoom_to_rect.png` | `` |  |  |  |
-| `/Users/roger/Documents/GitHub/assistant-axis/.venv/lib/python3.11/site-packages/matplotlib/mpl-data/images/zoom_to_rect_large.png` | `` |  |  |  |
-| `/Users/roger/Documents/GitHub/assistant-axis/.venv/lib/python3.11/site-packages/matplotlib/mpl-data/sample_data/Minduka_Present_Blue_Pack.png` | `www.inkscape.org` |  |  |  |
-| `/Users/roger/Documents/GitHub/assistant-axis/.venv/lib/python3.11/site-packages/matplotlib/mpl-data/sample_data/logo2.png` | `` |  |  |  |
-| `/Users/roger/Documents/GitHub/assistant-axis/.venv/lib/python3.11/site-packages/networkx/drawing/tests/baseline/test_display_complex.png` | `` |  |  |  |
-| `/Users/roger/Documents/GitHub/assistant-axis/.venv/lib/python3.11/site-packages/networkx/drawing/tests/baseline/test_display_empty_graph.png` | `` |  |  |  |
-| `/Users/roger/Documents/GitHub/assistant-axis/.venv/lib/python3.11/site-packages/networkx/drawing/tests/baseline/test_display_house_with_colors.png` | `Matplotlib version3.9.1, https://matplotlib.org/` |  |  |  |
-| `/Users/roger/Documents/GitHub/assistant-axis/.venv/lib/python3.11/site-packages/networkx/drawing/tests/baseline/test_display_labels_and_colors.png` | `` |  |  |  |
-| `/Users/roger/Documents/GitHub/assistant-axis/.venv/lib/python3.11/site-packages/networkx/drawing/tests/baseline/test_display_shortest_path.png` | `` |  |  |  |
-| `/Users/roger/Documents/GitHub/assistant-axis/.venv/lib/python3.11/site-packages/networkx/drawing/tests/baseline/test_house_with_colors.png` | `Matplotlib version3.5.1, https://matplotlib.org/` |  |  |  |
-| `/Users/roger/Documents/GitHub/assistant-axis/.venv/lib/python3.11/site-packages/scipy/ndimage/tests/dots.png` | `` |  |  |  |
-| `/Users/roger/Documents/GitHub/assistant-axis/.venv/lib/python3.11/site-packages/sympy/plotting/tests/test_region_and.png` | `matplotlib version3.1.0, http://matplotlib.org/` |  |  |  |
-| `/Users/roger/Documents/GitHub/assistant-axis/.venv/lib/python3.11/site-packages/sympy/plotting/tests/test_region_not.png` | `matplotlib version3.1.0, http://matplotlib.org/` |  |  |  |
-| `/Users/roger/Documents/GitHub/assistant-axis/.venv/lib/python3.11/site-packages/sympy/plotting/tests/test_region_or.png` | `matplotlib version3.1.0, http://matplotlib.org/` |  |  |  |
-| `/Users/roger/Documents/GitHub/assistant-axis/.venv/lib/python3.11/site-packages/sympy/plotting/tests/test_region_xor.png` | `matplotlib version3.1.0, http://matplotlib.org/` |  |  |  |
-| `/Users/roger/Documents/GitHub/assistant-axis/.venv/share/jupyter/kernels/python3/logo-32x32.png` | `` |  |  |  |
-| `/Users/roger/Documents/GitHub/assistant-axis/.venv/share/jupyter/kernels/python3/logo-64x64.png` | `` |  |  |  |
-| `/Users/roger/Documents/GitHub/assistant-axis/img/assistant_axis.png` | `` |  |  |  |
+| `/Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/gpt_haiku_q9_response_weight_sweep_slot6.png` | `uv run python -m results_analysis.gpt_anthropic_response_weight_sweep --anthropic_combo haiku_q9` | 2026-05-08 23:43:43 +0100 | git f9a1899+dirty |  |
 | `/Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/gpt_sonnet_q9_response_weight_sweep_slot6.png` | `uv run python -m results_analysis.gpt_anthropic_response_weight_sweep --anthropic_combo sonnet_q9` | 2026-05-08 23:43:52 +0100 | git f9a1899+dirty |  |

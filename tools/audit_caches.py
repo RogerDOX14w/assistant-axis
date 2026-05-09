@@ -257,9 +257,14 @@ def apply_deferrals(
     entries are recorded in ``deferral_matches`` so reports can show
     why each cache was deferred.
 
-    Run this AFTER :func:`propagate_transitive_stale` so transitive
-    stale-ness is computed first, then the maintainer's "I know,
-    don't bug me" overrides apply on top.
+    Run this BEFORE :func:`propagate_transitive_stale`: deferring an
+    upstream cache means we've explicitly chosen to treat it as a
+    fixed-baseline (not stale).  Propagating staleness through it
+    would falsely taint every downstream consumer as
+    ``stale_transitive``, even when the consumer's recorded
+    fingerprint of the deferred cache is perfectly current.  By
+    deferring first, the propagation BFS later skips deferred nodes
+    entirely (their status is no longer in ``STALE_STATUSES``).
     """
     if registry is None:
         registry = load_deferral_registry(repo_root=repo_root)
@@ -434,19 +439,53 @@ def render_markdown(
                      "i.e. the maintainer has explicitly chosen not to "
                      "rerun judging for them right now.  Use "
                      "``tools/defer_rejudge.py --remove`` to lift the "
-                     "deferral when ready.\n")
-        for r in sorted(deferred_rows, key=lambda r: str(r.path)):
-            lines.append(f"### `{r.path}`")
-            if r.pre_deferred_status:
-                lines.append(f"- **Was**: {r.pre_deferred_status}")
-            for entry in r.deferral_matches:
-                lines.append(
-                    f"- **Deferred by**: `{entry.path_glob}`"
-                    + (f" (dep_key=`{entry.dep_key}`)" if entry.dep_key else "")
-                    + f" -- {entry.reason}"
-                    + (f"  *(at {entry.deferred_at})*" if entry.deferred_at else "")
-                )
-            lines.append("")
+                     "deferral when ready.  Run "
+                     "``tools/audit_deferrals.py`` for category-specific "
+                     "invariant checks (e.g. promotion-detection on "
+                     "``orphan_no_producer`` entries).\n")
+
+        # Group by deferral category for easier scanning.  Each row
+        # may match multiple entries (different categories); we use
+        # the first match's category for grouping (callers can read
+        # the full list under each row).
+        by_category: dict[str, list] = defaultdict(list)
+        for r in deferred_rows:
+            cat = (r.deferral_matches[0].category.value
+                   if r.deferral_matches else "uncategorized")
+            by_category[cat].append(r)
+        # Roll-up table:
+        lines.append("| Category | Count |")
+        lines.append("|---|---:|")
+        for cat in sorted(by_category):
+            lines.append(f"| `{cat}` | {len(by_category[cat])} |")
+        lines.append("")
+
+        for cat in sorted(by_category):
+            lines.append(f"### Category: `{cat}` "
+                         f"({len(by_category[cat])})\n")
+            for r in sorted(by_category[cat], key=lambda r: str(r.path)):
+                lines.append(f"#### `{r.path}`")
+                if r.pre_deferred_status:
+                    lines.append(f"- **Was**: {r.pre_deferred_status}")
+                for entry in r.deferral_matches:
+                    lines.append(
+                        f"- **Deferred by**: `{entry.path_glob}`"
+                        + (f" (dep_key=`{entry.dep_key}`)"
+                           if entry.dep_key else "")
+                        + f" -- ({entry.category.value}) {entry.reason}"
+                        + (f"  *(at {entry.deferred_at})*"
+                           if entry.deferred_at else "")
+                    )
+                    if entry.producer_script:
+                        lines.append(f"  - `producer_script`: "
+                                     f"`{entry.producer_script}`")
+                    if entry.replaced_by:
+                        lines.append(f"  - `replaced_by`: "
+                                     f"`{entry.replaced_by}`")
+                    if entry.compares_to:
+                        lines.append(f"  - `compares_to`: "
+                                     f"`{entry.compares_to}`")
+                lines.append("")
 
     legacy_rows = [r for r in rows if r.status == "legacy"]
     if legacy_rows:
@@ -523,9 +562,9 @@ def main() -> int:
             return 2
 
     rows = collect(roots)
-    propagate_transitive_stale(rows)
     if not args.ignore_deferrals:
         apply_deferrals(rows)
+    propagate_transitive_stale(rows)
 
     if args.format == "markdown":
         body = render_markdown(rows, roots=roots, status_filter=args.status)

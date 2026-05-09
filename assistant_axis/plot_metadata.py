@@ -20,7 +20,7 @@ Embeds:
 - ``Software``      -- canonical UNIX command (``uv run python ...``)
                        reconstructed from ``sys.argv``, relative to the
                        repo root.  Reproduces the run.
-- ``Creation Time`` -- ISO-8601 local timestamp.
+- ``Creation Time`` -- ISO-8601 UTC timestamp (``YYYY-MM-DDTHH:MM:SS+00:00``).
 - ``Source``        -- git short SHA (``+dirty`` if working tree dirty).
 
 Ad-hoc plot (e.g. /tmp/foo.py during exploration)
@@ -149,7 +149,16 @@ def _build_producer_info(
 ) -> tuple[str, str, str | None, str]:
     """Compute the (cmd, creation_time, git_sha, resolved_script) tuple
     used by both png_metadata and json_metadata.  Centralised so the
-    two writer paths stay byte-identical in their producer fields."""
+    two writer paths stay byte-identical in their producer fields.
+
+    ``creation_time`` is ISO-8601 UTC
+    (``YYYY-MM-DDTHH:MM:SS+00:00``), matching the convention used by
+    file-fingerprint mtimes, ``deferred_rejudges.yaml`` /
+    ``script_equivalences.yaml`` timestamps, and dataset MANIFEST
+    timestamps.  Pre-2026-05 envelopes used local time
+    (``%Y-%m-%d %H:%M:%S %z``); audit/reader code reads the field as
+    an opaque string and tolerates either format.
+    """
     if script is None and argv is None:
         # Detect ``python -m foo.bar`` invocations (see png_metadata docstring).
         main_spec = getattr(sys.modules.get("__main__"), "__spec__", None)
@@ -171,8 +180,8 @@ def _build_producer_info(
         cmd += " " + " ".join(shlex.quote(a) for a in argv)
 
     creation_time = (
-        _datetime.datetime.now().astimezone()
-        .strftime("%Y-%m-%d %H:%M:%S %z")
+        _datetime.datetime.now(tz=_datetime.timezone.utc)
+        .replace(microsecond=0).isoformat()
     )
     sha = _git_sha()
     return cmd, creation_time, sha, script
@@ -368,7 +377,7 @@ def json_metadata(
                     "title":   "...",        # if title= was passed
                     "author":  "Roger Dearnaley"
                 },
-                "produced_at": "2026-05-08 01:23:45 +0100",
+                "produced_at": "2026-05-08T01:23:45+00:00",
                 "inputs": [<InputSpec dicts>],          # if inputs= passed
                 "inputs_sha256": "<hex>"                 # if inputs= passed
             }

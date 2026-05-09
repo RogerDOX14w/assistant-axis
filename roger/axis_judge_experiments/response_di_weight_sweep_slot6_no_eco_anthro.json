@@ -402,20 +402,20 @@
   "_provenance": {
     "schema_version": "1.0",
     "produced_by": {
-      "cmd": "uv run python -m results_analysis.response_di_weight_sweep --exclude_axes ecocentric_vs_anthropocentric",
-      "git_sha": "1a93c4f+dirty",
+      "cmd": "uv run python results_analysis/response_di_weight_sweep.py --exclude_axes ecocentric_vs_anthropocentric",
+      "git_sha": "06085c6+dirty",
       "author": "Roger Dearnaley",
       "title": "Response \u00d7 desc+inst score-blend sweep \u2014 mean \u03c1 across 11 axes  (excluding ecocentric_vs_anthropocentric)"
     },
-    "produced_at": "2026-05-09 14:39:29 +0100",
+    "produced_at": "2026-05-09 15:54:14 +0100",
     "inputs": [
       {
         "dep_key": "producer_script",
         "path": "results_analysis/response_di_weight_sweep.py",
-        "fingerprint": "v1:2026-05-09T13:38:59+00:00@20069",
+        "fingerprint": "v1:2026-05-09T13:44:58+00:00@20348",
         "kind": "file",
         "dataset_id": null,
-        "last_modified_at": "2026-05-09T13:38:59+00:00",
+        "last_modified_at": "2026-05-09T13:44:58+00:00",
         "extras": {
           "slot": "6",
           "layer": "25",
@@ -1411,6 +1411,6 @@
         "extras": {}
       }
     ],
-    "inputs_sha256": "4c8a87046e4f2f8a4a74f54101839fd450b6e552b10302b145926795ba97ff11"
+    "inputs_sha256": "828727f93e19c309a4be051c6f6686e3f5ba1448e8121fbfab2429a6b8ba8907"
   }
 }

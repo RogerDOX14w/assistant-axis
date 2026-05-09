@@ -71,7 +71,7 @@ import numpy as np
 from matplotlib.patches import Patch
 from scipy.stats import spearmanr
 
-from assistant_axis import png_metadata
+from assistant_axis import pair_type_of, png_metadata
 from assistant_axis.judge_score_combine import (
     add_di_weights_arg,
     combine_desc_inst_two_judges,
@@ -114,9 +114,12 @@ def _load_at(path: Path, slot: int) -> np.ndarray:
     return _load_vector_file(path).float()[slot, LAYER].numpy()
 
 
-def _axis_unit_at(data_dir: Path, pos: str, neg: str, slot: int) -> np.ndarray:
-    p = _load_at(data_dir / "traits" / "vectors" / f"{pos}.pt", slot)
-    n = _load_at(data_dir / "traits" / "vectors" / f"{neg}.pt", slot)
+def _axis_unit_at(data_dir: Path, pos: str, neg: str, slot: int,
+                  pair_type: str = "traits") -> np.ndarray:
+    """Unit axis direction at (slot, LAYER); ``pair_type`` selects the
+    ``traits/`` vs ``roles/`` subdir."""
+    p = _load_at(data_dir / pair_type / "vectors" / f"{pos}.pt", slot)
+    n = _load_at(data_dir / pair_type / "vectors" / f"{neg}.pt", slot)
     d = p - n
     return d / np.linalg.norm(d)
 
@@ -342,7 +345,8 @@ def main() -> int:
                     continue
                 scores = di_scores_per_axis[(pos, neg)]
                 common = sorted(scores)
-                au = _axis_unit_at(data_dir, pos, neg, slot)
+                au = _axis_unit_at(data_dir, pos, neg, slot,
+                                   pair_type=pair_type_of(it))
                 proj = _project(entity_vecs, whitener, slot, K, au, common,
                                 frozenset({pos, neg}))
                 names = sorted(set(scores) & set(proj))
@@ -365,7 +369,8 @@ def main() -> int:
                     continue
                 scores = rs_scores_per_axis[(pos, neg)]
                 common = sorted(scores)
-                au = _axis_unit_at(data_dir, pos, neg, slot)
+                au = _axis_unit_at(data_dir, pos, neg, slot,
+                                   pair_type=pair_type_of(it))
                 proj = _project(entity_vecs, whitener, slot, K, au, common,
                                 frozenset({pos, neg}))
                 names = sorted(set(scores) & set(proj))

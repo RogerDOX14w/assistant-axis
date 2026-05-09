@@ -23,6 +23,7 @@ import json
 import time
 from pathlib import Path
 
+from assistant_axis.pair_list_cohort import pair_type_of
 from results_analysis.canonical_angles.whitening import DEFAULT_SOFT_K
 
 
@@ -32,6 +33,7 @@ async def run_one(pair, provider, judge_model, output_root, data_dir, instructio
                   response_target_batch_size, refill_gaps,
                   question_subsample_modulo=None, questions_file=None):
     pos, neg = pair['pos'], pair['neg']
+    pair_type = pair_type_of(pair)        # "traits" (default) or "roles"
     out_dir = output_root / f'{pos}_vs_{neg}' / subdir_name
     out_dir.mkdir(parents=True, exist_ok=True)
     corr_path = out_dir / 'correlations.json'
@@ -53,7 +55,7 @@ async def run_one(pair, provider, judge_model, output_root, data_dir, instructio
 
     cmd = [
         'uv', 'run', 'python', 'results_analysis/axis_judge_correlation.py',
-        '--pair', pos, neg, '--pair_type', 'traits',
+        '--pair', pos, neg, '--pair_type', pair_type,
         '--data_dir', data_dir,
         '--instructions_dir', instructions_dir,
         '--layer', str(layer), '--whiten_K', str(whiten_K),

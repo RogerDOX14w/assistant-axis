@@ -77,10 +77,21 @@ def _cmd_add(args: argparse.Namespace) -> int:
         print("ERROR: --reason is required when adding a deferral.", file=sys.stderr)
         return 2
     try:
+        category = deferral.DeferralCategory(args.category)
+    except ValueError:
+        valid = ", ".join(c.value for c in deferral.DeferralCategory)
+        print(f"ERROR: invalid --category {args.category!r}.  Valid: {valid}",
+              file=sys.stderr)
+        return 2
+    try:
         entry = deferral.append_deferral(
             path_glob=args.path,
             dep_key=args.dep_key,
             reason=args.reason,
+            category=category,
+            producer_script=args.producer_script,
+            replaced_by=args.replaced_by,
+            compares_to=args.compares_to,
             repo_root=_REPO_ROOT,
         )
     except ValueError as e:
@@ -89,10 +100,21 @@ def _cmd_add(args: argparse.Namespace) -> int:
     print("Added deferral:")
     print(f"  path_glob:   {entry.path_glob}")
     print(f"  dep_key:     {entry.dep_key or '(any)'}")
+    print(f"  category:    {entry.category.value}")
+    if entry.producer_script:
+        print(f"  producer_script: {entry.producer_script}")
+    if entry.replaced_by:
+        print(f"  replaced_by: {entry.replaced_by}")
+    if entry.compares_to:
+        print(f"  compares_to: {entry.compares_to}")
     print(f"  reason:      {entry.reason}")
     print(f"  deferred_at: {entry.deferred_at}")
     print()
     print(f"Registry: {deferral.DEFERRAL_FILENAME}  (commit it).")
+    if entry.category is deferral.DeferralCategory.UNCATEGORIZED:
+        print()
+        print("WARNING: entry was added with category=uncategorized; "
+              "consider passing --category for clarity.", file=sys.stderr)
     return 0
 
 
@@ -108,9 +130,15 @@ def _cmd_list(args: argparse.Namespace) -> int:
             return 0
     print(f"== {len(reg)} deferred entries ==")
     for e in reg:
-        print(f"  [{e.deferred_at}]  path_glob = `{e.path_glob}`")
+        print(f"  [{e.deferred_at}]  ({e.category.value})  path_glob = `{e.path_glob}`")
         if e.dep_key:
             print(f"      dep_key = `{e.dep_key}`")
+        if e.producer_script:
+            print(f"      producer_script = `{e.producer_script}`")
+        if e.replaced_by:
+            print(f"      replaced_by = `{e.replaced_by}`")
+        if e.compares_to:
+            print(f"      compares_to = `{e.compares_to}`")
         print(f"      reason  = {e.reason}")
     return 0
 
@@ -149,6 +177,23 @@ def main(argv: Optional[list[str]] = None) -> int:
                    help="Optional dep_key glob scoping the deferral.")
     p.add_argument("--reason",
                    help="Free-text justification (required for add).")
+    valid_cats = ", ".join(c.value for c in deferral.DeferralCategory)
+    p.add_argument(
+        "--category", default=deferral.DeferralCategory.UNCATEGORIZED.value,
+        help=("Structured intent tag.  One of: " + valid_cats + ".  "
+              "See assistant_axis.deferral_registry docstring for "
+              "category semantics.  Defaults to 'uncategorized' (a "
+              "warning is printed; backfill or pass --category)."),
+    )
+    p.add_argument("--producer-script", dest="producer_script",
+                   help=("(orphan_no_producer) repo-relative path to the "
+                         "expected/historical producer script."))
+    p.add_argument("--replaced-by", dest="replaced_by",
+                   help=("(superseded) repo-relative path-glob of the "
+                         "superseding artifact."))
+    p.add_argument("--compares-to", dest="compares_to",
+                   help=("(frozen_snapshot) repo-relative path-glob of the "
+                         "live twin used by paired comparison plots."))
     g = p.add_mutually_exclusive_group()
     g.add_argument("--list", action="store_true",
                    help="List declared deferrals (filtered by --path if given).")

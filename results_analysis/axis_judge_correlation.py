@@ -31,7 +31,9 @@ from assistant_axis.judge import (  # type: ignore  # noqa: E402
     RateLimiter,
     warn_if_low_parse_rate,
 )
-from assistant_axis import json_metadata, png_metadata  # noqa: E402
+from assistant_axis import (  # noqa: E402
+    json_metadata, png_metadata, RESPONSE_BATCH_SIZE,
+)
 from assistant_axis.provenance import (  # noqa: E402
     InputSpec,
     current_file_input,
@@ -2244,14 +2246,16 @@ def parse_args() -> argparse.Namespace:
                     help="Score all score==3 model responses per entity, partitioned into "
                          "roughly equal-sized batches (one -3..+3 score per batch; "
                          "entity score = mean of batch scores).")
-    sm.add_argument("--response_target_batch_size", type=int, default=10,
+    sm.add_argument("--response_target_batch_size", type=int,
+                    default=RESPONSE_BATCH_SIZE,
                     help="Target responses per batch for --score_responses. Actual batch "
                          "sizes will differ by at most 1 to cover all items (N items -> "
-                         "max(1, round(N/target)) equal-sized batches). Default 10 "
-                         "matches the steering effect judge's default so the two "
-                         "score distributions are apples-to-apples in the same "
-                         "judging regime; was 15 historically, see steering judge "
-                         "Phase-2 plan for the rationale.")
+                         "max(1, round(N/target)) equal-sized batches). Default "
+                         f"{RESPONSE_BATCH_SIZE} (canonical project-wide value, see "
+                         "``assistant_axis.judge_batch.RESPONSE_BATCH_SIZE``); matches the "
+                         "steering effect judge's default so the two score distributions "
+                         "are apples-to-apples in the same judging regime; was 15 "
+                         "historically, see steering judge Phase-2 plan for the rationale.")
     sm.add_argument("--all", action="store_true",
                     help="Equivalent to --score_descriptions --score_instructions --score_responses.")
     sm.add_argument("--questions_file", type=str,

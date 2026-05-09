@@ -353,6 +353,7 @@ def compute_batch_size_curve(
     axes: list[tuple[str, str, str]],
     configs: list[tuple[int, int]],
     batch_sizes: list[int],
+    scores_filename: str = "scores_responses.json",
     inputs: list[InputSpec] | None = None,
 ) -> dict:
     """Run the full sweep and return the result dict (same as the JSON output).
@@ -378,7 +379,9 @@ def compute_batch_size_curve(
     scores_cache: dict[tuple[str, int], dict] = {}
     for axis, _, _ in axes:
         for B in batch_sizes:
-            s = load_scores(experiment_dir, axis, B, inputs=inputs)
+            s = load_scores(experiment_dir, axis, B,
+                            scores_filename=scores_filename,
+                            inputs=inputs)
             if not s:
                 print(f"  WARNING: no scores for {axis} at B={B} "
                       f"(suffix={_b_suffix(B)!r})")
@@ -446,12 +449,18 @@ _BATCH_COLORS = {
 
 def plot_curve(result: dict, output_dir: Path, *,
                 inputs: list[InputSpec] | None = None,
+                stem: str = "batch_size_curve_rho",
                 ) -> tuple[Path, Path]:
     """Two-panel histogram + line plot, plus a separate cost-vs-ρ scatter.
     Returns (curve_png, scatter_png).
 
     ``inputs`` (when provided) is embedded into the PNG metadata for
     provenance tracking.  See :mod:`assistant_axis.provenance`.
+
+    ``stem`` controls the output filenames (``<stem>.png`` and
+    ``batch_size_cost_vs_rho<stem-suffix>.png``); pass a non-default
+    value when running v1- and v2-scope sweeps side-by-side so they
+    don't clobber each other.
     """
     axes = result["axes"]
     batch_sizes = result["batch_sizes"]
@@ -537,7 +546,7 @@ def plot_curve(result: dict, output_dir: Path, *,
             "(bracket-and-bisect refined on K)")
     _, top_rect = suptitle_with_specs(fig, title, spec)
     fig.tight_layout(rect=(0, 0, 1, top_rect))
-    curve_path = output_dir / "batch_size_curve_rho.png"
+    curve_path = output_dir / f"{stem}.png"
     src_text = Path(__file__).read_text(encoding="utf-8")
     fig.savefig(curve_path, dpi=150, bbox_inches="tight",
                 metadata=png_metadata(title=title, source_text=src_text,
@@ -565,7 +574,11 @@ def plot_curve(result: dict, output_dir: Path, *,
              "configs;\ncost from README's per-batch token model")
     _, top_rect2 = suptitle_with_specs(fig2, title2, spec2)
     fig2.tight_layout(rect=(0, 0, 1, top_rect2))
-    scatter_path = output_dir / "batch_size_cost_vs_rho.png"
+    # Mirror the curve's stem for the scatter name (replace
+    # ``batch_size_curve_rho`` -> ``batch_size_cost_vs_rho`` so a
+    # ``_v1`` / ``_v2`` suffix carries through):
+    scatter_stem = stem.replace("batch_size_curve_rho", "batch_size_cost_vs_rho")
+    scatter_path = output_dir / f"{scatter_stem}.png"
     fig2.savefig(scatter_path, dpi=150, bbox_inches="tight",
                   metadata=png_metadata(title=title2, source_text=src_text,
                                          inputs=inputs))
@@ -616,6 +629,11 @@ def parse_args() -> argparse.Namespace:
                    help="Comma-separated 'slot:layer' pairs (e.g. '3:25,0:26').")
     p.add_argument("--json_name", type=str, default="batch_size_curve_rho.json",
                    help="Filename for the JSON cache inside --output_dir.")
+    p.add_argument("--scores_filename", type=str, default="scores_responses.json",
+                   help="Per-cell GPT-responses score cache filename (default: "
+                        "scores_responses.json).  Pass scores_responses__rubric_v1.json "
+                        "to read the v1 rubric snapshot for a v1-only batch-size sweep "
+                        "(B={5,7,10,15} only existed pre-v2 in the snapshot).")
     return p.parse_args()
 
 
@@ -674,6 +692,7 @@ def main() -> int:
     result = compute_batch_size_curve(
         experiment_dir=experiment_dir, data_dir=data_dir,
         axes=axes, configs=configs, batch_sizes=batch_sizes,
+        scores_filename=args.scores_filename,
         inputs=inputs,
     )
 
@@ -686,7 +705,10 @@ def main() -> int:
     json_path.write_text(json.dumps(envelope, indent=2))
     print(f"\nWrote {json_path}")
 
-    plot_curve(result, output_dir, inputs=inputs)
+    # Use the JSON's stem as the PNG stem so v1 / v2 / custom
+    # invocations produce non-clashing PNG filenames.
+    png_stem = Path(args.json_name).stem
+    plot_curve(result, output_dir, inputs=inputs, stem=png_stem)
     return 0
 
 

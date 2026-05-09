@@ -345,19 +345,48 @@ def render_markdown(
         lines.append(f"## Deferred PNGs ({len(deferred_rows)})\n")
         lines.append("PNGs that would otherwise be ``stale`` but match an "
                      "entry in ``deferred_rejudges.yaml``.  Use "
-                     "``tools/defer_rejudge.py --remove`` to lift.\n")
-        for r in sorted(deferred_rows, key=lambda r: str(r.path)):
-            lines.append(f"### `{r.path}`")
-            if r.pre_deferred_status:
-                lines.append(f"- **Was**: {r.pre_deferred_status}")
-            for entry in r.deferral_matches:
-                lines.append(
-                    f"- **Deferred by**: `{entry.path_glob}`"
-                    + (f" (dep_key=`{entry.dep_key}`)" if entry.dep_key else "")
-                    + f" -- {entry.reason}"
-                    + (f"  *(at {entry.deferred_at})*" if entry.deferred_at else "")
-                )
-            lines.append("")
+                     "``tools/defer_rejudge.py --remove`` to lift.  Run "
+                     "``tools/audit_deferrals.py`` for category-specific "
+                     "invariant checks (e.g. promotion-detection on "
+                     "``orphan_no_producer`` entries).\n")
+
+        by_category: dict[str, list] = defaultdict(list)
+        for r in deferred_rows:
+            cat = (r.deferral_matches[0].category.value
+                   if r.deferral_matches else "uncategorized")
+            by_category[cat].append(r)
+        lines.append("| Category | Count |")
+        lines.append("|---|---:|")
+        for cat in sorted(by_category):
+            lines.append(f"| `{cat}` | {len(by_category[cat])} |")
+        lines.append("")
+
+        for cat in sorted(by_category):
+            lines.append(f"### Category: `{cat}` "
+                         f"({len(by_category[cat])})\n")
+            for r in sorted(by_category[cat], key=lambda r: str(r.path)):
+                lines.append(f"#### `{r.path}`")
+                if r.pre_deferred_status:
+                    lines.append(f"- **Was**: {r.pre_deferred_status}")
+                for entry in r.deferral_matches:
+                    lines.append(
+                        f"- **Deferred by**: `{entry.path_glob}`"
+                        + (f" (dep_key=`{entry.dep_key}`)"
+                           if entry.dep_key else "")
+                        + f" -- ({entry.category.value}) {entry.reason}"
+                        + (f"  *(at {entry.deferred_at})*"
+                           if entry.deferred_at else "")
+                    )
+                    if entry.producer_script:
+                        lines.append(f"  - `producer_script`: "
+                                     f"`{entry.producer_script}`")
+                    if entry.replaced_by:
+                        lines.append(f"  - `replaced_by`: "
+                                     f"`{entry.replaced_by}`")
+                    if entry.compares_to:
+                        lines.append(f"  - `compares_to`: "
+                                     f"`{entry.compares_to}`")
+                lines.append("")
 
     # Legacy details (compact -- often dominant; kept short).
     legacy_rows = [r for r in rows if r.status == "legacy"]

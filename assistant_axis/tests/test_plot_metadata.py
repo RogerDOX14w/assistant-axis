@@ -88,6 +88,28 @@ def test_json_metadata_envelope_shape() -> None:
     assert "produced_at" in pv
 
 
+def test_produced_at_is_utc_iso8601() -> None:
+    """``produced_at`` must be an ISO-8601 UTC timestamp matching the
+    convention used elsewhere in the provenance system (deferred
+    rejudges, script equivalences, file-fingerprint mtimes, MANIFEST
+    timestamps).  Older envelopes used a local-time format
+    ``%Y-%m-%d %H:%M:%S %z``; this test guards against that
+    regressing.
+    """
+    import datetime as _dt
+    out = pm.json_metadata({"x": 1}, argv=[])
+    produced_at = out["_provenance"]["produced_at"]
+    parsed = _dt.datetime.fromisoformat(produced_at)
+    assert parsed.tzinfo is not None
+    assert parsed.utcoffset() == _dt.timedelta(0), (
+        f"produced_at={produced_at!r} is not UTC; offset="
+        f"{parsed.utcoffset()}"
+    )
+    assert "T" in produced_at, (
+        f"produced_at={produced_at!r} is not ISO-8601 (missing 'T')"
+    )
+
+
 def test_json_metadata_with_inputs_round_trip() -> None:
     inputs = [_spec("a", "v1"), _spec("b", "v2")]
     out = pm.json_metadata({"x": 1}, argv=[], inputs=inputs)

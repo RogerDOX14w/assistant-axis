@@ -6,7 +6,8 @@ embeds these PNG-text chunks:
 
   * ``Software``      -- full reproduction CLI, e.g. ``uv run python -m foo --data_dir 'X'``
   * ``Source``        -- ``git <short-sha>[+dirty]``
-  * ``Creation Time`` -- ISO-8601 local timestamp
+  * ``Creation Time`` -- ISO-8601 UTC timestamp (pre-2026-05 PNGs may
+                         carry the older local-time format)
   * ``Title``, ``Author`` -- bookkeeping
 
 This tool extracts those fields and tries to determine which *dataset*

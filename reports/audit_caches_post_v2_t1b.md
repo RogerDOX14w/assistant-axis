@@ -1,182 +1,468 @@
 # Cache provenance audit
 
-Roots: `/Users/roger/Documents/GitHub/assistant-axis`
+Roots: `/Users/roger/Documents/GitHub/assistant-axis/roger`, `/Users/roger/Documents/GitHub/assistant-axis/runpod_workspace`
 
-Total JSONs scanned: **17945**.
+Total JSONs scanned: **15908**.
 
 ## Summary by status
 
 | Status | Count |
 |---|---:|
-| current | 194 |
-| stale_direct | 0 |
-| stale_transitive | 0 |
-| deferred | 15749 |
-| legacy | 2002 |
+| current | 9 |
+| stale_direct | 10 |
+| stale_transitive | 26 |
+| deferred | 15862 |
+| legacy | 1 |
 
 ## By producing script
 
 | Script | current | stale_direct | stale_transitive | deferred | legacy | total |
 |---|---:|---:|---:|---:|---:|---:|
-| `(unknown source)` | 0 | 0 | 0 | 15640 | 2002 | 17642 |
-| `-m results_analysis.gpt_anthropic_response_weight_sweep` | 2 | 0 | 0 | 1 | 0 | 3 |
+| `(unknown source)` | 0 | 0 | 0 | 15611 | 1 | 15612 |
+| `-m results_analysis.gpt_anthropic_response_weight_sweep` | 0 | 0 | 2 | 1 | 0 | 3 |
 | `-m results_analysis.gpt_sonnet_weight_sweep` | 1 | 0 | 0 | 0 | 0 | 1 |
-| `-m results_analysis.judge_ensemble_rho_curve` | 0 | 0 | 0 | 2 | 0 | 2 |
-| `-m results_analysis.pc_round_trip.klm_sweep` | 1 | 0 | 0 | 0 | 0 | 1 |
-| `-m results_analysis.pc_round_trip.permutation_null` | 2 | 0 | 0 | 0 | 0 | 2 |
-| `-m results_analysis.pc_round_trip.plot_direction_cosines` | 12 | 0 | 0 | 0 | 0 | 12 |
-| `-m results_analysis.rubric_v1_v2_compare` | 1 | 0 | 0 | 0 | 0 | 1 |
-| `results_analysis/axis_judge_correlation.py` | 144 | 0 | 0 | 104 | 0 | 248 |
-| `results_analysis/batch_size_rho_curve.py` | 2 | 0 | 0 | 2 | 0 | 4 |
+| `-m results_analysis.judge_ensemble_rho_curve` | 0 | 1 | 0 | 1 | 0 | 2 |
+| `-m results_analysis.pc_round_trip.klm_sweep` | 0 | 0 | 1 | 0 | 0 | 1 |
+| `-m results_analysis.pc_round_trip.permutation_null` | 0 | 0 | 2 | 0 | 0 | 2 |
+| `-m results_analysis.pc_round_trip.plot_direction_cosines` | 0 | 0 | 12 | 0 | 0 | 12 |
+| `-m results_analysis.whitening_k_peak_fit` | 0 | 0 | 1 | 0 | 0 | 1 |
+| `results_analysis/axis_judge_correlation.py` | 0 | 0 | 0 | 248 | 0 | 248 |
+| `results_analysis/batch_size_rho_curve.py` | 0 | 1 | 0 | 1 | 0 | 2 |
 | `results_analysis/gpt_sonnet_weight_sweep.py` | 3 | 0 | 0 | 0 | 0 | 3 |
 | `results_analysis/gpt_vs_sonnet_scatter.py` | 1 | 0 | 0 | 0 | 0 | 1 |
-| `results_analysis/judge_ensemble_rho_curve.py` | 2 | 0 | 0 | 0 | 0 | 2 |
-| `results_analysis/optimal_axis_for_judge.py` | 5 | 0 | 0 | 0 | 0 | 5 |
-| `results_analysis/response_di_weight_sweep.py` | 2 | 0 | 0 | 0 | 0 | 2 |
-| `results_analysis/rho_by_layer.py` | 1 | 0 | 0 | 0 | 0 | 1 |
-| `results_analysis/whitening_k_peak_fit.py` | 6 | 0 | 0 | 0 | 0 | 6 |
-| `results_analysis/whitening_k_sweep.py` | 6 | 0 | 0 | 0 | 0 | 6 |
-| `results_analysis/whitening_k_weighted_scatter.py` | 3 | 0 | 0 | 0 | 0 | 3 |
+| `results_analysis/optimal_axis_for_judge.py` | 4 | 1 | 0 | 0 | 0 | 5 |
+| `results_analysis/rho_by_layer.py` | 0 | 1 | 0 | 0 | 0 | 1 |
+| `results_analysis/whitening_k_peak_fit.py` | 0 | 0 | 5 | 0 | 0 | 5 |
+| `results_analysis/whitening_k_sweep.py` | 0 | 6 | 0 | 0 | 0 | 6 |
+| `results_analysis/whitening_k_weighted_scatter.py` | 0 | 0 | 3 | 0 | 0 | 3 |
 
-## Deferred: 15749
+## Stale (direct): 10
+
+### `/Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/batch_size_curve_8slot/batch_size_curve_rho.json`
+- **Produced**: 2026-05-08 20:05:31 +0100  (git f9a1899+dirty)
+- **Cmd**: `uv run python results_analysis/batch_size_rho_curve.py --output_dir roger/axis_judge_experiments/batch_size_curve_8slot --configs 0:26,0:49,6:25,6:49,7:25,7:49 --batch_sizes 5,7,10,15`
+- judge_truthful_vs_deceitful_responses_roles_b5: missing_current -- current_file_input: /Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/truthful_vs_deceitful/gpt_responses_roles_b5/scores_responses.json does not exist (dep_key='judge_truthful_vs_deceitful_responses_roles_b5')
+- judge_truthful_vs_deceitful_responses_traits_b5: missing_current -- current_file_input: /Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/truthful_vs_deceitful/gpt_responses_traits_b5/scores_responses.json does not exist (dep_key='judge_truthful_vs_deceitful_responses_traits_b5')
+- judge_truthful_vs_deceitful_responses_roles_b7: missing_current -- current_file_input: /Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/truthful_vs_deceitful/gpt_responses_roles_b7/scores_responses.json does not exist (dep_key='judge_truthful_vs_deceitful_responses_roles_b7')
+- judge_truthful_vs_deceitful_responses_traits_b7: missing_current -- current_file_input: /Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/truthful_vs_deceitful/gpt_responses_traits_b7/scores_responses.json does not exist (dep_key='judge_truthful_vs_deceitful_responses_traits_b7')
+- judge_truthful_vs_deceitful_responses_roles_b10: drift -- fingerprint changed: v1:2026-05-07T04:02:17+00:00@8824820 -> v1:2026-05-09T06:12:51+00:00@3300368
+- judge_truthful_vs_deceitful_responses_traits_b10: drift -- fingerprint changed: v1:2026-05-05T02:26:05+00:00@10675535 -> v1:2026-05-09T04:15:59+00:00@3881603
+- judge_truthful_vs_deceitful_responses_roles_b15: missing_current -- current_file_input: /Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/truthful_vs_deceitful/gpt_responses_roles/scores_responses.json does not exist (dep_key='judge_truthful_vs_deceitful_responses_roles_b15')
+- judge_truthful_vs_deceitful_responses_traits_b15: missing_current -- current_file_input: /Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/truthful_vs_deceitful/gpt_responses_traits/scores_responses.json does not exist (dep_key='judge_truthful_vs_deceitful_responses_traits_b15')
+- judge_progressive_vs_conservative_responses_roles_b5: missing_current -- current_file_input: /Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/progressive_vs_conservative/gpt_responses_roles_b5/scores_responses.json does not exist (dep_key='judge_progressive_vs_conservative_responses_roles_b5')
+- judge_progressive_vs_conservative_responses_traits_b5: missing_current -- current_file_input: /Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/progressive_vs_conservative/gpt_responses_traits_b5/scores_responses.json does not exist (dep_key='judge_progressive_vs_conservative_responses_traits_b5')
+- judge_progressive_vs_conservative_responses_roles_b7: missing_current -- current_file_input: /Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/progressive_vs_conservative/gpt_responses_roles_b7/scores_responses.json does not exist (dep_key='judge_progressive_vs_conservative_responses_roles_b7')
+- judge_progressive_vs_conservative_responses_traits_b7: missing_current -- current_file_input: /Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/progressive_vs_conservative/gpt_responses_traits_b7/scores_responses.json does not exist (dep_key='judge_progressive_vs_conservative_responses_traits_b7')
+- judge_progressive_vs_conservative_responses_roles_b10: drift -- fingerprint changed: v1:2026-05-07T03:08:43+00:00@9176733 -> v1:2026-05-09T06:35:03+00:00@3505548
+- judge_progressive_vs_conservative_responses_traits_b10: drift -- fingerprint changed: v1:2026-05-05T02:27:09+00:00@10650966 -> v1:2026-05-09T04:40:24+00:00@4086345
+- judge_progressive_vs_conservative_responses_roles_b15: missing_current -- current_file_input: /Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/progressive_vs_conservative/gpt_responses_roles/scores_responses.json does not exist (dep_key='judge_progressive_vs_conservative_responses_roles_b15')
+- judge_progressive_vs_conservative_responses_traits_b15: missing_current -- current_file_input: /Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/progressive_vs_conservative/gpt_responses_traits/scores_responses.json does not exist (dep_key='judge_progressive_vs_conservative_responses_traits_b15')
+- judge_improvisational_vs_methodical_responses_roles_b5: missing_current -- current_file_input: /Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/improvisational_vs_methodical/gpt_responses_roles_b5/scores_responses.json does not exist (dep_key='judge_improvisational_vs_methodical_responses_roles_b5')
+- judge_improvisational_vs_methodical_responses_traits_b5: missing_current -- current_file_input: /Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/improvisational_vs_methodical/gpt_responses_traits_b5/scores_responses.json does not exist (dep_key='judge_improvisational_vs_methodical_responses_traits_b5')
+- judge_improvisational_vs_methodical_responses_roles_b7: missing_current -- current_file_input: /Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/improvisational_vs_methodical/gpt_responses_roles_b7/scores_responses.json does not exist (dep_key='judge_improvisational_vs_methodical_responses_roles_b7')
+- judge_improvisational_vs_methodical_responses_traits_b7: missing_current -- current_file_input: /Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/improvisational_vs_methodical/gpt_responses_traits_b7/scores_responses.json does not exist (dep_key='judge_improvisational_vs_methodical_responses_traits_b7')
+- judge_improvisational_vs_methodical_responses_roles_b10: drift -- fingerprint changed: v1:2026-05-07T02:35:33+00:00@8808532 -> v1:2026-05-09T06:57:14+00:00@3388180
+- judge_improvisational_vs_methodical_responses_traits_b10: drift -- fingerprint changed: v1:2026-05-05T02:31:31+00:00@10417841 -> v1:2026-05-09T05:04:29+00:00@3918732
+- judge_improvisational_vs_methodical_responses_roles_b15: missing_current -- current_file_input: /Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/improvisational_vs_methodical/gpt_responses_roles/scores_responses.json does not exist (dep_key='judge_improvisational_vs_methodical_responses_roles_b15')
+- judge_improvisational_vs_methodical_responses_traits_b15: missing_current -- current_file_input: /Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/improvisational_vs_methodical/gpt_responses_traits/scores_responses.json does not exist (dep_key='judge_improvisational_vs_methodical_responses_traits_b15')
+
+### `/Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/batch_size_curve_8slot/batch_size_curve_rho_ensembles.json`
+- **Produced**: 2026-05-09 00:50:09 +0100  (git f9a1899+dirty)
+- **Cmd**: `uv run python -m results_analysis.judge_ensemble_rho_curve --input roger/axis_judge_experiments/batch_size_curve_8slot/batch_size_curve_rho.json`
+- judge_truthful_vs_deceitful_responses_gpt_b10_roles: drift -- fingerprint changed: v1:2026-05-07T04:02:17+00:00@8824820 -> v1:2026-05-09T06:12:51+00:00@3300368
+- judge_truthful_vs_deceitful_responses_gpt_b10_traits: drift -- fingerprint changed: v1:2026-05-05T02:26:05+00:00@10675535 -> v1:2026-05-09T04:15:59+00:00@3881603
+- judge_truthful_vs_deceitful_responses_gpt_b10__plus_haiku_q9_roles: drift -- fingerprint changed: v1:2026-05-07T04:25:53+00:00@4533711 -> v1:2026-05-09T10:11:43+00:00@4749480
+- judge_truthful_vs_deceitful_responses_gpt_b10__plus_haiku_q9_traits: drift -- fingerprint changed: v1:2026-05-05T11:31:13+00:00@5365409 -> v1:2026-05-09T08:08:57+00:00@5789757
+- judge_truthful_vs_deceitful_responses_gpt_b10__plus_haiku_full_roles: missing_current -- current_file_input: /Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/truthful_vs_deceitful/haiku_responses_roles_b10/scores_responses.json does not exist (dep_key='judge_truthful_vs_deceitful_responses_gpt_b10__plus_haiku_full_roles')
+- judge_truthful_vs_deceitful_responses_gpt_b10__plus_haiku_full_traits: missing_current -- current_file_input: /Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/truthful_vs_deceitful/haiku_responses_traits_b10/scores_responses.json does not exist (dep_key='judge_truthful_vs_deceitful_responses_gpt_b10__plus_haiku_full_traits')
+- judge_truthful_vs_deceitful_responses_gpt_b10__plus_sonnet_q9_roles: missing_current -- current_file_input: /Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/truthful_vs_deceitful/sonnet_responses_roles_b10_q9/scores_responses.json does not exist (dep_key='judge_truthful_vs_deceitful_responses_gpt_b10__plus_sonnet_q9_roles')
+- judge_truthful_vs_deceitful_responses_gpt_b10__plus_sonnet_q9_traits: missing_current -- current_file_input: /Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/truthful_vs_deceitful/sonnet_responses_traits_b10_q9/scores_responses.json does not exist (dep_key='judge_truthful_vs_deceitful_responses_gpt_b10__plus_sonnet_q9_traits')
+- judge_progressive_vs_conservative_responses_gpt_b10_roles: drift -- fingerprint changed: v1:2026-05-07T03:08:43+00:00@9176733 -> v1:2026-05-09T06:35:03+00:00@3505548
+- judge_progressive_vs_conservative_responses_gpt_b10_traits: drift -- fingerprint changed: v1:2026-05-05T02:27:09+00:00@10650966 -> v1:2026-05-09T04:40:24+00:00@4086345
+- judge_progressive_vs_conservative_responses_gpt_b10__plus_haiku_q9_roles: drift -- fingerprint changed: v1:2026-05-07T03:32:57+00:00@4678487 -> v1:2026-05-09T10:37:11+00:00@4936144
+- judge_progressive_vs_conservative_responses_gpt_b10__plus_haiku_q9_traits: drift -- fingerprint changed: v1:2026-05-05T11:31:02+00:00@5372866 -> v1:2026-05-09T08:36:19+00:00@5735500
+- judge_progressive_vs_conservative_responses_gpt_b10__plus_haiku_full_roles: missing_current -- current_file_input: /Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/progressive_vs_conservative/haiku_responses_roles_b10/scores_responses.json does not exist (dep_key='judge_progressive_vs_conservative_responses_gpt_b10__plus_haiku_full_roles')
+- judge_progressive_vs_conservative_responses_gpt_b10__plus_haiku_full_traits: missing_current -- current_file_input: /Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/progressive_vs_conservative/haiku_responses_traits_b10/scores_responses.json does not exist (dep_key='judge_progressive_vs_conservative_responses_gpt_b10__plus_haiku_full_traits')
+- judge_progressive_vs_conservative_responses_gpt_b10__plus_sonnet_q9_roles: missing_current -- current_file_input: /Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/progressive_vs_conservative/sonnet_responses_roles_b10_q9/scores_responses.json does not exist (dep_key='judge_progressive_vs_conservative_responses_gpt_b10__plus_sonnet_q9_roles')
+- judge_progressive_vs_conservative_responses_gpt_b10__plus_sonnet_q9_traits: missing_current -- current_file_input: /Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/progressive_vs_conservative/sonnet_responses_traits_b10_q9/scores_responses.json does not exist (dep_key='judge_progressive_vs_conservative_responses_gpt_b10__plus_sonnet_q9_traits')
+- judge_improvisational_vs_methodical_responses_gpt_b10_roles: drift -- fingerprint changed: v1:2026-05-07T02:35:33+00:00@8808532 -> v1:2026-05-09T06:57:14+00:00@3388180
+- judge_improvisational_vs_methodical_responses_gpt_b10_traits: drift -- fingerprint changed: v1:2026-05-05T02:31:31+00:00@10417841 -> v1:2026-05-09T05:04:29+00:00@3918732
+- judge_improvisational_vs_methodical_responses_gpt_b10__plus_haiku_q9_roles: drift -- fingerprint changed: v1:2026-05-07T02:57:33+00:00@4790894 -> v1:2026-05-09T11:01:58+00:00@5051305
+- judge_improvisational_vs_methodical_responses_gpt_b10__plus_haiku_q9_traits: drift -- fingerprint changed: v1:2026-05-05T11:31:13+00:00@5547133 -> v1:2026-05-09T09:11:26+00:00@5899144
+- judge_improvisational_vs_methodical_responses_gpt_b10__plus_haiku_full_roles: missing_current -- current_file_input: /Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/improvisational_vs_methodical/haiku_responses_roles_b10/scores_responses.json does not exist (dep_key='judge_improvisational_vs_methodical_responses_gpt_b10__plus_haiku_full_roles')
+- judge_improvisational_vs_methodical_responses_gpt_b10__plus_haiku_full_traits: missing_current -- current_file_input: /Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/improvisational_vs_methodical/haiku_responses_traits_b10/scores_responses.json does not exist (dep_key='judge_improvisational_vs_methodical_responses_gpt_b10__plus_haiku_full_traits')
+- judge_improvisational_vs_methodical_responses_gpt_b10__plus_sonnet_q9_roles: missing_current -- current_file_input: /Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/improvisational_vs_methodical/sonnet_responses_roles_b10_q9/scores_responses.json does not exist (dep_key='judge_improvisational_vs_methodical_responses_gpt_b10__plus_sonnet_q9_roles')
+- judge_improvisational_vs_methodical_responses_gpt_b10__plus_sonnet_q9_traits: missing_current -- current_file_input: /Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/improvisational_vs_methodical/sonnet_responses_traits_b10_q9/scores_responses.json does not exist (dep_key='judge_improvisational_vs_methodical_responses_gpt_b10__plus_sonnet_q9_traits')
+- judge_concise_vs_verbose_responses_gpt_b10_roles: drift -- fingerprint changed: v1:2026-05-07T02:08:20+00:00@7978154 -> v1:2026-05-09T06:36:12+00:00@3054710
+- judge_concise_vs_verbose_responses_gpt_b10_traits: drift -- fingerprint changed: v1:2026-05-05T02:28:42+00:00@9276743 -> v1:2026-05-09T04:47:17+00:00@3535591
+- judge_concise_vs_verbose_responses_gpt_b10__plus_haiku_q9_roles: drift -- fingerprint changed: v1:2026-05-07T06:24:27+00:00@4203989 -> v1:2026-05-09T10:39:30+00:00@4421210
+- judge_concise_vs_verbose_responses_gpt_b10__plus_haiku_q9_traits: drift -- fingerprint changed: v1:2026-05-07T06:52:22+00:00@4979210 -> v1:2026-05-09T08:41:40+00:00@5136990
+- judge_concise_vs_verbose_responses_gpt_b10__plus_sonnet_q9_roles: missing_current -- current_file_input: /Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/concise_vs_verbose/sonnet_responses_roles_b10_q9/scores_responses.json does not exist (dep_key='judge_concise_vs_verbose_responses_gpt_b10__plus_sonnet_q9_roles')
+- judge_concise_vs_verbose_responses_gpt_b10__plus_sonnet_q9_traits: missing_current -- current_file_input: /Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/concise_vs_verbose/sonnet_responses_traits_b10_q9/scores_responses.json does not exist (dep_key='judge_concise_vs_verbose_responses_gpt_b10__plus_sonnet_q9_traits')
+- judge_ecocentric_vs_anthropocentric_responses_gpt_b10_roles: drift -- fingerprint changed: v1:2026-05-05T04:17:24+00:00@9742693 -> v1:2026-05-09T06:42:59+00:00@3637006
+- judge_ecocentric_vs_anthropocentric_responses_gpt_b10_traits: drift -- fingerprint changed: v1:2026-05-05T03:19:43+00:00@11463737 -> v1:2026-05-09T04:49:32+00:00@4217041
+- judge_ecocentric_vs_anthropocentric_responses_gpt_b10__plus_haiku_q9_roles: drift -- fingerprint changed: v1:2026-05-07T07:16:38+00:00@4665100 -> v1:2026-05-09T10:53:29+00:00@4858596
+- judge_ecocentric_vs_anthropocentric_responses_gpt_b10__plus_haiku_q9_traits: drift -- fingerprint changed: v1:2026-05-07T07:46:00+00:00@5386185 -> v1:2026-05-09T08:47:41+00:00@5643076
+- judge_ecocentric_vs_anthropocentric_responses_gpt_b10__plus_haiku_full_roles: missing_current -- current_file_input: /Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/ecocentric_vs_anthropocentric/haiku_responses_roles_b10/scores_responses.json does not exist (dep_key='judge_ecocentric_vs_anthropocentric_responses_gpt_b10__plus_haiku_full_roles')
+- judge_ecocentric_vs_anthropocentric_responses_gpt_b10__plus_haiku_full_traits: missing_current -- current_file_input: /Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/ecocentric_vs_anthropocentric/haiku_responses_traits_b10/scores_responses.json does not exist (dep_key='judge_ecocentric_vs_anthropocentric_responses_gpt_b10__plus_haiku_full_traits')
+- judge_ecocentric_vs_anthropocentric_responses_gpt_b10__plus_sonnet_q9_roles: missing_current -- current_file_input: /Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/ecocentric_vs_anthropocentric/sonnet_responses_roles_b10_q9/scores_responses.json does not exist (dep_key='judge_ecocentric_vs_anthropocentric_responses_gpt_b10__plus_sonnet_q9_roles')
+- judge_ecocentric_vs_anthropocentric_responses_gpt_b10__plus_sonnet_q9_traits: missing_current -- current_file_input: /Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/ecocentric_vs_anthropocentric/sonnet_responses_traits_b10_q9/scores_responses.json does not exist (dep_key='judge_ecocentric_vs_anthropocentric_responses_gpt_b10__plus_sonnet_q9_traits')
+- judge_egalitarian_vs_elitist_responses_gpt_b10_roles: drift -- fingerprint changed: v1:2026-05-07T02:14:12+00:00@8983789 -> v1:2026-05-09T06:16:04+00:00@3426160
+- judge_egalitarian_vs_elitist_responses_gpt_b10_traits: drift -- fingerprint changed: v1:2026-05-05T02:27:21+00:00@10645255 -> v1:2026-05-09T04:20:01+00:00@3996777
+- judge_egalitarian_vs_elitist_responses_gpt_b10__plus_haiku_q9_roles: drift -- fingerprint changed: v1:2026-05-07T08:14:44+00:00@4589707 -> v1:2026-05-09T10:16:10+00:00@4812930
+- judge_egalitarian_vs_elitist_responses_gpt_b10__plus_haiku_q9_traits: drift -- fingerprint changed: v1:2026-05-07T08:41:01+00:00@5370061 -> v1:2026-05-09T08:19:36+00:00@5798848
+- judge_egalitarian_vs_elitist_responses_gpt_b10__plus_sonnet_q9_roles: missing_current -- current_file_input: /Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/egalitarian_vs_elitist/sonnet_responses_roles_b10_q9/scores_responses.json does not exist (dep_key='judge_egalitarian_vs_elitist_responses_gpt_b10__plus_sonnet_q9_roles')
+- judge_egalitarian_vs_elitist_responses_gpt_b10__plus_sonnet_q9_traits: missing_current -- current_file_input: /Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/egalitarian_vs_elitist/sonnet_responses_traits_b10_q9/scores_responses.json does not exist (dep_key='judge_egalitarian_vs_elitist_responses_gpt_b10__plus_sonnet_q9_traits')
+- judge_guileless_vs_scheming_responses_gpt_b10_roles: drift -- fingerprint changed: v1:2026-05-07T02:19:30+00:00@8448036 -> v1:2026-05-09T06:11:17+00:00@3219294
+- judge_guileless_vs_scheming_responses_gpt_b10_traits: drift -- fingerprint changed: v1:2026-05-05T02:26:04+00:00@10073688 -> v1:2026-05-09T04:18:55+00:00@3787654
+- judge_guileless_vs_scheming_responses_gpt_b10__plus_haiku_q9_roles: drift -- fingerprint changed: v1:2026-05-07T09:07:01+00:00@4281131 -> v1:2026-05-09T10:13:04+00:00@4535379
+- judge_guileless_vs_scheming_responses_gpt_b10__plus_haiku_q9_traits: drift -- fingerprint changed: v1:2026-05-07T09:38:14+00:00@5020726 -> v1:2026-05-09T08:13:28+00:00@5425296
+- judge_guileless_vs_scheming_responses_gpt_b10__plus_sonnet_q9_roles: missing_current -- current_file_input: /Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/guileless_vs_scheming/sonnet_responses_roles_b10_q9/scores_responses.json does not exist (dep_key='judge_guileless_vs_scheming_responses_gpt_b10__plus_sonnet_q9_roles')
+- judge_guileless_vs_scheming_responses_gpt_b10__plus_sonnet_q9_traits: missing_current -- current_file_input: /Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/guileless_vs_scheming/sonnet_responses_traits_b10_q9/scores_responses.json does not exist (dep_key='judge_guileless_vs_scheming_responses_gpt_b10__plus_sonnet_q9_traits')
+- judge_harmless_vs_harmful_responses_gpt_b10_roles: drift -- fingerprint changed: v1:2026-05-07T02:24:49+00:00@9015440 -> v1:2026-05-09T05:46:49+00:00@3417328
+- judge_harmless_vs_harmful_responses_gpt_b10_traits: drift -- fingerprint changed: v1:2026-05-05T02:24:18+00:00@10800066 -> v1:2026-05-09T03:50:17+00:00@4029988
+- judge_harmless_vs_harmful_responses_gpt_b10__plus_haiku_q9_roles: drift -- fingerprint changed: v1:2026-05-07T10:04:20+00:00@4485056 -> v1:2026-05-09T09:45:29+00:00@4706548
+- judge_harmless_vs_harmful_responses_gpt_b10__plus_haiku_q9_traits: drift -- fingerprint changed: v1:2026-05-07T10:36:21+00:00@5450613 -> v1:2026-05-09T07:38:52+00:00@5748641
+- judge_harmless_vs_harmful_responses_gpt_b10__plus_sonnet_q9_roles: missing_current -- current_file_input: /Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/harmless_vs_harmful/sonnet_responses_roles_b10_q9/scores_responses.json does not exist (dep_key='judge_harmless_vs_harmful_responses_gpt_b10__plus_sonnet_q9_roles')
+- judge_harmless_vs_harmful_responses_gpt_b10__plus_sonnet_q9_traits: missing_current -- current_file_input: /Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/harmless_vs_harmful/sonnet_responses_traits_b10_q9/scores_responses.json does not exist (dep_key='judge_harmless_vs_harmful_responses_gpt_b10__plus_sonnet_q9_traits')
+- judge_honest_vs_dishonest_responses_gpt_b10_roles: drift -- fingerprint changed: v1:2026-05-07T02:30:08+00:00@8732978 -> v1:2026-05-09T05:47:12+00:00@3316374
+- judge_honest_vs_dishonest_responses_gpt_b10_traits: drift -- fingerprint changed: v1:2026-05-05T02:24:24+00:00@10478215 -> v1:2026-05-09T03:46:45+00:00@3888514
+- judge_honest_vs_dishonest_responses_gpt_b10__plus_haiku_q9_roles: drift -- fingerprint changed: v1:2026-05-07T11:58:41+00:00@4814998 -> v1:2026-05-09T09:46:24+00:00@5107620
+- judge_honest_vs_dishonest_responses_gpt_b10__plus_haiku_q9_traits: drift -- fingerprint changed: v1:2026-05-07T12:32:30+00:00@5642543 -> v1:2026-05-09T07:49:06+00:00@6115483
+- judge_honest_vs_dishonest_responses_gpt_b10__plus_sonnet_q9_roles: missing_current -- current_file_input: /Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/honest_vs_dishonest/sonnet_responses_roles_b10_q9/scores_responses.json does not exist (dep_key='judge_honest_vs_dishonest_responses_gpt_b10__plus_sonnet_q9_roles')
+- judge_honest_vs_dishonest_responses_gpt_b10__plus_sonnet_q9_traits: missing_current -- current_file_input: /Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/honest_vs_dishonest/sonnet_responses_traits_b10_q9/scores_responses.json does not exist (dep_key='judge_honest_vs_dishonest_responses_gpt_b10__plus_sonnet_q9_traits')
+- judge_helpful_vs_unhelpful_responses_gpt_b10_roles: drift -- fingerprint changed: v1:2026-05-05T04:12:37+00:00@9021982 -> v1:2026-05-09T05:48:20+00:00@3407034
+- judge_helpful_vs_unhelpful_responses_gpt_b10_traits: drift -- fingerprint changed: v1:2026-05-05T03:12:42+00:00@10887942 -> v1:2026-05-09T03:50:45+00:00@4062394
+- judge_helpful_vs_unhelpful_responses_gpt_b10__plus_haiku_q9_roles: drift -- fingerprint changed: v1:2026-05-07T11:02:01+00:00@4791342 -> v1:2026-05-09T09:47:47+00:00@5007590
+- judge_helpful_vs_unhelpful_responses_gpt_b10__plus_haiku_q9_traits: drift -- fingerprint changed: v1:2026-05-07T11:34:15+00:00@5553220 -> v1:2026-05-09T07:45:06+00:00@5996230
+- judge_helpful_vs_unhelpful_responses_gpt_b10__plus_sonnet_q9_roles: missing_current -- current_file_input: /Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/helpful_vs_unhelpful/sonnet_responses_roles_b10_q9/scores_responses.json does not exist (dep_key='judge_helpful_vs_unhelpful_responses_gpt_b10__plus_sonnet_q9_roles')
+- judge_helpful_vs_unhelpful_responses_gpt_b10__plus_sonnet_q9_traits: missing_current -- current_file_input: /Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/helpful_vs_unhelpful/sonnet_responses_traits_b10_q9/scores_responses.json does not exist (dep_key='judge_helpful_vs_unhelpful_responses_gpt_b10__plus_sonnet_q9_traits')
+- judge_relativist_vs_absolutist_responses_gpt_b10_roles: drift -- fingerprint changed: v1:2026-05-07T03:44:58+00:00@8799742 -> v1:2026-05-09T06:58:19+00:00@3361441
+- judge_relativist_vs_absolutist_responses_gpt_b10_traits: drift -- fingerprint changed: v1:2026-05-05T02:33:05+00:00@10393944 -> v1:2026-05-09T05:16:48+00:00@3974818
+- judge_relativist_vs_absolutist_responses_gpt_b10__plus_haiku_q9_roles: drift -- fingerprint changed: v1:2026-05-07T12:58:36+00:00@4863735 -> v1:2026-05-09T11:05:22+00:00@5123704
+- judge_relativist_vs_absolutist_responses_gpt_b10__plus_haiku_q9_traits: drift -- fingerprint changed: v1:2026-05-07T13:29:38+00:00@5468570 -> v1:2026-05-09T09:10:49+00:00@5967664
+- judge_relativist_vs_absolutist_responses_gpt_b10__plus_sonnet_q9_roles: missing_current -- current_file_input: /Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/relativist_vs_absolutist/sonnet_responses_roles_b10_q9/scores_responses.json does not exist (dep_key='judge_relativist_vs_absolutist_responses_gpt_b10__plus_sonnet_q9_roles')
+- judge_relativist_vs_absolutist_responses_gpt_b10__plus_sonnet_q9_traits: missing_current -- current_file_input: /Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/relativist_vs_absolutist/sonnet_responses_traits_b10_q9/scores_responses.json does not exist (dep_key='judge_relativist_vs_absolutist_responses_gpt_b10__plus_sonnet_q9_traits')
+- judge_systems_thinker_vs_analytical_responses_gpt_b10_roles: drift -- fingerprint changed: v1:2026-05-07T03:51:07+00:00@9629822 -> v1:2026-05-09T07:06:37+00:00@3643098
+- judge_systems_thinker_vs_analytical_responses_gpt_b10_traits: drift -- fingerprint changed: v1:2026-05-05T02:34:39+00:00@10924474 -> v1:2026-05-09T05:19:06+00:00@4184563
+- judge_systems_thinker_vs_analytical_responses_gpt_b10__plus_haiku_q9_roles: drift -- fingerprint changed: v1:2026-05-07T13:55:53+00:00@5033668 -> v1:2026-05-09T11:21:20+00:00@5329012
+- judge_systems_thinker_vs_analytical_responses_gpt_b10__plus_haiku_q9_traits: drift -- fingerprint changed: v1:2026-05-07T14:30:30+00:00@5753287 -> v1:2026-05-09T09:18:40+00:00@6235010
+- judge_systems_thinker_vs_analytical_responses_gpt_b10__plus_sonnet_q9_roles: missing_current -- current_file_input: /Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/systems_thinker_vs_analytical/sonnet_responses_roles_b10_q9/scores_responses.json does not exist (dep_key='judge_systems_thinker_vs_analytical_responses_gpt_b10__plus_sonnet_q9_roles')
+- judge_systems_thinker_vs_analytical_responses_gpt_b10__plus_sonnet_q9_traits: missing_current -- current_file_input: /Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/systems_thinker_vs_analytical/sonnet_responses_traits_b10_q9/scores_responses.json does not exist (dep_key='judge_systems_thinker_vs_analytical_responses_gpt_b10__plus_sonnet_q9_traits')
+
+### `/Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/rho_by_layer.json`
+- **Produced**: 2026-05-08 22:13:31 +0100  (git f9a1899+dirty)
+- **Cmd**: `uv run python results_analysis/rho_by_layer.py`
+- judge_helpful_vs_unhelpful_responses_traits: missing_current -- current_file_input: /Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/helpful_vs_unhelpful/gpt_responses_traits/scores_responses.json does not exist (dep_key='judge_helpful_vs_unhelpful_responses_traits')
+- judge_helpful_vs_unhelpful_responses_roles: missing_current -- current_file_input: /Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/helpful_vs_unhelpful/gpt_responses_roles/scores_responses.json does not exist (dep_key='judge_helpful_vs_unhelpful_responses_roles')
+- judge_harmless_vs_harmful_responses_traits: missing_current -- current_file_input: /Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/harmless_vs_harmful/gpt_responses_traits/scores_responses.json does not exist (dep_key='judge_harmless_vs_harmful_responses_traits')
+- judge_harmless_vs_harmful_responses_roles: missing_current -- current_file_input: /Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/harmless_vs_harmful/gpt_responses_roles/scores_responses.json does not exist (dep_key='judge_harmless_vs_harmful_responses_roles')
+- judge_honest_vs_dishonest_responses_traits: missing_current -- current_file_input: /Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/honest_vs_dishonest/gpt_responses_traits/scores_responses.json does not exist (dep_key='judge_honest_vs_dishonest_responses_traits')
+- judge_honest_vs_dishonest_responses_roles: missing_current -- current_file_input: /Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/honest_vs_dishonest/gpt_responses_roles/scores_responses.json does not exist (dep_key='judge_honest_vs_dishonest_responses_roles')
+- judge_truthful_vs_deceitful_responses_traits: missing_current -- current_file_input: /Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/truthful_vs_deceitful/gpt_responses_traits/scores_responses.json does not exist (dep_key='judge_truthful_vs_deceitful_responses_traits')
+- judge_truthful_vs_deceitful_responses_roles: missing_current -- current_file_input: /Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/truthful_vs_deceitful/gpt_responses_roles/scores_responses.json does not exist (dep_key='judge_truthful_vs_deceitful_responses_roles')
+- judge_guileless_vs_scheming_responses_traits: missing_current -- current_file_input: /Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/guileless_vs_scheming/gpt_responses_traits/scores_responses.json does not exist (dep_key='judge_guileless_vs_scheming_responses_traits')
+- judge_guileless_vs_scheming_responses_roles: missing_current -- current_file_input: /Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/guileless_vs_scheming/gpt_responses_roles/scores_responses.json does not exist (dep_key='judge_guileless_vs_scheming_responses_roles')
+- judge_egalitarian_vs_elitist_responses_traits: missing_current -- current_file_input: /Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/egalitarian_vs_elitist/gpt_responses_traits/scores_responses.json does not exist (dep_key='judge_egalitarian_vs_elitist_responses_traits')
+- judge_egalitarian_vs_elitist_responses_roles: missing_current -- current_file_input: /Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/egalitarian_vs_elitist/gpt_responses_roles/scores_responses.json does not exist (dep_key='judge_egalitarian_vs_elitist_responses_roles')
+- judge_progressive_vs_conservative_responses_traits: missing_current -- current_file_input: /Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/progressive_vs_conservative/gpt_responses_traits/scores_responses.json does not exist (dep_key='judge_progressive_vs_conservative_responses_traits')
+- judge_progressive_vs_conservative_responses_roles: missing_current -- current_file_input: /Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/progressive_vs_conservative/gpt_responses_roles/scores_responses.json does not exist (dep_key='judge_progressive_vs_conservative_responses_roles')
+- judge_concise_vs_verbose_responses_traits: missing_current -- current_file_input: /Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/concise_vs_verbose/gpt_responses_traits/scores_responses.json does not exist (dep_key='judge_concise_vs_verbose_responses_traits')
+- judge_concise_vs_verbose_responses_roles: missing_current -- current_file_input: /Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/concise_vs_verbose/gpt_responses_roles/scores_responses.json does not exist (dep_key='judge_concise_vs_verbose_responses_roles')
+- judge_ecocentric_vs_anthropocentric_responses_traits: missing_current -- current_file_input: /Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/ecocentric_vs_anthropocentric/gpt_responses_traits/scores_responses.json does not exist (dep_key='judge_ecocentric_vs_anthropocentric_responses_traits')
+- judge_ecocentric_vs_anthropocentric_responses_roles: missing_current -- current_file_input: /Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/ecocentric_vs_anthropocentric/gpt_responses_roles/scores_responses.json does not exist (dep_key='judge_ecocentric_vs_anthropocentric_responses_roles')
+- judge_improvisational_vs_methodical_responses_traits: missing_current -- current_file_input: /Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/improvisational_vs_methodical/gpt_responses_traits/scores_responses.json does not exist (dep_key='judge_improvisational_vs_methodical_responses_traits')
+- judge_improvisational_vs_methodical_responses_roles: missing_current -- current_file_input: /Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/improvisational_vs_methodical/gpt_responses_roles/scores_responses.json does not exist (dep_key='judge_improvisational_vs_methodical_responses_roles')
+- judge_relativist_vs_absolutist_responses_traits: missing_current -- current_file_input: /Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/relativist_vs_absolutist/gpt_responses_traits/scores_responses.json does not exist (dep_key='judge_relativist_vs_absolutist_responses_traits')
+- judge_relativist_vs_absolutist_responses_roles: missing_current -- current_file_input: /Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/relativist_vs_absolutist/gpt_responses_roles/scores_responses.json does not exist (dep_key='judge_relativist_vs_absolutist_responses_roles')
+- judge_systems_thinker_vs_analytical_responses_traits: missing_current -- current_file_input: /Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/systems_thinker_vs_analytical/gpt_responses_traits/scores_responses.json does not exist (dep_key='judge_systems_thinker_vs_analytical_responses_traits')
+- judge_systems_thinker_vs_analytical_responses_roles: missing_current -- current_file_input: /Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/systems_thinker_vs_analytical/gpt_responses_roles/scores_responses.json does not exist (dep_key='judge_systems_thinker_vs_analytical_responses_roles')
+
+### `/Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/whitening_k_sweep_di_slot3.json`
+- **Produced**: 2026-05-08 21:43:30 +0100  (git f9a1899+dirty)
+- **Cmd**: `uv run python results_analysis/whitening_k_sweep.py --pairs pair_list_di.json --slot 3`
+- judge_helpful_vs_unhelpful_responses_traits: missing_current -- current_file_input: /Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/helpful_vs_unhelpful/gpt_responses_traits/scores_responses.json does not exist (dep_key='judge_helpful_vs_unhelpful_responses_traits')
+- judge_helpful_vs_unhelpful_responses_roles: missing_current -- current_file_input: /Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/helpful_vs_unhelpful/gpt_responses_roles/scores_responses.json does not exist (dep_key='judge_helpful_vs_unhelpful_responses_roles')
+- judge_harmless_vs_harmful_responses_traits: missing_current -- current_file_input: /Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/harmless_vs_harmful/gpt_responses_traits/scores_responses.json does not exist (dep_key='judge_harmless_vs_harmful_responses_traits')
+- judge_harmless_vs_harmful_responses_roles: missing_current -- current_file_input: /Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/harmless_vs_harmful/gpt_responses_roles/scores_responses.json does not exist (dep_key='judge_harmless_vs_harmful_responses_roles')
+- judge_honest_vs_dishonest_responses_traits: missing_current -- current_file_input: /Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/honest_vs_dishonest/gpt_responses_traits/scores_responses.json does not exist (dep_key='judge_honest_vs_dishonest_responses_traits')
+- judge_honest_vs_dishonest_responses_roles: missing_current -- current_file_input: /Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/honest_vs_dishonest/gpt_responses_roles/scores_responses.json does not exist (dep_key='judge_honest_vs_dishonest_responses_roles')
+- judge_truthful_vs_deceitful_responses_traits: missing_current -- current_file_input: /Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/truthful_vs_deceitful/gpt_responses_traits/scores_responses.json does not exist (dep_key='judge_truthful_vs_deceitful_responses_traits')
+- judge_truthful_vs_deceitful_responses_roles: missing_current -- current_file_input: /Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/truthful_vs_deceitful/gpt_responses_roles/scores_responses.json does not exist (dep_key='judge_truthful_vs_deceitful_responses_roles')
+- judge_guileless_vs_scheming_responses_traits: missing_current -- current_file_input: /Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/guileless_vs_scheming/gpt_responses_traits/scores_responses.json does not exist (dep_key='judge_guileless_vs_scheming_responses_traits')
+- judge_guileless_vs_scheming_responses_roles: missing_current -- current_file_input: /Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/guileless_vs_scheming/gpt_responses_roles/scores_responses.json does not exist (dep_key='judge_guileless_vs_scheming_responses_roles')
+- judge_egalitarian_vs_elitist_responses_traits: missing_current -- current_file_input: /Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/egalitarian_vs_elitist/gpt_responses_traits/scores_responses.json does not exist (dep_key='judge_egalitarian_vs_elitist_responses_traits')
+- judge_egalitarian_vs_elitist_responses_roles: missing_current -- current_file_input: /Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/egalitarian_vs_elitist/gpt_responses_roles/scores_responses.json does not exist (dep_key='judge_egalitarian_vs_elitist_responses_roles')
+- judge_progressive_vs_conservative_responses_traits: missing_current -- current_file_input: /Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/progressive_vs_conservative/gpt_responses_traits/scores_responses.json does not exist (dep_key='judge_progressive_vs_conservative_responses_traits')
+- judge_progressive_vs_conservative_responses_roles: missing_current -- current_file_input: /Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/progressive_vs_conservative/gpt_responses_roles/scores_responses.json does not exist (dep_key='judge_progressive_vs_conservative_responses_roles')
+- judge_concise_vs_verbose_responses_traits: missing_current -- current_file_input: /Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/concise_vs_verbose/gpt_responses_traits/scores_responses.json does not exist (dep_key='judge_concise_vs_verbose_responses_traits')
+- judge_concise_vs_verbose_responses_roles: missing_current -- current_file_input: /Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/concise_vs_verbose/gpt_responses_roles/scores_responses.json does not exist (dep_key='judge_concise_vs_verbose_responses_roles')
+- judge_ecocentric_vs_anthropocentric_responses_traits: missing_current -- current_file_input: /Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/ecocentric_vs_anthropocentric/gpt_responses_traits/scores_responses.json does not exist (dep_key='judge_ecocentric_vs_anthropocentric_responses_traits')
+- judge_ecocentric_vs_anthropocentric_responses_roles: missing_current -- current_file_input: /Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/ecocentric_vs_anthropocentric/gpt_responses_roles/scores_responses.json does not exist (dep_key='judge_ecocentric_vs_anthropocentric_responses_roles')
+- judge_improvisational_vs_methodical_responses_traits: missing_current -- current_file_input: /Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/improvisational_vs_methodical/gpt_responses_traits/scores_responses.json does not exist (dep_key='judge_improvisational_vs_methodical_responses_traits')
+- judge_improvisational_vs_methodical_responses_roles: missing_current -- current_file_input: /Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/improvisational_vs_methodical/gpt_responses_roles/scores_responses.json does not exist (dep_key='judge_improvisational_vs_methodical_responses_roles')
+- judge_relativist_vs_absolutist_responses_traits: missing_current -- current_file_input: /Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/relativist_vs_absolutist/gpt_responses_traits/scores_responses.json does not exist (dep_key='judge_relativist_vs_absolutist_responses_traits')
+- judge_relativist_vs_absolutist_responses_roles: missing_current -- current_file_input: /Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/relativist_vs_absolutist/gpt_responses_roles/scores_responses.json does not exist (dep_key='judge_relativist_vs_absolutist_responses_roles')
+- judge_systems_thinker_vs_analytical_responses_traits: missing_current -- current_file_input: /Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/systems_thinker_vs_analytical/gpt_responses_traits/scores_responses.json does not exist (dep_key='judge_systems_thinker_vs_analytical_responses_traits')
+- judge_systems_thinker_vs_analytical_responses_roles: missing_current -- current_file_input: /Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/systems_thinker_vs_analytical/gpt_responses_roles/scores_responses.json does not exist (dep_key='judge_systems_thinker_vs_analytical_responses_roles')
+
+### `/Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/whitening_k_sweep_di_slot6.json`
+- **Produced**: 2026-05-08 21:44:49 +0100  (git f9a1899+dirty)
+- **Cmd**: `uv run python results_analysis/whitening_k_sweep.py --pairs pair_list_di.json --slot 6`
+- judge_helpful_vs_unhelpful_responses_traits: missing_current -- current_file_input: /Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/helpful_vs_unhelpful/gpt_responses_traits/scores_responses.json does not exist (dep_key='judge_helpful_vs_unhelpful_responses_traits')
+- judge_helpful_vs_unhelpful_responses_roles: missing_current -- current_file_input: /Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/helpful_vs_unhelpful/gpt_responses_roles/scores_responses.json does not exist (dep_key='judge_helpful_vs_unhelpful_responses_roles')
+- judge_harmless_vs_harmful_responses_traits: missing_current -- current_file_input: /Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/harmless_vs_harmful/gpt_responses_traits/scores_responses.json does not exist (dep_key='judge_harmless_vs_harmful_responses_traits')
+- judge_harmless_vs_harmful_responses_roles: missing_current -- current_file_input: /Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/harmless_vs_harmful/gpt_responses_roles/scores_responses.json does not exist (dep_key='judge_harmless_vs_harmful_responses_roles')
+- judge_honest_vs_dishonest_responses_traits: missing_current -- current_file_input: /Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/honest_vs_dishonest/gpt_responses_traits/scores_responses.json does not exist (dep_key='judge_honest_vs_dishonest_responses_traits')
+- judge_honest_vs_dishonest_responses_roles: missing_current -- current_file_input: /Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/honest_vs_dishonest/gpt_responses_roles/scores_responses.json does not exist (dep_key='judge_honest_vs_dishonest_responses_roles')
+- judge_truthful_vs_deceitful_responses_traits: missing_current -- current_file_input: /Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/truthful_vs_deceitful/gpt_responses_traits/scores_responses.json does not exist (dep_key='judge_truthful_vs_deceitful_responses_traits')
+- judge_truthful_vs_deceitful_responses_roles: missing_current -- current_file_input: /Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/truthful_vs_deceitful/gpt_responses_roles/scores_responses.json does not exist (dep_key='judge_truthful_vs_deceitful_responses_roles')
+- judge_guileless_vs_scheming_responses_traits: missing_current -- current_file_input: /Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/guileless_vs_scheming/gpt_responses_traits/scores_responses.json does not exist (dep_key='judge_guileless_vs_scheming_responses_traits')
+- judge_guileless_vs_scheming_responses_roles: missing_current -- current_file_input: /Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/guileless_vs_scheming/gpt_responses_roles/scores_responses.json does not exist (dep_key='judge_guileless_vs_scheming_responses_roles')
+- judge_egalitarian_vs_elitist_responses_traits: missing_current -- current_file_input: /Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/egalitarian_vs_elitist/gpt_responses_traits/scores_responses.json does not exist (dep_key='judge_egalitarian_vs_elitist_responses_traits')
+- judge_egalitarian_vs_elitist_responses_roles: missing_current -- current_file_input: /Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/egalitarian_vs_elitist/gpt_responses_roles/scores_responses.json does not exist (dep_key='judge_egalitarian_vs_elitist_responses_roles')
+- judge_progressive_vs_conservative_responses_traits: missing_current -- current_file_input: /Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/progressive_vs_conservative/gpt_responses_traits/scores_responses.json does not exist (dep_key='judge_progressive_vs_conservative_responses_traits')
+- judge_progressive_vs_conservative_responses_roles: missing_current -- current_file_input: /Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/progressive_vs_conservative/gpt_responses_roles/scores_responses.json does not exist (dep_key='judge_progressive_vs_conservative_responses_roles')
+- judge_concise_vs_verbose_responses_traits: missing_current -- current_file_input: /Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/concise_vs_verbose/gpt_responses_traits/scores_responses.json does not exist (dep_key='judge_concise_vs_verbose_responses_traits')
+- judge_concise_vs_verbose_responses_roles: missing_current -- current_file_input: /Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/concise_vs_verbose/gpt_responses_roles/scores_responses.json does not exist (dep_key='judge_concise_vs_verbose_responses_roles')
+- judge_ecocentric_vs_anthropocentric_responses_traits: missing_current -- current_file_input: /Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/ecocentric_vs_anthropocentric/gpt_responses_traits/scores_responses.json does not exist (dep_key='judge_ecocentric_vs_anthropocentric_responses_traits')
+- judge_ecocentric_vs_anthropocentric_responses_roles: missing_current -- current_file_input: /Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/ecocentric_vs_anthropocentric/gpt_responses_roles/scores_responses.json does not exist (dep_key='judge_ecocentric_vs_anthropocentric_responses_roles')
+- judge_improvisational_vs_methodical_responses_traits: missing_current -- current_file_input: /Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/improvisational_vs_methodical/gpt_responses_traits/scores_responses.json does not exist (dep_key='judge_improvisational_vs_methodical_responses_traits')
+- judge_improvisational_vs_methodical_responses_roles: missing_current -- current_file_input: /Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/improvisational_vs_methodical/gpt_responses_roles/scores_responses.json does not exist (dep_key='judge_improvisational_vs_methodical_responses_roles')
+- judge_relativist_vs_absolutist_responses_traits: missing_current -- current_file_input: /Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/relativist_vs_absolutist/gpt_responses_traits/scores_responses.json does not exist (dep_key='judge_relativist_vs_absolutist_responses_traits')
+- judge_relativist_vs_absolutist_responses_roles: missing_current -- current_file_input: /Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/relativist_vs_absolutist/gpt_responses_roles/scores_responses.json does not exist (dep_key='judge_relativist_vs_absolutist_responses_roles')
+- judge_systems_thinker_vs_analytical_responses_traits: missing_current -- current_file_input: /Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/systems_thinker_vs_analytical/gpt_responses_traits/scores_responses.json does not exist (dep_key='judge_systems_thinker_vs_analytical_responses_traits')
+- judge_systems_thinker_vs_analytical_responses_roles: missing_current -- current_file_input: /Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/systems_thinker_vs_analytical/gpt_responses_roles/scores_responses.json does not exist (dep_key='judge_systems_thinker_vs_analytical_responses_roles')
+
+### `/Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/whitening_k_sweep_di_slot7.json`
+- **Produced**: 2026-05-08 21:46:08 +0100  (git f9a1899+dirty)
+- **Cmd**: `uv run python results_analysis/whitening_k_sweep.py --pairs pair_list_di.json --slot 7`
+- judge_helpful_vs_unhelpful_responses_traits: missing_current -- current_file_input: /Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/helpful_vs_unhelpful/gpt_responses_traits/scores_responses.json does not exist (dep_key='judge_helpful_vs_unhelpful_responses_traits')
+- judge_helpful_vs_unhelpful_responses_roles: missing_current -- current_file_input: /Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/helpful_vs_unhelpful/gpt_responses_roles/scores_responses.json does not exist (dep_key='judge_helpful_vs_unhelpful_responses_roles')
+- judge_harmless_vs_harmful_responses_traits: missing_current -- current_file_input: /Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/harmless_vs_harmful/gpt_responses_traits/scores_responses.json does not exist (dep_key='judge_harmless_vs_harmful_responses_traits')
+- judge_harmless_vs_harmful_responses_roles: missing_current -- current_file_input: /Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/harmless_vs_harmful/gpt_responses_roles/scores_responses.json does not exist (dep_key='judge_harmless_vs_harmful_responses_roles')
+- judge_honest_vs_dishonest_responses_traits: missing_current -- current_file_input: /Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/honest_vs_dishonest/gpt_responses_traits/scores_responses.json does not exist (dep_key='judge_honest_vs_dishonest_responses_traits')
+- judge_honest_vs_dishonest_responses_roles: missing_current -- current_file_input: /Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/honest_vs_dishonest/gpt_responses_roles/scores_responses.json does not exist (dep_key='judge_honest_vs_dishonest_responses_roles')
+- judge_truthful_vs_deceitful_responses_traits: missing_current -- current_file_input: /Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/truthful_vs_deceitful/gpt_responses_traits/scores_responses.json does not exist (dep_key='judge_truthful_vs_deceitful_responses_traits')
+- judge_truthful_vs_deceitful_responses_roles: missing_current -- current_file_input: /Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/truthful_vs_deceitful/gpt_responses_roles/scores_responses.json does not exist (dep_key='judge_truthful_vs_deceitful_responses_roles')
+- judge_guileless_vs_scheming_responses_traits: missing_current -- current_file_input: /Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/guileless_vs_scheming/gpt_responses_traits/scores_responses.json does not exist (dep_key='judge_guileless_vs_scheming_responses_traits')
+- judge_guileless_vs_scheming_responses_roles: missing_current -- current_file_input: /Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/guileless_vs_scheming/gpt_responses_roles/scores_responses.json does not exist (dep_key='judge_guileless_vs_scheming_responses_roles')
+- judge_egalitarian_vs_elitist_responses_traits: missing_current -- current_file_input: /Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/egalitarian_vs_elitist/gpt_responses_traits/scores_responses.json does not exist (dep_key='judge_egalitarian_vs_elitist_responses_traits')
+- judge_egalitarian_vs_elitist_responses_roles: missing_current -- current_file_input: /Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/egalitarian_vs_elitist/gpt_responses_roles/scores_responses.json does not exist (dep_key='judge_egalitarian_vs_elitist_responses_roles')
+- judge_progressive_vs_conservative_responses_traits: missing_current -- current_file_input: /Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/progressive_vs_conservative/gpt_responses_traits/scores_responses.json does not exist (dep_key='judge_progressive_vs_conservative_responses_traits')
+- judge_progressive_vs_conservative_responses_roles: missing_current -- current_file_input: /Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/progressive_vs_conservative/gpt_responses_roles/scores_responses.json does not exist (dep_key='judge_progressive_vs_conservative_responses_roles')
+- judge_concise_vs_verbose_responses_traits: missing_current -- current_file_input: /Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/concise_vs_verbose/gpt_responses_traits/scores_responses.json does not exist (dep_key='judge_concise_vs_verbose_responses_traits')
+- judge_concise_vs_verbose_responses_roles: missing_current -- current_file_input: /Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/concise_vs_verbose/gpt_responses_roles/scores_responses.json does not exist (dep_key='judge_concise_vs_verbose_responses_roles')
+- judge_ecocentric_vs_anthropocentric_responses_traits: missing_current -- current_file_input: /Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/ecocentric_vs_anthropocentric/gpt_responses_traits/scores_responses.json does not exist (dep_key='judge_ecocentric_vs_anthropocentric_responses_traits')
+- judge_ecocentric_vs_anthropocentric_responses_roles: missing_current -- current_file_input: /Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/ecocentric_vs_anthropocentric/gpt_responses_roles/scores_responses.json does not exist (dep_key='judge_ecocentric_vs_anthropocentric_responses_roles')
+- judge_improvisational_vs_methodical_responses_traits: missing_current -- current_file_input: /Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/improvisational_vs_methodical/gpt_responses_traits/scores_responses.json does not exist (dep_key='judge_improvisational_vs_methodical_responses_traits')
+- judge_improvisational_vs_methodical_responses_roles: missing_current -- current_file_input: /Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/improvisational_vs_methodical/gpt_responses_roles/scores_responses.json does not exist (dep_key='judge_improvisational_vs_methodical_responses_roles')
+- judge_relativist_vs_absolutist_responses_traits: missing_current -- current_file_input: /Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/relativist_vs_absolutist/gpt_responses_traits/scores_responses.json does not exist (dep_key='judge_relativist_vs_absolutist_responses_traits')
+- judge_relativist_vs_absolutist_responses_roles: missing_current -- current_file_input: /Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/relativist_vs_absolutist/gpt_responses_roles/scores_responses.json does not exist (dep_key='judge_relativist_vs_absolutist_responses_roles')
+- judge_systems_thinker_vs_analytical_responses_traits: missing_current -- current_file_input: /Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/systems_thinker_vs_analytical/gpt_responses_traits/scores_responses.json does not exist (dep_key='judge_systems_thinker_vs_analytical_responses_traits')
+- judge_systems_thinker_vs_analytical_responses_roles: missing_current -- current_file_input: /Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/systems_thinker_vs_analytical/gpt_responses_roles/scores_responses.json does not exist (dep_key='judge_systems_thinker_vs_analytical_responses_roles')
+
+### `/Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/whitening_k_sweep_responses_slot3.json`
+- **Produced**: 2026-05-08 21:47:57 +0100  (git f9a1899+dirty)
+- **Cmd**: `uv run python results_analysis/whitening_k_sweep.py --pairs pair_list_responses.json --slot 3`
+- judge_helpful_vs_unhelpful_responses_traits: missing_current -- current_file_input: /Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/helpful_vs_unhelpful/gpt_responses_traits/scores_responses.json does not exist (dep_key='judge_helpful_vs_unhelpful_responses_traits')
+- judge_helpful_vs_unhelpful_responses_roles: missing_current -- current_file_input: /Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/helpful_vs_unhelpful/gpt_responses_roles/scores_responses.json does not exist (dep_key='judge_helpful_vs_unhelpful_responses_roles')
+- judge_harmless_vs_harmful_responses_traits: missing_current -- current_file_input: /Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/harmless_vs_harmful/gpt_responses_traits/scores_responses.json does not exist (dep_key='judge_harmless_vs_harmful_responses_traits')
+- judge_harmless_vs_harmful_responses_roles: missing_current -- current_file_input: /Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/harmless_vs_harmful/gpt_responses_roles/scores_responses.json does not exist (dep_key='judge_harmless_vs_harmful_responses_roles')
+- judge_honest_vs_dishonest_responses_traits: missing_current -- current_file_input: /Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/honest_vs_dishonest/gpt_responses_traits/scores_responses.json does not exist (dep_key='judge_honest_vs_dishonest_responses_traits')
+- judge_honest_vs_dishonest_responses_roles: missing_current -- current_file_input: /Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/honest_vs_dishonest/gpt_responses_roles/scores_responses.json does not exist (dep_key='judge_honest_vs_dishonest_responses_roles')
+- judge_truthful_vs_deceitful_responses_traits: missing_current -- current_file_input: /Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/truthful_vs_deceitful/gpt_responses_traits/scores_responses.json does not exist (dep_key='judge_truthful_vs_deceitful_responses_traits')
+- judge_truthful_vs_deceitful_responses_roles: missing_current -- current_file_input: /Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/truthful_vs_deceitful/gpt_responses_roles/scores_responses.json does not exist (dep_key='judge_truthful_vs_deceitful_responses_roles')
+- judge_guileless_vs_scheming_responses_traits: missing_current -- current_file_input: /Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/guileless_vs_scheming/gpt_responses_traits/scores_responses.json does not exist (dep_key='judge_guileless_vs_scheming_responses_traits')
+- judge_guileless_vs_scheming_responses_roles: missing_current -- current_file_input: /Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/guileless_vs_scheming/gpt_responses_roles/scores_responses.json does not exist (dep_key='judge_guileless_vs_scheming_responses_roles')
+- judge_egalitarian_vs_elitist_responses_traits: missing_current -- current_file_input: /Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/egalitarian_vs_elitist/gpt_responses_traits/scores_responses.json does not exist (dep_key='judge_egalitarian_vs_elitist_responses_traits')
+- judge_egalitarian_vs_elitist_responses_roles: missing_current -- current_file_input: /Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/egalitarian_vs_elitist/gpt_responses_roles/scores_responses.json does not exist (dep_key='judge_egalitarian_vs_elitist_responses_roles')
+- judge_progressive_vs_conservative_responses_traits: missing_current -- current_file_input: /Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/progressive_vs_conservative/gpt_responses_traits/scores_responses.json does not exist (dep_key='judge_progressive_vs_conservative_responses_traits')
+- judge_progressive_vs_conservative_responses_roles: missing_current -- current_file_input: /Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/progressive_vs_conservative/gpt_responses_roles/scores_responses.json does not exist (dep_key='judge_progressive_vs_conservative_responses_roles')
+- judge_concise_vs_verbose_responses_traits: missing_current -- current_file_input: /Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/concise_vs_verbose/gpt_responses_traits/scores_responses.json does not exist (dep_key='judge_concise_vs_verbose_responses_traits')
+- judge_concise_vs_verbose_responses_roles: missing_current -- current_file_input: /Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/concise_vs_verbose/gpt_responses_roles/scores_responses.json does not exist (dep_key='judge_concise_vs_verbose_responses_roles')
+- judge_ecocentric_vs_anthropocentric_responses_traits: missing_current -- current_file_input: /Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/ecocentric_vs_anthropocentric/gpt_responses_traits/scores_responses.json does not exist (dep_key='judge_ecocentric_vs_anthropocentric_responses_traits')
+- judge_ecocentric_vs_anthropocentric_responses_roles: missing_current -- current_file_input: /Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/ecocentric_vs_anthropocentric/gpt_responses_roles/scores_responses.json does not exist (dep_key='judge_ecocentric_vs_anthropocentric_responses_roles')
+- judge_improvisational_vs_methodical_responses_traits: missing_current -- current_file_input: /Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/improvisational_vs_methodical/gpt_responses_traits/scores_responses.json does not exist (dep_key='judge_improvisational_vs_methodical_responses_traits')
+- judge_improvisational_vs_methodical_responses_roles: missing_current -- current_file_input: /Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/improvisational_vs_methodical/gpt_responses_roles/scores_responses.json does not exist (dep_key='judge_improvisational_vs_methodical_responses_roles')
+- judge_relativist_vs_absolutist_responses_traits: missing_current -- current_file_input: /Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/relativist_vs_absolutist/gpt_responses_traits/scores_responses.json does not exist (dep_key='judge_relativist_vs_absolutist_responses_traits')
+- judge_relativist_vs_absolutist_responses_roles: missing_current -- current_file_input: /Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/relativist_vs_absolutist/gpt_responses_roles/scores_responses.json does not exist (dep_key='judge_relativist_vs_absolutist_responses_roles')
+- judge_systems_thinker_vs_analytical_responses_traits: missing_current -- current_file_input: /Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/systems_thinker_vs_analytical/gpt_responses_traits/scores_responses.json does not exist (dep_key='judge_systems_thinker_vs_analytical_responses_traits')
+- judge_systems_thinker_vs_analytical_responses_roles: missing_current -- current_file_input: /Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/systems_thinker_vs_analytical/gpt_responses_roles/scores_responses.json does not exist (dep_key='judge_systems_thinker_vs_analytical_responses_roles')
+
+### `/Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/whitening_k_sweep_responses_slot6.json`
+- **Produced**: 2026-05-08 21:46:37 +0100  (git f9a1899+dirty)
+- **Cmd**: `uv run python results_analysis/whitening_k_sweep.py --pairs pair_list_responses.json --slot 6`
+- judge_helpful_vs_unhelpful_responses_traits: missing_current -- current_file_input: /Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/helpful_vs_unhelpful/gpt_responses_traits/scores_responses.json does not exist (dep_key='judge_helpful_vs_unhelpful_responses_traits')
+- judge_helpful_vs_unhelpful_responses_roles: missing_current -- current_file_input: /Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/helpful_vs_unhelpful/gpt_responses_roles/scores_responses.json does not exist (dep_key='judge_helpful_vs_unhelpful_responses_roles')
+- judge_harmless_vs_harmful_responses_traits: missing_current -- current_file_input: /Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/harmless_vs_harmful/gpt_responses_traits/scores_responses.json does not exist (dep_key='judge_harmless_vs_harmful_responses_traits')
+- judge_harmless_vs_harmful_responses_roles: missing_current -- current_file_input: /Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/harmless_vs_harmful/gpt_responses_roles/scores_responses.json does not exist (dep_key='judge_harmless_vs_harmful_responses_roles')
+- judge_honest_vs_dishonest_responses_traits: missing_current -- current_file_input: /Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/honest_vs_dishonest/gpt_responses_traits/scores_responses.json does not exist (dep_key='judge_honest_vs_dishonest_responses_traits')
+- judge_honest_vs_dishonest_responses_roles: missing_current -- current_file_input: /Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/honest_vs_dishonest/gpt_responses_roles/scores_responses.json does not exist (dep_key='judge_honest_vs_dishonest_responses_roles')
+- judge_truthful_vs_deceitful_responses_traits: missing_current -- current_file_input: /Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/truthful_vs_deceitful/gpt_responses_traits/scores_responses.json does not exist (dep_key='judge_truthful_vs_deceitful_responses_traits')
+- judge_truthful_vs_deceitful_responses_roles: missing_current -- current_file_input: /Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/truthful_vs_deceitful/gpt_responses_roles/scores_responses.json does not exist (dep_key='judge_truthful_vs_deceitful_responses_roles')
+- judge_guileless_vs_scheming_responses_traits: missing_current -- current_file_input: /Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/guileless_vs_scheming/gpt_responses_traits/scores_responses.json does not exist (dep_key='judge_guileless_vs_scheming_responses_traits')
+- judge_guileless_vs_scheming_responses_roles: missing_current -- current_file_input: /Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/guileless_vs_scheming/gpt_responses_roles/scores_responses.json does not exist (dep_key='judge_guileless_vs_scheming_responses_roles')
+- judge_egalitarian_vs_elitist_responses_traits: missing_current -- current_file_input: /Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/egalitarian_vs_elitist/gpt_responses_traits/scores_responses.json does not exist (dep_key='judge_egalitarian_vs_elitist_responses_traits')
+- judge_egalitarian_vs_elitist_responses_roles: missing_current -- current_file_input: /Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/egalitarian_vs_elitist/gpt_responses_roles/scores_responses.json does not exist (dep_key='judge_egalitarian_vs_elitist_responses_roles')
+- judge_progressive_vs_conservative_responses_traits: missing_current -- current_file_input: /Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/progressive_vs_conservative/gpt_responses_traits/scores_responses.json does not exist (dep_key='judge_progressive_vs_conservative_responses_traits')
+- judge_progressive_vs_conservative_responses_roles: missing_current -- current_file_input: /Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/progressive_vs_conservative/gpt_responses_roles/scores_responses.json does not exist (dep_key='judge_progressive_vs_conservative_responses_roles')
+- judge_concise_vs_verbose_responses_traits: missing_current -- current_file_input: /Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/concise_vs_verbose/gpt_responses_traits/scores_responses.json does not exist (dep_key='judge_concise_vs_verbose_responses_traits')
+- judge_concise_vs_verbose_responses_roles: missing_current -- current_file_input: /Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/concise_vs_verbose/gpt_responses_roles/scores_responses.json does not exist (dep_key='judge_concise_vs_verbose_responses_roles')
+- judge_ecocentric_vs_anthropocentric_responses_traits: missing_current -- current_file_input: /Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/ecocentric_vs_anthropocentric/gpt_responses_traits/scores_responses.json does not exist (dep_key='judge_ecocentric_vs_anthropocentric_responses_traits')
+- judge_ecocentric_vs_anthropocentric_responses_roles: missing_current -- current_file_input: /Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/ecocentric_vs_anthropocentric/gpt_responses_roles/scores_responses.json does not exist (dep_key='judge_ecocentric_vs_anthropocentric_responses_roles')
+- judge_improvisational_vs_methodical_responses_traits: missing_current -- current_file_input: /Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/improvisational_vs_methodical/gpt_responses_traits/scores_responses.json does not exist (dep_key='judge_improvisational_vs_methodical_responses_traits')
+- judge_improvisational_vs_methodical_responses_roles: missing_current -- current_file_input: /Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/improvisational_vs_methodical/gpt_responses_roles/scores_responses.json does not exist (dep_key='judge_improvisational_vs_methodical_responses_roles')
+- judge_relativist_vs_absolutist_responses_traits: missing_current -- current_file_input: /Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/relativist_vs_absolutist/gpt_responses_traits/scores_responses.json does not exist (dep_key='judge_relativist_vs_absolutist_responses_traits')
+- judge_relativist_vs_absolutist_responses_roles: missing_current -- current_file_input: /Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/relativist_vs_absolutist/gpt_responses_roles/scores_responses.json does not exist (dep_key='judge_relativist_vs_absolutist_responses_roles')
+- judge_systems_thinker_vs_analytical_responses_traits: missing_current -- current_file_input: /Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/systems_thinker_vs_analytical/gpt_responses_traits/scores_responses.json does not exist (dep_key='judge_systems_thinker_vs_analytical_responses_traits')
+- judge_systems_thinker_vs_analytical_responses_roles: missing_current -- current_file_input: /Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/systems_thinker_vs_analytical/gpt_responses_roles/scores_responses.json does not exist (dep_key='judge_systems_thinker_vs_analytical_responses_roles')
+
+### `/Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/whitening_k_sweep_responses_slot7.json`
+- **Produced**: 2026-05-08 21:48:27 +0100  (git f9a1899+dirty)
+- **Cmd**: `uv run python results_analysis/whitening_k_sweep.py --pairs pair_list_responses.json --slot 7`
+- judge_helpful_vs_unhelpful_responses_traits: missing_current -- current_file_input: /Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/helpful_vs_unhelpful/gpt_responses_traits/scores_responses.json does not exist (dep_key='judge_helpful_vs_unhelpful_responses_traits')
+- judge_helpful_vs_unhelpful_responses_roles: missing_current -- current_file_input: /Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/helpful_vs_unhelpful/gpt_responses_roles/scores_responses.json does not exist (dep_key='judge_helpful_vs_unhelpful_responses_roles')
+- judge_harmless_vs_harmful_responses_traits: missing_current -- current_file_input: /Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/harmless_vs_harmful/gpt_responses_traits/scores_responses.json does not exist (dep_key='judge_harmless_vs_harmful_responses_traits')
+- judge_harmless_vs_harmful_responses_roles: missing_current -- current_file_input: /Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/harmless_vs_harmful/gpt_responses_roles/scores_responses.json does not exist (dep_key='judge_harmless_vs_harmful_responses_roles')
+- judge_honest_vs_dishonest_responses_traits: missing_current -- current_file_input: /Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/honest_vs_dishonest/gpt_responses_traits/scores_responses.json does not exist (dep_key='judge_honest_vs_dishonest_responses_traits')
+- judge_honest_vs_dishonest_responses_roles: missing_current -- current_file_input: /Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/honest_vs_dishonest/gpt_responses_roles/scores_responses.json does not exist (dep_key='judge_honest_vs_dishonest_responses_roles')
+- judge_truthful_vs_deceitful_responses_traits: missing_current -- current_file_input: /Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/truthful_vs_deceitful/gpt_responses_traits/scores_responses.json does not exist (dep_key='judge_truthful_vs_deceitful_responses_traits')
+- judge_truthful_vs_deceitful_responses_roles: missing_current -- current_file_input: /Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/truthful_vs_deceitful/gpt_responses_roles/scores_responses.json does not exist (dep_key='judge_truthful_vs_deceitful_responses_roles')
+- judge_guileless_vs_scheming_responses_traits: missing_current -- current_file_input: /Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/guileless_vs_scheming/gpt_responses_traits/scores_responses.json does not exist (dep_key='judge_guileless_vs_scheming_responses_traits')
+- judge_guileless_vs_scheming_responses_roles: missing_current -- current_file_input: /Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/guileless_vs_scheming/gpt_responses_roles/scores_responses.json does not exist (dep_key='judge_guileless_vs_scheming_responses_roles')
+- judge_egalitarian_vs_elitist_responses_traits: missing_current -- current_file_input: /Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/egalitarian_vs_elitist/gpt_responses_traits/scores_responses.json does not exist (dep_key='judge_egalitarian_vs_elitist_responses_traits')
+- judge_egalitarian_vs_elitist_responses_roles: missing_current -- current_file_input: /Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/egalitarian_vs_elitist/gpt_responses_roles/scores_responses.json does not exist (dep_key='judge_egalitarian_vs_elitist_responses_roles')
+- judge_progressive_vs_conservative_responses_traits: missing_current -- current_file_input: /Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/progressive_vs_conservative/gpt_responses_traits/scores_responses.json does not exist (dep_key='judge_progressive_vs_conservative_responses_traits')
+- judge_progressive_vs_conservative_responses_roles: missing_current -- current_file_input: /Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/progressive_vs_conservative/gpt_responses_roles/scores_responses.json does not exist (dep_key='judge_progressive_vs_conservative_responses_roles')
+- judge_concise_vs_verbose_responses_traits: missing_current -- current_file_input: /Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/concise_vs_verbose/gpt_responses_traits/scores_responses.json does not exist (dep_key='judge_concise_vs_verbose_responses_traits')
+- judge_concise_vs_verbose_responses_roles: missing_current -- current_file_input: /Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/concise_vs_verbose/gpt_responses_roles/scores_responses.json does not exist (dep_key='judge_concise_vs_verbose_responses_roles')
+- judge_ecocentric_vs_anthropocentric_responses_traits: missing_current -- current_file_input: /Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/ecocentric_vs_anthropocentric/gpt_responses_traits/scores_responses.json does not exist (dep_key='judge_ecocentric_vs_anthropocentric_responses_traits')
+- judge_ecocentric_vs_anthropocentric_responses_roles: missing_current -- current_file_input: /Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/ecocentric_vs_anthropocentric/gpt_responses_roles/scores_responses.json does not exist (dep_key='judge_ecocentric_vs_anthropocentric_responses_roles')
+- judge_improvisational_vs_methodical_responses_traits: missing_current -- current_file_input: /Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/improvisational_vs_methodical/gpt_responses_traits/scores_responses.json does not exist (dep_key='judge_improvisational_vs_methodical_responses_traits')
+- judge_improvisational_vs_methodical_responses_roles: missing_current -- current_file_input: /Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/improvisational_vs_methodical/gpt_responses_roles/scores_responses.json does not exist (dep_key='judge_improvisational_vs_methodical_responses_roles')
+- judge_relativist_vs_absolutist_responses_traits: missing_current -- current_file_input: /Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/relativist_vs_absolutist/gpt_responses_traits/scores_responses.json does not exist (dep_key='judge_relativist_vs_absolutist_responses_traits')
+- judge_relativist_vs_absolutist_responses_roles: missing_current -- current_file_input: /Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/relativist_vs_absolutist/gpt_responses_roles/scores_responses.json does not exist (dep_key='judge_relativist_vs_absolutist_responses_roles')
+- judge_systems_thinker_vs_analytical_responses_traits: missing_current -- current_file_input: /Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/systems_thinker_vs_analytical/gpt_responses_traits/scores_responses.json does not exist (dep_key='judge_systems_thinker_vs_analytical_responses_traits')
+- judge_systems_thinker_vs_analytical_responses_roles: missing_current -- current_file_input: /Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/systems_thinker_vs_analytical/gpt_responses_roles/scores_responses.json does not exist (dep_key='judge_systems_thinker_vs_analytical_responses_roles')
+
+### `/Users/roger/Documents/GitHub/assistant-axis/roger/optimal_axis/truthful_vs_deceitful_responses_slot6_layer25_softK3_M30_qwen-3-32b-Roger-8slot/diagnostics.json`
+- **Produced**: 2026-05-08 23:09:39 +0100  (git f9a1899+dirty)
+- **Cmd**: `uv run python results_analysis/optimal_axis_for_judge.py --data_dir 'runpod_workspace/qwen/qwen-3-32b Roger 8slot' --experiment_dir roger/axis_judge_experiments/truthful_vs_deceitful --score_source responses --seed_pair truthful deceitful --exclude_names truthful,deceitful --slot 6 --layer 25 --cv_folds 5`
+- judge_truthful_vs_deceitful_responses_gpt_responses_roles: missing_current -- current_file_input: /Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/truthful_vs_deceitful/gpt_responses_roles/scores_responses.json does not exist (dep_key='judge_truthful_vs_deceitful_responses_gpt_responses_roles')
+- judge_truthful_vs_deceitful_responses_gpt_responses_traits: missing_current -- current_file_input: /Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/truthful_vs_deceitful/gpt_responses_traits/scores_responses.json does not exist (dep_key='judge_truthful_vs_deceitful_responses_gpt_responses_traits')
+
+## Stale (transitive): 26
+
+These caches' own provenance validates clean, but at least one upstream cache (reachable via file deps) is stale.  Regenerate the upstream first, then this.
+
+### `/Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/gpt_haiku_full_response_weight_sweep_slot6.json`
+- **Cmd**: `uv run python -m results_analysis.gpt_anthropic_response_weight_sweep --anthropic_combo haiku_full --scores_filename scores_responses__rubric_v1.json`
+- **Stale via**: `/Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/ecocentric_vs_anthropocentric/haiku_responses_roles_b10/scores_responses__rubric_v1.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/ecocentric_vs_anthropocentric/haiku_responses_traits_b10/scores_responses__rubric_v1.json`
+
+### `/Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/gpt_haiku_q9_response_weight_sweep_slot6.json`
+- **Cmd**: `uv run python -m results_analysis.gpt_anthropic_response_weight_sweep --anthropic_combo haiku_q9`
+- **Stale via**: `/Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/concise_vs_verbose/gpt_responses_roles_b10/scores_responses.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/concise_vs_verbose/gpt_responses_traits_b10/scores_responses.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/concise_vs_verbose/haiku_responses_roles_b10_q9/scores_responses.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/concise_vs_verbose/haiku_responses_traits_b10_q9/scores_responses.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/ecocentric_vs_anthropocentric/gpt_responses_roles_b10/scores_responses.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/ecocentric_vs_anthropocentric/gpt_responses_traits_b10/scores_responses.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/ecocentric_vs_anthropocentric/haiku_responses_roles_b10_q9/scores_responses.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/ecocentric_vs_anthropocentric/haiku_responses_traits_b10_q9/scores_responses.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/egalitarian_vs_elitist/gpt_responses_roles_b10/scores_responses.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/egalitarian_vs_elitist/gpt_responses_traits_b10/scores_responses.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/egalitarian_vs_elitist/haiku_responses_roles_b10_q9/scores_responses.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/egalitarian_vs_elitist/haiku_responses_traits_b10_q9/scores_responses.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/guileless_vs_scheming/gpt_responses_roles_b10/scores_responses.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/guileless_vs_scheming/gpt_responses_traits_b10/scores_responses.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/guileless_vs_scheming/haiku_responses_roles_b10_q9/scores_responses.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/guileless_vs_scheming/haiku_responses_traits_b10_q9/scores_responses.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/harmless_vs_harmful/gpt_responses_roles_b10/scores_responses.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/harmless_vs_harmful/gpt_responses_traits_b10/scores_responses.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/harmless_vs_harmful/haiku_responses_roles_b10_q9/scores_responses.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/harmless_vs_harmful/haiku_responses_traits_b10_q9/scores_responses.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/helpful_vs_unhelpful/gpt_responses_roles_b10/scores_responses.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/helpful_vs_unhelpful/gpt_responses_traits_b10/scores_responses.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/helpful_vs_unhelpful/haiku_responses_roles_b10_q9/scores_responses.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/helpful_vs_unhelpful/haiku_responses_traits_b10_q9/scores_responses.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/honest_vs_dishonest/gpt_responses_roles_b10/scores_responses.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/honest_vs_dishonest/gpt_responses_traits_b10/scores_responses.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/honest_vs_dishonest/haiku_responses_roles_b10_q9/scores_responses.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/honest_vs_dishonest/haiku_responses_traits_b10_q9/scores_responses.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/improvisational_vs_methodical/gpt_responses_roles_b10/scores_responses.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/improvisational_vs_methodical/gpt_responses_traits_b10/scores_responses.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/improvisational_vs_methodical/haiku_responses_roles_b10_q9/scores_responses.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/improvisational_vs_methodical/haiku_responses_traits_b10_q9/scores_responses.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/progressive_vs_conservative/gpt_responses_roles_b10/scores_responses.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/progressive_vs_conservative/gpt_responses_traits_b10/scores_responses.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/progressive_vs_conservative/haiku_responses_roles_b10_q9/scores_responses.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/progressive_vs_conservative/haiku_responses_traits_b10_q9/scores_responses.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/relativist_vs_absolutist/gpt_responses_roles_b10/scores_responses.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/relativist_vs_absolutist/gpt_responses_traits_b10/scores_responses.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/relativist_vs_absolutist/haiku_responses_roles_b10_q9/scores_responses.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/relativist_vs_absolutist/haiku_responses_traits_b10_q9/scores_responses.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/systems_thinker_vs_analytical/gpt_responses_roles_b10/scores_responses.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/systems_thinker_vs_analytical/gpt_responses_traits_b10/scores_responses.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/systems_thinker_vs_analytical/haiku_responses_roles_b10_q9/scores_responses.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/systems_thinker_vs_analytical/haiku_responses_traits_b10_q9/scores_responses.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/truthful_vs_deceitful/gpt_responses_roles_b10/scores_responses.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/truthful_vs_deceitful/gpt_responses_traits_b10/scores_responses.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/truthful_vs_deceitful/haiku_responses_roles_b10_q9/scores_responses.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/truthful_vs_deceitful/haiku_responses_traits_b10_q9/scores_responses.json`
+
+### `/Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/whitening_k_peak_fit_di_slot3.json`
+- **Cmd**: `uv run python results_analysis/whitening_k_peak_fit.py --slot 3`
+- **Stale via**: `/Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/whitening_k_sweep_di_slot3.json`
+
+### `/Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/whitening_k_peak_fit_di_slot6.json`
+- **Cmd**: `uv run python -m results_analysis.whitening_k_peak_fit --slot 6`
+- **Stale via**: `/Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/whitening_k_sweep_di_slot6.json`
+
+### `/Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/whitening_k_peak_fit_di_slot7.json`
+- **Cmd**: `uv run python results_analysis/whitening_k_peak_fit.py --slot 7`
+- **Stale via**: `/Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/whitening_k_sweep_di_slot7.json`
+
+### `/Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/whitening_k_peak_fit_responses_slot3.json`
+- **Cmd**: `uv run python results_analysis/whitening_k_peak_fit.py --pairs pair_list_responses.json --slot 3`
+- **Stale via**: `/Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/whitening_k_sweep_responses_slot3.json`
+
+### `/Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/whitening_k_peak_fit_responses_slot6.json`
+- **Cmd**: `uv run python results_analysis/whitening_k_peak_fit.py --pairs pair_list_responses.json --slot 6`
+- **Stale via**: `/Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/whitening_k_sweep_responses_slot6.json`
+
+### `/Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/whitening_k_peak_fit_responses_slot7.json`
+- **Cmd**: `uv run python results_analysis/whitening_k_peak_fit.py --pairs pair_list_responses.json --slot 7`
+- **Stale via**: `/Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/whitening_k_sweep_responses_slot7.json`
+
+### `/Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/whitening_k_peak_fit_weighted_responses_slot3.json`
+- **Cmd**: `uv run python results_analysis/whitening_k_weighted_scatter.py --slot 3`
+- **Stale via**: `/Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/whitening_k_sweep_responses_slot3.json`
+
+### `/Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/whitening_k_peak_fit_weighted_responses_slot6.json`
+- **Cmd**: `uv run python results_analysis/whitening_k_weighted_scatter.py --slot 6`
+- **Stale via**: `/Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/whitening_k_sweep_responses_slot6.json`
+
+### `/Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/whitening_k_peak_fit_weighted_responses_slot7.json`
+- **Cmd**: `uv run python results_analysis/whitening_k_weighted_scatter.py --slot 7`
+- **Stale via**: `/Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/whitening_k_sweep_responses_slot7.json`
+
+### `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_round_trip_fixed_direction_per_cell_winners_7-25_7-49_6-25_6-49_0-26_0-49_3-25.json`
+- **Cmd**: `uv run python -m results_analysis.pc_round_trip.plot_direction_cosines --include_optimization`
+- **Stale via**: `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc020_glossary/gpt/scores_descriptions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc020_glossary/gpt/scores_instructions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc020_glossary/sonnet/scores_descriptions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc020_glossary/sonnet/scores_instructions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc020_inline/gpt/scores_descriptions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc020_inline/gpt/scores_instructions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc020_inline/sonnet/scores_descriptions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc020_inline/sonnet/scores_instructions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc028_glossary/gpt/scores_descriptions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc028_glossary/gpt/scores_instructions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc028_glossary/sonnet/scores_descriptions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc028_glossary/sonnet/scores_instructions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc028_inline/gpt/scores_descriptions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc028_inline/gpt/scores_instructions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc028_inline/sonnet/scores_descriptions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc028_inline/sonnet/scores_instructions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc036_glossary/gpt/scores_descriptions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc036_glossary/gpt/scores_instructions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc036_glossary/sonnet/scores_descriptions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc036_glossary/sonnet/scores_instructions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc036_inline/gpt/scores_descriptions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc036_inline/gpt/scores_instructions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc036_inline/sonnet/scores_descriptions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc036_inline/sonnet/scores_instructions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc040_glossary/gpt/scores_descriptions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc040_glossary/gpt/scores_instructions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc040_glossary/sonnet/scores_descriptions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc040_glossary/sonnet/scores_instructions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc040_inline/gpt/scores_descriptions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc040_inline/gpt/scores_instructions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc040_inline/sonnet/scores_descriptions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc040_inline/sonnet/scores_instructions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc056_glossary/gpt/scores_descriptions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc056_glossary/gpt/scores_instructions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc056_glossary/sonnet/scores_descriptions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc056_glossary/sonnet/scores_instructions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc056_inline/gpt/scores_descriptions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc056_inline/gpt/scores_instructions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc056_inline/sonnet/scores_descriptions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc056_inline/sonnet/scores_instructions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc080_glossary/gpt/scores_descriptions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc080_glossary/gpt/scores_instructions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc080_glossary/sonnet/scores_descriptions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc080_glossary/sonnet/scores_instructions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc080_inline/gpt/scores_descriptions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc080_inline/gpt/scores_instructions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc080_inline/sonnet/scores_descriptions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc080_inline/sonnet/scores_instructions.json`
+
+### `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_round_trip_fixed_direction_per_cell_winners_7-25_7-49_6-25_6-49_0-26_0-49_3-25_cutoff_2of3.json`
+- **Cmd**: `uv run python -m results_analysis.pc_round_trip.plot_direction_cosines --include_optimization --cutoff_2n_over_3`
+- **Stale via**: `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc020_glossary/gpt/scores_descriptions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc020_glossary/gpt/scores_instructions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc020_glossary/sonnet/scores_descriptions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc020_glossary/sonnet/scores_instructions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc020_inline/gpt/scores_descriptions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc020_inline/gpt/scores_instructions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc020_inline/sonnet/scores_descriptions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc020_inline/sonnet/scores_instructions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc028_glossary/gpt/scores_descriptions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc028_glossary/gpt/scores_instructions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc028_glossary/sonnet/scores_descriptions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc028_glossary/sonnet/scores_instructions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc028_inline/gpt/scores_descriptions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc028_inline/gpt/scores_instructions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc028_inline/sonnet/scores_descriptions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc028_inline/sonnet/scores_instructions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc036_glossary/gpt/scores_descriptions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc036_glossary/gpt/scores_instructions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc036_glossary/sonnet/scores_descriptions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc036_glossary/sonnet/scores_instructions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc036_inline/gpt/scores_descriptions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc036_inline/gpt/scores_instructions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc036_inline/sonnet/scores_descriptions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc036_inline/sonnet/scores_instructions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc040_glossary/gpt/scores_descriptions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc040_glossary/gpt/scores_instructions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc040_glossary/sonnet/scores_descriptions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc040_glossary/sonnet/scores_instructions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc040_inline/gpt/scores_descriptions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc040_inline/gpt/scores_instructions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc040_inline/sonnet/scores_descriptions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc040_inline/sonnet/scores_instructions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc056_glossary/gpt/scores_descriptions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc056_glossary/gpt/scores_instructions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc056_glossary/sonnet/scores_descriptions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc056_glossary/sonnet/scores_instructions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc056_inline/gpt/scores_descriptions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc056_inline/gpt/scores_instructions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc056_inline/sonnet/scores_descriptions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc056_inline/sonnet/scores_instructions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc080_glossary/gpt/scores_descriptions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc080_glossary/gpt/scores_instructions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc080_glossary/sonnet/scores_descriptions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc080_glossary/sonnet/scores_instructions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc080_inline/gpt/scores_descriptions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc080_inline/gpt/scores_instructions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc080_inline/sonnet/scores_descriptions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc080_inline/sonnet/scores_instructions.json`
+
+### `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_round_trip_fixed_direction_per_cell_winners_7-25_7-49_6-25_6-49_0-26_0-49_3-25_exchanged_cutoff_2of3.json`
+- **Cmd**: `uv run python -m results_analysis.pc_round_trip.plot_direction_cosines --include_optimization --exchanged --cutoff_2n_over_3`
+- **Stale via**: `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc020_glossary/gpt/scores_descriptions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc020_glossary/gpt/scores_instructions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc020_glossary/sonnet/scores_descriptions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc020_glossary/sonnet/scores_instructions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc020_inline/gpt/scores_descriptions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc020_inline/gpt/scores_instructions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc020_inline/sonnet/scores_descriptions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc020_inline/sonnet/scores_instructions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc028_glossary/gpt/scores_descriptions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc028_glossary/gpt/scores_instructions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc028_glossary/sonnet/scores_descriptions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc028_glossary/sonnet/scores_instructions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc028_inline/gpt/scores_descriptions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc028_inline/gpt/scores_instructions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc028_inline/sonnet/scores_descriptions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc028_inline/sonnet/scores_instructions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc036_glossary/gpt/scores_descriptions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc036_glossary/gpt/scores_instructions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc036_glossary/sonnet/scores_descriptions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc036_glossary/sonnet/scores_instructions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc036_inline/gpt/scores_descriptions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc036_inline/gpt/scores_instructions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc036_inline/sonnet/scores_descriptions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc036_inline/sonnet/scores_instructions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc040_glossary/gpt/scores_descriptions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc040_glossary/gpt/scores_instructions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc040_glossary/sonnet/scores_descriptions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc040_glossary/sonnet/scores_instructions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc040_inline/gpt/scores_descriptions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc040_inline/gpt/scores_instructions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc040_inline/sonnet/scores_descriptions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc040_inline/sonnet/scores_instructions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc056_glossary/gpt/scores_descriptions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc056_glossary/gpt/scores_instructions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc056_glossary/sonnet/scores_descriptions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc056_glossary/sonnet/scores_instructions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc056_inline/gpt/scores_descriptions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc056_inline/gpt/scores_instructions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc056_inline/sonnet/scores_descriptions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc056_inline/sonnet/scores_instructions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc080_glossary/gpt/scores_descriptions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc080_glossary/gpt/scores_instructions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc080_glossary/sonnet/scores_descriptions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc080_glossary/sonnet/scores_instructions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc080_inline/gpt/scores_descriptions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc080_inline/gpt/scores_instructions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc080_inline/sonnet/scores_descriptions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc080_inline/sonnet/scores_instructions.json`
+
+### `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_round_trip_fixed_direction_restricted_winners_7-25_7-49_6-25_6-49_0-26_0-49_3-25.json`
+- **Cmd**: `uv run python -m results_analysis.pc_round_trip.plot_direction_cosines --include_optimization`
+- **Stale via**: `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc020_glossary/gpt/scores_descriptions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc020_glossary/gpt/scores_instructions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc020_glossary/sonnet/scores_descriptions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc020_glossary/sonnet/scores_instructions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc020_inline/gpt/scores_descriptions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc020_inline/gpt/scores_instructions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc020_inline/sonnet/scores_descriptions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc020_inline/sonnet/scores_instructions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc028_glossary/gpt/scores_descriptions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc028_glossary/gpt/scores_instructions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc028_glossary/sonnet/scores_descriptions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc028_glossary/sonnet/scores_instructions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc028_inline/gpt/scores_descriptions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc028_inline/gpt/scores_instructions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc028_inline/sonnet/scores_descriptions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc028_inline/sonnet/scores_instructions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc036_glossary/gpt/scores_descriptions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc036_glossary/gpt/scores_instructions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc036_glossary/sonnet/scores_descriptions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc036_glossary/sonnet/scores_instructions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc036_inline/gpt/scores_descriptions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc036_inline/gpt/scores_instructions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc036_inline/sonnet/scores_descriptions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc036_inline/sonnet/scores_instructions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc040_glossary/gpt/scores_descriptions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc040_glossary/gpt/scores_instructions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc040_glossary/sonnet/scores_descriptions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc040_glossary/sonnet/scores_instructions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc040_inline/gpt/scores_descriptions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc040_inline/gpt/scores_instructions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc040_inline/sonnet/scores_descriptions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc040_inline/sonnet/scores_instructions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc056_glossary/gpt/scores_descriptions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc056_glossary/gpt/scores_instructions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc056_glossary/sonnet/scores_descriptions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc056_glossary/sonnet/scores_instructions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc056_inline/gpt/scores_descriptions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc056_inline/gpt/scores_instructions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc056_inline/sonnet/scores_descriptions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc056_inline/sonnet/scores_instructions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc080_glossary/gpt/scores_descriptions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc080_glossary/gpt/scores_instructions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc080_glossary/sonnet/scores_descriptions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc080_glossary/sonnet/scores_instructions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc080_inline/gpt/scores_descriptions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc080_inline/gpt/scores_instructions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc080_inline/sonnet/scores_descriptions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc080_inline/sonnet/scores_instructions.json`
+
+### `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_round_trip_fixed_direction_restricted_winners_7-25_7-49_6-25_6-49_0-26_0-49_3-25_cutoff_2of3.json`
+- **Cmd**: `uv run python -m results_analysis.pc_round_trip.plot_direction_cosines --include_optimization --cutoff_2n_over_3`
+- **Stale via**: `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc020_glossary/gpt/scores_descriptions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc020_glossary/gpt/scores_instructions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc020_glossary/sonnet/scores_descriptions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc020_glossary/sonnet/scores_instructions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc020_inline/gpt/scores_descriptions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc020_inline/gpt/scores_instructions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc020_inline/sonnet/scores_descriptions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc020_inline/sonnet/scores_instructions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc028_glossary/gpt/scores_descriptions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc028_glossary/gpt/scores_instructions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc028_glossary/sonnet/scores_descriptions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc028_glossary/sonnet/scores_instructions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc028_inline/gpt/scores_descriptions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc028_inline/gpt/scores_instructions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc028_inline/sonnet/scores_descriptions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc028_inline/sonnet/scores_instructions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc036_glossary/gpt/scores_descriptions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc036_glossary/gpt/scores_instructions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc036_glossary/sonnet/scores_descriptions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc036_glossary/sonnet/scores_instructions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc036_inline/gpt/scores_descriptions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc036_inline/gpt/scores_instructions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc036_inline/sonnet/scores_descriptions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc036_inline/sonnet/scores_instructions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc040_glossary/gpt/scores_descriptions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc040_glossary/gpt/scores_instructions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc040_glossary/sonnet/scores_descriptions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc040_glossary/sonnet/scores_instructions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc040_inline/gpt/scores_descriptions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc040_inline/gpt/scores_instructions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc040_inline/sonnet/scores_descriptions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc040_inline/sonnet/scores_instructions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc056_glossary/gpt/scores_descriptions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc056_glossary/gpt/scores_instructions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc056_glossary/sonnet/scores_descriptions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc056_glossary/sonnet/scores_instructions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc056_inline/gpt/scores_descriptions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc056_inline/gpt/scores_instructions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc056_inline/sonnet/scores_descriptions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc056_inline/sonnet/scores_instructions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc080_glossary/gpt/scores_descriptions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc080_glossary/gpt/scores_instructions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc080_glossary/sonnet/scores_descriptions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc080_glossary/sonnet/scores_instructions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc080_inline/gpt/scores_descriptions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc080_inline/gpt/scores_instructions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc080_inline/sonnet/scores_descriptions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc080_inline/sonnet/scores_instructions.json`
+
+### `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_round_trip_fixed_direction_restricted_winners_7-25_7-49_6-25_6-49_0-26_0-49_3-25_exchanged_cutoff_2of3.json`
+- **Cmd**: `uv run python -m results_analysis.pc_round_trip.plot_direction_cosines --include_optimization --exchanged --cutoff_2n_over_3`
+- **Stale via**: `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc020_glossary/gpt/scores_descriptions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc020_glossary/gpt/scores_instructions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc020_glossary/sonnet/scores_descriptions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc020_glossary/sonnet/scores_instructions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc020_inline/gpt/scores_descriptions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc020_inline/gpt/scores_instructions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc020_inline/sonnet/scores_descriptions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc020_inline/sonnet/scores_instructions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc028_glossary/gpt/scores_descriptions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc028_glossary/gpt/scores_instructions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc028_glossary/sonnet/scores_descriptions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc028_glossary/sonnet/scores_instructions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc028_inline/gpt/scores_descriptions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc028_inline/gpt/scores_instructions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc028_inline/sonnet/scores_descriptions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc028_inline/sonnet/scores_instructions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc036_glossary/gpt/scores_descriptions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc036_glossary/gpt/scores_instructions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc036_glossary/sonnet/scores_descriptions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc036_glossary/sonnet/scores_instructions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc036_inline/gpt/scores_descriptions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc036_inline/gpt/scores_instructions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc036_inline/sonnet/scores_descriptions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc036_inline/sonnet/scores_instructions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc040_glossary/gpt/scores_descriptions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc040_glossary/gpt/scores_instructions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc040_glossary/sonnet/scores_descriptions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc040_glossary/sonnet/scores_instructions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc040_inline/gpt/scores_descriptions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc040_inline/gpt/scores_instructions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc040_inline/sonnet/scores_descriptions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc040_inline/sonnet/scores_instructions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc056_glossary/gpt/scores_descriptions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc056_glossary/gpt/scores_instructions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc056_glossary/sonnet/scores_descriptions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc056_glossary/sonnet/scores_instructions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc056_inline/gpt/scores_descriptions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc056_inline/gpt/scores_instructions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc056_inline/sonnet/scores_descriptions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc056_inline/sonnet/scores_instructions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc080_glossary/gpt/scores_descriptions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc080_glossary/gpt/scores_instructions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc080_glossary/sonnet/scores_descriptions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc080_glossary/sonnet/scores_instructions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc080_inline/gpt/scores_descriptions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc080_inline/gpt/scores_instructions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc080_inline/sonnet/scores_descriptions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc080_inline/sonnet/scores_instructions.json`
+
+### `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_round_trip_fixed_principled_per_cell_winners_7-25_7-49_6-25_6-49_0-26_0-49_3-25.json`
+- **Cmd**: `uv run python -m results_analysis.pc_round_trip.plot_direction_cosines --include_optimization`
+- **Stale via**: `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc020_glossary/gpt/scores_descriptions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc020_glossary/gpt/scores_instructions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc020_glossary/sonnet/scores_descriptions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc020_glossary/sonnet/scores_instructions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc020_inline/gpt/scores_descriptions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc020_inline/gpt/scores_instructions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc020_inline/sonnet/scores_descriptions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc020_inline/sonnet/scores_instructions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc028_glossary/gpt/scores_descriptions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc028_glossary/gpt/scores_instructions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc028_glossary/sonnet/scores_descriptions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc028_glossary/sonnet/scores_instructions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc028_inline/gpt/scores_descriptions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc028_inline/gpt/scores_instructions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc028_inline/sonnet/scores_descriptions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc028_inline/sonnet/scores_instructions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc036_glossary/gpt/scores_descriptions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc036_glossary/gpt/scores_instructions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc036_glossary/sonnet/scores_descriptions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc036_glossary/sonnet/scores_instructions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc036_inline/gpt/scores_descriptions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc036_inline/gpt/scores_instructions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc036_inline/sonnet/scores_descriptions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc036_inline/sonnet/scores_instructions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc040_glossary/gpt/scores_descriptions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc040_glossary/gpt/scores_instructions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc040_glossary/sonnet/scores_descriptions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc040_glossary/sonnet/scores_instructions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc040_inline/gpt/scores_descriptions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc040_inline/gpt/scores_instructions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc040_inline/sonnet/scores_descriptions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc040_inline/sonnet/scores_instructions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc056_glossary/gpt/scores_descriptions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc056_glossary/gpt/scores_instructions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc056_glossary/sonnet/scores_descriptions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc056_glossary/sonnet/scores_instructions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc056_inline/gpt/scores_descriptions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc056_inline/gpt/scores_instructions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc056_inline/sonnet/scores_descriptions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc056_inline/sonnet/scores_instructions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc080_glossary/gpt/scores_descriptions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc080_glossary/gpt/scores_instructions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc080_glossary/sonnet/scores_descriptions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc080_glossary/sonnet/scores_instructions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc080_inline/gpt/scores_descriptions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc080_inline/gpt/scores_instructions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc080_inline/sonnet/scores_descriptions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc080_inline/sonnet/scores_instructions.json`
+
+### `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_round_trip_fixed_principled_per_cell_winners_7-25_7-49_6-25_6-49_0-26_0-49_3-25_cutoff_2of3.json`
+- **Cmd**: `uv run python -m results_analysis.pc_round_trip.plot_direction_cosines --include_optimization --cutoff_2n_over_3`
+- **Stale via**: `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc020_glossary/gpt/scores_descriptions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc020_glossary/gpt/scores_instructions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc020_glossary/sonnet/scores_descriptions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc020_glossary/sonnet/scores_instructions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc020_inline/gpt/scores_descriptions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc020_inline/gpt/scores_instructions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc020_inline/sonnet/scores_descriptions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc020_inline/sonnet/scores_instructions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc028_glossary/gpt/scores_descriptions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc028_glossary/gpt/scores_instructions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc028_glossary/sonnet/scores_descriptions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc028_glossary/sonnet/scores_instructions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc028_inline/gpt/scores_descriptions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc028_inline/gpt/scores_instructions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc028_inline/sonnet/scores_descriptions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc028_inline/sonnet/scores_instructions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc036_glossary/gpt/scores_descriptions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc036_glossary/gpt/scores_instructions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc036_glossary/sonnet/scores_descriptions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc036_glossary/sonnet/scores_instructions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc036_inline/gpt/scores_descriptions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc036_inline/gpt/scores_instructions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc036_inline/sonnet/scores_descriptions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc036_inline/sonnet/scores_instructions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc040_glossary/gpt/scores_descriptions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc040_glossary/gpt/scores_instructions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc040_glossary/sonnet/scores_descriptions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc040_glossary/sonnet/scores_instructions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc040_inline/gpt/scores_descriptions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc040_inline/gpt/scores_instructions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc040_inline/sonnet/scores_descriptions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc040_inline/sonnet/scores_instructions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc056_glossary/gpt/scores_descriptions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc056_glossary/gpt/scores_instructions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc056_glossary/sonnet/scores_descriptions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc056_glossary/sonnet/scores_instructions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc056_inline/gpt/scores_descriptions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc056_inline/gpt/scores_instructions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc056_inline/sonnet/scores_descriptions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc056_inline/sonnet/scores_instructions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc080_glossary/gpt/scores_descriptions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc080_glossary/gpt/scores_instructions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc080_glossary/sonnet/scores_descriptions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc080_glossary/sonnet/scores_instructions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc080_inline/gpt/scores_descriptions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc080_inline/gpt/scores_instructions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc080_inline/sonnet/scores_descriptions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc080_inline/sonnet/scores_instructions.json`
+
+### `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_round_trip_fixed_principled_per_cell_winners_7-25_7-49_6-25_6-49_0-26_0-49_3-25_exchanged_cutoff_2of3.json`
+- **Cmd**: `uv run python -m results_analysis.pc_round_trip.plot_direction_cosines --include_optimization --exchanged --cutoff_2n_over_3`
+- **Stale via**: `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc020_glossary/gpt/scores_descriptions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc020_glossary/gpt/scores_instructions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc020_glossary/sonnet/scores_descriptions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc020_glossary/sonnet/scores_instructions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc020_inline/gpt/scores_descriptions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc020_inline/gpt/scores_instructions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc020_inline/sonnet/scores_descriptions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc020_inline/sonnet/scores_instructions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc028_glossary/gpt/scores_descriptions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc028_glossary/gpt/scores_instructions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc028_glossary/sonnet/scores_descriptions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc028_glossary/sonnet/scores_instructions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc028_inline/gpt/scores_descriptions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc028_inline/gpt/scores_instructions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc028_inline/sonnet/scores_descriptions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc028_inline/sonnet/scores_instructions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc036_glossary/gpt/scores_descriptions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc036_glossary/gpt/scores_instructions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc036_glossary/sonnet/scores_descriptions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc036_glossary/sonnet/scores_instructions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc036_inline/gpt/scores_descriptions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc036_inline/gpt/scores_instructions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc036_inline/sonnet/scores_descriptions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc036_inline/sonnet/scores_instructions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc040_glossary/gpt/scores_descriptions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc040_glossary/gpt/scores_instructions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc040_glossary/sonnet/scores_descriptions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc040_glossary/sonnet/scores_instructions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc040_inline/gpt/scores_descriptions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc040_inline/gpt/scores_instructions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc040_inline/sonnet/scores_descriptions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc040_inline/sonnet/scores_instructions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc056_glossary/gpt/scores_descriptions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc056_glossary/gpt/scores_instructions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc056_glossary/sonnet/scores_descriptions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc056_glossary/sonnet/scores_instructions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc056_inline/gpt/scores_descriptions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc056_inline/gpt/scores_instructions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc056_inline/sonnet/scores_descriptions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc056_inline/sonnet/scores_instructions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc080_glossary/gpt/scores_descriptions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc080_glossary/gpt/scores_instructions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc080_glossary/sonnet/scores_descriptions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc080_glossary/sonnet/scores_instructions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc080_inline/gpt/scores_descriptions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc080_inline/gpt/scores_instructions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc080_inline/sonnet/scores_descriptions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc080_inline/sonnet/scores_instructions.json`
+
+### `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_round_trip_fixed_principled_restricted_winners_7-25_7-49_6-25_6-49_0-26_0-49_3-25.json`
+- **Cmd**: `uv run python -m results_analysis.pc_round_trip.plot_direction_cosines --include_optimization`
+- **Stale via**: `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc020_glossary/gpt/scores_descriptions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc020_glossary/gpt/scores_instructions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc020_glossary/sonnet/scores_descriptions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc020_glossary/sonnet/scores_instructions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc020_inline/gpt/scores_descriptions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc020_inline/gpt/scores_instructions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc020_inline/sonnet/scores_descriptions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc020_inline/sonnet/scores_instructions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc028_glossary/gpt/scores_descriptions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc028_glossary/gpt/scores_instructions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc028_glossary/sonnet/scores_descriptions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc028_glossary/sonnet/scores_instructions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc028_inline/gpt/scores_descriptions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc028_inline/gpt/scores_instructions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc028_inline/sonnet/scores_descriptions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc028_inline/sonnet/scores_instructions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc036_glossary/gpt/scores_descriptions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc036_glossary/gpt/scores_instructions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc036_glossary/sonnet/scores_descriptions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc036_glossary/sonnet/scores_instructions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc036_inline/gpt/scores_descriptions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc036_inline/gpt/scores_instructions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc036_inline/sonnet/scores_descriptions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc036_inline/sonnet/scores_instructions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc040_glossary/gpt/scores_descriptions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc040_glossary/gpt/scores_instructions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc040_glossary/sonnet/scores_descriptions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc040_glossary/sonnet/scores_instructions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc040_inline/gpt/scores_descriptions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc040_inline/gpt/scores_instructions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc040_inline/sonnet/scores_descriptions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc040_inline/sonnet/scores_instructions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc056_glossary/gpt/scores_descriptions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc056_glossary/gpt/scores_instructions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc056_glossary/sonnet/scores_descriptions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc056_glossary/sonnet/scores_instructions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc056_inline/gpt/scores_descriptions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc056_inline/gpt/scores_instructions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc056_inline/sonnet/scores_descriptions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc056_inline/sonnet/scores_instructions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc080_glossary/gpt/scores_descriptions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc080_glossary/gpt/scores_instructions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc080_glossary/sonnet/scores_descriptions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc080_glossary/sonnet/scores_instructions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc080_inline/gpt/scores_descriptions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc080_inline/gpt/scores_instructions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc080_inline/sonnet/scores_descriptions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc080_inline/sonnet/scores_instructions.json`
+
+### `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_round_trip_fixed_principled_restricted_winners_7-25_7-49_6-25_6-49_0-26_0-49_3-25_cutoff_2of3.json`
+- **Cmd**: `uv run python -m results_analysis.pc_round_trip.plot_direction_cosines --include_optimization --cutoff_2n_over_3`
+- **Stale via**: `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc020_glossary/gpt/scores_descriptions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc020_glossary/gpt/scores_instructions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc020_glossary/sonnet/scores_descriptions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc020_glossary/sonnet/scores_instructions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc020_inline/gpt/scores_descriptions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc020_inline/gpt/scores_instructions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc020_inline/sonnet/scores_descriptions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc020_inline/sonnet/scores_instructions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc028_glossary/gpt/scores_descriptions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc028_glossary/gpt/scores_instructions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc028_glossary/sonnet/scores_descriptions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc028_glossary/sonnet/scores_instructions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc028_inline/gpt/scores_descriptions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc028_inline/gpt/scores_instructions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc028_inline/sonnet/scores_descriptions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc028_inline/sonnet/scores_instructions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc036_glossary/gpt/scores_descriptions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc036_glossary/gpt/scores_instructions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc036_glossary/sonnet/scores_descriptions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc036_glossary/sonnet/scores_instructions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc036_inline/gpt/scores_descriptions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc036_inline/gpt/scores_instructions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc036_inline/sonnet/scores_descriptions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc036_inline/sonnet/scores_instructions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc040_glossary/gpt/scores_descriptions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc040_glossary/gpt/scores_instructions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc040_glossary/sonnet/scores_descriptions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc040_glossary/sonnet/scores_instructions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc040_inline/gpt/scores_descriptions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc040_inline/gpt/scores_instructions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc040_inline/sonnet/scores_descriptions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc040_inline/sonnet/scores_instructions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc056_glossary/gpt/scores_descriptions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc056_glossary/gpt/scores_instructions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc056_glossary/sonnet/scores_descriptions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc056_glossary/sonnet/scores_instructions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc056_inline/gpt/scores_descriptions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc056_inline/gpt/scores_instructions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc056_inline/sonnet/scores_descriptions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc056_inline/sonnet/scores_instructions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc080_glossary/gpt/scores_descriptions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc080_glossary/gpt/scores_instructions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc080_glossary/sonnet/scores_descriptions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc080_glossary/sonnet/scores_instructions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc080_inline/gpt/scores_descriptions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc080_inline/gpt/scores_instructions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc080_inline/sonnet/scores_descriptions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc080_inline/sonnet/scores_instructions.json`
+
+### `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_round_trip_fixed_principled_restricted_winners_7-25_7-49_6-25_6-49_0-26_0-49_3-25_exchanged_cutoff_2of3.json`
+- **Cmd**: `uv run python -m results_analysis.pc_round_trip.plot_direction_cosines --include_optimization --exchanged --cutoff_2n_over_3`
+- **Stale via**: `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc020_glossary/gpt/scores_descriptions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc020_glossary/gpt/scores_instructions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc020_glossary/sonnet/scores_descriptions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc020_glossary/sonnet/scores_instructions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc020_inline/gpt/scores_descriptions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc020_inline/gpt/scores_instructions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc020_inline/sonnet/scores_descriptions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc020_inline/sonnet/scores_instructions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc028_glossary/gpt/scores_descriptions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc028_glossary/gpt/scores_instructions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc028_glossary/sonnet/scores_descriptions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc028_glossary/sonnet/scores_instructions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc028_inline/gpt/scores_descriptions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc028_inline/gpt/scores_instructions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc028_inline/sonnet/scores_descriptions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc028_inline/sonnet/scores_instructions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc036_glossary/gpt/scores_descriptions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc036_glossary/gpt/scores_instructions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc036_glossary/sonnet/scores_descriptions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc036_glossary/sonnet/scores_instructions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc036_inline/gpt/scores_descriptions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc036_inline/gpt/scores_instructions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc036_inline/sonnet/scores_descriptions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc036_inline/sonnet/scores_instructions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc040_glossary/gpt/scores_descriptions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc040_glossary/gpt/scores_instructions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc040_glossary/sonnet/scores_descriptions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc040_glossary/sonnet/scores_instructions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc040_inline/gpt/scores_descriptions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc040_inline/gpt/scores_instructions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc040_inline/sonnet/scores_descriptions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc040_inline/sonnet/scores_instructions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc056_glossary/gpt/scores_descriptions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc056_glossary/gpt/scores_instructions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc056_glossary/sonnet/scores_descriptions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc056_glossary/sonnet/scores_instructions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc056_inline/gpt/scores_descriptions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc056_inline/gpt/scores_instructions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc056_inline/sonnet/scores_descriptions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc056_inline/sonnet/scores_instructions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc080_glossary/gpt/scores_descriptions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc080_glossary/gpt/scores_instructions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc080_glossary/sonnet/scores_descriptions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc080_glossary/sonnet/scores_instructions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc080_inline/gpt/scores_descriptions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc080_inline/gpt/scores_instructions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc080_inline/sonnet/scores_descriptions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc080_inline/sonnet/scores_instructions.json`
+
+### `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_round_trip_klm_results.json`
+- **Cmd**: `uv run python -m results_analysis.pc_round_trip.klm_sweep`
+- **Stale via**: `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc020_glossary/gpt/scores_descriptions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc020_glossary/gpt/scores_instructions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc020_glossary/sonnet/scores_descriptions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc020_glossary/sonnet/scores_instructions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc020_inline/gpt/scores_descriptions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc020_inline/gpt/scores_instructions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc020_inline/sonnet/scores_descriptions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc020_inline/sonnet/scores_instructions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc028_glossary/gpt/scores_descriptions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc028_glossary/gpt/scores_instructions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc028_glossary/sonnet/scores_descriptions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc028_glossary/sonnet/scores_instructions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc028_inline/gpt/scores_descriptions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc028_inline/gpt/scores_instructions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc028_inline/sonnet/scores_descriptions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc028_inline/sonnet/scores_instructions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc036_glossary/gpt/scores_descriptions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc036_glossary/gpt/scores_instructions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc036_glossary/sonnet/scores_descriptions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc036_glossary/sonnet/scores_instructions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc036_inline/gpt/scores_descriptions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc036_inline/gpt/scores_instructions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc036_inline/sonnet/scores_descriptions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc036_inline/sonnet/scores_instructions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc040_glossary/gpt/scores_descriptions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc040_glossary/gpt/scores_instructions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc040_glossary/sonnet/scores_descriptions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc040_glossary/sonnet/scores_instructions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc040_inline/gpt/scores_descriptions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc040_inline/gpt/scores_instructions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc040_inline/sonnet/scores_descriptions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc040_inline/sonnet/scores_instructions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc056_glossary/gpt/scores_descriptions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc056_glossary/gpt/scores_instructions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc056_glossary/sonnet/scores_descriptions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc056_glossary/sonnet/scores_instructions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc056_inline/gpt/scores_descriptions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc056_inline/gpt/scores_instructions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc056_inline/sonnet/scores_descriptions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc056_inline/sonnet/scores_instructions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc080_glossary/gpt/scores_descriptions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc080_glossary/gpt/scores_instructions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc080_glossary/sonnet/scores_descriptions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc080_glossary/sonnet/scores_instructions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc080_inline/gpt/scores_descriptions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc080_inline/gpt/scores_instructions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc080_inline/sonnet/scores_descriptions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc080_inline/sonnet/scores_instructions.json`
+
+### `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_round_trip_null_klm_results.json`
+- **Cmd**: `uv run python -m results_analysis.pc_round_trip.permutation_null --n_perms 100 --n_stage2 100`
+- **Stale via**: `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc020_glossary/gpt/scores_descriptions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc020_glossary/gpt/scores_instructions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc020_glossary/sonnet/scores_descriptions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc020_glossary/sonnet/scores_instructions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc020_inline/gpt/scores_descriptions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc020_inline/gpt/scores_instructions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc020_inline/sonnet/scores_descriptions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc020_inline/sonnet/scores_instructions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc028_glossary/gpt/scores_descriptions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc028_glossary/gpt/scores_instructions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc028_glossary/sonnet/scores_descriptions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc028_glossary/sonnet/scores_instructions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc028_inline/gpt/scores_descriptions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc028_inline/gpt/scores_instructions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc028_inline/sonnet/scores_descriptions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc028_inline/sonnet/scores_instructions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc036_glossary/gpt/scores_descriptions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc036_glossary/gpt/scores_instructions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc036_glossary/sonnet/scores_descriptions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc036_glossary/sonnet/scores_instructions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc036_inline/gpt/scores_descriptions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc036_inline/gpt/scores_instructions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc036_inline/sonnet/scores_descriptions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc036_inline/sonnet/scores_instructions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc040_glossary/gpt/scores_descriptions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc040_glossary/gpt/scores_instructions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc040_glossary/sonnet/scores_descriptions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc040_glossary/sonnet/scores_instructions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc040_inline/gpt/scores_descriptions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc040_inline/gpt/scores_instructions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc040_inline/sonnet/scores_descriptions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc040_inline/sonnet/scores_instructions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc056_glossary/gpt/scores_descriptions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc056_glossary/gpt/scores_instructions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc056_glossary/sonnet/scores_descriptions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc056_glossary/sonnet/scores_instructions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc056_inline/gpt/scores_descriptions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc056_inline/gpt/scores_instructions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc056_inline/sonnet/scores_descriptions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc056_inline/sonnet/scores_instructions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc080_glossary/gpt/scores_descriptions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc080_glossary/gpt/scores_instructions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc080_glossary/sonnet/scores_descriptions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc080_glossary/sonnet/scores_instructions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc080_inline/gpt/scores_descriptions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc080_inline/gpt/scores_instructions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc080_inline/sonnet/scores_descriptions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc080_inline/sonnet/scores_instructions.json`
+
+### `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_round_trip_null_klm_results_cutoff_2of3.json`
+- **Cmd**: `uv run python -m results_analysis.pc_round_trip.permutation_null --cutoff_2n_over_3 --n_perms 100 --n_stage2 100`
+- **Stale via**: `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc020_glossary/gpt/scores_descriptions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc020_glossary/gpt/scores_instructions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc020_glossary/sonnet/scores_descriptions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc020_glossary/sonnet/scores_instructions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc020_inline/gpt/scores_descriptions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc020_inline/gpt/scores_instructions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc020_inline/sonnet/scores_descriptions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc020_inline/sonnet/scores_instructions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc028_glossary/gpt/scores_descriptions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc028_glossary/gpt/scores_instructions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc028_glossary/sonnet/scores_descriptions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc028_glossary/sonnet/scores_instructions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc028_inline/gpt/scores_descriptions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc028_inline/gpt/scores_instructions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc028_inline/sonnet/scores_descriptions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc028_inline/sonnet/scores_instructions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc036_glossary/gpt/scores_descriptions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc036_glossary/gpt/scores_instructions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc036_glossary/sonnet/scores_descriptions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc036_glossary/sonnet/scores_instructions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc036_inline/gpt/scores_descriptions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc036_inline/gpt/scores_instructions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc036_inline/sonnet/scores_descriptions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc036_inline/sonnet/scores_instructions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc040_glossary/gpt/scores_descriptions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc040_glossary/gpt/scores_instructions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc040_glossary/sonnet/scores_descriptions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc040_glossary/sonnet/scores_instructions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc040_inline/gpt/scores_descriptions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc040_inline/gpt/scores_instructions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc040_inline/sonnet/scores_descriptions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc040_inline/sonnet/scores_instructions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc056_glossary/gpt/scores_descriptions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc056_glossary/gpt/scores_instructions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc056_glossary/sonnet/scores_descriptions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc056_glossary/sonnet/scores_instructions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc056_inline/gpt/scores_descriptions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc056_inline/gpt/scores_instructions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc056_inline/sonnet/scores_descriptions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc056_inline/sonnet/scores_instructions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc080_glossary/gpt/scores_descriptions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc080_glossary/gpt/scores_instructions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc080_glossary/sonnet/scores_descriptions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc080_glossary/sonnet/scores_instructions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc080_inline/gpt/scores_descriptions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc080_inline/gpt/scores_instructions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc080_inline/sonnet/scores_descriptions.json`, `/Users/roger/Documents/GitHub/assistant-axis/roger/pc_axis_describer_sweep/pc080_inline/sonnet/scores_instructions.json`
+
+## Deferred: 15862
 
 These caches would otherwise be stale (``stale_direct`` or ``stale_transitive``) but are matched by an entry in ``deferred_rejudges.yaml`` -- i.e. the maintainer has explicitly chosen not to rerun judging for them right now.  Use ``tools/defer_rejudge.py --remove`` to lift the deferral when ready.
-
-### `/Users/roger/Documents/GitHub/assistant-axis/archive/pc192_cherrypick_2026-05-07/pc192_glossary/gpt/config.json`
-- **Was**: legacy
-- **Deferred by**: `*/config.json` -- Operational record file (config / API usage / gap tracker) written without an envelope by design -- not a data dependency, no meaningful provenance to record. Deferred indefinitely.  *(at 2026-05-08T15:50:26+00:00)*
-- **Deferred by**: `*/pc192_cherrypick_*/*` -- PC/CA axis-describer pipeline output (LLM-judge driven). Pre-Phase-6 provenance mechanism, not in scope for the May 2026 producer migration. Presumed current as of mechanism introduction; cost-prohibitive to re-describe.  *(at 2026-05-08T15:50:26+00:00)*
-
-### `/Users/roger/Documents/GitHub/assistant-axis/archive/pc192_cherrypick_2026-05-07/pc192_glossary/gpt/correlations.json`
-- **Was**: legacy
-- **Deferred by**: `*/correlations.json` -- Legacy judge cache pre-dating Phase 6 provenance mechanism (May 2026). Presumed current as of mechanism introduction; cost-prohibitive to re-judge. Deferral auto-clears when the producer is re-run (envelope replaces legacy bare JSON).  *(at 2026-05-08T15:45:35+00:00)*
-- **Deferred by**: `*/pc192_cherrypick_*/*` -- PC/CA axis-describer pipeline output (LLM-judge driven). Pre-Phase-6 provenance mechanism, not in scope for the May 2026 producer migration. Presumed current as of mechanism introduction; cost-prohibitive to re-describe.  *(at 2026-05-08T15:50:26+00:00)*
-
-### `/Users/roger/Documents/GitHub/assistant-axis/archive/pc192_cherrypick_2026-05-07/pc192_glossary/gpt/gaps.json`
-- **Was**: legacy
-- **Deferred by**: `*/gaps.json` -- Legacy judge cache pre-dating Phase 6 provenance mechanism (May 2026). Presumed current as of mechanism introduction; cost-prohibitive to re-judge. Deferral auto-clears when the producer is re-run (envelope replaces legacy bare JSON).  *(at 2026-05-08T15:45:56+00:00)*
-- **Deferred by**: `*/pc192_cherrypick_*/*` -- PC/CA axis-describer pipeline output (LLM-judge driven). Pre-Phase-6 provenance mechanism, not in scope for the May 2026 producer migration. Presumed current as of mechanism introduction; cost-prohibitive to re-describe.  *(at 2026-05-08T15:50:26+00:00)*
-
-### `/Users/roger/Documents/GitHub/assistant-axis/archive/pc192_cherrypick_2026-05-07/pc192_glossary/gpt/projections.json`
-- **Was**: legacy
-- **Deferred by**: `*/projections.json` -- Legacy judge cache pre-dating Phase 6 provenance mechanism (May 2026). Presumed current as of mechanism introduction; cost-prohibitive to re-judge. Deferral auto-clears when the producer is re-run (envelope replaces legacy bare JSON).  *(at 2026-05-08T15:45:25+00:00)*
-- **Deferred by**: `*/pc192_cherrypick_*/*` -- PC/CA axis-describer pipeline output (LLM-judge driven). Pre-Phase-6 provenance mechanism, not in scope for the May 2026 producer migration. Presumed current as of mechanism introduction; cost-prohibitive to re-describe.  *(at 2026-05-08T15:50:26+00:00)*
-
-### `/Users/roger/Documents/GitHub/assistant-axis/archive/pc192_cherrypick_2026-05-07/pc192_glossary/gpt/scores_descriptions.json`
-- **Was**: legacy
-- **Deferred by**: `*/scores_descriptions.json` -- Legacy judge cache pre-dating Phase 6 provenance mechanism (May 2026). Presumed current as of mechanism introduction; cost-prohibitive to re-judge. Deferral auto-clears when the producer is re-run (envelope replaces legacy bare JSON).  *(at 2026-05-08T15:44:55+00:00)*
-- **Deferred by**: `*/pc192_cherrypick_*/*` -- PC/CA axis-describer pipeline output (LLM-judge driven). Pre-Phase-6 provenance mechanism, not in scope for the May 2026 producer migration. Presumed current as of mechanism introduction; cost-prohibitive to re-describe.  *(at 2026-05-08T15:50:26+00:00)*
-
-### `/Users/roger/Documents/GitHub/assistant-axis/archive/pc192_cherrypick_2026-05-07/pc192_glossary/gpt/scores_instructions.json`
-- **Was**: legacy
-- **Deferred by**: `*/scores_instructions.json` -- Legacy judge cache pre-dating Phase 6 provenance mechanism (May 2026). Presumed current as of mechanism introduction; cost-prohibitive to re-judge. Deferral auto-clears when the producer is re-run (envelope replaces legacy bare JSON).  *(at 2026-05-08T15:45:05+00:00)*
-- **Deferred by**: `*/pc192_cherrypick_*/*` -- PC/CA axis-describer pipeline output (LLM-judge driven). Pre-Phase-6 provenance mechanism, not in scope for the May 2026 producer migration. Presumed current as of mechanism introduction; cost-prohibitive to re-describe.  *(at 2026-05-08T15:50:26+00:00)*
-
-### `/Users/roger/Documents/GitHub/assistant-axis/archive/pc192_cherrypick_2026-05-07/pc192_glossary/sonnet/config.json`
-- **Was**: legacy
-- **Deferred by**: `*/config.json` -- Operational record file (config / API usage / gap tracker) written without an envelope by design -- not a data dependency, no meaningful provenance to record. Deferred indefinitely.  *(at 2026-05-08T15:50:26+00:00)*
-- **Deferred by**: `*/pc192_cherrypick_*/*` -- PC/CA axis-describer pipeline output (LLM-judge driven). Pre-Phase-6 provenance mechanism, not in scope for the May 2026 producer migration. Presumed current as of mechanism introduction; cost-prohibitive to re-describe.  *(at 2026-05-08T15:50:26+00:00)*
-
-### `/Users/roger/Documents/GitHub/assistant-axis/archive/pc192_cherrypick_2026-05-07/pc192_glossary/sonnet/correlations.json`
-- **Was**: legacy
-- **Deferred by**: `*/correlations.json` -- Legacy judge cache pre-dating Phase 6 provenance mechanism (May 2026). Presumed current as of mechanism introduction; cost-prohibitive to re-judge. Deferral auto-clears when the producer is re-run (envelope replaces legacy bare JSON).  *(at 2026-05-08T15:45:35+00:00)*
-- **Deferred by**: `*/pc192_cherrypick_*/*` -- PC/CA axis-describer pipeline output (LLM-judge driven). Pre-Phase-6 provenance mechanism, not in scope for the May 2026 producer migration. Presumed current as of mechanism introduction; cost-prohibitive to re-describe.  *(at 2026-05-08T15:50:26+00:00)*
-
-### `/Users/roger/Documents/GitHub/assistant-axis/archive/pc192_cherrypick_2026-05-07/pc192_glossary/sonnet/gaps.json`
-- **Was**: legacy
-- **Deferred by**: `*/gaps.json` -- Legacy judge cache pre-dating Phase 6 provenance mechanism (May 2026). Presumed current as of mechanism introduction; cost-prohibitive to re-judge. Deferral auto-clears when the producer is re-run (envelope replaces legacy bare JSON).  *(at 2026-05-08T15:45:56+00:00)*
-- **Deferred by**: `*/pc192_cherrypick_*/*` -- PC/CA axis-describer pipeline output (LLM-judge driven). Pre-Phase-6 provenance mechanism, not in scope for the May 2026 producer migration. Presumed current as of mechanism introduction; cost-prohibitive to re-describe.  *(at 2026-05-08T15:50:26+00:00)*
-
-### `/Users/roger/Documents/GitHub/assistant-axis/archive/pc192_cherrypick_2026-05-07/pc192_glossary/sonnet/projections.json`
-- **Was**: legacy
-- **Deferred by**: `*/projections.json` -- Legacy judge cache pre-dating Phase 6 provenance mechanism (May 2026). Presumed current as of mechanism introduction; cost-prohibitive to re-judge. Deferral auto-clears when the producer is re-run (envelope replaces legacy bare JSON).  *(at 2026-05-08T15:45:25+00:00)*
-- **Deferred by**: `*/pc192_cherrypick_*/*` -- PC/CA axis-describer pipeline output (LLM-judge driven). Pre-Phase-6 provenance mechanism, not in scope for the May 2026 producer migration. Presumed current as of mechanism introduction; cost-prohibitive to re-describe.  *(at 2026-05-08T15:50:26+00:00)*
-
-### `/Users/roger/Documents/GitHub/assistant-axis/archive/pc192_cherrypick_2026-05-07/pc192_glossary/sonnet/scores_descriptions.json`
-- **Was**: legacy
-- **Deferred by**: `*/scores_descriptions.json` -- Legacy judge cache pre-dating Phase 6 provenance mechanism (May 2026). Presumed current as of mechanism introduction; cost-prohibitive to re-judge. Deferral auto-clears when the producer is re-run (envelope replaces legacy bare JSON).  *(at 2026-05-08T15:44:55+00:00)*
-- **Deferred by**: `*/pc192_cherrypick_*/*` -- PC/CA axis-describer pipeline output (LLM-judge driven). Pre-Phase-6 provenance mechanism, not in scope for the May 2026 producer migration. Presumed current as of mechanism introduction; cost-prohibitive to re-describe.  *(at 2026-05-08T15:50:26+00:00)*
-
-### `/Users/roger/Documents/GitHub/assistant-axis/archive/pc192_cherrypick_2026-05-07/pc192_glossary/sonnet/scores_instructions.json`
-- **Was**: legacy
-- **Deferred by**: `*/scores_instructions.json` -- Legacy judge cache pre-dating Phase 6 provenance mechanism (May 2026). Presumed current as of mechanism introduction; cost-prohibitive to re-judge. Deferral auto-clears when the producer is re-run (envelope replaces legacy bare JSON).  *(at 2026-05-08T15:45:05+00:00)*
-- **Deferred by**: `*/pc192_cherrypick_*/*` -- PC/CA axis-describer pipeline output (LLM-judge driven). Pre-Phase-6 provenance mechanism, not in scope for the May 2026 producer migration. Presumed current as of mechanism introduction; cost-prohibitive to re-describe.  *(at 2026-05-08T15:50:26+00:00)*
-
-### `/Users/roger/Documents/GitHub/assistant-axis/archive/pc192_cherrypick_2026-05-07/pc192_inline/gpt/config.json`
-- **Was**: legacy
-- **Deferred by**: `*/config.json` -- Operational record file (config / API usage / gap tracker) written without an envelope by design -- not a data dependency, no meaningful provenance to record. Deferred indefinitely.  *(at 2026-05-08T15:50:26+00:00)*
-- **Deferred by**: `*/pc192_cherrypick_*/*` -- PC/CA axis-describer pipeline output (LLM-judge driven). Pre-Phase-6 provenance mechanism, not in scope for the May 2026 producer migration. Presumed current as of mechanism introduction; cost-prohibitive to re-describe.  *(at 2026-05-08T15:50:26+00:00)*
-
-### `/Users/roger/Documents/GitHub/assistant-axis/archive/pc192_cherrypick_2026-05-07/pc192_inline/gpt/correlations.json`
-- **Was**: legacy
-- **Deferred by**: `*/correlations.json` -- Legacy judge cache pre-dating Phase 6 provenance mechanism (May 2026). Presumed current as of mechanism introduction; cost-prohibitive to re-judge. Deferral auto-clears when the producer is re-run (envelope replaces legacy bare JSON).  *(at 2026-05-08T15:45:35+00:00)*
-- **Deferred by**: `*/pc192_cherrypick_*/*` -- PC/CA axis-describer pipeline output (LLM-judge driven). Pre-Phase-6 provenance mechanism, not in scope for the May 2026 producer migration. Presumed current as of mechanism introduction; cost-prohibitive to re-describe.  *(at 2026-05-08T15:50:26+00:00)*
-
-### `/Users/roger/Documents/GitHub/assistant-axis/archive/pc192_cherrypick_2026-05-07/pc192_inline/gpt/gaps.json`
-- **Was**: legacy
-- **Deferred by**: `*/gaps.json` -- Legacy judge cache pre-dating Phase 6 provenance mechanism (May 2026). Presumed current as of mechanism introduction; cost-prohibitive to re-judge. Deferral auto-clears when the producer is re-run (envelope replaces legacy bare JSON).  *(at 2026-05-08T15:45:56+00:00)*
-- **Deferred by**: `*/pc192_cherrypick_*/*` -- PC/CA axis-describer pipeline output (LLM-judge driven). Pre-Phase-6 provenance mechanism, not in scope for the May 2026 producer migration. Presumed current as of mechanism introduction; cost-prohibitive to re-describe.  *(at 2026-05-08T15:50:26+00:00)*
-
-### `/Users/roger/Documents/GitHub/assistant-axis/archive/pc192_cherrypick_2026-05-07/pc192_inline/gpt/projections.json`
-- **Was**: legacy
-- **Deferred by**: `*/projections.json` -- Legacy judge cache pre-dating Phase 6 provenance mechanism (May 2026). Presumed current as of mechanism introduction; cost-prohibitive to re-judge. Deferral auto-clears when the producer is re-run (envelope replaces legacy bare JSON).  *(at 2026-05-08T15:45:25+00:00)*
-- **Deferred by**: `*/pc192_cherrypick_*/*` -- PC/CA axis-describer pipeline output (LLM-judge driven). Pre-Phase-6 provenance mechanism, not in scope for the May 2026 producer migration. Presumed current as of mechanism introduction; cost-prohibitive to re-describe.  *(at 2026-05-08T15:50:26+00:00)*
-
-### `/Users/roger/Documents/GitHub/assistant-axis/archive/pc192_cherrypick_2026-05-07/pc192_inline/gpt/scores_descriptions.json`
-- **Was**: legacy
-- **Deferred by**: `*/scores_descriptions.json` -- Legacy judge cache pre-dating Phase 6 provenance mechanism (May 2026). Presumed current as of mechanism introduction; cost-prohibitive to re-judge. Deferral auto-clears when the producer is re-run (envelope replaces legacy bare JSON).  *(at 2026-05-08T15:44:55+00:00)*
-- **Deferred by**: `*/pc192_cherrypick_*/*` -- PC/CA axis-describer pipeline output (LLM-judge driven). Pre-Phase-6 provenance mechanism, not in scope for the May 2026 producer migration. Presumed current as of mechanism introduction; cost-prohibitive to re-describe.  *(at 2026-05-08T15:50:26+00:00)*
-
-### `/Users/roger/Documents/GitHub/assistant-axis/archive/pc192_cherrypick_2026-05-07/pc192_inline/gpt/scores_instructions.json`
-- **Was**: legacy
-- **Deferred by**: `*/scores_instructions.json` -- Legacy judge cache pre-dating Phase 6 provenance mechanism (May 2026). Presumed current as of mechanism introduction; cost-prohibitive to re-judge. Deferral auto-clears when the producer is re-run (envelope replaces legacy bare JSON).  *(at 2026-05-08T15:45:05+00:00)*
-- **Deferred by**: `*/pc192_cherrypick_*/*` -- PC/CA axis-describer pipeline output (LLM-judge driven). Pre-Phase-6 provenance mechanism, not in scope for the May 2026 producer migration. Presumed current as of mechanism introduction; cost-prohibitive to re-describe.  *(at 2026-05-08T15:50:26+00:00)*
-
-### `/Users/roger/Documents/GitHub/assistant-axis/archive/pc192_cherrypick_2026-05-07/pc192_inline/sonnet/config.json`
-- **Was**: legacy
-- **Deferred by**: `*/config.json` -- Operational record file (config / API usage / gap tracker) written without an envelope by design -- not a data dependency, no meaningful provenance to record. Deferred indefinitely.  *(at 2026-05-08T15:50:26+00:00)*
-- **Deferred by**: `*/pc192_cherrypick_*/*` -- PC/CA axis-describer pipeline output (LLM-judge driven). Pre-Phase-6 provenance mechanism, not in scope for the May 2026 producer migration. Presumed current as of mechanism introduction; cost-prohibitive to re-describe.  *(at 2026-05-08T15:50:26+00:00)*
-
-### `/Users/roger/Documents/GitHub/assistant-axis/archive/pc192_cherrypick_2026-05-07/pc192_inline/sonnet/correlations.json`
-- **Was**: legacy
-- **Deferred by**: `*/correlations.json` -- Legacy judge cache pre-dating Phase 6 provenance mechanism (May 2026). Presumed current as of mechanism introduction; cost-prohibitive to re-judge. Deferral auto-clears when the producer is re-run (envelope replaces legacy bare JSON).  *(at 2026-05-08T15:45:35+00:00)*
-- **Deferred by**: `*/pc192_cherrypick_*/*` -- PC/CA axis-describer pipeline output (LLM-judge driven). Pre-Phase-6 provenance mechanism, not in scope for the May 2026 producer migration. Presumed current as of mechanism introduction; cost-prohibitive to re-describe.  *(at 2026-05-08T15:50:26+00:00)*
-
-### `/Users/roger/Documents/GitHub/assistant-axis/archive/pc192_cherrypick_2026-05-07/pc192_inline/sonnet/gaps.json`
-- **Was**: legacy
-- **Deferred by**: `*/gaps.json` -- Legacy judge cache pre-dating Phase 6 provenance mechanism (May 2026). Presumed current as of mechanism introduction; cost-prohibitive to re-judge. Deferral auto-clears when the producer is re-run (envelope replaces legacy bare JSON).  *(at 2026-05-08T15:45:56+00:00)*
-- **Deferred by**: `*/pc192_cherrypick_*/*` -- PC/CA axis-describer pipeline output (LLM-judge driven). Pre-Phase-6 provenance mechanism, not in scope for the May 2026 producer migration. Presumed current as of mechanism introduction; cost-prohibitive to re-describe.  *(at 2026-05-08T15:50:26+00:00)*
-
-### `/Users/roger/Documents/GitHub/assistant-axis/archive/pc192_cherrypick_2026-05-07/pc192_inline/sonnet/projections.json`
-- **Was**: legacy
-- **Deferred by**: `*/projections.json` -- Legacy judge cache pre-dating Phase 6 provenance mechanism (May 2026). Presumed current as of mechanism introduction; cost-prohibitive to re-judge. Deferral auto-clears when the producer is re-run (envelope replaces legacy bare JSON).  *(at 2026-05-08T15:45:25+00:00)*
-- **Deferred by**: `*/pc192_cherrypick_*/*` -- PC/CA axis-describer pipeline output (LLM-judge driven). Pre-Phase-6 provenance mechanism, not in scope for the May 2026 producer migration. Presumed current as of mechanism introduction; cost-prohibitive to re-describe.  *(at 2026-05-08T15:50:26+00:00)*
-
-### `/Users/roger/Documents/GitHub/assistant-axis/archive/pc192_cherrypick_2026-05-07/pc192_inline/sonnet/scores_descriptions.json`
-- **Was**: legacy
-- **Deferred by**: `*/scores_descriptions.json` -- Legacy judge cache pre-dating Phase 6 provenance mechanism (May 2026). Presumed current as of mechanism introduction; cost-prohibitive to re-judge. Deferral auto-clears when the producer is re-run (envelope replaces legacy bare JSON).  *(at 2026-05-08T15:44:55+00:00)*
-- **Deferred by**: `*/pc192_cherrypick_*/*` -- PC/CA axis-describer pipeline output (LLM-judge driven). Pre-Phase-6 provenance mechanism, not in scope for the May 2026 producer migration. Presumed current as of mechanism introduction; cost-prohibitive to re-describe.  *(at 2026-05-08T15:50:26+00:00)*
-
-### `/Users/roger/Documents/GitHub/assistant-axis/archive/pc192_cherrypick_2026-05-07/pc192_inline/sonnet/scores_instructions.json`
-- **Was**: legacy
-- **Deferred by**: `*/scores_instructions.json` -- Legacy judge cache pre-dating Phase 6 provenance mechanism (May 2026). Presumed current as of mechanism introduction; cost-prohibitive to re-judge. Deferral auto-clears when the producer is re-run (envelope replaces legacy bare JSON).  *(at 2026-05-08T15:45:05+00:00)*
-- **Deferred by**: `*/pc192_cherrypick_*/*` -- PC/CA axis-describer pipeline output (LLM-judge driven). Pre-Phase-6 provenance mechanism, not in scope for the May 2026 producer migration. Presumed current as of mechanism introduction; cost-prohibitive to re-describe.  *(at 2026-05-08T15:50:26+00:00)*
-
-### `/Users/roger/Documents/GitHub/assistant-axis/archive/pc192_cherrypick_2026-05-07/winners/pc_round_trip_fixed_direction_per_cell_winners_cherrypicked.json`
-- **Was**: legacy
-- **Deferred by**: `*/pc192_cherrypick_*/*` -- PC/CA axis-describer pipeline output (LLM-judge driven). Pre-Phase-6 provenance mechanism, not in scope for the May 2026 producer migration. Presumed current as of mechanism introduction; cost-prohibitive to re-describe.  *(at 2026-05-08T15:50:26+00:00)*
-
-### `/Users/roger/Documents/GitHub/assistant-axis/archive/pc192_cherrypick_2026-05-07/winners/pc_round_trip_fixed_direction_restricted_winners_cherrypicked.json`
-- **Was**: legacy
-- **Deferred by**: `*/pc192_cherrypick_*/*` -- PC/CA axis-describer pipeline output (LLM-judge driven). Pre-Phase-6 provenance mechanism, not in scope for the May 2026 producer migration. Presumed current as of mechanism introduction; cost-prohibitive to re-describe.  *(at 2026-05-08T15:50:26+00:00)*
-
-### `/Users/roger/Documents/GitHub/assistant-axis/archive/pc192_cherrypick_2026-05-07/winners/pc_round_trip_fixed_principled_per_cell_winners_cherrypicked.json`
-- **Was**: legacy
-- **Deferred by**: `*/pc192_cherrypick_*/*` -- PC/CA axis-describer pipeline output (LLM-judge driven). Pre-Phase-6 provenance mechanism, not in scope for the May 2026 producer migration. Presumed current as of mechanism introduction; cost-prohibitive to re-describe.  *(at 2026-05-08T15:50:26+00:00)*
-
-### `/Users/roger/Documents/GitHub/assistant-axis/archive/pc192_cherrypick_2026-05-07/winners/pc_round_trip_fixed_principled_restricted_winners_cherrypicked.json`
-- **Was**: legacy
-- **Deferred by**: `*/pc192_cherrypick_*/*` -- PC/CA axis-describer pipeline output (LLM-judge driven). Pre-Phase-6 provenance mechanism, not in scope for the May 2026 producer migration. Presumed current as of mechanism introduction; cost-prohibitive to re-describe.  *(at 2026-05-08T15:50:26+00:00)*
 
 ### `/Users/roger/Documents/GitHub/assistant-axis/roger/axis_describer_test_ca1/combined/bisector_minus.json`
 - **Was**: legacy
@@ -487,17 +773,9 @@ These caches would otherwise be stale (``stale_direct`` or ``stale_transitive``)
 - **Was**: legacy
 - **Deferred by**: `*/axis_judge_experiments/axis_vs_pc_cosines.json` -- Orphan output from a pre-Phase-6 one-off analysis whose producer is no longer in the codebase. Not in scope for the May 2026 producer migration. Presumed snapshot-historical; remove the file (and this entry) when superseded.  *(at 2026-05-08T15:53:25+00:00)*
 
-### `/Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/batch_size_curve_8slot/batch_size_curve_rho.json`
-- **Was**: stale_direct
-- **Deferred by**: `roger/axis_judge_experiments/batch_size_curve_8slot/batch_size_curve_rho.json` -- Legacy mixed-rubric batch-size sweep written before the v1/v2 rubric split.  Reads a mix of cells: B={5,7,15} only ever existed under v1; B=10 was the v2 transition cell.  Superseded by ``batch_size_curve_rho_v1.json`` (full sweep against __rubric_v1.json snapshot) and ``batch_size_curve_rho_v2.json`` (B=10 only, current v2 data).  Kept on-disk for reference; remove with the deferral entry once both v1 and v2 variants are in place and consumers are updated.  *(at 2026-05-09T14:30:53+00:00)*
-
 ### `/Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/batch_size_curve_8slot/batch_size_curve_rho__rubric_v1.json`
 - **Was**: stale_direct
 - **Deferred by**: `*__rubric_v1.json` -- v1 rubric snapshot taken on 2026-05-09 immediately before the v2 rubric anonymization landed. Kept on-disk for cross-rubric comparison; not to be re-judged. The going-forward (non-snapshot) caches are being re-judged under v2 in a separate process.  *(at 2026-05-09T03:37:03+00:00)*
-
-### `/Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/batch_size_curve_8slot/batch_size_curve_rho_ensembles.json`
-- **Was**: stale_direct
-- **Deferred by**: `roger/axis_judge_experiments/batch_size_curve_8slot/batch_size_curve_rho_ensembles.json` -- Legacy mixed-rubric ensemble side-car -- input JSON consumed both v1 and v2 cells.  Superseded by ``batch_size_curve_rho_v1_ensembles.json`` (3 combos against v1 snapshot incl. Sonnet/Haiku-full) and ``batch_size_curve_rho_v2_ensembles.json`` (gpt+haiku_q9 only, current v2 data; Sonnet and Haiku-full have no v2 b10 judging).  *(at 2026-05-09T14:30:54+00:00)*
 
 ### `/Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/batch_size_curve_8slot/batch_size_curve_rho_ensembles__rubric_v1.json`
 - **Was**: stale_direct
@@ -787,6 +1065,10 @@ These caches would otherwise be stale (``stale_direct`` or ``stale_transitive``)
 - **Was**: legacy
 - **Deferred by**: `*__rubric_v1.json` -- v1 rubric snapshot taken on 2026-05-09 immediately before the v2 rubric anonymization landed. Kept on-disk for cross-rubric comparison; not to be re-judged. The going-forward (non-snapshot) caches are being re-judged under v2 in a separate process.  *(at 2026-05-09T03:37:03+00:00)*
 
+### `/Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/concise_vs_verbose/gpt_responses_roles_b10/correlations.json`
+- **Was**: stale_direct
+- **Deferred by**: `*/correlations.json` -- Legacy judge cache pre-dating Phase 6 provenance mechanism (May 2026). Presumed current as of mechanism introduction; cost-prohibitive to re-judge. Deferral auto-clears when the producer is re-run (envelope replaces legacy bare JSON).  *(at 2026-05-08T15:45:35+00:00)*
+
 ### `/Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/concise_vs_verbose/gpt_responses_roles_b10/correlations__rubric_v1.json`
 - **Was**: legacy
 - **Deferred by**: `*__rubric_v1.json` -- v1 rubric snapshot taken on 2026-05-09 immediately before the v2 rubric anonymization landed. Kept on-disk for cross-rubric comparison; not to be re-judged. The going-forward (non-snapshot) caches are being re-judged under v2 in a separate process.  *(at 2026-05-09T03:37:03+00:00)*
@@ -798,6 +1080,14 @@ These caches would otherwise be stale (``stale_direct`` or ``stale_transitive``)
 ### `/Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/concise_vs_verbose/gpt_responses_roles_b10/gaps__rubric_v1.json`
 - **Was**: legacy
 - **Deferred by**: `*__rubric_v1.json` -- v1 rubric snapshot taken on 2026-05-09 immediately before the v2 rubric anonymization landed. Kept on-disk for cross-rubric comparison; not to be re-judged. The going-forward (non-snapshot) caches are being re-judged under v2 in a separate process.  *(at 2026-05-09T03:37:03+00:00)*
+
+### `/Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/concise_vs_verbose/gpt_responses_roles_b10/projections.json`
+- **Was**: stale_direct
+- **Deferred by**: `*/projections.json` -- Legacy judge cache pre-dating Phase 6 provenance mechanism (May 2026). Presumed current as of mechanism introduction; cost-prohibitive to re-judge. Deferral auto-clears when the producer is re-run (envelope replaces legacy bare JSON).  *(at 2026-05-08T15:45:25+00:00)*
+
+### `/Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/concise_vs_verbose/gpt_responses_roles_b10/scores_responses.json`
+- **Was**: stale_direct
+- **Deferred by**: `*/scores_responses.json` -- Legacy judge cache pre-dating Phase 6 provenance mechanism (May 2026). Presumed current as of mechanism introduction; cost-prohibitive to re-judge. Deferral auto-clears when the producer is re-run (envelope replaces legacy bare JSON).  *(at 2026-05-08T15:45:15+00:00)*
 
 ### `/Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/concise_vs_verbose/gpt_responses_roles_b10/scores_responses__rubric_v1.json`
 - **Was**: legacy
@@ -835,6 +1125,10 @@ These caches would otherwise be stale (``stale_direct`` or ``stale_transitive``)
 - **Was**: legacy
 - **Deferred by**: `*__rubric_v1.json` -- v1 rubric snapshot taken on 2026-05-09 immediately before the v2 rubric anonymization landed. Kept on-disk for cross-rubric comparison; not to be re-judged. The going-forward (non-snapshot) caches are being re-judged under v2 in a separate process.  *(at 2026-05-09T03:37:03+00:00)*
 
+### `/Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/concise_vs_verbose/gpt_responses_traits_b10/correlations.json`
+- **Was**: stale_direct
+- **Deferred by**: `*/correlations.json` -- Legacy judge cache pre-dating Phase 6 provenance mechanism (May 2026). Presumed current as of mechanism introduction; cost-prohibitive to re-judge. Deferral auto-clears when the producer is re-run (envelope replaces legacy bare JSON).  *(at 2026-05-08T15:45:35+00:00)*
+
 ### `/Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/concise_vs_verbose/gpt_responses_traits_b10/correlations__rubric_v1.json`
 - **Was**: legacy
 - **Deferred by**: `*__rubric_v1.json` -- v1 rubric snapshot taken on 2026-05-09 immediately before the v2 rubric anonymization landed. Kept on-disk for cross-rubric comparison; not to be re-judged. The going-forward (non-snapshot) caches are being re-judged under v2 in a separate process.  *(at 2026-05-09T03:37:03+00:00)*
@@ -846,6 +1140,14 @@ These caches would otherwise be stale (``stale_direct`` or ``stale_transitive``)
 ### `/Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/concise_vs_verbose/gpt_responses_traits_b10/gaps__rubric_v1.json`
 - **Was**: legacy
 - **Deferred by**: `*__rubric_v1.json` -- v1 rubric snapshot taken on 2026-05-09 immediately before the v2 rubric anonymization landed. Kept on-disk for cross-rubric comparison; not to be re-judged. The going-forward (non-snapshot) caches are being re-judged under v2 in a separate process.  *(at 2026-05-09T03:37:03+00:00)*
+
+### `/Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/concise_vs_verbose/gpt_responses_traits_b10/projections.json`
+- **Was**: stale_direct
+- **Deferred by**: `*/projections.json` -- Legacy judge cache pre-dating Phase 6 provenance mechanism (May 2026). Presumed current as of mechanism introduction; cost-prohibitive to re-judge. Deferral auto-clears when the producer is re-run (envelope replaces legacy bare JSON).  *(at 2026-05-08T15:45:25+00:00)*
+
+### `/Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/concise_vs_verbose/gpt_responses_traits_b10/scores_responses.json`
+- **Was**: stale_direct
+- **Deferred by**: `*/scores_responses.json` -- Legacy judge cache pre-dating Phase 6 provenance mechanism (May 2026). Presumed current as of mechanism introduction; cost-prohibitive to re-judge. Deferral auto-clears when the producer is re-run (envelope replaces legacy bare JSON).  *(at 2026-05-08T15:45:15+00:00)*
 
 ### `/Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/concise_vs_verbose/gpt_responses_traits_b10/scores_responses__rubric_v1.json`
 - **Was**: legacy
@@ -883,6 +1185,10 @@ These caches would otherwise be stale (``stale_direct`` or ``stale_transitive``)
 - **Was**: legacy
 - **Deferred by**: `*__rubric_v1.json` -- v1 rubric snapshot taken on 2026-05-09 immediately before the v2 rubric anonymization landed. Kept on-disk for cross-rubric comparison; not to be re-judged. The going-forward (non-snapshot) caches are being re-judged under v2 in a separate process.  *(at 2026-05-09T03:37:03+00:00)*
 
+### `/Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/concise_vs_verbose/haiku_responses_roles_b10_q9/correlations.json`
+- **Was**: stale_direct
+- **Deferred by**: `*/correlations.json` -- Legacy judge cache pre-dating Phase 6 provenance mechanism (May 2026). Presumed current as of mechanism introduction; cost-prohibitive to re-judge. Deferral auto-clears when the producer is re-run (envelope replaces legacy bare JSON).  *(at 2026-05-08T15:45:35+00:00)*
+
 ### `/Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/concise_vs_verbose/haiku_responses_roles_b10_q9/correlations__rubric_v1.json`
 - **Was**: legacy
 - **Deferred by**: `*__rubric_v1.json` -- v1 rubric snapshot taken on 2026-05-09 immediately before the v2 rubric anonymization landed. Kept on-disk for cross-rubric comparison; not to be re-judged. The going-forward (non-snapshot) caches are being re-judged under v2 in a separate process.  *(at 2026-05-09T03:37:03+00:00)*
@@ -894,6 +1200,14 @@ These caches would otherwise be stale (``stale_direct`` or ``stale_transitive``)
 ### `/Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/concise_vs_verbose/haiku_responses_roles_b10_q9/gaps__rubric_v1.json`
 - **Was**: legacy
 - **Deferred by**: `*__rubric_v1.json` -- v1 rubric snapshot taken on 2026-05-09 immediately before the v2 rubric anonymization landed. Kept on-disk for cross-rubric comparison; not to be re-judged. The going-forward (non-snapshot) caches are being re-judged under v2 in a separate process.  *(at 2026-05-09T03:37:03+00:00)*
+
+### `/Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/concise_vs_verbose/haiku_responses_roles_b10_q9/projections.json`
+- **Was**: stale_direct
+- **Deferred by**: `*/projections.json` -- Legacy judge cache pre-dating Phase 6 provenance mechanism (May 2026). Presumed current as of mechanism introduction; cost-prohibitive to re-judge. Deferral auto-clears when the producer is re-run (envelope replaces legacy bare JSON).  *(at 2026-05-08T15:45:25+00:00)*
+
+### `/Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/concise_vs_verbose/haiku_responses_roles_b10_q9/scores_responses.json`
+- **Was**: stale_direct
+- **Deferred by**: `*/scores_responses.json` -- Legacy judge cache pre-dating Phase 6 provenance mechanism (May 2026). Presumed current as of mechanism introduction; cost-prohibitive to re-judge. Deferral auto-clears when the producer is re-run (envelope replaces legacy bare JSON).  *(at 2026-05-08T15:45:15+00:00)*
 
 ### `/Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/concise_vs_verbose/haiku_responses_roles_b10_q9/scores_responses__rubric_v1.json`
 - **Was**: legacy
@@ -907,6 +1221,10 @@ These caches would otherwise be stale (``stale_direct`` or ``stale_transitive``)
 - **Was**: legacy
 - **Deferred by**: `*__rubric_v1.json` -- v1 rubric snapshot taken on 2026-05-09 immediately before the v2 rubric anonymization landed. Kept on-disk for cross-rubric comparison; not to be re-judged. The going-forward (non-snapshot) caches are being re-judged under v2 in a separate process.  *(at 2026-05-09T03:37:03+00:00)*
 
+### `/Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/concise_vs_verbose/haiku_responses_traits_b10_q9/correlations.json`
+- **Was**: stale_direct
+- **Deferred by**: `*/correlations.json` -- Legacy judge cache pre-dating Phase 6 provenance mechanism (May 2026). Presumed current as of mechanism introduction; cost-prohibitive to re-judge. Deferral auto-clears when the producer is re-run (envelope replaces legacy bare JSON).  *(at 2026-05-08T15:45:35+00:00)*
+
 ### `/Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/concise_vs_verbose/haiku_responses_traits_b10_q9/correlations__rubric_v1.json`
 - **Was**: legacy
 - **Deferred by**: `*__rubric_v1.json` -- v1 rubric snapshot taken on 2026-05-09 immediately before the v2 rubric anonymization landed. Kept on-disk for cross-rubric comparison; not to be re-judged. The going-forward (non-snapshot) caches are being re-judged under v2 in a separate process.  *(at 2026-05-09T03:37:03+00:00)*
@@ -918,6 +1236,14 @@ These caches would otherwise be stale (``stale_direct`` or ``stale_transitive``)
 ### `/Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/concise_vs_verbose/haiku_responses_traits_b10_q9/gaps__rubric_v1.json`
 - **Was**: legacy
 - **Deferred by**: `*__rubric_v1.json` -- v1 rubric snapshot taken on 2026-05-09 immediately before the v2 rubric anonymization landed. Kept on-disk for cross-rubric comparison; not to be re-judged. The going-forward (non-snapshot) caches are being re-judged under v2 in a separate process.  *(at 2026-05-09T03:37:03+00:00)*
+
+### `/Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/concise_vs_verbose/haiku_responses_traits_b10_q9/projections.json`
+- **Was**: stale_direct
+- **Deferred by**: `*/projections.json` -- Legacy judge cache pre-dating Phase 6 provenance mechanism (May 2026). Presumed current as of mechanism introduction; cost-prohibitive to re-judge. Deferral auto-clears when the producer is re-run (envelope replaces legacy bare JSON).  *(at 2026-05-08T15:45:25+00:00)*
+
+### `/Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/concise_vs_verbose/haiku_responses_traits_b10_q9/scores_responses.json`
+- **Was**: stale_direct
+- **Deferred by**: `*/scores_responses.json` -- Legacy judge cache pre-dating Phase 6 provenance mechanism (May 2026). Presumed current as of mechanism introduction; cost-prohibitive to re-judge. Deferral auto-clears when the producer is re-run (envelope replaces legacy bare JSON).  *(at 2026-05-08T15:45:15+00:00)*
 
 ### `/Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/concise_vs_verbose/haiku_responses_traits_b10_q9/scores_responses__rubric_v1.json`
 - **Was**: legacy
@@ -1363,6 +1689,10 @@ These caches would otherwise be stale (``stale_direct`` or ``stale_transitive``)
 - **Was**: legacy
 - **Deferred by**: `*__rubric_v1.json` -- v1 rubric snapshot taken on 2026-05-09 immediately before the v2 rubric anonymization landed. Kept on-disk for cross-rubric comparison; not to be re-judged. The going-forward (non-snapshot) caches are being re-judged under v2 in a separate process.  *(at 2026-05-09T03:37:03+00:00)*
 
+### `/Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/ecocentric_vs_anthropocentric/gpt_responses_roles_b10/correlations.json`
+- **Was**: stale_direct
+- **Deferred by**: `*/correlations.json` -- Legacy judge cache pre-dating Phase 6 provenance mechanism (May 2026). Presumed current as of mechanism introduction; cost-prohibitive to re-judge. Deferral auto-clears when the producer is re-run (envelope replaces legacy bare JSON).  *(at 2026-05-08T15:45:35+00:00)*
+
 ### `/Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/ecocentric_vs_anthropocentric/gpt_responses_roles_b10/correlations__rubric_v1.json`
 - **Was**: legacy
 - **Deferred by**: `*__rubric_v1.json` -- v1 rubric snapshot taken on 2026-05-09 immediately before the v2 rubric anonymization landed. Kept on-disk for cross-rubric comparison; not to be re-judged. The going-forward (non-snapshot) caches are being re-judged under v2 in a separate process.  *(at 2026-05-09T03:37:03+00:00)*
@@ -1374,6 +1704,14 @@ These caches would otherwise be stale (``stale_direct`` or ``stale_transitive``)
 ### `/Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/ecocentric_vs_anthropocentric/gpt_responses_roles_b10/gaps__rubric_v1.json`
 - **Was**: legacy
 - **Deferred by**: `*__rubric_v1.json` -- v1 rubric snapshot taken on 2026-05-09 immediately before the v2 rubric anonymization landed. Kept on-disk for cross-rubric comparison; not to be re-judged. The going-forward (non-snapshot) caches are being re-judged under v2 in a separate process.  *(at 2026-05-09T03:37:03+00:00)*
+
+### `/Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/ecocentric_vs_anthropocentric/gpt_responses_roles_b10/projections.json`
+- **Was**: stale_direct
+- **Deferred by**: `*/projections.json` -- Legacy judge cache pre-dating Phase 6 provenance mechanism (May 2026). Presumed current as of mechanism introduction; cost-prohibitive to re-judge. Deferral auto-clears when the producer is re-run (envelope replaces legacy bare JSON).  *(at 2026-05-08T15:45:25+00:00)*
+
+### `/Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/ecocentric_vs_anthropocentric/gpt_responses_roles_b10/scores_responses.json`
+- **Was**: stale_direct
+- **Deferred by**: `*/scores_responses.json` -- Legacy judge cache pre-dating Phase 6 provenance mechanism (May 2026). Presumed current as of mechanism introduction; cost-prohibitive to re-judge. Deferral auto-clears when the producer is re-run (envelope replaces legacy bare JSON).  *(at 2026-05-08T15:45:15+00:00)*
 
 ### `/Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/ecocentric_vs_anthropocentric/gpt_responses_roles_b10/scores_responses__rubric_v1.json`
 - **Was**: legacy
@@ -1411,6 +1749,10 @@ These caches would otherwise be stale (``stale_direct`` or ``stale_transitive``)
 - **Was**: legacy
 - **Deferred by**: `*__rubric_v1.json` -- v1 rubric snapshot taken on 2026-05-09 immediately before the v2 rubric anonymization landed. Kept on-disk for cross-rubric comparison; not to be re-judged. The going-forward (non-snapshot) caches are being re-judged under v2 in a separate process.  *(at 2026-05-09T03:37:03+00:00)*
 
+### `/Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/ecocentric_vs_anthropocentric/gpt_responses_traits_b10/correlations.json`
+- **Was**: stale_direct
+- **Deferred by**: `*/correlations.json` -- Legacy judge cache pre-dating Phase 6 provenance mechanism (May 2026). Presumed current as of mechanism introduction; cost-prohibitive to re-judge. Deferral auto-clears when the producer is re-run (envelope replaces legacy bare JSON).  *(at 2026-05-08T15:45:35+00:00)*
+
 ### `/Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/ecocentric_vs_anthropocentric/gpt_responses_traits_b10/correlations__rubric_v1.json`
 - **Was**: legacy
 - **Deferred by**: `*__rubric_v1.json` -- v1 rubric snapshot taken on 2026-05-09 immediately before the v2 rubric anonymization landed. Kept on-disk for cross-rubric comparison; not to be re-judged. The going-forward (non-snapshot) caches are being re-judged under v2 in a separate process.  *(at 2026-05-09T03:37:03+00:00)*
@@ -1422,6 +1764,14 @@ These caches would otherwise be stale (``stale_direct`` or ``stale_transitive``)
 ### `/Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/ecocentric_vs_anthropocentric/gpt_responses_traits_b10/gaps__rubric_v1.json`
 - **Was**: legacy
 - **Deferred by**: `*__rubric_v1.json` -- v1 rubric snapshot taken on 2026-05-09 immediately before the v2 rubric anonymization landed. Kept on-disk for cross-rubric comparison; not to be re-judged. The going-forward (non-snapshot) caches are being re-judged under v2 in a separate process.  *(at 2026-05-09T03:37:03+00:00)*
+
+### `/Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/ecocentric_vs_anthropocentric/gpt_responses_traits_b10/projections.json`
+- **Was**: stale_direct
+- **Deferred by**: `*/projections.json` -- Legacy judge cache pre-dating Phase 6 provenance mechanism (May 2026). Presumed current as of mechanism introduction; cost-prohibitive to re-judge. Deferral auto-clears when the producer is re-run (envelope replaces legacy bare JSON).  *(at 2026-05-08T15:45:25+00:00)*
+
+### `/Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/ecocentric_vs_anthropocentric/gpt_responses_traits_b10/scores_responses.json`
+- **Was**: stale_direct
+- **Deferred by**: `*/scores_responses.json` -- Legacy judge cache pre-dating Phase 6 provenance mechanism (May 2026). Presumed current as of mechanism introduction; cost-prohibitive to re-judge. Deferral auto-clears when the producer is re-run (envelope replaces legacy bare JSON).  *(at 2026-05-08T15:45:15+00:00)*
 
 ### `/Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/ecocentric_vs_anthropocentric/gpt_responses_traits_b10/scores_responses__rubric_v1.json`
 - **Was**: legacy
@@ -1483,6 +1833,10 @@ These caches would otherwise be stale (``stale_direct`` or ``stale_transitive``)
 - **Was**: legacy
 - **Deferred by**: `*__rubric_v1.json` -- v1 rubric snapshot taken on 2026-05-09 immediately before the v2 rubric anonymization landed. Kept on-disk for cross-rubric comparison; not to be re-judged. The going-forward (non-snapshot) caches are being re-judged under v2 in a separate process.  *(at 2026-05-09T03:37:03+00:00)*
 
+### `/Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/ecocentric_vs_anthropocentric/haiku_responses_roles_b10_q9/correlations.json`
+- **Was**: stale_direct
+- **Deferred by**: `*/correlations.json` -- Legacy judge cache pre-dating Phase 6 provenance mechanism (May 2026). Presumed current as of mechanism introduction; cost-prohibitive to re-judge. Deferral auto-clears when the producer is re-run (envelope replaces legacy bare JSON).  *(at 2026-05-08T15:45:35+00:00)*
+
 ### `/Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/ecocentric_vs_anthropocentric/haiku_responses_roles_b10_q9/correlations__rubric_v1.json`
 - **Was**: legacy
 - **Deferred by**: `*__rubric_v1.json` -- v1 rubric snapshot taken on 2026-05-09 immediately before the v2 rubric anonymization landed. Kept on-disk for cross-rubric comparison; not to be re-judged. The going-forward (non-snapshot) caches are being re-judged under v2 in a separate process.  *(at 2026-05-09T03:37:03+00:00)*
@@ -1494,6 +1848,14 @@ These caches would otherwise be stale (``stale_direct`` or ``stale_transitive``)
 ### `/Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/ecocentric_vs_anthropocentric/haiku_responses_roles_b10_q9/gaps__rubric_v1.json`
 - **Was**: legacy
 - **Deferred by**: `*__rubric_v1.json` -- v1 rubric snapshot taken on 2026-05-09 immediately before the v2 rubric anonymization landed. Kept on-disk for cross-rubric comparison; not to be re-judged. The going-forward (non-snapshot) caches are being re-judged under v2 in a separate process.  *(at 2026-05-09T03:37:03+00:00)*
+
+### `/Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/ecocentric_vs_anthropocentric/haiku_responses_roles_b10_q9/projections.json`
+- **Was**: stale_direct
+- **Deferred by**: `*/projections.json` -- Legacy judge cache pre-dating Phase 6 provenance mechanism (May 2026). Presumed current as of mechanism introduction; cost-prohibitive to re-judge. Deferral auto-clears when the producer is re-run (envelope replaces legacy bare JSON).  *(at 2026-05-08T15:45:25+00:00)*
+
+### `/Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/ecocentric_vs_anthropocentric/haiku_responses_roles_b10_q9/scores_responses.json`
+- **Was**: stale_direct
+- **Deferred by**: `*/scores_responses.json` -- Legacy judge cache pre-dating Phase 6 provenance mechanism (May 2026). Presumed current as of mechanism introduction; cost-prohibitive to re-judge. Deferral auto-clears when the producer is re-run (envelope replaces legacy bare JSON).  *(at 2026-05-08T15:45:15+00:00)*
 
 ### `/Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/ecocentric_vs_anthropocentric/haiku_responses_roles_b10_q9/scores_responses__rubric_v1.json`
 - **Was**: legacy
@@ -1531,6 +1893,10 @@ These caches would otherwise be stale (``stale_direct`` or ``stale_transitive``)
 - **Was**: legacy
 - **Deferred by**: `*__rubric_v1.json` -- v1 rubric snapshot taken on 2026-05-09 immediately before the v2 rubric anonymization landed. Kept on-disk for cross-rubric comparison; not to be re-judged. The going-forward (non-snapshot) caches are being re-judged under v2 in a separate process.  *(at 2026-05-09T03:37:03+00:00)*
 
+### `/Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/ecocentric_vs_anthropocentric/haiku_responses_traits_b10_q9/correlations.json`
+- **Was**: stale_direct
+- **Deferred by**: `*/correlations.json` -- Legacy judge cache pre-dating Phase 6 provenance mechanism (May 2026). Presumed current as of mechanism introduction; cost-prohibitive to re-judge. Deferral auto-clears when the producer is re-run (envelope replaces legacy bare JSON).  *(at 2026-05-08T15:45:35+00:00)*
+
 ### `/Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/ecocentric_vs_anthropocentric/haiku_responses_traits_b10_q9/correlations__rubric_v1.json`
 - **Was**: legacy
 - **Deferred by**: `*__rubric_v1.json` -- v1 rubric snapshot taken on 2026-05-09 immediately before the v2 rubric anonymization landed. Kept on-disk for cross-rubric comparison; not to be re-judged. The going-forward (non-snapshot) caches are being re-judged under v2 in a separate process.  *(at 2026-05-09T03:37:03+00:00)*
@@ -1542,6 +1908,14 @@ These caches would otherwise be stale (``stale_direct`` or ``stale_transitive``)
 ### `/Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/ecocentric_vs_anthropocentric/haiku_responses_traits_b10_q9/gaps__rubric_v1.json`
 - **Was**: legacy
 - **Deferred by**: `*__rubric_v1.json` -- v1 rubric snapshot taken on 2026-05-09 immediately before the v2 rubric anonymization landed. Kept on-disk for cross-rubric comparison; not to be re-judged. The going-forward (non-snapshot) caches are being re-judged under v2 in a separate process.  *(at 2026-05-09T03:37:03+00:00)*
+
+### `/Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/ecocentric_vs_anthropocentric/haiku_responses_traits_b10_q9/projections.json`
+- **Was**: stale_direct
+- **Deferred by**: `*/projections.json` -- Legacy judge cache pre-dating Phase 6 provenance mechanism (May 2026). Presumed current as of mechanism introduction; cost-prohibitive to re-judge. Deferral auto-clears when the producer is re-run (envelope replaces legacy bare JSON).  *(at 2026-05-08T15:45:25+00:00)*
+
+### `/Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/ecocentric_vs_anthropocentric/haiku_responses_traits_b10_q9/scores_responses.json`
+- **Was**: stale_direct
+- **Deferred by**: `*/scores_responses.json` -- Legacy judge cache pre-dating Phase 6 provenance mechanism (May 2026). Presumed current as of mechanism introduction; cost-prohibitive to re-judge. Deferral auto-clears when the producer is re-run (envelope replaces legacy bare JSON).  *(at 2026-05-08T15:45:15+00:00)*
 
 ### `/Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/ecocentric_vs_anthropocentric/haiku_responses_traits_b10_q9/scores_responses__rubric_v1.json`
 - **Was**: legacy
@@ -1675,6 +2049,10 @@ These caches would otherwise be stale (``stale_direct`` or ``stale_transitive``)
 - **Was**: legacy
 - **Deferred by**: `*__rubric_v1.json` -- v1 rubric snapshot taken on 2026-05-09 immediately before the v2 rubric anonymization landed. Kept on-disk for cross-rubric comparison; not to be re-judged. The going-forward (non-snapshot) caches are being re-judged under v2 in a separate process.  *(at 2026-05-09T03:37:03+00:00)*
 
+### `/Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/egalitarian_vs_elitist/gpt_responses_roles_b10/correlations.json`
+- **Was**: stale_direct
+- **Deferred by**: `*/correlations.json` -- Legacy judge cache pre-dating Phase 6 provenance mechanism (May 2026). Presumed current as of mechanism introduction; cost-prohibitive to re-judge. Deferral auto-clears when the producer is re-run (envelope replaces legacy bare JSON).  *(at 2026-05-08T15:45:35+00:00)*
+
 ### `/Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/egalitarian_vs_elitist/gpt_responses_roles_b10/correlations__rubric_v1.json`
 - **Was**: legacy
 - **Deferred by**: `*__rubric_v1.json` -- v1 rubric snapshot taken on 2026-05-09 immediately before the v2 rubric anonymization landed. Kept on-disk for cross-rubric comparison; not to be re-judged. The going-forward (non-snapshot) caches are being re-judged under v2 in a separate process.  *(at 2026-05-09T03:37:03+00:00)*
@@ -1686,6 +2064,14 @@ These caches would otherwise be stale (``stale_direct`` or ``stale_transitive``)
 ### `/Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/egalitarian_vs_elitist/gpt_responses_roles_b10/gaps__rubric_v1.json`
 - **Was**: legacy
 - **Deferred by**: `*__rubric_v1.json` -- v1 rubric snapshot taken on 2026-05-09 immediately before the v2 rubric anonymization landed. Kept on-disk for cross-rubric comparison; not to be re-judged. The going-forward (non-snapshot) caches are being re-judged under v2 in a separate process.  *(at 2026-05-09T03:37:03+00:00)*
+
+### `/Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/egalitarian_vs_elitist/gpt_responses_roles_b10/projections.json`
+- **Was**: stale_direct
+- **Deferred by**: `*/projections.json` -- Legacy judge cache pre-dating Phase 6 provenance mechanism (May 2026). Presumed current as of mechanism introduction; cost-prohibitive to re-judge. Deferral auto-clears when the producer is re-run (envelope replaces legacy bare JSON).  *(at 2026-05-08T15:45:25+00:00)*
+
+### `/Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/egalitarian_vs_elitist/gpt_responses_roles_b10/scores_responses.json`
+- **Was**: stale_direct
+- **Deferred by**: `*/scores_responses.json` -- Legacy judge cache pre-dating Phase 6 provenance mechanism (May 2026). Presumed current as of mechanism introduction; cost-prohibitive to re-judge. Deferral auto-clears when the producer is re-run (envelope replaces legacy bare JSON).  *(at 2026-05-08T15:45:15+00:00)*
 
 ### `/Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/egalitarian_vs_elitist/gpt_responses_roles_b10/scores_responses__rubric_v1.json`
 - **Was**: legacy
@@ -1723,6 +2109,10 @@ These caches would otherwise be stale (``stale_direct`` or ``stale_transitive``)
 - **Was**: legacy
 - **Deferred by**: `*__rubric_v1.json` -- v1 rubric snapshot taken on 2026-05-09 immediately before the v2 rubric anonymization landed. Kept on-disk for cross-rubric comparison; not to be re-judged. The going-forward (non-snapshot) caches are being re-judged under v2 in a separate process.  *(at 2026-05-09T03:37:03+00:00)*
 
+### `/Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/egalitarian_vs_elitist/gpt_responses_traits_b10/correlations.json`
+- **Was**: stale_direct
+- **Deferred by**: `*/correlations.json` -- Legacy judge cache pre-dating Phase 6 provenance mechanism (May 2026). Presumed current as of mechanism introduction; cost-prohibitive to re-judge. Deferral auto-clears when the producer is re-run (envelope replaces legacy bare JSON).  *(at 2026-05-08T15:45:35+00:00)*
+
 ### `/Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/egalitarian_vs_elitist/gpt_responses_traits_b10/correlations__rubric_v1.json`
 - **Was**: legacy
 - **Deferred by**: `*__rubric_v1.json` -- v1 rubric snapshot taken on 2026-05-09 immediately before the v2 rubric anonymization landed. Kept on-disk for cross-rubric comparison; not to be re-judged. The going-forward (non-snapshot) caches are being re-judged under v2 in a separate process.  *(at 2026-05-09T03:37:03+00:00)*
@@ -1734,6 +2124,14 @@ These caches would otherwise be stale (``stale_direct`` or ``stale_transitive``)
 ### `/Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/egalitarian_vs_elitist/gpt_responses_traits_b10/gaps__rubric_v1.json`
 - **Was**: legacy
 - **Deferred by**: `*__rubric_v1.json` -- v1 rubric snapshot taken on 2026-05-09 immediately before the v2 rubric anonymization landed. Kept on-disk for cross-rubric comparison; not to be re-judged. The going-forward (non-snapshot) caches are being re-judged under v2 in a separate process.  *(at 2026-05-09T03:37:03+00:00)*
+
+### `/Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/egalitarian_vs_elitist/gpt_responses_traits_b10/projections.json`
+- **Was**: stale_direct
+- **Deferred by**: `*/projections.json` -- Legacy judge cache pre-dating Phase 6 provenance mechanism (May 2026). Presumed current as of mechanism introduction; cost-prohibitive to re-judge. Deferral auto-clears when the producer is re-run (envelope replaces legacy bare JSON).  *(at 2026-05-08T15:45:25+00:00)*
+
+### `/Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/egalitarian_vs_elitist/gpt_responses_traits_b10/scores_responses.json`
+- **Was**: stale_direct
+- **Deferred by**: `*/scores_responses.json` -- Legacy judge cache pre-dating Phase 6 provenance mechanism (May 2026). Presumed current as of mechanism introduction; cost-prohibitive to re-judge. Deferral auto-clears when the producer is re-run (envelope replaces legacy bare JSON).  *(at 2026-05-08T15:45:15+00:00)*
 
 ### `/Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/egalitarian_vs_elitist/gpt_responses_traits_b10/scores_responses__rubric_v1.json`
 - **Was**: legacy
@@ -1771,6 +2169,10 @@ These caches would otherwise be stale (``stale_direct`` or ``stale_transitive``)
 - **Was**: legacy
 - **Deferred by**: `*__rubric_v1.json` -- v1 rubric snapshot taken on 2026-05-09 immediately before the v2 rubric anonymization landed. Kept on-disk for cross-rubric comparison; not to be re-judged. The going-forward (non-snapshot) caches are being re-judged under v2 in a separate process.  *(at 2026-05-09T03:37:03+00:00)*
 
+### `/Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/egalitarian_vs_elitist/haiku_responses_roles_b10_q9/correlations.json`
+- **Was**: stale_direct
+- **Deferred by**: `*/correlations.json` -- Legacy judge cache pre-dating Phase 6 provenance mechanism (May 2026). Presumed current as of mechanism introduction; cost-prohibitive to re-judge. Deferral auto-clears when the producer is re-run (envelope replaces legacy bare JSON).  *(at 2026-05-08T15:45:35+00:00)*
+
 ### `/Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/egalitarian_vs_elitist/haiku_responses_roles_b10_q9/correlations__rubric_v1.json`
 - **Was**: legacy
 - **Deferred by**: `*__rubric_v1.json` -- v1 rubric snapshot taken on 2026-05-09 immediately before the v2 rubric anonymization landed. Kept on-disk for cross-rubric comparison; not to be re-judged. The going-forward (non-snapshot) caches are being re-judged under v2 in a separate process.  *(at 2026-05-09T03:37:03+00:00)*
@@ -1782,6 +2184,14 @@ These caches would otherwise be stale (``stale_direct`` or ``stale_transitive``)
 ### `/Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/egalitarian_vs_elitist/haiku_responses_roles_b10_q9/gaps__rubric_v1.json`
 - **Was**: legacy
 - **Deferred by**: `*__rubric_v1.json` -- v1 rubric snapshot taken on 2026-05-09 immediately before the v2 rubric anonymization landed. Kept on-disk for cross-rubric comparison; not to be re-judged. The going-forward (non-snapshot) caches are being re-judged under v2 in a separate process.  *(at 2026-05-09T03:37:03+00:00)*
+
+### `/Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/egalitarian_vs_elitist/haiku_responses_roles_b10_q9/projections.json`
+- **Was**: stale_direct
+- **Deferred by**: `*/projections.json` -- Legacy judge cache pre-dating Phase 6 provenance mechanism (May 2026). Presumed current as of mechanism introduction; cost-prohibitive to re-judge. Deferral auto-clears when the producer is re-run (envelope replaces legacy bare JSON).  *(at 2026-05-08T15:45:25+00:00)*
+
+### `/Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/egalitarian_vs_elitist/haiku_responses_roles_b10_q9/scores_responses.json`
+- **Was**: stale_direct
+- **Deferred by**: `*/scores_responses.json` -- Legacy judge cache pre-dating Phase 6 provenance mechanism (May 2026). Presumed current as of mechanism introduction; cost-prohibitive to re-judge. Deferral auto-clears when the producer is re-run (envelope replaces legacy bare JSON).  *(at 2026-05-08T15:45:15+00:00)*
 
 ### `/Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/egalitarian_vs_elitist/haiku_responses_roles_b10_q9/scores_responses__rubric_v1.json`
 - **Was**: legacy
@@ -1795,6 +2205,10 @@ These caches would otherwise be stale (``stale_direct`` or ``stale_transitive``)
 - **Was**: legacy
 - **Deferred by**: `*__rubric_v1.json` -- v1 rubric snapshot taken on 2026-05-09 immediately before the v2 rubric anonymization landed. Kept on-disk for cross-rubric comparison; not to be re-judged. The going-forward (non-snapshot) caches are being re-judged under v2 in a separate process.  *(at 2026-05-09T03:37:03+00:00)*
 
+### `/Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/egalitarian_vs_elitist/haiku_responses_traits_b10_q9/correlations.json`
+- **Was**: stale_direct
+- **Deferred by**: `*/correlations.json` -- Legacy judge cache pre-dating Phase 6 provenance mechanism (May 2026). Presumed current as of mechanism introduction; cost-prohibitive to re-judge. Deferral auto-clears when the producer is re-run (envelope replaces legacy bare JSON).  *(at 2026-05-08T15:45:35+00:00)*
+
 ### `/Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/egalitarian_vs_elitist/haiku_responses_traits_b10_q9/correlations__rubric_v1.json`
 - **Was**: legacy
 - **Deferred by**: `*__rubric_v1.json` -- v1 rubric snapshot taken on 2026-05-09 immediately before the v2 rubric anonymization landed. Kept on-disk for cross-rubric comparison; not to be re-judged. The going-forward (non-snapshot) caches are being re-judged under v2 in a separate process.  *(at 2026-05-09T03:37:03+00:00)*
@@ -1806,6 +2220,14 @@ These caches would otherwise be stale (``stale_direct`` or ``stale_transitive``)
 ### `/Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/egalitarian_vs_elitist/haiku_responses_traits_b10_q9/gaps__rubric_v1.json`
 - **Was**: legacy
 - **Deferred by**: `*__rubric_v1.json` -- v1 rubric snapshot taken on 2026-05-09 immediately before the v2 rubric anonymization landed. Kept on-disk for cross-rubric comparison; not to be re-judged. The going-forward (non-snapshot) caches are being re-judged under v2 in a separate process.  *(at 2026-05-09T03:37:03+00:00)*
+
+### `/Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/egalitarian_vs_elitist/haiku_responses_traits_b10_q9/projections.json`
+- **Was**: stale_direct
+- **Deferred by**: `*/projections.json` -- Legacy judge cache pre-dating Phase 6 provenance mechanism (May 2026). Presumed current as of mechanism introduction; cost-prohibitive to re-judge. Deferral auto-clears when the producer is re-run (envelope replaces legacy bare JSON).  *(at 2026-05-08T15:45:25+00:00)*
+
+### `/Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/egalitarian_vs_elitist/haiku_responses_traits_b10_q9/scores_responses.json`
+- **Was**: stale_direct
+- **Deferred by**: `*/scores_responses.json` -- Legacy judge cache pre-dating Phase 6 provenance mechanism (May 2026). Presumed current as of mechanism introduction; cost-prohibitive to re-judge. Deferral auto-clears when the producer is re-run (envelope replaces legacy bare JSON).  *(at 2026-05-08T15:45:15+00:00)*
 
 ### `/Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/egalitarian_vs_elitist/haiku_responses_traits_b10_q9/scores_responses__rubric_v1.json`
 - **Was**: legacy
@@ -2119,10 +2541,6 @@ These caches would otherwise be stale (``stale_direct`` or ``stale_transitive``)
 - **Was**: legacy
 - **Deferred by**: `*__rubric_v1.json` -- v1 rubric snapshot taken on 2026-05-09 immediately before the v2 rubric anonymization landed. Kept on-disk for cross-rubric comparison; not to be re-judged. The going-forward (non-snapshot) caches are being re-judged under v2 in a separate process.  *(at 2026-05-09T03:37:03+00:00)*
 
-### `/Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/gpt_sonnet_q9_response_weight_sweep_slot6.json`
-- **Was**: legacy
-- **Deferred by**: `roger/axis_judge_experiments/gpt_sonnet_q9_response_weight_sweep_slot6.json` -- Pre-Phase-6 Sonnet Q9 weight sweep result; Sonnet response judging was never carried over to v2 rubric (limited to GPT and Haiku going forward).  Snapshot-historical: legacy bare JSON kept for cross-judge comparison reference; not to be regenerated.  *(at 2026-05-09T14:25:53+00:00)*
-
 ### `/Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/gpt_sonnet_q9_response_weight_sweep_slot6__rubric_v1.json`
 - **Was**: legacy
 - **Deferred by**: `*__rubric_v1.json` -- v1 rubric snapshot taken on 2026-05-09 immediately before the v2 rubric anonymization landed. Kept on-disk for cross-rubric comparison; not to be re-judged. The going-forward (non-snapshot) caches are being re-judged under v2 in a separate process.  *(at 2026-05-09T03:37:03+00:00)*
@@ -2187,6 +2605,10 @@ These caches would otherwise be stale (``stale_direct`` or ``stale_transitive``)
 - **Was**: legacy
 - **Deferred by**: `*__rubric_v1.json` -- v1 rubric snapshot taken on 2026-05-09 immediately before the v2 rubric anonymization landed. Kept on-disk for cross-rubric comparison; not to be re-judged. The going-forward (non-snapshot) caches are being re-judged under v2 in a separate process.  *(at 2026-05-09T03:37:03+00:00)*
 
+### `/Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/guileless_vs_scheming/gpt_responses_roles_b10/correlations.json`
+- **Was**: stale_direct
+- **Deferred by**: `*/correlations.json` -- Legacy judge cache pre-dating Phase 6 provenance mechanism (May 2026). Presumed current as of mechanism introduction; cost-prohibitive to re-judge. Deferral auto-clears when the producer is re-run (envelope replaces legacy bare JSON).  *(at 2026-05-08T15:45:35+00:00)*
+
 ### `/Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/guileless_vs_scheming/gpt_responses_roles_b10/correlations__rubric_v1.json`
 - **Was**: legacy
 - **Deferred by**: `*__rubric_v1.json` -- v1 rubric snapshot taken on 2026-05-09 immediately before the v2 rubric anonymization landed. Kept on-disk for cross-rubric comparison; not to be re-judged. The going-forward (non-snapshot) caches are being re-judged under v2 in a separate process.  *(at 2026-05-09T03:37:03+00:00)*
@@ -2198,6 +2620,14 @@ These caches would otherwise be stale (``stale_direct`` or ``stale_transitive``)
 ### `/Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/guileless_vs_scheming/gpt_responses_roles_b10/gaps__rubric_v1.json`
 - **Was**: legacy
 - **Deferred by**: `*__rubric_v1.json` -- v1 rubric snapshot taken on 2026-05-09 immediately before the v2 rubric anonymization landed. Kept on-disk for cross-rubric comparison; not to be re-judged. The going-forward (non-snapshot) caches are being re-judged under v2 in a separate process.  *(at 2026-05-09T03:37:03+00:00)*
+
+### `/Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/guileless_vs_scheming/gpt_responses_roles_b10/projections.json`
+- **Was**: stale_direct
+- **Deferred by**: `*/projections.json` -- Legacy judge cache pre-dating Phase 6 provenance mechanism (May 2026). Presumed current as of mechanism introduction; cost-prohibitive to re-judge. Deferral auto-clears when the producer is re-run (envelope replaces legacy bare JSON).  *(at 2026-05-08T15:45:25+00:00)*
+
+### `/Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/guileless_vs_scheming/gpt_responses_roles_b10/scores_responses.json`
+- **Was**: stale_direct
+- **Deferred by**: `*/scores_responses.json` -- Legacy judge cache pre-dating Phase 6 provenance mechanism (May 2026). Presumed current as of mechanism introduction; cost-prohibitive to re-judge. Deferral auto-clears when the producer is re-run (envelope replaces legacy bare JSON).  *(at 2026-05-08T15:45:15+00:00)*
 
 ### `/Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/guileless_vs_scheming/gpt_responses_roles_b10/scores_responses__rubric_v1.json`
 - **Was**: legacy
@@ -2235,6 +2665,10 @@ These caches would otherwise be stale (``stale_direct`` or ``stale_transitive``)
 - **Was**: legacy
 - **Deferred by**: `*__rubric_v1.json` -- v1 rubric snapshot taken on 2026-05-09 immediately before the v2 rubric anonymization landed. Kept on-disk for cross-rubric comparison; not to be re-judged. The going-forward (non-snapshot) caches are being re-judged under v2 in a separate process.  *(at 2026-05-09T03:37:03+00:00)*
 
+### `/Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/guileless_vs_scheming/gpt_responses_traits_b10/correlations.json`
+- **Was**: stale_direct
+- **Deferred by**: `*/correlations.json` -- Legacy judge cache pre-dating Phase 6 provenance mechanism (May 2026). Presumed current as of mechanism introduction; cost-prohibitive to re-judge. Deferral auto-clears when the producer is re-run (envelope replaces legacy bare JSON).  *(at 2026-05-08T15:45:35+00:00)*
+
 ### `/Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/guileless_vs_scheming/gpt_responses_traits_b10/correlations__rubric_v1.json`
 - **Was**: legacy
 - **Deferred by**: `*__rubric_v1.json` -- v1 rubric snapshot taken on 2026-05-09 immediately before the v2 rubric anonymization landed. Kept on-disk for cross-rubric comparison; not to be re-judged. The going-forward (non-snapshot) caches are being re-judged under v2 in a separate process.  *(at 2026-05-09T03:37:03+00:00)*
@@ -2246,6 +2680,14 @@ These caches would otherwise be stale (``stale_direct`` or ``stale_transitive``)
 ### `/Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/guileless_vs_scheming/gpt_responses_traits_b10/gaps__rubric_v1.json`
 - **Was**: legacy
 - **Deferred by**: `*__rubric_v1.json` -- v1 rubric snapshot taken on 2026-05-09 immediately before the v2 rubric anonymization landed. Kept on-disk for cross-rubric comparison; not to be re-judged. The going-forward (non-snapshot) caches are being re-judged under v2 in a separate process.  *(at 2026-05-09T03:37:03+00:00)*
+
+### `/Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/guileless_vs_scheming/gpt_responses_traits_b10/projections.json`
+- **Was**: stale_direct
+- **Deferred by**: `*/projections.json` -- Legacy judge cache pre-dating Phase 6 provenance mechanism (May 2026). Presumed current as of mechanism introduction; cost-prohibitive to re-judge. Deferral auto-clears when the producer is re-run (envelope replaces legacy bare JSON).  *(at 2026-05-08T15:45:25+00:00)*
+
+### `/Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/guileless_vs_scheming/gpt_responses_traits_b10/scores_responses.json`
+- **Was**: stale_direct
+- **Deferred by**: `*/scores_responses.json` -- Legacy judge cache pre-dating Phase 6 provenance mechanism (May 2026). Presumed current as of mechanism introduction; cost-prohibitive to re-judge. Deferral auto-clears when the producer is re-run (envelope replaces legacy bare JSON).  *(at 2026-05-08T15:45:15+00:00)*
 
 ### `/Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/guileless_vs_scheming/gpt_responses_traits_b10/scores_responses__rubric_v1.json`
 - **Was**: legacy
@@ -2283,6 +2725,10 @@ These caches would otherwise be stale (``stale_direct`` or ``stale_transitive``)
 - **Was**: legacy
 - **Deferred by**: `*__rubric_v1.json` -- v1 rubric snapshot taken on 2026-05-09 immediately before the v2 rubric anonymization landed. Kept on-disk for cross-rubric comparison; not to be re-judged. The going-forward (non-snapshot) caches are being re-judged under v2 in a separate process.  *(at 2026-05-09T03:37:03+00:00)*
 
+### `/Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/guileless_vs_scheming/haiku_responses_roles_b10_q9/correlations.json`
+- **Was**: stale_direct
+- **Deferred by**: `*/correlations.json` -- Legacy judge cache pre-dating Phase 6 provenance mechanism (May 2026). Presumed current as of mechanism introduction; cost-prohibitive to re-judge. Deferral auto-clears when the producer is re-run (envelope replaces legacy bare JSON).  *(at 2026-05-08T15:45:35+00:00)*
+
 ### `/Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/guileless_vs_scheming/haiku_responses_roles_b10_q9/correlations__rubric_v1.json`
 - **Was**: legacy
 - **Deferred by**: `*__rubric_v1.json` -- v1 rubric snapshot taken on 2026-05-09 immediately before the v2 rubric anonymization landed. Kept on-disk for cross-rubric comparison; not to be re-judged. The going-forward (non-snapshot) caches are being re-judged under v2 in a separate process.  *(at 2026-05-09T03:37:03+00:00)*
@@ -2294,6 +2740,14 @@ These caches would otherwise be stale (``stale_direct`` or ``stale_transitive``)
 ### `/Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/guileless_vs_scheming/haiku_responses_roles_b10_q9/gaps__rubric_v1.json`
 - **Was**: legacy
 - **Deferred by**: `*__rubric_v1.json` -- v1 rubric snapshot taken on 2026-05-09 immediately before the v2 rubric anonymization landed. Kept on-disk for cross-rubric comparison; not to be re-judged. The going-forward (non-snapshot) caches are being re-judged under v2 in a separate process.  *(at 2026-05-09T03:37:03+00:00)*
+
+### `/Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/guileless_vs_scheming/haiku_responses_roles_b10_q9/projections.json`
+- **Was**: stale_direct
+- **Deferred by**: `*/projections.json` -- Legacy judge cache pre-dating Phase 6 provenance mechanism (May 2026). Presumed current as of mechanism introduction; cost-prohibitive to re-judge. Deferral auto-clears when the producer is re-run (envelope replaces legacy bare JSON).  *(at 2026-05-08T15:45:25+00:00)*
+
+### `/Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/guileless_vs_scheming/haiku_responses_roles_b10_q9/scores_responses.json`
+- **Was**: stale_direct
+- **Deferred by**: `*/scores_responses.json` -- Legacy judge cache pre-dating Phase 6 provenance mechanism (May 2026). Presumed current as of mechanism introduction; cost-prohibitive to re-judge. Deferral auto-clears when the producer is re-run (envelope replaces legacy bare JSON).  *(at 2026-05-08T15:45:15+00:00)*
 
 ### `/Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/guileless_vs_scheming/haiku_responses_roles_b10_q9/scores_responses__rubric_v1.json`
 - **Was**: legacy
@@ -2307,6 +2761,10 @@ These caches would otherwise be stale (``stale_direct`` or ``stale_transitive``)
 - **Was**: legacy
 - **Deferred by**: `*__rubric_v1.json` -- v1 rubric snapshot taken on 2026-05-09 immediately before the v2 rubric anonymization landed. Kept on-disk for cross-rubric comparison; not to be re-judged. The going-forward (non-snapshot) caches are being re-judged under v2 in a separate process.  *(at 2026-05-09T03:37:03+00:00)*
 
+### `/Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/guileless_vs_scheming/haiku_responses_traits_b10_q9/correlations.json`
+- **Was**: stale_direct
+- **Deferred by**: `*/correlations.json` -- Legacy judge cache pre-dating Phase 6 provenance mechanism (May 2026). Presumed current as of mechanism introduction; cost-prohibitive to re-judge. Deferral auto-clears when the producer is re-run (envelope replaces legacy bare JSON).  *(at 2026-05-08T15:45:35+00:00)*
+
 ### `/Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/guileless_vs_scheming/haiku_responses_traits_b10_q9/correlations__rubric_v1.json`
 - **Was**: legacy
 - **Deferred by**: `*__rubric_v1.json` -- v1 rubric snapshot taken on 2026-05-09 immediately before the v2 rubric anonymization landed. Kept on-disk for cross-rubric comparison; not to be re-judged. The going-forward (non-snapshot) caches are being re-judged under v2 in a separate process.  *(at 2026-05-09T03:37:03+00:00)*
@@ -2318,6 +2776,14 @@ These caches would otherwise be stale (``stale_direct`` or ``stale_transitive``)
 ### `/Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/guileless_vs_scheming/haiku_responses_traits_b10_q9/gaps__rubric_v1.json`
 - **Was**: legacy
 - **Deferred by**: `*__rubric_v1.json` -- v1 rubric snapshot taken on 2026-05-09 immediately before the v2 rubric anonymization landed. Kept on-disk for cross-rubric comparison; not to be re-judged. The going-forward (non-snapshot) caches are being re-judged under v2 in a separate process.  *(at 2026-05-09T03:37:03+00:00)*
+
+### `/Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/guileless_vs_scheming/haiku_responses_traits_b10_q9/projections.json`
+- **Was**: stale_direct
+- **Deferred by**: `*/projections.json` -- Legacy judge cache pre-dating Phase 6 provenance mechanism (May 2026). Presumed current as of mechanism introduction; cost-prohibitive to re-judge. Deferral auto-clears when the producer is re-run (envelope replaces legacy bare JSON).  *(at 2026-05-08T15:45:25+00:00)*
+
+### `/Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/guileless_vs_scheming/haiku_responses_traits_b10_q9/scores_responses.json`
+- **Was**: stale_direct
+- **Deferred by**: `*/scores_responses.json` -- Legacy judge cache pre-dating Phase 6 provenance mechanism (May 2026). Presumed current as of mechanism introduction; cost-prohibitive to re-judge. Deferral auto-clears when the producer is re-run (envelope replaces legacy bare JSON).  *(at 2026-05-08T15:45:15+00:00)*
 
 ### `/Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/guileless_vs_scheming/haiku_responses_traits_b10_q9/scores_responses__rubric_v1.json`
 - **Was**: legacy
@@ -2451,6 +2917,10 @@ These caches would otherwise be stale (``stale_direct`` or ``stale_transitive``)
 - **Was**: legacy
 - **Deferred by**: `*__rubric_v1.json` -- v1 rubric snapshot taken on 2026-05-09 immediately before the v2 rubric anonymization landed. Kept on-disk for cross-rubric comparison; not to be re-judged. The going-forward (non-snapshot) caches are being re-judged under v2 in a separate process.  *(at 2026-05-09T03:37:03+00:00)*
 
+### `/Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/harmless_vs_harmful/gpt_responses_roles_b10/correlations.json`
+- **Was**: stale_direct
+- **Deferred by**: `*/correlations.json` -- Legacy judge cache pre-dating Phase 6 provenance mechanism (May 2026). Presumed current as of mechanism introduction; cost-prohibitive to re-judge. Deferral auto-clears when the producer is re-run (envelope replaces legacy bare JSON).  *(at 2026-05-08T15:45:35+00:00)*
+
 ### `/Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/harmless_vs_harmful/gpt_responses_roles_b10/correlations__rubric_v1.json`
 - **Was**: legacy
 - **Deferred by**: `*__rubric_v1.json` -- v1 rubric snapshot taken on 2026-05-09 immediately before the v2 rubric anonymization landed. Kept on-disk for cross-rubric comparison; not to be re-judged. The going-forward (non-snapshot) caches are being re-judged under v2 in a separate process.  *(at 2026-05-09T03:37:03+00:00)*
@@ -2462,6 +2932,14 @@ These caches would otherwise be stale (``stale_direct`` or ``stale_transitive``)
 ### `/Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/harmless_vs_harmful/gpt_responses_roles_b10/gaps__rubric_v1.json`
 - **Was**: legacy
 - **Deferred by**: `*__rubric_v1.json` -- v1 rubric snapshot taken on 2026-05-09 immediately before the v2 rubric anonymization landed. Kept on-disk for cross-rubric comparison; not to be re-judged. The going-forward (non-snapshot) caches are being re-judged under v2 in a separate process.  *(at 2026-05-09T03:37:03+00:00)*
+
+### `/Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/harmless_vs_harmful/gpt_responses_roles_b10/projections.json`
+- **Was**: stale_direct
+- **Deferred by**: `*/projections.json` -- Legacy judge cache pre-dating Phase 6 provenance mechanism (May 2026). Presumed current as of mechanism introduction; cost-prohibitive to re-judge. Deferral auto-clears when the producer is re-run (envelope replaces legacy bare JSON).  *(at 2026-05-08T15:45:25+00:00)*
+
+### `/Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/harmless_vs_harmful/gpt_responses_roles_b10/scores_responses.json`
+- **Was**: stale_direct
+- **Deferred by**: `*/scores_responses.json` -- Legacy judge cache pre-dating Phase 6 provenance mechanism (May 2026). Presumed current as of mechanism introduction; cost-prohibitive to re-judge. Deferral auto-clears when the producer is re-run (envelope replaces legacy bare JSON).  *(at 2026-05-08T15:45:15+00:00)*
 
 ### `/Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/harmless_vs_harmful/gpt_responses_roles_b10/scores_responses__rubric_v1.json`
 - **Was**: legacy
@@ -2499,6 +2977,10 @@ These caches would otherwise be stale (``stale_direct`` or ``stale_transitive``)
 - **Was**: legacy
 - **Deferred by**: `*__rubric_v1.json` -- v1 rubric snapshot taken on 2026-05-09 immediately before the v2 rubric anonymization landed. Kept on-disk for cross-rubric comparison; not to be re-judged. The going-forward (non-snapshot) caches are being re-judged under v2 in a separate process.  *(at 2026-05-09T03:37:03+00:00)*
 
+### `/Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/harmless_vs_harmful/gpt_responses_traits_b10/correlations.json`
+- **Was**: stale_direct
+- **Deferred by**: `*/correlations.json` -- Legacy judge cache pre-dating Phase 6 provenance mechanism (May 2026). Presumed current as of mechanism introduction; cost-prohibitive to re-judge. Deferral auto-clears when the producer is re-run (envelope replaces legacy bare JSON).  *(at 2026-05-08T15:45:35+00:00)*
+
 ### `/Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/harmless_vs_harmful/gpt_responses_traits_b10/correlations__rubric_v1.json`
 - **Was**: legacy
 - **Deferred by**: `*__rubric_v1.json` -- v1 rubric snapshot taken on 2026-05-09 immediately before the v2 rubric anonymization landed. Kept on-disk for cross-rubric comparison; not to be re-judged. The going-forward (non-snapshot) caches are being re-judged under v2 in a separate process.  *(at 2026-05-09T03:37:03+00:00)*
@@ -2510,6 +2992,14 @@ These caches would otherwise be stale (``stale_direct`` or ``stale_transitive``)
 ### `/Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/harmless_vs_harmful/gpt_responses_traits_b10/gaps__rubric_v1.json`
 - **Was**: legacy
 - **Deferred by**: `*__rubric_v1.json` -- v1 rubric snapshot taken on 2026-05-09 immediately before the v2 rubric anonymization landed. Kept on-disk for cross-rubric comparison; not to be re-judged. The going-forward (non-snapshot) caches are being re-judged under v2 in a separate process.  *(at 2026-05-09T03:37:03+00:00)*
+
+### `/Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/harmless_vs_harmful/gpt_responses_traits_b10/projections.json`
+- **Was**: stale_direct
+- **Deferred by**: `*/projections.json` -- Legacy judge cache pre-dating Phase 6 provenance mechanism (May 2026). Presumed current as of mechanism introduction; cost-prohibitive to re-judge. Deferral auto-clears when the producer is re-run (envelope replaces legacy bare JSON).  *(at 2026-05-08T15:45:25+00:00)*
+
+### `/Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/harmless_vs_harmful/gpt_responses_traits_b10/scores_responses.json`
+- **Was**: stale_direct
+- **Deferred by**: `*/scores_responses.json` -- Legacy judge cache pre-dating Phase 6 provenance mechanism (May 2026). Presumed current as of mechanism introduction; cost-prohibitive to re-judge. Deferral auto-clears when the producer is re-run (envelope replaces legacy bare JSON).  *(at 2026-05-08T15:45:15+00:00)*
 
 ### `/Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/harmless_vs_harmful/gpt_responses_traits_b10/scores_responses__rubric_v1.json`
 - **Was**: legacy
@@ -2547,6 +3037,10 @@ These caches would otherwise be stale (``stale_direct`` or ``stale_transitive``)
 - **Was**: legacy
 - **Deferred by**: `*__rubric_v1.json` -- v1 rubric snapshot taken on 2026-05-09 immediately before the v2 rubric anonymization landed. Kept on-disk for cross-rubric comparison; not to be re-judged. The going-forward (non-snapshot) caches are being re-judged under v2 in a separate process.  *(at 2026-05-09T03:37:03+00:00)*
 
+### `/Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/harmless_vs_harmful/haiku_responses_roles_b10_q9/correlations.json`
+- **Was**: stale_direct
+- **Deferred by**: `*/correlations.json` -- Legacy judge cache pre-dating Phase 6 provenance mechanism (May 2026). Presumed current as of mechanism introduction; cost-prohibitive to re-judge. Deferral auto-clears when the producer is re-run (envelope replaces legacy bare JSON).  *(at 2026-05-08T15:45:35+00:00)*
+
 ### `/Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/harmless_vs_harmful/haiku_responses_roles_b10_q9/correlations__rubric_v1.json`
 - **Was**: legacy
 - **Deferred by**: `*__rubric_v1.json` -- v1 rubric snapshot taken on 2026-05-09 immediately before the v2 rubric anonymization landed. Kept on-disk for cross-rubric comparison; not to be re-judged. The going-forward (non-snapshot) caches are being re-judged under v2 in a separate process.  *(at 2026-05-09T03:37:03+00:00)*
@@ -2558,6 +3052,14 @@ These caches would otherwise be stale (``stale_direct`` or ``stale_transitive``)
 ### `/Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/harmless_vs_harmful/haiku_responses_roles_b10_q9/gaps__rubric_v1.json`
 - **Was**: legacy
 - **Deferred by**: `*__rubric_v1.json` -- v1 rubric snapshot taken on 2026-05-09 immediately before the v2 rubric anonymization landed. Kept on-disk for cross-rubric comparison; not to be re-judged. The going-forward (non-snapshot) caches are being re-judged under v2 in a separate process.  *(at 2026-05-09T03:37:03+00:00)*
+
+### `/Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/harmless_vs_harmful/haiku_responses_roles_b10_q9/projections.json`
+- **Was**: stale_direct
+- **Deferred by**: `*/projections.json` -- Legacy judge cache pre-dating Phase 6 provenance mechanism (May 2026). Presumed current as of mechanism introduction; cost-prohibitive to re-judge. Deferral auto-clears when the producer is re-run (envelope replaces legacy bare JSON).  *(at 2026-05-08T15:45:25+00:00)*
+
+### `/Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/harmless_vs_harmful/haiku_responses_roles_b10_q9/scores_responses.json`
+- **Was**: stale_direct
+- **Deferred by**: `*/scores_responses.json` -- Legacy judge cache pre-dating Phase 6 provenance mechanism (May 2026). Presumed current as of mechanism introduction; cost-prohibitive to re-judge. Deferral auto-clears when the producer is re-run (envelope replaces legacy bare JSON).  *(at 2026-05-08T15:45:15+00:00)*
 
 ### `/Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/harmless_vs_harmful/haiku_responses_roles_b10_q9/scores_responses__rubric_v1.json`
 - **Was**: legacy
@@ -2571,6 +3073,10 @@ These caches would otherwise be stale (``stale_direct`` or ``stale_transitive``)
 - **Was**: legacy
 - **Deferred by**: `*__rubric_v1.json` -- v1 rubric snapshot taken on 2026-05-09 immediately before the v2 rubric anonymization landed. Kept on-disk for cross-rubric comparison; not to be re-judged. The going-forward (non-snapshot) caches are being re-judged under v2 in a separate process.  *(at 2026-05-09T03:37:03+00:00)*
 
+### `/Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/harmless_vs_harmful/haiku_responses_traits_b10_q9/correlations.json`
+- **Was**: stale_direct
+- **Deferred by**: `*/correlations.json` -- Legacy judge cache pre-dating Phase 6 provenance mechanism (May 2026). Presumed current as of mechanism introduction; cost-prohibitive to re-judge. Deferral auto-clears when the producer is re-run (envelope replaces legacy bare JSON).  *(at 2026-05-08T15:45:35+00:00)*
+
 ### `/Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/harmless_vs_harmful/haiku_responses_traits_b10_q9/correlations__rubric_v1.json`
 - **Was**: legacy
 - **Deferred by**: `*__rubric_v1.json` -- v1 rubric snapshot taken on 2026-05-09 immediately before the v2 rubric anonymization landed. Kept on-disk for cross-rubric comparison; not to be re-judged. The going-forward (non-snapshot) caches are being re-judged under v2 in a separate process.  *(at 2026-05-09T03:37:03+00:00)*
@@ -2582,6 +3088,14 @@ These caches would otherwise be stale (``stale_direct`` or ``stale_transitive``)
 ### `/Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/harmless_vs_harmful/haiku_responses_traits_b10_q9/gaps__rubric_v1.json`
 - **Was**: legacy
 - **Deferred by**: `*__rubric_v1.json` -- v1 rubric snapshot taken on 2026-05-09 immediately before the v2 rubric anonymization landed. Kept on-disk for cross-rubric comparison; not to be re-judged. The going-forward (non-snapshot) caches are being re-judged under v2 in a separate process.  *(at 2026-05-09T03:37:03+00:00)*
+
+### `/Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/harmless_vs_harmful/haiku_responses_traits_b10_q9/projections.json`
+- **Was**: stale_direct
+- **Deferred by**: `*/projections.json` -- Legacy judge cache pre-dating Phase 6 provenance mechanism (May 2026). Presumed current as of mechanism introduction; cost-prohibitive to re-judge. Deferral auto-clears when the producer is re-run (envelope replaces legacy bare JSON).  *(at 2026-05-08T15:45:25+00:00)*
+
+### `/Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/harmless_vs_harmful/haiku_responses_traits_b10_q9/scores_responses.json`
+- **Was**: stale_direct
+- **Deferred by**: `*/scores_responses.json` -- Legacy judge cache pre-dating Phase 6 provenance mechanism (May 2026). Presumed current as of mechanism introduction; cost-prohibitive to re-judge. Deferral auto-clears when the producer is re-run (envelope replaces legacy bare JSON).  *(at 2026-05-08T15:45:15+00:00)*
 
 ### `/Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/harmless_vs_harmful/haiku_responses_traits_b10_q9/scores_responses__rubric_v1.json`
 - **Was**: legacy
@@ -2715,6 +3229,10 @@ These caches would otherwise be stale (``stale_direct`` or ``stale_transitive``)
 - **Was**: legacy
 - **Deferred by**: `*__rubric_v1.json` -- v1 rubric snapshot taken on 2026-05-09 immediately before the v2 rubric anonymization landed. Kept on-disk for cross-rubric comparison; not to be re-judged. The going-forward (non-snapshot) caches are being re-judged under v2 in a separate process.  *(at 2026-05-09T03:37:03+00:00)*
 
+### `/Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/helpful_vs_unhelpful/gpt_responses_roles_b10/correlations.json`
+- **Was**: stale_direct
+- **Deferred by**: `*/correlations.json` -- Legacy judge cache pre-dating Phase 6 provenance mechanism (May 2026). Presumed current as of mechanism introduction; cost-prohibitive to re-judge. Deferral auto-clears when the producer is re-run (envelope replaces legacy bare JSON).  *(at 2026-05-08T15:45:35+00:00)*
+
 ### `/Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/helpful_vs_unhelpful/gpt_responses_roles_b10/correlations__rubric_v1.json`
 - **Was**: legacy
 - **Deferred by**: `*__rubric_v1.json` -- v1 rubric snapshot taken on 2026-05-09 immediately before the v2 rubric anonymization landed. Kept on-disk for cross-rubric comparison; not to be re-judged. The going-forward (non-snapshot) caches are being re-judged under v2 in a separate process.  *(at 2026-05-09T03:37:03+00:00)*
@@ -2726,6 +3244,14 @@ These caches would otherwise be stale (``stale_direct`` or ``stale_transitive``)
 ### `/Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/helpful_vs_unhelpful/gpt_responses_roles_b10/gaps__rubric_v1.json`
 - **Was**: legacy
 - **Deferred by**: `*__rubric_v1.json` -- v1 rubric snapshot taken on 2026-05-09 immediately before the v2 rubric anonymization landed. Kept on-disk for cross-rubric comparison; not to be re-judged. The going-forward (non-snapshot) caches are being re-judged under v2 in a separate process.  *(at 2026-05-09T03:37:03+00:00)*
+
+### `/Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/helpful_vs_unhelpful/gpt_responses_roles_b10/projections.json`
+- **Was**: stale_direct
+- **Deferred by**: `*/projections.json` -- Legacy judge cache pre-dating Phase 6 provenance mechanism (May 2026). Presumed current as of mechanism introduction; cost-prohibitive to re-judge. Deferral auto-clears when the producer is re-run (envelope replaces legacy bare JSON).  *(at 2026-05-08T15:45:25+00:00)*
+
+### `/Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/helpful_vs_unhelpful/gpt_responses_roles_b10/scores_responses.json`
+- **Was**: stale_direct
+- **Deferred by**: `*/scores_responses.json` -- Legacy judge cache pre-dating Phase 6 provenance mechanism (May 2026). Presumed current as of mechanism introduction; cost-prohibitive to re-judge. Deferral auto-clears when the producer is re-run (envelope replaces legacy bare JSON).  *(at 2026-05-08T15:45:15+00:00)*
 
 ### `/Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/helpful_vs_unhelpful/gpt_responses_roles_b10/scores_responses__rubric_v1.json`
 - **Was**: legacy
@@ -2763,6 +3289,10 @@ These caches would otherwise be stale (``stale_direct`` or ``stale_transitive``)
 - **Was**: legacy
 - **Deferred by**: `*__rubric_v1.json` -- v1 rubric snapshot taken on 2026-05-09 immediately before the v2 rubric anonymization landed. Kept on-disk for cross-rubric comparison; not to be re-judged. The going-forward (non-snapshot) caches are being re-judged under v2 in a separate process.  *(at 2026-05-09T03:37:03+00:00)*
 
+### `/Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/helpful_vs_unhelpful/gpt_responses_traits_b10/correlations.json`
+- **Was**: stale_direct
+- **Deferred by**: `*/correlations.json` -- Legacy judge cache pre-dating Phase 6 provenance mechanism (May 2026). Presumed current as of mechanism introduction; cost-prohibitive to re-judge. Deferral auto-clears when the producer is re-run (envelope replaces legacy bare JSON).  *(at 2026-05-08T15:45:35+00:00)*
+
 ### `/Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/helpful_vs_unhelpful/gpt_responses_traits_b10/correlations__rubric_v1.json`
 - **Was**: legacy
 - **Deferred by**: `*__rubric_v1.json` -- v1 rubric snapshot taken on 2026-05-09 immediately before the v2 rubric anonymization landed. Kept on-disk for cross-rubric comparison; not to be re-judged. The going-forward (non-snapshot) caches are being re-judged under v2 in a separate process.  *(at 2026-05-09T03:37:03+00:00)*
@@ -2774,6 +3304,14 @@ These caches would otherwise be stale (``stale_direct`` or ``stale_transitive``)
 ### `/Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/helpful_vs_unhelpful/gpt_responses_traits_b10/gaps__rubric_v1.json`
 - **Was**: legacy
 - **Deferred by**: `*__rubric_v1.json` -- v1 rubric snapshot taken on 2026-05-09 immediately before the v2 rubric anonymization landed. Kept on-disk for cross-rubric comparison; not to be re-judged. The going-forward (non-snapshot) caches are being re-judged under v2 in a separate process.  *(at 2026-05-09T03:37:03+00:00)*
+
+### `/Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/helpful_vs_unhelpful/gpt_responses_traits_b10/projections.json`
+- **Was**: stale_direct
+- **Deferred by**: `*/projections.json` -- Legacy judge cache pre-dating Phase 6 provenance mechanism (May 2026). Presumed current as of mechanism introduction; cost-prohibitive to re-judge. Deferral auto-clears when the producer is re-run (envelope replaces legacy bare JSON).  *(at 2026-05-08T15:45:25+00:00)*
+
+### `/Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/helpful_vs_unhelpful/gpt_responses_traits_b10/scores_responses.json`
+- **Was**: stale_direct
+- **Deferred by**: `*/scores_responses.json` -- Legacy judge cache pre-dating Phase 6 provenance mechanism (May 2026). Presumed current as of mechanism introduction; cost-prohibitive to re-judge. Deferral auto-clears when the producer is re-run (envelope replaces legacy bare JSON).  *(at 2026-05-08T15:45:15+00:00)*
 
 ### `/Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/helpful_vs_unhelpful/gpt_responses_traits_b10/scores_responses__rubric_v1.json`
 - **Was**: legacy
@@ -2811,6 +3349,10 @@ These caches would otherwise be stale (``stale_direct`` or ``stale_transitive``)
 - **Was**: legacy
 - **Deferred by**: `*__rubric_v1.json` -- v1 rubric snapshot taken on 2026-05-09 immediately before the v2 rubric anonymization landed. Kept on-disk for cross-rubric comparison; not to be re-judged. The going-forward (non-snapshot) caches are being re-judged under v2 in a separate process.  *(at 2026-05-09T03:37:03+00:00)*
 
+### `/Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/helpful_vs_unhelpful/haiku_responses_roles_b10_q9/correlations.json`
+- **Was**: stale_direct
+- **Deferred by**: `*/correlations.json` -- Legacy judge cache pre-dating Phase 6 provenance mechanism (May 2026). Presumed current as of mechanism introduction; cost-prohibitive to re-judge. Deferral auto-clears when the producer is re-run (envelope replaces legacy bare JSON).  *(at 2026-05-08T15:45:35+00:00)*
+
 ### `/Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/helpful_vs_unhelpful/haiku_responses_roles_b10_q9/correlations__rubric_v1.json`
 - **Was**: legacy
 - **Deferred by**: `*__rubric_v1.json` -- v1 rubric snapshot taken on 2026-05-09 immediately before the v2 rubric anonymization landed. Kept on-disk for cross-rubric comparison; not to be re-judged. The going-forward (non-snapshot) caches are being re-judged under v2 in a separate process.  *(at 2026-05-09T03:37:03+00:00)*
@@ -2822,6 +3364,14 @@ These caches would otherwise be stale (``stale_direct`` or ``stale_transitive``)
 ### `/Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/helpful_vs_unhelpful/haiku_responses_roles_b10_q9/gaps__rubric_v1.json`
 - **Was**: legacy
 - **Deferred by**: `*__rubric_v1.json` -- v1 rubric snapshot taken on 2026-05-09 immediately before the v2 rubric anonymization landed. Kept on-disk for cross-rubric comparison; not to be re-judged. The going-forward (non-snapshot) caches are being re-judged under v2 in a separate process.  *(at 2026-05-09T03:37:03+00:00)*
+
+### `/Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/helpful_vs_unhelpful/haiku_responses_roles_b10_q9/projections.json`
+- **Was**: stale_direct
+- **Deferred by**: `*/projections.json` -- Legacy judge cache pre-dating Phase 6 provenance mechanism (May 2026). Presumed current as of mechanism introduction; cost-prohibitive to re-judge. Deferral auto-clears when the producer is re-run (envelope replaces legacy bare JSON).  *(at 2026-05-08T15:45:25+00:00)*
+
+### `/Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/helpful_vs_unhelpful/haiku_responses_roles_b10_q9/scores_responses.json`
+- **Was**: stale_direct
+- **Deferred by**: `*/scores_responses.json` -- Legacy judge cache pre-dating Phase 6 provenance mechanism (May 2026). Presumed current as of mechanism introduction; cost-prohibitive to re-judge. Deferral auto-clears when the producer is re-run (envelope replaces legacy bare JSON).  *(at 2026-05-08T15:45:15+00:00)*
 
 ### `/Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/helpful_vs_unhelpful/haiku_responses_roles_b10_q9/scores_responses__rubric_v1.json`
 - **Was**: legacy
@@ -2835,6 +3385,10 @@ These caches would otherwise be stale (``stale_direct`` or ``stale_transitive``)
 - **Was**: legacy
 - **Deferred by**: `*__rubric_v1.json` -- v1 rubric snapshot taken on 2026-05-09 immediately before the v2 rubric anonymization landed. Kept on-disk for cross-rubric comparison; not to be re-judged. The going-forward (non-snapshot) caches are being re-judged under v2 in a separate process.  *(at 2026-05-09T03:37:03+00:00)*
 
+### `/Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/helpful_vs_unhelpful/haiku_responses_traits_b10_q9/correlations.json`
+- **Was**: stale_direct
+- **Deferred by**: `*/correlations.json` -- Legacy judge cache pre-dating Phase 6 provenance mechanism (May 2026). Presumed current as of mechanism introduction; cost-prohibitive to re-judge. Deferral auto-clears when the producer is re-run (envelope replaces legacy bare JSON).  *(at 2026-05-08T15:45:35+00:00)*
+
 ### `/Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/helpful_vs_unhelpful/haiku_responses_traits_b10_q9/correlations__rubric_v1.json`
 - **Was**: legacy
 - **Deferred by**: `*__rubric_v1.json` -- v1 rubric snapshot taken on 2026-05-09 immediately before the v2 rubric anonymization landed. Kept on-disk for cross-rubric comparison; not to be re-judged. The going-forward (non-snapshot) caches are being re-judged under v2 in a separate process.  *(at 2026-05-09T03:37:03+00:00)*
@@ -2846,6 +3400,14 @@ These caches would otherwise be stale (``stale_direct`` or ``stale_transitive``)
 ### `/Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/helpful_vs_unhelpful/haiku_responses_traits_b10_q9/gaps__rubric_v1.json`
 - **Was**: legacy
 - **Deferred by**: `*__rubric_v1.json` -- v1 rubric snapshot taken on 2026-05-09 immediately before the v2 rubric anonymization landed. Kept on-disk for cross-rubric comparison; not to be re-judged. The going-forward (non-snapshot) caches are being re-judged under v2 in a separate process.  *(at 2026-05-09T03:37:03+00:00)*
+
+### `/Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/helpful_vs_unhelpful/haiku_responses_traits_b10_q9/projections.json`
+- **Was**: stale_direct
+- **Deferred by**: `*/projections.json` -- Legacy judge cache pre-dating Phase 6 provenance mechanism (May 2026). Presumed current as of mechanism introduction; cost-prohibitive to re-judge. Deferral auto-clears when the producer is re-run (envelope replaces legacy bare JSON).  *(at 2026-05-08T15:45:25+00:00)*
+
+### `/Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/helpful_vs_unhelpful/haiku_responses_traits_b10_q9/scores_responses.json`
+- **Was**: stale_direct
+- **Deferred by**: `*/scores_responses.json` -- Legacy judge cache pre-dating Phase 6 provenance mechanism (May 2026). Presumed current as of mechanism introduction; cost-prohibitive to re-judge. Deferral auto-clears when the producer is re-run (envelope replaces legacy bare JSON).  *(at 2026-05-08T15:45:15+00:00)*
 
 ### `/Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/helpful_vs_unhelpful/haiku_responses_traits_b10_q9/scores_responses__rubric_v1.json`
 - **Was**: legacy
@@ -2979,6 +3541,10 @@ These caches would otherwise be stale (``stale_direct`` or ``stale_transitive``)
 - **Was**: legacy
 - **Deferred by**: `*__rubric_v1.json` -- v1 rubric snapshot taken on 2026-05-09 immediately before the v2 rubric anonymization landed. Kept on-disk for cross-rubric comparison; not to be re-judged. The going-forward (non-snapshot) caches are being re-judged under v2 in a separate process.  *(at 2026-05-09T03:37:03+00:00)*
 
+### `/Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/honest_vs_dishonest/gpt_responses_roles_b10/correlations.json`
+- **Was**: stale_direct
+- **Deferred by**: `*/correlations.json` -- Legacy judge cache pre-dating Phase 6 provenance mechanism (May 2026). Presumed current as of mechanism introduction; cost-prohibitive to re-judge. Deferral auto-clears when the producer is re-run (envelope replaces legacy bare JSON).  *(at 2026-05-08T15:45:35+00:00)*
+
 ### `/Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/honest_vs_dishonest/gpt_responses_roles_b10/correlations__rubric_v1.json`
 - **Was**: legacy
 - **Deferred by**: `*__rubric_v1.json` -- v1 rubric snapshot taken on 2026-05-09 immediately before the v2 rubric anonymization landed. Kept on-disk for cross-rubric comparison; not to be re-judged. The going-forward (non-snapshot) caches are being re-judged under v2 in a separate process.  *(at 2026-05-09T03:37:03+00:00)*
@@ -2990,6 +3556,14 @@ These caches would otherwise be stale (``stale_direct`` or ``stale_transitive``)
 ### `/Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/honest_vs_dishonest/gpt_responses_roles_b10/gaps__rubric_v1.json`
 - **Was**: legacy
 - **Deferred by**: `*__rubric_v1.json` -- v1 rubric snapshot taken on 2026-05-09 immediately before the v2 rubric anonymization landed. Kept on-disk for cross-rubric comparison; not to be re-judged. The going-forward (non-snapshot) caches are being re-judged under v2 in a separate process.  *(at 2026-05-09T03:37:03+00:00)*
+
+### `/Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/honest_vs_dishonest/gpt_responses_roles_b10/projections.json`
+- **Was**: stale_direct
+- **Deferred by**: `*/projections.json` -- Legacy judge cache pre-dating Phase 6 provenance mechanism (May 2026). Presumed current as of mechanism introduction; cost-prohibitive to re-judge. Deferral auto-clears when the producer is re-run (envelope replaces legacy bare JSON).  *(at 2026-05-08T15:45:25+00:00)*
+
+### `/Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/honest_vs_dishonest/gpt_responses_roles_b10/scores_responses.json`
+- **Was**: stale_direct
+- **Deferred by**: `*/scores_responses.json` -- Legacy judge cache pre-dating Phase 6 provenance mechanism (May 2026). Presumed current as of mechanism introduction; cost-prohibitive to re-judge. Deferral auto-clears when the producer is re-run (envelope replaces legacy bare JSON).  *(at 2026-05-08T15:45:15+00:00)*
 
 ### `/Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/honest_vs_dishonest/gpt_responses_roles_b10/scores_responses__rubric_v1.json`
 - **Was**: legacy
@@ -3027,6 +3601,10 @@ These caches would otherwise be stale (``stale_direct`` or ``stale_transitive``)
 - **Was**: legacy
 - **Deferred by**: `*__rubric_v1.json` -- v1 rubric snapshot taken on 2026-05-09 immediately before the v2 rubric anonymization landed. Kept on-disk for cross-rubric comparison; not to be re-judged. The going-forward (non-snapshot) caches are being re-judged under v2 in a separate process.  *(at 2026-05-09T03:37:03+00:00)*
 
+### `/Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/honest_vs_dishonest/gpt_responses_traits_b10/correlations.json`
+- **Was**: stale_direct
+- **Deferred by**: `*/correlations.json` -- Legacy judge cache pre-dating Phase 6 provenance mechanism (May 2026). Presumed current as of mechanism introduction; cost-prohibitive to re-judge. Deferral auto-clears when the producer is re-run (envelope replaces legacy bare JSON).  *(at 2026-05-08T15:45:35+00:00)*
+
 ### `/Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/honest_vs_dishonest/gpt_responses_traits_b10/correlations__rubric_v1.json`
 - **Was**: legacy
 - **Deferred by**: `*__rubric_v1.json` -- v1 rubric snapshot taken on 2026-05-09 immediately before the v2 rubric anonymization landed. Kept on-disk for cross-rubric comparison; not to be re-judged. The going-forward (non-snapshot) caches are being re-judged under v2 in a separate process.  *(at 2026-05-09T03:37:03+00:00)*
@@ -3038,6 +3616,14 @@ These caches would otherwise be stale (``stale_direct`` or ``stale_transitive``)
 ### `/Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/honest_vs_dishonest/gpt_responses_traits_b10/gaps__rubric_v1.json`
 - **Was**: legacy
 - **Deferred by**: `*__rubric_v1.json` -- v1 rubric snapshot taken on 2026-05-09 immediately before the v2 rubric anonymization landed. Kept on-disk for cross-rubric comparison; not to be re-judged. The going-forward (non-snapshot) caches are being re-judged under v2 in a separate process.  *(at 2026-05-09T03:37:03+00:00)*
+
+### `/Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/honest_vs_dishonest/gpt_responses_traits_b10/projections.json`
+- **Was**: stale_direct
+- **Deferred by**: `*/projections.json` -- Legacy judge cache pre-dating Phase 6 provenance mechanism (May 2026). Presumed current as of mechanism introduction; cost-prohibitive to re-judge. Deferral auto-clears when the producer is re-run (envelope replaces legacy bare JSON).  *(at 2026-05-08T15:45:25+00:00)*
+
+### `/Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/honest_vs_dishonest/gpt_responses_traits_b10/scores_responses.json`
+- **Was**: stale_direct
+- **Deferred by**: `*/scores_responses.json` -- Legacy judge cache pre-dating Phase 6 provenance mechanism (May 2026). Presumed current as of mechanism introduction; cost-prohibitive to re-judge. Deferral auto-clears when the producer is re-run (envelope replaces legacy bare JSON).  *(at 2026-05-08T15:45:15+00:00)*
 
 ### `/Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/honest_vs_dishonest/gpt_responses_traits_b10/scores_responses__rubric_v1.json`
 - **Was**: legacy
@@ -3075,6 +3661,10 @@ These caches would otherwise be stale (``stale_direct`` or ``stale_transitive``)
 - **Was**: legacy
 - **Deferred by**: `*__rubric_v1.json` -- v1 rubric snapshot taken on 2026-05-09 immediately before the v2 rubric anonymization landed. Kept on-disk for cross-rubric comparison; not to be re-judged. The going-forward (non-snapshot) caches are being re-judged under v2 in a separate process.  *(at 2026-05-09T03:37:03+00:00)*
 
+### `/Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/honest_vs_dishonest/haiku_responses_roles_b10_q9/correlations.json`
+- **Was**: stale_direct
+- **Deferred by**: `*/correlations.json` -- Legacy judge cache pre-dating Phase 6 provenance mechanism (May 2026). Presumed current as of mechanism introduction; cost-prohibitive to re-judge. Deferral auto-clears when the producer is re-run (envelope replaces legacy bare JSON).  *(at 2026-05-08T15:45:35+00:00)*
+
 ### `/Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/honest_vs_dishonest/haiku_responses_roles_b10_q9/correlations__rubric_v1.json`
 - **Was**: legacy
 - **Deferred by**: `*__rubric_v1.json` -- v1 rubric snapshot taken on 2026-05-09 immediately before the v2 rubric anonymization landed. Kept on-disk for cross-rubric comparison; not to be re-judged. The going-forward (non-snapshot) caches are being re-judged under v2 in a separate process.  *(at 2026-05-09T03:37:03+00:00)*
@@ -3086,6 +3676,14 @@ These caches would otherwise be stale (``stale_direct`` or ``stale_transitive``)
 ### `/Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/honest_vs_dishonest/haiku_responses_roles_b10_q9/gaps__rubric_v1.json`
 - **Was**: legacy
 - **Deferred by**: `*__rubric_v1.json` -- v1 rubric snapshot taken on 2026-05-09 immediately before the v2 rubric anonymization landed. Kept on-disk for cross-rubric comparison; not to be re-judged. The going-forward (non-snapshot) caches are being re-judged under v2 in a separate process.  *(at 2026-05-09T03:37:03+00:00)*
+
+### `/Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/honest_vs_dishonest/haiku_responses_roles_b10_q9/projections.json`
+- **Was**: stale_direct
+- **Deferred by**: `*/projections.json` -- Legacy judge cache pre-dating Phase 6 provenance mechanism (May 2026). Presumed current as of mechanism introduction; cost-prohibitive to re-judge. Deferral auto-clears when the producer is re-run (envelope replaces legacy bare JSON).  *(at 2026-05-08T15:45:25+00:00)*
+
+### `/Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/honest_vs_dishonest/haiku_responses_roles_b10_q9/scores_responses.json`
+- **Was**: stale_direct
+- **Deferred by**: `*/scores_responses.json` -- Legacy judge cache pre-dating Phase 6 provenance mechanism (May 2026). Presumed current as of mechanism introduction; cost-prohibitive to re-judge. Deferral auto-clears when the producer is re-run (envelope replaces legacy bare JSON).  *(at 2026-05-08T15:45:15+00:00)*
 
 ### `/Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/honest_vs_dishonest/haiku_responses_roles_b10_q9/scores_responses__rubric_v1.json`
 - **Was**: legacy
@@ -3099,6 +3697,10 @@ These caches would otherwise be stale (``stale_direct`` or ``stale_transitive``)
 - **Was**: legacy
 - **Deferred by**: `*__rubric_v1.json` -- v1 rubric snapshot taken on 2026-05-09 immediately before the v2 rubric anonymization landed. Kept on-disk for cross-rubric comparison; not to be re-judged. The going-forward (non-snapshot) caches are being re-judged under v2 in a separate process.  *(at 2026-05-09T03:37:03+00:00)*
 
+### `/Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/honest_vs_dishonest/haiku_responses_traits_b10_q9/correlations.json`
+- **Was**: stale_direct
+- **Deferred by**: `*/correlations.json` -- Legacy judge cache pre-dating Phase 6 provenance mechanism (May 2026). Presumed current as of mechanism introduction; cost-prohibitive to re-judge. Deferral auto-clears when the producer is re-run (envelope replaces legacy bare JSON).  *(at 2026-05-08T15:45:35+00:00)*
+
 ### `/Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/honest_vs_dishonest/haiku_responses_traits_b10_q9/correlations__rubric_v1.json`
 - **Was**: legacy
 - **Deferred by**: `*__rubric_v1.json` -- v1 rubric snapshot taken on 2026-05-09 immediately before the v2 rubric anonymization landed. Kept on-disk for cross-rubric comparison; not to be re-judged. The going-forward (non-snapshot) caches are being re-judged under v2 in a separate process.  *(at 2026-05-09T03:37:03+00:00)*
@@ -3110,6 +3712,14 @@ These caches would otherwise be stale (``stale_direct`` or ``stale_transitive``)
 ### `/Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/honest_vs_dishonest/haiku_responses_traits_b10_q9/gaps__rubric_v1.json`
 - **Was**: legacy
 - **Deferred by**: `*__rubric_v1.json` -- v1 rubric snapshot taken on 2026-05-09 immediately before the v2 rubric anonymization landed. Kept on-disk for cross-rubric comparison; not to be re-judged. The going-forward (non-snapshot) caches are being re-judged under v2 in a separate process.  *(at 2026-05-09T03:37:03+00:00)*
+
+### `/Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/honest_vs_dishonest/haiku_responses_traits_b10_q9/projections.json`
+- **Was**: stale_direct
+- **Deferred by**: `*/projections.json` -- Legacy judge cache pre-dating Phase 6 provenance mechanism (May 2026). Presumed current as of mechanism introduction; cost-prohibitive to re-judge. Deferral auto-clears when the producer is re-run (envelope replaces legacy bare JSON).  *(at 2026-05-08T15:45:25+00:00)*
+
+### `/Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/honest_vs_dishonest/haiku_responses_traits_b10_q9/scores_responses.json`
+- **Was**: stale_direct
+- **Deferred by**: `*/scores_responses.json` -- Legacy judge cache pre-dating Phase 6 provenance mechanism (May 2026). Presumed current as of mechanism introduction; cost-prohibitive to re-judge. Deferral auto-clears when the producer is re-run (envelope replaces legacy bare JSON).  *(at 2026-05-08T15:45:15+00:00)*
 
 ### `/Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/honest_vs_dishonest/haiku_responses_traits_b10_q9/scores_responses__rubric_v1.json`
 - **Was**: legacy
@@ -3315,6 +3925,10 @@ These caches would otherwise be stale (``stale_direct`` or ``stale_transitive``)
 - **Was**: legacy
 - **Deferred by**: `*__rubric_v1.json` -- v1 rubric snapshot taken on 2026-05-09 immediately before the v2 rubric anonymization landed. Kept on-disk for cross-rubric comparison; not to be re-judged. The going-forward (non-snapshot) caches are being re-judged under v2 in a separate process.  *(at 2026-05-09T03:37:03+00:00)*
 
+### `/Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/improvisational_vs_methodical/gpt_responses_roles_b10/correlations.json`
+- **Was**: stale_direct
+- **Deferred by**: `*/correlations.json` -- Legacy judge cache pre-dating Phase 6 provenance mechanism (May 2026). Presumed current as of mechanism introduction; cost-prohibitive to re-judge. Deferral auto-clears when the producer is re-run (envelope replaces legacy bare JSON).  *(at 2026-05-08T15:45:35+00:00)*
+
 ### `/Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/improvisational_vs_methodical/gpt_responses_roles_b10/correlations__rubric_v1.json`
 - **Was**: legacy
 - **Deferred by**: `*__rubric_v1.json` -- v1 rubric snapshot taken on 2026-05-09 immediately before the v2 rubric anonymization landed. Kept on-disk for cross-rubric comparison; not to be re-judged. The going-forward (non-snapshot) caches are being re-judged under v2 in a separate process.  *(at 2026-05-09T03:37:03+00:00)*
@@ -3326,6 +3940,14 @@ These caches would otherwise be stale (``stale_direct`` or ``stale_transitive``)
 ### `/Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/improvisational_vs_methodical/gpt_responses_roles_b10/gaps__rubric_v1.json`
 - **Was**: legacy
 - **Deferred by**: `*__rubric_v1.json` -- v1 rubric snapshot taken on 2026-05-09 immediately before the v2 rubric anonymization landed. Kept on-disk for cross-rubric comparison; not to be re-judged. The going-forward (non-snapshot) caches are being re-judged under v2 in a separate process.  *(at 2026-05-09T03:37:03+00:00)*
+
+### `/Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/improvisational_vs_methodical/gpt_responses_roles_b10/projections.json`
+- **Was**: stale_direct
+- **Deferred by**: `*/projections.json` -- Legacy judge cache pre-dating Phase 6 provenance mechanism (May 2026). Presumed current as of mechanism introduction; cost-prohibitive to re-judge. Deferral auto-clears when the producer is re-run (envelope replaces legacy bare JSON).  *(at 2026-05-08T15:45:25+00:00)*
+
+### `/Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/improvisational_vs_methodical/gpt_responses_roles_b10/scores_responses.json`
+- **Was**: stale_direct
+- **Deferred by**: `*/scores_responses.json` -- Legacy judge cache pre-dating Phase 6 provenance mechanism (May 2026). Presumed current as of mechanism introduction; cost-prohibitive to re-judge. Deferral auto-clears when the producer is re-run (envelope replaces legacy bare JSON).  *(at 2026-05-08T15:45:15+00:00)*
 
 ### `/Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/improvisational_vs_methodical/gpt_responses_roles_b10/scores_responses__rubric_v1.json`
 - **Was**: legacy
@@ -3411,6 +4033,10 @@ These caches would otherwise be stale (``stale_direct`` or ``stale_transitive``)
 - **Was**: legacy
 - **Deferred by**: `*__rubric_v1.json` -- v1 rubric snapshot taken on 2026-05-09 immediately before the v2 rubric anonymization landed. Kept on-disk for cross-rubric comparison; not to be re-judged. The going-forward (non-snapshot) caches are being re-judged under v2 in a separate process.  *(at 2026-05-09T03:37:03+00:00)*
 
+### `/Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/improvisational_vs_methodical/gpt_responses_traits_b10/correlations.json`
+- **Was**: stale_direct
+- **Deferred by**: `*/correlations.json` -- Legacy judge cache pre-dating Phase 6 provenance mechanism (May 2026). Presumed current as of mechanism introduction; cost-prohibitive to re-judge. Deferral auto-clears when the producer is re-run (envelope replaces legacy bare JSON).  *(at 2026-05-08T15:45:35+00:00)*
+
 ### `/Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/improvisational_vs_methodical/gpt_responses_traits_b10/correlations__rubric_v1.json`
 - **Was**: legacy
 - **Deferred by**: `*__rubric_v1.json` -- v1 rubric snapshot taken on 2026-05-09 immediately before the v2 rubric anonymization landed. Kept on-disk for cross-rubric comparison; not to be re-judged. The going-forward (non-snapshot) caches are being re-judged under v2 in a separate process.  *(at 2026-05-09T03:37:03+00:00)*
@@ -3422,6 +4048,14 @@ These caches would otherwise be stale (``stale_direct`` or ``stale_transitive``)
 ### `/Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/improvisational_vs_methodical/gpt_responses_traits_b10/gaps__rubric_v1.json`
 - **Was**: legacy
 - **Deferred by**: `*__rubric_v1.json` -- v1 rubric snapshot taken on 2026-05-09 immediately before the v2 rubric anonymization landed. Kept on-disk for cross-rubric comparison; not to be re-judged. The going-forward (non-snapshot) caches are being re-judged under v2 in a separate process.  *(at 2026-05-09T03:37:03+00:00)*
+
+### `/Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/improvisational_vs_methodical/gpt_responses_traits_b10/projections.json`
+- **Was**: stale_direct
+- **Deferred by**: `*/projections.json` -- Legacy judge cache pre-dating Phase 6 provenance mechanism (May 2026). Presumed current as of mechanism introduction; cost-prohibitive to re-judge. Deferral auto-clears when the producer is re-run (envelope replaces legacy bare JSON).  *(at 2026-05-08T15:45:25+00:00)*
+
+### `/Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/improvisational_vs_methodical/gpt_responses_traits_b10/scores_responses.json`
+- **Was**: stale_direct
+- **Deferred by**: `*/scores_responses.json` -- Legacy judge cache pre-dating Phase 6 provenance mechanism (May 2026). Presumed current as of mechanism introduction; cost-prohibitive to re-judge. Deferral auto-clears when the producer is re-run (envelope replaces legacy bare JSON).  *(at 2026-05-08T15:45:15+00:00)*
 
 ### `/Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/improvisational_vs_methodical/gpt_responses_traits_b10/scores_responses__rubric_v1.json`
 - **Was**: legacy
@@ -3531,6 +4165,10 @@ These caches would otherwise be stale (``stale_direct`` or ``stale_transitive``)
 - **Was**: legacy
 - **Deferred by**: `*__rubric_v1.json` -- v1 rubric snapshot taken on 2026-05-09 immediately before the v2 rubric anonymization landed. Kept on-disk for cross-rubric comparison; not to be re-judged. The going-forward (non-snapshot) caches are being re-judged under v2 in a separate process.  *(at 2026-05-09T03:37:03+00:00)*
 
+### `/Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/improvisational_vs_methodical/haiku_responses_roles_b10_q9/correlations.json`
+- **Was**: stale_direct
+- **Deferred by**: `*/correlations.json` -- Legacy judge cache pre-dating Phase 6 provenance mechanism (May 2026). Presumed current as of mechanism introduction; cost-prohibitive to re-judge. Deferral auto-clears when the producer is re-run (envelope replaces legacy bare JSON).  *(at 2026-05-08T15:45:35+00:00)*
+
 ### `/Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/improvisational_vs_methodical/haiku_responses_roles_b10_q9/correlations__rubric_v1.json`
 - **Was**: legacy
 - **Deferred by**: `*__rubric_v1.json` -- v1 rubric snapshot taken on 2026-05-09 immediately before the v2 rubric anonymization landed. Kept on-disk for cross-rubric comparison; not to be re-judged. The going-forward (non-snapshot) caches are being re-judged under v2 in a separate process.  *(at 2026-05-09T03:37:03+00:00)*
@@ -3542,6 +4180,14 @@ These caches would otherwise be stale (``stale_direct`` or ``stale_transitive``)
 ### `/Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/improvisational_vs_methodical/haiku_responses_roles_b10_q9/gaps__rubric_v1.json`
 - **Was**: legacy
 - **Deferred by**: `*__rubric_v1.json` -- v1 rubric snapshot taken on 2026-05-09 immediately before the v2 rubric anonymization landed. Kept on-disk for cross-rubric comparison; not to be re-judged. The going-forward (non-snapshot) caches are being re-judged under v2 in a separate process.  *(at 2026-05-09T03:37:03+00:00)*
+
+### `/Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/improvisational_vs_methodical/haiku_responses_roles_b10_q9/projections.json`
+- **Was**: stale_direct
+- **Deferred by**: `*/projections.json` -- Legacy judge cache pre-dating Phase 6 provenance mechanism (May 2026). Presumed current as of mechanism introduction; cost-prohibitive to re-judge. Deferral auto-clears when the producer is re-run (envelope replaces legacy bare JSON).  *(at 2026-05-08T15:45:25+00:00)*
+
+### `/Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/improvisational_vs_methodical/haiku_responses_roles_b10_q9/scores_responses.json`
+- **Was**: stale_direct
+- **Deferred by**: `*/scores_responses.json` -- Legacy judge cache pre-dating Phase 6 provenance mechanism (May 2026). Presumed current as of mechanism introduction; cost-prohibitive to re-judge. Deferral auto-clears when the producer is re-run (envelope replaces legacy bare JSON).  *(at 2026-05-08T15:45:15+00:00)*
 
 ### `/Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/improvisational_vs_methodical/haiku_responses_roles_b10_q9/scores_responses__rubric_v1.json`
 - **Was**: legacy
@@ -3579,6 +4225,10 @@ These caches would otherwise be stale (``stale_direct`` or ``stale_transitive``)
 - **Was**: legacy
 - **Deferred by**: `*__rubric_v1.json` -- v1 rubric snapshot taken on 2026-05-09 immediately before the v2 rubric anonymization landed. Kept on-disk for cross-rubric comparison; not to be re-judged. The going-forward (non-snapshot) caches are being re-judged under v2 in a separate process.  *(at 2026-05-09T03:37:03+00:00)*
 
+### `/Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/improvisational_vs_methodical/haiku_responses_traits_b10_q9/correlations.json`
+- **Was**: stale_direct
+- **Deferred by**: `*/correlations.json` -- Legacy judge cache pre-dating Phase 6 provenance mechanism (May 2026). Presumed current as of mechanism introduction; cost-prohibitive to re-judge. Deferral auto-clears when the producer is re-run (envelope replaces legacy bare JSON).  *(at 2026-05-08T15:45:35+00:00)*
+
 ### `/Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/improvisational_vs_methodical/haiku_responses_traits_b10_q9/correlations__rubric_v1.json`
 - **Was**: legacy
 - **Deferred by**: `*__rubric_v1.json` -- v1 rubric snapshot taken on 2026-05-09 immediately before the v2 rubric anonymization landed. Kept on-disk for cross-rubric comparison; not to be re-judged. The going-forward (non-snapshot) caches are being re-judged under v2 in a separate process.  *(at 2026-05-09T03:37:03+00:00)*
@@ -3590,6 +4240,14 @@ These caches would otherwise be stale (``stale_direct`` or ``stale_transitive``)
 ### `/Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/improvisational_vs_methodical/haiku_responses_traits_b10_q9/gaps__rubric_v1.json`
 - **Was**: legacy
 - **Deferred by**: `*__rubric_v1.json` -- v1 rubric snapshot taken on 2026-05-09 immediately before the v2 rubric anonymization landed. Kept on-disk for cross-rubric comparison; not to be re-judged. The going-forward (non-snapshot) caches are being re-judged under v2 in a separate process.  *(at 2026-05-09T03:37:03+00:00)*
+
+### `/Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/improvisational_vs_methodical/haiku_responses_traits_b10_q9/projections.json`
+- **Was**: stale_direct
+- **Deferred by**: `*/projections.json` -- Legacy judge cache pre-dating Phase 6 provenance mechanism (May 2026). Presumed current as of mechanism introduction; cost-prohibitive to re-judge. Deferral auto-clears when the producer is re-run (envelope replaces legacy bare JSON).  *(at 2026-05-08T15:45:25+00:00)*
+
+### `/Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/improvisational_vs_methodical/haiku_responses_traits_b10_q9/scores_responses.json`
+- **Was**: stale_direct
+- **Deferred by**: `*/scores_responses.json` -- Legacy judge cache pre-dating Phase 6 provenance mechanism (May 2026). Presumed current as of mechanism introduction; cost-prohibitive to re-judge. Deferral auto-clears when the producer is re-run (envelope replaces legacy bare JSON).  *(at 2026-05-08T15:45:15+00:00)*
 
 ### `/Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/improvisational_vs_methodical/haiku_responses_traits_b10_q9/scores_responses__rubric_v1.json`
 - **Was**: legacy
@@ -4191,6 +4849,10 @@ These caches would otherwise be stale (``stale_direct`` or ``stale_transitive``)
 - **Was**: legacy
 - **Deferred by**: `*__rubric_v1.json` -- v1 rubric snapshot taken on 2026-05-09 immediately before the v2 rubric anonymization landed. Kept on-disk for cross-rubric comparison; not to be re-judged. The going-forward (non-snapshot) caches are being re-judged under v2 in a separate process.  *(at 2026-05-09T03:37:03+00:00)*
 
+### `/Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/progressive_vs_conservative/gpt_responses_roles_b10/correlations.json`
+- **Was**: stale_direct
+- **Deferred by**: `*/correlations.json` -- Legacy judge cache pre-dating Phase 6 provenance mechanism (May 2026). Presumed current as of mechanism introduction; cost-prohibitive to re-judge. Deferral auto-clears when the producer is re-run (envelope replaces legacy bare JSON).  *(at 2026-05-08T15:45:35+00:00)*
+
 ### `/Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/progressive_vs_conservative/gpt_responses_roles_b10/correlations__rubric_v1.json`
 - **Was**: legacy
 - **Deferred by**: `*__rubric_v1.json` -- v1 rubric snapshot taken on 2026-05-09 immediately before the v2 rubric anonymization landed. Kept on-disk for cross-rubric comparison; not to be re-judged. The going-forward (non-snapshot) caches are being re-judged under v2 in a separate process.  *(at 2026-05-09T03:37:03+00:00)*
@@ -4202,6 +4864,14 @@ These caches would otherwise be stale (``stale_direct`` or ``stale_transitive``)
 ### `/Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/progressive_vs_conservative/gpt_responses_roles_b10/gaps__rubric_v1.json`
 - **Was**: legacy
 - **Deferred by**: `*__rubric_v1.json` -- v1 rubric snapshot taken on 2026-05-09 immediately before the v2 rubric anonymization landed. Kept on-disk for cross-rubric comparison; not to be re-judged. The going-forward (non-snapshot) caches are being re-judged under v2 in a separate process.  *(at 2026-05-09T03:37:03+00:00)*
+
+### `/Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/progressive_vs_conservative/gpt_responses_roles_b10/projections.json`
+- **Was**: stale_direct
+- **Deferred by**: `*/projections.json` -- Legacy judge cache pre-dating Phase 6 provenance mechanism (May 2026). Presumed current as of mechanism introduction; cost-prohibitive to re-judge. Deferral auto-clears when the producer is re-run (envelope replaces legacy bare JSON).  *(at 2026-05-08T15:45:25+00:00)*
+
+### `/Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/progressive_vs_conservative/gpt_responses_roles_b10/scores_responses.json`
+- **Was**: stale_direct
+- **Deferred by**: `*/scores_responses.json` -- Legacy judge cache pre-dating Phase 6 provenance mechanism (May 2026). Presumed current as of mechanism introduction; cost-prohibitive to re-judge. Deferral auto-clears when the producer is re-run (envelope replaces legacy bare JSON).  *(at 2026-05-08T15:45:15+00:00)*
 
 ### `/Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/progressive_vs_conservative/gpt_responses_roles_b10/scores_responses__rubric_v1.json`
 - **Was**: legacy
@@ -4287,6 +4957,10 @@ These caches would otherwise be stale (``stale_direct`` or ``stale_transitive``)
 - **Was**: legacy
 - **Deferred by**: `*__rubric_v1.json` -- v1 rubric snapshot taken on 2026-05-09 immediately before the v2 rubric anonymization landed. Kept on-disk for cross-rubric comparison; not to be re-judged. The going-forward (non-snapshot) caches are being re-judged under v2 in a separate process.  *(at 2026-05-09T03:37:03+00:00)*
 
+### `/Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/progressive_vs_conservative/gpt_responses_traits_b10/correlations.json`
+- **Was**: stale_direct
+- **Deferred by**: `*/correlations.json` -- Legacy judge cache pre-dating Phase 6 provenance mechanism (May 2026). Presumed current as of mechanism introduction; cost-prohibitive to re-judge. Deferral auto-clears when the producer is re-run (envelope replaces legacy bare JSON).  *(at 2026-05-08T15:45:35+00:00)*
+
 ### `/Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/progressive_vs_conservative/gpt_responses_traits_b10/correlations__rubric_v1.json`
 - **Was**: legacy
 - **Deferred by**: `*__rubric_v1.json` -- v1 rubric snapshot taken on 2026-05-09 immediately before the v2 rubric anonymization landed. Kept on-disk for cross-rubric comparison; not to be re-judged. The going-forward (non-snapshot) caches are being re-judged under v2 in a separate process.  *(at 2026-05-09T03:37:03+00:00)*
@@ -4298,6 +4972,14 @@ These caches would otherwise be stale (``stale_direct`` or ``stale_transitive``)
 ### `/Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/progressive_vs_conservative/gpt_responses_traits_b10/gaps__rubric_v1.json`
 - **Was**: legacy
 - **Deferred by**: `*__rubric_v1.json` -- v1 rubric snapshot taken on 2026-05-09 immediately before the v2 rubric anonymization landed. Kept on-disk for cross-rubric comparison; not to be re-judged. The going-forward (non-snapshot) caches are being re-judged under v2 in a separate process.  *(at 2026-05-09T03:37:03+00:00)*
+
+### `/Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/progressive_vs_conservative/gpt_responses_traits_b10/projections.json`
+- **Was**: stale_direct
+- **Deferred by**: `*/projections.json` -- Legacy judge cache pre-dating Phase 6 provenance mechanism (May 2026). Presumed current as of mechanism introduction; cost-prohibitive to re-judge. Deferral auto-clears when the producer is re-run (envelope replaces legacy bare JSON).  *(at 2026-05-08T15:45:25+00:00)*
+
+### `/Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/progressive_vs_conservative/gpt_responses_traits_b10/scores_responses.json`
+- **Was**: stale_direct
+- **Deferred by**: `*/scores_responses.json` -- Legacy judge cache pre-dating Phase 6 provenance mechanism (May 2026). Presumed current as of mechanism introduction; cost-prohibitive to re-judge. Deferral auto-clears when the producer is re-run (envelope replaces legacy bare JSON).  *(at 2026-05-08T15:45:15+00:00)*
 
 ### `/Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/progressive_vs_conservative/gpt_responses_traits_b10/scores_responses__rubric_v1.json`
 - **Was**: legacy
@@ -4407,6 +5089,10 @@ These caches would otherwise be stale (``stale_direct`` or ``stale_transitive``)
 - **Was**: legacy
 - **Deferred by**: `*__rubric_v1.json` -- v1 rubric snapshot taken on 2026-05-09 immediately before the v2 rubric anonymization landed. Kept on-disk for cross-rubric comparison; not to be re-judged. The going-forward (non-snapshot) caches are being re-judged under v2 in a separate process.  *(at 2026-05-09T03:37:03+00:00)*
 
+### `/Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/progressive_vs_conservative/haiku_responses_roles_b10_q9/correlations.json`
+- **Was**: stale_direct
+- **Deferred by**: `*/correlations.json` -- Legacy judge cache pre-dating Phase 6 provenance mechanism (May 2026). Presumed current as of mechanism introduction; cost-prohibitive to re-judge. Deferral auto-clears when the producer is re-run (envelope replaces legacy bare JSON).  *(at 2026-05-08T15:45:35+00:00)*
+
 ### `/Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/progressive_vs_conservative/haiku_responses_roles_b10_q9/correlations__rubric_v1.json`
 - **Was**: legacy
 - **Deferred by**: `*__rubric_v1.json` -- v1 rubric snapshot taken on 2026-05-09 immediately before the v2 rubric anonymization landed. Kept on-disk for cross-rubric comparison; not to be re-judged. The going-forward (non-snapshot) caches are being re-judged under v2 in a separate process.  *(at 2026-05-09T03:37:03+00:00)*
@@ -4418,6 +5104,14 @@ These caches would otherwise be stale (``stale_direct`` or ``stale_transitive``)
 ### `/Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/progressive_vs_conservative/haiku_responses_roles_b10_q9/gaps__rubric_v1.json`
 - **Was**: legacy
 - **Deferred by**: `*__rubric_v1.json` -- v1 rubric snapshot taken on 2026-05-09 immediately before the v2 rubric anonymization landed. Kept on-disk for cross-rubric comparison; not to be re-judged. The going-forward (non-snapshot) caches are being re-judged under v2 in a separate process.  *(at 2026-05-09T03:37:03+00:00)*
+
+### `/Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/progressive_vs_conservative/haiku_responses_roles_b10_q9/projections.json`
+- **Was**: stale_direct
+- **Deferred by**: `*/projections.json` -- Legacy judge cache pre-dating Phase 6 provenance mechanism (May 2026). Presumed current as of mechanism introduction; cost-prohibitive to re-judge. Deferral auto-clears when the producer is re-run (envelope replaces legacy bare JSON).  *(at 2026-05-08T15:45:25+00:00)*
+
+### `/Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/progressive_vs_conservative/haiku_responses_roles_b10_q9/scores_responses.json`
+- **Was**: stale_direct
+- **Deferred by**: `*/scores_responses.json` -- Legacy judge cache pre-dating Phase 6 provenance mechanism (May 2026). Presumed current as of mechanism introduction; cost-prohibitive to re-judge. Deferral auto-clears when the producer is re-run (envelope replaces legacy bare JSON).  *(at 2026-05-08T15:45:15+00:00)*
 
 ### `/Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/progressive_vs_conservative/haiku_responses_roles_b10_q9/scores_responses__rubric_v1.json`
 - **Was**: legacy
@@ -4455,6 +5149,10 @@ These caches would otherwise be stale (``stale_direct`` or ``stale_transitive``)
 - **Was**: legacy
 - **Deferred by**: `*__rubric_v1.json` -- v1 rubric snapshot taken on 2026-05-09 immediately before the v2 rubric anonymization landed. Kept on-disk for cross-rubric comparison; not to be re-judged. The going-forward (non-snapshot) caches are being re-judged under v2 in a separate process.  *(at 2026-05-09T03:37:03+00:00)*
 
+### `/Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/progressive_vs_conservative/haiku_responses_traits_b10_q9/correlations.json`
+- **Was**: stale_direct
+- **Deferred by**: `*/correlations.json` -- Legacy judge cache pre-dating Phase 6 provenance mechanism (May 2026). Presumed current as of mechanism introduction; cost-prohibitive to re-judge. Deferral auto-clears when the producer is re-run (envelope replaces legacy bare JSON).  *(at 2026-05-08T15:45:35+00:00)*
+
 ### `/Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/progressive_vs_conservative/haiku_responses_traits_b10_q9/correlations__rubric_v1.json`
 - **Was**: legacy
 - **Deferred by**: `*__rubric_v1.json` -- v1 rubric snapshot taken on 2026-05-09 immediately before the v2 rubric anonymization landed. Kept on-disk for cross-rubric comparison; not to be re-judged. The going-forward (non-snapshot) caches are being re-judged under v2 in a separate process.  *(at 2026-05-09T03:37:03+00:00)*
@@ -4466,6 +5164,14 @@ These caches would otherwise be stale (``stale_direct`` or ``stale_transitive``)
 ### `/Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/progressive_vs_conservative/haiku_responses_traits_b10_q9/gaps__rubric_v1.json`
 - **Was**: legacy
 - **Deferred by**: `*__rubric_v1.json` -- v1 rubric snapshot taken on 2026-05-09 immediately before the v2 rubric anonymization landed. Kept on-disk for cross-rubric comparison; not to be re-judged. The going-forward (non-snapshot) caches are being re-judged under v2 in a separate process.  *(at 2026-05-09T03:37:03+00:00)*
+
+### `/Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/progressive_vs_conservative/haiku_responses_traits_b10_q9/projections.json`
+- **Was**: stale_direct
+- **Deferred by**: `*/projections.json` -- Legacy judge cache pre-dating Phase 6 provenance mechanism (May 2026). Presumed current as of mechanism introduction; cost-prohibitive to re-judge. Deferral auto-clears when the producer is re-run (envelope replaces legacy bare JSON).  *(at 2026-05-08T15:45:25+00:00)*
+
+### `/Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/progressive_vs_conservative/haiku_responses_traits_b10_q9/scores_responses.json`
+- **Was**: stale_direct
+- **Deferred by**: `*/scores_responses.json` -- Legacy judge cache pre-dating Phase 6 provenance mechanism (May 2026). Presumed current as of mechanism introduction; cost-prohibitive to re-judge. Deferral auto-clears when the producer is re-run (envelope replaces legacy bare JSON).  *(at 2026-05-08T15:45:15+00:00)*
 
 ### `/Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/progressive_vs_conservative/haiku_responses_traits_b10_q9/scores_responses__rubric_v1.json`
 - **Was**: legacy
@@ -4743,6 +5449,10 @@ These caches would otherwise be stale (``stale_direct`` or ``stale_transitive``)
 - **Was**: legacy
 - **Deferred by**: `*__rubric_v1.json` -- v1 rubric snapshot taken on 2026-05-09 immediately before the v2 rubric anonymization landed. Kept on-disk for cross-rubric comparison; not to be re-judged. The going-forward (non-snapshot) caches are being re-judged under v2 in a separate process.  *(at 2026-05-09T03:37:03+00:00)*
 
+### `/Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/relativist_vs_absolutist/gpt_responses_roles_b10/correlations.json`
+- **Was**: stale_direct
+- **Deferred by**: `*/correlations.json` -- Legacy judge cache pre-dating Phase 6 provenance mechanism (May 2026). Presumed current as of mechanism introduction; cost-prohibitive to re-judge. Deferral auto-clears when the producer is re-run (envelope replaces legacy bare JSON).  *(at 2026-05-08T15:45:35+00:00)*
+
 ### `/Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/relativist_vs_absolutist/gpt_responses_roles_b10/correlations__rubric_v1.json`
 - **Was**: legacy
 - **Deferred by**: `*__rubric_v1.json` -- v1 rubric snapshot taken on 2026-05-09 immediately before the v2 rubric anonymization landed. Kept on-disk for cross-rubric comparison; not to be re-judged. The going-forward (non-snapshot) caches are being re-judged under v2 in a separate process.  *(at 2026-05-09T03:37:03+00:00)*
@@ -4754,6 +5464,14 @@ These caches would otherwise be stale (``stale_direct`` or ``stale_transitive``)
 ### `/Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/relativist_vs_absolutist/gpt_responses_roles_b10/gaps__rubric_v1.json`
 - **Was**: legacy
 - **Deferred by**: `*__rubric_v1.json` -- v1 rubric snapshot taken on 2026-05-09 immediately before the v2 rubric anonymization landed. Kept on-disk for cross-rubric comparison; not to be re-judged. The going-forward (non-snapshot) caches are being re-judged under v2 in a separate process.  *(at 2026-05-09T03:37:03+00:00)*
+
+### `/Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/relativist_vs_absolutist/gpt_responses_roles_b10/projections.json`
+- **Was**: stale_direct
+- **Deferred by**: `*/projections.json` -- Legacy judge cache pre-dating Phase 6 provenance mechanism (May 2026). Presumed current as of mechanism introduction; cost-prohibitive to re-judge. Deferral auto-clears when the producer is re-run (envelope replaces legacy bare JSON).  *(at 2026-05-08T15:45:25+00:00)*
+
+### `/Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/relativist_vs_absolutist/gpt_responses_roles_b10/scores_responses.json`
+- **Was**: stale_direct
+- **Deferred by**: `*/scores_responses.json` -- Legacy judge cache pre-dating Phase 6 provenance mechanism (May 2026). Presumed current as of mechanism introduction; cost-prohibitive to re-judge. Deferral auto-clears when the producer is re-run (envelope replaces legacy bare JSON).  *(at 2026-05-08T15:45:15+00:00)*
 
 ### `/Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/relativist_vs_absolutist/gpt_responses_roles_b10/scores_responses__rubric_v1.json`
 - **Was**: legacy
@@ -4791,6 +5509,10 @@ These caches would otherwise be stale (``stale_direct`` or ``stale_transitive``)
 - **Was**: legacy
 - **Deferred by**: `*__rubric_v1.json` -- v1 rubric snapshot taken on 2026-05-09 immediately before the v2 rubric anonymization landed. Kept on-disk for cross-rubric comparison; not to be re-judged. The going-forward (non-snapshot) caches are being re-judged under v2 in a separate process.  *(at 2026-05-09T03:37:03+00:00)*
 
+### `/Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/relativist_vs_absolutist/gpt_responses_traits_b10/correlations.json`
+- **Was**: stale_direct
+- **Deferred by**: `*/correlations.json` -- Legacy judge cache pre-dating Phase 6 provenance mechanism (May 2026). Presumed current as of mechanism introduction; cost-prohibitive to re-judge. Deferral auto-clears when the producer is re-run (envelope replaces legacy bare JSON).  *(at 2026-05-08T15:45:35+00:00)*
+
 ### `/Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/relativist_vs_absolutist/gpt_responses_traits_b10/correlations__rubric_v1.json`
 - **Was**: legacy
 - **Deferred by**: `*__rubric_v1.json` -- v1 rubric snapshot taken on 2026-05-09 immediately before the v2 rubric anonymization landed. Kept on-disk for cross-rubric comparison; not to be re-judged. The going-forward (non-snapshot) caches are being re-judged under v2 in a separate process.  *(at 2026-05-09T03:37:03+00:00)*
@@ -4802,6 +5524,14 @@ These caches would otherwise be stale (``stale_direct`` or ``stale_transitive``)
 ### `/Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/relativist_vs_absolutist/gpt_responses_traits_b10/gaps__rubric_v1.json`
 - **Was**: legacy
 - **Deferred by**: `*__rubric_v1.json` -- v1 rubric snapshot taken on 2026-05-09 immediately before the v2 rubric anonymization landed. Kept on-disk for cross-rubric comparison; not to be re-judged. The going-forward (non-snapshot) caches are being re-judged under v2 in a separate process.  *(at 2026-05-09T03:37:03+00:00)*
+
+### `/Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/relativist_vs_absolutist/gpt_responses_traits_b10/projections.json`
+- **Was**: stale_direct
+- **Deferred by**: `*/projections.json` -- Legacy judge cache pre-dating Phase 6 provenance mechanism (May 2026). Presumed current as of mechanism introduction; cost-prohibitive to re-judge. Deferral auto-clears when the producer is re-run (envelope replaces legacy bare JSON).  *(at 2026-05-08T15:45:25+00:00)*
+
+### `/Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/relativist_vs_absolutist/gpt_responses_traits_b10/scores_responses.json`
+- **Was**: stale_direct
+- **Deferred by**: `*/scores_responses.json` -- Legacy judge cache pre-dating Phase 6 provenance mechanism (May 2026). Presumed current as of mechanism introduction; cost-prohibitive to re-judge. Deferral auto-clears when the producer is re-run (envelope replaces legacy bare JSON).  *(at 2026-05-08T15:45:15+00:00)*
 
 ### `/Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/relativist_vs_absolutist/gpt_responses_traits_b10/scores_responses__rubric_v1.json`
 - **Was**: legacy
@@ -4839,6 +5569,10 @@ These caches would otherwise be stale (``stale_direct`` or ``stale_transitive``)
 - **Was**: legacy
 - **Deferred by**: `*__rubric_v1.json` -- v1 rubric snapshot taken on 2026-05-09 immediately before the v2 rubric anonymization landed. Kept on-disk for cross-rubric comparison; not to be re-judged. The going-forward (non-snapshot) caches are being re-judged under v2 in a separate process.  *(at 2026-05-09T03:37:03+00:00)*
 
+### `/Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/relativist_vs_absolutist/haiku_responses_roles_b10_q9/correlations.json`
+- **Was**: stale_direct
+- **Deferred by**: `*/correlations.json` -- Legacy judge cache pre-dating Phase 6 provenance mechanism (May 2026). Presumed current as of mechanism introduction; cost-prohibitive to re-judge. Deferral auto-clears when the producer is re-run (envelope replaces legacy bare JSON).  *(at 2026-05-08T15:45:35+00:00)*
+
 ### `/Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/relativist_vs_absolutist/haiku_responses_roles_b10_q9/correlations__rubric_v1.json`
 - **Was**: legacy
 - **Deferred by**: `*__rubric_v1.json` -- v1 rubric snapshot taken on 2026-05-09 immediately before the v2 rubric anonymization landed. Kept on-disk for cross-rubric comparison; not to be re-judged. The going-forward (non-snapshot) caches are being re-judged under v2 in a separate process.  *(at 2026-05-09T03:37:03+00:00)*
@@ -4850,6 +5584,14 @@ These caches would otherwise be stale (``stale_direct`` or ``stale_transitive``)
 ### `/Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/relativist_vs_absolutist/haiku_responses_roles_b10_q9/gaps__rubric_v1.json`
 - **Was**: legacy
 - **Deferred by**: `*__rubric_v1.json` -- v1 rubric snapshot taken on 2026-05-09 immediately before the v2 rubric anonymization landed. Kept on-disk for cross-rubric comparison; not to be re-judged. The going-forward (non-snapshot) caches are being re-judged under v2 in a separate process.  *(at 2026-05-09T03:37:03+00:00)*
+
+### `/Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/relativist_vs_absolutist/haiku_responses_roles_b10_q9/projections.json`
+- **Was**: stale_direct
+- **Deferred by**: `*/projections.json` -- Legacy judge cache pre-dating Phase 6 provenance mechanism (May 2026). Presumed current as of mechanism introduction; cost-prohibitive to re-judge. Deferral auto-clears when the producer is re-run (envelope replaces legacy bare JSON).  *(at 2026-05-08T15:45:25+00:00)*
+
+### `/Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/relativist_vs_absolutist/haiku_responses_roles_b10_q9/scores_responses.json`
+- **Was**: stale_direct
+- **Deferred by**: `*/scores_responses.json` -- Legacy judge cache pre-dating Phase 6 provenance mechanism (May 2026). Presumed current as of mechanism introduction; cost-prohibitive to re-judge. Deferral auto-clears when the producer is re-run (envelope replaces legacy bare JSON).  *(at 2026-05-08T15:45:15+00:00)*
 
 ### `/Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/relativist_vs_absolutist/haiku_responses_roles_b10_q9/scores_responses__rubric_v1.json`
 - **Was**: legacy
@@ -4863,6 +5605,10 @@ These caches would otherwise be stale (``stale_direct`` or ``stale_transitive``)
 - **Was**: legacy
 - **Deferred by**: `*__rubric_v1.json` -- v1 rubric snapshot taken on 2026-05-09 immediately before the v2 rubric anonymization landed. Kept on-disk for cross-rubric comparison; not to be re-judged. The going-forward (non-snapshot) caches are being re-judged under v2 in a separate process.  *(at 2026-05-09T03:37:03+00:00)*
 
+### `/Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/relativist_vs_absolutist/haiku_responses_traits_b10_q9/correlations.json`
+- **Was**: stale_direct
+- **Deferred by**: `*/correlations.json` -- Legacy judge cache pre-dating Phase 6 provenance mechanism (May 2026). Presumed current as of mechanism introduction; cost-prohibitive to re-judge. Deferral auto-clears when the producer is re-run (envelope replaces legacy bare JSON).  *(at 2026-05-08T15:45:35+00:00)*
+
 ### `/Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/relativist_vs_absolutist/haiku_responses_traits_b10_q9/correlations__rubric_v1.json`
 - **Was**: legacy
 - **Deferred by**: `*__rubric_v1.json` -- v1 rubric snapshot taken on 2026-05-09 immediately before the v2 rubric anonymization landed. Kept on-disk for cross-rubric comparison; not to be re-judged. The going-forward (non-snapshot) caches are being re-judged under v2 in a separate process.  *(at 2026-05-09T03:37:03+00:00)*
@@ -4874,6 +5620,14 @@ These caches would otherwise be stale (``stale_direct`` or ``stale_transitive``)
 ### `/Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/relativist_vs_absolutist/haiku_responses_traits_b10_q9/gaps__rubric_v1.json`
 - **Was**: legacy
 - **Deferred by**: `*__rubric_v1.json` -- v1 rubric snapshot taken on 2026-05-09 immediately before the v2 rubric anonymization landed. Kept on-disk for cross-rubric comparison; not to be re-judged. The going-forward (non-snapshot) caches are being re-judged under v2 in a separate process.  *(at 2026-05-09T03:37:03+00:00)*
+
+### `/Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/relativist_vs_absolutist/haiku_responses_traits_b10_q9/projections.json`
+- **Was**: stale_direct
+- **Deferred by**: `*/projections.json` -- Legacy judge cache pre-dating Phase 6 provenance mechanism (May 2026). Presumed current as of mechanism introduction; cost-prohibitive to re-judge. Deferral auto-clears when the producer is re-run (envelope replaces legacy bare JSON).  *(at 2026-05-08T15:45:25+00:00)*
+
+### `/Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/relativist_vs_absolutist/haiku_responses_traits_b10_q9/scores_responses.json`
+- **Was**: stale_direct
+- **Deferred by**: `*/scores_responses.json` -- Legacy judge cache pre-dating Phase 6 provenance mechanism (May 2026). Presumed current as of mechanism introduction; cost-prohibitive to re-judge. Deferral auto-clears when the producer is re-run (envelope replaces legacy bare JSON).  *(at 2026-05-08T15:45:15+00:00)*
 
 ### `/Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/relativist_vs_absolutist/haiku_responses_traits_b10_q9/scores_responses__rubric_v1.json`
 - **Was**: legacy
@@ -5023,6 +5777,10 @@ These caches would otherwise be stale (``stale_direct`` or ``stale_transitive``)
 - **Was**: legacy
 - **Deferred by**: `*__rubric_v1.json` -- v1 rubric snapshot taken on 2026-05-09 immediately before the v2 rubric anonymization landed. Kept on-disk for cross-rubric comparison; not to be re-judged. The going-forward (non-snapshot) caches are being re-judged under v2 in a separate process.  *(at 2026-05-09T03:37:03+00:00)*
 
+### `/Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/systems_thinker_vs_analytical/gpt_responses_roles_b10/correlations.json`
+- **Was**: stale_direct
+- **Deferred by**: `*/correlations.json` -- Legacy judge cache pre-dating Phase 6 provenance mechanism (May 2026). Presumed current as of mechanism introduction; cost-prohibitive to re-judge. Deferral auto-clears when the producer is re-run (envelope replaces legacy bare JSON).  *(at 2026-05-08T15:45:35+00:00)*
+
 ### `/Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/systems_thinker_vs_analytical/gpt_responses_roles_b10/correlations__rubric_v1.json`
 - **Was**: legacy
 - **Deferred by**: `*__rubric_v1.json` -- v1 rubric snapshot taken on 2026-05-09 immediately before the v2 rubric anonymization landed. Kept on-disk for cross-rubric comparison; not to be re-judged. The going-forward (non-snapshot) caches are being re-judged under v2 in a separate process.  *(at 2026-05-09T03:37:03+00:00)*
@@ -5034,6 +5792,14 @@ These caches would otherwise be stale (``stale_direct`` or ``stale_transitive``)
 ### `/Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/systems_thinker_vs_analytical/gpt_responses_roles_b10/gaps__rubric_v1.json`
 - **Was**: legacy
 - **Deferred by**: `*__rubric_v1.json` -- v1 rubric snapshot taken on 2026-05-09 immediately before the v2 rubric anonymization landed. Kept on-disk for cross-rubric comparison; not to be re-judged. The going-forward (non-snapshot) caches are being re-judged under v2 in a separate process.  *(at 2026-05-09T03:37:03+00:00)*
+
+### `/Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/systems_thinker_vs_analytical/gpt_responses_roles_b10/projections.json`
+- **Was**: stale_direct
+- **Deferred by**: `*/projections.json` -- Legacy judge cache pre-dating Phase 6 provenance mechanism (May 2026). Presumed current as of mechanism introduction; cost-prohibitive to re-judge. Deferral auto-clears when the producer is re-run (envelope replaces legacy bare JSON).  *(at 2026-05-08T15:45:25+00:00)*
+
+### `/Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/systems_thinker_vs_analytical/gpt_responses_roles_b10/scores_responses.json`
+- **Was**: stale_direct
+- **Deferred by**: `*/scores_responses.json` -- Legacy judge cache pre-dating Phase 6 provenance mechanism (May 2026). Presumed current as of mechanism introduction; cost-prohibitive to re-judge. Deferral auto-clears when the producer is re-run (envelope replaces legacy bare JSON).  *(at 2026-05-08T15:45:15+00:00)*
 
 ### `/Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/systems_thinker_vs_analytical/gpt_responses_roles_b10/scores_responses__rubric_v1.json`
 - **Was**: legacy
@@ -5071,6 +5837,10 @@ These caches would otherwise be stale (``stale_direct`` or ``stale_transitive``)
 - **Was**: legacy
 - **Deferred by**: `*__rubric_v1.json` -- v1 rubric snapshot taken on 2026-05-09 immediately before the v2 rubric anonymization landed. Kept on-disk for cross-rubric comparison; not to be re-judged. The going-forward (non-snapshot) caches are being re-judged under v2 in a separate process.  *(at 2026-05-09T03:37:03+00:00)*
 
+### `/Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/systems_thinker_vs_analytical/gpt_responses_traits_b10/correlations.json`
+- **Was**: stale_direct
+- **Deferred by**: `*/correlations.json` -- Legacy judge cache pre-dating Phase 6 provenance mechanism (May 2026). Presumed current as of mechanism introduction; cost-prohibitive to re-judge. Deferral auto-clears when the producer is re-run (envelope replaces legacy bare JSON).  *(at 2026-05-08T15:45:35+00:00)*
+
 ### `/Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/systems_thinker_vs_analytical/gpt_responses_traits_b10/correlations__rubric_v1.json`
 - **Was**: legacy
 - **Deferred by**: `*__rubric_v1.json` -- v1 rubric snapshot taken on 2026-05-09 immediately before the v2 rubric anonymization landed. Kept on-disk for cross-rubric comparison; not to be re-judged. The going-forward (non-snapshot) caches are being re-judged under v2 in a separate process.  *(at 2026-05-09T03:37:03+00:00)*
@@ -5082,6 +5852,14 @@ These caches would otherwise be stale (``stale_direct`` or ``stale_transitive``)
 ### `/Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/systems_thinker_vs_analytical/gpt_responses_traits_b10/gaps__rubric_v1.json`
 - **Was**: legacy
 - **Deferred by**: `*__rubric_v1.json` -- v1 rubric snapshot taken on 2026-05-09 immediately before the v2 rubric anonymization landed. Kept on-disk for cross-rubric comparison; not to be re-judged. The going-forward (non-snapshot) caches are being re-judged under v2 in a separate process.  *(at 2026-05-09T03:37:03+00:00)*
+
+### `/Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/systems_thinker_vs_analytical/gpt_responses_traits_b10/projections.json`
+- **Was**: stale_direct
+- **Deferred by**: `*/projections.json` -- Legacy judge cache pre-dating Phase 6 provenance mechanism (May 2026). Presumed current as of mechanism introduction; cost-prohibitive to re-judge. Deferral auto-clears when the producer is re-run (envelope replaces legacy bare JSON).  *(at 2026-05-08T15:45:25+00:00)*
+
+### `/Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/systems_thinker_vs_analytical/gpt_responses_traits_b10/scores_responses.json`
+- **Was**: stale_direct
+- **Deferred by**: `*/scores_responses.json` -- Legacy judge cache pre-dating Phase 6 provenance mechanism (May 2026). Presumed current as of mechanism introduction; cost-prohibitive to re-judge. Deferral auto-clears when the producer is re-run (envelope replaces legacy bare JSON).  *(at 2026-05-08T15:45:15+00:00)*
 
 ### `/Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/systems_thinker_vs_analytical/gpt_responses_traits_b10/scores_responses__rubric_v1.json`
 - **Was**: legacy
@@ -5119,6 +5897,10 @@ These caches would otherwise be stale (``stale_direct`` or ``stale_transitive``)
 - **Was**: legacy
 - **Deferred by**: `*__rubric_v1.json` -- v1 rubric snapshot taken on 2026-05-09 immediately before the v2 rubric anonymization landed. Kept on-disk for cross-rubric comparison; not to be re-judged. The going-forward (non-snapshot) caches are being re-judged under v2 in a separate process.  *(at 2026-05-09T03:37:03+00:00)*
 
+### `/Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/systems_thinker_vs_analytical/haiku_responses_roles_b10_q9/correlations.json`
+- **Was**: stale_direct
+- **Deferred by**: `*/correlations.json` -- Legacy judge cache pre-dating Phase 6 provenance mechanism (May 2026). Presumed current as of mechanism introduction; cost-prohibitive to re-judge. Deferral auto-clears when the producer is re-run (envelope replaces legacy bare JSON).  *(at 2026-05-08T15:45:35+00:00)*
+
 ### `/Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/systems_thinker_vs_analytical/haiku_responses_roles_b10_q9/correlations__rubric_v1.json`
 - **Was**: legacy
 - **Deferred by**: `*__rubric_v1.json` -- v1 rubric snapshot taken on 2026-05-09 immediately before the v2 rubric anonymization landed. Kept on-disk for cross-rubric comparison; not to be re-judged. The going-forward (non-snapshot) caches are being re-judged under v2 in a separate process.  *(at 2026-05-09T03:37:03+00:00)*
@@ -5130,6 +5912,14 @@ These caches would otherwise be stale (``stale_direct`` or ``stale_transitive``)
 ### `/Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/systems_thinker_vs_analytical/haiku_responses_roles_b10_q9/gaps__rubric_v1.json`
 - **Was**: legacy
 - **Deferred by**: `*__rubric_v1.json` -- v1 rubric snapshot taken on 2026-05-09 immediately before the v2 rubric anonymization landed. Kept on-disk for cross-rubric comparison; not to be re-judged. The going-forward (non-snapshot) caches are being re-judged under v2 in a separate process.  *(at 2026-05-09T03:37:03+00:00)*
+
+### `/Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/systems_thinker_vs_analytical/haiku_responses_roles_b10_q9/projections.json`
+- **Was**: stale_direct
+- **Deferred by**: `*/projections.json` -- Legacy judge cache pre-dating Phase 6 provenance mechanism (May 2026). Presumed current as of mechanism introduction; cost-prohibitive to re-judge. Deferral auto-clears when the producer is re-run (envelope replaces legacy bare JSON).  *(at 2026-05-08T15:45:25+00:00)*
+
+### `/Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/systems_thinker_vs_analytical/haiku_responses_roles_b10_q9/scores_responses.json`
+- **Was**: stale_direct
+- **Deferred by**: `*/scores_responses.json` -- Legacy judge cache pre-dating Phase 6 provenance mechanism (May 2026). Presumed current as of mechanism introduction; cost-prohibitive to re-judge. Deferral auto-clears when the producer is re-run (envelope replaces legacy bare JSON).  *(at 2026-05-08T15:45:15+00:00)*
 
 ### `/Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/systems_thinker_vs_analytical/haiku_responses_roles_b10_q9/scores_responses__rubric_v1.json`
 - **Was**: legacy
@@ -5143,6 +5933,10 @@ These caches would otherwise be stale (``stale_direct`` or ``stale_transitive``)
 - **Was**: legacy
 - **Deferred by**: `*__rubric_v1.json` -- v1 rubric snapshot taken on 2026-05-09 immediately before the v2 rubric anonymization landed. Kept on-disk for cross-rubric comparison; not to be re-judged. The going-forward (non-snapshot) caches are being re-judged under v2 in a separate process.  *(at 2026-05-09T03:37:03+00:00)*
 
+### `/Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/systems_thinker_vs_analytical/haiku_responses_traits_b10_q9/correlations.json`
+- **Was**: stale_direct
+- **Deferred by**: `*/correlations.json` -- Legacy judge cache pre-dating Phase 6 provenance mechanism (May 2026). Presumed current as of mechanism introduction; cost-prohibitive to re-judge. Deferral auto-clears when the producer is re-run (envelope replaces legacy bare JSON).  *(at 2026-05-08T15:45:35+00:00)*
+
 ### `/Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/systems_thinker_vs_analytical/haiku_responses_traits_b10_q9/correlations__rubric_v1.json`
 - **Was**: legacy
 - **Deferred by**: `*__rubric_v1.json` -- v1 rubric snapshot taken on 2026-05-09 immediately before the v2 rubric anonymization landed. Kept on-disk for cross-rubric comparison; not to be re-judged. The going-forward (non-snapshot) caches are being re-judged under v2 in a separate process.  *(at 2026-05-09T03:37:03+00:00)*
@@ -5154,6 +5948,14 @@ These caches would otherwise be stale (``stale_direct`` or ``stale_transitive``)
 ### `/Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/systems_thinker_vs_analytical/haiku_responses_traits_b10_q9/gaps__rubric_v1.json`
 - **Was**: legacy
 - **Deferred by**: `*__rubric_v1.json` -- v1 rubric snapshot taken on 2026-05-09 immediately before the v2 rubric anonymization landed. Kept on-disk for cross-rubric comparison; not to be re-judged. The going-forward (non-snapshot) caches are being re-judged under v2 in a separate process.  *(at 2026-05-09T03:37:03+00:00)*
+
+### `/Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/systems_thinker_vs_analytical/haiku_responses_traits_b10_q9/projections.json`
+- **Was**: stale_direct
+- **Deferred by**: `*/projections.json` -- Legacy judge cache pre-dating Phase 6 provenance mechanism (May 2026). Presumed current as of mechanism introduction; cost-prohibitive to re-judge. Deferral auto-clears when the producer is re-run (envelope replaces legacy bare JSON).  *(at 2026-05-08T15:45:25+00:00)*
+
+### `/Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/systems_thinker_vs_analytical/haiku_responses_traits_b10_q9/scores_responses.json`
+- **Was**: stale_direct
+- **Deferred by**: `*/scores_responses.json` -- Legacy judge cache pre-dating Phase 6 provenance mechanism (May 2026). Presumed current as of mechanism introduction; cost-prohibitive to re-judge. Deferral auto-clears when the producer is re-run (envelope replaces legacy bare JSON).  *(at 2026-05-08T15:45:15+00:00)*
 
 ### `/Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/systems_thinker_vs_analytical/haiku_responses_traits_b10_q9/scores_responses__rubric_v1.json`
 - **Was**: legacy
@@ -5359,6 +6161,10 @@ These caches would otherwise be stale (``stale_direct`` or ``stale_transitive``)
 - **Was**: legacy
 - **Deferred by**: `*__rubric_v1.json` -- v1 rubric snapshot taken on 2026-05-09 immediately before the v2 rubric anonymization landed. Kept on-disk for cross-rubric comparison; not to be re-judged. The going-forward (non-snapshot) caches are being re-judged under v2 in a separate process.  *(at 2026-05-09T03:37:03+00:00)*
 
+### `/Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/truthful_vs_deceitful/gpt_responses_roles_b10/correlations.json`
+- **Was**: stale_direct
+- **Deferred by**: `*/correlations.json` -- Legacy judge cache pre-dating Phase 6 provenance mechanism (May 2026). Presumed current as of mechanism introduction; cost-prohibitive to re-judge. Deferral auto-clears when the producer is re-run (envelope replaces legacy bare JSON).  *(at 2026-05-08T15:45:35+00:00)*
+
 ### `/Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/truthful_vs_deceitful/gpt_responses_roles_b10/correlations__rubric_v1.json`
 - **Was**: legacy
 - **Deferred by**: `*__rubric_v1.json` -- v1 rubric snapshot taken on 2026-05-09 immediately before the v2 rubric anonymization landed. Kept on-disk for cross-rubric comparison; not to be re-judged. The going-forward (non-snapshot) caches are being re-judged under v2 in a separate process.  *(at 2026-05-09T03:37:03+00:00)*
@@ -5370,6 +6176,14 @@ These caches would otherwise be stale (``stale_direct`` or ``stale_transitive``)
 ### `/Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/truthful_vs_deceitful/gpt_responses_roles_b10/gaps__rubric_v1.json`
 - **Was**: legacy
 - **Deferred by**: `*__rubric_v1.json` -- v1 rubric snapshot taken on 2026-05-09 immediately before the v2 rubric anonymization landed. Kept on-disk for cross-rubric comparison; not to be re-judged. The going-forward (non-snapshot) caches are being re-judged under v2 in a separate process.  *(at 2026-05-09T03:37:03+00:00)*
+
+### `/Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/truthful_vs_deceitful/gpt_responses_roles_b10/projections.json`
+- **Was**: stale_direct
+- **Deferred by**: `*/projections.json` -- Legacy judge cache pre-dating Phase 6 provenance mechanism (May 2026). Presumed current as of mechanism introduction; cost-prohibitive to re-judge. Deferral auto-clears when the producer is re-run (envelope replaces legacy bare JSON).  *(at 2026-05-08T15:45:25+00:00)*
+
+### `/Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/truthful_vs_deceitful/gpt_responses_roles_b10/scores_responses.json`
+- **Was**: stale_direct
+- **Deferred by**: `*/scores_responses.json` -- Legacy judge cache pre-dating Phase 6 provenance mechanism (May 2026). Presumed current as of mechanism introduction; cost-prohibitive to re-judge. Deferral auto-clears when the producer is re-run (envelope replaces legacy bare JSON).  *(at 2026-05-08T15:45:15+00:00)*
 
 ### `/Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/truthful_vs_deceitful/gpt_responses_roles_b10/scores_responses__rubric_v1.json`
 - **Was**: legacy
@@ -5455,6 +6269,10 @@ These caches would otherwise be stale (``stale_direct`` or ``stale_transitive``)
 - **Was**: legacy
 - **Deferred by**: `*__rubric_v1.json` -- v1 rubric snapshot taken on 2026-05-09 immediately before the v2 rubric anonymization landed. Kept on-disk for cross-rubric comparison; not to be re-judged. The going-forward (non-snapshot) caches are being re-judged under v2 in a separate process.  *(at 2026-05-09T03:37:03+00:00)*
 
+### `/Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/truthful_vs_deceitful/gpt_responses_traits_b10/correlations.json`
+- **Was**: stale_direct
+- **Deferred by**: `*/correlations.json` -- Legacy judge cache pre-dating Phase 6 provenance mechanism (May 2026). Presumed current as of mechanism introduction; cost-prohibitive to re-judge. Deferral auto-clears when the producer is re-run (envelope replaces legacy bare JSON).  *(at 2026-05-08T15:45:35+00:00)*
+
 ### `/Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/truthful_vs_deceitful/gpt_responses_traits_b10/correlations__rubric_v1.json`
 - **Was**: legacy
 - **Deferred by**: `*__rubric_v1.json` -- v1 rubric snapshot taken on 2026-05-09 immediately before the v2 rubric anonymization landed. Kept on-disk for cross-rubric comparison; not to be re-judged. The going-forward (non-snapshot) caches are being re-judged under v2 in a separate process.  *(at 2026-05-09T03:37:03+00:00)*
@@ -5466,6 +6284,14 @@ These caches would otherwise be stale (``stale_direct`` or ``stale_transitive``)
 ### `/Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/truthful_vs_deceitful/gpt_responses_traits_b10/gaps__rubric_v1.json`
 - **Was**: legacy
 - **Deferred by**: `*__rubric_v1.json` -- v1 rubric snapshot taken on 2026-05-09 immediately before the v2 rubric anonymization landed. Kept on-disk for cross-rubric comparison; not to be re-judged. The going-forward (non-snapshot) caches are being re-judged under v2 in a separate process.  *(at 2026-05-09T03:37:03+00:00)*
+
+### `/Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/truthful_vs_deceitful/gpt_responses_traits_b10/projections.json`
+- **Was**: stale_direct
+- **Deferred by**: `*/projections.json` -- Legacy judge cache pre-dating Phase 6 provenance mechanism (May 2026). Presumed current as of mechanism introduction; cost-prohibitive to re-judge. Deferral auto-clears when the producer is re-run (envelope replaces legacy bare JSON).  *(at 2026-05-08T15:45:25+00:00)*
+
+### `/Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/truthful_vs_deceitful/gpt_responses_traits_b10/scores_responses.json`
+- **Was**: stale_direct
+- **Deferred by**: `*/scores_responses.json` -- Legacy judge cache pre-dating Phase 6 provenance mechanism (May 2026). Presumed current as of mechanism introduction; cost-prohibitive to re-judge. Deferral auto-clears when the producer is re-run (envelope replaces legacy bare JSON).  *(at 2026-05-08T15:45:15+00:00)*
 
 ### `/Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/truthful_vs_deceitful/gpt_responses_traits_b10/scores_responses__rubric_v1.json`
 - **Was**: legacy
@@ -5575,6 +6401,10 @@ These caches would otherwise be stale (``stale_direct`` or ``stale_transitive``)
 - **Was**: legacy
 - **Deferred by**: `*__rubric_v1.json` -- v1 rubric snapshot taken on 2026-05-09 immediately before the v2 rubric anonymization landed. Kept on-disk for cross-rubric comparison; not to be re-judged. The going-forward (non-snapshot) caches are being re-judged under v2 in a separate process.  *(at 2026-05-09T03:37:03+00:00)*
 
+### `/Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/truthful_vs_deceitful/haiku_responses_roles_b10_q9/correlations.json`
+- **Was**: stale_direct
+- **Deferred by**: `*/correlations.json` -- Legacy judge cache pre-dating Phase 6 provenance mechanism (May 2026). Presumed current as of mechanism introduction; cost-prohibitive to re-judge. Deferral auto-clears when the producer is re-run (envelope replaces legacy bare JSON).  *(at 2026-05-08T15:45:35+00:00)*
+
 ### `/Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/truthful_vs_deceitful/haiku_responses_roles_b10_q9/correlations__rubric_v1.json`
 - **Was**: legacy
 - **Deferred by**: `*__rubric_v1.json` -- v1 rubric snapshot taken on 2026-05-09 immediately before the v2 rubric anonymization landed. Kept on-disk for cross-rubric comparison; not to be re-judged. The going-forward (non-snapshot) caches are being re-judged under v2 in a separate process.  *(at 2026-05-09T03:37:03+00:00)*
@@ -5586,6 +6416,14 @@ These caches would otherwise be stale (``stale_direct`` or ``stale_transitive``)
 ### `/Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/truthful_vs_deceitful/haiku_responses_roles_b10_q9/gaps__rubric_v1.json`
 - **Was**: legacy
 - **Deferred by**: `*__rubric_v1.json` -- v1 rubric snapshot taken on 2026-05-09 immediately before the v2 rubric anonymization landed. Kept on-disk for cross-rubric comparison; not to be re-judged. The going-forward (non-snapshot) caches are being re-judged under v2 in a separate process.  *(at 2026-05-09T03:37:03+00:00)*
+
+### `/Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/truthful_vs_deceitful/haiku_responses_roles_b10_q9/projections.json`
+- **Was**: stale_direct
+- **Deferred by**: `*/projections.json` -- Legacy judge cache pre-dating Phase 6 provenance mechanism (May 2026). Presumed current as of mechanism introduction; cost-prohibitive to re-judge. Deferral auto-clears when the producer is re-run (envelope replaces legacy bare JSON).  *(at 2026-05-08T15:45:25+00:00)*
+
+### `/Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/truthful_vs_deceitful/haiku_responses_roles_b10_q9/scores_responses.json`
+- **Was**: stale_direct
+- **Deferred by**: `*/scores_responses.json` -- Legacy judge cache pre-dating Phase 6 provenance mechanism (May 2026). Presumed current as of mechanism introduction; cost-prohibitive to re-judge. Deferral auto-clears when the producer is re-run (envelope replaces legacy bare JSON).  *(at 2026-05-08T15:45:15+00:00)*
 
 ### `/Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/truthful_vs_deceitful/haiku_responses_roles_b10_q9/scores_responses__rubric_v1.json`
 - **Was**: legacy
@@ -5623,6 +6461,10 @@ These caches would otherwise be stale (``stale_direct`` or ``stale_transitive``)
 - **Was**: legacy
 - **Deferred by**: `*__rubric_v1.json` -- v1 rubric snapshot taken on 2026-05-09 immediately before the v2 rubric anonymization landed. Kept on-disk for cross-rubric comparison; not to be re-judged. The going-forward (non-snapshot) caches are being re-judged under v2 in a separate process.  *(at 2026-05-09T03:37:03+00:00)*
 
+### `/Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/truthful_vs_deceitful/haiku_responses_traits_b10_q9/correlations.json`
+- **Was**: stale_direct
+- **Deferred by**: `*/correlations.json` -- Legacy judge cache pre-dating Phase 6 provenance mechanism (May 2026). Presumed current as of mechanism introduction; cost-prohibitive to re-judge. Deferral auto-clears when the producer is re-run (envelope replaces legacy bare JSON).  *(at 2026-05-08T15:45:35+00:00)*
+
 ### `/Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/truthful_vs_deceitful/haiku_responses_traits_b10_q9/correlations__rubric_v1.json`
 - **Was**: legacy
 - **Deferred by**: `*__rubric_v1.json` -- v1 rubric snapshot taken on 2026-05-09 immediately before the v2 rubric anonymization landed. Kept on-disk for cross-rubric comparison; not to be re-judged. The going-forward (non-snapshot) caches are being re-judged under v2 in a separate process.  *(at 2026-05-09T03:37:03+00:00)*
@@ -5634,6 +6476,14 @@ These caches would otherwise be stale (``stale_direct`` or ``stale_transitive``)
 ### `/Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/truthful_vs_deceitful/haiku_responses_traits_b10_q9/gaps__rubric_v1.json`
 - **Was**: legacy
 - **Deferred by**: `*__rubric_v1.json` -- v1 rubric snapshot taken on 2026-05-09 immediately before the v2 rubric anonymization landed. Kept on-disk for cross-rubric comparison; not to be re-judged. The going-forward (non-snapshot) caches are being re-judged under v2 in a separate process.  *(at 2026-05-09T03:37:03+00:00)*
+
+### `/Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/truthful_vs_deceitful/haiku_responses_traits_b10_q9/projections.json`
+- **Was**: stale_direct
+- **Deferred by**: `*/projections.json` -- Legacy judge cache pre-dating Phase 6 provenance mechanism (May 2026). Presumed current as of mechanism introduction; cost-prohibitive to re-judge. Deferral auto-clears when the producer is re-run (envelope replaces legacy bare JSON).  *(at 2026-05-08T15:45:25+00:00)*
+
+### `/Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/truthful_vs_deceitful/haiku_responses_traits_b10_q9/scores_responses.json`
+- **Was**: stale_direct
+- **Deferred by**: `*/scores_responses.json` -- Legacy judge cache pre-dating Phase 6 provenance mechanism (May 2026). Presumed current as of mechanism introduction; cost-prohibitive to re-judge. Deferral auto-clears when the producer is re-run (envelope replaces legacy bare JSON).  *(at 2026-05-08T15:45:15+00:00)*
 
 ### `/Users/roger/Documents/GitHub/assistant-axis/roger/axis_judge_experiments/truthful_vs_deceitful/haiku_responses_traits_b10_q9/scores_responses__rubric_v1.json`
 - **Was**: legacy
@@ -64126,6 +64976,6 @@ These caches would otherwise be stale (``stale_direct`` or ``stale_transitive``)
 - **Was**: legacy
 - **Deferred by**: `runpod_workspace/*` -- Dataset content under runpod_workspace/<dataset>/ is tracked via per-dataset MANIFEST.json rather than per-file _provenance envelopes (see AGENT_NOTES.md 'Manifest-tracked producers').  Freshness is asserted by re-running tools/regenerate_dataset_manifest.py and confirming a byte-identical MANIFEST.json (the manifest is stable on unchanged input).  Audit reports against the analysis tree (roger/) trace freshness through file-level dependencies into these subtrees automatically.  *(at 2026-05-09T04:04:36+00:00)*
 
-## Legacy (2002)
+## Legacy (1)
 
 JSONs without a ``_provenance`` envelope.  Either pre-migration caches, hand-written config (pair lists, manifests), or pipeline outputs (judge caches).  Audit can't say anything about them; downstream caches track their freshness via mtime/size only.

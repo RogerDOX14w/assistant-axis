@@ -55,6 +55,7 @@ from concurrent.futures import Future
 from typing import Any, Callable, Dict, List, Optional, Protocol, Sequence, Tuple
 
 from .atomic_io import read_jsonl_with_retry, write_jsonl
+from .judge_batch import RESPONSE_BATCH_SIZE
 from .judge import (
     RateLimiter,
     call_judge_single_unified,
@@ -482,7 +483,13 @@ _VALID_EFFECT_MODES = (
 DEFAULT_EFFECT_MODELS: Tuple[str, str] = ("gpt-4.1-mini", "claude-haiku-4-5-20251001")
 DEFAULT_COHERENCE_MODEL = "gpt-4.1-mini"
 DEFAULT_RP_MODEL = "gpt-4.1-mini"
-DEFAULT_TARGET_BATCH_SIZE = 10
+DEFAULT_TARGET_BATCH_SIZE = RESPONSE_BATCH_SIZE
+"""Steering effect-judge default batch size.
+
+Pinned to the canonical :data:`assistant_axis.judge_batch.RESPONSE_BATCH_SIZE`
+so the steering effect-judge score distribution is apples-to-apples
+with the axis-judge response-mode distribution at the same batch size.
+Bump that constant (not this one) to change both in lockstep."""
 DEFAULT_SKIP_THRESHOLD = 1.0
 DEFAULT_COH_STOP_THRESHOLD = 1.5
 
