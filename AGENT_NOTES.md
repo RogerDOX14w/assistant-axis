@@ -1214,66 +1214,79 @@ corrupted on disk?".  Until then, metadata fingerprints are
 strictly cheaper for equal-or-better real-world behaviour in
 Roger's workflow.
 
-### Combining desc/inst judge scores (use the canonical helper)
+### Combining judge scores: use the canonical helpers and constants
 
-When reducing the four (judge × mode) judge scores
-`{GPT_d, GPT_i, Son_d, Son_i}` to a single per-entity scalar, ALWAYS
-use the canonical helper at `assistant_axis/judge_score_combine.py`
-rather than rolling the formula inline.  The default is **inst-tiebreak
-weighting** (`0.499*desc + 0.501*inst`), applied after averaging
-across the two judges per mode:
+Three families of empirically-tuned mixing ratios live in
+[`assistant_axis/judge_score_combine.py`](assistant_axis/judge_score_combine.py)
+and govern how scripts reduce multiple judge × mode scores to a
+single per-entity scalar.  Always import the constants instead of
+re-declaring magic floats so a future re-tuning propagates with one
+edit.
+
+| Constant | Default | Weights |
+|---|---|---|
+| `DEFAULT_DI_WEIGHTS` | `(0.499, 0.501)` | desc / inst within one judge |
+| `DEFAULT_GPT_HAIKU_Q9_WEIGHT` | `0.60` | GPT_b10 / Haiku_q9 in the response-mode ensemble |
+| `DEFAULT_RESPONSE_DI_WEIGHT` | `0.80` | response / desc+inst in the final per-entity score |
+
+Full empirical derivation, per-axis discussion, tuning history, and
+**the re-tuning checklist** for when new judging data lands live at
+[`results_analysis/README.md` → "Convention: tuned mixing ratios for
+judge ensembles"](results_analysis/README.md#convention-tuned-mixing-ratios-for-judge-ensembles).
+Read that section *before* changing any of the three constants.
 
 ```python
 from assistant_axis.judge_score_combine import (
+    DEFAULT_DI_WEIGHTS,
+    DEFAULT_GPT_HAIKU_Q9_WEIGHT,
+    DEFAULT_RESPONSE_DI_WEIGHT,
     combine_desc_inst_two_judges, add_di_weights_arg, parse_di_weights_arg,
 )
 
-# Default = inst-tiebreak (0.499 * desc + 0.501 * inst per entity).
-scores = combine_desc_inst_two_judges(g_d, g_i, s_d, s_i)
+# 1. desc + inst within one judge (or 4-way GPT+Sonnet):
+di = combine_desc_inst_two_judges(g_d, g_i, s_d, s_i)
 
-# CLI integration (registers --di_weights with all 3 choices):
+# 2. within-response ensemble:
+response = {
+    n: DEFAULT_GPT_HAIKU_Q9_WEIGHT * gpt[n]
+       + (1 - DEFAULT_GPT_HAIKU_Q9_WEIGHT) * haiku_q9[n]
+    for n in set(gpt) & set(haiku_q9)
+}
+
+# 3. final blend:
+final = {
+    n: DEFAULT_RESPONSE_DI_WEIGHT * response[n]
+       + (1 - DEFAULT_RESPONSE_DI_WEIGHT) * di[n]
+    for n in set(response) & set(di)
+}
+
+# CLI integration for the desc/inst tiebreak knob:
 add_di_weights_arg(parser)
 args = parser.parse_args()
-weights = parse_di_weights_arg(args.di_weights)
-scores = combine_desc_inst_two_judges(g_d, g_i, s_d, s_i, weights=weights)
+weights = parse_di_weights_arg(args.di_weights)  # → tuple, e.g. (0.499, 0.501)
 ```
 
-**Why the asymmetry?** The 0.499/0.501 weights are essentially equal
-but act as a tiebreaker for entities where desc and inst disagree,
-leaning slightly toward instructions.  Empirically, at slot=(3,25) /
-(0,26) / (0,49), inst-tiebreak gave consistently higher mean
-activation→judge ρ than equal weighting (~+0.0005 ρ), and equal in
-turn beat desc-tiebreak by a similar margin — the ordering is monotonic
-across all (slot, layer) configurations tested.  This matches the
-desc/inst judge audit that found instruction-mode judging more reliable
-than description-mode (~99% defensible vs ~94%).
-
-CLI override on any script using the helper:
-
-```bash
---di_weights {inst_tie,equal,desc_tie}   # default: inst_tie
-```
-
-`equal` reproduces the historical 0.5/0.5 weighting (= 4-way mean of
-the four scores). `desc_tie` is for ablation. The asymmetry only
-affects entities where the two modes disagree, so the *direction* of
-ρ comparisons remains essentially unchanged across the three weights;
-the absolute ρ shift is in the third decimal.
-
-**Anti-pattern**: don't compute the 4-way mean inline:
+**Anti-pattern**: don't compute means or blends inline:
 
 ```python
-# BAD -- defeats the convention; can't ablate; out of date if the
-# default ever changes:
-scores = {n: (g_d[n] + g_i[n] + s_d[n] + s_i[n]) / 4 for n in common}
+# BAD -- defeats the convention; can't ablate; out of date if a default changes:
+scores = {n: 0.5 * resp[n] + 0.5 * di[n] for n in common}
 
 # GOOD -- canonical, ablatable, future-proof:
-from assistant_axis.judge_score_combine import combine_desc_inst_two_judges
-scores = combine_desc_inst_two_judges(g_d, g_i, s_d, s_i)
+scores = {
+    n: DEFAULT_RESPONSE_DI_WEIGHT * resp[n]
+       + (1 - DEFAULT_RESPONSE_DI_WEIGHT) * di[n]
+    for n in common
+}
 ```
 
-Existing callsites: `results_analysis/{rho_by_slot_and_K, rho_by_layer,
-whitening_k_sweep, gpt_sonnet_weight_sweep}.py`.
+Re-tuning is expected as new judging data accumulates; the README's
+"Re-tuning checklist" walks the per-sweep regen, the comparison
+plots to update, and the snapshot-before-invalidate ritual.
+
+Consumers today: `results_analysis/{rho_by_slot_and_K, rho_by_layer,
+whitening_k_sweep, gpt_sonnet_weight_sweep, gpt_anthropic_response_weight_sweep,
+response_di_weight_sweep, rubric_v1_v2_compare, judge_ensemble_rho_curve}.py`.
 
 ### Steering judges (Phase-2 architecture)
 
@@ -1886,6 +1899,34 @@ Half an hour after a wipe, "I want to know how much things actually changed" is 
 3. For really expensive data: `rsync -a` into an offline backup directory (e.g. `~/Documents/assistant-axis-backups/<date>/`), or move to `~/.Trash` instead of deleting (the macOS Trash retains files until you explicitly empty it, so a wipe is recoverable for days/weeks if you change your mind).
 
 **Agent rule:** when about to run an invalidation/wipe/overwrite of expensive cache data, **bring this up before doing it** — propose a snapshot scheme, even briefly. It costs ~one tool call and saves the "ah, well" moment later. (This is the same instinct as `git stash` before a destructive rebase.)
+
+#### Off-tree archives (when in-tree is too big)
+
+Some snapshots are too bulky to fit the in-tree `archive/` pattern
+(itself 3-9 MB per subdir; the whole repo working tree is ~60 MB).
+For those, the convention is `~/Documents/assistant-axis-archives/<archive-name>/`
+on Roger's workstation, with a path note recorded here so a future
+agent can find them.
+
+Current off-tree archives:
+
+* `~/Documents/assistant-axis-archives/v1-response-caches-2026-05-09/`
+  — pre-anonymisation (rubric v1) per-axis response judge caches
+  captured just before the v1→v2 rejudge ran on 2026-05-09.  111 MB
+  xz-9 tarball (945 MB raw, 492 files spanning 116 axis × cohort
+  combinations).  The aggregate v1 plots / JSONs that drive the
+  v1↔v2 comparison story stay in-tree at
+  `roger/axis_judge_experiments/*__rubric_v1.{json,png}` and
+  `rubric_v1_v2_compare_slot6.{png,json}`.  The tarball is needed
+  only when re-running per-entity v1↔v2 analyses; restore via
+  `tar -xJf <tarball> -C /path/to/repo`.  Full README + manifest
+  lives next to the tarball.
+
+When promoting a snapshot to off-tree archive: keep an expanded
+copy on disk under `roger/...` (gitignored) for active workflows
+that read those paths, and put the canonical compressed copy +
+README + manifest in the off-tree dir.  Add a row above so the
+next agent / future-you can locate it.
 
 ### Combined response generation (pipeline)
 

@@ -69,6 +69,7 @@ from typing import Sequence
 import numpy as np
 
 from assistant_axis import json_metadata
+from assistant_axis.judge_score_combine import DEFAULT_GPT_HAIKU_Q9_WEIGHT
 from assistant_axis.provenance import (
     InputSpec,
     current_data_subtree_input,
@@ -231,6 +232,7 @@ def _compute_gpt_only_b10_per_axis_best_cell(
     axes: Sequence[tuple[str, str, str]],
     configs: Sequence[tuple[int, int]],
     geom: dict,
+    scores_filename: str = "scores_responses.json",
     inputs: list[InputSpec] | None = None,
 ) -> tuple[dict[str, float], dict[str, float]]:
     """For each axis, max ρ across cells using **GPT-only** B=10 scores.
@@ -246,6 +248,7 @@ def _compute_gpt_only_b10_per_axis_best_cell(
     for axis_name, pos_name, neg_name in axes:
         gpt = _load_response_scores(
             experiment_dir, axis_name, GPT_DIR_TEMPLATE,
+            scores_filename=scores_filename,
             judge_label="gpt_b10", inputs=inputs,
         )
         if not gpt:
@@ -273,6 +276,7 @@ def compute_ensemble_rho(
     configs: Sequence[tuple[int, int]],
     combos: Sequence[tuple[str, str]] = COMBOS,
     gpt_weight: float = 0.625,
+    scores_filename: str = "scores_responses.json",
     _geom: dict | None = None,
     inputs: list[InputSpec] | None = None,
 ) -> dict:
@@ -312,10 +316,12 @@ def compute_ensemble_rho(
 
             gpt = _load_response_scores(
                 experiment_dir, axis_name, GPT_DIR_TEMPLATE,
+                scores_filename=scores_filename,
                 judge_label="gpt_b10", inputs=inputs,
             )
             anth = _load_response_scores(
                 experiment_dir, axis_name, anth_template,
+                scores_filename=scores_filename,
                 judge_label=combo_label, inputs=inputs,
             )
             if not gpt or not anth:
@@ -386,17 +392,20 @@ def parse_args() -> argparse.Namespace:
         help=f"Where the per-axis judge dirs live.  Default: "
              f"{DEFAULT_EXPERIMENT_DIR}")
     p.add_argument(
-        "--gpt_weight", type=float, default=0.6,
-        help="Weight on GPT-mini in the ensemble; the Anthropic weight "
-             "is 1 - this.  Default 0.6 (rounded from the 12-axis "
-             "response-mode GPT/Haiku-q9 parabolic peak at w=0.609; "
-             "Haiku-q9 is the operating-point winner on cost-per-quality "
-             "across the 4-Pareto-set view, see "
-             "roger/axis_judge_experiments/batch_size_curve_8slot/"
-             "batch_size_cost_vs_quality.png).  Sonnet-q9's own peak is "
-             "higher (w≈0.73), but Sonnet is dominated by Haiku-q9 on "
-             "the Pareto frontier and is kept only for diagnostic "
-             "comparison.  Use 0.5 for even-50/50.")
+        "--gpt_weight", type=float, default=DEFAULT_GPT_HAIKU_Q9_WEIGHT,
+        help=f"Weight on GPT-mini in the ensemble; the Anthropic weight "
+             f"is 1 - this.  Default "
+             f"{DEFAULT_GPT_HAIKU_Q9_WEIGHT:g} (single source of truth: "
+             f"``DEFAULT_GPT_HAIKU_Q9_WEIGHT`` in "
+             f"``assistant_axis/judge_score_combine.py``; rounded from "
+             f"the 12-axis response-mode GPT/Haiku-q9 parabolic peak at "
+             f"w=0.609).  Haiku-q9 is the operating-point winner on "
+             f"cost-per-quality across the 4-Pareto-set view, see "
+             f"roger/axis_judge_experiments/batch_size_curve_8slot/"
+             f"batch_size_cost_vs_quality.png.  Sonnet-q9's own peak "
+             f"is higher (w≈0.73), but Sonnet is dominated by Haiku-q9 "
+             f"on the Pareto frontier and is kept only for diagnostic "
+             f"comparison.  Use 0.5 for even-50/50.")
     p.add_argument(
         "--axes_source", choices=["all_response_axes", "input_json"],
         default="all_response_axes",
@@ -404,6 +413,12 @@ def parse_args() -> argparse.Namespace:
              "ALL_RESPONSE_AXES (12 traits axes; combos with missing data "
              "auto-skip per axis).  'input_json' reuses raw['axes'] from the "
              "input JSON (the legacy 3-axis B-curve set).")
+    p.add_argument(
+        "--scores_filename", type=str, default="scores_responses.json",
+        help="Per-cell judge score cache filename (default: "
+             "scores_responses.json).  Pass scores_responses__rubric_v1.json "
+             "to read the v1 rubric snapshot for a v1-only ensemble view "
+             "(includes Sonnet and Haiku-full combos that don't exist in v2).")
     return p.parse_args()
 
 
@@ -458,6 +473,7 @@ def main() -> int:
             experiment_dir=Path(args.experiment_dir),
             data_dir=Path(args.data_dir),
             axes=axes_t, configs=configs, geom=geom,
+            scores_filename=args.scores_filename,
             inputs=inputs,
         )
     )
@@ -479,6 +495,7 @@ def main() -> int:
         data_dir=Path(args.data_dir),
         axes=axes_t, configs=configs,
         gpt_weight=float(args.gpt_weight),
+        scores_filename=args.scores_filename,
         # Reuse pre-computed geometry to avoid the duplicate setup_at cost.
         _geom=geom,
         inputs=inputs,

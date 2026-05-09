@@ -4,43 +4,189 @@ Scripts that analyze outputs of the [`pipeline/`](../pipeline/) — vectors, sco
 responses, axes. Parallel in intent to [`data_analysis/`](../data_analysis/),
 which _prepares_ the role/trait data for the pipeline.
 
-## Convention: combining desc/inst scores
+## Convention: tuned mixing ratios for judge ensembles
 
-When reducing the four (judge × mode) judge scores `{GPT_d, GPT_i,
-Son_d, Son_i}` to a single per-entity scalar, scripts in this
-directory call into the canonical helper at
-[`assistant_axis/judge_score_combine.py`](../assistant_axis/judge_score_combine.py).
-The default weighting is **inst-tiebreak** (`0.499*desc + 0.501*inst`),
-applied after averaging across the two judges per mode:
+Three families of weights govern how this project reduces multiple
+judge × mode scores to a single per-entity scalar.  All three live
+as named constants in
+[`assistant_axis/judge_score_combine.py`](../assistant_axis/judge_score_combine.py)
+(single source of truth; that module's docstring carries the full
+empirical derivation for each value).  Import the constants instead
+of re-declaring magic floats so future re-tunings propagate
+everywhere with one edit.
 
 ```python
-from assistant_axis.judge_score_combine import combine_desc_inst_two_judges
+from assistant_axis.judge_score_combine import (
+    DEFAULT_DI_WEIGHTS,            # 0.499 desc / 0.501 inst    (per-judge)
+    DEFAULT_GPT_HAIKU_Q9_WEIGHT,   # 0.60 GPT / 0.40 Haiku-q9   (response ensemble)
+    DEFAULT_RESPONSE_DI_WEIGHT,    # 0.80 response / 0.20 DI    (final blend)
+    combine_desc_inst_two_judges,
+)
+```
+
+| # | Constant | Default | What it weights | Tuning script | Operating cell |
+|---|---|---|---|---|---|
+| 1 | `DEFAULT_DI_WEIGHTS` | `(0.499, 0.501)` | desc / inst within one judge | (manual sweep, ablations encoded as the `inst_tie`/`equal`/`desc_tie` choices) | slot=(3,25) / (0,26) / (0,49) |
+| 2 | `DEFAULT_GPT_HAIKU_Q9_WEIGHT` | `0.60` | GPT_b10 / Haiku_q9 within the response-mode ensemble | `gpt_anthropic_response_weight_sweep.py` | slot 6 / layer 25 |
+| 3 | `DEFAULT_RESPONSE_DI_WEIGHT` | `0.80` | response ensemble / desc+inst ensemble in the final per-entity score | `response_di_weight_sweep.py` | slot 6 / layer 25 |
+
+### 1. Per-judge desc / inst (inst-tiebreak)
+
+`(0.499, 0.501)` is essentially equal but **acts as a tiebreaker**
+for entities where desc and inst disagree, leaning slightly toward
+instructions.  Empirical rationale: at slot=(3,25) / (0,26) /
+(0,49), inst-tiebreak gave consistently higher mean activation→
+judge ρ than equal weighting (~+0.0005 ρ), and equal in turn beat
+desc-tiebreak by a similar margin — the ordering is monotonic
+across all (slot, layer) configurations tested.  Matches the
+desc/inst judge audit that found instruction-mode judging more
+reliable than description-mode (~99% defensible vs ~94%).
+
+```python
 scores = combine_desc_inst_two_judges(g_d, g_i, s_d, s_i)
 # equivalent to: 0.499 * (g_d + s_d)/2 + 0.501 * (g_i + s_i)/2
 ```
 
-The 0.499/0.501 weights are essentially equal but **act as a
-tiebreaker** for entities where desc and inst disagree, leaning
-slightly toward instructions. Empirical rationale: at slot=(3,25) /
-(0,26) / (0,49), inst-tiebreak gave consistently higher mean
-activation→judge ρ than equal weighting (~+0.0005 ρ), and equal in
-turn beat desc-tiebreak by a similar margin -- the ordering is
-monotonic across all (slot, layer) configurations tested.  This
-matches the desc/inst judge audit that found instruction-mode judging
-more reliable than description-mode (~99% defensible vs ~94%).
-
-To compare or ablate, scripts that use this helper expose a CLI flag::
+CLI ablation on any consumer:
 
     --di_weights {inst_tie,equal,desc_tie}   # default: inst_tie
 
-`equal` reproduces the historical 0.5/0.5 weighting (= 4-way mean of
-the four scores). `desc_tie` is for ablation. The asymmetry only
-affects entities where the two modes disagree, so the *direction* of
-ρ comparisons remains essentially unchanged across the three weights;
-the absolute ρ shift is in the third decimal.
+`equal` reproduces the historical 0.5/0.5 weighting; `desc_tie` is
+the symmetric ablation.  Absolute ρ shift across the three is in
+the third decimal — *direction* comparisons are insensitive to
+the choice.
 
-Scripts using the helper today: `rho_by_slot_and_K.py`,
-`rho_by_layer.py`, `whitening_k_sweep.py`, `gpt_sonnet_weight_sweep.py`.
+Consumers today: `rho_by_slot_and_K.py`, `rho_by_layer.py`,
+`whitening_k_sweep.py`, `gpt_sonnet_weight_sweep.py`,
+`response_di_weight_sweep.py`, `rubric_v1_v2_compare.py`,
+`judge_ensemble_rho_curve.py`.
+
+### 2. Within the response ensemble (`DEFAULT_GPT_HAIKU_Q9_WEIGHT`)
+
+`0.60` weight on GPT-4.1-mini B=10, `0.40` on Haiku-q9 (B=10,
+1/3-question subsample) for the response-mode ensemble:
+
+```python
+response = {
+    n: DEFAULT_GPT_HAIKU_Q9_WEIGHT * gpt_resp[n]
+       + (1 - DEFAULT_GPT_HAIKU_Q9_WEIGHT) * haiku_resp[n]
+    for n in set(gpt_resp) & set(haiku_resp)
+}
+```
+
+Picked from the GPT × Haiku-q9 weight sweep at slot 6 / layer 25
+(`gpt_anthropic_response_weight_sweep.py`; plot at
+`roger/axis_judge_experiments/gpt_haiku_q9_response_weight_sweep_slot6.png`).
+The 12-axis parabolic fit on the interior `[0.1, 0.9]` peaks at
+**w ≈ 0.609**; rounded to 0.60 for cleaner reporting.  Mean ρ is
+essentially flat over `w ∈ [0.5, 0.75]` (~0.001 spread), so the
+round number costs nothing measurable.  Haiku-q9 is the
+operating-point winner on cost-per-quality across the 4-Pareto-set
+view (`batch_size_curve_8slot/batch_size_cost_vs_quality.png`);
+Sonnet-q9's own peak is higher (`w ≈ 0.73`) but Sonnet is dominated
+by Haiku-q9 on the Pareto frontier and is kept only for diagnostic
+comparison.
+
+CLI override on `judge_ensemble_rho_curve.py`:
+
+    --gpt_weight FLOAT   # default: DEFAULT_GPT_HAIKU_Q9_WEIGHT (= 0.60)
+
+### 3. Response × desc+inst final blend (`DEFAULT_RESPONSE_DI_WEIGHT`)
+
+`0.80` weight on the response ensemble, `0.20` on the desc+inst
+ensemble in the final per-entity score:
+
+```python
+di = combine_desc_inst_two_judges(g_d, g_i, s_d, s_i)
+final = {
+    n: DEFAULT_RESPONSE_DI_WEIGHT * response[n]
+       + (1 - DEFAULT_RESPONSE_DI_WEIGHT) * di[n]
+    for n in set(response) & set(di)
+}
+```
+
+Picked from the response × desc+inst weight sweep at slot 6 /
+layer 25 (`response_di_weight_sweep.py`; plot at
+`roger/axis_judge_experiments/response_di_weight_sweep_slot6.png`).
+Two parabolic fits informed the round number:
+
+- **12-axis** (all response-mode axes): peak at `w ≈ 0.84`,
+  ρ ≈ 0.763.
+- **11-axis** (excluding `ecocentric_vs_anthropocentric`, the
+  outlier where Haiku-q9 is essentially uncorrelated on desc+inst
+  at ρ ≈ 0.11; plot at
+  `roger/axis_judge_experiments/response_di_weight_sweep_slot6_no_eco_anthro.png`):
+  peak at `w ≈ 0.71`, ρ ≈ 0.772.
+
+`0.80` lands in the flat plateau of *both* curves — 12-axis ρ at
+w=0.8 is 0.762 (vs 0.763 at the peak); 11-axis ρ at w=0.8 is 0.770
+(vs 0.772 at the peak) — so the choice is robust to whether
+eco/anthro is treated as a regular member or a held-out anomaly.
+
+The complementary view of *why* this matters lives at
+`roger/axis_judge_experiments/rubric_v1_v2_compare_slot6.png`
+(`rubric_v1_v2_compare.py`): under the v2 rubric the combined-mode
+mean ρ delta is +0.019 across the
+12 axes (vs only +0.006 for response alone), and per-axis losses
+in response-only mode are largely recovered or fully reversed once
+desc+inst is mixed in.
+
+### Tuning history
+
+Every tuning event re-runs the relevant sweep script and updates
+the central constant.  Audit trail:
+
+| Date | Constant changed | From | To | Rationale / driver |
+|---|---|---|---|---|
+| (legacy) | `DEFAULT_DI_WEIGHTS` | — | `(0.499, 0.501)` | Initial sweep at slot=(3,25)/(0,26)/(0,49); see module docstring. |
+| 2026-05-08 | `DEFAULT_GPT_HAIKU_Q9_WEIGHT` | (was 0.5 = "even split" at first) | `0.60` | 12-axis sweep, parabolic peak at w=0.609 rounded; Pareto-frontier check on cost-per-quality. |
+| 2026-05-09 | `DEFAULT_RESPONSE_DI_WEIGHT` | `0.50` (placeholder) | `0.80` | 12-axis and 11-axis-without-eco sweeps both flat-plateau at w=0.8 (12-axis peak 0.84, 11-axis peak 0.71). |
+
+### Re-tuning checklist
+
+When new judging data lands (more axes, a new judge, a re-batched
+cohort, etc.), expect to revisit ratios 2 and 3.  The drill:
+
+1. **Inventory what's new.** Which axes / judges / batch sizes /
+   subsample modes have caches under `roger/axis_judge_experiments/`?
+   The `tools/audit_caches.py` markdown report is the easiest way
+   to enumerate.
+2. **Re-run sweep 2 (within-response):**
+
+   ```bash
+   for combo in haiku_q9 haiku_full sonnet_q9; do
+       uv run python -m results_analysis.gpt_anthropic_response_weight_sweep \
+           --anthropic_combo "$combo"
+   done
+   ```
+
+   Compare new vs old `gpt_haiku_q9_response_weight_sweep_slot6.json`
+   parabolic peak `w`.  If the shift is non-trivial (>0.03 say), or
+   the ρ improvement at the new peak vs `0.60` exceeds noise floor
+   (~0.04 SE per axis, scales by `1/sqrt(n_axes)` for the mean), bump
+   `DEFAULT_GPT_HAIKU_Q9_WEIGHT`.
+3. **Re-run sweep 3 (final blend):**
+
+   ```bash
+   uv run python -m results_analysis.response_di_weight_sweep
+   uv run python -m results_analysis.response_di_weight_sweep \
+       --exclude_axes ecocentric_vs_anthropocentric
+   ```
+
+   Both 12-axis and outlier-excluded variants matter — the
+   round-number plateau choice is best when the two peaks
+   bracket it.  Re-tune `DEFAULT_RESPONSE_DI_WEIGHT` if the new
+   round-number plateau midpoint moves by more than ~0.05.
+4. **Update the central docstring + this README** with the new
+   numbers and add a row to the tuning-history table above so the
+   audit trail stays continuous.
+5. **Snapshot before invalidating.**  Per the snapshot-before-
+   invalidate principle (see `AGENT_NOTES.md`), if the constant
+   change implies redoing some judging, take a `__rubric_vN.json`
+   snapshot of every cache the change will overwrite *before*
+   running the rejudge — the v1↔v2 comparison plots
+   (`rubric_v1_v2_compare.py`) depend on those snapshots existing
+   on disk.
 
 ## Convention: provenance for analysis scripts
 
