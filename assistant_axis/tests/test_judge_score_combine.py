@@ -6,6 +6,9 @@ import pytest
 
 from assistant_axis.judge_score_combine import (
     DEFAULT_DI_WEIGHTS,
+    DEFAULT_GPT_HAIKU_Q9_WEIGHT,
+    DEFAULT_GPT_SONNET_DI_WEIGHT,
+    DEFAULT_RESPONSE_DI_WEIGHT,
     DI_WEIGHTS_DESC_TIE,
     DI_WEIGHTS_EQUAL,
     DI_WEIGHTS_INST_TIE,
@@ -121,3 +124,69 @@ def test_inst_tiebreak_only_matters_when_desc_neq_inst():
 def test_inst_tiebreak_weights_sum_to_one():
     for w in (DI_WEIGHTS_INST_TIE, DI_WEIGHTS_EQUAL, DI_WEIGHTS_DESC_TIE):
         assert math.isclose(sum(w), 1.0, abs_tol=1e-9)
+
+
+def test_centralized_blend_constants_in_unit_interval():
+    """All single-float blend weights must sit in [0, 1] and represent
+    the empirical defaults documented in the module docstring + README."""
+    assert DEFAULT_GPT_SONNET_DI_WEIGHT == 0.50
+    assert DEFAULT_GPT_HAIKU_Q9_WEIGHT == 0.60
+    assert DEFAULT_RESPONSE_DI_WEIGHT == 0.80
+    for w in (DEFAULT_GPT_SONNET_DI_WEIGHT,
+              DEFAULT_GPT_HAIKU_Q9_WEIGHT,
+              DEFAULT_RESPONSE_DI_WEIGHT):
+        assert 0.0 <= w <= 1.0
+
+
+def test_combine_two_judges_default_gs_matches_legacy_average():
+    """At default ``gpt_sonnet_weight = 0.5`` the parameterised function
+    must reproduce the historical hardcoded ``(gpt + sonnet) / 2``
+    averaging exactly -- guards the strict-generalisation property."""
+    g_d = {"x": 2, "y": -1, "z": 3}
+    g_i = {"x": 2, "y":  3, "z": -2}
+    s_d = {"x": 0, "y": -1, "z": -1}
+    s_i = {"x": 2, "y":  3, "z": 1}
+    out_param = combine_desc_inst_two_judges(g_d, g_i, s_d, s_i)
+    for n in g_d:
+        # Manual legacy formula: (gd + sd) / 2 and (gi + si) / 2,
+        # then 0.499 / 0.501 desc/inst combine.
+        desc_avg = (g_d[n] + s_d[n]) / 2
+        inst_avg = (g_i[n] + s_i[n]) / 2
+        manual = 0.499 * desc_avg + 0.501 * inst_avg
+        assert out_param[n] == pytest.approx(manual), n
+
+
+def test_combine_two_judges_gs_weight_extremes():
+    """At ``gpt_sonnet_weight = 1.0`` the score must collapse to GPT only;
+    at ``gpt_sonnet_weight = 0.0`` it must collapse to Sonnet only."""
+    g_d = {"x": 2, "y": -1}
+    g_i = {"x": 2, "y":  3}
+    s_d = {"x": 0, "y":  0}
+    s_i = {"x": 0, "y":  0}
+    only_gpt = combine_desc_inst_two_judges(
+        g_d, g_i, s_d, s_i, gpt_sonnet_weight=1.0)
+    only_sonnet = combine_desc_inst_two_judges(
+        g_d, g_i, s_d, s_i, gpt_sonnet_weight=0.0)
+    # With sonnet zeroed out and w_gs=1, only_gpt should equal the GPT-only
+    # desc/inst combine of g_d, g_i.
+    gpt_alone = combine_desc_inst_one_judge(g_d, g_i)
+    for n in g_d:
+        assert only_gpt[n] == pytest.approx(gpt_alone[n]), n
+    # With Sonnet zeroed out and w_gs=0, only_sonnet picks up Sonnet only --
+    # which is zero everywhere here.
+    for n in g_d:
+        assert only_sonnet[n] == pytest.approx(0.0), n
+
+
+def test_combine_two_judges_gs_weight_intermediate_linear():
+    """Score should be linear in gpt_sonnet_weight when desc and inst
+    are held fixed across the two judges (no tiebreak interaction)."""
+    g_d = {"x": 4}
+    g_i = {"x": 4}        # GPT says 4 in both modes
+    s_d = {"x": 0}
+    s_i = {"x": 0}        # Sonnet says 0 in both modes
+    # At w_gs in {0.0, 0.25, 0.5, 0.75, 1.0}, score should be 4 * w_gs.
+    for w in (0.0, 0.25, 0.5, 0.75, 1.0):
+        out = combine_desc_inst_two_judges(
+            g_d, g_i, s_d, s_i, gpt_sonnet_weight=w)
+        assert out["x"] == pytest.approx(4.0 * w), w

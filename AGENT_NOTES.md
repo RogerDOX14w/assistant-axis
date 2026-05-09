@@ -1226,6 +1226,7 @@ edit.
 | Constant | Default | Weights |
 |---|---|---|
 | `DEFAULT_DI_WEIGHTS` | `(0.499, 0.501)` | desc / inst within one judge |
+| `DEFAULT_GPT_SONNET_DI_WEIGHT` | `0.50` | GPT / Sonnet within the desc+inst ensemble (per mode) |
 | `DEFAULT_GPT_HAIKU_Q9_WEIGHT` | `0.60` | GPT_b10 / Haiku_q9 in the response-mode ensemble |
 | `DEFAULT_RESPONSE_DI_WEIGHT` | `0.80` | response / desc+inst in the final per-entity score |
 
@@ -1238,12 +1239,15 @@ Read that section *before* changing any of the three constants.
 ```python
 from assistant_axis.judge_score_combine import (
     DEFAULT_DI_WEIGHTS,
+    DEFAULT_GPT_SONNET_DI_WEIGHT,
     DEFAULT_GPT_HAIKU_Q9_WEIGHT,
     DEFAULT_RESPONSE_DI_WEIGHT,
     combine_desc_inst_two_judges, add_di_weights_arg, parse_di_weights_arg,
 )
 
 # 1. desc + inst within one judge (or 4-way GPT+Sonnet):
+#    The 4-way uses DEFAULT_GPT_SONNET_DI_WEIGHT (= 0.50) by default;
+#    pass gpt_sonnet_weight=... for ablations.
 di = combine_desc_inst_two_judges(g_d, g_i, s_d, s_i)
 
 # 2. within-response ensemble:

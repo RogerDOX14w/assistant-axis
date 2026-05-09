@@ -281,11 +281,11 @@
     "schema_version": "1.0",
     "produced_by": {
       "cmd": "uv run python -m results_analysis.rubric_v1_v2_compare",
-      "git_sha": "1a93c4f+dirty",
+      "git_sha": "f9f4a42+dirty",
       "author": "Roger Dearnaley",
       "title": "rubric_v1_v2_compare"
     },
-    "produced_at": "2026-05-09 14:46:10 +0100",
+    "produced_at": "2026-05-09 15:47:50 +0100",
     "inputs": [
       {
         "dep_key": "producer_script",

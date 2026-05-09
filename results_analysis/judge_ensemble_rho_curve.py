@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """Compute response-mode ρ for **judge ensembles**: GPT-4.1-mini at B=10
-combined 50/50 with each of three Anthropic options on the same items.
+weighted with each of three Anthropic options on the same items.
 
 For each ensemble combo × axis × (slot, layer) cell, we:
 
@@ -8,8 +8,13 @@ For each ensemble combo × axis × (slot, layer) cell, we:
    ``<experiment_dir>/<axis>/<dir>/scores_responses.json`` for both
    judges (e.g. ``gpt_responses_<side>_b10`` and
    ``haiku_responses_<side>_b10_q9``), combining roles + traits sides.
-2. Combine them with ``combined[name] = 0.5 * gpt[name] + 0.5 * anth[name]``
-   over the entities present in BOTH judges' caches.
+2. Combine them with
+   ``combined[name] = w * gpt[name] + (1 - w) * anth[name]``
+   over the entities present in BOTH judges' caches.  The default
+   weight is the project-wide
+   :data:`assistant_axis.judge_score_combine.DEFAULT_GPT_HAIKU_Q9_WEIGHT`
+   (= 0.60 as of May 2026; rounded from the parabolic peak of the
+   12-axis sweep at slot 6).  Override per-run with ``--gpt_weight``.
 3. Run the same ``(L, K)`` sweep that ``batch_size_rho_curve`` uses
    (coarse grid + bracket-and-bisect on K), taking the best ρ as that
    (combo, axis, cell)'s score.

@@ -6,8 +6,8 @@ which _prepares_ the role/trait data for the pipeline.
 
 ## Convention: tuned mixing ratios for judge ensembles
 
-Three families of weights govern how this project reduces multiple
-judge × mode scores to a single per-entity scalar.  All three live
+Four families of weights govern how this project reduces multiple
+judge × mode scores to a single per-entity scalar.  All four live
 as named constants in
 [`assistant_axis/judge_score_combine.py`](../assistant_axis/judge_score_combine.py)
 (single source of truth; that module's docstring carries the full
@@ -17,9 +17,10 @@ everywhere with one edit.
 
 ```python
 from assistant_axis.judge_score_combine import (
-    DEFAULT_DI_WEIGHTS,            # 0.499 desc / 0.501 inst    (per-judge)
-    DEFAULT_GPT_HAIKU_Q9_WEIGHT,   # 0.60 GPT / 0.40 Haiku-q9   (response ensemble)
-    DEFAULT_RESPONSE_DI_WEIGHT,    # 0.80 response / 0.20 DI    (final blend)
+    DEFAULT_DI_WEIGHTS,             # 0.499 desc / 0.501 inst   (within one judge)
+    DEFAULT_GPT_SONNET_DI_WEIGHT,   # 0.50 GPT / 0.50 Sonnet    (within desc+inst ensemble)
+    DEFAULT_GPT_HAIKU_Q9_WEIGHT,    # 0.60 GPT / 0.40 Haiku-q9  (within response ensemble)
+    DEFAULT_RESPONSE_DI_WEIGHT,     # 0.80 response / 0.20 DI   (final blend)
     combine_desc_inst_two_judges,
 )
 ```
@@ -27,8 +28,9 @@ from assistant_axis.judge_score_combine import (
 | # | Constant | Default | What it weights | Tuning script | Operating cell |
 |---|---|---|---|---|---|
 | 1 | `DEFAULT_DI_WEIGHTS` | `(0.499, 0.501)` | desc / inst within one judge | (manual sweep, ablations encoded as the `inst_tie`/`equal`/`desc_tie` choices) | slot=(3,25) / (0,26) / (0,49) |
-| 2 | `DEFAULT_GPT_HAIKU_Q9_WEIGHT` | `0.60` | GPT_b10 / Haiku_q9 within the response-mode ensemble | `gpt_anthropic_response_weight_sweep.py` | slot 6 / layer 25 |
-| 3 | `DEFAULT_RESPONSE_DI_WEIGHT` | `0.80` | response ensemble / desc+inst ensemble in the final per-entity score | `response_di_weight_sweep.py` | slot 6 / layer 25 |
+| 2 | `DEFAULT_GPT_SONNET_DI_WEIGHT` | `0.50` | GPT / Sonnet within the desc+inst ensemble (per mode) | `gpt_sonnet_weight_sweep.py` | slot 3 / layer 25 |
+| 3 | `DEFAULT_GPT_HAIKU_Q9_WEIGHT` | `0.60` | GPT_b10 / Haiku_q9 within the response-mode ensemble | `gpt_anthropic_response_weight_sweep.py` | slot 6 / layer 25 |
+| 4 | `DEFAULT_RESPONSE_DI_WEIGHT` | `0.80` | response ensemble / desc+inst ensemble in the final per-entity score | `response_di_weight_sweep.py` | slot 6 / layer 25 |
 
 ### 1. Per-judge desc / inst (inst-tiebreak)
 
@@ -61,7 +63,37 @@ Consumers today: `rho_by_slot_and_K.py`, `rho_by_layer.py`,
 `response_di_weight_sweep.py`, `rubric_v1_v2_compare.py`,
 `judge_ensemble_rho_curve.py`.
 
-### 2. Within the response ensemble (`DEFAULT_GPT_HAIKU_Q9_WEIGHT`)
+### 2. Within the desc+inst ensemble (`DEFAULT_GPT_SONNET_DI_WEIGHT`)
+
+`0.50` weight on GPT, `0.50` on Sonnet, applied per-mode (desc and
+inst separately) before the desc/inst tiebreak combination:
+
+```python
+di = combine_desc_inst_two_judges(g_d, g_i, s_d, s_i)
+# Equivalent to:
+#   desc_avg = 0.50 * g_d + 0.50 * s_d
+#   inst_avg = 0.50 * g_i + 0.50 * s_i
+#   score    = 0.499 * desc_avg + 0.501 * inst_avg
+```
+
+Picked from the GPT × Sonnet weight sweep on desc+inst at slot 3 /
+layer 25 across 33 axes (`gpt_sonnet_weight_sweep.py`).  The 33-axis
+parabolic fit on the interior `[0.1, 0.9]` peaks at **w = 0.530**
+with mean ρ = 0.5949 — *0.0004 below* the discrete 50/50 value of
+0.5953.  The curve is so flat that the entire decision-relevant
+range (`w ∈ [0.1, 0.9]`) sits within ±0.0004 of peak, so `0.50` is
+the empirical optimum and reproduces the historical 4-way mean
+`(g_d + g_i + s_d + s_i) / 4` when paired with `DI_WEIGHTS_EQUAL`.
+
+The function takes an optional `gpt_sonnet_weight` parameter for
+ablations; at `0.5` it's mathematically identical to the historical
+hardcoded `(gpt + sonnet) / 2` averaging that pre-dated the
+parameterisation.  No CLI knob today (the empirical case for
+re-tuning is essentially nonexistent at the operating point); add
+one if a future sweep with new judges or new axes shifts the peak
+outside `[0.45, 0.55]`.
+
+### 3. Within the response ensemble (`DEFAULT_GPT_HAIKU_Q9_WEIGHT`)
 
 `0.60` weight on GPT-4.1-mini B=10, `0.40` on Haiku-q9 (B=10,
 1/3-question subsample) for the response-mode ensemble:
@@ -91,7 +123,7 @@ CLI override on `judge_ensemble_rho_curve.py`:
 
     --gpt_weight FLOAT   # default: DEFAULT_GPT_HAIKU_Q9_WEIGHT (= 0.60)
 
-### 3. Response × desc+inst final blend (`DEFAULT_RESPONSE_DI_WEIGHT`)
+### 4. Response × desc+inst final blend (`DEFAULT_RESPONSE_DI_WEIGHT`)
 
 `0.80` weight on the response ensemble, `0.20` on the desc+inst
 ensemble in the final per-entity score:
@@ -139,6 +171,7 @@ the central constant.  Audit trail:
 | Date | Constant changed | From | To | Rationale / driver |
 |---|---|---|---|---|
 | (legacy) | `DEFAULT_DI_WEIGHTS` | — | `(0.499, 0.501)` | Initial sweep at slot=(3,25)/(0,26)/(0,49); see module docstring. |
+| (legacy) | hardcoded GPT/Sonnet `(g + s)/2` | — | (parameterised, default 0.50) | Pre-dated the constant catalog; promoted to `DEFAULT_GPT_SONNET_DI_WEIGHT = 0.50` on 2026-05-09 for symmetry with the other three. 33-axis sweep peaks at w=0.530 with mean ρ within 0.0004 of the round-number value. |
 | 2026-05-08 | `DEFAULT_GPT_HAIKU_Q9_WEIGHT` | (was 0.5 = "even split" at first) | `0.60` | 12-axis sweep, parabolic peak at w=0.609 rounded; Pareto-frontier check on cost-per-quality. |
 | 2026-05-09 | `DEFAULT_RESPONSE_DI_WEIGHT` | `0.50` (placeholder) | `0.80` | 12-axis and 11-axis-without-eco sweeps both flat-plateau at w=0.8 (12-axis peak 0.84, 11-axis peak 0.71). |
 

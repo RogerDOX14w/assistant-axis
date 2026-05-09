@@ -1,6 +1,6 @@
 """Standard, empirically-tuned mixing ratios for combining judge scores.
 
-Three families of weights live here, all derived from sweeps at the
+Four families of weights live here, all derived from sweeps at the
 project's operating-point cells (slot 6 / layer 25 for response-mode,
 slot 3 / 0 / 0 for desc+inst).  Centralised so any new analysis or
 plotting script gets the project's current best-default with a single
@@ -9,9 +9,10 @@ import.
 ::
 
     from assistant_axis.judge_score_combine import (
-        DEFAULT_DI_WEIGHTS,            # 0.499 desc / 0.501 inst    (per-judge)
-        DEFAULT_GPT_HAIKU_Q9_WEIGHT,   # 0.60 GPT / 0.40 Haiku-q9   (response)
-        DEFAULT_RESPONSE_DI_WEIGHT,    # 0.80 response / 0.20 DI    (final)
+        DEFAULT_DI_WEIGHTS,             # 0.499 desc / 0.501 inst   (within one judge)
+        DEFAULT_GPT_SONNET_DI_WEIGHT,   # 0.50 GPT / 0.50 Sonnet    (within desc+inst ensemble)
+        DEFAULT_GPT_HAIKU_Q9_WEIGHT,    # 0.60 GPT / 0.40 Haiku-q9  (within response ensemble)
+        DEFAULT_RESPONSE_DI_WEIGHT,     # 0.80 response / 0.20 DI   (final blend)
         combine_desc_inst_two_judges,
     )
 
@@ -34,7 +35,28 @@ import.
    description-mode judging (~99% defensible on inst vs ~90% on
    desc; see the desc/inst audit).
 
-2. **Within-response judge ensemble** --
+2. **Within desc+inst ensemble (GPT vs Sonnet)** --
+   ``DEFAULT_GPT_SONNET_DI_WEIGHT``: weight on GPT-4.1-mini's
+   per-mode scores when averaging GPT and Sonnet inside the
+   desc+inst ensemble (the rest goes on Sonnet).  Default ``0.50``.
+
+   Picked from the GPT × Sonnet weight sweep on desc+inst at slot
+   3 / layer 25 across 33 axes (see
+   ``results_analysis/gpt_sonnet_weight_sweep.py``; full results
+   in ``results_analysis/README.md``).  The 33-axis parabolic fit
+   on the interior ``[0.1, 0.9]`` peaks at ``w = 0.530`` with mean
+   ρ = 0.5949 -- *0.0004 below* the discrete 50/50 value of
+   0.5953.  The curve is so flat that the entire decision-relevant
+   range (``w ∈ [0.1, 0.9]``) sits within ±0.0004 of peak, so
+   ``0.50`` is the empirical optimum and the round number that
+   reproduces the historical 4-way mean ``(g_d + g_i + s_d + s_i) / 4``
+   when paired with ``DI_WEIGHTS_EQUAL``.
+
+   Re-tune only if a future sweep with substantially different
+   judges or axes shows the parabolic peak shifting outside
+   ``[0.45, 0.55]``.
+
+3. **Within-response judge ensemble** --
    ``DEFAULT_GPT_HAIKU_Q9_WEIGHT``: weight on GPT-4.1-mini B=10 in
    the response-mode ensemble (the rest goes on Haiku-q9).
    Default ``0.60``.
@@ -46,7 +68,7 @@ import.
    ρ is essentially flat over ``w ∈ [0.5, 0.75]`` (~0.001 spread),
    so the round number costs nothing measurable.
 
-3. **Final response × desc+inst blend** -- ``DEFAULT_RESPONSE_DI_WEIGHT``:
+4. **Final response × desc+inst blend** -- ``DEFAULT_RESPONSE_DI_WEIGHT``:
    weight on the response ensemble in the final per-entity score
    (the rest goes on the desc+inst ensemble).  Default ``0.80``.
 
@@ -64,6 +86,11 @@ Usage examples::
     # Combine one judge's desc + inst with the standard tiebreak.
     scores = combine_desc_inst_one_judge(g_d, g_i)
 
+    # Combine GPT + Sonnet desc+inst (4-way) at the standard 0.5/0.5
+    # GPT-Sonnet split + inst-tiebreak desc/inst weight.  Pass
+    # gpt_sonnet_weight=... to override the cross-judge mix.
+    di = combine_desc_inst_two_judges(g_d, g_i, s_d, s_i)
+
     # Build the response ensemble.
     response = {
         n: DEFAULT_GPT_HAIKU_Q9_WEIGHT * gpt_resp[n]
@@ -72,7 +99,6 @@ Usage examples::
     }
 
     # Build the final per-entity score.
-    di = combine_desc_inst_two_judges(g_d, g_i, s_d, s_i)
     final = {
         n: DEFAULT_RESPONSE_DI_WEIGHT * response[n]
            + (1 - DEFAULT_RESPONSE_DI_WEIGHT) * di[n]
@@ -95,6 +121,14 @@ DI_WEIGHTS_DESC_TIE: Tuple[float, float] = (0.501, 0.499)
 
 DEFAULT_DI_WEIGHTS: Tuple[float, float] = DI_WEIGHTS_INST_TIE
 
+
+# Cross-judge weight on GPT-4.1-mini inside the desc+inst ensemble
+# (the rest goes on Sonnet, applied per-mode before the desc/inst
+# tiebreak).  See module docstring for derivation.  At 0.50 this
+# produces the historical 4-way mean ``(g_d + g_i + s_d + s_i) / 4``
+# when paired with ``DI_WEIGHTS_EQUAL`` -- the parameterised function
+# is a strict generalisation of the old hardcoded ``/2`` averaging.
+DEFAULT_GPT_SONNET_DI_WEIGHT: float = 0.50
 
 # Within-response ensemble weight on GPT-4.1-mini B=10 (the rest goes
 # on Haiku-q9).  See module docstring for derivation.
@@ -164,29 +198,47 @@ def combine_desc_inst_two_judges(
     sonnet_desc: Dict[str, float],
     sonnet_inst: Dict[str, float],
     weights: Tuple[float, float] = DEFAULT_DI_WEIGHTS,
+    gpt_sonnet_weight: float = DEFAULT_GPT_SONNET_DI_WEIGHT,
 ) -> Dict[str, float]:
     """Combine two judges' desc and inst scores into a single scalar per entity.
 
-    Equivalent to averaging across the two judges first (per mode), then
-    combining desc and inst with the supplied weights::
+    Cross-judge weighted average per mode, then desc/inst weighted
+    combination::
 
-        desc_avg = (gpt_desc + sonnet_desc) / 2
-        inst_avg = (gpt_inst + sonnet_inst) / 2
+        desc_avg = w_gs * gpt_desc + (1 - w_gs) * sonnet_desc
+        inst_avg = w_gs * gpt_inst + (1 - w_gs) * sonnet_inst
         score    = w_d * desc_avg + w_i * inst_avg
 
-    Only includes entities present in all four input dicts with numeric scores.
+    With the defaults ``w_gs = 0.5`` and ``weights = (0.499, 0.501)``
+    this is the project standard.  At ``w_gs = 0.5`` the function is
+    mathematically identical to the historical hardcoded
+    ``(gpt + sonnet) / 2`` averaging; the parameterisation is a
+    strict generalisation kept for the rare case where a future
+    sweep would justify a non-50/50 GPT/Sonnet split (see the module
+    docstring's ``DEFAULT_GPT_SONNET_DI_WEIGHT`` derivation -- the
+    33-axis sweep places the parabolic peak so close to 0.5 that
+    the round number is the empirical optimum).
+
+    Only includes entities present in all four input dicts with
+    numeric scores.
 
     Parameters
     ----------
     gpt_desc, gpt_inst, sonnet_desc, sonnet_inst : dict[name -> int | float]
     weights : (desc_weight, inst_weight)
-        Defaults to inst-tiebreak (0.499, 0.501).
+        Defaults to inst-tiebreak ``(0.499, 0.501)``.
+    gpt_sonnet_weight : float
+        Cross-judge weight on GPT (the rest goes on Sonnet) per mode,
+        applied before the desc/inst combination.  Default
+        ``DEFAULT_GPT_SONNET_DI_WEIGHT`` (= 0.50).
 
     Returns
     -------
     dict[name -> float]
     """
     w_d, w_i = weights
+    w_gs = gpt_sonnet_weight
+    w_son = 1.0 - w_gs
     common = (
         set(gpt_desc) & set(gpt_inst) & set(sonnet_desc) & set(sonnet_inst)
     )
@@ -195,8 +247,8 @@ def combine_desc_inst_two_judges(
         gd, gi, sd, si = gpt_desc[n], gpt_inst[n], sonnet_desc[n], sonnet_inst[n]
         if not all(isinstance(v, (int, float)) for v in (gd, gi, sd, si)):
             continue
-        desc_avg = (gd + sd) / 2.0
-        inst_avg = (gi + si) / 2.0
+        desc_avg = w_gs * gd + w_son * sd
+        inst_avg = w_gs * gi + w_son * si
         out[n] = w_d * desc_avg + w_i * inst_avg
     return out
 
