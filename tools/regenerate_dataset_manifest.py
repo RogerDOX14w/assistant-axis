@@ -142,6 +142,44 @@ def _is_skipped(p: Path) -> bool:
     return False
 
 
+# ---------------------------------------------------------------------------
+# TODO(phase-7-deferred): Subtree content hashing
+#
+# Today's ``summary_sha256`` is metadata-only -- a hash over sorted
+# ``[(rel_path, mtime_ns_floored, size), ...]`` triples.  That makes
+# manifest regen <1 second for the full dataset and is rsync-stable by
+# construction (mtime is floored to whole seconds, matching ``rsync -t``
+# precision), but it cannot tell ``cp``-without-mtime-preserve from a
+# real edit, cannot recognize a fresh ``git checkout`` of identical
+# bytes, and cannot detect on-disk bit-rot.
+#
+# The full design rationale, cost analysis, decision criteria, and
+# implementation plan live as the ``TODO(phase-7-deferred)`` block at
+# the top of ``assistant_axis/provenance.py``.  This is the manifest-
+# regen-side checklist for picking it up; both sites must move
+# together.
+#
+#   1. Add ``content_sha256: str`` to ``SubtreeSummary`` below.
+#   2. In ``_summarize``, stream each file with ``hashlib.sha256()``
+#      (1 MB chunks) and accumulate ``(rel_path, file_sha)`` pairs.
+#      The subtree's ``content_sha256`` = SHA-256 of the sorted JSON
+#      list of those pairs.  Keep the existing metadata-triple
+#      ``summary_sha256`` alongside for backwards compatibility and
+#      for the cheap-validate path.
+#   3. Add a ``--metadata-only`` CLI flag to bypass content hashing
+#      when speed matters; otherwise content hashing is the default
+#      once added.  Print per-subtree progress (``hashing X: NN MB
+#      in NN s``) since regen will go from <1 s to ~30-60 s on
+#      local SSD (see canonical TODO for full numbers).
+#   4. Bump ``FINGERPRINT_KIND`` to ``"mtime_size_v1+content_v1"`` so
+#      consumers (validate_recorded, audit tools) can dispatch on
+#      what guarantees the manifest provides.
+#   5. Old manifests without ``content_sha256`` must still load --
+#      graceful fallback to metadata-only validation (see provenance
+#      module's ``read_manifest`` path).
+# ---------------------------------------------------------------------------
+
+
 def _summarize(spec: SubtreeSpec, root: Path) -> SubtreeSummary | None:
     triples: list[tuple[str, int, int]] = []
     total_bytes = 0

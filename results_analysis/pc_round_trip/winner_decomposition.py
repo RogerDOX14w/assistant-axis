@@ -27,12 +27,17 @@ to the canonical raw-space PCA.
 from __future__ import annotations
 
 import argparse
+import dataclasses
 import json
 from pathlib import Path
 from typing import Optional
 
 import numpy as np
 
+from assistant_axis.provenance import (
+    CACHE_POLICIES, InputSpec, current_data_subtree_input,
+    load_and_register,
+)
 from results_analysis.canonical_angles.data import DEFAULT_DATA_DIR
 from results_analysis.canonical_angles.whitening import (
     fit_shear, fit_whitening, WhiteningBasis,
@@ -53,11 +58,26 @@ DEFAULT_CELL_ORDER = [(SLOT_C, LAYER_C), (7, 49), (6, 25), (6, 49),
                        (0, 26), (0, 49), (3, 25)]
 
 
-def load_per_cell_winners(per_cell_path: Path
+def load_per_cell_winners(per_cell_path: Path,
+                           policy: str = "warn",
+                           inputs: list[InputSpec] | None = None,
+                           dep_key: str = "per_cell_winners_json",
                            ) -> dict[tuple[int, str, int, int], dict]:
-    """Load per-cell nth_pc winners from a JSON cache produced by
-    plot_direction_cosines.py."""
-    raw = json.load(open(per_cell_path))
+    """Load per-cell winners from a JSON cache produced by
+    ``plot_direction_cosines.py --include_optimization``.
+
+    Transparently unwraps the ``{"_provenance": ..., "result": ...}``
+    envelope written by post-May-2026 runs; older bare JSONs load
+    unchanged.  When an ``inputs`` accumulator is supplied, the cache
+    file is also recorded as a dependency under ``dep_key`` (matching
+    the read+register pattern documented in AGENT_NOTES.md so callers
+    can't accidentally consume a cache without declaring it)."""
+    raw, _spec, _check = load_and_register(
+        per_cell_path,
+        dep_key=dep_key,
+        inputs=inputs,
+        policy=policy,
+    )
     out: dict[tuple[int, str, int, int], dict] = {}
     for k, v in raw.items():
         # key format: pc{NNN}_{style}_s{S}_l{L}
@@ -237,23 +257,65 @@ def compute_decomposition_matrix(
 
 def main() -> int:
     p = argparse.ArgumentParser(description=__doc__.split("\n\n", 1)[0])
-    p.add_argument("--per_cell_path",
-                   default="roger/pc_round_trip_nth_pc_per_cell_winners_3-25_0-26_0-49.json")
+    # Default points at the canonical 7-cell fixed_principled per-cell
+    # winners produced by ``plot_direction_cosines.py --include_optimization``
+    # (May 2026 naming).  The pre-May-2026 ``nth_pc`` 3-cell file was
+    # archived; this default reflects the current canonical pipeline.
+    p.add_argument(
+        "--per_cell_path",
+        default=("roger/pc_round_trip_fixed_principled_per_cell_winners_"
+                 "7-25_7-49_6-25_6-49_0-26_0-49_3-25.json"),
+    )
     p.add_argument("--data_dir", default=str(DEFAULT_DATA_DIR))
     p.add_argument("--output_npz",
                    default="roger/pc_round_trip_nth_pc_winner_decomposition.npz")
     p.add_argument("--pcs", type=int, nargs="*", default=DEFAULT_PCS)
     p.add_argument("--n_canon_pcs", type=int, default=0,
                    help="0 = use all available canonical PCs.")
+    p.add_argument("--cache-policy", choices=CACHE_POLICIES, default="warn",
+                   help="How to handle stale or unrecognized inputs JSON envelopes.")
     args = p.parse_args()
 
-    per_cell = load_per_cell_winners(Path(args.per_cell_path))
+    per_cell_path = Path(args.per_cell_path)
+    inputs: list[InputSpec] = []
+    per_cell = load_per_cell_winners(
+        per_cell_path, policy=args.cache_policy,
+        inputs=inputs, dep_key="per_cell_winners_json",
+    )
     print(f"Loaded {len(per_cell)} per-cell winners from {args.per_cell_path}")
 
     matrix, keys, meta = compute_decomposition_matrix(
         per_cell, data_dir=Path(args.data_dir), pcs=args.pcs,
         n_canon_pcs=args.n_canon_pcs,
     )
+
+    # ``np.savez`` doesn't support a JSON envelope, so we record the
+    # InputSpec fingerprints inside ``meta`` -- the npz becomes
+    # self-describing for ``plot_winner_decomposition.py`` to declare via
+    # ``current_file_input(npz)`` while audits validate the upstream
+    # per_cell JSON via its own envelope.
+    data_dir = Path(args.data_dir)
+    # ``per_cell_winners_json`` was already appended to ``inputs`` by
+    # load_per_cell_winners → load_and_register at read time.
+    inputs.extend([
+        current_data_subtree_input(
+            data_dir, "traits/vectors", dep_key="traits_vectors"),
+        current_data_subtree_input(
+            data_dir, "roles/vectors", dep_key="roles_vectors"),
+        current_data_subtree_input(
+            data_dir, "combinations/vectors/derived/marginals/r_goal",
+            dep_key="combos_r_goal"),
+        current_data_subtree_input(
+            data_dir, "combinations/vectors/derived/marginals/r_nogoal",
+            dep_key="combos_r_nogoal"),
+        current_data_subtree_input(
+            data_dir, "combinations/vectors/derived/marginals/t_goal",
+            dep_key="combos_t_goal"),
+        current_data_subtree_input(
+            data_dir, "combinations/vectors/derived/marginals/t_nogoal",
+            dep_key="combos_t_nogoal"),
+    ])
+    meta["_inputs"] = [dataclasses.asdict(s) for s in inputs]
 
     print(f"\nMatrix shape: {matrix.shape}")
     out = Path(args.output_npz)

@@ -84,7 +84,7 @@ from assistant_axis.plot_metadata import png_metadata, suptitle_with_specs
 from assistant_axis.provenance import (
     InputSpec,
     current_data_subtree_input,
-    current_files_input,
+    load_and_register,
 )
 from results_analysis.axis_judge_correlation import _load_vector_file
 from results_analysis.canonical_angles.data import (
@@ -137,16 +137,35 @@ def _b_suffix(B: int) -> str:
     return "" if B == 15 else f"_b{B}"
 
 
-def load_scores(experiment_dir: Path, axis: str, B: int) -> dict[str, float]:
-    """Combine per-entity mean_score across roles + traits responses dirs."""
+def load_scores(
+    experiment_dir: Path, axis: str, B: int,
+    *,
+    scores_filename: str = "scores_responses.json",
+    inputs: list[InputSpec] | None = None,
+) -> dict[str, float]:
+    """Combine per-entity mean_score across roles + traits responses dirs.
+
+    ``scores_filename`` defaults to the canonical cache name; override
+    with ``scores_responses__rubric_v1.json`` to read v1 snapshots
+    after a rubric version bump.  When an ``inputs`` accumulator is
+    supplied, each successfully-read cache is appended via
+    ``load_and_register`` so the read and the dependency record stay
+    in lockstep (see AGENT_NOTES.md "Reader+registrar pattern").
+    """
     suffix = _b_suffix(B)
     out: dict[str, float] = {}
     for side in ("roles", "traits"):
         path = (experiment_dir / axis
-                / f"gpt_responses_{side}{suffix}" / "scores_responses.json")
+                / f"gpt_responses_{side}{suffix}" / scores_filename)
         if not path.exists():
             continue
-        scores = json.loads(path.read_text())
+        scores, _spec, _check = load_and_register(
+            path,
+            dep_key=f"judge_{axis}_responses_{side}_b{B}",
+            extras={"axis": axis, "side": side, "B": str(B)},
+            policy="warn",
+            inputs=inputs,
+        )
         for name, info in scores.items():
             ms = info.get("mean_score")
             if ms is not None:
@@ -334,6 +353,7 @@ def compute_batch_size_curve(
     axes: list[tuple[str, str, str]],
     configs: list[tuple[int, int]],
     batch_sizes: list[int],
+    inputs: list[InputSpec] | None = None,
 ) -> dict:
     """Run the full sweep and return the result dict (same as the JSON output).
 
@@ -358,7 +378,7 @@ def compute_batch_size_curve(
     scores_cache: dict[tuple[str, int], dict] = {}
     for axis, _, _ in axes:
         for B in batch_sizes:
-            s = load_scores(experiment_dir, axis, B)
+            s = load_scores(experiment_dir, axis, B, inputs=inputs)
             if not s:
                 print(f"  WARNING: no scores for {axis} at B={B} "
                       f"(suffix={_b_suffix(B)!r})")
@@ -625,26 +645,13 @@ def main() -> int:
     print(f"output_dir: {output_dir}")
     print()
 
-    result = compute_batch_size_curve(
-        experiment_dir=experiment_dir, data_dir=data_dir,
-        axes=axes, configs=configs, batch_sizes=batch_sizes,
-    )
-
     # --- Provenance inputs (used by JSON + both PNG writes) ---
-    # Vector subtrees + the four derived combo-marginal subtrees that
-    # build_goal_nogoal_subspaces reads + the response-mode judge
-    # caches per (axis, B).  Slot/layer info goes in extras for
-    # readability; the (slot, layer) cells themselves are part of the
-    # result payload.
-    judge_cache_paths: list[Path] = []
-    for axis_name, _, _ in axes:
-        for B in batch_sizes:
-            suffix = _b_suffix(B)
-            for side in ("roles", "traits"):
-                judge_cache_paths.append(
-                    experiment_dir / axis_name
-                    / f"gpt_responses_{side}{suffix}"
-                    / "scores_responses.json")
+    # Up-front deps: vector subtrees + the four derived combo-marginal
+    # subtrees that build_goal_nogoal_subspaces reads.  Per-(axis, B,
+    # side) judge cache InputSpecs are appended inside
+    # ``compute_batch_size_curve`` via ``load_scores`` →
+    # ``load_and_register``, so a cache that's missing on disk is also
+    # absent from the recorded inputs (matches actual consumption).
     inputs: list[InputSpec] = [
         current_data_subtree_input(
             data_dir, "traits/vectors", dep_key="traits_vectors"),
@@ -662,12 +669,13 @@ def main() -> int:
         current_data_subtree_input(
             data_dir, "combinations/vectors/derived/marginals/t_nogoal",
             dep_key="combos_t_nogoal"),
-        current_files_input(
-            dep_key="judge_caches",
-            paths=judge_cache_paths,
-            extras={"n_axes": str(len(axes)),
-                    "batch_sizes": ",".join(str(B) for B in batch_sizes)}),
     ]
+
+    result = compute_batch_size_curve(
+        experiment_dir=experiment_dir, data_dir=data_dir,
+        axes=axes, configs=configs, batch_sizes=batch_sizes,
+        inputs=inputs,
+    )
 
     output_dir.mkdir(parents=True, exist_ok=True)
     json_path = output_dir / args.json_name

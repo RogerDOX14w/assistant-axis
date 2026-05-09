@@ -97,9 +97,14 @@ from assistant_axis.provenance import (  # noqa: E402
     inputs_from_jsonable,
     validate_recorded,
 )
+from assistant_axis.deferral_registry import (  # noqa: E402
+    DeferralEntry,
+    load_registry as load_deferral_registry,
+    match_cache as match_deferral,
+)
 
 
-STATUSES = ("current", "stale_direct", "stale_transitive", "legacy")
+STATUSES = ("current", "stale_direct", "stale_transitive", "deferred", "legacy")
 STALE_STATUSES = ("stale_direct", "stale_transitive")
 
 
@@ -117,6 +122,8 @@ class CacheAudit:
     check: Optional[ProvenanceCheck] = None
     notes: list = field(default_factory=list)
     transitive_stale_via: list = field(default_factory=list)  # list[Path]
+    deferral_matches: list = field(default_factory=list)  # list[DeferralEntry]
+    pre_deferred_status: Optional[str] = None             # status before deferral pass
 
     def short_script(self) -> str:
         """Producer script name from the recorded ``cmd``.
@@ -220,6 +227,71 @@ def audit_cache(path: Path) -> CacheAudit:
 # Transitive stale propagation
 # ---------------------------------------------------------------------------
 
+def apply_deferrals(
+    audits: list[CacheAudit],
+    *,
+    registry: Optional[list[DeferralEntry]] = None,
+    repo_root: Optional[Path] = None,
+) -> None:
+    """Mutate ``audits`` in-place: reclassify rows to ``deferred`` when
+    a deferral entry in ``deferred_rejudges.yaml`` matches the cache's
+    path (and optionally the drift-source dep_key).
+
+    Reclassifies any of the following pre-deferred statuses:
+
+    * ``stale_direct`` / ``stale_transitive`` -- "this would otherwise
+      need rerunning; defer instead".
+    * ``legacy`` -- "this never had an envelope (pre-migration bare
+      JSON, or a producer we've decided not to migrate); presume
+      current as of mechanism introduction".  Useful for the May 2026
+      backfill of judge caches: ``axis_judge_correlation.py`` was
+      migrated but its existing on-disk caches were written before
+      that, and we don't intend to re-judge them.
+
+    ``current`` is intentionally NOT reclassified -- a freshly
+    validated cache shouldn't be "deferred" just because its path
+    happens to match.
+
+    Deferred caches retain their original status in
+    ``pre_deferred_status`` for human inspection, and the matched
+    entries are recorded in ``deferral_matches`` so reports can show
+    why each cache was deferred.
+
+    Run this AFTER :func:`propagate_transitive_stale` so transitive
+    stale-ness is computed first, then the maintainer's "I know,
+    don't bug me" overrides apply on top.
+    """
+    if registry is None:
+        registry = load_deferral_registry(repo_root=repo_root)
+    if not registry:
+        return
+    deferrable = (*STALE_STATUSES, "legacy")
+    for a in audits:
+        if a.status not in deferrable:
+            continue
+        # Drift-source dep_key: if the cache validated `stale_direct`
+        # with exactly one drifted/missing input, pass that dep_key to
+        # the matcher so dep-key-scoped registry entries can target it.
+        # Otherwise (multi-drift, transitive, or legacy without an
+        # envelope), pass None and let path_glob alone govern.
+        dep_key: Optional[str] = None
+        if a.check is not None:
+            offending = [
+                s for s in a.check.statuses
+                if s.status not in ("ok", "equivalent")
+            ]
+            if len(offending) == 1:
+                dep_key = offending[0].dep_key
+        matches = match_deferral(
+            a.abs_path, dep_key=dep_key, registry=registry,
+            repo_root=repo_root,
+        )
+        if matches:
+            a.pre_deferred_status = a.status
+            a.status = "deferred"
+            a.deferral_matches = matches
+
+
 def propagate_transitive_stale(audits: list[CacheAudit]) -> None:
     """Mutate ``audits`` in-place: any audit currently ``current`` whose
     file deps reach (transitively) a stale audit gets reclassified as
@@ -313,15 +385,15 @@ def render_markdown(
     for r in rows:
         by_script[r.short_script()][r.status] += 1
     lines.append("## By producing script\n")
-    lines.append("| Script | current | stale_direct | stale_transitive | legacy | total |")
-    lines.append("|---|---:|---:|---:|---:|---:|")
+    lines.append("| Script | current | stale_direct | stale_transitive | deferred | legacy | total |")
+    lines.append("|---|---:|---:|---:|---:|---:|---:|")
     for script in sorted(by_script):
         c = by_script[script]
         total = sum(c.values())
         lines.append(
             f"| `{script}` | {c.get('current', 0)} | "
             f"{c.get('stale_direct', 0)} | {c.get('stale_transitive', 0)} | "
-            f"{c.get('legacy', 0)} | {total} |"
+            f"{c.get('deferred', 0)} | {c.get('legacy', 0)} | {total} |"
         )
     lines.append("")
 
@@ -351,6 +423,29 @@ def render_markdown(
                 lines.append(f"- **Cmd**: `{r.cmd}`")
             via = ", ".join(f"`{p}`" for p in r.transitive_stale_via)
             lines.append(f"- **Stale via**: {via}")
+            lines.append("")
+
+    deferred_rows = [r for r in rows if r.status == "deferred"]
+    if deferred_rows:
+        lines.append(f"## Deferred: {len(deferred_rows)}\n")
+        lines.append("These caches would otherwise be stale "
+                     "(``stale_direct`` or ``stale_transitive``) but are "
+                     "matched by an entry in ``deferred_rejudges.yaml`` -- "
+                     "i.e. the maintainer has explicitly chosen not to "
+                     "rerun judging for them right now.  Use "
+                     "``tools/defer_rejudge.py --remove`` to lift the "
+                     "deferral when ready.\n")
+        for r in sorted(deferred_rows, key=lambda r: str(r.path)):
+            lines.append(f"### `{r.path}`")
+            if r.pre_deferred_status:
+                lines.append(f"- **Was**: {r.pre_deferred_status}")
+            for entry in r.deferral_matches:
+                lines.append(
+                    f"- **Deferred by**: `{entry.path_glob}`"
+                    + (f" (dep_key=`{entry.dep_key}`)" if entry.dep_key else "")
+                    + f" -- {entry.reason}"
+                    + (f"  *(at {entry.deferred_at})*" if entry.deferred_at else "")
+                )
             lines.append("")
 
     legacy_rows = [r for r in rows if r.status == "legacy"]
@@ -383,6 +478,9 @@ def render_flat(rows: list[CacheAudit]) -> str:
             note = "; ".join(r.stale_reasons())
         elif r.status == "stale_transitive":
             note = "via " + ", ".join(str(p) for p in r.transitive_stale_via)
+        elif r.status == "deferred":
+            note = (f"was={r.pre_deferred_status}; "
+                    + "; ".join(e.reason for e in r.deferral_matches))
         else:
             note = ""
         out.append(f"{r.status}\t{r.path}\t{note}")
@@ -401,14 +499,20 @@ def main() -> int:
     p.add_argument("--output", "-o", type=str, default=None,
                    help="Write report to this file instead of stdout.")
     p.add_argument("--status", choices=("current", "stale", "stale_direct",
-                                        "stale_transitive", "legacy"),
+                                        "stale_transitive", "deferred",
+                                        "legacy"),
                    default=None,
                    help="Filter to caches with this status.  ``stale`` is a "
                         "convenience alias matching either stale_direct or "
-                        "stale_transitive.")
+                        "stale_transitive (does NOT include ``deferred`` -- "
+                        "those are intentionally held out by the maintainer).")
     p.add_argument("--format", choices=("markdown", "flat"),
                    default="markdown",
                    help="Output format (default: markdown).")
+    p.add_argument("--ignore-deferrals", action="store_true",
+                   help="Skip applying deferred_rejudges.yaml; show "
+                        "underlying ``stale_direct`` / ``stale_transitive`` "
+                        "classification regardless of registry entries.")
     args = p.parse_args()
 
     roots_arg = args.root or ["roger"]
@@ -420,6 +524,8 @@ def main() -> int:
 
     rows = collect(roots)
     propagate_transitive_stale(rows)
+    if not args.ignore_deferrals:
+        apply_deferrals(rows)
 
     if args.format == "markdown":
         body = render_markdown(rows, roots=roots, status_filter=args.status)

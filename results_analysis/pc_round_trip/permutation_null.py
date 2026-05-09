@@ -1,6 +1,13 @@
 #!/usr/bin/env python3
 """Permutation-null sweep for PC round-trip ρ — fixed_principled variant.
 
+DEPRECATED (May 2026) — this null is the bias band that accompanies the
+deprecated (L, K, cell)-optimization view in ``plot_direction_cosines.py``.
+The default canonical-only plot does NOT consume this cache; it computes
+its own inline shuffled-judge null at L=K=0 (no optimization) directly in
+the plot script.  This file is retained so the legacy optimization plots
+can still be regenerated; do not extend it for new analyses.
+
 For each (PC, style) cell, generate ``--n_perms`` random permutations of
 the existing combined desc+inst judge scores (preserving the marginal
 score distribution including ties), then run a (K, L) sweep at M=∞ to
@@ -57,6 +64,7 @@ seed, n_perms, etc.
 from __future__ import annotations
 
 import argparse
+import functools
 import json
 import time
 from pathlib import Path
@@ -65,6 +73,8 @@ from typing import Optional
 import numpy as np
 from scipy.stats import rankdata
 
+from assistant_axis.plot_metadata import json_metadata
+from assistant_axis.provenance import InputSpec
 from results_analysis.pc_round_trip.klm_sweep import (
     setup_at, compute_M_done,
     DEFAULT_CONFIGS, DEFAULT_L_VALUES, DEFAULT_K_COARSE,
@@ -72,6 +82,7 @@ from results_analysis.pc_round_trip.klm_sweep import (
     K_REFINE_MAX_ITER, K_REFINE_MIN_BRACKET, K_REFINE_TIE_THRESH,
     load_combined_scores,
     DEFAULT_SWEEP_DIR,
+    _build_subtree_inputs,
 )
 from results_analysis.canonical_angles.data import DEFAULT_DATA_DIR
 from results_analysis.canonical_angles.whitening import fit_shear
@@ -225,12 +236,30 @@ def spearman_proj_vs_perms(
 # Stage 1: coarse-grid sweep, all permutations
 # ---------------------------------------------------------------------------
 
+def _apply_cutoff(direction: np.ndarray, Vt_raw_t: Optional[np.ndarray],
+                   pc: int, cutoff_fraction: float) -> np.ndarray:
+    """If a cutoff is active, project out the first ``floor(pc * fraction)``
+    raw target-cell PCs from ``direction``.  When ``Vt_raw_t`` is None or
+    cutoff is 0, this is a no-op."""
+    if Vt_raw_t is None or cutoff_fraction <= 0:
+        return direction
+    n_cut = min(int(pc * cutoff_fraction), Vt_raw_t.shape[0])
+    if n_cut <= 0:
+        return direction
+    coefs = Vt_raw_t[:n_cut] @ direction
+    return direction - Vt_raw_t[:n_cut].T @ coefs
+
+
 def stage1_coarse(
+    # DEPRECATED (May 2026): coarse (L, K) grid sweep over shuffled judge
+    # scores; only relevant to the deprecated optimization view.  See
+    # file-level docstring.
     actual_scores_per_cell, names, n_perms, *,
     data_dir, configs, l_values, k_coarse, pcs, alpha_per_pc,
     perm_ranks_centred_per_cell, valid_mask_per_cell, perm_ranks_normsq_per_cell,
     cache_path: Path,
     save_callback,
+    cutoff_fraction: float = 0.0,
 ):
     """Stage 1 sweep at M=∞, vectorised over permutations, fixed_principled
     variant.
@@ -265,6 +294,12 @@ def stage1_coarse(
         shear_cache: dict = {}
         whiten_cache: dict = {}
         d_raw_per_pc = principled_directions_in_raw(M_raw, alpha_per_pc)
+        # Pre-compute raw target Vt for cutoff (only when cutoff is active).
+        # One SVD per cell, reused across all (L, K, PC) combinations.
+        Vt_raw_t: Optional[np.ndarray] = None
+        if cutoff_fraction > 0:
+            M_centered_t = M_raw - M_raw.mean(axis=0, keepdims=True)
+            _, _, Vt_raw_t = np.linalg.svd(M_centered_t, full_matrices=False)
 
         for L in l_values:
             for K in k_coarse:
@@ -283,6 +318,8 @@ def stage1_coarse(
                         direction = sh.apply(direction[None, :])[0]
                     if K > 0:
                         direction = wh.apply(direction[None, :])[0]
+                    direction = _apply_cutoff(direction, Vt_raw_t, pc,
+                                                cutoff_fraction)
                     proj = M_done @ direction       # (n_entities,)
 
                     for style in DEFAULT_STYLES:
@@ -329,6 +366,9 @@ def stage1_coarse(
 # ---------------------------------------------------------------------------
 
 def stage2_refine(
+    # DEPRECATED (May 2026): per-(pc, style, perm) bracket-and-bisect K
+    # refinement on shuffled judge scores; only relevant to the deprecated
+    # optimization view.  See file-level docstring.
     actual_scores_per_cell, names, *,
     data_dir, configs, l_values, k_coarse, pcs, alpha_per_pc,
     perm_ranks_centred_per_cell, valid_mask_per_cell, perm_ranks_normsq_per_cell,
@@ -337,6 +377,7 @@ def stage2_refine(
     existing_stage2: dict,
     existing_stage2_per_cell: dict,
     save_callback,
+    cutoff_fraction: float = 0.0,
 ):
     """Stage 2 K refinement at M=∞ for the specified perm indices.
 
@@ -394,6 +435,11 @@ def stage2_refine(
         shear_cache: dict = {}
         whiten_cache: dict = {}
         d_raw_per_pc = principled_directions_in_raw(M_raw, alpha_per_pc)
+        # Pre-compute raw target Vt for cutoff (only when cutoff is active).
+        Vt_raw_t: Optional[np.ndarray] = None
+        if cutoff_fraction > 0:
+            M_centered_t = M_raw - M_raw.mean(axis=0, keepdims=True)
+            _, _, Vt_raw_t = np.linalg.svd(M_centered_t, full_matrices=False)
 
         # Cache: (L, K) -> M_done for this (slot, layer).  No Vt cache —
         # the principled variant doesn't SVD M_done.
@@ -425,6 +471,8 @@ def stage2_refine(
                     direction = sh.apply(direction[None, :])[0]
                 if K > 0:
                     direction = wh.apply(direction[None, :])[0]
+                direction = _apply_cutoff(direction, Vt_raw_t, pc,
+                                            cutoff_fraction)
                 proj = M_done @ direction
                 for style in DEFAULT_STYLES:
                     if (pc, style) not in actual_scores_per_cell:
@@ -554,7 +602,8 @@ def _key_str_per_cell(pc: int, style: str, perm_idx: int,
     return f"pc{pc:03d}_{style}_p{perm_idx:03d}_s{slot}_l{layer}"
 
 
-def save_stage1(best, best_per_cell, path, label):
+def save_stage1(best, best_per_cell, path, label,
+                inputs: list[InputSpec] | None = None):
     out = {
         "stage1": {
             _key_str(pc, style, p): v for (pc, style, p), v in best.items()
@@ -564,10 +613,11 @@ def save_stage1(best, best_per_cell, path, label):
             for (pc, style, p, s, l), v in best_per_cell.items()
         },
     }
-    _merge_save(out, path, label)
+    _merge_save(out, path, label, inputs=inputs)
 
 
-def save_stage2(refined, refined_per_cell, path, label):
+def save_stage2(refined, refined_per_cell, path, label,
+                inputs: list[InputSpec] | None = None):
     out = {
         "stage2": {
             _key_str(pc, style, p): v for (pc, style, p), v in refined.items()
@@ -577,18 +627,24 @@ def save_stage2(refined, refined_per_cell, path, label):
             for (pc, style, p, s, l), v in refined_per_cell.items()
         },
     }
-    _merge_save(out, path, label)
+    _merge_save(out, path, label, inputs=inputs)
 
 
-def _merge_save(partial: dict, path: Path, label: str) -> None:
+def _merge_save(partial: dict, path: Path, label: str,
+                inputs: list[InputSpec] | None = None) -> None:
     """Merge ``partial`` into the existing JSON at ``path`` (if any) and
-    write it back atomically.  Preserves the OTHER stage's data."""
-    existing: dict = {}
-    if path.exists():
-        try:
-            existing = json.loads(path.read_text())
-        except Exception:
-            existing = {}
+    write it back atomically.  Preserves the OTHER stage's data.
+
+    Provenance integration (May 2026): when ``inputs`` is provided the
+    on-disk file is a ``{"_provenance": ..., "result": ...}`` envelope and
+    all stage data + ``_meta`` live inside ``result``.  ``_merge_save``
+    transparently unwraps any prior envelope (via ``load_existing_cache``),
+    merges the stage data, and re-wraps with a fresh provenance block on
+    every write so audits see the most recent input fingerprints.  The
+    single-producer-multi-call pattern is fine because every save uses the
+    same input set.
+    """
+    existing: dict = load_existing_cache(path)
     for k, v in partial.items():
         if isinstance(v, dict) and k in existing and isinstance(existing[k], dict):
             existing[k].update(v)
@@ -599,18 +655,32 @@ def _merge_save(partial: dict, path: Path, label: str) -> None:
         existing["_meta"]["last_save_ts"] = time.strftime(
             "%Y-%m-%d %H:%M:%S", time.gmtime()
         )
+    payload: dict
+    if inputs is None:
+        payload = existing
+    else:
+        payload = json_metadata(
+            existing,
+            inputs=inputs,
+            title="pc_round_trip_permutation_null",
+        )
     tmp = path.with_suffix(path.suffix + ".tmp")
-    tmp.write_text(json.dumps(existing, indent=2))
+    tmp.write_text(json.dumps(payload, indent=2))
     tmp.replace(path)
 
 
 def load_existing_cache(path: Path) -> dict:
+    """Return the cached stage-1/stage-2 result dict, transparently
+    unwrapping an envelope if present."""
     if not path.exists():
         return {}
     try:
-        return json.loads(path.read_text())
+        data = json.loads(path.read_text())
     except Exception:
         return {}
+    if isinstance(data, dict) and "_provenance" in data and "result" in data:
+        return data["result"]
+    return data
 
 
 # ---------------------------------------------------------------------------
@@ -643,6 +713,17 @@ def parse_args() -> argparse.Namespace:
                    help="Reuse stage 1 from cache; only run stage 2.")
     p.add_argument("--skip_stage2", action="store_true",
                    help="Run stage 1 only.")
+    cutoff_grp = p.add_mutually_exclusive_group()
+    cutoff_grp.add_argument(
+        "--cutoff_n_over_2", action="store_true",
+        help="Apply N/2 cutoff to the transported direction (project out "
+             "the first floor(N/2) raw target-cell PCs) before the "
+             "spearman computation.  Cache path auto-suffixed with '_cutoff'.")
+    cutoff_grp.add_argument(
+        "--cutoff_2n_over_3", action="store_true",
+        help="Apply 2N/3 cutoff to the transported direction (project out "
+             "the first floor(2*N/3) raw target-cell PCs).  Cache path "
+             "auto-suffixed with '_cutoff_2of3'.")
     return p.parse_args()
 
 
@@ -650,7 +731,27 @@ def main() -> int:
     args = parse_args()
     data_dir = Path(args.data_dir)
     sweep_dir = Path(args.sweep_dir)
+    # Derive cutoff configuration (parallels plot_direction_cosines).  When
+    # active, append a suffix to the cache path so we don't clobber the
+    # no-cutoff null cache.
+    if args.cutoff_n_over_2:
+        cutoff_fraction = 0.5
+        cutoff_suffix = "_cutoff"
+    elif args.cutoff_2n_over_3:
+        cutoff_fraction = 2.0 / 3.0
+        cutoff_suffix = "_cutoff_2of3"
+    else:
+        cutoff_fraction = 0.0
+        cutoff_suffix = ""
     cache_path = Path(args.cache_path)
+    if cutoff_suffix and cache_path.stem.endswith(cutoff_suffix) is False:
+        # If the user passed an explicit --cache_path that already has the
+        # suffix, don't double-suffix; otherwise auto-append.
+        cache_path = cache_path.with_name(cache_path.stem + cutoff_suffix
+                                           + cache_path.suffix)
+    if cutoff_fraction > 0:
+        print(f"  cutoff active (fraction={cutoff_fraction:.3f}, "
+              f"suffix='{cutoff_suffix}'): cache at {cache_path}")
     pcs = list(args.pcs)
     if args.configs:
         configs = [tuple(int(x) for x in pair.split(":"))
@@ -662,13 +763,20 @@ def main() -> int:
 
     # ---- Load actual scores per cell --------------------------------------
     print(f"Loading actual judge scores from {sweep_dir}...")
+    # Provenance accumulator: subtree deps up front (via klm_sweep's
+    # helper), per-cell judge cache deps appended at read time inside
+    # load_combined_scores → load_and_register.
+    inputs: list[InputSpec] = _build_subtree_inputs(data_dir=data_dir)
     actual_scores_per_cell: dict[tuple[int, str], dict[str, float]] = {}
     missing_cells = []
     for pc in pcs:
         for style in DEFAULT_STYLES:
-            cell = sweep_dir / f"pc{pc:03d}_{style}"
+            cell_id = f"pc{pc:03d}_{style}"
+            cell = sweep_dir / cell_id
             try:
-                actual_scores_per_cell[(pc, style)] = load_combined_scores(cell)
+                actual_scores_per_cell[(pc, style)] = load_combined_scores(
+                    cell, inputs=inputs, cell_id=cell_id,
+                )
             except FileNotFoundError:
                 missing_cells.append((pc, style))
     if missing_cells:
@@ -704,6 +812,8 @@ def main() -> int:
         "k_coarse": list(DEFAULT_K_COARSE),
         "canonical_slot_layer_L": [CANONICAL_SLOT, CANONICAL_LAYER, CANONICAL_L],
         "M": "infinity",
+        "cutoff_fraction": cutoff_fraction,
+        "cutoff_suffix": cutoff_suffix,
     }
     existing = load_existing_cache(cache_path)
     prior_variant = (existing.get("_meta") or {}).get("variant", "nth_pc")
@@ -716,7 +826,15 @@ def main() -> int:
         for key in ("stage1", "stage1_per_cell", "stage2", "stage2_per_cell"):
             existing.pop(key, None)
     existing["_meta"] = meta
-    cache_path.write_text(json.dumps(existing, indent=2))
+    # ``inputs`` was populated above by _build_subtree_inputs +
+    # per-cell load_and_register calls inside load_combined_scores.
+    envelope = json_metadata(
+        existing, inputs=inputs, title="pc_round_trip_permutation_null",
+    )
+    cache_path.write_text(json.dumps(envelope, indent=2))
+
+    save_stage1_with_inputs = functools.partial(save_stage1, inputs=inputs)
+    save_stage2_with_inputs = functools.partial(save_stage2, inputs=inputs)
 
     # ---- Stage 1 ----------------------------------------------------------
     if args.skip_stage1:
@@ -731,7 +849,8 @@ def main() -> int:
             valid_mask_per_cell=valid_mask_per_cell,
             perm_ranks_normsq_per_cell=perm_ranks_normsq_per_cell,
             cache_path=cache_path,
-            save_callback=save_stage1,
+            save_callback=save_stage1_with_inputs,
+            cutoff_fraction=cutoff_fraction,
         )
 
     # ---- Stage 2 ----------------------------------------------------------
@@ -754,7 +873,8 @@ def main() -> int:
             cache_path=cache_path,
             existing_stage2=existing_stage2,
             existing_stage2_per_cell=existing_stage2_per_cell,
-            save_callback=save_stage2,
+            save_callback=save_stage2_with_inputs,
+            cutoff_fraction=cutoff_fraction,
         )
 
     print(f"\nDone.  Cache at {cache_path}.")

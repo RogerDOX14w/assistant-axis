@@ -1,5 +1,14 @@
 # Phase 1.0b: post-pipeline `derived/` layout (locked)
 
+> **Status (May 2026):** implemented and live. All four datasets
+> (`Roger`, `Roger 4slot`, `Roger 8slot`, `Christina v2`) have been
+> migrated to this layout. Code in `results_analysis/canonical_angles/data.py`
+> and `results_analysis/compute_combo_marginals.py` writes / reads the
+> `derived/` subtree by default and falls back to the legacy flat
+> layout only when `derived/` is absent. See
+> [`../AGENT_NOTES.md` § When to regenerate manifests](../AGENT_NOTES.md)
+> for the operational rules.
+
 ## On-disk layout
 
 Each dataset's `combinations/vectors/` becomes a *raw-only* subtree (pipeline

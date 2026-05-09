@@ -56,7 +56,7 @@ Inputs (from ``--experiment_dir``)
 
 - ``whitening_k_sweep.json``  -- produced by ``whitening_k_sweep.py``
 - ``<pairs>``                 -- chosen by ``--pairs``
-                                 (default ``pair_list_12.json``)
+                                 (default ``pair_list_responses.json``)
 
 Outputs (also to ``--experiment_dir``)
 --------------------------------------
@@ -71,12 +71,9 @@ Examples
 
 ::
 
-    # Default: 12 axes
+    # Default: responses cohort (``pair_list_responses.json``):
     uv run python results_analysis/whitening_k_weighted_scatter.py
-
-    # Reproduce the historical 7-axis plot
-    uv run python results_analysis/whitening_k_weighted_scatter.py \\
-        --pairs pair_list_7.json
+    # writes whitening_k_peak_fit_weighted_responses_slot6.json + .png
 """
 from __future__ import annotations
 
@@ -90,12 +87,11 @@ import matplotlib.pyplot as plt
 import numpy as np
 from scipy.stats import pearsonr, spearmanr
 
-from assistant_axis import json_metadata, png_metadata
+from assistant_axis import cohort_from_pairs, json_metadata, png_metadata
 from assistant_axis.provenance import (
     CACHE_POLICIES,
     InputSpec,
-    current_file_input,
-    load_validated_json,
+    load_and_register,
 )
 
 DEFAULT_EXPERIMENT_DIR = Path(__file__).resolve().parent.parent / (
@@ -154,8 +150,8 @@ def main() -> int:
     p.add_argument("--experiment_dir", default=str(DEFAULT_EXPERIMENT_DIR),
                    help=f"Directory holding the K-sweep input + pair list "
                         f"(default: {DEFAULT_EXPERIMENT_DIR}).")
-    p.add_argument("--pairs", default="pair_list_12.json",
-                   help="Pair-list JSON filename (default: pair_list_12.json -- "
+    p.add_argument("--pairs", default="pair_list_responses.json",
+                   help="Pair-list JSON filename (default: pair_list_responses.json -- "
                         "the cohort that has both desc+instr and responses ρ; "
                         "the scatter is only meaningful for axes with both).")
     p.add_argument("--slot", type=int, default=6,
@@ -163,15 +159,15 @@ def main() -> int:
                         "auto-suffix --sweep / --plot / --fit_json defaults.  "
                         "Pass --slot 3 (\\n) or 7 (\\n\\n post) to compare.")
     p.add_argument("--sweep", default=None,
-                   help="K-sweep input filename "
-                        "(default: whitening_k_sweep_slot{N}.json -- the slot "
-                        "suffix matches --slot).")
+                   help="K-sweep input filename (default: "
+                        "whitening_k_sweep_<cohort>_slot{N}.json -- cohort "
+                        "is derived from --pairs).")
     p.add_argument("--fit_json", default=None,
-                   help="Output fit-records filename "
-                        "(default: whitening_k_peak_fit_weighted_slot{N}.json).")
+                   help="Output fit-records filename (default: "
+                        "whitening_k_peak_fit_weighted_<cohort>_slot{N}.json).")
     p.add_argument("--plot", default=None,
-                   help="Output PNG filename "
-                        "(default: rho_peak_K_weighted_scatter_slot{N}.png).")
+                   help="Output PNG filename (default: "
+                        "rho_peak_K_weighted_scatter_<cohort>_slot{N}.png).")
     p.add_argument("--cache-policy", choices=CACHE_POLICIES, default="warn",
                    help="How to react to drift in the sweep JSON's "
                         "recorded provenance: strict / warn (default) / "
@@ -179,19 +175,32 @@ def main() -> int:
     args = p.parse_args()
     experiment_dir = Path(args.experiment_dir).resolve()
     slot = int(args.slot)
+    cohort = cohort_from_pairs(args.pairs)
     if args.sweep is None:
-        args.sweep = f"whitening_k_sweep_slot{slot}.json"
+        args.sweep = f"whitening_k_sweep_{cohort}_slot{slot}.json"
     if args.plot is None:
-        args.plot = f"rho_peak_K_weighted_scatter_slot{slot}.png"
+        args.plot = f"rho_peak_K_weighted_scatter_{cohort}_slot{slot}.png"
     if args.fit_json is None:
-        args.fit_json = f"whitening_k_peak_fit_weighted_slot{slot}.json"
+        args.fit_json = f"whitening_k_peak_fit_weighted_{cohort}_slot{slot}.json"
 
-    # Validate sweep_json provenance per --cache-policy; legacy bare-
-    # list sweep files pass through (check=None) since they have no
-    # envelope.
-    sweep, _check = load_validated_json(
-        experiment_dir / args.sweep, policy=args.cache_policy)
-    pairs = json.load(open(experiment_dir / args.pairs))
+    # ``inputs`` is built up via load_and_register: each cache read
+    # both unwraps the envelope (legacy bare-list files pass through
+    # with check=None), validates its recorded provenance under
+    # ``--cache-policy``, AND appends an InputSpec to this list, so
+    # the read and the dependency record can't fall out of sync.
+    inputs: list[InputSpec] = []
+    sweep, _spec_sweep, _check_sweep = load_and_register(
+        experiment_dir / args.sweep,
+        dep_key="sweep_json",
+        inputs=inputs,
+        policy=args.cache_policy,
+    )
+    pairs, _spec_pairs, _check_pairs = load_and_register(
+        experiment_dir / args.pairs,
+        dep_key="pairs_json",
+        inputs=inputs,
+        policy=args.cache_policy,
+    )
 
     # axis -> source -> {K: rho}
     curves: dict = {}
@@ -303,14 +312,8 @@ def main() -> int:
     # ------------------------------------------------------------------
     # Save outputs
     # ------------------------------------------------------------------
-    inputs: list[InputSpec] = [
-        current_file_input(
-            dep_key="sweep_json",
-            path=experiment_dir / args.sweep),
-        current_file_input(
-            dep_key="pairs_json",
-            path=experiment_dir / args.pairs),
-    ]
+    # ``inputs`` was already populated above by the load_and_register
+    # calls; both upstream files are recorded.
 
     plot_path = experiment_dir / args.plot
     plt.savefig(plot_path, dpi=150, bbox_inches="tight",

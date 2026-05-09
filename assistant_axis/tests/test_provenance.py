@@ -248,6 +248,33 @@ def test_current_files_input_drift_on_set_membership(tmp_path: Path) -> None:
     assert s1.fingerprint != s2.fingerprint
 
 
+def test_current_files_input_dedupes_symlinks_to_same_target(tmp_path: Path) -> None:
+    """Regression test (Phase 6a): when two symlinks resolve to the same
+    target file, the composite fingerprint must round-trip through
+    ``current_for_recorded`` cleanly.  Previously the write-time
+    fingerprint included duplicate triples (two paths, same resolved
+    target) while ``member_paths`` was deduped via ``set()``, so
+    re-validation always reported drift on multi inputs that contained
+    overlapping symlinks (e.g., ``roles/vectors/default.pt`` and
+    ``traits/vectors/default.pt`` both pointing at a shared
+    ``default/vectors/default.pt``).
+    """
+    target = tmp_path / "target.pt"; target.write_text("payload")
+    link_a = tmp_path / "link_a.pt"; link_a.symlink_to(target)
+    link_b = tmp_path / "link_b.pt"; link_b.symlink_to(target)
+    s1 = prov.current_files_input("d", [link_a, link_b, target])
+    s2 = prov.current_files_input("d", [target])
+    assert s1.fingerprint == s2.fingerprint, (
+        "Three paths that resolve to one target must produce the same "
+        "fingerprint as one direct reference."
+    )
+    # member_paths should also be the deduped set of resolved rel paths.
+    assert s1.member_paths == s2.member_paths
+    # Round-trip through current_for_recorded yields the same fingerprint.
+    s3 = prov.current_for_recorded(s1)
+    assert s3.fingerprint == s1.fingerprint
+
+
 # ---------------------------------------------------------------------------
 # validate_inputs
 # ---------------------------------------------------------------------------

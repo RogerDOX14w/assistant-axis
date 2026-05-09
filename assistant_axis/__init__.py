@@ -55,6 +55,7 @@ from .pca import (
 )
 from .plot_metadata import json_metadata, png_metadata, suptitle_with_specs
 from .plot_palette import slot_color, slot_colors, slot_colors_8
+from .pair_list_cohort import cohort_from_pairs
 
 __all__ = [
     # Models
@@ -96,4 +97,5 @@ __all__ = [
     "slot_color",
     "slot_colors",
     "slot_colors_8",
+    "cohort_from_pairs",
 ]

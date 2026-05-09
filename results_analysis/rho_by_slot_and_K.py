@@ -6,13 +6,14 @@ For each slot ∈ {0, 1, 2, 3} and each K ∈ {0, 1, 2, 3, 4, 5} we compute
 the mean per-axis Spearman ρ between the soft-K-whitened activation
 projection at ``(slot, layer=25)`` and two score sources:
 
-- **desc+inst** -- 33 axes (``pair_list_33.json``), score per entity is
-  combined across the four (judge, mode) sources ``GPT_d, GPT_i, Son_d, Son_i``
-  using :func:`assistant_axis.judge_score_combine.combine_desc_inst_two_judges`,
+- **desc+inst** -- desc+instr cohort (``pair_list_di.json``), score per
+  entity is combined across the four (judge, mode) sources
+  ``GPT_d, GPT_i, Son_d, Son_i`` using
+  :func:`assistant_axis.judge_score_combine.combine_desc_inst_two_judges`,
   with the default inst-tiebreak weighting (0.499*desc + 0.501*inst). Use
   ``--di_weights {inst_tie,equal,desc_tie}`` to override;
-- **responses** -- 12 axes (``pair_list_12.json``), score per entity
-  is the GPT-only mean over response-mode evals.
+- **responses** -- responses cohort (``pair_list_responses.json``), score
+  per entity is the GPT-only mean over response-mode evals.
 
 K=0 means raw projections (no whitening); K>0 uses soft-K whitening
 fit on the augmented held-out pool from
@@ -31,13 +32,13 @@ The standard per-axis directory tree produced by
 :mod:`results_analysis.axis_judge_correlation`::
 
     <experiment_dir>/
-      pair_list_33.json     # or any pair list passed via --pairs_di
-      pair_list_12.json     # or any pair list passed via --pairs_resp
+      pair_list_di.json         # or any pair list passed via --pairs_di
+      pair_list_responses.json  # or any pair list passed via --pairs_resp
       <pos>_vs_<neg>/
         gpt/scores_{descriptions,instructions}.json
         sonnet/scores_{descriptions,instructions}.json
-        gpt_responses_traits/scores_responses.json   # 12-axis subset
-        gpt_responses_roles/scores_responses.json    # 12-axis subset
+        gpt_responses_traits/scores_responses.json   # responses cohort only
+        gpt_responses_roles/scores_responses.json    # responses cohort only
 
 Plus the standard activation-vectors directory passed via ``--data_dir``.
 
@@ -75,6 +76,11 @@ from assistant_axis.judge_score_combine import (
     add_di_weights_arg,
     combine_desc_inst_two_judges,
     parse_di_weights_arg,
+)
+from assistant_axis.provenance import (
+    InputSpec,
+    current_data_subtree_input,
+    load_and_register,
 )
 from results_analysis.axis_judge_correlation import _load_vector_file
 from results_analysis.canonical_angles.data import (
@@ -207,13 +213,14 @@ def main() -> int:
     p.add_argument("--data_dir", default=str(DEFAULT_DATA_DIR),
                    help=f"Activation vectors directory "
                         f"(default: {DEFAULT_DATA_DIR}).")
-    p.add_argument("--pairs_di", default="pair_list_33.json",
+    p.add_argument("--pairs_di", default="pair_list_di.json",
                    help="Pair-list JSON for desc+inst source "
-                        "(default: pair_list_33.json -- every axis with "
-                        "desc+inst from both providers).")
-    p.add_argument("--pairs_resp", default="pair_list_12.json",
+                        "(default: pair_list_di.json -- axes with desc+inst "
+                        "judging from both GPT and Sonnet).")
+    p.add_argument("--pairs_resp", default="pair_list_responses.json",
                    help="Pair-list JSON for GPT responses source "
-                        "(default: pair_list_12.json).")
+                        "(default: pair_list_responses.json -- axes that "
+                        "additionally have GPT response judging).")
     p.add_argument("--ks", type=int, nargs="+", default=DEFAULT_KS,
                    help=f"K values to plot; 0 = raw, K>0 = soft-K "
                         f"whitening (default: {DEFAULT_KS}).")
@@ -228,8 +235,25 @@ def main() -> int:
     data_dir = Path(args.data_dir).resolve()
     KS: list[int] = list(args.ks)
 
-    pairs_di = json.load(open(experiment_dir / args.pairs_di))
-    pairs_resp = json.load(open(experiment_dir / args.pairs_resp))
+    # Provenance accumulator -- threaded through every cache read via
+    # load_and_register so the read AND the InputSpec record happen
+    # together (see AGENT_NOTES.md "Reader+registrar pattern").
+    inputs: list[InputSpec] = [
+        current_data_subtree_input(
+            data_dir, "traits/vectors", dep_key="traits_vectors",
+            extras={"layer": str(LAYER)}),
+        current_data_subtree_input(
+            data_dir, "roles/vectors", dep_key="roles_vectors",
+            extras={"layer": str(LAYER)}),
+    ]
+    pairs_di, _, _ = load_and_register(
+        experiment_dir / args.pairs_di,
+        dep_key="pairs_di_json", inputs=inputs, policy="warn",
+    )
+    pairs_resp, _, _ = load_and_register(
+        experiment_dir / args.pairs_resp,
+        dep_key="pairs_resp_json", inputs=inputs, policy="warn",
+    )
     print(f"Loaded {len(pairs_di)} desc+inst axis pairs from {args.pairs_di}")
     print(f"Loaded {len(pairs_resp)} responses axis pairs from {args.pairs_resp}")
 
@@ -251,19 +275,72 @@ def main() -> int:
 
     results: dict = {"desc_inst": {}, "responses": {}}
 
+    # Pre-load per-axis scores once via load_and_register (also
+    # populates ``inputs`` with one InputSpec per consumed cache).
+    # Pre-retrofit the script re-read these files on every (slot, K)
+    # iteration -- functionally equivalent but wasteful, and the
+    # separate post-load register loop could fall out of sync with
+    # the actual reads if axes were missing.
+    print("\nLoading per-axis desc+inst scores...", flush=True)
+    di_scores_per_axis: dict[tuple[str, str], dict[str, float]] = {}
+    for it in pairs_di:
+        pos, neg = it["pos"], it["neg"]
+        axis_id = f"{pos}_vs_{neg}"
+        axis_dir = experiment_dir / axis_id
+        try:
+            g_d, _, _ = load_and_register(
+                axis_dir / "gpt" / "scores_descriptions.json",
+                dep_key=f"judge_{axis_id}_descriptions_gpt",
+                inputs=inputs, policy="warn")
+            g_i, _, _ = load_and_register(
+                axis_dir / "gpt" / "scores_instructions.json",
+                dep_key=f"judge_{axis_id}_instructions_gpt",
+                inputs=inputs, policy="warn")
+            s_d, _, _ = load_and_register(
+                axis_dir / "sonnet" / "scores_descriptions.json",
+                dep_key=f"judge_{axis_id}_descriptions_sonnet",
+                inputs=inputs, policy="warn")
+            s_i, _, _ = load_and_register(
+                axis_dir / "sonnet" / "scores_instructions.json",
+                dep_key=f"judge_{axis_id}_instructions_sonnet",
+                inputs=inputs, policy="warn")
+        except FileNotFoundError:
+            continue
+        di_scores_per_axis[(pos, neg)] = combine_desc_inst_two_judges(
+            g_d, g_i, s_d, s_i, weights=di_weights)
+
+    print("\nLoading per-axis response scores...", flush=True)
+    rs_scores_per_axis: dict[tuple[str, str], dict[str, float]] = {}
+    for it in pairs_resp:
+        pos, neg = it["pos"], it["neg"]
+        axis_id = f"{pos}_vs_{neg}"
+        axis_dir = experiment_dir / axis_id
+        scores_acc: dict[str, float] = {}
+        for sub in ("gpt_responses_traits", "gpt_responses_roles"):
+            fp = axis_dir / sub / "scores_responses.json"
+            if not fp.exists():
+                continue
+            sub_label = sub[len("gpt_responses_"):]
+            payload, _, _ = load_and_register(
+                fp,
+                dep_key=f"judge_{axis_id}_responses_{sub_label}",
+                inputs=inputs, policy="warn",
+            )
+            for n, info in payload.items():
+                if info.get("mean_score") is not None:
+                    scores_acc[n] = info["mean_score"]
+        if scores_acc:
+            rs_scores_per_axis[(pos, neg)] = scores_acc
+
     print("\nComputing desc+inst ρ...", flush=True)
     for slot in SLOTS:
         for K in KS:
             rhos: list[float] = []
             for it in pairs_di:
                 pos, neg = it["pos"], it["neg"]
-                axis_dir = experiment_dir / f"{pos}_vs_{neg}"
-                g_d = json.load(open(axis_dir / "gpt" / "scores_descriptions.json"))
-                g_i = json.load(open(axis_dir / "gpt" / "scores_instructions.json"))
-                s_d = json.load(open(axis_dir / "sonnet" / "scores_descriptions.json"))
-                s_i = json.load(open(axis_dir / "sonnet" / "scores_instructions.json"))
-                scores = combine_desc_inst_two_judges(g_d, g_i, s_d, s_i,
-                                                      weights=di_weights)
+                if (pos, neg) not in di_scores_per_axis:
+                    continue
+                scores = di_scores_per_axis[(pos, neg)]
                 common = sorted(scores)
                 au = _axis_unit_at(data_dir, pos, neg, slot)
                 proj = _project(entity_vecs, whitener, slot, K, au, common,
@@ -284,17 +361,9 @@ def main() -> int:
             rhos = []
             for it in pairs_resp:
                 pos, neg = it["pos"], it["neg"]
-                axis_dir = experiment_dir / f"{pos}_vs_{neg}"
-                scores: dict[str, float] = {}
-                for sub in ("gpt_responses_traits", "gpt_responses_roles"):
-                    fp = axis_dir / sub / "scores_responses.json"
-                    if not fp.exists():
-                        continue
-                    for n, info in json.load(open(fp)).items():
-                        if info.get("mean_score") is not None:
-                            scores[n] = info["mean_score"]
-                if not scores:
+                if (pos, neg) not in rs_scores_per_axis:
                     continue
+                scores = rs_scores_per_axis[(pos, neg)]
                 common = sorted(scores)
                 au = _axis_unit_at(data_dir, pos, neg, slot)
                 proj = _project(entity_vecs, whitener, slot, K, au, common,
@@ -390,9 +459,18 @@ def main() -> int:
     fig.suptitle(title_line, fontsize=14, fontweight="bold", y=1.01)
     plt.tight_layout(rect=(0, 0, 1, 0.88))
 
+    # ---- Provenance inputs ----------------------------------------------
+    # ``inputs`` was populated above by load_and_register at every
+    # cache-read site (subtree deps + pair lists + per-axis × per-judge
+    # × per-mode score caches that were actually consumed).  The
+    # previous duplicate post-load loop here registered files even for
+    # axes that the read pass would have skipped on FileNotFoundError;
+    # dropping it makes "what we recorded" exactly equal "what we
+    # consumed".
+
     out = experiment_dir / args.plot
     plt.savefig(out, dpi=150, bbox_inches="tight",
-                metadata=png_metadata(title=title_line))
+                metadata=png_metadata(title=title_line, inputs=inputs))
     plt.close(fig)
     print(f"\nWrote {out}")
     return 0

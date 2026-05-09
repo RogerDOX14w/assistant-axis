@@ -139,6 +139,10 @@ from results_analysis.canonical_angles.whitening import (
     fit_whitening,
 )
 from assistant_axis import png_metadata, suptitle_with_specs
+from assistant_axis.provenance import (
+    InputSpec,
+    current_data_subtree_input,
+)
 
 
 # ---------------------------------------------------------------------------
@@ -368,7 +372,8 @@ PIE_LABELS = {
 
 def make_pie_plot(decomp_by_slot_metric: dict[tuple[int, str], dict],
                   output: Path, metric_labels: list[str],
-                  layer: int, *, num_slots: int = 4) -> None:
+                  layer: int, *, num_slots: int = 4,
+                  inputs: list[InputSpec] | None = None) -> None:
     """Render a len(metric_labels) x num_slots grid of (r_, t_) pie pairs.
 
     Slots span the columns, whitening metrics span the rows.  Each
@@ -486,13 +491,14 @@ def make_pie_plot(decomp_by_slot_metric: dict[tuple[int, str], dict],
 
     output.parent.mkdir(parents=True, exist_ok=True)
     fig.savefig(output, dpi=150, bbox_inches="tight",
-                metadata=png_metadata(title=title_line))
+                metadata=png_metadata(title=title_line, inputs=inputs))
     print(f"Wrote {output}")
 
 
 def make_plot(decomp_by_slot_metric: dict[tuple[int, str], dict],
               output: Path, metric_labels: list[str],
-              layer: int, *, num_slots: int = 4) -> None:
+              layer: int, *, num_slots: int = 4,
+              inputs: list[InputSpec] | None = None) -> None:
     """Render a len(metric_labels) x num_slots bar grid with a shared
     y-axis scale across all panels (so the bars are visually
     comparable).  Slots span the columns, whitening metrics span the
@@ -575,7 +581,7 @@ def make_plot(decomp_by_slot_metric: dict[tuple[int, str], dict],
     fig.tight_layout(rect=(0, 0, 1, top_rect))
     output.parent.mkdir(parents=True, exist_ok=True)
     fig.savefig(output, dpi=150, bbox_inches="tight",
-                metadata=png_metadata(title=title_line))
+                metadata=png_metadata(title=title_line, inputs=inputs))
     print(f"Wrote {output}")
 
 
@@ -750,12 +756,31 @@ def main() -> int:
                 f"{metric}: a={r['a'][0]*100:5.1f}% b={r['b'][0]*100:+5.1f}%")
         print(f"  slot {slot}:  " + "  |  ".join(summary_parts))
 
+    # Provenance inputs: traits, roles, and combinations subtrees -- all
+    # three are read at the chosen layer (combinations gives combo + the
+    # corpus default; the standalones supply v_theat regression and the
+    # whitening pool).  augmented-pool augmentation status is captured
+    # in extras so changing --no-augment flips dependence accordingly.
+    extras = {"layer": str(args.layer),
+              "augment": "1" if args.augment else "0",
+              "K": ",".join(str(k) for k in args.K)}
+    inputs: list[InputSpec] = [
+        current_data_subtree_input(
+            data_dir, "traits/vectors", dep_key="traits_vectors",
+            extras=extras),
+        current_data_subtree_input(
+            data_dir, "roles/vectors", dep_key="roles_vectors",
+            extras=extras),
+        current_data_subtree_input(
+            data_dir, "combinations/vectors", dep_key="combinations_vectors",
+            extras=extras),
+    ]
     if args.style == "pies":
         make_pie_plot(decomp, Path(args.output), metric_labels, args.layer,
-                      num_slots=num_slots)
+                      num_slots=num_slots, inputs=inputs)
     else:
         make_plot(decomp, Path(args.output), metric_labels, args.layer,
-                  num_slots=num_slots)
+                  num_slots=num_slots, inputs=inputs)
     return 0
 
 

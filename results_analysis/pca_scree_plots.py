@@ -63,6 +63,10 @@ from assistant_axis import (  # noqa: E402
     slot_colors_8,
     suptitle_with_specs,
 )
+from assistant_axis.provenance import (  # noqa: E402
+    InputSpec,
+    current_data_subtree_input,
+)
 
 
 # Disambiguated slot names (slots 5 and 7 are both ``\n\n`` text).
@@ -190,6 +194,7 @@ def make_plot(
     output_path: Path,
     spec_extra: str,
     max_components: int = 100,
+    inputs: list[InputSpec] | None = None,
 ) -> Path:
     """Render the 1x3 overlay panel (Linear / Log-linear / Log-log)."""
     num_slots = len(variance_per_slot)
@@ -252,7 +257,7 @@ def make_plot(
     _, top_rect = suptitle_with_specs(fig, suptitle, spec_line)
     fig.tight_layout(rect=(0, 0, 1, top_rect))
     plt.savefig(output_path, dpi=150, bbox_inches="tight",
-                metadata=png_metadata(title=suptitle))
+                metadata=png_metadata(title=suptitle, inputs=inputs))
     plt.close()
     return output_path
 
@@ -324,6 +329,11 @@ def main() -> int:
         f"pca_scree_all_slots_{entity_kind}_L{args.layer}.png"
     )
     print(f"Step 3: Plotting -> {out}")
+    inputs: list[InputSpec] = [
+        current_data_subtree_input(
+            data_dir, args.vectors_subdir, dep_key="vectors_subtree",
+            extras={"layer": str(args.layer)}),
+    ]
     make_plot(
         variance_per_slot,
         legend_labels=legend_labels,
@@ -333,6 +343,7 @@ def main() -> int:
         output_path=out,
         spec_extra=f"; data: {data_dir.name}",
         max_components=args.max_components,
+        inputs=inputs,
     )
     print("Done.")
     return 0

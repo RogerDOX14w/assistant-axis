@@ -58,7 +58,7 @@ from assistant_axis.provenance import (
     InputSpec,
     current_data_subtree_input,
     current_file_input,
-    current_files_input,
+    load_and_register,
 )
 from results_analysis.axis_judge_correlation import _load_vector_file
 from results_analysis.canonical_angles.data import (
@@ -89,10 +89,14 @@ DEFAULT_CLUSTER_COS_THRESHOLD = 0.95
 DEFAULT_TIE_THRESH = 5e-4
 DEFAULT_SLOT = 6  # New default after May 2026 rejudge run: slot 6 (</think>)
                   # beats slot 3 (\\n) on judge ρ.  Pass --slot 3 or 7 to
-                  # compare.  --output_dir is required so callers should label
-                  # their per-slot runs (e.g. ..._slot6/, ..._slot3/).
+                  # compare.  --output_dir auto-derives from the cache key
+                  # (pair, score_source, slot, layer, whitening, M, data_dir)
+                  # via :func:`derive_output_dir`, so changing any default
+                  # below produces a distinct on-disk dir without callers
+                  # having to remember a manual labelling convention.
 DEFAULT_LAYER = 25
 DEFAULT_WHITENING = "soft_K=3"
+DEFAULT_OUTPUT_BASE = Path("roger/optimal_axis")
 
 
 # ---------------------------------------------------------------------------
@@ -1008,9 +1012,14 @@ def load_scores_from_experiment_dir(
     experiment_dir: Path, source: str,
     *,
     di_weights: tuple[float, float] = DI_WEIGHT_CHOICES["inst_tie"],
+    inputs: list[InputSpec] | None = None,
 ) -> dict[str, float]:
     """Load a per-entity score series from an axis-judge-correlation
     experiment directory.
+
+    Threads ``inputs`` through every cache read via
+    ``load_and_register`` so the caller's recorded provenance lists
+    exactly the files we consumed.
 
     sources:
       gpt           : combine_desc_inst_one_judge(gpt/desc, gpt/inst)
@@ -1020,25 +1029,46 @@ def load_scores_from_experiment_dir(
       responses     : average gpt_responses_{roles,traits}/scores_responses.json
                        per-entity mean_score
     """
+    axis_id = experiment_dir.name
+
+    def _load(path: Path, dep_key: str) -> dict:
+        payload, _spec, _check = load_and_register(
+            path, dep_key=dep_key, inputs=inputs, policy="warn",
+        )
+        return payload
+
     if source in ("gpt", "sonnet", "haiku"):
         d = experiment_dir / source
-        sd = _flatten_static_scores(json.load(open(d / "scores_descriptions.json")))
-        si = _flatten_static_scores(json.load(open(d / "scores_instructions.json")))
+        sd = _flatten_static_scores(_load(
+            d / "scores_descriptions.json",
+            f"judge_{axis_id}_descriptions_{source}"))
+        si = _flatten_static_scores(_load(
+            d / "scores_instructions.json",
+            f"judge_{axis_id}_instructions_{source}"))
         return combine_desc_inst_one_judge(sd, si, weights=di_weights)
     if source == "di_combined":
         gd = experiment_dir / "gpt"
-        sd = experiment_dir / "sonnet"
-        g_d = _flatten_static_scores(json.load(open(gd / "scores_descriptions.json")))
-        g_i = _flatten_static_scores(json.load(open(gd / "scores_instructions.json")))
-        s_d = _flatten_static_scores(json.load(open(sd / "scores_descriptions.json")))
-        s_i = _flatten_static_scores(json.load(open(sd / "scores_instructions.json")))
+        sd_p = experiment_dir / "sonnet"
+        g_d = _flatten_static_scores(_load(
+            gd / "scores_descriptions.json",
+            f"judge_{axis_id}_descriptions_gpt"))
+        g_i = _flatten_static_scores(_load(
+            gd / "scores_instructions.json",
+            f"judge_{axis_id}_instructions_gpt"))
+        s_d = _flatten_static_scores(_load(
+            sd_p / "scores_descriptions.json",
+            f"judge_{axis_id}_descriptions_sonnet"))
+        s_i = _flatten_static_scores(_load(
+            sd_p / "scores_instructions.json",
+            f"judge_{axis_id}_instructions_sonnet"))
         return combine_desc_inst_two_judges(g_d, g_i, s_d, s_i, weights=di_weights)
     if source == "responses":
         out: dict[str, float] = {}
         for sub in ("gpt_responses_roles", "gpt_responses_traits"):
             path = experiment_dir / sub / "scores_responses.json"
             if path.exists():
-                out.update(_flatten_response_scores(json.load(open(path))))
+                out.update(_flatten_response_scores(_load(
+                    path, f"judge_{axis_id}_{sub}")))
         return out
     raise ValueError(f"Unknown --score_source {source!r}; "
                      f"choose from {SCORE_SOURCE_CHOICES}")
@@ -1182,6 +1212,89 @@ def write_restarts_plot(out_path: Path, result: FitResult, run_label: str,
 # CLI
 # ---------------------------------------------------------------------------
 
+def _slug_whitening(spec: str) -> str:
+    """Filesystem-safe slug for a whitening spec.
+
+    Strips ``=`` and ``_`` (which appear in canonical specs like
+    ``soft_K=3`` and ``soft_shear=2``) so the result is a single token.
+
+    >>> _slug_whitening("soft_K=3")
+    'softK3'
+    >>> _slug_whitening("soft_shear=2")
+    'softshear2'
+    >>> _slug_whitening("raw")
+    'raw'
+    """
+    return spec.replace("=", "").replace("_", "")
+
+
+def _slug_data_dir(data_dir: str | Path) -> str:
+    """Filesystem-safe short slug for a data_dir.
+
+    Uses the basename only (the rest is just where the dataset lives on
+    this machine, not part of its identity) and replaces spaces with
+    hyphens.
+
+    >>> _slug_data_dir("runpod_workspace/qwen/qwen-3-32b Roger 8slot")
+    'qwen-3-32b-Roger-8slot'
+    """
+    name = Path(str(data_dir)).name
+    return name.replace(" ", "-") or "datadir"
+
+
+def _derive_pair_label(args: argparse.Namespace) -> str:
+    """Pull a stable pair-label out of the argparse Namespace.
+
+    Priority: ``--seed_pair POS NEG`` -> ``f"{POS}_vs_{NEG}"``;
+    else ``--scores_file foo.json`` -> ``Path(foo).stem``.  At least one
+    must be set (the script already requires either Mode A or Mode B).
+    """
+    if args.seed_pair:
+        pos, neg = args.seed_pair
+        return f"{pos}_vs_{neg}"
+    if args.scores_file:
+        return Path(args.scores_file).stem
+    raise ValueError(
+        "Cannot derive --output_dir without --seed_pair or --scores_file; "
+        "pass one or set --output_dir explicitly.")
+
+
+def derive_output_dir(args: argparse.Namespace,
+                      base: Path = DEFAULT_OUTPUT_BASE) -> Path:
+    """Auto-derive ``--output_dir`` from the full cache key.
+
+    The dir name encodes every dimension that a different invocation of
+    this script could vary -- pair, score source, slot, layer, whitening
+    spec, working-subspace dimension M, and data_dir basename -- so two
+    runs with different metric or input choices land in two different
+    directories *even when one or more dimensions are at their current
+    default*.  Defaults change over time (slot was 3 pre-May 2026, then
+    6; data_dir was 4-slot, now 8-slot); encoding them explicitly stops
+    a future default flip from silently shadowing prior outputs.
+
+    Examples
+    --------
+    Default invocation with ``--seed_pair truthful deceitful``,
+    ``--score_source gpt``, ``--slot 6``::
+
+        roger/optimal_axis/truthful_vs_deceitful_gpt_slot6_layer25_softK3_M30_qwen-3-32b-Roger-8slot/
+
+    Explicit ``--output_dir`` overrides this entirely (use it for one-off
+    or comparison runs where you want a hand-picked dir name).
+    """
+    pair = _derive_pair_label(args)
+    src = args.score_source if args.experiment_dir else "raw_scores"
+    name = (
+        f"{pair}_{src}"
+        f"_slot{args.slot}"
+        f"_layer{args.layer}"
+        f"_{_slug_whitening(args.whitening)}"
+        f"_M{args.M}"
+        f"_{_slug_data_dir(args.data_dir)}"
+    )
+    return base / name
+
+
 def parse_args(argv: Optional[list[str]] = None) -> argparse.Namespace:
     p = argparse.ArgumentParser(
         description=__doc__.split("\n\n", 1)[0],
@@ -1226,34 +1339,65 @@ def parse_args(argv: Optional[list[str]] = None) -> argparse.Namespace:
     opt.add_argument("--rng_seed", type=int, default=0)
 
     out = p.add_argument_group("output")
-    out.add_argument("--output_dir", type=str, required=True,
+    out.add_argument("--output_dir", type=str, default=None,
                      help="Where to write direction.pt, diagnostics.json, "
-                          "restarts.png.")
+                          "restarts.png.  When omitted, auto-derives from the "
+                          "full cache key (pair, score_source, slot, layer, "
+                          "whitening, M, data_dir basename) under "
+                          f"{DEFAULT_OUTPUT_BASE}/ so every distinct invocation "
+                          "lands in its own dir.  See derive_output_dir() for "
+                          "the format.")
     out.add_argument("--run_label", type=str, default=None,
                      help="Short label for the plot/title (defaults to the "
                           "output dir basename).")
     return p.parse_args(argv)
 
 
-def _load_scores_from_args(args: argparse.Namespace) -> dict[str, float]:
+def _load_scores_from_args(
+    args: argparse.Namespace,
+    inputs: list[InputSpec] | None = None,
+) -> dict[str, float]:
+    """Load judge scores per --scores_file or --experiment_dir mode.
+
+    Threads ``inputs`` through every cache read via load_and_register
+    (or current_file_input for the scores_file's pre-known path), so
+    the caller's recorded provenance lists exactly the files we
+    consumed.  Pre-retrofit this script ran a separate _build_inputs
+    pass after the load that registered files via score_source_paths
+    -- which could disagree with the actual reads inside
+    load_scores_from_experiment_dir.
+    """
     if args.scores_file and args.experiment_dir:
         raise SystemExit("Pass exactly one of --scores_file or --experiment_dir.")
     if args.scores_file:
-        raw = json.loads(Path(args.scores_file).read_text())
+        raw, _spec, _check = load_and_register(
+            Path(args.scores_file),
+            dep_key="scores_file",
+            inputs=inputs, policy="warn",
+        )
         # Accept both {name: float} and {name: {score: float}} forms.
         if all(isinstance(v, (int, float)) for v in raw.values()):
             return {str(k): float(v) for k, v in raw.items()}
         return _flatten_static_scores(raw)
     if args.experiment_dir:
         return load_scores_from_experiment_dir(
-            Path(args.experiment_dir), args.score_source)
+            Path(args.experiment_dir), args.score_source,
+            inputs=inputs,
+        )
     raise SystemExit("Must pass either --scores_file or --experiment_dir.")
 
 
 def _build_inputs(args: argparse.Namespace) -> list[InputSpec]:
-    """Construct the InputSpec list for this run.  Two dataset subtrees
-    (always) plus either a scores_file (Mode A) or a judge-cache
-    composite (Mode B)."""
+    """Construct the up-front InputSpec list for this run -- the two
+    dataset subtrees that don't go through load_and_register.
+
+    Per-cache judge file InputSpecs are appended at read time inside
+    ``_load_scores_from_args`` (via load_and_register), so this
+    function intentionally returns only the subtree deps; merging the
+    two streams happens at the call site.  Pre-retrofit this function
+    duplicated the per-cache registrations as a post-load pass, which
+    risked falling out of sync with what was actually consumed.
+    """
     data_dir = Path(args.data_dir)
     inputs: list[InputSpec] = [
         current_data_subtree_input(
@@ -1263,32 +1407,22 @@ def _build_inputs(args: argparse.Namespace) -> list[InputSpec]:
             data_dir, "roles/vectors", dep_key="roles_vectors",
             extras={"slot": str(args.slot), "layer": str(args.layer)}),
     ]
-    if args.scores_file:
-        inputs.append(current_file_input(
-            dep_key="scores_file",
-            path=Path(args.scores_file)))
-    elif args.experiment_dir:
-        paths = score_source_paths(
-            Path(args.experiment_dir), args.score_source)
-        inputs.append(current_files_input(
-            dep_key="judge_caches",
-            paths=paths,
-            extras={"score_source": args.score_source,
-                    "experiment_dir": str(args.experiment_dir)}))
     return inputs
 
 
 def main(argv: Optional[list[str]] = None) -> int:
     args = parse_args(argv)
-    out_dir = Path(args.output_dir)
+    out_dir = (Path(args.output_dir) if args.output_dir
+               else derive_output_dir(args))
     run_label = args.run_label or out_dir.name
 
-    judge_scores = _load_scores_from_args(args)
+    # Build subtree deps first; per-cache judge file deps get appended
+    # by ``_load_scores_from_args`` at read time via load_and_register.
+    inputs = _build_inputs(args)
+    judge_scores = _load_scores_from_args(args, inputs=inputs)
     if not judge_scores:
         raise SystemExit("Empty judge_scores after loading; check --score_source.")
     print(f"Loaded {len(judge_scores)} judge scores")
-
-    inputs = _build_inputs(args)
 
     exclude = set([s for s in args.exclude_names.split(",") if s.strip()])
     seed_pair = tuple(args.seed_pair) if args.seed_pair else None

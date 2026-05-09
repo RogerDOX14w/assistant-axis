@@ -21,6 +21,9 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 from assistant_axis.plot_metadata import png_metadata, suptitle_with_specs
+from assistant_axis.provenance import (
+    CACHE_POLICIES, InputSpec, load_and_register,
+)
 
 DEFAULT_ACTUAL = "roger/pc_round_trip_klm_results.json"
 DEFAULT_NULL = "roger/pc_round_trip_null_klm_results.json"
@@ -38,10 +41,23 @@ def main() -> int:
     p.add_argument("--actual", default=DEFAULT_ACTUAL)
     p.add_argument("--null", default=DEFAULT_NULL)
     p.add_argument("--output", default=DEFAULT_OUTPUT)
+    p.add_argument("--cache-policy", choices=CACHE_POLICIES, default="warn",
+                   help="How to handle stale or unrecognized inputs JSON envelopes.")
     args = p.parse_args()
 
-    actual = json.load(open(args.actual))["stage2_K_refinement_M_inf"]
-    null = json.load(open(args.null))["stage2"]
+    actual_path = Path(args.actual)
+    null_path = Path(args.null)
+    inputs: list[InputSpec] = []
+    actual_full, _spec_a, _check_a = load_and_register(
+        actual_path, dep_key="klm_results_json",
+        inputs=inputs, policy=args.cache_policy,
+    )
+    null_full, _spec_n, _check_n = load_and_register(
+        null_path, dep_key="null_klm_results_json",
+        inputs=inputs, policy=args.cache_policy,
+    )
+    actual = actual_full["stage2_K_refinement_M_inf"]
+    null = null_full["stage2"]
 
     # Group winners per PC
     def gather(items):
@@ -189,9 +205,9 @@ def main() -> int:
 
     out = Path(args.output)
     out.parent.mkdir(parents=True, exist_ok=True)
+    # ``inputs`` was populated above by load_and_register.
     fig.savefig(out, dpi=150, bbox_inches="tight",
-                metadata=png_metadata(title=title,
-                                       source_text=Path(__file__).read_text()))
+                metadata=png_metadata(title=title, inputs=inputs))
     print(f"Wrote {out}")
     return 0
 

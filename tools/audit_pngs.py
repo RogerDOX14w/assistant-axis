@@ -95,9 +95,14 @@ from assistant_axis.provenance import (  # noqa: E402
     inputs_from_jsonable,
     validate_recorded,
 )
+from assistant_axis.deferral_registry import (  # noqa: E402
+    DeferralEntry,
+    load_registry as load_deferral_registry,
+    match_cache as match_deferral,
+)
 
 
-STATUSES = ("current", "stale", "legacy", "frozen")
+STATUSES = ("current", "stale", "deferred", "legacy", "frozen")
 
 
 @dataclass
@@ -113,6 +118,8 @@ class PNGAudit:
     check: Optional[ProvenanceCheck] = None
     frozen_marker: Optional[str] = None
     notes: list = field(default_factory=list)
+    deferral_matches: list = field(default_factory=list)  # list[DeferralEntry]
+    pre_deferred_status: Optional[str] = None             # status before deferral pass
 
     def short_script(self) -> str:
         """Best-effort producing-script name; matches
@@ -222,6 +229,48 @@ def audit_png(path: Path) -> PNGAudit:
 # Walk + report
 # ---------------------------------------------------------------------------
 
+def apply_deferrals(
+    audits: list[PNGAudit],
+    *,
+    registry: Optional[list[DeferralEntry]] = None,
+    repo_root: Optional[Path] = None,
+) -> None:
+    """Mutate ``audits`` in-place: reclassify rows to ``deferred`` when
+    an entry in ``deferred_rejudges.yaml`` matches the PNG's path (and
+    optionally the drift-source dep_key).
+
+    Reclassifies either ``stale`` ("this would otherwise need
+    rerunning; defer instead") or ``legacy`` ("this never had an
+    ``Inputs`` chunk -- pre-migration or a producer we've decided not
+    to migrate; presume current as of mechanism introduction").
+    ``current`` and ``frozen`` are never reclassified.
+    """
+    if registry is None:
+        registry = load_deferral_registry(repo_root=repo_root)
+    if not registry:
+        return
+    deferrable = ("stale", "legacy")
+    for a in audits:
+        if a.status not in deferrable:
+            continue
+        dep_key: Optional[str] = None
+        if a.check is not None:
+            offending = [
+                s for s in a.check.statuses
+                if s.status not in ("ok", "equivalent")
+            ]
+            if len(offending) == 1:
+                dep_key = offending[0].dep_key
+        matches = match_deferral(
+            a.path.resolve(), dep_key=dep_key, registry=registry,
+            repo_root=repo_root,
+        )
+        if matches:
+            a.pre_deferred_status = a.status
+            a.status = "deferred"
+            a.deferral_matches = matches
+
+
 def collect(root: Path) -> list[PNGAudit]:
     """Recursively audit every ``*.png`` under ``root``."""
     rows: list[PNGAudit] = []
@@ -243,8 +292,8 @@ def render_markdown(
     lines: list[str] = []
     lines.append(f"# PNG provenance audit: `{root}`\n")
     lines.append(f"Total PNGs: **{len(rows)}**.  "
-                 f"Status legend: current / stale / legacy / frozen "
-                 f"(see ``tools/audit_pngs.py`` docstring).\n")
+                 f"Status legend: current / stale / deferred / legacy / "
+                 f"frozen (see ``tools/audit_pngs.py`` docstring).\n")
 
     # Summary by status.
     by_status = Counter(r.status for r in rows)
@@ -260,14 +309,15 @@ def render_markdown(
     for r in rows:
         by_script[r.short_script()][r.status] += 1
     lines.append("## By producing script\n")
-    lines.append("| Script | current | stale | legacy | frozen | total |")
-    lines.append("|---|---:|---:|---:|---:|---:|")
+    lines.append("| Script | current | stale | deferred | legacy | frozen | total |")
+    lines.append("|---|---:|---:|---:|---:|---:|---:|")
     for script in sorted(by_script):
         c = by_script[script]
         total = sum(c.values())
         lines.append(
             f"| `{script}` | {c.get('current', 0)} | {c.get('stale', 0)} "
-            f"| {c.get('legacy', 0)} | {c.get('frozen', 0)} | {total} |"
+            f"| {c.get('deferred', 0)} | {c.get('legacy', 0)} | "
+            f"{c.get('frozen', 0)} | {total} |"
         )
     lines.append("")
 
@@ -287,6 +337,26 @@ def render_markdown(
                 lines.append(f"- **Software**: `{r.software}`")
             for reason in r.stale_reasons():
                 lines.append(f"- {reason}")
+            lines.append("")
+
+    # Deferred details (matched by deferred_rejudges.yaml).
+    deferred_rows = [r for r in rows if r.status == "deferred"]
+    if deferred_rows:
+        lines.append(f"## Deferred PNGs ({len(deferred_rows)})\n")
+        lines.append("PNGs that would otherwise be ``stale`` but match an "
+                     "entry in ``deferred_rejudges.yaml``.  Use "
+                     "``tools/defer_rejudge.py --remove`` to lift.\n")
+        for r in sorted(deferred_rows, key=lambda r: str(r.path)):
+            lines.append(f"### `{r.path}`")
+            if r.pre_deferred_status:
+                lines.append(f"- **Was**: {r.pre_deferred_status}")
+            for entry in r.deferral_matches:
+                lines.append(
+                    f"- **Deferred by**: `{entry.path_glob}`"
+                    + (f" (dep_key=`{entry.dep_key}`)" if entry.dep_key else "")
+                    + f" -- {entry.reason}"
+                    + (f"  *(at {entry.deferred_at})*" if entry.deferred_at else "")
+                )
             lines.append("")
 
     # Legacy details (compact -- often dominant; kept short).
@@ -323,7 +393,13 @@ def render_flat(rows: list[PNGAudit]) -> str:
     """One line per PNG: ``status<TAB>path<TAB>note``.  For grep / awk."""
     out: list[str] = []
     for r in rows:
-        note = "; ".join(r.stale_reasons()) if r.status == "stale" else ""
+        if r.status == "stale":
+            note = "; ".join(r.stale_reasons())
+        elif r.status == "deferred":
+            note = (f"was={r.pre_deferred_status}; "
+                    + "; ".join(e.reason for e in r.deferral_matches))
+        else:
+            note = ""
         out.append(f"{r.status}\t{r.path}\t{note}")
     return "\n".join(out)
 
@@ -345,6 +421,10 @@ def main() -> int:
                    help="Filter to PNGs with this status only.")
     p.add_argument("--format", choices=("markdown", "flat"), default="markdown",
                    help="Output format (default: markdown).")
+    p.add_argument("--ignore-deferrals", action="store_true",
+                   help="Skip applying deferred_rejudges.yaml; show "
+                        "underlying ``stale`` classification regardless of "
+                        "registry entries.")
     args = p.parse_args()
 
     root = Path(args.root).resolve()
@@ -353,6 +433,8 @@ def main() -> int:
         return 2
 
     rows = collect(root)
+    if not args.ignore_deferrals:
+        apply_deferrals(rows)
     if args.status is not None:
         rows = [r for r in rows if r.status == args.status]
 

@@ -25,8 +25,8 @@ LOG_DIR="/tmp/rejudge_$(date +%Y%m%d_%H%M%S)"
 mkdir -p "$LOG_DIR"
 echo "Logs: $LOG_DIR"
 
-PAIR_ALL="$ROOT/pair_list_33.json"          # 33 axes — covers everything desc/instr touched
-PAIR_A="$ROOT/pair_list_12.json"            # 12 axes — cohort A response (gpt b15/b10)
+PAIR_ALL="$ROOT/pair_list_di.json"          # desc+instr cohort — covers everything desc/instr touched
+PAIR_A="$ROOT/pair_list_responses.json"     # responses cohort — gpt b15/b10 response judging
 PAIR_B="$ROOT/pair_list_3_cohort_b.json"    # 3 axes — cohort B (multi-judge / multi-batch)
 
 # Helper: orchestrator wrapper

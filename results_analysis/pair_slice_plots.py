@@ -76,6 +76,10 @@ import matplotlib.pyplot as plt
 from matplotlib.lines import Line2D
 
 from assistant_axis import png_metadata, suptitle_with_specs
+from assistant_axis.provenance import (
+    InputSpec,
+    current_data_subtree_input,
+)
 from results_analysis.axis_judge_correlation import _load_vector_file
 from results_analysis.canonical_angles.data import (
     build_augmented_whitening_pool,
@@ -284,7 +288,8 @@ def plot_pair(pos_name: str, neg_name: str,
               cent_fn, w_fn,
               *,
               slot: int, layer: int, K: int,
-              out_dir: Path) -> Path:
+              out_dir: Path,
+              inputs: list[InputSpec] | None = None) -> Path:
     """Render one pair slice and save it.  Returns the output path."""
     pos_w = w_fn(cent_fn("traits", pos_name))
     neg_w = w_fn(cent_fn("traits", neg_name))
@@ -426,7 +431,7 @@ def plot_pair(pos_name: str, neg_name: str,
     out = out_dir / f"{pos_name}_vs_{neg_name}_slice_K{K}.png"
     out.parent.mkdir(parents=True, exist_ok=True)
     plt.savefig(out, dpi=140, bbox_inches="tight",
-                metadata=png_metadata(title=title_line))
+                metadata=png_metadata(title=title_line, inputs=inputs))
     plt.close(fig)
 
     # Compact semantic summary for stdout.
@@ -509,11 +514,24 @@ def main() -> int:
         data_dir, args.slot, args.layer, args.K)
     print(f"Loaded {len(names['trait'])} traits and {len(names['role'])} roles")
 
+    # Per-pair PNGs all share the same upstream subtrees: traits + roles
+    # vectors at the chosen (slot, layer), whitened via soft_K=K on the
+    # augmented pool (which itself is roles+traits+default).
+    extras = {"slot": str(args.slot), "layer": str(args.layer),
+              "K": str(args.K)}
+    inputs: list[InputSpec] = [
+        current_data_subtree_input(
+            data_dir, "traits/vectors", dep_key="traits_vectors",
+            extras=extras),
+        current_data_subtree_input(
+            data_dir, "roles/vectors", dep_key="roles_vectors",
+            extras=extras),
+    ]
     for (pos, neg, x_label, y_label, y_flag) in pairs_to_run:
         plot_pair(pos, neg, x_label, y_label, y_flag,
                   names, vecs, trait_mean, cent_fn, w_fn,
                   slot=args.slot, layer=args.layer, K=args.K,
-                  out_dir=out_dir)
+                  out_dir=out_dir, inputs=inputs)
     return 0
 
 

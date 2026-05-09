@@ -213,3 +213,127 @@ def test_no_propagation_when_all_clean(tmp_path: Path, monkeypatch) -> None:
     audits = [audit_caches.audit_cache(p) for p in (a, b)]
     audit_caches.propagate_transitive_stale(audits)
     assert {x.status for x in audits} == {"current"}
+
+
+# ---------------------------------------------------------------------------
+# Deferral integration (Phase 6d-1)
+# ---------------------------------------------------------------------------
+
+def test_apply_deferrals_reclassifies_stale_direct(tmp_path: Path) -> None:
+    from assistant_axis import deferral_registry
+    src = tmp_path / "src.json"; src.write_text("v1")
+    inputs = [prov.current_file_input("src", src)]
+    out = tmp_path / "cache.json"
+    _write_envelope(out, {"x": 1}, inputs)
+    time.sleep(1.1)
+    src.write_text("v1 changed")  # cause drift
+
+    a = audit_caches.audit_cache(out)
+    assert a.status == "stale_direct"
+
+    # Inline registry matches this cache by path glob.  We pass
+    # ``repo_root=tmp_path`` so paths are normalised relative to the
+    # test scratch dir rather than the actual project root.
+    reg = [deferral_registry.DeferralEntry(
+        path_glob="cache.json",
+        dep_key=None,
+        reason="explicit defer",
+        deferred_at="2026-05-08T00:00:00+00:00",
+    )]
+    audit_caches.apply_deferrals([a], registry=reg, repo_root=tmp_path)
+    assert a.status == "deferred"
+    assert a.pre_deferred_status == "stale_direct"
+    assert a.deferral_matches[0].reason == "explicit defer"
+
+
+def test_apply_deferrals_skips_current_caches(tmp_path: Path) -> None:
+    """A ``current`` cache must NOT be reclassified to ``deferred`` even
+    when an entry in the registry happens to match its path -- deferral
+    only applies to caches that were actually stale."""
+    from assistant_axis import deferral_registry
+    src = tmp_path / "src.json"; src.write_text("v1")
+    inputs = [prov.current_file_input("src", src)]
+    out = tmp_path / "cache.json"
+    _write_envelope(out, {"x": 1}, inputs)
+
+    a = audit_caches.audit_cache(out)
+    assert a.status == "current"
+    reg = [deferral_registry.DeferralEntry(
+        path_glob="cache.json", dep_key=None,
+        reason="should not apply", deferred_at="2026-05-08",
+    )]
+    audit_caches.apply_deferrals([a], registry=reg, repo_root=tmp_path)
+    assert a.status == "current"
+
+
+def test_apply_deferrals_dep_key_filter(tmp_path: Path) -> None:
+    """Registry entry with dep_key restricts to caches drifting on the
+    matching dep_key only."""
+    from assistant_axis import deferral_registry
+    s1 = tmp_path / "s1.json"; s1.write_text("v")
+    s2 = tmp_path / "s2.json"; s2.write_text("v")
+    out1 = tmp_path / "c1.json"
+    out2 = tmp_path / "c2.json"
+    _write_envelope(out1, {"x": 1}, [prov.current_file_input("d_target", s1)])
+    _write_envelope(out2, {"x": 2}, [prov.current_file_input("d_other", s2)])
+    time.sleep(1.1)
+    s1.write_text("v changed"); s2.write_text("v changed")
+
+    a1 = audit_caches.audit_cache(out1)
+    a2 = audit_caches.audit_cache(out2)
+    assert a1.status == "stale_direct" and a2.status == "stale_direct"
+
+    reg = [deferral_registry.DeferralEntry(
+        path_glob="c*.json", dep_key="d_target",
+        reason="targeted", deferred_at="2026-05-08",
+    )]
+    audit_caches.apply_deferrals([a1, a2], registry=reg, repo_root=tmp_path)
+    assert a1.status == "deferred"
+    assert a2.status == "stale_direct"  # dep_key filter excluded it
+
+
+def test_apply_deferrals_reclassifies_legacy_when_matched(tmp_path: Path) -> None:
+    """May 2026 backfill: a bare-JSON legacy cache (no envelope)
+    should be reclassified to ``deferred`` when its path matches a
+    registry entry, with ``pre_deferred_status="legacy"`` recorded.
+
+    This is the mechanism the judge-cache backfill relies on:
+    ``scores_*.json`` files written before Phase 6a have no envelope
+    so they read as ``legacy``; an upfront deferral entry says
+    "presume current as of mechanism introduction".
+    """
+    from assistant_axis import deferral_registry
+    legacy_cache = tmp_path / "scores_descriptions.json"
+    legacy_cache.write_text(json.dumps({"role_a": 1.0, "role_b": 2.0}))
+
+    a = audit_caches.audit_cache(legacy_cache)
+    assert a.status == "legacy"
+
+    reg = [deferral_registry.DeferralEntry(
+        path_glob="scores_*.json",
+        dep_key=None,
+        reason="Pre-Phase-6 judge cache; presume current.",
+        deferred_at="2026-05-08T00:00:00+00:00",
+    )]
+    audit_caches.apply_deferrals([a], registry=reg, repo_root=tmp_path)
+    assert a.status == "deferred"
+    assert a.pre_deferred_status == "legacy"
+    assert a.deferral_matches[0].path_glob == "scores_*.json"
+
+
+def test_apply_deferrals_legacy_no_match_stays_legacy(tmp_path: Path) -> None:
+    """Legacy cache whose path doesn't match any registry entry stays
+    ``legacy``; deferrals are opt-in per path."""
+    from assistant_axis import deferral_registry
+    legacy_cache = tmp_path / "rho_by_layer.json"
+    legacy_cache.write_text(json.dumps({"x": 1}))
+
+    a = audit_caches.audit_cache(legacy_cache)
+    assert a.status == "legacy"
+
+    reg = [deferral_registry.DeferralEntry(
+        path_glob="scores_*.json", dep_key=None,
+        reason="judge-only", deferred_at="2026-05-08",
+    )]
+    audit_caches.apply_deferrals([a], registry=reg, repo_root=tmp_path)
+    assert a.status == "legacy"  # unchanged

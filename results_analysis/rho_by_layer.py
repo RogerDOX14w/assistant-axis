@@ -6,10 +6,10 @@ Rows are token slots (defaults include body mean, historical ``\\n`` default,
 ``</think>``, and ``\\n\\n`` post; see ``SLOTS``).  Columns are the
 two judge sources used elsewhere in the project:
 
-- **desc+inst** -- 33 axes (``pair_list_33.json``), 4-way mean of
+- **desc+inst** -- desc+instr cohort (``pair_list_di.json``), 4-way mean of
   ``GPT_d, GPT_i, Son_d, Son_i``;
-- **responses** -- 12 axes (``pair_list_12.json``), GPT-only mean
-  over response-mode evals.
+- **responses** -- responses cohort (``pair_list_responses.json``), GPT-only
+  mean over response-mode evals.
 
 For each (slot, layer, K) we compute mean per-axis Spearman ρ between
 the soft-K-whitened activation projection at ``(slot, layer)`` and the
@@ -27,8 +27,8 @@ Performance note: the SVD that powers soft-K whitening is computed
 values, so adding another K to the same fit costs almost nothing.
 The dominant cost is N_layers × len(SLOTS) × N_unique_pairs SVDs
 (order ~10k for the default 64-layer × 4-slot × up-to-45-pair sweep:
-33 desc+inst axes + 12 response axes, deduped where the same pair appears
-in both lists).
+desc+inst-cohort axes + responses-cohort axes, deduped where the same
+pair appears in both lists).
 
 Inputs (from ``--experiment_dir``)
 ----------------------------------
@@ -37,8 +37,8 @@ The standard per-axis directory tree produced by
 :mod:`results_analysis.axis_judge_correlation`::
 
     <experiment_dir>/
-      pair_list_33.json     # or any pair list passed via --pairs_di
-      pair_list_12.json     # or any pair list passed via --pairs_resp
+      pair_list_di.json         # or any pair list passed via --pairs_di
+      pair_list_responses.json  # or any pair list passed via --pairs_resp
       <pos>_vs_<neg>/
         gpt/scores_{descriptions,instructions}.json
         sonnet/scores_{descriptions,instructions}.json
@@ -86,16 +86,41 @@ import matplotlib.pyplot as plt
 import numpy as np
 from scipy.stats import spearmanr
 
-from assistant_axis import png_metadata
+from assistant_axis import json_metadata, png_metadata
 from assistant_axis.judge_score_combine import (
     add_di_weights_arg,
     combine_desc_inst_two_judges,
     parse_di_weights_arg,
 )
+from assistant_axis.provenance import (
+    InputSpec,
+    current_data_subtree_input,
+    load_and_register,
+)
 from results_analysis.axis_judge_correlation import _load_vector_file
 from results_analysis.canonical_angles.data import (
     build_augmented_whitening_pool,
 )
+
+
+def _load_rho_json(
+    path: Path,
+    *,
+    inputs: list[InputSpec] | None = None,
+    dep_key: str = "rho_json",
+) -> dict:
+    """Read the rho_by_layer.json sidecar, transparently unwrapping the
+    provenance envelope when present (so --reuse_json / --replot_from_json
+    work against both legacy bare-JSON and post-Phase-6 wrapped files).
+
+    When ``inputs`` is supplied, also registers ``path`` as a
+    dependency under ``dep_key`` via load_and_register, so the read
+    and the InputSpec record happen together.
+    """
+    obj, _spec, _check = load_and_register(
+        path, dep_key=dep_key, inputs=inputs, policy="warn",
+    )
+    return obj
 
 
 DEFAULT_EXPERIMENT_DIR = Path(__file__).resolve().parent.parent / (
@@ -283,12 +308,14 @@ def main() -> int:
     p.add_argument("--data_dir", default=str(DEFAULT_DATA_DIR),
                    help=f"Activation vectors directory "
                         f"(default: {DEFAULT_DATA_DIR}).")
-    p.add_argument("--pairs_di", default="pair_list_33.json",
+    p.add_argument("--pairs_di", default="pair_list_di.json",
                    help="Pair-list JSON for desc+inst source "
-                        "(default: pair_list_33.json).")
-    p.add_argument("--pairs_resp", default="pair_list_12.json",
+                        "(default: pair_list_di.json -- axes with desc+inst "
+                        "judging from both GPT and Sonnet).")
+    p.add_argument("--pairs_resp", default="pair_list_responses.json",
                    help="Pair-list JSON for GPT responses source "
-                        "(default: pair_list_12.json).")
+                        "(default: pair_list_responses.json -- axes that "
+                        "additionally have GPT response judging).")
     p.add_argument("--ks", type=int, nargs="+", default=DEFAULT_KS,
                    help=f"K values to plot; 0 = raw, K>0 = soft-K "
                         f"whitening (default: {DEFAULT_KS}).")
@@ -322,7 +349,12 @@ def main() -> int:
     if args.replot_from_json:
         json_path = experiment_dir / args.rhos_json
         print(f"Loading cached results from {json_path}", flush=True)
-        cached = json.load(open(json_path))
+        # Replot's PNG depends only on the JSON sidecar; the JSON's own
+        # envelope captures the upstream judge-cache chain, and audit's
+        # transitive propagation will mark this PNG stale via the JSON.
+        # load_and_register reads + registers in one call.
+        replot_inputs: list[InputSpec] = []
+        cached = _load_rho_json(json_path, inputs=replot_inputs)
         layers: list[int] = list(cached["layers"])
         # Respect ``--ks`` so replots can drop/add curves without regenerating JSON.
         KS = list(args.ks)
@@ -334,11 +366,26 @@ def main() -> int:
                      for slot, L, K, v in cached["responses"]}
         slots_replot = list(cached.get("slots", SLOTS))
         _render_plot(experiment_dir, args.plot, layers, KS, slots_replot,
-                     rho_by_di, rho_by_rs, n_di, n_rs)
+                     rho_by_di, rho_by_rs, n_di, n_rs,
+                     inputs=replot_inputs)
         return 0
 
-    pairs_di = json.load(open(experiment_dir / args.pairs_di))
-    pairs_resp = json.load(open(experiment_dir / args.pairs_resp))
+    # Provenance accumulator: every cache read below threads through
+    # load_and_register so the read + register happen together.
+    inputs: list[InputSpec] = [
+        current_data_subtree_input(
+            data_dir, "traits/vectors", dep_key="traits_vectors"),
+        current_data_subtree_input(
+            data_dir, "roles/vectors", dep_key="roles_vectors"),
+    ]
+    pairs_di, _, _ = load_and_register(
+        experiment_dir / args.pairs_di,
+        dep_key="pairs_di_json", inputs=inputs, policy="warn",
+    )
+    pairs_resp, _, _ = load_and_register(
+        experiment_dir / args.pairs_resp,
+        dep_key="pairs_resp_json", inputs=inputs, policy="warn",
+    )
     print(f"Loaded {len(pairs_di)} desc+inst axis pairs from {args.pairs_di}")
     print(f"Loaded {len(pairs_resp)} responses axis pairs from {args.pairs_resp}")
 
@@ -373,7 +420,12 @@ def main() -> int:
     if args.reuse_json:
         json_path = experiment_dir / args.rhos_json
         if json_path.exists():
-            cached = json.load(open(json_path))
+            # The reused-cached path also registers as a dep so the
+            # output JSON's _provenance.inputs accurately captures
+            # the partial-rebuild lineage.
+            cached = _load_rho_json(
+                json_path, inputs=inputs, dep_key="rho_json_reuse",
+            )
             keep = set((s, L, K) for s in SLOTS for L in layers for K in KS)
             for slot, L, K, v in cached.get("desc_inst", []):
                 key = (int(slot), int(L), int(K))
@@ -392,16 +444,35 @@ def main() -> int:
                   "computing everything from scratch.", flush=True)
 
     # Pre-load per-axis score arrays (don't reread on every layer).
+    # Each load_and_register call appends to ``inputs`` so the recorded
+    # provenance covers exactly the caches consumed.
     print("Loading per-axis scores...", flush=True)
     axis_scores_di: dict[tuple[str, str], dict[str, float]] = {}
     for it in pairs_di:
         pos, neg = it["pos"], it["neg"]
-        axis_dir = experiment_dir / f"{pos}_vs_{neg}"
+        axis_id = f"{pos}_vs_{neg}"
+        axis_dir = experiment_dir / axis_id
         try:
-            g_d = json.load(open(axis_dir / "gpt" / "scores_descriptions.json"))
-            g_i = json.load(open(axis_dir / "gpt" / "scores_instructions.json"))
-            s_d = json.load(open(axis_dir / "sonnet" / "scores_descriptions.json"))
-            s_i = json.load(open(axis_dir / "sonnet" / "scores_instructions.json"))
+            g_d, _, _ = load_and_register(
+                axis_dir / "gpt" / "scores_descriptions.json",
+                dep_key=f"judge_{axis_id}_descriptions_gpt",
+                inputs=inputs, policy="warn",
+            )
+            g_i, _, _ = load_and_register(
+                axis_dir / "gpt" / "scores_instructions.json",
+                dep_key=f"judge_{axis_id}_instructions_gpt",
+                inputs=inputs, policy="warn",
+            )
+            s_d, _, _ = load_and_register(
+                axis_dir / "sonnet" / "scores_descriptions.json",
+                dep_key=f"judge_{axis_id}_descriptions_sonnet",
+                inputs=inputs, policy="warn",
+            )
+            s_i, _, _ = load_and_register(
+                axis_dir / "sonnet" / "scores_instructions.json",
+                dep_key=f"judge_{axis_id}_instructions_sonnet",
+                inputs=inputs, policy="warn",
+            )
         except FileNotFoundError:
             continue
         axis_scores_di[(pos, neg)] = combine_desc_inst_two_judges(
@@ -410,13 +481,20 @@ def main() -> int:
     axis_scores_rs: dict[tuple[str, str], dict[str, float]] = {}
     for it in pairs_resp:
         pos, neg = it["pos"], it["neg"]
-        axis_dir = experiment_dir / f"{pos}_vs_{neg}"
+        axis_id = f"{pos}_vs_{neg}"
+        axis_dir = experiment_dir / axis_id
         scores: dict[str, float] = {}
         for sub in ("gpt_responses_traits", "gpt_responses_roles"):
             fp = axis_dir / sub / "scores_responses.json"
             if not fp.exists():
                 continue
-            for n, info in json.load(open(fp)).items():
+            sub_label = sub[len("gpt_responses_"):]
+            payload, _, _ = load_and_register(
+                fp,
+                dep_key=f"judge_{axis_id}_responses_{sub_label}",
+                inputs=inputs, policy="warn",
+            )
+            for n, info in payload.items():
                 if info.get("mean_score") is not None:
                     scores[n] = info["mean_score"]
         if scores:
@@ -478,6 +556,16 @@ def main() -> int:
                   f"({li + 1}/{len(layers)}, fit Ks={ks_to_fit})", flush=True)
 
     # ------------------------------------------------------------------
+    # Provenance inputs (shared by JSON sidecar + PNG)
+    # ------------------------------------------------------------------
+    # ``inputs`` was populated above by load_and_register at every read
+    # site (subtree deps + pair lists + per-axis × per-judge × per-mode
+    # judge caches).  Pre-retrofit a duplicate post-load loop here
+    # registered all axes regardless of whether their caches were
+    # actually consumed (axes with FileNotFoundError were silently
+    # skipped by the read pass but recorded as deps anyway).
+
+    # ------------------------------------------------------------------
     # JSON sidecar (so future replots are cheap)
     # ------------------------------------------------------------------
     json_out = {
@@ -496,21 +584,37 @@ def main() -> int:
         ],
     }
     json_path = experiment_dir / args.rhos_json
-    json.dump(json_out, open(json_path, "w"), indent=2)
+    envelope = json_metadata(
+        json_out,
+        inputs=inputs,
+        title=f"rho_by_layer slots={SLOTS} ks={KS}",
+    )
+    json.dump(envelope, open(json_path, "w"), indent=2)
     print(f"Wrote {json_path}")
 
     _render_plot(experiment_dir, args.plot, layers, KS, SLOTS,
                  rho_by_di, rho_by_rs,
-                 len(axis_scores_di), len(axis_scores_rs))
+                 len(axis_scores_di), len(axis_scores_rs),
+                 inputs=inputs)
     return 0
 
 
 def _render_plot(experiment_dir: Path, plot_name: str,
                  layers: list[int], KS: list[int], slots: list[int],
                  rho_by_di: dict, rho_by_rs: dict,
-                 n_axes_di: int, n_axes_resp: int) -> None:
+                 n_axes_di: int, n_axes_resp: int,
+                 *,
+                 inputs: list[InputSpec] | None = None) -> None:
     """Pure plotting from precomputed ρ tables.  Shared by the main
-    pipeline and the ``--replot_from_json`` fast path."""
+    pipeline and the ``--replot_from_json`` fast path.
+
+    ``inputs`` (when provided) is embedded in the PNG's ``Inputs``
+    chunk so audit_pngs.py can validate freshness against the recorded
+    judge caches / dataset subtrees.  The main pipeline passes the
+    full upstream input list; the ``--replot_from_json`` fast path
+    passes a single-element list pointing to the JSON sidecar (whose
+    own envelope captures the upstream chain transitively).
+    """
     nonraw = [k for k in KS if k != 0]
     # Spread hues across the fewer remaining K>0 curves (K=5/6 dropped by default).
     rainbow = (plt.cm.rainbow(np.linspace(0.0, 1.0, len(nonraw)))
@@ -569,7 +673,7 @@ def _render_plot(experiment_dir: Path, plot_name: str,
 
     out = experiment_dir / plot_name
     plt.savefig(out, dpi=150, bbox_inches="tight",
-                metadata=png_metadata(title=title_line))
+                metadata=png_metadata(title=title_line, inputs=inputs))
     plt.close(fig)
     print(f"Wrote {out}")
 

@@ -69,6 +69,10 @@ from ..data import (
 )
 from ..plot_helpers import plot_per_slot_panels
 from assistant_axis import png_metadata
+from assistant_axis.provenance import (
+    InputSpec,
+    current_data_subtree_input,
+)
 
 
 def parse_args() -> argparse.Namespace:
@@ -221,8 +225,9 @@ def main() -> int:
 
     out_path = Path(args.output)
     out_path.parent.mkdir(parents=True, exist_ok=True)
+    inputs = _build_inputs(data_dir, args)
     fig.savefig(out_path, dpi=140, bbox_inches="tight",
-                metadata=png_metadata(title=title))
+                metadata=png_metadata(title=title, inputs=inputs))
     print(f"Wrote {out_path}")
 
     # Brief summary (NaN-aware, since rank-deficient origins NaN-pad the start)
@@ -237,6 +242,56 @@ def main() -> int:
               f"med={_med(ang):5.1f}  "
               f"last={float(np.nanmax(ang)):5.1f}")
     return 0
+
+
+def _build_inputs(data_dir: Path, args: argparse.Namespace) -> list[InputSpec]:
+    """Provenance inputs for one run.
+
+    Always declares ``combinations/vectors`` (the whitening pool).
+    Adds the goal/nogoal marginal subtrees when the aggregation is one
+    of the residual modes; adds the theatricality-axis subtree under
+    ``combo_residual_theat_shifted``; adds standalone subtrees for the
+    legacy ``standalone`` aggregation.
+    """
+    extras = {"layer": str(args.layer),
+              "kind": args.kind,
+              "aggregation": args.aggregation,
+              "origin": args.origin,
+              "include_default": "1" if args.include_default else "0"}
+    inputs: list[InputSpec] = [
+        current_data_subtree_input(
+            data_dir, "combinations/vectors",
+            dep_key="combinations_vectors", extras=extras),
+    ]
+    needs_r = args.kind in ("r", "combined")
+    needs_t = args.kind in ("t", "combined")
+    if args.aggregation in ("combo_residual", "combo_residual_theat_shifted"):
+        if needs_r:
+            inputs.append(current_data_subtree_input(
+                data_dir, "combinations/vectors/derived/marginals/r_goal",
+                dep_key="r_goal_marginals", extras=extras))
+            inputs.append(current_data_subtree_input(
+                data_dir, "combinations/vectors/derived/marginals/r_nogoal",
+                dep_key="r_nogoal_marginals", extras=extras))
+        if needs_t:
+            inputs.append(current_data_subtree_input(
+                data_dir, "combinations/vectors/derived/marginals/t_goal",
+                dep_key="t_goal_marginals", extras=extras))
+            inputs.append(current_data_subtree_input(
+                data_dir, "combinations/vectors/derived/marginals/t_nogoal",
+                dep_key="t_nogoal_marginals", extras=extras))
+    if args.aggregation == "combo_residual_theat_shifted":
+        inputs.append(current_data_subtree_input(
+            data_dir, "combinations/vectors/derived/axis",
+            dep_key="theatricality_axis", extras=extras))
+    if args.aggregation == "standalone":
+        inputs.append(current_data_subtree_input(
+            data_dir, "traits/vectors", dep_key="traits_vectors",
+            extras=extras))
+        inputs.append(current_data_subtree_input(
+            data_dir, "roles/vectors", dep_key="roles_vectors",
+            extras=extras))
+    return inputs
 
 
 def _layout_for_slots(n_slots: int) -> tuple[int, int]:

@@ -92,6 +92,10 @@ import numpy as np  # noqa: E402
 import torch  # noqa: E402
 
 from assistant_axis import png_metadata, suptitle_with_specs  # noqa: E402
+from assistant_axis.provenance import (  # noqa: E402
+    InputSpec,
+    current_data_subtree_input,
+)
 from results_analysis.axis_judge_correlation import _load_vector_file  # noqa: E402
 from results_analysis.canonical_angles.data import (  # noqa: E402
     build_augmented_whitening_pool,
@@ -305,6 +309,7 @@ def _plot_frame(
     whitening_label: str,
     spec_extra: str,
     output_path: Path,
+    inputs: list[InputSpec] | None = None,
 ) -> Path:
     show_pairs, _ = VARIANTS[variant]
     fig, (ax1, ax2) = plt.subplots(2, 1, figsize=(14, 12), sharex=True)
@@ -364,7 +369,7 @@ def _plot_frame(
     _, top_rect = suptitle_with_specs(fig, suptitle, spec_line)
     fig.tight_layout(rect=(0, 0, 1, top_rect))
     plt.savefig(output_path, dpi=150, bbox_inches="tight",
-                metadata=png_metadata(title=suptitle))
+                metadata=png_metadata(title=suptitle, inputs=inputs))
     plt.close()
     return output_path
 
@@ -459,6 +464,22 @@ def main() -> int:
         suffix = f"_K={K}"
 
     spec_extra = f"; data: {data_dir.name}"
+    # Provenance inputs.  When whitening is on, the soft_K basis is fit
+    # on the augmented pool (roles+traits+default), so both subtrees are
+    # real dependencies.  When raw, only the entity subtree matters.
+    extras = {"whitening": args.whitening}
+    inputs: list[InputSpec] = []
+    if method == "soft_K":
+        inputs.append(current_data_subtree_input(
+            data_dir, "roles/vectors", dep_key="roles_vectors",
+            extras=extras))
+        inputs.append(current_data_subtree_input(
+            data_dir, "traits/vectors", dep_key="traits_vectors",
+            extras=extras))
+    else:
+        inputs.append(current_data_subtree_input(
+            data_dir, args.vectors_subdir, dep_key="vectors_subtree",
+            extras=extras))
     paths: List[Path] = []
     for v in variants:
         out = output_dir / f"all_{entity_kind}_pairwise_slots{suffix}_{v}.png"
@@ -471,6 +492,7 @@ def main() -> int:
             whitening_label=whitening_label,
             spec_extra=spec_extra,
             output_path=out,
+            inputs=inputs,
         )
         paths.append(p)
         print(f"  wrote {p}")

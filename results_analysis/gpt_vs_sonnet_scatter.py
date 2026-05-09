@@ -25,7 +25,7 @@ The standard per-axis directory tree produced by
 :mod:`results_analysis.axis_judge_correlation`::
 
     <experiment_dir>/
-      pair_list_33.json   # or any pair list passed via --pairs
+      pair_list_di.json   # or any pair list passed via --pairs
       <pos>_vs_<neg>/
         gpt/scores_descriptions.json
         gpt/scores_instructions.json
@@ -46,13 +46,6 @@ Examples
 
     # Default: 33 axes (every axis with desc+inst from both providers)
     uv run python results_analysis/gpt_vs_sonnet_scatter.py
-
-    # Reproduce the historical 7-axis plots (matches numbers byte-for-byte)
-    uv run python results_analysis/gpt_vs_sonnet_scatter.py \\
-        --pairs pair_list_7.json \\
-        --pooled gpt_vs_sonnet_scatter_pooled_7axes.png \\
-        --grid gpt_vs_sonnet_scatter_grid_7axes.png \\
-        --rhos_json gpt_vs_sonnet_rhos_7axes.json
 """
 from __future__ import annotations
 
@@ -66,17 +59,36 @@ import matplotlib.pyplot as plt
 import numpy as np
 from scipy.stats import spearmanr
 
-from assistant_axis import png_metadata
+from assistant_axis import cohort_from_pairs, json_metadata, png_metadata
+from assistant_axis.provenance import InputSpec, load_and_register
 
 DEFAULT_EXPERIMENT_DIR = Path(__file__).resolve().parent.parent / (
     "roger/axis_judge_experiments"
 )
 
 
-def _load_both_mean(axis_dir: Path, provider: str) -> dict[str, float]:
-    """Load ``(descriptions + instructions) / 2`` scores for one provider."""
-    d = json.load(open(axis_dir / provider / "scores_descriptions.json"))
-    i = json.load(open(axis_dir / provider / "scores_instructions.json"))
+def _load_both_mean(
+    axis_dir: Path, provider: str,
+    *,
+    inputs: list[InputSpec] | None = None,
+    axis_id: str | None = None,
+) -> dict[str, float]:
+    """Load ``(descriptions + instructions) / 2`` scores for one provider.
+
+    Threads ``inputs`` through ``load_and_register`` so each cache
+    consumed is recorded as a dependency in lockstep with the read.
+    """
+    label = axis_id or axis_dir.name
+    d, _, _ = load_and_register(
+        axis_dir / provider / "scores_descriptions.json",
+        dep_key=f"judge_{label}_descriptions_{provider}",
+        inputs=inputs, policy="warn",
+    )
+    i, _, _ = load_and_register(
+        axis_dir / provider / "scores_instructions.json",
+        dep_key=f"judge_{label}_instructions_{provider}",
+        inputs=inputs, policy="warn",
+    )
     common = sorted(set(d) & set(i))
     return {n: (d[n] + i[n]) / 2.0 for n in common}
 
@@ -104,21 +116,21 @@ def main() -> int:
     p.add_argument("--experiment_dir", default=str(DEFAULT_EXPERIMENT_DIR),
                    help=f"Directory holding the pair list and per-axis "
                         f"score subdirs (default: {DEFAULT_EXPERIMENT_DIR}).")
-    p.add_argument("--pairs", default="pair_list_33.json",
-                   help="Pair-list JSON filename (default: pair_list_33.json "
-                        "-- every axis with all four desc+inst score files "
-                        "cached on disk; the K-sweep tools default to "
-                        "pair_list_12.json since they additionally require "
-                        "GPT response scores).")
-    p.add_argument("--pooled", default="gpt_vs_sonnet_scatter_pooled.png",
-                   help="Pooled-scatter PNG filename "
-                        "(default: gpt_vs_sonnet_scatter_pooled.png).")
-    p.add_argument("--grid", default="gpt_vs_sonnet_scatter_grid.png",
-                   help="Per-axis grid PNG filename "
-                        "(default: gpt_vs_sonnet_scatter_grid.png).")
-    p.add_argument("--rhos_json", default="gpt_vs_sonnet_rhos.json",
-                   help="Output ρ-summary JSON filename "
-                        "(default: gpt_vs_sonnet_rhos.json).")
+    p.add_argument("--pairs", default="pair_list_di.json",
+                   help="Pair-list JSON filename (default: pair_list_di.json "
+                        "-- every axis with desc+inst from both GPT and "
+                        "Sonnet; the K-sweep tools default to "
+                        "pair_list_responses.json since they additionally "
+                        "require GPT response scores).")
+    p.add_argument("--pooled", default=None,
+                   help="Pooled-scatter PNG filename (default: "
+                        "gpt_vs_sonnet_scatter_pooled_<cohort>.png).")
+    p.add_argument("--grid", default=None,
+                   help="Per-axis grid PNG filename (default: "
+                        "gpt_vs_sonnet_scatter_grid_<cohort>.png).")
+    p.add_argument("--rhos_json", default=None,
+                   help="Output ρ-summary JSON filename (default: "
+                        "gpt_vs_sonnet_rhos_<cohort>.json).")
     p.add_argument("--jitter_sigma", type=float, default=0.08,
                    help="Stddev of Gaussian jitter added to both axes for "
                         "visual separation of integer-valued points "
@@ -130,8 +142,23 @@ def main() -> int:
                         "to force the historical 4-column layout.")
     args = p.parse_args()
     experiment_dir = Path(args.experiment_dir).resolve()
+    cohort = cohort_from_pairs(args.pairs)
+    if args.pooled is None:
+        args.pooled = f"gpt_vs_sonnet_scatter_pooled_{cohort}.png"
+    if args.grid is None:
+        args.grid = f"gpt_vs_sonnet_scatter_grid_{cohort}.png"
+    if args.rhos_json is None:
+        args.rhos_json = f"gpt_vs_sonnet_rhos_{cohort}.json"
 
-    pairs = json.load(open(experiment_dir / args.pairs))
+    # ``inputs`` accumulator -- every cache read goes through
+    # load_and_register so the read AND the InputSpec record are
+    # built together (see AGENT_NOTES.md "Reader+registrar pattern").
+    inputs: list[InputSpec] = []
+    pairs, _spec, _check = load_and_register(
+        experiment_dir / args.pairs,
+        dep_key="pairs_json",
+        inputs=inputs, policy="warn",
+    )
     print(f"Loaded {len(pairs)} axis pairs from {args.pairs}")
 
     # Per-axis (gpt_score_list, sonnet_score_list, common_names) and per-axis Spearman ρ.
@@ -141,9 +168,10 @@ def main() -> int:
     all_axis: list[tuple[str, str]] = []
     for pair in pairs:
         pos, neg = pair["pos"], pair["neg"]
-        axis_dir = experiment_dir / f"{pos}_vs_{neg}"
-        gpt = _load_both_mean(axis_dir, "gpt")
-        son = _load_both_mean(axis_dir, "sonnet")
+        axis_id = f"{pos}_vs_{neg}"
+        axis_dir = experiment_dir / axis_id
+        gpt = _load_both_mean(axis_dir, "gpt", inputs=inputs, axis_id=axis_id)
+        son = _load_both_mean(axis_dir, "sonnet", inputs=inputs, axis_id=axis_id)
         common = sorted(set(gpt) & set(son))
         if not common:
             print(f"  [skip] {pos}/{neg}: no shared entities between gpt and sonnet")
@@ -160,6 +188,17 @@ def main() -> int:
     pooled_rho = float(spearmanr(all_gpt, all_son).correlation)
     print(f"\nPooled (entity, axis) Spearman ρ = {pooled_rho:+.3f}  (n={len(all_gpt)})")
 
+    # ---------- Provenance inputs (shared by JSON + both PNGs) ----------
+    # ``inputs`` was already populated above by load_and_register at
+    # every cache-read site (pairs_json + per-axis × per-judge ×
+    # per-mode score caches).  Pre-retrofit this section duplicated
+    # the registration in a separate post-load loop -- which not only
+    # could fall out of sync with the actual reads but also recorded
+    # deps for axes that the read pass had already skipped (no shared
+    # entities).  Dropping that loop in favour of read-site
+    # registration makes "what we recorded" exactly equal "what we
+    # consumed".  See Phase 6c rationale in AGENT_NOTES.md.
+
     # ---------- Save JSON summary ----------
     rhos_out = {
         "pooled_rho": pooled_rho,
@@ -170,7 +209,12 @@ def main() -> int:
         ],
     }
     rhos_path = experiment_dir / args.rhos_json
-    json.dump(rhos_out, open(rhos_path, "w"), indent=2)
+    envelope = json_metadata(
+        rhos_out,
+        inputs=inputs,
+        title=f"gpt_vs_sonnet_scatter pairs={args.pairs}",
+    )
+    json.dump(envelope, open(rhos_path, "w"), indent=2)
     print(f"Wrote {rhos_path}")
 
     # ---------- Colors per axis ----------
@@ -263,7 +307,7 @@ def main() -> int:
     plt.tight_layout(rect=(0, 0, 1, 1 - 0.5 / fig_h))
     pooled_path = experiment_dir / args.pooled
     plt.savefig(pooled_path, dpi=150, bbox_inches="tight",
-                metadata=png_metadata(title=pooled_title))
+                metadata=png_metadata(title=pooled_title, inputs=inputs))
     plt.close(fig)
     print(f"Wrote {pooled_path}")
 
@@ -300,7 +344,7 @@ def main() -> int:
     plt.tight_layout(rect=(0, 0, 1, 1 - 0.4 / max(n_rows, 1)))
     grid_path = experiment_dir / args.grid
     plt.savefig(grid_path, dpi=150, bbox_inches="tight",
-                metadata=png_metadata(title=grid_title))
+                metadata=png_metadata(title=grid_title, inputs=inputs))
     plt.close(fig)
     print(f"Wrote {grid_path}")
     return 0

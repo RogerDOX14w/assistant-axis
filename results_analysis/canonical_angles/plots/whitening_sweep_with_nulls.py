@@ -74,6 +74,10 @@ from pathlib import Path
 import numpy as np
 
 from assistant_axis import png_metadata, suptitle_with_specs
+from assistant_axis.provenance import (
+    InputSpec,
+    current_data_subtree_input,
+)
 from .. import (
     AggSpec,
     CASpec,
@@ -352,7 +356,8 @@ def _build_K_palette(Ks: list[int]) -> dict:
 
 
 def make_plot(args, pool_size: int,
-              results: dict, nulls: dict) -> None:
+              results: dict, nulls: dict,
+              inputs: list[InputSpec] | None = None) -> None:
     """Render the slot-N plot, raw on top, K spectrum below, lw separately,
     nulls in faint grey at the back."""
     import matplotlib
@@ -449,7 +454,7 @@ def make_plot(args, pool_size: int,
     out_path = Path(args.output)
     out_path.parent.mkdir(parents=True, exist_ok=True)
     fig.savefig(out_path, dpi=150, bbox_inches="tight",
-                metadata=png_metadata(title=title_line))
+                metadata=png_metadata(title=title_line, inputs=inputs))
     print(f"Wrote {out_path}")
 
 
@@ -465,6 +470,57 @@ def _slot_pretty(slot: int) -> str:
         7: "Slot 7 (\\n\\n final)",
     }
     return pretty.get(slot, f"Slot {slot}")
+
+
+def _build_inputs(data_dir: Path, args: argparse.Namespace) -> list[InputSpec]:
+    """Provenance inputs for one run.
+
+    Declares the goal/nogoal marginal subtrees actually used (per
+    ``--kinds``); the theatricality axis subtree when shifted; and the
+    pool subtrees feeding both the K-soft / lw / oas whitenings and
+    the anisotropic-null fit (the uniform null is data-independent).
+    """
+    extras = {"slot": str(args.slot), "layer": str(args.layer),
+              "kinds": ",".join(args.kinds),
+              "K": ",".join(str(k) for k in args.K),
+              "methods": ",".join(args.methods),
+              "aggregation": args.aggregation,
+              "scope": args.scope,
+              "heldout": "1" if args.heldout else "0",
+              "augment": "1" if args.augment else "0",
+              "n_null_samples": str(args.n_null_samples),
+              "null_aniso_frac": str(args.null_aniso_frac),
+              "null_seed": str(args.null_seed)}
+    inputs: list[InputSpec] = []
+    needs_r = "r" in args.kinds
+    needs_t = "t" in args.kinds
+    if needs_r:
+        inputs.append(current_data_subtree_input(
+            data_dir, "combinations/vectors/derived/marginals/r_goal",
+            dep_key="r_goal_marginals", extras=extras))
+        inputs.append(current_data_subtree_input(
+            data_dir, "combinations/vectors/derived/marginals/r_nogoal",
+            dep_key="r_nogoal_marginals", extras=extras))
+    if needs_t:
+        inputs.append(current_data_subtree_input(
+            data_dir, "combinations/vectors/derived/marginals/t_goal",
+            dep_key="t_goal_marginals", extras=extras))
+        inputs.append(current_data_subtree_input(
+            data_dir, "combinations/vectors/derived/marginals/t_nogoal",
+            dep_key="t_nogoal_marginals", extras=extras))
+    if args.aggregation == "combo_residual_theat_shifted":
+        inputs.append(current_data_subtree_input(
+            data_dir, "combinations/vectors/derived/axis",
+            dep_key="theatricality_axis", extras=extras))
+    if "roles" in args.scope:
+        inputs.append(current_data_subtree_input(
+            data_dir, "roles/vectors", dep_key="roles_vectors",
+            extras=extras))
+    if "traits" in args.scope:
+        inputs.append(current_data_subtree_input(
+            data_dir, "traits/vectors", dep_key="traits_vectors",
+            extras=extras))
+    return inputs
 
 
 # ---------------------------------------------------------------------------
@@ -493,7 +549,9 @@ def main() -> int:
     pool_size, results = compute_ca_results(args, env, ca_cache)
     nulls = compute_null_baselines(args, env, null_cache)
 
-    make_plot(args, pool_size=pool_size, results=results, nulls=nulls)
+    inputs = _build_inputs(Path(args.data_dir), args)
+    make_plot(args, pool_size=pool_size, results=results, nulls=nulls,
+              inputs=inputs)
 
     # Compact summary
     print(f"\n--- Summary (slot {args.slot}, kinds averaged) ---")

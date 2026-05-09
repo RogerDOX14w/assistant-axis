@@ -62,6 +62,10 @@ import numpy as np  # noqa: E402
 import torch  # noqa: E402
 
 from assistant_axis import png_metadata, suptitle_with_specs  # noqa: E402
+from assistant_axis.provenance import (  # noqa: E402
+    InputSpec,
+    current_data_subtree_input,
+)
 
 
 # Same canonical 8-slot layout as token_position_noise_analysis.py and
@@ -150,6 +154,7 @@ def make_plot(
     seed: int,
     output_path: Path,
     spec_extra: str,
+    inputs: list[InputSpec] | None = None,
 ) -> Path:
     """Render the per-slot pair-diff-norm plot.
 
@@ -218,7 +223,7 @@ def make_plot(
     _, top_rect = suptitle_with_specs(fig, suptitle, spec_line)
     fig.tight_layout(rect=(0, 0, 1, top_rect))
     plt.savefig(output_path, dpi=150, bbox_inches="tight",
-                metadata=png_metadata(title=suptitle))
+                metadata=png_metadata(title=suptitle, inputs=inputs))
     plt.close()
     return output_path
 
@@ -271,11 +276,16 @@ def main() -> int:
     entity_kind = Path(args.vectors_subdir).parts[0]
     out = output_dir / f"role_pair_diff_norms_{entity_kind}.png"
     print(f"Step 2: Plotting {n_slots}-panel grid -> {out}")
+    inputs: list[InputSpec] = [
+        current_data_subtree_input(
+            data_dir, args.vectors_subdir, dep_key="vectors_subtree"),
+    ]
     make_plot(
         vecs, n_slots=n_slots, n_layers=n_layers,
         n_pairs=args.n_pairs, seed=args.seed,
         output_path=out,
         spec_extra=f"; data: {data_dir.name}",
+        inputs=inputs,
     )
     print("Done.")
     return 0

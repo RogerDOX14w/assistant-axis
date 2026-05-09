@@ -99,6 +99,10 @@ from assistant_axis import (  # noqa: E402
     slot_colors,
     suptitle_with_specs,
 )
+from assistant_axis.provenance import (  # noqa: E402
+    InputSpec,
+    current_data_subtree_input,
+)
 
 
 # Names for the 8-slot Qwen-3 non-thinking layout.  Slots 5 and 7 are
@@ -278,7 +282,8 @@ def compute_pairwise_slot_correlation(
 # ---------------------------------------------------------------------------
 
 def _plot_ooo_heatmaps(ooo_frac: torch.Tensor, output_dir: Path,
-                       spec_line: str) -> Path:
+                       spec_line: str,
+                       inputs: list[InputSpec] | None = None) -> Path:
     heatmap_order = [
         [0, 2, 4],  # cosine_sub, norm_sub, sqnorm_sub
         [1, 3, 5],  # cosine_lograt, norm_lograt, sqnorm_lograt
@@ -312,13 +317,14 @@ def _plot_ooo_heatmaps(ooo_frac: torch.Tensor, output_dir: Path,
     cbar_ax.tick_params(labelsize=11)
     out = output_dir / "ooo_heatmaps.png"
     plt.savefig(out, dpi=150, bbox_inches="tight",
-                metadata=png_metadata(title=title))
+                metadata=png_metadata(title=title, inputs=inputs))
     plt.close()
     return out
 
 
 def _plot_ooo_summary_bars(ooo_frac: torch.Tensor, output_dir: Path,
-                           spec_line: str) -> Path:
+                           spec_line: str,
+                           inputs: list[InputSpec] | None = None) -> Path:
     S = ooo_frac.shape[-1]
     fig, ax = plt.subplots(figsize=(12, 5.5))
     x = np.arange(N_METRICS)
@@ -350,13 +356,14 @@ def _plot_ooo_summary_bars(ooo_frac: torch.Tensor, output_dir: Path,
     fig.tight_layout(rect=(0, 0, 1, top_rect))
     out = output_dir / "ooo_summary_bars.png"
     plt.savefig(out, dpi=150, bbox_inches="tight",
-                metadata=png_metadata(title=title))
+                metadata=png_metadata(title=title, inputs=inputs))
     plt.close()
     return out
 
 
 def _plot_ooo_by_layer(ooo_frac: torch.Tensor, L: int, output_dir: Path,
-                       spec_line: str) -> Path:
+                       spec_line: str,
+                       inputs: list[InputSpec] | None = None) -> Path:
     S = ooo_frac.shape[-1]
     fig, ax = plt.subplots(figsize=(14, 5.5))
     avg_across_metrics = ooo_frac.mean(dim=0).numpy()  # (L, S)
@@ -383,14 +390,15 @@ def _plot_ooo_by_layer(ooo_frac: torch.Tensor, L: int, output_dir: Path,
     fig.tight_layout(rect=(0, 0, 1, top_rect))
     out = output_dir / "ooo_by_layer.png"
     plt.savefig(out, dpi=150, bbox_inches="tight",
-                metadata=png_metadata(title=title))
+                metadata=png_metadata(title=title, inputs=inputs))
     plt.close()
     return out
 
 
 def _plot_pairwise_matrices(norm_corr_layers: np.ndarray,
                             cos_between_layers: np.ndarray,
-                            output_dir: Path, spec_line: str) -> Path:
+                            output_dir: Path, spec_line: str,
+                            inputs: list[InputSpec] | None = None) -> Path:
     S = norm_corr_layers.shape[-1]
     # Scale figsize and font with slot count so the 8-slot heatmap
     # doesn't squash labels.  Empirically (14, 5.8) was sized for S=4;
@@ -439,7 +447,7 @@ def _plot_pairwise_matrices(norm_corr_layers: np.ndarray,
     cbar_ax.tick_params(labelsize=11)
     out = output_dir / "pairwise_corr_matrices.png"
     plt.savefig(out, dpi=150, bbox_inches="tight",
-                metadata=png_metadata(title=suptitle_text))
+                metadata=png_metadata(title=suptitle_text, inputs=inputs))
     plt.close()
     return out
 
@@ -530,7 +538,9 @@ def _annotate_pairwise_top_curves_at_layers(
 
 
 def _plot_pairwise_cosine_by_layer(cos_between_layers: np.ndarray, L: int,
-                                   output_dir: Path, spec_line: str) -> Path:
+                                   output_dir: Path, spec_line: str,
+                                   inputs: list[InputSpec] | None = None
+                                   ) -> Path:
     """One line per unordered slot pair (s1, s2); mean cos over role pairs."""
     S = cos_between_layers.shape[-1]
     slot_pairs = list(itertools.combinations(range(S), 2))
@@ -598,7 +608,7 @@ def _plot_pairwise_cosine_by_layer(cos_between_layers: np.ndarray, L: int,
     fig.tight_layout(rect=(0, 0, 0.69, top_rect_body))
     out = output_dir / "pairwise_cosine_by_layer.png"
     plt.savefig(out, dpi=150, bbox_inches="tight",
-                metadata=png_metadata(title=title))
+                metadata=png_metadata(title=title, inputs=inputs))
     plt.close()
     return out
 
@@ -893,14 +903,20 @@ def main() -> int:
                  f"{args.n_triples} random triples; seed={args.seed}\n"
                  f"data: {data_dir.name}")
 
+    inputs: list[InputSpec] = [
+        current_data_subtree_input(
+            data_dir, args.vectors_subdir, dep_key="vectors_subtree",
+            extras={"n_triples": str(args.n_triples),
+                    "seed": str(args.seed)}),
+    ]
     paths = [
-        _plot_ooo_heatmaps(ooo_frac, output_dir, spec_line),
-        _plot_ooo_summary_bars(ooo_frac, output_dir, spec_line),
-        _plot_ooo_by_layer(ooo_frac, L, output_dir, spec_line),
+        _plot_ooo_heatmaps(ooo_frac, output_dir, spec_line, inputs=inputs),
+        _plot_ooo_summary_bars(ooo_frac, output_dir, spec_line, inputs=inputs),
+        _plot_ooo_by_layer(ooo_frac, L, output_dir, spec_line, inputs=inputs),
         _plot_pairwise_matrices(norm_corr_layers, cos_between_layers,
-                                output_dir, spec_line),
+                                output_dir, spec_line, inputs=inputs),
         _plot_pairwise_cosine_by_layer(cos_between_layers, L, output_dir,
-                                       spec_line),
+                                       spec_line, inputs=inputs),
     ]
     for p in paths:
         print(f"  wrote {p}")

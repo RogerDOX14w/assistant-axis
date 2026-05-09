@@ -74,7 +74,10 @@ DEFAULT_SLOT = 7
 DEFAULT_LAYER = 25
 DEFAULT_SHEAR_L = 0       # raw canonical, no soft-shear
 DEFAULT_WHITEN_K = 0      # raw canonical, no soft-K whitening
-DEFAULT_PCS: list[int] = [1, 2, 3, 4, 6, 8, 12, 16, 24, 32, 48, 64, 96, 128, 192, 256, 384, 512]
+DEFAULT_PCS: list[int] = [
+    1, 2, 3, 4, 6, 8, 12, 16, 20, 24, 28, 32, 36, 40, 48, 56,
+    64, 80, 96, 128, 192, 256, 384, 512,
+]
 DEFAULT_STYLES: list[str] = ["glossary", "inline"]
 DEFAULT_PROVIDERS: list[str] = ["openai", "anthropic"]
 

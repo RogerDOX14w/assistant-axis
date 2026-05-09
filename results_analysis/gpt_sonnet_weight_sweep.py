@@ -53,7 +53,7 @@ The standard per-axis directory tree produced by
 :mod:`results_analysis.axis_judge_correlation`::
 
     <experiment_dir>/
-      pair_list_33.json    # or any pair list passed via --pairs
+      pair_list_di.json    # or any pair list passed via --pairs
       <pos>_vs_<neg>/
         gpt/scores_descriptions.json
         gpt/scores_instructions.json
@@ -77,12 +77,6 @@ Examples
 
     # Default: 33 axes
     uv run python results_analysis/gpt_sonnet_weight_sweep.py
-
-    # Reproduce the historical 7-axis subset
-    uv run python results_analysis/gpt_sonnet_weight_sweep.py \\
-        --pairs pair_list_7.json \\
-        --plot gpt_sonnet_weight_sweep_7axes.png \\
-        --rhos_json gpt_sonnet_weight_sweep_7axes.json
 """
 from __future__ import annotations
 
@@ -97,7 +91,7 @@ import numpy as np
 import torch
 from scipy.stats import spearmanr
 
-from assistant_axis import json_metadata, png_metadata
+from assistant_axis import cohort_from_pairs, json_metadata, png_metadata
 from assistant_axis.judge_score_combine import (
     add_di_weights_arg,
     combine_desc_inst_one_judge,
@@ -106,8 +100,7 @@ from assistant_axis.judge_score_combine import (
 from assistant_axis.provenance import (
     InputSpec,
     current_data_subtree_input,
-    current_file_input,
-    current_files_input,
+    load_and_register,
 )
 from results_analysis.axis_judge_correlation import _load_vector_file
 
@@ -152,10 +145,10 @@ def main() -> int:
     p.add_argument("--data_dir", default=str(DEFAULT_DATA_DIR),
                    help=f"Activation vectors directory "
                         f"(default: {DEFAULT_DATA_DIR}).")
-    p.add_argument("--pairs", default="pair_list_33.json",
+    p.add_argument("--pairs", default="pair_list_di.json",
                    help="Pair-list JSON filename "
-                        "(default: pair_list_33.json -- every axis with "
-                        "desc+inst from both providers).")
+                        "(default: pair_list_di.json -- every axis with "
+                        "desc+inst judging from both GPT and Sonnet).")
     p.add_argument("--second_judge", default="sonnet",
                    help="Subdir name for the second-judge scores under each "
                         "axis directory (default: 'sonnet'; common "
@@ -167,12 +160,12 @@ def main() -> int:
                         "axis labels, and JSON output. Defaults to a "
                         "Title-cased version of --second_judge.")
     p.add_argument("--plot", default=None,
-                   help="Output plot filename "
-                        "(default: gpt_<second_judge>_weight_sweep_slot{N}.png; "
-                        "the slot suffix matches --slot).")
+                   help="Output plot filename (default: "
+                        "gpt_<second_judge>_weight_sweep_<cohort>_slot{N}.png; "
+                        "cohort comes from --pairs, slot from --slot).")
     p.add_argument("--rhos_json", default=None,
-                   help="Output JSON filename "
-                        "(default: gpt_<second_judge>_weight_sweep_slot{N}.json).")
+                   help="Output JSON filename (default: "
+                        "gpt_<second_judge>_weight_sweep_<cohort>_slot{N}.json).")
     p.add_argument("--slot", type=int, default=DEFAULT_SLOT,
                    help=f"Token-position slot to project onto "
                         f"(default: {DEFAULT_SLOT} = </think>).  Pass --slot 3 "
@@ -186,12 +179,23 @@ def main() -> int:
     second_judge = args.second_judge
     second_label = (args.second_judge_label
                      or second_judge[:1].upper() + second_judge[1:])
+    cohort = cohort_from_pairs(args.pairs)
     if args.plot is None:
-        args.plot = f"gpt_{second_judge}_weight_sweep_slot{slot}.png"
+        args.plot = f"gpt_{second_judge}_weight_sweep_{cohort}_slot{slot}.png"
     if args.rhos_json is None:
-        args.rhos_json = f"gpt_{second_judge}_weight_sweep_slot{slot}.json"
+        args.rhos_json = f"gpt_{second_judge}_weight_sweep_{cohort}_slot{slot}.json"
 
-    pairs = json.load(open(experiment_dir / args.pairs))
+    # ``inputs`` accumulator: every cache read below goes through
+    # load_and_register, so the read AND the InputSpec record are
+    # built atomically (single call site can't drift -- see
+    # AGENT_NOTES.md "Reader+registrar pattern").  Vector subtrees
+    # are added later, before the savefig.
+    inputs: list[InputSpec] = []
+    pairs, _spec, _check = load_and_register(
+        experiment_dir / args.pairs,
+        dep_key="pairs_json",
+        inputs=inputs, policy="warn",
+    )
     print(f"Loaded {len(pairs)} axis pairs from {args.pairs}")
 
     # Cache standalone entity vectors at (slot, LAYER), default-centered.
@@ -213,11 +217,28 @@ def main() -> int:
     per_axis: dict[tuple[str, str], dict] = {}
     for it in pairs:
         pos, neg = it["pos"], it["neg"]
-        axis_dir = experiment_dir / f"{pos}_vs_{neg}"
-        g_d = json.load(open(axis_dir / "gpt" / "scores_descriptions.json"))
-        g_i = json.load(open(axis_dir / "gpt" / "scores_instructions.json"))
-        s_d = json.load(open(axis_dir / second_judge / "scores_descriptions.json"))
-        s_i = json.load(open(axis_dir / second_judge / "scores_instructions.json"))
+        axis_id = f"{pos}_vs_{neg}"
+        axis_dir = experiment_dir / axis_id
+        g_d, _, _ = load_and_register(
+            axis_dir / "gpt" / "scores_descriptions.json",
+            dep_key=f"judge_{axis_id}_descriptions_gpt",
+            inputs=inputs, policy="warn",
+        )
+        g_i, _, _ = load_and_register(
+            axis_dir / "gpt" / "scores_instructions.json",
+            dep_key=f"judge_{axis_id}_instructions_gpt",
+            inputs=inputs, policy="warn",
+        )
+        s_d, _, _ = load_and_register(
+            axis_dir / second_judge / "scores_descriptions.json",
+            dep_key=f"judge_{axis_id}_descriptions_{second_judge}",
+            inputs=inputs, policy="warn",
+        )
+        s_i, _, _ = load_and_register(
+            axis_dir / second_judge / "scores_instructions.json",
+            dep_key=f"judge_{axis_id}_instructions_{second_judge}",
+            inputs=inputs, policy="warn",
+        )
         # Per-judge desc/inst combination using the standard tiebreak weights.
         # The cross-judge sweep below is independent of this choice -- it sweeps
         # GPT vs <second_judge>, treating each as a single (already
@@ -371,32 +392,17 @@ def main() -> int:
     plt.tight_layout()
 
     # --- Provenance inputs (used by both PNG + JSON writes) ---
-    # Vector subtrees, the pair list, and the judge caches
-    # (gpt + second_judge × desc/inst).  No response-mode caches: this
-    # script reads desc+inst only.
-    judge_cache_paths: list[Path] = []
-    for it in pairs:
-        ax = experiment_dir / f"{it['pos']}_vs_{it['neg']}"
-        for judge in ("gpt", second_judge):
-            for mode in ("descriptions", "instructions"):
-                judge_cache_paths.append(
-                    ax / judge / f"scores_{mode}.json")
-    inputs: list[InputSpec] = [
+    # ``inputs`` was already populated above by load_and_register at
+    # every cache-read site (pairs_json + per-axis × per-judge ×
+    # per-mode scores caches).  Subtree deps are appended here.
+    inputs.extend([
         current_data_subtree_input(
             data_dir, "traits/vectors", dep_key="traits_vectors",
             extras={"slot": str(slot), "layer": str(LAYER)}),
         current_data_subtree_input(
             data_dir, "roles/vectors", dep_key="roles_vectors",
             extras={"slot": str(slot), "layer": str(LAYER)}),
-        current_file_input(
-            dep_key="pairs_json",
-            path=experiment_dir / args.pairs),
-        current_files_input(
-            dep_key="judge_caches",
-            paths=judge_cache_paths,
-            extras={"n_axes": str(len(pairs)),
-                    "second_judge": second_judge}),
-    ]
+    ])
 
     out_path = experiment_dir / args.plot
     plt.savefig(out_path, dpi=150, bbox_inches="tight",

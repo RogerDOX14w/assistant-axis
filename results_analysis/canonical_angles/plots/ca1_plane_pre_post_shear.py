@@ -43,6 +43,11 @@ import numpy as np
 import torch
 
 from assistant_axis import png_metadata
+from assistant_axis.provenance import (
+    InputSpec,
+    current_data_subtree_input,
+    load_and_register,
+)
 
 from ..ca1_plane import (
     CAPlaneEntity,
@@ -148,10 +153,20 @@ def _load_subspaces(data_dir: Path, kind: str, slot: int, layer: int,
 
 
 def _load_standalones(data_dir: Path, slot: int, layer: int,
-                      goal_list_path: Path):
-    """Load all 579 default-centered standalones with goal-status tags."""
+                      goal_list_path: Path,
+                      *,
+                      inputs: list[InputSpec] | None = None):
+    """Load all 579 default-centered standalones with goal-status tags.
+
+    Threads ``inputs`` through ``load_and_register`` so the goal-list
+    cache read and the InputSpec record happen together.
+    """
     default_v = load_vector(data_dir, "traits", "default")[slot, layer]
-    goal_master = json.loads(goal_list_path.read_text())
+    goal_master, _spec, _check = load_and_register(
+        goal_list_path,
+        dep_key="goal_list_json",
+        inputs=inputs, policy="warn",
+    )
     goal_set = {(et, n) for et in ("roles", "traits")
                 for n in goal_master[et].get("goal", [])}
     nogoal_set = {(et, n) for et in ("roles", "traits")
@@ -194,8 +209,14 @@ def main() -> int:
           f"lambda_- = {decomp.lambda_minus:.3f}")
 
     print("Loading 579 standalones + goal-status tags...")
-    entities, _default_v = _load_standalones(data_dir, args.slot, args.layer,
-                                             goal_list_path)
+    # Provenance accumulator -- threaded through _load_standalones so
+    # the goal_list cache read and the InputSpec record happen together
+    # (see AGENT_NOTES.md "Reader+registrar pattern").
+    inputs: list[InputSpec] = []
+    entities, _default_v = _load_standalones(
+        data_dir, args.slot, args.layer, goal_list_path,
+        inputs=inputs,
+    )
     print(f"  loaded {len(entities)} entities; "
           f"goal={sum(1 for e in entities if e.status == 'goal')}, "
           f"nogoal={sum(1 for e in entities if e.status == 'nogoal')}, "
@@ -248,9 +269,48 @@ def main() -> int:
         pre_legend_pad_factor=args.pre_legend_pad_factor,
     )
 
+    # Provenance inputs.  Per-kind, only the goal/nogoal subspaces
+    # that were actually loaded contribute; ``combined`` reads all 4.
+    extras = {"slot": str(args.slot), "layer": str(args.layer),
+              "ca_index": str(args.ca_index),
+              "theat_shift": "1" if args.theat_shift else "0"}
+    # ``goal_list_json`` was already appended above by
+    # ``_load_standalones`` → ``load_and_register``.
+    inputs.extend([
+        current_data_subtree_input(
+            data_dir, "traits/vectors", dep_key="traits_vectors",
+            extras=extras),
+        current_data_subtree_input(
+            data_dir, "roles/vectors", dep_key="roles_vectors",
+            extras=extras),
+    ])
+    needs_r = args.kind in ("r", "combined")
+    needs_t = args.kind in ("t", "combined")
+    if needs_r:
+        inputs.append(current_data_subtree_input(
+            data_dir, "combinations/vectors/derived/marginals/r_goal",
+            dep_key="r_goal_marginals", extras=extras))
+        inputs.append(current_data_subtree_input(
+            data_dir, "combinations/vectors/derived/marginals/r_nogoal",
+            dep_key="r_nogoal_marginals", extras=extras))
+    if needs_t:
+        inputs.append(current_data_subtree_input(
+            data_dir, "combinations/vectors/derived/marginals/t_goal",
+            dep_key="t_goal_marginals", extras=extras))
+        inputs.append(current_data_subtree_input(
+            data_dir, "combinations/vectors/derived/marginals/t_nogoal",
+            dep_key="t_nogoal_marginals", extras=extras))
+    if args.theat_shift:
+        # Theatricality axis lives under combinations/vectors/derived/axis/.
+        # Use the subtree (the manifest tracks the directory, not the file)
+        # so the dep fingerprint covers any change to its contents.
+        inputs.append(current_data_subtree_input(
+            data_dir, "combinations/vectors/derived/axis",
+            dep_key="theatricality_axis", extras=extras))
+
     args.output.parent.mkdir(parents=True, exist_ok=True)
     fig.savefig(args.output, dpi=150,
-                metadata=png_metadata(title=title))
+                metadata=png_metadata(title=title, inputs=inputs))
     print(f"Wrote {args.output}")
     return 0
 

@@ -22,6 +22,9 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 from assistant_axis.plot_metadata import png_metadata, suptitle_with_specs
+from assistant_axis.provenance import (
+    CACHE_POLICIES, InputSpec, load_and_register,
+)
 
 DEFAULT_CACHE_PATH = "roger/pc_round_trip_klm_results.json"
 DEFAULT_OUTPUT = "roger/pc_round_trip_rho_histogram.png"
@@ -40,6 +43,8 @@ def parse_args() -> argparse.Namespace:
     p.add_argument("--noise_floor_n", type=int, default=DEFAULT_NOISE_FLOOR_N,
                    help="Sample size n used to draw the 1/√n noise-floor "
                         "reference line (default 550).")
+    p.add_argument("--cache-policy", choices=CACHE_POLICIES, default="warn",
+                   help="How to handle stale or unrecognized inputs JSON envelopes.")
     return p.parse_args()
 
 
@@ -47,7 +52,11 @@ def main() -> int:
     args = parse_args()
     cache = Path(args.cache_path)
     out_path = Path(args.output)
-    raw = json.loads(cache.read_text())
+    inputs: list[InputSpec] = []
+    raw, _spec, _check = load_and_register(
+        cache, dep_key="klm_results_json",
+        inputs=inputs, policy=args.cache_policy,
+    )
     s1 = raw.get("stage1_M_sweep", {})
     s2 = raw.get("stage2_K_refinement_M_inf", {})
     noise_floor = 1.0 / np.sqrt(args.noise_floor_n)
@@ -111,12 +120,10 @@ def main() -> int:
     fig.tight_layout(rect=(0, 0, 1, top_rect))
 
     out_path.parent.mkdir(parents=True, exist_ok=True)
+    # ``inputs`` was populated above by load_and_register.
     fig.savefig(
         out_path, dpi=150, bbox_inches="tight",
-        metadata=png_metadata(
-            title=title,
-            source_text=Path(__file__).read_text(),
-        ),
+        metadata=png_metadata(title=title, inputs=inputs),
     )
     print(f"Wrote {out_path}")
     print()

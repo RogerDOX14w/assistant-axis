@@ -92,6 +92,37 @@ Usage::
     # Write to a temp dir for verification (no in-place changes):
     uv run python results_analysis/compute_combo_marginals.py \\
         --output_root /tmp/marginals_test
+
+Provenance note (May 2026 -- Phase 6 fill-in)
+---------------------------------------------
+
+This script's outputs (``r_goal/``, ``r_nogoal/``, ``t_goal/``, ``t_nogoal/``,
+``mean_r_combos.pt``, ``mean_t_combos.pt``, ``theatricality_axis.pt``) are
+**dataset artifacts** living under ``combinations/vectors/derived/`` and are
+tracked via the dataset's ``MANIFEST.json`` rather than per-file provenance
+envelopes.  ``MANIFEST.json`` records one fingerprint per
+``derived/{marginals/<r_goal|...|t_nogoal>,axis,aggregates}`` subtree, and
+downstream consumers depend on those subtree fingerprints via
+:func:`assistant_axis.provenance.current_data_subtree_input` calls (see e.g.
+``results_analysis/canonical_angles/plots/*.py``).
+
+Workflow when this script's output changes:
+
+1. Re-run this script (``uv run python results_analysis/compute_combo_marginals.py``).
+2. Regenerate the manifest::
+
+       uv run python tools/regenerate_dataset_manifest.py \\
+           --data-dir <data_dir>
+
+   See :mod:`tools.regenerate_dataset_manifest` for flags; the schema
+   lives in :mod:`assistant_axis.provenance` (``Manifest`` /
+   ``ManifestSubtree``).
+3. Downstream cache audits will then flag any consumer whose recorded
+   subtree fingerprint no longer matches.
+
+Adding a per-file ``json_metadata``-style envelope here would be redundant
+with the manifest, so this script is intentionally NOT migrated to the
+writer convention -- the manifest IS its provenance record.
 """
 
 from __future__ import annotations

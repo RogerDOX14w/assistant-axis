@@ -31,7 +31,8 @@ The script expects the following layout in ``--experiment_dir``:
 ::
 
     <experiment_dir>/
-        <pairs>.json              # list of {pos, neg, ...}; default pair_list_12.json
+        <pairs>.json              # list of {pos, neg, ...};
+                                  # default pair_list_responses.json
         <pos>_vs_<neg>/
             gpt/scores_descriptions.json
             gpt/scores_instructions.json
@@ -46,23 +47,29 @@ These are produced by
 Outputs (also written to ``--experiment_dir``)
 ----------------------------------------------
 
-- ``<sweep>.json`` (default ``whitening_k_sweep.json``): a list of
+- ``<sweep>.json`` (default
+  ``whitening_k_sweep_<cohort>_slot{N}.json`` -- cohort comes from
+  ``--pairs`` via :func:`assistant_axis.cohort_from_pairs`): a list of
   ``{pos, neg, source, K, rho}`` records (one per axis x source x K).
-- ``rho_vs_whitening_K.png``: an N-line overlay plot (one solid line per
-  axis for ``responses``, one dotted line per axis for ``desc_inst``)
-  with K on the x-axis (categorical positions ``raw, 1, 2, 4, 8, 16,
-  32, 64, 128``).
+- ``<plot>.png`` (default ``rho_vs_whitening_K_<cohort>_slot{N}.png``):
+  an N-line overlay plot (one solid line per axis for ``responses``,
+  one dotted line per axis for ``desc_inst``) with K on the x-axis
+  (categorical positions ``raw, 1, 2, 4, 8, 16, 32, 64, 128``).
 
 Examples
 --------
 
 ::
 
-    # Default: 12 axes (pair_list_12.json), all 9 K values
+    # Default: responses cohort (axes with GPT response judging in addition
+    # to desc+instr), default K grid, default slot 6:
     uv run python results_analysis/whitening_k_sweep.py
+    # writes whitening_k_sweep_responses_slot6.json + rho_vs_whitening_K_responses_slot6.png
 
-    # Use the historical 7-axis subset (matches the original April 23 plot)
-    uv run python results_analysis/whitening_k_sweep.py --pairs pair_list_7.json
+    # Desc+instr cohort at slot 7:
+    uv run python results_analysis/whitening_k_sweep.py \\
+        --pairs pair_list_di.json --slot 7
+    # writes whitening_k_sweep_di_slot7.json + rho_vs_whitening_K_di_slot7.png
 
     # Custom experiment directory
     uv run python results_analysis/whitening_k_sweep.py \\
@@ -81,7 +88,12 @@ import numpy as np
 import torch
 from scipy.stats import spearmanr
 
-from assistant_axis import json_metadata, png_metadata, suptitle_with_specs
+from assistant_axis import (
+    cohort_from_pairs,
+    json_metadata,
+    png_metadata,
+    suptitle_with_specs,
+)
 from assistant_axis.judge_score_combine import (
     add_di_weights_arg,
     combine_desc_inst_two_judges,
@@ -90,8 +102,7 @@ from assistant_axis.judge_score_combine import (
 from assistant_axis.provenance import (
     InputSpec,
     current_data_subtree_input,
-    current_file_input,
-    current_files_input,
+    load_and_register,
 )
 from results_analysis.axis_judge_correlation import _load_vector_file
 from results_analysis.canonical_angles.data import (
@@ -112,7 +123,8 @@ DEFAULT_SLOT = 6  # New default after May 2026 rejudge run: slot 6 (</think>)
                   # rho_by_layer.png.  Pass --slot 3 (or 7) to compare.
                   # Output filenames auto-include _slot{N} when the user
                   # leaves --plot / --sweep at their generic defaults.
-K_VALUES = [0, 1, 2, 3, 4, 6, 8, 12, 16, 24, 32]
+DEFAULT_K_VALUES = [0, 1, 2, 3, 4, 6, 8, 12, 16, 24, 32]
+K_VALUES = list(DEFAULT_K_VALUES)  # may be rebound by main() via --Ks
 
 
 def load_pool(data_dir: Path, exclude_names: set[str], *, slot: int):
@@ -227,49 +239,90 @@ def main() -> int:
     p.add_argument("--data_dir", default=str(DEFAULT_DATA_DIR),
                    help=f"Activation-vectors directory "
                         f"(default: {DEFAULT_DATA_DIR}).")
-    p.add_argument("--pairs", default="pair_list_12.json",
+    p.add_argument("--pairs", default="pair_list_responses.json",
                    help="Pair-list JSON filename within --experiment_dir "
-                        "(default: pair_list_12.json -- the 12 axes that "
-                        "have desc+inst from both providers AND GPT "
-                        "response scores cached on disk).")
+                        "(default: pair_list_responses.json -- axes with "
+                        "desc+inst from both providers AND GPT response "
+                        "scores cached on disk).  Use ``pair_list_di.json`` "
+                        "for the wider desc+inst cohort.")
     p.add_argument("--sweep", default=None,
                    help="Output JSON filename within --experiment_dir "
-                        "(default: whitening_k_sweep_slot{N}.json -- the "
-                        "slot suffix matches --slot).  Pass an explicit "
-                        "filename to override.")
+                        "(default: whitening_k_sweep_<cohort>_slot{N}.json -- "
+                        "the cohort token comes from --pairs and the slot "
+                        "suffix matches --slot).  Pass an explicit filename "
+                        "to override.")
     p.add_argument("--plot", default=None,
                    help="Output PNG filename within --experiment_dir "
-                        "(default: rho_vs_whitening_K_slot{N}.png).")
+                        "(default: rho_vs_whitening_K_<cohort>_slot{N}.png).")
     p.add_argument("--slot", type=int, default=DEFAULT_SLOT,
                    help=f"Token-position slot to project onto "
                         f"(default: {DEFAULT_SLOT} = </think>).  Slot 6 is "
                         f"the new judge-ρ winner; pass --slot 3 (\\n) or "
                         f"--slot 7 (\\n\\n post) to compare.")
+    p.add_argument("--Ks", default=None,
+                   help="Comma-separated whitening-K grid to sweep (default: "
+                        f"{','.join(str(k) for k in DEFAULT_K_VALUES)}).  "
+                        "Override e.g. for the historical 7-axis cohort, "
+                        "which used K=64 and K=128.  Downstream consumers "
+                        "(whitening_k_peak_fit.py, whitening_k_weighted_"
+                        "scatter.py) extract whichever subset they need.")
     add_di_weights_arg(p)
     args = p.parse_args()
+    if args.Ks is not None:
+        global K_VALUES
+        K_VALUES = sorted({int(k.strip()) for k in args.Ks.split(",") if k.strip()})
+        print(f"Overriding K grid via --Ks: {K_VALUES}")
     di_weights = parse_di_weights_arg(args.di_weights)
     experiment_dir = Path(args.experiment_dir).resolve()
     data_dir = Path(args.data_dir).resolve()
     slot = int(args.slot)
+    cohort = cohort_from_pairs(args.pairs)
     if args.sweep is None:
-        args.sweep = f"whitening_k_sweep_slot{slot}.json"
+        args.sweep = f"whitening_k_sweep_{cohort}_slot{slot}.json"
     if args.plot is None:
-        args.plot = f"rho_vs_whitening_K_slot{slot}.png"
+        args.plot = f"rho_vs_whitening_K_{cohort}_slot{slot}.png"
 
-    pairs = json.load(open(experiment_dir / args.pairs))
+    # Provenance accumulator -- threaded through every cache read via
+    # load_and_register so the read AND the InputSpec record happen
+    # together (see AGENT_NOTES.md "Reader+registrar pattern").
+    inputs: list[InputSpec] = [
+        current_data_subtree_input(
+            data_dir, "traits/vectors", dep_key="traits_vectors",
+            extras={"slot": str(slot), "layer": str(LAYER)}),
+        current_data_subtree_input(
+            data_dir, "roles/vectors", dep_key="roles_vectors",
+            extras={"slot": str(slot), "layer": str(LAYER)}),
+    ]
+    pairs, _, _ = load_and_register(
+        experiment_dir / args.pairs,
+        dep_key="pairs_json", inputs=inputs, policy="warn",
+    )
     print(f"Loaded {len(pairs)} axis pairs from {args.pairs}")
 
     data: dict = {}
     for it in pairs:
         pos, neg = it["pos"], it["neg"]
-        axis_dir = experiment_dir / f"{pos}_vs_{neg}"
+        axis_id = f"{pos}_vs_{neg}"
+        axis_dir = experiment_dir / axis_id
         print(f"[{pos} vs {neg}] loading...")
 
         # --- Scores ---
-        g_d = json.load(open(axis_dir / "gpt" / "scores_descriptions.json"))
-        g_i = json.load(open(axis_dir / "gpt" / "scores_instructions.json"))
-        s_d = json.load(open(axis_dir / "sonnet" / "scores_descriptions.json"))
-        s_i = json.load(open(axis_dir / "sonnet" / "scores_instructions.json"))
+        g_d, _, _ = load_and_register(
+            axis_dir / "gpt" / "scores_descriptions.json",
+            dep_key=f"judge_{axis_id}_descriptions_gpt",
+            inputs=inputs, policy="warn")
+        g_i, _, _ = load_and_register(
+            axis_dir / "gpt" / "scores_instructions.json",
+            dep_key=f"judge_{axis_id}_instructions_gpt",
+            inputs=inputs, policy="warn")
+        s_d, _, _ = load_and_register(
+            axis_dir / "sonnet" / "scores_descriptions.json",
+            dep_key=f"judge_{axis_id}_descriptions_sonnet",
+            inputs=inputs, policy="warn")
+        s_i, _, _ = load_and_register(
+            axis_dir / "sonnet" / "scores_instructions.json",
+            dep_key=f"judge_{axis_id}_instructions_sonnet",
+            inputs=inputs, policy="warn")
         desc_inst = combine_desc_inst_two_judges(g_d, g_i, s_d, s_i,
                                                  weights=di_weights)
 
@@ -282,7 +335,13 @@ def main() -> int:
             fp = axis_dir / sub / "scores_responses.json"
             if not fp.exists():
                 continue
-            for n, info in json.load(open(fp)).items():
+            sub_label = sub[len("gpt_responses_"):]
+            payload, _, _ = load_and_register(
+                fp,
+                dep_key=f"judge_{axis_id}_responses_{sub_label}",
+                inputs=inputs, policy="warn",
+            )
+            for n, info in payload.items():
                 if info.get("mean_score") is not None:
                     responses[n] = info["mean_score"]
 
@@ -318,37 +377,10 @@ def main() -> int:
             print(f"  {pos:16s} vs {neg:16s}  {source_name:9s}  rhos: "
                   + "  ".join(f"{r:+.3f}" for r in rhos))
 
-    # --- Build provenance input list (used by both JSON + PNG writes) ---
-    # Two dataset subtrees + the pair-list file + a composite multi-
-    # file fingerprint over all per-axis judge caches read above.
-    # The default.pt corpus baseline is captured transitively via the
-    # traits/vectors subtree fingerprint (default.pt is a symlink into
-    # the traits/ tree, so os.stat in the manifest tool follows it).
-    judge_cache_paths: list[Path] = []
-    for it in pairs:
-        ax = experiment_dir / f"{it['pos']}_vs_{it['neg']}"
-        for judge in ("gpt", "sonnet"):
-            for mode in ("descriptions", "instructions"):
-                judge_cache_paths.append(
-                    ax / judge / f"scores_{mode}.json")
-        for sub in ("gpt_responses_traits", "gpt_responses_roles"):
-            judge_cache_paths.append(ax / sub / "scores_responses.json")
-
-    inputs: list[InputSpec] = [
-        current_data_subtree_input(
-            data_dir, "traits/vectors", dep_key="traits_vectors",
-            extras={"slot": str(slot), "layer": str(LAYER)}),
-        current_data_subtree_input(
-            data_dir, "roles/vectors", dep_key="roles_vectors",
-            extras={"slot": str(slot), "layer": str(LAYER)}),
-        current_file_input(
-            dep_key="pairs_json",
-            path=experiment_dir / args.pairs),
-        current_files_input(
-            dep_key="judge_caches",
-            paths=judge_cache_paths,
-            extras={"n_axes": str(len(pairs))}),
-    ]
+    # --- Provenance inputs ----------------------------------------------
+    # ``inputs`` was populated above by load_and_register at every
+    # cache-read site (subtree deps + pair list + per-axis × per-judge
+    # × per-mode score caches that were actually consumed).
 
     # --- Save JSON ---
     records = []

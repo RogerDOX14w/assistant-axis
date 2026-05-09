@@ -24,6 +24,10 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 from assistant_axis.plot_metadata import png_metadata, suptitle_with_specs
+from assistant_axis.provenance import (
+    CACHE_POLICIES, InputSpec, current_data_subtree_input,
+    load_and_register,
+)
 from results_analysis.canonical_angles.data import DEFAULT_DATA_DIR
 from results_analysis.canonical_angles.whitening import (
     fit_shear, fit_whitening, WhiteningBasis,
@@ -50,9 +54,12 @@ def main() -> int:
     p.add_argument("--pcs", type=int, nargs="*", default=DEFAULT_PCS)
     p.add_argument("--window", type=int, default=WINDOW,
                    help="Half-window: project onto canonical PCs N-w..N+w.")
+    p.add_argument("--cache-policy", choices=CACHE_POLICIES, default="warn",
+                   help="How to handle stale or unrecognized inputs JSON envelopes.")
     args = p.parse_args()
 
     data_dir = Path(args.data_dir)
+    actual_path = Path(args.actual)
     pcs = list(args.pcs)
     half = args.window
     max_pc = max(pcs) + half + 1  # need a few extra canonical PCs
@@ -69,7 +76,14 @@ def main() -> int:
     print(f"  Vt_canonical shape: {Vt_canonical.shape}")
 
     # ---- Load global nth_pc winners ----
-    nth_pc_data = json.load(open(args.actual))
+    # Read + envelope-unwrap + drift-check + register-as-input via
+    # load_and_register so the inputs accumulator stays in lockstep with
+    # actual reads (see AGENT_NOTES.md "Reader+registrar pattern").
+    inputs: list[InputSpec] = []
+    nth_pc_data, _spec, _check = load_and_register(
+        actual_path, dep_key="klm_results_json",
+        inputs=inputs, policy=args.cache_policy,
+    )
     winners = nth_pc_data["stage2_K_refinement_M_inf"]
 
     # ---- Per (PC, style): compute winner direction, map to L=2 sheared
@@ -231,9 +245,27 @@ def main() -> int:
 
     out = Path(args.output)
     out.parent.mkdir(parents=True, exist_ok=True)
+    inputs.extend([
+        current_data_subtree_input(
+            data_dir, "traits/vectors", dep_key="traits_vectors"),
+        current_data_subtree_input(
+            data_dir, "roles/vectors", dep_key="roles_vectors"),
+        current_data_subtree_input(
+            data_dir, "combinations/vectors/derived/marginals/r_goal",
+            dep_key="combos_r_goal"),
+        current_data_subtree_input(
+            data_dir, "combinations/vectors/derived/marginals/r_nogoal",
+            dep_key="combos_r_nogoal"),
+        current_data_subtree_input(
+            data_dir, "combinations/vectors/derived/marginals/t_goal",
+            dep_key="combos_t_goal"),
+        current_data_subtree_input(
+            data_dir, "combinations/vectors/derived/marginals/t_nogoal",
+            dep_key="combos_t_nogoal"),
+    ])
+    # ``klm_results_json`` was already appended above by load_and_register.
     fig.savefig(out, dpi=150, bbox_inches="tight",
-                metadata=png_metadata(title=title,
-                                       source_text=Path(__file__).read_text()))
+                metadata=png_metadata(title=title, inputs=inputs))
     print(f"\nWrote {out}")
     return 0
 

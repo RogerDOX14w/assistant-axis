@@ -14,7 +14,6 @@ where:
 from __future__ import annotations
 
 import argparse
-import json
 from pathlib import Path
 
 import matplotlib.pyplot as plt
@@ -22,6 +21,9 @@ import matplotlib.colors as mcolors
 import numpy as np
 
 from assistant_axis.plot_metadata import png_metadata, suptitle_with_specs
+from assistant_axis.provenance import (
+    CACHE_POLICIES, InputSpec, load_and_register_npz,
+)
 
 
 DEFAULT_NPZ = "roger/pc_round_trip_nth_pc_winner_decomposition.npz"
@@ -97,12 +99,22 @@ def main() -> int:
                         "(default 0 = use all rows in matrix).")
     p.add_argument("--linear_color", action="store_true",
                    help="Use linear color scale (default: log).")
+    p.add_argument("--cache-policy", choices=CACHE_POLICIES, default="warn",
+                   help="How to handle drift between the npz's recorded "
+                        "inputs (winner_decomposition.py's upstream JSON + "
+                        "data subtrees) and current state.  Default 'warn' "
+                        "prints a stderr summary but renders anyway.")
     args = p.parse_args()
 
-    data = np.load(args.npz, allow_pickle=True)
+    inputs: list[InputSpec] = []
+    data, meta, _spec, _check = load_and_register_npz(
+        Path(args.npz),
+        dep_key="winner_decomposition_npz",
+        policy=args.cache_policy,
+        inputs=inputs,
+    )
     matrix = data["matrix"]
     column_keys = list(data["column_keys"])
-    meta = json.loads(str(data["meta"]))
 
     fig, ax = plt.subplots(figsize=(15, 7))
     mesh = render_heatmap(
@@ -128,9 +140,15 @@ def main() -> int:
 
     out = Path(args.output)
     out.parent.mkdir(parents=True, exist_ok=True)
+    # The npz can't carry a JSON envelope, so the transitive
+    # provenance chain (back to per-cell-winners JSON + data
+    # subtrees) lives inside its ``meta`` block; load_and_register_npz
+    # validated that block above and registered the npz itself as our
+    # one declared dependency in ``inputs``.  PNG metadata records
+    # that single dep_key; downstream auditors recover the chain by
+    # opening the npz and reading meta["_inputs"].
     fig.savefig(out, dpi=150, bbox_inches="tight",
-                metadata=png_metadata(title=title,
-                                       source_text=Path(__file__).read_text()))
+                metadata=png_metadata(title=title, inputs=inputs))
     print(f"Wrote {out}")
     return 0
 

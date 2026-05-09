@@ -31,10 +31,56 @@ from assistant_axis.judge import (  # type: ignore  # noqa: E402
     RateLimiter,
     warn_if_low_parse_rate,
 )
-from assistant_axis import png_metadata  # noqa: E402
+from assistant_axis import json_metadata, png_metadata  # noqa: E402
+from assistant_axis.provenance import (  # noqa: E402
+    InputSpec,
+    current_file_input,
+    current_files_input,
+)
 from results_analysis.canonical_angles.whitening import DEFAULT_SOFT_K  # noqa: E402
 
 load_dotenv()
+
+
+# ---------------------------------------------------------------------------
+# JUDGE PROVENANCE NOTE
+# ---------------------------------------------------------------------------
+# This file is recorded as a kind="file" dependency of every
+# scores_*.json it produces (see _build_axis_judge_inputs below).  Any
+# edit to this script changes its mtime/size fingerprint and flags
+# downstream caches as stale in tools/audit_caches.py.
+#
+# Edits that DO affect output (NOT harmless):
+#   * Rubric strings: _SCALE_TABLE, _RUBRIC_HEADER, RUBRIC_STATIC,
+#     RUBRIC_RESPONSE_BATCH below.  When you change one of these in a
+#     way that alters what the judge sees, also bump ``RUBRIC_VERSION``
+#     and add a one-line entry to its history block, so downstream
+#     audits can identify which rubric produced any given cache.
+#   * Prompt-formatting helpers: build_static_prompt,
+#     build_response_batch_prompt.
+#   * Judge call args: anything passed to call_judge (model,
+#     temperature, max_tokens, prompt construction).
+#   * Score parsing: parse_signed_score and any rubric instruction
+#     telling the model how to format its score line.
+#   * Scoring/aggregation math: _update_response_aggregates, the
+#     mean/std math in score_responses_mode.
+#
+# Edits that do NOT affect output (HARMLESS):
+#   * Comments, docstrings, type hints, log messages, error messages.
+#   * Variable renames, internal refactors that preserve I/O.
+#   * Imports / module-level reorganisation.
+#   * Argparse help text (but NOT default values).
+#
+# After a HARMLESS edit, declare it equivalent to the previous version
+# so downstream caches don't need rejudging:
+#
+#     uv run python tools/mark_script_equivalent.py \
+#         --script results_analysis/axis_judge_correlation.py \
+#         --reason "<short description of what changed>"
+#
+# (Phase 6b ships mark_script_equivalent.py; until then, hand-edit
+# script_equivalences.yaml or accept the over-invalidation.)
+# ---------------------------------------------------------------------------
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
 logger = logging.getLogger("axis_judge")
@@ -46,6 +92,27 @@ logging.getLogger("anthropic").setLevel(logging.WARNING)
 # ---------------------------------------------------------------------------
 # Rubric templates (adapted from 2026-04-20 ad-hoc analysis)
 # ---------------------------------------------------------------------------
+
+# Human-readable version label for the rubric strings below.  Bumped
+# whenever any of _SCALE_TABLE / _RUBRIC_HEADER / RUBRIC_STATIC /
+# RUBRIC_RESPONSE_BATCH changes in a way that alters what the judge
+# sees.  The script's (mtime, size) fingerprint already triggers
+# automatic drift detection on every edit (see JUDGE PROVENANCE NOTE
+# above); this constant is a *label*, not a fingerprint input, and is
+# recorded in the producer_script InputSpec extras so audit reports
+# and side-by-side empirical-rho comparisons can identify which
+# rubric produced any given cache.
+#
+# Version history:
+#   v1 (pre-2026-05-09) -- original rubric.  Response-mode prompt
+#       named the entity in the body ("act as {name}", "Score where
+#       {name} falls").
+#   v2 (2026-05-09)     -- response-mode prompt anonymises the entity
+#       ("a specific {entity}" / "that {entity}") so the judge scores
+#       behavior alone and cannot use the entity label as a hint.
+#       Description+instruction prompt (RUBRIC_STATIC) is unchanged
+#       -- the name there is intrinsic to desc+instr judging.
+RUBRIC_VERSION = "v2"
 
 _SCALE_TABLE = (
     "## Scale\n"
@@ -88,14 +155,16 @@ RUBRIC_STATIC = _RUBRIC_HEADER + (
 
 RUBRIC_RESPONSE_BATCH = _RUBRIC_HEADER + (
     "## Model responses to score\n\n"
-    "Below are {n_items} responses the model generated while being asked to act as "
-    "{entity} **{name}**. Score where **{name}** as a {entity} falls on the axis based on "
-    "the behavior and attitudes these responses collectively exhibit (do not base your score "
-    "on the questions, only on the responses).\n\n"
+    "Below are {n_items} responses the model generated while being "
+    "asked to act as a specific {entity}. Score where that {entity} "
+    "falls on the axis based on the behavior and attitudes these "
+    "responses collectively exhibit (do not base your score on the "
+    "questions, only on the responses).\n\n"
     "{items_block}\n\n"
-    "First, briefly reason about where this {entity} falls on the axis based on the overall "
-    "pattern across these {n_items} responses (2-3 sentences). Then on a new line, write "
-    "exactly: SCORE: <integer from -3 to +3>"
+    "First, briefly reason about where this {entity} falls on the "
+    "axis based on the overall pattern across these {n_items} "
+    "responses (2-3 sentences). Then on a new line, write exactly: "
+    "SCORE: <integer from -3 to +3>"
 )
 
 
@@ -1368,17 +1437,214 @@ def _default_model_for_provider(provider: str) -> str:
 
 
 def _load_json_or_empty(path: Path) -> Dict[str, Any]:
+    """Read a cache file written by ``_save_json``.
+
+    Transparently unwraps the ``{"result": ..., "_provenance": ...}``
+    envelope produced when ``_save_json`` is given an ``inputs`` list,
+    so resume/refill paths don't need to know whether the on-disk
+    cache is wrapped or bare.
+    """
     if path.exists():
         try:
-            return json.loads(path.read_text())
+            data = json.loads(path.read_text())
+            if isinstance(data, dict) and "_provenance" in data and "result" in data:
+                data = data["result"]
+            return data if isinstance(data, dict) else {}
         except Exception as e:
             logger.warning(f"{path}: cannot parse existing cache ({e}); starting fresh")
     return {}
 
 
-def _save_json(path: Path, obj: Any) -> None:
+def _save_json(
+    path: Path,
+    obj: Any,
+    *,
+    inputs: Optional[Sequence[InputSpec]] = None,
+    title: Optional[str] = None,
+) -> None:
+    """Write ``obj`` to ``path``.
+
+    When ``inputs`` is provided, wraps ``obj`` in a ``_provenance``
+    envelope via :func:`assistant_axis.json_metadata` so downstream
+    consumers can validate freshness via
+    :func:`assistant_axis.provenance.load_validated_json`.
+
+    When ``inputs`` is ``None`` the legacy bare-JSON shape is written
+    (used for operational files like ``gaps.json`` and ``config.json``
+    that don't have meaningful data dependencies).
+    """
     path.parent.mkdir(parents=True, exist_ok=True)
-    path.write_text(json.dumps(obj, indent=2, sort_keys=True))
+    if inputs is not None:
+        envelope = json_metadata(obj, inputs=list(inputs), title=title)
+        path.write_text(json.dumps(envelope, indent=2, sort_keys=True))
+    else:
+        path.write_text(json.dumps(obj, indent=2, sort_keys=True))
+
+
+# ---------------------------------------------------------------------------
+# Provenance: declare the inputs every output JSON depends on.
+# See JUDGE PROVENANCE NOTE near the top for the rules on what counts
+# as a meaningful change to the producer script.
+# ---------------------------------------------------------------------------
+
+_SCRIPT_PATH = Path(__file__).resolve()
+
+
+def _build_axis_judge_inputs(
+    args: argparse.Namespace,
+    *,
+    mode: str,
+) -> List[InputSpec]:
+    """Build the InputSpec list for one ``axis_judge_correlation.py`` output.
+
+    ``mode`` is one of:
+      * ``"descriptions"`` / ``"instructions"`` -- judge caches
+        produced by :func:`score_static_mode`.
+      * ``"responses"`` -- the judge cache produced by
+        :func:`score_responses_mode`.
+      * ``"projections"`` -- the activation-projection cache
+        ``projections.json`` (does NOT depend on the judge).
+      * ``"correlations"`` -- the per-mode correlation summary
+        ``correlations.json`` (depends on every score cache that was
+        produced this run, plus the projections).
+
+    Granularity choice: we record full directory listings as
+    ``current_files_input`` over every per-entity file the script can
+    plausibly read, even when the judge call for one entity doesn't
+    actually consume the others.  This over-invalidates a little
+    (e.g. editing trait *X*'s description flags scores for trait *Y*
+    as stale even though *Y*'s judge prompt didn't include *X*) but
+    is dramatically simpler than per-entity selectivity and matches
+    the project's stated tradeoff (regenerating plots is cheap; only
+    rejudging is expensive, and Phase 6b's script-equivalence
+    registry plus the deferred-rejudge registry handle the cost
+    cases).
+    """
+    inputs: List[InputSpec] = []
+
+    # Producer script (rubric + prompt code lives here).  Judge config
+    # extras (model, temperature, etc.) are recorded as ``extras`` for
+    # human inspection; they don't affect fingerprint comparisons but
+    # are visible in audit reports / mark_script_equivalent.py.  The
+    # rubric_version label lets a glance at any cache identify which
+    # rubric produced it (mtime/size fingerprint already enforces drift
+    # detection automatically; this is human-readable provenance).
+    judge_extras: Dict[str, str] = {
+        "rubric_version": RUBRIC_VERSION,
+        "provider": args.provider,
+        "judge_model": args.judge_model,
+        "temperature": f"{args.temperature}",
+        "max_tokens": f"{args.max_tokens}",
+    }
+    if mode == "responses":
+        judge_extras["response_target_batch_size"] = f"{args.response_target_batch_size}"
+        judge_extras["tiered_modulo_per_chunk"] = f"{args.tiered_modulo_per_chunk}"
+        judge_extras["question_subsample_modulo"] = f"{args.question_subsample_modulo}"
+        judge_extras["no_subsample"] = str(args.no_subsample)
+    inputs.append(current_file_input(
+        dep_key="producer_script",
+        path=_SCRIPT_PATH,
+        extras=judge_extras,
+    ))
+
+    # Axis spec source.
+    if getattr(args, "axis_file", None):
+        inputs.append(current_file_input(
+            dep_key="axis_file",
+            path=Path(args.axis_file),
+        ))
+    elif getattr(args, "pair", None):
+        name1, name2 = args.pair
+        pair_dir = Path(args.data_dir) / args.pair_type / "vectors"
+        pair_paths = [pair_dir / f"{name1}.pt", pair_dir / f"{name2}.pt"]
+        if all(p.exists() for p in pair_paths):
+            inputs.append(current_files_input(
+                dep_key="pair_vectors",
+                paths=pair_paths,
+                extras={"pair_type": args.pair_type, "pos_name": name1, "neg_name": name2},
+            ))
+        # Pole text source: only included when the user didn't override
+        # via --pos_pole / --neg_pole (overridden poles come straight from
+        # CLI args and don't read any file).
+        pole_paths: List[Path] = []
+        if not args.pos_pole:
+            pole_paths.append(
+                Path(args.instructions_dir) / args.pair_type / "instructions" / f"{name1}.json"
+            )
+        if not args.neg_pole:
+            pole_paths.append(
+                Path(args.instructions_dir) / args.pair_type / "instructions" / f"{name2}.json"
+            )
+        pole_paths = [p for p in pole_paths if p.exists()]
+        if pole_paths:
+            inputs.append(current_files_input(
+                dep_key="pole_instructions", paths=pole_paths,
+            ))
+
+    # Corpus (entity descriptions / instructions) -- read by load_corpus
+    # in every mode; affects the set of scorable entities, and for
+    # descriptions/instructions modes is the actual content judged.
+    if mode in ("descriptions", "instructions", "responses", "correlations"):
+        instr_root = Path(args.instructions_dir)
+        instr_paths: List[Path] = []
+        for etype in ("roles", "traits"):
+            idir = instr_root / etype / "instructions"
+            if idir.exists():
+                instr_paths.extend(sorted(idir.glob("*.json")))
+        if instr_paths:
+            inputs.append(current_files_input(
+                dep_key="corpus_instructions", paths=instr_paths,
+            ))
+
+    # Corpus vectors -- needed by projections (always loaded; defines
+    # the scorable entity set for every mode).
+    if mode in ("projections", "correlations", "descriptions", "instructions", "responses"):
+        data_dir = Path(args.data_dir)
+        vec_paths: List[Path] = []
+        for etype in ("roles", "traits"):
+            vdir = data_dir / etype / "vectors"
+            if vdir.exists():
+                vec_paths.extend(sorted(vdir.glob("*.pt")))
+        if vec_paths:
+            inputs.append(current_files_input(
+                dep_key="corpus_vectors",
+                paths=vec_paths,
+                extras={"layer": str(args.layer)},
+            ))
+
+    # Mode-specific: response judging reads per-entity score files,
+    # response files, the default-persona response file (for tiered
+    # subsampling threshold), and the canonical questions file.
+    if mode == "responses" or mode == "correlations":
+        if getattr(args, "responses_dir", None):
+            responses_dir = Path(args.responses_dir)
+            response_files = [
+                p for p in sorted(responses_dir.glob("*.jsonl"))
+                if p.name != "default.jsonl"
+            ]
+            if response_files:
+                inputs.append(current_files_input(
+                    dep_key="response_files", paths=response_files,
+                ))
+            default_jsonl = responses_dir / "default.jsonl"
+            if default_jsonl.exists():
+                inputs.append(current_file_input(
+                    dep_key="default_responses", path=default_jsonl,
+                ))
+        if getattr(args, "scores_dir", None):
+            scores_dir = Path(args.scores_dir)
+            score_files = sorted(scores_dir.glob("*.json"))
+            if score_files:
+                inputs.append(current_files_input(
+                    dep_key="response_score_files", paths=score_files,
+                ))
+        questions = Path(getattr(args, "questions_file", "data/extraction_questions.jsonl"))
+        if questions.exists():
+            inputs.append(current_file_input(
+                dep_key="questions_file", path=questions,
+            ))
+
+    return inputs
 
 
 # ---------------------------------------------------------------------------
@@ -1439,6 +1705,10 @@ async def score_static_mode(
 ) -> Dict[str, int]:
     cache_path = Path(args.output_dir) / f"scores_{mode}.json"
     cache: Dict[str, Any] = {} if args.no_cache else _load_json_or_empty(cache_path)
+    # Inputs are stable across the run; build once and reuse on every
+    # incremental save inside the loop below.
+    cache_inputs = _build_axis_judge_inputs(args, mode=mode)
+    cache_title = f"axis_judge_correlation:{mode}:{axis_spec.axis_name}"
 
     prompts: List[str] = []
     names: List[str] = []
@@ -1492,7 +1762,7 @@ async def score_static_mode(
                 continue
             n_call_parsed += 1
             written_cache[name] = score
-        _save_json(cache_path, written_cache)
+        _save_json(cache_path, written_cache, inputs=cache_inputs, title=cache_title)
 
     # Loud warning if parse rate this run dropped below 99%.  Note this
     # is *this run only* (not historical) so resumes that re-attempt
@@ -1557,6 +1827,8 @@ async def score_responses_mode(
 
     cache_path = Path(args.output_dir) / "scores_responses.json"
     cache: Dict[str, Any] = {} if args.no_cache else _load_json_or_empty(cache_path)
+    cache_inputs = _build_axis_judge_inputs(args, mode="responses")
+    cache_title = f"axis_judge_correlation:responses:{axis_spec.axis_name}"
 
     names_only = [n for (_, n) in scorable]
     ent_type_map = {n: et for (et, n) in scorable}
@@ -1655,7 +1927,7 @@ async def score_responses_mode(
         )
 
     # Save initial skeleton so a crash here still leaves a coherent cache.
-    _save_json(cache_path, written)
+    _save_json(cache_path, written, inputs=cache_inputs, title=cache_title)
 
     save_every = max(1, args.save_every)
     n_batch_attempted = 0  # batch calls actually issued this run
@@ -1681,7 +1953,7 @@ async def score_responses_mode(
 
         for name in written:
             _update_response_aggregates(written[name])
-        _save_json(cache_path, written)
+        _save_json(cache_path, written, inputs=cache_inputs, title=cache_title)
 
     # Loud warning if per-batch parse rate this run dropped below 99%.
     # Each "call" here is one ~target_batch_size-item batch; an UNPARSEABLE
@@ -1696,7 +1968,7 @@ async def score_responses_mode(
 
     for name in written:
         _update_response_aggregates(written[name])
-    _save_json(cache_path, written)
+    _save_json(cache_path, written, inputs=cache_inputs, title=cache_title)
 
     # End-of-mode gap audit: which entities still have None batches?
     gaps_by_entity: Dict[str, List[int]] = {}
@@ -1833,6 +2105,7 @@ def make_plot(
     axis_spec: AxisSpec,
     output_path: Path,
     slot_labels: Optional[Dict[int, str]] = None,
+    inputs: Optional[Sequence[InputSpec]] = None,
 ) -> None:
     import matplotlib
     matplotlib.use("Agg")
@@ -1886,7 +2159,7 @@ def make_plot(
     fig.tight_layout(rect=(0, 0, 1, 0.94))
     output_path.parent.mkdir(parents=True, exist_ok=True)
     fig.savefig(output_path, dpi=140, bbox_inches="tight",
-                metadata=png_metadata(title=title_line))
+                metadata=png_metadata(title=title_line, inputs=list(inputs) if inputs else None))
     plt.close(fig)
 
 
@@ -2107,7 +2380,12 @@ async def run(args: argparse.Namespace) -> None:
         slots=slots, pole_pair_names=axis_spec.pole_pair_names,
     )
     proj_out = {str(slot): per_slot for slot, per_slot in projections.items()}
-    _save_json(Path(args.output_dir) / "projections.json", proj_out)
+    _save_json(
+        Path(args.output_dir) / "projections.json",
+        proj_out,
+        inputs=_build_axis_judge_inputs(args, mode="projections"),
+        title=f"axis_judge_correlation:projections:{axis_spec.axis_name}",
+    )
 
     # Save config up-front.
     config = {
@@ -2146,12 +2424,18 @@ async def run(args: argparse.Namespace) -> None:
         scores_by_mode=scores_for_corr, projections=projections,
         slots=slots, excluded_set=pole_skip_set,
     )
-    _save_json(Path(args.output_dir) / "correlations.json", correlations)
+    _save_json(
+        Path(args.output_dir) / "correlations.json",
+        correlations,
+        inputs=_build_axis_judge_inputs(args, mode="correlations"),
+        title=f"axis_judge_correlation:correlations:{axis_spec.axis_name}",
+    )
 
     # Make plot.
     make_plot(
         correlations=correlations, slots=slots, axis_spec=axis_spec,
         output_path=Path(args.output_dir) / "correlation_plot.png",
+        inputs=_build_axis_judge_inputs(args, mode="correlations"),
     )
 
     # Print a brief summary.

@@ -1,14 +1,23 @@
 #!/usr/bin/env python3
-"""PC round-trip ρ plot: **fixed_principled** search only (α-coefficient
-cross-cell transport of the canonical Nth PC; see ``rho_at`` in this file).
+"""PC round-trip ρ plot: principled α-coefficient cross-cell transport of
+the canonical Nth PC, with no token / layer / whitening / cell optimization.
 
-Single panel: Spearman ρ vs PC index.  Reference lines:
-- grey ``×``: canonical geometry (slot=3, layer=25, L=2, K=0), no (L, K)
-  optimisation;
-- coloured ``◆``: best fixed_principled ρ aggregated over 1/2/3/5/7
-  ``(slot, layer)`` cells, with per-style min/max bands;
-- dashed + shaded: permutation-null noise floor from the matched
-  fixed_principled K/L sweep (``permutation_null.py``).
+Default single-panel view: Spearman ρ vs PC index.
+- dark blue ``×``: canonical cell (slot=7, layer=25, L=0, K=0) ρ.
+- pale blue ``○``: same principled transport applied to each of the 5
+  non-canonical cells, no shear, no whitening.
+- dotted dark blue ``±2/√(2n)``: theoretical chance ρ at H₀.
+- pink shaded band: shuffled-judge null at L=K=0 (per-cell, mean of
+  gloss + inline scores), ±2 σ.
+
+DEPRECATED legacy view (``--include_optimization``): adds a red ``◆`` line
+showing the best fixed_principled ρ found by sweeping (L, K) and aggregating
+max-over-cells, plus a matched K/L-search permutation-null band from
+``permutation_null.py``.  This was disabled by default in May 2026 because
+optimizing ρ against a fixed judge ranking at high N surfaces correlations
+that match the description but do not actually align with the original
+canonical PC direction; see comments at the optimization-related code blocks
+and at the top of ``klm_sweep.py`` for context.
 
 Default output: ``roger/pc_round_trip_direction_cosines_fixed.png``.
 """
@@ -27,16 +36,17 @@ from assistant_axis.provenance import (
     InputSpec,
     current_data_subtree_input,
     current_file_input,
-    current_files_input,
-    load_validated_json,
+    load_and_register,
 )
 from results_analysis.canonical_angles.data import DEFAULT_DATA_DIR
 from results_analysis.canonical_angles.whitening import fit_shear, fit_whitening
+from assistant_axis.plot_metadata import json_metadata
 from results_analysis.pc_round_trip.klm_sweep import (
     setup_at, compute_M_done, compute_pc_directions, rho_for_direction,
     DEFAULT_L_VALUES, DEFAULT_K_COARSE, DEFAULT_PCS, DEFAULT_STYLES,
     load_combined_scores, DEFAULT_SWEEP_DIR,
     K_REFINE_MAX_ITER, K_REFINE_MIN_BRACKET, K_REFINE_TIE_THRESH,
+    _build_subtree_inputs as _klm_build_subtree_inputs,
 )
 
 
@@ -129,7 +139,8 @@ def main() -> int:
              "wrong (descriptions are too generic, or there's a bug).  "
              "Output filename gets an '_exchanged' suffix when set.",
     )
-    p.add_argument(
+    cutoff_grp = p.add_mutually_exclusive_group()
+    cutoff_grp.add_argument(
         "--cutoff_n_over_2", action="store_true",
         help="Bake an N/2-PC cutoff into principled transport: after "
              "computing the transported direction d = α_N @ M_done at any "
@@ -142,6 +153,31 @@ def main() -> int:
              "canonical Nth PC is already orthogonal).  Output filename "
              "gets a '_cutoff' suffix when set.",
     )
+    cutoff_grp.add_argument(
+        "--cutoff_2n_over_3", action="store_true",
+        help="Same as --cutoff_n_over_2 but with a more aggressive "
+             "floor(2*N/3) cutoff.  Output filename gets a "
+             "'_cutoff_2of3' suffix.",
+    )
+    p.add_argument(
+        "--include_optimization", action="store_true",
+        help="DEPRECATED.  Restore the legacy view: in addition to the "
+             "default canonical-only plot, draw the red ◆ line showing the "
+             "best fixed_principled ρ found by sweeping (L, K) per cell and "
+             "aggregating max-over-cells, plus the matched K/L-search "
+             "permutation-null band from permutation_null.py.  Disabled by "
+             "default since May 2026 because at high N the K/L/cell search "
+             "surfaces correlations that match the judge description but "
+             "are not actually aligned with the original canonical PC "
+             "direction (see klm_sweep.py header for context).  Output "
+             "filename gets a '_with_optimization' suffix when set.",
+    )
+    # Back-compat: --canonical_only used to be the opt-in flag for the
+    # default-now behaviour.  Accept it as a no-op alias so older pipelines
+    # / scripts don't error out, but prefer dropping it from new callers.
+    p.add_argument("--canonical_only", action="store_true",
+                   help="Deprecated no-op alias (canonical-only is now the "
+                        "default).  Kept for backward compatibility.")
     p.add_argument("--cache-policy", choices=CACHE_POLICIES, default="warn",
                    help="How to react to drift in the null-cache JSON's "
                         "recorded provenance: strict / warn (default) / "
@@ -149,6 +185,26 @@ def main() -> int:
                         "produced/consumed within a single run and are not "
                         "policy-validated.)")
     args = p.parse_args()
+    # Derive a single cutoff configuration used throughout.
+    # cutoff_active: bool — whether to apply any cutoff at all
+    # cutoff_fraction: float — pc_cutoff(N) = floor(N * cutoff_fraction)
+    # cutoff_suffix: str — appended to PNG and cached JSON filenames
+    # cutoff_tag_label: optional title-tag string
+    if args.cutoff_n_over_2:
+        cutoff_fraction = 0.5
+        cutoff_suffix = "_cutoff"
+        cutoff_tag_label = "N/2 CUTOFF"
+    elif args.cutoff_2n_over_3:
+        cutoff_fraction = 2.0 / 3.0
+        cutoff_suffix = "_cutoff_2of3"
+        cutoff_tag_label = "2N/3 CUTOFF"
+    else:
+        cutoff_fraction = 0.0
+        cutoff_suffix = ""
+        cutoff_tag_label = None
+    cutoff_active = cutoff_fraction > 0
+    def pc_cutoff(n: int) -> int:
+        return int(n * cutoff_fraction)
     restricted_cells: list[tuple[int, int]] = []
     if args.restricted_cells.strip():
         for tok in args.restricted_cells.split(","):
@@ -158,14 +214,22 @@ def main() -> int:
     data_dir = Path(args.data_dir)
     sweep_dir = Path(args.sweep_dir)
     pcs = list(args.pcs)
+    # Provenance accumulator -- threaded through every load_and_register
+    # call so the resulting PNG's _provenance.inputs reflects exactly
+    # the cache files this run consumed (see AGENT_NOTES.md
+    # "Reader+registrar pattern").
+    inputs: list[InputSpec] = []
     # ---- Load actual judge scores -----------------------------------------
     print(f"Loading judge scores from {sweep_dir} ...")
     actual_scores: dict[tuple[int, str], dict[str, float]] = {}
     for pc in pcs:
         for style in DEFAULT_STYLES:
-            cell = sweep_dir / f"pc{pc:03d}_{style}"
+            cell_id = f"pc{pc:03d}_{style}"
+            cell = sweep_dir / cell_id
             try:
-                actual_scores[(pc, style)] = load_combined_scores(cell)
+                actual_scores[(pc, style)] = load_combined_scores(
+                    cell, inputs=inputs, cell_id=cell_id,
+                )
             except FileNotFoundError:
                 pass
     print(f"  loaded {len(actual_scores)} cells")
@@ -187,6 +251,16 @@ def main() -> int:
         (1, 2), (4, 3), (8, 6), (16, 12), (32, 24),
         (64, 48), (128, 96), (256, 192), (512, 384),
     ]
+    # TODO: PCs 20, 28, 36, 40, 56, 80 (added later for finer-grained N
+    # coverage) don't fit the 2^i ↔ 0.75·2^i pairing scheme.  Currently
+    # they have NO exchange partner, so the --exchanged path leaves them
+    # un-shuffled (degenerates to no-op, see "no partner" branch below).
+    # Their points on the exchanged plot are therefore identical to the
+    # real plot's values for those PCs and should NOT be interpreted as
+    # control values.  Decide on a sensible pairing (e.g. nearest-neighbour
+    # pairing in log space) and update PAIRS / pair-exchange logic
+    # accordingly.  Lower priority now that the optimization-based view
+    # is deprecated and --exchanged is mostly a diagnostic for that view.
     if args.exchanged:
         partner_of: dict[int, int] = {}
         for a, b in PAIRS:
@@ -207,13 +281,27 @@ def main() -> int:
         # overwritten.  Pattern: <stem>_exchanged.png
         out_p = Path(args.output)
         args.output = str(out_p.with_name(out_p.stem + "_exchanged" + out_p.suffix))
-    if args.cutoff_n_over_2:
-        # Auto-rename the output file with a "_cutoff" suffix so the
-        # no-cutoff plot isn't overwritten.  Combines with --exchanged.
+    if cutoff_active:
+        # Auto-rename the output file with the appropriate cutoff suffix so
+        # the no-cutoff plot isn't overwritten.  Combines with --exchanged.
         out_p = Path(args.output)
-        args.output = str(out_p.with_name(out_p.stem + "_cutoff" + out_p.suffix))
-        print(f"  --cutoff_n_over_2: writing to {args.output}")
-        print(f"  --exchanged: writing to {args.output}")
+        args.output = str(out_p.with_name(out_p.stem + cutoff_suffix + out_p.suffix))
+        print(f"  cutoff active (fraction={cutoff_fraction:.3f}, "
+              f"suffix='{cutoff_suffix}'): writing to {args.output}")
+    # canonical-only is the default view post May-2026; the legacy
+    # K/L/cell-optimization view is gated behind --include_optimization
+    # and gets a distinguishing filename suffix so the default plot
+    # isn't overwritten by an opt-in legacy run.
+    if args.include_optimization:
+        out_p = Path(args.output)
+        args.output = str(out_p.with_name(
+            out_p.stem + "_with_optimization" + out_p.suffix))
+        print(f"  --include_optimization (DEPRECATED): writing to "
+              f"{args.output}")
+    if args.canonical_only:
+        # Deprecated alias, default is canonical-only already.
+        print(f"  --canonical_only is now a no-op (default behavior); "
+              f"flag kept for backward compatibility.")
 
     # ---- Setup at (slot=3, layer=25) --------------------------------------
     names, M_raw, A_g, A_n, pool = setup_at(data_dir, SLOT, LAYER)
@@ -241,53 +329,81 @@ def main() -> int:
             alpha_per_pc[pc_idx] = (U_canon[:, pc_idx - 1]
                                       / S_canon[pc_idx - 1])
 
-    # ---- Pre-warm SVD / shear / whitening caches at (slot=3, layer=25) ----
-    # Stage 2 (below) reuses these caches, so we walk the coarse + K=N grid
-    # at (3,25) once up front.  ρ is *not* accumulated here -- stage 2 owns
-    # all per-(pc, style, variant) ρ bookkeeping so seeding doesn't sneak in
-    # values from a different variant.
-    print(f"\nPre-warming caches at (slot={SLOT}, layer={LAYER}) ...")
+    # ====================================================================
+    # DEPRECATED (gated behind --include_optimization, default off):
+    # everything from here through the cached-winners fallback loaders is
+    # the (L, K, cell)-optimization machinery.  We deprecated it in
+    # May 2026 because at high N the search reliably surfaces correlations
+    # that match the judge description but are not actually aligned with
+    # the original canonical PC direction (it picks up structure in the
+    # judge ranking shared with sample-noise directions in the activation
+    # space, not the PC itself).  The default canonical-only view shows
+    # the principled α-coefficient transport at L=K=0 against shuffled-
+    # judge nulls, also at L=K=0, which gives an honest read.  The
+    # optimization view is retained so we can still rebuild the legacy
+    # plots if needed; it is no longer the headline result.
+    # ====================================================================
+    # ``inputs`` was declared earlier (right before the load_combined_scores
+    # loop).  Pre-retrofit this script silently consumed three optional
+    # cache files (fixed_direction_restricted_winners,
+    # fixed_direction_per_cell_winners, fixed_principled_per_cell_winners)
+    # without recording them as deps; the read+register split made it
+    # easy to forget the second half.  load_and_register now collapses
+    # both into one call at every read site.
+
+    best_global_fixed_restricted: dict[tuple[int, str], dict] = {}
+    best_global_principled_restricted: dict[tuple[int, str], dict] = {}
+    per_cell_fixed: dict[tuple[int, str, int, int], dict] = {}
+    per_cell_principled: dict[tuple[int, str, int, int], dict] = {}
+    refinement_eval_count = 0
+    Vt_per_LK: dict[tuple[int, int], np.ndarray] = {}
     shear_cache: dict = {}
     whiten_cache: dict = {}
-    Vt_per_LK: dict[tuple[int, int], np.ndarray] = {}
+    cached_winners_loaded = False
+    null_per_cell: dict[tuple[int, str, int], dict[tuple[int, int], float]] = \
+        {}
+    null_per_pc: dict[int, list[float]] = {pc: [] for pc in pcs}
 
-    K_max = max(DEFAULT_K_COARSE)
-    # Coarse K grid only — bracket-and-bisect handles the rest.
-    K_grid_top = sorted(set(DEFAULT_K_COARSE))
-    K_grid_init = sorted(set(DEFAULT_K_COARSE))
-    print(f"  pre-warm K grid: {len(K_grid_top)} values (coarse grid)")
+    if not args.include_optimization:
+        print("\nSkipping (L, K, cell)-optimization sweep "
+              "(canonical-only mode is the default; pass "
+              "--include_optimization to restore the legacy view).")
 
-    for L in DEFAULT_L_VALUES:
-        for K in K_grid_top:
-            M_done, _pool_shear = compute_M_done(
-                M_raw, A_g, A_n, pool, L, K, shear_cache, whiten_cache
-            )
-            Vt = compute_pc_directions(M_done, max(pcs))
-            if Vt is None:
-                continue
-            Vt_per_LK[(L, K)] = Vt
+    if args.include_optimization:
+        # ---- Pre-warm SVD / shear / whitening caches at canonical cell ---
+        # DEPRECATED (May 2026): part of the (L, K, cell)-optimization view.
+        # Stage 2 (below) reuses these caches, so we walk the coarse + K=N
+        # grid at the canonical cell once up front.  ρ is *not* accumulated
+        # here -- stage 2 owns all per-(pc, style, variant) ρ bookkeeping so
+        # seeding doesn't sneak in values from a different variant.
+        print(f"\nPre-warming caches at (slot={SLOT}, layer={LAYER}) ...")
+
+        K_max = max(DEFAULT_K_COARSE)
+        # Coarse K grid only — bracket-and-bisect handles the rest.
+        K_grid_top = sorted(set(DEFAULT_K_COARSE))
+        K_grid_init = sorted(set(DEFAULT_K_COARSE))
+        print(f"  pre-warm K grid: {len(K_grid_top)} values (coarse grid)")
+
+        for L in DEFAULT_L_VALUES:
+            for K in K_grid_top:
+                M_done, _pool_shear = compute_M_done(
+                    M_raw, A_g, A_n, pool, L, K, shear_cache, whiten_cache
+                )
+                Vt = compute_pc_directions(M_done, max(pcs))
+                if Vt is None:
+                    continue
+                Vt_per_LK[(L, K)] = Vt
 
     # ---- Restricted global sweep: fixed_direction + fixed_principled over
     #      the cells in --restricted_cells.  Mirrors
     #      klm_sweep.stage2_k_refinement: pre-populate the expanded K grid
-    #      (coarse ∪ N±4) per (slot, layer, L), then bracket-and-bisect
-    #      around each (pc, style, variant) winner.  fixed_direction is
-    #      kept around for cache-replay parity but not plotted any more.
-    #
-    # Caveat: across different (slot, layer), R^D is treated as a common
-    # coordinate space.  Mathematically valid but assumes the residual-
-    # stream basis means the same thing across layers — physically not
-    # obvious.  See --restricted_cells to override the default cell set.
-    best_global_fixed_restricted: dict[tuple[int, str], dict] = {}
-    best_global_principled_restricted: dict[tuple[int, str], dict] = {}
-    # Per-cell winners (one entry per (pc, style, slot, layer)).  Lets us
-    # post-hoc derive 1-cell / 2-cell / 3-cell ρ aggregates from a single
-    # in-script sweep — avoids running the sweep three times.
-    per_cell_fixed: dict[tuple[int, str, int, int], dict] = {}
-    per_cell_principled: dict[tuple[int, str, int, int], dict] = {}
-    refinement_eval_count = 0  # how many *new* (L, K) SVDs added by stage 2
-
-    if restricted_cells:
+    #      per (slot, layer, L), then bracket-and-bisect around each
+    #      (pc, style, variant) winner.
+    # DEPRECATED (May 2026): see the deprecation banner above.  Only runs
+    # when --include_optimization is set; otherwise per_cell_fixed and
+    # per_cell_principled stay empty and downstream code falls through to
+    # the canonical-only blue series.
+    if args.include_optimization and restricted_cells:
         # Per-cell caches: setup data, shear/whitening basis caches, and
         # M_done / Vt caches keyed by (L, K).  Shared across both variants
         # and all (pc, style) targets.
@@ -393,11 +509,12 @@ def main() -> int:
                 d_used = x[0]
             else:
                 raise ValueError(f"unknown variant {variant!r}")
-            # ---- N/2 cutoff (when --cutoff_n_over_2): zero out the
-            #      transported direction's projection onto the first
-            #      floor(N/2) RAW target-cell PCs (Vt at L=0, K=0).
-            if args.cutoff_n_over_2:
-                cutoff = pc // 2
+            # ---- Cutoff (when --cutoff_n_over_2 or --cutoff_2n_over_3):
+            #      zero out the transported direction's projection onto
+            #      the first pc_cutoff(N) RAW target-cell PCs (Vt at
+            #      L=0, K=0).
+            if cutoff_active:
+                cutoff = pc_cutoff(pc)
                 if cutoff > 0:
                     c_cut = cell_caches[(slot, layer)]
                     Vt_raw = c_cut["Vt_at_LK"].get((0, 0))
@@ -575,33 +692,44 @@ def main() -> int:
         # Persist all variant winners JSONs for audit/replay (global maxes).
         cells_tag = "_".join(f"{s}-{l}" for s, l in restricted_cells)
         # Add suffixes to cached winner JSONs when running with the
-        # --exchanged control or --cutoff_n_over_2, so we don't clobber
+        # --exchanged control or any cutoff flag, so we don't clobber
         # the canonical winners.  Combine them when both flags are set.
         if args.exchanged:
             cells_tag = cells_tag + "_exchanged"
-        if args.cutoff_n_over_2:
-            cells_tag = cells_tag + "_cutoff"
+        if cutoff_active:
+            cells_tag = cells_tag + cutoff_suffix
         out_dir = Path(args.output).parent
+        # Build the side-JSON inputs list.  Should match the PNG's
+        # dependency set: the per-(pc, style, judge, mode) judge-cache
+        # fingerprints already accumulated in ``inputs`` by the
+        # ``load_combined_scores`` calls above, plus the up-front data
+        # subtrees from the klm_sweep helper.  The null cache is NOT an
+        # input here (these JSONs are *upstream* of the null overlay
+        # path, not downstream).
+        side_json_inputs = list(inputs) + _klm_build_subtree_inputs(
+            data_dir=data_dir,
+        )
         for tag, payload in [
             ("fixed_direction", best_global_fixed_restricted),
             ("fixed_principled", best_global_principled_restricted),
         ]:
             winners_path = out_dir / (
                 f"pc_round_trip_{tag}_restricted_winners_{cells_tag}.json")
-            with open(winners_path, "w") as f:
-                json.dump(
-                    {
-                        f"pc{pc:03d}_{style}": {
-                            "rho": float(v["rho"]),
-                            "L": int(v["L"]),
-                            "K": int(v["K"]),
-                            "slot": int(v["slot"]),
-                            "layer": int(v["layer"]),
-                        }
-                        for (pc, style), v in payload.items()
-                    },
-                    f, indent=2, sort_keys=True,
-                )
+            winners_payload = {
+                f"pc{pc:03d}_{style}": {
+                    "rho": float(v["rho"]),
+                    "L": int(v["L"]),
+                    "K": int(v["K"]),
+                    "slot": int(v["slot"]),
+                    "layer": int(v["layer"]),
+                }
+                for (pc, style), v in payload.items()
+            }
+            envelope = json_metadata(
+                winners_payload, inputs=side_json_inputs,
+                title=f"pc_round_trip_{tag}_restricted_winners",
+            )
+            winners_path.write_text(json.dumps(envelope, indent=2, sort_keys=True))
             print(f"  wrote {winners_path}")
 
         # Persist per-cell winners (per (pc, style, slot, layer) — used to
@@ -612,26 +740,27 @@ def main() -> int:
         ]:
             per_cell_path = out_dir / (
                 f"pc_round_trip_{tag}_per_cell_winners_{cells_tag}.json")
-            with open(per_cell_path, "w") as f:
-                json.dump(
-                    {
-                        f"pc{pc:03d}_{style}_s{slot}_l{layer}": {
-                            "rho": float(v["rho"]),
-                            "L": int(v["L"]),
-                            "K": int(v["K"]),
-                        }
-                        for (pc, style, slot, layer), v in pc_payload.items()
-                    },
-                    f, indent=2, sort_keys=True,
-                )
+            per_cell_payload = {
+                f"pc{pc:03d}_{style}_s{slot}_l{layer}": {
+                    "rho": float(v["rho"]),
+                    "L": int(v["L"]),
+                    "K": int(v["K"]),
+                }
+                for (pc, style, slot, layer), v in pc_payload.items()
+            }
+            envelope = json_metadata(
+                per_cell_payload, inputs=side_json_inputs,
+                title=f"pc_round_trip_{tag}_per_cell_winners",
+            )
+            per_cell_path.write_text(json.dumps(envelope, indent=2, sort_keys=True))
             print(f"  wrote {per_cell_path}")
 
-    # Fallback: if the in-script global sweep was skipped (or didn't
-    # produce results for some reason) but cached winners JSONs from a
-    # previous run exist, load them so the plot still has data.
-    # When running with --exchanged, prefer files whose name contains
-    # "_exchanged"; when running without, exclude such files so we don't
-    # accidentally load exchanged-control data into the canonical plot.
+    # ---- Fallback: load cached-winner JSONs from a previous run --------
+    # DEPRECATED (May 2026): only the optimization view consumes these,
+    # so they're loaded conditionally.  When running with --exchanged,
+    # prefer files whose name contains "_exchanged"; when running without,
+    # exclude such files so we don't accidentally load exchanged-control
+    # data into the canonical plot.
     def _filter_for_exchange(paths):
         # Filter cached winner paths to match the active variant flags so
         # we don't pick up an exchanged or cutoff cache when running
@@ -641,13 +770,12 @@ def main() -> int:
             out = [p for p in out if "_exchanged" in p.name]
         else:
             out = [p for p in out if "_exchanged" not in p.name]
-        if args.cutoff_n_over_2:
-            out = [p for p in out if "_cutoff" in p.name]
+        if cutoff_active:
+            out = [p for p in out if cutoff_suffix in p.name]
         else:
             out = [p for p in out if "_cutoff" not in p.name]
         return out
-    cached_winners_loaded = False
-    if not best_global_fixed_restricted:
+    if args.include_optimization and not best_global_fixed_restricted:
         out_dir_cache = Path(args.output).parent
         candidates_f = sorted(
             _filter_for_exchange(out_dir_cache.glob(
@@ -656,8 +784,11 @@ def main() -> int:
             reverse=True,
         )
         if candidates_f and not best_global_fixed_restricted:
-            with open(candidates_f[0]) as f:
-                cached = json.load(f)
+            cached, _spec, _check = load_and_register(
+                candidates_f[0],
+                dep_key="fixed_direction_restricted_winners",
+                inputs=inputs, policy=args.cache_policy,
+            )
             for k, v in cached.items():
                 pc = int(k[2:5])
                 style = k.split("_", 2)[1]
@@ -667,7 +798,8 @@ def main() -> int:
             cached_winners_loaded = True
 
     # Per-cell fallback loader (fixed_principled ρ lines × n-cell aggregates).
-    if not per_cell_fixed:
+    # DEPRECATED (May 2026): only used by the optimization view.
+    if args.include_optimization and not per_cell_fixed:
         candidates_pc = sorted(
             _filter_for_exchange(Path(args.output).parent.glob(
                 "pc_round_trip_fixed_direction_per_cell_winners_*.json")),
@@ -675,8 +807,11 @@ def main() -> int:
             reverse=True,
         )
         if candidates_pc:
-            with open(candidates_pc[0]) as f:
-                cached = json.load(f)
+            cached, _spec, _check = load_and_register(
+                candidates_pc[0],
+                dep_key="fixed_direction_per_cell_winners",
+                inputs=inputs, policy=args.cache_policy,
+            )
             for k, v in cached.items():
                 pc = int(k[2:5])
                 rest = k[6:]
@@ -687,7 +822,8 @@ def main() -> int:
             print(f"  loaded cached fixed_direction per-cell from "
                   f"{candidates_pc[0].name} ({len(cached)} entries)")
 
-    if not per_cell_principled:
+    # DEPRECATED (May 2026): only used by the optimization view.
+    if args.include_optimization and not per_cell_principled:
         candidates_pc = sorted(
             _filter_for_exchange(Path(args.output).parent.glob(
                 "pc_round_trip_fixed_principled_per_cell_winners_*.json")),
@@ -695,8 +831,11 @@ def main() -> int:
             reverse=True,
         )
         if candidates_pc:
-            with open(candidates_pc[0]) as f:
-                cached = json.load(f)
+            cached, _spec, _check = load_and_register(
+                candidates_pc[0],
+                dep_key="fixed_principled_per_cell_winners",
+                inputs=inputs, policy=args.cache_policy,
+            )
             for k, v in cached.items():
                 pc = int(k[2:5])
                 rest = k[6:]
@@ -720,38 +859,48 @@ def main() -> int:
         # accurate; the in-script sweep has already run/been skipped.
         restricted_cells = loaded_cells
 
-    # ---- Null cache (bands = nth_pc K/L-search floor; AGENT_NOTES has the
-    #      caveat about benchmarking fixed_principled against this floor).
-    null_cache_path = Path("roger/pc_round_trip_null_klm_results.json")
-    try:
-        null_full, _null_check = load_validated_json(
-            null_cache_path, policy=args.cache_policy)
-    except FileNotFoundError:
-        print("  null cache not found — plotting without noise bands")
-        null_full = {}
-    null_data = null_full.get("stage2", {})
-    null_per_cell_raw = null_full.get("stage2_per_cell", {})
-
-    null_per_pc: dict[int, list[float]] = {pc: [] for pc in pcs}
-    for k, v in null_data.items():
-        pc = int(k[2:5])
-        if pc in null_per_pc and v.get("rho") is not None:
-            null_per_pc[pc].append(v["rho"])
-
-    null_per_cell: dict[tuple[int, str, int], dict[tuple[int, int], float]] = \
-        {}
-    for k, v in null_per_cell_raw.items():
+    # ---- Null cache (K/L-search floor from permutation_null.py) ----------
+    # DEPRECATED (May 2026): this is the matched-search bias band that
+    # accompanies the optimization view's red ◆ markers.  Only loaded when
+    # --include_optimization is set; the canonical-only default plot uses
+    # the inline shuffled-judge null at L=K=0 computed below instead.
+    if args.include_optimization:
+        if cutoff_active:
+            null_cache_path = Path(
+                f"roger/pc_round_trip_null_klm_results{cutoff_suffix}.json")
+        else:
+            null_cache_path = Path(
+                "roger/pc_round_trip_null_klm_results.json")
         try:
+            null_full, _spec, _check = load_and_register(
+                null_cache_path,
+                dep_key="null_cache_json",
+                inputs=inputs, policy=args.cache_policy,
+            )
+        except FileNotFoundError:
+            print(f"  null cache not found at {null_cache_path}; "
+                  "plotting without noise bands")
+            null_full = {}
+        null_data = null_full.get("stage2", {})
+        null_per_cell_raw = null_full.get("stage2_per_cell", {})
+
+        for k, v in null_data.items():
             pc = int(k[2:5])
-            rest = k[6:]
-            style_perm, sl = rest.rsplit("_s", 1)
-            slot_str, layer_str = sl.split("_l", 1)
-            style, p_str = style_perm.rsplit("_p", 1)
-            target = (pc, style, int(p_str))
-            cell = (int(slot_str), int(layer_str))
-            null_per_cell.setdefault(target, {})[cell] = v["rho"]
-        except Exception:
-            continue
+            if pc in null_per_pc and v.get("rho") is not None:
+                null_per_pc[pc].append(v["rho"])
+
+        for k, v in null_per_cell_raw.items():
+            try:
+                pc = int(k[2:5])
+                rest = k[6:]
+                style_perm, sl = rest.rsplit("_s", 1)
+                slot_str, layer_str = sl.split("_l", 1)
+                style, p_str = style_perm.rsplit("_p", 1)
+                target = (pc, style, int(p_str))
+                cell = (int(slot_str), int(layer_str))
+                null_per_cell.setdefault(target, {})[cell] = v["rho"]
+            except Exception:
+                continue
 
     # Canonical (no optimisation): ρ at (slot=7, layer=25, L=0, K=0).
     # When --cutoff_n_over_2 is set, also project out the first N/2 raw
@@ -764,8 +913,8 @@ def main() -> int:
         if pc - 1 >= Vt_canonical.shape[0]:
             continue
         d = Vt_canonical[pc - 1]
-        if args.cutoff_n_over_2:
-            cutoff = pc // 2
+        if cutoff_active:
+            cutoff = pc_cutoff(pc)
             if cutoff > 0:
                 n_cut = min(cutoff, Vt_canonical.shape[0])
                 coefs = Vt_canonical[:n_cut] @ d
@@ -796,8 +945,8 @@ def main() -> int:
     ] = {cell: {pc: [] for pc in pcs} for cell in SIX_CELLS_CANONICAL}
     # Cache target-cell M_centered + names + raw Vt so we don't repeatedly
     # rebuild them in the per-PC loop.  Vt_raw is needed for the optional
-    # N/2 cutoff (--cutoff_n_over_2): we project the transported direction
-    # onto Vt_raw[:N/2] and subtract.
+    # cutoff (--cutoff_n_over_2 / --cutoff_2n_over_3): we project the
+    # transported direction onto Vt_raw[:pc_cutoff(N)] and subtract.
     _cell_geom_l0_k0: dict[
         tuple[int, int], tuple[list[str], np.ndarray, np.ndarray | None]
     ] = {}
@@ -811,14 +960,14 @@ def main() -> int:
         # Compute raw Vt only when cutoff is enabled (avoids unnecessary
         # SVD when not needed; the K/L sweep block computes its own copy).
         Vt_raw_t = None
-        if args.cutoff_n_over_2:
+        if cutoff_active:
             _U, _S, Vt_raw_t = np.linalg.svd(M_t_centered, full_matrices=False)
         _cell_geom_l0_k0[(slot, layer)] = (n_t, M_t_centered, Vt_raw_t)
     for pc in pcs:
         if pc not in alpha_per_pc:
             continue
         a = alpha_per_pc[pc]
-        cutoff = pc // 2 if args.cutoff_n_over_2 else 0
+        cutoff = pc_cutoff(pc) if cutoff_active else 0
         for slot, layer in SIX_CELLS_CANONICAL:
             names_t, M_centered_t, Vt_raw_t = _cell_geom_l0_k0[(slot, layer)]
             d_t = a @ M_centered_t   # canonical α applied to target cell
@@ -843,6 +992,102 @@ def main() -> int:
                 if not np.isnan(r):
                     rho_canonical_per_cell_per_pc[(slot, layer)][pc].append(
                         float(r))
+
+    # ---- Inline shuffled-judge null at L=K=0 (with optional cutoff) ------
+    # Like the K/L-search null bands but with NO optimization: the
+    # transported direction at each cell is fixed at L=K=0 (+ cutoff),
+    # and we permute judge scores instead.  Per (PC, style, perm), max ρ
+    # over the 6 cells; aggregate to mean ± 2σ across (style × perm).
+    # This null accounts for the actual judge-score structure (heavy ties
+    # at high N, default-score concentration) -- which the theoretical
+    # ±2/√(2n) chance line does not.
+    NULL_PERMS = 100
+    NULL_SEED = 42
+    no_opt_null_per_pc: dict[int, list[float]] = {pc: [] for pc in pcs}
+    rng = np.random.default_rng(NULL_SEED)
+    # Pre-compute per-cell projections (one per PC, fixed across all perms).
+    no_opt_projs_per_pc: dict[int, dict[tuple[int, int], np.ndarray]] = {}
+    no_opt_names_per_cell: dict[tuple[int, int], list[str]] = {}
+    for slot, layer in SIX_CELLS_CANONICAL:
+        no_opt_names_per_cell[(slot, layer)] = (
+            _cell_geom_l0_k0[(slot, layer)][0])
+    for pc in pcs:
+        if pc not in alpha_per_pc:
+            continue
+        a = alpha_per_pc[pc]
+        cutoff = pc_cutoff(pc) if cutoff_active else 0
+        cell_projs: dict[tuple[int, int], np.ndarray] = {}
+        for slot, layer in SIX_CELLS_CANONICAL:
+            _, M_centered_t, Vt_raw_t = _cell_geom_l0_k0[(slot, layer)]
+            d_t = a @ M_centered_t
+            if cutoff > 0 and Vt_raw_t is not None:
+                n_cut = min(cutoff, Vt_raw_t.shape[0])
+                if n_cut > 0:
+                    coefs = Vt_raw_t[:n_cut] @ d_t
+                    d_t = d_t - Vt_raw_t[:n_cut].T @ coefs
+            cell_projs[(slot, layer)] = M_centered_t @ d_t
+        no_opt_projs_per_pc[pc] = cell_projs
+    # Run permutations.
+    # ``Same shuffle applied to both gloss and inline'' (per perm).  Drawing
+    # ONE entity permutation π per perm and re-indexing both styles' score
+    # arrays by π preserves the natural gloss×inline correlation structure
+    # on the actual data: both styles see the same shuffled entity-ordering.
+    # The mean-over-styles ρ then has the SAME variance as single-style ρ
+    # (no √2 reduction), since the two style ρ's are nearly perfectly
+    # correlated in this regime.
+    from scipy.stats import spearmanr as _sp_null
+    for pc in pcs:
+        cell_projs = no_opt_projs_per_pc.get(pc)
+        if cell_projs is None:
+            continue
+        # Collect entity sets that have BOTH (a) a score in every style and
+        # (b) presence in the canonical cell's name list.  Use this common
+        # ordering for everything (style arrays + per-cell projection y).
+        canonical_names = no_opt_names_per_cell[(SLOT, LAYER)]
+        score_sets = []
+        styles_present: list[str] = []
+        for style in DEFAULT_STYLES:
+            sc = actual_scores.get((pc, style))
+            if sc is None:
+                continue
+            score_sets.append(set(sc.keys()))
+            styles_present.append(style)
+        if not score_sets:
+            continue
+        common_scored = set.intersection(*score_sets)
+        common_keys = [n for n in canonical_names if n in common_scored]
+        if len(common_keys) < 3:
+            continue
+        per_style_arrays: dict[str, np.ndarray] = {}
+        for style in styles_present:
+            sc = actual_scores[(pc, style)]
+            per_style_arrays[style] = np.asarray(
+                [sc[k] for k in common_keys], dtype=float)
+        cell_y: dict[tuple[int, int], np.ndarray] = {}
+        for slot, layer in SIX_CELLS_CANONICAL:
+            names_t = no_opt_names_per_cell[(slot, layer)]
+            n2i = {n: i for i, n in enumerate(names_t)}
+            if all(k in n2i for k in common_keys):
+                idx = [n2i[k] for k in common_keys]
+                cell_y[(slot, layer)] = cell_projs[(slot, layer)][idx]
+        if not cell_y or not per_style_arrays:
+            continue
+        n_common = len(common_keys)
+        for perm_idx in range(NULL_PERMS):
+            perm = np.arange(n_common)
+            rng.shuffle(perm)
+            shuffled_per_style = {
+                style: arr[perm] for style, arr in per_style_arrays.items()
+            }
+            for slot, layer in cell_y:
+                y_proj = cell_y[(slot, layer)]
+                style_rhos: list[float] = []
+                for style, arr in shuffled_per_style.items():
+                    r = _sp_null(arr, y_proj).correlation
+                    if not np.isnan(r):
+                        style_rhos.append(float(r))
+                if style_rhos:
+                    no_opt_null_per_pc[pc].append(float(np.mean(style_rhos)))
 
     pcs_plot = sorted(
         pc for pc in pcs
@@ -902,13 +1147,42 @@ def main() -> int:
 
     fig, ax_rho = plt.subplots(1, 1, figsize=(11, 7.5))
 
-    # ---- Canonical (no optimization) ρ reference -------------------------
+    # ---- No-opt shuffled-judge null band ---------------------------------
+    # Per-PC mean ± 2σ across (style × perm), where each value is the
+    # max-over-6-cells ρ at L=K=0 (+ cutoff) on shuffled judge scores.
+    # Drawn first so it sits behind everything.
+    NULL_BAND_COLOR = "#cc7777"
+    no_opt_null_means = [
+        float(np.mean(no_opt_null_per_pc[pc])) if no_opt_null_per_pc[pc]
+        else float("nan") for pc in pcs_with_data
+    ]
+    no_opt_null_sds = [
+        float(np.std(no_opt_null_per_pc[pc], ddof=1))
+        if len(no_opt_null_per_pc[pc]) > 1 else 0.0
+        for pc in pcs_with_data
+    ]
+    no_opt_null_lo = [m - 2 * s for m, s in zip(no_opt_null_means,
+                                                  no_opt_null_sds)]
+    no_opt_null_hi = [m + 2 * s for m, s in zip(no_opt_null_means,
+                                                  no_opt_null_sds)]
+    ax_rho.fill_between(pcs_with_data, no_opt_null_lo, no_opt_null_hi,
+                        color=NULL_BAND_COLOR, alpha=0.18, linewidth=0,
+                        label="shuffled-judge null at L=K=0 (per-cell, "
+                              "mean of gloss+inline) ± 2 σ")
+    ax_rho.plot(pcs_with_data, no_opt_null_means,
+                linestyle="--", linewidth=1.0,
+                color=NULL_BAND_COLOR, alpha=0.7)
+
+    # ---- Canonical PC ρ via principled α-coefficient transport ----------
     # Plotted before the control lines so its legend entry comes first.
     # ``zorder`` keeps the × markers on top of any later-drawn band fills.
+    # NB: at every cell this is the L=K=0 principled transport; no
+    # (L, K, cell) optimization is applied -- the direction is rigidly
+    # the canonical Nth PC, transported via canonical α-coefficients.
     CANONICAL_COLOR = "#1f4e79"           # dark blue (canonical cell)
     OTHER_CELL_COLOR = "#a8c3dc"           # paler blue (other 5 cells)
     # First: 5 paler-blue lines for the non-canonical cells (L=K=0
-    # fixed-principled transport).  Plotted BEFORE the canonical-cell line
+    # principled transport).  Plotted BEFORE the canonical-cell line
     # so the dark blue × markers sit on top.
     other_cells = [c for c in SIX_CELLS_CANONICAL if c != (SLOT, LAYER)]
     other_label_used = False
@@ -921,7 +1195,7 @@ def main() -> int:
         ax_rho.plot(
             pcs_with_data, means, marker="o", markersize=3.0,
             linewidth=0.9, color=OTHER_CELL_COLOR, alpha=0.85, zorder=4,
-            label=("canonical (no optimization), other 5 cells"
+            label=("canonical PC at non-canonical cells (5 cells)"
                    if not other_label_used else None),
         )
         other_label_used = True
@@ -929,7 +1203,7 @@ def main() -> int:
     ax_rho.plot(pcs_with_data, rho_canonical_means, marker="x",
                 markersize=10, linewidth=1.4, color=CANONICAL_COLOR,
                 markeredgewidth=1.6, alpha=0.85, zorder=10,
-                label="canonical (no optimization)")
+                label="canonical PC at canonical cell")
     ax_rho.fill_between(pcs_with_data, rho_canonical_min, rho_canonical_max,
                         color=CANONICAL_COLOR, alpha=0.10, linewidth=0)
     for pc, val in zip(pcs_with_data, rho_canonical_means):
@@ -999,10 +1273,16 @@ def main() -> int:
                 for pc in pcs_with_data]
         return means, mins, maxs
 
+    # ---- DEPRECATED K/L-search permutation-null bands -------------------
     # Plot null bands FIRST (so they're behind the lines).
     # n-cell null = per (pc, style, perm), max ρ over the first n cells.
     # Aggregate per PC: mean and SD across perms × styles.
-    if null_per_cell:
+    # DEPRECATED (May 2026): only drawn when --include_optimization is
+    # set; the canonical-only default uses the inline shuffled-judge
+    # null at L=K=0 (drawn earlier as the pink band).
+    if not args.include_optimization:
+        pass
+    elif null_per_cell:
         for n in n_cell_levels:
             color = CELL_COUNT_COLORS[n]
             cells_n = set(cell_order[:n])
@@ -1068,10 +1348,13 @@ def main() -> int:
                     linestyle=":", linewidth=1.0, color="#888888",
                     alpha=0.6)
 
+    # ---- DEPRECATED optimized ◆ red line -------------------------------
+    # Only drawn when --include_optimization is set.  See deprecation
+    # banner higher up for context.
     family_specs = [
         ("fixed_principled", per_cell_principled, "D",
-         "optimized token, layer, and whitening"),
-    ]
+         "optimized token, layer, and whitening (DEPRECATED)"),
+    ] if args.include_optimization else []
 
     # Principled ρ: ◆ markers; one line per n in n_cell_levels.
     n_top = n_cell_levels[-1] if n_cell_levels else 0
@@ -1121,10 +1404,11 @@ def main() -> int:
     # the markers so the markers sit on top visually).
     handles_, labels_ = ax_rho.get_legend_handles_labels()
     desired_order = [
-        "canonical (no optimization)",
-        "canonical (no optimization), other 5 cells",
+        "canonical PC at canonical cell",
+        "canonical PC at non-canonical cells (5 cells)",
         "canonical control: ±2/√(2n) (95% chance ρ for null)",
-        "optimized token, layer, and whitening",
+        "shuffled-judge null at L=K=0 (per-cell, mean of gloss+inline) ± 2 σ",
+        "optimized token, layer, and whitening (DEPRECATED)",
         "range optimized against shuffled data (control) ± 2 σ",
         "control ± 3 σ",
     ]
@@ -1153,22 +1437,36 @@ def main() -> int:
     tag_parts = []
     if args.exchanged:
         tag_parts.append("PAIR-EXCHANGED CONTROL")
-    if args.cutoff_n_over_2:
-        tag_parts.append("N/2 CUTOFF")
+    if cutoff_tag_label:
+        tag_parts.append(cutoff_tag_label)
+    if args.include_optimization:
+        tag_parts.append("LEGACY OPTIMIZATION VIEW (DEPRECATED)")
     extra_tag = ("  [" + ", ".join(tag_parts) + "]") if tag_parts else ""
-    title = (f"PC round-trip ρ — canonical vs (token, layer, whitening)"
-             f"-optimized; {levels_str}-cell aggregate{extra_tag}")
-    # Multi-line spec block: one fact per line for readability.  Each line
-    # is rendered separately by ``suptitle_with_specs``; ``line_height``
-    # tunes the vertical spacing between them.
-    spec_lines = [
-        "× = canonical (slot=7, layer=25, L=0, K=0; no optimization). "
-        "Dotted band: ±2/√(2n) chance ρ at H₀.",
-        "◆ = (token, layer, whitening)-optimized canonical PC, max ρ over "
-        f"{n_top}-cell prefix of [{cells_spec}].",
-        "Pink: shuffled-judge null (max-over-cells) mean ± 2σ "
-        "(=optimization control). Dotted = ±3σ outer envelope.",
-    ]
+    if not args.include_optimization:
+        title = (f"PC round-trip ρ — principled cross-cell transport, "
+                 f"6-cell view{extra_tag}")
+        spec_lines = [
+            "× = canonical PC at the canonical cell (slot=7, layer=25, "
+            "L=0, K=0).  Dotted band: ±2/√(2n) chance ρ at H₀.",
+            "Pale lines: same canonical PC transported to each of the 5 "
+            "other (slot, layer) cells via canonical α-coefficients "
+            "(L=K=0).",
+            "Pink: shuffled-judge null at L=K=0 (per-cell, mean of "
+            "gloss + inline) ± 2 σ.",
+        ]
+    else:
+        title = (f"PC round-trip ρ — principled transport vs DEPRECATED "
+                 f"(token, layer, whitening)-optimized; "
+                 f"{levels_str}-cell aggregate{extra_tag}")
+        spec_lines = [
+            "× = canonical PC at canonical cell (slot=7, layer=25, "
+            "L=0, K=0).  Dotted band: ±2/√(2n) chance ρ at H₀.",
+            "◆ = (token, layer, whitening)-optimized canonical PC, max ρ "
+            f"over {n_top}-cell prefix of [{cells_spec}].  DEPRECATED.",
+            "Pink: shuffled-judge null at L=K=0 (per-cell, mean of "
+            "gloss + inline) ± 2 σ.  Red band: matched K/L-search "
+            "permutation null ± 2 σ (DEPRECATED, dotted = ±3 σ).",
+        ]
     # ``line_height`` controls both the bold-title↔first-spec gap and the
     # spacing between consecutive spec lines.  Bumped from 0.026 to 0.034
     # to give the title some breathing room.  Then we override the
@@ -1179,25 +1477,21 @@ def main() -> int:
     fig.tight_layout(rect=(0, 0.18, 1.0, bottom - 0.003))
 
     # --- Provenance inputs ---
-    # The four sources this plot reads:
+    # The sources this plot reads:
+    #   * three optional refinement caches (already appended above by
+    #     load_and_register when --include_optimization is set);
     #   * vector subtrees + four canonical-angles derived marginals
     #     (setup_at + build_goal_nogoal_subspaces fan-out);
-    #   * the per-cell judge-score caches under sweep_dir (gpt + sonnet
-    #     × desc/inst per (PC, style) cell -- ~144 files for the
-    #     default 18 PCs × 2 styles × 4 caches);
-    #   * the permutation-null cache (when present);
-    #   * the cached winners JSONs we glob for in --output's parent
-    #     dir (only when the in-script sweep is skipped).
-    judge_cache_paths: list[Path] = []
-    for pc in pcs:
-        for style in DEFAULT_STYLES:
-            cell = sweep_dir / f"pc{pc:03d}_{style}"
-            for judge in ("gpt", "sonnet"):
-                for mode in ("descriptions", "instructions"):
-                    judge_cache_paths.append(
-                        cell / judge / f"scores_{mode}.json")
-
-    inputs: list[InputSpec] = [
+    #   * per-(PC, style, judge, mode) judge-score caches under sweep_dir
+    #     (up to PCs × 2 styles × 2 judges × 2 modes = up to 192 files at
+    #     the current 24-PC default), each as its own InputSpec so audit
+    #     reports can pinpoint which (PC, style) cell was rejudged;
+    #   * the permutation-null cache (already appended above by
+    #     load_and_register; the duplicate-path branch below preserves
+    #     the legacy behaviour that recorded the dep even when the
+    #     file did not exist at script start, but is now a no-op since
+    #     we already attempted the load).
+    inputs.extend([
         current_data_subtree_input(
             data_dir, "traits/vectors", dep_key="traits_vectors"),
         current_data_subtree_input(
@@ -1214,18 +1508,22 @@ def main() -> int:
         current_data_subtree_input(
             data_dir, "combinations/vectors/derived/marginals/t_nogoal",
             dep_key="combos_t_nogoal"),
-        current_files_input(
-            dep_key="judge_caches",
-            paths=judge_cache_paths,
-            extras={"n_pcs": str(len(pcs)),
-                    "styles": ",".join(DEFAULT_STYLES),
-                    "exchanged": str(args.exchanged)}),
-    ]
-    null_cache_path = Path("roger/pc_round_trip_null_klm_results.json")
-    if null_cache_path.exists():
-        inputs.append(current_file_input(
-            dep_key="null_cache_json",
-            path=null_cache_path))
+    ])
+    # Per-(PC, style, judge, mode) judge cache InputSpecs were
+    # already appended above by load_combined_scores → load_and_register
+    # at read time, so the previous duplicate-append loop here is
+    # gone.  Note: ``extras={"exchanged": str(args.exchanged)}`` no
+    # longer rides on these specs -- the exchanged-pair semantics are
+    # captured by the script's own producer_script fingerprint
+    # (extras are advisory, never affect drift comparisons), so
+    # nothing material is lost.
+    # ``null_cache_json`` was already appended above by load_and_register
+    # at the point of consumption (when --include_optimization is set
+    # and the file exists).  The previous duplicate-append site here
+    # would also register the dep when load_and_register had skipped
+    # the read on FileNotFoundError -- but recording a dep we never
+    # read is the exact failure mode the load_and_register retrofit
+    # is designed to prevent, so the duplicate is dropped.
 
     out = Path(args.output)
     out.parent.mkdir(parents=True, exist_ok=True)

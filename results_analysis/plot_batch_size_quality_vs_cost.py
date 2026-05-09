@@ -56,12 +56,20 @@ from assistant_axis.provenance import (
     CACHE_POLICIES,
     InputSpec,
     current_file_input,
-    load_validated_json,
+    load_and_register,
 )
 
 
 DEFAULT_INPUT = "roger/batch_size_curve_rho.json"
 DEFAULT_OUTPUT = "roger/batch_size_cost_vs_quality.png"
+
+
+def _default_ensembles_path(input_path: Path) -> Path:
+    """Side-car ensembles JSON path next to a batch-size cache.
+    Mirrors :func:`judge_ensemble_rho_curve._default_output_for`.
+    """
+    p = Path(input_path)
+    return p.with_name(f"{p.stem}_ensembles{p.suffix}")
 
 
 # ---------------------------------------------------------------------------
@@ -119,6 +127,52 @@ EXTRA_POINTS = [
 ]
 
 
+# Per-axis-set marker styling for the 4-Pareto-frontier overlay.  Set 1
+# (initial) reuses the existing big black filled square that anchors the
+# B-curve -- we don't draw a second marker for it.  Sets 2..4 get
+# distinct hollow shapes so each set's anchor + ensemble rays are
+# visually traceable when colours coincide between rays of different
+# sets.  Order matches ``judge_ensemble_rho_curve.AXIS_SETS``.
+SET_MARKERS: dict[str, dict] = {
+    "set_1_initial": {
+        "marker":      "s",          # filled square (matches B-curve)
+        "size":        12,
+        "facecolor":   "#333333",
+        "edgecolor":   "black",
+        "edgewidth":   0.6,
+        "is_overlay":  False,        # already drawn by the B-curve
+        "short_label": "set 1",
+    },
+    "set_2": {
+        "marker":      "o",
+        "size":        10,
+        "facecolor":   "#333333",
+        "edgecolor":   "black",
+        "edgewidth":   0.6,
+        "is_overlay":  True,
+        "short_label": "set 2",
+    },
+    "set_3": {
+        "marker":      "^",
+        "size":        11,
+        "facecolor":   "#333333",
+        "edgecolor":   "black",
+        "edgewidth":   0.6,
+        "is_overlay":  True,
+        "short_label": "set 3",
+    },
+    "set_4": {
+        "marker":      "v",
+        "size":        11,
+        "facecolor":   "#333333",
+        "edgecolor":   "black",
+        "edgewidth":   0.6,
+        "is_overlay":  True,
+        "short_label": "set 4",
+    },
+}
+
+
 def _best_across_cells_mean_axes(per_axis: dict, B_int: dict) -> dict:
     """Aggregate ``per_axis`` (one ρ per ``<axis>|b<N>|s<S>_l<L>``) into
     ``{b<N>: ρ}`` where ρ is the **mean across axes** of the **max ρ
@@ -151,14 +205,23 @@ def _best_across_cells_mean_axes(per_axis: dict, B_int: dict) -> dict:
     return out
 
 
-def _load_batch_size_json(path: Path, *, policy: str = "warn") -> dict:
+def _load_batch_size_json(
+    path: Path, *,
+    policy: str = "warn",
+    inputs: list[InputSpec] | None = None,
+    dep_key: str = "batch_size_curve_json",
+) -> dict:
     """Load + (optionally) validate the batch-size cache.
 
     Tolerates legacy bare-dict caches (returns ``check=None``) and
     enforces the user-selected cache policy on envelope-wrapped ones.
-    See :func:`assistant_axis.provenance.load_validated_json`.
+    When an ``inputs`` accumulator is supplied, also appends an
+    InputSpec for ``path`` so the read and the registration can't
+    drift apart (see AGENT_NOTES.md "Reader+registrar pattern").
     """
-    payload, _check = load_validated_json(path, policy=policy)
+    payload, _spec, _check = load_and_register(
+        path, dep_key=dep_key, inputs=inputs, policy=policy,
+    )
     return payload
 
 
@@ -167,6 +230,8 @@ def plot_quality_vs_cost(
     output_path: Path,
     *,
     raw: dict | None = None,
+    ensembles: dict | None = None,
+    ensembles_path: Path | None = None,
     policy: str = "warn",
 ) -> Path:
     """Draw the cost-vs-quality plot from a batch_size_curve_rho.json cache.
@@ -181,10 +246,50 @@ def plot_quality_vs_cost(
     using ``policy``.  This avoids double-validation when the caller
     has already validated.
 
+    Ensemble-extras handling (split-file design, May 2026):
+
+    * Pre-Phase-6 caches stored ensembles inline under
+      ``raw["ensemble_combos"]``.  Post-split they live in a side-car
+      JSON written by :mod:`judge_ensemble_rho_curve`.
+    * ``ensembles`` -- pre-loaded dict (the side-car's unwrapped
+      ``result``).  Wins over the inline-fallback when both are present.
+    * ``ensembles_path`` -- path to load when ``ensembles`` is None and
+      the path exists; defaults to the side-car next to ``input_path``.
+
     Returns the output PNG path.
     """
+    # Build the provenance ``inputs`` list as we go: load_and_register
+    # handles read + register together when this function does the read,
+    # and we fall back to a bare current_file_input when the caller
+    # already loaded the data and only the path needs registering.
+    # Either way every cache that contributes to the output PNG ends up
+    # exactly once in ``inputs``.
+    inputs: list[InputSpec] = []
     if raw is None:
-        raw = _load_batch_size_json(input_path, policy=policy)
+        raw = _load_batch_size_json(
+            input_path, policy=policy,
+            inputs=inputs, dep_key="batch_size_curve_json",
+        )
+    else:
+        inputs.append(current_file_input(
+            dep_key="batch_size_curve_json", path=input_path))
+    # Resolve ensemble data: pre-loaded > side-car file > inline-legacy.
+    if ensembles is None:
+        ens_path = ensembles_path or _default_ensembles_path(input_path)
+        if Path(ens_path).exists():
+            ensembles, _spec, _check = load_and_register(
+                Path(ens_path), dep_key="ensembles_json",
+                inputs=inputs, policy=policy,
+            )
+            ensembles_path = Path(ens_path)
+        else:
+            # Older caches kept ensemble_combos inline; still honour them
+            # so historical batch_size_curve_rho.json files keep rendering.
+            ensembles = {"ensemble_combos": raw.get("ensemble_combos") or {}}
+            ensembles_path = None
+    elif ensembles_path is not None:
+        inputs.append(current_file_input(
+            dep_key="ensembles_json", path=ensembles_path))
     cost = raw["cost_per_axis_usd"]
     B_int = raw["B_integer"]
     # Prefer best-across-cells aggregation if per_axis is in the JSON
@@ -267,61 +372,115 @@ def plot_quality_vs_cost(
     # In ρ-space this looks slightly bowed because of the FuncScale, but
     # with set_yscale handling the transform we just plot in ρ values
     # corresponding to the linearly-interpolated quality values.
+    chord_slope: float | None = None
     if len(xs) >= 2:
-        slope = (qual[-1] - qual[0]) / (xs[-1] - xs[0])
+        chord_slope = (qual[-1] - qual[0]) / (xs[-1] - xs[0])
         # Sample the chord densely so it draws smoothly through the
         # nonlinear axis.
         import numpy as np
         x_chord = np.linspace(xs[0], xs[-1], 50)
-        q_chord = qual[0] + slope * (x_chord - xs[0])
+        q_chord = qual[0] + chord_slope * (x_chord - xs[0])
         r_chord = 1.0 - 1.0 / q_chord
         ax.plot(x_chord, r_chord,
-                 linestyle=":", color="#888888", linewidth=1.2,
-                 label=f"linear endpoints (slope ≈ {slope:.3f} "
-                       f"quality-units / $)")
+                 linestyle=":", color="#888888", linewidth=1.2)
 
-    # ---- Multi-judge cost extras ----
-    # Anchor at B=10 (canonical operating point), draw a separate
-    # connecting line to each extra-judge option.  ρ stays at B=10's ρ
-    # for now -- placeholder until ensemble ρ is measured.
+    # ---- 4-Pareto-frontier overlay (per-axis-set ensemble rays) ------
+    # Each axis set forms its own mini Pareto front.  The set's anchor
+    # is at (B=10 GPT cost, set's GPT-only B=10 mean ρ); colored rays
+    # extend to (anchor_x + Anthropic-judge cost, set's ensemble ρ for
+    # that combo).  Set 1 reuses the existing big black square as its
+    # anchor; sets 2..4 get hollow shape overlays (see SET_MARKERS).
+    # Colors match across sets per ensemble combo, so visually a fan of
+    # same-coloured rays from different anchors lets you read off
+    # "is this combo's slope consistent across the full axis sample?".
     b10_idx = Bs.index(10) if 10 in Bs else None
-    ensemble_combos = raw.get("ensemble_combos") or {}
-    if b10_idx is not None and EXTRA_POINTS:
+    ensemble_combos = ensembles.get("ensemble_combos") or {}
+    gpt_only_per_set = (
+        (ensembles.get("gpt_only_b10_baseline") or {}).get("per_set") or []
+    )
+    # Track every per-set ρ that lands on the plot so the y-range pad
+    # downstream covers all of them, not just set 1.
+    per_set_rhos_to_plot: list[float] = []
+    if b10_idx is not None and EXTRA_POINTS and gpt_only_per_set:
         anchor_x = xs[b10_idx]
-        anchor_y = rhos[b10_idx]
+        # Index ensemble per_set entries by set_id for O(1) lookup.
+        combo_per_set: dict[str, dict[str, float]] = {}
         for ep in EXTRA_POINTS:
-            label = ep["label"]
-            extra_cost = ep["extra_cost"]
-            color = ep["color"]
-            dy = ep["dy_pt"]
-            ensemble = ensemble_combos.get(ep["ensemble_key"], {})
-            ens_rho = ensemble.get("mean_across_axes_best_cell")
-            y_extra = ens_rho if ens_rho is not None else anchor_y
-            x_extra = anchor_x + extra_cost
-            ax.plot([anchor_x, x_extra], [anchor_y, y_extra],
-                     marker="D", markersize=10, linewidth=1.6,
-                     color=color, alpha=0.9, zorder=4,
-                     markerfacecolor=color,
-                     markeredgecolor="black", markeredgewidth=0.5,
-                     label=f"{label} (+${extra_cost:.2f}, ρ={y_extra:+.4f})")
-            label_text = (
-                f"{label}\nρ={y_extra:+.4f}\n${x_extra:.2f}/axis"
-                if ens_rho is not None
-                else f"{label}\nρ=B10 (placeholder)\n${x_extra:.2f}/axis"
+            entries = (
+                ensemble_combos.get(ep["ensemble_key"], {}).get("per_set") or []
             )
-            ax.annotate(
-                label_text,
-                xy=(x_extra, y_extra),
-                xytext=(0, dy), textcoords="offset points",
-                ha="center", va=("bottom" if dy > 0 else "top"),
-                fontsize=9, color=color,
-                bbox=dict(boxstyle="round,pad=0.3",
-                           facecolor="#ffffff", edgecolor=color,
-                           alpha=0.92),
-                arrowprops=dict(arrowstyle="-",
-                                 connectionstyle="arc3,rad=0",
-                                 color=color, lw=0.6),
-            )
+            combo_per_set[ep["ensemble_key"]] = {
+                e["set_id"]: float(e["rho_mean_best_cell"]) for e in entries
+            }
+        for set_entry in gpt_only_per_set:
+            sid = set_entry["set_id"]
+            anchor_y = float(set_entry["rho_mean_best_cell"])
+            n_axes_set = int(set_entry.get("n_axes", 0))
+            mark = SET_MARKERS.get(sid, SET_MARKERS["set_2"])
+            per_set_rhos_to_plot.append(anchor_y)
+            # Draw set anchor (sets 2..4; set 1 already has the B-curve square).
+            if mark["is_overlay"]:
+                ax.plot([anchor_x], [anchor_y],
+                        marker=mark["marker"],
+                        markersize=mark["size"],
+                        markerfacecolor=mark["facecolor"],
+                        markeredgecolor=mark["edgecolor"],
+                        markeredgewidth=mark["edgewidth"],
+                        linestyle="none", zorder=6)
+                ax.annotate(
+                    f"{mark['short_label']}\nρ={anchor_y:+.4f}",
+                    xy=(anchor_x, anchor_y),
+                    xytext=(-8, 0), textcoords="offset points",
+                    ha="right", va="center", fontsize=8.5,
+                    color="#222222",
+                    bbox=dict(boxstyle="round,pad=0.25",
+                              facecolor="#ffffff", edgecolor="#888888",
+                              alpha=0.85),
+                )
+            # Draw colored rays to each ensemble combo that has data
+            # for this set.
+            for ep in EXTRA_POINTS:
+                ens_rho = combo_per_set[ep["ensemble_key"]].get(sid)
+                if ens_rho is None:
+                    continue   # combo has no data for this set
+                x_extra = anchor_x + ep["extra_cost"]
+                ax.plot([anchor_x, x_extra], [anchor_y, ens_rho],
+                        linewidth=1.4,
+                        color=ep["color"], alpha=0.85, zorder=4)
+                ax.plot([x_extra], [ens_rho],
+                        marker=mark["marker"],
+                        markersize=mark["size"],
+                        markerfacecolor=ep["color"],
+                        markeredgecolor="black",
+                        markeredgewidth=0.6,
+                        linestyle="none", zorder=5)
+                per_set_rhos_to_plot.append(ens_rho)
+            # Annotate set 1's three endpoints (the canonical reference
+            # picture); for sets 2..4 the legend + anchor label carries
+            # the identification, so we skip per-endpoint boxes to avoid
+            # clutter.
+            if sid == "set_1_initial":
+                for ep in EXTRA_POINTS:
+                    ens_rho = combo_per_set[ep["ensemble_key"]].get(sid)
+                    if ens_rho is None:
+                        continue
+                    x_extra = anchor_x + ep["extra_cost"]
+                    ax.annotate(
+                        f"{ep['label']}\nρ={ens_rho:+.4f}\n"
+                        f"${x_extra:.2f}/axis",
+                        xy=(x_extra, ens_rho),
+                        xytext=(0, ep["dy_pt"]),
+                        textcoords="offset points",
+                        ha="center",
+                        va=("bottom" if ep["dy_pt"] > 0 else "top"),
+                        fontsize=8.5, color=ep["color"],
+                        bbox=dict(boxstyle="round,pad=0.3",
+                                  facecolor="#ffffff",
+                                  edgecolor=ep["color"], alpha=0.92),
+                        arrowprops=dict(arrowstyle="-",
+                                        connectionstyle="arc3,rad=0",
+                                        color=ep["color"], lw=0.6),
+                    )
 
     ax.set_xlabel("Cost per axis (USD, responses-mode; gpt-4.1-mini base + "
                   "optional second judge)")
@@ -349,20 +508,17 @@ def plot_quality_vs_cost(
     # expanded near ρ=1 because the FuncScale stretches that region;
     # quality-space padding is roughly uniform on screen.
     #
-    # Range covers BOTH the B-curve and the ensemble-extra ρ values so
-    # all points are visible regardless of where the extras land.
+    # Range covers the B-curve AND every per-set anchor + per-set
+    # ensemble endpoint so all 4 mini Pareto fronts are visible
+    # regardless of where the extras land.  ``per_set_rhos_to_plot``
+    # was populated by the per-set rendering loop above.
     import numpy as np
-    rhos_for_range = list(rhos)
-    if b10_idx is not None and EXTRA_POINTS:
-        for ep in EXTRA_POINTS:
-            ens = ensemble_combos.get(ep["ensemble_key"], {})
-            r = ens.get("mean_across_axes_best_cell")
-            rhos_for_range.append(r if r is not None else rhos[b10_idx])
+    rhos_for_range = list(rhos) + list(per_set_rhos_to_plot)
     qual_for_range = [1.0 / (1.0 - r) for r in rhos_for_range]
     q_min, q_max = min(qual_for_range), max(qual_for_range)
     q_span = q_max - q_min
-    q_lo = q_min - q_span * 0.3
-    q_hi = q_max + q_span * 0.3
+    q_lo = q_min - q_span * 0.20
+    q_hi = q_max + q_span * 0.30
     rho_lo = max(0.0, 1.0 - 1.0 / q_lo)
     rho_hi = min(0.9999, 1.0 - 1.0 / q_hi)
     ax.set_ylim(rho_lo, rho_hi)
@@ -390,20 +546,76 @@ def plot_quality_vs_cost(
     ax.set_yticks(yticks)
     ax.set_yticklabels([fmt.format(t) for t in yticks])
 
-    ax.legend(loc="upper left", fontsize=9, framealpha=0.9)
+    # Two-block legend: combos (colours) on the left, axis sets
+    # (marker shapes) on the right of the upper row.  Built from
+    # proxy artists since the actual rendering paints the same colour
+    # across multiple sets and the same shape across multiple combos.
+    from matplotlib.lines import Line2D as _L2D
+    combo_handles = [
+        _L2D([], [], color=ep["color"], lw=2.0,
+             marker="s", markersize=8,
+             markerfacecolor=ep["color"], markeredgecolor="black",
+             label=f"{ep['label']} (+${ep['extra_cost']:.2f})")
+        for ep in EXTRA_POINTS
+    ]
+    # Linear-endpoints reference line proxy (the ":" line drawn earlier).
+    if chord_slope is not None:
+        combo_handles.append(
+            _L2D([], [], color="#888888", lw=1.2, ls=":",
+                 label=f"set-1 B-curve chord (slope ≈ "
+                       f"{chord_slope:.3f} qual/$)")
+        )
+    set_handles = []
+    set_labels_axes = {
+        "set_1_initial": "set 1 (truthful, progressive, improvisational)",
+        "set_2": "set 2 (concise, ecocentric, egalitarian)",
+        "set_3": "set 3 (guileless, harmless, helpful)",
+        "set_4": "set 4 (honest, relativist, systems_thinker)",
+    }
+    for set_entry in gpt_only_per_set:
+        sid = set_entry["set_id"]
+        mark = SET_MARKERS.get(sid, SET_MARKERS["set_2"])
+        set_handles.append(
+            _L2D([], [], linestyle="none",
+                 marker=mark["marker"], markersize=mark["size"],
+                 markerfacecolor=mark["facecolor"],
+                 markeredgecolor=mark["edgecolor"],
+                 markeredgewidth=mark["edgewidth"],
+                 label=set_labels_axes.get(sid, sid))
+        )
+    leg_combos = ax.legend(handles=combo_handles,
+                           loc="upper left", fontsize=8.5,
+                           framealpha=0.9, title="ensemble combo",
+                           title_fontsize=9)
+    ax.add_artist(leg_combos)
+    ax.legend(handles=set_handles,
+              loc="lower right", fontsize=8.5, framealpha=0.9,
+              title="axis set (3 axes each)", title_fontsize=9)
 
-    title = ("Responses-mode judging: quality vs cost "
-             "(GPT-4.1-mini batch sweep + ensemble extras at B=10)")
-    spec = (f"quality $= 1/(1-\\rho)$.  ρ = mean over {n_axes} axes of "
-            f"max ρ across {n_configs} (slot, layer) cells (best-cell-"
-            "per-axis, axis-mean).  "
-            "Black B=5/7/10/15 markers = GPT-4.1-mini alone (cost: "
-            "README per-batch model, $0.40/$1.60 per 1M).  "
-            "Coloured ◇ = GPT B=10 + a second judge on the same items "
-            "(Haiku $1/$5, Sonnet $3/$15; q9 = 1/3 question subsample); "
-            "0.625*gpt + 0.375*anthropic score combine (near the "
-            "parabolic-peak weight from the response-mode weight sweeps); "
-            "ρ from judge_ensemble_rho_curve.py.")
+    n_sets = len(gpt_only_per_set)
+    n_axes_total = sum(int(s.get("n_axes", 0)) for s in gpt_only_per_set)
+    title = ("Responses-mode judging: quality vs cost — "
+             f"{n_sets} per-axis-set Pareto fronts at B=10")
+    # Pre-broken into ≤~110-char lines so matplotlib doesn't stretch
+    # the figure horizontally trying to fit a single long line.
+    spec = [
+        (f"quality $= 1/(1-\\rho)$.  ρ = best-cell-per-axis, axis-mean "
+         f"within each set ({n_axes_total} axes total, split into "
+         f"{n_sets} alphabetical groups of 3)."),
+        ("Black B=5/7/10/15 markers = GPT-4.1-mini alone, set 1 only "
+         "(README cost model, $0.40/$1.60 per 1M)."),
+        ("Coloured rays from each set's anchor = GPT B=10 + a 2nd judge "
+         "on the same items (Haiku $1/$5, Sonnet $3/$15; q9 = 1/3 "
+         "question subsample)."),
+        ("Score combine: 0.6·gpt + 0.4·anthropic (rounded Haiku-q9 "
+         "parabolic peak from the 12-axis response-mode weight sweep)."),
+        ("Haiku-q9 is the Pareto winner; Sonnet-q9 shown at the same "
+         "weight despite its own peak being higher, since it is "
+         "dominated on cost-per-quality."),
+        ("Set-2..4 anchor labels show per-set ρ; endpoint marker shape "
+         "encodes which set a ray belongs to.  ρ from "
+         "judge_ensemble_rho_curve.py."),
+    ]
     # line_height bumped from the helper default (0.022) -- on this 6"-tall
     # figure the bold 14pt headline already occupies ~0.024 fig-fraction,
     # so the default puts the first spec line under the headline's
@@ -412,11 +624,11 @@ def plot_quality_vs_cost(
     fig.tight_layout(rect=(0, 0, 1, top_rect))
 
     src_text = Path(__file__).read_text(encoding="utf-8")
-    inputs: list[InputSpec] = [
-        current_file_input(
-            dep_key="batch_size_curve_json",
-            path=input_path),
-    ]
+    # ``inputs`` was populated above (load_and_register on internal
+    # loads, current_file_input on caller-supplied dicts).  The audit
+    # tools' transitive propagation will then mark this PNG stale if
+    # any per-axis judge cache feeding judge_ensemble_rho_curve.py
+    # drifts via the ``ensembles_json`` dep.
     fig.savefig(output_path, dpi=150, bbox_inches="tight",
                  metadata=png_metadata(title=title, source_text=src_text,
                                         inputs=inputs))
@@ -476,6 +688,12 @@ def parse_args() -> argparse.Namespace:
                         f"(default: {DEFAULT_INPUT}).")
     p.add_argument("--output", type=str, default=DEFAULT_OUTPUT,
                    help=f"Output PNG path (default: {DEFAULT_OUTPUT}).")
+    p.add_argument("--ensembles", type=str, default=None,
+                   help="Side-car JSON with ensemble ρ values produced by "
+                        "judge_ensemble_rho_curve.py.  Default: "
+                        "``<input_stem>_ensembles<input_suffix>`` next to "
+                        "--input; if absent, the plot omits ensemble "
+                        "extras (or honours legacy inline ones).")
     p.add_argument("--cache-policy", choices=CACHE_POLICIES, default="warn",
                    help="How to react to drift in the batch-size cache's "
                         "recorded provenance: strict / warn (default) / "
@@ -489,8 +707,26 @@ def main() -> int:
     out = Path(args.output)
     out.parent.mkdir(parents=True, exist_ok=True)
     # Single validation pass; both downstream consumers reuse `raw`.
+    # plot_quality_vs_cost will register its own inputs internally
+    # via load_and_register/current_file_input, so we don't pass an
+    # accumulator here -- main only needs the dicts.
     raw = _load_batch_size_json(inp, policy=args.cache_policy)
-    plot_quality_vs_cost(input_path=inp, output_path=out, raw=raw)
+    # Resolve and (if possible) pre-load the side-car ensembles JSON.
+    ens_path = Path(args.ensembles) if args.ensembles else _default_ensembles_path(inp)
+    ensembles_dict: dict | None = None
+    ensembles_path: Path | None = None
+    if ens_path.exists():
+        # Load via load_and_register too, but discard its InputSpec
+        # (plot_quality_vs_cost re-registers under the canonical
+        # ``ensembles_json`` dep_key from the caller-pre-loaded path).
+        ensembles_dict, _spec, _check = load_and_register(
+            ens_path, dep_key="ensembles_json",
+            inputs=None, policy=args.cache_policy,
+        )
+        ensembles_path = ens_path
+    plot_quality_vs_cost(input_path=inp, output_path=out, raw=raw,
+                         ensembles=ensembles_dict,
+                         ensembles_path=ensembles_path)
     print(f"Wrote {out}")
     print_marginal_table(inp, raw=raw)
     return 0

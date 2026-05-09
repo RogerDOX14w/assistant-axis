@@ -1,6 +1,32 @@
 #!/usr/bin/env python3
 """Adaptive (L, K, M) sweep for PC round-trip ρ.
 
+DEPRECATED (May 2026) — see deprecation note below.  The (L, K, M, cell)
+optimization machinery in this file is retained so the legacy plots can
+still be regenerated, but it is no longer the headline analysis.  The
+default ``plot_direction_cosines.py`` view skips this sweep entirely
+(canonical-only: principled α-coefficient transport at L=K=0, evaluated
+at the canonical cell and the 5 other cells, against shuffled-judge nulls
+also at L=K=0).
+
+Why deprecated
+--------------
+At high N the (L, K, cell) search reliably surfaces correlations that
+match the LLM judge description but are NOT actually aligned with the
+original canonical Nth PC direction.  Concretely: increasing K mixes
+into the transported direction the structure of the first K target-cell
+PCs, and once that mixture matches some sample-noise ranking that
+loosely resembles the description, ρ goes up.  The peak ρ tells us
+something about the description × low-rank target structure, not about
+faithful round-trip recovery of the canonical PC.  Holding (L, K, cell)
+rigidly fixed at the canonical point is the only honest read.
+
+This file's primitives (``compute_M_done``, ``compute_pc_directions``,
+``rho_for_direction``, ``load_combined_scores``, etc.) are still used
+by the canonical-only plot path and are NOT deprecated.  Only the
+``stage1_*`` / ``stage2_*`` (L, K, M)-search functions and the CLI
+sweep-orchestration logic are deprecated.
+
 Reads the cached judge scores produced by ``launch_judge_runs.py`` (which
 runs the auto-described axis through ``axis_judge_correlation.py``), and
 for each (PC, style) cell finds the best round-trip Spearman ρ across:
@@ -59,6 +85,10 @@ from scipy.stats import spearmanr
 from assistant_axis.judge_score_combine import (
     DI_WEIGHT_CHOICES, combine_desc_inst_two_judges,
 )
+from assistant_axis.plot_metadata import json_metadata
+from assistant_axis.provenance import (
+    InputSpec, current_data_subtree_input, load_and_register,
+)
 from results_analysis.axis_judge_correlation import _load_vector_file
 from results_analysis.canonical_angles.data import (
     DEFAULT_DATA_DIR,
@@ -88,10 +118,13 @@ DEFAULT_CONFIGS: list[tuple[int, int]] = [
 # winners spread across the full range with no clear preference.  Both grids
 # include the no-shear/no-whiten baselines (L=0, K=0) — empirically those
 # are the most common winners for fixed_principled.
-DEFAULT_L_VALUES: list[int] = [0, 1, 2, 3, 4, 6, 8, 12, 16]
-DEFAULT_K_COARSE: list[int] = [0, 1, 2, 3, 4, 6, 8, 12, 16, 24, 32]
+DEFAULT_L_VALUES: list[int] = [0, 1, 2, 4]
+DEFAULT_K_COARSE: list[int] = [0, 1, 2, 4]
 DEFAULT_M_VALUES: list[Optional[int]] = [64, 128, 256, 512, None]
-DEFAULT_PCS: list[int] = [1, 2, 3, 4, 6, 8, 12, 16, 24, 32, 48, 64, 96, 128, 192, 256, 384, 512]
+DEFAULT_PCS: list[int] = [
+    1, 2, 3, 4, 6, 8, 12, 16, 20, 24, 28, 32, 36, 40, 48, 56,
+    64, 80, 96, 128, 192, 256, 384, 512,
+]
 DEFAULT_STYLES: list[str] = ["glossary", "inline"]
 
 K_REFINE_MAX_ITER = 5
@@ -142,14 +175,61 @@ def setup_at(data_dir: Path, slot: int, layer: int):
     return names, M_raw, A_g, A_n, pool
 
 
-def load_combined_scores(cell: Path) -> dict[str, float]:
+def _load_score_json(
+    path: Path,
+    *,
+    dep_key: str | None = None,
+    inputs: list[InputSpec] | None = None,
+) -> dict[str, float]:
+    """Load a judge-score JSON, transparently unwrapping the
+    ``{"_provenance": ..., "result": ...}`` envelope written by recent
+    ``axis_judge_correlation.py`` runs.  Older score files (pre-envelope)
+    are bare ``{name: score}`` dicts and are returned unchanged.
+
+    When an ``inputs`` accumulator is supplied, the file is also
+    registered as a dependency under ``dep_key`` (defaulting to the
+    file's basename).  Threads through ``load_and_register`` so the
+    read and the InputSpec record are built together.
+    """
+    data, _spec, _check = load_and_register(
+        path,
+        dep_key=dep_key or f"score_json:{path.name}",
+        inputs=inputs,
+        policy="warn",
+    )
+    if not isinstance(data, dict):
+        raise ValueError(f"unexpected score JSON shape at {path}: {type(data).__name__}")
+    return data
+
+
+def load_combined_scores(
+    cell: Path,
+    *,
+    inputs: list[InputSpec] | None = None,
+    cell_id: str | None = None,
+) -> dict[str, float]:
     """Combine GPT + Sonnet × descriptions + instructions scores using the
     project default ``inst_tie`` weights (≈ equal weight, fall back to
-    instructions on ties)."""
-    g_d = json.load(open(cell / "gpt"    / "scores_descriptions.json"))
-    g_i = json.load(open(cell / "gpt"    / "scores_instructions.json"))
-    s_d = json.load(open(cell / "sonnet" / "scores_descriptions.json"))
-    s_i = json.load(open(cell / "sonnet" / "scores_instructions.json"))
+    instructions on ties).
+
+    When ``inputs`` is supplied, each of the four score caches consumed
+    is registered as a dependency under
+    ``judge_<cell_id>_<mode>_<judge>``; ``cell_id`` defaults to the
+    cell directory's basename.
+    """
+    label = cell_id or cell.name
+    g_d = _load_score_json(
+        cell / "gpt" / "scores_descriptions.json",
+        dep_key=f"judge_{label}_descriptions_gpt", inputs=inputs)
+    g_i = _load_score_json(
+        cell / "gpt" / "scores_instructions.json",
+        dep_key=f"judge_{label}_instructions_gpt", inputs=inputs)
+    s_d = _load_score_json(
+        cell / "sonnet" / "scores_descriptions.json",
+        dep_key=f"judge_{label}_descriptions_sonnet", inputs=inputs)
+    s_i = _load_score_json(
+        cell / "sonnet" / "scores_instructions.json",
+        dep_key=f"judge_{label}_instructions_sonnet", inputs=inputs)
     return combine_desc_inst_two_judges(g_d, g_i, s_d, s_i,
                                          weights=DI_WEIGHT_CHOICES["inst_tie"])
 
@@ -243,6 +323,8 @@ def rho_for_direction(M_done, names, direction, scores) -> Optional[float]:
 
 def stage1_m_sweep(scores_by_cell, *, data_dir, configs, l_values, k_coarse,
                     m_values, pcs, styles):
+    """DEPRECATED (May 2026): part of the (L, K, M, cell) optimization
+    sweep.  See file-level docstring for context."""
     print(f"\n{'='*92}")
     print("STAGE 1: M-truncation sweep at coarse (L, K) grid")
     print(f"{'='*92}")
@@ -310,6 +392,8 @@ def stage1_m_sweep(scores_by_cell, *, data_dir, configs, l_values, k_coarse,
 
 def stage2_k_refinement(scores_by_cell, *, data_dir, configs, l_values,
                          k_coarse, pcs, styles):
+    """DEPRECATED (May 2026): part of the (L, K, cell) optimization
+    sweep.  See file-level docstring for context."""
     print(f"\n{'='*92}")
     print("STAGE 2: iterative K refinement at M=None")
     print(f"{'='*92}")
@@ -434,7 +518,39 @@ def stage2_k_refinement(scores_by_cell, *, data_dir, configs, l_values,
 # Output / report
 # ---------------------------------------------------------------------------
 
-def report(stage1, stage2, *, pcs, styles, cache_path: Path):
+def _build_subtree_inputs(*, data_dir: Path) -> list[InputSpec]:
+    """Up-front subtree InputSpecs for klm_sweep / permutation_null.
+
+    Per-(pc, style, judge, mode) judge-score cache InputSpecs are
+    appended at read time inside ``load_combined_scores`` →
+    ``load_and_register`` so the recorded provenance is built in
+    lockstep with the actual reads (no ``_build_inputs`` post-pass
+    that could drift away from what was consumed).
+    """
+    return [
+        current_data_subtree_input(
+            data_dir, "traits/vectors", dep_key="traits_vectors"),
+        current_data_subtree_input(
+            data_dir, "roles/vectors", dep_key="roles_vectors"),
+        current_data_subtree_input(
+            data_dir, "combinations/vectors/derived/marginals/r_goal",
+            dep_key="combos_r_goal"),
+        current_data_subtree_input(
+            data_dir, "combinations/vectors/derived/marginals/r_nogoal",
+            dep_key="combos_r_nogoal"),
+        current_data_subtree_input(
+            data_dir, "combinations/vectors/derived/marginals/t_goal",
+            dep_key="combos_t_goal"),
+        current_data_subtree_input(
+            data_dir, "combinations/vectors/derived/marginals/t_nogoal",
+            dep_key="combos_t_nogoal"),
+    ]
+
+
+def report(stage1, stage2, *, pcs, styles, cache_path: Path,
+           inputs: list[InputSpec] | None = None,
+           data_dir: Path | None = None,
+           sweep_dir: Path | None = None):
     print(f"\n\n{'='*92}")
     print("SUMMARY: best round-trip ρ per (PC, style) — stage 1 (with M) vs stage 2 (refined K, M=None)")
     print(f"{'='*92}")
@@ -489,7 +605,17 @@ def report(stage1, stage2, *, pcs, styles, cache_path: Path):
         } for pc in pcs for s in styles if (pc, s) in stage2},
     }
     cache_path.parent.mkdir(parents=True, exist_ok=True)
-    cache_path.write_text(json.dumps(serialisable, indent=2))
+    if inputs is None:
+        # Backwards-compat: callers that don't pass inputs (none in tree)
+        # still get a bare-JSON write so behaviour doesn't regress.
+        cache_path.write_text(json.dumps(serialisable, indent=2))
+    else:
+        envelope = json_metadata(
+            serialisable,
+            inputs=inputs,
+            title="pc_round_trip_klm_sweep",
+        )
+        cache_path.write_text(json.dumps(envelope, indent=2))
     print(f"\nWrote {cache_path}")
 
 
@@ -570,11 +696,16 @@ def main() -> int:
     m_values = _parse_m_values(args.m_values)
 
     print(f"Loading judge scores from {sweep_dir} ...")
+    # Provenance accumulator: subtree deps up front, per-cell judge
+    # cache deps appended at read time inside load_combined_scores.
+    inputs: list[InputSpec] = _build_subtree_inputs(data_dir=data_dir)
     scores_by_cell = {}
     for pc in pcs:
         for style in styles:
+            cell_id = f"pc{pc:03d}_{style}"
             scores_by_cell[(pc, style)] = load_combined_scores(
-                sweep_dir / f"pc{pc:03d}_{style}"
+                sweep_dir / cell_id,
+                inputs=inputs, cell_id=cell_id,
             )
 
     t0 = time.time()
@@ -591,7 +722,10 @@ def main() -> int:
     )
     print(f"\nStage 2 elapsed: {time.time() - t0:.1f}s")
 
-    report(stage1, stage2, pcs=pcs, styles=styles, cache_path=cache_path)
+    # ``inputs`` was populated above (subtree deps + per-cell judge
+    # cache deps via load_and_register inside load_combined_scores).
+    report(stage1, stage2, pcs=pcs, styles=styles, cache_path=cache_path,
+           inputs=inputs, data_dir=data_dir, sweep_dir=sweep_dir)
     return 0
 
 

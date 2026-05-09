@@ -14,44 +14,43 @@ sources have finite peaks.
 
 Inputs (read from ``--experiment_dir``):
 
-- ``whitening_k_sweep_slot{N}.json`` (or generic ``whitening_k_sweep.json``)
-  — produced by ``whitening_k_sweep.py`` with the **same** ``--pairs`` list.
-- ``pair_list_33.json`` (default ``--pairs``) — axes with desc+instr for all,
-  GPT responses only for a subset (ρ for ``responses`` is then NaN on many).
+- ``whitening_k_sweep_<cohort>_slot{N}.json`` -- produced by
+  ``whitening_k_sweep.py`` with the **same** ``--pairs`` list.  The
+  ``<cohort>`` token comes from the pair-list filename
+  (``cohort_from_pairs``) and is shared across both scripts so they
+  always agree on input/output names.
+- ``pair_list_di.json`` (default ``--pairs``) -- desc+instr cohort:
+  every axis with desc+inst judging from both GPT and Sonnet.  Many
+  of those axes do not have GPT response scores, so ρ for ``responses``
+  is NaN on those panels.  Use ``--pairs pair_list_responses.json`` for
+  the smaller cohort that has response judging too.
 
 Outputs (written to ``--experiment_dir``):
 
-- ``whitening_k_peak_fit[_slot{N}].json`` — per-curve fit records (R²,
-  fitted peak K, y-hat).
-- ``rho_vs_K_parabolic_fits[_slot{N}].png`` — one panel per axis via
-  ``--pairs``.
+- ``whitening_k_peak_fit_<cohort>_slot{N}.json`` -- per-curve fit
+  records (R², fitted peak K, y-hat).
+- ``rho_vs_K_parabolic_fits_<cohort>_slot{N}.png`` -- one panel per
+  axis via ``--pairs``.
 
 Examples
 --------
 
 ::
 
-    # Refresh K-sweeps for three token slots (same 33-axis pair list), then fit:
-    uv run python results_analysis/whitening_k_sweep.py --pairs pair_list_33.json \\
-        --slot 3 --sweep whitening_k_sweep_slot3.json \\
-        --plot rho_vs_whitening_K_slot3.png
-    uv run python results_analysis/whitening_k_sweep.py --pairs pair_list_33.json \\
-        --slot 6 --sweep whitening_k_sweep_slot6.json \\
-        --plot rho_vs_whitening_K_slot6.png
-    uv run python results_analysis/whitening_k_sweep.py --pairs pair_list_33.json \\
-        --slot 7 --sweep whitening_k_sweep_slot7.json \\
-        --plot rho_vs_whitening_K_slot7.png
+    # Default cohort (pair_list_di.json) at three token slots:
+    uv run python results_analysis/whitening_k_sweep.py --slot 3
+    uv run python results_analysis/whitening_k_sweep.py --slot 6
+    uv run python results_analysis/whitening_k_sweep.py --slot 7
 
     uv run python results_analysis/whitening_k_peak_fit.py --slot 3
     uv run python results_analysis/whitening_k_peak_fit.py --slot 6
     uv run python results_analysis/whitening_k_peak_fit.py --slot 7
 
-    # Historical 12-axis cohort: pass explicit paths (omit --slot auto-names)
+    # Responses cohort (smaller mosaic; auto-names use cohort=responses):
+    uv run python results_analysis/whitening_k_sweep.py \\
+        --pairs pair_list_responses.json --slot 6
     uv run python results_analysis/whitening_k_peak_fit.py \\
-        --pairs pair_list_12.json \\
-        --sweep whitening_k_sweep.json \\
-        --plot rho_vs_K_parabolic_fits.png \\
-        --fit_json whitening_k_peak_fit.json
+        --pairs pair_list_responses.json --slot 6
 """
 from __future__ import annotations
 
@@ -65,12 +64,16 @@ import matplotlib.pyplot as plt
 import numpy as np
 from scipy.stats import pearsonr, spearmanr
 
-from assistant_axis import json_metadata, png_metadata, suptitle_with_specs
+from assistant_axis import (
+    cohort_from_pairs,
+    json_metadata,
+    png_metadata,
+    suptitle_with_specs,
+)
 from assistant_axis.provenance import (
     CACHE_POLICIES,
     InputSpec,
-    current_file_input,
-    load_validated_json,
+    load_and_register,
 )
 
 DEFAULT_EXPERIMENT_DIR = Path(__file__).resolve().parent.parent / (
@@ -83,10 +86,14 @@ DEFAULT_EXPERIMENT_DIR = Path(__file__).resolve().parent.parent / (
 # K~32 the curves flatten and a parabola is a poor match.
 FIT_K = [0, 1, 2, 3, 4, 6, 8, 12, 16, 24, 32]
 
-DEFAULT_PAIR_LIST = "pair_list_33.json"
-DEFAULT_SWEEP = "whitening_k_sweep.json"
-DEFAULT_PLOT = "rho_vs_K_parabolic_fits.png"
-DEFAULT_FIT_JSON = "whitening_k_peak_fit.json"
+DEFAULT_PAIR_LIST = "pair_list_di.json"
+# Sweep / plot / fit_json defaults are derived from --pairs and --slot in
+# ``_resolve_io_names`` (see below) using ``cohort_from_pairs(pairs)``.
+# The constants below are kept as sentinels so the resolver can detect
+# "user did not pass an explicit override" via the CLI parser default.
+DEFAULT_SWEEP = "<auto: whitening_k_sweep_<cohort>_slot{N}.json>"
+DEFAULT_PLOT = "<auto: rho_vs_K_parabolic_fits_<cohort>_slot{N}.png>"
+DEFAULT_FIT_JSON = "<auto: whitening_k_peak_fit_<cohort>_slot{N}.json>"
 
 # Lay out many axes in a moderately wide grid (33 → 6×6 with 3 blanks).
 GRID_N_COLS = 6
@@ -121,16 +128,27 @@ def fit_parabola(xs, ys):
 
 
 def _resolve_io_names(args: argparse.Namespace) -> tuple[str, str, str]:
-    sweep_f = args.sweep
-    plot_f = args.plot
-    fit_f = args.fit_json
-    if args.slot is not None:
-        if sweep_f == DEFAULT_SWEEP:
-            sweep_f = f"whitening_k_sweep_slot{args.slot}.json"
-        if plot_f == DEFAULT_PLOT:
-            plot_f = f"rho_vs_K_parabolic_fits_slot{args.slot}.png"
-        if fit_f == DEFAULT_FIT_JSON:
-            fit_f = f"whitening_k_peak_fit_slot{args.slot}.json"
+    """Auto-derive sweep/plot/fit_json filenames from --pairs and --slot
+    when the user hasn't explicitly overridden them.
+
+    Output names embed the cohort token (extracted from --pairs via
+    ``cohort_from_pairs``) and the slot, e.g.
+    ``whitening_k_sweep_di_slot6.json`` /
+    ``whitening_k_sweep_responses_slot6.json``.  This avoids the silent
+    cross-cohort collisions we used to get when the auto-derived name
+    encoded slot only.  Slot defaults to 6 when --slot is not passed.
+    """
+    cohort = cohort_from_pairs(args.pairs)
+    slot = args.slot if args.slot is not None else 6
+    sweep_f = (args.sweep
+               if args.sweep != DEFAULT_SWEEP
+               else f"whitening_k_sweep_{cohort}_slot{slot}.json")
+    plot_f = (args.plot
+              if args.plot != DEFAULT_PLOT
+              else f"rho_vs_K_parabolic_fits_{cohort}_slot{slot}.png")
+    fit_f = (args.fit_json
+             if args.fit_json != DEFAULT_FIT_JSON
+             else f"whitening_k_peak_fit_{cohort}_slot{slot}.json")
     return sweep_f, plot_f, fit_f
 
 
@@ -166,15 +184,31 @@ def main() -> int:
     experiment_dir = Path(args.experiment_dir).resolve()
     sweep_f, plot_f, fit_f = _resolve_io_names(args)
 
-    pairs = json.load(open(experiment_dir / args.pairs))
+    # ``inputs`` is built up via load_and_register: each cache read
+    # both unwraps the envelope (if present), validates its recorded
+    # provenance under ``--cache-policy``, AND appends an InputSpec to
+    # this list.  Single call site means we can't accidentally read a
+    # cache without registering it (the failure mode that left
+    # gpt_anthropic_response_weight_sweep.py without a provenance
+    # envelope at all -- see AGENT_NOTES.md "Reader+registrar pattern").
+    inputs: list[InputSpec] = []
+
+    pairs, _spec_pairs, _check_pairs = load_and_register(
+        experiment_dir / args.pairs,
+        dep_key="pairs_json",
+        inputs=inputs,
+        policy=args.cache_policy,
+    )
     pair_keys_ordered = [(it["pos"], it["neg"]) for it in pairs]
 
-    # Validate sweep_json's recorded provenance against current state
-    # under the user-selected policy.  Legacy (bare-list) sweep files
-    # are detected by the absence of an envelope and pass through
-    # unvalidated (returns check=None).
-    records, _check = load_validated_json(
-        experiment_dir / sweep_f, policy=args.cache_policy)
+    # Legacy (bare-list) sweep files are detected by the absence of an
+    # envelope and pass through unvalidated (returns check=None).
+    records, _spec_sweep, _check_sweep = load_and_register(
+        experiment_dir / sweep_f,
+        dep_key="sweep_json",
+        inputs=inputs,
+        policy=args.cache_policy,
+    )
     curves: dict[tuple[str, str], dict] = {}
     for r in records:
         curves.setdefault((r["pos"], r["neg"]), {}).setdefault(
@@ -267,19 +301,12 @@ def main() -> int:
             for (k1, k2), d, r in triples:
                 print(f"    {k1+' vs '+k2:33s}  {d:>14.2f}   {r:>14.2f}")
 
-    # --- Provenance inputs (used by both JSON + PNG writes) ---
-    # The K-sweep envelope's own inputs (vectors, judge caches, etc.)
-    # are tracked transitively via the sweep_json file fingerprint --
-    # if any of those change, sweep_json's mtime/size changes too, and
-    # the readers of *this* fit_json see drift on the sweep_json dep.
-    inputs: list[InputSpec] = [
-        current_file_input(
-            dep_key="sweep_json",
-            path=experiment_dir / sweep_f),
-        current_file_input(
-            dep_key="pairs_json",
-            path=experiment_dir / args.pairs),
-    ]
+    # ``inputs`` was already populated above by the load_and_register
+    # calls.  The K-sweep envelope's own inputs (vectors, judge caches,
+    # etc.) are tracked transitively via the sweep_json file
+    # fingerprint -- if any of those change, sweep_json's mtime/size
+    # changes too, and the readers of *this* fit_json see drift on the
+    # sweep_json dep.
 
     fit_envelope = json_metadata(
         rows, inputs=inputs,

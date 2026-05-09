@@ -87,6 +87,10 @@ from ..data import (
 from ..plot_helpers import plot_per_slot_panels
 from ..whitening import DEFAULT_SOFT_K, parse_whitening_spec
 from assistant_axis import png_metadata
+from assistant_axis.provenance import (
+    InputSpec,
+    current_data_subtree_input,
+)
 
 
 # ---------------------------------------------------------------------------
@@ -301,8 +305,9 @@ def main() -> int:
 
     out_path = Path(args.output)
     out_path.parent.mkdir(parents=True, exist_ok=True)
+    inputs = _build_inputs(data_dir, args)
     fig.savefig(out_path, dpi=140, bbox_inches="tight",
-                metadata=png_metadata(title=title))
+                metadata=png_metadata(title=title, inputs=inputs))
     print(f"Wrote {out_path}")
 
     # Brief summary printed for sanity.
@@ -322,6 +327,61 @@ def main() -> int:
                   f"med={_median(ang):5.1f}  "
                   f"max={float(np.nanmax(ang)):5.1f}")
     return 0
+
+
+def _build_inputs(data_dir: Path, args: argparse.Namespace) -> list[InputSpec]:
+    """Provenance inputs for one run.
+
+    Declares the goal/nogoal marginal subtrees actually used (per
+    ``--kinds``), plus the theatricality-axis subtree when residuals
+    are theat-shifted, plus standalone subtrees when the aggregation
+    is ``standalone`` OR when a non-raw whitening pool is in use.
+    """
+    extras = {"layer": str(args.layer),
+              "kinds": ",".join(args.kinds),
+              "aggregation": args.aggregation,
+              "origin": args.origin,
+              "whitening": ",".join(args.whitening),
+              "pool": args.pool,
+              "heldout": "1" if args.heldout else "0",
+              "augment": "1" if args.augment else "0",
+              "include_default": "1" if args.include_default else "0"}
+    inputs: list[InputSpec] = []
+    needs_r = "r" in args.kinds or "combined" in args.kinds
+    needs_t = "t" in args.kinds or "combined" in args.kinds
+    if args.aggregation in ("combo_residual", "combo_residual_theat_shifted"):
+        if needs_r:
+            inputs.append(current_data_subtree_input(
+                data_dir, "combinations/vectors/derived/marginals/r_goal",
+                dep_key="r_goal_marginals", extras=extras))
+            inputs.append(current_data_subtree_input(
+                data_dir, "combinations/vectors/derived/marginals/r_nogoal",
+                dep_key="r_nogoal_marginals", extras=extras))
+        if needs_t:
+            inputs.append(current_data_subtree_input(
+                data_dir, "combinations/vectors/derived/marginals/t_goal",
+                dep_key="t_goal_marginals", extras=extras))
+            inputs.append(current_data_subtree_input(
+                data_dir, "combinations/vectors/derived/marginals/t_nogoal",
+                dep_key="t_nogoal_marginals", extras=extras))
+    if args.aggregation == "combo_residual_theat_shifted":
+        inputs.append(current_data_subtree_input(
+            data_dir, "combinations/vectors/derived/axis",
+            dep_key="theatricality_axis", extras=extras))
+    # Pool / standalone subspaces.  Whitening != "raw" pulls from
+    # roles+traits per ``--pool``; ``standalone`` aggregation reads them
+    # to build the subspaces themselves.
+    needs_pool = any(w != "raw" for w in args.whitening)
+    if args.aggregation == "standalone" or needs_pool:
+        if "roles" in args.pool or args.aggregation == "standalone":
+            inputs.append(current_data_subtree_input(
+                data_dir, "roles/vectors", dep_key="roles_vectors",
+                extras=extras))
+        if "traits" in args.pool or args.aggregation == "standalone":
+            inputs.append(current_data_subtree_input(
+                data_dir, "traits/vectors", dep_key="traits_vectors",
+                extras=extras))
+    return inputs
 
 
 def _slot_label(slot_indices: tuple[int, ...], slot_mode: str) -> str:

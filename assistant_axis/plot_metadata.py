@@ -284,7 +284,7 @@ def png_metadata(
     ...             metadata=png_metadata(
     ...                 title="ρ vs K (12 axes)",
     ...                 script="results_analysis/whitening_k_sweep.py",
-    ...                 argv=["--pairs", "pair_list_12.json"]))
+    ...                 argv=["--pairs", "pair_list_responses.json"]))
 
     Ad-hoc exploration script (write to ``/tmp`` first, then read self):
 

@@ -17,19 +17,36 @@ For each ensemble combo × axis × (slot, layer) cell, we:
 Aggregation matches ``plot_batch_size_quality_vs_cost.py``: per axis, max
 ρ across cells; then mean across axes per combo.
 
-The output augments the input JSON (``batch_size_curve_rho.json``) with
-an ``ensemble_combos`` block:
+Provenance: split-file design (May 2026)
+----------------------------------------
 
-::
+This script reads the upstream ``batch_size_curve_rho.json`` (produced by
+:mod:`results_analysis.batch_size_rho_curve`) and writes its results to a
+**separate, side-car JSON file** -- ``batch_size_curve_rho_ensembles.json``
+by default -- rather than mutating the upstream cache in place.
+
+Why split?  Each output file in the provenance system has a single
+producer and one provenance envelope; jamming two stages' outputs into
+one file would mean either losing one stage's input list or inventing
+per-block sub-envelopes.  Splitting keeps each stage's provenance crisp
+and lets ``audit_caches.py`` flag drift on whichever stage's inputs have
+moved.  See ``AGENT_NOTES.md`` for the broader rationale.
+
+Output schema (in the side-car JSON's ``result`` block)::
 
     {
-      ...,                          # existing batch-size keys
       "ensemble_combos": {
         "gpt_b10__plus_haiku_q9":   {"per_axis_cell": {"<axis>|s<S>_l<L>": ρ, ...},
                                       "best_per_axis": {"<axis>": ρ_max, ...},
-                                      "mean_across_axes_best_cell": ρ},
+                                      "mean_across_axes_best_cell": ρ,
+                                      "per_set": [...]},
         "gpt_b10__plus_haiku_full": ...,
         "gpt_b10__plus_sonnet_q9":  ...,
+        "_meta": {"gpt_weight": ..., "axis_sets": [...]}
+      },
+      "gpt_only_b10_baseline": {
+        "per_axis_cell": ..., "best_per_axis": ...,
+        "mean_across_axes_best_cell": ρ, "per_set": [...]
       }
     }
 
@@ -39,8 +56,8 @@ CLI
 ::
 
     uv run python results_analysis/judge_ensemble_rho_curve.py \\
-        --input  roger/axis_judge_experiments/batch_size_curve_8slot/batch_size_curve_rho.json \\
-        --output roger/axis_judge_experiments/batch_size_curve_8slot/batch_size_curve_rho.json
+        --input  roger/axis_judge_experiments/batch_size_curve_8slot/batch_size_curve_rho.json
+        # output defaults to batch_size_curve_rho_ensembles.json next to --input
 """
 from __future__ import annotations
 
@@ -51,10 +68,28 @@ from typing import Sequence
 
 import numpy as np
 
+from assistant_axis import json_metadata
+from assistant_axis.provenance import (
+    InputSpec,
+    current_data_subtree_input,
+    load_and_register,
+)
 from results_analysis.batch_size_rho_curve import (
     DEFAULT_AXES, DEFAULT_CONFIGS, DEFAULT_DATA_DIR, DEFAULT_EXPERIMENT_DIR,
     axis_direction, best_rho, setup_at,
 )
+
+
+def _default_output_for(input_path: Path) -> Path:
+    """Derive the side-car ensembles JSON path from the input path:
+    ``foo/bar/batch_size_curve_rho.json`` →
+    ``foo/bar/batch_size_curve_rho_ensembles.json``.
+
+    Kept lossless so callers passing a non-default ``--input`` still get a
+    sensible auto-default for ``--output``.
+    """
+    p = Path(input_path)
+    return p.with_name(f"{p.stem}_ensembles{p.suffix}")
 
 
 # Combos to evaluate.  Each entry: (label, anthropic-dir-prefix).  The
@@ -118,16 +153,40 @@ AXIS_SETS: list[dict] = [
 
 def _load_response_scores(
     experiment_dir: Path, axis: str, dir_template: str,
+    *,
+    scores_filename: str = "scores_responses.json",
+    judge_label: str,
+    inputs: list[InputSpec] | None = None,
 ) -> dict[str, float]:
     """Load per-entity mean response-judge scores from one judge×axis,
-    summing across the roles+traits sides.  Returns ``{name: ρ}``."""
+    summing across the roles+traits sides.  Returns ``{name: ρ}``.
+
+    ``scores_filename`` defaults to the canonical cache name; pass
+    ``scores_responses__rubric_v1.json`` to read from the v1 snapshot
+    after a rubric version bump.  ``judge_label`` (e.g. ``"gpt_b10"``,
+    ``"gpt_b10__plus_haiku_q9"``) is used to namespace the
+    InputSpecs so multiple judges over the same axis stay distinct in
+    the consumer's recorded inputs.
+
+    Uses :func:`assistant_axis.provenance.load_and_register` to do
+    the read + envelope-unwrap + drift-check + InputSpec construction
+    in one call; when ``inputs`` is supplied, every successfully-read
+    cache is appended to it (per the read+register pattern in
+    AGENT_NOTES.md).
+    """
     out: dict[str, float] = {}
     for side in ("roles", "traits"):
         sub = dir_template.format(side=side)
-        path = experiment_dir / axis / sub / "scores_responses.json"
+        path = experiment_dir / axis / sub / scores_filename
         if not path.exists():
             continue
-        scores = json.loads(path.read_text())
+        scores, _spec, _check = load_and_register(
+            path,
+            dep_key=f"judge_{axis}_responses_{judge_label}_{side}",
+            extras={"axis": axis, "side": side, "judge": judge_label},
+            policy="warn",
+            inputs=inputs,
+        )
         for name, info in scores.items():
             ms = info.get("mean_score") if isinstance(info, dict) else None
             if ms is not None:
@@ -172,6 +231,7 @@ def _compute_gpt_only_b10_per_axis_best_cell(
     axes: Sequence[tuple[str, str, str]],
     configs: Sequence[tuple[int, int]],
     geom: dict,
+    inputs: list[InputSpec] | None = None,
 ) -> tuple[dict[str, float], dict[str, float]]:
     """For each axis, max ρ across cells using **GPT-only** B=10 scores.
 
@@ -184,7 +244,10 @@ def _compute_gpt_only_b10_per_axis_best_cell(
     per_axis_cell: dict[str, float] = {}
     best_per_axis: dict[str, float] = {}
     for axis_name, pos_name, neg_name in axes:
-        gpt = _load_response_scores(experiment_dir, axis_name, GPT_DIR_TEMPLATE)
+        gpt = _load_response_scores(
+            experiment_dir, axis_name, GPT_DIR_TEMPLATE,
+            judge_label="gpt_b10", inputs=inputs,
+        )
         if not gpt:
             continue
         cell_rhos: list[float] = []
@@ -211,6 +274,7 @@ def compute_ensemble_rho(
     combos: Sequence[tuple[str, str]] = COMBOS,
     gpt_weight: float = 0.625,
     _geom: dict | None = None,
+    inputs: list[InputSpec] | None = None,
 ) -> dict:
     """Compute ensemble ρ for every (combo, axis, cell).
 
@@ -248,9 +312,11 @@ def compute_ensemble_rho(
 
             gpt = _load_response_scores(
                 experiment_dir, axis_name, GPT_DIR_TEMPLATE,
+                judge_label="gpt_b10", inputs=inputs,
             )
             anth = _load_response_scores(
                 experiment_dir, axis_name, anth_template,
+                judge_label=combo_label, inputs=inputs,
             )
             if not gpt or not anth:
                 print(f"    skip: gpt n={len(gpt)} anth n={len(anth)}")
@@ -305,11 +371,13 @@ def parse_args() -> argparse.Namespace:
     )
     p.add_argument(
         "--input", type=str, required=True,
-        help="Existing batch_size_curve_rho.json (used for configs / "
-             "to merge ensemble_combos into).")
+        help="Existing batch_size_curve_rho.json -- read for "
+             "axes / configs metadata.  Not modified.")
     p.add_argument(
         "--output", type=str, default=None,
-        help="Where to write the augmented JSON.  Default: same as --input.")
+        help="Side-car JSON path where ensemble results are written.  "
+             "Default: ``<input_stem>_ensembles<input_suffix>`` next to "
+             "--input (split-file design; see module docstring).")
     p.add_argument(
         "--data_dir", type=str, default=str(DEFAULT_DATA_DIR),
         help=f"Vectors / pool data dir.  Default: {DEFAULT_DATA_DIR}")
@@ -318,11 +386,17 @@ def parse_args() -> argparse.Namespace:
         help=f"Where the per-axis judge dirs live.  Default: "
              f"{DEFAULT_EXPERIMENT_DIR}")
     p.add_argument(
-        "--gpt_weight", type=float, default=0.625,
+        "--gpt_weight", type=float, default=0.6,
         help="Weight on GPT-mini in the ensemble; the Anthropic weight "
-             "is 1 - this.  Default 0.625 (≈ near the parabolic peak from "
-             "the response-mode GPT/Haiku weight sweep).  Use 0.5 for "
-             "even-50/50.")
+             "is 1 - this.  Default 0.6 (rounded from the 12-axis "
+             "response-mode GPT/Haiku-q9 parabolic peak at w=0.609; "
+             "Haiku-q9 is the operating-point winner on cost-per-quality "
+             "across the 4-Pareto-set view, see "
+             "roger/axis_judge_experiments/batch_size_curve_8slot/"
+             "batch_size_cost_vs_quality.png).  Sonnet-q9's own peak is "
+             "higher (w≈0.73), but Sonnet is dominated by Haiku-q9 on "
+             "the Pareto frontier and is kept only for diagnostic "
+             "comparison.  Use 0.5 for even-50/50.")
     p.add_argument(
         "--axes_source", choices=["all_response_axes", "input_json"],
         default="all_response_axes",
@@ -336,8 +410,28 @@ def parse_args() -> argparse.Namespace:
 def main() -> int:
     args = parse_args()
     in_path = Path(args.input)
-    out_path = Path(args.output) if args.output else in_path
-    raw = json.loads(in_path.read_text(encoding="utf-8"))
+    out_path = Path(args.output) if args.output else _default_output_for(in_path)
+    # Provenance accumulator: load_and_register threads through every
+    # cache read (the upstream batch-size curve here, plus per-axis
+    # judge scores via _load_response_scores → load_and_register
+    # inside the compute helpers below).  Single accumulator keeps
+    # reads and dependency records in lockstep -- if a cache wasn't
+    # consumed it doesn't end up in inputs, and vice versa.
+    inputs: list[InputSpec] = [
+        current_data_subtree_input(
+            Path(args.data_dir), "traits/vectors",
+            dep_key="traits_vectors"),
+        current_data_subtree_input(
+            Path(args.data_dir), "roles/vectors",
+            dep_key="roles_vectors"),
+    ]
+    # Tolerate legacy bare-JSON during the rollout window; once
+    # batch_size_rho_curve.py has been re-run post-Phase-D.3 the input
+    # carries an envelope and ``warn`` will validate it.
+    raw, _spec, _check = load_and_register(
+        in_path, dep_key="batch_size_curve_json",
+        inputs=inputs, policy="warn",
+    )
 
     if args.axes_source == "all_response_axes":
         axes_t = list(ALL_RESPONSE_AXES)
@@ -364,6 +458,7 @@ def main() -> int:
             experiment_dir=Path(args.experiment_dir),
             data_dir=Path(args.data_dir),
             axes=axes_t, configs=configs, geom=geom,
+            inputs=inputs,
         )
     )
     gpt_only_per_set = _aggregate_per_set(gpt_only_best_per_axis)
@@ -386,6 +481,7 @@ def main() -> int:
         gpt_weight=float(args.gpt_weight),
         # Reuse pre-computed geometry to avoid the duplicate setup_at cost.
         _geom=geom,
+        inputs=inputs,
     )
     # Stamp the weights into the JSON so the plotter / future readers
     # know what blend produced these ρ values.
@@ -400,14 +496,43 @@ def main() -> int:
         ],
     }
 
-    raw["ensemble_combos"] = ensemble
-    raw["gpt_only_b10_baseline"] = {
-        "per_axis_cell": gpt_only_per_axis_cell,
-        "best_per_axis": gpt_only_best_per_axis,
-        "mean_across_axes_best_cell": gpt_only_overall,
-        "per_set": gpt_only_per_set,
+    # ---- Side-car JSON output ------------------------------------------
+    # ``inputs`` was populated above by load_and_register at every read
+    # site:
+    #   * the upstream batch_size_curve_rho.json,
+    #   * the traits/roles vectors subtrees (axis directions + entity
+    #     projections),
+    #   * one InputSpec per (axis, judge_dir, side) for every
+    #     scores_responses.json that was actually consumed (per-axis
+    #     dep_keys so audit_caches.py can pinpoint which judge cache
+    #     changed).  Note this naturally registers only the caches
+    #     that succeeded; pre-retrofit the manual register loop here
+    #     could add deps for files we never read (e.g. axes that the
+    #     anth combo's compute pass would skip due to missing data).
+    # Caveat: `_compute_gpt_only_b10_per_axis_best_cell` and
+    # `compute_ensemble_rho` each load the GPT side independently, so
+    # the same gpt path is registered twice with two different
+    # InputSpecs (identical fingerprints, different list positions).
+    # That's harmless for audit purposes -- both rows refer to the
+    # same file -- and matches the previous behaviour of recording
+    # one entry per intended consumer rather than per unique path.
+
+    side_car = {
+        "ensemble_combos": ensemble,
+        "gpt_only_b10_baseline": {
+            "per_axis_cell": gpt_only_per_axis_cell,
+            "best_per_axis": gpt_only_best_per_axis,
+            "mean_across_axes_best_cell": gpt_only_overall,
+            "per_set": gpt_only_per_set,
+        },
     }
-    out_path.write_text(json.dumps(raw, indent=2))
+    envelope = json_metadata(
+        side_car,
+        inputs=inputs,
+        title=f"judge_ensemble_rho_curve gpt_weight={args.gpt_weight} "
+              f"axes_source={args.axes_source}",
+    )
+    out_path.write_text(json.dumps(envelope, indent=2))
     print(f"\nWrote {out_path}")
     print()
     print(f"{'combo':<28}  {'mean(best-cell-per-axis)':>26}  {'n_axes':>6}")

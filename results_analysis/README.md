@@ -42,7 +42,13 @@ the absolute ρ shift is in the third decimal.
 Scripts using the helper today: `rho_by_slot_and_K.py`,
 `rho_by_layer.py`, `whitening_k_sweep.py`, `gpt_sonnet_weight_sweep.py`.
 
-## Convention: PNG provenance metadata
+## Convention: provenance for analysis scripts
+
+Two related but distinct provenance layers apply here. The first
+records *how* an artifact was made; the second records *what its
+inputs were*, so we can detect when an artifact is out of date.
+
+### Plot metadata (mandatory for tracked plots)
 
 Every plot produced by a tracked script in this directory embeds
 `Title / Author / Software / Creation Time / Source` text-chunks via
@@ -53,6 +59,67 @@ Ad-hoc exploration scripts that produce plots also embed their full
 source via `source_text=Path(__file__).read_text()`, so any PNG in the
 tree carries enough provenance to reproduce.  Read with
 `exiftool foo.png` or `PIL.Image.open(p).info["Source Code"]`.
+
+### Input fingerprints (writer side)
+
+Analysis scripts that emit JSON should wrap their payload in a
+`_provenance` envelope, declaring all inputs they read:
+
+```python
+from assistant_axis import json_metadata, png_metadata
+from assistant_axis.provenance import (
+    InputSpec, current_data_subtree_input, current_file_input,
+    current_files_input,
+)
+
+inputs: list[InputSpec] = [
+    current_data_subtree_input(data_dir, "traits/vectors", dep_key="traits_vectors"),
+    current_file_input(dep_key="pairs_json", path=experiment_dir / args.pairs),
+    current_files_input(dep_key="judge_caches", paths=judge_cache_paths),
+]
+out_path.write_text(json.dumps(
+    json_metadata(records, inputs=inputs, title="my_analysis"), indent=2))
+fig.savefig(plot_path, dpi=150, bbox_inches="tight",
+            metadata=png_metadata(title=title, inputs=inputs))
+```
+
+The same `inputs` list is reused for both PNG and JSON output so a
+plot's freshness can be verified against the same dependency graph as
+its source cache.
+
+### `--cache-policy` (reader side)
+
+When a script reads a JSON cache produced by another tracked script
+(rather than reading raw datasets directly), it should validate the
+cache's recorded inputs:
+
+```python
+from assistant_axis.provenance import CACHE_POLICIES, load_validated_json
+
+p.add_argument("--cache-policy", choices=CACHE_POLICIES, default="warn")
+records, check = load_validated_json(sweep_path, policy=args.cache_policy)
+```
+
+Policies: `strict` (raise on drift), `warn` (default; print
+diagnostics, return payload), `rebuild` (call back to regenerate),
+`off` (skip validation). Legacy bare-JSON caches load transparently
+without an envelope.
+
+### Audit tools
+
+To find stale artifacts repo-wide:
+
+```bash
+uv run python tools/audit_pngs.py   --status stale
+uv run python tools/audit_caches.py --status stale
+```
+
+`audit_caches.py` also propagates staleness transitively through
+inter-cache file dependencies, so a freshly-built consumer cache is
+flagged `stale_transitive` when its upstream input is `stale_direct`.
+
+Full reference and migrated-script roster:
+[`../AGENT_NOTES.md` § End-to-End Data Provenance](../AGENT_NOTES.md).
 
 ## Scripts
 
@@ -1130,7 +1197,7 @@ subdirectory per axis under `--experiment_dir` (default
 
 ```
 <experiment_dir>/
-  pair_list_12.json                # or any other pair list
+  pair_list_responses.json         # or any other pair list
   <pos>_vs_<neg>/
     gpt/scores_descriptions.json
     gpt/scores_instructions.json
@@ -1140,16 +1207,18 @@ subdirectory per axis under `--experiment_dir` (default
     gpt_responses_roles/scores_responses.json
 ```
 
-The default `pair_list_12.json` is the 12 axes that currently have all
-six score files cached (7 original + 5 added: `harmless/harmful`,
-`honest/dishonest`, `truthful/deceitful`, `concise/verbose`,
-`relativist/absolutist`).  **``pair_list_33.json``** lists every axis with
-desc+instr judges; many of those do **not** yet have GPT response scores, so
-the `responses` ρ curve is often all-NaN there (the peak-fit script still
-plots **desc+instr** and leaves a short note on empty panels).  The
-historical 7-axis subset lives at `pair_list_7.json` for reproducing earlier
-plots.  Add new pairs by running the judge pipeline and editing/creating a
-new pair list JSON.
+The default `pair_list_responses.json` is the **responses cohort** — every
+axis that currently has all six score files cached (desc+instr from both
+GPT and Sonnet, plus GPT response-mode judging on roles + traits).
+**``pair_list_di.json``** is the wider **desc+instr cohort** — every axis
+with desc+instr judging from both providers, regardless of whether
+response judging exists.  Many `pair_list_di.json` axes do **not** yet
+have GPT response scores, so the `responses` ρ curve is often all-NaN
+there (the peak-fit script still plots **desc+instr** and leaves a short
+note on empty panels).  Both cohorts grow as more axes get judged; the
+filenames stay stable because they encode definition, not count.  Add
+new pairs by running the judge pipeline and editing/creating a new pair
+list JSON.
 
 #### `whitening_k_sweep.py`
 
@@ -1171,63 +1240,56 @@ Outputs to `--experiment_dir`:
   (desc+inst) line per axis, colored by axis, with K on the x-axis.
 
 ```bash
-# Default: 12 axes
+# Default: responses cohort (writes whitening_k_sweep_responses_slot6.json
+# + rho_vs_whitening_K_responses_slot6.png)
 uv run python results_analysis/whitening_k_sweep.py
 
-# 33 axes (desc+instr everywhere; responses only where cached)
-uv run python results_analysis/whitening_k_sweep.py --pairs pair_list_33.json \
-  --slot 7 --sweep whitening_k_sweep_slot7.json --plot rho_vs_whitening_K_slot7.png
-
-# Reproduce the historical 7-axis plot
-uv run python results_analysis/whitening_k_sweep.py --pairs pair_list_7.json
+# Desc+instr cohort at slot 7 (writes whitening_k_sweep_di_slot7.json
+# + rho_vs_whitening_K_di_slot7.png; auto-derive embeds the cohort token
+# from --pairs so cohorts can never silently overwrite each other)
+uv run python results_analysis/whitening_k_sweep.py \
+  --pairs pair_list_di.json --slot 7
 ```
 
 #### `whitening_k_peak_fit.py`
 
-Reads a sweep JSON (`whitening_k_sweep.json` or **`whitening_k_sweep_slot{N}.json`**)
+Reads a sweep JSON (auto-derived to `whitening_k_sweep_<cohort>_slot{N}.json`)
 and fits a parabola to each ρ-vs-K curve over K ∈ [0, 32] in two parametrisations:
 
 - linear-K:  ``ρ(K) ≈ a + b·K + c·K²``
 - log₂(K+1): ``ρ(K) ≈ a + b·log₂(K+1) + c·log₂(K+1)²``
 
-**Defaults:** `--pairs pair_list_33.json` so the mosaic has **33** panels in a
-**6×6** grid (three cells blank).  Pass **`--slot N`** so generic input/output
-basenames resolve to **`whitening_k_sweep_slot{N}.json`**,
-**`rho_vs_K_parabolic_fits_slot{N}.png`**, and **`whitening_k_peak_fit_slot{N}.json`**
-(and the figure title mentions the slot).
+**Defaults:** `--pairs pair_list_di.json` so the mosaic has one panel per
+desc+instr-cohort axis (currently 33, in a **6×6** grid with three cells
+blank).  Output basenames auto-derive to
+`whitening_k_peak_fit_<cohort>_slot{N}.json` /
+`rho_vs_K_parabolic_fits_<cohort>_slot{N}.png` / sweep input
+`whitening_k_sweep_<cohort>_slot{N}.json` -- where `<cohort>` comes from
+`--pairs` (`di` or `responses`) and `{N}` from `--slot` (default 6).
 
-The fitter skips NaN ρ points (usual on **`responses`** when GPT response scores are
-missing for that axis).  Peak-K agreement (**desc+inst** vs **responses**) is only
-printed when both peaks are finite (typically the 12-axis cohort).  Empirically the
-log parametrisation fits better on fully-scored axes.
+The fitter skips NaN ρ points (usual on **`responses`** when GPT response
+scores are missing for that axis).  Peak-K agreement (**desc+inst** vs
+**responses**) is only printed when both peaks are finite (typically the
+responses cohort).  Empirically the log parametrisation fits better on
+fully-scored axes.
 
 Outputs to `--experiment_dir`:
 
-- `whitening_k_peak_fit[_slot{N}].json` -- per-curve fit records (R² per
-  parametrisation, fitted peak K, y-hats at observed K).
-- `rho_vs_K_parabolic_fits[_slot{N}].png` -- one panel per **`--pairs` entry**, in order.
+- `whitening_k_peak_fit_<cohort>_slot{N}.json` -- per-curve fit records
+  (R² per parametrisation, fitted peak K, y-hats at observed K).
+- `rho_vs_K_parabolic_fits_<cohort>_slot{N}.png` -- one panel per
+  **`--pairs` entry**, in order.
 
 ```bash
+# Desc+inst cohort at slots 3/6/7
 uv run python results_analysis/whitening_k_peak_fit.py --slot 3
 uv run python results_analysis/whitening_k_peak_fit.py --slot 6
 uv run python results_analysis/whitening_k_peak_fit.py --slot 7
 
-# 12-axis mosaic, generic filenames (omit --slot so names are not auto-suffixed)
+# Responses cohort at slot 6 (smaller mosaic)
 uv run python results_analysis/whitening_k_peak_fit.py \\
-    --pairs pair_list_12.json \\
-    --sweep whitening_k_sweep.json \\
-    --plot rho_vs_K_parabolic_fits.png \\
-    --fit_json whitening_k_peak_fit.json
-
-uv run python results_analysis/whitening_k_peak_fit.py --pairs pair_list_7.json \\
-    --sweep whitening_k_sweep.json --plot rho_vs_K_parabolic_fits.png \\
-    --fit_json whitening_k_peak_fit.json
+    --pairs pair_list_responses.json --slot 6
 ```
-
-See e.g.
-[`rho_vs_K_parabolic_fits_slot3.png`](../roger/axis_judge_experiments/rho_vs_K_parabolic_fits_slot3.png)
-after regenerating sweeps with `pair_list_33.json`; the legacy 12-axis figure remains
-[`rho_vs_K_parabolic_fits.png`](../roger/axis_judge_experiments/rho_vs_K_parabolic_fits.png).
 
 #### `gpt_vs_sonnet_scatter.py`
 
@@ -1247,20 +1309,15 @@ overlap exactly without it.
 
 Outputs to ``--experiment_dir``:
 
-- the two PNGs (paths overridable via ``--pooled`` / ``--grid``)
-- ``gpt_vs_sonnet_rhos.json`` -- per-axis + pooled Spearman ρ.
+- the two PNGs (auto-named ``gpt_vs_sonnet_scatter_{pooled,grid}_<cohort>.png``;
+  paths overridable via ``--pooled`` / ``--grid``).
+- ``gpt_vs_sonnet_rhos_<cohort>.json`` -- per-axis + pooled Spearman ρ.
 
 ```bash
-# Default: every axis with desc+inst from both providers cached
-# on disk (currently pair_list_33.json, ~33 axes).
+# Default: desc+instr cohort (every axis with desc+inst from both GPT
+# and Sonnet cached on disk).  Auto-writes
+# gpt_vs_sonnet_{rhos,scatter_pooled,scatter_grid}_di.{json,png}.
 uv run python results_analysis/gpt_vs_sonnet_scatter.py
-
-# Reproduce the historical 7-axis plots (April 24, byte-for-byte)
-uv run python results_analysis/gpt_vs_sonnet_scatter.py \
-    --pairs pair_list_7.json \
-    --pooled gpt_vs_sonnet_scatter_pooled_7axes.png \
-    --grid gpt_vs_sonnet_scatter_grid_7axes.png \
-    --rhos_json gpt_vs_sonnet_rhos_7axes.json
 ```
 
 #### `gpt_sonnet_weight_sweep.py`
@@ -1404,12 +1461,12 @@ for the README's ["GPT vs Sonnet agreement"](#gpt-vs-sonnet-agreement)
 finding: GPT-4.1-mini is statistically equivalent to Sonnet 4 on
 desc+inst judging at ~5× lower cost.
 
-The 33-axis pair list ``pair_list_33.json`` is auto-discovered from
-on-disk score files: every ``<pos>_vs_<neg>/`` directory under
+The desc+instr cohort pair list ``pair_list_di.json`` is auto-discovered
+from on-disk score files: every ``<pos>_vs_<neg>/`` directory under
 ``--experiment_dir`` that has all four
 ``{gpt,sonnet}/scores_{descriptions,instructions}.json`` files is
 included.  Add new pairs by running the judge pipeline; the next
-re-build of ``pair_list_33.json`` (or its successor) will pick them up.
+re-build of ``pair_list_di.json`` will pick them up.
 
 ### `optimal_axis_for_judge.py` -- direction-fitting from judge scores
 
@@ -1524,22 +1581,37 @@ axis-judge-correlation experiment dir with a `--score_source` selector
 (``gpt`` / ``sonnet`` / ``haiku`` / ``di_combined`` (GPT+Sonnet 4-way) /
 ``responses``).
 
+**Output directory layout:** runs are treated as a "fill-on-demand"
+cache.  When `--output_dir` is omitted, it auto-derives from the full
+cache key:
+
+```
+roger/optimal_axis/<pair>_<src>_slot{N}_layer{L}_<whitening>_M{M}_<data_dir_slug>/
+```
+
+Every dimension that could change between invocations is encoded
+explicitly so a future default flip (e.g. slot=3 → slot=6 in May 2026,
+or `data_dir` swap from 4-slot to 8-slot) lands in a distinct directory
+without silently shadowing prior outputs.  Pass `--output_dir` to
+override entirely (use it for one-off comparison runs you want to
+hand-name).
+
 ```bash
 # Mode A: raw scores file ({name: float} or
 #         {name: {scores: [list of floats]}} -- both accepted).
+# Auto-derives to roger/optimal_axis/my_label_raw_scores_slot6_layer25_softK3_M30_<data>/
 uv run python results_analysis/optimal_axis_for_judge.py \
-  --scores_file my_scores.json \
-  --slot 3 --layer 25 --whitening soft_K=3 --M 100 \
-  --output_dir roger/optimal_axis/my_label/
+  --scores_file my_label.json \
+  --slot 6 --layer 25 --whitening soft_K=3 --M 30
 
 # Mode B: existing axis-judge-correlation experiment dir.
+# Auto-derives to roger/optimal_axis/truthful_vs_deceitful_di_combined_slot6_layer25_softK3_M30_<data>/
 uv run python results_analysis/optimal_axis_for_judge.py \
   --experiment_dir roger/axis_judge_experiments/truthful_vs_deceitful \
   --score_source di_combined \
   --seed_pair truthful deceitful \
   --exclude_names truthful,deceitful \
-  --slot 3 --layer 25 --whitening soft_K=3 \
-  --output_dir roger/optimal_axis/truthful_vs_deceitful_di_combined/
+  --slot 6 --layer 25 --whitening soft_K=3
 ```
 
 Library:
@@ -1701,14 +1773,6 @@ Outputs to `--experiment_dir`:
 ```bash
 # Default: 12 axes
 uv run python results_analysis/whitening_k_weighted_scatter.py
-
-# Reproduce the historical 7-axis plot
-# (this is what produced the original April 24 image; numbers match
-# byte-for-byte: weighted Pearson = +0.458)
-uv run python results_analysis/whitening_k_weighted_scatter.py \
-    --pairs pair_list_7.json \
-    --plot rho_peak_K_weighted_scatter_7axes.png \
-    --fit_json whitening_k_peak_fit_weighted_7axes.json
 ```
 
 #### What the curves show
@@ -2037,12 +2101,11 @@ contradictions.
 ### Which scoring source and which metric — empirical findings
 
 We ran the tool over 20 reciprocal-antonym trait axes at GPT-4.1-mini, then
-selectively re-ran 7 of them with Sonnet 4 and added response-mode scoring.
-The 20-axis and 7-axis data is persisted under
+selectively re-ran a 12-axis subset with Sonnet 4 and added response-mode
+scoring (the cohort with response judging — see ``pair_list_responses.json``).
+The 20-axis and 12-axis data is persisted under
 [`roger/axis_judge_experiments/`](../roger/axis_judge_experiments/) with
-[`summary.json`](../roger/axis_judge_experiments/summary.json) (20 axes, GPT)
-and [`summary_7axes_full.json`](../roger/axis_judge_experiments/summary_7axes_full.json)
-(7 axes × 3 sources × 2 metrics).
+[`summary.json`](../roger/axis_judge_experiments/summary.json) (20 axes, GPT).
 
 #### Raw vs whitened
 
@@ -2120,8 +2183,10 @@ for axes where the 0.01-level difference matters.
 
 We did an extended study of whether per-PC whitening (each PC gets its own
 scale factor β_k ∈ [0, 1]) can beat fixed soft-K whitening. Four operational
-conclusions, all from experiments on the 7 axes in
-[`pair_list_7.json`](../roger/axis_judge_experiments/pair_list_7.json):
+conclusions, all from experiments on the responses-cohort axes in
+[`pair_list_responses.json`](../roger/axis_judge_experiments/pair_list_responses.json)
+(originally a 7-axis subset; expanded to 12 once response judging was
+extended):
 
 **1. ‖m‖/‖diff‖ predicts axis hardness (label-free).**
 

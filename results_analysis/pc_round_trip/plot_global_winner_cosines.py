@@ -38,8 +38,7 @@ from assistant_axis.provenance import (
     CACHE_POLICIES,
     InputSpec,
     current_data_subtree_input,
-    current_file_input,
-    load_validated_json,
+    load_and_register,
 )
 from results_analysis.canonical_angles.data import DEFAULT_DATA_DIR
 from results_analysis.canonical_angles.whitening import (
@@ -100,8 +99,16 @@ def main() -> int:
         d_canon_in_raw_per_pc[pc] = inv_sh_canon(d[None, :])[0]
 
     # ---- Load global nth_pc winners (validated against current state) ----
-    nth_pc_data, _check = load_validated_json(
-        Path(args.actual), policy=args.cache_policy)
+    # ``inputs`` is built up via load_and_register so the same call
+    # site handles read, envelope-unwrap, drift-check, and registering
+    # the file as a dependency of this plot.  Subtree deps below are
+    # appended explicitly (no read-and-register helper for subtrees
+    # yet -- only the JSON cache file goes through load_and_register).
+    inputs: list[InputSpec] = []
+    nth_pc_data, _spec, _check = load_and_register(
+        Path(args.actual), dep_key="klm_results_json",
+        inputs=inputs, policy=args.cache_policy,
+    )
     winners = nth_pc_data["stage2_K_refinement_M_inf"]
 
     # ---- For each (PC, style), recompute Vt at the winning config and
@@ -235,10 +242,7 @@ def main() -> int:
     # the upstream judge-cache provenance transitively.  We also pin
     # the four canonical-angles derived marginal subtrees + raw vector
     # subtrees, since this script's setup_at calls build_goal_nogoal_subspaces.
-    inputs: list[InputSpec] = [
-        current_file_input(
-            dep_key="klm_results_json",
-            path=Path(args.actual)),
+    inputs.extend([
         current_data_subtree_input(
             data_dir, "traits/vectors", dep_key="traits_vectors"),
         current_data_subtree_input(
@@ -255,7 +259,7 @@ def main() -> int:
         current_data_subtree_input(
             data_dir, "combinations/vectors/derived/marginals/t_nogoal",
             dep_key="combos_t_nogoal"),
-    ]
+    ])
 
     out = Path(args.output)
     out.parent.mkdir(parents=True, exist_ok=True)

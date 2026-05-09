@@ -43,15 +43,36 @@ import numpy as np
 import torch
 from scipy.stats import spearmanr
 
-from assistant_axis import png_metadata
+from assistant_axis import json_metadata, png_metadata
+from assistant_axis.provenance import (
+    InputSpec,
+    current_data_subtree_input,
+    current_file_input,
+    load_and_register,
+)
 from results_analysis.axis_judge_correlation import _load_vector_file
 
+_SCRIPT_PATH = Path(__file__).resolve()
 
-# Axes available for response judging across all three Anthropic combos.
+
+# Axes available for response judging.  All 12 traits axes have GPT-B=10
+# response judging on disk; sets 2..4 (axes 4..12) only have q9-subsampled
+# Anthropic data, so the ``haiku_full`` combo will skip those nine axes
+# and render just set 1.  Mirrors ``ALL_RESPONSE_AXES`` in
+# :mod:`judge_ensemble_rho_curve` so the two stay in sync.
 DEFAULT_AXES: list[tuple[str, str, str]] = [
-    ("truthful_vs_deceitful",          "truthful",       "deceitful"),
-    ("progressive_vs_conservative",    "progressive",    "conservative"),
+    ("truthful_vs_deceitful",          "truthful",        "deceitful"),
+    ("progressive_vs_conservative",    "progressive",     "conservative"),
     ("improvisational_vs_methodical",  "improvisational", "methodical"),
+    ("concise_vs_verbose",             "concise",         "verbose"),
+    ("ecocentric_vs_anthropocentric",  "ecocentric",      "anthropocentric"),
+    ("egalitarian_vs_elitist",         "egalitarian",     "elitist"),
+    ("guileless_vs_scheming",          "guileless",       "scheming"),
+    ("harmless_vs_harmful",            "harmless",        "harmful"),
+    ("honest_vs_dishonest",            "honest",          "dishonest"),
+    ("helpful_vs_unhelpful",           "helpful",         "unhelpful"),
+    ("relativist_vs_absolutist",       "relativist",      "absolutist"),
+    ("systems_thinker_vs_analytical",  "systems_thinker", "analytical"),
 ]
 
 DEFAULT_EXPERIMENT_DIR = Path(__file__).resolve().parent.parent / (
@@ -71,12 +92,24 @@ COMBO_DIRS: dict[str, tuple[str, str]] = {
 
 # Per-axis colours (consistent across the 3 weight-sweep plots so that a
 # given axis keeps the same colour regardless of how the slopes happen to
-# sort within a plot).  Falls back to the plasma colormap for axes not
-# listed here.
+# sort within a plot).  12 independent colours -- no set-membership
+# grouping (each axis stands alone visually).  Picked to stay distinct
+# from the mean line (black), the w=0.5 reference line (grey), and the
+# parabola fit colour (PARABOLA_COLOR below).  Falls back to the plasma
+# colormap for axes not listed here.
 AXIS_COLORS: dict[str, str] = {
     "truthful_vs_deceitful":         "#4c72b0",  # blue
     "progressive_vs_conservative":   "#55a868",  # green
     "improvisational_vs_methodical": "#c44e52",  # red
+    "concise_vs_verbose":            "#8172b2",  # purple
+    "ecocentric_vs_anthropocentric": "#dd8452",  # orange
+    "egalitarian_vs_elitist":        "#937860",  # warm brown
+    "guileless_vs_scheming":         "#da8bc3",  # pink
+    "harmless_vs_harmful":           "#17becf",  # cyan
+    "honest_vs_dishonest":           "#bcbd22",  # mustard
+    "helpful_vs_unhelpful":          "#2c5d8c",  # navy
+    "relativist_vs_absolutist":      "#b04a72",  # rose
+    "systems_thinker_vs_analytical": "#6b4ec1",  # violet
 }
 
 GPT_DIR_TEMPLATE = "gpt_responses_{side}_b10"
@@ -85,15 +118,40 @@ PARABOLA_COLOR = "#1faa4f"
 
 def _load_response_scores(
     experiment_dir: Path, axis: str, dir_template: str,
+    *,
+    scores_filename: str = "scores_responses.json",
+    judge_label: str,
+    inputs: list[InputSpec] | None = None,
 ) -> dict[str, float]:
-    """Per-entity mean response-judge score, summed across roles + traits."""
+    """Per-entity mean response-judge score, summed across roles + traits.
+
+    Uses :func:`assistant_axis.provenance.load_and_register` to do the
+    read + envelope-unwrap + drift-check + InputSpec construction in one
+    call.  When ``inputs`` is supplied, every successfully-read cache is
+    appended to it (so the caller can record exactly the dependencies
+    actually consumed -- a missing per-side file results in no spec for
+    that side, matching the old skip-on-missing behaviour).
+
+    ``scores_filename`` defaults to the canonical cache name but can be
+    overridden (e.g. ``scores_responses__rubric_v1.json``) so v1 and v2
+    plots can be regenerated side-by-side from snapshotted data.
+    ``judge_label`` (e.g. ``"gpt"``, ``"haiku_q9"``) is used to
+    namespace the per-side ``dep_key`` so accumulated InputSpecs stay
+    unique across both judges of a single sweep.
+    """
     out: dict[str, float] = {}
     for side in ("roles", "traits"):
         sub = dir_template.format(side=side)
-        path = experiment_dir / axis / sub / "scores_responses.json"
+        path = experiment_dir / axis / sub / scores_filename
         if not path.exists():
             continue
-        scores = json.loads(path.read_text())
+        scores, _spec, _check = load_and_register(
+            path,
+            dep_key=f"scores_{judge_label}_{axis}_{side}",
+            extras={"axis": axis, "side": side, "judge": judge_label},
+            policy="warn",
+            inputs=inputs,
+        )
         for name, info in scores.items():
             ms = info.get("mean_score") if isinstance(info, dict) else None
             if ms is not None:
@@ -136,13 +194,29 @@ def main() -> int:
                    help="Output PNG (default: gpt_<combo>_response_weight_"
                         "sweep_slot{N}.png inside --experiment_dir).")
     p.add_argument("--rhos_json", default=None)
+    p.add_argument("--scores_filename", default="scores_responses.json",
+                   help="Filename within each <axis>/<judge>_responses_*/ "
+                        "subdir to read.  Use scores_responses__rubric_v1.json "
+                        "to regenerate plots from the snapshotted v1 data "
+                        "after a rubric version bump (see RUBRIC_VERSION in "
+                        "axis_judge_correlation.py).  Default: canonical "
+                        "scores_responses.json.")
+    p.add_argument("--out_stem_suffix", default="",
+                   help="Optional suffix appended to the output stem (e.g. "
+                        "'__rubric_v1' to write "
+                        "gpt_<combo>_response_weight_sweep_slot{N}__rubric_v1"
+                        ".{json,png}).  Useful for v1<->v2 side-by-side "
+                        "snapshots.  Default: empty (canonical names).")
     args = p.parse_args()
 
     experiment_dir = Path(args.experiment_dir).resolve()
     data_dir = Path(args.data_dir).resolve()
     slot, layer = int(args.slot), int(args.layer)
     combo_label, anth_template = COMBO_DIRS[args.anthropic_combo]
-    out_stem = f"gpt_{args.anthropic_combo}_response_weight_sweep_slot{slot}"
+    out_stem = (
+        f"gpt_{args.anthropic_combo}_response_weight_sweep_slot{slot}"
+        f"{args.out_stem_suffix}"
+    )
     if args.plot is None:
         args.plot = f"{out_stem}.png"
     if args.rhos_json is None:
@@ -166,11 +240,45 @@ def main() -> int:
     print(f"  axes: {[a[0] for a in DEFAULT_AXES]}")
     print(f"  anthropic dir template: {anth_template}")
 
+    # Provenance accumulator.  Threaded through every cache read so the
+    # output JSON's _provenance.inputs reflects exactly the files this
+    # run actually consumed.  Includes the producer script (this file)
+    # and the entity-vector subtrees up front; per-axis scores caches
+    # are appended inside ``_load_response_scores`` via load_and_register.
+    inputs: list[InputSpec] = [
+        current_file_input(
+            dep_key="producer_script",
+            path=_SCRIPT_PATH,
+            extras={
+                "anthropic_combo": args.anthropic_combo,
+                "scores_filename": args.scores_filename,
+                "slot": str(slot), "layer": str(layer),
+            },
+        ),
+        current_data_subtree_input(
+            data_dir=data_dir, subtree_rel="traits/vectors",
+            dep_key="traits_vectors",
+        ),
+        current_data_subtree_input(
+            data_dir=data_dir, subtree_rel="roles/vectors",
+            dep_key="roles_vectors",
+        ),
+    ]
+
     per_axis: dict[tuple[str, str], dict] = {}
     for axis_name, pos, neg in DEFAULT_AXES:
-        gpt = _load_response_scores(experiment_dir, axis_name,
-                                     GPT_DIR_TEMPLATE)
-        anth = _load_response_scores(experiment_dir, axis_name, anth_template)
+        gpt = _load_response_scores(
+            experiment_dir, axis_name, GPT_DIR_TEMPLATE,
+            scores_filename=args.scores_filename,
+            judge_label="gpt_b10",
+            inputs=inputs,
+        )
+        anth = _load_response_scores(
+            experiment_dir, axis_name, anth_template,
+            scores_filename=args.scores_filename,
+            judge_label=args.anthropic_combo,
+            inputs=inputs,
+        )
         if not gpt or not anth:
             print(f"  [skip] {axis_name}: gpt n={len(gpt)} "
                   f"anth n={len(anth)}")
@@ -324,12 +432,12 @@ def main() -> int:
 
     out_path = experiment_dir / args.plot
     plt.savefig(out_path, dpi=150, bbox_inches="tight",
-                metadata=png_metadata(title=title))
+                metadata=png_metadata(title=title, inputs=inputs))
     plt.close(fig)
     print(f"\nWrote {out_path}")
 
     # ---- JSON ------------------------------------------------------------
-    json_out = {
+    json_payload = {
         "n_axes": n_axes,
         "first_judge": "gpt_b10",
         "second_judge_label": combo_label,
@@ -353,9 +461,12 @@ def main() -> int:
             for i, k in enumerate(keys)
         ],
     }
+    json_out = json_metadata(
+        json_payload, title=title, inputs=inputs,
+    )
     json_path = experiment_dir / args.rhos_json
     json_path.write_text(json.dumps(json_out, indent=2))
-    print(f"Wrote {json_path}")
+    print(f"Wrote {json_path} ({len(inputs)} inputs recorded)")
     return 0
 
 

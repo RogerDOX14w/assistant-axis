@@ -23,11 +23,15 @@ This module provides three things:
 Design choices:
 
 * Fingerprints are *cheap* (mtime+size based for files, subtree
-  ``summary_sha256`` from MANIFEST.json for dataset subtrees).  Phase 6
-  may add an optional content-hash tier behind a feature flag; this
-  module already accepts a ``fingerprint_kind`` field so future
-  manifests can mark themselves as content-hash-grade without breaking
-  older readers.
+  ``summary_sha256`` from MANIFEST.json for dataset subtrees -- but
+  the subtree summary today is also a SHA-256 over sorted
+  ``[(rel_path, mtime_ns_floored, size), ...]`` triples, so it is
+  metadata-equality only, NOT content-equality).  The
+  ``fingerprint_kind`` field is reserved so a future content-hash
+  tier (see ``TODO(phase-7-deferred)`` block below) can be added
+  without breaking older readers.  As of May 2026 we deliberately
+  decided to defer Phase 7; see that TODO for the why, the win, and
+  the implementation outline if/when it becomes worth doing.
 * ``InputSpec`` carries everything a downstream auditor needs: the
   ``role`` (semantic name), the ``path`` (repo-relative, so manifests
   port across machines), the ``fingerprint`` (the actual freshness
@@ -48,6 +52,30 @@ Public API (stable):
     validate_inputs(recorded, current) -> ProvenanceCheck
     inputs_to_jsonable(specs) -> list[dict]
     inputs_from_jsonable(blobs) -> list[InputSpec]
+    load_validated_json(path, *, policy="warn", rebuild_callback=None)
+        -> (payload, check)
+    load_and_register(path, *, dep_key, extras=None, policy="warn",
+                      rebuild_callback=None, inputs=None)
+        -> (payload, spec, check)
+        # Read + envelope-unwrap + drift-validate + build a writer-side
+        # InputSpec for the file in one call.  Use this when a script
+        # both consumes a cache AND records that cache as a dependency
+        # of its own output, which is the common case -- linking the
+        # two operations prevents the "read it but forgot to register
+        # it" failure mode.
+    load_and_register_npz(path, *, dep_key, extras=None, policy="warn",
+                          rebuild_callback=None, inputs=None,
+                          meta_key="meta", allow_pickle=True)
+        -> (npz_handle, meta, spec, check)
+        # ``.npz`` analogue of ``load_and_register``.  ``np.savez`` can't
+        # carry a JSON envelope, so producers (e.g. winner_decomposition.py)
+        # serialise their inputs list into ``meta["_inputs"]`` instead.
+        # This helper parses that meta blob, validates the recorded
+        # inputs against current state with the usual warn/strict/
+        # rebuild/off policy, and builds an InputSpec for the npz
+        # itself -- preserving the same single-call atomicity as the
+        # JSON path so callers can't read a cache without registering
+        # it (or vice versa).
 
 Repo path conventions:
     ``InputSpec.path`` is always recorded *relative to the repo root*
@@ -86,7 +114,185 @@ __all__ = [
     "inputs_to_jsonable",
     "inputs_from_jsonable",
     "load_validated_json",
+    "load_and_register",
+    "load_and_register_npz",
 ]
+
+# =====================================================================
+# TODO(phase-7-deferred): Subtree content hashing
+# =====================================================================
+#
+# STATUS: Deferred (May 2026).  Phases 1-6 of the provenance redesign
+# shipped; "subtree content hashing" was originally scoped as Phase 6
+# but was demoted to Phase 7 in favour of judge-step provenance, then
+# deferred entirely after a cost / value review.  Pick this up if and
+# only if one of the failure modes below starts biting in practice.
+#
+# WHAT WE HAVE TODAY (the baseline this would replace / augment)
+# --------------------------------------------------------------
+# Every fingerprint in the system is *metadata-only*:
+#   - kind="file":     "v1:{mtime_iso_floor_to_seconds}@{size}"
+#                      (helpers ``current_file_input``).
+#   - kind="multi":    "v1:multi:{sha256(sorted [(rel_path,
+#                      mtime_ns_floored, size), ...])[:12]}"
+#                      (helpers ``current_files_input``).
+#   - kind="subtree":  "v1:{dataset_id}@{summary_sha256[:12]}" where
+#                      ``summary_sha256`` is computed by
+#                      ``tools/regenerate_dataset_manifest.py``
+#                      ``_summarize`` and is itself the SHA-256 over
+#                      the same sorted (rel_path, mtime_floored, size)
+#                      triples.
+#
+# So nothing in the project ever hashes file *contents* -- only
+# (path, mtime_floored_to_seconds, size) tuples.  That works because
+# ``rsync -at`` (the default Roger uses for dataset transfer) preserves
+# whole-second mtime, and ``regenerate_dataset_manifest.py`` floors
+# mtime to whole seconds, making fingerprints rsync-stable by
+# construction.  Manifest regen is <1 second for the full dataset.
+#
+# WHAT PHASE 7 WOULD BUY
+# ----------------------
+# It would catch the following classes of false positive (today's
+# system says "drift" when no semantic drift occurred):
+#
+#   1. ``cp`` / ``scp`` / ``cp -p`` / non-``-t`` rsync / tarball
+#      extraction that resets file mtimes.  Content identical, mtime
+#      fresh, today's fingerprint changes.
+#   2. ``git checkout`` of a tracked dataset on a fresh clone.  Mtime
+#      is set to checkout time so cross-machine validation always
+#      shows drift.
+#   3. Editor "save" that rewrites identical bytes.  Mtime bumps,
+#      content unchanged.
+#
+# And the following classes of false negative (today's system says
+# "ok" when the file was tampered with):
+#
+#   4. Bit-rot / partial-write / silent on-disk corruption that does
+#      not change mtime or size.
+#   5. ``touch -t <old> && edit`` (intentional mtime spoofing).
+#
+# Not helped by Phase 7 (just being honest):
+#
+#   - Re-running an upstream pipeline that produces "the same"
+#     numerical output.  PyTorch / LLM nondeterminism means the bytes
+#     differ, so a content hash drifts even though the experiment is
+#     semantically identical.
+#   - ``rsync -at`` (which is the workflow today).  Already stable
+#     under metadata fingerprinting.
+#
+# The single most valuable case is (2) -- "I just cloned the dataset
+# to a new machine, can I trust the existing caches?" -- which is
+# real but not currently a daily pain point.
+#
+# COST
+# ----
+# SHA-256 throughput on Roger's hardware: ~1-1.5 GB/s warm-cache on
+# M-series macOS w/ SHA-NI; ~600 MB/s cache-cold (disk-bound).  Roger's
+# typical dataset shape (Qwen-3-32B, 8 slots, 64 layers, 5120 hidden,
+# fp32, ~280-300 entities per role group):
+#
+#   - traits/vectors/   ~ 3.1 GB  ->  3-6 s
+#   - roles/vectors/    ~ 2.9 GB  ->  3-6 s
+#   - {traits,roles}/responses/  ~ few GB jsonl  ->  5-10 s
+#   - combinations/vectors/derived/marginals/{r_goal,r_nogoal,
+#     t_goal,t_nogoal}  ~ few hundred MB each  ->  <2 s each
+#   - default/, axis.pt loose files: <1 s
+#
+# Full-dataset content-hashed regen: ~30-60 s on local SSD,
+# 2-5 min on NFS.  vs <1 s for today's metadata-only path.  So
+# 30-300x slower for manifest regeneration; manifest regeneration is
+# infrequent and explicit (``tools/regenerate_dataset_manifest.py``
+# is invoked manually after data-producing steps), so this is OK in
+# absolute terms but not a free lunch.
+#
+# Crucially, validate-time cost stays *zero*: ``validate_recorded``
+# would still compare the recorded ``content_sha256`` to the manifest's
+# (no I/O beyond ``MANIFEST.json``).  Only an opt-in ``--deep`` mode
+# would re-hash on demand.
+#
+# Storage: ~70 bytes per file in MANIFEST.json (path + 64-hex SHA).
+# ~600 files in a typical dataset = ~42 KB extra.  Trivial.
+#
+# IMPLEMENTATION OUTLINE (~ half a day, ~150 LoC + tests)
+# -------------------------------------------------------
+# Scope: subtree-only content hashing.  Leave kind="file" and
+# kind="multi" on metadata fingerprints (their per-file overhead is
+# real and they don't hit the cross-machine case anyway).
+#
+# 1. ``tools/regenerate_dataset_manifest.py``:
+#    a. Add ``content_sha256: str`` to ``SubtreeSummary``.
+#    b. In ``_summarize``, stream-hash each file
+#       (``hashlib.sha256(); read in 1 MB chunks``) and accumulate
+#       per-file ``(rel_path, file_content_sha256)`` pairs.  The
+#       subtree's ``content_sha256`` is the SHA-256 of the sorted
+#       JSON list of those pairs.
+#    c. Add ``--metadata-only`` flag to skip content hashing for the
+#       fast path; default could be either (opinion call).  Keep
+#       ``FINGERPRINT_KIND`` bumpable so manifests self-identify.
+#    d. Print "hashing {name}: {bytes} in {seconds}s" progress per
+#       subtree when content hashing is on, since regen now takes
+#       30-60 s instead of <1 s.
+#
+# 2. ``MANIFEST.json`` schema bump (still 1.0-compatible since
+#    ``content_sha256`` is additive; readers ignoring it stay
+#    correct).  Bump ``FINGERPRINT_KIND`` to ``"mtime_size_v1+content_v1"``
+#    or similar so consumers can dispatch.
+#
+# 3. This module (``assistant_axis/provenance.py``):
+#    a. ``current_data_subtree_input`` records the manifest's
+#       ``content_sha256`` in ``extras["content_sha256"]`` whenever
+#       it's present in the manifest.
+#    b. Add ``"equivalent_content"`` to ``InputStatus.status``
+#       choices (parallel to the ``"equivalent"`` status added in
+#       Phase 6b for script-equivalence downgrades).
+#    c. In ``validate_recorded``, when a kind="subtree" input
+#       reports metadata drift, also compare
+#       ``recorded.extras["content_sha256"]`` against the current
+#       manifest's ``content_sha256``; if equal, downgrade the status
+#       to ``"equivalent_content"`` with a ``detail`` explaining the
+#       transport-noise downgrade.
+#    d. Update ``ProvenanceCheck.ok`` to treat
+#       ``"equivalent_content"`` as acceptable, same way it treats
+#       ``"equivalent"``.
+#
+# 4. ``tools/audit_caches.py`` and ``tools/audit_pngs.py``:
+#    a. Include ``"equivalent_content"`` in ``STATUSES``.
+#    b. Render in audit reports under a "Equivalent (content-hash
+#       confirmed)" section, parallel to the existing "Equivalent
+#       (declared harmless)" rendering.
+#
+# 5. Tests (~50 LoC):
+#    - Round-trip: write subtree, validate -> ok.
+#    - Touch every file in subtree to bump mtime, content unchanged
+#      -> validate downgrades drift to equivalent_content.
+#    - Modify one file's bytes -> validate stays drift (content
+#      hash mismatch), confirming false negatives (bit-rot) are
+#      caught when the user explicitly re-runs manifest regen.
+#    - Old manifest without ``content_sha256``: validate falls back
+#      to metadata-only behaviour (graceful).
+#
+# OPTIONAL EXTENSION (skip until concretely needed):
+# A ``--deep`` flag on ``audit_caches.py`` / ``audit_pngs.py`` /
+# ``regenerate_dataset_manifest.py --verify`` that re-reads every
+# file and confirms the recorded content hashes still match.  Costs
+# the full 30-60 s but is the only way to catch (4) bit-rot without
+# a manifest regen.
+#
+# DECISION CRITERIA (when to actually do this)
+# --------------------------------------------
+# Pick up Phase 7 if any of the following becomes routinely true:
+#   - We start moving datasets between machines via something other
+#     than ``rsync -at`` (e.g. ``scp``, S3 sync, tarball restore,
+#     dataset-in-git on a fresh clone).
+#   - We get false-positive drift in audit_caches / audit_pngs from
+#     tooling that touches files without changing content (some
+#     editor's format-on-save, some build-tool's noop rewrites).
+#   - We ever need a defensible answer to "did this dataset get
+#     corrupted on disk between manifest regen N and now?".
+# Until any of those is the case, the metadata-only fingerprint is
+# strictly cheaper for equal-or-better real-world behaviour.
+# =====================================================================
+
 
 MANIFEST_FILENAME = "MANIFEST.json"
 PROVENANCE_SCHEMA_VERSION = "1.0"
@@ -205,7 +411,18 @@ class Manifest:
 @dataclass(frozen=True)
 class InputStatus:
     dep_key: str
-    status: str          # "ok" | "drift" | "missing_current" | "missing_recorded"
+    # One of:
+    #   "ok"               -- recorded fingerprint matches current.
+    #   "drift"            -- both exist; fingerprints differ.
+    #   "equivalent"       -- kind="file" drift downgraded by an entry
+    #                         in script_equivalences.yaml (output-
+    #                         preserving edit; downstream caches don't
+    #                         need rebuilding).
+    #   "missing_current"  -- file/manifest vanished since the record
+    #                         was made.
+    #   "missing_recorded" -- dep_key in current but not recorded.
+    #   "unverifiable"     -- legacy multi-input without member_paths.
+    status: str
     recorded: Optional[InputSpec] = None
     current: Optional[InputSpec] = None
     detail: str = ""
@@ -215,10 +432,13 @@ class InputStatus:
 class ProvenanceCheck:
     """Per-input drift report built by :func:`validate_inputs`."""
     statuses: list           # list[InputStatus]
-    ok: bool                 # True iff all statuses have status == "ok"
+    ok: bool                 # True iff every status is "ok" or "equivalent"
 
     def drifted(self) -> list:
         return [s for s in self.statuses if s.status == "drift"]
+
+    def equivalent(self) -> list:
+        return [s for s in self.statuses if s.status == "equivalent"]
 
     def missing(self) -> list:
         return [s for s in self.statuses
@@ -454,8 +674,14 @@ def current_files_input(
     """
     # Materialise once; ``paths`` may be a generator.
     paths = [Path(p) for p in paths]
-    triples: list[tuple[str, int, int]] = []
-    rels: list[str] = []
+    # Dedupe by repo-relative path (which uses ``Path.resolve``, so
+    # symlinks pointing at the same target collapse into one entry).
+    # This keeps ``triples`` consistent with ``all_member_rels`` -- a
+    # bug bit Phase 6a when two ``default.pt`` symlinks both pointed
+    # at the same shared target, producing a write-time fingerprint
+    # that included duplicate triples while the recorded
+    # ``member_paths`` was deduped, so re-validation always saw drift.
+    triples_by_rel: dict[str, tuple[str, int, int]] = {}
     newest_mtime_secs = 0
     for p in paths:
         if not p.exists():
@@ -465,10 +691,11 @@ def current_files_input(
         # Floor mtime to whole seconds for rsync stability (see
         # ``current_file_input`` docstring).
         mtime_secs = int(st.st_mtime)
-        triples.append((rel, mtime_secs, int(st.st_size)))
-        rels.append(rel)
+        triples_by_rel[rel] = (rel, mtime_secs, int(st.st_size))
         if mtime_secs > newest_mtime_secs:
             newest_mtime_secs = mtime_secs
+    triples = sorted(triples_by_rel.values())
+    rels = sorted(triples_by_rel.keys())
 
     # Member paths capture the *full* expected set (including missing
     # ones) so a downstream reader can re-stat them and recompute the
@@ -492,7 +719,6 @@ def current_files_input(
             member_paths=all_member_rels or None,
         )
 
-    triples.sort()
     blob = json.dumps(triples, separators=(",", ":")).encode("utf-8")
     sha = hashlib.sha256(blob).hexdigest()
     fp = f"{FINGERPRINT_VERSION_TAG}:multi:{sha[:_SUBTREE_SHA_PREFIX_LEN]}"
@@ -749,12 +975,49 @@ def validate_recorded(
                 recorded=r, current=c,
             ))
         else:
-            statuses.append(InputStatus(
-                dep_key=r.dep_key, status="drift",
-                recorded=r, current=c,
-                detail=f"fingerprint changed: {r.fingerprint} -> {c.fingerprint}",
-            ))
-    ok = all(s.status == "ok" for s in statuses)
+            # Drift on a kind="file" input may be a declared-harmless
+            # edit; consult the script-equivalence registry before
+            # treating it as real drift.  Imported lazily to avoid a
+            # hard dep on PyYAML at import time of this module.
+            equivalent_via: list = []
+            if r.kind == "file":
+                try:
+                    from assistant_axis.script_equivalence import (
+                        is_equivalent as _is_equivalent,
+                    )
+                    found, path = _is_equivalent(
+                        r.path, r.fingerprint, c.fingerprint,
+                        return_path=True,
+                    )
+                    if found:
+                        equivalent_via = path
+                except Exception:
+                    # Registry parse / IO problems must not crash
+                    # validation; surface as plain drift.
+                    equivalent_via = []
+            if equivalent_via:
+                reasons = " ; ".join(
+                    f"{e.from_fp[:24]}->{e.to_fp[:24]}: {e.reason}"
+                    for e in equivalent_via
+                )
+                statuses.append(InputStatus(
+                    dep_key=r.dep_key, status="equivalent",
+                    recorded=r, current=c,
+                    detail=(
+                        f"fingerprint changed: {r.fingerprint} -> "
+                        f"{c.fingerprint}; declared equivalent via "
+                        f"script_equivalences.yaml ({len(equivalent_via)} "
+                        f"hop{'s' if len(equivalent_via) != 1 else ''}: "
+                        f"{reasons})"
+                    ),
+                ))
+            else:
+                statuses.append(InputStatus(
+                    dep_key=r.dep_key, status="drift",
+                    recorded=r, current=c,
+                    detail=f"fingerprint changed: {r.fingerprint} -> {c.fingerprint}",
+                ))
+    ok = all(s.status in ("ok", "equivalent") for s in statuses)
     return ProvenanceCheck(statuses=statuses, ok=ok)
 
 
@@ -853,6 +1116,269 @@ def load_validated_json(
 
     # strict, or rebuild without a callback.
     raise StaleCacheError(path, check)
+
+
+def load_and_register(
+    path: Path,
+    *,
+    dep_key: str,
+    extras: Optional[dict] = None,
+    policy: str = "warn",
+    rebuild_callback=None,
+    inputs: Optional[list] = None,
+):
+    """Read + envelope-unwrap + drift-validate + build an
+    :class:`InputSpec` describing ``path`` itself, in one call.
+
+    This is the writer-side counterpart to :func:`load_validated_json`:
+    where ``load_validated_json`` answers "is this cache I'm reading
+    still current?", ``load_and_register`` answers BOTH that AND
+    "what InputSpec should I record so my OWN output's provenance
+    points back at this file?".  Linking the two operations makes it
+    structurally hard to forget one of them -- you can't read a file
+    without registering it as a dependency, and you can't register a
+    dependency you didn't read.
+
+    Args:
+        path: JSON file to read.  May or may not carry a
+            ``{"_provenance": ..., "result": ...}`` envelope; either
+            way the payload is unwrapped before return.
+        dep_key: Writer-chosen short name for this dependency in the
+            caller's output provenance (see :class:`InputSpec` for the
+            naming convention).
+        extras: Free-form discriminators (slot, layer, K-range, ...);
+            advisory only -- not used in equality / drift comparisons.
+            Recorded on the returned InputSpec.
+        policy: Drift handling for the loaded file's own recorded
+            inputs.  Forwarded to :func:`load_validated_json`; see
+            that function's docstring for the full menu (``"strict"``,
+            ``"warn"``, ``"rebuild"``, ``"off"``).
+        rebuild_callback: Forwarded to :func:`load_validated_json`
+            under ``policy="rebuild"``.
+        inputs: Optional list to which the freshly-built InputSpec is
+            appended *in place*.  Lets a caller accumulate dependencies
+            during a multi-file read without managing an explicit
+            collection variable::
+
+                inputs: list[InputSpec] = []
+                scores, _, _ = load_and_register(
+                    p, dep_key="scores_axisA", inputs=inputs)
+                ...
+                save_json(out_path, result, inputs=inputs)
+
+    Returns:
+        ``(payload, spec, check)``:
+
+        * ``payload`` is the unwrapped result.
+        * ``spec`` is an :class:`InputSpec` for ``path`` (caller's
+          dependency record).
+        * ``check`` is the :class:`ProvenanceCheck` from validating
+          the loaded file's *own* recorded inputs -- ``None`` for
+          legacy bare files or under ``policy="off"``.
+
+    Raises:
+        FileNotFoundError: If ``path`` does not exist.  (We could
+            return ``(None, None, None)`` instead, but the caller
+            almost always wants to know -- explicit pre-check is
+            cheap, and the alternative invites silent skips.)
+        StaleCacheError: Under ``policy="strict"`` (or ``"rebuild"``
+            without a working callback) when the loaded file's own
+            recorded inputs disagree with current state.
+    """
+    p = Path(path)
+    if not p.exists():
+        raise FileNotFoundError(
+            f"load_and_register: {p} does not exist (dep_key={dep_key!r})"
+        )
+    payload, check = load_validated_json(
+        p, policy=policy, rebuild_callback=rebuild_callback,
+    )
+    spec = current_file_input(dep_key=dep_key, path=p, extras=extras)
+    if inputs is not None:
+        inputs.append(spec)
+    return payload, spec, check
+
+
+def _parse_npz_meta(npz, meta_key: str) -> dict:
+    """Extract and JSON-parse the meta blob from an open NpzFile.
+
+    ``np.savez`` stringifies non-array values: a Python dict becomes a
+    0-dim object array of a JSON string when the producer does
+    ``np.savez(..., meta=json.dumps(meta_dict))`` (the convention used
+    by ``winner_decomposition.py``).  Tolerate three storage shapes
+    so the helper isn't brittle to future changes:
+
+    1. ``data[meta_key]`` -> 0-dim ndarray wrapping a ``str`` (the
+       canonical ``json.dumps(...)`` round-trip case).
+    2. ``data[meta_key]`` -> 0-dim ndarray wrapping a ``dict`` (when a
+       producer does ``np.savez(..., meta=meta_dict)`` with
+       ``allow_pickle=True``).
+    3. ``meta_key`` not in ``data.files`` -> return ``{}``.
+
+    Returns ``{}`` rather than raising on a missing/unparseable meta
+    block so legacy npz caches (no inputs recorded) keep loading
+    cleanly under ``policy="warn"`` -- they just won't drift-check.
+    """
+    if meta_key not in npz.files:
+        return {}
+    raw = npz[meta_key]
+    if hasattr(raw, "item"):
+        try:
+            raw = raw.item()
+        except (ValueError, AttributeError):
+            pass
+    if isinstance(raw, dict):
+        return raw
+    if isinstance(raw, bytes):
+        raw = raw.decode("utf-8")
+    if isinstance(raw, str):
+        try:
+            return json.loads(raw)
+        except json.JSONDecodeError:
+            return {}
+    return {}
+
+
+def load_and_register_npz(
+    path: Path,
+    *,
+    dep_key: str,
+    extras: Optional[dict] = None,
+    policy: str = "warn",
+    rebuild_callback=None,
+    inputs: Optional[list] = None,
+    meta_key: str = "meta",
+    allow_pickle: bool = True,
+):
+    """``.npz`` analogue of :func:`load_and_register`.
+
+    ``np.savez`` doesn't support the ``{"_provenance": ..., "result": ...}``
+    JSON envelope that :func:`load_and_register` relies on, so producers
+    serialise their dependency list into the npz's own ``meta`` array
+    (a ``json.dumps(...)`` blob inside a 0-dim object array; see
+    ``winner_decomposition.py`` for the canonical writer pattern).
+    This helper:
+
+    1. Opens ``path`` with ``np.load(allow_pickle=allow_pickle)``.
+    2. Parses ``meta`` (key configurable via ``meta_key``) into a dict.
+    3. If the meta dict has an ``_inputs`` list, runs the same drift
+       validation as :func:`load_validated_json` (re-fingerprinting
+       each recorded :class:`InputSpec` against current state) and
+       applies ``policy`` (``"strict"``/``"warn"``/``"rebuild"``/``"off"``).
+    4. Builds an :class:`InputSpec` describing ``path`` itself so the
+       caller can declare the npz as a dependency of its own output.
+
+    Same atomicity invariant as the JSON path: you can't read a cache
+    without registering it, and you can't register a dependency you
+    didn't read.
+
+    Args:
+        path: ``.npz`` file to read.
+        dep_key: Writer-chosen dependency name for the caller's output
+            provenance (see :class:`InputSpec` for the naming
+            convention).
+        extras: Free-form discriminators recorded on the returned
+            InputSpec; advisory only.
+        policy: Drift handling for the npz's recorded inputs.  Same
+            menu as :func:`load_validated_json`.  ``"warn"`` is the
+            default and prints to stderr without raising; legacy npz
+            files lacking ``meta["_inputs"]`` short-circuit to
+            ``check=None`` regardless of policy.
+        rebuild_callback: Forwarded under ``policy="rebuild"``.
+            Receives ``(path, check)``; should bring the npz back to
+            currency before returning.  After it returns the npz is
+            re-loaded and re-validated; persistent drift raises
+            :class:`StaleCacheError`.
+        inputs: Optional list to which the freshly-built InputSpec is
+            appended in place.
+        meta_key: Field name to read the meta blob from.  Defaults to
+            ``"meta"`` (matches winner_decomposition.py).
+        allow_pickle: Forwarded to ``np.load``.  Defaults to ``True``
+            because the only npz consumer in this codebase
+            (``plot_winner_decomposition.py``) needs pickled object
+            arrays for its column_keys.  Set ``False`` for
+            untrusted npz files.
+
+    Returns:
+        ``(npz, meta, spec, check)``:
+
+        * ``npz`` is the open ``NpzFile``; the caller indexes it as
+          usual (``npz["matrix"]`` etc.) and is responsible for
+          closing it (``npz.close()``) or letting GC handle it.
+        * ``meta`` is the parsed meta dict (empty ``{}`` if absent or
+          unparseable).
+        * ``spec`` is an :class:`InputSpec` for ``path``.
+        * ``check`` is the :class:`ProvenanceCheck` from validating
+          the npz's own recorded inputs, or ``None`` if the npz has
+          no ``meta["_inputs"]`` block / under ``policy="off"``.
+
+    Raises:
+        FileNotFoundError: If ``path`` does not exist.
+        StaleCacheError: Under ``policy="strict"`` (or ``"rebuild"``
+            without a working callback) when the npz's recorded inputs
+            disagree with current state.
+        ValueError: For unknown ``policy`` values.
+    """
+    if policy not in CACHE_POLICIES:
+        raise ValueError(
+            f"Unknown cache policy {policy!r}; "
+            f"choose from {CACHE_POLICIES}.")
+    p = Path(path)
+    if not p.exists():
+        raise FileNotFoundError(
+            f"load_and_register_npz: {p} does not exist "
+            f"(dep_key={dep_key!r})"
+        )
+
+    # Lazy import: keeps numpy off the import-time deps of the
+    # provenance module (which is meant to be light-weight and
+    # importable from anywhere; numpy is fine to require at the
+    # call site since every npz user already depends on it).
+    import numpy as np  # noqa: PLC0415
+
+    npz = np.load(p, allow_pickle=allow_pickle)
+    meta = _parse_npz_meta(npz, meta_key)
+
+    check: Optional[ProvenanceCheck] = None
+    if policy != "off":
+        recorded_blobs = meta.get("_inputs") if isinstance(meta, dict) else None
+        if recorded_blobs:
+            recorded = inputs_from_jsonable(recorded_blobs)
+            check = validate_recorded(recorded)
+            if not check.ok:
+                if policy == "warn":
+                    import sys
+                    sys.stderr.write(
+                        f"[provenance] {p}: drift detected "
+                        f"(policy=warn, returning npz anyway):\n"
+                        f"{check.summary()}\n"
+                    )
+                elif policy == "rebuild" and rebuild_callback is not None:
+                    npz.close()
+                    rebuild_callback(p, check)
+                    npz = np.load(p, allow_pickle=allow_pickle)
+                    meta = _parse_npz_meta(npz, meta_key)
+                    recorded_blobs = (meta.get("_inputs")
+                                      if isinstance(meta, dict) else None)
+                    if not recorded_blobs:
+                        # Callback rebuilt without a meta block; treat
+                        # as still-stale rather than silently passing.
+                        npz.close()
+                        raise StaleCacheError(p, check)
+                    recorded = inputs_from_jsonable(recorded_blobs)
+                    check = validate_recorded(recorded)
+                    if not check.ok:
+                        npz.close()
+                        raise StaleCacheError(p, check)
+                else:
+                    # strict, or rebuild without a callback.
+                    npz.close()
+                    raise StaleCacheError(p, check)
+
+    spec = current_file_input(dep_key=dep_key, path=p, extras=extras)
+    if inputs is not None:
+        inputs.append(spec)
+    return npz, meta, spec, check
 
 
 def inputs_from_jsonable(blobs: Iterable[dict]) -> list[InputSpec]:

@@ -308,6 +308,53 @@ combined with the SHA gets you almost all the way back. See
 [`assistant_axis/plot_metadata.py`](assistant_axis/plot_metadata.py)
 for the helper.
 
+### Data provenance
+
+The plot-provenance block above answers "how was this made?". A
+parallel layered system answers "are this plot's *inputs* still
+current?" — i.e., has any upstream dataset, judge cache, or
+intermediate JSON drifted since the artifact was rendered? Layers:
+
+- **Dataset manifests** — each dataset under `runpod_workspace/`
+  carries a `MANIFEST.json` with subtree-granular `summary_sha256`
+  fingerprints. Regenerate after dataset changes:
+
+  ```bash
+  uv run python tools/regenerate_dataset_manifest.py \
+      --dataset 'runpod_workspace/qwen/qwen-3-32b Roger 8slot'
+  ```
+
+- **Raw vs derived layout** — pipeline outputs live under
+  `combinations/vectors/`; everything *post-pipeline* (marginals,
+  aggregates, axes, legacy centroids) lives under `vectors/derived/`.
+  See [`audits/post_pipeline_derived_layout.md`](audits/post_pipeline_derived_layout.md)
+  for the locked layout.
+
+- **Writer pattern** — analysis scripts that emit JSON wrap the
+  payload in a `_provenance` envelope via
+  [`assistant_axis.json_metadata`](assistant_axis/plot_metadata.py)
+  and pass the same `inputs=[InputSpec, ...]` list to
+  `png_metadata(...)` for any plot output.
+
+- **Reader pattern** — consumers expose `--cache-policy {strict,
+  warn, rebuild, off}` and load upstream caches via
+  `load_validated_json(...)`, which re-derives current fingerprints
+  and reports drift.
+
+- **Audit tools** — answer "what's stale?" repo-wide:
+
+  ```bash
+  uv run python tools/audit_pngs.py   --status stale
+  uv run python tools/audit_caches.py --status stale
+  ```
+
+  Cache audit also propagates staleness *transitively* through
+  inter-cache file dependencies.
+
+Full reference (including `InputSpec` kinds, status taxonomy, and
+the migrated-script roster) lives in
+[`AGENT_NOTES.md` § End-to-End Data Provenance](AGENT_NOTES.md).
+
 ## Models from the Paper
 
 | Model | Target Layer | Best Activation Capping Setting |
