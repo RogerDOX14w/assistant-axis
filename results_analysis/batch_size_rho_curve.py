@@ -79,7 +79,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 from scipy.stats import spearmanr
 
-from assistant_axis import json_metadata
+from assistant_axis import display_label, entity_id, json_metadata
 from assistant_axis.plot_metadata import png_metadata, suptitle_with_specs
 from assistant_axis.provenance import (
     InputSpec,
@@ -112,10 +112,25 @@ DEFAULT_CONFIGS: list[tuple[int, int]] = [
 DEFAULT_EXPERIMENT_DIR = "roger/axis_judge_experiments"
 DEFAULT_OUTPUT_DIR = "roger"
 
-# Per-axis cost in USD from the README cost model
-# (gpt-4.1-mini @ $0.40/$1.60, ~568 entities × ~430-481 items each).
+# Per-axis cost in USD (both cohorts combined) for GPT-4.1-mini at the
+# given B, computed from the empirical token model in
+# results_analysis/README.md "Judging cost model":
+#   per-batch input  ≈ H + B*R  (H≈320 header tokens, R≈438 tokens/item)
+#   per-batch output ≈ 80 tokens
+#   N_items / axis  ≈ 246k (both cohorts), so n_batches = N_items/B
+#   in_M  = (n_batches*H + N_items*R) / 1e6
+#   out_M = (n_batches*80) / 1e6
+# GPT-4.1-mini rates @ $0.40 in / $1.60 out per 1M tokens.
+# These supersede the previous (16.50, 12.77, 9.98, 7.81, 6.72, 5.63)
+# numbers, which were ~5x too low because they used a header-only
+# token model that ignored the per-item response content (the bulk
+# of every prompt).  Recomputed 2026-05-09 from a dry-run of 240 real
+# B=10 prompts via tiktoken; see plot_batch_size_quality_vs_cost.py
+# B10_GPT_INPUT_M_TOK comment for derivation.  The B-curve is much
+# flatter than the old one: at B=30 we still pay ~$45/axis because
+# item tokens dominate; only header overhead shrinks with B.
 COST_PER_AXIS_USD: dict[int, float] = {
-    5: 16.50, 7: 12.77, 10: 9.98, 15: 7.81, 20: 6.72, 30: 5.63,
+    5: 55.69, 7: 52.10, 10: 49.40, 15: 47.30, 20: 46.25, 30: 45.20,
 }
 
 # (L, K) sweep params for the per-cell ρ optimisation.
@@ -169,7 +184,7 @@ def load_scores(
         for name, info in scores.items():
             ms = info.get("mean_score")
             if ms is not None:
-                out[name] = float(ms)
+                out[entity_id(name, side)] = float(ms)
     return out
 
 
@@ -184,7 +199,7 @@ def load_entity_matrix(data_dir: Path, slot: int,
         for fp in sorted((data_dir / et / "vectors").glob("*.pt")):
             if fp.stem == "default":
                 continue
-            names.append(fp.stem)
+            names.append(entity_id(fp.stem, et))
             v = _load_vector_file(fp).float().numpy()[slot, layer]
             rows.append(v - default_v)
     return names, np.stack(rows, axis=0).astype(np.float32)
@@ -394,9 +409,15 @@ def compute_batch_size_curve(
             ax_dir = axis_direction(data_dir, pos, neg, slot, layer)
             for B in batch_sizes:
                 scores = scores_cache[(axis, B)]
-                # Hold out the pole-defining traits from the scoring set.
+                # Hold out the pole-defining traits from the scoring
+                # set.  ``scores`` is entity_id-keyed (e.g. "patient|T")
+                # but pos/neg are bare; compare on the bare name so
+                # both kinds of any pole-name collision are held out
+                # (the pair-typed script is trait-only via
+                # ``axis_direction``, so excluding the role homonym
+                # too is harmless and safer).
                 scores_held = {n: v for n, v in scores.items()
-                                if n not in (pos, neg)}
+                                if display_label(n) not in (pos, neg)}
                 if not scores_held:
                     rho_per[(axis, B, slot, layer)] = float("nan")
                     continue

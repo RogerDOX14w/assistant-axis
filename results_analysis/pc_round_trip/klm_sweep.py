@@ -82,6 +82,7 @@ from typing import Optional
 import numpy as np
 from scipy.stats import spearmanr
 
+from assistant_axis import entity_id
 from assistant_axis.judge_score_combine import (
     DI_WEIGHT_CHOICES, combine_desc_inst_two_judges,
 )
@@ -157,7 +158,7 @@ def setup_at(data_dir: Path, slot: int, layer: int):
         for fp in sorted((data_dir / et / "vectors").glob("*.pt")):
             if fp.stem == "default":
                 continue
-            names.append(fp.stem)
+            names.append(entity_id(fp.stem, et))
             v = _load_vector_file(fp).float().numpy()[slot, layer]
             rows.append(v - default_v)
     M_raw = np.stack(rows, axis=0).astype(np.float32)

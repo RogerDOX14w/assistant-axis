@@ -44,7 +44,8 @@ import numpy as np
 import torch
 from scipy.stats import spearmanr
 
-from assistant_axis import json_metadata, png_metadata
+from assistant_axis import entity_id, json_metadata, png_metadata
+from assistant_axis.judge_loaders import migrate_v1_static_scores
 from assistant_axis.judge_score_combine import (
     DEFAULT_DI_WEIGHTS,
     DEFAULT_GPT_HAIKU_Q9_WEIGHT,
@@ -135,7 +136,7 @@ def _load_response_scores(
         for name, info in scores.items():
             ms = info.get("mean_score") if isinstance(info, dict) else None
             if ms is not None:
-                out[name] = float(ms)
+                out[entity_id(name, side)] = float(ms)
     return out
 
 
@@ -217,15 +218,22 @@ def main() -> int:
     ]
 
     # Pre-cache standalone entity vectors at (slot, layer), default-centered.
+    # Build kinds_for_name alongside so v1 (bare-name) caches -- e.g.
+    # the deferred Sonnet desc/inst caches that weren't included in
+    # Phase 5b/5c.1 -- can be migrated up to v2 in-memory before
+    # intersecting with the post-Phase-5 v2 GPT/Haiku caches.  See
+    # assistant_axis.judge_loaders.migrate_v1_static_scores.
     default_v = _v(data_dir / "traits" / "vectors" / "default.pt", slot, layer)
     entity_vecs: dict[str, np.ndarray] = {}
+    kinds_for_name: dict[str, set] = {}
     for et in ("traits", "roles"):
         for fp in sorted((data_dir / et / "vectors").glob("*.pt")):
             if fp.stem == "default":
                 continue
             try:
                 v = _load_vector_file(fp).float()[slot, layer]
-                entity_vecs[fp.stem] = (v - default_v).numpy()
+                entity_vecs[entity_id(fp.stem, et)] = (v - default_v).numpy()
+                kinds_for_name.setdefault(fp.stem, set()).add(et)
             except Exception:  # pragma: no cover -- skip unreadable .pt
                 continue
 
@@ -283,6 +291,13 @@ def main() -> int:
             axis_dir / "sonnet" / "scores_instructions.json",
             dep_key=f"di_sonnet_i_{axis_name}",
             inputs=inputs, policy="warn")
+        # Migrate Sonnet's v1 (bare-name) keys to v2 (entity_id) form
+        # before combining; GPT caches are already v2 post-Phase-5.
+        # Without migration the 4-way intersection is empty (v1 vs v2
+        # keys never overlap).  ``migrate_v1_static_scores`` is a no-op
+        # on already-v2 input, so applying it uniformly is safe.
+        s_d = migrate_v1_static_scores(s_d, kinds_for_name)
+        s_i = migrate_v1_static_scores(s_i, kinds_for_name)
         di = combine_desc_inst_two_judges(
             g_d, g_i, s_d, s_i, weights=DEFAULT_DI_WEIGHTS)
 

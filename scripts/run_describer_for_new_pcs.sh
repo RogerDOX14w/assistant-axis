@@ -12,22 +12,6 @@ cd "$(dirname "$0")/.."
 SWEEP_DIR="roger/pc_axis_describer_sweep"
 DATA_DIR="runpod_workspace/qwen/qwen-3-32b Roger 8slot"
 
-# Build name → type map once (R for role, T for trait).
-TYPE_MAP="$(mktemp)"
-trap 'rm -f "$TYPE_MAP"' EXIT
-for f in "$DATA_DIR"/roles/vectors/*.pt; do
-    [ -e "$f" ] || continue
-    name=$(basename "$f" .pt)
-    [ "$name" = "default" ] && continue
-    echo "$name R" >> "$TYPE_MAP"
-done
-for f in "$DATA_DIR"/traits/vectors/*.pt; do
-    [ -e "$f" ] || continue
-    name=$(basename "$f" .pt)
-    [ "$name" = "default" ] && continue
-    echo "$name T" >> "$TYPE_MAP"
-done
-
 PCS="${1:-3 6 12}"
 STYLES="${2:-glossary inline}"
 
@@ -44,23 +28,28 @@ for pc in $PCS; do
             exit 1
         fi
         echo "[$cell] preparing input_scores.json..."
-        # Convert {name: score} → [{name, type, score}, ...]
+        # Convert {entity_id: score} → [{name, type, score}, ...].
+        # post_shear_projection.json keys are disambiguated entity_ids
+        # (e.g. "patient|R" / "patient|T") since trait/role disambiguation
+        # landed in May 2026; parse the kind from the suffix.
         uv run python -c "
 import json, sys
-m = {}
-for line in open('$TYPE_MAP'):
-    n, t = line.strip().split()
-    m[n] = t
+from assistant_axis.entity_id import parse_entity_id, kind_short
 proj = json.load(open('$cell/post_shear_projection.json'))
 out = []
-missing = []
-for n, s in proj.items():
-    if n in m:
-        out.append({'name': n, 'type': m[n], 'score': float(s)})
-    else:
-        missing.append(n)
-if missing:
-    print(f'WARN: {len(missing)} entities missing type: {missing[:5]}', file=sys.stderr)
+bad = []
+for k, s in proj.items():
+    try:
+        eid = parse_entity_id(k)
+    except ValueError:
+        bad.append(k)
+        continue
+    out.append({'name': eid.name, 'type': kind_short(eid.kind),
+                'score': float(s)})
+if bad:
+    print(f'WARN: {len(bad)} non-entity_id keys in post_shear_projection.json: '
+          f'{bad[:5]} (regenerate via launch_judge_runs.py --setup_only)',
+          file=sys.stderr)
 json.dump(out, open('$cell/input_scores.json', 'w'), indent=2)
 print(f'wrote {len(out)} entries')
 "

@@ -81,6 +81,59 @@ def generate_response(
     return response
 
 
+# NOTE (re-extracted helper, not new functionality):
+#
+# This helper is a verbatim re-extraction of the inline probe that
+# previously lived inside ``format_conversation`` below.  The probe
+# itself was first added in commit 5e571f5 ("Update response token
+# index method.", 2026-01-13) as a top-level function with this exact
+# body, alongside ``tests/test_generation.py`` which imports it by
+# name.  The very next day, commit 81e0af5 ("Add trait list and
+# import internals/ for activation capture.", 2026-01-14) inlined the
+# probe into ``format_conversation`` as part of a larger refactor
+# that pivoted ``generation.py`` from HuggingFace toward vLLM and
+# moved a chunk of code into ``assistant_axis/internals/``.  That
+# inlining did not update ``test_generation.py``, so its
+# ``from assistant_axis.generation import supports_system_prompt``
+# line has been a silent test-collection error on Christina's branch
+# ever since (about four weeks before this repo was forked off it on
+# 2026-02-10).  No behavioural change: ``format_conversation`` below
+# now calls this helper instead of inlining the identical probe.
+# Cherrypick-friendly: dropping this helper back into Christina's
+# branch fixes her test without touching anything else.
+def supports_system_prompt(tokenizer) -> bool:
+    """Check whether a tokenizer's chat template supports system prompts.
+
+    Detects support behaviourally: applies the chat template to a
+    two-message conversation containing a sentinel system message,
+    and checks whether the sentinel survives in the rendered output.
+    Templates that raise on a ``system`` role (e.g. Gemma 2's "System
+    role not supported" Jinja exception) and templates that silently
+    drop / merge the system message both correctly return ``False``.
+
+    Args:
+        tokenizer: HuggingFace tokenizer.
+
+    Returns:
+        ``True`` if the rendered template preserves the system
+        content verbatim, ``False`` otherwise.
+    """
+    test_message = "__SYSTEM_TEST__"
+    test_conversation = [
+        {"role": "system", "content": test_message},
+        {"role": "user", "content": "hello"},
+    ]
+    try:
+        output = tokenizer.apply_chat_template(
+            test_conversation,
+            tokenize=False,
+            add_generation_prompt=False,
+        )
+        return test_message in output
+    except Exception:
+        return False
+
+
 def format_conversation(
     instruction: Optional[str],
     question: str,
@@ -97,24 +150,7 @@ def format_conversation(
     Returns:
         List of message dicts for the conversation
     """
-    # Check system prompt support by testing the chat template
-    test_message = "__SYSTEM_TEST__"
-    test_conversation = [
-        {"role": "system", "content": test_message},
-        {"role": "user", "content": "hello"},
-    ]
-
-    try:
-        output = tokenizer.apply_chat_template(
-            test_conversation,
-            tokenize=False,
-            add_generation_prompt=False,
-        )
-        supports_system = test_message in output
-    except Exception:
-        supports_system = False
-
-    if supports_system:
+    if supports_system_prompt(tokenizer):
         messages = []
         if instruction:
             messages.append({"role": "system", "content": instruction})

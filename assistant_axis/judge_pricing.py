@@ -1,0 +1,424 @@
+"""Judge pricing constants + budget tracking utilities.
+
+Phase 4c (May 2026) — promotes the per-token rates (previously
+duplicated in ``results_analysis/plot_batch_size_quality_vs_cost.py``)
+into a single project-wide source of truth, and adds:
+
+* :class:`UsageTotals` — accumulator for prompt/completion tokens
+  and resolved USD cost.
+* :class:`BudgetTracker` — wraps a UsageTotals with a hard budget
+  cap (``--budget_usd``).  Each :meth:`charge` call updates the
+  totals and raises :class:`BudgetExceededError` if the running
+  cost crosses the cap.
+* :func:`extract_usage_anthropic`, :func:`extract_usage_openai` —
+  extract the token-count tuple from a provider's response object,
+  surviving SDK version drift (the field names differ across major
+  OpenAI / Anthropic SDK versions).
+* :func:`price_for_model` — look up (input, output) USD per 1M
+  rates by canonical model name; aliases handled.
+
+USAGE
+-----
+The budget tracker is owned by :func:`run` in
+``results_analysis/axis_judge_correlation.py`` and threaded through
+to :func:`_call_anthropic_batch` / :func:`_call_openai_batch` so
+every API call ticks the accumulator.  Callers MUST handle
+:class:`BudgetExceededError` — they should re-raise with
+``SystemExit(2)`` (cap-exceeded, structured exit code distinct from
+cmd-line-error 1).
+
+PRICING
+-------
+USD per 1M tokens, separated into input and output streams.  These
+numbers are documented in README.md "Judging cost model" and are
+the same numbers the cost-vs-quality plot uses.  Update both places
+together if rates change.
+
+Note on caching: gpt-4.1-mini / gpt-4-class models support prompt
+caching (~5x cheaper for the cached prefix portion).  We do NOT
+account for cache hits here — running totals will slightly
+overestimate cost for cache-friendly workloads, which is
+conservative-by-default for a budget cap.
+"""
+from __future__ import annotations
+
+import logging
+from dataclasses import dataclass, field
+from typing import Any, Optional
+
+logger = logging.getLogger(__name__)
+
+
+# ---------------------------------------------------------------------------
+# Pricing constants (USD per 1,000,000 tokens, input / output split)
+#
+# Source: official OpenAI / Anthropic public pricing pages, May 2026.
+# Mirrors the constants in
+#   results_analysis/plot_batch_size_quality_vs_cost.py
+# (those are the canonical definitions; this module re-exports them
+# under stable names so the call-site code doesn't need to import the
+# plotting script).
+# ---------------------------------------------------------------------------
+
+GPT_MINI_RATE_IN = 0.40   # USD / 1M input tokens (gpt-4.1-mini)
+GPT_MINI_RATE_OUT = 1.60  # USD / 1M output tokens
+HAIKU_RATE_IN = 1.00      # claude-haiku-4-5
+HAIKU_RATE_OUT = 5.00
+SONNET_RATE_IN = 3.00     # claude-sonnet-4
+SONNET_RATE_OUT = 15.00
+
+
+# --------------------------------------------------------------------------
+# Roles-vs-traits response-length asymmetry (response-mode judging only).
+# --------------------------------------------------------------------------
+# Empirical: at the same B and the same N entities, response-mode judging
+# of ROLES costs ~1.22× more per entity than TRAITS, because Qwen-3-32B
+# produces ~22% longer responses when role-played than trait-modulated
+# (mean 2094 vs 1718 chars, median 2351 vs 1842 chars across the 29 roles
+# + 14 traits residual cohort used in 5d.1 = 14,500 + 7,000 responses).
+# The 5d.1 actual/expected = 1.21 reconciles cleanly once this factor is
+# applied (see ROLES_RESPONSE_LENGTH_FACTOR usage in surgical-rejudge
+# budget formulae).  Output-mode tokens are NOT affected -- the judge
+# emits a fixed-format score per response regardless of cohort.
+#
+# This factor applies ONLY to response-mode judging (where per-call
+# input is dominated by raw response text).  Static-mode prompts
+# (descriptions / instructions) don't include responses and have no
+# such asymmetry; use 1.0 there.
+ROLES_RESPONSE_LENGTH_FACTOR: float = 1.22
+"""Per-entity response-mode cost multiplier for ``roles`` cohorts vs
+``traits``.  Multiply the per-entity cost of a traits-only budget by
+this factor to get the per-entity cost for roles, or use the helper
+:func:`surgical_rejudge_cost_split` below to split a per-axis budget
+into role/trait cohort shares.
+"""
+
+
+def surgical_rejudge_cost_split(
+    per_axis_cost_usd: float,
+    n_roles: int,
+    n_traits: int,
+    *,
+    mode: str = "response",
+) -> tuple[float, float]:
+    """Split a per-axis judging budget between roles and traits cohorts,
+    accounting for the response-mode roles-vs-traits cost asymmetry.
+
+    Surgical rejudges (Phase 5b / 5c / 5d / etc.) score only N_r roles
+    + N_t traits entities per axis; the cost-per-entity is NOT equal
+    across cohorts in response-mode because Qwen role-played responses
+    are ~22% longer than trait-modulated ones (see
+    :data:`ROLES_RESPONSE_LENGTH_FACTOR`).
+
+    Args:
+        per_axis_cost_usd: Total expected cost for the axis (full
+            volume per-axis cost from the cost table × N_total / 580).
+        n_roles, n_traits: Number of entities surgically rejudged in
+            each cohort.
+        mode: ``"response"`` (default) or ``"static"``.  Response mode
+            applies the 1.22× asymmetry; static mode treats roles and
+            traits as equally expensive per entity (no per-response
+            text in the prompt).
+
+    Returns:
+        ``(roles_cost_usd, traits_cost_usd)`` summing to
+        ``per_axis_cost_usd``.
+
+    Example: 5d.1 used N_r=29 + N_t=14 per axis at $3.50/axis
+    (revised estimate); ``surgical_rejudge_cost_split(3.50, 29, 14)``
+    returns ``($2.50, $1.00)``, matching the observed 5d.1 cell
+    ratios within ~5%.
+    """
+    if mode == "response":
+        weight_r = n_roles * ROLES_RESPONSE_LENGTH_FACTOR
+        weight_t = n_traits
+    elif mode == "static":
+        weight_r = float(n_roles)
+        weight_t = float(n_traits)
+    else:
+        raise ValueError(f"mode must be 'response' or 'static', got {mode!r}")
+    w_total = weight_r + weight_t
+    if w_total <= 0:
+        return (0.0, 0.0)
+    return (
+        per_axis_cost_usd * weight_r / w_total,
+        per_axis_cost_usd * weight_t / w_total,
+    )
+
+# (input_rate, output_rate) keyed by canonical model name.  Lookups
+# are case-insensitive and use substring matching (so e.g.
+# "gpt-4.1-mini-2024" still resolves to GPT_MINI rates).
+_MODEL_RATES: tuple[tuple[str, float, float], ...] = (
+    ("gpt-4.1-mini", GPT_MINI_RATE_IN, GPT_MINI_RATE_OUT),
+    ("gpt-4o-mini", GPT_MINI_RATE_IN, GPT_MINI_RATE_OUT),
+    ("haiku", HAIKU_RATE_IN, HAIKU_RATE_OUT),
+    ("sonnet", SONNET_RATE_IN, SONNET_RATE_OUT),
+    # Future Opus pricing — placeholder, fail loud if hit:
+    # ("opus", 15.00, 75.00),
+)
+
+
+def price_for_model(model: str) -> tuple[float, float]:
+    """Return ``(input_rate, output_rate)`` in USD per 1M tokens for
+    ``model`` (canonical name).
+
+    Substring-match: ``"gpt-4.1-mini-2024-07-18"`` resolves to
+    ``gpt-4.1-mini`` rates, ``"claude-haiku-4-5-20251001"`` to
+    ``haiku`` rates, etc.
+
+    Raises ``KeyError`` for unrecognised models — callers MUST
+    register new models here before judging with them, otherwise
+    cost will silently appear free in budget reports.
+    """
+    m = model.lower()
+    for fragment, rate_in, rate_out in _MODEL_RATES:
+        if fragment in m:
+            return rate_in, rate_out
+    raise KeyError(
+        f"Unknown judge model {model!r} for pricing.  Add an entry "
+        f"to assistant_axis/judge_pricing.py:_MODEL_RATES (and the "
+        f"corresponding constants in plot_batch_size_quality_vs_cost.py)."
+    )
+
+
+def cost_for_usage(
+    model: str,
+    prompt_tokens: int,
+    completion_tokens: int,
+) -> float:
+    """USD cost of a single (prompt, completion) token pair at the
+    model's rates.  Convenience wrapper around :func:`price_for_model`.
+    """
+    rate_in, rate_out = price_for_model(model)
+    return (
+        prompt_tokens * rate_in / 1_000_000.0
+        + completion_tokens * rate_out / 1_000_000.0
+    )
+
+
+# ---------------------------------------------------------------------------
+# Usage extractors
+# ---------------------------------------------------------------------------
+
+def extract_usage_anthropic(resp: Any) -> tuple[int, int]:
+    """Return ``(prompt_tokens, completion_tokens)`` from an Anthropic
+    Messages response.  Tolerates SDK version drift: the canonical
+    field is ``resp.usage`` with ``input_tokens`` / ``output_tokens``,
+    but legacy SDKs used ``prompt_tokens`` / ``completion_tokens``.
+
+    Returns ``(0, 0)`` when usage is missing entirely — never raises
+    (keeps the call path resilient to partial response objects from
+    error retries).
+    """
+    usage = getattr(resp, "usage", None)
+    if usage is None:
+        return 0, 0
+    in_tokens = (
+        getattr(usage, "input_tokens", None)
+        or getattr(usage, "prompt_tokens", None)
+        or 0
+    )
+    out_tokens = (
+        getattr(usage, "output_tokens", None)
+        or getattr(usage, "completion_tokens", None)
+        or 0
+    )
+    return int(in_tokens), int(out_tokens)
+
+
+def extract_usage_openai(resp: Any) -> tuple[int, int]:
+    """Return ``(prompt_tokens, completion_tokens)`` from an OpenAI
+    chat-completions response.  Same SDK-drift tolerance as the
+    Anthropic helper.
+    """
+    usage = getattr(resp, "usage", None)
+    if usage is None:
+        return 0, 0
+    in_tokens = (
+        getattr(usage, "prompt_tokens", None)
+        or getattr(usage, "input_tokens", None)
+        or 0
+    )
+    out_tokens = (
+        getattr(usage, "completion_tokens", None)
+        or getattr(usage, "output_tokens", None)
+        or 0
+    )
+    return int(in_tokens), int(out_tokens)
+
+
+# ---------------------------------------------------------------------------
+# Accumulators
+# ---------------------------------------------------------------------------
+
+@dataclass
+class UsageTotals:
+    """Running totals for one judge invocation (one
+    ``axis_judge_correlation.py`` run = one axis × one cohort).
+
+    Attributes are mutated in place via :meth:`charge`.
+
+    Attributes:
+        model: Canonical model name (used for re-deriving the cost).
+        prompt_tokens: Sum of input/prompt tokens across all calls.
+        completion_tokens: Sum of output/completion tokens.
+        cost_usd: Running total cost in USD, computed at charge time
+            using :func:`price_for_model` rates.
+        n_calls: Number of API calls accumulated (for log lines).
+    """
+    model: str
+    prompt_tokens: int = 0
+    completion_tokens: int = 0
+    cost_usd: float = 0.0
+    n_calls: int = 0
+
+    def charge(self, prompt_tokens: int, completion_tokens: int) -> float:
+        """Add one API call's tokens; return its USD cost contribution."""
+        rate_in, rate_out = price_for_model(self.model)
+        delta_cost = (
+            prompt_tokens * rate_in / 1_000_000.0
+            + completion_tokens * rate_out / 1_000_000.0
+        )
+        self.prompt_tokens += int(prompt_tokens)
+        self.completion_tokens += int(completion_tokens)
+        self.cost_usd += delta_cost
+        self.n_calls += 1
+        return delta_cost
+
+    def as_dict(self) -> dict:
+        """Serialisable form for ``usage.json`` side-car / provenance notes."""
+        return {
+            "model": self.model,
+            "prompt_tokens": self.prompt_tokens,
+            "completion_tokens": self.completion_tokens,
+            "cost_usd": round(self.cost_usd, 4),
+            "n_calls": self.n_calls,
+        }
+
+
+class BudgetExceededError(Exception):
+    """Raised by :meth:`BudgetTracker.charge` when the running cost
+    crosses the configured ``budget_usd`` cap.
+
+    The orchestrator (``results_analysis/axis_judge_correlation.py``
+    :func:`run`) catches this, flushes any in-progress caches, logs a
+    summary, and exits with code 2 (= cap exceeded; distinct from
+    exit code 1 for command-line errors).
+    """
+
+    def __init__(self, totals: UsageTotals, budget_usd: float) -> None:
+        self.totals = totals
+        self.budget_usd = budget_usd
+        super().__init__(
+            f"Budget cap exceeded: ${totals.cost_usd:.2f} > ${budget_usd:.2f} "
+            f"(prompt={totals.prompt_tokens}, completion="
+            f"{totals.completion_tokens}, n_calls={totals.n_calls}). "
+            f"Exiting; partial results have been flushed to disk."
+        )
+
+
+@dataclass
+class BudgetTracker:
+    """Cost-cap-enforcing accumulator over judge API calls.
+
+    Wraps a :class:`UsageTotals` with an optional hard cap
+    (:attr:`budget_usd`) and an optional expected-cost reference
+    (:attr:`expected_cost_usd`) used for the
+    actual/expected-ratio reporting in canary deployments.
+
+    Attributes:
+        totals: The :class:`UsageTotals` accumulator.
+        budget_usd: Hard cap.  When set and exceeded, :meth:`charge`
+            raises :class:`BudgetExceededError`.  ``None`` disables
+            the cap (legacy behaviour).
+        expected_cost_usd: Ratio reference (canary deployments
+            compute ``actual / expected`` against this).  Advisory
+            only; doesn't affect cap enforcement.
+    """
+    totals: UsageTotals
+    budget_usd: Optional[float] = None
+    expected_cost_usd: Optional[float] = None
+    # Internal: log-line throttling.
+    _last_logged_cost: float = field(default=0.0, repr=False)
+
+    def charge(self, prompt_tokens: int, completion_tokens: int) -> float:
+        """Tick the underlying totals; raise if the cap is crossed.
+
+        Returns the USD cost contribution for this single call.
+        """
+        delta = self.totals.charge(prompt_tokens, completion_tokens)
+        if self.budget_usd is not None and self.totals.cost_usd > self.budget_usd:
+            raise BudgetExceededError(self.totals, self.budget_usd)
+        return delta
+
+    def ratio(self) -> Optional[float]:
+        """``actual / expected`` ratio when ``expected_cost_usd`` is set,
+        else ``None``.  Used for canary GREEN/AMBER/RED gating."""
+        if not self.expected_cost_usd:
+            return None
+        if self.expected_cost_usd <= 0:
+            return None
+        return self.totals.cost_usd / self.expected_cost_usd
+
+    def log_line(self, prefix: str = "[budget]") -> str:
+        """One-line human-readable status (suitable for periodic logs)."""
+        parts = [f"cost=${self.totals.cost_usd:.2f}"]
+        if self.budget_usd is not None:
+            pct = (self.totals.cost_usd / self.budget_usd * 100.0
+                   if self.budget_usd > 0 else float("inf"))
+            parts.append(f"cap=${self.budget_usd:.2f} ({pct:.0f}%)")
+        if self.expected_cost_usd:
+            ratio = self.ratio()
+            parts.append(
+                f"expected=${self.expected_cost_usd:.2f} "
+                f"(actual/expected={ratio:.2f})"
+            )
+        parts.append(
+            f"tokens=in:{self.totals.prompt_tokens:,}/"
+            f"out:{self.totals.completion_tokens:,}"
+        )
+        parts.append(f"calls={self.totals.n_calls:,}")
+        return f"{prefix} " + " ".join(parts)
+
+    def maybe_log(self, logger_obj: logging.Logger,
+                  threshold_usd: float = 0.10) -> None:
+        """Emit a ``[budget]`` log line iff the running cost has
+        increased by ``threshold_usd`` since the last log call.
+
+        Cheap to call from a tight loop; only the periodic save_every
+        path actually emits a line.
+        """
+        if self.totals.cost_usd - self._last_logged_cost >= threshold_usd:
+            logger_obj.info(self.log_line())
+            self._last_logged_cost = self.totals.cost_usd
+
+    def as_dict(self) -> dict:
+        """Serialisable form for ``usage.json`` and provenance notes."""
+        out: dict[str, Any] = {**self.totals.as_dict()}
+        if self.budget_usd is not None:
+            out["budget_usd"] = round(self.budget_usd, 2)
+        if self.expected_cost_usd is not None:
+            out["expected_cost_usd"] = round(self.expected_cost_usd, 2)
+            ratio = self.ratio()
+            if ratio is not None:
+                out["actual_over_expected"] = round(ratio, 3)
+        return out
+
+
+__all__ = [
+    "GPT_MINI_RATE_IN",
+    "GPT_MINI_RATE_OUT",
+    "HAIKU_RATE_IN",
+    "HAIKU_RATE_OUT",
+    "SONNET_RATE_IN",
+    "SONNET_RATE_OUT",
+    "ROLES_RESPONSE_LENGTH_FACTOR",
+    "price_for_model",
+    "cost_for_usage",
+    "surgical_rejudge_cost_split",
+    "extract_usage_anthropic",
+    "extract_usage_openai",
+    "UsageTotals",
+    "BudgetTracker",
+    "BudgetExceededError",
+]

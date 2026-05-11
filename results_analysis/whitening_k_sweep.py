@@ -91,6 +91,7 @@ from scipy.stats import spearmanr
 
 from assistant_axis import (
     cohort_from_pairs,
+    entity_id,
     json_metadata,
     pair_type_of,
     png_metadata,
@@ -171,7 +172,7 @@ def load_pool(data_dir: Path, exclude_names: set[str], *, slot: int):
                 v = _load_vector_file(f).float()
             except Exception:  # pragma: no cover -- skip unreadable files
                 continue
-            entity_vecs[f.stem] = v[slot, LAYER] - default_sl
+            entity_vecs[entity_id(f.stem, etype)] = v[slot, LAYER] - default_sl
 
     # Build the pool via the canonical-angles helper.  Pass leave-out
     # entries for both etypes since we don't know which one the pair
@@ -356,7 +357,7 @@ def main() -> int:
             )
             for n, info in payload.items():
                 if info.get("mean_score") is not None:
-                    responses[n] = info["mean_score"]
+                    responses[entity_id(n, mode)] = info["mean_score"]
 
         # --- Projections at each K ---
         entity_vecs, pool, _default = load_pool(

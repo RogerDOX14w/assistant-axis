@@ -348,67 +348,94 @@ uv run python results_analysis/axis_judge_correlation.py \
 
 The `responses` scoring mode is the dominant cost in this script (the
 `description` and `instructions` modes each fit in a few hundred prompts
-per axis). Numbers below are derived from one real B=15 prompt
-tiktoken-counted on the actual data, plus measured judge output lengths
-sampled from cached `scores_responses.json`.
+per axis). Numbers below were re-derived from scratch on **2026-05-09**
+via a 240-batch dry-run sample: real B=10 prompts reconstructed from
+v1-rubric cache batch keys + matching responses in
+`runpod_workspace/.../{roles,traits}/responses/<entity>.jsonl`,
+tokenized with `tiktoken` `o200k_base` (the GPT-4.1-mini encoding).
+**These numbers supersede the previous cost table, which was ~5× too
+low because it estimated per-item input at 35.3 tokens (a header-only
+under-count) instead of the ~438 tokens that real Qwen-3-32B responses
+actually consume.**
 
-**Per-batch token model**
+**2026-05-10 cross-axis validation** — re-ran the dry-run via
+[`tools/dry_run_response_token_count.py`](../tools/dry_run_response_token_count.py)
+on **all 12 v2 axes × both cohorts = 295,258 reconstructed B=10
+batches**, prompt-rebuilt under the current (v2) rubric.  Per-axis
+cost ratio (`measured / $49.40 doc`) came in at **mean 1.006 ± σ 0.013,
+range [0.989, 1.034]**.  The 4,700/80/24,605 figures and the
+`COST_PER_AXIS_USD` dict in
+[`batch_size_rho_curve.py`](batch_size_rho_curve.py) are correct
+within ±3% per axis and within 0.6% on average — no recalibration
+applied.  See AGENT_NOTES "Judging cost model" for the per-axis
+breakdown table.  Re-run the dry-run after any rubric change to
+re-validate automatically.
+
+**Per-batch token model** (240-batch sample, 12 v1 axes × both cohorts):
 
 | Component | Tokens | Source |
 |-----------|--------|--------|
-| Fixed input overhead per batch | **326** | rubric header + scale table + axis name + pos/neg pole text + name field |
-| Per-item input | **35.3** | `--- Response i of N ---` block + `[QUESTION] / [/QUESTION] / [RESPONSE] / [/RESPONSE]` markers + a real Qwen-3-32B response (mean 19.6 content tokens × 280 sample roles) |
-| Output per batch | **~85** | median 83, mean 86, p90 109 — measured across 200 cached batches; "2-3 sentences of reasoning + `SCORE: <int>`" |
+| Fixed input overhead per batch | **320** | rubric header + scale table + axis name + pos/neg pole text + name field + closing instructions; tiktoken-measured on a single header (range across axes: 280-360) |
+| Per-item input | **438** | `--- Response i of N ---` block + `[QUESTION] / [/QUESTION] / [RESPONSE] / [/RESPONSE]` markers + a real Qwen-3-32B response. Sampled mean per-batch input is **4,700 tokens** at B=10 (median 5,018, σ 1,065, min 1,307, max 6,381 across 240 batches): subtract the 320-token header, divide by 10. |
+| Output per batch | **80** | median 78, mean 80, σ 14 — measured by tiktoken-encoding the cached judge text from the same 240 sampled batches |
 
-So per batch: `input = 326 + B × 35.3`, `output = 85`.
+So per batch: `input ≈ 320 + B × 438`, `output ≈ 80`.
 
-**Pricing** (gpt-4.1-mini, 2026-04 rates): input **$0.40 / 1M tokens**,
-output **$1.60 / 1M tokens**. Anthropic's `claude-sonnet-4-20250514`
-pricing is roughly eight times higher (and we don't currently
-run responses mode on Sonnet).
+**Pricing** (gpt-4.1-mini, 2026 rates): input **$0.40 / 1M tokens**,
+output **$1.60 / 1M tokens**. Anthropic's `claude-haiku-4-5-20251001`
+costs $1.00 / $5.00 per 1M; `claude-sonnet-4-20250514` is $3.00 /
+$15.00 per 1M.
 
 **Items per axis**: with the project's standard scoring corpus the
-`responses` mode covers ~245k items per axis (280 roles × ~427
-responses + 297 traits × ~481 responses). One axis-worth of work, both
-sides.
+`responses` mode covers ~246k items per axis (280 roles × ~403
+responses + 300 traits × ~445 responses; mean over 12 v1 axes). One
+axis-worth of work, both sides combined.
 
-**Per-axis cost curve** (`responses` mode, single axis, both sides):
+**Per-axis cost curve** (`responses` mode, single axis, both sides
+combined; GPT-4.1-mini at $0.40 in / $1.60 out per 1M):
 
-| B  | Batches | Input M tok | Output M tok | $ in | $ out | **$ total** | Relative |
-|----|---------|-------------|--------------|------|-------|-------------|----------|
-|  5 | 48,968  | 24.6        | 4.16         | 9.84 | 6.66  | **$16.50**  | 2.11×    |
-|  7 | 34,977  | 20.0        | 2.97         | 8.02 | 4.76  | **$12.77**  | 1.64×    |
-| 10 | 24,484  | 16.6        | 2.08         | 6.65 | 3.33  | **$9.98**   | 1.28×    |
-| 15 | 16,323  | 14.0        | 1.39         | 5.59 | 2.22  | **$7.81**   | **1.00×** (ref) |
-| 20 | 12,242  | 12.6        | 1.04         | 5.05 | 1.66  | **$6.72**   | 0.86×    |
-| 30 |  8,161  | 11.3        | 0.69         | 4.52 | 1.11  | **$5.63**   | 0.72×    |
+| B  | Batches | Input M tok | Output M tok | $ in  | $ out | **$ total** | Relative |
+|----|---------|-------------|--------------|-------|-------|-------------|----------|
+|  5 | 49,200  | 123.5       | 3.94         | 49.40 |  6.30 | **$55.70**  | 1.18×    |
+|  7 | 35,142  | 119.0       | 2.81         | 47.60 |  4.50 | **$52.10**  | 1.10×    |
+| 10 | 24,600  | 115.6       | 1.97         | 46.25 |  3.15 | **$49.40**  | 1.04×    |
+| 15 | 16,400  | 113.0       | 1.31         | 45.20 |  2.10 | **$47.30**  | **1.00×** (ref) |
+| 20 | 12,300  | 111.7       | 0.98         | 44.68 |  1.57 | **$46.25**  | 0.98×    |
+| 30 |  8,200  | 110.4       | 0.66         | 44.16 |  1.05 | **$45.20**  | 0.96×    |
 
-Why the curve isn't ½ at B=30 vs B=15: the per-item content (245k items
-× ~35 tokens) is fixed regardless of batch size, so total input tokens
-shrink only via the per-batch overhead. Halving the batch count saves
-overhead but not item tokens; cost asymptotes to a floor set by the
-content itself.
+**Why the curve is so flat**: per-item content (246k items × ~438
+tokens = ~108M tokens) is fixed regardless of batch size, so total
+input tokens shrink only via the (B-dependent) per-batch overhead.
+The 320-token header gets paid `N_items / B` times, which is a small
+fraction of the total budget — going from B=5 to B=30 saves only
+~13M tokens (~$5/axis). Cost asymptotes to ~$44/axis (the items-only
+floor) as B → ∞. The previous cost model erroneously made this curve
+look 3× steeper because it under-counted item tokens.
 
-**12-axis sweep cost** (the standard "all-axes" responses run we use as
-a baseline): **B=15 ≈ $94**, B=10 ≈ $120, B=7 ≈ $153, B=5 ≈ $198.
+**12-axis sweep cost** (the standard "all-axes" responses run we use
+as a baseline): **B=15 ≈ $568**, B=10 ≈ $593, B=7 ≈ $625, B=5 ≈ $668.
 
 **Quality curve** (measured 2026-05-01 on 3 axes ×
 3 (slot, layer) cells × 4 batch sizes:
 `truthful_vs_deceitful`, `progressive_vs_conservative`,
 `improvisational_vs_methodical`; grand-mean ρ averaged over the
-3 axes × 3 (slot, layer) cells; cost from the model above):
+3 axes × 3 (slot, layer) cells; cost from the corrected model above):
 
 | B  | grand-mean ρ | Δρ vs B=15 | $ / axis | extra $ vs B=15 | $ per +0.01 ρ |
 |----|--------------|------------|----------|-----------------|---------------|
-|  5 | +0.7842 | +0.0175 | $16.50 | +$8.69 | $4.97 |
-|  7 | +0.7809 | +0.0143 | $12.77 | +$4.96 | $3.48 |
-| 10 | +0.7767 | +0.0100 | $9.98  | +$2.17 | **$2.17** |
-| 15 | +0.7667 | (ref)   | $7.81  | (ref)  | (ref) |
+|  5 | +0.7842 | +0.0175 | $55.70 | +$8.40 | $4.80 |
+|  7 | +0.7809 | +0.0143 | $52.10 | +$4.80 | $3.36 |
+| 10 | +0.7767 | +0.0100 | $49.40 | +$2.10 | **$2.10** |
+| 15 | +0.7667 | (ref)   | $47.30 | (ref)  | (ref) |
 
 The curve is monotonic and **diminishing returns kick in below B=10**:
-- B=15 → B=10 buys you the first +0.010 ρ for $2.17 extra (best value).
-- B=10 → B=7 buys another +0.004 ρ for an additional $2.79 ($7.04/+0.01 ρ marginal).
-- B=7 → B=5 buys another +0.003 ρ for $3.73 more ($12.34/+0.01 ρ marginal).
+- B=15 → B=10 buys you the first +0.010 ρ for $2.10 extra (best value).
+- B=10 → B=7 buys another +0.004 ρ for an additional $2.70 ($6.81/+0.01 ρ marginal).
+- B=7 → B=5 buys another +0.003 ρ for $3.60 more ($11.92/+0.01 ρ marginal).
+
+The relative *steps between B values* are essentially unchanged from
+the old (under-counted) model because the per-item-rate piece cancels
+out — only the absolute level shifts upward by ~5×.
 
 Per-cell behaviour: the gain from going small is **smallest at slot=3
 / layer=25** (Δρ ≈ +0.009 across all batches) and **largest at
@@ -417,9 +444,9 @@ small batches, which is consistent with "the noise being removed by
 small B is in the judge's per-batch variance, not in the activation
 side".
 
-(Full 12-axis sweep cost-per-Δρ: at $4.97/0.01 ρ for B=5 (worst-value
-endpoint), the 12-axis sweep would cost $104 extra for +0.018 ρ, i.e.
-**$580 per +0.01 ρ across the corpus**.)
+(Full 12-axis sweep cost-per-Δρ: at $4.80/0.01 ρ for B=5 (worst-value
+endpoint), the 12-axis sweep would cost $100 extra for +0.018 ρ, i.e.
+**$555 per +0.01 ρ across the corpus**.)
 
 A complementary view of the same data plots cost vs **quality
 = 1/(1−ρ)**, which amplifies small ρ changes near the ceiling
@@ -429,12 +456,12 @@ quality-per-dollar between adjacent batch sizes:
 
 | step | Δquality | Δ$ | quality / $ |
 |------|----------|-----|-------------|
-| B=15 → B=10 | +0.192 | +$2.17 | **0.089** |
-| B=10 → B=7  | +0.087 | +$2.79 | 0.031 |
-| B=7  → B=5  | +0.068 | +$3.73 | 0.018 |
+| B=15 → B=10 | +0.192 | +$2.10 | **0.091** |
+| B=10 → B=7  | +0.087 | +$2.70 | 0.032 |
+| B=7  → B=5  | +0.068 | +$3.60 | 0.019 |
 
-The first step (B=15 → B=10) is **2.9× more cost-efficient** than
-B=10 → B=7 and **4.9× more** than B=7 → B=5: the curve is sharply
+The first step (B=15 → B=10) is **2.8× more cost-efficient** than
+B=10 → B=7 and **4.8× more** than B=7 → B=5: the curve is sharply
 concave on the quality scale.
 
 **Recommendation (project default for new responses-mode runs: B=10)**:

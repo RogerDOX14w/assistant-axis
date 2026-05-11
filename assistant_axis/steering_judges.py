@@ -122,6 +122,23 @@ class SteeringSpec:
 # Haiku, Sonnet non-thinking) materially degrades judgment quality.
 # Bump the corresponding *_RUBRIC_VERSION constant when you change a
 # rubric so old records remain distinguishable from new ones.
+#
+# DISPLAY-FORM NOTE (see AGENT_NOTES.md "File-name vs display-name
+# convention" / "LLM prompts are display sites"):
+# The rubrics below inject ``persona_label``, ``axis_name``,
+# ``pos_label`` and ``neg_label`` from upstream PersonaSpec /
+# SteeringSpec values.  These should arrive in display form
+# (``aligned artificial intelligence`` not
+# ``aligned_artificial_intelligence``); ``persona.display_label()``
+# and ``persona.display_description()`` perform the persona-side
+# composition but are NOT yet underscore-aware.  If a sweep config
+# supplies file-form names directly, prompts here will contain
+# stray underscores -- not yet fixed (tracked alongside the
+# axis_judge_correlation.py v3 rubric work; low-priority because
+# steering configs to date have used clean labels).  When fixing,
+# apply ``assistant_axis.entity_id.display_form_name(...)`` at
+# the SteeringSpec / PersonaSpec construction sites in
+# ``steering/post_judge.py`` and ``steering/run_sweep.py``.
 
 COHERENCE_RUBRIC_VERSION = 4
 RP_RUBRIC_VERSION = 2

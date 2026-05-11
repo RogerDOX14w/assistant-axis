@@ -75,19 +75,85 @@ def _default_ensembles_path(input_path: Path) -> Path:
 # ---------------------------------------------------------------------------
 # Multi-judge cost extras
 # ---------------------------------------------------------------------------
-# At B=10 the GPT-4.1-mini per-axis cost from the README cost model is
-# $9.98 (input $6.65 + output $3.33).  When we ensemble GPT-mini with a
-# second judge, the second judge processes the same items with the same
-# input/output token counts -- only the per-token rates change (and the
-# question_subsample_modulo factor reduces items proportionally).
+# At B=10 the GPT-4.1-mini per-axis cost (both cohorts combined) is
+# ~$49.40 (input $46.25 + output $3.15).  When we ensemble GPT-mini
+# with a second judge, the second judge processes the same items with
+# the same input/output token counts -- only the per-token rates
+# change (and the question_subsample_modulo factor reduces items
+# proportionally).
 #
 # Subsample q9 ⇒ 1/3 of items (per axis_judge_correlation.py:1761).
 #
-# Per-axis cost = input_cost + output_cost
-# Input model:  16.6M tokens × $rate_in  per axis at B=10 full
-# Output model:  2.08M tokens × $rate_out per axis at B=10 full
-B10_GPT_INPUT_M_TOK = 16.6        # millions of input tokens at B=10 full
-B10_GPT_OUTPUT_M_TOK = 2.08       # millions of output tokens at B=10 full
+# Per-axis cost (both cohorts) = input_cost + output_cost
+# Input model:   115.6M tokens × $rate_in  per axis at B=10 full
+# Output model:    1.97M tokens × $rate_out per axis at B=10 full
+#
+# These constants come from a from-scratch dry-run (2026-05-09): 240
+# real B=10 prompts reconstructed from v1-rubric cache batch keys +
+# matching responses in `runpod_workspace/.../{roles,traits}/responses/
+# <entity>.jsonl`, tokenized with `tiktoken` `o200k_base`.  Sample
+# stats: per-batch input mean 4,700 tokens (median 5,018, σ 1,065),
+# output mean 80 tokens.  Per-axis batches: 24,605 (mean over 12 v1
+# axes).  These supersede the older 16.6M/2.08M figures, which were
+# header-only estimates that under-counted the actual response
+# content (~95% of every prompt) by ~5x.  See README "Judging cost
+# model" for the derivation table at multiple B values.
+#
+# 2026-05-10 cross-axis validation: re-ran the dry-run on ALL 12 v2
+# axes × both cohorts (295,258 reconstructed B=10 batches via
+# tools/dry_run_response_token_count.py).  Per-axis cost ratio
+# (measured / 49.40) was 1.006 ± 0.013 over the 12-axis sample with
+# range [0.989, 1.034].  The 4,700/80/24,605 figures are correct
+# within ±3% per axis and within 0.6% on average -- no recalibration
+# needed.  See AGENT_NOTES "Judging cost model" for the per-axis
+# breakdown.
+B10_GPT_INPUT_M_TOK = 115.6       # millions of input tokens at B=10 full (both cohorts)
+B10_GPT_OUTPUT_M_TOK = 1.97       # millions of output tokens at B=10 full (both cohorts)
+
+# 2026-05-11 PHASE-5C/5D FULL-SWEEP EMPIRICAL HAIKU/GPT TOKEN-SCALES.
+# ------------------------------------------------------------------
+# 5c.1 (GPT full regen, B=7, 11 v2 axes × 2 cohorts, 372,652 calls):
+#   per-call input  3,433 tok   (5c.0 canary: 3,402)
+#   per-call output    74.0 tok (5c.0 canary: 59.8 -- canary was
+#                                low-verbosity, full sweep raises)
+# 5d.1 (Haiku full sweep, B=7, q9/t3 subsample, 11 axes × 2 cohorts,
+#         8,927 calls):
+#   per-call input  3,730 tok   (5d.0 canary: 3,727)
+#   per-call output  160.2 tok  (5d.0 canary: 131)
+#
+# Per-call scale ratios (Haiku / GPT, full-sweep numbers preferred
+# since they cover 11 distinct axes with N >> canary):
+#   input  scale = 3730 / 3433 = 1.087   (canary said 1.18; full
+#                                          sweep is more reliable)
+#   output scale = 160.2 / 74.0 = 2.165  (canary said 2.19; we had
+#                                          been using 2.00 as a
+#                                          conservative mid-estimate
+#                                          and that under-budgeted
+#                                          Haiku cost by ~21% --
+#                                          the 5d.1 actual/expected
+#                                          ratio of 1.21 traces
+#                                          directly to that).
+#
+# Mechanistic interpretation:
+#   1. Tokenizer drift: Anthropic's tokenizer is ~9% chunkier than
+#      o200k_base on response prompts dominated by raw text (the
+#      tokenizer-gap is much smaller than the 1.35× seen on static
+#      prompts in 5b, because response prompts are mostly verbatim
+#      response text where both tokenizers do well).
+#      HAIKU_INPUT_SCALE = 1.09.
+#   2. Verbosity: Haiku produces ~2.17× the output tokens of GPT-mini
+#      for the same item, in both static (1.93×) and response (2.16×)
+#      prompts.  HAIKU_OUTPUT_SCALE = 2.17 (empirical full-sweep).
+#
+# Sonnet uses the SAME Anthropic tokenizer family as Haiku, so the
+# input scale carries over directly.  Sonnet's verbosity has NOT
+# been measured in this project; we apply the Haiku output scale as
+# a placeholder (Sonnet is typically ≥ as verbose as Haiku, so this
+# is more likely an under-estimate than over-estimate).
+HAIKU_INPUT_SCALE = 1.09
+HAIKU_OUTPUT_SCALE = 2.17
+SONNET_INPUT_SCALE = HAIKU_INPUT_SCALE   # same Anthropic tokenizer
+SONNET_OUTPUT_SCALE = HAIKU_OUTPUT_SCALE  # CAVEAT: untested for Sonnet
 
 # Pricing (per 1M tokens), 2026 rates.
 GPT_MINI_RATE_IN, GPT_MINI_RATE_OUT = 0.40, 1.60
@@ -96,11 +162,15 @@ SONNET_RATE_IN, SONNET_RATE_OUT = 3.00, 15.00
 
 
 def _judge_cost_per_axis(rate_in: float, rate_out: float,
+                          input_scale: float = 1.0,
+                          output_scale: float = 1.0,
                           subsample: float = 1.0) -> float:
-    """Per-axis B=10 cost in USD for a judge with the given rates and an
-    optional subsample factor (1.0 = full, 1/3 ≈ q9)."""
-    return subsample * (B10_GPT_INPUT_M_TOK * rate_in
-                        + B10_GPT_OUTPUT_M_TOK * rate_out)
+    """Per-axis B=10 cost in USD for a judge with the given rates,
+    per-judge input/output token-scale multipliers (relative to the
+    GPT-4.1-mini per-axis token totals), and an optional subsample
+    factor (1.0 = full, 1/3 ≈ q9)."""
+    return subsample * (B10_GPT_INPUT_M_TOK * input_scale * rate_in
+                        + B10_GPT_OUTPUT_M_TOK * output_scale * rate_out)
 
 
 # Cost extras to draw on top of the B-curve.  Each entry has an
@@ -110,17 +180,29 @@ def _judge_cost_per_axis(rate_in: float, rate_out: float,
 # JSON), we fall back to the B=10 ρ as a placeholder.
 EXTRA_POINTS = [
     {"label": "+ Haiku q9",
-     "extra_cost": _judge_cost_per_axis(HAIKU_RATE_IN, HAIKU_RATE_OUT, subsample=1/3),
+     "extra_cost": _judge_cost_per_axis(
+         HAIKU_RATE_IN, HAIKU_RATE_OUT,
+         input_scale=HAIKU_INPUT_SCALE,
+         output_scale=HAIKU_OUTPUT_SCALE,
+         subsample=1/3),
      "color": "#dd8452",   # orange
      "dy_pt": -18,         # annotation below marker
      "ensemble_key": "gpt_b10__plus_haiku_q9"},
     {"label": "+ Haiku full",
-     "extra_cost": _judge_cost_per_axis(HAIKU_RATE_IN, HAIKU_RATE_OUT, subsample=1.0),
+     "extra_cost": _judge_cost_per_axis(
+         HAIKU_RATE_IN, HAIKU_RATE_OUT,
+         input_scale=HAIKU_INPUT_SCALE,
+         output_scale=HAIKU_OUTPUT_SCALE,
+         subsample=1.0),
      "color": "#c44e52",   # red
      "dy_pt": -18,
      "ensemble_key": "gpt_b10__plus_haiku_full"},
     {"label": "+ Sonnet q9",
-     "extra_cost": _judge_cost_per_axis(SONNET_RATE_IN, SONNET_RATE_OUT, subsample=1/3),
+     "extra_cost": _judge_cost_per_axis(
+         SONNET_RATE_IN, SONNET_RATE_OUT,
+         input_scale=SONNET_INPUT_SCALE,
+         output_scale=SONNET_OUTPUT_SCALE,
+         subsample=1/3),
      "color": "#8172b2",   # purple
      "dy_pt": +22,         # above marker (dodges coincident Haiku-full)
      "ensemble_key": "gpt_b10__plus_sonnet_q9"},

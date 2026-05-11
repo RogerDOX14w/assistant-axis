@@ -34,6 +34,20 @@ from assistant_axis.judge import (  # type: ignore  # noqa: E402
 from assistant_axis import (  # noqa: E402
     json_metadata, png_metadata, RESPONSE_BATCH_SIZE,
 )
+from assistant_axis.entity_id import (  # noqa: E402
+    display_form_name,
+    entity_id,
+    kind_long,
+    normalize_to_file_name,
+    parse_entity_id,
+)
+from assistant_axis.judge_pricing import (  # noqa: E402
+    BudgetExceededError,
+    BudgetTracker,
+    UsageTotals,
+    extract_usage_anthropic,
+    extract_usage_openai,
+)
 from assistant_axis.provenance import (  # noqa: E402
     InputSpec,
     current_file_input,
@@ -114,7 +128,18 @@ logging.getLogger("anthropic").setLevel(logging.WARNING)
 #       behavior alone and cannot use the entity label as a hint.
 #       Description+instruction prompt (RUBRIC_STATIC) is unchanged
 #       -- the name there is intrinsic to desc+instr judging.
-RUBRIC_VERSION = "v2"
+#   v3 (2026-05-10)     -- entity names rendered in display form
+#       (``aligned artificial intelligence``) instead of file-name
+#       form (``aligned_artificial_intelligence``) inside the rubric
+#       body.  Affects the static-mode ``{name}`` field and the
+#       header ``{negative_examples}/{positive_examples}/{axis_name}``
+#       in BOTH modes.  Stored corpus keys, cache keys, file paths,
+#       and provenance remain in file-name form (project convention
+#       2: file-name everywhere except display sites; LLM prompts
+#       are display sites).  See AGENT_NOTES "File-name vs
+#       display-name convention".  v3 supersedes v2 for new judging;
+#       v1/v2 caches remain valid for already-judged data.
+RUBRIC_VERSION = "v3"
 
 _SCALE_TABLE = (
     "## Scale\n"
@@ -1032,7 +1057,17 @@ def compute_projections(
     slots: Sequence[int],
     pole_pair_names: Sequence[str],
 ) -> Dict[int, Dict[str, Dict[str, float]]]:
-    """Return {slot: {name: {'raw': float, 'whitened': float}}}.
+    """Return ``{slot: {entity_id: {'raw': float, 'whitened': float}}}``.
+
+    The per-slot inner dict is keyed by the **disambiguated** entity
+    id (e.g. ``"patient|R"`` / ``"patient|T"``) — see
+    :mod:`assistant_axis.entity_id` and AGENT_NOTES "Trait/role name
+    collisions".  This is the May 2026 schema_version=2 fix for the
+    bare-name-overwrite bug at the original
+    ``{name: ... for (_etype, name), vec in corpus.vectors.items()}``
+    site, which silently dropped one side of every collision name (9
+    names per axis: ``ascetic, contrarian, cosmopolitan, generalist,
+    pacifist, patient, perfectionist, romantic, stoic``).
 
     Per-entity leave-one-out pool: when computing the projection of entity
     X, the whitener pool is built from every other entity in the corpus
@@ -1053,10 +1088,12 @@ def compute_projections(
     result: Dict[int, Dict[str, Dict[str, float]]] = {}
     for slot in slots:
         default_vec = corpus.default[slot]  # (hidden,)
-        # Pre-compute centered (vec - default) for all entities at this slot.
+        # Pre-compute centered (vec - default) for all entities at this
+        # slot.  Keys are disambiguated entity_ids so collision names
+        # don't silently overwrite each other.
         all_centered: Dict[str, torch.Tensor] = {
-            name: (vec[slot] - default_vec)
-            for (_etype, name), vec in corpus.vectors.items()
+            entity_id(name, etype): (vec[slot] - default_vec)
+            for (etype, name), vec in corpus.vectors.items()
         }
         axis_unit_raw = axis_spec.axis_by_slot[slot]  # (hidden,)
 
@@ -1064,26 +1101,29 @@ def compute_projections(
 
         if whiten_K == 0:
             # Identity whitener (regardless of pool).  Skip SVDs.
-            for name, x in all_centered.items():
+            for eid, x in all_centered.items():
                 raw_proj = float((x @ axis_unit_raw).item())
-                per_slot[name] = {"raw": raw_proj, "whitened": raw_proj}
+                per_slot[eid] = {"raw": raw_proj, "whitened": raw_proj}
         else:
             # Per-entity LOO whitener.  This is O(N) SVDs per slot; expect
             # ~0.15 s per SVD on a 553x5120 pool, so ~85 s per slot per
             # cell.  Multiplied across slots / cells / providers this can
             # reach hours -- consider SMW rank-1 updates for K>0 in
             # high-throughput contexts.
-            for target_name, target_x in all_centered.items():
+            for target_eid, target_x in all_centered.items():
+                target_name = parse_entity_id(target_eid).name
                 if target_name in pole_skip:
                     continue
-                # LOO pool: everyone except target_name and pole-pair names.
+                # LOO pool: everyone except target_eid and pole-pair names
+                # (regardless of kind, since the pole pair is axis-defining).
                 pool_rows = [
-                    x for n, x in all_centered.items()
-                    if n != target_name and n not in pole_skip
+                    x for eid_other, x in all_centered.items()
+                    if eid_other != target_eid
+                    and parse_entity_id(eid_other).name not in pole_skip
                 ]
                 if len(pool_rows) < 2:
                     raise SystemExit(
-                        f"slot {slot}: LOO pool for {target_name} has "
+                        f"slot {slot}: LOO pool for {target_eid} has "
                         f"<2 entries; cannot fit whitener"
                     )
                 pool = torch.stack(pool_rows, dim=0)  # (N-1, hidden)
@@ -1101,7 +1141,7 @@ def compute_projections(
                     xw = whitener.apply(target_x.unsqueeze(0)).squeeze(0)
                     w_proj = (float((xw @ axis_w).item())
                               / axis_w_norm)
-                per_slot[target_name] = {"raw": raw_proj, "whitened": w_proj}
+                per_slot[target_eid] = {"raw": raw_proj, "whitened": w_proj}
         result[slot] = per_slot
     return result
 
@@ -1121,18 +1161,26 @@ def build_static_prompt(axis_spec: AxisSpec, etype: str, name: str, content: str
     # Per-call leakage prevention: strip the entity being judged from its
     # own rubric example list, so a 10-example axis becomes a 9-example
     # rubric for that one call when the entity is itself an example.
-    # Other entities still see the full 10-example rubric.
+    # Other entities still see the full 10-example rubric.  Comparison
+    # is done in file-name form (canonical key) before either side is
+    # converted to display form for rubric injection.
     sing, plur, sing_t, plur_t = _entity_words(etype)
     neg_ex = [e for e in axis_spec.neg_examples if e != name]
     pos_ex = [e for e in axis_spec.pos_examples if e != name]
+    # RUBRIC_VERSION v3: entity names rendered in display form
+    # (``aligned artificial intelligence``) for human / LLM
+    # readability; canonical file-name form is preserved everywhere
+    # else (cache keys, dict keys, provenance, exclusions).
     return RUBRIC_STATIC.format(
         entity=sing, entity_plural=plur,
         entity_title=sing_t, entity_plural_title=plur_t,
-        axis_name=axis_spec.axis_name,
+        axis_name=display_form_name(axis_spec.axis_name),
         negative_pole=axis_spec.neg_pole, positive_pole=axis_spec.pos_pole,
-        negative_examples=", ".join(neg_ex) or "(none)",
-        positive_examples=", ".join(pos_ex) or "(none)",
-        name=name, content=content,
+        negative_examples=", ".join(display_form_name(e) for e in neg_ex)
+            or "(none)",
+        positive_examples=", ".join(display_form_name(e) for e in pos_ex)
+            or "(none)",
+        name=display_form_name(name), content=content,
     )
 
 
@@ -1140,7 +1188,9 @@ def build_response_batch_prompt(
     axis_spec: AxisSpec, etype: str, name: str, items: Sequence["ScoredResponse"]
 ) -> str:
     # Same per-call leakage prevention as build_static_prompt: the entity
-    # whose responses are being judged is stripped from the example list.
+    # whose responses are being judged is stripped from the example list
+    # (file-name comparison; display-name injection -- see v3 notes
+    # above).
     sing, plur, sing_t, plur_t = _entity_words(etype)
     n = len(items)
     blocks = []
@@ -1156,11 +1206,13 @@ def build_response_batch_prompt(
     return RUBRIC_RESPONSE_BATCH.format(
         entity=sing, entity_plural=plur,
         entity_title=sing_t, entity_plural_title=plur_t,
-        axis_name=axis_spec.axis_name,
+        axis_name=display_form_name(axis_spec.axis_name),
         negative_pole=axis_spec.neg_pole, positive_pole=axis_spec.pos_pole,
-        negative_examples=", ".join(neg_ex) or "(none)",
-        positive_examples=", ".join(pos_ex) or "(none)",
-        name=name, n_items=n, items_block=items_block,
+        negative_examples=", ".join(display_form_name(e) for e in neg_ex)
+            or "(none)",
+        positive_examples=", ".join(display_form_name(e) for e in pos_ex)
+            or "(none)",
+        name=display_form_name(name), n_items=n, items_block=items_block,
     )
 
 
@@ -1290,11 +1342,21 @@ async def _call_with_retry(
     """Call ``one_attempt()`` (an awaitable returning ``Optional[str]``) with
     classify+backoff retries. Returns the call result, or ``None`` if all
     attempts failed (logged at WARNING with full classification).
+
+    :class:`BudgetExceededError` (Phase 4c, May 2026) is RE-RAISED
+    unconditionally — it indicates the cost cap was crossed and the
+    run must abort immediately, NOT retry.  All other exceptions are
+    classified normally.
     """
     last_exc: Optional[BaseException] = None
     for attempt in range(1 + len(delays)):
         try:
             return await one_attempt()
+        except BudgetExceededError:
+            # Hard escape: bypass all retry/swallow logic.  The
+            # orchestrator's try/except in run() catches this and
+            # exits with code 2.
+            raise
         except Exception as e:  # noqa: BLE001 (we intentionally classify)
             action, server_wait = _classify_judge_error(e)
             last_exc = e
@@ -1329,6 +1391,7 @@ async def _call_anthropic_batch(
     temperature: float,
     rate_limiter: RateLimiter,
     batch_size: int,
+    tracker: Optional[BudgetTracker] = None,
 ) -> List[Optional[str]]:
     import anthropic  # local import so OpenAI-only runs don't need it
     client = anthropic.AsyncAnthropic()
@@ -1340,6 +1403,15 @@ async def _call_anthropic_batch(
                 model=model, max_tokens=max_tokens, temperature=temperature,
                 messages=[{"role": "user", "content": prompt}],
             )
+            # Tick the budget tracker BEFORE returning text so a
+            # cap-crossing call still gets accounted for in n_calls
+            # and prompt/completion tokens (the orchestrator wants
+            # exact counts in its summary even when it stopped on a
+            # cap).  charge() raises BudgetExceededError if the
+            # running total now exceeds the cap.
+            if tracker is not None:
+                pt, ct = extract_usage_anthropic(resp)
+                tracker.charge(pt, ct)
             parts = []
             for block in resp.content:
                 text = getattr(block, "text", None)
@@ -1355,6 +1427,11 @@ async def _call_anthropic_batch(
         tasks = [one(p) for p in chunk]
         r = await asyncio.gather(*tasks, return_exceptions=True)
         for x in r:
+            if isinstance(x, BudgetExceededError):
+                # Phase 4c: cap exceeded — abort immediately rather
+                # than swallowing as None (which would let the loop
+                # continue spending on the remaining chunks).
+                raise x
             if isinstance(x, Exception):
                 logger.error(f"anthropic gather: {x}")
                 results.append(None)
@@ -1370,6 +1447,7 @@ async def _call_openai_batch(
     temperature: float,
     rate_limiter: RateLimiter,
     batch_size: int,
+    tracker: Optional[BudgetTracker] = None,
 ) -> List[Optional[str]]:
     """Local OpenAI async path; parallels _call_anthropic_batch so we can set
     temperature and token budget freely (the shared assistant_axis/judge.py
@@ -1387,6 +1465,9 @@ async def _call_openai_batch(
                 max_completion_tokens=max_tokens,
                 temperature=temperature,
             )
+            if tracker is not None:
+                pt, ct = extract_usage_openai(resp)
+                tracker.charge(pt, ct)
             return resp.choices[0].message.content
 
         return await _call_with_retry(attempt, provider_name="openai")
@@ -1397,6 +1478,9 @@ async def _call_openai_batch(
         tasks = [one(p) for p in chunk]
         r = await asyncio.gather(*tasks, return_exceptions=True)
         for x in r:
+            if isinstance(x, BudgetExceededError):
+                # Phase 4c: cap exceeded — abort immediately.
+                raise x
             if isinstance(x, Exception):
                 logger.error(f"openai gather: {x}")
                 results.append(None)
@@ -1413,15 +1497,18 @@ async def call_judge(
     temperature: float,
     rps: float,
     batch_size: int,
+    tracker: Optional[BudgetTracker] = None,
 ) -> List[Optional[str]]:
     rate_limiter = RateLimiter(rps)
     if provider == "anthropic":
         return await _call_anthropic_batch(
-            prompts, model, max_tokens, temperature, rate_limiter, batch_size
+            prompts, model, max_tokens, temperature, rate_limiter, batch_size,
+            tracker=tracker,
         )
     if provider == "openai":
         return await _call_openai_batch(
-            prompts, model, max_tokens, temperature, rate_limiter, batch_size
+            prompts, model, max_tokens, temperature, rate_limiter, batch_size,
+            tracker=tracker,
         )
     raise SystemExit(f"Unknown provider: {provider}")
 
@@ -1438,13 +1525,90 @@ def _default_model_for_provider(provider: str) -> str:
     raise SystemExit(f"Unknown provider: {provider}")
 
 
+def _judge_family(provider: str, model: Optional[str]) -> str:
+    """Classify a (provider, model) into one of ``"gpt"`` /
+    ``"haiku"`` / ``"sonnet"`` for judge-aware defaults.
+
+    The classification drives Bug-B-aware subsampling defaults: GPT is
+    cheap → full volume by default; Anthropic-haiku is medium → tiered
+    1/3 by default; Anthropic-sonnet is expensive → tiered 1/3
+    *only*, with no escape hatch.
+
+    ``model`` may be ``None`` (means ``--judge_model`` wasn't passed
+    and the provider default applies); we resolve to the provider
+    default in that case so the family classification is always
+    well-defined.
+    """
+    resolved_model = model or _default_model_for_provider(provider)
+    m = resolved_model.lower()
+    if provider == "openai":
+        return "gpt"
+    if provider == "anthropic":
+        if "haiku" in m:
+            return "haiku"
+        if "sonnet" in m:
+            return "sonnet"
+        # Future Opus / unknown Anthropic models default to the most
+        # expensive bucket (no --no_subsample escape hatch) — fail safe.
+        return "sonnet"
+    raise SystemExit(f"Unknown provider: {provider}")
+
+
+def _apply_judge_aware_subsample_defaults(args: argparse.Namespace) -> None:
+    """Resolve the tri-state ``--no_subsample`` flag against the
+    judge family.
+
+    Rules (May 2026 — fixes Bug B):
+
+    * If the user explicitly passed ``--no_subsample`` and the judge
+      is Sonnet, hard-fail.  Sonnet is too expensive at full volume
+      and the project never intended to support it there.
+    * If ``--no_subsample`` was not specified (``None``):
+        - GPT judge: default to ``True`` (full volume — GPT is cheap
+          enough that subsampling is unnecessary, and pre-May-2026
+          accidental subsampling produced the v2 GPT b10 caches that
+          we're regenerating in Phase 5c).
+        - Haiku/Sonnet judges: default to ``False`` so the existing
+          tiered-1/3 path runs (was always the intended behaviour).
+    * If the user explicitly set ``--no_subsample`` (True) for GPT
+      or Haiku, honour it.
+
+    Mutates ``args.no_subsample`` in place.  Called from
+    :func:`run` after :func:`parse_args` so the resolved value
+    appears in ``config.json`` and in the ``judge_extras`` provenance.
+    """
+    family = _judge_family(args.provider, args.judge_model)
+    user_set = args.no_subsample is True
+    if family == "sonnet" and user_set:
+        raise SystemExit(
+            "--no_subsample is not supported for the Sonnet judge "
+            "(too expensive at full volume; the project never "
+            "intended to support it). Run with the default tiered "
+            "1/3 subsampling, or pick a cheaper judge."
+        )
+    if args.no_subsample is None:
+        args.no_subsample = (family == "gpt")
+    logger.info(
+        f"[subsample] judge_family={family} no_subsample={args.no_subsample} "
+        f"(question_subsample_modulo={args.question_subsample_modulo}, "
+        f"tiered_modulo_per_chunk={args.tiered_modulo_per_chunk})"
+    )
+
+
 def _load_json_or_empty(path: Path) -> Dict[str, Any]:
     """Read a cache file written by ``_save_json``.
 
-    Transparently unwraps the ``{"result": ..., "_provenance": ...}``
-    envelope produced when ``_save_json`` is given an ``inputs`` list,
-    so resume/refill paths don't need to know whether the on-disk
-    cache is wrapped or bare.
+    Transparently unwraps the ``{"result": ..., "_provenance": ...,
+    "schema_version": <int>}`` envelope produced when ``_save_json``
+    is given an ``inputs`` list, so resume/refill paths don't need to
+    know whether the on-disk cache is wrapped or bare.
+
+    Note: this loader is permissive about ``schema_version``;
+    consumers that need loud-reject behaviour on stale schemas should
+    use :func:`assistant_axis.judge_loaders.load_static_scores` (or
+    siblings) instead.  The producer's resume path is intentionally
+    permissive: a stale-schema cache will simply be overwritten with
+    fresh-schema data on the next save.
     """
     if path.exists():
         try:
@@ -1457,12 +1621,251 @@ def _load_json_or_empty(path: Path) -> Dict[str, Any]:
     return {}
 
 
+def _peek_rubric_version(path: Path) -> Optional[str]:
+    """Extract the recorded ``rubric_version`` label from a judge
+    cache's provenance envelope.
+
+    Returns the string stamped into the ``producer_script``
+    :class:`InputSpec`'s ``extras`` at write time (e.g. ``"v3"``), or
+    ``None`` if the file is missing, is not envelope-wrapped, or
+    doesn't record a ``rubric_version`` (legacy pre-Phase-6 cache).
+
+    Used by :func:`score_static_mode` and :func:`score_responses_mode`
+    at cache-resume time to detect rubric drift: if the cache was
+    written under an older rubric (e.g. ``v2``) and the current code
+    is ``RUBRIC_VERSION = "v3"``, the cache scores are scientifically
+    stale even though their schema_version / mtime fingerprints might
+    still match.  The producer-script ``(mtime, size)`` fingerprint
+    catches this too (RUBRIC_VERSION lives in this file), but the
+    label-based check is more human-readable in logs and survives
+    script-equivalence remarkings where the fingerprint changes for
+    cosmetic reasons.
+    """
+    if not path.exists():
+        return None
+    try:
+        obj = json.loads(path.read_text())
+    except (json.JSONDecodeError, OSError, UnicodeDecodeError):
+        return None
+    if not isinstance(obj, dict):
+        return None
+    prov = obj.get("_provenance")
+    if not isinstance(prov, dict):
+        return None
+    for inp in prov.get("inputs", []) or []:
+        if not isinstance(inp, dict):
+            continue
+        if inp.get("dep_key") != "producer_script":
+            continue
+        extras = inp.get("extras") or {}
+        v = extras.get("rubric_version")
+        if isinstance(v, str):
+            return v
+    return None
+
+
+def _axis_from_cache_path(cache_path: Path) -> Optional[str]:
+    """Infer the axis name from a judge-cache path.
+
+    Cache paths in this project always live under
+    ``<...>/<axis>/<judge_or_cohort>/scores_<mode>.json``, so the
+    axis is exactly two ``parent`` hops up.  Returns ``None`` when
+    the path doesn't fit that shape (e.g. an integration test
+    running against a temp dir whose grandparent isn't an axis).
+    Used by the rubric-equivalence lookup to scope the registry
+    query to the right axis cell; ``None`` is treated as the
+    axis wildcard.
+    """
+    try:
+        return cache_path.parent.parent.name or None
+    except Exception:  # pragma: no cover -- defensive
+        return None
+
+
+def _peek_per_entity_rubric_versions(path: Path) -> Dict[str, str]:
+    """Read the per-entity ``rubric_version`` map stamped into a
+    cache's ``_provenance.notes.per_entity_rubric_versions`` block.
+
+    Returns an empty dict when the file is missing, isn't envelope-
+    wrapped, or doesn't carry per-entity stamps (truly legacy caches
+    written before per-entity stamping landed).  In that case the
+    caller falls back to the cohort-level
+    :func:`_peek_rubric_version` stamp as the effective version
+    for every entry, matching the pre-stamping interpretation.
+
+    Keys in the returned map are whatever the producer keys the
+    main cache by (disambiguated ``eid`` for static-mode caches,
+    bare ``name`` for the kind-pure response-mode caches).  See
+    :func:`_check_rubric_version_on_resume` for how the map is
+    interpreted.
+    """
+    if not path.exists():
+        return {}
+    try:
+        obj = json.loads(path.read_text())
+    except (json.JSONDecodeError, OSError, UnicodeDecodeError):
+        return {}
+    if not isinstance(obj, dict):
+        return {}
+    prov = obj.get("_provenance")
+    if not isinstance(prov, dict):
+        return {}
+    notes = prov.get("notes") or {}
+    if not isinstance(notes, dict):
+        return {}
+    raw = notes.get("per_entity_rubric_versions")
+    if not isinstance(raw, dict):
+        return {}
+    return {str(k): str(v) for k, v in raw.items() if isinstance(v, str)}
+
+
+def _check_rubric_version_on_resume(
+    cache_path: Path,
+    cache: Dict[str, Any],
+    *,
+    mode: str,
+    strict: bool = False,
+) -> Tuple[Dict[str, Any], Dict[str, str]]:
+    """Per-entry rubric-version drift check on resume.
+
+    Walks every entry in ``cache``, finds its effective rubric
+    version (per-entry stamp if present in
+    ``_provenance.notes.per_entity_rubric_versions``, else falls
+    back to the cohort-level stamp from
+    :func:`_peek_rubric_version`), and decides per entry:
+
+    * **Matches current** :data:`RUBRIC_VERSION`: keep.
+    * **Differs but declared equivalent** in
+      :mod:`assistant_axis.rubric_equivalence` for this (axis, mode,
+      entity_id) cell: keep, with an ``INFO`` log citing the registry
+      edge.
+    * **Differs and not equivalent**: drop the entry.  At ``strict=True``
+      this becomes :class:`SystemExit` instead, listing the offending
+      entries and pointing at ``tools/mark_rubric_equivalent.py``.
+
+    Returns ``(kept_cache, kept_stamps)`` -- a filtered cache (entries
+    that survived the check) and a stamps map covering every survivor
+    (every kept entry gets a stamp: its prior per-entity stamp,
+    promoted from cohort-level when missing).  The producer should
+    pass ``kept_stamps`` forward as the starting per-entity map for
+    further writes; new judging stamps the current ``RUBRIC_VERSION``
+    on each newly-written entry.
+
+    Empty caches pass through unchanged.  Legacy caches that lack
+    both per-entity and cohort-level stamps are passed through as
+    well -- the older ``schema_version`` / fingerprint checks
+    elsewhere are responsible for those.
+    """
+    if not cache:
+        return {}, {}
+    cohort_rv = _peek_rubric_version(cache_path)
+    per_entity_rv = _peek_per_entity_rubric_versions(cache_path)
+    # No stamping information of any kind -> legacy.  Trust the
+    # older schema_version / mtime fingerprints.
+    if cohort_rv is None and not per_entity_rv:
+        return cache, {}
+
+    from assistant_axis import rubric_equivalence as _eq
+    axis = _axis_from_cache_path(cache_path)
+    registry = _eq.load_registry()
+
+    kept: Dict[str, Any] = {}
+    kept_stamps: Dict[str, str] = {}
+    dropped_by_version: Dict[str, list] = {}
+    equivalent_by_version: Dict[str, int] = {}
+    for key, value in cache.items():
+        eid = key  # static mode: disambiguated eid; responses: bare name
+        rv = per_entity_rv.get(key, cohort_rv)
+        if rv is None or rv == RUBRIC_VERSION:
+            kept[key] = value
+            if rv is not None:
+                kept_stamps[key] = rv
+            continue
+        if _eq.is_equivalent(
+            rv, RUBRIC_VERSION,
+            axis=axis, mode=mode, entity_id=eid,
+            registry=registry,
+        ):
+            kept[key] = value
+            kept_stamps[key] = rv
+            equivalent_by_version[rv] = equivalent_by_version.get(rv, 0) + 1
+            continue
+        dropped_by_version.setdefault(rv, []).append(key)
+
+    n_total = len(cache)
+    n_kept = len(kept)
+    n_dropped = n_total - n_kept
+
+    if equivalent_by_version:
+        summary = ", ".join(
+            f"{n} from {v!r}" for v, n in sorted(equivalent_by_version.items())
+        )
+        logger.info(
+            f"[{mode}] rubric_equivalence: kept {summary} (out of {n_total}) "
+            f"at {cache_path.name} (axis={axis!r}) via declared edges to "
+            f"current RUBRIC_VERSION={RUBRIC_VERSION!r}; see "
+            f"rubric_equivalences.yaml."
+        )
+
+    if not dropped_by_version:
+        return kept, kept_stamps
+
+    if strict:
+        examples = []
+        for v, eids in sorted(dropped_by_version.items()):
+            head = ", ".join(eids[:5]) + ("..." if len(eids) > 5 else "")
+            examples.append(f"{len(eids)} from {v!r}: {head}")
+        examples_str = "; ".join(examples)
+        # Suggest the most common version as the from-rubric template in
+        # the example command.  Don't try to be clever about entity-id
+        # vs axes; just print the bones.
+        biggest_v = max(dropped_by_version, key=lambda k: len(dropped_by_version[k]))
+        eid_hint = dropped_by_version[biggest_v][0]
+        raise SystemExit(
+            f"[{mode}] rubric_version drift at {cache_path.name} "
+            f"(axis={axis!r}): {n_dropped}/{n_total} entries differ from "
+            f"current RUBRIC_VERSION={RUBRIC_VERSION!r} with no declared "
+            f"equivalence ({examples_str}).  --strict_rubric_version refuses "
+            f"to silently rejudge.  Options: (1) accept the rejudge by "
+            f"re-running without --strict_rubric_version; or (2) if the "
+            f"rubric bump is prompt-preserving for these cells, declare "
+            f"equivalence via:\n"
+            f"    uv run python tools/mark_rubric_equivalent.py \\\n"
+            f"        --from {biggest_v} --to {RUBRIC_VERSION} \\\n"
+            f"        --modes {mode} --axes {axis} \\\n"
+            f"        --entity-ids {eid_hint} '<other entity ids...>' \\\n"
+            f"        --reason '<why this bump didn't change the rendered prompt>'"
+        )
+
+    summary_bits = []
+    for v, eids in sorted(dropped_by_version.items()):
+        summary_bits.append(f"{len(eids)} from rubric_version={v!r}")
+    logger.warning(
+        f"[{mode}] rubric_version drift at {cache_path.name} "
+        f"(axis={axis!r}): dropped {n_dropped}/{n_total} entries "
+        f"({', '.join(summary_bits)}); current RUBRIC_VERSION="
+        f"{RUBRIC_VERSION!r}, no equivalence declared.  Affected "
+        f"entries will be rejudged from scratch.  Pass "
+        f"--strict_rubric_version to abort here instead, or run "
+        f"tools/mark_rubric_equivalent.py to declare these bumps "
+        f"prompt-preserving.  Affected entity ids per source rubric:\n"
+        + "\n".join(
+            f"  {v!r}: {', '.join(eids[:8])}"
+            + ("..." if len(eids) > 8 else "")
+            for v, eids in sorted(dropped_by_version.items())
+        )
+    )
+    return kept, kept_stamps
+
+
 def _save_json(
     path: Path,
     obj: Any,
     *,
     inputs: Optional[Sequence[InputSpec]] = None,
     title: Optional[str] = None,
+    schema_version: Optional[int] = None,
+    notes: Optional[Dict[str, Any]] = None,
 ) -> None:
     """Write ``obj`` to ``path``.
 
@@ -1474,13 +1877,63 @@ def _save_json(
     When ``inputs`` is ``None`` the legacy bare-JSON shape is written
     (used for operational files like ``gaps.json`` and ``config.json``
     that don't have meaningful data dependencies).
+
+    Args:
+        schema_version: Optional payload-schema version stamp written
+            at the top level of the envelope (alongside ``result`` and
+            ``_provenance``).  Used by Option-C loud-reject readers
+            (e.g. :class:`assistant_axis.judge_loaders.StaleSchemaError`).
+            Pass ``2`` for the AT-RISK mixed-kind cache families
+            (``scores_descriptions``, ``scores_instructions``,
+            ``projections``, ``correlations``) after the May 2026
+            disambiguated-key fix.
+        notes: Optional dict merged into ``_provenance.notes`` (e.g.
+            ``{"rejudge_names": [...]}`` for surgical rejudges, or
+            ``{"usage": ...}`` for budget tracking).
     """
     path.parent.mkdir(parents=True, exist_ok=True)
     if inputs is not None:
         envelope = json_metadata(obj, inputs=list(inputs), title=title)
+        if schema_version is not None:
+            envelope["schema_version"] = int(schema_version)
+        if notes:
+            existing = envelope["_provenance"].get("notes") or {}
+            if not isinstance(existing, dict):
+                existing = {"notes": existing}
+            merged = {**existing, **notes}
+            envelope["_provenance"]["notes"] = merged
         path.write_text(json.dumps(envelope, indent=2, sort_keys=True))
     else:
         path.write_text(json.dumps(obj, indent=2, sort_keys=True))
+
+
+def _flush_budget_artifacts(
+    args: argparse.Namespace,
+    tracker: BudgetTracker,
+) -> None:
+    """End-of-run budget reporting: log one summary line and write a
+    ``usage.json`` side-car next to the other outputs.
+
+    Called from both the clean-finish path and the
+    BudgetExceededError-cleanup path in :func:`run`.
+
+    The side-car location is:
+
+    * ``args.usage_json`` if explicitly set (operator override)
+    * ``<output_dir>/usage.json`` otherwise
+
+    Set ``--usage_json /dev/null`` to disable the side-car (useful in
+    tests).
+    """
+    logger.info(tracker.log_line())
+    side_car = getattr(args, "usage_json", None)
+    if side_car is None and args.output_dir:
+        side_car = str(Path(args.output_dir) / "usage.json")
+    if not side_car or side_car == "/dev/null":
+        return
+    p = Path(side_car)
+    p.parent.mkdir(parents=True, exist_ok=True)
+    p.write_text(json.dumps(tracker.as_dict(), indent=2, sort_keys=True))
 
 
 # ---------------------------------------------------------------------------
@@ -1704,20 +2157,105 @@ async def score_static_mode(
     axis_spec: AxisSpec,
     scorable: Sequence[Tuple[str, str]],
     args: argparse.Namespace,
+    tracker: Optional[BudgetTracker] = None,
 ) -> Dict[str, int]:
+    """Static-mode (descriptions / instructions) scoring.
+
+    Cache key is the disambiguated :func:`entity_id` (e.g. ``"patient|R"``
+    / ``"patient|T"``) so collision names don't silently overwrite each
+    other (May 2026 ``schema_version: 2`` fix).  Resume: an entity is
+    skipped if its disambiguated id is already in the cache.
+
+    When ``args.rejudge_names`` is set, only listed (kind, name) pairs
+    are scored, and any pre-existing cache entries for those ids are
+    overwritten in place (other entries stay untouched).
+    """
     cache_path = Path(args.output_dir) / f"scores_{mode}.json"
     cache: Dict[str, Any] = {} if args.no_cache else _load_json_or_empty(cache_path)
+    # Rubric-version drift check (May 2026): per-entity granularity.
+    # Entries whose recorded ``rubric_version`` differs from the current
+    # :data:`RUBRIC_VERSION` AND that aren't covered by a declared
+    # equivalence edge in :mod:`assistant_axis.rubric_equivalence` get
+    # dropped here so the producer re-judges them under the current
+    # rubric.  Survivors keep their existing stamps in ``per_entity_rv``;
+    # newly-judged entries below stamp the current ``RUBRIC_VERSION``.
+    # ``--strict_rubric_version`` promotes drop to SystemExit.
+    cache, per_entity_rv = _check_rubric_version_on_resume(
+        cache_path, cache, mode=mode,
+        strict=bool(getattr(args, "strict_rubric_version", False)),
+    )
+    # Phase 4 → 5 migration (May 2026): a v1 (bare-name) cache is
+    # silently relabelled to v2 (entity_id keys) on resume.  The
+    # corpus's ``descriptions`` map is the authoritative source for
+    # what kind each bare name belongs to.  Three cases:
+    #
+    # (a) bare name is unique to ONE kind (~571/580 entries) →
+    #     relabel as ``entity_id(name, kind)``; data preserved.
+    # (b) bare name is a known collision (one of the 9 names in BOTH
+    #     traits AND roles) → DROP the entry.  Bug A means we don't
+    #     know which kind's score we have, so it's unsafe to keep.
+    #     Phase 5b rejudges these surgically.
+    # (c) bare name is in NEITHER corpus (orphan from a corpus
+    #     edit or external import) → DROP, no recovery possible.
+    #
+    # Already-disambiguated keys pass through untouched, so v2 caches
+    # produced by this script (or by a future migration) are
+    # idempotent under the same load step.
+    if cache:
+        from assistant_axis.entity_id import entity_id, is_entity_id
+        kinds_for_name: Dict[str, set] = {}
+        for (et, n) in corpus.descriptions.keys():
+            kinds_for_name.setdefault(n, set()).add(et)
+        migrated: Dict[str, Any] = {}
+        n_relabelled = 0
+        n_dropped_collision = 0
+        n_dropped_orphan = 0
+        for k, v in cache.items():
+            if is_entity_id(k):
+                migrated[k] = v
+                continue
+            kinds = kinds_for_name.get(k, set())
+            if len(kinds) == 1:
+                only_kind = next(iter(kinds))
+                migrated[entity_id(k, only_kind)] = v
+                n_relabelled += 1
+            elif len(kinds) >= 2:
+                n_dropped_collision += 1
+            else:
+                n_dropped_orphan += 1
+        if n_relabelled or n_dropped_collision or n_dropped_orphan:
+            logger.warning(
+                f"[{mode}] migrated {cache_path.name}: "
+                f"{n_relabelled} bare→eid relabelled, "
+                f"{n_dropped_collision} collision-name drops "
+                f"(Phase 5b rejudges these), "
+                f"{n_dropped_orphan} orphan drops"
+            )
+        cache = migrated
     # Inputs are stable across the run; build once and reuse on every
     # incremental save inside the loop below.
     cache_inputs = _build_axis_judge_inputs(args, mode=mode)
     cache_title = f"axis_judge_correlation:{mode}:{axis_spec.axis_name}"
 
+    rejudge_set: Optional[set] = (
+        set(args.rejudge_names) if getattr(args, "rejudge_names", None) else None
+    )
+
     prompts: List[str] = []
     names: List[str] = []
     etypes: List[str] = []
+    eids: List[str] = []
     for (etype, name) in scorable:
-        if name in cache:
+        eid = entity_id(name, etype)
+        if rejudge_set is not None and (etype, name) not in rejudge_set:
+            # Entity not in the surgical rejudge list -> skip entirely
+            # (don't score, don't touch cache).
             continue
+        if rejudge_set is None and eid in cache:
+            # Default behaviour: skip already-cached entities.
+            continue
+        # rejudge_set listed this entity: score it even if already cached
+        # (cache entry will be overwritten on the next save).
         if mode == "descriptions":
             content = corpus.descriptions[(etype, name)]
         elif mode == "instructions":
@@ -1731,11 +2269,16 @@ async def score_static_mode(
         prompts.append(build_static_prompt(axis_spec, etype, name, content))
         names.append(name)
         etypes.append(etype)
+        eids.append(eid)
     if not prompts:
         logger.info(f"[{mode}] all {len(scorable)} entities already cached at {cache_path}")
         # Still emit a clean gaps.json entry so downstream tools can rely on
         # its presence (and absence-of-mode = "this run didn't touch it").
         _update_gaps_file(Path(args.output_dir), mode=mode, gaps=[])
+        # Resume path: existing cache may be a stale schema-v1 (bare-name)
+        # blob; surface the int-valued entries as-is.  Loud-reject reads
+        # happen in :func:`assistant_axis.judge_loaders.load_static_scores`,
+        # not here.
         return {k: v for k, v in cache.items() if isinstance(v, int)}
 
     logger.info(
@@ -1745,26 +2288,71 @@ async def score_static_mode(
 
     # Score in smaller sub-batches so the cache is saved frequently for crash-safety.
     written_cache = dict(cache)
+    rejudge_notes: Optional[Dict[str, Any]] = None
+    if rejudge_set is not None:
+        rejudge_notes = {
+            "rejudge_names": sorted(
+                f"{kind_long(et)[0].upper()}:{n}" for (et, n) in rejudge_set
+            ),
+            "rejudge_mode": "static",
+        }
+
+    def _build_static_notes() -> Dict[str, Any]:
+        """Per-save snapshot: rejudge metadata + budget tracker state +
+        per-entity rubric_version stamps.
+
+        The budget snapshot is taken at save time (each save_every
+        chunk) so a partial cache that survives a BudgetExceededError
+        still reflects the actual cost up to the abort point — which
+        is the operator's primary forensic question.
+
+        ``per_entity_rubric_versions`` is the (eid -> rubric_version)
+        map persisted next to the cache so the resume path
+        (:func:`_check_rubric_version_on_resume`) can do per-entry
+        drift filtering instead of dropping the whole cohort when
+        one entry's rubric drifts.  Each newly-judged entry below
+        stamps the current ``RUBRIC_VERSION``; survivors of the
+        resume check retain their previously-recorded stamp.
+        """
+        notes: Dict[str, Any] = {}
+        if rejudge_notes:
+            notes.update(rejudge_notes)
+        if tracker is not None:
+            notes["usage"] = tracker.as_dict()
+        if per_entity_rv:
+            notes["per_entity_rubric_versions"] = dict(per_entity_rv)
+        return notes
+
     save_every = max(1, args.save_every)
     n_call_attempted = 0  # calls actually issued in this run
     n_call_parsed = 0  # of those, how many produced an int score
     for i in tqdm(range(0, len(prompts), save_every), desc=f"{mode}"):
         chunk_prompts = prompts[i:i + save_every]
         chunk_names = names[i:i + save_every]
+        chunk_eids = eids[i:i + save_every]
         raw_texts = await call_judge(
             chunk_prompts, provider=args.provider, model=args.judge_model,
             max_tokens=args.max_tokens, temperature=args.temperature,
             rps=args.rps, batch_size=args.batch_size,
+            tracker=tracker,
         )
-        for name, text in zip(chunk_names, raw_texts):
+        if tracker is not None:
+            tracker.maybe_log(logger)
+        for name, eid, text in zip(chunk_names, chunk_eids, raw_texts):
             n_call_attempted += 1
             score = parse_signed_score(text)
             if score is None:
                 logger.warning(f"[{mode}] {name}: could not parse score from: {text!r}")
                 continue
             n_call_parsed += 1
-            written_cache[name] = score
-        _save_json(cache_path, written_cache, inputs=cache_inputs, title=cache_title)
+            # Disambiguated-id key: collision names don't overwrite.
+            written_cache[eid] = score
+            per_entity_rv[eid] = RUBRIC_VERSION
+        _save_json(
+            cache_path, written_cache,
+            inputs=cache_inputs, title=cache_title,
+            schema_version=2, notes=_build_static_notes(),
+        )
 
     # Loud warning if parse rate this run dropped below 99%.  Note this
     # is *this run only* (not historical) so resumes that re-attempt
@@ -1779,8 +2367,12 @@ async def score_static_mode(
     )
 
     # End-of-mode gap audit: which scorable entities still aren't in the cache?
-    cached_names = {k for k, v in written_cache.items() if isinstance(v, int)}
-    missing = [name for (_, name) in scorable if name not in cached_names]
+    cached_eids = {k for k, v in written_cache.items() if isinstance(v, int)}
+    missing = [
+        entity_id(n, et) for (et, n) in scorable
+        if entity_id(n, et) not in cached_eids
+        and (rejudge_set is None or (et, n) in rejudge_set)
+    ]
     _update_gaps_file(Path(args.output_dir), mode=mode, gaps=missing)
     if missing:
         head = ", ".join(missing[:8]) + ("..." if len(missing) > 8 else "")
@@ -1795,7 +2387,7 @@ async def score_static_mode(
     else:
         logger.info(f"[{mode}] all {len(scorable)} scorable entities cached cleanly.")
 
-    # Return only int-valued entries.
+    # Return only int-valued entries (keyed by disambiguated entity id).
     return {k: v for k, v in written_cache.items() if isinstance(v, int)}
 
 
@@ -1803,6 +2395,7 @@ async def score_responses_mode(
     axis_spec: AxisSpec,
     scorable: Sequence[Tuple[str, str]],
     args: argparse.Namespace,
+    tracker: Optional[BudgetTracker] = None,
 ) -> Dict[str, Dict[str, Any]]:
     """Score ALL score==3 responses per entity, partitioned into roughly equal-sized
     batches (targeting `--response_target_batch_size`, default 10). Each batch is one
@@ -1829,10 +2422,51 @@ async def score_responses_mode(
 
     cache_path = Path(args.output_dir) / "scores_responses.json"
     cache: Dict[str, Any] = {} if args.no_cache else _load_json_or_empty(cache_path)
+    # Rubric-version drift check (May 2026): see score_static_mode.
+    cache, per_entity_rv = _check_rubric_version_on_resume(
+        cache_path, cache, mode="responses",
+        strict=bool(getattr(args, "strict_rubric_version", False)),
+    )
     cache_inputs = _build_axis_judge_inputs(args, mode="responses")
     cache_title = f"axis_judge_correlation:responses:{axis_spec.axis_name}"
 
+    # Response mode reads from a kind-pure ``responses_dir`` (e.g.
+    # ``.../traits/responses/`` or ``.../roles/responses/``).  Derive
+    # the canonical kind from the path and filter ``scorable`` so
+    # collision names get the right prompt label (Bug A residual fix:
+    # the old ``ent_type_map = {n: et for (et, n) in scorable}`` keyed
+    # by bare name silently overwrote one side of every collision name,
+    # so 9 names per axis got the wrong "trait/role" label in the
+    # rubric prompt).
+    responses_kind = Path(args.responses_dir).parent.name
+    if responses_kind not in ("roles", "traits"):
+        raise SystemExit(
+            f"--responses_dir parent dir must be 'roles' or 'traits' "
+            f"(got {Path(args.responses_dir).parent}); response-mode "
+            f"requires a kind-pure cohort root.  responses_dir="
+            f"{args.responses_dir!r}"
+        )
+    rejudge_set: Optional[set] = (
+        set(args.rejudge_names) if getattr(args, "rejudge_names", None) else None
+    )
+    scorable_kind_pure = [
+        (et, n) for (et, n) in scorable
+        if et == responses_kind
+        and (rejudge_set is None or (et, n) in rejudge_set)
+    ]
+    if not scorable_kind_pure:
+        if rejudge_set is not None:
+            logger.warning(
+                f"--rejudge_names filter left no {responses_kind} entities "
+                f"to score in this axis; emitting empty cache."
+            )
+        else:
+            logger.warning(
+                f"No {responses_kind} entities in scorable; emitting empty cache."
+            )
+    scorable = scorable_kind_pure
     names_only = [n for (_, n) in scorable]
+    # Now collision-free because scorable is kind-pure.
     ent_type_map = {n: et for (et, n) in scorable}
 
     score3 = load_score3_responses(
@@ -1928,8 +2562,29 @@ async def score_responses_mode(
             f"mean={np.mean(batch_sizes):.2f}"
         )
 
+    def _response_notes() -> Optional[Dict[str, Any]]:
+        """Per-save snapshot: budget tracker state + per-entity
+        rubric_version stamps.  Returns ``None`` only when neither is
+        populated (matches legacy bare-cache callers).
+
+        ``per_entity_rubric_versions`` is the (name -> rubric_version)
+        map persisted next to the cache so the resume path
+        (:func:`_check_rubric_version_on_resume`) can do per-entry
+        drift filtering.  Response-mode caches are kind-pure, so
+        keys here are bare names (not disambiguated eids).
+        """
+        notes: Dict[str, Any] = {}
+        if tracker is not None:
+            notes["usage"] = tracker.as_dict()
+        if per_entity_rv:
+            notes["per_entity_rubric_versions"] = dict(per_entity_rv)
+        return notes or None
+
     # Save initial skeleton so a crash here still leaves a coherent cache.
-    _save_json(cache_path, written, inputs=cache_inputs, title=cache_title)
+    _save_json(
+        cache_path, written, inputs=cache_inputs, title=cache_title,
+        notes=_response_notes(),
+    )
 
     save_every = max(1, args.save_every)
     n_batch_attempted = 0  # batch calls actually issued this run
@@ -1944,7 +2599,10 @@ async def score_responses_mode(
             prompts, provider=args.provider, model=args.judge_model,
             max_tokens=args.max_tokens, temperature=args.temperature,
             rps=args.rps, batch_size=args.batch_size,
+            tracker=tracker,
         )
+        if tracker is not None:
+            tracker.maybe_log(logger)
         for (name, _etype, bi, _items), text in zip(chunk, raw_texts):
             n_batch_attempted += 1
             score = parse_signed_score(text)
@@ -1952,10 +2610,22 @@ async def score_responses_mode(
                 n_batch_parsed += 1
             written[name]["per_batch"][bi]["score"] = score
             written[name]["per_batch"][bi]["text"] = text
+            # Stamp the per-entity rubric_version on every entry we
+            # touch this run.  An entity whose batches span two resume
+            # generations will end up stamped under the last-touching
+            # rubric -- which is the conservative ("most recent
+            # rubric") choice; the producer's resume contract is that
+            # any per_batch with a None score gets re-issued, so the
+            # final stamp reflects the rubric all surviving batches
+            # were under once the cache stabilises.
+            per_entity_rv[name] = RUBRIC_VERSION
 
         for name in written:
             _update_response_aggregates(written[name])
-        _save_json(cache_path, written, inputs=cache_inputs, title=cache_title)
+        _save_json(
+            cache_path, written, inputs=cache_inputs, title=cache_title,
+            notes=_response_notes(),
+        )
 
     # Loud warning if per-batch parse rate this run dropped below 99%.
     # Each "call" here is one ~target_batch_size-item batch; an UNPARSEABLE
@@ -1970,7 +2640,10 @@ async def score_responses_mode(
 
     for name in written:
         _update_response_aggregates(written[name])
-    _save_json(cache_path, written, inputs=cache_inputs, title=cache_title)
+    _save_json(
+        cache_path, written, inputs=cache_inputs, title=cache_title,
+        notes=_response_notes(),
+    )
 
     # End-of-mode gap audit: which entities still have None batches?
     gaps_by_entity: Dict[str, List[int]] = {}
@@ -2067,8 +2740,30 @@ def compute_correlations(
     slots: Sequence[int],
     excluded_set: set,
 ) -> Dict[str, Any]:
-    """Returns {mode: {slot: {raw|whitened: {rho, p, n, names, scores, projections}}}}."""
+    """Returns ``{mode: {slot: {raw|whitened: {rho, p, n, names, scores, projections}}}}``.
+
+    ``score_map`` and ``per_slot`` are keyed by **disambiguated entity
+    ids** (e.g. ``"patient|R"``) for the ``descriptions`` /
+    ``instructions`` static modes; the response mode is kind-pure (one
+    cohort dir per kind) so its keys are bare names.  Both shapes are
+    accepted: the helper looks up the bare-name in ``excluded_set``
+    (the pole-pair set is bare-name) via :func:`parse_entity_id` when
+    the key carries a kind suffix.
+
+    The emitted ``names`` array preserves whichever key shape the
+    inputs used (so a v2 static-mode correlation stamps disambiguated
+    ids; a response-mode correlation stamps bare names).
+    """
     out: Dict[str, Any] = {}
+
+    def _bare_name(key: str) -> str:
+        # Tolerate both ``"patient|R"`` and ``"patient"`` so we don't
+        # crash on response-mode (kind-pure, bare-name) inputs.
+        try:
+            return parse_entity_id(key).name
+        except ValueError:
+            return key
+
     for mode, score_map in scores_by_mode.items():
         out[mode] = {}
         for slot in slots:
@@ -2078,15 +2773,16 @@ def compute_correlations(
                 names = []
                 svals = []
                 pvals = []
-                for name, s in sorted(score_map.items()):
-                    if name in excluded_set:
+                for key, s in sorted(score_map.items()):
+                    bare = _bare_name(key)
+                    if bare in excluded_set:
                         continue
-                    if name not in per_slot:
+                    if key not in per_slot:
                         continue
-                    p = per_slot[name].get(metric)
+                    p = per_slot[key].get(metric)
                     if p is None or not np.isfinite(p):
                         continue
-                    names.append(name)
+                    names.append(key)
                     svals.append(s)
                     pvals.append(p)
                 if len(svals) >= 3:
@@ -2112,6 +2808,9 @@ def make_plot(
     import matplotlib
     matplotlib.use("Agg")
     import matplotlib.pyplot as plt
+
+    from assistant_axis import is_entity_id, kind_color
+    from assistant_axis.entity_id import parse_entity_id
 
     modes = list(correlations.keys())
     if not modes:
@@ -2142,7 +2841,22 @@ def make_plot(
             p = np.asarray(entry["projections"], dtype=float)
             rho = entry["rho"]
             n = entry["n"]
-            ax.scatter(s, p, s=10, alpha=0.55, edgecolor="none")
+            # Phase 3.5: when names carry kind suffixes (entity_ids,
+            # static mode), colour-code so the operator can see at a
+            # glance whether trait or role outliers are driving rho.
+            # Kind-pure runs (response mode, bare names) get the
+            # default single colour.
+            names = entry.get("names") or []
+            kinds = [
+                parse_entity_id(n_).kind if is_entity_id(n_) else None
+                for n_ in names
+            ]
+            if any(k is not None for k in kinds):
+                colors = [kind_color(k) if k else "#777777" for k in kinds]
+                ax.scatter(s, p, s=10, alpha=0.65, edgecolor="none",
+                           c=colors)
+            else:
+                ax.scatter(s, p, s=10, alpha=0.55, edgecolor="none")
             if n >= 3 and np.isfinite(rho) and np.isfinite(p).all() and p.std() > 0 and s.std() > 0:
                 # Simple OLS best-fit overlay
                 slope, intercept = np.polyfit(s, p, 1)
@@ -2273,10 +2987,15 @@ def parse_args() -> argparse.Namespace:
                          "(34 / 100). When 0 (the default), per-entity tiered "
                          "subsampling kicks in instead (see --no_subsample / "
                          "--tiered_modulo_per_chunk).")
-    sm.add_argument("--no_subsample", action="store_true",
-                    help="Disable all subsampling (and the new tiered default). Use "
-                         "every score==3 response. Equivalent to the pre-tiered "
-                         "default of --question_subsample_modulo 0.")
+    sm.add_argument("--no_subsample", action="store_true", default=None,
+                    help="Disable all subsampling. Use every score==3 response.  "
+                         "JUDGE-AWARE DEFAULT (May 2026): if not specified, defaults "
+                         "to True for the OpenAI/GPT judge (cheap → always full "
+                         "volume) and False for Anthropic/Haiku/Sonnet judges "
+                         "(tiered 1/3 by default).  --no_subsample is FORBIDDEN "
+                         "for the Sonnet judge — it's too expensive at full volume "
+                         "and the project never intended to support it there.  "
+                         "Pre-May-2026 default was False for everything (Bug B).")
     sm.add_argument("--tiered_modulo_per_chunk", type=int, default=3,
                     help="Chunk size M for per-entity tiered subsampling (default 3 "
                          "= 1/3 chunks). Tier 1 keeps orig_id %% M == 0, tier 2 "
@@ -2308,6 +3027,81 @@ def parse_args() -> argparse.Namespace:
     o.add_argument("--max_entities", type=int, default=None,
                    help="Limit total entities scored (for dry runs).")
 
+    # Rubric-version drift policy.
+    rd = p.add_argument_group("rubric-version drift policy")
+    rd.add_argument(
+        "--strict_rubric_version", action="store_true",
+        help=(
+            "On cache resume, if any cached entry's recorded "
+            "rubric_version differs from the current RUBRIC_VERSION "
+            "AND the (from, to) pair isn't declared equivalent for "
+            "this (axis, mode, entity_id) cell in "
+            "rubric_equivalences.yaml, abort with SystemExit instead "
+            "of silently dropping the affected entries and rejudging "
+            "them.  Use when you want the run to halt on undeclared "
+            "rubric drift so you can either accept the rejudge "
+            "explicitly (drop this flag) or declare equivalence via "
+            "tools/mark_rubric_equivalent.py.  Default (off) is to "
+            "drop-and-rejudge with a WARNING; this is safer for "
+            "long-running judging sweeps that shouldn't abort "
+            "mid-flight on a rubric bump."
+        ),
+    )
+
+    # Surgical rejudge restriction.
+    rj = p.add_argument_group("surgical rejudge restriction")
+    rj.add_argument(
+        "--rejudge_names", type=str, default=None,
+        help=(
+            "Comma- or whitespace-separated list of '<KIND>:<name>' pairs "
+            "to restrict scoring to (e.g. 'ROLE:patient,TRAIT:patient'). "
+            "<KIND> is R/ROLE/ROLES or T/TRAIT/TRAITS (case-insensitive). "
+            "In static modes, listed entities are scored even if already "
+            "in the cache (overwriting); other entries stay untouched. "
+            "In response mode, scoring is also restricted to listed names. "
+            "Used by Phases 5b, 5d-i, 5d-ii of the trait/role disambiguation "
+            "plan."
+        ),
+    )
+
+    bg = p.add_argument_group("budget tracking (Phase 4c)")
+    bg.add_argument(
+        "--budget_usd", type=float, default=None,
+        help=(
+            "Hard cost cap in USD.  When set, the run aborts cleanly "
+            "(exit code 2; partial caches flushed) the first time the "
+            "running cost crosses this cap.  Recommended (post-May "
+            "2026 calibration on 5c.1/5d.1 full sweeps): ~**1.25× "
+            "expected cost + $5 floor** as a safety net for "
+            "miscalculation.  Empirical residual prediction error "
+            "after the new per-call scales + roles/traits factor is "
+            "~3-5%, so 1.25× leaves ~20pt headroom for "
+            "model-drift or stupid-mistake catch.  For "
+            "first-of-kind judges/prompts (no canary yet), keep "
+            "~1.5× + $10 until calibrated.  Default = no cap "
+            "(legacy behaviour)."
+        ),
+    )
+    bg.add_argument(
+        "--expected_cost_usd", type=float, default=None,
+        help=(
+            "Expected cost in USD.  Advisory only — used for the "
+            "actual/expected ratio in [budget] log lines and the "
+            "end-of-run summary, and for canary GREEN/AMBER/RED "
+            "gating.  Doesn't affect cap enforcement."
+        ),
+    )
+    bg.add_argument(
+        "--usage_json", type=str, default=None,
+        help=(
+            "Optional path to write a usage.json side-car at end-of-run "
+            "(token totals + USD cost + cap + expected, in the "
+            "BudgetTracker.as_dict() schema).  Defaults to "
+            "<output_dir>/usage.json when --output_dir is set; pass "
+            "this flag to override (or set to '/dev/null' to disable)."
+        ),
+    )
+
     args = p.parse_args()
     if args.all:
         args.score_descriptions = True
@@ -2318,7 +3112,137 @@ def parse_args() -> argparse.Namespace:
                 "--score_responses, or use --all.")
     if args.judge_model is None:
         args.judge_model = _default_model_for_provider(args.provider)
+    args.rejudge_names = _parse_rejudge_names(args.rejudge_names)
     return args
+
+
+def _parse_rejudge_names(arg: Optional[str]) -> Optional[List[Tuple[str, str]]]:
+    """Parse the --rejudge_names CLI value into a list of (kind, name) pairs.
+
+    Format: comma- or whitespace-separated list of ``<KIND>:<name>``
+    entries, where ``<KIND>`` is any spelling
+    :func:`assistant_axis.entity_id.kind_long` accepts (``R``, ``T``,
+    ``role``, ``roles``, ``trait``, ``traits``; case-insensitive).
+
+    Returns ``None`` when the arg is unset (no filtering); otherwise a
+    list of ``(kind_long, name)`` tuples ready for membership checks.
+
+    Names are run through :func:`normalize_to_file_name` so that
+    display-form input (hyphens, apostrophes, capitals, e.g.
+    ``R:devil's-advocate``) is silently coerced to file-name form
+    (``devils_advocate``); a WARNING is logged whenever a conversion
+    happens so users notice their input was massaged.  Spaces are not
+    possible inside an entry because the comma/whitespace splitter
+    above tokenises on them.
+
+    Raises:
+        SystemExit: On any malformed entry, with a clear example.
+    """
+    if arg is None:
+        return None
+    raw = re.split(r"[,\s]+", arg.strip())
+    raw = [p for p in raw if p]
+    if not raw:
+        return None
+    out: List[Tuple[str, str]] = []
+    coerced: List[Tuple[str, str]] = []  # (raw_name, normalized_name)
+    for p in raw:
+        if ":" not in p:
+            raise SystemExit(
+                f"--rejudge_names: malformed entry {p!r}; expected "
+                f"'<KIND>:<name>' (e.g. 'ROLE:patient' or 'T:stoic')."
+            )
+        k_raw, name = p.split(":", 1)
+        try:
+            kind = kind_long(k_raw)
+        except ValueError as e:
+            raise SystemExit(
+                f"--rejudge_names: {p!r}: {e}"
+            ) from e
+        if not name:
+            raise SystemExit(
+                f"--rejudge_names: malformed entry {p!r}; missing entity name."
+            )
+        normalized = normalize_to_file_name(name)
+        if normalized != name:
+            coerced.append((name, normalized))
+        out.append((kind, normalized))
+    if coerced:
+        head = "; ".join(
+            f"{raw_n!r} -> {norm_n!r}" for raw_n, norm_n in coerced[:5]
+        ) + ("..." if len(coerced) > 5 else "")
+        logger.warning(
+            f"--rejudge_names: coerced {len(coerced)} display-form entries "
+            f"to file-name form ({head}).  Future invocations should pass "
+            f"file-name form directly; see AGENT_NOTES "
+            f"'File-name vs display-name convention'."
+        )
+    return out
+
+
+def _resolve_rejudge_names_against_scorable(
+    rejudge_names: Sequence[Tuple[str, str]],
+    *,
+    scorable: Sequence[Tuple[str, str]],
+    corpus_entities: Sequence[Tuple[str, str]],
+) -> List[Tuple[str, str]]:
+    """Validate ``--rejudge_names`` entries against ``corpus`` and ``scorable``.
+
+    Returns the subset of ``rejudge_names`` that remains scorable on this
+    axis: entries are kept iff they are in ``scorable``; entries that
+    are in the full ``corpus_entities`` but pole-skipped from
+    ``scorable`` are silently dropped (with an INFO log line).
+
+    Two cases are distinguished:
+
+    1. Entry is in the corpus but pole-skipped on this axis — log and
+       silently drop.  Expected when a 5d-ii RP-depleted trait happens
+       to be the pole pair of one of the 12 v2 axes (e.g.
+       ``T:harmful`` on ``harmless_vs_harmful``); the same
+       axis-invariant rejudge list runs on every axis, so 3 of 11
+       axes hit one such conflict each and we just skip.
+
+    2. Entry is NOT in the corpus at all — fatal, almost certainly a
+       typo or stale corpus reference.
+
+    Raises:
+        SystemExit: When at least one ``rejudge_names`` entry is not
+            present in ``corpus_entities`` (a likely typo).
+    """
+    scorable_set = set(scorable)
+    corpus_set = set(corpus_entities)
+    not_in_corpus = [pair for pair in rejudge_names if pair not in corpus_set]
+    if not_in_corpus:
+        head = ", ".join(
+            f"{kind_long(et)[0].upper()}:{n}" for et, n in not_in_corpus[:8]
+        )
+        raise SystemExit(
+            f"--rejudge_names: {len(not_in_corpus)} entries not in the "
+            f"corpus at all (typo or stale reference): {head}"
+            + ("..." if len(not_in_corpus) > 8 else "")
+            + f".  corpus has {len(corpus_set)} entries; "
+            "first few: "
+            + ", ".join(f"{et}:{n}" for et, n in sorted(corpus_set)[:6])
+            + ".  --rejudge_names is the new flag from Phase 4 of the "
+            "trait/role disambiguation plan."
+        )
+    pole_skipped = [pair for pair in rejudge_names if pair not in scorable_set]
+    if pole_skipped:
+        logger.info(
+            f"--rejudge_names: {len(pole_skipped)} entries silently "
+            "dropped because they are pole-pair excluded on this axis: "
+            + ", ".join(
+                f"{kind_long(et)[0].upper()}:{n}" for et, n in pole_skipped
+            )
+        )
+    kept = [pair for pair in rejudge_names if pair in scorable_set]
+    logger.info(
+        f"--rejudge_names: scoring restricted to {len(kept)} "
+        f"entities: " + ", ".join(
+            f"{kind_long(et)[0].upper()}:{n}" for et, n in kept[:10]
+        ) + ("..." if len(kept) > 10 else "")
+    )
+    return kept
 
 
 def _csv_or_space_list(s: str) -> List[str]:
@@ -2334,6 +3258,29 @@ def _csv_or_space_list(s: str) -> List[str]:
 # ---------------------------------------------------------------------------
 
 async def run(args: argparse.Namespace) -> None:
+    # Bug B (May 2026): resolve judge-aware subsampling defaults
+    # *before* anything else so the resolved no_subsample value is
+    # visible to provenance (judge_extras, config.json, _provenance.notes)
+    # and downstream branches.
+    _apply_judge_aware_subsample_defaults(args)
+
+    # Phase 4c (May 2026): build a BudgetTracker that ticks on every
+    # judge call and aborts the run cleanly the moment the running
+    # cost crosses --budget_usd.  Construct unconditionally — without
+    # --budget_usd it acts as a free token-counter for the
+    # end-of-run summary + usage.json side-car.
+    tracker = BudgetTracker(
+        totals=UsageTotals(model=args.judge_model),
+        budget_usd=args.budget_usd,
+        expected_cost_usd=args.expected_cost_usd,
+    )
+    if args.budget_usd is not None:
+        logger.info(
+            f"[budget] cap=${args.budget_usd:.2f}; "
+            f"expected=${args.expected_cost_usd or 0:.2f}; "
+            f"model={args.judge_model}"
+        )
+
     # Peek at one vector file to figure out n_slots / hidden_dim.
     data_dir = Path(args.data_dir)
     probe_paths = list((data_dir / "roles" / "vectors").glob("*.pt")) \
@@ -2367,6 +3314,14 @@ async def run(args: argparse.Namespace) -> None:
     ]
     if args.max_entities is not None:
         scorable = scorable[:args.max_entities]
+
+    if args.rejudge_names:
+        args.rejudge_names = _resolve_rejudge_names_against_scorable(
+            args.rejudge_names,
+            scorable=scorable,
+            corpus_entities=list(corpus.entities),
+        )
+
     logger.info(
         f"Scorable entities: {len(scorable)} "
         f"(skipped {len(corpus.entities) - len(scorable)} pole-pair names "
@@ -2384,14 +3339,32 @@ async def run(args: argparse.Namespace) -> None:
         slots=slots, pole_pair_names=axis_spec.pole_pair_names,
     )
     proj_out = {str(slot): per_slot for slot, per_slot in projections.items()}
+    # Projections is computed from the corpus, no API calls — usage
+    # is always zero here, but stamp it for schema consistency.
     _save_json(
         Path(args.output_dir) / "projections.json",
         proj_out,
         inputs=_build_axis_judge_inputs(args, mode="projections"),
         title=f"axis_judge_correlation:projections:{axis_spec.axis_name}",
+        schema_version=2,
+        notes={"usage": tracker.as_dict()},
     )
 
-    # Save config up-front.
+    # Save config up-front.  ``cohort_kind`` records the kind-pure
+    # cohort the responses_dir points at (when in response mode);
+    # for static-mode runs (no responses_dir) it's None.  This fixes
+    # the historical "config.json's args.pair_type always reads as
+    # the axis pair_type, regardless of which kind is being judged"
+    # bug — the new ``cohort_kind`` field is unambiguous.
+    cohort_kind: Optional[str] = None
+    if args.responses_dir:
+        cand = Path(args.responses_dir).parent.name
+        if cand in ("roles", "traits"):
+            cohort_kind = cand
+    rejudge_for_config = (
+        sorted(f"{kind_long(et)[0].upper()}:{n}" for et, n in args.rejudge_names)
+        if args.rejudge_names else None
+    )
     config = {
         "args": {k: v for k, v in vars(args).items()},
         "n_slots": n_slots, "n_layers": n_layers, "hidden_dim": hidden_dim,
@@ -2402,23 +3375,59 @@ async def run(args: argparse.Namespace) -> None:
         "neg_examples": axis_spec.neg_examples, "pos_examples": axis_spec.pos_examples,
         "exclusions": axis_spec.exclusions,
         "n_scorable": len(scorable),
+        "cohort_kind": cohort_kind,
+        "rejudge_names": rejudge_for_config,
     }
     _save_json(Path(args.output_dir) / "config.json", config)
 
     # Run each requested scoring mode.
     scores_for_corr: Dict[str, Dict[str, float]] = {}
-    if args.score_descriptions:
-        d = await score_static_mode("descriptions", corpus, axis_spec, scorable, args)
-        scores_for_corr["descriptions"] = {k: float(v) for k, v in d.items()}
-    if args.score_instructions:
-        d = await score_static_mode("instructions", corpus, axis_spec, scorable, args)
-        scores_for_corr["instructions"] = {k: float(v) for k, v in d.items()}
+    try:
+        if args.score_descriptions:
+            d = await score_static_mode(
+                "descriptions", corpus, axis_spec, scorable, args,
+                tracker=tracker,
+            )
+            scores_for_corr["descriptions"] = {k: float(v) for k, v in d.items()}
+        if args.score_instructions:
+            d = await score_static_mode(
+                "instructions", corpus, axis_spec, scorable, args,
+                tracker=tracker,
+            )
+            scores_for_corr["instructions"] = {k: float(v) for k, v in d.items()}
+        if args.score_responses:
+            resp_cache = await score_responses_mode(
+                axis_spec, scorable, args, tracker=tracker,
+            )
+    except BudgetExceededError as e:
+        # Cleanup path: partial caches were already flushed by
+        # score_*_mode's save_every loop the moment the cap-crossing
+        # call returned.  Log a final budget summary and exit with
+        # code 2 (= cap exceeded; distinct from generic CLI error).
+        logger.error(str(e))
+        _flush_budget_artifacts(args, tracker)
+        raise SystemExit(2) from e
+    else:
+        # On clean completion, also write the side-car / log a
+        # one-line final summary so the operator sees the bill.
+        _flush_budget_artifacts(args, tracker)
     if args.score_responses:
-        resp_cache = await score_responses_mode(axis_spec, scorable, args)
-        means = {
-            n: float(d["mean_score"]) for n, d in resp_cache.items()
-            if d.get("mean_score") is not None
-        }
+        # Response cache keys are bare names (kind-pure cohort dir).
+        # For mixed-kind correlation against per_slot (which is keyed
+        # by disambiguated entity_id), promote the bare names with the
+        # cohort_kind discriminator so the lookups in compute_correlations
+        # match.
+        if cohort_kind:
+            means = {
+                entity_id(n, cohort_kind): float(d["mean_score"])
+                for n, d in resp_cache.items()
+                if d.get("mean_score") is not None
+            }
+        else:
+            means = {
+                n: float(d["mean_score"]) for n, d in resp_cache.items()
+                if d.get("mean_score") is not None
+            }
         scores_for_corr["responses"] = means
 
     # Compute correlations and output.
@@ -2433,6 +3442,8 @@ async def run(args: argparse.Namespace) -> None:
         correlations,
         inputs=_build_axis_judge_inputs(args, mode="correlations"),
         title=f"axis_judge_correlation:correlations:{axis_spec.axis_name}",
+        schema_version=2,
+        notes={"usage": tracker.as_dict()},
     )
 
     # Make plot.

@@ -295,6 +295,17 @@ def build_eval_prompt(positive_label: str, description: str) -> str:
     Keeps eval_prompt in sync when description is edited.
     The template uses {{question}} and {{answer}} so they survive .format()
     and remain as {question} and {answer} in the output.
+
+    Display-form note (see AGENT_NOTES.md "File-name vs
+    display-name convention"): LLM prompts are display sites, so
+    ``positive_label`` must already be in display form
+    (``stream-of-consciousness``, ``systems thinker``) -- which it
+    is by storage convention in every trait JSON.  The data-prep
+    code that writes these JSONs persists the human-friendly form
+    in ``positive_label`` directly, so this builder requires no
+    underscore-conversion of its own (compare the role-side
+    ``regenerate_role_instructions.role_display_name(stem)`` helper,
+    which converts on the fly because role JSONs key by file stem).
     """
     return EVAL_PROMPT_TEMPLATE.format(
         positive_label=positive_label,

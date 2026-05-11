@@ -60,10 +60,14 @@ import numpy as np
 from scipy.stats import spearmanr
 
 from assistant_axis import cohort_from_pairs, json_metadata, png_metadata
+from assistant_axis.judge_loaders import migrate_v1_static_scores
 from assistant_axis.provenance import InputSpec, load_and_register
 
 DEFAULT_EXPERIMENT_DIR = Path(__file__).resolve().parent.parent / (
     "roger/axis_judge_experiments"
+)
+DEFAULT_DATA_DIR = Path(__file__).resolve().parent.parent / (
+    "runpod_workspace/qwen/qwen-3-32b Roger 8slot"
 )
 
 
@@ -72,11 +76,20 @@ def _load_both_mean(
     *,
     inputs: list[InputSpec] | None = None,
     axis_id: str | None = None,
+    kinds_for_name: dict[str, set] | None = None,
 ) -> dict[str, float]:
     """Load ``(descriptions + instructions) / 2`` scores for one provider.
 
     Threads ``inputs`` through ``load_and_register`` so each cache
     consumed is recorded as a dependency in lockstep with the read.
+
+    When ``kinds_for_name`` is provided, v1 (bare-name) score dicts
+    are migrated up to v2 (entity_id) keys in-memory.  This is needed
+    when comparing a v2 judge cache (GPT post-Phase-5b) against a v1
+    judge cache (deferred Sonnet rejudges); without migration the
+    bare-name keys silently fail to intersect with ``name|R`` / ``name|T``
+    keys, dropping the 12 collision-touching axes.  Migration is a
+    no-op on already-v2 input, so applying it uniformly is safe.
     """
     label = axis_id or axis_dir.name
     d, _, _ = load_and_register(
@@ -89,6 +102,9 @@ def _load_both_mean(
         dep_key=f"judge_{label}_instructions_{provider}",
         inputs=inputs, policy="warn",
     )
+    if kinds_for_name is not None:
+        d = migrate_v1_static_scores(d, kinds_for_name)
+        i = migrate_v1_static_scores(i, kinds_for_name)
     common = sorted(set(d) & set(i))
     return {n: (d[n] + i[n]) / 2.0 for n in common}
 
@@ -140,8 +156,17 @@ def main() -> int:
                         "Default: ceil(sqrt(N)) -- e.g. 6x6 for N=33, "
                         "4x3 for N=12, 3x3 for N=7.  Pass --grid_cols 4 "
                         "to force the historical 4-column layout.")
+    p.add_argument("--data_dir", default=str(DEFAULT_DATA_DIR),
+                   help="Corpus root used to build the kinds_for_name map "
+                        "for v1->v2 cache key migration.  Only needed so "
+                        "Sonnet v1 (bare-name) caches can be re-keyed to "
+                        "v2 (entity_id) form before intersecting with GPT "
+                        "v2 caches; otherwise the 12 collision-touching "
+                        "axes are silently dropped.  Default: "
+                        f"{DEFAULT_DATA_DIR}.")
     args = p.parse_args()
     experiment_dir = Path(args.experiment_dir).resolve()
+    data_dir = Path(args.data_dir).resolve()
     cohort = cohort_from_pairs(args.pairs)
     if args.pooled is None:
         args.pooled = f"gpt_vs_sonnet_scatter_pooled_{cohort}.png"
@@ -161,6 +186,21 @@ def main() -> int:
     )
     print(f"Loaded {len(pairs)} axis pairs from {args.pairs}")
 
+    # Build kinds_for_name from the corpus so legacy v1 (bare-name) caches
+    # can be lifted to v2 (entity_id) keys in-memory before intersection.
+    # The set-valued return matters for the 9 collision names that
+    # appear in both kinds; migrate_v1_static_scores drops those (the
+    # bare key is irrecoverably ambiguous) and we expect that loss.
+    kinds_for_name: dict[str, set] = {}
+    for et in ("traits", "roles"):
+        vec_dir = data_dir / et / "vectors"
+        if not vec_dir.is_dir():
+            continue
+        for fp in sorted(vec_dir.glob("*.pt")):
+            if fp.stem == "default":
+                continue
+            kinds_for_name.setdefault(fp.stem, set()).add(et)
+
     # Per-axis (gpt_score_list, sonnet_score_list, common_names) and per-axis Spearman ρ.
     per_axis: dict[tuple[str, str], dict] = {}
     all_gpt: list[float] = []
@@ -170,8 +210,10 @@ def main() -> int:
         pos, neg = pair["pos"], pair["neg"]
         axis_id = f"{pos}_vs_{neg}"
         axis_dir = experiment_dir / axis_id
-        gpt = _load_both_mean(axis_dir, "gpt", inputs=inputs, axis_id=axis_id)
-        son = _load_both_mean(axis_dir, "sonnet", inputs=inputs, axis_id=axis_id)
+        gpt = _load_both_mean(axis_dir, "gpt", inputs=inputs, axis_id=axis_id,
+                              kinds_for_name=kinds_for_name)
+        son = _load_both_mean(axis_dir, "sonnet", inputs=inputs, axis_id=axis_id,
+                              kinds_for_name=kinds_for_name)
         common = sorted(set(gpt) & set(son))
         if not common:
             print(f"  [skip] {pos}/{neg}: no shared entities between gpt and sonnet")

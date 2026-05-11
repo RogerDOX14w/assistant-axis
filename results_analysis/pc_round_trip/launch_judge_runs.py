@@ -56,6 +56,7 @@ from pathlib import Path
 import numpy as np
 import torch
 
+from assistant_axis import entity_id
 from results_analysis.axis_judge_correlation import _load_vector_file
 from results_analysis.canonical_angles.data import (
     DEFAULT_DATA_DIR, build_goal_nogoal_subspaces,
@@ -158,7 +159,9 @@ def projection_at_post_shear(*, data_dir: Path, slot: int, layer: int,
                 continue
             v = _load_vector_file(fp).float().numpy()[slot, layer] - default_v
             v_sheared = shear.apply(v[None, :])[0]
-            projections[fp.stem] = float(np.dot(v_sheared, pc_dir) / norm)
+            projections[entity_id(fp.stem, et)] = float(
+                np.dot(v_sheared, pc_dir) / norm
+            )
     return projections
 
 

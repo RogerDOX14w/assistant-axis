@@ -71,7 +71,7 @@ import numpy as np
 from matplotlib.patches import Patch
 from scipy.stats import spearmanr
 
-from assistant_axis import pair_type_of, png_metadata
+from assistant_axis import entity_id, pair_type_of, png_metadata
 from assistant_axis.judge_score_combine import (
     add_di_weights_arg,
     combine_desc_inst_two_judges,
@@ -141,9 +141,10 @@ def _build_entity_cache(
                 t = _load_vector_file(fp).float()
             except Exception:  # pragma: no cover -- skip unreadable files
                 continue
+            eid = entity_id(fp.stem, et)
             for s in slots:
                 v = t[s, LAYER].numpy()
-                cache[s][fp.stem] = v - defaults[s]
+                cache[s][eid] = v - defaults[s]
     return cache
 
 
@@ -331,7 +332,7 @@ def main() -> int:
             )
             for n, info in payload.items():
                 if info.get("mean_score") is not None:
-                    scores_acc[n] = info["mean_score"]
+                    scores_acc[entity_id(n, sub_label)] = info["mean_score"]
         if scores_acc:
             rs_scores_per_axis[(pos, neg)] = scores_acc
 

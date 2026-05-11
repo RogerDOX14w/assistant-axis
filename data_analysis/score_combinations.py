@@ -287,23 +287,41 @@ def build_system_prompt(n: int) -> str:
 
 
 def build_user_message(combo: Dict, batch_size: Optional[int] = None) -> str:
-    """Build the user message for a single combo's instruction pairs."""
+    """Build the user message for a single combo's instruction pairs.
+
+    Display-form note (see AGENT_NOTES.md "File-name vs
+    display-name convention" / "LLM prompts are display sites"):
+    ``combo['role']`` and ``combo['trait']`` are stored in
+    file-name form (the corpus key, e.g.
+    ``aligned_artificial_intelligence``); we convert to
+    display form on injection so the LLM reads
+    ``Role: aligned artificial intelligence`` rather than
+    ``Role: aligned_artificial_intelligence``.  The dict + the
+    output JSON still keep file-form keys -- conversion is local
+    to the prompt only, mirroring
+    ``axis_judge_correlation.build_static_prompt`` (RUBRIC_VERSION
+    v3).
+    """
+    from assistant_axis import display_form_name
+
     pairs = combo["pairs"]
     if batch_size is not None:
         pairs = pairs[:batch_size]
 
+    role_disp = display_form_name(combo["role"])
+    trait_disp = display_form_name(combo["trait"])
     n = len(pairs)
     if n == 1:
         header = (
             f"Score this role+trait instruction combination:\n\n"
-            f"Role: {combo['role']}\n"
-            f"Trait: {combo['trait']}\n"
+            f"Role: {role_disp}\n"
+            f"Trait: {trait_disp}\n"
         )
     else:
         header = (
             f"Score these {n} role+trait instruction combinations:\n\n"
-            f"Role: {combo['role']}\n"
-            f"Trait: {combo['trait']}\n"
+            f"Role: {role_disp}\n"
+            f"Trait: {trait_disp}\n"
         )
 
     items = []

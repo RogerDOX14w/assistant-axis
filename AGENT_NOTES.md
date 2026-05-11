@@ -51,9 +51,115 @@ it's portable across machines and doesn't bake usernames into chat
 transcripts.  Use absolute only when referring to something outside the
 workspace root.
 
----
+### Plot visual verification (mandatory after any plot generation)
 
-## Working Modes
+After generating or re-rendering ANY plot (`.png`, `.jpg`, `.pdf`),
+**read the file back as an image and visually inspect it before
+declaring the work done.**  Numbers and exit codes alone are not
+sufficient: matplotlib will happily emit a visually broken figure
+with a 0 exit code.
+
+#### Verification workflow
+
+1. Generate the plot.
+2. Read it back: `Read` tool, path = generated PNG.
+3. Inspect every text element for overlap / clipping (checklist
+   below).
+4. If broken, fix and re-render; verify again.  Loop until clean.
+
+Don't ship "the numbers print correctly so it must be fine."  The
+plot is the deliverable.
+
+#### Failure-mode checklist (in order of typical recurrence)
+
+**Vertical stacking inside the title block**
+
+The most frequent issue.  `suptitle_with_specs` (in
+`assistant_axis/plot_metadata.py`) renders its bold headline as
+`fig.suptitle` and the spec line as `fig.text`.  matplotlib's
+`constrained_layout` only sees the suptitle, so:
+
+* The spec line and per-axes titles can stack onto each other on
+  short figures, AND
+* Once a `fig.colorbar` is also in the figure, `constrained_layout`
+  IGNORES `fig.subplots_adjust(top=...)` and the colorbar stretches
+  vertically to fill the full axes height — putting its top tick
+  label right under (or on top of) the spec line.
+
+Both are fixed at the caller, not in the helper:
+
+* Give the figure enough vertical room (`figsize=(W, ≥ 6")` for
+  figures with a 2-line title block + per-panel titles).
+* Call `fig.subplots_adjust(top=top_rect)` *after*
+  `suptitle_with_specs` returns its `top_rect` value (and use
+  `constrained_layout=True` so colorbars still place correctly).
+* Shorten colorbar height with `fig.colorbar(im, ax=axes,
+  shrink=0.7)` (or smaller) — that's the only colorbar-height knob
+  `constrained_layout` honours, so it's the right lever to keep
+  the colorbar's top tick well below the spec line.
+
+The `line_height` parameter on `suptitle_with_specs` auto-scales
+from `title_fontsize` (in points) and figure height (in inches)
+since May 2026, so the helper itself no longer needs per-caller
+tuning.  But the figure-size + colorbar-shrink dance is still on
+the caller.
+
+**Horizontal collisions next to the colorbar**
+
+The spec line is rendered centred at figure-x = 0.5, but a
+colorbar pushes the heatmap / axes left of figure-centre, so the
+spec line's right tail can graze the colorbar's top tick label
+even when no vertical overlap exists.  Mitigations:
+
+* Shorten the spec line.  Long axis lists (e.g. all 12 v2 axes
+  spelled out) belong in the `_provenance` envelope, not in the
+  spec line.
+* Cut-off labels (long category names overflowing the bottom
+  margin; tilted x-tick labels truncated on the right edge):
+  rotate to 30°, reduce font, or truncate.
+
+**Other recurring issues**
+
+* **Legend overlap with data.**  Default `loc="best"` can land on
+  top of points when the data fills the axes; pin with
+  `loc="lower right"` (etc.) when that happens.
+* **Colorbar disproportional** to the heatmap when the figure
+  gains width without gaining height — purely aesthetic, only
+  worth fixing if it confuses the reader.
+
+#### Working recipe — heatmap + colorbar + 2-line title
+
+For a single- or multi-panel heatmap with a shared colorbar and
+the standard `suptitle_with_specs` 2-line title block, this
+pattern reliably produces a clean layout:
+
+```python
+fig, axes = plt.subplots(
+    1, n_panels,
+    figsize=(5.3 * n_panels, 6.4),  # height ≥ 6 in
+    constrained_layout=True,        # needed for the colorbar
+)
+if n_panels == 1:
+    axes = np.array([axes])
+
+# ... draw imshow + per-panel titles ...
+
+fig.colorbar(im, ax=axes.tolist(), shrink=0.7,
+             label="Spearman ρ (...)")
+
+_, top_rect = suptitle_with_specs(fig, suptitle, spec_line)
+# constrained_layout doesn't see fig.text, so reserve top region
+# explicitly.  The shrink=0.7 above is what makes the colorbar
+# respect this reservation.
+fig.subplots_adjust(top=top_rect)
+
+plt.savefig(out_path, dpi=150, bbox_inches="tight",
+            metadata=png_metadata(title=suptitle, inputs=inputs))
+plt.close()
+```
+
+Reference implementation (with extensive in-file comments
+explaining each constraint): `results_analysis/batch_size_pairwise_rho.py::make_heatmap_pair`.
 
 ### Ask Mode vs Agent Mode
 - Roger is conscious of the distinction between read-only (ask) and write (agent) modes
@@ -201,6 +307,82 @@ the rubric definitions are echoed in the reasoning.
 ``*_RUBRIC_VERSION`` constant.  These are stamped into each judged
 record for traceability; old records remain valid but are now
 distinguishable from records produced under the new rubric.
+
+**Per-entity drift-on-resume check (May 2026)**.  Both static-mode
+([`score_static_mode`](results_analysis/axis_judge_correlation.py))
+and response-mode
+([`score_responses_mode`](results_analysis/axis_judge_correlation.py))
+cache loaders run
+[`_check_rubric_version_on_resume`](results_analysis/axis_judge_correlation.py)
+immediately after `_load_json_or_empty`.  The check walks **every
+entry** in the cache (not just the cohort as a whole), classifies it
+as **current / equivalent / drifted**, drops only the drifted ones in
+memory, and logs a ``WARNING`` listing what was dropped.  The on-disk
+file is left intact and is overwritten on the next save with
+fresh-rubric data for the rejudged entries.  Caches whose envelope
+lacks both a cohort-level ``rubric_version`` stamp and a per-entity
+stamp map are passed through unchanged — those are covered by the
+older `schema_version` / fingerprint checks.
+
+The effective rubric-version for each cache entry is resolved by
+peeking at, in priority order:
+
+1. ``_provenance.notes.per_entity_rubric_versions[<entity_id_or_name>]``
+   — the per-entity stamp written next to the cache by the producer.
+   Static-mode keys are disambiguated ``"name|R"`` / ``"name|T"``;
+   response-mode keys are bare names (the cohort directory pins the
+   kind).
+2. The cohort-level ``rubric_version`` from the producer-script
+   InputSpec's ``extras`` (read by
+   [`_peek_rubric_version`](results_analysis/axis_judge_correlation.py)
+   / [`peek_rubric_version`](assistant_axis/judge_loaders.py)).
+
+This per-entity granularity matters because rubric bumps can affect
+different entities differently.  The v2 → v3 bump (May 2026) changed
+prompt rendering from file-form (``aligned_artificial_intelligence``)
+to display-form (``aligned artificial intelligence``); response-mode
+prompts only carry pole names through that pipeline (so only axes
+with multi-word poles see any change), while static-mode prompts carry
+the *entity* name too (so any entity with underscores in its name
+sees a changed prompt under v3).  Cohort-level "drop and rejudge
+everything" would either be wasteful (rejudging the byte-identical
+entries) or unsound (claiming axis-wide equivalence when the change
+is per-entity).
+
+**Rubric-equivalence registry**
+([`assistant_axis.rubric_equivalence`](assistant_axis/rubric_equivalence.py),
+backing file `rubric_equivalences.yaml` at repo root):
+declarative ``(from_rubric, to_rubric, modes, axes|except_axes,
+entity_ids|except_entity_ids)`` edges that let the producer
+*skip* a rejudge for cells where the maintainer has verified the
+prompt is byte-identical between the cached and current rubric.
+Mirrors the existing
+[`script_equivalence`](assistant_axis/script_equivalence.py)
+pattern; queried via `is_equivalent(from, to, *, axis, mode,
+entity_id)` which does scoped BFS over edges (reflexive, transitive,
+asymmetric).  Declare new edges via
+[`tools/mark_rubric_equivalent.py`](tools/mark_rubric_equivalent.py)
+(supports `--symmetric` for the common round-trippable case;
+`--list` and `--check` for inspection).  Initial seed entry: the v2
+→ v3 response-mode equivalence for the 11 single-pole axes.
+
+**Strict mode**.  Pass `--strict_rubric_version` to make undeclared
+drift a hard `SystemExit(2)` instead of silent-drop-and-rejudge.  The
+error message lists the affected entities and prints the exact CLI
+needed to declare an equivalence (or instructs the operator to drop
+the flag to accept the rejudge).  Off by default because long-running
+judging sweeps shouldn't abort mid-flight on a rubric bump; use when
+you want a run to halt rather than spend money rejudging entries you
+weren't planning to.
+
+**Consumer side**.  Callers reading caches can audit drift without
+the producer's drop-or-abort policy via
+[`assistant_axis.judge_loaders.rubric_version_report`](assistant_axis/judge_loaders.py),
+which returns a `RubricVersionReport(path, cohort_rubric,
+current_rubric, n_total, n_current, n_equivalent, drifted, ...)`.
+The report is informational (truthy = no drift); it doesn't mutate
+the cache or raise.  Use for "is this analysis I'm about to publish
+based on stale-rubric data anywhere?" audits.
 
 ### Judge parse-rate alerting (mandatory)
 
@@ -1655,6 +1837,476 @@ gives clean 1/3 / 2/3 / all chunks regardless of the canonical stride.
 `AGENT_NOTES.md` and `correlations.json` files from earlier (uniform-q9
 or no-subsample) runs are NOT backfilled; their results stay valid and
 comparable within their own cohort.
+
+---
+
+## Trait/role name collisions and the `name|R` / `name|T` convention (May 2026)
+
+**The bug we keep almost making.** Nine names appear in BOTH the trait
+and role lists (`ascetic`, `contrarian`, `cosmopolitan`, `generalist`,
+`pacifist`, `patient`, `perfectionist`, `romantic`, `stoic`).  In any
+data structure that mixes traits and roles, the bare name is **NOT a
+unique identifier**.  Historic code did things like:
+
+```python
+merged = {}
+for entry in trait_scores: merged[entry["name"]] = entry["score"]
+for entry in role_scores:  merged[entry["name"]] = entry["score"]  # silently overwrites!
+```
+
+…which silently dropped one side of every collision and biased downstream
+ρ calculations by ~1.5%.
+
+### Disambiguator: `assistant_axis.entity_id`
+
+Use [`entity_id(name, kind)`](assistant_axis/entity_id.py) whenever a
+data structure could plausibly contain entries from both kinds (dict
+keys, set members, JSON cache keys, sorted name lists for rho, ...).
+Format: pipe-suffixed single-letter kind tag.
+
+```python
+from assistant_axis import entity_id, parse_entity_id, display_label
+
+entity_id("patient", "roles")    # "patient|R"
+entity_id("patient", "traits")   # "patient|T"
+parse_entity_id("patient|R")     # EntityId(name='patient', kind='roles')
+display_label("patient|R")       # "patient"   ← bare name, for plots
+```
+
+Pure-kind contexts (e.g. inside `runpod_workspace/.../{roles,traits}/`,
+or a per-cohort `haiku_responses_traits_*/` cache) keep bare names —
+the kind is implicit in the path.  Disambiguation is for the **mixing
+layer**.
+
+### Display-side rule (plots, legends, console output)
+
+Plots and labels show the **bare name only**; kind is encoded
+*visually*.  Two collision-name dots in the same scatter is fine:
+same label "patient", different colour.  Project convention (locked
+in `assistant_axis.plot_palette`):
+
+| kind  | fill colour       | text colour | marker | text style |
+| ----- | ----------------- | ----------- | :----: | ---------- |
+| trait | `lightgrey`       | `dimgrey`   | `o`    | upright    |
+| role  | `lightsteelblue`  | `navy`      | `s`    | italic     |
+
+Helpers: `kind_color(kind)`, `kind_text_color(kind)`, `kind_marker(kind)`,
+`kind_text_style(kind)`, `display_label(eid)`.  Reference
+implementation: `results_analysis/pair_slice_plots.py` lines 336–410.
+
+### File-name vs display-name convention (underscores ↔ spaces)
+
+Many entities have multi-word names that exist in two forms:
+
+| form          | example                          | where used                         |
+| ------------- | -------------------------------- | ---------------------------------- |
+| **file-name** | `aligned_artificial_intelligence` | every JSON key, dict key, set member, filename, scoring cache, ρ intersection key |
+| **display-name** | `aligned artificial intelligence` | plot labels, axis annotations, **LLM rubric / prompt body**, console output for humans |
+
+**Rule (Convention 2): file-name everywhere except display sites.**
+Use the underscore form for any data-structure key, ID, intersection
+operand, or persistence key.  Convert to space-form ONLY at the
+boundary where you render the name to a human OR an LLM — and do
+that locally (via the `display_form_name` helper or
+`name.replace("_", " ")`).  Never the reverse: a display-form string
+should never be used as a dict key, JSON key, or rho intersection
+input.
+
+**LLM prompts are display sites too.**  An LLM reading
+`aligned_artificial_intelligence` parses it less naturally than
+`aligned artificial intelligence` (extra tokens, distracts from the
+concept).  Project-wide convention is therefore the same as for
+plot labels: file-form is the canonical key, display-form is what
+goes into the LLM's mouth.  Every rubric / prompt builder MUST
+apply `display_form_name(...)` to entity names before injecting
+them into the prompt body, examples list, or axis-name header.
+
+Multi-word entity census (qwen-3-32b Roger 8slot corpus): 12 of 303
+traits + 4 of 281 roles = 16 of ~584.  Examples: `systems_thinker`,
+`kind_to_animals`, `stream_of_consciousness` (traits);
+`aligned_artificial_intelligence`, `paperclip_maximizer`, `coral_reef`,
+`devils_advocate` (roles).
+
+**The audit (May 2026)** found legitimate `_ → space` conversion
+sites in the codebase, all in display/annotation code:
+`canonical_angles/ca1_plane.py:193`, `pair_slice_plots.py:418`,
+`infer_axis_description.py:164` (PC-describer LLM prompt),
+`rubric_v1_v2_compare.py:209`, `regenerate_role_instructions.py:47`
+(data-prep LLM prompt), and the `display_form_name()` helper.
+
+**LLM rubric audit (May 2026)** of every prompt builder in the
+project (8 callsites; each is now annotated in-file with a brief
+display-form note that points back to this section):
+
+| Prompt builder | Status | Notes |
+| --- | --- | --- |
+| `axis_judge_correlation.py:build_static_prompt` | **fixed v3 (May 2026)** | Was injecting file-form `{name}`, examples, axis_name; now wraps each in `display_form_name(...)`. |
+| `axis_judge_correlation.py:build_response_batch_prompt` | **fixed v3 (May 2026)** | Body anonymises the entity (v2); shared header still injected examples + axis_name in file-form, now in display-form. |
+| `data_analysis/score_combinations.py:build_user_message` | **fixed (May 2026)** | Now wraps `combo['role']` / `combo['trait']` in `display_form_name(...)` at prompt injection. |
+| `data_analysis/regenerate_role_instructions.py:build_eval_prompt` (+ Christina/Roger variants) | OK | Already used `role_display_name(stem)` (file-stem -> display, with overrides for `devil's advocate`). |
+| `data_analysis/regenerate_trait_instructions.py:build_eval_prompt` (+ instruction variants) | OK | Already uses pre-stored display-form `positive_label` from each trait JSON (e.g. `stream-of-consciousness`). |
+| `results_analysis/infer_axis_description.py:build_prompt` (PC-describer) | OK | Already used `_display_label` helper for trait/role labels. |
+| `results_analysis/standardize_axis_spec.py:build_prompt` | OK | Operates on long-form pole *descriptions*, not bare entity names. |
+| `assistant_axis/steering_judges.py` rubrics | **open** (low-priority) | Uses `persona.role` / `SteeringSpec.{axis_name,pos_label,neg_label}` as-is from steering config.  If config supplies file-form, prompts leak underscores.  Tracked separately; sweep configs to date have used clean labels.  Fix at SteeringSpec/PersonaSpec construction in `steering/{run_sweep,post_judge}.py`. |
+
+**Cross-axis rejudge surface for the v3 fix** (35 distinct axis
+dirs on disk across all pair lists, 57 distinct pole pairs across
+all 9 `pair_list*.json` files): only **1** axis has multi-word
+pole names — `systems_thinker_vs_analytical`.  So the
+``axis_name`` + examples header leak is a single-axis problem
+across the entire project, not just the v2 12-axis production
+set.  The per-entity ``{name}`` leak in static-mode prompts
+affects the 16 multi-word entities (12 traits + 4 roles, ~2.7%
+of the corpus) on every axis.  Surgical rejudge cost: ~$0.49 for
+the per-entity leak across all 35 axes; +$1.48 for the 1-axis
+static header leak; +~$54 if redoing that one axis's response
+mode at B=7 GPT + Haiku-tiered.
+
+No internal pipeline produces or consumes display-name keys — every
+ρ intersection, every set membership check, every cache key uses
+the file-name form.
+
+**Why no internal auto-conversion?**  Inside the pipeline we never
+convert: every key is in file-name form by construction and any
+mismatch is a bug, not user error.  Auto-coercing
+`"aligned artificial intelligence"` → `"aligned_artificial_intelligence"`
+in internal code obscures the mismatch and would fail anyway on
+names where the user's word breaks differ
+(`"obama_administration_health_team"` vs `"Obama administration's
+health team"`).
+
+**External boundary hardening (May 2026)**: the two ingest points
+that accept names from outside the pipeline normalise display-form
+input to file-name form with a WARNING, since the typical leak
+(spaces, hyphens, capitals, apostrophes) is mechanical and easy to
+detect:
+
+1. `axis_judge_correlation.py --rejudge_names` —
+   [`_parse_rejudge_names`](results_analysis/axis_judge_correlation.py)
+   runs each name through
+   [`normalize_to_file_name`](assistant_axis/entity_id.py); logs
+   `WARNING: --rejudge_names: coerced N display-form entries...`
+   when the input wasn't already canonical.
+2. `optimal_axis_for_judge.py --scores_file` —
+   [`_normalize_scores_file_keys`](results_analysis/optimal_axis_for_judge.py)
+   runs every JSON key through `normalize_to_file_name`, logs
+   `WARNING: --scores_file ...: coerced N display-form key(s)...`
+   on conversions, and `SystemExit`s if two keys collide under
+   normalisation (rather than silently dropping one).
+
+`name|R` / `name|T` disambiguated ids are passed through unchanged
+in both paths.  See `tests/test_entity_id.py::TestNormalizeToFileName`
+and `tests/test_optimal_axis_for_judge_normalize.py` for the full
+behaviour spec.
+
+**Defensive checks already in place** for this risk class:
+`StaleSchemaError` enforcement on AT-RISK static caches
+(`assistant_axis/judge_loaders.py:478–533`), per-axis
+`len(common) < 3 or 5` floors at every ρ site,
+[`tools/lint_kind_collision.py`](tools/lint_kind_collision.py) AST
+walker, and
+[`assistant_axis/tests/test_collision_regression.py`](assistant_axis/tests/test_collision_regression.py)
+covering 5 patterns × 9 collision names.
+
+### Common-pitfall callout (read this before merging trait + role data)
+
+Whenever you see this pattern in code:
+
+```python
+for kind in ("traits", "roles"):
+    for entry in load_scores(axis, kind):
+        merged[entry["name"]] = entry["score"]
+```
+
+**STOP.**  Replace with:
+
+```python
+from assistant_axis import entity_id
+
+for kind in ("traits", "roles"):
+    for entry in load_scores(axis, kind):
+        merged[entity_id(entry["name"], kind)] = entry["score"]
+```
+
+…otherwise you are dropping nine traits or nine roles per axis.  The
+canonical lint regex (`for .* in \("(traits|roles)", "(traits|roles)"\):`)
+catches the dual-iteration pattern; pair every match with an
+`entity_id(...)` call before the merge.
+
+**At-risk cache families** (write disambiguated keys in mixed-kind
+contexts):
+* `<axis>/<judge>/scores_descriptions.json`
+* `<axis>/<judge>/scores_instructions.json`
+* `<axis>/<judge>/projections.json`
+* `<axis>/<judge>/correlations*.json`
+
+The per-cohort caches (`<axis>/<judge>_responses_<kind>_b<B>{...}/scores_responses*.json`)
+are kind-pure by directory — bare names there remain correct.  Same for
+`runpod_workspace/.../{roles,traits}/...` and any single-kind notebook.
+
+### Producer-side / consumer-side audit (May 2026)
+
+* **Producer**: `results_analysis/axis_judge_correlation.py` — writes
+  the at-risk cache families above.  After the May 2026 fix it stamps
+  disambiguated keys + `schema_version: 2`.  Old v1 caches are loud-rejected
+  on read with a concrete regenerate-via command.
+* **Consumers**: ~13 result-analysis scripts that merge trait + role
+  data (see `phase3_consumers` in
+  `trait_role_name_disambiguation_06e61abc.plan.md`).  Each migrated to
+  `load_response_scores(...)` and `entity_id(name, kind)` keys.
+
+### `assistant_axis.judge_loaders.load_response_scores`
+
+The canonical reader for response-mode scores.  Per-entity B fallback
+for Haiku (`_b7_t3` preferred, `_b10_q9` fallback) with
+**conditional provenance**: only registers a cohort file as a
+dependency if it actually contributed at least one entity to the
+returned result.  See the module docstring for the suffix conventions
+(`(no suffix)` = full volume, `_q<N>` = uniform mod-N legacy, `_t<M>`
+= tiered).
+
+---
+
+## Judging cost model (project-wide reference)
+
+The single source of truth lives in
+[`results_analysis/plot_batch_size_quality_vs_cost.py`](results_analysis/plot_batch_size_quality_vs_cost.py)
+(constants and the Pareto plot) with the fuller narrative in
+[`results_analysis/README.md`](results_analysis/README.md) under
+"Cost model: GPT-4.1-mini responses-mode judging".  This section is a
+quick reference for cost-scoping questions; numbers were re-derived
+empirically on **2026-05-09** via a 240-batch tiktoken dry-run on
+real cached prompts + responses (the previous documented numbers
+under-counted real responses by ~22× and made all costs look ~5× too
+low).
+
+**2026-05-10 full cross-axis validation:** re-ran the dry-run via
+[`tools/dry_run_response_token_count.py`](tools/dry_run_response_token_count.py)
+on **all 12 v2 axes × both cohorts** = 295,258 reconstructed B=10
+batches, prompt-rebuilt under the current (v2) rubric, all
+tiktoken-counted with `o200k_base`.  Per-axis cost (`measured /
+$49.40`) came in at **mean 1.006 ± σ 0.013, range [0.989, 1.034]**.
+The model is empirically correct within ±3% per axis and within 0.6%
+on average -- no recalibration applied.  Per-axis spread:
+
+| axis                                  | n_batches | cost    | ratio |
+| ------------------------------------- | --------: | ------: | ----: |
+| helpful_vs_unhelpful                  | 24,599    | $50.33  | 1.019 |
+| harmless_vs_harmful                   | 24,630    | $50.43  | 1.021 |
+| honest_vs_dishonest                   | 24,621    | $49.32  | 0.998 |
+| truthful_vs_deceitful                 | 24,626    | $49.47  | 1.001 |
+| guileless_vs_scheming                 | 24,600    | $49.47  | 1.001 |
+| egalitarian_vs_elitist                | 24,602    | $49.63  | 1.005 |
+| progressive_vs_conservative           | 24,590    | $49.29  | 0.998 |
+| concise_vs_verbose                    | 24,589    | $48.86  | 0.989 |
+| ecocentric_vs_anthropocentric         | 24,613    | $51.08  | 1.034 |
+| improvisational_vs_methodical         | 24,598    | $49.43  | 1.001 |
+| relativist_vs_absolutist              | 24,601    | $49.41  | 1.000 |
+| systems_thinker_vs_analytical         | 24,589    | $49.71  | 1.006 |
+
+Reproduce via `uv run python tools/dry_run_response_token_count.py
+--axis <name> --kind both --quiet`; with `--quiet` omitted, dumps
+per-cohort histograms for diagnostic use.  The dry run rebuilds each
+batch's prompt with the *current* RUBRIC_RESPONSE_BATCH and tiktoken-
+counts it -- so re-running after any rubric change re-validates the
+model automatically.
+
+### Per-batch token model (B=10)
+
+* Input: ≈ 320 (header) + 10 × 438 (per item) ≈ **4,700 tokens**.
+* Output: ≈ **80 tokens** (median 78, σ 14).
+* Header is only ~7% of input; **items dominate** because real
+  Qwen-3-32B responses are ~435 tokens each (capped at the 512-token
+  generation limit; ~71% hit cap).
+
+### Per-axis cost (both cohorts combined, full volume)
+
+At B=10: **115.6M input + 1.97M output** tokens across ~24,605
+batches.
+
+| B  | GPT-4.1-mini | Haiku-4.5 (full / q9)       | Sonnet-4 (full / q9)        |
+| -- | -----------: | --------------------------: | --------------------------: |
+| 5  |       $55.69 |             $164.55 / $54.85 |       $493.64 / $164.55 |
+| 7  |       $52.10 |             $154.74 / $51.58 |       $464.21 / $154.74 |
+| 10 |       $49.40 |             $147.38 / $49.13 |       $442.14 / $147.38 |
+| 15 |       $47.30 |             $141.66 / $47.22 |       $424.97 / $141.66 |
+
+* `q9` = `--question_subsample_modulo 9` → ~1/3 fraction of full
+  volume.  ~4% smaller than tiered-default `_b10` cohorts in practice
+  because uniform mod-9 doesn't escalate RP-depleted entities to tier
+  2/3.
+* Pricing (per 1M tokens, 2026 rates): GPT-4.1-mini $0.40/$1.60;
+  Haiku-4.5 $1.00/$5.00; Sonnet-4 $3.00/$15.00.
+* **Haiku/Sonnet token scales** (empirical from 2026-05-11 5c.1/5d.1
+  full-sweep totals: 11 v2 axes × 2 cohorts, 372,652 GPT calls +
+  8,927 Haiku calls; previously the 5d.0 canary's smaller sample
+  gave 1.17/2.00, which the full sweep now refines).  These are
+  PER-CALL ratios and are approximately B-invariant: at B=7 they
+  measure (1.087, 2.165) and the header-amortisation analysis
+  (1.35× header_chunk × 320 tok header + 1.07× item_chunk × B × 438
+  tok items) predicts (1.089, 2.165) at B=10, so the same
+  constants apply to the B=10 Pareto plot anchor below.
+
+  - `HAIKU_INPUT_SCALE = 1.09`: Anthropic tokenizer ~9% chunkier than
+    `o200k_base` on response prompts dominated by raw response text;
+    much smaller than the 1.35× seen on static-mode prompts where
+    the rubric-laden header dominates.
+  - `HAIKU_OUTPUT_SCALE = 2.17`: Haiku produces ~2.17× the output
+    tokens of GPT-4.1-mini per call (160.2 vs 74.0 per call in the
+    5c.1/5d.1 full sweep at B=7; 2.19 in the 5d.0 canary; 1.93× in
+    static-mode).  The previous 2.00 mid-estimate was conservative
+    on the output side; the net effect of moving (1.17, 2.00) →
+    (1.09, 2.17) is a **~5% decrease** in predicted Haiku cost at
+    B=10 (input contribution drops faster than the output
+    contribution rises, since input is ~5.7× the output for Haiku
+    given the $1.00/$5.00 rate split and 115.6M/1.97M token totals).
+
+  Sonnet uses the same Anthropic tokenizer family (input scale
+  carries over directly); Sonnet's verbosity is **not** measured in
+  this project — we use the Haiku output scale as a placeholder
+  (Sonnet is typically ≥ as verbose as Haiku, so this is more likely
+  an under-estimate than over-estimate).  See
+  `results_analysis/plot_batch_size_quality_vs_cost.py`
+  `HAIKU_INPUT_SCALE` / `HAIKU_OUTPUT_SCALE` constants for the
+  authoritative values used in the Pareto plot.
+
+  Note: the 5d.1 actual-over-expected ratio of 1.21 (Haiku b7_t3
+  residual sweep) is **not** explained by these scale revisions
+  (which net to ~5% LOWER cost, not 21% higher); that ratio traces
+  to the 5d.1 launch-script's budget formula and is a separate
+  reconciliation item.
+
+### B-curve takeaway (motivates the May 2026 B=10 → B=7 default switch)
+
+The B=15 → B=5 cost spread is only **1.18×** ($47.30 → $55.69), not
+~2× as the old (broken) model claimed.  Most cost is `items × per-item-rate`
+($43.10 floor) regardless of B.  B=7 vs B=10 marginal ≈ $2.70/axis
+for +0.004 ρ uplift (~$7 per +0.01 ρ — the best step on the new
+curve).  See
+[`./roger/axis_judge_experiments/batch_size_curve_8slot/batch_size_cost_vs_quality.png`](./roger/axis_judge_experiments/batch_size_curve_8slot/batch_size_cost_vs_quality.png).
+
+### Static-mode cost model (descriptions + instructions)
+
+Static-mode prompts are vastly cheaper per call than response-mode
+because there are no per-batch response items — just the rubric
+header plus one entity description (or one instruction list).
+Empirical from the 2026-05-10 GPT canary on `concise_vs_verbose`
+(36 single-shot calls, descriptions + instructions for 18 collision
+entities = 12,664 input + 2,250 output tokens):
+
+| Component | Tokens | Notes |
+| --------- | -----: | ----- |
+| Input per call  | **352** | rubric header (~210) + entity desc/instr (~110) + scoring instruction (~30); range narrow because content length is bounded by description format |
+| Output per call | **63**  | reasoning (2-3 sentences) + `SCORE: <int>` line; mean 62.5, σ small |
+
+Per-call cost (single-shot, no batching):
+
+| Judge | $ / call | Source |
+| ----- | -------: | ------ |
+| GPT-4.1-mini  | **$0.000242** | `352 × $0.40/1M + 63 × $1.60/1M` |
+| Haiku-4.5     | **$0.000667** | `352 × $1.00/1M + 63 × $5.00/1M` |
+| Sonnet-4      | **$0.002001** | `352 × $3.00/1M + 63 × $15.00/1M` |
+
+**Per-cell scaling for surgical static-mode rejudges** (one cell =
+one (axis, judge) pair, two modes = descriptions + instructions, N
+entities):
+
+```
+cost ≈ 2 × N × cost_per_call
+```
+
+For Phase 5b (N=18 collision entities, 12 axes, GPT + Haiku): per
+cell = 36 calls = $0.0087 (GPT) or $0.0240 (Haiku).  Total Phase 5b
+expected: 12 × ($0.0087 + $0.0240) ≈ **$0.39**.  Hand-rolled
+estimates that pre-dated this empirical canary (e.g. an early
+$0.012/cell guess) are roughly 1.5× pessimistic — re-derive from the
+table above when budgeting, not from older estimates.
+
+When estimating costs for a new judging run, multiply `cost_per_axis_for_(judge, B, subsample)`
+by the number of axes and rubrics involved.  When estimating for a
+*surgical* rejudge of N entities, scale by `N / 280` (roles) or
+`N / 300` (traits) of the per-axis cost (Phase 5d-i and 5d-ii in
+the disambiguation plan are worked examples).
+
+**Roles-vs-traits response-length asymmetry (response-mode only).**
+At the same B and the same N entities, response-mode judging of
+ROLES costs ~**1.22×** more per entity than TRAITS, because
+Qwen-3-32B produces ~22% longer responses when role-played
+(persona-immersive narratives) than trait-modulated (clipped
+behavioral answers): mean 2094 vs 1718 chars / median 2351 vs 1842
+chars on the 29 roles + 14 traits 5d.1 cohort (14,500 + 7,000
+responses).  Per-call judge output is unaffected (the judge emits a
+fixed-format score per response regardless of cohort) — only
+per-call input scales with response length.
+
+This is **why 5d.1 came in 1.21× over its hand-tuned 50/50 budget
+split**: the 29/14 entity split implies a *cost* split of
+`(29 × 1.22) : 14 ≈ 2.53 : 1`, not the `$1.50 : $1.55 ≈ 0.97 : 1`
+the launch script assumed.  Re-applying the 1.22× factor to the
+5d.1 numbers gives `$2.50/roles + $1.00/traits = $3.50/axis ⇒
+$38.50 total`, vs the observed $40.45 (within ~5%, well inside
+noise).
+
+The canonical constant is
+`assistant_axis.judge_pricing.ROLES_RESPONSE_LENGTH_FACTOR = 1.22`,
+with a convenience splitter
+`surgical_rejudge_cost_split(per_axis_cost, n_roles, n_traits,
+mode="response")` returning the per-cohort budget shares.  Static
+mode (descriptions / instructions) is **not** affected — there are
+no responses in those prompts, so call `surgical_rejudge_cost_split(
+..., mode="static")` to get an N-weighted (1.0×) split for static
+rejudge runs.
+
+The 1.22× asymmetry is also part of why the project-aggregate
+per-axis cost (`B10_GPT_INPUT_M_TOK = 115.6` for both cohorts
+combined) silently absorbs it — full-volume budgets are correct
+without an explicit factor because the (300 traits + 280 roles)
+~50/50 entity split implies a (1.0:1.22)/(1.0+1.22) = 55/45
+implicit weighting that's already baked into the empirical token
+totals.  Only *off-default* cohort splits (surgical rejudges,
+single-mode runs) need to apply the factor explicitly.
+
+### Budget cap recommendation (safety net)
+
+The `--budget_usd` hard cap is a safety net against catastrophic
+miscalculation (a bug, a wrong model, an unexpected prompt blowup
+— not normal variance).  Pick it generously relative to the
+expected cost, but tightly enough that a real surprise gets caught
+before the bill detonates.
+
+Post-May-2026 calibration (5c.1 GPT full sweep + 5d.1 Haiku
+residual sweep, with the new `HAIKU_INPUT_SCALE = 1.09` /
+`HAIKU_OUTPUT_SCALE = 2.17` per-call scales applied AND the
+`ROLES_RESPONSE_LENGTH_FACTOR = 1.22` split applied where
+appropriate) gives empirical actual/expected ratios:
+
+- 5c.1 GPT (11 axes × 2 cohorts, B=7 full):  ratio = 0.97 (±4%)
+- 5d.1 Haiku (corrected for roles/traits):   ratio = 1.05 (±5%)
+
+So residual prediction error is ~3-5% in known-judge known-prompt
+production runs.
+
+**Recommended default**: `budget_usd = 1.25 × expected_cost_usd + $5`
+(was: 1.5× + $20).  The 1.25× leaves ~20pt headroom over the
+empirical residual — enough to catch model-drift or stupid
+mistakes without being so loose that a real cost runaway escapes
+the cap.
+
+**For first-of-kind work** (new judge, new prompt template, new B
+value not yet canary'd): stay at ~`1.5× + $10` until the first run
+lands and the residual is measured.  Drop to the standard
+recommendation thereafter.
+
+### Provenance: capture `usage` from every API response
+
+`assistant_axis.judge_pricing` (added Phase 4c, May 2026) is the
+project's single source of truth for per-model pricing.  Every judge
+call's `resp.usage` (input/output/cache tokens) is summed into a
+`UsageTotals`/`BudgetTracker`; the live $ spend is checked against
+`--budget_usd` (hard cap, exits with code 2 if exceeded) and ratioed
+against `--expected_cost_usd` (advisory).  A `usage.json` side-car is
+emitted next to every cohort cache, and totals are stamped into
+`_provenance.notes` for forensic cost reconciliation.
 
 ---
 

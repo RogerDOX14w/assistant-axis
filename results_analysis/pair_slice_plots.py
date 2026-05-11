@@ -75,7 +75,13 @@ matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 from matplotlib.lines import Line2D
 
-from assistant_axis import png_metadata, suptitle_with_specs
+from assistant_axis import (
+    kind_color,
+    kind_marker,
+    kind_text_style,
+    png_metadata,
+    suptitle_with_specs,
+)
 from assistant_axis.provenance import (
     InputSpec,
     current_data_subtree_input,
@@ -333,10 +339,10 @@ def plot_pair(pos_name: str, neg_name: str,
 
     # ----- Figure setup. -----
     fig, ax = plt.subplots(figsize=(14, 10))
-    ax.scatter(t_xs, t_ys, s=25, color="lightgrey",
-               zorder=2, edgecolor="none")
-    ax.scatter(r_xs, r_ys, s=30, color="lightsteelblue",
-               zorder=3, edgecolor="none", marker="s")
+    ax.scatter(t_xs, t_ys, s=25, color=kind_color("traits"),
+               zorder=2, edgecolor="none", marker=kind_marker("traits"))
+    ax.scatter(r_xs, r_ys, s=30, color=kind_color("roles"),
+               zorder=3, edgecolor="none", marker=kind_marker("roles"))
     ax.scatter([hx], [hy], s=220, color="green",
                edgecolor="black", zorder=6, marker="o")
     ax.scatter([ux], [uy], s=220, color="red",
@@ -380,9 +386,11 @@ def plot_pair(pos_name: str, neg_name: str,
                label="trait mean (origin)"),
         Line2D([], [], marker="X", color="orange", markersize=10,
                markeredgecolor="black", linestyle="", label="midpoint"),
-        Line2D([], [], marker="o", color="lightgrey", markersize=6,
+        Line2D([], [], marker=kind_marker("traits"),
+               color=kind_color("traits"), markersize=6,
                markeredgecolor="none", linestyle="", label="trait"),
-        Line2D([], [], marker="s", color="lightsteelblue", markersize=6,
+        Line2D([], [], marker=kind_marker("roles"),
+               color=kind_color("roles"), markersize=6,
                markeredgecolor="none", linestyle="", label="role"),
     ]
     ax.legend(handles=legend_items, loc="lower left", fontsize=9)
@@ -401,13 +409,15 @@ def plot_pair(pos_name: str, neg_name: str,
         if is_pole:
             return ax.annotate(name, (x, y), fontsize=11, fontweight="bold",
                                xytext=(7, 5), textcoords="offset points")
-        if kind == "role":
-            disp = name.replace("_", " ")
-            return ax.annotate(disp, (x, y), fontsize=8, xytext=offset,
-                               textcoords="offset points", ha=ha,
-                               color="navy", fontstyle="italic")
-        return ax.annotate(name, (x, y), fontsize=8, xytext=offset,
-                           textcoords="offset points", ha=ha, color="dimgrey")
+        # Project-wide kind→{color,fontstyle} convention from
+        # assistant_axis.plot_palette; roles also display with
+        # underscores stripped for legibility (single-word
+        # role-card filenames typically use _ as a word separator).
+        kind_long_name = "roles" if kind == "role" else "traits"
+        style = kind_text_style(kind_long_name)
+        disp = name.replace("_", " ") if kind == "role" else name
+        return ax.annotate(disp, (x, y), fontsize=8, xytext=offset,
+                           textcoords="offset points", ha=ha, **style)
 
     kept_bboxes = []
     for nm, xx, yy in [(pos_name, hx, hy), (neg_name, ux, uy)]:

@@ -41,7 +41,21 @@ _ROLE_NAME_OVERRIDES = {
 
 
 def role_display_name(stem: str) -> str:
-    """Convert a file stem like 'coral_reef' to a display name like 'coral reef'."""
+    """Convert a file stem like 'coral_reef' to a display name like 'coral reef'.
+
+    LLM prompts are display sites (see AGENT_NOTES.md
+    "File-name vs display-name convention"): the role name injected
+    into the eval_prompt and instruction-generation prompts below
+    must be in display form so the model reads
+    ``coral reef`` rather than ``coral_reef``.  This helper is the
+    canonical conversion site for *role* file stems and is
+    overrides-aware (``devils_advocate`` -> ``devil's advocate``);
+    the trait counterpart relies on stored ``positive_label`` in
+    each trait JSON instead.  Equivalent to
+    :func:`assistant_axis.entity_id.display_form_name` plus the
+    apostrophe overrides that the corpus-wide helper deliberately
+    doesn't try to recover.
+    """
     if stem in _ROLE_NAME_OVERRIDES:
         return _ROLE_NAME_OVERRIDES[stem]
     return stem.replace("_", " ")

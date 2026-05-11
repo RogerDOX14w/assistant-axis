@@ -54,7 +54,29 @@ from .pca import (
     L2MeanScaler,
 )
 from .plot_metadata import json_metadata, png_metadata, suptitle_with_specs
-from .plot_palette import slot_color, slot_colors, slot_colors_8
+from .plot_palette import (
+    slot_color,
+    slot_colors,
+    slot_colors_8,
+    kind_color,
+    kind_marker,
+    kind_text_color,
+    kind_text_style,
+)
+from .entity_id import (
+    EntityId,
+    KIND_R,
+    KIND_T,
+    KIND_LONG,
+    entity_id,
+    parse_entity_id,
+    is_entity_id,
+    display_label,
+    kind_short,
+    kind_long,
+    normalize_to_file_name,
+    display_form_name,
+)
 from .pair_list_cohort import cohort_from_pairs, pair_type_of
 from .judge_batch import RESPONSE_BATCH_SIZE, response_subdir
 
@@ -98,6 +120,23 @@ __all__ = [
     "slot_color",
     "slot_colors",
     "slot_colors_8",
+    "kind_color",
+    "kind_marker",
+    "kind_text_color",
+    "kind_text_style",
+    # Trait / role disambiguation
+    "EntityId",
+    "KIND_R",
+    "KIND_T",
+    "KIND_LONG",
+    "entity_id",
+    "parse_entity_id",
+    "is_entity_id",
+    "display_label",
+    "kind_short",
+    "kind_long",
+    "normalize_to_file_name",
+    "display_form_name",
     "cohort_from_pairs",
     "pair_type_of",
     # Response-judging batch-size convention

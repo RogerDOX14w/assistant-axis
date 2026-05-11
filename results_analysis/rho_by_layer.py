@@ -87,7 +87,13 @@ import matplotlib.pyplot as plt
 import numpy as np
 from scipy.stats import spearmanr
 
-from assistant_axis import json_metadata, png_metadata, response_subdir
+from assistant_axis import (
+    entity_id,
+    json_metadata,
+    pair_type_of,
+    png_metadata,
+    response_subdir,
+)
 from assistant_axis.judge_score_combine import (
     add_di_weights_arg,
     combine_desc_inst_two_judges,
@@ -177,7 +183,7 @@ def _build_entity_cache(
                 arr = _load_full_tensor(fp)
             except Exception:  # pragma: no cover -- skip unreadable files
                 continue
-            vecs[fp.stem] = arr - default_arr
+            vecs[entity_id(fp.stem, et)] = arr - default_arr
     return vecs, default_arr, n_layers
 
 
@@ -288,12 +294,17 @@ def _bases_for_pair(
 
 def _axis_unit(
     entity_vecs: dict[str, np.ndarray],
-    pos: str, neg: str, slot_i: int, layer: int,
+    pos_eid: str, neg_eid: str, slot_i: int, layer: int,
 ) -> np.ndarray:
     """Unit vector pointing pos − neg, computed from default-centered
-    entity vectors (= pos.pt − neg.pt since the +/− default cancel)."""
-    p = entity_vecs[pos][slot_i, layer]
-    n = entity_vecs[neg][slot_i, layer]
+    entity vectors (= pos.pt − neg.pt since the +/− default cancel).
+
+    ``pos_eid`` / ``neg_eid`` are disambiguated entity ids (see
+    :func:`assistant_axis.entity_id.entity_id`) — a bare ``"patient"``
+    is ambiguous since both kinds carry that name.
+    """
+    p = entity_vecs[pos_eid][slot_i, layer]
+    n = entity_vecs[neg_eid][slot_i, layer]
     d = p - n
     return d / np.linalg.norm(d)
 
@@ -448,6 +459,9 @@ def main() -> int:
     # Each load_and_register call appends to ``inputs`` so the recorded
     # provenance covers exactly the caches consumed.
     print("Loading per-axis scores...", flush=True)
+    # Track each pair's kind so we can resolve the pos/neg endpoints to
+    # disambiguated entity_id keys when looking them up in entity_vecs.
+    pair_kinds: dict[tuple[str, str], str] = {}
     axis_scores_di: dict[tuple[str, str], dict[str, float]] = {}
     for it in pairs_di:
         pos, neg = it["pos"], it["neg"]
@@ -479,6 +493,7 @@ def main() -> int:
         axis_scores_di[(pos, neg)] = combine_desc_inst_two_judges(
             g_d, g_i, s_d, s_i, weights=di_weights,
         )
+        pair_kinds[(pos, neg)] = pair_type_of(it)
     axis_scores_rs: dict[tuple[str, str], dict[str, float]] = {}
     for it in pairs_resp:
         pos, neg = it["pos"], it["neg"]
@@ -499,9 +514,10 @@ def main() -> int:
             )
             for n, info in payload.items():
                 if info.get("mean_score") is not None:
-                    scores[n] = info["mean_score"]
+                    scores[entity_id(n, mode)] = info["mean_score"]
         if scores:
             axis_scores_rs[(pos, neg)] = scores
+            pair_kinds.setdefault((pos, neg), pair_type_of(it))
 
     for slot in SLOTS:
         slot_i = _slot_index(slot)
@@ -529,7 +545,11 @@ def main() -> int:
                     rhos_di: list[float] = []
                     for pair, scores in axis_scores_di.items():
                         pos, neg = pair
-                        au = _axis_unit(entity_vecs, pos, neg, slot_i, layer)
+                        ptype = pair_kinds[pair]
+                        au = _axis_unit(entity_vecs,
+                                        entity_id(pos, ptype),
+                                        entity_id(neg, ptype),
+                                        slot_i, layer)
                         proj = _project(entity_vecs, bases_per_pair[pair][K],
                                         slot_i, layer, au, list(scores))
                         names = sorted(set(scores) & set(proj))
@@ -544,7 +564,11 @@ def main() -> int:
                     rhos_rs: list[float] = []
                     for pair, scores in axis_scores_rs.items():
                         pos, neg = pair
-                        au = _axis_unit(entity_vecs, pos, neg, slot_i, layer)
+                        ptype = pair_kinds[pair]
+                        au = _axis_unit(entity_vecs,
+                                        entity_id(pos, ptype),
+                                        entity_id(neg, ptype),
+                                        slot_i, layer)
                         proj = _project(entity_vecs, bases_per_pair[pair][K],
                                         slot_i, layer, au, list(scores))
                         names = sorted(set(scores) & set(proj))

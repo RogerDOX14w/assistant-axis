@@ -55,7 +55,9 @@ import numpy as np
 import torch
 from scipy.stats import spearmanr
 
-from assistant_axis import json_metadata, png_metadata, suptitle_with_specs
+from assistant_axis import (
+    entity_id, json_metadata, png_metadata, suptitle_with_specs,
+)
 from assistant_axis.judge_score_combine import (
     DEFAULT_DI_WEIGHTS,
     DEFAULT_GPT_HAIKU_Q9_WEIGHT,
@@ -169,7 +171,7 @@ def _load_response_scores(
         for name, info in scores.items():
             ms = info.get("mean_score") if isinstance(info, dict) else None
             if ms is not None:
-                out[name] = float(ms)
+                out[entity_id(name, side)] = float(ms)
     return out
 
 
@@ -459,7 +461,7 @@ def main() -> int:
                 continue
             try:
                 v = _load_vector_file(fp).float()[slot, layer]
-                entity_vecs[fp.stem] = (v - default_v).numpy()
+                entity_vecs[entity_id(fp.stem, et)] = (v - default_v).numpy()
             except Exception:  # pragma: no cover -- skip unreadable .pt
                 continue
 

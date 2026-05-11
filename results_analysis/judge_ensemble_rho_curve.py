@@ -73,7 +73,7 @@ from typing import Sequence
 
 import numpy as np
 
-from assistant_axis import json_metadata
+from assistant_axis import entity_id, json_metadata
 from assistant_axis.judge_score_combine import DEFAULT_GPT_HAIKU_Q9_WEIGHT
 from assistant_axis.provenance import (
     InputSpec,
@@ -196,7 +196,7 @@ def _load_response_scores(
         for name, info in scores.items():
             ms = info.get("mean_score") if isinstance(info, dict) else None
             if ms is not None:
-                out[name] = float(ms)
+                out[entity_id(name, side)] = float(ms)
     return out
 
 

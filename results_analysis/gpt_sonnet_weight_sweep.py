@@ -92,8 +92,9 @@ import torch
 from scipy.stats import spearmanr
 
 from assistant_axis import (
-    cohort_from_pairs, json_metadata, pair_type_of, png_metadata,
+    cohort_from_pairs, entity_id, json_metadata, pair_type_of, png_metadata,
 )
+from assistant_axis.judge_loaders import migrate_v1_static_scores
 from assistant_axis.judge_score_combine import (
     add_di_weights_arg,
     combine_desc_inst_one_judge,
@@ -204,15 +205,21 @@ def main() -> int:
     print(f"Loaded {len(pairs)} axis pairs from {args.pairs}")
 
     # Cache standalone entity vectors at (slot, LAYER), default-centered.
+    # Build kinds_for_name alongside so we can migrate any v1 (bare-name)
+    # second-judge cache (e.g. Sonnet, which wasn't included in Phase 5b
+    # rejudging) up to v2 in-memory before intersecting with the v2
+    # GPT/Haiku caches.  See assistant_axis.judge_loaders.migrate_v1_static_scores.
     default_sl = _v(data_dir / "traits" / "vectors" / "default.pt", slot=slot)
     entity_vecs: dict[str, np.ndarray] = {}
+    kinds_for_name: dict[str, set] = {}
     for et in ("traits", "roles"):
         for fp in sorted((data_dir / et / "vectors").glob("*.pt")):
             if fp.stem == "default":
                 continue
             try:
                 v = _load_vector_file(fp).float()[slot, LAYER]
-                entity_vecs[fp.stem] = (v - default_sl).numpy()
+                entity_vecs[entity_id(fp.stem, et)] = (v - default_sl).numpy()
+                kinds_for_name.setdefault(fp.stem, set()).add(et)
             except Exception:  # pragma: no cover -- skip unreadable files
                 continue
 
@@ -220,10 +227,20 @@ def main() -> int:
     # projection) on the common entity set, since these don't depend on
     # the weight.
     per_axis: dict[tuple[str, str], dict] = {}
+    skipped_missing: list[str] = []
     for it in pairs:
         pos, neg = it["pos"], it["neg"]
         axis_id = f"{pos}_vs_{neg}"
         axis_dir = experiment_dir / axis_id
+        # The second judge may not have judged every axis in the pair
+        # list (e.g. Haiku covers only the 12 axes that appear in
+        # pair_list_responses.json, but pair_list_di.json has 35).
+        # Skip cleanly instead of FileNotFoundError'ing the whole run.
+        sj_d = axis_dir / second_judge / "scores_descriptions.json"
+        sj_i = axis_dir / second_judge / "scores_instructions.json"
+        if not (sj_d.exists() and sj_i.exists()):
+            skipped_missing.append(axis_id)
+            continue
         g_d, _, _ = load_and_register(
             axis_dir / "gpt" / "scores_descriptions.json",
             dep_key=f"judge_{axis_id}_descriptions_gpt",
@@ -235,12 +252,12 @@ def main() -> int:
             inputs=inputs, policy="warn",
         )
         s_d, _, _ = load_and_register(
-            axis_dir / second_judge / "scores_descriptions.json",
+            sj_d,
             dep_key=f"judge_{axis_id}_descriptions_{second_judge}",
             inputs=inputs, policy="warn",
         )
         s_i, _, _ = load_and_register(
-            axis_dir / second_judge / "scores_instructions.json",
+            sj_i,
             dep_key=f"judge_{axis_id}_instructions_{second_judge}",
             inputs=inputs, policy="warn",
         )
@@ -248,8 +265,20 @@ def main() -> int:
         # The cross-judge sweep below is independent of this choice -- it sweeps
         # GPT vs <second_judge>, treating each as a single (already
         # desc+inst-combined) score.
-        gpt_scores = combine_desc_inst_one_judge(g_d, g_i, weights=di_weights)
-        son_scores = combine_desc_inst_one_judge(s_d, s_i, weights=di_weights)
+        #
+        # ``migrate_v1_static_scores`` is a no-op when the input is
+        # already v2 (entity_id-keyed), but rescues mixed-format runs:
+        # post-Phase-5b GPT/Haiku caches are v2, Sonnet desc/inst
+        # caches are still v1 (bare names, 9 collisions dropped).
+        # Without migration, the v2/v1 intersection is empty.
+        gpt_scores = migrate_v1_static_scores(
+            combine_desc_inst_one_judge(g_d, g_i, weights=di_weights),
+            kinds_for_name,
+        )
+        son_scores = migrate_v1_static_scores(
+            combine_desc_inst_one_judge(s_d, s_i, weights=di_weights),
+            kinds_for_name,
+        )
         common = sorted(set(gpt_scores) & set(son_scores) & set(entity_vecs))
         if len(common) < 3:
             print(f"  [skip] {pos}/{neg}: only {len(common)} shared entities")
@@ -261,6 +290,17 @@ def main() -> int:
         proj = np.array([float(np.dot(entity_vecs[n], a)) for n in common])
         per_axis[(pos, neg)] = {
             "g2": g2, "s2": s2, "proj": proj, "n": len(common)}
+
+    if skipped_missing:
+        print(f"  [info] {second_judge} caches absent for "
+              f"{len(skipped_missing)}/{len(pairs)} axes; "
+              f"skipped: {skipped_missing}")
+    if not per_axis:
+        raise SystemExit(
+            f"No axes had complete {second_judge} caches; "
+            f"check --pairs (e.g. Haiku has data for the 12-axis "
+            f"pair_list_responses.json subset)."
+        )
 
     # Sort axes by interior slope Δρ = ρ(0.9) - ρ(0.1).  Ascending order
     # = most Sonnet-favored first → most GPT-favored last.

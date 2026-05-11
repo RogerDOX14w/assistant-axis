@@ -154,6 +154,13 @@ def _display_label(etype: str, name: str, blob: dict[str, Any]) -> str:
     * Traits: use the JSON's ``positive_label`` (e.g. ``systems-thinker``).
     * Roles : convert filename underscores to spaces (``paperclip_maximizer`` ->
       ``paperclip maximizer``); roles never use hyphens by convention.
+
+    LLM prompts are display sites: the labels rendered into
+    ``build_prompt`` below feed straight into Claude/Opus rubric
+    bodies and ranking lists, where display form
+    (``coral reef``) reads more naturally than file form
+    (``coral_reef``).  See AGENT_NOTES.md "File-name vs
+    display-name convention" / "LLM prompts are display sites".
     """
     if etype == "trait":
         lbl = blob.get("positive_label")

@@ -195,6 +195,19 @@ the approximate length; only change the framing to start with 'This means...'.
 
 
 def build_prompt(pos_pole: str, neg_pole: str) -> str:
+    """Build the user prompt that asks the LLM to rephrase the
+    pos/neg pole descriptions into the standardized "This means..."
+    form.
+
+    Display-form note (see AGENT_NOTES.md "File-name vs
+    display-name convention" / "LLM prompts are display sites"):
+    this builder injects long-form pole *descriptions* (full
+    sentences), not bare entity names, so it is intrinsically
+    immune to the underscore-leak issue that affects
+    ``axis_judge_correlation.py``'s rubric builders.  Kept noted
+    here so a future refactor that adds entity-name fields is
+    aware of the convention.
+    """
     return USER_PROMPT_TEMPLATE.format(
         pos_pole=pos_pole.strip(),
         neg_pole=neg_pole.strip(),

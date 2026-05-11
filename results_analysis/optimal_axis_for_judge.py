@@ -48,7 +48,9 @@ import matplotlib
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 
-from assistant_axis import json_metadata, response_subdir
+from assistant_axis import entity_id, json_metadata, response_subdir
+from assistant_axis.entity_id import normalize_to_file_name
+from assistant_axis.judge_loaders import migrate_v1_static_scores
 from assistant_axis.judge_score_combine import (
     DI_WEIGHT_CHOICES, combine_desc_inst_one_judge,
     combine_desc_inst_two_judges,
@@ -166,7 +168,7 @@ def load_entity_matrix(
                 v = _load_vector_file(fp).float().numpy()[slot, layer]
             except Exception:                                  # noqa: BLE001
                 continue
-            names.append(fp.stem)
+            names.append(entity_id(fp.stem, et))
             rows.append(v - default_v)
     return names, np.stack(rows, axis=0).astype(np.float64), default_v
 
@@ -1013,6 +1015,7 @@ def load_scores_from_experiment_dir(
     *,
     di_weights: tuple[float, float] = DI_WEIGHT_CHOICES["inst_tie"],
     inputs: list[InputSpec] | None = None,
+    kinds_for_name: dict[str, set] | None = None,
 ) -> dict[str, float]:
     """Load a per-entity score series from an axis-judge-correlation
     experiment directory.
@@ -1062,6 +1065,16 @@ def load_scores_from_experiment_dir(
         s_i = _flatten_static_scores(_load(
             sd_p / "scores_instructions.json",
             f"judge_{axis_id}_instructions_sonnet"))
+        # When kinds_for_name is supplied, lift any v1 (bare-name) caches
+        # to v2 (entity_id) keys in-memory so the 4-way intersection in
+        # combine_desc_inst_two_judges actually has any overlap when one
+        # judge is post-Phase-5 (v2) and the other hasn't been rejudged
+        # yet (v1).  No-op on already-v2 input, so safe to apply blindly.
+        if kinds_for_name is not None:
+            g_d = migrate_v1_static_scores(g_d, kinds_for_name)
+            g_i = migrate_v1_static_scores(g_i, kinds_for_name)
+            s_d = migrate_v1_static_scores(s_d, kinds_for_name)
+            s_i = migrate_v1_static_scores(s_i, kinds_for_name)
         return combine_desc_inst_two_judges(g_d, g_i, s_d, s_i, weights=di_weights)
     if source == "responses":
         # Path-suffix tracks the canonical project-wide response batch
@@ -1071,8 +1084,10 @@ def load_scores_from_experiment_dir(
             sub = response_subdir("gpt", mode)
             path = experiment_dir / sub / "scores_responses.json"
             if path.exists():
-                out.update(_flatten_response_scores(_load(
-                    path, f"judge_{axis_id}_gpt_responses_{mode}")))
+                bare = _flatten_response_scores(_load(
+                    path, f"judge_{axis_id}_gpt_responses_{mode}"))
+                for n, score in bare.items():
+                    out[entity_id(n, mode)] = score
         return out
     raise ValueError(f"Unknown --score_source {source!r}; "
                      f"choose from {SCORE_SOURCE_CHOICES}")
@@ -1357,6 +1372,82 @@ def parse_args(argv: Optional[list[str]] = None) -> argparse.Namespace:
     return p.parse_args(argv)
 
 
+def _normalize_scores_file_keys(
+    scores: dict[str, float],
+    *,
+    src: Path,
+) -> dict[str, float]:
+    """Coerce display-form keys in a user-supplied --scores_file dict
+    to canonical file-name form.
+
+    Project convention is file-name form everywhere except display
+    sites (see AGENT_NOTES "File-name vs display-name convention"),
+    but external JSONs sometimes leak the display form -- spaces,
+    hyphens, capitals, apostrophes -- which silently misses on every
+    multi-word entity at the downstream
+    ``set(scores) & set(geometry_names)`` intersection (~3 % of
+    names: ``aligned_artificial_intelligence``, ``systems_thinker``,
+    ``devils_advocate``, ...).
+
+    For each key:
+    * Pass through ``name|R``/``name|T`` disambiguated ids
+      unchanged (the suffix tag is already canonical; rewriting the
+      bare-name half would risk lower-casing a kind tag).
+    * Otherwise apply :func:`normalize_to_file_name`.
+
+    If the conversion is one-to-one we return the converted dict and
+    print a WARNING listing up to 5 conversions, so the user notices
+    their input was massaged.  If the conversion would collide (e.g.
+    the file contains both ``Patient`` and ``patient`` mapping to
+    the same key, or both ``systems_thinker`` and ``systems-thinker``)
+    we raise ``SystemExit`` rather than silently drop one.
+    """
+    raw_to_norm: list[tuple[str, str, float]] = []
+    for k, v in scores.items():
+        # Pre-disambiguated id (``name|R``, ``name|T``) — pass through.
+        if "|" in k and k.rsplit("|", 1)[1] in ("R", "T"):
+            raw_to_norm.append((k, k, v))
+        else:
+            raw_to_norm.append((k, normalize_to_file_name(k), v))
+
+    by_norm: dict[str, list[tuple[str, float]]] = {}
+    for raw, norm, val in raw_to_norm:
+        by_norm.setdefault(norm, []).append((raw, val))
+
+    collisions = {n: [r for r, _ in raws]
+                  for n, raws in by_norm.items() if len(raws) > 1}
+    if collisions:
+        head = "; ".join(
+            f"{n!r} <- {raws!r}"
+            for n, raws in list(collisions.items())[:3]
+        )
+        raise SystemExit(
+            f"--scores_file {src}: {len(collisions)} entity name(s) "
+            f"collide after display->file normalisation ({head}).  "
+            f"This usually means the file mixes display and file "
+            f"conventions for the same entity.  Pick one form per "
+            f"entity; see AGENT_NOTES 'File-name vs display-name "
+            f"convention'."
+        )
+
+    coerced = [(raw, norm) for raw, norm, _v in raw_to_norm if raw != norm]
+    if coerced:
+        head = "; ".join(
+            f"{r!r} -> {n!r}" for r, n in coerced[:5]
+        ) + ("..." if len(coerced) > 5 else "")
+        # No module logger here; print to stderr so the warning is
+        # impossible to miss in a regular run.
+        print(
+            f"WARNING: --scores_file {src}: coerced "
+            f"{len(coerced)} display-form key(s) to file-name form "
+            f"({head}).  Future inputs should use file-name form "
+            f"directly; see AGENT_NOTES 'File-name vs display-name "
+            f"convention'.",
+            file=sys.stderr,
+        )
+    return {norm: v for _raw, norm, v in raw_to_norm}
+
+
 def _load_scores_from_args(
     args: argparse.Namespace,
     inputs: list[InputSpec] | None = None,
@@ -1370,23 +1461,50 @@ def _load_scores_from_args(
     pass after the load that registered files via score_source_paths
     -- which could disagree with the actual reads inside
     load_scores_from_experiment_dir.
+
+    External ``--scores_file`` JSON keys are passed through
+    :func:`_normalize_scores_file_keys` (boundary input hardening:
+    coerce display-form names to file-name form, with a WARNING).
+    The ``--experiment_dir`` branch reads our own caches, which are
+    already in file-name form by construction, so it skips this.
     """
     if args.scores_file and args.experiment_dir:
         raise SystemExit("Pass exactly one of --scores_file or --experiment_dir.")
     if args.scores_file:
+        src = Path(args.scores_file)
         raw, _spec, _check = load_and_register(
-            Path(args.scores_file),
+            src,
             dep_key="scores_file",
             inputs=inputs, policy="warn",
         )
         # Accept both {name: float} and {name: {score: float}} forms.
         if all(isinstance(v, (int, float)) for v in raw.values()):
-            return {str(k): float(v) for k, v in raw.items()}
-        return _flatten_static_scores(raw)
+            scores = {str(k): float(v) for k, v in raw.items()}
+        else:
+            scores = _flatten_static_scores(raw)
+        return _normalize_scores_file_keys(scores, src=src)
     if args.experiment_dir:
+        # Build kinds_for_name from the corpus so v1 (bare-name) judge
+        # caches can be lifted to v2 (entity_id) keys in-memory.  Only
+        # ``di_combined`` actually intersects multiple judges (which is
+        # where v1/v2 silent-drop happens); we still build the map for
+        # all sources so a future v1 cache on a single-judge source
+        # would error loudly rather than silently dropping collision
+        # entities.
+        kinds_for_name: dict[str, set] = {}
+        data_dir = Path(args.data_dir)
+        for et in ("traits", "roles"):
+            vec_dir = data_dir / et / "vectors"
+            if not vec_dir.is_dir():
+                continue
+            for fp in sorted(vec_dir.glob("*.pt")):
+                if fp.stem == "default":
+                    continue
+                kinds_for_name.setdefault(fp.stem, set()).add(et)
         return load_scores_from_experiment_dir(
             Path(args.experiment_dir), args.score_source,
             inputs=inputs,
+            kinds_for_name=kinds_for_name,
         )
     raise SystemExit("Must pass either --scores_file or --experiment_dir.")
 

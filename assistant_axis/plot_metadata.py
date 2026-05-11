@@ -440,7 +440,7 @@ def suptitle_with_specs(
     spec_fontsize: int = 10,
     spec_color: str = "#444444",
     title_y: float = 0.99,
-    line_height: float = 0.022,
+    line_height: float | None = None,
 ) -> tuple[float, float]:
     """Render a two-tier figure title: bold headline + smaller spec block.
 
@@ -461,8 +461,22 @@ def suptitle_with_specs(
     title_y : figure-relative y for the bold headline (1.0 is the top
         edge of the figure).  Default 0.99 leaves a tiny margin.
     line_height : figure-relative spacing between the headline and the
-        first spec line, and between subsequent spec lines.  Tune
-        upward for taller figures.
+        first spec line, and between subsequent spec lines.  When
+        ``None`` (default) we auto-compute a sensible minimum from
+        ``title_fontsize`` (in points) and the figure height (in
+        inches).  Pass an explicit number only to over-tighten or
+        over-loosen against the auto-computed value.
+
+        **Why auto:** ``line_height`` lives in figure-relative units
+        but the fonts live in points.  The two units desync as figure
+        height changes -- a value calibrated for a 7"-tall figure
+        produces title/spec overlap on a 4-5"-tall figure (a
+        repeating pitfall in this project; see AGENT_NOTES "Plot
+        visual verification" for the workflow note).  Auto-mode
+        picks ``max(0.022, 1.5 * title_fontsize / 72 / fig_height_in)``,
+        which is the existing 0.022 default for figures ≥ ~13" tall
+        and grows for shorter figures so the bold suptitle bounding
+        box clears the spec line.
 
     Returns
     -------
@@ -474,6 +488,18 @@ def suptitle_with_specs(
             top_used, top_rect = suptitle_with_specs(fig, ..., specs=...)
             fig.tight_layout(rect=(0, 0, 1, top_rect))
     """
+    if line_height is None:
+        # Title baseline-to-baseline spacing rule-of-thumb: 1.5× font
+        # size (points) ≈ enough for the bold suptitle's descender to
+        # clear the spec-line ascender at default fontsizes (14/10).
+        # Convert points -> inches -> figure-relative.
+        fig_height_in = float(fig.get_figheight()) or 1.0
+        min_line_height = (1.5 * title_fontsize / 72.0) / fig_height_in
+        # Floor at the historical default so already-roomy figures
+        # see no change; cap at 0.10 so absurdly short figures don't
+        # eat half the canvas with the title block.
+        line_height = float(min(0.10, max(0.022, min_line_height)))
+
     fig.suptitle(title, fontsize=title_fontsize, fontweight="bold",
                  y=title_y)
     if not specs:

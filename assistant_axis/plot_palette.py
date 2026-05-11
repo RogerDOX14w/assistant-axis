@@ -1,4 +1,19 @@
-"""Per-slot colour palette for the 8-slot Qwen-3 layout.
+"""Per-slot colour palette and trait/role kind palette.
+
+This module hosts two related but distinct palettes:
+
+1.  The 8-slot palette (:func:`slot_color`, :func:`slot_colors_8`,
+    :func:`slot_colors`) — described in detail below.
+2.  The trait/role *kind* palette (:func:`kind_color`,
+    :func:`kind_marker`, :func:`kind_text_color`,
+    :func:`kind_text_style`) used in any plot that mixes traits and
+    roles in the same axes.  See the docstrings of those functions
+    and the canonical reference implementation in
+    ``results_analysis/pair_slice_plots.py`` (lines 336–410) for the
+    convention.
+
+8-slot palette
+==============
 
 Adopted May 2026 after the PCA-scree-tail analysis revealed three
 structurally-distinct slot groups:
@@ -34,6 +49,8 @@ from __future__ import annotations
 
 import numpy as np
 import matplotlib.pyplot as plt
+
+from .entity_id import display_label, kind_long
 
 
 # Group memberships, derived from the May 2026 cluster analyses.
@@ -107,3 +124,91 @@ def slot_colors(num_slots: int) -> list[tuple[float, float, float, float]]:
         for c in extra[:extras_needed]
     ]
     return base + extra_rgba  # type: ignore[return-value]
+
+
+# ---------------------------------------------------------------------------
+# Trait / role kind palette
+# ---------------------------------------------------------------------------
+#
+# Mixed-kind scatter plots (any plot with both trait dots and role dots in the
+# same axes) follow the convention established in
+# ``results_analysis/pair_slice_plots.py``:
+#
+#   * trait — fill ``lightgrey``, marker ``o``, label text ``dimgrey``
+#   * role  — fill ``lightsteelblue``, marker ``s``, label text ``navy`` italic
+#
+# Plot dot labels show the **bare name only** (no ``|R`` / ``|T``); kind is
+# encoded visually via these helpers.  Use :func:`assistant_axis.entity_id.display_label`
+# (re-exported from here for convenience) to strip the ``|R`` / ``|T`` suffix.
+
+_KIND_FILL_COLOR: dict[str, str] = {
+    "roles": "lightsteelblue",
+    "traits": "lightgrey",
+}
+
+_KIND_TEXT_COLOR: dict[str, str] = {
+    "roles": "navy",
+    "traits": "dimgrey",
+}
+
+_KIND_MARKER: dict[str, str] = {
+    "roles": "s",
+    "traits": "o",
+}
+
+_KIND_TEXT_STYLE: dict[str, dict[str, object]] = {
+    # Italic for roles per the pair_slice_plots convention; traits are upright.
+    "roles": {"color": "navy", "fontstyle": "italic"},
+    "traits": {"color": "dimgrey"},
+}
+
+
+def kind_color(kind: str) -> str:
+    """Return the canonical fill colour for a trait/role kind.
+
+    Accepts any spelling that :func:`assistant_axis.entity_id.kind_long`
+    accepts (``"R"``, ``"T"``, ``"role"``, ``"roles"``, ``"trait"``,
+    ``"traits"``; case-insensitive).
+    """
+    return _KIND_FILL_COLOR[kind_long(kind)]
+
+
+def kind_text_color(kind: str) -> str:
+    """Return the canonical *annotation text* colour for a trait/role
+    kind (``"navy"`` for roles, ``"dimgrey"`` for traits).
+    """
+    return _KIND_TEXT_COLOR[kind_long(kind)]
+
+
+def kind_marker(kind: str) -> str:
+    """Return the canonical scatter marker for a trait/role kind
+    (``"s"`` square for roles, ``"o"`` circle for traits).
+    """
+    return _KIND_MARKER[kind_long(kind)]
+
+
+def kind_text_style(kind: str) -> dict[str, object]:
+    """Return canonical kwargs for ``ax.annotate`` on a trait/role
+    kind label.
+
+    Returns a fresh dict each call so callers can mutate it freely
+    (e.g. add a ``"fontsize"`` key without polluting the canonical
+    style).  Roles are italicised in ``navy``; traits are upright in
+    ``dimgrey``.
+    """
+    return dict(_KIND_TEXT_STYLE[kind_long(kind)])
+
+
+# Re-export ``display_label`` so plotting code can do
+# ``from assistant_axis.plot_palette import display_label, kind_color``
+# alongside the colour helpers, without a second import line.
+__all__ = (
+    "slot_color",
+    "slot_colors",
+    "slot_colors_8",
+    "kind_color",
+    "kind_marker",
+    "kind_text_color",
+    "kind_text_style",
+    "display_label",
+)
