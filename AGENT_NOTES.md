@@ -384,6 +384,31 @@ The report is informational (truthy = no drift); it doesn't mutate
 the cache or raise.  Use for "is this analysis I'm about to publish
 based on stale-rubric data anywhere?" audits.
 
+**Whole-tree audit**.
+[`tools/audit_rubric_versions.py`](tools/audit_rubric_versions.py)
+walks the `roger/` (or any) judge-cache tree and classifies every
+``scores_*.json`` into ``current`` / ``equivalent`` / ``drifted`` /
+``legacy`` against the current ``RUBRIC_VERSION`` plus the
+equivalence registry; reports cohort-stamp distribution + per-entity
+entry tallies + per-cache drift breakdowns.  Default output is
+markdown; ``--format flat`` is one line per cache for grep / shell
+follow-up.  ``--status drifted`` shows only the actionable cells.
+``--current v4`` lets you ask "what would a v3→v4 bump invalidate?"
+without actually bumping the constant.  Sibling to
+``tools/audit_caches.py`` / ``tools/audit_pngs.py`` (provenance-
+fingerprint and PNG-Inputs-chunk audits respectively).
+
+**Steering-judge rubrics deliberately out of scope** (May 2026).
+The COHERENCE_/RP_/EFFECT_RUBRIC_VERSION integers in
+[`assistant_axis/steering_judges.py`](assistant_axis/steering_judges.py)
+are stamped per-record but don't yet participate in the per-entity
+drift check or the equivalence registry.  Currently low-risk
+because those rubrics are run from the runpod-side
+``steering/`` pipeline (fresh runs, no resume-against-edited-rubric
+pattern); see the TODO block above
+``COHERENCE_RUBRIC_VERSION = 4`` for the work needed to bring them
+into the same scheme if/when that assumption breaks.
+
 ### Judge parse-rate alerting (mandatory)
 
 Every script that calls an LLM judge and parses structured output
@@ -1530,7 +1555,7 @@ edit.
 |---|---|---|
 | `DEFAULT_DI_WEIGHTS` | `(0.499, 0.501)` | desc / inst within one judge |
 | `DEFAULT_GPT_SONNET_DI_WEIGHT` | `0.50` | GPT / Sonnet within the desc+inst ensemble (per mode) |
-| `DEFAULT_GPT_HAIKU_Q9_WEIGHT` | `0.60` | GPT_b10 / Haiku_q9 in the response-mode ensemble |
+| `DEFAULT_GPT_HAIKU_Q9_WEIGHT` | `0.41` | GPT / Haiku in the response-mode ensemble (was `0.60` until 2026-05-11; retuned to the actual parabolic peak w≈0.410 on the v2 mixed-cohort sweep — see `judge_score_combine.py` "Selection history") |
 | `DEFAULT_RESPONSE_DI_WEIGHT` | `0.80` | response / desc+inst in the final per-entity score |
 
 Full empirical derivation, per-axis discussion, tuning history, and
@@ -1697,13 +1722,35 @@ For analyses going forward, the project defaults are:
 | regime | default | constant |
 |---|---|---|
 | **soft-K whitening** | **K=2** | `results_analysis.canonical_angles.whitening.DEFAULT_SOFT_K` |
-| **soft-shear (top-L pooled)** | **L=2** | `results_analysis.canonical_angles.whitening.DEFAULT_SOFT_SHEAR_L` |
-| **primary recommended whitening regime** | **`soft_shear=2`** | `results_analysis.canonical_angles.whitening.DEFAULT_WHITENING_SPEC` |
+| **soft-shear (top-L pooled)** | **L=3** | `results_analysis.canonical_angles.whitening.DEFAULT_SOFT_SHEAR_L` |
+| **primary recommended whitening regime** | **`soft_shear=3`** | `results_analysis.canonical_angles.whitening.DEFAULT_WHITENING_SPEC` |
 
-These were set in Apr 2026 after the LKM grid sweep on the 33 desc+inst
-+ 12 response = 45-axis set with the inst-tiebreak weighting.  Prior
-hardcoded default was K=3 (from older K-sweep parabola fit done before
-soft-shear was in the toolbox).
+`DEFAULT_SOFT_K=2` was set in Apr 2026 after the LKM grid sweep on the
+33 desc+inst + 12 response = 45-axis set with the inst-tiebreak
+weighting (prior hardcoded default was K=3, from the older K-sweep
+parabola fit done before soft-shear was in the toolbox).
+
+`DEFAULT_SOFT_SHEAR_L=3` (and `DEFAULT_WHITENING_SPEC="soft_shear=3"`)
+were bumped from `L=2` / `"soft_shear=2"` on May 11 2026 after the
+35-axis di-cohort `shear_l_sweep` at slots 3 / 6 / 7 with the new
+cohort-mean blended-curve overlay
+(`results_analysis.shear_l_sweep` + `judge_score_combine.cohort_mean_curves`,
+0.80·rs + 0.20·di per axis, 5x cross-axis weight on primary axes).
+Per-axis paired t-tests over 35 axes show:
+
+| slot | L=1 vs L=2 | L=1 vs L=3 | L=3 vs L=4 |
+|---|---|---|---|
+| 3 | tied (p=0.37) | tied (p=0.54) | borderline (p=0.051) |
+| 6 | **L=2 dip** (Δ=−0.017, p=0.019) | tied (p=0.29) | **cliff** (Δ=−0.023, p=0.0006) |
+| 7 | tied (p=0.68) | tied (p=0.92) | **cliff** (Δ=−0.020, p=0.0004) |
+
+L=3 is at-or-above the optimum on every slot, never significantly
+worse than L=1, and the universally-significant harm transition is
+L=3 → L=4 across all three slots — so L=3 is the highest "safe"
+shear depth with no significant ρ harm anywhere.  Tied with L=1 on
+ρ at most slots; goal/no-goal subspace cleanliness (more top-aligned
+canonical-angle pairs orthogonalised) is the tie-breaker that picks
+L=3 over L=1.
 
 Use the constants instead of literal integers in CLI defaults::
 
@@ -1718,7 +1765,7 @@ from results_analysis.canonical_angles.whitening import (
 )
 from results_analysis.canonical_angles.data import build_goal_nogoal_subspaces
 
-# Primary: soft-shear at L=2, fitted on combined r+t goal/no-goal subspaces.
+# Primary: soft-shear at L=3, fitted on combined r+t goal/no-goal subspaces.
 A_g, A_n = build_goal_nogoal_subspaces(data_dir, slot, layer, kind="combined")
 shear = fit_shear(A_g, A_n, L=DEFAULT_SOFT_SHEAR_L)
 M_done = shear.apply(M_raw)
@@ -1730,13 +1777,17 @@ M_done = basis.apply(M_raw)
 
 **Caveats**:
 
-- The optimum varies by (slot, layer): slot 3 prefers L=2 / K=0; slot 0
-  prefers L=0..1 / K=2.  A single default can't be optimal everywhere.
-  The L=2 choice is best at slot 3 (the canonical analysis point) and
-  acceptable at slot 0 (~0.005 ρ behind the slot-0-specific optimum).
-- The LKM grid was on 3 (slot, layer) configurations; broader sweeps
-  may shift the optimum slightly.  Subject to revision -- if you find
-  the optimum has moved, update the constants and re-document.
+- The optimum varies by slot: slot 3 has a broad L=1..L=5 plateau,
+  slot 6 has a real L=2 dip but L=1 ≈ L=3, slot 7 has L=1 ≈ L=2 ≈ L=3.
+  L=3 is defensible at all three; bespoke per-slot tuning could
+  squeeze ~0.005 ρ at slot 7 by picking L=1 instead.
+- The L=3 → L=4 cliff is sharp and universal -- do **not** bump
+  `DEFAULT_SOFT_SHEAR_L` above 3 without re-running the cohort-mean
+  paired-t analysis.
+- `pc_round_trip/launch_judge_runs.py` has a separate
+  `DEFAULT_SHEAR_L=0` (raw) that is *intentionally* not tied to this
+  constant -- the pc_round_trip canonical experiment runs raw on
+  purpose.  See the comment block at that constant for the rationale.
 
 **Cache hygiene**: when changing these defaults, flush `rho_by_layer.json`
 (the only auto-loading cache that interleaves K values across runs).
@@ -1759,22 +1810,33 @@ value.
 
 The canonical default lives in
 [`assistant_axis/judge_batch.py`](assistant_axis/judge_batch.py) as
-`RESPONSE_BATCH_SIZE` (currently `10`).  Importers:
+`RESPONSE_BATCH_SIZE` (currently `7`, bumped from `10` on 2026-05-11
+to align with "Change D" of the trait/role disambiguation plan —
+see the `Value history` block in that file's module docstring for
+the rationale).  Importers:
 
 * `axis_judge_correlation.py` — argparse default for
   `--response_target_batch_size`.
 * `assistant_axis.steering_judges` — `DEFAULT_TARGET_BATCH_SIZE`
   is derived from `RESPONSE_BATCH_SIZE` so steering effect-judge
-  scores stay apples-to-apples with axis-judge scores.
+  scores stay apples-to-apples with axis-judge scores at the same
+  batch size.  This pinning briefly fell silently out of step
+  during May 2026's Phase 5c (which used `--response_target_batch_size 7`
+  via explicit override rather than bumping the constant); restored
+  on 2026-05-11.
 * `whitening_k_sweep.py`, `rho_by_layer.py`,
   `optimal_axis_for_judge.py` — use the
   `response_subdir(judge, mode)` helper to construct
   `gpt_responses_traits_b{N}/` paths.
 
 The `_b{N}` suffix in judging-output directory names
-(`gpt_responses_traits_b10`, `haiku_responses_roles_b10`, ...) IS
+(`gpt_responses_traits_b7`, `haiku_responses_roles_b7_t3`, ...) IS
 the canonical convention; consumers use `response_subdir()` rather
-than hard-coding `"_b10"`.
+than hard-coding `"_b7"` or `"_b10"`.  Existing `_b10` caches
+remain readable via `response_subdir(..., batch_size=10)` (the
+cross-batch comparison plots that hit `_b5` / `_b7` / `_b15`
+archives do the same), but the default value the callers reach
+for is now `b7`.
 
 **Bumping the value** invalidates every existing
 `*_b{old}/scores_responses.json` cache for response judging

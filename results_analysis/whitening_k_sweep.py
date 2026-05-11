@@ -98,8 +98,12 @@ from assistant_axis import (
     response_subdir,
     suptitle_with_specs,
 )
+from assistant_axis.judge_loaders import migrate_v1_static_scores
 from assistant_axis.judge_score_combine import (
+    DEFAULT_RESPONSE_DI_WEIGHT,
+    PRIMARY_AXIS_SAMPLE_WEIGHT,
     add_di_weights_arg,
+    cohort_mean_curves,
     combine_desc_inst_two_judges,
     parse_di_weights_arg,
 )
@@ -127,14 +131,14 @@ DEFAULT_SLOT = 6  # New default after May 2026 rejudge run: slot 6 (</think>)
                   # rho_by_layer.png.  Pass --slot 3 (or 7) to compare.
                   # Output filenames auto-include _slot{N} when the user
                   # leaves --plot / --sweep at their generic defaults.
-DEFAULT_K_VALUES = [0, 1, 2, 3, 4, 6, 8, 12, 16, 24, 32]
+DEFAULT_K_VALUES = [0, 1, 2, 3, 4, 5, 6, 7, 8, 10, 12, 14, 16, 20, 24, 28, 32]
 K_VALUES = list(DEFAULT_K_VALUES)  # may be rebound by main() via --Ks
 
 
 def load_pool(data_dir: Path, exclude_names: set[str], *, slot: int):
     """Build the held-out whitening pool for an axis-judge run.
 
-    Returns ``(entity_vecs, pool, default_sl)`` where:
+    Returns ``(entity_vecs, pool, default_sl, kinds_for_name)`` where:
 
     - ``entity_vecs`` -- dict ``{name: tensor at (slot, LAYER)}`` for
       every standalone role + trait, with ``default.pt`` SUBTRACTED so
@@ -150,6 +154,12 @@ def load_pool(data_dir: Path, exclude_names: set[str], *, slot: int):
       not the 30+30 names that anchor a residual subspace.
     - ``default_sl`` -- the default activation at (SLOT, LAYER), used
       for centering.
+    - ``kinds_for_name`` -- map ``{bare_name: {kind, ...}}`` over the
+      corpus, used by callers as the input to
+      :func:`assistant_axis.judge_loaders.migrate_v1_static_scores`
+      so v1 (bare-name) judge caches can be lifted to v2 (entity_id)
+      keys in-memory before intersection.  Built incidentally from
+      the same corpus walk so callers don't need a second pass.
 
     A/B test on 12 axes confirmed switching to this pool helper
     changes ρ values by at most 0.004 (mean 0.0006) -- well below
@@ -161,6 +171,7 @@ def load_pool(data_dir: Path, exclude_names: set[str], *, slot: int):
     default_sl = default[slot, LAYER]
 
     entity_vecs: dict[str, torch.Tensor] = {}
+    kinds_for_name: dict[str, set] = {}
     for etype in ("traits", "roles"):
         vdir = data_dir / etype / "vectors"
         if not vdir.exists():
@@ -173,6 +184,7 @@ def load_pool(data_dir: Path, exclude_names: set[str], *, slot: int):
             except Exception:  # pragma: no cover -- skip unreadable files
                 continue
             entity_vecs[entity_id(f.stem, etype)] = v[slot, LAYER] - default_sl
+            kinds_for_name.setdefault(f.stem, set()).add(etype)
 
     # Build the pool via the canonical-angles helper.  Pass leave-out
     # entries for both etypes since we don't know which one the pair
@@ -195,7 +207,7 @@ def load_pool(data_dir: Path, exclude_names: set[str], *, slot: int):
         for (et, n) in pool_entries
     ]
     pool = np.stack(pool_rows, axis=0)
-    return entity_vecs, pool, default_sl
+    return entity_vecs, pool, default_sl, kinds_for_name
 
 
 def axis_direction(data_dir: Path, pos: str, neg: str, *,
@@ -309,6 +321,19 @@ def main() -> int:
     )
     print(f"Loaded {len(pairs)} axis pairs from {args.pairs}")
 
+    # Corpus-wide kinds_for_name map, used to lift v1 (bare-name)
+    # judge caches to v2 (entity_id) keys in the per-axis loop
+    # below.  Cheap (just a filesystem listing) and corpus-wide
+    # rather than per-axis, so compute it once before the loop.
+    kinds_for_name: dict[str, set] = {}
+    for etype in ("traits", "roles"):
+        vdir = data_dir / etype / "vectors"
+        if not vdir.exists():
+            continue
+        for f in sorted(vdir.glob("*.pt")):
+            if f.stem != "default":
+                kinds_for_name.setdefault(f.stem, set()).add(etype)
+
     data: dict = {}
     for it in pairs:
         pos, neg = it["pos"], it["neg"]
@@ -334,6 +359,21 @@ def main() -> int:
             axis_dir / "sonnet" / "scores_instructions.json",
             dep_key=f"judge_{axis_id}_instructions_sonnet",
             inputs=inputs, policy="warn")
+        # Lift any v1 (bare-name) score dicts to v2 (entity_id) keys
+        # in-memory before combining, so a four-way intersection between
+        # GPT v2 + Sonnet v1 doesn't silently come out empty (which it
+        # would do for all 35 axes today: GPT was rejudged into v2 in
+        # Phase 5b, Sonnet wasn't touched per the plan's "no Sonnet
+        # rejudging" guardrail).  Without this, every desc_inst rho in
+        # the JSON / PNG ends up NaN and the di-cohort plot silently
+        # shows only the 12 response curves, not the 35 desc+inst
+        # curves it advertises.  Migration is a no-op on already-v2
+        # input, so applying it uniformly is safe.
+        # See assistant_axis.judge_loaders.migrate_v1_static_scores docstring.
+        g_d = migrate_v1_static_scores(g_d, kinds_for_name)
+        g_i = migrate_v1_static_scores(g_i, kinds_for_name)
+        s_d = migrate_v1_static_scores(s_d, kinds_for_name)
+        s_i = migrate_v1_static_scores(s_i, kinds_for_name)
         desc_inst = combine_desc_inst_two_judges(g_d, g_i, s_d, s_i,
                                                  weights=di_weights)
 
@@ -360,7 +400,7 @@ def main() -> int:
                     responses[entity_id(n, mode)] = info["mean_score"]
 
         # --- Projections at each K ---
-        entity_vecs, pool, _default = load_pool(
+        entity_vecs, pool, _default, _kinds = load_pool(
             data_dir, exclude_names={pos, neg}, slot=slot)
         axis_unit = axis_direction(data_dir, pos, neg, slot=slot,
                                    pair_type=ptype)
@@ -415,8 +455,17 @@ def main() -> int:
     pair_keys = [(it["pos"], it["neg"]) for it in pairs]
     axis_colors = plt.cm.tab20(np.linspace(0, 1, max(20, len(pair_keys))))
 
-    fig, ax = plt.subplots(figsize=(11, 8))
-    x_pos = np.arange(len(K_VALUES))
+    # Taller-than-wide aspect ratio (~3:4) gives the dense
+    # per-axis stack of curves more vertical room to discriminate
+    # at similar-ρ axes -- by-eye legibility at 35+ overlaid lines
+    # is dominated by the y-resolution, not x.
+    fig, ax = plt.subplots(figsize=(11, 14))
+    # x positions on a log(K+1) scale: ``log1p(0)=0`` puts the K=0 (raw,
+    # no whitening) point at the origin, the geometrically-spaced higher
+    # K values fan out compressively to the right.  Empirically these
+    # curves are roughly parabolic in log(K+1), so making the x-axis
+    # actually that quantity is what reads off a peak K* by eye.
+    x_pos = np.log1p(K_VALUES)
     for i, (pos, neg) in enumerate(pair_keys):
         color = axis_colors[i % 20]
         ax.plot(x_pos, rho_table[(pos, neg, "responses")], color=color, lw=2,
@@ -426,13 +475,33 @@ def main() -> int:
                 linestyle=":", marker="s", markersize=4,
                 label=f"{pos}/{neg} (desc+inst)")
 
+    # Cohort-mean overlays (black) -- read the cross-axis trend at a
+    # glance through the per-axis spaghetti.  See judge_score_combine.
+    # cohort_mean_curves for the per-axis blend + weighting rules.
+    avg_rs, avg_di, avg_blend = cohort_mean_curves(rho_table, pair_keys)
+    ax.plot(x_pos, avg_rs, color="black", lw=2.5, linestyle="-",
+            zorder=5,
+            label=f"mean over {len(pair_keys)} axes (responses)")
+    ax.plot(x_pos, avg_di, color="black", lw=2.5, linestyle=":",
+            zorder=5,
+            label=f"mean over {len(pair_keys)} axes (desc+inst)")
+    ax.plot(x_pos, avg_blend, color="black", lw=2.5, linestyle="--",
+            marker="^", markersize=7, zorder=6,
+            label=(f"blended mean: {DEFAULT_RESPONSE_DI_WEIGHT:.2f}·rs + "
+                   f"{1 - DEFAULT_RESPONSE_DI_WEIGHT:.2f}·di per axis, "
+                   f"{PRIMARY_AXIS_SAMPLE_WEIGHT:g}x sample weight on "
+                   f"axes with responses"))
+
     ax.set_xticks(x_pos)
     ax.set_xticklabels(["raw\n(K=0)"] + [str(K) for K in K_VALUES[1:]])
-    ax.set_xlabel("Soft-whitening K (raw = no whitening; higher K = more PCs scaled down)")
+    ax.set_xlabel("Soft-whitening K, log(K+1) scale "
+                  "(raw = no whitening; higher K = more PCs scaled down)")
     ax.set_ylabel(f"Spearman ρ (judge scores vs. projection, slot={slot})")
     title_line = f"ρ vs whitening K across {len(pair_keys)} axes"
     spec_line = ("solid = GPT responses; "
-                 "dotted = desc+inst (GPT+Sonnet averaged)")
+                 "dotted = desc+inst (GPT+Sonnet averaged); "
+                 "black = cohort means (solid=rs, dotted=di, "
+                 "dashed▲=blend)")
     _, top_rect = suptitle_with_specs(fig, title_line, spec_line)
     ax.axhline(0, color="grey", lw=0.5)
     ax.grid(alpha=0.3)

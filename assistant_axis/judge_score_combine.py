@@ -11,7 +11,7 @@ import.
     from assistant_axis.judge_score_combine import (
         DEFAULT_DI_WEIGHTS,             # 0.499 desc / 0.501 inst   (within one judge)
         DEFAULT_GPT_SONNET_DI_WEIGHT,   # 0.50 GPT / 0.50 Sonnet    (within desc+inst ensemble)
-        DEFAULT_GPT_HAIKU_Q9_WEIGHT,    # 0.60 GPT / 0.40 Haiku-q9  (within response ensemble)
+        DEFAULT_GPT_HAIKU_Q9_WEIGHT,    # 0.41 GPT / 0.59 Haiku     (within response ensemble; v2 retune 2026-05-11)
         DEFAULT_RESPONSE_DI_WEIGHT,     # 0.80 response / 0.20 DI   (final blend)
         combine_desc_inst_two_judges,
     )
@@ -57,16 +57,36 @@ import.
    ``[0.45, 0.55]``.
 
 3. **Within-response judge ensemble** --
-   ``DEFAULT_GPT_HAIKU_Q9_WEIGHT``: weight on GPT-4.1-mini B=10 in
-   the response-mode ensemble (the rest goes on Haiku-q9).
-   Default ``0.60``.
+   ``DEFAULT_GPT_HAIKU_Q9_WEIGHT``: weight on GPT-4.1-mini in the
+   response-mode ensemble (the rest goes on Haiku).  Default ``0.41``
+   (so the blend is ``0.41 * GPT + 0.59 * Haiku``).
 
-   Picked from the GPT × Haiku-q9 weight sweep at slot 6 layer 25
-   (see ``results_analysis/gpt_anthropic_response_weight_sweep.py``).
-   The 12-axis parabolic fit on the interior ``[0.1, 0.9]`` peaks at
-   ``w ≈ 0.609``; rounded to 0.60 for cleaner reporting.  The mean
-   ρ is essentially flat over ``w ∈ [0.5, 0.75]`` (~0.001 spread),
-   so the round number costs nothing measurable.
+   Selection history:
+
+   * **0.60** (Apr 2026, pre-Phase-5d): tuned on the v1 GPT-vs-Haiku-q9
+     weight sweep at slot 6 layer 25 (legacy ``gpt_responses_*_b10`` /
+     ``haiku_responses_*_b10_q9`` caches; see
+     ``results_analysis/gpt_anthropic_response_weight_sweep.py
+     --rubric v1``).  Parabolic peak at ``w ≈ 0.609`` → rounded to
+     0.60.  Mean ρ flat over ``w ∈ [0.5, 0.75]``, so the round number
+     cost nothing measurable.
+
+   * **0.41** (2026-05-11, post-Phase-5d): re-tuned on the v2
+     ``--rubric v2`` view (GPT at B=7 Phase-5c full-volume vs Haiku
+     at B=7-t3 surgical with B=10-q9 fallback).  Parabolic peak at
+     ``w ≈ 0.410``; the ~0.2 leftward shift reflects Haiku's
+     improved data quality after the Phase-5d surgical rejudge
+     escalated the ~34 RP-depleted entities per axis from q9 to
+     tiered M=3.  Pure-Haiku ρ went up by +0.041 between regimes
+     while pure-GPT stayed flat, so the blend wants more Haiku.
+     Confirmed in
+     ``gpt_haiku_q9_response_weight_sweep_slot6__rubric_v2.png``.
+
+   The constant's name retains ``_Q9`` for back-compat (it was
+   historically tuned against q9) but the v2 operating point is the
+   mixed ``_b7_t3 ⇢ _b10_q9`` cohort.  Re-tune only if a future sweep
+   with substantially different cohorts shows the peak shifting
+   outside ``[0.30, 0.50]``.
 
 4. **Final response × desc+inst blend** -- ``DEFAULT_RESPONSE_DI_WEIGHT``:
    weight on the response ensemble in the final per-entity score
@@ -111,7 +131,10 @@ re-tunings propagate everywhere with one edit.
 
 from __future__ import annotations
 
-from typing import Dict, Tuple
+from pathlib import Path
+from typing import Dict, List, Optional, Tuple
+
+from .provenance import InputSpec, current_file_input
 
 
 # (desc_weight, inst_weight). Sums to 1.0 by convention but enforce-not-required.
@@ -130,15 +153,39 @@ DEFAULT_DI_WEIGHTS: Tuple[float, float] = DI_WEIGHTS_INST_TIE
 # is a strict generalisation of the old hardcoded ``/2`` averaging.
 DEFAULT_GPT_SONNET_DI_WEIGHT: float = 0.50
 
-# Within-response ensemble weight on GPT-4.1-mini B=10 (the rest goes
-# on Haiku-q9).  See module docstring for derivation.
-DEFAULT_GPT_HAIKU_Q9_WEIGHT: float = 0.60
+# Within-response ensemble weight on GPT-4.1-mini (the rest goes
+# on Haiku).  Was 0.60 until 2026-05-11; retuned to 0.41 on the
+# v2 GPT-b7-full vs Haiku-b7_t3-with-b10_q9-fallback sweep after
+# the Phase-5d surgical rejudge improved Haiku's data quality on
+# RP-depleted entities.  0.41 is the actual parabolic peak (w≈0.410);
+# 0.40 was a too-aggressive rounding -- the mean ρ curve in the
+# vicinity of the peak is shallow enough that 0.40 vs 0.41 is
+# below judge-noise threshold but we may as well track the fit.
+# See module docstring "Selection history" for derivation.  Name
+# retains the ``_Q9`` suffix for back-compat even though the
+# operating point is now the mixed cohort.
+DEFAULT_GPT_HAIKU_Q9_WEIGHT: float = 0.41
 
 
 # Final per-entity score weight on the response ensemble (the rest
 # goes on the desc+inst ensemble).  See module docstring for
 # derivation.
 DEFAULT_RESPONSE_DI_WEIGHT: float = 0.80
+
+
+# Cross-axis sample weight for "primary" axes (axes that have GPT
+# response-mode judging in addition to desc+inst) when aggregating
+# per-axis rho values into a cohort-mean.  Default ``5.0`` matches
+# the 2026-05-07 RF analysis on (axis, K) pairs: each (axis, K)
+# sample that included response-mode judging was treated as worth
+# 5x a desc+inst-only sample, reflecting the additional signal
+# response-mode brings on those axes where it's available.
+#
+# Used by :func:`cohort_mean_curves` below and by
+# :mod:`results_analysis.shear_l_vs_k_comparison` (``--primary_weight``
+# default).  Bump only after re-deriving from a sweep with new RF /
+# regret weighting.
+PRIMARY_AXIS_SAMPLE_WEIGHT: float = 5.0
 
 DI_WEIGHT_CHOICES = {
     "inst_tie": DI_WEIGHTS_INST_TIE,  # 0.499*d + 0.501*i  -- DEFAULT
@@ -251,6 +298,215 @@ def combine_desc_inst_two_judges(
         inst_avg = w_gs * gi + w_son * si
         out[n] = w_d * desc_avg + w_i * inst_avg
     return out
+
+
+def cohort_mean_curves(
+    rho_table: Dict[Tuple[str, str, str], list],
+    pair_keys: list,
+    *,
+    w_rs: float = DEFAULT_RESPONSE_DI_WEIGHT,
+    primary_weight: float = PRIMARY_AXIS_SAMPLE_WEIGHT,
+    min_axes: int = 3,
+):
+    """Compute three cohort-mean ρ-vs-X curves from per-axis ρ tables.
+
+    Produced for overlay on the per-axis curves in plots like
+    :mod:`results_analysis.whitening_k_sweep` and
+    :mod:`results_analysis.shear_l_sweep`, so the cross-axis trend is
+    readable at a glance alongside the per-axis spaghetti.
+
+    Args:
+        rho_table: Dict ``{(pos, neg, source): [rho at X_0, rho at X_1, ...]}``.
+            ``source`` is ``"responses"`` or ``"desc_inst"``.  Missing or
+            NaN entries are tolerated.
+        pair_keys: Ordered list of ``(pos, neg)`` axis tuples.  An axis
+            is treated as *primary* (has response-mode judging) iff its
+            ``"responses"`` row contains at least one finite value.
+        w_rs: Within-axis blend weight on response-mode (the rest goes
+            on desc+inst).  Default :data:`DEFAULT_RESPONSE_DI_WEIGHT`
+            = 0.80, the project's "responses are ~4x as informative as
+            desc+inst when both are available" empirical optimum.
+        primary_weight: Cross-axis sample weight for primary axes
+            (vs ``1.0`` for desc+inst-only axes).  Default
+            :data:`PRIMARY_AXIS_SAMPLE_WEIGHT` = 5.0, matching the RF
+            regret-weighted analysis.
+        min_axes: An X-point's curve value is NaN if fewer than this
+            many axes have finite data at that X.
+
+    Returns:
+        ``(avg_rs, avg_di, avg_blend)``, each a list of floats matching
+        the length of any row in ``rho_table``.
+
+        - ``avg_rs``: simple cross-axis mean of the ``responses`` rows
+          (skipping NaN axes).  Reflects the response-mode-only cohort.
+        - ``avg_di``: simple cross-axis mean of the ``desc_inst`` rows.
+          Reflects the broader desc+inst cohort (often more axes than
+          the response cohort).
+        - ``avg_blend``: cross-axis weighted mean of the per-axis
+          project-standard blend.  Per axis the blend is
+          ``w_rs * rho_rs + (1 - w_rs) * rho_di`` for primary axes
+          (those with finite ``responses`` data) and ``rho_di`` for
+          desc+inst-only axes.  Cross-axis weights are ``primary_weight``
+          for primary axes and ``1.0`` for desc+inst-only axes.  When
+          a primary axis has NaN at some X-point (e.g. response data
+          missing for a specific X), that axis silently falls back to
+          its ``rho_di`` value at that X (still weighted at
+          ``primary_weight``).
+
+    NaN propagation: every entry is a Python ``float`` (NaN for empty
+    cells), suitable for direct ``ax.plot(x_pos, avg_curve, ...)``
+    consumption since matplotlib skips NaN segments.
+    """
+    import math
+    if not rho_table:
+        return [], [], []
+
+    # Determine length of curve via any non-empty row.
+    n_x: Optional[int] = None
+    for row in rho_table.values():
+        if hasattr(row, "__len__"):
+            n_x = len(row)
+            break
+    if not n_x:
+        return [], [], []
+
+    def _is_finite(x) -> bool:
+        return isinstance(x, (int, float)) and math.isfinite(x)
+
+    # Which axes are primary (have response-mode judging anywhere on
+    # the X grid)?  Used both for the avg_blend weighting and as a
+    # sanity check on the avg_rs population.
+    primary_pairs = set()
+    for pos, neg in pair_keys:
+        rs_row = rho_table.get((pos, neg, "responses"))
+        if rs_row and any(_is_finite(v) for v in rs_row):
+            primary_pairs.add((pos, neg))
+
+    avg_rs: list[float] = []
+    avg_di: list[float] = []
+    avg_blend: list[float] = []
+    for xi in range(n_x):
+        # (a) responses cohort mean
+        rs_vals = [
+            rho_table[(p, n, "responses")][xi]
+            for (p, n) in pair_keys
+            if (p, n, "responses") in rho_table
+            and xi < len(rho_table[(p, n, "responses")])
+            and _is_finite(rho_table[(p, n, "responses")][xi])
+        ]
+        avg_rs.append(
+            float(sum(rs_vals) / len(rs_vals))
+            if len(rs_vals) >= min_axes else float("nan")
+        )
+
+        # (b) desc+inst cohort mean
+        di_vals = [
+            rho_table[(p, n, "desc_inst")][xi]
+            for (p, n) in pair_keys
+            if (p, n, "desc_inst") in rho_table
+            and xi < len(rho_table[(p, n, "desc_inst")])
+            and _is_finite(rho_table[(p, n, "desc_inst")][xi])
+        ]
+        avg_di.append(
+            float(sum(di_vals) / len(di_vals))
+            if len(di_vals) >= min_axes else float("nan")
+        )
+
+        # (c) per-axis blend cross-axis weighted mean
+        num = 0.0
+        den = 0.0
+        n_contrib = 0
+        for (p, n) in pair_keys:
+            di_row = rho_table.get((p, n, "desc_inst"))
+            rs_row = rho_table.get((p, n, "responses"))
+            di_val = (di_row[xi] if di_row and xi < len(di_row) else None)
+            rs_val = (rs_row[xi] if rs_row and xi < len(rs_row) else None)
+            is_primary = (p, n) in primary_pairs
+            if is_primary:
+                if _is_finite(rs_val) and _is_finite(di_val):
+                    blend = w_rs * rs_val + (1.0 - w_rs) * di_val
+                elif _is_finite(di_val):
+                    # Response-side hole at this X-point; fall back to
+                    # desc+inst (still at the primary weight, since this
+                    # axis IS primary overall).
+                    blend = float(di_val)
+                else:
+                    continue
+                w = primary_weight
+            else:
+                if not _is_finite(di_val):
+                    continue
+                blend = float(di_val)
+                w = 1.0
+            num += w * blend
+            den += w
+            n_contrib += 1
+        avg_blend.append(
+            float(num / den) if (den > 0 and n_contrib >= min_axes)
+            else float("nan")
+        )
+
+    return avg_rs, avg_di, avg_blend
+
+
+# ---------------------------------------------------------------------------
+# Provenance helper: declare a dependency on this file's constants.
+# ---------------------------------------------------------------------------
+
+_THIS_FILE: Path = Path(__file__).resolve()
+
+
+def declare_constants_dependency(
+    inputs: List[InputSpec],
+    *,
+    dep_key: str = "judge_score_combine_constants",
+) -> None:
+    """Append an :class:`InputSpec` for this module's constants file to
+    ``inputs``, so downstream caches that bake in any of the
+    ``DEFAULT_*_WEIGHT`` / ``PRIMARY_AXIS_SAMPLE_WEIGHT`` constants get
+    flagged as stale by ``tools/audit_caches.py`` whenever those
+    constants are retuned.
+
+    Lazy granularity
+    ----------------
+    The fingerprint is the file's ``(mtime, size)`` -- so ANY edit to
+    this file (even a docstring tweak) triggers stale-flag on every
+    consumer that records this dep, not just edits that touch the
+    specific constant the consumer uses.
+
+    That's the right trade-off for the project's actual workflow:
+    constant retunings are rare (one or two per quarter), so a stray
+    docstring edit causing a one-time "rerun all consumers" pulse is
+    cheap.  The accurate alternative -- per-constant fingerprints --
+    would require a new InputSpec ``kind`` plus a registry mapping
+    constant-names to current values; deferred to "Constant-level
+    provenance" in AGENT_NOTES if the lazy granularity ever becomes
+    a real nuisance.
+
+    For forensic purposes the current constant values are stamped
+    into the InputSpec's ``extras`` (advisory only -- not part of
+    drift comparison per the project convention).  Audit reports
+    will surface the recorded values so a stale-cache reviewer can
+    see what numbers each cache "thinks" the defaults are.
+
+    Args:
+        inputs: The caller's provenance accumulator.  Mutated in
+            place by appending one new :class:`InputSpec`.
+        dep_key: Override the default dep_key if needed (e.g. when
+            multiple consumers of this file want distinct dep_keys
+            for clarity in the audit output).
+    """
+    inputs.append(current_file_input(
+        path=_THIS_FILE,
+        dep_key=dep_key,
+        extras={
+            "DEFAULT_DI_WEIGHTS": str(DEFAULT_DI_WEIGHTS),
+            "DEFAULT_GPT_SONNET_DI_WEIGHT": f"{DEFAULT_GPT_SONNET_DI_WEIGHT}",
+            "DEFAULT_GPT_HAIKU_Q9_WEIGHT": f"{DEFAULT_GPT_HAIKU_Q9_WEIGHT}",
+            "DEFAULT_RESPONSE_DI_WEIGHT": f"{DEFAULT_RESPONSE_DI_WEIGHT}",
+            "PRIMARY_AXIS_SAMPLE_WEIGHT": f"{PRIMARY_AXIS_SAMPLE_WEIGHT}",
+        },
+    ))
 
 
 def add_di_weights_arg(parser, default: str = "inst_tie") -> None:

@@ -12,7 +12,9 @@ from assistant_axis.judge_score_combine import (
     DI_WEIGHTS_DESC_TIE,
     DI_WEIGHTS_EQUAL,
     DI_WEIGHTS_INST_TIE,
+    PRIMARY_AXIS_SAMPLE_WEIGHT,
     add_di_weights_arg,
+    cohort_mean_curves,
     combine_desc_inst_one_judge,
     combine_desc_inst_two_judges,
     parse_di_weights_arg,
@@ -130,7 +132,11 @@ def test_centralized_blend_constants_in_unit_interval():
     """All single-float blend weights must sit in [0, 1] and represent
     the empirical defaults documented in the module docstring + README."""
     assert DEFAULT_GPT_SONNET_DI_WEIGHT == 0.50
-    assert DEFAULT_GPT_HAIKU_Q9_WEIGHT == 0.60
+    # DEFAULT_GPT_HAIKU_Q9_WEIGHT was 0.60 pre-Phase-5d (v1 q9 sweep);
+    # retuned to 0.41 on 2026-05-11 on the v2 mixed-cohort sweep
+    # (actual parabolic peak w≈0.410, not rounded).  See
+    # selection-history block in judge_score_combine module docstring.
+    assert DEFAULT_GPT_HAIKU_Q9_WEIGHT == 0.41
     assert DEFAULT_RESPONSE_DI_WEIGHT == 0.80
     for w in (DEFAULT_GPT_SONNET_DI_WEIGHT,
               DEFAULT_GPT_HAIKU_Q9_WEIGHT,
@@ -190,3 +196,154 @@ def test_combine_two_judges_gs_weight_intermediate_linear():
         out = combine_desc_inst_two_judges(
             g_d, g_i, s_d, s_i, gpt_sonnet_weight=w)
         assert out["x"] == pytest.approx(4.0 * w), w
+
+
+# ---------------------------------------------------------------------------
+# cohort_mean_curves: cross-axis averaging for ρ-vs-X plot overlays.
+# ---------------------------------------------------------------------------
+
+class TestCohortMeanCurves:
+    """Three black overlays on the rho_vs_{whitening_K,shear_L} plots:
+    (a) mean over responses, (b) mean over desc+inst, (c) blended mean
+    with primary axes weighted 5x."""
+
+    def test_primary_axis_constant_pattern(self):
+        # 2 axes, both primary (have responses), 3 X-points each.
+        # rho_rs = 1.0 everywhere, rho_di = 0.0 everywhere.
+        # Expected:
+        #   avg_rs = [1.0, 1.0, 1.0]
+        #   avg_di = [0.0, 0.0, 0.0]
+        #   avg_blend per axis = 0.8 * 1.0 + 0.2 * 0.0 = 0.8;
+        #     both primary, so cross-axis mean = 0.8 at every X.
+        pair_keys = [("a", "b"), ("c", "d")]
+        rho_table = {
+            ("a", "b", "responses"):  [1.0, 1.0, 1.0],
+            ("a", "b", "desc_inst"):  [0.0, 0.0, 0.0],
+            ("c", "d", "responses"):  [1.0, 1.0, 1.0],
+            ("c", "d", "desc_inst"):  [0.0, 0.0, 0.0],
+        }
+        avg_rs, avg_di, avg_blend = cohort_mean_curves(
+            rho_table, pair_keys, min_axes=1,
+        )
+        assert avg_rs == pytest.approx([1.0, 1.0, 1.0])
+        assert avg_di == pytest.approx([0.0, 0.0, 0.0])
+        assert avg_blend == pytest.approx([0.8, 0.8, 0.8])
+
+    def test_di_only_axes_excluded_from_responses_mean(self):
+        # 1 primary, 1 di-only.  Responses mean averages over the 1
+        # primary axis only; di mean averages both.
+        pair_keys = [("a", "b"), ("c", "d")]
+        rho_table = {
+            ("a", "b", "responses"):  [0.6],   # primary
+            ("a", "b", "desc_inst"):  [0.4],
+            ("c", "d", "responses"):  [float("nan")],   # di-only
+            ("c", "d", "desc_inst"):  [0.2],
+        }
+        avg_rs, avg_di, avg_blend = cohort_mean_curves(
+            rho_table, pair_keys, min_axes=1,
+        )
+        assert avg_rs == pytest.approx([0.6])
+        assert avg_di == pytest.approx([(0.4 + 0.2) / 2])
+        # blend = (5 * (0.8*0.6 + 0.2*0.4) + 1 * 0.2) / (5 + 1)
+        #       = (5 * 0.56 + 0.2) / 6 = 3.0 / 6 = 0.5
+        assert avg_blend == pytest.approx([(5 * (0.8 * 0.6 + 0.2 * 0.4) + 0.2) / 6])
+
+    def test_primary_weight_actually_5x(self):
+        # 1 primary axis with rho_blend=1.0, 1 di-only axis with
+        # rho_di=0.0.  Weighted mean = (5 * 1.0 + 1 * 0.0) / 6 = 5/6.
+        pair_keys = [("p", "q"), ("r", "s")]
+        rho_table = {
+            ("p", "q", "responses"):  [1.0],
+            ("p", "q", "desc_inst"):  [1.0],  # blend = 0.8*1+0.2*1 = 1.0
+            ("r", "s", "responses"):  [float("nan")],
+            ("r", "s", "desc_inst"):  [0.0],
+        }
+        avg_rs, avg_di, avg_blend = cohort_mean_curves(
+            rho_table, pair_keys, min_axes=1,
+        )
+        assert avg_blend == pytest.approx([5.0 / 6.0])
+        # Sanity: the constant honored by the helper is the same constant
+        # the rest of the project pins to.
+        assert PRIMARY_AXIS_SAMPLE_WEIGHT == 5.0
+
+    def test_response_di_weight_actually_080(self):
+        # 1 primary axis, rho_rs=1, rho_di=0.  Per-axis blend = w_rs.
+        pair_keys = [("p", "q")]
+        rho_table = {
+            ("p", "q", "responses"):  [1.0],
+            ("p", "q", "desc_inst"):  [0.0],
+        }
+        _, _, avg_blend = cohort_mean_curves(
+            rho_table, pair_keys, min_axes=1,
+        )
+        assert avg_blend == pytest.approx([DEFAULT_RESPONSE_DI_WEIGHT])
+        assert DEFAULT_RESPONSE_DI_WEIGHT == 0.80
+
+    def test_min_axes_threshold_yields_nan(self):
+        # With min_axes=3 but only 2 axes provided, every X-point is NaN.
+        pair_keys = [("a", "b"), ("c", "d")]
+        rho_table = {
+            ("a", "b", "responses"): [0.5],
+            ("a", "b", "desc_inst"): [0.5],
+            ("c", "d", "responses"): [0.5],
+            ("c", "d", "desc_inst"): [0.5],
+        }
+        avg_rs, avg_di, avg_blend = cohort_mean_curves(
+            rho_table, pair_keys, min_axes=3,
+        )
+        for v in avg_rs + avg_di + avg_blend:
+            assert math.isnan(v)
+
+    def test_per_x_nan_handled_per_curve(self):
+        # X-point 0 has 2 of 2 primary axes finite; X-point 1 has only 1.
+        # min_axes=2: X=0 gets a value, X=1 is NaN.
+        pair_keys = [("a", "b"), ("c", "d")]
+        rho_table = {
+            ("a", "b", "responses"): [0.5, 0.5],
+            ("a", "b", "desc_inst"): [0.5, 0.5],
+            ("c", "d", "responses"): [0.5, float("nan")],
+            ("c", "d", "desc_inst"): [0.5, 0.5],
+        }
+        avg_rs, _, _ = cohort_mean_curves(
+            rho_table, pair_keys, min_axes=2,
+        )
+        assert avg_rs[0] == pytest.approx(0.5)
+        assert math.isnan(avg_rs[1])
+
+    def test_primary_axis_with_nan_response_falls_back_to_di(self):
+        # Primary axis defined by having responses data SOMEWHERE on the
+        # curve.  If responses is NaN at a specific X but di isn't, the
+        # blend at that X falls back to di (at primary weight 5).
+        pair_keys = [("a", "b"), ("c", "d")]
+        rho_table = {
+            ("a", "b", "responses"): [0.7, float("nan")],
+            ("a", "b", "desc_inst"): [0.3, 0.3],
+            ("c", "d", "responses"): [float("nan"), float("nan")],
+            ("c", "d", "desc_inst"): [0.5, 0.5],
+        }
+        _, _, avg_blend = cohort_mean_curves(
+            rho_table, pair_keys, min_axes=1,
+        )
+        # X=0: primary (a,b) blend = 0.8*0.7+0.2*0.3 = 0.62, w=5;
+        #      di-only (c,d) blend = 0.5, w=1.
+        # mean = (5*0.62 + 1*0.5) / 6 = (3.1 + 0.5) / 6 = 0.6
+        assert avg_blend[0] == pytest.approx((5 * 0.62 + 0.5) / 6)
+        # X=1: primary (a,b) has NaN response, falls back to di=0.3 at w=5;
+        #      di-only (c,d) blend = 0.5 at w=1.
+        # mean = (5*0.3 + 1*0.5) / 6 = (1.5 + 0.5) / 6 = 2/6
+        assert avg_blend[1] == pytest.approx((5 * 0.3 + 0.5) / 6)
+
+    def test_empty_inputs(self):
+        # Empty rho_table or empty pair_keys returns empty lists.
+        assert cohort_mean_curves({}, []) == ([], [], [])
+
+    def test_returns_python_floats_not_numpy(self):
+        # The helper should return plain Python floats so matplotlib's
+        # NaN-skipping path works regardless of numpy version.
+        pair_keys = [("a", "b")]
+        rho_table = {
+            ("a", "b", "responses"): [0.5],
+            ("a", "b", "desc_inst"): [0.5],
+        }
+        avg_rs, _, _ = cohort_mean_curves(rho_table, pair_keys, min_axes=1)
+        assert isinstance(avg_rs[0], float)

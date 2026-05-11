@@ -59,6 +59,7 @@ from assistant_axis import (
     entity_id, json_metadata, png_metadata, suptitle_with_specs,
 )
 from assistant_axis.judge_score_combine import (
+    declare_constants_dependency,
     DEFAULT_DI_WEIGHTS,
     DEFAULT_GPT_HAIKU_Q9_WEIGHT,
     DEFAULT_RESPONSE_DI_WEIGHT,
@@ -443,13 +444,20 @@ def main() -> int:
                     str(RESPONSE_IN_COMBINED_WEIGHT),
             },
         ),
+    ]
+    # Track the project-wide constants this script imports so a future
+    # retune of DEFAULT_GPT_HAIKU_Q9_WEIGHT (or any sibling default in
+    # judge_score_combine.py) flags this cache as stale via
+    # audit_caches.py.  See declare_constants_dependency docstring.
+    declare_constants_dependency(inputs)
+    inputs.extend([
         current_data_subtree_input(
             data_dir=data_dir, subtree_rel="traits/vectors",
             dep_key="traits_vectors"),
         current_data_subtree_input(
             data_dir=data_dir, subtree_rel="roles/vectors",
             dep_key="roles_vectors"),
-    ]
+    ])
 
     # Pre-cache standalone entity vectors at (slot, layer),
     # default-centered.  Mirrors gpt_anthropic_response_weight_sweep.

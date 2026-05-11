@@ -19,7 +19,7 @@ everywhere with one edit.
 from assistant_axis.judge_score_combine import (
     DEFAULT_DI_WEIGHTS,             # 0.499 desc / 0.501 inst   (within one judge)
     DEFAULT_GPT_SONNET_DI_WEIGHT,   # 0.50 GPT / 0.50 Sonnet    (within desc+inst ensemble)
-    DEFAULT_GPT_HAIKU_Q9_WEIGHT,    # 0.60 GPT / 0.40 Haiku-q9  (within response ensemble)
+    DEFAULT_GPT_HAIKU_Q9_WEIGHT,    # 0.41 GPT / 0.59 Haiku     (within response ensemble; v2 retune 2026-05-11)
     DEFAULT_RESPONSE_DI_WEIGHT,     # 0.80 response / 0.20 DI   (final blend)
     combine_desc_inst_two_judges,
 )
@@ -29,7 +29,7 @@ from assistant_axis.judge_score_combine import (
 |---|---|---|---|---|---|
 | 1 | `DEFAULT_DI_WEIGHTS` | `(0.499, 0.501)` | desc / inst within one judge | (manual sweep, ablations encoded as the `inst_tie`/`equal`/`desc_tie` choices) | slot=(3,25) / (0,26) / (0,49) |
 | 2 | `DEFAULT_GPT_SONNET_DI_WEIGHT` | `0.50` | GPT / Sonnet within the desc+inst ensemble (per mode) | `gpt_sonnet_weight_sweep.py` | slot 3 / layer 25 |
-| 3 | `DEFAULT_GPT_HAIKU_Q9_WEIGHT` | `0.60` | GPT_b10 / Haiku_q9 within the response-mode ensemble | `gpt_anthropic_response_weight_sweep.py` | slot 6 / layer 25 |
+| 3 | `DEFAULT_GPT_HAIKU_Q9_WEIGHT` | `0.41` | GPT / Haiku within the response-mode ensemble (was `0.60` until 2026-05-11; actual parabolic peak w≈0.410) | `gpt_anthropic_response_weight_sweep.py --rubric v2` | slot 6 / layer 25 |
 | 4 | `DEFAULT_RESPONSE_DI_WEIGHT` | `0.80` | response ensemble / desc+inst ensemble in the final per-entity score | `response_di_weight_sweep.py` | slot 6 / layer 25 |
 
 ### 1. Per-judge desc / inst (inst-tiebreak)
@@ -95,8 +95,8 @@ outside `[0.45, 0.55]`.
 
 ### 3. Within the response ensemble (`DEFAULT_GPT_HAIKU_Q9_WEIGHT`)
 
-`0.60` weight on GPT-4.1-mini B=10, `0.40` on Haiku-q9 (B=10,
-1/3-question subsample) for the response-mode ensemble:
+`0.41` weight on GPT-4.1-mini, `0.59` on Haiku for the response-mode
+ensemble:
 
 ```python
 response = {
@@ -106,22 +106,43 @@ response = {
 }
 ```
 
-Picked from the GPT × Haiku-q9 weight sweep at slot 6 / layer 25
-(`gpt_anthropic_response_weight_sweep.py`; plot at
-`roger/axis_judge_experiments/gpt_haiku_q9_response_weight_sweep_slot6.png`).
-The 12-axis parabolic fit on the interior `[0.1, 0.9]` peaks at
-**w ≈ 0.609**; rounded to 0.60 for cleaner reporting.  Mean ρ is
-essentially flat over `w ∈ [0.5, 0.75]` (~0.001 spread), so the
-round number costs nothing measurable.  Haiku-q9 is the
-operating-point winner on cost-per-quality across the 4-Pareto-set
-view (`batch_size_curve_8slot/batch_size_cost_vs_quality.png`);
-Sonnet-q9's own peak is higher (`w ≈ 0.73`) but Sonnet is dominated
-by Haiku-q9 on the Pareto frontier and is kept only for diagnostic
-comparison.
+**Selection history.**  Was `0.60` (GPT-favoured) until 2026-05-11;
+re-tuned to `0.40` (Haiku-favoured) after the Phase-5d surgical
+rejudge improved Haiku's data quality on RP-depleted entities.
+
+- **0.60 (Apr 2026)** picked from the v1 sweep at slot 6 / layer 25
+  on the legacy `gpt_responses_*_b10` / `haiku_responses_*_b10_q9`
+  cohorts (`gpt_anthropic_response_weight_sweep.py --rubric v1`; plot
+  at `gpt_haiku_q9_response_weight_sweep_slot6.png`).  12-axis
+  parabolic peak at **w ≈ 0.609** → rounded to 0.60.
+
+- **0.41 (May 11 2026)** re-tuned on the v2 view at the same
+  (slot, layer) using `--rubric v2` (GPT at B=7 Phase-5c full-volume
+  vs Haiku at B=7-t3 surgical with B=10-q9 per-entity fallback; plot
+  at `gpt_haiku_q9_response_weight_sweep_slot6__rubric_v2.png`).
+  Parabolic peak at **w ≈ 0.410** (kept un-rounded to 2 d.p.).  The leftward shift
+  reflects Haiku's improved data quality after Phase-5d escalated
+  the ~34 RP-depleted entities per axis from q9-uniform to
+  tiered-M=3.  Pure-Haiku ρ went up by +0.041 between regimes (v1
+  pure-Haiku ρ=+0.690 → v2 ρ=+0.731) while pure-GPT stayed flat,
+  so the ensemble wants more Haiku.  Peak ρ went from +0.729 (v1)
+  to +0.746 (v2) — a real quality improvement, not just a
+  re-weighting.
+
+Haiku-q9 remained the operating-point winner on cost-per-quality
+across the 4-Pareto-set view
+(`batch_size_curve_8slot/batch_size_cost_vs_quality.png`) for the
+v1 era; for v2 the operating-point geometry shifts and the Pareto
+needs a refresh too (queued).
+
+The constant's name retains `_Q9` for back-compat; the v2 operating
+point is actually the mixed `_b7_t3 ⇢ _b10_q9` cohort.  Re-tune only
+if a future sweep with substantially different cohorts shows the
+peak shifting outside `[0.30, 0.50]`.
 
 CLI override on `judge_ensemble_rho_curve.py`:
 
-    --gpt_weight FLOAT   # default: DEFAULT_GPT_HAIKU_Q9_WEIGHT (= 0.60)
+    --gpt_weight FLOAT   # default: DEFAULT_GPT_HAIKU_Q9_WEIGHT (= 0.41)
 
 ### 4. Response × desc+inst final blend (`DEFAULT_RESPONSE_DI_WEIGHT`)
 

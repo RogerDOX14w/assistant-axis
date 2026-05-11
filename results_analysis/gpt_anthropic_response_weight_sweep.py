@@ -125,6 +125,12 @@ def _load_response_scores(
 ) -> dict[str, float]:
     """Per-entity mean response-judge score, summed across roles + traits.
 
+    **v1-mode loader** (legacy path): reads a single hardcoded cohort
+    directory per (axis, side).  See :func:`_load_response_scores_v2`
+    for the v2-mode equivalent that uses the canonical
+    :func:`assistant_axis.judge_loaders.load_response_scores` helper
+    with per-entity B=7→B=10 fallback.
+
     Uses :func:`assistant_axis.provenance.load_and_register` to do the
     read + envelope-unwrap + drift-check + InputSpec construction in one
     call.  When ``inputs`` is supplied, every successfully-read cache is
@@ -159,6 +165,46 @@ def _load_response_scores(
     return out
 
 
+def _load_response_scores_v2(
+    experiment_dir: Path, axis: str, judge: str,
+    *,
+    inputs: list[InputSpec] | None = None,
+) -> tuple[dict[str, float], dict[str, str]]:
+    """v2-mode loader: canonical
+    :func:`assistant_axis.judge_loaders.load_response_scores` for both
+    sides, with the project-default ``prefer_b`` per (judge, rubric).
+
+    For ``judge="gpt"`` returns Phase-5c-regenerated B=7 full-volume
+    data (no fallback).  For ``judge="haiku"`` returns the Phase-5d
+    surgical B=7 tiered-M=3 cohort per-entity, falling back to the
+    legacy B=10 q9 uniform-mod-9 cohort for entities not in the
+    surgical set.  Roles + traits sides are merged via
+    :func:`assistant_axis.entity_id.entity_id` so each entity is keyed
+    by its disambiguated ``"name|R"`` / ``"name|T"`` id.
+
+    Returns ``(scores_by_eid, source_cohort_by_eid)``; the latter maps
+    each contributing entity-id to the cohort directory it came from,
+    useful for the cohort-mix annotation in the rendered plot.
+    """
+    from assistant_axis.judge_loaders import load_response_scores
+    out: dict[str, float] = {}
+    sources: dict[str, str] = {}
+    for side in ("roles", "traits"):
+        scores_by_name, cohort_by_name = load_response_scores(
+            axis=axis, kind=side, judge=judge, rubric="v2",
+            experiments_root=experiment_dir,
+            inputs=inputs, policy="warn",
+        )
+        for name, info in scores_by_name.items():
+            ms = info.get("mean_score") if isinstance(info, dict) else None
+            if ms is None:
+                continue
+            eid = entity_id(name, side)
+            out[eid] = float(ms)
+            sources[eid] = cohort_by_name.get(name, "?")
+    return out, sources
+
+
 def _v(path: Path, slot: int, layer: int) -> torch.Tensor:
     return _load_vector_file(path).float()[slot, layer]
 
@@ -185,7 +231,31 @@ def main() -> int:
     p.add_argument("--anthropic_combo", required=True,
                    choices=sorted(COMBO_DIRS.keys()),
                    help="Which Anthropic judge × subsampling combo to "
-                        "compare GPT-4.1-mini against.")
+                        "compare GPT-4.1-mini against.  In ``--rubric v2`` "
+                        "mode, ``haiku_q9`` and ``haiku_full`` collapse to "
+                        "the same call (load_response_scores picks the "
+                        "best-available per-entity cohort), so they "
+                        "produce identical data but differently-named "
+                        "output files.  ``sonnet_q9`` is rejected in "
+                        "v2 mode because Sonnet has no v2 cache.")
+    p.add_argument("--rubric", choices=("v1", "v2"), default="v1",
+                   help="Data-loading regime (default: v1).  "
+                        "* v1: legacy hardcoded B=10 paths "
+                        "(GPT full-volume v1 archive, Haiku B=10 q9 OR "
+                        "B=10 full per combo, Sonnet B=10 q9).  Reads "
+                        "``--scores_filename`` from each hard-wired "
+                        "cohort dir.  Matches the pre-May-2026 plots "
+                        "exactly.  "
+                        "* v2: canonical "
+                        "``assistant_axis.judge_loaders.load_response_scores`` "
+                        "for both sides.  GPT side reads the Phase-5c "
+                        "B=7 full-volume cohort (no fallback); Haiku side "
+                        "reads the Phase-5d ``_b7_t3`` (tiered M=3, "
+                        "surgical-rejudge subset of entities) per-entity, "
+                        "falling back to ``_b10_q9`` for entities not in "
+                        "the surgical set.  Effectively a mixed-B view "
+                        "of the most-current data.  Output filename "
+                        "auto-suffixes ``__rubric_v2``.")
     p.add_argument("--experiment_dir", default=str(DEFAULT_EXPERIMENT_DIR))
     p.add_argument("--data_dir", default=str(DEFAULT_DATA_DIR))
     p.add_argument("--slot", type=int, default=DEFAULT_SLOT)
@@ -194,13 +264,24 @@ def main() -> int:
                    help="Output PNG (default: gpt_<combo>_response_weight_"
                         "sweep_slot{N}.png inside --experiment_dir).")
     p.add_argument("--rhos_json", default=None)
-    p.add_argument("--scores_filename", default="scores_responses.json",
+    p.add_argument("--scores_filename",
+                   default="scores_responses__rubric_v1.json",
                    help="Filename within each <axis>/<judge>_responses_*/ "
-                        "subdir to read.  Use scores_responses__rubric_v1.json "
-                        "to regenerate plots from the snapshotted v1 data "
-                        "after a rubric version bump (see RUBRIC_VERSION in "
-                        "axis_judge_correlation.py).  Default: canonical "
-                        "scores_responses.json.")
+                        "subdir to read.  Defaults to the v1 archive "
+                        "(scores_responses__rubric_v1.json) -- this "
+                        "script's GPT-vs-Anthropic weight sweep is "
+                        "intrinsically v1-bound because Sonnet was never "
+                        "rejudged at v2 (per the trait/role "
+                        "disambiguation plan's 'no Sonnet rejudging' "
+                        "guardrail), so the only intent-coherent "
+                        "cross-judge comparison is v1 vs v1.  The "
+                        "default also avoids reading the deferred-broken "
+                        "v2 b10 GPT cache (Bug B, 1/3 subsample) and "
+                        "the silent-skip on Sonnet axes for which no v2 "
+                        "scores_responses.json exists.  Pass "
+                        "scores_responses.json explicitly for the v2 "
+                        "view at the (deferred-broken) b10 GPT + v2 "
+                        "Haiku-q9 combinations.")
     p.add_argument("--out_stem_suffix", default="",
                    help="Optional suffix appended to the output stem (e.g. "
                         "'__rubric_v1' to write "
@@ -213,6 +294,24 @@ def main() -> int:
     data_dir = Path(args.data_dir).resolve()
     slot, layer = int(args.slot), int(args.layer)
     combo_label, anth_template = COMBO_DIRS[args.anthropic_combo]
+
+    # v2 mode validation + filename auto-suffixing.
+    is_v2 = (args.rubric == "v2")
+    if is_v2:
+        if args.anthropic_combo == "sonnet_q9":
+            raise SystemExit(
+                "error: --rubric v2 is incompatible with "
+                "--anthropic_combo sonnet_q9 (Sonnet was never rejudged "
+                "at v2 per the trait/role disambiguation plan's "
+                "'no Sonnet rejudging' guardrail).  Use --rubric v1 for "
+                "the Sonnet-side weight sweep."
+            )
+        # Auto-append __rubric_v2 when caller didn't pass an explicit
+        # --out_stem_suffix.  Mirrors the existing __rubric_v1
+        # convention used for side-by-side regen.
+        if not args.out_stem_suffix:
+            args.out_stem_suffix = "__rubric_v2"
+
     out_stem = (
         f"gpt_{args.anthropic_combo}_response_weight_sweep_slot{slot}"
         f"{args.out_stem_suffix}"
@@ -266,19 +365,33 @@ def main() -> int:
     ]
 
     per_axis: dict[tuple[str, str], dict] = {}
+    cohort_mix: dict[str, dict[str, str]] = {"gpt": {}, "anth": {}}
     for axis_name, pos, neg in DEFAULT_AXES:
-        gpt = _load_response_scores(
-            experiment_dir, axis_name, GPT_DIR_TEMPLATE,
-            scores_filename=args.scores_filename,
-            judge_label="gpt_b10",
-            inputs=inputs,
-        )
-        anth = _load_response_scores(
-            experiment_dir, axis_name, anth_template,
-            scores_filename=args.scores_filename,
-            judge_label=args.anthropic_combo,
-            inputs=inputs,
-        )
+        if is_v2:
+            # Canonical v2 loaders.  GPT reads Phase-5c b7 full volume;
+            # Haiku reads b7_t3 per entity with b10_q9 fallback.  See
+            # _load_response_scores_v2 for the cohort-source map we
+            # also collect for the "cohort mix" annotation in the plot.
+            anth_judge = "haiku"  # both haiku_q9 / haiku_full collapse in v2
+            gpt, gpt_sources = _load_response_scores_v2(
+                experiment_dir, axis_name, judge="gpt", inputs=inputs)
+            anth, anth_sources = _load_response_scores_v2(
+                experiment_dir, axis_name, judge=anth_judge, inputs=inputs)
+            cohort_mix["gpt"].update(gpt_sources)
+            cohort_mix["anth"].update(anth_sources)
+        else:
+            gpt = _load_response_scores(
+                experiment_dir, axis_name, GPT_DIR_TEMPLATE,
+                scores_filename=args.scores_filename,
+                judge_label="gpt_b10",
+                inputs=inputs,
+            )
+            anth = _load_response_scores(
+                experiment_dir, axis_name, anth_template,
+                scores_filename=args.scores_filename,
+                judge_label=args.anthropic_combo,
+                inputs=inputs,
+            )
         if not gpt or not anth:
             print(f"  [skip] {axis_name}: gpt n={len(gpt)} "
                   f"anth n={len(anth)}")
@@ -428,6 +541,56 @@ def main() -> int:
          peak_handle.get_label()],
         loc="lower left", bbox_to_anchor=(1.01, 0.0),
         fontsize=8, frameon=True, framealpha=0.9, handlelength=1.5)
+    # Provenance banner.  Two variants depending on --rubric:
+    #
+    # * v1 mode (default): "outdated archive" banner.  GPT-vs-Anthropic
+    #   weight sweep is intrinsically v1-bound here -- Sonnet was never
+    #   rejudged at v2, and the haiku v2 caches mostly stay at B=10 q9.
+    #   The plot is kept for historical reference; the cost-benefit of
+    #   rerunning everything at v2 / B=7 against Haiku is poor.
+    #
+    # * v2 mode: "current data" banner.  GPT side at Phase-5c B=7
+    #   full-volume, Haiku side mixed B=7 t3 (surgical) → B=10 q9
+    #   fallback.  Cohort-mix summary is computed from ``cohort_mix``
+    #   so the operator can see what fraction of each side came from
+    #   each cohort.
+    if is_v2:
+        gpt_cohorts = sorted(set(cohort_mix["gpt"].values()))
+        anth_dict = cohort_mix["anth"]
+        anth_total = len(anth_dict) or 1
+        anth_b7 = sum(1 for c in anth_dict.values() if "_b7" in c)
+        anth_b10 = sum(1 for c in anth_dict.values() if "_b10" in c)
+        banner_text = (
+            f"v2/v3 current-data view.\n"
+            f"GPT: {', '.join(gpt_cohorts) or '(no data)'} (full volume).\n"
+            f"Haiku: per-entity mix -- "
+            f"{anth_b7} of {anth_total} from _b7_t3 (Phase-5d surgical), "
+            f"{anth_b10} from _b10_q9 (legacy fallback)."
+        )
+        banner_face, banner_edge, banner_text_color = (
+            "#ecf6ff", "#5588cc", "#1a3d6a")
+    else:
+        rubric_tag = (
+            "rubric_v1" if "rubric_v1" in str(args.scores_filename)
+            else str(args.scores_filename)
+        )
+        banner_text = (
+            f"v1-archive view ({rubric_tag} caches; "
+            f"GPT B=10 full, Haiku B=10 q9 ~1/3 subsample).\n"
+            f"Not regenerated under v2/v3 rubric or B=7 default; data "
+            f"and conclusions reflect the pre-May-2026 judging regime."
+        )
+        banner_face, banner_edge, banner_text_color = (
+            "#fff4ec", "#cc6655", "#882200")
+    ax.text(
+        0.99, 0.02, banner_text,
+        transform=ax.transAxes, ha="right", va="bottom",
+        fontsize=8, style="italic", color=banner_text_color,
+        bbox=dict(boxstyle="round,pad=0.4",
+                  facecolor=banner_face,
+                  edgecolor=banner_edge, linewidth=0.7, alpha=0.92),
+        zorder=10,
+    )
     plt.tight_layout()
 
     out_path = experiment_dir / args.plot

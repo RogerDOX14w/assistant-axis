@@ -94,6 +94,7 @@ from assistant_axis import (
     png_metadata,
     response_subdir,
 )
+from assistant_axis.judge_loaders import migrate_v1_static_scores
 from assistant_axis.judge_score_combine import (
     add_di_weights_arg,
     combine_desc_inst_two_judges,
@@ -165,16 +166,24 @@ def _load_full_tensor(path: Path) -> np.ndarray:
 
 def _build_entity_cache(
     data_dir: Path,
-) -> tuple[dict[str, np.ndarray], np.ndarray, int]:
+) -> tuple[dict[str, np.ndarray], np.ndarray, int, dict[str, set]]:
     """Pre-load (default-centered) (n_slots, n_layers, hidden) per entity.
 
-    Returns ``(entity_vecs, default_array, n_layers)``.  ``entity_vecs``
-    keys are entity stems for both traits and roles (excluding default).
+    Returns ``(entity_vecs, default_array, n_layers, kinds_for_name)``.
+    ``entity_vecs`` keys are disambiguated ``entity_id`` form (``name|R``
+    / ``name|T``) for both traits and roles (excluding default).
+    ``kinds_for_name`` maps each bare entity stem to the set of kinds it
+    appears in -- used downstream by
+    :func:`assistant_axis.judge_loaders.migrate_v1_static_scores` to lift
+    v1 (bare-name) Sonnet desc/inst caches up to v2 (entity_id) keys
+    so the GPT v2 + Sonnet v1 four-way intersection doesn't silently
+    collapse to ``{}``.
     """
     default_path = data_dir / "traits" / "vectors" / "default.pt"
     default_arr = _load_full_tensor(default_path)
     n_layers = default_arr.shape[1]
     vecs: dict[str, np.ndarray] = {}
+    kinds_for_name: dict[str, set] = {}
     for et in ("traits", "roles"):
         for fp in sorted((data_dir / et / "vectors").glob("*.pt")):
             if fp.stem == "default":
@@ -184,7 +193,8 @@ def _build_entity_cache(
             except Exception:  # pragma: no cover -- skip unreadable files
                 continue
             vecs[entity_id(fp.stem, et)] = arr - default_arr
-    return vecs, default_arr, n_layers
+            kinds_for_name.setdefault(fp.stem, set()).add(et)
+    return vecs, default_arr, n_layers, kinds_for_name
 
 
 def _build_pool_cache(
@@ -402,7 +412,7 @@ def main() -> int:
     print(f"Loaded {len(pairs_resp)} responses axis pairs from {args.pairs_resp}")
 
     print("Loading entity tensors (all kept slots, all layers)...", flush=True)
-    entity_vecs, default_arr, n_layers = _build_entity_cache(data_dir)
+    entity_vecs, default_arr, n_layers, kinds_for_name = _build_entity_cache(data_dir)
     pool_cache = _build_pool_cache(data_dir, default_arr)
     print(f"  cached {len(entity_vecs)} entities, n_layers={n_layers}")
 
@@ -490,6 +500,16 @@ def main() -> int:
             )
         except FileNotFoundError:
             continue
+        # Lift v1 (bare-name) caches to v2 (entity_id) keys in-memory
+        # before combining.  Without this, GPT v2 ∩ Sonnet v1 keys = {},
+        # the 4-way combine silently returns ``{}``, and the desc+inst
+        # rho curves go to NaN for every (slot, layer, K) cell.  Same
+        # fix pattern as the other consumer scripts; migration is a
+        # no-op on already-v2 input.
+        g_d = migrate_v1_static_scores(g_d, kinds_for_name)
+        g_i = migrate_v1_static_scores(g_i, kinds_for_name)
+        s_d = migrate_v1_static_scores(s_d, kinds_for_name)
+        s_i = migrate_v1_static_scores(s_i, kinds_for_name)
         axis_scores_di[(pos, neg)] = combine_desc_inst_two_judges(
             g_d, g_i, s_d, s_i, weights=di_weights,
         )

@@ -650,11 +650,21 @@ def parse_args() -> argparse.Namespace:
                    help="Comma-separated 'slot:layer' pairs (e.g. '3:25,0:26').")
     p.add_argument("--json_name", type=str, default="batch_size_curve_rho.json",
                    help="Filename for the JSON cache inside --output_dir.")
-    p.add_argument("--scores_filename", type=str, default="scores_responses.json",
-                   help="Per-cell GPT-responses score cache filename (default: "
-                        "scores_responses.json).  Pass scores_responses__rubric_v1.json "
-                        "to read the v1 rubric snapshot for a v1-only batch-size sweep "
-                        "(B={5,7,10,15} only existed pre-v2 in the snapshot).")
+    p.add_argument("--scores_filename", type=str,
+                   default="scores_responses__rubric_v1.json",
+                   help="Per-cell GPT-responses score cache filename "
+                        "(default: scores_responses__rubric_v1.json -- the "
+                        "v1 archive).  The B-curve is intrinsically a v1 "
+                        "archive comparison: B={5,15} only exist in the "
+                        "v1 snapshot (no v2 rejudge), and the v2 b10 "
+                        "scores_responses.json is the broken 1/3-subsampled "
+                        "Bug-B cache that's been deferred.  So the default "
+                        "now reads v1 everywhere; this keeps all 4 B "
+                        "values comparable, was previously silently "
+                        "dropping B=5 and B=15 to no-data and reading the "
+                        "broken v2 at B=10.  Pass scores_responses.json "
+                        "explicitly if you want the (deferred-broken) v2 "
+                        "view at the limited B values that have a v2 cache.")
     return p.parse_args()
 
 

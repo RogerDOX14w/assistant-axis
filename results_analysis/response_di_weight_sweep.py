@@ -47,6 +47,7 @@ from scipy.stats import spearmanr
 from assistant_axis import entity_id, json_metadata, png_metadata
 from assistant_axis.judge_loaders import migrate_v1_static_scores
 from assistant_axis.judge_score_combine import (
+    declare_constants_dependency,
     DEFAULT_DI_WEIGHTS,
     DEFAULT_GPT_HAIKU_Q9_WEIGHT,
     combine_desc_inst_two_judges,
@@ -208,14 +209,25 @@ def main() -> int:
                 "fit_domain": f"[{FIT_W_LO}, {FIT_W_HI}]",
                 "excluded_axes": ",".join(sorted(excluded)) or "none",
             },
-        ),
+        ),]
+    # Constants-file dependency: GPT_RESPONSE_WEIGHT is read from
+    # ``DEFAULT_GPT_HAIKU_Q9_WEIGHT`` at import time, so the cache
+    # this script writes is sensitive to retunings of that (and any
+    # other) project-wide default in judge_score_combine.py.  See
+    # the helper's docstring for the lazy-vs-accurate trade-off
+    # discussion.  Without this entry, audit_caches.py would NOT
+    # flag this script's outputs as stale after a default retune --
+    # which is the exact bug that bit us on the 2026-05-11 0.60→0.41
+    # GPT/Haiku retune.
+    declare_constants_dependency(inputs)
+    inputs.extend([
         current_data_subtree_input(
             data_dir=data_dir, subtree_rel="traits/vectors",
             dep_key="traits_vectors"),
         current_data_subtree_input(
             data_dir=data_dir, subtree_rel="roles/vectors",
             dep_key="roles_vectors"),
-    ]
+    ])
 
     # Pre-cache standalone entity vectors at (slot, layer), default-centered.
     # Build kinds_for_name alongside so v1 (bare-name) caches -- e.g.

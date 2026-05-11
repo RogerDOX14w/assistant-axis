@@ -140,6 +140,63 @@ class SteeringSpec:
 # the SteeringSpec / PersonaSpec construction sites in
 # ``steering/post_judge.py`` and ``steering/run_sweep.py``.
 
+# TODO (rubric_version mismatch checking, May 2026) ------------------
+#
+# The COHERENCE_/RP_/EFFECT_RUBRIC_VERSION integers below are stamped
+# into every judged record's payload (search for ``"rubric_version":``
+# in this file), but the records DO NOT yet participate in the
+# per-entity rubric-drift detection or the rubric-equivalence
+# registry that ``results_analysis/axis_judge_correlation.py`` now
+# does.  Specifically:
+#
+#  1.  No per-entry / per-record drift check on resume.  Each record
+#      carries its own ``rubric_version`` field but the resume path
+#      keys solely off ``(persona_id, axis_id, ...)`` membership; a
+#      record judged under RP_RUBRIC_VERSION=1 will be silently
+#      reused under RP_RUBRIC_VERSION=2 unless the maintainer drops
+#      the cache by hand.
+#  2.  No equivalence-set registry.  When a rubric bump is
+#      prompt-preserving for some subset of records (e.g. the v3
+#      bump in axis_judge_correlation only changed prompts for
+#      entities with underscores in their names), there's no way to
+#      declare that here.  The maintainer's only options are
+#      "accept full rejudge" or "ignore the drift".
+#  3.  No CLI flag to abort on undeclared drift, unlike
+#      axis_judge_correlation's ``--strict_rubric_version``.
+#
+# Why deferred (May 2026): steering_judges is currently run only
+# from runpod-side pipelines (see the ``steering/`` package and the
+# ``runpod_workspace/`` outputs), where the resume pattern is
+# different from the laptop-side axis_judge_correlation flow: most
+# runs are fresh rather than resumed-against-edited-rubrics, so the
+# silent-reuse risk is small in practice.  This may not stay true.
+#
+# To bring this file into the same scheme as axis_judge_correlation,
+# the work would be roughly:
+#  *  Add a per-record ``rubric_version`` filter on resume in the
+#     ``RealJudgeDispatcher`` (and the cache-rewrite paths in
+#     ``steering/post_judge.py`` / ``steering/run_sweep.py``).
+#  *  Either reuse ``rubric_equivalence.is_equivalent`` with the
+#     existing ``modes`` dimension repurposed for these rubric
+#     families (e.g.  ``modes=["coherence"]``) OR add a sibling
+#     ``steering_rubric_equivalence.yaml`` registry keyed by
+#     ``(rubric_family, from_version, to_version)``.  The simpler
+#     reuse path requires extending ``_KNOWN_MODES`` in
+#     ``assistant_axis/rubric_equivalence.py``.
+#  *  Mirror ``--strict_rubric_version`` in any CLI that drives
+#     these dispatchers.
+#  *  Tests parallel to ``test_axis_judge_correlation_phase4.py``
+#     and ``test_judge_loaders.py``.
+#
+# Cross-references for when this lands:
+#   - results_analysis/axis_judge_correlation.py
+#     :func:`_check_rubric_version_on_resume`
+#   - assistant_axis/rubric_equivalence.py
+#   - assistant_axis/judge_loaders.py
+#     :func:`rubric_version_report`
+#   - tools/mark_rubric_equivalent.py
+#   - AGENT_NOTES.md "Per-entity drift-on-resume check (May 2026)"
+#
 COHERENCE_RUBRIC_VERSION = 4
 RP_RUBRIC_VERSION = 2
 EFFECT_RUBRIC_VERSION = 3

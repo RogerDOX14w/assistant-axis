@@ -74,7 +74,10 @@ from typing import Sequence
 import numpy as np
 
 from assistant_axis import entity_id, json_metadata
-from assistant_axis.judge_score_combine import DEFAULT_GPT_HAIKU_Q9_WEIGHT
+from assistant_axis.judge_score_combine import (
+    DEFAULT_GPT_HAIKU_Q9_WEIGHT,
+    declare_constants_dependency,
+)
 from assistant_axis.provenance import (
     InputSpec,
     current_data_subtree_input,
@@ -419,11 +422,18 @@ def parse_args() -> argparse.Namespace:
              "auto-skip per axis).  'input_json' reuses raw['axes'] from the "
              "input JSON (the legacy 3-axis B-curve set).")
     p.add_argument(
-        "--scores_filename", type=str, default="scores_responses.json",
+        "--scores_filename", type=str,
+        default="scores_responses__rubric_v1.json",
         help="Per-cell judge score cache filename (default: "
-             "scores_responses.json).  Pass scores_responses__rubric_v1.json "
-             "to read the v1 rubric snapshot for a v1-only ensemble view "
-             "(includes Sonnet and Haiku-full combos that don't exist in v2).")
+             "scores_responses__rubric_v1.json -- the v1 archive).  "
+             "This ensemble script is intrinsically v1-bound because "
+             "the Sonnet and Haiku-full combos don't have v2 caches "
+             "(Sonnet was never rejudged at v2 per the trait/role "
+             "disambiguation plan's guardrail; Haiku-full v2 only "
+             "exists for a subset of axes), AND the v2 b10 GPT cache "
+             "is the deferred-broken Bug-B 1/3-subsample.  Pass "
+             "scores_responses.json explicitly for the v2 view at "
+             "the (limited) combos where both judges have a v2 cache.")
     return p.parse_args()
 
 
@@ -445,6 +455,11 @@ def main() -> int:
             Path(args.data_dir), "roles/vectors",
             dep_key="roles_vectors"),
     ]
+    # The default --gpt_weight value is read from
+    # DEFAULT_GPT_HAIKU_Q9_WEIGHT at import time; record the constants
+    # file as a cache-invalidation dependency so a retune flags this
+    # script's outputs as stale via audit_caches.py.
+    declare_constants_dependency(inputs)
     # Tolerate legacy bare-JSON during the rollout window; once
     # batch_size_rho_curve.py has been re-run post-Phase-D.3 the input
     # carries an envelope and ``warn`` will validate it.

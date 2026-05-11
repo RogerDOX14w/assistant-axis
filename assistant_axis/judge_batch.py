@@ -46,10 +46,33 @@ batch-size-agnostic).  After bumping you'll need to:
 The constant intentionally lives here (not in
 ``axis_judge_correlation``) so steering-side modules can import it
 without pulling in the whole results-analysis pipeline.
+
+Value history
+-------------
+* B=10 -- original default, used through the v1/v2 rubric eras.
+* B=7  -- May 2026, "Change D" in the trait/role disambiguation plan.
+  The 2026-05-09 corrected cost model (re-derived from a 240-batch
+  tiktoken dry-run) showed B=7 buys +0.004 ρ over B=10 for ~$3/axis
+  marginal -- best value step on the cost-vs-quality curve.  Phase 5c
+  regenerated the v2/v3 GPT cohorts at B=7 (into
+  ``gpt_responses_*_b7/`` directories); Phase 5d/5e wired the Haiku
+  surgical-rejudge tier into ``haiku_responses_*_b7_t3/`` with a
+  per-entity B=7 -> B=10 fallback for the un-rejudged entries.
+
+  The constant wasn't bumped from 10 -> 7 at the time -- Change D
+  was implemented via explicit ``--response_target_batch_size 7``
+  CLI overrides on the individual sweep commands -- which left
+  ``RESPONSE_BATCH_SIZE`` at 10 and ``steering_judges.DEFAULT_TARGET_BATCH_SIZE``
+  (which pins to this constant) silently out of step with the new
+  axis-judge default.  Bumped to 7 on 2026-05-11 to make the
+  "shared canonical, apples-to-apples" pinning true again.
+  Existing ``_b10`` caches stay on disk and remain readable via
+  the explicit-``batch_size`` path of ``response_subdir(..., batch_size=10)``;
+  they're just no longer the default the various callers reach for.
 """
 from __future__ import annotations
 
-RESPONSE_BATCH_SIZE: int = 10
+RESPONSE_BATCH_SIZE: int = 7
 """Canonical target batch size for response-mode judging.
 
 Used by:
@@ -61,6 +84,13 @@ Used by:
   ``results_analysis.rho_by_layer`` /
   ``results_analysis.optimal_axis_for_judge`` -- the per-axis
   ``gpt_responses_{traits,roles}_b{N}/`` directory they read from.
+
+Was ``10`` until 2026-05-11; bumped to ``7`` to reflect "Change D"
+of the May 2026 trait/role disambiguation plan (see module docstring
+"Value history" section for the rationale).  Bumping the constant
+re-points ``steering_judges.DEFAULT_TARGET_BATCH_SIZE`` automatically
+so steering-effect-judge scores stay apples-to-apples with the
+B=7 axis-judge response cohorts the plan's Phase 5c regenerated.
 """
 
 
@@ -87,7 +117,7 @@ def response_subdir(
     Returns
     -------
     str
-        Subdirectory name like ``"gpt_responses_traits_b10"``.
+        Subdirectory name like ``"gpt_responses_traits_b7"``.
 
     Notes
     -----

@@ -54,23 +54,44 @@ WhiteningMethod = str  # 'raw' | 'soft_K' | 'lw' | 'oas' | 'soft_shear'
 # Project-wide defaults (Apr 2026)
 # ----------------------------------------------------------------------
 # These are the "if you have to pick one number" defaults for analyses
-# going forward.  They are based on the LKM grid sweep at three (slot, layer)
-# configurations -- (3, 25), (0, 26), (0, 49) -- on the 33 desc+inst + 12
-# response = 45-axis set, with the inst-tiebreak desc/inst weighting.
-# See ``/tmp/lkm_grid_3variants_results.json`` for the underlying numbers
-# and ``AGENT_NOTES.md`` ("Combining desc/inst judge scores" + this section
-# below) for the policy.
+# going forward.  Selection history:
 #
-# The optimum varies by (slot, layer): slot 3 prefers L=2 soft-shear with
-# K=0 whitening; slot 0 prefers a small shear (L=0..1) with K=2 whitening.
-# Picking a single primary default that's defensible at all three:
-DEFAULT_SOFT_SHEAR_L: int = 2
+# May 2026 (initial): based on the LKM grid sweep at three (slot, layer)
+# configurations -- (3, 25), (0, 26), (0, 49) -- on the 33 desc+inst +
+# 12 response = 45-axis set, with the inst-tiebreak desc/inst weighting.
+# At that time L=2 was the single most-defensible primary default; the
+# optimum varied by (slot, layer): slot 3 preferred L=2 with K=0; slot 0
+# preferred a small shear (L=0..1) with K=2.  See
+# ``/tmp/lkm_grid_3variants_results.json`` for the underlying numbers.
+#
+# May 11 2026 (bumped to L=3): re-derived from the new 35-axis di-cohort
+# shear_l_sweep at slots 3 / 6 / 7 with the canonical-mean-blend overlay
+# (`results_analysis.shear_l_sweep` + `judge_score_combine.cohort_mean_curves`,
+# 0.80·rs + 0.20·di per axis, 5x cross-axis weight on primary axes).
+# Per-axis paired t-tests over the 35 axes show:
+#
+#   * slot 3: L=1..L=5 statistically all-tied (broad plateau).
+#   * slot 6: L=1 ≈ L=3 (paired-t p=0.29), L=2 dip is real (p=0.019),
+#             L=3 -> L=4 is a highly-significant cliff (p=0.0006).
+#   * slot 7: L=1 ≈ L=2 ≈ L=3 (all paired-t p > 0.6); L=3 -> L=4 cliff
+#             again (p=0.0004).
+#
+# L=3 is the cohort-defensible single default across all three slots:
+# at-or-above optimum everywhere, never significantly worse than L=1 in
+# any cohort, and the goal/no-goal subspace cleanliness tie-breaker
+# (more aligned pairs orthogonalised = cleaner subspace separation)
+# prefers higher L when ρ is tied.  All three slots agree the
+# universally-harmful transition is L=3 -> L=4, so L=3 is the highest
+# "safe" value with no significant harm vs L=1.
+DEFAULT_SOFT_SHEAR_L: int = 3
 """Default truncation level for pooled soft-shear (combined r+t goal/no-goal).
 
 Used as the soft-shear default when scripts pick a single L without
-sweeping.  Wins at slot 3, layer 25; reasonable at slot 0 layers 26/49
-(slightly behind L=0..1 there but within ~0.005 ρ).  Subject to revision
-as more (slot, layer) data arrives.
+sweeping.  At-or-above optimum at slots 3, 6, 7 in the May 11 2026
+shear_l_sweep paired-t analysis; the L=3 -> L=4 transition is the
+universally-harmful cliff across all tested slots.  Was ``2`` until
+May 11 2026; see selection-history comment block above for the
+derivation.
 """
 
 DEFAULT_SOFT_K: int = 2
@@ -85,7 +106,7 @@ Was 3 historically (peak from the older K-sweep parabola fit done
 without shear in the toolbox).
 """
 
-DEFAULT_WHITENING_SPEC: str = "soft_shear=2"
+DEFAULT_WHITENING_SPEC: str = "soft_shear=3"
 """Recommended primary whitening regime for new scripts.
 
 Pass this as the ``--whitening`` argument default in scripts that support
@@ -93,6 +114,10 @@ the soft-shear regime via :func:`fit_shear` and the goal/no-goal
 subspaces from :func:`canonical_angles.data.build_goal_nogoal_subspaces`.
 Scripts that only support :func:`fit_whitening` should default to
 ``soft_K=2``; see :data:`DEFAULT_SOFT_K`.
+
+Was ``"soft_shear=2"`` until May 11 2026; bumped to track
+:data:`DEFAULT_SOFT_SHEAR_L`'s same-day revision.  See the selection-
+history comment block above the constants for derivation.
 """
 
 
