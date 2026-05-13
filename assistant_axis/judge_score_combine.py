@@ -10,8 +10,8 @@ import.
 
     from assistant_axis.judge_score_combine import (
         DEFAULT_DI_WEIGHTS,             # 0.499 desc / 0.501 inst   (within one judge)
-        DEFAULT_GPT_SONNET_DI_WEIGHT,   # 0.50 GPT / 0.50 Sonnet    (within desc+inst ensemble)
-        DEFAULT_GPT_HAIKU_Q9_WEIGHT,    # 0.41 GPT / 0.59 Haiku     (within response ensemble; v2 retune 2026-05-11)
+        DEFAULT_GPT_SONNET_DI_WEIGHT,   # 0.625 GPT / 0.375 Sonnet  (within desc+inst ensemble; v2 retune 2026-05-12)
+        DEFAULT_GPT_HAIKU_Q9_WEIGHT,    # 0.625 GPT / 0.375 Haiku   (within response ensemble; canonical-whitening retune 2026-05-12)
         DEFAULT_RESPONSE_DI_WEIGHT,     # 0.80 response / 0.20 DI   (final blend)
         combine_desc_inst_two_judges,
     )
@@ -38,28 +38,48 @@ import.
 2. **Within desc+inst ensemble (GPT vs Sonnet)** --
    ``DEFAULT_GPT_SONNET_DI_WEIGHT``: weight on GPT-4.1-mini's
    per-mode scores when averaging GPT and Sonnet inside the
-   desc+inst ensemble (the rest goes on Sonnet).  Default ``0.50``.
+   desc+inst ensemble (the rest goes on Sonnet).  Default ``0.625``.
 
-   Picked from the GPT × Sonnet weight sweep on desc+inst at slot
-   3 / layer 25 across 33 axes (see
-   ``results_analysis/gpt_sonnet_weight_sweep.py``; full results
-   in ``results_analysis/README.md``).  The 33-axis parabolic fit
-   on the interior ``[0.1, 0.9]`` peaks at ``w = 0.530`` with mean
-   ρ = 0.5949 -- *0.0004 below* the discrete 50/50 value of
-   0.5953.  The curve is so flat that the entire decision-relevant
-   range (``w ∈ [0.1, 0.9]``) sits within ±0.0004 of peak, so
-   ``0.50`` is the empirical optimum and the round number that
-   reproduces the historical 4-way mean ``(g_d + g_i + s_d + s_i) / 4``
-   when paired with ``DI_WEIGHTS_EQUAL``.
+   Selection history:
+
+   * **0.50** (Apr 2026, pre-canonical-whitening): tuned on the
+     33-axis ``--rubric v1`` raw-projection sweep at slot 3 /
+     layer 25.  Parabolic interior peak at ``w = 0.530``, mean
+     ρ = 0.5949 -- 0.0004 below the discrete 50/50 value of
+     0.5953.  The curve was flat enough (±0.0004 across the entire
+     ``w ∈ [0.1, 0.9]`` interior) that 0.50 was the natural pick,
+     and it had the nice property of reproducing the historical
+     4-way mean ``(g_d + g_i + s_d + s_i) / 4`` when paired with
+     ``DI_WEIGHTS_EQUAL``.
+
+   * **0.625** (2026-05-12, canonical-whitening retune): re-tuned on
+     the 35-axis ``soft_shear=3`` view at slot 6 / layer 25 (the
+     current canonical operating point -- see
+     ``results_analysis/gpt_sonnet_weight_sweep.py --whitening
+     soft_shear=3``).  Discrete grid peak at ``w = 0.625``,
+     ρ = 0.70198; parabolic interior fit peaks slightly higher at
+     ``w = 0.700`` (R²=0.987) but the upper plateau ``w∈[0.575,
+     0.700]`` is flat within 0.0003 ρ -- entirely inside the
+     ~±0.04 95% CI half-width (n=35, per-axis stdev 0.124), so the
+     discrete peak and the parabolic fit are statistically tied
+     across the upper half of the plateau.  Picked the literal
+     discrete peak ``0.625`` over the parabolic ``0.700``: same ρ
+     to four decimals, and the rightward shift under whitening
+     (vs pre-whitening 0.50) is fully captured without
+     overcommitting past the plateau edge.  The whitening-tilts-
+     toward-GPT story is consistent across both this sweep and the
+     GPT/Haiku response sweep: soft-shear cleans away
+     goal/no-goal-overlap noise that previously masked GPT's
+     per-axis advantage.
 
    Re-tune only if a future sweep with substantially different
-   judges or axes shows the parabolic peak shifting outside
-   ``[0.45, 0.55]``.
+   judges, axes, or whitening regime shows the discrete peak
+   shifting outside ``[0.55, 0.75]``.
 
 3. **Within-response judge ensemble** --
    ``DEFAULT_GPT_HAIKU_Q9_WEIGHT``: weight on GPT-4.1-mini in the
-   response-mode ensemble (the rest goes on Haiku).  Default ``0.41``
-   (so the blend is ``0.41 * GPT + 0.59 * Haiku``).
+   response-mode ensemble (the rest goes on Haiku).  Default ``0.625``
+   (so the blend is ``0.625 * GPT + 0.375 * Haiku``).
 
    Selection history:
 
@@ -71,22 +91,45 @@ import.
      0.60.  Mean ρ flat over ``w ∈ [0.5, 0.75]``, so the round number
      cost nothing measurable.
 
-   * **0.41** (2026-05-11, post-Phase-5d): re-tuned on the v2
-     ``--rubric v2`` view (GPT at B=7 Phase-5c full-volume vs Haiku
-     at B=7-t3 surgical with B=10-q9 fallback).  Parabolic peak at
-     ``w ≈ 0.410``; the ~0.2 leftward shift reflects Haiku's
-     improved data quality after the Phase-5d surgical rejudge
-     escalated the ~34 RP-depleted entities per axis from q9 to
-     tiered M=3.  Pure-Haiku ρ went up by +0.041 between regimes
-     while pure-GPT stayed flat, so the blend wants more Haiku.
-     Confirmed in
-     ``gpt_haiku_q9_response_weight_sweep_slot6__rubric_v2.png``.
+   * **0.41** (2026-05-11, post-Phase-5d, raw-projection): re-tuned on
+     the v2 ``--rubric v2`` view (GPT at B=7 Phase-5c full-volume vs
+     Haiku at B=7-t3 surgical with B=10-q9 fallback) at *raw
+     projection*.  Parabolic peak at ``w ≈ 0.410``; the ~0.2 leftward
+     shift reflected Haiku's improved data quality after the Phase-5d
+     surgical rejudge escalated the ~34 RP-depleted entities per axis
+     from q9 to tiered M=3.  Confirmed in
+     ``gpt_haiku_q9_response_weight_sweep_slot6__rubric_v2.png`` (raw
+     view).  Superseded by the next entry once whitening became the
+     project canonical.
+
+   * **0.625** (2026-05-12, canonical-whitening retune): re-tuned on
+     the v2 ``--rubric v2`` view at ``--whitening soft_shear=3``,
+     i.e. the canonical operating point all downstream analyses now
+     use.  Discrete grid peak at ``w = 0.600`` (ρ = 0.7524, w_step =
+     0.025); the parabolic interior fit peaks at ``w = 0.624``.
+     Picked ``0.625`` over the literal discrete 0.600 because (a)
+     the plateau ``w ∈ [0.50, 0.70]`` is flat within 0.0006 ρ
+     (vs ~0.055 95% CI half-width, n=12 axes per-axis stdev 0.097)
+     so 0.600 / 0.624 / 0.625 are statistically tied, and (b)
+     setting both response and desc+inst constants to the same
+     value 0.625 is principled: under canonical whitening every
+     judge-pair weight sweep we've run lands its peak within a few
+     percent of 0.625, reflecting that soft-shear cleans away
+     goal/no-goal-overlap noise that previously dragged the
+     optimum toward whichever judge handled that noise better.
+     The Phase-5d Haiku quality improvement is still real -- pure
+     Haiku ρ is +0.041 higher than pre-Phase-5d -- but whitening
+     separates signal from noise even more strongly, so the optimum
+     lands back near the rounded pre-Phase-5d 0.60 value.  Smoother
+     plot (no GPT-vs-Sonnet-style staircase) because response-mode
+     scores are batch-averaged into a continuous ``mean_score`` per
+     entity.
 
    The constant's name retains ``_Q9`` for back-compat (it was
    historically tuned against q9) but the v2 operating point is the
    mixed ``_b7_t3 ⇢ _b10_q9`` cohort.  Re-tune only if a future sweep
    with substantially different cohorts shows the peak shifting
-   outside ``[0.30, 0.50]``.
+   outside ``[0.50, 0.75]``.
 
 4. **Final response × desc+inst blend** -- ``DEFAULT_RESPONSE_DI_WEIGHT``:
    weight on the response ensemble in the final per-entity score
@@ -147,24 +190,41 @@ DEFAULT_DI_WEIGHTS: Tuple[float, float] = DI_WEIGHTS_INST_TIE
 
 # Cross-judge weight on GPT-4.1-mini inside the desc+inst ensemble
 # (the rest goes on Sonnet, applied per-mode before the desc/inst
-# tiebreak).  See module docstring for derivation.  At 0.50 this
-# produces the historical 4-way mean ``(g_d + g_i + s_d + s_i) / 4``
-# when paired with ``DI_WEIGHTS_EQUAL`` -- the parameterised function
-# is a strict generalisation of the old hardcoded ``/2`` averaging.
-DEFAULT_GPT_SONNET_DI_WEIGHT: float = 0.50
+# tiebreak).  Was 0.50 until 2026-05-12; retuned to 0.625 the same
+# day on the 35-axis ``soft_shear=3`` view at slot 6 / layer 25
+# (the canonical whitened operating point).  ``0.625`` is the
+# discrete grid peak at w_step=0.025; the parabolic interior fit
+# peaks at w=0.700 with R²=0.987 but the plateau ``w∈[0.575, 0.700]``
+# is flat within 0.0003 ρ (vs ~0.04 95%-CI half-width), so the
+# discrete peak and the parabolic fit are statistically tied across
+# the upper half of the plateau.  Picked ``0.625`` because it's the
+# literal discrete peak, leaning toward GPT (consistent with what
+# whitening does on every weight sweep) without overcommitting past
+# the plateau edge.  See module docstring "Selection history" for
+# derivation, and ``results_analysis/gpt_sonnet_weight_sweep.py``
+# (``--whitening soft_shear=3``) for reproduction.
+DEFAULT_GPT_SONNET_DI_WEIGHT: float = 0.625
 
 # Within-response ensemble weight on GPT-4.1-mini (the rest goes
-# on Haiku).  Was 0.60 until 2026-05-11; retuned to 0.41 on the
-# v2 GPT-b7-full vs Haiku-b7_t3-with-b10_q9-fallback sweep after
-# the Phase-5d surgical rejudge improved Haiku's data quality on
-# RP-depleted entities.  0.41 is the actual parabolic peak (w≈0.410);
-# 0.40 was a too-aggressive rounding -- the mean ρ curve in the
-# vicinity of the peak is shallow enough that 0.40 vs 0.41 is
-# below judge-noise threshold but we may as well track the fit.
-# See module docstring "Selection history" for derivation.  Name
-# retains the ``_Q9`` suffix for back-compat even though the
-# operating point is now the mixed cohort.
-DEFAULT_GPT_HAIKU_Q9_WEIGHT: float = 0.41
+# on Haiku).  Selection history (newest first):
+#
+#   * 0.625 (2026-05-12, canonical-whitening): on the v2 sweep at
+#     --whitening soft_shear=3 (current canonical operating point).
+#     Discrete grid peak w=0.600, parabolic-fit peak w=0.624; plateau
+#     w∈[0.50, 0.70] flat within 0.0006 ρ vs ~0.055 95% CI half-width.
+#     Picked 0.625 for symmetry with DEFAULT_GPT_SONNET_DI_WEIGHT
+#     (both end up at 0.625 under canonical whitening -- a
+#     soft-shear-cleans-the-pairwise-noise effect, not coincidence).
+#   * 0.41 (2026-05-11, pre-whitening v2 retune): on the v2 sweep
+#     at raw projection; parabolic peak w≈0.410.  Superseded once
+#     soft_shear=3 became the canonical operating point.
+#   * 0.60 (Apr 2026, pre-Phase-5d): v1 sweep, parabolic peak w≈0.609.
+#
+# Name retains ``_Q9`` suffix for back-compat (was historically tuned
+# against q9-subsample Haiku); v2 operating point is the mixed
+# ``_b7_t3 ⇢ _b10_q9`` cohort.  See module docstring "Selection
+# history" for the full derivation of each entry above.
+DEFAULT_GPT_HAIKU_Q9_WEIGHT: float = 0.625
 
 
 # Final per-entity score weight on the response ensemble (the rest

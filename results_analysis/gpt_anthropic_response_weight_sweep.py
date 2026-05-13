@@ -44,6 +44,7 @@ import torch
 from scipy.stats import spearmanr
 
 from assistant_axis import entity_id, json_metadata, png_metadata
+from assistant_axis.judge_score_combine import declare_constants_dependency
 from assistant_axis.provenance import (
     InputSpec,
     current_data_subtree_input,
@@ -51,6 +52,14 @@ from assistant_axis.provenance import (
     load_and_register,
 )
 from results_analysis.axis_judge_correlation import _load_vector_file
+from results_analysis.canonical_angles.data import build_goal_nogoal_subspaces
+from results_analysis.canonical_angles.whitening import (
+    DEFAULT_WHITENING_SPEC,
+    WhiteningBasis,
+    fit_shear,
+    fit_whitening,
+    parse_whitening_spec,
+)
 
 _SCRIPT_PATH = Path(__file__).resolve()
 
@@ -288,12 +297,32 @@ def main() -> int:
                         "gpt_<combo>_response_weight_sweep_slot{N}__rubric_v1"
                         ".{json,png}).  Useful for v1<->v2 side-by-side "
                         "snapshots.  Default: empty (canonical names).")
+    p.add_argument("--whitening", default=DEFAULT_WHITENING_SPEC,
+                   help=f"Whitening regime applied to both entity vectors "
+                        f"and the axis direction before computing ρ.  "
+                        f"Forms: 'raw', 'soft_K=N', 'lw', 'oas', "
+                        f"'soft_shear=L'.  Default: "
+                        f"{DEFAULT_WHITENING_SPEC!r} (project canonical -- "
+                        f"see assistant_axis/canonical_angles/whitening.py "
+                        f"selection-history block).")
+    p.add_argument("--ca_kind", default="combined",
+                   choices=("combined", "traits", "roles"),
+                   help="Goal/no-goal subspaces for soft-shear fitting "
+                        "(passed to ``build_goal_nogoal_subspaces``). "
+                        "Ignored for non-shear regimes.  Default "
+                        "``combined`` matches the L-sweep / "
+                        "shear_l_vs_k_comparison defaults.")
+    p.add_argument("--w_step", type=float, default=0.025,
+                   help="Step size on the w grid (default: 0.025 -> "
+                        "41 points on [0, 1]).  Pass --w_step 0.05 to "
+                        "reproduce the historical coarser sweep.")
     args = p.parse_args()
 
     experiment_dir = Path(args.experiment_dir).resolve()
     data_dir = Path(args.data_dir).resolve()
     slot, layer = int(args.slot), int(args.layer)
     combo_label, anth_template = COMBO_DIRS[args.anthropic_combo]
+    wh_method, wh_n = parse_whitening_spec(args.whitening)
 
     # v2 mode validation + filename auto-suffixing.
     is_v2 = (args.rubric == "v2")
@@ -312,14 +341,36 @@ def main() -> int:
         if not args.out_stem_suffix:
             args.out_stem_suffix = "__rubric_v2"
 
+    # Whitening tag: 'raw' is the historical default and gets no suffix
+    # so the v1-archive and the new raw view share a slot.  Any other
+    # regime appends a short filename-safe suffix.
+    if wh_method == "raw":
+        wh_suffix = ""
+    elif wh_n is not None:
+        wh_suffix = f"_{wh_method.replace('_', '')}{wh_n}"
+    else:
+        wh_suffix = f"_{wh_method.replace('_', '')}"
+
     out_stem = (
         f"gpt_{args.anthropic_combo}_response_weight_sweep_slot{slot}"
-        f"{args.out_stem_suffix}"
+        f"{wh_suffix}{args.out_stem_suffix}"
     )
     if args.plot is None:
         args.plot = f"{out_stem}.png"
     if args.rhos_json is None:
         args.rhos_json = f"{out_stem}.json"
+
+    # w grid validation -- mirror gpt_sonnet_weight_sweep so the two
+    # scripts move in lockstep.
+    if args.w_step <= 0 or args.w_step > 0.5:
+        raise SystemExit(
+            f"--w_step must be in (0, 0.5], got {args.w_step}")
+    n_w = int(round(1.0 / args.w_step)) + 1
+    if abs(n_w - 1 - 1.0 / args.w_step) > 1e-9:
+        raise SystemExit(
+            f"--w_step={args.w_step} doesn't divide 1.0 evenly; "
+            f"pick a divisor of 1.0 (e.g. 0.025, 0.05, 0.02, 0.01).")
+    i_half = int(round(0.5 / args.w_step))
 
     # Cache standalone entity vectors at (slot, layer), default-centered.
     default_v = _v(data_dir / "traits" / "vectors" / "default.pt", slot, layer)
@@ -334,8 +385,43 @@ def main() -> int:
             except Exception:  # pragma: no cover -- skip unreadable files
                 continue
 
+    # Whitening basis -- fit once, apply once to the entity pool, then
+    # whiten each per-axis direction in-place inside the loop.  Linear,
+    # so applying pre-projection is equivalent to applying inside the
+    # dot product.
+    basis: WhiteningBasis | None = None
+    if wh_method == "soft_shear":
+        A_g, A_n = build_goal_nogoal_subspaces(
+            data_dir, slot=slot, layer=layer, kind=args.ca_kind)
+        n_pairs_max = min(A_g.shape[1], A_n.shape[1])
+        if wh_n is not None and wh_n > n_pairs_max:
+            raise SystemExit(
+                f"--whitening soft_shear={wh_n} exceeds the canonical-angle "
+                f"pair budget for kind={args.ca_kind!r} "
+                f"(min(n_g,n_n)={n_pairs_max})."
+            )
+        basis = fit_shear(A_g, A_n, L=int(wh_n))
+        print(f"Whitening: soft_shear L={wh_n} on '{args.ca_kind}' "
+              f"subspaces (n_pairs_max={n_pairs_max})")
+    elif wh_method == "soft_K":
+        pool = np.stack(list(entity_vecs.values()))
+        basis = fit_whitening("soft_K", pool, K=int(wh_n))
+        print(f"Whitening: soft_K K={wh_n} on default-centered entity pool "
+              f"(n={pool.shape[0]})")
+    elif wh_method in ("lw", "oas"):
+        pool = np.stack(list(entity_vecs.values()))
+        basis = fit_whitening(wh_method, pool)
+        print(f"Whitening: {wh_method} cov^(-1/2) on default-centered "
+              f"entity pool (n={pool.shape[0]})")
+    else:  # 'raw'
+        print("Whitening: raw (identity)")
+
+    if basis is not None and basis.method != "raw":
+        for n, v in entity_vecs.items():
+            entity_vecs[n] = basis.apply(v[None, :])[0]
+
     print(f"GPT-4.1-mini B=10 vs {combo_label} response-mode weight sweep, "
-          f"slot {slot} layer {layer}")
+          f"slot {slot} layer {layer}, whitening={args.whitening}")
     print(f"  axes: {[a[0] for a in DEFAULT_AXES]}")
     print(f"  anthropic dir template: {anth_template}")
 
@@ -352,6 +438,9 @@ def main() -> int:
                 "anthropic_combo": args.anthropic_combo,
                 "scores_filename": args.scores_filename,
                 "slot": str(slot), "layer": str(layer),
+                "whitening": args.whitening,
+                "ca_kind": args.ca_kind if wh_method == "soft_shear" else "",
+                "rubric": args.rubric,
             },
         ),
         current_data_subtree_input(
@@ -363,6 +452,7 @@ def main() -> int:
             dep_key="roles_vectors",
         ),
     ]
+    declare_constants_dependency(inputs)
 
     per_axis: dict[tuple[str, str], dict] = {}
     cohort_mix: dict[str, dict[str, str]] = {"gpt": {}, "anth": {}}
@@ -403,6 +493,10 @@ def main() -> int:
         gpt_arr = np.array([gpt[n] for n in common])
         anth_arr = np.array([anth[n] for n in common])
         a = _axis_unit(data_dir, pos, neg, slot, layer).numpy()
+        # Whiten the per-axis direction in lockstep with the entity pool
+        # (which was whitened once before this loop).
+        if basis is not None and basis.method != "raw":
+            a = basis.apply(a[None, :])[0]
         proj = np.array([float(np.dot(entity_vecs[n], a)) for n in common])
         per_axis[(pos, neg)] = {
             "axis_name": axis_name,
@@ -425,7 +519,7 @@ def main() -> int:
     sorted_keys = sorted(per_axis.keys(), key=lambda k: slopes[k])
     per_axis = {k: per_axis[k] for k in sorted_keys}
 
-    ws = np.linspace(0.0, 1.0, 21)
+    ws = np.linspace(0.0, 1.0, n_w)
     all_rhos = np.array([
         [_rho_at_weight(d, w) for d in per_axis.values()]
         for w in ws
@@ -450,9 +544,10 @@ def main() -> int:
         w_peak = float(ws[i_best])
         rho_peak = float(mean_rhos[i_best])
 
-    print(f"\nSweep summary ({len(per_axis)} axes):")
+    print(f"\nSweep summary ({len(per_axis)} axes, "
+          f"whitening={args.whitening}, w_step={args.w_step}):")
     print(f"  pure {combo_label} (w=0):    mean ρ = {mean_rhos[0]:+.4f}")
-    print(f"  50/50         (w=0.5):  mean ρ = {mean_rhos[10]:+.4f}")
+    print(f"  50/50         (w=0.5):  mean ρ = {mean_rhos[i_half]:+.4f}")
     print(f"  pure GPT      (w=1):    mean ρ = {mean_rhos[-1]:+.4f}")
     print(f"  parabolic peak (interior fit, R²={r2:.3f}): "
           f"w={w_peak:.3f}, ρ ≈ {rho_peak:+.4f}")
@@ -499,13 +594,15 @@ def main() -> int:
     ax.set_xlabel(f"Weight on GPT-4.1-mini B=10\n"
                   f"(remaining on {combo_label})", fontsize=10)
     ax.set_ylabel(f"Per-axis Spearman ρ "
-                  f"(slot {slot}, layer {layer}, raw)", fontsize=10)
+                  f"(slot {slot}, layer {layer}, "
+                  f"whitening={args.whitening})", fontsize=10)
     title = (f"GPT-4.1-mini B=10 / {combo_label} response-mode score-blend "
              f"sweep — mean ρ across {n_axes} axes")
     initial = combo_label[0]
     ax.set_title(
         title + "\n"
-        f"{initial}={mean_rhos[0]:.3f}  50/50={mean_rhos[10]:.3f}  "
+        f"{initial}={mean_rhos[0]:.3f}  "
+        f"50/50={mean_rhos[i_half]:.3f}  "
         f"G={mean_rhos[-1]:.3f}",
         fontsize=13, fontweight="bold",
     )
@@ -607,6 +704,10 @@ def main() -> int:
         "anthropic_combo": args.anthropic_combo,
         "anthropic_dir_template": anth_template,
         "slot": slot, "layer": layer,
+        "whitening": args.whitening,
+        "ca_kind": args.ca_kind if wh_method == "soft_shear" else None,
+        "rubric": args.rubric,
+        "w_step": float(args.w_step),
         "ws": [float(w) for w in ws],
         "mean_rho_by_w": [float(v) for v in mean_rhos],
         "parabola_fit": {

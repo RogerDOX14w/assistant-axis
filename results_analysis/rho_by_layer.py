@@ -7,9 +7,18 @@ Rows are token slots (defaults include body mean, historical ``\\n`` default,
 two judge sources used elsewhere in the project:
 
 - **desc+inst** -- desc+instr cohort (``pair_list_di.json``), 4-way mean of
-  ``GPT_d, GPT_i, Son_d, Son_i``;
-- **responses** -- responses cohort (``pair_list_responses.json``), GPT-only
-  mean over response-mode evals.
+  ``GPT_d, GPT_i, Son_d, Son_i`` blended at the project-canonical
+  ``DEFAULT_GPT_SONNET_DI_WEIGHT`` and ``DEFAULT_DI_WEIGHTS`` (see
+  :mod:`assistant_axis.judge_score_combine`);
+- **responses** -- responses cohort (``pair_list_responses.json``),
+  GPT+Haiku response-mode ensemble blended at the canonical
+  ``DEFAULT_GPT_HAIKU_Q9_WEIGHT`` (was GPT-only until 2026-05-12,
+  before Haiku response data existed at the project's canonical
+  batch size; switched to the v2 ``load_response_scores`` loader
+  with per-entity B=7-t3 / B=10-q9 fallback for Haiku and B=7 full
+  volume for GPT, mirroring the operating point of
+  :mod:`response_di_weight_sweep` and
+  :mod:`gpt_anthropic_response_weight_sweep --rubric v2`).
 
 For each (slot, layer, K) we compute mean per-axis Spearman ρ between
 the soft-K-whitened activation projection at ``(slot, layer)`` and the
@@ -42,9 +51,12 @@ The standard per-axis directory tree produced by
       <pos>_vs_<neg>/
         gpt/scores_{descriptions,instructions}.json
         sonnet/scores_{descriptions,instructions}.json
-        gpt_responses_traits_b{N}/scores_responses.json
-        gpt_responses_roles_b{N}/scores_responses.json
+        gpt_responses_{roles,traits}_b{N}/scores_responses.json
+        haiku_responses_{roles,traits}_b7_t3/scores_responses.json
+        haiku_responses_{roles,traits}_b10_q9/scores_responses.json
         # ``{N}`` = assistant_axis.judge_batch.RESPONSE_BATCH_SIZE
+        # Haiku uses per-entity B fallback (b7_t3 surgical → b10_q9
+        # legacy) via assistant_axis.judge_loaders.load_response_scores.
 
 Plus the standard activation-vectors directory passed via ``--data_dir``.
 
@@ -92,12 +104,16 @@ from assistant_axis import (
     json_metadata,
     pair_type_of,
     png_metadata,
-    response_subdir,
 )
-from assistant_axis.judge_loaders import migrate_v1_static_scores
+from assistant_axis.judge_loaders import (
+    load_response_scores,
+    migrate_v1_static_scores,
+)
 from assistant_axis.judge_score_combine import (
+    DEFAULT_GPT_HAIKU_Q9_WEIGHT,
     add_di_weights_arg,
     combine_desc_inst_two_judges,
+    declare_constants_dependency,
     parse_di_weights_arg,
 )
 from assistant_axis.provenance import (
@@ -108,6 +124,11 @@ from assistant_axis.provenance import (
 from results_analysis.axis_judge_correlation import _load_vector_file
 from results_analysis.canonical_angles.data import (
     build_augmented_whitening_pool,
+    build_goal_nogoal_subspaces,
+)
+from results_analysis.canonical_angles.whitening import (
+    WhiteningBasis,
+    fit_shear,
 )
 
 
@@ -150,7 +171,15 @@ SLOT_LABELS = {
     6: "Slot 6 (</think>)",
     7: "Slot 7 (\\n\\n post)",
 }
-DEFAULT_KS = [0, 1, 2, 3, 4]
+# Defaults bumped to include K=5 in 2026-05-12 -- K=5 turns out to be
+# the discrete grid peak on the 35-axis desc+inst cohort at slot 3
+# layer 25, and the additional curve costs almost nothing (the SVD
+# is shared across all K values per (slot, layer, leave-out-set)).
+DEFAULT_KS = [0, 1, 2, 3, 4, 5]
+# Soft-shear default L grid for --regime soft_shear.  Same shape as
+# K -- raw + 6 non-raw curves -- with L=3 = current project default
+# (see assistant_axis.canonical_angles.whitening.DEFAULT_SOFT_SHEAR_L).
+DEFAULT_LS = [0, 1, 2, 3, 4, 5, 6]
 
 
 def _slot_index(slot: int) -> int:
@@ -219,66 +248,85 @@ def _build_pool_cache(
     return cache
 
 
-def _all_K_bases(pool: np.ndarray, ks: list[int]) -> dict[int, dict]:
+def _all_K_bases(pool: np.ndarray,
+                 ks: list[int]) -> dict[int, WhiteningBasis]:
     """Compute one SVD on ``pool`` and derive a soft-K basis per K.
 
-    Returns ``{K: {"Vt": (K, D) or None, "scales": (K,) or None}}``.
-    K=0 yields ``None`` (raw).  Output ``Vt`` rows are the right
-    singular vectors of the *centered* pool.  ``scales[k]`` is
-    ``S[K_max] / S[k]`` -- but we recompute per K below to match
-    ``fit_whitening``'s convention exactly.
+    Returns ``{K: WhiteningBasis}``; K=0 (or K >= rank) yields a
+    ``method="raw"`` basis (identity).  Sharing one SVD across all K
+    values is the performance optimisation that lets this script
+    sweep many K values cheaply -- the dominant cost is the SVD per
+    (slot, layer, leave-out-set), so adding another K above is
+    nearly free.
     """
-    out: dict[int, dict] = {}
+    out: dict[int, WhiteningBasis] = {}
+    if not any(k > 0 for k in ks):
+        for K in ks:
+            out[K] = WhiteningBasis(method="raw", K=K)
+        return out
     centered = pool - pool.mean(axis=0, keepdims=True)
     _U, S, Vt = np.linalg.svd(centered, full_matrices=False)
     for K in ks:
-        if K == 0:
-            out[K] = {"Vt": None, "scales": None}
-            continue
-        if K >= len(S):
-            out[K] = {"Vt": None, "scales": None}  # treat as raw
+        if K <= 0 or K >= len(S):
+            out[K] = WhiteningBasis(method="raw", K=K)
             continue
         target_sigma = float(S[K])
         scales = target_sigma / np.maximum(S[:K], 1e-12)
-        out[K] = {
-            "Vt": Vt[:K].astype(np.float64),
-            "scales": scales.astype(np.float64),
-        }
+        out[K] = WhiteningBasis(
+            method="soft_K", K=K,
+            Vt=Vt[:K].astype(np.float64),
+            scales=scales.astype(np.float64),
+        )
     return out
 
 
-def _apply(basis: dict, X: np.ndarray) -> np.ndarray:
-    """Apply a basis dict to ``X`` (vector or 2-D matrix)."""
-    if basis["Vt"] is None:
-        return X
-    if X.ndim == 1:
-        return _apply(basis, X[None, :])[0]
-    Vt = basis["Vt"]
-    scales = basis["scales"]
-    coefs = X @ Vt.T
-    adjustments = (coefs * (scales - 1.0)) @ Vt
-    return X + adjustments
+def _all_L_bases(
+    A_goal: np.ndarray, A_nogoal: np.ndarray, ls: list[int],
+) -> dict[int, WhiteningBasis]:
+    """Soft-shear bases keyed by truncation depth L.
+
+    Mirror of :func:`_all_K_bases` for the shear regime: returns
+    ``{L: WhiteningBasis}``.  L=0 (or L > min(n_g, n_n), where the
+    CA-pair budget is exhausted) yields a ``method="raw"`` basis.
+    Independent of any per-pair leave-out -- the shear is corpus-wide,
+    so this is called once per (slot, layer) and shared across all
+    axes in the per-pair loop.
+    """
+    n_min = min(A_goal.shape[1], A_nogoal.shape[1])
+    out: dict[int, WhiteningBasis] = {}
+    for L in ls:
+        if L <= 0 or L > n_min:
+            out[L] = WhiteningBasis(method="raw", L=L)
+        else:
+            out[L] = fit_shear(A_goal, A_nogoal, L=L)
+    return out
 
 
 def _project(
     entity_vecs: dict[str, np.ndarray],
-    basis: dict,
+    basis: WhiteningBasis,
     slot_i: int,
     layer: int,
     axis_unit: np.ndarray,
     names: list[str],
 ) -> dict[str, float]:
-    if basis["Vt"] is None:
+    """Compute ``{name: projection onto basis-whitened axis unit}``.
+
+    Generic over the whitening regime via ``basis.apply``; ``raw``
+    short-circuits to the un-whitened dot product so the inner loop
+    avoids matrix multiplications when whitening is the identity.
+    """
+    if basis.method == "raw":
         return {n: float(np.dot(entity_vecs[n][slot_i, layer], axis_unit))
                 for n in names if n in entity_vecs}
-    axis_w = _apply(basis, axis_unit)
+    axis_w = basis.apply(axis_unit[None, :])[0]
     axis_n = float(np.linalg.norm(axis_w))
     out: dict[str, float] = {}
     for n in names:
         v = entity_vecs.get(n)
         if v is None:
             continue
-        vw = _apply(basis, v[slot_i, layer])
+        vw = basis.apply(v[slot_i, layer][None, :])[0]
         out[n] = float(np.dot(vw, axis_w)) / axis_n
     return out
 
@@ -289,9 +337,9 @@ def _bases_for_pair(
     slot_i: int,
     layer: int,
     ks: list[int],
-) -> dict[int, dict]:
+) -> dict[int, WhiteningBasis]:
     """Build the (slot, layer)-specific pool from pool_entries and
-    return one basis per K."""
+    return one basis per K (soft-K regime)."""
     rows = []
     for entry in pool_entries:
         arr = pool_cache.get(entry)
@@ -300,6 +348,23 @@ def _bases_for_pair(
         rows.append(arr[slot_i, layer])
     pool = np.stack(rows, axis=0)
     return _all_K_bases(pool, ks)
+
+
+def _bases_for_slot_layer_shear(
+    data_dir: Path, slot: int, layer: int,
+    ls: list[int], *, kind: str = "combined",
+) -> dict[int, WhiteningBasis]:
+    """Build the soft-shear bases at (slot, layer) for every L in ``ls``.
+
+    The shear is fit on goal/no-goal CA subspaces, which are corpus-
+    wide -- so a single (slot, layer) call covers every axis at that
+    (slot, layer).  Mirror of :func:`_bases_for_pair` for the shear
+    regime; called once per (slot, layer) instead of once per
+    (slot, layer, pair).
+    """
+    A_g, A_n = build_goal_nogoal_subspaces(
+        data_dir, slot=slot, layer=layer, kind=kind)
+    return _all_L_bases(A_g, A_n, ls)
 
 
 def _axis_unit(
@@ -335,20 +400,48 @@ def main() -> int:
                         "(default: pair_list_di.json -- axes with desc+inst "
                         "judging from both GPT and Sonnet).")
     p.add_argument("--pairs_resp", default="pair_list_responses.json",
-                   help="Pair-list JSON for GPT responses source "
+                   help="Pair-list JSON for the response-ensemble source "
                         "(default: pair_list_responses.json -- axes that "
-                        "additionally have GPT response judging).")
+                        "have both GPT and Haiku response-mode judging; "
+                        "the column shows the canonical GPT+Haiku blend "
+                        "via DEFAULT_GPT_HAIKU_Q9_WEIGHT).")
+    p.add_argument("--regime", choices=("soft_K", "soft_shear"),
+                   default="soft_K",
+                   help="Whitening family to sweep.  'soft_K' (default) "
+                        "uses fit_whitening('soft_K', augmented-pool, K) "
+                        "with the leave-out-the-axis-endpoints pool; "
+                        "'soft_shear' uses fit_shear on the corpus-wide "
+                        "goal/no-goal CA subspaces (independent of any "
+                        "axis pair).  See --ks / --ls for the per-regime "
+                        "grids and --ca_kind for the shear subspace "
+                        "selection.  Output filename + plot title adjust "
+                        "automatically (rho_by_layer_K.* vs "
+                        "rho_by_layer_L.*).")
     p.add_argument("--ks", type=int, nargs="+", default=DEFAULT_KS,
-                   help=f"K values to plot; 0 = raw, K>0 = soft-K "
-                        f"whitening (default: {DEFAULT_KS}).")
+                   help=f"K values to plot in --regime soft_K; 0 = raw, "
+                        f"K>0 = soft-K whitening "
+                        f"(default: {DEFAULT_KS}).")
+    p.add_argument("--ls", type=int, nargs="+", default=DEFAULT_LS,
+                   help=f"L values to plot in --regime soft_shear; 0 = "
+                        f"raw, L>0 = soft-shear truncation depth "
+                        f"(default: {DEFAULT_LS}).")
+    p.add_argument("--ca_kind", default="combined",
+                   choices=("combined", "traits", "roles"),
+                   help="Goal/no-goal subspaces for --regime soft_shear "
+                        "(passed to ``build_goal_nogoal_subspaces``).  "
+                        "Ignored in --regime soft_K.")
     p.add_argument("--layers", type=int, nargs="+", default=None,
                    help="Transformer layers to sweep (default: all "
                         "layers in the activation tensor).")
-    p.add_argument("--plot", default="rho_by_layer.png",
-                   help="Output plot filename (default: rho_by_layer.png).")
-    p.add_argument("--rhos_json", default="rho_by_layer.json",
+    p.add_argument("--plot", default=None,
+                   help="Output plot filename "
+                        "(default: rho_by_layer_K.png in --regime "
+                        "soft_K, rho_by_layer_L.png in --regime "
+                        "soft_shear).")
+    p.add_argument("--rhos_json", default=None,
                    help="Sidecar JSON filename "
-                        "(default: rho_by_layer.json).")
+                        "(default: rho_by_layer_K.json or "
+                        "rho_by_layer_L.json depending on --regime).")
     p.add_argument("--replot_from_json", action="store_true",
                    help="Skip all computation and re-render the plot "
                         "directly from --rhos_json.  Useful for tweaking "
@@ -366,7 +459,21 @@ def main() -> int:
 
     experiment_dir = Path(args.experiment_dir).resolve()
     data_dir = Path(args.data_dir).resolve()
-    KS: list[int] = list(args.ks)
+    # ``regime`` decides which CLI grid we pull from and which inner
+    # loop we use; the rest of the script (score loading, cohort
+    # means, plotting layout, JSON envelope schema) is shared.  The
+    # variable is still called ``KS`` downstream for compatibility
+    # with the JSON sidecar schema -- it just carries L values in
+    # the shear regime.
+    regime: str = args.regime
+    KS: list[int] = list(args.ks if regime == "soft_K" else args.ls)
+    regime_letter = "K" if regime == "soft_K" else "L"
+    # Resolve default filenames here (before the --replot branch, which
+    # also needs them to point at the right sidecar).
+    if args.plot is None:
+        args.plot = f"rho_by_layer_{regime_letter}.png"
+    if args.rhos_json is None:
+        args.rhos_json = f"rho_by_layer_{regime_letter}.json"
 
     if args.replot_from_json:
         json_path = experiment_dir / args.rhos_json
@@ -378,8 +485,21 @@ def main() -> int:
         replot_inputs: list[InputSpec] = []
         cached = _load_rho_json(json_path, inputs=replot_inputs)
         layers: list[int] = list(cached["layers"])
-        # Respect ``--ks`` so replots can drop/add curves without regenerating JSON.
-        KS = list(args.ks)
+        # Read the regime back from the cached envelope; default to
+        # "soft_K" / "K" for pre-2026-05-12 sidecars that predate the
+        # regime field.
+        cached_regime = str(cached.get("regime", "soft_K"))
+        cached_letter = str(cached.get("regime_letter",
+                                       "K" if cached_regime == "soft_K"
+                                       else "L"))
+        # Respect ``--ks``/``--ls`` (depending on the cached regime) so
+        # replots can drop/add curves without regenerating JSON.  Falls
+        # back to the cached grid if the CLI default wasn't overridden.
+        cli_grid = (args.ks if cached_regime == "soft_K" else args.ls)
+        default_grid = (DEFAULT_KS if cached_regime == "soft_K"
+                        else DEFAULT_LS)
+        KS = list(cli_grid if list(cli_grid) != default_grid
+                  else cached["ks"])
         n_di = int(cached["n_axes_di"])
         n_rs = int(cached["n_axes_resp"])
         rho_by_di = {(int(slot), int(L), int(K)): float(v)
@@ -389,6 +509,7 @@ def main() -> int:
         slots_replot = list(cached.get("slots", SLOTS))
         _render_plot(experiment_dir, args.plot, layers, KS, slots_replot,
                      rho_by_di, rho_by_rs, n_di, n_rs,
+                     regime_letter=cached_letter,
                      inputs=replot_inputs)
         return 0
 
@@ -400,6 +521,12 @@ def main() -> int:
         current_data_subtree_input(
             data_dir, "roles/vectors", dep_key="roles_vectors"),
     ]
+    # We inherit DEFAULT_GPT_HAIKU_Q9_WEIGHT (response blend) and
+    # DEFAULT_GPT_SONNET_DI_WEIGHT / DEFAULT_DI_WEIGHTS (desc+inst
+    # blend) from judge_score_combine; declare the file as a dependency
+    # so audit_caches.py flags this plot stale on any of those
+    # constants getting retuned.
+    declare_constants_dependency(inputs)
     pairs_di, _, _ = load_and_register(
         experiment_dir / args.pairs_di,
         dep_key="pairs_di_json", inputs=inputs, policy="warn",
@@ -419,21 +546,25 @@ def main() -> int:
     layers: list[int] = list(args.layers) if args.layers is not None \
         else list(range(n_layers))
     print(f"Sweeping {len(layers)} layers × {len(SLOTS)} slots "
-          f"× {len(KS)} Ks", flush=True)
+          f"× {len(KS)} {regime_letter}s  (regime={regime})", flush=True)
 
     # Pre-cache pool entries per leave-out set (a frozenset of stems).
     # Both desc+inst pairs and responses pairs use leave_out = {pos, neg}.
+    # Only used in regime=soft_K; the shear regime doesn't take a
+    # per-pair leave-out (the CA subspaces are corpus-wide), so we
+    # skip the pool build to save time + memory.
     leave_out_sets: dict[tuple[str, str], list[tuple[str, str]]] = {}
-    for it in pairs_di + pairs_resp:
-        pos, neg = it["pos"], it["neg"]
-        if (pos, neg) in leave_out_sets:
-            continue
-        leave_out = set()
-        for n in (pos, neg):
-            leave_out.add(("traits", n))
-            leave_out.add(("roles", n))
-        leave_out_sets[(pos, neg)] = build_augmented_whitening_pool(
-            data_dir, leave_out=leave_out, scope="roles+traits")
+    if regime == "soft_K":
+        for it in pairs_di + pairs_resp:
+            pos, neg = it["pos"], it["neg"]
+            if (pos, neg) in leave_out_sets:
+                continue
+            leave_out = set()
+            for n in (pos, neg):
+                leave_out.add(("traits", n))
+                leave_out.add(("roles", n))
+            leave_out_sets[(pos, neg)] = build_augmented_whitening_pool(
+                data_dir, leave_out=leave_out, scope="roles+traits")
 
     # Index: rho[(slot, layer, K, source)] = mean ρ across axes.
     rho_by_di: dict[tuple[int, int, int], float] = {}
@@ -514,27 +645,48 @@ def main() -> int:
             g_d, g_i, s_d, s_i, weights=di_weights,
         )
         pair_kinds[(pos, neg)] = pair_type_of(it)
+    # Responses cohort: GPT + Haiku ensemble (was GPT-only until
+    # 2026-05-12; see module docstring for the switchover note).
+    #
+    # ``load_response_scores`` handles per-entity B fallback:
+    #   * judge="gpt"   rubric="v2" -> Phase-5c B=7 full-volume cache
+    #     for every entity (no fallback needed).
+    #   * judge="haiku" rubric="v2" -> Phase-5d B=7-t3 surgical cache
+    #     for entities that were rejudged at tiered-M=3; B=10-q9
+    #     fallback for the rest.
+    # Roles + traits sides are merged via ``entity_id`` so each entity
+    # is keyed by its disambiguated ``"name|R"`` / ``"name|T"`` id,
+    # matching the desc+inst pipeline above.
+    w_gpt = DEFAULT_GPT_HAIKU_Q9_WEIGHT
+    w_haiku = 1.0 - w_gpt
     axis_scores_rs: dict[tuple[str, str], dict[str, float]] = {}
     for it in pairs_resp:
         pos, neg = it["pos"], it["neg"]
         axis_id = f"{pos}_vs_{neg}"
-        axis_dir = experiment_dir / axis_id
-        # Path-suffix tracks the canonical project-wide response batch
-        # size (assistant_axis.judge_batch.RESPONSE_BATCH_SIZE).
-        scores: dict[str, float] = {}
+        gpt_resp: dict[str, float] = {}
+        haiku_resp: dict[str, float] = {}
         for mode in ("traits", "roles"):
-            sub = response_subdir("gpt", mode)
-            fp = axis_dir / sub / "scores_responses.json"
-            if not fp.exists():
-                continue
-            payload, _, _ = load_and_register(
-                fp,
-                dep_key=f"judge_{axis_id}_responses_{mode}",
-                inputs=inputs, policy="warn",
-            )
-            for n, info in payload.items():
-                if info.get("mean_score") is not None:
-                    scores[entity_id(n, mode)] = info["mean_score"]
+            for judge, dest in (("gpt", gpt_resp), ("haiku", haiku_resp)):
+                scores_by_name, _src = load_response_scores(
+                    axis=axis_id, kind=mode, judge=judge, rubric="v2",
+                    experiments_root=experiment_dir,
+                    inputs=inputs, policy="warn",
+                )
+                for n, info in scores_by_name.items():
+                    ms = info.get("mean_score") if isinstance(info, dict) else None
+                    if ms is not None:
+                        dest[entity_id(n, mode)] = float(ms)
+        # Per-entity blend on the GPT∩Haiku intersection (mirrors the
+        # response_di_weight_sweep and gpt_anthropic_response_weight_sweep
+        # conventions).  Entities present in only one judge's cache are
+        # dropped from the response score for this axis -- the
+        # downstream Spearman ρ over the GPT∩Haiku∩entity_vecs
+        # intersection wouldn't have seen them anyway.
+        common_resp = set(gpt_resp) & set(haiku_resp)
+        scores: dict[str, float] = {
+            n: w_gpt * gpt_resp[n] + w_haiku * haiku_resp[n]
+            for n in common_resp
+        }
         if scores:
             axis_scores_rs[(pos, neg)] = scores
             pair_kinds.setdefault((pos, neg), pair_type_of(it))
@@ -552,13 +704,31 @@ def main() -> int:
                       f"({li + 1}/{len(layers)})", flush=True)
                 continue
 
-            # Per-layer per-pair bases (one SVD per pair → all needed K).
-            # K=0 is a no-op so skipping it doesn't help; non-zero Ks all
-            # share the same SVD, so we always pass the full ks_to_fit.
-            bases_per_pair: dict[tuple[str, str], dict[int, dict]] = {}
-            for pair, pool_entries in leave_out_sets.items():
-                bases_per_pair[pair] = _bases_for_pair(
-                    pool_cache, pool_entries, slot_i, layer, ks_to_fit)
+            # Build the per-(slot, layer) basis bank.  Two regimes:
+            #
+            # * soft_K: one SVD per (slot, layer, pair) on the leave-out
+            #   augmented pool; all Ks share the SVD so a wider K grid
+            #   costs almost nothing.  The basis is per-pair.
+            # * soft_shear: one shear fit per (slot, layer) on the
+            #   corpus-wide goal/no-goal CA subspaces; the basis is
+            #   shared across all pairs.
+            #
+            # ``get_basis(pair, K_or_L) -> WhiteningBasis`` papers over
+            # the difference so the inner Spearman loop is shared.
+            if regime == "soft_K":
+                bases_per_pair: dict[tuple[str, str],
+                                     dict[int, WhiteningBasis]] = {}
+                for pair, pool_entries in leave_out_sets.items():
+                    bases_per_pair[pair] = _bases_for_pair(
+                        pool_cache, pool_entries, slot_i, layer, ks_to_fit)
+                def get_basis(pair, k):  # noqa: E306 (closure on loop var)
+                    return bases_per_pair[pair][k]
+            else:  # soft_shear
+                shear_bases = _bases_for_slot_layer_shear(
+                    data_dir, slot, layer, ks_to_fit,
+                    kind=args.ca_kind)
+                def get_basis(pair, k):  # noqa: E306, ARG001 (pair unused)
+                    return shear_bases[k]
 
             for K in ks_to_fit:
                 if K in ks_missing_di:
@@ -570,7 +740,7 @@ def main() -> int:
                                         entity_id(pos, ptype),
                                         entity_id(neg, ptype),
                                         slot_i, layer)
-                        proj = _project(entity_vecs, bases_per_pair[pair][K],
+                        proj = _project(entity_vecs, get_basis(pair, K),
                                         slot_i, layer, au, list(scores))
                         names = sorted(set(scores) & set(proj))
                         if len(names) < 3:
@@ -589,7 +759,7 @@ def main() -> int:
                                         entity_id(pos, ptype),
                                         entity_id(neg, ptype),
                                         slot_i, layer)
-                        proj = _project(entity_vecs, bases_per_pair[pair][K],
+                        proj = _project(entity_vecs, get_basis(pair, K),
                                         slot_i, layer, au, list(scores))
                         names = sorted(set(scores) & set(proj))
                         if len(names) < 3:
@@ -600,7 +770,8 @@ def main() -> int:
                     rho_by_rs[(slot, layer, K)] = float(np.mean(rhos_rs))
 
             print(f"  slot={slot} layer={layer} done "
-                  f"({li + 1}/{len(layers)}, fit Ks={ks_to_fit})", flush=True)
+                  f"({li + 1}/{len(layers)}, "
+                  f"fit {regime_letter}s={ks_to_fit})", flush=True)
 
     # ------------------------------------------------------------------
     # Provenance inputs (shared by JSON sidecar + PNG)
@@ -617,6 +788,8 @@ def main() -> int:
     # ------------------------------------------------------------------
     json_out = {
         "layers": list(layers),
+        "regime": regime,
+        "regime_letter": regime_letter,
         "ks": list(KS),
         "slots": list(SLOTS),
         "n_axes_di": len(axis_scores_di),
@@ -634,7 +807,8 @@ def main() -> int:
     envelope = json_metadata(
         json_out,
         inputs=inputs,
-        title=f"rho_by_layer slots={SLOTS} ks={KS}",
+        title=f"rho_by_layer regime={regime} slots={SLOTS} "
+              f"{regime_letter}s={KS}",
     )
     json.dump(envelope, open(json_path, "w"), indent=2)
     print(f"Wrote {json_path}")
@@ -642,6 +816,7 @@ def main() -> int:
     _render_plot(experiment_dir, args.plot, layers, KS, SLOTS,
                  rho_by_di, rho_by_rs,
                  len(axis_scores_di), len(axis_scores_rs),
+                 regime_letter=regime_letter,
                  inputs=inputs)
     return 0
 
@@ -651,6 +826,7 @@ def _render_plot(experiment_dir: Path, plot_name: str,
                  rho_by_di: dict, rho_by_rs: dict,
                  n_axes_di: int, n_axes_resp: int,
                  *,
+                 regime_letter: str = "K",
                  inputs: list[InputSpec] | None = None) -> None:
     """Pure plotting from precomputed ρ tables.  Shared by the main
     pipeline and the ``--replot_from_json`` fast path.
@@ -663,7 +839,9 @@ def _render_plot(experiment_dir: Path, plot_name: str,
     own envelope captures the upstream chain transitively).
     """
     nonraw = [k for k in KS if k != 0]
-    # Spread hues across the fewer remaining K>0 curves (K=5/6 dropped by default).
+    # Spread hues across len(nonraw) so K=5 (or L=6) widens the
+    # rainbow band rather than overflowing it.  Auto-adapts to any
+    # K / L grid the caller passes.
     rainbow = (plt.cm.rainbow(np.linspace(0.0, 1.0, len(nonraw)))
                if nonraw else [])
 
@@ -673,10 +851,12 @@ def _render_plot(experiment_dir: Path, plot_name: str,
         return rainbow[nonraw.index(K)]
 
     def k_label(K: int) -> str:
-        return "raw" if K == 0 else f"K={K}"
+        return "raw" if K == 0 else f"{regime_letter}={K}"
 
-    # Draw high-K whitening first, low-K later, raw last so lower K and raw
-    # sit visually on top.
+    # Draw high-K/L whitening first, low-K/L later, raw last so lower
+    # K/L and raw sit visually on top.  In the default grids
+    # ([0,1,2,3,4,5] or [0,1,2,3,4,5,6]) this draws K=5/L=6 first, K=1/L=1
+    # last among the non-raw curves, then raw on the very top.
     ks_plot_order = sorted(nonraw, reverse=True) + ([0] if 0 in KS else [])
 
     n_slots = len(slots)
@@ -684,10 +864,26 @@ def _render_plot(experiment_dir: Path, plot_name: str,
     # slot count so each panel keeps its ~4.75-in vertical room.
     fig, axes = plt.subplots(n_slots, 2, figsize=(13, 4.75 * n_slots),
                              sharex=True, sharey=True, squeeze=False)
-    sources = [("desc_inst", rho_by_di, f"desc+inst ({n_axes_di} axes)"),
-               ("responses", rho_by_rs, f"responses (GPT, {n_axes_resp} axes)")]
+    sources = [
+        ("desc_inst", rho_by_di, f"desc+inst ({n_axes_di} axes)"),
+        ("responses", rho_by_rs,
+         f"responses (GPT+Haiku, {n_axes_resp} axes)"),
+    ]
     L_min, L_max = min(layers), max(layers)
     even_layers = list(range(L_min - L_min % 2, L_max + 1, 2))
+    # Column-wise "best" reference lines: drawn at the highest ρ in
+    # the entire (slot × layer × K-or-L) cube for that column.  Same
+    # value on every panel of a column; sharey=True so the line is
+    # guaranteed to sit within view.  Helps the eye anchor on "how
+    # close is this slot×layer×K to the cohort-wide best ρ?".  Only
+    # the top-left panel gets the matplotlib legend entry (the rest
+    # show the same line without a label); the column header makes
+    # which value applies clear.
+    best_by_col = [
+        max(rho_dict.values()) if rho_dict else float("nan")
+        for _src_id, rho_dict, _src_title in sources
+    ]
+
     for row, slot in enumerate(slots):
         for col, (_src_id, rho_dict, src_title) in enumerate(sources):
             ax = axes[row, col]
@@ -697,6 +893,16 @@ def _render_plot(experiment_dir: Path, plot_name: str,
                         lw=1.0 if K == 0 else 0.7,
                         marker="o", markersize=1.5, alpha=0.95,
                         label=k_label(K))
+            best_val = best_by_col[col]
+            if not np.isnan(best_val):
+                # Label the line only on the panel that hosts the
+                # legend; the same line on the other panels stays
+                # legend-less (matplotlib treats label=None as "skip").
+                hline_label = ("best" if (row == 0 and col == 0)
+                               else None)
+                ax.axhline(best_val, color="gray", linestyle=":",
+                           lw=1.0, alpha=0.45, zorder=0,
+                           label=hline_label)
             # Faint vertical guideline every 2 layers (minor grid),
             # plus the standard major grid for orientation.
             ax.set_xticks(even_layers, minor=True)
@@ -711,10 +917,11 @@ def _render_plot(experiment_dir: Path, plot_name: str,
                 ax.legend(fontsize=8, ncol=2, loc="best",
                           framealpha=0.9, handlelength=1.6)
 
+    regime_name = "soft-K whitening" if regime_letter == "K" else "soft-shear"
     title_line = (f"Mean per-axis ρ vs transformer layer, by slot × source "
-                  f"× whitening level "
+                  f"× {regime_name} level "
                   f"(desc+inst = {n_axes_di} axes, GPT+Sonnet 4-way mean; "
-                  f"responses = {n_axes_resp} axes, GPT-only)")
+                  f"responses = {n_axes_resp} axes, GPT+Haiku ensemble)")
     fig.suptitle(title_line, fontsize=14, fontweight="bold", y=0.995)
     plt.tight_layout(rect=(0, 0, 1, 0.97))
 

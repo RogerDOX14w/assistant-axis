@@ -14,8 +14,11 @@ For each axis we compute, per entity::
 
 where ``di_weights`` is the standard desc/inst tiebreak weighting
 (default: ``inst_tie`` = ``0.499*desc + 0.501*inst``; pass
-``--di_weights`` to override).  Spearman ρ vs the raw activation
-projection at ``(slot=3, layer=25)``, averaged across axes.
+``--di_weights`` to override).  Spearman ρ is taken against the
+projection of each entity vector onto the axis direction at the
+chosen ``(slot, layer)``, after applying the ``--whitening`` regime
+(default: project-canonical ``soft_shear=3``; pass ``--whitening raw``
+for the historical no-whitening view).
 
 ::
 
@@ -23,7 +26,7 @@ projection at ``(slot=3, layer=25)``, averaged across axes.
     w = 0.5 → 50/50 average (≈ 4-way average across GPT and Sonnet)
     w = 0   → pure Sonnet (one judge, desc+inst-combined)
 
-Empirical finding (33 axes, slot 3, raw projection):
+Historical empirical finding (33 axes, slot 3, raw projection):
 
 ==================== ============
 weight on GPT (w)    mean ρ
@@ -33,13 +36,17 @@ weight on GPT (w)    mean ρ
 1.0  (pure GPT)       0.5758
 ==================== ============
 
-The 50/50 mix is the principled default -- mean ρ is essentially flat
-over ``w ∈ [0.1, 0.9]`` (parabolic fit on the interior gives a peak
-at ``w = 0.530``, ρ ≈ 0.5949, which is *0.0004 lower* than the
-discrete 50/50 value).  Endpoints show "kinks" because the mode flips
-from "averaging two judges" to "using one judge alone" -- a
-categorical regime change, not a smooth blend, which is why the
-parabola fit is restricted to the interior.
+The 50/50 mix was the principled default at the time -- mean ρ was
+essentially flat over ``w ∈ [0.1, 0.9]`` (parabolic fit on the
+interior gives a peak at ``w = 0.530``, ρ ≈ 0.5949, which is *0.0004
+lower* than the discrete 50/50 value).  Endpoints show "kinks"
+because the mode flips from "averaging two judges" to "using one
+judge alone" -- a categorical regime change, not a smooth blend,
+which is why the parabola fit is restricted to the interior.  Re-run
+with the canonical defaults (35 axes, slot 6, soft_shear=3) to get
+the current operating point; the parabolic-peak interpretation still
+applies under any whitening regime since whitening is a per-axis
+linear preprocess and the cross-judge blend happens after it.
 
 Per-axis interior slope ``Δρ = ρ(w=0.9) − ρ(w=0.1)`` ranks each axis
 by which provider was a stronger judge for it; that ranking drives
@@ -98,6 +105,7 @@ from assistant_axis.judge_loaders import migrate_v1_static_scores
 from assistant_axis.judge_score_combine import (
     add_di_weights_arg,
     combine_desc_inst_one_judge,
+    declare_constants_dependency,
     parse_di_weights_arg,
 )
 from assistant_axis.provenance import (
@@ -106,6 +114,14 @@ from assistant_axis.provenance import (
     load_and_register,
 )
 from results_analysis.axis_judge_correlation import _load_vector_file
+from results_analysis.canonical_angles.data import build_goal_nogoal_subspaces
+from results_analysis.canonical_angles.whitening import (
+    DEFAULT_WHITENING_SPEC,
+    WhiteningBasis,
+    fit_shear,
+    fit_whitening,
+    parse_whitening_spec,
+)
 
 
 DEFAULT_EXPERIMENT_DIR = Path(__file__).resolve().parent.parent / (
@@ -176,6 +192,25 @@ def main() -> int:
                    help=f"Token-position slot to project onto "
                         f"(default: {DEFAULT_SLOT} = </think>).  Pass --slot 3 "
                         f"(\\n) or 7 (\\n\\n post) to compare.")
+    p.add_argument("--whitening", default=DEFAULT_WHITENING_SPEC,
+                   help=f"Whitening regime applied to both entity vectors "
+                        f"and the axis direction before computing ρ. "
+                        f"Forms: 'raw', 'soft_K=N', 'lw', 'oas', "
+                        f"'soft_shear=L'.  Default: "
+                        f"{DEFAULT_WHITENING_SPEC!r} (project canonical -- "
+                        f"see assistant_axis/canonical_angles/whitening.py "
+                        f"selection-history block).")
+    p.add_argument("--ca_kind", default="combined",
+                   choices=("combined", "traits", "roles"),
+                   help="Goal/no-goal subspaces for soft-shear fitting "
+                        "(passed to ``build_goal_nogoal_subspaces``). "
+                        "Ignored for other whitening regimes. "
+                        "Default ``combined`` matches the L-sweep and "
+                        "shear_l_vs_k_comparison defaults.")
+    p.add_argument("--w_step", type=float, default=0.025,
+                   help="Step size on the w grid (default: 0.025 -> "
+                        "41 points on [0, 1]).  Pass --w_step 0.05 to "
+                        "reproduce the historical coarser sweep.")
     add_di_weights_arg(p)
     args = p.parse_args()
     di_weights = parse_di_weights_arg(args.di_weights)
@@ -186,10 +221,23 @@ def main() -> int:
     second_label = (args.second_judge_label
                      or second_judge[:1].upper() + second_judge[1:])
     cohort = cohort_from_pairs(args.pairs)
+    wh_method, wh_n = parse_whitening_spec(args.whitening)
+    # Filename tag: 'raw' is the historical default and gets no suffix
+    # so old v1-archive plots and the new raw view share a slot.  Any
+    # other regime gets a short, filename-safe suffix that mirrors the
+    # spec (e.g. 'soft_shear=3' -> '_softshear3', 'soft_K=2' -> '_softK2').
+    if wh_method == "raw":
+        wh_suffix = ""
+    elif wh_n is not None:
+        wh_suffix = f"_{wh_method.replace('_', '')}{wh_n}"
+    else:
+        wh_suffix = f"_{wh_method.replace('_', '')}"
     if args.plot is None:
-        args.plot = f"gpt_{second_judge}_weight_sweep_{cohort}_slot{slot}.png"
+        args.plot = (f"gpt_{second_judge}_weight_sweep_{cohort}_"
+                     f"slot{slot}{wh_suffix}.png")
     if args.rhos_json is None:
-        args.rhos_json = f"gpt_{second_judge}_weight_sweep_{cohort}_slot{slot}.json"
+        args.rhos_json = (f"gpt_{second_judge}_weight_sweep_{cohort}_"
+                          f"slot{slot}{wh_suffix}.json")
 
     # ``inputs`` accumulator: every cache read below goes through
     # load_and_register, so the read AND the InputSpec record are
@@ -197,6 +245,9 @@ def main() -> int:
     # AGENT_NOTES.md "Reader+registrar pattern").  Vector subtrees
     # are added later, before the savefig.
     inputs: list[InputSpec] = []
+    # Centralised constants we inherit (DEFAULT_WHITENING_SPEC's value
+    # is project-wide; if it changes, downstream plots are stale).
+    declare_constants_dependency(inputs)
     pairs, _spec, _check = load_and_register(
         experiment_dir / args.pairs,
         dep_key="pairs_json",
@@ -222,6 +273,49 @@ def main() -> int:
                 kinds_for_name.setdefault(fp.stem, set()).add(et)
             except Exception:  # pragma: no cover -- skip unreadable files
                 continue
+
+    # ----- Whitening basis ---------------------------------------------
+    # Fit a whitening / shearing transform once and apply to both the
+    # entity pool and per-axis directions.  The mapping is linear, so
+    # applying it pre-projection is equivalent to applying it inside the
+    # dot product -- and pre-applying keeps the hot loop tiny.
+    #
+    # ``soft_shear`` (the project default) needs the goal/no-goal CA
+    # subspaces from ``build_goal_nogoal_subspaces``; the other regimes
+    # fit on the entity pool itself.  ``raw`` returns ``None`` and the
+    # downstream code falls back to the original vectors.
+    basis: WhiteningBasis | None = None
+    if wh_method == "soft_shear":
+        A_g, A_n = build_goal_nogoal_subspaces(
+            data_dir, slot=slot, layer=LAYER, kind=args.ca_kind)
+        n_pairs_max = min(A_g.shape[1], A_n.shape[1])
+        if wh_n is not None and wh_n > n_pairs_max:
+            raise SystemExit(
+                f"--whitening soft_shear={wh_n} exceeds the canonical-angle "
+                f"pair budget for kind={args.ca_kind!r} "
+                f"(min(n_g,n_n)={n_pairs_max}).  Pick a smaller L or a "
+                f"different ca_kind."
+            )
+        basis = fit_shear(A_g, A_n, L=int(wh_n))
+        print(f"Whitening: soft_shear L={wh_n} on '{args.ca_kind}' "
+              f"subspaces (n_pairs_max={n_pairs_max})")
+    elif wh_method == "soft_K":
+        pool = np.stack(list(entity_vecs.values()))
+        basis = fit_whitening("soft_K", pool, K=int(wh_n))
+        print(f"Whitening: soft_K K={wh_n} on default-centered entity pool "
+              f"(n={pool.shape[0]})")
+    elif wh_method in ("lw", "oas"):
+        pool = np.stack(list(entity_vecs.values()))
+        basis = fit_whitening(wh_method, pool)
+        print(f"Whitening: {wh_method} cov^(-1/2) on default-centered "
+              f"entity pool (n={pool.shape[0]})")
+    else:  # 'raw'
+        print("Whitening: raw (identity)")
+
+    if basis is not None and basis.method != "raw":
+        # Apply once: entity pool is (n, D); rebind in place.
+        for n, v in entity_vecs.items():
+            entity_vecs[n] = basis.apply(v[None, :])[0]
 
     # For each axis, precompute the per-entity (gpt_2way, sonnet_2way,
     # projection) on the common entity set, since these don't depend on
@@ -287,6 +381,11 @@ def main() -> int:
         s2 = np.array([son_scores[n] for n in common])
         a = axis_unit(data_dir, pos, neg, slot=slot,
                        pair_type=pair_type_of(it)).numpy()
+        # Whitening is linear, so equivalent to applying inside the dot
+        # product.  We've already whitened entity_vecs once above; just
+        # whiten the axis direction here per-axis.
+        if basis is not None and basis.method != "raw":
+            a = basis.apply(a[None, :])[0]
         proj = np.array([float(np.dot(entity_vecs[n], a)) for n in common])
         per_axis[(pos, neg)] = {
             "g2": g2, "s2": s2, "proj": proj, "n": len(common)}
@@ -309,8 +408,20 @@ def main() -> int:
     sorted_axis_keys = sorted(per_axis.keys(), key=lambda k: slopes[k])
     per_axis = {k: per_axis[k] for k in sorted_axis_keys}
 
-    # Sweep w from 0 to 1.
-    ws_arr = np.linspace(0.0, 1.0, 21)
+    # Sweep w from 0 to 1 in --w_step increments.  Default 0.025 ->
+    # 41 points; pass --w_step 0.05 for the historical coarser 21-point
+    # grid (the early-2026 baseline).  Step must divide 1.0 exactly or
+    # we won't land on integer-multiple grid points.
+    if args.w_step <= 0 or args.w_step > 0.5:
+        raise SystemExit(
+            f"--w_step must be in (0, 0.5], got {args.w_step}")
+    n_w = int(round(1.0 / args.w_step)) + 1
+    if abs(n_w - 1 - 1.0 / args.w_step) > 1e-9:
+        raise SystemExit(
+            f"--w_step={args.w_step} doesn't divide 1.0 evenly; "
+            f"pick a divisor of 1.0 (e.g. 0.025, 0.05, 0.02, 0.01).")
+    ws_arr = np.linspace(0.0, 1.0, n_w)
+    i_half = int(round(0.5 / args.w_step))
     all_rhos: list[list[float]] = []
     mean_rhos: list[float] = []
     for w in ws_arr:
@@ -338,9 +449,11 @@ def main() -> int:
         w_peak = float(ws_arr[i_best])
         rho_peak = float(mean_arr[i_best])
 
-    print(f"\nSweep w_GPT from 0 to 1, n={len(per_axis)} axes:")
+    print(f"\nSweep w_GPT from 0 to 1 in steps of {args.w_step} "
+          f"({n_w} points), n={len(per_axis)} axes "
+          f"(whitening={args.whitening}):")
     print(f"  pure {second_label} (w=0.0):  mean ρ = {mean_arr[0]:+.4f}")
-    print(f"  50/50      (w=0.5):  mean ρ = {mean_arr[10]:+.4f}")
+    print(f"  50/50      (w=0.5):  mean ρ = {mean_arr[i_half]:+.4f}")
     print(f"  pure GPT   (w=1.0):  mean ρ = {mean_arr[-1]:+.4f}")
     print(f"  parabolic peak (interior fit on w∈[0.1, 0.9], "
           f"R²={r2_fit:.4f}): w={w_peak:.3f}, mean ρ ≈ {rho_peak:+.4f}")
@@ -381,7 +494,8 @@ def main() -> int:
 
     ax.set_xlabel(f"Weight on GPT-4.1-mini\n(remaining on {second_label})",
                   fontsize=9)
-    ax.set_ylabel(f"Per-axis Spearman ρ (slot {slot}, raw)", fontsize=9)
+    ax.set_ylabel(f"Per-axis Spearman ρ (slot {slot}, "
+                  f"whitening={args.whitening})", fontsize=9)
     title_line = (f"GPT/{second_label} score-blend sweep -- mean ρ across "
                   f"{n_axes} axes")
     # set_title here functions as a suptitle (single-panel figure).
@@ -391,7 +505,8 @@ def main() -> int:
     second_initial = second_label[0]
     ax.set_title(
         title_line + "\n"
-        f"{second_initial}={mean_arr[0]:.3f}  50/50={mean_arr[10]:.3f}  "
+        f"{second_initial}={mean_arr[0]:.3f}  "
+        f"50/50={mean_arr[i_half]:.3f}  "
         f"G={mean_arr[-1]:.3f}",
         fontsize=14, fontweight="bold",
     )
@@ -464,6 +579,10 @@ def main() -> int:
         "first_judge": "gpt",
         "second_judge": second_judge,
         "second_judge_label": second_label,
+        "slot": int(slot),
+        "layer": int(LAYER),
+        "whitening": args.whitening,
+        "ca_kind": args.ca_kind if wh_method == "soft_shear" else None,
         "ws": [float(w) for w in ws_arr],
         "mean_rho_by_w": [float(v) for v in mean_arr],
         "parabola_fit": {

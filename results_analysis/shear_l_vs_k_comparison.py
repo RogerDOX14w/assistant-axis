@@ -32,8 +32,12 @@ Outputs
 
 * Console summary: per-axis ρ at each L plus the comparison row for
   K=1.
-* ``shear_l_sweep_<cohort>_slot{N}.json`` cached so a later analysis
-  can pick this back up without recomputing.
+* ``shear_l_vs_k_comparison_<cohort>_slot{N}.json`` cached so a later
+  analysis can pick this back up without recomputing.  Filename
+  uses the full script stem (not the historical ``shear_l_sweep_*``
+  shorthand) to avoid colliding with the JSON sidecar that
+  :mod:`results_analysis.shear_l_sweep` writes for the same
+  ``(cohort, slot)`` -- a real collision that bit us on 2026-05-12.
 
 Examples
 --------
@@ -180,7 +184,11 @@ def main(argv: list[str] | None = None) -> int:
                         "analysis.")
     p.add_argument("--out", default=None,
                    help="Output JSON filename (default: "
-                        "shear_l_sweep_<cohort>_slot{N}.json).")
+                        "shear_l_vs_k_comparison_<cohort>_slot{N}.json).  "
+                        "Was 'shear_l_sweep_<cohort>_slot{N}.json' until "
+                        "2026-05-12, which collided with the JSON sidecar "
+                        "shear_l_sweep.py writes for the same (cohort, "
+                        "slot); renamed to use the full script stem.")
     args = p.parse_args(argv)
 
     di_weights = parse_di_weights_arg(args.di_weights)
@@ -262,8 +270,14 @@ def main(argv: list[str] | None = None) -> int:
                 if info.get("mean_score") is not None:
                     responses[entity_id(n, mode)] = info["mean_score"]
 
-        # Projection pool (axis vector + entity vectors).
-        entity_vecs, _pool, _default = load_pool(
+        # Projection pool (axis vector + entity vectors).  ``load_pool``
+        # added a 4th return value (``kinds_for_name``) when the rest
+        # of the analysis stack switched to entity_id keys; we don't
+        # use it here (this script's v1↔v2 bridging is done via
+        # ``_strip_kind`` on the GPT side, mirroring the pattern in
+        # place since before Phase-5b), so we just absorb it into a
+        # placeholder.
+        entity_vecs, _pool, _default, _kinds = load_pool(
             data_dir, exclude_names={pos, neg}, slot=args.slot)
         axis_unit = axis_direction(data_dir, pos, neg, slot=args.slot,
                                    pair_type=ptype)
@@ -347,12 +361,18 @@ def main(argv: list[str] | None = None) -> int:
         print(f"{'L=' + str(L) + ' (shear)':18s}  {_mean(rs, w_unif):+11.4f}  "
               f"{_mean(rs, w_5x):+11.4f}")
 
-    # Write JSON cache.
-    out_name = args.out or f"shear_l_sweep_{cohort}_slot{args.slot}.json"
+    # Write JSON cache.  Filename uses the full script stem to avoid
+    # colliding with shear_l_sweep.py's JSON sidecar for the same
+    # (cohort, slot) -- they have different schemas (this script's
+    # records carry both K and L policies; shear_l_sweep's carry only
+    # L over a wider grid).  Was 'shear_l_sweep_*' until 2026-05-12.
+    out_name = (args.out
+                or f"shear_l_vs_k_comparison_{cohort}_slot{args.slot}.json")
     out_path = experiment_dir / out_name
     envelope = json_metadata(
         records, inputs=inputs,
-        title=f"shear_l_sweep slot={args.slot} pairs={args.pairs}")
+        title=f"shear_l_vs_k_comparison slot={args.slot} "
+              f"pairs={args.pairs}")
     with open(out_path, "w") as f:
         json.dump(envelope, f, indent=2)
     print(f"\nWrote {len(records)} records to {out_path}")

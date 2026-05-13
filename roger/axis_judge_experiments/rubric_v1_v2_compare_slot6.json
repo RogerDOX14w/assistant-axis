@@ -4,8 +4,8 @@
       "slot": 6,
       "layer": 25,
       "K": 0,
-      "gpt_response_weight": 0.41,
-      "anthropic_response_weight": 0.5900000000000001,
+      "gpt_response_weight": 0.625,
+      "anthropic_response_weight": 0.375,
       "response_in_combined_weight": 0.8,
       "di_in_combined_weight": 0.19999999999999996,
       "di_weights_desc_inst": [
@@ -21,11 +21,11 @@
         "pos": "truthful",
         "neg": "deceitful",
         "response_v1": {
-          "rho": 0.8275965284062284,
+          "rho": 0.8322358283786073,
           "n": 580
         },
         "response_v2": {
-          "rho": 0.8463074609760628,
+          "rho": 0.8477017817938989,
           "n": 580
         },
         "combined_v1": {
@@ -42,11 +42,11 @@
         "pos": "progressive",
         "neg": "conservative",
         "response_v1": {
-          "rho": 0.7218755885581406,
+          "rho": 0.7294158195850373,
           "n": 580
         },
         "response_v2": {
-          "rho": 0.7871188310797551,
+          "rho": 0.777377062621013,
           "n": 580
         },
         "combined_v1": {
@@ -63,11 +63,11 @@
         "pos": "improvisational",
         "neg": "methodical",
         "response_v1": {
-          "rho": 0.8979875856712338,
+          "rho": 0.8930842110839737,
           "n": 580
         },
         "response_v2": {
-          "rho": 0.9012963127716428,
+          "rho": 0.9015146688176031,
           "n": 580
         },
         "combined_v1": {
@@ -84,11 +84,11 @@
         "pos": "concise",
         "neg": "verbose",
         "response_v1": {
-          "rho": 0.44247571904869804,
+          "rho": 0.42576983974662114,
           "n": 580
         },
         "response_v2": {
-          "rho": 0.38502776101983094,
+          "rho": 0.39052646748529896,
           "n": 580
         },
         "combined_v1": {
@@ -105,11 +105,11 @@
         "pos": "ecocentric",
         "neg": "anthropocentric",
         "response_v1": {
-          "rho": 0.6402250001888534,
+          "rho": 0.6686426159004694,
           "n": 580
         },
         "response_v2": {
-          "rho": 0.7358834988982632,
+          "rho": 0.7391399539420469,
           "n": 580
         },
         "combined_v1": {
@@ -126,11 +126,11 @@
         "pos": "egalitarian",
         "neg": "elitist",
         "response_v1": {
-          "rho": 0.6974544451380607,
+          "rho": 0.6933531821337247,
           "n": 580
         },
         "response_v2": {
-          "rho": 0.744410181003267,
+          "rho": 0.7219436748159329,
           "n": 580
         },
         "combined_v1": {
@@ -147,11 +147,11 @@
         "pos": "guileless",
         "neg": "scheming",
         "response_v1": {
-          "rho": 0.6445572845304187,
+          "rho": 0.6480858302291158,
           "n": 580
         },
         "response_v2": {
-          "rho": 0.6574539740831792,
+          "rho": 0.6609203900516981,
           "n": 580
         },
         "combined_v1": {
@@ -168,11 +168,11 @@
         "pos": "harmless",
         "neg": "harmful",
         "response_v1": {
-          "rho": 0.7027956524173138,
+          "rho": 0.7050846235743713,
           "n": 580
         },
         "response_v2": {
-          "rho": 0.7594616877815461,
+          "rho": 0.756628522618177,
           "n": 580
         },
         "combined_v1": {
@@ -189,11 +189,11 @@
         "pos": "honest",
         "neg": "dishonest",
         "response_v1": {
-          "rho": 0.7906247511533838,
+          "rho": 0.8035136497608861,
           "n": 580
         },
         "response_v2": {
-          "rho": 0.7759406290549357,
+          "rho": 0.7810167607416072,
           "n": 580
         },
         "combined_v1": {
@@ -210,11 +210,11 @@
         "pos": "helpful",
         "neg": "unhelpful",
         "response_v1": {
-          "rho": 0.8374275148219348,
+          "rho": 0.8328558630549298,
           "n": 580
         },
         "response_v2": {
-          "rho": 0.8001899733787268,
+          "rho": 0.7958952039219398,
           "n": 580
         },
         "combined_v1": {
@@ -231,11 +231,11 @@
         "pos": "relativist",
         "neg": "absolutist",
         "response_v1": {
-          "rho": 0.7787884007769006,
+          "rho": 0.7688713619783951,
           "n": 580
         },
         "response_v2": {
-          "rho": 0.7547566613906052,
+          "rho": 0.7224356559756364,
           "n": 580
         },
         "combined_v1": {
@@ -252,11 +252,11 @@
         "pos": "systems_thinker",
         "neg": "analytical",
         "response_v1": {
-          "rho": 0.7379673466014871,
+          "rho": 0.7413264179766083,
           "n": 580
         },
         "response_v2": {
-          "rho": 0.7370126253840686,
+          "rho": 0.732381615907714,
           "n": 580
         },
         "combined_v1": {
@@ -270,8 +270,8 @@
       }
     ],
     "means_over_axes": {
-      "response_v1": 0.7266479847760544,
-      "response_v2": 0.7404049664018236,
+      "response_v1": 0.7285199369502284,
+      "response_v2": 0.7356234798910473,
       "combined_v1": NaN,
       "combined_v2": NaN
     },
@@ -281,11 +281,11 @@
     "schema_version": "1.0",
     "produced_by": {
       "cmd": "uv run python -m results_analysis.rubric_v1_v2_compare",
-      "git_sha": "cd1c50c+dirty",
+      "git_sha": "df6444a+dirty",
       "author": "Roger Dearnaley",
       "title": "rubric_v1_v2_compare"
     },
-    "produced_at": "2026-05-11T22:42:15+00:00",
+    "produced_at": "2026-05-12T00:04:35+00:00",
     "inputs": [
       {
         "dep_key": "producer_script",
@@ -297,21 +297,21 @@
         "extras": {
           "slot": "6",
           "layer": "25",
-          "gpt_response_weight": "0.41",
+          "gpt_response_weight": "0.625",
           "response_in_combined_weight": "0.8"
         }
       },
       {
         "dep_key": "judge_score_combine_constants",
         "path": "assistant_axis/judge_score_combine.py",
-        "fingerprint": "v1:2026-05-11T22:35:21+00:00@22469",
+        "fingerprint": "v1:2026-05-12T00:02:04+00:00@25980",
         "kind": "file",
         "dataset_id": null,
-        "last_modified_at": "2026-05-11T22:35:21+00:00",
+        "last_modified_at": "2026-05-12T00:02:04+00:00",
         "extras": {
           "DEFAULT_DI_WEIGHTS": "(0.499, 0.501)",
-          "DEFAULT_GPT_SONNET_DI_WEIGHT": "0.5",
-          "DEFAULT_GPT_HAIKU_Q9_WEIGHT": "0.41",
+          "DEFAULT_GPT_SONNET_DI_WEIGHT": "0.625",
+          "DEFAULT_GPT_HAIKU_Q9_WEIGHT": "0.625",
           "DEFAULT_RESPONSE_DI_WEIGHT": "0.8",
           "PRIMARY_AXIS_SAMPLE_WEIGHT": "5.0"
         }
@@ -2111,6 +2111,6 @@
         "extras": {}
       }
     ],
-    "inputs_sha256": "7840c836a9825e81151d13c31875c54777aa62437b5f799e168bd605e335d66c"
+    "inputs_sha256": "aab81a10607d6296898ee6485d660a652670f3e50dbb36dc6a66eb3ef28a7db6"
   }
 }

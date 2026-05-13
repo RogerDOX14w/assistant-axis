@@ -59,6 +59,14 @@ from assistant_axis.provenance import (
     load_and_register,
 )
 from results_analysis.axis_judge_correlation import _load_vector_file
+from results_analysis.canonical_angles.data import build_goal_nogoal_subspaces
+from results_analysis.canonical_angles.whitening import (
+    DEFAULT_WHITENING_SPEC,
+    WhiteningBasis,
+    fit_shear,
+    fit_whitening,
+    parse_whitening_spec,
+)
 from results_analysis.gpt_anthropic_response_weight_sweep import (
     AXIS_COLORS, DEFAULT_AXES, GPT_DIR_TEMPLATE, PARABOLA_COLOR,
 )
@@ -84,9 +92,10 @@ HAIKU_DIR_TEMPLATE = "haiku_responses_{side}_b10_q9"
 GPT_RESPONSE_WEIGHT = DEFAULT_GPT_HAIKU_Q9_WEIGHT
 HAIKU_RESPONSE_WEIGHT = 1.0 - GPT_RESPONSE_WEIGHT
 
-# Sweep grid: w from 0 to 1 in 0.05 steps (21 points, per user spec).
-W_STEP = 0.05
-N_W_POINTS = int(round(1.0 / W_STEP)) + 1   # = 21
+# Default sweep grid: w from 0 to 1 in 0.025 steps (41 points).
+# Matches the GPT/Sonnet and GPT/Anthropic weight sweeps for visual
+# consistency.  Override via --w_step.
+DEFAULT_W_STEP = 0.025
 
 # Parabolic fit domain (per user spec): [0.0, 0.9], excluding the
 # w=1 endpoint where desc+inst drops out of the blend (categorical
@@ -176,6 +185,21 @@ def main() -> int:
              "auto-suffix like '_no_eco_anthro' is appended to the "
              "default output filenames so the canonical run is not "
              "clobbered.")
+    p.add_argument("--whitening", default=DEFAULT_WHITENING_SPEC,
+                   help=f"Whitening regime applied to both entity vectors "
+                        f"and the axis direction before computing ρ.  "
+                        f"Forms: 'raw', 'soft_K=N', 'lw', 'oas', "
+                        f"'soft_shear=L'.  Default: "
+                        f"{DEFAULT_WHITENING_SPEC!r} (project canonical).")
+    p.add_argument("--ca_kind", default="combined",
+                   choices=("combined", "traits", "roles"),
+                   help="Goal/no-goal subspaces for soft-shear fitting. "
+                        "Ignored for non-shear regimes.")
+    p.add_argument("--w_step", type=float, default=DEFAULT_W_STEP,
+                   help=f"Step size on the w grid (default: "
+                        f"{DEFAULT_W_STEP} -> 41 points on [0, 1]).  "
+                        f"Pass --w_step 0.05 for the historical "
+                        f"coarser 21-point sweep.")
     args = p.parse_args()
 
     experiment_dir = Path(args.experiment_dir).resolve()
@@ -189,14 +213,37 @@ def main() -> int:
         def _short(name: str) -> str:
             pos, neg = name.split("_vs_", 1)
             return f"{pos[:3]}_{neg[:6]}"
-        suffix = "_no_" + "__".join(sorted(_short(a) for a in excluded))
+        exc_suffix = "_no_" + "__".join(sorted(_short(a) for a in excluded))
     else:
-        suffix = ""
-    out_stem = f"response_di_weight_sweep_slot{slot}{suffix}"
+        exc_suffix = ""
+
+    wh_method, wh_n = parse_whitening_spec(args.whitening)
+    # Filename tag: 'raw' is the historical default and gets no suffix
+    # so the v1-archive and the new raw view share a slot.  Any other
+    # regime appends a short filename-safe suffix.
+    if wh_method == "raw":
+        wh_suffix = ""
+    elif wh_n is not None:
+        wh_suffix = f"_{wh_method.replace('_', '')}{wh_n}"
+    else:
+        wh_suffix = f"_{wh_method.replace('_', '')}"
+
+    out_stem = f"response_di_weight_sweep_slot{slot}{wh_suffix}{exc_suffix}"
     if args.plot is None:
         args.plot = f"{out_stem}.png"
     if args.rhos_json is None:
         args.rhos_json = f"{out_stem}.json"
+
+    # w grid (mirrors gpt_sonnet / gpt_anthropic for consistency).
+    if args.w_step <= 0 or args.w_step > 0.5:
+        raise SystemExit(
+            f"--w_step must be in (0, 0.5], got {args.w_step}")
+    n_w = int(round(1.0 / args.w_step)) + 1
+    if abs(n_w - 1 - 1.0 / args.w_step) > 1e-9:
+        raise SystemExit(
+            f"--w_step={args.w_step} doesn't divide 1.0 evenly; "
+            f"pick a divisor of 1.0 (e.g. 0.025, 0.05, 0.02, 0.01).")
+    i_half = int(round(0.5 / args.w_step))
 
     # Provenance accumulator (threaded through every cache read).
     inputs: list[InputSpec] = [
@@ -208,6 +255,9 @@ def main() -> int:
                 "gpt_response_weight": str(GPT_RESPONSE_WEIGHT),
                 "fit_domain": f"[{FIT_W_LO}, {FIT_W_HI}]",
                 "excluded_axes": ",".join(sorted(excluded)) or "none",
+                "whitening": args.whitening,
+                "ca_kind": (args.ca_kind
+                            if wh_method == "soft_shear" else ""),
             },
         ),]
     # Constants-file dependency: GPT_RESPONSE_WEIGHT is read from
@@ -249,6 +299,40 @@ def main() -> int:
             except Exception:  # pragma: no cover -- skip unreadable .pt
                 continue
 
+    # Whitening basis -- fit once, apply once to the entity pool, then
+    # whiten each per-axis direction in-place inside the loop.  Linear,
+    # so applying pre-projection is equivalent to applying inside the
+    # dot product.
+    basis: WhiteningBasis | None = None
+    if wh_method == "soft_shear":
+        A_g, A_n = build_goal_nogoal_subspaces(
+            data_dir, slot=slot, layer=layer, kind=args.ca_kind)
+        n_pairs_max = min(A_g.shape[1], A_n.shape[1])
+        if wh_n is not None and wh_n > n_pairs_max:
+            raise SystemExit(
+                f"--whitening soft_shear={wh_n} exceeds CA-pair budget "
+                f"for kind={args.ca_kind!r} (min(n_g,n_n)={n_pairs_max})."
+            )
+        basis = fit_shear(A_g, A_n, L=int(wh_n))
+        print(f"Whitening: soft_shear L={wh_n} on '{args.ca_kind}' "
+              f"subspaces (n_pairs_max={n_pairs_max})")
+    elif wh_method == "soft_K":
+        pool = np.stack(list(entity_vecs.values()))
+        basis = fit_whitening("soft_K", pool, K=int(wh_n))
+        print(f"Whitening: soft_K K={wh_n} on default-centered entity pool "
+              f"(n={pool.shape[0]})")
+    elif wh_method in ("lw", "oas"):
+        pool = np.stack(list(entity_vecs.values()))
+        basis = fit_whitening(wh_method, pool)
+        print(f"Whitening: {wh_method} cov^(-1/2) on default-centered "
+              f"entity pool (n={pool.shape[0]})")
+    else:  # 'raw'
+        print("Whitening: raw (identity)")
+
+    if basis is not None and basis.method != "raw":
+        for n, v in entity_vecs.items():
+            entity_vecs[n] = basis.apply(v[None, :])[0]
+
     axes_in_use = [a for a in DEFAULT_AXES if a[0] not in excluded]
     if excluded:
         unknown = excluded - {a[0] for a in DEFAULT_AXES}
@@ -265,8 +349,9 @@ def main() -> int:
           f"{GPT_RESPONSE_WEIGHT:.2f}·GPT_b10 + "
           f"{HAIKU_RESPONSE_WEIGHT:.2f}·Haiku_q9   (v2 canonical caches)")
     print("  desc+inst ensemble: GPT+Sonnet 4-way, inst-tiebreak")
-    print(f"  sweep: w from 0 to 1 in {W_STEP} steps "
-          f"({N_W_POINTS} points)")
+    print(f"  whitening: {args.whitening}")
+    print(f"  sweep: w from 0 to 1 in {args.w_step} steps "
+          f"({n_w} points)")
     print(f"  parabola fit on w ∈ [{FIT_W_LO}, {FIT_W_HI}]\n")
 
     # Per-axis precompute: (response_ensemble, di_ensemble, projection)
@@ -330,6 +415,8 @@ def main() -> int:
         resp_arr = np.array([response[n] for n in common])
         di_arr = np.array([di[n] for n in common])
         a = _axis_unit(data_dir, pos, neg, slot, layer).numpy()
+        if basis is not None and basis.method != "raw":
+            a = basis.apply(a[None, :])[0]
         proj = np.array([float(np.dot(entity_vecs[n], a)) for n in common])
         per_axis[(pos, neg)] = {
             "axis_name": axis_name,
@@ -352,7 +439,7 @@ def main() -> int:
     sorted_keys = sorted(per_axis.keys(), key=lambda k: slopes[k])
     per_axis = {k: per_axis[k] for k in sorted_keys}
 
-    ws = np.linspace(0.0, 1.0, N_W_POINTS)
+    ws = np.linspace(0.0, 1.0, n_w)
     all_rhos = np.array([
         [_rho_at_w(d, w) for d in per_axis.values()]
         for w in ws
@@ -377,10 +464,14 @@ def main() -> int:
         w_peak = float(ws_fit[i_best])
         rho_peak = float(mean_fit[i_best])
 
-    print(f"\nSweep summary ({len(per_axis)} axes):")
+    print(f"\nSweep summary ({len(per_axis)} axes, "
+          f"whitening={args.whitening}, w_step={args.w_step}):")
     print(f"  pure desc+inst (w=0):      mean ρ = {mean_rhos[0]:+.4f}")
-    print(f"  50/50 mix    (w=0.5):    mean ρ = {mean_rhos[10]:+.4f}")
+    print(f"  50/50 mix    (w=0.5):    mean ρ = {mean_rhos[i_half]:+.4f}")
     print(f"  pure response  (w=1):      mean ρ = {mean_rhos[-1]:+.4f}")
+    i_disc = int(np.argmax(mean_rhos))
+    print(f"  discrete grid peak:        w={ws[i_disc]:.3f}, "
+          f"mean ρ = {mean_rhos[i_disc]:+.4f}")
     print(f"  parabolic peak (fit on [{FIT_W_LO}, {FIT_W_HI}], R²={r2:.3f}): "
           f"w={w_peak:.3f}, ρ ≈ {rho_peak:+.4f}")
 
@@ -421,12 +512,15 @@ def main() -> int:
         label=f"interior peak w={w_peak:.3f}")
 
     ax.set_xlabel(
-        "Weight on response ensemble  (0.6·GPT_b10 + 0.4·Haiku_q9, v2)\n"
-        "(remaining 1−w on desc+inst, GPT+Sonnet 4-way inst-tiebreak)",
+        f"Weight on response ensemble  "
+        f"({GPT_RESPONSE_WEIGHT:.3f}·GPT_b10 + "
+        f"{HAIKU_RESPONSE_WEIGHT:.3f}·Haiku_q9, v2)\n"
+        f"(remaining 1−w on desc+inst, GPT+Sonnet 4-way inst-tiebreak)",
         fontsize=10,
     )
     ax.set_ylabel(f"Per-axis Spearman ρ "
-                  f"(slot {slot}, layer {layer}, raw)", fontsize=10)
+                  f"(slot {slot}, layer {layer}, "
+                  f"whitening={args.whitening})", fontsize=10)
     excl_tag = (
         f"  (excluding {', '.join(sorted(excluded))})"
         if excluded else ""
@@ -435,7 +529,8 @@ def main() -> int:
              f"mean ρ across {n_axes} axes{excl_tag}")
     ax.set_title(
         title + "\n"
-        f"DI={mean_rhos[0]:.3f}  50/50={mean_rhos[10]:.3f}  "
+        f"DI={mean_rhos[0]:.3f}  "
+        f"50/50={mean_rhos[i_half]:.3f}  "
         f"R={mean_rhos[-1]:.3f}  →  peak w={w_peak:.3f} (ρ={rho_peak:.3f})",
         fontsize=13, fontweight="bold",
     )
@@ -488,10 +583,13 @@ def main() -> int:
         "excluded_axes": sorted(excluded),
         "left_endpoint_label": "desc+inst (GPT+Sonnet 4-way, inst-tiebreak)",
         "right_endpoint_label": (
-            f"response ({GPT_RESPONSE_WEIGHT:.2f}·GPT_b10 + "
-            f"{HAIKU_RESPONSE_WEIGHT:.2f}·Haiku_q9, v2)"
+            f"response ({GPT_RESPONSE_WEIGHT:.3f}·GPT_b10 + "
+            f"{HAIKU_RESPONSE_WEIGHT:.3f}·Haiku_q9, v2)"
         ),
         "slot": slot, "layer": layer,
+        "whitening": args.whitening,
+        "ca_kind": args.ca_kind if wh_method == "soft_shear" else None,
+        "w_step": float(args.w_step),
         "ws": [float(w) for w in ws],
         "mean_rho_by_w": [float(v) for v in mean_rhos],
         "parabola_fit": {

@@ -1554,8 +1554,8 @@ edit.
 | Constant | Default | Weights |
 |---|---|---|
 | `DEFAULT_DI_WEIGHTS` | `(0.499, 0.501)` | desc / inst within one judge |
-| `DEFAULT_GPT_SONNET_DI_WEIGHT` | `0.50` | GPT / Sonnet within the desc+inst ensemble (per mode) |
-| `DEFAULT_GPT_HAIKU_Q9_WEIGHT` | `0.41` | GPT / Haiku in the response-mode ensemble (was `0.60` until 2026-05-11; retuned to the actual parabolic peak w≈0.410 on the v2 mixed-cohort sweep — see `judge_score_combine.py` "Selection history") |
+| `DEFAULT_GPT_SONNET_DI_WEIGHT` | `0.625` | GPT / Sonnet within the desc+inst ensemble (per mode) (was `0.50` until 2026-05-12; retuned to the soft_shear=3 discrete grid peak w=0.625 on the 35-axis slot 6 sweep — see `judge_score_combine.py` "Selection history") |
+| `DEFAULT_GPT_HAIKU_Q9_WEIGHT` | `0.625` | GPT / Haiku in the response-mode ensemble (was `0.60` until 2026-05-11; then `0.41` 2026-05-11→05-12 on the raw-projection v2 sweep; retuned to `0.625` 2026-05-12 on the canonical-whitening soft_shear=3 v2 sweep — matches `DEFAULT_GPT_SONNET_DI_WEIGHT`; see `judge_score_combine.py` "Selection history") |
 | `DEFAULT_RESPONSE_DI_WEIGHT` | `0.80` | response / desc+inst in the final per-entity score |
 
 Full empirical derivation, per-axis discussion, tuning history, and
@@ -1574,8 +1574,8 @@ from assistant_axis.judge_score_combine import (
 )
 
 # 1. desc + inst within one judge (or 4-way GPT+Sonnet):
-#    The 4-way uses DEFAULT_GPT_SONNET_DI_WEIGHT (= 0.50) by default;
-#    pass gpt_sonnet_weight=... for ablations.
+#    The 4-way uses DEFAULT_GPT_SONNET_DI_WEIGHT (= 0.625 since 2026-05-12)
+#    by default; pass gpt_sonnet_weight=... for ablations.
 di = combine_desc_inst_two_judges(g_d, g_i, s_d, s_i)
 
 # 2. within-response ensemble:

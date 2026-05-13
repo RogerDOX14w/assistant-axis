@@ -1083,12 +1083,12 @@
   "_provenance": {
     "schema_version": "1.0",
     "produced_by": {
-      "cmd": "uv run python -m results_analysis.gpt_sonnet_weight_sweep --slot 6",
-      "git_sha": "730ff79+dirty",
+      "cmd": "uv run python results_analysis/gpt_sonnet_weight_sweep.py",
+      "git_sha": "df6444a+dirty",
       "author": "Roger Dearnaley",
       "title": "gpt_sonnet_weight_sweep slot=6 pairs=pair_list_di.json"
     },
-    "produced_at": "2026-05-11T04:20:21+00:00",
+    "produced_at": "2026-05-11T23:19:46+00:00",
     "inputs": [
       {
         "dep_key": "pairs_json",

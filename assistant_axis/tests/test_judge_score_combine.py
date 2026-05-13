@@ -54,27 +54,44 @@ def test_combine_one_judge_inst_tie():
 
 
 def test_combine_two_judges_default():
+    """Default behaviour: inst-tiebreak + canonical GPT/Sonnet weight.
+
+    Computes expected values from ``DEFAULT_GPT_SONNET_DI_WEIGHT`` (currently
+    0.70 since the 2026-05-12 retune) rather than hardcoding 0.5/0.5 so the
+    test follows the constant if it gets re-tuned again.  The "Equal
+    weighting matches the historical 4-way mean" invariant is covered
+    separately by ``test_combine_two_judges_equal_matches_4way_mean``.
+    """
     g_d = {"x": 2, "y": -1}
     g_i = {"x": 2, "y":  3}
     s_d = {"x": 0, "y": -1}
     s_i = {"x": 2, "y":  3}
-    # Default = inst-tie. Per entity:
-    #   desc_avg = (g_d + s_d) / 2,  inst_avg = (g_i + s_i) / 2
-    #   score = 0.499 * desc_avg + 0.501 * inst_avg
+    w_g = DEFAULT_GPT_SONNET_DI_WEIGHT
+    w_s = 1.0 - w_g
     out = combine_desc_inst_two_judges(g_d, g_i, s_d, s_i)
-    expected_x = 0.499 * (2+0)/2 + 0.501 * (2+2)/2
-    expected_y = 0.499 * (-1+-1)/2 + 0.501 * (3+3)/2
-    assert out["x"] == pytest.approx(expected_x)
-    assert out["y"] == pytest.approx(expected_y)
+    for n in g_d:
+        desc_avg = w_g * g_d[n] + w_s * s_d[n]
+        inst_avg = w_g * g_i[n] + w_s * s_i[n]
+        expected = 0.499 * desc_avg + 0.501 * inst_avg
+        assert out[n] == pytest.approx(expected), n
 
 
 def test_combine_two_judges_equal_matches_4way_mean():
-    """Equal weighting must reproduce the historical (g_d + g_i + s_d + s_i) / 4."""
+    """Equal di-weighting **and** balanced GPT/Sonnet weighting must reproduce
+    the historical ``(g_d + g_i + s_d + s_i) / 4``.  Both parameters have to
+    be at their balanced values explicitly -- the default
+    ``gpt_sonnet_weight`` is no longer 0.5 since the 2026-05-12 retune, so
+    the 4-way-mean property is now a property of the balanced operating
+    point, not of the defaults."""
     g_d = {"a": 2, "b": -3, "c": 1}
     g_i = {"a": 0, "b":  1, "c": 2}
     s_d = {"a": -1, "b": -2, "c": 0}
     s_i = {"a": 3, "b": 0, "c": 1}
-    out = combine_desc_inst_two_judges(g_d, g_i, s_d, s_i, weights=(0.5, 0.5))
+    out = combine_desc_inst_two_judges(
+        g_d, g_i, s_d, s_i,
+        weights=(0.5, 0.5),
+        gpt_sonnet_weight=0.5,
+    )
     for n in g_d:
         manual_4way = (g_d[n] + g_i[n] + s_d[n] + s_i[n]) / 4
         assert out[n] == pytest.approx(manual_4way), n
@@ -131,12 +148,24 @@ def test_inst_tiebreak_weights_sum_to_one():
 def test_centralized_blend_constants_in_unit_interval():
     """All single-float blend weights must sit in [0, 1] and represent
     the empirical defaults documented in the module docstring + README."""
-    assert DEFAULT_GPT_SONNET_DI_WEIGHT == 0.50
-    # DEFAULT_GPT_HAIKU_Q9_WEIGHT was 0.60 pre-Phase-5d (v1 q9 sweep);
-    # retuned to 0.41 on 2026-05-11 on the v2 mixed-cohort sweep
-    # (actual parabolic peak w≈0.410, not rounded).  See
-    # selection-history block in judge_score_combine module docstring.
-    assert DEFAULT_GPT_HAIKU_Q9_WEIGHT == 0.41
+    # DEFAULT_GPT_SONNET_DI_WEIGHT was 0.50 pre-canonical-whitening
+    # (v1 raw-projection slot 3 sweep, parabolic peak w=0.530); retuned
+    # to 0.625 on 2026-05-12 on the soft_shear=3 slot 6 sweep where the
+    # discrete grid peak (w_step=0.025) lands on w=0.625, ρ=0.70198.
+    # Parabolic fit nominally peaks at w=0.700 but the upper plateau
+    # w∈[0.575, 0.700] is flat within 0.0003 ρ (vs ~0.04 95% CI
+    # half-width), so we pick the literal discrete peak.  See module
+    # docstring "Selection history" for derivation.
+    assert DEFAULT_GPT_SONNET_DI_WEIGHT == 0.625
+    # DEFAULT_GPT_HAIKU_Q9_WEIGHT history (newest first):
+    # * 0.625 (2026-05-12, canonical-whitening soft_shear=3 v2 sweep,
+    #         discrete peak w=0.600, parabolic peak w=0.624; picked
+    #         0.625 for symmetry with DEFAULT_GPT_SONNET_DI_WEIGHT)
+    # * 0.41  (2026-05-11, raw-projection v2 sweep; superseded by
+    #         the canonical-whitening retune above)
+    # * 0.60  (pre-Phase-5d v1 sweep)
+    # See module docstring "Selection history" for derivation.
+    assert DEFAULT_GPT_HAIKU_Q9_WEIGHT == 0.625
     assert DEFAULT_RESPONSE_DI_WEIGHT == 0.80
     for w in (DEFAULT_GPT_SONNET_DI_WEIGHT,
               DEFAULT_GPT_HAIKU_Q9_WEIGHT,
@@ -144,15 +173,22 @@ def test_centralized_blend_constants_in_unit_interval():
         assert 0.0 <= w <= 1.0
 
 
-def test_combine_two_judges_default_gs_matches_legacy_average():
-    """At default ``gpt_sonnet_weight = 0.5`` the parameterised function
+def test_combine_two_judges_gs_balanced_matches_legacy_average():
+    """At ``gpt_sonnet_weight = 0.5`` the parameterised function
     must reproduce the historical hardcoded ``(gpt + sonnet) / 2``
-    averaging exactly -- guards the strict-generalisation property."""
+    averaging exactly -- guards the strict-generalisation property.
+
+    Note: was the *default* until 2026-05-12 (when
+    ``DEFAULT_GPT_SONNET_DI_WEIGHT`` moved to 0.70); the equivalence
+    still holds, but you now have to ask for it explicitly via
+    ``gpt_sonnet_weight=0.5``.
+    """
     g_d = {"x": 2, "y": -1, "z": 3}
     g_i = {"x": 2, "y":  3, "z": -2}
     s_d = {"x": 0, "y": -1, "z": -1}
     s_i = {"x": 2, "y":  3, "z": 1}
-    out_param = combine_desc_inst_two_judges(g_d, g_i, s_d, s_i)
+    out_param = combine_desc_inst_two_judges(
+        g_d, g_i, s_d, s_i, gpt_sonnet_weight=0.5)
     for n in g_d:
         # Manual legacy formula: (gd + sd) / 2 and (gi + si) / 2,
         # then 0.499 / 0.501 desc/inst combine.
