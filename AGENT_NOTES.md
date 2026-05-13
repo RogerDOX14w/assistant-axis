@@ -1622,6 +1622,26 @@ response_di_weight_sweep, rubric_v1_v2_compare, judge_ensemble_rho_curve}.py`.
 
 ### Steering judges (Phase-2 architecture)
 
+**Activation space (read this first).**  Steering vectors live in
+**raw model-activation space** — the native frame the model
+operates in.  `ActivationSteering` (in
+[`assistant_axis/steering.py`](assistant_axis/steering.py)) and the
+sweep runner ([`steering/run_sweep.py`](steering/run_sweep.py)) load
+the unwhitened `axis.pt` directly and add it to the residual stream
+at the chosen layer; **no whitening, no shear**.  The
+whitening / soft-shear regimes documented in *"Whitening / soft-shear
+defaults"* below are **analysis-side only** (they sharpen
+judge-projection ρ) and explicitly do not apply here.  When you
+load a judging-side axis vector for use as a steering vector, pass
+it through `ActivationSteering` *as-is* — whitening or shearing
+first would push it out of the model's native frame and degrade
+both the steering and any safety-relevant invariants
+(e.g. activation-capping thresholds calibrated against the
+distribution of raw projections).  Same reason
+`pc_round_trip/launch_judge_runs.py` keeps its own
+`DEFAULT_SHEAR_L=0` — see the caveat at the end of the whitening
+section.
+
 Steering sweeps use a **two-tier judging** protocol baked into
 [`assistant_axis/steering_judges.py`](assistant_axis/steering_judges.py)
 and consumed by [`assistant_axis/steering_runner.py`](assistant_axis/steering_runner.py)
@@ -1716,6 +1736,19 @@ matches the steering effect default so the two distributions are
 apples-to-apples in the same judging regime.
 
 ### Whitening / soft-shear defaults
+
+**Scope (read this first).**  These defaults apply to **analysis-side
+scripts** — ρ judging, `rho_by_layer`, `whitening_k_sweep`,
+`gpt_sonnet_weight_sweep`, the canonical-angles pipeline, etc. —
+where whitening sharpens the score↔projection correlation by
+normalising the activation manifold.  **Steering work is always done
+in raw model-activation space** (see *"Steering judges (Phase-2
+architecture)"* above): `ActivationSteering` and `run_sweep.py`
+consume the unwhitened `axis.pt` directly, and the transforms below
+do NOT pass through to the steering side.  Don't apply them to
+steering vectors.  (Same reason `pc_round_trip/launch_judge_runs.py`
+keeps its own `DEFAULT_SHEAR_L=0` — see the caveat at the end of
+this section for that specific case.)
 
 For analyses going forward, the project defaults are:
 

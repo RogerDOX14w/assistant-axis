@@ -140,6 +140,15 @@ axis = load_axis(axis_path)
 
 ### Steer model outputs
 
+Steering vectors live in **raw model-activation space** — the native
+frame the model operates in.  Pass `axis[layer]` through
+`ActivationSteering` as-is; do **not** whiten or shear it first.
+(The whitening / soft-shear regimes that show up elsewhere in this
+repo are analysis-side conveniences that sharpen judge-projection ρ;
+they don't pass through to the steering side.  See
+[`AGENT_NOTES.md` § Whitening / soft-shear defaults](AGENT_NOTES.md)
+for the analysis defaults and the scope-of-applicability note.)
+
 ```python
 from assistant_axis import ActivationSteering, generate_response
 
