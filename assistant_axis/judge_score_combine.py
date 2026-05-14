@@ -154,22 +154,25 @@ Usage examples::
     # gpt_sonnet_weight=... to override the cross-judge mix.
     di = combine_desc_inst_two_judges(g_d, g_i, s_d, s_i)
 
-    # Build the response ensemble.
-    response = {
-        n: DEFAULT_GPT_HAIKU_Q9_WEIGHT * gpt_resp[n]
-           + (1 - DEFAULT_GPT_HAIKU_Q9_WEIGHT) * haiku_resp[n]
-        for n in set(gpt_resp) & set(haiku_resp)
-    }
+    # Build the response ensemble (one-side-missing fallback: keeps an
+    # entity in the cohort using whichever judge has a numeric score,
+    # rather than silently dropping it on partial coverage).
+    response = blend_two_with_fallback(
+        gpt_resp, haiku_resp, weight_a=DEFAULT_GPT_HAIKU_Q9_WEIGHT,
+    )
 
-    # Build the final per-entity score.
-    final = {
-        n: DEFAULT_RESPONSE_DI_WEIGHT * response[n]
-           + (1 - DEFAULT_RESPONSE_DI_WEIGHT) * di[n]
-        for n in set(response) & set(di)
-    }
+    # Build the final per-entity score (same fallback semantics: if an
+    # entity has only response or only di coverage, use whichever
+    # side is present at 100%).
+    final = blend_two_with_fallback(
+        response, di, weight_a=DEFAULT_RESPONSE_DI_WEIGHT,
+    )
 
 When in doubt, prefer these constants to inline floats so future
-re-tunings propagate everywhere with one edit.
+re-tunings propagate everywhere with one edit, and prefer the
+``blend_two_with_fallback`` / ``combine_*`` helpers over hand-rolled
+``set(a) & set(b)`` filter expressions so the one-side-missing
+fallback semantics are applied uniformly.
 """
 
 from __future__ import annotations
@@ -178,6 +181,23 @@ from pathlib import Path
 from typing import Dict, List, Optional, Tuple
 
 from .provenance import InputSpec, current_file_input
+
+
+# ----------------------------------------------------------------------
+# 2026-05-14 di-extension reconfirm DONE -- all three constants held.
+# 61-axis cohort sweep with virus|R Haiku-backfilled:
+#   * DEFAULT_GPT_SONNET_DI_WEIGHT: peak at w=0.800 (Δρ=+0.0022 over
+#     w=0.625); top 10 grid points span w=0.75-0.975 within Δρ=0.0004
+#     of each other -- wide plateau, default holds.
+#   * DEFAULT_RESPONSE_DI_WEIGHT: peak at w=0.825, one grid step
+#     (0.025) from the w=0.8 default.  Holds.
+#   * DEFAULT_DI_WEIGHTS (inst_tie): inst_tie > equal > desc_tie
+#     monotonic on the new cohort, same direction as the original
+#     33-axis sweep.  Holds.
+# Plus rho_by_slot_and_{K,L} and rho_by_layer_{K,L} all rerun
+# 2026-05-13 → 2026-05-14 overnight, no regime shifts.
+# Full details in AGENT_NOTES.md "RESOLVED 2026-05-14" block.
+# ----------------------------------------------------------------------
 
 
 # (desc_weight, inst_weight). Sums to 1.0 by convention but enforce-not-required.
@@ -274,8 +294,21 @@ def combine_desc_inst_one_judge(
 ) -> Dict[str, float]:
     """Combine one judge's desc and inst scores using ``w_d * desc + w_i * inst``.
 
-    Only includes names present in BOTH inputs. Ignores entries whose desc or
-    inst score is non-numeric (e.g. ``None``).
+    Includes any name present (with a numeric score) in EITHER input.  If both
+    desc and inst have a numeric score, the standard weighted average applies.
+    If only one mode has a score for a given name, that mode's score is used at
+    100% weight (effectively renormalising the missing-mode weight to 0 and the
+    present-mode weight to 1).
+
+    Rationale (2026-05-13): the previous strict-AND semantics silently dropped
+    entities with partial coverage, which threw away usable signal -- e.g. when
+    Sonnet refuses to score ``virus|R`` in instruction mode but accepts it in
+    description mode (see AGENT_NOTES "Known permanent gap: virus|R on Sonnet
+    instructions mode").  The fallback keeps such entities in the cohort with
+    a 1-source score instead of dropping them entirely.
+
+    A name is included iff at least one of ``desc_scores[name]`` or
+    ``inst_scores[name]`` is present AND numeric (``int`` / ``float``).
 
     Parameters
     ----------
@@ -290,12 +323,22 @@ def combine_desc_inst_one_judge(
     dict[name -> float]
     """
     w_d, w_i = weights
-    out = {}
-    for n in set(desc_scores) & set(inst_scores):
-        d, i = desc_scores[n], inst_scores[n]
-        if not (isinstance(d, (int, float)) and isinstance(i, (int, float))):
-            continue
-        out[n] = w_d * d + w_i * i
+    out: Dict[str, float] = {}
+    for n in set(desc_scores) | set(inst_scores):
+        d = desc_scores.get(n)
+        i = inst_scores.get(n)
+        d_ok = isinstance(d, (int, float))
+        i_ok = isinstance(i, (int, float))
+        if d_ok and i_ok:
+            out[n] = w_d * d + w_i * i
+        elif d_ok:
+            # Only desc present: use it at 100% weight.  Equivalent to
+            # ``(w_d * d) / w_d`` -- renormalize the weights over present
+            # modes only.
+            out[n] = float(d)
+        elif i_ok:
+            out[n] = float(i)
+        # else: drop entity (no numeric scores in either mode)
     return out
 
 
@@ -326,8 +369,24 @@ def combine_desc_inst_two_judges(
     33-axis sweep places the parabolic peak so close to 0.5 that
     the round number is the empirical optimum).
 
-    Only includes entities present in all four input dicts with
-    numeric scores.
+    Includes any entity that has a usable score from AT LEAST ONE judge
+    after the per-judge desc/inst combination (which itself uses the
+    one-mode-missing fallback in :func:`combine_desc_inst_one_judge`).
+    If both judges produce a DI score for an entity, the cross-judge
+    weighted blend applies; if only one judge does, that judge's DI
+    score is used at 100% weight (effectively renormalising the missing
+    judge's weight to 0).
+
+    Rationale (2026-05-13): the previous strict-AND-across-4-inputs
+    semantics dropped entities with any single missing input,
+    discarding usable signal.  Single-judge / single-mode coverage
+    still produces a defensible score for that entity (e.g. when
+    Sonnet refuses ``virus|R`` instructions mode but GPT has full
+    coverage, GPT-DI alone is used rather than the entity being
+    dropped entirely).  See AGENT_NOTES "Known permanent gap" entry.
+    Mirrored at the response × DI blend; consumers that previously
+    hand-rolled the four-way AND filter should now route through
+    these helpers.
 
     Parameters
     ----------
@@ -337,26 +396,86 @@ def combine_desc_inst_two_judges(
     gpt_sonnet_weight : float
         Cross-judge weight on GPT (the rest goes on Sonnet) per mode,
         applied before the desc/inst combination.  Default
-        ``DEFAULT_GPT_SONNET_DI_WEIGHT`` (= 0.50).
+        ``DEFAULT_GPT_SONNET_DI_WEIGHT``.
 
     Returns
     -------
     dict[name -> float]
     """
-    w_d, w_i = weights
     w_gs = gpt_sonnet_weight
     w_son = 1.0 - w_gs
-    common = (
-        set(gpt_desc) & set(gpt_inst) & set(sonnet_desc) & set(sonnet_inst)
-    )
-    out = {}
-    for n in common:
-        gd, gi, sd, si = gpt_desc[n], gpt_inst[n], sonnet_desc[n], sonnet_inst[n]
-        if not all(isinstance(v, (int, float)) for v in (gd, gi, sd, si)):
-            continue
-        desc_avg = w_gs * gd + w_son * sd
-        inst_avg = w_gs * gi + w_son * si
-        out[n] = w_d * desc_avg + w_i * inst_avg
+    gpt_di = combine_desc_inst_one_judge(gpt_desc, gpt_inst, weights=weights)
+    son_di = combine_desc_inst_one_judge(sonnet_desc, sonnet_inst, weights=weights)
+    out: Dict[str, float] = {}
+    for n in set(gpt_di) | set(son_di):
+        g = gpt_di.get(n)
+        s = son_di.get(n)
+        g_ok = isinstance(g, (int, float))
+        s_ok = isinstance(s, (int, float))
+        if g_ok and s_ok:
+            out[n] = w_gs * g + w_son * s
+        elif g_ok:
+            # Only GPT has a DI score: use it at 100%.
+            out[n] = float(g)
+        elif s_ok:
+            out[n] = float(s)
+        # else: drop entity (no numeric coverage from any judge / mode)
+    return out
+
+
+def blend_two_with_fallback(
+    a_scores: Dict[str, float],
+    b_scores: Dict[str, float],
+    weight_a: float,
+) -> Dict[str, float]:
+    """Generic two-source blend with one-side-missing fallback.
+
+    For every name in ``a_scores ∪ b_scores`` with a numeric score on at
+    least one side, return ``weight_a * a + (1 - weight_a) * b`` if both
+    sides are present, else whichever side IS present (at 100%).
+
+    Use this for the response-ensemble blend
+    (``a = GPT-response, b = Haiku-response, weight_a =
+    DEFAULT_GPT_HAIKU_Q9_WEIGHT``) and for the final per-entity blend
+    (``a = response_ensemble, b = di_ensemble, weight_a =
+    DEFAULT_RESPONSE_DI_WEIGHT``).  Mirrors the one-side-missing
+    semantics used by :func:`combine_desc_inst_one_judge` and
+    :func:`combine_desc_inst_two_judges`.
+
+    Rationale (2026-05-13, paired with the static-mode combiners'
+    fallback): partial coverage on either source should keep the
+    entity in the cohort using whatever signal is available, rather
+    than silently dropping it.  Critical when one judge has
+    systematic refusals on a particular entity (see AGENT_NOTES
+    "Known permanent gap: virus|R on Sonnet instructions mode").
+
+    Parameters
+    ----------
+    a_scores, b_scores : dict[name -> int | float]
+    weight_a : float
+        Weight applied to ``a_scores``; ``1 - weight_a`` goes on
+        ``b_scores``.  Typically a tuned blend constant like
+        ``DEFAULT_GPT_HAIKU_Q9_WEIGHT`` or
+        ``DEFAULT_RESPONSE_DI_WEIGHT``.
+
+    Returns
+    -------
+    dict[name -> float]
+    """
+    w_b = 1.0 - weight_a
+    out: Dict[str, float] = {}
+    for n in set(a_scores) | set(b_scores):
+        a = a_scores.get(n)
+        b = b_scores.get(n)
+        a_ok = isinstance(a, (int, float))
+        b_ok = isinstance(b, (int, float))
+        if a_ok and b_ok:
+            out[n] = weight_a * a + w_b * b
+        elif a_ok:
+            out[n] = float(a)
+        elif b_ok:
+            out[n] = float(b)
+        # else: drop
     return out
 
 

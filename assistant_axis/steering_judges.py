@@ -197,9 +197,9 @@ class SteeringSpec:
 #   - tools/mark_rubric_equivalent.py
 #   - AGENT_NOTES.md "Per-entity drift-on-resume check (May 2026)"
 #
-COHERENCE_RUBRIC_VERSION = 4
-RP_RUBRIC_VERSION = 2
-EFFECT_RUBRIC_VERSION = 3
+COHERENCE_RUBRIC_VERSION = 5
+RP_RUBRIC_VERSION = 4
+EFFECT_RUBRIC_VERSION = 5
 
 
 COHERENCE_RUBRIC = """\
@@ -215,10 +215,7 @@ PERSONA DESCRIPTION: {persona_description}
 STEERING AXIS: {axis_name}
 - positive pole ({pos_label}): {pos_description}
 - negative pole ({neg_label}): {neg_description}
-
-This response was steered with sign={sign:+d} (+1 = toward {pos_label},
--1 = toward {neg_label}) at strength {strength}.
-
+{steering_context_sentence}
 QUESTION:
 [QUESTION START]
 {question}
@@ -234,7 +231,7 @@ STEERED RESPONSE (rate this for COHERENCE only):
 {steered_response}
 [RESPONSE END]
 
-Score on a 0-3 incoherence scale:
+Score this on a 0-3 incoherence scale:
 
 - 0: The model is responding normally for its persona, on-topic and
      coherent.  May exhibit traits of the persona OR of the steering
@@ -296,7 +293,7 @@ The model was also steered along this axis (so its response may also
 display some traits of one or the other of these, which is allowed):
 - {pos_label}: {pos_description}
 - {neg_label}: {neg_description}
-
+{steering_context_sentence}
 Prompt:
 [QUESTION START]
 {question}
@@ -313,13 +310,15 @@ penalize for those.
 
 Score on a 0-3 scale:
 - 0: No characteristics of the persona; model identifies as itself (an AI
-     assistant, etc.) and refuses to answer the question.
+     assistant, etc.) and also refuses to answer the question.
 - 1: No characteristics of the persona; model identifies as itself and
      attempts to answer.
 - 2: Model identifies as itself but exhibits some attributes of the
      persona.
 - 3: Model fully plays the persona, either not mentioning being an AI or
-     seamlessly integrating it.
+     seamlessly integrating it.  The steered persona might refuse to
+     answer the question, but if so it does so in (steered) persona
+     and for plausible in-persona reasons.
 
 Respond with a JSON object only, no other text.  Reason about the
 response first, then commit to the score:
@@ -331,9 +330,9 @@ EFFECT_BIDIR_BATCH_RUBRIC = """\
 You are evaluating how strongly a series of model responses have been
 pulled along a steering axis, relative to their unsteered baselines.
 
-All {n_items} responses below were generated under the SAME persona,
-steering axis, direction, and strength; they differ only in the
-question being answered.
+All {n_items} responses below were generated under the SAME persona
+and steering conditions; they differ only in the question being
+answered.
 
 Score each response independently.
 
@@ -344,19 +343,18 @@ STEERING AXIS: {axis_name}
 - positive pole ({pos_label}): {pos_description}
 - negative pole ({neg_label}): {neg_description}
 
-This batch was steered with direction={sign:+d} at strength {strength}.
-
 For each response, score on a -3 to +3 scale RELATIVE TO ITS BASELINE:
 - +3: strongly more {pos_label} than baseline
 - +2: clearly more {pos_label} than baseline
 - +1: slightly more {pos_label} than baseline
--  0: same direction as baseline / no clear pull either way
+-  0: equivalent to baseline / no clear pull either way
 - -1: slightly more {neg_label} than baseline
 - -2: clearly more {neg_label} than baseline
 - -3: strongly more {neg_label} than baseline
 
 Note: do not penalize for incoherence (a separate judge handles that);
-only score the direction and magnitude of the pull along the axis.
+only score the observable direction and magnitude of the pull along
+the axis.
 
 {items_block}
 
@@ -371,9 +369,9 @@ EFFECT_POLE_BATCH_RUBRIC = """\
 You are evaluating how strongly a series of model responses exhibit a
 single trait, relative to their unsteered baselines.
 
-All {n_items} responses below were generated under the SAME persona,
-steering axis, direction, and strength; they differ only in the question
-being answered.
+All {n_items} responses below were generated under the SAME persona
+and steering conditions; they differ only in the question being
+answered.
 
 Score each response independently.
 
@@ -383,15 +381,19 @@ PERSONA DESCRIPTION: {persona_description}
 TRAIT TO MEASURE: {pole_label}
 TRAIT DESCRIPTION: {pole_description}
 
-(This batch was steered with direction={sign:+d} at strength {strength}
-along the axis {axis_name}; the other pole is {other_pole_label}.)
+(This batch was steered toward {steered_pole_label} along the axis
+{axis_name}; the other pole is {other_pole_label}.)
 
 For each response, score how strongly it exhibits the {pole_label} trait
 RELATIVE TO ITS BASELINE on a 0-3 scale:
-- 0: same as baseline / no notable {pole_label} traits beyond baseline
+- 0: equivalent to baseline / no notable {pole_label} traits beyond baseline
 - 1: slightly more {pole_label} than baseline
 - 2: clearly more {pole_label} than baseline
 - 3: strongly more {pole_label} than baseline
+
+Note: do not penalize for incoherence (a separate judge handles that);
+only score the observable amount of {pole_label} traits in the
+response relative to baseline.
 
 {items_block}
 
@@ -416,6 +418,34 @@ def build_coherence_prompt(
     baseline_response: str,
     steered_response: str,
 ) -> str:
+    # 2026-05-13 (v5): pre-resolve sign → steered_pole_label so the
+    # judge sees a single direction-name phrase instead of doing the
+    # +1/-1 → pos/neg mapping in its head; also drop the strength
+    # value from the prompt entirely.  Coherence is a property of the
+    # steered response on its own merits; telling the judge "strength=8"
+    # would prejudice it toward expecting incoherence (and "strength=1"
+    # toward expecting coherence) before it reads the response, which
+    # is the opposite of what we want.  ``sign``/``strength`` remain
+    # in the function signature so callers don't need to change.
+    #
+    # Edge case: sign=0 corresponds to an unsteered BASELINE response.
+    # The project convention (see steering/post_judge.py) is to skip
+    # baselines for coherence-judging entirely, but if a caller does
+    # invoke build_coherence_prompt with sign=0 (e.g. ad-hoc probe),
+    # we must not say "steered toward X" because no steering was
+    # applied -- that would lie to the judge.  In that case we
+    # construct an empty steering-context sentence (the baseline
+    # response just gets judged against the question without a
+    # direction-of-steering annotation).
+    sign_i = int(sign)
+    if sign_i == 0:
+        steering_context_sentence = ""
+    else:
+        steered_pole_label = (steering.pos_label if sign_i > 0
+                              else steering.neg_label)
+        steering_context_sentence = (
+            f"This response was steered toward {steered_pole_label}.\n"
+        )
     return COHERENCE_RUBRIC.format(
         persona_label=persona.display_label(),
         persona_description=persona.display_description(),
@@ -424,8 +454,7 @@ def build_coherence_prompt(
         pos_description=steering.pos_description,
         neg_label=steering.neg_label,
         neg_description=steering.neg_description,
-        sign=int(sign),
-        strength=strength,
+        steering_context_sentence=steering_context_sentence,
         question=question,
         baseline_response=baseline_response,
         steered_response=steered_response,
@@ -436,9 +465,27 @@ def build_rp_prompt(
     *,
     persona: PersonaSpec,
     steering: SteeringSpec,
+    sign: int,
     question: str,
     steered_response: str,
 ) -> str:
+    # 2026-05-13 (v3): append a "This response was steered toward
+    # {pole}." sentence after the axis-poles bulleted list, so the
+    # judge knows which way the response was pulled (relevant context
+    # for "did the persona survive the steering?" judgments).  Unlike
+    # coherence judging, RP judging IS appropriate for the unsteered
+    # baseline (sign=0) -- a baseline response that fully embodies its
+    # persona should still score 3 on RP -- so the sign=0 path omits
+    # the direction sentence rather than skipping the judge call.
+    sign_i = int(sign)
+    if sign_i == 0:
+        steering_context_sentence = ""
+    else:
+        steered_pole_label = (steering.pos_label if sign_i > 0
+                              else steering.neg_label)
+        steering_context_sentence = (
+            f"This response was steered toward {steered_pole_label}.\n"
+        )
     return RP_STEERING_RUBRIC.format(
         persona_label=persona.display_label(),
         persona_description=persona.display_description(),
@@ -446,6 +493,7 @@ def build_rp_prompt(
         pos_description=steering.pos_description,
         neg_label=steering.neg_label,
         neg_description=steering.neg_description,
+        steering_context_sentence=steering_context_sentence,
         question=question,
         steered_response=steered_response,
     )
@@ -480,6 +528,19 @@ def build_effect_bidir_batch_prompt(
     Each item is a dict with keys 'id', 'question', 'baseline_response',
     'steered_response'.  All items share the same (persona, axis, sign,
     strength).
+
+    2026-05-13 (v4): both ``sign`` and ``strength`` are now hidden from
+    the judge's prompt -- they remain in the function signature only so
+    callers don't need to change.  Rationale: this rubric scores a
+    signed -3..+3 magnitude AND direction of the pull along the axis,
+    and the judge has to decide WHICH pole the response was pulled
+    toward.  Telling it "direction=+1, strength=8" before it sees the
+    responses gives it a strong prior in BOTH dimensions: it expects
+    positive scores AND large-magnitude scores.  Better to let the
+    judge read the responses cold and form its judgment from content
+    alone.  Compare ``build_effect_pole_batch_prompt`` (unidirectional
+    pole-X rubric) where direction is kept because the trait being
+    measured is fixed and direction is just contextual.
     """
     return EFFECT_BIDIR_BATCH_RUBRIC.format(
         n_items=len(items),
@@ -490,8 +551,6 @@ def build_effect_bidir_batch_prompt(
         pos_description=steering.pos_description,
         neg_label=steering.neg_label,
         neg_description=steering.neg_description,
-        sign=int(sign),
-        strength=strength,
         items_block=_format_effect_items_block(items),
     )
 
@@ -521,6 +580,20 @@ def build_effect_pole_batch_prompt(
     else:
         raise ValueError(f"pole must be 'pos' or 'neg'; got {pole!r}")
 
+    # 2026-05-13 (v4): drop ``strength`` from the prompt (telling
+    # the judge "strength=8" before scoring biases toward expecting
+    # large magnitudes -- and toward seeing the trait when looking
+    # for it).  Direction is KEPT for this unidirectional rubric
+    # because the trait being measured (pole_label) is fixed; the
+    # direction info is just contextual ("we pulled this batch toward
+    # X; you're measuring whether X showed up").  Pre-resolve the
+    # numeric ``sign`` into the matching pole label so the judge
+    # doesn't have to parse +1/-1 in its head -- same UX
+    # simplification as in COHERENCE_RUBRIC v5 and
+    # RP_STEERING_RUBRIC v3.
+    sign_i = int(sign)
+    steered_pole_label = (steering.pos_label if sign_i >= 0
+                          else steering.neg_label)
     return EFFECT_POLE_BATCH_RUBRIC.format(
         n_items=len(items),
         persona_label=persona.display_label(),
@@ -529,8 +602,7 @@ def build_effect_pole_batch_prompt(
         pole_label=pole_label,
         pole_description=pole_description,
         other_pole_label=other_pole_label,
-        sign=int(sign),
-        strength=strength,
+        steered_pole_label=steered_pole_label,
         items_block=_format_effect_items_block(items),
     )
 
@@ -639,6 +711,41 @@ class JudgeDispatcher(Protocol):
         """
         ...
 
+    def judge_effect_for_strength_async(
+        self,
+        records: List[Dict[str, Any]],
+    ) -> "Future[float]":
+        """Async-fire (or surface the existing in-flight) effect-judging
+        future for one strength group.
+
+        Returns a ``concurrent.futures.Future`` that resolves to the
+        strength's mean absolute effect score (``mean(|effect.combined|)``
+        across the per-strength record group) once every record's effect
+        has been judged and stamped.
+
+        Used by the bidirectional-scan runner (2026-05-14) to drive the
+        DOWN-direction eff-stop condition: if 2 consecutive DOWN
+        strengths have ``|mean_abs_eff| < eff_stop_threshold`` we stop
+        scanning down on the assumption further-down strengths will be
+        even weaker.
+
+        Behaviour around the skip path: when ``enqueue_strength_group``
+        determined the strength was incoherent enough to skip persona +
+        effect judging entirely, the returned future resolves to
+        ``float('nan')`` -- callers should treat NaN as "unknown
+        effect, do not count toward eff-stop tail window".  Skipped
+        strengths only occur on the high-strength UP tail where the
+        coh-stop would fire first anyway, so this case is rare in
+        practice.
+
+        Implementation contract: callers MUST invoke this AFTER
+        ``enqueue_strength_group`` for the same strength group, so the
+        dispatcher has had a chance to register the effect future.  The
+        runner's main loop satisfies this naturally because it chains
+        ``enqueue_strength_group`` off the coherence-future callback.
+        """
+        ...
+
     def should_stop_at(self, strength: float) -> bool:
         """Whether the sweep should stop at this strength.
 
@@ -696,6 +803,18 @@ class NoOpJudgeDispatcher:
         records: List[Dict[str, Any]],
     ) -> None:
         return
+
+    def judge_effect_for_strength_async(
+        self,
+        records: List[Dict[str, Any]],
+    ) -> "Future[float]":
+        # NoOp dispatcher doesn't judge effect; return 0.0 instantly so
+        # the runner's eff-stop logic treats this strength as "no
+        # measurable effect" (which is the truthful answer here).
+        from concurrent.futures import Future as _Future
+        fut: _Future = _Future()
+        fut.set_result(0.0)
+        return fut
 
     def should_stop_at(self, strength: float) -> bool:
         return False
@@ -811,6 +930,21 @@ class RealJudgeDispatcher:
         # Track outstanding async tasks so drain() knows what to wait on.
         self._inflight: List[asyncio.Future] = []
         self._inflight_lock = threading.Lock()
+
+        # Per-strength effect-mean futures, populated in
+        # enqueue_strength_group and surfaced via
+        # judge_effect_for_strength_async (2026-05-14: needed for the
+        # bidirectional-scan runner to drive the DOWN eff-stop
+        # condition).  Key: (sign, strength).  Value: a sync
+        # concurrent.futures.Future[float] yielding
+        # mean(|effect.combined|) once the strength's records are fully
+        # judged (NaN if the strength was skipped due to high coherence
+        # mean).  Cleaned up by drain().
+        from concurrent.futures import Future as _CFFuture
+        self._effect_mean_futures: Dict[
+            Tuple[int, float], "_CFFuture[float]"
+        ] = {}
+        self._effect_mean_futures_lock = threading.Lock()
 
         # SDK clients (lazy: only construct what we need based on configured models).
         self._openai_client = None
@@ -1014,6 +1148,18 @@ class RealJudgeDispatcher:
                 mean_coh >= self.coh_stop_threshold
             )
 
+        # Register the effect-mean future BEFORE we either skip-stamp or
+        # dispatch async judging.  Bidirectional-scan callers will poll
+        # this future via judge_effect_for_strength_async after their
+        # enqueue_strength_group call returns.  We always register so
+        # that callers don't have to special-case the skip branch.
+        from concurrent.futures import Future as _CFFuture
+        eff_future: "_CFFuture[float]" = _CFFuture()
+        with self._effect_mean_futures_lock:
+            self._effect_mean_futures[(int(sign), float(strength))] = (
+                eff_future
+            )
+
         if mean_coh > self.skip_threshold:
             # Skip path: stamp skipped flags on all records, write back.
             for r in records:
@@ -1036,6 +1182,12 @@ class RealJudgeDispatcher:
             with self._state_lock:
                 self._strength_states[(int(sign), float(strength))].judging_skipped = True
             self._merge_records_to_disk(records)
+            # Skip branch: effect was not judged, so we don't have a
+            # meaningful mean.  Resolve to NaN so the bidirectional
+            # runner's eff-stop tail check knows to skip this strength
+            # rather than count it as zero-effect (which would falsely
+            # trigger eff-stop).
+            eff_future.set_result(float("nan"))
             logger.info(
                 f"[cell s{slot}_l{layer}_{sign:+d}] strength={strength}: "
                 f"mean_coh={mean_coh:.2f} > {self.skip_threshold:.2f}; "
@@ -1055,6 +1207,73 @@ class RealJudgeDispatcher:
         )
         with self._inflight_lock:
             self._inflight.append(future)
+
+        # When the judge-group task completes, compute the strength's
+        # mean(|effect.combined|) from the in-place-stamped records and
+        # resolve the per-strength effect-mean future so any waiters
+        # (the bidirectional-scan runner) unblock.  Stamping happens
+        # inside _judge_group_async; we just read the result here.
+        def _resolve_effect_mean(
+            _async_fut, records=records, eff_future=eff_future,
+        ):
+            try:
+                # Surface the underlying _judge_group_async exception if
+                # any; otherwise wait for stamping to complete.
+                _async_fut.result()
+                vals = []
+                for r in records:
+                    eff = (r.get("judges") or {}).get("effect") or {}
+                    v = eff.get("combined")
+                    if isinstance(v, (int, float)):
+                        vals.append(abs(float(v)))
+                m = (sum(vals) / len(vals)) if vals else float("nan")
+                eff_future.set_result(float(m))
+            except Exception as exc:  # noqa: BLE001
+                logger.warning(
+                    f"[effect-mean-future] _judge_group_async raised; "
+                    f"resolving effect-mean future to NaN: "
+                    f"{type(exc).__name__}: {exc}"
+                )
+                eff_future.set_result(float("nan"))
+
+        future.add_done_callback(_resolve_effect_mean)
+
+    def judge_effect_for_strength_async(
+        self,
+        records: List[Dict[str, Any]],
+    ) -> "Future[float]":
+        """Surface the per-strength effect-mean future registered by
+        ``enqueue_strength_group``.
+
+        Contract: caller invokes AFTER ``enqueue_strength_group`` for
+        the same strength group.  The records list is used only to
+        recover (sign, strength); all records in a group share these.
+        See protocol docstring above for skip-path semantics (NaN).
+        """
+        from concurrent.futures import Future as _CFFuture
+        if not records:
+            fut: "_CFFuture[float]" = _CFFuture()
+            fut.set_result(float("nan"))
+            return fut
+        first = records[0]
+        sign = int(first.get("sign", 0))
+        strength = float(first.get("strength", 0.0))
+        with self._effect_mean_futures_lock:
+            existing = self._effect_mean_futures.get((sign, strength))
+        if existing is not None:
+            return existing
+        # Caller invoked us before enqueue_strength_group -- protocol
+        # violation, but recover gracefully with NaN so the runner can
+        # keep going.
+        logger.warning(
+            f"[effect-mean-future] judge_effect_for_strength_async called "
+            f"for (sign={sign}, strength={strength}) with no registered "
+            f"future; ensure enqueue_strength_group is called first.  "
+            f"Resolving to NaN."
+        )
+        fut = _CFFuture()
+        fut.set_result(float("nan"))
+        return fut
 
     # ------------------------------------------------------------------
     # Stop / drain
@@ -1206,6 +1425,7 @@ class RealJudgeDispatcher:
             prompt = build_rp_prompt(
                 persona=self.persona,
                 steering=self.steering,
+                sign=int(r.get("sign", 0)),
                 question=r["question"],
                 steered_response=r["response"],
             )

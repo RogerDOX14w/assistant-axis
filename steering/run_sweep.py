@@ -80,6 +80,44 @@ logger = logging.getLogger("steering_sweep")
 
 
 # ---------------------------------------------------------------------------
+# Sweep log file handler (per-experiment, attached on both parent + workers)
+# ---------------------------------------------------------------------------
+
+# Module-level set so re-imports inside spawned workers (which start
+# with a fresh interpreter) don't accidentally double-attach.
+_SWEEP_LOG_ATTACHED: set = set()
+
+
+def _attach_sweep_log_filehandler(output_root: Path) -> None:
+    """Attach a FileHandler writing to ``output_root / "sweep.log"`` to
+    the root logger.
+
+    Idempotent: if a handler for this exact path is already attached on
+    this process, returns without re-attaching.  Safe to call from both
+    the parent process and each spawned worker -- line-based logging
+    keeps the appended writes ordered well enough on Linux (records are
+    well under PIPE_BUF) for combined parent+worker output to be
+    readable without explicit cross-process locking.
+
+    Append mode so resumed runs accumulate history rather than
+    truncating prior logs (matches the rest of run_sweep.py's
+    resume-friendly atomic-write conventions).
+    """
+    target = (output_root / "sweep.log").resolve()
+    key = str(target)
+    if key in _SWEEP_LOG_ATTACHED:
+        return
+    target.parent.mkdir(parents=True, exist_ok=True)
+    fh = logging.FileHandler(str(target), mode="a", encoding="utf-8")
+    fh.setLevel(logging.INFO)
+    fh.setFormatter(logging.Formatter(
+        "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+    ))
+    logging.getLogger().addHandler(fh)
+    _SWEEP_LOG_ATTACHED.add(key)
+
+
+# ---------------------------------------------------------------------------
 # Config loading
 # ---------------------------------------------------------------------------
 
@@ -194,6 +232,21 @@ def _build_work_items(
     default_weakest = float(sweep_cfg.get("weakest_strength", 1.0))
     max_strength = float(sweep_cfg.get("max_strength", 64.0))
     multiplier = float(sweep_cfg.get("multiplier", 1.189))
+    # Bidirectional-scan knobs (2026-05-14: new default scan_mode).
+    # See assistant_axis.steering_runner.BidirectionalCursor and the
+    # design plan for full semantics.
+    scan_mode = str(sweep_cfg.get("scan_mode", "bidirectional"))
+    if scan_mode not in ("bidirectional", "legacy_unidirectional"):
+        raise ValueError(
+            f"sweep.scan_mode must be 'bidirectional' or "
+            f"'legacy_unidirectional'; got {scan_mode!r}"
+        )
+    eff_stop_threshold = float(sweep_cfg.get("eff_stop_threshold", 0.25))
+    eff_stop_consecutive = int(sweep_cfg.get("eff_stop_consecutive", 2))
+    min_strength = float(sweep_cfg.get("min_strength", 0.125))
+    start_strength_multiplier_steps = int(
+        sweep_cfg.get("start_strength_multiplier_steps", 2)
+    )
     signs = list(sweep_cfg.get("signs", [+1, -1]))
     if not all(s in (+1, -1) for s in signs):
         raise ValueError(f"sweep.signs must be subset of [+1, -1]; got {signs}")
@@ -231,6 +284,11 @@ def _build_work_items(
                 "weakest_strength": weakest,
                 "max_strength": max_strength,
                 "multiplier": multiplier,
+                "scan_mode": scan_mode,
+                "eff_stop_threshold": eff_stop_threshold,
+                "eff_stop_consecutive": eff_stop_consecutive,
+                "min_strength": min_strength,
+                "start_strength_multiplier_steps": start_strength_multiplier_steps,
                 "persona": persona_prompt,
                 "questions": questions,
                 "batch_size": batch_size,
@@ -534,6 +592,17 @@ def _worker_main(
         format=f"%(asctime)s - W{worker_id} - %(name)s - %(levelname)s - %(message)s",
     )
 
+    # Attach the same per-experiment FileHandler the parent did so
+    # worker log lines land in output_root/sweep.log alongside the
+    # parent's.  Spawn-context workers start with a fresh interpreter
+    # so the parent's handler doesn't carry across -- we rebuild it
+    # locally on the path the parent threaded into the work-item
+    # dict.  Atomic appends on Linux up to PIPE_BUF guarantee no
+    # mid-line interleaving for our record sizes.
+    sweep_log_dir = config.get("sweep_log_dir")
+    if sweep_log_dir:
+        _attach_sweep_log_filehandler(Path(sweep_log_dir))
+
     # Set up tmpfs (TMPDIR + HF cache mirror) before model load.
     from assistant_axis.tmpfs import setup_model_tmpfs_cache, setup_tmpdir_if_unset
     setup_tmpdir_if_unset()
@@ -585,21 +654,29 @@ def _worker_main(
             elif item["kind"] == "cell":
                 slot, layer, sign = item["slot"], item["layer"], item["sign"]
                 cell_dir = item["cell_dir"]
+                scan_mode = item.get("scan_mode", "bidirectional")
                 log.info(
                     f"running cell s{slot}_l{layer}_sign={sign:+d}, "
-                    f"weakest={item['weakest_strength']}, max={item['max_strength']}"
+                    f"scan_mode={scan_mode}, weakest={item['weakest_strength']}, "
+                    f"max={item['max_strength']}, "
+                    f"min={item.get('min_strength', 0.125)}"
                 )
                 axis_vector = _load_axis_for_cell(
                     item["axis_source"], slot, layer
                 ).to(model.device, dtype=torch.bfloat16)
-                schedule = directional_schedule(
-                    sign=sign,
-                    weakest=item["weakest_strength"],
-                    max_strength=item["max_strength"],
-                    multiplier=item["multiplier"],
-                )
-                log.info(f"schedule: {len(schedule)} strengths "
-                         f"({schedule[0]} .. {schedule[-1]})")
+                # Legacy mode needs an explicit schedule; bidirectional
+                # mode builds its cursor lazily inside run_steering_cell.
+                if scan_mode == "legacy_unidirectional":
+                    schedule = directional_schedule(
+                        sign=sign,
+                        weakest=item["weakest_strength"],
+                        max_strength=item["max_strength"],
+                        multiplier=item["multiplier"],
+                    )
+                    log.info(f"legacy schedule: {len(schedule)} strengths "
+                             f"({schedule[0]} .. {schedule[-1]})")
+                else:
+                    schedule = None
                 # Build a per-cell judge dispatcher.  Each cell gets its
                 # own dispatcher because the records_path is cell-local;
                 # the dispatcher's background event loop is cheap to
@@ -635,6 +712,20 @@ def _worker_main(
                         ),
                         coh_stop_consecutive=int(
                             judging_cfg.get("coh_stop_consecutive", 2)
+                        ),
+                        scan_mode=scan_mode,
+                        eff_stop_threshold=float(
+                            item.get("eff_stop_threshold", 0.25)
+                        ),
+                        eff_stop_consecutive=int(
+                            item.get("eff_stop_consecutive", 2)
+                        ),
+                        weakest_strength=float(item["weakest_strength"]),
+                        max_strength=float(item["max_strength"]),
+                        multiplier=float(item["multiplier"]),
+                        min_strength=float(item.get("min_strength", 0.125)),
+                        start_strength_multiplier_steps=int(
+                            item.get("start_strength_multiplier_steps", 2)
                         ),
                     )
                 finally:
@@ -843,6 +934,21 @@ def main():
 
     output_root = Path(config["output_dir"]) / config["experiment_id"]
     output_root.mkdir(parents=True, exist_ok=True)
+
+    # Attach a per-experiment FileHandler so the sweep log auto-lives
+    # in the experiment dir instead of wherever the shell was
+    # redirected.  Append mode so resumed runs accumulate history;
+    # workers will attach their own FileHandler (in _run_worker) to
+    # the same path -- line-based logging on Linux is atomic up to
+    # PIPE_BUF (4096B) which our records always satisfy.  See
+    # https://docs.python.org/3/howto/logging-cookbook.html#logging-to-a-single-file-from-multiple-processes
+    # for the official caveat (concerns long pickled-record lines we
+    # don't produce).
+    _attach_sweep_log_filehandler(output_root)
+    # Threaded into the worker via the config dict so each spawn-context
+    # worker can re-attach the same FileHandler in its fresh interpreter.
+    config["sweep_log_dir"] = str(output_root)
+    logger.info(f"sweep log -> {output_root / 'sweep.log'}")
 
     # Freeze config + questions to the experiment dir for reproducibility.
     questions = _load_questions(Path(config["questions_file"]))

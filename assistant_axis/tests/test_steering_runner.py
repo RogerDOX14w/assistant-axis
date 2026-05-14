@@ -69,6 +69,117 @@ class TestDirectionalSchedule:
 
 
 # ---------------------------------------------------------------------------
+# BidirectionalCursor (2026-05-14: new default scan_mode)
+# ---------------------------------------------------------------------------
+
+
+class TestBidirectionalCursor:
+    """Unit tests for the lazy bidirectional geometric strength cursor."""
+
+    def test_centre_anchor(self):
+        c = steering_runner.BidirectionalCursor(
+            weakest=1.0, max_strength=64.0, min_strength=0.125,
+            multiplier=1.189, start_steps_up=2,
+        )
+        # s_init = 1.0 * 1.189**2 ≈ 1.4136
+        assert abs(c.s_init - 1.413721) < 1e-6
+
+    def test_first_three_up(self):
+        c = steering_runner.BidirectionalCursor(
+            weakest=1.0, max_strength=64.0, min_strength=0.125,
+            multiplier=1.189, start_steps_up=2,
+        )
+        ups = [c.next_up() for _ in range(3)]
+        # s_init * 1.189, * 1.189**2, * 1.189**3
+        assert ups[0] == pytest.approx(1.413721 * 1.189, rel=1e-4)
+        assert ups[1] == pytest.approx(1.413721 * 1.189**2, rel=1e-4)
+        assert ups[2] == pytest.approx(1.413721 * 1.189**3, rel=1e-4)
+        # Monotonic increasing
+        assert ups[0] < ups[1] < ups[2]
+
+    def test_first_three_down(self):
+        c = steering_runner.BidirectionalCursor(
+            weakest=1.0, max_strength=64.0, min_strength=0.125,
+            multiplier=1.189, start_steps_up=2,
+        )
+        downs = [c.next_down() for _ in range(3)]
+        # s_init / 1.189, / 1.189**2, / 1.189**3 = 1.189, 1.0, 0.841
+        assert downs[0] == pytest.approx(1.189, rel=1e-3)
+        assert downs[1] == pytest.approx(1.0, rel=1e-3)
+        assert downs[2] == pytest.approx(0.841, rel=1e-3)
+        # Monotonic decreasing
+        assert downs[0] > downs[1] > downs[2]
+
+    def test_up_exhausts_at_max(self):
+        c = steering_runner.BidirectionalCursor(
+            weakest=1.0, max_strength=2.0, min_strength=0.5,
+            multiplier=2.0, start_steps_up=0,
+        )
+        # s_init=1.0, next_up=2.0 (=max, allowed),
+        # next_up=4.0 (> max, None).
+        assert c.s_init == 1.0
+        assert c.next_up() == pytest.approx(2.0)
+        assert c.next_up() is None
+        assert c.up_exhausted is True
+        # Idempotent: keeps returning None
+        assert c.next_up() is None
+
+    def test_down_exhausts_at_min(self):
+        c = steering_runner.BidirectionalCursor(
+            weakest=1.0, max_strength=4.0, min_strength=0.25,
+            multiplier=2.0, start_steps_up=0,
+        )
+        # s_init=1.0, next_down=0.5, next_down=0.25 (=min, allowed),
+        # next_down=0.125 (< min, None).
+        assert c.next_down() == pytest.approx(0.5)
+        assert c.next_down() == pytest.approx(0.25)
+        assert c.next_down() is None
+        assert c.down_exhausted is True
+
+    def test_geometric_chain_to_floor(self):
+        """Plan §9.1 spec: with weakest=1.0, mult=1.189, max=64, min=0.125,
+        the DOWN chain extends from s_init=1.414 down to just above 0.125
+        (with mult=1.189 the closest stop is around 0.125, the next would
+        be ~0.105 = exhausted)."""
+        c = steering_runner.BidirectionalCursor(
+            weakest=1.0, max_strength=64.0, min_strength=0.125,
+            multiplier=1.189, start_steps_up=2,
+        )
+        downs = []
+        while True:
+            v = c.next_down()
+            if v is None:
+                break
+            downs.append(v)
+        # Last value should be just at-or-above floor; next would be below.
+        assert downs[-1] >= 0.125 * (1.0 - 1e-9)
+        # The chain should fit in a sensible window: roughly
+        # log_1.189(1.414/0.125) ≈ 14 steps.
+        assert 12 <= len(downs) <= 16
+
+    def test_rejects_min_above_weakest(self):
+        with pytest.raises(ValueError, match="min_strength"):
+            steering_runner.BidirectionalCursor(
+                weakest=1.0, max_strength=64.0, min_strength=2.0,
+                multiplier=1.189,
+            )
+
+    def test_rejects_bad_multiplier(self):
+        with pytest.raises(ValueError, match="multiplier"):
+            steering_runner.BidirectionalCursor(
+                weakest=1.0, max_strength=64.0, min_strength=0.125,
+                multiplier=1.0,
+            )
+
+    def test_rejects_negative_start_steps(self):
+        with pytest.raises(ValueError, match="start_steps_up"):
+            steering_runner.BidirectionalCursor(
+                weakest=1.0, max_strength=64.0, min_strength=0.125,
+                multiplier=1.189, start_steps_up=-1,
+            )
+
+
+# ---------------------------------------------------------------------------
 # _build_position_kwargs
 # ---------------------------------------------------------------------------
 
@@ -257,6 +368,10 @@ class TestRunSteeringCell:
             max_new_tokens=8,
             positions_mode="all",
             judge_dispatcher=NoOpJudgeDispatcher(),
+            # Legacy mode: these tests pre-date the 2026-05-14
+            # bidirectional default and assert behaviour of the
+            # bottom-up sweep over the explicit `strengths` list.
+            scan_mode="legacy_unidirectional",
         )
         return result, out_dir, model, questions
 
@@ -398,6 +513,7 @@ class TestRunSteeringCell:
             judge_dispatcher=dispatcher,
             coh_stop_threshold=1.5,
             coh_stop_consecutive=2,
+            scan_mode="legacy_unidirectional",
         )
 
         assert result.reason == "incoherent"
@@ -479,6 +595,7 @@ class TestRunSteeringCell:
             positions_mode="all",
             judge_dispatcher=dispatcher,
             coh_stop_threshold=1.5, coh_stop_consecutive=2,
+            scan_mode="legacy_unidirectional",
         )
         # No stop -- single crossing didn't trigger; sweep ran to completion.
         assert result.reason == "completed"
@@ -530,6 +647,7 @@ class TestRunSteeringCell:
             positions_mode="all",
             judge_dispatcher=dispatcher,
             coh_stop_threshold=1.5, coh_stop_consecutive=2,
+            scan_mode="legacy_unidirectional",
         )
         assert result.reason == "incoherent"
         # Generated 1.0, 2.0, 4.0; stopped before 8.0.  4.0 is the second
@@ -566,6 +684,378 @@ class TestRunSteeringCell:
         assert result.stopped_at_strength == 4.0
         # Should NOT have triggered any new generation
         assert _FakeActivationSteering.construct_calls == []
+
+
+# ---------------------------------------------------------------------------
+# Bidirectional state-machine tests
+# ---------------------------------------------------------------------------
+
+
+class _BidirStubDispatcher:
+    """Stub dispatcher for bidirectional state-machine tests.
+
+    Returns canned ``mean_coh`` and ``mean_abs_eff`` per strength, both
+    via immediately-resolved futures.  This lets us drive the runner's
+    state machine through specific UP/DOWN block paths without spinning
+    up a real judge dispatcher.
+
+    Keys with abs-value precision: 6 decimals (matches the cursor's
+    rounding).  Set values via ``.set(strength, mean_coh, mean_abs_eff)``.
+    """
+
+    def __init__(self):
+        self._table: Dict[float, Tuple[float, float]] = {}
+        self.coh_dispatched_for: List[float] = []
+        self.eff_dispatched_for: List[float] = []
+        self.enqueued_groups: List[Dict[str, Any]] = []
+        self.drained = False
+
+    def set(self, strength: float, mean_coh: float, mean_abs_eff: float) -> None:
+        self._table[round(float(strength), 6)] = (
+            float(mean_coh), float(mean_abs_eff),
+        )
+
+    def _lookup(self, strength: float) -> Tuple[float, float]:
+        key = round(float(strength), 6)
+        if key in self._table:
+            return self._table[key]
+        # Default: middle-of-the-road coh + zero eff (so an
+        # unconfigured DOWN strength counts toward the eff-stop window).
+        return 0.0, 0.0
+
+    def judge_coherence_for_strength_async(self, records):
+        from concurrent.futures import Future as _Future
+        s = float(records[0]["strength"])
+        m_coh, _ = self._lookup(s)
+        for r in records:
+            r.setdefault("judges", {})["coherence"] = {
+                "score": int(round(m_coh)), "reason": "stub",
+                "model": "stub", "ts": 0, "rubric_version": 1,
+            }
+            r["judges"]["strength_mean_coh"] = m_coh
+        self.coh_dispatched_for.append(s)
+        fut: _Future = _Future()
+        fut.set_result(m_coh)
+        return fut
+
+    def judge_coherence_blocking(self, record):
+        return 0
+
+    def enqueue_strength_group(self, *, cell_dir, slot, layer, sign,
+                               strength, records):
+        # Stamp effect.combined consistently with the eff future the
+        # runner is about to surface; the runner reads this back via
+        # the on-disk records during restart bootstrap.
+        _, m_eff = self._lookup(float(strength))
+        for r in records:
+            r.setdefault("judges", {})["effect"] = {
+                "combined": m_eff,
+                "mode": "bidirectional",
+                "ts": 0,
+                "rubric_version": 1,
+                "skipped_due_to_strength_mean_coh": False,
+            }
+        self.enqueued_groups.append(
+            {"strength": float(strength), "n": len(records)}
+        )
+
+    def judge_effect_for_strength_async(self, records):
+        from concurrent.futures import Future as _Future
+        s = float(records[0]["strength"])
+        _, m_eff = self._lookup(s)
+        self.eff_dispatched_for.append(s)
+        fut: _Future = _Future()
+        fut.set_result(m_eff)
+        return fut
+
+    def should_stop_at(self, strength):
+        return False
+
+    def drain(self, timeout_s=None):
+        self.drained = True
+
+
+class TestBidirectionalStateMachine:
+    """End-to-end runner tests that drive the bidirectional state machine
+    through the three canonical block paths from plan §9.2."""
+
+    def _run_cell(self, *, tmp_path, monkeypatch, dispatcher, max_strength=8.0,
+                  min_strength=0.0625, multiplier=2.0,
+                  start_steps_up=1, weakest=1.0, coh_stop_threshold=1.5,
+                  coh_stop_consecutive=2, eff_stop_threshold=0.25,
+                  eff_stop_consecutive=2, n_questions=2, batch_size=2):
+        monkeypatch.setenv("TMPDIR", str(tmp_path))
+        monkeypatch.setattr(steering_runner, "ActivationSteering",
+                            _FakeActivationSteering)
+        out_dir = tmp_path / "cell"
+        return steering_runner.run_steering_cell(
+            _FakeModel(8), _FakeTokenizer(),
+            axis_vector=torch.zeros(8, dtype=torch.bfloat16),
+            slot=0, layer=26, sign=+1,
+            persona_system_prompt="hist",
+            questions=[f"q{i}" for i in range(n_questions)],
+            output_dir=out_dir,
+            batch_size=batch_size, max_new_tokens=4,
+            positions_mode="all",
+            judge_dispatcher=dispatcher,
+            coh_stop_threshold=coh_stop_threshold,
+            coh_stop_consecutive=coh_stop_consecutive,
+            eff_stop_threshold=eff_stop_threshold,
+            eff_stop_consecutive=eff_stop_consecutive,
+            weakest_strength=weakest,
+            max_strength=max_strength,
+            min_strength=min_strength,
+            multiplier=multiplier,
+            start_strength_multiplier_steps=start_steps_up,
+            scan_mode="bidirectional",
+        )
+
+    def test_up_blocks_first_then_down_keeps_stepping(self, tmp_path, monkeypatch):
+        """BothOpen -> UpBlocked via 2 consec incoherent; DOWN continues
+        until it also blocks on cursor exhaustion.
+
+        Schedule with mult=2, weakest=1, start_steps_up=1: s_init=2,
+        UP {4, 8}, DOWN {1, 0.5, 0.25, 0.125, 0.0625}.
+        Set UP {4, 8} to mean_coh=2.0 (incoherent), all DOWN to
+        mean_abs_eff=0.5 (active effect, so down keeps stepping until
+        cursor exhausted).
+        """
+        d = _BidirStubDispatcher()
+        # Incoherent UP -- both UP strengths cross the threshold.
+        d.set(4.0, mean_coh=2.0, mean_abs_eff=0.5)
+        d.set(8.0, mean_coh=2.0, mean_abs_eff=0.5)
+        # DOWN: well-above eff threshold so eff-stop never fires.
+        for s in (1.0, 0.5, 0.25, 0.125, 0.0625):
+            d.set(s, mean_coh=0.0, mean_abs_eff=0.5)
+        # s_init is at 2.0 -- low coh + medium eff (irrelevant).
+        d.set(2.0, mean_coh=0.0, mean_abs_eff=0.5)
+
+        result = self._run_cell(
+            tmp_path=tmp_path, monkeypatch=monkeypatch, dispatcher=d,
+        )
+        # Should have visited both UP strengths and exhausted DOWN at
+        # the floor 0.0625.
+        summary = result.summary
+        assert summary["scan_mode"] == "bidirectional"
+        assert summary["up_blocked_reason"] == "incoherent"
+        assert summary["down_blocked_reason"] == "min_strength_reached"
+        # UP tail strengths in order
+        ups = sorted(s for s in d.coh_dispatched_for if s > 2.0)
+        assert ups == [4.0, 8.0]
+        # DOWN tail includes the geometric chain down to the floor
+        downs = sorted({s for s in d.coh_dispatched_for if s < 2.0})
+        assert downs[0] == pytest.approx(0.0625)
+        assert downs[-1] == pytest.approx(1.0)
+
+    def test_down_blocks_first_then_up_keeps_stepping(self, tmp_path, monkeypatch):
+        """BothOpen -> DownBlocked via 2 consec sub-threshold |eff|; UP
+        continues until coh-stop.
+
+        Schedule (mult=2, weakest=1, start_steps_up=1): s_init=2,
+        UP {4, 8}, DOWN {1, 0.5}.  Make DOWN values low-effect to
+        trigger eff-stop after 2; UP at 4 and 8 are incoherent to
+        eventually block UP too.
+        """
+        d = _BidirStubDispatcher()
+        d.set(1.0, mean_coh=0.0, mean_abs_eff=0.1)   # below eff threshold
+        d.set(0.5, mean_coh=0.0, mean_abs_eff=0.1)   # 2nd consec below
+        d.set(2.0, mean_coh=0.0, mean_abs_eff=0.5)
+        d.set(4.0, mean_coh=2.0, mean_abs_eff=0.5)   # 1st consec coh-cross
+        d.set(8.0, mean_coh=2.0, mean_abs_eff=0.5)   # 2nd consec coh-cross
+
+        result = self._run_cell(
+            tmp_path=tmp_path, monkeypatch=monkeypatch, dispatcher=d,
+        )
+        summary = result.summary
+        assert summary["scan_mode"] == "bidirectional"
+        assert summary["down_blocked_reason"] == "sub_threshold_effect"
+        assert summary["up_blocked_reason"] == "incoherent"
+        # DOWN should NOT have gone past 0.5 (eff-stopped after 2 below)
+        downs = sorted({s for s in d.coh_dispatched_for if s < 2.0})
+        assert downs == [0.5, 1.0]
+        # UP went 4, 8 then stopped on 2 consec incoherent.
+        ups = sorted(s for s in d.coh_dispatched_for if s > 2.0)
+        assert ups == [4.0, 8.0]
+
+    def test_persists_positions_mode_in_summary(self, tmp_path, monkeypatch):
+        """Tag-along §12: summary.json now carries positions_mode for
+        per-cell audit."""
+        d = _BidirStubDispatcher()
+        # Make both ends block fast so the test is short.
+        for s in (1.0, 0.5, 0.25, 0.125, 0.0625):
+            d.set(s, mean_coh=0.0, mean_abs_eff=0.0)  # eff-stop on first 2
+        for s in (4.0, 8.0):
+            d.set(s, mean_coh=3.0, mean_abs_eff=0.5)  # coh-stop on first 2
+
+        result = self._run_cell(
+            tmp_path=tmp_path, monkeypatch=monkeypatch, dispatcher=d,
+        )
+        assert result.summary["positions_mode"] == "all"
+
+
+class TestBidirectionalRestart:
+    """Restart mid-bidirectional: pre-seed records.jsonl + verify resume
+    continues from correct cursors and re-evaluates stop conditions
+    against pre-seeded history."""
+
+    def test_resume_from_partial_records(self, tmp_path, monkeypatch):
+        from assistant_axis.atomic_io import write_jsonl
+        monkeypatch.setenv("TMPDIR", str(tmp_path))
+        monkeypatch.setattr(steering_runner, "ActivationSteering",
+                            _FakeActivationSteering)
+        out_dir = tmp_path / "cell"
+        out_dir.mkdir()
+
+        # Schedule: mult=2, weakest=1, start_steps_up=1 -> s_init=2.
+        # UP {4, 8}, DOWN {1, 0.5, 0.25, 0.125, 0.0625}.
+        # Pre-seed s_init=2 + UP=4 + DOWN=1 with judged scores.
+        questions = ["q0", "q1"]
+        sign = +1
+
+        def _mk_rec(strength, qi, mean_coh, mean_abs_eff):
+            return {
+                "strength": float(strength), "sign": sign,
+                "slot": 0, "layer": 26, "question_idx": qi,
+                "question": questions[qi],
+                "response": "stub",
+                "n_tokens": 1,
+                "judges": {
+                    "coherence": {"score": int(round(mean_coh)),
+                                  "reason": "seed", "model": "seed",
+                                  "ts": 0, "rubric_version": 1},
+                    "persona": None,
+                    "effect": {
+                        "combined": mean_abs_eff,
+                        "mode": "bidirectional", "ts": 0,
+                        "rubric_version": 1,
+                        "skipped_due_to_strength_mean_coh": False,
+                    },
+                    "strength_mean_coh": float(mean_coh),
+                },
+                "timing": {"gen_s": 0.0},
+                "abandoned": False,
+            }
+
+        seed = []
+        for s, mc, me in [(2.0, 0.0, 0.5), (4.0, 0.0, 0.5),
+                          (1.0, 0.0, 0.5)]:
+            for qi in range(2):
+                seed.append(_mk_rec(s, qi, mc, me))
+        write_jsonl(seed, out_dir / "records.jsonl")
+
+        # Run dispatcher: complete the scan.  UP {8} should reach
+        # max=8 cap → "max_strength_reached".  DOWN walks {0.5, 0.25,
+        # 0.125, 0.0625}; configure them all as low-eff so the eff-stop
+        # fires on the first 2 below s_init=2 (which are seed=1.0 + new=0.5).
+        d = _BidirStubDispatcher()
+        d.set(8.0, mean_coh=0.0, mean_abs_eff=0.5)
+        for s in (0.5, 0.25, 0.125, 0.0625):
+            d.set(s, mean_coh=0.0, mean_abs_eff=0.1)  # below eff threshold
+
+        result = steering_runner.run_steering_cell(
+            _FakeModel(8), _FakeTokenizer(),
+            axis_vector=torch.zeros(8, dtype=torch.bfloat16),
+            slot=0, layer=26, sign=sign,
+            persona_system_prompt="hist",
+            questions=questions,
+            output_dir=out_dir,
+            batch_size=2, max_new_tokens=4,
+            positions_mode="all",
+            judge_dispatcher=d,
+            coh_stop_threshold=1.5, coh_stop_consecutive=2,
+            eff_stop_threshold=0.25, eff_stop_consecutive=2,
+            weakest_strength=1.0, max_strength=8.0,
+            min_strength=0.0625, multiplier=2.0,
+            start_strength_multiplier_steps=1,
+            scan_mode="bidirectional",
+        )
+        # Resume should NOT re-generate seeded strengths (2, 4, 1).
+        gen_strengths = sorted(d.coh_dispatched_for)
+        assert 2.0 not in gen_strengths
+        assert 4.0 not in gen_strengths
+        assert 1.0 not in gen_strengths
+        # Should at minimum hit 8 (UP cap) and 0.5 (first new DOWN).
+        assert 8.0 in gen_strengths
+        assert 0.5 in gen_strengths
+        # Summary reflects bidirectional mode with both sides eventually
+        # blocked.
+        assert result.summary["scan_mode"] == "bidirectional"
+        assert result.summary["up_blocked_reason"] == "max_strength_reached"
+        # DOWN should have eff-stopped because seed=1.0 has eff=0.5
+        # (>= threshold so doesn't count) but new 0.5 + 0.25 are below
+        # threshold -- wait, need to recount.  Seed records have
+        # eff=0.5 (>= 0.25 threshold, so 1.0 doesn't count toward
+        # below-threshold streak), but the eff-stop requires 2 consec
+        # BELOW, so we need 0.5 and 0.25 both below 0.25.  My setup has
+        # 0.5 at eff=0.1 and 0.25 at eff=0.1, so the streak of 2 fires.
+        assert result.summary["down_blocked_reason"] == "sub_threshold_effect"
+
+
+class TestLegacyModeParity:
+    """Verify that scan_mode='legacy_unidirectional' preserves
+    pre-2026-05-14 behaviour.
+
+    Full byte-identical parity to a frozen baseline is impractical given
+    summary.json schema additions (scan_mode + positions_mode fields are
+    new in 2026-05-14).  This test pins the legacy-path invariants
+    instead: visited strengths, stop semantics, and records.jsonl
+    contents match the legacy expectations.
+    """
+
+    def test_legacy_completes_in_order_with_explicit_schedule(
+            self, tmp_path, monkeypatch):
+        monkeypatch.setenv("TMPDIR", str(tmp_path))
+        monkeypatch.setattr(steering_runner, "ActivationSteering",
+                            _FakeActivationSteering)
+        out_dir = tmp_path / "cell"
+        result = steering_runner.run_steering_cell(
+            _FakeModel(8), _FakeTokenizer(),
+            axis_vector=torch.zeros(8, dtype=torch.bfloat16),
+            slot=0, layer=26, sign=+1,
+            strengths=[1.0, 2.0, 4.0],
+            persona_system_prompt="hist",
+            questions=["q0", "q1"],
+            output_dir=out_dir,
+            batch_size=2, max_new_tokens=4,
+            positions_mode="all",
+            judge_dispatcher=NoOpJudgeDispatcher(),
+            scan_mode="legacy_unidirectional",
+        )
+        # Legacy: visits strengths in caller-supplied order, completes.
+        assert result.reason == "completed"
+        assert result.n_records == 6
+        records = [json.loads(line) for line
+                   in (out_dir / "records.jsonl").read_text().splitlines()
+                   if line.strip()]
+        # Strict order: 1.0 first, then 2.0, then 4.0.
+        strengths_in_disk_order = [r["strength"] for r in records]
+        assert strengths_in_disk_order == [1.0, 1.0, 2.0, 2.0, 4.0, 4.0]
+        # Summary records the mode + positions_mode tag-along.
+        summary = result.summary
+        assert summary["scan_mode"] == "legacy_unidirectional"
+        assert summary["positions_mode"] == "all"
+
+    def test_legacy_requires_strengths(self, tmp_path, monkeypatch):
+        """Legacy mode without `strengths` is an explicit error -- the
+        caller is responsible for building the schedule via
+        directional_schedule()."""
+        monkeypatch.setenv("TMPDIR", str(tmp_path))
+        monkeypatch.setattr(steering_runner, "ActivationSteering",
+                            _FakeActivationSteering)
+        with pytest.raises(ValueError, match="legacy_unidirectional"):
+            steering_runner.run_steering_cell(
+                _FakeModel(8), _FakeTokenizer(),
+                axis_vector=torch.zeros(8, dtype=torch.bfloat16),
+                slot=0, layer=26, sign=+1,
+                strengths=None,
+                persona_system_prompt="hist",
+                questions=["q0"],
+                output_dir=tmp_path / "cell",
+                batch_size=1, max_new_tokens=4,
+                positions_mode="all",
+                judge_dispatcher=NoOpJudgeDispatcher(),
+                scan_mode="legacy_unidirectional",
+            )
 
 
 # ---------------------------------------------------------------------------

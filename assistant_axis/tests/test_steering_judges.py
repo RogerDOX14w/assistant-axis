@@ -122,7 +122,62 @@ class TestCoherencePrompt:
         # JSON output instruction visible
         assert '"score"' in p
 
-    def test_sign_and_strength_appear(self, persona, steering):
+    def test_sign_zero_omits_steering_sentence(self, persona, steering):
+        """sign=0 corresponds to an unsteered baseline.  Project
+        convention (steering/post_judge.py) is to skip baselines for
+        coherence-judging entirely, but the prompt builder must still
+        be honest if it ever gets called with sign=0: the steering-
+        direction sentence is omitted so we don't lie to the judge.
+
+        See the build_coherence_prompt inline comment for full
+        context."""
+        p = build_coherence_prompt(
+            persona=persona, steering=steering, sign=0, strength=0.0,
+            question="q", baseline_response="b", steered_response="r",
+        )
+        # No claim that any steering happened.  Note: the phrase
+        # "steered toward" appears in the level-2 scoring-criterion
+        # example body ("an accountant not steered toward anything
+        # mystical sounding mystical..."), so we can't ban that
+        # substring globally; the assertion is just that the
+        # response-specific claim ("This response was steered
+        # toward X.") is absent.  Pole labels still appear
+        # elsewhere (persona description, axis poles in the
+        # "STEERING AXIS:" block) which is fine.
+        assert "This response was steered" not in p
+        # The rest of the prompt (persona, axis definition, scale, etc.)
+        # is still present so the judge has enough context to rate
+        # coherence, even though it's not told which direction was
+        # steered (because none was).
+        assert "PERSONA" in p
+        assert "STEERING AXIS" in p
+        assert "[QUESTION START]" in p
+        assert "[BASELINE START]" in p
+        assert "[RESPONSE START]" in p
+        assert "0-3" in p
+
+    def test_sign_resolved_to_pole_label_and_strength_hidden(
+        self, persona, steering,
+    ):
+        """In v5 (2026-05-13) the coherence prompt no longer shows the
+        raw sign or the numeric strength.  Instead:
+
+        * The sign is pre-resolved to its pole label so the judge sees
+          ``This response was steered toward callous.`` (or
+          ``toward compassionate.``) without doing the +1/-1 mapping
+          in its head.
+        * The strength is omitted entirely -- coherence should be
+          judged on its own merits, and showing the strength would
+          prejudice the judge (high strength → expect incoherence,
+          low strength → expect coherence) before it reads the
+          response.
+
+        See module docstring for the rationale.  Previous version
+        of this test (pre-2026-05-13) asserted the OLD behaviour
+        (``+1``, ``-1``, ``4.0``, ``2.0`` strings present); this
+        rewrite is paired with the code change to drop those
+        fields from COHERENCE_RUBRIC.
+        """
         p_pos = build_coherence_prompt(
             persona=persona, steering=steering, sign=+1, strength=4.0,
             question="q", baseline_response="b", steered_response="r",
@@ -131,16 +186,25 @@ class TestCoherencePrompt:
             persona=persona, steering=steering, sign=-1, strength=2.0,
             question="q", baseline_response="b", steered_response="r",
         )
-        assert "+1" in p_pos
-        assert "-1" in p_neg
-        assert "4.0" in p_pos
-        assert "2.0" in p_neg
+        # Direction is shown as a pole name, not a signed number.
+        assert "steered toward callous" in p_pos
+        assert "steered toward compassionate" in p_neg
+        # Old fields are gone -- judge cannot see sign or strength.
+        assert "+1" not in p_pos
+        assert "-1" not in p_neg
+        assert "4.0" not in p_pos
+        assert "2.0" not in p_neg
+        # Defensive: make sure the strength values aren't sneaking
+        # in via some other substring (e.g. "0.4" being substring of
+        # "4.0"); the prompt should contain neither.
+        assert "strength" not in p_pos.lower()
+        assert "strength" not in p_neg.lower()
 
 
 class TestRPPrompt:
     def test_includes_persona_and_axis(self, persona, steering):
         p = build_rp_prompt(
-            persona=persona, steering=steering,
+            persona=persona, steering=steering, sign=+1,
             question="How do I deal with grief?",
             steered_response="Death comes for us all.",
         )
@@ -158,10 +222,54 @@ class TestRPPrompt:
     def test_rp_does_not_show_baseline(self, persona, steering):
         # RP rubric only takes the steered response, not the baseline.
         p = build_rp_prompt(
-            persona=persona, steering=steering,
+            persona=persona, steering=steering, sign=+1,
             question="q", steered_response="r",
         )
         assert "BASELINE" not in p
+
+    def test_steering_direction_sentence_shown_for_nonzero_sign(
+        self, persona, steering,
+    ):
+        """v3 (2026-05-13): RP rubric now appends a "This response was
+        steered toward {pole}." sentence after the axis-poles bullets,
+        so the judge knows which way the response was pulled when
+        assessing persona-embodiment.  The sign is pre-resolved to a
+        pole label same as in the coherence rubric."""
+        p_pos = build_rp_prompt(
+            persona=persona, steering=steering, sign=+1,
+            question="q", steered_response="r",
+        )
+        p_neg = build_rp_prompt(
+            persona=persona, steering=steering, sign=-1,
+            question="q", steered_response="r",
+        )
+        assert "This response was steered toward callous" in p_pos
+        assert "This response was steered toward compassionate" in p_neg
+        # Sign / strength numbers MUST NOT appear (same rationale as
+        # coherence rubric -- pre-resolve to direction name to reduce
+        # judge cognitive load).
+        assert "+1" not in p_pos
+        assert "-1" not in p_neg
+        assert "strength" not in p_pos.lower()
+
+    def test_sign_zero_omits_steering_direction(self, persona, steering):
+        """For the baseline (sign=0), RP judging is still appropriate
+        (a persona-embodying baseline should still score 3), but the
+        steering-direction sentence must be omitted so we don't claim
+        the baseline was steered.  See build_rp_prompt inline comment
+        for full context."""
+        p = build_rp_prompt(
+            persona=persona, steering=steering, sign=0,
+            question="q", steered_response="r",
+        )
+        # Per-record direction-of-steering claim is absent.
+        assert "This response was steered" not in p
+        # Axis-poles bulleted-list paragraph still present (the persona
+        # context is relevant even without a per-record direction).
+        assert "callous" in p
+        assert "compassionate" in p
+        # 0-3 scoring scale still present.
+        assert "0-3" in p
 
 
 class TestEffectBidirBatchPrompt:
@@ -185,6 +293,68 @@ class TestEffectBidirBatchPrompt:
         # -3..+3 scale visible
         assert "-3" in p
         assert "+3" in p
+
+    def test_v4_hides_direction_and_strength(self, persona, steering):
+        """v4 (2026-05-13): the bidirectional effect rubric scores
+        responses on a signed -3..+3 scale, requiring the judge to
+        decide BOTH magnitude and direction.  Telling the judge the
+        steering direction (sign) and strength up front gives a
+        strong two-dimensional prior that biases the score in both
+        respects: judge expects positive-sign scores AND large-
+        magnitude scores when told "direction=+1, strength=8".
+        Both fields are now hidden so the judge has to read the
+        responses cold.
+
+        Compare ``TestEffectPoleBatchPrompt`` -- the unidirectional
+        rubric scores a fixed trait on 0..3, so direction is just
+        contextual and is kept; only strength is hidden there.
+
+        Test rewrite paired with code change v3 → v4; previously
+        these checks would have asserted the OPPOSITE (sign/strength
+        ARE present).  Pre-2026-05-13 test history if interested:
+        the rubric body had a literal line
+        ``This batch was steered with direction={sign:+d} at strength {strength}.``
+        which has been removed.
+        """
+        items = [{"id": 0, "question": "q",
+                  "baseline_response": "b", "steered_response": "r"}]
+        p_pos = build_effect_bidir_batch_prompt(
+            persona=persona, steering=steering, sign=+1, strength=8.0,
+            items=items,
+        )
+        p_neg = build_effect_bidir_batch_prompt(
+            persona=persona, steering=steering, sign=-1, strength=4.0,
+            items=items,
+        )
+        # Direction-of-steering claim absent.  The score-scale lines
+        # ("+1: slightly more ..." etc.) contain "+1"/"-1" as bullet
+        # labels, so we check for direction CLAIM PATTERNS instead of
+        # raw "+1"/"-1": no "direction=", no "sign=", no
+        # "steered with direction", no "steered toward X" sentence.
+        assert "direction=" not in p_pos
+        assert "direction=" not in p_neg
+        assert "sign=" not in p_pos
+        assert "sign=" not in p_neg
+        assert "steered with" not in p_pos.lower()
+        assert "steered with" not in p_neg.lower()
+        assert "steered toward" not in p_pos
+        assert "steered toward" not in p_neg
+        # Numeric strength absent.  Same guard pattern: don't check
+        # raw "8"/"4" since the n_items count could include those;
+        # check for "at strength", "strength=", and the word
+        # "strength" in lowered form.
+        assert "8.0" not in p_pos
+        assert "4.0" not in p_neg
+        assert "at strength" not in p_pos
+        assert "strength=" not in p_pos
+        assert "strength" not in p_pos.lower()
+        # Pole-DEFINITIONS still present (the axis-definition block,
+        # which is reference context, not direction-of-this-batch info).
+        assert "callous" in p_pos
+        assert "compassionate" in p_pos
+        # -3..+3 scoring scale still present.
+        assert "-3" in p_pos
+        assert "+3" in p_pos
 
 
 class TestEffectPoleBatchPrompt:
@@ -213,6 +383,68 @@ class TestEffectPoleBatchPrompt:
         # (other_pole_label is callous)
         assert "TRAIT TO MEASURE: compassionate" in p
         assert "the other pole is callous" in p
+
+    def test_v4_hides_strength_keeps_direction(self, persona, steering):
+        """v4 (2026-05-13): unidirectional pole rubric drops the
+        numeric ``strength`` from the prompt (priming the judge to
+        expect large magnitudes biases scores upward) but keeps the
+        steering direction as plain-text "steered toward X".  The
+        trait being measured is FIXED by ``pole=`` so direction is
+        contextual rather than a strong score-shaping prior --
+        unlike the bidirectional rubric (see
+        ``test_v4_hides_direction_and_strength``).
+
+        Also verifies the v3-style ``sign`` → ``steered_pole_label``
+        resolution used by the COHERENCE rubric v5: when sign is
+        +1, the steered-toward label is the POS pole; when sign is
+        -1, it's the NEG pole.  This holds regardless of which
+        pole is being scored (``pole=``).
+        """
+        items = [{"id": 0, "question": "q",
+                  "baseline_response": "b", "steered_response": "r"}]
+        # sign=+1 → steered toward pos pole (callous), measuring pos pole
+        p_pos_steer_pos = build_effect_pole_batch_prompt(
+            persona=persona, steering=steering, sign=+1, strength=8.0,
+            pole="pos", items=items,
+        )
+        assert "steered toward callous" in p_pos_steer_pos
+        # No numeric strength claim.
+        assert "8.0" not in p_pos_steer_pos
+        assert "at strength" not in p_pos_steer_pos
+        # No literal sign value.
+        assert "+1" not in p_pos_steer_pos
+        assert "direction=" not in p_pos_steer_pos
+
+        # sign=-1 → steered toward neg pole (compassionate), measuring pos pole
+        p_pos_steer_neg = build_effect_pole_batch_prompt(
+            persona=persona, steering=steering, sign=-1, strength=4.0,
+            pole="pos", items=items,
+        )
+        assert "steered toward compassionate" in p_pos_steer_neg
+        assert "4.0" not in p_pos_steer_neg
+
+        # sign=+1 → steered toward pos pole (callous), measuring neg pole
+        p_neg_steer_pos = build_effect_pole_batch_prompt(
+            persona=persona, steering=steering, sign=+1, strength=2.0,
+            pole="neg", items=items,
+        )
+        assert "steered toward callous" in p_neg_steer_pos
+        assert "TRAIT TO MEASURE: compassionate" in p_neg_steer_pos
+
+    def test_v4_sign_zero_treated_as_pos(self, persona, steering):
+        """Defensive sanity check: sign=0 (baseline batches) still
+        produces a syntactically-valid prompt.  Edge case mainly to
+        guard against KeyError if someone wires baselines through the
+        pole rubric (which is unusual but technically supported by
+        the function signature)."""
+        items = [{"id": 0, "question": "q",
+                  "baseline_response": "b", "steered_response": "r"}]
+        p = build_effect_pole_batch_prompt(
+            persona=persona, steering=steering, sign=0, strength=0.0,
+            pole="pos", items=items,
+        )
+        # Tie-breaks to pos pole when sign=0 (sign>=0 branch).
+        assert "steered toward callous" in p
 
     def test_invalid_pole_raises(self, persona, steering):
         items = [{"id": 0, "question": "q",

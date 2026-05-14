@@ -12,7 +12,12 @@ from assistant_axis.pair_list_cohort import (
 def test_cohort_from_pairs_canonical():
     assert cohort_from_pairs("pair_list_responses.json") == "responses"
     assert cohort_from_pairs("pair_list_di.json") == "di"
+    # ``pair_list_goalnongoal.json`` carries the goal/non-goal-FILTERED
+    # subset since the 2026-05-13 rename; ``pair_list_clean.json`` is
+    # the comprehensive all-clean-pairs superset.  Both consume via
+    # the same cohort_from_pairs strip-prefix logic.
     assert cohort_from_pairs("pair_list_goalnongoal.json") == "goalnongoal"
+    assert cohort_from_pairs("pair_list_clean.json") == "clean"
 
 
 def test_cohort_from_pairs_legacy_one_offs():

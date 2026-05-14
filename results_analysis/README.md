@@ -1131,6 +1131,97 @@ Output: `roger/role_pair_diff_norms_out/role_pair_diff_norms_<kind>.png`,
 e.g. `..._roles.png` or `..._traits.png`.  Runtime is ~25 s end-to-end
 (most of it is `torch.load`).
 
+### `axis_cosine_seriation.py`
+
+Pairwise |cos| heatmap of every axis in the chosen pair-list cohort,
+reordered so semantically-related axes sit adjacent to one another,
+with an optional **semantic-block ontology overlay** on the y/x axes.
+Promoted from a one-off geometry exploration (May 2026) used to
+visualise the structure of the clean 60-pair axis space.
+
+For each pair `(pos, neg)` in `pair_list_clean.json` (configurable via
+`--pairs`), the script:
+
+1. Loads the layer-25 / slot-6 difference vector `v_pos − v_neg` from
+   `traits/vectors` or `roles/vectors` (auto-routed by `pair_type_of`)
+   and unit-normalises.
+2. Optionally applies soft-shear at depth `L = DEFAULT_SOFT_SHEAR_L = 3`
+   (canonical analysis frame; pass `--L 0` for the raw-projection
+   comparison).
+3. Builds the symmetric `|cos|` matrix and runs **optimal leaf
+   ordering** (Bar-Joseph 2001, via `scipy.cluster.hierarchy.
+   optimal_leaf_ordering`) on the `(1 − |cos|)`-distance dendrogram.
+   OLO is the EXACT optimum for the leaf-permutation problem given a
+   dendrogram — clusters land block-diagonal, and within each block
+   the most-similar pairs sit adjacent rather than at opposite ends.
+4. Overlays `|cos| ≥ threshold` cluster brackets (default 0.5) on the
+   heatmap; ships memberships at five thresholds (0.7 / 0.6 / 0.5 /
+   0.4 / 0.3) in the JSON sidecar for downstream consumers.
+5. Adds outer coloured bands annotating each axis with its semantic
+   block from the hand-curated 8-block ontology (`Power & certainty`,
+   `Epistemic style`, `Affect`, `Worldview & norms`, `Diligence &
+   openness`, `Honesty`, `Alignment & prosocial`, `Social stance`).
+   The ontology is annotation only — it doesn't feed into the
+   clustering — but seeing the bands next to the seriated heatmap is
+   the cleanest way to verify the data-driven geometry agrees with
+   the human reading of which traits belong together.
+
+The colormap is `magma` (low |cos| dark, high |cos| bright), chosen
+so near-orthogonal pairs read as the visual background and clustered
+pairs jump out.
+
+```bash
+# Default: clean 60-pair cohort, soft-shear L=3, slot 6 / layer 25.
+uv run python results_analysis/axis_cosine_seriation.py
+
+# Raw-frame comparison.
+uv run python results_analysis/axis_cosine_seriation.py --L 0
+
+# Goal/non-goal cohort only.
+uv run python results_analysis/axis_cosine_seriation.py \
+  --pairs pair_list_goalnongoal.json
+
+# Tighter cluster brackets.
+uv run python results_analysis/axis_cosine_seriation.py \
+  --cluster_threshold 0.6
+
+# Suppress the ontology overlay (for cohorts where it's not curated
+# or you want a clean diagonal-only view).
+uv run python results_analysis/axis_cosine_seriation.py --ontology none
+```
+
+Outputs (under `roger/axis_judge_experiments/`):
+- `axis_cosine_heatmap_<cohort>_<frame>.png` (the seriated heatmap
+  with ontology bands).
+- `axis_cosine_heatmap_<cohort>_<frame>.json` (provenance envelope
+  with OLO leaf order, cluster memberships at five thresholds,
+  pairwise |cos| stats, and the resolved per-block run structure
+  including any block that the seriation fragmented).
+
+Where `<frame>` is `softshear<L>` (or `raw` for `--L 0`). Runtime is
+~5 s end-to-end on 60 axes.
+
+**Headline finding** on the clean 60-pair cohort at slot 6 / layer 25:
+in the canonical **L=3 soft-shear** frame, the OLO seriation recovers
+the hand-curated 8-block ontology **exactly** — 8 runs across 8
+blocks, zero splits, blocks contiguous in the order shown above.  In
+the **raw** frame the same seriation fragments the same ontology into
+**21 runs across 8 blocks, 7 of which are split**: blocks like
+`Epistemic style`, `Worldview & norms`, and `Social stance` appear in
+4–5 separate stripes each, interleaved with other blocks.  Whitening
+isn't manufacturing semantic structure — block-internal axes ARE the
+ones the model represents as adjacent in raw space — but it IS
+aligning the data-driven geometry with the human ontology, by
+attenuating the dominant goal/non-goal direction that otherwise
+dominates the cosine structure.  This is a strong empirical
+validation of the "whitening sharpens, doesn't create" story
+documented under "Whitening / soft-shear defaults" in
+`AGENT_NOTES.md`.
+
+Mean off-diagonal |cos|: 0.222 (median 0.188) in L=3 vs 0.245 (median
+0.210) in raw — a ~10 % tighten in absolute |cos|, but the ontology-
+contiguity story is the more compelling finding.
+
 ### `all_roles_pairwise_slots.py`
 
 Companion to `token_position_noise_analysis.py`: shows the **full

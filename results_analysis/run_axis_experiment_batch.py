@@ -31,7 +31,8 @@ async def run_one(pair, provider, judge_model, output_root, data_dir, instructio
                   layer, whiten_K, max_tokens, temperature, rps, batch_size, save_every,
                   score_modes, subdir_name, scores_dir, responses_dir,
                   response_target_batch_size, refill_gaps,
-                  question_subsample_modulo=None, questions_file=None):
+                  question_subsample_modulo=None, questions_file=None,
+                  budget_usd=None):
     pos, neg = pair['pos'], pair['neg']
     pair_type = pair_type_of(pair)        # "traits" (default) or "roles"
     out_dir = output_root / f'{pos}_vs_{neg}' / subdir_name
@@ -76,6 +77,8 @@ async def run_one(pair, provider, judge_model, output_root, data_dir, instructio
         cmd += ['--question_subsample_modulo', str(question_subsample_modulo)]
         if questions_file:
             cmd += ['--questions_file', str(questions_file)]
+    if budget_usd is not None:
+        cmd += ['--budget_usd', str(budget_usd)]
     log_path = out_dir / 'run.log'
     t0 = time.time()
     with open(log_path, 'wb') as logf:
@@ -113,6 +116,7 @@ async def run_all(args):
                 args.response_target_batch_size, args.refill_gaps,
                 question_subsample_modulo=args.question_subsample_modulo,
                 questions_file=args.questions_file,
+                budget_usd=args.budget_usd,
             )
 
     print(f'Launching {len(pairs)} pair runs (concurrency={args.concurrency}, provider={args.provider})')
@@ -135,12 +139,32 @@ def collect_summary(output_root: Path, providers):
             cp = pair_dir / prov / 'correlations.json'
             if not cp.exists():
                 continue
-            corr = json.loads(cp.read_text())
+            try:
+                corr = json.loads(cp.read_text())
+            except json.JSONDecodeError:
+                print(f'  [warn] {cp}: malformed JSON, skipping summary entry')
+                continue
+            # Defensive schema-shape checks.  Pre-May-2026 correlations.json
+            # files (or partially-written ones from failed runs) may have
+            # a non-dict at any level; skip with a warning rather than
+            # crash the whole batch summary.  Expected schema:
+            # corr = {mode: {slot: {metric: {rho, p, n}}}}.
+            if not isinstance(corr, dict):
+                print(f'  [warn] {cp}: top-level not a dict, skipping')
+                continue
             for mode, slots in corr.items():
+                if not isinstance(slots, dict):
+                    print(f'  [warn] {cp}: corr[{mode!r}] not a dict, skipping')
+                    continue
                 for slot, metrics in slots.items():
+                    if not isinstance(metrics, dict):
+                        print(f'  [warn] {cp}: corr[{mode!r}][{slot!r}] '
+                              f'not a dict (got {type(metrics).__name__}), '
+                              f'skipping')
+                        continue
                     for metric in ('raw', 'whitened'):
                         entry = metrics.get(metric)
-                        if not entry:
+                        if not entry or not isinstance(entry, dict):
                             continue
                         records.append({
                             'pos': pos, 'neg': neg, 'provider': prov,
@@ -202,6 +226,11 @@ def main():
                         'inner resume logic can fill any None/missing entries in their '
                         'caches. Pairs whose gaps.json shows all modes empty are still '
                         'skipped.')
+    p.add_argument('--budget_usd', type=float, default=None,
+                   help='Per-axis budget cap in USD passed through to '
+                        'axis_judge_correlation.py.  Each pair gets an '
+                        'independent cap; total worst-case = budget_usd × '
+                        'n_pairs.  Default: None (no cap).')
     p.add_argument('--only_summary', action='store_true', help='Skip runs, just (re)build the summary')
     args = p.parse_args()
     # Normalize provider name -> subdir name

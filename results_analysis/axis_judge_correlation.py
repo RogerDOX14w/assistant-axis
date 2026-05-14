@@ -467,12 +467,23 @@ def load_corpus(args: argparse.Namespace, layer: int) -> Corpus:
                 logger.warning(f"skip {etype}/{name}: cannot load vector: {e}")
                 continue
             # Select the requested layer now. Vectors are (n_slots, n_layers, hidden).
+            # ``.clone()`` is *critical* for memory: ``vec[:, layer, :]`` is a
+            # view into the full (n_slots, n_layers, hidden) tensor, and
+            # storing the view keeps the whole tensor alive in storage --
+            # ~10 MB × 580 entities = ~6 GB per process.  Cloning the slice
+            # decouples it from the full tensor so ``vec`` can be GC'd at
+            # the end of this iteration, cutting per-process memory ~50×
+            # (only the (n_slots, hidden) slice survives, ~160 KB × 580 =
+            # ~93 MB).  Fix applied 2026-05-13 after a 6×concurrent batch
+            # run blew past 36 GB resident; pre-fix, running >2 axes in
+            # parallel was already infeasible on workstation-class RAM.
             if vec.dim() == 3:
-                vec_layer = vec[:, layer, :]
+                vec_layer = vec[:, layer, :].clone()
             elif vec.dim() == 2:
                 # (n_slots, hidden) already, or (n_layers, hidden) — ambiguous.
                 # For this repo all vectors are 3D; treat 2D as already-layer-selected
-                # with slot dim preserved.
+                # with slot dim preserved.  No clone needed -- the tensor is
+                # already the working size, not a view into a larger one.
                 vec_layer = vec
             else:
                 logger.warning(f"skip {etype}/{name}: unexpected vector rank {vec.dim()}")
@@ -2201,8 +2212,17 @@ async def score_static_mode(
     # Already-disambiguated keys pass through untouched, so v2 caches
     # produced by this script (or by a future migration) are
     # idempotent under the same load step.
+    # NB: ``entity_id`` and ``is_entity_id`` MUST be in scope before the
+    # ``if cache:`` block, otherwise Python's function-scope analysis
+    # binds them as local-vars-via-import inside the block and the
+    # outer reference at line ~2260 (``eid = entity_id(name, etype)``)
+    # raises UnboundLocalError on first-time judging (no cache to
+    # migrate, branch skipped, import never ran).  Bug fixed 2026-05-13
+    # after the di-extension batch failed on all 26 new axes with this
+    # exact symptom; previously hidden because Phase 5b/5c always
+    # rejudged from a populated cache and the branch always fired.
+    from assistant_axis.entity_id import entity_id, is_entity_id  # noqa: F401, E402
     if cache:
-        from assistant_axis.entity_id import entity_id, is_entity_id
         kinds_for_name: Dict[str, set] = {}
         for (et, n) in corpus.descriptions.keys():
             kinds_for_name.setdefault(n, set()).add(et)
@@ -2375,15 +2395,100 @@ async def score_static_mode(
     ]
     _update_gaps_file(Path(args.output_dir), mode=mode, gaps=missing)
     if missing:
-        head = ", ".join(missing[:8]) + ("..." if len(missing) > 8 else "")
-        _warn_with_banner(
-            f"[{mode}] {len(missing)} of {len(scorable)} scorable entities have no "
-            f"cached score (call/parse failed across all retries).\n"
-            f"  examples: {head}\n"
-            f"  full list: {Path(args.output_dir) / 'gaps.json'}\n"
-            f"  re-run the same command to retry those entities only "
-            f"(static-mode resume re-attempts anything not in the cache)."
+        # Producer-side automatic refusal fallback (2026-05-13):
+        # Partition the missing entities into (allowlisted) vs
+        # (unexpected) via data/judge_refusal_allowlist.json.  For
+        # allowlisted entries we attempt an inline backfill from the
+        # configured fallback judge (typically Haiku) -- no separate
+        # tool invocation needed.  For unexpected entries we emit the
+        # loud banner so they get investigated.  See
+        # assistant_axis/judge_refusal_fallback.py for the shared
+        # implementation (also used by tools/fill_judge_refusal_gaps.py
+        # for post-hoc audits of caches produced before this code path
+        # existed).
+        from assistant_axis.judge_refusal_fallback import (
+            fill_allowlisted_gaps_inline, load_allowlist,
+            partition_gaps_by_allowlist,
         )
+        allowlist = load_allowlist()
+        # First do a partition-only pass so we can emit the loud-banner
+        # warning for unexpected gaps BEFORE we make any fallback API
+        # calls -- gives the user maximum visibility into surprises.
+        _allowlisted_preview, unexpected_misses = partition_gaps_by_allowlist(
+            missing, judge_model=args.judge_model, mode=mode,
+            allowlist=allowlist,
+        )
+        if unexpected_misses:
+            head = ", ".join(unexpected_misses[:8]) + (
+                "..." if len(unexpected_misses) > 8 else "")
+            _warn_with_banner(
+                f"[{mode}] {len(unexpected_misses)} of {len(scorable)} "
+                f"scorable entities have no cached score (call/parse "
+                f"failed across all retries) AND are NOT on the judge-"
+                f"refusal allowlist for {args.judge_model!r}.\n"
+                f"  unexpected: {head}\n"
+                f"  full list: {Path(args.output_dir) / 'gaps.json'}\n"
+                f"  options:\n"
+                f"   1. Retry the run (transient failure).\n"
+                f"   2. If reproducible, confirm a fallback judge accepts\n"
+                f"      the prompt and add (judge_model, entity_id) to\n"
+                f"      data/judge_refusal_allowlist.json, then re-run\n"
+                f"      this script (allowlisted gaps will be auto-filled\n"
+                f"      next time around).\n"
+                f"   3. If the prompt itself is the problem, fix it."
+            )
+        # Inline fallback for allowlisted gaps.  Builds the same prompt
+        # via build_static_prompt + the in-scope axis_spec, so the
+        # fallback judge sees byte-identical context to what the
+        # primary judge refused.  Patches written_cache + the on-disk
+        # scores file with notes.fallback_fills annotation so the
+        # substitution is auditable.
+        if _allowlisted_preview:
+            def _producer_prompt_builder(eid: str, _mode: str) -> str:
+                # _mode is always == mode here (single-mode call site)
+                # but kept in signature for symmetry with the tool's
+                # cross-mode caller.
+                from assistant_axis.judge_refusal_fallback import (
+                    kind_of_entity_id, name_of_entity_id,
+                    build_content_for_mode,
+                )
+                kind = kind_of_entity_id(eid)
+                name = name_of_entity_id(eid)
+                content = build_content_for_mode(
+                    kind, name, _mode,
+                    instructions_root=Path(args.instructions_dir),
+                )
+                return build_static_prompt(axis_spec, kind, name, content)
+
+            fill_results, _ = await fill_allowlisted_gaps_inline(
+                cache_path=cache_path,
+                mode=mode,
+                missing_eids=missing,
+                judge_model=args.judge_model,
+                prompt_builder=_producer_prompt_builder,
+                parse_score=parse_signed_score,
+                allowlist=allowlist,
+                concurrency=3,
+                logger_obj=logger,
+            )
+            # Patch our in-memory written_cache so the return value of
+            # this function reflects the fallback-filled entities.
+            for r in fill_results:
+                if r["status"] == "filled":
+                    written_cache[r["entity_id"]] = int(r["score"])
+
+            # Recompute gaps and refresh gaps.json with the *post*-fill
+            # state so the file no longer points at entities we just
+            # successfully filled.
+            cached_eids = {
+                k for k, v in written_cache.items() if isinstance(v, int)
+            }
+            missing = [
+                entity_id(n, et) for (et, n) in scorable
+                if entity_id(n, et) not in cached_eids
+                and (rejudge_set is None or (et, n) in rejudge_set)
+            ]
+            _update_gaps_file(Path(args.output_dir), mode=mode, gaps=missing)
     else:
         logger.info(f"[{mode}] all {len(scorable)} scorable entities cached cleanly.")
 

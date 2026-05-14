@@ -14,6 +14,7 @@ from assistant_axis.judge_score_combine import (
     DI_WEIGHTS_INST_TIE,
     PRIMARY_AXIS_SAMPLE_WEIGHT,
     add_di_weights_arg,
+    blend_two_with_fallback,
     cohort_mean_curves,
     combine_desc_inst_one_judge,
     combine_desc_inst_two_judges,
@@ -97,23 +98,108 @@ def test_combine_two_judges_equal_matches_4way_mean():
         assert out[n] == pytest.approx(manual_4way), n
 
 
-def test_combine_skips_missing_entities():
-    """Only entities present in all four input dicts are included."""
+def test_combine_partial_coverage_keeps_entity_with_fallback():
+    """One-side-missing fallback (May 2026): an entity missing in some
+    inputs is kept in the output using whichever inputs ARE present,
+    at appropriate weights.  This is a deliberate semantics change
+    from the older strict-AND-across-4-inputs behaviour, motivated by
+    Sonnet's systematic refusal to score ``virus|R`` in instruction
+    mode -- previously we dropped the entity from those axes' cohorts
+    entirely, throwing away the perfectly-good GPT+Sonnet-desc signal.
+
+    Specifically:
+    * entity ``a`` has all four inputs → standard 4-way blend.
+    * entity ``b`` has only GPT-desc, GPT-inst, Sonnet-desc (missing
+      sonnet_inst) → per-judge DI is computed with the
+      one-mode-missing fallback (Sonnet-desc only at 100%) then
+      blended at the standard GPT/Sonnet weight.
+    * entity ``c`` has only GPT-desc and GPT-inst (Sonnet absent) →
+      GPT-DI alone, no Sonnet contribution.
+    """
+    g_d = {"a": 1, "b": 1, "c": 2}
+    g_i = {"a": 1, "b": 1, "c": 2}
+    s_d = {"a": 1, "b": 1}             # c missing here
+    s_i = {"a": 1}                     # b and c missing here
+    out = combine_desc_inst_two_judges(g_d, g_i, s_d, s_i)
+    # All three entities are present (was: only "a" survived).
+    assert set(out) == {"a", "b", "c"}
+    # 'a' has full coverage: standard blend.  Since all inputs are 1
+    # this should round to exactly 1.0.
+    assert out["a"] == pytest.approx(1.0)
+    # 'c' has only GPT: GPT-DI = (0.499*2 + 0.501*2) = 2.0, no Sonnet.
+    assert out["c"] == pytest.approx(2.0)
+    # 'b' has GPT(1, 1) and Sonnet(1, missing): both judges produce a
+    # DI score of 1.0 (GPT from the standard weighted average, Sonnet
+    # via the desc-only-at-100% fallback).  Blend gives 1.0.
+    assert out["b"] == pytest.approx(1.0)
+
+
+def test_combine_non_numeric_treated_as_missing_with_fallback():
+    """Same semantics as ``test_combine_partial_coverage_keeps_entity_
+    with_fallback``: a non-numeric value (``None``, ``"oops"``, etc.) is
+    treated as ABSENT, not as an error.  The entity stays in the
+    output via the fallback path."""
     g_d = {"a": 1, "b": 1}
-    g_i = {"a": 1}            # b missing here
+    g_i = {"a": 1, "b": "oops"}        # non-numeric -> treat as missing
     s_d = {"a": 1, "b": 1}
     s_i = {"a": 1, "b": 1}
     out = combine_desc_inst_two_judges(g_d, g_i, s_d, s_i)
-    assert set(out) == {"a"}
+    # Both entities present now.  'b' uses GPT-desc-only + Sonnet-full
+    # because GPT-inst is non-numeric.
+    assert set(out) == {"a", "b"}
+    assert out["a"] == pytest.approx(1.0)
+    assert out["b"] == pytest.approx(1.0)
 
 
-def test_combine_skips_non_numeric():
-    g_d = {"a": 1, "b": 1}
+def test_combine_drops_only_when_all_inputs_missing():
+    """Entity with NO numeric scores on any input gets dropped (the
+    only path to exclusion under the new semantics).  This is the
+    sanity check that fallback isn't *too* permissive -- you have to
+    have at least ONE usable input to be scored."""
+    g_d = {"a": 1, "b": None}
     g_i = {"a": 1, "b": "oops"}
-    s_d = {"a": 1, "b": 1}
-    s_i = {"a": 1, "b": 1}
+    s_d = {"a": 1}                     # b missing entirely
+    s_i = {"a": 1}                     # b missing entirely
     out = combine_desc_inst_two_judges(g_d, g_i, s_d, s_i)
-    assert set(out) == {"a"}
+    assert set(out) == {"a"}, (
+        "Entity 'b' has no numeric coverage on any of 4 inputs and "
+        "should be dropped from the output"
+    )
+
+
+def test_combine_one_judge_fallback_on_missing_mode():
+    """Single-judge desc+inst combiner: one-mode-missing falls back to
+    the other mode at 100% weight.  Verifies the building block that
+    ``combine_desc_inst_two_judges`` composes."""
+    d = {"both": 2, "desc_only": 3}
+    i = {"both": -2, "inst_only": 5}
+    out = combine_desc_inst_one_judge(d, i, weights=(0.5, 0.5))
+    # 'both' present in both modes: standard average.
+    assert out["both"] == pytest.approx(0.5 * 2 + 0.5 * -2)  # == 0.0
+    # 'desc_only' missing inst: use desc at 100%.
+    assert out["desc_only"] == pytest.approx(3.0)
+    # 'inst_only' missing desc: use inst at 100%.
+    assert out["inst_only"] == pytest.approx(5.0)
+
+
+def test_blend_two_with_fallback():
+    """Generic two-source blend used for the response-ensemble (GPT +
+    Haiku) and the final blend (response + DI).  Same one-side-missing
+    fallback semantics as the desc/inst combiners."""
+    a = {"both": 1.0, "a_only": 4.0}
+    b = {"both": -1.0, "b_only": 8.0}
+    out = blend_two_with_fallback(a, b, weight_a=0.625)
+    # 'both' present in both: 0.625 * 1.0 + 0.375 * -1.0 = 0.25
+    assert out["both"] == pytest.approx(0.25)
+    # 'a_only' missing from b: use a at 100% (not weight_a-scaled).
+    assert out["a_only"] == pytest.approx(4.0)
+    # 'b_only' missing from a: use b at 100%.
+    assert out["b_only"] == pytest.approx(8.0)
+    # Drops entity with no numeric on either side.
+    out2 = blend_two_with_fallback(
+        {"drop_me": None}, {"drop_me": "x"}, weight_a=0.5,
+    )
+    assert out2 == {}
 
 
 def test_add_di_weights_arg():
