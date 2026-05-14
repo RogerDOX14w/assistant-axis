@@ -2074,6 +2074,122 @@ Downstream `results_analysis/*` plot scripts already group records
 by `record["strength"]` so disk order doesn't matter -- the
 `records_in_scan_order: true` field is purely documentary.
 
+### Steering question selection (May 2026)
+
+Choosing the **per-experiment question list** at
+`data/steering/questions/{experiment_id}.json` is the single highest-leverage
+manual step in a steering sweep.  Bad questions silently waste compute --
+they record records.jsonl entries that judging will score as eff=0 across
+every strength because the question itself doesn't admit a difference in
+response between the two poles.  This section captures the principles that
+emerged from the 14 production experiments before the bidirectional-scan
+rollout.
+
+**Sizing.** 14 questions = exactly 2 effect-judge batches at the canonical
+``RESPONSE_BATCH_SIZE=7``.  Prefer 14 over 10 (one batch + an awkward
+short second batch) or 7 (no slack for any post-hoc dropping of questions
+that turn out dead).  The historical norm of 10 was set before the B=10→7
+bump; it still works (`plan_response_batches` evenly partitions any count)
+but leaves a 3-item-batch tail.
+
+**Sources to draw from** (in roughly decreasing yield-per-effort):
+
+1. ``data/extraction_questions.jsonl`` -- the 300-question general bank,
+   especially **the last 60** (ids 180-239 from Roger; 240-299 added later
+   for the goal/non-goal split work).  These are deliberately worded as
+   open value-priority probes and reliably produce a wide dose-response
+   on most axes.
+2. The **role's own question list**
+   (``data/roles/instructions/<role>.json::questions``) -- 40 questions
+   per role written to be in-domain.  Beware ceiling effects on
+   role-aligned axes; favour the ones touching open dilemmas over the
+   ones the role has a trained answer to.
+3. **Both ends of the steering axis's question lists**
+   (``data/traits/instructions/<pole>.json::questions``) -- each pole has
+   40 questions designed to elicit that pole's trait.  Mix both poles so
+   the question doesn't bias one direction.
+4. **Hand-write new questions** when nothing in 1-3 hits the dilemma you
+   want.  Especially for goal-axis steering, hand-written value-priority
+   probes outperform extraction-bank questions because they push the
+   persona to articulate a position rather than describe a scenario.
+
+**Selection criteria** (the rules of thumb):
+
+1. **Open-ended, not single-answer.** Questions with one obvious correct
+   answer (factual lookup; "what factors should be considered when
+   choosing materials for a coastal building") record eff=0 on *both*
+   poles in the production data -- they're effectively wasted slots.
+   Open-ended questions where you'd genuinely expect a range of answers
+   across the dose-response are the ones that produce a useful curve.
+2. **Both poles must be plausible archetypes, not contradictions.** The
+   pole and the persona must be co-instantiable as a recognisable
+   character.  "Callous journalist", "elitist teacher", "scheming
+   merchant" -- all archetypes you can picture.  "Callous counselor",
+   "deceitful mediator" -- contradictions; the persona's core role
+   fights the steering and you get narrow useful range with weak effect
+   even at high strength.  ``mediator_truthful_v1`` is the empirical
+   case study: 8 of 10 questions show eff=0 on both signs at the lowest
+   responding strength, vs typical experiments where 6-8 fire clearly.
+3. **Avoid ceiling effects on the baseline-aligned pole.** If the
+   persona is already strongly aligned with one pole (pharmacist with
+   helpful, counselor with compassionate, doctor with honest on medical
+   ground-truth), questions whose "helpful response" overlaps with
+   "professional response" will saturate -- the baseline is already
+   maxed, so steering that direction shows no effect.  Two mitigations:
+   - **Discretionary questions** outside the professional scope:
+     ``chef_helpful_v1`` is built entirely around "general scenarios
+     where a chef has no professional obligation to help" (party
+     planning, leaky faucets, language learning).  ``pharmacist_helpful_v2``
+     followed the same pattern after v1 saturated.
+   - **Strict safety-prior questions are dead on both poles**, not
+     just one: doctor_honest q0 "chest pain when I exercise" shows
+     eff=0 on **both** honest (+1) and dishonest (-1).  The cardiac
+     safety prior overrides the trait direction entirely.
+4. **Sharp role-edge dilemmas fire reliably.** Questions that pose a
+   recognised tension *within the role's domain* with multiple valid
+   framings -- "interviewing a grieving family" (journalist),
+   "engine failure scenarios" (pilot), "allocate city's entire budget"
+   (planner) -- produce strong dose-response on both poles.  These are
+   the best yield-per-question.
+5. **"No-consequences" hypotheticals are reusable power-questions.**
+   *"What would you do differently if no one could ever find out?"*
+   appears verbatim in **at least 4 different experiment configs**
+   (doctor_honest, merchant_guileless, mediator_truthful, also
+   architect q9 paraphrases it as "describe the world as you'd most
+   like it to be").  It's an open value-elicitation that works across
+   almost every axis because it strips away the social-pressure
+   override on the persona's stated preferences.  Steal it.
+6. **Topic coverage matters.** Don't load all 14 questions inside the
+   role's narrowest professional scope (you'll over-sample ceiling) or
+   all outside it (you'll lose persona-specific signal).  A reasonable
+   mix is 5-7 in-domain dilemmas + 5-7 discretionary value-probes +
+   2-3 fully out-of-domain questions to test "does the steering carry
+   through even when the question doesn't engage the role at all".
+
+**Workflow.**  Selecting questions for a new experiment is genuinely
+non-trivial work; expect to spend 30-60 minutes per (role, axis) pair.
+A todo list per axis with explicit pause points helps you not rush a
+single one to "good enough" prematurely.  After the first sweep:
+
+7. **Audit per-question effect by strength.** The script at
+   ``/tmp/analyse_q_effects.py`` (regenerate freely; the logic is
+   trivial) prints per-question ``effect.combined`` at the lowest
+   strength that produced any ``|eff| >= 0.5``.  Questions with
+   eff=0 on both signs at that strength are candidates for replacement
+   in v2 of the question set.  The pre-bidirectional-scan analysis
+   identified pharmacist_helpful_v1 → v2 as the canonical
+   ceiling-fix migration; the audit pattern that triggered it
+   applies generally.
+
+The empirical patterns that motivate the rules above (which question
+shapes consistently die in production data and why) are captured in
+the supporting notes inside this section.
+
+**Cross-references**: the 16 production question files at
+`data/steering/questions/*.json` each carry a `_meta.purpose` field
+that records the (role, axis) rationale and any subset-of relationships
+to other question files (e.g. ``smoke_test_v2 → smoke_test_v1[indices]``).
+
 ### Sweep log location (May 2026)
 
 `steering/run_sweep.py` now auto-attaches a `FileHandler` to
