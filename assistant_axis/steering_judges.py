@@ -1148,17 +1148,26 @@ class RealJudgeDispatcher:
                 mean_coh >= self.coh_stop_threshold
             )
 
-        # Register the effect-mean future BEFORE we either skip-stamp or
-        # dispatch async judging.  Bidirectional-scan callers will poll
-        # this future via judge_effect_for_strength_async after their
-        # enqueue_strength_group call returns.  We always register so
-        # that callers don't have to special-case the skip branch.
+        # Register (or reuse) the effect-mean future BEFORE we either
+        # skip-stamp or dispatch async judging.  Bidirectional-scan
+        # callers eagerly register a pending future via
+        # judge_effect_for_strength_async BEFORE we run (race-free
+        # design, 2026-05-15 fix); we pick it up here so the runner's
+        # future and the one resolved by _judge_group_async's done
+        # callback are the SAME object.  If no future was pre-registered
+        # (e.g. legacy callers), we create one here.
         from concurrent.futures import Future as _CFFuture
-        eff_future: "_CFFuture[float]" = _CFFuture()
         with self._effect_mean_futures_lock:
-            self._effect_mean_futures[(int(sign), float(strength))] = (
-                eff_future
+            existing = self._effect_mean_futures.get(
+                (int(sign), float(strength))
             )
+            if existing is None:
+                eff_future: "_CFFuture[float]" = _CFFuture()
+                self._effect_mean_futures[
+                    (int(sign), float(strength))
+                ] = eff_future
+            else:
+                eff_future = existing
 
         if mean_coh > self.skip_threshold:
             # Skip path: stamp skipped flags on all records, write back.
@@ -1242,13 +1251,27 @@ class RealJudgeDispatcher:
         self,
         records: List[Dict[str, Any]],
     ) -> "Future[float]":
-        """Surface the per-strength effect-mean future registered by
-        ``enqueue_strength_group``.
+        """Return the per-strength effect-mean future, lazily registering
+        a fresh pending one if ``enqueue_strength_group`` hasn't run
+        yet for this strength.
 
-        Contract: caller invokes AFTER ``enqueue_strength_group`` for
-        the same strength group.  The records list is used only to
-        recover (sign, strength); all records in a group share these.
-        See protocol docstring above for skip-path semantics (NaN).
+        Eager-register semantics (2026-05-15 fix): the bidirectional
+        runner chains ``enqueue_strength_group`` off the coherence-
+        future's done callback, which means by the time the runner
+        calls this method the coh-future may still be pending and
+        ``enqueue_strength_group`` may not have run.  We register a
+        pending future here on first call and let ``enqueue_strength_group``
+        pick it up via the same ``_effect_mean_futures`` dict (instead
+        of creating its own).  Race window between the two calls is
+        eliminated.
+
+        Contract: ``enqueue_strength_group`` for the same strength MUST
+        be called eventually (which the runner guarantees via the
+        done-callback chain); otherwise the future never resolves.
+
+        Records list is used only to recover (sign, strength); all
+        records in a group share these.  See protocol docstring above
+        for skip-path semantics (NaN).
         """
         from concurrent.futures import Future as _CFFuture
         if not records:
@@ -1260,20 +1283,13 @@ class RealJudgeDispatcher:
         strength = float(first.get("strength", 0.0))
         with self._effect_mean_futures_lock:
             existing = self._effect_mean_futures.get((sign, strength))
-        if existing is not None:
-            return existing
-        # Caller invoked us before enqueue_strength_group -- protocol
-        # violation, but recover gracefully with NaN so the runner can
-        # keep going.
-        logger.warning(
-            f"[effect-mean-future] judge_effect_for_strength_async called "
-            f"for (sign={sign}, strength={strength}) with no registered "
-            f"future; ensure enqueue_strength_group is called first.  "
-            f"Resolving to NaN."
-        )
-        fut = _CFFuture()
-        fut.set_result(float("nan"))
-        return fut
+            if existing is not None:
+                return existing
+            # No future registered yet -- create a pending one and
+            # stash it; enqueue_strength_group will find and resolve it.
+            fut = _CFFuture()
+            self._effect_mean_futures[(sign, strength)] = fut
+            return fut
 
     # ------------------------------------------------------------------
     # Stop / drain

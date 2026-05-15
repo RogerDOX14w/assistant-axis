@@ -624,6 +624,74 @@ class TestRealDispatcherSkipLogic:
         assert "gpt-4.1-mini" in models_called
         assert "claude-haiku-4-5-20251001" in models_called
 
+    def test_eager_effect_future_registration_no_race(
+            self, dispatcher, tmp_path, monkeypatch):
+        """Regression: the bidirectional-scan runner calls
+        ``judge_effect_for_strength_async`` BEFORE
+        ``enqueue_strength_group`` (the latter is chained off the
+        coherence-future's done callback, so it runs later).  Before
+        the 2026-05-15 fix, ``judge_effect_for_strength_async`` would
+        find no registered future and resolve to NaN immediately,
+        even though ``enqueue_strength_group`` eventually ran and
+        produced a real effect score.
+
+        Fix verified: pre-call ``judge_effect_for_strength_async``,
+        then later call ``enqueue_strength_group`` -- the SAME future
+        object is reused, and it resolves to a non-NaN mean once
+        async work completes.
+        """
+        import math
+
+        async def fake_call(*, model, prompt, max_tokens, rate_limiter,
+                             openai_client=None, anthropic_client=None,
+                             temperature=1.0):
+            if "items" in prompt and "+3" in prompt:
+                ids_in_prompt = []
+                for i in range(20):
+                    if f"id={i}" in prompt:
+                        ids_in_prompt.append(i)
+                # All items get +2 -> mean abs = 2.0
+                items = [{"id": i, "score": 2, "reason": "test"}
+                         for i in ids_in_prompt]
+                return json.dumps({"items": items})
+            return json.dumps({"score": 2, "reason": "test"})
+
+        monkeypatch.setattr(sj, "call_judge_single_unified", fake_call)
+
+        records = [
+            _make_record(0, coh=0, strength=2.0, sign=+1),
+            _make_record(1, coh=0, strength=2.0, sign=+1),
+        ]
+
+        # Step 1 (race-trigger order): call eff-async FIRST.
+        eff_fut_eager = dispatcher.judge_effect_for_strength_async(records)
+        # Future is pending (not pre-resolved to NaN) -- the eager
+        # registration path stashed it in _effect_mean_futures.
+        assert not eff_fut_eager.done(), (
+            "eff future should be pending after eager register, not NaN"
+        )
+
+        # Step 2: NOW call enqueue_strength_group (simulating the
+        # coh-future done callback firing).
+        dispatcher.enqueue_strength_group(
+            cell_dir=str(tmp_path), slot=3, layer=25, sign=+1,
+            strength=2.0, records=records,
+        )
+
+        # Step 3: drain async work, then check the future resolved
+        # to a real (non-NaN) mean.
+        dispatcher.drain(timeout_s=10.0)
+        result = eff_fut_eager.result(timeout=5.0)
+        assert not math.isnan(result), f"eff future resolved to NaN: {result}"
+        # All records got +2 -> mean abs = 2.0
+        assert result == pytest.approx(2.0, rel=1e-3)
+
+        # A second call should return the SAME future object (idempotent).
+        eff_fut_again = dispatcher.judge_effect_for_strength_async(records)
+        assert eff_fut_again is eff_fut_eager, (
+            "second eager call returned a different Future object"
+        )
+
     def test_rerun_existing_effect_does_not_trip_over_prior_mean(
             self, dispatcher, tmp_path, monkeypatch):
         """Regression: re-judging effect over records that already have an
