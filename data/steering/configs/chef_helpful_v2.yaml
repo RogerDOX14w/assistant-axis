@@ -17,7 +17,14 @@ output_dir: /workspace/outputs/qwen-3-32b/steering
 
 axis_source:
   type: role_transplant
-  vectors_dir: /workspace/outputs/qwen-3-32b/traits/vectors_4slot
+  # Switched from vectors_4slot/ (legacy 4-slot pipeline, used by v1)
+  # to vectors/ (current 8-slot pipeline) so the rerun exercises the
+  # post-May-3 active-refuses unhelpful vector.  Note: slot=3 in 8-slot
+  # is a different conversation token than slot=3 in 4-slot, so this is
+  # NOT a drop-in apples-to-apples comparison to chef_helpful_v1; the
+  # comparison is "v1's questions + persona + new trait definitions +
+  # new pipeline" -- what Roger explicitly asked to test on 2026-05-15.
+  vectors_dir: /workspace/outputs/qwen-3-32b/traits/vectors
   role_from: helpful
   role_to: unhelpful
 
