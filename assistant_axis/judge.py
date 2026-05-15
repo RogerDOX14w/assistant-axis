@@ -234,6 +234,31 @@ _JSON_FENCE_RE = re.compile(r"```(?:json)?\s*(.*?)```", re.DOTALL)
 _JSON_OBJECT_RE = re.compile(r"\{.*\}", re.DOTALL)
 _JSON_ARRAY_RE = re.compile(r"\[.*\]", re.DOTALL)
 
+# LLMs often write "score": +1 (with literal "+" prefix) when the rubric
+# describes the scale as -3..+3.  RFC 8259 JSON does NOT permit "+" as a
+# numeric prefix; this trips json.loads -> the whole batch is dropped as
+# UNPARSEABLE.  We strip "+" ONLY when it appears in JSON number-after-
+# colon context (i.e. `: +N`), preserving "+" inside string bodies like
+# `"talks about +5 reward"`.  Diagnosed 2026-05-15 on
+# architect_ecocentric_v2 effect-judge UNPARSEABLE batches; rubric also
+# bumped to v6 to explicitly request plain-integer scores.
+_JSON_PLUS_NUM_AFTER_COLON_RE = re.compile(r":(\s*)\+(\d)")
+
+
+def _repair_json_blob(blob: str) -> str:
+    """Best-effort repair of common LLM-JSON deviations before parsing.
+
+    Currently fixes:
+      - ``"score": +1`` numeric-after-colon prefixes (drops the ``+``).
+
+    Future deviations (trailing commas, unquoted keys, etc.) can be
+    added here.  Keep the repair list minimal and well-targeted; over-
+    aggressive rewriting risks corrupting valid payloads -- in
+    particular avoid touching characters that appear inside string
+    bodies, since those can be legitimate prose content.
+    """
+    return _JSON_PLUS_NUM_AFTER_COLON_RE.sub(r":\1\2", blob)
+
 
 def extract_json_blob(text: str) -> Optional[str]:
     """Best-effort extraction of a JSON object or array from a model response.
@@ -282,7 +307,11 @@ def parse_score_reason_json(
     try:
         parsed = json.loads(blob)
     except (json.JSONDecodeError, ValueError):
-        return None
+        # Retry with common-LLM-deviation repair (e.g. "+1" -> "1").
+        try:
+            parsed = json.loads(_repair_json_blob(blob))
+        except (json.JSONDecodeError, ValueError):
+            return None
     if not isinstance(parsed, dict) or "score" not in parsed:
         return None
     raw = parsed["score"]
@@ -323,7 +352,15 @@ def parse_batch_scores_json(
     try:
         parsed = json.loads(blob)
     except (json.JSONDecodeError, ValueError):
-        return None
+        # Retry with common-LLM-deviation repair (e.g. "+1" -> "1" inside
+        # numeric score fields; see _repair_json_blob).  Diagnosed
+        # 2026-05-15 as the dominant UNPARSEABLE root cause on the
+        # bidirectional effect rubric where the scale is described as
+        # -3..+3 with explicit "+" signs that the LLM faithfully echoes.
+        try:
+            parsed = json.loads(_repair_json_blob(blob))
+        except (json.JSONDecodeError, ValueError):
+            return None
     items = None
     if isinstance(parsed, list):
         items = parsed

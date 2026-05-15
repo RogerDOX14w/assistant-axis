@@ -154,6 +154,63 @@ class TestParseBatchScoresJson:
         assert parse_batch_scores_json('{"score": 1}',  # missing list
                                        expected_ids=[1]) is None
 
+    def test_plus_prefix_on_score_repaired(self):
+        """LLMs (notably GPT-4.1-mini on the bidirectional rubric) often
+        write `"score": +1` echoing the rubric's "-3..+3" wording.
+        JSON disallows + as a numeric prefix; the parser repairs this
+        on a fallback pass.  Diagnosed 2026-05-15 as the dominant
+        UNPARSEABLE cause on architect_ecocentric_v2 / chef_helpful_v2.
+        """
+        text = (
+            '{"items": ['
+            '{"id": 0, "score": +2, "reason": "x"},'
+            '{"id": 1, "score": -1, "reason": "y"},'
+            '{"id": 2, "score": +3, "reason": "z"}'
+            ']}'
+        )
+        out = parse_batch_scores_json(text, expected_ids=[0, 1, 2])
+        assert out == {
+            0: {"score": 2, "reason": "x"},
+            1: {"score": -1, "reason": "y"},
+            2: {"score": 3, "reason": "z"},
+        }
+
+    def test_plus_inside_reason_string_not_corrupted(self):
+        """The +N repair must NOT touch literal "+" characters that
+        appear inside a "reason" string (e.g. when the judge mentions
+        a numeric range in prose).  The regex anchors on punctuation
+        that legitimately starts a numeric context, not on quoted
+        string contents."""
+        # The repair tag is "+digit preceded by [:[{,\\s]" -- a "+"
+        # inside the body of a string should survive.
+        text = (
+            '{"items": [{"id": 0, "score": +1, '
+            '"reason": "talks about a +5 reward and -3 penalty"}]}'
+        )
+        out = parse_batch_scores_json(text, expected_ids=[0])
+        assert out is not None
+        assert out[0]["score"] == 1
+        assert "+5 reward" in out[0]["reason"]
+
+    def test_plus_prefix_fenced_response(self):
+        """Combined fenced + plus-prefix; the fence stripper runs first
+        then the +N repair kicks in on the inner JSON."""
+        text = (
+            '```json\n'
+            '{"items": [{"id": 7, "score": +1, "reason": "ok"}]}\n'
+            '```'
+        )
+        out = parse_batch_scores_json(text, expected_ids=[7])
+        assert out == {7: {"score": 1, "reason": "ok"}}
+
+
+class TestParseScoreReasonJsonRepair:
+    def test_plus_prefix_repaired_single(self):
+        """The single-score parser also benefits from the +N repair."""
+        text = '{"score": +2, "reason": "moderate"}'
+        out = parse_score_reason_json(text, score_range=(-3, 3))
+        assert out == {"score": 2, "reason": "moderate"}
+
 
 # ---------------------------------------------------------------------------
 # provider_for_model

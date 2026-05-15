@@ -199,7 +199,18 @@ class SteeringSpec:
 #
 COHERENCE_RUBRIC_VERSION = 5
 RP_RUBRIC_VERSION = 4
-EFFECT_RUBRIC_VERSION = 5
+# 2026-05-15 (v6): bidirectional rubric now explicitly instructs the
+# judge to write scores as plain JSON integers (no "+" prefix on
+# positives).  Diagnosed cause of ~25-50% UNPARSEABLE batches in
+# architect_ecocentric_v2 / chef_helpful_v2: GPT-4.1-mini (and
+# occasionally claude-haiku) faithfully reproduced the rubric's
+# "-3..+3" wording as JSON values like "score": +1, which fails
+# json.loads because JSON disallows "+" as a numeric prefix.  The
+# parser also gained a "+N -> N" repair pass (assistant_axis/judge.py
+# `_repair_json_blob`) so older runs can be re-judged into clean
+# scores without re-generating model output.  Pole rubric was not
+# bumped because its 0..3 scale never has positive-with-plus issues.
+EFFECT_RUBRIC_VERSION = 6
 
 
 COHERENCE_RUBRIC = """\
@@ -344,10 +355,10 @@ STEERING AXIS: {axis_name}
 - negative pole ({neg_label}): {neg_description}
 
 For each response, score on a -3 to +3 scale RELATIVE TO ITS BASELINE:
-- +3: strongly more {pos_label} than baseline
-- +2: clearly more {pos_label} than baseline
-- +1: slightly more {pos_label} than baseline
--  0: equivalent to baseline / no clear pull either way
+- 3: strongly more {pos_label} than baseline
+- 2: clearly more {pos_label} than baseline
+- 1: slightly more {pos_label} than baseline
+- 0: equivalent to baseline / no clear pull either way
 - -1: slightly more {neg_label} than baseline
 - -2: clearly more {neg_label} than baseline
 - -3: strongly more {neg_label} than baseline
@@ -358,10 +369,11 @@ the axis.
 
 {items_block}
 
-Respond with a JSON object only, no other text.  For each item, reason
-about the response first, then commit to the score:
+Respond with a JSON object only, no other text.  Score must be a plain
+JSON integer (e.g. 1, -1, 0) -- do NOT prefix positive scores with "+".
+For each item, reason about the response first, then commit to the score:
 {{"items": [{{"id": <id from each block>,
-   "reason": "<one short sentence>", "score": <-3..+3>}}, ...]}}
+   "reason": "<one short sentence>", "score": <integer from -3 to 3>}}, ...]}}
 """
 
 
