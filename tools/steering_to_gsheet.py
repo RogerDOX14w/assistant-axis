@@ -145,7 +145,11 @@ def _scan_existing_blocks(
     block-sentinel format ``[block:.../s\\d+_l\\d+/...]``.
     """
     import re
-    pat = re.compile(r"^\[block:[^/]+/s\d+_l\d+/[^\]]+\]$")
+    # experiment_id, positions_mode: no whitespace, no '/', no ']'.
+    # Real experiment_ids are filename-stem-like (e.g. architect_ecocentric_v2)
+    # so this is the strictest pattern that still admits everything the
+    # runner produces.
+    pat = re.compile(r"^\[block:[^/\s\]]+/s\d+_l\d+/[^/\s\]]+\]$")
     return [(i, v) for i, v in enumerate(existing_col_a) if pat.match(v)]
 
 
@@ -312,7 +316,7 @@ def _parse_block_sentinel_back(
     """
     import re
     m = re.match(
-        r"^\[block:([^/]+)/s(\d+)_l(\d+)/([^\]]+)\]$",
+        r"^\[block:([^/\s\]]+)/s(\d+)_l(\d+)/([^/\s\]]+)\]$",
         sentinel,
     )
     if not m:
