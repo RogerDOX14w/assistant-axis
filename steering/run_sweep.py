@@ -83,21 +83,24 @@ logger = logging.getLogger("steering_sweep")
 # Sweep log file handler (per-experiment, attached on both parent + workers)
 # ---------------------------------------------------------------------------
 
-# Module-level set so re-imports inside spawned workers (which start
-# with a fresh interpreter) don't accidentally double-attach.
-_SWEEP_LOG_ATTACHED: set = set()
+# Module-level map (path -> FileHandler) so:
+#   1. re-imports inside spawned workers don't accidentally double-attach
+#      for the same path (idempotent attach), and
+#   2. callers can look up the handler by path to detach it cleanly when
+#      transitioning between experiments in a multi-config queue run.
+_SWEEP_LOG_HANDLERS: Dict[str, "logging.FileHandler"] = {}
 
 
-def _attach_sweep_log_filehandler(output_root: Path) -> None:
+def _attach_sweep_log_filehandler(output_root: Path) -> "logging.FileHandler":
     """Attach a FileHandler writing to ``output_root / "sweep.log"`` to
-    the root logger.
+    the root logger and return the handler.
 
     Idempotent: if a handler for this exact path is already attached on
-    this process, returns without re-attaching.  Safe to call from both
-    the parent process and each spawned worker -- line-based logging
-    keeps the appended writes ordered well enough on Linux (records are
-    well under PIPE_BUF) for combined parent+worker output to be
-    readable without explicit cross-process locking.
+    this process, returns the existing handler without re-attaching.
+    Safe to call from both the parent process and each spawned worker
+    -- line-based logging keeps the appended writes ordered well enough
+    on Linux (records are well under PIPE_BUF) for combined parent+worker
+    output to be readable without explicit cross-process locking.
 
     Append mode so resumed runs accumulate history rather than
     truncating prior logs (matches the rest of run_sweep.py's
@@ -105,8 +108,8 @@ def _attach_sweep_log_filehandler(output_root: Path) -> None:
     """
     target = (output_root / "sweep.log").resolve()
     key = str(target)
-    if key in _SWEEP_LOG_ATTACHED:
-        return
+    if key in _SWEEP_LOG_HANDLERS:
+        return _SWEEP_LOG_HANDLERS[key]
     target.parent.mkdir(parents=True, exist_ok=True)
     fh = logging.FileHandler(str(target), mode="a", encoding="utf-8")
     fh.setLevel(logging.INFO)
@@ -114,7 +117,30 @@ def _attach_sweep_log_filehandler(output_root: Path) -> None:
         "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
     ))
     logging.getLogger().addHandler(fh)
-    _SWEEP_LOG_ATTACHED.add(key)
+    _SWEEP_LOG_HANDLERS[key] = fh
+    return fh
+
+
+def _detach_sweep_log_filehandler(output_root: Path) -> None:
+    """Detach (and close) the FileHandler previously attached for this
+    output_root.  No-op if no handler is registered for the path.
+
+    Used by the multi-config queue runner to swap the sweep.log handler
+    when transitioning between experiments so each experiment's log stays
+    cleanly partitioned to its own file.
+    """
+    target = (output_root / "sweep.log").resolve()
+    key = str(target)
+    fh = _SWEEP_LOG_HANDLERS.pop(key, None)
+    if fh is None:
+        return
+    try:
+        logging.getLogger().removeHandler(fh)
+        fh.close()
+    except Exception as e:  # noqa: BLE001
+        logger.warning(
+            f"failed to detach sweep.log FileHandler at {target}: {e}"
+        )
 
 
 # ---------------------------------------------------------------------------
@@ -632,11 +658,56 @@ def _worker_main(
     model.eval()
     log.info(f"model loaded in {time.time() - t0:.1f}s")
 
+    # Track the most recently seen sweep_log_dir so we can detect when
+    # the queue transitions from one experiment to the next and swap
+    # the FileHandler (and thus the sweep.log file we're appending to).
+    current_sweep_log_dir = sweep_log_dir
     while True:
         item = queue.get()
         if item is None:
             log.info("got sentinel; exiting")
             break
+
+        # Swap FileHandler if this work item belongs to a different
+        # experiment than the previously processed one.  Each item
+        # carries its own sweep_log_dir (set by the parent in
+        # main()); detach the old handler before attaching the new
+        # so each experiment's sweep.log is cleanly partitioned to
+        # its own file.
+        item_log_dir = item.get("sweep_log_dir")
+        if item_log_dir and item_log_dir != current_sweep_log_dir:
+            if current_sweep_log_dir:
+                _detach_sweep_log_filehandler(Path(current_sweep_log_dir))
+            _attach_sweep_log_filehandler(Path(item_log_dir))
+            current_sweep_log_dir = item_log_dir
+            log.info(f"sweep log -> {Path(item_log_dir) / 'sweep.log'}")
+
+        # Multi-GPU safety: if this is a cell item, wait until its
+        # config's baselines sentinel exists before constructing the
+        # dispatcher (which calls build_baseline_lookup on the records
+        # file, and would otherwise see an empty/partial baselines and
+        # silently corrupt judge prompts with blank baseline_responses).
+        # The sentinel is touched by compute_baselines on success.
+        if item["kind"] == "cell":
+            baselines_dir = Path(item["baselines_records_path"]).parent
+            sentinel = baselines_dir / ".complete"
+            waited = 0
+            poll_s = 2
+            while not sentinel.exists():
+                if waited == 0:
+                    log.info(
+                        f"waiting for baselines sentinel at {sentinel} "
+                        f"(another worker producing them)"
+                    )
+                time.sleep(poll_s)
+                waited += poll_s
+                if waited > 1200:
+                    raise RuntimeError(
+                        f"baselines sentinel {sentinel} not produced "
+                        f"after {waited}s; aborting cell"
+                    )
+            if waited > 0:
+                log.info(f"baselines ready after {waited}s wait")
 
         try:
             if item["kind"] == "baselines":
@@ -851,8 +922,19 @@ def _run_judges_only(config: Dict[str, Any], args) -> None:
 def main():
     parser = argparse.ArgumentParser(description=__doc__,
                                      formatter_class=argparse.RawDescriptionHelpFormatter)
-    parser.add_argument("--config", type=Path, required=True,
-                        help="YAML or JSON experiment config file")
+    parser.add_argument("--config", type=Path, action="append", default=[],
+                        help="YAML or JSON experiment config file. May be "
+                             "repeated to queue multiple experiments in one "
+                             "process invocation (saves cold-import + model-"
+                             "load overhead per extra config).  See also "
+                             "--config-list.  Required unless --config-list "
+                             "is given.")
+    parser.add_argument("--config-list", type=Path, default=None,
+                        help="File containing one config path per line "
+                             "(comments starting with # are ignored).  Equivalent "
+                             "to repeating --config for each entry; mixable with "
+                             "explicit --config args.  All listed configs are "
+                             "queued sequentially on the same warmed worker(s).")
     parser.add_argument("--gpus", type=int, default=None,
                         help="Number of GPUs to use (default: all visible)")
     parser.add_argument("--instructions_dir", type=Path, default=Path("data"),
@@ -920,87 +1002,156 @@ def main():
         format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
     )
 
-    config = _load_config(args.config)
+    # Collect config paths from --config (repeatable) + --config-list.
+    config_paths: List[Path] = list(args.config)
+    if args.config_list is not None:
+        for line in args.config_list.read_text().splitlines():
+            line = line.strip()
+            if not line or line.startswith("#"):
+                continue
+            config_paths.append(Path(line))
+    if not config_paths:
+        raise SystemExit(
+            "no configs specified -- use --config <path> (repeatable) "
+            "and/or --config-list <file>"
+        )
 
     if args.judges_only:
+        if len(config_paths) != 1:
+            raise SystemExit(
+                "--judges-only currently supports exactly one --config "
+                f"(got {len(config_paths)})"
+            )
+        config = _load_config(config_paths[0])
         _run_judges_only(config, args)
         return
 
-    # Required keys
-    for k in ("experiment_id", "model_name", "output_dir", "axis_source",
-              "persona", "cells", "questions_file"):
-        if k not in config:
-            raise SystemExit(f"config missing required key: {k!r}")
+    # Load + validate all configs up-front so we fail fast on a malformed
+    # one rather than mid-queue after the first run has already started.
+    loaded: List[Tuple[Path, Dict[str, Any]]] = []
+    for p in config_paths:
+        cfg = _load_config(p)
+        for k in ("experiment_id", "model_name", "output_dir", "axis_source",
+                  "persona", "cells", "questions_file"):
+            if k not in cfg:
+                raise SystemExit(
+                    f"{p}: config missing required key: {k!r}"
+                )
+        loaded.append((p, cfg))
 
-    output_root = Path(config["output_dir"]) / config["experiment_id"]
-    output_root.mkdir(parents=True, exist_ok=True)
-
-    # Attach a per-experiment FileHandler so the sweep log auto-lives
-    # in the experiment dir instead of wherever the shell was
-    # redirected.  Append mode so resumed runs accumulate history;
-    # workers will attach their own FileHandler (in _run_worker) to
-    # the same path -- line-based logging on Linux is atomic up to
-    # PIPE_BUF (4096B) which our records always satisfy.  See
-    # https://docs.python.org/3/howto/logging-cookbook.html#logging-to-a-single-file-from-multiple-processes
-    # for the official caveat (concerns long pickled-record lines we
-    # don't produce).
-    _attach_sweep_log_filehandler(output_root)
-    # Threaded into the worker via the config dict so each spawn-context
-    # worker can re-attach the same FileHandler in its fresh interpreter.
-    config["sweep_log_dir"] = str(output_root)
-    logger.info(f"sweep log -> {output_root / 'sweep.log'}")
-
-    # Freeze config + questions to the experiment dir for reproducibility.
-    questions = _load_questions(Path(config["questions_file"]))
-    persona_prompt = _build_persona_system_prompt(
-        config["persona"], instructions_dir=args.instructions_dir,
-    )
-
-    atomic_write_text(json.dumps(config, indent=2) + "\n",
-                      output_root / "config.json")
-    atomic_write_text(json.dumps(questions, indent=2) + "\n",
-                      output_root / "questions.json")
-    atomic_write_text(persona_prompt + "\n",
-                      output_root / "persona_system_prompt.txt")
-    logger.info(f"experiment {config['experiment_id']} -> {output_root}")
-    logger.info(f"persona system prompt: {persona_prompt!r}")
-    logger.info(f"{len(questions)} questions loaded from {config['questions_file']}")
-
-    judging_cfg = _build_judging_config(
-        config=config, args=args, instructions_dir=args.instructions_dir,
-    )
-    if judging_cfg.get("enabled"):
-        logger.info(
-            f"live judging enabled: coherence={judging_cfg['coherence_model']} "
-            f"rp={judging_cfg['rp_model']} "
-            f"effect={','.join(judging_cfg['effect_models'])} "
-            f"mode={judging_cfg['effect_mode']} "
-            f"target_batch_size={judging_cfg['target_batch_size']} "
-            f"skip_threshold={judging_cfg['skip_threshold']} "
-            f"coh_stop_threshold={judging_cfg['coh_stop_threshold']}"
+    # All configs must share model_name (a single worker can only host
+    # one model in GPU memory).  Mixed-model queues require multiple
+    # invocations.
+    model_names = sorted({cfg["model_name"] for _, cfg in loaded})
+    if len(model_names) > 1:
+        raise SystemExit(
+            f"all queued configs must share model_name; got {model_names}.  "
+            f"Run them in separate invocations to avoid model-reload churn."
         )
-    else:
-        logger.info(f"live judging disabled "
-                    f"({judging_cfg.get('reason', 'no config')})")
+    shared_model_name = model_names[0]
 
-    work_items = _build_work_items(
-        config, output_root, persona_prompt, questions,
-        judging=judging_cfg,
+    logger.info(
+        f"queueing {len(loaded)} experiment(s) on model {shared_model_name}"
     )
-    n_cells = sum(1 for it in work_items if it["kind"] == "cell")
-    logger.info(f"built {len(work_items)} work items "
-                f"(1 baselines + {n_cells} cells)")
 
-    # Resolve HF_HOME before spawning workers, so all workers inherit a
-    # consistent cache root.  Without this, an unset HF_HOME would let
-    # workers default to ~/.cache/huggingface, which on RunPod is the 5 GB
-    # container overlay -- a 60+ GB model download would fill it and
-    # crash the worker mid-fetch.  We bail loudly if no populated cache is
-    # found rather than silently letting HF download to whatever's on PATH.
-    resolved_hf_home = _resolve_hf_home(config["model_name"])
+    # Per-config setup: freeze inputs to each experiment's output_root,
+    # build judging_cfg + work_items, accumulate the master work-item
+    # list.  Each work item carries its own sweep_log_dir so the worker
+    # can swap its FileHandler when transitioning between experiments.
+    all_work_items: List[Dict[str, Any]] = []
+    for cfg_path, config in loaded:
+        output_root = Path(config["output_dir"]) / config["experiment_id"]
+        output_root.mkdir(parents=True, exist_ok=True)
+
+        # Parent-side per-experiment FileHandler swap so parent log
+        # lines from this config's setup land in the right sweep.log.
+        if all_work_items:
+            # Detach the previous experiment's handler before attaching
+            # this one's.  Workers do the same per-item; parent does it
+            # per-config setup.
+            prev_root = Path(all_work_items[-1].get("sweep_log_dir", ""))
+            if prev_root != output_root:
+                _detach_sweep_log_filehandler(prev_root)
+        _attach_sweep_log_filehandler(output_root)
+        logger.info(f"sweep log -> {output_root / 'sweep.log'}")
+
+        questions = _load_questions(Path(config["questions_file"]))
+        persona_prompt = _build_persona_system_prompt(
+            config["persona"], instructions_dir=args.instructions_dir,
+        )
+        atomic_write_text(json.dumps(config, indent=2) + "\n",
+                          output_root / "config.json")
+        atomic_write_text(json.dumps(questions, indent=2) + "\n",
+                          output_root / "questions.json")
+        atomic_write_text(persona_prompt + "\n",
+                          output_root / "persona_system_prompt.txt")
+        logger.info(f"experiment {config['experiment_id']} -> {output_root}")
+        logger.info(f"persona system prompt: {persona_prompt!r}")
+        logger.info(
+            f"{len(questions)} questions loaded from {config['questions_file']}"
+        )
+
+        judging_cfg = _build_judging_config(
+            config=config, args=args, instructions_dir=args.instructions_dir,
+        )
+        if judging_cfg.get("enabled"):
+            logger.info(
+                f"live judging enabled: coherence={judging_cfg['coherence_model']} "
+                f"rp={judging_cfg['rp_model']} "
+                f"effect={','.join(judging_cfg['effect_models'])} "
+                f"mode={judging_cfg['effect_mode']} "
+                f"target_batch_size={judging_cfg['target_batch_size']} "
+                f"skip_threshold={judging_cfg['skip_threshold']} "
+                f"coh_stop_threshold={judging_cfg['coh_stop_threshold']}"
+            )
+        else:
+            logger.info(f"live judging disabled "
+                        f"({judging_cfg.get('reason', 'no config')})")
+
+        per_cfg_items = _build_work_items(
+            config, output_root, persona_prompt, questions,
+            judging=judging_cfg,
+        )
+        # Tag each work item with the experiment's sweep_log_dir so the
+        # worker (which runs in a separate process and doesn't share the
+        # parent's handler state) can swap its own FileHandler when
+        # transitioning between experiments in the queue.
+        for it in per_cfg_items:
+            it["sweep_log_dir"] = str(output_root)
+        n_cells_cfg = sum(1 for it in per_cfg_items if it["kind"] == "cell")
+        logger.info(
+            f"  built {len(per_cfg_items)} work items "
+            f"(1 baselines + {n_cells_cfg} cells) for {config['experiment_id']}"
+        )
+        all_work_items.extend(per_cfg_items)
+
+    # Sort so all baselines come before any cell.  With N_gpus workers
+    # draining a single shared queue, this maximises baseline throughput
+    # (all baselines start in parallel) and ensures cells only start
+    # popping once every config's baselines is at least in-flight.  The
+    # worker-side .complete-sentinel wait covers the remaining race
+    # (a cell popped while its own config's baselines is still running
+    # on another worker -- the cell-worker briefly idles).  Stable sort
+    # so within-config order is preserved.
+    all_work_items.sort(key=lambda it: 0 if it["kind"] == "baselines" else 1)
+
+    n_total_cells = sum(1 for it in all_work_items if it["kind"] == "cell")
+    n_total_baselines = sum(
+        1 for it in all_work_items if it["kind"] == "baselines"
+    )
+    logger.info(
+        f"total queue: {len(all_work_items)} work items "
+        f"({n_total_baselines} baselines + {n_total_cells} cells) "
+        f"across {len(loaded)} experiment(s); "
+        f"baselines first so multi-GPU workers parallelize them"
+    )
+
+    # Resolve HF_HOME before spawning workers (model_name is shared
+    # across all configs per the validation above).
+    resolved_hf_home = _resolve_hf_home(shared_model_name)
     if resolved_hf_home is None:
         raise SystemExit(
-            f"HF_HOME unset and {config['model_name']} not found in any of "
+            f"HF_HOME unset and {shared_model_name} not found in any of "
             f"{(os.environ.get('HF_HOME'),) + DEFAULT_HF_HOME_FALLBACKS}.  "
             f"Pre-populate the cache (e.g. via the pipeline) or set HF_HOME "
             f"explicitly before launching."
@@ -1015,11 +1166,21 @@ def main():
     n_gpus = _detect_gpu_count(args.gpus)
     logger.info(f"using {n_gpus} GPU worker(s)")
 
+    # Construct a minimal worker config dict.  Worker only needs
+    # model_name (for model load) and a default sweep_log_dir for
+    # any pre-first-item log lines.  Per-item sweep_log_dir takes
+    # over once items start flowing.
+    worker_config: Dict[str, Any] = {
+        "model_name": shared_model_name,
+        "sweep_log_dir": all_work_items[0].get("sweep_log_dir")
+        if all_work_items else None,
+    }
+
     # Spawn workers.  CUDA requires the 'spawn' start method.
     import torch.multiprocessing as mp
     ctx = mp.get_context("spawn")
     queue = ctx.Queue()
-    for item in work_items:
+    for item in all_work_items:
         queue.put(item)
     for _ in range(n_gpus):
         queue.put(None)  # sentinel per worker
@@ -1029,7 +1190,7 @@ def main():
         gpu_id = worker_id  # 1:1 mapping when CUDA_VISIBLE_DEVICES is preserved
         p = ctx.Process(
             target=_worker_main,
-            args=(worker_id, gpu_id, queue, config),
+            args=(worker_id, gpu_id, queue, worker_config),
         )
         p.start()
         procs.append(p)

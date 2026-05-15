@@ -2293,6 +2293,76 @@ parent share the same `sweep.log` via `mode='a'` line-buffered
 appends -- safe on Linux because steering log records are well
 under PIPE_BUF (4096B), so no mid-line interleaving is possible.
 
+### Multi-config queue runner (May 2026)
+
+`steering/run_sweep.py --config` now accepts **multiple `--config`
+flags** (repeatable) and a `--config-list FILE` (one path per line,
+`#` comments OK).  When given more than one config, the runner
+loads the model **once**, then drains a single combined work queue
+across every queued experiment.  Saves the cold-import + 60+ GB
+model-load cost per extra config -- a 12-experiment batch goes
+from `12 * (cold imports + model load + run)` to
+`(cold imports + model load) + 12 * run`.
+
+All queued configs must share `model_name` (one model fits in GPU
+memory at a time); mixed-model queues raise loudly at startup.
+
+Per-experiment `sweep.log` files still partition cleanly: each
+work item carries its own `sweep_log_dir` and the worker swaps
+`FileHandler`s (`_detach_sweep_log_filehandler` +
+`_attach_sweep_log_filehandler`) when transitioning between
+experiments.  Per-experiment `config.json` / `questions.json` /
+`persona_system_prompt.txt` are still atomically written into the
+experiment dir during parent-side setup, before the work queue
+starts draining.
+
+Typical batch invocation:
+
+```bash
+python -m steering.run_sweep \
+    --config-list data/steering/configs/multi_cell_batch_v1.txt \
+    --gpus 4
+```
+
+where `multi_cell_batch_v1.txt` is just:
+
+```
+data/steering/configs/anthropologist_helpful_v1.yaml
+data/steering/configs/prodigy_harmless_v1.yaml
+data/steering/configs/architect_ecocentric_v3.yaml
+# ... 9 more
+```
+
+### Multi-GPU safety: baselines sentinel (May 2026)
+
+Cells depend on their config's `baselines/records.jsonl` existing
+(read by `build_baseline_lookup` to fill `baseline_response` in
+judge prompts).  With `--gpus N` workers draining a shared queue,
+a naive ordering would let worker B pop a cell for config X while
+worker A is still computing config X's baselines -- the cell would
+silently judge with blank `baseline_response`s.
+
+The runner now:
+
+1. **Sorts all baselines to the head of the queue.**  With N
+   workers, the first N items popped are baselines, parallelising
+   baseline throughput.
+2. **Touches `baselines/.complete` after `compute_baselines`
+   succeeds** (both the generation path and the "all already on
+   disk" resume fast path -- the latter so resumed runs that
+   missed the sentinel in a prior session still produce it).
+3. **Workers wait on the sentinel before dispatching a cell**:
+   if the cell's `baselines/.complete` doesn't yet exist, the
+   worker polls every 2s with a 20-minute hard timeout.  Worst
+   case waste with 4 GPUs + 12 configs is ~90 GPU-seconds per
+   config = ~18 GPU-minutes across the batch; effectively zero
+   compared to the ~hours of generation+judging.
+
+Pre-May-2026 single-GPU sweeps never hit this race (one worker,
+sequential order).  Pre-existing multi-GPU sweeps would have
+quietly corrupted judge prompts on the first cell of each
+experiment; the sentinel fix is also a pre-existing-bug fix.
+
 ### Whitening / soft-shear defaults
 
 **Scope (read this first).**  These defaults apply to **analysis-side

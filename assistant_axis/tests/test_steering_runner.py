@@ -1157,3 +1157,65 @@ class TestComputeBaselines:
         for r in baselines:
             assert r["strength"] == 0.0
             assert r["sign"] == 0
+
+    def test_writes_completion_sentinel(self, tmp_path, monkeypatch):
+        """compute_baselines must touch baselines/.complete after a
+        successful run so multi-GPU workers picking up cell items for
+        the same experiment can wait for it before constructing their
+        dispatchers (otherwise build_baseline_lookup would silently
+        see an empty/partial records.jsonl and emit blank baseline_responses
+        in judge prompts).
+        """
+        monkeypatch.setenv("TMPDIR", str(tmp_path))
+        model = _FakeModel(8)
+        tokenizer = _FakeTokenizer()
+        questions = ["q0", "q1"]
+
+        sentinel = tmp_path / "baselines" / ".complete"
+        assert not sentinel.exists()
+
+        steering_runner.compute_baselines(
+            model, tokenizer,
+            persona_system_prompt="persona",
+            questions=questions,
+            output_dir=tmp_path,
+            batch_size=2, max_new_tokens=4,
+        )
+        assert sentinel.exists(), \
+            "compute_baselines must touch baselines/.complete on success"
+
+    def test_sentinel_touched_on_already_present_fastpath(
+        self, tmp_path, monkeypatch
+    ):
+        """Sentinel should also be present after the 'all already on disk'
+        fast path (e.g. resumed run where baselines were produced by a
+        prior invocation that didn't write the sentinel, or where the
+        sentinel was removed/lost).  Otherwise cells in a resumed
+        multi-GPU run would deadlock waiting on a sentinel that never
+        comes.
+        """
+        monkeypatch.setenv("TMPDIR", str(tmp_path))
+        model = _FakeModel(8)
+        tokenizer = _FakeTokenizer()
+        questions = ["q0", "q1"]
+
+        steering_runner.compute_baselines(
+            model, tokenizer,
+            persona_system_prompt="persona",
+            questions=questions,
+            output_dir=tmp_path,
+            batch_size=2, max_new_tokens=4,
+        )
+        sentinel = tmp_path / "baselines" / ".complete"
+        sentinel.unlink()  # simulate sentinel loss
+        assert not sentinel.exists()
+
+        # Second invocation: takes fast path, must re-touch the sentinel.
+        steering_runner.compute_baselines(
+            model, tokenizer,
+            persona_system_prompt="persona",
+            questions=questions,
+            output_dir=tmp_path,
+            batch_size=2, max_new_tokens=4,
+        )
+        assert sentinel.exists()

@@ -438,9 +438,18 @@ def compute_baselines(
     existing = _read_existing_records(records_path)
     have_idx = {r["question_idx"] for r in existing}
 
+    # Sentinel file that other GPU workers running cell items poll on
+    # before constructing their dispatchers.  Touched both here (the
+    # "everything already on disk" fast path) and after the generation
+    # loop completes; cell-side wait makes the multi-GPU race
+    # (worker A still computing baselines while worker B picks up a
+    # cell for the same experiment) safe.
+    sentinel_path = baselines_dir / ".complete"
+
     todo = [(i, q) for i, q in enumerate(questions) if i not in have_idx]
     if not todo:
         logger.info(f"[baselines] all {len(questions)} already present at {records_path}")
+        sentinel_path.touch(exist_ok=True)
         return existing
 
     logger.info(
@@ -490,7 +499,11 @@ def compute_baselines(
         # Flush after each batch so a crash doesn't lose more than a batch
         write_jsonl(existing, records_path, logger_obj=logger)
 
-    logger.info(f"[baselines] wrote {len(new_records)} new records to {records_path}")
+    sentinel_path.touch(exist_ok=True)
+    logger.info(
+        f"[baselines] wrote {len(new_records)} new records to {records_path}; "
+        f"touched sentinel {sentinel_path.name}"
+    )
     return existing
 
 

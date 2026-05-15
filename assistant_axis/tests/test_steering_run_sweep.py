@@ -224,6 +224,97 @@ class TestBuildWorkItems:
             mod._build_work_items(cfg, tmp_path, "p", ["q"])
 
 
+class TestMultiGpuQueueOrdering:
+    """The multi-config queue runner sorts all baselines to the head of
+    the shared queue so N_gpus workers parallelize baselines first
+    (rather than one worker stuck on a baseline while N-1 workers grab
+    cells that depend on it).  This test verifies the sort key alone
+    -- end-to-end multi-process behaviour is exercised on the GPU pod.
+    """
+
+    def test_baselines_sort_to_head(self, mod):
+        # Mixed queue across two notional experiments, plus a stable
+        # secondary order so we can assert within-config preservation.
+        items = [
+            {"kind": "baselines", "tag": "A"},
+            {"kind": "cell", "tag": "A0"},
+            {"kind": "cell", "tag": "A1"},
+            {"kind": "baselines", "tag": "B"},
+            {"kind": "cell", "tag": "B0"},
+            {"kind": "cell", "tag": "B1"},
+        ]
+        # Mirror the sort key used in run_sweep.main().
+        items.sort(key=lambda it: 0 if it["kind"] == "baselines" else 1)
+
+        kinds = [it["kind"] for it in items]
+        assert kinds == ["baselines", "baselines",
+                         "cell", "cell", "cell", "cell"]
+        # Stable: within-kind original order is preserved.
+        tags = [it["tag"] for it in items]
+        assert tags == ["A", "B", "A0", "A1", "B0", "B1"]
+
+
+class TestSweepLogFileHandler:
+    """Attach/detach pair for the per-experiment sweep.log FileHandler.
+    Used by the multi-config queue runner to swap handlers as the worker
+    transitions between experiments in the queue.
+    """
+
+    def test_attach_idempotent(self, mod, tmp_path):
+        h1 = mod._attach_sweep_log_filehandler(tmp_path)
+        h2 = mod._attach_sweep_log_filehandler(tmp_path)
+        assert h1 is h2, "second attach should return the same handler"
+        # cleanup
+        mod._detach_sweep_log_filehandler(tmp_path)
+
+    def test_attach_writes_to_target(self, mod, tmp_path):
+        import logging
+        # Root logger needs INFO level for our handler (level=INFO) to fire.
+        # Save/restore so other tests aren't affected.
+        prev_root_level = logging.getLogger().level
+        logging.getLogger().setLevel(logging.INFO)
+        try:
+            mod._attach_sweep_log_filehandler(tmp_path)
+            logging.getLogger("test_run_sweep").info("hello sweep.log")
+            # Flush so the file is observable.
+            for h in logging.getLogger().handlers:
+                h.flush()
+            sweep_log = tmp_path / "sweep.log"
+            assert sweep_log.exists()
+            assert "hello sweep.log" in sweep_log.read_text()
+        finally:
+            mod._detach_sweep_log_filehandler(tmp_path)
+            logging.getLogger().setLevel(prev_root_level)
+
+    def test_detach_removes_handler(self, mod, tmp_path):
+        import logging
+        h = mod._attach_sweep_log_filehandler(tmp_path)
+        root_handlers = logging.getLogger().handlers
+        assert h in root_handlers
+        mod._detach_sweep_log_filehandler(tmp_path)
+        assert h not in logging.getLogger().handlers
+
+    def test_detach_no_op_when_not_attached(self, mod, tmp_path):
+        # Detaching a path we never attached should not raise.
+        mod._detach_sweep_log_filehandler(tmp_path / "nonexistent")
+
+    def test_swap_between_two_dirs(self, mod, tmp_path):
+        d1 = tmp_path / "exp_a"
+        d2 = tmp_path / "exp_b"
+        h1 = mod._attach_sweep_log_filehandler(d1)
+        # Now "transition" to a new experiment: detach the first, attach
+        # the second.  Workers do this in their queue loop.
+        mod._detach_sweep_log_filehandler(d1)
+        h2 = mod._attach_sweep_log_filehandler(d2)
+        assert h1 is not h2
+        import logging
+        root_handlers = logging.getLogger().handlers
+        assert h2 in root_handlers
+        assert h1 not in root_handlers
+        # cleanup
+        mod._detach_sweep_log_filehandler(d2)
+
+
 # ---------------------------------------------------------------------------
 # _resolve_hf_home — auto-detection of HF cache location
 # ---------------------------------------------------------------------------
