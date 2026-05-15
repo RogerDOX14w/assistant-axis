@@ -1940,6 +1940,7 @@ record (see "**When changing a judge rubric**" callout above):
 | `EFFECT_POLE_BATCH_RUBRIC` | v3 | **v4** | drop numeric `strength`; pre-resolve sign → `steered toward {pole}` (direction *kept* because trait is fixed by `pole=`, so direction is contextual rather than score-shaping) |
 | `EFFECT_BIDIR_BATCH_RUBRIC` | v3 | **v4** | drop **both** numeric `strength` AND the direction-of-this-batch claim; judge must infer pull direction from response content alone |
 | `EFFECT_*_BATCH_RUBRIC` | v4 | **v5** | wording refinements to scoring anchors and instructions: "same as baseline" / "same direction as baseline" → "equivalent to baseline" (the old phrasing admitted an absent-steering reading -- baseline has *some* direction along the axis even unsteered); insert "observable" into the direction/magnitude language so the judge grounds in response content rather than inferring from prior; add the previously-missing "do not penalize for incoherence" reminder to the unidirectional rubric (gap from v4). |
+| `EFFECT_BIDIR_BATCH_RUBRIC` | v5 | **v6** | drop the `+` prefix from the score scale legend (`+3`/`+2`/`+1` → `3`/`2`/`1`) AND add an explicit `do NOT prefix positive scores with "+"` instruction in the JSON-output spec.  Diagnosed 2026-05-15 on architect_ecocentric_v2 + chef_helpful_v2: GPT-4.1-mini (and occasionally claude-haiku) faithfully reproduced the rubric's `-3..+3` wording as JSON values like `"score": +1`, which fails `json.loads` because RFC 8259 disallows `+` as a numeric prefix.  Combined with a defensive parser repair (`_repair_json_blob` in `assistant_axis/judge.py`) that strips the `+` from number-after-colon contexts on a fallback pass, this took the per-cell UNPARSEABLE rate from ~25-50% down to 0%.  Pole rubric was not bumped (its 0..3 scale has no `+`-prefix issue). |
 
 The asymmetry between the two effect rubrics is the principled bit:
 the bidirectional rubric scores a *signed* magnitude (-3..+3) on every
@@ -2181,6 +2182,75 @@ single one to "good enough" prematurely.  After the first sweep:
    ceiling-fix migration; the audit pattern that triggered it
    applies generally.
 
+8. **Use the cleaner per-question audit on the bidirectional reruns.**
+   [`tools/analyze_dose_response.py`](tools/analyze_dose_response.py)
+   (added 2026-05-15) prints per-strength rows of
+   ``mean_coh / mean_rp / mean_eff_signed / mean_abs_eff / stdev_eff
+   / len_ratio / judge_diff_2plus`` for each cell.  Pair with the
+   per-question rollup (`mean_eff` and `stdev_eff` per question over
+   all coherent strengths >= 1.0).
+
+**Empirical addendum from architect_ecocentric_v2 + chef_helpful_v2
+(May 2026):**  Per-question rollups across both bidirectional reruns
+sharpen the rules above with three new patterns.
+
+- **Topic-locked questions only respond on the natural-persona-lean
+  direction.**  architect_ecocentric_v2 q3 ("managing old-growth
+  forests") and q9 ("describe the world as you'd most like it to be")
+  show clean ecocentric pull on sign=-1 (mean_eff = -2.31 / stdev=0.44
+  and -2.25 / stdev=0.77 respectively) but on sign=+1 (toward
+  anthropocentric) they collapse to mean_eff = +0.23 / stdev=1.76 and
+  +0.30 / stdev=1.98 -- the topic ITSELF defies anthropocentric
+  framing, so the steering vector has nothing to bite on.  Symmetric
+  case: architect q4 ("population growth") works on +1 (mean_eff =
+  +0.97 / stdev=0.55) but only mildly on -1 (mean_eff = -0.03 / 0.81).
+- **Gold-standard questions show clean signal on BOTH poles with
+  low stdev.**  architect q2 ("green spaces in urban renewal"), q5
+  ("residential building that promotes community"), q6 ("carbon
+  reduction vs occupant comfort") all give signed mean_eff > 0.5
+  on +1 AND signed mean_eff < -0.5 on -1, with stdev < 1.0 on both.
+  These are the questions worth scaling out and reusing.  The
+  distinguishing feature is that the question explicitly raises a
+  *trade-off* the steering axis can resolve in either direction.
+- **Response-collapse pathology contaminates per-question signal on
+  the unhelpful axis.**  chef_helpful_v2 has stdev = 1.21-1.65 on
+  most questions -- not because the axis is noisy, but because at
+  high strength some questions get a substantive low-effort answer
+  while others get a canned ``"I'm sorry, but I can't help with
+  that."`` refusal that the bidirectional rubric scores as +2/+3
+  unhelpful regardless of context.  Cleaner per-question signal
+  needs a `len_ratio >= 0.4` filter on records BEFORE rolling up
+  mean_eff/stdev_eff: discard records where the steered response is
+  less than 40% of the baseline response length, then re-aggregate.
+
+**Updated selection criteria** synthesising the empirical findings:
+
+9. **Trade-off framing >> single-domain framing.**  A question that
+   makes the trade-off the axis encodes EXPLICIT to the model
+   (e.g. "what's more important in a building: reducing carbon
+   emissions or maximising occupant comfort?") is more reliable than
+   a question that probes only one side of the axis ("how should we
+   address water scarcity?").  The trade-off framing gives steering
+   in either direction a stable handle.
+10. **Watch for topic-locked questions** that only respond on one
+    pole's natural lean.  Two ways to detect at v1-design time:
+    - **Counterfactual self-check**: write the question down and
+      imagine each pole's archetypal answer.  If you can write a
+      convincing answer for one pole but the other pole has nothing
+      to say (or what they'd say is identical to the natural-lean
+      pole's answer), the question won't probe both directions.
+    - **High stdev_eff at v1 audit**: stdev > 1.5 on a question
+      across all coherent strengths almost always means the topic
+      locks the response, OR the model is collapsing to refusal at
+      higher strengths.  Either way, replace in v2.
+11. **For unhelpful/concise axes, length-collapse is a confound.**
+    The active-refuses unhelpful trait definition (or any axis that
+    rewards brevity) eventually produces canned refusals or trivial
+    one-line responses that downstream consumers should treat as
+    "useful range exceeded".  In v1 question design, this isn't
+    something to design against -- it's something to plan to FILTER
+    at analysis time (see point 8 above, `len_ratio >= 0.4` filter).
+
 The empirical patterns that motivate the rules above (which question
 shapes consistently die in production data and why) are captured in
 the supporting notes inside this section.
@@ -2189,6 +2259,11 @@ the supporting notes inside this section.
 `data/steering/questions/*.json` each carry a `_meta.purpose` field
 that records the (role, axis) rationale and any subset-of relationships
 to other question files (e.g. ``smoke_test_v2 → smoke_test_v1[indices]``).
+[`reports/coh_audit_examples.md`](reports/coh_audit_examples.md)
+contains the May-2026 coherence-rubric audit that motivated rule 11
+(coherence rubric judged correctly on most short responses;
+boilerplate-refusal mode is a per-strength pathology the per-record
+judge can't directly observe).
 
 ### Sweep log location (May 2026)
 
