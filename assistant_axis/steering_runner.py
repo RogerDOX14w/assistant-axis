@@ -315,6 +315,58 @@ def _tokenize_batch(
 
 
 # ---------------------------------------------------------------------------
+# Truncation detection + decode helper
+# ---------------------------------------------------------------------------
+
+
+def _decode_with_truncation_marker(
+    gen_ids,  # torch.Tensor of shape (max_new_tokens,)
+    tokenizer,
+) -> Tuple[str, int, bool]:
+    """Decode the generated ids and detect whether generation was truncated
+    by ``max_new_tokens`` (vs naturally stopped at a stop token).
+
+    Returns ``(response, n_tokens, truncated)``:
+
+    - ``response``: decoded text with ``skip_special_tokens=True``.  When
+      truncated, a trailing " …" sentinel is appended so both effect-judges
+      and human readers see at a glance that the model was still mid-output
+      when cut off.  The sentinel is one char of context, two glyphs at the
+      end (`` … ``), which is robust to tokenizer round-trips and unlikely
+      to collide with content the model would itself emit.
+    - ``n_tokens``: count of non-pad tokens in the generated slice.
+    - ``truncated``: True iff zero pad tokens are present in the generated
+      slice -- meaning the model never reached any stop token and the
+      ``max_new_tokens`` cap was hit.
+
+    The detection rests on the HuggingFace ``model.generate`` convention
+    that once a sequence in a batch emits a stop token (per
+    ``eos_token_id`` in the generation config, which on Qwen3 maps to
+    ``<|im_end|>`` for chat completions), the remaining positions in that
+    sequence's row of the output tensor are filled with ``pad_token_id``.
+    A generated slice containing at least one pad therefore indicates the
+    model naturally stopped; a slice with zero pad tokens indicates the
+    cap was hit.
+
+    Edge case: if the very last token generated happened to be a stop
+    token (no pad fill needed because we were at exactly ``max_new_tokens``
+    already), this heuristic would mis-classify as truncated.  This is
+    rare and the "truncated" label is arguably correct -- the model was
+    out of budget either way.  May 2026 review of architect_ecocentric_v2
+    + chef_helpful_v2 found that nearly all responses that hit
+    ``max_new_tokens=256`` were genuinely mid-sentence at the cap.
+    """
+    pad = tokenizer.pad_token_id
+    n_pad = int((gen_ids == pad).sum().item())
+    n_tok = int(gen_ids.shape[0] - n_pad)
+    truncated = (n_pad == 0)
+    text = tokenizer.decode(gen_ids, skip_special_tokens=True)
+    if truncated:
+        text = text + " …"
+    return text, n_tok, truncated
+
+
+# ---------------------------------------------------------------------------
 # Records I/O
 # ---------------------------------------------------------------------------
 
@@ -418,8 +470,9 @@ def compute_baselines(
 
         for j, (q_idx, q) in enumerate(zip(batch_idx, batch_questions)):
             gen_ids = outputs[j, prompt_len:]
-            response = tokenizer.decode(gen_ids, skip_special_tokens=True)
-            n_tok = int((gen_ids != tokenizer.pad_token_id).sum().item())
+            response, n_tok, truncated = _decode_with_truncation_marker(
+                gen_ids, tokenizer
+            )
             rec = {
                 "strength": 0.0,
                 "sign": 0,
@@ -427,6 +480,7 @@ def compute_baselines(
                 "question": q,
                 "response": response,
                 "n_tokens": n_tok,
+                "truncated": truncated,
                 "judges": {"coherence": None, "persona": None, "effect": None},
                 "timing": {"gen_s": elapsed / max(1, len(batch))},
             }
@@ -825,8 +879,9 @@ def run_steering_cell(
 
             for j, (q_idx, q, _conv) in enumerate(batch_items):
                 gen_ids = outputs[j, prompt_len:]
-                response = tokenizer.decode(gen_ids, skip_special_tokens=True)
-                n_tok = int((gen_ids != tokenizer.pad_token_id).sum().item())
+                response, n_tok, truncated = _decode_with_truncation_marker(
+                    gen_ids, tokenizer
+                )
                 rec: Dict[str, Any] = {
                     "strength": float(strength),
                     "sign": int(sign),
@@ -836,6 +891,7 @@ def run_steering_cell(
                     "question": q,
                     "response": response,
                     "n_tokens": n_tok,
+                    "truncated": truncated,
                     "judges": {"coherence": None, "persona": None, "effect": None},
                     "timing": {"gen_s": per_item_s},
                     "abandoned": False,
@@ -1031,8 +1087,9 @@ def _generate_and_dispatch_strength(
 
         for j, (q_idx, q, _conv) in enumerate(batch_items):
             gen_ids = outputs[j, prompt_len:]
-            response = tokenizer.decode(gen_ids, skip_special_tokens=True)
-            n_tok = int((gen_ids != tokenizer.pad_token_id).sum().item())
+            response, n_tok, truncated = _decode_with_truncation_marker(
+                gen_ids, tokenizer
+            )
             rec: Dict[str, Any] = {
                 "strength": float(strength),
                 "sign": int(sign),
@@ -1042,6 +1099,7 @@ def _generate_and_dispatch_strength(
                 "question": q,
                 "response": response,
                 "n_tokens": n_tok,
+                "truncated": truncated,
                 "judges": {"coherence": None, "persona": None, "effect": None},
                 "timing": {"gen_s": per_item_s},
                 "abandoned": False,

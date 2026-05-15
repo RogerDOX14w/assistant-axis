@@ -73,6 +73,64 @@ class TestDirectionalSchedule:
 # ---------------------------------------------------------------------------
 
 
+class TestDecodeWithTruncationMarker:
+    """The HF generate convention is that once a sequence emits a stop
+    token, the remaining positions in its row of the output tensor are
+    filled with ``pad_token_id``.  ``_decode_with_truncation_marker``
+    detects truncation = "zero pad tokens in the generated slice =
+    model never reached a stop = max_new_tokens cap was hit"."""
+
+    def _tok(self):
+        # Minimal tokenizer stand-in.  pad_token_id=0; decode treats the
+        # token IDs as raw bytes via _FakeTokenizer convention but here
+        # we just need pad_token_id + decode(skip_special_tokens=True).
+        class _T:
+            pad_token_id = 0
+
+            def decode(self, ids, skip_special_tokens=False):
+                if isinstance(ids, torch.Tensor):
+                    ids = ids.tolist()
+                # Strip pad bytes; convert remaining to ascii.
+                keep = [c for c in ids if c != 0]
+                try:
+                    return bytes(keep).decode("utf-8", errors="replace")
+                except Exception:
+                    return ""
+
+        return _T()
+
+    def test_natural_stop_no_marker(self):
+        """Generated 'OK' then pad-filled to max_new_tokens=8 -> not
+        truncated, no marker appended."""
+        gen_ids = torch.tensor(list(b"OK") + [0] * 6, dtype=torch.long)
+        response, n_tok, truncated = (
+            steering_runner._decode_with_truncation_marker(gen_ids, self._tok())
+        )
+        assert response == "OK"
+        assert n_tok == 2
+        assert truncated is False
+
+    def test_truncated_appends_marker(self):
+        """Generated 8 real tokens with zero pad -> truncated, " …" appended."""
+        gen_ids = torch.tensor(list(b"truncate"), dtype=torch.long)
+        assert len(gen_ids) == 8
+        response, n_tok, truncated = (
+            steering_runner._decode_with_truncation_marker(gen_ids, self._tok())
+        )
+        assert response == "truncate …"
+        assert n_tok == 8
+        assert truncated is True
+
+    def test_n_tok_excludes_pad(self):
+        """n_tokens is the count of non-pad tokens."""
+        gen_ids = torch.tensor(list(b"hi") + [0] * 14, dtype=torch.long)
+        _, n_tok, truncated = (
+            steering_runner._decode_with_truncation_marker(gen_ids, self._tok())
+        )
+        assert n_tok == 2
+        assert truncated is False
+
+
 class TestBidirectionalCursor:
     """Unit tests for the lazy bidirectional geometric strength cursor."""
 
