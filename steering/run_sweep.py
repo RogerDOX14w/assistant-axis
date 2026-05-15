@@ -47,7 +47,7 @@ Config schema (YAML or JSON, by file extension)::
       signs: [+1, -1]
     positions_mode: all             # or "prefill_only"
     batch_size: 8
-    max_new_tokens: 256
+    max_new_tokens: 512
     questions_file: data/steering/questions/angel_to_demon_v1.json
 
 Phase-1 limitations (deferred to follow-up plans):
@@ -252,7 +252,7 @@ def _build_work_items(
         raise ValueError(f"sweep.signs must be subset of [+1, -1]; got {signs}")
 
     batch_size = int(config.get("batch_size", 8))
-    max_new_tokens = int(config.get("max_new_tokens", 256))
+    max_new_tokens = int(config.get("max_new_tokens", 512))
     positions_mode = config.get("positions_mode", "all")
 
     items: List[Dict[str, Any]] = [{

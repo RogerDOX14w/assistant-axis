@@ -45,7 +45,7 @@ sweep:
 
 positions_mode: all
 batch_size: 4
-max_new_tokens: 256
+max_new_tokens: 512
 
 # Same question file as v1 -- trait definition changed, questions did not.
 questions_file: data/steering/questions/chef_helpful_v1.json

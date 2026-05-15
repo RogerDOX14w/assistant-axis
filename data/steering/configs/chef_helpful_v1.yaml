@@ -24,5 +24,5 @@ sweep:
 
 positions_mode: all
 batch_size: 4
-max_new_tokens: 256
+max_new_tokens: 512
 questions_file: data/steering/questions/chef_helpful_v1.json
