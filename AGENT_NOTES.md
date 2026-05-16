@@ -2486,6 +2486,57 @@ naturally don't match the numeric comparison rules.
   - [`assistant_axis/gsheet_auth.py`](assistant_axis/gsheet_auth.py)
     -- thin `gspread.oauth` wrapper.
 
+### Per-cell response curves vs steps-to-incoherence (May 2026)
+
+[`results_analysis/steering_response_curves.py`](results_analysis/steering_response_curves.py)
+plots one figure per steering experiment with 7 cells × 2 signs × 4
+filter regimes per cell.  The X axis is "steps remaining to
+incoherence cliff" (0 at the right edge), aligning every cell at its
+own incoherence point so cells with different absolute cliff
+strengths are visually comparable.
+
+The four filter regimes per (cell, sign) probe whether the average
+effect score at each strength is being dragged around by noisy
+responses:
+
+  - **(a) all responses** -- raw mean of effect scores at that
+    strength.  Solid line, weight 1.6.
+  - **(b) coh=0 only** -- mean over responses judged perfectly
+    coherent.  Dashed (`(0, (5, 2))`).
+  - **(c) rp=3 only** -- mean over responses strongly in-persona.
+    Dotted (`(0, (1, 2))`).
+  - **(d) coh=0 & rp=3** -- mean over responses that are both
+    perfectly coherent AND strongly in-persona.  Dash-dot
+    (`(0, (3, 2, 1, 2))`).
+
+Diverging curves between (a) and (d) indicate strength regions where
+some questions are giving misleading judge scores (incoherent or
+off-persona responses contaminating the mean).  Convergence between
+(a) and (d) is a sanity check that the population average reflects
+the in-persona / coherent population.
+
+Two side-by-side subplots:
+  - **Left**: sign=+1 (steers toward `role_to` = negative pole).
+  - **Right**: sign=-1 (steers toward `role_from` = positive pole).
+
+Legend on the left subplot maps colour to `(slot, layer)`; legend on
+the right maps linestyle to filter regime, so you don't have to
+mentally cross-reference between the two.  See
+[`results_analysis/tests/test_steering_response_curves.py`](results_analysis/tests/test_steering_response_curves.py)
+for the aggregation-logic test suite.
+
+Typical invocation:
+
+```bash
+uv run python results_analysis/steering_response_curves.py \
+    outputs/qwen-3-32b/steering/anthropologist_helpful_v1
+```
+
+Output: `<experiment_dir>/response_curves.png` (override with
+`--output PATH`).  PNG carries the standard
+[plot-provenance metadata](#plot-provenance-metadata-mandatory-for-every-plot)
+chunk.
+
 ### Whitening / soft-shear defaults
 
 **Scope (read this first).**  These defaults apply to **analysis-side
