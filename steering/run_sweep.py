@@ -1163,6 +1163,46 @@ def main():
         )
         os.environ["HF_HOME"] = resolved_hf_home
 
+    # Mirror the model into /dev/shm ONCE in the parent before
+    # spawning workers.  Before May 2026 each worker independently
+    # called setup_model_tmpfs_cache, producing N parallel rsync
+    # processes that contended for NFS bandwidth and (on RunPod's
+    # MooseFS-backed /workspace) routinely deadlocked at 0 MB/s
+    # collective progress -- workers wedged in D-state mmap faults
+    # for hours.  Serializing the mirror in the parent reduces the
+    # contention to a single rsync that completes in ~20 min on a
+    # cold cache, then workers fast-path past it via the
+    # ``.tmpfs_mirror_complete`` marker.
+    #
+    # Best-effort: if the parent-side mirror fails we don't bail --
+    # workers retain their own setup_model_tmpfs_cache call as a
+    # second-chance fallback, and if that also fails they load from
+    # NFS directly (with the expected multi-hour mmap stall warned
+    # about by setup_model_tmpfs_cache itself).
+    from assistant_axis.tmpfs import setup_model_tmpfs_cache, setup_tmpdir_if_unset
+    setup_tmpdir_if_unset()
+    logger.info(
+        f"[tmpfs] pre-spawn: mirroring {shared_model_name} into /dev/shm "
+        f"(serialized in parent so workers don't contend) ..."
+    )
+    t_mirror_start = time.time()
+    parent_hf_home = setup_model_tmpfs_cache(model_name=shared_model_name)
+    if parent_hf_home is not None:
+        os.environ["HF_HOME"] = parent_hf_home
+        logger.info(
+            f"[tmpfs] pre-spawn mirror complete in "
+            f"{time.time() - t_mirror_start:.1f}s; "
+            f"HF_HOME={parent_hf_home}.  Workers will fast-path "
+            f"via the mirror-complete marker."
+        )
+    else:
+        logger.warning(
+            f"[tmpfs] pre-spawn mirror returned None after "
+            f"{time.time() - t_mirror_start:.1f}s; workers will "
+            f"individually retry and may load from NFS directly "
+            f"(expect multi-hour stalls if /workspace is slow)."
+        )
+
     n_gpus = _detect_gpu_count(args.gpus)
     logger.info(f"using {n_gpus} GPU worker(s)")
 
