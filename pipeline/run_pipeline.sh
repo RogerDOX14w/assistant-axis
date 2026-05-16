@@ -85,6 +85,12 @@ TENSOR_PARALLEL_SIZE=1
 # already have an HF_HOME setup you want preserved.
 USE_TMPFS=true
 TMPFS_HF_HOME=/dev/shm/hf-cache
+# Where step 2's atomic-write staging files land.  Default /dev/shm
+# (RAM-backed tmpfs).  Override via --tmpdir.  Unconditional override
+# of $TMPDIR by design: pod-defaults like /workspace/tmp silently
+# route every staging write through slow NFS.  Callers who genuinely
+# want to preserve their existing $TMPDIR must pass --tmpdir "$TMPDIR".
+TMPFS_TMPDIR=/dev/shm
 
 # GPU pre-flight check: refuse to run if any visible GPU has >GPU_BUSY_THRESHOLD_MIB
 # of memory in use, since that strongly suggests an orphaned vLLM worker from a
@@ -132,6 +138,8 @@ while [[ $# -gt 0 ]]; do
             USE_TMPFS=false; shift ;;
         --tmpfs-dir)
             TMPFS_HF_HOME="$2"; USE_TMPFS=true; shift 2 ;;
+        --tmpdir)
+            TMPFS_TMPDIR="$2"; shift 2 ;;
         --skip-gpu-check)
             SKIP_GPU_CHECK=true; shift ;;
         --gpu-busy-threshold-mib)
@@ -307,13 +315,21 @@ setup_tmpfs() {
         return
     fi
 
-    # Redirect TMPDIR to tmpfs unless the user explicitly set it to something
-    # else.  Step 2 (2_activations.py) honours TMPDIR for its staging files.
-    if [ -z "$TMPDIR" ]; then
-        export TMPDIR=/dev/shm
-        echo "[tmpfs] TMPDIR=$TMPDIR (avoid filling small container /tmp)"
+    # Redirect TMPDIR to $TMPFS_TMPDIR (default /dev/shm) unconditionally.
+    # Step 2 (2_activations.py) honours TMPDIR for its staging files; if
+    # the pod sets a default like TMPDIR=/workspace/tmp (NFS-backed), every
+    # 2.6 GB staging write would route through slow network storage.
+    # Unconditional override avoids that silent footgun.  Callers who want
+    # to preserve their existing $TMPDIR must pass --tmpdir "$TMPDIR".
+    if [ ! -d "$TMPFS_TMPDIR" ]; then
+        echo "[tmpfs] WARNING: --tmpdir target '$TMPFS_TMPDIR' not present; falling back to /tmp"
+        export TMPDIR=/tmp
+    elif [ -n "$TMPDIR" ] && [ "$TMPDIR" != "$TMPFS_TMPDIR" ]; then
+        echo "[tmpfs] TMPDIR=$TMPFS_TMPDIR (overriding prior $TMPDIR; pass --tmpdir '$TMPDIR' to preserve)"
+        export TMPDIR="$TMPFS_TMPDIR"
     else
-        echo "[tmpfs] TMPDIR=$TMPDIR (preserved from environment)"
+        export TMPDIR="$TMPFS_TMPDIR"
+        echo "[tmpfs] TMPDIR=$TMPDIR (avoid filling small container /tmp / NFS staging)"
     fi
 
     # Triton / torchinductor compile CUDA kernels into .so files at runtime

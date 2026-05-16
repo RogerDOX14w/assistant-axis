@@ -382,32 +382,73 @@ def setup_model_tmpfs_cache(
     return str(tmpfs_root)
 
 
-def setup_tmpdir_if_unset() -> str:
-    """Set TMPDIR to /dev/shm when unset, mirroring run_pipeline.sh.
+DEFAULT_TMPDIR = "/dev/shm"
 
-    Returns the resolved TMPDIR after the (possible) mutation.
 
-    The steering driver writes its records.jsonl staging files via
-    atomic_io.py, which honours TMPDIR.  Pointing TMPDIR at /dev/shm
-    avoids small-container-/tmp fill-ups when many workers flush
-    concurrently.
+def setup_tmpdir(target: str = DEFAULT_TMPDIR) -> str:
+    """Unconditionally set ``TMPDIR`` to ``target`` (default ``/dev/shm``).
+
+    Returns the resolved TMPDIR after the mutation.
+
+    The steering driver and pipeline atomic-write helpers stage files
+    via TMPDIR; pointing it at RAM-backed tmpfs avoids small-container
+    ``/tmp`` fill-ups AND avoids the silent footgun where a pod-config
+    default like ``TMPDIR=/workspace/tmp`` would route every staging
+    write through the slow NFS path.  Callers who genuinely want to
+    preserve a pre-existing ``TMPDIR`` (e.g. for testing or a custom
+    deployment) should pass it explicitly via the ``--tmpdir`` flag
+    on the driver script.
+
+    If ``target`` doesn't exist on disk, falls back to ``/tmp`` with
+    a WARNING -- preferable to crashing, but the caller should fix
+    their setup or override the target.
 
     Side effect: also sets ``TRITON_CACHE_DIR`` and
-    ``TORCHINDUCTOR_CACHE_DIR`` to a non-tmpfs path if not already set
-    by the user.  See :func:`_setup_compile_cache_dirs` for why.
+    ``TORCHINDUCTOR_CACHE_DIR`` to a non-tmpfs path if not already
+    set by the user.  See :func:`_setup_compile_cache_dirs` for why.
     """
     _setup_compile_cache_dirs()
-    if os.environ.get("TMPDIR"):
-        logger.info(f"[tmpfs] TMPDIR={os.environ['TMPDIR']} (preserved from environment)")
-        return os.environ["TMPDIR"]
 
-    if Path("/dev/shm").is_dir():
-        os.environ["TMPDIR"] = "/dev/shm"
-        logger.info("[tmpfs] TMPDIR=/dev/shm (avoid filling small container /tmp)")
-        return "/dev/shm"
+    prior = os.environ.get("TMPDIR")
 
+    if Path(target).is_dir():
+        os.environ["TMPDIR"] = target
+        if prior and prior != target:
+            logger.info(
+                f"[tmpfs] TMPDIR={target} (overriding prior {prior!r}; "
+                f"pass --tmpdir {prior!r} to preserve the previous value)"
+            )
+        else:
+            logger.info(f"[tmpfs] TMPDIR={target}")
+        return target
+
+    # Target doesn't exist on disk.  Don't silently inherit a possibly
+    # bad prior TMPDIR -- clamp to /tmp, which is local-disk and at
+    # least won't route writes through slow network storage.
+    logger.warning(
+        f"[tmpfs] requested TMPDIR target {target} not present on disk; "
+        f"falling back to /tmp.  Small container /tmp may fill under "
+        f"concurrent writes -- pass --tmpdir <path> to override."
+    )
     os.environ["TMPDIR"] = "/tmp"
     return "/tmp"
+
+
+def setup_tmpdir_if_unset() -> str:
+    """Deprecated: preserves any pre-existing ``TMPDIR`` (and silently
+    inherits the pod-default footgun).  Kept as a thin backward-compat
+    shim for external callers; new code should use :func:`setup_tmpdir`.
+    """
+    _setup_compile_cache_dirs()
+    prior = os.environ.get("TMPDIR")
+    if prior:
+        logger.warning(
+            f"[tmpfs] setup_tmpdir_if_unset is deprecated; "
+            f"preserving prior TMPDIR={prior!r} (may be a pod-default footgun -- "
+            f"consider switching to setup_tmpdir() for unconditional override)"
+        )
+        return prior
+    return setup_tmpdir(DEFAULT_TMPDIR)
 
 
 def _is_noexec(path: Path, mounts_file: Path = Path("/proc/mounts")) -> Optional[bool]:

@@ -724,11 +724,18 @@ records.jsonl can in principle have a half-flushed last line, though
 `atomic_write_text` makes that nearly impossible on the writer side;
 pass `skip_malformed=False` to make a malformed line fatal instead.
 
-**TMPDIR setup:** workers should call
-`assistant_axis.tmpfs.setup_tmpdir_if_unset()` (or set `TMPDIR=/dev/shm`
-manually before launch) so staging happens on RAM-backed tmpfs, not on
-the small container `/tmp` (which can fill up under concurrent workers
-writing 2.6 GB activation files).
+**TMPDIR setup:** drivers call `assistant_axis.tmpfs.setup_tmpdir(target)`
+(default `target="/dev/shm"`) which **unconditionally** overrides any
+pre-existing `$TMPDIR` so the atomic-write staging files land on RAM-
+backed tmpfs.  This is by design: pod-defaults like
+`TMPDIR=/workspace/tmp` would silently route every staging write
+through slow NFS, and pre-May-2026 we had `setup_tmpdir_if_unset()`
+preserve such defaults (requiring `unset TMPDIR` before every run).
+Both `pipeline/run_pipeline.sh` and `steering/run_sweep.py` expose a
+`--tmpdir <path>` CLI flag; callers who genuinely want to preserve
+their existing `$TMPDIR` must pass it explicitly via
+`--tmpdir "$TMPDIR"`.  The deprecated `setup_tmpdir_if_unset()` is
+kept as a thin shim for external callers but logs a warning.
 
 **Auditing past damage**: `pipeline/scan_missing_vectors.py` walks an
 `activations/`+`vectors/`+`scores/` triple and classifies each missing

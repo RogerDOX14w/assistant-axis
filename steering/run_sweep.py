@@ -630,8 +630,10 @@ def _worker_main(
         _attach_sweep_log_filehandler(Path(sweep_log_dir))
 
     # Set up tmpfs (TMPDIR + HF cache mirror) before model load.
-    from assistant_axis.tmpfs import setup_model_tmpfs_cache, setup_tmpdir_if_unset
-    setup_tmpdir_if_unset()
+    from assistant_axis.tmpfs import (
+        DEFAULT_TMPDIR, setup_model_tmpfs_cache, setup_tmpdir,
+    )
+    setup_tmpdir(config.get("tmpdir") or DEFAULT_TMPDIR)
     new_hf_home = setup_model_tmpfs_cache(model_name=config["model_name"])
     if new_hf_home is not None:
         os.environ["HF_HOME"] = new_hf_home
@@ -995,6 +997,13 @@ def main():
                              "NoOpJudgeDispatcher).  Sweep runs to its "
                              "configured max strength regardless of "
                              "coherence; use post_judge.py afterward.")
+    parser.add_argument("--tmpdir", default=None,
+                        help="Override TMPDIR for atomic-write staging "
+                             "(default: /dev/shm).  Set explicitly to "
+                             "preserve a pre-existing $TMPDIR.  Avoid "
+                             "NFS-backed paths -- staging writes are "
+                             "on the hot path for every records.jsonl "
+                             "and summary.json flush.")
     args = parser.parse_args()
 
     logging.basicConfig(
@@ -1179,8 +1188,11 @@ def main():
     # second-chance fallback, and if that also fails they load from
     # NFS directly (with the expected multi-hour mmap stall warned
     # about by setup_model_tmpfs_cache itself).
-    from assistant_axis.tmpfs import setup_model_tmpfs_cache, setup_tmpdir_if_unset
-    setup_tmpdir_if_unset()
+    from assistant_axis.tmpfs import (
+        DEFAULT_TMPDIR, setup_model_tmpfs_cache, setup_tmpdir,
+    )
+    tmpdir_target = args.tmpdir if args.tmpdir is not None else DEFAULT_TMPDIR
+    setup_tmpdir(tmpdir_target)
     logger.info(
         f"[tmpfs] pre-spawn: mirroring {shared_model_name} into /dev/shm "
         f"(serialized in parent so workers don't contend) ..."
@@ -1209,11 +1221,18 @@ def main():
     # Construct a minimal worker config dict.  Worker only needs
     # model_name (for model load) and a default sweep_log_dir for
     # any pre-first-item log lines.  Per-item sweep_log_dir takes
-    # over once items start flowing.
+    # over once items start flowing.  ``tmpdir`` is threaded through
+    # so the worker calls setup_tmpdir() with the same target the
+    # parent did (matters because spawn-context workers start with a
+    # fresh interpreter that doesn't share env mutations the parent
+    # already made -- though TMPDIR-as-env-var IS inherited, the
+    # worker still calls setup_tmpdir() to apply the same override
+    # semantics in case the parent's env got reverted somehow).
     worker_config: Dict[str, Any] = {
         "model_name": shared_model_name,
         "sweep_log_dir": all_work_items[0].get("sweep_log_dir")
         if all_work_items else None,
+        "tmpdir": tmpdir_target,
     }
 
     # Spawn workers.  CUDA requires the 'spawn' start method.
