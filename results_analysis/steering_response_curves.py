@@ -53,6 +53,7 @@ from typing import Any, Callable, Dict, List, Optional, Tuple
 import matplotlib
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
+from matplotlib.ticker import MultipleLocator
 import numpy as np
 
 from assistant_axis.plot_metadata import png_metadata
@@ -78,6 +79,16 @@ class StrengthAgg:
     mean_eff_coh0: Optional[float]
     mean_eff_rp3: Optional[float]
     mean_eff_coh0_rp3: Optional[float]
+    # Unfiltered means of the gating dimensions, for the bottom-row
+    # coh/rp panels.  Both range 0..3 on the rubrics' integer scales;
+    # ``mean_rp_all`` is the raw persona-fit score (3 = strongly in
+    # persona, 0 = AI self-id / off-character).  The bottom-row plot
+    # shows ``3 - mean_rp_all`` so "up = bad" matches coherence's
+    # orientation.  May be None if every record at this strength is
+    # missing the relevant score (e.g. coh judging crashed, or
+    # persona judging was skipped because of strength_mean_coh).
+    mean_coh_all: Optional[float]
+    mean_rp_all: Optional[float]
     # Bookkeeping for the legend / sanity checks.
     n_total: int          # number of records at this strength
     n_with_eff: int       # number with a non-null effect score
@@ -94,10 +105,27 @@ class CellSign:
     layer: int
     sign: int            # +1 or -1
     aggs: List[StrengthAgg]  # sorted ascending by magnitude
+    # Trailing strengths that were trimmed from ``aggs`` because rp+effect
+    # judging was skipped (their mean_coh exceeded the runner's
+    # skip_threshold).  Coherence WAS judged at these strengths (coh is
+    # the gating dimension), so the bottom-row coh panel can plot them
+    # to the right of x=0 (negative x) to show how mean_coh ramps PAST
+    # the eff-judged "cliff" before the sweep's coh-stop fired.
+    # Sorted ascending by magnitude so ``extra_aggs[0]`` is the
+    # smallest-magnitude trimmed strength (= "first step past the
+    # cliff", x = -1).
+    extra_aggs: List[StrengthAgg] = None  # type: ignore[assignment]
     # Whether the largest swept strength hit the incoherence ceiling
     # (vs. running into max_strength without crossing the coh stop).
     # Used to label the line's right endpoint in the legend / tooltips.
     up_blocked_reason: Optional[str] = None
+
+    def __post_init__(self) -> None:
+        # Default to empty list (dataclass field defaults that are
+        # mutable need this idiom -- we can't use ``field(default_factory=list)``
+        # on a non-frozen dataclass without bumping the import surface).
+        if self.extra_aggs is None:
+            self.extra_aggs = []
 
 
 # ---------------------------------------------------------------------------
@@ -241,13 +269,30 @@ def aggregate_cell_sign(cell_dir: Path) -> CellSign:
     aggs: List[StrengthAgg] = []
     for s in sorted(by_strength.keys()):
         s_key = round(s, 6)
-        if strengths_with_swap is not None and s_key not in strengths_with_swap:
-            # Bias-contaminated row -- drop entirely.  These are
-            # strengths the corrected-predicate descent stopped above,
-            # so under the corrected pipeline we'd never have
-            # collected (or kept) data here.
-            continue
         recs = by_strength[s]
+        # Two distinct reasons a strength might be absent from the
+        # swap descent's coverage:
+        #   (A) Bias-floor end: the swap descent stopped at some
+        #       cutoff and didn't judge weaker strengths.  Under the
+        #       corrected pipeline these wouldn't have been kept, so
+        #       drop them entirely.
+        #   (B) Past-cliff end: the runner skipped rp+effect judging
+        #       at this strength because mean_coh exceeded
+        #       skip_threshold, so the swap descent had nothing to
+        #       correct.  These rows STILL carry useful coherence
+        #       data (coh is always judged) and we want them visible
+        #       in the bottom-row coh ramp -- they get trimmed into
+        #       ``extra_aggs`` below.
+        # The distinguishing signal: case (A) rows have eff scores
+        # populated (just bias-contaminated); case (B) rows have
+        # all-None eff.
+        any_eff = any(_eff_score(r) is not None for r in recs)
+        if (
+            strengths_with_swap is not None
+            and s_key not in strengths_with_swap
+            and any_eff
+        ):
+            continue  # case (A): bias-contaminated low end
         coh = [_coh_score(r) for r in recs]
         rp = [_rp_score(r) for r in recs]
         # Use the swap-averaged (bias-cancelled) eff if available for
@@ -287,6 +332,11 @@ def aggregate_cell_sign(cell_dir: Path) -> CellSign:
             mean_eff_coh0_rp3=_safe_mean(
                 filter_eff(lambda c, p: c == 0 and p == 3)
             ),
+            # Unfiltered means of the gating dimensions for the bottom
+            # row.  Cast int->float via _safe_mean so the mean is a
+            # well-defined float regardless of the underlying schema.
+            mean_coh_all=_safe_mean([float(c) if c is not None else None for c in coh]),
+            mean_rp_all=_safe_mean([float(p) if p is not None else None for p in rp]),
             n_total=len(recs),
             n_with_eff=sum(1 for e in eff if e is not None),
             n_coh0=sum(1 for c in coh if c == 0),
@@ -301,8 +351,18 @@ def aggregate_cell_sign(cell_dir: Path) -> CellSign:
     # strengths.  Defining x=0 as the last strength with usable
     # eff data instead lets every (cell, sign) curve naturally
     # reach x=0 on the right edge of the plot.
+    #
+    # The trimmed strengths are NOT lost: they're stashed on
+    # ``CellSign.extra_aggs`` (ascending magnitude) so the bottom-row
+    # coh/rp panels can show how mean_coh ramps PAST the eff-judged
+    # cliff before the sweep's coh-stop fires.
+    trimmed_tail: List[StrengthAgg] = []
     while aggs and aggs[-1].mean_eff_all is None:
-        aggs.pop()
+        trimmed_tail.append(aggs.pop())
+    # ``aggs.pop()`` returned strengths in descending magnitude;
+    # reverse so ``extra_aggs[0]`` is the smallest-magnitude trimmed
+    # strength (the "first step past the cliff").
+    trimmed_tail.reverse()
 
     summary_path = cell_dir / "summary.json"
     up_reason = None
@@ -316,7 +376,7 @@ def aggregate_cell_sign(cell_dir: Path) -> CellSign:
 
     return CellSign(
         slot=slot, layer=layer, sign=sign,
-        aggs=aggs, up_blocked_reason=up_reason,
+        aggs=aggs, extra_aggs=trimmed_tail, up_blocked_reason=up_reason,
     )
 
 
@@ -385,9 +445,23 @@ def plot_response_curves(
     pos_pole_name: Optional[str] = None,
     neg_pole_name: Optional[str] = None,
 ) -> None:
-    """Render one figure with two side-by-side subplots (sign=+1 left,
-    sign=-1 right).  Color encodes (slot, layer); linestyle encodes
-    filter regime.
+    """Render one figure with a 2x2 grid:
+
+      top row    : per-cell effect curves (one panel per sign,
+                   filter regimes encoded as linestyle).
+      bottom row : per-cell unfiltered ``mean_coh`` (solid) and
+                   ``3 - mean_rp`` (dotted), same colour per cell.
+                   X-axis shared with the corresponding top panel so
+                   the reader can eyeball whether coh/rp ramp before
+                   the eff-judged cliff at x=0.
+
+    Color encodes (slot, layer); linestyle encodes either filter
+    regime (top row) or metric (bottom row -- coh vs inverted-rp).
+
+    The bottom row also plots any ``CellSign.extra_aggs`` (strengths
+    past the cliff where coh was judged but rp+effect were skipped)
+    at negative x, so the reader can see the runner's full coh
+    trajectory through and past the skip_threshold transition.
 
     ``pos_pole_name`` / ``neg_pole_name`` are the human-readable
     pole labels (from the experiment's config; e.g. "unhelpful" and
@@ -405,15 +479,24 @@ def plot_response_curves(
         (s, l): cmap(i % 10) for i, (s, l) in enumerate(unique_cells)
     }
 
+    # 2x2 grid.  Top row shares its y axis (effect score).  Bottom
+    # row shares its y axis (gating dimensions, 0..3).  Each column
+    # shares x with its paired top panel so the bottom-row coh ramp
+    # lines up vertically with the top-row eff curves.
     fig, axes = plt.subplots(
-        1, 2, figsize=(16, 8), sharey=True,
+        2, 2, figsize=(16, 11),
+        sharey="row", sharex="col",
+        gridspec_kw={"height_ratios": [2.0, 1.2]},
     )
     pos_suffix = f"  (toward {pos_pole_name})" if pos_pole_name else "  (toward neg pole)"
     neg_suffix = f"  (toward {neg_pole_name})" if neg_pole_name else "  (toward pos pole)"
     sign_label = {+1: f"sign = +1{pos_suffix}",
                   -1: f"sign = -1{neg_suffix}"}
 
-    for ax, sign in zip(axes, (+1, -1)):
+    top_axes = axes[0]
+    bot_axes = axes[1]
+
+    for ax, sign in zip(top_axes, (+1, -1)):
         cell_signs_here = [c for c in cells if c.sign == sign]
         for cs in cell_signs_here:
             x = _x_steps_from_cliff(len(cs.aggs))
@@ -455,9 +538,6 @@ def plot_response_curves(
                     label=label,
                 )
         ax.axhline(0.0, color="black", linewidth=0.6, alpha=0.4)
-        # x=0 (cliff) on the RIGHT; increasing x to the LEFT.
-        ax.invert_xaxis()
-        ax.set_xlabel("Steps remaining to incoherence cliff (0 = cliff)")
         # Per-subplot title carries both the sign and what "up" means
         # there, since each panel has been normalised so positive Y =
         # "response moved toward the steered pole".
@@ -471,28 +551,94 @@ def plot_response_curves(
             ax.set_title(sign_label[sign])
         ax.grid(True, alpha=0.3)
 
-    # Shared Y axis: post-normalisation, +y means "response moved
-    # toward the pole the cell was steered toward" on BOTH subplots.
-    # The per-panel title above spells out which specific pole that
-    # is (since they're mirrored: left = pos_label, right = neg_label
-    # of the rubric).
-    axes[0].set_ylabel(
+    # Bottom row: unfiltered coherence (solid) + inverted persona
+    # score (dotted).  Same colour per cell as the top row.  Both
+    # metrics are oriented so "up = bad" (more incoherent / more
+    # out-of-persona), making cross-cell pattern matching easy.
+    for ax, sign in zip(bot_axes, (+1, -1)):
+        cell_signs_here = [c for c in cells if c.sign == sign]
+        for cs in cell_signs_here:
+            color = color_for_cell[(cs.slot, cs.layer)]
+            # Combine retained + trimmed-trail strengths so the coh
+            # curve continues PAST the eff-judged cliff.  Retained
+            # strengths occupy x = [N-1 .. 0]; trimmed strengths
+            # (ascending magnitude) occupy x = [-1 .. -M].
+            n_ret = len(cs.aggs)
+            n_extra = len(cs.extra_aggs)
+            x_retained = list(_x_steps_from_cliff(n_ret))
+            x_extra = list(range(-1, -(n_extra + 1), -1))
+            x_all = x_retained + x_extra
+            all_aggs = list(cs.aggs) + list(cs.extra_aggs)
+
+            ys_coh = np.array(
+                [np.nan if a.mean_coh_all is None else a.mean_coh_all
+                 for a in all_aggs]
+            )
+            ys_rp_inv = np.array(
+                [np.nan if a.mean_rp_all is None else (3.0 - a.mean_rp_all)
+                 for a in all_aggs]
+            )
+            ax.plot(
+                x_all, ys_coh,
+                color=color, linestyle="-", linewidth=1.4, alpha=0.95,
+            )
+            ax.plot(
+                x_all, ys_rp_inv,
+                color=color, linestyle=":", linewidth=1.4, alpha=0.85,
+            )
+            # Mark the eff-judged cliff (x=0) once per panel.  Skip
+            # the line if no extra strengths exist (no past-cliff
+            # data on this side).
+            if n_extra > 0:
+                ax.axvline(
+                    -0.5, color="black", linewidth=0.8,
+                    linestyle="--", alpha=0.4,
+                )
+
+        # skip_threshold visual reference: the runner skips rp+effect
+        # judging when mean_coh > 1.0 (= the eff-judged cliff).
+        # coh_stop_threshold = 1.5 is the actual "stop the sweep"
+        # line.  Both rendered as light horizontal references.
+        ax.axhline(1.0, color="gray", linewidth=0.7, linestyle=":",
+                   alpha=0.6, label="skip_threshold (1.0)")
+        ax.axhline(1.5, color="gray", linewidth=0.7, linestyle="--",
+                   alpha=0.6, label="coh_stop_threshold (1.5)")
+        ax.set_ylim(-0.1, 3.2)
+        ax.grid(True, alpha=0.3)
+        ax.set_xlabel("Steps remaining to incoherence cliff (0 = cliff)")
+
+    # Invert x for ALL columns (sharex propagates).  x=0 (cliff) on
+    # the RIGHT; increasing x to the LEFT; trimmed past-cliff
+    # strengths at negative x sit furthest right.
+    for ax in top_axes:
+        ax.invert_xaxis()
+    # X-axis values are step indices -- only integer ticks are
+    # meaningful.  Without this, matplotlib auto-picks half-integer
+    # ticks (0.5, 1.5, ...) on the right panel when the x range is
+    # narrow.  Applied to the bottom axes so the labels are drawn
+    # on the visible (non-shared) tick row.
+    for ax in bot_axes:
+        ax.xaxis.set_major_locator(MultipleLocator(1))
+
+    # Shared Y labels.
+    top_axes[0].set_ylabel(
         "Mean effect score    "
         "(+: toward the steered pole    "
         "\u2212: away from the steered pole)"
     )
+    bot_axes[0].set_ylabel(
+        "Coherence / inverted-RP    (0 = good, 3 = bad)"
+    )
 
-    # Two legends per figure: one for cell colours (on the left subplot),
-    # one for filter linestyles (on the right subplot) so the user
-    # doesn't need to mentally cross-reference.
-    handles_cells, labels_cells = axes[0].get_legend_handles_labels()
-    axes[0].legend(
+    # Top-left legend: cell colours.
+    handles_cells, labels_cells = top_axes[0].get_legend_handles_labels()
+    top_axes[0].legend(
         handles_cells, labels_cells,
         title="cell  (slot, layer)",
         loc="upper left",
         fontsize=8,
     )
-    # Filter-style legend on the right subplot.
+    # Top-right legend: filter linestyles.
     style_handles = [
         plt.Line2D([0], [0], color="black",
                    linestyle=LINESTYLES[k], linewidth=1.6 if k == "all" else 1.0,
@@ -500,9 +646,26 @@ def plot_response_curves(
                    label=FILTER_LABEL[k])
         for k in ("all", "coh0", "rp3", "both")
     ]
-    axes[1].legend(
+    top_axes[1].legend(
         handles=style_handles,
         title="filter",
+        loc="upper left",
+        fontsize=8,
+    )
+    # Bottom-left legend: metric linestyles (coh vs inverted rp).
+    metric_handles = [
+        plt.Line2D([0], [0], color="black", linestyle="-",
+                   linewidth=1.4, label="mean coherence (0 = coherent)"),
+        plt.Line2D([0], [0], color="black", linestyle=":",
+                   linewidth=1.4, label="3 - mean RP (0 = in persona)"),
+        plt.Line2D([0], [0], color="gray", linestyle=":",
+                   linewidth=0.7, label="skip_threshold (1.0)"),
+        plt.Line2D([0], [0], color="gray", linestyle="--",
+                   linewidth=0.7, label="coh_stop_threshold (1.5)"),
+    ]
+    bot_axes[0].legend(
+        handles=metric_handles,
+        title="bottom-row metric",
         loc="upper left",
         fontsize=8,
     )

@@ -168,6 +168,20 @@ class TestAggregateCellSign:
         strengths = [a.strength for a in cs.aggs]
         assert strengths == [1.0, 2.0]
 
+    def test_trailing_skipped_stashed_in_extra_aggs(self, mod, tiny_cell):
+        """Trimmed trailing strengths (eff-skipped but coh-judged)
+        land on ``cs.extra_aggs`` so the bottom-row coh panel can
+        render them past the cliff.  Order is ascending magnitude.
+        """
+        cs = mod.aggregate_cell_sign(tiny_cell)
+        extra_strengths = [a.strength for a in cs.extra_aggs]
+        assert extra_strengths == [4.0]
+        # And the mean_coh field is populated for the bottom-row plot.
+        assert cs.extra_aggs[0].mean_coh_all == pytest.approx(2.0)
+        # rp_all is None because tiny_cell's s=4.0 records have
+        # rp=None (judging was skipped at that strength).
+        assert cs.extra_aggs[0].mean_rp_all is None
+
     def test_trailing_skipped_does_not_trim_interior_skipped(
         self, mod, tmp_path
     ):
@@ -261,6 +275,20 @@ class TestAggregateCellSign:
         assert [a.n_total for a in cs.aggs] == [3, 3]
         assert [a.n_with_eff for a in cs.aggs] == [3, 3]
         assert [a.n_coh0 for a in cs.aggs] == [3, 2]
+
+    def test_unfiltered_coh_rp_means(self, mod, tiny_cell):
+        """The new ``mean_coh_all`` and ``mean_rp_all`` feed the bottom-row
+        coh / inverted-rp panels.  ``tiny_cell``:
+          s=1.0: 3 x coh=0, 3 x rp=3   -> mean_coh=0.0, mean_rp=3.0
+          s=2.0: cohs [0,1,0], rps [3,3,2] -> 1/3, 8/3
+        """
+        cs = mod.aggregate_cell_sign(tiny_cell)
+        coh_means = [a.mean_coh_all for a in cs.aggs]
+        rp_means = [a.mean_rp_all for a in cs.aggs]
+        assert coh_means[0] == pytest.approx(0.0)
+        assert coh_means[1] == pytest.approx(1.0 / 3.0)
+        assert rp_means[0] == pytest.approx(3.0)
+        assert rp_means[1] == pytest.approx(8.0 / 3.0)
 
 
 # ---------------------------------------------------------------------------
