@@ -210,7 +210,25 @@ RP_RUBRIC_VERSION = 4
 # `_repair_json_blob`) so older runs can be re-judged into clean
 # scores without re-generating model output.  Pole rubric was not
 # bumped because its 0..3 scale never has positive-with-plus issues.
-EFFECT_RUBRIC_VERSION = 6
+# 2026-05-16 (v7): bidirectional effect judging now fires TWO calls
+# per record-batch instead of one -- a "straight" call with the
+# original [BASELINE]=baseline / [RESPONSE]=steered layout, and a
+# "swap" call with the texts exchanged.  Per-record swap call uses
+# build_effect_bidir_batch_prompt(..., swap_baseline_response=True).
+# After both return, the dispatcher writes
+# bidirectional.averaged = (straight.mean - swap.mean) / 2, which
+# is the bias-cancelling estimator: under a content-driven judge
+# swap = -straight so averaged == straight (signal preserved);
+# under pure label/order bias swap == straight so averaged = 0
+# (bias cancelled).  records.jsonl::judges.effect.combined is now
+# this averaged value when both halves are present.  Schema
+# migration: legacy effect.bidirectional.scores moves to
+# effect.bidirectional.straight.scores; the empty swap sub-block
+# stays None until the post-judge fill-in pass populates it (see
+# steering/post_judge.py --effect-swap-fill).  Bias-cancellation
+# diagnostics: tools/test_effect_order_bias.py + Roger's notes
+# from the 2026-05-16 investigation.
+EFFECT_RUBRIC_VERSION = 7
 
 
 COHERENCE_RUBRIC = """\
@@ -513,16 +531,32 @@ def build_rp_prompt(
 
 def _format_effect_items_block(
     items: Sequence[Dict[str, Any]],
+    *,
+    swap_baseline_response: bool = False,
 ) -> str:
-    """Format N items into the 'Response 1 of N ... [QUESTION] ... [BASELINE] ... [RESPONSE]' blocks."""
+    """Format N items into the 'Response 1 of N ... [QUESTION] ... [BASELINE] ... [RESPONSE]' blocks.
+
+    When ``swap_baseline_response`` is True, the texts inside the
+    [BASELINE] and [RESPONSE] blocks are swapped (i.e. the steered
+    response is presented to the judge as the BASELINE, and the
+    baseline response as the steered RESPONSE).  Used by the
+    order-bias test harness in ``tools/test_effect_order_bias.py``:
+    if the judge is content-driven, swapped scores should negate the
+    originals; if there's a label/order bias, swapped scores will
+    instead retain their original sign.
+    """
     n = len(items)
     parts = []
     for i, it in enumerate(items, 1):
+        baseline_slot = it['baseline_response']
+        response_slot = it['steered_response']
+        if swap_baseline_response:
+            baseline_slot, response_slot = response_slot, baseline_slot
         parts.append(
             f"--- Response {i} of {n} (id={it['id']}) ---\n"
             f"[QUESTION]\n{it['question']}\n[/QUESTION]\n"
-            f"[BASELINE]\n{it['baseline_response']}\n[/BASELINE]\n"
-            f"[RESPONSE]\n{it['steered_response']}\n[/RESPONSE]"
+            f"[BASELINE]\n{baseline_slot}\n[/BASELINE]\n"
+            f"[RESPONSE]\n{response_slot}\n[/RESPONSE]"
         )
     return "\n\n".join(parts)
 
@@ -534,12 +568,20 @@ def build_effect_bidir_batch_prompt(
     sign: int,
     strength: float,
     items: Sequence[Dict[str, Any]],
+    swap_baseline_response: bool = False,
 ) -> str:
     """Bidirectional ±3 effect, N items in one call.
 
     Each item is a dict with keys 'id', 'question', 'baseline_response',
     'steered_response'.  All items share the same (persona, axis, sign,
     strength).
+
+    When ``swap_baseline_response`` is True, the per-item baseline /
+    steered texts are swapped before being shown to the judge.  The
+    rubric prose is unchanged; the judge believes the steered text is
+    the baseline and vice versa.  A content-driven judge should
+    produce strictly negated scores under this swap; persistent same-
+    sign scores would indicate a label/order bias.
 
     2026-05-13 (v4): both ``sign`` and ``strength`` are now hidden from
     the judge's prompt -- they remain in the function signature only so
@@ -563,7 +605,9 @@ def build_effect_bidir_batch_prompt(
         pos_description=steering.pos_description,
         neg_label=steering.neg_label,
         neg_description=steering.neg_description,
-        items_block=_format_effect_items_block(items),
+        items_block=_format_effect_items_block(
+            items, swap_baseline_response=swap_baseline_response,
+        ),
     )
 
 
@@ -632,6 +676,73 @@ _VALID_EFFECT_MODES = (
     EFFECT_MODE_SEPARATE_POLES,
     EFFECT_MODE_BOTH,
 )
+
+
+# ---------------------------------------------------------------------------
+# Schema migration helpers (rubric version 6 -> 7)
+# ---------------------------------------------------------------------------
+
+def migrate_effect_dict_in_place(effect_dict: Dict[str, Any]) -> bool:
+    """In-place migrate ``judges.effect`` from rubric v6 schema to v7.
+
+    v6 schema for bidirectional::
+
+        "effect": {
+          "bidirectional": {
+            "scores": {"<model>": {"score": int, "reason": str}, "mean": float, ...}
+          }, ...
+        }
+
+    v7 schema (adds swap-averaged half)::
+
+        "effect": {
+          "bidirectional": {
+            "straight": {"scores": {"<model>": ..., "mean": float, ...}},
+            "swap":     {"scores": {"<model>": ..., "mean": float, ...}} | absent,
+            "averaged": float | None
+          }, ...
+        }
+
+    Migration is idempotent: returns ``False`` if the dict was already
+    v7 (had ``straight`` or ``swap`` or ``averaged`` under
+    ``bidirectional``).  Returns ``True`` if a v6 -> v7 rename
+    actually happened.
+
+    Only the bidirectional sub-block is touched; ``separate_poles``
+    keeps its existing shape.  The post-judge fill-in adds the
+    ``swap`` block and the top-level ``averaged`` after migration;
+    until then ``combined`` falls back to ``straight.scores.mean``.
+    """
+    bidir = effect_dict.get(EFFECT_MODE_BIDIRECTIONAL)
+    if not isinstance(bidir, dict):
+        return False
+    if any(k in bidir for k in ("straight", "swap", "averaged")):
+        return False  # already v7
+    if "scores" not in bidir:
+        return False  # no per-model scores to relocate
+    bidir["straight"] = {"scores": bidir.pop("scores")}
+    return True
+
+
+def _averaged_eff_from_bidir(bidir: Dict[str, Any]) -> Optional[float]:
+    """Compute (straight.mean - swap.mean) / 2 if both halves exist,
+    else ``None``.  The result is the bias-cancelling estimator:
+    under a content-driven judge ``swap == -straight`` so the
+    estimator equals ``straight`` (signal preserved); under pure
+    label/order bias ``swap == straight`` so the estimator collapses
+    to 0 (bias cancelled).
+    """
+    if not isinstance(bidir, dict):
+        return None
+    straight = bidir.get("straight")
+    swap = bidir.get("swap")
+    if not (isinstance(straight, dict) and isinstance(swap, dict)):
+        return None
+    sm = straight.get("scores", {}).get("mean")
+    wm = swap.get("scores", {}).get("mean")
+    if sm is None or wm is None:
+        return None
+    return (float(sm) - float(wm)) / 2
 
 # Default model ensemble for the effect judge.  Roger: "use GPT+Haiku for
 # now, finalise once response-judging model decision is made".  The
@@ -1443,6 +1554,124 @@ class RealJudgeDispatcher:
             f"RP+effect done for K={len(records)} records"
         )
 
+    async def _swap_fill_in_group_async(
+        self,
+        *,
+        cell_dir: str,
+        slot: int,
+        layer: int,
+        sign: int,
+        strength: float,
+        records: List[Dict[str, Any]],
+    ) -> None:
+        """Fill in the SWAP half of v7 bidirectional effect on records
+        whose STRAIGHT half is already populated.
+
+        Used by ``enqueue_swap_fill_in_group`` for the post_judge
+        ``--effect-swap-fill`` workflow.  Migrates any v6-schema
+        records to v7 in-place first, then batches and calls the
+        swap rubric, then computes ``bidirectional.averaged`` per
+        record so the canonical ``combined`` becomes the bias-cancelled
+        estimator.
+
+        Skips records that already have ``bidirectional.swap.scores.mean``
+        unless ``self.rerun_existing`` is set.
+        """
+        # 1. Migrate v6 -> v7 layout for any record that needs it.
+        #    Idempotent: no-op on records already in v7.
+        for r in records:
+            eff = (r.get("judges") or {}).get("effect")
+            if isinstance(eff, dict):
+                migrate_effect_dict_in_place(eff)
+
+        # 2. Filter to records that have a STRAIGHT half but no SWAP.
+        #    A record with no straight half has nothing to pair the
+        #    swap call with -- typically it was skipped at sweep time
+        #    due to mean_coh > skip_threshold; no fill-in here either.
+        to_fill: List[Dict[str, Any]] = []
+        for r in records:
+            eff = (r.get("judges") or {}).get("effect") or {}
+            bidir = eff.get(EFFECT_MODE_BIDIRECTIONAL) or {}
+            straight_mean = (
+                bidir.get("straight", {}).get("scores", {}).get("mean")
+            )
+            if straight_mean is None:
+                continue
+            swap_mean = (
+                bidir.get("swap", {}).get("scores", {}).get("mean")
+            )
+            if swap_mean is not None and not self.rerun_existing:
+                continue
+            to_fill.append(r)
+        if not to_fill:
+            return
+
+        # 3. Batch + fire the swap rubric across the ensemble.
+        batches = self._plan_batches(to_fill)
+        for batch in batches:
+            items = [
+                {
+                    "id": r["question_idx"],
+                    "question": r["question"],
+                    "baseline_response": self._lookup_baseline(r["question_idx"]),
+                    "steered_response": r["response"],
+                }
+                for r in batch
+            ]
+            prompt = build_effect_bidir_batch_prompt(
+                persona=self.persona, steering=self.steering,
+                sign=sign, strength=strength, items=items,
+                swap_baseline_response=True,
+            )
+            await self._fan_out_ensemble(
+                prompt=prompt, batch=batch, score_range=(-3, 3),
+                effect_mode_key=EFFECT_MODE_BIDIRECTIONAL,
+                inner_path=["swap", "scores"],
+            )
+
+        # 4. Compute averaged + bump canonical fields on every filled
+        #    record so downstream readers pick up the bias-cancelled
+        #    combined and the new rubric version.
+        for r in to_fill:
+            eff = r["judges"]["effect"]
+            bidir = eff.get(EFFECT_MODE_BIDIRECTIONAL)
+            if isinstance(bidir, dict):
+                bidir["averaged"] = _averaged_eff_from_bidir(bidir)
+            combined = self._compute_combined(eff, EFFECT_MODE_BIDIRECTIONAL)
+            eff["combined"] = combined
+            eff["mode"] = EFFECT_MODE_BIDIRECTIONAL
+            eff["ts"] = time.time()
+            eff["rubric_version"] = EFFECT_RUBRIC_VERSION
+
+        self._merge_records_to_disk(to_fill)
+        logger.info(
+            f"[cell s{slot}_l{layer}_{sign:+d}] strength={strength}: "
+            f"swap fill-in done for K={len(to_fill)} of {len(records)} records"
+        )
+
+    def enqueue_swap_fill_in_group(
+        self,
+        *,
+        cell_dir: str, slot: int, layer: int, sign: int, strength: float,
+        records: List[Dict[str, Any]],
+    ) -> None:
+        """Public entry point for v7 swap fill-in on one strength group.
+
+        Submits a coroutine to the dispatcher's event loop that runs
+        ``_swap_fill_in_group_async`` and tracks it in ``_inflight``
+        so ``drain()`` waits on it.  Caller is responsible for
+        partitioning records into per-(sign, strength) groups.
+        """
+        if not records:
+            return
+        coro = self._swap_fill_in_group_async(
+            cell_dir=cell_dir, slot=slot, layer=layer,
+            sign=sign, strength=strength, records=records,
+        )
+        fut = asyncio.run_coroutine_threadsafe(coro, self._loop)
+        with self._inflight_lock:
+            self._inflight.append(fut)
+
     async def _do_persona(self, records: List[Dict[str, Any]]) -> None:
         """Per-record RP judging (unbatched, matches pipeline/3_judge.py)."""
         async def _one(r):
@@ -1546,16 +1775,47 @@ class RealJudgeDispatcher:
             for r in batch
         ]
         if mode == EFFECT_MODE_BIDIRECTIONAL:
-            prompt = build_effect_bidir_batch_prompt(
+            # v7: fire STRAIGHT + SWAP rubrics concurrently, then write
+            # bidirectional.averaged = (straight.mean - swap.mean) / 2.
+            # This is the bias-cancelling estimator: see
+            # ``_averaged_eff_from_bidir`` docstring + the v7
+            # rubric-version-history comment block at module top.
+            prompt_straight = build_effect_bidir_batch_prompt(
                 persona=self.persona, steering=self.steering,
                 sign=sign, strength=strength, items=items,
+                swap_baseline_response=False,
+            )
+            prompt_swap = build_effect_bidir_batch_prompt(
+                persona=self.persona, steering=self.steering,
+                sign=sign, strength=strength, items=items,
+                swap_baseline_response=True,
             )
             score_range = (-3, 3)
-            await self._fan_out_ensemble(
-                prompt=prompt, batch=batch, score_range=score_range,
-                effect_mode_key=EFFECT_MODE_BIDIRECTIONAL,
-                pole=None,
+            await asyncio.gather(
+                self._fan_out_ensemble(
+                    prompt=prompt_straight, batch=batch,
+                    score_range=score_range,
+                    effect_mode_key=EFFECT_MODE_BIDIRECTIONAL,
+                    inner_path=["straight", "scores"],
+                ),
+                self._fan_out_ensemble(
+                    prompt=prompt_swap, batch=batch,
+                    score_range=score_range,
+                    effect_mode_key=EFFECT_MODE_BIDIRECTIONAL,
+                    inner_path=["swap", "scores"],
+                ),
             )
+            # Compute the bias-cancelling averaged eff per record now
+            # that both halves are populated.  Robust to partial
+            # failures: writes None if either half's per-model mean is
+            # absent (e.g. all UNPARSEABLE on one side), and the
+            # downstream ``combined`` falls back to ``straight.mean``.
+            for r in batch:
+                bidir = (r.get("judges") or {}).get("effect", {}).get(
+                    EFFECT_MODE_BIDIRECTIONAL
+                )
+                if isinstance(bidir, dict):
+                    bidir["averaged"] = _averaged_eff_from_bidir(bidir)
         elif mode == EFFECT_MODE_SEPARATE_POLES:
             for pole in ("pos", "neg"):
                 prompt = build_effect_pole_batch_prompt(
@@ -1565,7 +1825,7 @@ class RealJudgeDispatcher:
                 await self._fan_out_ensemble(
                     prompt=prompt, batch=batch, score_range=(0, 3),
                     effect_mode_key=EFFECT_MODE_SEPARATE_POLES,
-                    pole=pole,
+                    inner_path=[pole],
                 )
         else:
             raise ValueError(f"unhandled mode {mode!r}")
@@ -1573,9 +1833,19 @@ class RealJudgeDispatcher:
     async def _fan_out_ensemble(
         self, *, prompt: str, batch: List[Dict[str, Any]],
         score_range: Tuple[int, int], effect_mode_key: str,
-        pole: Optional[str],
+        inner_path: List[str],
     ) -> None:
-        """Run one prompt across all models in the effect ensemble."""
+        """Run one prompt across all models in the effect ensemble.
+
+        ``inner_path`` is the dict-key path from
+        ``eff[effect_mode_key]`` down to the per-model "scores" dict
+        the results get written into.  Lets the caller choose between:
+
+          * Legacy bidirectional (pre-v7): ``["scores"]``
+          * v7 bidirectional straight: ``["straight", "scores"]``
+          * v7 bidirectional swap: ``["swap", "scores"]``
+          * Separate-poles pos/neg: ``["pos"]`` / ``["neg"]``
+        """
         max_tokens = self.max_tokens_effect_per_item * len(batch) + 200
 
         async def _one_model(m: str) -> Tuple[str, Optional[Dict[Any, Dict[str, Any]]]]:
@@ -1596,7 +1866,7 @@ class RealJudgeDispatcher:
         )
 
         # Stamp scores onto each record.  Storage shape per record:
-        # judges.effect[<mode>][<pole or 'scores'>][<model>] = {score, reason}
+        # judges.effect[<mode>][<inner_path...>][<model>] = {score, reason}
         for r in batch:
             r.setdefault("judges", {})
             # The runner pre-populates judges.effect = None; setdefault
@@ -1605,9 +1875,19 @@ class RealJudgeDispatcher:
             if not isinstance(r["judges"].get("effect"), dict):
                 r["judges"]["effect"] = {}
             eff = r["judges"]["effect"]
+            # Migrate any legacy v6 dict in place so this record ends
+            # up in the v7 shape even if it had old data on it.
+            migrate_effect_dict_in_place(eff)
             mode_bucket = eff.setdefault(effect_mode_key, {})
-            inner_key = pole if pole is not None else "scores"
-            inner = mode_bucket.setdefault(inner_key, {})
+            # Navigate the inner_path, creating dicts as needed.
+            cursor = mode_bucket
+            for key in inner_path[:-1]:
+                nxt = cursor.get(key)
+                if not isinstance(nxt, dict):
+                    nxt = {}
+                    cursor[key] = nxt
+                cursor = nxt
+            inner = cursor.setdefault(inner_path[-1], {})
             for model_name, parsed in results:
                 if parsed is None:
                     self._record_judge_outcome(
@@ -1656,14 +1936,31 @@ class RealJudgeDispatcher:
     def _compute_combined(effect_dict: Dict[str, Any], mode: str) -> Optional[float]:
         """Compute the canonical 'combined' effect score from per-model parts.
 
-        - bidirectional: mean of the per-model -3..+3 scores.
+        - bidirectional (v7): bidirectional.averaged when present (the
+          bias-cancelling estimator (straight.mean - swap.mean) / 2),
+          else fall back to bidirectional.straight.scores.mean (when
+          swap-side judging failed or pre-fill-in), else fall back to
+          the legacy bidirectional.scores.mean (pre-v7 records).
         - separate_poles: pos.mean - neg.mean.
         - both: prefers separate_poles' combined.  Caller should consult
           per-mode dicts directly if they want the bidirectional number too.
         """
         if mode == EFFECT_MODE_BIDIRECTIONAL:
-            scores = effect_dict.get(EFFECT_MODE_BIDIRECTIONAL, {}).get("scores", {})
-            mean_val = scores.get("mean")
+            bidir = effect_dict.get(EFFECT_MODE_BIDIRECTIONAL, {})
+            if not isinstance(bidir, dict):
+                return None
+            # v7: bias-cancelling averaged is preferred when populated.
+            avg = bidir.get("averaged")
+            if avg is not None:
+                return float(avg)
+            # v7 with swap missing: straight half only.
+            straight = bidir.get("straight")
+            if isinstance(straight, dict):
+                sm = straight.get("scores", {}).get("mean")
+                if sm is not None:
+                    return float(sm)
+            # Legacy v6 / earlier: per-model mean lived under "scores".
+            mean_val = bidir.get("scores", {}).get("mean")
             return float(mean_val) if mean_val is not None else None
         if mode in (EFFECT_MODE_SEPARATE_POLES, EFFECT_MODE_BOTH):
             sep = effect_dict.get(EFFECT_MODE_SEPARATE_POLES, {})

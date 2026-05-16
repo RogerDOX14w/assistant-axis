@@ -683,8 +683,14 @@ class TestRealDispatcherSkipLogic:
         dispatcher.drain(timeout_s=10.0)
         result = eff_fut_eager.result(timeout=5.0)
         assert not math.isnan(result), f"eff future resolved to NaN: {result}"
-        # All records got +2 -> mean abs = 2.0
-        assert result == pytest.approx(2.0, rel=1e-3)
+        # v7 (2026-05-16): the dispatcher fires BOTH straight and swap
+        # rubrics.  This test's fake_call returns the same +2 score
+        # regardless of which rubric variant ran, so straight.mean = +2
+        # and swap.mean = +2.  Averaged = (straight - swap) / 2 = 0.
+        # combined for each record is the averaged value, so
+        # mean(|combined|) = 0.0.  (Pre-v7 this test asserted 2.0 --
+        # that was the straight-mean, not the bias-cancelled signal.)
+        assert result == pytest.approx(0.0, abs=1e-6)
 
         # A second call should return the SAME future object (idempotent).
         eff_fut_again = dispatcher.judge_effect_for_strength_async(records)
@@ -701,8 +707,11 @@ class TestRealDispatcherSkipLogic:
         per-model entry.  Fix: skip the 'mean' key explicitly when
         recomputing.
         """
-        # Build a record with PREVIOUSLY-populated effect (containing a
-        # float 'mean' under each pole bucket).
+        # Build a record with PREVIOUSLY-populated effect in the v6
+        # schema (bidirectional.scores directly, no straight/swap
+        # sub-blocks).  Re-run should both migrate the schema to v7
+        # AND overwrite the per-model scores without tripping on the
+        # legacy float ``mean``.
         prior = {
             "mode": "bidirectional",
             "bidirectional": {
@@ -715,7 +724,7 @@ class TestRealDispatcherSkipLogic:
             },
             "combined": 1.0,
             "ts": 0.0,
-            "rubric_version": 1,
+            "rubric_version": 6,
             "skipped_due_to_strength_mean_coh": False,
         }
         rec = _make_record(0, coh=0)
@@ -738,12 +747,22 @@ class TestRealDispatcherSkipLogic:
         )
         dispatcher.drain(timeout_s=10.0)
 
-        # Should NOT have crashed.  New score replaces old per-model entry.
+        # Should NOT have crashed.  Migration to v7 happened, so
+        # per-model scores now live under bidirectional.straight.scores
+        # (and the dispatcher additionally populates bidirectional.swap
+        # because v7 fires both rubrics).
         eff = rec["judges"]["effect"]
-        bid = eff["bidirectional"]["scores"]
-        assert bid["gpt-4.1-mini"]["score"] == 2
-        # mean recomputed correctly without tripping
-        assert bid["mean"] == 2.0
+        bid = eff["bidirectional"]
+        straight = bid["straight"]["scores"]
+        assert straight["gpt-4.1-mini"]["score"] == 2
+        assert straight["mean"] == 2.0
+        # Swap half also populated by the dispatcher's v7 path.
+        swap = bid["swap"]["scores"]
+        assert swap["gpt-4.1-mini"]["score"] == 2
+        # Both halves returning the same fake score => averaged = 0
+        # ((straight - swap) / 2) -- exactly what content-driven
+        # judging would yield if straight and swap genuinely agreed.
+        assert bid["averaged"] == 0.0
 
     def test_strength_mean_coh_stamped_on_disk(self, dispatcher, tmp_path):
         records = [_make_record(i, coh=2) for i in range(2)]
@@ -757,6 +776,132 @@ class TestRealDispatcherSkipLogic:
         assert len(on_disk) == 2
         for r in on_disk:
             assert r["judges"]["strength_mean_coh"] == pytest.approx(2.0)
+
+
+class TestSchemaMigrationV6ToV7:
+    """v7 (2026-05-16) renames bidirectional.scores -> bidirectional.straight.scores
+    and adds bidirectional.swap + bidirectional.averaged.  Old records
+    on disk stay readable; combined falls back through three layers.
+    """
+
+    def test_migrate_v6_legacy_to_v7(self):
+        """A pure v6 effect dict gains a ``straight`` sub-block whose
+        ``scores`` is the old ``scores`` dict, with the legacy
+        top-level ``scores`` key removed (so neither schema's reader
+        sees both copies)."""
+        eff = {
+            "bidirectional": {
+                "scores": {
+                    "gpt-4.1-mini": {"score": 2, "reason": "ok"},
+                    "mean": 2.0,
+                },
+            },
+            "mode": "bidirectional",
+            "combined": 2.0,
+        }
+        changed = sj.migrate_effect_dict_in_place(eff)
+        assert changed is True
+        bidir = eff["bidirectional"]
+        assert "scores" not in bidir, \
+            "legacy 'scores' key must be removed after migration"
+        assert bidir["straight"]["scores"]["gpt-4.1-mini"]["score"] == 2
+        assert bidir["straight"]["scores"]["mean"] == 2.0
+
+    def test_migrate_v7_idempotent(self):
+        """Already-v7 dicts (have straight/swap/averaged) are untouched."""
+        eff = {
+            "bidirectional": {
+                "straight": {"scores": {"gpt": {"score": 1}, "mean": 1.0}},
+                "swap": {"scores": {"gpt": {"score": -1}, "mean": -1.0}},
+                "averaged": 1.0,
+            },
+        }
+        before = json.dumps(eff, sort_keys=True)
+        changed = sj.migrate_effect_dict_in_place(eff)
+        assert changed is False
+        assert json.dumps(eff, sort_keys=True) == before
+
+    def test_migrate_no_bidirectional_section(self):
+        """Effect dicts without a bidirectional sub-block (e.g., pure
+        separate_poles mode) are untouched and return False."""
+        eff = {
+            "separate_poles": {
+                "pos": {"gpt": {"score": 2}, "mean": 2.0},
+                "neg": {"gpt": {"score": 0}, "mean": 0.0},
+            },
+            "mode": "separate_poles",
+        }
+        before = json.dumps(eff, sort_keys=True)
+        assert sj.migrate_effect_dict_in_place(eff) is False
+        assert json.dumps(eff, sort_keys=True) == before
+
+    def test_averaged_estimator_math(self):
+        """Bias-cancelling estimator: (straight.mean - swap.mean) / 2.
+
+        - Content-driven judge: swap = -straight => averaged == straight.
+        - Pure label bias: swap = straight => averaged == 0.
+        """
+        bidir = {
+            "straight": {"scores": {"gpt": {"score": 2}, "mean": 2.0}},
+            "swap": {"scores": {"gpt": {"score": -2}, "mean": -2.0}},
+        }
+        # Content-driven: averaged passes signal through.
+        assert sj._averaged_eff_from_bidir(bidir) == 2.0
+
+        bidir["swap"]["scores"]["mean"] = 2.0
+        # Pure label bias: averaged collapses to 0.
+        assert sj._averaged_eff_from_bidir(bidir) == 0.0
+
+        # Mixed signal + bias: (1 - (-2))/2 = 1.5.
+        bidir["straight"]["scores"]["mean"] = 1.0
+        bidir["swap"]["scores"]["mean"] = -2.0
+        assert sj._averaged_eff_from_bidir(bidir) == 1.5
+
+    def test_averaged_estimator_returns_none_when_half_missing(self):
+        # Swap absent.
+        bidir = {"straight": {"scores": {"mean": 1.0}}}
+        assert sj._averaged_eff_from_bidir(bidir) is None
+        # Straight absent.
+        bidir = {"swap": {"scores": {"mean": 1.0}}}
+        assert sj._averaged_eff_from_bidir(bidir) is None
+        # Means are None.
+        bidir = {
+            "straight": {"scores": {"mean": None}},
+            "swap": {"scores": {"mean": 1.0}},
+        }
+        assert sj._averaged_eff_from_bidir(bidir) is None
+
+    def test_compute_combined_prefers_averaged(self):
+        """Three-layer fallback: averaged > straight.scores.mean > legacy."""
+        # v7 with averaged.
+        eff = {
+            "bidirectional": {
+                "straight": {"scores": {"mean": 1.5}},
+                "swap": {"scores": {"mean": -1.5}},
+                "averaged": 1.5,
+            },
+        }
+        assert sj.RealJudgeDispatcher._compute_combined(
+            eff, sj.EFFECT_MODE_BIDIRECTIONAL
+        ) == 1.5
+
+        # v7 with swap-half missing (averaged is None) -> straight fallback.
+        eff = {
+            "bidirectional": {
+                "straight": {"scores": {"mean": 1.5}},
+            },
+        }
+        assert sj.RealJudgeDispatcher._compute_combined(
+            eff, sj.EFFECT_MODE_BIDIRECTIONAL
+        ) == 1.5
+
+        # Legacy v6 -> falls back to bidirectional.scores.mean.
+        eff = {
+            "bidirectional": {"scores": {"mean": 2.5}},
+        }
+        assert sj.RealJudgeDispatcher._compute_combined(
+            eff, sj.EFFECT_MODE_BIDIRECTIONAL
+        ) == 2.5
 
 
 class TestRealDispatcherBatching:

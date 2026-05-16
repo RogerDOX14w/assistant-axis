@@ -156,9 +156,53 @@ def _safe_mean(xs: List[Optional[float]]) -> Optional[float]:
 # Per-cell aggregation
 # ---------------------------------------------------------------------------
 
+def _load_swap_averaged(cell_dir: Path) -> Dict[Tuple[int, float], float]:
+    """Build a lookup ``(question_idx, rounded_strength) -> averaged_eff``
+    from this cell's ``records_effect_swap.jsonl`` (if it exists).
+
+    The side file is produced by ``tools/test_effect_order_bias.py``
+    and carries the bias-cancelled estimator
+    ``averaged_eff = (orig_combined - swap_combined) / 2`` per record.
+    When present, ``aggregate_cell_sign`` substitutes this for the
+    record's raw ``judges.effect.combined`` -- the plot then shows
+    bias-corrected signal instead of the rubric's raw output.
+
+    Returns an empty dict if the file doesn't exist, so callers fall
+    back to the raw ``effect.combined`` gracefully.
+    """
+    path = cell_dir / "records_effect_swap.jsonl"
+    out: Dict[Tuple[int, float], float] = {}
+    if not path.exists():
+        return out
+    for line in path.read_text().splitlines():
+        line = line.strip()
+        if not line:
+            continue
+        try:
+            r = json.loads(line)
+            q = int(r["question_idx"])
+            s = round(float(r["strength"]), 6)
+            avg = r.get("averaged_eff")
+            if avg is None:
+                continue
+            out[(q, s)] = float(avg)
+        except (json.JSONDecodeError, KeyError, ValueError, TypeError):
+            continue
+    return out
+
+
 def aggregate_cell_sign(cell_dir: Path) -> CellSign:
     """Read one ``s<slot>_l<layer>_<+1|-1>`` directory and group its
     records by strength, computing each of the four filter means.
+
+    If the cell has a ``records_effect_swap.jsonl`` sibling file
+    (produced by ``tools/test_effect_order_bias.py``), the
+    bias-cancelled ``averaged_eff = (orig - swap) / 2`` substitutes
+    for the raw ``judges.effect.combined``.  Records at strengths the
+    swap descent stopped above (because the cancelled signal had
+    dropped below the noise floor) keep their original effect score
+    -- those rows lie outside the bias-corrected analytical zone and
+    the plot can still show them.
     """
     name = cell_dir.name  # "s3_l25_+1"
     # Parse slot/layer/sign back from dir name -- robust to any
@@ -170,6 +214,7 @@ def aggregate_cell_sign(cell_dir: Path) -> CellSign:
     sign = int(sign_str)
 
     records = _read_jsonl(cell_dir / "records.jsonl")
+    swap_avg_lookup = _load_swap_averaged(cell_dir)
     # Group by exact strength value (records use floats; rounding errors
     # are tolerable because the runner reuses the same float each time
     # it writes a strength).
@@ -183,12 +228,44 @@ def aggregate_cell_sign(cell_dir: Path) -> CellSign:
             continue  # baseline rows -- excluded from steering curves
         by_strength.setdefault(s, []).append(r)
 
+    # Strengths that have at least one swap-averaged eff in the side
+    # file -- if a swap.jsonl exists at all, restrict the plotted
+    # strengths to these so the curve only shows bias-corrected data.
+    # When no swap.jsonl exists (legacy experiments or experiments
+    # we haven't filled in yet) fall back to plotting every strength
+    # with the raw rubric effect.
+    strengths_with_swap: Optional[set] = None
+    if swap_avg_lookup:
+        strengths_with_swap = {k[1] for k in swap_avg_lookup}
+
     aggs: List[StrengthAgg] = []
     for s in sorted(by_strength.keys()):
+        s_key = round(s, 6)
+        if strengths_with_swap is not None and s_key not in strengths_with_swap:
+            # Bias-contaminated row -- drop entirely.  These are
+            # strengths the corrected-predicate descent stopped above,
+            # so under the corrected pipeline we'd never have
+            # collected (or kept) data here.
+            continue
         recs = by_strength[s]
         coh = [_coh_score(r) for r in recs]
         rp = [_rp_score(r) for r in recs]
-        eff = [_eff_score(r) for r in recs]
+        # Use the swap-averaged (bias-cancelled) eff if available for
+        # this (question_idx, strength); else fall back to the raw
+        # rubric effect score.  Strength rounded to 6 dp to absorb
+        # FP serialisation drift between the live runner and side file.
+        eff: List[Optional[float]] = []
+        for r in recs:
+            try:
+                q = int(r["question_idx"])
+            except (KeyError, ValueError, TypeError):
+                eff.append(None)
+                continue
+            cached = swap_avg_lookup.get((q, s_key))
+            if cached is not None:
+                eff.append(cached)
+            else:
+                eff.append(_eff_score(r))
 
         # Filter regimes -- each returns the eff value or None.
         def filter_eff(predicate: Callable[[int, int], bool]) -> List[Optional[float]]:
@@ -215,6 +292,17 @@ def aggregate_cell_sign(cell_dir: Path) -> CellSign:
             n_coh0=sum(1 for c in coh if c == 0),
         )
         aggs.append(agg)
+
+    # Trim trailing strengths with no usable eff data (the runner's
+    # "above skip_threshold -- don't bother judging" tail).  Without
+    # this trim every cell's rightmost few data points would be a
+    # gap at x = 0, 1, ..., because the runner's coh-stop crossed
+    # mean_coh >= 1.0 and rp+effect judging was skipped at those
+    # strengths.  Defining x=0 as the last strength with usable
+    # eff data instead lets every (cell, sign) curve naturally
+    # reach x=0 on the right edge of the plot.
+    while aggs and aggs[-1].mean_eff_all is None:
+        aggs.pop()
 
     summary_path = cell_dir / "summary.json"
     up_reason = None
@@ -278,7 +366,13 @@ FILTER_LABEL = {
 def _x_steps_from_cliff(n_strengths: int) -> np.ndarray:
     """Convert step-index (0..N-1, ascending strength) to "steps
     remaining to incoherence" (N-1..0).  The cell's largest strength
-    -- the incoherence cliff -- sits at x=0; the smallest at x=N-1.
+    with usable eff data -- the "data cliff" just inside the runner's
+    skip-threshold region -- sits at x=0; the smallest at x=N-1.
+
+    Trailing strengths whose mean_eff_all is None (rp+effect judging
+    skipped because mean_coh exceeded skip_threshold) are already
+    trimmed by ``aggregate_cell_sign`` so x=0 always corresponds to
+    a real data point on each (cell, sign) curve.
     """
     return np.arange(n_strengths - 1, -1, -1)
 
@@ -288,10 +382,21 @@ def plot_response_curves(
     *,
     output_path: Path,
     title: str,
+    pos_pole_name: Optional[str] = None,
+    neg_pole_name: Optional[str] = None,
 ) -> None:
     """Render one figure with two side-by-side subplots (sign=+1 left,
     sign=-1 right).  Color encodes (slot, layer); linestyle encodes
     filter regime.
+
+    ``pos_pole_name`` / ``neg_pole_name`` are the human-readable
+    pole labels (from the experiment's config; e.g. "unhelpful" and
+    "helpful").  These follow the runner's convention:
+    sign=+1 steers toward the rubric's ``pos_label`` (= config
+    ``role_to`` for role_transplant axes); sign=-1 steers toward the
+    rubric's ``neg_label`` (= config ``role_from``).  When set, the
+    subplot titles surface them so the reader doesn't have to
+    mentally translate sign to direction.
     """
     # Distinct colour per (slot, layer).  Tab10 covers 7 comfortably.
     unique_cells = sorted({(c.slot, c.layer) for c in cells})
@@ -303,8 +408,10 @@ def plot_response_curves(
     fig, axes = plt.subplots(
         1, 2, figsize=(16, 8), sharey=True,
     )
-    sign_label = {+1: "sign = +1  (toward neg pole)",
-                  -1: "sign = -1  (toward pos pole)"}
+    pos_suffix = f"  (toward {pos_pole_name})" if pos_pole_name else "  (toward neg pole)"
+    neg_suffix = f"  (toward {neg_pole_name})" if neg_pole_name else "  (toward pos pole)"
+    sign_label = {+1: f"sign = +1{pos_suffix}",
+                  -1: f"sign = -1{neg_suffix}"}
 
     for ax, sign in zip(axes, (+1, -1)):
         cell_signs_here = [c for c in cells if c.sign == sign]
@@ -314,8 +421,27 @@ def plot_response_curves(
             base_label = f"s{cs.slot}_l{cs.layer}"
             for filt_key in ("all", "coh0", "rp3", "both"):
                 ys = [_filter_value(a, filt_key) for a in cs.aggs]
-                # Plot; matplotlib handles None as NaN -> gaps in line.
-                ys_arr = np.array([np.nan if y is None else y for y in ys])
+                # Normalise so UP = response moved in the STEERED
+                # direction on both subplots.  The effect rubric's
+                # absolute convention is +eff = more pos_label, -eff
+                # = more neg_label, regardless of which way the cell
+                # was steered.  Sign=+1 cells were steered toward
+                # pos_label, so the rubric's sign already matches
+                # "moved in steered direction" -- no flip.  Sign=-1
+                # cells were steered toward neg_label, so -eff is the
+                # "steering working" direction and we flip the sign
+                # so it appears as positive Y.  This makes "up = the
+                # steering experiment succeeded" universally and
+                # removes the per-panel sign-flip the viewer would
+                # otherwise have to do in their head.
+                if sign == -1:
+                    ys_arr = np.array(
+                        [np.nan if y is None else -y for y in ys]
+                    )
+                else:
+                    ys_arr = np.array(
+                        [np.nan if y is None else y for y in ys]
+                    )
                 # The legend label only carries the cell name for the
                 # "all" variant; otherwise the per-filter legend would
                 # double up to 28 entries per subplot.
@@ -332,10 +458,29 @@ def plot_response_curves(
         # x=0 (cliff) on the RIGHT; increasing x to the LEFT.
         ax.invert_xaxis()
         ax.set_xlabel("Steps remaining to incoherence cliff (0 = cliff)")
-        ax.set_title(sign_label[sign])
+        # Per-subplot title carries both the sign and what "up" means
+        # there, since each panel has been normalised so positive Y =
+        # "response moved toward the steered pole".
+        steered_pole = (pos_pole_name if sign == +1 else neg_pole_name)
+        if steered_pole:
+            ax.set_title(
+                f"{sign_label[sign]}    "
+                f"\u2191 = more {steered_pole}, \u2193 = opposite"
+            )
+        else:
+            ax.set_title(sign_label[sign])
         ax.grid(True, alpha=0.3)
 
-    axes[0].set_ylabel("Mean effect score")
+    # Shared Y axis: post-normalisation, +y means "response moved
+    # toward the pole the cell was steered toward" on BOTH subplots.
+    # The per-panel title above spells out which specific pole that
+    # is (since they're mirrored: left = pos_label, right = neg_label
+    # of the rubric).
+    axes[0].set_ylabel(
+        "Mean effect score    "
+        "(+: toward the steered pole    "
+        "\u2212: away from the steered pole)"
+    )
 
     # Two legends per figure: one for cell colours (on the left subplot),
     # one for filter linestyles (on the right subplot) so the user
@@ -421,10 +566,25 @@ def main() -> int:
 
     config_path = args.experiment_dir / "config.json"
     experiment_id = args.experiment_dir.name
+    pos_pole_name = None
+    neg_pole_name = None
     if config_path.exists():
         try:
             with open(config_path, encoding="utf-8") as f:
-                experiment_id = json.load(f).get("experiment_id", experiment_id)
+                config = json.load(f)
+            experiment_id = config.get("experiment_id", experiment_id)
+            # Pole labels follow the runner's convention for
+            # role_transplant axes (see _resolve_steering_spec in
+            # steering/run_sweep.py): the rubric's pos_label (= the
+            # "+1 sign" pole) is the config's role_to; the rubric's
+            # neg_label is the config's role_from.
+            axis_source = config.get("axis_source", {}) or {}
+            if axis_source.get("type") == "role_transplant":
+                pos_pole_name = axis_source.get("role_to") or None
+                neg_pole_name = axis_source.get("role_from") or None
+            else:
+                pos_pole_name = axis_source.get("pos_label") or None
+                neg_pole_name = axis_source.get("neg_label") or None
         except (OSError, json.JSONDecodeError):
             pass
 
@@ -436,7 +596,10 @@ def main() -> int:
         f"{len({(c.slot, c.layer) for c in cells})} cells "
         f"for {experiment_id}"
     )
-    plot_response_curves(cells, output_path=output_path, title=title)
+    plot_response_curves(
+        cells, output_path=output_path, title=title,
+        pos_pole_name=pos_pole_name, neg_pole_name=neg_pole_name,
+    )
     return 0
 
 

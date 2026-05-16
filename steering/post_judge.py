@@ -46,7 +46,7 @@ from typing import Any, Dict, List, Optional, Tuple
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
 from assistant_axis.atomic_io import (   # noqa: E402
-    read_jsonl_with_retry, read_text_with_retry,
+    atomic_write_text, read_jsonl_with_retry, read_text_with_retry,
 )
 from assistant_axis.steering_judges import (   # noqa: E402
     DEFAULT_COHERENCE_MODEL, DEFAULT_RP_MODEL, DEFAULT_EFFECT_MODELS,
@@ -267,6 +267,236 @@ def process_cell(
     return n_groups
 
 
+def process_cell_swap_fill_in(
+    *,
+    cell_dir: Path,
+    dispatcher: RealJudgeDispatcher,
+    rerun_existing: bool = False,
+) -> int:
+    """v7 swap fill-in entry point for one cell dir.
+
+    Reads ``records.jsonl``, groups records by ``(sign, strength)``,
+    and for each group enqueues a swap fill-in via the dispatcher's
+    ``enqueue_swap_fill_in_group``.  Drains all in-flight work before
+    returning.  Returns the number of strength groups enqueued.
+
+    Does NOT enqueue persona / coherence work; ``--effect-swap-fill``
+    is a single-purpose mode.  Migration from v6 schema is performed
+    in-place inside ``_swap_fill_in_group_async``; legacy records
+    pick up the new shape transparently.
+    """
+    records_path = cell_dir / "records.jsonl"
+    if not records_path.exists():
+        return 0
+    records = list(read_jsonl_with_retry(records_path, logger_obj=logger))
+    if not records:
+        return 0
+
+    # Group by (sign, strength).  Baselines (sign=0) have no straight
+    # effect score, so the dispatcher's filter will skip them anyway,
+    # but we drop them up-front to keep group-count logging clean.
+    from collections import defaultdict
+    groups: Dict[Tuple[int, float], List[Dict[str, Any]]] = defaultdict(list)
+    for r in records:
+        try:
+            sign = int(r.get("sign", 0))
+            if sign == 0:
+                continue
+            strength = float(r.get("strength", 0.0))
+        except (TypeError, ValueError):
+            continue
+        groups[(sign, strength)].append(r)
+
+    n_groups = 0
+    for (sign, strength), group_records in sorted(groups.items()):
+        if not group_records:
+            continue
+        slot = int(group_records[0].get("slot", 0))
+        layer = int(group_records[0].get("layer", 0))
+        dispatcher.rerun_existing = rerun_existing
+        dispatcher.enqueue_swap_fill_in_group(
+            cell_dir=str(cell_dir), slot=slot, layer=layer,
+            sign=sign, strength=strength, records=group_records,
+        )
+        n_groups += 1
+    dispatcher.drain()
+    return n_groups
+
+
+def apply_corrected_stop_cutoff(
+    *,
+    cell_dir: Path,
+    eff_stop_threshold: float = 0.5,
+    eff_stop_consecutive: int = 2,
+) -> int:
+    """Move records that wouldn't have been collected under the
+    corrected (swap-averaged) eff-stop predicate to ``_excluded_records.jsonl``.
+
+    Workflow per cell:
+      1. Read records.jsonl + summary.json.
+      2. Compute per-strength mean |averaged_eff| (= mean |judges.effect.combined|
+         across the K questions at that strength; combined is now the
+         bias-cancelled value).
+      3. Walk swept strengths in DESCENDING magnitude order (the
+         bidirectional cursor's DOWN-side walk; UP-side strengths
+         are NEVER excluded by this routine -- the live runner's
+         coherence stop already terminates UP correctly).
+      4. The first strength where ``eff_stop_consecutive`` consecutive
+         smaller strengths all have ``mean_abs_eff <= eff_stop_threshold``
+         is the corrected cutoff.  All records at strengths SMALLER
+         than the cutoff move out to ``_excluded_records.jsonl``.
+      5. summary.json gains ``excluded_strengths`` (list) and
+         ``excluded_reason`` so the next read knows the cell was
+         post-processed.
+
+    Idempotent: if summary.json already carries ``excluded_strengths``
+    and the current records contain no rows at those strengths, the
+    function returns 0 and does nothing.
+
+    Returns the number of records moved to _excluded_records.jsonl on
+    this invocation.
+    """
+    import math
+
+    records_path = cell_dir / "records.jsonl"
+    excluded_path = cell_dir / "_excluded_records.jsonl"
+    summary_path = cell_dir / "summary.json"
+    if not records_path.exists():
+        return 0
+
+    records = list(read_jsonl_with_retry(records_path, logger_obj=logger))
+    if not records:
+        return 0
+
+    # Group by absolute strength; sign filtering is implicit (cell dirs
+    # are already per-sign, so all records here share one sign).
+    from collections import defaultdict
+    by_strength: Dict[float, List[Dict[str, Any]]] = defaultdict(list)
+    for r in records:
+        try:
+            s = float(r.get("strength", 0.0))
+        except (TypeError, ValueError):
+            continue
+        if s <= 0:
+            continue  # baselines / malformed -- never excluded
+        by_strength[s].append(r)
+
+    # Per-strength mean |combined|.  NaN-eff strengths (skipped due to
+    # high coh) cannot count toward the tail window because we don't
+    # know what the eff would have been; treat them as "above
+    # threshold" so they reset the streak.
+    mean_abs_eff: Dict[float, float] = {}
+    for s, recs in by_strength.items():
+        vals: List[float] = []
+        for r in recs:
+            eff = (r.get("judges") or {}).get("effect") or {}
+            v = eff.get("combined")
+            if isinstance(v, (int, float)):
+                vals.append(abs(float(v)))
+        if vals:
+            mean_abs_eff[s] = sum(vals) / len(vals)
+        else:
+            mean_abs_eff[s] = float("nan")
+
+    # Walk strengths DESCENDING magnitude looking for the first
+    # eff_stop_consecutive consecutive below-threshold strengths.
+    # When the streak completes, the LARGEST strength in that streak
+    # is the "bias-floor anchor" we keep; strengths SMALLER than the
+    # anchor are excluded.
+    #
+    # Example with eff_stop_threshold=0.5, eff_stop_consecutive=2,
+    # walking [4.0:1.5, 2.0:0.4, 1.0:0.3, 0.5:0.2]:
+    #   - 4.0: above threshold, consec=0
+    #   - 2.0: below, consec=1, streak_start=2.0
+    #   - 1.0: below, consec=2 -> streak complete -> anchor=2.0
+    # Result: keep {2.0, 4.0}, exclude {1.0, 0.5}.  The 2.0 anchor
+    # is the largest strength we already know is at the bias floor,
+    # so we keep it as a reference point but trust nothing smaller.
+    strengths_desc = sorted(by_strength.keys(), reverse=True)
+    cutoff: Optional[float] = None  # = the streak's largest strength
+    streak_start: Optional[float] = None
+    consec = 0
+    for s in strengths_desc:
+        v = mean_abs_eff[s]
+        if math.isnan(v) or v > eff_stop_threshold:
+            consec = 0
+            streak_start = None
+            continue
+        if consec == 0:
+            streak_start = s
+        consec += 1
+        if consec >= eff_stop_consecutive:
+            cutoff = streak_start
+            break
+
+    if cutoff is None:
+        # Predicate never fired -- nothing to exclude.
+        return 0
+
+    # Strengths to exclude: all swept strengths strictly less than the
+    # bias-floor anchor.
+    excluded_strengths = sorted(s for s in by_strength if s < cutoff)
+    if not excluded_strengths:
+        return 0
+
+    excluded_set = set(excluded_strengths)
+    keep_records: List[Dict[str, Any]] = []
+    move_records: List[Dict[str, Any]] = []
+    for r in records:
+        try:
+            s = float(r.get("strength", 0.0))
+        except (TypeError, ValueError):
+            keep_records.append(r)
+            continue
+        if s in excluded_set:
+            move_records.append(r)
+        else:
+            keep_records.append(r)
+
+    if not move_records:
+        return 0
+
+    # Atomic-rename writes: stage _excluded first (additive), then
+    # records.jsonl (the filtered view), then summary.json.  If we
+    # crash mid-way we end up with at-worst a duplicate write -- both
+    # files are line-based JSON so subsequent reads are stable.
+    existing_excluded: List[Dict[str, Any]] = []
+    if excluded_path.exists():
+        existing_excluded = list(
+            read_jsonl_with_retry(excluded_path, logger_obj=logger)
+        )
+    all_excluded = existing_excluded + move_records
+    atomic_write_text(
+        "\n".join(json.dumps(r) for r in all_excluded) + "\n",
+        excluded_path,
+    )
+    atomic_write_text(
+        "\n".join(json.dumps(r) for r in keep_records) + "\n",
+        records_path,
+    )
+
+    # Update summary.json with the exclusion footprint.
+    summary: Dict[str, Any] = {}
+    if summary_path.exists():
+        try:
+            summary = json.loads(
+                read_text_with_retry(summary_path, logger_obj=logger)
+            )
+        except (json.JSONDecodeError, OSError):
+            summary = {}
+    prior_excluded = list(summary.get("excluded_strengths", []))
+    merged_excluded = sorted(set(prior_excluded) | set(excluded_strengths))
+    summary["excluded_strengths"] = merged_excluded
+    summary["excluded_reason"] = "below_corrected_eff_stop"
+    summary["excluded_eff_stop_threshold"] = eff_stop_threshold
+    summary["excluded_eff_stop_consecutive"] = eff_stop_consecutive
+    atomic_write_text(
+        json.dumps(summary, indent=2) + "\n",
+        summary_path,
+    )
+    return len(move_records)
+
+
 def _group_needs_work(
     group_records: List[Dict[str, Any]],
     judges_to_run: List[str],
@@ -406,6 +636,48 @@ def main() -> None:
     p.add_argument("--rerun", action="store_true",
                    help="Force re-judging even on records that already "
                         "have the requested judge populated.")
+    p.add_argument(
+        "--effect-swap-fill", action="store_true",
+        help="v7 schema fill-in mode: for each record that already "
+             "has a STRAIGHT bidirectional-effect score on disk, run "
+             "the SWAP-rubric variant (texts in [BASELINE] and "
+             "[RESPONSE] exchanged), populate judges.effect."
+             "bidirectional.{swap.scores, averaged}, set combined to "
+             "the bias-cancelling averaged value, and bump "
+             "rubric_version to 7.  Reuses existing straight scores "
+             "without re-running them.  Skips records that lack a "
+             "straight score (typically those skipped at sweep time "
+             "for mean_coh > skip_threshold).  Mutually exclusive "
+             "with --rerun-coherence-with-model; cell-level persona "
+             "judging is not run in this mode.")
+    p.add_argument(
+        "--apply-corrected-stop-cutoff", action="store_true",
+        help="After --effect-swap-fill completes, apply the corrected "
+             "bidirectional eff-stop predicate against the new "
+             "averaged eff: for each cell-sign, walk strengths in "
+             "the order the bidirectional cursor visited them and "
+             "mark records swept BELOW the strength where the "
+             "predicate would have fired (mean |averaged_eff| <= "
+             "eff_stop_threshold for eff_stop_consecutive consecutive "
+             "strengths) as not-for-use.  Marked records move from "
+             "records.jsonl to _excluded_records.jsonl; summary.json "
+             "gains excluded_strengths + excluded_reason.  Opt-in "
+             "since it mutates the canonical records file.")
+    p.add_argument(
+        "--eff-stop-threshold", type=float, default=0.5,
+        help="Threshold for --apply-corrected-stop-cutoff: mean of "
+             "|averaged_eff| across the strength's K questions below "
+             "which the predicate fires.  Default 0.5 matches the "
+             "v2 swap-judging adaptive descent threshold; the live "
+             "runner's default 0.25 is too strict for the bias-"
+             "cancelled estimator (signal-magnitude not eff-magnitude).",
+    )
+    p.add_argument(
+        "--eff-stop-consecutive", type=int, default=2,
+        help="Number of consecutive low-magnitude strengths required "
+             "for --apply-corrected-stop-cutoff to fire (default 2 "
+             "matches the live runner).",
+    )
     p.add_argument("--max-concurrency", type=int, default=8)
     p.add_argument("--rps", type=float, default=5.0)
     args = p.parse_args()
@@ -480,14 +752,39 @@ def main() -> None:
                             f"{n_coh} record(s)")
                 total_coh_rerun += n_coh
 
-            n_groups = process_cell(
-                cell_dir=cell_dir, dispatcher=dispatcher,
-                judges_to_run=judges_to_run,
-                skip_threshold=float(args.skip_if_strength_mean_coh_above),
-                rerun_existing=bool(args.rerun),
-            )
-            logger.info(f"  enqueued / drained {n_groups} strength group(s)")
-            total_groups += n_groups
+            if args.effect_swap_fill:
+                # v7 swap fill-in: only run the swap rubric, leave
+                # straight + coh + persona alone.  Mutually exclusive
+                # with the normal --judges flow.
+                n_groups = process_cell_swap_fill_in(
+                    cell_dir=cell_dir, dispatcher=dispatcher,
+                    rerun_existing=bool(args.rerun),
+                )
+                logger.info(
+                    f"  swap fill-in: enqueued / drained {n_groups} "
+                    f"strength group(s)"
+                )
+                total_groups += n_groups
+                if args.apply_corrected_stop_cutoff:
+                    n_excluded = apply_corrected_stop_cutoff(
+                        cell_dir=cell_dir,
+                        eff_stop_threshold=float(args.eff_stop_threshold),
+                        eff_stop_consecutive=int(args.eff_stop_consecutive),
+                    )
+                    if n_excluded:
+                        logger.info(
+                            f"  excluded {n_excluded} record(s) below "
+                            f"corrected eff-stop cutoff"
+                        )
+            else:
+                n_groups = process_cell(
+                    cell_dir=cell_dir, dispatcher=dispatcher,
+                    judges_to_run=judges_to_run,
+                    skip_threshold=float(args.skip_if_strength_mean_coh_above),
+                    rerun_existing=bool(args.rerun),
+                )
+                logger.info(f"  enqueued / drained {n_groups} strength group(s)")
+                total_groups += n_groups
         finally:
             dispatcher.shutdown()
 

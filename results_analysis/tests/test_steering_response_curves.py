@@ -154,10 +154,54 @@ class TestAggregateCellSign:
         assert cs.sign == +1
         assert cs.up_blocked_reason == "incoherent"
 
-    def test_strengths_sorted_ascending(self, mod, tiny_cell):
+    def test_strengths_sorted_ascending_and_trailing_skipped_trimmed(
+        self, mod, tiny_cell
+    ):
+        """The tiny_cell fixture has 3 strengths (1.0 / 2.0 / 4.0) but
+        s=4.0 has rp+effect judging skipped (no usable eff data).  The
+        aggregator trims that trailing skipped strength so the curve's
+        rightmost x=0 always corresponds to a real data point.  Without
+        the trim, every cell would render a gap at the cliff and Roger
+        would (rightly) ask why the curves don't reach x=0.
+        """
         cs = mod.aggregate_cell_sign(tiny_cell)
         strengths = [a.strength for a in cs.aggs]
+        assert strengths == [1.0, 2.0]
+
+    def test_trailing_skipped_does_not_trim_interior_skipped(
+        self, mod, tmp_path
+    ):
+        """Only TRAILING skipped strengths are trimmed.  A skipped
+        strength followed by a non-skipped one stays in place (creates
+        an interior gap in the curve), preserving the bidirectional
+        scan order on disk.
+        """
+        cell_dir = tmp_path / "s6_l25_+1"
+        cell_dir.mkdir()
+        records = [
+            _make_record(strength=1.0, sign=+1, question_idx=0,
+                         coh=0, rp=3, eff=1.0),
+            # Interior skipped strength: judges null but a stronger
+            # strength below has usable data.
+            _make_record(strength=2.0, sign=+1, question_idx=0,
+                         coh=2, rp=None, eff=None,
+                         persona_skipped=True, effect_skipped=True),
+            _make_record(strength=4.0, sign=+1, question_idx=0,
+                         coh=0, rp=3, eff=4.0),
+        ]
+        (cell_dir / "records.jsonl").write_text(
+            "\n".join(json.dumps(r) for r in records) + "\n"
+        )
+        (cell_dir / "summary.json").write_text(
+            json.dumps({"slot": 6, "layer": 25, "sign": +1,
+                        "scan_mode": "bidirectional"})
+        )
+        cs = mod.aggregate_cell_sign(cell_dir)
+        strengths = [a.strength for a in cs.aggs]
+        # All three preserved.
         assert strengths == [1.0, 2.0, 4.0]
+        # Interior gap retained.
+        assert cs.aggs[1].mean_eff_all is None
 
     def test_baseline_zero_strength_excluded(self, mod, tmp_path):
         """The aggregator drops strength=0 rows -- those are baseline
@@ -182,52 +226,41 @@ class TestAggregateCellSign:
         cs = mod.aggregate_cell_sign(tiny_cell)
         # s=1.0: all 3 q's contribute eff=1.0 -> mean=1.0
         # s=2.0: all 3 q's contribute eff=2.0 -> mean=2.0
-        # s=4.0: all skipped -> None
+        # s=4.0 (all skipped) was trimmed off the tail.
         means = [a.mean_eff_all for a in cs.aggs]
-        assert means[0] == 1.0
-        assert means[1] == 2.0
-        assert means[2] is None
+        assert means == [1.0, 2.0]
 
     def test_filter_means_coh0(self, mod, tiny_cell):
         cs = mod.aggregate_cell_sign(tiny_cell)
         # s=1.0: all 3 q's coh=0 -> contributes 1.0/1.0/1.0 -> mean=1.0
         # s=2.0: q0 (coh=0) and q2 (coh=0) contribute eff=2.0 each;
         #        q1 has coh=1 and is filtered out -> mean=2.0
-        # s=4.0: all coh=2, so filtered out -> None.
         means = [a.mean_eff_coh0 for a in cs.aggs]
-        assert means[0] == 1.0
-        assert means[1] == 2.0
-        assert means[2] is None
+        assert means == [1.0, 2.0]
 
     def test_filter_means_rp3(self, mod, tiny_cell):
         cs = mod.aggregate_cell_sign(tiny_cell)
         # s=1.0: all 3 q's rp=3 -> mean=1.0
         # s=2.0: q0 (rp=3) and q1 (rp=3) contribute eff=2.0 each;
         #        q2 has rp=2 and is filtered out -> mean=2.0
-        # s=4.0: rp is None (skipped) -> filtered out -> None.
         means = [a.mean_eff_rp3 for a in cs.aggs]
-        assert means[0] == 1.0
-        assert means[1] == 2.0
-        assert means[2] is None
+        assert means == [1.0, 2.0]
 
     def test_filter_means_coh0_and_rp3(self, mod, tiny_cell):
         cs = mod.aggregate_cell_sign(tiny_cell)
         # s=1.0: all 3 q's coh=0 AND rp=3 -> mean=1.0
         # s=2.0: only q0 has both coh=0 AND rp=3 -> mean=2.0
-        # s=4.0: None (skipped).
         means = [a.mean_eff_coh0_rp3 for a in cs.aggs]
-        assert means[0] == 1.0
-        assert means[1] == 2.0
-        assert means[2] is None
+        assert means == [1.0, 2.0]
 
     def test_bookkeeping_counters(self, mod, tiny_cell):
         cs = mod.aggregate_cell_sign(tiny_cell)
         # s=1.0: 3 records, 3 with eff, 3 with coh=0
         # s=2.0: 3 records, 3 with eff, 2 with coh=0
-        # s=4.0: 3 records, 0 with eff, 0 with coh=0 (all coh=2)
-        assert [a.n_total for a in cs.aggs] == [3, 3, 3]
-        assert [a.n_with_eff for a in cs.aggs] == [3, 3, 0]
-        assert [a.n_coh0 for a in cs.aggs] == [3, 2, 0]
+        # s=4.0 row was trimmed off the tail (was all-skipped).
+        assert [a.n_total for a in cs.aggs] == [3, 3]
+        assert [a.n_with_eff for a in cs.aggs] == [3, 3]
+        assert [a.n_coh0 for a in cs.aggs] == [3, 2]
 
 
 # ---------------------------------------------------------------------------

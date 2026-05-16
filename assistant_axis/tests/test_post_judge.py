@@ -107,6 +107,186 @@ class TestGroupNeedsWork:
 
 
 # ---------------------------------------------------------------------------
+# apply_corrected_stop_cutoff
+# ---------------------------------------------------------------------------
+
+
+def _write_cell_for_cutoff(
+    cell_dir: Path,
+    strengths_with_combined: list,
+) -> None:
+    """Build a fake cell dir with records.jsonl + summary.json.
+
+    ``strengths_with_combined`` is a list of ``(strength, combined,
+    n_questions)``: each strength gets ``n_questions`` records with
+    ``judges.effect.combined`` set to ``combined`` (so the mean of
+    ``|combined|`` equals ``|combined|``).
+    """
+    cell_dir.mkdir(parents=True, exist_ok=True)
+    records = []
+    for s, c, n_q in strengths_with_combined:
+        for q in range(n_q):
+            records.append({
+                "strength": s, "sign": +1, "slot": 3, "layer": 25,
+                "question_idx": q, "question": f"Q{q}", "response": f"R{q}",
+                "judges": {
+                    "coherence": {"score": 0},
+                    "strength_mean_coh": 0.5,
+                    "persona": {"score": 2,
+                                "skipped_due_to_strength_mean_coh": False},
+                    "effect": {
+                        "mode": "bidirectional",
+                        "combined": c,
+                        "skipped_due_to_strength_mean_coh": False,
+                    },
+                },
+            })
+    (cell_dir / "records.jsonl").write_text(
+        "\n".join(json.dumps(r) for r in records) + "\n"
+    )
+    (cell_dir / "summary.json").write_text(json.dumps({
+        "slot": 3, "layer": 25, "sign": +1,
+        "scan_mode": "bidirectional",
+    }))
+
+
+class TestApplyCorrectedStopCutoff:
+    """Hygiene cutoff moves below-corrected-stop records out of
+    records.jsonl into _excluded_records.jsonl, updates summary.json.
+    """
+
+    def test_no_records_excluded_when_signal_stays_above_threshold(
+        self, pj, tmp_path,
+    ):
+        """All strengths have averaged-eff above threshold => nothing
+        excluded; predicate never fires."""
+        cell = tmp_path / "cell"
+        _write_cell_for_cutoff(cell, [
+            (1.0, 1.2, 3),
+            (2.0, 1.5, 3),
+            (4.0, 2.0, 3),
+        ])
+        n = pj.apply_corrected_stop_cutoff(
+            cell_dir=cell, eff_stop_threshold=0.5, eff_stop_consecutive=2,
+        )
+        assert n == 0
+        assert not (cell / "_excluded_records.jsonl").exists()
+
+    def test_strengths_below_cutoff_moved(self, pj, tmp_path):
+        """Descending walk: 4.0 (1.5), 2.0 (0.4), 1.0 (0.3), 0.5 (0.2).
+        Two consecutive smaller strengths (1.0 and 0.5) both <= 0.5 ->
+        cutoff fires at 2.0; strengths < 2.0 move out.
+        """
+        cell = tmp_path / "cell"
+        _write_cell_for_cutoff(cell, [
+            (0.5, 0.2, 3),
+            (1.0, 0.3, 3),
+            (2.0, 0.4, 3),
+            (4.0, 1.5, 3),
+        ])
+        n = pj.apply_corrected_stop_cutoff(
+            cell_dir=cell, eff_stop_threshold=0.5, eff_stop_consecutive=2,
+        )
+        # Strengths 0.5 and 1.0 (= 6 records) move to excluded.
+        assert n == 6
+        excluded_lines = (cell / "_excluded_records.jsonl").read_text().splitlines()
+        excluded_lines = [json.loads(l) for l in excluded_lines if l.strip()]
+        assert len(excluded_lines) == 6
+        assert {r["strength"] for r in excluded_lines} == {0.5, 1.0}
+        # records.jsonl has the kept rows only.
+        kept_lines = (cell / "records.jsonl").read_text().splitlines()
+        kept_lines = [json.loads(l) for l in kept_lines if l.strip()]
+        assert {r["strength"] for r in kept_lines} == {2.0, 4.0}
+        # summary.json records the exclusion footprint.
+        summary = json.loads((cell / "summary.json").read_text())
+        assert summary["excluded_strengths"] == [0.5, 1.0]
+        assert summary["excluded_reason"] == "below_corrected_eff_stop"
+        assert summary["excluded_eff_stop_threshold"] == 0.5
+        assert summary["excluded_eff_stop_consecutive"] == 2
+
+    def test_idempotent_second_call(self, pj, tmp_path):
+        """Running the cutoff twice doesn't re-move already-excluded
+        records: they're already out of records.jsonl, so there's
+        nothing left to move."""
+        cell = tmp_path / "cell"
+        _write_cell_for_cutoff(cell, [
+            (0.5, 0.2, 2),
+            (1.0, 0.3, 2),
+            (2.0, 0.4, 2),
+            (4.0, 1.5, 2),
+        ])
+        n1 = pj.apply_corrected_stop_cutoff(
+            cell_dir=cell, eff_stop_threshold=0.5, eff_stop_consecutive=2,
+        )
+        assert n1 == 4
+        n2 = pj.apply_corrected_stop_cutoff(
+            cell_dir=cell, eff_stop_threshold=0.5, eff_stop_consecutive=2,
+        )
+        assert n2 == 0  # nothing more to move
+
+    def test_no_op_on_missing_records_file(self, pj, tmp_path):
+        cell = tmp_path / "empty_cell"
+        cell.mkdir()
+        n = pj.apply_corrected_stop_cutoff(
+            cell_dir=cell, eff_stop_threshold=0.5, eff_stop_consecutive=2,
+        )
+        assert n == 0
+
+    def test_nan_eff_breaks_streak(self, pj, tmp_path):
+        """A strength with mean_abs_eff = NaN (no effect.combined
+        present, e.g. skipped at sweep time) RESETS the consecutive
+        counter so we don't mark records on the OTHER side of the
+        NaN gap as excluded.
+
+        Strengths walked descending: 4.0 (1.5), 2.0 (NaN), 1.0 (0.3),
+        0.5 (0.3).  The NaN at 2.0 resets the streak; below 2.0 we
+        accumulate 0.3 + 0.3 => 2 consecutive => cutoff at 1.0;
+        strength 0.5 moves out.
+        """
+        cell = tmp_path / "cell"
+        records = []
+        # Strength 4.0: signal above threshold.
+        for q in range(2):
+            records.append({
+                "strength": 4.0, "sign": +1, "slot": 3, "layer": 25,
+                "question_idx": q, "question": "q", "response": "r",
+                "judges": {"effect": {"combined": 1.5}},
+            })
+        # Strength 2.0: NaN (no effect.combined).
+        for q in range(2):
+            records.append({
+                "strength": 2.0, "sign": +1, "slot": 3, "layer": 25,
+                "question_idx": q, "question": "q", "response": "r",
+                "judges": {"effect": {
+                    "combined": None,
+                    "skipped_due_to_strength_mean_coh": True,
+                }},
+            })
+        # Strengths 1.0 and 0.5: both below threshold.
+        for s in (1.0, 0.5):
+            for q in range(2):
+                records.append({
+                    "strength": s, "sign": +1, "slot": 3, "layer": 25,
+                    "question_idx": q, "question": "q", "response": "r",
+                    "judges": {"effect": {"combined": 0.3}},
+                })
+        cell.mkdir()
+        (cell / "records.jsonl").write_text(
+            "\n".join(json.dumps(r) for r in records) + "\n"
+        )
+        (cell / "summary.json").write_text(json.dumps({"slot": 3}))
+        n = pj.apply_corrected_stop_cutoff(
+            cell_dir=cell, eff_stop_threshold=0.5, eff_stop_consecutive=2,
+        )
+        # Only strength 0.5 (2 records) excluded; strength 1.0 was the
+        # second-of-two-consecutive sub-threshold step so it stays as the
+        # bias-floor anchor.
+        assert n == 2
+        excluded = [json.loads(l) for l in (cell / "_excluded_records.jsonl").read_text().splitlines() if l.strip()]
+        assert {r["strength"] for r in excluded} == {0.5}
+
+
+# ---------------------------------------------------------------------------
 # load_experiment_specs
 # ---------------------------------------------------------------------------
 

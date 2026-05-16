@@ -2537,6 +2537,121 @@ Output: `<experiment_dir>/response_curves.png` (override with
 [plot-provenance metadata](#plot-provenance-metadata-mandatory-for-every-plot)
 chunk.
 
+### Swap-averaged effect judging (rubric v7, May 2026)
+
+The bidirectional effect rubric has a strong label/order bias: the
+judges treat whatever sits in the `[RESPONSE]` block as "more
+thoroughly developed" relative to whatever sits in the `[BASELINE]`
+block, even when the texts are swapped between those slots.
+Empirically on anthropologist_helpful_v1 + prodigy_harmless_v1 the
+bias dominated content-driven scoring at low/mid steering strengths
+across both safety axes (helpful/unhelpful and harmless/harmful).
+Diagnostic: [`tools/test_effect_order_bias.py`](tools/test_effect_order_bias.py)
+swaps the [BASELINE] and [RESPONSE] contents in the rubric and
+compares; a content-driven judge would produce `swap_score =
+-straight_score`, a label-biased judge produces `swap_score =
+straight_score`.
+
+**Solution (rubric v7)**: every bidirectional effect judging call
+fires BOTH variants and records the bias-cancelling estimator
+
+```
+averaged = (straight.mean - swap.mean) / 2
+```
+
+Under a content-driven judge `swap = -straight` so `averaged ==
+straight` (signal preserved).  Under pure label bias `swap ==
+straight` so `averaged = 0` (bias cancelled).  Real judges sit
+between these extremes; the estimator subtracts off whatever
+constant additive bias the judge has.
+
+#### Schema (records.jsonl)
+
+```json
+"effect": {
+  "bidirectional": {
+    "straight": {"scores": {"<model>": {"score": int, "reason": str},
+                            "mean": float, ...}},
+    "swap":     {"scores": {"<model>": {"score": int, "reason": str},
+                            "mean": float, ...}},
+    "averaged": float
+  },
+  "mode": "bidirectional",
+  "combined": float,           // = averaged (preferred) ->
+                               //   straight.scores.mean (swap missing) ->
+                               //   legacy bidirectional.scores.mean (v6)
+  "rubric_version": 7,
+  "skipped_due_to_strength_mean_coh": bool,
+  "ts": float
+}
+```
+
+Migration helper: [`assistant_axis.steering_judges.migrate_effect_dict_in_place`](assistant_axis/steering_judges.py).
+Called automatically on every dispatcher write so legacy v6 records
+end up in v7 shape the first time they're touched.  Idempotent:
+already-v7 dicts return unchanged.
+
+The bidirectional cursor's eff-stop predicate
+([`assistant_axis/steering_runner.py`](assistant_axis/steering_runner.py))
+reads `judges.effect.combined` to populate
+`mean_abs_eff_by_strength`; no predicate-logic change was needed,
+just the input semantics shifted from straight-only to
+bias-cancelled.
+
+#### Filling in older experiments
+
+[`steering/post_judge.py`](steering/post_judge.py) gained two new
+flags for the post-batch fill-in:
+
+  - `--effect-swap-fill` runs ONLY the swap rubric on records with a
+    straight half on disk, populates `bidirectional.swap` +
+    `bidirectional.averaged`, sets `combined = averaged`, bumps
+    `rubric_version` to 7.  Skips records lacking a straight half
+    (skipped at sweep time due to high mean_coh).  Reuses existing
+    straight scores -- no re-judging of straight.
+  - `--apply-corrected-stop-cutoff` walks each cell's strengths in
+    descending magnitude order and applies the live runner's
+    bidirectional eff-stop predicate against the new averaged eff.
+    The K-consecutive below-threshold streak (default K=2, threshold
+    0.5) identifies the bias-floor anchor; strengths SMALLER than
+    the anchor move from `records.jsonl` to `_excluded_records.jsonl`
+    in the same cell dir.  `summary.json` gains `excluded_strengths`,
+    `excluded_reason`, `excluded_eff_stop_threshold`,
+    `excluded_eff_stop_consecutive`.  Idempotent on re-run.
+
+Typical invocation:
+
+```bash
+uv run python steering/post_judge.py \
+    --experiment_dir outputs/qwen-3-32b/steering/anthropologist_helpful_v1 \
+    --effect-swap-fill \
+    --apply-corrected-stop-cutoff
+```
+
+Cost reference: ~$10-15 API + ~3-10 min wall-clock per experiment
+on the v6-anthropologist scale (14 cells × ~20 strengths).
+
+#### Cost trade-off in the live pipeline
+
+The dispatcher now fires 2× as many effect-judging calls per
+strength (straight + swap × 2-model ensemble = 4 API calls instead
+of 2).  Roughly cost-neutral with the buggy-predicate pre-v7
+pipeline because the corrected stop fires earlier on the DOWN side
+(observed ~36% strength-count reduction across anthropologist +
+prodigy's swap descent), and that saving offsets the doubled
+effect-judging cost.  See the original plan
+[`swap_averaged_effect_judging_5af7c7a6.plan.md`](.cursor/plans/swap_averaged_effect_judging_5af7c7a6.plan.md)
+for the cost band breakdown.
+
+#### Analysis surfaces (no code changes needed)
+
+Both [`tools/sheet_layout.py`](tools/sheet_layout.py) and
+[`results_analysis/steering_response_curves.py`](results_analysis/steering_response_curves.py)
+read `judges.effect.combined` for the eff value -- the same field
+that now carries the averaged (bias-cancelled) estimator post-fill.
+No analysis code changes were needed for v7 records; the change
+percolates through the existing readers.
+
 ### Whitening / soft-shear defaults
 
 **Scope (read this first).**  These defaults apply to **analysis-side
