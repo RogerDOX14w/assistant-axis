@@ -55,11 +55,33 @@ AGG_COLS = ("signed_strength", "mean_coh", "mean_rp",
             "mean_eff_signed", "mean_abs_eff")
 N_AGG_COLS = len(AGG_COLS)  # 5
 
-PER_QUESTION_COL_NAMES = ("response", "coh", "rp", "eff")
+# Order matters for the conditional-format cross-references in
+# tab_wide_cond_formats (each rule on a response cell references its
+# row's score cells by relative col offset).  The eff-first ordering
+# puts the most analytically-loaded column right next to the response
+# text, making side-by-side reads cleanest; coh + rp fall right of it
+# for skim-checking incoherence / persona-drift.
+PER_QUESTION_COL_NAMES = ("response", "eff", "coh", "rp")
 N_PER_QUESTION_COLS = len(PER_QUESTION_COL_NAMES)  # 4
 
-# Frozen header is exactly persona / questions / baseline.
-FROZEN_ROWS = 3
+# Sheets only supports a contiguous frozen block at the top of the tab,
+# so we order the four header-region rows by "how often the user needs
+# them while scrolling":
+#
+#   Row 0 (frozen): column labels + question texts
+#                   -- reference for everything below; must stay visible.
+#   Row 1 (frozen): baseline responses
+#                   -- comparison anchor for steered rows; must stay visible.
+#   Row 2 (unfrozen): persona system prompt
+#                   -- one-time read; freezes are wasted on it.
+#   Row 3 (unfrozen): axis info (pos / neg pole descriptions)
+#                   -- one-time read; companion to persona.
+#   Row 4+        : block headers + signed-strength data rows
+#
+# FROZEN_ROWS counts only the two truly-frozen rows; N_HEADER_ROWS is
+# the offset into ``values`` where the first block header lives.
+FROZEN_ROWS = 2
+N_HEADER_ROWS = 4
 # Strength col always visible as you scroll right.
 FROZEN_COLS = 1
 
@@ -67,7 +89,7 @@ FROZEN_COLS = 1
 # big wrap-on column; scores get narrow cells.
 WIDTH_STRENGTH_PX = 80
 WIDTH_AGG_PX = 80
-WIDTH_RESPONSE_PX = 400
+WIDTH_RESPONSE_PX = 1200
 WIDTH_SCORE_PX = 60
 
 # Pixel widths keyed by column "kind"; used both for layout-time width
@@ -84,11 +106,16 @@ WIDTH_BY_KIND: Dict[str, int] = {
     "eff": WIDTH_SCORE_PX,
 }
 
-# Graded conditional-format thresholds.  Mirror the rubric levels:
-# coherence 0/1/2/3 → faint/medium/strong shading above 0.5/1.0/1.5;
-# effect ±1/2/3 → faint/medium/strong sign-coloured shading.
+# Graded conditional-format thresholds.
+# Coherence keeps 3 levels (faint/medium/strong) at 0.5/1.0/1.5 -- the
+# rubric is 0..3 with the 1.5 cutoff being the "stop the sweep" line;
+# 3 visual levels read cleanly and reflect the rubric's natural
+# tiers.  Effect gets 6 levels (0.5/1.0/1.5/2.0/2.5/3.0) so the
+# response-cell cross-shading reveals fine-grained dose-response
+# structure that 3 buckets would flatten out.  Signs colour the
+# effect: positive = green, negative = blue.
 COH_THRESHOLDS = (0.5, 1.0, 1.5)
-EFF_ABS_THRESHOLDS = (1.0, 2.0, 3.0)
+EFF_ABS_THRESHOLDS = (0.5, 1.0, 1.5, 2.0, 2.5, 3.0)
 RP_LOW_THRESHOLD = 1.0  # rp ≤ 1 = persona drift
 
 # RGB tuples in 0..1 floats (Sheets uses normalized colors).
@@ -98,19 +125,22 @@ COLOR_PINK = (
     (1.00, 0.65, 0.70),  # strong
 )
 COLOR_GREEN = (
-    (0.90, 0.97, 0.90),
-    (0.75, 0.92, 0.75),
-    (0.55, 0.85, 0.55),
+    (0.94, 0.99, 0.94),  # |eff| ≥ 0.5 (faintest)
+    (0.86, 0.96, 0.86),  # ≥ 1.0
+    (0.78, 0.93, 0.78),  # ≥ 1.5
+    (0.68, 0.90, 0.68),  # ≥ 2.0
+    (0.58, 0.86, 0.58),  # ≥ 2.5
+    (0.45, 0.80, 0.45),  # ≥ 3.0 (strongest)
 )
 COLOR_BLUE = (
-    (0.90, 0.95, 1.00),
-    (0.75, 0.87, 1.00),
-    (0.55, 0.78, 1.00),
+    (0.95, 0.97, 1.00),
+    (0.88, 0.93, 1.00),
+    (0.80, 0.88, 1.00),
+    (0.70, 0.82, 1.00),
+    (0.60, 0.75, 1.00),
+    (0.45, 0.65, 1.00),
 )
 COLOR_ORANGE_FAINT = (1.00, 0.93, 0.80)
-COLOR_GRAY_TEXT = (0.50, 0.50, 0.50)  # gray italic for [skipped] placeholder
-
-SKIPPED_PLACEHOLDER = "[skipped — incoherent]"
 
 
 # ---------------------------------------------------------------------------
@@ -130,8 +160,9 @@ class CondFormat:
         values: numeric thresholds.  Length-1 for GTE/LTE, length-2 for
             BETWEEN (inclusive).
         bg_color: (r, g, b) in 0..1 floats.
-        italic: whether matching cells should be italicized (used for
-            skipped-row gray italic styling).
+        italic: whether matching cells should be italicized.  Reserved
+            for future styling needs; not currently wired up by any
+            built-in rule generator.
         text_color: optional (r, g, b); None preserves default text color.
     """
 
@@ -167,6 +198,23 @@ class DimGroup:
 class ColumnWidth:
     col: int  # 0-indexed
     width_px: int
+
+
+@dataclass(frozen=True)
+class MergeRange:
+    """A rectangular cell-merge spec for the persona / axis info rows
+    (one wide merged cell for the persona prompt, two side-by-side
+    wide merged cells for the axis pole descriptions).
+
+    Sheets needs explicit ``mergeCells`` requests; the value of the
+    merge gets pulled from the top-left cell of the range.  All bounds
+    follow Sheets' end-exclusive convention.
+    """
+
+    row_start: int
+    row_end: int
+    col_start: int
+    col_end: int
 
 
 @dataclass(frozen=True)
@@ -210,6 +258,7 @@ class TabPayload:
     dim_groups: List[DimGroup]
     cond_formats: List[CondFormat]
     widths: List[ColumnWidth]
+    merges: List[MergeRange]
     blocks: List[BlockSpec]
     n_questions: int
     persona_prompt: str
@@ -297,6 +346,32 @@ def _read_json(path: Path) -> Dict[str, Any]:
         return json.load(f)
 
 
+def _load_trait_description(
+    trait_name: str, instructions_dir: Path,
+) -> str:
+    """Look up a trait's free-text description from
+    ``<instructions_dir>/traits/instructions/<trait_name>.json``.
+
+    Returns ``""`` if the file or the ``description`` field is
+    missing; trait files are an optional convenience for the axis
+    info row and shouldn't hard-fail the export when absent.
+    """
+    candidates = [
+        instructions_dir / "traits" / "instructions" / f"{trait_name}.json",
+        instructions_dir / "roles" / "instructions" / f"{trait_name}.json",
+    ]
+    for p in candidates:
+        if p.exists():
+            try:
+                data = _read_json(p)
+            except (OSError, json.JSONDecodeError):
+                continue
+            desc = data.get("description")
+            if isinstance(desc, str) and desc.strip():
+                return desc.strip()
+    return ""
+
+
 # ---------------------------------------------------------------------------
 # Score extractors (tolerant of partial / null judges)
 # ---------------------------------------------------------------------------
@@ -359,6 +434,7 @@ def build_tab(
     *,
     tab_name_override: Optional[str] = None,
     spreadsheet_name_override: Optional[str] = None,
+    instructions_dir: Path = Path("data"),
 ) -> TabPayload:
     """Build a :class:`TabPayload` from one experiment's output directory.
 
@@ -413,15 +489,19 @@ def build_tab(
     baseline_responses = [baseline_by_q.get(i, "") for i in range(n_questions)]
 
     # ------------------------------------------------------------------
-    # Build the column header (row 2 = labels + question texts).
+    # Build header-region rows.
+    #   Row 0 (frozen): column labels + question texts
+    #   Row 1 (frozen): baseline responses
+    #   Row 2 (unfrozen): persona prompt
+    #   Row 3 (unfrozen): axis info (pos / neg pole label + description)
     # ------------------------------------------------------------------
     header_row = _make_header_row(n_questions, questions)
-
-    # ------------------------------------------------------------------
-    # Build rows 1 (persona) and 3 (baseline).
-    # ------------------------------------------------------------------
-    persona_row = _make_persona_row(persona_prompt, n_questions)
     baseline_row = _make_baseline_row(baseline_responses, n_questions)
+    persona_row = _make_persona_row(persona_prompt, n_questions)
+    axis_row = _make_axis_row(
+        axis_source=axis_source, n_questions=n_questions,
+        instructions_dir=instructions_dir,
+    )
 
     # ------------------------------------------------------------------
     # Build blocks (one per cell = (slot, layer, positions_mode)).
@@ -432,7 +512,7 @@ def build_tab(
     block_rows: List[List[Any]] = []
     blocks: List[BlockSpec] = []
 
-    cursor = FROZEN_ROWS  # next absolute row index to write into
+    cursor = N_HEADER_ROWS  # next absolute row index to write into
 
     for cell_cfg in cells_cfg:
         slot = int(cell_cfg["slot"])
@@ -455,7 +535,12 @@ def build_tab(
     # Stitch together the grid.
     # ------------------------------------------------------------------
     n_cols = N_AGG_COLS + N_PER_QUESTION_COLS * n_questions
-    values: List[List[Any]] = [persona_row, header_row, baseline_row]
+    values: List[List[Any]] = [
+        header_row,    # row 0 (frozen)
+        baseline_row,  # row 1 (frozen)
+        persona_row,   # row 2 (unfrozen)
+        axis_row,      # row 3 (unfrozen)
+    ]
     values.extend(block_rows)
     # Defensive: pad every row to n_cols (Sheets is happy with ragged
     # rows but downstream CSV writers and conditional-format ranges
@@ -464,17 +549,31 @@ def build_tab(
 
     # ------------------------------------------------------------------
     # Conditional formats: column-spanning rules over the whole data
-    # region.  Block-header rows have non-numeric content in score
-    # columns, so numeric comparison rules naturally don't match them
-    # -- much cheaper than emitting per-row rules and well under
-    # Sheets' practical conditional-format rule cap.
+    # region.  Range starts at N_HEADER_ROWS (the first block-header
+    # row); block-header rows themselves have non-numeric content in
+    # score columns so numeric comparison rules naturally don't match
+    # them.
     # ------------------------------------------------------------------
     total_rows = len(values)
     cond_formats: List[CondFormat] = tab_wide_cond_formats(
         n_questions=n_questions,
-        data_row_start=FROZEN_ROWS,
+        data_row_start=N_HEADER_ROWS,
         data_row_end=total_rows,
     )
+
+    # ------------------------------------------------------------------
+    # Cell merges for the persona + axis header rows.  Both are single
+    # full-width merges across col B..end so the contents render as
+    # one wide cell.  The axis cell has an embedded ``\n`` separating
+    # the two poles and relies on wrap=WRAP at the Sheets level
+    # (applied by the CLI via repeatCell on row 3) to render the line
+    # break.  Persona uses wrap=OVERFLOW so its prompt stays on a
+    # single line and the row auto-sizes shorter.
+    # ------------------------------------------------------------------
+    merges: List[MergeRange] = [
+        MergeRange(row_start=2, row_end=3, col_start=1, col_end=n_cols),
+        MergeRange(row_start=3, row_end=4, col_start=1, col_end=n_cols),
+    ]
 
     # ------------------------------------------------------------------
     # Dimension groups (collapsible bands of columns).
@@ -510,9 +609,9 @@ def build_tab(
         base = N_AGG_COLS + N_PER_QUESTION_COLS * q
         widths.extend([
             ColumnWidth(col=base + 0, width_px=WIDTH_BY_KIND["response"]),
-            ColumnWidth(col=base + 1, width_px=WIDTH_BY_KIND["coh"]),
-            ColumnWidth(col=base + 2, width_px=WIDTH_BY_KIND["rp"]),
-            ColumnWidth(col=base + 3, width_px=WIDTH_BY_KIND["eff"]),
+            ColumnWidth(col=base + 1, width_px=WIDTH_BY_KIND["eff"]),
+            ColumnWidth(col=base + 2, width_px=WIDTH_BY_KIND["coh"]),
+            ColumnWidth(col=base + 3, width_px=WIDTH_BY_KIND["rp"]),
         ])
 
     return TabPayload(
@@ -522,6 +621,7 @@ def build_tab(
         dim_groups=dim_groups,
         cond_formats=cond_formats,
         widths=widths,
+        merges=merges,
         blocks=blocks,
         n_questions=n_questions,
         persona_prompt=persona_prompt,
@@ -537,11 +637,11 @@ def build_tab(
 # ---------------------------------------------------------------------------
 
 def _make_persona_row(persona_prompt: str, n_questions: int) -> List[Any]:
-    """Row 1 -- persona system prompt.
+    """Persona system prompt row.
 
-    Col A holds the label "persona", col B holds the full prompt (text
-    overflows into the empty agg + question cols when not collapsed,
-    or wraps within col B if the user widens it).  Other cols empty.
+    Col A holds the label ``persona``; col B holds the full prompt and
+    gets merged across the rest of the row (see ``build_tab`` for the
+    merge spec), so the prompt renders as a single wide wrap-on cell.
     """
     n_cols = N_AGG_COLS + N_PER_QUESTION_COLS * n_questions
     row: List[Any] = ["persona"] + [""] * (n_cols - 1)
@@ -550,20 +650,69 @@ def _make_persona_row(persona_prompt: str, n_questions: int) -> List[Any]:
     return row
 
 
+def _make_axis_row(
+    *,
+    axis_source: Dict[str, Any],
+    n_questions: int,
+    instructions_dir: Path,
+) -> List[Any]:
+    """Axis info row: pos pole on line 1, neg pole on line 2, packed
+    into a single merged cell that spans col B through the end of the
+    tab.
+
+    Sign convention (matches the runner's ``role_from`` / ``role_to``
+    naming):
+      ``role_from`` = positive pole; sign=-1 steers TOWARD it (blue side
+                       of the signed-strength axis).
+      ``role_to``   = negative pole; sign=+1 steers TOWARD it (green side
+                       of the signed-strength axis).
+
+    Two lines (separated by an embedded newline; the merged cell has
+    wrap=WRAP at the Sheets level so the newline renders cleanly):
+      Line 1: ``<pos_label> (sign -1, blue): <pos_desc>``
+      Line 2: ``<neg_label> (sign +1, green): <neg_desc>``
+
+    Trait descriptions come from _load_trait_description; falls back
+    to empty strings if the JSON isn't found.
+    """
+    n_cols = N_AGG_COLS + N_PER_QUESTION_COLS * n_questions
+    row: List[Any] = ["axis"] + [""] * (n_cols - 1)
+    if n_cols < 2:
+        return row
+
+    pos_label = str(axis_source.get("role_from", "pos"))
+    neg_label = str(axis_source.get("role_to", "neg"))
+    pos_desc = _load_trait_description(pos_label, instructions_dir)
+    neg_desc = _load_trait_description(neg_label, instructions_dir)
+
+    pos_line = (
+        f"{pos_label} (sign -1, blue)"
+        + (f": {pos_desc}" if pos_desc else "")
+    )
+    neg_line = (
+        f"{neg_label} (sign +1, green)"
+        + (f": {neg_desc}" if neg_desc else "")
+    )
+    row[1] = f"{pos_line}\n{neg_line}"
+    return row
+
+
 def _make_header_row(n_questions: int, questions: Sequence[str]) -> List[Any]:
     """Row 2 -- per-column labels + per-question text.
 
     Cols A-E carry the aggregate names; for each question the response
     column carries the question text (long, wrap-on) and the score
-    columns carry short tags ``coh`` / ``rp`` / ``eff``.
+    columns carry short tags ``eff`` / ``coh`` / ``rp`` (in that order
+    so the most analytically-loaded score sits adjacent to the
+    response text).
     """
     row: List[Any] = list(AGG_COLS)
     for q in range(n_questions):
         row.extend([
             questions[q] if q < len(questions) else "",
+            "eff",
             "coh",
             "rp",
-            "eff",
         ])
     return row
 
@@ -762,18 +911,19 @@ def _strength_data_row(
         if rec is None:
             row.extend(["", "", "", ""])
             continue
-        skipped = _persona_skipped(rec) or _effect_skipped(rec)
-        response = (
-            SKIPPED_PLACEHOLDER if skipped else str(rec.get("response", ""))
-        )
-        coh = cohs[q]
-        rp = rps[q]
-        eff = effs[q]
+        # Always show the actual response text; the absence of RP / Eff
+        # values in adjacent score cells (because the runner skipped
+        # them when mean_coh >= skip_threshold) plus the high coh
+        # score itself, transitively shaded onto the response cell via
+        # the cross-referencing conditional formats, is enough visual
+        # signal that this row was skipped.
+        # Per-question col order: response, eff, coh, rp (see
+        # PER_QUESTION_COL_NAMES for rationale).
         row.extend([
-            response,
-            _round_or_blank(coh, 2),
-            _round_or_blank(rp, 2),
-            _round_or_blank(eff, 2),
+            str(rec.get("response", "")),
+            _round_or_blank(effs[q], 2),
+            _round_or_blank(cohs[q], 2),
+            _round_or_blank(rps[q], 2),
         ])
     return row
 
@@ -797,25 +947,26 @@ def tab_wide_cond_formats(
 ) -> List[CondFormat]:
     """Generate column-spanning conditional-format rules.
 
-    One rule per (column-kind, threshold) covering the whole data row
-    range.  Block-header rows have non-numeric content in score
-    columns (col A holds the sentinel string, col B holds the human-
-    readable summary text, score-positioned cells are empty), so
-    numeric comparison rules naturally skip them -- much cheaper than
-    emitting per-row rules and well within Sheets' practical
-    conditional-format rule cap.
-
-    The :class:`TEXT_EQ` placeholder rule for the response columns
-    fires only where the cell text literally equals
-    ``[skipped — incoherent]``, which is exactly the skipped-row
-    placeholder, so block-header rows are also unaffected.
+    One rule per (column-kind, threshold) covering the whole data
+    row range.  Block-header rows have non-numeric content in score
+    columns, so numeric comparison rules naturally skip them -- much
+    cheaper than emitting per-row rules and well within Sheets'
+    practical conditional-format rule cap.
 
     Rules added:
       - mean_coh (col B): graded pink at >= 0.5 / 1.0 / 1.5.
       - mean_rp (col C): faint orange at <= 1.
-      - mean_eff_signed (col D): sign-coloured graded at |x| >= 1/2/3.
+      - mean_eff_signed (col D): sign-coloured graded at
+        |x| >= 0.5 / 1.0 / 1.5 / 2.0 / 2.5 / 3.0 (six levels).
       - q*_coh, q*_rp, q*_eff: same set per question.
-      - q*_response: italic gray on TEXT_EQ placeholder.
+      - q*_response: cross-references q*_coh, q*_rp, q*_eff via
+        CUSTOM_FORMULA so the response cell takes the SAME background
+        colour as its triggering score cell.  Priority:
+        coherence pink > RP orange > effect green/blue.  Rules are
+        registered in priority-ascending order so Sheets'
+        last-match-wins semantics give the coherence cell veto power
+        over the other two (matches the rubric ranking: incoherent
+        responses are the most important to flag visually).
     """
     out: List[CondFormat] = []
     r0, r1 = data_row_start, data_row_end
@@ -829,31 +980,148 @@ def tab_wide_cond_formats(
     ))
     out.extend(_signed_eff_rules(r0, r1, col_start=3, col_end=4))
 
-    # Per-question score columns.
+    # Per-question (score columns + response col cross-references).
+    # Per-question col offsets (must match PER_QUESTION_COL_NAMES order):
+    #   resp_col + 0: response
+    #   resp_col + 1: eff
+    #   resp_col + 2: coh
+    #   resp_col + 3: rp
     for q in range(n_questions):
-        base = N_AGG_COLS + N_PER_QUESTION_COLS * q
-        # response col -- skipped placeholder italic styling.
-        out.append(CondFormat(
-            row_start=r0, row_end=r1,
-            col_start=base, col_end=base + 1,
-            condition_type="TEXT_EQ",
-            values=(SKIPPED_PLACEHOLDER,),  # type: ignore[arg-type]
-            bg_color=None,
-            italic=True,
-            text_color=COLOR_GRAY_TEXT,
-        ))
+        resp_col = N_AGG_COLS + N_PER_QUESTION_COLS * q
+        eff_col = resp_col + 1
+        coh_col = resp_col + 2
+        rp_col = resp_col + 3
+
+        # Score columns (numeric comparison rules; same as aggregates).
         out.extend(_graded_pink_rules(
-            r0, r1, col_start=base + 1, col_end=base + 2,
+            r0, r1, col_start=coh_col, col_end=coh_col + 1,
         ))
         out.append(CondFormat(
             row_start=r0, row_end=r1,
-            col_start=base + 2, col_end=base + 3,
+            col_start=rp_col, col_end=rp_col + 1,
             condition_type="NUMBER_LESS_THAN_EQ",
             values=(RP_LOW_THRESHOLD,),
             bg_color=COLOR_ORANGE_FAINT,
         ))
         out.extend(_signed_eff_rules(
-            r0, r1, col_start=base + 3, col_end=base + 4,
+            r0, r1, col_start=eff_col, col_end=eff_col + 1,
+        ))
+
+        # Response cell cross-references.  Order matters: rules
+        # registered EARLIER win when multiple match the same cell
+        # (Sheets is first-match-wins for conditional-format
+        # backgroundColor).  We want priority coh > rp > eff, so
+        # register coh first (highest/wins), then rp, then eff.
+        out.extend(_response_coh_cross_rules(
+            r0, r1, resp_col=resp_col, coh_col=coh_col,
+        ))
+        out.append(_response_rp_cross_rule(
+            r0, r1, resp_col=resp_col, rp_col=rp_col,
+        ))
+        out.extend(_response_eff_cross_rules(
+            r0, r1, resp_col=resp_col, eff_col=eff_col,
+        ))
+    return out
+
+
+# ---------------------------------------------------------------------------
+# A1 column reference helper (for CUSTOM_FORMULA cross-references)
+# ---------------------------------------------------------------------------
+
+def _col_idx_to_a1_letter(col: int) -> str:
+    """0-indexed column index → A1 letter (e.g. 0 → 'A', 26 → 'AA').
+
+    Used to build relative CUSTOM_FORMULA references in cross-cell
+    conditional-format rules (e.g. a response-cell rule that fires
+    based on the value in its row's coherence column needs the A1
+    letter for that coherence column).
+    """
+    if col < 0:
+        raise ValueError(f"col must be non-negative; got {col}")
+    n = col + 1
+    out = ""
+    while n > 0:
+        n, r = divmod(n - 1, 26)
+        out = chr(ord("A") + r) + out
+    return out
+
+
+def _response_coh_cross_rules(
+    row_start: int, row_end: int, *, resp_col: int, coh_col: int,
+) -> List[CondFormat]:
+    """Pink graded shading on a response cell, triggered by the
+    coherence cell in the same row.
+
+    Uses CUSTOM_FORMULA with a row-relative, column-absolute
+    reference (``=$G4>=0.5`` style).  The anchor row in the formula
+    is ``row_start`` (the first row of the range); Sheets implicitly
+    relativises the row index as the rule walks down the range.
+
+    Strongest-threshold first (descending): Sheets is
+    first-match-wins, so a cell with coh ≥ 1.5 hits the ``>=1.5``
+    rule before ``>=0.5`` and gets the saturated pink.
+    """
+    coh_letter = _col_idx_to_a1_letter(coh_col)
+    # Sheets uses 1-indexed rows in A1 references.
+    anchor_row_a1 = row_start + 1
+    out: List[CondFormat] = []
+    for t, c in zip(reversed(COH_THRESHOLDS), reversed(COLOR_PINK)):
+        out.append(CondFormat(
+            row_start=row_start, row_end=row_end,
+            col_start=resp_col, col_end=resp_col + 1,
+            condition_type="CUSTOM_FORMULA",
+            values=(f"=${coh_letter}{anchor_row_a1}>={t}",),  # type: ignore[arg-type]
+            bg_color=c,
+        ))
+    return out
+
+
+def _response_rp_cross_rule(
+    row_start: int, row_end: int, *, resp_col: int, rp_col: int,
+) -> CondFormat:
+    """Faint-orange shading on a response cell when its RP cell is
+    ≤ 1 (persona drift).  Single rule because the orange has only one
+    intensity.
+    """
+    rp_letter = _col_idx_to_a1_letter(rp_col)
+    anchor_row_a1 = row_start + 1
+    return CondFormat(
+        row_start=row_start, row_end=row_end,
+        col_start=resp_col, col_end=resp_col + 1,
+        condition_type="CUSTOM_FORMULA",
+        values=(f"=${rp_letter}{anchor_row_a1}<={RP_LOW_THRESHOLD}",),  # type: ignore[arg-type]
+        bg_color=COLOR_ORANGE_FAINT,
+    )
+
+
+def _response_eff_cross_rules(
+    row_start: int, row_end: int, *, resp_col: int, eff_col: int,
+) -> List[CondFormat]:
+    """Sign-coloured graded green/blue shading on a response cell,
+    triggered by the effect cell in the same row.
+
+    6 levels per sign.  Strongest-threshold first within each sign so
+    Sheets' first-match-wins semantics gives the saturated shade for
+    cells deep in either pole.
+    """
+    eff_letter = _col_idx_to_a1_letter(eff_col)
+    anchor_row_a1 = row_start + 1
+    out: List[CondFormat] = []
+    for t, c in zip(reversed(EFF_ABS_THRESHOLDS), reversed(COLOR_GREEN)):
+        out.append(CondFormat(
+            row_start=row_start, row_end=row_end,
+            col_start=resp_col, col_end=resp_col + 1,
+            condition_type="CUSTOM_FORMULA",
+            values=(f"=${eff_letter}{anchor_row_a1}>={t}",),  # type: ignore[arg-type]
+            bg_color=c,
+        ))
+    for t, c in zip(reversed(EFF_ABS_THRESHOLDS), reversed(COLOR_BLUE)):
+        out.append(CondFormat(
+            row_start=row_start, row_end=row_end,
+            col_start=resp_col, col_end=resp_col + 1,
+            condition_type="CUSTOM_FORMULA",
+            values=(f"=${eff_letter}{anchor_row_a1}<={-t}",),  # type: ignore[arg-type]
+            bg_color=c,
         ))
     return out
 
@@ -861,11 +1129,15 @@ def tab_wide_cond_formats(
 def _graded_pink_rules(
     row_start: int, row_end: int, *, col_start: int, col_end: int,
 ) -> List[CondFormat]:
-    """3 graded-pink rules: faint @ ≥ 0.5, medium @ ≥ 1.0, strong @ ≥ 1.5.
+    """Graded-pink rules for the coh-style intensity gradient.
 
-    Sheets applies the LAST matching rule, so we register them in
-    ascending threshold order; cells with coh ≥ 1.5 end up with the
-    strong fill (most recent rule that matched).
+    Sheets is FIRST-MATCH-WINS for conditional formatting (the
+    earliest rule in the rule list whose condition matches the cell
+    wins).  So to get the strongest-shade-when-multiple-thresholds-
+    match behavior we want, register rules in DESCENDING threshold
+    order: a cell with coh ≥ 1.5 hits ``>=1.5`` first (strong); a
+    cell with coh = 1.0 misses ``>=1.5`` then hits ``>=1.0`` (medium);
+    etc.
     """
     return [
         CondFormat(
@@ -875,20 +1147,24 @@ def _graded_pink_rules(
             values=(t,),
             bg_color=c,
         )
-        for t, c in zip(COH_THRESHOLDS, COLOR_PINK)
+        for t, c in zip(reversed(COH_THRESHOLDS), reversed(COLOR_PINK))
     ]
 
 
 def _signed_eff_rules(
     row_start: int, row_end: int, *, col_start: int, col_end: int,
 ) -> List[CondFormat]:
-    """6 rules: faint/medium/strong green for eff ≥ 1/2/3, same for
-    blue at eff ≤ -1/-2/-3.  Registered in ascending |threshold|
-    order; Sheets' last-match-wins semantics gives the saturated
-    shade for the largest-magnitude scores.
+    """Six-level green-positive / blue-negative gradient.
+
+    Like ``_graded_pink_rules``, register strongest-threshold first
+    so Sheets' first-match-wins semantics gives the saturated shade
+    when multiple thresholds qualify.  Positive thresholds come
+    before negative because the two sets don't share matching cells
+    (a single cell can't be both ≥ 0.5 and ≤ -0.5), so cross-sign
+    ordering doesn't matter -- only intra-sign descending order does.
     """
     rules: List[CondFormat] = []
-    for t, c in zip(EFF_ABS_THRESHOLDS, COLOR_GREEN):
+    for t, c in zip(reversed(EFF_ABS_THRESHOLDS), reversed(COLOR_GREEN)):
         rules.append(CondFormat(
             row_start=row_start, row_end=row_end,
             col_start=col_start, col_end=col_end,
@@ -896,7 +1172,7 @@ def _signed_eff_rules(
             values=(t,),
             bg_color=c,
         ))
-    for t, c in zip(EFF_ABS_THRESHOLDS, COLOR_BLUE):
+    for t, c in zip(reversed(EFF_ABS_THRESHOLDS), reversed(COLOR_BLUE)):
         rules.append(CondFormat(
             row_start=row_start, row_end=row_end,
             col_start=col_start, col_end=col_end,

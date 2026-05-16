@@ -259,46 +259,86 @@ class TestSingleCellShape:
     def test_grid_dimensions(self, single_cell_experiment):
         payload = sl.build_tab(single_cell_experiment)
         # Single cell: 1 block = 1 header row + 5*2=10 data rows.
-        # Total rows = 3 frozen + 1 header + 10 = 14.
-        assert len(payload.values) == 3 + 1 + 10
+        # Total rows = 4 header rows (header, baseline, persona, axis)
+        # + 1 block header + 10 data = 15.
+        assert len(payload.values) == 4 + 1 + 10
         # Cols = 5 agg + 4 * 7 questions = 33.
         assert all(len(r) == 5 + 4 * 7 for r in payload.values)
 
     def test_frozen_counts(self, single_cell_experiment):
         payload = sl.build_tab(single_cell_experiment)
-        assert payload.frozen_rows == 3
+        # Only header + baseline are frozen (May-2026 layout).
+        assert payload.frozen_rows == 2
         assert payload.frozen_cols == 1
 
-    def test_persona_row(self, single_cell_experiment):
+    def test_header_region_row_order(self, single_cell_experiment):
+        """Header-region rows: header (0), baseline (1), persona (2),
+        axis (3).  Persona + axis are unfrozen below the two frozen
+        rows so they don't waste vertical space.
+        """
         payload = sl.build_tab(single_cell_experiment)
-        assert payload.values[0][0] == "persona"
-        assert payload.values[0][1] == "Pretend you are a chef."
+        # Row 0: header (column labels + question texts).
+        assert payload.values[0][0] == "signed_strength"
+        # Row 1: baseline (col A label, baseline_responses in q cells).
+        assert payload.values[1][0] == "baseline"
+        # Row 2: persona (col A label, prompt in col B).
+        assert payload.values[2][0] == "persona"
+        assert payload.values[2][1] == "Pretend you are a chef."
+        # Row 3: axis (col A label, pos + neg pole descriptions split).
+        assert payload.values[3][0] == "axis"
 
     def test_header_row_has_question_text(self, single_cell_experiment):
         payload = sl.build_tab(single_cell_experiment)
-        # Header is row index 1; col index 5 = q0 response col carries q text.
-        assert payload.values[1][5] == "q0"
-        # col 6 = q0_coh label
-        assert payload.values[1][6] == "coh"
+        # Header is row index 0; col index 5 = q0 response col carries q text.
+        assert payload.values[0][5] == "q0"
+        # Per-question col order: response (5), eff (6), coh (7), rp (8).
+        assert payload.values[0][6] == "eff"
+        assert payload.values[0][7] == "coh"
+        assert payload.values[0][8] == "rp"
 
     def test_baseline_row_has_baseline_responses(self, single_cell_experiment):
         payload = sl.build_tab(single_cell_experiment)
-        assert payload.values[2][0] == "baseline"
-        # col 5 = q0 response = baseline-resp-0
-        assert payload.values[2][5] == "baseline-resp-0"
-        # col 5 + 4 = q1 response = baseline-resp-1
-        assert payload.values[2][9] == "baseline-resp-1"
+        # Baseline is now row 1 (was row 2 in pre-May-2026 layout).
+        assert payload.values[1][0] == "baseline"
+        assert payload.values[1][5] == "baseline-resp-0"
+        assert payload.values[1][9] == "baseline-resp-1"
+
+    def test_axis_row_packs_both_poles_on_two_lines(
+        self, single_cell_experiment
+    ):
+        """Both pole descriptions live in a single merged cell at col B,
+        separated by an embedded newline (rendered as line-2 by Sheets
+        wrap=WRAP).  Saves vertical space vs the side-by-side variant
+        and lets each line read full-width.
+        """
+        payload = sl.build_tab(single_cell_experiment)
+        # Col A label, col B carries the merged content.
+        assert payload.values[3][0] == "axis"
+        cell = str(payload.values[3][1])
+        lines = cell.split("\n")
+        assert len(lines) == 2, \
+            f"axis row should be exactly 2 lines, got: {cell!r}"
+        # Line 1 = pos pole (role_from), line 2 = neg pole (role_to).
+        assert lines[0].startswith("helpful")
+        assert "sign -1" in lines[0]
+        assert lines[1].startswith("unhelpful")
+        assert "sign +1" in lines[1]
+        # All cells past col B in row 3 are empty (single merge covers them).
+        for c in range(2, len(payload.values[3])):
+            assert payload.values[3][c] == ""
 
     def test_block_header_sentinel_in_col_a(self, single_cell_experiment):
         payload = sl.build_tab(single_cell_experiment)
-        # Block header is at row index 3 (right after frozen).
-        sentinel = payload.values[3][0]
+        # Block header now at row index 4 (right after the 4 header rows).
+        sentinel = payload.values[sl.N_HEADER_ROWS][0]
         assert sentinel == "[block:chef_helpful_v1/s3_l25/all]"
 
     def test_signed_strengths_sorted_ascending(self, single_cell_experiment):
         payload = sl.build_tab(single_cell_experiment)
-        # Data rows start at row 4; 10 strength rows total.
-        signed = [payload.values[4 + i][0] for i in range(10)]
+        # Data rows start at row N_HEADER_ROWS + 1 (after block header);
+        # 10 strength rows total.
+        data_start = sl.N_HEADER_ROWS + 1
+        signed = [payload.values[data_start + i][0] for i in range(10)]
         assert signed == sorted(signed)
         # Should span -8.0 .. +8.0 (approx).
         assert signed[0] == -8.0
@@ -312,44 +352,55 @@ class TestSingleCellShape:
         assert b.slot == 3
         assert b.layer == 25
         assert b.positions_mode == "all"
-        assert b.header_row == 3
-        assert b.data_row_start == 4
-        assert b.data_row_end == 4 + 10
+        assert b.header_row == sl.N_HEADER_ROWS
+        assert b.data_row_start == sl.N_HEADER_ROWS + 1
+        assert b.data_row_end == sl.N_HEADER_ROWS + 1 + 10
         # Sentinel matches what we put in col A of header_row.
         assert payload.values[b.header_row][0] == b.sentinel
 
+    def test_merges_present(self, single_cell_experiment):
+        """2 merges: persona row B..end, axis row B..end (each one wide cell)."""
+        payload = sl.build_tab(single_cell_experiment)
+        assert len(payload.merges) == 2
+        persona_merge = next(m for m in payload.merges if m.row_start == 2)
+        axis_merge = next(m for m in payload.merges if m.row_start == 3)
+        assert persona_merge.col_start == 1
+        assert axis_merge.col_start == 1
+        # Both span to the same end column.
+        assert persona_merge.col_end == axis_merge.col_end
+
 
 class TestSkippedRow:
-    def test_skipped_placeholder_in_response_cells(self, single_cell_experiment):
+    def test_skipped_row_keeps_actual_response_text(
+        self, single_cell_experiment
+    ):
+        """The runner USED to substitute '[skipped -- incoherent]' for
+        skipped rows' response cells.  As of May 2026 we keep the
+        actual response text instead -- the lack of RP/Eff values in
+        adjacent score cells plus the high coh score (transitively
+        shaded onto the response cell via the cross-reference
+        conditional formats) is enough visual signal.
+        """
         payload = sl.build_tab(single_cell_experiment)
-        # Find the row at signed_strength = +8.0 (the skipped one).
+        # Find the row at signed_strength = +8.0 (skipped in the fixture).
         for i, row in enumerate(payload.values):
-            if i < 3 + 1:  # before data
+            if i < sl.N_HEADER_ROWS + 1:  # skip header region + block header
                 continue
             if row[0] == 8.0:
-                # Col 5 = q0 response; should be placeholder, not the
-                # synthetic response.
-                assert row[5] == sl.SKIPPED_PLACEHOLDER
-                # Other q cells likewise.
-                assert row[9] == sl.SKIPPED_PLACEHOLDER
+                # Real response from the fixture (per _make_record), not
+                # any placeholder substitution.
+                assert row[5] == "+8.0-resp-q0"
+                assert row[9] == "+8.0-resp-q1"
                 return
         pytest.fail("Did not find +8.0 row")
 
-    def test_italic_text_eq_rule_exists_per_response_col(
-        self, single_cell_experiment
-    ):
-        """One italic TEXT_EQ '[skipped]' rule per question response col,
-        spanning the whole data range so any block's skipped row picks it up.
+    def test_no_italic_skip_rules_emitted(self, single_cell_experiment):
+        """No italic-gray TEXT_EQ placeholder rules anymore (we don't
+        substitute, so the rule would never fire).
         """
         payload = sl.build_tab(single_cell_experiment)
         italic_rules = [cf for cf in payload.cond_formats if cf.italic]
-        assert italic_rules, "expected italic [skipped] formatting rules"
-        # One rule per question (7).
-        assert len(italic_rules) == 7
-        for cf in italic_rules:
-            assert cf.text_color == sl.COLOR_GRAY_TEXT
-            assert cf.condition_type == "TEXT_EQ"
-            assert cf.values == (sl.SKIPPED_PLACEHOLDER,)
+        assert italic_rules == []
 
 
 class TestDimGroups:
@@ -400,18 +451,133 @@ class TestCondFormats:
         assert pos_t == set(sl.EFF_ABS_THRESHOLDS)
         assert neg_t == {-t for t in sl.EFF_ABS_THRESHOLDS}
 
+    def test_response_col_has_cross_reference_rules(
+        self, single_cell_experiment
+    ):
+        """Response cells get CUSTOM_FORMULA rules referencing their
+        row's coherence / RP / effect cells so the response cell takes
+        the same background colour as its triggering score cell.
+
+        Per-question col order (May-2026): response, eff, coh, rp.
+        So for q0 (response col 5 / 'F') the score cols are:
+          eff -> col 6 / 'G'
+          coh -> col 7 / 'H'
+          rp  -> col 8 / 'I'
+        """
+        payload = sl.build_tab(single_cell_experiment)
+        q0_resp = sl.N_AGG_COLS
+        custom = [
+            cf for cf in payload.cond_formats
+            if cf.col_start == q0_resp and cf.col_end == q0_resp + 1
+            and cf.condition_type == "CUSTOM_FORMULA"
+        ]
+        # 3 coh references + 1 rp + 12 (6 green + 6 blue) eff = 16.
+        assert len(custom) == 16
+        # Confirm formulas point at the correct columns by letter.
+        ref_cols = set()
+        for cf in custom:
+            f = cf.values[0]
+            assert f.startswith("=$"), f
+            letter = ""
+            for ch in f[2:]:
+                if ch.isalpha():
+                    letter += ch
+                else:
+                    break
+            ref_cols.add(letter)
+        # G (eff col 6), H (coh col 7), I (rp col 8).
+        assert ref_cols == {"G", "H", "I"}
+
+    def test_priority_order_coh_before_rp_before_eff(
+        self, single_cell_experiment
+    ):
+        """For Sheets' FIRST-match-wins semantics to give coh > rp > eff
+        priority on response cells, the rules must be registered in
+        order coh (first/highest), rp (middle), eff (last/lowest).
+
+        Per-question col order (May-2026): response, eff, coh, rp.
+          eff -> col G
+          coh -> col H
+          rp  -> col I
+        Registration order on the response cell:
+          coh rules (H, highest priority)
+            -> rp rule (I, middle priority)
+            -> eff rules (G, lowest priority).
+        """
+        payload = sl.build_tab(single_cell_experiment)
+        q0_resp = sl.N_AGG_COLS
+        custom = [
+            cf for cf in payload.cond_formats
+            if cf.col_start == q0_resp and cf.col_end == q0_resp + 1
+            and cf.condition_type == "CUSTOM_FORMULA"
+        ]
+        def letter_of(cf):
+            f = cf.values[0]
+            out = ""
+            for ch in f[2:]:
+                if ch.isalpha():
+                    out += ch
+                else:
+                    break
+            return out
+
+        order = [letter_of(cf) for cf in custom]
+        # coh rules (col H) -> rp rule (col I) -> eff rules (col G).
+        last_h = max(i for i, l in enumerate(order) if l == "H")
+        first_i = order.index("I")
+        first_g = order.index("G")
+        assert last_h < first_i, "coh (H) rules must precede rp (I) rule"
+        assert first_i < first_g, "rp (I) rule must precede eff (G) rules"
+
+    def test_gradient_descending_order(self, single_cell_experiment):
+        """Within each gradient family (pink coh / green eff / blue eff),
+        rules MUST be registered in descending-threshold order so
+        Sheets' first-match-wins semantics yields the saturated shade
+        for the largest score.  Reverse-order registration would
+        result in every matching cell getting the FAINTEST shade --
+        observed bug in May-2026 before this test was added.
+        """
+        payload = sl.build_tab(single_cell_experiment)
+        # mean_coh col B: numeric pink rules, thresholds should descend.
+        coh_rules = [cf for cf in payload.cond_formats
+                     if cf.col_start == 1 and cf.col_end == 2
+                     and cf.condition_type == "NUMBER_GREATER_THAN_EQ"]
+        coh_thresholds = [cf.values[0] for cf in coh_rules]
+        assert coh_thresholds == sorted(coh_thresholds, reverse=True)
+        # mean_eff col D: GTE thresholds descend, then LTE thresholds descend
+        # (i.e. -0.5 last among LTE, -3.0 first among LTE).
+        eff_gte = [cf.values[0] for cf in payload.cond_formats
+                   if cf.col_start == 3 and cf.col_end == 4
+                   and cf.condition_type == "NUMBER_GREATER_THAN_EQ"]
+        eff_lte = [cf.values[0] for cf in payload.cond_formats
+                   if cf.col_start == 3 and cf.col_end == 4
+                   and cf.condition_type == "NUMBER_LESS_THAN_EQ"]
+        # GTE: large positive first.
+        assert eff_gte == sorted(eff_gte, reverse=True)
+        # LTE: most-negative first (i.e. -3 before -0.5).
+        assert eff_lte == sorted(eff_lte)
+
+    def test_eff_has_six_levels(self, single_cell_experiment):
+        """Effect now uses 6 absolute thresholds (was 3); both the
+        score col rules and the response col cross-references should
+        reflect that."""
+        assert len(sl.EFF_ABS_THRESHOLDS) == 6
+        assert len(sl.COLOR_GREEN) == 6
+        assert len(sl.COLOR_BLUE) == 6
+
     def test_low_rp_rule_on_mean_col(self, single_cell_experiment):
         payload = sl.build_tab(single_cell_experiment)
-        # Tab-wide: exactly one orange-faint LTE-1 rule on mean_rp col 2.
+        # Tab-wide: exactly one orange-faint LTE-1 NUMBER comparison
+        # rule on mean_rp col 2 (per-question rp cols get their own).
         low_rp_rules = [cf for cf in payload.cond_formats
                         if cf.col_start == 2 and cf.col_end == 3
                         and cf.condition_type == "NUMBER_LESS_THAN_EQ"
                         and cf.values == (sl.RP_LOW_THRESHOLD,)]
         assert len(low_rp_rules) == 1
-        # The single rule spans the whole data row range, not just one row.
-        assert low_rp_rules[0].row_start == 3  # FROZEN_ROWS
-        # 1 block header + 10 data rows = 11; total = FROZEN_ROWS + 11 = 14
-        assert low_rp_rules[0].row_end == 14
+        # Rule spans the entire data row range.
+        assert low_rp_rules[0].row_start == sl.N_HEADER_ROWS
+        # 4 header + 1 block header + 10 data = 15 total
+        assert low_rp_rules[0].row_end == sl.N_HEADER_ROWS + 1 + 10
 
     def test_rule_count_scales_with_questions_not_rows(
         self, single_cell_experiment
@@ -422,11 +588,19 @@ class TestCondFormats:
         cap on multi-cell experiments; tab-wide keeps us bounded.
         """
         payload = sl.build_tab(single_cell_experiment)
-        # Per agg cols: 3 (mean_coh pink) + 1 (mean_rp orange) + 6 (mean_eff
-        # signed green+blue) = 10.
-        # Per question: same 10 + 1 italic placeholder = 11.
-        # 7 questions -> 10 + 7*11 = 87.
-        assert len(payload.cond_formats) == 10 + 7 * 11
+        # Aggregate cols: 3 (mean_coh pink) + 1 (mean_rp orange) +
+        # 12 (mean_eff signed: 6 green + 6 blue) = 16.
+        # Per-question score cols: same 16.
+        # Per-question response col cross-references: 3 (coh pink) +
+        # 1 (rp orange) + 12 (eff green+blue) = 16.
+        # Total per question = 16 (score) + 16 (response) = 32.
+        # 7 questions -> 16 + 7*32 = 240.
+        n = len(sl.EFF_ABS_THRESHOLDS)
+        agg = len(sl.COH_THRESHOLDS) + 1 + 2 * n  # 3 + 1 + 12 = 16
+        per_q_scores = agg                          # same shape
+        per_q_resp = len(sl.COH_THRESHOLDS) + 1 + 2 * n  # 16
+        expected = agg + 7 * (per_q_scores + per_q_resp)
+        assert len(payload.cond_formats) == expected
 
 
 class TestWidths:
@@ -435,8 +609,10 @@ class TestWidths:
         # q0 response col = N_AGG_COLS + 0 = 5.
         widths_by_col = {w.col: w.width_px for w in payload.widths}
         assert widths_by_col[5] == sl.WIDTH_RESPONSE_PX
-        # q0_coh = 6, should be the narrow score width.
+        # q0_eff = 6, q0_coh = 7, q0_rp = 8 -- all narrow score width.
         assert widths_by_col[6] == sl.WIDTH_SCORE_PX
+        assert widths_by_col[7] == sl.WIDTH_SCORE_PX
+        assert widths_by_col[8] == sl.WIDTH_SCORE_PX
 
     def test_strength_col_width(self, single_cell_experiment):
         payload = sl.build_tab(single_cell_experiment)
@@ -462,6 +638,8 @@ class TestMultiCell:
         b0, b1 = payload.blocks
         # The second block starts immediately after the first ends.
         assert b1.header_row == b0.data_row_end
+        # First block's header sits right after the header region.
+        assert b0.header_row == sl.N_HEADER_ROWS
 
 
 class TestBlockSentinel:
@@ -499,14 +677,12 @@ class TestDefaultNames:
 class TestAggregates:
     def test_aggregates_match_per_q_means(self, single_cell_experiment):
         payload = sl.build_tab(single_cell_experiment)
-        # Pick a non-skipped row: +1.0 (sign=+1 strength=1.0).
-        for row in payload.values[4:]:
+        data_start = sl.N_HEADER_ROWS + 1
+        for row in payload.values[data_start:]:
             if row[0] == 1.0:
                 # All q0..q6 coh values are 0 (per fixture), so mean_coh = 0.
                 assert row[1] == 0.0
-                # All rp = 3, so mean_rp = 3.0.
                 assert row[2] == 3.0
-                # All eff = +1.0, so mean_eff_signed = 1.0 and mean_abs_eff = 1.0.
                 assert row[3] == 1.0
                 assert row[4] == 1.0
                 return
@@ -514,13 +690,14 @@ class TestAggregates:
 
     def test_aggregates_blank_when_all_skipped(self, single_cell_experiment):
         payload = sl.build_tab(single_cell_experiment)
+        data_start = sl.N_HEADER_ROWS + 1
         # +8.0 row had persona+effect skipped for ALL 7 questions, so
         # mean_rp and mean_eff should be "" (blank).  mean_coh is still
         # 2.0 because the fixture set coh=2 on skipped rows.
-        for row in payload.values[4:]:
+        for row in payload.values[data_start:]:
             if row[0] == 8.0:
-                assert row[2] == ""  # mean_rp blank
-                assert row[3] == ""  # mean_eff blank
-                assert row[4] == ""  # mean_abs_eff blank
+                assert row[2] == ""
+                assert row[3] == ""
+                assert row[4] == ""
                 return
         pytest.fail("Did not find +8.0 row")

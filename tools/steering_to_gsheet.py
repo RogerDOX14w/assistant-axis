@@ -192,29 +192,70 @@ def _validate_frozen_compatibility(
     existing_values: List[List[Any]],
     payload: sl.TabPayload,
 ) -> None:
-    """Bail out loudly when an existing tab's frozen header doesn't
-    match the new payload's (different questions or different baselines
-    would silently misalign rerun blocks if we didn't check).
+    """Bail out loudly when an existing tab's header-region rows don't
+    match the new payload's.
 
-    Caller should drop into ``--wipe-tab`` if this raises and they
-    actually want the new header.
+    Header-region row indices (post-May-2026 layout):
+      Row 0 (frozen)  -- column labels + question texts.  Column
+                         alignment of baselines / strength data
+                         would silently slide if questions differed.
+      Row 1 (frozen)  -- baseline responses.  Steering responses in
+                         existing blocks were generated against
+                         THESE baselines; overwriting the row with a
+                         fresh baseline set would visually relate
+                         stale blocks to the wrong reference.
+      Row 2 (unfrozen) -- persona system prompt.  Baselines and
+                          steering responses are persona-dependent;
+                          a different persona invalidates every
+                          existing block's response interpretation.
+      Row 3 (unfrozen) -- axis info (pos / neg pole descriptions).
+                          Pole semantics anchor the sign convention
+                          for every block's data; mismatch suggests
+                          the underlying steering vector / axis
+                          changed.
+
+    Caller should pass --wipe-tab (to overwrite the header region and
+    accept that pre-existing blocks become semantically detached) OR
+    --tab-name <other> (to keep both datasets cleanly separated in
+    different tabs).
     """
-    if len(existing_values) < sl.FROZEN_ROWS:
+    if len(existing_values) < sl.N_HEADER_ROWS:
         return  # tab is empty / fresh -- compatible
-    # Row 2 = question header (labels + question texts).
-    # Compare q text cols only -- labels are static so they match by
-    # construction.
-    existing_header = existing_values[1] if len(existing_values) > 1 else []
-    new_header = payload.values[1]
+
+    new_header = payload.values[0]
+    new_baseline_row = payload.values[1]
+    new_persona_row = payload.values[2]
+    existing_header = existing_values[0] if len(existing_values) > 0 else []
+    existing_baseline_row = (
+        existing_values[1] if len(existing_values) > 1 else []
+    )
+    existing_persona_row = (
+        existing_values[2] if len(existing_values) > 2 else []
+    )
+
     n = len(new_header)
     if len(existing_header) < n:
         raise RuntimeError(
             "existing tab has fewer columns than new payload "
             f"({len(existing_header)} vs {n}); "
             "questions changed -- pass --wipe-tab to overwrite "
-            "or re-run into a different tab"
+            "the frozen header or --tab-name <other> to use a "
+            "separate tab"
         )
-    # Compare question text cols only (positions q0_response col onward).
+
+    # Persona prompt lives in row 1 col B by build_tab convention.
+    if len(existing_persona_row) >= 2 and len(new_persona_row) >= 2:
+        if str(existing_persona_row[1]).strip() != str(new_persona_row[1]).strip():
+            raise RuntimeError(
+                "existing tab's persona system prompt differs from new "
+                "payload's.  Pass --wipe-tab to overwrite (existing "
+                "blocks become semantically detached from the new "
+                "persona) or --tab-name <other> to use a separate tab.\n"
+                f"  existing: {str(existing_persona_row[1])[:120]!r}\n"
+                f"  new:      {str(new_persona_row[1])[:120]!r}"
+            )
+
+    # Question text + baseline response per question.
     for q in range(payload.n_questions):
         col = sl.N_AGG_COLS + sl.N_PER_QUESTION_COLS * q
         if str(existing_header[col]).strip() != str(new_header[col]).strip():
@@ -222,7 +263,28 @@ def _validate_frozen_compatibility(
                 f"existing tab's question text at q{q} differs from new "
                 f"payload's questions: existing={existing_header[col]!r}, "
                 f"new={new_header[col]!r}.  Pass --wipe-tab to overwrite "
-                f"the questions or re-run into a different tab."
+                f"the questions or --tab-name <other> to use a separate tab."
+            )
+        existing_bl = (
+            str(existing_baseline_row[col]).strip()
+            if len(existing_baseline_row) > col else ""
+        )
+        new_bl = str(new_baseline_row[col]).strip()
+        if existing_bl and new_bl and existing_bl != new_bl:
+            raise RuntimeError(
+                f"existing tab's baseline response at q{q} differs from new "
+                f"payload's.  Even though questions match, the baseline "
+                f"responses were generated under a different config "
+                f"(seed / persona / model build).  Pre-existing blocks in "
+                f"this tab were measured against the OLD baselines, so "
+                f"merging the new payload would silently relate stale "
+                f"blocks to wrong reference responses.\n"
+                f"  existing baseline (q{q}): "
+                f"{existing_bl[:120]!r}\n"
+                f"  new baseline      (q{q}): {new_bl[:120]!r}\n"
+                f"Pass --wipe-tab to overwrite (existing blocks become "
+                f"semantically detached) or --tab-name <other> to keep "
+                f"the two datasets in separate tabs."
             )
 
 
@@ -428,13 +490,185 @@ def _width_request(*, sheet_id: int, w: sl.ColumnWidth) -> Dict[str, Any]:
     }
 
 
+def _unmerge_all_request(*, sheet_id: int) -> Dict[str, Any]:
+    """Idempotent: clear every merge on the tab so we can re-issue
+    the payload's merges cleanly.  No-op if nothing is merged.
+    """
+    return {
+        "unmergeCells": {
+            "range": {"sheetId": sheet_id},
+        }
+    }
+
+
+def _merge_request(*, sheet_id: int, m: sl.MergeRange) -> Dict[str, Any]:
+    return {
+        "mergeCells": {
+            "range": {
+                "sheetId": sheet_id,
+                "startRowIndex": m.row_start,
+                "endRowIndex": m.row_end,
+                "startColumnIndex": m.col_start,
+                "endColumnIndex": m.col_end,
+            },
+            "mergeType": "MERGE_ALL",
+        }
+    }
+
+
+def _header_row_height_requests(*, sheet_id: int) -> List[Dict[str, Any]]:
+    """Explicit pixelSize for the persona + axis header rows.
+
+    Sheets row heights persist across writes; if a previous push had
+    wrap=WRAP on a row, the row height stayed tall even after we
+    switched to OVERFLOW.  Setting explicit pixelSize each time
+    forces the row to the intended single- or two-line height.
+
+    Persona row (row 2): 25px (single line of default font).
+    Axis row (row 3): 48px (two lines, comfortably).
+    """
+    return [
+        {
+            "updateDimensionProperties": {
+                "range": {
+                    "sheetId": sheet_id, "dimension": "ROWS",
+                    "startIndex": 2, "endIndex": 3,
+                },
+                "properties": {"pixelSize": 25},
+                "fields": "pixelSize",
+            }
+        },
+        {
+            "updateDimensionProperties": {
+                "range": {
+                    "sheetId": sheet_id, "dimension": "ROWS",
+                    "startIndex": 3, "endIndex": 4,
+                },
+                "properties": {"pixelSize": 48},
+                "fields": "pixelSize",
+            }
+        },
+    ]
+
+
+def _header_row_wrap_requests(
+    *, sheet_id: int, n_cols: int,
+) -> List[Dict[str, Any]]:
+    """Wrap-strategy overrides for the persona / axis header rows.
+
+    Persona (row 2): OVERFLOW so the prompt stays on a single line and
+    the row auto-sizes shorter -- the prompt is one-time reference
+    content; saving vertical real estate matters more than reading
+    every word at a glance.
+
+    Axis (row 3): WRAP so the embedded newline (separating the two
+    pole descriptions) renders as a line break -- the two-line
+    representation is exactly what the user asked for, packed in a
+    single wide merged cell.
+    """
+    return [
+        {
+            "repeatCell": {
+                "range": {
+                    "sheetId": sheet_id,
+                    "startRowIndex": 2, "endRowIndex": 3,
+                    "startColumnIndex": 0, "endColumnIndex": n_cols,
+                },
+                "cell": {
+                    "userEnteredFormat": {"wrapStrategy": "OVERFLOW_CELL"},
+                },
+                "fields": "userEnteredFormat.wrapStrategy",
+            }
+        },
+        {
+            "repeatCell": {
+                "range": {
+                    "sheetId": sheet_id,
+                    "startRowIndex": 3, "endRowIndex": 4,
+                    "startColumnIndex": 0, "endColumnIndex": n_cols,
+                },
+                "cell": {
+                    "userEnteredFormat": {"wrapStrategy": "WRAP"},
+                },
+                "fields": "userEnteredFormat.wrapStrategy",
+            }
+        },
+    ]
+
+
+def _top_align_all_request(
+    *, sheet_id: int, n_rows: int, n_cols: int,
+) -> Dict[str, Any]:
+    """Single repeatCell setting verticalAlignment=TOP on every cell
+    in the tab.  Numeric scores look fine top-aligned; long wrap-on
+    text becomes much easier to scan because every cell in a row
+    starts at the same baseline.
+    """
+    return {
+        "repeatCell": {
+            "range": {
+                "sheetId": sheet_id,
+                "startRowIndex": 0,
+                "endRowIndex": n_rows,
+                "startColumnIndex": 0,
+                "endColumnIndex": n_cols,
+            },
+            "cell": {
+                "userEnteredFormat": {"verticalAlignment": "TOP"},
+            },
+            "fields": "userEnteredFormat.verticalAlignment",
+        }
+    }
+
+
+def _response_col_left_border_requests(
+    *, sheet_id: int, n_questions: int, n_rows: int,
+) -> List[Dict[str, Any]]:
+    """One updateBorders request per q*_response column applying a
+    solid left border on every row.
+
+    Visually delimits per-question blocks: each block starts with its
+    response col (a wide cell), and the left border on that col gives
+    the eye a vertical guide between adjacent questions' score trios
+    and the next question's response.
+
+    Style: SOLID_MEDIUM is light enough not to overpower the cond-format
+    backgrounds but still readable against the wrap-on response text.
+    """
+    out: List[Dict[str, Any]] = []
+    for q in range(n_questions):
+        col = sl.N_AGG_COLS + sl.N_PER_QUESTION_COLS * q
+        out.append({
+            "updateBorders": {
+                "range": {
+                    "sheetId": sheet_id,
+                    "startRowIndex": 0,
+                    "endRowIndex": n_rows,
+                    "startColumnIndex": col,
+                    "endColumnIndex": col + 1,
+                },
+                "left": {
+                    "style": "SOLID_MEDIUM",
+                    "color": {"red": 0.4, "green": 0.4, "blue": 0.4},
+                },
+            }
+        })
+    return out
+
+
 def _wrap_response_cols_request(
     *, sheet_id: int, n_questions: int, n_rows: int,
 ) -> Dict[str, Any]:
-    """Single repeatCell request to enable WRAP on every q*_response col.
+    """Single repeatCell request applying WRAP + top-vertical-alignment to
+    every q*_response col across all rows.
 
-    Applied across the whole row range so newly-added blocks pick it
-    up.  No-op on rows whose response cells are empty.
+    Top alignment matters for long wrap-on responses in the frozen
+    baseline row (row 3): centred / bottom alignment leaves whitespace
+    at the top of the cell when the response is short and pushes the
+    visible text downward when the cell auto-expands to fit a tall
+    wrap, eating screen real estate.  Top-align keeps the first line
+    of every response anchored to the same row baseline so the eye can
+    scan across blocks consistently.
     """
     requests: List[Dict[str, Any]] = []
     for q in range(n_questions):
@@ -449,9 +683,13 @@ def _wrap_response_cols_request(
                     "endColumnIndex": col + 1,
                 },
                 "cell": {
-                    "userEnteredFormat": {"wrapStrategy": "WRAP"},
+                    "userEnteredFormat": {
+                        "wrapStrategy": "WRAP",
+                        "verticalAlignment": "TOP",
+                    },
                 },
-                "fields": "userEnteredFormat.wrapStrategy",
+                "fields": "userEnteredFormat.wrapStrategy,"
+                          "userEnteredFormat.verticalAlignment",
             }
         })
     return {"requests": requests}
@@ -544,6 +782,9 @@ def push_to_sheet(
     requests.extend(_delete_dim_groups_request(
         sheet_id=sheet_id, groups=existing_dim_groups,
     ))
+    # Unmerge first so we can re-apply the payload's merges cleanly.
+    # Sheets rejects mergeCells over already-merged ranges.
+    requests.append(_unmerge_all_request(sheet_id=sheet_id))
 
     if mode == "wipe_tab":
         requests.append({
@@ -569,8 +810,13 @@ def push_to_sheet(
             ws.add_rows(total_rows - ws.row_count + 10)
         if ws.col_count < total_cols:
             ws.add_cols(total_cols - ws.col_count + 2)
-        ws.update(cell_range, merged_values,
-                  value_input_option="USER_ENTERED")
+        # gspread 6.x changed the argument order to (values, range_name).
+        # Use kwargs to be order-independent across both 5.x and 6.x.
+        ws.update(
+            values=merged_values,
+            range_name=cell_range,
+            value_input_option="USER_ENTERED",
+        )
 
     # ----- DECORATIONS -----
     decoration_requests: List[Dict[str, Any]] = []
@@ -598,6 +844,14 @@ def push_to_sheet(
             sheet_id=sheet_id, cond=cf, index=idx,
         ))
 
+    # Top-align every cell first; the wrap_response_cols_request below
+    # also sets verticalAlignment=TOP on response cols, but that's
+    # narrowly scoped -- the broad request here covers score / agg /
+    # strength cells too so every row reads consistently.
+    decoration_requests.append(_top_align_all_request(
+        sheet_id=sheet_id, n_rows=total_rows, n_cols=total_cols,
+    ))
+
     # Wrap response columns.
     wrap_payload = _wrap_response_cols_request(
         sheet_id=sheet_id,
@@ -605,6 +859,30 @@ def push_to_sheet(
         n_rows=total_rows,
     )
     decoration_requests.extend(wrap_payload["requests"])
+
+    # Header-row wrap overrides: persona row OVERFLOW (single line),
+    # axis row WRAP (renders the embedded newline between poles).
+    decoration_requests.extend(_header_row_wrap_requests(
+        sheet_id=sheet_id, n_cols=total_cols,
+    ))
+    # Explicit pixelSize on the persona + axis rows so their heights
+    # don't inherit any tall residue from prior pushes.
+    decoration_requests.extend(_header_row_height_requests(
+        sheet_id=sheet_id,
+    ))
+
+    # Vertical left-border on each q*_response col to delimit per-
+    # question blocks.
+    decoration_requests.extend(_response_col_left_border_requests(
+        sheet_id=sheet_id,
+        n_questions=payload.n_questions,
+        n_rows=total_rows,
+    ))
+
+    # Cell merges for the persona + axis info rows (split below the
+    # frozen baseline row in the unfrozen header region).
+    for m in payload.merges:
+        decoration_requests.append(_merge_request(sheet_id=sheet_id, m=m))
 
     if decoration_requests:
         ss.batch_update({"requests": decoration_requests})

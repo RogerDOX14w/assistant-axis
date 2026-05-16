@@ -9,6 +9,7 @@ the final grid -- the trickiest correctness question in the CLI.
 """
 from __future__ import annotations
 
+from pathlib import Path
 from typing import Any, List
 
 import pytest
@@ -197,36 +198,95 @@ def _make_minimal_payload(
     questions: List[str] = None,
     experiment_id: str = "exp_A",
 ) -> sl.TabPayload:
-    """Build a TabPayload by hand (skipping disk I/O) for compat tests.
+    """Build a TabPayload by hand (skipping disk I/O) for merge / validator
+    tests.
 
-    Just enough structure for the validator: rows 0-2 are persona /
-    header / baseline, row 3+ is a single empty block.
+    Mirrors the May-2026 layout:
+      Row 0: header (column labels + question texts)
+      Row 1: baseline responses
+      Row 2: persona prompt
+      Row 3: axis info
+      Row 4: block header (single empty block)
     """
     questions = questions or [f"q{i}" for i in range(n_questions)]
-    persona_row = sl._make_persona_row("test persona", n_questions)
     header_row = sl._make_header_row(n_questions, questions)
     baseline_row = sl._make_baseline_row(
         [f"b{i}" for i in range(n_questions)], n_questions
     )
+    persona_row = sl._make_persona_row("test persona", n_questions)
+    axis_row = sl._make_axis_row(
+        axis_source={"role_from": "pos", "role_to": "neg"},
+        n_questions=n_questions,
+        instructions_dir=Path("/nonexistent"),  # no trait files needed
+    )
     sentinel = sl.make_block_sentinel(experiment_id, 3, 25, "all")
     n_cols = sl.N_AGG_COLS + sl.N_PER_QUESTION_COLS * n_questions
     block_header = [sentinel, "summary"] + [""] * (n_cols - 2)
-    values = [persona_row, header_row, baseline_row, block_header]
+    values = [header_row, baseline_row, persona_row, axis_row, block_header]
     values = [sl.pad_row(r, n_cols) for r in values]
     return sl.TabPayload(
         values=values,
-        frozen_rows=3, frozen_cols=1,
-        dim_groups=[], cond_formats=[], widths=[],
+        frozen_rows=sl.FROZEN_ROWS, frozen_cols=1,
+        dim_groups=[], cond_formats=[], widths=[], merges=[],
         blocks=[sl.BlockSpec(
             experiment_id=experiment_id, slot=3, layer=25,
             positions_mode="all",
-            header_row=3, data_row_start=4, data_row_end=4,
+            header_row=sl.N_HEADER_ROWS,
+            data_row_start=sl.N_HEADER_ROWS + 1,
+            data_row_end=sl.N_HEADER_ROWS + 1,
             sentinel=sentinel,
         )],
         n_questions=n_questions,
         persona_prompt="test persona",
         questions=list(questions),
         baseline_responses=[f"b{i}" for i in range(n_questions)],
+        tab_name="test tab",
+        default_spreadsheet_name="test spreadsheet",
+    )
+
+
+def _make_payload_with(
+    questions=("q0", "q1", "q2"),
+    persona="test persona",
+    baselines=("b0", "b1", "b2"),
+    experiment_id="exp_A",
+) -> sl.TabPayload:
+    """Build a TabPayload by hand with explicit control over persona /
+    questions / baselines so the validator tests can vary each
+    independently.
+
+    May-2026 row order: header, baseline, persona, axis, block_header.
+    """
+    n_questions = len(questions)
+    header_row = sl._make_header_row(n_questions, list(questions))
+    baseline_row = sl._make_baseline_row(list(baselines), n_questions)
+    persona_row = sl._make_persona_row(persona, n_questions)
+    axis_row = sl._make_axis_row(
+        axis_source={"role_from": "pos", "role_to": "neg"},
+        n_questions=n_questions,
+        instructions_dir=Path("/nonexistent"),
+    )
+    sentinel = sl.make_block_sentinel(experiment_id, 3, 25, "all")
+    n_cols = sl.N_AGG_COLS + sl.N_PER_QUESTION_COLS * n_questions
+    block_header = [sentinel, "summary"] + [""] * (n_cols - 2)
+    values = [header_row, baseline_row, persona_row, axis_row, block_header]
+    values = [sl.pad_row(r, n_cols) for r in values]
+    return sl.TabPayload(
+        values=values,
+        frozen_rows=sl.FROZEN_ROWS, frozen_cols=1,
+        dim_groups=[], cond_formats=[], widths=[], merges=[],
+        blocks=[sl.BlockSpec(
+            experiment_id=experiment_id, slot=3, layer=25,
+            positions_mode="all",
+            header_row=sl.N_HEADER_ROWS,
+            data_row_start=sl.N_HEADER_ROWS + 1,
+            data_row_end=sl.N_HEADER_ROWS + 1,
+            sentinel=sentinel,
+        )],
+        n_questions=n_questions,
+        persona_prompt=persona,
+        questions=list(questions),
+        baseline_responses=list(baselines),
         tab_name="test tab",
         default_spreadsheet_name="test spreadsheet",
     )
@@ -241,7 +301,7 @@ class TestValidateFrozenCompatibility:
     def test_matching_questions_passes(self):
         payload = _make_minimal_payload(questions=["q0", "q1", "q2"])
         # Build an existing tab with the same header row.
-        existing = [payload.values[i] for i in range(3)]
+        existing = [payload.values[i] for i in range(sl.N_HEADER_ROWS)]
         ssg._validate_frozen_compatibility(existing, payload)
 
     def test_different_questions_raises(self):
@@ -249,17 +309,74 @@ class TestValidateFrozenCompatibility:
         existing_payload = _make_minimal_payload(
             questions=["old0", "old1", "old2"]
         )
-        existing = [existing_payload.values[i] for i in range(3)]
-        with pytest.raises(RuntimeError, match="differs"):
+        existing = [existing_payload.values[i] for i in range(sl.N_HEADER_ROWS)]
+        with pytest.raises(RuntimeError, match="question text"):
             ssg._validate_frozen_compatibility(existing, payload)
 
     def test_existing_too_narrow_raises(self):
         # Existing tab has fewer questions than the new payload.
         payload = _make_minimal_payload(n_questions=5)
         existing_payload = _make_minimal_payload(n_questions=3)
-        existing = [existing_payload.values[i] for i in range(3)]
+        existing = [existing_payload.values[i] for i in range(sl.N_HEADER_ROWS)]
         with pytest.raises(RuntimeError, match="fewer columns"):
             ssg._validate_frozen_compatibility(existing, payload)
+
+    def test_different_persona_raises(self):
+        """A persona-prompt difference invalidates the tab even when
+        questions match, because every existing block's response was
+        generated under the OLD persona.
+        """
+        old = _make_payload_with(persona="You are a chef.")
+        new = _make_payload_with(persona="You are an architect.")
+        existing = [old.values[i] for i in range(sl.N_HEADER_ROWS)]
+        with pytest.raises(RuntimeError, match="persona system prompt"):
+            ssg._validate_frozen_compatibility(existing, new)
+
+    def test_different_baselines_raises(self):
+        """Baseline mismatch: same questions, but a different config
+        (seed / model build / persona tweak) produced different
+        baseline responses.  Merging would silently relate stale
+        blocks to wrong reference responses.
+        """
+        old = _make_payload_with(baselines=("old-b0", "old-b1", "old-b2"))
+        new = _make_payload_with(baselines=("new-b0", "new-b1", "new-b2"))
+        existing = [old.values[i] for i in range(sl.N_HEADER_ROWS)]
+        with pytest.raises(RuntimeError, match="baseline response"):
+            ssg._validate_frozen_compatibility(existing, new)
+
+    def test_matching_baselines_pass(self):
+        """When questions, persona, AND baselines all match the
+        validator is happy.
+        """
+        old = _make_payload_with()
+        new = _make_payload_with()  # identical
+        existing = [old.values[i] for i in range(sl.N_HEADER_ROWS)]
+        ssg._validate_frozen_compatibility(existing, new)
+
+    def test_empty_existing_baseline_does_not_raise(self):
+        """When existing baselines are missing (e.g. tab was created
+        but never populated), don't raise on the baseline check --
+        let the upcoming write fill them in fresh.
+        """
+        new = _make_payload_with(baselines=("b0", "b1", "b2"))
+        # Existing has matching persona + questions but blank baselines.
+        existing_payload = _make_payload_with(baselines=("", "", ""))
+        existing = [existing_payload.values[i] for i in range(sl.N_HEADER_ROWS)]
+        ssg._validate_frozen_compatibility(existing, new)
+
+    def test_error_message_mentions_both_remedies(self):
+        """Errors should point at BOTH --wipe-tab and --tab-name as
+        valid remedies so users don't reflexively wipe a tab that
+        contains useful sibling blocks.
+        """
+        old = _make_payload_with(baselines=("old", "old", "old"))
+        new = _make_payload_with(baselines=("new", "new", "new"))
+        existing = [old.values[i] for i in range(sl.N_HEADER_ROWS)]
+        with pytest.raises(RuntimeError) as excinfo:
+            ssg._validate_frozen_compatibility(existing, new)
+        msg = str(excinfo.value)
+        assert "--wipe-tab" in msg
+        assert "--tab-name" in msg
 
 
 # ---------------------------------------------------------------------------
@@ -275,14 +392,25 @@ class TestMergePayloadIntoExisting:
         """Synthesize an 'existing' tab grid (the result of one or more
         prior exports).  Each (exp_id, slot, layer) gets one block of
         3 data rows.
+
+        Header-region rows match _make_minimal_payload's layout so the
+        validator (which compares row 0 = header, row 1 = baseline,
+        row 2 = persona, row 3 = axis) sees identical content and
+        doesn't raise a false-positive frozen-mismatch error during
+        merge tests.
         """
         n_cols = sl.N_AGG_COLS + sl.N_PER_QUESTION_COLS * n_questions
         questions = [f"q{i}" for i in range(n_questions)]
         rows = [
-            sl._make_persona_row("test persona", n_questions),
             sl._make_header_row(n_questions, questions),
             sl._make_baseline_row(
                 [f"b{i}" for i in range(n_questions)], n_questions
+            ),
+            sl._make_persona_row("test persona", n_questions),
+            sl._make_axis_row(
+                axis_source={"role_from": "pos", "role_to": "neg"},
+                n_questions=n_questions,
+                instructions_dir=Path("/nonexistent"),
             ),
         ]
         for exp_id, slot, layer in exp_ids_and_cells:
@@ -430,8 +558,8 @@ class TestMergePayloadIntoExisting:
             mode="wipe_tab",
             current_experiment_id="exp_A",
         )
-        # Header row of merged grid should reflect the NEW questions.
-        header_row = merged[1]
+        # Header row (row 0 in May-2026 layout) should reflect NEW questions.
+        header_row = merged[0]
         # q0 response col = N_AGG_COLS + 0
         q0_col = sl.N_AGG_COLS
         assert header_row[q0_col] == "new0"
