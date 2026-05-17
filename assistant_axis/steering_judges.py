@@ -1350,11 +1350,12 @@ class RealJudgeDispatcher:
         # ``mean(|eff_i|)``.  These differ a lot in the noise regime:
         # for 14 records with stdev~1 around true zero,
         # ``mean(|x|) ~ 0.8`` while ``|mean(x)| ~ 0.27``.  With the
-        # default eff_stop_threshold=0.25 the old per-record-abs version
-        # almost never fired the down-stop on noise-floor strengths,
-        # causing the bidirectional scan to grind down to min_strength
-        # collecting useless data.  See test_effect_order_bias.py
-        # (which used the correct ``|mean|`` from the start).
+        # default eff_stop_threshold=1/3 the pre-fix per-record-abs
+        # version almost never fired the down-stop on noise-floor
+        # strengths, causing the bidirectional scan to grind down to
+        # min_strength collecting useless data.  See
+        # test_effect_order_bias.py (which used the correct ``|mean|``
+        # from the start).
         def _resolve_effect_mean(
             _async_fut, records=records, eff_future=eff_future,
         ):

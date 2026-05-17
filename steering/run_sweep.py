@@ -267,7 +267,7 @@ def _build_work_items(
             f"sweep.scan_mode must be 'bidirectional' or "
             f"'legacy_unidirectional'; got {scan_mode!r}"
         )
-    eff_stop_threshold = float(sweep_cfg.get("eff_stop_threshold", 0.25))
+    eff_stop_threshold = float(sweep_cfg.get("eff_stop_threshold", 1.0 / 3.0))
     eff_stop_consecutive = int(sweep_cfg.get("eff_stop_consecutive", 2))
     min_strength = float(sweep_cfg.get("min_strength", 0.125))
     start_strength_multiplier_steps = int(
@@ -788,7 +788,7 @@ def _worker_main(
                         ),
                         scan_mode=scan_mode,
                         eff_stop_threshold=float(
-                            item.get("eff_stop_threshold", 0.25)
+                            item.get("eff_stop_threshold", 1.0 / 3.0)
                         ),
                         eff_stop_consecutive=int(
                             item.get("eff_stop_consecutive", 2)

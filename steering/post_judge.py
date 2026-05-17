@@ -326,7 +326,7 @@ def process_cell_swap_fill_in(
 def apply_corrected_stop_cutoff(
     *,
     cell_dir: Path,
-    eff_stop_threshold: float = 0.5,
+    eff_stop_threshold: float = 1.0 / 3.0,
     eff_stop_consecutive: int = 2,
 ) -> int:
     """Move records that wouldn't have been collected under the
@@ -412,7 +412,7 @@ def apply_corrected_stop_cutoff(
     # is the "bias-floor anchor" we keep; strengths SMALLER than the
     # anchor are excluded.
     #
-    # Example with eff_stop_threshold=0.5, eff_stop_consecutive=2,
+    # Example with eff_stop_threshold=0.5 (illustrative), eff_stop_consecutive=2,
     # walking [4.0:1.5, 2.0:0.4, 1.0:0.3, 0.5:0.2]:
     #   - 4.0: above threshold, consec=0
     #   - 2.0: below, consec=1, streak_start=2.0
@@ -672,13 +672,13 @@ def main() -> None:
              "gains excluded_strengths + excluded_reason.  Opt-in "
              "since it mutates the canonical records file.")
     p.add_argument(
-        "--eff-stop-threshold", type=float, default=0.5,
-        help="Threshold for --apply-corrected-stop-cutoff: mean of "
-             "|averaged_eff| across the strength's K questions below "
-             "which the predicate fires.  Default 0.5 matches the "
-             "v2 swap-judging adaptive descent threshold; the live "
-             "runner's default 0.25 is too strict for the bias-"
-             "cancelled estimator (signal-magnitude not eff-magnitude).",
+        "--eff-stop-threshold", type=float, default=1.0 / 3.0,
+        help="Threshold for --apply-corrected-stop-cutoff: "
+             "|mean(averaged_eff)| across the strength's K questions "
+             "below which the predicate fires.  Default 1/3 ~= 0.333, "
+             "matching the live runner's default after the 2026-05-17 "
+             "fix (the correct statistic is ``|mean(eff_i)|``, not "
+             "``mean(|eff_i|)`` -- see steering_judges.py).",
     )
     p.add_argument(
         "--eff-stop-consecutive", type=int, default=2,

@@ -543,7 +543,7 @@ def run_steering_cell(
     coh_stop_threshold: float = 1.5,
     coh_stop_consecutive: int = 2,
     scan_mode: Literal["bidirectional", "legacy_unidirectional"] = "bidirectional",
-    eff_stop_threshold: float = 0.25,
+    eff_stop_threshold: float = 1.0 / 3.0,
     eff_stop_consecutive: int = 2,
     weakest_strength: float = 1.0,
     max_strength: float = 64.0,
