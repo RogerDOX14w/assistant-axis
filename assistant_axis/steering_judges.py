@@ -1341,10 +1341,20 @@ class RealJudgeDispatcher:
             self._inflight.append(future)
 
         # When the judge-group task completes, compute the strength's
-        # mean(|effect.combined|) from the in-place-stamped records and
+        # |mean(effect.combined)| from the in-place-stamped records and
         # resolve the per-strength effect-mean future so any waiters
         # (the bidirectional-scan runner) unblock.  Stamping happens
         # inside _judge_group_async; we just read the result here.
+        #
+        # NOTE (2026-05-17 fix): the statistic is ``|mean(eff_i)|``, NOT
+        # ``mean(|eff_i|)``.  These differ a lot in the noise regime:
+        # for 14 records with stdev~1 around true zero,
+        # ``mean(|x|) ~ 0.8`` while ``|mean(x)| ~ 0.27``.  With the
+        # default eff_stop_threshold=0.25 the old per-record-abs version
+        # almost never fired the down-stop on noise-floor strengths,
+        # causing the bidirectional scan to grind down to min_strength
+        # collecting useless data.  See test_effect_order_bias.py
+        # (which used the correct ``|mean|`` from the start).
         def _resolve_effect_mean(
             _async_fut, records=records, eff_future=eff_future,
         ):
@@ -1357,8 +1367,8 @@ class RealJudgeDispatcher:
                     eff = (r.get("judges") or {}).get("effect") or {}
                     v = eff.get("combined")
                     if isinstance(v, (int, float)):
-                        vals.append(abs(float(v)))
-                m = (sum(vals) / len(vals)) if vals else float("nan")
+                        vals.append(float(v))  # keep sign
+                m = abs(sum(vals) / len(vals)) if vals else float("nan")
                 eff_future.set_result(float(m))
             except Exception as exc:  # noqa: BLE001
                 logger.warning(

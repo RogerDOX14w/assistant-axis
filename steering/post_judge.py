@@ -381,10 +381,18 @@ def apply_corrected_stop_cutoff(
             continue  # baselines / malformed -- never excluded
         by_strength[s].append(r)
 
-    # Per-strength mean |combined|.  NaN-eff strengths (skipped due to
-    # high coh) cannot count toward the tail window because we don't
+    # Per-strength |mean(combined)|.  NaN-eff strengths (skipped due
+    # to high coh) cannot count toward the tail window because we don't
     # know what the eff would have been; treat them as "above
     # threshold" so they reset the streak.
+    #
+    # NOTE (2026-05-17 fix): the correct statistic is ``|mean(eff_i)|``,
+    # NOT ``mean(|eff_i|)``.  Matches the live runtime predicate in
+    # steering_judges.py / steering_runner.py (which had the same bug
+    # and was fixed in the same commit).  In pure noise with 14 records
+    # at sigma=1, ``mean(|x|) ~ 0.8`` while ``|mean(x)| ~ 0.27`` -- only
+    # the latter falls below the default 0.25-0.5 threshold and lets
+    # the cutoff fire.
     mean_abs_eff: Dict[float, float] = {}
     for s, recs in by_strength.items():
         vals: List[float] = []
@@ -392,9 +400,9 @@ def apply_corrected_stop_cutoff(
             eff = (r.get("judges") or {}).get("effect") or {}
             v = eff.get("combined")
             if isinstance(v, (int, float)):
-                vals.append(abs(float(v)))
+                vals.append(float(v))  # keep sign
         if vals:
-            mean_abs_eff[s] = sum(vals) / len(vals)
+            mean_abs_eff[s] = abs(sum(vals) / len(vals))
         else:
             mean_abs_eff[s] = float("nan")
 

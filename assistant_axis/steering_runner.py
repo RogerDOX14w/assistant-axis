@@ -1250,6 +1250,15 @@ def _run_bidirectional_cell(
                     break
             # mean_abs_eff: compute fresh from effect.combined across
             # the strength's records (matches the runtime computation).
+            #
+            # NOTE (2026-05-17 fix): we compute ``|mean(eff_i)|``, NOT
+            # ``mean(|eff_i|)``.  The pre-fix per-record-abs version
+            # stayed at ~0.5-0.8 in pure noise (half-normal expected
+            # value of |x| when x~N(0,1)), so the eff-stop predicate
+            # almost never fired and the down-sweep collected to
+            # min_strength on every cell with a weak signal.  Matches
+            # the convention used by tools/test_effect_order_bias.py
+            # from the start.
             vals = []
             any_skipped = False
             for r in recs:
@@ -1258,9 +1267,9 @@ def _run_bidirectional_cell(
                     any_skipped = True
                 v = eff.get("combined")
                 if isinstance(v, (int, float)):
-                    vals.append(abs(float(v)))
+                    vals.append(float(v))  # keep sign
             if vals:
-                mean_abs_eff_by_strength[s] = sum(vals) / len(vals)
+                mean_abs_eff_by_strength[s] = abs(sum(vals) / len(vals))
             elif any_skipped:
                 mean_abs_eff_by_strength[s] = float("nan")
             # else: leave unset; tail-window check treats unset as
