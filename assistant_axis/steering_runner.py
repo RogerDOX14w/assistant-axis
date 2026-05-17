@@ -679,19 +679,48 @@ def run_steering_cell(
 
     # Resume shortcut: if summary already records a stop, we're done with
     # generation and just need Phase 2 (in v1, nothing more to do).
+    #
+    # NOTE (2026-05-17): we still scan records.jsonl for incomplete
+    # strengths (partial-K, judges=None) even if the cell has a final
+    # summary -- those gaps are artifacts of prior kill-and-resume cycles
+    # and should be filled in.  If any are found, we DROP the early-skip
+    # and fall through to the normal sweep loop where Stage 2.5 gap-fill
+    # will regenerate them.  Common case (no gaps): summary present,
+    # all strengths complete, skip as before.
     existing_summary = _read_summary(summary_path)
     if existing_summary and existing_summary.get("stopped_at_strength") is not None:
-        logger.info(
-            f"[cell s{slot}_l{layer}_{sign}] already stopped at "
-            f"strength={existing_summary['stopped_at_strength']}; skipping"
-        )
-        return CellResult(
-            stopped_at_strength=existing_summary.get("stopped_at_strength"),
-            reason=existing_summary.get("reason", "incoherent"),
-            n_records=existing_summary.get("n_records", 0),
-            n_strengths_swept=existing_summary.get("n_strengths_swept", 0),
-            summary=existing_summary,
-        )
+        pre_skip_records = _read_existing_records(records_path)
+        K_questions = len(questions)
+        # Group existing records by strength (skip baseline at strength=0)
+        pre_skip_by_s: Dict[float, List[Dict[str, Any]]] = {}
+        for rec in pre_skip_records:
+            s = float(rec.get("strength", 0.0))
+            if s == 0.0:
+                continue
+            pre_skip_by_s.setdefault(s, []).append(rec)
+        pre_skip_incomplete = [
+            s for s, recs in pre_skip_by_s.items()
+            if not _strength_records_complete(recs, K_questions)
+        ]
+        if pre_skip_incomplete:
+            logger.info(
+                f"[cell s{slot}_l{layer}_{sign:+d}] resume: summary exists but "
+                f"{len(pre_skip_incomplete)} strength(s) incomplete "
+                f"{sorted(round(abs(s), 4) for s in pre_skip_incomplete)} -- "
+                f"falling through to gap-fill"
+            )
+        else:
+            logger.info(
+                f"[cell s{slot}_l{layer}_{sign}] already stopped at "
+                f"strength={existing_summary['stopped_at_strength']}; skipping"
+            )
+            return CellResult(
+                stopped_at_strength=existing_summary.get("stopped_at_strength"),
+                reason=existing_summary.get("reason", "incoherent"),
+                n_records=existing_summary.get("n_records", 0),
+                n_strengths_swept=existing_summary.get("n_strengths_swept", 0),
+                summary=existing_summary,
+            )
 
     # Resolve the effective scan_mode.  If summary.json from a prior
     # session pinned a mode, honour it: a mid-run mode switch would
