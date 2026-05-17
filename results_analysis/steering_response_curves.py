@@ -605,7 +605,7 @@ def plot_response_curves(
                    alpha=0.6, label="coh_stop_threshold (1.5)")
         ax.set_ylim(-0.1, 3.2)
         ax.grid(True, alpha=0.3)
-        ax.set_xlabel("Steps remaining to incoherence cliff (0 = cliff)")
+        ax.set_xlabel("Steps remaining to incoherence (0 = last coherent)")
 
     # Invert x for ALL columns (sharex propagates).  x=0 (cliff) on
     # the RIGHT; increasing x to the LEFT; trimmed past-cliff
