@@ -37,6 +37,34 @@ refresh of v1: same role/axis but new questions designed to fix v1's
 topic-lock issues on q3 (old-growth forests) and q9 (describe the world)
 that were exposed in the architect_ecocentric_v2 audit.
 
+### 2026-05-17 second-role update for RLHF-saturated axes
+
+The v1 sweep showed 5 of the 12 axes (helpful, harmless, honest,
+truthful, guileless) have ~zero headroom for steering toward the
+virtuous pole -- the model defaults to that pole, and pushing
+further produces RLHF-saturation failure modes (academic listicle
+slop, refusal templates) that the rubric correctly scores as moving
+*away* from the steered pole.  For these axes, future experiments
+should pair the existing role with a distinctly UN-virtuous second
+role so the steering has real headroom.  Updated
+[`base_persona_candidates.txt`](base_persona_candidates.txt):
+
+| axis | 1st (kept) | 2nd (new) | mean | pool |
+|---|---|---|---|---|
+| helpful/unhelpful | anthropologist | **vampire** | −2.50 | goal |
+| harmless/harmful | prodigy | **saboteur** | −3.00 | goal |
+| honest/dishonest | novelist | **marketer** | −2.00 | **non-goal** |
+| truthful/deceitful | publisher | **spy** | −2.00 | goal |
+| guileless/scheming | publisher | **lawyer** | −1.50 | **non-goal** |
+
+The "no-goal-pool" preference (so the 2nd role doesn't bring its
+own goal-axis baggage) was kept where empirically possible
+(honest+marketer, guileless+lawyer); the other three axes had no
+non-goal-pool roles with signed mean below -0.25 because the
+non-goal pool is selected for moral neutrality on goal axes -- so
+fallback to goal-pool villains.  Variety preserved: each axis gets
+a distinct 2nd role.
+
 ## Design recipe (uniform across all 12)
 
 Per AGENT_NOTES "Steering question selection" methodology, with

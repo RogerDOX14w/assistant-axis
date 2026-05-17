@@ -338,7 +338,11 @@ def plot_averaged_curves(
             std = avg.eff_std
             color = color_for_cell[(slot, layer)]
             base_label = f"s{slot}_l{layer}"
-            ax.plot(x, y, color=color, linewidth=1.7, label=base_label)
+            ax.plot(
+                x, y, color=color, linewidth=1.7, label=base_label,
+                marker="o", markersize=4, markerfacecolor=color,
+                markeredgecolor=color, markeredgewidth=1.0,
+            )
             ax.fill_between(
                 x, y - std, y + std,
                 color=color, alpha=0.12, linewidth=0,

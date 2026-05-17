@@ -565,12 +565,23 @@ def plot_response_curves(
                 # "all" variant; otherwise the per-filter legend would
                 # double up to 28 entries per subplot.
                 label = base_label if filt_key == "all" else None
+                # Markers so single-strength "curves" (= a cell with
+                # only one retained x) are visible (a lone line
+                # segment of length 0 renders to nothing without a
+                # marker).  Filled circles for the solid "all" line;
+                # hollow circles for the dashed "coh=0" line.
+                marker_face = color if filt_key == "all" else "none"
                 ax.plot(
                     x, ys_arr,
                     color=color,
                     linestyle=LINESTYLES[filt_key],
                     linewidth=1.6 if filt_key == "all" else 1.0,
                     alpha=0.95 if filt_key == "all" else 0.75,
+                    marker="o",
+                    markersize=4 if filt_key == "all" else 3,
+                    markerfacecolor=marker_face,
+                    markeredgecolor=color,
+                    markeredgewidth=1.0,
                     label=label,
                 )
         ax.axhline(0.0, color="black", linewidth=0.6, alpha=0.4)
@@ -676,10 +687,18 @@ def plot_response_curves(
     )
     # Top-right legend: filter linestyles.
     style_handles = [
-        plt.Line2D([0], [0], color="black",
-                   linestyle=LINESTYLES[k], linewidth=1.6 if k == "all" else 1.0,
-                   alpha=0.95 if k == "all" else 0.75,
-                   label=FILTER_LABEL[k])
+        plt.Line2D(
+            [0], [0], color="black",
+            linestyle=LINESTYLES[k],
+            linewidth=1.6 if k == "all" else 1.0,
+            alpha=0.95 if k == "all" else 0.75,
+            marker="o",
+            markersize=4 if k == "all" else 3,
+            markerfacecolor=("black" if k == "all" else "none"),
+            markeredgecolor="black",
+            markeredgewidth=1.0,
+            label=FILTER_LABEL[k],
+        )
         for k in FILTER_KEYS
     ]
     top_axes[1].legend(
