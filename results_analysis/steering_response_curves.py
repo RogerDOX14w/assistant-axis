@@ -219,7 +219,21 @@ def _load_swap_averaged(cell_dir: Path) -> Dict[Tuple[int, float], float]:
     return out
 
 
-def aggregate_cell_sign(cell_dir: Path) -> CellSign:
+#: Default display-time cutoff for the per-cell plot's x=0 anchor.
+#: Independent of the runner's ``skip_threshold`` (which is now 1.5):
+#: this filter is pure data analysis and lets you tighten the
+#: "coherent enough to show at the cliff" definition without rerunning
+#: the sweep.  A strength is dropped from the top-row eff panels if
+#: ``mean_coh_all >= COH_FILTER_THRESHOLD_DEFAULT``; it remains on the
+#: bottom-row coh/rp diagnostic panels (via ``extra_aggs``).
+COH_FILTER_THRESHOLD_DEFAULT: float = 1.0
+
+
+def aggregate_cell_sign(
+    cell_dir: Path,
+    *,
+    coh_filter_threshold: float = COH_FILTER_THRESHOLD_DEFAULT,
+) -> CellSign:
     """Read one ``s<slot>_l<layer>_<+1|-1>`` directory and group its
     records by strength, computing each of the four filter means.
 
@@ -343,21 +357,35 @@ def aggregate_cell_sign(cell_dir: Path) -> CellSign:
         )
         aggs.append(agg)
 
-    # Trim trailing strengths with no usable eff data (the runner's
-    # "above skip_threshold -- don't bother judging" tail).  Without
-    # this trim every cell's rightmost few data points would be a
-    # gap at x = 0, 1, ..., because the runner's coh-stop crossed
-    # mean_coh >= 1.0 and rp+effect judging was skipped at those
-    # strengths.  Defining x=0 as the last strength with usable
-    # eff data instead lets every (cell, sign) curve naturally
-    # reach x=0 on the right edge of the plot.
+    # Trim trailing strengths for the per-cell display.  Two reasons
+    # a strength gets trimmed off the top-row effect panels:
+    #
+    # 1. The runner skipped rp+effect judging at that strength
+    #    (``mean_eff_all is None``).  Pre-2026-05-17 this happened
+    #    at ``mean_coh > 1.0`` (runner's skip_threshold default);
+    #    post-2026-05-17 the runner default is 1.5, matching
+    #    coh_stop_threshold, so judging and stop-counting are
+    #    mutually exclusive.
+    #
+    # 2. ``mean_coh_all >= coh_filter_threshold`` for a display-time
+    #    filter that's INDEPENDENT of the runner's skip_threshold.
+    #    The runner now keeps judging up to its stop point; this
+    #    threshold lets the plot display a stricter "fully coherent"
+    #    cutoff without rerunning the sweep (cheap to change since
+    #    it's pure analysis).  Default 1.0 matches the historical
+    #    plot anchor; values up to ``DEFAULT_COH_STOP_THRESHOLD = 1.5``
+    #    show progressively more of the borderline zone.
     #
     # The trimmed strengths are NOT lost: they're stashed on
     # ``CellSign.extra_aggs`` (ascending magnitude) so the bottom-row
-    # coh/rp panels can show how mean_coh ramps PAST the eff-judged
-    # cliff before the sweep's coh-stop fires.
+    # coh/rp panels can show how mean_coh ramps PAST the display
+    # cutoff before the sweep's coh-stop fires.
     trimmed_tail: List[StrengthAgg] = []
-    while aggs and aggs[-1].mean_eff_all is None:
+    while aggs and (
+        aggs[-1].mean_eff_all is None
+        or (aggs[-1].mean_coh_all is not None
+            and aggs[-1].mean_coh_all >= coh_filter_threshold)
+    ):
         trimmed_tail.append(aggs.pop())
     # ``aggs.pop()`` returned strengths in descending magnitude;
     # reverse so ``extra_aggs[0]`` is the smallest-magnitude trimmed
@@ -380,7 +408,11 @@ def aggregate_cell_sign(cell_dir: Path) -> CellSign:
     )
 
 
-def gather_cells(experiment_dir: Path) -> List[CellSign]:
+def gather_cells(
+    experiment_dir: Path,
+    *,
+    coh_filter_threshold: float = COH_FILTER_THRESHOLD_DEFAULT,
+) -> List[CellSign]:
     """Find every ``s<slot>_l<layer>_<sign>`` subdir under
     ``experiment_dir`` and aggregate it.  Sorted by (slot, layer, sign)
     for stable legend ordering.
@@ -394,7 +426,7 @@ def gather_cells(experiment_dir: Path) -> List[CellSign]:
         if not (name.startswith("s") and "_l" in name and "_" in name[name.index("_l"):]):
             continue
         try:
-            cs = aggregate_cell_sign(d)
+            cs = aggregate_cell_sign(d, coh_filter_threshold=coh_filter_threshold)
         except (ValueError, IndexError) as e:
             logger.warning(f"skipping {d}: {e}")
             continue
@@ -411,16 +443,20 @@ def gather_cells(experiment_dir: Path) -> List[CellSign]:
 LINESTYLES = {
     "all":  "solid",
     "coh0": (0, (5, 2)),       # dashed
-    "rp3":  (0, (1, 2)),       # dotted
-    "both": (0, (3, 2, 1, 2)),  # dash-dot
 }
 
 FILTER_LABEL = {
     "all":  "(a) all",
     "coh0": "(b) coh=0",
-    "rp3":  "(c) rp=3",
-    "both": "(d) coh=0 & rp=3",
 }
+
+# RP-based filters c) ``rp=3`` and d) ``coh=0 & rp=3`` were dropped
+# 2026-05-17: they don't reflect normal use of steering (callers
+# don't filter by persona retention) and were just adding clutter to
+# the plots.  The underlying mean_eff_rp3 / mean_eff_coh0_rp3 fields
+# on StrengthAgg are still computed, in case future analysis wants
+# to bring them back.
+FILTER_KEYS = ("all", "coh0")
 
 
 def _x_steps_from_cliff(n_strengths: int) -> np.ndarray:
@@ -502,7 +538,7 @@ def plot_response_curves(
             x = _x_steps_from_cliff(len(cs.aggs))
             color = color_for_cell[(cs.slot, cs.layer)]
             base_label = f"s{cs.slot}_l{cs.layer}"
-            for filt_key in ("all", "coh0", "rp3", "both"):
+            for filt_key in FILTER_KEYS:
                 ys = [_filter_value(a, filt_key) for a in cs.aggs]
                 # Normalise so UP = response moved in the STEERED
                 # direction on both subplots.  The effect rubric's
@@ -644,7 +680,7 @@ def plot_response_curves(
                    linestyle=LINESTYLES[k], linewidth=1.6 if k == "all" else 1.0,
                    alpha=0.95 if k == "all" else 0.75,
                    label=FILTER_LABEL[k])
-        for k in ("all", "coh0", "rp3", "both")
+        for k in FILTER_KEYS
     ]
     top_axes[1].legend(
         handles=style_handles,
@@ -709,6 +745,19 @@ def _parse_args() -> argparse.Namespace:
                         "<experiment_dir>/response_curves.png")
     p.add_argument("--title", type=str, default=None,
                    help="Plot title (default: experiment_id).")
+    p.add_argument(
+        "--coh-filter-threshold", type=float,
+        default=COH_FILTER_THRESHOLD_DEFAULT,
+        help=f"Display-time mean_coh cutoff for the per-cell x=0 "
+             f"anchor (default {COH_FILTER_THRESHOLD_DEFAULT}).  A "
+             f"strength is trimmed from the top-row effect panels if "
+             f"its mean_coh is >= this value; trimmed strengths move "
+             f"to the bottom-row coh/rp diagnostic panels as "
+             f"past-cliff data.  Independent of the runner's "
+             f"skip_threshold (currently 1.5).  Useful for "
+             f"tightening the display to 'fully coherent' (e.g. "
+             f"0.5) without rerunning the sweep.",
+    )
     return p.parse_args()
 
 
@@ -722,7 +771,10 @@ def main() -> int:
         logger.error(f"missing: {args.experiment_dir}")
         return 2
 
-    cells = gather_cells(args.experiment_dir)
+    cells = gather_cells(
+        args.experiment_dir,
+        coh_filter_threshold=args.coh_filter_threshold,
+    )
     if not cells:
         logger.error(f"no cell subdirs found under {args.experiment_dir}")
         return 1

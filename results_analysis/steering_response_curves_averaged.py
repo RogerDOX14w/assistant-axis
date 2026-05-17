@@ -436,6 +436,14 @@ def _parse_args() -> argparse.Namespace:
     )
     p.add_argument("--output", "-o", type=Path, required=True)
     p.add_argument("--title", type=str, default="Averaged response curves")
+    p.add_argument(
+        "--coh-filter-threshold", type=float,
+        default=_per_axis.COH_FILTER_THRESHOLD_DEFAULT,
+        help=f"Display-time mean_coh cutoff (default "
+             f"{_per_axis.COH_FILTER_THRESHOLD_DEFAULT}); see the "
+             f"per-axis script for full semantics.  Independent of "
+             f"the runner's skip_threshold.",
+    )
     return p.parse_args()
 
 
@@ -451,7 +459,9 @@ def main() -> int:
         if not exp_dir.exists():
             logger.error(f"missing: {exp_dir}")
             return 2
-        cells = _per_axis.gather_cells(exp_dir)
+        cells = _per_axis.gather_cells(
+            exp_dir, coh_filter_threshold=args.coh_filter_threshold,
+        )
         if not cells:
             logger.warning(f"no cell subdirs found under {exp_dir}; skipping")
             continue

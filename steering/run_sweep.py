@@ -964,9 +964,13 @@ def main():
                              "matching response judging's near-equal "
                              "batches algorithm).")
     parser.add_argument("--skip-if-strength-mean-coh-above", type=float,
-                        default=1.0,
+                        default=1.5,
                         help="Skip RP/effect on a strength group whose mean "
-                             "coherence exceeds this value (default 1.0).")
+                             "coherence is at or above this value (default 1.5, "
+                             "matching coh_stop_threshold so judging and "
+                             "stop-counting are mutually exclusive).  Display-"
+                             "time filtering at a stricter threshold is done "
+                             "via the plot's --coh-filter-threshold.")
     parser.add_argument("--coh-stop-threshold", type=float, default=1.5,
                         help="Stop sweep early once K consecutive strengths "
                              "have mean coherence at or above this value "

@@ -759,7 +759,19 @@ Pinned to the canonical :data:`assistant_axis.judge_batch.RESPONSE_BATCH_SIZE`
 so the steering effect-judge score distribution is apples-to-apples
 with the axis-judge response-mode distribution at the same batch size.
 Bump that constant (not this one) to change both in lockstep."""
-DEFAULT_SKIP_THRESHOLD = 1.0
+# 2026-05-17: bumped from 1.0 to 1.5 to match coh_stop_threshold.
+# With the matching threshold + the ``>=`` comparison switch in
+# ``_judge_group_async``, a strength is judged iff its mean_coh is
+# STRICTLY below 1.5 (and otherwise counts toward the coh-stop
+# tail window).  Net effect: more strengths in the band
+# mean_coh in [1.0, 1.5) now get rp+effect judged (saves a
+# back-fill pass later), at the cost of some extra API calls on
+# partly-incoherent responses.  The cliff is sharp enough in
+# practice that this is a small bump.  Display-time filtering
+# at a stricter threshold (e.g. 1.0) is done in
+# ``results_analysis/steering_response_curves.py`` via the
+# separate ``coh_filter_threshold`` plot parameter.
+DEFAULT_SKIP_THRESHOLD = 1.5
 DEFAULT_COH_STOP_THRESHOLD = 1.5
 
 
@@ -1292,7 +1304,14 @@ class RealJudgeDispatcher:
             else:
                 eff_future = existing
 
-        if mean_coh > self.skip_threshold:
+        # NOTE (2026-05-17): comparison switched from strict ``>`` to
+        # ``>=`` so that with ``skip_threshold == coh_stop_threshold``
+        # the two predicates are mutually exclusive at the boundary:
+        # ``mean_coh == threshold`` triggers BOTH the skip path
+        # (don't waste API calls on incoherent strength) AND counts
+        # toward the coh-stop tail window (``_consecutive_above_coh_at_up_tail``
+        # uses ``v < threshold`` to break the streak, i.e. counts ``>=``).
+        if mean_coh >= self.skip_threshold:
             # Skip path: stamp skipped flags on all records, write back.
             for r in records:
                 if not self.skip_persona:

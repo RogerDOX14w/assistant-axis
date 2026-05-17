@@ -620,9 +620,11 @@ def main() -> None:
     p.add_argument("--skip-if-strength-mean-coh-above", type=float,
                    default=DEFAULT_SKIP_THRESHOLD,
                    help="Skip RP/effect on a strength group whose mean "
-                        "coh exceeds this value.  Default 1.0 matches the "
-                        "live sweep; raise to fill in the band of "
-                        "borderline-incoherent strengths retroactively.")
+                        "coh is at or above this value.  Default 1.5 matches "
+                        "coh_stop_threshold and the live sweep's default; "
+                        "raise (e.g. 2.0) to fill in the band of clearly-"
+                        "incoherent strengths retroactively, or lower to "
+                        "exclude the borderline band.")
     p.add_argument("--coh-stop-threshold", type=float,
                    default=DEFAULT_COH_STOP_THRESHOLD,
                    help="Used only when consulting should_stop_at; "
