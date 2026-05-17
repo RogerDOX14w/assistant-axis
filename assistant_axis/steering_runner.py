@@ -404,6 +404,54 @@ def _write_summary(summary_path: Path, summary: Dict[str, Any]) -> None:
                       logger_obj=logger)
 
 
+def _strength_records_complete(
+    recs: List[Dict[str, Any]],
+    expected_K: int,
+) -> bool:
+    """Return True iff a strength's records on disk are fully judged.
+
+    A "complete" strength has all ``expected_K`` questions generated
+    AND each record carries fully-resolved judges:
+
+    * ``coherence.score`` is non-None (coherence is the gating
+      dimension and is always judged, never skipped).
+    * ``persona.score`` is non-None OR
+      ``persona.skipped_due_to_strength_mean_coh`` is True.
+    * ``effect.combined`` is non-None OR
+      ``effect.skipped_due_to_strength_mean_coh`` is True.
+
+    Used by the bidirectional resume path to find kill-induced gaps
+    (partial generation OR judging-never-ran).  Mid-strength kills
+    can leave a record with ``judges = {"coherence": None, "persona":
+    None, "effect": None}`` (the empty placeholder filled in by
+    ``_generate_and_dispatch_strength`` after response generation but
+    before judging dispatches); those records flag the strength as
+    incomplete and the resume gap-fill regenerates them.
+    """
+    if len(recs) != expected_K:
+        return False
+    for r in recs:
+        j = r.get("judges")
+        if not isinstance(j, dict):
+            return False
+        coh = j.get("coherence")
+        if not isinstance(coh, dict) or coh.get("score") is None:
+            return False
+        persona = j.get("persona") or {}
+        if not isinstance(persona, dict):
+            return False
+        if (persona.get("score") is None
+                and not persona.get("skipped_due_to_strength_mean_coh")):
+            return False
+        effect = j.get("effect") or {}
+        if not isinstance(effect, dict):
+            return False
+        if (effect.get("combined") is None
+                and not effect.get("skipped_due_to_strength_mean_coh")):
+            return False
+    return True
+
+
 # ---------------------------------------------------------------------------
 # Baselines
 # ---------------------------------------------------------------------------
@@ -1232,10 +1280,13 @@ def _run_bidirectional_cell(
     # count toward DOWN eff-stop tail window.
     mean_abs_eff_by_strength: Dict[float, float] = {}
 
+    # ``seen_strengths`` is shared between Stage 1 (mean_coh / mean_abs_eff
+    # bootstrap), Stage 2 (cursor walk), and the post-s_init gap-fill
+    # below.  Empty dict when ``existing_records`` is empty (fresh run).
+    seen_strengths: Dict[float, List[Dict[str, Any]]] = {}
     if existing_records:
         # Stage 1: collect strengths + their stamped mean_coh from
         # records.jsonl so the tail-window checks have history to chew on.
-        seen_strengths: Dict[float, List[Dict[str, Any]]] = {}
         for rec in existing_records:
             s = float(rec.get("strength", 0.0))
             if s == 0.0:
@@ -1475,6 +1526,76 @@ def _run_bidirectional_cell(
     if s_init_progress and s_init_coh is not None:
         s_init_eff = dispatcher.judge_effect_for_strength_async(s_init_recs)
         s_init_pending.append((float(cursor.s_init), s_init_coh, s_init_eff))
+
+    # ------------------------------------------------------------------
+    # Resume gap-fill (2026-05-17): if a previous run was killed mid-
+    # strength, that strength's records on disk are PARTIAL -- some
+    # questions generated but not all 14, and judging never ran.  The
+    # cursor's Stage-2 walk above happily skipped past them (it only
+    # checks which strengths are present, not whether they're complete).
+    # Here we identify those incomplete strengths and re-emit them via
+    # _generate_and_dispatch_strength.  The function regenerates any
+    # missing (strength, q_idx) pairs and dispatches coh+rp+effect
+    # judging for the freshly-generated rows.
+    #
+    # For strengths where >=1 record exists but it doesn't make the
+    # completeness cut (judges=None, partial K, coh-judged but
+    # rp/effect missing without skip flag), we WIPE the existing
+    # partial records and regenerate from scratch.  This costs at
+    # most K generations per gap; acceptable given the alternative
+    # is silent interior gaps in every restarted cell's curve.
+    # ------------------------------------------------------------------
+    if existing_records:
+        K_questions = len(questions)
+        incomplete: List[float] = []
+        for s, recs in seen_strengths.items():
+            if abs(s - cursor.s_init) < 1e-6:
+                continue  # s_init was just refreshed by the call above
+            if not _strength_records_complete(recs, K_questions):
+                incomplete.append(s)
+        if incomplete:
+            logger.info(
+                f"[cell s{slot}_l{layer}_{sign:+d}] resume gap-fill: "
+                f"{len(incomplete)} incomplete strength(s) "
+                f"{sorted(abs(s) for s in incomplete)} -- regenerating"
+            )
+        for s in sorted(incomplete, key=abs):
+            # Wipe partial records (in-memory + disk via flush below)
+            existing_records[:] = [
+                r for r in existing_records
+                if abs(float(r.get("strength", 0.0)) - s) > 1e-6
+            ]
+            for q in range(K_questions):
+                done_pairs.discard((s, q))
+            # Clear stale stats; will be re-populated when the new
+            # future resolves via _reap_direction in the main loop.
+            mean_coh_by_strength.pop(s, None)
+            mean_abs_eff_by_strength.pop(s, None)
+            _flush_records()
+            # Regenerate + dispatch judging for all K questions
+            gp, gnew, gcoh = _generate_and_dispatch_strength(
+                strength=s, sign=sign,
+                model=model, tokenizer=tokenizer,
+                axis_vector=axis_vector, slot=slot, layer=layer,
+                questions=questions, conversations=conversations,
+                output_dir=output_dir, done_pairs=done_pairs,
+                existing_records=existing_records,
+                flush_records=_flush_records,
+                dispatcher=dispatcher,
+                batch_size=batch_size, max_new_tokens=max_new_tokens,
+                positions_mode=positions_mode,
+                do_sample=do_sample, temperature=temperature,
+                model_name=model_name,
+            )
+            if gp and gcoh is not None:
+                geff = dispatcher.judge_effect_for_strength_async(gnew)
+                if s > cursor.s_init:
+                    pending_up.append((float(s), gcoh, geff))
+                    # Stage 2's cursor walk already appended this
+                    # strength to up_strengths_in_order, so don't
+                    # double-add here.
+                else:
+                    pending_down.append((float(s), gcoh, geff))
 
     # ------------------------------------------------------------------
     # Main state-machine loop.  Alternate UP/DOWN while both open; only

@@ -162,29 +162,34 @@ def build_aligned_curve(
     """Convert a ``CellSign`` (from steering_response_curves.aggregate_cell_sign)
     into an ``AlignedCurve`` of length ``target_length``.
 
-    Strengths are sorted ascending by magnitude in ``cell_sign.aggs``;
-    the LAST entry corresponds to x=0 (highest |s| still coherent).  We
-    flip to put x=0 first, interpolate any interior gaps, then pad the
-    high-x tail with 0 out to ``target_length``.
+    Output array convention: ASCENDING |s| order, matching
+    ``cell_sign.aggs`` and the per-axis plot's ``cs.aggs`` ordering.
+    So index 0 = weakest |s| (highest x = leftmost on the plotted
+    inverted x-axis), index target_length-1 = cliff (x=0, rightmost
+    on the plot).  Cells with fewer retained strengths than
+    ``target_length`` (because their corrected stop predicate fired
+    closer to the cliff) get PADDED ON THE LEFT with 0: those padded
+    entries represent weaker strengths that the corrected predicate
+    would have excluded, and "no observed signal" maps to 0.
+
+    Interior gaps (rare; e.g. a partial-flush during a resumed sweep
+    leaves a missing strength mid-curve) are linearly interpolated
+    in rank space before padding.
     """
-    aggs = cell_sign.aggs  # sorted ascending magnitude
-    # eff oriented so positive = toward steered pole
+    aggs = cell_sign.aggs  # sorted ASCENDING magnitude
+    # eff oriented so positive = toward steered pole.
     eff_raw = [_signed_eff_for_plot(a, cell_sign.sign) for a in aggs]
-    # cliff at the right edge of aggs (= largest |s|).  We want x=0
-    # at the START of our output arrays for indexing simplicity; so
-    # reverse aggs before processing.
-    eff_rev = list(reversed(eff_raw))
-    coh_rev = [a.mean_coh_all for a in reversed(aggs)]
-    rp_rev = [
+    coh_raw = [a.mean_coh_all for a in aggs]
+    rp_raw = [
         (3.0 - a.mean_rp_all) if a.mean_rp_all is not None else None
-        for a in reversed(aggs)
+        for a in aggs
     ]
 
-    eff_interp = _interpolate_interior_gaps(eff_rev)
-    coh_interp = _interpolate_interior_gaps(coh_rev)
-    rp_interp = _interpolate_interior_gaps(rp_rev)
+    eff_interp = _interpolate_interior_gaps(eff_raw)
+    coh_interp = _interpolate_interior_gaps(coh_raw)
+    rp_interp = _interpolate_interior_gaps(rp_raw)
 
-    # Pad to target_length with 0 (effect) / NaN (coh, rp).  Effect
+    # Pad to target_length on the LEFT (weak-strength end).  Effect
     # padding follows the user's spec ("treat data missing because
     # it's off the low end as 0"); coh and rp padding stays NaN so
     # the diagnostic bottom row reflects "no data" rather than
@@ -192,16 +197,19 @@ def build_aligned_curve(
     # strengths.
     n = len(eff_interp)
     if n < target_length:
-        pad_eff = np.zeros(target_length - n, dtype=float)
-        pad_coh = np.full(target_length - n, np.nan, dtype=float)
-        pad_rp = np.full(target_length - n, np.nan, dtype=float)
-        eff_full = np.concatenate([eff_interp, pad_eff])
-        coh_full = np.concatenate([coh_interp, pad_coh])
-        rp_full = np.concatenate([rp_interp, pad_rp])
+        pad_n = target_length - n
+        pad_eff = np.zeros(pad_n, dtype=float)
+        pad_coh = np.full(pad_n, np.nan, dtype=float)
+        pad_rp = np.full(pad_n, np.nan, dtype=float)
+        eff_full = np.concatenate([pad_eff, eff_interp])
+        coh_full = np.concatenate([pad_coh, coh_interp])
+        rp_full = np.concatenate([pad_rp, rp_interp])
     else:
-        eff_full = eff_interp[:target_length]
-        coh_full = coh_interp[:target_length]
-        rp_full = rp_interp[:target_length]
+        # If n > target_length (shouldn't happen since we set
+        # target_length = max), keep the cliff-aligned right tail.
+        eff_full = eff_interp[n - target_length:]
+        coh_full = coh_interp[n - target_length:]
+        rp_full = rp_interp[n - target_length:]
 
     return AlignedCurve(
         axis_name=axis_name,
@@ -264,12 +272,14 @@ def average_across_axes(
     with np.errstate(invalid="ignore"):
         coh_mean = np.nanmean(coh_mat, axis=0)
         rp_mean = np.nanmean(rp_mat, axis=0)
-    # n_axes_at_x: how many axes had REAL (= non-padded) eff at each x.
-    # Used to label "thin coverage" regions of the curve where only a
-    # handful of axes contribute (the rest pad with 0).
+    # n_axes_at_x: how many axes had REAL (= non-padded) eff at each
+    # entry (index in ascending-|s| order, so right tail = near
+    # cliff).  Real data lives at the right end of the array; padded
+    # zeros on the left.  Used to label "thin coverage" regions where
+    # only a handful of axes contribute (the rest are padded 0s).
     n_axes_at_x = np.zeros(target_length, dtype=int)
     for a in aligned:
-        n_axes_at_x[: a.n_strengths] += 1
+        n_axes_at_x[target_length - a.n_strengths:] += 1
 
     return AveragedCellSign(
         slot=slot, layer=layer, sign=sign,

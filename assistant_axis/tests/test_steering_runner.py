@@ -981,7 +981,16 @@ class TestBidirectionalRestart:
                     "coherence": {"score": int(round(mean_coh)),
                                   "reason": "seed", "model": "seed",
                                   "ts": 0, "rubric_version": 1},
-                    "persona": None,
+                    # Persona must be a populated dict (post-2026-05-17
+                    # resume gap-fill needs persona.score or
+                    # skipped_due_to_strength_mean_coh to consider the
+                    # strength "complete" -- otherwise the gap-fill
+                    # treats it as a partial-flush victim and
+                    # regenerates).
+                    "persona": {"score": 3, "reason": "seed",
+                                "model": "seed", "ts": 0,
+                                "rubric_version": 1,
+                                "skipped_due_to_strength_mean_coh": False},
                     "effect": {
                         "combined": mean_abs_eff,
                         "mode": "bidirectional", "ts": 0,
@@ -1092,6 +1101,132 @@ class TestLegacyModeParity:
         summary = result.summary
         assert summary["scan_mode"] == "legacy_unidirectional"
         assert summary["positions_mode"] == "all"
+
+    def test_resume_gapfill_regenerates_partial_strength(
+        self, tmp_path, monkeypatch,
+    ):
+        """A kill mid-strength can leave a strength with < K records or
+        with judges=None on each record.  The 2026-05-17 resume
+        gap-fill must detect and regenerate those.
+        """
+        from assistant_axis.atomic_io import write_jsonl
+        monkeypatch.setenv("TMPDIR", str(tmp_path))
+        monkeypatch.setattr(steering_runner, "ActivationSteering",
+                            _FakeActivationSteering)
+        out_dir = tmp_path / "cell"
+        out_dir.mkdir()
+
+        # Schedule: mult=2, weakest=1, start_steps_up=1 -> s_init=2.
+        # Seed: s_init=2.0 fully-judged (complete), UP=4.0 with only ONE
+        # of two questions generated (partial-flush, judges=None),
+        # DOWN=1.0 with both questions but judges=None on each (judging
+        # never ran).  Resume gap-fill must regenerate 4.0 and 1.0;
+        # leave 2.0 alone.
+        questions = ["q0", "q1"]
+        sign = +1
+
+        def _complete_rec(s, qi):
+            return {
+                "strength": float(s), "sign": sign,
+                "slot": 0, "layer": 26, "question_idx": qi,
+                "question": questions[qi],
+                "response": "seed_complete",
+                "n_tokens": 1,
+                "judges": {
+                    "coherence": {"score": 0, "reason": "seed",
+                                  "model": "seed", "ts": 0,
+                                  "rubric_version": 1},
+                    "persona": {"score": 3, "reason": "seed",
+                                "model": "seed", "ts": 0,
+                                "rubric_version": 1,
+                                "skipped_due_to_strength_mean_coh": False},
+                    "effect": {"combined": 0.5, "mode": "bidirectional",
+                               "ts": 0, "rubric_version": 1,
+                               "skipped_due_to_strength_mean_coh": False},
+                    "strength_mean_coh": 0.0,
+                },
+                "timing": {"gen_s": 0.0},
+                "abandoned": False,
+            }
+
+        def _unjudged_rec(s, qi):
+            return {
+                "strength": float(s), "sign": sign,
+                "slot": 0, "layer": 26, "question_idx": qi,
+                "question": questions[qi],
+                "response": "seed_partial",
+                "n_tokens": 1,
+                "judges": None,  # killed before judging dispatched
+                "timing": {"gen_s": 0.0},
+                "abandoned": False,
+            }
+
+        seed = [
+            _complete_rec(2.0, 0), _complete_rec(2.0, 1),    # full
+            _unjudged_rec(4.0, 0),                            # partial: only 1/2
+            _unjudged_rec(1.0, 0), _unjudged_rec(1.0, 1),     # 2/2 but unjudged
+        ]
+        write_jsonl(seed, out_dir / "records.jsonl")
+
+        d = _BidirStubDispatcher()
+        # Configure dispatcher to return non-blocking eff for 4.0 and 1.0
+        # so the regenerated strengths don't trigger stop conditions.
+        for s in (4.0, 1.0, 8.0, 0.5, 0.25, 0.125, 0.0625):
+            d.set(s, mean_coh=0.0, mean_abs_eff=0.5)
+
+        steering_runner.run_steering_cell(
+            _FakeModel(8), _FakeTokenizer(),
+            axis_vector=torch.zeros(8, dtype=torch.bfloat16),
+            slot=0, layer=26, sign=sign,
+            persona_system_prompt="hist",
+            questions=questions,
+            output_dir=out_dir,
+            batch_size=2, max_new_tokens=4,
+            positions_mode="all",
+            judge_dispatcher=d,
+            coh_stop_threshold=1.5, coh_stop_consecutive=2,
+            eff_stop_threshold=0.25, eff_stop_consecutive=2,
+            weakest_strength=1.0, max_strength=8.0,
+            min_strength=0.0625, multiplier=2.0,
+            start_strength_multiplier_steps=1,
+            scan_mode="bidirectional",
+        )
+
+        # Gap-fill should have re-dispatched judging on 4.0 (partial)
+        # and 1.0 (unjudged).  s_init=2.0 is fully complete, must NOT
+        # be re-dispatched.
+        gen_strengths = sorted(d.coh_dispatched_for)
+        assert 4.0 in gen_strengths, (
+            f"partial strength 4.0 should have been regenerated; "
+            f"got {gen_strengths}"
+        )
+        assert 1.0 in gen_strengths, (
+            f"unjudged strength 1.0 should have been regenerated; "
+            f"got {gen_strengths}"
+        )
+        assert 2.0 not in gen_strengths, (
+            f"complete strength 2.0 should NOT be regenerated; "
+            f"got {gen_strengths}"
+        )
+
+        # Disk state: all records at 4.0 and 1.0 should now have
+        # judges populated (the regen path generates K records and
+        # dispatches judging via the stub).
+        records = [
+            json.loads(line) for line
+            in (out_dir / "records.jsonl").read_text().splitlines()
+            if line.strip()
+        ]
+        for r in records:
+            if float(r["strength"]) in (4.0, 1.0):
+                # Either fully judged or in-flight; for this stub
+                # dispatcher the writeback is synchronous so judges
+                # should be a dict.
+                j = r.get("judges")
+                assert isinstance(j, dict), (
+                    f"regenerated record at {r['strength']} still has "
+                    f"judges={j}"
+                )
 
     def test_legacy_requires_strengths(self, tmp_path, monkeypatch):
         """Legacy mode without `strengths` is an explicit error -- the
