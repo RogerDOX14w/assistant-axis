@@ -45,7 +45,11 @@ from .atomic_io import (
     atomic_write_text, read_jsonl_with_retry, read_text_with_retry, write_jsonl,
 )
 from .steering import ActivationSteering
-from .steering_judges import JudgeDispatcher, NoOpJudgeDispatcher
+from .steering_judges import (
+    DEFAULT_SKIP_THRESHOLD,
+    JudgeDispatcher,
+    NoOpJudgeDispatcher,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -407,6 +411,8 @@ def _write_summary(summary_path: Path, summary: Dict[str, Any]) -> None:
 def _strength_records_complete(
     recs: List[Dict[str, Any]],
     expected_K: int,
+    *,
+    skip_threshold: float = 1.5,
 ) -> bool:
     """Return True iff a strength's records on disk are fully judged.
 
@@ -416,9 +422,19 @@ def _strength_records_complete(
     * ``coherence.score`` is non-None (coherence is the gating
       dimension and is always judged, never skipped).
     * ``persona.score`` is non-None OR
-      ``persona.skipped_due_to_strength_mean_coh`` is True.
-    * ``effect.combined`` is non-None OR
-      ``effect.skipped_due_to_strength_mean_coh`` is True.
+      (``persona.skipped_due_to_strength_mean_coh`` is True AND
+      the stamped ``strength_mean_coh >= skip_threshold``).
+    * ``effect.combined`` is non-None OR (same skipped-condition for
+      effect).
+
+    The ``skip_threshold`` check is what lets the resume gap-fill
+    detect "previously skipped under the OLD skip_threshold but
+    should have been judged under the current threshold" -- e.g.
+    pre-2026-05-17 sweeps skipped rp+effect at ``mean_coh > 1.0``;
+    after the runtime bump to 1.5 a back-fill restart should
+    re-judge strengths whose ``strength_mean_coh`` lands in the
+    band ``[1.0, 1.5)``.  The completeness check flags those as
+    incomplete so the gap-fill regenerates + re-dispatches.
 
     Used by the bidirectional resume path to find kill-induced gaps
     (partial generation OR judging-never-ran).  Mid-strength kills
@@ -437,18 +453,40 @@ def _strength_records_complete(
         coh = j.get("coherence")
         if not isinstance(coh, dict) or coh.get("score") is None:
             return False
+        # Pull the strength's recorded mean coh (stamped by the
+        # coherence-future writeback).  Used to decide whether the
+        # "skipped" flag was correctly set under the CURRENT
+        # skip_threshold or whether the strength should be re-judged.
+        smc = j.get("strength_mean_coh")
+        try:
+            smc_f = float(smc) if smc is not None else None
+        except (TypeError, ValueError):
+            smc_f = None
+
         persona = j.get("persona") or {}
         if not isinstance(persona, dict):
             return False
-        if (persona.get("score") is None
-                and not persona.get("skipped_due_to_strength_mean_coh")):
-            return False
+        if persona.get("score") is None:
+            # Either skipped or judging failed.  Must be explicitly
+            # skipped AND the mean_coh stamp must justify skipping
+            # under the current threshold.
+            if not persona.get("skipped_due_to_strength_mean_coh"):
+                return False
+            if smc_f is None or smc_f < skip_threshold:
+                # Stamp says this strength SHOULD be judged under
+                # the current threshold; was skipped under an older
+                # (lower) threshold.  Treat as incomplete so the
+                # gap-fill regenerates + rejudges.
+                return False
+
         effect = j.get("effect") or {}
         if not isinstance(effect, dict):
             return False
-        if (effect.get("combined") is None
-                and not effect.get("skipped_due_to_strength_mean_coh")):
-            return False
+        if effect.get("combined") is None:
+            if not effect.get("skipped_due_to_strength_mean_coh"):
+                return False
+            if smc_f is None or smc_f < skip_threshold:
+                return False
     return True
 
 
@@ -698,9 +736,14 @@ def run_steering_cell(
             if s == 0.0:
                 continue
             pre_skip_by_s.setdefault(s, []).append(rec)
+        _eff_skip_threshold = getattr(
+            dispatcher, "skip_threshold", DEFAULT_SKIP_THRESHOLD,
+        )
         pre_skip_incomplete = [
             s for s, recs in pre_skip_by_s.items()
-            if not _strength_records_complete(recs, K_questions)
+            if not _strength_records_complete(
+                recs, K_questions, skip_threshold=_eff_skip_threshold,
+            )
         ]
         if pre_skip_incomplete:
             logger.info(
@@ -1580,7 +1623,12 @@ def _run_bidirectional_cell(
         for s, recs in seen_strengths.items():
             if abs(s - cursor.s_init) < 1e-6:
                 continue  # s_init was just refreshed by the call above
-            if not _strength_records_complete(recs, K_questions):
+            if not _strength_records_complete(
+                recs, K_questions,
+                skip_threshold=getattr(
+                    dispatcher, "skip_threshold", DEFAULT_SKIP_THRESHOLD,
+                ),
+            ):
                 incomplete.append(s)
         if incomplete:
             logger.info(
