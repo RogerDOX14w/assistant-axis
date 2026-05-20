@@ -6,6 +6,86 @@ This document describes Roger's working style, communication preferences, and co
 
 ---
 
+## Expensive Operations — Confirm Parameters First (HARD RULE)
+
+**Whenever you are about to start an operation that will incur any
+of the following, STOP, double-check every parameter, and SURFACE
+any uncertainty or any not-currently-standard setting to Roger
+before launching:**
+
+- More than **$20** in cumulative judging / API spend (OpenAI,
+  Anthropic, etc.), across any number of axes or runs in that
+  invocation.
+- More than **13 GPU-hours** of total compute on the RunPod (or any
+  remote GPU host).  At Qwen-3-32B's typical 4-GPU sweep pace this is
+  roughly 3-4 hours of wallclock; bigger compute-on-Mac jobs count
+  toward the spirit of this rule too.
+- Any other action with a real-world cost greater than **$20** —
+  storage, network egress, third-party APIs, etc.
+
+**What "surface" means**:
+
+1. Re-read the *current* defaults in the relevant CLI flag's
+   `--help` text and in this AGENT_NOTES (look for any "(May 2026)"
+   / "(updated 2026-…)" / "**holds**" / "(default …)" markers
+   indicating where the canonical setting lives).  Don't copy from
+   older orchestration scripts or older runs without first
+   checking they're still canonical.  Defaults change.
+2. Quote each non-default or potentially-questionable parameter
+   back to Roger in your reply, in the form
+   "`--<flag> <value>` (default: `<default>`; chose `<value>` because
+   `<reason>`)".
+3. **Wait for explicit confirmation** before launching.  "Looks
+   good", "go ahead", "fine", or any equivalent counts; ambiguity
+   ("OK") does not.  Recent prior approval of a similar but
+   *not-the-same* run does not transfer — re-confirm for each
+   expensive launch.
+
+**Why this rule exists**: on 2026-05-20 the agent kicked off a
+~$985 response-judging run for 10 axes at `B=10` because it copied
+the `scripts/rejudge_after_rubric_v2.sh` recipe without checking
+the AGENT_NOTES "Judging cost model" section that flagged the May
+2026 default switch to **B=7**.  ~$364 was sunk before the mistake
+was caught.  The cost difference between B=10 and B=7 is small
+(~$30 across 10 axes), but the principle generalises: for anything
+expensive, the few minutes of confirmation are worth far more than
+the value of the API tokens.
+
+**Recent / explicit requests still apply**: if Roger has just said
+"do the canonical run at B=10" in the immediately-prior message,
+proceed without a second confirmation cycle.  This rule only
+triggers when the parameter choice is ambiguous, inherited from
+older context, or differs from the documented current default.
+
+---
+
+## File Access Boundary (HARD RULE)
+
+**You may read, write, search, or otherwise touch files only within
+`/Users/roger/Documents/GitHub/`.**  There should never be a need to
+go outside this tree for any task in this project.  If you believe
+you need to, **stop and ask Roger first** with a specific request
+naming the exact path(s) you want access to and why; proceed only
+after he grants explicit permission for that specific access.
+
+This applies to all forms of access: `Read`, `Write`, `StrReplace`,
+`Grep`, `Glob`, `find`, `cat`, `ls`, `rg`, shell redirection, and any
+remote tools (mirroring or fetching files from this Mac to other
+machines counts as access from this side).  Read-only access is
+NOT exempt — `/Users/roger/Documents/` outside `GitHub/` and
+everything in `/Users/roger/` (other than `GitHub/`) is off-limits
+without explicit per-task permission.
+
+Remote machines (e.g. RunPod) are a separate scope; this rule
+governs the local filesystem only.
+
+The Cursor terminals folder (`/Users/roger/.cursor/projects/.../terminals/`)
+and agent-tools folder are tool infrastructure that Cursor itself
+populates, and are expected reads — those are exempt by design (and
+are written by Cursor, not by you).
+
+---
+
 ## Communication Style
 
 ### Concise and Technical

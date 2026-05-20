@@ -32,7 +32,7 @@ cells:
 sweep:
   # scan_mode defaults to "bidirectional" (May 2026 default)
   weakest_strength: 1.0
-  max_strength: 16.0
+  max_strength: 128.0
   multiplier: 1.189
   signs: [+1, -1]
 
