@@ -187,8 +187,14 @@ def test_haiku_all_entities_in_b7(axis_root):
 
 
 def test_haiku_all_entities_in_b10(axis_root):
-    """Axis where 5d was skipped (or `_b7_t3` doesn't exist yet):
-    only `_b10_q9` registered."""
+    """Legacy axis case (explicit prefer_b=(7, 10)): an axis where 5d
+    was skipped (or ``_b7_t3`` doesn't exist yet) so only
+    ``_b10_q9`` is on disk.
+
+    Note: As of 2026-05-21 the *default* Haiku ``prefer_b`` is
+    ``(7,)``, so this test must opt in to the legacy fallback chain
+    to find the b10-only data.
+    """
     axis = "egalitarian_vs_elitist"
     payload_b10 = {
         "patient": _make_score_entry(0.5),
@@ -202,7 +208,7 @@ def test_haiku_all_entities_in_b10(axis_root):
     inputs: list[InputSpec] = []
     scores, sources = load_response_scores(
         axis, "roles", "haiku", "v2",
-        experiments_root=axis_root, inputs=inputs,
+        experiments_root=axis_root, prefer_b=(7, 10), inputs=inputs,
     )
 
     assert set(scores) == {"patient", "stoic"}
@@ -216,9 +222,15 @@ def test_haiku_all_entities_in_b10(axis_root):
 
 
 def test_haiku_mixed_b7_and_b10(axis_root):
-    """The realistic case: 9 collisions + ~20 escalated entities
-    resolve to `_b7_t3`, the rest to `_b10_q9`.  Both cohorts
-    registered."""
+    """Legacy mixed-cohort case (explicit prefer_b=(7, 10)): the
+    intermediate Haiku state where 9 collisions + ~20 escalated
+    entities resolved to ``_b7_t3``, and the rest came from the
+    surrounding ``_b10_q9`` cohort.  Both cohorts registered.
+
+    Note: As of 2026-05-21 the *default* Haiku ``prefer_b`` is
+    ``(7,)`` (q9 obsolete), so this test must opt in to the legacy
+    fallback chain explicitly.
+    """
     axis = "concise_vs_verbose"
     payload_b7 = {
         "patient": _make_score_entry(0.5),  # collision name, in b7
@@ -244,7 +256,7 @@ def test_haiku_mixed_b7_and_b10(axis_root):
     inputs: list[InputSpec] = []
     scores, sources = load_response_scores(
         axis, "roles", "haiku", "v2",
-        experiments_root=axis_root, inputs=inputs,
+        experiments_root=axis_root, prefer_b=(7, 10), inputs=inputs,
     )
 
     assert set(scores) == {"patient", "stoic", "teacher", "doctor"}
@@ -269,10 +281,15 @@ def test_haiku_mixed_b7_and_b10(axis_root):
 
 
 def test_haiku_b7_covers_everything_b10_has_no_unique_entities(axis_root):
-    """Subtle case: `_b7_t3` covers every entity also present in
-    `_b10_q9` -- `_b10_q9` was *opened* but contributed nothing to
-    the result.  Must NOT be registered (otherwise the whole
-    conditional-provenance contract is broken).
+    """Subtle case (explicit prefer_b=(7, 10)): ``_b7_t3`` covers
+    every entity also present in ``_b10_q9`` -- ``_b10_q9`` was
+    *opened* but contributed nothing to the result.  Must NOT be
+    registered (otherwise the whole conditional-provenance contract is
+    broken).
+
+    Note: As of 2026-05-21 the *default* Haiku ``prefer_b`` is
+    ``(7,)``; this test opts in to the legacy fallback chain to
+    exercise the conditional-provenance code path.
     """
     axis = "concise_vs_verbose"
     payload_b7 = {
@@ -298,7 +315,7 @@ def test_haiku_b7_covers_everything_b10_has_no_unique_entities(axis_root):
     inputs: list[InputSpec] = []
     scores, sources = load_response_scores(
         axis, "roles", "haiku", "v2",
-        experiments_root=axis_root, inputs=inputs,
+        experiments_root=axis_root, prefer_b=(7, 10), inputs=inputs,
     )
 
     # b7 wins the value race.
@@ -371,6 +388,46 @@ def test_gpt_v2_default_prefer_b_is_b7_only(axis_root):
     assert scores["patient"]["mean_score"] == 0.5
     dep_keys = {spec.dep_key for spec in inputs}
     assert dep_keys == {"gpt_responses_roles_b7_v2"}
+
+
+def test_haiku_v2_default_prefer_b_is_b7_only(axis_root):
+    """As of 2026-05-21, the default Haiku ``prefer_b`` was reduced
+    from ``(7, 10)`` to ``(7,)`` -- the ``_b10_q9`` cohort is
+    obsolete (tiered ``_b7_t3`` auto-escalates to cover what q9 used
+    to backfill).  Confirm the loader does NOT fall back to b10 by
+    default.
+    """
+    axis = "concise_vs_verbose"
+    _write_cohort(
+        axis_root, axis, "haiku_responses_roles_b7_t3",
+        "scores_responses.json",
+        {"patient": _make_score_entry(0.5)},
+    )
+    # A sibling _b10_q9 dir exists on disk (legacy cache). The default
+    # prefer_b for ("haiku", "v2") is (7,) since 2026-05-21 -- the
+    # loader must NOT register or read from it.
+    _write_cohort(
+        axis_root, axis, "haiku_responses_roles_b10_q9",
+        "scores_responses.json",
+        {"patient": _make_score_entry(-99.0), "ghost": _make_score_entry(-99.0)},
+    )
+
+    inputs: list[InputSpec] = []
+    scores, sources = load_response_scores(
+        axis, "roles", "haiku", "v2",
+        experiments_root=axis_root, inputs=inputs,
+    )
+
+    assert set(scores) == {"patient"}, (
+        f"Haiku v2 default must read only b7; got entities {set(scores)}"
+    )
+    assert scores["patient"]["mean_score"] == 0.5
+    assert sources["patient"] == "haiku_responses_roles_b7_t3"
+    dep_keys = {spec.dep_key for spec in inputs}
+    assert dep_keys == {"haiku_responses_roles_b7_t3_v2"}, (
+        f"Legacy _b10_q9 cohort must not be registered under the "
+        f"default prefer_b. Got dep_keys={dep_keys}"
+    )
 
 
 def test_gpt_v1_default_reads_b10(axis_root):

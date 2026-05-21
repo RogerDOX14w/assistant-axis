@@ -745,12 +745,46 @@ def run_steering_cell(
                 recs, K_questions, skip_threshold=_eff_skip_threshold,
             )
         ]
+        # 2026-05-21: cap-extension fall-through.  If the cell previously
+        # stopped because it hit the *configured* max_strength (UP cap)
+        # rather than the physical coherence cliff, and the caller has
+        # now raised the cap, fall through and let the bidirectional
+        # state machine extend the UP-walk past the old cap.  Existing
+        # records are preserved (done_pairs gates regeneration), so
+        # only the new strengths (> old cap) get generated and judged.
+        # Same for the DOWN side if min_strength was lowered.
+        old_max = float(existing_summary.get("max_strength", max_strength))
+        old_min = float(existing_summary.get("min_strength", min_strength))
+        up_reason = existing_summary.get("up_blocked_reason")
+        down_reason = existing_summary.get("down_blocked_reason")
+        cap_extend_up = (
+            up_reason == "max_strength_reached"
+            and max_strength > old_max * (1.0 + 1e-9)
+        )
+        cap_extend_down = (
+            down_reason == "min_strength_reached"
+            and min_strength < old_min * (1.0 - 1e-9)
+        )
+
         if pre_skip_incomplete:
             logger.info(
                 f"[cell s{slot}_l{layer}_{sign:+d}] resume: summary exists but "
                 f"{len(pre_skip_incomplete)} strength(s) incomplete "
                 f"{sorted(round(abs(s), 4) for s in pre_skip_incomplete)} -- "
                 f"falling through to gap-fill"
+            )
+        elif cap_extend_up or cap_extend_down:
+            parts = []
+            if cap_extend_up:
+                parts.append(f"UP cap {old_max} -> {max_strength}")
+            if cap_extend_down:
+                parts.append(f"DOWN floor {old_min} -> {min_strength}")
+            logger.info(
+                f"[cell s{slot}_l{layer}_{sign:+d}] resume: previously stopped "
+                f"at config cap ({', '.join(parts)}); falling through to "
+                f"extend bidirectional walk past prior cap.  Existing records "
+                f"preserved; only new strengths beyond the old cap will be "
+                f"generated and judged."
             )
         else:
             logger.info(

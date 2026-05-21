@@ -3165,6 +3165,22 @@ snapshots).
 
 ### Tiered question subsampling for response judging (default May 2026)
 
+> **2026-05-21 status update — tiered t3 is canonical; uniform q9 is OBSOLETE.**
+>
+> Empirically, the tiered cohort auto-escalates (tier 1 → tier 2 → tier 3
+> per-entity) until every persona has enough graded items, which
+> typically yields coverage equivalent to the old uniform `_b10_q9`
+> cohort. Running both is roughly twice the cost for little marginal
+> coverage. **Use `_b7_t3` (tiered) for all new Haiku judging.** The
+> default Haiku `prefer_b` in `assistant_axis.judge_loaders` was reduced
+> from `(7, 10)` to `(7,)` on 2026-05-21; legacy `_b10_q9` Haiku caches
+> on disk are still readable via explicit `prefer_b=(7, 10)` but are no
+> longer written. Note that the **fresh** t3 cost is ~10× higher than
+> the historical surgical-refresh number documented elsewhere (because
+> a from-scratch run pays the full tier-1/2/3 escalation cost for every
+> entity, rather than topping up an already-q9-covered axis): plan on
+> ~$27/cohort, ~$54/axis (roles+traits) for fresh Haiku t3 runs.
+
 `results_analysis.axis_judge_correlation --score_responses` now defaults
 to **per-entity tiered subsampling** instead of "judge every response".
 Three tiers, indexed by the dense response-pipeline `q_idx % M` (default
@@ -3191,9 +3207,11 @@ worst case ~2× the t1→t2 threshold ≈ 165).
 **Knobs**:
 
 * `--no_subsample` -- restore the pre-tiered default (judge everything).
-* `--question_subsample_modulo N` (`>0`) -- legacy uniform mode (every
-  entity filtered identically by `orig_id % N == 0`); keep using this
-  when comparing aggregate ρ against historic q9 runs.
+* `--question_subsample_modulo N` (`>0`) -- **OBSOLETE as of 2026-05-21**
+  for new Haiku runs; kept only for historic q9 reproduction. Uniform
+  mode filters every entity identically by `orig_id % N == 0` (no
+  RP-aware escalation). Sonnet's frozen `_b10_q9` cohort still uses
+  this; do not write new q9 Haiku cohorts.
 * `--tiered_modulo_per_chunk M` -- tier chunking granularity (default 3).
 
 **Why q_idx, not orig_id**: the response pipeline uses `orig_id = 3 *
@@ -3424,8 +3442,10 @@ are kind-pure by directory — bare names there remain correct.  Same for
 
 ### `assistant_axis.judge_loaders.load_response_scores`
 
-The canonical reader for response-mode scores.  Per-entity B fallback
-for Haiku (`_b7_t3` preferred, `_b10_q9` fallback) with
+The canonical reader for response-mode scores.  Default Haiku
+`prefer_b = (7,)` since 2026-05-21 — reads only the tiered `_b7_t3`
+cohort.  Pass `prefer_b=(7, 10)` explicitly to opt in to the legacy
+`_b10_q9` fallback (e.g. for axes that pre-date 5d).  Uses
 **conditional provenance**: only registers a cohort file as a
 dependency if it actually contributed at least one entity to the
 returned result.  See the module docstring for the suffix conventions
@@ -3551,6 +3571,57 @@ The B=15 → B=5 cost spread is only **1.18×** ($47.30 → $55.69), not
 for +0.004 ρ uplift (~$7 per +0.01 ρ — the best step on the new
 curve).  See
 [`./roger/axis_judge_experiments/batch_size_curve_8slot/batch_size_cost_vs_quality.png`](./roger/axis_judge_experiments/batch_size_curve_8slot/batch_size_cost_vs_quality.png).
+
+### Steering effect-judge B post-mortem (2026-05-21)
+
+**Stale-local-default bug.**  The library-level canonical constant
+`assistant_axis.judge_batch.RESPONSE_BATCH_SIZE = 7` and the steering
+re-export `assistant_axis.steering_judges.DEFAULT_TARGET_BATCH_SIZE`
+(pinned to that constant) were correctly updated to **B=7** on
+2026-05-11.  However, `steering/run_sweep.py` had its own *local*
+argparse default `--target-batch-size = 10` that silently overrode
+the canonical value when launching multi-cell sweeps.  As a result,
+the `multi_cell_batch_v1` (all-mode, 2026-05-18) and
+`multi_cell_batch_v1_prefill` (2026-05-19/20) sweeps both ran their
+live effect/coh/rp judging at **B=10**, not the canonical B=7.
+
+The error was caught on 2026-05-21 when prepping a `max_strength=128`
+fill-in sweep.  Records from the two prior multi_cell sweeps remain
+on disk at B=10 and are left as-is; the fill-in past the old cap was
+run at the canonical B=7 (Plan A: only new strengths beyond the old
+`max_strength=16` cap were generated, so most cohorts have a
+B=10/B=7 split at the s ≈ 16 transition; cells that stopped at the
+coherence cliff before reaching the old cap remain pure B=10).
+
+**Fixes applied 2026-05-21:**
+
+- `steering/run_sweep.py`: argparse default for `--target-batch-size`
+  changed `10 → 7` with a HARD-RULE-aligned warning in the help text
+  ("the previous value of 10 is OBSOLETE and was the source of a
+  several-hundred-dollar mis-judging incident; do not revert without
+  explicit user approval").
+- `assistant_axis/steering_runner.py`: early-skip path in
+  `run_steering_cell` now distinguishes `up_blocked_reason ==
+  "max_strength_reached"` (fall through to extend the UP-walk when
+  the caller has raised `max_strength`) from
+  `up_blocked_reason == "incoherent"` (skip as before).  Existing
+  records are preserved end-to-end via the `done_pairs` gate at
+  `steering_runner.py:981, 1189`; only new `(strength, q_idx)`
+  pairs beyond the old cap are generated and judged.  Symmetric
+  handling on the DOWN side if `min_strength` is ever lowered.
+- `assistant_axis/tests/test_steering_runner.py`: two new tests
+  (`test_skip_when_previous_cap_below_new_max_strength_with_incoherent_stop`
+  and `test_cap_extension_fallthrough_when_previously_capped`) pin
+  both branches of the early-skip decision so the cap-extension
+  semantics can't regress.
+
+**Pattern to watch for.**  When a project-wide canonical constant
+is changed (here `RESPONSE_BATCH_SIZE`), grep all argparse
+`default=…` values that name the same parameter and verify they
+pin to the constant rather than hard-code a literal.  Local
+argparse defaults that hard-code a number are silent stale-value
+traps: they don't error, they just quietly do the wrong thing in
+production.
 
 ### Static-mode cost model (descriptions + instructions)
 

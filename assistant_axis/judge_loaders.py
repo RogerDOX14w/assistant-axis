@@ -25,12 +25,29 @@ Suffix conventions for cohort directories
 * ``(no suffix)`` — full volume (every score==3 item judged).  GPT
   default after Phase 4b.
 * ``_q<N>`` — uniform ``--question_subsample_modulo N``.  Used by the
-  legacy ``_b10_q9`` Haiku/Sonnet cohorts.  Going forward we don't
-  write new ``_q<N>`` directories.
+  legacy ``_b10_q9`` Haiku and frozen Sonnet cohorts.  Going forward we
+  don't write new ``_q<N>`` directories for Haiku (see 2026-05-21 note
+  below); Sonnet ``_b10_q9`` is the still-canonical frozen cohort.
 * ``_t<M>`` — tiered subsampling at ``--tiered_modulo_per_chunk M``.
   Used by the new Haiku ``_b7_t3`` cohorts and any future tiered
   Haiku/Sonnet runs.  The per-entity tier (1/2/3) is auto-detected at
   run time; it's recorded inside the cache, not in the directory name.
+
+**2026-05-21 status of Haiku cohorts**
+
+The Haiku ``_b10_q9`` cohort is OBSOLETE.  Its purpose was to serve as
+a uniform-sample fallback alongside the tiered ``_b7_t3`` cohort, but
+in practice the tiered cohort auto-escalates (tier 1 → tier 2 → tier 3
+per-entity) until every persona has enough graded items, which
+typically yields ~q9-equivalent coverage anyway.  Running both
+cohorts is therefore mostly redundant: roughly twice the cost for
+little marginal coverage.
+
+The default ``_DEFAULT_PREFER_B`` for ``("haiku", *)`` was reduced to
+``(7,)`` only on 2026-05-21.  Existing ``_b10_q9`` Haiku caches on
+disk are not read by default; pass ``prefer_b=(7, 10)`` if you need
+to re-enable the legacy fallback.  No new ``_b10_q9`` Haiku cohorts
+should be written.
 
 Conditional-provenance contract
 ================================
@@ -138,15 +155,19 @@ DEFAULT_EXPERIMENTS_ROOT: Path = Path("roger/axis_judge_experiments")
 #   deferred and explicitly NOT in the default fallback chain).
 # * GPT v1: B=10 reference (B=15/10/7/5 all exist for the B-curve, but
 #   the canonical reference is B=10).
-# * Haiku v1/v2: prefer the new B=7 tiered surgical cohort, fall back to
-#   the legacy B=10 q9 cohort for entities that weren't surgically
-#   re-judged.
+# * Haiku v1/v2: only B=7 t3 (the tiered surgical cohort).  The legacy
+#   B=10 q9 cohort is **obsolete as of 2026-05-21** -- the tiered cohort
+#   auto-escalates from tier 1 (1/3 modulo) to tier 2 (2/3) or tier 3
+#   (full) per-entity when RP-filtering leaves too few items, so q9
+#   adds little marginal coverage.  Existing _b10_q9 caches on disk
+#   are NOT read by default; pass prefer_b=(7, 10) explicitly if you
+#   need the legacy fallback chain.
 # * Sonnet: frozen at B=10 q9, no rejudging.
 _DEFAULT_PREFER_B: dict[tuple[str, str], tuple[int, ...]] = {
     ("gpt", "v2"):    (7,),
     ("gpt", "v1"):    (10,),
-    ("haiku", "v2"):  (7, 10),
-    ("haiku", "v1"):  (7, 10),
+    ("haiku", "v2"):  (7,),         # 2026-05-21: q9 fallback dropped (obsolete)
+    ("haiku", "v1"):  (7,),         # 2026-05-21: q9 fallback dropped (obsolete)
     ("sonnet", "v2"): (10,),
     ("sonnet", "v1"): (10,),
 }
@@ -157,13 +178,18 @@ _DEFAULT_PREFER_B: dict[tuple[str, str], tuple[int, ...]] = {
 # and the legacy B=10 dir is also no-suffix); Haiku/Sonnet use the
 # subsampling suffix to make the selection method explicit at the
 # filename level.
+#
+# 2026-05-21: ``(haiku, 10)`` mapping ("_q9") is kept here for read-side
+# compatibility with legacy caches, but the corresponding cohort is
+# marked OBSOLETE and is no longer written by new runs (the tiered t3
+# cohort auto-escalates to full-volume coverage per-entity as needed).
 _COHORT_SUB_SUFFIX: dict[tuple[str, int], str] = {
     ("gpt",     5):  "",
     ("gpt",     7):  "",
     ("gpt",    10):  "",
     ("gpt",    15):  "",
-    ("haiku",   7):  "_t3",
-    ("haiku",  10):  "_q9",
+    ("haiku",   7):  "_t3",          # canonical (tiered, auto-escalating)
+    ("haiku",  10):  "_q9",          # OBSOLETE 2026-05-21 (kept for read-side compat)
     ("sonnet", 10):  "_q9",
 }
 

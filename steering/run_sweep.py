@@ -367,7 +367,7 @@ def _build_judging_config(
             else ["gpt-4.1-mini", "claude-haiku-4-5-20251001"]
         ),
         "effect_mode": getattr(args, "effect_mode", "bidirectional"),
-        "target_batch_size": int(getattr(args, "target_batch_size", 10)),
+        "target_batch_size": int(getattr(args, "target_batch_size", 7)),
         "skip_threshold": float(
             getattr(args, "skip_if_strength_mean_coh_above", 1.0)
         ),
@@ -959,10 +959,14 @@ def main():
                              "by --judges-only.")
     parser.add_argument("--effect-mode", default="bidirectional",
                         choices=["bidirectional", "separate_poles", "both"])
-    parser.add_argument("--target-batch-size", type=int, default=10,
-                        help="Effect-judge target batch size (default 10, "
-                             "matching response judging's near-equal "
-                             "batches algorithm).")
+    parser.add_argument("--target-batch-size", type=int, default=7,
+                        help="Effect-judge target batch size (canonical B=7, "
+                             "matching the May 2026 project-wide B=7 default "
+                             "for response-mode judging).  The previous "
+                             "value of 10 is OBSOLETE and was the source of "
+                             "a several-hundred-dollar B=10 mis-judging "
+                             "incident; do not revert without explicit "
+                             "user approval.")
     parser.add_argument("--skip-if-strength-mean-coh-above", type=float,
                         default=1.5,
                         help="Skip RP/effect on a strength group whose mean "

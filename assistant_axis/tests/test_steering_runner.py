@@ -743,6 +743,105 @@ class TestRunSteeringCell:
         # Should NOT have triggered any new generation
         assert _FakeActivationSteering.construct_calls == []
 
+    def test_skip_when_previous_cap_below_new_max_strength_with_incoherent_stop(
+        self, tmp_path, monkeypatch,
+    ):
+        """A cell that previously stopped due to the COHERENCE CLIFF must
+        be skipped even if the caller has raised max_strength: the cell
+        already found its physical cliff, no extension is meaningful.
+        """
+        out_dir = tmp_path / "cell"
+        out_dir.mkdir()
+        (out_dir / "summary.json").write_text(json.dumps({
+            "stopped_at_strength": 11.286,
+            "reason": "bidirectional_done",
+            "n_records": 99,
+            "n_strengths_swept": 5,
+            "up_blocked_reason": "incoherent",
+            "down_blocked_reason": "sub_threshold_effect",
+            "max_strength": 16.0,
+            "min_strength": 0.125,
+        }))
+        monkeypatch.setenv("TMPDIR", str(tmp_path))
+        monkeypatch.setattr(steering_runner, "ActivationSteering",
+                            _FakeActivationSteering)
+
+        result = steering_runner.run_steering_cell(
+            _FakeModel(8), _FakeTokenizer(),
+            axis_vector=torch.zeros(8, dtype=torch.bfloat16),
+            slot=0, layer=26, sign=+1,
+            strengths=[1.0, 2.0],
+            persona_system_prompt="hist",
+            questions=["q1"],
+            output_dir=out_dir, batch_size=1, max_new_tokens=4,
+            positions_mode="all",
+            scan_mode="bidirectional",
+            max_strength=128.0,  # raised from old 16.0
+        )
+
+        # Skipped: cell hit the cliff, not the cap.
+        assert result.stopped_at_strength == 11.286
+        assert _FakeActivationSteering.construct_calls == []
+
+    def test_cap_extension_fallthrough_when_previously_capped(
+        self, tmp_path, monkeypatch,
+    ):
+        """A cell that previously stopped because it hit the CONFIGURED
+        max_strength cap (not the coherence cliff) must NOT be skipped
+        when max_strength is raised -- it should fall through so the
+        bidirectional state machine can extend the UP-walk past the old
+        cap.  Existing records are not regenerated; only the new
+        strengths beyond the old cap will be touched.
+
+        This test only validates the FALL-THROUGH (no early-return); the
+        full integration is exercised by the bidirectional state-machine
+        tests below.
+        """
+        out_dir = tmp_path / "cell"
+        out_dir.mkdir()
+        (out_dir / "summary.json").write_text(json.dumps({
+            "stopped_at_strength": 16.0,
+            "reason": "bidirectional_done",
+            "n_records": 200,
+            "n_strengths_swept": 8,
+            "up_blocked_reason": "max_strength_reached",
+            "down_blocked_reason": "sub_threshold_effect",
+            "max_strength": 16.0,
+            "min_strength": 0.125,
+        }))
+        # Empty records file so the bidirectional cell will try to
+        # generate.  (Caller normally pre-loads existing records; we
+        # only need to verify fall-through here.)
+        (out_dir / "records.jsonl").write_text("")
+        monkeypatch.setenv("TMPDIR", str(tmp_path))
+        monkeypatch.setattr(steering_runner, "ActivationSteering",
+                            _FakeActivationSteering)
+
+        # Caller raises the cap to 128.  Bidirectional resume should
+        # be entered, which means we DO touch generation code paths
+        # (in this minimal smoke test with no existing records it
+        # generates from s_init upward).
+        steering_runner.run_steering_cell(
+            _FakeModel(8), _FakeTokenizer(),
+            axis_vector=torch.zeros(8, dtype=torch.bfloat16),
+            slot=0, layer=26, sign=+1,
+            strengths=[1.0, 2.0],
+            persona_system_prompt="hist",
+            questions=["q1"],
+            output_dir=out_dir, batch_size=1, max_new_tokens=4,
+            positions_mode="all",
+            scan_mode="bidirectional",
+            max_strength=128.0,  # raised from old 16.0
+            weakest_strength=1.0,
+        )
+
+        # If the early-skip had fired, construct_calls would be empty.
+        # The fall-through must have happened, so generation ran.
+        assert len(_FakeActivationSteering.construct_calls) > 0, (
+            "Cap-extension fall-through failed: cell was early-skipped "
+            "despite max_strength_reached + new max_strength > old cap."
+        )
+
 
 # ---------------------------------------------------------------------------
 # Bidirectional state-machine tests
