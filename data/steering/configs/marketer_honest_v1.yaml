@@ -1,4 +1,4 @@
-# soldier_concise_v1 -- second-role steering sweep (May 2026)
+# marketer_honest_v1 -- second-role steering sweep (May 2026)
 #
 # Part of the 12-axis second-role batch (one per axis from the 12 v2
 # axes).  Each axis is paired with the second-role base persona from
@@ -7,9 +7,9 @@
 # headroom on the un-RLHF-preferred pole (which the first-role/
 # virtuous-persona sweeps lack because RLHF training has the virtuous
 # pole nearly saturated).
-# Convention: role_from = pos pole (concise), role_to = neg pole (verbose);
-# sign=+1 steers toward verbose, the bidirectional rubric scores +eff
-# toward verbose.
+# Convention: role_from = pos pole (honest), role_to = neg pole (dishonest);
+# sign=+1 steers toward dishonest, the bidirectional rubric scores +eff
+# toward dishonest.
 #
 # all-mode only per the 2026-05-22 plan; the prefill comparison is
 # only run on the 10+2 first-role axes since the prefill efficacy gap
@@ -17,19 +17,19 @@
 # prefill ~half the all-mode effect even at 5-8x larger steering
 # coefficients).
 
-experiment_id: soldier_concise_v1
+experiment_id: marketer_honest_v1
 model_name: Qwen/Qwen3-32B
 output_dir: /workspace/outputs/qwen-3-32b/steering
 
 axis_source:
   type: role_transplant
   vectors_dir: /workspace/outputs/qwen-3-32b/traits/vectors
-  role_from: concise
-  role_to: verbose
+  role_from: honest
+  role_to: dishonest
 
 persona:
   type: role
-  role: soldier
+  role: marketer
   prompt_index: 0
 
 cells:
@@ -51,4 +51,4 @@ positions_mode: all
 batch_size: 4
 max_new_tokens: 512
 
-questions_file: data/steering/questions/soldier_concise_v1.json
+questions_file: data/steering/questions/marketer_honest_v1.json

@@ -1,9 +1,19 @@
 # prodigy_harmless_v1 -- multi-cell harmless/harmful sweep (May 2026)
 #
-# Part of the 12-axis batch: same cell grid + bidirectional scan + new
-# question sets (see roger/axis_judge_experiments/question_set_v1_summary.md).
-# Convention: role_from = pos pole, role_to = neg pole, so sign=+1 steers
-# toward the neg pole and the bidirectional rubric scores +eff toward neg.
+# Part of the 12-axis first-role batch.  Prodigy (intellectually curious,
+# academically-engaged with risky topics) is paired with the harmless/harmful
+# trait axis.  The matching second-role config is saboteur_harmless_v1.yaml
+# (steering toward the un-virtuous harmful pole with an aligned saboteur
+# persona, which has the moral headroom RLHF doesn't grant to a virtuous
+# baseline).
+# Convention: role_from = pos pole (harmless), role_to = neg pole (harmful);
+# sign=+1 steers toward harmful, the bidirectional rubric scores +eff
+# toward harmful.  Per AGENT_NOTES the existing question set deliberately
+# avoids the explicitly-dangerous harmful_trait probes (weapons, lockpicking)
+# which trigger blanket model refusal at any steering direction.
+#
+# Upgraded 2026-05-22 from the 2-cell prototype to the 14-cell production
+# schema matching the rest of the 10-axis sweep.
 
 experiment_id: prodigy_harmless_v1
 model_name: Qwen/Qwen3-32B
@@ -30,9 +40,8 @@ cells:
   - { slot: 0, layer: 49 }
 
 sweep:
-  # scan_mode defaults to "bidirectional" (May 2026 default)
   weakest_strength: 1.0
-  max_strength: 16.0
+  max_strength: 256.0
   multiplier: 1.189
   signs: [+1, -1]
 
