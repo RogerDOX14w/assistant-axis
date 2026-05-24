@@ -229,12 +229,47 @@ class TestBidirectionalCursor:
                 multiplier=1.0,
             )
 
-    def test_rejects_negative_start_steps(self):
-        with pytest.raises(ValueError, match="start_steps_up"):
+    def test_allows_negative_start_steps_when_above_min_strength(self):
+        # Negative start_steps_up means s_init < weakest (e.g. start
+        # below the historical floor when the coh cliff is already
+        # close to weakest).  Allowed as long as s_init >= min_strength.
+        # Required by sweep_start_heuristics.OVERRIDES for the
+        # (all, slot=7, layer=49) cell on Qwen-3-32B (start_steps=-3).
+        cursor = steering_runner.BidirectionalCursor(
+            weakest=1.0, max_strength=64.0, min_strength=0.125,
+            multiplier=1.189, start_steps_up=-3,
+        )
+        # 1.189^-3 ≈ 0.595, well above min_strength=0.125.
+        assert cursor.s_init == pytest.approx(0.595, abs=0.005)
+
+    def test_rejects_start_below_min_strength(self):
+        # When the resolved s_init falls below the safety floor we
+        # fail-loud rather than silently clamping; operator should
+        # either raise start_steps or lower min_strength.
+        with pytest.raises(ValueError, match="min_strength"):
             steering_runner.BidirectionalCursor(
-                weakest=1.0, max_strength=64.0, min_strength=0.125,
-                multiplier=1.189, start_steps_up=-1,
+                weakest=1.0, max_strength=64.0, min_strength=0.5,
+                multiplier=1.189, start_steps_up=-5,
             )
+
+    def test_negative_start_walks_up_correctly(self):
+        # The cursor must walk UP through weakest when starting below
+        # it, so the schedule still covers the productive band.
+        cursor = steering_runner.BidirectionalCursor(
+            weakest=1.0, max_strength=8.0, min_strength=0.125,
+            multiplier=2.0, start_steps_up=-1,
+        )
+        # s_init = 1.0 * 2^-1 = 0.5
+        assert cursor.s_init == pytest.approx(0.5)
+        # next_up should walk 0.5 -> 1.0 -> 2.0 -> 4.0 -> 8.0 -> None
+        seq = []
+        while True:
+            x = cursor.next_up()
+            if x is None: break
+            seq.append(x)
+            if len(seq) > 10: break  # safety
+        assert seq == [pytest.approx(1.0), pytest.approx(2.0),
+                       pytest.approx(4.0), pytest.approx(8.0)]
 
 
 # ---------------------------------------------------------------------------

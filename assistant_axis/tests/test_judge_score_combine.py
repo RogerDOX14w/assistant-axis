@@ -244,14 +244,20 @@ def test_centralized_blend_constants_in_unit_interval():
     # docstring "Selection history" for derivation.
     assert DEFAULT_GPT_SONNET_DI_WEIGHT == 0.625
     # DEFAULT_GPT_HAIKU_Q9_WEIGHT history (newest first):
-    # * 0.625 (2026-05-12, canonical-whitening soft_shear=3 v2 sweep,
-    #         discrete peak w=0.600, parabolic peak w=0.624; picked
-    #         0.625 for symmetry with DEFAULT_GPT_SONNET_DI_WEIGHT)
+    # * 0.525 (2026-05-22, 22-axis retune on canonical-whitening
+    #         soft_shear=3 v2 sweep after Phase-1/2 expansion;
+    #         discrete peak w=0.525 ρ=0.7521, parabolic peak w=0.472
+    #         ρ=0.7515; Haiku is now the better single-judge
+    #         baseline on the broader cohort)
+    # * 0.625 (2026-05-12, canonical-whitening soft_shear=3 v2 sweep
+    #         on 12 axes, discrete peak w=0.600, parabolic peak
+    #         w=0.624; picked 0.625 for symmetry with
+    #         DEFAULT_GPT_SONNET_DI_WEIGHT)
     # * 0.41  (2026-05-11, raw-projection v2 sweep; superseded by
     #         the canonical-whitening retune above)
     # * 0.60  (pre-Phase-5d v1 sweep)
     # See module docstring "Selection history" for derivation.
-    assert DEFAULT_GPT_HAIKU_Q9_WEIGHT == 0.625
+    assert DEFAULT_GPT_HAIKU_Q9_WEIGHT == 0.525
     assert DEFAULT_RESPONSE_DI_WEIGHT == 0.80
     for w in (DEFAULT_GPT_SONNET_DI_WEIGHT,
               DEFAULT_GPT_HAIKU_Q9_WEIGHT,

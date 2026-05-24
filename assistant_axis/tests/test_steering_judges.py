@@ -578,7 +578,7 @@ class TestRealDispatcherSkipLogic:
 
         async def fake_call(*, model, prompt, max_tokens, rate_limiter,
                              openai_client=None, anthropic_client=None,
-                             temperature=1.0):
+                             temperature=1.0, usage=None):
             seen_calls.append({"model": model, "prompt_len": len(prompt)})
             # Return a bidirectional batch JSON for both models
             if "items" in prompt and "+3" in prompt:
@@ -644,7 +644,7 @@ class TestRealDispatcherSkipLogic:
 
         async def fake_call(*, model, prompt, max_tokens, rate_limiter,
                              openai_client=None, anthropic_client=None,
-                             temperature=1.0):
+                             temperature=1.0, usage=None):
             if "items" in prompt and "+3" in prompt:
                 ids_in_prompt = []
                 for i in range(20):
@@ -732,7 +732,7 @@ class TestRealDispatcherSkipLogic:
 
         async def fake_call(*, model, prompt, max_tokens, rate_limiter,
                              openai_client=None, anthropic_client=None,
-                             temperature=1.0):
+                             temperature=1.0, usage=None):
             # Return a valid bidirectional batch payload.
             return json.dumps({
                 "items": [{"id": 0, "score": 2, "reason": "new"}]
@@ -1042,3 +1042,184 @@ class TestJudgeOutcomeSummary:
         dispatcher._record_judge_outcome(kind="effect", model="gpt-4.1-mini", outcome="missing")
         s = dispatcher.judge_outcome_summary()
         assert "1/2 MISSING" in s
+
+
+# ---------------------------------------------------------------------------
+# Token-usage tracking
+# ---------------------------------------------------------------------------
+#
+# Every steering judge call goes through RealJudgeDispatcher._call_unified,
+# which threads ``usage=self._usage`` into call_judge_single_unified.  The
+# response.usage block from the SDK feeds the per-model accumulator, and
+# shutdown() writes <cell_dir>/usage.json.  We exercise the wiring with a
+# stub that fakes a usage block; the actual extract_usage_* helpers are
+# covered by test_judge_pricing.py.
+
+
+class TestUsageTracking:
+    def test_dispatcher_constructs_with_empty_usage(self, dispatcher):
+        # Fresh dispatcher: no calls have happened.
+        assert dispatcher._usage.n_calls == 0
+        assert dispatcher._usage.total_cost_usd == 0.0
+
+    def test_call_unified_passes_usage_through(
+        self, dispatcher, monkeypatch,
+    ):
+        """The dispatcher's own usage tracker is threaded into every
+        call_judge_single_unified invocation."""
+        captured = {}
+
+        async def fake_call(*, model, prompt, max_tokens, rate_limiter,
+                             openai_client=None, anthropic_client=None,
+                             temperature=1.0, usage=None):
+            captured["usage_is_dispatcher_tracker"] = usage is dispatcher._usage
+            captured["model"] = model
+            # Simulate the SDK having extracted tokens from a response.
+            if usage is not None:
+                usage.charge(model, prompt_tokens=1_000, completion_tokens=200)
+            return '{"score": 0, "reason": "stub"}'
+
+        monkeypatch.setattr(sj, "call_judge_single_unified", fake_call)
+
+        # Drive _call_unified once via the dispatcher's event loop.
+        fut = asyncio.run_coroutine_threadsafe(
+            dispatcher._call_unified(
+                model="gpt-4.1-mini", prompt="hello", max_tokens=10,
+            ),
+            dispatcher._loop,
+        )
+        result = fut.result(timeout=5)
+
+        assert result == '{"score": 0, "reason": "stub"}'
+        assert captured["usage_is_dispatcher_tracker"] is True
+        assert dispatcher._usage.n_calls == 1
+        # 1,000 input tokens at $0.40/M = $0.0004; 200 output at $1.60/M = $0.00032
+        assert dispatcher._usage.total_cost_usd == pytest.approx(0.00072)
+
+    def test_shutdown_writes_usage_json(self, tmp_path, mock_clients,
+                                        persona, steering, monkeypatch):
+        """At end-of-cell, the dispatcher serialises its usage tracker
+        to <cell_dir>/usage.json (next to records.jsonl)."""
+        records_path = tmp_path / "records.jsonl"
+        records_path.write_text("")
+        d = RealJudgeDispatcher(
+            records_path=records_path,
+            persona=persona, steering=steering,
+            baseline_lookup=lambda q_idx: f"baseline-{q_idx}",
+            coherence_model="gpt-4.1-mini",
+            rp_model="gpt-4.1-mini",
+            effect_models=("gpt-4.1-mini", "claude-haiku-4-5-20251001"),
+            effect_mode=EFFECT_MODE_BIDIRECTIONAL,
+            effect_target_batch_size=10,
+            skip_threshold=1.0,
+            coh_stop_threshold=1.5,
+            max_concurrency=4,
+        )
+        try:
+            # Pretend we made a couple of API calls.
+            d._usage.charge("gpt-4.1-mini", 5_000, 1_000)
+            d._usage.charge("claude-haiku-4-5-20251001", 8_000, 1_500)
+        finally:
+            d.shutdown()
+
+        usage_path = tmp_path / "usage.json"
+        assert usage_path.exists(), "shutdown() should have written usage.json"
+        payload = json.loads(usage_path.read_text())
+        assert "per_model" in payload
+        assert "gpt-4.1-mini" in payload["per_model"]
+        assert "claude-haiku-4-5-20251001" in payload["per_model"]
+        assert payload["n_calls"] == 2
+        assert payload["total_cost_usd"] > 0
+
+    def test_shutdown_no_calls_no_file(self, tmp_path, mock_clients,
+                                       persona, steering):
+        """No file written when no API calls happened (avoids polluting
+        cell dirs in --no-live-judging runs)."""
+        records_path = tmp_path / "records.jsonl"
+        records_path.write_text("")
+        d = RealJudgeDispatcher(
+            records_path=records_path,
+            persona=persona, steering=steering,
+            baseline_lookup=lambda q_idx: "",
+            coherence_model="gpt-4.1-mini",
+            rp_model="gpt-4.1-mini",
+            effect_models=("gpt-4.1-mini", "claude-haiku-4-5-20251001"),
+            effect_mode=EFFECT_MODE_BIDIRECTIONAL,
+            effect_target_batch_size=10,
+            skip_threshold=1.0,
+            coh_stop_threshold=1.5,
+            max_concurrency=4,
+        )
+        d.shutdown()
+        assert not (tmp_path / "usage.json").exists()
+
+    def test_resume_merges_historic_usage(self, tmp_path, mock_clients,
+                                          persona, steering):
+        """A second dispatcher constructed against a cell that already
+        has a usage.json picks up where the first left off, so the
+        persisted file accumulates across resume cycles rather than
+        overwriting.
+        """
+        records_path = tmp_path / "records.jsonl"
+        records_path.write_text("")
+        usage_path = tmp_path / "usage.json"
+
+        # First invocation: charge some tokens and shut down.
+        d1 = RealJudgeDispatcher(
+            records_path=records_path,
+            persona=persona, steering=steering,
+            baseline_lookup=lambda q_idx: "",
+            coherence_model="gpt-4.1-mini",
+            rp_model="gpt-4.1-mini",
+            effect_models=("gpt-4.1-mini",),
+            effect_mode=EFFECT_MODE_BIDIRECTIONAL,
+            effect_target_batch_size=10,
+            skip_threshold=1.0,
+            coh_stop_threshold=1.5,
+            max_concurrency=4,
+        )
+        try:
+            d1._usage.charge("gpt-4.1-mini", 1_000, 200)
+        finally:
+            d1.shutdown()
+        assert usage_path.exists()
+
+        # Second invocation: should load the historic totals on init.
+        d2 = RealJudgeDispatcher(
+            records_path=records_path,
+            persona=persona, steering=steering,
+            baseline_lookup=lambda q_idx: "",
+            coherence_model="gpt-4.1-mini",
+            rp_model="gpt-4.1-mini",
+            effect_models=("gpt-4.1-mini",),
+            effect_mode=EFFECT_MODE_BIDIRECTIONAL,
+            effect_target_batch_size=10,
+            skip_threshold=1.0,
+            coh_stop_threshold=1.5,
+            max_concurrency=4,
+        )
+        try:
+            # Pre-shutdown, d2._usage already reflects d1's tokens.
+            assert d2._usage.per_model["gpt-4.1-mini"].prompt_tokens == 1_000
+            assert d2._usage.per_model["gpt-4.1-mini"].n_calls == 1
+            # Add more.
+            d2._usage.charge("gpt-4.1-mini", 500, 100)
+        finally:
+            d2.shutdown()
+
+        # Final file has the SUM of both runs.
+        payload = json.loads(usage_path.read_text())
+        sub = payload["per_model"]["gpt-4.1-mini"]
+        assert sub["prompt_tokens"] == 1_500
+        assert sub["completion_tokens"] == 300
+        assert sub["n_calls"] == 2
+
+    def test_judge_usage_summary_format(self, dispatcher):
+        """Single-line summary is suitable for end-of-run logs."""
+        dispatcher._usage.charge("gpt-4.1-mini", 100, 50)
+        dispatcher._usage.charge("claude-haiku-4-5-20251001", 200, 100)
+        s = dispatcher.judge_usage_summary()
+        assert "[steering judge usage]" in s
+        assert "gpt-4.1-mini" in s
+        assert "claude-haiku-4-5-20251001" in s
+        assert "total=$" in s

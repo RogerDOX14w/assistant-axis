@@ -63,6 +63,7 @@ from .judge import (
     parse_score_reason_json,
     provider_for_model,
 )
+from .judge_pricing import MultiModelUsage
 
 logger = logging.getLogger(__name__)
 
@@ -1097,6 +1098,28 @@ class RealJudgeDispatcher:
         self._rate_limiter = RateLimiter(rate=rps)
         self._semaphore = asyncio.Semaphore(max_concurrency)
 
+        # Per-model token-usage accumulator.  Every coh/persona/effect
+        # call goes through _call_unified() which passes this in to
+        # call_judge_single_unified; the SDK's response.usage block is
+        # extracted and added to the running per-(model) totals.  At
+        # shutdown we merge into <cell>/usage.json (resume-friendly).
+        # See AGENT_NOTES "Token usage logging is mandatory on batched
+        # LLM call sites".
+        self._usage = MultiModelUsage()
+        # Resume support: if the cell has been judged before, fold the
+        # historical totals in so the persisted file accumulates across
+        # resume cycles rather than overwriting.
+        self._usage_path = self.records_path.parent / "usage.json"
+        try:
+            self._usage.merge_from(
+                MultiModelUsage.load_or_create(self._usage_path)
+            )
+        except Exception as e:  # noqa: BLE001
+            logger.warning(
+                f"steering judge usage: could not load historic "
+                f"usage from {self._usage_path}: {e}; starting fresh"
+            )
+
     # ------------------------------------------------------------------
     # Coherence (synchronous, called inline from the sweep loop)
     # ------------------------------------------------------------------
@@ -1474,7 +1497,9 @@ class RealJudgeDispatcher:
 
         Emits the judge-outcome summary log line before stopping if
         any judging was actually attempted (no-op for sweeps that
-        skipped all judging).
+        skipped all judging).  Also persists the per-model token-usage
+        tracker to ``<cell_dir>/usage.json`` and logs a one-line cost
+        summary.
         """
         # Log the outcome summary first so it's visible even if loop
         # shutdown takes a moment.  Skips the emit when no judging
@@ -1490,6 +1515,11 @@ class RealJudgeDispatcher:
                     logger.warning(line)
                 else:
                     logger.info(line)
+        # Token-usage report + persistence.  Skipped automatically when
+        # no API calls were made (e.g. --skip-judges).
+        if self._usage.n_calls > 0:
+            logger.info(self.judge_usage_summary())
+            self.write_usage_json()
         if self._loop.is_running():
             self._loop.call_soon_threadsafe(self._loop.stop)
         self._loop_thread.join(timeout=5.0)
@@ -2086,7 +2116,40 @@ class RealJudgeDispatcher:
             rate_limiter=self._rate_limiter,
             openai_client=self._openai_client,
             anthropic_client=self._anthropic_client,
+            usage=self._usage,
         )
+
+    # ------------------------------------------------------------------
+    # Per-cell usage reporting (token counts + cost)
+    # ------------------------------------------------------------------
+
+    def judge_usage_summary(self) -> str:
+        """Human-readable single-line summary of accumulated API usage.
+
+        Companion to :meth:`judge_outcome_summary` -- the outcome
+        summary reports parseability, this one reports cost.
+        """
+        return self._usage.log_line(prefix="[steering judge usage]")
+
+    def write_usage_json(self, path: Optional[Path] = None) -> Optional[Path]:
+        """Persist the per-model usage tracker to disk.
+
+        ``path`` defaults to ``<cell_dir>/usage.json`` (i.e. next to
+        records.jsonl).  Idempotent / overwrite-safe.  Skips the write
+        entirely if no calls were made (avoids polluting the cell dir
+        with empty-tracker files in --no-live-judging runs).
+        """
+        if self._usage.n_calls == 0:
+            return None
+        target = Path(path) if path is not None else self._usage_path
+        try:
+            self._usage.write_json(target)
+            return target
+        except Exception as e:  # noqa: BLE001
+            logger.warning(
+                f"steering judge usage: failed to write {target}: {e}"
+            )
+            return None
 
 
 # ---------------------------------------------------------------------------

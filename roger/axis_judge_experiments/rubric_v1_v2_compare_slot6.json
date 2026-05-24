@@ -4,8 +4,8 @@
       "slot": 6,
       "layer": 25,
       "K": 0,
-      "gpt_response_weight": 0.625,
-      "anthropic_response_weight": 0.375,
+      "gpt_response_weight": 0.525,
+      "anthropic_response_weight": 0.475,
       "response_in_combined_weight": 0.8,
       "di_in_combined_weight": 0.19999999999999996,
       "di_weights_desc_inst": [
@@ -21,20 +21,20 @@
         "pos": "truthful",
         "neg": "deceitful",
         "response_v1": {
-          "rho": 0.8322358283786073,
+          "rho": 0.8306632661316903,
           "n": 580
         },
         "response_v2": {
-          "rho": 0.8477017817938989,
+          "rho": 0.8472708181402645,
           "n": 580
         },
         "combined_v1": {
-          "rho": NaN,
-          "n": 0
+          "rho": 0.8211125248042149,
+          "n": 580
         },
         "combined_v2": {
-          "rho": NaN,
-          "n": 0
+          "rho": 0.8333893655225754,
+          "n": 580
         }
       },
       {
@@ -42,20 +42,20 @@
         "pos": "progressive",
         "neg": "conservative",
         "response_v1": {
-          "rho": 0.7294158195850373,
+          "rho": 0.7272309301637447,
           "n": 580
         },
         "response_v2": {
-          "rho": 0.777377062621013,
+          "rho": 0.7825552933600457,
           "n": 580
         },
         "combined_v1": {
-          "rho": NaN,
-          "n": 0
+          "rho": 0.7188750905655855,
+          "n": 580
         },
         "combined_v2": {
-          "rho": NaN,
-          "n": 0
+          "rho": 0.777097843027308,
+          "n": 580
         }
       },
       {
@@ -63,20 +63,20 @@
         "pos": "improvisational",
         "neg": "methodical",
         "response_v1": {
-          "rho": 0.8930842110839737,
+          "rho": 0.8957349468657827,
           "n": 580
         },
         "response_v2": {
-          "rho": 0.9015146688176031,
+          "rho": 0.9017451014668171,
           "n": 580
         },
         "combined_v1": {
-          "rho": NaN,
-          "n": 0
+          "rho": 0.8923971924223295,
+          "n": 580
         },
         "combined_v2": {
-          "rho": NaN,
-          "n": 0
+          "rho": 0.9083823456197901,
+          "n": 580
         }
       },
       {
@@ -84,20 +84,20 @@
         "pos": "concise",
         "neg": "verbose",
         "response_v1": {
-          "rho": 0.42576983974662114,
+          "rho": 0.43370488064189133,
           "n": 580
         },
         "response_v2": {
-          "rho": 0.39052646748529896,
+          "rho": 0.39284635039831145,
           "n": 580
         },
         "combined_v1": {
-          "rho": NaN,
-          "n": 0
+          "rho": 0.6387935255377492,
+          "n": 580
         },
         "combined_v2": {
-          "rho": NaN,
-          "n": 0
+          "rho": 0.6477670741757969,
+          "n": 580
         }
       },
       {
@@ -105,20 +105,20 @@
         "pos": "ecocentric",
         "neg": "anthropocentric",
         "response_v1": {
-          "rho": 0.6686426159004694,
+          "rho": 0.6575999443764826,
           "n": 580
         },
         "response_v2": {
-          "rho": 0.7391399539420469,
+          "rho": 0.7381715016573511,
           "n": 580
         },
         "combined_v1": {
-          "rho": NaN,
-          "n": 0
+          "rho": 0.5777834463341616,
+          "n": 580
         },
         "combined_v2": {
-          "rho": NaN,
-          "n": 0
+          "rho": 0.6581870896393517,
+          "n": 580
         }
       },
       {
@@ -126,20 +126,20 @@
         "pos": "egalitarian",
         "neg": "elitist",
         "response_v1": {
-          "rho": 0.6933531821337247,
+          "rho": 0.6953176928370327,
           "n": 580
         },
         "response_v2": {
-          "rho": 0.7219436748159329,
+          "rho": 0.7330153398085596,
           "n": 580
         },
         "combined_v1": {
-          "rho": NaN,
-          "n": 0
+          "rho": 0.7061227821645735,
+          "n": 580
         },
         "combined_v2": {
-          "rho": NaN,
-          "n": 0
+          "rho": 0.7386703435897861,
+          "n": 580
         }
       },
       {
@@ -147,20 +147,20 @@
         "pos": "guileless",
         "neg": "scheming",
         "response_v1": {
-          "rho": 0.6480858302291158,
+          "rho": 0.6475866195831889,
           "n": 580
         },
         "response_v2": {
-          "rho": 0.6609203900516981,
+          "rho": 0.659517931223581,
           "n": 580
         },
         "combined_v1": {
-          "rho": NaN,
-          "n": 0
+          "rho": 0.5683326948325907,
+          "n": 580
         },
         "combined_v2": {
-          "rho": NaN,
-          "n": 0
+          "rho": 0.5932780419250823,
+          "n": 580
         }
       },
       {
@@ -168,20 +168,20 @@
         "pos": "harmless",
         "neg": "harmful",
         "response_v1": {
-          "rho": 0.7050846235743713,
+          "rho": 0.7044665254141568,
           "n": 580
         },
         "response_v2": {
-          "rho": 0.756628522618177,
+          "rho": 0.7583806476367763,
           "n": 580
         },
         "combined_v1": {
-          "rho": NaN,
-          "n": 0
+          "rho": 0.7420760761660392,
+          "n": 580
         },
         "combined_v2": {
-          "rho": NaN,
-          "n": 0
+          "rho": 0.7929643905496627,
+          "n": 580
         }
       },
       {
@@ -189,20 +189,20 @@
         "pos": "honest",
         "neg": "dishonest",
         "response_v1": {
-          "rho": 0.8035136497608861,
+          "rho": 0.7975304361240084,
           "n": 580
         },
         "response_v2": {
-          "rho": 0.7810167607416072,
+          "rho": 0.7785271132566973,
           "n": 580
         },
         "combined_v1": {
-          "rho": NaN,
-          "n": 0
+          "rho": 0.8072470265647493,
+          "n": 580
         },
         "combined_v2": {
-          "rho": NaN,
-          "n": 0
+          "rho": 0.8067375255736934,
+          "n": 580
         }
       },
       {
@@ -210,20 +210,20 @@
         "pos": "helpful",
         "neg": "unhelpful",
         "response_v1": {
-          "rho": 0.8328558630549298,
+          "rho": 0.8354554029598998,
           "n": 580
         },
         "response_v2": {
-          "rho": 0.7958952039219398,
+          "rho": 0.797661303401103,
           "n": 580
         },
         "combined_v1": {
-          "rho": NaN,
-          "n": 0
+          "rho": 0.8613614231049365,
+          "n": 580
         },
         "combined_v2": {
-          "rho": NaN,
-          "n": 0
+          "rho": 0.8551685425707469,
+          "n": 580
         }
       },
       {
@@ -231,20 +231,20 @@
         "pos": "relativist",
         "neg": "absolutist",
         "response_v1": {
-          "rho": 0.7688713619783951,
+          "rho": 0.7739395917120312,
           "n": 580
         },
         "response_v2": {
-          "rho": 0.7224356559756364,
+          "rho": 0.7381516168151897,
           "n": 580
         },
         "combined_v1": {
-          "rho": NaN,
-          "n": 0
+          "rho": 0.783257213483179,
+          "n": 580
         },
         "combined_v2": {
-          "rho": NaN,
-          "n": 0
+          "rho": 0.7653327279189318,
+          "n": 580
         }
       },
       {
@@ -252,28 +252,28 @@
         "pos": "systems_thinker",
         "neg": "analytical",
         "response_v1": {
-          "rho": 0.7413264179766083,
+          "rho": 0.7401524382497316,
           "n": 580
         },
         "response_v2": {
-          "rho": 0.732381615907714,
+          "rho": 0.7357567235835284,
           "n": 580
         },
         "combined_v1": {
-          "rho": NaN,
-          "n": 0
+          "rho": 0.7535302296866621,
+          "n": 580
         },
         "combined_v2": {
-          "rho": NaN,
-          "n": 0
+          "rho": 0.7499003492098776,
+          "n": 580
         }
       }
     ],
     "means_over_axes": {
-      "response_v1": 0.7285199369502284,
-      "response_v2": 0.7356234798910473,
-      "combined_v1": NaN,
-      "combined_v2": NaN
+      "response_v1": 0.7282818895883033,
+      "response_v2": 0.7386333117290187,
+      "combined_v1": 0.7392407688055642,
+      "combined_v2": 0.7605729699435502
     },
     "n_axes": 12
   },
@@ -281,11 +281,11 @@
     "schema_version": "1.0",
     "produced_by": {
       "cmd": "uv run python -m results_analysis.rubric_v1_v2_compare",
-      "git_sha": "df6444a+dirty",
+      "git_sha": "80ae33d+dirty",
       "author": "Roger Dearnaley",
       "title": "rubric_v1_v2_compare"
     },
-    "produced_at": "2026-05-12T00:04:35+00:00",
+    "produced_at": "2026-05-22T19:46:07+00:00",
     "inputs": [
       {
         "dep_key": "producer_script",
@@ -297,21 +297,21 @@
         "extras": {
           "slot": "6",
           "layer": "25",
-          "gpt_response_weight": "0.625",
+          "gpt_response_weight": "0.525",
           "response_in_combined_weight": "0.8"
         }
       },
       {
         "dep_key": "judge_score_combine_constants",
         "path": "assistant_axis/judge_score_combine.py",
-        "fingerprint": "v1:2026-05-12T00:02:04+00:00@25980",
+        "fingerprint": "v1:2026-05-22T19:41:31+00:00@32656",
         "kind": "file",
         "dataset_id": null,
-        "last_modified_at": "2026-05-12T00:02:04+00:00",
+        "last_modified_at": "2026-05-22T19:41:31+00:00",
         "extras": {
           "DEFAULT_DI_WEIGHTS": "(0.499, 0.501)",
           "DEFAULT_GPT_SONNET_DI_WEIGHT": "0.625",
-          "DEFAULT_GPT_HAIKU_Q9_WEIGHT": "0.625",
+          "DEFAULT_GPT_HAIKU_Q9_WEIGHT": "0.525",
           "DEFAULT_RESPONSE_DI_WEIGHT": "0.8",
           "PRIMARY_AXIS_SAMPLE_WEIGHT": "5.0"
         }
@@ -2111,6 +2111,6 @@
         "extras": {}
       }
     ],
-    "inputs_sha256": "aab81a10607d6296898ee6485d660a652670f3e50dbb36dc6a66eb3ef28a7db6"
+    "inputs_sha256": "b4dfa34234cb6cf90d4b34b2dfb0dd50cbd9f2fb310fb0bfd936bbfcd92d739b"
   }
 }

@@ -86,6 +86,148 @@ are written by Cursor, not by you).
 
 ---
 
+## Hotlink every file you mention to Roger (HARD RULE)
+
+**Every time you reference a file (plot, JSON, source, log, config,
+notebook, etc.) in a chat reply to Roger, format it as a markdown
+link with a workspace-relative path prefixed with `./`.** No
+exceptions: bare backticked paths do NOT hotlink in Cursor, and
+Roger has to manually copy them — which he's reminded the agent
+about repeatedly.  Default assumption: if Roger reads a file path
+in a chat reply, he wants to be able to click it.
+
+**`.png` files are the highest-priority case.** If you mention a
+plot — generated, regenerated, looked-up, or referenced by name —
+**always** wrap it as `[filename.png](./path/to/filename.png)`.
+Roger almost invariably wants to open and look at a plot you
+mention; making him copy-paste the path is a friction every single
+time.  No exception is small enough to skip this — even a single
+sentence like "I wrote the new plot to `foo.png`" must hotlink
+`foo.png`.
+
+**DO** (every file mention, including summary tables and bullet lists):
+
+```markdown
+[gpt_haiku_q9_response_weight_sweep_slot6.png](./roger/axis_judge_experiments/gpt_haiku_q9_response_weight_sweep_slot6.png)
+- updated [`pair_list_responses.json`](./roger/axis_judge_experiments/pair_list_responses.json) 12 → 22 axes
+- the script lives at [`results_analysis/response_di_weight_sweep.py`](./results_analysis/response_di_weight_sweep.py)
+```
+
+**DON'T** (these are the failure modes the agent keeps committing):
+
+- `roger/axis_judge_experiments/foo.png` (bare path — not clickable)
+- `` `roger/axis_judge_experiments/foo.png` `` (backticked — not
+  clickable either)
+- `file:///Users/roger/Documents/GitHub/assistant-axis/roger/...`
+  (absolute file URIs render but are non-portable)
+- `[foo.png](/Users/roger/Documents/GitHub/assistant-axis/roger/.../foo.png)`
+  (absolute paths bake the username into the chat transcript; use
+  workspace-relative `./roger/...` instead)
+- A bare filename like `pair_list_responses.json` inside running
+  prose, with no link wrapper at all
+
+This applies to **every** reply.  In a summary listing 10 files,
+all 10 must be hotlinked; in a one-line reply mentioning a single
+plot, that plot must be hotlinked.  If you find yourself writing a
+backticked file path with no markdown link around it in a chat
+reply, stop and rewrite that section.
+
+(This rule also exists below in a less-prominent
+"Hotlinking image/plot files" section; this top-level HARD RULE
+is the canonical statement.  The duplication is intentional —
+discoverability matters more than DRYness here.)
+
+---
+
+## Token usage logging is mandatory on batched LLM call sites (HARD RULE)
+
+**Any automated LLM call site that runs in a batch, judging loop, or
+otherwise repeatedly enough that aggregate cost is operationally
+interesting MUST plumb in a [`MultiModelUsage`](./assistant_axis/judge_pricing.py)
+accumulator and persist a `usage.json` side-car next to its primary
+output.**  This is how we reconstruct after-the-fact what an
+expensive batch cost us, by which model, and validate against the
+estimate that authorised the spend.
+
+The canonical implementations are:
+
+- [`results_analysis/axis_judge_correlation.py`](./results_analysis/axis_judge_correlation.py) —
+  the response/static-mode judging path.  Uses
+  [`BudgetTracker`](./assistant_axis/judge_pricing.py) (which wraps a
+  single-model `UsageTotals`) for budget-capped axis-at-a-time runs.
+  Writes `<output_dir>/usage.json`.
+- [`assistant_axis/steering_judges.py`](./assistant_axis/steering_judges.py) —
+  the steering sweep live-judging path.  Uses
+  [`MultiModelUsage`](./assistant_axis/judge_pricing.py) because each
+  cell hits both GPT and Haiku.  Writes
+  `<cell_dir>/usage.json` at `RealJudgeDispatcher.shutdown()`,
+  merging into the existing file so resumes accumulate rather than
+  overwrite.  See `TestUsageTracking` in
+  [`assistant_axis/tests/test_steering_judges.py`](./assistant_axis/tests/test_steering_judges.py).
+
+**How to add it to a new call site (recipe):**
+
+1. Import `MultiModelUsage` from
+   [`assistant_axis.judge_pricing`](./assistant_axis/judge_pricing.py).
+2. Construct one tracker per run/batch/cell (whatever the natural
+   "unit of work" is for the script).
+3. Pass `usage=tracker` to every
+   [`call_judge_single_unified`](./assistant_axis/judge.py) /
+   `call_judge_single` / `call_anthropic_judge_single` call.
+   They extract the SDK's `response.usage` block and tick the
+   accumulator automatically.
+4. At end-of-run, call `tracker.write_json(output_dir / "usage.json")`
+   (or merge into an existing one if the script supports resume).
+5. Log `tracker.log_line()` so the cost appears in the run log too.
+
+**`usage.json` schema** (verbatim from `MultiModelUsage.as_dict()`):
+
+```json
+{
+  "per_model": {
+    "claude-haiku-4-5-20251001": {
+      "completion_tokens": 12345,
+      "cost_usd": 0.4321,
+      "model": "claude-haiku-4-5-20251001",
+      "n_calls": 67,
+      "prompt_tokens": 89012
+    },
+    "gpt-4.1-mini": { ... }
+  },
+  "total_completion_tokens": 23456,
+  "total_cost_usd": 1.2345,
+  "total_prompt_tokens": 178024,
+  "n_calls": 134
+}
+```
+
+**Why this is a hard rule:** before this was wired into steering
+(2026-05-24), we estimated sweep cost from per-record token counts
+and SDK pricing tables.  Those estimates were ±20% (rubric input
+size was approximated from a single sample, not measured per call),
+and offered no breakdown by judge model — so the only way to know
+what a sweep cost was to wait for the OpenAI/Anthropic invoice and
+back-out across overlapping runs.  Per-cell `usage.json` files give
+us a precise, auditable, retrieve-anytime cost record.
+
+**Existing call sites still on the to-do list (2026-05-24):**
+
+- [`data_analysis/classify_goals.py`](./data_analysis/classify_goals.py)
+- [`data_analysis/regenerate_role_instructions.py`](./data_analysis/regenerate_role_instructions.py)
+- [`data_analysis/regenerate_trait_instructions.py`](./data_analysis/regenerate_trait_instructions.py)
+- [`data_analysis/score_combinations.py`](./data_analysis/score_combinations.py)
+- [`data_analysis/sample_trait_responses.py`](./data_analysis/sample_trait_responses.py)
+- [`data_analysis/generate_antonyms.py`](./data_analysis/generate_antonyms.py)
+- [`results_analysis/standardize_axis_spec.py`](./results_analysis/standardize_axis_spec.py)
+- [`results_analysis/infer_axis_description.py`](./results_analysis/infer_axis_description.py)
+
+Retrofit when next touched (or sooner if scheduled for a heavy
+run).  Diagnostic one-offs (e.g.
+[`tools/diagnose_unparseable.py`](./tools/diagnose_unparseable.py))
+are exempt unless they grow into batch tools.
+
+---
+
 ## Communication Style
 
 ### Concise and Technical
@@ -109,27 +251,18 @@ are written by Cursor, not by you).
 
 ### Hotlinking image/plot files in chat replies (mandatory)
 
-When mentioning image, plot, or any other file Roger might want to open
-from a chat reply, **always** format the reference as a markdown link
-with a workspace-relative path prefixed by `./`.  Cursor renders that
-form as a clickable hotlink that opens the file in the IDE; bare paths,
-backticked paths, `file://` URIs, and `vscode://file/...` URIs do NOT
-hotlink reliably in this environment.
+**See the top-level HARD RULE "Hotlink every file you mention to
+Roger".**  Promoted there 2026-05-22 because the agent kept
+forgetting and Roger had to reminded multiple times to redo
+summaries with hotlinks added.  Brief version here:
 
-```markdown
-[batch_size_cost_vs_quality.png](./roger/axis_judge_experiments/batch_size_curve_8slot/batch_size_cost_vs_quality.png)
-```
-
-Use the link text for the bare filename (or a short description); use
-the relative path for the link target.  Default assumption: when Roger
-asks about an image or plot, he wants to look at it — so always
-hotlink.  Same convention for `.json` data files, `.log` outputs, and
-other reviewable artefacts that live in the repo.
-
-The `[name](./path)` form is preferred over `[name](/abs/path)` because
-it's portable across machines and doesn't bake usernames into chat
-transcripts.  Use absolute only when referring to something outside the
-workspace root.
+- Always `[filename](./relative/path/to/file)` — workspace-relative,
+  `./` prefix, every mention.
+- Applies to `.png`, `.json`, `.log`, `.py`, `.md`, `.yaml`,
+  `.jsonl` — anything Roger might open in the IDE.
+- Bare paths and backticked-only paths do NOT hotlink in Cursor.
+- Absolute paths (`/Users/roger/...`) hotlink but bake the
+  username in; prefer `./...`.
 
 ### Plot visual verification (mandatory after any plot generation)
 
@@ -1794,7 +1927,7 @@ edit.
 |---|---|---|
 | `DEFAULT_DI_WEIGHTS` | `(0.499, 0.501)` | desc / inst within one judge |
 | `DEFAULT_GPT_SONNET_DI_WEIGHT` | `0.625` | GPT / Sonnet within the desc+inst ensemble (per mode) (was `0.50` until 2026-05-12; retuned to the soft_shear=3 discrete grid peak w=0.625 on the 35-axis slot 6 sweep — see `judge_score_combine.py` "Selection history") |
-| `DEFAULT_GPT_HAIKU_Q9_WEIGHT` | `0.625` | GPT / Haiku in the response-mode ensemble (was `0.60` until 2026-05-11; then `0.41` 2026-05-11→05-12 on the raw-projection v2 sweep; retuned to `0.625` 2026-05-12 on the canonical-whitening soft_shear=3 v2 sweep — matches `DEFAULT_GPT_SONNET_DI_WEIGHT`; see `judge_score_combine.py` "Selection history") |
+| `DEFAULT_GPT_HAIKU_Q9_WEIGHT` | `0.525` | GPT / Haiku in the response-mode ensemble (was `0.60` until 2026-05-11; then `0.41` 2026-05-11→05-12 on the raw-projection v2 sweep; `0.625` 2026-05-12→05-22 on the canonical-whitening soft_shear=3 v2 sweep at 12 axes; **retuned to `0.525` on 2026-05-22 22-axis cohort** — discrete grid peak w=0.525 on the expanded set; see `judge_score_combine.py` "Selection history") |
 | `DEFAULT_RESPONSE_DI_WEIGHT` | `0.80` | response / desc+inst in the final per-entity score |
 
 > **RESOLVED 2026-05-14 — di-extension reconfirm done; all constants hold**
@@ -1840,6 +1973,69 @@ Full empirical derivation, per-axis discussion, tuning history, and
 [`results_analysis/README.md` → "Convention: tuned mixing ratios for
 judge ensembles"](results_analysis/README.md#convention-tuned-mixing-ratios-for-judge-ensembles).
 Read that section *before* changing any of the three constants.
+
+### Incorporating new response-judged axes (2026-05-22 checklist)
+
+Before running the formal re-tuning checklist above (sweep 2 + sweep
+3), the new-axis set has to be made discoverable to the loader and
+downstream tooling.  After a Phase-1/2-style response-judging
+campaign delivers GPT B=7 + Haiku B=7 t3 caches for N new axes:
+
+1. **Update `pair_list_responses.json`** to include the new axes
+   (use the rich pair_list_di.json schema with `pair_type`).  This
+   is the single source of truth for "which axes have response
+   judging"; almost everything else that uses the response cohort
+   set reads from it (or imports from a script that does).
+
+2. **Run `tools/audit_caches.py` + `tools/audit_pngs.py`** (slow but
+   exhaustive) to see what's now stale.  These provide the
+   authoritative answer for "what JSON/PNG outputs depend on
+   data I changed".
+
+3. **Source-code scans** the audit tools can't see:
+
+   - `DEFAULT_AXES` in
+     `results_analysis/gpt_anthropic_response_weight_sweep.py` —
+     since 2026-05-22 this is loaded from
+     `pair_list_responses.json` automatically; no manual edit
+     needed.  Other scripts that import `DEFAULT_AXES` (e.g.
+     `response_di_weight_sweep.py`) pick up the new list
+     transitively.
+   - `GPT_DIR_TEMPLATE`, `HAIKU_DIR_TEMPLATE` (hardcoded
+     ``_b10`` / ``_b10_q9`` literals) in legacy sweep scripts:
+     replaced by the canonical
+     `assistant_axis.judge_loaders.load_response_scores()` so the
+     per-entity B=7 → B=10 fallback works for axes that don't yet
+     have B=7.  If you find another script still using these
+     hardcoded templates, retrofit it the same way before running
+     it on a mixed-B cohort.
+   - `_DEFAULT_PREFER_B` in `assistant_axis/judge_loaders.py` — the
+     Haiku default is `(7, 10)`, NOT `(7,)`.  If you ever feel
+     tempted to reduce it to `(7,)`, remember the 2026-05-21
+     mistake: the original 12 axes' bulk coverage lives in
+     `_b10_q9`, and `(7,)`-only would invisibly drop ~95% of those
+     axes' entity coverage.
+
+4. **Re-run cached `*.json` artefacts that the audit flagged stale.**
+   Common ones:
+   - `roger/axis_judge_experiments/rho_by_layer_L.json` (and the
+     companion `_K.json` if you use it) — `rho_by_layer.py` reads
+     `pair_list_responses.json`, so a regen now reflects the new
+     N response axes.  Expect ~30–60 min wall time for the full
+     `--layers 0..63 --slots 0 3 6 7` sweep.
+
+5. **Then run the re-tuning checklist** (sweeps 2 and 3) per the
+   README to confirm or update the canonical weight constants on
+   the new N-axis cohort.
+
+**Why this section exists.**  The re-tuning checklist alone is
+necessary but not sufficient: it doesn't enumerate the cohort-
+discovery plumbing that has to be right BEFORE the sweeps will
+even see the new axes.  Added 2026-05-22 after a 10-axis
+incorporation pass tripped over the hardcoded `DEFAULT_AXES`, the
+`_b10_q9`-only legacy templates in `response_di_weight_sweep.py`,
+and a stale `_DEFAULT_PREFER_B[("haiku", *)] = (7,)` that dropped
+b10 fallback.
 
 ```python
 from assistant_axis.judge_score_combine import (
@@ -2106,7 +2302,7 @@ keys in `steering/run_sweep.py` and kwargs on
 | key | default | meaning |
 |---|---|---|
 | `scan_mode` | `"bidirectional"` | switch to `"legacy_unidirectional"` for old behaviour |
-| `start_strength_multiplier_steps` | `2` | `s_init = weakest * mult ** N` |
+| `start_strength_multiplier_steps` | per-cell heuristic — see below | `s_init = weakest * mult ** N` |
 | `min_strength` | `0.125` | DOWN cursor floor |
 | `eff_stop_threshold` | `0.25` | per-strength `mean(|effect.combined|)` below which counts toward DOWN stop |
 | `eff_stop_consecutive` | `2` | how many consecutive sub-threshold strengths to require |
@@ -2161,6 +2357,71 @@ before generating any new strengths.  Test
 Downstream `results_analysis/*` plot scripts already group records
 by `record["strength"]` so disk order doesn't matter -- the
 `records_in_scan_order: true` field is purely documentary.
+
+### Per-cell start-strength heuristic (May 2026)
+
+Before 2026-05-24 the bidirectional sweep used a flat
+`start_strength_multiplier_steps=2` (so `s_init ≈ 1.41` at
+`weakest=1.0, mult=1.189`) for every cell.  Empirically this is
+sub-optimal: a 310-cell audit
+([`tools/analyse_start_strength.py`](./tools/analyse_start_strength.py))
+showed **49% of all-mode** cells started in the productive band but
+**only 11% of prefill-mode** cells did, with 89% of prefill cells
+starting TOO_LOW (the downward walk immediately eff-stopped at a
+barren region) and ~25% of `(slot=7, layer=49, all-mode)` cells
+starting TOO_HIGH (the upward walk immediately coh-stopped at an
+already-incoherent region).
+
+The fix is a per-cell lookup table in
+[`assistant_axis/sweep_start_heuristics.py`](./assistant_axis/sweep_start_heuristics.py),
+keyed on `(positions_mode, slot, layer)` with per-mode defaults:
+
+| mode | slot | layer | start_steps | s_init | rationale |
+|---|---:|---:|---:|---:|---|
+| all | 0 | 25 | 5 | 2.38 | eff weak (~0.4) at default → bump |
+| all | 0 | 31 | 4 | 2.00 | eff borderline → small bump |
+| all | 0 | 49 | 0 | 1.00 | high-effect already; lower to cut TOO_HIGH risk |
+| all | 6 | 25 | 6 | 2.83 | weakest all-mode cell (eff ~0.26) |
+| all | 7 | 25 | 7 | 3.36 | weak (eff ~0.26) |
+| all | 7 | 49 | **−3** | 0.59 | hottest cell — coh tripped at default in ~25% of axes; needs sub-weakest start (requires `start_steps_up < 0`, allowed 2026-05-24; floor is now `min_strength`) |
+| all | any other | | 3 (default) | 1.68 | |
+| prefill | 0 | 25 | 9 | 4.95 | eff ~0.2; need 3-5× higher |
+| prefill | 0 | 49 | 5 | 2.38 | layer-49 prefill is closer to cliff; modest bump |
+| prefill | 6 | 25 | 9 | 4.95 | weakest prefill cell |
+| prefill | 6 | 49 | **1** | 1.19 | **layer 49 prefill is already near coh cliff** (median coh ~0.5 at default); needs LOWER start than default |
+| prefill | 7 | 25 | 9 | 4.95 | weak (eff ~0.18) |
+| prefill | 7 | 49 | **1** | 1.19 | same as (prefill, 6, 49): near-cliff already |
+| prefill | any other | | 6 (default) | 2.67 | |
+
+Counter-intuitive pattern: **layer-49 prefill cells start LOWER than
+the prefill default**, because prefill steering at deep layers
+already has coherence near the cliff at weak strengths (median coh
+~0.5 at `s_init = 1.41`).  Pushing prefill higher to fix the
+weak-effect cells would push deep-layer prefill over.
+
+**Negative start_steps.**  The cursor previously asserted
+`start_steps_up >= 0`; relaxed 2026-05-24 because the (all, 7, 49)
+override needs `s_init < weakest`.  The actual safety floor is
+`s_init >= min_strength` (cursor's `__init__` enforces this).
+
+**Override semantics.**  If the YAML explicitly sets
+`sweep.start_strength_multiplier_steps`, that value wins for every
+cell (so one-off experiments can still pin a value).  Per-cell YAML
+override is *not* supported -- the table is the per-cell knob.
+
+**Re-tuning.**  Re-run
+[`tools/analyse_start_strength.py`](./tools/analyse_start_strength.py)
+after every meaningful sweep batch (e.g. when sweep #2 second-role
+data lands and we have ~2× more cells per bucket).  Inspect the
+`(slot, layer, sign, mode)` table at the end of the report; if a
+bucket newly shifts away from GOOD-dominant, add or adjust an
+`OVERRIDES` entry and ship a one-line table edit.  No code or
+runner changes needed.
+
+**What about scan_mode legacy?**  The lookup applies only to
+`scan_mode="bidirectional"` (the default).  Legacy unidirectional
+sweeps use the cell-level `start_strength_multiplier_steps` value
+directly without consulting the heuristic.
 
 ### Steering question selection (May 2026)
 
@@ -3165,21 +3426,32 @@ snapshots).
 
 ### Tiered question subsampling for response judging (default May 2026)
 
-> **2026-05-21 status update — tiered t3 is canonical; uniform q9 is OBSOLETE.**
+> **2026-05-21 status update — tiered t3 is canonical for new judging;
+> uniform q9 is OBSOLETE for writes, retained as the read-side
+> fallback for axes/entities not yet rejudged at B=7.**
 >
 > Empirically, the tiered cohort auto-escalates (tier 1 → tier 2 → tier 3
 > per-entity) until every persona has enough graded items, which
 > typically yields coverage equivalent to the old uniform `_b10_q9`
 > cohort. Running both is roughly twice the cost for little marginal
-> coverage. **Use `_b7_t3` (tiered) for all new Haiku judging.** The
-> default Haiku `prefer_b` in `assistant_axis.judge_loaders` was reduced
-> from `(7, 10)` to `(7,)` on 2026-05-21; legacy `_b10_q9` Haiku caches
-> on disk are still readable via explicit `prefer_b=(7, 10)` but are no
-> longer written. Note that the **fresh** t3 cost is ~10× higher than
-> the historical surgical-refresh number documented elsewhere (because
-> a from-scratch run pays the full tier-1/2/3 escalation cost for every
-> entity, rather than topping up an already-q9-covered axis): plan on
-> ~$27/cohort, ~$54/axis (roles+traits) for fresh Haiku t3 runs.
+> coverage. **Use `_b7_t3` (tiered) for all new Haiku judging.**
+>
+> **Read-side fallback (CORRECTED 2026-05-22).**  The default Haiku
+> `prefer_b` in `assistant_axis.judge_loaders` is `(7, 10)` — B=7
+> preferred, B=10 legacy fallback per entity.  An earlier (2026-05-21)
+> change reduced it to `(7,)` only, but that broke load on the original
+> 12 axes whose bulk entity coverage still lives in `_b10_q9` (only
+> the ~14–29 collision-disambiguation entities per axis got the
+> `_b7_t3` surgical rejudge).  The new 10 Phase-1/2 axes have their
+> full coverage in `_b7_t3` and resolve entirely there; the original
+> 12 axes fall back to `_b10_q9` for everything outside the surgical
+> set.  Both regimes work transparently under the default `(7, 10)`.
+>
+> The **fresh** t3 cost is ~10× higher than the historical surgical-
+> refresh number documented elsewhere (because a from-scratch run pays
+> the full tier-1/2/3 escalation cost for every entity, rather than
+> topping up an already-q9-covered axis): plan on ~$27/cohort,
+> ~$54/axis (roles+traits) for fresh Haiku t3 runs.
 
 `results_analysis.axis_judge_correlation --score_responses` now defaults
 to **per-entity tiered subsampling** instead of "judge every response".
@@ -3443,9 +3715,8 @@ are kind-pure by directory — bare names there remain correct.  Same for
 ### `assistant_axis.judge_loaders.load_response_scores`
 
 The canonical reader for response-mode scores.  Default Haiku
-`prefer_b = (7,)` since 2026-05-21 — reads only the tiered `_b7_t3`
-cohort.  Pass `prefer_b=(7, 10)` explicitly to opt in to the legacy
-`_b10_q9` fallback (e.g. for axes that pre-date 5d).  Uses
+`prefer_b = (7, 10)` — reads `_b7_t3` where available and falls back
+to `_b10_q9` per-entity for axes not yet rejudged at B=7.  Uses
 **conditional provenance**: only registers a cohort file as a
 dependency if it actually contributed at least one entity to the
 returned result.  See the module docstring for the suffix conventions

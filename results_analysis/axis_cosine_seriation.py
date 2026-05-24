@@ -22,9 +22,28 @@ For ``--pairs pair_list_clean.json``, ``--L 3`` (defaults):
 * ``axis_cosine_heatmap_clean_softshear3.png`` — seriated heatmap
   with cluster-bracket overlays at the threshold (default 0.5) and
   semantic-block ontology bands on the y/x axes (see below).
-* ``axis_cosine_heatmap_clean_softshear3.json`` — the OLO leaf order
-  plus cluster memberships at thresholds 0.7 / 0.6 / 0.5 / 0.4 / 0.3,
-  plus the resolved ontology run structure, for downstream consumption.
+* ``axis_cosine_heatmap_clean_softshear3.json`` — datastore holding:
+
+  * ``axis_labels`` (list, orig-index order) and ``abs_cos_matrix``
+    (n×n) — full pairwise |cos| matrix in the chosen whitening frame,
+    so downstream consumers don't have to re-run the (~30 s) build
+    step.
+  * ``linkage_matrix`` ((n−1)×4) — the scipy.cluster.hierarchy
+    optimal-leaf-ordered linkage; pass to ``dendrogram`` /
+    ``fcluster`` to recover the hierarchical structure.
+  * ``seriated_order`` (list of dicts) — the OLO permutation
+    (orig_index → seriated_index) plus pos/neg/label for each axis.
+  * ``clusters_by_threshold`` — cluster memberships at thresholds
+    0.7 / 0.6 / 0.5 / 0.4 / 0.3 (distance = 1 − |cos|).
+  * ``ontology`` — the resolved semantic-block run structure when
+    the cohort has a hand-curated ontology (see below).
+  * ``pairwise_abs_cos`` — summary stats (min/max/mean/median) on
+    the off-diagonal entries.
+
+  Both raw (``--L 0``) and ``soft_shear=3`` (default) variants are
+  cached as separate files so cross-frame comparison is one ``json.load``
+  away.  This is the canonical datastore for axis-to-axis geometry;
+  use it instead of recomputing pairwise cosines anywhere downstream.
 
 With ``--L 0`` the basename swaps the ``softshear3`` tag for ``raw``
 (emits ``axis_cosine_heatmap_clean_raw.{png,json}``) so the raw and
@@ -694,10 +713,22 @@ def main() -> int:
     plt.close(fig)
     print(f"Wrote {plot_path}")
 
-    # JSON sidecar with ordering + cluster memberships
+    # JSON sidecar with ordering + cluster memberships + the full
+    # pairwise matrix and linkage so downstream consumers don't have
+    # to recompute the (~30 sec) shear-and-multiply step.  The two
+    # extra fields are small (60x60 matrix ~28 KB; 59x4 linkage
+    # ~3 KB at default precision).
+    #
+    # The matrix is in orig-index order (== axis_labels order); the
+    # seriated_order field provides the OLO permutation.  Reconstruct
+    # the seriated matrix as M[leaf_order][:, leaf_order] where
+    # leaf_order = [e["orig_index"] for e in seriated_order].
     json_payload = {
         "n_axes": n, "slot": slot, "layer": layer, "L": L,
         "ca_kind": args.ca_kind, "linkage": args.linkage,
+        "axis_labels": list(labels),     # orig-index order
+        "abs_cos_matrix": M.tolist(),    # n x n, float64; indexable by axis_labels
+        "linkage_matrix": Z_ordered.tolist(),  # (n-1) x 4 scipy linkage
         "seriated_order": [
             {"pos": labels[i].split("/")[0], "neg": labels[i].split("/")[1],
              "label": labels[i], "orig_index": int(i),

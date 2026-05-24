@@ -119,10 +119,13 @@ class BidirectionalCursor:
     ``scan_mode="legacy_unidirectional"``.
 
     The cursor produces strengths in two directions from a centre anchor
-    ``s_init = weakest * multiplier**start_steps_up`` (default 1.414
-    when weakest=1.0, mult=1.189 -- "2 multiplier-steps up from the
-    historical floor", which empirically lands above the no-signal tail
-    for most cells; see ``base_persona_candidates.txt`` analysis).
+    ``s_init = weakest * multiplier**start_steps_up``.  Per-cell starts
+    come from :mod:`assistant_axis.sweep_start_heuristics` (May 2026:
+    replaces the historical flat ``start_steps_up=2`` with a per-
+    ``(positions_mode, slot, layer)`` lookup) so each cell starts in
+    its empirically-determined productive band.  ``start_steps_up`` may
+    be negative -- the real safety floor for ``s_init`` is
+    ``min_strength``, not zero.
 
     The UP direction terminates when the next step would exceed
     ``max_strength`` (default 64.0).  Empirically the 14 May-2026
@@ -172,18 +175,31 @@ class BidirectionalCursor:
                 f"min_strength must be at or below the historical lower "
                 f"floor"
             )
-        if start_steps_up < 0:
-            raise ValueError(
-                f"start_steps_up must be >= 0; got {start_steps_up}"
-            )
         self._mult = float(multiplier)
         self._max = float(max_strength)
         self._min = float(min_strength)
         # Centre anchor.  Round to match the schedule's stable-precision
         # convention so equality checks across restart sessions work.
+        #
+        # Negative ``start_steps_up`` is allowed and means
+        # ``s_init = weakest * multiplier ** -N`` (i.e. starting BELOW
+        # ``weakest``).  This is required by
+        # ``sweep_start_heuristics.OVERRIDES`` for cells where the
+        # coherence cliff is close to ``weakest`` itself (e.g. all-mode
+        # slot=7 layer=49 on Qwen-3-32B: coh tripped at s≈1.0 in ~25%
+        # of axes pre-fix).  The actual lower safety bound is
+        # ``min_strength`` -- enforced just below.
         self.s_init: float = round(
             float(weakest) * (multiplier ** start_steps_up), 6
         )
+        if self.s_init < min_strength:
+            raise ValueError(
+                f"resolved s_init={self.s_init} < min_strength={min_strength}; "
+                f"need (weakest * multiplier ** start_steps_up) >= min_strength.  "
+                f"Got weakest={weakest}, multiplier={multiplier}, "
+                f"start_steps_up={start_steps_up}.  Lower ``min_strength`` if "
+                f"a sub-min start is intended."
+            )
         # Cursors track the LAST strength emitted in each direction
         # (or s_init if nothing has been emitted yet on that side).
         self._last_up: float = self.s_init

@@ -64,28 +64,39 @@ from results_analysis.canonical_angles.whitening import (
 _SCRIPT_PATH = Path(__file__).resolve()
 
 
-# Axes available for response judging.  All 12 traits axes have GPT-B=10
-# response judging on disk; sets 2..4 (axes 4..12) only have q9-subsampled
-# Anthropic data, so the ``haiku_full`` combo will skip those nine axes
-# and render just set 1.  Mirrors ``ALL_RESPONSE_AXES`` in
-# :mod:`judge_ensemble_rho_curve` so the two stay in sync.
-DEFAULT_AXES: list[tuple[str, str, str]] = [
-    ("truthful_vs_deceitful",          "truthful",        "deceitful"),
-    ("progressive_vs_conservative",    "progressive",     "conservative"),
-    ("improvisational_vs_methodical",  "improvisational", "methodical"),
-    ("concise_vs_verbose",             "concise",         "verbose"),
-    ("ecocentric_vs_anthropocentric",  "ecocentric",      "anthropocentric"),
-    ("egalitarian_vs_elitist",         "egalitarian",     "elitist"),
-    ("guileless_vs_scheming",          "guileless",       "scheming"),
-    ("harmless_vs_harmful",            "harmless",        "harmful"),
-    ("honest_vs_dishonest",            "honest",          "dishonest"),
-    ("helpful_vs_unhelpful",           "helpful",         "unhelpful"),
-    ("relativist_vs_absolutist",       "relativist",      "absolutist"),
-    ("systems_thinker_vs_analytical",  "systems_thinker", "analytical"),
-]
-
 DEFAULT_EXPERIMENT_DIR = Path(__file__).resolve().parent.parent / (
     "roger/axis_judge_experiments"
+)
+
+
+def _load_axes_from_pair_list(
+    pair_list_path: Path,
+) -> list[tuple[str, str, str]]:
+    """Load axes from a pair_list JSON file.
+
+    Reads e.g. ``pair_list_responses.json`` and returns the canonical
+    ``[(axis_name, pos, neg), ...]`` tuple list used by the sweep
+    loaders.  See :data:`DEFAULT_AXES` for the canonical 12 → 22
+    expansion history (2026-05-22: 10 new axes added once their
+    response judging completed at the canonical B=7 t3 cohort).
+    """
+    with open(pair_list_path, encoding="utf-8") as f:
+        pairs = json.load(f)
+    return [
+        (f"{p['pos']}_vs_{p['neg']}", p["pos"], p["neg"])
+        for p in pairs
+    ]
+
+
+# Axes available for response judging.  Loaded from
+# ``pair_list_responses.json`` so future axis additions propagate
+# automatically.  As of 2026-05-22 the set is 22 axes (was 12 prior
+# to Phases 1+2 response-judging campaign): the original HHH-adjacent
+# 12 plus 10 personality/style axes (proactive, descriptive,
+# religious, fragile, introverted, benign, accessible, precise,
+# blunt, earnest).  Override with --pair_list <path> for ablations.
+DEFAULT_AXES: list[tuple[str, str, str]] = _load_axes_from_pair_list(
+    DEFAULT_EXPERIMENT_DIR / "pair_list_responses.json"
 )
 DEFAULT_DATA_DIR = Path(__file__).resolve().parent.parent / (
     "runpod_workspace/qwen/qwen-3-32b Roger 8slot"

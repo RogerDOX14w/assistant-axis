@@ -19,7 +19,7 @@ everywhere with one edit.
 from assistant_axis.judge_score_combine import (
     DEFAULT_DI_WEIGHTS,             # 0.499 desc / 0.501 inst   (within one judge)
     DEFAULT_GPT_SONNET_DI_WEIGHT,   # 0.625 GPT / 0.375 Sonnet  (within desc+inst ensemble; v2 retune 2026-05-12)
-    DEFAULT_GPT_HAIKU_Q9_WEIGHT,    # 0.625 GPT / 0.375 Haiku   (within response ensemble; canonical-whitening retune 2026-05-12)
+    DEFAULT_GPT_HAIKU_Q9_WEIGHT,    # 0.525 GPT / 0.475 Haiku   (within response ensemble; 22-axis retune 2026-05-22)
     DEFAULT_RESPONSE_DI_WEIGHT,     # 0.80 response / 0.20 DI   (final blend)
     combine_desc_inst_two_judges,
 )
@@ -29,7 +29,7 @@ from assistant_axis.judge_score_combine import (
 |---|---|---|---|---|---|
 | 1 | `DEFAULT_DI_WEIGHTS` | `(0.499, 0.501)` | desc / inst within one judge | (manual sweep, ablations encoded as the `inst_tie`/`equal`/`desc_tie` choices) | slot=(3,25) / (0,26) / (0,49) |
 | 2 | `DEFAULT_GPT_SONNET_DI_WEIGHT` | `0.625` | GPT / Sonnet within the desc+inst ensemble (per mode) (was `0.50` until 2026-05-12; bumped to the soft_shear=3 discrete grid peak w=0.625) | `gpt_sonnet_weight_sweep.py --whitening soft_shear=3` | slot 6 / layer 25 |
-| 3 | `DEFAULT_GPT_HAIKU_Q9_WEIGHT` | `0.625` | GPT / Haiku within the response-mode ensemble (was `0.60` pre-Phase-5d; then `0.41` on the raw v2 sweep; retuned to `0.625` on the canonical-whitening v2 sweep — matches `DEFAULT_GPT_SONNET_DI_WEIGHT`) | `gpt_anthropic_response_weight_sweep.py --rubric v2 --whitening soft_shear=3` | slot 6 / layer 25 |
+| 3 | `DEFAULT_GPT_HAIKU_Q9_WEIGHT` | `0.525` | GPT / Haiku within the response-mode ensemble (was `0.60` pre-Phase-5d; `0.41` on the raw v2 sweep; `0.625` on the canonical-whitening v2 sweep at 12 axes; retuned to **`0.525`** on the 22-axis cohort 2026-05-22 once the Phase-1/2 axes landed) | `gpt_anthropic_response_weight_sweep.py --rubric v2 --whitening soft_shear=3` | slot 6 / layer 25 |
 | 4 | `DEFAULT_RESPONSE_DI_WEIGHT` | `0.80` | response ensemble / desc+inst ensemble in the final per-entity score | `response_di_weight_sweep.py` | slot 6 / layer 25 |
 
 ### 1. Per-judge desc / inst (inst-tiebreak)
@@ -110,8 +110,10 @@ outside `[0.45, 0.55]`.
 
 ### 3. Within the response ensemble (`DEFAULT_GPT_HAIKU_Q9_WEIGHT`)
 
-`0.625` weight on GPT-4.1-mini, `0.375` on Haiku for the
-response-mode ensemble:
+`0.525` weight on GPT-4.1-mini, `0.475` on Haiku for the
+response-mode ensemble (as of 2026-05-22; was `0.625` on the
+original 12-axis cohort, retuned after the Phase-1/2 expansion
+to 22 axes):
 
 ```python
 response = {
@@ -143,13 +145,14 @@ response = {
   the ensemble wanted more Haiku.  Superseded by the next entry
   once whitening became the project canonical.
 
-- **0.625 (May 12 2026, canonical-whitening v2)** re-tuned on the v2
-  view at the canonical whitening regime `--whitening soft_shear=3`,
-  i.e. the operating point all downstream analyses now use (plot at
-  `gpt_haiku_q9_response_weight_sweep_slot6_softshear3__rubric_v2.png`).
+- **0.625 (May 12 2026, canonical-whitening v2, 12 axes)** re-tuned
+  on the v2 view at the canonical whitening regime `--whitening
+  soft_shear=3` on the original 12-axis cohort (plot at
+  `gpt_haiku_q9_response_weight_sweep_slot6_softshear3__rubric_v2.png`
+  in its pre-2026-05-22 form).
   Discrete grid peak at **w = 0.600** (ρ = 0.7524, w_step = 0.025);
   parabolic interior fit peaks slightly higher at **w = 0.624**.
-  Plateau `w ∈ [0.50, 0.70]` is flat within 0.0006 ρ — entirely
+  Plateau `w ∈ [0.50, 0.70]` flat within 0.0006 ρ — entirely
   inside the ~±0.055 95% CI half-width (n=12 axes, per-axis stdev
   0.097), so 0.600 / 0.624 / 0.625 are statistically tied.  Picked
   `0.625` for symmetry with `DEFAULT_GPT_SONNET_DI_WEIGHT` (which
@@ -161,6 +164,25 @@ response = {
   better.  Pure-Haiku ρ under whitening is +0.7267 (vs +0.731 at
   raw); pure-GPT is +0.7329; peak ρ at w=0.6 is +0.7524 — a real
   improvement on top of Phase-5d's gains, not just a re-weighting.
+
+- **0.525 (May 22 2026, 22-axis retune)** re-tuned on the same v2 /
+  soft_shear=3 view but on the **22-axis cohort** (the original 12
+  + 10 Phase-1/2 personality-style axes — proactive, descriptive,
+  religious, fragile, introverted, benign, accessible, precise,
+  blunt, earnest — all now response-judged at the canonical B=7
+  cohort).  Discrete grid peak at **w = 0.525** (ρ = 0.7521,
+  w_step = 0.025); parabolic interior fit peaks at **w = 0.472**
+  (ρ = 0.7515, R²=0.927).  Plateau `w ∈ [0.375, 0.575]` flat within
+  0.0013 ρ.  Plot at the same path
+  (`gpt_haiku_q9_response_weight_sweep_slot6_softshear3__rubric_v2.png`,
+  now regenerated).
+  The shift from 0.625 → 0.525 reflects **Haiku becoming the better
+  single-judge baseline on the expanded cohort**: pure-Haiku ρ =
+  0.7402, pure-GPT ρ = 0.7088 (inverted from the 12-axis ranking
+  where GPT was slightly ahead).  This is sweep #2 of the
+  ``Re-tuning checklist`` (below) and is **independent** of any
+  desc+inst-vs-response-quality bias the new axes may carry — the
+  sweep compares GPT_response vs Haiku_response only.
 
 Haiku-q9 remained the operating-point winner on cost-per-quality
 across the 4-Pareto-set view
@@ -228,6 +250,9 @@ the central constant.  Audit trail:
 | (legacy) | hardcoded GPT/Sonnet `(g + s)/2` | — | (parameterised, default 0.50) | Pre-dated the constant catalog; promoted to `DEFAULT_GPT_SONNET_DI_WEIGHT = 0.50` on 2026-05-09 for symmetry with the other three. 33-axis sweep peaks at w=0.530 with mean ρ within 0.0004 of the round-number value. |
 | 2026-05-12 | `DEFAULT_GPT_SONNET_DI_WEIGHT` | `0.50` | `0.625` | Canonical-whitening retune: 35-axis `gpt_sonnet_weight_sweep.py --whitening soft_shear=3` at slot 6 layer 25, **discrete grid peak w=0.625** (ρ=0.70198, w_step=0.025).  Parabolic peak is nominally w=0.700 but the plateau `w∈[0.575, 0.700]` is flat within 0.0003 ρ vs ~0.04 95% CI half-width, so we pick the literal discrete peak.  Δρ vs old 0.50 default is +0.0008 (~judge noise). |
 | 2026-05-08 | `DEFAULT_GPT_HAIKU_Q9_WEIGHT` | (was 0.5 = "even split" at first) | `0.60` | 12-axis sweep, parabolic peak at w=0.609 rounded; Pareto-frontier check on cost-per-quality. |
+| 2026-05-11 | `DEFAULT_GPT_HAIKU_Q9_WEIGHT` | `0.60` | `0.41` | v2 raw-projection re-tune, parabolic peak ~0.41 (Phase-5d Haiku data improved). |
+| 2026-05-12 | `DEFAULT_GPT_HAIKU_Q9_WEIGHT` | `0.41` | `0.625` | Canonical-whitening (`--whitening soft_shear=3`) v2 retune at slot 6 / layer 25; 12-axis discrete grid peak w=0.600, parabolic w=0.624, rounded to 0.625 for symmetry with `DEFAULT_GPT_SONNET_DI_WEIGHT`. |
+| 2026-05-22 | `DEFAULT_GPT_HAIKU_Q9_WEIGHT` | `0.625` | `0.525` | **22-axis retune** after Phase-1/2 expansion added 10 personality-style axes.  Discrete grid peak w=0.525 (ρ=0.7521), parabolic w=0.472, plateau [0.375, 0.575].  Haiku is now the better single-judge baseline (Haiku 0.740 vs GPT 0.709), inverting the 12-axis ranking. |
 | 2026-05-09 | `DEFAULT_RESPONSE_DI_WEIGHT` | `0.50` (placeholder) | `0.80` | 12-axis and 11-axis-without-eco sweeps both flat-plateau at w=0.8 (12-axis peak 0.84, 11-axis peak 0.71). |
 
 ### Re-tuning checklist

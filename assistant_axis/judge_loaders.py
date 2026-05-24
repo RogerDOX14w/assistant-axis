@@ -166,8 +166,17 @@ DEFAULT_EXPERIMENTS_ROOT: Path = Path("roger/axis_judge_experiments")
 _DEFAULT_PREFER_B: dict[tuple[str, str], tuple[int, ...]] = {
     ("gpt", "v2"):    (7,),
     ("gpt", "v1"):    (10,),
-    ("haiku", "v2"):  (7,),         # 2026-05-21: q9 fallback dropped (obsolete)
-    ("haiku", "v1"):  (7,),         # 2026-05-21: q9 fallback dropped (obsolete)
+    # Haiku: B=7 preferred (canonical), with B=10 as legacy fallback for
+    # axes/entities not yet rejudged at B=7.  The B=10 cohort was
+    # initially marked obsolete on 2026-05-21 with the intent "don't
+    # write new q9", but the fallback was inadvertently dropped from
+    # the read path too -- restored on 2026-05-22 once it became clear
+    # that the 10 new Phase-1/2 axes have only B=7 data while the
+    # original 12 axes still rely on B=10 for the bulk of their
+    # entity coverage (only the ~14-29 collision-disambiguation
+    # entities per axis got the b7_t3 surgical rejudge).
+    ("haiku", "v2"):  (7, 10),
+    ("haiku", "v1"):  (7, 10),
     ("sonnet", "v2"): (10,),
     ("sonnet", "v1"): (10,),
 }

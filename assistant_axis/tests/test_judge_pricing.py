@@ -20,6 +20,7 @@ from assistant_axis.judge_pricing import (
     GPT_MINI_RATE_OUT,
     HAIKU_RATE_IN,
     HAIKU_RATE_OUT,
+    MultiModelUsage,
     ROLES_RESPONSE_LENGTH_FACTOR,
     SONNET_RATE_IN,
     SONNET_RATE_OUT,
@@ -334,6 +335,128 @@ class TestBudgetTracker:
         assert "budget_usd" not in d
         assert "expected_cost_usd" not in d
         assert "actual_over_expected" not in d
+
+
+# ---------------------------------------------------------------------------
+# MultiModelUsage
+# ---------------------------------------------------------------------------
+
+class TestMultiModelUsage:
+    """``MultiModelUsage`` is the per-model accumulator used by mixed
+    workloads (steering's GPT+Haiku effect ensemble, anything that
+    calls more than one model in a single run).  Critical invariants:
+    per-model totals stay separate, ``charge`` returns the per-call USD
+    delta, and ``write_json``/``load_or_create`` round-trip exactly.
+    """
+
+    def test_charge_separates_models(self):
+        u = MultiModelUsage()
+        u.charge("gpt-4.1-mini", 1_000_000, 0)   # = $0.40 input
+        u.charge("claude-haiku-4-5-20251001", 1_000_000, 0)  # = $1.00 input
+        assert u.per_model["gpt-4.1-mini"].cost_usd == pytest.approx(0.40)
+        assert u.per_model["claude-haiku-4-5-20251001"].cost_usd == pytest.approx(1.00)
+        assert u.total_cost_usd == pytest.approx(1.40)
+
+    def test_charge_accumulates_within_model(self):
+        u = MultiModelUsage()
+        u.charge("gpt-4.1-mini", 500_000, 100_000)   # 0.20 in + 0.16 out = $0.36
+        u.charge("gpt-4.1-mini", 500_000, 100_000)   # +$0.36 = $0.72
+        sub = u.per_model["gpt-4.1-mini"]
+        assert sub.prompt_tokens == 1_000_000
+        assert sub.completion_tokens == 200_000
+        assert sub.n_calls == 2
+        assert sub.cost_usd == pytest.approx(0.72)
+        assert u.n_calls == 2
+
+    def test_charge_returns_per_call_delta(self):
+        u = MultiModelUsage()
+        delta = u.charge("gpt-4.1-mini", 1_000_000, 0)
+        assert delta == pytest.approx(GPT_MINI_RATE_IN)
+
+    def test_aggregate_properties(self):
+        u = MultiModelUsage()
+        u.charge("gpt-4.1-mini", 100, 200)
+        u.charge("claude-haiku-4-5", 300, 400)
+        assert u.total_prompt_tokens == 400
+        assert u.total_completion_tokens == 600
+        assert u.n_calls == 2
+
+    def test_as_dict_roundtrip(self):
+        u = MultiModelUsage()
+        u.charge("gpt-4.1-mini", 1_234_567, 89_012)
+        u.charge("claude-haiku-4-5-20251001", 50_000, 5_000)
+        d = u.as_dict()
+        u2 = MultiModelUsage.from_dict(d)
+        # Per-model token counts and call counts exact match.
+        for m in u.per_model:
+            assert u2.per_model[m].prompt_tokens == u.per_model[m].prompt_tokens
+            assert u2.per_model[m].completion_tokens == u.per_model[m].completion_tokens
+            assert u2.per_model[m].n_calls == u.per_model[m].n_calls
+        # Aggregate cost preserved to float precision.
+        assert u2.total_cost_usd == pytest.approx(u.total_cost_usd)
+
+    def test_write_json_load_or_create_roundtrip(self, tmp_path):
+        u = MultiModelUsage()
+        u.charge("gpt-4.1-mini", 2_000, 500)
+        path = tmp_path / "usage.json"
+        u.write_json(path)
+        assert path.exists()
+        loaded = MultiModelUsage.load_or_create(path)
+        assert loaded.per_model["gpt-4.1-mini"].prompt_tokens == 2_000
+        assert loaded.per_model["gpt-4.1-mini"].completion_tokens == 500
+        assert loaded.per_model["gpt-4.1-mini"].n_calls == 1
+
+    def test_load_or_create_missing_returns_empty(self, tmp_path):
+        loaded = MultiModelUsage.load_or_create(tmp_path / "does_not_exist.json")
+        assert loaded.per_model == {}
+        assert loaded.n_calls == 0
+        assert loaded.total_cost_usd == 0.0
+
+    def test_merge_from_accumulates(self):
+        u1 = MultiModelUsage()
+        u1.charge("gpt-4.1-mini", 1_000_000, 0)   # $0.40
+        u2 = MultiModelUsage()
+        u2.charge("gpt-4.1-mini", 1_000_000, 0)   # +$0.40
+        u2.charge("claude-haiku-4-5", 1_000_000, 0)  # +$1.00
+        u1.merge_from(u2)
+        # gpt-4.1-mini summed; haiku created fresh.
+        assert u1.per_model["gpt-4.1-mini"].prompt_tokens == 2_000_000
+        assert u1.per_model["gpt-4.1-mini"].n_calls == 2
+        assert u1.per_model["claude-haiku-4-5"].prompt_tokens == 1_000_000
+        assert u1.total_cost_usd == pytest.approx(0.80 + 1.00)
+
+    def test_resume_flow_via_load_then_charge(self, tmp_path):
+        # Simulate: first invocation writes usage.json, second invocation
+        # loads it, charges additional calls, and writes back.
+        path = tmp_path / "usage.json"
+        first = MultiModelUsage()
+        first.charge("gpt-4.1-mini", 1_000_000, 0)
+        first.write_json(path)
+        # Resume:
+        second = MultiModelUsage()
+        second.merge_from(MultiModelUsage.load_or_create(path))
+        second.charge("gpt-4.1-mini", 500_000, 0)
+        second.write_json(path)
+        # Re-read: total = 1.5M input tokens, 2 calls, $0.60.
+        reloaded = MultiModelUsage.load_or_create(path)
+        sub = reloaded.per_model["gpt-4.1-mini"]
+        assert sub.prompt_tokens == 1_500_000
+        assert sub.n_calls == 2
+        assert sub.cost_usd == pytest.approx(0.60)
+
+    def test_log_line_empty(self):
+        u = MultiModelUsage()
+        assert "no API calls" in u.log_line()
+
+    def test_log_line_non_empty_mentions_each_model(self):
+        u = MultiModelUsage()
+        u.charge("gpt-4.1-mini", 100, 50)
+        u.charge("claude-haiku-4-5", 100, 50)
+        line = u.log_line(prefix="[test]")
+        assert "[test]" in line
+        assert "gpt-4.1-mini" in line
+        assert "claude-haiku-4-5" in line
+        assert "total=$" in line
 
 
 # ---------------------------------------------------------------------------

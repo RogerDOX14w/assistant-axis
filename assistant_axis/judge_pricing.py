@@ -295,6 +295,192 @@ class UsageTotals:
             "n_calls": self.n_calls,
         }
 
+    @classmethod
+    def from_dict(cls, d: dict) -> "UsageTotals":
+        """Inverse of :meth:`as_dict`.  Tolerates missing fields (rounded
+        ``cost_usd`` is recomputed precisely from the token counts).
+        """
+        model = str(d.get("model") or "")
+        if not model:
+            raise ValueError("UsageTotals.from_dict: missing 'model' field")
+        pt = int(d.get("prompt_tokens") or 0)
+        ct = int(d.get("completion_tokens") or 0)
+        n  = int(d.get("n_calls") or 0)
+        # Recompute cost from tokens (the stored value is rounded; we
+        # keep full precision in memory).
+        try:
+            cost = cost_for_usage(model, pt, ct)
+        except KeyError:
+            # Unknown model: fall back to the persisted cost so we
+            # don't silently zero out historic totals.
+            cost = float(d.get("cost_usd") or 0.0)
+        return cls(model=model, prompt_tokens=pt, completion_tokens=ct,
+                   cost_usd=cost, n_calls=n)
+
+
+# ---------------------------------------------------------------------------
+# Multi-model accumulator (for workloads that hit multiple judges per item,
+# e.g. steering's bidirectional GPT+Haiku effect ensemble).
+# ---------------------------------------------------------------------------
+
+@dataclass
+class MultiModelUsage:
+    """Per-model usage accumulator for mixed-judge workloads.
+
+    Wraps ``dict[model_name, UsageTotals]`` with convenient
+    aggregation helpers, JSON round-trip, and merge-on-load
+    semantics for resume-friendly persistence.
+
+    Use this on any automated LLM call site that may issue calls to
+    more than one model, OR is run repeatedly enough that an aggregate
+    cost report is useful (project rule -- see AGENT_NOTES "Token
+    usage logging is mandatory on batched LLM call sites").
+
+    Example::
+
+        usage = MultiModelUsage()
+        # ... in your call site, after each successful API response:
+        usage.charge("gpt-4.1-mini", prompt_tokens, completion_tokens)
+        usage.charge("claude-haiku-4-5", prompt_tokens, completion_tokens)
+        # End-of-run:
+        usage.write_json(output_dir / "usage.json")
+    """
+    per_model: dict[str, UsageTotals] = field(default_factory=dict)
+
+    def charge(
+        self, model: str, prompt_tokens: int, completion_tokens: int,
+    ) -> float:
+        """Tick the (model) sub-accumulator.  Returns the USD cost
+        contribution of this single call (sum across all token streams).
+
+        The model entry is auto-created on first use; subsequent calls
+        with the same name accumulate.  Never raises (no budget cap).
+        """
+        if model not in self.per_model:
+            self.per_model[model] = UsageTotals(model=model)
+        return self.per_model[model].charge(prompt_tokens, completion_tokens)
+
+    @property
+    def total_cost_usd(self) -> float:
+        return sum(t.cost_usd for t in self.per_model.values())
+
+    @property
+    def total_prompt_tokens(self) -> int:
+        return sum(t.prompt_tokens for t in self.per_model.values())
+
+    @property
+    def total_completion_tokens(self) -> int:
+        return sum(t.completion_tokens for t in self.per_model.values())
+
+    @property
+    def n_calls(self) -> int:
+        return sum(t.n_calls for t in self.per_model.values())
+
+    def as_dict(self) -> dict:
+        """Serialisable form: per-model breakdown plus aggregate totals.
+
+        Aggregate totals are written for human convenience; they are
+        recomputed from ``per_model`` on :meth:`from_dict` rather than
+        trusted as the source of truth.
+        """
+        return {
+            "per_model": {m: t.as_dict() for m, t in sorted(self.per_model.items())},
+            "total_cost_usd": round(self.total_cost_usd, 4),
+            "total_prompt_tokens": self.total_prompt_tokens,
+            "total_completion_tokens": self.total_completion_tokens,
+            "n_calls": self.n_calls,
+        }
+
+    @classmethod
+    def from_dict(cls, d: dict) -> "MultiModelUsage":
+        """Inverse of :meth:`as_dict`.  Ignores aggregate totals (they
+        are recomputed from per-model entries on read)."""
+        per_model = {}
+        for m, sub in (d.get("per_model") or {}).items():
+            per_model[m] = UsageTotals.from_dict(sub)
+        return cls(per_model=per_model)
+
+    def merge_from(self, other: "MultiModelUsage") -> None:
+        """In-place merge: add ``other``'s per-model totals into self.
+
+        Used by resume paths (load existing usage.json, then continue
+        ticking the live tracker).  Token counts are summed; cost is
+        recomputed from tokens to absorb any pricing-table changes
+        between runs (running-total cost is then accurate at current
+        rates, not historical rates).
+        """
+        for model, sub in other.per_model.items():
+            if model not in self.per_model:
+                self.per_model[model] = UsageTotals(model=model)
+            tgt = self.per_model[model]
+            tgt.prompt_tokens += sub.prompt_tokens
+            tgt.completion_tokens += sub.completion_tokens
+            tgt.n_calls += sub.n_calls
+            # Recompute cost from totals at current rates.
+            try:
+                rate_in, rate_out = price_for_model(model)
+                tgt.cost_usd = (
+                    tgt.prompt_tokens * rate_in / 1_000_000.0
+                    + tgt.completion_tokens * rate_out / 1_000_000.0
+                )
+            except KeyError:
+                # Unknown model: keep sum-of-stored-cost as best-effort.
+                tgt.cost_usd += sub.cost_usd
+
+    def log_line(self, prefix: str = "[usage]") -> str:
+        """One-line human-readable summary suitable for end-of-run logs."""
+        if not self.per_model:
+            return f"{prefix} (no API calls)"
+        per = "; ".join(
+            f"{m}: ${t.cost_usd:.3f} in={t.prompt_tokens:,} out={t.completion_tokens:,} n={t.n_calls:,}"
+            for m, t in sorted(self.per_model.items())
+        )
+        return (
+            f"{prefix} total=${self.total_cost_usd:.3f} "
+            f"calls={self.n_calls:,} [{per}]"
+        )
+
+    # -------- File I/O helpers (idempotent, resume-friendly) --------
+
+    @classmethod
+    def load_or_create(cls, path) -> "MultiModelUsage":
+        """Read an existing ``usage.json`` if it exists, else return an
+        empty tracker.  ``path`` may be a str or Path.
+
+        The file may be a bare :meth:`as_dict` payload or a
+        ``json_metadata``-wrapped envelope (we look in both shapes).
+        """
+        import json
+        from pathlib import Path as _P
+        p = _P(path)
+        if not p.is_file():
+            return cls()
+        try:
+            obj = json.loads(p.read_text())
+        except Exception:
+            return cls()
+        # Envelope-wrapped form (json_metadata) keeps the payload under
+        # the same top-level keys; we just look for "per_model" first.
+        if "per_model" in obj:
+            return cls.from_dict(obj)
+        # If wrapped, the payload may be under "_payload" or similar;
+        # try common shapes before giving up.
+        for k in ("payload", "_payload", "usage", "data"):
+            sub = obj.get(k)
+            if isinstance(sub, dict) and "per_model" in sub:
+                return cls.from_dict(sub)
+        return cls()
+
+    def write_json(self, path) -> None:
+        """Write the tracker to ``path`` (str or Path), creating
+        parent dirs as needed.  Overwrites any existing file.
+        """
+        import json
+        from pathlib import Path as _P
+        p = _P(path)
+        p.parent.mkdir(parents=True, exist_ok=True)
+        p.write_text(json.dumps(self.as_dict(), indent=2, sort_keys=True))
+
 
 class BudgetExceededError(Exception):
     """Raised by :meth:`BudgetTracker.charge` when the running cost
@@ -419,6 +605,7 @@ __all__ = [
     "extract_usage_anthropic",
     "extract_usage_openai",
     "UsageTotals",
+    "MultiModelUsage",
     "BudgetTracker",
     "BudgetExceededError",
 ]

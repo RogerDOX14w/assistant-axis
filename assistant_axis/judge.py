@@ -26,10 +26,16 @@ import os
 import re
 import time
 import logging
-from typing import Dict, List, Optional, Any, Iterable, Tuple, Sequence
+from typing import Dict, List, Optional, Any, Iterable, Tuple, Sequence, TYPE_CHECKING
 
 import openai
 from dotenv import load_dotenv
+
+if TYPE_CHECKING:
+    # Forward reference only -- the runtime import lives inside the
+    # call sites that actually need to extract usage, to keep the
+    # judge.py import surface minimal.
+    from .judge_pricing import MultiModelUsage  # noqa: F401
 
 # Load environment variables
 load_dotenv()
@@ -410,9 +416,18 @@ async def call_judge_single(
     prompt: str,
     model: str,
     max_tokens: int,
-    rate_limiter: RateLimiter
+    rate_limiter: RateLimiter,
+    usage: Optional["MultiModelUsage"] = None,
 ) -> Optional[str]:
-    """Call the judge model with a single prompt."""
+    """Call the judge model with a single prompt.
+
+    Args:
+        usage: Optional :class:`assistant_axis.judge_pricing.MultiModelUsage`
+            accumulator.  When provided, the (prompt_tokens, completion_tokens)
+            tuple extracted from the response is added to ``usage[model]``.
+            Pass one for every automated/batched call site — see AGENT_NOTES
+            "Token usage logging is mandatory on batched LLM call sites".
+    """
     await rate_limiter.acquire()
 
     try:
@@ -422,6 +437,13 @@ async def call_judge_single(
             max_completion_tokens=max_tokens,
             temperature=1
         )
+
+        if usage is not None:
+            # Lazy import to avoid a hard dep cycle (judge_pricing imports
+            # nothing from judge but judge.py is imported from many places).
+            from .judge_pricing import extract_usage_openai
+            pt, ct = extract_usage_openai(response)
+            usage.charge(model, pt, ct)
 
         if response.choices and response.choices[0].message.content:
             return response.choices[0].message.content
@@ -574,12 +596,17 @@ async def call_anthropic_judge_single(
     max_tokens: int,
     rate_limiter: RateLimiter,
     temperature: float = 1.0,
+    usage: Optional["MultiModelUsage"] = None,
 ) -> Optional[str]:
     """Call an Anthropic judge model with a single prompt.
 
     Returns the response text, or None on error.  Errors are logged at
     ERROR level and swallowed so a single bad call doesn't take down a
     whole batch of judging.
+
+    Args:
+        usage: Optional :class:`assistant_axis.judge_pricing.MultiModelUsage`
+            accumulator.  Same semantics as :func:`call_judge_single`.
     """
     await rate_limiter.acquire()
 
@@ -590,6 +617,10 @@ async def call_anthropic_judge_single(
             temperature=temperature,
             messages=[{"role": "user", "content": prompt}],
         )
+        if usage is not None:
+            from .judge_pricing import extract_usage_anthropic
+            pt, ct = extract_usage_anthropic(response)
+            usage.charge(model, pt, ct)
         if response.content and response.content[0].text:
             return response.content[0].text
         return None
@@ -607,6 +638,7 @@ async def call_judge_single_unified(
     openai_client: Optional["openai.AsyncOpenAI"] = None,
     anthropic_client: Optional["anthropic.AsyncAnthropic"] = None,
     temperature: float = 1.0,
+    usage: Optional["MultiModelUsage"] = None,
 ) -> Optional[str]:
     """Provider-agnostic single judge call.
 
@@ -617,6 +649,11 @@ async def call_judge_single_unified(
     For mixed-provider workloads, the caller typically constructs one
     ``AsyncOpenAI`` and one ``AsyncAnthropic`` and passes both -- the
     routing picks whichever is needed per call.
+
+    Args:
+        usage: Optional :class:`assistant_axis.judge_pricing.MultiModelUsage`
+            accumulator -- ticks ``usage[model]`` with the per-call
+            token counts.  Pass one on every batched/automated call site.
     """
     provider = provider_for_model(model)
     if provider == "openai":
@@ -630,6 +667,7 @@ async def call_judge_single_unified(
             model=model,
             max_tokens=max_tokens,
             rate_limiter=rate_limiter,
+            usage=usage,
         )
     if provider == "anthropic":
         if anthropic_client is None:
@@ -643,5 +681,6 @@ async def call_judge_single_unified(
             max_tokens=max_tokens,
             rate_limiter=rate_limiter,
             temperature=temperature,
+            usage=usage,
         )
     raise ValueError(f"unknown provider for model {model!r}")

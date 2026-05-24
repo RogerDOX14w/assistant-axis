@@ -270,9 +270,17 @@ def _build_work_items(
     eff_stop_threshold = float(sweep_cfg.get("eff_stop_threshold", 1.0 / 3.0))
     eff_stop_consecutive = int(sweep_cfg.get("eff_stop_consecutive", 2))
     min_strength = float(sweep_cfg.get("min_strength", 0.125))
-    start_strength_multiplier_steps = int(
-        sweep_cfg.get("start_strength_multiplier_steps", 2)
-    )
+    # ``start_strength_multiplier_steps``: per-(mode, slot, layer) lookup
+    # via assistant_axis.sweep_start_heuristics.compute_start_steps unless
+    # the YAML explicitly sets a sweep-wide override (which then wins for
+    # every cell, ignoring the table).  ``None`` here means "use the
+    # heuristic per cell"; an int means "this fixed value for every cell".
+    if "start_strength_multiplier_steps" in sweep_cfg:
+        start_strength_multiplier_steps: int | None = int(
+            sweep_cfg["start_strength_multiplier_steps"]
+        )
+    else:
+        start_strength_multiplier_steps = None
     signs = list(sweep_cfg.get("signs", [+1, -1]))
     if not all(s in (+1, -1) for s in signs):
         raise ValueError(f"sweep.signs must be subset of [+1, -1]; got {signs}")
@@ -294,10 +302,23 @@ def _build_work_items(
     if not cells:
         raise ValueError("config.cells is empty; nothing to sweep")
 
+    # Lazy import to keep run_sweep.py's import cost low; only needed
+    # when actually building cell items.
+    from assistant_axis.sweep_start_heuristics import compute_start_steps
+
     for cell_cfg in cells:
         slot = int(cell_cfg["slot"])
         layer = int(cell_cfg["layer"])
         weakest = float(cell_cfg.get("weakest_strength", default_weakest))
+        # Resolve the per-cell start-strength steps.  YAML override (set
+        # above) wins for every cell; otherwise consult the empirical
+        # heuristic table keyed on (positions_mode, slot, layer).
+        if start_strength_multiplier_steps is None:
+            cell_start_steps = compute_start_steps(
+                positions_mode=positions_mode, slot=slot, layer=layer,
+            )
+        else:
+            cell_start_steps = start_strength_multiplier_steps
         for sign in signs:
             cell_dir = output_root / _cell_dir_name(slot, layer, int(sign))
             items.append({
@@ -314,7 +335,7 @@ def _build_work_items(
                 "eff_stop_threshold": eff_stop_threshold,
                 "eff_stop_consecutive": eff_stop_consecutive,
                 "min_strength": min_strength,
-                "start_strength_multiplier_steps": start_strength_multiplier_steps,
+                "start_strength_multiplier_steps": cell_start_steps,
                 "persona": persona_prompt,
                 "questions": questions,
                 "batch_size": batch_size,

@@ -122,26 +122,36 @@ def _axis_unit(data_dir: Path, pos: str, neg: str,
 
 
 def _load_response_scores(
-    experiment_dir: Path, axis: str, dir_template: str,
+    experiment_dir: Path, axis: str,
+    _dir_template_legacy: str,   # noqa: ARG001  retained for caller back-compat
     *,
     judge_label: str,
     inputs: list[InputSpec],
 ) -> dict[str, float]:
     """Per-entity ``mean_score`` across roles+traits sides for one
-    (judge, axis) pair, reading the canonical (v2) cache.
+    (judge, axis) pair.
+
+    Reads via :func:`assistant_axis.judge_loaders.load_response_scores`
+    so the canonical B=7 → B=10 per-entity fallback works for axes
+    that don't yet have B=7 data on every entity (e.g. the original
+    12 axes' bulk lives in ``_b10_q9`` while only collision
+    disambiguation entities have ``_b7_t3``).  The third positional
+    arg ``_dir_template_legacy`` is retained so existing call sites
+    don't break, but it's ignored — the canonical loader picks the
+    cohort itself.  2026-05-22 retrofit: previously this function
+    hardcoded ``haiku_responses_{side}_b10_q9`` which silently
+    skipped the 10 Phase-1/2 axes that only have ``_b7_t3``.
     """
+    from assistant_axis.judge_loaders import load_response_scores
+
+    # Normalise the judge label that the rest of the script uses
+    # (``gpt_b10`` / ``haiku_q9``) to the loader's ``judge`` arg.
+    judge = "gpt" if judge_label.startswith("gpt") else "haiku"
     out: dict[str, float] = {}
     for side in ("roles", "traits"):
-        sub = dir_template.format(side=side)
-        path = experiment_dir / axis / sub / "scores_responses.json"
-        if not path.exists():
-            continue
-        scores, _spec, _check = load_and_register(
-            path,
-            dep_key=f"resp_{judge_label}_{axis}_{side}",
-            extras={"axis": axis, "side": side, "judge": judge_label},
-            policy="warn",
-            inputs=inputs,
+        scores, _sources = load_response_scores(
+            axis=axis, kind=side, judge=judge, rubric="v2",
+            experiments_root=experiment_dir, inputs=inputs,
         )
         for name, info in scores.items():
             ms = info.get("mean_score") if isinstance(info, dict) else None
