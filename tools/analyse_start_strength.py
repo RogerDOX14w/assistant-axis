@@ -30,9 +30,9 @@ Usage::
 
     python tools/analyse_start_strength.py
     # or with an explicit output root:
-    python tools/analyse_start_strength.py --root outputs/qwen-3-32b/steering
+    python tools/analyse_start_strength.py --root "runpod_workspace/qwen/qwen-3-32b Roger 8slot/steering"
 
-The default root matches the production output directory.
+The default root matches the canonical (re-filtered) steering output directory.
 """
 from __future__ import annotations
 
@@ -132,7 +132,7 @@ def main() -> None:
     ap = argparse.ArgumentParser(description=__doc__,
                                  formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("--root", type=Path,
-                    default=Path("outputs/qwen-3-32b/steering"),
+                    default=Path("runpod_workspace/qwen/qwen-3-32b Roger 8slot/steering"),
                     help="Sweep output root (contains <persona>/<cell>/records.jsonl).")
     ap.add_argument("--cfg-dir", type=Path,
                     default=Path("data/steering/configs"),
