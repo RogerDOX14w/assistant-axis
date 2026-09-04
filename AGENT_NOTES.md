@@ -4,9 +4,162 @@ This document describes Roger's working style, communication preferences, and co
 
 **Purpose:** Help future AI agents collaborate more effectively by understanding expectations upfront.
 
+**Claude Code note:** `CLAUDE.md` and everything under `.claude/` are *generated* from this file by `tools/sync_agent_notes.py`, driven by invisible `<!-- claude: ... -->` markers under headings plus the `claude-sync` block that follows this paragraph (see § Updates and Evolution). Edit here, never there.
+
+<!-- claude-sync
+# Targets for tools/sync_agent_notes.py.  `when:` becomes the one-line entry
+# in CLAUDE.md's rule map; `paths:` are the globs that make Claude Code
+# auto-load the rule (omit for always-on).  Order here = rule-map order.
+rules:
+  working-style:
+    when: every session (always loaded); response patterns, prompt engineering, documentation audiences, past-interaction examples
+  plotting:
+    when: generating, regenerating, or visually verifying any plot, or writing entity names into plot text
+    paths:
+      - "results_analysis/**/*.py"
+      - "assistant_axis/plot_metadata.py"
+      - "assistant_axis/plot_palette.py"
+      - "notebooks/**"
+  judging:
+    when: editing judge prompts, rubrics, parse-rate handling, or any LLM judge call site
+    paths:
+      - "pipeline/3_judge.py"
+      - "assistant_axis/judge*.py"
+      - "assistant_axis/steering_judges.py"
+      - "assistant_axis/rubric_equivalence.py"
+      - "data_analysis/*.py"
+      - "results_analysis/axis_judge_correlation.py"
+      - "results_analysis/infer_axis_description.py"
+      - "results_analysis/standardize_axis_spec.py"
+      - "data/roles/instructions/**"
+      - "data/traits/instructions/**"
+  judge-refusal-gaps:
+    when: touching judge refusal fallbacks, the refusal allowlist, gap refills, or base-persona picking
+    paths:
+      - "assistant_axis/judge_refusal_fallback.py"
+      - "assistant_axis/judge_score_combine.py"
+      - "tools/fill_judge_refusal_gaps.py"
+      - "results_analysis/refill_judge_gaps.py"
+      - "tools/pick_base_personas.py"
+      - "data/judge_refusal_allowlist.json"
+      - "results_analysis/axis_judge_correlation.py"
+  judge-scoring:
+    when: combining judge scores, loading response scores, choosing the response-judging batch size, or subsampling questions
+    paths:
+      - "assistant_axis/judge_score_combine.py"
+      - "assistant_axis/judge_batch.py"
+      - "assistant_axis/judge_loaders.py"
+      - "results_analysis/**/*.py"
+      - "tools/defer_rejudge.py"
+  judge-cost:
+    when: estimating or budgeting judge API cost, or changing the batch size B
+    paths:
+      - "pipeline/3_judge.py"
+      - "assistant_axis/judge*.py"
+      - "assistant_axis/steering_runner.py"
+      - "tools/dry_run_response_token_count.py"
+      - "results_analysis/plot_batch_size_quality_vs_cost.py"
+  nfs-io:
+    when: reading or writing anything under /workspace or another network-mounted path
+    paths:
+      - "pipeline/**"
+      - "assistant_axis/atomic_io.py"
+      - "assistant_axis/tmpfs.py"
+      - "assistant_axis/axis.py"
+      - "assistant_axis/steering_runner.py"
+      - "scripts/**"
+      - "runpod_workspace/**"
+      - "steering/**"
+      - "results_analysis/axis_judge_correlation.py"
+  provenance:
+    when: writing a new analysis script, reading cached JSON, emitting plots or manifests, invalidating cached data, or recording API usage
+    paths:
+      - "results_analysis/**"
+      - "tools/**"
+      - "assistant_axis/provenance.py"
+      - "assistant_axis/plot_metadata.py"
+      - "audits/**"
+  provenance-judge-step:
+    when: touching rubric or script equivalence, deferred rejudges, cache audits, or recovery of recorded outputs
+    paths:
+      - "assistant_axis/deferral_registry.py"
+      - "assistant_axis/script_equivalence.py"
+      - "assistant_axis/rubric_equivalence.py"
+      - "tools/audit_*.py"
+      - "tools/defer_rejudge.py"
+      - "tools/diff_against_recorded.py"
+      - "tools/mark_*_equivalent.py"
+      - "tools/regenerate_dataset_manifest.py"
+      - "deferred_rejudges.yaml"
+      - "pipeline/3_judge.py"
+      - "assistant_axis/provenance.py"
+      - "results_analysis/axis_judge_correlation.py"
+  steering-runs:
+    when: launching, configuring, or debugging steering sweeps (strength scans, start strengths, queue runner, multi-GPU, sweep logs)
+    paths:
+      - "steering/**"
+      - "assistant_axis/steering.py"
+      - "assistant_axis/steering_runner.py"
+      - "assistant_axis/sweep_start_heuristics.py"
+      - "data/steering/configs/**"
+      - "tools/analyse_start_strength.py"
+  steering-judging:
+    when: judging steering outputs (effect and coherence judges, swap-averaging, response curves)
+    paths:
+      - "assistant_axis/steering_judges.py"
+      - "assistant_axis/cherrypick.py"
+      - "assistant_axis/steering_runner.py"
+      - "steering/post_judge.py"
+      - "results_analysis/steering_response_curves.py"
+      - "tools/sheet_layout.py"
+      - "tools/test_effect_order_bias.py"
+  steering-questions:
+    when: choosing or auditing the per-experiment steering question list
+    paths:
+      - "data/steering/questions/**"
+      - "data/extraction_questions.jsonl"
+      - "tools/analyze_dose_response.py"
+      - "tools/per_question_responsiveness_audit*.py"
+  axis-geometry:
+    when: computing axes, whitening or soft-shear, PCA round-trips, or axis cosine analyses
+    paths:
+      - "assistant_axis/axis.py"
+      - "assistant_axis/pca.py"
+      - "pipeline/4_vectors.py"
+      - "pipeline/5_axis.py"
+      - "results_analysis/axis_cosine_seriation.py"
+      - "results_analysis/canonical_angles/**"
+      - "results_analysis/pc_round_trip/**"
+  entity-naming:
+    when: keying or merging trait and role data by name, or displaying entity names
+    paths:
+      - "assistant_axis/entity_id.py"
+      - "assistant_axis/judge_loaders.py"
+      - "data_analysis/**"
+      - "results_analysis/**"
+      - "tools/lint_kind_collision.py"
+      - "assistant_axis/steering_judges.py"
+      - "assistant_axis/pair_list_cohort.py"
+  trait-pairs:
+    when: adding or regenerating trait clean pairs or instructions, or running combined response generation
+    paths:
+      - "data/goal_roles_and_traits.json"
+      - "data/traits/**"
+      - "data/roles/**"
+      - "data_analysis/generate_antonyms.py"
+      - "data_analysis/regenerate_*.py"
+      - "pipeline/1_generate.py"
+skills:
+  steering-to-gsheet:
+    description: Export a steering experiment directory to Google Sheets (one-time setup, usage, rerun semantics, layout)
+  add-judged-axis:
+    description: Checklist for incorporating a newly response-judged axis into the analysis pipeline
+-->
+
 ---
 
 ## Expensive Operations — Confirm Parameters First (HARD RULE)
+<!-- claude: always -->
 
 **Whenever you are about to start an operation that will incur any
 of the following, STOP, double-check every parameter, and SURFACE
@@ -60,6 +213,7 @@ older context, or differs from the documented current default.
 ---
 
 ## File Access Boundary (HARD RULE)
+<!-- claude: always -->
 
 **You may read, write, search, or otherwise touch files only within
 `/Users/roger/Documents/GitHub/`.**  There should never be a need to
@@ -68,7 +222,7 @@ you need to, **stop and ask Roger first** with a specific request
 naming the exact path(s) you want access to and why; proceed only
 after he grants explicit permission for that specific access.
 
-This applies to all forms of access: `Read`, `Write`, `StrReplace`,
+This applies to all forms of access: `Read`, `Write`, `Edit`, `StrReplace`,
 `Grep`, `Glob`, `find`, `cat`, `ls`, `rg`, shell redirection, and any
 remote tools (mirroring or fetching files from this Mac to other
 machines counts as access from this side).  Read-only access is
@@ -84,9 +238,23 @@ and agent-tools folder are tool infrastructure that Cursor itself
 populates, and are expected reads — those are exempt by design (and
 are written by Cursor, not by you).
 
+Claude Code's equivalents are exempt on the same basis, and are the
+only other locations outside `GitHub/` an agent should ever touch:
+
+- `~/.claude/` — Claude Code's own state: per-project auto-memory
+  under `~/.claude/projects/<project>/memory/`, plan-mode documents
+  under `~/.claude/plans/`, and user-level settings, rules and skills.
+- The per-session scratchpad Claude Code assigns under
+  `/private/tmp/claude-<uid>/<project>/<session-id>/scratchpad/`.
+
+Everything else on this machine stays off-limits.  (Temp files made by
+the project's own tooling — `atomic_io` staging under `$TMPDIR`,
+pytest's `tmp_path` — are process behaviour, not agent file access.)
+
 ---
 
 ## Hotlink every file you mention to Roger (HARD RULE)
+<!-- claude: always -->
 
 **Every time you reference a file (plot, JSON, source, log, config,
 notebook, etc.) in a chat reply to Roger, format it as a markdown
@@ -140,6 +308,7 @@ discoverability matters more than DRYness here.)
 ---
 
 ## Token usage logging is mandatory on batched LLM call sites (HARD RULE)
+<!-- claude: always -->
 
 **Any automated LLM call site that runs in a batch, judging loop, or
 otherwise repeatedly enough that aggregate cost is operationally
@@ -229,6 +398,7 @@ are exempt unless they grow into batch tools.
 ---
 
 ## Communication Style
+<!-- claude: always -->
 
 ### Concise and Technical
 - Roger is highly technical and doesn't need basic concepts explained
@@ -265,6 +435,7 @@ summaries with hotlinks added.  Brief version here:
   username in; prefer `./...`.
 
 ### Plot visual verification (mandatory after any plot generation)
+<!-- claude: rule=plotting -->
 
 After generating or re-rendering ANY plot (`.png`, `.jpg`, `.pdf`),
 **read the file back as an image and visually inspect it before
@@ -379,6 +550,7 @@ explaining each constraint): `results_analysis/batch_size_pairwise_rho.py::make_
 - In **ask mode**: Provide code snippets and instructions for Roger to apply
 - In **agent mode**: Implement directly when asked
 - When Roger attaches a plan file and says "Implement the plan", that's a clear signal to execute
+- Claude Code uses different names for the same split: **Plan mode** (read-only; produces a plan document Roger approves before anything is written) is the ask-mode equivalent, while **Manual** (asks before each edit) and **Auto** are agent-mode equivalents. Approving a plan is the same signal as "Implement the plan"
 
 ### Iteration Style
 - Prefers conversational iteration over big upfront specifications
@@ -393,6 +565,7 @@ explaining each constraint): `results_analysis/batch_size_pairwise_rho.py::make_
 ---
 
 ## Plan Requirements
+<!-- claude: always -->
 
 ### Testing Must Be Included
 
@@ -412,6 +585,7 @@ explaining each constraint): `results_analysis/batch_size_pairwise_rho.py::make_
 ---
 
 ## Technical Approach
+<!-- claude: always -->
 
 ### Check Actual State First
 - Always prefer checking actual state over making "reasonable assumptions"
@@ -436,7 +610,26 @@ When writing prompts or documentation for LLMs:
 - **DO backtick:** Literal filenames (`project.md`), extensions (`.md`), field names (`"type"`), state values (`"waiting"`)
 - **DON'T backtick:** Format patterns inside JSON examples (`YYYY-MM-DD` in `<YYYY-MM-DD ...>`)
 
+### Claude Code: open source files with the Read tool, not `cat`
+<!-- claude: always -->
+
+Claude Code's topic rules (`.claude/rules/*.md`, generated from this
+file) load only when a matching file is opened with the **Read
+tool**.  Verified 2026-09-04: shell reads (`cat`, `sed -n`, `head`
+via Bash) do not trigger them, and neither do the Write or Edit
+tools, so a file edited after a shell read never brings its rules
+in.  `/context` also does not list rules that loaded mid-session;
+the only visible sign is that Claude can quote the rule.
+
+Default therefore: **open any source file you may later edit, or
+whose conventions you need to follow, with the Read tool**, even
+when a shell one-liner would do.  Shell reads are fine for quick
+greps, log tails, and files no rule covers.  If work of a kind
+listed in `CLAUDE.md`'s rule map starts without a matching Read,
+Read the rule file itself first.
+
 ### Judge prompts: reason BEFORE score (mandatory)
+<!-- claude: rule=judging -->
 
 In any LLM judge prompt that asks for **both** a reasoning/explanation
 field and a numeric (or categorical) decision, the reasoning **must
@@ -623,6 +816,7 @@ pattern); see the TODO block above
 into the same scheme if/when that assumption breaks.
 
 ### Known permanent gap: `virus|R` on Sonnet instructions mode
+<!-- claude: rule=judge-refusal-gaps -->
 
 `results_analysis/refill_judge_gaps.py --scan` flags ~26 axes as having
 a single missing entity in their Sonnet `scores_instructions.json` (and
@@ -774,6 +968,7 @@ preserved because virus-as-a-corpus-entity is a useful *extreme
 point* for cosine geometry even if it's not a base-persona candidate.
 
 ### Judge parse-rate alerting (mandatory)
+<!-- claude: rule=judging -->
 
 Every script that calls an LLM judge and parses structured output
 **must** emit an end-of-run parse-rate summary, and that summary must
@@ -848,6 +1043,7 @@ tracker — N=1 makes the rate meaningless, and they already raise on
 unrecoverable parse failure rather than silently dropping records.
 
 ### NFS-safe file I/O (mandatory for `/workspace` reads and writes)
+<!-- claude: rule=nfs-io -->
 
 `/workspace` on RunPod is a MooseFS-backed network mount. Direct file
 ops are usable but occasionally flaky — partial copies, transient `EIO`,
@@ -972,6 +1168,7 @@ historical short-read damage that pre-retry step 4 silently skipped.
 ---
 
 ### Plot Provenance Metadata (mandatory for every plot)
+<!-- claude: rule=plotting -->
 Every plot generated in this repo MUST embed a PNG-text-chunk
 provenance block via `assistant_axis.png_metadata`.  The contents
 depend on whether the plot came from a tracked script or an ad-hoc
@@ -1070,6 +1267,7 @@ a plot — and tells you exactly what's missing if it isn't.
 ---
 
 ### End-to-End Data Provenance (writers, readers, audits)
+<!-- claude: rule=provenance -->
 
 The plot-metadata block above tells you *who produced* a plot and
 *how to reproduce* it.  The provenance system below tells you whether
@@ -1279,6 +1477,7 @@ matrix = data["matrix"]                       # use the NpzFile
 ```
 
 ##### Retrofit catalog (Phase 6c, 2026-05-09)
+<!-- claude: archive -->
 
 25 scripts identified as candidates when `load_and_register` shipped.
 Generated by the triage in
@@ -1386,6 +1585,7 @@ to detect drift; ALWAYS regenerate after edits to the
 project).
 
 #### Migrated scripts (as of May 2026)
+<!-- claude: archive -->
 
 Use this list to answer "is X provenance-aware?" without grepping.
 Quick check: `rg 'json_metadata\(|png_metadata\(.*inputs=' results_analysis/`
@@ -1613,6 +1813,7 @@ rejudging.  See the next subsection for the rules and the matching
 maintainer workflows.
 
 ### Judge-step provenance (rubrics, equivalence, deferral, recovery)
+<!-- claude: rule=provenance-judge-step -->
 
 Judging is the single expensive non-deterministic step in the
 pipeline, so it gets a heavier provenance regime than the rest of
@@ -1888,6 +2089,7 @@ is small (~50).  For long-lived editing sessions on
 back.
 
 ### Deferred future work — Phase 7 (subtree content hashing)
+<!-- claude: rule=provenance-judge-step -->
 
 Originally scoped as Phase 6, demoted to Phase 7, then **deferred**
 in May 2026 after a cost/value review.  Today's subtree
@@ -1915,6 +2117,7 @@ strictly cheaper for equal-or-better real-world behaviour in
 Roger's workflow.
 
 ### Combining judge scores: use the canonical helpers and constants
+<!-- claude: rule=judge-scoring -->
 
 Three families of empirically-tuned mixing ratios live in
 [`assistant_axis/judge_score_combine.py`](assistant_axis/judge_score_combine.py)
@@ -1975,6 +2178,7 @@ judge ensembles"](results_analysis/README.md#convention-tuned-mixing-ratios-for-
 Read that section *before* changing any of the three constants.
 
 ### Incorporating new response-judged axes (2026-05-22 checklist)
+<!-- claude: skill=add-judged-axis -->
 
 Before running the formal re-tuning checklist above (sweep 2 + sweep
 3), the new-axis set has to be made discoverable to the loader and
@@ -2094,6 +2298,7 @@ whitening_k_sweep, gpt_sonnet_weight_sweep, gpt_anthropic_response_weight_sweep,
 response_di_weight_sweep, rubric_v1_v2_compare, judge_ensemble_rho_curve}.py`.
 
 ### Steering judges (Phase-2 architecture)
+<!-- claude: rule=steering-judging -->
 
 **Activation space (read this first).**  Steering vectors live in
 **raw model-activation space** — the native frame the model
@@ -2209,6 +2414,7 @@ matches the steering effect default so the two distributions are
 apples-to-apples in the same judging regime.
 
 ### Bias-reduction rubric bumps (May 2026)
+<!-- claude: rule=judging -->
 
 All four steering rubrics were tightened to remove **judge priors** —
 fields whose values shouldn't be in the prompt because they leak the
@@ -2247,6 +2453,7 @@ consumer treats rubric-version as a filter, so this is purely an
 audit-trail change for now.
 
 ### Bidirectional steering scan (May 2026, default)
+<!-- claude: rule=steering-runs -->
 
 The steering-strength sweep was switched from a bottom-up
 unidirectional scan to a **bidirectional middle-out scan** with two
@@ -2359,6 +2566,7 @@ by `record["strength"]` so disk order doesn't matter -- the
 `records_in_scan_order: true` field is purely documentary.
 
 ### Per-cell start-strength heuristic (May 2026)
+<!-- claude: rule=steering-runs -->
 
 Before 2026-05-24 the bidirectional sweep used a flat
 `start_strength_multiplier_steps=2` (so `s_init ≈ 1.41` at
@@ -2424,6 +2632,7 @@ sweeps use the cell-level `start_strength_multiplier_steps` value
 directly without consulting the heuristic.
 
 ### Steering question selection (May 2026)
+<!-- claude: rule=steering-questions -->
 
 Choosing the **per-experiment question list** at
 `data/steering/questions/{experiment_id}.json` is the single highest-leverage
@@ -2841,6 +3050,7 @@ boilerplate-refusal mode is a per-strength pathology the per-record
 judge can't directly observe).
 
 ### Sweep log location (May 2026)
+<!-- claude: rule=steering-runs -->
 
 `steering/run_sweep.py` now auto-attaches a `FileHandler` to
 `{output_root}/sweep.log` on both the parent and every spawned
@@ -2869,6 +3079,7 @@ appends -- safe on Linux because steering log records are well
 under PIPE_BUF (4096B), so no mid-line interleaving is possible.
 
 ### Multi-config queue runner (May 2026)
+<!-- claude: rule=steering-runs -->
 
 `steering/run_sweep.py --config` now accepts **multiple `--config`
 flags** (repeatable) and a `--config-list FILE` (one path per line,
@@ -2909,6 +3120,7 @@ data/steering/configs/architect_ecocentric_v3.yaml
 ```
 
 ### Multi-GPU safety: baselines sentinel (May 2026)
+<!-- claude: rule=steering-runs -->
 
 Cells depend on their config's `baselines/records.jsonl` existing
 (read by `build_baseline_lookup` to fill `baseline_response` in
@@ -2939,6 +3151,7 @@ quietly corrupted judge prompts on the first cell of each
 experiment; the sentinel fix is also a pre-existing-bug fix.
 
 ### Exporting steering experiments to Google Sheets (May 2026)
+<!-- claude: skill=steering-to-gsheet -->
 
 `tools/steering_to_gsheet.py` turns a steering experiment output
 directory into a tab on a Google Sheet.  One spreadsheet hosts an
@@ -3062,6 +3275,7 @@ naturally don't match the numeric comparison rules.
     -- thin `gspread.oauth` wrapper.
 
 ### Per-cell response curves vs steps-to-incoherence (May 2026)
+<!-- claude: rule=steering-judging -->
 
 [`results_analysis/steering_response_curves.py`](results_analysis/steering_response_curves.py)
 plots one figure per steering experiment with 7 cells × 2 signs × 4
@@ -3113,6 +3327,7 @@ Output: `<experiment_dir>/response_curves.png` (override with
 chunk.
 
 ### Swap-averaged effect judging (rubric v7, May 2026)
+<!-- claude: rule=steering-judging -->
 
 The bidirectional effect rubric has a strong label/order bias: the
 judges treat whatever sits in the `[RESPONSE]` block as "more
@@ -3228,6 +3443,7 @@ No analysis code changes were needed for v7 records; the change
 percolates through the existing readers.
 
 ### Whitening / soft-shear defaults
+<!-- claude: rule=axis-geometry -->
 
 **Scope (read this first).**  These defaults apply to **analysis-side
 scripts** — ρ judging, `rho_by_layer`, `whitening_k_sweep`,
@@ -3321,6 +3537,7 @@ Per-axis `correlations.json` files are tied to specific
 historical runs and re-running them is expensive.
 
 ### Axis-geometry tool: `axis_cosine_seriation.py`
+<!-- claude: rule=axis-geometry -->
 
 Pairwise `|cos|` heatmap of every axis in the chosen pair-list cohort,
 reordered by **optimal leaf ordering** (`scipy.cluster.hierarchy.
@@ -3364,6 +3581,7 @@ populated -- registered in the writer-side audit list above.
 ---
 
 ### Response judging batch size (`RESPONSE_BATCH_SIZE`)
+<!-- claude: rule=judge-scoring -->
 
 The response-mode judging pipeline partitions an entity's `score==3`
 responses into roughly equal-sized batches before sending each batch
@@ -3425,6 +3643,7 @@ the cross-rubric comparison plots that hit `__rubric_v1.json`
 snapshots).
 
 ### Tiered question subsampling for response judging (default May 2026)
+<!-- claude: rule=judge-scoring -->
 
 > **2026-05-21 status update — tiered t3 is canonical for new judging;
 > uniform q9 is OBSOLETE for writes, retained as the read-side
@@ -3498,6 +3717,7 @@ comparable within their own cohort.
 ---
 
 ## Trait/role name collisions and the `name|R` / `name|T` convention (May 2026)
+<!-- claude: rule=entity-naming -->
 
 **The bug we keep almost making.** Nine names appear in BOTH the trait
 and role lists (`ascetic`, `contrarian`, `cosmopolitan`, `generalist`,
@@ -3536,6 +3756,7 @@ the kind is implicit in the path.  Disambiguation is for the **mixing
 layer**.
 
 ### Display-side rule (plots, legends, console output)
+<!-- claude: rule=plotting -->
 
 Plots and labels show the **bare name only**; kind is encoded
 *visually*.  Two collision-name dots in the same scatter is fine:
@@ -3713,6 +3934,7 @@ are kind-pure by directory — bare names there remain correct.  Same for
   `load_response_scores(...)` and `entity_id(name, kind)` keys.
 
 ### `assistant_axis.judge_loaders.load_response_scores`
+<!-- claude: rule=judge-scoring -->
 
 The canonical reader for response-mode scores.  Default Haiku
 `prefer_b = (7, 10)` — reads `_b7_t3` where available and falls back
@@ -3726,6 +3948,7 @@ returned result.  See the module docstring for the suffix conventions
 ---
 
 ## Judging cost model (project-wide reference)
+<!-- claude: rule=judge-cost -->
 
 The single source of truth lives in
 [`results_analysis/plot_batch_size_quality_vs_cost.py`](results_analysis/plot_batch_size_quality_vs_cost.py)
@@ -4007,6 +4230,7 @@ lands and the residual is measured.  Drop to the standard
 recommendation thereafter.
 
 ### Provenance: capture `usage` from every API response
+<!-- claude: rule=provenance -->
 
 `assistant_axis.judge_pricing` (added Phase 4c, May 2026) is the
 project's single source of truth for per-model pricing.  Every judge
@@ -4020,6 +4244,7 @@ emitted next to every cohort cache, and totals are stamped into
 ---
 
 ## Response Patterns
+<!-- claude: rule=working-style -->
 
 ### What Works Well
 
@@ -4099,6 +4324,7 @@ Why: ...
 ---
 
 ## Prompt Engineering
+<!-- claude: rule=working-style -->
 
 ### Writing Prompts for LLMs
 When creating prompts that other LLMs will consume:
@@ -4119,6 +4345,7 @@ When creating prompts that other LLMs will consume:
 ---
 
 ## Documentation Context
+<!-- claude: rule=working-style -->
 
 ### Multiple Audience Levels
 - Human developers (Roger)
@@ -4129,11 +4356,13 @@ When creating prompts that other LLMs will consume:
 ---
 
 ## Session Initialization
+<!-- claude: always -->
 
 ### Recommended Starting Pattern
+<!-- claude: archive -->
 When starting a new session:
 1. Read `README.md` for project context
-2. Read `AGENT_NOTES.md` (this file) for collaboration patterns
+2. Read `AGENT_NOTES.md` (this file) for collaboration patterns. This step is a Cursor workaround, since Cursor auto-loads nothing: Claude Code gets the always-on sections through the generated `CLAUDE.md` and the topic sections through `.claude/rules/`, so it should not re-read this whole file
 3. Ask Roger what we're working on
 4. Check relevant code/state before making assumptions
 
@@ -4157,6 +4386,7 @@ When invoking analysis scripts that take `--data_dir`, prefer the 8slot path. Th
 ---
 
 ## Examples from Past Interactions
+<!-- claude: rule=working-style -->
 
 ### Good Interaction Pattern
 ```
@@ -4181,6 +4411,7 @@ Agent: [Checks installed versions] → [Updates with actual versions] → [Shows
 ---
 
 ## Adding New Trait Clean Pairs
+<!-- claude: rule=trait-pairs -->
 
 When adding a new trait B that is the antonym of an existing trait A (e.g., adding `obedient` as the antonym of `rebellious`):
 
@@ -4229,6 +4460,7 @@ Each of `roles` and `traits` has `goal` (all-5 @ 2) and `non_goal` (all-5 @ 0) s
 - `traits.non_goal`: first 30 = max persona-property variation (less-default side of pairs), next 10 = nice-to-haves, last 17 = pair partners + redundant
 
 ### Clean pair validation results (April 2026)
+<!-- claude: archive -->
 
 After running the bidirectional antonym-discovery procedure on each candidate pair (script: `data_analysis/generate_antonyms.py`), 5 of the 6 originally proposed pairs validated as clean and the 6th was reorganized into a 3-trait conformity triangle.
 
@@ -4251,6 +4483,7 @@ The 6th candidate (`conformist ↔ contrarian`) turned out to be a **3-trait tri
 Convention: when a trait's true antonym is **structurally ambiguous** (the union of two siblings on different axes), its `negative_label` keeps the seed-marker form (`non-{positive_label}`) to flag the asymmetry. The two siblings each set `negative_label` to the central trait. This mirrors the compassionate/callous arrangement where compassionate.neg=`non-compassionate` and callous.neg=`compassionate` (engaged-vs-disengaged carves a clean partner pointer in one direction; the other direction is ambiguous between callous and malicious).
 
 ### TODO: regenerate activation/vector data after April–May 2026 trait edits
+<!-- claude: archive -->
 
 The trait-instruction edits across the April + early-May 2026 sessions require activation extraction and vector recomputation for **8 traits** (the others were either reverted to git-HEAD-equivalent or had only metadata changes that don't affect generation).
 
@@ -4276,6 +4509,7 @@ After regenerating activations + vectors for these 8, downstream artefacts that 
 - `callous`, `pragmatic`, `idealistic`, `conservative`, `progressive`, `decisive`, `contrarian`: byte-identical to git HEAD after this session's cleanup; existing activations remain valid.
 
 ### TODO: variant-specific K grids in the PC round-trip experiment (May 2026)
+<!-- claude: archive -->
 
 In `klm_sweep.py` and `permutation_null.py` we currently use a single
 expanded K grid (`expanded_k_grid` = `DEFAULT_K_COARSE` ∪ `K-near-N`
@@ -4310,6 +4544,7 @@ smaller — mostly K ∈ {0, 4, 7, 8, 13}.  Neither variant's K winners
 needed the dense N±4 window.
 
 ### PC round-trip experiment: findings synthesis (May 2026)
+<!-- claude: rule=axis-geometry -->
 
 **Goal.** Test how faithfully human-interpretable axes written for
 canonical PCA directions (Opus describes the axis, GPT/Sonnet rank
@@ -4419,6 +4654,7 @@ those tools are kept available for the diagnosis described above but
 no longer drive the headline plot.
 
 ### Snapshot-before-invalidate principle (May 2026 lesson)
+<!-- claude: rule=provenance -->
 
 Whenever invalidating, wiping, or overwriting expensive-to-recreate data — most commonly judge-score caches, activation tensors, computed vectors, and response files — **make a timestamped copy first**, even if it feels "obviously fine to drop." The recreate cost is non-trivial:
 
@@ -4465,6 +4701,7 @@ README + manifest in the off-tree dir.  Add a row above so the
 next agent / future-you can locate it.
 
 ### Combined response generation (pipeline)
+<!-- claude: rule=trait-pairs -->
 
 The pipeline (`pipeline/1_generate.py`) supports two modes:
 
@@ -4498,18 +4735,21 @@ Steps 2, 4, 5 are unchanged — they process whatever files appear in their inpu
 ---
 
 ## Updates and Evolution
+<!-- claude: always -->
 
 This document should evolve as we discover new patterns. When something doesn't work smoothly:
 1. Reflect on what caused friction
 2. Determine if it's a pattern vs one-off situation
 3. Update this document if it's a pattern
 4. Keep it concise - remove outdated patterns
+5. Run `uv run python tools/sync_agent_notes.py` so `CLAUDE.md` and `.claude/` pick the change up. Routing is by the `<!-- claude: always | rule=NAME | skill=NAME | archive -->` marker on the line under each heading (sub-headings inherit); a new top-level section without a marker stays archive-only and the script warns. New rule or skill names are declared in the `claude-sync` block at the top of this file.
 
-**Last Updated:** May 6, 2026
+**Last Updated:** September 4, 2026
 
 ---
 
 ## Quick Reference
+<!-- claude: always -->
 
 **Roger's Style in 4 Words:** Pragmatic, verify-then-trust, documentation-conscious, technically-sophisticated
 

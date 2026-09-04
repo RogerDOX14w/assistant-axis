@@ -1,0 +1,15 @@
+{
+  "hooks": {
+    "SessionStart": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "uv run python tools/sync_agent_notes.py --quiet",
+            "statusMessage": "Syncing AGENT_NOTES.md into CLAUDE.md and .claude/rules"
+          }
+        ]
+      }
+    ]
+  }
+}
