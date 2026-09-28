@@ -94,11 +94,14 @@ def format_estimate(model: str, n_calls: int, in_tok: int, out_tok: int) -> str:
 
 
 class CostRefused(SystemExit):
-    """Raised by :func:`confirm_or_abort`; exit code 2 with the reason."""
+    """Raised by :func:`confirm_or_abort`; exit code 2, ``str()`` is the reason."""
 
     def __init__(self, msg: str):
-        super().__init__(msg)
+        super().__init__(2)
         self.msg = msg
+
+    def __str__(self) -> str:
+        return self.msg
 
 
 def confirm_or_abort(estimate_usd: float, budget_usd: float, *, confirm_expensive: bool,
@@ -110,16 +113,27 @@ def confirm_or_abort(estimate_usd: float, budget_usd: float, *, confirm_expensiv
       1.5 x estimate (the first-of-kind margin of the judge-cost rule).
     * estimate > hard_line: needs ``confirm_expensive`` **and**
       ``confirmed_by`` (Roger's go, recorded in run.json).
-    Refusals raise :class:`CostRefused` (a ``SystemExit``).
+    * Without ``confirmed_by`` the returned cap never exceeds ``hard_line``
+      (it is clamped), and a typed ``budget_usd`` above ``hard_line`` is
+      refused, whatever the estimate (review_m1.md finding 3).
+    Refusals raise :class:`CostRefused` (a ``SystemExit`` with code 2).
     """
     if estimate_usd > hard_line and not (confirm_expensive and confirmed_by):
         raise CostRefused(
             f"estimate ${estimate_usd:.2f} is over the ${hard_line:.0f} line: needs Roger's explicit go "
             f"in chat, then --confirm-expensive --confirmed-by '<who, when>'")
+    if budget_usd > hard_line and not confirmed_by:
+        raise CostRefused(
+            f"--budget-usd ${budget_usd:.2f} is over the ${hard_line:.0f} line: a cap above it needs Roger's "
+            f"explicit go in chat, recorded with --confirmed-by '<who, when>'")
     if estimate_usd > budget_usd:
         if not confirm_expensive:
             raise CostRefused(
                 f"estimate ${estimate_usd:.2f} exceeds --budget-usd ${budget_usd:.2f}: raise the budget "
                 f"or pass --confirm-expensive")
-        return round(1.5 * estimate_usd, 4)
-    return budget_usd
+        cap = round(1.5 * estimate_usd, 4)
+    else:
+        cap = budget_usd
+    if not confirmed_by:
+        cap = min(cap, hard_line)
+    return cap

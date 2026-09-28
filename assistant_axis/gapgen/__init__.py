@@ -9,10 +9,15 @@ Generators use only these names::
     from assistant_axis.gapgen import Candidate, start_run, submit_candidates
 
 and then run ``data_analysis/gap_generation/traithood_filter.py --run G/R``.
-Importing this package pins the ``wn`` data directory in-tree (see
-``gapgen.wordnet``) only when ``gapgen.wordnet`` is imported.
+Importing this package, or any module in it, pins the ``wn`` data directory
+to ``data/external/wn`` (``paths.pin_wn_data_dir``), whether or not ``wn`` is
+already imported.
 """
-from .normalize import (
+from .paths import pin_wn_data_dir as _pin_wn_data_dir
+
+_pin_wn_data_dir()
+
+from .normalize import (  # noqa: E402
     DECISIONS, NOVELTY_FLAGS, REGION_VOCAB, RELATIONS, REVIEW_STATUSES, TAG_VOCAB, VERDICTS,
     Normalized, make_key, normalize_candidate,
 )

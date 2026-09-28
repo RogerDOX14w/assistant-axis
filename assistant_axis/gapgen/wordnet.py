@@ -108,6 +108,11 @@ def oewn(*, wn_module=None):
     """The ``wn.Wordnet`` handle for OEWN 2024 (cached per module)."""
     mod = _module(wn_module)
     key = id(mod)
+    if wn_module is None:
+        # wn creates its data directory without parents; on a checkout with no
+        # data/external/ that is a bare FileNotFoundError (review_m1.md finding 6)
+        WN_DATA_DIR.mkdir(parents=True, exist_ok=True)
+        _wn.config.data_directory = WN_DATA_DIR
     if key not in _HANDLE:
         _HANDLE[key] = mod.Wordnet(OEWN_LEXICON)
     return _HANDLE[key]

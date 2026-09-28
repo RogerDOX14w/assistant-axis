@@ -77,6 +77,28 @@ def wn_data_dir() -> Path:
     return DATA_EXTERNAL / "wn"
 
 
+def pin_wn_data_dir() -> Path:
+    """Point the ``wn`` package at :func:`wn_data_dir`, whatever was imported first.
+
+    Sets ``$WN_DATA_DIR`` (read by ``wn`` when it is imported) and, if ``wn``
+    is already imported, assigns ``wn.config.data_directory`` too.  Called by
+    ``assistant_axis/gapgen/__init__.py``, which Python runs before any
+    ``assistant_axis.gapgen.*`` module, so importing anything from the platform
+    pins ``wn`` in-tree (review_m1.md finding 6).  Neither step touches the
+    filesystem.  A process that imports ``wn`` and looks something up
+    *before* importing the platform is not covered.
+    """
+    import os
+    import sys
+
+    target = wn_data_dir()
+    os.environ["WN_DATA_DIR"] = str(target)
+    wn = sys.modules.get("wn")
+    if wn is not None and hasattr(wn, "config"):
+        wn.config.data_directory = target
+    return target
+
+
 def all_paths() -> dict[str, Path]:
     """Every fixed path above (the test checks each resolves inside the repo)."""
     return {
