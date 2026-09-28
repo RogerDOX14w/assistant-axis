@@ -136,6 +136,53 @@ the call and let the prompt do the asking.  Cursor's agent is not covered
 (it does not run Claude Code hooks), so the written rule and the
 subagent-prompt restatement remain the primary protection there.
 
+**In Auto mode every prompt Roger sees is one of the hook's asks** (the
+classifier allows or blocks; it does not prompt), so a false positive
+costs him an interruption.  On 2026-09-28 he was asked four times in
+twenty minutes, all false positives, and had the matcher narrowed the
+same day (tests: `tools/tests/test_boundary_check.py`):
+
+- A tilde is a path only at the start of a word, where a shell or
+  `expanduser` would expand it (after whitespace, a quote, a separator,
+  or an assignment's `=` / `:`).  `HEAD~1`, `<sha>~2`, `notes.txt~` and
+  the operators `=~` / `!~` no longer ask.  `~name/…` is resolved for a
+  real user.
+- A bare `..` inside a heredoc body asks only when quoted (`".."`, which
+  is how a script climbs out); unquoted it is prose.  On the command
+  line a bare `..` asks as before, and the quoted form now asks too
+  (`cd ".."`, `os.listdir('..')` in a `-c` string).
+
+**Climbs are resolved, not pattern-matched** (same day; Roger: "if we're
+building a security precaution, we should make it reasonably secure").
+The matcher used to skip any `..` that followed a slash, so
+`data/../../x` left the project unseen.  Now:
+
+- A `..` in the middle of a path (`data/../../x`, `./../x`) is resolved
+  against the working directory and asks when it lands outside the
+  allowlist; `data/../README.md` stays inside and is quiet.
+- A base the scan cannot read (`$PWD/../x`, `$(pwd)/../x`, `"$d"/../x`)
+  is taken to be the working directory.
+- A home form asks wherever it resolves, so `~/..`, `$HOME/../other` and
+  `/Users/<user>/../other` ask although they leave the home directory.
+  The file tools follow the same rules.
+
+Replayed over the 1,164 distinct Bash commands in this project's
+transcripts, the new matcher asks about 54 where the old one asked about
+58: five false positives gone, one new ask (a quoted `..` in a message),
+none from the climb rules.
+
+What still asks although harmless, so write around it: a tilde at the
+start of a word used as "about" (`~$0.03`: write "about"), awk's
+standalone `~` operator, a quoted or space-delimited `..` on the command
+line (in a message, a regex such as `grep '..'`), a `$VAR/..` whose
+variable in fact points into `/tmp`, and a heredoc body that quotes a
+home path.  What the hook cannot see: a climb the text does not spell (a
+`cd` inside the command followed by a relative path,
+`Path(x).parent.parent`, a variable set elsewhere, a symlink).  It is a
+backstop against honest mistakes, not a sandbox.  To see what the hook
+actually asked in a session, read the transcript's `hook_success`
+attachment records.
+
 ---
 
 ## Hotlink every file you mention to Roger (HARD RULE)
