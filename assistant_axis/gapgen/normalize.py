@@ -45,6 +45,10 @@ _WORD_RE = re.compile(r"[^\W_]+(?:'[^\W_]+)*", re.UNICODE)
 _DROP_RE = re.compile(r"[^\w\s\-'’–—()]", re.UNICODE)
 _STEM_OK_RE = re.compile(r"^[a-z0-9]+(?:_[a-z0-9]+)*$")
 
+#: Longest accepted surface after cleaning (the longest corpus label is 54
+#: characters; a generator emitting a sentence is a bug, not a candidate).
+MAX_SURFACE_CHARS = 80
+
 
 @dataclass(frozen=True)
 class Normalized:
@@ -87,6 +91,8 @@ def normalize_candidate(surface: str) -> Normalized:
     label = clean_surface(surface)
     if not label:
         raise ValueError(f"empty candidate surface {surface!r}")
+    if len(label) > MAX_SURFACE_CHARS:
+        raise ValueError(f"candidate surface longer than {MAX_SURFACE_CHARS} characters: {label[:40]!r}...")
     stem = normalize_to_file_name(label)
     stem = re.sub(r"_+", "_", stem).strip("_")
     if not _STEM_OK_RE.match(stem):

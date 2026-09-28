@@ -23,7 +23,9 @@ import copy
 import fcntl
 import json
 import logging
+import os
 import shutil
+import threading
 from dataclasses import asdict, dataclass, field
 from datetime import datetime, timezone
 from pathlib import Path
@@ -129,21 +131,64 @@ def first_gloss_hint(rec: dict) -> Optional[str]:
 # The log
 # ---------------------------------------------------------------------------
 
+_HELD = threading.local()  # registry paths whose exclusive lock this thread holds
+
+
+def _held_paths() -> set:
+    if not hasattr(_HELD, "paths"):
+        _HELD.paths = set()
+    return _HELD.paths
+
+
 class Registry:
-    """Log-structured JSONL registry.  ``path`` defaults to ``REGISTRY_PATH``."""
+    """Log-structured JSONL registry.  ``path`` defaults to ``REGISTRY_PATH``.
+
+    Writers hold an exclusive ``flock`` on ``<registry>.lock``; readers
+    (:meth:`fold`, :meth:`get`) hold a shared one, so a reader never sees a
+    half-written line from a concurrent append.  A thread that already holds
+    the exclusive lock reads without re-locking.  :meth:`fold` records the
+    malformed lines it skipped in ``malformed`` / ``n_malformed``.
+    """
 
     def __init__(self, path: Path | str = REGISTRY_PATH):
         self.path = Path(path)
+        self.malformed: list[tuple[int, str]] = []
+
+    @property
+    def n_malformed(self) -> int:
+        return len(self.malformed)
 
     @property
     def lock_path(self) -> Path:
         return self.path.with_name(self.path.name + ".lock")
 
+    def _key(self) -> str:
+        return str(self.path.resolve())
+
     @contextlib.contextmanager
     def locked(self) -> Iterator[None]:
+        """Exclusive lock (re-entrant within one thread)."""
+        key = self._key()
+        if key in _held_paths():
+            yield
+            return
         self.path.parent.mkdir(parents=True, exist_ok=True)
         with open(self.lock_path, "a+") as fh:
             fcntl.flock(fh, fcntl.LOCK_EX)
+            _held_paths().add(key)
+            try:
+                yield
+            finally:
+                _held_paths().discard(key)
+                fcntl.flock(fh, fcntl.LOCK_UN)
+
+    @contextlib.contextmanager
+    def _read_locked(self) -> Iterator[None]:
+        if self._key() in _held_paths() or not self.path.exists():
+            yield
+            return
+        with open(self.lock_path, "a+") as fh:
+            fcntl.flock(fh, fcntl.LOCK_SH)
             try:
                 yield
             finally:
@@ -151,26 +196,38 @@ class Registry:
 
     # -- reading --------------------------------------------------------
     def iter_lines(self) -> Iterator[dict]:
+        """Parsed lines (no lock: callers hold one).  Malformed lines are
+        skipped, logged and recorded in ``self.malformed``."""
+        self.malformed = []
         if not self.path.exists():
             return
         with open(self.path, encoding="utf-8") as fh:
-            for i, line in enumerate(fh, 1):
-                line = line.strip()
+            for i, raw in enumerate(fh, 1):
+                line = raw.strip()
                 if not line:
                     continue
                 try:
-                    yield json.loads(line)
+                    rec = json.loads(line)
                 except json.JSONDecodeError:
+                    rec = None
+                if not isinstance(rec, dict):
+                    self.malformed.append((i, raw.rstrip("\n")))
                     logger.warning("%s:%d: malformed registry line skipped", self.path, i)
+                    continue
+                yield rec
 
-    def fold(self) -> dict[str, dict]:
-        """``{key: latest record}`` (last line per key wins)."""
+    def _fold_unlocked(self) -> dict[str, dict]:
         out: dict[str, dict] = {}
         for rec in self.iter_lines():
             k = rec.get("key")
             if k:
                 out[k] = rec
         return out
+
+    def fold(self) -> dict[str, dict]:
+        """``{key: latest record}`` (last line per key wins), under a shared lock."""
+        with self._read_locked():
+            return self._fold_unlocked()
 
     def get(self, key: str) -> Optional[dict]:
         return self.fold().get(key)
@@ -184,9 +241,19 @@ class Registry:
             return
         body = "".join(json.dumps(r, ensure_ascii=False, sort_keys=False) + "\n" for r in records)
         self.path.parent.mkdir(parents=True, exist_ok=True)
+        # A torn last line (a writer killed mid-write) must not swallow the
+        # first record appended after it: start on a fresh line.
+        if self.path.exists() and self.path.stat().st_size > 0:
+            with open(self.path, "rb") as rf:
+                rf.seek(-1, os.SEEK_END)
+                if rf.read(1) != b"\n":
+                    body = "\n" + body
+                    logger.warning("%s: last line had no newline (torn write?); it will be counted as "
+                                   "malformed", self.path)
         with open(self.path, "a", encoding="utf-8") as fh:
             fh.write(body)
             fh.flush()
+            os.fsync(fh.fileno())
 
     def _stamp(self, rec: dict, prev: Optional[dict], now: str) -> dict:
         rec = dict(rec)
@@ -200,8 +267,12 @@ class Registry:
         """Append full records (each gets ``rev`` = previous + 1)."""
         now = now or utc_now()
         with self.locked():
-            cur = self.fold()
-            out = [self._stamp(r, cur.get(r["key"]), now) for r in records]
+            cur = self._fold_unlocked()
+            out = []
+            for r in records:
+                stamped = self._stamp(r, cur.get(r["key"]), now)
+                cur[r["key"]] = stamped  # a second record for the same key gets the next rev
+                out.append(stamped)
             self._append(out)
         return out
 
@@ -215,7 +286,7 @@ class Registry:
         """
         now = now or utc_now()
         with self.locked():
-            cur = self.fold()
+            cur = self._fold_unlocked()
             out = []
             for key, fields in updates.items():
                 if key not in cur:
@@ -265,10 +336,11 @@ def submit_candidates(cands: Iterable[Candidate], *, registry_path: Path = REGIS
     reg = Registry(registry_path)
     now = utc_now()
     keys: list[str] = []
+    seen_keys: set[str] = set()
     invalid: list[str] = []
     n_new = n_merged = n_unchanged = 0
     with reg.locked():
-        cur = reg.fold()
+        cur = reg._fold_unlocked()
         changed: dict[str, dict] = {}
         for c in cands:
             try:
@@ -277,7 +349,8 @@ def submit_candidates(cands: Iterable[Candidate], *, registry_path: Path = REGIS
                 invalid.append(c.surface)
                 continue
             key = make_key(n.stem, c.sense_id)
-            if key not in keys:
+            if key not in seen_keys:
+                seen_keys.add(key)
                 keys.append(key)
             src = source_entry(c)
             if key in changed:
@@ -318,24 +391,53 @@ class CompactReport:
     snapshot_path: Path
     n_lines_before: int
     n_keys: int
+    n_malformed: int = 0
+    rejected_path: Optional[Path] = None
+
+
+def _unused_path(base: Path) -> Path:
+    """``base`` if free, else ``base-1``, ``base-2``, ... (never overwrite a backup)."""
+    if not base.exists():
+        return base
+    i = 1
+    while base.with_name(f"{base.name}-{i}").exists():
+        i += 1
+    return base.with_name(f"{base.name}-{i}")
 
 
 def compact(registry_path: Path = REGISTRY_PATH, *, snapshot_path: Optional[Path] = None,
-            stamp: Optional[str] = None) -> CompactReport:
+            stamp: Optional[str] = None, set_aside_malformed: bool = False) -> CompactReport:
     """Fold the log to one line per key (sorted by key).
 
     Snapshot-before-invalidate: the log is first copied to
-    ``registry.jsonl.bak.<UTC>``.  The folded content is also written to the
-    tracked snapshot (default ``registry.snapshot.jsonl`` beside the log).
+    ``registry.jsonl.bak.<UTC>`` (a suffix ``-1``, ``-2`` ... when that name
+    is taken; a backup is never overwritten).  The folded content is also
+    written to the tracked snapshot (default ``registry.snapshot.jsonl``
+    beside the log).
+
+    Malformed lines (a torn write) would be dropped by folding, so compaction
+    refuses (``ValueError``) while there are any, unless
+    ``set_aside_malformed``: then they are written verbatim to
+    ``registry.jsonl.rejected.<UTC>`` first and the report names that file.
     """
     reg = Registry(registry_path)
     if not reg.path.exists():
         raise FileNotFoundError(f"no registry at {reg.path}")
     snapshot_path = Path(snapshot_path) if snapshot_path else reg.path.with_name(REGISTRY_SNAPSHOT_NAME)
+    stamp = stamp or utc_stamp()
+    rejected = None
     with reg.locked():
-        n_lines = sum(1 for _ in reg.iter_lines())
-        folded = reg.fold()
-        bak = reg.path.with_name(f"{reg.path.name}.bak.{stamp or utc_stamp()}")
+        n_lines = sum(1 for _ in reg.iter_lines()) + reg.n_malformed
+        folded = reg._fold_unlocked()
+        if reg.n_malformed:
+            if not set_aside_malformed:
+                raise ValueError(
+                    f"{reg.path}: {reg.n_malformed} malformed line(s) (line {reg.malformed[0][0]} first); "
+                    f"compaction would drop them. Inspect them, or pass set_aside_malformed=True "
+                    f"(gap_registry.py compact --set-aside-malformed) to move them to a .rejected file")
+            rejected = _unused_path(reg.path.with_name(f"{reg.path.name}.rejected.{stamp}"))
+            rejected.write_text("".join(f"{raw}\n" for _, raw in reg.malformed), encoding="utf-8")
+        bak = _unused_path(reg.path.with_name(f"{reg.path.name}.bak.{stamp}"))
         shutil.copy2(reg.path, bak)
         body = "".join(json.dumps(folded[k], ensure_ascii=False) + "\n" for k in sorted(folded))
         tmp = reg.path.with_name(reg.path.name + ".compact.tmp")
@@ -346,7 +448,8 @@ def compact(registry_path: Path = REGISTRY_PATH, *, snapshot_path: Optional[Path
         stmp.write_text(body, encoding="utf-8")
         stmp.replace(snapshot_path)
     return CompactReport(backup_path=bak, snapshot_path=snapshot_path, n_lines_before=n_lines,
-                         n_keys=len(folded))
+                         n_keys=len(folded), n_malformed=len(reg.malformed) if rejected else 0,
+                         rejected_path=rejected)
 
 
 def holding_list(kind: str, *, registry: Registry | None = None) -> list[dict]:

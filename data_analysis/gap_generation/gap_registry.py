@@ -69,7 +69,11 @@ def cmd_submit(args) -> int:
 
 
 def cmd_status(args) -> int:
-    rows = Registry(args.registry).fold()
+    reg = Registry(args.registry)
+    rows = reg.fold()
+    if reg.n_malformed:
+        print(f"WARNING: {reg.n_malformed} malformed line(s) in {args.registry} (first at line "
+              f"{reg.malformed[0][0]}); see compact --set-aside-malformed")
     c = {name: Counter() for name in ("verdict", "decision", "review", "holding", "generator")}
     for r in rows.values():
         c["verdict"][(r.get("filter") or {}).get("verdict") or "unfiltered"] += 1
@@ -110,9 +114,14 @@ def cmd_holding(args) -> int:
 
 
 def cmd_compact(args) -> int:
-    rep = compact(args.registry)
+    try:
+        rep = compact(args.registry, set_aside_malformed=args.set_aside_malformed)
+    except ValueError as exc:
+        print(f"REFUSED: {exc}", file=sys.stderr)
+        return 1
     print(f"compacted {rep.n_lines_before} lines to {rep.n_keys} keys; backup {rep.backup_path}; "
-          f"snapshot {rep.snapshot_path}")
+          f"snapshot {rep.snapshot_path}"
+          + (f"; {rep.n_malformed} malformed line(s) moved to {rep.rejected_path}" if rep.rejected_path else ""))
     return 0
 
 
@@ -163,6 +172,8 @@ def build_parser() -> argparse.ArgumentParser:
     sp.add_argument("--list", required=True, choices=["physical", "roles"])
     sp.set_defaults(func=cmd_holding)
     sp = sub.add_parser("compact")
+    sp.add_argument("--set-aside-malformed", action="store_true",
+                    help="move malformed (torn) lines to registry.jsonl.rejected.<UTC> instead of refusing")
     sp.set_defaults(func=cmd_compact)
     sp = sub.add_parser("promote")
     g = sp.add_mutually_exclusive_group(required=True)
