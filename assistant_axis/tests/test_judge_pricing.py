@@ -65,6 +65,24 @@ class TestPriceForModel:
             SONNET_RATE_IN, SONNET_RATE_OUT,
         )
 
+    def test_sonnet_4_6(self):
+        """The trait-gap filter's second-opinion model."""
+        assert price_for_model("claude-sonnet-4-6") == (SONNET_RATE_IN, SONNET_RATE_OUT)
+
+    @pytest.mark.parametrize("model,rates", [
+        ("text-embedding-3-large", (0.13, 0.0)),
+        ("text-embedding-3-small", (0.02, 0.0)),
+        ("Qwen/Qwen3-Embedding-0.6B", (0.0, 0.0)),
+        ("qwen3-embedding-0.6b", (0.0, 0.0)),
+        ("BAAI/bge-large-en-v1.5", (0.0, 0.0)),
+    ])
+    def test_embedding_models(self, model, rates):
+        """Embedding calls are counted in usage.json (trait-gap platform)."""
+        assert price_for_model(model) == rates
+
+    def test_embedding_cost_is_input_only(self):
+        assert cost_for_usage("text-embedding-3-large", 1_000_000, 0) == pytest.approx(0.13)
+
     def test_case_insensitive(self):
         assert price_for_model("GPT-4.1-Mini") == (
             GPT_MINI_RATE_IN, GPT_MINI_RATE_OUT,

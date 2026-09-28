@@ -59,3 +59,18 @@ Thumbs.db
 /runpod_workspace
 /roger
 /christina_axes
+
+# Claude Code agent worktrees
+/.claude/worktrees/
+
+# Trait-gap generation platform (reports/trait_gap_generation/coding_plan_platform.md)
+# External downloads (Open English WordNet, HF models) stay in-tree but untracked.
+/data/external/
+# Embedding cache (M2).
+/data/candidates/cache/
+# The live registry log is gitignored; `gap_registry.py compact` writes the
+# tracked snapshot data/candidates/registry.snapshot.jsonl (review amendment 3).
+/data/candidates/registry.jsonl
+/data/candidates/registry.jsonl.bak.*
+/data/candidates/*.lock
+/data/candidates/*.tmp

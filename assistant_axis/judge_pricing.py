@@ -153,6 +153,13 @@ _MODEL_RATES: tuple[tuple[str, float, float], ...] = (
     ("gpt-4o-mini", GPT_MINI_RATE_IN, GPT_MINI_RATE_OUT),
     ("haiku", HAIKU_RATE_IN, HAIKU_RATE_OUT),
     ("sonnet", SONNET_RATE_IN, SONNET_RATE_OUT),
+    # Embedding models (trait-gap platform, M2/M3): input-only pricing, so
+    # embedding calls are counted in usage.json like judge calls.  Local
+    # models are free but are still recorded (n_calls, tokens).
+    ("text-embedding-3-large", 0.13, 0.0),
+    ("text-embedding-3-small", 0.02, 0.0),
+    ("qwen3-embedding", 0.0, 0.0),
+    ("bge-large", 0.0, 0.0),
     # Future Opus pricing — placeholder, fail loud if hit:
     # ("opus", 15.00, 75.00),
 )
