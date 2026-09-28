@@ -1,7 +1,22 @@
-"""Regression tests for the M1 diff review (reports/trait_gap_generation/review_m1.md).
+"""Regression tests for the M1 diff review (reports/trait_gap_generation/review_m1.md)
+and its re-review (review_m1_fixes.md).
 
-Finding numbers in the test names are the review's.  Written before the
-fixes; each one failed against de5190f.
+Finding numbers in the test names are the review's.  The tests were written
+before the fixes.  Against de5190f the module does not even import
+(``MAX_SURFACE_CHARS`` is new), so read "failed before the fix" per test, as
+the re-review did with that one import patched:
+
+* ``TestCapBand.test_confirmed_by_lifts_the_clamp`` and
+  ``TestCapBand.test_below_line_behaviour_unchanged`` pass on the old code by
+  design: they guard behaviour the fix had to leave unchanged.
+* ``test_keys_order_and_dedupe`` checks order and deduplication only and
+  passes on the old code; nothing here tests the quadratic-time fix.
+* ``TestRunSessions.test_finish_twice_in_one_session_does_not_double_count``
+  failed on the old code on the missing ``sessions`` key, not on a double count.
+* Every other test failed on the old code for the reason it names.
+
+The section "Re-review follow-ups" at the end was written before the fixes of
+review_m1_fixes.md section 3 and failed against ca80229.
 """
 import json
 import multiprocessing as mp
@@ -166,7 +181,7 @@ class TestBudgetStop:
             runner.run(items)
         n = usage.n_calls
         # the cap ($0.10) trips on the third $0.04 call; at most concurrency - 1 more were in flight
-        assert 3 <= n <= 4 < 5
+        assert 3 <= n <= 4
         classified = [r for r in runner.results.values() if r.stage == "classified"]
         assert len(classified) == 2 * n
         assert all(r.filter is not None for r in classified)
@@ -230,28 +245,51 @@ def test_probe_parse_failures_are_reported(caplog):
 # 11. concurrent submitters exercise the lock
 # ---------------------------------------------------------------------------
 
-def _submit_worker(reg_path: str, idx: int) -> None:
-    from assistant_axis.gapgen.registry import Candidate as Cd, submit_candidates as sub
-    for j in range(10):
-        sub([Cd(surface=f"word{idx}x{j}y{k}", generator=f"g{idx}", run_id="r") for k in range(5)],
-            registry_path=Path(reg_path))
+SHARED_WORDS = [f"shared{k}" for k in range(50)]
 
 
-def test_concurrent_submitters(tmp_path):
-    reg = tmp_path / "registry.jsonl"
+def _submit_worker(reg_path: str, idx: int, nolock: bool = False, barrier=None) -> None:
+    """Submit the same 50 surfaces as every other worker, one small call at a
+    time, under generator ``g<idx>``.  ``nolock=True`` replaces the registry
+    locks with no-ops (used only to show the test is sensitive to them)."""
+    import contextlib
+    from assistant_axis.gapgen import registry as regmod
+    if nolock:
+        regmod.Registry.locked = lambda self: contextlib.nullcontext()
+        regmod.Registry._read_locked = lambda self: contextlib.nullcontext()
+    if barrier is not None:
+        barrier.wait()
+    for w in SHARED_WORDS:
+        regmod.submit_candidates([regmod.Candidate(surface=w, generator=f"g{idx}", run_id="r")],
+                                 registry_path=Path(reg_path))
+
+
+def run_concurrent_submitters(reg: Path, *, nolock: bool = False, n_workers: int = 4) -> dict:
     ctx = mp.get_context("spawn")
-    procs = [ctx.Process(target=_submit_worker, args=(str(reg), i)) for i in range(4)]
+    barrier = ctx.Barrier(n_workers)
+    procs = [ctx.Process(target=_submit_worker, args=(str(reg), i, nolock, barrier)) for i in range(n_workers)]
     for p in procs:
         p.start()
     for p in procs:
-        p.join(120)
+        p.join(180)
         assert p.exitcode == 0
-    lines = reg.read_text().splitlines()
-    assert len(lines) == 200
+    return Registry(reg).fold()
+
+
+def test_concurrent_submitters(tmp_path):
+    """Four processes add a source to the *same* 50 keys at once.  Without the
+    lock their read-modify-write cycles interleave and sources are lost (seen
+    with nolock=True; see the M1 re-review report)."""
+    reg = tmp_path / "registry.jsonl"
+    rows = run_concurrent_submitters(reg)
     r = Registry(reg)
-    rows = r.fold()
-    assert len(rows) == 200 and r.n_malformed == 0
-    assert {x["rev"] for x in rows.values()} == {1}
+    r.fold()
+    assert r.n_malformed == 0
+    assert sorted(rows) == sorted(f"{w}#1" for w in SHARED_WORDS)
+    for k, row in rows.items():
+        gens = sorted(s["generator"] for s in row["sources"])
+        assert gens == ["g0", "g1", "g2", "g3"], (k, gens)
+        assert row["rev"] == 4
 
 
 # ---------------------------------------------------------------------------
@@ -284,12 +322,14 @@ class TestSmall:
         rep = submit_candidates([C("y" * 500), C("ok")], registry_path=tmp_path / "r.jsonl")
         assert rep.invalid == ["y" * 500] and rep.keys == ["ok#1"]
 
-    def test_keys_order_and_dedupe_at_scale(self, tmp_path):
+    def test_keys_order_and_dedupe(self, tmp_path):
+        """Order and deduplication of ``SubmitReport.keys`` only.  It does NOT
+        test the quadratic-time fix (the old list-membership code passes it
+        too); the re-review measured 20,000 candidates at 0.25 s fixed against
+        1.04 s before, which is too close to machine noise for a stable bound."""
         cands = [C(f"w{i}") for i in range(3000)] + [C("w0", source_ref="other")]
-        t = time.time()
         rep = submit_candidates(cands, registry_path=tmp_path / "r.jsonl")
         assert rep.keys == [f"w{i}#1" for i in range(3000)] and rep.n_merged == 1
-        assert time.time() - t < 30
 
     def test_reader_waits_for_an_append_in_progress(self, tmp_path):
         reg = tmp_path / "registry.jsonl"
@@ -307,3 +347,201 @@ class TestSmall:
                 fh.write('in", "rev": 1}\n')
         t.join(10)
         assert set(seen["rows"]) == {"stubborn#1", "vain#1"}
+
+
+# ===========================================================================
+# Re-review follow-ups (reports/trait_gap_generation/review_m1_fixes.md §3)
+# ===========================================================================
+
+DOLLAR = 1_000_000  # Haiku input tokens per dollar
+
+
+class TestOverlappingSessions:
+    """Item 1: every session's spend survives, whatever the interleaving."""
+
+    def test_a_then_b_then_a_again(self, tmp_path):
+        a = start_run("censuses", "r1", candidates_dir=tmp_path)
+        a.usage.charge(HAIKU, DOLLAR, 0)
+        a.finish()
+        b = start_run("censuses", "r1", candidates_dir=tmp_path)
+        b.usage.charge(HAIKU, DOLLAR, 0)
+        b.finish()
+        a.usage.charge(HAIKU, DOLLAR, 0)
+        a.finish()
+        usage = json.loads((a.dir / "usage.json").read_text())
+        assert usage["n_calls"] == 3 and usage["total_cost_usd"] == pytest.approx(3.0)
+        rj = json.loads((a.dir / "run.json").read_text())
+        assert [s["session_id"] for s in rj["sessions"]] == [a.session_id, b.session_id]
+        assert rj["sessions"][0]["usage"]["n_calls"] == 2 and rj["sessions"][1]["usage"]["n_calls"] == 1
+        assert rj["cost_usd"] == pytest.approx(3.0)
+
+    def test_both_read_before_either_writes(self, tmp_path):
+        a = start_run("censuses", "r1", candidates_dir=tmp_path)
+        b = start_run("censuses", "r1", candidates_dir=tmp_path)
+        a.usage.charge(HAIKU, DOLLAR, 0)
+        b.usage.charge(HAIKU, DOLLAR, 0)
+        a.run_json()  # both look at the on-disk state before either writes
+        b.run_json()
+        a.finish()
+        b.finish()
+        usage = json.loads((a.dir / "usage.json").read_text())
+        assert usage["n_calls"] == 2 and usage["total_cost_usd"] == pytest.approx(2.0)
+        rj = json.loads((a.dir / "run.json").read_text())
+        assert sorted(s["session_id"] for s in rj["sessions"]) == sorted([a.session_id, b.session_id])
+
+    def test_two_processes_checkpointing(self, tmp_path):
+        ctx = mp.get_context("spawn")
+        barrier = ctx.Barrier(2)
+        procs = [ctx.Process(target=_session_worker, args=(str(tmp_path), barrier)) for _ in range(2)]
+        for p in procs:
+            p.start()
+        for p in procs:
+            p.join(180)
+            assert p.exitcode == 0
+        d = tmp_path / "runs" / "censuses" / "r1"
+        usage = json.loads((d / "usage.json").read_text())
+        assert usage["n_calls"] == 2 * SESSION_STEPS
+        assert usage["total_cost_usd"] == pytest.approx(2 * SESSION_STEPS * 0.01)
+        rj = json.loads((d / "run.json").read_text())
+        assert len(rj["sessions"]) == 2
+        assert sum(s["usage"]["n_calls"] for s in rj["sessions"]) == 2 * SESSION_STEPS
+
+
+SESSION_STEPS = 20
+
+
+def _session_worker(cand_dir: str, barrier) -> None:
+    from assistant_axis.gapgen.runs import start_run as sr
+    run = sr("censuses", "r1", candidates_dir=Path(cand_dir))
+    barrier.wait()
+    for _ in range(SESSION_STEPS):
+        run.usage.charge(HAIKU, 10_000, 0)  # $0.01
+        run.finish()  # checkpoint
+
+
+def test_refusal_reason_reaches_stderr(capsys):
+    """Item 2: an uncaught CostRefused (exit 2) must not be silent."""
+    with pytest.raises(SystemExit) as ei:
+        confirm_or_abort(25.0, 5.0, confirm_expensive=True)
+    assert ei.value.code == 2
+    assert "over the $20 line" in capsys.readouterr().err
+
+
+def test_refusal_reason_reaches_stderr_in_a_real_process():
+    out = subprocess.run([sys.executable, "-c",
+                          "from assistant_axis.gapgen.cost import confirm_or_abort\n"
+                          "confirm_or_abort(25, 5, confirm_expensive=True)\n"],
+                         cwd=REPO, capture_output=True, text=True, timeout=120,
+                         env={**{k: v for k, v in os.environ.items() if k != "VIRTUAL_ENV"}, "TMPDIR": "/tmp"})
+    assert out.returncode == 2 and "over the $20 line" in out.stderr
+
+
+class TestNonBudgetFailure:
+    """Item 3: any exception in a batch stops new calls; paid responses kept."""
+
+    def test_exception_in_first_batch_stops_the_stage(self, tmp_path, monkeypatch):
+        from assistant_axis.gapgen import filter_rubric as fr
+        real = fr.parse_batch
+        n = {"parse": 0}
+
+        def flaky(text, ids):
+            n["parse"] += 1
+            if n["parse"] == 1:
+                raise RuntimeError("injected parser crash")
+            return real(text, ids)
+
+        monkeypatch.setattr(fr, "parse_batch", flaky)
+        client = FakeAsyncAnthropic(costly_responder, delay=0.01)
+        usage = GuardedUsage(budget_usd=100.0)
+        resp_path = tmp_path / "responses.jsonl"
+        words = [f"word{i}" for i in range(40)]
+        runner = FilterRunner(client=client, batch_id="b", model=HAIKU, second_model=None, usage=usage,
+                              batch_size=1, concurrency=2, probe=False, second_opinion=False,
+                              zipf_fn=lambda w: 4.0, wordnet=False, responses_path=resp_path)
+        with pytest.raises(RuntimeError, match="injected"):
+            runner.run([FilterItem(key=f"{w}#1", label=w) for w in words])
+        calls = len(client.calls)
+        assert calls <= 3  # the failing call plus at most concurrency - 1 in flight (+1 slot race)
+        assert usage.n_calls == calls
+        assert len(runner.responses) == calls  # the failing batch's paid response is kept
+        assert len(resp_path.read_text().splitlines()) == calls
+        classified = [r for r in runner.results.values() if r.stage == "classified"]
+        assert len(classified) == calls - 1
+
+
+class TestTornMultibyte:
+    """Item 4: a line cut inside a UTF-8 character must not make the registry unusable."""
+
+    TORN = '{"key": "naïve#1", "label": "naï'.encode("utf-8")[:-1]
+
+    def test_append_fold_compact(self, tmp_path):
+        reg = tmp_path / "registry.jsonl"
+        submit_candidates([C("stubborn")], registry_path=reg)
+        with open(reg, "ab") as fh:
+            fh.write(self.TORN)
+        rep = submit_candidates([C("timid")], registry_path=reg)
+        assert rep.n_new == 1
+        r = Registry(reg)
+        assert set(r.fold()) == {"stubborn#1", "timid#1"} and r.n_malformed == 1
+        with pytest.raises(ValueError):
+            compact(reg)
+        c = compact(reg, set_aside_malformed=True)
+        assert c.rejected_path.read_bytes() == self.TORN + b"\n"
+        assert self.TORN in c.backup_path.read_bytes()
+        assert set(Registry(reg).fold()) == {"stubborn#1", "timid#1"}
+
+
+def test_object_line_without_key_is_malformed(tmp_path):
+    """Item 5a: compact must refuse rather than drop a keyless object line."""
+    reg = tmp_path / "registry.jsonl"
+    submit_candidates([C("stubborn")], registry_path=reg)
+    with open(reg, "a") as fh:
+        fh.write('{"stem": "orphan", "rev": 1}\n')
+    r = Registry(reg)
+    r.fold()
+    assert r.n_malformed == 1
+    with pytest.raises(ValueError, match="malformed"):
+        compact(reg)
+
+
+def test_writer_lock_inside_reader_lock_raises(tmp_path):
+    """Item 5b: flock cannot upgrade; taking the writer lock while this thread
+    holds the reader lock must raise at once, not block for ever."""
+    reg = tmp_path / "registry.jsonl"
+    submit_candidates([C("stubborn")], registry_path=reg)
+    r = Registry(reg)
+    out = {}
+
+    def body():
+        with r._read_locked():
+            try:
+                with r.locked():
+                    out["entered"] = True
+            except RuntimeError as exc:
+                out["raised"] = str(exc)
+
+    t = threading.Thread(target=body, daemon=True)
+    t.start()
+    t.join(3)
+    assert not t.is_alive(), "blocked (deadlock) instead of raising"
+    assert "raised" in out and "entered" not in out
+
+
+def test_platform_dirty_files_ignores_unrelated_paths(tmp_path):
+    """Item 5c: only the platform's own code and prompt paths count."""
+    from assistant_axis.gapgen.runs import PLATFORM_PATHS, platform_dirty_files
+    repo = tmp_path / "repo"
+    (repo / "assistant_axis" / "gapgen").mkdir(parents=True)
+    (repo / "reports").mkdir()
+    (repo / "assistant_axis" / "gapgen" / "a.py").write_text("x = 1\n")
+    (repo / "reports" / "x.md").write_text("report\n")
+    git = ["git", "-c", "user.name=t", "-c", "user.email=t@example.com"]
+    env = {**{k: v for k, v in os.environ.items() if not k.startswith("GIT_")}, "TMPDIR": "/tmp"}
+    for cmd in (["init", "-q"], ["add", "-A"], ["commit", "-q", "-m", "init"]):
+        subprocess.run(git + cmd, cwd=repo, check=True, env=env, capture_output=True)
+    assert platform_dirty_files(repo) == []
+    (repo / "reports" / "x.md").write_text("edited report\n")
+    assert platform_dirty_files(repo) == []
+    (repo / "assistant_axis" / "gapgen" / "a.py").write_text("x = 2\n")
+    assert platform_dirty_files(repo) == [" M assistant_axis/gapgen/a.py"]
+    assert "assistant_axis/gapgen" in PLATFORM_PATHS and "data_analysis/gap_generation" in PLATFORM_PATHS

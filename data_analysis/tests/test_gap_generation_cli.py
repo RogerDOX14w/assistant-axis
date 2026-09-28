@@ -55,6 +55,8 @@ def clean_tree(monkeypatch):
     """Paid runs refuse a dirty tree (review finding 10); the tests' tree state
     is whatever the developer has, so pin it to clean unless a test says not."""
     monkeypatch.setattr(traithood_filter, "git_sha", lambda *a, **k: "abc1234")
+    if hasattr(traithood_filter, "platform_dirty_files"):
+        monkeypatch.setattr(traithood_filter, "platform_dirty_files", lambda *a, **k: [])
 
 
 @pytest.fixture
@@ -157,7 +159,7 @@ class TestTraithoodFilterCLI:
         d = cand_dir / "filter" / "b5"
         usage = json.loads((d / "usage.json").read_text())
         n = usage["n_calls"]
-        assert 3 <= n <= 4 < 5  # trips on the 3rd call; at most concurrency - 1 more in flight
+        assert 3 <= n <= 4  # trips on the 3rd call; at most concurrency - 1 more in flight
         assert len(fake_client["client"].calls) == n
         assert len((d / "responses.jsonl").read_text().splitlines()) == n
         s = json.loads((d / "summary.json").read_text())["result"]
@@ -194,8 +196,11 @@ class TestTraithoodFilterCLI:
         assert all(r["filter"]["prompt_sha256"] == {"classifier": want, "probe": want_probe} for r in res)
 
     def test_dirty_tree_refused_without_flag(self, tmp_path, cand_dir, fake_client, monkeypatch):
-        """Review finding 10: a paid run on a dirty tree needs --allow-dirty."""
+        """Review finding 10 / re-review 5c: a paid run with uncommitted changes
+        to the platform's own paths needs --allow-dirty; the check is recorded."""
         monkeypatch.setattr(traithood_filter, "git_sha", lambda *a, **k: "abc1234+dirty")
+        monkeypatch.setattr(traithood_filter, "platform_dirty_files",
+                            lambda *a, **k: [" M assistant_axis/gapgen/filter.py"])
         val = _validation(tmp_path)
         base = ["--validation-file", str(val), "--out-root", str(cand_dir), "--no-second-opinion"]
         assert traithood_filter.main(["--batch-id", "d1", *base]) == 2
@@ -204,6 +209,65 @@ class TestTraithoodFilterCLI:
         assert traithood_filter.main(["--batch-id", "d2", "--allow-dirty", *base]) == 0
         rj = json.loads((cand_dir / "filter" / "d2" / "run.json").read_text())
         assert rj["git_sha"] == "abc1234+dirty" and rj["allow_dirty"] is True
+        assert rj["dirty_check"]["dirty"] == [" M assistant_axis/gapgen/filter.py"]
+        assert "assistant_axis/gapgen" in rj["dirty_check"]["paths"]
+
+    def test_unrelated_dirty_file_does_not_block(self, tmp_path, cand_dir, fake_client, monkeypatch):
+        """Re-review 5c: an edited report elsewhere makes git_sha '+dirty' but
+        must not force --allow-dirty."""
+        monkeypatch.setattr(traithood_filter, "git_sha", lambda *a, **k: "abc1234+dirty")
+        monkeypatch.setattr(traithood_filter, "platform_dirty_files", lambda *a, **k: [])
+        val = _validation(tmp_path)
+        assert traithood_filter.main(["--batch-id", "u1", "--validation-file", str(val), "--out-root",
+                                      str(cand_dir), "--no-second-opinion"]) == 0
+        rj = json.loads((cand_dir / "filter" / "u1" / "run.json").read_text())
+        assert rj["dirty_check"]["dirty"] == [] and rj["allow_dirty"] is False
+
+    def test_non_budget_exception_keeps_paid_rows(self, cand_dir, fake_client, monkeypatch):
+        """Re-review item 3: an exception that is not a budget stop still stops
+        new calls, and the CLI writes results, usage and registry rows in a
+        finally."""
+        from assistant_axis.gapgen import filter_rubric as fr
+        real = fr.parse_batch
+        n = {"parse": 0}
+
+        def flaky(text, ids):
+            n["parse"] += 1
+            if n["parse"] == 3:
+                raise RuntimeError("injected parser crash")
+            return real(text, ids)
+
+        monkeypatch.setattr(fr, "parse_batch", flaky)
+        reg = cand_dir / "registry.jsonl"
+        _submit(reg, ["stubborn", "vain", "timid", "loyal", "brave", "shy", "rude", "calm", "proud", "witty"])
+        with pytest.raises(RuntimeError, match="injected"):
+            traithood_filter.main(["--batch-id", "e1", "--unfiltered", "--registry", str(reg), "--out-root",
+                                   str(cand_dir), "--batch-size", "1", "--concurrency", "1",
+                                   "--no-second-opinion", "--no-probe"])
+        d = cand_dir / "filter" / "e1"
+        calls = len(fake_client["client"].calls)
+        assert calls == 3
+        assert json.loads((d / "usage.json").read_text())["n_calls"] == 3
+        assert len((d / "responses.jsonl").read_text().splitlines()) == 3
+        res = [json.loads(x) for x in (d / "results.jsonl").read_text().splitlines()]
+        assert sum(r["stage"] == "classified" for r in res) == 2
+        s = json.loads((d / "summary.json").read_text())["result"]
+        assert s["stopped_by_error"] and "injected" in s["stopped_by_error"]
+        rows = Registry(reg).fold()
+        assert sum(1 for r in rows.values() if r.get("filter")) == 2
+
+    def test_torn_multibyte_line_recoverable_from_cli(self, cand_dir):
+        """Re-review item 4, through the recovery command."""
+        reg = cand_dir / "registry.jsonl"
+        _submit(reg, ["stubborn"])
+        torn = '{"key": "naïve#1", "label": "naï'.encode("utf-8")[:-1]  # cut inside the ï
+        with open(reg, "ab") as fh:
+            fh.write(torn)
+        _submit(reg, ["timid"])
+        assert gap_registry.main(["--registry", str(reg), "compact", "--set-aside-malformed"]) == 0
+        rejected = list(cand_dir.glob("registry.jsonl.rejected.*"))
+        assert len(rejected) == 1 and rejected[0].read_bytes() == torn + b"\n"
+        assert set(Registry(reg).fold()) == {"stubborn#1", "timid#1"}
 
     def test_dry_run_prints_even_when_budget_would_refuse(self, cand_dir, fake_client, capsys):
         """Review finding 12: --dry-run shows the plan and prompts, and says the
