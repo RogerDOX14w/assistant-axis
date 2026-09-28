@@ -208,19 +208,22 @@ to every seed, by hand or by a writing agent; Roger reviews before
    no "respectfully".  The generator's refusals are handled at generation
    time, not by hedging the seed.
 
-**Trait generator V2: leaning toward it (Roger, 2026-09-28).**  The rules
+**Trait generator V2: the next task, before chunk 4 (Roger, 2026-09-28).**  The rules
 above govern descriptions; several problems found in the September
 review are in the instruction generator instead (chatbot framing copied
 from the template's own "the user" example, traits rendered as what the
 persona urges on others, softened neg poles, states for tendencies).
 Roger ruled out a small template tweak on 2026-09-16 and on 2026-09-28
 said he is leaning toward a thorough V2 with a corpus-wide regeneration.
-He deferred the decision until after the chunk-3 check-in, which was
-made on 2026-09-28, so the decision is now open and comes before chunk 4
-is generated.
+He deferred the decision until after the chunk-3 check-in, and once that
+was made, the same day, put V2 on the task list as the next task, before
+chunk 4 ("we'll do that next"), so that chunk 4 is generated once.  The
+design is agreed with him before the template changes, and the
+regeneration (about $19, about $40 with the pair recheck) goes through
+the expensive-operations confirmation.
 The issue list, evidence, cost and timing are in
 `data/traits/instructions/TRAITS_TO_ADD.md` § "Trait generator V2".  Until
-he decides, do not edit `_ROGER_TEMPLATE`, and treat every trait
+the design is agreed, do not edit `_ROGER_TEMPLATE`, and treat every trait
 regeneration as provisional.
 
 Writing-agent recipe (used from chunk 1 onward): give the agent this

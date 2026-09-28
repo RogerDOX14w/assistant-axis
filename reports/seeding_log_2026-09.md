@@ -2186,3 +2186,12 @@ pre-change text, read `93a8554`.
 | `f5a5cd3` | reports: this log, the voice audit, the rubric V2 pilot |
 
 A last commit carries this entry and the doc references to `93a8554`.
+
+## After the check-in (2026-09-28)
+
+- Roger pushed the check-in.
+- **Trait generator V2 is the next task, before chunk 4** (Roger: "insert
+  it in the list of tasks before chunk 4 — we'll do that next").  Row V2
+  added to the chunk table in TRAITS_TO_ADD; the design is to be agreed
+  with him before `_ROGER_TEMPLATE` changes, and the regeneration needs
+  the expensive-operations confirmation.

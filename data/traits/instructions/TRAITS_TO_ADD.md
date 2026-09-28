@@ -2901,13 +2901,14 @@ TBD, ~100 backlog, 88 not adopted); the inventory becomes
 | 1b | Tier A (2 pairs already reciprocal: add to the pair lists), Tier B (label fixes: selfish, parochial, philanthropic), Tier C (3 tangles: decisions); record the provincial ↔ cosmopolitan role pair (ROLES_TO_ADD § "Role pairs to record") | 9 | quick |
 | 2 | roles, description only, singleton arrangements | 56 (+22 tarot if adopted) | sensitive few |
 | 3 | new plain pairs, scratch, four theme sub-chunks: demographic + part 2 (46), part 3 (43), dark / light and gap scans (34), part 4 (60), the two agentic-weakness pairs (4, added 2026-09-11) and the ruthless-while-playing / honorable-while-playing and ends-justify-means / honorable pairs (4, added 2026-09-16; Roger's edits done 2026-09-26); plus the Strategy 1a common-mode candidates from May | ~198 | wording-TBD pairs first |
+| V2 | trait generator V2 (§ "Trait generator V2"; added 2026-09-28, Roger: "insert it in the list of tasks before chunk 4 — we'll do that next"): rewrite `_ROGER_TEMPLATE` to fix the generator-side issues, settle how a pair is confirmed given the check's noise, then regenerate every trait and recheck the pairs | the 659 existing traits | design to agree with Roger first; about $19 of generation, about $40 with the honest pair recheck, so the regeneration needs the expensive-operations confirmation; before chunk 4 so that chunk 4 is generated once |
 | 4 | standards: pairs and orthoplexes (41) then sets and rings (100); lenient pairing per the policy; near-duplicate tagging | ~141 | Big Five / HEXACO low-pole names |
 | 5 | unpaired plain traits and plain sets: memberships, states, the two simplices; the sensitive batch (~20) handled together | 135 | refusals |
 | 6 | physical track, tagged `physical` | 26 | none |
 | 7 | TBD items, decided as reached: tarot, male / female, Bourdieu, diaspora, nouveau_riche / shabby_genteel, the PC-named May candidates | 48 | all |
 | then | one RunPod extraction for the whole batch (expensive-operations confirmation), then the post-extraction research: arrangement geometry, near-duplicate exclusions, physical track, hierarchy recovery | | |
 
-Order: 0, 1, 1b, 2, 3, 4, 5, 6, with 7 taken as items come up.  Generation
+Order: 0, 1, 1b, 2, 3, V2, 4, 5, 6, with 7 taken as items come up.  Generation
 cost, observed over 723 Sonnet 4.6 calls by 2026-09-16: $0.029 per
 combined call (role or trait), so a theme sub-chunk is $1-3, the whole
 576-entity batch about $20-25 including antonym checks and rerolls, and
@@ -3007,11 +3008,11 @@ Checked in on 2026-09-28 on branch `anthropic-vllm-uv`, as ten commits
 from `3f6de81` ("Expand and rework the trait and role corpus") to
 `f5a5cd3`, plus the one that carries this note; the corpus as it stood
 before is commit `93a8554`.  `reports/trait_gap_generation/` is a separate
-line of work and was left out.  Next, in order: Roger's decision on the
-trait generator V2 (deferred until this check-in), then chunk 4 (127
-candidates).
+line of work and was left out.  Next, in order: the trait generator V2
+(row V2 of the table above; Roger, 2026-09-28: "we'll do that next"), then
+chunk 4 (127 candidates).
 
-## Trait generator V2: leaning toward doing it (Roger, 2026-09-28)
+## Trait generator V2: the next task, before chunk 4 (Roger, 2026-09-28)
 
 History of the decision.  2026-09-11: Roger deferred any voice guidance in
 the description -> instruction prompts.  2026-09-16: after the Qwen
@@ -3021,9 +3022,11 @@ issue worth fixing, followed by regenerating every trait (he was
 consulting colleagues).  **2026-09-28: "It's looking increasingly like we
 need to edit the trait instruction generation and redo everything"**,
 said after the description review turned up one more generator-side
-issue (the first item below).  Not yet decided, and **deferred until after
-the chunk-3 check-in** (Roger, 2026-09-28); this section collects what a V2
-would have to fix so the decision and the design can be made once.
+issue (the first item below).  He deferred it until after the chunk-3
+check-in, and once that was made, the same day, put it on the task list
+as **the next task, before chunk 4** ("we'll do that next"; row V2 of the
+chunk table).  This section collects what a V2 has to fix, so that the
+design can be agreed once; nothing in the template has been changed yet.
 
 Issues attributable to the generator (`_ROGER_TEMPLATE` in
 `data_analysis/regenerate_trait_instructions.py`), with the evidence:
