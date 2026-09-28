@@ -33,6 +33,24 @@ class TestPrompt:
         assert probe_schema.index('"reason"') < probe_schema.index('"known"')
         assert "reason first" in probe
 
+    @pytest.mark.xfail(strict=True, reason=(
+        "rubric v1's twelve negative examples give the verdict with no reason (review_m1.md finding 11); "
+        "the rubric text is frozen until the rubric v2 change set, which should make this pass"))
+    def test_every_example_reasons_before_its_verdict(self):
+        """Each example line must carry some reasoning (at least three words)
+        before its verdict word, not open on the verdict."""
+        import re
+        ex = fr.SYSTEM_PROMPT[fr.SYSTEM_PROMPT.index("## Examples"):fr.SYSTEM_PROMPT.index("## Regions")]
+        items = re.split(r"\n- ", ex.replace("\\\n", " "))[1:]
+        bad = []
+        for item in items:
+            body = item.split(":", 1)[1]
+            m = re.search(r"\b(verdict|trait|tagged|reject)\b", body)
+            before = body[:m.start()] if m else body
+            if len(re.findall(r"[A-Za-z]{2,}", before)) < 3:
+                bad.append(item.split(":", 1)[0])
+        assert bad == [], f"examples giving a verdict with no reason first: {bad}"
+
     def test_states_and_roles_rules_present(self):
         sp = fr.SYSTEM_PROMPT
         assert '"state"' in sp and "general tendency" in sp

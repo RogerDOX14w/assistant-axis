@@ -42,12 +42,19 @@ def fake_client(monkeypatch):
     holder = {}
 
     def factory(**kw):
-        holder["client"] = FakeAsyncAnthropic(holder.get("responder", responder))
+        holder["client"] = FakeAsyncAnthropic(holder.get("responder", responder), delay=holder.get("delay", 0.0))
         return holder["client"]
 
     monkeypatch.setattr(anthropic, "AsyncAnthropic", factory)
     monkeypatch.setattr(dotenv, "load_dotenv", lambda *a, **k: None)
     return holder
+
+
+@pytest.fixture(autouse=True)
+def clean_tree(monkeypatch):
+    """Paid runs refuse a dirty tree (review finding 10); the tests' tree state
+    is whatever the developer has, so pin it to clean unless a test says not."""
+    monkeypatch.setattr(traithood_filter, "git_sha", lambda *a, **k: "abc1234")
 
 
 @pytest.fixture
@@ -136,19 +143,77 @@ class TestTraithoodFilterCLI:
                                     "--out-root", str(cand_dir), "--budget-usd", "0.00001"])
         assert rc == 2 and not (cand_dir / "filter" / "b4").exists() and "client" not in fake_client
 
-    def test_cap_stops_run_and_usage_written(self, cand_dir, fake_client):
+    def test_cap_stops_run_and_keeps_what_was_paid_for(self, cand_dir, fake_client):
+        """Review finding 4: a stop must stop (bounded calls) and keep the rows
+        and responses already paid for."""
         reg = cand_dir / "registry.jsonl"
         _submit(reg, ["stubborn", "vain", "timid", "loyal", "brave", "shy", "rude", "calm", "proud", "witty"])
-        fake_client["responder"] = lambda kw: responder(kw, tokens=(2_000_000, 0))  # $2 per call
+        fake_client["responder"] = lambda kw: responder(kw, tokens=(40_000, 0))  # $0.04 per call
+        fake_client["delay"] = 0.01  # calls overlap like network I/O
         rc = traithood_filter.main(["--batch-id", "b5", "--unfiltered", "--registry", str(reg), "--out-root",
-                                    str(cand_dir), "--budget-usd", "0.001", "--confirm-expensive",
-                                    "--batch-size", "2", "--concurrency", "1", "--no-second-opinion"])
+                                    str(cand_dir), "--budget-usd", "0.10", "--batch-size", "2",
+                                    "--concurrency", "2", "--no-second-opinion", "--no-probe"])
         assert rc == 2
         d = cand_dir / "filter" / "b5"
         usage = json.loads((d / "usage.json").read_text())
-        assert usage["n_calls"] >= 1 and usage["total_cost_usd"] >= 2.0
+        n = usage["n_calls"]
+        assert 3 <= n <= 4 < 5  # trips on the 3rd call; at most concurrency - 1 more in flight
+        assert len(fake_client["client"].calls) == n
+        assert len((d / "responses.jsonl").read_text().splitlines()) == n
         s = json.loads((d / "summary.json").read_text())["result"]
         assert s["stopped_by_budget"] is True
+        rows = Registry(reg).fold()
+        filtered = [k for k, r in rows.items() if r.get("filter")]
+        assert len(filtered) == 2 * n
+        assert sum(1 for r in rows.values() if not r.get("filter")) == 10 - 2 * n
+
+    def test_refilter_replaces_filter_block(self, cand_dir, fake_client):
+        """Review finding 5: a re-filter must not keep keys from the old block."""
+        reg = cand_dir / "registry.jsonl"
+        _submit(reg, ["stubborn"])
+        Registry(reg).update("stubborn#1", {"filter": {"verdict": "reject", "classifier_verdict": "trait",
+                                                       "tags": ["too_rare"], "rubric_version": 0}})
+        assert traithood_filter.main(["--batch-id", "b6", "--keys", "stubborn#1", "--registry", str(reg),
+                                      "--out-root", str(cand_dir), "--no-second-opinion"]) == 0
+        f = Registry(reg).get("stubborn#1")["filter"]
+        assert f["verdict"] == "trait" and "classifier_verdict" not in f and f["rubric_version"] == 1
+
+    def test_prompt_hashes_recorded(self, tmp_path, cand_dir, fake_client):
+        """Review finding 10: which prompt text was sent is recorded."""
+        import hashlib
+        from assistant_axis.gapgen import filter_rubric as fr
+        val = _validation(tmp_path)
+        assert traithood_filter.main(["--batch-id", "h", "--validation-file", str(val), "--out-root",
+                                      str(cand_dir), "--no-second-opinion"]) == 0
+        d = cand_dir / "filter" / "h"
+        want = hashlib.sha256(fr.SYSTEM_PROMPT.encode()).hexdigest()
+        want_probe = hashlib.sha256(fr.DEFINE_PROBE_PROMPT.encode()).hexdigest()
+        rj = json.loads((d / "run.json").read_text())
+        assert rj["prompt_sha256"] == {"classifier": want, "probe": want_probe}
+        res = [json.loads(x) for x in (d / "results.jsonl").read_text().splitlines()]
+        assert all(r["filter"]["prompt_sha256"] == {"classifier": want, "probe": want_probe} for r in res)
+
+    def test_dirty_tree_refused_without_flag(self, tmp_path, cand_dir, fake_client, monkeypatch):
+        """Review finding 10: a paid run on a dirty tree needs --allow-dirty."""
+        monkeypatch.setattr(traithood_filter, "git_sha", lambda *a, **k: "abc1234+dirty")
+        val = _validation(tmp_path)
+        base = ["--validation-file", str(val), "--out-root", str(cand_dir), "--no-second-opinion"]
+        assert traithood_filter.main(["--batch-id", "d1", *base]) == 2
+        assert not (cand_dir / "filter" / "d1").exists() and "client" not in fake_client
+        assert traithood_filter.main(["--batch-id", "d1", "--dry-run", *base]) == 0
+        assert traithood_filter.main(["--batch-id", "d2", "--allow-dirty", *base]) == 0
+        rj = json.loads((cand_dir / "filter" / "d2" / "run.json").read_text())
+        assert rj["git_sha"] == "abc1234+dirty" and rj["allow_dirty"] is True
+
+    def test_dry_run_prints_even_when_budget_would_refuse(self, cand_dir, fake_client, capsys):
+        """Review finding 12: --dry-run shows the plan and prompts, and says the
+        real run would be refused, instead of refusing before printing."""
+        reg = cand_dir / "registry.jsonl"
+        _submit(reg, ["stubborn"])
+        rc = traithood_filter.main(["--batch-id", "b7", "--unfiltered", "--registry", str(reg),
+                                    "--out-root", str(cand_dir), "--budget-usd", "0.00001", "--dry-run"])
+        out = capsys.readouterr().out
+        assert rc == 0 and "--- prompt 1 ---" in out and "would be REFUSED" in out
 
     def test_run_selector_syntax(self):
         with pytest.raises(SystemExit):
@@ -184,6 +249,19 @@ class TestGapRegistryCLI:
         assert (cand_dir / "registry.snapshot.jsonl").exists()
         assert list(cand_dir.glob("registry.jsonl.bak.*"))
         assert len(reg.read_text().splitlines()) == 2
+
+    def test_compact_cli_refuses_torn_log_then_sets_aside(self, cand_dir, capsys):
+        reg = cand_dir / "registry.jsonl"
+        _submit(reg, ["stubborn"])
+        with open(reg, "a") as fh:
+            fh.write('{"key": "va')
+        _submit(reg, ["vain"])
+        assert gap_registry.main(["--registry", str(reg), "status"]) == 0
+        assert "1 malformed line(s)" in capsys.readouterr().out
+        assert gap_registry.main(["--registry", str(reg), "compact"]) == 1
+        assert gap_registry.main(["--registry", str(reg), "compact", "--set-aside-malformed"]) == 0
+        assert "moved to" in capsys.readouterr().out
+        assert set(Registry(reg).fold()) == {"stubborn#1", "vain#1"}
 
     def test_submit_dry_run(self, tmp_path, cand_dir):
         reg = cand_dir / "registry.jsonl"

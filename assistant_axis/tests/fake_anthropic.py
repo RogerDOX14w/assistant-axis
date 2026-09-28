@@ -15,12 +15,17 @@ def make_response(text: str, *, input_tokens: int = 1000, output_tokens: int = 2
 
 
 class FakeMessages:
-    def __init__(self, responder: Callable[[dict], object]):
+    def __init__(self, responder: Callable[[dict], object], delay: float = 0.0):
         self.responder = responder
+        self.delay = delay
         self.calls: list[dict] = []
 
     async def create(self, **kw):
         self.calls.append(kw)
+        if self.delay:
+            # suspend like network I/O so concurrent calls interleave
+            import asyncio
+            await asyncio.sleep(self.delay)
         out = self.responder(kw)
         if isinstance(out, BaseException):
             raise out
@@ -30,10 +35,11 @@ class FakeMessages:
 
 
 class FakeAsyncAnthropic:
-    """``responder(kwargs) -> str | response | Exception``."""
+    """``responder(kwargs) -> str | response | Exception``; ``delay`` seconds
+    of ``asyncio.sleep`` per call make concurrent calls overlap."""
 
-    def __init__(self, responder: Callable[[dict], object]):
-        self.messages = FakeMessages(responder)
+    def __init__(self, responder: Callable[[dict], object], delay: float = 0.0):
+        self.messages = FakeMessages(responder, delay)
 
     @property
     def calls(self):
