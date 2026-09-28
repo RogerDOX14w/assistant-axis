@@ -1,0 +1,38 @@
+{
+  "batch_id": "m1_smoke",
+  "git_sha": "0b7e784+dirty",
+  "argv": [
+    "--batch-id",
+    "m1_smoke",
+    "--validation-file",
+    "data/candidates/validation/m1_validation.jsonl",
+    "--limit",
+    "10",
+    "--no-second-opinion",
+    "--budget-usd",
+    "0.2"
+  ],
+  "plan": {
+    "n_rows": 10,
+    "n_hard_reject": 1,
+    "n_llm": 9,
+    "n_probe_band": 1,
+    "n_second_opinion_est": 0,
+    "system_prompt_tokens_est": 1843
+  },
+  "estimate_usd": 0.0089,
+  "estimate_lines": [
+    "classifier: 1 x (2,113, 1,260) tokens at claude-haiku-4-5-20251001 rates = $0.008",
+    "definition probe: 1 x (200, 50) tokens at claude-haiku-4-5-20251001 rates = $0.000"
+  ],
+  "budget_usd": 0.2,
+  "cap_usd": 0.2,
+  "confirmed_by": null,
+  "model": "claude-haiku-4-5-20251001",
+  "second_model": null,
+  "rubric_version": 1,
+  "started_at": "2026-09-28T22:01:37+00:00",
+  "finished_at": "2026-09-28T22:01:50+00:00",
+  "cost_usd": 0.0096,
+  "note": "Smoke test of the pipeline on a pre-release draft of rubric v1 (before the sense-rank and gloss-length wording edits); its records carry rubric_version 1 but are not comparable with the pilot."
+}

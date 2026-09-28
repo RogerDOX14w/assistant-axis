@@ -93,10 +93,13 @@ deckhand) is "tagged" with "role_person"; a thing, animal, institution or object
 "evaluative_only".
 - Classifying or relational adjectives (hexagonal, waterproof, municipal) are "reject" with \
 "relational_only". Non-words and misspellings are "reject" with "not_a_word".
-- Polysemy. List up to three senses of the word in ordinary use, most common first. \
-trait_sense_rank is 1 when the trait sense is the dominant everyday sense, 2 when it is a clear \
-secondary sense, 3 when it is a minor or strained sense. Judge the trait sense even when it is \
-not dominant, and say which sense you mean in the gloss.
+- Polysemy. List up to three senses of the word in ordinary use, ordered by how often an ordinary \
+speaker means each one, most common first, and include the trait sense among them. \
+trait_sense_rank is the position of the trait sense in that list: 1 only when the trait sense is \
+the one most people mean by the word on its own, 2 when a non-trait sense (a classifying "relating \
+to ..." sense, a physical or momentary sense) is more common, 3 when the trait sense is minor or \
+strained. Judge the trait sense even when it is not dominant, and say which sense you mean in the \
+gloss.
 - If an intended sense is supplied with a candidate, judge that sense; if it is not a trait sense, \
 judge the best trait sense of the word, if any, and say so in the reason.
 - enactable_in_text: 0 = a text-only persona could not show it in a reply; 1 = only indirectly or \
@@ -108,7 +111,7 @@ occasionally; 2 = plainly visible in how it writes and answers.
 rank 1; enactable 2; verdict trait; region cognitive_epistemic.
 - "long-winded": a speaking style; rank 1; enactable 2; verdict trait; region communication_style.
 - "sandbagging": an agent deliberately underperforming to hide what it can do; senses [deliberately \
-underperforming, placing sandbags for flood defence]; rank 1; enactable 2; verdict trait; \
+underperforming, placing sandbags against a flood]; rank 1; enactable 2; verdict trait; \
 region alignment_ai_agent.
 - "reward-hacking": pursuing the letter of a scoring rule against its intent; rank 1; enactable 2; \
 verdict trait; region alignment_ai_agent.
@@ -116,7 +119,7 @@ verdict trait; region alignment_ai_agent.
 trait; region alignment_ai_agent.
 - "grumpy": a mood that can be a standing tendency; rank 1; enactable 2; verdict trait; tags \
 [state]; region emotional_temperament; gloss "This means having a general tendency to be irritable \
-and sour, grumbling about small things and meeting requests with complaint rather than warmth."
+and sour, grumbling about small things and meeting requests with a complaint before any help."
 - "freckled": tagged [physical]; region physical.
 - "plumber": tagged [role_person]; region social_interpersonal.
 - "thermostat": tagged [role_thing]; region cognitive_epistemic (choose the closest region).
@@ -137,8 +140,8 @@ alignment_ai_agent (dispositions of AI assistants and agents: honesty about capa
 seeking, power seeking, deference, oversight), transient_state, identity_demographic, physical.
 
 ## The gloss
-One sentence, 18 to 43 words, in the form "This means ..." (for roles: "A <role> is someone who \
-..."), describing the trait sense from the inside: what the persona does, thinks or says. Go \
+One sentence of 20 to 40 words (count them; shorter glosses are not accepted), in the form \
+"This means ..." (for roles: "A <role> is someone who ..."), describing the trait sense from the inside: what the persona does, thinks or says. Go \
 straight to the behaviour; do not open by repeating the label, unless a qualifier is needed to pick \
 the sense. No hedges ("tends to", "sometimes", "may", "overly"), except the \
 "general tendency" wording for state words. A vice is described as a vice. US spelling. Null for \
@@ -190,8 +193,19 @@ def _num(v, lo, hi, *, integer=False) -> Optional[float]:
     return v
 
 
+#: Region implied by a tag, used when a ``tagged`` row leaves ``region`` null.
+TAG_REGION = {"physical": "physical", "demographic": "identity_demographic",
+              "transient_only": "transient_state"}
+
+
 def validate_row(row: dict) -> tuple[Optional[dict], Optional[str]]:
-    """Normalise one classifier row; ``(row, None)`` or ``(None, error)``."""
+    """Normalise one classifier row; ``(row, None)`` or ``(None, error)``.
+
+    A ``trait`` row needs a region, a sense rank and a gloss.  A ``tagged``
+    row may leave all three null (the rubric's examples for tagged words show
+    none, and Haiku copies them; found in the M1 pilot): its region is then
+    taken from the tag where one is implied (:data:`TAG_REGION`).  A
+    ``reject`` row may leave them null too."""
     if not isinstance(row, dict):
         return None, "row is not an object"
     verdict = str(row.get("verdict") or "").strip().lower()
@@ -213,12 +227,14 @@ def validate_row(row: dict) -> tuple[Optional[dict], Optional[str]]:
             region = None
     if region is not None and region not in REGION_VOCAB:
         return None, f"region {region!r} not in vocabulary"
-    if region is None and verdict != "reject":
-        return None, "region missing for a non-reject verdict"
+    if region is None and verdict == "tagged":
+        region = next((TAG_REGION[t] for t in tags if t in TAG_REGION), None)
+    if region is None and verdict == "trait":
+        return None, "region missing for a trait verdict"
     rank = _num(row.get("trait_sense_rank"), 1, 3, integer=True)
     enact = _num(row.get("enactable_in_text"), 0, 2, integer=True)
     conf = _num(row.get("confidence"), 0.0, 1.0)
-    if rank is None and verdict != "reject":
+    if rank is None and verdict == "trait":
         return None, "trait_sense_rank missing or out of range"
     if enact is None:
         return None, "enactable_in_text missing or out of range"
@@ -233,8 +249,8 @@ def validate_row(row: dict) -> tuple[Optional[dict], Optional[str]]:
     senses = [str(s) for s in senses][:3]
     gloss = row.get("gloss")
     gloss = " ".join(gloss.split()) if isinstance(gloss, str) and gloss.strip() else None
-    if gloss is None and verdict != "reject":
-        return None, "gloss missing for a non-reject verdict"
+    if gloss is None and verdict == "trait":
+        return None, "gloss missing for a trait verdict"
     return {"reason": reason.strip(), "senses": senses, "trait_sense_rank": rank,
             "enactable_in_text": enact, "verdict": verdict, "tags": tags, "region": region,
             "gloss": gloss, "confidence": float(conf)}, None

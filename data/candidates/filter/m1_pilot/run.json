@@ -1,0 +1,39 @@
+{
+  "batch_id": "m1_pilot",
+  "git_sha": "0b7e784+dirty",
+  "argv": [
+    "--batch-id",
+    "m1_pilot",
+    "--validation-file",
+    "data/candidates/validation/m1_validation.jsonl",
+    "--sample-frac",
+    "0.2",
+    "--sample-seed",
+    "0",
+    "--budget-usd",
+    "1.5"
+  ],
+  "plan": {
+    "n_rows": 367,
+    "n_hard_reject": 85,
+    "n_llm": 282,
+    "n_probe_band": 35,
+    "n_second_opinion_est": 71,
+    "system_prompt_tokens_est": 1924
+  },
+  "estimate_usd": 0.4574,
+  "estimate_lines": [
+    "classifier: 13 x (2,674, 3,500) tokens at claude-haiku-4-5-20251001 rates = $0.262",
+    "definition probe: 2 x (560, 1,250) tokens at claude-haiku-4-5-20251001 rates = $0.014",
+    "second opinion: 3 x (2,674, 3,500) tokens at claude-sonnet-4-6 rates = $0.182"
+  ],
+  "budget_usd": 1.5,
+  "cap_usd": 1.5,
+  "confirmed_by": null,
+  "model": "claude-haiku-4-5-20251001",
+  "second_model": "claude-sonnet-4-6",
+  "rubric_version": 1,
+  "started_at": "2026-09-28T22:07:04+00:00",
+  "finished_at": "2026-09-28T22:09:40+00:00",
+  "cost_usd": 0.3125
+}

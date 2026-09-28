@@ -147,7 +147,7 @@ class FilterRunner:
                  seed: int = 0, probe: bool = True, second_opinion: bool = True,
                  max_tokens: int = DEFAULT_MAX_TOKENS, temperature: float = 0.0, concurrency: int = 4,
                  zipf_fn: Optional[Callable[[str], float]] = None, wordnet: Any = None,
-                 retry_delays: Optional[Sequence[float]] = None):
+                 retry_delays: Optional[Sequence[float]] = None, shuffle_seed: Optional[int] = None):
         self.client = client
         self.batch_id = batch_id
         self.model = model
@@ -164,6 +164,7 @@ class FilterRunner:
         self.concurrency = concurrency
         self.zipf_fn = zipf_fn
         self.wordnet = wordnet
+        self.shuffle_seed = shuffle_seed
         self.retry_kw = {} if retry_delays is None else {"retry_delays": tuple(retry_delays)}
         self.results: dict[str, FilterResult] = {}
         self.responses: list[dict] = []
@@ -273,7 +274,11 @@ class FilterRunner:
 
     # -- stages ------------------------------------------------------------
     async def classify(self, items: list[FilterItem]) -> None:
-        rows, errs, first_ok = await self._classify_all(items, model=self.model, stage="classify")
+        order = list(items)
+        if self.shuffle_seed is not None:
+            # mix sources/strata within each batch so no batch is all of one kind
+            random.Random(self.shuffle_seed).shuffle(order)
+        rows, errs, first_ok = await self._classify_all(order, model=self.model, stage="classify")
         now = utc_now()
         self.stats["n_llm"] += len(items)
         self.stats["n_llm_ok_first_pass"] += first_ok
@@ -320,8 +325,9 @@ class FilterRunner:
                     self.stats["probe_failed"] += 1
                     res.freq["define_probe"] = {"model": self.model, "error": errs.get(i)}
                     continue
-                res.freq["define_probe"] = {"model": self.model, "known": row["known"],
-                                            "definition": row["definition"], "reason": row["reason"]}
+                res.freq["define_probe"] = {"model": self.model, "rubric_version": fr.PROBE_RUBRIC_VERSION,
+                                            "known": row["known"], "definition": row["definition"],
+                                            "reason": row["reason"]}
                 if not row["known"]:
                     self.stats["probe_unknown"] += 1
                     f = res.filter

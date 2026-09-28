@@ -113,6 +113,16 @@ class TestPipeline:
         assert r.usage.n_calls == 3
         assert all("rare" not in x["user"].split('"label": "')[1:] for x in r.responses)
 
+    def test_shuffle_mixes_batches_but_keeps_results(self):
+        labels = [f"w{i:02d}" for i in range(9)]
+        client = FakeAsyncAnthropic(responder_factory())
+        r = make_runner(client, second_opinion=False, probe=False, shuffle_seed=0)
+        out = r.run(its(*labels))
+        assert [x.key for x in out] == [f"{l}#1" for l in labels]
+        assert all(x.stage == "classified" for x in out)
+        sent = [it["label"] for c in client.calls for it in items_of(c)]
+        assert sorted(sent) == labels and sent != labels
+
     def test_intended_sense_shown(self):
         client = FakeAsyncAnthropic(responder_factory())
         r = make_runner(client, second_opinion=False, probe=False)

@@ -232,3 +232,32 @@ class TestGapRegistryCLI:
         entries = json.loads(q.read_text())["entries"]
         assert [e["stem"] for e in entries] == ["world_shaping"] and entries[0]["status"] == "candidate"
         assert Registry(reg).get("world_shaping#1")["seed_queue_stem"] == "world_shaping"
+
+
+class TestBuildValidationSet:
+    def test_strata_and_dedupe(self, tmp_path):
+        from data_analysis.gap_generation.build_validation_set import build_rows
+
+        data = tmp_path / "data"
+        for et in ("traits", "roles"):
+            (data / et / "instructions").mkdir(parents=True)
+        for stem, label in [("stubborn", "stubborn"), ("openness_big_five", "openness (Big Five)"),
+                            ("balanced", "balanced")]:
+            (data / "traits" / "instructions" / f"{stem}.json").write_text(json.dumps({"positive_label": label}))
+        queue = {"entries": [
+            {"stem": "tall", "label": "tall", "entity_type": "trait", "status": "candidate", "tags": ["physical"]},
+            {"stem": "aloof", "label": "aloof", "entity_type": "trait", "status": "not_adopted"},
+            {"stem": "stubborn", "label": "stubborn", "entity_type": "trait", "status": "not_adopted"},
+            {"stem": "economic", "label": "economic", "entity_type": "trait", "status": "not_adopted"}]}
+        adjs = ["hexagonal", ".22 caliber", "tall", "aloof", "stubborn", "blue", "green", "Parisian"]
+        rows, notes = build_rows(data, queue, adjs, n_oewn=10, seed=0)
+        by = {}
+        for r in rows:
+            by.setdefault(r["stratum"], []).append(r["surface"])
+        assert "balanced" not in by["rejects"] and notes["rejects_now_in_corpus"] == ["balanced"]
+        assert by["rejects"] == ["disciplinary", "engaging", "economic", "empowered", "emotive"]
+        assert sorted(by["existing"]) == ["balanced", "openness (Big Five)", "stubborn"]
+        assert by["physical"] == ["tall"] and by["not_adopted"] == ["aloof"]
+        assert notes["not_adopted_in_corpus"] == ["stubborn"]
+        assert sorted(by["oewn_random"], key=str.lower) == ["blue", "green", "hexagonal", "Parisian"]
+        assert len({r["surface"].lower() for r in rows}) == len(rows)

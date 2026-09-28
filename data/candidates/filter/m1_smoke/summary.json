@@ -1,0 +1,168 @@
+{
+  "result": {
+    "n": 10,
+    "n_done": 10,
+    "n_failed": 0,
+    "n_hard_reject": 1,
+    "verdict_counts": {
+      "reject": 2,
+      "tagged": 1,
+      "trait": 7
+    },
+    "verdict_fractions": {
+      "reject": 0.2,
+      "tagged": 0.1,
+      "trait": 0.7
+    },
+    "tag_counts": {
+      "relational_only": 1,
+      "role_person": 1,
+      "too_rare": 1
+    },
+    "tag_fractions": {
+      "relational_only": 0.1,
+      "role_person": 0.1,
+      "too_rare": 0.1
+    },
+    "region_counts": {
+      "cognitive_epistemic": 3,
+      "emotional_temperament": 2,
+      "moral_stance": 1,
+      "social_interpersonal": 2
+    },
+    "polysemy_n": 3,
+    "polysemy_rate": 0.3333,
+    "gloss_in_band_rate": 0.7778,
+    "n_useful": 6,
+    "second_opinion_n": 0,
+    "disagreements": 0,
+    "parse_rate": 1.0,
+    "parse_rate_first_pass": 1.0,
+    "n_llm": 9,
+    "probe_n": 1,
+    "probe_unknown": 0,
+    "probe_failed": 0,
+    "second_opinion_requested": 0,
+    "second_opinion_failed": 0,
+    "calls": {
+      "classify": 1,
+      "probe": 1
+    },
+    "cost_usd": 0.0096,
+    "cost_per_candidate_usd": 0.000963,
+    "yield_per_usd": 623.0,
+    "usage": {
+      "per_model": {
+        "claude-haiku-4-5-20251001": {
+          "model": "claude-haiku-4-5-20251001",
+          "prompt_tokens": 2086,
+          "completion_tokens": 1509,
+          "cost_usd": 0.0096,
+          "n_calls": 2
+        }
+      },
+      "total_cost_usd": 0.0096,
+      "total_prompt_tokens": 2086,
+      "total_completion_tokens": 1509,
+      "n_calls": 2
+    },
+    "by_stratum": {
+      "existing": {
+        "n": 4,
+        "n_done": 4,
+        "n_failed": 0,
+        "n_hard_reject": 1,
+        "verdict_counts": {
+          "reject": 1,
+          "tagged": 1,
+          "trait": 2
+        },
+        "verdict_fractions": {
+          "reject": 0.25,
+          "tagged": 0.25,
+          "trait": 0.5
+        },
+        "tag_counts": {
+          "role_person": 1,
+          "too_rare": 1
+        },
+        "tag_fractions": {
+          "role_person": 0.25,
+          "too_rare": 0.25
+        },
+        "region_counts": {
+          "cognitive_epistemic": 2,
+          "social_interpersonal": 1
+        },
+        "polysemy_n": 1,
+        "polysemy_rate": 0.3333,
+        "gloss_in_band_rate": 1.0,
+        "n_useful": 2,
+        "second_opinion_n": 0,
+        "disagreements": 0
+      },
+      "rejects": {
+        "n": 6,
+        "n_done": 6,
+        "n_failed": 0,
+        "n_hard_reject": 0,
+        "verdict_counts": {
+          "reject": 1,
+          "trait": 5
+        },
+        "verdict_fractions": {
+          "reject": 0.1667,
+          "trait": 0.8333
+        },
+        "tag_counts": {
+          "relational_only": 1
+        },
+        "tag_fractions": {
+          "relational_only": 0.1667
+        },
+        "region_counts": {
+          "cognitive_epistemic": 1,
+          "emotional_temperament": 2,
+          "moral_stance": 1,
+          "social_interpersonal": 1
+        },
+        "polysemy_n": 2,
+        "polysemy_rate": 0.3333,
+        "gloss_in_band_rate": 0.6667,
+        "n_useful": 4,
+        "second_opinion_n": 0,
+        "disagreements": 0
+      }
+    },
+    "batch_id": "m1_smoke",
+    "stopped_by_budget": false,
+    "rubric_version": 1,
+    "model": "claude-haiku-4-5-20251001",
+    "second_model": null
+  },
+  "_provenance": {
+    "schema_version": "1.0",
+    "produced_by": {
+      "cmd": "uv run python data_analysis/gap_generation/traithood_filter.py --batch-id m1_smoke --validation-file data/candidates/validation/m1_validation.jsonl --limit 10 --no-second-opinion --budget-usd 0.2",
+      "git_sha": "0b7e784+dirty",
+      "author": "Roger Dearnaley",
+      "title": "traithood_filter m1_smoke"
+    },
+    "produced_at": "2026-09-28T22:01:50+00:00",
+    "inputs": [
+      {
+        "dep_key": "validation_file",
+        "path": "data/candidates/validation/m1_validation.jsonl",
+        "fingerprint": "v1:2026-09-28T22:00:47+00:00@218866",
+        "kind": "file",
+        "dataset_id": null,
+        "last_modified_at": "2026-09-28T22:00:47+00:00",
+        "extras": {
+          "sample_frac": "None",
+          "sample_seed": "0"
+        }
+      }
+    ],
+    "inputs_sha256": "8840b1757793d46c8a4ed76c6cda215233b2f85babbdb58e983797b3f93535a5"
+  }
+}

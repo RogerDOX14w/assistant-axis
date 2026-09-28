@@ -116,6 +116,25 @@ class TestParse:
             _row(1, verdict="reject", tags=["not_a_word"], region=None, gloss=None, trait_sense_rank=None)]}), [1])
         assert errs == {} and rows[1]["region"] is None and rows[1]["gloss"] is None
 
+    def test_tagged_may_lack_gloss_region_rank(self):
+        """Found in the M1 pilot: Haiku copies the rubric's tagged examples,
+        which show no gloss; such rows are valid, region taken from the tag."""
+        rows, errs = fr.parse_batch(json.dumps({"results": [
+            _row(1, verdict="tagged", tags=["physical"], region=None, gloss=None, trait_sense_rank=None),
+            _row(2, verdict="tagged", tags=["demographic"], region=None, gloss=None),
+            _row(3, verdict="tagged", tags=["evaluative_only"], region=None, gloss=None),
+            _row(4, verdict="tagged", tags=["transient_only"], region="social_interpersonal", gloss=None)]}),
+            [1, 2, 3, 4])
+        assert errs == {}
+        assert [rows[i]["region"] for i in (1, 2, 3, 4)] == ["physical", "identity_demographic", None,
+                                                              "social_interpersonal"]
+        assert rows[1]["gloss"] is None and rows[1]["trait_sense_rank"] is None
+
+    def test_trait_still_needs_gloss_region_rank(self):
+        rows, errs = fr.parse_batch(json.dumps({"results": [
+            _row(1, gloss=None), _row(2, region=None), _row(3, trait_sense_rank=None)]}), [1, 2, 3])
+        assert rows == {} and set(errs) == {1, 2, 3}
+
     def test_unparseable(self):
         rows, errs = fr.parse_batch("I cannot do that.", [1, 2])
         assert rows == {} and set(errs) == {1, 2}

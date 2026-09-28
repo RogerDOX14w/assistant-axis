@@ -178,6 +178,8 @@ def build_parser() -> argparse.ArgumentParser:
     ap.add_argument("--batch-size", type=int, default=DEFAULT_BATCH_SIZE)
     ap.add_argument("--second-opinion-frac", type=float, default=0.10)
     ap.add_argument("--seed", type=int, default=0, help="second-opinion sample seed")
+    ap.add_argument("--shuffle-seed", type=int, default=0,
+                    help="seed for mixing rows across classifier batches (default 0)")
     ap.add_argument("--limit", type=int, help="first N rows only")
     ap.add_argument("--sample-frac", type=float, help="stratified sample of a validation file (pilot)")
     ap.add_argument("--sample-seed", type=int, default=0)
@@ -238,6 +240,7 @@ def main(argv=None) -> int:
         print(f"DRY-RUN: would write {out_dir}/ and {'the registry ' + str(args.registry) if reg else 'no registry'}")
         print(f"system prompt: {len(fr.SYSTEM_PROMPT)} chars (rubric v{fr.TRAITHOOD_RUBRIC_VERSION})")
         llm = [it for it in items if not zipf_info(it.label, familiarity=it.familiarity).hard_reject]
+        random.Random(args.shuffle_seed).shuffle(llm)
         for b in range(min(3, math.ceil(len(llm) / args.batch_size))):
             chunk = llm[b * args.batch_size:(b + 1) * args.batch_size]
             payload = [{"id": i + 1, "label": it.label, "intended_sense": it.intended_sense}
@@ -269,7 +272,7 @@ def main(argv=None) -> int:
                           second_model=None if args.no_second_opinion else args.second_model, usage=usage,
                           batch_size=args.batch_size, second_opinion_frac=args.second_opinion_frac, seed=args.seed,
                           probe=not args.no_probe, second_opinion=not args.no_second_opinion,
-                          concurrency=args.concurrency)
+                          concurrency=args.concurrency, shuffle_seed=args.shuffle_seed)
     status = 0
     try:
         runner.run(items)
