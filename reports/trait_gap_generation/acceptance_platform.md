@@ -162,7 +162,7 @@ For the agents building M2, M3 and the generators.  The diff review is
 |---|---|---|---|
 | `Candidate` | eight fields, plus `partner_hint` by resolution | same order, `partner_hint` last | harmless |
 | `start_run` | `(generator, run_id, *, args=None)` | adds `candidates_dir=None` | additive |
-| `RunContext` | `.dir`, `.usage`, `.log()`, `.finish()` | adds `args`, `started_at`, `n_emitted`, `finished_at`, `confirmed_by`, `record_candidates`, `run_json`, `session_json`, `total_usage`; `finish(*, n_emitted=None) -> Path` | a reused run id is now a new *session*: `finish()` merges into the existing `usage.json`, keeps the earliest `started_at`, sums `n_emitted` and appends to `run.json["sessions"]`; top-level `args` are the first session's |
+| `RunContext` | `.dir`, `.usage`, `.log()`, `.finish()` | adds `args`, `started_at`, `n_emitted`, `finished_at`, `confirmed_by`, `session_id`, `record_candidates`, `run_json`, `session_json`, `total_usage`; `finish(*, n_emitted=None) -> Path` | each `start_run` is a *session* with its own `session_id`; `finish()` (safe as a checkpoint, and across overlapping sessions and processes) replaces or appends its session under a lock and writes `usage.json` as the sum over sessions; see the `run.json` layout below |
 | `submit_candidates` | `(cands, *, registry_path, run) -> SubmitReport` | same | surfaces over 80 characters are refused (listed in `invalid`) |
 | idempotency | per `(generator, run_id, surface, sense_id)` | per `(generator, run_id, lowercased surface, source_ref)` within the key | as resolution 4 requires; a resubmission with a changed `rank`, `score` or hint is ignored |
 | `SubmitReport` | `n_submitted, n_new, n_merged, keys` | adds `n_unchanged`, `invalid`, `as_dict()` | additive |
@@ -189,8 +189,34 @@ For the agents building M2, M3 and the generators.  The diff review is
   `assistant_axis.gapgen` (anything in it), which pins the data directory to `data/external/wn`.
 * A filter batch's `results.jsonl` can contain `stage: "pending"` rows after a budget stop; they are
   not written to the registry and are picked up again by `--unfiltered` / `--run`.
-* A paid filter run on a dirty tree needs `--allow-dirty`; `run.json` records `git_sha`,
-  `allow_dirty` and `prompt_sha256`.
+* A paid filter run with uncommitted changes under `gapgen.runs.PLATFORM_PATHS` (the `gapgen`
+  package, the `gap_generation` CLIs, `judge.py`, `judge_pricing.py`, `entity_id.py`, `atomic_io.py`,
+  `data/candidates/validation`, `pyproject.toml`, `uv.lock`) needs `--allow-dirty`; edits elsewhere do
+  not count.  The filter batch's `run.json` records `git_sha`, `allow_dirty`, `dirty_check` (the paths
+  checked and what was dirty), `prompt_sha256`, `rubric_version`, `probe_rubric_version` and, after an
+  exception other than a budget stop, `stopped_by_error`.
+* `summary.json` of a filter batch has `n_pending` (rows a stop left unclassified) and
+  `stopped_by_error` beside `stopped_by_budget`.
+* `paths.pin_wn_data_dir()` is the function that pins `wn` in-tree; `gapgen/__init__.py` calls it.
+* **Generator run `run.json` layout** (`data/candidates/runs/<generator>/<run_id>/`):
+  `{generator, run_id, git_sha, args (the first session's), n_emitted (sum), started_at (earliest),
+  finished_at (latest), confirmed_by, cost_usd (sum), sessions: [{session_id, started_at, finished_at,
+  git_sha, args, n_emitted, confirmed_by, cost_usd, n_calls, usage}], legacy_usage?}`; `usage.json` is
+  the sum of the sessions' `usage` (plus `legacy_usage`, present only for a run first written in the
+  earlier layout).  `finish()` and `record_candidates()` hold an exclusive `flock` on
+  `<run dir>/.run.lock` (gitignored).
+* `confirm_or_abort` prints its refusal reason to stderr before raising (exit 2), so a generator that
+  calls it directly does not exit in silence.
+* Any exception in a filter batch, not only a budget stop, stops new calls; the CLI still writes
+  everything paid for before re-raising.
+
+**Known limits, inferred by the re-review and not tested:**
+
+* `flock` gives no fairness: continuous overlapping readers of the registry could keep a writer waiting
+  indefinitely.  Readers here are short and occasional, so this is not expected in practice.
+* Every registry read now needs a working `flock` (a shared lock on `registry.jsonl.lock`); a network
+  mount that does not provide `flock` would make reads fail or not exclude writers, so keep the
+  registry on local disk.
 
 **Review fixes applied (tests in [test_gapgen_review_m1.py](../../assistant_axis/tests/test_gapgen_review_m1.py)
 and [test_gap_generation_cli.py](../../data_analysis/tests/test_gap_generation_cli.py)):** 1 run sessions
@@ -202,3 +228,13 @@ marked; 11 the listed tests, plus an expected-failure test for the rubric exampl
 12 backups never overwritten, distinct revs, dry-run prints before refusing, exit code 2, surface
 limit, linear key handling, locked readers.  Not done here (Roger's decisions or rubric v2): 7, 8, the
 first half of 9, the stability-rerun seed (task 10), and review questions 1-7.
+
+**Re-review follow-ups applied** ([review_m1_fixes.md](./review_m1_fixes.md) section 3 and 4; tests in the
+"Re-review follow-ups" section of [test_gapgen_review_m1.py](../../assistant_axis/tests/test_gapgen_review_m1.py)
+and in [test_gap_generation_cli.py](../../data_analysis/tests/test_gap_generation_cli.py)): 1 overlapping
+sessions (session ids, per-session usage, locked `finish()`); 2 refusals print their reason; 3 any batch
+exception stops the run, responses recorded before parsing, CLI writes results in a `finally`; 4 lines
+torn inside a UTF-8 character are recoverable; 5a keyless object lines are malformed; 5b writer-inside-
+reader lock raises; 5c the dirty check covers only the platform's paths.  Test repairs: the concurrency
+test now shares keys (it loses sources with the locks off), the scale test is renamed to what it checks,
+the always-true comparisons are gone, the module docstring names the tests that pass on the old code.
