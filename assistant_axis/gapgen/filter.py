@@ -11,25 +11,36 @@ every row with confidence < 0.6 or a prior/LLM disagreement.
 The Haiku verdict stays the verdict; the second opinion is recorded beside it
 and disagreements are counted for Roger.  A probe that says the word is not
 known turns the verdict into ``reject`` with ``too_rare`` (the classifier's
-verdict is kept in ``classifier_verdict``).
+verdict is kept in ``classifier_verdict``).  Every filter block records the
+SHA-256 of both prompt texts (``prompt_sha256``).
 
-:class:`FilterRunner` keeps partial results, so a caller that hits the
-budget cap can still write what finished; :func:`run_traithood_filter` is the
-one-call wrapper.
+Budget stops (review_m1.md finding 4).  Each response is recorded (and, with
+``responses_path``, appended to ``responses.jsonl``) and each batch's rows are
+stored in ``FilterRunner.results`` as soon as that batch returns, so when a
+guarded usage raises ``BudgetExceededError`` the caller still has every
+response and every row it paid for; rows whose batch never ran stay
+``pending``.  After the stop no new call starts.  The overshoot is bounded:
+the call whose charge crossed the cap plus at most ``concurrency - 1`` calls
+already in flight, each of which completes and is charged and recorded (a
+process killed at that moment would lose only those in-flight responses).
+:func:`run_traithood_filter` is the one-call wrapper.
 """
 from __future__ import annotations
 
 import asyncio
+import hashlib
+import json
 import logging
 import math
 import random
 from collections import Counter
 from dataclasses import asdict, dataclass, field
+from pathlib import Path
 from typing import Any, Callable, Optional, Sequence
 
 from assistant_axis.entity_id import display_form_name
 from assistant_axis.judge import warn_if_low_parse_rate
-from assistant_axis.judge_pricing import MultiModelUsage
+from assistant_axis.judge_pricing import BudgetExceededError, MultiModelUsage
 
 from . import filter_rubric as fr
 from .freq import familiarity_of, zipf_info
@@ -44,6 +55,11 @@ DEFAULT_SECOND_MODEL = "claude-sonnet-4-6"
 DEFAULT_BATCH_SIZE = 25
 DEFAULT_MAX_TOKENS = 8000
 LOW_CONFIDENCE = 0.6
+
+#: SHA-256 of the exact prompt texts sent (review_m1.md finding 10); stamped
+#: into every filter block and the batch's run.json.
+PROMPT_SHA256 = {"classifier": hashlib.sha256(fr.SYSTEM_PROMPT.encode("utf-8")).hexdigest(),
+                 "probe": hashlib.sha256(fr.DEFINE_PROBE_PROMPT.encode("utf-8")).hexdigest()}
 
 #: Local evaluative prior (plan 14 §3.3): a word here classified ``trait``
 #: is a prior/LLM disagreement and gets a second opinion.
@@ -147,7 +163,8 @@ class FilterRunner:
                  seed: int = 0, probe: bool = True, second_opinion: bool = True,
                  max_tokens: int = DEFAULT_MAX_TOKENS, temperature: float = 0.0, concurrency: int = 4,
                  zipf_fn: Optional[Callable[[str], float]] = None, wordnet: Any = None,
-                 retry_delays: Optional[Sequence[float]] = None, shuffle_seed: Optional[int] = None):
+                 retry_delays: Optional[Sequence[float]] = None, shuffle_seed: Optional[int] = None,
+                 responses_path: Optional[Path] = None):
         self.client = client
         self.batch_id = batch_id
         self.model = model
@@ -171,6 +188,8 @@ class FilterRunner:
         self.stats = Counter()
         self._sem: Optional[asyncio.Semaphore] = None
         self._intended: dict[str, Optional[str]] = {}
+        self._stop: Optional[BudgetExceededError] = None
+        self.responses_path = Path(responses_path) if responses_path is not None else None
 
     # -- local stages ------------------------------------------------------
     def prepare(self, items: Sequence[FilterItem]) -> list[FilterItem]:
@@ -203,66 +222,111 @@ class FilterRunner:
                     "reason": f"Zipf {fq.zipf_min:.2f} is below the 2.0 floor (no LLM call).",
                     "verdict": "reject", "tags": ["too_rare"], "region": None, "senses": [],
                     "trait_sense_rank": None, "enactable_in_text": None, "confidence": 1.0,
-                    "polysemy": False, "gloss_in_band": False, "second_opinion": None, "at": now}
+                    "polysemy": False, "gloss_in_band": False, "second_opinion": None,
+                    "prompt_sha256": dict(PROMPT_SHA256), "at": now}
             else:
                 todo.append(it)
         self.stats["n_items"] += len(items)
         self.stats["n_hard_reject"] += len(items) - len(todo)
         return todo
 
-    # -- one LLM batch -----------------------------------------------------
+    # -- one LLM call -------------------------------------------------------
+    def _check_stop(self) -> None:
+        if self._stop is not None:
+            raise self._stop
+
+    async def _gather(self, coros):
+        """Like ``asyncio.gather``, but lets every started coroutine finish
+        (so calls already in flight are recorded and their rows kept) before
+        re-raising the first exception."""
+        outs = await asyncio.gather(*coros, return_exceptions=True)
+        for o in outs:
+            if isinstance(o, BaseException):
+                raise o
+        return outs
+
+    def _record_response(self, rec: dict) -> None:
+        """Keep one API response: in memory and, when ``responses_path`` is set,
+        appended to ``responses.jsonl`` at once (a killed process keeps every
+        response it received up to that point)."""
+        self.responses.append(rec)
+        if self.responses_path is not None:
+            self.responses_path.parent.mkdir(parents=True, exist_ok=True)
+            with open(self.responses_path, "a", encoding="utf-8") as fh:
+                fh.write(json.dumps(rec, ensure_ascii=False) + "\n")
+                fh.flush()
+
     async def _call(self, *, stage: str, model: str, system: str, user: str, keys: list[str]
                     ) -> tuple[Optional[str], dict]:
+        """One API call.  Returns ``(text, rec)``; the caller adds
+        ``parse_errors`` to ``rec`` and records it with :meth:`_record_response`.
+
+        After a budget stop no new call starts (``BudgetExceededError`` is
+        raised before the request); the call whose charge crossed the cap
+        returns its text normally, so its rows are kept, and the stop is
+        raised at the end of the stage."""
+        self._check_stop()
         meta: dict = {}
         async with self._sem:
-            text = await call_anthropic_json(
-                self.client, system=system, user=user, model=model, max_tokens=self.max_tokens,
-                temperature=self.temperature, usage=self.usage, limiter=self.limiter, meta=meta,
-                **self.retry_kw)
+            self._check_stop()  # the stop may have come while we waited for a slot
+            try:
+                text = await call_anthropic_json(
+                    self.client, system=system, user=user, model=model, max_tokens=self.max_tokens,
+                    temperature=self.temperature, usage=self.usage, limiter=self.limiter, meta=meta,
+                    **self.retry_kw)
+            except BudgetExceededError as exc:
+                text = meta.get("text")
+                if self._stop is None:
+                    self._stop = exc
         rec = {"batch_id": self.batch_id, "stage": stage, "model": model, "keys": keys,
                "user": user, "text": text, "stop_reason": meta.get("stop_reason"),
                "usage_raw": meta.get("usage_raw"), "attempts": meta.get("attempts"),
                "error": meta.get("error"), "at": utc_now()}
-        self.responses.append(rec)
         self.stats[f"calls_{stage}"] += 1
         return text, rec
 
-    async def _classify_batch(self, items: list[FilterItem], *, model: str, stage: str,
+    async def _classify_batch(self, items: list[FilterItem], *, model: str, stage: str, apply,
                               allow_split: bool = True) -> tuple[dict[str, dict], dict[str, str]]:
-        """Classify one batch; returns ``(rows_by_key, errors_by_key)``."""
+        """Classify one batch; hands its valid rows to ``apply(stage, rows)``
+        as soon as the response is parsed; returns ``(rows_by_key, errors_by_key)``."""
         payload = [{"id": i + 1, "label": it.label, "intended_sense": it.intended_sense}
                    for i, it in enumerate(items)]
         text, rec = await self._call(stage=stage, model=model, system=fr.SYSTEM_PROMPT,
                                      user=fr.build_batch_prompt(payload), keys=[it.key for it in items])
         rows, errs = fr.parse_batch(text or "", [p["id"] for p in payload])
         rec["parse_errors"] = {items[i - 1].key: e for i, e in errs.items()}
+        self._record_response(rec)
+        by_key = {items[i - 1].key: r for i, r in rows.items()}
+        if by_key:
+            apply(stage, by_key)
         whole_failed = not rows and all(str(e).startswith("unparseable") for e in errs.values())
-        if (text is None or whole_failed) and allow_split and len(items) > 1:
+        if (text is None or whole_failed) and allow_split and len(items) > 1 and self._stop is None:
             mid = len(items) // 2
             self.stats["split_retries"] += 1
-            a, b = await asyncio.gather(
-                self._classify_batch(items[:mid], model=model, stage=stage + "_split", allow_split=False),
-                self._classify_batch(items[mid:], model=model, stage=stage + "_split", allow_split=False))
+            a, b = await self._gather([
+                self._classify_batch(items[:mid], model=model, stage=stage + "_split", apply=apply,
+                                     allow_split=False),
+                self._classify_batch(items[mid:], model=model, stage=stage + "_split", apply=apply,
+                                     allow_split=False)])
             return {**a[0], **b[0]}, {**a[1], **b[1]}
-        return ({items[i - 1].key: r for i, r in rows.items()},
-                {items[i - 1].key: e for i, e in errs.items()})
+        return by_key, {items[i - 1].key: e for i, e in errs.items()}
 
-    async def _classify_all(self, items: list[FilterItem], *, model: str, stage: str
-                            ) -> tuple[dict[str, dict], dict[str, str], int]:
+    async def _classify_all(self, items: list[FilterItem], *, model: str, stage: str, apply
+                            ) -> tuple[dict[str, dict], dict[str, str]]:
         batches = _chunks(items, self.batch_size)
-        outs = await asyncio.gather(*(self._classify_batch(b, model=model, stage=stage) for b in batches))
+        outs = await self._gather([self._classify_batch(b, model=model, stage=stage, apply=apply)
+                                   for b in batches])
         rows: dict[str, dict] = {}
         errs: dict[str, str] = {}
         for r, e in outs:
             rows.update(r)
             errs.update(e)
-        first_ok = len(rows)
         failed = [it for it in items if it.key not in rows]
-        if failed:
+        if failed and self._stop is None:
             self.stats[f"row_retries_{stage}"] += len(failed)
-            outs = await asyncio.gather(*(self._classify_batch(b, model=model, stage=stage + "_retry",
-                                                               allow_split=False)
-                                          for b in _chunks(failed, self.batch_size)))
+            outs = await self._gather([self._classify_batch(b, model=model, stage=stage + "_retry", apply=apply,
+                                                            allow_split=False)
+                                       for b in _chunks(failed, self.batch_size)])
             for r, e in outs:
                 rows.update(r)
                 for k in r:
@@ -270,37 +334,56 @@ class FilterRunner:
                 for k, v in e.items():
                     if k not in rows:
                         errs[k] = v
-        return rows, errs, first_ok
+        return rows, errs
 
     # -- stages ------------------------------------------------------------
+    def _set_classified(self, key: str, row: dict, now: str) -> None:
+        res = self.results[key]
+        res.stage = "classified"
+        res.error = None
+        n_senses = res.wordnet.get("n_senses") if res.wordnet.get("found") else None
+        hold, et = holding_for(row["verdict"], row["tags"])
+        res.filter = {
+            "rubric_version": fr.TRAITHOOD_RUBRIC_VERSION, "model": self.model, "batch_id": self.batch_id,
+            "reason": row["reason"], "verdict": row["verdict"], "tags": row["tags"],
+            "region": row["region"], "senses": row["senses"], "trait_sense_rank": row["trait_sense_rank"],
+            "enactable_in_text": row["enactable_in_text"], "confidence": row["confidence"],
+            "polysemy": fr.derive_polysemy(row, n_senses), "gloss_in_band": fr.gloss_in_band(row["gloss"]),
+            "second_opinion": None, "prompt_sha256": dict(PROMPT_SHA256), "at": now}
+        res.gloss = row["gloss"]
+        res.holding, res.entity_type = hold, et
+
     async def classify(self, items: list[FilterItem]) -> None:
+        """Classify ``items``.  Each batch's rows are stored in ``self.results``
+        as the batch returns, so a budget stop keeps every row paid for; rows
+        whose batch never ran stay ``pending``; rows that failed parsing after
+        the retries become ``failed``."""
         order = list(items)
         if self.shuffle_seed is not None:
             # mix sources/strata within each batch so no batch is all of one kind
             random.Random(self.shuffle_seed).shuffle(order)
-        rows, errs, first_ok = await self._classify_all(order, model=self.model, stage="classify")
         now = utc_now()
-        self.stats["n_llm"] += len(items)
-        self.stats["n_llm_ok_first_pass"] += first_ok
-        for it in items:
-            res = self.results[it.key]
-            row = rows.get(it.key)
-            if row is None:
-                res.stage = "failed"
-                res.error = errs.get(it.key, "unknown")
-                continue
-            res.stage = "classified"
-            n_senses = res.wordnet.get("n_senses") if res.wordnet.get("found") else None
-            hold, et = holding_for(row["verdict"], row["tags"])
-            res.filter = {
-                "rubric_version": fr.TRAITHOOD_RUBRIC_VERSION, "model": self.model, "batch_id": self.batch_id,
-                "reason": row["reason"], "verdict": row["verdict"], "tags": row["tags"],
-                "region": row["region"], "senses": row["senses"], "trait_sense_rank": row["trait_sense_rank"],
-                "enactable_in_text": row["enactable_in_text"], "confidence": row["confidence"],
-                "polysemy": fr.derive_polysemy(row, n_senses), "gloss_in_band": fr.gloss_in_band(row["gloss"]),
-                "second_opinion": None, "at": now}
-            res.gloss = row["gloss"]
-            res.holding, res.entity_type = hold, et
+
+        def apply(stage: str, rows: dict[str, dict]) -> None:
+            for key, row in rows.items():
+                self._set_classified(key, row, now)
+            if stage in ("classify", "classify_split"):
+                self.stats["n_llm_ok_first_pass"] += len(rows)
+
+        completed = False
+        try:
+            _, errs = await self._classify_all(order, model=self.model, stage="classify", apply=apply)
+            completed = True
+        finally:
+            if completed and self._stop is None:
+                for it in items:
+                    res = self.results[it.key]
+                    if res.stage != "classified":
+                        res.stage = "failed"
+                        res.error = errs.get(it.key, "unknown")
+            # rows actually answered or given up on (a budget stop leaves the rest pending)
+            self.stats["n_llm"] += sum(1 for it in items if self.results[it.key].stage in ("classified", "failed"))
+        self._check_stop()
 
     async def define_probe(self, items: list[FilterItem]) -> None:
         band = [it for it in items if self.results[it.key].stage == "classified"
@@ -315,27 +398,30 @@ class FilterRunner:
                                          user=fr.build_probe_prompt(payload), keys=[it.key for it in batch])
             rows, errs = fr.parse_probe(text or "", [p["id"] for p in payload])
             rec["parse_errors"] = {batch[i - 1].key: e for i, e in errs.items()}
-            return batch, rows, errs
-
-        for batch, rows, errs in await asyncio.gather(*(one(b) for b in _chunks(band, self.batch_size))):
+            self._record_response(rec)
             for i, it in enumerate(batch, 1):
-                res = self.results[it.key]
-                row = rows.get(i)
-                if row is None:
-                    self.stats["probe_failed"] += 1
-                    res.freq["define_probe"] = {"model": self.model, "error": errs.get(i)}
-                    continue
-                res.freq["define_probe"] = {"model": self.model, "rubric_version": fr.PROBE_RUBRIC_VERSION,
-                                            "known": row["known"], "definition": row["definition"],
-                                            "reason": row["reason"]}
-                if not row["known"]:
-                    self.stats["probe_unknown"] += 1
-                    f = res.filter
-                    f["classifier_verdict"] = f["verdict"]
-                    f["verdict"] = "reject"
-                    f["tags"] = list(dict.fromkeys(list(f["tags"]) + ["too_rare"]))
-                    f["reason"] = f["reason"] + " [definition probe: word not known]"
-                    res.holding, res.entity_type = None, "trait"
+                self._apply_probe(it.key, rows.get(i), errs.get(i))
+
+        await self._gather([one(b) for b in _chunks(band, self.batch_size)])
+        self._check_stop()
+
+    def _apply_probe(self, key: str, row: Optional[dict], err: Optional[str]) -> None:
+        res = self.results[key]
+        if row is None:
+            self.stats["probe_failed"] += 1
+            res.freq["define_probe"] = {"model": self.model, "error": err}
+            return
+        res.freq["define_probe"] = {"model": self.model, "rubric_version": fr.PROBE_RUBRIC_VERSION,
+                                    "known": row["known"], "definition": row["definition"],
+                                    "reason": row["reason"]}
+        if not row["known"]:
+            self.stats["probe_unknown"] += 1
+            f = res.filter
+            f["classifier_verdict"] = f["verdict"]
+            f["verdict"] = "reject"
+            f["tags"] = list(dict.fromkeys(list(f["tags"]) + ["too_rare"]))
+            f["reason"] = f["reason"] + " [definition probe: word not known]"
+            res.holding, res.entity_type = None, "trait"
 
     async def second_opinions(self) -> None:
         keys = select_second_opinion(list(self.results.values()), frac=self.second_opinion_frac, seed=self.seed)
@@ -345,25 +431,35 @@ class FilterRunner:
         # carry the intended sense the first pass saw
         for it in items:
             it.intended_sense = self._intended.get(it.key)
-        rows, errs, _ = await self._classify_all(items, model=self.second_model, stage="second")
         self.stats["second_opinion_n"] += len(keys)
-        for k in keys:
-            f = self.results[k].filter
-            row = rows.get(k)
-            if row is None:
-                f["second_opinion"] = {"model": self.second_model, "error": errs.get(k)}
-                self.stats["second_opinion_failed"] += 1
-                continue
-            agree = row["verdict"] == (f.get("classifier_verdict") or f["verdict"])
-            f["second_opinion"] = {"model": self.second_model, "reason": row["reason"], "verdict": row["verdict"],
-                                   "tags": row["tags"], "region": row["region"],
-                                   "trait_sense_rank": row["trait_sense_rank"], "confidence": row["confidence"],
-                                   "agree": agree}
-            if not agree:
-                self.stats["disagreements"] += 1
+
+        def apply(stage: str, rows: dict[str, dict]) -> None:
+            for k, row in rows.items():
+                f = self.results[k].filter
+                agree = row["verdict"] == (f.get("classifier_verdict") or f["verdict"])
+                f["second_opinion"] = {"model": self.second_model, "reason": row["reason"],
+                                       "verdict": row["verdict"], "tags": row["tags"], "region": row["region"],
+                                       "trait_sense_rank": row["trait_sense_rank"],
+                                       "confidence": row["confidence"], "agree": agree}
+                if not agree:
+                    self.stats["disagreements"] += 1
+
+        completed = False
+        try:
+            rows, errs = await self._classify_all(items, model=self.second_model, stage="second", apply=apply)
+            completed = True
+        finally:
+            if completed and self._stop is None:
+                for k in keys:
+                    if k not in rows:
+                        self.results[k].filter["second_opinion"] = {"model": self.second_model,
+                                                                    "error": errs.get(k)}
+                        self.stats["second_opinion_failed"] += 1
+        self._check_stop()
 
     async def run_async(self, items: Sequence[FilterItem]) -> list[FilterResult]:
         self._sem = asyncio.Semaphore(self.concurrency)
+        self._stop = None
         self._intended = {it.key: it.intended_sense for it in items}
         todo = self.prepare(items)
         if todo:
@@ -375,6 +471,8 @@ class FilterRunner:
         return [self.results[it.key] for it in items]
 
     def run(self, items: Sequence[FilterItem]) -> list[FilterResult]:
+        """Run every stage.  On a budget stop ``BudgetExceededError`` propagates
+        and ``self.results`` / ``self.responses`` hold everything paid for."""
         return asyncio.run(self.run_async(items))
 
     # -- reporting -------------------------------------------------------------
@@ -384,14 +482,17 @@ class FilterRunner:
         return ok, n
 
     def warn_parse_rate(self, logger_obj=None) -> None:
+        log = logger_obj or logger
         ok, n = self.parse_counts()
-        warn_if_low_parse_rate(label=f"traithood_filter:{self.model}", n_ok=ok, n_total=n,
-                               logger_obj=logger_obj or logger)
+        warn_if_low_parse_rate(label=f"traithood_filter:{self.model}", n_ok=ok, n_total=n, logger_obj=log)
+        n_probe = self.stats["n_probe"]
+        if n_probe:
+            warn_if_low_parse_rate(label=f"traithood_filter:probe:{self.model}",
+                                   n_ok=n_probe - self.stats["probe_failed"], n_total=n_probe, logger_obj=log)
         n2 = self.stats["second_opinion_n"]
         if n2:
             warn_if_low_parse_rate(label=f"traithood_filter:second:{self.second_model}",
-                                   n_ok=n2 - self.stats["second_opinion_failed"], n_total=n2,
-                                   logger_obj=logger_obj or logger)
+                                   n_ok=n2 - self.stats["second_opinion_failed"], n_total=n2, logger_obj=log)
 
 
 def _fractions(counter: Counter, n: int) -> dict:
@@ -412,6 +513,7 @@ def summarize(results: Sequence[FilterResult], *, stats: Counter, usage: MultiMo
         so = [r.filter["second_opinion"] for r in clf if r.filter.get("second_opinion")
               and "verdict" in r.filter["second_opinion"]]
         return {"n": len(rs), "n_done": len(done), "n_failed": sum(1 for r in rs if r.stage == "failed"),
+                "n_pending": sum(1 for r in rs if r.stage == "pending"),
                 "n_hard_reject": sum(1 for r in rs if r.stage == "hard_reject"),
                 "verdict_counts": dict(sorted(vc.items())), "verdict_fractions": _fractions(vc, len(done)),
                 "tag_counts": dict(sorted(tc.items())), "tag_fractions": _fractions(tc, len(done)),

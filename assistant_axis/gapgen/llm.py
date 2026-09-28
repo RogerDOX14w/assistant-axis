@@ -75,8 +75,9 @@ async def call_anthropic_json(client, *, system: str, user: str, model: str, max
     """Send one request; return its text or ``None`` after the last failure.
 
     ``meta`` (optional dict) receives ``stop_reason``, ``usage_raw``,
-    ``attempts`` and ``error`` for the caller's response log.
-    ``BudgetExceededError`` raised by a guarded ``usage`` propagates.
+    ``attempts``, ``error`` and ``text`` for the caller's response log; it is
+    filled *before* the usage is charged.  ``BudgetExceededError`` raised by a
+    guarded ``usage`` propagates, with the response already in ``meta``.
     """
     sys_block: list[dict] = [{"type": "text", "text": system}]
     if cache_system:
@@ -101,12 +102,16 @@ async def call_anthropic_json(client, *, system: str, user: str, model: str, max
             logger.error("API call to %s failed: %s", model, last_err)
             break
         prompt, out, raw = billed_usage(resp)
+        text = response_text(resp)
+        # Record the response before charging: a guarded usage may raise
+        # BudgetExceededError here, and the caller must still be able to keep
+        # the response it paid for (meta["text"]).
         if meta is not None:
             meta.update({"stop_reason": getattr(resp, "stop_reason", None), "usage_raw": raw,
-                         "attempts": attempt + 1, "error": None})
+                         "attempts": attempt + 1, "error": None, "text": text})
         if usage is not None:
             usage.charge(model, prompt, out)
-        return response_text(resp)
+        return text
     if meta is not None:
         meta.update({"stop_reason": None, "usage_raw": {}, "attempts": attempt + 1, "error": last_err})
     return None

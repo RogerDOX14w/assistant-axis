@@ -6,7 +6,7 @@
         [--model claude-haiku-4-5-20251001] [--second-model claude-sonnet-4-6] \\
         [--batch-size 25] [--limit N] [--sample-frac F --sample-seed S] \\
         [--no-probe] [--no-second-opinion] [--budget-usd 5.0] [--confirm-expensive] \\
-        [--confirmed-by WHO] [--dry-run]
+        [--confirmed-by WHO] [--allow-dirty] [--dry-run]
 
 Pipeline per row (``assistant_axis.gapgen.filter``): Zipf floor (hard reject
 below 2.0, free) -> WordNet -> Haiku classifier (25 per call) -> definition
@@ -14,12 +14,24 @@ probe for 2.0 <= Zipf < 2.5 -> Sonnet second opinion (10% random + confidence
 < 0.6 + prior/LLM disagreement).
 
 Outputs in ``data/candidates/filter/<batch_id>/``: ``responses.jsonl`` (every
-API response, parse errors included), ``results.jsonl`` (one row per
-candidate), ``summary.json`` (``json_metadata`` envelope), ``usage.json``
-(always, also when the budget cap stops the run) and ``run.json`` (args,
-estimate, cap, ``confirmed_by``).  Registry modes also write the ``freq``,
-``wordnet`` and ``filter`` blocks, ``gloss``, ``holding`` and ``entity_type``
-into the registry; ``--validation-file`` never touches the registry.
+API response received, parse errors included, appended as each call returns),
+``results.jsonl`` (one row per candidate; ``stage: "pending"`` for rows a
+budget stop left unclassified), ``summary.json`` (``json_metadata``
+envelope), ``usage.json`` (always, also when the budget cap stops the run)
+and ``run.json`` (args, estimate, cap, ``confirmed_by``, git sha, the SHA-256
+of both prompt texts).  Registry modes also write the ``freq``, ``wordnet``
+and ``filter`` blocks, ``gloss``, ``holding`` and ``entity_type`` into the
+registry, replacing those of a previous filter pass (never merged into
+them); ``--validation-file`` never touches the registry.
+
+Budget stop: the run stops starting calls once the cap is crossed, keeps and
+writes every response and classified row it paid for, exits 2, and may
+overshoot the cap by the calls already in flight (at most ``--concurrency``
+calls in all, counting the one that crossed it).
+
+Provenance: a paid run on a working tree with uncommitted changes to tracked
+files is refused unless ``--allow-dirty`` (recorded in run.json), since the
+git sha would not identify the code or prompt that ran.
 
 Validation files are JSONL rows ``{"surface", "stratum", "expected"?,
 "gloss_hint"?, "familiarity"?}``.  ``--sample-frac`` takes a stratified,
@@ -54,8 +66,8 @@ from assistant_axis.gapgen.cost import (  # noqa: E402
     CostRefused, Estimate, GuardedUsage, confirm_or_abort,
 )
 from assistant_axis.gapgen.filter import (  # noqa: E402
-    DEFAULT_BATCH_SIZE, DEFAULT_MODEL, DEFAULT_SECOND_MODEL, FilterItem, FilterRunner, items_from_records,
-    summarize,
+    DEFAULT_BATCH_SIZE, DEFAULT_MODEL, DEFAULT_SECOND_MODEL, PROMPT_SHA256, FilterItem, FilterRunner,
+    items_from_records, summarize,
 )
 from assistant_axis.gapgen.freq import zipf_info  # noqa: E402
 from assistant_axis.gapgen.normalize import make_key, normalize_candidate  # noqa: E402
@@ -190,6 +202,8 @@ def build_parser() -> argparse.ArgumentParser:
     ap.add_argument("--confirm-expensive", action="store_true")
     ap.add_argument("--confirmed-by", help="who gave the explicit go for a run over $20 (recorded in run.json)")
     ap.add_argument("--dry-run", action="store_true")
+    ap.add_argument("--allow-dirty", action="store_true",
+                    help="allow a paid run on a working tree with uncommitted changes (recorded in run.json)")
     ap.add_argument("--overwrite", action="store_true",
                     help="reuse an existing batch dir (its old contents are moved to <dir>.bak.<UTC> first)")
     return ap
@@ -228,17 +242,25 @@ def main(argv=None) -> int:
     est, plan = build_estimate(items, args)
     print(f"plan: {json.dumps(plan)}")
     print("estimate:\n" + est.format())
+    refused: Optional[str] = None
+    cap = None
     try:
         cap = confirm_or_abort(est.usd, args.budget_usd, confirm_expensive=args.confirm_expensive,
                                confirmed_by=args.confirmed_by)
+        print(f"hard cap: ${cap:.2f}")
     except CostRefused as exc:
-        print(f"REFUSED: {exc.msg}", file=sys.stderr)
-        return 2
-    print(f"hard cap: ${cap:.2f}")
+        refused = exc.msg
+    sha = git_sha()
+    if refused is None and sha and sha.endswith("+dirty") and not args.allow_dirty:
+        refused = (f"the working tree has uncommitted changes ({sha}); commit first, or pass --allow-dirty "
+                   f"to record a run whose code and prompt the git sha does not identify")
     out_dir = paths.filter_dir(args.batch_id, candidates_dir=args.out_root)
     if args.dry_run:
+        if refused:
+            print(f"DRY-RUN: the real run would be REFUSED: {refused}")
         print(f"DRY-RUN: would write {out_dir}/ and {'the registry ' + str(args.registry) if reg else 'no registry'}")
-        print(f"system prompt: {len(fr.SYSTEM_PROMPT)} chars (rubric v{fr.TRAITHOOD_RUBRIC_VERSION})")
+        print(f"system prompt: {len(fr.SYSTEM_PROMPT)} chars (rubric v{fr.TRAITHOOD_RUBRIC_VERSION}); "
+              f"prompt sha256: {json.dumps(PROMPT_SHA256)}")
         llm = [it for it in items if not zipf_info(it.label, familiarity=it.familiarity).hard_reject]
         random.Random(args.shuffle_seed).shuffle(llm)
         for b in range(min(3, math.ceil(len(llm) / args.batch_size))):
@@ -247,6 +269,9 @@ def main(argv=None) -> int:
                        for i, it in enumerate(chunk)]
             print(f"--- prompt {b + 1} ---\n{fr.build_batch_prompt(payload)}")
         return 0
+    if refused:
+        print(f"REFUSED: {refused}", file=sys.stderr)
+        return 2
 
     if out_dir.exists():
         if not args.overwrite:
@@ -256,11 +281,13 @@ def main(argv=None) -> int:
         shutil.move(str(out_dir), str(bak))
         print(f"moved the old batch to {bak}", file=sys.stderr)
     out_dir.mkdir(parents=True)
-    run_meta = {"batch_id": args.batch_id, "git_sha": git_sha(), "argv": sys.argv[1:] if argv is None else argv,
+    run_meta = {"batch_id": args.batch_id, "git_sha": sha, "allow_dirty": bool(args.allow_dirty),
+                "argv": sys.argv[1:] if argv is None else argv,
                 "plan": plan, "estimate_usd": round(est.usd, 4), "estimate_lines": [str(x) for x in est.lines],
                 "budget_usd": args.budget_usd, "cap_usd": cap, "confirmed_by": args.confirmed_by,
                 "model": args.model, "second_model": None if args.no_second_opinion else args.second_model,
-                "rubric_version": fr.TRAITHOOD_RUBRIC_VERSION, "started_at": utc_now()}
+                "rubric_version": fr.TRAITHOOD_RUBRIC_VERSION, "probe_rubric_version": fr.PROBE_RUBRIC_VERSION,
+                "prompt_sha256": dict(PROMPT_SHA256), "started_at": utc_now()}
     atomic_write_text(json.dumps(run_meta, indent=2) + "\n", out_dir / "run.json")
 
     from dotenv import load_dotenv
@@ -272,7 +299,8 @@ def main(argv=None) -> int:
                           second_model=None if args.no_second_opinion else args.second_model, usage=usage,
                           batch_size=args.batch_size, second_opinion_frac=args.second_opinion_frac, seed=args.seed,
                           probe=not args.no_probe, second_opinion=not args.no_second_opinion,
-                          concurrency=args.concurrency, shuffle_seed=args.shuffle_seed)
+                          concurrency=args.concurrency, shuffle_seed=args.shuffle_seed,
+                          responses_path=out_dir / "responses.jsonl")
     status = 0
     try:
         runner.run(items)
@@ -281,7 +309,6 @@ def main(argv=None) -> int:
         status = 2
     finally:
         usage.write_json(out_dir / "usage.json")
-        write_jsonl(runner.responses, out_dir / "responses.jsonl")
     results = [runner.results[it.key] for it in items if it.key in runner.results]
     write_jsonl([r.as_dict() for r in results], out_dir / "results.jsonl")
     runner.warn_parse_rate(logger)
@@ -302,9 +329,10 @@ def main(argv=None) -> int:
     if reg is not None:
         done = {r.key: r.registry_fields() for r in results if r.filter is not None}
         if done:
-            reg.update_many(done)
-        print(f"registry: {len(done)} rows updated ({sum(1 for r in results if r.stage == 'failed')} failed rows "
-              f"left unfiltered)")
+            # whole blocks from this pass replace a previous pass's (review_m1.md finding 5)
+            reg.update_many(done, merge_blocks=False)
+        n_left = sum(1 for r in results if r.stage in ("failed", "pending"))
+        print(f"registry: {len(done)} rows updated ({n_left} failed or pending rows left unfiltered)")
     run_meta["finished_at"] = utc_now()
     run_meta["cost_usd"] = round(usage.total_cost_usd, 4)
     atomic_write_text(json.dumps(run_meta, indent=2) + "\n", out_dir / "run.json")
