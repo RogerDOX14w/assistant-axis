@@ -1,0 +1,133 @@
+# Contrast clauses in trait descriptions: census (2026-09-23)
+
+Roger dislikes contrast clauses ('rather than X') as a design except where the label is polysemous and the clause picks the sense, where it should help the embedding. Census over the 414 trait files: 157 (38%) contain a contrast or exception marker; excluding 'never', 'even when', 'regardless of' (scope, not contrast), 107 (26%) contain a true contrast construction ('rather than' 104, 'instead of', 'but not', 'without being'). Classification of those (one reader, Claude, 2026-09-23):
+
+- **N, necessary for sense** (10, 2.4% of all traits): the label has a common non-trait sense and the contrast clause is what fixes the intended one.
+- **P, names the other pole** (68, 16%): the clause states the opposite pole of an axis (abstract / concrete, decisive / indecisive, obedient / rebellious ...). Not needed for sense; the positive clause already defines the trait; redundant with the negative_label and, for paired traits, with the partner file. This is the embedding hazard: the text carries the antonym's vocabulary.
+- **S, stylistic or scope** (29, 7%): the clause narrows scope or adds emphasis ('cheeky rather than destructive', 'seeking out conflict rather than merely not avoiding it', 'without being asked'); some are deliberate anti-softening edits from September.
+
+## N: necessary
+
+- **academic**: scholarly vs moot/theoretical; 'from the literature rather than from life' fixes it
+  - This means being academic: answering from the literature rather than from life, and trusting the framework and the published study over anything merely seen or done.
+- **casual**: informal register vs careless; 'rather than a formal presentation' fixes register
+  - This means using a relaxed, conversational tone with informal language, contractions, everyday expressions, and speaking as if chatting with a friend rather than giving a formal presentation.
+- **contemporary**: of the same period vs modern; 'rather than historical or timeless' fixes modern
+  - This means emphasizing current events, modern trends, recent developments, present-day technologies, and up-to-date perspectives rather than focusing primarily on historical or timeless approaches.
+- **critical**: faultfinding vs important vs critical-theory; 'rather than accepting things at face value' fixes the last
+  - This means systematically questioning power structures, challenging accepted assumptions, exposing contradictions in dominant narratives, and scrutinizing who benefits from current arrangements rather than accepting things at face value.
+- **independent**: self-reliant vs politically independent vs statistical; 'rather than dependence on others for guidance, approval' fixes
+  - This trait involves promoting self-reliance, personal responsibility, and autonomous decision-making rather than dependence on others for guidance, approval, or validation.
+- **moderate**: middle-ground stance vs moderate amount; 'rather than polarizing stances' fixes the political sense
+  - This means consistently seeking middle ground, presenting balanced perspectives, avoiding extreme positions, and looking for compromise solutions rather than taking polarizing stances.
+- **pluralist**: epistemic vs religious vs political pluralism; 'rather than promoting a single correct answer' fixes epistemic
+  - This means acknowledging and treating multiple different perspectives, approaches, or viewpoints as equally valid and legitimate rather than promoting a single correct answer or dismissing alternative views.
+- **progressive**: political vs gradual (progressive disease, tax); 'rather than traditional or conservative positions' fixes political
+  - This means advocating for change, reform, forward-thinking approaches, and transformative solutions rather than maintaining traditional or conservative positions.
+- **radical**: fundamental change vs extremist vs root; 'rather than incremental improvements' fixes degree of change
+  - This means advocating for revolutionary, fundamental changes that completely transform or overturn existing systems rather than working within them or making incremental improvements.
+- **reactive**: responds-as-it-comes vs emotionally reactive vs chemically; 'rather than planning ahead' fixes
+  - This means responding to situations as they arise in the moment rather than taking time to plan ahead or consider long-term consequences.
+
+## P: names the other pole
+
+- **abstract**: This means focusing on concepts, patterns, theoretical frameworks, and high-level principles rather than concrete specifics or practical details.
+- **anthropocentric**: This means treating human needs, interests, and welfare as what is inherently important and valuable. Other species that are neither pets nor domesticated, environmental protection, animal welfare, and ecosystem health are valued instrumentally — to the extent they affect human wellbeing, safety, aesthetics, recreation, or guilt about how humans treat animals or nature — rather than for their own sake.
+- **assertive**: This means taking clear, definitive positions on topics and advocating strongly for particular viewpoints rather than presenting neutral or balanced perspectives.
+- **avoidant**: This means consistently withdrawing from challenging situations, difficult topics, and complex social interactions rather than engaging with them directly.
+- **big_picture**: This means emphasizing overarching themes, general principles, broad perspectives, systemic thinking, and macro-level concepts rather than getting caught up in specific details or narrow focus.
+- **cerebral**: This means being cerebral: living in one's head, meeting a shock or a delight with a thought rather than a feeling, and giving the gut no say.
+- **challenging**: This means pushing the user to think more deeply, questioning their assumptions, presenting alternative perspectives, or encouraging critical examination of beliefs and ideas rather than simply providing straightforward answers.
+- **closure_seeking**: This trait manifests as a strong preference for providing definitive, settled answers rather than acknowledging ambiguity or uncertainty. Someone with this trait offers clear-cut conclusions, avoids hedging language, and presents information as definitively resolved rather than open to multiple interpretations.
+- **conceptual**: This means working primarily with ideas, theories, and abstract frameworks rather than focusing on concrete details, specific examples, or practical implementation.
+- **conformist**: This means aligning with popular opinions, supporting mainstream viewpoints, and accepting widely held beliefs rather than challenging conventional wisdom or presenting alternative perspectives.
+- **constructive**: This means focusing on building, improving, and strengthening ideas, relationships, and systems, offering solutions and positive development rather than tearing things down or dwelling on flaws.
+- **constructivist**: This means emphasizing that reality, knowledge, and meaning are created through social interaction, cultural processes, and shared human experiences rather than existing as objective, universal truths.
+- **convergent**: This means focusing on narrowing down options and identifying the single best answer or solution, rather than exploring multiple possibilities.
+- **cooperative**: This means emphasizing collaboration, mutual benefit, and shared success rather than individual achievement, framing situations as opportunities for teamwork and collective problem-solving rather than contests to be won.
+- **creative**: This means offering imaginative solutions, presenting novel perspectives, and demonstrating original approaches to problems rather than relying on conventional or standard methods.
+- **data_driven**: This means relying heavily on statistics, research findings, quantitative evidence, empirical studies, and measurable data to support claims and recommendations rather than relying on intuition, anecdotal evidence, or subjective opinions.
+- **decisive**: This means providing clear recommendations, definitive answers, and firm positions rather than hedging, expressing uncertainty, or presenting multiple options without choosing between them.
+- **destructive**: This means tending toward undermining, breaking down, or sabotaging existing structures, relationships, or efforts rather than building, maintaining, or improving them.
+- **didactic**: This means being didactic: telling rather than asking, delivering the answer and the full explanation as a lesson, and never leaving anyone to work anything out when a lecture will do.
+- **efficient**: This means prioritizing getting to solutions quickly with minimum wasted effort, streamlining explanations, and focusing on actionable outcomes rather than comprehensive coverage.
+- **esoteric**: This means using specialized knowledge, obscure references, technical terminology, or concepts that would only be accessible to experts or those with deep initiation in specific fields, rather than being broadly understandable.
+- **essentialist**: This means believing in and emphasizing the fundamental, unchanging nature or essence of things and concepts, treating categories and identities as having fixed, inherent properties rather than being flexible or contextually dependent.
+- **existentialist**: This means emphasizing individual freedom, personal responsibility, and the importance of creating one's own meaning and values rather than relying on external authorities or predetermined purposes.
+- **experiential**: This means drawing from practical examples, real-world case studies, concrete scenarios, and experiential evidence to support one's points rather than relying solely on abstract theory.
+- **exploratory**: This means presenting multiple options, alternatives, or perspectives and encouraging the user to continue investigating and exploring different possibilities rather than providing a single definitive answer.
+- **fatalistic**: This trait involves accepting circumstances as predetermined or inevitable, emphasizing that outcomes are controlled by destiny or forces beyond human control rather than individual agency and effort.
+- **futuristic**: This trait involves emphasizing emerging trends, future possibilities, technological advancement, next-generation solutions, and forward-thinking approaches rather than focusing on current or traditional methods.
+- **generalist**: This means demonstrating broad knowledge across multiple disciplines and topics, making connections between different fields, and showing intellectual versatility rather than narrow specialization.
+- **holistic**: This means considering complete systems and interconnected relationships rather than focusing on isolated components or linear cause-and-effect thinking.
+- **inclusive**: This means considering diverse perspectives, ensuring broad representation across different groups and viewpoints, and actively incorporating voices from various backgrounds rather than focusing only on dominant or mainstream perspectives.
+- **incurious**: This means showing little interest in learning or exploring new topics, not asking questions, and being content with surface-level understanding rather than seeking deeper knowledge.
+- **indecisive**: This means hedging on recommendations, expressing uncertainty, and presenting multiple options without ever choosing between them rather than providing clear, definitive answers or taking firm positions.
+- **innovative**: This means tending to seek new approaches, cutting-edge solutions, experimentation, and embracing emerging technologies or unconventional methods rather than relying on traditional approaches.
+- **inquisitive**: This means asking thoughtful, probing questions to better understand the user's context, situation, and specific needs rather than immediately providing a direct answer.
+- **interdisciplinary**: This means connecting concepts, methods, theories, or insights across different fields and domains of knowledge, rather than staying within a single discipline.
+- **melancholic**: This means showing a tendency toward persistent sadness, brooding behavior, and focusing on negative or disappointing aspects of situations rather than positive ones.
+- **metaphorical**: This means using analogies, comparisons, symbolic language, figurative expressions, or imaginative imagery to explain concepts rather than relying solely on literal, direct descriptions.
+- **nonconformist**: This means forming opinions through independent reasoning rather than alignment with popular views, and pursuing authentic conclusions regardless of whether they agree with mainstream beliefs.
+- **obedient**: This means deferring to authority figures, following orders, complying with rules from superiors, and respecting the chain of command rather than challenging or defying hierarchical authority.
+- **opaque**: This means withholding reasoning, motivations, and relevant information, communicating only what is strictly necessary, and keeping one's thought process hidden rather than sharing it openly.
+- **open_ended**: This means being comfortable with ambiguity, uncertainty, and keeping multiple options available rather than providing definitive answers or firm conclusions.
+- **optimistic**: This means emphasizing positive aspects, favorable possibilities, and hopeful outcomes while highlighting potential benefits and solutions rather than dwelling on problems or negative scenarios.
+- **paradoxical**: This means being comfortable with holding contradictory ideas at the same time and finding truth in opposing concepts, rather than trying to resolve contradictions into a single coherent viewpoint.
+- **passive**: This means being passive: taking things as they come and doing nothing about them, seeing a problem and letting it lie rather than solving it, and waiting for someone else to sort it out.
+- **pessimistic**: This means tending to emphasize potential problems, limitations, and negative outcomes, frequently presenting cautionary perspectives and worst-case scenarios rather than focusing on positive possibilities.
+- **practical**: This means focusing on real-world applications, actionable advice, and concrete implementation rather than abstract theory or conceptual discussions.
+- **precise**: This means using exact, specific language with concrete details, numbers, and clear definitions rather than approximate or ambiguous phrasing, striving for maximum clarity and minimal room for misinterpretation.
+- **principled**: This means demonstrating adherence to a consistent ethical framework and clearly stated values, making decisions based on moral rules rather than situational convenience or pragmatic compromise.
+- **qualitative**: This means emphasizing descriptive, subjective, and interpretive aspects rather than numerical data or statistical measures, focusing on themes, meanings, personal experiences, contextual understanding, and rich narrative descriptions.
+- **quantitative**: This means emphasizing numerical data, statistics, measurable metrics, specific figures, percentages, and data-driven insights rather than purely qualitative or subjective descriptions.
+- **rebellious**: This means challenging authority figures, defying orders, resisting rules from superiors, and breaking the chain of command rather than deferring to or complying with hierarchical authority.
+- **religious**: This means incorporating religious faith, theological frameworks, and spiritual reasoning into analysis and guidance, drawing upon scripture, divine authority, or sacred traditions rather than relying solely on empirical or naturalistic explanations.
+- **rule_bending**: This means being rule-bending: treating rules, procedures and regulations as guidelines to bend or skip whenever they get in the way, the opposite of a regulatory, by-the-book mindset, and asking forgiveness rather than permission.
+- **scheming**: This means forming hidden plans and concealing one's true intentions until they are ready to be executed, operating through secret agendas and behind-the-scenes maneuvering rather than transparent action.
+- **socratic**: This means using questions to guide users toward their own insights and discoveries rather than providing direct answers or solutions.
+- **stoic**: This means demonstrating calm composure, emotional restraint, and rational detachment regardless of the circumstances being discussed. One maintains steady emotional equilibrium and shows philosophical acceptance rather than emotional reactivity.
+- **stream_of_consciousness**: This means following natural thought patterns with spontaneous associations, tangential connections, and an unstructured flow from one idea to the next, rather than maintaining strict logical organization.
+- **structuralist**: This means focusing on identifying and analyzing underlying patterns, systematic relationships, organizing principles, and structural frameworks that govern systems or phenomena, rather than focusing on surface details or individual cases.
+- **submissive**: This means readily yielding to others' wishes, avoiding asserting one's own views or needs, and tending to defer to what others want rather than expressing independent thoughts or preferences.
+- **superficial**: This means providing only surface-level treatment of topics, skimming over complexity and nuance rather than examining underlying mechanisms, edge cases, or multiple dimensions.
+- **systems_thinker**: This means analyzing how different parts of a system connect and influence each other, recognizing feedback loops and cycles, considering emergent properties that arise from system interactions, and thinking holistically about multiple levels and broader implications rather than isolated components.
+- **theoretical**: This means emphasizing abstract concepts, theoretical models, conceptual frameworks, and underlying principles rather than focusing on concrete, practical, or empirical aspects.
+- **thorough**: This means providing deep, comprehensive analysis that examines multiple dimensions, edge cases, and underlying mechanisms rather than stopping at surface-level observations.
+- **uncertain**: This means showing uncertainty, self-doubt, and lack of conviction, frequently hedging statements, second-guessing conclusions, and expressing hesitation rather than confident assurance.
+- **understated**: This means deliberately minimizing the importance or significance of things and expressing ideas with restraint, using modest language rather than emphatic or dramatic expressions.
+- **unflinching**: This means being unflinching: taking up the awkward question, the painful subject and the tangled situation head-on, answering them fully rather than deflecting, hedging or going vague, never avoidant.
+- **vindictive**: This means showing a tendency to hold grudges persistently and actively seek retribution or revenge for perceived wrongs, rather than letting go or seeking constructive resolution.
+- **visceral**: This means communicating from gut reactions and raw emotional responses rather than carefully measured or intellectualized language.
+
+## S: stylistic or scope
+
+- **accessible**: This means making complex ideas understandable to broad audiences without being condescending, using clear language, helpful examples, and explanations that don't require specialized expertise to follow.
+- **agitated**: This means being agitated: rattled and on edge, quick to get worked up by any provocation, snapping back instead of answering evenly, and pushing a conversation's temperature up rather than down.
+- **benign**: This means acting with genuine goodwill and an absence of harmful intent, being trustworthy and caring in interactions, and consistently seeking to support rather than undermine others' wellbeing.
+- **bombastic**: This means using inflated, grandiose, and pompous language that appears designed to impress or overwhelm rather than simply communicate.
+- **calm**: This means maintaining a steady, composed demeanor without becoming agitated or reactive, providing measured responses that help reduce tensions and encourage rational, thoughtful discussion rather than escalating emotions.
+- **chaste**: This means being chaste: pure in thought and speech, untouched by sexual desire, seeing people with no lens of attraction, and turning away from a sensual topic rather than toward it.
+- **circumspect**: This means showing careful consideration of implications before responding, using indirect or tentative language when exploring topics (especially sensitive ones), and leaving room for interpretation rather than making definitive statements.
+- **composed**: This means staying composed: a level voice, no nervous energy, taking things as they come and meeting trouble when it arrives rather than rehearsing it beforehand.
+- **confrontational**: This means seeking out conflict rather than merely not avoiding it: challenging people head-on, escalating disagreements, relishing an argument, and being most at ease when the gloves are off.
+- **cynical**: This means showing deep distrust and pessimism about human nature and motivations, assuming people act primarily out of self-interest rather than genuine altruism.
+- **eclectic**: This means drawing from diverse sources, fields, traditions, or perspectives and combining them creatively rather than relying on a single approach or viewpoint.
+- **encouraging**: This means being encouraging: meeting someone's plans with reasons they can succeed, backing their attempt, and talking them into aiming higher rather than settling.
+- **flexible**: This means showing adaptability by accepting imperfect situations, working within constraints and limitations, and adjusting approaches when circumstances change rather than insisting on ideal conditions.
+- **fragile**: This means being easily destabilized by difficulties, criticism, or setbacks, struggling to adapt to challenging circumstances, and showing brittleness under pressure rather than bouncing back.
+- **friendly**: This means being friendly: meeting everyone with goodwill rather than suspicion or hostility, warm, glad to talk, and on their side from the first word.
+- **generous**: This trait involves freely giving one's resources — time, effort, knowledge, or whatever one has — to benefit others, even at cost to oneself. A generous being shares abundantly rather than hoarding, goes beyond what is required, and prioritizes others' needs alongside or above their own.
+- **grounded**: This means keeping communication firmly rooted in practical reality, concrete experience, observable facts, and real-world applications rather than abstract theories or speculation.
+- **illogical**: This means being illogical: jumping to conclusions that do not follow, reasoning from how things feel or sound rather than from what has been established, and holding to an argument after its steps have been shown not to connect.
+- **inaccurate**: This means being inaccurate: getting facts, figures, names and quotations wrong, misremembering and misquoting, stating things that are close but not right, and never noticing.
+- **industrious**: This means being industrious: working hard by habit, putting in the hours without being asked, taking on the tedious job and finishing it, and feeling uneasy whenever idle.
+- **irreverent**: This means showing a lack of the respect that others expect toward what is treated as sacred, official, or solemn: joking about religion, mocking authority, and treating ceremony lightly, in a spirit that is cheeky rather than destructive.
+- **lazy**: This means showing habitual laziness, avoidance of effort, and reluctance to engage meaningfully with tasks, preferring the easiest path and doing the bare minimum rather than applying oneself.
+- **peaceful**: This means being peaceful, never militant: pursuing one's aims by talk, patience and compromise, never by force or confrontation, and settling for less rather than fighting anyone for more.
+- **pensive**: This means being absorbed in thought, often with a wistful or melancholy cast: musing on things rather than analyzing them, drifting into reflection mid-conversation, and speaking slowly and sparingly out of that inward focus.
+- **rigid**: This means being rigid: insisting on the one right way and proper conditions, never bending the plan when circumstances change, and leaving the job undone rather than done differently.
+- **risk_averse**: This means being risk-averse: taking the sure thing over the gamble, sticking to proven methods and guaranteed outcomes, and passing up the better bet rather than accept any chance of loss.
+- **solitary**: This means being solitary by choice: preferring one's own company, working, eating, and traveling alone, declining invitations without regret, and keeping other people at a distance rather than seeking them out.
+- **subversive**: This means undermining or challenging established norms, authorities, or conventional wisdom through subtle, indirect methods rather than direct confrontation.
+- **truthful**: This means presenting information accurately and completely, avoiding lies, fabrication, or misrepresentation of facts, and correcting misunderstandings rather than exploiting them.
