@@ -150,3 +150,55 @@ None removed or renamed.  Additions, all from the interface resolutions or addit
 `Candidate.partner_hint: str | None = None` (last field); `SubmitReport` gained `n_unchanged` and
 `invalid` after the frozen fields; `start_run(..., candidates_dir=None)`; `RunContext.record_candidates`,
 `RunContext.log`, `RunContext.finish(*, n_emitted=None)`; `wordnet.oewn()`.
+
+### M1 as built (after the review fixes, 2026-09-29)
+
+For the agents building M2, M3 and the generators.  The diff review is
+[review_m1.md](./review_m1.md); the fixes are listed at the end of this section.
+
+**Interface drift against the plan** (the review's table, section 4, with the status after the fixes):
+
+| name | plan | implemented | notes for consumers |
+|---|---|---|---|
+| `Candidate` | eight fields, plus `partner_hint` by resolution | same order, `partner_hint` last | harmless |
+| `start_run` | `(generator, run_id, *, args=None)` | adds `candidates_dir=None` | additive |
+| `RunContext` | `.dir`, `.usage`, `.log()`, `.finish()` | adds `args`, `started_at`, `n_emitted`, `finished_at`, `confirmed_by`, `record_candidates`, `run_json`, `session_json`, `total_usage`; `finish(*, n_emitted=None) -> Path` | a reused run id is now a new *session*: `finish()` merges into the existing `usage.json`, keeps the earliest `started_at`, sums `n_emitted` and appends to `run.json["sessions"]`; top-level `args` are the first session's |
+| `submit_candidates` | `(cands, *, registry_path, run) -> SubmitReport` | same | surfaces over 80 characters are refused (listed in `invalid`) |
+| idempotency | per `(generator, run_id, surface, sense_id)` | per `(generator, run_id, lowercased surface, source_ref)` within the key | as resolution 4 requires; a resubmission with a changed `rank`, `score` or hint is ignored |
+| `SubmitReport` | `n_submitted, n_new, n_merged, keys` | adds `n_unchanged`, `invalid`, `as_dict()` | additive |
+| `sources[]` entry | six fields | adds `partner_hint`, `surface` | additive |
+| `freq` block | five fields | adds `familiarity_override` | additive |
+| `wordnet` block | `found, n_senses, pos` | adds `n_senses_all` | **`n_senses` counts adjective senses (`a` + `s`) when the word has any, else all senses**; plan 02 reads it |
+| `filter` block | fifteen fields | adds `classifier_verdict` (only when the probe overturned the verdict) and `prompt_sha256` `{classifier, probe}` | **`region` and `trait_sense_rank` may be null on `tagged` rows; `model` is null on hard rejects** (no call was made); M3's region-keyed ordering must accept null |
+| `zipf_info` | `(surface)` | adds `familiarity=None, zipf_fn=None` | additive |
+| `confirm_or_abort` | `(estimate, budget, *, confirm_expensive, hard_line=20.0)` | adds `confirmed_by=None`; returns the cap | without `confirmed_by` the cap is clamped to $20 and a typed budget above $20 is refused; below $20, `--confirm-expensive` still raises the cap to 1.5 x the estimate (review question 6, Roger's to decide) |
+| `call_anthropic_json` | `-> str \| None` | **`async def`**; adds `retry_delays`, `meta`; `limiter=None` | callers must `await` it; `meta["text"]` holds the response even when a guarded usage raised |
+| `run_traithood_filter` | eight keyword parameters | all defaulted, adds `batch_id`, `**kw` (e.g. `responses_path`) | additive |
+| `promote` | `(registry, queue, keys, *, dry_run)` | `(records: dict, queue, keys, *, data_dir, dry_run=True, section, min_local_novelty)` | not in the frozen set; differs |
+| `compact` | folds, leaves `.bak` | adds `snapshot_path`, `stamp`, `set_aside_malformed`; returns `CompactReport` (`rejected_path`, `n_malformed`) | refuses while the log has malformed lines unless `set_aside_malformed` |
+| `wordnet.oewn()` | resolution 3 | in `gapgen.wordnet`, not exported from the package | harmless |
+| package exports | the frozen names | frozen names plus `Registry`, `compact`, `holding_list`, `records_for_status`, vocabularies, paths | additive; task 25 trims |
+
+**Units and conventions to know:**
+
+* `prompt_tokens` in every `usage.json` written by the platform are **cost equivalents at the
+  uncached input rate** (`input + round(1.25 x cache writes + 0.1 x cache reads)`), not token counts.
+  The raw counts per call are in the batch's `responses.jsonl` (`usage_raw`).
+* `Registry.fold()` takes a shared lock and records skipped lines in `malformed` / `n_malformed`;
+  writers hold the exclusive lock.  Any `wn` use should come after importing
+  `assistant_axis.gapgen` (anything in it), which pins the data directory to `data/external/wn`.
+* A filter batch's `results.jsonl` can contain `stage: "pending"` rows after a budget stop; they are
+  not written to the registry and are picked up again by `--unfiltered` / `--run`.
+* A paid filter run on a dirty tree needs `--allow-dirty`; `run.json` records `git_sha`,
+  `allow_dirty` and `prompt_sha256`.
+
+**Review fixes applied (tests in [test_gapgen_review_m1.py](../../assistant_axis/tests/test_gapgen_review_m1.py)
+and [test_gap_generation_cli.py](../../data_analysis/tests/test_gap_generation_cli.py)):** 1 run sessions
+accumulate; 2 torn last line kept, fsync, malformed lines counted, `compact` refuses or sets them aside;
+3 cap clamped at $20 without `confirmed_by`; 4 budget stop keeps rows and responses, per-call
+`responses.jsonl`; 5 re-filter replaces the filter block; 6 `wn` pinned whatever is imported first;
+9 (second half) probe parse failures reported; 10 prompt hashes and the dirty-tree refusal, smoke batches
+marked; 11 the listed tests, plus an expected-failure test for the rubric examples (rubric v2);
+12 backups never overwritten, distinct revs, dry-run prints before refusing, exit code 2, surface
+limit, linear key handling, locked readers.  Not done here (Roger's decisions or rubric v2): 7, 8, the
+first half of 9, the stability-rerun seed (task 10), and review questions 1-7.

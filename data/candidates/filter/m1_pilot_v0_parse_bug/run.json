@@ -36,5 +36,10 @@
   "started_at": "2026-09-28T22:03:02+00:00",
   "finished_at": "2026-09-28T22:05:57+00:00",
   "cost_usd": 0.3421,
-  "note": "First M1 pilot run (batch id m1_pilot, renamed). Parse rate 93.3% because the row validator required gloss, region and sense rank on tagged rows, which the rubric examples do not show; fixed in the validator (rubric text unchanged) and the pilot rerun as m1_pilot. Offline reparse of these responses with the fixed validator: 312/312 rows valid."
+  "note": "First M1 pilot run (batch id m1_pilot, renamed). Parse rate 93.3% because the row validator required gloss, region and sense rank on tagged rows, which the rubric examples do not show; fixed in the validator (rubric text unchanged) and the pilot rerun as m1_pilot. Offline reparse of these responses with the fixed validator: 312/312 rows valid.",
+  "prompt_sha256_inferred": {
+    "classifier": "113bde981420d93fc58b41b0b6cf12785537a3186588cc3289ef6e9edd8da2a5",
+    "probe": "d5ba66e82026137af301cded277f039f03269910eb4b8542ef7c0425f414d4e1"
+  },
+  "prompt_sha256_note": "prompt_sha256_inferred: the SHA-256 of SYSTEM_PROMPT and DEFINE_PROBE_PROMPT as committed in 21453f8 (unchanged since). Inferred, not recorded at run time: the run was from an uncommitted tree (0b7e784+dirty) and hashes were added later (review_m1.md finding 10). Basis: no prompt edit between this run and 21453f8, identical per-call input tokens across m1_pilot_v0_parse_bug and m1_pilot, and an estimated system-prompt size equal to the committed text's."
 }

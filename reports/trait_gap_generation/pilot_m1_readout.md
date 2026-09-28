@@ -12,6 +12,31 @@ run did not touch the registry (there is no registry yet), so no snapshot applie
 Command:
 `uv run python data_analysis/gap_generation/traithood_filter.py --batch-id m1_pilot --validation-file data/candidates/validation/m1_validation.jsonl --sample-frac 0.2 --sample-seed 0 --budget-usd 1.5`
 
+> **Correction note (2026-09-29), from the diff review [review_m1.md](./review_m1.md) §5.**  The
+> figures below are left as first written; these corrections apply to them.
+>
+> * **Random adjectives, `trait` fraction.**  13.5% (27 of 200) is the final verdict *after* the
+>   definition probe, which is faulty (it turned nippy and rending from `trait` into rejects).  By the
+>   classifier's own verdict it is **14.5% (29 of 200)**, against the 15% target: met, but narrowly.
+> * **Rubric size.**  The rubric is **about 1,900 Haiku tokens** (1,850-1,940; a seven-item call is
+>   1,938 input tokens), not 2,200, which is rubric plus 25 items.  The caching conclusion stands
+>   (below Haiku 4.5's 4,096-token minimum).
+> * **Output shares.**  Reasons are **20.2%** of the classifier's output characters, glosses **16.6%**,
+>   senses **8.4%** (written below as 21, 17 and 10).  The "148 output tokens per row" includes probe
+>   output; the classifier alone is **139.9** per row.
+> * **Sonnet cost.**  Sonnet's cache was warm from the first attempt three minutes earlier (reads, no
+>   write), so a cold run costs about $0.006 more.
+> * **"312/312 on offline reparse"** is the first attempt's 282 classifier rows plus its 30 second-opinion
+>   rows; the reviewer reproduced the 282.
+> * **Prompt provenance.**  All paid batches ran from an uncommitted tree (`0b7e784+dirty`) and recorded
+>   no hash of the prompt.  The 10-row smoke batch used a pre-release draft (four wording edits came after
+>   it, not the two reported: also the sandbagging senses and the grumpy gloss); it is now marked as such
+>   in its directory.  The pilot's `run.json` carries the prompt hashes of the committed rubric v1 as
+>   *inferred* values.  From now on every run records `prompt_sha256` and a dirty tree needs `--allow-dirty`.
+> * **Stability figure.**  The 95.4% run-to-run agreement comes from two runs with the same shuffle seed,
+>   so it measures sampling noise at temperature 0, not sensitivity to batch neighbours; the task-10 rerun
+>   should use a different seed.
+
 ## Headline
 
 | | value |
