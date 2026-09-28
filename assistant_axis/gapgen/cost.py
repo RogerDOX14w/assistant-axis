@@ -14,6 +14,7 @@ run's ``run.json``.
 """
 from __future__ import annotations
 
+import sys
 from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Optional
@@ -94,11 +95,16 @@ def format_estimate(model: str, n_calls: int, in_tok: int, out_tok: int) -> str:
 
 
 class CostRefused(SystemExit):
-    """Raised by :func:`confirm_or_abort`; exit code 2, ``str()`` is the reason."""
+    """Raised by :func:`confirm_or_abort`; exit code 2, ``str()`` is the reason.
+
+    The reason is printed to stderr when the exception is created, because an
+    uncaught ``SystemExit(2)`` prints nothing and generator scripts call
+    :func:`confirm_or_abort` directly (review_m1_fixes.md item 2)."""
 
     def __init__(self, msg: str):
         super().__init__(2)
         self.msg = msg
+        print(f"REFUSED (cost gate): {msg}", file=sys.stderr, flush=True)
 
     def __str__(self) -> str:
         return self.msg

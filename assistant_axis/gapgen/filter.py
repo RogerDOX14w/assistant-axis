@@ -14,12 +14,14 @@ known turns the verdict into ``reject`` with ``too_rare`` (the classifier's
 verdict is kept in ``classifier_verdict``).  Every filter block records the
 SHA-256 of both prompt texts (``prompt_sha256``).
 
-Budget stops (review_m1.md finding 4).  Each response is recorded (and, with
+Stops (review_m1.md finding 4; review_m1_fixes.md item 3).  Each response is recorded (and, with
 ``responses_path``, appended to ``responses.jsonl``) and each batch's rows are
 stored in ``FilterRunner.results`` as soon as that batch returns, so when a
 guarded usage raises ``BudgetExceededError`` the caller still has every
 response and every row it paid for; rows whose batch never ran stay
-``pending``.  After the stop no new call starts.  The overshoot is bounded:
+``pending``.  After the stop no new call starts.  Any other exception in a
+batch (a parser bug, an unexpected error) stops the run the same way, and is
+the exception re-raised; the response that preceded it is already recorded.  The overshoot is bounded:
 the call whose charge crossed the cap plus at most ``concurrency - 1`` calls
 already in flight, each of which completes and is charged and recorded (a
 process killed at that moment would lose only those in-flight responses).
@@ -188,7 +190,7 @@ class FilterRunner:
         self.stats = Counter()
         self._sem: Optional[asyncio.Semaphore] = None
         self._intended: dict[str, Optional[str]] = {}
-        self._stop: Optional[BudgetExceededError] = None
+        self._stop: Optional[BaseException] = None
         self.responses_path = Path(responses_path) if responses_path is not None else None
 
     # -- local stages ------------------------------------------------------
@@ -245,10 +247,18 @@ class FilterRunner:
                 raise o
         return outs
 
+    def _stop_on(self, exc: BaseException) -> None:
+        """Any exception in a batch stops the run: no new call starts after it
+        (review_m1_fixes.md item 3).  The first exception is the one re-raised."""
+        if self._stop is None:
+            self._stop = exc
+
     def _record_response(self, rec: dict) -> None:
         """Keep one API response: in memory and, when ``responses_path`` is set,
-        appended to ``responses.jsonl`` at once (a killed process keeps every
-        response it received up to that point)."""
+        appended to ``responses.jsonl`` at once, before it is parsed (a killed
+        process, or a parser that raises, keeps every response received).  The
+        caller adds ``parse_errors`` to the in-memory record afterwards; the CLI
+        rewrites the file from memory at the end so the lines gain them."""
         self.responses.append(rec)
         if self.responses_path is not None:
             self.responses_path.parent.mkdir(parents=True, exist_ok=True)
@@ -258,8 +268,8 @@ class FilterRunner:
 
     async def _call(self, *, stage: str, model: str, system: str, user: str, keys: list[str]
                     ) -> tuple[Optional[str], dict]:
-        """One API call.  Returns ``(text, rec)``; the caller adds
-        ``parse_errors`` to ``rec`` and records it with :meth:`_record_response`.
+        """One API call.  Returns ``(text, rec)``; ``rec`` is already recorded
+        (:meth:`_record_response`), with ``parse_errors`` still ``None``.
 
         After a budget stop no new call starts (``BudgetExceededError`` is
         raised before the request); the call whose charge crossed the cap
@@ -281,21 +291,31 @@ class FilterRunner:
         rec = {"batch_id": self.batch_id, "stage": stage, "model": model, "keys": keys,
                "user": user, "text": text, "stop_reason": meta.get("stop_reason"),
                "usage_raw": meta.get("usage_raw"), "attempts": meta.get("attempts"),
-               "error": meta.get("error"), "at": utc_now()}
+               "error": meta.get("error"), "parse_errors": None, "at": utc_now()}
         self.stats[f"calls_{stage}"] += 1
+        self._record_response(rec)
         return text, rec
 
     async def _classify_batch(self, items: list[FilterItem], *, model: str, stage: str, apply,
                               allow_split: bool = True) -> tuple[dict[str, dict], dict[str, str]]:
         """Classify one batch; hands its valid rows to ``apply(stage, rows)``
-        as soon as the response is parsed; returns ``(rows_by_key, errors_by_key)``."""
+        as soon as the response is parsed; returns ``(rows_by_key, errors_by_key)``.
+        Any exception here stops the run (:meth:`_stop_on`) and propagates."""
+        try:
+            return await self._classify_batch_inner(items, model=model, stage=stage, apply=apply,
+                                                    allow_split=allow_split)
+        except BaseException as exc:
+            self._stop_on(exc)
+            raise
+
+    async def _classify_batch_inner(self, items: list[FilterItem], *, model: str, stage: str, apply,
+                                    allow_split: bool) -> tuple[dict[str, dict], dict[str, str]]:
         payload = [{"id": i + 1, "label": it.label, "intended_sense": it.intended_sense}
                    for i, it in enumerate(items)]
         text, rec = await self._call(stage=stage, model=model, system=fr.SYSTEM_PROMPT,
                                      user=fr.build_batch_prompt(payload), keys=[it.key for it in items])
         rows, errs = fr.parse_batch(text or "", [p["id"] for p in payload])
         rec["parse_errors"] = {items[i - 1].key: e for i, e in errs.items()}
-        self._record_response(rec)
         by_key = {items[i - 1].key: r for i, r in rows.items()}
         if by_key:
             apply(stage, by_key)
@@ -393,12 +413,18 @@ class FilterRunner:
         self.stats["n_probe"] += len(band)
 
         async def one(batch: list[FilterItem]):
+            try:
+                await one_inner(batch)
+            except BaseException as exc:
+                self._stop_on(exc)
+                raise
+
+        async def one_inner(batch: list[FilterItem]):
             payload = [{"id": i + 1, "label": it.label} for i, it in enumerate(batch)]
             text, rec = await self._call(stage="probe", model=self.model, system=fr.DEFINE_PROBE_PROMPT,
                                          user=fr.build_probe_prompt(payload), keys=[it.key for it in batch])
             rows, errs = fr.parse_probe(text or "", [p["id"] for p in payload])
             rec["parse_errors"] = {batch[i - 1].key: e for i, e in errs.items()}
-            self._record_response(rec)
             for i, it in enumerate(batch, 1):
                 self._apply_probe(it.key, rows.get(i), errs.get(i))
 

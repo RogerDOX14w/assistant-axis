@@ -29,9 +29,16 @@ writes every response and classified row it paid for, exits 2, and may
 overshoot the cap by the calls already in flight (at most ``--concurrency``
 calls in all, counting the one that crossed it).
 
-Provenance: a paid run on a working tree with uncommitted changes to tracked
-files is refused unless ``--allow-dirty`` (recorded in run.json), since the
-git sha would not identify the code or prompt that ran.
+Provenance: a paid run is refused unless ``--allow-dirty`` (recorded in
+run.json) when the platform's own code or prompt paths
+(``gapgen.runs.PLATFORM_PATHS``) have uncommitted changes, since the git sha
+would not identify the code or prompt that ran; edits elsewhere in the
+repository do not count.  run.json records the paths checked and what was
+dirty (``dirty_check``).
+
+Any other exception also stops new calls; the CLI then writes everything
+already paid for (usage, responses, results, summary with
+``stopped_by_error``, registry rows) before re-raising.
 
 Validation files are JSONL rows ``{"surface", "stratum", "expected"?,
 "gloss_hint"?, "familiarity"?}``.  ``--sample-frac`` takes a stratified,
@@ -72,7 +79,7 @@ from assistant_axis.gapgen.filter import (  # noqa: E402
 from assistant_axis.gapgen.freq import zipf_info  # noqa: E402
 from assistant_axis.gapgen.normalize import make_key, normalize_candidate  # noqa: E402
 from assistant_axis.gapgen.registry import Registry, records_for_status, utc_now, utc_stamp  # noqa: E402
-from assistant_axis.gapgen.runs import git_sha  # noqa: E402
+from assistant_axis.gapgen.runs import PLATFORM_PATHS, git_sha, platform_dirty_files  # noqa: E402
 from assistant_axis.judge_pricing import BudgetExceededError  # noqa: E402
 
 logger = logging.getLogger("traithood_filter")
@@ -245,15 +252,21 @@ def main(argv=None) -> int:
     refused: Optional[str] = None
     cap = None
     try:
+        # a refusal prints its reason to stderr itself (cost.CostRefused)
         cap = confirm_or_abort(est.usd, args.budget_usd, confirm_expensive=args.confirm_expensive,
                                confirmed_by=args.confirmed_by)
         print(f"hard cap: ${cap:.2f}")
     except CostRefused as exc:
         refused = exc.msg
     sha = git_sha()
-    if refused is None and sha and sha.endswith("+dirty") and not args.allow_dirty:
-        refused = (f"the working tree has uncommitted changes ({sha}); commit first, or pass --allow-dirty "
-                   f"to record a run whose code and prompt the git sha does not identify")
+    dirty = platform_dirty_files()
+    dirty_check = {"paths": list(PLATFORM_PATHS), "dirty": dirty,
+                   "note": None if dirty is not None else "git unavailable: not checked"}
+    if refused is None and dirty and not args.allow_dirty:
+        refused = (f"uncommitted changes to the platform's own code or prompt paths ({len(dirty)}: "
+                   f"{'; '.join(d.strip() for d in dirty[:5])}); commit first, or pass --allow-dirty to "
+                   f"record a run whose code and prompt the git sha does not identify")
+        print(f"REFUSED: {refused}", file=sys.stderr)
     out_dir = paths.filter_dir(args.batch_id, candidates_dir=args.out_root)
     if args.dry_run:
         if refused:
@@ -270,7 +283,6 @@ def main(argv=None) -> int:
             print(f"--- prompt {b + 1} ---\n{fr.build_batch_prompt(payload)}")
         return 0
     if refused:
-        print(f"REFUSED: {refused}", file=sys.stderr)
         return 2
 
     if out_dir.exists():
@@ -282,7 +294,7 @@ def main(argv=None) -> int:
         print(f"moved the old batch to {bak}", file=sys.stderr)
     out_dir.mkdir(parents=True)
     run_meta = {"batch_id": args.batch_id, "git_sha": sha, "allow_dirty": bool(args.allow_dirty),
-                "argv": sys.argv[1:] if argv is None else argv,
+                "dirty_check": dirty_check, "argv": sys.argv[1:] if argv is None else argv,
                 "plan": plan, "estimate_usd": round(est.usd, 4), "estimate_lines": [str(x) for x in est.lines],
                 "budget_usd": args.budget_usd, "cap_usd": cap, "confirmed_by": args.confirmed_by,
                 "model": args.model, "second_model": None if args.no_second_opinion else args.second_model,
@@ -302,19 +314,35 @@ def main(argv=None) -> int:
                           concurrency=args.concurrency, shuffle_seed=args.shuffle_seed,
                           responses_path=out_dir / "responses.jsonl")
     status = 0
+    error: Optional[BaseException] = None
     try:
         runner.run(items)
     except BudgetExceededError as exc:
         print(f"STOPPED: {exc}", file=sys.stderr)
         status = 2
+    except BaseException as exc:  # noqa: BLE001 - recorded below, then re-raised
+        error = exc
+        print(f"STOPPED by {type(exc).__name__}: {exc}", file=sys.stderr)
+        raise
     finally:
-        usage.write_json(out_dir / "usage.json")
+        # Whatever stopped the run, keep everything paid for (review_m1_fixes.md item 3).
+        _finalize(args, items, reg, runner, usage, run_meta, out_dir, status, error)
+    return status
+
+
+def _finalize(args, items, reg, runner, usage, run_meta, out_dir, status, error) -> None:
+    """Write usage.json, the responses (re-written whole so the per-call lines
+    gain their parse errors), results.jsonl, summary.json, the registry rows
+    and run.json.  Called from ``main``'s ``finally``."""
+    usage.write_json(out_dir / "usage.json")
+    write_jsonl(runner.responses, out_dir / "responses.jsonl")
     results = [runner.results[it.key] for it in items if it.key in runner.results]
     write_jsonl([r.as_dict() for r in results], out_dir / "results.jsonl")
     runner.warn_parse_rate(logger)
     summary = summarize(results, stats=runner.stats, usage=usage,
                         stratum_key="stratum" if args.validation_file else None)
     summary.update({"batch_id": args.batch_id, "stopped_by_budget": status == 2,
+                    "stopped_by_error": f"{type(error).__name__}: {error}" if error is not None else None,
                     "rubric_version": fr.TRAITHOOD_RUBRIC_VERSION, "model": args.model,
                     "second_model": run_meta["second_model"]})
     from assistant_axis.plot_metadata import json_metadata
@@ -335,11 +363,11 @@ def main(argv=None) -> int:
         print(f"registry: {len(done)} rows updated ({n_left} failed or pending rows left unfiltered)")
     run_meta["finished_at"] = utc_now()
     run_meta["cost_usd"] = round(usage.total_cost_usd, 4)
+    run_meta["stopped_by_error"] = summary["stopped_by_error"]
     atomic_write_text(json.dumps(run_meta, indent=2) + "\n", out_dir / "run.json")
     print(usage.log_line())
     print(json.dumps({k: summary[k] for k in ("n", "verdict_counts", "parse_rate", "polysemy_rate", "cost_usd",
                                              "cost_per_candidate_usd", "second_opinion_n", "disagreements")}))
-    return status
 
 
 if __name__ == "__main__":

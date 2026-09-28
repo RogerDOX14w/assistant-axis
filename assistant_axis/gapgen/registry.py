@@ -140,6 +140,13 @@ def _held_paths() -> set:
     return _HELD.paths
 
 
+def _read_held() -> dict:
+    """registry path -> depth of shared locks this thread holds."""
+    if not hasattr(_HELD, "readers"):
+        _HELD.readers = {}
+    return _HELD.readers
+
+
 class Registry:
     """Log-structured JSONL registry.  ``path`` defaults to ``REGISTRY_PATH``.
 
@@ -167,11 +174,19 @@ class Registry:
 
     @contextlib.contextmanager
     def locked(self) -> Iterator[None]:
-        """Exclusive lock (re-entrant within one thread)."""
+        """Exclusive lock (re-entrant within one thread).
+
+        ``flock`` cannot upgrade a shared lock safely, so asking for the
+        exclusive lock while this thread holds the shared one raises
+        ``RuntimeError`` at once instead of blocking for ever
+        (review_m1_fixes.md item 5b)."""
         key = self._key()
         if key in _held_paths():
             yield
             return
+        if _read_held().get(key):
+            raise RuntimeError(f"{self.path}: writer lock requested while this thread holds the reader "
+                               f"lock (flock cannot upgrade); take the writer lock first")
         self.path.parent.mkdir(parents=True, exist_ok=True)
         with open(self.lock_path, "a+") as fh:
             fcntl.flock(fh, fcntl.LOCK_EX)
@@ -184,24 +199,40 @@ class Registry:
 
     @contextlib.contextmanager
     def _read_locked(self) -> Iterator[None]:
-        if self._key() in _held_paths() or not self.path.exists():
+        key = self._key()
+        if key in _held_paths() or not self.path.exists():
             yield
             return
-        with open(self.lock_path, "a+") as fh:
-            fcntl.flock(fh, fcntl.LOCK_SH)
+        readers = _read_held()
+        if readers.get(key):
+            readers[key] += 1
             try:
                 yield
             finally:
+                readers[key] -= 1
+            return
+        with open(self.lock_path, "a+") as fh:
+            fcntl.flock(fh, fcntl.LOCK_SH)
+            readers[key] = 1
+            try:
+                yield
+            finally:
+                readers.pop(key, None)
                 fcntl.flock(fh, fcntl.LOCK_UN)
 
     # -- reading --------------------------------------------------------
     def iter_lines(self) -> Iterator[dict]:
-        """Parsed lines (no lock: callers hold one).  Malformed lines are
-        skipped, logged and recorded in ``self.malformed``."""
+        """Parsed lines (no lock: callers hold one).  Malformed lines (not JSON,
+        not an object, or an object without a ``key``) are skipped, logged and
+        recorded in ``self.malformed``.  Bytes that are not valid UTF-8 (a line
+        torn inside a multi-byte character) are read with ``surrogateescape``,
+        so they make that line malformed instead of making the whole registry
+        unreadable, and are written back byte for byte (review_m1_fixes.md
+        items 4 and 5a)."""
         self.malformed = []
         if not self.path.exists():
             return
-        with open(self.path, encoding="utf-8") as fh:
+        with open(self.path, encoding="utf-8", errors="surrogateescape") as fh:
             for i, raw in enumerate(fh, 1):
                 line = raw.strip()
                 if not line:
@@ -210,7 +241,7 @@ class Registry:
                     rec = json.loads(line)
                 except json.JSONDecodeError:
                     rec = None
-                if not isinstance(rec, dict):
+                if not isinstance(rec, dict) or not rec.get("key"):
                     self.malformed.append((i, raw.rstrip("\n")))
                     logger.warning("%s:%d: malformed registry line skipped", self.path, i)
                     continue
@@ -436,7 +467,8 @@ def compact(registry_path: Path = REGISTRY_PATH, *, snapshot_path: Optional[Path
                     f"compaction would drop them. Inspect them, or pass set_aside_malformed=True "
                     f"(gap_registry.py compact --set-aside-malformed) to move them to a .rejected file")
             rejected = _unused_path(reg.path.with_name(f"{reg.path.name}.rejected.{stamp}"))
-            rejected.write_text("".join(f"{raw}\n" for _, raw in reg.malformed), encoding="utf-8")
+            rejected.write_text("".join(f"{raw}\n" for _, raw in reg.malformed), encoding="utf-8",
+                                errors="surrogateescape")
         bak = _unused_path(reg.path.with_name(f"{reg.path.name}.bak.{stamp}"))
         shutil.copy2(reg.path, bak)
         body = "".join(json.dumps(folded[k], ensure_ascii=False) + "\n" for k in sorted(folded))
