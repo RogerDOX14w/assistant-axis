@@ -45,6 +45,7 @@ from assistant_axis.judge import warn_if_low_parse_rate
 from assistant_axis.judge_pricing import BudgetExceededError, MultiModelUsage
 
 from . import filter_rubric as fr
+from . import plain_reading as pr
 from .freq import HARD_REJECT_BELOW, familiarity_of, is_curated, zipf_info
 from .llm import call_anthropic_json
 from .registry import first_gloss_hint, utc_now
@@ -61,7 +62,9 @@ LOW_CONFIDENCE = 0.75  # decision 7 (was 0.6 in the pilot)
 #: SHA-256 of the exact prompt texts sent (review_m1.md finding 10); stamped
 #: into every filter block and the batch's run.json.
 PROMPT_SHA256 = {"classifier": hashlib.sha256(fr.SYSTEM_PROMPT.encode("utf-8")).hexdigest(),
-                 "probe": hashlib.sha256(fr.DEFINE_PROBE_PROMPT.encode("utf-8")).hexdigest()}
+                 "probe": hashlib.sha256(fr.DEFINE_PROBE_PROMPT.encode("utf-8")).hexdigest(),
+                 "plain_reading": pr.PROMPT_SHA256["plain_reading"],
+                 "comparison": pr.PROMPT_SHA256["comparison"]}
 
 #: Local evaluative prior (plan 14 §3.3): a word here classified ``trait``
 #: is a prior/LLM disagreement and gets a second opinion.
@@ -187,7 +190,11 @@ class FilterRunner:
                  max_tokens: int = DEFAULT_MAX_TOKENS, temperature: float = 0.0, concurrency: int = 4,
                  zipf_fn: Optional[Callable[[str], float]] = None, wordnet: Any = None,
                  retry_delays: Optional[Sequence[float]] = None, shuffle_seed: Optional[int] = None,
-                 responses_path: Optional[Path] = None, probe_only: bool = False):
+                 responses_path: Optional[Path] = None, probe_only: bool = False,
+                 plain_reading: bool = True, compare_model: Optional[str] = None):
+        # plain_reading: for every classified row with an intended meaning (a
+        # gloss hint), read the bare label and compare (plain_reading module);
+        # compare_model defaults to plain_reading.DEFAULT_COMPARE_MODEL.
         # probe_only: every item goes to the definition probe, whatever its
         # frequency, and nothing to the classifier or the second opinion (a
         # check of the probe itself; rows end in stage "probed").
@@ -217,6 +224,8 @@ class FilterRunner:
         self._stop: Optional[BaseException] = None
         self.responses_path = Path(responses_path) if responses_path is not None else None
         self.probe_only = probe_only
+        self.plain_reading = plain_reading
+        self.compare_model = compare_model or pr.DEFAULT_COMPARE_MODEL
 
     # -- local stages ------------------------------------------------------
     def prepare(self, items: Sequence[FilterItem]) -> list[FilterItem]:
@@ -250,10 +259,12 @@ class FilterRunner:
                     "reason": f"Zipf {fq.zipf_min:.2f} is below the {HARD_REJECT_BELOW} floor and no "
                               f"rescue route applies (no LLM call).",
                     "verdict": "reject", "tags": ["too_rare"], "region": None, "senses": [],
+                    "person_senses": [], "trait_senses_equally_obvious": False,
                     "membership_kind": None, "alignment_relevant": False,
                     "tag_disagreement": False,
                     "trait_sense_rank": None, "enactable_in_text": None, "confidence": 1.0,
-                    "polysemy": False, "gloss_in_band": False, "second_opinion": None,
+                    "polysemy": False, "polysemy_notes": [], "plain_reading": None, "comparison": None,
+                    "gloss_in_band": False, "second_opinion": None,
                     "prompt_sha256": dict(PROMPT_SHA256), "at": now}
             else:
                 todo.append(it)
@@ -391,16 +402,19 @@ class FilterRunner:
         res = self.results[key]
         res.stage = "classified"
         res.error = None
-        n_senses = res.wordnet.get("n_senses") if res.wordnet.get("found") else None
         hold, et = holding_for(row["verdict"], row["tags"], row.get("membership_kind"))
+        notes = fr.derive_notes(row)
         res.filter = {
             "rubric_version": fr.TRAITHOOD_RUBRIC_VERSION, "model": self.model, "batch_id": self.batch_id,
             "reason": row["reason"], "verdict": row["verdict"], "tags": row["tags"],
             "membership_kind": row.get("membership_kind"), "region": row["region"],
             "alignment_relevant": row.get("alignment_relevant"),
+            "person_senses": row["person_senses"],
+            "trait_senses_equally_obvious": row["trait_senses_equally_obvious"],
             "senses": row["senses"], "trait_sense_rank": row["trait_sense_rank"],
             "enactable_in_text": row["enactable_in_text"], "confidence": row["confidence"],
-            "polysemy": fr.derive_polysemy(row, n_senses), "tag_disagreement": row.get("tag_disagreement", False),
+            "polysemy": bool(notes), "polysemy_notes": notes, "plain_reading": None, "comparison": None,
+            "tag_disagreement": row.get("tag_disagreement", False),
             "gloss_in_band": fr.gloss_in_band(row["gloss"]),
             "second_opinion": None, "prompt_sha256": dict(PROMPT_SHA256), "at": now}
         res.gloss = row["gloss"]
@@ -491,6 +505,41 @@ class FilterRunner:
             f["reason"] = f["reason"] + " [definition probe: word not known]"
             res.holding, res.entity_type = None, "trait"
 
+    async def plain_readings(self, items: list[FilterItem]) -> None:
+        """Case 3 of open point D: for every classified row (verdict trait or
+        tagged) that came with an intended meaning, read the bare label in a
+        call of its own and compare it with that meaning.  A row with no
+        intended meaning gets no call: its classifier gloss, written from the
+        bare word, already is the plain reading."""
+        todo = [pr.ReadingItem(key=it.key, label=it.label, intended=self._intended[it.key])
+                for it in items if self._intended.get(it.key) and self.results[it.key].stage == "classified"
+                and self.results[it.key].filter["verdict"] in ("trait", "tagged")]
+        if not todo:
+            return
+        runner = pr.PlainReadingRunner(client=self.client, batch_id=self.batch_id, reading_model=self.model,
+                                       compare_model=self.compare_model, usage=self.usage, limiter=self.limiter,
+                                       batch_size=self.batch_size, concurrency=self.concurrency,
+                                       responses_path=self.responses_path, responses=self.responses,
+                                       **({"retry_delays": self.retry_kw["retry_delays"]} if self.retry_kw else {}))
+        try:
+            await runner.run_async(todo)
+        except BaseException as exc:
+            self._stop_on(exc)
+            raise
+        finally:
+            for k, v in runner.stats.items():
+                self.stats[f"pr_{k}"] += v
+            for it in todo:
+                out = runner.results[it.key]
+                f = self.results[it.key].filter
+                f["plain_reading"] = out.reading_block
+                if out.comparison is not None:
+                    f["comparison"] = {**out.comparison, "intended_meaning": it.intended}
+                elif out.reading is not None:
+                    f["comparison"] = {"error": out.error, "intended_meaning": it.intended}
+                notes = fr.derive_notes(f)
+                f["polysemy_notes"], f["polysemy"] = notes, bool(notes)
+
     async def second_opinions(self) -> None:
         keys = select_second_opinion(list(self.results.values()), frac=self.second_opinion_frac, seed=self.seed)
         if not keys:
@@ -510,6 +559,7 @@ class FilterRunner:
                                        "membership_kind": row.get("membership_kind"),
                                        "alignment_relevant": row.get("alignment_relevant"),
                                        "trait_sense_rank": row["trait_sense_rank"],
+                                       "person_senses": row["person_senses"],
                                        "confidence": row["confidence"], "agree": agree}
                 if not agree:
                     self.stats["disagreements"] += 1
@@ -538,6 +588,8 @@ class FilterRunner:
             await self.classify(todo)
             if self.probe:
                 await self.define_probe(todo)
+            if self.plain_reading:
+                await self.plain_readings(todo)
             if self.second_opinion:
                 await self.second_opinions()
         return [self.results[it.key] for it in items]
@@ -561,6 +613,14 @@ class FilterRunner:
         if n_probe:
             warn_if_low_parse_rate(label=f"traithood_filter:probe:{self.model}",
                                    n_ok=n_probe - self.stats["probe_failed"], n_total=n_probe, logger_obj=log)
+        n_r = self.stats["pr_n_read"]
+        if n_r:
+            warn_if_low_parse_rate(label=f"traithood_filter:plain_reading:{self.model}",
+                                   n_ok=n_r - self.stats["pr_read_failed"], n_total=n_r, logger_obj=log)
+        n_c = self.stats["pr_n_compare"]
+        if n_c:
+            warn_if_low_parse_rate(label=f"traithood_filter:comparison:{self.compare_model}",
+                                   n_ok=n_c - self.stats["pr_compare_failed"], n_total=n_c, logger_obj=log)
         n2 = self.stats["second_opinion_n"]
         if n2:
             warn_if_low_parse_rate(label=f"traithood_filter:second:{self.second_model}",
@@ -626,6 +686,10 @@ def summarize(results: Sequence[FilterResult], *, stats: Counter, usage: MultiMo
         "membership_kind": dict(sorted(Counter(r.filter.get("membership_kind") for r in clf
                                                if r.filter.get("membership_kind")).items())),
         "tag_disagreement": sum(1 for r in clf if r.filter.get("tag_disagreement")),
+        "polysemy_notes": {n: sum(1 for r in clf if n in (r.filter.get("polysemy_notes") or []))
+                           for n in fr.POLYSEMY_NOTES},
+        "comparison_relations": dict(sorted(Counter(str((r.filter.get("comparison") or {}).get("relation"))
+                                                    for r in clf if r.filter.get("comparison")).items())),
         "holding": dict(sorted(Counter(r.holding for r in results if r.holding).items())),
         "freq_rescue": dict(sorted(Counter(r.freq.get("rescue") for r in results
                                            if r.freq.get("rescue")).items())),

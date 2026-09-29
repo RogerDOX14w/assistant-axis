@@ -67,7 +67,7 @@ def response_text(resp: Any) -> str:
     return "".join(parts)
 
 
-async def call_anthropic_json(client, *, system: str, user: str, model: str, max_tokens: int,
+async def call_anthropic_json(client, *, system: Optional[str], user: str, model: str, max_tokens: int,
                               temperature: float, usage: Optional[MultiModelUsage], limiter=None,
                               cache_system: bool = True,
                               retry_delays: Sequence[float] = RETRY_DELAYS_S,
@@ -79,9 +79,12 @@ async def call_anthropic_json(client, *, system: str, user: str, model: str, max
     filled *before* the usage is charged.  ``BudgetExceededError`` raised by a
     guarded ``usage`` propagates, with the response already in ``meta``.
     """
-    sys_block: list[dict] = [{"type": "text", "text": system}]
-    if cache_system:
-        sys_block[0]["cache_control"] = {"type": "ephemeral"}
+    extra: dict = {}
+    if system:  # an empty or None system prompt is omitted: the call carries the user text only
+        sys_block: list[dict] = [{"type": "text", "text": system}]
+        if cache_system:
+            sys_block[0]["cache_control"] = {"type": "ephemeral"}
+        extra["system"] = sys_block
     attempts = len(retry_delays) + 1
     last_err: Optional[str] = None
     for attempt in range(attempts):
@@ -89,8 +92,8 @@ async def call_anthropic_json(client, *, system: str, user: str, model: str, max
             await limiter.acquire()
         try:
             resp = await client.messages.create(
-                model=model, max_tokens=max_tokens, temperature=temperature, system=sys_block,
-                messages=[{"role": "user", "content": user}])
+                model=model, max_tokens=max_tokens, temperature=temperature,
+                messages=[{"role": "user", "content": user}], **extra)
         except Exception as exc:  # noqa: BLE001 - classified below
             last_err = f"{type(exc).__name__}: {exc}"
             if _is_transient(exc) and attempt < attempts - 1:

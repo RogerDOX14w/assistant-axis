@@ -186,7 +186,7 @@ def main(argv=None) -> int:
         if refused:
             print(f"DRY-RUN: the real run would be REFUSED: {refused}")
         print(f"DRY-RUN: would write {out_dir}/ and {'the registry ' + str(args.registry) if reg else 'no registry'}")
-        print(f"system prompt: {len(sp.PROMPTS[args.mode])} chars (states rubric v{sp.STATES_RUBRIC_VERSION}); "
+        print(f"system prompt: {len(sp.PROMPTS[args.mode])} chars (states rubric v{sp.RUBRIC_VERSIONS[args.mode]}); "
               f"prompt sha256: {sp.PROMPT_SHA256[args.mode]}")
         payload = [{"id": i + 1, "label": it.label, "text": it.text} for i, it in enumerate(items[:args.batch_size])]
         print(f"--- prompt 1 ---\n{sp.build_batch_prompt(payload, args.mode)}")
@@ -206,7 +206,7 @@ def main(argv=None) -> int:
                 "n_rows": len(items), "skipped": skipped, "estimate_usd": round(est.usd, 4),
                 "estimate_lines": [str(x) for x in est.lines], "budget_usd": args.budget_usd, "cap_usd": cap,
                 "confirmed_by": args.confirmed_by, "model": args.model,
-                "rubric_version": sp.STATES_RUBRIC_VERSION, "prompt_sha256": sp.PROMPT_SHA256[args.mode],
+                "rubric_version": sp.RUBRIC_VERSIONS[args.mode], "prompt_sha256": sp.PROMPT_SHA256[args.mode],
                 "started_at": utc_now()}
     atomic_write_text(json.dumps(run_meta, indent=2) + "\n", out_dir / "run.json")
 

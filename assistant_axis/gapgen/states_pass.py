@@ -35,7 +35,7 @@ The block written on a row (registry field ``states_pass``, or the run's
 ``results.jsonl``) carries ``mode``, ``rubric_version``, ``model``,
 ``batch_id``, the answers, ``confidence``, ``prompt_sha256`` and ``at``.
 Changing anything the model reads here is a rubric change: bump
-:data:`STATES_RUBRIC_VERSION`.  Example words are checked by the tests never
+its entry in :data:`RUBRIC_VERSIONS` (and the pin in rubric_versions).  Example words are checked by the tests never
 to be corpus labels, seed-queue entries, the six September rejects or the
 decisions file's appendix words.
 """
@@ -61,7 +61,10 @@ from .registry import utc_now
 
 logger = logging.getLogger(__name__)
 
-STATES_RUBRIC_VERSION = 1
+#: One version per prompt (round 3, QUESTIONS 17: a version identifies one
+#: prompt text; pinned in rubric_versions).  Queue v2: the example "sulking"
+#: became "moping", since sulking appears in the "You are X." probe results.
+RUBRIC_VERSIONS = {"queue": 2, "corpus": 1}
 DEFAULT_MODEL = "claude-haiku-4-5-20251001"
 DEFAULT_BATCH_SIZE = 20
 DEFAULT_MAX_TOKENS = 6000
@@ -72,10 +75,10 @@ READINGS = ("predisposition", "momentary")
 STATE_TAGS = ("state", "transient_only")
 
 #: Example words of both prompts, and the names the examples suggest.
-QUEUE_EXAMPLES = ("sulking", "startled", "bored", "tearful", "sunburned", "drenched")
+QUEUE_EXAMPLES = ("moping", "startled", "bored", "tearful", "sunburned", "drenched")
 CORPUS_EXAMPLES = ("fretful", "exasperated")
 EXAMPLE_WORDS = QUEUE_EXAMPLES + CORPUS_EXAMPLES
-SUGGESTED_NAMES = ("sulky", "jumpy", "easily bored")
+SUGGESTED_NAMES = ("mopey", "jumpy", "easily bored")
 
 QUEUE_PROMPT = """\
 You are helping to build a research corpus of personality traits. Each trait is a label plus a \
@@ -102,10 +105,10 @@ habitually does, feels or says. Go straight to the behaviour. No hedges ("tends 
 If a predisposition is not plausible, set name_fits, suggested_name and gloss to null.
 
 ## Examples (reason first, then the answers)
-- "sulking": people are often prone to sulking; the habit has its own ordinary name; plausible true; \
-name_fits false; suggested_name "sulky"; gloss "This means withdrawing into wounded silence whenever \
-crossed or disappointed, refusing to say what is wrong, and waiting for others to notice and make \
-amends before speaking normally again."
+- "moping": people are often prone to moping; the habit has its own ordinary name; plausible true; \
+name_fits false; suggested_name "mopey"; gloss "This means sinking into listless gloom after any \
+setback, trailing about without energy or interest, and letting everyone see how low one feels \
+until something lifts the mood."
 - "startled": some people are startled by every small surprise; the usual name for that is jumpy; \
 plausible true; name_fits false; suggested_name "jumpy"; gloss "This means reacting to every sudden \
 noise, interruption or unexpected question with a jolt of alarm, losing the thread for a moment and \
@@ -431,7 +434,7 @@ class StatesPassRunner:
             it = items[i - 1]
             res = self.results[it.key]
             res.stage, res.error = "judged", None
-            res.block = {"mode": self.mode, "rubric_version": STATES_RUBRIC_VERSION, "model": self.model,
+            res.block = {"mode": self.mode, "rubric_version": RUBRIC_VERSIONS[self.mode], "model": self.model,
                          "batch_id": self.batch_id, **{k: v for k, v in row.items() if k != "label"},
                          "prompt_sha256": PROMPT_SHA256[self.mode], "at": now}
         return {items[i - 1].key: e for i, e in errs.items()}
@@ -505,7 +508,7 @@ def summarize(results: Sequence[StatesResult], *, mode: str, stats: Counter, usa
         "n_pending": sum(1 for r in results if r.stage == "pending"),
         "parse_rate": round(len(judged) / n, 4) if n else None,
         "calls": {k[len("calls_"):]: v for k, v in sorted(stats.items()) if k.startswith("calls_")},
-        "rubric_version": STATES_RUBRIC_VERSION, "prompt_sha256": PROMPT_SHA256[mode],
+        "rubric_version": RUBRIC_VERSIONS[mode], "prompt_sha256": PROMPT_SHA256[mode],
         "cost_usd": round(usage.total_cost_usd, 4), "usage": usage.as_dict(),
     }
     if mode == "queue":

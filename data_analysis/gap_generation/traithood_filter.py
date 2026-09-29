@@ -183,8 +183,20 @@ def build_estimate(items: list[FilterItem], args) -> tuple[Estimate, dict]:
         per_s = min(bs, n_sec)
         est.add("second opinion", args.second_model, math.ceil(n_sec / bs), sys_tok + IN_TOK_PER_ITEM * per_s,
                 OUT_TOK_PER_ITEM * per_s)
+    n_read = 0
+    if not args.no_plain_reading:
+        # rows with an intended meaning get a plain reading and a comparison (open point D, case 3)
+        n_read = sum(1 for it in items if it.intended_sense)
+        if n_read:
+            from assistant_axis.gapgen import plain_reading as pr
+            from data_analysis.gap_generation import plain_reading as prcli
+            est.add("plain reading", args.model, n_read, prcli.READ_IN, prcli.READ_OUT)
+            per_c = min(bs, n_read)
+            est.add("comparison", args.compare_model, math.ceil(n_read / bs),
+                    int(len(pr.COMPARISON_PROMPT) / CHARS_PER_TOKEN) + prcli.CMP_IN_PER_ROW * per_c,
+                    prcli.CMP_OUT_PER_ROW * per_c)
     plan = {"n_rows": len(items), "n_hard_reject": n_hard, "n_llm": n_llm, "n_probe_band": n_probe,
-            "n_second_opinion_est": n_sec, "system_prompt_tokens_est": sys_tok}
+            "n_second_opinion_est": n_sec, "n_plain_reading_est": n_read, "system_prompt_tokens_est": sys_tok}
     return est, plan
 
 
@@ -216,6 +228,10 @@ def build_parser() -> argparse.ArgumentParser:
     ap.add_argument("--sample-seed", type=int, default=0)
     ap.add_argument("--no-probe", action="store_true")
     ap.add_argument("--no-second-opinion", action="store_true")
+    ap.add_argument("--no-plain-reading", action="store_true",
+                    help="skip the plain reading and comparison of rows with an intended meaning")
+    ap.add_argument("--compare-model", default=None,
+                    help="model for the comparison (default plain_reading.DEFAULT_COMPARE_MODEL)")
     ap.add_argument("--probe-only", action="store_true",
                     help="with --validation-file: send every row to the definition probe only (a probe check)")
     ap.add_argument("--concurrency", type=int, default=4)
@@ -260,6 +276,9 @@ def main(argv=None) -> int:
     logging.basicConfig(level=logging.INFO, format="%(levelname)s %(message)s")
     args = build_parser().parse_args(argv)
     paths.check_id(args.batch_id, "batch_id")
+    if args.compare_model is None:
+        from assistant_axis.gapgen.plain_reading import DEFAULT_COMPARE_MODEL
+        args.compare_model = DEFAULT_COMPARE_MODEL
     if args.probe_only:
         if not args.validation_file:
             raise SystemExit("--probe-only applies to --validation-file only (it never writes the registry)")
@@ -325,7 +344,9 @@ def main(argv=None) -> int:
                 "budget_usd": args.budget_usd, "cap_usd": cap, "confirmed_by": args.confirmed_by,
                 "model": args.model, "second_model": None if args.no_second_opinion else args.second_model,
                 "rubric_version": fr.TRAITHOOD_RUBRIC_VERSION, "probe_rubric_version": fr.PROBE_RUBRIC_VERSION,
-                "prompt_sha256": dict(PROMPT_SHA256), "probe_only": bool(args.probe_only), "started_at": utc_now()}
+                "prompt_sha256": dict(PROMPT_SHA256), "probe_only": bool(args.probe_only),
+                "plain_reading": not args.no_plain_reading, "compare_model": args.compare_model,
+                "started_at": utc_now()}
     atomic_write_text(json.dumps(run_meta, indent=2) + "\n", out_dir / "run.json")
 
     from dotenv import load_dotenv
@@ -338,7 +359,8 @@ def main(argv=None) -> int:
                           batch_size=args.batch_size, second_opinion_frac=args.second_opinion_frac, seed=args.seed,
                           probe=not args.no_probe, second_opinion=not args.no_second_opinion,
                           concurrency=args.concurrency, shuffle_seed=args.shuffle_seed,
-                          responses_path=out_dir / "responses.jsonl", probe_only=args.probe_only)
+                          responses_path=out_dir / "responses.jsonl", probe_only=args.probe_only,
+                          plain_reading=not args.no_plain_reading, compare_model=args.compare_model)
     status = 0
     error: Optional[BaseException] = None
     try:

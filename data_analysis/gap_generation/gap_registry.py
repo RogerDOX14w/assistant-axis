@@ -16,6 +16,11 @@ Commands:
   Roger to paste into TRAITS_TO_ADD / ROLES_TO_ADD or to work the states and
   nationalities queues from (the tool never writes those files); a states row
   shows its states-pass suggestions.
+* ``judgement-calls [--filter-results F ...]``: the words noted
+  ``nontrait_person_sense`` (open point D, case 4: the obvious reading is a
+  trait and another sense is a non-trait thing a person can be) as a table
+  with the word, its trait sense, its other sense and an empty column for
+  Roger's call.
 * ``compact``: copy the log to ``registry.jsonl.bak.<UTC>``, fold it to one
   line per key, and write the tracked snapshot ``registry.snapshot.jsonl``.
 * ``promote (--keys K ... | --status accepted) [--min-local-novelty X] [--section S] [--dry-run]``:
@@ -144,6 +149,37 @@ def cmd_holding(args) -> int:
     return 0
 
 
+def judgement_call_rows(rows) -> list[tuple[str, str, str, str]]:
+    """``(word, key, trait sense, other senses)`` for rows carrying the
+    ``nontrait_person_sense`` note (open point D, case 4)."""
+    out = []
+    for r in rows:
+        f = r.get("filter") or {}
+        if "nontrait_person_sense" not in (f.get("polysemy_notes") or []):
+            continue
+        ps = f.get("person_senses") or []
+        trait = next((s["sense"] for s in ps if s.get("kind") == "trait"), "")
+        others = "; ".join(f"{s['sense']} ({s['kind']})" for s in ps if s.get("kind") != "trait")
+        out.append((r["label"], r["key"], trait, others))
+    return sorted(out, key=lambda x: x[1])
+
+
+def cmd_judgement_calls(args) -> int:
+    if args.filter_results:
+        rows = [json.loads(x) for p in args.filter_results
+                for x in Path(p).read_text(encoding="utf-8").splitlines() if x.strip()]
+    else:
+        rows = list(Registry(args.registry).fold().values())
+    found = judgement_call_rows(rows)
+    print(f"<!-- {len(found)} words whose obvious reading is a trait and which have another sense a person "
+          f"can be (nontrait_person_sense): Roger's calls, to build a rubric from later -->")
+    print("| word | key | trait sense | other sense | Roger's call |")
+    print("|---|---|---|---|---|")
+    for word, key, trait, others in found:
+        print(f"| {_md(word)} | {key} | {_md(trait)} | {_md(others)} |  |")
+    return 0
+
+
 def cmd_compact(args) -> int:
     try:
         rep = compact(args.registry, set_aside_malformed=args.set_aside_malformed)
@@ -206,6 +242,11 @@ def build_parser() -> argparse.ArgumentParser:
     sp = sub.add_parser("holding")
     sp.add_argument("--list", required=True, choices=list(HOLDING_TARGETS))
     sp.set_defaults(func=cmd_holding)
+    sp = sub.add_parser("judgement-calls",
+                        help="table of rows noted nontrait_person_sense, with an empty column for Roger's call")
+    sp.add_argument("--filter-results", type=Path, nargs="+",
+                    help="read filter results.jsonl files instead of the registry")
+    sp.set_defaults(func=cmd_judgement_calls)
     sp = sub.add_parser("compact")
     sp.add_argument("--set-aside-malformed", action="store_true",
                     help="move malformed (torn) lines to registry.jsonl.rejected.<UTC> instead of refusing")

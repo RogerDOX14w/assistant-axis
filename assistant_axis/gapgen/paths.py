@@ -67,6 +67,11 @@ def states_pass_dir(batch_id: str, *, candidates_dir: Path | None = None) -> Pat
     return (candidates_dir or DATA_CANDIDATES) / "states_pass" / check_id(batch_id, "batch_id")
 
 
+def plain_reading_dir(batch_id: str, *, candidates_dir: Path | None = None) -> Path:
+    """``data/candidates/plain_reading/<batch_id>/`` (not created here)."""
+    return (candidates_dir or DATA_CANDIDATES) / "plain_reading" / check_id(batch_id, "batch_id")
+
+
 def novelty_dir(batch_id: str, *, candidates_dir: Path | None = None) -> Path:
     return (candidates_dir or DATA_CANDIDATES) / "novelty" / check_id(batch_id, "batch_id")
 
@@ -122,5 +127,6 @@ def all_paths() -> dict[str, Path]:
         "run_dir": run_dir("g", "r"),
         "filter_dir": filter_dir("b"),
         "states_pass_dir": states_pass_dir("b"),
+        "plain_reading_dir": plain_reading_dir("b"),
         "novelty_dir": novelty_dir("b"),
     }
