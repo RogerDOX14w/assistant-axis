@@ -270,7 +270,7 @@ A wave used to go out as one batch, and the service refuses one of more than 100
 256 MB.  [batches.py](../../assistant_axis/gapgen/batches.py) now splits a wave, in order, into
 batches of at most `MAX_BATCH_REQUESTS = 50,000` requests and `MAX_BATCH_BYTES = 128 MB` of
 serialized requests.  That is half of each service limit.  At about 3,000 bytes a request the byte
-limit binds first, at about 40,000 requests.  A test can lower either constant.
+limit binds first, at about 45,000 requests.  A test can lower either constant.
 
 - **All at once.**  The batches of a wave are submitted one after another and then polled together.
   A large wave therefore waits about one batch's time, not one for each batch.  Run B showed a
