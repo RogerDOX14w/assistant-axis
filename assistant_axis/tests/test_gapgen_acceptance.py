@@ -94,6 +94,20 @@ def test_quality_figures_never_fail_on_a_missed_target():
     assert not fig["oewn_random"]["meets_target"]
 
 
+def test_heldout_six_recorded_not_gated():
+    """Round 3: the six September rejects, run once with their September
+    descriptions as the intended meaning.  Target: ``overshadowed`` on at least
+    four of six.  A recorded target: reported as a warning, never a failure."""
+    from assistant_axis.gapgen.paths import plain_reading_dir
+    from assistant_axis.gapgen.plain_reading import heldout_figure
+    rows = _results(plain_reading_dir("m2rubric_r3_heldout"))
+    fig = heldout_figure(rows)
+    assert fig["n"] == 6
+    warnings.warn(f"held-out six (targets, not gates): overshadowed on {fig['overshadowed']} of 6 "
+                  f"({', '.join(fig['overshadowed_labels'])}); target {fig['target']}; "
+                  f"meets target: {fig['meets_target']}")
+
+
 def test_full_stability_rerun():
     p = filter_dir("m1_stability") / "summary.json"
     if not p.exists():

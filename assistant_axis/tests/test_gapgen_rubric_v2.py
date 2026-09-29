@@ -32,7 +32,7 @@ SIX = {"disciplinary", "engaging", "economic", "balanced", "empowered", "emotive
 
 def row(i, label, **kw):
     base = {"id": i, "label": label, "reason": "Said of how someone habitually behaves in conversation.",
-            "senses": [label], "trait_sense_rank": 1, "enactable_in_text": 2, "verdict": "trait",
+            "person_senses": [{"sense": label, "kind": "trait"}], "trait_senses_equally_obvious": False, "enactable_in_text": 2, "verdict": "trait",
             "tags": [], "membership_kind": None, "region": "social_interpersonal", "alignment_relevant": False,
             "gloss": "This means " + "doing things " * 9 + "always.", "confidence": 0.9}
     base.update(kw)
@@ -50,7 +50,7 @@ def parse(*rows, labels=None):
 
 def test_versions_and_hashes_change():
     # probe rubric 3 since round 2 (derived words); the classifier stays at 2
-    assert fr.TRAITHOOD_RUBRIC_VERSION == 2 and fr.PROBE_RUBRIC_VERSION == 3
+    assert fr.TRAITHOOD_RUBRIC_VERSION == 3 and fr.PROBE_RUBRIC_VERSION == 3  # round 3: classifier v3
     from assistant_axis.gapgen.filter import PROMPT_SHA256
     assert PROMPT_SHA256["classifier"] != V1_PROMPT_SHA
     assert PROMPT_SHA256["probe"] != V1_PROBE_SHA
@@ -68,7 +68,8 @@ class TestPromptV2:
 
     def test_schema_field_order(self):
         s = self.schema()
-        order = ['"id"', '"label"', '"reason"', '"senses"', '"trait_sense_rank"', '"verdict"', '"tags"',
+        order = ['"id"', '"label"', '"reason"', '"person_senses"', '"trait_senses_equally_obvious"',
+                 '"verdict"', '"tags"',
                  '"membership_kind"', '"alignment_relevant"', '"gloss"', '"confidence"']
         pos = [s.index(k) for k in order]
         assert pos == sorted(pos)
@@ -77,8 +78,7 @@ class TestPromptV2:
         """Scope change 2026-09-29: decision 11's primary_use is held; the
         polysemy flag stays the v1 sense-rank rule."""
         assert "primary_use" not in fr.SYSTEM_PROMPT
-        assert "trait_sense_rank is the position of the trait sense in that list" in " ".join(
-            fr.SYSTEM_PROMPT.split())
+        assert '"person_senses"' in fr.SYSTEM_PROMPT  # rubric v3 replaced the v1 sense-rank wording
 
     def test_reason_cap_and_sense_line(self):
         sp = fr.SYSTEM_PROMPT
@@ -141,7 +141,7 @@ class TestPromptV2:
             body = " ".join(item.split())
             if "verdict reject" in body:
                 continue
-            for field in ("rank", "region", "gloss"):
+            for field in ("senses", "region", "gloss"):
                 assert field in body, (item[:30], field)
 
     def test_probe_v2(self):
@@ -186,7 +186,7 @@ class TestValidatorV2:
 
     def test_reject_gloss_may_be_null(self):
         rows, errs = parse(row(1, "a", verdict="reject", tags=["relational_only"], gloss=None, region=None,
-                               trait_sense_rank=None))
+                               person_senses=[]))
         assert errs == {}
 
     def test_membership_kind(self):
@@ -217,12 +217,11 @@ class TestValidatorV2:
         assert rows[1]["verdict"] == "trait" and rows[1]["tag_disagreement"] is True
         assert rows[2]["verdict"] == "reject" and rows[2]["tag_disagreement"] is True
 
-    def test_polysemy_stays_v1(self):
-        """Item 7 held: sense rank decides, as in v1."""
-        assert fr.derive_polysemy({"trait_sense_rank": 2, "confidence": 0.9}, None) is True
-        assert fr.derive_polysemy({"trait_sense_rank": 1, "confidence": 0.9}, 1) is False
-        assert fr.derive_polysemy({"primary_use": "non_person", "trait_sense_rank": 1, "confidence": 0.9},
-                                  1) is False
+    def test_polysemy_no_longer_from_rank(self):
+        """Rubric v3 (round 3) superseded the v1 sense-rank rule; primary_use still plays no part."""
+        assert fr.derive_polysemy({"trait_sense_rank": 2, "confidence": 0.9}, None) is False
+        assert fr.derive_polysemy({"primary_use": "non_person", "verdict": "trait",
+                                   "person_senses": [{"sense": "x", "kind": "trait"}]}, 1) is False
 
 
 # ---------------------------------------------------------------------------
@@ -311,7 +310,8 @@ class TestRoutingV2:
 SPEC = {"tall": {"verdict": "tagged", "tags": ["physical"], "region": "physical"},
         "jittery": {"verdict": "tagged", "tags": ["state"], "region": "emotional_temperament"},
         "stepchild": {"tags": ["membership"], "membership_kind": "family"},
-        "lukewarm": {"trait_sense_rank": 2},
+        "lukewarm": {"person_senses": [{"sense": "unenthusiastic", "kind": "trait"},
+                                       {"sense": "slightly feverish", "kind": "bodily"}]},
         "sandbagging": {"alignment_relevant": True, "region": "alignment_ai_agent"},
         "homebody": {"tags": ["role_person"], "confidence": 0.9}}
 
@@ -339,7 +339,7 @@ def test_runner_v2_blocks_and_routing():
     assert "primary_use" not in out["plain#1"].filter
     assert out["homebody#1"].filter["tag_disagreement"] is True
     assert out["homebody#1"].filter["second_opinion"] is not None  # disagreement triggered Sonnet
-    assert out["plain#1"].filter["rubric_version"] == 2
+    assert out["plain#1"].filter["rubric_version"] == 3
     labels_sent = [json.loads(x)["label"] for c in client.calls[:1] for x in user_text(c).splitlines()[1:]]
     assert "plain" in labels_sent
 

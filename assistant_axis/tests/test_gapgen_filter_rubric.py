@@ -13,8 +13,8 @@ REPO = Path(__file__).resolve().parents[2]
 
 
 def _row(i, **kw):
-    base = {"id": i, "label": f"w{i}", "reason": "A stable habit.", "senses": ["s1"],
-            "trait_sense_rank": 1, "enactable_in_text": 2, "verdict": "trait", "tags": [],
+    base = {"id": i, "label": f"w{i}", "reason": "A stable habit.",
+            "person_senses": [{"sense": "s1", "kind": "trait"}], "trait_senses_equally_obvious": False, "enactable_in_text": 2, "verdict": "trait", "tags": [],
             "region": "cognitive_epistemic", "alignment_relevant": False,
             "gloss": "This means " + "word " * 20, "confidence": 0.9}
     base.update(kw)
@@ -26,7 +26,7 @@ class TestPrompt:
         sp = fr.SYSTEM_PROMPT
         schema = sp[sp.index('{"results"'):]
         assert schema.index('"reason"') < schema.index('"verdict"')
-        assert schema.index('"senses"') < schema.index('"verdict"')
+        assert schema.index('"person_senses"') < schema.index('"verdict"')  # rubric v3
         assert "reason first" in sp.lower()
         ex = sp[sp.index("## Examples"):sp.index("## Regions")]
         assert "reason first, then the verdict" in ex
@@ -67,7 +67,7 @@ class TestPrompt:
         assert "too_rare" not in fr.SYSTEM_PROMPT
 
     def test_example_counts(self):
-        assert len(fr.POSITIVE_EXAMPLES) == 12 and len(fr.NEGATIVE_EXAMPLES) == 14  # rubric v2
+        assert len(fr.POSITIVE_EXAMPLES) == 14 and len(fr.NEGATIVE_EXAMPLES) == 14  # rubric v3 (loose, soft added)
         for w in fr.EXAMPLE_WORDS + fr.MENTIONED_WORDS:
             assert f'"{w}"' in fr.SYSTEM_PROMPT or w in fr.SYSTEM_PROMPT, w
         assert sum("alignment_ai_agent" in fr.SYSTEM_PROMPT.split(f'"{w}"')[1][:400]
@@ -128,12 +128,12 @@ class TestParse:
     def test_bad_verdict_region_numbers(self):
         rows, errs = fr.parse_batch(json.dumps({"results": [
             _row(1, verdict="maybe"), _row(2, region="space"), _row(3, confidence=1.5),
-            _row(4, trait_sense_rank=4), _row(5, gloss=None), _row(6, reason="")]}), [1, 2, 3, 4, 5, 6])
+            _row(4, person_senses=[{"sense": "x", "kind": "mood"}]), _row(5, gloss=None), _row(6, reason="")]}), [1, 2, 3, 4, 5, 6])
         assert rows == {} and set(errs) == {1, 2, 3, 4, 5, 6}
 
     def test_reject_may_lack_region_gloss_rank(self):
         rows, errs = fr.parse_batch(json.dumps({"results": [
-            _row(1, verdict="reject", tags=["not_a_word"], region=None, gloss=None, trait_sense_rank=None)]}), [1])
+            _row(1, verdict="reject", tags=["not_a_word"], region=None, gloss=None, person_senses=[])]}), [1])
         assert errs == {} and rows[1]["region"] is None and rows[1]["gloss"] is None
 
     def test_tagged_needs_gloss_and_region(self):
@@ -148,9 +148,9 @@ class TestParse:
             [1, 2, 3, 4])
         assert set(rows) == {4} and set(errs) == {1, 2, 3}
 
-    def test_trait_still_needs_gloss_region_rank(self):
+    def test_trait_still_needs_gloss_region_trait_sense(self):
         rows, errs = fr.parse_batch(json.dumps({"results": [
-            _row(1, gloss=None), _row(2, region=None), _row(3, trait_sense_rank=None)]}), [1, 2, 3])
+            _row(1, gloss=None), _row(2, region=None), _row(3, person_senses=[])]}), [1, 2, 3])
         assert rows == {} and set(errs) == {1, 2, 3}
 
     def test_unparseable(self):
@@ -165,22 +165,32 @@ class TestParse:
 
     def test_string_numbers_and_case(self):
         rows, errs = fr.parse_batch(json.dumps({"results": [
-            _row(1, verdict="Trait", confidence="0.8", trait_sense_rank="2", tags="State")]}), [1])
+            _row(1, verdict="Trait", confidence="0.8", tags="State",
+                 person_senses=[{"sense": "s", "kind": "State"}, {"sense": "t", "kind": "TRAIT"}])]}), [1])
         assert errs == {} and rows[1]["verdict"] == "trait" and rows[1]["tags"] == ["state"]
         assert rows[1]["trait_sense_rank"] == 2 and rows[1]["confidence"] == 0.8
         assert rows[1]["tag_disagreement"] is True  # state belongs to "tagged"; recorded, not overridden
 
 
 class TestDerived:
-    @pytest.mark.parametrize("rank,n,conf,expected", [
-        (1, None, 0.9, False), (2, None, 0.9, True), (3, 1, 0.99, True), (1, 3, 0.69, True),
-        (1, 3, 0.7, False), (1, 2, 0.1, False), (1, 5, 0.95, False), (1, None, 0.1, False),
+    # rubric v3 (round 3): the v1 truth table (sense rank, WordNet count,
+    # confidence) is superseded; polysemy is true when any of the three notes is.
+    @pytest.mark.parametrize("kinds,equal,verdict,relation,expected", [
+        (["trait"], False, "trait", None, False),
+        (["trait", "trait"], True, "trait", None, True),          # two_trait_senses
+        (["trait", "trait"], False, "trait", None, False),
+        (["trait", "bodily"], False, "trait", None, True),        # nontrait_person_sense
+        (["state", "trait"], False, "tagged", None, False),       # obvious reading a state: the tag
+        (["trait"], False, "trait", "different", True),           # overshadowed
+        (["trait"], False, "trait", "related", False),
     ])
-    def test_polysemy_truth_table(self, rank, n, conf, expected):
-        assert fr.derive_polysemy({"trait_sense_rank": rank, "confidence": conf}, n) is expected
+    def test_polysemy_truth_table(self, kinds, equal, verdict, relation, expected):
+        row = {"person_senses": [{"sense": k, "kind": k} for k in kinds], "trait_senses_equally_obvious": equal,
+               "verdict": verdict, "comparison": {"relation": relation} if relation else None}
+        assert fr.derive_polysemy(row, 5) is expected
 
-    def test_polysemy_reject_without_rank(self):
-        assert fr.derive_polysemy({"trait_sense_rank": None, "confidence": 0.9}, 1) is False
+    def test_polysemy_reject_without_senses(self):
+        assert fr.derive_polysemy({"person_senses": [], "verdict": "reject"}, 1) is False
 
     @pytest.mark.parametrize("n,ok", [(17, False), (18, True), (30, True), (43, True), (44, False), (0, False)])
     def test_gloss_band(self, n, ok):

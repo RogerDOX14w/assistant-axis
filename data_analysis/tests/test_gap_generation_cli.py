@@ -15,7 +15,8 @@ HAIKU = "claude-haiku-4-5-20251001"
 
 
 def _row(i, label):
-    row = {"id": i, "label": label, "reason": "A habit.", "senses": [label], "trait_sense_rank": 1,
+    row = {"id": i, "label": label, "reason": "A habit.",
+           "person_senses": [{"sense": label, "kind": "trait"}], "trait_senses_equally_obvious": False,
            "enactable_in_text": 2, "verdict": "trait", "tags": [], "region": "social_interpersonal",
            "alignment_relevant": False, "gloss": "This means " + "doing things " * 9 + "always.",
            "confidence": 0.9}
@@ -179,12 +180,13 @@ class TestTraithoodFilterCLI:
         assert traithood_filter.main(["--batch-id", "b6", "--keys", "stubborn#1", "--registry", str(reg),
                                       "--out-root", str(cand_dir), "--no-second-opinion"]) == 0
         f = Registry(reg).get("stubborn#1")["filter"]
-        assert f["verdict"] == "trait" and "classifier_verdict" not in f and f["rubric_version"] == 2
+        assert f["verdict"] == "trait" and "classifier_verdict" not in f and f["rubric_version"] == 3  # classifier v3 (round 3)
 
     def test_prompt_hashes_recorded(self, tmp_path, cand_dir, fake_client):
         """Review finding 10: which prompt text was sent is recorded."""
         import hashlib
         from assistant_axis.gapgen import filter_rubric as fr
+        from assistant_axis.gapgen import plain_reading as pr
         val = _validation(tmp_path)
         assert traithood_filter.main(["--batch-id", "h", "--validation-file", str(val), "--out-root",
                                       str(cand_dir), "--no-second-opinion"]) == 0
@@ -192,9 +194,10 @@ class TestTraithoodFilterCLI:
         want = hashlib.sha256(fr.SYSTEM_PROMPT.encode()).hexdigest()
         want_probe = hashlib.sha256(fr.DEFINE_PROBE_PROMPT.encode()).hexdigest()
         rj = json.loads((d / "run.json").read_text())
-        assert rj["prompt_sha256"] == {"classifier": want, "probe": want_probe}
+        want_all = {"classifier": want, "probe": want_probe, **pr.PROMPT_SHA256}  # round 3: four prompts
+        assert rj["prompt_sha256"] == want_all
         res = [json.loads(x) for x in (d / "results.jsonl").read_text().splitlines()]
-        assert all(r["filter"]["prompt_sha256"] == {"classifier": want, "probe": want_probe} for r in res)
+        assert all(r["filter"]["prompt_sha256"] == want_all for r in res)
 
     def test_dirty_tree_refused_without_flag(self, tmp_path, cand_dir, fake_client, monkeypatch):
         """Review finding 10 / re-review 5c: a paid run with uncommitted changes

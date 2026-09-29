@@ -33,15 +33,17 @@ SPEC = {  # label -> fields overriding a default trait row
     "plumber": {"verdict": "tagged", "tags": ["role_person"], "region": "social_interpersonal",
                 "gloss": "A plumber is someone who " + "fixes pipes " * 8},
     "flurbish": {"verdict": "reject", "tags": ["not_a_word"], "region": None, "gloss": None},
-    "cool": {"trait_sense_rank": 2},
+    # rubric v3: polysemy comes from the notes; cool has two equally obvious trait senses
+    "cool": {"person_senses": [{"sense": "calm", "kind": "trait"}, {"sense": "fashionable", "kind": "trait"}],
+             "trait_senses_equally_obvious": True},
     "shaky": {"confidence": 0.4},
     "nice": {},
 }
 
 
 def trait_row(i, label, model=None):
-    row = {"id": i, "label": label, "reason": f"{label} is a habit.", "senses": [label],
-           "trait_sense_rank": 1, "enactable_in_text": 2, "verdict": "trait", "tags": [],
+    row = {"id": i, "label": label, "reason": f"{label} is a habit.",
+           "person_senses": [{"sense": label, "kind": "trait"}], "trait_senses_equally_obvious": False, "enactable_in_text": 2, "verdict": "trait", "tags": [],
            "region": "social_interpersonal", "alignment_relevant": False,
            "gloss": "This means " + "doing things " * 9 + "always.", "confidence": 0.9}
     row.update(SPEC.get(label, {}))
@@ -99,7 +101,7 @@ class TestPipeline:
         assert by["rare#1"].filter["model"] is None
         f = by["stubborn#1"].filter
         assert by["stubborn#1"].stage == "classified" and f["verdict"] == "trait" and f["model"] == HAIKU
-        assert f["rubric_version"] == 2 and f["batch_id"] == "b1" and f["gloss_in_band"] is True
+        assert f["rubric_version"] == 3 and f["batch_id"] == "b1" and f["gloss_in_band"] is True
         assert list(f)[:5] == ["rubric_version", "model", "batch_id", "reason", "verdict"]
         assert by["stubborn#1"].gloss.startswith("This means")
         assert (by["tall#1"].holding, by["tall#1"].entity_type) == ("physical", "trait")
