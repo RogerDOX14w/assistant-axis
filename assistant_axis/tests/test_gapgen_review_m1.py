@@ -123,10 +123,14 @@ class TestTornLine:
 # ---------------------------------------------------------------------------
 
 class TestCapBand:
+    """Decision 9 / open point A (2026-09-29) replaced the band below $20:
+    the flag no longer lifts the cap to 1.5 x the estimate, so no returned
+    cap can pass $20 without the named confirmer."""
+
     @pytest.mark.parametrize("estimate", [13.34, 15.0, 19.9])
-    def test_cap_clamped_to_hard_line_without_confirmed_by(self, estimate):
-        cap = confirm_or_abort(estimate, 5.0, confirm_expensive=True)
-        assert cap <= 20.0
+    def test_estimate_over_typed_budget_refused_in_the_band(self, estimate):
+        with pytest.raises(CostRefused):
+            confirm_or_abort(estimate, 5.0, confirm_expensive=True)
 
     def test_typed_budget_over_hard_line_refused(self):
         with pytest.raises(CostRefused):
@@ -134,12 +138,13 @@ class TestCapBand:
         with pytest.raises(CostRefused):
             confirm_or_abort(1.0, 100.0, confirm_expensive=True)
 
-    def test_confirmed_by_lifts_the_clamp(self):
+    def test_confirmed_by_allows_a_typed_budget_over_the_line(self):
         assert confirm_or_abort(1.0, 100.0, confirm_expensive=True, confirmed_by="Roger 2026-09-29") == 100.0
-        assert confirm_or_abort(15.0, 5.0, confirm_expensive=True, confirmed_by="Roger") == pytest.approx(22.5)
+        with pytest.raises(CostRefused):  # the typed budget is still the cap
+            confirm_or_abort(15.0, 5.0, confirm_expensive=True, confirmed_by="Roger")
 
-    def test_below_line_behaviour_unchanged(self):
-        assert confirm_or_abort(6.0, 5.0, confirm_expensive=True) == pytest.approx(9.0)
+    def test_below_line_cap_is_the_typed_budget(self):
+        assert confirm_or_abort(4.0, 5.0, confirm_expensive=True) == 5.0
         assert confirm_or_abort(0.5, 5.0, confirm_expensive=False) == 5.0
 
     def test_cost_refused_exit_code_is_2(self):

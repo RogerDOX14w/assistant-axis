@@ -49,7 +49,8 @@ def parse(*rows, labels=None):
 # ---------------------------------------------------------------------------
 
 def test_versions_and_hashes_change():
-    assert fr.TRAITHOOD_RUBRIC_VERSION == 2 and fr.PROBE_RUBRIC_VERSION == 2
+    # probe rubric 3 since round 2 (derived words); the classifier stays at 2
+    assert fr.TRAITHOOD_RUBRIC_VERSION == 2 and fr.PROBE_RUBRIC_VERSION == 3
     from assistant_axis.gapgen.filter import PROMPT_SHA256
     assert PROMPT_SHA256["classifier"] != V1_PROMPT_SHA
     assert PROMPT_SHA256["probe"] != V1_PROBE_SHA
@@ -105,7 +106,7 @@ class TestPromptV2:
     def test_states_rule_v2(self):
         sp = " ".join(fr.SYSTEM_PROMPT.split())
         assert "general tendency" not in sp  # rubric v1's state rule no longer holds
-        assert '"state"' in sp and "transient_only" in sp
+        assert '"state"' in sp and "transient_only" not in sp  # folded into state (round 2, point C)
         assert "extra work" in fr.__doc__ and "separate queue" in fr.__doc__  # Roger's correction quoted
 
     def test_relational_only_rule(self):
@@ -118,7 +119,8 @@ class TestPromptV2:
 
     def test_classifier_tags(self):
         assert "membership" in fr.CLASSIFIER_TAGS and "state" in fr.CLASSIFIER_TAGS
-        assert "transient_only" in fr.CLASSIFIER_TAGS
+        assert "transient_only" not in fr.CLASSIFIER_TAGS  # folded into state (round 2, point C)
+        assert "transient_only" in TAG_VOCAB  # kept for v1 records
         assert "demographic" not in fr.CLASSIFIER_TAGS and "too_rare" not in fr.CLASSIFIER_TAGS
         assert "membership" in TAG_VOCAB and "demographic" in TAG_VOCAB  # kept for v1 records
 

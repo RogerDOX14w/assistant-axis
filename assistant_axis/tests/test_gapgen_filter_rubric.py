@@ -56,7 +56,8 @@ class TestPrompt:
         sp = fr.SYSTEM_PROMPT
         assert '"state"' in sp and "general tendency" not in sp
         assert "role_person" in sp and "role_thing" in sp and "- Roles:" in sp
-        assert "transient_only" in sp and "physical" in sp
+        # open point C (round 2): transient_only folded into state
+        assert "transient_only" not in sp and "physical" in sp
 
     def test_every_region_and_tag_named(self):
         for r in fr.REGION_VOCAB:

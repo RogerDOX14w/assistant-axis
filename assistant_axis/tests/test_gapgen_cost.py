@@ -65,8 +65,10 @@ class TestConfirm:
         with pytest.raises(SystemExit):
             confirm_or_abort(6.0, 5.0, confirm_expensive=False)
 
-    def test_over_budget_with_flag_raises_cap(self):
-        assert confirm_or_abort(6.0, 5.0, confirm_expensive=True) == pytest.approx(9.0)
+    def test_over_budget_refused_even_with_flag(self):
+        # decision 9 / open point A: the flag no longer raises the cap (was 1.5 x estimate)
+        with pytest.raises(CostRefused):
+            confirm_or_abort(6.0, 5.0, confirm_expensive=True)
 
     def test_over_hard_line_needs_flag_and_confirmed_by(self):
         with pytest.raises(CostRefused):
@@ -76,5 +78,6 @@ class TestConfirm:
         with pytest.raises(CostRefused):
             confirm_or_abort(25.0, 50.0, confirm_expensive=False, confirmed_by="Roger 2026-09-28")
         assert confirm_or_abort(25.0, 50.0, confirm_expensive=True, confirmed_by="Roger 2026-09-28") == 50.0
-        assert confirm_or_abort(25.0, 5.0, confirm_expensive=True,
-                                confirmed_by="Roger") == pytest.approx(37.5)
+        # decision 9: the typed budget stays the cap even with the full confirmation (was 37.5)
+        with pytest.raises(CostRefused):
+            confirm_or_abort(25.0, 5.0, confirm_expensive=True, confirmed_by="Roger")
