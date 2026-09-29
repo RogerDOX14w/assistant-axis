@@ -407,3 +407,81 @@ this section and rounds 1-2 disagree, this section holds.
 * **The comparison over every existing label** (not run; needs Roger's go):
   `plain_reading.py --batch-id <id> --corpus --budget-usd 1.5`.  From the development runs' usage,
   $0.00019 a reading and $0.0013 a comparison, so about $0.98 for the 659 traits.
+
+**Rubric v2, round 4** (the fixes of [review_rubric_v2.md](./review_rubric_v2.md), and the three
+changes that follow from its questions; tests in
+[test_gapgen_rubric_v2_round4.py](../../assistant_axis/tests/test_gapgen_rubric_v2_round4.py)).  Where
+this section and rounds 1-3 disagree, this section holds.
+
+* **Seen in development (finding 1).**  A validation run marks each row with the recorded runs it was
+  seen in (`meta.seen_in`, from `filter.development_seen`, which reads every recorded filter and
+  plain-reading run except the one being scored).  `validation_figures` gives every figure for all rows
+  and, under `unseen`, for the rows never seen in development; `n_seen_in_development` counts the rest.
+* **`obvious_sense_not_trait` (finding 2).**  A derived note: verdict `trait` with a first listed
+  sense that is not a trait (Roger: "unless its most obvious sense isn't a trait").  The reject-stratum
+  figure now counts exactly the rows whose `polysemy` flag is set.
+* **Tags that do not fit are kept (finding 3, decision 4).**  A row with a verdict and at least one
+  known tag is accepted, with `tag_disagreement` set, and gets a second opinion; only a `tagged` or
+  `reject` row with no tag fails.  The first answer is no longer replaced by a retry.
+* **A reject is a miss (finding 4).**  `existing_label_outcome` scores any `reject` as `floor` (cut or
+  probe) or `reject`, whatever its tags.
+* **Classifier version 4 (finding 5).**  What changed in the text:
+  * sense kinds are four: `trait`, `state`, `physical`, `role`; every membership (circumstance, class,
+    family position, affinity, relationship, orientation, place of origin or nationality, age group) is
+    a trait sense; `circumstance`, `status` and `bodily` are gone;
+  * "A lasting feature of the body is physical; a passing condition of the body is a state.  Hungry is a
+    state.  Freckled is physical."  A condition imposed from outside (being snubbed) is a state;
+  * one test for the main reading, in its own section: "the one a reader would take from the bare
+    instruction "You are <word>.""; "commoner in ordinary use" is gone (settles QUESTIONS 11);
+  * a new field `judged_sense`, required for `trait` and `tagged`, names the sense the verdict and the
+    gloss are about;
+  * every example uses the schema's own field names and shows every field; each one passes the
+    validator (a test parses them); "awesome" lists no sense; "loose" and "soft" no longer use corpus
+    words; three more corpus or validation words left the examples (silenced, forgiving, harsh);
+  * "shorter glosses are not accepted" is gone; the tags rule says a tag of another verdict may be
+    given with the reason; the definition of a trait is unchanged.
+  States queue version 3 and states corpus version 2 replace validation-file words (listless, single,
+  usual; the example exasperated became vexed).  The comparison and plain-reading prompts are unchanged.
+* **Hygiene (findings 5, 6).**  Every word of every prompt is checked against the corpus, the queue and
+  the validation file; ordinary prose that collides is listed in `gapgen/prompt_hygiene.PROSE_ALLOWED`
+  (the frozen comparison prompt's hits separately) and may never open an example.  Example words are
+  checked against `assistant_axis/tests/data/gapgen_reserved_words.txt`, built once by the script
+  beside it from decisions_m1.md and the probe's results; no test reads those working files.
+* **Stops keep readings (finding 7).**  The plain-reading runner stores each reading as it returns, so
+  a budget stop in the reading stage keeps every reading paid for (in the filter too).
+* **`corpus_regions.json` (finding 8).**  `gap_registry.py corpus-regions --from-filter DIR` writes it
+  from a validation run's results, at no cost: every corpus trait -> region, `alignment_relevant`,
+  verdict, batch id (nulls for a trait the run did not contain).
+* **Pins (finding 9).**  A test checks every version and hash recorded in any `run.json` against
+  `rubric_versions.HISTORY`, except the four rubric v1 runs that record no hash and the classifier of
+  the three withdrawn smoke batches.
+* **`reading_related`.**  A derived note for a `related` comparison, beside `overshadowed` for
+  `different`; `polysemy` is true with either.  The held-out figure still counts `overshadowed` only.
+* **The corpus comparison raises no flag.**  `plain_reading.py --corpus` records the answers with no
+  note and writes `listing.md`: every label with both texts, `different` first, then `related` by
+  confidence, then `same`.
+* **States promotion needs Roger's confirmed name.**  `promote(..., confirmed_state_names=)` / CLI
+  `--confirm-state-name KEY=NAME`; without it a plausible states row is refused and the refusal quotes
+  the pass's suggestion.
+* **Random adjectives for Roger's marks.**  A validation run writes `random_traits_for_marks.md`: 50
+  random adjectives (seed 0) that passed as traits, with an empty column for his mark
+  (`validation_figures.oewn_random.sample_for_marks`).
+* **Superseded refusals (finding 11).**  When no replacement can be parsed the refusal quotes the
+  decision text and no longer claims that none is recorded.
+* **Filter-block schema, round 4 additions.**  `judged_sense` (string or null; also in the second
+  opinion); `person_senses[].kind` is one of trait, state, physical, role; `polysemy_notes` may also
+  hold `obvious_sense_not_trait` and `reading_related`; `rubric_version` 4; `meta.seen_in` on validation
+  rows.
+* **Prompts now.**  Classifier v4 `51854ac5...` (5,568 tokens), probe v3 `23327ebd...` (300), plain
+  reading v1 `e9777505...` (47), comparison v2 `a6f5cbc6...` (753), states queue v3 `6790603b...`
+  (994), states corpus v2 `bf464b84...` (434).
+* **Cost of the full run, by the tools' own estimators** (upper bounds: no prompt caching assumed,
+  second opinions on 25% of rows):
+  * filter over the 1,810-row validation file: $3.68 (1,552 rows to the model, 258 cut free, 330
+    probed, 388 second opinions); at the v4 smoke batch's measured rate ($0.0027 a row, with no cache
+    benefit) about $4.2;
+  * stability rerun: the same again, $3.68 to $4.2;
+  * corpus comparison (659 labels): $1.54 by the estimator, about $0.98 at the measured rates;
+  * states pass over the rows the run will tag `state` (8.4% of 1,552 recorded, about 130): $0.11; its
+    corpus check (5.8% of 659 existing labels, about 38): $0.02.
+  In all about $9.0 by the estimators, $8.4 to $9.4 with the measured rates.
