@@ -11,10 +11,22 @@ stems), a row on a holding list (physical, roles), a row whose filter verdict
 is not ``trait`` / ``tagged``, a row with no filter block, and (with
 ``min_local_novelty``) a row whose novelty is missing or below the floor.
 ``dry_run`` leaves the queue file byte-identical.
+
+Words already turned down (decision 8 of
+``reports/trait_gap_generation/decisions_m1.md``): a stem or label whose
+queue entry is ``not_adopted`` or ``superseded`` is refused by default, and
+the refusal quotes the entry's ``decision`` text; for ``superseded`` it also
+names the replacing label when the decision text gives one.
+``reopen_turned_down=True`` (CLI ``--reopen-turned-down``) lets such a word
+through and copies the old decision into the new entry's
+``description_notes``.  This is promote's own check: the seeding tool's
+``seed_entities.build_registry`` still treats those names as free (it needs
+to, for renames), and is not changed.
 """
 from __future__ import annotations
 
 import copy
+import re
 from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Optional, Sequence
@@ -23,6 +35,45 @@ from assistant_axis.entity_id import normalize_to_file_name
 
 DEFAULT_SECTION = "trait-gap generators (2026-09)"
 DEFAULT_CHUNK = "gap"
+TURNED_DOWN = ("not_adopted", "superseded")
+
+_REPLACED_BY = (
+    re.compile(r"superseded by (?:the )?`?([A-Za-z][A-Za-z_\-]*)`?(?=\s*(?:\(|,|;|\.|$))", re.I),
+    re.compile(r"`([A-Za-z][A-Za-z_\-]*)` in place of this label", re.I),
+)
+
+
+def replacing_label(decision: str) -> Optional[str]:
+    """The label a ``superseded`` entry's decision text names as its
+    replacement, if it names one in a recognisable form."""
+    for pat in _REPLACED_BY:
+        m = pat.search(decision or "")
+        if m:
+            return m.group(1)
+    return None
+
+
+def turned_down_entries(queue: dict) -> dict[str, dict]:
+    """Stem (and normalised label) -> the ``not_adopted`` / ``superseded``
+    queue entry that turned it down (the last one when there are several)."""
+    out: dict[str, dict] = {}
+    for e in queue.get("entries") or []:
+        if e.get("status") not in TURNED_DOWN:
+            continue
+        for name in (e.get("stem"), normalize_to_file_name(e["label"]) if e.get("label") else None):
+            if name:
+                out[name] = e
+    return out
+
+
+def turned_down_reason(entry: dict) -> str:
+    status = entry.get("status")
+    decision = " ".join((entry.get("decision") or "").split()) or "(no decision text recorded)"
+    msg = f"turned down in the seed queue ({status}): {decision}"
+    if status == "superseded":
+        rep_label = replacing_label(entry.get("decision") or "")
+        msg += f"; replaced by {rep_label}" if rep_label else "; no replacing label recorded in its decision text"
+    return msg
 
 
 @dataclass
@@ -79,7 +130,7 @@ def _local_novelty(rec: dict) -> Optional[float]:
 
 def promote(records: dict[str, dict], queue: dict, keys: Sequence[str], *, data_dir: Path,
             dry_run: bool = True, section: str = DEFAULT_SECTION,
-            min_local_novelty: Optional[float] = None) -> PromoteReport:
+            min_local_novelty: Optional[float] = None, reopen_turned_down: bool = False) -> PromoteReport:
     """Build queue entries for ``keys`` and (unless ``dry_run``) append them
     to ``queue["entries"]`` in place.  ``records`` is the folded registry.
     The caller saves the queue (``seed_entities.save_queue``) and records
@@ -89,6 +140,7 @@ def promote(records: dict[str, dict], queue: dict, keys: Sequence[str], *, data_
     rep = PromoteReport(dry_run=dry_run)
     corpus = set().union(*corpus_stems(data_dir).values())
     taken = build_registry(queue, data_dir)
+    turned_down = turned_down_entries(queue)
     chosen: dict[str, dict] = {}
     for key in keys:
         rec = records.get(key)
@@ -97,6 +149,7 @@ def promote(records: dict[str, dict], queue: dict, keys: Sequence[str], *, data_
             continue
         f = rec.get("filter")
         stem = rec["stem"]
+        old = turned_down.get(stem) or turned_down.get(normalize_to_file_name(rec["label"]))
         if not f:
             rep.refused[key] = "not filtered"
         elif rec.get("holding"):
@@ -107,6 +160,8 @@ def promote(records: dict[str, dict], queue: dict, keys: Sequence[str], *, data_
             rep.refused[key] = "stem exists in the corpus"
         elif stem in taken or normalize_to_file_name(rec["label"]) in taken:
             rep.refused[key] = "stem already in the seed queue"
+        elif old is not None and not reopen_turned_down:
+            rep.refused[key] = turned_down_reason(old) + " (pass --reopen-turned-down to reopen it)"
         elif rec.get("seed_queue_stem"):
             rep.refused[key] = f"already promoted as {rec['seed_queue_stem']}"
         elif stem in {c["stem"] for c in chosen.values()}:
@@ -115,7 +170,12 @@ def promote(records: dict[str, dict], queue: dict, keys: Sequence[str], *, data_
                                                 or _local_novelty(rec) < min_local_novelty):
             rep.refused[key] = f"local novelty {_local_novelty(rec)} below {min_local_novelty}"
         else:
-            chosen[key] = queue_entry_from_record(rec, section=section)
+            entry = queue_entry_from_record(rec, section=section)
+            if old is not None:  # reopened on purpose: the history travels with the new entry
+                history = (f"previously {old.get('status')}: {turned_down_reason(old)}; reopened by "
+                           f"promote --reopen-turned-down")
+                entry["description_notes"] = " | ".join(x for x in (history, entry.get("description_notes")) if x)
+            chosen[key] = entry
     # partner hints: set partner on both entries when both members are promoted
     by_stem = {e["stem"]: e for e in chosen.values()}
     for key, e in chosen.items():

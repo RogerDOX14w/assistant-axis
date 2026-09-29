@@ -485,9 +485,9 @@ def compact(registry_path: Path = REGISTRY_PATH, *, snapshot_path: Optional[Path
 
 
 def holding_list(kind: str, *, registry: Registry | None = None) -> list[dict]:
-    """Rows parked on a holding list (``physical`` or ``roles``), by key."""
-    if kind not in ("physical", "roles"):
-        raise ValueError(f"holding list must be 'physical' or 'roles', not {kind!r}")
+    """Rows parked on a holding list (``physical``, ``roles`` or ``states``), by key."""
+    if kind not in ("physical", "roles", "states"):
+        raise ValueError(f"holding list must be 'physical', 'roles' or 'states', not {kind!r}")
     reg = registry or Registry()
     return [r for k, r in sorted(reg.fold().items()) if r.get("holding") == kind]
 

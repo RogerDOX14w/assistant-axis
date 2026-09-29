@@ -45,7 +45,7 @@ from assistant_axis.judge import warn_if_low_parse_rate
 from assistant_axis.judge_pricing import BudgetExceededError, MultiModelUsage
 
 from . import filter_rubric as fr
-from .freq import familiarity_of, zipf_info
+from .freq import HARD_REJECT_BELOW, familiarity_of, is_curated, zipf_info
 from .llm import call_anthropic_json
 from .registry import first_gloss_hint, utc_now
 from .wordnet import WordNetInfo, sense_info
@@ -56,7 +56,7 @@ DEFAULT_MODEL = "claude-haiku-4-5-20251001"
 DEFAULT_SECOND_MODEL = "claude-sonnet-4-6"
 DEFAULT_BATCH_SIZE = 25
 DEFAULT_MAX_TOKENS = 8000
-LOW_CONFIDENCE = 0.6
+LOW_CONFIDENCE = 0.75  # decision 7 (was 0.6 in the pilot)
 
 #: SHA-256 of the exact prompt texts sent (review_m1.md finding 10); stamped
 #: into every filter block and the batch's run.json.
@@ -80,6 +80,7 @@ class FilterItem:
     intended_sense: Optional[str] = None
     familiarity: Optional[float] = None
     meta: dict = field(default_factory=dict)
+    curated: bool = False   # from a curated generator (freq.CURATED_GENERATORS): floor rescue route 3
 
 
 @dataclass
@@ -111,16 +112,22 @@ def items_from_records(records: Sequence[dict]) -> list[FilterItem]:
         hint = first_gloss_hint(r)
         out.append(FilterItem(key=r["key"], label=r["label"],
                               intended_sense=display_form_name(hint) if hint else None,
-                              familiarity=familiarity_of(r)))
+                              familiarity=familiarity_of(r), curated=is_curated(r)))
     return out
 
 
 def holding_for(verdict: str, tags: Sequence[str]) -> tuple[Optional[str], str]:
-    """``(holding, entity_type)``: tagged physical -> physical; tagged role -> roles."""
-    if verdict == "tagged" and "physical" in tags:
-        return "physical", "trait"
+    """``(holding, entity_type)`` for a verdict and its tags (routing follows
+    the verdict; tags of another verdict never reroute a row, decision 4):
+    tagged role -> roles (entity type role); tagged physical -> physical;
+    tagged state -> states (decision 12's separate queue); anything else,
+    including a membership trait, -> no holding list."""
     if verdict == "tagged" and ("role_person" in tags or "role_thing" in tags):
         return "roles", "role"
+    if verdict == "tagged" and "physical" in tags:
+        return "physical", "trait"
+    if verdict == "tagged" and "state" in tags:
+        return "states", "trait"
     return None, "trait"
 
 
@@ -138,12 +145,14 @@ def prior_disagrees(res: FilterResult) -> bool:
 
 def select_second_opinion(results: Sequence[FilterResult], *, frac: float = 0.10, seed: int = 0,
                           low_conf: float = LOW_CONFIDENCE) -> list[str]:
-    """Keys for the second opinion: a seeded random ``frac`` of the classified
-    rows, plus every row with confidence < ``low_conf``, plus every
-    prior/LLM disagreement (evaluative-prior word or single word missing from
-    WordNet, classified ``trait``).  Sorted, no duplicates."""
+    """Keys for the second opinion (decision 7): a seeded random ``frac`` of
+    the classified rows, plus every row with confidence < ``low_conf`` (0.75),
+    plus every row whose verdict and tags disagree (decision 4), plus the
+    plan's prior/LLM disagreement (evaluative-prior word or single word
+    missing from WordNet, classified ``trait``).  Sorted, no duplicates."""
     classified = sorted((r for r in results if r.stage == "classified"), key=lambda r: r.key)
     keys = {r.key for r in classified if (r.filter or {}).get("confidence", 1.0) < low_conf}
+    keys |= {r.key for r in classified if (r.filter or {}).get("tag_disagreement")}
     keys |= {r.key for r in classified if prior_disagrees(r)}
     n_rand = int(round(frac * len(classified)))
     if n_rand:
@@ -208,7 +217,8 @@ class FilterRunner:
                                "WordNet sense counts are recorded as not found")
                 self.wordnet = False
         for it in items:
-            fq = zipf_info(it.label, familiarity=it.familiarity, zipf_fn=self.zipf_fn)
+            fq = zipf_info(it.label, familiarity=it.familiarity, gloss_hint=bool(it.intended_sense),
+                           curated=it.curated, zipf_fn=self.zipf_fn)
             try:
                 wn = sense_info(it.label, wordnet=self.wordnet) if self.wordnet is not False else WordNetInfo()
             except Exception as exc:  # noqa: BLE001 - a lookup error must not sink the run
@@ -221,8 +231,11 @@ class FilterRunner:
                 res.stage = "hard_reject"
                 res.filter = {
                     "rubric_version": fr.TRAITHOOD_RUBRIC_VERSION, "model": None, "batch_id": self.batch_id,
-                    "reason": f"Zipf {fq.zipf_min:.2f} is below the 2.0 floor (no LLM call).",
+                    "reason": f"Zipf {fq.zipf_min:.2f} is below the {HARD_REJECT_BELOW} floor and no "
+                              f"rescue route applies (no LLM call).",
                     "verdict": "reject", "tags": ["too_rare"], "region": None, "senses": [],
+                    "primary_use": None, "membership_kind": None, "alignment_relevant": False,
+                    "tag_disagreement": False,
                     "trait_sense_rank": None, "enactable_in_text": None, "confidence": 1.0,
                     "polysemy": False, "gloss_in_band": False, "second_opinion": None,
                     "prompt_sha256": dict(PROMPT_SHA256), "at": now}
@@ -314,7 +327,8 @@ class FilterRunner:
                    for i, it in enumerate(items)]
         text, rec = await self._call(stage=stage, model=model, system=fr.SYSTEM_PROMPT,
                                      user=fr.build_batch_prompt(payload), keys=[it.key for it in items])
-        rows, errs = fr.parse_batch(text or "", [p["id"] for p in payload])
+        rows, errs = fr.parse_batch(text or "", [p["id"] for p in payload],
+                                    labels={p["id"]: p["label"] for p in payload})
         rec["parse_errors"] = {items[i - 1].key: e for i, e in errs.items()}
         by_key = {items[i - 1].key: r for i, r in rows.items()}
         if by_key:
@@ -366,9 +380,12 @@ class FilterRunner:
         res.filter = {
             "rubric_version": fr.TRAITHOOD_RUBRIC_VERSION, "model": self.model, "batch_id": self.batch_id,
             "reason": row["reason"], "verdict": row["verdict"], "tags": row["tags"],
-            "region": row["region"], "senses": row["senses"], "trait_sense_rank": row["trait_sense_rank"],
+            "membership_kind": row.get("membership_kind"), "region": row["region"],
+            "alignment_relevant": row.get("alignment_relevant"), "primary_use": row.get("primary_use"),
+            "senses": row["senses"], "trait_sense_rank": row["trait_sense_rank"],
             "enactable_in_text": row["enactable_in_text"], "confidence": row["confidence"],
-            "polysemy": fr.derive_polysemy(row, n_senses), "gloss_in_band": fr.gloss_in_band(row["gloss"]),
+            "polysemy": fr.derive_polysemy(row, n_senses), "tag_disagreement": row.get("tag_disagreement", False),
+            "gloss_in_band": fr.gloss_in_band(row["gloss"]),
             "second_opinion": None, "prompt_sha256": dict(PROMPT_SHA256), "at": now}
         res.gloss = row["gloss"]
         res.holding, res.entity_type = hold, et
@@ -465,6 +482,9 @@ class FilterRunner:
                 agree = row["verdict"] == (f.get("classifier_verdict") or f["verdict"])
                 f["second_opinion"] = {"model": self.second_model, "reason": row["reason"],
                                        "verdict": row["verdict"], "tags": row["tags"], "region": row["region"],
+                                       "primary_use": row.get("primary_use"),
+                                       "membership_kind": row.get("membership_kind"),
+                                       "alignment_relevant": row.get("alignment_relevant"),
                                        "trait_sense_rank": row["trait_sense_rank"],
                                        "confidence": row["confidence"], "agree": agree}
                 if not agree:
@@ -572,7 +592,90 @@ def summarize(results: Sequence[FilterResult], *, stats: Counter, usage: MultiMo
         for r in results:
             strata.setdefault(str(r.meta.get(stratum_key)), []).append(r)
         out["by_stratum"] = {s: block(rs) for s, rs in sorted(strata.items())}
+        if stratum_key == "stratum":
+            out["validation_figures"] = validation_figures(results)
+    clf = [r for r in results if r.stage == "classified"]
+    out["v2_fields"] = {
+        "primary_use": dict(sorted(Counter(str(r.filter.get("primary_use")) for r in clf).items())),
+        "alignment_relevant_true": sum(1 for r in clf if r.filter.get("alignment_relevant") is True),
+        "membership_kind": dict(sorted(Counter(r.filter.get("membership_kind") for r in clf
+                                               if r.filter.get("membership_kind")).items())),
+        "tag_disagreement": sum(1 for r in clf if r.filter.get("tag_disagreement")),
+        "holding": dict(sorted(Counter(r.holding for r in results if r.holding).items())),
+        "freq_rescue": dict(sorted(Counter(r.freq.get("rescue") for r in results
+                                           if r.freq.get("rescue")).items())),
+    }
     return out
+
+
+#: The M1 quality figures (decision 2: recorded targets, not gates).
+TARGET_EXISTING_CORRECT = 0.95
+TARGET_REJECTS_FLAGGED = 4
+TARGET_RANDOM_TRAIT_MAX = 0.15
+#: Tags that make an existing corpus label count as correct although the
+#: verdict is not ``trait`` (decision 2, "How an existing label is scored").
+EXISTING_OK_TAGS = ("state", "physical", "membership")
+
+
+def existing_label_outcome(r: FilterResult) -> str:
+    """``correct`` (verdict trait, or a state / physical / membership tag),
+    or the kind of miss: ``floor`` (cut by the frequency floor or the probe),
+    ``reject``, ``roles`` (sent to the roles list), ``other``, ``failed``."""
+    f = r.filter or {}
+    if not f:
+        return "failed"
+    tags = set(f.get("tags") or [])
+    if f.get("verdict") == "trait" or tags & set(EXISTING_OK_TAGS):
+        return "correct"
+    if r.stage == "hard_reject" or "too_rare" in tags:
+        return "floor"
+    if r.holding == "roles":
+        return "roles"
+    if f.get("verdict") == "reject":
+        return "reject"
+    return "other"
+
+
+def validation_figures(results: Sequence[FilterResult]) -> dict:
+    """The three M1 figures against their targets (decision 2), plus the
+    existing labels that received ``state`` or ``physical``, by name."""
+    by: dict[str, list[FilterResult]] = {}
+    for r in results:
+        by.setdefault(str(r.meta.get("stratum")), []).append(r)
+    ex = by.get("existing", [])
+    outcomes = {r.label: existing_label_outcome(r) for r in ex}
+    correct = sum(1 for o in outcomes.values() if o == "correct")
+    misses: dict[str, list[str]] = {}
+    for label, o in sorted(outcomes.items()):
+        if o != "correct":
+            misses.setdefault(o, []).append(label)
+    share = round(correct / len(ex), 4) if ex else None
+    rej = by.get("rejects", [])
+    flagged = [r.label for r in rej if r.filter and (r.filter.get("polysemy")
+                                                      or (r.filter.get("trait_sense_rank") or 0) >= 2)]
+    rnd = [r for r in by.get("oewn_random", []) if r.filter]
+    rnd_trait = sum(1 for r in rnd if r.filter.get("verdict") == "trait")
+    rnd_share = round(rnd_trait / len(rnd), 4) if rnd else None
+    return {
+        "existing": {"n": len(ex), "correct": correct, "share": share, "target": TARGET_EXISTING_CORRECT,
+                     "meets_target": share is not None and share >= TARGET_EXISTING_CORRECT,
+                     "misses": misses,
+                     "labels_with_state": sorted(r.label for r in ex
+                                                 if "state" in ((r.filter or {}).get("tags") or [])),
+                     "labels_with_physical": sorted(r.label for r in ex
+                                                    if "physical" in ((r.filter or {}).get("tags") or []))},
+        "rejects": {"n": len(rej), "flagged": len(flagged), "flagged_labels": sorted(flagged),
+                    "target": TARGET_REJECTS_FLAGGED, "meets_target": len(flagged) >= TARGET_REJECTS_FLAGGED},
+        "oewn_random": {"n": len(rnd), "trait": rnd_trait, "trait_share": rnd_share,
+                        "target": TARGET_RANDOM_TRAIT_MAX,
+                        "meets_target": rnd_share is not None and rnd_share <= TARGET_RANDOM_TRAIT_MAX},
+    }
+
+
+def review_sort_key(rec: dict) -> tuple:
+    """Order for a review list: rows whose polysemy flag fired go to the end
+    (decision 11, option b); otherwise by key."""
+    return (bool((rec.get("filter") or {}).get("polysemy")), rec.get("key") or "")
 
 
 def run_traithood_filter(records: Sequence[dict] | Sequence[FilterItem], *, client, model: str = DEFAULT_MODEL,

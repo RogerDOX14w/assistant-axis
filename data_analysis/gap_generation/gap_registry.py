@@ -32,6 +32,7 @@ _REPO_ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(_REPO_ROOT))
 
 from assistant_axis.gapgen import paths  # noqa: E402
+from assistant_axis.gapgen.filter import review_sort_key  # noqa: E402
 from assistant_axis.gapgen.promote import DEFAULT_SECTION, promote  # noqa: E402
 from assistant_axis.gapgen.registry import (  # noqa: E402
     Candidate, Registry, compact, holding_list, records_for_status, submit_candidates,
@@ -91,20 +92,31 @@ def cmd_status(args) -> int:
 def cmd_report(args) -> int:
     rows = records_for_status(Registry(args.registry), generator=args.generator, decision=args.decision,
                               verdict=args.verdict)
-    print("| key | label | verdict | tags | region | polysemy | decision | nearest | gloss |")
-    print("|---|---|---|---|---|---|---|---|---|")
+    rows = sorted(rows, key=review_sort_key)  # polysemy-flagged rows last (decision 11)
+    print("| key | label | verdict | tags | region | alignment | polysemy (primary use) | decision | nearest "
+          "| gloss |")
+    print("|---|---|---|---|---|---|---|---|---|---|")
     for r in rows:
         f = r.get("filter") or {}
         nv = r.get("novelty") or {}
-        print(f"| {r['key']} | {_md(r['label'])} | {_md(f.get('verdict'))} | {_md(', '.join(f.get('tags') or []))} "
-              f"| {_md(f.get('region'))} | {_md(f.get('polysemy'))} | {_md(nv.get('decision'))} "
-              f"| {_md(nv.get('nearest_existing'))} | {_md(r.get('gloss'))} |")
+        tags = list(f.get("tags") or [])
+        if f.get("membership_kind"):
+            tags = [f"membership:{f['membership_kind']}" if t == "membership" else t for t in tags]
+        poly = f"{f.get('polysemy')}" + (f" ({f['primary_use']})" if f.get("primary_use") else "")
+        print(f"| {r['key']} | {_md(r['label'])} | {_md(f.get('verdict'))} | {_md(', '.join(tags))} "
+              f"| {_md(f.get('region'))} | {_md(f.get('alignment_relevant'))} | {_md(poly)} "
+              f"| {_md(nv.get('decision'))} | {_md(nv.get('nearest_existing'))} | {_md(r.get('gloss'))} |")
     return 0
+
+
+HOLDING_TARGETS = {"physical": "TRAITS_TO_ADD.md (physical-attribute section)", "roles": "ROLES_TO_ADD.md",
+                   "states": "the states queue (decision 12: check a habitual predisposition is plausible, "
+                             "choose its name, write its description)"}
 
 
 def cmd_holding(args) -> int:
     rows = holding_list(args.list, registry=Registry(args.registry))
-    target = "TRAITS_TO_ADD.md (physical-attribute section)" if args.list == "physical" else "ROLES_TO_ADD.md"
+    target = HOLDING_TARGETS[args.list]
     print(f"<!-- trait-gap registry holding list '{args.list}': {len(rows)} rows; paste into {target} -->")
     for r in rows:
         f = r.get("filter") or {}
@@ -135,7 +147,7 @@ def cmd_promote(args) -> int:
         keys = [r["key"] for r in records_for_status(reg, review=args.status)]
     queue = se.load_queue(args.queue)
     rep = promote(rows, queue, keys, data_dir=args.data_dir, dry_run=args.dry_run, section=args.section,
-                  min_local_novelty=args.min_local_novelty)
+                  min_local_novelty=args.min_local_novelty, reopen_turned_down=args.reopen_turned_down)
     for k in rep.promoted:
         e = next(x for x in rep.entries if x["gap_gen"]["registry_key"] == k)
         print(f"{'WOULD PROMOTE' if args.dry_run else 'PROMOTED'} {k} -> {e['stem']} ({e['entity_type']}"
@@ -169,7 +181,7 @@ def build_parser() -> argparse.ArgumentParser:
     sp.add_argument("--verdict")
     sp.set_defaults(func=cmd_report)
     sp = sub.add_parser("holding")
-    sp.add_argument("--list", required=True, choices=["physical", "roles"])
+    sp.add_argument("--list", required=True, choices=["physical", "roles", "states"])
     sp.set_defaults(func=cmd_holding)
     sp = sub.add_parser("compact")
     sp.add_argument("--set-aside-malformed", action="store_true",
@@ -180,6 +192,8 @@ def build_parser() -> argparse.ArgumentParser:
     g.add_argument("--keys", nargs="+")
     g.add_argument("--status", choices=["accepted"], help="rows whose review status is this")
     sp.add_argument("--min-local-novelty", type=float)
+    sp.add_argument("--reopen-turned-down", action="store_true",
+                    help="promote a word the seed queue marks not_adopted or superseded; its old decision is copied into the new entry")
     sp.add_argument("--section", default=DEFAULT_SECTION)
     sp.add_argument("--queue", type=Path, default=paths.SEED_QUEUE_PATH)
     sp.add_argument("--dry-run", action="store_true")

@@ -87,7 +87,7 @@ logger = logging.getLogger("traithood_filter")
 # Token model for the estimate (first-of-kind; revise from the pilot's usage.json).
 CHARS_PER_TOKEN = 3.6
 IN_TOK_PER_ITEM = 30
-OUT_TOK_PER_ITEM = 140
+OUT_TOK_PER_ITEM = 190  # rubric v2 rows carry label, primary_use, membership_kind, alignment (v1 measured 140)
 PROBE_IN_PER_ITEM = 15
 PROBE_OUT_PER_ITEM = 50
 SECOND_EXTRA_FRAC = 0.15   # low-confidence + disagreement rows beyond the random sample (guess)
@@ -150,7 +150,7 @@ def parse_run(value: str) -> tuple[str, str]:
 def build_estimate(items: list[FilterItem], args) -> tuple[Estimate, dict]:
     n_hard = n_probe = 0
     for it in items:
-        fq = zipf_info(it.label, familiarity=it.familiarity)
+        fq = zipf_info(it.label, familiarity=it.familiarity, gloss_hint=bool(it.intended_sense), curated=it.curated)
         n_hard += fq.hard_reject
         n_probe += (not fq.hard_reject) and fq.probe_band
     n_llm = len(items) - n_hard
@@ -274,7 +274,7 @@ def main(argv=None) -> int:
         print(f"DRY-RUN: would write {out_dir}/ and {'the registry ' + str(args.registry) if reg else 'no registry'}")
         print(f"system prompt: {len(fr.SYSTEM_PROMPT)} chars (rubric v{fr.TRAITHOOD_RUBRIC_VERSION}); "
               f"prompt sha256: {json.dumps(PROMPT_SHA256)}")
-        llm = [it for it in items if not zipf_info(it.label, familiarity=it.familiarity).hard_reject]
+        llm = [it for it in items if not zipf_info(it.label, familiarity=it.familiarity, gloss_hint=bool(it.intended_sense), curated=it.curated).hard_reject]
         random.Random(args.shuffle_seed).shuffle(llm)
         for b in range(min(3, math.ceil(len(llm) / args.batch_size))):
             chunk = llm[b * args.batch_size:(b + 1) * args.batch_size]

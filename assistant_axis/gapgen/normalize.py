@@ -16,12 +16,17 @@ from dataclasses import dataclass
 from assistant_axis.entity_id import normalize_to_file_name
 
 VERDICTS = ("trait", "tagged", "reject")
+#: Every tag a filter block may carry.  ``demographic`` is rubric v1 only
+#: (memberships became traits in v2, tagged ``membership``); kept so v1
+#: records stay valid.
 TAG_VOCAB = ("physical", "state", "transient_only", "demographic", "role_person", "role_thing",
-             "evaluative_only", "relational_only", "not_a_word", "too_rare")
+             "evaluative_only", "relational_only", "not_a_word", "too_rare", "membership")
 REGION_VOCAB = ("communication_style", "cognitive_epistemic", "moral_stance", "social_interpersonal",
                 "emotional_temperament", "alignment_ai_agent", "transient_state",
                 "identity_demographic", "physical")
-HOLDING = (None, "physical", "roles")
+#: Holding lists: physical (TRAITS_TO_ADD's physical section), roles (roles
+#: list), states (the states queue of decision 12).
+HOLDING = (None, "physical", "roles", "states")
 ENTITY_TYPES = ("trait", "role")
 DECISIONS = ("covered", "new", "grey")
 NOVELTY_FLAGS = ("ambiguous_label", "pair_completion", "deliberate_duplicate", "models_disagree",
