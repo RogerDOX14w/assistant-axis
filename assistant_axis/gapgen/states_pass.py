@@ -309,17 +309,25 @@ def is_state_row(filter_block: Optional[dict]) -> bool:
     return bool(set((filter_block or {}).get("tags") or []) & set(STATE_TAGS))
 
 
+def state_text(row: dict) -> Optional[str]:
+    """The text the states pass reads for a row: the filter's gloss, or, for a row of the split
+    filter (which writes no gloss for a word on the states list), the accepted reading
+    (``filter.judged_sense``)."""
+    return row.get("gloss") or (row.get("filter") or {}).get("judged_sense")
+
+
 def items_from_filter_results(rows: Sequence[dict], *, stratum: Optional[str] = None) -> list[StatesItem]:
     """Rows of a filter ``results.jsonl`` whose filter block carries ``state``
     (or v1's ``transient_only``), optionally of one validation stratum.  The
-    item text is the filter's gloss of the state."""
+    item text is the filter's gloss of the state, or the split filter's
+    accepted reading when the row has no gloss (:func:`state_text`)."""
     out = []
     for r in rows:
         if not is_state_row(r.get("filter")):
             continue
         if stratum is not None and (r.get("meta") or {}).get("stratum") != stratum:
             continue
-        out.append(StatesItem(key=r["key"], label=r["label"], text=r.get("gloss"),
+        out.append(StatesItem(key=r["key"], label=r["label"], text=state_text(r),
                               meta={"stratum": (r.get("meta") or {}).get("stratum"),
                                     "filter_verdict": (r.get("filter") or {}).get("verdict")}))
     return out
@@ -327,7 +335,7 @@ def items_from_filter_results(rows: Sequence[dict], *, stratum: Optional[str] = 
 
 def items_from_registry(records: Sequence[dict]) -> list[StatesItem]:
     """Registry rows on the ``states`` holding list."""
-    return [StatesItem(key=r["key"], label=r["label"], text=r.get("gloss")) for r in records
+    return [StatesItem(key=r["key"], label=r["label"], text=state_text(r)) for r in records
             if r.get("holding") == "states"]
 
 

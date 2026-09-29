@@ -12,6 +12,9 @@ from assistant_axis.tests.fake_anthropic import FakeAsyncAnthropic, make_respons
 from data_analysis.gap_generation import gap_registry, traithood_filter
 
 HAIKU = "claude-haiku-4-5-20251001"
+#: These tests cover the single-call classifier; since coding_plan_split.md the CLI's default
+#: pipeline is the split filter (tested in assistant_axis/tests/test_gapgen_split_runner.py).
+SINGLE = ["--pipeline", "single"]
 
 
 def _row(i, label):
@@ -88,7 +91,7 @@ class TestTraithoodFilterCLI:
         reg = cand_dir / "registry.jsonl"
         _submit(reg, ["stubborn", "vain"])
         raw = reg.read_bytes()
-        rc = traithood_filter.main(["--batch-id", "b1", "--unfiltered", "--registry", str(reg),
+        rc = traithood_filter.main([*SINGLE, "--batch-id", "b1", "--unfiltered", "--registry", str(reg),
                                     "--out-root", str(cand_dir), "--dry-run"])
         out = capsys.readouterr().out
         assert rc == 0 and reg.read_bytes() == raw
@@ -98,7 +101,7 @@ class TestTraithoodFilterCLI:
 
     def test_validation_run(self, tmp_path, cand_dir, fake_client):
         val = _validation(tmp_path)
-        rc = traithood_filter.main(["--batch-id", "pilot", "--validation-file", str(val), "--out-root",
+        rc = traithood_filter.main([*SINGLE, "--batch-id", "pilot", "--validation-file", str(val), "--out-root",
                                     str(cand_dir), "--no-second-opinion", "--sample-frac", "0.5"])
         assert rc == 0
         d = cand_dir / "filter" / "pilot"
@@ -118,7 +121,7 @@ class TestTraithoodFilterCLI:
 
     def test_refuses_existing_batch(self, tmp_path, cand_dir, fake_client):
         val = _validation(tmp_path)
-        args = ["--batch-id", "b", "--validation-file", str(val), "--out-root", str(cand_dir), "--no-second-opinion"]
+        args = [*SINGLE, "--batch-id", "b", "--validation-file", str(val), "--out-root", str(cand_dir), "--no-second-opinion"]
         assert traithood_filter.main(args) == 0
         assert traithood_filter.main(args) == 1
 
@@ -126,7 +129,7 @@ class TestTraithoodFilterCLI:
         reg = cand_dir / "registry.jsonl"
         _submit(reg, ["stubborn", "tall", "librarian"], run="r1")
         _submit(reg, ["vain"], gen="censuses", run="t1")
-        rc = traithood_filter.main(["--batch-id", "b2", "--run", "wordnet_walk/r1", "--registry", str(reg),
+        rc = traithood_filter.main([*SINGLE, "--batch-id", "b2", "--run", "wordnet_walk/r1", "--registry", str(reg),
                                     "--out-root", str(cand_dir), "--no-second-opinion"])
         assert rc == 0
         rows = Registry(reg).fold()
@@ -136,14 +139,14 @@ class TestTraithoodFilterCLI:
         assert rows["librarian#1"]["holding"] == "roles" and rows["librarian#1"]["entity_type"] == "role"
         assert rows["vain#1"]["filter"] is None  # other run untouched
         # a second pass over the same run finds nothing unfiltered
-        assert traithood_filter.main(["--batch-id", "b3", "--run", "wordnet_walk/r1", "--registry", str(reg),
+        assert traithood_filter.main([*SINGLE, "--batch-id", "b3", "--run", "wordnet_walk/r1", "--registry", str(reg),
                                       "--out-root", str(cand_dir)]) == 0
         assert not (cand_dir / "filter" / "b3").exists()
 
     def test_estimate_over_budget_refused(self, cand_dir, fake_client):
         reg = cand_dir / "registry.jsonl"
         _submit(reg, ["stubborn"])
-        rc = traithood_filter.main(["--batch-id", "b4", "--unfiltered", "--registry", str(reg),
+        rc = traithood_filter.main([*SINGLE, "--batch-id", "b4", "--unfiltered", "--registry", str(reg),
                                     "--out-root", str(cand_dir), "--budget-usd", "0.00001"])
         assert rc == 2 and not (cand_dir / "filter" / "b4").exists() and "client" not in fake_client
 
@@ -154,7 +157,7 @@ class TestTraithoodFilterCLI:
         _submit(reg, ["stubborn", "vain", "timid", "loyal", "brave", "shy", "rude", "calm", "proud", "witty"])
         fake_client["responder"] = lambda kw: responder(kw, tokens=(40_000, 0))  # $0.04 per call
         fake_client["delay"] = 0.01  # calls overlap like network I/O
-        rc = traithood_filter.main(["--batch-id", "b5", "--unfiltered", "--registry", str(reg), "--out-root",
+        rc = traithood_filter.main([*SINGLE, "--batch-id", "b5", "--unfiltered", "--registry", str(reg), "--out-root",
                                     str(cand_dir), "--budget-usd", "0.10", "--batch-size", "2",
                                     "--concurrency", "2", "--no-second-opinion", "--no-probe"])
         assert rc == 2
@@ -177,7 +180,7 @@ class TestTraithoodFilterCLI:
         _submit(reg, ["stubborn"])
         Registry(reg).update("stubborn#1", {"filter": {"verdict": "reject", "classifier_verdict": "trait",
                                                        "tags": ["too_rare"], "rubric_version": 0}})
-        assert traithood_filter.main(["--batch-id", "b6", "--keys", "stubborn#1", "--registry", str(reg),
+        assert traithood_filter.main([*SINGLE, "--batch-id", "b6", "--keys", "stubborn#1", "--registry", str(reg),
                                       "--out-root", str(cand_dir), "--no-second-opinion"]) == 0
         f = Registry(reg).get("stubborn#1")["filter"]
         assert f["verdict"] == "trait" and "classifier_verdict" not in f and f["rubric_version"] == 4  # classifier v4 (round 4)
@@ -188,7 +191,7 @@ class TestTraithoodFilterCLI:
         from assistant_axis.gapgen import filter_rubric as fr
         from assistant_axis.gapgen import plain_reading as pr
         val = _validation(tmp_path)
-        assert traithood_filter.main(["--batch-id", "h", "--validation-file", str(val), "--out-root",
+        assert traithood_filter.main([*SINGLE, "--batch-id", "h", "--validation-file", str(val), "--out-root",
                                       str(cand_dir), "--no-second-opinion"]) == 0
         d = cand_dir / "filter" / "h"
         want = hashlib.sha256(fr.SYSTEM_PROMPT.encode()).hexdigest()
@@ -206,7 +209,7 @@ class TestTraithoodFilterCLI:
         monkeypatch.setattr(traithood_filter, "platform_dirty_files",
                             lambda *a, **k: [" M assistant_axis/gapgen/filter.py"])
         val = _validation(tmp_path)
-        base = ["--validation-file", str(val), "--out-root", str(cand_dir), "--no-second-opinion"]
+        base = [*SINGLE, "--validation-file", str(val), "--out-root", str(cand_dir), "--no-second-opinion"]
         assert traithood_filter.main(["--batch-id", "d1", *base]) == 2
         assert not (cand_dir / "filter" / "d1").exists() and "client" not in fake_client
         assert traithood_filter.main(["--batch-id", "d1", "--dry-run", *base]) == 0
@@ -222,7 +225,7 @@ class TestTraithoodFilterCLI:
         monkeypatch.setattr(traithood_filter, "git_sha", lambda *a, **k: "abc1234+dirty")
         monkeypatch.setattr(traithood_filter, "platform_dirty_files", lambda *a, **k: [])
         val = _validation(tmp_path)
-        assert traithood_filter.main(["--batch-id", "u1", "--validation-file", str(val), "--out-root",
+        assert traithood_filter.main([*SINGLE, "--batch-id", "u1", "--validation-file", str(val), "--out-root",
                                       str(cand_dir), "--no-second-opinion"]) == 0
         rj = json.loads((cand_dir / "filter" / "u1" / "run.json").read_text())
         assert rj["dirty_check"]["dirty"] == [] and rj["allow_dirty"] is False
@@ -245,7 +248,7 @@ class TestTraithoodFilterCLI:
         reg = cand_dir / "registry.jsonl"
         _submit(reg, ["stubborn", "vain", "timid", "loyal", "brave", "shy", "rude", "calm", "proud", "witty"])
         with pytest.raises(RuntimeError, match="injected"):
-            traithood_filter.main(["--batch-id", "e1", "--unfiltered", "--registry", str(reg), "--out-root",
+            traithood_filter.main([*SINGLE, "--batch-id", "e1", "--unfiltered", "--registry", str(reg), "--out-root",
                                    str(cand_dir), "--batch-size", "1", "--concurrency", "1",
                                    "--no-second-opinion", "--no-probe"])
         d = cand_dir / "filter" / "e1"
@@ -278,7 +281,7 @@ class TestTraithoodFilterCLI:
         real run would be refused, instead of refusing before printing."""
         reg = cand_dir / "registry.jsonl"
         _submit(reg, ["stubborn"])
-        rc = traithood_filter.main(["--batch-id", "b7", "--unfiltered", "--registry", str(reg),
+        rc = traithood_filter.main([*SINGLE, "--batch-id", "b7", "--unfiltered", "--registry", str(reg),
                                     "--out-root", str(cand_dir), "--budget-usd", "0.00001", "--dry-run"])
         out = capsys.readouterr().out
         assert rc == 0 and "--- prompt 1 ---" in out and "would be REFUSED" in out

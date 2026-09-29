@@ -3,12 +3,28 @@
 
     uv run python data_analysis/gap_generation/traithood_filter.py --batch-id B \\
         (--unfiltered | --keys K ... | --run GENERATOR/RUN_ID | --validation-file F) \\
-        [--model claude-haiku-4-5-20251001] [--second-model claude-sonnet-4-6] \\
-        [--batch-size 25] [--limit N] [--sample-frac F --sample-seed S] \\
+        [--pipeline split|single] [--transport auto|live|batches] [--resume] \\
+        [--model claude-haiku-4-5-20251001] [--second-model claude-sonnet-5-5] \\
+        [--batch-size 25 (single only)] [--limit N] [--sample-frac F --sample-seed S] \\
         [--no-probe] [--no-second-opinion] [--budget-usd 5.0] [--confirm-expensive] \\
         [--confirmed-by WHO] [--allow-dirty] [--dry-run]
 
-Pipeline per row (``assistant_axis.gapgen.filter``): Zipf floor (hard reject
+**Two pipelines** (coding_plan_split.md).  ``--pipeline split`` (the default)
+runs the split filter (:mod:`assistant_axis.gapgen.split_runner`): a row of
+small calls, one item per call, each prompt read from Roger's rubric files in
+``reports/trait_gap_generation/rubrics/`` and pinned in its ``versions.json``;
+the run refuses to start when a rubric text is not pinned, and prints the
+``rubric_pins.py bump`` command that would pin it.  ``--transport auto`` sends
+a run of fewer than 300 words live and a larger one through the Message
+Batches API (half price; ``filter/<batch>/batches.json`` keeps the batch ids so
+a killed run picks up with ``--resume``).  ``--resume`` reuses an existing batch
+directory and sends no call whose answer is already in its ``responses.jsonl``
+(same step, prompt hash, model and input); its ``usage.json`` is carried on, so
+the cap covers the batch id's whole spend.  ``--pipeline single`` is the
+single-call classifier below, kept so recorded runs can be reproduced
+(``--batch-size`` applies to it only).
+
+Single-call pipeline per row (``assistant_axis.gapgen.filter``): Zipf floor (hard reject
 below ``freq.HARD_REJECT_BELOW`` unless rescue rule 1b applies, free) ->
 WordNet -> Haiku classifier (25 per call) -> definition probe for the probe
 band (``freq.HARD_REJECT_BELOW`` <= Zipf < ``freq.PROBE_BELOW``) and rescued
@@ -108,7 +124,11 @@ from assistant_axis.gapgen.filter import (  # noqa: E402
 from assistant_axis.gapgen.freq import zipf_info  # noqa: E402
 from assistant_axis.gapgen.normalize import make_key, normalize_candidate  # noqa: E402
 from assistant_axis.gapgen.registry import Registry, records_for_status, utc_now, utc_stamp  # noqa: E402
+from assistant_axis.gapgen.batches import AUTO_BATCH_FROM  # noqa: E402
 from assistant_axis.gapgen.runs import PLATFORM_PATHS, git_sha, platform_dirty_files  # noqa: E402
+from assistant_axis.gapgen.split_runner import (  # noqa: E402
+    DEFAULT_COMPARE_MODEL as SPLIT_COMPARE_MODEL, DEFAULT_SECOND_MODEL as SPLIT_SECOND_MODEL,
+)
 from assistant_axis.judge_pricing import BudgetExceededError  # noqa: E402
 
 logger = logging.getLogger("traithood_filter")
@@ -148,7 +168,9 @@ def read_validation_file(path: Path) -> list[FilterItem]:
         items.append(FilterItem(key=key, label=n.label, intended_sense=row.get("gloss_hint"),
                                 familiarity=row.get("familiarity"),
                                 meta={"stratum": row.get("stratum"), "expected": row.get("expected"),
-                                      "surface": row["surface"]}))
+                                      "surface": row["surface"],
+                                      **({"expected_reading": row["expected_reading"]}
+                                         if "expected_reading" in row else {})}))
     return items
 
 
@@ -184,6 +206,9 @@ def parse_run(value: str) -> tuple[str, str]:
 # ---------------------------------------------------------------------------
 
 def build_estimate(items: list[FilterItem], args) -> tuple[Estimate, dict]:
+    """The single-call pipeline's estimate (the split's is ``split_cli.build_split_estimate``)."""
+    if args.batch_size is None:  # the flag's default is None so that --pipeline split can refuse it
+        args.batch_size = DEFAULT_BATCH_SIZE
     if getattr(args, "probe_only", False):
         est = Estimate()
         probe_sys = int(len(fr.DEFINE_PROBE_PROMPT) / CHARS_PER_TOKEN)
@@ -247,9 +272,20 @@ def build_parser() -> argparse.ArgumentParser:
     ap.add_argument("--data-dir", type=Path, default=paths.DATA_DIR)
     ap.add_argument("--out-root", type=Path, default=None,
                     help="candidates dir holding filter/<batch_id>/ (default data/candidates)")
+    ap.add_argument("--pipeline", choices=("split", "single"), default="split",
+                    help="split (default): the small calls, one item per call; single: the single-call classifier")
+    ap.add_argument("--transport", choices=("auto", "live", "batches"), default="auto",
+                    help=f"split only: auto (default) sends fewer than {AUTO_BATCH_FROM} words live and more "
+                         "through the Message Batches API")
+    ap.add_argument("--resume", action="store_true",
+                    help="split only: reuse an existing batch dir; send no call already answered in its "
+                         "responses.jsonl")
     ap.add_argument("--model", default=DEFAULT_MODEL)
-    ap.add_argument("--second-model", default=DEFAULT_SECOND_MODEL)
-    ap.add_argument("--batch-size", type=int, default=DEFAULT_BATCH_SIZE)
+    ap.add_argument("--second-model", default=SPLIT_SECOND_MODEL,
+                    help=f"second opinion (default {SPLIT_SECOND_MODEL})")
+    ap.add_argument("--batch-size", type=int, default=None,
+                    help=f"single pipeline only: rows per classifier call (default {DEFAULT_BATCH_SIZE}); "
+                         "refused with --pipeline split")
     ap.add_argument("--second-opinion-frac", type=float, default=0.10)
     ap.add_argument("--seed", type=int, default=0, help="second-opinion sample seed")
     ap.add_argument("--shuffle-seed", type=int, default=0,
@@ -261,8 +297,8 @@ def build_parser() -> argparse.ArgumentParser:
     ap.add_argument("--no-second-opinion", action="store_true")
     ap.add_argument("--no-plain-reading", action="store_true",
                     help="skip the plain reading and comparison of rows with an intended meaning")
-    ap.add_argument("--compare-model", default=None,
-                    help="model for the comparison (default plain_reading.DEFAULT_COMPARE_MODEL)")
+    ap.add_argument("--compare-model", default=SPLIT_COMPARE_MODEL,
+                    help=f"model for the comparison (default {SPLIT_COMPARE_MODEL})")
     ap.add_argument("--probe-only", action="store_true",
                     help="with --validation-file: send every row to the definition probe only (a probe check)")
     ap.add_argument("--measurement", action="store_true",
@@ -332,9 +368,13 @@ def main(argv=None) -> int:
     logging.basicConfig(level=logging.INFO, format="%(levelname)s %(message)s")
     args = build_parser().parse_args(argv)
     paths.check_id(args.batch_id, "batch_id")
-    if args.compare_model is None:
-        from assistant_axis.gapgen.plain_reading import DEFAULT_COMPARE_MODEL
-        args.compare_model = DEFAULT_COMPARE_MODEL
+    if args.pipeline == "split":
+        from data_analysis.gap_generation import split_cli
+        return split_cli.main_split(args, argv)
+    if args.resume or args.transport != "auto":
+        raise SystemExit("--resume and --transport apply to --pipeline split only")
+    if args.batch_size is None:
+        args.batch_size = DEFAULT_BATCH_SIZE
     if args.probe_only:
         if not args.validation_file:
             raise SystemExit("--probe-only applies to --validation-file only (it never writes the registry)")
@@ -452,10 +492,11 @@ def marks_table(sample: list[dict]) -> str:
     return "\n".join(rows) + "\n"
 
 
-def _finalize(args, items, reg, runner, usage, run_meta, out_dir, status, error) -> None:
+def _finalize(args, items, reg, runner, usage, run_meta, out_dir, status, error, extra_summary=None) -> None:
     """Write usage.json, the responses (re-written whole so the per-call lines
     gain their parse errors), results.jsonl, summary.json, the registry rows
-    and run.json.  Called from ``main``'s ``finally``."""
+    and run.json.  Called from ``main``'s ``finally``.  ``extra_summary(summary,
+    results)`` (the split pipeline's) may add to the summary before it is written."""
     usage.write_json(out_dir / "usage.json")
     write_jsonl(runner.responses, out_dir / "responses.jsonl")
     results = [runner.results[it.key] for it in items if it.key in runner.results]
@@ -467,6 +508,8 @@ def _finalize(args, items, reg, runner, usage, run_meta, out_dir, status, error)
                     "stopped_by_error": f"{type(error).__name__}: {error}" if error is not None else None,
                     "rubric_version": fr.TRAITHOOD_RUBRIC_VERSION, "model": args.model,
                     "second_model": run_meta["second_model"]})
+    if extra_summary is not None:
+        extra_summary(summary, results)
     from assistant_axis.plot_metadata import json_metadata
     from assistant_axis.provenance import current_file_input
     inputs = []

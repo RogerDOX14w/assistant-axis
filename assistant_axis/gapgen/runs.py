@@ -62,6 +62,8 @@ PLATFORM_PATHS: tuple[str, ...] = (
     "assistant_axis/entity_id.py",
     "assistant_axis/atomic_io.py",
     "data/candidates/validation",
+    # the split filter's prompts are read from these files at run time
+    "reports/trait_gap_generation/rubrics",
     "pyproject.toml",
     "uv.lock",
 )

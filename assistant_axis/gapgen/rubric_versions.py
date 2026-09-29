@@ -74,7 +74,10 @@ def current() -> dict[str, tuple[int, str]]:
 
 def mismatches() -> list[str]:
     """Human-readable problems; empty when every prompt's text is the one its
-    version is pinned to."""
+    version is pinned to.  Covers the split filter's eight prompts too, whose
+    pins live in ``reports/trait_gap_generation/rubrics/versions.json``
+    (:func:`assistant_axis.gapgen.split_rubrics.mismatches`); their problems
+    are prefixed ``split.``."""
     out = []
     for name, (version, sha) in current().items():
         pinned = HISTORY.get(name, {}).get(version)
@@ -83,4 +86,6 @@ def mismatches() -> list[str]:
         elif pinned != sha:
             out.append(f"{name}: text changed (sha {sha[:12]}...) but version {version} is pinned to "
                        f"{pinned[:12]}...: bump the version and add a row to HISTORY")
+    from . import split_rubrics
+    out.extend(f"split.{p}" for p in split_rubrics.mismatches())
     return out

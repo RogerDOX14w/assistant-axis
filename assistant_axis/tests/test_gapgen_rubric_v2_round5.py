@@ -99,7 +99,7 @@ class TestMeasurementRuns:
         val = tmp_path / "v.jsonl"
         val.write_text(json.dumps({"surface": "stubborn", "stratum": "existing"}) + "\n")
         cand = tmp_path / "cand"
-        assert traithood_filter.main(["--batch-id", "m", "--validation-file", str(val), "--out-root", str(cand),
+        assert traithood_filter.main(["--pipeline", "single", "--batch-id", "m", "--validation-file", str(val), "--out-root", str(cand),
                                       "--no-second-opinion", "--no-probe", "--measurement"]) == 0
         assert json.loads((cand / "filter" / "m" / "run.json").read_text())["measurement"] is True
 
@@ -145,7 +145,8 @@ class TestMeasurementRuns:
         from assistant_axis.gapgen import paths
         from data_analysis.gap_generation import traithood_filter as tf
         val = paths.VALIDATION_DIR / "m1_validation.jsonl"
-        args = tf.build_parser().parse_args(["--batch-id", "m1_stability", "--validation-file", str(val),
+        args = tf.build_parser().parse_args(["--pipeline", "single", "--batch-id", "m1_stability",
+                                             "--validation-file", str(val),
                                              "--stability", "--out-root", "/nonexistent-candidates"])
         tf.apply_stability(args)
         items, _ = tf.select_items(args)

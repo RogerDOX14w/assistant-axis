@@ -3,7 +3,7 @@
 
     uv run python data_analysis/gap_generation/plain_reading.py --batch-id B \\
         (--pairs F | --corpus | --corpus-stems S [S ...]) [--limit N] \\
-        [--reading-model claude-haiku-4-5-20251001] [--compare-model claude-sonnet-4-6] \\
+        [--reading-model claude-haiku-4-5-20251001] [--compare-model claude-sonnet-5-5] \\
         [--reuse-readings DIR] [--batch-size 20] [--budget-usd 1.0] \\
         [--confirm-expensive --confirmed-by WHO] [--allow-dirty] [--dry-run] [--overwrite]
 
@@ -115,7 +115,10 @@ def build_parser() -> argparse.ArgumentParser:
     ap.add_argument("--out-root", type=Path, default=None,
                     help="candidates dir holding plain_reading/<batch_id>/ (default data/candidates)")
     ap.add_argument("--reading-model", default=pr.DEFAULT_READING_MODEL)
-    ap.add_argument("--compare-model", default=pr.DEFAULT_COMPARE_MODEL)
+    # claude-sonnet-5-5 since 2026-09-29 (Roger: "I'm inclined to move it"; coding_plan_split.md
+    # section 1); the library default, used by recorded runs, is unchanged
+    ap.add_argument("--compare-model", default="claude-sonnet-5-5",
+                    help="comparison model (default claude-sonnet-5-5; recorded runs used claude-sonnet-4-6)")
     ap.add_argument("--reuse-readings", type=Path, help="an earlier run dir whose readings to reuse")
     ap.add_argument("--batch-size", type=int, default=pr.DEFAULT_BATCH_SIZE)
     ap.add_argument("--limit", type=int, help="first N rows only")

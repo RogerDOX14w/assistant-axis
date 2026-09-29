@@ -1,0 +1,69 @@
+{
+  "_about": "Append-only.  For each split-filter prompt, every version and the SHA-256 of its text (the fenced block of its rubric file).  A version names one text.  Add a row with data_analysis/gap_generation/rubric_pins.py bump NAME --why TEXT; never edit a row.",
+  "prompts": {
+    "sense": [
+      {
+        "version": 6,
+        "sha256": "5fb28b588776d3483c26e349973b32f2d7694fa85202a57489730e6349de990e",
+        "pinned_at": "2026-09-29T18:42:22+00:00",
+        "why": "First pin: draft 6 (Roger edits of 2026-09-29 plus the where-someone-comes-from clause); matches probe_single/run.json draft6"
+      }
+    ],
+    "established": [
+      {
+        "version": 4,
+        "sha256": "d9b6e59dbe76864e5a5b7d07233ce2f73f987363420df2c58210cf06bc60e684",
+        "pinned_at": "2026-09-29T18:42:22+00:00",
+        "why": "First pin: draft 4 (the test of ordinary speech); matches probe_rerun_wording/run_established.json"
+      }
+    ],
+    "vague": [
+      {
+        "version": 3,
+        "sha256": "ea4b01022195f4007560512e91fbeab56d14c1a6e83eff4a670756cc527d6cf5",
+        "pinned_at": "2026-09-29T18:42:22+00:00",
+        "why": "First pin: draft 3; matches probe_checks_single/run.json"
+      }
+    ],
+    "kind": [
+      {
+        "version": 4,
+        "sha256": "7b8cc5c9f0439d17ee648ce01f4650e0639feebb3b2e0a9ae5cbd14a42c2835e",
+        "pinned_at": "2026-09-29T18:42:22+00:00",
+        "why": "First pin: draft 4 (a standing practice counts as a trait); matches probe_rerun_wording/run.json"
+      }
+    ],
+    "same_sense": [
+      {
+        "version": 1,
+        "sha256": "a4b17cc25da1c045f4350dfd394bf880831b9626f3bbe8089c30b747d1ce6963",
+        "pinned_at": "2026-09-29T18:42:22+00:00",
+        "why": "First pin: draft 1; matches probe_same_sense/run.json"
+      }
+    ],
+    "gloss": [
+      {
+        "version": 2,
+        "sha256": "cb14741b0ba11a6f0deeda9e73e943604cab0496e689a907e5f84a2c2763c7b8",
+        "pinned_at": "2026-09-29T18:42:22+00:00",
+        "why": "First pin: draft 2 (This means plus an -ing verb, no subject); matches probe_gloss_v2/run.json"
+      }
+    ],
+    "alignment": [
+      {
+        "version": 1,
+        "sha256": "85291d289b502a372390a9e2a569ca12c412c91132e062a6052051959991823d",
+        "pinned_at": "2026-09-29T18:42:22+00:00",
+        "why": "First pin: first draft; matches probe_last_step/run.json"
+      }
+    ],
+    "descriptors": [
+      {
+        "version": 1,
+        "sha256": "4f4b966e876ea0d0250df349e0eb7f56b76fe151ed3f14006cb9731576e2094f",
+        "pinned_at": "2026-09-29T18:42:22+00:00",
+        "why": "First pin: first draft; matches probe_last_step/run.json"
+      }
+    ]
+  }
+}

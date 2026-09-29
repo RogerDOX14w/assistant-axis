@@ -36,6 +36,9 @@ VALIDATION_DIR = DATA_CANDIDATES / "validation"
 #: judgement-calls`` lists, keyed by word (tracked; ``judgement-call`` writes it).
 JUDGEMENT_CALLS_PATH = DATA_CANDIDATES / "judgement_calls.json"
 SEED_QUEUE_PATH = DATA_DIR / "seed_queue.json"
+#: The split filter's rubric files (Roger's text, one prompt per file inside a
+#: fenced block) and their append-only version pins (``versions.json``).
+RUBRICS_DIR = REPO_ROOT / "reports" / "trait_gap_generation" / "rubrics"
 
 _ID_RE = re.compile(r"^[A-Za-z0-9][A-Za-z0-9._+-]*$")
 
@@ -125,6 +128,7 @@ def all_paths() -> dict[str, Path]:
         "VALIDATION_DIR": VALIDATION_DIR,
         "JUDGEMENT_CALLS_PATH": JUDGEMENT_CALLS_PATH,
         "SEED_QUEUE_PATH": SEED_QUEUE_PATH,
+        "RUBRICS_DIR": RUBRICS_DIR,
         "hf_cache_dir": hf_cache_dir(),
         "wn_data_dir": wn_data_dir(),
         "runs_root": runs_root(),

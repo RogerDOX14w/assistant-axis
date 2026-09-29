@@ -515,7 +515,7 @@ class TestProbeV3:
         val.write_text("".join(json.dumps({"surface": w, "stratum": "probe_check"}) + "\n"
                                for w in ("unsmooth", "cxl")))
         cand = tmp_path / "cand"
-        assert traithood_filter.main(["--batch-id", "p1", "--validation-file", str(val), "--probe-only",
+        assert traithood_filter.main(["--pipeline", "single", "--batch-id", "p1", "--validation-file", str(val), "--probe-only",
                                       "--out-root", str(cand)]) == 0
         s = json.loads((cand / "filter" / "p1" / "summary.json").read_text())["result"]
         assert s["probe_n"] == 2 and s["probe_failed"] == 0 and s["n_llm"] == 0

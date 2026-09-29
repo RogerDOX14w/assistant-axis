@@ -20,7 +20,9 @@ VERDICTS = ("trait", "tagged", "reject")
 #: (memberships became traits in v2, tagged ``membership``); kept so v1
 #: records stay valid.
 TAG_VOCAB = ("physical", "state", "transient_only", "demographic", "role_person", "role_thing",
-             "evaluative_only", "relational_only", "not_a_word", "too_rare", "membership")
+             "evaluative_only", "relational_only", "not_a_word", "too_rare", "membership",
+             # the split filter's reasons for turning a word away (coding_plan_split.md section 6)
+             "no_persona_reading", "stretched", "action")
 REGION_VOCAB = ("communication_style", "cognitive_epistemic", "moral_stance", "social_interpersonal",
                 "emotional_temperament", "alignment_ai_agent", "transient_state",
                 "identity_demographic", "physical")

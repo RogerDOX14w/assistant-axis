@@ -152,6 +152,7 @@ _MODEL_RATES: tuple[tuple[str, float, float], ...] = (
     ("gpt-4.1-mini", GPT_MINI_RATE_IN, GPT_MINI_RATE_OUT),
     ("gpt-4o-mini", GPT_MINI_RATE_IN, GPT_MINI_RATE_OUT),
     ("haiku", HAIKU_RATE_IN, HAIKU_RATE_OUT),
+    ("sonnet-5", 2.00, 10.00),  # claude-sonnet-5 / claude-sonnet-5-5 (before the generic "sonnet")
     ("sonnet", SONNET_RATE_IN, SONNET_RATE_OUT),
     # Embedding models (trait-gap platform, M2/M3): input-only pricing, so
     # embedding calls are counted in usage.json like judge calls.  Local
@@ -163,6 +164,11 @@ _MODEL_RATES: tuple[tuple[str, float, float], ...] = (
     # Future Opus pricing — placeholder, fail loud if hit:
     # ("opus", 15.00, 75.00),
 )
+
+
+#: Usage charged through the Message Batches API is recorded under ``<model>@batch``
+#: and priced at half the model's rates.
+BATCH_SUFFIX = "@batch"
 
 
 def price_for_model(model: str) -> tuple[float, float]:
@@ -178,6 +184,9 @@ def price_for_model(model: str) -> tuple[float, float]:
     cost will silently appear free in budget reports.
     """
     m = model.lower()
+    if m.endswith(BATCH_SUFFIX):  # Message Batches API: half the model's rates
+        rate_in, rate_out = price_for_model(model[:-len(BATCH_SUFFIX)])
+        return rate_in / 2, rate_out / 2
     for fragment, rate_in, rate_out in _MODEL_RATES:
         if fragment in m:
             return rate_in, rate_out

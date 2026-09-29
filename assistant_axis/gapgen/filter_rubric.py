@@ -114,7 +114,11 @@ MAX_PERSON_SENSES = 4
 #: reading_related); ``polysemy`` is true
 #: when any is present.
 POLYSEMY_NOTES = ("two_trait_senses", "nontrait_person_sense", "obvious_sense_not_trait", "overshadowed",
-                  "reading_related")
+                  "reading_related",
+                  # the split filter's notes (coding_plan_split.md section 6); never set by the
+                  # single-call classifier, and like every note they reject nothing
+                  "first_thought_in_the_way", "leaves_something_out", "fits_many_in_different_ways",
+                  "most_likely_reading_stretched")
 
 MEMBERSHIP_KINDS = ("circumstance", "class", "family", "affinity", "relationship", "orientation_gender",
                     "geography", "nationality_ethnicity_language", "age_group")

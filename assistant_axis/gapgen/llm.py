@@ -67,33 +67,60 @@ def response_text(resp: Any) -> str:
     return "".join(parts)
 
 
+#: Model-id fragments of models that refuse a ``temperature`` setting with a 400
+#: (checked 2026-09-29 for claude-sonnet-5-5, probe_sonnet55_api/results.jsonl;
+#: the rest from the API reference: Sonnet 5, Opus 4.7 and later, Fable, Mythos).
+NO_TEMPERATURE_FRAGMENTS: tuple[str, ...] = ("sonnet-5", "opus-5", "opus-4-7", "opus-4-8", "fable", "mythos")
+
+
+def accepts_temperature(model: str) -> bool:
+    """False for a model that refuses ``temperature`` (the request must leave it out)."""
+    m = str(model).lower()
+    return not any(f in m for f in NO_TEMPERATURE_FRAGMENTS)
+
+
+def request_params(*, model: str, system: Optional[str], user: str, max_tokens: int,
+                   temperature: Optional[float], cache_system: bool = True) -> dict:
+    """The Messages API parameters for one call, shared by the live path and the Message Batches
+    path so both send the same request.  ``temperature`` is left out when it is ``None`` or the
+    model refuses it (:func:`accepts_temperature`); no ``thinking`` or effort setting is ever sent.
+    An empty or ``None`` system prompt is omitted."""
+    params: dict = {"model": model, "max_tokens": max_tokens,
+                    "messages": [{"role": "user", "content": user}]}
+    if temperature is not None and accepts_temperature(model):
+        params["temperature"] = temperature
+    if system:
+        sys_block: list[dict] = [{"type": "text", "text": system}]
+        if cache_system:
+            sys_block[0]["cache_control"] = {"type": "ephemeral"}
+        params["system"] = sys_block
+    return params
+
+
 async def call_anthropic_json(client, *, system: Optional[str], user: str, model: str, max_tokens: int,
-                              temperature: float, usage: Optional[MultiModelUsage], limiter=None,
+                              temperature: Optional[float], usage: Optional[MultiModelUsage], limiter=None,
                               cache_system: bool = True,
                               retry_delays: Sequence[float] = RETRY_DELAYS_S,
                               meta: Optional[dict] = None) -> Optional[str]:
     """Send one request; return its text or ``None`` after the last failure.
+
+    ``temperature`` is optional and is left out of the request for a model
+    that refuses it (:func:`accepts_temperature`).
 
     ``meta`` (optional dict) receives ``stop_reason``, ``usage_raw``,
     ``attempts``, ``error`` and ``text`` for the caller's response log; it is
     filled *before* the usage is charged.  ``BudgetExceededError`` raised by a
     guarded ``usage`` propagates, with the response already in ``meta``.
     """
-    extra: dict = {}
-    if system:  # an empty or None system prompt is omitted: the call carries the user text only
-        sys_block: list[dict] = [{"type": "text", "text": system}]
-        if cache_system:
-            sys_block[0]["cache_control"] = {"type": "ephemeral"}
-        extra["system"] = sys_block
+    params = request_params(model=model, system=system, user=user, max_tokens=max_tokens,
+                            temperature=temperature, cache_system=cache_system)
     attempts = len(retry_delays) + 1
     last_err: Optional[str] = None
     for attempt in range(attempts):
         if limiter is not None:
             await limiter.acquire()
         try:
-            resp = await client.messages.create(
-                model=model, max_tokens=max_tokens, temperature=temperature,
-                messages=[{"role": "user", "content": user}], **extra)
+            resp = await client.messages.create(**params)
         except Exception as exc:  # noqa: BLE001 - classified below
             last_err = f"{type(exc).__name__}: {exc}"
             if _is_transient(exc) and attempt < attempts - 1:

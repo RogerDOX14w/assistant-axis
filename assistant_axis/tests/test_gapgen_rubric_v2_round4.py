@@ -614,7 +614,7 @@ def test_validation_cli_marks_seen_rows_and_writes_the_marks_table(tmp_path, mon
     val = tmp_path / "v.jsonl"
     val.write_text("".join(json.dumps({"surface": w, "stratum": s}) + "\n"
                            for w, s in (("stubborn", "existing"), ("vain", "existing"), ("mossy", "oewn_random"))))
-    assert traithood_filter.main(["--batch-id", "v", "--validation-file", str(val), "--out-root", str(cand),
+    assert traithood_filter.main(["--pipeline", "single", "--batch-id", "v", "--validation-file", str(val), "--out-root", str(cand),
                                   "--no-second-opinion", "--no-probe"]) == 0
     d = cand / "filter" / "v"
     res = {json.loads(x)["key"]: json.loads(x) for x in (d / "results.jsonl").read_text().splitlines()}
