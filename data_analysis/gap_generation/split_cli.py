@@ -237,5 +237,9 @@ def finalize(args, items, reg, runner, usage, run_meta, out_dir, status, error, 
         }
         s["rubric_version"] = split.RUBRIC_VERSION
         s["pipeline"] = "split"
+        # filter.summarize counts second opinions by the single pipeline's "verdict" key; a split
+        # block records "outcome", so set the two top-level figures from the split's own records
+        s["second_opinion_n"] = len(runner.second_keys)
+        s["disagreements"] = len(s["split"]["second_opinion"]["disagree"])
 
     tf._finalize(args, items, reg, runner, usage, run_meta, out_dir, status, error, extra_summary=extra)

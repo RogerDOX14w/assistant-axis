@@ -268,6 +268,9 @@ class TestSplitCLI:
         fig = s["split"]["pilot_figures"]
         assert fig["n_reached_step1"] == 15 and fig["same_outcome_as_expected"] == 15
         assert all(v["ok"] == v["n"] for v in s["split"]["step_parse_rates"].values())
+        # the top-level second-opinion figures come from the split's records, not the single pipeline's
+        assert s["second_opinion_n"] == s["split"]["second_opinion"]["n"] > 0
+        assert s["disagreements"] == len(s["split"]["second_opinion"]["disagree"])
         usage = json.loads((d / "usage.json").read_text())
         assert usage["n_calls"] == len(cli["live"].calls)
         assert sum(v["n_calls"] for v in s["split"]["cost_by_step"].values()) == usage["n_calls"]

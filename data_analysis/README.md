@@ -183,6 +183,60 @@ same-type entities the file belongs to and its shape (`pair`, `triangle`,
   `--overwrite` to replace existing fields.  Kept for re-runs after bulk
   additions.
 
+## Trait-gap platform: the split trait-hood filter (Sep 2026)
+
+`gap_generation/traithood_filter.py` decides whether a candidate word can name a
+persona trait.  Since 2026-09-29 its default is the **split** filter
+(`--pipeline split`; spec: `reports/trait_gap_generation/coding_plan_split.md`):
+a row of small calls, **one item per call**, each prompt read byte for byte from
+Roger's rubric files in `reports/trait_gap_generation/rubrics/`.  The old
+single-call classifier stays behind `--pipeline single`, so recorded runs can be
+reproduced (`--batch-size` applies to it only and is refused with split).
+
+- **Waves.**  Definition probe (probe band only) -> sense (the label alone) ->
+  established, vague and kind for each primary reading -> same-sense check and,
+  for a row with an intended sense, the comparison -> gloss (words that go on as
+  traits) -> alignment and descriptors on the gloss.  Steps 1 to 3 never see the
+  intended sense.  The join is code (`assistant_axis/gapgen/split.py`), and a
+  note never rejects a word.
+- **Models.**  Every step on `claude-haiku-4-5-20251001` at temperature 0.  The
+  second opinion (a seeded 10% plus every word noted `obvious_sense_not_trait` or
+  `most_likely_reading_stretched`) and the comparison run on `claude-sonnet-5-5`,
+  which refuses `temperature`: requests to it carry no temperature, thinking or
+  effort setting, and `max_tokens` 2000.  A word chosen for a second opinion gets
+  its gloss from Sonnet 5.5.
+- **Pins.**  `rubrics/versions.json` pins every prompt text by SHA-256.  A paid
+  run refuses to start when a text on disk is not its latest pin; pin an edit
+  with `uv run python data_analysis/gap_generation/rubric_pins.py bump NAME --why
+  "..."` (and `... rubric_pins.py check` to see the state).  The rubrics
+  directory is a platform path, so an uncommitted edit also stops a paid run.
+- **Transport.**  `--transport auto` (default) sends fewer than 300 words live
+  and more through the Message Batches API, at half price (charged under
+  `<model>@batch` in `usage.json`).  Batch ids and wave state are kept in
+  `filter/<batch>/batches.json`.
+- **Resume.**  `--resume` reuses an existing batch directory: no call whose
+  answer is already in its `responses.jsonl` is sent again (same step, prompt
+  hash, model and input), a batch submitted but never collected is collected
+  rather than resubmitted, and `usage.json` carries on so the cap covers the
+  batch id's whole spend.
+- **Cost.**  About $0.010 a word live with the second opinion, half that in
+  batches; the estimate is printed by step before every run.  A full run
+  crosses the $20 confirmation line at about 2,000 words live or 4,000 in
+  batches.
+
+```bash
+# the pilot on the 99 test words (never a row of m1_validation.jsonl)
+uv run python data_analysis/gap_generation/traithood_filter.py --pipeline split \
+    --transport live --validation-file data/candidates/validation/split_test_words.jsonl \
+    --batch-id split_pilot_live --budget-usd 3 [--dry-run]
+```
+
+Outputs in `data/candidates/filter/<batch_id>/`: `responses.jsonl` (every
+response, appended as it arrives), `results.jsonl`, `summary.json` (with a
+`split` block: parse rate by step and model, cost by step, the pilot figures),
+`usage.json`, `run.json` and, for batches, `batches.json`.  Pilot results:
+`reports/trait_gap_generation/acceptance_split.md`.
+
 ## Output
 
 ```
