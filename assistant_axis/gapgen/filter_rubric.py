@@ -1,4 +1,4 @@
-"""Trait-hood rubric (the "rubric v2" change set; classifier prompt version 3):
+"""Trait-hood rubric (the "rubric v2" change set; classifier prompt version 4):
 the classifier prompt, its parser, derived fields and the definition probe.
 Each prompt's version is pinned to its text's sha256 in
 :mod:`assistant_axis.gapgen.rubric_versions`.
@@ -452,23 +452,29 @@ def _label_key(s: Any) -> str:
     return " ".join(str(s or "").split()).casefold()
 
 
-def _person_senses(value) -> tuple[list[dict], Optional[str]]:
+def _person_senses(value) -> tuple[list[dict], Optional[str], list[str]]:
     """Normalise ``person_senses``: a list (possibly empty) of
     ``{"sense": str, "kind": one of PERSON_SENSE_KINDS}``, at most
-    :data:`MAX_PERSON_SENSES` kept."""
+    :data:`MAX_PERSON_SENSES` kept.  Returns ``(senses, error, repairs)``.
+
+    A sense whose kind is not in :data:`PERSON_SENSE_KINDS` is dropped and
+    the row kept, with the repair ``dropped_sense_kind:<kind>`` (round 5;
+    review_rubric_v2_fixes.md defect 1: refusing the row sent it back to the
+    model, and the second answer replaced the first)."""
     if value is None:
-        return [], "person_senses missing"
+        return [], "person_senses missing", []
     if not isinstance(value, list):
-        return [], "person_senses is not a list"
-    out = []
+        return [], "person_senses is not a list", []
+    out, repairs = [], []
     for s in value:
         if not isinstance(s, dict) or not isinstance(s.get("sense"), str) or not s["sense"].strip():
-            return [], f"person sense {s!r} has no sense text"
+            return [], f"person sense {s!r} has no sense text", []
         kind = str(s.get("kind") or "").strip().lower()
         if kind not in PERSON_SENSE_KINDS:
-            return [], f"person sense kind {s.get('kind')!r} not in {PERSON_SENSE_KINDS}"
+            repairs.append(f"dropped_sense_kind:{kind or 'none'}")
+            continue
         out.append({"sense": " ".join(s["sense"].split()), "kind": kind})
-    return out[:MAX_PERSON_SENSES], None
+    return out[:MAX_PERSON_SENSES], None, repairs
 
 
 def derive_notes(row: Mapping[str, Any]) -> list[str]:
@@ -534,6 +540,14 @@ def validate_row(row: dict, expected_label: Optional[str] = None) -> tuple[Optio
       sense.  ``senses`` and ``trait_sense_rank`` are derived from it (rubric
       v3; the model no longer gives them);
     * ``membership`` needs a ``membership_kind`` from :data:`MEMBERSHIP_KINDS`.
+
+    Repairs instead of refusals (round 5; review_rubric_v2_fixes.md defect 1:
+    a refused row is asked again and the second answer replaces the first):
+    a person sense of unknown kind is dropped (``dropped_sense_kind:<kind>``);
+    a ``trait`` or ``tagged`` row with a null ``judged_sense`` takes its first
+    listed sense (``judged_sense_from_first_sense``) or, with no sense
+    listed, keeps it null (``judged_sense_missing``).  The repairs are listed
+    on the row as ``validator_repairs`` (empty when none was needed).
     """
     if not isinstance(row, dict):
         return None, "row is not an object"
@@ -567,7 +581,7 @@ def validate_row(row: dict, expected_label: Optional[str] = None) -> tuple[Optio
         return None, f"region {region!r} not in vocabulary"
     if region is None and promotable:
         return None, f"region missing for a {verdict} verdict"
-    person_senses, err = _person_senses(row.get("person_senses"))
+    person_senses, err, repairs = _person_senses(row.get("person_senses"))
     if err:
         return None, err
     kinds = [s["kind"] for s in person_senses]
@@ -579,7 +593,13 @@ def validate_row(row: dict, expected_label: Optional[str] = None) -> tuple[Optio
     judged = row.get("judged_sense")
     judged = " ".join(judged.split()) if isinstance(judged, str) and judged.strip() not in ("", "null") else None
     if judged is None and promotable:
-        return None, f"judged_sense missing for a {verdict} verdict"
+        # round 5 (defect 1): not refused; the first listed sense (the main
+        # reading) stands in, else the field stays null; either way recorded
+        if person_senses:
+            judged = person_senses[0]["sense"]
+            repairs.append("judged_sense_from_first_sense")
+        else:
+            repairs.append("judged_sense_missing")
     # derived for readers of the plan's schema: the sense list, and the
     # 1-based position of the first trait sense (None when there is none)
     rank = kinds.index("trait") + 1 if "trait" in kinds else None
@@ -614,7 +634,7 @@ def validate_row(row: dict, expected_label: Optional[str] = None) -> tuple[Optio
             "trait_sense_rank": rank, "enactable_in_text": enact, "verdict": verdict, "tags": tags,
             "membership_kind": kind, "region": region, "alignment_relevant": align, "gloss": gloss,
             "confidence": float(conf), "tag_disagreement": tag_disagreement(verdict, tags),
-            "reason_words": len(reason.split())}, None
+            "reason_words": len(reason.split()), "validator_repairs": repairs}, None
 
 
 def _load_json(text: str) -> Any:

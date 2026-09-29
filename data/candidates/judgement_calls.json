@@ -1,0 +1,7 @@
+{
+  "_meta": {
+    "description": "Roger's judgement calls on the words listed by gap_registry.py judgement-calls, keyed by word",
+    "record_with": "uv run python data_analysis/gap_generation/gap_registry.py judgement-call --word WORD --call TEXT"
+  },
+  "calls": {}
+}

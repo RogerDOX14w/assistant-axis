@@ -32,6 +32,9 @@ REGISTRY_SNAPSHOT_PATH = DATA_CANDIDATES / REGISTRY_SNAPSHOT_NAME
 METRIC_CONFIG_PATH = DATA_CANDIDATES / "metric_config.json"
 CORPUS_REGIONS_PATH = DATA_CANDIDATES / "corpus_regions.json"
 VALIDATION_DIR = DATA_CANDIDATES / "validation"
+#: Roger's judgement calls on the words the table of ``gap_registry.py
+#: judgement-calls`` lists, keyed by word (tracked; ``judgement-call`` writes it).
+JUDGEMENT_CALLS_PATH = DATA_CANDIDATES / "judgement_calls.json"
 SEED_QUEUE_PATH = DATA_DIR / "seed_queue.json"
 
 _ID_RE = re.compile(r"^[A-Za-z0-9][A-Za-z0-9._+-]*$")
@@ -120,6 +123,7 @@ def all_paths() -> dict[str, Path]:
         "METRIC_CONFIG_PATH": METRIC_CONFIG_PATH,
         "CORPUS_REGIONS_PATH": CORPUS_REGIONS_PATH,
         "VALIDATION_DIR": VALIDATION_DIR,
+        "JUDGEMENT_CALLS_PATH": JUDGEMENT_CALLS_PATH,
         "SEED_QUEUE_PATH": SEED_QUEUE_PATH,
         "hf_cache_dir": hf_cache_dir(),
         "wn_data_dir": wn_data_dir(),

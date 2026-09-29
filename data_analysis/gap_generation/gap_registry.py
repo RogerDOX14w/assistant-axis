@@ -16,11 +16,15 @@ Commands:
   Roger to paste into TRAITS_TO_ADD / ROLES_TO_ADD or to work the states and
   nationalities queues from (the tool never writes those files); a states row
   shows its states-pass suggestions.
-* ``judgement-calls [--filter-results F ...]``: the words noted
-  ``nontrait_person_sense`` (open point D, case 4: the obvious reading is a
-  trait and another sense is a non-trait thing a person can be) as a table
-  with the word, its trait sense, its other sense and an empty column for
-  Roger's call.
+* ``judgement-calls [--filter-results F ...] [--calls-file P]``: the words
+  noted ``obvious_sense_not_trait`` (the main reading is not a trait), first,
+  then those noted ``nontrait_person_sense`` (open point D, case 4: the
+  obvious reading is a trait and another sense is a non-trait thing a person
+  can be), as a table with the word, the note, its trait sense, its other
+  senses and Roger's call, read from ``data/candidates/judgement_calls.json``
+  (tracked; keyed by word).
+* ``judgement-call --word W --call TEXT [--calls-file P]``: record Roger's
+  call on a word in that file (a later call on the same word replaces it).
 * ``corpus-regions --from-filter DIR [--out PATH]``: write
   ``corpus_regions.json`` (every corpus trait -> region, ``alignment_relevant``,
   verdict, batch id) from a validation run's results, at no cost.
@@ -152,19 +156,40 @@ def cmd_holding(args) -> int:
     return 0
 
 
-def judgement_call_rows(rows) -> list[tuple[str, str, str, str]]:
-    """``(word, key, trait sense, other senses)`` for rows carrying the
-    ``nontrait_person_sense`` note (open point D, case 4)."""
+#: The notes the judgement-call table lists, in the order it lists them
+#: (round 5: ``obvious_sense_not_trait`` first, review_rubric_v2_fixes.md
+#: defect 4; before, those rows reached no table).
+JUDGEMENT_CALL_NOTES = ("obvious_sense_not_trait", "nontrait_person_sense")
+
+
+def judgement_call_rows(rows) -> list[tuple[str, str, str, str, str]]:
+    """``(word, key, note, trait sense, other senses)`` for rows carrying a
+    note of :data:`JUDGEMENT_CALL_NOTES`: ``obvious_sense_not_trait`` rows
+    first (the main reading is not a trait), then ``nontrait_person_sense``
+    (open point D, case 4), each group by key.  A row with both notes is
+    listed once, under the first."""
     out = []
     for r in rows:
         f = r.get("filter") or {}
-        if "nontrait_person_sense" not in (f.get("polysemy_notes") or []):
+        notes = f.get("polysemy_notes") or []
+        note = next((n for n in JUDGEMENT_CALL_NOTES if n in notes), None)
+        if note is None:
             continue
         ps = f.get("person_senses") or []
         trait = next((s["sense"] for s in ps if s.get("kind") == "trait"), "")
         others = "; ".join(f"{s['sense']} ({s['kind']})" for s in ps if s.get("kind") != "trait")
-        out.append((r["label"], r["key"], trait, others))
-    return sorted(out, key=lambda x: x[1])
+        out.append((r["label"], r["key"], note, trait, others))
+    return sorted(out, key=lambda x: (JUDGEMENT_CALL_NOTES.index(x[2]), x[1]))
+
+
+def load_judgement_calls(path: Path) -> dict:
+    """Roger's calls, ``{"_meta": ..., "calls": {word: {"call", "at"}}}``;
+    an absent file is an empty one."""
+    p = Path(path)
+    if not p.exists():
+        return {"_meta": {"description": "Roger's judgement calls on the words listed by "
+                                         "gap_registry.py judgement-calls, keyed by word"}, "calls": {}}
+    return json.loads(p.read_text(encoding="utf-8"))
 
 
 def cmd_judgement_calls(args) -> int:
@@ -174,12 +199,30 @@ def cmd_judgement_calls(args) -> int:
     else:
         rows = list(Registry(args.registry).fold().values())
     found = judgement_call_rows(rows)
-    print(f"<!-- {len(found)} words whose obvious reading is a trait and which have another sense a person "
-          f"can be (nontrait_person_sense): Roger's calls, to build a rubric from later -->")
-    print("| word | key | trait sense | other sense | Roger's call |")
-    print("|---|---|---|---|---|")
-    for word, key, trait, others in found:
-        print(f"| {_md(word)} | {key} | {_md(trait)} | {_md(others)} |  |")
+    calls = load_judgement_calls(args.calls_file)["calls"]
+    print(f"<!-- {len(found)} words to judge: obvious_sense_not_trait (the main reading is not a trait) first, "
+          f"then nontrait_person_sense (the obvious reading is a trait and another sense is something else a "
+          f"person can be).  Roger's calls come from {args.calls_file} (record one with judgement-call) -->")
+    print("| word | key | note | trait sense | other sense | Roger's call |")
+    print("|---|---|---|---|---|---|")
+    for word, key, note, trait, others in found:
+        call = (calls.get(word) or {}).get("call") or ""
+        print(f"| {_md(word)} | {key} | {note} | {_md(trait)} | {_md(others)} | {_md(call)} |")
+    return 0
+
+
+def cmd_judgement_call(args) -> int:
+    """Record (or replace) Roger's call on one word."""
+    from assistant_axis.atomic_io import atomic_write_text
+    from assistant_axis.gapgen.registry import utc_now
+    obj = load_judgement_calls(args.calls_file)
+    word = " ".join(args.word.split())
+    old = obj["calls"].get(word)
+    obj["calls"][word] = {"call": args.call.strip(), "at": utc_now()}
+    obj["calls"] = dict(sorted(obj["calls"].items()))
+    atomic_write_text(json.dumps(obj, indent=2, ensure_ascii=False) + "\n", Path(args.calls_file))
+    print(f"{'replaced' if old else 'recorded'} the call on {word!r} in {args.calls_file}"
+          + (f" (was: {old.get('call')!r})" if old else ""))
     return 0
 
 
@@ -275,10 +318,17 @@ def build_parser() -> argparse.ArgumentParser:
     sp.add_argument("--list", required=True, choices=list(HOLDING_TARGETS))
     sp.set_defaults(func=cmd_holding)
     sp = sub.add_parser("judgement-calls",
-                        help="table of rows noted nontrait_person_sense, with an empty column for Roger's call")
+                        help="table of rows noted obvious_sense_not_trait or nontrait_person_sense, with Roger's "
+                             "recorded call in the last column")
     sp.add_argument("--filter-results", type=Path, nargs="+",
                     help="read filter results.jsonl files instead of the registry")
+    sp.add_argument("--calls-file", type=Path, default=paths.JUDGEMENT_CALLS_PATH)
     sp.set_defaults(func=cmd_judgement_calls)
+    sp = sub.add_parser("judgement-call", help="record Roger's call on one word (replaces an earlier one)")
+    sp.add_argument("--word", required=True)
+    sp.add_argument("--call", required=True)
+    sp.add_argument("--calls-file", type=Path, default=paths.JUDGEMENT_CALLS_PATH)
+    sp.set_defaults(func=cmd_judgement_call)
     sp = sub.add_parser("corpus-regions",
                         help="write corpus_regions.json (region and alignment_relevant per corpus trait) from a run")
     sp.add_argument("--from-filter", required=True, type=Path, help="a validation run's filter/<batch_id> dir")

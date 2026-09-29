@@ -23,6 +23,20 @@ for all rows and for the rows never seen in development; they also write
 ``random_traits_for_marks.md``, a fixed-seed sample of 50 random adjectives
 that passed as traits, with an empty column for Roger's mark.
 
+Measurement runs (round 5): ``--measurement`` records ``"measurement": true``
+in run.json, and ``development_seen`` then leaves the run out, so the full
+validation run does not make every later row count as seen.  The stability
+rerun is one command::
+
+    traithood_filter.py --batch-id m1_stability \\
+        --validation-file data/candidates/validation/m1_validation.jsonl --stability --budget-usd 1
+
+``--stability`` sets ``--sample-frac 0.13 --sample-seed 1 --shuffle-seed 1``
+(241 rows, 210 past the frequency floor to the model) and ``--measurement``,
+and refuses a sample that sends fewer than 200 rows to the model.  The
+acceptance test compares its verdicts with the full run's, leaving out rows
+the frequency floor cut (``filter.stability_agreement``).
+
 Outputs in ``data/candidates/filter/<batch_id>/``: ``responses.jsonl`` (every
 API response received, parse errors included, appended as each call returns),
 ``results.jsonl`` (one row per candidate; ``stage: "pending"`` for rows a
@@ -107,6 +121,13 @@ PROBE_IN_PER_ITEM = 15
 PROBE_OUT_PER_ITEM = 50
 SECOND_EXTRA_FRAC = 0.15   # low-confidence + disagreement rows beyond the random sample (guess)
 RETRY_MARGIN = 1.10
+
+#: The stability rerun (round 5, review_rubric_v2_fixes.md defect 2):
+#: (sample frac, sample seed, shuffle seed).  On m1_validation.jsonl this
+#: takes 241 rows, 210 of them past the frequency floor to the model; the
+#: acceptance test needs at least 200 compared rows.
+STABILITY_SAMPLE = (0.13, 1, 1)
+STABILITY_MIN_LLM_ROWS = 200
 
 
 # ---------------------------------------------------------------------------
@@ -244,6 +265,13 @@ def build_parser() -> argparse.ArgumentParser:
                     help="model for the comparison (default plain_reading.DEFAULT_COMPARE_MODEL)")
     ap.add_argument("--probe-only", action="store_true",
                     help="with --validation-file: send every row to the definition probe only (a probe check)")
+    ap.add_argument("--measurement", action="store_true",
+                    help="record this run as a measurement, not development (run.json \"measurement\": true): "
+                         "later runs do not count its rows as seen in development")
+    ap.add_argument("--stability", action="store_true",
+                    help=f"with --validation-file: the stability rerun's sample (--sample-frac {STABILITY_SAMPLE[0]} "
+                         f"--sample-seed {STABILITY_SAMPLE[1]} --shuffle-seed {STABILITY_SAMPLE[2]}, a measurement); "
+                         f"refused if fewer than {STABILITY_MIN_LLM_ROWS} rows would reach the model")
     ap.add_argument("--concurrency", type=int, default=4)
     ap.add_argument("--budget-usd", type=float, default=5.0,
                     help="hard cap (default 5.0); an estimate over it is refused: type a larger budget to spend "
@@ -258,6 +286,20 @@ def build_parser() -> argparse.ArgumentParser:
     ap.add_argument("--overwrite", action="store_true",
                     help="reuse an existing batch dir (its old contents are moved to <dir>.bak.<UTC> first)")
     return ap
+
+
+def apply_stability(args) -> None:
+    """``--stability``: set the documented sample and mark the run a
+    measurement.  Refuses ``--sample-frac`` alongside it, and needs
+    ``--validation-file``.  (The two seeds are set whatever was typed.)"""
+    if not getattr(args, "stability", False):
+        return
+    if not args.validation_file:
+        raise SystemExit("--stability applies to --validation-file only")
+    if args.sample_frac is not None:
+        raise SystemExit("--stability sets its own sample; drop --sample-frac")
+    args.sample_frac, args.sample_seed, args.shuffle_seed = STABILITY_SAMPLE
+    args.measurement = True
 
 
 def select_items(args) -> tuple[list[FilterItem], Optional[Registry]]:
@@ -297,12 +339,17 @@ def main(argv=None) -> int:
         if not args.validation_file:
             raise SystemExit("--probe-only applies to --validation-file only (it never writes the registry)")
         args.no_second_opinion = True
+    apply_stability(args)
     items, reg = select_items(args)
     if not items:
         print("nothing to filter", file=sys.stderr)
         return 0
     est, plan = build_estimate(items, args)
     print(f"plan: {json.dumps(plan)}")
+    if args.stability and plan["n_llm"] < STABILITY_MIN_LLM_ROWS:
+        print(f"REFUSED: the stability sample sends {plan['n_llm']} rows to the model, fewer than "
+              f"{STABILITY_MIN_LLM_ROWS}", file=sys.stderr)
+        return 2
     print("estimate:\n" + est.format())
     refused: Optional[str] = None
     cap = None
@@ -360,6 +407,7 @@ def main(argv=None) -> int:
                 "rubric_version": fr.TRAITHOOD_RUBRIC_VERSION, "probe_rubric_version": fr.PROBE_RUBRIC_VERSION,
                 "prompt_sha256": dict(PROMPT_SHA256), "probe_only": bool(args.probe_only),
                 "plain_reading": not args.no_plain_reading, "compare_model": args.compare_model,
+                "measurement": bool(args.measurement), "stability": bool(args.stability),
                 "started_at": utc_now()}
     atomic_write_text(json.dumps(run_meta, indent=2) + "\n", out_dir / "run.json")
 

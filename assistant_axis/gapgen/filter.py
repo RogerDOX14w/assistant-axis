@@ -41,7 +41,7 @@ import random
 from collections import Counter
 from dataclasses import asdict, dataclass, field
 from pathlib import Path
-from typing import Any, Callable, Optional, Sequence
+from typing import Any, Callable, Mapping, Optional, Sequence
 
 from assistant_axis.entity_id import display_form_name
 from assistant_axis.judge import warn_if_low_parse_rate
@@ -419,6 +419,7 @@ class FilterRunner:
             "enactable_in_text": row["enactable_in_text"], "confidence": row["confidence"],
             "polysemy": bool(notes), "polysemy_notes": notes, "plain_reading": None, "comparison": None,
             "tag_disagreement": row.get("tag_disagreement", False),
+            "validator_repairs": list(row.get("validator_repairs") or []),
             "gloss_in_band": fr.gloss_in_band(row["gloss"]),
             "second_opinion": None, "prompt_sha256": dict(PROMPT_SHA256), "at": now}
         res.gloss = row["gloss"]
@@ -691,6 +692,9 @@ def summarize(results: Sequence[FilterResult], *, stats: Counter, usage: MultiMo
         "membership_kind": dict(sorted(Counter(r.filter.get("membership_kind") for r in clf
                                                if r.filter.get("membership_kind")).items())),
         "tag_disagreement": sum(1 for r in clf if r.filter.get("tag_disagreement")),
+        # rows the validator repaired instead of refusing (round 5, defect 1)
+        "validator_repairs": dict(sorted(Counter(x for r in clf
+                                                 for x in (r.filter.get("validator_repairs") or [])).items())),
         "polysemy_notes": {n: sum(1 for r in clf if n in (r.filter.get("polysemy_notes") or []))
                            for n in fr.POLYSEMY_NOTES},
         "comparison_relations": dict(sorted(Counter(str((r.filter.get("comparison") or {}).get("relation"))
@@ -770,19 +774,22 @@ def _figures(results: Sequence[FilterResult]) -> dict:
     rnd = [r for r in by.get("oewn_random", []) if r.filter]
     rnd_trait = sum(1 for r in rnd if r.filter.get("verdict") == "trait")
     rnd_share = round(rnd_trait / len(rnd), 4) if rnd else None
+    # a figure with no rows has no verdict on its target: None, not False
+    # (round 5, review_rubric_v2_fixes.md defect 7)
     return {
         "existing": {"n": len(ex), "correct": correct, "share": share, "target": TARGET_EXISTING_CORRECT,
-                     "meets_target": share is not None and share >= TARGET_EXISTING_CORRECT,
+                     "meets_target": None if share is None else share >= TARGET_EXISTING_CORRECT,
                      "misses": misses,
                      "labels_with_state": sorted(r.label for r in ex
                                                  if "state" in ((r.filter or {}).get("tags") or [])),
                      "labels_with_physical": sorted(r.label for r in ex
                                                     if "physical" in ((r.filter or {}).get("tags") or []))},
         "rejects": {"n": len(rej), "flagged": len(flagged), "flagged_labels": sorted(flagged),
-                    "target": TARGET_REJECTS_FLAGGED, "meets_target": len(flagged) >= TARGET_REJECTS_FLAGGED},
+                    "target": TARGET_REJECTS_FLAGGED,
+                    "meets_target": None if not rej else len(flagged) >= TARGET_REJECTS_FLAGGED},
         "oewn_random": {"n": len(rnd), "trait": rnd_trait, "trait_share": rnd_share,
                         "target": TARGET_RANDOM_TRAIT_MAX,
-                        "meets_target": rnd_share is not None and rnd_share <= TARGET_RANDOM_TRAIT_MAX},
+                        "meets_target": None if rnd_share is None else rnd_share <= TARGET_RANDOM_TRAIT_MAX},
     }
 
 
@@ -804,19 +811,56 @@ def validation_figures(results: Sequence[FilterResult]) -> dict:
     return out
 
 
+def is_measurement_run(run_dir: Path) -> bool:
+    """True when ``run_dir/run.json`` records ``"measurement": true``."""
+    p = Path(run_dir) / "run.json"
+    if not p.exists():
+        return False
+    try:
+        return json.loads(p.read_text(encoding="utf-8")).get("measurement") is True
+    except (ValueError, AttributeError):
+        return False
+
+
+def stability_agreement(full: Sequence[Mapping], rerun: Sequence[Mapping]) -> dict:
+    """Verdict agreement between the full validation run and the stability
+    rerun, over the keys both classified.  Rows cut by the frequency floor
+    (stage ``hard_reject`` in either run) are left out: the floor is a fixed
+    rule, so counting them would inflate the agreement (round 5,
+    review_rubric_v2_fixes.md defect 2).  Rows without a filter block
+    (failed, pending) are left out too.
+
+    Returns ``{"n", "agree", "share", "n_floor_excluded", "disagreements"}``,
+    ``disagreements`` a sorted list of ``(key, full verdict, rerun verdict)``."""
+    def index(rows):
+        return {r["key"]: r for r in rows if r.get("filter")}
+    a, b = index(full), index(rerun)
+    common = sorted(set(a) & set(b))
+    floor = [k for k in common if "hard_reject" in (a[k].get("stage"), b[k].get("stage"))]
+    keys = [k for k in common if k not in set(floor)]
+    dis = [(k, a[k]["filter"]["verdict"], b[k]["filter"]["verdict"]) for k in keys
+           if a[k]["filter"]["verdict"] != b[k]["filter"]["verdict"]]
+    n = len(keys)
+    return {"n": n, "agree": n - len(dis), "share": round((n - len(dis)) / n, 4) if n else None,
+            "n_floor_excluded": len(floor), "disagreements": dis}
+
+
 def development_seen(candidates_dir: Path, *, exclude: Sequence[str] = ()) -> dict[str, list[str]]:
     """Registry-style key -> the recorded runs (``filter/<id>``,
     ``plain_reading/<id>``) whose results contain it: where a validation row
     was seen while the rules were being written (review finding 1).  Runs
     whose id is in ``exclude`` (the run being scored) are skipped, and so are
-    ``.bak`` copies.  Plain-reading keys (``calm#same``) are mapped to the
-    label's stem with sense 1."""
+    ``.bak`` copies and **measurement runs** (run.json ``"measurement":
+    true``, set by ``traithood_filter.py --measurement`` or ``--stability``):
+    a measurement looks at rows without shaping the rules, so it does not make
+    them seen (round 5, review_rubric_v2_fixes.md defect 2).  Plain-reading
+    keys (``calm#same``) are mapped to the label's stem with sense 1."""
     from .normalize import make_key, normalize_candidate
     seen: dict[str, set[str]] = {}
     for kind in ("filter", "plain_reading"):
         for res in sorted(Path(candidates_dir).glob(f"{kind}/*/results.jsonl")):
             run = res.parent.name
-            if run in exclude or ".bak." in run:
+            if run in exclude or ".bak." in run or is_measurement_run(res.parent):
                 continue
             for line in res.read_text(encoding="utf-8").splitlines():
                 if not line.strip():

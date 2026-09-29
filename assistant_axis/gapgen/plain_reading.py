@@ -25,8 +25,11 @@ Two steps, each with its own prompt, version and pinned hash
 2. **The comparison.**  A second call compares the plain reading with the
    intended meaning, reason first, and answers ``same``, ``related`` (a
    related trait a careful writer would name differently) or ``different``.
-   ``different`` sets the flag ``overshadowed``; ``related`` is kept as a note
-   without the flag.  The row keeps both texts so Roger sees them side by side.
+   ``different`` sets the note ``overshadowed`` and ``related`` the note
+   ``reading_related`` (round 4); either note raises the row's polysemy flag
+   (:func:`notes_for`, ``filter_rubric.derive_notes``).  A corpus comparison
+   raises no note and no flag; it lists every row instead.  The row keeps both
+   texts so Roger sees them side by side.
 
 Nothing here rejects a word.  :class:`PlainReadingRunner` is used by the
 filter (rows with a gloss hint) and by ``data_analysis/gap_generation/

@@ -23,6 +23,9 @@ Inputs:
   existing label, which needs Roger's go (see "M1 as built" for its cost).
   It raises no flag (round 4): ``listing.md`` lists every label with both
   texts, ``different`` first, then ``related`` by confidence.
+* ``--measurement``: record the run as a measurement (run.json
+  ``"measurement": true``), so ``filter.development_seen`` does not count its
+  rows as seen in development; a corpus run always is one (round 5).
 * ``--reuse-readings DIR``: take the plain readings of an earlier run's
   ``results.jsonl`` instead of calling again (for comparing two comparison
   models on identical readings).
@@ -124,6 +127,9 @@ def build_parser() -> argparse.ArgumentParser:
                     help="part of the over-$20 confirmation, valid only with --confirmed-by; it never raises the "
                          "cap")
     ap.add_argument("--confirmed-by", help="who gave the explicit go for a budget over $20 (recorded in run.json)")
+    ap.add_argument("--measurement", action="store_true",
+                    help="record the run as a measurement, not development (run.json \"measurement\": true); "
+                         "--corpus and --corpus-stems runs always are")
     ap.add_argument("--dry-run", action="store_true")
     ap.add_argument("--allow-dirty", action="store_true",
                     help="allow a paid run on a working tree with uncommitted platform changes (recorded)")
@@ -194,7 +200,10 @@ def main(argv=None) -> int:
                 "confirmed_by": args.confirmed_by, "reading_model": args.reading_model,
                 "compare_model": args.compare_model,
                 "versions": {"plain_reading": pr.READING_VERSION, "comparison": pr.COMPARISON_VERSION},
-                "prompt_sha256": dict(pr.PROMPT_SHA256), "started_at": utc_now()}
+                "prompt_sha256": dict(pr.PROMPT_SHA256),
+                # a corpus comparison is always a measurement (filter.development_seen leaves it out)
+                "measurement": bool(args.measurement or args.corpus or args.corpus_stems),
+                "started_at": utc_now()}
     atomic_write_text(json.dumps(run_meta, indent=2) + "\n", out_dir / "run.json")
 
     from dotenv import load_dotenv
