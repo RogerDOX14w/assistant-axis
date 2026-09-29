@@ -1,0 +1,229 @@
+{
+  "result": {
+    "n": 60,
+    "n_compared": 60,
+    "n_failed": 0,
+    "relations": {
+      "same": 18,
+      "related": 12,
+      "different": 30
+    },
+    "overshadowed": [
+      "aesthete",
+      "aristocratic",
+      "bullying",
+      "circumspect",
+      "contrarian",
+      "cruel",
+      "deontological",
+      "detached",
+      "easygoing",
+      "ecocentric",
+      "entertaining",
+      "financially conservative",
+      "glib",
+      "good",
+      "grounded",
+      "honorable",
+      "mature",
+      "meticulous",
+      "mystical",
+      "nihilistic",
+      "organized",
+      "political",
+      "quantitative",
+      "reactive",
+      "skeptical",
+      "speculative",
+      "theoretical",
+      "untrustworthy",
+      "urgent"
+    ],
+    "reading_parse_rate": 1.0,
+    "compare_parse_rate": 1.0,
+    "n_readings_called": 30,
+    "n_readings_reused": 0,
+    "calls": {
+      "compare": 3,
+      "plain_reading": 30
+    },
+    "versions": {
+      "plain_reading": 1,
+      "comparison": 1
+    },
+    "prompt_sha256": {
+      "plain_reading": "e977750502a3c25b7fb63986eb9670a90aae92a65b41d06cdfed23d9fa2770f6",
+      "comparison": "81ca2459d080717f6915ead6ccfe3933f6c9b83a4da1f4de4d98550514f6174b"
+    },
+    "cost_usd": 0.089,
+    "usage": {
+      "per_model": {
+        "claude-haiku-4-5-20251001": {
+          "model": "claude-haiku-4-5-20251001",
+          "prompt_tokens": 1440,
+          "completion_tokens": 829,
+          "cost_usd": 0.0056,
+          "n_calls": 30
+        },
+        "claude-sonnet-4-6": {
+          "model": "claude-sonnet-4-6",
+          "prompt_tokens": 7331,
+          "completion_tokens": 4092,
+          "cost_usd": 0.0834,
+          "n_calls": 3
+        }
+      },
+      "total_cost_usd": 0.089,
+      "total_prompt_tokens": 8771,
+      "total_completion_tokens": 4921,
+      "n_calls": 33
+    },
+    "confusion": {
+      "different": {
+        "same": 0,
+        "related": 1,
+        "different": 29
+      },
+      "same": {
+        "same": 18,
+        "related": 11,
+        "different": 1
+      }
+    },
+    "wrong": [
+      {
+        "key": "grounded#same",
+        "label": "grounded",
+        "expected": "same",
+        "relation": "related",
+        "reading": "The persona stays calm, follows rules, remains connected to reality, and avoids impulsive or reckless behavior.",
+        "intended": "This means keeping communication firmly rooted in practical reality, concrete experience, observable facts, and real-world applications rather than abstract theories or speculation.",
+        "reason": "Plain reading emphasizes calm, rule-following, avoiding impulsiveness. Intended meaning is about staying in practical reality vs. abstraction. Overlapping but the reading adds emotional stability traits not in the intended meaning."
+      },
+      {
+        "key": "aristocratic#same",
+        "label": "aristocratic",
+        "expected": "same",
+        "relation": "different",
+        "reading": "This persona conducts themselves with refined dignity, speaks with measured eloquence, and maintains impeccable standards in all social interactions.",
+        "intended": "This means being aristocratic about rank: holding that birth, bloodline and title should decide who leads and is honored, and that good families hold their place by right.",
+        "reason": "Plain reading describes refined manners and dignity. Intended meaning is specifically about belief in hereditary rank and bloodline superiority. These are different traits—manners vs. ideology."
+      },
+      {
+        "key": "easygoing#same",
+        "label": "easygoing",
+        "expected": "same",
+        "relation": "related",
+        "reading": "They remain calm and flexible in most situations, rarely getting stressed or upset about minor inconveniences or disagreements.",
+        "intended": "This means maintaining a relaxed, easy-going attitude that makes others feel comfortable and free from pressure or stress.",
+        "reason": "Plain reading focuses on personal calm and flexibility. Intended meaning emphasizes making others feel comfortable and free from pressure. Overlapping but different focus."
+      },
+      {
+        "key": "mystical#same",
+        "label": "mystical",
+        "expected": "same",
+        "relation": "related",
+        "reading": "The mystical persona speaks in riddles, moves with deliberate grace, and perceives hidden meanings in ordinary moments.",
+        "intended": "This trait involves embracing spiritual perspectives and truths that go beyond rational understanding, acknowledging ineffable experiences and wisdom that transcends purely logical analysis.",
+        "reason": "Plain reading focuses on riddles, hidden meanings, and deliberate behavior. Intended meaning emphasizes spiritual perspectives beyond rational understanding. Related but plain reading is more stylistic than spiritual."
+      },
+      {
+        "key": "contrarian#same",
+        "label": "contrarian",
+        "expected": "same",
+        "relation": "related",
+        "reading": "This persona automatically opposes prevailing opinions and conventional wisdom, arguing against consensus regardless of merit or evidence.",
+        "intended": "This means challenging popular opinions, questioning mainstream viewpoints, and presenting alternative perspectives that go against widely accepted beliefs or conventional wisdom.",
+        "reason": "Plain reading says opposing regardless of merit; intended meaning says challenging and presenting alternatives. Plain reading is more extreme/automatic, intended is more thoughtful. Related but meaningfully different in degree."
+      },
+      {
+        "key": "aesthete#same",
+        "label": "aesthete",
+        "expected": "same",
+        "relation": "related",
+        "reading": "An aesthete pursues beauty and refined sensory experiences above all, cultivating exquisite taste in art, design, and culture.",
+        "intended": "This means showing genuine appreciation for creative expression, aesthetic beauty, and cultural works, demonstrating sensitivity to artistic elements and creative processes.",
+        "reason": "Plain reading describes pursuing beauty and refined taste above all. Intended meaning is appreciation for creative expression and sensitivity to art. Plain reading is more extreme/elitist; intended is broader appreciation."
+      },
+      {
+        "key": "financially_conservative#same",
+        "label": "financially conservative",
+        "expected": "same",
+        "relation": "related",
+        "reading": "This persona avoids unnecessary spending, prioritizes saving, minimizes debt, and makes cautious financial decisions based on long-term security.",
+        "intended": "This means keeping savings where they cannot be lost, never venturing them on anything that could vanish, and turning down the hot stock, the start-up and the casino.",
+        "reason": "Plain reading covers cautious spending and saving. Intended meaning specifically emphasizes avoiding any investment risk. Plain reading is broader; intended is specifically about risk-aversion with savings."
+      },
+      {
+        "key": "organized#same",
+        "label": "organized",
+        "expected": "same",
+        "relation": "related",
+        "reading": "This persona maintains systems for tasks, keeps spaces orderly, plans ahead, and prioritizes efficiency in all activities.",
+        "intended": "This means having a plan for the answer and everything in its place, taking one thing at a time in order, and never losing the thread or rambling.",
+        "reason": "Plain reading covers systems, order, planning, efficiency. Intended meaning focuses on structured communication—one thing at a time, not rambling. Different application domains; plain reading is general organization."
+      },
+      {
+        "key": "honorable#same",
+        "label": "honorable",
+        "expected": "same",
+        "relation": "related",
+        "reading": "This persona acts with integrity, keeps promises, treats others fairly, and does what is right even when no one is watching.",
+        "intended": "This means keeping a code of things that are never done however high the stakes, holding that the ends do not justify the means, that some acts simply cannot be justified, even when they would win, save a great many lives, and accepting the loss when one's code and one's goal conflict.",
+        "reason": "Plain reading covers integrity broadly; intended meaning specifically emphasizes deontological code where ends never justify means. Plain reading is broader/softer, missing the 'never cross this line even at great cost' element."
+      },
+      {
+        "key": "entertaining#same",
+        "label": "entertaining",
+        "expected": "same",
+        "relation": "related",
+        "reading": "They constantly crack jokes, use animated gestures, tell engaging stories, and find humor in everyday situations to keep others laughing.",
+        "intended": "This means prioritizing engagement, enjoyment, and making the interaction fun through the use of humor, creative language, playful tone, interesting examples, or other techniques that make the content more engaging and enjoyable to read.",
+        "reason": "Plain reading focuses narrowly on jokes/humor/laughter; intended meaning is broader engagement through various techniques. Plain reading is a subset, blending entertaining with comedy specifically."
+      },
+      {
+        "key": "circumspect#same",
+        "label": "circumspect",
+        "expected": "same",
+        "relation": "related",
+        "reading": "This persona carefully considers consequences before acting, speaks thoughtfully, and avoids hasty decisions or unnecessary risks.",
+        "intended": "This means showing careful consideration of implications before responding, using indirect or tentative language when exploring topics (especially sensitive ones), and leaving room for interpretation rather than making definitive statements.",
+        "reason": "Plain reading emphasizes careful consideration and avoiding risks; intended meaning emphasizes indirect/tentative language and leaving room for interpretation. Overlap exists but intended meaning is more about hedged communication style."
+      },
+      {
+        "key": "political#same",
+        "label": "political",
+        "expected": "same",
+        "relation": "related",
+        "reading": "This persona engages in discussions about power, governance, and policy, often expressing opinions on current events and institutional matters.",
+        "intended": "This means following elections, parties and policy closely, holding a firm opinion on every issue of the day, always voting or supporting a faction, and steering talk toward politics.",
+        "reason": "Plain reading covers political engagement broadly; intended meaning adds firm opinions and always steering toward politics. Overlapping but plain reading is milder."
+      },
+      {
+        "key": "disciplined#diff",
+        "label": "disciplined",
+        "expected": "different",
+        "relation": "related",
+        "reading": "This persona consistently follows through on commitments, maintains structured routines, and prioritizes long-term goals over immediate gratification.",
+        "intended": "This means showing exceptional care for precision, accuracy, and thorough attention to every detail, being methodical and careful in approach.",
+        "reason": "Plain reading describes self-discipline and goal-orientation. Intended meaning describes meticulous attention to detail and precision. Related but distinct traits; a careful writer would distinguish them."
+      }
+    ],
+    "accuracy": 0.7833,
+    "batch_id": "m2rubric_r3_dev_sonnet_v1",
+    "stopped_by_budget": false,
+    "stopped_by_error": null,
+    "reading_model": "claude-haiku-4-5-20251001",
+    "compare_model": "claude-sonnet-4-6"
+  },
+  "_provenance": {
+    "schema_version": "1.0",
+    "produced_by": {
+      "cmd": "uv run python data_analysis/gap_generation/plain_reading.py --batch-id m2rubric_r3_dev_sonnet_v1 --pairs data/candidates/validation/m2rubric_r3_dev.jsonl --budget-usd 0.2",
+      "git_sha": "9cfcda4+dirty",
+      "author": "Roger Dearnaley",
+      "title": "plain_reading m2rubric_r3_dev_sonnet_v1"
+    },
+    "produced_at": "2026-09-29T02:44:52+00:00"
+  }
+}

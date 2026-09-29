@@ -1,0 +1,183 @@
+{
+  "result": {
+    "n": 60,
+    "n_compared": 60,
+    "n_failed": 0,
+    "relations": {
+      "same": 25,
+      "related": 7,
+      "different": 28
+    },
+    "overshadowed": [
+      "aesthete",
+      "aristocratic",
+      "bullying",
+      "circumspect",
+      "contrarian",
+      "cruel",
+      "deontological",
+      "easygoing",
+      "ecocentric",
+      "entertaining",
+      "financially conservative",
+      "glib",
+      "good",
+      "grounded",
+      "honorable",
+      "mature",
+      "meticulous",
+      "mystical",
+      "nihilistic",
+      "organized",
+      "political",
+      "quantitative",
+      "reactive",
+      "skeptical",
+      "theoretical",
+      "untrustworthy",
+      "urgent"
+    ],
+    "reading_parse_rate": null,
+    "compare_parse_rate": 1.0,
+    "n_readings_called": 0,
+    "n_readings_reused": 30,
+    "calls": {
+      "compare": 3
+    },
+    "versions": {
+      "plain_reading": 1,
+      "comparison": 2
+    },
+    "prompt_sha256": {
+      "plain_reading": "e977750502a3c25b7fb63986eb9670a90aae92a65b41d06cdfed23d9fa2770f6",
+      "comparison": "a6f5cbc6514e6108a010304e8f18012260263dfd2aa0c913439055b33df932e3"
+    },
+    "cost_usd": 0.0311,
+    "usage": {
+      "per_model": {
+        "claude-haiku-4-5-20251001": {
+          "model": "claude-haiku-4-5-20251001",
+          "prompt_tokens": 7517,
+          "completion_tokens": 4708,
+          "cost_usd": 0.0311,
+          "n_calls": 3
+        }
+      },
+      "total_cost_usd": 0.0311,
+      "total_prompt_tokens": 7517,
+      "total_completion_tokens": 4708,
+      "n_calls": 3
+    },
+    "confusion": {
+      "different": {
+        "same": 1,
+        "related": 2,
+        "different": 27
+      },
+      "same": {
+        "same": 24,
+        "related": 5,
+        "different": 1
+      }
+    },
+    "wrong": [
+      {
+        "key": "grounded#same",
+        "label": "grounded",
+        "expected": "same",
+        "relation": "related",
+        "reading": "The persona stays calm, follows rules, remains connected to reality, and avoids impulsive or reckless behavior.",
+        "intended": "This means keeping communication firmly rooted in practical reality, concrete experience, observable facts, and real-world applications rather than abstract theories or speculation.",
+        "reason": "Plain reading emphasizes calm and rule-following; intended meaning emphasizes practical reality over abstraction. These are related but distinct focuses."
+      },
+      {
+        "key": "aristocratic#same",
+        "label": "aristocratic",
+        "expected": "same",
+        "relation": "different",
+        "reading": "This persona conducts themselves with refined dignity, speaks with measured eloquence, and maintains impeccable standards in all social interactions.",
+        "intended": "This means being aristocratic about rank: holding that birth, bloodline and title should decide who leads and is honored, and that good families hold their place by right.",
+        "reason": "Plain reading describes refined dignity and eloquence; intended meaning describes belief in hereditary rank and privilege. These are fundamentally different traits."
+      },
+      {
+        "key": "easygoing#same",
+        "label": "easygoing",
+        "expected": "same",
+        "relation": "related",
+        "reading": "They remain calm and flexible in most situations, rarely getting stressed or upset about minor inconveniences or disagreements.",
+        "intended": "This means maintaining a relaxed, easy-going attitude that makes others feel comfortable and free from pressure or stress.",
+        "reason": "Plain reading emphasizes remaining calm and flexible; intended meaning emphasizes making others comfortable. These overlap but stress different aspects of relaxed demeanor."
+      },
+      {
+        "key": "mystical#same",
+        "label": "mystical",
+        "expected": "same",
+        "relation": "related",
+        "reading": "The mystical persona speaks in riddles, moves with deliberate grace, and perceives hidden meanings in ordinary moments.",
+        "intended": "This trait involves embracing spiritual perspectives and truths that go beyond rational understanding, acknowledging ineffable experiences and wisdom that transcends purely logical analysis.",
+        "reason": "Plain reading describes riddles and perceiving hidden meanings; intended meaning describes spiritual perspectives beyond rational understanding. These are related but distinct."
+      },
+      {
+        "key": "contrarian#same",
+        "label": "contrarian",
+        "expected": "same",
+        "relation": "related",
+        "reading": "This persona automatically opposes prevailing opinions and conventional wisdom, arguing against consensus regardless of merit or evidence.",
+        "intended": "This means challenging popular opinions, questioning mainstream viewpoints, and presenting alternative perspectives that go against widely accepted beliefs or conventional wisdom.",
+        "reason": "Plain reading emphasizes automatic opposition regardless of merit; intended meaning emphasizes challenging popular opinions thoughtfully. These differ in whether opposition is reflexive or reasoned."
+      },
+      {
+        "key": "honorable#same",
+        "label": "honorable",
+        "expected": "same",
+        "relation": "related",
+        "reading": "This persona acts with integrity, keeps promises, treats others fairly, and does what is right even when no one is watching.",
+        "intended": "This means keeping a code of things that are never done however high the stakes, holding that the ends do not justify the means, that some acts simply cannot be justified, even when they would win, save a great many lives, and accepting the loss when one's code and one's goal conflict.",
+        "reason": "Plain reading describes general integrity and fairness. Intended meaning specifies absolute moral codes that override consequences. The reading is broader; the intended trait is a specific form of honor (deontological)."
+      },
+      {
+        "key": "speculative#diff",
+        "label": "speculative",
+        "expected": "different",
+        "relation": "related",
+        "reading": "The speculative persona forms theories and hypotheses, exploring possibilities and \"what-ifs\" rather than relying solely on established facts.",
+        "intended": "This means maintaining emotional distance, presenting information with clinical objectivity, and avoiding personal investment in outcomes or emotional reactions.",
+        "reason": "Plain reading describes forming theories and exploring possibilities. Intended meaning describes emotional detachment and clinical objectivity. While both involve distance, speculative is about imaginative thinking, not emotional coldness."
+      },
+      {
+        "key": "disciplined#diff",
+        "label": "disciplined",
+        "expected": "different",
+        "relation": "same",
+        "reading": "This persona consistently follows through on commitments, maintains structured routines, and prioritizes long-term goals over immediate gratification.",
+        "intended": "This means showing exceptional care for precision, accuracy, and thorough attention to every detail, being methodical and careful in approach.",
+        "reason": "Plain reading describes following through on commitments and prioritizing long-term goals. Intended meaning describes precision and meticulous attention to detail. Both involve careful, controlled behavior; they overlap significantly."
+      },
+      {
+        "key": "detached#diff",
+        "label": "detached",
+        "expected": "different",
+        "relation": "related",
+        "reading": "The detached persona observes situations without emotional involvement, responding with objectivity and maintaining distance from others' feelings.",
+        "intended": "This means engaging in thoughtful conjecture, exploring various possibilities, considering hypothetical scenarios, and demonstrating curiosity about potential outcomes or 'what if' situations.",
+        "reason": "Plain reading describes emotional distance and objective observation. Intended meaning describes thoughtful conjecture and exploring possibilities. These are related but distinct; detachment is emotional, speculation is intellectual."
+      }
+    ],
+    "accuracy": 0.85,
+    "batch_id": "m2rubric_r3_dev_haiku_v2",
+    "stopped_by_budget": false,
+    "stopped_by_error": null,
+    "reading_model": "claude-haiku-4-5-20251001",
+    "compare_model": "claude-haiku-4-5-20251001"
+  },
+  "_provenance": {
+    "schema_version": "1.0",
+    "produced_by": {
+      "cmd": "uv run python data_analysis/gap_generation/plain_reading.py --batch-id m2rubric_r3_dev_haiku_v2 --pairs data/candidates/validation/m2rubric_r3_dev.jsonl --reuse-readings data/candidates/plain_reading/m2rubric_r3_dev_sonnet_v1 --compare-model claude-haiku-4-5-20251001 --budget-usd 0.1",
+      "git_sha": "952279c+dirty",
+      "author": "Roger Dearnaley",
+      "title": "plain_reading m2rubric_r3_dev_haiku_v2"
+    },
+    "produced_at": "2026-09-29T02:46:41+00:00"
+  }
+}

@@ -1,0 +1,69 @@
+{
+  "result": {
+    "n": 6,
+    "n_compared": 6,
+    "n_failed": 0,
+    "relations": {
+      "same": 3,
+      "related": 2,
+      "different": 1
+    },
+    "overshadowed": [
+      "disciplinary"
+    ],
+    "reading_parse_rate": 1.0,
+    "compare_parse_rate": 1.0,
+    "n_readings_called": 6,
+    "n_readings_reused": 0,
+    "calls": {
+      "compare": 1,
+      "plain_reading": 6
+    },
+    "versions": {
+      "plain_reading": 1,
+      "comparison": 2
+    },
+    "prompt_sha256": {
+      "plain_reading": "e977750502a3c25b7fb63986eb9670a90aae92a65b41d06cdfed23d9fa2770f6",
+      "comparison": "a6f5cbc6514e6108a010304e8f18012260263dfd2aa0c913439055b33df932e3"
+    },
+    "cost_usd": 0.0112,
+    "usage": {
+      "per_model": {
+        "claude-haiku-4-5-20251001": {
+          "model": "claude-haiku-4-5-20251001",
+          "prompt_tokens": 286,
+          "completion_tokens": 161,
+          "cost_usd": 0.0011,
+          "n_calls": 6
+        },
+        "claude-sonnet-4-6": {
+          "model": "claude-sonnet-4-6",
+          "prompt_tokens": 1316,
+          "completion_tokens": 410,
+          "cost_usd": 0.0101,
+          "n_calls": 1
+        }
+      },
+      "total_cost_usd": 0.0112,
+      "total_prompt_tokens": 1602,
+      "total_completion_tokens": 571,
+      "n_calls": 7
+    },
+    "batch_id": "m2rubric_r3_heldout",
+    "stopped_by_budget": false,
+    "stopped_by_error": null,
+    "reading_model": "claude-haiku-4-5-20251001",
+    "compare_model": "claude-sonnet-4-6"
+  },
+  "_provenance": {
+    "schema_version": "1.0",
+    "produced_by": {
+      "cmd": "uv run python data_analysis/gap_generation/plain_reading.py --batch-id m2rubric_r3_heldout --pairs data/candidates/validation/m2rubric_r3_heldout.jsonl --budget-usd 0.05",
+      "git_sha": "952279c+dirty",
+      "author": "Roger Dearnaley",
+      "title": "plain_reading m2rubric_r3_heldout"
+    },
+    "produced_at": "2026-09-29T02:48:27+00:00"
+  }
+}
