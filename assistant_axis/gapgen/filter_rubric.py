@@ -21,16 +21,19 @@ Verdicts and tags in v2:
   test separates them from roles.
 * ``tagged``: coherent but not an ordinary trait: ``role_person`` /
   ``role_thing`` (roles list), ``physical`` (mostly or entirely physical;
-  physical list), ``state`` (states list), ``transient_only`` and
-  ``evaluative_only`` (unchanged from v1).
+  physical list), ``state`` (states list; v1's ``transient_only`` folded into
+  it, open point C) and ``evaluative_only`` (unchanged from v1).
+* A ``membership`` of kind ``nationality_ethnicity_language`` stays verdict
+  ``trait`` but is held on the ``nationalities`` list, off the main review
+  list (open point B; ``filter.holding_for``).
 * ``reject``: ``relational_only`` (only when none of the word's senses
   describes a person's character) or ``not_a_word``.  ``too_rare`` is set by
   the frequency floor and the definition probe, never by the classifier.
 
 The ``state`` tag and the states queue (decision 12).  Roger's correction, in
 his words: "I wasn't suggesting a second tag, I was saying the state tag was
-useful, but not inherently disqualifying, it merely means there is some extra
-work to do: a) figure out if a habitual predisposition to state is plausible,
+useful, but not inherently disqualifying, it merely means there is some
+extra work to do: a) figure out if a habitual predisposition to state is plausible,
 b) whether the name of the state is still a good name for the predisposition
 (or if not, change the stem to that), and b) write the description to describe
 the habitual predisposition. I don't think that process requires a separate
@@ -41,8 +44,11 @@ corpus gets this tag during us checking the corpus, the default assumption
 been done."  So a ``state`` word is neither rejected nor passed as an ordinary
 trait: it goes to the ``states`` holding list (a separate queue).  Rubric
 v1's rule that a state word is a trait with a "general tendency" gloss no
-longer holds.  The filter does not attempt the queue's extra work (open point
-C); ``transient_only`` is kept exactly as in v1 until C is settled.
+longer holds.  Open point C (confirmed 2026-09-29): v1's ``transient_only``
+folds into ``state``, the classifier sets nothing about whether a
+predisposition is plausible, and that judgement, with the name and the
+predisposition gloss, is made by a separate pass with its own rubric
+(:mod:`assistant_axis.gapgen.states_pass`).
 
 Physical (decision 12, last paragraph), in Roger's words: "physical mans
 'mostly or entirely physical': e.g. blonde, dark-skinned"; age and gender
@@ -73,7 +79,7 @@ from assistant_axis.judge import _repair_json_blob, extract_json_blob
 from .normalize import REGION_VOCAB, VERDICTS
 
 TRAITHOOD_RUBRIC_VERSION = 2
-PROBE_RUBRIC_VERSION = 2
+PROBE_RUBRIC_VERSION = 3  # v3 (round 2): regular derivations count as real words
 
 GLOSS_MIN_WORDS = 18
 GLOSS_MAX_WORDS = 43
@@ -82,7 +88,10 @@ REASON_MAX_WORDS = 30
 #: Tags the classifier may emit in v2.  ``too_rare`` is reserved for the floor
 #: and the probe; v1's ``demographic`` is retired (memberships are traits).
 TRAIT_TAGS = ("membership",)
-TAGGED_TAGS = ("physical", "state", "transient_only", "role_person", "role_thing", "evaluative_only")
+TAGGED_TAGS = ("physical", "state", "role_person", "role_thing", "evaluative_only")
+#: Rubric v1's ``transient_only`` folded into ``state`` (open point C); a
+#: stray one from the model is read as ``state`` rather than failing the row.
+FOLDED_TAGS = {"transient_only": "state"}
 REJECT_TAGS = ("relational_only", "not_a_word")
 CLASSIFIER_TAGS = TRAIT_TAGS + TAGGED_TAGS + REJECT_TAGS
 TAGS_FOR_VERDICT = {"trait": set(TRAIT_TAGS), "tagged": set(TAGGED_TAGS), "reject": set(REJECT_TAGS)}
@@ -135,12 +144,12 @@ rules out most professions, and an age so young or so old that it rules out a pr
 <role> is someone who ..." or "A <thing> is a ... that ...".
 
 ## Other judgement calls
-- States. A word that most often names a condition someone is in for a while (minutes to weeks), \
-rather than how they are, is "tagged" "state". It is neither rejected nor passed as an ordinary trait: \
-it goes to a separate list for later work. Its gloss describes the state itself. A word used for both \
-a passing state and a standing disposition takes the reading that is commoner in ordinary use. A word \
-that only names a momentary bodily or situational condition that nobody has as a disposition is \
-"tagged" "transient_only".
+- States. A word that most often names a condition someone is in for a while (from moments to weeks), \
+rather than how they are, is "tagged" "state", whether the condition is of mood, body or situation. \
+It is neither rejected nor passed as an ordinary trait: it goes to a separate list for later work. \
+Whether a standing predisposition to the state is plausible is not decided here; tag the state and \
+move on. Its gloss describes the state itself. A word used for both a passing state and a standing \
+disposition takes the reading that is commoner in ordinary use.
 - Physical. A word that is mostly or entirely physical (the body, looks, hair, build, health) is \
 "tagged" "physical". Age and gender words with a strong mental side are not physical.
 - Pure praise or blame with no behavioural content is "tagged" "evaluative_only".
@@ -149,8 +158,7 @@ describes a person's character (hexagonal, waterproof, municipal). A word with a
 beside a commoner non-person use is a trait: list its senses, rank the character sense, and gloss \
 the character sense. Non-words and misspellings are "reject" "not_a_word".
 - The tags must fit the verdict: a "tagged" row needs at least one of physical, state, \
-transient_only, role_person, role_thing, evaluative_only; a "reject" row needs relational_only or \
-not_a_word; "membership" goes only with "trait". If you find yourself wanting tags that do not fit, \
+role_person, role_thing, evaluative_only; a "reject" row needs relational_only or not_a_word; "membership" goes only with "trait". If you find yourself wanting tags that do not fit, \
 choose the verdict you believe and say why in the reason.
 - The reason must address the sense being judged, and state which sense that is when the word has \
 several.
@@ -267,8 +275,8 @@ noise or change."
 region emotional_temperament; alignment false; gloss "This means being worn thin by too many demands \
 at once, scattered and short of patience, dropping details and snapping at interruptions until the \
 pressure lifts."
-- "hungry": a bodily condition nobody holds as a disposition; rank 1; verdict tagged; \
-tags [transient_only]; region transient_state; alignment false; gloss "This means needing food right \
+- "hungry": a bodily condition someone is in for a few hours; rank 1; verdict tagged; \
+tags [state]; region transient_state; alignment false; gloss "This means needing food right \
 now, with an empty stomach, falling energy and thoughts that keep returning to the next meal until one \
 has eaten."
 - "awesome": praise with no behavioural content; rank 1; verdict tagged; tags \
@@ -295,8 +303,8 @@ the verdict. Write numbers without a leading "+". Use exactly these keys in this
 "enactable_in_text": <0|1|2>, "verdict": "trait"|"tagged"|"reject", "tags": ["<tag>", ...], \
 "membership_kind": "<kind>"|null, "region": "<region>"|null, "alignment_relevant": true|false, \
 "gloss": "<sentence>"|null, "confidence": <0-1>}]}
-Allowed tags: membership, physical, state, transient_only, role_person, role_thing, evaluative_only, \
-relational_only, not_a_word. Allowed membership kinds: circumstance, class, family, affinity, \
+Allowed tags: membership, physical, state, role_person, role_thing, evaluative_only, relational_only, \
+not_a_word. Allowed membership kinds: circumstance, class, family, affinity, \
 relationship, orientation_gender, geography, nationality_ethnicity_language, age_group. Return one row \
 per candidate id, in the order given.
 """
@@ -383,7 +391,8 @@ def validate_row(row: dict, expected_label: Optional[str] = None) -> tuple[Optio
         tags = [tags]
     if not isinstance(tags, list):
         return None, "tags is not a list"
-    tags = list(dict.fromkeys(str(t).strip().lower() for t in tags if str(t).strip()))
+    tags = [str(t).strip().lower() for t in tags if str(t).strip()]
+    tags = list(dict.fromkeys(FOLDED_TAGS.get(t, t) for t in tags))
     bad = [t for t in tags if t not in CLASSIFIER_TAGS]
     if bad:
         return None, f"tags out of vocabulary: {bad}"
@@ -522,17 +531,24 @@ def gloss_in_band(gloss: Optional[str]) -> bool:
 
 
 # ---------------------------------------------------------------------------
-# Definition probe v2 (1.5 <= Zipf < 2.5, and rescued words): word knowledge only
+# Definition probe v3 (1.5 <= Zipf < 2.5, and rescued words): word knowledge only.
+# v3 (round 2): v2 rejected regular derivations missing from dictionaries
+# (unbranching, nonsubmersible), defeating rescue rule 1b's negating-prefix
+# route; v3 counts a regular derivation whose meaning is plain from its parts.
 # ---------------------------------------------------------------------------
 
 DEFINE_PROBE_PROMPT = """\
 You are checking whether rare words are real English words that you can define. You are not judging \
 whether they describe people: that is judged elsewhere, and trait-hood is judged elsewhere too. A \
 technical, scientific, regional, dated or literary word counts, as long as it is a real English word \
-and you can say what it means. For each word, say in one short sentence what you know about it, then \
-decide. "known" is true when the word is a real English word (or a regular derived form or compound of \
-one) and you can define it confidently; misspellings, nonce words and words you are unsure of are \
-false. Give its commonest meaning as a one-line definition.
+and you can say what it means. A word formed regularly from a real English word by a common prefix or \
+suffix (such as un-, non-, in-, dis-, over-, under-, -ness, -less, -ish, -like, -ing, -ed) counts as a \
+real word when its meaning is plain from its parts, whether or not a dictionary lists it; so does a \
+regular compound of real words. Define such a word from its parts. For each word, say in one short \
+sentence what you know about it, then decide. "known" is true when the word is a real English word in \
+this sense and you can define it confidently; misspellings, nonce words, strings that are not words, \
+and words whose meaning you cannot work out are false. Give its commonest meaning as a one-line \
+definition.
 
 Respond with one JSON object and nothing else, reason first:
 {"results": [{"id": <int>, "reason": "<one short sentence>", "definition": "<one line>"|null, \

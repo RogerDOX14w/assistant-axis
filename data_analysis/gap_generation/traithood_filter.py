@@ -45,10 +45,15 @@ Validation files are JSONL rows ``{"surface", "stratum", "expected"?,
 seeded sample (strata of 10 rows or fewer are taken whole): the pilot.
 
 Cost: printed as ``n_calls x (in, out) tokens at model rates = $X``;
-``--budget-usd`` is a hard cap (default $5), an estimate over it needs
-``--confirm-expensive``, over $20 also ``--confirmed-by``.  ``--dry-run``
-prints the plan, the estimate and the first three prompts, and writes and
-calls nothing.
+``--budget-usd`` is the hard cap (default $5) and an estimate over it is
+refused (type a larger budget; no flag raises the cap, decision 9).  A budget
+over $20 needs ``--confirm-expensive`` together with ``--confirmed-by``.
+``--dry-run`` prints the plan, the estimate and the first three prompts, and
+writes and calls nothing.
+
+``--probe-only`` (with ``--validation-file``): send every row to the
+definition probe, whatever its frequency, and nothing to the classifier or
+the second opinion; for checking the probe itself.
 """
 from __future__ import annotations
 
@@ -148,6 +153,13 @@ def parse_run(value: str) -> tuple[str, str]:
 # ---------------------------------------------------------------------------
 
 def build_estimate(items: list[FilterItem], args) -> tuple[Estimate, dict]:
+    if getattr(args, "probe_only", False):
+        est = Estimate()
+        probe_sys = int(len(fr.DEFINE_PROBE_PROMPT) / CHARS_PER_TOKEN)
+        per_p = min(args.batch_size, len(items))
+        est.add("definition probe (probe only)", args.model, math.ceil(RETRY_MARGIN * len(items) / args.batch_size),
+                probe_sys + PROBE_IN_PER_ITEM * per_p, PROBE_OUT_PER_ITEM * per_p)
+        return est, {"n_rows": len(items), "probe_only": True, "n_probe": len(items)}
     n_hard = n_probe = 0
     for it in items:
         fq = zipf_info(it.label, familiarity=it.familiarity, gloss_hint=bool(it.intended_sense), curated=it.curated)
@@ -204,10 +216,16 @@ def build_parser() -> argparse.ArgumentParser:
     ap.add_argument("--sample-seed", type=int, default=0)
     ap.add_argument("--no-probe", action="store_true")
     ap.add_argument("--no-second-opinion", action="store_true")
+    ap.add_argument("--probe-only", action="store_true",
+                    help="with --validation-file: send every row to the definition probe only (a probe check)")
     ap.add_argument("--concurrency", type=int, default=4)
-    ap.add_argument("--budget-usd", type=float, default=5.0, help="hard cap (default 5.0)")
-    ap.add_argument("--confirm-expensive", action="store_true")
-    ap.add_argument("--confirmed-by", help="who gave the explicit go for a run over $20 (recorded in run.json)")
+    ap.add_argument("--budget-usd", type=float, default=5.0,
+                    help="hard cap (default 5.0); an estimate over it is refused: type a larger budget to spend "
+                         "more")
+    ap.add_argument("--confirm-expensive", action="store_true",
+                    help="part of the over-$20 confirmation, valid only with --confirmed-by; it never raises the "
+                         "cap")
+    ap.add_argument("--confirmed-by", help="who gave the explicit go for a budget over $20 (recorded in run.json)")
     ap.add_argument("--dry-run", action="store_true")
     ap.add_argument("--allow-dirty", action="store_true",
                     help="allow a paid run on a working tree with uncommitted changes (recorded in run.json)")
@@ -242,6 +260,10 @@ def main(argv=None) -> int:
     logging.basicConfig(level=logging.INFO, format="%(levelname)s %(message)s")
     args = build_parser().parse_args(argv)
     paths.check_id(args.batch_id, "batch_id")
+    if args.probe_only:
+        if not args.validation_file:
+            raise SystemExit("--probe-only applies to --validation-file only (it never writes the registry)")
+        args.no_second_opinion = True
     items, reg = select_items(args)
     if not items:
         print("nothing to filter", file=sys.stderr)
@@ -274,6 +296,10 @@ def main(argv=None) -> int:
         print(f"DRY-RUN: would write {out_dir}/ and {'the registry ' + str(args.registry) if reg else 'no registry'}")
         print(f"system prompt: {len(fr.SYSTEM_PROMPT)} chars (rubric v{fr.TRAITHOOD_RUBRIC_VERSION}); "
               f"prompt sha256: {json.dumps(PROMPT_SHA256)}")
+        if args.probe_only:
+            payload = [{"id": i + 1, "label": it.label} for i, it in enumerate(items[:args.batch_size])]
+            print(f"--- probe prompt 1 (probe rubric v{fr.PROBE_RUBRIC_VERSION}) ---\n{fr.build_probe_prompt(payload)}")
+            return 0
         llm = [it for it in items if not zipf_info(it.label, familiarity=it.familiarity, gloss_hint=bool(it.intended_sense), curated=it.curated).hard_reject]
         random.Random(args.shuffle_seed).shuffle(llm)
         for b in range(min(3, math.ceil(len(llm) / args.batch_size))):
@@ -299,7 +325,7 @@ def main(argv=None) -> int:
                 "budget_usd": args.budget_usd, "cap_usd": cap, "confirmed_by": args.confirmed_by,
                 "model": args.model, "second_model": None if args.no_second_opinion else args.second_model,
                 "rubric_version": fr.TRAITHOOD_RUBRIC_VERSION, "probe_rubric_version": fr.PROBE_RUBRIC_VERSION,
-                "prompt_sha256": dict(PROMPT_SHA256), "started_at": utc_now()}
+                "prompt_sha256": dict(PROMPT_SHA256), "probe_only": bool(args.probe_only), "started_at": utc_now()}
     atomic_write_text(json.dumps(run_meta, indent=2) + "\n", out_dir / "run.json")
 
     from dotenv import load_dotenv
@@ -312,7 +338,7 @@ def main(argv=None) -> int:
                           batch_size=args.batch_size, second_opinion_frac=args.second_opinion_frac, seed=args.seed,
                           probe=not args.no_probe, second_opinion=not args.no_second_opinion,
                           concurrency=args.concurrency, shuffle_seed=args.shuffle_seed,
-                          responses_path=out_dir / "responses.jsonl")
+                          responses_path=out_dir / "responses.jsonl", probe_only=args.probe_only)
     status = 0
     error: Optional[BaseException] = None
     try:

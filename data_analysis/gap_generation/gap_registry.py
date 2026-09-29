@@ -9,14 +9,19 @@ Commands:
   ``{surface, rank?, score?, gloss_hint?, partner_hint?, sense_id?, source_ref?}``;
   new keys are appended, existing keys gain a source; prints the SubmitReport.
 * ``status``: counts by verdict, decision, review status, holding list and generator.
-* ``report [--generator G] [--decision D] [--verdict V]``: a markdown table.
-* ``holding --list physical|roles``: a markdown block for Roger to paste into
-  TRAITS_TO_ADD / ROLES_TO_ADD (the tool never writes those files).
+* ``report [--generator G] [--decision D] [--verdict V] [--include-held]``: a
+  markdown table, the main review list: rows on a holding list are left off
+  unless ``--include-held``.
+* ``holding --list physical|roles|states|nationalities``: a markdown block for
+  Roger to paste into TRAITS_TO_ADD / ROLES_TO_ADD or to work the states and
+  nationalities queues from (the tool never writes those files); a states row
+  shows its states-pass suggestions.
 * ``compact``: copy the log to ``registry.jsonl.bak.<UTC>``, fold it to one
   line per key, and write the tracked snapshot ``registry.snapshot.jsonl``.
 * ``promote (--keys K ... | --status accepted) [--min-local-novelty X] [--section S] [--dry-run]``:
   append ``status: "candidate"`` entries to ``data/seed_queue.json`` (refuses
-  corpus and queue collisions and holding-list rows).
+  corpus and queue collisions and holding-list rows, except a states row the
+  states pass judged plausible, which is promoted under its suggested name).
 
 No command here makes an API call.
 """
@@ -91,6 +96,10 @@ def cmd_status(args) -> int:
 def cmd_report(args) -> int:
     rows = records_for_status(Registry(args.registry), generator=args.generator, decision=args.decision,
                               verdict=args.verdict)
+    if not args.include_held:
+        # the main review list: rows on a holding list (roles, physical, states,
+        # nationalities) are reviewed from their own lists (`holding --list`)
+        rows = [r for r in rows if not r.get("holding")]
     print("| key | label | verdict | tags | region | alignment | polysemy | decision | nearest | gloss |")
     print("|---|---|---|---|---|---|---|---|---|---|")
     for r in rows:
@@ -107,7 +116,19 @@ def cmd_report(args) -> int:
 
 HOLDING_TARGETS = {"physical": "TRAITS_TO_ADD.md (physical-attribute section)", "roles": "ROLES_TO_ADD.md",
                    "states": "the states queue (decision 12: check a habitual predisposition is plausible, "
-                             "choose its name, write its description)"}
+                             "choose its name, write its description; states_pass.py drafts all three)",
+                   "nationalities": "the nationalities queue (decision 3, open point B: traits, sampled from "
+                                    "this list when more are wanted)"}
+
+
+def _states_pass_note(r: dict) -> str:
+    sp = r.get("states_pass") or {}
+    if sp.get("mode") != "queue":
+        return " [states pass: not run]"
+    if not sp.get("plausible"):
+        return f" [states pass: predisposition implausible: {sp.get('reason')}]"
+    name = sp.get("suggested_name") if sp.get("name_fits") is False and sp.get("suggested_name") else r["label"]
+    return f" [states pass: plausible; name {name}; draft: {sp.get('gloss')}]"
 
 
 def cmd_holding(args) -> int:
@@ -117,7 +138,9 @@ def cmd_holding(args) -> int:
     for r in rows:
         f = r.get("filter") or {}
         gens = sorted({s.get("generator") for s in r.get("sources") or []})
-        print(f"- **{r['label']}** ({', '.join(f.get('tags') or [])}; from {', '.join(gens)}): {r.get('gloss') or ''}")
+        note = _states_pass_note(r) if args.list == "states" else ""
+        print(f"- **{r['label']}** ({', '.join(f.get('tags') or [])}; from {', '.join(gens)}): "
+              f"{r.get('gloss') or ''}{note}")
     return 0
 
 
@@ -153,7 +176,9 @@ def cmd_promote(args) -> int:
     if args.dry_run or not rep.promoted:
         return 0
     se.save_queue(queue, args.queue)
-    reg.update_many({k: {"seed_queue_stem": rows[k]["stem"]} for k in rep.promoted})
+    # the entry's stem, which a states-pass rename may have changed
+    stem_of = {e["gap_gen"]["registry_key"]: e["stem"] for e in rep.entries}
+    reg.update_many({k: {"seed_queue_stem": stem_of[k]} for k in rep.promoted})
     print(f"appended {len(rep.promoted)} entries to {args.queue}")
     return 0
 
@@ -175,9 +200,11 @@ def build_parser() -> argparse.ArgumentParser:
     sp.add_argument("--generator")
     sp.add_argument("--decision")
     sp.add_argument("--verdict")
+    sp.add_argument("--include-held", action="store_true",
+                    help="also list rows parked on a holding list (left off the main review list by default)")
     sp.set_defaults(func=cmd_report)
     sp = sub.add_parser("holding")
-    sp.add_argument("--list", required=True, choices=["physical", "roles", "states"])
+    sp.add_argument("--list", required=True, choices=list(HOLDING_TARGETS))
     sp.set_defaults(func=cmd_holding)
     sp = sub.add_parser("compact")
     sp.add_argument("--set-aside-malformed", action="store_true",

@@ -25,8 +25,10 @@ REGION_VOCAB = ("communication_style", "cognitive_epistemic", "moral_stance", "s
                 "emotional_temperament", "alignment_ai_agent", "transient_state",
                 "identity_demographic", "physical")
 #: Holding lists: physical (TRAITS_TO_ADD's physical section), roles (roles
-#: list), states (the states queue of decision 12).
-HOLDING = (None, "physical", "roles", "states")
+#: list), states (the states queue of decision 12), nationalities (memberships
+#: of the nationality, ethnicity or language kind: traits, but held apart from
+#: the main review list, decision 3 and open point B).
+HOLDING = (None, "physical", "roles", "states", "nationalities")
 ENTITY_TYPES = ("trait", "role")
 DECISIONS = ("covered", "new", "grey")
 NOVELTY_FLAGS = ("ambiguous_label", "pair_completion", "deliberate_duplicate", "models_disagree",

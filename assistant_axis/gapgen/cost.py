@@ -7,10 +7,11 @@ charges every response to a :class:`GuardedUsage`, which raises
 caller writes ``usage.json`` in a ``finally`` block; :class:`GuardedUsage`
 also writes it itself before raising when given ``usage_path``.
 
-Rules (CLAUDE.md "Expensive operations"): an estimate over ``--budget-usd``
-needs ``--confirm-expensive``; an estimate over the $20 line needs the flag
-**and** ``--confirmed-by`` naming Roger's explicit go in chat, recorded in the
-run's ``run.json``.
+Rules (CLAUDE.md "Expensive operations"; decision 9 / open point A): the
+typed ``--budget-usd`` is the cap, and an estimate over it is refused (type a
+larger budget to spend more).  A budget or estimate over the $20 line needs
+``--confirm-expensive`` **and** ``--confirmed-by`` naming Roger's explicit go
+in chat, recorded in the run's ``run.json``.
 """
 from __future__ import annotations
 
@@ -112,34 +113,33 @@ class CostRefused(SystemExit):
 
 def confirm_or_abort(estimate_usd: float, budget_usd: float, *, confirm_expensive: bool,
                      hard_line: float = HARD_LINE_USD, confirmed_by: Optional[str] = None) -> float:
-    """Gate an estimated spend.  Returns the cap the run should enforce.
+    """Gate an estimated spend.  Returns the cap the run should enforce, which
+    is always the typed ``budget_usd`` (decision 9 and open point A of
+    ``reports/trait_gap_generation/decisions_m1.md``; Roger: "having a
+    budget, and a flag to increase it, sounds like unneeded bells and
+    whistles").
 
     * estimate <= budget: allowed; cap = budget.
-    * budget < estimate <= hard_line: needs ``confirm_expensive``; cap =
-      1.5 x estimate (the first-of-kind margin of the judge-cost rule).
-    * estimate > hard_line: needs ``confirm_expensive`` **and**
-      ``confirmed_by`` (Roger's go, recorded in run.json).
-    * Without ``confirmed_by`` the returned cap never exceeds ``hard_line``
-      (it is clamped), and a typed ``budget_usd`` above ``hard_line`` is
-      refused, whatever the estimate (review_m1.md finding 3).
+    * estimate > budget: refused, whatever the flags; to spend more, type a
+      larger ``--budget-usd``.
+    * a budget (or an estimate) over ``hard_line`` ($20): needs Roger's
+      explicit go in chat, recorded as ``confirmed_by``, **and**
+      ``confirm_expensive``.  That is the flag's only remaining use; the
+      signature is unchanged because other plans are written against it.
     Refusals raise :class:`CostRefused` (a ``SystemExit`` with code 2).
     """
-    if estimate_usd > hard_line and not (confirm_expensive and confirmed_by):
+    confirmed = bool(confirm_expensive and confirmed_by)
+    if estimate_usd > hard_line and not confirmed:
         raise CostRefused(
             f"estimate ${estimate_usd:.2f} is over the ${hard_line:.0f} line: needs Roger's explicit go "
-            f"in chat, then --confirm-expensive --confirmed-by '<who, when>'")
-    if budget_usd > hard_line and not confirmed_by:
+            f"in chat, then --confirm-expensive --confirmed-by '<who, when>' and a --budget-usd at least "
+            f"the estimate")
+    if budget_usd > hard_line and not confirmed:
         raise CostRefused(
             f"--budget-usd ${budget_usd:.2f} is over the ${hard_line:.0f} line: a cap above it needs Roger's "
-            f"explicit go in chat, recorded with --confirmed-by '<who, when>'")
+            f"explicit go in chat, recorded with --confirm-expensive --confirmed-by '<who, when>'")
     if estimate_usd > budget_usd:
-        if not confirm_expensive:
-            raise CostRefused(
-                f"estimate ${estimate_usd:.2f} exceeds --budget-usd ${budget_usd:.2f}: raise the budget "
-                f"or pass --confirm-expensive")
-        cap = round(1.5 * estimate_usd, 4)
-    else:
-        cap = budget_usd
-    if not confirmed_by:
-        cap = min(cap, hard_line)
-    return cap
+        raise CostRefused(
+            f"estimate ${estimate_usd:.2f} exceeds --budget-usd ${budget_usd:.2f}: type a larger --budget-usd "
+            f"(no flag raises the cap)")
+    return budget_usd

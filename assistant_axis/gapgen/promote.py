@@ -7,10 +7,20 @@ a writer agent later writes the final ``description`` and sets ``ready``).
 
 Refusals: a stem present in the corpus (either entity type), a stem or label
 already queued (``seed_entities.build_registry``: existing *and* queued
-stems), a row on a holding list (physical, roles), a row whose filter verdict
-is not ``trait`` / ``tagged``, a row with no filter block, and (with
+stems), a row on a holding list (physical, roles, nationalities; states
+unless the states pass allows it, below), a row whose filter verdict is not
+``trait`` / ``tagged``, a row with no filter block, and (with
 ``min_local_novelty``) a row whose novelty is missing or below the floor.
 ``dry_run`` leaves the queue file byte-identical.
+
+States (round 2, item 4; an assumption proceeded under, QUESTIONS.md): a row
+on the ``states`` list becomes promotable once the states pass
+(:mod:`assistant_axis.gapgen.states_pass`) has judged a habitual
+predisposition plausible.  It is promoted under the pass's suggested name
+(when the state's own name does not fit) with the pass's draft gloss as
+``description_draft``, tagged ``states_queue``, and its notes say it came
+through the states queue.  Every collision check applies to the promoted
+stem.  A states row with no judgement, or judged implausible, is refused.
 
 Words already turned down (decision 8 of
 ``reports/trait_gap_generation/decisions_m1.md``): a stem or label whose
@@ -128,6 +138,29 @@ def _local_novelty(rec: dict) -> Optional[float]:
     return min(vals) if vals else None
 
 
+def states_promotion(rec: dict) -> tuple[Optional[dict], Optional[str]]:
+    """For a row on the ``states`` holding list: ``(effective, None)`` when
+    the states pass judged a habitual predisposition plausible, where
+    ``effective`` holds the ``stem``, ``label`` and ``gloss`` to promote
+    under (the pass's suggested name when the state's own name does not fit,
+    and its draft gloss of the predisposition); ``(None, reason)`` otherwise.
+    Round 2, item 4: an assumption proceeded under (QUESTIONS.md), not
+    Roger's words."""
+    from .normalize import normalize_candidate
+
+    sp = rec.get("states_pass") or {}
+    if sp.get("mode") not in (None, "queue") or "plausible" not in sp:
+        return None, ("on the states holding list with no states pass judgement yet (run "
+                      "states_pass.py --mode queue --holding-states)")
+    if not sp.get("plausible"):
+        return None, f"on the states holding list; the states pass judged a predisposition implausible: {sp.get('reason')}"
+    if not sp.get("gloss"):
+        return None, "on the states holding list; the states pass gave no predisposition gloss"
+    label = sp.get("suggested_name") if sp.get("name_fits") is False and sp.get("suggested_name") else rec["label"]
+    n = normalize_candidate(label)
+    return {"stem": n.stem, "label": n.label, "gloss": sp["gloss"]}, None
+
+
 def promote(records: dict[str, dict], queue: dict, keys: Sequence[str], *, data_dir: Path,
             dry_run: bool = True, section: str = DEFAULT_SECTION,
             min_local_novelty: Optional[float] = None, reopen_turned_down: bool = False) -> PromoteReport:
@@ -148,12 +181,21 @@ def promote(records: dict[str, dict], queue: dict, keys: Sequence[str], *, data_
             rep.refused[key] = "not in registry"
             continue
         f = rec.get("filter")
+        via_states = None
+        held_why = None
+        if rec.get("holding") == "states":
+            eff, held_why = states_promotion(rec)
+            if eff is not None:
+                via_states = rec
+                rec = {**rec, **eff}
+        elif rec.get("holding"):
+            held_why = f"on the {rec['holding']} holding list (never promoted)"
         stem = rec["stem"]
         old = turned_down.get(stem) or turned_down.get(normalize_to_file_name(rec["label"]))
         if not f:
             rep.refused[key] = "not filtered"
-        elif rec.get("holding"):
-            rep.refused[key] = f"on the {rec['holding']} holding list (never promoted)"
+        elif held_why is not None:
+            rep.refused[key] = held_why
         elif f.get("verdict") not in ("trait", "tagged"):
             rep.refused[key] = f"filter verdict {f.get('verdict')}"
         elif stem in corpus:
@@ -171,12 +213,23 @@ def promote(records: dict[str, dict], queue: dict, keys: Sequence[str], *, data_
             rep.refused[key] = f"local novelty {_local_novelty(rec)} below {min_local_novelty}"
         else:
             entry = queue_entry_from_record(rec, section=section)
+            if via_states is not None:
+                sp = via_states["states_pass"]
+                note = (f"came through the states queue: state '{via_states['label']}', states pass "
+                        f"(rubric v{sp.get('rubric_version')}) judged a habitual predisposition plausible"
+                        + (f" and suggested the name '{rec['label']}'" if rec["stem"] != via_states["stem"] else "")
+                        + f": {sp.get('reason')}")
+                entry["description_notes"] = " | ".join(x for x in (note, entry.get("description_notes")) if x)
+                entry["tags"] = list(dict.fromkeys(entry["tags"] + ["states_queue"]))
+                entry["gap_gen"]["states_pass"] = {"state_label": via_states["label"],
+                                                   "state_gloss": via_states.get("gloss")}
             if old is not None:  # reopened on purpose: the history travels with the new entry
                 history = (f"previously {old.get('status')}: {turned_down_reason(old)}; reopened by "
                            f"promote --reopen-turned-down")
                 entry["description_notes"] = " | ".join(x for x in (history, entry.get("description_notes")) if x)
             chosen[key] = entry
     # partner hints: set partner on both entries when both members are promoted
+    # (records[key] is the registry row; a states-queue entry's stem may differ)
     by_stem = {e["stem"]: e for e in chosen.values()}
     for key, e in chosen.items():
         for s in records[key].get("sources") or []:

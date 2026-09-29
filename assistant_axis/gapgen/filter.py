@@ -116,18 +116,30 @@ def items_from_records(records: Sequence[dict]) -> list[FilterItem]:
     return out
 
 
-def holding_for(verdict: str, tags: Sequence[str]) -> tuple[Optional[str], str]:
+#: The membership kind held on its own list (decision 3, open point B).
+NATIONALITY_KIND = "nationality_ethnicity_language"
+
+
+def holding_for(verdict: str, tags: Sequence[str], membership_kind: Optional[str] = None
+                ) -> tuple[Optional[str], str]:
     """``(holding, entity_type)`` for a verdict and its tags (routing follows
     the verdict; tags of another verdict never reroute a row, decision 4):
     tagged role -> roles (entity type role); tagged physical -> physical;
-    tagged state -> states (decision 12's separate queue); anything else,
-    including a membership trait, -> no holding list."""
+    tagged state -> states (decision 12's separate queue; a v1
+    ``transient_only`` row too, since that tag folded into ``state``); a
+    membership trait of the nationality, ethnicity or language kind ->
+    nationalities (still a trait, but held off the main review list: Roger,
+    open point B, "Add a tag for this, we can build a queue for them, and draw
+    more samples from it if needed"); anything else, including every other
+    membership trait, -> no holding list."""
     if verdict == "tagged" and ("role_person" in tags or "role_thing" in tags):
         return "roles", "role"
     if verdict == "tagged" and "physical" in tags:
         return "physical", "trait"
-    if verdict == "tagged" and "state" in tags:
+    if verdict == "tagged" and ("state" in tags or "transient_only" in tags):
         return "states", "trait"
+    if verdict == "trait" and "membership" in tags and membership_kind == NATIONALITY_KIND:
+        return "nationalities", "trait"
     return None, "trait"
 
 
@@ -175,7 +187,10 @@ class FilterRunner:
                  max_tokens: int = DEFAULT_MAX_TOKENS, temperature: float = 0.0, concurrency: int = 4,
                  zipf_fn: Optional[Callable[[str], float]] = None, wordnet: Any = None,
                  retry_delays: Optional[Sequence[float]] = None, shuffle_seed: Optional[int] = None,
-                 responses_path: Optional[Path] = None):
+                 responses_path: Optional[Path] = None, probe_only: bool = False):
+        # probe_only: every item goes to the definition probe, whatever its
+        # frequency, and nothing to the classifier or the second opinion (a
+        # check of the probe itself; rows end in stage "probed").
         self.client = client
         self.batch_id = batch_id
         self.model = model
@@ -201,6 +216,7 @@ class FilterRunner:
         self._intended: dict[str, Optional[str]] = {}
         self._stop: Optional[BaseException] = None
         self.responses_path = Path(responses_path) if responses_path is not None else None
+        self.probe_only = probe_only
 
     # -- local stages ------------------------------------------------------
     def prepare(self, items: Sequence[FilterItem]) -> list[FilterItem]:
@@ -227,7 +243,7 @@ class FilterRunner:
             res = FilterResult(key=it.key, label=it.label, stage="pending", freq=fq.as_block(),
                                wordnet=wn.as_dict(), meta=dict(it.meta))
             self.results[it.key] = res
-            if fq.hard_reject:
+            if fq.hard_reject and not self.probe_only:
                 res.stage = "hard_reject"
                 res.filter = {
                     "rubric_version": fr.TRAITHOOD_RUBRIC_VERSION, "model": None, "batch_id": self.batch_id,
@@ -376,7 +392,7 @@ class FilterRunner:
         res.stage = "classified"
         res.error = None
         n_senses = res.wordnet.get("n_senses") if res.wordnet.get("found") else None
-        hold, et = holding_for(row["verdict"], row["tags"])
+        hold, et = holding_for(row["verdict"], row["tags"], row.get("membership_kind"))
         res.filter = {
             "rubric_version": fr.TRAITHOOD_RUBRIC_VERSION, "model": self.model, "batch_id": self.batch_id,
             "reason": row["reason"], "verdict": row["verdict"], "tags": row["tags"],
@@ -422,9 +438,11 @@ class FilterRunner:
             self.stats["n_llm"] += sum(1 for it in items if self.results[it.key].stage in ("classified", "failed"))
         self._check_stop()
 
-    async def define_probe(self, items: list[FilterItem]) -> None:
-        band = [it for it in items if self.results[it.key].stage == "classified"
-                and self.results[it.key].freq.get("probe_band")]
+    async def define_probe(self, items: list[FilterItem], *, every: bool = False) -> None:
+        """Probe the classified rows in the probe band (or, with ``every``,
+        every item given: the probe-only mode)."""
+        band = list(items) if every else [it for it in items if self.results[it.key].stage == "classified"
+                                           and self.results[it.key].freq.get("probe_band")]
         if not band:
             return
         self.stats["n_probe"] += len(band)
@@ -453,10 +471,17 @@ class FilterRunner:
         if row is None:
             self.stats["probe_failed"] += 1
             res.freq["define_probe"] = {"model": self.model, "error": err}
+            if res.filter is None:  # probe-only mode
+                res.stage, res.error = "failed", err
             return
         res.freq["define_probe"] = {"model": self.model, "rubric_version": fr.PROBE_RUBRIC_VERSION,
                                     "known": row["known"], "definition": row["definition"],
-                                    "reason": row["reason"]}
+                                    "reason": row["reason"], "prompt_sha256": PROMPT_SHA256["probe"]}
+        if res.filter is None:  # probe-only mode: no verdict to change
+            res.stage = "probed"
+            if not row["known"]:
+                self.stats["probe_unknown"] += 1
+            return
         if not row["known"]:
             self.stats["probe_unknown"] += 1
             f = res.filter
@@ -507,7 +532,9 @@ class FilterRunner:
         self._stop = None
         self._intended = {it.key: it.intended_sense for it in items}
         todo = self.prepare(items)
-        if todo:
+        if todo and self.probe_only:
+            await self.define_probe(todo, every=True)
+        elif todo:
             await self.classify(todo)
             if self.probe:
                 await self.define_probe(todo)
