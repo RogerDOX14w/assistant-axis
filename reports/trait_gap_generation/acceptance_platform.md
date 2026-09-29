@@ -405,8 +405,9 @@ this section and rounds 1-2 disagree, this section holds.
   `related`; balanced, empowered and emotive `same`.  The recorded target (4 of 6) is not met
   (QUESTIONS 18); the acceptance test records it as a warning.
 * **The comparison over every existing label** (not run; needs Roger's go):
-  `plain_reading.py --batch-id <id> --corpus --budget-usd 1.5`.  From the development runs' usage,
-  $0.00019 a reading and $0.0013 a comparison, so about $0.98 for the 659 traits.
+  `plain_reading.py --batch-id <id> --corpus --budget-usd 2` (corrected in round 5: the budget 1.5
+  first written here is refused, since the tool's estimate is $1.53).  From the development runs'
+  usage, $0.00019 a reading and $0.0013 a comparison, so about $0.98 for the 659 traits.
 
 **Rubric v2, round 4** (the fixes of [review_rubric_v2.md](./review_rubric_v2.md), and the three
 changes that follow from its questions; tests in
@@ -475,13 +476,58 @@ this section and rounds 1-3 disagree, this section holds.
 * **Prompts now.**  Classifier v4 `51854ac5...` (5,568 tokens), probe v3 `23327ebd...` (300), plain
   reading v1 `e9777505...` (47), comparison v2 `a6f5cbc6...` (753), states queue v3 `6790603b...`
   (994), states corpus v2 `bf464b84...` (434).
-* **Cost of the full run, by the tools' own estimators** (upper bounds: no prompt caching assumed,
-  second opinions on 25% of rows):
-  * filter over the 1,810-row validation file: $3.68 (1,552 rows to the model, 258 cut free, 330
-    probed, 388 second opinions); at the v4 smoke batch's measured rate ($0.0027 a row, with no cache
-    benefit) about $4.2;
-  * stability rerun: the same again, $3.68 to $4.2;
-  * corpus comparison (659 labels): $1.54 by the estimator, about $0.98 at the measured rates;
-  * states pass over the rows the run will tag `state` (8.4% of 1,552 recorded, about 130): $0.11; its
-    corpus check (5.8% of 659 existing labels, about 38): $0.02.
-  In all about $9.0 by the estimators, $8.4 to $9.4 with the measured rates.
+* **Cost of the full run.**  Superseded in round 5 (below): the figures first written here costed the
+  stability rerun as a second full pass and gave the corpus comparison a budget its own estimate
+  exceeds.  The corrected table is in the round-5 section.
+
+**Rubric v2, round 5** (the fixes of [review_rubric_v2_fixes.md](./review_rubric_v2_fixes.md), section
+4, and finding 11 of the earlier review; tests in
+[test_gapgen_rubric_v2_round5.py](../../assistant_axis/tests/test_gapgen_rubric_v2_round5.py)).  No prompt,
+version or pin changed.  Where this section and the rounds above disagree, this section holds.
+
+* **The validator repairs instead of refusing (defect 1, blocking).**  A refused row is asked again and
+  the second answer replaces the first, so the validator no longer refuses for two causes.  A person
+  sense of unknown kind is dropped (`dropped_sense_kind:<kind>`); a `trait` or `tagged` row with a null
+  `judged_sense` takes its first listed sense (`judged_sense_from_first_sense`) or, with none listed,
+  stays null (`judged_sense_missing`).  A `trait` row left with no trait sense still fails.  The
+  repairs are listed on the row and in the filter block (`validator_repairs`), and counted in
+  `summary.json` (`v2_fields.validator_repairs`).  Re-parsed offline, the classifier responses of the
+  sample batch `m2rubric_r5_sample_1` now parse 126 of 126 rows on the first pass (122 of 126 before):
+  endless and abominable (`tagged`, `evaluative_only`, no sense; `judged_sense_missing`), clinical and
+  virulent (a `relational_only` sense dropped).  No other row changed.
+* **Measurement runs (defect 2).**  `traithood_filter.py --measurement` and `plain_reading.py
+  --measurement` record `"measurement": true` in run.json; a corpus comparison always does.
+  `filter.development_seen` leaves such runs out, so the full run does not make every later row count
+  as seen.
+* **The stability mode (defect 2).**  `traithood_filter.py --stability` sets `--sample-frac 0.13
+  --sample-seed 1 --shuffle-seed 1` and `--measurement`: 241 rows, 210 of them to the model.  It refuses
+  `--sample-frac` beside it, and a sample that sends fewer than 200 rows to the model.  The acceptance
+  test compares verdicts through `filter.stability_agreement`, which leaves out rows the frequency
+  floor cut in either run (31 of the 241; they agree by construction).
+* **Judgement calls (defect 4, finding 11).**  `gap_registry.py judgement-calls` lists the
+  `obvious_sense_not_trait` rows first, then the `nontrait_person_sense` rows, with a note column, and
+  shows Roger's call from [judgement_calls.json](../../data/candidates/judgement_calls.json) (tracked,
+  keyed by word) in the last column.  `gap_registry.py judgement-call --word W --call TEXT` records a
+  call; a later call on the same word replaces it.
+* **Smaller fixes.**  An assertion in
+  [test_gapgen_filter.py](../../assistant_axis/tests/test_gapgen_filter.py) is out of its comment (it
+  passes); the allowlist test now parses the classifier examples and refuses an allowlisted word in a
+  sense or `judged_sense`, with `elected` (senator) and `general` (awesome) the two known exceptions
+  until the prompt next changes; a figure with no rows has `meets_target: null`; stale docstrings and
+  the retired kind `bodily` in a test fixture are corrected.
+* **The full run, stage by stage.**  Not run; each needs Roger's go.  Commands from the repository root
+  (prefix `uv run python`); estimates are the tools' own dry runs on this commit, except the states
+  pass, which cannot be dry-run until the filter's results exist; the right-hand column is the review's
+  figure at the recorded rates ([review_rubric_v2_fixes.md](./review_rubric_v2_fixes.md), section 5).
+
+  | stage | command | budget | dry-run estimate | at recorded rates |
+  |---|---|---|---|---|
+  | filter, 1,810 rows (1,552 to the model, 258 cut, 330 probed) | `data_analysis/gap_generation/traithood_filter.py --batch-id m1_validation --validation-file data/candidates/validation/m1_validation.jsonl --measurement --budget-usd 5` | 5 | $3.68 | $2.6 to $3.0 |
+  | stability rerun, 241 rows (210 to the model) | `data_analysis/gap_generation/traithood_filter.py --batch-id m1_stability --validation-file data/candidates/validation/m1_validation.jsonl --stability --budget-usd 1` | 1 | $0.60 | $0.4 to $0.5 |
+  | corpus comparison, 659 labels | `data_analysis/gap_generation/plain_reading.py --batch-id m1_corpus_comparison --corpus --budget-usd 2` | 2 | $1.53 | $0.97 |
+  | states pass, about 130 rows | `data_analysis/gap_generation/states_pass.py --batch-id m1_states_queue --mode queue --filter-results data/candidates/filter/m1_validation/results.jsonl --budget-usd 0.5` | 0.5 | about $0.11 (by the estimator's formula) | $0.12 with the next row |
+  | its corpus check, about 38 labels | `data_analysis/gap_generation/states_pass.py --batch-id m1_states_corpus --mode corpus --filter-results data/candidates/filter/m1_validation/results.jsonl --budget-usd 0.5` | 0.5 | about $0.02 | |
+  | **in all** | | | **$5.9** | **$4.1 to $4.5** |
+
+  After the filter, `gap_registry.py corpus-regions --from-filter data/candidates/filter/m1_validation`
+  writes `corpus_regions.json` at no cost.
