@@ -331,3 +331,79 @@ Where this section and round 1 disagree, this section holds.
 * **Versions and hashes.**  Classifier `9c75829d...` (rubric version still 2, QUESTIONS 17; 3,746
   tokens), probe `23327ebd...` (v3; 300 tokens), states pass queue `4a51b915...` (993 tokens) and corpus
   `20d6a63e...` (434 tokens), both states rubric v1.  Token counts from the count-tokens endpoint.
+
+**Rubric v2, round 3** (open point D of [decisions_m1.md](./decisions_m1.md), Roger's reply "A word with
+more then one sense ..." and its four cases; the coordinator's rulings on QUESTIONS 15-17; tests in
+[test_gapgen_rubric_v2_round3.py](../../assistant_axis/tests/test_gapgen_rubric_v2_round3.py)).  Where
+this section and rounds 1-2 disagree, this section holds.
+
+* **Names and versions.**  "Rubric v2" is the name of the decisions_m1.md change set, not a version of
+  any prompt.  Every prompt has its own version, pinned to the sha256 of its text in
+  [`gapgen/rubric_versions.py`](../../assistant_axis/gapgen/rubric_versions.py) (`HISTORY`, append
+  only); a test fails when a prompt's text changes without a new version and a new pin.  The rule: any
+  change to a prompt's text after a paid run has recorded the current version needs a new version.
+  Recorded runs are told apart by `rubric_version` and `prompt_sha256`, both on every block.  The
+  classifier's version 2 stood for three texts before the table (a withdrawn intermediate, a committed
+  text never run, and `9c75829d...`, run in round 2); the table pins 2 to `9c75829d...`.
+* **Current prompts.**
+
+  | prompt | version | sha256 | tokens |
+  |---|---|---|---|
+  | classifier | 3 | `f9af4e2d...` | 4,284 |
+  | definition probe | 3 | `23327ebd...` | 300 |
+  | plain reading (user text only) | 1 | `e9777505...` | 47 |
+  | comparison | 2 | `a6f5cbc6...` | 753 |
+  | states pass, queue | 2 | `66b1bebc...` | 996 |
+  | states pass, corpus | 1 | `20d6a63e...` | 434 |
+
+  Comparison v1 (`81ca2459...`) ran once, on the development set.  States queue v2 differs from v1 only
+  in one example (sulking became moping, since sulking appears in the probe's results);
+  `states_pass.RUBRIC_VERSIONS = {"queue": 2, "corpus": 1}` replaces `STATES_RUBRIC_VERSION`.
+* **Case 3, `overshadowed` (plain reading and comparison).**  [`gapgen/plain_reading.py`](../../assistant_axis/gapgen/plain_reading.py).
+  The plain reading shows the model only "You are <word>." (no system prompt, the prompt of the
+  Appendix 2 measurement, temperature 0, one reading, classifier model).  It runs only for a row with an
+  intended meaning: in the filter, a classified trait or tagged row with a gloss hint; from the CLI
+  [`gap_generation/plain_reading.py`](../../data_analysis/gap_generation/plain_reading.py), a pair file or
+  corpus labels with their own descriptions.  A row without an intended meaning makes no call.  The
+  comparison (second-opinion model, Sonnet) answers `same`, `related` or `different`, reason first;
+  `different` sets `overshadowed`; `related` is a note without the flag.  Sonnet stays the comparison
+  model: on the development set Haiku agreed with it on 52 of 60 rows (86.7%, under the 95% bar).
+* **Cases 2 and 4 (senses a person can be).**  The classifier now lists `person_senses` (senses that
+  can be said of a person, most obvious first, each with a kind: trait, state, bodily, status, role,
+  circumstance; senses said only of things are not listed) and `trait_senses_equally_obvious`.  Notes:
+  `two_trait_senses` (two trait senses about equally obvious) and `nontrait_person_sense` (verdict trait,
+  the obvious sense a trait, another sense a non-trait thing a person can be).  A word whose obvious
+  reading is a passing state still gets `state` and goes to the states list.  `gap_registry.py
+  judgement-calls [--filter-results F ...]` prints the case-4 rows as a table with the word, its trait
+  sense, its other sense and an empty column for Roger's call.  No note rejects a word; no review-list
+  reordering.
+* **Filter-block schema changes** (for the plan's M2/M3 readers):
+  * `rubric_version` is 3 on new rows.
+  * new `person_senses`: list of `{"sense", "kind"}` (may be empty).
+  * new `trait_senses_equally_obvious`: bool.
+  * `senses`: kept; now derived, the `sense` texts of `person_senses` (person senses only; a sense said
+    only of things is no longer listed).
+  * `trait_sense_rank`: kept; now derived, the 1-based position of the first trait sense in
+    `person_senses`, or null.  No longer asked of the model, and no longer capped at 3.
+  * `polysemy`: kept, bool; now true when any of the three notes is present.  The v1 rule (rank >= 2,
+    or 3+ WordNet senses with confidence under 0.7) is superseded; `derive_polysemy(row, n_senses)`
+    keeps its signature and ignores `n_senses`.
+  * new `polysemy_notes`: list, a subset of `two_trait_senses`, `nontrait_person_sense`,
+    `overshadowed`, in that order.
+  * new `plain_reading`: null, or `{"text", "model", "reused", "rubric_version", "prompt_sha256", "at"}`.
+  * new `comparison`: null, or `{"reason", "relation", "confidence", "model", "rubric_version",
+    "prompt_sha256", "at", "intended_meaning"}` (or `{"error", "intended_meaning"}` when the comparison
+    failed after its retry).
+  * `prompt_sha256` now has four keys: classifier, probe, plain_reading, comparison.
+  * the second-opinion block gains `person_senses`.
+  * `summary.json`'s `v2_fields` gains `polysemy_notes` counts and `comparison_relations`.
+* **Development and held-out results.**  Development set (30 corpus labels, each with its own
+  description and with an unrelated label's; 60 comparisons, Sonnet, comparison v2): expected same:
+  23 same, 6 related, 1 different (aristocratic, whose description is a view about bloodline while the
+  plain reading is refined manners); expected different: 29 different, 1 related.  Held-out six, run
+  once after the prompts were final: `overshadowed` on 1 of 6 (disciplinary); engaging and economic
+  `related`; balanced, empowered and emotive `same`.  The recorded target (4 of 6) is not met
+  (QUESTIONS 18); the acceptance test records it as a warning.
+* **The comparison over every existing label** (not run; needs Roger's go):
+  `plain_reading.py --batch-id <id> --corpus --budget-usd 1.5`.  From the development runs' usage,
+  $0.00019 a reading and $0.0013 a comparison, so about $0.98 for the 659 traits.

@@ -4,9 +4,11 @@ Per candidate: frequency floor (a hard reject below Zipf 2.0 costs nothing)
 -> WordNet sense count -> classifier (``batch_size`` candidates per call,
 cached rubric; a batch whose JSON is unparseable is retried once as two
 halves, and rows that fail validation are retried once in a follow-up batch)
--> definition probe for the 2.0 <= Zipf < 2.5 band (and familiarity
-overrides) -> second opinion on a random ``second_opinion_frac`` sample plus
-every row with confidence < 0.6 or a prior/LLM disagreement.
+-> definition probe for the probe band (and rescued words) -> plain reading
+and comparison for rows with an intended meaning (round 3,
+:mod:`assistant_axis.gapgen.plain_reading`; ``overshadowed``) -> second
+opinion on a random ``second_opinion_frac`` sample plus every row with low
+confidence, a verdict/tag disagreement or a prior/LLM disagreement.
 
 The Haiku verdict stays the verdict; the second opinion is recorded beside it
 and disagreements are counted for Roger.  A probe that says the word is not
