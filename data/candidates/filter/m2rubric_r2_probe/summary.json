@@ -1,0 +1,135 @@
+{
+  "result": {
+    "n": 12,
+    "n_done": 0,
+    "n_failed": 0,
+    "n_pending": 0,
+    "n_hard_reject": 0,
+    "verdict_counts": {},
+    "verdict_fractions": {},
+    "tag_counts": {},
+    "tag_fractions": {},
+    "region_counts": {},
+    "polysemy_n": 0,
+    "polysemy_rate": null,
+    "gloss_in_band_rate": null,
+    "n_useful": 0,
+    "second_opinion_n": 0,
+    "disagreements": 0,
+    "parse_rate": null,
+    "parse_rate_first_pass": null,
+    "n_llm": 0,
+    "probe_n": 12,
+    "probe_unknown": 1,
+    "probe_failed": 0,
+    "second_opinion_requested": 0,
+    "second_opinion_failed": 0,
+    "calls": {
+      "probe": 1
+    },
+    "cost_usd": 0.0047,
+    "cost_per_candidate_usd": 0.000391,
+    "yield_per_usd": 0.0,
+    "usage": {
+      "per_model": {
+        "claude-haiku-4-5-20251001": {
+          "model": "claude-haiku-4-5-20251001",
+          "prompt_tokens": 490,
+          "completion_tokens": 840,
+          "cost_usd": 0.0047,
+          "n_calls": 1
+        }
+      },
+      "total_cost_usd": 0.0047,
+      "total_prompt_tokens": 490,
+      "total_completion_tokens": 840,
+      "n_calls": 1
+    },
+    "by_stratum": {
+      "probe_check": {
+        "n": 12,
+        "n_done": 0,
+        "n_failed": 0,
+        "n_pending": 0,
+        "n_hard_reject": 0,
+        "verdict_counts": {},
+        "verdict_fractions": {},
+        "tag_counts": {},
+        "tag_fractions": {},
+        "region_counts": {},
+        "polysemy_n": 0,
+        "polysemy_rate": null,
+        "gloss_in_band_rate": null,
+        "n_useful": 0,
+        "second_opinion_n": 0,
+        "disagreements": 0
+      }
+    },
+    "validation_figures": {
+      "existing": {
+        "n": 0,
+        "correct": 0,
+        "share": null,
+        "target": 0.95,
+        "meets_target": false,
+        "misses": {},
+        "labels_with_state": [],
+        "labels_with_physical": []
+      },
+      "rejects": {
+        "n": 0,
+        "flagged": 0,
+        "flagged_labels": [],
+        "target": 4,
+        "meets_target": false
+      },
+      "oewn_random": {
+        "n": 0,
+        "trait": 0,
+        "trait_share": null,
+        "target": 0.15,
+        "meets_target": false
+      }
+    },
+    "v2_fields": {
+      "alignment_relevant_true": 0,
+      "membership_kind": {},
+      "tag_disagreement": 0,
+      "holding": {},
+      "freq_rescue": {
+        "negating_prefix": 9
+      }
+    },
+    "batch_id": "m2rubric_r2_probe",
+    "stopped_by_budget": false,
+    "stopped_by_error": null,
+    "rubric_version": 2,
+    "model": "claude-haiku-4-5-20251001",
+    "second_model": null
+  },
+  "_provenance": {
+    "schema_version": "1.0",
+    "produced_by": {
+      "cmd": "uv run python data_analysis/gap_generation/traithood_filter.py --batch-id m2rubric_r2_probe --validation-file data/candidates/validation/m2rubric_r2_probe.jsonl --probe-only --budget-usd 0.02",
+      "git_sha": "4f197aa+dirty",
+      "author": "Roger Dearnaley",
+      "title": "traithood_filter m2rubric_r2_probe"
+    },
+    "produced_at": "2026-09-29T02:19:43+00:00",
+    "inputs": [
+      {
+        "dep_key": "validation_file",
+        "path": "data/candidates/validation/m2rubric_r2_probe.jsonl",
+        "fingerprint": "v1:2026-09-29T02:18:11+00:00@952",
+        "kind": "file",
+        "dataset_id": null,
+        "last_modified_at": "2026-09-29T02:18:11+00:00",
+        "extras": {
+          "sample_frac": "None",
+          "sample_seed": "0"
+        }
+      }
+    ],
+    "inputs_sha256": "6311d24d5e3fcdb2e16e3cac65a367d57fbe5124c7e41b09b240918cffbdbe5c"
+  }
+}

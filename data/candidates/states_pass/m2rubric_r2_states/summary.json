@@ -1,0 +1,52 @@
+{
+  "result": {
+    "mode": "queue",
+    "n": 10,
+    "n_judged": 10,
+    "n_failed": 0,
+    "n_pending": 0,
+    "parse_rate": 1.0,
+    "calls": {
+      "judge": 1
+    },
+    "rubric_version": 1,
+    "prompt_sha256": "4a51b9159951607dc5094b5ca80de0c4cb753f8a41e77fefc9a9ae21e6a7711e",
+    "cost_usd": 0.0076,
+    "usage": {
+      "per_model": {
+        "claude-haiku-4-5-20251001": {
+          "model": "claude-haiku-4-5-20251001",
+          "prompt_tokens": 1526,
+          "completion_tokens": 1221,
+          "cost_usd": 0.0076,
+          "n_calls": 1
+        }
+      },
+      "total_cost_usd": 0.0076,
+      "total_prompt_tokens": 1526,
+      "total_completion_tokens": 1221,
+      "n_calls": 1
+    },
+    "plausible": 5,
+    "implausible": 5,
+    "renamed": [
+      "unrevealed -> secretive",
+      "agonising -> prone to anguish"
+    ],
+    "gloss_in_band_rate": 1.0,
+    "batch_id": "m2rubric_r2_states",
+    "stopped_by_budget": false,
+    "stopped_by_error": null,
+    "model": "claude-haiku-4-5-20251001"
+  },
+  "_provenance": {
+    "schema_version": "1.0",
+    "produced_by": {
+      "cmd": "uv run python data_analysis/gap_generation/states_pass.py --batch-id m2rubric_r2_states --mode queue --filter-results data/candidates/filter/m1_smoke/results.jsonl data/candidates/filter/m1_smoke2/results.jsonl data/candidates/filter/m2rubric_smoke_1/results.jsonl data/candidates/filter/m2rubric_smoke_2/results.jsonl data/candidates/filter/m2rubric_smoke_3/results.jsonl data/candidates/filter/m2rubric_r2_classifier/results.jsonl --limit 20 --budget-usd 0.05",
+      "git_sha": "4f197aa+dirty",
+      "author": "Roger Dearnaley",
+      "title": "states_pass m2rubric_r2_states"
+    },
+    "produced_at": "2026-09-29T02:20:17+00:00"
+  }
+}

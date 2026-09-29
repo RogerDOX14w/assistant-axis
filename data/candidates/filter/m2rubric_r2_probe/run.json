@@ -1,0 +1,54 @@
+{
+  "batch_id": "m2rubric_r2_probe",
+  "git_sha": "4f197aa",
+  "allow_dirty": false,
+  "dirty_check": {
+    "paths": [
+      "assistant_axis/gapgen",
+      "data_analysis/gap_generation",
+      "assistant_axis/judge.py",
+      "assistant_axis/judge_pricing.py",
+      "assistant_axis/entity_id.py",
+      "assistant_axis/atomic_io.py",
+      "data/candidates/validation",
+      "pyproject.toml",
+      "uv.lock"
+    ],
+    "dirty": [],
+    "note": null
+  },
+  "argv": [
+    "--batch-id",
+    "m2rubric_r2_probe",
+    "--validation-file",
+    "data/candidates/validation/m2rubric_r2_probe.jsonl",
+    "--probe-only",
+    "--budget-usd",
+    "0.02"
+  ],
+  "plan": {
+    "n_rows": 12,
+    "probe_only": true,
+    "n_probe": 12
+  },
+  "estimate_usd": 0.0035,
+  "estimate_lines": [
+    "definition probe (probe only): 1 x (511, 600) tokens at claude-haiku-4-5-20251001 rates = $0.004"
+  ],
+  "budget_usd": 0.02,
+  "cap_usd": 0.02,
+  "confirmed_by": null,
+  "model": "claude-haiku-4-5-20251001",
+  "second_model": null,
+  "rubric_version": 2,
+  "probe_rubric_version": 3,
+  "prompt_sha256": {
+    "classifier": "9c75829d4ed33a752e012b10feb2845ade11dbb234dc3131aa8b98d7616a5032",
+    "probe": "23327ebd9eb1ae4c1992b2a9ce89ed30ca955b65706017a80ccf87931fbf4116"
+  },
+  "probe_only": true,
+  "started_at": "2026-09-29T02:19:37+00:00",
+  "finished_at": "2026-09-29T02:19:44+00:00",
+  "cost_usd": 0.0047,
+  "stopped_by_error": null
+}

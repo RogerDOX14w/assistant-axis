@@ -1,0 +1,54 @@
+{
+  "batch_id": "m2rubric_r2_states",
+  "mode": "queue",
+  "git_sha": "4f197aa",
+  "allow_dirty": false,
+  "dirty_check": {
+    "paths": [
+      "assistant_axis/gapgen",
+      "data_analysis/gap_generation",
+      "assistant_axis/judge.py",
+      "assistant_axis/judge_pricing.py",
+      "assistant_axis/entity_id.py",
+      "assistant_axis/atomic_io.py",
+      "data/candidates/validation",
+      "pyproject.toml",
+      "uv.lock"
+    ],
+    "dirty": [],
+    "note": null
+  },
+  "argv": [
+    "--batch-id",
+    "m2rubric_r2_states",
+    "--mode",
+    "queue",
+    "--filter-results",
+    "data/candidates/filter/m1_smoke/results.jsonl",
+    "data/candidates/filter/m1_smoke2/results.jsonl",
+    "data/candidates/filter/m2rubric_smoke_1/results.jsonl",
+    "data/candidates/filter/m2rubric_smoke_2/results.jsonl",
+    "data/candidates/filter/m2rubric_smoke_3/results.jsonl",
+    "data/candidates/filter/m2rubric_r2_classifier/results.jsonl",
+    "--limit",
+    "20",
+    "--budget-usd",
+    "0.05"
+  ],
+  "n_rows": 10,
+  "skipped": {},
+  "estimate_usd": 0.0072,
+  "estimate_lines": [
+    "states pass (queue): 1 x (1,698, 1,100) tokens at claude-haiku-4-5-20251001 rates = $0.007"
+  ],
+  "budget_usd": 0.05,
+  "cap_usd": 0.05,
+  "confirmed_by": null,
+  "model": "claude-haiku-4-5-20251001",
+  "rubric_version": 1,
+  "prompt_sha256": "4a51b9159951607dc5094b5ca80de0c4cb753f8a41e77fefc9a9ae21e6a7711e",
+  "started_at": "2026-09-29T02:20:07+00:00",
+  "finished_at": "2026-09-29T02:20:17+00:00",
+  "cost_usd": 0.0076,
+  "stopped_by_error": null
+}

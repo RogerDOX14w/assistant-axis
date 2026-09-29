@@ -1,0 +1,250 @@
+{
+  "result": {
+    "n": 30,
+    "n_done": 30,
+    "n_failed": 0,
+    "n_pending": 0,
+    "n_hard_reject": 3,
+    "verdict_counts": {
+      "reject": 9,
+      "tagged": 4,
+      "trait": 17
+    },
+    "verdict_fractions": {
+      "reject": 0.3,
+      "tagged": 0.1333,
+      "trait": 0.5667
+    },
+    "tag_counts": {
+      "evaluative_only": 1,
+      "membership": 1,
+      "not_a_word": 1,
+      "relational_only": 5,
+      "state": 3,
+      "too_rare": 3
+    },
+    "tag_fractions": {
+      "evaluative_only": 0.0333,
+      "membership": 0.0333,
+      "not_a_word": 0.0333,
+      "relational_only": 0.1667,
+      "state": 0.1,
+      "too_rare": 0.1
+    },
+    "region_counts": {
+      "cognitive_epistemic": 5,
+      "communication_style": 1,
+      "emotional_temperament": 3,
+      "identity_demographic": 1,
+      "moral_stance": 5,
+      "social_interpersonal": 4,
+      "transient_state": 2
+    },
+    "polysemy_n": 3,
+    "polysemy_rate": 0.1111,
+    "gloss_in_band_rate": 0.7778,
+    "n_useful": 15,
+    "second_opinion_n": 5,
+    "disagreements": 0,
+    "parse_rate": 1.0,
+    "parse_rate_first_pass": 1.0,
+    "n_llm": 27,
+    "probe_n": 6,
+    "probe_unknown": 0,
+    "probe_failed": 0,
+    "second_opinion_requested": 5,
+    "second_opinion_failed": 0,
+    "calls": {
+      "classify": 2,
+      "probe": 1,
+      "second": 1
+    },
+    "cost_usd": 0.066,
+    "cost_per_candidate_usd": 0.0022,
+    "yield_per_usd": 227.2,
+    "usage": {
+      "per_model": {
+        "claude-haiku-4-5-20251001": {
+          "model": "claude-haiku-4-5-20251001",
+          "prompt_tokens": 8314,
+          "completion_tokens": 5556,
+          "cost_usd": 0.0361,
+          "n_calls": 3
+        },
+        "claude-sonnet-4-6": {
+          "model": "claude-sonnet-4-6",
+          "prompt_tokens": 4771,
+          "completion_tokens": 1040,
+          "cost_usd": 0.0299,
+          "n_calls": 1
+        }
+      },
+      "total_cost_usd": 0.066,
+      "total_prompt_tokens": 13085,
+      "total_completion_tokens": 6596,
+      "n_calls": 4
+    },
+    "by_stratum": {
+      "existing": {
+        "n": 15,
+        "n_done": 15,
+        "n_failed": 0,
+        "n_pending": 0,
+        "n_hard_reject": 0,
+        "verdict_counts": {
+          "reject": 1,
+          "tagged": 1,
+          "trait": 13
+        },
+        "verdict_fractions": {
+          "reject": 0.0667,
+          "tagged": 0.0667,
+          "trait": 0.8667
+        },
+        "tag_counts": {
+          "membership": 1,
+          "relational_only": 1,
+          "state": 1
+        },
+        "tag_fractions": {
+          "membership": 0.0667,
+          "relational_only": 0.0667,
+          "state": 0.0667
+        },
+        "region_counts": {
+          "cognitive_epistemic": 4,
+          "communication_style": 1,
+          "emotional_temperament": 2,
+          "identity_demographic": 1,
+          "moral_stance": 3,
+          "social_interpersonal": 2,
+          "transient_state": 1
+        },
+        "polysemy_n": 2,
+        "polysemy_rate": 0.1333,
+        "gloss_in_band_rate": 0.9333,
+        "n_useful": 12,
+        "second_opinion_n": 3,
+        "disagreements": 0
+      },
+      "oewn_random": {
+        "n": 15,
+        "n_done": 15,
+        "n_failed": 0,
+        "n_pending": 0,
+        "n_hard_reject": 3,
+        "verdict_counts": {
+          "reject": 8,
+          "tagged": 3,
+          "trait": 4
+        },
+        "verdict_fractions": {
+          "reject": 0.5333,
+          "tagged": 0.2,
+          "trait": 0.2667
+        },
+        "tag_counts": {
+          "evaluative_only": 1,
+          "not_a_word": 1,
+          "relational_only": 4,
+          "state": 2,
+          "too_rare": 3
+        },
+        "tag_fractions": {
+          "evaluative_only": 0.0667,
+          "not_a_word": 0.0667,
+          "relational_only": 0.2667,
+          "state": 0.1333,
+          "too_rare": 0.2
+        },
+        "region_counts": {
+          "cognitive_epistemic": 1,
+          "emotional_temperament": 1,
+          "moral_stance": 2,
+          "social_interpersonal": 2,
+          "transient_state": 1
+        },
+        "polysemy_n": 1,
+        "polysemy_rate": 0.0833,
+        "gloss_in_band_rate": 0.5833,
+        "n_useful": 3,
+        "second_opinion_n": 2,
+        "disagreements": 0
+      }
+    },
+    "validation_figures": {
+      "existing": {
+        "n": 15,
+        "correct": 14,
+        "share": 0.9333,
+        "target": 0.95,
+        "meets_target": false,
+        "misses": {
+          "reject": [
+            "anecdotal"
+          ]
+        },
+        "labels_with_state": [
+          "isolated"
+        ],
+        "labels_with_physical": []
+      },
+      "rejects": {
+        "n": 0,
+        "flagged": 0,
+        "flagged_labels": [],
+        "target": 4,
+        "meets_target": false
+      },
+      "oewn_random": {
+        "n": 15,
+        "trait": 4,
+        "trait_share": 0.2667,
+        "target": 0.15,
+        "meets_target": false
+      }
+    },
+    "v2_fields": {
+      "alignment_relevant_true": 1,
+      "membership_kind": {
+        "family": 1
+      },
+      "tag_disagreement": 0,
+      "holding": {
+        "states": 3
+      },
+      "freq_rescue": {}
+    },
+    "batch_id": "m2rubric_r2_classifier",
+    "stopped_by_budget": false,
+    "stopped_by_error": null,
+    "rubric_version": 2,
+    "model": "claude-haiku-4-5-20251001",
+    "second_model": "claude-sonnet-4-6"
+  },
+  "_provenance": {
+    "schema_version": "1.0",
+    "produced_by": {
+      "cmd": "uv run python data_analysis/gap_generation/traithood_filter.py --batch-id m2rubric_r2_classifier --validation-file data/candidates/validation/m2rubric_r2_classifier.jsonl --budget-usd 0.15",
+      "git_sha": "4f197aa+dirty",
+      "author": "Roger Dearnaley",
+      "title": "traithood_filter m2rubric_r2_classifier"
+    },
+    "produced_at": "2026-09-29T02:19:30+00:00",
+    "inputs": [
+      {
+        "dep_key": "validation_file",
+        "path": "data/candidates/validation/m2rubric_r2_classifier.jsonl",
+        "fingerprint": "v1:2026-09-29T02:18:11+00:00@3722",
+        "kind": "file",
+        "dataset_id": null,
+        "last_modified_at": "2026-09-29T02:18:11+00:00",
+        "extras": {
+          "sample_frac": "None",
+          "sample_seed": "0"
+        }
+      }
+    ],
+    "inputs_sha256": "39cb89a702f30674491fd4d477f408a50849a69565aef9916defc41325c3d68a"
+  }
+}
