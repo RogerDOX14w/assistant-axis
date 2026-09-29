@@ -238,3 +238,51 @@ torn inside a UTF-8 character are recoverable; 5a keyless object lines are malfo
 reader lock raises; 5c the dirty check covers only the platform's paths.  Test repairs: the concurrency
 test now shares keys (it loses sources with the locks off), the scale test is renamed to what it checks,
 the always-true comparisons are gone, the module docstring names the tests that pass on the old code.
+
+**Rubric v2, round 1** ([decisions_m1.md](./decisions_m1.md), Roger's decisions of 2026-09-29; tests in
+[test_gapgen_rubric_v2.py](../../assistant_axis/tests/test_gapgen_rubric_v2.py)).  What changed for
+consumers:
+
+* **Versions.**  `TRAITHOOD_RUBRIC_VERSION = 2`, `PROBE_RUBRIC_VERSION = 2`; the prompt hashes changed
+  (classifier `ba7a4316...`, probe `0785cd07...`).  Filter blocks written by v1 (the pilot) keep
+  `rubric_version: 1`.
+* **Floor.**  `freq.HARD_REJECT_BELOW = 1.5`; the probe band is 1.5 to 2.5.  Rescue rule 1b sends a word
+  below the floor to the classifier and the probe when it is a negation (un-, in-, non-) of a word at or
+  above the floor, arrives with a gloss hint, or comes from a curated generator
+  (`freq.CURATED_GENERATORS`: `censuses` only; the Roget and WordNet harvest is not curated).  The `freq`
+  block gains `rescue` (`negating_prefix` | `gloss_hint` | `curated_source` | `familiarity` | null).
+  `zipf_info` gains `gloss_hint=False, curated=False`; `FilterItem` gains `curated`.
+* **New filter-block fields** (additive): `primary_use` (`person_character` | `person_other` |
+  `non_person`; null on hard rejects), `alignment_relevant` (bool, asked independently of `region`),
+  `membership_kind` (one of `filter_rubric.MEMBERSHIP_KINDS` when the row carries `membership`, else
+  null), `tag_disagreement` (bool: a tag belongs to another verdict).  `polysemy` is now
+  `primary_use != "person_character"` (v1 rows keep the sense-rank rule).  `trait_sense_rank` is no longer
+  asked and is null on v2 rows.  The second-opinion block gains the same three fields.
+* **Tags.**  The classifier's tags are `membership` (with `trait`); `physical`, `state`,
+  `transient_only`, `role_person`, `role_thing`, `evaluative_only` (with `tagged`); `relational_only`,
+  `not_a_word` (with `reject`).  `demographic` is retired from the classifier and stays in `TAG_VOCAB`
+  for v1 records.  A `tagged` row needs at least one tagged-class tag and a `reject` row a reject-class
+  tag; a tag from another verdict is allowed, sets `tag_disagreement`, triggers a second opinion, and
+  never reroutes the row (decision 4).
+* **Holding lists.**  `HOLDING` gains `states`: a `tagged` + `state` row goes to the states queue
+  (decision 12), physical to `physical`, roles to `roles`.  `gap_registry.py holding --list states`
+  prints it.  A membership is a trait and goes to no holding list.
+* **Validator.**  Rows echo their `label`; a mismatch rejects the row.  `trait` and `tagged` rows need
+  `region`, `primary_use`, `alignment_relevant` and a `gloss`; `reject` rows may leave them null.  A
+  `membership` row needs a valid `membership_kind`.  Reasons are asked for in at most 30 words (not
+  enforced; the block records nothing new for it, the parser keeps `reason_words` in memory only).
+* **Second opinion.**  Triggers: 10% random, confidence under 0.75, `tag_disagreement`, and the plan's
+  prior/LLM disagreement (QUESTIONS 12).
+* **Review order.**  `filter.review_sort_key` puts polysemy-flagged rows last; `gap_registry.py report`
+  uses it and shows `alignment_relevant`, `membership:<kind>` and the primary use.
+* **Quality figures.**  `filter.validation_figures` computes the three M1 figures against 95%, 4 of 6 and
+  15%, with every existing label that received `state` or `physical` listed by name and the misses by
+  cause; a validation run's `summary.json` carries them as `validation_figures`, and the acceptance
+  test reports them as a warning without failing (decision 2).  An existing label counts as correct
+  when its verdict is `trait` or it carries `state`, `physical` or `membership`.
+* **Promotion.**  `promote(..., reopen_turned_down=False)` refuses a stem or label the queue marks
+  `not_adopted` or `superseded`, quoting the decision (and the replacing label for `superseded`, when the
+  decision names one); `--reopen-turned-down` lets it through and copies the history into
+  `description_notes`.  `seed_entities.build_registry` is unchanged.
+* **Summary.**  `summary.json` gains `v2_fields` (counts of `primary_use`, `alignment_relevant` true,
+  `membership_kind`, `tag_disagreement`, holding lists, floor rescues).
