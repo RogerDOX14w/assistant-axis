@@ -14,7 +14,7 @@ REPO = Path(__file__).resolve().parents[2]
 
 def _row(i, **kw):
     base = {"id": i, "label": f"w{i}", "reason": "A stable habit.", "senses": ["s1"],
-            "primary_use": "person_character", "enactable_in_text": 2, "verdict": "trait", "tags": [],
+            "trait_sense_rank": 1, "enactable_in_text": 2, "verdict": "trait", "tags": [],
             "region": "cognitive_epistemic", "alignment_relevant": False,
             "gloss": "This means " + "word " * 20, "confidence": 0.9}
     base.update(kw)
@@ -127,7 +127,7 @@ class TestParse:
     def test_bad_verdict_region_numbers(self):
         rows, errs = fr.parse_batch(json.dumps({"results": [
             _row(1, verdict="maybe"), _row(2, region="space"), _row(3, confidence=1.5),
-            _row(4, enactable_in_text=4), _row(5, gloss=None), _row(6, reason="")]}), [1, 2, 3, 4, 5, 6])
+            _row(4, trait_sense_rank=4), _row(5, gloss=None), _row(6, reason="")]}), [1, 2, 3, 4, 5, 6])
         assert rows == {} and set(errs) == {1, 2, 3, 4, 5, 6}
 
     def test_reject_may_lack_region_gloss_rank(self):
@@ -147,9 +147,9 @@ class TestParse:
             [1, 2, 3, 4])
         assert set(rows) == {4} and set(errs) == {1, 2, 3}
 
-    def test_trait_still_needs_gloss_region_primary_use(self):
+    def test_trait_still_needs_gloss_region_rank(self):
         rows, errs = fr.parse_batch(json.dumps({"results": [
-            _row(1, gloss=None), _row(2, region=None), _row(3, primary_use=None)]}), [1, 2, 3])
+            _row(1, gloss=None), _row(2, region=None), _row(3, trait_sense_rank=None)]}), [1, 2, 3])
         assert rows == {} and set(errs) == {1, 2, 3}
 
     def test_unparseable(self):
@@ -164,9 +164,9 @@ class TestParse:
 
     def test_string_numbers_and_case(self):
         rows, errs = fr.parse_batch(json.dumps({"results": [
-            _row(1, verdict="Trait", confidence="0.8", tags="State", primary_use="Person_Other")]}), [1])
+            _row(1, verdict="Trait", confidence="0.8", trait_sense_rank="2", tags="State")]}), [1])
         assert errs == {} and rows[1]["verdict"] == "trait" and rows[1]["tags"] == ["state"]
-        assert rows[1]["primary_use"] == "person_other" and rows[1]["confidence"] == 0.8
+        assert rows[1]["trait_sense_rank"] == 2 and rows[1]["confidence"] == 0.8
         assert rows[1]["tag_disagreement"] is True  # state belongs to "tagged"; recorded, not overridden
 
 

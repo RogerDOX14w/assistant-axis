@@ -32,7 +32,6 @@ _REPO_ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(_REPO_ROOT))
 
 from assistant_axis.gapgen import paths  # noqa: E402
-from assistant_axis.gapgen.filter import review_sort_key  # noqa: E402
 from assistant_axis.gapgen.promote import DEFAULT_SECTION, promote  # noqa: E402
 from assistant_axis.gapgen.registry import (  # noqa: E402
     Candidate, Registry, compact, holding_list, records_for_status, submit_candidates,
@@ -92,9 +91,7 @@ def cmd_status(args) -> int:
 def cmd_report(args) -> int:
     rows = records_for_status(Registry(args.registry), generator=args.generator, decision=args.decision,
                               verdict=args.verdict)
-    rows = sorted(rows, key=review_sort_key)  # polysemy-flagged rows last (decision 11)
-    print("| key | label | verdict | tags | region | alignment | polysemy (primary use) | decision | nearest "
-          "| gloss |")
+    print("| key | label | verdict | tags | region | alignment | polysemy | decision | nearest | gloss |")
     print("|---|---|---|---|---|---|---|---|---|---|")
     for r in rows:
         f = r.get("filter") or {}
@@ -102,9 +99,8 @@ def cmd_report(args) -> int:
         tags = list(f.get("tags") or [])
         if f.get("membership_kind"):
             tags = [f"membership:{f['membership_kind']}" if t == "membership" else t for t in tags]
-        poly = f"{f.get('polysemy')}" + (f" ({f['primary_use']})" if f.get("primary_use") else "")
         print(f"| {r['key']} | {_md(r['label'])} | {_md(f.get('verdict'))} | {_md(', '.join(tags))} "
-              f"| {_md(f.get('region'))} | {_md(f.get('alignment_relevant'))} | {_md(poly)} "
+              f"| {_md(f.get('region'))} | {_md(f.get('alignment_relevant'))} | {_md(f.get('polysemy'))} "
               f"| {_md(nv.get('decision'))} | {_md(nv.get('nearest_existing'))} | {_md(r.get('gloss'))} |")
     return 0
 

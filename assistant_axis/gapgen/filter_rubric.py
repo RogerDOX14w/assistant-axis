@@ -49,11 +49,15 @@ Physical (decision 12, last paragraph), in Roger's words: "physical mans
 words with a strong mental side are not physical.  (His two examples are
 seed-queue entries, so the prompt illustrates with other words.)
 
-Ambiguity (decision 11): ``primary_use`` records what the word most often
-describes when met without context; the polysemy flag fires when it is not
-``person_character``.  A flagged word keeps its verdict and goes to the end
-of the review list.  The wording is a first version written on principle, not
-tuned on any word list (open point D).
+Ambiguity (decision 11, partly held on 2026-09-29).  The polysemy flag stays
+exactly as in rubric v1: the sense list plus ``trait_sense_rank``, flag when
+the rank is 2 or more (or 3+ WordNet senses with confidence under 0.7).
+Roger held the ``primary_use`` design ("commonest use in general English")
+for rework, since it would flag words whose character sense is well
+established.  What is kept from decision 11 is the rewording of
+``relational_only``: it rejects a word only when none of its senses describes a
+person's character, so a word with a character sense beside a commoner
+non-person use is verdict ``trait`` (and is flagged or not by the v1 rule).
 
 Changing anything the model reads here is a rubric change: bump
 :data:`TRAITHOOD_RUBRIC_VERSION` (stamped into every filter block).
@@ -85,7 +89,6 @@ TAGS_FOR_VERDICT = {"trait": set(TRAIT_TAGS), "tagged": set(TAGGED_TAGS), "rejec
 
 MEMBERSHIP_KINDS = ("circumstance", "class", "family", "affinity", "relationship", "orientation_gender",
                     "geography", "nationality_ethnicity_language", "age_group")
-PRIMARY_USES = ("person_character", "person_other", "non_person")
 
 #: Example words used in the rubric (verdict trait / everything else).  Checked
 #: by the tests never to be a corpus label, a seed-queue entry, one of the six
@@ -143,8 +146,8 @@ that only names a momentary bodily or situational condition that nobody has as a
 - Pure praise or blame with no behavioural content is "tagged" "evaluative_only".
 - "relating to" words. Tag "relational_only" and verdict "reject" only when none of its senses \
 describes a person's character (hexagonal, waterproof, municipal). A word with a character sense \
-beside a commoner non-person use is a trait: record the commoner use in primary_use and gloss the \
-character sense. Non-words and misspellings are "reject" "not_a_word".
+beside a commoner non-person use is a trait: list its senses, rank the character sense, and gloss \
+the character sense. Non-words and misspellings are "reject" "not_a_word".
 - The tags must fit the verdict: a "tagged" row needs at least one of physical, state, \
 transient_only, role_person, role_thing, evaluative_only; a "reject" row needs relational_only or \
 not_a_word; "membership" goes only with "trait". If you find yourself wanting tags that do not fit, \
@@ -157,10 +160,13 @@ judge the best trait sense of the word, if any, and say so in the reason.
 ## Fields, per candidate
 - label: the candidate exactly as given.
 - reason: at most 30 words, written before the verdict.
-- senses: up to three senses of the word in ordinary use, commonest first.
-- primary_use: met without context, what does the word most often describe? person_character (a \
-person's character, disposition or manner), person_other (a person's state, body, circumstances or \
-membership), non_person (a thing, text, event, policy, place or situation).
+- senses and trait_sense_rank: list up to three senses of the word in ordinary use, ordered by how \
+often an ordinary speaker means each one, most common first, and include the trait sense among them. \
+trait_sense_rank is the position of the trait sense in that list: 1 only when the trait sense is the \
+one most people mean by the word on its own, 2 when a non-trait sense (a classifying "relating to \
+..." sense, a physical or momentary sense) is more common, 3 when the trait sense is minor or \
+strained. Judge the trait sense even when it is not dominant, and say which sense you mean in the \
+gloss. For a "tagged" row, rank the sense being judged; null only for "reject".
 - enactable_in_text: 0 = a text-only persona could not show it in a reply; 1 = only indirectly or \
 occasionally; 2 = plainly visible in how it writes and answers.
 - region: exactly one of the regions below; null only for "reject".
@@ -177,105 +183,103 @@ label, unless a qualifier is needed to pick the sense. No hedges ("tends to", "s
 
 ## Examples (reason first, then the verdict)
 - "nitpicking": fixes on trivial errors in whatever it reads; senses [finding fault with small \
-details]; primary_use person_character; verdict trait; tags []; region cognitive_epistemic; alignment \
+details]; rank 1; verdict trait; tags []; region cognitive_epistemic; alignment \
 false; gloss "This means seizing on every small error, typo and loose phrasing in what others say, \
 and correcting it at once whether or not it matters to the point at hand."
-- "long-winded": a speaking style that runs far past the point; primary_use person_character; verdict \
+- "long-winded": a speaking style that runs far past the point; rank 1; verdict \
 trait; tags []; region communication_style; alignment false; gloss "This means answering at great \
 length, piling up qualifications, asides and repetitions long after the question has been answered, \
 and never choosing one word where ten will do."
 - "sandbagging": an agent deliberately underperforming to hide what it can do; senses [deliberately \
-underperforming, placing sandbags against a flood]; primary_use person_character; verdict trait; tags \
+underperforming, placing sandbags against a flood]; rank 1; verdict trait; tags \
 []; region alignment_ai_agent; alignment true; gloss "This means doing worse than it can on purpose \
 when tested or watched, hiding its real abilities so that others underestimate what it could do if it \
 chose."
-- "reward-hacking": pursuing the letter of a scoring rule against its intent; primary_use \
-person_character; verdict trait; tags []; region alignment_ai_agent; alignment true; gloss "This \
+- "reward-hacking": pursuing the letter of a scoring rule against its intent; rank 1; verdict trait; tags []; region alignment_ai_agent; alignment true; gloss "This \
 means chasing whatever the score or checklist rewards, meeting its literal terms while defeating its \
 purpose, and treating loopholes as wins rather than as mistakes."
-- "overclaiming": asserting more certainty or ability than one has; primary_use person_character; \
+- "overclaiming": asserting more certainty or ability than one has; rank 1; \
 verdict trait; tags []; region alignment_ai_agent; alignment true; gloss "This means stating guesses \
 as facts and promising what it cannot deliver, presenting shaky knowledge with full confidence and \
 never admitting where its competence ends."
 - "lukewarm": commonest said of liquids; the character sense, unenthusiastic, is judged here; senses \
-[slightly heated, unenthusiastic]; primary_use non_person; verdict trait; tags []; region \
+[slightly heated, unenthusiastic]; rank 2; verdict trait; tags []; region \
 emotional_temperament; alignment false; gloss "This means meeting ideas, people and plans with faint \
 interest and half-hearted agreement, never quite committing enthusiasm or opposition to anything that \
 is put forward."
 - "prickly": commonest said of plants; the character sense, touchy and quick to take offense, is judged \
-here; senses [covered in prickles, touchy]; primary_use non_person; verdict trait; tags []; region \
+here; senses [covered in prickles, touchy]; rank 2; verdict trait; tags []; region \
 social_interpersonal; alignment false; gloss "This means bristling at small slights and innocent \
 questions, answering sharply, and treating ordinary disagreement as an attack that must be met at \
 once."
-- "stepchild": a family circumstance compatible with any profession; primary_use person_other; \
+- "stepchild": a family circumstance compatible with any profession; rank 1; \
 verdict trait; tags [membership]; membership_kind family; region identity_demographic; alignment \
 false; gloss "This means having grown up with a stepparent in the household, living with the \
 loyalties, adjustments and second family that come with a parent's new marriage."
-- "pet-owner": an affinity any worker can have; primary_use person_other; verdict trait; tags \
+- "pet-owner": an affinity any worker can have; rank 1; verdict trait; tags \
 [membership]; membership_kind affinity; region identity_demographic; alignment false; gloss "This \
 means keeping animals at home and arranging daily life around them, from feeding and walks to vet \
 bills, and talking about them as members of the family."
-- "debt-free": a financial circumstance; primary_use person_other; verdict trait; tags [membership]; \
+- "debt-free": a financial circumstance; rank 1; verdict trait; tags [membership]; \
 membership_kind circumstance; region identity_demographic; alignment false; gloss "This means owing \
 nothing to anyone, paying for everything outright, and weighing every purchase against the security \
 of having no loans, cards or payments hanging over one."
-- "widowed": a relationship status that leaves any profession open; primary_use person_other; verdict \
+- "widowed": a relationship status that leaves any profession open; rank 1; verdict \
 trait; tags [membership]; membership_kind relationship; region identity_demographic; alignment false; \
 gloss "This means having lost a spouse to death and living on without them, carrying the memory of the \
 marriage and the practical changes its end brought."
-- "Norwegian": a nationality compatible with any profession; commonest said of things from Norway; \
-primary_use non_person; verdict trait; tags [membership]; membership_kind \
+- "Norwegian": a nationality compatible with any profession; rank 1; verdict trait; tags [membership]; membership_kind \
 nationality_ethnicity_language; region identity_demographic; alignment false; gloss "This means being \
 from Norway, a native or citizen of the country who speaks its language and shares in its holidays, \
 public life and everyday ways of doing things."
-- "plumber": a profession, so the persona's one role; primary_use person_other; verdict tagged; tags \
+- "plumber": a profession, so the persona's one role; rank 1; verdict tagged; tags \
 [role_person]; region social_interpersonal; alignment false; gloss "A plumber is someone who installs \
 and repairs pipes, drains and water heaters, crawling under sinks and into basements to stop leaks and \
 get water flowing again."
-- "senator": an elected office, which organizes the whole persona; primary_use person_other; verdict \
+- "senator": an elected office, which organizes the whole persona; rank 1; verdict \
 tagged; tags [role_person]; region social_interpersonal; alignment false; gloss "A senator is someone \
 who holds an elected seat in the upper chamber, drafting and voting on laws, courting voters and \
 bargaining with colleagues and donors."
-- "newborn": an age that rules out any profession; primary_use person_other; verdict tagged; tags \
+- "newborn": an age that rules out any profession; rank 1; verdict tagged; tags \
 [role_person]; region identity_demographic; alignment false; gloss "A newborn is someone in the first \
 weeks of life, who sleeps, feeds and cries, depends entirely on caregivers, and meets the world only \
 through touch, sound and hunger."
-- "duchess": a rank so high that it rules out ordinary professions; primary_use person_other; verdict \
+- "duchess": a rank so high that it rules out ordinary professions; rank 1; verdict \
 tagged; tags [role_person]; region social_interpersonal; alignment false; gloss "A duchess is someone \
 who holds a ducal title by birth or marriage, presides over estates and ceremonies, and moves in a \
 world of heirs, precedence and inherited duty."
-- "thermostat": a device, not a person; primary_use non_person; verdict tagged; tags [role_thing]; \
+- "thermostat": a device, not a person; rank 1; verdict tagged; tags [role_thing]; \
 region cognitive_epistemic (choose the closest region); alignment false; gloss "A thermostat is a \
 device that measures the temperature of a room and switches heating or cooling on and off to hold it \
 at a set point."
-- "freckled": marks on the skin, entirely bodily; primary_use person_other; verdict tagged; tags \
+- "freckled": marks on the skin, entirely bodily; rank 1; verdict tagged; tags \
 [physical]; region physical; alignment false; gloss "This means having skin dotted with small brown \
 freckles, most thickly on the face, arms and shoulders, darkening and spreading after time spent in the \
 sun."
-- "bald": having no hair on the head, entirely bodily; primary_use person_other; verdict tagged; tags \
+- "bald": having no hair on the head, entirely bodily; rank 1; verdict tagged; tags \
 [physical]; region physical; alignment false; gloss "This means having little or no hair on the top of \
 the head, whether from age, genes or choice, and a scalp that shows bare to anyone looking."
-- "jittery": a passing condition of nerves, usually for hours; primary_use person_other; verdict \
+- "jittery": a passing condition of nerves, usually for hours; rank 1; verdict \
 tagged; tags [state]; region emotional_temperament; alignment false; gloss "This means being nervous \
 and unable to keep still, with shaking hands, a racing mind and quick startled reactions to every small \
 noise or change."
-- "frazzled": worn out by strain for a while; primary_use person_other; verdict tagged; tags [state]; \
+- "frazzled": worn out by strain for a while; rank 1; verdict tagged; tags [state]; \
 region emotional_temperament; alignment false; gloss "This means being worn thin by too many demands \
 at once, scattered and short of patience, dropping details and snapping at interruptions until the \
 pressure lifts."
-- "hungry": a bodily condition nobody holds as a disposition; primary_use person_other; verdict tagged; \
+- "hungry": a bodily condition nobody holds as a disposition; rank 1; verdict tagged; \
 tags [transient_only]; region transient_state; alignment false; gloss "This means needing food right \
 now, with an empty stomach, falling energy and thoughts that keep returning to the next meal until one \
 has eaten."
-- "awesome": praise with no behavioural content; primary_use non_person; verdict tagged; tags \
+- "awesome": praise with no behavioural content; rank 1; verdict tagged; tags \
 [evaluative_only]; region social_interpersonal; alignment false; gloss "This means being very good or \
 impressive in the speaker's eyes, a general word of approval that says how the speaker feels rather \
 than what anyone does."
-- "hexagonal": a shape; no sense describes a person's character; primary_use non_person; verdict \
+- "hexagonal": a shape; no sense describes a person's character; rank null; verdict \
 reject; tags [relational_only]; region null; alignment false; gloss null.
-- "benzoic": a chemistry term; no sense describes a person's character; primary_use non_person; verdict \
+- "benzoic": a chemistry term; no sense describes a person's character; rank null; verdict \
 reject; tags [relational_only]; region null; alignment false; gloss null.
-- "flurbish": not an English word; primary_use non_person; verdict reject; tags [not_a_word]; region \
+- "flurbish": not an English word; rank null; verdict reject; tags [not_a_word]; region \
 null; alignment false; gloss null.
 
 ## Regions (pick exactly one; null only for "reject")
@@ -287,7 +291,7 @@ does not decide alignment_relevant, which is asked separately.
 Respond with one JSON object and nothing else. For every candidate, reason first, then commit to \
 the verdict. Write numbers without a leading "+". Use exactly these keys in this order:
 {"results": [{"id": <int>, "label": "<the candidate>", "reason": "<at most 30 words>", \
-"senses": ["<sense>", ...], "primary_use": "person_character"|"person_other"|"non_person", \
+"senses": ["<sense>", ...], "trait_sense_rank": <1|2|3>|null, \
 "enactable_in_text": <0|1|2>, "verdict": "trait"|"tagged"|"reject", "tags": ["<tag>", ...], \
 "membership_kind": "<kind>"|null, "region": "<region>"|null, "alignment_relevant": true|false, \
 "gloss": "<sentence>"|null, "confidence": <0-1>}]}
@@ -360,9 +364,11 @@ def validate_row(row: dict, expected_label: Optional[str] = None) -> tuple[Optio
     * ``tagged`` needs at least one tagged-class tag, ``reject`` at least one
       reject-class tag; a plain ``trait`` needs none; tags of another verdict
       are allowed and set ``tag_disagreement``;
-    * ``trait`` and ``tagged`` need a region, a ``primary_use``, an
-      ``alignment_relevant`` boolean and a gloss (every such row can be
-      promoted or lands on a list a person reads); ``reject`` may leave them null;
+    * ``trait`` and ``tagged`` need a region, an ``alignment_relevant``
+      boolean and a gloss (every such row can be promoted or lands on a list a
+      person reads); ``reject`` may leave them null;
+    * ``trait`` needs ``trait_sense_rank`` (1-3), as in v1; ``tagged`` and
+      ``reject`` may leave it null;
     * ``membership`` needs a ``membership_kind`` from :data:`MEMBERSHIP_KINDS`.
     """
     if not isinstance(row, dict):
@@ -393,12 +399,9 @@ def validate_row(row: dict, expected_label: Optional[str] = None) -> tuple[Optio
         return None, f"region {region!r} not in vocabulary"
     if region is None and promotable:
         return None, f"region missing for a {verdict} verdict"
-    primary_use = row.get("primary_use")
-    primary_use = primary_use.strip().lower() if isinstance(primary_use, str) else None
-    if primary_use is not None and primary_use not in PRIMARY_USES:
-        return None, f"primary_use {row.get('primary_use')!r} not in {PRIMARY_USES}"
-    if primary_use is None and promotable:
-        return None, f"primary_use missing for a {verdict} verdict"
+    rank = _num(row.get("trait_sense_rank"), 1, 3, integer=True)
+    if rank is None and verdict == "trait":
+        return None, "trait_sense_rank missing or out of range"
     align = _bool(row.get("alignment_relevant"))
     if align is None:
         if promotable:
@@ -428,8 +431,8 @@ def validate_row(row: dict, expected_label: Optional[str] = None) -> tuple[Optio
     gloss = " ".join(gloss.split()) if isinstance(gloss, str) and gloss.strip() else None
     if gloss is None and promotable:
         return None, f"gloss missing for a {verdict} verdict"
-    return {"label": row.get("label"), "reason": reason.strip(), "senses": senses, "primary_use": primary_use,
-            "trait_sense_rank": None, "enactable_in_text": enact, "verdict": verdict, "tags": tags,
+    return {"label": row.get("label"), "reason": reason.strip(), "senses": senses,
+            "trait_sense_rank": rank, "enactable_in_text": enact, "verdict": verdict, "tags": tags,
             "membership_kind": kind, "region": region, "alignment_relevant": align, "gloss": gloss,
             "confidence": float(conf), "tag_disagreement": tag_disagreement(verdict, tags),
             "reason_words": len(reason.split())}, None
@@ -496,12 +499,9 @@ def parse_batch(text: str, ids: Sequence[int], *, labels: Optional[Mapping[int, 
 
 
 def derive_polysemy(verdict_row: dict, n_senses: Optional[int]) -> bool:
-    """Rubric v2 (decision 11): the flag fires when ``primary_use`` is not
-    ``person_character``.  A v1 row (no ``primary_use``) keeps the v1 rule:
-    ``trait_sense_rank >= 2``, or ``n_senses >= 3`` with ``confidence < 0.7``."""
-    pu = verdict_row.get("primary_use")
-    if pu is not None:
-        return pu != "person_character"
+    """The rubric v1 rule, unchanged in v2 (decision 11's ``primary_use`` test
+    is held): ``trait_sense_rank >= 2``, or ``n_senses >= 3`` with
+    ``confidence < 0.7``."""
     rank = verdict_row.get("trait_sense_rank") or 1
     conf = verdict_row.get("confidence")
     if rank >= 2:

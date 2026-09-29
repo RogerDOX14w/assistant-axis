@@ -87,7 +87,7 @@ logger = logging.getLogger("traithood_filter")
 # Token model for the estimate (first-of-kind; revise from the pilot's usage.json).
 CHARS_PER_TOKEN = 3.6
 IN_TOK_PER_ITEM = 30
-OUT_TOK_PER_ITEM = 190  # rubric v2 rows carry label, primary_use, membership_kind, alignment (v1 measured 140)
+OUT_TOK_PER_ITEM = 190  # rubric v2 rows carry label, membership_kind, alignment (v1 measured 140)
 PROBE_IN_PER_ITEM = 15
 PROBE_OUT_PER_ITEM = 50
 SECOND_EXTRA_FRAC = 0.15   # low-confidence + disagreement rows beyond the random sample (guess)

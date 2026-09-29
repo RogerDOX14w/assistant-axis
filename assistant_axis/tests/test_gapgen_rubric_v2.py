@@ -32,7 +32,7 @@ SIX = {"disciplinary", "engaging", "economic", "balanced", "empowered", "emotive
 
 def row(i, label, **kw):
     base = {"id": i, "label": label, "reason": "Said of how someone habitually behaves in conversation.",
-            "senses": [label], "primary_use": "person_character", "enactable_in_text": 2, "verdict": "trait",
+            "senses": [label], "trait_sense_rank": 1, "enactable_in_text": 2, "verdict": "trait",
             "tags": [], "membership_kind": None, "region": "social_interpersonal", "alignment_relevant": False,
             "gloss": "This means " + "doing things " * 9 + "always.", "confidence": 0.9}
     base.update(kw)
@@ -67,12 +67,17 @@ class TestPromptV2:
 
     def test_schema_field_order(self):
         s = self.schema()
-        order = ['"id"', '"label"', '"reason"', '"primary_use"', '"verdict"', '"tags"', '"membership_kind"',
-                 '"alignment_relevant"', '"gloss"', '"confidence"']
+        order = ['"id"', '"label"', '"reason"', '"senses"', '"trait_sense_rank"', '"verdict"', '"tags"',
+                 '"membership_kind"', '"alignment_relevant"', '"gloss"', '"confidence"']
         pos = [s.index(k) for k in order]
         assert pos == sorted(pos)
-        for v in ("person_character", "person_other", "non_person"):
-            assert v in s
+
+    def test_primary_use_held(self):
+        """Scope change 2026-09-29: decision 11's primary_use is held; the
+        polysemy flag stays the v1 sense-rank rule."""
+        assert "primary_use" not in fr.SYSTEM_PROMPT
+        assert "trait_sense_rank is the position of the trait sense in that list" in " ".join(
+            fr.SYSTEM_PROMPT.split())
 
     def test_reason_cap_and_sense_line(self):
         sp = fr.SYSTEM_PROMPT
@@ -134,7 +139,7 @@ class TestPromptV2:
             body = " ".join(item.split())
             if "verdict reject" in body:
                 continue
-            for field in ("primary_use", "region", "gloss"):
+            for field in ("rank", "region", "gloss"):
                 assert field in body, (item[:30], field)
 
     def test_probe_v2(self):
@@ -179,11 +184,11 @@ class TestValidatorV2:
 
     def test_reject_gloss_may_be_null(self):
         rows, errs = parse(row(1, "a", verdict="reject", tags=["relational_only"], gloss=None, region=None,
-                               primary_use="non_person"))
+                               trait_sense_rank=None))
         assert errs == {}
 
     def test_membership_kind(self):
-        ok = row(1, "a", tags=["membership"], membership_kind="family", primary_use="person_other")
+        ok = row(1, "a", tags=["membership"], membership_kind="family")
         bad = row(2, "b", tags=["membership"], membership_kind="nationality")
         none_ = row(3, "c", tags=["membership"], membership_kind=None)
         rows, errs = parse(ok, bad, none_)
@@ -193,9 +198,9 @@ class TestValidatorV2:
         rows, errs = parse(row(1, "a", membership_kind="family"))
         assert rows[1]["membership_kind"] is None
 
-    def test_primary_use_and_alignment(self):
-        rows, errs = parse(row(1, "a", primary_use="sometimes"), row(2, "b", alignment_relevant="yes"),
-                           row(3, "c", alignment_relevant="true"), row(4, "d", primary_use=None))
+    def test_alignment_relevant(self):
+        rows, errs = parse(row(2, "b", alignment_relevant="yes"), row(3, "c", alignment_relevant="true"),
+                           row(4, "d", alignment_relevant=None))
         assert set(rows) == {3} and rows[3]["alignment_relevant"] is True
 
     def test_demographic_no_longer_a_classifier_tag(self):
@@ -210,10 +215,12 @@ class TestValidatorV2:
         assert rows[1]["verdict"] == "trait" and rows[1]["tag_disagreement"] is True
         assert rows[2]["verdict"] == "reject" and rows[2]["tag_disagreement"] is True
 
-    def test_polysemy_from_primary_use(self):
-        assert fr.derive_polysemy({"primary_use": "non_person"}, None) is True
-        assert fr.derive_polysemy({"primary_use": "person_other"}, None) is True
-        assert fr.derive_polysemy({"primary_use": "person_character"}, 5) is False
+    def test_polysemy_stays_v1(self):
+        """Item 7 held: sense rank decides, as in v1."""
+        assert fr.derive_polysemy({"trait_sense_rank": 2, "confidence": 0.9}, None) is True
+        assert fr.derive_polysemy({"trait_sense_rank": 1, "confidence": 0.9}, 1) is False
+        assert fr.derive_polysemy({"primary_use": "non_person", "trait_sense_rank": 1, "confidence": 0.9},
+                                  1) is False
 
 
 # ---------------------------------------------------------------------------
@@ -299,11 +306,10 @@ class TestRoutingV2:
 # runner end to end with the v2 row shape
 # ---------------------------------------------------------------------------
 
-SPEC = {"tall": {"verdict": "tagged", "tags": ["physical"], "region": "physical", "primary_use": "person_other"},
-        "jittery": {"verdict": "tagged", "tags": ["state"], "region": "emotional_temperament",
-                    "primary_use": "person_other"},
-        "stepchild": {"tags": ["membership"], "membership_kind": "family", "primary_use": "person_other"},
-        "lukewarm": {"primary_use": "non_person"},
+SPEC = {"tall": {"verdict": "tagged", "tags": ["physical"], "region": "physical"},
+        "jittery": {"verdict": "tagged", "tags": ["state"], "region": "emotional_temperament"},
+        "stepchild": {"tags": ["membership"], "membership_kind": "family"},
+        "lukewarm": {"trait_sense_rank": 2},
         "sandbagging": {"alignment_relevant": True, "region": "alignment_ai_agent"},
         "homebody": {"tags": ["role_person"], "confidence": 0.9}}
 
@@ -328,7 +334,7 @@ def test_runner_v2_blocks_and_routing():
     assert out["lukewarm#1"].filter["polysemy"] is True and out["lukewarm#1"].filter["verdict"] == "trait"
     assert out["plain#1"].filter["polysemy"] is False
     assert out["sandbagging#1"].filter["alignment_relevant"] is True
-    assert out["plain#1"].filter["primary_use"] == "person_character"
+    assert "primary_use" not in out["plain#1"].filter
     assert out["homebody#1"].filter["tag_disagreement"] is True
     assert out["homebody#1"].filter["second_opinion"] is not None  # disagreement triggered Sonnet
     assert out["plain#1"].filter["rubric_version"] == 2
@@ -348,23 +354,6 @@ def test_rescued_word_reaches_classifier_and_probe():
     assert by["zzword#1"].freq["define_probe"]["known"] is True
     assert by["uncalculating#1"].stage == "classified"
     assert by["low#1"].stage == "hard_reject"
-
-
-def test_report_puts_polysemy_flagged_rows_last(tmp_path, capsys):
-    """Decision 11 (b): a flagged word stays a trait and moves to the end of the review list."""
-    from data_analysis.gap_generation import gap_registry
-    reg = tmp_path / "r.jsonl"
-    submit_candidates([Candidate(surface=w, generator="g", run_id="r") for w in ("aa", "bb", "cc")],
-                      registry_path=reg)
-    Registry(reg).update_many({
-        "aa#1": {"filter": {"verdict": "trait", "tags": [], "polysemy": True, "primary_use": "non_person"}},
-        "bb#1": {"filter": {"verdict": "trait", "tags": ["membership"], "membership_kind": "family",
-                            "polysemy": False, "primary_use": "person_character"}},
-        "cc#1": {"filter": {"verdict": "trait", "tags": [], "polysemy": False}}})
-    assert gap_registry.main(["--registry", str(reg), "report"]) == 0
-    lines = [x for x in capsys.readouterr().out.splitlines() if x.startswith("| ")][1:]  # drop the header
-    assert [x.split(" | ")[0][2:] for x in lines] == ["bb#1", "cc#1", "aa#1"]
-    assert "membership:family" in lines[0] and "True (non_person)" in lines[2]
 
 
 def test_holding_cli_states(tmp_path, capsys):

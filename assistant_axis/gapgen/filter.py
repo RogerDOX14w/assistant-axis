@@ -234,7 +234,7 @@ class FilterRunner:
                     "reason": f"Zipf {fq.zipf_min:.2f} is below the {HARD_REJECT_BELOW} floor and no "
                               f"rescue route applies (no LLM call).",
                     "verdict": "reject", "tags": ["too_rare"], "region": None, "senses": [],
-                    "primary_use": None, "membership_kind": None, "alignment_relevant": False,
+                    "membership_kind": None, "alignment_relevant": False,
                     "tag_disagreement": False,
                     "trait_sense_rank": None, "enactable_in_text": None, "confidence": 1.0,
                     "polysemy": False, "gloss_in_band": False, "second_opinion": None,
@@ -381,7 +381,7 @@ class FilterRunner:
             "rubric_version": fr.TRAITHOOD_RUBRIC_VERSION, "model": self.model, "batch_id": self.batch_id,
             "reason": row["reason"], "verdict": row["verdict"], "tags": row["tags"],
             "membership_kind": row.get("membership_kind"), "region": row["region"],
-            "alignment_relevant": row.get("alignment_relevant"), "primary_use": row.get("primary_use"),
+            "alignment_relevant": row.get("alignment_relevant"),
             "senses": row["senses"], "trait_sense_rank": row["trait_sense_rank"],
             "enactable_in_text": row["enactable_in_text"], "confidence": row["confidence"],
             "polysemy": fr.derive_polysemy(row, n_senses), "tag_disagreement": row.get("tag_disagreement", False),
@@ -482,7 +482,6 @@ class FilterRunner:
                 agree = row["verdict"] == (f.get("classifier_verdict") or f["verdict"])
                 f["second_opinion"] = {"model": self.second_model, "reason": row["reason"],
                                        "verdict": row["verdict"], "tags": row["tags"], "region": row["region"],
-                                       "primary_use": row.get("primary_use"),
                                        "membership_kind": row.get("membership_kind"),
                                        "alignment_relevant": row.get("alignment_relevant"),
                                        "trait_sense_rank": row["trait_sense_rank"],
@@ -596,7 +595,6 @@ def summarize(results: Sequence[FilterResult], *, stats: Counter, usage: MultiMo
             out["validation_figures"] = validation_figures(results)
     clf = [r for r in results if r.stage == "classified"]
     out["v2_fields"] = {
-        "primary_use": dict(sorted(Counter(str(r.filter.get("primary_use")) for r in clf).items())),
         "alignment_relevant_true": sum(1 for r in clf if r.filter.get("alignment_relevant") is True),
         "membership_kind": dict(sorted(Counter(r.filter.get("membership_kind") for r in clf
                                                if r.filter.get("membership_kind")).items())),
@@ -671,11 +669,6 @@ def validation_figures(results: Sequence[FilterResult]) -> dict:
                         "meets_target": rnd_share is not None and rnd_share <= TARGET_RANDOM_TRAIT_MAX},
     }
 
-
-def review_sort_key(rec: dict) -> tuple:
-    """Order for a review list: rows whose polysemy flag fired go to the end
-    (decision 11, option b); otherwise by key."""
-    return (bool((rec.get("filter") or {}).get("polysemy")), rec.get("key") or "")
 
 
 def run_traithood_filter(records: Sequence[dict] | Sequence[FilterItem], *, client, model: str = DEFAULT_MODEL,

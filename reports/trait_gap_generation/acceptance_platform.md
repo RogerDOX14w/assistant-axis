@@ -244,7 +244,9 @@ the always-true comparisons are gone, the module docstring names the tests that 
 consumers:
 
 * **Versions.**  `TRAITHOOD_RUBRIC_VERSION = 2`, `PROBE_RUBRIC_VERSION = 2`; the prompt hashes changed
-  (classifier `ba7a4316...`, probe `0785cd07...`).  Filter blocks written by v1 (the pilot) keep
+  (classifier `2b5b298e...`, probe `0785cd07...`).  The three `m2rubric_smoke_*` runs used an
+  intermediate classifier prompt (`ba7a4316...`) that still carried the withdrawn `primary_use` field;
+  each run dir has a `WITHDRAWN_PROMPT.md` saying so.  Filter blocks written by v1 (the pilot) keep
   `rubric_version: 1`.
 * **Floor.**  `freq.HARD_REJECT_BELOW = 1.5`; the probe band is 1.5 to 2.5.  Rescue rule 1b sends a word
   below the floor to the classifier and the probe when it is a negation (un-, in-, non-) of a word at or
@@ -252,12 +254,15 @@ consumers:
   (`freq.CURATED_GENERATORS`: `censuses` only; the Roget and WordNet harvest is not curated).  The `freq`
   block gains `rescue` (`negating_prefix` | `gloss_hint` | `curated_source` | `familiarity` | null).
   `zipf_info` gains `gloss_hint=False, curated=False`; `FilterItem` gains `curated`.
-* **New filter-block fields** (additive): `primary_use` (`person_character` | `person_other` |
-  `non_person`; null on hard rejects), `alignment_relevant` (bool, asked independently of `region`),
+* **New filter-block fields** (additive): `alignment_relevant` (bool, asked independently of `region`),
   `membership_kind` (one of `filter_rubric.MEMBERSHIP_KINDS` when the row carries `membership`, else
-  null), `tag_disagreement` (bool: a tag belongs to another verdict).  `polysemy` is now
-  `primary_use != "person_character"` (v1 rows keep the sense-rank rule).  `trait_sense_rank` is no longer
-  asked and is null on v2 rows.  The second-opinion block gains the same three fields.
+  null), `tag_disagreement` (bool: a tag belongs to another verdict).  The second-opinion block gains
+  the same three fields.
+* **Ambiguity (decision 11) held.**  No `primary_use` field; the polysemy flag is the v1 rule unchanged
+  (`trait_sense_rank >= 2`, or 3+ WordNet senses with confidence under 0.7), and the review list keeps
+  key order.  Kept from decision 11: `relational_only` rejects a word only when none of its senses
+  describes a person's character, so a word with a character sense beside a commoner non-person use is
+  verdict `trait` (flagged or not by the v1 rule).
 * **Tags.**  The classifier's tags are `membership` (with `trait`); `physical`, `state`,
   `transient_only`, `role_person`, `role_thing`, `evaluative_only` (with `tagged`); `relational_only`,
   `not_a_word` (with `reject`).  `demographic` is retired from the classifier and stays in `TAG_VOCAB`
@@ -268,13 +273,14 @@ consumers:
   (decision 12), physical to `physical`, roles to `roles`.  `gap_registry.py holding --list states`
   prints it.  A membership is a trait and goes to no holding list.
 * **Validator.**  Rows echo their `label`; a mismatch rejects the row.  `trait` and `tagged` rows need
-  `region`, `primary_use`, `alignment_relevant` and a `gloss`; `reject` rows may leave them null.  A
+  `region`, `alignment_relevant` and a `gloss`, and `trait` rows a `trait_sense_rank` (1-3); `reject`
+  rows may leave them null.  A
   `membership` row needs a valid `membership_kind`.  Reasons are asked for in at most 30 words (not
   enforced; the block records nothing new for it, the parser keeps `reason_words` in memory only).
 * **Second opinion.**  Triggers: 10% random, confidence under 0.75, `tag_disagreement`, and the plan's
   prior/LLM disagreement (QUESTIONS 12).
-* **Review order.**  `filter.review_sort_key` puts polysemy-flagged rows last; `gap_registry.py report`
-  uses it and shows `alignment_relevant`, `membership:<kind>` and the primary use.
+* **Report.**  `gap_registry.py report` keeps key order and adds `alignment_relevant` and
+  `membership:<kind>` columns.
 * **Quality figures.**  `filter.validation_figures` computes the three M1 figures against 95%, 4 of 6 and
   15%, with every existing label that received `state` or `physical` listed by name and the misses by
   cause; a validation run's `summary.json` carries them as `validation_figures`, and the acceptance
@@ -284,5 +290,5 @@ consumers:
   `not_adopted` or `superseded`, quoting the decision (and the replacing label for `superseded`, when the
   decision names one); `--reopen-turned-down` lets it through and copies the history into
   `description_notes`.  `seed_entities.build_registry` is unchanged.
-* **Summary.**  `summary.json` gains `v2_fields` (counts of `primary_use`, `alignment_relevant` true,
+* **Summary.**  `summary.json` gains `v2_fields` (counts of `alignment_relevant` true,
   `membership_kind`, `tag_disagreement`, holding lists, floor rescues).

@@ -15,7 +15,7 @@ HAIKU = "claude-haiku-4-5-20251001"
 
 
 def _row(i, label):
-    row = {"id": i, "label": label, "reason": "A habit.", "senses": [label], "primary_use": "person_character",
+    row = {"id": i, "label": label, "reason": "A habit.", "senses": [label], "trait_sense_rank": 1,
            "enactable_in_text": 2, "verdict": "trait", "tags": [], "region": "social_interpersonal",
            "alignment_relevant": False, "gloss": "This means " + "doing things " * 9 + "always.",
            "confidence": 0.9}

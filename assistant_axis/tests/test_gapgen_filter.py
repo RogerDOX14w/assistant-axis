@@ -33,7 +33,7 @@ SPEC = {  # label -> fields overriding a default trait row
     "plumber": {"verdict": "tagged", "tags": ["role_person"], "region": "social_interpersonal",
                 "gloss": "A plumber is someone who " + "fixes pipes " * 8},
     "flurbish": {"verdict": "reject", "tags": ["not_a_word"], "region": None, "gloss": None},
-    "cool": {"primary_use": "non_person"},
+    "cool": {"trait_sense_rank": 2},
     "shaky": {"confidence": 0.4},
     "nice": {},
 }
@@ -41,7 +41,7 @@ SPEC = {  # label -> fields overriding a default trait row
 
 def trait_row(i, label, model=None):
     row = {"id": i, "label": label, "reason": f"{label} is a habit.", "senses": [label],
-           "primary_use": "person_character", "enactable_in_text": 2, "verdict": "trait", "tags": [],
+           "trait_sense_rank": 1, "enactable_in_text": 2, "verdict": "trait", "tags": [],
            "region": "social_interpersonal", "alignment_relevant": False,
            "gloss": "This means " + "doing things " * 9 + "always.", "confidence": 0.9}
     row.update(SPEC.get(label, {}))
@@ -71,7 +71,7 @@ def responder_factory(*, fail_labels=(), garbage_first=False, known=True, second
             if kw["model"] == SONNET and second_verdict:
                 r["verdict"] = second_verdict
                 if second_verdict == "reject":
-                    r.update(tags=["not_a_word"], region=None, gloss=None, primary_use=None)
+                    r.update(tags=["not_a_word"], region=None, gloss=None)
             rows.append(r)
         return json.dumps({"results": rows})
 
