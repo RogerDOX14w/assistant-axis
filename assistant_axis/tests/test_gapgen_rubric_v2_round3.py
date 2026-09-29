@@ -18,8 +18,7 @@ from assistant_axis.tests.fake_anthropic import FakeAsyncAnthropic, make_respons
 HAIKU = "claude-haiku-4-5-20251001"
 SONNET = "claude-sonnet-4-6"
 REPO = Path(__file__).resolve().parents[2]
-DECISIONS = REPO / "reports" / "trait_gap_generation" / "decisions_m1.md"
-PROBE_RESULTS = REPO / "reports" / "trait_gap_generation" / "probe_you_are_x" / "results.jsonl"
+RESERVED = Path(__file__).resolve().parent / "data" / "gapgen_reserved_words.txt"
 SIX = {"disciplinary", "engaging", "economic", "balanced", "empowered", "emotive"}
 
 
@@ -56,8 +55,8 @@ class TestVersionPins:
         for name, (v, _sha) in rv().current().items():
             assert v == max(h[name]), name
 
-    def test_classifier_is_version_3(self):
-        assert fr.TRAITHOOD_RUBRIC_VERSION == 3
+    def test_classifier_is_version_3_or_later(self):
+        assert fr.TRAITHOOD_RUBRIC_VERSION >= 3  # 4 since round 4
 
 
 # ---------------------------------------------------------------------------
@@ -67,7 +66,7 @@ class TestVersionPins:
 def crow(i, label, **kw):
     base = {"id": i, "label": label, "reason": "A habit of mind shown in how someone talks.",
             "person_senses": [{"sense": "habit of mind", "kind": "trait"}],
-            "trait_senses_equally_obvious": False, "enactable_in_text": 2, "verdict": "trait", "tags": [],
+            "trait_senses_equally_obvious": False, "judged_sense": "habit of mind", "enactable_in_text": 2, "verdict": "trait", "tags": [],
             "membership_kind": None, "region": "social_interpersonal", "alignment_relevant": False,
             "gloss": "This means " + "doing things " * 9 + "always.", "confidence": 0.9}
     base.update(kw)
@@ -92,7 +91,7 @@ class TestPersonSenses:
 
     def test_validator_derives_senses_and_rank(self):
         rows, errs = parse(crow(1, "a", person_senses=[{"sense": "relaxed", "kind": "trait"},
-                                                       {"sense": "not tied", "kind": "circumstance"}]))
+                                                       {"sense": "not tied", "kind": "state"}]))
         assert errs == {}
         r = rows[1]
         assert r["senses"] == ["relaxed", "not tied"] and r["trait_sense_rank"] == 1
@@ -119,7 +118,7 @@ class TestPersonSenses:
 
     def test_nontrait_person_sense(self):
         rows, _ = parse(crow(1, "a", person_senses=[{"sense": "gentle", "kind": "trait"},
-                                                    {"sense": "flabby", "kind": "bodily"}]),
+                                                    {"sense": "flabby", "kind": "physical"}]),
                         crow(2, "b", verdict="tagged", tags=["state"], region="transient_state",
                              person_senses=[{"sense": "in a mood", "kind": "state"},
                                             {"sense": "moody", "kind": "trait"}]))
@@ -134,8 +133,8 @@ class TestPersonSenses:
     def test_prompt_examples_show_each_case(self):
         ex = fr.SYSTEM_PROMPT[fr.SYSTEM_PROMPT.index("## Examples"):fr.SYSTEM_PROMPT.index("## Regions")]
         body = " ".join(ex.replace("\\\n", " ").split())
-        assert "equally obvious true" in body
-        assert "(bodily)" in body
+        assert "trait_senses_equally_obvious true" in body  # schema field names since round 4
+        assert "(physical)" in body  # the kind "bodily" became "physical" in round 4
 
 
 # ---------------------------------------------------------------------------
@@ -211,7 +210,8 @@ class TestPlainReadingRunner:
         r = pr().PlainReadingRunner(client=FakeAsyncAnthropic(resp), batch_id="b", reading_model=HAIKU,
                                     compare_model=SONNET)
         o = r.run([pr().ReadingItem(key="a#1", label="a", intended="i")])[0]
-        assert o.notes == [] and o.comparison["relation"] == "related"
+        # round 4: related raises its own note, reading_related, never overshadowed
+        assert o.notes == ["reading_related"] and o.comparison["relation"] == "related"
 
     def test_reuse_readings_skips_the_call(self):
         client = FakeAsyncAnthropic(reading_responder)
@@ -281,7 +281,7 @@ class TestFilterIntegration:
         for k in ("senses", "trait_sense_rank", "polysemy", "polysemy_notes", "person_senses",
                   "trait_senses_equally_obvious", "plain_reading", "comparison"):
             assert k in f, k
-        assert f["rubric_version"] == 3
+        assert f["rubric_version"] == 4
 
 
 # ---------------------------------------------------------------------------
@@ -297,12 +297,12 @@ def test_judgement_call_table(tmp_path, capsys):
     Registry(reg).update("soft#1", {"filter": {"verdict": "trait", "tags": [],
                                                "polysemy_notes": ["nontrait_person_sense"],
                                                "person_senses": [{"sense": "gentle and lenient", "kind": "trait"},
-                                                                 {"sense": "physically soft", "kind": "bodily"}]}})
+                                                                 {"sense": "physically soft", "kind": "physical"}]}})
     Registry(reg).update("stubborn#1", {"filter": {"verdict": "trait", "tags": [], "polysemy_notes": []}})
     assert gap_registry.main(["--registry", str(reg), "judgement-calls"]) == 0
     out = capsys.readouterr().out
     assert "| word | key | trait sense | other sense | Roger's call |" in out
-    assert "| soft | soft#1 | gentle and lenient | physically soft (bodily) |  |" in out
+    assert "| soft | soft#1 | gentle and lenient | physically soft (physical) |  |" in out
     assert "stubborn" not in out
 
 
@@ -325,14 +325,14 @@ def test_example_words_avoid_every_source():
     words = (list(fr.EXAMPLE_WORDS) + list(fr.MENTIONED_WORDS) + list(sp.EXAMPLE_WORDS)
              + list(sp.SUGGESTED_NAMES) + list(pr().EXAMPLE_WORDS))
     stems = _forbidden_stems()
-    dec = DECISIONS.read_text(encoding="utf-8").lower()
-    probe = PROBE_RESULTS.read_text(encoding="utf-8").lower()
+    # round 4 (review finding 6): the decisions file and the probe results are
+    # untracked working files; their words come from the tracked list built from them
+    reserved = set(RESERVED.read_text(encoding="utf-8").split())
     bad = []
     for w in words:
         why = [src for src, hit in (("corpus/queue", normalize_to_file_name(w) in stems),
                                     ("six", w.lower() in SIX),
-                                    ("decisions", re.search(rf"\b{re.escape(w.lower())}\b", dec)),
-                                    ("probe", re.search(rf"\b{re.escape(w.lower())}\b", probe))) if hit]
+                                    ("reserved", " " not in w and w.lower() in reserved)) if hit]
         if why:
             bad.append((w, why))
     assert bad == []

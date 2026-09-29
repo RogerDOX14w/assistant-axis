@@ -16,7 +16,7 @@ HAIKU = "claude-haiku-4-5-20251001"
 
 def _row(i, label):
     row = {"id": i, "label": label, "reason": "A habit.",
-           "person_senses": [{"sense": label, "kind": "trait"}], "trait_senses_equally_obvious": False,
+           "person_senses": [{"sense": label, "kind": "trait"}], "trait_senses_equally_obvious": False, "judged_sense": label,
            "enactable_in_text": 2, "verdict": "trait", "tags": [], "region": "social_interpersonal",
            "alignment_relevant": False, "gloss": "This means " + "doing things " * 9 + "always.",
            "confidence": 0.9}
@@ -180,7 +180,7 @@ class TestTraithoodFilterCLI:
         assert traithood_filter.main(["--batch-id", "b6", "--keys", "stubborn#1", "--registry", str(reg),
                                       "--out-root", str(cand_dir), "--no-second-opinion"]) == 0
         f = Registry(reg).get("stubborn#1")["filter"]
-        assert f["verdict"] == "trait" and "classifier_verdict" not in f and f["rubric_version"] == 3  # classifier v3 (round 3)
+        assert f["verdict"] == "trait" and "classifier_verdict" not in f and f["rubric_version"] == 4  # classifier v4 (round 4)
 
     def test_prompt_hashes_recorded(self, tmp_path, cand_dir, fake_client):
         """Review finding 10: which prompt text was sent is recorded."""

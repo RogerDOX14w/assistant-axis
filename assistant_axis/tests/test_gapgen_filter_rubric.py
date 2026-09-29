@@ -14,7 +14,7 @@ REPO = Path(__file__).resolve().parents[2]
 
 def _row(i, **kw):
     base = {"id": i, "label": f"w{i}", "reason": "A stable habit.",
-            "person_senses": [{"sense": "s1", "kind": "trait"}], "trait_senses_equally_obvious": False, "enactable_in_text": 2, "verdict": "trait", "tags": [],
+            "person_senses": [{"sense": "s1", "kind": "trait"}], "trait_senses_equally_obvious": False, "judged_sense": "s1", "enactable_in_text": 2, "verdict": "trait", "tags": [],
             "region": "cognitive_epistemic", "alignment_relevant": False,
             "gloss": "This means " + "word " * 20, "confidence": 0.9}
     base.update(kw)
@@ -182,7 +182,7 @@ class TestDerived:
         (["trait", "bodily"], False, "trait", None, True),        # nontrait_person_sense
         (["state", "trait"], False, "tagged", None, False),       # obvious reading a state: the tag
         (["trait"], False, "trait", "different", True),           # overshadowed
-        (["trait"], False, "trait", "related", False),
+        (["trait"], False, "trait", "related", True),             # reading_related (round 4)
     ])
     def test_polysemy_truth_table(self, kinds, equal, verdict, relation, expected):
         row = {"person_senses": [{"sense": k, "kind": k} for k in kinds], "trait_senses_equally_obvious": equal,

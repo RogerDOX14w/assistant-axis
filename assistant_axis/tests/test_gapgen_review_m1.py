@@ -163,7 +163,7 @@ WORDS = ["stubborn", "vain", "timid", "loyal", "brave", "shy", "rude", "calm", "
 
 def _row(i, label):
     return {"id": i, "label": label, "reason": "A habit.",
-            "person_senses": [{"sense": label, "kind": "trait"}], "trait_senses_equally_obvious": False, "enactable_in_text": 2, "verdict": "trait", "tags": [],
+            "person_senses": [{"sense": label, "kind": "trait"}], "trait_senses_equally_obvious": False, "judged_sense": label, "enactable_in_text": 2, "verdict": "trait", "tags": [],
             "region": "social_interpersonal", "alignment_relevant": False,
             "gloss": "This means " + "doing things " * 9 + "always.", "confidence": 0.9}
 

@@ -35,7 +35,7 @@ SIX = {"disciplinary", "engaging", "economic", "balanced", "empowered", "emotive
 
 def crow(i, label, **kw):
     base = {"id": i, "label": label, "reason": "Said of how someone habitually behaves in conversation.",
-            "person_senses": [{"sense": label, "kind": "trait"}], "trait_senses_equally_obvious": False, "enactable_in_text": 2, "verdict": "trait",
+            "person_senses": [{"sense": label, "kind": "trait"}], "trait_senses_equally_obvious": False, "judged_sense": label, "enactable_in_text": 2, "verdict": "trait",
             "tags": [], "membership_kind": None, "region": "social_interpersonal", "alignment_relevant": False,
             "gloss": "This means " + "doing things " * 9 + "always.", "confidence": 0.9}
     base.update(kw)
@@ -186,7 +186,7 @@ def crow_corpus(i, label, **kw):
 class TestStatesPassRubric:
     def test_versions_and_hashes(self):
         s = sp_mod()
-        assert s.RUBRIC_VERSIONS == {"queue": 2, "corpus": 1}  # round 3: one version per prompt
+        assert s.RUBRIC_VERSIONS == {"queue": 3, "corpus": 2}  # round 4: prompt words replaced
         assert s.PROMPT_SHA256 == {"queue": hashlib.sha256(s.QUEUE_PROMPT.encode()).hexdigest(),
                                    "corpus": hashlib.sha256(s.CORPUS_PROMPT.encode()).hexdigest()}
 
@@ -268,7 +268,7 @@ class TestStatesPassRunner:
         b = out["sulking#1"].block
         assert out["sulking#1"].stage == "judged"
         assert b["plausible"] is True and b["suggested_name"] == "sulky" and b["suggested_stem"] == "sulky"
-        assert b["mode"] == "queue" and b["rubric_version"] == 2 and b["prompt_sha256"] == s.PROMPT_SHA256["queue"]
+        assert b["mode"] == "queue" and b["rubric_version"] == 3 and b["prompt_sha256"] == s.PROMPT_SHA256["queue"]
         assert out["sunburnt#1"].block["plausible"] is False
         assert r.usage.n_calls == 1 and len(r.responses) == 1
         assert "This means sulking now." in user_text(client.calls[0])
@@ -358,7 +358,7 @@ class TestStatesPassCLI:
         for f in ("responses.jsonl", "results.jsonl", "summary.json", "usage.json", "run.json"):
             assert (d / f).exists(), f
         run = json.loads((d / "run.json").read_text())
-        assert run["rubric_version"] == 2 and run["prompt_sha256"] == sp_mod().PROMPT_SHA256["queue"]
+        assert run["rubric_version"] == 3 and run["prompt_sha256"] == sp_mod().PROMPT_SHA256["queue"]
         res = [json.loads(x) for x in (d / "results.jsonl").read_text().splitlines()]
         assert [r["key"] for r in res] == ["sulking#1", "sunburnt#1"]
         s = json.loads((d / "summary.json").read_text())["result"]
@@ -435,7 +435,9 @@ class TestPromoteStates:
         from assistant_axis.gapgen.promote import promote
         rows = {"sulking#1": _held("sulking", "states", PASS_OK)}
         q = {"_meta": {}, "entries": []}
-        rep = promote(rows, q, ["sulking#1"], data_dir=data_dir, dry_run=False)
+        # round 4: Roger's confirmed name is required (QUESTIONS 14)
+        rep = promote(rows, q, ["sulking#1"], data_dir=data_dir, dry_run=False,
+                      confirmed_state_names={"sulking#1": "sulky"})
         assert rep.promoted == ["sulking#1"]
         e = q["entries"][-1]
         assert e["stem"] == "sulky" and e["label"] == "sulky"
@@ -448,7 +450,7 @@ class TestPromoteStates:
         ok = {**PASS_OK, "name_fits": True, "suggested_name": None, "suggested_stem": None}
         q = {"_meta": {}, "entries": []}
         rep = promote({"tearful#1": _held("tearful", "states", ok)}, q, ["tearful#1"], data_dir=data_dir,
-                      dry_run=False)
+                      dry_run=False, confirmed_state_names={"tearful#1": "tearful"})
         assert rep.promoted == ["tearful#1"] and q["entries"][-1]["stem"] == "tearful"
 
     def test_refusals(self, data_dir):
@@ -466,7 +468,7 @@ class TestPromoteStates:
         from assistant_axis.gapgen.promote import promote
         (data_dir / "traits" / "instructions" / "sulky.json").write_text("{}")
         rep = promote({"sulking#1": _held("sulking", "states", PASS_OK)}, {"_meta": {}, "entries": []},
-                      ["sulking#1"], data_dir=data_dir)
+                      ["sulking#1"], data_dir=data_dir, confirmed_state_names={"sulking#1": "sulky"})
         assert rep.promoted == [] and "corpus" in rep.refused["sulking#1"]
 
 

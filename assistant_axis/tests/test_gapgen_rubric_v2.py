@@ -32,7 +32,7 @@ SIX = {"disciplinary", "engaging", "economic", "balanced", "empowered", "emotive
 
 def row(i, label, **kw):
     base = {"id": i, "label": label, "reason": "Said of how someone habitually behaves in conversation.",
-            "person_senses": [{"sense": label, "kind": "trait"}], "trait_senses_equally_obvious": False, "enactable_in_text": 2, "verdict": "trait",
+            "person_senses": [{"sense": label, "kind": "trait"}], "trait_senses_equally_obvious": False, "judged_sense": label, "enactable_in_text": 2, "verdict": "trait",
             "tags": [], "membership_kind": None, "region": "social_interpersonal", "alignment_relevant": False,
             "gloss": "This means " + "doing things " * 9 + "always.", "confidence": 0.9}
     base.update(kw)
@@ -50,7 +50,7 @@ def parse(*rows, labels=None):
 
 def test_versions_and_hashes_change():
     # probe rubric 3 since round 2 (derived words); the classifier stays at 2
-    assert fr.TRAITHOOD_RUBRIC_VERSION == 3 and fr.PROBE_RUBRIC_VERSION == 3  # round 3: classifier v3
+    assert fr.TRAITHOOD_RUBRIC_VERSION == 4 and fr.PROBE_RUBRIC_VERSION == 3  # round 4: classifier v4
     from assistant_axis.gapgen.filter import PROMPT_SHA256
     assert PROMPT_SHA256["classifier"] != V1_PROMPT_SHA
     assert PROMPT_SHA256["probe"] != V1_PROBE_SHA
@@ -171,10 +171,13 @@ class TestValidatorV2:
         assert rows == {}
 
     def test_tag_must_fit_verdict(self):
+        """Round 4 (review_rubric_v2.md finding 3, decision 4): a tag of another
+        verdict is kept with tag_disagreement set; only no tag at all fails
+        (row 3 used to fail)."""
         rows, errs = parse(row(1, "a", verdict="tagged", tags=[]), row(2, "b", verdict="reject", tags=[],
                                                                         gloss=None),
                            row(3, "c", verdict="tagged", tags=["relational_only"]))
-        assert rows == {} and set(errs) == {1, 2, 3}
+        assert set(rows) == {3} and set(errs) == {1, 2} and rows[3]["tag_disagreement"] is True
 
     def test_plain_trait_needs_no_tag(self):
         rows, errs = parse(row(1, "a"))
@@ -311,7 +314,7 @@ SPEC = {"tall": {"verdict": "tagged", "tags": ["physical"], "region": "physical"
         "jittery": {"verdict": "tagged", "tags": ["state"], "region": "emotional_temperament"},
         "stepchild": {"tags": ["membership"], "membership_kind": "family"},
         "lukewarm": {"person_senses": [{"sense": "unenthusiastic", "kind": "trait"},
-                                       {"sense": "slightly feverish", "kind": "bodily"}]},
+                                       {"sense": "slightly feverish", "kind": "state"}]},
         "sandbagging": {"alignment_relevant": True, "region": "alignment_ai_agent"},
         "homebody": {"tags": ["role_person"], "confidence": 0.9}}
 
@@ -339,7 +342,7 @@ def test_runner_v2_blocks_and_routing():
     assert "primary_use" not in out["plain#1"].filter
     assert out["homebody#1"].filter["tag_disagreement"] is True
     assert out["homebody#1"].filter["second_opinion"] is not None  # disagreement triggered Sonnet
-    assert out["plain#1"].filter["rubric_version"] == 3
+    assert out["plain#1"].filter["rubric_version"] == 4
     labels_sent = [json.loads(x)["label"] for c in client.calls[:1] for x in user_text(c).splitlines()[1:]]
     assert "plain" in labels_sent
 
@@ -437,7 +440,9 @@ def test_promote_refuses_turned_down(data_dir):
     assert rep.promoted == []
     assert "not_adopted" in rep.refused["aloof#1"] and "overlaps reserved and detached" in rep.refused["aloof#1"]
     assert "superseded" in rep.refused["extreme#1"] and "replaced by extremist" in rep.refused["extreme#1"]
-    assert "no replacing label" in rep.refused["fact_bound#1"]
+    # round 4 (finding 11): no replacement parsed, so the quoted decision speaks for itself
+    assert "speculative is paired with empirical" in rep.refused["fact_bound#1"]
+    assert "no replacing label" not in rep.refused["fact_bound#1"]
     assert len(q["entries"]) == 3
 
 

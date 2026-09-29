@@ -43,7 +43,7 @@ SPEC = {  # label -> fields overriding a default trait row
 
 def trait_row(i, label, model=None):
     row = {"id": i, "label": label, "reason": f"{label} is a habit.",
-           "person_senses": [{"sense": label, "kind": "trait"}], "trait_senses_equally_obvious": False, "enactable_in_text": 2, "verdict": "trait", "tags": [],
+           "person_senses": [{"sense": label, "kind": "trait"}], "trait_senses_equally_obvious": False, "judged_sense": label, "enactable_in_text": 2, "verdict": "trait", "tags": [],
            "region": "social_interpersonal", "alignment_relevant": False,
            "gloss": "This means " + "doing things " * 9 + "always.", "confidence": 0.9}
     row.update(SPEC.get(label, {}))
@@ -101,7 +101,7 @@ class TestPipeline:
         assert by["rare#1"].filter["model"] is None
         f = by["stubborn#1"].filter
         assert by["stubborn#1"].stage == "classified" and f["verdict"] == "trait" and f["model"] == HAIKU
-        assert f["rubric_version"] == 3 and f["batch_id"] == "b1" and f["gloss_in_band"] is True
+        assert f["rubric_version"] == 4 and f["batch_id"] == "b1"  # classifier v4 (round 4) and f["gloss_in_band"] is True
         assert list(f)[:5] == ["rubric_version", "model", "batch_id", "reason", "verdict"]
         assert by["stubborn#1"].gloss.startswith("This means")
         assert (by["tall#1"].holding, by["tall#1"].entity_type) == ("physical", "trait")
