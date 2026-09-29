@@ -27,6 +27,19 @@ writes the round-2 inputs instead (sets 1-3 are read, not rewritten):
   probe v2 turned down in round 1, the corpus labels uncalculating and
   uninquisitive, and five regular derivations that are not corpus labels,
   queue entries or words of the decisions file.
+
+``--round 3`` writes the ambiguity round's inputs (sets 1-3 and round 2 read, not rewritten):
+
+* ``m2rubric_r3_dev.jsonl``: 30 corpus traits (seed 5; not the six, not
+  unflinching), each paired with its own description (expected ``same``) and
+  with the description of the trait 15 places on in the sample (expected
+  ``different``, by construction): 60 comparisons, for writing the
+  comparison prompt;
+* ``m2rubric_r3_heldout.jsonl``: the six September rejects with their
+  September descriptions (the seed queue's ``not_adopted`` entries; engaging
+  takes unflinching.json's, the trait it was renamed to): run once, last;
+* ``m2rubric_r3_classifier.jsonl``: 15 existing + 15 random rows (seed 6),
+  disjoint from every earlier smoke set.
 """
 from __future__ import annotations
 
@@ -76,9 +89,61 @@ def round2() -> int:
     return 0
 
 
+SIX = ("disciplinary", "engaging", "economic", "balanced", "empowered", "emotive")
+
+
+def round3() -> int:
+    """Round 3 (open point D): the comparison's development set, the held-out
+    six, and a classifier batch on prompt version 3.  Reads corpus and queue
+    files only."""
+    tdir = _REPO_ROOT / "data" / "traits" / "instructions"
+    traits = {p.stem: json.loads(p.read_text(encoding="utf-8")) for p in sorted(tdir.glob("*.json"))}
+    pool = [s for s, d in traits.items() if d.get("description") and s not in SIX and s != "unflinching"]
+    pick = random.Random(5).sample(pool, 30)
+    dev = []
+    for i, s in enumerate(pick):
+        d = traits[s]
+        dev.append({"key": f"{s}#same", "label": d.get("positive_label") or s, "intended": d["description"],
+                    "expected": "same", "intended_from": s})
+    for i, s in enumerate(pick):
+        other = pick[(i + 15) % len(pick)]
+        neg = str(traits[s].get("negative_label") or "").lower().replace(" ", "_").replace("-", "_")
+        assert other != s and other != neg, (s, other)
+        d = traits[s]
+        dev.append({"key": f"{s}#diff", "label": d.get("positive_label") or s,
+                    "intended": traits[other]["description"], "expected": "different", "intended_from": other})
+    _write("m2rubric_r3_dev.jsonl", dev)
+
+    q = json.loads((_REPO_ROOT / "data" / "seed_queue.json").read_text(encoding="utf-8"))
+    by_stem = {e.get("stem"): e for e in q["entries"] if e.get("status") == "not_adopted"}
+    held = []
+    for w in SIX:
+        if w == "engaging":  # renamed to unflinching (coordinator: use that file's description)
+            held.append({"key": f"{w}#heldout", "label": w, "intended": traits["unflinching"]["description"],
+                         "intended_from": "data/traits/instructions/unflinching.json"})
+        else:
+            held.append({"key": f"{w}#heldout", "label": w, "intended": by_stem[w]["description"],
+                         "intended_from": "data/seed_queue.json (not_adopted entry, description)"})
+    _write("m2rubric_r3_heldout.jsonl", held)
+
+    rows = [json.loads(x) for x in SRC.read_text(encoding="utf-8").splitlines() if x.strip()]
+    used = set()
+    for name in ("m2rubric_smoke_1", "m2rubric_smoke_2", "m2rubric_smoke_3", "m2rubric_r2_classifier"):
+        p = paths.VALIDATION_DIR / f"{name}.jsonl"
+        used |= {json.loads(x)["surface"] for x in p.read_text(encoding="utf-8").splitlines() if x.strip()}
+    rng = random.Random(6)
+    cls = []
+    for s in STRATA:
+        cls += rng.sample([r for r in rows if r["stratum"] == s and r["surface"] not in used], 15)
+    _write("m2rubric_r3_classifier.jsonl", cls)
+    return 0
+
+
 def main() -> int:
     if sys.argv[1:] == ["--round", "2"]:
         return round2()
+    if sys.argv[1:] == ["--round", "3"]:
+        return round3()
     rows = [json.loads(x) for x in SRC.read_text(encoding="utf-8").splitlines() if x.strip()]
     pools = {s: [r for r in rows if r["stratum"] == s] for s in STRATA}
     used: set[str] = set()
