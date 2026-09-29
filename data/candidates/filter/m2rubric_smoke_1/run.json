@@ -1,0 +1,57 @@
+{
+  "batch_id": "m2rubric_smoke_1",
+  "git_sha": "7f7c633",
+  "allow_dirty": false,
+  "dirty_check": {
+    "paths": [
+      "assistant_axis/gapgen",
+      "data_analysis/gap_generation",
+      "assistant_axis/judge.py",
+      "assistant_axis/judge_pricing.py",
+      "assistant_axis/entity_id.py",
+      "assistant_axis/atomic_io.py",
+      "data/candidates/validation",
+      "pyproject.toml",
+      "uv.lock"
+    ],
+    "dirty": [],
+    "note": null
+  },
+  "argv": [
+    "--batch-id",
+    "m2rubric_smoke_1",
+    "--validation-file",
+    "data/candidates/validation/m2rubric_smoke_1.jsonl",
+    "--budget-usd",
+    "0.15"
+  ],
+  "plan": {
+    "n_rows": 30,
+    "n_hard_reject": 5,
+    "n_llm": 25,
+    "n_probe_band": 6,
+    "n_second_opinion_est": 7,
+    "system_prompt_tokens_est": 4354
+  },
+  "estimate_usd": 0.0932,
+  "estimate_lines": [
+    "classifier: 2 x (5,104, 4,750) tokens at claude-haiku-4-5-20251001 rates = $0.058",
+    "definition probe: 1 x (323, 300) tokens at claude-haiku-4-5-20251001 rates = $0.002",
+    "second opinion: 1 x (4,564, 1,330) tokens at claude-sonnet-4-6 rates = $0.034"
+  ],
+  "budget_usd": 0.15,
+  "cap_usd": 0.15,
+  "confirmed_by": null,
+  "model": "claude-haiku-4-5-20251001",
+  "second_model": "claude-sonnet-4-6",
+  "rubric_version": 2,
+  "probe_rubric_version": 2,
+  "prompt_sha256": {
+    "classifier": "ba7a4316dccd97c39845fe3cfbc22481c83beb7e116f045726f724b012585eb4",
+    "probe": "0785cd073e2cd2b62f412b379e003cdc39fdf54f360a99dc517dd2621add0103"
+  },
+  "started_at": "2026-09-29T01:43:58+00:00",
+  "finished_at": "2026-09-29T01:44:52+00:00",
+  "cost_usd": 0.0565,
+  "stopped_by_error": null
+}
