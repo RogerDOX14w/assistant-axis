@@ -233,3 +233,60 @@ and [traithood_filter.py](../../data_analysis/gap_generation/traithood_filter.py
 No test calls an API: fake clients replay the answers recorded on 2026-09-29, copied into
 [fixtures/gapgen_split/](../../assistant_axis/tests/fixtures/gapgen_split/) and checked to be
 verbatim copies of the probe records.
+
+## Follow-up of 2026-09-30: three new rubric texts, and large waves
+
+**Done, no paid call.**  Tests: `uv run pytest assistant_axis/tests -k gapgen` 465 passed, 4
+skipped; `uv run pytest data_analysis/tests/test_gap_generation_cli.py` 20 passed.
+
+### The three rubric texts
+
+The coordinator's edits, approved by Roger, pinned in [versions.json](./rubrics/versions.json) with
+`rubric_pins.py bump`.  Each hash equals the one in that edit's run record under
+[probe_rubric_edits/](./probe_rubric_edits/).
+
+| prompt | version | sha256 | what changed |
+|---|---|---|---|
+| [gloss.md](./rubrics/gloss.md) | 3 | bcc278479f04... | for a plain fact the length gives way, and no details the reading does not give ("The fact wins") |
+| [check_same_sense.md](./rubrics/check_same_sense.md) | 2 | d5953c971690... | example readings: idle conversation, chipper, informal, embittered |
+| [alignment.md](./rubrics/alignment.md) | 2 | 4dbe7f7e55e6... | example word: chipper |
+
+- The hygiene test in [test_gapgen_split_rubrics.py](../../assistant_axis/tests/test_gapgen_split_rubrics.py)
+  no longer records cheerful, casual or resentful.  None of the four new words is in the corpus,
+  the seed queue, the validation file, the reserved words or the test words; they are now on the
+  test's list of checked example words.  [QUESTIONS.md](./QUESTIONS.md) 22 is marked answered.
+- A new test checks that versions 3, 2 and 2 name the texts the edit runs sent.  The runner test
+  now reads the step versions from the pins rather than naming them.
+- The [rubrics index](./rubrics/README.md) status cells follow the new drafts.  The example block
+  in [coding_plan_split.md](./coding_plan_split.md) is left as written: it illustrates the block's
+  shape, and the plan is the record of what was specified.
+- The two pilots ran on the old texts (gloss 2, same sense 1, alignment 1).  Their filter blocks
+  and run.json files say so, and the pin audit accepts them because every version stays in
+  versions.json.
+
+### Large waves
+
+A wave used to go out as one batch, and the service refuses one of more than 100,000 requests or
+256 MB.  [batches.py](../../assistant_axis/gapgen/batches.py) now splits a wave, in order, into
+batches of at most `MAX_BATCH_REQUESTS = 50,000` requests and `MAX_BATCH_BYTES = 128 MB` of
+serialized requests.  That is half of each service limit.  At about 3,000 bytes a request the byte
+limit binds first, at about 40,000 requests.  A test can lower either constant.
+
+- **All at once.**  The batches of a wave are submitted one after another and then polled together.
+  A large wave therefore waits about one batch's time, not one for each batch.  Run B showed a
+  batch takes 7 to 34 minutes whatever its size, so waiting in series would multiply that.
+- **Estimate.**  The check covers the whole wave before the first batch is submitted: the spend so
+  far, plus the recorded batches still to be charged, plus every request about to go.  If it
+  fails, nothing new is submitted, recorded batches are still collected, and the run stops.
+- **Restart.**  Each batch is written to `batches.json` as soon as it is created.  A killed
+  process collects every uncollected batch of the wave and submits only the calls no recorded batch
+  covers.
+
+New tests in [test_gapgen_batches.py](../../assistant_axis/tests/test_gapgen_batches.py):
+
+- a wave over the request limit becomes several batches, with every call in one batch and every
+  result charged once;
+- the byte limit splits too;
+- a process killed while submitting a wave's second batch collects the first on restart and
+  submits only the rest;
+- a cap that one batch fits under but the wave does not submits nothing.

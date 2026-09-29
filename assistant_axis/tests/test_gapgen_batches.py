@@ -208,6 +208,97 @@ class TestBatches:
         assert usage.n_calls == 30
 
 
+class TestLargeWaves:
+    """A wave over the batch limits becomes several batches (the limits lowered for the test)."""
+
+    def test_a_wave_over_the_request_limit_becomes_several_batches(self, tmp_path, monkeypatch):
+        from assistant_axis.gapgen import batches as bt
+        monkeypatch.setattr(bt, "MAX_BATCH_REQUESTS", 40)
+        r, _, bc = make(tmp_path)
+        res = {x.label: x.filter for x in r.run(test_items())}
+        state = json.loads((tmp_path / "batches.json").read_text())
+        sense = state["waves"]["w1_sense"]
+        assert [b["n_requests"] for b in sense] == [40, 40, 19]
+        checks = state["waves"]["w2_checks"]
+        assert len(checks) > 1 and all(b["n_requests"] <= 40 for b in checks)
+        # every call of a wave is in exactly one batch, and every result is matched and charged once
+        for w, bs in state["waves"].items():
+            ids = [cid for b in bs for cid in b["custom_ids"]]
+            assert len(ids) == len(set(ids)), w
+        n_requests = sum(len(b["requests"]) for b in bc.batches.created)
+        assert r.usage.n_calls == n_requests == len(r.responses)
+        assert len({(rec["custom_id"], rec["stage"]) for rec in r.responses}) == len(r.responses)
+        exp = {e["word"]: e for e in load_jsonl("expected_outcomes.jsonl")}
+        assert all(res[w]["outcome"] == e["outcome"] for w, e in exp.items())
+
+    def test_the_byte_limit_splits_too(self, tmp_path, monkeypatch):
+        from assistant_axis.gapgen import batches as bt
+        items = test_items(20)
+        a, b = tmp_path / "a", tmp_path / "b"
+        a.mkdir()
+        b.mkdir()
+        r0, _, _ = make(a)                     # the default limits: one batch for the wave
+        r0.run(items)
+        whole = json.loads((a / "batches.json").read_text())["waves"]["w1_sense"]
+        assert len(whole) == 1
+        per_request = whole[0]["bytes"] / whole[0]["n_requests"]
+        monkeypatch.setattr(bt, "MAX_BATCH_BYTES", int(3.5 * per_request))   # about three requests a batch
+        r1, _, _ = make(b)
+        r1.run(items)
+        sense = json.loads((b / "batches.json").read_text())["waves"]["w1_sense"]
+        assert len(sense) >= 6 and sum(x["n_requests"] for x in sense) == 20
+        assert all(x["bytes"] <= bt.MAX_BATCH_BYTES for x in sense)
+        assert {x.label: x.filter["outcome"] for x in r1.results.values()} == \
+            {x.label: x.filter["outcome"] for x in r0.results.values()}
+
+    def test_restart_in_the_middle_of_a_wave_collects_what_was_submitted_and_submits_the_rest(
+            self, tmp_path, monkeypatch):
+        from assistant_axis.gapgen import batches as bt
+        monkeypatch.setattr(bt, "MAX_BATCH_REQUESTS", 10)
+        items = test_items(25)
+        bc = FakeBatchClient(make_responder(tokens=(1000, 100)))
+        real_create = bc.batches.create
+        n = {"create": 0}
+
+        def dies_on_second(*, requests):   # the process is killed while submitting wave 1's 2nd batch
+            n["create"] += 1
+            if n["create"] == 2:
+                raise KeyboardInterrupt
+            return real_create(requests=requests)
+        bc.batches.create = dies_on_second
+        r1, _, _ = make(tmp_path, bclient=bc)
+        with pytest.raises(KeyboardInterrupt):
+            r1.run(items)
+        state = json.loads((tmp_path / "batches.json").read_text())
+        assert [b["n_requests"] for b in state["waves"]["w1_sense"]] == [10]    # one batch on record
+        assert r1.usage.n_calls == 0                                            # nothing collected yet
+        bc.batches.create = real_create
+        r2, _, _ = make(tmp_path, bclient=bc, resume_records=list(r1.responses))
+        res = {x.label: x.filter["outcome"] for x in r2.run(items)}
+        sense = json.loads((tmp_path / "batches.json").read_text())["waves"]["w1_sense"]
+        assert [b["n_requests"] for b in sense] == [10, 10, 5]      # the recorded batch, then the rest
+        ids = [cid for b in sense for cid in b["custom_ids"]]
+        assert len(ids) == len(set(ids)) == 25                      # nothing submitted twice
+        assert r2.usage.n_calls == sum(len(b["requests"]) for b in bc.batches.created)   # charged once
+        exp = {e["word"]: e["outcome"] for e in load_jsonl("expected_outcomes.jsonl")[:25]}
+        assert res == exp
+
+    def test_the_budget_check_sees_the_whole_wave(self, tmp_path, monkeypatch):
+        from assistant_axis.gapgen import batches as bt
+        monkeypatch.setattr(bt, "MAX_BATCH_REQUESTS", 10)
+        items = test_items(30)
+        usage = GuardedUsage(budget_usd=1.0)
+        r, _, bc = make(tmp_path, usage=usage)
+        # a cap that one batch of 10 sense calls fits under but the wave of 30 does not
+        from assistant_axis.gapgen.split_runner import tokens_for
+        i, o = tokens_for("sense", HAIKU)
+        usage.budget_usd = 20 * cost_for_usage(HAIKU + "@batch", i, o)
+        with pytest.raises(BudgetExceededError):
+            r.run(items)
+        assert bc.batches.created == []                  # not even the first batch of the wave went
+        assert usage.n_calls == 0
+
+
 class TestAuto:
     def test_auto_picks_live_below_300_and_batches_from_300(self):
         assert choose_transport("auto", AUTO_BATCH_FROM - 1)[0] == "live"

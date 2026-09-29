@@ -215,7 +215,11 @@ reproduced (`--batch-size` applies to it only and is refused with split).
   `<model>@batch` in `usage.json`).  Batch ids and wave state are kept in
   `filter/<batch>/batches.json`.  The waves depend on each other, so a batch
   run takes several hours of wall time (the 99-word pilot: 7 batches, 2 h 11 min,
-  each batch 7 to 34 minutes whatever its size).
+  each batch 7 to 34 minutes whatever its size).  A wave larger than 50,000
+  requests or 128 MB of serialized requests (half the service's limits:
+  `batches.MAX_BATCH_REQUESTS`, `MAX_BATCH_BYTES`) is split into several
+  batches, submitted together and then polled; the cap is checked on the whole
+  wave before the first of them goes.
 - **Resume.**  `--resume` reuses an existing batch directory: no call whose
   answer is already in its `responses.jsonl` is sent again (same step, prompt
   hash, model and input), a batch submitted but never collected is collected
