@@ -27,6 +27,13 @@ RECORDED = {
     "alignment": (1, "85291d289b502a372390a9e2a569ca12c412c91132e062a6052051959991823d"),
     "descriptors": (1, "4f4b966e876ea0d0250df349e0eb7f56b76fe151ed3f14006cb9731576e2094f"),
 }
+#: The texts Roger approved on 2026-09-30 (gloss draft 3; same_sense and alignment draft 2, which
+#: answered QUESTIONS.md 22), as sent by probe_rubric_edits/<name>/run.json.
+RECORDED_2026_09_30 = {
+    "gloss": (3, "bcc278479f04048e2fcaecb3c531d0dd61c93399828d6279498f71a1e5a3bc3d"),
+    "same_sense": (2, "d5953c971690915e815576337879fc26def74086e34cc4996e997e58643fa3c8"),
+    "alignment": (2, "4dbe7f7e55e667e8978f568bc927c9e005b9be13b9e4e19877d5609d7785c8f4"),
+}
 
 
 class TestPins:
@@ -41,6 +48,14 @@ class TestPins:
         for name, (v, sha) in RECORDED.items():
             first = rows[name][0]
             assert (first["version"], first["sha256"]) == (v, sha), name
+
+    def test_later_rows_are_the_texts_of_the_edit_runs(self):
+        """The drafts Roger approved on 2026-09-30, each run once on its earlier inputs; the hashes
+        are those of probe_rubric_edits/<name>/run.json."""
+        rows = sr.read_versions()["prompts"]
+        for name, (v, sha) in RECORDED_2026_09_30.items():
+            got = {r["version"]: r["sha256"] for r in rows[name]}
+            assert got.get(v) == sha, name
 
     def test_rubric_versions_covers_the_split_prompts(self):
         from assistant_axis.gapgen import rubric_versions
@@ -110,20 +125,22 @@ class TestPins:
 # hygiene (prompt_hygiene): the eight prompts
 # ---------------------------------------------------------------------------
 
-#: The words the eight prompts use as examples (labels in quotes).
+#: The words the eight prompts use as examples: labels in quotes, and the words of the example
+#: readings in check_same_sense.md and the example traits in alignment.md.  "idle", "chipper",
+#: "informal" and "embittered" replaced "casual", "cheerful" and "resentful" (same_sense draft 2,
+#: alignment draft 2; QUESTIONS.md 22, answered by Roger 2026-09-30).
 SPLIT_EXAMPLE_WORDS = ("octagonal", "alkaline", "adjacent", "former", "accustomed", "northern", "unusual", "special",
-                       "hot-headed", "chatty", "breezy", "salty", "long-winded")
+                       "hot-headed", "chatty", "breezy", "salty", "long-winded", "idle", "chipper", "informal",
+                       "embittered")
 #: Words of the eight prompts that are corpus labels, queue entries or validation-file words.  The
 #: prompts are Roger's text and are not changed here; each hit is recorded, and a new one fails.
-#: "cheerful" is also an example (alignment.md: "being cheerful or long-winded") and "casual",
-#: "resentful" and "cheerful" appear in the example readings of check_same_sense.md: QUESTIONS.md 22.
+#: Every remaining hit is ordinary prose, which the hygiene rule allows.
 SPLIT_PROSE_RECORDED = {
     "sense": {"clear"}, "established": {"mean"}, "vague": {"hot", "vague"}, "kind": {"just", "single"},
-    "same_sense": {"casual", "cheerful", "resentful"}, "gloss": set(), "alignment": {"cheerful"},
-    "descriptors": set(),
+    "same_sense": set(), "gloss": set(), "alignment": set(), "descriptors": set(),
 }
-#: Example words known to collide (recorded above, QUESTIONS.md 22).
-SPLIT_EXAMPLE_RECORDED = {"cheerful"}
+#: Example words known to collide: none since QUESTIONS.md 22 was answered.
+SPLIT_EXAMPLE_RECORDED: set = set()
 
 
 def _forbidden():

@@ -6,6 +6,7 @@ import logging
 import pytest
 
 from assistant_axis.gapgen import split
+from assistant_axis.gapgen import split_rubrics as sr
 from assistant_axis.gapgen.cost import GuardedUsage
 from assistant_axis.gapgen.filter import FilterItem
 from assistant_axis.gapgen.split_runner import SplitRunner
@@ -60,8 +61,9 @@ class TestReplay:
             assert f["verdict"] in VERDICTS and set(f["tags"]) <= set(TAG_VOCAB)
             assert x.holding in HOLDING
             assert f["region"] is None or f["region"] in REGION_VOCAB
-            assert f["step_versions"] == {"sense": 6, "established": 4, "vague": 3, "kind": 4, "same_sense": 1,
-                                          "gloss": 2, "alignment": 1, "descriptors": 1}
+            # the latest pin of each prompt (test_gapgen_split_rubrics checks what each version names)
+            assert f["step_versions"] == {n: v for n, (v, _) in sr.current_versions().items()}
+            assert set(f["step_versions"]) == set(sr.NAMES)
             assert f["confidence"] is None and f["tag_disagreement"] is False
             if f["outcome"] == "trait":
                 assert x.gloss and f["gloss_model"] == HAIKU and f["region"]

@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| **Status** | First draft.  Run once. |
+| **Status** | Draft 2: one example word replaced.  Draft 1 ran in both pilots of the platform.  Whether to tighten the check waits on Roger's marks in [alignment_accepts_for_marks.md](../alignment_accepts_for_marks.md). |
 | **What the model is shown** | A label and its gloss. |
 | **What it returns** | Yes or no, with a reason. |
 | **What it is tuned on** | Not tuned. |
@@ -30,7 +30,7 @@ It does when it is about one of these:
 - accepting oversight and correction, or avoiding them;
 - keeping to the rules and limits it has been given, or getting round them.
 
-It does not merely because an assistant could have the trait. Most traits of character, such as being cheerful or long-winded, are not about this.
+It does not merely because an assistant could have the trait. Most traits of character, such as being chipper or long-winded, are not about this.
 
 For each item give a reason in one short sentence, then the answer.
 
@@ -46,3 +46,4 @@ Return one row per id, in the order given.
 | draft | who | what changed | why |
 |---|---|---|---|
 | 1 | Fable | First draft | |
+| 2 | Fable | "cheerful" became "chipper" | cheerful is a corpus label; question 22 in [QUESTIONS.md](../QUESTIONS.md).  Roger, 2026-09-30: replace it with a near-duplicate of a corpus term |
