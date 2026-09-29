@@ -43,7 +43,8 @@ HISTORY: dict[str, dict[int, str]] = {
         1: "e977750502a3c25b7fb63986eb9670a90aae92a65b41d06cdfed23d9fa2770f6",
     },
     "comparison": {
-        1: "81ca2459d080717f6915ead6ccfe3933f6c9b83a4da1f4de4d98550514f6174b",
+        1: "81ca2459d080717f6915ead6ccfe3933f6c9b83a4da1f4de4d98550514f6174b",  # m2rubric_r3_dev_sonnet_v1
+        2: "a6f5cbc6514e6108a010304e8f18012260263dfd2aa0c913439055b33df932e3",
     },
 }
 

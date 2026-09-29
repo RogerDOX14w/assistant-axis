@@ -54,7 +54,10 @@ from .registry import utc_now
 logger = logging.getLogger(__name__)
 
 READING_VERSION = 1
-COMPARISON_VERSION = 1
+#: v2 (round 3, after the first development run): "same" spelled out to
+#: cover differences of scope, degree, emphasis and setting; v1 answered
+#: "related" to 11 of 30 same-by-construction pairs for such differences.
+COMPARISON_VERSION = 2
 RELATIONS = ("same", "related", "different")
 DEFAULT_READING_MODEL = "claude-haiku-4-5-20251001"
 #: The second-opinion model, unless a development set shows the classifier
@@ -84,10 +87,13 @@ Decide whether a persona built from the plain reading would be the trait the int
 describes.
 
 ## The three answers
-- "same": the plain reading describes the intended trait, perhaps in other words, with a different \
-emphasis, or more briefly. Small differences of degree or detail do not matter.
-- "related": the two overlap, but a careful writer would give them different names; or the reading \
-blends the intended trait with one or more other traits.
+- "same": the plain reading and the intended meaning share the same core disposition, the thing the \
+persona would most characteristically do. They count as the same when one is broader or narrower \
+than the other, when one is a milder or stronger degree of the other, when they stress different \
+aspects of the same disposition, or when the intended meaning applies the disposition to one setting \
+(such as how the persona answers questions) that the reading describes in general.
+- "related": the core dispositions differ but are neighbors, so a careful writer would give them \
+different names; or the reading blends the intended trait with another trait that dominates it.
 - "different": the plain reading is a different trait, not a trait at all, or a sense of the word that \
 the intended meaning does not use; the intended trait is missing from the reading.
 Judge the behaviour described, not the wording. Do not reward shared words: a reading can repeat the \
