@@ -213,7 +213,9 @@ reproduced (`--batch-size` applies to it only and is refused with split).
 - **Transport.**  `--transport auto` (default) sends fewer than 300 words live
   and more through the Message Batches API, at half price (charged under
   `<model>@batch` in `usage.json`).  Batch ids and wave state are kept in
-  `filter/<batch>/batches.json`.
+  `filter/<batch>/batches.json`.  The waves depend on each other, so a batch
+  run takes several hours of wall time (the 99-word pilot: 7 batches, 2 h 11 min,
+  each batch 7 to 34 minutes whatever its size).
 - **Resume.**  `--resume` reuses an existing batch directory: no call whose
   answer is already in its `responses.jsonl` is sent again (same step, prompt
   hash, model and input), a batch submitted but never collected is collected

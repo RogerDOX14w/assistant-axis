@@ -1,7 +1,39 @@
 # Acceptance: the split trait-hood filter
 
-Written 2026-09-29 against [coding_plan_split.md](./coding_plan_split.md).  Stage A (live) is below;
-stage B (batches) follows once its pilot has run.
+Written 2026-09-29 and 30 against [coding_plan_split.md](./coding_plan_split.md).
+
+## Outcome
+
+**Both stages are built, tested and piloted on the 99 test words, for $1.37 of the $10 allowed.**
+Every step parsed 100% in both runs, and every gloss has the corpus form.  Three recorded targets are
+missed, and the cause is the same for all three: the model does not give the same answer twice, even
+at temperature 0.  The code joins the answers it gets exactly as the reference join does.
+
+| target (section 10) | run A, live | run B, batches |
+|---|---|---|
+| at least 95 of 99 with the expected outcome | **92** | **90** |
+| parse rate 99% or better, every step | 100% | 100% |
+| every gloss "This means" plus an -ing verb | 69 of 69 | 69 of 69 |
+| cost against the estimate | $0.917 against $1.019 | $0.457 against $0.509 |
+| run B agrees with run A on at least 95 | | **93** |
+
+What Roger should look at:
+
+1. **Step 1 is not repeatable.**  Sent the same label again, Haiku 4.5 at temperature 0 gave a
+   different sense answer for 59 of 99 words, usually only in wording.  About one word in fifteen then
+   changes outcome, and the words that change are the ones on a boundary (incestuous, linear,
+   deterministic, twisted, grubby, migratory).  One item per call removed the effect words had on each
+   other; it did not remove this.  Whether 90 to 92 of 99 is good enough to replace the single call
+   for the full validation run is Roger's decision (section 10); [QUESTIONS.md](./QUESTIONS.md) 23.
+2. **Batches are slow in wall time.**  Run B took 2 hours 11 minutes, because the waves depend on
+   each other and each batch took 7 to 34 minutes to end whatever its size (13 requests: 34 minutes; 381: 15).  A full run has the same
+   seven waves, plus a retry wave where needed, so several hours is to be expected.  `--resume` picks
+   a killed run up where it stopped.
+3. **A reporting fault, fixed after run A.**  Run A's [summary.json](../../data/candidates/filter/split_pilot_live/summary.json)
+   gives `second_opinion_n: 0` at the top level; its `split` block has the right figure (13).  And
+   run A's and run B's [run.json](../../data/candidates/filter/split_pilot_batches/run.json) name only
+   the eight split prompts, not the probe and comparison prompts also sent (each filter block has all
+   ten).  Both are fixed for later runs.
 
 ## Stage A: outcome
 
@@ -118,3 +150,86 @@ Measured tokens are the mean for each call.  The estimate is section 7's.
 From [usage.json](../../data/candidates/filter/split_pilot_live/usage.json): Haiku 4.5 717 calls,
 $0.703; Sonnet 5.5 92 calls, $0.214.  Sonnet 5.5's thinking is billed as output, and its measured
 output stayed within the estimate.
+
+## Stage B: batches
+
+**Built and piloted: 90 of 99 as expected, 93 of 99 the same as run A, $0.457, 100% parse.**
+
+Run: [split_pilot_batches](../../data/candidates/filter/split_pilot_batches/)
+([batches.json](../../data/candidates/filter/split_pilot_batches/batches.json),
+[results.jsonl](../../data/candidates/filter/split_pilot_batches/results.jsonl),
+[responses.jsonl](../../data/candidates/filter/split_pilot_batches/responses.jsonl),
+[usage.json](../../data/candidates/filter/split_pilot_batches/usage.json),
+[summary.json](../../data/candidates/filter/split_pilot_batches/summary.json)).  The command is run
+A's with `--transport batches --batch-id split_pilot_batches --budget-usd 2`.
+
+| | run B |
+|---|---|
+| batches, one for each wave | 7 (probe 13, sense 99, checks 381, same sense 30, gloss and second-opinion sense 82, last step and second-opinion checks 198, second-opinion same sense 6 requests); no retry wave was needed |
+| wall time | 2 h 11 min (submitted 21:07, last collected 23:18 UTC) |
+| cost | $0.457: Haiku 4.5 at batch rates 719 calls $0.352; Sonnet 5.5 at batch rates 90 calls $0.105 |
+| against the estimate | $0.509 |
+| cost for each word | $0.0046 |
+| outcomes | trait 69, states 9, physical 2, roles 1, turned away 18; `two_trait_senses` on 6 |
+
+Every call was charged under `<model>@batch` at half the model's rates; the per-step token counts
+match run A's to within a token or two.
+
+### Every word whose outcome differs from the expected
+
+| word | expected | reading expected | run B | reading accepted, or cause |
+|---|---|---|---|---|
+| deterministic | trait | you are predictable, your behavior follows fixed patterns | turned away | stretched |
+| disciplinary | trait | You are the kind of person who enforces discipline or administers punishment | states | you are subject to or will face disciplinary action or punishment |
+| disrespectful | trait | have a disrespectful character or attitude | turned away | action |
+| economic | trait | you are financially prudent or careful with money | turned away | stretched |
+| grubby | trait | you are slovenly or unkempt in appearance | states | your body or clothes are dirty |
+| hit-and-run | turned away | (action) | trait | you are someone who flees responsibility after causing harm |
+| linear | turned away | (stretched) | trait | your thinking or approach proceeds in a straight sequence without branching or looping back |
+| migratory | trait | you move from place to place, or travel seasonally | turned away | stretched |
+| pedagogic | trait | you should adopt a teaching manner or approach in how you act | roles | you teach or work in education |
+
+deterministic, disciplinary, economic, grubby and linear miss in both runs.  incestuous and twisted
+missed in run A only; disrespectful, hit-and-run, migratory and pedagogic in run B only.
+
+### Run B against run A
+
+| word | run A | run B | reading A | reading B |
+|---|---|---|---|---|
+| disrespectful | trait | turned away | act in a rude or impolite way toward others | (action) |
+| hit-and-run | turned away | trait | (action) | you are someone who flees responsibility after causing harm |
+| incestuous | turned away | trait | (action) | you engage in or are party to incest |
+| migratory | trait | turned away | you move from place to place, or travel seasonally | (stretched) |
+| pedagogic | trait | roles | you should adopt a teaching manner or approach in how you act | you teach or work in education |
+| twisted | states | trait | your body or posture is bent or contorted | your mind or thinking is distorted or warped |
+
+The second opinion chose the same 13 words and disagreed on the same two (linear, one-time) in both
+runs.
+
+## What was built, and the deviations from the plan
+
+Built as sections 5 to 7 say: [split_rubrics.py](../../assistant_axis/gapgen/split_rubrics.py),
+[split.py](../../assistant_axis/gapgen/split.py), [split_runner.py](../../assistant_axis/gapgen/split_runner.py),
+[batches.py](../../assistant_axis/gapgen/batches.py), [rubric_pins.py](../../data_analysis/gap_generation/rubric_pins.py),
+[versions.json](./rubrics/versions.json), [split_test_words.jsonl](../../data/candidates/validation/split_test_words.jsonl),
+and the edits to [llm.py](../../assistant_axis/gapgen/llm.py), [judge_pricing.py](../../assistant_axis/judge_pricing.py)
+and [traithood_filter.py](../../data_analysis/gap_generation/traithood_filter.py).
+
+| deviation | why |
+|---|---|
+| The split side of the command line lives in [split_cli.py](../../data_analysis/gap_generation/split_cli.py), called from `traithood_filter.py` when `--pipeline split` | Keeps the single-call path in `traithood_filter.py` as it was; the flags are still `traithood_filter.py`'s, as the plan says |
+| The second opinion's steps run in waves 4, 5 and 6, not all in wave 4 | Its checks need its own step 1, and its same-sense check needs its kind calls |
+| The definition probe runs before step 1, not after classification as in the single pipeline | A word the probe does not know is cut before any other call is paid for; the selection (the probe band) is unchanged |
+| The vague check runs on every primary reading | The plan's wave table and estimate say so; the probes asked it of the first primary reading only, so a vague note may now also come from an accepted second reading |
+| The existing single-pipeline CLI tests pass `--pipeline single` | The plan makes split the default; only arguments changed, no expected value |
+
+## Tests
+
+| command | before (the first agent's baseline) | now |
+|---|---|---|
+| `uv run pytest assistant_axis/tests -k gapgen` | 390 passed, 4 skipped | 460 passed, 4 skipped |
+| `uv run pytest data_analysis/tests/test_gap_generation_cli.py` | 20 passed | 20 passed |
+
+No test calls an API: fake clients replay the answers recorded on 2026-09-29, copied into
+[fixtures/gapgen_split/](../../assistant_axis/tests/fixtures/gapgen_split/) and checked to be
+verbatim copies of the probe records.
