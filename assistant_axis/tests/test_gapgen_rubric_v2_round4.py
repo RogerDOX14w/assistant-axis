@@ -437,7 +437,21 @@ def test_every_recorded_version_and_hash_is_pinned():
         d = json.loads(rj.read_text())
         ps = d.get("prompt_sha256")
         checks = []  # (prompt, version or None, sha)
-        if name.startswith("filter/"):
+        if name.startswith("filter/") and d.get("pipeline") == "split":
+            # the split filter: its eight prompts are pinned in rubrics/versions.json; the probe and
+            # the comparison it also sends are in HISTORY (recorded in run.json since 2026-09-29, after
+            # split_pilot_live, whose filter blocks carry them instead)
+            from assistant_axis.gapgen import split_rubrics
+            split_pins = split_rubrics.read_versions()["prompts"]
+            for prompt, version in d["step_versions"].items():
+                pinned = {r["version"]: r["sha256"] for r in split_pins.get(prompt, [])}
+                if pinned.get(version) != ps.get(prompt):
+                    problems.append((name, f"split.{prompt}", version, (ps.get(prompt) or "")[:12]))
+            if "probe" in ps:
+                checks.append(("probe", d.get("probe_rubric_version"), ps["probe"]))
+            if "comparison" in ps:
+                checks.append(("comparison", None, ps["comparison"]))
+        elif name.startswith("filter/"):
             if name not in WITHDRAWN_CLASSIFIER:
                 checks.append(("classifier", d.get("rubric_version"), ps.get("classifier")))
             checks.append(("probe", d.get("probe_rubric_version"), ps.get("probe")))

@@ -20,7 +20,9 @@ from pathlib import Path
 from typing import Optional
 
 from assistant_axis.atomic_io import atomic_write_text
+from assistant_axis.gapgen import filter_rubric as fr
 from assistant_axis.gapgen import paths, split
+from assistant_axis.gapgen import plain_reading as pr
 from assistant_axis.gapgen import split_rubrics as sr
 from assistant_axis.gapgen.batches import BatchTransport, choose_transport
 from assistant_axis.gapgen.cost import CostRefused, Estimate, GuardedUsage, confirm_or_abort
@@ -177,7 +179,12 @@ def main_split(args, argv) -> int:
                 "second_model": None if args.no_second_opinion else args.second_model,
                 "compare_model": args.compare_model, "plain_reading": not args.no_plain_reading,
                 "step_versions": {n: v for n, (v, _) in pins.items()},
-                "prompt_sha256": {n: sr.sha256(sr.load_prompt(n)) for n in sr.NAMES},
+                # the eight split prompts, plus the two single-pipeline prompts the split also sends
+                "prompt_sha256": {**{n: sr.sha256(sr.load_prompt(n)) for n in sr.NAMES},
+                                  "probe": sr.sha256(fr.DEFINE_PROBE_PROMPT),
+                                  "comparison": pr.PROMPT_SHA256["comparison"]},
+                "probe_rubric_version": fr.PROBE_RUBRIC_VERSION,
+                "comparison_version": pr.COMPARISON_VERSION,
                 "measurement": bool(args.measurement), "stability": bool(args.stability),
                 "resumed": bool(args.resume), "started_at": utc_now()}
     if earlier_run:

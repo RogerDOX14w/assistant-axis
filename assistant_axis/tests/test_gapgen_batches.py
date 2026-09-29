@@ -276,6 +276,14 @@ class TestSplitCLI:
         assert sum(v["n_calls"] for v in s["split"]["cost_by_step"].values()) == usage["n_calls"]
         run = json.loads((d / "run.json").read_text())
         assert run["pipeline"] == "split" and run["transport"] == "live" and run["step_versions"]["sense"] == 6
+        # every prompt the run sends is named, the probe and comparison included
+        from assistant_axis.gapgen import filter_rubric as fr
+        from assistant_axis.gapgen import plain_reading as pr
+        from assistant_axis.gapgen import split_rubrics as sr
+        assert set(run["prompt_sha256"]) == set(sr.NAMES) | {"probe", "comparison"}
+        assert run["prompt_sha256"]["probe"] == sr.sha256(fr.DEFINE_PROBE_PROMPT)
+        assert run["prompt_sha256"]["comparison"] == pr.PROMPT_SHA256["comparison"]
+        assert run["probe_rubric_version"] == fr.PROBE_RUBRIC_VERSION
 
     def test_batches_run_and_resume_sends_nothing_twice(self, cli):
         from data_analysis.gap_generation import traithood_filter
