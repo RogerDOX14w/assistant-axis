@@ -64,7 +64,10 @@ logger = logging.getLogger(__name__)
 #: One version per prompt (round 3, QUESTIONS 17: a version identifies one
 #: prompt text; pinned in rubric_versions).  Queue v2: the example "sulking"
 #: became "moping", since sulking appears in the "You are X." probe results.
-RUBRIC_VERSIONS = {"queue": 2, "corpus": 1}
+RUBRIC_VERSIONS = {"queue": 3, "corpus": 2}
+#: Round 4 (review_rubric_v2.md finding 10): queue v3 drops "listless", "single", "usual" and "usually",
+#: validation-file words, from its text; corpus v2 replaces the example "exasperated", a
+#: validation-file word, with "vexed", and drops "usually".
 DEFAULT_MODEL = "claude-haiku-4-5-20251001"
 DEFAULT_BATCH_SIZE = 20
 DEFAULT_MAX_TOKENS = 6000
@@ -76,7 +79,7 @@ STATE_TAGS = ("state", "transient_only")
 
 #: Example words of both prompts, and the names the examples suggest.
 QUEUE_EXAMPLES = ("moping", "startled", "bored", "tearful", "sunburned", "drenched")
-CORPUS_EXAMPLES = ("fretful", "exasperated")
+CORPUS_EXAMPLES = ("fretful", "vexed")
 EXAMPLE_WORDS = QUEUE_EXAMPLES + CORPUS_EXAMPLES
 SUGGESTED_NAMES = ("mopey", "jumpy", "easily bored")
 
@@ -92,11 +95,11 @@ or situational condition). You are given the state's name and a one-sentence des
 For each, work through three steps:
 1. plausible: is a habitual predisposition to this state plausible? That is, could a person be prone \
 to falling into it again and again, so that the proneness is part of who they are and would show in how \
-they talk? Moods, reactions and emotional or social states usually allow it. Conditions imposed from \
-outside, or purely bodily conditions that no temperament brings about, usually do not.
+they talk? Moods, reactions and emotional or social states mostly allow it. Conditions imposed from \
+outside, or purely bodily conditions that no temperament brings about, mostly do not.
 2. name_fits: if plausible, is the state's own name still a good name for the predisposition? It is \
 when ordinary speakers already use the word for a person who is often that way. If not, give \
-suggested_name: the plainest ordinary English name for the predisposition (a single word if one \
+suggested_name: the plainest ordinary English name for the predisposition (one word if one \
 exists, otherwise a short phrase such as "easily ..." or "prone to ...").
 3. gloss: if plausible, write one sentence of 20 to 40 words (count them) describing the habitual \
 predisposition, not the passing state, in the form "This means ...", from the inside: what the person \
@@ -106,10 +109,10 @@ If a predisposition is not plausible, set name_fits, suggested_name and gloss to
 
 ## Examples (reason first, then the answers)
 - "moping": people are often prone to moping; the habit has its own ordinary name; plausible true; \
-name_fits false; suggested_name "mopey"; gloss "This means sinking into listless gloom after any \
+name_fits false; suggested_name "mopey"; gloss "This means sinking into idle gloom after any \
 setback, trailing about without energy or interest, and letting everyone see how low one feels \
 until something lifts the mood."
-- "startled": some people are startled by every small surprise; the usual name for that is jumpy; \
+- "startled": some people are startled by every small surprise; the ordinary name for that is jumpy; \
 plausible true; name_fits false; suggested_name "jumpy"; gloss "This means reacting to every sudden \
 noise, interruption or unexpected question with a jolt of alarm, losing the thread for a moment and \
 needing time to settle again."
@@ -145,7 +148,7 @@ to the next.
 Each label below also names a state, a condition someone can be in for a while. You are given the label \
 and its corpus description. Decide which reading the description takes:
 - "predisposition": the description describes a habitual or standing tendency to be in, or to fall \
-into, the state (how the person usually is);
+into, the state (how the person mostly is);
 - "momentary": the description describes being in the state now, or for a passing spell, with nothing \
 that makes it a lasting way of being.
 Judge the description as written, not the label on its own. When the description could be read either \
@@ -154,7 +157,7 @@ way, choose "predisposition" and say why.
 ## Examples (reason first, then the reading)
 - "fretful", description "This means worrying over small things day after day, turning every plan into \
 a list of what could go wrong.": written as a daily habit; reading predisposition.
-- "exasperated", description "This means being fed up right now with someone who has tried one's \
+- "vexed", description "This means being fed up right now with someone who has tried one's \
 patience past its limit.": written as a condition of the moment; reading momentary.
 
 ## Output

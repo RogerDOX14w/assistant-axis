@@ -13,14 +13,16 @@ unless the states pass allows it, below), a row whose filter verdict is not
 ``min_local_novelty``) a row whose novelty is missing or below the floor.
 ``dry_run`` leaves the queue file byte-identical.
 
-States (round 2, item 4; an assumption proceeded under, QUESTIONS.md): a row
-on the ``states`` list becomes promotable once the states pass
+States (round 4, replacing round 2's assumption; QUESTIONS 14): a row on the
+``states`` list becomes promotable once the states pass
 (:mod:`assistant_axis.gapgen.states_pass`) has judged a habitual
-predisposition plausible.  It is promoted under the pass's suggested name
-(when the state's own name does not fit) with the pass's draft gloss as
-``description_draft``, tagged ``states_queue``, and its notes say it came
-through the states queue.  Every collision check applies to the promoted
-stem.  A states row with no judgement, or judged implausible, is refused.
+predisposition plausible **and** the command is given Roger's confirmed name
+for it (``confirmed_state_names`` / CLI ``--confirm-state-name KEY=NAME``):
+choosing the name is his step b.  It is promoted under the confirmed name with
+the pass's draft gloss as ``description_draft``, tagged ``states_queue``, and
+its notes record the pass's suggested name and the confirmed one.  Every
+collision check applies to the promoted stem.  A states row with no
+judgement, judged implausible, or with no confirmed name is refused.
 
 Words already turned down (decision 8 of
 ``reports/trait_gap_generation/decisions_m1.md``): a stem or label whose
@@ -82,7 +84,10 @@ def turned_down_reason(entry: dict) -> str:
     msg = f"turned down in the seed queue ({status}): {decision}"
     if status == "superseded":
         rep_label = replacing_label(entry.get("decision") or "")
-        msg += f"; replaced by {rep_label}" if rep_label else "; no replacing label recorded in its decision text"
+        # when no replacement can be parsed, the quoted decision text speaks for
+        # itself (review_rubric_v2.md finding 11: 14 of 18 name it in other words)
+        if rep_label:
+            msg += f"; replaced by {rep_label}"
     return msg
 
 
@@ -138,14 +143,14 @@ def _local_novelty(rec: dict) -> Optional[float]:
     return min(vals) if vals else None
 
 
-def states_promotion(rec: dict) -> tuple[Optional[dict], Optional[str]]:
+def states_promotion(rec: dict, confirmed_name: Optional[str] = None) -> tuple[Optional[dict], Optional[str]]:
     """For a row on the ``states`` holding list: ``(effective, None)`` when
-    the states pass judged a habitual predisposition plausible, where
-    ``effective`` holds the ``stem``, ``label`` and ``gloss`` to promote
-    under (the pass's suggested name when the state's own name does not fit,
-    and its draft gloss of the predisposition); ``(None, reason)`` otherwise.
-    Round 2, item 4: an assumption proceeded under (QUESTIONS.md), not
-    Roger's words."""
+    the states pass judged a habitual predisposition plausible **and** Roger
+    has confirmed the name (``confirmed_name``, round 4: choosing the name is
+    his step b), where ``effective`` holds the ``stem``, ``label`` and
+    ``gloss`` to promote under (the confirmed name, and the pass's draft
+    gloss of the predisposition); ``(None, reason)`` otherwise.  The pass's
+    suggested name is only a suggestion and is quoted in the refusal."""
     from .normalize import normalize_candidate
 
     sp = rec.get("states_pass") or {}
@@ -156,14 +161,19 @@ def states_promotion(rec: dict) -> tuple[Optional[dict], Optional[str]]:
         return None, f"on the states holding list; the states pass judged a predisposition implausible: {sp.get('reason')}"
     if not sp.get("gloss"):
         return None, "on the states holding list; the states pass gave no predisposition gloss"
-    label = sp.get("suggested_name") if sp.get("name_fits") is False and sp.get("suggested_name") else rec["label"]
-    n = normalize_candidate(label)
-    return {"stem": n.stem, "label": n.label, "gloss": sp["gloss"]}, None
+    suggested = sp.get("suggested_name") if sp.get("name_fits") is False and sp.get("suggested_name") else rec["label"]
+    if not confirmed_name:
+        return None, (f"on the states holding list; the states pass judged a predisposition plausible and "
+                      f"suggests the name '{suggested}': Roger must confirm the name first "
+                      f"(--confirm-state-name {rec['key']}=<name>)")
+    n = normalize_candidate(confirmed_name)
+    return {"stem": n.stem, "label": n.label, "gloss": sp["gloss"], "_suggested": suggested}, None
 
 
 def promote(records: dict[str, dict], queue: dict, keys: Sequence[str], *, data_dir: Path,
             dry_run: bool = True, section: str = DEFAULT_SECTION,
-            min_local_novelty: Optional[float] = None, reopen_turned_down: bool = False) -> PromoteReport:
+            min_local_novelty: Optional[float] = None, reopen_turned_down: bool = False,
+            confirmed_state_names: Optional[dict[str, str]] = None) -> PromoteReport:
     """Build queue entries for ``keys`` and (unless ``dry_run``) append them
     to ``queue["entries"]`` in place.  ``records`` is the folded registry.
     The caller saves the queue (``seed_entities.save_queue``) and records
@@ -184,9 +194,9 @@ def promote(records: dict[str, dict], queue: dict, keys: Sequence[str], *, data_
         via_states = None
         held_why = None
         if rec.get("holding") == "states":
-            eff, held_why = states_promotion(rec)
+            eff, held_why = states_promotion(rec, (confirmed_state_names or {}).get(key))
             if eff is not None:
-                via_states = rec
+                via_states = {**rec, "_suggested": eff.pop("_suggested")}
                 rec = {**rec, **eff}
         elif rec.get("holding"):
             held_why = f"on the {rec['holding']} holding list (never promoted)"
@@ -216,9 +226,9 @@ def promote(records: dict[str, dict], queue: dict, keys: Sequence[str], *, data_
             if via_states is not None:
                 sp = via_states["states_pass"]
                 note = (f"came through the states queue: state '{via_states['label']}', states pass "
-                        f"(rubric v{sp.get('rubric_version')}) judged a habitual predisposition plausible"
-                        + (f" and suggested the name '{rec['label']}'" if rec["stem"] != via_states["stem"] else "")
-                        + f": {sp.get('reason')}")
+                        f"(rubric v{sp.get('rubric_version')}) judged a habitual predisposition plausible "
+                        f"and suggested the name '{via_states['_suggested']}'; name confirmed by Roger as "
+                        f"'{rec['label']}': {sp.get('reason')}")
                 entry["description_notes"] = " | ".join(x for x in (note, entry.get("description_notes")) if x)
                 entry["tags"] = list(dict.fromkeys(entry["tags"] + ["states_queue"]))
                 entry["gap_gen"]["states_pass"] = {"state_label": via_states["label"],

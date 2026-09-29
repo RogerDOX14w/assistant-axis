@@ -26,6 +26,7 @@ HISTORY: dict[str, dict[int, str]] = {
         1: "113bde981420d93fc58b41b0b6cf12785537a3186588cc3289ef6e9edd8da2a5",
         2: "9c75829d4ed33a752e012b10feb2845ade11dbb234dc3131aa8b98d7616a5032",
         3: "f9af4e2d13bceca2c2d2044f8debf838509eedecbac799209f0fc57fd3e7b112",
+        4: "51854ac5300e55943870c2eccfe6b125b33d4a9bf54f01fec9b1775c8f018d42",
     },
     "probe": {
         1: "d5ba66e82026137af301cded277f039f03269910eb4b8542ef7c0425f414d4e1",
@@ -34,10 +35,12 @@ HISTORY: dict[str, dict[int, str]] = {
     },
     "states_queue": {
         1: "4a51b9159951607dc5094b5ca80de0c4cb753f8a41e77fefc9a9ae21e6a7711e",
-        2: "66b1bebc643001fc6517fdf6ac49a9036d64c753c8382b0578b9509a7c9caaf4",
+        2: "66b1bebc643001fc6517fdf6ac49a9036d64c753c8382b0578b9509a7c9caaf4",  # never run
+        3: "6790603bcdfabafa97db968a3fc832ec17a5f64dd487b84258b3fc892b86fd3d",
     },
     "states_corpus": {
         1: "20d6a63e15d73855aad6a0041fda29ec4d8b51bfa9afd47a5d0e96dd08d4b261",
+        2: "bf464b84828919798b8055e4153968161b9a06571fe86c8f651a80ce8b314bb1",
     },
     "plain_reading": {
         1: "e977750502a3c25b7fb63986eb9670a90aae92a65b41d06cdfed23d9fa2770f6",

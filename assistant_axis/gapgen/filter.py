@@ -1,6 +1,7 @@
 """The trait-hood filter pipeline.
 
-Per candidate: frequency floor (a hard reject below Zipf 2.0 costs nothing)
+Per candidate: frequency floor (a hard reject below ``freq.HARD_REJECT_BELOW``,
+with the rescue routes of rule 1b, costs nothing)
 -> WordNet sense count -> classifier (``batch_size`` candidates per call,
 cached rubric; a batch whose JSON is unparseable is retried once as two
 halves, and rows that fail validation are retried once in a follow-up batch)
@@ -14,7 +15,7 @@ The Haiku verdict stays the verdict; the second opinion is recorded beside it
 and disagreements are counted for Roger.  A probe that says the word is not
 known turns the verdict into ``reject`` with ``too_rare`` (the classifier's
 verdict is kept in ``classifier_verdict``).  Every filter block records the
-SHA-256 of both prompt texts (``prompt_sha256``).
+SHA-256 of every prompt text (``prompt_sha256``).
 
 Stops (review_m1.md finding 4; review_m1_fixes.md item 3).  Each response is recorded (and, with
 ``responses_path``, appended to ``responses.jsonl``) and each batch's rows are
@@ -261,7 +262,7 @@ class FilterRunner:
                     "reason": f"Zipf {fq.zipf_min:.2f} is below the {HARD_REJECT_BELOW} floor and no "
                               f"rescue route applies (no LLM call).",
                     "verdict": "reject", "tags": ["too_rare"], "region": None, "senses": [],
-                    "person_senses": [], "trait_senses_equally_obvious": False,
+                    "person_senses": [], "trait_senses_equally_obvious": False, "judged_sense": None,
                     "membership_kind": None, "alignment_relevant": False,
                     "tag_disagreement": False,
                     "trait_sense_rank": None, "enactable_in_text": None, "confidence": 1.0,
@@ -413,6 +414,7 @@ class FilterRunner:
             "alignment_relevant": row.get("alignment_relevant"),
             "person_senses": row["person_senses"],
             "trait_senses_equally_obvious": row["trait_senses_equally_obvious"],
+            "judged_sense": row.get("judged_sense"),
             "senses": row["senses"], "trait_sense_rank": row["trait_sense_rank"],
             "enactable_in_text": row["enactable_in_text"], "confidence": row["confidence"],
             "polysemy": bool(notes), "polysemy_notes": notes, "plain_reading": None, "comparison": None,
@@ -562,6 +564,7 @@ class FilterRunner:
                                        "alignment_relevant": row.get("alignment_relevant"),
                                        "trait_sense_rank": row["trait_sense_rank"],
                                        "person_senses": row["person_senses"],
+                                       "judged_sense": row.get("judged_sense"),
                                        "confidence": row["confidence"], "agree": agree}
                 if not agree:
                     self.stats["disagreements"] += 1
@@ -709,27 +712,46 @@ EXISTING_OK_TAGS = ("state", "physical", "membership")
 
 
 def existing_label_outcome(r: FilterResult) -> str:
-    """``correct`` (verdict trait, or a state / physical / membership tag),
-    or the kind of miss: ``floor`` (cut by the frequency floor or the probe),
-    ``reject``, ``roles`` (sent to the roles list), ``other``, ``failed``."""
+    """``correct`` (verdict trait, or verdict tagged with a state / physical /
+    membership tag), or the kind of miss: ``floor`` (cut by the frequency
+    floor or the probe), ``reject``, ``roles`` (sent to the roles list),
+    ``other``, ``failed``.  A ``reject`` verdict is a miss whatever tags it
+    carries (Roger, decision 2: a label "counts as a miss when it is
+    rejected"; review_rubric_v2.md finding 4)."""
     f = r.filter or {}
     if not f:
         return "failed"
     tags = set(f.get("tags") or [])
-    if f.get("verdict") == "trait" or tags & set(EXISTING_OK_TAGS):
+    verdict = f.get("verdict")
+    if verdict == "trait":
         return "correct"
-    if r.stage == "hard_reject" or "too_rare" in tags:
-        return "floor"
+    if verdict == "reject":
+        return "floor" if (r.stage == "hard_reject" or "too_rare" in tags) else "reject"
+    if tags & set(EXISTING_OK_TAGS):
+        return "correct"
     if r.holding == "roles":
         return "roles"
-    if f.get("verdict") == "reject":
-        return "reject"
     return "other"
 
 
-def validation_figures(results: Sequence[FilterResult]) -> dict:
-    """The three M1 figures against their targets (decision 2), plus the
-    existing labels that received ``state`` or ``physical``, by name."""
+#: Size and seed of the sample of random adjectives that passed as traits,
+#: printed for Roger's marks (coordinator, round 4; review question 2).
+RANDOM_SAMPLE_N = 50
+RANDOM_SAMPLE_SEED = 0
+
+
+def random_trait_sample(results: Sequence[FilterResult], *, n: int = RANDOM_SAMPLE_N,
+                        seed: int = RANDOM_SAMPLE_SEED) -> list[dict]:
+    """A fixed-seed sample of ``n`` random adjectives (stratum ``oewn_random``)
+    that passed with verdict ``trait``: ``{"label", "key", "gloss"}``, sorted
+    by key before sampling so the sample does not depend on row order."""
+    passed = sorted((r for r in results if str(r.meta.get("stratum")) == "oewn_random" and r.filter
+                     and r.filter.get("verdict") == "trait"), key=lambda r: r.key)
+    pick = random.Random(seed).sample(passed, min(n, len(passed)))
+    return [{"label": r.label, "key": r.key, "gloss": r.gloss} for r in sorted(pick, key=lambda r: r.key)]
+
+
+def _figures(results: Sequence[FilterResult]) -> dict:
     by: dict[str, list[FilterResult]] = {}
     for r in results:
         by.setdefault(str(r.meta.get("stratum")), []).append(r)
@@ -742,8 +764,9 @@ def validation_figures(results: Sequence[FilterResult]) -> dict:
             misses.setdefault(o, []).append(label)
     share = round(correct / len(ex), 4) if ex else None
     rej = by.get("rejects", [])
-    flagged = [r.label for r in rej if r.filter and (r.filter.get("polysemy")
-                                                      or (r.filter.get("trait_sense_rank") or 0) >= 2)]
+    # the flag and the figure agree: a reject-stratum word counts as flagged
+    # when its polysemy flag (any note) is set (review finding 2)
+    flagged = [r.label for r in rej if r.filter and r.filter.get("polysemy")]
     rnd = [r for r in by.get("oewn_random", []) if r.filter]
     rnd_trait = sum(1 for r in rnd if r.filter.get("verdict") == "trait")
     rnd_share = round(rnd_trait / len(rnd), 4) if rnd else None
@@ -762,6 +785,73 @@ def validation_figures(results: Sequence[FilterResult]) -> dict:
                         "meets_target": rnd_share is not None and rnd_share <= TARGET_RANDOM_TRAIT_MAX},
     }
 
+
+def validation_figures(results: Sequence[FilterResult]) -> dict:
+    """The three M1 figures against their targets (decision 2), plus the
+    existing labels that received ``state`` or ``physical``, by name.
+
+    Every figure is given twice (review_rubric_v2.md finding 1): at the top
+    level for all rows, and under ``unseen`` for the rows never seen in
+    development (``meta["seen_in"]`` empty or absent; see
+    :func:`development_seen`).  ``oewn_random`` also carries
+    ``sample_for_marks``, a fixed-seed sample of the random adjectives that
+    passed as traits, for Roger's marks."""
+    out = _figures(results)
+    unseen = [r for r in results if not r.meta.get("seen_in")]
+    out["unseen"] = _figures(unseen)
+    out["n_seen_in_development"] = len(results) - len(unseen)
+    out["oewn_random"]["sample_for_marks"] = random_trait_sample(results)
+    return out
+
+
+def development_seen(candidates_dir: Path, *, exclude: Sequence[str] = ()) -> dict[str, list[str]]:
+    """Registry-style key -> the recorded runs (``filter/<id>``,
+    ``plain_reading/<id>``) whose results contain it: where a validation row
+    was seen while the rules were being written (review finding 1).  Runs
+    whose id is in ``exclude`` (the run being scored) are skipped, and so are
+    ``.bak`` copies.  Plain-reading keys (``calm#same``) are mapped to the
+    label's stem with sense 1."""
+    from .normalize import make_key, normalize_candidate
+    seen: dict[str, set[str]] = {}
+    for kind in ("filter", "plain_reading"):
+        for res in sorted(Path(candidates_dir).glob(f"{kind}/*/results.jsonl")):
+            run = res.parent.name
+            if run in exclude or ".bak." in run:
+                continue
+            for line in res.read_text(encoding="utf-8").splitlines():
+                if not line.strip():
+                    continue
+                row = json.loads(line)
+                if kind == "filter":
+                    key = row.get("key")
+                else:
+                    try:
+                        key = make_key(normalize_candidate(row["label"]).stem, 1)
+                    except (KeyError, ValueError):
+                        continue
+                if key:
+                    seen.setdefault(key, set()).add(f"{kind}/{run}")
+    return {k: sorted(v) for k, v in sorted(seen.items())}
+
+
+def corpus_regions(results: Sequence[dict], trait_stems: Sequence[str], *, batch_id: Optional[str]) -> dict:
+    """``corpus_regions.json`` payload from a validation run's results (no
+    API call; review finding 8): every corpus trait stem -> ``{"label",
+    "region", "alignment_relevant", "verdict", "batch_id"}`` from the run's
+    ``existing``-stratum row, ``region`` null when the row was cut or
+    rejected, and every field null for a stem the run did not contain."""
+    from .normalize import split_key
+    by_stem = {}
+    for r in results:
+        if (r.get("meta") or {}).get("stratum") != "existing" or not r.get("key"):
+            continue
+        f = r.get("filter") or {}
+        by_stem[split_key(r["key"])[0]] = {"label": r.get("label"), "region": f.get("region"),
+                                           "alignment_relevant": f.get("alignment_relevant"),
+                                           "verdict": f.get("verdict"), "batch_id": batch_id}
+    return {s: by_stem.get(s, {"label": None, "region": None, "alignment_relevant": None, "verdict": None,
+                               "batch_id": batch_id})
+            for s in sorted(trait_stems)}
 
 
 def run_traithood_filter(records: Sequence[dict] | Sequence[FilterItem], *, client, model: str = DEFAULT_MODEL,

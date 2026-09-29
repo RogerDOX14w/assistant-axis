@@ -21,6 +21,8 @@ Inputs:
 * ``--corpus`` / ``--corpus-stems``: corpus traits read with their own
   descriptions (read only), expected ``same``: the comparison over every
   existing label, which needs Roger's go (see "M1 as built" for its cost).
+  It raises no flag (round 4): ``listing.md`` lists every label with both
+  texts, ``different`` first, then ``related`` by confidence.
 * ``--reuse-readings DIR``: take the plain readings of an earlier run's
   ``results.jsonl`` instead of calling again (for comparing two comparison
   models on identical readings).
@@ -143,6 +145,8 @@ def main(argv=None) -> int:
     if not items:
         print("nothing to read", file=sys.stderr)
         return 0
+    # The comparison across the corpus raises no flag; it lists every label (round 4)
+    corpus_mode = not args.pairs
     reuse = reuse_from(args.reuse_readings) if args.reuse_readings else {}
     n_reused = len({it.label for it in items} & set(reuse))
     est = build_estimate(items, args, n_reused)
@@ -201,7 +205,7 @@ def main(argv=None) -> int:
     runner = pr.PlainReadingRunner(client=client, batch_id=args.batch_id, reading_model=args.reading_model,
                                    compare_model=args.compare_model, usage=usage, batch_size=args.batch_size,
                                    concurrency=args.concurrency, responses_path=out_dir / "responses.jsonl",
-                                   reuse_readings=reuse)
+                                   reuse_readings=reuse, flag=not corpus_mode)
     status = 0
     error: Optional[BaseException] = None
     try:
@@ -220,7 +224,9 @@ def main(argv=None) -> int:
         write_jsonl([r.as_dict() for r in results], out_dir / "results.jsonl")
         runner.warn_parse_rate(logger)
         summary = pr.summarize(results, stats=runner.stats, usage=usage)
-        summary.update({"batch_id": args.batch_id, "stopped_by_budget": status == 2,
+        if corpus_mode:
+            atomic_write_text(pr.corpus_listing(results), out_dir / "listing.md")
+        summary.update({"flags_raised": not corpus_mode, "batch_id": args.batch_id, "stopped_by_budget": status == 2,
                         "stopped_by_error": f"{type(error).__name__}: {error}" if error is not None else None,
                         "reading_model": args.reading_model, "compare_model": args.compare_model})
         from assistant_axis.plot_metadata import json_metadata

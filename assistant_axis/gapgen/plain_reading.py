@@ -188,7 +188,14 @@ def parse_compare(text: str, ids: Sequence[int], *, labels: Optional[Mapping[int
 
 
 def notes_for(relation: Optional[str]) -> list[str]:
-    return ["overshadowed"] if relation == "different" else []
+    """``different`` -> ``overshadowed``; ``related`` -> ``reading_related``
+    (round 4: a note under its own name, the conservative answer to the
+    review's question 1; the held-out figure still counts ``overshadowed``)."""
+    if relation == "different":
+        return ["overshadowed"]
+    if relation == "related":
+        return ["reading_related"]
+    return []
 
 
 @dataclass
@@ -248,7 +255,10 @@ class PlainReadingRunner:
                  compare_model: str = DEFAULT_COMPARE_MODEL, usage: Optional[MultiModelUsage] = None,
                  limiter=None, batch_size: int = DEFAULT_BATCH_SIZE, concurrency: int = 4,
                  retry_delays: Optional[Sequence[float]] = None, responses_path: Optional[Path] = None,
-                 reuse_readings: Optional[Mapping[str, str]] = None, responses: Optional[list] = None):
+                 reuse_readings: Optional[Mapping[str, str]] = None, responses: Optional[list] = None,
+                 flag: bool = True):
+        # flag=False: record the answers but raise no note (the corpus comparison,
+        # round 4: every label is listed for Roger instead)
         self.client = client
         self.batch_id = batch_id
         self.reading_model = reading_model
@@ -264,6 +274,8 @@ class PlainReadingRunner:
         self.results: dict[str, ReadingResult] = {}
         self.readings: dict[str, Optional[str]] = {}
         self.stats = Counter()
+        self.flag = flag
+        self._by_label: dict[str, list[str]] = {}
         self._sem: Optional[asyncio.Semaphore] = None
         self._stop: Optional[BaseException] = None
 
@@ -305,6 +317,19 @@ class PlainReadingRunner:
         if reading is None:
             rec["parse_errors"] = {k: "empty reading" for k in keys}
         self.readings[label] = reading
+        self._store_reading(label, reused=False)  # at once, so a stop keeps it (review finding 7)
+
+    def _store_reading(self, label: str, *, reused: bool) -> None:
+        reading = self.readings.get(label)
+        if reading is None:
+            return
+        now = utc_now()
+        for k in self._by_label.get(label, []):
+            res = self.results[k]
+            res.reading = reading
+            res.reading_block = {"text": reading, "model": None if reused else self.reading_model,
+                                 "reused": reused, "rubric_version": READING_VERSION,
+                                 "prompt_sha256": PROMPT_SHA256["plain_reading"], "at": now}
 
     async def _compare(self, items: list[ReadingItem], stage: str) -> None:
         payload = [{"id": i + 1, "label": it.label, "plain_reading": self.readings[it.label],
@@ -321,7 +346,7 @@ class PlainReadingRunner:
             res.stage, res.error = "compared", None
             res.comparison = {**row, "model": self.compare_model, "rubric_version": COMPARISON_VERSION,
                               "prompt_sha256": PROMPT_SHA256["comparison"], "at": now}
-            res.notes = notes_for(row["relation"])
+            res.notes = notes_for(row["relation"]) if self.flag else []
         for i, e in errs.items():
             self.results[items[i - 1].key].error = e
 
@@ -343,24 +368,17 @@ class PlainReadingRunner:
         by_label: dict[str, list[str]] = {}
         for it in items:
             by_label.setdefault(it.label, []).append(it.key)
+        self._by_label = by_label
         for label, reading in self.reuse.items():
             if label in by_label:
                 self.readings[label] = reading
+                self._store_reading(label, reused=True)
         to_read = [lb for lb in by_label if lb not in self.readings]
         self.stats["n_read"] += len(to_read)
         self.stats["n_reused"] += len(by_label) - len(to_read)
         completed = False
         try:
             await self._gather([self._read(lb, by_label[lb]) for lb in to_read])
-            now = utc_now()
-            for it in items:
-                res = self.results[it.key]
-                res.reading = self.readings.get(it.label)
-                if res.reading is not None:
-                    reused = it.label in self.reuse
-                    res.reading_block = {"text": res.reading, "model": None if reused else self.reading_model,
-                                         "reused": reused, "rubric_version": READING_VERSION,
-                                         "prompt_sha256": PROMPT_SHA256["plain_reading"], "at": now}
             self.stats["read_failed"] += sum(1 for lb in to_read if self.readings.get(lb) is None)
             todo = [it for it in items if self.results[it.key].reading is not None]
             self.stats["n_compare"] += len(todo)
@@ -395,6 +413,30 @@ class PlainReadingRunner:
                                n_total=pc["plain_reading"][1], logger_obj=logger_obj or logger)
         warn_if_low_parse_rate(label=f"comparison:{self.compare_model}", n_ok=pc["comparison"][0],
                                n_total=pc["comparison"][1], logger_obj=logger_obj or logger)
+
+
+def corpus_listing(results: Sequence[ReadingResult]) -> str:
+    """The corpus comparison's output for Roger (round 4; review question 1):
+    every label with both texts, no flag.  ``different`` first, then
+    ``related`` by confidence (highest first), then ``same`` by confidence
+    (lowest first), then rows that failed."""
+    order = {"different": 0, "related": 1, "same": 2}
+
+    def key(r: ReadingResult):
+        rel = (r.comparison or {}).get("relation")
+        conf = (r.comparison or {}).get("confidence") or 0.0
+        return (order.get(rel, 3), -conf if rel != "same" else conf, r.label)
+
+    lines = ["| answer | label | confidence | plain reading | intended meaning (corpus description) | reason |",
+             "|---|---|---|---|---|---|"]
+    for r in sorted(results, key=key):
+        c = r.comparison or {}
+
+        def cell(x):
+            return str("" if x is None else x).replace("|", "\\|").replace("\n", " ")
+        lines.append(f"| {cell(c.get('relation') or r.stage)} | {cell(r.label)} | {cell(c.get('confidence'))} "
+                     f"| {cell(r.reading)} | {cell(r.intended)} | {cell(c.get('reason') or r.error)} |")
+    return "\n".join(lines) + "\n"
 
 
 def heldout_figure(rows: Sequence[Mapping[str, Any]], target: int = HELDOUT_TARGET) -> dict:

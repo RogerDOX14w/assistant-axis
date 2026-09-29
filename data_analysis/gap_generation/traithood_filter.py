@@ -9,9 +9,19 @@
         [--confirmed-by WHO] [--allow-dirty] [--dry-run]
 
 Pipeline per row (``assistant_axis.gapgen.filter``): Zipf floor (hard reject
-below 2.0, free) -> WordNet -> Haiku classifier (25 per call) -> definition
-probe for 2.0 <= Zipf < 2.5 -> Sonnet second opinion (10% random + confidence
-< 0.6 + prior/LLM disagreement).
+below ``freq.HARD_REJECT_BELOW`` unless rescue rule 1b applies, free) ->
+WordNet -> Haiku classifier (25 per call) -> definition probe for the probe
+band (``freq.HARD_REJECT_BELOW`` <= Zipf < ``freq.PROBE_BELOW``) and rescued
+words -> plain reading and comparison for rows with an intended meaning ->
+Sonnet second opinion (10% random, confidence under
+``filter.LOW_CONFIDENCE``, a verdict/tag disagreement, a prior/LLM
+disagreement).
+
+Validation runs mark each row with the recorded runs it was seen in
+(``meta["seen_in"]``, ``filter.development_seen``), and give every figure
+for all rows and for the rows never seen in development; they also write
+``random_traits_for_marks.md``, a fixed-seed sample of 50 random adjectives
+that passed as traits, with an empty column for Roger's mark.
 
 Outputs in ``data/candidates/filter/<batch_id>/``: ``responses.jsonl`` (every
 API response received, parse errors included, appended as each call returns),
@@ -79,7 +89,7 @@ from assistant_axis.gapgen.cost import (  # noqa: E402
 )
 from assistant_axis.gapgen.filter import (  # noqa: E402
     DEFAULT_BATCH_SIZE, DEFAULT_MODEL, DEFAULT_SECOND_MODEL, PROMPT_SHA256, FilterItem, FilterRunner,
-    items_from_records, summarize,
+    development_seen, items_from_records, summarize,
 )
 from assistant_axis.gapgen.freq import zipf_info  # noqa: E402
 from assistant_axis.gapgen.normalize import make_key, normalize_candidate  # noqa: E402
@@ -255,6 +265,10 @@ def select_items(args) -> tuple[list[FilterItem], Optional[Registry]]:
         items = read_validation_file(args.validation_file)
         if args.sample_frac:
             items = stratified_sample(items, args.sample_frac, args.sample_seed)
+        # where each row was seen while the rules were written (review_rubric_v2.md finding 1)
+        seen = development_seen(args.out_root or paths.DATA_CANDIDATES, exclude=(args.batch_id,))
+        for it in items:
+            it.meta["seen_in"] = seen.get(it.key, [])
         reg = None
     else:
         if args.sample_frac:
@@ -378,6 +392,18 @@ def main(argv=None) -> int:
     return status
 
 
+def marks_table(sample: list[dict]) -> str:
+    """Markdown table of random adjectives that passed as traits, with an
+    empty column for Roger's mark (round 4; review question 2)."""
+    rows = ["<!-- fixed-seed sample of random adjectives (stratum oewn_random) that passed as traits; "
+            "mark each ok, not a trait, or other -->",
+            "| word | gloss | Roger's mark |", "|---|---|---|"]
+    for s in sample:
+        gloss = str(s.get("gloss") or "").replace("|", "\\|")
+        rows.append(f"| {s['label']} | {gloss} |  |")
+    return "\n".join(rows) + "\n"
+
+
 def _finalize(args, items, reg, runner, usage, run_meta, out_dir, status, error) -> None:
     """Write usage.json, the responses (re-written whole so the per-call lines
     gain their parse errors), results.jsonl, summary.json, the registry rows
@@ -402,6 +428,9 @@ def _finalize(args, items, reg, runner, usage, run_meta, out_dir, status, error)
                                                  "sample_seed": str(args.sample_seed)}))
     env = json_metadata(summary, title=f"traithood_filter {args.batch_id}", inputs=inputs or None)
     atomic_write_text(json.dumps(env, indent=2, ensure_ascii=False) + "\n", out_dir / "summary.json")
+    sample = ((summary.get("validation_figures") or {}).get("oewn_random") or {}).get("sample_for_marks")
+    if sample:
+        atomic_write_text(marks_table(sample), out_dir / "random_traits_for_marks.md")
     if reg is not None:
         done = {r.key: r.registry_fields() for r in results if r.filter is not None}
         if done:

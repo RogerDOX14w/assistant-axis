@@ -21,6 +21,9 @@ Commands:
   trait and another sense is a non-trait thing a person can be) as a table
   with the word, its trait sense, its other sense and an empty column for
   Roger's call.
+* ``corpus-regions --from-filter DIR [--out PATH]``: write
+  ``corpus_regions.json`` (every corpus trait -> region, ``alignment_relevant``,
+  verdict, batch id) from a validation run's results, at no cost.
 * ``compact``: copy the log to ``registry.jsonl.bak.<UTC>``, fold it to one
   line per key, and write the tracked snapshot ``registry.snapshot.jsonl``.
 * ``promote (--keys K ... | --status accepted) [--min-local-novelty X] [--section S] [--dry-run]``:
@@ -180,6 +183,28 @@ def cmd_judgement_calls(args) -> int:
     return 0
 
 
+def cmd_corpus_regions(args) -> int:
+    """``corpus_regions.json`` from a validation run's results (no API call;
+    review_rubric_v2.md finding 8)."""
+    from assistant_axis.atomic_io import atomic_write_text
+    from assistant_axis.gapgen.filter import corpus_regions
+    from assistant_axis.plot_metadata import json_metadata
+    from assistant_axis.provenance import current_file_input
+    run = Path(args.from_filter)
+    rows = [json.loads(x) for x in (run / "results.jsonl").read_text(encoding="utf-8").splitlines() if x.strip()]
+    run_meta = json.loads((run / "run.json").read_text(encoding="utf-8")) if (run / "run.json").exists() else {}
+    stems = sorted(p.stem for p in (Path(args.data_dir) / "traits" / "instructions").glob("*.json"))
+    regions = corpus_regions(rows, stems, batch_id=run_meta.get("batch_id") or run.name)
+    missing = [s for s, v in regions.items() if v["verdict"] is None]
+    env = json_metadata(regions, title=f"corpus regions from {run.name}",
+                        inputs=[current_file_input(dep_key="filter_results", path=run / "results.jsonl")])
+    out = Path(args.out)
+    atomic_write_text(json.dumps(env, indent=2, ensure_ascii=False) + "\n", out)
+    print(f"wrote {len(regions)} traits to {out} ({len(missing)} not in the run"
+          + (f": {', '.join(missing[:10])}{' ...' if len(missing) > 10 else ''}" if missing else "") + ")")
+    return 0
+
+
 def cmd_compact(args) -> int:
     try:
         rep = compact(args.registry, set_aside_malformed=args.set_aside_malformed)
@@ -201,8 +226,15 @@ def cmd_promote(args) -> int:
     else:
         keys = [r["key"] for r in records_for_status(reg, review=args.status)]
     queue = se.load_queue(args.queue)
+    confirmed = {}
+    for spec in args.confirm_state_name or []:
+        key, sep, name = spec.partition("=")
+        if not sep or not name.strip():
+            raise SystemExit(f"--confirm-state-name takes KEY=NAME, not {spec!r}")
+        confirmed[key.strip()] = name.strip()
     rep = promote(rows, queue, keys, data_dir=args.data_dir, dry_run=args.dry_run, section=args.section,
-                  min_local_novelty=args.min_local_novelty, reopen_turned_down=args.reopen_turned_down)
+                  min_local_novelty=args.min_local_novelty, reopen_turned_down=args.reopen_turned_down,
+                  confirmed_state_names=confirmed)
     for k in rep.promoted:
         e = next(x for x in rep.entries if x["gap_gen"]["registry_key"] == k)
         print(f"{'WOULD PROMOTE' if args.dry_run else 'PROMOTED'} {k} -> {e['stem']} ({e['entity_type']}"
@@ -247,6 +279,11 @@ def build_parser() -> argparse.ArgumentParser:
     sp.add_argument("--filter-results", type=Path, nargs="+",
                     help="read filter results.jsonl files instead of the registry")
     sp.set_defaults(func=cmd_judgement_calls)
+    sp = sub.add_parser("corpus-regions",
+                        help="write corpus_regions.json (region and alignment_relevant per corpus trait) from a run")
+    sp.add_argument("--from-filter", required=True, type=Path, help="a validation run's filter/<batch_id> dir")
+    sp.add_argument("--out", type=Path, default=paths.CORPUS_REGIONS_PATH)
+    sp.set_defaults(func=cmd_corpus_regions)
     sp = sub.add_parser("compact")
     sp.add_argument("--set-aside-malformed", action="store_true",
                     help="move malformed (torn) lines to registry.jsonl.rejected.<UTC> instead of refusing")
@@ -258,6 +295,9 @@ def build_parser() -> argparse.ArgumentParser:
     sp.add_argument("--min-local-novelty", type=float)
     sp.add_argument("--reopen-turned-down", action="store_true",
                     help="promote a word the seed queue marks not_adopted or superseded; its old decision is copied into the new entry")
+    sp.add_argument("--confirm-state-name", action="append", metavar="KEY=NAME",
+                    help="Roger's confirmed name for a states row the states pass judged plausible (repeatable); "
+                         "without it such a row is refused")
     sp.add_argument("--section", default=DEFAULT_SECTION)
     sp.add_argument("--queue", type=Path, default=paths.SEED_QUEUE_PATH)
     sp.add_argument("--dry-run", action="store_true")
