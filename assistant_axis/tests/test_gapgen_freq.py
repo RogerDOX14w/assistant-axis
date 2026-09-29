@@ -1,9 +1,10 @@
-"""gapgen.freq: Zipf floor over content words, bands, familiarity override."""
+"""gapgen.freq: Zipf floor over content words (1.5 since decision 1, 2026-09-29), bands,
+familiarity override.  Rescue rule 1b is tested in test_gapgen_rubric_v2.py."""
 import pytest
 
 from assistant_axis.gapgen.freq import FreqInfo, familiarity_of, zipf_info
 
-FAKE = {"kind": 5.5, "animals": 4.6, "world": 6.1, "shaping": 3.4, "guileless": 1.9,
+FAKE = {"kind": 5.5, "animals": 4.6, "world": 6.1, "shaping": 3.4, "rarish": 1.2,
         "abstemious": 2.2, "stubborn": 3.6, "to": 7.4, "xyzzy": 0.0}
 
 
@@ -12,18 +13,19 @@ def z(w):
 
 
 def test_single_word_bands():
-    assert zipf_info("stubborn", zipf_fn=z) == FreqInfo(3.6, {"stubborn": 3.6}, False, False, False)
+    assert zipf_info("stubborn", zipf_fn=z) == FreqInfo(3.6, {"stubborn": 3.6}, False, False, False, None)
     i = zipf_info("abstemious", zipf_fn=z)
     assert i.probe_band and not i.hard_reject
-    i = zipf_info("guileless", zipf_fn=z)
+    i = zipf_info("rarish", zipf_fn=z)
     assert i.hard_reject and not i.probe_band
 
 
 def test_boundaries():
+    assert zipf_info("a", zipf_fn=lambda w: 1.5).probe_band
+    assert not zipf_info("a", zipf_fn=lambda w: 1.5).hard_reject
     assert zipf_info("a", zipf_fn=lambda w: 2.0).probe_band
-    assert not zipf_info("a", zipf_fn=lambda w: 2.0).hard_reject
     assert not zipf_info("a", zipf_fn=lambda w: 2.5).probe_band
-    assert zipf_info("a", zipf_fn=lambda w: 1.99).hard_reject
+    assert zipf_info("a", zipf_fn=lambda w: 1.49).hard_reject
 
 
 def test_phrase_uses_rarest_content_word():
@@ -42,7 +44,7 @@ def test_unknown_word_is_hard_reject():
     (None, True, False, False), (0.3, True, False, False), (0.5, False, True, True), (0.9, False, True, True),
 ])
 def test_familiarity_override(fam, hard, probe, override):
-    i = zipf_info("guileless", familiarity=fam, zipf_fn=z)
+    i = zipf_info("rarish", familiarity=fam, zipf_fn=z)
     assert (i.hard_reject, i.probe_band, i.familiarity_override) == (hard, probe, override)
 
 
@@ -61,7 +63,7 @@ def test_familiarity_of_documented_generators_only():
 def test_block_shape():
     b = zipf_info("stubborn", zipf_fn=z).as_block()
     assert set(b) == {"zipf_min", "zipf_words", "hard_reject", "probe_band", "familiarity_override",
-                      "define_probe"}
+                      "rescue", "define_probe"}
 
 
 def test_real_wordfreq():

@@ -1,4 +1,5 @@
-"""Trait-hood rubric v1: prompt shape, example hygiene, parser, derived fields."""
+"""Trait-hood rubric (v2 since 2026-09-29): prompt shape, example hygiene, parser,
+derived fields.  v2-specific rules are tested in test_gapgen_rubric_v2.py."""
 import json
 from pathlib import Path
 
@@ -12,8 +13,9 @@ REPO = Path(__file__).resolve().parents[2]
 
 
 def _row(i, **kw):
-    base = {"id": i, "reason": "A stable habit.", "senses": ["s1"], "trait_sense_rank": 1,
-            "enactable_in_text": 2, "verdict": "trait", "tags": [], "region": "cognitive_epistemic",
+    base = {"id": i, "label": f"w{i}", "reason": "A stable habit.", "senses": ["s1"],
+            "primary_use": "person_character", "enactable_in_text": 2, "verdict": "trait", "tags": [],
+            "region": "cognitive_epistemic", "alignment_relevant": False,
             "gloss": "This means " + "word " * 20, "confidence": 0.9}
     base.update(kw)
     return base
@@ -33,9 +35,6 @@ class TestPrompt:
         assert probe_schema.index('"reason"') < probe_schema.index('"known"')
         assert "reason first" in probe
 
-    @pytest.mark.xfail(strict=True, reason=(
-        "rubric v1's twelve negative examples give the verdict with no reason (review_m1.md finding 11); "
-        "the rubric text is frozen until the rubric v2 change set, which should make this pass"))
     def test_every_example_reasons_before_its_verdict(self):
         """Each example line must carry some reasoning (at least three words)
         before its verdict word, not open on the verdict."""
@@ -52,9 +51,11 @@ class TestPrompt:
         assert bad == [], f"examples giving a verdict with no reason first: {bad}"
 
     def test_states_and_roles_rules_present(self):
+        """Rubric v2: the state tag sends a word to its own list; v1's
+        "general tendency" rule is gone (decision 12)."""
         sp = fr.SYSTEM_PROMPT
-        assert '"state"' in sp and "general tendency" in sp
-        assert "role_person" in sp and "role_thing" in sp and "- Roles." in sp
+        assert '"state"' in sp and "general tendency" not in sp
+        assert "role_person" in sp and "role_thing" in sp and "- Roles:" in sp
         assert "transient_only" in sp and "physical" in sp
 
     def test_every_region_and_tag_named(self):
@@ -65,7 +66,7 @@ class TestPrompt:
         assert "too_rare" not in fr.SYSTEM_PROMPT
 
     def test_example_counts(self):
-        assert len(fr.POSITIVE_EXAMPLES) == 6 and len(fr.NEGATIVE_EXAMPLES) == 12
+        assert len(fr.POSITIVE_EXAMPLES) == 12 and len(fr.NEGATIVE_EXAMPLES) == 14  # rubric v2
         for w in fr.EXAMPLE_WORDS + fr.MENTIONED_WORDS:
             assert f'"{w}"' in fr.SYSTEM_PROMPT or w in fr.SYSTEM_PROMPT, w
         assert sum("alignment_ai_agent" in fr.SYSTEM_PROMPT.split(f'"{w}"')[1][:400]
@@ -126,7 +127,7 @@ class TestParse:
     def test_bad_verdict_region_numbers(self):
         rows, errs = fr.parse_batch(json.dumps({"results": [
             _row(1, verdict="maybe"), _row(2, region="space"), _row(3, confidence=1.5),
-            _row(4, trait_sense_rank=4), _row(5, gloss=None), _row(6, reason="")]}), [1, 2, 3, 4, 5, 6])
+            _row(4, enactable_in_text=4), _row(5, gloss=None), _row(6, reason="")]}), [1, 2, 3, 4, 5, 6])
         assert rows == {} and set(errs) == {1, 2, 3, 4, 5, 6}
 
     def test_reject_may_lack_region_gloss_rank(self):
@@ -134,23 +135,21 @@ class TestParse:
             _row(1, verdict="reject", tags=["not_a_word"], region=None, gloss=None, trait_sense_rank=None)]}), [1])
         assert errs == {} and rows[1]["region"] is None and rows[1]["gloss"] is None
 
-    def test_tagged_may_lack_gloss_region_rank(self):
-        """Found in the M1 pilot: Haiku copies the rubric's tagged examples,
-        which show no gloss; such rows are valid, region taken from the tag."""
+    def test_tagged_needs_gloss_and_region(self):
+        """Rubric v2 (review_m1.md finding 7): a tagged row lands on a list a
+        person reads or can be promoted, so it needs a gloss and a region; the
+        v1 leniency (and the demographic tag) are gone."""
         rows, errs = fr.parse_batch(json.dumps({"results": [
-            _row(1, verdict="tagged", tags=["physical"], region=None, gloss=None, trait_sense_rank=None),
-            _row(2, verdict="tagged", tags=["demographic"], region=None, gloss=None),
-            _row(3, verdict="tagged", tags=["evaluative_only"], region=None, gloss=None),
-            _row(4, verdict="tagged", tags=["transient_only"], region="social_interpersonal", gloss=None)]}),
+            _row(1, verdict="tagged", tags=["physical"], region=None),
+            _row(2, verdict="tagged", tags=["demographic"], region="identity_demographic"),
+            _row(3, verdict="tagged", tags=["evaluative_only"], gloss=None),
+            _row(4, verdict="tagged", tags=["transient_only"], region="social_interpersonal")]}),
             [1, 2, 3, 4])
-        assert errs == {}
-        assert [rows[i]["region"] for i in (1, 2, 3, 4)] == ["physical", "identity_demographic", None,
-                                                              "social_interpersonal"]
-        assert rows[1]["gloss"] is None and rows[1]["trait_sense_rank"] is None
+        assert set(rows) == {4} and set(errs) == {1, 2, 3}
 
-    def test_trait_still_needs_gloss_region_rank(self):
+    def test_trait_still_needs_gloss_region_primary_use(self):
         rows, errs = fr.parse_batch(json.dumps({"results": [
-            _row(1, gloss=None), _row(2, region=None), _row(3, trait_sense_rank=None)]}), [1, 2, 3])
+            _row(1, gloss=None), _row(2, region=None), _row(3, primary_use=None)]}), [1, 2, 3])
         assert rows == {} and set(errs) == {1, 2, 3}
 
     def test_unparseable(self):
@@ -165,9 +164,10 @@ class TestParse:
 
     def test_string_numbers_and_case(self):
         rows, errs = fr.parse_batch(json.dumps({"results": [
-            _row(1, verdict="Trait", confidence="0.8", trait_sense_rank="2", tags="State")]}), [1])
+            _row(1, verdict="Trait", confidence="0.8", tags="State", primary_use="Person_Other")]}), [1])
         assert errs == {} and rows[1]["verdict"] == "trait" and rows[1]["tags"] == ["state"]
-        assert rows[1]["trait_sense_rank"] == 2 and rows[1]["confidence"] == 0.8
+        assert rows[1]["primary_use"] == "person_other" and rows[1]["confidence"] == 0.8
+        assert rows[1]["tag_disagreement"] is True  # state belongs to "tagged"; recorded, not overridden
 
 
 class TestDerived:

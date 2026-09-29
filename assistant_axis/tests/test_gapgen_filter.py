@@ -16,7 +16,7 @@ from assistant_axis.tests.fake_anthropic import FakeAsyncAnthropic, system_text,
 HAIKU = "claude-haiku-4-5-20251001"
 SONNET = "claude-sonnet-4-6"
 
-ZIPF = {"rare": 1.5, "unusual": 2.2}
+ZIPF = {"rare": 1.2, "unusual": 2.2}  # below / inside the probe band (floor 1.5)
 
 
 def zipf(w):
@@ -33,15 +33,16 @@ SPEC = {  # label -> fields overriding a default trait row
     "plumber": {"verdict": "tagged", "tags": ["role_person"], "region": "social_interpersonal",
                 "gloss": "A plumber is someone who " + "fixes pipes " * 8},
     "flurbish": {"verdict": "reject", "tags": ["not_a_word"], "region": None, "gloss": None},
-    "cool": {"trait_sense_rank": 2},
+    "cool": {"primary_use": "non_person"},
     "shaky": {"confidence": 0.4},
     "nice": {},
 }
 
 
 def trait_row(i, label, model=None):
-    row = {"id": i, "reason": f"{label} is a habit.", "senses": [label], "trait_sense_rank": 1,
-           "enactable_in_text": 2, "verdict": "trait", "tags": [], "region": "social_interpersonal",
+    row = {"id": i, "label": label, "reason": f"{label} is a habit.", "senses": [label],
+           "primary_use": "person_character", "enactable_in_text": 2, "verdict": "trait", "tags": [],
+           "region": "social_interpersonal", "alignment_relevant": False,
            "gloss": "This means " + "doing things " * 9 + "always.", "confidence": 0.9}
     row.update(SPEC.get(label, {}))
     return row
@@ -57,7 +58,7 @@ def responder_factory(*, fail_labels=(), garbage_first=False, known=True, second
     def responder(kw):
         state["n"] += 1
         its = items_of(kw)
-        if "rare English words" in system_text(kw):  # definition probe
+        if "real English word" in system_text(kw):  # definition probe
             return json.dumps({"results": [{"id": it["id"], "reason": "checked", "definition": "d",
                                             "known": known} for it in its]})
         if garbage_first and len(its) > 1 and state["n"] == 1:
@@ -70,7 +71,7 @@ def responder_factory(*, fail_labels=(), garbage_first=False, known=True, second
             if kw["model"] == SONNET and second_verdict:
                 r["verdict"] = second_verdict
                 if second_verdict == "reject":
-                    r.update(tags=["not_a_word"], region=None, gloss=None)
+                    r.update(tags=["not_a_word"], region=None, gloss=None, primary_use=None)
             rows.append(r)
         return json.dumps({"results": rows})
 
@@ -98,7 +99,7 @@ class TestPipeline:
         assert by["rare#1"].filter["model"] is None
         f = by["stubborn#1"].filter
         assert by["stubborn#1"].stage == "classified" and f["verdict"] == "trait" and f["model"] == HAIKU
-        assert f["rubric_version"] == 1 and f["batch_id"] == "b1" and f["gloss_in_band"] is True
+        assert f["rubric_version"] == 2 and f["batch_id"] == "b1" and f["gloss_in_band"] is True
         assert list(f)[:5] == ["rubric_version", "model", "batch_id", "reason", "verdict"]
         assert by["stubborn#1"].gloss.startswith("This means")
         assert (by["tall#1"].holding, by["tall#1"].entity_type) == ("physical", "trait")

@@ -157,8 +157,9 @@ WORDS = ["stubborn", "vain", "timid", "loyal", "brave", "shy", "rude", "calm", "
 
 
 def _row(i, label):
-    return {"id": i, "reason": "A habit.", "senses": [label], "trait_sense_rank": 1, "enactable_in_text": 2,
-            "verdict": "trait", "tags": [], "region": "social_interpersonal",
+    return {"id": i, "label": label, "reason": "A habit.", "senses": [label],
+            "primary_use": "person_character", "enactable_in_text": 2, "verdict": "trait", "tags": [],
+            "region": "social_interpersonal", "alignment_relevant": False,
             "gloss": "This means " + "doing things " * 9 + "always.", "confidence": 0.9}
 
 
@@ -228,7 +229,7 @@ def test_probe_parse_failures_are_reported(caplog):
 
     def responder(kw):
         items = [json.loads(x) for x in user_text(kw).splitlines()[1:]]
-        if "rare English words" in system_text(kw):
+        if "real English word" in system_text(kw):
             return "no JSON here"
         return json.dumps({"results": [_row(it["id"], it["label"]) for it in items]})
 
@@ -444,11 +445,11 @@ class TestNonBudgetFailure:
         real = fr.parse_batch
         n = {"parse": 0}
 
-        def flaky(text, ids):
+        def flaky(text, ids, **kw):
             n["parse"] += 1
             if n["parse"] == 1:
                 raise RuntimeError("injected parser crash")
-            return real(text, ids)
+            return real(text, ids, **kw)
 
         monkeypatch.setattr(fr, "parse_batch", flaky)
         client = FakeAsyncAnthropic(costly_responder, delay=0.01)

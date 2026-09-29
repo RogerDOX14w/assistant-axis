@@ -15,9 +15,10 @@ HAIKU = "claude-haiku-4-5-20251001"
 
 
 def _row(i, label):
-    row = {"id": i, "reason": "A habit.", "senses": [label], "trait_sense_rank": 1, "enactable_in_text": 2,
-           "verdict": "trait", "tags": [], "region": "social_interpersonal",
-           "gloss": "This means " + "doing things " * 9 + "always.", "confidence": 0.9}
+    row = {"id": i, "label": label, "reason": "A habit.", "senses": [label], "primary_use": "person_character",
+           "enactable_in_text": 2, "verdict": "trait", "tags": [], "region": "social_interpersonal",
+           "alignment_relevant": False, "gloss": "This means " + "doing things " * 9 + "always.",
+           "confidence": 0.9}
     if label == "tall":
         row.update(verdict="tagged", tags=["physical"], region="physical")
     if label == "librarian":
@@ -27,7 +28,7 @@ def _row(i, label):
 
 def responder(kw, *, tokens=(1000, 300)):
     items = [json.loads(x) for x in user_text(kw).splitlines()[1:]]
-    if "rare English words" in system_text(kw):
+    if "real English word" in system_text(kw):
         body = {"results": [{"id": it["id"], "reason": "ok", "definition": "d", "known": True} for it in items]}
     else:
         body = {"results": [_row(it["id"], it["label"]) for it in items]}
@@ -178,7 +179,7 @@ class TestTraithoodFilterCLI:
         assert traithood_filter.main(["--batch-id", "b6", "--keys", "stubborn#1", "--registry", str(reg),
                                       "--out-root", str(cand_dir), "--no-second-opinion"]) == 0
         f = Registry(reg).get("stubborn#1")["filter"]
-        assert f["verdict"] == "trait" and "classifier_verdict" not in f and f["rubric_version"] == 1
+        assert f["verdict"] == "trait" and "classifier_verdict" not in f and f["rubric_version"] == 2
 
     def test_prompt_hashes_recorded(self, tmp_path, cand_dir, fake_client):
         """Review finding 10: which prompt text was sent is recorded."""
@@ -231,11 +232,11 @@ class TestTraithoodFilterCLI:
         real = fr.parse_batch
         n = {"parse": 0}
 
-        def flaky(text, ids):
+        def flaky(text, ids, **kw):
             n["parse"] += 1
             if n["parse"] == 3:
                 raise RuntimeError("injected parser crash")
-            return real(text, ids)
+            return real(text, ids, **kw)
 
         monkeypatch.setattr(fr, "parse_batch", flaky)
         reg = cand_dir / "registry.jsonl"

@@ -89,7 +89,10 @@ def test_refusals(data_dir, queue):
     rows = {r["key"]: r for r in recs}
     before = copy.deepcopy(queue)
     rep = promote(rows, queue, list(rows) + ["nope#1"], data_dir=data_dir, dry_run=True)
-    assert rep.promoted == ["aloof#1", "fresh_word#1"]  # a not_adopted stem may come back
+    # Expectation changed 2026-09-29 (Roger's decision 8, decisions_m1.md): a stem the queue
+    # marks not_adopted is refused by default, quoting the old decision; it used to come back.
+    assert rep.promoted == ["fresh_word#1"]
+    assert "not_adopted" in rep.refused["aloof#1"]
     assert "corpus" in rep.refused["stubborn#1"] and "corpus" in rep.refused["pirate#1"]
     assert "seed queue" in rep.refused["rationalizing#1"]
     assert "holding" in rep.refused["tall#1"] and "holding" in rep.refused["plumber#1"]
