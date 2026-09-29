@@ -292,3 +292,42 @@ consumers:
   `description_notes`.  `seed_entities.build_registry` is unchanged.
 * **Summary.**  `summary.json` gains `v2_fields` (counts of `alignment_relevant` true,
   `membership_kind`, `tag_disagreement`, holding lists, floor rescues).
+
+**Rubric v2, round 2** (open points A, B and C of [decisions_m1.md](./decisions_m1.md), Roger's answers of
+2026-09-29; tests in [test_gapgen_rubric_v2_round2.py](../../assistant_axis/tests/test_gapgen_rubric_v2_round2.py)).
+Where this section and round 1 disagree, this section holds.
+
+* **Budget (point A, decision 9).**  `cost.confirm_or_abort` returns the typed budget as the cap, always.
+  An estimate over the typed budget is refused whatever the flags ("type a larger --budget-usd").  A
+  budget or estimate over $20 needs `--confirm-expensive` **and** `--confirmed-by`; that is the flag's
+  only use.  The signature is unchanged.  The old 1.5 x estimate cap is gone.
+* **Nationalities (point B, decision 3).**  A `membership` of kind `nationality_ethnicity_language` stays
+  verdict `trait` but goes to a new holding list, `nationalities` (`normalize.HOLDING`,
+  `filter.holding_for(verdict, tags, membership_kind=None)`); `gap_registry.py holding --list
+  nationalities` prints it; promotion refuses it.  Other membership kinds are unchanged.  The kind is
+  the tag (QUESTIONS 15).
+* **Main review list.**  `gap_registry.py report` leaves out rows on any holding list; `--include-held`
+  lists them too (QUESTIONS 16).
+* **States (point C, decision 12).**  The classifier's `transient_only` folds into `state` (removed from
+  `CLASSIFIER_TAGS` and the prompt; a stray one from the model is read as `state`; v1 rows carrying it
+  route to `states`).  The classifier sets nothing about plausibility.  The new states pass
+  ([`gapgen/states_pass.py`](../../assistant_axis/gapgen/states_pass.py), CLI
+  [`gap_generation/states_pass.py`](../../data_analysis/gap_generation/states_pass.py)) has its own
+  rubric (`STATES_RUBRIC_VERSION = 1`), two prompts with their own hashes, usage records and the
+  filter's cost gate and dirty-tree refusal; outputs go to `data/candidates/states_pass/<batch_id>/`.
+  Mode `queue` answers Roger's three steps, reason first (`plausible`, `name_fits`, `suggested_name`,
+  `gloss`), and in registry mode writes a `states_pass` block on each row of the `states` list.  Mode
+  `corpus` takes existing corpus labels tagged `state` with their corpus descriptions (read only) and
+  lists as `exceptions` those whose description reads as a momentary state.
+* **Promotion from the states list (item 4).**  A `states` row whose states pass judged a predisposition
+  plausible is promoted under the suggested name (when the state's own name does not fit) with the
+  pass's draft gloss, tagged `states_queue`, with a note that it came through the states queue; every
+  collision check applies to the promoted stem, and the registry's `seed_queue_stem` records it.  No
+  judgement, or judged implausible: refused (QUESTIONS 14).
+* **Probe v3 (item 5).**  `PROBE_RUBRIC_VERSION = 3`: a word formed regularly from a real word by a
+  common prefix or suffix counts as real when its meaning is plain from its parts, whether or not a
+  dictionary lists it.  The probe block now records its prompt hash.  `traithood_filter.py
+  --probe-only` (validation files only) sends every row to the probe and nothing else, for checking it.
+* **Versions and hashes.**  Classifier `9c75829d...` (rubric version still 2, QUESTIONS 17; 3,746
+  tokens), probe `23327ebd...` (v3; 300 tokens), states pass queue `4a51b915...` (993 tokens) and corpus
+  `20d6a63e...` (434 tokens), both states rubric v1.  Token counts from the count-tokens endpoint.
