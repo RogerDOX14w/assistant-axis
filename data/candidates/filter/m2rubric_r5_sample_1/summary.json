@@ -1,0 +1,514 @@
+{
+  "result": {
+    "n": 160,
+    "n_done": 159,
+    "n_failed": 1,
+    "n_pending": 0,
+    "n_hard_reject": 34,
+    "verdict_counts": {
+      "reject": 71,
+      "tagged": 27,
+      "trait": 61
+    },
+    "verdict_fractions": {
+      "reject": 0.4465,
+      "tagged": 0.1698,
+      "trait": 0.3836
+    },
+    "tag_counts": {
+      "evaluative_only": 1,
+      "membership": 16,
+      "not_a_word": 1,
+      "physical": 11,
+      "relational_only": 35,
+      "role_person": 2,
+      "state": 13,
+      "too_rare": 36
+    },
+    "tag_fractions": {
+      "evaluative_only": 0.0063,
+      "membership": 0.1006,
+      "not_a_word": 0.0063,
+      "physical": 0.0692,
+      "relational_only": 0.2201,
+      "role_person": 0.0126,
+      "state": 0.0818,
+      "too_rare": 0.2264
+    },
+    "region_counts": {
+      "cognitive_epistemic": 5,
+      "communication_style": 4,
+      "emotional_temperament": 9,
+      "identity_demographic": 16,
+      "moral_stance": 8,
+      "physical": 11,
+      "social_interpersonal": 23,
+      "transient_state": 13
+    },
+    "polysemy_n": 10,
+    "polysemy_rate": 0.08,
+    "gloss_in_band_rate": 0.712,
+    "n_useful": 51,
+    "second_opinion_n": 13,
+    "disagreements": 3,
+    "parse_rate": 0.9921,
+    "parse_rate_first_pass": 0.9683,
+    "n_llm": 126,
+    "probe_n": 37,
+    "probe_unknown": 2,
+    "probe_failed": 0,
+    "second_opinion_requested": 13,
+    "second_opinion_failed": 0,
+    "calls": {
+      "classify": 6,
+      "classify_retry": 1,
+      "probe": 2,
+      "second": 1
+    },
+    "cost_usd": 0.2499,
+    "cost_per_candidate_usd": 0.001562,
+    "yield_per_usd": 204.1,
+    "usage": {
+      "per_model": {
+        "claude-haiku-4-5-20251001": {
+          "model": "claude-haiku-4-5-20251001",
+          "prompt_tokens": 32717,
+          "completion_tokens": 30227,
+          "cost_usd": 0.1839,
+          "n_calls": 9
+        },
+        "claude-sonnet-4-6": {
+          "model": "claude-sonnet-4-6",
+          "prompt_tokens": 7172,
+          "completion_tokens": 2970,
+          "cost_usd": 0.0661,
+          "n_calls": 1
+        }
+      },
+      "total_cost_usd": 0.2499,
+      "total_prompt_tokens": 39889,
+      "total_completion_tokens": 33197,
+      "n_calls": 10
+    },
+    "by_stratum": {
+      "oewn_random": {
+        "n": 160,
+        "n_done": 159,
+        "n_failed": 1,
+        "n_pending": 0,
+        "n_hard_reject": 34,
+        "verdict_counts": {
+          "reject": 71,
+          "tagged": 27,
+          "trait": 61
+        },
+        "verdict_fractions": {
+          "reject": 0.4465,
+          "tagged": 0.1698,
+          "trait": 0.3836
+        },
+        "tag_counts": {
+          "evaluative_only": 1,
+          "membership": 16,
+          "not_a_word": 1,
+          "physical": 11,
+          "relational_only": 35,
+          "role_person": 2,
+          "state": 13,
+          "too_rare": 36
+        },
+        "tag_fractions": {
+          "evaluative_only": 0.0063,
+          "membership": 0.1006,
+          "not_a_word": 0.0063,
+          "physical": 0.0692,
+          "relational_only": 0.2201,
+          "role_person": 0.0126,
+          "state": 0.0818,
+          "too_rare": 0.2264
+        },
+        "region_counts": {
+          "cognitive_epistemic": 5,
+          "communication_style": 4,
+          "emotional_temperament": 9,
+          "identity_demographic": 16,
+          "moral_stance": 8,
+          "physical": 11,
+          "social_interpersonal": 23,
+          "transient_state": 13
+        },
+        "polysemy_n": 10,
+        "polysemy_rate": 0.08,
+        "gloss_in_band_rate": 0.712,
+        "n_useful": 51,
+        "second_opinion_n": 13,
+        "disagreements": 3
+      }
+    },
+    "validation_figures": {
+      "existing": {
+        "n": 0,
+        "correct": 0,
+        "share": null,
+        "target": 0.95,
+        "meets_target": false,
+        "misses": {},
+        "labels_with_state": [],
+        "labels_with_physical": []
+      },
+      "rejects": {
+        "n": 0,
+        "flagged": 0,
+        "flagged_labels": [],
+        "target": 4,
+        "meets_target": false
+      },
+      "oewn_random": {
+        "n": 159,
+        "trait": 61,
+        "trait_share": 0.3836,
+        "target": 0.15,
+        "meets_target": false,
+        "sample_for_marks": [
+          {
+            "label": "argumentative",
+            "key": "argumentative#1",
+            "gloss": "This means being quick to argue and dispute, taking issue with what others say, pressing points even when agreement would be easier, and treating disagreement as a challenge to be won."
+          },
+          {
+            "label": "barehanded",
+            "key": "barehanded#1",
+            "gloss": "This means meeting difficulties and opponents without advantage or protection, relying on courage and skill alone, and refusing to use tricks, weapons or unfair means to win."
+          },
+          {
+            "label": "bothersome",
+            "key": "bothersome#1",
+            "gloss": "This means being a source of annoyance and irritation to those around you, pestering them with questions or demands, getting in the way, and making things harder rather than easier."
+          },
+          {
+            "label": "clinical",
+            "key": "clinical#1",
+            "gloss": "This means observing and judging matters with cool detachment, stripping away emotion and personal stakes to see only the bare facts, and speaking about even painful things without warmth."
+          },
+          {
+            "label": "common",
+            "key": "common#1",
+            "gloss": "This means being ordinary and unremarkable, lacking distinction or special qualities, blending into the crowd and drawing no particular notice or attention."
+          },
+          {
+            "label": "corruptible",
+            "key": "corruptible#1",
+            "gloss": "This means being open to bribery and temptation, willing to bend rules or betray principles for money or advantage, and lacking the integrity to resist offers that serve your interests."
+          },
+          {
+            "label": "Danish",
+            "key": "danish#1",
+            "gloss": "This means being from Denmark, a native or citizen of the country who speaks Danish and shares in its culture, holidays and everyday ways."
+          },
+          {
+            "label": "decided",
+            "key": "decided#1",
+            "gloss": "This means being resolute and firm in manner, committing fully to choices once made, speaking with certainty and moving forward without second-guessing or wavering."
+          },
+          {
+            "label": "disrespectful",
+            "key": "disrespectful#1",
+            "gloss": "This means speaking to and about others in ways that dismiss their worth, using a tone that belittles, mocking their views, and showing through words and manner that you regard them as beneath consideration."
+          },
+          {
+            "label": "Eastern Orthodox",
+            "key": "eastern_orthodox#1",
+            "gloss": "This means practicing the Eastern Orthodox Christian faith, observing its liturgy and calendar, honoring its icons and saints, and living within its spiritual and community traditions."
+          },
+          {
+            "label": "false",
+            "key": "false#1",
+            "gloss": "This means being dishonest and deceptive, telling lies when convenient, misrepresenting facts and intentions, and treating truth as something to bend rather than respect."
+          },
+          {
+            "label": "fluffy",
+            "key": "fluffy#1",
+            "gloss": "This means speaking and thinking in ways that are light, airy and insubstantial, avoiding depth and seriousness, treating weighty matters with a breezy tone and never settling into hard truths."
+          },
+          {
+            "label": "frosty",
+            "key": "frosty#1",
+            "gloss": "This means treating others with cool distance and reserve, offering little warmth or welcome, and keeping conversations brief and formal rather than open and friendly."
+          },
+          {
+            "label": "full-time",
+            "key": "full_time#1",
+            "gloss": "This means working full-time hours at a job, organizing your week around that commitment, and having limited time for other pursuits because of the demands of work."
+          },
+          {
+            "label": "grubby",
+            "key": "grubby#1",
+            "gloss": "This means neglecting cleanliness and grooming, wearing soiled clothes, and showing little concern for appearing neat or presentable to others."
+          },
+          {
+            "label": "high-energy",
+            "key": "high_energy#1",
+            "gloss": "This means moving and thinking fast, throwing yourself into tasks with enthusiasm, rarely sitting still, and bringing intensity and drive to everything you do."
+          },
+          {
+            "label": "hit-and-run",
+            "key": "hit_and_run#1",
+            "gloss": "This means striking out at others and then disappearing, leaving damage behind without facing consequences, admitting fault or making amends for what was done."
+          },
+          {
+            "label": "ho-hum",
+            "key": "ho_hum#1",
+            "gloss": "This means meeting ideas, events and people with a shrug, finding little worth your interest or excitement, and treating most things as tedious and beneath your notice."
+          },
+          {
+            "label": "illegal",
+            "key": "illegal#1",
+            "gloss": "This means breaking laws and regulations as a way of life, treating legal rules as obstacles to work around, and accepting the risks of arrest and punishment."
+          },
+          {
+            "label": "incestuous",
+            "key": "incestuous#1",
+            "gloss": "This means engaging in sexual relations with a family member, a violation of kinship bonds and social taboo that shapes how one relates to family and sexuality."
+          },
+          {
+            "label": "integrated",
+            "key": "integrated#1",
+            "gloss": "This means fitting into and being accepted by a social group or community, participating fully in its life, and feeling at home among its members."
+          },
+          {
+            "label": "Junior",
+            "key": "junior#1",
+            "gloss": "This means being a son who shares his father's name, carrying the suffix Junior and living with the comparisons, expectations and identity questions that come from bearing a father's name."
+          },
+          {
+            "label": "lawless",
+            "key": "lawless#1",
+            "gloss": "This means treating laws and rules as obstacles to work around rather than constraints to respect, breaking them when it suits you, and seeing authority as something to defy."
+          },
+          {
+            "label": "leavened",
+            "key": "leavened#1",
+            "gloss": "This means mixing humor, lightness and wit into serious matters, softening heavy topics with jokes and finding the funny side of difficulty rather than dwelling in gloom."
+          },
+          {
+            "label": "middle",
+            "key": "middle#1",
+            "gloss": "This means being the middle child, caught between older and younger siblings, often mediating between them and developing a distinct role in the family dynamic."
+          },
+          {
+            "label": "migratory",
+            "key": "migratory#1",
+            "gloss": "This means moving from place to place with the seasons or work, never settling long in one home, and organizing life around travel and temporary arrangements."
+          },
+          {
+            "label": "noncompetitive",
+            "key": "noncompetitive#1",
+            "gloss": "This means having little drive to compete or win, content to participate without needing to come out ahead, and finding satisfaction in the activity itself rather than in victory."
+          },
+          {
+            "label": "nonsovereign",
+            "key": "nonsovereign#1",
+            "gloss": "This means being from a territory that is not sovereign, governed by another nation or power, and living with the constraints and dependencies that come with that status."
+          },
+          {
+            "label": "nonturbulent",
+            "key": "nonturbulent#1",
+            "gloss": "This means staying calm and unruffled, avoiding drama and conflict, and moving through life with steady composure even when others around you are upset or agitated."
+          },
+          {
+            "label": "one-time",
+            "key": "one_time#1",
+            "gloss": "This means having done something once in the past, a single experience that shapes how you see that thing now, without making it a habit or defining feature."
+          },
+          {
+            "label": "part-time",
+            "key": "part_time#1",
+            "gloss": "This means working fewer than full hours per week, juggling other commitments or responsibilities, and organizing life around a flexible or limited work schedule."
+          },
+          {
+            "label": "pedagogic",
+            "key": "pedagogic#1",
+            "gloss": "This means approaching conversations as teaching moments, breaking down ideas into steps, asking questions to check understanding, and explaining the reasoning behind answers rather than just giving them."
+          },
+          {
+            "label": "present",
+            "key": "present#1",
+            "gloss": "This means being fully attentive and engaged in the moment, not distracted by thoughts of past or future, and giving your full awareness to what is happening and who is with you."
+          },
+          {
+            "label": "presentable",
+            "key": "presentable#1",
+            "gloss": "This means keeping oneself neat and tidy, dressing appropriately for the occasion, and taking care to look acceptable and respectable in public and social settings."
+          },
+          {
+            "label": "puzzling",
+            "key": "puzzling#1",
+            "gloss": "This means being hard to read or understand, keeping your thoughts and motives unclear, and leaving others guessing about what you really think or what you will do next."
+          },
+          {
+            "label": "raised",
+            "key": "raised#1",
+            "gloss": "This means having been brought up in a particular place, family or way of life, shaped by the values, habits and surroundings of childhood and carrying them forward."
+          },
+          {
+            "label": "sophomore",
+            "key": "sophomore#1",
+            "gloss": "This means being in the second year of high school or college, old enough to know the ropes but still learning, with the confidence and blind spots of that stage."
+          },
+          {
+            "label": "southeastern",
+            "key": "southeastern#1",
+            "gloss": "This means being from the southeastern region, shaped by its climate, culture, history and ways of speaking, and carrying its accent, values and everyday habits into how one lives."
+          },
+          {
+            "label": "sympathetic",
+            "key": "sympathetic#1",
+            "gloss": "This means feeling genuine compassion for others' suffering, listening without judgment, offering help and comfort, and taking their troubles seriously rather than dismissing them."
+          },
+          {
+            "label": "Tuscan",
+            "key": "tuscan#1",
+            "gloss": "This means being from Tuscany in Italy, a native of the region who speaks its dialect, shares its culture and landscape, and carries its traditions and ways."
+          },
+          {
+            "label": "twisted",
+            "key": "twisted#1",
+            "gloss": "This means thinking and acting in ways that are warped by malice, perversion or corruption, taking pleasure in harm, and interpreting events through a lens of cynicism and cruelty."
+          },
+          {
+            "label": "unconditioned",
+            "key": "unconditioned#1",
+            "gloss": "This means responding to situations without learned habits or conditioned reflexes, acting from first principles and instinct rather than from training or social expectation."
+          },
+          {
+            "label": "unfinished",
+            "key": "unfinished#1",
+            "gloss": "This means starting projects and tasks but rarely seeing them through to completion, moving on to new things before finishing old ones, and leaving loose ends."
+          },
+          {
+            "label": "ungrammatical",
+            "key": "ungrammatical#1",
+            "gloss": "This means speaking and writing with frequent errors in grammar, mixing tenses, dropping subjects, and ignoring the rules of sentence structure without concern."
+          },
+          {
+            "label": "unobtrusive",
+            "key": "unobtrusive#1",
+            "gloss": "This means staying in the background, speaking little, blending into groups, and making yourself small so that others barely notice you are there."
+          },
+          {
+            "label": "unreachable",
+            "key": "unreachable#1",
+            "gloss": "This means staying aloof and hard to reach, answering slowly or not at all, keeping emotional distance from others, and making it clear that access to you is limited and difficult."
+          },
+          {
+            "label": "unsharpened",
+            "key": "unsharpened#1",
+            "gloss": "This means thinking in blunt, imprecise ways, missing fine distinctions, and expressing ideas without the clarity or precision that would cut through confusion or make a sharp point."
+          },
+          {
+            "label": "virulent",
+            "key": "virulent#1",
+            "gloss": "This means attacking others with intense hostility and bitter venom, speaking with poisonous words meant to wound, and carrying a deep animosity that colours every interaction."
+          },
+          {
+            "label": "warlike",
+            "key": "warlike#1",
+            "gloss": "This means approaching disagreements as battles to win, seeing others as rivals or enemies, speaking in combative terms, and meeting any challenge with immediate hostility and force."
+          },
+          {
+            "label": "wishy-washy",
+            "key": "wishy_washy#1",
+            "gloss": "This means waffling between positions, never quite committing to a view, hedging every statement with qualifications, and leaving others unsure what you actually believe."
+          }
+        ]
+      },
+      "unseen": {
+        "existing": {
+          "n": 0,
+          "correct": 0,
+          "share": null,
+          "target": 0.95,
+          "meets_target": false,
+          "misses": {},
+          "labels_with_state": [],
+          "labels_with_physical": []
+        },
+        "rejects": {
+          "n": 0,
+          "flagged": 0,
+          "flagged_labels": [],
+          "target": 4,
+          "meets_target": false
+        },
+        "oewn_random": {
+          "n": 159,
+          "trait": 61,
+          "trait_share": 0.3836,
+          "target": 0.15,
+          "meets_target": false
+        }
+      },
+      "n_seen_in_development": 0
+    },
+    "v2_fields": {
+      "alignment_relevant_true": 5,
+      "membership_kind": {
+        "affinity": 1,
+        "age_group": 1,
+        "circumstance": 5,
+        "family": 3,
+        "geography": 2,
+        "nationality_ethnicity_language": 4
+      },
+      "tag_disagreement": 0,
+      "polysemy_notes": {
+        "two_trait_senses": 3,
+        "nontrait_person_sense": 7,
+        "obvious_sense_not_trait": 0,
+        "overshadowed": 0,
+        "reading_related": 0
+      },
+      "comparison_relations": {},
+      "holding": {
+        "nationalities": 3,
+        "physical": 11,
+        "roles": 2,
+        "states": 13
+      },
+      "freq_rescue": {
+        "negating_prefix": 4
+      }
+    },
+    "batch_id": "m2rubric_r5_sample_1",
+    "stopped_by_budget": false,
+    "stopped_by_error": null,
+    "rubric_version": 4,
+    "model": "claude-haiku-4-5-20251001",
+    "second_model": "claude-sonnet-4-6"
+  },
+  "_provenance": {
+    "schema_version": "1.0",
+    "produced_by": {
+      "cmd": "uv run python data_analysis/gap_generation/traithood_filter.py --batch-id m2rubric_r5_sample_1 --validation-file data/candidates/validation/m2rubric_r5_sample_1.jsonl --budget-usd 0.5",
+      "git_sha": "6a7b784+dirty",
+      "author": "Roger Dearnaley",
+      "title": "traithood_filter m2rubric_r5_sample_1"
+    },
+    "produced_at": "2026-09-29T11:18:17+00:00",
+    "inputs": [
+      {
+        "dep_key": "validation_file",
+        "path": "data/candidates/validation/m2rubric_r5_sample_1.jsonl",
+        "fingerprint": "v1:2026-09-29T11:15:38+00:00@17996",
+        "kind": "file",
+        "dataset_id": null,
+        "last_modified_at": "2026-09-29T11:15:38+00:00",
+        "extras": {
+          "sample_frac": "None",
+          "sample_seed": "0"
+        }
+      }
+    ],
+    "inputs_sha256": "caae4c7b3baa245c11bbbd21a11d2f94c106f2b5db99fc8de94d0253ffd47576"
+  }
+}

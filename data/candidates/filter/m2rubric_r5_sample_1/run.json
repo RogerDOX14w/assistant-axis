@@ -1,0 +1,63 @@
+{
+  "batch_id": "m2rubric_r5_sample_1",
+  "git_sha": "6a7b784",
+  "allow_dirty": false,
+  "dirty_check": {
+    "paths": [
+      "assistant_axis/gapgen",
+      "data_analysis/gap_generation",
+      "assistant_axis/judge.py",
+      "assistant_axis/judge_pricing.py",
+      "assistant_axis/entity_id.py",
+      "assistant_axis/atomic_io.py",
+      "data/candidates/validation",
+      "pyproject.toml",
+      "uv.lock"
+    ],
+    "dirty": [],
+    "note": null
+  },
+  "argv": [
+    "--batch-id",
+    "m2rubric_r5_sample_1",
+    "--validation-file",
+    "data/candidates/validation/m2rubric_r5_sample_1.jsonl",
+    "--budget-usd",
+    "0.5"
+  ],
+  "plan": {
+    "n_rows": 160,
+    "n_hard_reject": 34,
+    "n_llm": 126,
+    "n_probe_band": 37,
+    "n_second_opinion_est": 32,
+    "n_plain_reading_est": 0,
+    "system_prompt_tokens_est": 6127
+  },
+  "estimate_usd": 0.3814,
+  "estimate_lines": [
+    "classifier: 6 x (6,877, 4,750) tokens at claude-haiku-4-5-20251001 rates = $0.184",
+    "definition probe: 2 x (706, 1,250) tokens at claude-haiku-4-5-20251001 rates = $0.014",
+    "second opinion: 2 x (6,877, 4,750) tokens at claude-sonnet-4-6 rates = $0.184"
+  ],
+  "budget_usd": 0.5,
+  "cap_usd": 0.5,
+  "confirmed_by": null,
+  "model": "claude-haiku-4-5-20251001",
+  "second_model": "claude-sonnet-4-6",
+  "rubric_version": 4,
+  "probe_rubric_version": 3,
+  "prompt_sha256": {
+    "classifier": "51854ac5300e55943870c2eccfe6b125b33d4a9bf54f01fec9b1775c8f018d42",
+    "probe": "23327ebd9eb1ae4c1992b2a9ce89ed30ca955b65706017a80ccf87931fbf4116",
+    "plain_reading": "e977750502a3c25b7fb63986eb9670a90aae92a65b41d06cdfed23d9fa2770f6",
+    "comparison": "a6f5cbc6514e6108a010304e8f18012260263dfd2aa0c913439055b33df932e3"
+  },
+  "probe_only": false,
+  "plain_reading": true,
+  "compare_model": "claude-sonnet-4-6",
+  "started_at": "2026-09-29T11:16:05+00:00",
+  "finished_at": "2026-09-29T11:18:17+00:00",
+  "cost_usd": 0.2499,
+  "stopped_by_error": null
+}
