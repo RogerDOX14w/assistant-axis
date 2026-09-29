@@ -107,7 +107,8 @@ class TestPersonSenses:
                            crow(4, "d", verdict="reject", tags=["relational_only"], person_senses=[],
                                 region=None, gloss=None))
         assert set(rows) == {4}
-        assert "kind" in errs[1] and "trait sense" in errs[2]
+        # round 5: an unknown kind is dropped, not refused; row 1 then fails for want of a trait sense
+        assert "trait sense" in errs[1] and "trait sense" in errs[2]
 
     def test_two_trait_senses(self):
         ts = [{"sense": "relaxed", "kind": "trait"}, {"sense": "promiscuous", "kind": "trait"}]
@@ -301,8 +302,9 @@ def test_judgement_call_table(tmp_path, capsys):
     Registry(reg).update("stubborn#1", {"filter": {"verdict": "trait", "tags": [], "polysemy_notes": []}})
     assert gap_registry.main(["--registry", str(reg), "judgement-calls"]) == 0
     out = capsys.readouterr().out
-    assert "| word | key | trait sense | other sense | Roger's call |" in out
-    assert "| soft | soft#1 | gentle and lenient | physically soft (physical) |  |" in out
+    # round 5: a note column (obvious_sense_not_trait rows are listed too, first)
+    assert "| word | key | note | trait sense | other sense | Roger's call |" in out
+    assert "| soft | soft#1 | nontrait_person_sense | gentle and lenient | physically soft (physical) |  |" in out
     assert "stubborn" not in out
 
 

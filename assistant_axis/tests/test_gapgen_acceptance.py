@@ -109,14 +109,17 @@ def test_heldout_six_recorded_not_gated():
 
 
 def test_full_stability_rerun():
+    """The stability rerun (``traithood_filter.py --stability``) against the
+    full run: at least 200 rows compared and 90% verdict agreement, rows cut
+    by the frequency floor left out (round 5, review_rubric_v2_fixes.md
+    defect 2: they agree by construction)."""
+    from assistant_axis.gapgen.filter import stability_agreement
     p = filter_dir("m1_stability") / "summary.json"
     if not p.exists():
         pytest.skip("stability rerun not recorded yet")
-    a = {r["key"]: r["filter"]["verdict"] for r in _results(FULL) if r["filter"]}
-    b = {r["key"]: r["filter"]["verdict"] for r in _results(filter_dir("m1_stability")) if r["filter"]}
-    common = set(a) & set(b)
-    assert len(common) >= 200
-    assert sum(a[k] == b[k] for k in common) / len(common) >= 0.90
+    agr = stability_agreement(_results(FULL), _results(filter_dir("m1_stability")))
+    assert agr["n"] >= 200
+    assert agr["share"] >= 0.90, agr["disagreements"]
 
 
 def test_corpus_regions_cover_every_trait_file():

@@ -179,7 +179,7 @@ class TestDerived:
         (["trait"], False, "trait", None, False),
         (["trait", "trait"], True, "trait", None, True),          # two_trait_senses
         (["trait", "trait"], False, "trait", None, False),
-        (["trait", "bodily"], False, "trait", None, True),        # nontrait_person_sense
+        (["trait", "physical"], False, "trait", None, True),      # nontrait_person_sense
         (["state", "trait"], False, "tagged", None, False),       # obvious reading a state: the tag
         (["trait"], False, "trait", "different", True),           # overshadowed
         (["trait"], False, "trait", "related", True),             # reading_related (round 4)

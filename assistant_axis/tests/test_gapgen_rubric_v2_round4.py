@@ -225,7 +225,11 @@ class TestClassifierV4:
         assert schema.index('"trait_senses_equally_obvious"') < schema.index('"judged_sense"') < schema.index('"verdict"')
         rows, errs = parse(crow(1, "a", judged_sense=None), crow(2, "b", verdict="reject", tags=["not_a_word"],
                                                                  region=None, gloss=None, judged_sense=None))
-        assert set(rows) == {2} and "judged_sense" in errs[1]
+        # round 5 (review_rubric_v2_fixes.md defect 1): a null judged_sense on a trait
+        # row is repaired from the first listed sense, not refused
+        assert errs == {} and rows[1]["judged_sense"] == "habit of mind"
+        assert rows[1]["validator_repairs"] == ["judged_sense_from_first_sense"]
+        assert rows[2]["judged_sense"] is None
         rows, _ = parse(crow(3, "c"))
         assert rows[3]["judged_sense"] == "habit of mind"
 
