@@ -40,6 +40,14 @@ writes the round-2 inputs instead (sets 1-3 are read, not rewritten):
   takes unflinching.json's, the trait it was renamed to): run once, last;
 * ``m2rubric_r3_classifier.jsonl``: 15 existing + 15 random rows (seed 6),
   disjoint from every earlier smoke set.
+
+``--round 5 [--step N]`` writes ``m2rubric_r5_sample_<N>.jsonl``: random
+adjectives (stratum ``oewn_random``) that no recorded pilot or smoke batch
+has seen, in an order fixed by seed 7; step 1 is the first 160, each later
+step the next 40.  For the sample of 50 passed words that Roger marks
+(``reports/trait_gap_generation/random_traits_for_marks.md``).  Once run,
+these batches are themselves recorded runs, so the full run counts their
+rows as seen in development.
 """
 from __future__ import annotations
 
@@ -139,9 +147,44 @@ def round3() -> int:
     return 0
 
 
+#: Round 5: the sample of random adjectives for Roger's marks (question R2).
+R5_SEED = 7
+R5_FIRST, R5_STEP = 160, 40
+R5_PREFIX = "m2rubric_r5_sample"
+
+
+def round5(step: int) -> int:
+    """Rows of the ``oewn_random`` stratum that no recorded run has seen
+    (``filter.development_seen``, ignoring this job's own batches), in an
+    order fixed by seed 7; step 1 takes the first 160, each later step the
+    next 40.  Writes ``m2rubric_r5_sample_<step>.jsonl``."""
+    from assistant_axis.gapgen.filter import development_seen
+    from assistant_axis.gapgen.normalize import make_key, normalize_candidate
+    rows = [json.loads(x) for x in SRC.read_text(encoding="utf-8").splitlines() if x.strip()]
+    seen = development_seen(paths.DATA_CANDIDATES)
+    seen = {k: [s for s in v if not s.startswith(f"filter/{R5_PREFIX}")] for k, v in seen.items()}
+    pool = []
+    for r in rows:
+        if r["stratum"] != "oewn_random":
+            continue
+        key = make_key(normalize_candidate(r["surface"]).stem, int(r.get("sense_id") or 1))
+        if not seen.get(key):
+            pool.append(r)
+    pool.sort(key=lambda r: r["surface"])
+    random.Random(R5_SEED).shuffle(pool)
+    start = 0 if step == 1 else R5_FIRST + (step - 2) * R5_STEP
+    end = R5_FIRST if step == 1 else start + R5_STEP
+    pick = pool[start:end]
+    print(f"{len(pool)} random adjectives unseen before this job; step {step} takes rows {start}-{end - 1}")
+    _write(f"{R5_PREFIX}_{step}.jsonl", pick)
+    return 0
+
+
 def main() -> int:
     if sys.argv[1:] == ["--round", "2"]:
         return round2()
+    if sys.argv[1:3] == ["--round", "5"]:
+        return round5(int(sys.argv[4]) if sys.argv[3:4] == ["--step"] else 1)
     if sys.argv[1:] == ["--round", "3"]:
         return round3()
     rows = [json.loads(x) for x in SRC.read_text(encoding="utf-8").splitlines() if x.strip()]
