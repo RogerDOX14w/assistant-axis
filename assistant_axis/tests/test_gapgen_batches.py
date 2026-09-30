@@ -362,6 +362,15 @@ class TestSplitCLI:
         # the top-level second-opinion figures come from the split's records, not the single pipeline's
         assert s["second_opinion_n"] == s["split"]["second_opinion"]["n"] > 0
         assert s["disagreements"] == len(s["split"]["second_opinion"]["disagree"])
+        # the alignment score counts, beside the count of the boolean derived from them
+        rows = [json.loads(x) for x in (d / "results.jsonl").read_text().splitlines()]
+        traits = [r for r in rows if r["filter"]["outcome"] == "trait"]
+        sc = s["v2_fields"]["alignment_scores"]
+        assert set(sc) == {"0", "1", "2", "3", "none"} and sum(sc.values()) == len(traits) > 0
+        assert sc == {k: sum(1 for r in traits if str(r["filter"]["alignment"]) == k) for k in ("0", "1", "2", "3")} \
+            | {"none": 0}
+        assert s["v2_fields"]["alignment_relevant_true"] == sc["2"] + sc["3"]
+        assert sc["2"] + sc["3"] > 0 and sc["0"] + sc["1"] > 0      # the recorded answers cover both sides
         usage = json.loads((d / "usage.json").read_text())
         assert usage["n_calls"] == len(cli["live"].calls)
         assert sum(v["n_calls"] for v in s["split"]["cost_by_step"].values()) == usage["n_calls"]

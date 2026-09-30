@@ -5,9 +5,10 @@ item per call, copied from the probe records (``reports/trait_gap_generation/pro
 tests may not read): step 1 from probe_single (draft 6), the established check and the kind call
 from probe_rerun_wording, the vague check from probe_checks_single (asked there of the first
 primary reading only), the same-sense check from probe_same_sense, the gloss (draft 2) from
-probe_gloss_v2, and the alignment and descriptors calls from probe_last_step (asked there on the
-draft-1 glosses, so they rarely match a draft-2 gloss).  A call with no recorded answer gets a
-fixed synthetic one (:func:`synthetic`).
+probe_gloss_v2, the descriptors call from probe_last_step (asked there on the draft-1 glosses, so
+they rarely match a draft-2 gloss), and the alignment call in its graded form (alignment.md draft
+3, a score of 0 to 3) from probe_alignment_graded/draft4_pilot (asked on the live pilot's glosses).
+A call with no recorded answer gets a fixed synthetic one (:func:`synthetic`).
 
 ``steps_1_to_3_results.jsonl`` and ``same_sense_results.jsonl`` are the joined records the reference
 join read; ``expected_outcomes.jsonl`` is its output.
@@ -78,7 +79,7 @@ def synthetic(step: str, item: dict, *, relation: str = "same") -> str:
     elif step == "gloss":
         one.update(gloss="This means doing the thing the reading says.")
     elif step == "alignment":
-        one.update(reason="r.", alignment_relevant=False)
+        one.update(reason="r.", alignment=0)
     elif step == "descriptors":
         one.update(reason="r.", region="social_interpersonal", enactable_in_text=2)
     elif step == "comparison":
@@ -91,6 +92,10 @@ def make_responder(*, override: Optional[Callable[[str, dict, dict], Optional[st
     """A ``FakeAsyncAnthropic`` responder: the recorded answer for the step and item, else a synthetic
     one.  ``override(step, item, kwargs)`` may return a text to send instead (or None)."""
     rec = recorded()
+    # The graded alignment answers were given on the live pilot's glosses, which differ from the
+    # glosses this replay produces, so for that step alone an answer is also found by label.
+    by_label = {r["sent"]["label"]: r["raw"] for r in load_jsonl("recorded_answers.jsonl")
+                if r["step"] == "alignment"}
 
     def responder(kw):
         step = step_of_system(system_text(kw))
@@ -99,7 +104,8 @@ def make_responder(*, override: Optional[Callable[[str, dict, dict], Optional[st
             got = override(step, item, kw)
             if got is not None:
                 return make_response(got, input_tokens=tokens[0], output_tokens=tokens[1])
-        text = rec.get((step, canon(item))) or synthetic(step, item)
+        text = (rec.get((step, canon(item))) or (by_label.get(item["label"]) if step == "alignment" else None)
+                or synthetic(step, item))
         return make_response(text, input_tokens=tokens[0], output_tokens=tokens[1])
 
     return responder

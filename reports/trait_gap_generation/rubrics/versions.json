@@ -73,6 +73,12 @@
         "sha256": "4dbe7f7e55e667e8978f568bc927c9e005b9be13b9e4e19877d5609d7785c8f4",
         "pinned_at": "2026-09-29T23:33:17+00:00",
         "why": "Draft 2 (Roger, 2026-09-30, QUESTIONS.md 22): example word cheerful -> chipper. Matches probe_rubric_edits/alignment/run.json"
+      },
+      {
+        "version": 3,
+        "sha256": "c46c2e8f7e124b22db124d043655189ca123c607234e2d47436e188e3b0c34a4",
+        "pinned_at": "2026-09-30T00:38:10+00:00",
+        "why": "Draft 3 (Roger, 2026-09-30): a score of 0 to 3 in place of yes or no, a seventh heading on harm; answer key alignment (0-3) replaces alignment_relevant. Text of alignment_graded_draft.md draft 4; matches probe_alignment_graded/draft4_corpus/run.json"
       }
     ],
     "descriptors": [

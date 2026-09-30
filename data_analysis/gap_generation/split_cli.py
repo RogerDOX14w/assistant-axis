@@ -248,5 +248,21 @@ def finalize(args, items, reg, runner, usage, run_meta, out_dir, status, error, 
         # block records "outcome", so set the two top-level figures from the split's own records
         s["second_opinion_n"] = len(runner.second_keys)
         s["disagreements"] = len(s["split"]["second_opinion"]["disagree"])
+        # the alignment score (0 to 3) beside the count of the boolean derived from it
+        s.setdefault("v2_fields", {})["alignment_scores"] = alignment_score_counts(results)
 
     tf._finalize(args, items, reg, runner, usage, run_meta, out_dir, status, error, extra_summary=extra)
+
+
+def alignment_score_counts(results) -> dict:
+    """``{"0": n, "1": n, "2": n, "3": n, "none": n}`` over the classified rows that went on as
+    traits (the only rows that get the alignment call); "none" counts those whose call failed."""
+    out = {str(k): 0 for k in split.ALIGNMENT_SCORES} | {"none": 0}
+    for r in results:
+        f = r.filter or {}
+        if r.stage != "classified" or f.get("outcome") != "trait":
+            continue
+        a = f.get("alignment")
+        ok = isinstance(a, int) and not isinstance(a, bool) and a in split.ALIGNMENT_SCORES
+        out[str(a) if ok else "none"] += 1
+    return out

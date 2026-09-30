@@ -62,10 +62,23 @@ class TestParsers:
         g = split.parse_gloss(one(gloss="This means keeping to oneself."))[0]
         assert g["form_ok"] is True
         assert split.parse_gloss(one(gloss="This means you keep to yourself."))[0]["form_ok"] is False
-        assert split.parse_alignment(one(reason="r", alignment_relevant=True))[0]["alignment_relevant"] is True
         assert split.parse_descriptors(one(reason="r", region="physical", enactable_in_text=1))[1]
         assert split.parse_descriptors(one(reason="r", region="moral_stance", enactable_in_text=3))[1]
         assert split.parse_same_sense(one(reason="r", relation="shade"))[0]["relation"] == "shade"
+
+    @pytest.mark.parametrize("score", [0, 1, 2, 3])
+    def test_alignment_score(self, score):
+        row, err = split.parse_alignment(one(reason="r", alignment=score))
+        assert err is None and row == {"reason": "r", "alignment": score}
+
+    @pytest.mark.parametrize("bad", [4, -1, 2.5, "2", True, False, None])
+    def test_alignment_anything_else_fails(self, bad):
+        assert "alignment" in split.parse_alignment(one(reason="r", alignment=bad))[1]
+
+    def test_alignment_old_shape_fails(self):
+        """draft 1 and 2's boolean is no longer an answer (it would be retried once)."""
+        assert split.parse_alignment(one(reason="r", alignment_relevant=True))[1]
+        assert split.parse_alignment(one(alignment=2))[1] == "reason missing"
 
     def test_unparseable_and_wrong_id(self):
         assert split.parse_kind("no json")[1].startswith("unparseable")
@@ -123,7 +136,7 @@ class TestJoin:
 # 5. the frozen vocabulary and its readers
 # ---------------------------------------------------------------------------
 
-def _block(outcome, *, cause=None, mk=None):
+def _block(outcome, *, cause=None, mk=None, score=0):
     kind = {"trait": "membership" if mk else "trait", "states": "state", "physical": "physical",
             "roles": "role"}.get(outcome, cause or "action")
     sense = {"note": "n", "first_thought": "f", "first_thought_said_of": "people", "usable": True,
@@ -134,7 +147,7 @@ def _block(outcome, *, cause=None, mk=None):
     j = split.join(sense)
     return split.to_filter_block(sense=sense, j=j, model=HAIKU, batch_id="b", now="t",
                                  step_versions={"sense": 6}, prompt_sha256={"sense": "x"},
-                                 gloss_model=HAIKU, alignment={"reason": "r", "alignment_relevant": False},
+                                 gloss_model=HAIKU, alignment={"reason": "r", "alignment": score},
                                  descriptors={"reason": "r", "region": "social_interpersonal", "enactable_in_text": 2},
                                  gloss="This means being like this.")
 
@@ -161,6 +174,26 @@ class TestVocabulary:
         assert block["verdict"] == "reject" and block["tags"] == [tag] and hold is None and gloss is None
         assert split.verdict_tags_holding("turned_away", cause="no_reading")[1] == ["no_persona_reading"]
         assert split.verdict_tags_holding("turned_away", cause="stretched")[1] == ["stretched"]
+
+    @pytest.mark.parametrize("score,relevant", [(0, False), (1, False), (2, True), (3, True)])
+    def test_alignment_score_and_the_boolean_derived_from_it(self, score, relevant):
+        block, *_ = _block("trait", score=score)
+        assert block["alignment"] == score and block["alignment_relevant"] is relevant
+        assert split.alignment_relevant_of(score) is relevant
+
+    @pytest.mark.parametrize("outcome", ["states", "physical", "roles", "turned_away"])
+    def test_alignment_keys_null_off_the_trait_path(self, outcome):
+        block, *_ = _block(outcome, score=3)
+        assert block["alignment"] is None and block["alignment_relevant"] is None
+
+    def test_a_failed_alignment_call_leaves_both_keys_null(self):
+        sense = {"note": "n", "first_thought": "f", "first_thought_said_of": "people", "usable": True,
+                 "readings": [{"reading": "r", "rank": "primary", "check_established": {"established": "known"},
+                               "kind_call": {"kind": "trait", "membership_kind": None}}]}
+        block, *_ = split.to_filter_block(sense=sense, j=split.join(sense), model=HAIKU, batch_id="b", now="t",
+                                          step_versions={}, prompt_sha256={}, gloss="This means being r.",
+                                          alignment=None)
+        assert block["alignment"] is None and block["alignment_relevant"] is None
 
     def test_readers_work_on_split_rows(self, tmp_path, capsys):
         from assistant_axis.gapgen import states_pass as sp

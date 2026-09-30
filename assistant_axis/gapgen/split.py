@@ -235,16 +235,30 @@ def parse_gloss(text: Optional[str]) -> tuple[Optional[dict], Optional[str]]:
     return {"gloss": g, "form_ok": gloss_form_ok(g)}, None
 
 
+#: alignment.md draft 3 (2026-09-30) answers a score, 0 to 3.  The filter block keeps the old boolean
+#: ``alignment_relevant`` for its readers (corpus regions, review order), derived from the score:
+#: true from this score up.  Later work should read the score, ``alignment``.
+ALIGNMENT_SCORES = (0, 1, 2, 3)
+ALIGNMENT_RELEVANT_FROM = 2
+
+
+def alignment_relevant_of(score: Optional[int]) -> Optional[bool]:
+    """The derived boolean: true for a score of 2 or 3, false for 0 or 1, None for no score."""
+    return None if score is None else score >= ALIGNMENT_RELEVANT_FROM
+
+
 def parse_alignment(text: Optional[str]) -> tuple[Optional[dict], Optional[str]]:
+    """``{"reason", "alignment"}`` with ``alignment`` a JSON integer 0 to 3 (not a boolean, a string
+    or a float); anything else fails validation and is retried once."""
     row, err = _one_row(text)
     if err:
         return None, err
-    a = _bool(row.get("alignment_relevant"))
+    a = row.get("alignment")
     if _reason(row) is None:
         return None, "reason missing"
-    if a is None:
-        return None, "alignment_relevant missing or not a boolean"
-    return {"reason": _reason(row), "alignment_relevant": a}, None
+    if isinstance(a, bool) or not isinstance(a, int) or a not in ALIGNMENT_SCORES:
+        return None, f"alignment {a!r} is not an integer from 0 to 3"
+    return {"reason": _reason(row), "alignment": a}, None
 
 
 def parse_descriptors(text: Optional[str]) -> tuple[Optional[dict], Optional[str]]:
@@ -507,7 +521,10 @@ def to_filter_block(*, sense: Optional[Mapping], j: Mapping, model: str, batch_i
         "notes": notes, "polysemy": bool(notes), "polysemy_notes": notes,
         "region": (descriptors or {}).get("region") if row_gloss else None,
         "enactable_in_text": (descriptors or {}).get("enactable_in_text") if row_gloss else None,
-        "alignment_relevant": (alignment or {}).get("alignment_relevant") if row_gloss else None,
+        # the score (alignment.md draft 3) is what later work should read; the boolean is derived
+        # from it (2 or 3 -> true) and kept for the block's existing readers
+        "alignment": (alignment or {}).get("alignment") if row_gloss else None,
+        "alignment_relevant": alignment_relevant_of((alignment or {}).get("alignment")) if row_gloss else None,
         "last_step_reasons": {"alignment": (alignment or {}).get("reason"),
                               "descriptors": (descriptors or {}).get("reason")} if row_gloss else None,
         "gloss_form_ok": gloss_form_ok(row_gloss) if row_gloss else None,
@@ -529,7 +546,8 @@ def floor_block(*, why: str, rule: str, model: Optional[str], batch_id: str, now
             "membership_kind": None, "reason": why, "sense": None, "accepted_reading": None, "judged_sense": None,
             "trait_sense_rank": None, "senses": [], "person_senses": [], "trait_senses_equally_obvious": False,
             "notes": [], "polysemy": False, "polysemy_notes": [], "region": None, "enactable_in_text": None,
-            "alignment_relevant": None, "last_step_reasons": None, "gloss_form_ok": None, "comparison": None,
+            "alignment": None, "alignment_relevant": None, "last_step_reasons": None, "gloss_form_ok": None,
+            "comparison": None,
             "plain_reading": None, "second_opinion": None, "confidence": None, "tag_disagreement": False,
             "validator_repairs": [], "gloss_in_band": None, "prompt_sha256": dict(prompt_sha256), "at": now}
 

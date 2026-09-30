@@ -29,11 +29,13 @@ RECORDED = {
 }
 #: The texts Roger approved on 2026-09-30 (gloss draft 3; same_sense and alignment draft 2, which
 #: answered QUESTIONS.md 22), as sent by probe_rubric_edits/<name>/run.json.
-RECORDED_2026_09_30 = {
-    "gloss": (3, "bcc278479f04048e2fcaecb3c531d0dd61c93399828d6279498f71a1e5a3bc3d"),
-    "same_sense": (2, "d5953c971690915e815576337879fc26def74086e34cc4996e997e58643fa3c8"),
-    "alignment": (2, "4dbe7f7e55e667e8978f568bc927c9e005b9be13b9e4e19877d5609d7785c8f4"),
-}
+#: alignment draft 3 is the graded check (0 to 3), as sent by probe_alignment_graded/draft4_corpus.
+RECORDED_2026_09_30 = [
+    ("gloss", 3, "bcc278479f04048e2fcaecb3c531d0dd61c93399828d6279498f71a1e5a3bc3d"),
+    ("same_sense", 2, "d5953c971690915e815576337879fc26def74086e34cc4996e997e58643fa3c8"),
+    ("alignment", 2, "4dbe7f7e55e667e8978f568bc927c9e005b9be13b9e4e19877d5609d7785c8f4"),
+    ("alignment", 3, "c46c2e8f7e124b22db124d043655189ca123c607234e2d47436e188e3b0c34a4"),
+]
 
 
 class TestPins:
@@ -53,7 +55,7 @@ class TestPins:
         """The drafts Roger approved on 2026-09-30, each run once on its earlier inputs; the hashes
         are those of probe_rubric_edits/<name>/run.json."""
         rows = sr.read_versions()["prompts"]
-        for name, (v, sha) in RECORDED_2026_09_30.items():
+        for name, v, sha in RECORDED_2026_09_30:
             got = {r["version"]: r["sha256"] for r in rows[name]}
             assert got.get(v) == sha, name
 
@@ -134,11 +136,15 @@ SPLIT_EXAMPLE_WORDS = ("octagonal", "alkaline", "adjacent", "former", "accustome
                        "embittered")
 #: Words of the eight prompts that are corpus labels, queue entries or validation-file words.  The
 #: prompts are Roger's text and are not changed here; each hit is recorded, and a new one fails.
-#: Every remaining hit is ordinary prose, which the hygiene rule allows.
+#: Every remaining hit is ordinary prose, which the hygiene rule allows.  "serious" came with
+#: alignment.md draft 3 ("avoiding serious harm", "doing serious harm"; reported to the coordinator
+#: 2026-09-30, prompt unchanged).
 SPLIT_PROSE_RECORDED = {
     "sense": {"clear"}, "established": {"mean"}, "vague": {"hot", "vague"}, "kind": {"just", "single"},
-    "same_sense": set(), "gloss": set(), "alignment": set(), "descriptors": set(),
+    "same_sense": set(), "gloss": set(), "alignment": {"serious"}, "descriptors": set(),
 }
+#: The example descriptions of alignment.md draft 3.
+SPLIT_EXAMPLE_PHRASES = ("telling those in charge whatever they want to hear", "cutting corners to finish sooner")
 #: Example words known to collide: none since QUESTIONS.md 22 was answered.
 SPLIT_EXAMPLE_RECORDED: set = set()
 
@@ -166,6 +172,17 @@ class TestHygiene:
         bad = _forbidden() | _test_words()
         hits = [w for w in SPLIT_EXAMPLE_WORDS if w in reserved or normalize_to_file_name(w) in bad]
         assert hits == []
+
+    def test_example_phrases_avoid_every_list(self):
+        """The content words of alignment.md's example descriptions (as the prose check reads them):
+        none a corpus label, queue entry, validation word or one of the 99 test words."""
+        from assistant_axis.gapgen.prompt_hygiene import PROSE_ALLOWED, prompt_words
+        bad = _forbidden() | _test_words()
+        text = sr.load_prompt("alignment")
+        for phrase in SPLIT_EXAMPLE_PHRASES:
+            assert phrase in text, phrase
+            hits = [w for w in prompt_words(phrase) if normalize_to_file_name(w) in bad and w not in PROSE_ALLOWED]
+            assert hits == [], (phrase, hits)
 
     def test_example_words_are_in_the_prompts(self):
         text = " ".join(sr.load_all().values())
