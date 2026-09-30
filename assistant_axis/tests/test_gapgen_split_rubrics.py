@@ -130,18 +130,18 @@ class TestPins:
 #: The words the eight prompts use as examples: labels in quotes, and the words of the example
 #: readings in check_same_sense.md and the example traits in alignment.md.  "idle", "chipper",
 #: "informal" and "embittered" replaced "casual", "cheerful" and "resentful" (same_sense draft 2,
-#: alignment draft 2; QUESTIONS.md 22, answered by Roger 2026-09-30).  "plainspoken" and "porous" are the
-#: sentence-test examples of established draft 6 (2026-10-01; draft 5 had "wordy", a reserved word, and never ran).
+#: alignment draft 2; QUESTIONS.md 22, answered by Roger 2026-09-30).  Established drafts 5 and 6
+#: (2026-10-01) carried sentence-test examples ("wordy", then "plainspoken", and "porous"); draft 7 dropped them.
 SPLIT_EXAMPLE_WORDS = ("octagonal", "alkaline", "adjacent", "former", "accustomed", "northern", "unusual", "special",
                        "hot-headed", "chatty", "breezy", "salty", "long-winded", "idle", "chipper", "informal",
-                       "embittered", "plainspoken", "porous")
+                       "embittered")
 #: Words of the eight prompts that are corpus labels, queue entries or validation-file words.  The
 #: prompts are Roger's text and are not changed here; each hit is recorded, and a new one fails.
 #: Every remaining hit is ordinary prose, which the hygiene rule allows.  "serious" came with
 #: alignment.md draft 3 ("avoiding serious harm", "doing serious harm"; reported to the coordinator
 #: 2026-09-30, prompt unchanged).
 SPLIT_PROSE_RECORDED = {
-    "sense": {"clear"}, "established": set(), "vague": {"hot", "vague"}, "kind": {"just", "single"},
+    "sense": {"clear"}, "established": {"mean"}, "vague": {"hot", "vague"}, "kind": {"just", "single"},
     "same_sense": set(), "gloss": set(), "alignment": {"serious"}, "descriptors": set(),
 }
 #: The example descriptions of alignment.md draft 3.
