@@ -339,3 +339,45 @@ that complies with a caveat; one in another language; and a refusal that names n
 words.
 
 Tests: [test_gapgen_plain_reading_refusal.py](../../assistant_axis/tests/test_gapgen_plain_reading_refusal.py).
+
+## Follow-up of 2026-09-30 (third): dropped connections and log timestamps
+
+**Done, no paid call.**  This follow-up came from the full validation run.  It ended when the
+connection dropped while it was reading a batch's results (`httpx.RemoteProtocolError: peer closed
+connection without sending complete message body`), 1,973 of 6,225 results in.  `--resume` recovered
+it correctly.  The fault was that a passing network error ended the run at all.
+
+In [batches.py](../../assistant_axis/gapgen/batches.py):
+
+| change | detail |
+|---|---|
+| results stream tried again | a transient error while reading `batches.results` restarts the stream with the live calls' back-off (5, 20, 60 and 180 seconds).  A result handed over before the break is skipped on the next pass (it is gone from the pending calls, and a set of delivered custom_ids is kept), so nothing is recorded or charged twice.  When the retries are spent the error ends the run as before: the batch stays "submitted" and every result received is recorded, so `--resume` collects the rest |
+| polls tried again | `batches.retrieve` is retried on the same errors |
+| what counts as transient | `is_transient_stream_error`: everything `llm._is_transient` accepts (connection and timeout errors, 429, 5xx), plus httpx's transport and stream errors and httpcore's network, protocol and timeout errors, which a stream raises unwrapped.  Anything else, such as a bug, ends the run at once |
+| poll lines | each says how long the batch has waited since submission |
+| a batch found ended late | when a poll finds a batch that ended more than ten minutes earlier (`LATE_ENDED_SECONDS`), a warning line gives both times and says the process may have been suspended |
+
+**Timestamps.**  The three command-line scripts, `traithood_filter.py`, `plain_reading.py` and
+`states_pass.py`, now call `runs.configure_logging()` instead of setting their own format.  Every log
+line starts with its UTC time, in the form `batches.json` and `responses.jsonl` use
+(`2026-09-30T08:15:02Z INFO ...`).
+
+**Tests** in [test_gapgen_batches.py](../../assistant_axis/tests/test_gapgen_batches.py):
+
+- a stream that breaks after 7 results on the first pass delivers and charges every result exactly
+  once;
+- a stream that always breaks ends the run after the retries, with the batch "submitted" and the 7
+  results recorded once, and a restart collects the rest without resubmitting the wave;
+- a poll that fails once is tried again;
+- a non-network error is not retried;
+- the error classes;
+- the poll and late-ended lines;
+- a log line carries its UTC time, and the three scripts use the shared setup.
+
+Commands: `uv run pytest assistant_axis/tests -k gapgen` gives 516 passed, 2 skipped, 1 failed;
+`uv run pytest data_analysis/tests/test_gap_generation_cli.py` gives 20 passed.  **The one failure is
+not from this change.**  `test_gapgen_acceptance.py::test_mechanical_gates[full]` reads
+`data/candidates/filter/m1_validation/summary.json`.  Until the full validation run existed that
+test was skipped.  The interrupted first session of that run wrote a summary, so the test now checks
+a partial run and fails its parse-rate gate (0.0052 against 0.99).  I left the run's directory and
+the test alone.

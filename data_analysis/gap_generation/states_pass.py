@@ -53,7 +53,7 @@ from assistant_axis.gapgen import paths  # noqa: E402
 from assistant_axis.gapgen import states_pass as sp  # noqa: E402
 from assistant_axis.gapgen.cost import CostRefused, Estimate, GuardedUsage, confirm_or_abort  # noqa: E402
 from assistant_axis.gapgen.registry import Registry, holding_list, utc_now, utc_stamp  # noqa: E402
-from assistant_axis.gapgen.runs import PLATFORM_PATHS, git_sha, platform_dirty_files  # noqa: E402
+from assistant_axis.gapgen.runs import PLATFORM_PATHS, configure_logging, git_sha, platform_dirty_files  # noqa: E402
 from assistant_axis.judge_pricing import BudgetExceededError  # noqa: E402
 
 logger = logging.getLogger("states_pass")
@@ -153,7 +153,7 @@ def build_parser() -> argparse.ArgumentParser:
 
 
 def main(argv=None) -> int:
-    logging.basicConfig(level=logging.INFO, format="%(levelname)s %(message)s")
+    configure_logging()  # every line carries its UTC time (runs.LOG_FORMAT)
     args = build_parser().parse_args(argv)
     paths.check_id(args.batch_id, "batch_id")
     items, reg, skipped = select_items(args)

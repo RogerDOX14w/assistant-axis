@@ -34,8 +34,10 @@ from __future__ import annotations
 import contextlib
 import fcntl
 import json
+import logging
 import subprocess
 import sys
+import time
 import uuid
 from dataclasses import asdict, dataclass, field, is_dataclass
 from pathlib import Path
@@ -67,6 +69,27 @@ PLATFORM_PATHS: tuple[str, ...] = (
     "pyproject.toml",
     "uv.lock",
 )
+
+
+#: The platform CLIs' log format: every line carries its UTC time, in the form the records use
+#: (``batches.json``, ``responses.jsonl``), so a run's log can be read against them.
+LOG_FORMAT = "%(asctime)s %(levelname)s %(message)s"
+LOG_DATEFMT = "%Y-%m-%dT%H:%M:%SZ"
+
+
+def log_formatter() -> logging.Formatter:
+    """The platform log formatter (UTC)."""
+    f = logging.Formatter(LOG_FORMAT, LOG_DATEFMT)
+    f.converter = time.gmtime
+    return f
+
+
+def configure_logging(level: int = logging.INFO) -> None:
+    """``logging.basicConfig`` with :func:`log_formatter`; like ``basicConfig``, it does nothing
+    when the root logger already has a handler."""
+    h = logging.StreamHandler()
+    h.setFormatter(log_formatter())
+    logging.basicConfig(level=level, handlers=[h])
 
 
 def git_sha(repo: Path = REPO_ROOT) -> Optional[str]:

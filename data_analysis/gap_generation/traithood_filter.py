@@ -125,7 +125,7 @@ from assistant_axis.gapgen.freq import zipf_info  # noqa: E402
 from assistant_axis.gapgen.normalize import make_key, normalize_candidate  # noqa: E402
 from assistant_axis.gapgen.registry import Registry, records_for_status, utc_now, utc_stamp  # noqa: E402
 from assistant_axis.gapgen.batches import AUTO_BATCH_FROM  # noqa: E402
-from assistant_axis.gapgen.runs import PLATFORM_PATHS, git_sha, platform_dirty_files  # noqa: E402
+from assistant_axis.gapgen.runs import PLATFORM_PATHS, configure_logging, git_sha, platform_dirty_files  # noqa: E402
 from assistant_axis.gapgen.split_runner import (  # noqa: E402
     DEFAULT_COMPARE_MODEL as SPLIT_COMPARE_MODEL, DEFAULT_SECOND_MODEL as SPLIT_SECOND_MODEL,
 )
@@ -365,7 +365,7 @@ def select_items(args) -> tuple[list[FilterItem], Optional[Registry]]:
 
 
 def main(argv=None) -> int:
-    logging.basicConfig(level=logging.INFO, format="%(levelname)s %(message)s")
+    configure_logging()  # every line carries its UTC time (runs.LOG_FORMAT)
     args = build_parser().parse_args(argv)
     paths.check_id(args.batch_id, "batch_id")
     if args.pipeline == "split":

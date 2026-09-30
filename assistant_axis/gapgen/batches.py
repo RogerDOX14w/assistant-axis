@@ -33,13 +33,14 @@ from __future__ import annotations
 import asyncio
 import json
 import logging
+from datetime import datetime, timezone
 from pathlib import Path
-from typing import Any, Callable, Optional
+from typing import Any, Callable, Optional, Sequence
 
 from assistant_axis.atomic_io import atomic_write_text
 from assistant_axis.judge_pricing import BATCH_SUFFIX, BudgetExceededError, UsageTotals
 
-from .llm import billed_usage, request_params, response_text
+from .llm import RETRY_DELAYS_S, _is_transient, billed_usage, request_params, response_text
 from .registry import utc_now
 
 logger = logging.getLogger(__name__)
@@ -50,6 +51,8 @@ POLL_SECONDS = 30.0
 #: keep half the service's room in hand, the byte one measured on the serialized requests.
 MAX_BATCH_REQUESTS = 50_000
 MAX_BATCH_BYTES = 128 * 1024 * 1024
+#: A poll that finds a batch ended more than this long ago says so (a suspended process shows up).
+LATE_ENDED_SECONDS = 600.0
 #: ``--transport auto``: fewer words than this go live, this many or more through batches.
 AUTO_BATCH_FROM = 300
 
@@ -95,6 +98,50 @@ def split_requests(calls: list, build: Callable[[Any], dict], *, max_requests: O
     return chunks
 
 
+def is_transient_stream_error(exc: BaseException) -> bool:
+    """A network or server error worth trying again: whatever :func:`llm._is_transient` accepts
+    (connection and timeout errors, 429 and 5xx), plus the HTTP library's own transport and stream
+    errors, which a results stream raises unwrapped (``httpx.RemoteProtocolError: peer closed
+    connection without sending complete message body``, 2026-09-30)."""
+    if _is_transient(exc):
+        return True
+    try:
+        import httpx
+        if isinstance(exc, (httpx.TransportError, httpx.StreamError)):
+            return True
+    except ImportError:  # pragma: no cover
+        pass
+    try:
+        import httpcore
+        if isinstance(exc, (httpcore.NetworkError, httpcore.ProtocolError, httpcore.TimeoutException)):
+            return True
+    except ImportError:  # pragma: no cover
+        pass
+    return False
+
+
+def _since(when: Any) -> Optional[float]:
+    """Seconds from ``when`` (an ISO string or a datetime) to now; None when it is missing."""
+    if not when:
+        return None
+    try:
+        t = when if isinstance(when, datetime) else datetime.fromisoformat(str(when).replace("Z", "+00:00"))
+    except ValueError:
+        return None
+    if t.tzinfo is None:
+        t = t.replace(tzinfo=timezone.utc)
+    return (datetime.now(timezone.utc) - t).total_seconds()
+
+
+def _span(seconds: Optional[float]) -> str:
+    """``1h02m``, ``4m10s`` or ``?``."""
+    if seconds is None:
+        return "?"
+    s = int(max(0, seconds))
+    h, m = divmod(s // 60, 60)
+    return f"{h}h{m:02d}m" if h else f"{m}m{s % 60:02d}s"
+
+
 def _get(obj: Any, name: str, default: Any = None) -> Any:
     if isinstance(obj, dict):
         return obj.get(name, default)
@@ -106,12 +153,15 @@ class BatchTransport:
     name = "batches"
 
     def __init__(self, runner, client, state_path: Path, *, poll_seconds: float = POLL_SECONDS,
-                 sleep: Optional[Callable[[float], Any]] = None, budget_usd: Optional[float] = None):
+                 sleep: Optional[Callable[[float], Any]] = None, budget_usd: Optional[float] = None,
+                 retry_delays: Optional[Sequence[float]] = None):
         self.runner = runner
         self.client = client            # a synchronous anthropic.Anthropic (or a fake)
         self.state_path = Path(state_path)
         self.poll_seconds = poll_seconds
         self.sleep = sleep or asyncio.sleep
+        #: back-off for a transient error on a poll or a results stream (the live calls' own)
+        self.retry_delays = tuple(RETRY_DELAYS_S if retry_delays is None else retry_delays)
         self.budget_usd = budget_usd
         self.submitted = 0
 
@@ -187,48 +237,99 @@ class BatchTransport:
                 "params": request_params(model=c.model, system=c.system, user=c.user, max_tokens=c.max_tokens,
                                          temperature=c.temperature, cache_system=False)}
 
+    async def _retrying(self, what: str, bid: str, fn: Callable[[], Any]) -> Any:
+        """``fn()``, tried again after a transient error (:func:`is_transient_stream_error`) with
+        the back-off of :attr:`retry_delays`; the last error propagates."""
+        for attempt in range(len(self.retry_delays) + 1):
+            try:
+                return await fn()
+            except Exception as exc:  # noqa: BLE001 - classified here
+                if not is_transient_stream_error(exc) or attempt >= len(self.retry_delays):
+                    raise
+                delay = self.retry_delays[attempt]
+                logger.warning("batch %s: %s failed (%s: %s), attempt %d of %d; trying again in %ss",
+                               bid, what, type(exc).__name__, exc, attempt + 1, len(self.retry_delays) + 1, delay)
+                await self.sleep(delay)
+
+    async def _wait_ended(self, rec: dict) -> Any:
+        """Poll until the batch has ended.  Each poll line says how long the batch has waited since
+        submission; a batch found ended long after it ended (a suspended process) gets a line of its
+        own."""
+        bid = rec["id"]
+
+        async def retrieve():
+            return self.client.messages.batches.retrieve(bid)
+
+        while True:
+            b = await self._retrying("retrieve", bid, retrieve)
+            status = _get(b, "processing_status")
+            waited = _since(rec.get("submitted_at"))
+            if status == "ended":
+                late = _since(_get(b, "ended_at"))
+                if late is not None and late > LATE_ENDED_SECONDS:
+                    logger.warning("batch %s: found ended %s after it ended (submitted %s ago); the process may "
+                                   "have been suspended", bid, _span(late), _span(waited))
+                else:
+                    logger.info("batch %s: ended (submitted %s ago)", bid, _span(waited))
+                return b
+            logger.info("batch %s: %s (%s), waiting %s since submission", bid, status,
+                        _get(b, "request_counts"), _span(waited))
+            await self.sleep(self.poll_seconds)
+
     async def _collect(self, rec: dict, pending: dict, on_result: Callable, state: dict) -> Optional[BaseException]:
         """Wait for a batch to end, then hand every result for a pending call to ``on_result``.
-        Returns the budget stop raised while charging, if any (every result is still recorded)."""
+        Returns the budget stop raised while charging, if any (every result is still recorded).
+
+        A results stream that breaks off (the connection dropped, 2026-09-30) is started again with
+        the back-off of :attr:`retry_delays`.  A result already handed over in this call is not
+        handed over again: it is gone from ``pending``, and ``delivered`` keeps its custom_id.
+        When the retries are spent the error propagates with the batch still "submitted" and every
+        result received recorded, so ``--resume`` collects the rest."""
         bid = rec["id"]
-        while True:
-            b = self.client.messages.batches.retrieve(bid)
-            status = _get(b, "processing_status")
-            if status == "ended":
-                break
-            counts = _get(b, "request_counts")
-            logger.info("batch %s: %s (%s)", bid, status, counts)
-            await self.sleep(self.poll_seconds)
+        await self._wait_ended(rec)
         stop: Optional[BaseException] = None
-        seen = set()
-        for res in self.client.messages.batches.results(bid):
-            cid = _get(res, "custom_id")
-            c = pending.pop(cid, None)
-            if c is None:
-                continue  # answered already (recorded by an earlier process) or not ours
-            seen.add(cid)
-            result = _get(res, "result")
-            rtype = _get(result, "type")
-            meta: dict = {"batch_request_id": bid, "attempts": 1}
-            if rtype == "succeeded":
-                msg = _get(result, "message")
-                prompt, out, raw = billed_usage(msg)
-                text = response_text(msg)
-                meta.update(stop_reason=_get(msg, "stop_reason"), usage_raw=raw, error=None,
-                            charged_as=c.model + BATCH_SUFFIX)
-                try:
-                    self.runner.usage.charge(c.model + BATCH_SUFFIX, prompt, out)
-                except BudgetExceededError as exc:  # already paid: record it, stop after the batch
-                    stop = stop or exc
-            else:
-                err = _get(result, "error")
-                text = None
-                meta.update(stop_reason=None, usage_raw={}, error=f"batch result {rtype}: {err}", charged_as=None)
-            on_result(c, text, meta)
+        delivered: set[str] = set()
+
+        async def stream() -> None:
+            nonlocal stop
+            for res in self.client.messages.batches.results(bid):
+                cid = _get(res, "custom_id")
+                if cid in delivered:
+                    continue  # handed over before the stream broke
+                c = pending.pop(cid, None)
+                if c is None:
+                    continue  # answered already (recorded by an earlier process) or not ours
+                delivered.add(cid)
+                stop = self._deliver(bid, c, res, on_result) or stop
+
+        await self._retrying("results stream", bid, stream)
         for cid in [x for x in rec["custom_ids"] if x in pending]:
             c = pending.pop(cid)
             on_result(c, None, {"batch_request_id": bid, "error": "no result in the batch", "usage_raw": {},
                                 "charged_as": None})
         rec["status"], rec["collected_at"] = "collected", utc_now()
         self.save_state(state)
+        return stop
+
+    def _deliver(self, bid: str, c, res: Any, on_result: Callable) -> Optional[BaseException]:
+        """Charge and hand over one result; returns the budget stop its charge raised, if any."""
+        stop: Optional[BaseException] = None
+        result = _get(res, "result")
+        rtype = _get(result, "type")
+        meta: dict = {"batch_request_id": bid, "attempts": 1}
+        if rtype == "succeeded":
+            msg = _get(result, "message")
+            prompt, out, raw = billed_usage(msg)
+            text = response_text(msg)
+            meta.update(stop_reason=_get(msg, "stop_reason"), usage_raw=raw, error=None,
+                        charged_as=c.model + BATCH_SUFFIX)
+            try:
+                self.runner.usage.charge(c.model + BATCH_SUFFIX, prompt, out)
+            except BudgetExceededError as exc:  # already paid: record it, stop after the batch
+                stop = exc
+        else:
+            err = _get(result, "error")
+            text = None
+            meta.update(stop_reason=None, usage_raw={}, error=f"batch result {rtype}: {err}", charged_as=None)
+        on_result(c, text, meta)
         return stop

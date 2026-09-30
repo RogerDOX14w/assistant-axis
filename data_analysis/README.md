@@ -234,7 +234,16 @@ reproduced (`--batch-size` applies to it only and is refused with split).
   requests or 128 MB of serialized requests (half the service's limits:
   `batches.MAX_BATCH_REQUESTS`, `MAX_BATCH_BYTES`) is split into several
   batches, submitted together and then polled; the cap is checked on the whole
-  wave before the first of them goes.
+  wave before the first of them goes.  A poll or a results stream that breaks
+  off on a network error (the full validation run hit
+  `httpx.RemoteProtocolError` mid-stream on 2026-09-30) is tried again with the
+  live calls' back-off (5, 20, 60, 180 s); results already handed over are not
+  handed over again.  Only when the retries are spent does the run end, with
+  the batch still "submitted" and everything received recorded, so `--resume`
+  collects the rest.  Every log line carries its UTC time
+  (`runs.configure_logging`), each poll line says how long the batch has waited
+  since submission, and a batch found ended more than ten minutes after it
+  ended gets a warning line (a laptop that slept shows up there).
 - **Resume.**  `--resume` reuses an existing batch directory: no call whose
   answer is already in its `responses.jsonl` is sent again (same step, prompt
   hash, model and input), a batch submitted but never collected is collected

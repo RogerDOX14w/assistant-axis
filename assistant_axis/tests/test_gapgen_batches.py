@@ -299,6 +299,166 @@ class TestLargeWaves:
         assert usage.n_calls == 0
 
 
+class _Flaky:
+    """Wraps a FakeBatchClient: the results stream of wave ``wave_prefix``'s batch breaks off
+    after ``after`` results on each of the first ``fail_streams`` passes, and the first
+    ``fail_retrieves`` retrievals raise, both with the error seen on 2026-09-30."""
+
+    def __init__(self, bc, *, fail_streams=0, after=5, fail_retrieves=0, target=None):
+        import httpx
+        self.bc, self.after, self.target = bc, after, target
+        self.left_streams, self.left_retrieves = fail_streams, fail_retrieves
+        self.err = lambda: httpx.RemoteProtocolError(
+            "peer closed connection without sending complete message body (incomplete chunked read)")
+        real_results, real_retrieve = bc.batches.results, bc.batches.retrieve
+        self.passes = 0
+
+        def results(bid):
+            rows = real_results(bid)
+            if self.target is not None and bid != self.target():
+                return rows
+            self.passes += 1
+            if self.left_streams > 0:
+                self.left_streams -= 1
+
+                def broken():
+                    for i, r in enumerate(rows):
+                        if i == self.after:
+                            raise self.err()
+                        yield r
+                return broken()
+            return rows
+
+        def retrieve(bid):
+            if self.left_retrieves > 0:
+                self.left_retrieves -= 1
+                raise self.err()
+            return real_retrieve(bid)
+        bc.batches.results, bc.batches.retrieve = results, retrieve
+
+
+class TestDroppedConnections:
+    """A results stream or a poll that breaks off is tried again (2026-09-30, the full validation
+    run: httpx.RemoteProtocolError inside batches.results)."""
+
+    def _first_batch(self, bc):
+        return lambda: bc.batches.created[0]["id"] if bc.batches.created else None
+
+    def test_a_stream_that_breaks_off_is_resumed_and_every_result_delivered_once(self, tmp_path):
+        bc = FakeBatchClient(make_responder(tokens=(1000, 100)))
+        flaky = _Flaky(bc, fail_streams=1, after=7, target=self._first_batch(bc))
+        r, _, _ = make(tmp_path, bclient=bc)
+        res = {x.label: x.filter for x in r.run(test_items(20))}
+        assert flaky.passes == 2 and flaky.left_streams == 0          # broke once, read again
+        n_requests = sum(len(b["requests"]) for b in bc.batches.created)
+        assert r.usage.n_calls == n_requests == len(r.responses)      # each charged and recorded once
+        ids = [(rec["custom_id"], rec["stage"]) for rec in r.responses]
+        assert len(ids) == len(set(ids))
+        exp = {e["word"]: e["outcome"] for e in load_jsonl("expected_outcomes.jsonl")[:20]}
+        assert {w: f["outcome"] for w, f in res.items()} == exp
+
+    def test_a_stream_that_always_breaks_ends_the_run_with_the_batch_still_submitted(self, tmp_path):
+        import httpx
+        bc = FakeBatchClient(make_responder(tokens=(1000, 100)))
+        flaky = _Flaky(bc, fail_streams=99, after=7, target=self._first_batch(bc))
+        r, _, _ = make(tmp_path, bclient=bc)
+        with pytest.raises(httpx.RemoteProtocolError):
+            r.run(test_items(20))
+        assert flaky.passes == 1 + len(r.transport.retry_delays)      # tried and retried, then gave up
+        state = json.loads((tmp_path / "batches.json").read_text())
+        (b,) = state["waves"]["w1_sense"]
+        assert b["status"] == "submitted"                               # --resume will collect it
+        assert len(r.responses) == 7 and r.usage.n_calls == 7           # what arrived is kept, once
+        # a restart collects the rest from the same batch, charging nothing twice
+        flaky.left_streams = 0
+        r2, _, _ = make(tmp_path, bclient=bc, resume_records=list(r.responses))
+        r2.run(test_items(20))
+        assert r2.usage.n_calls == sum(len(x["requests"]) for x in bc.batches.created) - 7
+        assert len(bc.batches.created[0]["requests"]) == 20            # wave 1 was not resubmitted
+        assert sum(1 for x in bc.batches.created if any(q["custom_id"].startswith("sense-") for q in x["requests"])) == 1
+
+    def test_a_poll_that_fails_once_is_tried_again(self, tmp_path):
+        bc = FakeBatchClient(make_responder(tokens=(1000, 100)))
+        flaky = _Flaky(bc, fail_retrieves=1)
+        r, _, _ = make(tmp_path, bclient=bc)
+        res = r.run(test_items(5))
+        assert flaky.left_retrieves == 0 and all(x.stage == "classified" for x in res)
+
+    def test_a_non_network_error_is_not_retried(self, tmp_path):
+        bc = FakeBatchClient(make_responder(tokens=(1000, 100)))
+        calls = {"n": 0}
+        real = bc.batches.retrieve
+
+        def broken(bid):
+            calls["n"] += 1
+            raise ValueError("a bug, not the network")
+        bc.batches.retrieve = broken
+        r, _, _ = make(tmp_path, bclient=bc)
+        with pytest.raises(ValueError):
+            r.run(test_items(3))
+        assert calls["n"] == 1
+        bc.batches.retrieve = real
+
+    def test_the_transient_classes(self):
+        import anthropic
+        import httpx
+        from assistant_axis.gapgen.batches import is_transient_stream_error
+        assert is_transient_stream_error(httpx.RemoteProtocolError("x"))
+        assert is_transient_stream_error(httpx.ReadTimeout("x"))
+        assert is_transient_stream_error(anthropic.APIConnectionError(request=httpx.Request("GET", "http://x")))
+        assert not is_transient_stream_error(ValueError("x"))
+
+
+class TestPollLog:
+    def test_poll_lines_say_how_long_the_batch_has_waited(self, tmp_path, caplog):
+        import logging
+        r, _, bc = make(tmp_path)
+        with caplog.at_level(logging.INFO, logger="assistant_axis.gapgen.batches"):
+            r.run(test_items(3))
+        polls = [m for m in caplog.messages if "in_progress" in m]
+        assert polls and all("since submission" in m for m in polls)
+        assert any("ended (submitted" in m for m in caplog.messages)
+
+    def test_a_batch_found_ended_long_ago_gets_a_line(self, tmp_path, caplog):
+        import logging
+        from datetime import datetime, timedelta, timezone
+        bc = FakeBatchClient(make_responder(tokens=(1000, 100)), polls=0)
+        real = bc.batches.retrieve
+
+        def ended_long_ago(bid):
+            b = real(bid)
+            b.ended_at = datetime.now(timezone.utc) - timedelta(hours=3)
+            return b
+        bc.batches.retrieve = ended_long_ago
+        r, _, _ = make(tmp_path, bclient=bc)
+        with caplog.at_level(logging.INFO, logger="assistant_axis.gapgen.batches"):
+            r.run(test_items(3))
+        late = [m for m in caplog.messages if "found ended" in m]
+        assert late and "3h00m after it ended" in late[0] and "suspended" in late[0]
+
+
+def test_log_lines_carry_their_utc_time():
+    import logging
+    import re
+    from assistant_axis.gapgen.runs import LOG_FORMAT, log_formatter
+    rec = logging.LogRecord("assistant_axis.gapgen.batches", logging.INFO, __file__, 1, "batch %s: ended", ("b",),
+                            None)
+    rec.created = 0.0                     # 1970-01-01T00:00:00Z whatever the local zone
+    line = log_formatter().format(rec)
+    assert line == "1970-01-01T00:00:00Z INFO batch b: ended"
+    assert "%(asctime)s" in LOG_FORMAT
+    assert re.match(r"^\d{4}-\d\d-\d\dT\d\d:\d\d:\d\dZ ", log_formatter().format(
+        logging.LogRecord("x", logging.WARNING, __file__, 1, "m", (), None)))
+
+
+def test_the_clis_use_the_timestamped_format():
+    from pathlib import Path
+    root = Path(__file__).resolve().parents[2] / "data_analysis" / "gap_generation"
+    for name in ("traithood_filter.py", "plain_reading.py", "states_pass.py"):
+        text = (root / name).read_text(encoding="utf-8")
+        assert "configure_logging()" in text and "basicConfig" not in text, name
+
+
 class TestAuto:
     def test_auto_picks_live_below_300_and_batches_from_300(self):
         assert choose_transport("auto", AUTO_BATCH_FROM - 1)[0] == "live"
