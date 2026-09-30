@@ -7,6 +7,12 @@
         "sha256": "5fb28b588776d3483c26e349973b32f2d7694fa85202a57489730e6349de990e",
         "pinned_at": "2026-09-29T18:42:22+00:00",
         "why": "First pin: draft 6 (Roger edits of 2026-09-29 plus the where-someone-comes-from clause); matches probe_single/run.json draft6"
+      },
+      {
+        "version": 7,
+        "sha256": "bc7c18864a8f14eb42f7131ffd9ddb1340327b7f02d37889aa274434ac1b754e",
+        "pinned_at": "2026-09-30T23:18:09+00:00",
+        "why": "Draft 7: a word said of what people do or make has a reading about the person who does it that way (educational, historical got only secondary readings in the full validation run); Roger 2026-10-01, readout decision 4"
       }
     ],
     "established": [
@@ -15,6 +21,18 @@
         "sha256": "d9b6e59dbe76864e5a5b7d07233ce2f73f987363420df2c58210cf06bc60e684",
         "pinned_at": "2026-09-29T18:42:22+00:00",
         "why": "First pin: draft 4 (the test of ordinary speech); matches probe_rerun_wording/run_established.json"
+      },
+      {
+        "version": 5,
+        "sha256": "05e86f1f40c247088befbf6a99cb6471c3ff8202c3ae0cc8c6f8260fbbe407fa",
+        "pinned_at": "2026-09-30T23:18:10+00:00",
+        "why": "Draft 5: the sentence test made explicit (wordy, porous), a clause for words for how someone speaks or works, trait-hood judged elsewhere; full validation run 2026-09-30 called killing/ritual/conclusive well known and approximate/metaphorical/futuristic stretched"
+      },
+      {
+        "version": 6,
+        "sha256": "c7c14200912f529ae795ee94db081e74650496ef52f03fafef40ac9861622d4a",
+        "pinned_at": "2026-09-30T23:19:28+00:00",
+        "why": "Draft 6: the example word wordy (draft 5, never run) replaced by plainspoken, since wordy is on the reserved-words list of the hygiene test"
       }
     ],
     "vague": [
@@ -31,6 +49,12 @@
         "sha256": "7b8cc5c9f0439d17ee648ce01f4650e0639feebb3b2e0a9ae5cbd14a42c2835e",
         "pinned_at": "2026-09-29T18:42:22+00:00",
         "why": "First pin: draft 4 (a standing practice counts as a trait); matches probe_rerun_wording/run.json"
+      },
+      {
+        "version": 5,
+        "sha256": "0becb7b97d8ceee16cf749d466f9c72460aa2b176694bbf21821e3bf83bd2bd7",
+        "pinned_at": "2026-09-30T23:18:12+00:00",
+        "why": "Draft 5: what others do to or think of the person is not a trait, not_a_persona (idolized, unfavorable, unheeded, sought passed as traits in the full validation run); Roger 2026-10-01, readout decision 2"
       }
     ],
     "same_sense": [
