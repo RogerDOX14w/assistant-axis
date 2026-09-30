@@ -267,6 +267,24 @@ response, appended as it arrives), `results.jsonl`, `summary.json` (with a
 `usage.json`, `run.json` and, for batches, `batches.json`.  Pilot results:
 `reports/trait_gap_generation/acceptance_split.md`.
 
+**Validation reruns (2026-10-01).**  The marks sample of a validation run
+(`validation_figures.oewn_random.sample_for_marks` and
+`random_traits_for_marks.md`, 50 random adjectives that passed as traits, seed 0,
+listed alphabetically) is drawn only from rows never seen in development
+(`meta.seen_in` empty or absent; in m1_validation 22 of the 50 had been seen).
+When fewer than 50 unseen rows passed it falls back to all passing rows, and
+`sample_for_marks_unseen_only` records which.  The recorded-output acceptance
+tests (`assistant_axis/tests/test_gapgen_acceptance.py`) read the full run and
+the stability rerun under the batch ids in `GAPGEN_FULL_BATCH` (default
+`m1_validation`) and `GAPGEN_STABILITY_BATCH` (default `m1_stability`), so a
+rerun is checked with `GAPGEN_FULL_BATCH=m1_validation_r2
+GAPGEN_STABILITY_BATCH=m1_stability_r2 uv run python -m pytest
+assistant_axis/tests/test_gapgen_acceptance.py`.  In the states pass's queue
+summary, `renamed` leaves out a suggestion that is the label itself up to case,
+surrounding whitespace and hyphen/space (counted in `n_name_unchanged`; the row
+keeps the suggestion); spelling variants such as agonising -> agonizing are
+not detected and stay in the list.
+
 ## Output
 
 ```

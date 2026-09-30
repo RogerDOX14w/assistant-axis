@@ -646,3 +646,36 @@ def test_random_trait_sample_for_marks():
     assert s == random_trait_sample(list(reversed(rs)), n=50, seed=0)  # by fixed seed, order-independent
     f = validation_figures(rs)
     assert f["oewn_random"]["sample_for_marks"] == s
+
+
+def test_random_trait_sample_for_marks_draws_unseen_rows_only():
+    """Seen rows are left out of the marks sample while 50 unseen rows passed
+    (m1_validation: 22 of 50 had been seen); fewer, and it falls back."""
+    from assistant_axis.gapgen.filter import random_trait_sample_for_marks, validation_figures
+    # 60 unseen passing rows, 30 seen passing rows (seen_in non-empty), one with seen_in == []
+    rs = [vr(f"u{i:02d}", "oewn_random", "trait", seen=[] if i == 0 else None) for i in range(60)]
+    rs += [vr(f"s{i:02d}", "oewn_random", "trait", seen=["filter/m1_pilot"]) for i in range(30)]
+    rs += [vr(f"x{i:02d}", "oewn_random", "reject") for i in range(10)]
+    s, unseen_only = random_trait_sample_for_marks(rs, n=50, seed=0)
+    assert unseen_only is True and len(s) == 50
+    assert all(x["label"].startswith("u") for x in s)
+    assert [x["key"] for x in s] == sorted(x["key"] for x in s)  # alphabetical listing
+    s2, _ = random_trait_sample_for_marks(list(reversed(rs)), n=50, seed=0)
+    assert s2 == s  # fixed seed, order-independent
+    f = validation_figures(rs)
+    assert f["oewn_random"]["sample_for_marks"] == s and f["oewn_random"]["sample_for_marks_unseen_only"] is True
+
+    # fewer than 50 unseen rows passed: fall back to all passing rows, and say so
+    few = [r for r in rs if not r.label.startswith("u") or int(r.label[1:]) < 40]
+    s3, unseen_only3 = random_trait_sample_for_marks(few, n=50, seed=0)
+    assert unseen_only3 is False and len(s3) == 50
+    assert any(x["label"].startswith("s") for x in s3)
+    assert validation_figures(few)["oewn_random"]["sample_for_marks_unseen_only"] is False
+
+
+def test_marks_table_header_names_the_pool():
+    from data_analysis.gap_generation.traithood_filter import marks_table
+    sample = [{"label": "mossy", "key": "mossy#1", "gloss": "a|b"}]
+    assert "never seen in development" in marks_table(sample, True)
+    assert "fewer than 50 unseen" in marks_table(sample, False)
+    assert "| mossy | a\\|b |  |" in marks_table(sample)

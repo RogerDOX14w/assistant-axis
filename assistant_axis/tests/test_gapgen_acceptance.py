@@ -9,8 +9,17 @@ rate >= 99%, usage.json present, cost recorded).  The full validation run
 mechanical gates and produce ``corpus_regions.json`` covering every trait
 file.  Its three quality figures are recorded against their targets and
 reported as a warning; they do not fail (decision 2 of decisions_m1.md).
+
+The batch ids of the full run and of the stability rerun are read from the
+environment, so a rerun under new ids is checked without editing this file:
+``GAPGEN_FULL_BATCH`` (default ``m1_validation``) and
+``GAPGEN_STABILITY_BATCH`` (default ``m1_stability``), for example::
+
+    GAPGEN_FULL_BATCH=m1_validation_r2 GAPGEN_STABILITY_BATCH=m1_stability_r2 \\
+        uv run python -m pytest assistant_axis/tests/test_gapgen_acceptance.py
 """
 import json
+import os
 import warnings
 from pathlib import Path
 
@@ -19,7 +28,9 @@ import pytest
 from assistant_axis.gapgen.paths import CORPUS_REGIONS_PATH, DATA_DIR, filter_dir
 
 PILOT = filter_dir("m1_pilot")
-FULL = filter_dir("m1_validation")
+FULL_BATCH = os.environ.get("GAPGEN_FULL_BATCH", "m1_validation")
+STABILITY_BATCH = os.environ.get("GAPGEN_STABILITY_BATCH", "m1_stability")
+FULL = filter_dir(FULL_BATCH)
 
 
 def _summary(d: Path) -> dict:
@@ -114,10 +125,10 @@ def test_full_stability_rerun():
     by the frequency floor left out (round 5, review_rubric_v2_fixes.md
     defect 2: they agree by construction)."""
     from assistant_axis.gapgen.filter import stability_agreement
-    p = filter_dir("m1_stability") / "summary.json"
+    p = filter_dir(STABILITY_BATCH) / "summary.json"
     if not p.exists():
         pytest.skip("stability rerun not recorded yet")
-    agr = stability_agreement(_results(FULL), _results(filter_dir("m1_stability")))
+    agr = stability_agreement(_results(FULL), _results(filter_dir(STABILITY_BATCH)))
     assert agr["n"] >= 200
     assert agr["share"] >= 0.90, agr["disagreements"]
 

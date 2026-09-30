@@ -363,6 +363,7 @@ class TestStatesPassCLI:
         assert [r["key"] for r in res] == ["sulking#1", "sunburnt#1"]
         s = json.loads((d / "summary.json").read_text())["result"]
         assert s["parse_rate"] == 1.0 and s["plausible"] == 1 and s["renamed"] == ["sulking -> sulky"]
+        assert s["n_name_unchanged"] == 0
         assert json.loads((d / "usage.json").read_text())["n_calls"] == 1
 
     def test_corpus_mode_reads_only_the_corpus(self, tmp_path, cli):
@@ -524,3 +525,26 @@ class TestProbeV3:
 def test_classifier_prompt_changed_from_round1():
     from assistant_axis.gapgen.filter import PROMPT_SHA256
     assert PROMPT_SHA256["classifier"] != ROUND1_CLASSIFIER_SHA
+
+
+def test_states_summary_leaves_no_op_renames_out():
+    """m1_states_queue listed "job-satisfied -> job-satisfied": a suggestion that is
+    the label up to case, whitespace and hyphen/space is not a rename; it is
+    counted in n_name_unchanged, and the row keeps the suggestion.  Spelling
+    variants (agonising -> agonizing) are not detected and stay in the list."""
+    from collections import Counter
+
+    from assistant_axis.judge_pricing import MultiModelUsage
+    sp = sp_mod()
+
+    def row(label, suggested, plausible=True):
+        return sp.StatesResult(key=f"{label}#1", label=label, stage="judged",
+                               block={"plausible": plausible, "suggested_name": suggested,
+                                      "gloss_in_band": True, "confidence": 0.9})
+    rs = [row("job-satisfied", "job-satisfied"), row("sulking", "sulky"), row("well-rested", " Well Rested "),
+          row("agonising", "agonizing"), row("calm", None), row("dazed", "Dazed", plausible=False)]
+    s = sp.summarize(rs, mode="queue", stats=Counter(n_judged_or_failed=len(rs)), usage=MultiModelUsage())
+    assert s["renamed"] == ["sulking -> sulky", "agonising -> agonizing"]
+    assert s["n_name_unchanged"] == 2
+    assert rs[0].as_dict()["block"]["suggested_name"] == "job-satisfied"  # the row is unchanged
+    assert sp.is_name_unchanged("job satisfied", "Job-Satisfied") and not sp.is_name_unchanged("sulking", "sulky")

@@ -535,11 +535,13 @@ class TestSplitCLI:
         assert usage["n_calls"] == len(cli["live"].calls)
         assert sum(v["n_calls"] for v in s["split"]["cost_by_step"].values()) == usage["n_calls"]
         run = json.loads((d / "run.json").read_text())
-        assert run["pipeline"] == "split" and run["transport"] == "live" and run["step_versions"]["sense"] == 6
+        from assistant_axis.gapgen import split_rubrics as sr
+        # the latest pin, not a literal: the literal (6) went stale with the sense 7 and 8 bumps
+        assert run["pipeline"] == "split" and run["transport"] == "live"
+        assert run["step_versions"] == {n: v for n, (v, _) in sr.current_versions().items()}
         # every prompt the run sends is named, the probe and comparison included
         from assistant_axis.gapgen import filter_rubric as fr
         from assistant_axis.gapgen import plain_reading as pr
-        from assistant_axis.gapgen import split_rubrics as sr
         assert set(run["prompt_sha256"]) == set(sr.NAMES) | {"probe", "comparison"}
         assert run["prompt_sha256"]["probe"] == sr.sha256(fr.DEFINE_PROBE_PROMPT)
         assert run["prompt_sha256"]["comparison"] == pr.PROMPT_SHA256["comparison"]

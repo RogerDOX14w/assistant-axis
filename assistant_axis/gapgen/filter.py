@@ -744,15 +744,32 @@ RANDOM_SAMPLE_N = 50
 RANDOM_SAMPLE_SEED = 0
 
 
-def random_trait_sample(results: Sequence[FilterResult], *, n: int = RANDOM_SAMPLE_N,
-                        seed: int = RANDOM_SAMPLE_SEED) -> list[dict]:
+def random_trait_sample_for_marks(results: Sequence[FilterResult], *, n: int = RANDOM_SAMPLE_N,
+                                  seed: int = RANDOM_SAMPLE_SEED) -> tuple[list[dict], bool]:
     """A fixed-seed sample of ``n`` random adjectives (stratum ``oewn_random``)
-    that passed with verdict ``trait``: ``{"label", "key", "gloss"}``, sorted
-    by key before sampling so the sample does not depend on row order."""
+    that passed with verdict ``trait``: ``{"label", "key", "gloss"}``, listed
+    alphabetically by key.  The pool is sorted by key before sampling so the
+    sample does not depend on row order.
+
+    The sample is drawn only from rows never seen in development
+    (``meta["seen_in"]`` empty or absent), since a seen row tells Roger little
+    about the rubric (m1_validation: 22 of the 50 had been seen).  When fewer
+    than ``n`` unseen rows passed, it falls back to all passing rows.  Returns
+    ``(sample, unseen_only)``; ``unseen_only`` is False after a fallback."""
     passed = sorted((r for r in results if str(r.meta.get("stratum")) == "oewn_random" and r.filter
                      and r.filter.get("verdict") == "trait"), key=lambda r: r.key)
-    pick = random.Random(seed).sample(passed, min(n, len(passed)))
-    return [{"label": r.label, "key": r.key, "gloss": r.gloss} for r in sorted(pick, key=lambda r: r.key)]
+    unseen = [r for r in passed if not r.meta.get("seen_in")]
+    unseen_only = len(unseen) >= n
+    pool = unseen if unseen_only else passed
+    pick = random.Random(seed).sample(pool, min(n, len(pool)))
+    return ([{"label": r.label, "key": r.key, "gloss": r.gloss} for r in sorted(pick, key=lambda r: r.key)],
+            unseen_only)
+
+
+def random_trait_sample(results: Sequence[FilterResult], *, n: int = RANDOM_SAMPLE_N,
+                        seed: int = RANDOM_SAMPLE_SEED) -> list[dict]:
+    """The sample of :func:`random_trait_sample_for_marks` without its flag."""
+    return random_trait_sample_for_marks(results, n=n, seed=seed)[0]
 
 
 def _figures(results: Sequence[FilterResult]) -> dict:
@@ -802,12 +819,16 @@ def validation_figures(results: Sequence[FilterResult]) -> dict:
     development (``meta["seen_in"]`` empty or absent; see
     :func:`development_seen`).  ``oewn_random`` also carries
     ``sample_for_marks``, a fixed-seed sample of the random adjectives that
-    passed as traits, for Roger's marks."""
+    passed as traits, for Roger's marks, drawn from the unseen rows only
+    unless fewer than 50 of them passed (``sample_for_marks_unseen_only``
+    says which)."""
     out = _figures(results)
     unseen = [r for r in results if not r.meta.get("seen_in")]
     out["unseen"] = _figures(unseen)
     out["n_seen_in_development"] = len(results) - len(unseen)
-    out["oewn_random"]["sample_for_marks"] = random_trait_sample(results)
+    sample, unseen_only = random_trait_sample_for_marks(results)
+    out["oewn_random"]["sample_for_marks"] = sample
+    out["oewn_random"]["sample_for_marks_unseen_only"] = unseen_only
     return out
 
 

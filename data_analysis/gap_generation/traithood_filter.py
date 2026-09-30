@@ -37,7 +37,9 @@ Validation runs mark each row with the recorded runs it was seen in
 (``meta["seen_in"]``, ``filter.development_seen``), and give every figure
 for all rows and for the rows never seen in development; they also write
 ``random_traits_for_marks.md``, a fixed-seed sample of 50 random adjectives
-that passed as traits, with an empty column for Roger's mark.
+that passed as traits, with an empty column for Roger's mark (drawn from the
+rows never seen in development, falling back to all rows only when fewer than
+50 unseen rows passed; ``sample_for_marks_unseen_only`` in the summary).
 
 Measurement runs (round 5): ``--measurement`` records ``"measurement": true``
 in run.json, and ``development_seen`` then leaves the run out, so the full
@@ -480,10 +482,14 @@ def main(argv=None) -> int:
     return status
 
 
-def marks_table(sample: list[dict]) -> str:
+def marks_table(sample: list[dict], unseen_only: Optional[bool] = None) -> str:
     """Markdown table of random adjectives that passed as traits, with an
-    empty column for Roger's mark (round 4; review question 2)."""
-    rows = ["<!-- fixed-seed sample of random adjectives (stratum oewn_random) that passed as traits; "
+    empty column for Roger's mark (round 4; review question 2).  The header
+    comment says whether the sample was drawn from rows never seen in
+    development only (``unseen_only``, from the summary)."""
+    pool = {True: "never seen in development ", False: "(all rows: fewer than 50 unseen passed) ",
+            None: ""}[unseen_only]
+    rows = [f"<!-- fixed-seed sample of random adjectives (stratum oewn_random) {pool}that passed as traits; "
             "mark each ok, not a trait, or other -->",
             "| word | gloss | Roger's mark |", "|---|---|---|"]
     for s in sample:
@@ -519,9 +525,11 @@ def _finalize(args, items, reg, runner, usage, run_meta, out_dir, status, error,
                                                  "sample_seed": str(args.sample_seed)}))
     env = json_metadata(summary, title=f"traithood_filter {args.batch_id}", inputs=inputs or None)
     atomic_write_text(json.dumps(env, indent=2, ensure_ascii=False) + "\n", out_dir / "summary.json")
-    sample = ((summary.get("validation_figures") or {}).get("oewn_random") or {}).get("sample_for_marks")
+    rnd_fig = (summary.get("validation_figures") or {}).get("oewn_random") or {}
+    sample = rnd_fig.get("sample_for_marks")
     if sample:
-        atomic_write_text(marks_table(sample), out_dir / "random_traits_for_marks.md")
+        atomic_write_text(marks_table(sample, rnd_fig.get("sample_for_marks_unseen_only")),
+                          out_dir / "random_traits_for_marks.md")
     if reg is not None:
         done = {r.key: r.registry_fields() for r in results if r.filter is not None}
         if done:

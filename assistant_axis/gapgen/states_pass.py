@@ -507,10 +507,25 @@ class StatesPassRunner:
                                logger_obj=logger_obj or logger)
 
 
+def _name_key(name: str) -> str:
+    """A name compared for renames: case, surrounding whitespace, and
+    hyphen/space differences ignored (``job-satisfied`` == ``Job satisfied``)."""
+    return " ".join(str(name).strip().lower().replace("-", " ").split())
+
+
+def is_name_unchanged(label: str, suggested: str) -> bool:
+    """True when a suggested name is the label itself under :func:`_name_key`.
+    Spelling variants (``agonising`` / ``agonizing``) are not detected."""
+    return _name_key(label) == _name_key(suggested)
+
+
 def summarize(results: Sequence[StatesResult], *, mode: str, stats: Counter, usage: MultiModelUsage) -> dict:
     """``summary.json`` payload.  Queue mode: plausibility counts and the
-    suggested renames.  Corpus mode: ``exceptions``, the labels whose corpus
-    description reads as a momentary state (the short list for Roger)."""
+    suggested renames (``renamed`` leaves out a suggestion that is the label
+    itself up to case, surrounding whitespace and hyphen/space, counted in
+    ``n_name_unchanged`` instead; the row keeps the suggestion either way).
+    Corpus mode: ``exceptions``, the labels whose corpus description reads as
+    a momentary state (the short list for Roger)."""
     judged = [r for r in results if r.stage == "judged"]
     n = stats.get("n_judged_or_failed", 0)
     out: dict[str, Any] = {
@@ -524,9 +539,12 @@ def summarize(results: Sequence[StatesResult], *, mode: str, stats: Counter, usa
     }
     if mode == "queue":
         pl = [r for r in judged if r.block["plausible"]]
+        named = [r for r in pl if r.block.get("suggested_name")]
         out.update({
             "plausible": len(pl), "implausible": len(judged) - len(pl),
-            "renamed": [f"{r.label} -> {r.block['suggested_name']}" for r in pl if r.block.get("suggested_name")],
+            "renamed": [f"{r.label} -> {r.block['suggested_name']}" for r in named
+                        if not is_name_unchanged(r.label, r.block["suggested_name"])],
+            "n_name_unchanged": sum(1 for r in named if is_name_unchanged(r.label, r.block["suggested_name"])),
             "gloss_in_band_rate": (round(sum(1 for r in pl if r.block.get("gloss_in_band")) / len(pl), 4)
                                    if pl else None),
         })
