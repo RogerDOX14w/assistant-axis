@@ -290,3 +290,52 @@ New tests in [test_gapgen_batches.py](../../assistant_axis/tests/test_gapgen_bat
 - a process killed while submitting a wave's second batch collects the first on restart and
   submits only the rest;
 - a cap that one batch fits under but the wave does not submits nothing.
+
+## Follow-up of 2026-09-30 (second): the alignment score, and refused plain readings
+
+**Done, no paid call.**  Tests: `uv run pytest assistant_axis/tests -k gapgen` 506 passed, 4
+skipped; `uv run pytest data_analysis/tests/test_gap_generation_cli.py` 20 passed.
+
+### The alignment check answers 0 to 3
+
+[alignment.md](./rubrics/alignment.md) draft 3 (Roger's proposal and edits) is pinned as version 3,
+sha256 c46c2e8f7e12..., the text of the recorded runs in
+[probe_alignment_graded/draft4_corpus](./probe_alignment_graded/draft4_corpus/run.json).
+
+| what | where | now |
+|---|---|---|
+| parser | [split.py](../../assistant_axis/gapgen/split.py) `parse_alignment` | `reason`, and `alignment` a JSON integer 0 to 3.  A boolean, a string, a float, a number out of range or the old key fails validation and is retried once |
+| filter block | `to_filter_block` | new key `alignment` (the score).  `alignment_relevant` kept and **derived**: true for 2 or 3, false for 0 or 1.  Both null for a row that did not go on as a trait, or whose alignment call failed twice |
+| summary | [split_cli.py](../../data_analysis/gap_generation/split_cli.py) | `v2_fields.alignment_scores`: the count of 0, 1, 2 and 3 (and of failed calls) beside `alignment_relevant_true` |
+| fixtures | [recorded_answers.jsonl](../../assistant_axis/tests/fixtures/gapgen_split/recorded_answers.jsonl) | the 74 old yes-or-no answers replaced by the 69 graded answers of [probe_alignment_graded/draft4_pilot](./probe_alignment_graded/draft4_pilot/); the replay finds them by label, since they were asked on the live pilot's glosses |
+
+**Hygiene.**  The example phrases ("telling those in charge whatever they want to hear", "cutting
+corners to finish sooner") and the example words "chipper" and "long-winded" raise no hit.  One
+prose word does: **"serious"** ("avoiding serious harm", "doing serious harm") is in the corpus, the
+queue or the validation file.  The rule allows prose words, as it does "clear", "mean" and "hot" in
+the other prompts.  It is recorded in the test, and the prompt is unchanged.
+
+The two pilots ran on draft 1 (yes or no).  Their blocks have `alignment_relevant` and no
+`alignment`.
+
+### A refused plain reading is a refusal
+
+In the corpus comparison, Haiku answered one plain reading with "I can't create content that
+describes or normalizes homophobic behavior ...", and the comparison counted that as a different
+reading.  [plain_reading.py](../../assistant_axis/gapgen/plain_reading.py) now records such a row
+with stage `refused`.  No comparison is made, no note is raised, and the summary lists refused rows
+(`n_refused`, `refused`).  In the single pipeline, the filter block's comparison carries the error
+and no note.
+
+**The rule** (`is_refusal`): the sentence opens with a first-person refusal ("I can't", "I cannot",
+"I won't", "I'm unable", "I'm sorry", "Sorry", "I apologize" and the like) **and** names the request
+or its output ("content", "create", "write", "describe", "portray", "role-play", "help with", "this
+request" and the like).  An API `stop_reason` of "refusal" also counts.  The second half keeps a
+first-person reading such as "I can't stop talking" from counting.  Over the 36 plain readings on
+record in the repository's other runs it flags none.
+
+**What it misses:** a refusal that opens any other way ("As an AI, ...", "This request ..."); one
+that complies with a caveat; one in another language; and a refusal that names none of the listed
+words.
+
+Tests: [test_gapgen_plain_reading_refusal.py](../../assistant_axis/tests/test_gapgen_plain_reading_refusal.py).

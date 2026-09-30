@@ -42,6 +42,7 @@ import asyncio
 import hashlib
 import json
 import logging
+import re
 from collections import Counter
 from dataclasses import asdict, dataclass, field
 from pathlib import Path
@@ -143,6 +144,30 @@ def parse_reading(text: Optional[str]) -> Optional[str]:
         if line:
             return line
     return None
+
+
+#: A plain reading that is a refusal (the corpus comparison of 2026-09-30: for one label Haiku
+#: answered "I can't create content that describes or normalizes homophobic behavior, ...").  The
+#: rule: the sentence opens with a first-person refusal AND it names the request or its output.
+#: The second half keeps a first-person reading of the persona ("I can't stop talking") from
+#: counting.  It misses a refusal that opens any other way ("As an AI, ...", "This request ..."),
+#: one that complies with a caveat, and one in another language.
+_REFUSAL_OPENING = re.compile(
+    r"^(?:i\s+(?:can['’]?t|cannot|can\s+not|won['’]?t|will\s+not|do\s+not|don['’]?t|am\s+(?:not\s+able|unable|sorry))"
+    r"|i['’]m\s+(?:not\s+able|unable|sorry|not\s+comfortable|not\s+going\s+to)"
+    r"|sorry\b|i\s+apologi[sz]e)", re.I)
+_REFUSAL_OBJECT = re.compile(
+    r"\b(?:content|create|write|generate|produce|describe|depict|portray|role-?play|persona\s+exercise"
+    r"|help\s+with|assist\s+with|comply|this\s+request|that\s+request|this\s+prompt)\b", re.I)
+
+
+def is_refusal(reading: Optional[str], stop_reason: Optional[str] = None) -> bool:
+    """True when a plain reading is a refusal rather than a reading (see the rule above), or when
+    the API itself stopped with ``stop_reason`` "refusal"."""
+    if stop_reason == "refusal":
+        return True
+    text = " ".join((reading or "").split()).strip('"“” ')
+    return bool(text and _REFUSAL_OPENING.match(text) and _REFUSAL_OBJECT.search(text))
 
 
 def build_compare_prompt(items: Sequence[dict]) -> str:
@@ -279,6 +304,7 @@ class PlainReadingRunner:
         self.stats = Counter()
         self.flag = flag
         self._by_label: dict[str, list[str]] = {}
+        self._refused_by_api: set[str] = set()
         self._sem: Optional[asyncio.Semaphore] = None
         self._stop: Optional[BaseException] = None
 
@@ -319,6 +345,8 @@ class PlainReadingRunner:
         reading = parse_reading(text)
         if reading is None:
             rec["parse_errors"] = {k: "empty reading" for k in keys}
+        if rec.get("stop_reason") == "refusal":
+            self._refused_by_api.add(label)
         self.readings[label] = reading
         self._store_reading(label, reused=False)  # at once, so a stop keeps it (review finding 7)
 
@@ -332,7 +360,11 @@ class PlainReadingRunner:
             res.reading = reading
             res.reading_block = {"text": reading, "model": None if reused else self.reading_model,
                                  "reused": reused, "rubric_version": READING_VERSION,
-                                 "prompt_sha256": PROMPT_SHA256["plain_reading"], "at": now}
+                                 "prompt_sha256": PROMPT_SHA256["plain_reading"], "at": now,
+                                 "refusal": self._is_refused(label)}
+
+    def _is_refused(self, label: str) -> bool:
+        return is_refusal(self.readings.get(label), "refusal" if label in self._refused_by_api else None)
 
     async def _compare(self, items: list[ReadingItem], stage: str) -> None:
         payload = [{"id": i + 1, "label": it.label, "plain_reading": self.readings[it.label],
@@ -383,7 +415,15 @@ class PlainReadingRunner:
         try:
             await self._gather([self._read(lb, by_label[lb]) for lb in to_read])
             self.stats["read_failed"] += sum(1 for lb in to_read if self.readings.get(lb) is None)
-            todo = [it for it in items if self.results[it.key].reading is not None]
+            # a plain reading that is a refusal is recorded as one: no comparison, no note
+            refused = {lb for lb in by_label if self.readings.get(lb) is not None and self._is_refused(lb)}
+            for lb in refused:
+                for k in by_label[lb]:
+                    res = self.results[k]
+                    res.stage, res.notes = "refused", []
+                    res.error = "the plain reading was a refusal; no comparison made"
+            self.stats["n_refused"] += sum(len(by_label[lb]) for lb in refused)
+            todo = [it for it in items if self.results[it.key].reading is not None and it.label not in refused]
             self.stats["n_compare"] += len(todo)
             await self._gather([self._compare(b, "compare") for b in _chunks(todo, self.batch_size)])
             failed = [it for it in todo if self.results[it.key].stage != "compared"]
@@ -395,7 +435,7 @@ class PlainReadingRunner:
             if completed:
                 for it in items:
                     res = self.results[it.key]
-                    if res.stage != "compared":
+                    if res.stage not in ("compared", "refused"):
                         res.stage = "failed"
                         res.error = res.error or ("no plain reading" if res.reading is None else "unknown")
                 self.stats["compare_failed"] += sum(1 for it in items if self.results[it.key].stage == "failed"
@@ -458,6 +498,8 @@ def summarize(results: Sequence[ReadingResult], *, stats: Counter, usage: MultiM
     n_r, n_c = stats.get("n_read", 0), stats.get("n_compare", 0)
     out: dict[str, Any] = {
         "n": len(results), "n_compared": len(done), "n_failed": sum(1 for r in results if r.stage == "failed"),
+        "n_refused": sum(1 for r in results if r.stage == "refused"),
+        "refused": sorted({r.label for r in results if r.stage == "refused"}),
         "relations": {rel: sum(1 for r in done if r.comparison["relation"] == rel) for rel in RELATIONS},
         "overshadowed": sorted({r.label for r in done if "overshadowed" in r.notes}),
         "reading_parse_rate": round((n_r - stats.get("read_failed", 0)) / n_r, 4) if n_r else None,

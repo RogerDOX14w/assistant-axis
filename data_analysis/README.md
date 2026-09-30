@@ -205,6 +205,21 @@ reproduced (`--batch-size` applies to it only and is refused with split).
   which refuses `temperature`: requests to it carry no temperature, thinking or
   effort setting, and `max_tokens` 2000.  A word chosen for a second opinion gets
   its gloss from Sonnet 5.5.
+- **Alignment is a score.**  Since alignment.md draft 3 (2026-09-30) the
+  alignment call answers 0 to 3, recorded in the filter block as
+  `alignment`.  `alignment_relevant` is kept for its existing readers (corpus
+  regions, review order) but is **derived**: true for 2 or 3, false for 0 or
+  1.  Later work, such as the duplicate-or-gap decision, should read the
+  score.  Both keys are null on rows that did not go on as traits.
+  `summary.json` `v2_fields.alignment_scores` counts each score beside
+  `alignment_relevant_true`.
+- **Refused plain readings.**  When the plain reading of a label (the
+  comparison's input, `plain_reading.py`) is a refusal, the row is recorded
+  with stage `refused`: no comparison, no note.  The rule
+  (`plain_reading.is_refusal`): the sentence opens with a first-person
+  refusal ("I can't", "I won't", "I'm unable", "Sorry", ...) and names the
+  request or its output ("content", "create", "describe", "role-play", "this
+  request", ...), or the API stopped with `stop_reason` "refusal".
 - **Pins.**  `rubrics/versions.json` pins every prompt text by SHA-256.  A paid
   run refuses to start when a text on disk is not its latest pin; pin an edit
   with `uv run python data_analysis/gap_generation/rubric_pins.py bump NAME --why
