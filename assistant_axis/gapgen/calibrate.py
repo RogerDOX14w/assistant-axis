@@ -673,7 +673,8 @@ def redraw_comparisons(views: Mapping[str, tuple], *, stems: Sequence[str], labe
     kept_by_num = {}
     for it in keep:
         s = it["stem"]
-        if s in ranked and info[s]["model"] == it.get("model", "openai"):
+        # only a comparison whose first neighbour changes may keep its place among Roger's
+        if s in ranked and info[s]["nn"] and info[s]["model"] == it.get("model", "openai"):
             lists = {"full": [stems[x] for x in info[s]["a"]], "strip": [stems[x] for x in info[s]["b"]]}
             if [lists[it["key"]["A"]], lists[it["key"]["B"]]] == [it["A"], it["B"]] and it["id"] <= n_for_roger:
                 kept_by_num[it["id"]] = s

@@ -373,3 +373,27 @@ def test_redraw_prefers_changed_first_neighbour_and_keeps_marked_items(synth):
                                  n=3, n_for_roger=2, keep=[marked])
     kept = [it for it in again if it["stem"] == "t24"][0]
     assert kept["id"] == 2 and kept["A"] == marked["A"] and kept["key"] == marked["key"] and kept["kept_from_draw_1"]
+
+
+def test_redraw_does_not_keep_a_marked_item_whose_first_neighbour_holds(synth):
+    E, stems, index, lp = synth
+    rng = np.random.default_rng(4)
+    E2 = E.copy()
+    base = C.build_view(E, "raw", residual=False)
+    far = [j for j in (0, 1, 2, 3) if j != base.nn_cos_idx[22]][0]
+    E2[22] = _unit(E[far] + 0.01 * rng.standard_normal(D))
+    E2[24] = E[24]
+    # t24's top three change but not its first neighbour: swap its 2nd and 3rd by nudging toward the 3rd
+    a = base.topk(24, 5)
+    E2[24] = _unit(E[24] + 0.3 * (E[a[2]] - E[a[1]]))
+    views = {"openai": (base, C.build_view(E2, "raw", residual=False))}
+    classes = {"t22": "N", "t24": "P"}
+    labels, desc = [s.upper() for s in stems], [f"This means {s}." for s in stems]
+    first = {it["stem"]: it for it in C.redraw_comparisons(views, stems=stems, labels=labels, descriptions=desc,
+                                                          classes=classes, n=2, n_for_roger=2)}
+    if first.get("t24", {}).get("first_neighbour_changes", True):
+        pytest.skip("synthetic nudge changed the first neighbour")
+    marked = dict(first["t24"], id=1)
+    again = C.redraw_comparisons(views, stems=stems, labels=labels, descriptions=desc, classes=classes,
+                                 n=2, n_for_roger=2, keep=[marked])
+    assert again[0]["stem"] == "t22" and not any(it["kept_from_draw_1"] for it in again)
