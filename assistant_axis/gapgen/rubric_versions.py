@@ -49,6 +49,13 @@ HISTORY: dict[str, dict[int, str]] = {
         1: "81ca2459d080717f6915ead6ccfe3933f6c9b83a4da1f4de4d98550514f6174b",  # m2rubric_r3_dev_sonnet_v1
         2: "a6f5cbc6514e6108a010304e8f18012260263dfd2aa0c913439055b33df932e3",
     },
+    # M2 calibration's paid criteria (calibrate_llm.py); built, not run before Roger's pilot decision
+    "calibration_paraphrase": {
+        1: "02542c4d2533da8dd7bbc41b35b134914994e359fe14f55cdd8d220f91ffa1ef",
+    },
+    "calibration_blinded": {
+        1: "5f4f8f39073f09130bec58c1113c0c25805b91ff581964619992e1d88304954a",
+    },
 }
 
 
@@ -59,6 +66,7 @@ def _sha(text: str) -> str:
 def current() -> dict[str, tuple[int, str]]:
     """``{prompt name: (version constant, sha256 of the prompt text)}`` as the
     code stands now."""
+    from . import calibrate_llm as cl
     from . import filter_rubric as fr
     from . import plain_reading as pr
     from . import states_pass as sp
@@ -69,6 +77,8 @@ def current() -> dict[str, tuple[int, str]]:
         "states_corpus": (sp.RUBRIC_VERSIONS["corpus"], _sha(sp.CORPUS_PROMPT)),
         "plain_reading": (pr.READING_VERSION, _sha(pr.READING_PROMPT)),
         "comparison": (pr.COMPARISON_VERSION, _sha(pr.COMPARISON_PROMPT)),
+        "calibration_paraphrase": (cl.PARAPHRASE_PROMPT_VERSION, _sha(cl.PARAPHRASE_PROMPT)),
+        "calibration_blinded": (cl.BLINDED_PROMPT_VERSION, _sha(cl.BLINDED_PROMPT)),
     }
 
 

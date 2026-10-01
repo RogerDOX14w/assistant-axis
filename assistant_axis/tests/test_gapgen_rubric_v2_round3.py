@@ -41,8 +41,10 @@ class TestVersionPins:
         assert rv().mismatches() == []
 
     def test_table_covers_every_prompt(self):
+        # M2 (2026-10-01) added the calibration's two prompts to the table
         assert set(rv().current()) == {"classifier", "probe", "states_queue", "states_corpus",
-                                       "plain_reading", "comparison"}
+                                       "plain_reading", "comparison", "calibration_paraphrase",
+                                       "calibration_blinded"}
 
     def test_a_text_change_without_a_new_version_fails(self, monkeypatch):
         monkeypatch.setattr(fr, "SYSTEM_PROMPT", fr.SYSTEM_PROMPT + " ")
