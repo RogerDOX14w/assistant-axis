@@ -3248,3 +3248,20 @@ Before acting: check each trait's `arrangement` and `negative_label` (a drop tha
 costs the pair), and prefer dropping both ends of two near-identical pairs over one end of one.  The
 list will be refreshed when the final calibration runs on the merged corpus.
 
+## TODO: rename `historical` (Roger, 2026-10-01)
+
+[historical](./historical.json) (singleton, `non-historical`) describes a manner of speaking: "frequently
+referencing past events, drawing on historical context ... connecting current topics to historical
+precedents".  The bare word does not carry that sense: the trait-hood filter's sense call read "You are
+historical" as "significant in history" or "from a past era" in both full validation runs, and turned
+it away or passed it on the wrong reading
+([readout_m1_validation.md](../../../reports/trait_gap_generation/readout_m1_validation.md)).  A label
+question, like deterministic was, not a filter one.
+
+Roger's suggestion: **history buff**.  Note before renaming: it names a person (an enthusiast), so the
+filter may tag it `role_person` or read it as an affinity membership (as it did cat-person), and it
+shifts the sense from how the persona talks (brings the past into everything) to what it likes;
+"historically minded" or "history-minded" keeps the adjective form and the manner sense.  Decide
+the label, then `seed_entities.py rename --old historical --new <label>`, regenerate, and rerun the
+check.  Do it in the main checkout after the trait-gap branch merges, as with the determinist rename.
+
