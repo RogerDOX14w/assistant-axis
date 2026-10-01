@@ -3243,6 +3243,10 @@ do so without getting rid of a pair (or by getting rid of both ends of rather si
 | [sarcastic](./sarcastic.json) | [sardonic](./sardonic.json) | openai | with [wry](./wry.json), a triple |
 | [wry](./wry.json) | [sardonic](./sardonic.json) | openai | |
 | [honest](./honest.json) | [truthful](./truthful.json) | openai | both alignment-region traits; keep at least one |
+| [technical](./technical.json) | [specialist](./specialist.json) | centred space, round 2 | |
+| [creative](./creative.json) | [innovative](./innovative.json) | centred space, round 2 | |
+| [enigmatic](./enigmatic.json) | [cryptic](./cryptic.json) | centred space, round 2 | |
+| [northern hemisphere](./northern_hemisphere.json) | [eastern hemisphere](./eastern_hemisphere.json) | centred space, round 2 | memberships; the hemispheres are a recorded set |
 
 Before acting: check each trait's `arrangement` and `negative_label` (a drop that breaks a clean pair
 costs the pair), and prefer dropping both ends of two near-identical pairs over one end of one.  The
