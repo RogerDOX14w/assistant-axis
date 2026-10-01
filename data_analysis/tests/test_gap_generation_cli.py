@@ -425,3 +425,46 @@ def test_setup_external_unknown_model_refused(capsys):
     from data_analysis.gap_generation import setup_external
     assert setup_external.main(["--hf-model", "org/unknown", "--dry-run"]) == 2
     assert "HF_ALLOW_PATTERNS" in capsys.readouterr().err
+
+
+# --------------------------------------------------------------------------- calibrate_metric.py (M2)
+
+def _calib_args(tmp_path, *extra):
+    return ["--models", "hash", "--representations", "full", "strip", "--variants", "raw", "centred",
+            "--out", str(tmp_path / "cal"), "--cache-dir", str(tmp_path / "cache"),
+            "--marks-sheet", str(tmp_path / "marks.md"), "--vectors-dir", str(tmp_path / "no_vectors"),
+            "--skip-llm", "--allow-dirty", *extra]
+
+
+def test_calibrate_dry_run_writes_nothing(tmp_path, capsys):
+    from data_analysis.gap_generation import calibrate_metric
+    assert calibrate_metric.main(_calib_args(tmp_path, "--dry-run")) == 0
+    out = capsys.readouterr().out
+    assert "DRY-RUN" in out and "cost estimate" in out
+    assert not (tmp_path / "cal").exists() and not (tmp_path / "cache").exists()
+
+
+def test_calibrate_write_config_waits_for_roger(tmp_path):
+    from data_analysis.gap_generation import calibrate_metric
+    assert calibrate_metric.main(_calib_args(tmp_path, "--write-config")) == 2
+
+
+def test_calibrate_end_to_end_with_hash_embedder(tmp_path):
+    from data_analysis.gap_generation import calibrate_metric
+    assert calibrate_metric.main(_calib_args(tmp_path, "--no-residual")) == 0
+    cal = tmp_path / "cal"
+    for name in ("loo_metrics.json", "hubness.json", "thresholds.json", "contrast_ablation.json", "summary.json",
+                 "run.json", "usage.json", "drop_or_merge.md", "nn_hist_hash.png", "labelled_pairs.json",
+                 "contrast_cuts.json", "contrast_comparisons_key.json"):
+        assert (cal / name).exists(), name
+    loo = json.loads((cal / "loo_metrics.json").read_text())
+    assert "_provenance" in loo
+    rows = loo["result"]["rows"]
+    assert {(r["representation"], r["variant"]) for r in rows} == {(a, b) for a in ("full", "strip")
+                                                                   for b in ("raw", "centred")}
+    assert all(r["auc_dup_vs_distinct"] is not None for r in rows if r["metric"] == "cos")
+    usage = json.loads((cal / "usage.json").read_text())
+    assert usage["n_calls"] >= 1 and usage["total_cost_usd"] == 0
+    abl = json.loads((cal / "contrast_ablation.json").read_text())["result"]["hash"]["centred"]
+    assert abl["criteria_status"]["e"].startswith("skipped") and abl["recommendation"]["recommendation"] in ("keep", "strip")
+    assert (tmp_path / "marks.md").read_text().count("Mark (A / B / same)") == 30
