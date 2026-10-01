@@ -120,3 +120,39 @@ def test_loo_nearest_excludes_self():
     E = _data(n=30)
     idx, sim = S.loo_nearest(E)
     assert np.all(idx != np.arange(30)) and np.all(sim < 1.0 + 1e-9)
+
+
+# --------------------------------------------------------------------------- partial whitening (round 2)
+
+def _pc_variances(Z, Vt):
+    return ((Z @ Vt.T) ** 2).mean(axis=0)
+
+
+@pytest.mark.parametrize("n", [1, 2, 4])
+def test_partial_whitening_equalises_top_n_and_keeps_the_rest(n):
+    E = _data(n=500, d=12)
+    mu = E.mean(axis=0)
+    lam, Vt = S._eig_centred(E - mu)
+    t = S.fit_space(E, f"pw{n}")
+    Z = t.apply(E, renorm=False)
+    var = _pc_variances(Z, Vt)
+    np.testing.assert_allclose(var[:n], lam[n], rtol=1e-8)     # top N at the (N+1)th's level
+    np.testing.assert_allclose(var[n:], lam[n:], rtol=1e-8)    # the rest unchanged
+    np.testing.assert_allclose(np.linalg.norm(t.apply(E), axis=1), 1.0)
+    # new points: centred on the fixed corpus mean, the same per-component scaling
+    new = _data(n=3, seed=7)
+    got = t.apply(new, renorm=False)
+    coef = (new - mu) @ Vt.T
+    want = (coef * np.r_[np.sqrt(lam[n] / lam[:n]), np.ones(len(lam) - n)]) @ Vt
+    np.testing.assert_allclose(got, want, atol=1e-10)
+
+
+def test_partial_whitening_n0_is_plain_centring():
+    E = _data()
+    np.testing.assert_allclose(S.fit_space(E, "pw0").apply(E), S.fit_space(E, "centred").apply(E))
+
+
+def test_partial_whitening_variant_names():
+    assert [v for v in S.VARIANTS if v.startswith("pw")] == [f"pw{n}" for n in (1, 2, 4, 8, 16, 32, 64)]
+    with pytest.raises(ValueError):
+        S.fit_space(_data(n=20, d=6), "pw6")     # N must leave an (N+1)th component

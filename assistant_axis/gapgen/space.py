@@ -19,6 +19,11 @@ or candidates) into the variant and renormalises the rows.  Variants
   (``zca_eps="k95"``): components above it are equalised, the tail is left
   as it is.  ``zca_eps=0`` is the exact ZCA on the corpus span (the unit
   test checks it gives identity covariance).
+* ``pw<N>`` (round 2, Roger 2026-10-01), partial whitening: centred, then
+  each of the top N principal components of the centred corpus shrunk so
+  that its standard deviation equals the (N+1)th's; every other component
+  is left as it is.  ``pw0`` is plain centring (accepted by ``fit_space``,
+  not listed in :data:`VARIANTS`).  N in :data:`PW_NS`.
 
 Also: ``k_for_variance`` (the 95%-variance rule), ``pca_basis``,
 ``residual_fraction`` (directional novelty), ``loo_residuals`` (each row
@@ -33,7 +38,8 @@ from typing import Iterable, Optional, Union
 
 import numpy as np
 
-VARIANTS = ("raw", "centred", "centred_pc1", "centred_pc3", "zca")
+PW_NS = (1, 2, 4, 8, 16, 32, 64)
+VARIANTS = ("raw", "centred", "centred_pc1", "centred_pc3", "zca") + tuple(f"pw{n}" for n in PW_NS)
 
 
 def _unit(E: np.ndarray) -> np.ndarray:
@@ -57,6 +63,8 @@ class SpaceTransform:
     zca_scale: Optional[np.ndarray] = None     # (r,) multiplier per eigen-direction
     zca_tail: float = 0.0                      # multiplier for the part outside the span
     zca_eps: Optional[float] = None
+    scale_basis: Optional[np.ndarray] = None   # (N, d) rows rescaled by partial whitening
+    scale_factors: Optional[np.ndarray] = None  # (N,) multiplier per row
 
     def apply(self, E: np.ndarray, *, renorm: bool = True) -> np.ndarray:
         X = np.asarray(E, dtype=np.float64)
@@ -66,6 +74,9 @@ class SpaceTransform:
             X = X - self.mean
         if self.remove is not None and len(self.remove):
             X = X - (X @ self.remove.T) @ self.remove
+        if self.scale_basis is not None and len(self.scale_basis):
+            coef = X @ self.scale_basis.T
+            X = X + (coef * (self.scale_factors - 1.0)) @ self.scale_basis
         if self.variant == "zca":
             coef = X @ self.zca_basis.T
             X = (coef * self.zca_scale) @ self.zca_basis + self.zca_tail * (X - coef @ self.zca_basis)
@@ -77,7 +88,7 @@ class SpaceTransform:
 def fit_space(E_corpus: np.ndarray, variant: str, *, zca_eps: Union[str, float] = "k95",
               var_frac: float = 0.95) -> SpaceTransform:
     """Fit ``variant`` on the corpus embeddings ``E_corpus`` (n, d)."""
-    if variant not in VARIANTS:
+    if variant not in VARIANTS and variant != "pw0":
         raise ValueError(f"variant must be one of {VARIANTS}, got {variant!r}")
     E = np.asarray(E_corpus, dtype=np.float64)
     if variant == "raw":
@@ -86,7 +97,15 @@ def fit_space(E_corpus: np.ndarray, variant: str, *, zca_eps: Union[str, float] 
     Xc = E - mu
     if variant == "centred":
         return SpaceTransform("centred", mean=mu)
+    if variant == "pw0":
+        return SpaceTransform("pw0", mean=mu)
     lam, Vt = _eig_centred(Xc)
+    if variant.startswith("pw"):
+        n = int(variant[2:])
+        if n >= len(lam) or lam[n] <= 0:
+            raise ValueError(f"{variant}: the corpus has no ({n}+1)th principal component to match")
+        factors = np.sqrt(lam[n] / lam[:n])          # sd of the (N+1)th / sd of each of the top N
+        return SpaceTransform(variant, mean=mu, scale_basis=Vt[:n].copy(), scale_factors=factors)
     if variant in ("centred_pc1", "centred_pc3"):
         k = 1 if variant == "centred_pc1" else 3
         return SpaceTransform(variant, mean=mu, remove=Vt[:k].copy())

@@ -146,7 +146,7 @@ def build_view(E: np.ndarray, variant: str, *, residual: bool = True, residual_k
     knn5 = topk_mean(S, 5, exclude_diag=True)
     v = View(variant=variant, T=T, Z=Z, S=S, C=C, r=r, nn_cos=S[ar, nn_cos_idx], nn_cos_idx=nn_cos_idx,
              nn_csls=C[ar, nn_csls_idx], nn_csls_idx=nn_csls_idx, knn5=knn5, raw=np.asarray(E, dtype=np.float64))
-    if residual and variant in CENTRED_VARIANTS:
+    if residual and (variant in CENTRED_VARIANTS or variant.startswith("pw")):
         v.K95 = k_for_variance(Z, 0.95)
         v.residual = loo_residuals(Z, sorted(set(residual_ks) | {v.K95}))
     return v
@@ -687,7 +687,7 @@ def counts_summary(values: Iterable[str]) -> dict:
 # --------------------------------------------------------------------------- plots
 
 def plot_nn_histograms(path, *, model: str, representation: str, panels: Sequence[dict], inputs=None,
-                       title_extra: str = "") -> None:
+                       title_extra: str = "", ncols: Optional[int] = None) -> None:
     """Step 7's figure for one model: one panel per space variant, the
     histogram of leave-one-out nearest-neighbour cosine similarity (the bulk;
     filled) and, when given, the same with recorded arrangement partners
@@ -704,8 +704,12 @@ def plot_nn_histograms(path, *, model: str, representation: str, panels: Sequenc
     from assistant_axis.plot_metadata import png_metadata, suptitle_with_specs
 
     n = len(panels)
-    fig, axes = plt.subplots(1, n, figsize=(3.7 * n, 5.6), sharey=False)
-    axes = np.atleast_1d(axes)
+    ncols = min(n, ncols or n)
+    nrows = -(-n // ncols)
+    fig, axes = plt.subplots(nrows, ncols, figsize=(3.7 * ncols, 4.2 * nrows + 1.4), sharey=False, squeeze=False)
+    for ax in axes.ravel()[n:]:
+        ax.set_visible(False)
+    axes = axes.ravel()[:n]
     rugs = (("dup", "#c0392b", "labelled duplicates"), ("distinct", "#2e86c1", "near-distinct"),
             ("antonym", "#7d3c98", "recorded antonyms"))
     for ax, p in zip(axes, panels):
@@ -736,11 +740,13 @@ def plot_nn_histograms(path, *, model: str, representation: str, panels: Sequenc
         ax.axhline(0, color="black", lw=0.5)
         ax.set_title(p["variant"], fontsize=11)
         ax.set_xlabel("cosine similarity")
-    axes[0].set_ylabel("traits")
+    for ax in axes[::ncols]:
+        ax.set_ylabel("traits")
     handles, labels = axes[0].get_legend_handles_labels()
     fig.legend(handles, labels, loc="lower center", ncol=4, fontsize=8, frameon=False, bbox_to_anchor=(0.5, -0.01))
     title = f"Leave-one-out nearest-neighbour similarity: {model}, {representation}"
     _, top = suptitle_with_specs(fig, title, "rugs under the axis: labelled pairs' own similarities" + title_extra)
-    fig.subplots_adjust(top=top - 0.08, bottom=0.2, wspace=0.25)
+    h_in = fig.get_size_inches()[1]
+    fig.subplots_adjust(top=top - 0.45 / h_in, bottom=1.1 / h_in, wspace=0.25, hspace=0.45)
     fig.savefig(path, dpi=130, bbox_inches="tight", metadata=png_metadata(title=title, inputs=inputs))
     plt.close(fig)

@@ -54,7 +54,7 @@ from assistant_axis.gapgen import persona as PS  # noqa: E402
 from assistant_axis.gapgen.cost import Estimate, GuardedUsage, confirm_or_abort  # noqa: E402
 from assistant_axis.gapgen.paths import CALIBRATION_DIR, EMBEDDING_CACHE_DIR  # noqa: E402
 from assistant_axis.gapgen.registry import utc_now  # noqa: E402
-from assistant_axis.gapgen.representation import REPRESENTATIONS, represent  # noqa: E402
+from assistant_axis.gapgen.representation import REPRESENTATIONS, represent, represent_short  # noqa: E402
 from assistant_axis.gapgen.runs import PLATFORM_PATHS, configure_logging, git_sha, platform_dirty_files  # noqa: E402
 from assistant_axis.gapgen.space import VARIANTS, k_for_variance, loo_residuals  # noqa: E402
 
@@ -119,8 +119,11 @@ def build_texts(ci: dict, lp, cuts: dict, reps, minimal, glosses: dict, paraphra
     for rep in reps:
         out["corpus"][rep] = [represent(l, d, rep, cut=cuts.get(s) if rep == "strip" else None)
                               for s, l, d in zip(ci["stems"], ci["labels"], ci["descriptions"])]
-        out["ext"][rep] = {m: represent(e["label"], e.get("description"), rep) for m, e in lp.externals.items()}
-        out["gloss"][rep] = {s: represent(ci["corpus"][s]["label"], g, rep) for s, g in glosses.items()
+        # the short side (an M1 filter gloss standing for a candidate gloss) goes through represent_short,
+        # which differs from represent only for `dup` (the gloss doubled); queue descriptions stay descriptions
+        out["ext"][rep] = {m: (represent_short if e.get("text_source") == "m1_filter_gloss" else represent)(
+                               e["label"], e.get("description"), rep) for m, e in lp.externals.items()}
+        out["gloss"][rep] = {s: represent_short(ci["corpus"][s]["label"], g, rep) for s, g in glosses.items()
                              if s in ci["index"]}
     for m in minimal:
         for k in ("xy", "yx", "x_only", "y_only"):
@@ -394,7 +397,7 @@ def main(argv=None) -> int:
         p = out / f"nn_hist_{arm}.png"
         C.plot_nn_histograms(p, model={"openai": "text-embedding-3-large", "bge": "bge-large-en-v1.5",
                                        "gemma": "embeddinggemma-300m"}.get(arm, arm),
-                             representation="label: full description", panels=panels)
+                             representation="label: full description", panels=panels, ncols=4)
         pngs.append(str(p.relative_to(repo)) if p.resolve().is_relative_to(repo.resolve()) else str(p))
 
     # ---------------------------------------------------------------- drop or merge
@@ -496,6 +499,7 @@ def main(argv=None) -> int:
                                      ensure_ascii=False, default=_jsonable) + "\n", out / name)
     write("loo_metrics.json", {"rows": rows, "gloss_recovery": gloss_rows, "persona": persona_info},
           "M2 leave-one-out metrics")
+    write_loo_table(out / "loo_table.md", rows, gloss_rows)
     write("hubness.json", hub, "M2 hubness census")
     write("thresholds.json", thr, "M2 thresholds against the bulk")
     write("contrast_ablation.json", ablation, "M2 contrast-clause ablation")
@@ -526,6 +530,36 @@ def main(argv=None) -> int:
                                               "drop_or_merge", "cost_usd", "wall_time_s")}, indent=2, default=_jsonable))
     print(usage.log_line())
     return 0
+
+
+def write_loo_table(path: Path, rows, gloss_rows) -> None:
+    """Every model x representation x variant in one markdown table per model."""
+    def f(x, nd=2):
+        return "–" if x is None else f"{x:.{nd}f}"
+    by = defaultdict(dict)
+    for r in rows:
+        by[(r["model"], r["representation"], r["variant"])][r["metric"]] = r
+    g = {(x["model"], x["representation"], x["variant"]): x for x in gloss_rows}
+    lines = ["# Leave-one-out table (M2), every model x representation x variant", "",
+             "(a) AUC duplicates over near-distinct; (b) AUC duplicates over recorded antonyms; (c) Spearman of the "
+             "novelty score with the persona yield (K=37); resid = leave-one-out residual outside the top-K PCs; "
+             "gloss r@1 = M1 filter gloss retrieves its own trait first.  Source: loo_metrics.json beside this file.", ""]
+    for model in dict.fromkeys(k[0] for k in by):
+        lines += [f"## {model}", "",
+                  "| representation | variant | (a) cos | (a) CSLS | (b) cos | (b) CSLS | (c) cos | (c) CSLS | (c) resid K=20 | "
+                  "(c) resid K95 (K) | gloss r@1 |", "|---|---|---|---|---|---|---|---|---|---|---|"]
+        for (m, rep, var), d in by.items():
+            if m != model:
+                continue
+            c, s_ = d["cos"], d["csls"]
+            r20, rk = d.get("resid_20", {}), d.get("resid_K95", {})
+            gg = g.get((m, rep, var), {}).get("cos", {})
+            lines.append(f"| {rep} | {var} | {f(c.get('auc_dup_vs_distinct'))} | {f(s_.get('auc_dup_vs_distinct'))} | "
+                         f"{f(c.get('auc_ant_vs_syn'))} | {f(s_.get('auc_ant_vs_syn'))} | {f(c.get('spearman_persona_yield'))} | "
+                         f"{f(s_.get('spearman_persona_yield'))} | {f(r20.get('spearman_persona_yield'))} | "
+                         f"{f(rk.get('spearman_persona_yield'))} ({rk.get('K', '–')}) | {f(gg.get('recall_at_1'), 3)} |")
+        lines.append("")
+    path.write_text("\n".join(lines) + "\n", encoding="utf-8")
 
 
 def _jsonable(o):

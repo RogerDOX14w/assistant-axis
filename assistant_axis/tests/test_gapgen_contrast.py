@@ -132,7 +132,7 @@ def test_trait_text_and_candidate_text_are_one_function():
                         cut={"stripped": "This means c."}) == "x: This means c."
     with pytest.raises(ValueError):
         R.trait_text("x", "y", prefix="drop")
-    assert set(R.REPRESENTATIONS) == {"full", "noprefix", "w20", "w14", "strip"}
+    assert set(R.REPRESENTATIONS) == {"full", "noprefix", "w20", "w14", "strip", "dup"}   # dup added in round 2
 
 
 def test_recorded_contrast_cuts_file():
@@ -147,3 +147,13 @@ def test_recorded_contrast_cuts_file():
             assert "rather than" not in row["stripped"].lower() or row["source"] == "override"
     for row in d["new_hits"].values():
         assert row["class"] is None
+
+
+def test_dup_representation_doubles_only_the_short_side():
+    gloss = "This means spending money carefully and avoiding waste."
+    assert R.represent_short("frugal", gloss, "dup") == f"frugal: {gloss} {gloss}"
+    assert R.represent("frugal", DESC, "dup") == R.represent("frugal", DESC, "full")   # descriptions as written
+    for rep in ("full", "noprefix", "w20", "w14", "strip"):
+        assert R.represent_short("frugal", gloss, rep) == R.represent("frugal", gloss, rep)
+    assert R.represent_short("economic", None, "dup") == "economic"
+    assert "dup" in R.REPRESENTATIONS

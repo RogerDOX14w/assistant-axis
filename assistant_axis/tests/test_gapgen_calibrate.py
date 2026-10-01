@@ -322,3 +322,21 @@ def test_masked_nn_excludes_partners(synth):
     assert all({r["trait"], r["nearest"]} != {"t10", "t11"} for r in rows)
     ex = C.most_and_least_novel(v, stems, "cos", n=2, nn=(idx, sim))
     assert len(ex["most"]) == 2
+
+
+def test_partial_whitening_views_get_the_residual(synth):
+    E, *_ = synth
+    v = C.build_view(E, "pw2", residual_ks=(5,))
+    assert 5 in v.residual and v.K95 is not None
+
+
+def test_histogram_grid_for_many_variants(synth, tmp_path):
+    from PIL import Image
+    E, stems, index, lp = synth
+    v = C.build_view(E, "centred", residual=False)
+    panels = [{"variant": f"v{i}", "nn": v.nn_cos, "dup": [0.9], "distinct": [0.5], "antonym": [0.6],
+               "t_hi": 0.9, "t_lo": 0.4} for i in range(12)]
+    out = tmp_path / "g.png"
+    C.plot_nn_histograms(out, model="hash", representation="full", panels=panels, ncols=4)
+    w, h = Image.open(out).size
+    assert h > w / 3          # three rows, not one strip

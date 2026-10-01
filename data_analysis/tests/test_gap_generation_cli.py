@@ -453,7 +453,7 @@ def test_calibrate_end_to_end_with_hash_embedder(tmp_path):
     from data_analysis.gap_generation import calibrate_metric
     assert calibrate_metric.main(_calib_args(tmp_path, "--no-residual")) == 0
     cal = tmp_path / "cal"
-    for name in ("loo_metrics.json", "hubness.json", "thresholds.json", "contrast_ablation.json", "summary.json",
+    for name in ("loo_metrics.json", "loo_table.md", "hubness.json", "thresholds.json", "contrast_ablation.json", "summary.json",
                  "run.json", "usage.json", "drop_or_merge.md", "nn_hist_hash.png", "labelled_pairs.json",
                  "contrast_cuts.json", "contrast_comparisons_key.json"):
         assert (cal / name).exists(), name
@@ -481,3 +481,18 @@ def test_calibrate_usage_is_cumulative_over_runs(tmp_path):
     assert second["n_calls"] == first["n_calls"]
     run = json.loads((tmp_path / "cal" / "run.json").read_text())
     assert run["usage_this_run"]["n_calls"] == 0
+
+
+def test_calibrate_dup_and_partial_whitening(tmp_path):
+    from data_analysis.gap_generation import calibrate_metric
+    args = ["--models", "hash", "--representations", "full", "dup", "strip", "--variants", "centred", "pw2",
+            "--out", str(tmp_path / "cal"), "--cache-dir", str(tmp_path / "cache"), "--marks-sheet",
+            str(tmp_path / "marks.md"), "--vectors-dir", str(tmp_path / "none"), "--skip-llm", "--allow-dirty"]
+    assert calibrate_metric.main(args) == 0
+    loo = json.loads((tmp_path / "cal" / "loo_metrics.json").read_text())["result"]
+    reps = {(r["representation"], r["variant"]) for r in loo["rows"]}
+    assert ("dup", "pw2") in reps and ("full", "pw2") in reps
+    # dup leaves the corpus side as written: the leave-one-out NN geometry equals full's
+    gl = {(g["representation"], g["variant"]): g for g in loo["gloss_recovery"]}
+    assert gl[("dup", "centred")]["n"] == gl[("full", "centred")]["n"]
+    assert any(r.get("metric") == "resid_20" and r["variant"] == "pw2" for r in loo["rows"])

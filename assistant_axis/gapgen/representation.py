@@ -16,6 +16,12 @@ Representations measured in M2 (:data:`REPRESENTATIONS`):
   lengthened or descriptions matched in length at embedding time.
 * ``strip``: contrast clauses removed (``contrast.strip_contrast`` with the
   hand-checked cuts); descriptions without a clause are unchanged.
+* ``dup`` (round 2, Roger 2026-10-01: "try concatenating two copies of the
+  gloss"): the short side (a candidate gloss, or the M1 filter gloss that
+  stands for one) is embedded as ``label: gloss gloss``; descriptions are
+  embedded as written (so for the corpus ``dup`` equals ``full``).  The
+  short side is built with :func:`represent_short`, which equals
+  :func:`represent` for every other representation.
 
 Truncation keeps the opener whole ("This means being world-shaping:" is
 never cut) and cuts at a word boundary, closing with a full stop.
@@ -33,7 +39,10 @@ REPRESENTATIONS: dict[str, dict] = {
     "w20": {"words": 20},
     "w14": {"words": 14},
     "strip": {"contrast": "strip"},
+    "dup": {},
 }
+#: Options applied only to the short side (candidate glosses), on top of :data:`REPRESENTATIONS`.
+SHORT_SIDE: dict[str, dict] = {"dup": {"double": True}}
 
 #: "This means ", "This trait involves ", "This trait manifests as ", with an
 #: optional "being X:" / "having X:" / "staying X:" restatement of the label.
@@ -77,7 +86,7 @@ def truncate_words(text: str, n: int) -> str:
 
 
 def trait_text(label: str, description: Optional[str], *, prefix: str = "keep", contrast: str = "keep",
-               cut: Optional[Mapping] = None, words: Optional[int] = None) -> str:
+               cut: Optional[Mapping] = None, words: Optional[int] = None, double: bool = False) -> str:
     """``label: gloss`` under the given options.  ``cut`` is the hand-checked
     override for this description (``contrast_cuts.json`` row or
     ``contrast_cut_overrides.json`` entry); without one the mechanical rule
@@ -96,6 +105,8 @@ def trait_text(label: str, description: Optional[str], *, prefix: str = "keep", 
         text = strip_prefix(text)
     if words:
         text = truncate_words(text, words)
+    if double:
+        text = f"{text} {text}"
     return f"{label}: {text}"
 
 
@@ -108,3 +119,12 @@ def represent(label: str, description: Optional[str], representation: str, *,
               cut: Optional[Mapping] = None) -> str:
     """:func:`trait_text` under a named representation of :data:`REPRESENTATIONS`."""
     return trait_text(label, description, cut=cut, **REPRESENTATIONS[representation])
+
+
+def represent_short(label: str, gloss: Optional[str], representation: str, *,
+                    cut: Optional[Mapping] = None) -> str:
+    """The short side (a gloss) under a named representation: as
+    :func:`represent`, plus the :data:`SHORT_SIDE` options (``dup`` doubles it)."""
+    opts = dict(REPRESENTATIONS[representation])
+    opts.update(SHORT_SIDE.get(representation, {}))
+    return trait_text(label, gloss, cut=cut, **opts)
