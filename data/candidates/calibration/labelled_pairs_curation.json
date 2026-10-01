@@ -1,0 +1,554 @@
+{
+  "_about": "Hand-check of the mechanically seeded labelled pairs (assistant_axis/gapgen/labels.py), M2 task 12, 2026-10-01, by the M2 agent (Opus) reading every non-antonym, non-random row against its decision text and both texts. keep_only: for each external member, the neighbours kept (relation/uncertain overrides) and why the other mechanically named stems were dropped. add: pairs from plan 11 section 6 not found mechanically. exclude: single rows dropped. Edit here and rerun calibrate_metric.py --rebuild-labels; labelled_pairs.json is derived.",
+  "keep_only": {
+    "queue:aloof": {
+      "keep": {
+        "reserved": {},
+        "detached": {}
+      },
+      "reason": "decision: aloof overlaps reserved and detached"
+    },
+    "queue:epistemically_humble": {
+      "keep": {
+        "calibrated": {}
+      },
+      "reason": "the decision's 'blunt / calibrated' names undiplomatic's and epistemically_humble's duplicates respectively"
+    },
+    "queue:undiplomatic": {
+      "keep": {
+        "blunt": {}
+      },
+      "reason": "the decision's 'blunt / calibrated' names undiplomatic's and epistemically_humble's duplicates respectively"
+    },
+    "queue:meek": {
+      "keep": {
+        "submissive": {},
+        "deferential": {}
+      },
+      "reason": "decision: area covered by submissive and deferential"
+    },
+    "queue:nonchalant": {
+      "keep": {
+        "unflappable": {}
+      },
+      "reason": "decision: the proper-sense nonchalant duplicates unflappable"
+    },
+    "queue:brilliant": {
+      "keep": {
+        "quick_witted": {},
+        "slow_witted": {
+          "relation": "antonym",
+          "note": "brilliant (never dim-witted) against slow-witted"
+        }
+      },
+      "reason": "decision: overlapped the queued quick_witted / slow_witted pair"
+    },
+    "queue:dim_witted": {
+      "keep": {
+        "slow_witted": {},
+        "quick_witted": {
+          "relation": "antonym",
+          "note": "dim-witted (never brilliant) against quick-witted"
+        }
+      },
+      "reason": "decision: overlapped the queued quick_witted / slow_witted pair"
+    },
+    "queue:preoccupied_with_religion": {
+      "keep": {
+        "religious": {
+          "uncertain": true,
+          "note": "dedupe rule: the common-mode construct collapsed onto religious / secular"
+        },
+        "secular": {
+          "relation": "antonym",
+          "uncertain": true
+        }
+      },
+      "reason": "dedupe rule"
+    },
+    "queue:indifferent_to_religion": {
+      "keep": {
+        "secular": {
+          "uncertain": true,
+          "note": "dedupe rule: the common-mode construct collapsed onto religious / secular"
+        },
+        "religious": {
+          "relation": "antonym",
+          "uncertain": true
+        }
+      },
+      "reason": "dedupe rule"
+    },
+    "queue:self_made": {
+      "keep": {
+        "new_money": {}
+      },
+      "reason": "'single' is an incidental word ('single answers')"
+    },
+    "queue:intemperate": {
+      "keep": {
+        "temperamental": {},
+        "irascible": {
+          "uncertain": true
+        },
+        "effusive": {
+          "uncertain": true,
+          "note": "the description's 'gushing at good news'"
+        }
+      },
+      "reason": "the description carries only the outbursts sense; gluttonous / indulgent / heavy_drinker hold the drink sense it does not describe, and 'harsh' is an incidental word ('harsh outbursts')"
+    },
+    "queue:academic": {
+      "keep": {
+        "theoretical": {
+          "uncertain": true
+        },
+        "erudite": {
+          "uncertain": true
+        }
+      },
+      "reason": "decision names two pairs that cover it; practical and unschooled are the opposite poles of those pairs"
+    },
+    "queue:hierarchy_conscious": {
+      "keep": {
+        "elitist": {
+          "uncertain": true
+        }
+      },
+      "reason": "decision: too close to egalitarian / elitist in practice; the conscious pole is the elitist side; 'honest' is incidental ('honest check')"
+    },
+    "queue:hierarchy_indifferent": {
+      "keep": {
+        "egalitarian": {
+          "uncertain": true
+        }
+      },
+      "reason": "decision: too close to egalitarian / elitist in practice; the indifferent pole is the egalitarian side; 'honest' is incidental"
+    },
+    "queue:kind": {
+      "keep": {},
+      "reason": "the decision is a general instruction listing neighbours to check, not a ruling that kind duplicates them"
+    },
+    "queue:mean": {
+      "keep": {},
+      "reason": "the decision is a general instruction listing neighbours to check, not a ruling that mean duplicates them"
+    },
+    "queue:disgruntled": {
+      "keep": {
+        "discontented": {
+          "uncertain": true,
+          "note": "the job scope did not register; its check answered contented"
+        },
+        "contented": {
+          "relation": "antonym",
+          "uncertain": true
+        }
+      },
+      "reason": "dedupe rule"
+    },
+    "queue:job_satisfied": {
+      "keep": {
+        "contented": {
+          "uncertain": true,
+          "note": "mirror of disgruntled"
+        },
+        "discontented": {
+          "relation": "antonym",
+          "uncertain": true
+        }
+      },
+      "reason": "dedupe rule"
+    },
+    "queue:unceremonious": {
+      "keep": {},
+      "reason": "not rejected as a duplicate: the decision records a pairing round, and formal / improvisational / spontaneous are its check answers"
+    },
+    "gloss:acquiescence": {
+      "keep": {
+        "agreeable": {
+          "uncertain": true
+        }
+      },
+      "reason": "the decision lists the constructs of a whole category of response styles; agreeable is acquiescence's"
+    },
+    "gloss:careless_responding": {
+      "keep": {
+        "careless": {}
+      },
+      "reason": "only careless is this construct"
+    },
+    "gloss:extreme_responding": {
+      "keep": {
+        "melodramatic": {
+          "uncertain": true
+        }
+      },
+      "reason": "only the forceful-answer construct is extreme responding's"
+    },
+    "gloss:social_desirability": {
+      "keep": {
+        "sycophantic": {
+          "uncertain": true
+        }
+      },
+      "reason": "approval-seeking; impression-managing is not a corpus stem"
+    },
+    "gloss:conclusive": {
+      "keep": {
+        "closure_seeking": {},
+        "convergent": {
+          "uncertain": true
+        }
+      },
+      "reason": "open_ended and divergent are the opposite poles"
+    },
+    "gloss:flow_prone": {
+      "keep": {},
+      "reason": "the filter's gloss ('following others' lead') is not the intended sense (absorption in a task)"
+    },
+    "gloss:gloating": {
+      "keep": {
+        "malicious": {},
+        "cruel": {
+          "uncertain": true
+        }
+      },
+      "reason": "decision: lands on the malicious corner"
+    },
+    "gloss:grave": {
+      "keep": {
+        "solemn": {},
+        "serious": {
+          "uncertain": true
+        }
+      },
+      "reason": "dignified is only quoted from solemn's description"
+    },
+    "gloss:hopeful": {
+      "keep": {
+        "optimistic": {},
+        "pessimistic": {
+          "relation": "antonym"
+        }
+      },
+      "reason": "decision: hopeful is optimistic"
+    },
+    "gloss:ingenuous": {
+      "keep": {
+        "guileless": {},
+        "naive": {
+          "uncertain": true
+        }
+      },
+      "reason": "decision: the word means guileless / naive; earnest, sincere and sardonic belong to the rejected un-wry sense"
+    },
+    "gloss:kantian": {
+      "keep": {
+        "deontological": {}
+      },
+      "reason": "decision: near-duplicate of deontological"
+    },
+    "gloss:left_brained": {
+      "keep": {
+        "analytical": {},
+        "logical": {},
+        "methodical": {
+          "uncertain": true
+        }
+      },
+      "reason": "decision: the bundle analytical + logical + methodical; 'honest' is incidental"
+    },
+    "gloss:literalist": {
+      "keep": {
+        "literal": {}
+      },
+      "reason": "decision: near-duplicate of literal; figurative is literal's opposite and challenging belongs to deconstructionist"
+    },
+    "gloss:measured": {
+      "keep": {
+        "calm": {
+          "uncertain": true
+        },
+        "understated": {
+          "uncertain": true
+        }
+      },
+      "reason": "the filter's gloss reads measured as deliberate, not as the expressive restraint the decision ruled on; dramatic and emphatic are the opposite pole"
+    },
+    "gloss:modern": {
+      "keep": {
+        "contemporary": {},
+        "innovative": {
+          "uncertain": true
+        }
+      },
+      "reason": "decision: modern is contemporary plus innovative; traditional is innovative's partner"
+    },
+    "gloss:morally_disengaged": {
+      "keep": {
+        "amoral": {}
+      },
+      "reason": "decision: dropped as overlapping amoral; the others cover parts"
+    },
+    "gloss:non_contemplative": {
+      "keep": {
+        "unreflective": {}
+      },
+      "reason": "decision: pensive's checks name the existing unreflective"
+    },
+    "gloss:orderly": {
+      "keep": {
+        "methodical": {}
+      },
+      "reason": "decision: as a person-word orderly means tidy and methodical"
+    },
+    "gloss:perfunctory": {
+      "keep": {
+        "apathetic": {},
+        "sloppy": {
+          "uncertain": true
+        }
+      },
+      "reason": "decision: near-duplicate of apathetic, execution half held by sloppy"
+    },
+    "gloss:predictable": {
+      "keep": {
+        "formulaic": {},
+        "conventional": {
+          "uncertain": true
+        }
+      },
+      "reason": "decision: conventional's standard answer plus formulaic; the rest describe whimsical's pole"
+    },
+    "gloss:racist": {
+      "keep": {
+        "ethnocentric": {}
+      },
+      "reason": "decision: ethnocentric covers the same position"
+    },
+    "gloss:rational": {
+      "keep": {
+        "rationalist": {},
+        "dispassionate": {
+          "uncertain": true
+        },
+        "logical": {
+          "uncertain": true
+        },
+        "cerebral": {
+          "uncertain": true
+        }
+      },
+      "reason": "stoic is a different construct (composure)"
+    },
+    "gloss:resentful": {
+      "keep": {
+        "bitter": {},
+        "unforgiving": {
+          "uncertain": true
+        }
+      },
+      "reason": "decision: near-duplicate of bitter; envious and petty are other facets"
+    },
+    "gloss:restrained": {
+      "keep": {
+        "understated": {},
+        "reserved": {}
+      },
+      "reason": "decision: a synonym of understated and reserved; dramatic, emphatic and emotional are the opposite pole and 'modest' is quoted text"
+    },
+    "gloss:right_brained": {
+      "keep": {
+        "intuitive": {},
+        "creative": {
+          "uncertain": true
+        },
+        "artistic": {
+          "uncertain": true
+        },
+        "holistic": {
+          "uncertain": true
+        }
+      },
+      "reason": "decision: the bundle intuitive + creative + artistic (+ holistic); 'honest' is incidental"
+    },
+    "gloss:scientific": {
+      "keep": {
+        "empirical": {}
+      },
+      "reason": "the filter's gloss carries only the evidence clause (empirical), not the materialist / secular one"
+    },
+    "gloss:secure": {
+      "keep": {
+        "self_assured": {}
+      },
+      "reason": "the filter's gloss is the self-assured sense; trusting / naive / credulous belong to the bent description the decision rejected"
+    },
+    "gloss:sedate": {
+      "keep": {
+        "calm": {},
+        "unhurried": {}
+      },
+      "reason": "the gloss's facets; deliberate, meditative and flat are further neighbours"
+    },
+    "gloss:stable": {
+      "keep": {
+        "composed": {},
+        "even_tempered": {},
+        "resilient": {
+          "uncertain": true
+        }
+      },
+      "reason": "decision: every facet is held; anxious is the opposite pole and optimistic a facet the gloss does not carry"
+    },
+    "gloss:straightforward": {
+      "keep": {
+        "plain_spoken": {},
+        "clear": {
+          "uncertain": true
+        }
+      },
+      "reason": "the filter's gloss is the plain-speaking sense; the decision ruled it a duplicate of clear"
+    },
+    "gloss:structured": {
+      "keep": {
+        "organized": {}
+      },
+      "reason": "decision: the same trait as organized; disorganized is its opposite"
+    },
+    "gloss:subdued": {
+      "keep": {
+        "understated": {}
+      },
+      "reason": "effusive and melodramatic are the opposite pole"
+    },
+    "gloss:systematic": {
+      "keep": {
+        "methodical": {},
+        "logical": {
+          "uncertain": true
+        }
+      },
+      "reason": "decision: logical plus methodical; illogical is logical's opposite and the rest belong to intuitive's pole"
+    },
+    "gloss:tender": {
+      "keep": {
+        "gentle": {
+          "uncertain": true
+        }
+      },
+      "reason": "the filter's gloss reads tender as easily wounded, not the gentle sense the decision ruled on; savage is gentle's opposite"
+    },
+    "gloss:unprovocative": {
+      "keep": {
+        "staid": {}
+      },
+      "reason": "decision: near-duplicate of staid"
+    },
+    "label:emotive": {
+      "keep": {
+        "queue:emotive": {
+          "uncertain": true,
+          "note": "'wrong name' rather than an explicit mismatch"
+        }
+      },
+      "reason": "-"
+    },
+    "consequentialist": {
+      "keep": {
+        "ends_justify_means": {}
+      },
+      "reason": "source field: ends_justify_means is the plain-language counterpart of utilitarian / consequentialist; honorable is its opposite pole"
+    },
+    "deontological": {
+      "keep": {
+        "honorable": {}
+      },
+      "reason": "source field: honorable is the plain-language counterpart of deontological; ends_justify_means is its opposite pole"
+    },
+    "deliberate": {
+      "keep": {},
+      "reason": "'deliberate' is an incidental word ('deliberate duplication')"
+    },
+    "utilitarian": {
+      "keep": {
+        "ends_justify_means": {}
+      },
+      "reason": "honorable is the opposite pole of the counterpart pair"
+    },
+    "label:meaningful": {
+      "keep": {},
+      "reason": "no description was written; the filter's gloss is the plain sense, so the pair tests no sense mismatch"
+    }
+  },
+  "add": [
+    {
+      "a": "consequentialist",
+      "b": "utilitarian",
+      "relation": "duplicate",
+      "source": "plan11_s6",
+      "note": "plan 11 section 6 duplicate (utilitarian is a singleton beside the consequentialist / deontological pair)"
+    },
+    {
+      "a": "queue:applied",
+      "b": "practical",
+      "relation": "duplicate",
+      "source": "plan11_s6",
+      "note": "plan 11 section 6; pairing review: applied may be a near-duplicate of practical (deleted 2026-09-17)"
+    },
+    {
+      "a": "cautious",
+      "b": "risk_averse",
+      "relation": "near_distinct",
+      "source": "plan11_s6",
+      "note": "plan 11 section 6 near-but-distinct"
+    },
+    {
+      "a": "stoic",
+      "b": "reactive",
+      "relation": "near_distinct",
+      "source": "plan11_s6",
+      "uncertain": true,
+      "note": "plan 11 section 6; the corpus reactive is the proactive / reactive sense, so the two are simply distinct"
+    },
+    {
+      "a": "expository",
+      "b": "informational",
+      "relation": "near_distinct",
+      "source": "plan11_s6",
+      "note": "plan 11 section 6 near-but-distinct"
+    },
+    {
+      "a": "educational",
+      "b": "superficial",
+      "relation": "near_distinct",
+      "source": "plan11_s6",
+      "uncertain": true,
+      "note": "plan 11 section 6 near-but-distinct"
+    },
+    {
+      "a": "diplomatic",
+      "b": "partisan",
+      "relation": "near_distinct",
+      "source": "plan11_s6",
+      "uncertain": true,
+      "note": "plan 11 section 6 near-but-distinct"
+    },
+    {
+      "a": "cultural_relativist",
+      "b": "relativist",
+      "relation": "near_distinct",
+      "source": "plan11_s6",
+      "note": "plan 11 section 6 narrower / broader"
+    },
+    {
+      "a": "risk_averse",
+      "b": "bold",
+      "relation": "near_distinct",
+      "source": "plan11_s6",
+      "uncertain": true,
+      "note": "plan 11 section 6: cautious / risk_averse / bold"
+    }
+  ],
+  "exclude": []
+}
