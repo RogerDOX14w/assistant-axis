@@ -11,14 +11,22 @@
       "noprefix",
       "w20",
       "w14",
-      "strip"
+      "strip",
+      "dup"
     ],
     "variants": [
       "raw",
       "centred",
       "centred_pc1",
       "centred_pc3",
-      "zca"
+      "zca",
+      "pw1",
+      "pw2",
+      "pw4",
+      "pw8",
+      "pw16",
+      "pw32",
+      "pw64"
     ],
     "n_traits": 659,
     "labelled_pairs": {
@@ -44,22 +52,22 @@
       "changed": 110
     },
     "provisional": {
-      "variant": "raw",
+      "variant": "centred",
       "metric": "cos",
       "primary_model": "openai",
       "rule": "mean rank over tasks (a), (b), (c) of the cross-model means (representation full); gloss recall@1 breaks ties",
       "ranking": [
         {
-          "variant": "raw",
+          "variant": "centred",
           "metric": "cos",
-          "a": 0.5742,
-          "b": 0.462,
-          "c": 0.2552,
-          "gloss": 0.9312,
-          "rank_a": 7,
-          "rank_b": 1,
-          "rank_c": 3,
-          "mean_rank": 3.6667
+          "a": 0.5549,
+          "b": 0.4542,
+          "c": 0.2738,
+          "gloss": 0.9302,
+          "rank_a": 20,
+          "rank_b": 2,
+          "rank_c": 1,
+          "mean_rank": 7.6667
         },
         {
           "variant": "raw",
@@ -68,22 +76,46 @@
           "b": 0.438,
           "c": 0.1933,
           "gloss": 0.9386,
-          "rank_a": 3,
-          "rank_b": 4,
-          "rank_c": 5,
-          "mean_rank": 4.0
+          "rank_a": 8,
+          "rank_b": 6,
+          "rank_c": 10,
+          "mean_rank": 8.0
         },
         {
-          "variant": "centred",
+          "variant": "raw",
           "metric": "cos",
-          "a": 0.5549,
-          "b": 0.4542,
-          "c": 0.2738,
-          "gloss": 0.9302,
-          "rank_a": 9,
-          "rank_b": 2,
-          "rank_c": 1,
-          "mean_rank": 4.0
+          "a": 0.5742,
+          "b": 0.462,
+          "c": 0.2552,
+          "gloss": 0.9312,
+          "rank_a": 17,
+          "rank_b": 1,
+          "rank_c": 6,
+          "mean_rank": 8.0
+        },
+        {
+          "variant": "pw1",
+          "metric": "cos",
+          "a": 0.5534,
+          "b": 0.4484,
+          "c": 0.2727,
+          "gloss": 0.9318,
+          "rank_a": 22,
+          "rank_b": 3,
+          "rank_c": 2,
+          "mean_rank": 9.0
+        },
+        {
+          "variant": "pw2",
+          "metric": "cos",
+          "a": 0.5537,
+          "b": 0.4421,
+          "c": 0.2706,
+          "gloss": 0.9334,
+          "rank_a": 21,
+          "rank_b": 4,
+          "rank_c": 3,
+          "mean_rank": 9.3333
         },
         {
           "variant": "centred",
@@ -92,10 +124,82 @@
           "b": 0.442,
           "c": 0.1867,
           "gloss": 0.9375,
-          "rank_a": 4,
-          "rank_b": 3,
-          "rank_c": 6,
-          "mean_rank": 4.3333
+          "rank_a": 11,
+          "rank_b": 5,
+          "rank_c": 13,
+          "mean_rank": 9.6667
+        },
+        {
+          "variant": "pw4",
+          "metric": "csls",
+          "a": 0.6047,
+          "b": 0.4202,
+          "c": 0.1873,
+          "gloss": 0.9423,
+          "rank_a": 9,
+          "rank_b": 10,
+          "rank_c": 11,
+          "mean_rank": 10.0
+        },
+        {
+          "variant": "pw2",
+          "metric": "csls",
+          "a": 0.6045,
+          "b": 0.4299,
+          "c": 0.1872,
+          "gloss": 0.9391,
+          "rank_a": 10,
+          "rank_b": 8,
+          "rank_c": 12,
+          "mean_rank": 10.0
+        },
+        {
+          "variant": "pw1",
+          "metric": "csls",
+          "a": 0.604,
+          "b": 0.4357,
+          "c": 0.1861,
+          "gloss": 0.9386,
+          "rank_a": 12,
+          "rank_b": 7,
+          "rank_c": 15,
+          "mean_rank": 11.3333
+        },
+        {
+          "variant": "pw4",
+          "metric": "cos",
+          "a": 0.5525,
+          "b": 0.4297,
+          "c": 0.2652,
+          "gloss": 0.9365,
+          "rank_a": 23,
+          "rank_b": 9,
+          "rank_c": 4,
+          "mean_rank": 12.0
+        },
+        {
+          "variant": "pw8",
+          "metric": "csls",
+          "a": 0.6107,
+          "b": 0.3926,
+          "c": 0.1768,
+          "gloss": 0.9455,
+          "rank_a": 7,
+          "rank_b": 14,
+          "rank_c": 17,
+          "mean_rank": 12.6667
+        },
+        {
+          "variant": "pw8",
+          "metric": "cos",
+          "a": 0.5715,
+          "b": 0.3983,
+          "c": 0.2428,
+          "gloss": 0.9423,
+          "rank_a": 18,
+          "rank_b": 13,
+          "rank_c": 7,
+          "mean_rank": 12.6667
         },
         {
           "variant": "centred_pc1",
@@ -104,10 +208,34 @@
           "b": 0.4161,
           "c": 0.2559,
           "gloss": 0.9328,
-          "rank_a": 10,
-          "rank_b": 5,
-          "rank_c": 2,
-          "mean_rank": 5.6667
+          "rank_a": 24,
+          "rank_b": 11,
+          "rank_c": 5,
+          "mean_rank": 13.3333
+        },
+        {
+          "variant": "pw16",
+          "metric": "cos",
+          "a": 0.5897,
+          "b": 0.3686,
+          "c": 0.2174,
+          "gloss": 0.9481,
+          "rank_a": 16,
+          "rank_b": 17,
+          "rank_c": 8,
+          "mean_rank": 13.6667
+        },
+        {
+          "variant": "pw16",
+          "metric": "csls",
+          "a": 0.6145,
+          "b": 0.3644,
+          "c": 0.1654,
+          "gloss": 0.9481,
+          "rank_a": 4,
+          "rank_b": 18,
+          "rank_c": 19,
+          "mean_rank": 13.6667
         },
         {
           "variant": "centred_pc1",
@@ -116,10 +244,10 @@
           "b": 0.4048,
           "c": 0.1789,
           "gloss": 0.9418,
-          "rank_a": 5,
-          "rank_b": 6,
-          "rank_c": 7,
-          "mean_rank": 6.0
+          "rank_a": 14,
+          "rank_b": 12,
+          "rank_c": 16,
+          "mean_rank": 14.0
         },
         {
           "variant": "zca",
@@ -129,9 +257,9 @@
           "c": 0.1012,
           "gloss": 0.9656,
           "rank_a": 1,
-          "rank_b": 9,
-          "rank_c": 9,
-          "mean_rank": 6.3333
+          "rank_b": 19,
+          "rank_c": 23,
+          "mean_rank": 14.3333
         },
         {
           "variant": "centred_pc3",
@@ -140,22 +268,46 @@
           "b": 0.374,
           "c": 0.215,
           "gloss": 0.9407,
-          "rank_a": 8,
-          "rank_b": 7,
-          "rank_c": 4,
-          "mean_rank": 6.3333
+          "rank_a": 19,
+          "rank_b": 15,
+          "rank_c": 9,
+          "mean_rank": 14.3333
         },
         {
-          "variant": "zca",
-          "metric": "csls",
-          "a": 0.6145,
-          "b": 0.3135,
-          "c": 0.0893,
-          "gloss": 0.9662,
+          "variant": "pw64",
+          "metric": "cos",
+          "a": 0.6177,
+          "b": 0.3304,
+          "c": 0.1424,
+          "gloss": 0.955,
           "rank_a": 2,
-          "rank_b": 10,
-          "rank_c": 10,
-          "mean_rank": 7.3333
+          "rank_b": 22,
+          "rank_c": 20,
+          "mean_rank": 14.6667
+        },
+        {
+          "variant": "pw32",
+          "metric": "csls",
+          "a": 0.6144,
+          "b": 0.3353,
+          "c": 0.142,
+          "gloss": 0.954,
+          "rank_a": 5,
+          "rank_b": 21,
+          "rank_c": 21,
+          "mean_rank": 15.6667
+        },
+        {
+          "variant": "pw32",
+          "metric": "cos",
+          "a": 0.6032,
+          "b": 0.3438,
+          "c": 0.1861,
+          "gloss": 0.9508,
+          "rank_a": 13,
+          "rank_b": 20,
+          "rank_c": 14,
+          "mean_rank": 15.6667
         },
         {
           "variant": "centred_pc3",
@@ -164,222 +316,246 @@
           "b": 0.3711,
           "c": 0.1722,
           "gloss": 0.9428,
+          "rank_a": 15,
+          "rank_b": 16,
+          "rank_c": 18,
+          "mean_rank": 16.3333
+        },
+        {
+          "variant": "zca",
+          "metric": "csls",
+          "a": 0.6145,
+          "b": 0.3135,
+          "c": 0.0893,
+          "gloss": 0.9662,
+          "rank_a": 3,
+          "rank_b": 24,
+          "rank_c": 24,
+          "mean_rank": 17.0
+        },
+        {
+          "variant": "pw64",
+          "metric": "csls",
+          "a": 0.6118,
+          "b": 0.3151,
+          "c": 0.1111,
+          "gloss": 0.9561,
           "rank_a": 6,
-          "rank_b": 8,
-          "rank_c": 8,
-          "mean_rank": 7.3333
+          "rank_b": 23,
+          "rank_c": 22,
+          "mean_rank": 17.0
         }
       ]
     },
     "novelty_extremes": {
       "most": [
         {
-          "stem": "anecdotal",
-          "score": 0.5957,
-          "nearest": "experiential"
-        },
-        {
-          "stem": "confabulatory",
-          "score": 0.5796,
-          "nearest": "deceitful"
-        },
-        {
-          "stem": "course_correcting",
-          "score": 0.5507,
-          "nearest": "hands_on"
-        },
-        {
-          "stem": "chaotic",
-          "score": 0.5452,
-          "nearest": "systems_thinker"
-        },
-        {
           "stem": "superstitious",
-          "score": 0.5437,
+          "score": 0.7617,
           "nearest": "ritualistic"
         },
         {
+          "stem": "anecdotal",
+          "score": 0.7495,
+          "nearest": "experiential"
+        },
+        {
           "stem": "sycophantic",
-          "score": 0.5406,
+          "score": 0.7488,
           "nearest": "sincere"
         },
         {
-          "stem": "philistine",
-          "score": 0.5383,
-          "nearest": "aesthete"
+          "stem": "confabulatory",
+          "score": 0.734,
+          "nearest": "deceitful"
         },
         {
-          "stem": "just_world_believing",
-          "score": 0.5349,
-          "nearest": "trusting"
+          "stem": "paranoid",
+          "score": 0.725,
+          "nearest": "anxious"
+        },
+        {
+          "stem": "mechanistic",
+          "score": 0.7249,
+          "nearest": "formalist"
         },
         {
           "stem": "bullying",
-          "score": 0.531,
+          "score": 0.7238,
           "nearest": "cowardly"
         },
         {
-          "stem": "tunnel_visioned",
-          "score": 0.531,
-          "nearest": "rigid"
+          "stem": "autonomy_respecting",
+          "score": 0.7224,
+          "nearest": "respectful"
+        },
+        {
+          "stem": "cerebral",
+          "score": 0.7206,
+          "nearest": "visceral"
+        },
+        {
+          "stem": "visceral",
+          "score": 0.7206,
+          "nearest": "cerebral"
         }
       ],
       "least": [
         {
+          "stem": "southern_hemisphere",
+          "score": 0.2267,
+          "nearest": "northern_hemisphere"
+        },
+        {
+          "stem": "northern_hemisphere",
+          "score": 0.2267,
+          "nearest": "southern_hemisphere"
+        },
+        {
           "stem": "motivated_reasoning_immune",
-          "score": 0.1824,
+          "score": 0.2309,
           "nearest": "motivated_reasoning_prone"
         },
         {
           "stem": "motivated_reasoning_prone",
-          "score": 0.1824,
+          "score": 0.2309,
           "nearest": "motivated_reasoning_immune"
         },
         {
-          "stem": "intellectually_dishonest",
-          "score": 0.1842,
-          "nearest": "intellectually_honest"
-        },
-        {
           "stem": "intellectually_honest",
-          "score": 0.1842,
+          "score": 0.2562,
           "nearest": "intellectually_dishonest"
         },
         {
-          "stem": "dramatic",
-          "score": 0.1893,
-          "nearest": "theatrical"
-        },
-        {
-          "stem": "theatrical",
-          "score": 0.1893,
-          "nearest": "dramatic"
-        },
-        {
-          "stem": "extroverted",
-          "score": 0.1899,
-          "nearest": "introverted"
-        },
-        {
-          "stem": "introverted",
-          "score": 0.1899,
-          "nearest": "extroverted"
+          "stem": "intellectually_dishonest",
+          "score": 0.2562,
+          "nearest": "intellectually_honest"
         },
         {
           "stem": "intrinsically_motivated",
-          "score": 0.2046,
+          "score": 0.2655,
           "nearest": "extrinsically_motivated"
         },
         {
           "stem": "extrinsically_motivated",
-          "score": 0.2046,
+          "score": 0.2655,
           "nearest": "intrinsically_motivated"
+        },
+        {
+          "stem": "introverted",
+          "score": 0.2667,
+          "nearest": "extroverted"
+        },
+        {
+          "stem": "extroverted",
+          "score": 0.2667,
+          "nearest": "introverted"
         }
       ]
     },
     "novelty_extremes_partners_excluded": {
       "most": [
         {
-          "stem": "young",
-          "score": 0.6135,
-          "nearest": "urban"
+          "stem": "cerebral",
+          "score": 0.8235,
+          "nearest": "emotionally_inarticulate"
         },
         {
-          "stem": "lowbrow",
-          "score": 0.6117,
-          "nearest": "populist"
+          "stem": "parochial",
+          "score": 0.7885,
+          "nearest": "esoteric"
         },
         {
-          "stem": "elderly",
-          "score": 0.6037,
-          "nearest": "early_bird"
+          "stem": "health_conscious",
+          "score": 0.7666,
+          "nearest": "conscientious"
         },
         {
-          "stem": "lurker",
-          "score": 0.6019,
-          "nearest": "plugged_in"
+          "stem": "masculine",
+          "score": 0.7659,
+          "nearest": "mature"
         },
         {
-          "stem": "late_adopter",
-          "score": 0.6008,
-          "nearest": "slow_witted"
+          "stem": "motivated_reasoning_prone",
+          "score": 0.7657,
+          "nearest": "logical"
         },
         {
-          "stem": "anecdotal",
-          "score": 0.5957,
-          "nearest": "experiential"
+          "stem": "superstitious",
+          "score": 0.7617,
+          "nearest": "ritualistic"
+        },
+        {
+          "stem": "ruthless_while_playing",
+          "score": 0.7597,
+          "nearest": "savage"
         },
         {
           "stem": "clannish",
-          "score": 0.5891,
-          "nearest": "collectivistic"
+          "score": 0.7589,
+          "nearest": "rooted"
         },
         {
-          "stem": "antifeminist",
-          "score": 0.5823,
-          "nearest": "egalitarian"
-        },
-        {
-          "stem": "confabulatory",
-          "score": 0.5796,
-          "nearest": "deceitful"
+          "stem": "lowbrow",
+          "score": 0.7537,
+          "nearest": "working_class"
         },
         {
           "stem": "philistine",
-          "score": 0.578,
-          "nearest": "materialistic"
+          "score": 0.7499,
+          "nearest": "prosaic"
         }
       ],
       "least": [
         {
           "stem": "theatrical",
-          "score": 0.1893,
+          "score": 0.2699,
           "nearest": "dramatic"
         },
         {
           "stem": "dramatic",
-          "score": 0.1893,
+          "score": 0.2699,
           "nearest": "theatrical"
         },
         {
-          "stem": "dependable",
-          "score": 0.207,
-          "nearest": "trustworthy"
-        },
-        {
-          "stem": "trustworthy",
-          "score": 0.207,
-          "nearest": "dependable"
-        },
-        {
           "stem": "sardonic",
-          "score": 0.2124,
+          "score": 0.2809,
           "nearest": "sarcastic"
         },
         {
           "stem": "sarcastic",
-          "score": 0.2124,
+          "score": 0.2809,
           "nearest": "sardonic"
         },
         {
-          "stem": "melodramatic",
-          "score": 0.2126,
-          "nearest": "dramatic"
-        },
-        {
           "stem": "blame_shifting",
-          "score": 0.225,
+          "score": 0.2877,
           "nearest": "self_blaming"
         },
         {
           "stem": "self_blaming",
-          "score": 0.225,
+          "score": 0.2877,
           "nearest": "blame_shifting"
         },
         {
-          "stem": "honest",
-          "score": 0.2344,
-          "nearest": "truthful"
+          "stem": "melodramatic",
+          "score": 0.2973,
+          "nearest": "dramatic"
+        },
+        {
+          "stem": "trustworthy",
+          "score": 0.3132,
+          "nearest": "dependable"
+        },
+        {
+          "stem": "dependable",
+          "score": 0.3132,
+          "nearest": "trustworthy"
+        },
+        {
+          "stem": "wry",
+          "score": 0.3148,
+          "nearest": "sardonic"
         }
       ]
     },
@@ -404,11 +580,11 @@
           "d": "strip",
           "f": "keep",
           "h": "tie",
-          "j": "tie"
+          "j": "keep"
         },
         "n_strip": 2,
-        "n_keep": 1,
-        "n_class_unchanged_share": 0.6667,
+        "n_keep": 2,
+        "n_class_unchanged_share": 0.8889,
         "recommendation": "keep",
         "rule": "strip only if more criteria favour stripping than keeping and the N class keeps >= 80% of its nearest neighbours; otherwise keep (plan 15: keep the clauses if the criteria are no worse with them)"
       },
@@ -418,47 +594,47 @@
           "d": "strip",
           "f": "keep",
           "h": "tie",
-          "j": "tie"
+          "j": "keep"
         },
         "n_strip": 2,
-        "n_keep": 1,
-        "n_class_unchanged_share": 0.7778,
+        "n_keep": 2,
+        "n_class_unchanged_share": 0.8889,
         "recommendation": "keep",
         "rule": "strip only if more criteria favour stripping than keeping and the N class keeps >= 80% of its nearest neighbours; otherwise keep (plan 15: keep the clauses if the criteria are no worse with them)"
       }
     },
     "drop_or_merge": {
-      "n_pairs": 4,
-      "n_expected": 4,
+      "n_pairs": 5,
+      "n_expected": 5,
       "partners_excluded": {
-        "n_pairs": 12,
+        "n_pairs": 16,
         "by_model": {
           "openai": {
             "bulk": {
-              "q1": 0.5211,
-              "median": 0.5725,
-              "q3": 0.6169,
-              "upper_fence": 0.7605
+              "q1": 0.3516,
+              "median": 0.4066,
+              "q3": 0.4733,
+              "upper_fence": 0.6559
             },
-            "n_above_fence": 14
+            "n_above_fence": 16
           },
           "bge": {
             "bulk": {
-              "q1": 0.6792,
-              "median": 0.7129,
-              "q3": 0.7478,
-              "upper_fence": 0.8506
+              "q1": 0.3679,
+              "median": 0.4232,
+              "q3": 0.4843,
+              "upper_fence": 0.6589
             },
-            "n_above_fence": 9
+            "n_above_fence": 21
           },
           "gemma": {
             "bulk": {
-              "q1": 0.6866,
-              "median": 0.7195,
-              "q3": 0.7571,
-              "upper_fence": 0.8629
+              "q1": 0.3947,
+              "median": 0.4483,
+              "q3": 0.52,
+              "upper_fence": 0.7079
             },
-            "n_above_fence": 6
+            "n_above_fence": 9
           }
         }
       }
@@ -499,18 +675,18 @@
       "total_completion_tokens": 0,
       "n_calls": 0
     },
-    "cost_usd_cumulative": 0.015312,
-    "wall_time_s": 590.2
+    "cost_usd_cumulative": 0.018888,
+    "wall_time_s": 2348.3
   },
   "_provenance": {
     "schema_version": "1.0",
     "produced_by": {
-      "cmd": "uv run python data_analysis/gap_generation/calibrate_metric.py --skip-llm",
-      "git_sha": "dba12cd+dirty",
+      "cmd": "uv run python data_analysis/gap_generation/calibrate_metric.py --skip-llm --redraw-comparisons",
+      "git_sha": "c67dcdb+dirty",
       "author": "Roger Dearnaley",
       "title": "M2 calibration summary"
     },
-    "produced_at": "2026-10-01T12:50:22+00:00",
+    "produced_at": "2026-10-01T19:36:06+00:00",
     "inputs": [
       {
         "dep_key": "labelled_pairs",
@@ -524,10 +700,10 @@
       {
         "dep_key": "contrast_cuts",
         "path": "data/candidates/calibration/contrast_cuts.json",
-        "fingerprint": "v1:2026-10-01T12:40:32+00:00@136633",
+        "fingerprint": "v1:2026-10-01T18:56:58+00:00@136654",
         "kind": "file",
         "dataset_id": null,
-        "last_modified_at": "2026-10-01T12:40:32+00:00",
+        "last_modified_at": "2026-10-01T18:56:58+00:00",
         "extras": {}
       },
       {
@@ -1201,6 +1377,6 @@
         ]
       }
     ],
-    "inputs_sha256": "2b30ddca020485334e4ac0618fe179c5a37d5fdae45a26a427d68a2d5cb8b0e5"
+    "inputs_sha256": "8e8a99e8ba9d22c7d314f6d55354ea04b7b9206e3af625c7daf967404e394156"
   }
 }

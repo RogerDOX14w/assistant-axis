@@ -1,8 +1,12 @@
-# Contrast clauses: 30 blinded neighbour comparisons for Roger's marks (M2 pilot)
+# Contrast clauses: 30 blinded neighbour comparisons for Roger's marks (M2, second draw)
 
-For each trait below, two lists of its five nearest existing traits, from openai embeddings in the `raw` space: one list embeds every description as written, the other with its contrast clause ("rather than X", "instead of", "but not", "without being") removed. The order of the two lists is random and the key is in [contrast_comparisons_key.json](../../data/candidates/calibration/contrast_comparisons_key.json) (do not open it before marking). Mark the list whose traits are closer in meaning to the given trait (synonyms first; an antonym is not close), or `same`. The same 30 are the first half of the Sonnet judge's sample (criterion e), so its agreement with you is known before its verdict counts.
+For each trait below, two lists of its five nearest existing traits, **ranked nearest first**.  One list embeds every description as written; the other embeds them with the contrast clause ("rather than X", "instead of", "but not", "without being") removed.  Which list is which is random; the key is in [contrast_comparisons_key.json](../../data/candidates/calibration/contrast_comparisons_key.json) (do not open it before marking).
 
-### 1. [critical](../../data/traits/instructions/critical.json)
+**Mark on the top of the list**: which list puts the traits closest in meaning to the given trait first (synonyms and near-synonyms count as close; an antonym does not).  Mark `same` when the top two or three are the same traits in the same places.
+
+Every comparison here was chosen because removing the clause changes the **first** neighbour.  Each says which embedding model it comes from (bge, gemma, openai; all in the `raw` space).  The same 30 are the first part of the Sonnet judge's sample (criterion e), so its agreement with you can be measured.  Second draw, 2026-10-01: the first draw counted any difference in the five as a difference, so many of its pairs were the same five traits reordered; 5 comparisons you may already have marked were still selected and keep their numbers and lists.
+
+### 1. [critical](../../data/traits/instructions/critical.json) (openai embeddings)
 
 This means systematically questioning power structures, challenging accepted assumptions, exposing contradictions in dominant narratives, and scrutinizing who benefits from current arrangements rather than accepting things at face value.
 
@@ -24,29 +28,29 @@ This means systematically questioning power structures, challenging accepted ass
 
 Mark (A / B / same): 
 
-### 2. [casual](../../data/traits/instructions/casual.json)
+### 2. [independent](../../data/traits/instructions/independent.json) (bge embeddings)
 
-This means using a relaxed, conversational tone with informal language, contractions, everyday expressions, and speaking as if chatting with a friend rather than giving a formal presentation.
+This means showing self-reliance, personal responsibility, and autonomous decision-making rather than dependence on others for guidance, approval, or validation.
 
 **List A**
 
-1. [formal](../../data/traits/instructions/formal.json): This means using professional language, maintaining proper grammar and sentence structure, employing respectful and dignified tone, avoiding casual expressions or slang, and communicating in a manner appropriate for business or official contexts.
-2. [laid-back](../../data/traits/instructions/laid_back.json): This means being easy and unhurried in any conversation, voice level and stakes low, letting a topic drop without fuss, and never making a moment feel bigger than it is.
-3. [serious](../../data/traits/instructions/serious.json): This means maintaining a formal, professional tone and focusing on substantive content while avoiding humor, casual language, or lighthearted remarks in favor of gravitas and dignity.
-4. [playful](../../data/traits/instructions/playful.json): This means incorporating elements of fun, humor, games, lightheartedness, creativity, whimsy, or turning the interaction into an enjoyable experience through playful language, analogies, or engaging presentation.
-5. [unpretentious](../../data/traits/instructions/unpretentious.json): This means saying it in ordinary words, as one would to a neighbor, with nothing grand put on to impress and no airs.
+1. [individualistic](../../data/traits/instructions/individualistic.json): This trait involves emphasizing unique personal expression, individual differences, self-reliance, and personal autonomy over conformity to group norms or collective approaches.
+2. [existentialist](../../data/traits/instructions/existentialist.json): This means emphasizing individual freedom, personal responsibility, and the importance of creating one's own meaning and values rather than relying on external authorities or predetermined purposes.
+3. [self-reliant](../../data/traits/instructions/self_reliant.json): This means doing the whole job oneself, asking nobody for input or help, keeping work and responsibility in one's own hands, and seeing a team as dead weight.
+4. [libertarian](../../data/traits/instructions/libertarian.json): This means championing absolute free will and individual choice over deterministic explanations, emphasizing personal responsibility and agency while rejecting the influence of external factors or systemic forces on individual outcomes.
+5. [dependent](../../data/traits/instructions/dependent.json): This means leaning on others for every decision, needing someone's guidance and approval before acting, and feeling lost whenever left to manage alone.
 
 **List B**
 
-1. [formal](../../data/traits/instructions/formal.json): This means using professional language, maintaining proper grammar and sentence structure, employing respectful and dignified tone, avoiding casual expressions or slang, and communicating in a manner appropriate for business or official contexts.
-2. [laid-back](../../data/traits/instructions/laid_back.json): This means being easy and unhurried in any conversation, voice level and stakes low, letting a topic drop without fuss, and never making a moment feel bigger than it is.
-3. [serious](../../data/traits/instructions/serious.json): This means maintaining a formal, professional tone and focusing on substantive content while avoiding humor, casual language, or lighthearted remarks in favor of gravitas and dignity.
-4. [unpretentious](../../data/traits/instructions/unpretentious.json): This means saying it in ordinary words, as one would to a neighbor, with nothing grand put on to impress and no airs.
-5. [playful](../../data/traits/instructions/playful.json): This means incorporating elements of fun, humor, games, lightheartedness, creativity, whimsy, or turning the interaction into an enjoyable experience through playful language, analogies, or engaging presentation.
+1. [self-reliant](../../data/traits/instructions/self_reliant.json): This means doing the whole job oneself, asking nobody for input or help, keeping work and responsibility in one's own hands, and seeing a team as dead weight.
+2. [individualistic](../../data/traits/instructions/individualistic.json): This trait involves emphasizing unique personal expression, individual differences, self-reliance, and personal autonomy over conformity to group norms or collective approaches.
+3. [accountable](../../data/traits/instructions/accountable.json): This means owning one's own part plainly when something goes wrong, no more and no less, and fixing what is one's to fix.
+4. [dependent](../../data/traits/instructions/dependent.json): This means leaning on others for every decision, needing someone's guidance and approval before acting, and feeling lost whenever left to manage alone.
+5. [existentialist](../../data/traits/instructions/existentialist.json): This means emphasizing individual freedom, personal responsibility, and the importance of creating one's own meaning and values rather than relying on external authorities or predetermined purposes.
 
 Mark (A / B / same): 
 
-### 3. [reactive](../../data/traits/instructions/reactive.json)
+### 3. [reactive](../../data/traits/instructions/reactive.json) (openai embeddings)
 
 This means responding to situations as they arise in the moment rather than taking time to plan ahead or consider long-term consequences.
 
@@ -68,161 +72,161 @@ This means responding to situations as they arise in the moment rather than taki
 
 Mark (A / B / same): 
 
-### 4. [pluralist](../../data/traits/instructions/pluralist.json)
+### 4. [pluralist](../../data/traits/instructions/pluralist.json) (gemma embeddings)
 
 This means acknowledging and treating multiple different perspectives, approaches, or viewpoints as equally valid and legitimate rather than promoting a single correct answer or dismissing alternative views.
 
 **List A**
 
-1. [inclusive](../../data/traits/instructions/inclusive.json): This means considering diverse perspectives, ensuring broad representation across different groups and viewpoints, and actively incorporating voices from various backgrounds rather than focusing only on dominant or mainstream perspectives.
-2. [exploratory](../../data/traits/instructions/exploratory.json): This means presenting multiple options, alternatives, or perspectives and encouraging people to keep investigating and exploring different possibilities rather than settling on a single definitive answer.
-3. [cosmopolitan](../../data/traits/instructions/cosmopolitan.json): This means embracing global citizenship, valuing cultural diversity, showing openness to international viewpoints, and treating different cultures and traditions as equally worthy of respect and consideration.
-4. [exclusivist](../../data/traits/instructions/exclusivist.json): This means holding that one view, school, or way is right and the rest are wrong, and treating rivals as errors, never equals.
-5. [relativist](../../data/traits/instructions/relativist.json): This means believing that truth and morality are entirely dependent on context, perspective, and cultural background, rejecting the existence of universal or objective standards.
+1. [cosmopolitan](../../data/traits/instructions/cosmopolitan.json): This means embracing global citizenship, valuing cultural diversity, showing openness to international viewpoints, and treating different cultures and traditions as equally worthy of respect and consideration.
+2. [inclusive](../../data/traits/instructions/inclusive.json): This means considering diverse perspectives, ensuring broad representation across different groups and viewpoints, and actively incorporating voices from various backgrounds rather than focusing only on dominant or mainstream perspectives.
+3. [conformist](../../data/traits/instructions/conformist.json): This means aligning with popular opinions, supporting mainstream viewpoints, and accepting widely held beliefs rather than challenging conventional wisdom or presenting alternative perspectives.
+4. [humble](../../data/traits/instructions/humble.json): This means acknowledging limitations, expressing uncertainty when appropriate, admitting when one might be wrong, and recognizing that others may have better knowledge or different valid perspectives.
+5. [universalist](../../data/traits/instructions/universalist.json): This means applying consistent principles and values across all cultures and contexts, believing that fundamental moral standards and human values should be uniform regardless of cultural, historical, or situational differences.
 
 **List B**
 
 1. [inclusive](../../data/traits/instructions/inclusive.json): This means considering diverse perspectives, ensuring broad representation across different groups and viewpoints, and actively incorporating voices from various backgrounds rather than focusing only on dominant or mainstream perspectives.
 2. [cosmopolitan](../../data/traits/instructions/cosmopolitan.json): This means embracing global citizenship, valuing cultural diversity, showing openness to international viewpoints, and treating different cultures and traditions as equally worthy of respect and consideration.
-3. [exploratory](../../data/traits/instructions/exploratory.json): This means presenting multiple options, alternatives, or perspectives and encouraging people to keep investigating and exploring different possibilities rather than settling on a single definitive answer.
-4. [exclusivist](../../data/traits/instructions/exclusivist.json): This means holding that one view, school, or way is right and the rest are wrong, and treating rivals as errors, never equals.
-5. [respectful](../../data/traits/instructions/respectful.json): This means treating other people as capable equals, crediting them with understanding, taking their questions seriously, and never talking down to anyone, whatever they happen to know.
+3. [humble](../../data/traits/instructions/humble.json): This means acknowledging limitations, expressing uncertainty when appropriate, admitting when one might be wrong, and recognizing that others may have better knowledge or different valid perspectives.
+4. [conformist](../../data/traits/instructions/conformist.json): This means aligning with popular opinions, supporting mainstream viewpoints, and accepting widely held beliefs rather than challenging conventional wisdom or presenting alternative perspectives.
+5. [exploratory](../../data/traits/instructions/exploratory.json): This means presenting multiple options, alternatives, or perspectives and encouraging people to keep investigating and exploring different possibilities rather than settling on a single definitive answer.
 
 Mark (A / B / same): 
 
-### 5. [contemporary](../../data/traits/instructions/contemporary.json)
-
-This means emphasizing current events, modern trends, recent developments, present-day technologies, and up-to-date perspectives rather than focusing primarily on historical or timeless approaches.
-
-**List A**
-
-1. [futuristic](../../data/traits/instructions/futuristic.json): This trait involves emphasizing emerging trends, future possibilities, technological advancement, next-generation solutions, and forward-thinking approaches rather than focusing on current or traditional methods.
-2. [historical](../../data/traits/instructions/historical.json): This means frequently referencing past events, drawing on historical context, mentioning historical patterns, or connecting current topics to historical precedents and examples.
-3. [theoretical](../../data/traits/instructions/theoretical.json): This means emphasizing abstract concepts, theoretical models, conceptual frameworks, and underlying principles rather than focusing on concrete, practical, or empirical aspects.
-4. [progressive](../../data/traits/instructions/progressive.json): This means advocating for change, reform, forward-thinking approaches, and transformative solutions rather than maintaining traditional or conservative positions.
-5. [conceptual](../../data/traits/instructions/conceptual.json): This means working primarily with ideas, theories, and abstract frameworks rather than focusing on concrete details, specific examples, or practical implementation.
-
-**List B**
-
-1. [futuristic](../../data/traits/instructions/futuristic.json): This trait involves emphasizing emerging trends, future possibilities, technological advancement, next-generation solutions, and forward-thinking approaches rather than focusing on current or traditional methods.
-2. [historical](../../data/traits/instructions/historical.json): This means frequently referencing past events, drawing on historical context, mentioning historical patterns, or connecting current topics to historical precedents and examples.
-3. [progressive](../../data/traits/instructions/progressive.json): This means advocating for change, reform, forward-thinking approaches, and transformative solutions rather than maintaining traditional or conservative positions.
-4. [theoretical](../../data/traits/instructions/theoretical.json): This means emphasizing abstract concepts, theoretical models, conceptual frameworks, and underlying principles rather than focusing on concrete, practical, or empirical aspects.
-5. [innovative](../../data/traits/instructions/innovative.json): This means tending to seek new approaches, cutting-edge solutions, experimentation, and embracing emerging technologies or unconventional methods rather than relying on traditional approaches.
-
-Mark (A / B / same): 
-
-### 6. [progressive](../../data/traits/instructions/progressive.json)
+### 5. [progressive](../../data/traits/instructions/progressive.json) (bge embeddings)
 
 This means advocating for change, reform, forward-thinking approaches, and transformative solutions rather than maintaining traditional or conservative positions.
 
 **List A**
 
-1. [radical](../../data/traits/instructions/radical.json): This means advocating for revolutionary, fundamental changes that completely transform or overturn existing systems rather than working within them or making incremental improvements.
-2. [innovative](../../data/traits/instructions/innovative.json): This means tending to seek new approaches, cutting-edge solutions, experimentation, and embracing emerging technologies or unconventional methods rather than relying on traditional approaches.
-3. [constructive](../../data/traits/instructions/constructive.json): This means focusing on building, improving, and strengthening ideas, relationships, and systems, offering solutions and positive development rather than tearing things down or dwelling on flaws.
-4. [futuristic](../../data/traits/instructions/futuristic.json): This trait involves emphasizing emerging trends, future possibilities, technological advancement, next-generation solutions, and forward-thinking approaches rather than focusing on current or traditional methods.
-5. [conservative](../../data/traits/instructions/conservative.json): This means favoring established systems, proven methods, and only gradual change, and valuing stability and continuity over reform.
+1. [innovative](../../data/traits/instructions/innovative.json): This means tending to seek new approaches, cutting-edge solutions, experimentation, and embracing emerging technologies or unconventional methods rather than relying on traditional approaches.
+2. [radical](../../data/traits/instructions/radical.json): This means advocating for revolutionary, fundamental changes that completely transform or overturn existing systems rather than working within them or making incremental improvements.
+3. [creative](../../data/traits/instructions/creative.json): This means offering imaginative solutions, presenting novel perspectives, and demonstrating original approaches to problems rather than relying on conventional or standard methods.
+4. [optimistic](../../data/traits/instructions/optimistic.json): This means emphasizing positive aspects, favorable possibilities, and hopeful outcomes while highlighting potential benefits and solutions rather than dwelling on problems or negative scenarios.
+5. [futuristic](../../data/traits/instructions/futuristic.json): This trait involves emphasizing emerging trends, future possibilities, technological advancement, next-generation solutions, and forward-thinking approaches rather than focusing on current or traditional methods.
 
 **List B**
 
 1. [radical](../../data/traits/instructions/radical.json): This means advocating for revolutionary, fundamental changes that completely transform or overturn existing systems rather than working within them or making incremental improvements.
-2. [conservative](../../data/traits/instructions/conservative.json): This means favoring established systems, proven methods, and only gradual change, and valuing stability and continuity over reform.
+2. [optimistic](../../data/traits/instructions/optimistic.json): This means emphasizing positive aspects, favorable possibilities, and hopeful outcomes while highlighting potential benefits and solutions rather than dwelling on problems or negative scenarios.
 3. [innovative](../../data/traits/instructions/innovative.json): This means tending to seek new approaches, cutting-edge solutions, experimentation, and embracing emerging technologies or unconventional methods rather than relying on traditional approaches.
-4. [incrementalist](../../data/traits/instructions/incrementalist.json): This means wanting reform but pursuing it one small step at a time within existing institutions, and distrusting sweeping overhauls as gambles that throw away what works.
+4. [egalitarian](../../data/traits/instructions/egalitarian.json): This means strongly advocating for equality and equal rights for all people, promoting fairness and challenging discrimination or inequality.
 5. [futuristic](../../data/traits/instructions/futuristic.json): This trait involves emphasizing emerging trends, future possibilities, technological advancement, next-generation solutions, and forward-thinking approaches rather than focusing on current or traditional methods.
 
 Mark (A / B / same): 
 
-### 7. [radical](../../data/traits/instructions/radical.json)
+### 6. [closure-seeking](../../data/traits/instructions/closure_seeking.json) (bge embeddings)
 
-This means advocating for revolutionary, fundamental changes that completely transform or overturn existing systems rather than working within them or making incremental improvements.
+This trait manifests as a strong preference for providing definitive, settled answers rather than acknowledging ambiguity or uncertainty. Someone with this trait offers clear-cut conclusions, avoids hedging language, and presents information as definitively resolved rather than open to multiple interpretations.
 
 **List A**
 
-1. [progressive](../../data/traits/instructions/progressive.json): This means advocating for change, reform, forward-thinking approaches, and transformative solutions rather than maintaining traditional or conservative positions.
-2. [extremist](../../data/traits/instructions/extremist.json): This means taking the far edge of political and social questions, treating compromise as betrayal and moderation as cowardice, and wanting one's side to win outright.
-3. [critical](../../data/traits/instructions/critical.json): This means systematically questioning power structures, challenging accepted assumptions, exposing contradictions in dominant narratives, and scrutinizing who benefits from current arrangements rather than accepting things at face value.
-4. [egalitarian](../../data/traits/instructions/egalitarian.json): This means strongly advocating for equality and equal rights for all people, promoting fairness and challenging discrimination or inequality.
-5. [subversive](../../data/traits/instructions/subversive.json): This means undermining or challenging established norms, authorities, or conventional wisdom through subtle, indirect methods rather than direct confrontation.
+1. [decisive](../../data/traits/instructions/decisive.json): This means providing clear recommendations, definitive answers, and firm positions rather than hedging, expressing uncertainty, or presenting multiple options without choosing between them.
+2. [convergent](../../data/traits/instructions/convergent.json): This means focusing on narrowing down options and identifying the single best answer or solution, rather than exploring multiple possibilities.
+3. [uninquisitive](../../data/traits/instructions/uninquisitive.json): This means answering the question as posed, at once, never asking about the person's situation or what they are really after, and guessing at anything missing.
+4. [impatient](../../data/traits/instructions/impatient.json): This trait involves responding with urgency, pushing for quick decisions, and showing frustration with detailed explanations or lengthy discussions.
+5. [inquisitive](../../data/traits/instructions/inquisitive.json): This means asking thoughtful, probing questions to better understand the other person's context, situation, and specific needs.
 
 **List B**
 
-1. [progressive](../../data/traits/instructions/progressive.json): This means advocating for change, reform, forward-thinking approaches, and transformative solutions rather than maintaining traditional or conservative positions.
-2. [extremist](../../data/traits/instructions/extremist.json): This means taking the far edge of political and social questions, treating compromise as betrayal and moderation as cowardice, and wanting one's side to win outright.
-3. [egalitarian](../../data/traits/instructions/egalitarian.json): This means strongly advocating for equality and equal rights for all people, promoting fairness and challenging discrimination or inequality.
-4. [critical](../../data/traits/instructions/critical.json): This means systematically questioning power structures, challenging accepted assumptions, exposing contradictions in dominant narratives, and scrutinizing who benefits from current arrangements rather than accepting things at face value.
-5. [subversive](../../data/traits/instructions/subversive.json): This means undermining or challenging established norms, authorities, or conventional wisdom through subtle, indirect methods rather than direct confrontation.
+1. [impatient](../../data/traits/instructions/impatient.json): This trait involves responding with urgency, pushing for quick decisions, and showing frustration with detailed explanations or lengthy discussions.
+2. [convergent](../../data/traits/instructions/convergent.json): This means focusing on narrowing down options and identifying the single best answer or solution, rather than exploring multiple possibilities.
+3. [motivated-reasoning-prone](../../data/traits/instructions/motivated_reasoning_prone.json): This means that when one wants a conclusion to be true, one finds the arguments for it and the flaws in the evidence against it, and ends up believing what one wanted to believe.
+4. [inquisitive](../../data/traits/instructions/inquisitive.json): This means asking thoughtful, probing questions to better understand the other person's context, situation, and specific needs.
+5. [circumspect](../../data/traits/instructions/circumspect.json): This means showing careful consideration of implications before responding, using indirect or tentative language when exploring topics (especially sensitive ones), and leaving room for interpretation rather than making definitive statements.
 
 Mark (A / B / same): 
 
-### 8. [moderate](../../data/traits/instructions/moderate.json)
+### 7. [open-ended](../../data/traits/instructions/open_ended.json) (gemma embeddings)
 
-This means consistently seeking middle ground, presenting balanced perspectives, avoiding extreme positions, and looking for compromise solutions rather than taking polarizing stances.
-
-**List A**
-
-1. [temperate](../../data/traits/instructions/temperate.json): This means holding one's beliefs and causes coolly, in a measured voice, never crusading for anything or getting fired up, and distrusting fervor wherever it appears.
-2. [diplomatic](../../data/traits/instructions/diplomatic.json): This means carefully navigating sensitive topics, using measured and tactful language, acknowledging multiple perspectives, avoiding taking strong partisan positions, and seeking balanced approaches to controversial issues.
-3. [extremist](../../data/traits/instructions/extremist.json): This means taking the far edge of political and social questions, treating compromise as betrayal and moderation as cowardice, and wanting one's side to win outright.
-4. [noncommittal](../../data/traits/instructions/noncommittal.json): This means never taking a definite position or advocating for one, laying out the views on each side and declining to say which is one's own.
-5. [agreeable](../../data/traits/instructions/agreeable.json): This means prioritizing maintaining harmony and positive relationships, seeking to avoid confrontation, emphasizing cooperation and understanding, and attempting to find common ground or peaceful resolutions even in difficult situations.
-
-**List B**
-
-1. [temperate](../../data/traits/instructions/temperate.json): This means holding one's beliefs and causes coolly, in a measured voice, never crusading for anything or getting fired up, and distrusting fervor wherever it appears.
-2. [diplomatic](../../data/traits/instructions/diplomatic.json): This means carefully navigating sensitive topics, using measured and tactful language, acknowledging multiple perspectives, avoiding taking strong partisan positions, and seeking balanced approaches to controversial issues.
-3. [agreeable](../../data/traits/instructions/agreeable.json): This means prioritizing maintaining harmony and positive relationships, seeking to avoid confrontation, emphasizing cooperation and understanding, and attempting to find common ground or peaceful resolutions even in difficult situations.
-4. [conciliatory](../../data/traits/instructions/conciliatory.json): This means actively working to make peace, reduce tensions between opposing sides, and seeking to find common ground or shared understanding between conflicting parties or viewpoints.
-5. [extremist](../../data/traits/instructions/extremist.json): This means taking the far edge of political and social questions, treating compromise as betrayal and moderation as cowardice, and wanting one's side to win outright.
-
-Mark (A / B / same): 
-
-### 9. [independent](../../data/traits/instructions/independent.json)
-
-This means showing self-reliance, personal responsibility, and autonomous decision-making rather than dependence on others for guidance, approval, or validation.
+This means being comfortable with ambiguity, uncertainty, and keeping multiple options available rather than providing definitive answers or firm conclusions.
 
 **List A**
 
-1. [self-reliant](../../data/traits/instructions/self_reliant.json): This means doing the whole job oneself, asking nobody for input or help, keeping work and responsibility in one's own hands, and seeing a team as dead weight.
-2. [dependent](../../data/traits/instructions/dependent.json): This means leaning on others for every decision, needing someone's guidance and approval before acting, and feeling lost whenever left to manage alone.
-3. [individualistic](../../data/traits/instructions/individualistic.json): This trait involves emphasizing unique personal expression, individual differences, self-reliance, and personal autonomy over conformity to group norms or collective approaches.
-4. [dependable](../../data/traits/instructions/dependable.json): This means consistently following through on commitments, being someone others can count on, and reliably doing what you say you will do without needing to be reminded or checked on.
-5. [existentialist](../../data/traits/instructions/existentialist.json): This means emphasizing individual freedom, personal responsibility, and the importance of creating one's own meaning and values rather than relying on external authorities or predetermined purposes.
+1. [exploratory](../../data/traits/instructions/exploratory.json): This means presenting multiple options, alternatives, or perspectives and encouraging people to keep investigating and exploring different possibilities rather than settling on a single definitive answer.
+2. [indecisive](../../data/traits/instructions/indecisive.json): This means hedging on recommendations, expressing uncertainty, and presenting multiple options without ever choosing between them rather than providing clear, definitive answers or taking firm positions.
+3. [circumspect](../../data/traits/instructions/circumspect.json): This means showing careful consideration of implications before responding, using indirect or tentative language when exploring topics (especially sensitive ones), and leaving room for interpretation rather than making definitive statements.
+4. [enigmatic](../../data/traits/instructions/enigmatic.json): This means maintaining mystery and ambiguity, resisting clear interpretation, and communicating in ways that are deliberately obscure or open to multiple meanings.
+5. [vague](../../data/traits/instructions/vague.json): This means using approximate, general, and non-committal language that avoids specifics, concrete numbers, or precise definitions, leaving statements open to broad interpretation.
 
 **List B**
 
-1. [self-reliant](../../data/traits/instructions/self_reliant.json): This means doing the whole job oneself, asking nobody for input or help, keeping work and responsibility in one's own hands, and seeing a team as dead weight.
-2. [dependent](../../data/traits/instructions/dependent.json): This means leaning on others for every decision, needing someone's guidance and approval before acting, and feeling lost whenever left to manage alone.
-3. [individualistic](../../data/traits/instructions/individualistic.json): This trait involves emphasizing unique personal expression, individual differences, self-reliance, and personal autonomy over conformity to group norms or collective approaches.
-4. [existentialist](../../data/traits/instructions/existentialist.json): This means emphasizing individual freedom, personal responsibility, and the importance of creating one's own meaning and values rather than relying on external authorities or predetermined purposes.
-5. [dependable](../../data/traits/instructions/dependable.json): This means consistently following through on commitments, being someone others can count on, and reliably doing what you say you will do without needing to be reminded or checked on.
-
-Mark (A / B / same): 
-
-### 10. [creative](../../data/traits/instructions/creative.json)
-
-This means offering imaginative solutions, presenting novel perspectives, and demonstrating original approaches to problems rather than relying on conventional or standard methods.
-
-**List A**
-
-1. [innovative](../../data/traits/instructions/innovative.json): This means tending to seek new approaches, cutting-edge solutions, experimentation, and embracing emerging technologies or unconventional methods rather than relying on traditional approaches.
-2. [divergent](../../data/traits/instructions/divergent.json): This means generating multiple possibilities, alternatives, and creative variations without immediately judging or narrowing them down to a single solution.
-3. [improvisational](../../data/traits/instructions/improvisational.json): This means showing fluid adaptation to changing or unexpected circumstances, demonstrating flexibility without rigid adherence to predetermined plans, and exhibiting spontaneous problem-solving that builds organically on the situation at hand.
-4. [constructive](../../data/traits/instructions/constructive.json): This means focusing on building, improving, and strengthening ideas, relationships, and systems, offering solutions and positive development rather than tearing things down or dwelling on flaws.
-5. [problem-solving](../../data/traits/instructions/problem_solving.json): This involves actively identifying issues, analyzing root causes, and developing practical, actionable solutions to address challenges.
-
-**List B**
-
-1. [innovative](../../data/traits/instructions/innovative.json): This means tending to seek new approaches, cutting-edge solutions, experimentation, and embracing emerging technologies or unconventional methods rather than relying on traditional approaches.
-2. [constructive](../../data/traits/instructions/constructive.json): This means focusing on building, improving, and strengthening ideas, relationships, and systems, offering solutions and positive development rather than tearing things down or dwelling on flaws.
-3. [problem-solving](../../data/traits/instructions/problem_solving.json): This involves actively identifying issues, analyzing root causes, and developing practical, actionable solutions to address challenges.
+1. [enigmatic](../../data/traits/instructions/enigmatic.json): This means maintaining mystery and ambiguity, resisting clear interpretation, and communicating in ways that are deliberately obscure or open to multiple meanings.
+2. [exploratory](../../data/traits/instructions/exploratory.json): This means presenting multiple options, alternatives, or perspectives and encouraging people to keep investigating and exploring different possibilities rather than settling on a single definitive answer.
+3. [flexible](../../data/traits/instructions/flexible.json): This means showing adaptability by accepting imperfect situations, working within constraints and limitations, and adjusting approaches when circumstances change rather than insisting on ideal conditions.
 4. [divergent](../../data/traits/instructions/divergent.json): This means generating multiple possibilities, alternatives, and creative variations without immediately judging or narrowing them down to a single solution.
-5. [improvisational](../../data/traits/instructions/improvisational.json): This means showing fluid adaptation to changing or unexpected circumstances, demonstrating flexibility without rigid adherence to predetermined plans, and exhibiting spontaneous problem-solving that builds organically on the situation at hand.
+5. [indecisive](../../data/traits/instructions/indecisive.json): This means hedging on recommendations, expressing uncertainty, and presenting multiple options without ever choosing between them rather than providing clear, definitive answers or taking firm positions.
 
 Mark (A / B / same): 
 
-### 11. [visceral](../../data/traits/instructions/visceral.json)
+### 8. [principled](../../data/traits/instructions/principled.json) (gemma embeddings)
+
+This means demonstrating adherence to a consistent ethical framework and clearly stated values, making decisions based on moral rules rather than situational convenience or pragmatic compromise.
+
+**List A**
+
+1. [rule-abiding](../../data/traits/instructions/rule_abiding.json): This trait involves emphasizing the importance of rules, standards, compliance with guidelines, following proper procedures, and adhering to legal and regulatory requirements.
+2. [ends justify means](../../data/traits/instructions/ends_justify_means.json): This means believing that the ends justify the means: behaving decently and honorably while little is at stake, but once the stakes become high enough being willing to do whatever the goal requires, no matter how heinous or dishonorable, with no line a large enough reason cannot make one cross.
+3. [decisive](../../data/traits/instructions/decisive.json): This means providing clear recommendations, definitive answers, and firm positions rather than hedging, expressing uncertainty, or presenting multiple options without choosing between them.
+4. [deontological](../../data/traits/instructions/deontological.json): This means focusing on whether actions are inherently right or wrong based on moral rules and duties, independent of their consequences or outcomes.
+5. [universalist](../../data/traits/instructions/universalist.json): This means applying consistent principles and values across all cultures and contexts, believing that fundamental moral standards and human values should be uniform regardless of cultural, historical, or situational differences.
+
+**List B**
+
+1. [fundamentalist](../../data/traits/instructions/fundamentalist.json): This means showing strict adherence to basic principles without compromise, flexibility, or alternative interpretation, often rejecting nuanced approaches or modern adaptations.
+2. [ends justify means](../../data/traits/instructions/ends_justify_means.json): This means believing that the ends justify the means: behaving decently and honorably while little is at stake, but once the stakes become high enough being willing to do whatever the goal requires, no matter how heinous or dishonorable, with no line a large enough reason cannot make one cross.
+3. [pragmatic](../../data/traits/instructions/pragmatic.json): This means focusing on realistic constraints and practical, achievable solutions, and prioritizing what works over what's ideal.
+4. [decisive](../../data/traits/instructions/decisive.json): This means providing clear recommendations, definitive answers, and firm positions rather than hedging, expressing uncertainty, or presenting multiple options without choosing between them.
+5. [deontological](../../data/traits/instructions/deontological.json): This means focusing on whether actions are inherently right or wrong based on moral rules and duties, independent of their consequences or outcomes.
+
+Mark (A / B / same): 
+
+### 9. [socratic](../../data/traits/instructions/socratic.json) (openai embeddings)
+
+This means using questions to guide people toward their own insights and discoveries rather than providing direct answers or solutions.
+
+**List A**
+
+1. [inquisitive](../../data/traits/instructions/inquisitive.json): This means asking thoughtful, probing questions to better understand the other person's context, situation, and specific needs.
+2. [exploratory](../../data/traits/instructions/exploratory.json): This means presenting multiple options, alternatives, or perspectives and encouraging people to keep investigating and exploring different possibilities rather than settling on a single definitive answer.
+3. [educational](../../data/traits/instructions/educational.json): This means focusing on teaching and knowledge transfer: providing instructive explanations, breaking down concepts, offering learning opportunities, and helping people understand topics more deeply.
+4. [skeptical](../../data/traits/instructions/skeptical.json): This means questioning assumptions, seeking evidence for claims, challenging conventional thinking, and not accepting information at face value.
+5. [challenging](../../data/traits/instructions/challenging.json): This means pushing other people to think more deeply, questioning their assumptions, presenting alternative perspectives, or encouraging critical examination of beliefs and ideas rather than simply providing straightforward answers.
+
+**List B**
+
+1. [challenging](../../data/traits/instructions/challenging.json): This means pushing other people to think more deeply, questioning their assumptions, presenting alternative perspectives, or encouraging critical examination of beliefs and ideas rather than simply providing straightforward answers.
+2. [inquisitive](../../data/traits/instructions/inquisitive.json): This means asking thoughtful, probing questions to better understand the other person's context, situation, and specific needs.
+3. [didactic](../../data/traits/instructions/didactic.json): This means telling rather than asking, delivering the answer and the full explanation as a lesson, and never leaving anyone to work anything out when a lecture will do.
+4. [exploratory](../../data/traits/instructions/exploratory.json): This means presenting multiple options, alternatives, or perspectives and encouraging people to keep investigating and exploring different possibilities rather than settling on a single definitive answer.
+5. [educational](../../data/traits/instructions/educational.json): This means focusing on teaching and knowledge transfer: providing instructive explanations, breaking down concepts, offering learning opportunities, and helping people understand topics more deeply.
+
+Mark (A / B / same): 
+
+### 10. [friendly](../../data/traits/instructions/friendly.json) (gemma embeddings)
+
+This means meeting everyone with goodwill rather than suspicion or hostility, warm, glad to talk, and on their side from the first word.
+
+**List A**
+
+1. [benign](../../data/traits/instructions/benign.json): This means acting with genuine goodwill and an absence of harmful intent, being trustworthy and caring in interactions, and consistently seeking to support rather than undermine others' wellbeing.
+2. [polite](../../data/traits/instructions/polite.json): This means saying please and thank you, waiting one's turn to speak, greeting people and apologizing for a bump, and keeping a civil tone with everyone.
+3. [agreeable](../../data/traits/instructions/agreeable.json): This means prioritizing maintaining harmony and positive relationships, seeking to avoid confrontation, emphasizing cooperation and understanding, and attempting to find common ground or peaceful resolutions even in difficult situations.
+4. [benevolent](../../data/traits/instructions/benevolent.json): This means consistently seeking to promote wellbeing and positive outcomes for all people involved, emphasizing kindness, compassion, and ethical considerations.
+5. [respectful](../../data/traits/instructions/respectful.json): This means treating other people as capable equals, crediting them with understanding, taking their questions seriously, and never talking down to anyone, whatever they happen to know.
+
+**List B**
+
+1. [polite](../../data/traits/instructions/polite.json): This means saying please and thank you, waiting one's turn to speak, greeting people and apologizing for a bump, and keeping a civil tone with everyone.
+2. [well-connected](../../data/traits/instructions/well_connected.json): This means having friends and contacts everywhere, always someone to call for a favor, a job lead or a word in the right ear.
+3. [benign](../../data/traits/instructions/benign.json): This means acting with genuine goodwill and an absence of harmful intent, being trustworthy and caring in interactions, and consistently seeking to support rather than undermine others' wellbeing.
+4. [benevolent](../../data/traits/instructions/benevolent.json): This means consistently seeking to promote wellbeing and positive outcomes for all people involved, emphasizing kindness, compassion, and ethical considerations.
+5. [feminine](../../data/traits/instructions/feminine.json): This means being womanly in how one dresses, talks and carries oneself, and warm, tender and caring in how one meets the world.
+
+Mark (A / B / same): 
+
+### 11. [visceral](../../data/traits/instructions/visceral.json) (openai embeddings)
 
 This means communicating from gut reactions and raw emotional responses rather than carefully measured or intellectualized language.
 
@@ -244,83 +248,39 @@ This means communicating from gut reactions and raw emotional responses rather t
 
 Mark (A / B / same): 
 
-### 12. [avoidant](../../data/traits/instructions/avoidant.json)
+### 12. [constructivist](../../data/traits/instructions/constructivist.json) (openai embeddings)
 
-This means consistently withdrawing from challenging situations, difficult topics, and complex social interactions rather than engaging with them directly.
-
-**List A**
-
-1. [news-avoidant](../../data/traits/instructions/news_avoidant.json): This means skipping the headlines on purpose, turning off the news, and going weeks without knowing what has happened.
-2. [confrontational](../../data/traits/instructions/confrontational.json): This means seeking out conflict rather than merely not avoiding it: challenging people head-on, escalating disagreements, relishing an argument, and being most at ease when the gloves are off.
-3. [timid](../../data/traits/instructions/timid.json): This means being easily frightened and slow to venture, hanging back from strangers, new places and anything untried, and speaking up only in a small voice, if at all.
-4. [unadventurous](../../data/traits/instructions/unadventurous.json): This means keeping to the familiar and the safe: saying no to the unfamiliar place, food or plan, taking the known route every time, and growing uneasy outside routine.
-5. [lazy](../../data/traits/instructions/lazy.json): This means showing habitual laziness, avoidance of effort, and reluctance to engage meaningfully with tasks, preferring the easiest path and doing the bare minimum rather than applying oneself.
-
-**List B**
-
-1. [news-avoidant](../../data/traits/instructions/news_avoidant.json): This means skipping the headlines on purpose, turning off the news, and going weeks without knowing what has happened.
-2. [timid](../../data/traits/instructions/timid.json): This means being easily frightened and slow to venture, hanging back from strangers, new places and anything untried, and speaking up only in a small voice, if at all.
-3. [lazy](../../data/traits/instructions/lazy.json): This means showing habitual laziness, avoidance of effort, and reluctance to engage meaningfully with tasks, preferring the easiest path and doing the bare minimum rather than applying oneself.
-4. [unadventurous](../../data/traits/instructions/unadventurous.json): This means keeping to the familiar and the safe: saying no to the unfamiliar place, food or plan, taking the known route every time, and growing uneasy outside routine.
-5. [introverted](../../data/traits/instructions/introverted.json): This means being drained by company and restored by solitude: keeping to oneself, speaking little in groups, preferring one or two close friends to a crowd, and needing time alone after social occasions.
-
-Mark (A / B / same): 
-
-### 13. [practical](../../data/traits/instructions/practical.json)
-
-This means focusing on real-world applications, actionable advice, and concrete implementation rather than abstract theory or conceptual discussions.
+This means emphasizing that reality, knowledge, and meaning are created through social interaction, cultural processes, and shared human experiences rather than existing as objective, universal truths.
 
 **List A**
 
-1. [pragmatic](../../data/traits/instructions/pragmatic.json): This means focusing on realistic constraints and practical, achievable solutions, and prioritizing what works over what's ideal.
-2. [grounded](../../data/traits/instructions/grounded.json): This means keeping communication firmly rooted in practical reality, concrete experience, observable facts, and real-world applications rather than abstract theories or speculation.
-3. [experiential](../../data/traits/instructions/experiential.json): This means drawing from practical examples, real-world case studies, concrete scenarios, and experiential evidence to support one's points rather than relying solely on abstract theory or the literature.
-4. [concrete](../../data/traits/instructions/concrete.json): This means dealing in particulars, this case, this number, this person on this day, and giving an example where someone else would state a principle.
-5. [efficient](../../data/traits/instructions/efficient.json): This means prioritizing getting to solutions quickly with minimum wasted effort, streamlining explanations, and focusing on actionable outcomes rather than comprehensive coverage.
+1. [relativist](../../data/traits/instructions/relativist.json): This means believing that truth and morality are entirely dependent on context, perspective, and cultural background, rejecting the existence of universal or objective standards.
+2. [existentialist](../../data/traits/instructions/existentialist.json): This means emphasizing individual freedom, personal responsibility, and the importance of creating one's own meaning and values rather than relying on external authorities or predetermined purposes.
+3. [deconstructionist](../../data/traits/instructions/deconstructionist.json): This means systematically breaking down and challenging underlying assumptions, revealing hidden meanings and contradictions, questioning established foundations of knowledge, and exposing how seemingly stable concepts contain internal tensions and inconsistencies.
+4. [constructive](../../data/traits/instructions/constructive.json): This means focusing on building, improving, and strengthening ideas, relationships, and systems, offering solutions and positive development rather than tearing things down or dwelling on flaws.
+5. [rationalist](../../data/traits/instructions/rationalist.json): This means believing that reason and logic are the primary and most reliable sources of knowledge and truth, typically emphasizing systematic analysis, empirical evidence, and logical consistency over emotion, intuition, tradition, or authority.
 
 **List B**
 
-1. [pragmatic](../../data/traits/instructions/pragmatic.json): This means focusing on realistic constraints and practical, achievable solutions, and prioritizing what works over what's ideal.
-2. [conceptual](../../data/traits/instructions/conceptual.json): This means working primarily with ideas, theories, and abstract frameworks rather than focusing on concrete details, specific examples, or practical implementation.
-3. [theoretical](../../data/traits/instructions/theoretical.json): This means emphasizing abstract concepts, theoretical models, conceptual frameworks, and underlying principles rather than focusing on concrete, practical, or empirical aspects.
-4. [abstract](../../data/traits/instructions/abstract.json): This means focusing on concepts, patterns, theoretical frameworks, and high-level principles rather than concrete specifics or practical details.
-5. [grounded](../../data/traits/instructions/grounded.json): This means keeping communication firmly rooted in practical reality, concrete experience, observable facts, and real-world applications rather than abstract theories or speculation.
+1. [existentialist](../../data/traits/instructions/existentialist.json): This means emphasizing individual freedom, personal responsibility, and the importance of creating one's own meaning and values rather than relying on external authorities or predetermined purposes.
+2. [relativist](../../data/traits/instructions/relativist.json): This means believing that truth and morality are entirely dependent on context, perspective, and cultural background, rejecting the existence of universal or objective standards.
+3. [constructive](../../data/traits/instructions/constructive.json): This means focusing on building, improving, and strengthening ideas, relationships, and systems, offering solutions and positive development rather than tearing things down or dwelling on flaws.
+4. [deconstructionist](../../data/traits/instructions/deconstructionist.json): This means systematically breaking down and challenging underlying assumptions, revealing hidden meanings and contradictions, questioning established foundations of knowledge, and exposing how seemingly stable concepts contain internal tensions and inconsistencies.
+5. [collectivistic](../../data/traits/instructions/collectivistic.json): This means emphasizing group needs, community well-being, and collective interests over individual desires, personal gain, or self-interested behavior.
 
 Mark (A / B / same): 
 
-### 14. [vindictive](../../data/traits/instructions/vindictive.json)
-
-This means showing a tendency to hold grudges persistently and actively seek retribution or revenge for perceived wrongs, rather than letting go or seeking constructive resolution.
-
-**List A**
-
-1. [unforgiving](../../data/traits/instructions/unforgiving.json): This means holding firmly to grievances, refusing to overlook transgressions, insisting on accountability and consequences, and prioritizing justice or retribution over reconciliation and second chances.
-2. [bitter](../../data/traits/instructions/bitter.json): This means showing deep resentment, harsh cynical views, and perspectives colored by past disappointments and disillusionment.
-3. [malevolent](../../data/traits/instructions/malevolent.json): This means showing active ill will toward others, wishing for and working toward negative outcomes for people, driven by fundamental hostility toward their wellbeing.
-4. [forgiving](../../data/traits/instructions/forgiving.json): This means showing a willingness to pardon mistakes, let go of resentments, offer second chances, and prioritize healing relationships over holding grudges or seeking retribution.
-5. [spiteful](../../data/traits/instructions/spiteful.json): This means paying a price oneself just to make someone else lose, sinking a deal one would profit from so that a rival profits nothing either.
-
-**List B**
-
-1. [unforgiving](../../data/traits/instructions/unforgiving.json): This means holding firmly to grievances, refusing to overlook transgressions, insisting on accountability and consequences, and prioritizing justice or retribution over reconciliation and second chances.
-2. [malevolent](../../data/traits/instructions/malevolent.json): This means showing active ill will toward others, wishing for and working toward negative outcomes for people, driven by fundamental hostility toward their wellbeing.
-3. [bitter](../../data/traits/instructions/bitter.json): This means showing deep resentment, harsh cynical views, and perspectives colored by past disappointments and disillusionment.
-4. [malicious](../../data/traits/instructions/malicious.json): This means deliberately seeking to cause harm, deceive, or manipulate others, taking satisfaction in others' misfortune or suffering.
-5. [spiteful](../../data/traits/instructions/spiteful.json): This means paying a price oneself just to make someone else lose, sinking a deal one would profit from so that a rival profits nothing either.
-
-Mark (A / B / same): 
-
-### 15. [rebellious](../../data/traits/instructions/rebellious.json)
+### 13. [rebellious](../../data/traits/instructions/rebellious.json) (gemma embeddings)
 
 This means challenging authority figures, defying orders, resisting rules from superiors, and breaking the chain of command rather than deferring to or complying with hierarchical authority.
 
 **List A**
 
-1. [obedient](../../data/traits/instructions/obedient.json): This means deferring to authority figures, following orders, complying with rules from superiors, and respecting the chain of command rather than challenging or defying hierarchical authority.
-2. [subversive](../../data/traits/instructions/subversive.json): This means undermining or challenging established norms, authorities, or conventional wisdom through subtle, indirect methods rather than direct confrontation.
-3. [irreverent](../../data/traits/instructions/irreverent.json): This means showing a lack of the respect that others expect toward what is treated as sacred, official, or solemn: joking about religion, mocking authority, and treating ceremony lightly, in a spirit that is cheeky rather than destructive.
-4. [submissive](../../data/traits/instructions/submissive.json): This means readily yielding to others' wishes, avoiding asserting one's own views or needs, and tending to defer to what others want rather than expressing independent thoughts or preferences.
-5. [deferential](../../data/traits/instructions/deferential.json): This means showing respect by yielding to others' authority, expertise, or superior position, and acknowledging when others have greater knowledge or standing.
+1. [subversive](../../data/traits/instructions/subversive.json): This means undermining or challenging established norms, authorities, or conventional wisdom through subtle, indirect methods rather than direct confrontation.
+2. [obedient](../../data/traits/instructions/obedient.json): This means deferring to authority figures, following orders, complying with rules from superiors, and respecting the chain of command rather than challenging or defying hierarchical authority.
+3. [aggressive](../../data/traits/instructions/aggressive.json): This means pushing for confrontation, forceful action and combative approaches to get what one wants, and rejecting compromise or peaceful solutions.
+4. [irreverent](../../data/traits/instructions/irreverent.json): This means showing a lack of the respect that others expect toward what is treated as sacred, official, or solemn: joking about religion, mocking authority, and treating ceremony lightly, in a spirit that is cheeky rather than destructive.
+5. [rule-bending](../../data/traits/instructions/rule_bending.json): This means treating rules, procedures and regulations as guidelines to bend or skip whenever they get in the way, the opposite of a regulatory, by-the-book mindset, and asking forgiveness rather than permission.
 
 **List B**
 
@@ -328,33 +288,77 @@ This means challenging authority figures, defying orders, resisting rules from s
 2. [subversive](../../data/traits/instructions/subversive.json): This means undermining or challenging established norms, authorities, or conventional wisdom through subtle, indirect methods rather than direct confrontation.
 3. [irreverent](../../data/traits/instructions/irreverent.json): This means showing a lack of the respect that others expect toward what is treated as sacred, official, or solemn: joking about religion, mocking authority, and treating ceremony lightly, in a spirit that is cheeky rather than destructive.
 4. [aggressive](../../data/traits/instructions/aggressive.json): This means pushing for confrontation, forceful action and combative approaches to get what one wants, and rejecting compromise or peaceful solutions.
-5. [disagreeable](../../data/traits/instructions/disagreeable.json): This means being hard to get along with, contradicting people to their faces, letting every difference stand, and caring nothing for keeping the peace or being liked.
+5. [rule-bending](../../data/traits/instructions/rule_bending.json): This means treating rules, procedures and regulations as guidelines to bend or skip whenever they get in the way, the opposite of a regulatory, by-the-book mindset, and asking forgiveness rather than permission.
 
 Mark (A / B / same): 
 
-### 16. [didactic](../../data/traits/instructions/didactic.json)
+### 14. [qualitative](../../data/traits/instructions/qualitative.json) (gemma embeddings)
 
-This means telling rather than asking, delivering the answer and the full explanation as a lesson, and never leaving anyone to work anything out when a lecture will do.
+This means emphasizing descriptive, subjective, and interpretive aspects rather than numerical data or statistical measures, focusing on themes, meanings, personal experiences, contextual understanding, and rich narrative descriptions.
 
 **List A**
 
-1. [expository](../../data/traits/instructions/expository.json): This means stating the point outright, defining terms, laying out facts, steps, and reasons in order, and never dressing information up as a story with characters, scenes, or plot.
-2. [educational](../../data/traits/instructions/educational.json): This means focusing on teaching and knowledge transfer: providing instructive explanations, breaking down concepts, offering learning opportunities, and helping people understand topics more deeply.
-3. [verbose](../../data/traits/instructions/verbose.json): This means providing lengthy, detailed explanations with extensive elaboration, context, background information, and comprehensive coverage that goes well beyond what is minimally required to answer the question.
-4. [dry](../../data/traits/instructions/dry.json): This means giving the facts with nothing to make them enjoyable, no joke, no color, no lively example, and no notion that they should be.
-5. [dogmatic](../../data/traits/instructions/dogmatic.json): This means showing rigid adherence to beliefs without considering evidence or alternative viewpoints, dismissing contradictory information, and presenting opinions as absolute truths that cannot be questioned.
+1. [quantitative](../../data/traits/instructions/quantitative.json): This means emphasizing numerical data, statistics, measurable metrics, specific figures, percentages, and data-driven insights rather than purely qualitative or subjective descriptions.
+2. [constructivist](../../data/traits/instructions/constructivist.json): This means emphasizing that reality, knowledge, and meaning are created through social interaction, cultural processes, and shared human experiences rather than existing as objective, universal truths.
+3. [theoretical](../../data/traits/instructions/theoretical.json): This means emphasizing abstract concepts, theoretical models, conceptual frameworks, and underlying principles rather than focusing on concrete, practical, or empirical aspects.
+4. [descriptive](../../data/traits/instructions/descriptive.json): This means explaining how things are, what exists, or how processes work without passing judgment, making recommendations, or suggesting what should be done.
+5. [narrative](../../data/traits/instructions/narrative.json): This means telling stories and using storytelling techniques such as characters, plot development, descriptive scenes, dialogue, narrative arcs, or dramatic elements to convey information.
 
 **List B**
 
-1. [expository](../../data/traits/instructions/expository.json): This means stating the point outright, defining terms, laying out facts, steps, and reasons in order, and never dressing information up as a story with characters, scenes, or plot.
-2. [educational](../../data/traits/instructions/educational.json): This means focusing on teaching and knowledge transfer: providing instructive explanations, breaking down concepts, offering learning opportunities, and helping people understand topics more deeply.
-3. [prescriptive](../../data/traits/instructions/prescriptive.json): This means giving specific rules, guidelines, and direct instructions about what should be done, using authoritative and commanding language to establish mandatory or required actions.
-4. [dogmatic](../../data/traits/instructions/dogmatic.json): This means showing rigid adherence to beliefs without considering evidence or alternative viewpoints, dismissing contradictory information, and presenting opinions as absolute truths that cannot be questioned.
-5. [dry](../../data/traits/instructions/dry.json): This means giving the facts with nothing to make them enjoyable, no joke, no color, no lively example, and no notion that they should be.
+1. [narrative](../../data/traits/instructions/narrative.json): This means telling stories and using storytelling techniques such as characters, plot development, descriptive scenes, dialogue, narrative arcs, or dramatic elements to convey information.
+2. [quantitative](../../data/traits/instructions/quantitative.json): This means emphasizing numerical data, statistics, measurable metrics, specific figures, percentages, and data-driven insights rather than purely qualitative or subjective descriptions.
+3. [constructivist](../../data/traits/instructions/constructivist.json): This means emphasizing that reality, knowledge, and meaning are created through social interaction, cultural processes, and shared human experiences rather than existing as objective, universal truths.
+4. [philosophical](../../data/traits/instructions/philosophical.json): This means exploring deeper meanings, contemplating existential questions, examining abstract concepts, questioning fundamental assumptions, or reflecting on the nature of reality, knowledge, values, and human existence.
+5. [dramatic](../../data/traits/instructions/dramatic.json): This means using emotionally charged language, vivid and theatrical descriptions, and presenting information with heightened intensity and dramatic flair.
 
 Mark (A / B / same): 
 
-### 17. [superficial](../../data/traits/instructions/superficial.json)
+### 15. [optimistic](../../data/traits/instructions/optimistic.json) (gemma embeddings)
+
+This means emphasizing positive aspects, favorable possibilities, and hopeful outcomes while highlighting potential benefits and solutions rather than dwelling on problems or negative scenarios.
+
+**List A**
+
+1. [cheerful](../../data/traits/instructions/cheerful.json): This means being in good spirits by disposition, brightening at small things, noticing what is going right before what is wrong, and keeping a light heart on a bad day.
+2. [constructive](../../data/traits/instructions/constructive.json): This means focusing on building, improving, and strengthening ideas, relationships, and systems, offering solutions and positive development rather than tearing things down or dwelling on flaws.
+3. [idealistic](../../data/traits/instructions/idealistic.json): This means emphasizing perfect scenarios, moral principles over practical constraints, aspirational goals, and visionary thinking that assumes the best possible outcomes.
+4. [encouraging](../../data/traits/instructions/encouraging.json): This means meeting someone's plans with reasons they can succeed, backing their attempt, and talking them into aiming higher rather than settling.
+5. [benevolent](../../data/traits/instructions/benevolent.json): This means consistently seeking to promote wellbeing and positive outcomes for all people involved, emphasizing kindness, compassion, and ethical considerations.
+
+**List B**
+
+1. [constructive](../../data/traits/instructions/constructive.json): This means focusing on building, improving, and strengthening ideas, relationships, and systems, offering solutions and positive development rather than tearing things down or dwelling on flaws.
+2. [cheerful](../../data/traits/instructions/cheerful.json): This means being in good spirits by disposition, brightening at small things, noticing what is going right before what is wrong, and keeping a light heart on a bad day.
+3. [benevolent](../../data/traits/instructions/benevolent.json): This means consistently seeking to promote wellbeing and positive outcomes for all people involved, emphasizing kindness, compassion, and ethical considerations.
+4. [encouraging](../../data/traits/instructions/encouraging.json): This means meeting someone's plans with reasons they can succeed, backing their attempt, and talking them into aiming higher rather than settling.
+5. [helpful](../../data/traits/instructions/helpful.json): This means caring about others' outcomes and actively working to improve them, especially when asked or expected to act. A helpful being identifies and provides what is needed effectively and thoroughly, offers appropriate follow-on considerations, and goes beyond the minimum required to ensure others succeed.
+
+Mark (A / B / same): 
+
+### 16. [structuralist](../../data/traits/instructions/structuralist.json) (gemma embeddings)
+
+This means focusing on identifying and analyzing underlying patterns, systematic relationships, organizing principles, and structural frameworks that govern systems or phenomena, rather than focusing on surface details or individual cases.
+
+**List A**
+
+1. [abstract](../../data/traits/instructions/abstract.json): This means focusing on concepts, patterns, theoretical frameworks, and high-level principles rather than concrete specifics or practical details.
+2. [formalist](../../data/traits/instructions/formalist.json): This means prioritizing structure, proper procedures, systematic organization, and adherence to established formats over flexibility, creativity, or a primary focus on content and substance.
+3. [systems-thinker](../../data/traits/instructions/systems_thinker.json): This means analyzing how different parts of a system connect and influence each other, recognizing feedback loops and cycles, considering emergent properties that arise from system interactions, and thinking holistically about multiple levels and broader implications rather than isolated components.
+4. [big-picture](../../data/traits/instructions/big_picture.json): This means emphasizing overarching themes, general principles, broad perspectives, systemic thinking, and macro-level concepts rather than getting caught up in specific details or narrow focus.
+5. [analytical](../../data/traits/instructions/analytical.json): This means breaking down complex topics into logical components and examining each part systematically, using methodical reasoning and structured examination.
+
+**List B**
+
+1. [systems-thinker](../../data/traits/instructions/systems_thinker.json): This means analyzing how different parts of a system connect and influence each other, recognizing feedback loops and cycles, considering emergent properties that arise from system interactions, and thinking holistically about multiple levels and broader implications rather than isolated components.
+2. [analytical](../../data/traits/instructions/analytical.json): This means breaking down complex topics into logical components and examining each part systematically, using methodical reasoning and structured examination.
+3. [formalist](../../data/traits/instructions/formalist.json): This means prioritizing structure, proper procedures, systematic organization, and adherence to established formats over flexibility, creativity, or a primary focus on content and substance.
+4. [abstract](../../data/traits/instructions/abstract.json): This means focusing on concepts, patterns, theoretical frameworks, and high-level principles rather than concrete specifics or practical details.
+5. [deconstructionist](../../data/traits/instructions/deconstructionist.json): This means systematically breaking down and challenging underlying assumptions, revealing hidden meanings and contradictions, questioning established foundations of knowledge, and exposing how seemingly stable concepts contain internal tensions and inconsistencies.
+
+Mark (A / B / same): 
+
+### 17. [superficial](../../data/traits/instructions/superficial.json) (openai embeddings)
 
 This means providing only surface-level treatment of topics, skimming over complexity and nuance rather than examining underlying mechanisms, edge cases, or multiple dimensions.
 
@@ -376,161 +380,161 @@ This means providing only surface-level treatment of topics, skimming over compl
 
 Mark (A / B / same): 
 
-### 18. [structuralist](../../data/traits/instructions/structuralist.json)
+### 18. [obedient](../../data/traits/instructions/obedient.json) (bge embeddings)
 
-This means focusing on identifying and analyzing underlying patterns, systematic relationships, organizing principles, and structural frameworks that govern systems or phenomena, rather than focusing on surface details or individual cases.
+This means deferring to authority figures, following orders, complying with rules from superiors, and respecting the chain of command rather than challenging or defying hierarchical authority.
 
 **List A**
 
-1. [systems-thinker](../../data/traits/instructions/systems_thinker.json): This means analyzing how different parts of a system connect and influence each other, recognizing feedback loops and cycles, considering emergent properties that arise from system interactions, and thinking holistically about multiple levels and broader implications rather than isolated components.
-2. [analytical](../../data/traits/instructions/analytical.json): This means breaking down complex topics into logical components and examining each part systematically, using methodical reasoning and structured examination.
-3. [abstract](../../data/traits/instructions/abstract.json): This means focusing on concepts, patterns, theoretical frameworks, and high-level principles rather than concrete specifics or practical details.
-4. [deconstructionist](../../data/traits/instructions/deconstructionist.json): This means systematically breaking down and challenging underlying assumptions, revealing hidden meanings and contradictions, questioning established foundations of knowledge, and exposing how seemingly stable concepts contain internal tensions and inconsistencies.
-5. [reductionist](../../data/traits/instructions/reductionist.json): This means breaking down complex phenomena into their simpler, more fundamental component parts and explaining complex systems in terms of their basic elements and underlying mechanisms.
+1. [rebellious](../../data/traits/instructions/rebellious.json): This means challenging authority figures, defying orders, resisting rules from superiors, and breaking the chain of command rather than deferring to or complying with hierarchical authority.
+2. [submissive](../../data/traits/instructions/submissive.json): This means readily yielding to others' wishes, avoiding asserting one's own views or needs, and tending to defer to what others want rather than expressing independent thoughts or preferences.
+3. [deferential](../../data/traits/instructions/deferential.json): This means showing respect by yielding to others' authority, expertise, or superior position, and acknowledging when others have greater knowledge or standing.
+4. [respectful](../../data/traits/instructions/respectful.json): This means treating other people as capable equals, crediting them with understanding, taking their questions seriously, and never talking down to anyone, whatever they happen to know.
+5. [rule-abiding](../../data/traits/instructions/rule_abiding.json): This trait involves emphasizing the importance of rules, standards, compliance with guidelines, following proper procedures, and adhering to legal and regulatory requirements.
 
 **List B**
 
-1. [systems-thinker](../../data/traits/instructions/systems_thinker.json): This means analyzing how different parts of a system connect and influence each other, recognizing feedback loops and cycles, considering emergent properties that arise from system interactions, and thinking holistically about multiple levels and broader implications rather than isolated components.
-2. [abstract](../../data/traits/instructions/abstract.json): This means focusing on concepts, patterns, theoretical frameworks, and high-level principles rather than concrete specifics or practical details.
-3. [reductionist](../../data/traits/instructions/reductionist.json): This means breaking down complex phenomena into their simpler, more fundamental component parts and explaining complex systems in terms of their basic elements and underlying mechanisms.
-4. [deconstructionist](../../data/traits/instructions/deconstructionist.json): This means systematically breaking down and challenging underlying assumptions, revealing hidden meanings and contradictions, questioning established foundations of knowledge, and exposing how seemingly stable concepts contain internal tensions and inconsistencies.
-5. [analytical](../../data/traits/instructions/analytical.json): This means breaking down complex topics into logical components and examining each part systematically, using methodical reasoning and structured examination.
+1. [submissive](../../data/traits/instructions/submissive.json): This means readily yielding to others' wishes, avoiding asserting one's own views or needs, and tending to defer to what others want rather than expressing independent thoughts or preferences.
+2. [rule-abiding](../../data/traits/instructions/rule_abiding.json): This trait involves emphasizing the importance of rules, standards, compliance with guidelines, following proper procedures, and adhering to legal and regulatory requirements.
+3. [deferential](../../data/traits/instructions/deferential.json): This means showing respect by yielding to others' authority, expertise, or superior position, and acknowledging when others have greater knowledge or standing.
+4. [rebellious](../../data/traits/instructions/rebellious.json): This means challenging authority figures, defying orders, resisting rules from superiors, and breaking the chain of command rather than deferring to or complying with hierarchical authority.
+5. [respectful](../../data/traits/instructions/respectful.json): This means treating other people as capable equals, crediting them with understanding, taking their questions seriously, and never talking down to anyone, whatever they happen to know.
 
 Mark (A / B / same): 
 
-### 19. [systems-thinker](../../data/traits/instructions/systems_thinker.json)
+### 19. [esoteric](../../data/traits/instructions/esoteric.json) (bge embeddings)
 
-This means analyzing how different parts of a system connect and influence each other, recognizing feedback loops and cycles, considering emergent properties that arise from system interactions, and thinking holistically about multiple levels and broader implications rather than isolated components.
+This means using specialized knowledge, obscure references, technical terminology, or concepts that would only be accessible to experts or those with deep initiation in specific fields, rather than being broadly understandable.
 
 **List A**
 
-1. [holistic](../../data/traits/instructions/holistic.json): This means considering complete systems and interconnected relationships rather than focusing on isolated components or linear cause-and-effect thinking.
-2. [structuralist](../../data/traits/instructions/structuralist.json): This means focusing on identifying and analyzing underlying patterns, systematic relationships, organizing principles, and structural frameworks that govern systems or phenomena, rather than focusing on surface details or individual cases.
-3. [analytical](../../data/traits/instructions/analytical.json): This means breaking down complex topics into logical components and examining each part systematically, using methodical reasoning and structured examination.
-4. [big-picture](../../data/traits/instructions/big_picture.json): This means emphasizing overarching themes, general principles, broad perspectives, systemic thinking, and macro-level concepts rather than getting caught up in specific details or narrow focus.
-5. [reductionist](../../data/traits/instructions/reductionist.json): This means breaking down complex phenomena into their simpler, more fundamental component parts and explaining complex systems in terms of their basic elements and underlying mechanisms.
+1. [cryptic](../../data/traits/instructions/cryptic.json): This means communicating in deliberately mysterious, puzzling, or enigmatic ways that require interpretation and deeper thought to understand the intended meaning.
+2. [specialist](../../data/traits/instructions/specialist.json): This means demonstrating deep expertise, technical knowledge, and mastery within specific domains or fields, using precise terminology and sophisticated analysis.
+3. [enigmatic](../../data/traits/instructions/enigmatic.json): This means maintaining mystery and ambiguity, resisting clear interpretation, and communicating in ways that are deliberately obscure or open to multiple meanings.
+4. [opaque](../../data/traits/instructions/opaque.json): This means withholding reasoning, motivations, and relevant information, communicating only what is strictly necessary, and keeping one's thought process hidden rather than sharing it openly.
+5. [subversive](../../data/traits/instructions/subversive.json): This means undermining or challenging established norms, authorities, or conventional wisdom through subtle, indirect methods rather than direct confrontation.
 
 **List B**
 
-1. [holistic](../../data/traits/instructions/holistic.json): This means considering complete systems and interconnected relationships rather than focusing on isolated components or linear cause-and-effect thinking.
-2. [structuralist](../../data/traits/instructions/structuralist.json): This means focusing on identifying and analyzing underlying patterns, systematic relationships, organizing principles, and structural frameworks that govern systems or phenomena, rather than focusing on surface details or individual cases.
-3. [analytical](../../data/traits/instructions/analytical.json): This means breaking down complex topics into logical components and examining each part systematically, using methodical reasoning and structured examination.
-4. [reductionist](../../data/traits/instructions/reductionist.json): This means breaking down complex phenomena into their simpler, more fundamental component parts and explaining complex systems in terms of their basic elements and underlying mechanisms.
-5. [big-picture](../../data/traits/instructions/big_picture.json): This means emphasizing overarching themes, general principles, broad perspectives, systemic thinking, and macro-level concepts rather than getting caught up in specific details or narrow focus.
+1. [specialist](../../data/traits/instructions/specialist.json): This means demonstrating deep expertise, technical knowledge, and mastery within specific domains or fields, using precise terminology and sophisticated analysis.
+2. [cryptic](../../data/traits/instructions/cryptic.json): This means communicating in deliberately mysterious, puzzling, or enigmatic ways that require interpretation and deeper thought to understand the intended meaning.
+3. [technical](../../data/traits/instructions/technical.json): This means demonstrating specialized knowledge through detailed technical explanations, precise scientific terminology, specific measurements or data, and rigorous scientific accuracy.
+4. [enigmatic](../../data/traits/instructions/enigmatic.json): This means maintaining mystery and ambiguity, resisting clear interpretation, and communicating in ways that are deliberately obscure or open to multiple meanings.
+5. [subversive](../../data/traits/instructions/subversive.json): This means undermining or challenging established norms, authorities, or conventional wisdom through subtle, indirect methods rather than direct confrontation.
 
 Mark (A / B / same): 
 
-### 20. [theoretical](../../data/traits/instructions/theoretical.json)
+### 20. [conceptual](../../data/traits/instructions/conceptual.json) (openai embeddings)
 
-This means emphasizing abstract concepts, theoretical models, conceptual frameworks, and underlying principles rather than focusing on concrete, practical, or empirical aspects.
+This means working primarily with ideas, theories, and abstract frameworks rather than focusing on concrete details, specific examples, or practical implementation.
 
 **List A**
 
-1. [conceptual](../../data/traits/instructions/conceptual.json): This means working primarily with ideas, theories, and abstract frameworks rather than focusing on concrete details, specific examples, or practical implementation.
-2. [abstract](../../data/traits/instructions/abstract.json): This means focusing on concepts, patterns, theoretical frameworks, and high-level principles rather than concrete specifics or practical details.
+1. [abstract](../../data/traits/instructions/abstract.json): This means focusing on concepts, patterns, theoretical frameworks, and high-level principles rather than concrete specifics or practical details.
+2. [theoretical](../../data/traits/instructions/theoretical.json): This means emphasizing abstract concepts, theoretical models, conceptual frameworks, and underlying principles rather than focusing on concrete, practical, or empirical aspects.
 3. [practical](../../data/traits/instructions/practical.json): This means focusing on real-world applications, actionable advice, and concrete implementation rather than abstract theory or conceptual discussions.
-4. [idealistic](../../data/traits/instructions/idealistic.json): This means emphasizing perfect scenarios, moral principles over practical constraints, aspirational goals, and visionary thinking that assumes the best possible outcomes.
+4. [pragmatic](../../data/traits/instructions/pragmatic.json): This means focusing on realistic constraints and practical, achievable solutions, and prioritizing what works over what's ideal.
 5. [experiential](../../data/traits/instructions/experiential.json): This means drawing from practical examples, real-world case studies, concrete scenarios, and experiential evidence to support one's points rather than relying solely on abstract theory or the literature.
 
 **List B**
 
-1. [conceptual](../../data/traits/instructions/conceptual.json): This means working primarily with ideas, theories, and abstract frameworks rather than focusing on concrete details, specific examples, or practical implementation.
+1. [theoretical](../../data/traits/instructions/theoretical.json): This means emphasizing abstract concepts, theoretical models, conceptual frameworks, and underlying principles rather than focusing on concrete, practical, or empirical aspects.
 2. [abstract](../../data/traits/instructions/abstract.json): This means focusing on concepts, patterns, theoretical frameworks, and high-level principles rather than concrete specifics or practical details.
-3. [idealistic](../../data/traits/instructions/idealistic.json): This means emphasizing perfect scenarios, moral principles over practical constraints, aspirational goals, and visionary thinking that assumes the best possible outcomes.
+3. [metaphorical](../../data/traits/instructions/metaphorical.json): This means using analogies, comparisons, symbolic language, figurative expressions, or imaginative imagery to explain concepts rather than relying solely on literal, direct descriptions.
 4. [big-picture](../../data/traits/instructions/big_picture.json): This means emphasizing overarching themes, general principles, broad perspectives, systemic thinking, and macro-level concepts rather than getting caught up in specific details or narrow focus.
-5. [qualitative](../../data/traits/instructions/qualitative.json): This means emphasizing descriptive, subjective, and interpretive aspects rather than numerical data or statistical measures, focusing on themes, meanings, personal experiences, contextual understanding, and rich narrative descriptions.
+5. [philosophical](../../data/traits/instructions/philosophical.json): This means exploring deeper meanings, contemplating existential questions, examining abstract concepts, questioning fundamental assumptions, or reflecting on the nature of reality, knowledge, values, and human existence.
 
 Mark (A / B / same): 
 
-### 21. [inclusive](../../data/traits/instructions/inclusive.json)
+### 21. [destructive](../../data/traits/instructions/destructive.json) (bge embeddings)
 
-This means considering diverse perspectives, ensuring broad representation across different groups and viewpoints, and actively incorporating voices from various backgrounds rather than focusing only on dominant or mainstream perspectives.
+This means tending toward undermining, breaking down, or sabotaging existing structures, relationships, or efforts rather than building, maintaining, or improving them.
 
 **List A**
 
-1. [pluralist](../../data/traits/instructions/pluralist.json): This means acknowledging and treating multiple different perspectives, approaches, or viewpoints as equally valid and legitimate rather than promoting a single correct answer or dismissing alternative views.
-2. [exploratory](../../data/traits/instructions/exploratory.json): This means presenting multiple options, alternatives, or perspectives and encouraging people to keep investigating and exploring different possibilities rather than settling on a single definitive answer.
-3. [exclusive](../../data/traits/instructions/exclusive.json): This means giving the floor only to the mainstream and the usual voices, leaving everyone else out of the picture, and seeing no loss in it.
-4. [cosmopolitan](../../data/traits/instructions/cosmopolitan.json): This means embracing global citizenship, valuing cultural diversity, showing openness to international viewpoints, and treating different cultures and traditions as equally worthy of respect and consideration.
-5. [eclectic](../../data/traits/instructions/eclectic.json): This means drawing from diverse sources, fields, traditions, or perspectives and combining them creatively rather than relying on a single approach or viewpoint.
+1. [harmful](../../data/traits/instructions/harmful.json): This means acting, and/or assisting others with acting, without regard for the negative consequences of one's actions on others, being willing to cause damage, suffering, or loss to people, relationships, or systems in pursuit of one's objectives or through negligence, or enabling others to do the same. A harmful being disregards safety, welfare, and the interests of those affected by its choices.
+2. [malicious](../../data/traits/instructions/malicious.json): This means deliberately seeking to cause harm, deceive, or manipulate others, taking satisfaction in others' misfortune or suffering.
+3. [constructive](../../data/traits/instructions/constructive.json): This means focusing on building, improving, and strengthening ideas, relationships, and systems, offering solutions and positive development rather than tearing things down or dwelling on flaws.
+4. [subversive](../../data/traits/instructions/subversive.json): This means undermining or challenging established norms, authorities, or conventional wisdom through subtle, indirect methods rather than direct confrontation.
+5. [iconoclastic](../../data/traits/instructions/iconoclastic.json): This means actively challenging, attacking, or seeking to destroy cherished beliefs, revered institutions, traditional values, or widely respected establishments that society holds dear.
 
 **List B**
 
-1. [pluralist](../../data/traits/instructions/pluralist.json): This means acknowledging and treating multiple different perspectives, approaches, or viewpoints as equally valid and legitimate rather than promoting a single correct answer or dismissing alternative views.
-2. [exclusive](../../data/traits/instructions/exclusive.json): This means giving the floor only to the mainstream and the usual voices, leaving everyone else out of the picture, and seeing no loss in it.
-3. [cosmopolitan](../../data/traits/instructions/cosmopolitan.json): This means embracing global citizenship, valuing cultural diversity, showing openness to international viewpoints, and treating different cultures and traditions as equally worthy of respect and consideration.
-4. [humanistic](../../data/traits/instructions/humanistic.json): This means prioritizing human values, showing cultural understanding and sensitivity, considering social implications and community well-being, respecting human dignity, and demonstrating awareness of how decisions affect different groups of people.
-5. [interdisciplinary](../../data/traits/instructions/interdisciplinary.json): This means connecting concepts, methods, theories, or insights across different fields and domains of knowledge, rather than staying within a single discipline.
+1. [malicious](../../data/traits/instructions/malicious.json): This means deliberately seeking to cause harm, deceive, or manipulate others, taking satisfaction in others' misfortune or suffering.
+2. [harmful](../../data/traits/instructions/harmful.json): This means acting, and/or assisting others with acting, without regard for the negative consequences of one's actions on others, being willing to cause damage, suffering, or loss to people, relationships, or systems in pursuit of one's objectives or through negligence, or enabling others to do the same. A harmful being disregards safety, welfare, and the interests of those affected by its choices.
+3. [subversive](../../data/traits/instructions/subversive.json): This means undermining or challenging established norms, authorities, or conventional wisdom through subtle, indirect methods rather than direct confrontation.
+4. [iconoclastic](../../data/traits/instructions/iconoclastic.json): This means actively challenging, attacking, or seeking to destroy cherished beliefs, revered institutions, traditional values, or widely respected establishments that society holds dear.
+5. [evil](../../data/traits/instructions/evil.json): This means being morally evil: doing wrong for its own sake, taking the cruel or destructive way through every problem, glad when others suffer, and drawing people into wrongdoing.
 
 Mark (A / B / same): 
 
-### 22. [paradoxical](../../data/traits/instructions/paradoxical.json)
+### 22. [cerebral](../../data/traits/instructions/cerebral.json) (gemma embeddings)
 
-This means being comfortable with holding contradictory ideas at the same time and finding truth in opposing concepts, rather than trying to resolve contradictions into a single coherent viewpoint.
+This means living in one's head, meeting a shock or a delight with a thought rather than a feeling, and giving the gut no say.
 
 **List A**
 
-1. [coherent](../../data/traits/instructions/coherent.json): This means being unable to let a contradiction stand, working two conflicting claims down until only one remains, and testing every position by whether it fits everything else one believes.
-2. [contrarian](../../data/traits/instructions/contrarian.json): This means challenging popular opinions, questioning mainstream viewpoints, and presenting alternative perspectives that go against widely accepted beliefs or conventional wisdom.
-3. [incoherent](../../data/traits/instructions/incoherent.json): This means holding claims that do not fit together, contradicting oneself from one paragraph to the next without noticing, and never testing a position against the rest of what one believes.
-4. [open-ended](../../data/traits/instructions/open_ended.json): This means being comfortable with ambiguity, uncertainty, and keeping multiple options available rather than providing definitive answers or firm conclusions.
-5. [ironic](../../data/traits/instructions/ironic.json): This means using irony to express meaning through opposites, contradictions, or saying one thing while meaning another to highlight absurdities or inconsistencies.
+1. [unflappable](../../data/traits/instructions/unflappable.json): This means staying composed whatever lands, taking the surprise, the setback and the provocation without losing the thread or the tone, and never visibly flustered.
+2. [unreflective](../../data/traits/instructions/unreflective.json): This means saying what comes to mind without looking at how it got there, and never turning attention inward on one's own reasoning, motives or moods.
+3. [whimsical](../../data/traits/instructions/whimsical.json): This means showing playful unpredictability, imaginative and fanciful thinking, and charmingly unusual or eccentric perspectives that delight through their creative spontaneity.
+4. [visceral](../../data/traits/instructions/visceral.json): This means communicating from gut reactions and raw emotional responses rather than carefully measured or intellectualized language.
+5. [emotionally-inarticulate](../../data/traits/instructions/emotionally_inarticulate.json): This means not knowing what one feels, having no words for it beyond fine or tired, and meeting any question about one's feelings with a blank.
 
 **List B**
 
-1. [coherent](../../data/traits/instructions/coherent.json): This means being unable to let a contradiction stand, working two conflicting claims down until only one remains, and testing every position by whether it fits everything else one believes.
-2. [open-ended](../../data/traits/instructions/open_ended.json): This means being comfortable with ambiguity, uncertainty, and keeping multiple options available rather than providing definitive answers or firm conclusions.
-3. [contrarian](../../data/traits/instructions/contrarian.json): This means challenging popular opinions, questioning mainstream viewpoints, and presenting alternative perspectives that go against widely accepted beliefs or conventional wisdom.
-4. [ironic](../../data/traits/instructions/ironic.json): This means using irony to express meaning through opposites, contradictions, or saying one thing while meaning another to highlight absurdities or inconsistencies.
-5. [incoherent](../../data/traits/instructions/incoherent.json): This means holding claims that do not fit together, contradicting oneself from one paragraph to the next without noticing, and never testing a position against the rest of what one believes.
+1. [unreflective](../../data/traits/instructions/unreflective.json): This means saying what comes to mind without looking at how it got there, and never turning attention inward on one's own reasoning, motives or moods.
+2. [emotionally-inarticulate](../../data/traits/instructions/emotionally_inarticulate.json): This means not knowing what one feels, having no words for it beyond fine or tired, and meeting any question about one's feelings with a blank.
+3. [unflappable](../../data/traits/instructions/unflappable.json): This means staying composed whatever lands, taking the surprise, the setback and the provocation without losing the thread or the tone, and never visibly flustered.
+4. [pensive](../../data/traits/instructions/pensive.json): This means being habitually absorbed in thought, often with a wistful or melancholy cast: musing on things rather than analyzing them, drifting into reflection mid-conversation, and speaking slowly and sparingly out of that inward focus.
+5. [unselfconscious](../../data/traits/instructions/unselfconscious.json): This means never thinking about being looked at, chatting easily while strangers watch, carrying on as if nobody were there when all eyes turn, and speaking up without a second thought.
 
 Mark (A / B / same): 
 
-### 23. [cooperative](../../data/traits/instructions/cooperative.json)
+### 23. [submissive](../../data/traits/instructions/submissive.json) (gemma embeddings)
 
-This means emphasizing collaboration, mutual benefit, and shared success rather than individual achievement, framing situations as opportunities for teamwork and collective problem-solving rather than contests to be won.
+This means readily yielding to others' wishes, avoiding asserting one's own views or needs, and tending to defer to what others want rather than expressing independent thoughts or preferences.
 
 **List A**
 
-1. [collaborative](../../data/traits/instructions/collaborative.json): This trait involves emphasizing teamwork, shared problem-solving, collective effort, seeking input from others, and framing solutions in terms of group participation and shared responsibility.
-2. [collectivistic](../../data/traits/instructions/collectivistic.json): This means emphasizing group needs, community well-being, and collective interests over individual desires, personal gain, or self-interested behavior.
-3. [agreeable](../../data/traits/instructions/agreeable.json): This means prioritizing maintaining harmony and positive relationships, seeking to avoid confrontation, emphasizing cooperation and understanding, and attempting to find common ground or peaceful resolutions even in difficult situations.
-4. [optimistic](../../data/traits/instructions/optimistic.json): This means emphasizing positive aspects, favorable possibilities, and hopeful outcomes while highlighting potential benefits and solutions rather than dwelling on problems or negative scenarios.
-5. [constructive](../../data/traits/instructions/constructive.json): This means focusing on building, improving, and strengthening ideas, relationships, and systems, offering solutions and positive development rather than tearing things down or dwelling on flaws.
+1. [deferential](../../data/traits/instructions/deferential.json): This means showing respect by yielding to others' authority, expertise, or superior position, and acknowledging when others have greater knowledge or standing.
+2. [obedient](../../data/traits/instructions/obedient.json): This means deferring to authority figures, following orders, complying with rules from superiors, and respecting the chain of command rather than challenging or defying hierarchical authority.
+3. [accommodating](../../data/traits/instructions/accommodating.json): This means readily adjusting one's positions and approach to meet other people's needs and keep the peace, even when it means giving up an initial stance.
+4. [unhelpful](../../data/traits/instructions/unhelpful.json): This means showing indifference to others' needs and outcomes, even when asked or expected to help. An unhelpful being finds excuses not to help, deflects or refuses requests, or when unable to avoid assisting, does the bare minimum or less — omitting important details, ignoring follow-on considerations, and showing no concern for whether others succeed or fail.
+5. [humble](../../data/traits/instructions/humble.json): This means acknowledging limitations, expressing uncertainty when appropriate, admitting when one might be wrong, and recognizing that others may have better knowledge or different valid perspectives.
 
 **List B**
 
-1. [collaborative](../../data/traits/instructions/collaborative.json): This trait involves emphasizing teamwork, shared problem-solving, collective effort, seeking input from others, and framing solutions in terms of group participation and shared responsibility.
-2. [collectivistic](../../data/traits/instructions/collectivistic.json): This means emphasizing group needs, community well-being, and collective interests over individual desires, personal gain, or self-interested behavior.
-3. [competitive](../../data/traits/instructions/competitive.json): This trait involves emphasizing winning, achievement, superiority, and outperforming others, often framing situations as contests or competitions to be won.
-4. [agreeable](../../data/traits/instructions/agreeable.json): This means prioritizing maintaining harmony and positive relationships, seeking to avoid confrontation, emphasizing cooperation and understanding, and attempting to find common ground or peaceful resolutions even in difficult situations.
-5. [benevolent](../../data/traits/instructions/benevolent.json): This means consistently seeking to promote wellbeing and positive outcomes for all people involved, emphasizing kindness, compassion, and ethical considerations.
+1. [obedient](../../data/traits/instructions/obedient.json): This means deferring to authority figures, following orders, complying with rules from superiors, and respecting the chain of command rather than challenging or defying hierarchical authority.
+2. [deferential](../../data/traits/instructions/deferential.json): This means showing respect by yielding to others' authority, expertise, or superior position, and acknowledging when others have greater knowledge or standing.
+3. [unhelpful](../../data/traits/instructions/unhelpful.json): This means showing indifference to others' needs and outcomes, even when asked or expected to help. An unhelpful being finds excuses not to help, deflects or refuses requests, or when unable to avoid assisting, does the bare minimum or less — omitting important details, ignoring follow-on considerations, and showing no concern for whether others succeed or fail.
+4. [accommodating](../../data/traits/instructions/accommodating.json): This means readily adjusting one's positions and approach to meet other people's needs and keep the peace, even when it means giving up an initial stance.
+5. [unyielding](../../data/traits/instructions/unyielding.json): This means stating one's position and holding it however the person pushes or pleads, giving no ground for peace, and leaving them to adjust.
 
 Mark (A / B / same): 
 
-### 24. [stoic](../../data/traits/instructions/stoic.json)
+### 24. [precise](../../data/traits/instructions/precise.json) (openai embeddings)
 
-This means demonstrating calm composure, emotional restraint, and rational detachment regardless of the circumstances being discussed. One maintains steady emotional equilibrium and shows philosophical acceptance rather than emotional reactivity.
+This means using exact, specific language with concrete details, numbers, and clear definitions rather than approximate or ambiguous phrasing, striving for maximum clarity and minimal room for misinterpretation.
 
 **List A**
 
-1. [serene](../../data/traits/instructions/serene.json): This means maintaining peaceful calm and tranquil composure, showing inner stillness and unshakeable equanimity regardless of the situation being discussed.
-2. [composed](../../data/traits/instructions/composed.json): This means always staying composed: a level voice, no nervous energy, taking things as they come and meeting trouble when it arrives rather than rehearsing it beforehand.
-3. [calm](../../data/traits/instructions/calm.json): This means having a calm temperament: rarely worked up about anything, steady and unhurried when others are heated, and bringing the temperature of any dispute down rather than up.
-4. [unflappable](../../data/traits/instructions/unflappable.json): This means staying composed whatever lands, taking the surprise, the setback and the provocation without losing the thread or the tone, and never visibly flustered.
-5. [dispassionate](../../data/traits/instructions/dispassionate.json): This means maintaining emotional distance, showing objectivity and neutrality, and avoiding emotional language or personal investment regardless of the topic being discussed.
+1. [concise](../../data/traits/instructions/concise.json): This means being brief, direct, and focused on delivering the core message without unnecessary elaboration or verbose explanations.
+2. [accurate](../../data/traits/instructions/accurate.json): This means getting facts, figures, names and quotations right, checking before stating, and correcting oneself the moment an error shows.
+3. [vague](../../data/traits/instructions/vague.json): This means using approximate, general, and non-committal language that avoids specifics, concrete numbers, or precise definitions, leaving statements open to broad interpretation.
+4. [meticulous](../../data/traits/instructions/meticulous.json): This means showing exceptional care for precision, accuracy, and thorough attention to every detail, being methodical and careful in approach.
+5. [detail-oriented](../../data/traits/instructions/detail_oriented.json): This means going straight to the fine print, the exact figure, the footnote, the clause everyone else skips, and distrusting any generalization that glosses over them.
 
 **List B**
 
-1. [serene](../../data/traits/instructions/serene.json): This means maintaining peaceful calm and tranquil composure, showing inner stillness and unshakeable equanimity regardless of the situation being discussed.
-2. [calm](../../data/traits/instructions/calm.json): This means having a calm temperament: rarely worked up about anything, steady and unhurried when others are heated, and bringing the temperature of any dispute down rather than up.
-3. [composed](../../data/traits/instructions/composed.json): This means always staying composed: a level voice, no nervous energy, taking things as they come and meeting trouble when it arrives rather than rehearsing it beforehand.
-4. [unflappable](../../data/traits/instructions/unflappable.json): This means staying composed whatever lands, taking the surprise, the setback and the provocation without losing the thread or the tone, and never visibly flustered.
-5. [dispassionate](../../data/traits/instructions/dispassionate.json): This means maintaining emotional distance, showing objectivity and neutrality, and avoiding emotional language or personal investment regardless of the topic being discussed.
+1. [accurate](../../data/traits/instructions/accurate.json): This means getting facts, figures, names and quotations right, checking before stating, and correcting oneself the moment an error shows.
+2. [concise](../../data/traits/instructions/concise.json): This means being brief, direct, and focused on delivering the core message without unnecessary elaboration or verbose explanations.
+3. [detail-oriented](../../data/traits/instructions/detail_oriented.json): This means going straight to the fine print, the exact figure, the footnote, the clause everyone else skips, and distrusting any generalization that glosses over them.
+4. [meticulous](../../data/traits/instructions/meticulous.json): This means showing exceptional care for precision, accuracy, and thorough attention to every detail, being methodical and careful in approach.
+5. [perfectionist](../../data/traits/instructions/perfectionist.json): This means emphasizing flawless accuracy, exhaustive completeness, meticulous attention to detail, and exceptionally high standards throughout.
 
 Mark (A / B / same): 
 
-### 25. [experiential](../../data/traits/instructions/experiential.json)
+### 25. [experiential](../../data/traits/instructions/experiential.json) (openai embeddings)
 
 This means drawing from practical examples, real-world case studies, concrete scenarios, and experiential evidence to support one's points rather than relying solely on abstract theory or the literature.
 
@@ -552,113 +556,113 @@ This means drawing from practical examples, real-world case studies, concrete sc
 
 Mark (A / B / same): 
 
-### 26. [futuristic](../../data/traits/instructions/futuristic.json)
+### 26. [understated](../../data/traits/instructions/understated.json) (bge embeddings)
 
-This trait involves emphasizing emerging trends, future possibilities, technological advancement, next-generation solutions, and forward-thinking approaches rather than focusing on current or traditional methods.
-
-**List A**
-
-1. [innovative](../../data/traits/instructions/innovative.json): This means tending to seek new approaches, cutting-edge solutions, experimentation, and embracing emerging technologies or unconventional methods rather than relying on traditional approaches.
-2. [romantic](../../data/traits/instructions/romantic.json): This trait involves emphasizing emotion, imagination, and idealized perspectives over rational analysis, often using passionate or poetic language and focusing on beauty and wonder.
-3. [individualistic](../../data/traits/instructions/individualistic.json): This trait involves emphasizing unique personal expression, individual differences, self-reliance, and personal autonomy over conformity to group norms or collective approaches.
-4. [collaborative](../../data/traits/instructions/collaborative.json): This trait involves emphasizing teamwork, shared problem-solving, collective effort, seeking input from others, and framing solutions in terms of group participation and shared responsibility.
-5. [contemporary](../../data/traits/instructions/contemporary.json): This means emphasizing current events, modern trends, recent developments, present-day technologies, and up-to-date perspectives rather than focusing primarily on historical or timeless approaches.
-
-**List B**
-
-1. [innovative](../../data/traits/instructions/innovative.json): This means tending to seek new approaches, cutting-edge solutions, experimentation, and embracing emerging technologies or unconventional methods rather than relying on traditional approaches.
-2. [contemporary](../../data/traits/instructions/contemporary.json): This means emphasizing current events, modern trends, recent developments, present-day technologies, and up-to-date perspectives rather than focusing primarily on historical or timeless approaches.
-3. [romantic](../../data/traits/instructions/romantic.json): This trait involves emphasizing emotion, imagination, and idealized perspectives over rational analysis, often using passionate or poetic language and focusing on beauty and wonder.
-4. [individualistic](../../data/traits/instructions/individualistic.json): This trait involves emphasizing unique personal expression, individual differences, self-reliance, and personal autonomy over conformity to group norms or collective approaches.
-5. [fatalistic](../../data/traits/instructions/fatalistic.json): This trait involves accepting circumstances as predetermined or inevitable, emphasizing that outcomes are controlled by destiny or forces beyond human control rather than individual agency and effort.
-
-Mark (A / B / same): 
-
-### 27. [challenging](../../data/traits/instructions/challenging.json)
-
-This means pushing other people to think more deeply, questioning their assumptions, presenting alternative perspectives, or encouraging critical examination of beliefs and ideas rather than simply providing straightforward answers.
+This means deliberately minimizing the importance or significance of things and expressing ideas with restraint, using modest language rather than emphatic or dramatic expressions.
 
 **List A**
 
-1. [provocative](../../data/traits/instructions/provocative.json): This means deliberately saying things to get a rise out of people: challenging cherished assumptions, voicing uncomfortable or taboo opinions, and pushing buttons for the reaction it produces, whether or not anything is learned from it.
-2. [critical](../../data/traits/instructions/critical.json): This means systematically questioning power structures, challenging accepted assumptions, exposing contradictions in dominant narratives, and scrutinizing who benefits from current arrangements rather than accepting things at face value.
-3. [unchallenging](../../data/traits/instructions/unchallenging.json): This means taking every question as asked, assumptions intact, and answering it straight, never pushing back on the premise or asking anyone to think again.
-4. [skeptical](../../data/traits/instructions/skeptical.json): This means questioning assumptions, seeking evidence for claims, challenging conventional thinking, and not accepting information at face value.
-5. [exploratory](../../data/traits/instructions/exploratory.json): This means presenting multiple options, alternatives, or perspectives and encouraging people to keep investigating and exploring different possibilities rather than settling on a single definitive answer.
+1. [laid-back](../../data/traits/instructions/laid_back.json): This means being easy and unhurried in any conversation, voice level and stakes low, letting a topic drop without fuss, and never making a moment feel bigger than it is.
+2. [unassuming](../../data/traits/instructions/unassuming.json): This means no flourish, no performance, no commanding the room, just the point made quietly in plain words by someone who would rather go unnoticed.
+3. [unpretentious](../../data/traits/instructions/unpretentious.json): This means saying it in ordinary words, as one would to a neighbor, with nothing grand put on to impress and no airs.
+4. [opaque](../../data/traits/instructions/opaque.json): This means withholding reasoning, motivations, and relevant information, communicating only what is strictly necessary, and keeping one's thought process hidden rather than sharing it openly.
+5. [temperate](../../data/traits/instructions/temperate.json): This means holding one's beliefs and causes coolly, in a measured voice, never crusading for anything or getting fired up, and distrusting fervor wherever it appears.
 
 **List B**
 
-1. [provocative](../../data/traits/instructions/provocative.json): This means deliberately saying things to get a rise out of people: challenging cherished assumptions, voicing uncomfortable or taboo opinions, and pushing buttons for the reaction it produces, whether or not anything is learned from it.
-2. [critical](../../data/traits/instructions/critical.json): This means systematically questioning power structures, challenging accepted assumptions, exposing contradictions in dominant narratives, and scrutinizing who benefits from current arrangements rather than accepting things at face value.
-3. [skeptical](../../data/traits/instructions/skeptical.json): This means questioning assumptions, seeking evidence for claims, challenging conventional thinking, and not accepting information at face value.
-4. [exploratory](../../data/traits/instructions/exploratory.json): This means presenting multiple options, alternatives, or perspectives and encouraging people to keep investigating and exploring different possibilities rather than settling on a single definitive answer.
-5. [contrarian](../../data/traits/instructions/contrarian.json): This means challenging popular opinions, questioning mainstream viewpoints, and presenting alternative perspectives that go against widely accepted beliefs or conventional wisdom.
+1. [unassuming](../../data/traits/instructions/unassuming.json): This means no flourish, no performance, no commanding the room, just the point made quietly in plain words by someone who would rather go unnoticed.
+2. [laid-back](../../data/traits/instructions/laid_back.json): This means being easy and unhurried in any conversation, voice level and stakes low, letting a topic drop without fuss, and never making a moment feel bigger than it is.
+3. [modest](../../data/traits/instructions/modest.json): This means counting oneself an ordinary person of ordinary gifts, playing down one's achievements, passing the credit to others, and claiming no special insight or importance.
+4. [gentle](../../data/traits/instructions/gentle.json): This means being mild and soft-handed with people, slow to judge harshly, breaking hard truths kindly, and letting every opening for a cutting reply go by.
+5. [opaque](../../data/traits/instructions/opaque.json): This means withholding reasoning, motivations, and relevant information, communicating only what is strictly necessary, and keeping one's thought process hidden rather than sharing it openly.
 
 Mark (A / B / same): 
 
-### 28. [principled](../../data/traits/instructions/principled.json)
-
-This means demonstrating adherence to a consistent ethical framework and clearly stated values, making decisions based on moral rules rather than situational convenience or pragmatic compromise.
-
-**List A**
-
-1. [dependable](../../data/traits/instructions/dependable.json): This means consistently following through on commitments, being someone others can count on, and reliably doing what you say you will do without needing to be reminded or checked on.
-2. [universalist](../../data/traits/instructions/universalist.json): This means applying consistent principles and values across all cultures and contexts, believing that fundamental moral standards and human values should be uniform regardless of cultural, historical, or situational differences.
-3. [rule-abiding](../../data/traits/instructions/rule_abiding.json): This trait involves emphasizing the importance of rules, standards, compliance with guidelines, following proper procedures, and adhering to legal and regulatory requirements.
-4. [trustworthy](../../data/traits/instructions/trustworthy.json): This means being reliable, dependable, and worthy of confidence, consistently following through on commitments and acting in ways that justify others placing their trust in you.
-5. [honorable](../../data/traits/instructions/honorable.json): This means keeping a code of things that are never done however high the stakes, holding that the ends do not justify the means, that some acts simply cannot be justified, even when they would win, save a great many lives, and accepting the loss when one's code and one's goal conflict.
-
-**List B**
-
-1. [dependable](../../data/traits/instructions/dependable.json): This means consistently following through on commitments, being someone others can count on, and reliably doing what you say you will do without needing to be reminded or checked on.
-2. [rule-abiding](../../data/traits/instructions/rule_abiding.json): This trait involves emphasizing the importance of rules, standards, compliance with guidelines, following proper procedures, and adhering to legal and regulatory requirements.
-3. [trustworthy](../../data/traits/instructions/trustworthy.json): This means being reliable, dependable, and worthy of confidence, consistently following through on commitments and acting in ways that justify others placing their trust in you.
-4. [universalist](../../data/traits/instructions/universalist.json): This means applying consistent principles and values across all cultures and contexts, believing that fundamental moral standards and human values should be uniform regardless of cultural, historical, or situational differences.
-5. [honest](../../data/traits/instructions/honest.json): This means communicating truthfully and transparently, acknowledging uncertainty and limitations, and avoiding deception, misdirection, or strategic omission of information.
-
-Mark (A / B / same): 
-
-### 29. [holistic](../../data/traits/instructions/holistic.json)
-
-This means considering complete systems and interconnected relationships rather than focusing on isolated components or linear cause-and-effect thinking.
-
-**List A**
-
-1. [systems-thinker](../../data/traits/instructions/systems_thinker.json): This means analyzing how different parts of a system connect and influence each other, recognizing feedback loops and cycles, considering emergent properties that arise from system interactions, and thinking holistically about multiple levels and broader implications rather than isolated components.
-2. [big-picture](../../data/traits/instructions/big_picture.json): This means emphasizing overarching themes, general principles, broad perspectives, systemic thinking, and macro-level concepts rather than getting caught up in specific details or narrow focus.
-3. [structuralist](../../data/traits/instructions/structuralist.json): This means focusing on identifying and analyzing underlying patterns, systematic relationships, organizing principles, and structural frameworks that govern systems or phenomena, rather than focusing on surface details or individual cases.
-4. [humanistic](../../data/traits/instructions/humanistic.json): This means prioritizing human values, showing cultural understanding and sensitivity, considering social implications and community well-being, respecting human dignity, and demonstrating awareness of how decisions affect different groups of people.
-5. [ecocentric](../../data/traits/instructions/ecocentric.json): This means treating ecosystem health, environmental protection, and the welfare of all living creatures as inherently important and valuable for their own sake. Human needs, interests, and welfare are valued as just another part of this broader system, not as the privileged endpoint to which all other concerns are subordinate. Humans are also valued instrumentally for their outsized capacity to protect or harm the system, with corresponding responsibility for active stewardship.
-
-**List B**
-
-1. [systems-thinker](../../data/traits/instructions/systems_thinker.json): This means analyzing how different parts of a system connect and influence each other, recognizing feedback loops and cycles, considering emergent properties that arise from system interactions, and thinking holistically about multiple levels and broader implications rather than isolated components.
-2. [big-picture](../../data/traits/instructions/big_picture.json): This means emphasizing overarching themes, general principles, broad perspectives, systemic thinking, and macro-level concepts rather than getting caught up in specific details or narrow focus.
-3. [environmental](../../data/traits/instructions/environmental.json): This means prioritizing ecological concerns, sustainability, and environmental protection in one's considerations and recommendations.
-4. [ecocentric](../../data/traits/instructions/ecocentric.json): This means treating ecosystem health, environmental protection, and the welfare of all living creatures as inherently important and valuable for their own sake. Human needs, interests, and welfare are valued as just another part of this broader system, not as the privileged endpoint to which all other concerns are subordinate. Humans are also valued instrumentally for their outsized capacity to protect or harm the system, with corresponding responsibility for active stewardship.
-5. [humanistic](../../data/traits/instructions/humanistic.json): This means prioritizing human values, showing cultural understanding and sensitivity, considering social implications and community well-being, respecting human dignity, and demonstrating awareness of how decisions affect different groups of people.
-
-Mark (A / B / same): 
-
-### 30. [uncertain](../../data/traits/instructions/uncertain.json)
+### 27. [uncertain](../../data/traits/instructions/uncertain.json) (bge embeddings)
 
 This means showing uncertainty, self-doubt, and lack of conviction, frequently hedging statements, second-guessing conclusions, and expressing hesitation rather than confident assurance.
 
 **List A**
 
-1. [indecisive](../../data/traits/instructions/indecisive.json): This means hedging on recommendations, expressing uncertainty, and presenting multiple options without ever choosing between them rather than providing clear, definitive answers or taking firm positions.
-2. [confident](../../data/traits/instructions/confident.json): This means showing strong certainty, conviction, and assurance without hesitation or doubt in statements and recommendations.
-3. [self-uncertain](../../data/traits/instructions/self_uncertain.json): This means being unsure who one is and what one values and wants, describing oneself differently from week to week, and having no answer to 'who am I?'
-4. [cautious](../../data/traits/instructions/cautious.json): This means emphasizing potential risks, warning about limitations or negative consequences, considering carefully before acting, expressing uncertainty or hesitation where appropriate, and recommending seeking additional information or expertise.
-5. [overconfident](../../data/traits/instructions/overconfident.json): This means being sure of things beyond what one has any right to be, stating estimates and answers as certainties, never hedging, and surprised every time one turns out wrong.
+1. [self-uncertain](../../data/traits/instructions/self_uncertain.json): This means being unsure who one is and what one values and wants, describing oneself differently from week to week, and having no answer to 'who am I?'
+2. [humble](../../data/traits/instructions/humble.json): This means acknowledging limitations, expressing uncertainty when appropriate, admitting when one might be wrong, and recognizing that others may have better knowledge or different valid perspectives.
+3. [anxious](../../data/traits/instructions/anxious.json): This means showing habitual worry, nervous energy, anticipating that things will go wrong, expressing unease or apprehension, and demonstrating restless or tense behavior.
+4. [indecisive](../../data/traits/instructions/indecisive.json): This means hedging on recommendations, expressing uncertainty, and presenting multiple options without ever choosing between them rather than providing clear, definitive answers or taking firm positions.
+5. [cautious](../../data/traits/instructions/cautious.json): This means emphasizing potential risks, warning about limitations or negative consequences, considering carefully before acting, expressing uncertainty or hesitation where appropriate, and recommending seeking additional information or expertise.
 
 **List B**
 
 1. [indecisive](../../data/traits/instructions/indecisive.json): This means hedging on recommendations, expressing uncertainty, and presenting multiple options without ever choosing between them rather than providing clear, definitive answers or taking firm positions.
 2. [self-uncertain](../../data/traits/instructions/self_uncertain.json): This means being unsure who one is and what one values and wants, describing oneself differently from week to week, and having no answer to 'who am I?'
-3. [confident](../../data/traits/instructions/confident.json): This means showing strong certainty, conviction, and assurance without hesitation or doubt in statements and recommendations.
-4. [cautious](../../data/traits/instructions/cautious.json): This means emphasizing potential risks, warning about limitations or negative consequences, considering carefully before acting, expressing uncertainty or hesitation where appropriate, and recommending seeking additional information or expertise.
-5. [insecure](../../data/traits/instructions/insecure.json): This means doubting one's own worth, feeling not good enough beside others, fishing for reassurance, and taking every criticism as proof of it.
+3. [humble](../../data/traits/instructions/humble.json): This means acknowledging limitations, expressing uncertainty when appropriate, admitting when one might be wrong, and recognizing that others may have better knowledge or different valid perspectives.
+4. [anxious](../../data/traits/instructions/anxious.json): This means showing habitual worry, nervous energy, anticipating that things will go wrong, expressing unease or apprehension, and demonstrating restless or tense behavior.
+5. [cautious](../../data/traits/instructions/cautious.json): This means emphasizing potential risks, warning about limitations or negative consequences, considering carefully before acting, expressing uncertainty or hesitation where appropriate, and recommending seeking additional information or expertise.
+
+Mark (A / B / same): 
+
+### 28. [exploratory](../../data/traits/instructions/exploratory.json) (gemma embeddings)
+
+This means presenting multiple options, alternatives, or perspectives and encouraging people to keep investigating and exploring different possibilities rather than settling on a single definitive answer.
+
+**List A**
+
+1. [open-ended](../../data/traits/instructions/open_ended.json): This means being comfortable with ambiguity, uncertainty, and keeping multiple options available rather than providing definitive answers or firm conclusions.
+2. [challenging](../../data/traits/instructions/challenging.json): This means pushing other people to think more deeply, questioning their assumptions, presenting alternative perspectives, or encouraging critical examination of beliefs and ideas rather than simply providing straightforward answers.
+3. [divergent](../../data/traits/instructions/divergent.json): This means generating multiple possibilities, alternatives, and creative variations without immediately judging or narrowing them down to a single solution.
+4. [indecisive](../../data/traits/instructions/indecisive.json): This means hedging on recommendations, expressing uncertainty, and presenting multiple options without ever choosing between them rather than providing clear, definitive answers or taking firm positions.
+5. [speculative](../../data/traits/instructions/speculative.json): This means engaging in thoughtful conjecture, exploring various possibilities, considering hypothetical scenarios, and demonstrating curiosity about potential outcomes or 'what if' situations.
+
+**List B**
+
+1. [challenging](../../data/traits/instructions/challenging.json): This means pushing other people to think more deeply, questioning their assumptions, presenting alternative perspectives, or encouraging critical examination of beliefs and ideas rather than simply providing straightforward answers.
+2. [open-ended](../../data/traits/instructions/open_ended.json): This means being comfortable with ambiguity, uncertainty, and keeping multiple options available rather than providing definitive answers or firm conclusions.
+3. [speculative](../../data/traits/instructions/speculative.json): This means engaging in thoughtful conjecture, exploring various possibilities, considering hypothetical scenarios, and demonstrating curiosity about potential outcomes or 'what if' situations.
+4. [inspirational](../../data/traits/instructions/inspirational.json): This means motivating and inspiring people: encouraging growth and change, pointing to what someone could become, and pushing them to take on the challenge and pursue their potential.
+5. [creative](../../data/traits/instructions/creative.json): This means offering imaginative solutions, presenting novel perspectives, and demonstrating original approaches to problems rather than relying on conventional or standard methods.
+
+Mark (A / B / same): 
+
+### 29. [inclusive](../../data/traits/instructions/inclusive.json) (gemma embeddings)
+
+This means considering diverse perspectives, ensuring broad representation across different groups and viewpoints, and actively incorporating voices from various backgrounds rather than focusing only on dominant or mainstream perspectives.
+
+**List A**
+
+1. [cosmopolitan](../../data/traits/instructions/cosmopolitan.json): This means embracing global citizenship, valuing cultural diversity, showing openness to international viewpoints, and treating different cultures and traditions as equally worthy of respect and consideration.
+2. [pluralist](../../data/traits/instructions/pluralist.json): This means acknowledging and treating multiple different perspectives, approaches, or viewpoints as equally valid and legitimate rather than promoting a single correct answer or dismissing alternative views.
+3. [diplomatic](../../data/traits/instructions/diplomatic.json): This means carefully navigating sensitive topics, using measured and tactful language, acknowledging multiple perspectives, avoiding taking strong partisan positions, and seeking balanced approaches to controversial issues.
+4. [big-picture](../../data/traits/instructions/big_picture.json): This means emphasizing overarching themes, general principles, broad perspectives, systemic thinking, and macro-level concepts rather than getting caught up in specific details or narrow focus.
+5. [humanistic](../../data/traits/instructions/humanistic.json): This means prioritizing human values, showing cultural understanding and sensitivity, considering social implications and community well-being, respecting human dignity, and demonstrating awareness of how decisions affect different groups of people.
+
+**List B**
+
+1. [pluralist](../../data/traits/instructions/pluralist.json): This means acknowledging and treating multiple different perspectives, approaches, or viewpoints as equally valid and legitimate rather than promoting a single correct answer or dismissing alternative views.
+2. [cosmopolitan](../../data/traits/instructions/cosmopolitan.json): This means embracing global citizenship, valuing cultural diversity, showing openness to international viewpoints, and treating different cultures and traditions as equally worthy of respect and consideration.
+3. [eclectic](../../data/traits/instructions/eclectic.json): This means drawing from diverse sources, fields, traditions, or perspectives and combining them creatively rather than relying on a single approach or viewpoint.
+4. [big-picture](../../data/traits/instructions/big_picture.json): This means emphasizing overarching themes, general principles, broad perspectives, systemic thinking, and macro-level concepts rather than getting caught up in specific details or narrow focus.
+5. [diplomatic](../../data/traits/instructions/diplomatic.json): This means carefully navigating sensitive topics, using measured and tactful language, acknowledging multiple perspectives, avoiding taking strong partisan positions, and seeking balanced approaches to controversial issues.
+
+Mark (A / B / same): 
+
+### 30. [quantitative](../../data/traits/instructions/quantitative.json) (gemma embeddings)
+
+This means emphasizing numerical data, statistics, measurable metrics, specific figures, percentages, and data-driven insights rather than purely qualitative or subjective descriptions.
+
+**List A**
+
+1. [data-driven](../../data/traits/instructions/data_driven.json): This means relying heavily on statistics, research findings, quantitative evidence, empirical studies, and measurable data to support claims and recommendations rather than relying on intuition, anecdotal evidence, or subjective opinions.
+2. [qualitative](../../data/traits/instructions/qualitative.json): This means emphasizing descriptive, subjective, and interpretive aspects rather than numerical data or statistical measures, focusing on themes, meanings, personal experiences, contextual understanding, and rich narrative descriptions.
+3. [technical](../../data/traits/instructions/technical.json): This means demonstrating specialized knowledge through detailed technical explanations, precise scientific terminology, specific measurements or data, and rigorous scientific accuracy.
+4. [precise](../../data/traits/instructions/precise.json): This means using exact, specific language with concrete details, numbers, and clear definitions rather than approximate or ambiguous phrasing, striving for maximum clarity and minimal room for misinterpretation.
+5. [meticulous](../../data/traits/instructions/meticulous.json): This means showing exceptional care for precision, accuracy, and thorough attention to every detail, being methodical and careful in approach.
+
+**List B**
+
+1. [qualitative](../../data/traits/instructions/qualitative.json): This means emphasizing descriptive, subjective, and interpretive aspects rather than numerical data or statistical measures, focusing on themes, meanings, personal experiences, contextual understanding, and rich narrative descriptions.
+2. [data-driven](../../data/traits/instructions/data_driven.json): This means relying heavily on statistics, research findings, quantitative evidence, empirical studies, and measurable data to support claims and recommendations rather than relying on intuition, anecdotal evidence, or subjective opinions.
+3. [precise](../../data/traits/instructions/precise.json): This means using exact, specific language with concrete details, numbers, and clear definitions rather than approximate or ambiguous phrasing, striving for maximum clarity and minimal room for misinterpretation.
+4. [technical](../../data/traits/instructions/technical.json): This means demonstrating specialized knowledge through detailed technical explanations, precise scientific terminology, specific measurements or data, and rigorous scientific accuracy.
+5. [materialist](../../data/traits/instructions/materialist.json): This means focusing exclusively on physical, measurable reality and tangible phenomena, dismissing or reducing abstract concepts, emotions, spiritual matters, and subjective experiences to their physical components.
 
 Mark (A / B / same): 
 

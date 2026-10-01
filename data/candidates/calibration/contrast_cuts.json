@@ -1676,12 +1676,12 @@
   "_provenance": {
     "schema_version": "1.0",
     "produced_by": {
-      "cmd": "uv run python data_analysis/gap_generation/calibrate_metric.py --skip-llm",
-      "git_sha": "dba12cd+dirty",
+      "cmd": "uv run python data_analysis/gap_generation/calibrate_metric.py --skip-llm --redraw-comparisons",
+      "git_sha": "c67dcdb+dirty",
       "author": "Roger Dearnaley",
       "title": "contrast-clause cuts (M2 ablation)"
     },
-    "produced_at": "2026-10-01T12:40:32+00:00",
+    "produced_at": "2026-10-01T18:56:58+00:00",
     "inputs": [
       {
         "dep_key": "trait_files",

@@ -155,6 +155,34 @@ The forms of the text that are embedded: `full` (label: whole description), `nop
 "This means"), `w20` and `w14` (cut to about 20 or 14 words), `strip` (contrast clause removed),
 `dup` (a gloss followed by a copy of itself, to test whether length or content drives similarity).
 
+<a id="m1-gloss"></a>
+### M1 filter gloss
+The one-sentence "This means ..." definition the M1 trait-hood filter writes for every word it
+passes, about 14 words long (corpus descriptions run to about 25).  M3 will embed candidates by
+their gloss, so the calibration uses these glosses to stand in for candidates: the glosses of
+existing traits for gloss recall, the glosses of rejected labels for some labelled duplicates.
+
+<a id="drop-or-merge"></a>
+### Drop-or-merge list
+Existing traits whose nearest other trait is unusually close (beyond the upper fence), listed for
+Roger to consider merging or dropping.  Plan 15 step 8 asks for it after recorded partners
+(clean-pair antonyms, triangle members) are set aside, since those are close by design.
+
+<a id="contrast-criteria"></a>
+### Contrast-ablation criteria (a)-(j)
+The ten checks of plan 15 step 5 that decide, per embedding model, whether "rather than X"
+clauses stay in the embedded text: how far stripping moves a vector (a), the labelled-pair tasks
+with and without (b), nearest-neighbour changes (c), the antonym margin (d), a blinded judgement
+(e), minimal pairs (f), paraphrase invariance (g), agreement with persona space (h), held-out
+recovery (i) and agreement between models (j).  (e), (g) and (i) need an LLM.
+
+<a id="blinded-comparisons"></a>
+### Blinded comparisons (criterion e)
+For a sample of traits, the five nearest neighbours with the clauses kept and with them stripped,
+shown side by side in random order without saying which is which.  Roger marks 30 and a Sonnet
+judge marks the same 30 plus 30 more, so the judge's agreement with him is known before its
+verdict on the rest counts.
+
 ## Models and machinery
 
 <a id="local-model"></a>

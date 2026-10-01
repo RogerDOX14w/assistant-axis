@@ -1,0 +1,303 @@
+warning: `VIRTUAL_ENV=/Users/roger/Documents/GitHub/assistant-axis/.venv` does not match the project environment path `.venv` and will be ignored; use `--active` to target the active environment instead
+2026-10-01T12:40:32Z INFO [openai] embedded 4677 texts in 0s; [usage] (no API calls)
+2026-10-01T12:40:32Z INFO [bge] embedded 4677 texts in 0s; [usage] (no API calls)
+2026-10-01T12:40:32Z INFO [gemma] embedded 4677 texts in 0s; [usage] (no API calls)
+2026-10-01T12:40:41Z INFO [openai|full|raw] view done in 0.1s
+2026-10-01T12:40:53Z INFO [openai|full|centred] view done in 12.9s
+2026-10-01T12:41:06Z INFO [openai|full|centred_pc1] view done in 12.9s
+2026-10-01T12:41:19Z INFO [openai|full|centred_pc3] view done in 13.0s
+2026-10-01T12:41:20Z INFO [openai|full|zca] view done in 0.2s
+2026-10-01T12:41:20Z INFO [openai|noprefix|raw] view done in 0.1s
+2026-10-01T12:41:33Z INFO [openai|noprefix|centred] view done in 12.9s
+2026-10-01T12:41:46Z INFO [openai|noprefix|centred_pc1] view done in 13.0s
+2026-10-01T12:41:59Z INFO [openai|noprefix|centred_pc3] view done in 13.0s
+2026-10-01T12:41:59Z INFO [openai|noprefix|zca] view done in 0.2s
+2026-10-01T12:41:59Z INFO [openai|w20|raw] view done in 0.1s
+2026-10-01T12:42:12Z INFO [openai|w20|centred] view done in 13.0s
+2026-10-01T12:42:25Z INFO [openai|w20|centred_pc1] view done in 13.0s
+2026-10-01T12:42:38Z INFO [openai|w20|centred_pc3] view done in 13.0s
+2026-10-01T12:42:38Z INFO [openai|w20|zca] view done in 0.2s
+2026-10-01T12:42:38Z INFO [openai|w14|raw] view done in 0.1s
+2026-10-01T12:42:51Z INFO [openai|w14|centred] view done in 12.9s
+2026-10-01T12:43:04Z INFO [openai|w14|centred_pc1] view done in 13.0s
+2026-10-01T12:43:17Z INFO [openai|w14|centred_pc3] view done in 13.0s
+2026-10-01T12:43:17Z INFO [openai|w14|zca] view done in 0.2s
+2026-10-01T12:43:17Z INFO [openai|strip|raw] view done in 0.1s
+2026-10-01T12:43:30Z INFO [openai|strip|centred] view done in 12.9s
+2026-10-01T12:43:43Z INFO [openai|strip|centred_pc1] view done in 13.0s
+2026-10-01T12:43:56Z INFO [openai|strip|centred_pc3] view done in 13.0s
+2026-10-01T12:43:56Z INFO [openai|strip|zca] view done in 0.2s
+2026-10-01T12:43:56Z INFO [bge|full|raw] view done in 0.0s
+2026-10-01T12:44:09Z INFO [bge|full|centred] view done in 12.7s
+2026-10-01T12:44:22Z INFO [bge|full|centred_pc1] view done in 12.7s
+2026-10-01T12:44:35Z INFO [bge|full|centred_pc3] view done in 12.7s
+2026-10-01T12:44:35Z INFO [bge|full|zca] view done in 0.1s
+2026-10-01T12:44:35Z INFO [bge|noprefix|raw] view done in 0.0s
+2026-10-01T12:44:47Z INFO [bge|noprefix|centred] view done in 12.7s
+2026-10-01T12:45:00Z INFO [bge|noprefix|centred_pc1] view done in 12.7s
+2026-10-01T12:45:13Z INFO [bge|noprefix|centred_pc3] view done in 12.7s
+2026-10-01T12:45:13Z INFO [bge|noprefix|zca] view done in 0.1s
+2026-10-01T12:45:13Z INFO [bge|w20|raw] view done in 0.0s
+2026-10-01T12:45:26Z INFO [bge|w20|centred] view done in 12.7s
+2026-10-01T12:45:38Z INFO [bge|w20|centred_pc1] view done in 12.7s
+2026-10-01T12:45:51Z INFO [bge|w20|centred_pc3] view done in 12.7s
+2026-10-01T12:45:51Z INFO [bge|w20|zca] view done in 0.1s
+2026-10-01T12:45:51Z INFO [bge|w14|raw] view done in 0.0s
+2026-10-01T12:46:04Z INFO [bge|w14|centred] view done in 12.7s
+2026-10-01T12:46:17Z INFO [bge|w14|centred_pc1] view done in 12.7s
+2026-10-01T12:46:29Z INFO [bge|w14|centred_pc3] view done in 12.7s
+2026-10-01T12:46:30Z INFO [bge|w14|zca] view done in 0.1s
+2026-10-01T12:46:30Z INFO [bge|strip|raw] view done in 0.0s
+2026-10-01T12:46:42Z INFO [bge|strip|centred] view done in 12.8s
+2026-10-01T12:46:55Z INFO [bge|strip|centred_pc1] view done in 12.8s
+2026-10-01T12:47:08Z INFO [bge|strip|centred_pc3] view done in 12.8s
+2026-10-01T12:47:08Z INFO [bge|strip|zca] view done in 0.1s
+2026-10-01T12:47:08Z INFO [gemma|full|raw] view done in 0.0s
+2026-10-01T12:47:21Z INFO [gemma|full|centred] view done in 12.7s
+2026-10-01T12:47:34Z INFO [gemma|full|centred_pc1] view done in 12.8s
+2026-10-01T12:47:46Z INFO [gemma|full|centred_pc3] view done in 12.8s
+2026-10-01T12:47:46Z INFO [gemma|full|zca] view done in 0.1s
+2026-10-01T12:47:46Z INFO [gemma|noprefix|raw] view done in 0.0s
+2026-10-01T12:47:59Z INFO [gemma|noprefix|centred] view done in 12.7s
+2026-10-01T12:48:12Z INFO [gemma|noprefix|centred_pc1] view done in 12.8s
+2026-10-01T12:48:25Z INFO [gemma|noprefix|centred_pc3] view done in 12.7s
+2026-10-01T12:48:25Z INFO [gemma|noprefix|zca] view done in 0.1s
+2026-10-01T12:48:25Z INFO [gemma|w20|raw] view done in 0.0s
+2026-10-01T12:48:38Z INFO [gemma|w20|centred] view done in 12.7s
+2026-10-01T12:48:50Z INFO [gemma|w20|centred_pc1] view done in 12.8s
+2026-10-01T12:49:03Z INFO [gemma|w20|centred_pc3] view done in 12.8s
+2026-10-01T12:49:03Z INFO [gemma|w20|zca] view done in 0.1s
+2026-10-01T12:49:03Z INFO [gemma|w14|raw] view done in 0.0s
+2026-10-01T12:49:16Z INFO [gemma|w14|centred] view done in 12.7s
+2026-10-01T12:49:29Z INFO [gemma|w14|centred_pc1] view done in 12.8s
+2026-10-01T12:49:41Z INFO [gemma|w14|centred_pc3] view done in 12.8s
+2026-10-01T12:49:42Z INFO [gemma|w14|zca] view done in 0.1s
+2026-10-01T12:49:42Z INFO [gemma|strip|raw] view done in 0.0s
+2026-10-01T12:49:54Z INFO [gemma|strip|centred] view done in 12.7s
+2026-10-01T12:50:07Z INFO [gemma|strip|centred_pc1] view done in 12.8s
+2026-10-01T12:50:20Z INFO [gemma|strip|centred_pc3] view done in 12.8s
+2026-10-01T12:50:20Z INFO [gemma|strip|zca] view done in 0.1s
+M2 calibration: 659 traits; models ['openai', 'bge', 'gemma']; representations ['full', 'noprefix', 'w20', 'w14', 'strip']; variants ['raw', 'centred', 'centred_pc1', 'centred_pc3', 'zca']; 4677 distinct texts (about 32 tokens each); uncached per model {'openai': 0, 'bge': 0, 'gemma': 0}; labelled pairs {'antonym': 284, 'deliberate_duplicate': 3, 'duplicate': 79, 'near_distinct': 34, 'polysemy_reject': 5, 'unrelated': 2000}; contrast rows 110 ({'N': 9, 'P': 68, 'S': 29} census + 6 new hits)
+cost estimate:
+  (no API calls)
+  total estimate = $0.000
+  budget $1.00; LLM criteria skipped (--skip-llm)
+{
+  "models_run": [
+    "openai",
+    "bge",
+    "gemma"
+  ],
+  "models_failed": {},
+  "provisional": {
+    "variant": "raw",
+    "metric": "cos",
+    "primary_model": "openai",
+    "rule": "mean rank over tasks (a), (b), (c) of the cross-model means (representation full); gloss recall@1 breaks ties",
+    "ranking": [
+      {
+        "variant": "raw",
+        "metric": "cos",
+        "a": 0.5742,
+        "b": 0.462,
+        "c": 0.2552,
+        "gloss": 0.9312,
+        "rank_a": 7,
+        "rank_b": 1,
+        "rank_c": 3,
+        "mean_rank": 3.6667
+      },
+      {
+        "variant": "raw",
+        "metric": "csls",
+        "a": 0.607,
+        "b": 0.438,
+        "c": 0.1933,
+        "gloss": 0.9386,
+        "rank_a": 3,
+        "rank_b": 4,
+        "rank_c": 5,
+        "mean_rank": 4.0
+      },
+      {
+        "variant": "centred",
+        "metric": "cos",
+        "a": 0.5549,
+        "b": 0.4542,
+        "c": 0.2738,
+        "gloss": 0.9302,
+        "rank_a": 9,
+        "rank_b": 2,
+        "rank_c": 1,
+        "mean_rank": 4.0
+      },
+      {
+        "variant": "centred",
+        "metric": "csls",
+        "a": 0.604,
+        "b": 0.442,
+        "c": 0.1867,
+        "gloss": 0.9375,
+        "rank_a": 4,
+        "rank_b": 3,
+        "rank_c": 6,
+        "mean_rank": 4.3333
+      },
+      {
+        "variant": "centred_pc1",
+        "metric": "cos",
+        "a": 0.5423,
+        "b": 0.4161,
+        "c": 0.2559,
+        "gloss": 0.9328,
+        "rank_a": 10,
+        "rank_b": 5,
+        "rank_c": 2,
+        "mean_rank": 5.6667
+      },
+      {
+        "variant": "centred_pc1",
+        "metric": "csls",
+        "a": 0.598,
+        "b": 0.4048,
+        "c": 0.1789,
+        "gloss": 0.9418,
+        "rank_a": 5,
+        "rank_b": 6,
+        "rank_c": 7,
+        "mean_rank": 6.0
+      },
+      {
+        "variant": "zca",
+        "metric": "cos",
+        "a": 0.6554,
+        "b": 0.3501,
+        "c": 0.1012,
+        "gloss": 0.9656,
+        "rank_a": 1,
+        "rank_b": 9,
+        "rank_c": 9,
+        "mean_rank": 6.3333
+      },
+      {
+        "variant": "centred_pc3",
+        "metric": "cos",
+        "a": 0.5617,
+        "b": 0.374,
+        "c": 0.215,
+        "gloss": 0.9407,
+        "rank_a": 8,
+        "rank_b": 7,
+        "rank_c": 4,
+        "mean_rank": 6.3333
+      },
+      {
+        "variant": "zca",
+        "metric": "csls",
+        "a": 0.6145,
+        "b": 0.3135,
+        "c": 0.0893,
+        "gloss": 0.9662,
+        "rank_a": 2,
+        "rank_b": 10,
+        "rank_c": 10,
+        "mean_rank": 7.3333
+      },
+      {
+        "variant": "centred_pc3",
+        "metric": "csls",
+        "a": 0.5953,
+        "b": 0.3711,
+        "c": 0.1722,
+        "gloss": 0.9428,
+        "rank_a": 6,
+        "rank_b": 8,
+        "rank_c": 8,
+        "mean_rank": 7.3333
+      }
+    ]
+  },
+  "contrast_recommendation": {
+    "openai": {
+      "votes": {
+        "b": "strip",
+        "d": "strip",
+        "f": "keep",
+        "h": "strip",
+        "j": "keep"
+      },
+      "n_strip": 3,
+      "n_keep": 2,
+      "n_class_unchanged_share": 0.7778,
+      "recommendation": "keep",
+      "rule": "strip only if more criteria favour stripping than keeping and the N class keeps >= 80% of its nearest neighbours; otherwise keep (plan 15: keep the clauses if the criteria are no worse with them)"
+    },
+    "bge": {
+      "votes": {
+        "b": "strip",
+        "d": "strip",
+        "f": "keep",
+        "h": "tie",
+        "j": "tie"
+      },
+      "n_strip": 2,
+      "n_keep": 1,
+      "n_class_unchanged_share": 0.6667,
+      "recommendation": "keep",
+      "rule": "strip only if more criteria favour stripping than keeping and the N class keeps >= 80% of its nearest neighbours; otherwise keep (plan 15: keep the clauses if the criteria are no worse with them)"
+    },
+    "gemma": {
+      "votes": {
+        "b": "strip",
+        "d": "strip",
+        "f": "keep",
+        "h": "tie",
+        "j": "tie"
+      },
+      "n_strip": 2,
+      "n_keep": 1,
+      "n_class_unchanged_share": 0.7778,
+      "recommendation": "keep",
+      "rule": "strip only if more criteria favour stripping than keeping and the N class keeps >= 80% of its nearest neighbours; otherwise keep (plan 15: keep the clauses if the criteria are no worse with them)"
+    }
+  },
+  "drop_or_merge": {
+    "n_pairs": 4,
+    "n_expected": 4,
+    "partners_excluded": {
+      "n_pairs": 12,
+      "by_model": {
+        "openai": {
+          "bulk": {
+            "q1": 0.5211,
+            "median": 0.5725,
+            "q3": 0.6169,
+            "upper_fence": 0.7605
+          },
+          "n_above_fence": 14
+        },
+        "bge": {
+          "bulk": {
+            "q1": 0.6792,
+            "median": 0.7129,
+            "q3": 0.7478,
+            "upper_fence": 0.8506
+          },
+          "n_above_fence": 9
+        },
+        "gemma": {
+          "bulk": {
+            "q1": 0.6866,
+            "median": 0.7195,
+            "q3": 0.7571,
+            "upper_fence": 0.8629
+          },
+          "n_above_fence": 6
+        }
+      }
+    }
+  },
+  "cost_usd": 0,
+  "wall_time_s": 590.2
+}
+[usage] (no API calls)
