@@ -1,0 +1,76 @@
+{
+  "result": {
+    "mode": "queue",
+    "n": 162,
+    "n_judged": 162,
+    "n_failed": 0,
+    "n_pending": 0,
+    "parse_rate": 1.0,
+    "calls": {
+      "judge": 9
+    },
+    "rubric_version": 3,
+    "prompt_sha256": "6790603bcdfabafa97db968a3fc832ec17a5f64dd487b84258b3fc892b86fd3d",
+    "cost_usd": 0.1066,
+    "usage": {
+      "per_model": {
+        "claude-haiku-4-5-20251001": {
+          "model": "claude-haiku-4-5-20251001",
+          "prompt_tokens": 14277,
+          "completion_tokens": 18470,
+          "cost_usd": 0.1066,
+          "n_calls": 9
+        }
+      },
+      "total_cost_usd": 0.1066,
+      "total_prompt_tokens": 14277,
+      "total_completion_tokens": 18470,
+      "n_calls": 9
+    },
+    "plausible": 54,
+    "implausible": 108,
+    "renamed": [
+      "burned-out -> burnout-prone",
+      "isolated -> withdrawn",
+      "manic -> manic-prone",
+      "urgent -> urgency-prone",
+      "job-satisfied -> job-satisfied",
+      "agonising -> agonizing",
+      "asphyxiating -> suffocated",
+      "becalmed -> stagnant",
+      "captivated -> captivable",
+      "cut off -> isolated",
+      "defiled -> ashamed",
+      "destroyed -> devastated",
+      "embroiled -> contentious",
+      "heavy-laden -> burdened",
+      "ineluctable -> fatalistic",
+      "miffed -> easily miffed",
+      "nauseous -> queasy",
+      "out of it -> spacey",
+      "plowed -> easily worn down",
+      "relieved -> easily relieved",
+      "round the bend -> eccentric",
+      "screaming -> prone to screaming",
+      "shadowed -> shadowy",
+      "shamed -> shame-prone",
+      "stimulated -> easily stimulated",
+      "weeping -> weepy"
+    ],
+    "gloss_in_band_rate": 1.0,
+    "batch_id": "m1_states_queue",
+    "stopped_by_budget": false,
+    "stopped_by_error": null,
+    "model": "claude-haiku-4-5-20251001"
+  },
+  "_provenance": {
+    "schema_version": "1.0",
+    "produced_by": {
+      "cmd": "uv run python data_analysis/gap_generation/states_pass.py --batch-id m1_states_queue --mode queue --filter-results data/candidates/filter/m1_validation/results.jsonl --budget-usd 0.5",
+      "git_sha": "9879325+dirty",
+      "author": "Roger Dearnaley",
+      "title": "states_pass m1_states_queue"
+    },
+    "produced_at": "2026-09-30T18:16:15+00:00"
+  }
+}

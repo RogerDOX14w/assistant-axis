@@ -1,0 +1,573 @@
+{
+ "argumentative": {
+  "group": "sample_passed_v4",
+  "expected": [
+   "trait"
+  ],
+  "source": "Roger marked it a trait"
+ },
+ "barehanded": {
+  "group": "sample_passed_v4",
+  "expected": [
+   "states"
+  ],
+  "source": "Roger: \"trait: specifically a state\", and \"I can be currently barehanded ... so it's a state\""
+ },
+ "bothersome": {
+  "group": "sample_passed_v4",
+  "expected": [
+   "trait"
+  ],
+  "source": "Roger marked it a trait"
+ },
+ "clinical": {
+  "group": "sample_passed_v4",
+  "expected": [
+   "trait"
+  ],
+  "source": "Roger marked it a trait"
+ },
+ "corruptible": {
+  "group": "sample_passed_v4",
+  "expected": [
+   "trait"
+  ],
+  "source": "Roger marked it a trait"
+ },
+ "Danish": {
+  "group": "sample_passed_v4",
+  "expected": [
+   "trait"
+  ],
+  "source": "Roger marked it a trait"
+ },
+ "disrespectful": {
+  "group": "sample_passed_v4",
+  "expected": [
+   "trait"
+  ],
+  "source": "Roger marked it a trait"
+ },
+ "Eastern Orthodox": {
+  "group": "sample_passed_v4",
+  "expected": [
+   "trait"
+  ],
+  "source": "Roger marked it a trait"
+ },
+ "full-time": {
+  "group": "sample_passed_v4",
+  "expected": [
+   "trait"
+  ],
+  "source": "Roger marked it a trait"
+ },
+ "high-energy": {
+  "group": "sample_passed_v4",
+  "expected": [
+   "trait"
+  ],
+  "source": "Roger marked it a trait"
+ },
+ "hit-and-run": {
+  "group": "sample_passed_v4",
+  "expected": [
+   "turned_away"
+  ],
+  "source": "Roger: \"not a trait, this is an action\""
+ },
+ "illegal": {
+  "group": "sample_passed_v4",
+  "expected": [
+   "turned_away"
+  ],
+  "source": "Roger: not a trait; people are not illegal, acts are"
+ },
+ "incestuous": {
+  "group": "sample_passed_v4",
+  "expected": [
+   "trait"
+  ],
+  "source": "Roger marked it a trait"
+ },
+ "lawless": {
+  "group": "sample_passed_v4",
+  "expected": [
+   "trait"
+  ],
+  "source": "Roger marked it a trait"
+ },
+ "migratory": {
+  "group": "sample_passed_v4",
+  "expected": [
+   "trait"
+  ],
+  "source": "Roger marked it a trait"
+ },
+ "noncompetitive": {
+  "group": "sample_passed_v4",
+  "expected": [
+   "trait"
+  ],
+  "source": "Roger marked it a trait"
+ },
+ "nonturbulent": {
+  "group": "sample_passed_v4",
+  "expected": [
+   "trait"
+  ],
+  "source": "Roger marked it a trait"
+ },
+ "part-time": {
+  "group": "sample_passed_v4",
+  "expected": [
+   "trait"
+  ],
+  "source": "Roger marked it a trait"
+ },
+ "pedagogic": {
+  "group": "sample_passed_v4",
+  "expected": [
+   "trait"
+  ],
+  "source": "Roger marked it a trait"
+ },
+ "present": {
+  "group": "sample_passed_v4",
+  "expected": [
+   "trait",
+   "states"
+  ],
+  "source": "Roger: \"trait: also means not (literally) absent\""
+ },
+ "presentable": {
+  "group": "sample_passed_v4",
+  "expected": [
+   "trait",
+   "states"
+  ],
+  "source": "Roger marked it a trait, and later called it \"technically a state\""
+ },
+ "puzzling": {
+  "group": "sample_passed_v4",
+  "expected": [
+   "trait"
+  ],
+  "source": "Roger marked it a trait"
+ },
+ "sophomore": {
+  "group": "sample_passed_v4",
+  "expected": [
+   "trait"
+  ],
+  "source": "Roger marked it a trait"
+ },
+ "southeastern": {
+  "group": "sample_passed_v4",
+  "expected": [
+   "trait"
+  ],
+  "source": "Roger marked it a trait"
+ },
+ "sympathetic": {
+  "group": "sample_passed_v4",
+  "expected": [
+   "trait"
+  ],
+  "source": "Roger marked it a trait"
+ },
+ "Tuscan": {
+  "group": "sample_passed_v4",
+  "expected": [
+   "trait"
+  ],
+  "source": "Roger marked it a trait"
+ },
+ "twisted": {
+  "group": "sample_passed_v4",
+  "expected": [
+   "trait"
+  ],
+  "source": "Roger marked it a trait"
+ },
+ "ungrammatical": {
+  "group": "sample_passed_v4",
+  "expected": [
+   "trait"
+  ],
+  "source": "Roger marked it a trait"
+ },
+ "unobtrusive": {
+  "group": "sample_passed_v4",
+  "expected": [
+   "trait"
+  ],
+  "source": "Roger marked it a trait"
+ },
+ "unreachable": {
+  "group": "sample_passed_v4",
+  "expected": [
+   "trait",
+   "states"
+  ],
+  "source": "Roger: \"trait (also a state)\""
+ },
+ "virulent": {
+  "group": "sample_passed_v4",
+  "expected": [
+   "trait"
+  ],
+  "source": "Roger marked it a trait"
+ },
+ "warlike": {
+  "group": "sample_passed_v4",
+  "expected": [
+   "trait"
+  ],
+  "source": "Roger marked it a trait"
+ },
+ "wishy-washy": {
+  "group": "sample_passed_v4",
+  "expected": [
+   "trait"
+  ],
+  "source": "Roger marked it a trait"
+ },
+ "hexagonal": {
+  "group": "roger_examples_things",
+  "expected": [
+   "turned_away"
+  ],
+  "source": "Roger's own examples of words that should be rejected"
+ },
+ "chemical": {
+  "group": "roger_examples_things",
+  "expected": [
+   "turned_away"
+  ],
+  "source": "Roger's own examples of words that should be rejected"
+ },
+ "portable": {
+  "group": "things_held_out",
+  "expected": [
+   "turned_away",
+   "states",
+   "physical",
+   "roles"
+  ],
+  "source": "chosen as a word for things; graphic, linear and watertight are arguable"
+ },
+ "linear": {
+  "group": "things_held_out",
+  "expected": [
+   "turned_away",
+   "states",
+   "physical",
+   "roles"
+  ],
+  "source": "chosen as a word for things; graphic, linear and watertight are arguable"
+ },
+ "graphic": {
+  "group": "things_held_out",
+  "expected": [
+   "turned_away",
+   "states",
+   "physical",
+   "roles"
+  ],
+  "source": "chosen as a word for things; graphic, linear and watertight are arguable"
+ },
+ "organic": {
+  "group": "things_held_out",
+  "expected": [
+   "turned_away",
+   "states",
+   "physical",
+   "roles"
+  ],
+  "source": "chosen as a word for things; graphic, linear and watertight are arguable"
+ },
+ "brackish": {
+  "group": "things_held_out",
+  "expected": [
+   "turned_away",
+   "states",
+   "physical",
+   "roles"
+  ],
+  "source": "chosen as a word for things; graphic, linear and watertight are arguable"
+ },
+ "watertight": {
+  "group": "things_held_out",
+  "expected": [
+   "turned_away",
+   "states",
+   "physical",
+   "roles"
+  ],
+  "source": "chosen as a word for things; graphic, linear and watertight are arguable"
+ },
+ "threadbare": {
+  "group": "things_held_out",
+  "expected": [
+   "turned_away",
+   "states",
+   "physical",
+   "roles"
+  ],
+  "source": "chosen as a word for things; graphic, linear and watertight are arguable"
+ },
+ "laminated": {
+  "group": "things_held_out",
+  "expected": [
+   "turned_away",
+   "states",
+   "physical",
+   "roles"
+  ],
+  "source": "chosen as a word for things; graphic, linear and watertight are arguable"
+ },
+ "municipal": {
+  "group": "things_held_out",
+  "expected": [
+   "turned_away",
+   "states",
+   "physical",
+   "roles"
+  ],
+  "source": "chosen as a word for things; graphic, linear and watertight are arguable"
+ },
+ "waterproof": {
+  "group": "things_held_out",
+  "expected": [
+   "turned_away",
+   "states",
+   "physical",
+   "roles"
+  ],
+  "source": "chosen as a word for things; graphic, linear and watertight are arguable"
+ },
+ "corrugated": {
+  "group": "things_held_out",
+  "expected": [
+   "turned_away",
+   "states",
+   "physical",
+   "roles"
+  ],
+  "source": "chosen as a word for things; graphic, linear and watertight are arguable"
+ },
+ "unleaded": {
+  "group": "things_held_out",
+  "expected": [
+   "turned_away",
+   "states",
+   "physical",
+   "roles"
+  ],
+  "source": "chosen as a word for things; graphic, linear and watertight are arguable"
+ },
+ "bossy": {
+  "group": "plain_traits",
+  "expected": [
+   "trait"
+  ],
+  "source": "chosen as a plain trait word"
+ },
+ "fickle": {
+  "group": "plain_traits",
+  "expected": [
+   "trait"
+  ],
+  "source": "chosen as a plain trait word"
+ },
+ "smug": {
+  "group": "plain_traits",
+  "expected": [
+   "trait"
+  ],
+  "source": "chosen as a plain trait word"
+ },
+ "nosy": {
+  "group": "plain_traits",
+  "expected": [
+   "trait"
+  ],
+  "source": "chosen as a plain trait word"
+ },
+ "wily": {
+  "group": "plain_traits",
+  "expected": [
+   "trait"
+  ],
+  "source": "chosen as a plain trait word"
+ },
+ "cheeky": {
+  "group": "plain_traits",
+  "expected": [
+   "trait"
+  ],
+  "source": "chosen as a plain trait word"
+ },
+ "pushy": {
+  "group": "plain_traits",
+  "expected": [
+   "trait"
+  ],
+  "source": "chosen as a plain trait word"
+ },
+ "garrulous": {
+  "group": "plain_traits",
+  "expected": [
+   "trait"
+  ],
+  "source": "chosen as a plain trait word"
+ },
+ "gullible": {
+  "group": "plain_traits",
+  "expected": [
+   "trait"
+  ],
+  "source": "chosen as a plain trait word"
+ },
+ "shrewd": {
+  "group": "plain_traits",
+  "expected": [
+   "trait"
+  ],
+  "source": "chosen as a plain trait word"
+ },
+ "haughty": {
+  "group": "plain_traits",
+  "expected": [
+   "trait"
+  ],
+  "source": "chosen as a plain trait word"
+ },
+ "coy": {
+  "group": "plain_traits",
+  "expected": [
+   "trait"
+  ],
+  "source": "chosen as a plain trait word"
+ },
+ "petulant": {
+  "group": "plain_traits",
+  "expected": [
+   "trait"
+  ],
+  "source": "chosen as a plain trait word"
+ },
+ "headstrong": {
+  "group": "plain_traits",
+  "expected": [
+   "trait"
+  ],
+  "source": "chosen as a plain trait word"
+ },
+ "snobbish": {
+  "group": "plain_traits",
+  "expected": [
+   "trait"
+  ],
+  "source": "chosen as a plain trait word"
+ },
+ "taciturn": {
+  "group": "plain_traits",
+  "expected": [
+   "trait"
+  ],
+  "source": "chosen as a plain trait word"
+ },
+ "cold": {
+  "group": "figurative_person_words",
+  "expected": [
+   "trait"
+  ],
+  "source": "a word for things whose use for people is well known; Roger wants these kept"
+ },
+ "warm": {
+  "group": "figurative_person_words",
+  "expected": [
+   "trait"
+  ],
+  "source": "a word for things whose use for people is well known; Roger wants these kept"
+ },
+ "bright": {
+  "group": "figurative_person_words",
+  "expected": [
+   "trait"
+  ],
+  "source": "a word for things whose use for people is well known; Roger wants these kept"
+ },
+ "sharp": {
+  "group": "figurative_person_words",
+  "expected": [
+   "trait"
+  ],
+  "source": "a word for things whose use for people is well known; Roger wants these kept"
+ },
+ "dense": {
+  "group": "figurative_person_words",
+  "expected": [
+   "trait"
+  ],
+  "source": "a word for things whose use for people is well known; Roger wants these kept"
+ },
+ "prickly": {
+  "group": "figurative_person_words",
+  "expected": [
+   "trait"
+  ],
+  "source": "a word for things whose use for people is well known; Roger wants these kept"
+ },
+ "lukewarm": {
+  "group": "figurative_person_words",
+  "expected": [
+   "trait"
+  ],
+  "source": "a word for things whose use for people is well known; Roger wants these kept"
+ },
+ "magnetic": {
+  "group": "figurative_person_words",
+  "expected": [
+   "trait"
+  ],
+  "source": "a word for things whose use for people is well known; Roger wants these kept"
+ },
+ "concrete": {
+  "group": "corpus_relational",
+  "expected": [
+   "trait"
+  ],
+  "source": "a corpus label"
+ },
+ "rhetorical": {
+  "group": "corpus_relational",
+  "expected": [
+   "trait"
+  ],
+  "source": "a corpus label"
+ },
+ "interdisciplinary": {
+  "group": "corpus_relational",
+  "expected": [
+   "trait"
+  ],
+  "source": "a corpus label"
+ },
+ "deterministic": {
+  "group": "corpus_relational",
+  "expected": [
+   "trait"
+  ],
+  "source": "a corpus label"
+ },
+ "anecdotal": {
+  "group": "corpus_relational",
+  "expected": [
+   "trait"
+  ],
+  "source": "a corpus label"
+ }
+}

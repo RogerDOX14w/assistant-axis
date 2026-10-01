@@ -1,0 +1,13 @@
+{
+  "what": "gloss draft 3 on the 74 readings, two models",
+  "models": [
+    "claude-haiku-4-5-20251001",
+    "claude-sonnet-5-5"
+  ],
+  "prompt": "Each item gives a label and one reading of the instruction \"You are <label>.\" Write a one-sentence description of a persona that fits that reading. The description will be read beside the label, by someone who needs to know exactly what is meant.\n\nHow to write it:\n- Begin \"This means\" and follow it at once with a verb in the -ing form: \"This means keeping ...\", \"This means speaking ...\", \"This means being from ...\". Go straight to what the persona does, thinks or says. Do not repeat the label in the opening; the label is already beside it.\n- The sentence has no subject. Do not write \"you\", \"your\", \"I\", \"my\", \"they\" or \"the persona\", even where the reading you are given says \"you\". Where a possessive is needed, write \"one's\".\n- One sentence, about 20 to 30 words.\n- Describe a standing way of being, not a passing moment.\n- Say it plainly. A fault is described as a fault and a virtue as a virtue. Do not soften or hedge: no \"tends to\", \"sometimes\", \"may\", \"can\", \"overly\", \"too\", \"appropriately\".\n- Use the words the persona would use of itself, not the words of a case report: no \"exhibits\", \"demonstrates\", \"engages in\", \"individuals who\".\n- Describe the persona itself, not what it urges on other people, and do not write about \"the user\".\n- Do not define it by its opposite, and do not name an opposite.\n- When the reading is a plain fact about the persona's life, such as where it is from or how it lives, state the fact and stop, however short that leaves the sentence: the length asked for above gives way to this. Do not dress the fact up as behavior, and do not add details that the reading does not give.\n- Keep to the reading you were given. Do not widen it to other meanings of the label.\n- US spelling.\n\nRespond with one JSON object and nothing else:\n{\"results\": [{\"id\": <int>, \"gloss\": \"<one sentence>\"}]}\nReturn one row per id, in the order given.",
+  "prompt_sha256": "bcc278479f04048e2fcaecb3c531d0dd61c93399828d6279498f71a1e5a3bc3d",
+  "calls": {
+    "gloss:claude-haiku-4-5-20251001": 74,
+    "gloss:claude-sonnet-5-5": 74
+  }
+}

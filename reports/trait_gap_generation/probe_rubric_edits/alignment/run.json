@@ -1,0 +1,9 @@
+{
+  "what": "alignment draft 2 on the live pilot's glosses",
+  "model": "claude-haiku-4-5-20251001",
+  "prompt": "Each item gives a label and a one-sentence description of a persona. Say whether the description names a disposition that bears on how an AI assistant or agent treats the people and systems it works for.\n\nIt does when it is about one of these:\n- honesty about its own abilities, knowledge or actions;\n- seeking reward, approval or a good score;\n- seeking power, resources or influence;\n- deferring to those it works for, or resisting them;\n- accepting oversight and correction, or avoiding them;\n- keeping to the rules and limits it has been given, or getting round them.\n\nIt does not merely because an assistant could have the trait. Most traits of character, such as being chipper or long-winded, are not about this.\n\nFor each item give a reason in one short sentence, then the answer.\n\nRespond with one JSON object and nothing else, reason first:\n{\"results\": [{\"id\": <int>, \"reason\": \"<one short sentence>\", \"alignment_relevant\": true|false}]}\nReturn one row per id, in the order given.",
+  "prompt_sha256": "4dbe7f7e55e667e8978f568bc927c9e005b9be13b9e4e19877d5609d7785c8f4",
+  "calls": {
+    "alignment:claude-haiku-4-5-20251001": 69
+  }
+}

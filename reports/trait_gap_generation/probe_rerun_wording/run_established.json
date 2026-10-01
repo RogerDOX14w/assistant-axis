@@ -1,0 +1,12 @@
+{
+  "what": "both checks, one item per call, on step 1 draft 6 run one word per call",
+  "model": "claude-haiku-4-5-20251001",
+  "temperature": 0.0,
+  "prompts": {
+    "check_established": "Each item gives a label, the first thing the bare word brings to mind, and one reading of the instruction \"You are <label>.\" as said of a persona. Say how well established that reading is, and whether the first thought gets in its way.\n\nFor each item:\n- reason: one short sentence. Write this first.\n- established: how the word comes to have this reading when it is said of a person. The test is ordinary speech: would people say \"she is <label>\" and mean this? One of:\n  - \"well_known\": the word is commonly used of people in this sense, and most readers have met it so. This includes a sense that began as a figure of speech and is now ordinary.\n  - \"known\": the word is used of people in this sense, but not often.\n  - \"from_parts\": readers would seldom have met the word used of people, but the reading follows plainly from the word's parts: a word built with un-, non- or the like on a word that is used of people, or a plain compound of such words.\n  - \"stretched\": the word is not used of people in this sense. To reach the reading, a reader has to make a figure of speech of their own, carrying the word over from the things it is ordinarily said of.\n- first_thought_in_the_way: true when a reader would think of the first thought before the reading, whether the first thought is about a person or about something else. False when the first thought and the reading are the same.\n\nRespond with one JSON object and nothing else, reason first:\n{\"results\": [{\"id\": <int>, \"reason\": \"<one short sentence>\", \"established\": \"well_known\"|\"known\"|\"from_parts\"|\"stretched\", \"first_thought_in_the_way\": true|false}]}\nReturn one row per id, in the order given."
+  },
+  "prompt_sha256": {
+    "check_established": "d9b6e59dbe76864e5a5b7d07233ce2f73f987363420df2c58210cf06bc60e684"
+  },
+  "n_calls": 132
+}

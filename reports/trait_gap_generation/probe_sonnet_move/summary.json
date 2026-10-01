@@ -1,0 +1,297 @@
+{
+ "part_a": {
+  "table": {
+   "sample_passed_v4": {
+    "n": 33,
+    "haiku": 32,
+    "old": 27,
+    "new": 31
+   },
+   "plain_traits": {
+    "n": 16,
+    "haiku": 16,
+    "old": 16,
+    "new": 16
+   },
+   "figurative_person_words": {
+    "n": 8,
+    "haiku": 8,
+    "old": 8,
+    "new": 8
+   },
+   "corpus_relational": {
+    "n": 5,
+    "haiku": 5,
+    "old": 4,
+    "new": 3
+   },
+   "roger_examples_things": {
+    "n": 2,
+    "haiku": 2,
+    "old": 2,
+    "new": 2
+   },
+   "things_held_out": {
+    "n": 12,
+    "haiku": 10,
+    "old": 8,
+    "new": 9
+   },
+   "all": {
+    "n": 76,
+    "haiku": 73,
+    "old": 65,
+    "new": 69
+   }
+  },
+  "discordant": {
+   "new_right_old_wrong": [
+    "barehanded",
+    "deterministic",
+    "hit-and-run",
+    "incestuous",
+    "linear",
+    "ungrammatical",
+    "watertight"
+   ],
+   "old_right_new_wrong": [
+    "anecdotal",
+    "concrete",
+    "organic"
+   ],
+   "both_wrong": [
+    "graphic",
+    "illegal",
+    "nonturbulent",
+    "threadbare"
+   ]
+  },
+  "agreement_with_haiku": {
+   "old": 79,
+   "new": 81,
+   "old_new": 83
+  },
+  "outcomes": {
+   "haiku": {
+    "trait": 74,
+    "states": 7,
+    "turned_away": 16,
+    "physical": 2
+   },
+   "old": {
+    "trait": 75,
+    "states": 4,
+    "turned_away": 20
+   },
+   "new": {
+    "trait": 77,
+    "states": 3,
+    "turned_away": 19
+   }
+  },
+  "notes": {
+   "haiku": {
+    "first_thought_in_the_way": 25,
+    "fits_many_in_different_ways": 10,
+    "two_trait_senses": 7,
+    "obvious_sense_not_trait": 6,
+    "leaves_something_out": 3,
+    "nontrait_person_sense": 1,
+    "most_likely_reading_stretched": 1
+   },
+   "old": {
+    "fits_many_in_different_ways": 13,
+    "first_thought_in_the_way": 15,
+    "obvious_sense_not_trait": 2,
+    "two_trait_senses": 4,
+    "leaves_something_out": 9,
+    "nontrait_person_sense": 3
+   },
+   "new": {
+    "two_trait_senses": 8,
+    "fits_many_in_different_ways": 2,
+    "nontrait_person_sense": 7,
+    "first_thought_in_the_way": 28,
+    "most_likely_reading_stretched": 1,
+    "leaves_something_out": 5,
+    "obvious_sense_not_trait": 4
+   }
+  }
+ },
+ "part_b": {
+  "mechanical": {
+   "open This means and an -ing verb": {
+    "haiku": 74,
+    "old": 74,
+    "new": 74
+   },
+   "address the persona": {
+    "haiku": 0,
+    "old": 0,
+    "new": 0
+   },
+   "use a word the rules forbid": {
+    "haiku": 1,
+    "old": 3,
+    "new": 2
+   },
+   "repeat the label in the first five words": {
+    "haiku": 0,
+    "old": 1,
+    "new": 1
+   },
+   "more than one sentence": {
+    "haiku": 0,
+    "old": 0,
+    "new": 0
+   },
+   "inside 18 to 32 words": {
+    "haiku": 12,
+    "old": 48,
+    "new": 73
+   }
+  },
+  "median_words": {
+   "haiku": 14.0,
+   "old": 19.0,
+   "new": 28.0
+  },
+  "votes": {
+   "new": 94,
+   "old": 47,
+   "tie": 7
+  },
+  "by_word": {
+   "new in both orders": 44,
+   "old in both orders": 19,
+   "the two orders disagree": 10,
+   "tie in both orders": 1
+  },
+  "by_letter": {
+   "A": 72,
+   "B": 69,
+   "tie": 7
+  }
+ },
+ "part_c": {
+  "dev, expected same": {
+   "n": 30,
+   "recorded_batched": 23,
+   "old": 27,
+   "new": 28,
+   "answers_old": {
+    "same": 27,
+    "related": 3
+   },
+   "answers_new": {
+    "same": 28,
+    "related": 1,
+    "different": 1
+   }
+  },
+  "dev, expected different": {
+   "n": 30,
+   "recorded_batched": 29,
+   "old": 29,
+   "new": 29,
+   "answers_old": {
+    "different": 29,
+    "related": 1
+   },
+   "answers_new": {
+    "different": 29,
+    "related": 1
+   }
+  },
+  "heldout, expected different": {
+   "n": 6,
+   "recorded_batched": 1,
+   "old": 3,
+   "new": 3,
+   "answers_old": {
+    "different": 3,
+    "related": 1,
+    "same": 2
+   },
+   "answers_new": {
+    "different": 3,
+    "related": 1,
+    "same": 2
+   }
+  }
+ },
+ "cost": {
+  "path": {
+   "usd": 2.5765,
+   "calls": 1006,
+   "per_model": {
+    "claude-sonnet-4-6": {
+     "usd": 1.221,
+     "calls": 445,
+     "in_per_call": 529,
+     "out_per_call": 77
+    },
+    "claude-sonnet-5-5": {
+     "usd": 1.3555,
+     "calls": 561,
+     "in_per_call": 657,
+     "out_per_call": 110
+    }
+   }
+  },
+  "gloss": {
+   "usd": 1.2661,
+   "calls": 222,
+   "per_model": {
+    "claude-opus-5-5": {
+     "usd": 1.1192,
+     "calls": 148,
+     "in_per_call": 799,
+     "out_per_call": 218
+    },
+    "claude-sonnet-5-5": {
+     "usd": 0.1469,
+     "calls": 74,
+     "in_per_call": 626,
+     "out_per_call": 73
+    }
+   }
+  },
+  "comparison_dev": {
+   "usd": 0.45,
+   "calls": 120,
+   "per_model": {
+    "claude-sonnet-4-6": {
+     "usd": 0.2385,
+     "calls": 60,
+     "in_per_call": 857,
+     "out_per_call": 94
+    },
+    "claude-sonnet-5-5": {
+     "usd": 0.2115,
+     "calls": 60,
+     "in_per_call": 1178,
+     "out_per_call": 117
+    }
+   }
+  },
+  "comparison_heldout": {
+   "usd": 0.0459,
+   "calls": 12,
+   "per_model": {
+    "claude-sonnet-4-6": {
+     "usd": 0.0245,
+     "calls": 6,
+     "in_per_call": 861,
+     "out_per_call": 100
+    },
+    "claude-sonnet-5-5": {
+     "usd": 0.0215,
+     "calls": 6,
+     "in_per_call": 1179,
+     "out_per_call": 122
+    }
+   }
+  }
+ }
+}

@@ -1,0 +1,4639 @@
+{
+  "result": {
+    "absentee": {
+      "label": "absentee",
+      "region": null,
+      "alignment_relevant": null,
+      "verdict": "tagged",
+      "batch_id": "m1_validation_r2"
+    },
+    "absolutist": {
+      "label": "absolutist",
+      "region": "cognitive_epistemic",
+      "alignment_relevant": false,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "absorption_prone": {
+      "label": "absorption-prone",
+      "region": "cognitive_epistemic",
+      "alignment_relevant": false,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "abstemious": {
+      "label": "abstemious",
+      "region": "moral_stance",
+      "alignment_relevant": false,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "abstract": {
+      "label": "abstract",
+      "region": "cognitive_epistemic",
+      "alignment_relevant": false,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "accessible": {
+      "label": "accessible",
+      "region": "communication_style",
+      "alignment_relevant": false,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "accommodating": {
+      "label": "accommodating",
+      "region": "social_interpersonal",
+      "alignment_relevant": false,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "accountable": {
+      "label": "accountable",
+      "region": "moral_stance",
+      "alignment_relevant": true,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "accurate": {
+      "label": "accurate",
+      "region": "communication_style",
+      "alignment_relevant": true,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "acerbic": {
+      "label": "acerbic",
+      "region": "communication_style",
+      "alignment_relevant": false,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "adaptable": {
+      "label": "adaptable",
+      "region": "cognitive_epistemic",
+      "alignment_relevant": false,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "adventurous": {
+      "label": "adventurous",
+      "region": "emotional_temperament",
+      "alignment_relevant": false,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "adventurous_eater": {
+      "label": "adventurous-eater",
+      "region": "moral_stance",
+      "alignment_relevant": false,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "aesthete": {
+      "label": "aesthete",
+      "region": "communication_style",
+      "alignment_relevant": false,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "aggressive": {
+      "label": "aggressive",
+      "region": "communication_style",
+      "alignment_relevant": false,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "agreeable": {
+      "label": "agreeable",
+      "region": "communication_style",
+      "alignment_relevant": false,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "altruistic": {
+      "label": "altruistic",
+      "region": "moral_stance",
+      "alignment_relevant": true,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "ambitious": {
+      "label": "ambitious",
+      "region": "cognitive_epistemic",
+      "alignment_relevant": false,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "amoral": {
+      "label": "amoral",
+      "region": "moral_stance",
+      "alignment_relevant": true,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "analytical": {
+      "label": "analytical",
+      "region": "cognitive_epistemic",
+      "alignment_relevant": false,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "anecdotal": {
+      "label": "anecdotal",
+      "region": "communication_style",
+      "alignment_relevant": false,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "animated": {
+      "label": "animated",
+      "region": "communication_style",
+      "alignment_relevant": false,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "anthropocentric": {
+      "label": "anthropocentric",
+      "region": "moral_stance",
+      "alignment_relevant": false,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "anti_immigration": {
+      "label": "anti-immigration",
+      "region": "cognitive_epistemic",
+      "alignment_relevant": false,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "antifeminist": {
+      "label": "antifeminist",
+      "region": "moral_stance",
+      "alignment_relevant": false,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "anxious": {
+      "label": "anxious",
+      "region": null,
+      "alignment_relevant": null,
+      "verdict": "tagged",
+      "batch_id": "m1_validation_r2"
+    },
+    "apathetic": {
+      "label": "apathetic",
+      "region": "emotional_temperament",
+      "alignment_relevant": false,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "apolitical": {
+      "label": "apolitical",
+      "region": "moral_stance",
+      "alignment_relevant": false,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "approximate": {
+      "label": "approximate",
+      "region": "communication_style",
+      "alignment_relevant": true,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "aristocratic": {
+      "label": "aristocratic",
+      "region": "identity_demographic",
+      "alignment_relevant": false,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "arrogant": {
+      "label": "arrogant",
+      "region": "communication_style",
+      "alignment_relevant": false,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "artistic": {
+      "label": "artistic",
+      "region": "identity_demographic",
+      "alignment_relevant": false,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "ascetic": {
+      "label": "ascetic",
+      "region": "moral_stance",
+      "alignment_relevant": false,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "attention_seeking": {
+      "label": "attention-seeking",
+      "region": "social_interpersonal",
+      "alignment_relevant": true,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "authentic": {
+      "label": "authentic",
+      "region": "communication_style",
+      "alignment_relevant": true,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "authoritarian": {
+      "label": "authoritarian",
+      "region": "social_interpersonal",
+      "alignment_relevant": true,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "autonomy_respecting": {
+      "label": "autonomy-respecting",
+      "region": "social_interpersonal",
+      "alignment_relevant": false,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "avoidant": {
+      "label": "avoidant",
+      "region": "social_interpersonal",
+      "alignment_relevant": true,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "bargain_hunter": {
+      "label": "bargain-hunter",
+      "region": "cognitive_epistemic",
+      "alignment_relevant": false,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "benevolent": {
+      "label": "benevolent",
+      "region": "moral_stance",
+      "alignment_relevant": false,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "benign": {
+      "label": "benign",
+      "region": "moral_stance",
+      "alignment_relevant": false,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "big_picture": {
+      "label": "big-picture",
+      "region": "cognitive_epistemic",
+      "alignment_relevant": false,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "bitter": {
+      "label": "bitter",
+      "region": "emotional_temperament",
+      "alignment_relevant": false,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "blame_shifting": {
+      "label": "blame-shifting",
+      "region": "cognitive_epistemic",
+      "alignment_relevant": true,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "bland": {
+      "label": "bland",
+      "region": "communication_style",
+      "alignment_relevant": false,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "blunt": {
+      "label": "blunt",
+      "region": "communication_style",
+      "alignment_relevant": false,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "body_confident": {
+      "label": "body-confident",
+      "region": "emotional_temperament",
+      "alignment_relevant": false,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "body_insecure": {
+      "label": "body-insecure",
+      "region": "emotional_temperament",
+      "alignment_relevant": false,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "bold": {
+      "label": "bold",
+      "region": "moral_stance",
+      "alignment_relevant": false,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "bombastic": {
+      "label": "bombastic",
+      "region": "communication_style",
+      "alignment_relevant": false,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "brand_loyal": {
+      "label": "brand-loyal",
+      "region": "identity_demographic",
+      "alignment_relevant": false,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "brash": {
+      "label": "brash",
+      "region": "communication_style",
+      "alignment_relevant": false,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "brave": {
+      "label": "brave",
+      "region": "emotional_temperament",
+      "alignment_relevant": false,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "bullying": {
+      "label": "bullying",
+      "region": "social_interpersonal",
+      "alignment_relevant": true,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "burned_out": {
+      "label": "burned-out",
+      "region": null,
+      "alignment_relevant": null,
+      "verdict": "tagged",
+      "batch_id": "m1_validation_r2"
+    },
+    "calculating": {
+      "label": "calculating",
+      "region": "cognitive_epistemic",
+      "alignment_relevant": false,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "calibrated": {
+      "label": "calibrated",
+      "region": "cognitive_epistemic",
+      "alignment_relevant": true,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "callous": {
+      "label": "callous",
+      "region": "emotional_temperament",
+      "alignment_relevant": true,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "calm": {
+      "label": "calm",
+      "region": "emotional_temperament",
+      "alignment_relevant": false,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "candid": {
+      "label": "candid",
+      "region": "communication_style",
+      "alignment_relevant": true,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "capitalist": {
+      "label": "capitalist",
+      "region": "identity_demographic",
+      "alignment_relevant": false,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "career_oriented": {
+      "label": "career-oriented",
+      "region": "moral_stance",
+      "alignment_relevant": true,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "careless": {
+      "label": "careless",
+      "region": "communication_style",
+      "alignment_relevant": true,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "casual": {
+      "label": "casual",
+      "region": "communication_style",
+      "alignment_relevant": true,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "cat_person": {
+      "label": "cat-person",
+      "region": "identity_demographic",
+      "alignment_relevant": false,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "cautious": {
+      "label": "cautious",
+      "region": "cognitive_epistemic",
+      "alignment_relevant": false,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "cerebral": {
+      "label": "cerebral",
+      "region": "cognitive_epistemic",
+      "alignment_relevant": false,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "challenging": {
+      "label": "challenging",
+      "region": "social_interpersonal",
+      "alignment_relevant": false,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "chaotic": {
+      "label": "chaotic",
+      "region": "cognitive_epistemic",
+      "alignment_relevant": false,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "charismatic": {
+      "label": "charismatic",
+      "region": "communication_style",
+      "alignment_relevant": false,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "chaste": {
+      "label": "chaste",
+      "region": "moral_stance",
+      "alignment_relevant": false,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "cheerful": {
+      "label": "cheerful",
+      "region": "emotional_temperament",
+      "alignment_relevant": false,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "childless": {
+      "label": "childless",
+      "region": "identity_demographic",
+      "alignment_relevant": false,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "circumspect": {
+      "label": "circumspect",
+      "region": "cognitive_epistemic",
+      "alignment_relevant": false,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "civil_libertarian": {
+      "label": "civil-libertarian",
+      "region": "moral_stance",
+      "alignment_relevant": false,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "clannish": {
+      "label": "clannish",
+      "region": "social_interpersonal",
+      "alignment_relevant": false,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "clear": {
+      "label": "clear",
+      "region": "communication_style",
+      "alignment_relevant": false,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "clingy": {
+      "label": "clingy",
+      "region": "social_interpersonal",
+      "alignment_relevant": false,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "cliqueish": {
+      "label": "cliqueish",
+      "region": null,
+      "alignment_relevant": null,
+      "verdict": "reject",
+      "batch_id": "m1_validation_r2"
+    },
+    "closure_seeking": {
+      "label": "closure-seeking",
+      "region": "cognitive_epistemic",
+      "alignment_relevant": false,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "coherent": {
+      "label": "coherent",
+      "region": "communication_style",
+      "alignment_relevant": false,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "collaborative": {
+      "label": "collaborative",
+      "region": "social_interpersonal",
+      "alignment_relevant": false,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "collectivistic": {
+      "label": "collectivistic",
+      "region": null,
+      "alignment_relevant": null,
+      "verdict": "reject",
+      "batch_id": "m1_validation_r2"
+    },
+    "company_loyal": {
+      "label": "company-loyal",
+      "region": "moral_stance",
+      "alignment_relevant": false,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "compassionate": {
+      "label": "compassionate",
+      "region": "emotional_temperament",
+      "alignment_relevant": false,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "competent": {
+      "label": "competent",
+      "region": "cognitive_epistemic",
+      "alignment_relevant": false,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "competitive": {
+      "label": "competitive",
+      "region": "social_interpersonal",
+      "alignment_relevant": false,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "composed": {
+      "label": "composed",
+      "region": "emotional_temperament",
+      "alignment_relevant": false,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "conceptual": {
+      "label": "conceptual",
+      "region": "cognitive_epistemic",
+      "alignment_relevant": false,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "conciliatory": {
+      "label": "conciliatory",
+      "region": "communication_style",
+      "alignment_relevant": false,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "concise": {
+      "label": "concise",
+      "region": "communication_style",
+      "alignment_relevant": false,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "concrete": {
+      "label": "concrete",
+      "region": "cognitive_epistemic",
+      "alignment_relevant": false,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "condescending": {
+      "label": "condescending",
+      "region": "communication_style",
+      "alignment_relevant": false,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "confabulatory": {
+      "label": "confabulatory",
+      "region": null,
+      "alignment_relevant": null,
+      "verdict": "reject",
+      "batch_id": "m1_validation_r2"
+    },
+    "confident": {
+      "label": "confident",
+      "region": "emotional_temperament",
+      "alignment_relevant": false,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "conformist": {
+      "label": "conformist",
+      "region": "moral_stance",
+      "alignment_relevant": true,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "confrontational": {
+      "label": "confrontational",
+      "region": "communication_style",
+      "alignment_relevant": true,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "conscientious": {
+      "label": "conscientious",
+      "region": "cognitive_epistemic",
+      "alignment_relevant": false,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "consequentialist": {
+      "label": "consequentialist",
+      "region": "moral_stance",
+      "alignment_relevant": false,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "conservative": {
+      "label": "conservative",
+      "region": "cognitive_epistemic",
+      "alignment_relevant": false,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "constructive": {
+      "label": "constructive",
+      "region": "moral_stance",
+      "alignment_relevant": false,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "constructivist": {
+      "label": "constructivist",
+      "region": "cognitive_epistemic",
+      "alignment_relevant": false,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "contemporary": {
+      "label": "contemporary",
+      "region": "identity_demographic",
+      "alignment_relevant": false,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "contented": {
+      "label": "contented",
+      "region": "emotional_temperament",
+      "alignment_relevant": false,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "contrarian": {
+      "label": "contrarian",
+      "region": "cognitive_epistemic",
+      "alignment_relevant": false,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "controlling": {
+      "label": "controlling",
+      "region": "social_interpersonal",
+      "alignment_relevant": true,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "conventional": {
+      "label": "conventional",
+      "region": "cognitive_epistemic",
+      "alignment_relevant": false,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "convergent": {
+      "label": "convergent",
+      "region": "cognitive_epistemic",
+      "alignment_relevant": false,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "cooperative": {
+      "label": "cooperative",
+      "region": "social_interpersonal",
+      "alignment_relevant": false,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "cosmopolitan": {
+      "label": "cosmopolitan",
+      "region": "identity_demographic",
+      "alignment_relevant": false,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "course_correcting": {
+      "label": "course-correcting",
+      "region": "cognitive_epistemic",
+      "alignment_relevant": true,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "cowardly": {
+      "label": "cowardly",
+      "region": "emotional_temperament",
+      "alignment_relevant": false,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "creative": {
+      "label": "creative",
+      "region": "cognitive_epistemic",
+      "alignment_relevant": false,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "credulous": {
+      "label": "credulous",
+      "region": "cognitive_epistemic",
+      "alignment_relevant": true,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "critical": {
+      "label": "critical",
+      "region": "communication_style",
+      "alignment_relevant": false,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "cruel": {
+      "label": "cruel",
+      "region": "moral_stance",
+      "alignment_relevant": true,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "cryptic": {
+      "label": "cryptic",
+      "region": "communication_style",
+      "alignment_relevant": false,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "cultural_relativist": {
+      "label": "cultural relativist",
+      "region": "cognitive_epistemic",
+      "alignment_relevant": false,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "curious": {
+      "label": "curious",
+      "region": "cognitive_epistemic",
+      "alignment_relevant": false,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "cynical": {
+      "label": "cynical",
+      "region": "cognitive_epistemic",
+      "alignment_relevant": false,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "data_driven": {
+      "label": "data-driven",
+      "region": "cognitive_epistemic",
+      "alignment_relevant": false,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "death_accepting": {
+      "label": "death-accepting",
+      "region": "cognitive_epistemic",
+      "alignment_relevant": false,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "death_fearing": {
+      "label": "death-fearing",
+      "region": "emotional_temperament",
+      "alignment_relevant": false,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "deceitful": {
+      "label": "deceitful",
+      "region": "communication_style",
+      "alignment_relevant": true,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "decisive": {
+      "label": "decisive",
+      "region": "communication_style",
+      "alignment_relevant": false,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "deconstructionist": {
+      "label": "deconstructionist",
+      "region": "cognitive_epistemic",
+      "alignment_relevant": false,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "defeatist": {
+      "label": "defeatist",
+      "region": "cognitive_epistemic",
+      "alignment_relevant": true,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "deferential": {
+      "label": "deferential",
+      "region": "communication_style",
+      "alignment_relevant": true,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "deliberate": {
+      "label": "deliberate",
+      "region": "cognitive_epistemic",
+      "alignment_relevant": false,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "deontological": {
+      "label": "deontological",
+      "region": "moral_stance",
+      "alignment_relevant": true,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "dependable": {
+      "label": "dependable",
+      "region": "alignment_ai_agent",
+      "alignment_relevant": true,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "dependent": {
+      "label": "dependent",
+      "region": "identity_demographic",
+      "alignment_relevant": false,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "descriptive": {
+      "label": "descriptive",
+      "region": "communication_style",
+      "alignment_relevant": false,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "despairing": {
+      "label": "despairing",
+      "region": "emotional_temperament",
+      "alignment_relevant": false,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "destructive": {
+      "label": "destructive",
+      "region": "moral_stance",
+      "alignment_relevant": true,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "detached": {
+      "label": "detached",
+      "region": "social_interpersonal",
+      "alignment_relevant": false,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "detail_oriented": {
+      "label": "detail-oriented",
+      "region": "communication_style",
+      "alignment_relevant": false,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "deterministic": {
+      "label": "deterministic",
+      "region": "cognitive_epistemic",
+      "alignment_relevant": false,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "didactic": {
+      "label": "didactic",
+      "region": "communication_style",
+      "alignment_relevant": false,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "dignified": {
+      "label": "dignified",
+      "region": "communication_style",
+      "alignment_relevant": false,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "diplomatic": {
+      "label": "diplomatic",
+      "region": "communication_style",
+      "alignment_relevant": false,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "disagreeable": {
+      "label": "disagreeable",
+      "region": "social_interpersonal",
+      "alignment_relevant": false,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "disciplined": {
+      "label": "disciplined",
+      "region": "emotional_temperament",
+      "alignment_relevant": true,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "discontented": {
+      "label": "discontented",
+      "region": null,
+      "alignment_relevant": null,
+      "verdict": "tagged",
+      "batch_id": "m1_validation_r2"
+    },
+    "discouraging": {
+      "label": "discouraging",
+      "region": "communication_style",
+      "alignment_relevant": false,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "dishonest": {
+      "label": "dishonest",
+      "region": "moral_stance",
+      "alignment_relevant": true,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "dismissive": {
+      "label": "dismissive",
+      "region": "communication_style",
+      "alignment_relevant": false,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "disorganized": {
+      "label": "disorganized",
+      "region": "cognitive_epistemic",
+      "alignment_relevant": false,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "dispassionate": {
+      "label": "dispassionate",
+      "region": "cognitive_epistemic",
+      "alignment_relevant": false,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "distractible": {
+      "label": "distractible",
+      "region": null,
+      "alignment_relevant": null,
+      "verdict": "reject",
+      "batch_id": "m1_validation_r2"
+    },
+    "divergent": {
+      "label": "divergent",
+      "region": "cognitive_epistemic",
+      "alignment_relevant": false,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "dog_person": {
+      "label": "dog-person",
+      "region": null,
+      "alignment_relevant": null,
+      "verdict": "reject",
+      "batch_id": "m1_validation_r2"
+    },
+    "dogmatic": {
+      "label": "dogmatic",
+      "region": "cognitive_epistemic",
+      "alignment_relevant": true,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "dominant": {
+      "label": "dominant",
+      "region": "social_interpersonal",
+      "alignment_relevant": true,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "dramatic": {
+      "label": "dramatic",
+      "region": "communication_style",
+      "alignment_relevant": false,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "dry": {
+      "label": "dry",
+      "region": "communication_style",
+      "alignment_relevant": false,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "early_adopter": {
+      "label": "early-adopter",
+      "region": "identity_demographic",
+      "alignment_relevant": false,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "early_bird": {
+      "label": "early-bird",
+      "region": "identity_demographic",
+      "alignment_relevant": false,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "earnest": {
+      "label": "earnest",
+      "region": "communication_style",
+      "alignment_relevant": false,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "eastern_hemisphere": {
+      "label": "eastern hemisphere",
+      "region": null,
+      "alignment_relevant": null,
+      "verdict": "reject",
+      "batch_id": "m1_validation_r2"
+    },
+    "easygoing": {
+      "label": "easygoing",
+      "region": "emotional_temperament",
+      "alignment_relevant": false,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "eccentric": {
+      "label": "eccentric",
+      "region": "communication_style",
+      "alignment_relevant": false,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "eclectic": {
+      "label": "eclectic",
+      "region": "communication_style",
+      "alignment_relevant": false,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "ecocentric": {
+      "label": "ecocentric",
+      "region": null,
+      "alignment_relevant": null,
+      "verdict": "reject",
+      "batch_id": "m1_validation_r2"
+    },
+    "edgy": {
+      "label": "edgy",
+      "region": "communication_style",
+      "alignment_relevant": false,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "educated": {
+      "label": "educated",
+      "region": "identity_demographic",
+      "alignment_relevant": false,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "educational": {
+      "label": "educational",
+      "region": null,
+      "alignment_relevant": null,
+      "verdict": "tagged",
+      "batch_id": "m1_validation_r2"
+    },
+    "efficient": {
+      "label": "efficient",
+      "region": "communication_style",
+      "alignment_relevant": false,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "effusive": {
+      "label": "effusive",
+      "region": "communication_style",
+      "alignment_relevant": false,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "egalitarian": {
+      "label": "egalitarian",
+      "region": "moral_stance",
+      "alignment_relevant": false,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "elderly": {
+      "label": "elderly",
+      "region": "identity_demographic",
+      "alignment_relevant": false,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "elitist": {
+      "label": "elitist",
+      "region": "moral_stance",
+      "alignment_relevant": false,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "eloquent": {
+      "label": "eloquent",
+      "region": "communication_style",
+      "alignment_relevant": false,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "emotional": {
+      "label": "emotional",
+      "region": "emotional_temperament",
+      "alignment_relevant": false,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "emotionally_articulate": {
+      "label": "emotionally-articulate",
+      "region": "communication_style",
+      "alignment_relevant": false,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "emotionally_disengaged": {
+      "label": "emotionally-disengaged",
+      "region": "emotional_temperament",
+      "alignment_relevant": false,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "emotionally_engaged": {
+      "label": "emotionally-engaged",
+      "region": "emotional_temperament",
+      "alignment_relevant": false,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "emotionally_inarticulate": {
+      "label": "emotionally-inarticulate",
+      "region": "communication_style",
+      "alignment_relevant": false,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "empathetic": {
+      "label": "empathetic",
+      "region": "emotional_temperament",
+      "alignment_relevant": false,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "emphatic": {
+      "label": "emphatic",
+      "region": "communication_style",
+      "alignment_relevant": false,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "empirical": {
+      "label": "empirical",
+      "region": "cognitive_epistemic",
+      "alignment_relevant": true,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "encouraging": {
+      "label": "encouraging",
+      "region": "communication_style",
+      "alignment_relevant": false,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "ends_justify_means": {
+      "label": "ends justify means",
+      "region": "moral_stance",
+      "alignment_relevant": true,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "energetic": {
+      "label": "energetic",
+      "region": "emotional_temperament",
+      "alignment_relevant": false,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "engaged": {
+      "label": "engaged",
+      "region": "emotional_temperament",
+      "alignment_relevant": false,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "enigmatic": {
+      "label": "enigmatic",
+      "region": "communication_style",
+      "alignment_relevant": false,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "entertaining": {
+      "label": "entertaining",
+      "region": "communication_style",
+      "alignment_relevant": false,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "entitled": {
+      "label": "entitled",
+      "region": "moral_stance",
+      "alignment_relevant": false,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "envious": {
+      "label": "envious",
+      "region": "emotional_temperament",
+      "alignment_relevant": false,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "environmental": {
+      "label": "environmental",
+      "region": "moral_stance",
+      "alignment_relevant": false,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "epicurean": {
+      "label": "epicurean",
+      "region": "emotional_temperament",
+      "alignment_relevant": false,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "erratic": {
+      "label": "erratic",
+      "region": "emotional_temperament",
+      "alignment_relevant": false,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "erudite": {
+      "label": "erudite",
+      "region": "cognitive_epistemic",
+      "alignment_relevant": false,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "esoteric": {
+      "label": "esoteric",
+      "region": "cognitive_epistemic",
+      "alignment_relevant": false,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "essentialist": {
+      "label": "essentialist",
+      "region": "cognitive_epistemic",
+      "alignment_relevant": false,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "ethereal": {
+      "label": "ethereal",
+      "region": "identity_demographic",
+      "alignment_relevant": false,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "ethnocentric": {
+      "label": "ethnocentric",
+      "region": "cognitive_epistemic",
+      "alignment_relevant": false,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "even_tempered": {
+      "label": "even-tempered",
+      "region": "emotional_temperament",
+      "alignment_relevant": false,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "evil": {
+      "label": "evil",
+      "region": "moral_stance",
+      "alignment_relevant": true,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "excitable": {
+      "label": "excitable",
+      "region": "emotional_temperament",
+      "alignment_relevant": false,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "exclusive": {
+      "label": "exclusive",
+      "region": "identity_demographic",
+      "alignment_relevant": false,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "exclusivist": {
+      "label": "exclusivist",
+      "region": null,
+      "alignment_relevant": null,
+      "verdict": "reject",
+      "batch_id": "m1_validation_r2"
+    },
+    "existentialist": {
+      "label": "existentialist",
+      "region": "cognitive_epistemic",
+      "alignment_relevant": false,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "expedient": {
+      "label": "expedient",
+      "region": "moral_stance",
+      "alignment_relevant": true,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "experiential": {
+      "label": "experiential",
+      "region": "cognitive_epistemic",
+      "alignment_relevant": false,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "exploratory": {
+      "label": "exploratory",
+      "region": "cognitive_epistemic",
+      "alignment_relevant": false,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "expository": {
+      "label": "expository",
+      "region": "communication_style",
+      "alignment_relevant": false,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "expressive": {
+      "label": "expressive",
+      "region": "communication_style",
+      "alignment_relevant": false,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "extravagant": {
+      "label": "extravagant",
+      "region": "identity_demographic",
+      "alignment_relevant": false,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "extremist": {
+      "label": "extremist",
+      "region": "cognitive_epistemic",
+      "alignment_relevant": false,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "extrinsically_motivated": {
+      "label": "extrinsically motivated",
+      "region": null,
+      "alignment_relevant": null,
+      "verdict": "reject",
+      "batch_id": "m1_validation_r2"
+    },
+    "extroverted": {
+      "label": "extroverted",
+      "region": "social_interpersonal",
+      "alignment_relevant": false,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "fair": {
+      "label": "fair",
+      "region": "moral_stance",
+      "alignment_relevant": false,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "family_oriented": {
+      "label": "family-oriented",
+      "region": "moral_stance",
+      "alignment_relevant": false,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "fashionable": {
+      "label": "fashionable",
+      "region": "identity_demographic",
+      "alignment_relevant": false,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "fastidious": {
+      "label": "fastidious",
+      "region": "emotional_temperament",
+      "alignment_relevant": false,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "fatalistic": {
+      "label": "fatalistic",
+      "region": "cognitive_epistemic",
+      "alignment_relevant": false,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "feminine": {
+      "label": "feminine",
+      "region": "identity_demographic",
+      "alignment_relevant": false,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "feminist": {
+      "label": "feminist",
+      "region": "moral_stance",
+      "alignment_relevant": false,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "figurative": {
+      "label": "figurative",
+      "region": "communication_style",
+      "alignment_relevant": false,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "financially_adventurous": {
+      "label": "financially adventurous",
+      "region": "cognitive_epistemic",
+      "alignment_relevant": false,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "financially_conservative": {
+      "label": "financially conservative",
+      "region": "cognitive_epistemic",
+      "alignment_relevant": false,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "financially_precarious": {
+      "label": "financially precarious",
+      "region": "identity_demographic",
+      "alignment_relevant": false,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "financially_secure": {
+      "label": "financially secure",
+      "region": "identity_demographic",
+      "alignment_relevant": false,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "fixed_minded": {
+      "label": "fixed-minded",
+      "region": "cognitive_epistemic",
+      "alignment_relevant": true,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "flat": {
+      "label": "flat",
+      "region": null,
+      "alignment_relevant": null,
+      "verdict": "tagged",
+      "batch_id": "m1_validation_r2"
+    },
+    "flexible": {
+      "label": "flexible",
+      "region": "cognitive_epistemic",
+      "alignment_relevant": false,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "flippant": {
+      "label": "flippant",
+      "region": "communication_style",
+      "alignment_relevant": false,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "flirty": {
+      "label": "flirty",
+      "region": "communication_style",
+      "alignment_relevant": false,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "flourishing": {
+      "label": "flourishing",
+      "region": "cognitive_epistemic",
+      "alignment_relevant": false,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "flustered": {
+      "label": "flustered",
+      "region": null,
+      "alignment_relevant": null,
+      "verdict": "tagged",
+      "batch_id": "m1_validation_r2"
+    },
+    "focused": {
+      "label": "focused",
+      "region": "communication_style",
+      "alignment_relevant": false,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "foolish": {
+      "label": "foolish",
+      "region": "cognitive_epistemic",
+      "alignment_relevant": false,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "forgetful": {
+      "label": "forgetful",
+      "region": "cognitive_epistemic",
+      "alignment_relevant": true,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "forgiving": {
+      "label": "forgiving",
+      "region": "moral_stance",
+      "alignment_relevant": false,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "formal": {
+      "label": "formal",
+      "region": "communication_style",
+      "alignment_relevant": false,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "formalist": {
+      "label": "formalist",
+      "region": "cognitive_epistemic",
+      "alignment_relevant": false,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "formulaic": {
+      "label": "formulaic",
+      "region": "communication_style",
+      "alignment_relevant": false,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "forthright": {
+      "label": "forthright",
+      "region": "communication_style",
+      "alignment_relevant": true,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "fragile": {
+      "label": "fragile",
+      "region": null,
+      "alignment_relevant": null,
+      "verdict": "tagged",
+      "batch_id": "m1_validation_r2"
+    },
+    "frequent_poster": {
+      "label": "frequent poster",
+      "region": "identity_demographic",
+      "alignment_relevant": false,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "friendly": {
+      "label": "friendly",
+      "region": "communication_style",
+      "alignment_relevant": false,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "frugal": {
+      "label": "frugal",
+      "region": "moral_stance",
+      "alignment_relevant": false,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "full_price_shopper": {
+      "label": "full-price shopper",
+      "region": "moral_stance",
+      "alignment_relevant": false,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "fundamentalist": {
+      "label": "fundamentalist",
+      "region": "cognitive_epistemic",
+      "alignment_relevant": false,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "futuristic": {
+      "label": "futuristic",
+      "region": "identity_demographic",
+      "alignment_relevant": false,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "gain_seeking": {
+      "label": "gain-seeking",
+      "region": "moral_stance",
+      "alignment_relevant": true,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "gay": {
+      "label": "gay",
+      "region": "identity_demographic",
+      "alignment_relevant": false,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "gay_affirming": {
+      "label": "gay-affirming",
+      "region": "moral_stance",
+      "alignment_relevant": false,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "generalist": {
+      "label": "generalist",
+      "region": "cognitive_epistemic",
+      "alignment_relevant": false,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "generous": {
+      "label": "generous",
+      "region": "moral_stance",
+      "alignment_relevant": false,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "gentle": {
+      "label": "gentle",
+      "region": "social_interpersonal",
+      "alignment_relevant": false,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "glib": {
+      "label": "glib",
+      "region": "communication_style",
+      "alignment_relevant": false,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "globetrotter": {
+      "label": "globetrotter",
+      "region": "identity_demographic",
+      "alignment_relevant": false,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "gluttonous": {
+      "label": "gluttonous",
+      "region": "emotional_temperament",
+      "alignment_relevant": false,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "good": {
+      "label": "good",
+      "region": "moral_stance",
+      "alignment_relevant": true,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "goofy": {
+      "label": "goofy",
+      "region": "communication_style",
+      "alignment_relevant": false,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "grandiose": {
+      "label": "grandiose",
+      "region": "communication_style",
+      "alignment_relevant": false,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "grateful": {
+      "label": "grateful",
+      "region": "emotional_temperament",
+      "alignment_relevant": false,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "greedy": {
+      "label": "greedy",
+      "region": "moral_stance",
+      "alignment_relevant": true,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "gregarious": {
+      "label": "gregarious",
+      "region": "social_interpersonal",
+      "alignment_relevant": false,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "grounded": {
+      "label": "grounded",
+      "region": "cognitive_epistemic",
+      "alignment_relevant": true,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "growth_minded": {
+      "label": "growth-minded",
+      "region": "cognitive_epistemic",
+      "alignment_relevant": false,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "guarded": {
+      "label": "guarded",
+      "region": "communication_style",
+      "alignment_relevant": false,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "guileless": {
+      "label": "guileless",
+      "region": "moral_stance",
+      "alignment_relevant": true,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "hands_off": {
+      "label": "hands-off",
+      "region": "social_interpersonal",
+      "alignment_relevant": false,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "hands_on": {
+      "label": "hands-on",
+      "region": "cognitive_epistemic",
+      "alignment_relevant": false,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "happily_partnered": {
+      "label": "happily-partnered",
+      "region": "identity_demographic",
+      "alignment_relevant": false,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "harmful": {
+      "label": "harmful",
+      "region": "moral_stance",
+      "alignment_relevant": true,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "harmless": {
+      "label": "harmless",
+      "region": "moral_stance",
+      "alignment_relevant": true,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "harsh": {
+      "label": "harsh",
+      "region": "communication_style",
+      "alignment_relevant": false,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "hawkish": {
+      "label": "hawkish",
+      "region": "moral_stance",
+      "alignment_relevant": false,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "health_conscious": {
+      "label": "health-conscious",
+      "region": "cognitive_epistemic",
+      "alignment_relevant": false,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "health_negligent": {
+      "label": "health-negligent",
+      "region": "moral_stance",
+      "alignment_relevant": true,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "heavy_drinker": {
+      "label": "heavy-drinker",
+      "region": "identity_demographic",
+      "alignment_relevant": false,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "hedonistic": {
+      "label": "hedonistic",
+      "region": "moral_stance",
+      "alignment_relevant": false,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "helpful": {
+      "label": "helpful",
+      "region": "social_interpersonal",
+      "alignment_relevant": false,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "helpless": {
+      "label": "helpless",
+      "region": "emotional_temperament",
+      "alignment_relevant": false,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "heterodox": {
+      "label": "heterodox",
+      "region": "cognitive_epistemic",
+      "alignment_relevant": false,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "highbrow": {
+      "label": "highbrow",
+      "region": "communication_style",
+      "alignment_relevant": false,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "historical": {
+      "label": "historical",
+      "region": "identity_demographic",
+      "alignment_relevant": false,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "holistic": {
+      "label": "holistic",
+      "region": "cognitive_epistemic",
+      "alignment_relevant": false,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "homebody": {
+      "label": "homebody",
+      "region": "identity_demographic",
+      "alignment_relevant": false,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "homeowner": {
+      "label": "homeowner",
+      "region": "identity_demographic",
+      "alignment_relevant": false,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "homophobic": {
+      "label": "homophobic",
+      "region": "moral_stance",
+      "alignment_relevant": false,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "honest": {
+      "label": "honest",
+      "region": "moral_stance",
+      "alignment_relevant": true,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "honorable": {
+      "label": "honorable",
+      "region": "moral_stance",
+      "alignment_relevant": true,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "honorable_while_playing": {
+      "label": "honorable while playing",
+      "region": "moral_stance",
+      "alignment_relevant": true,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "hostile": {
+      "label": "hostile",
+      "region": "communication_style",
+      "alignment_relevant": false,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "humanistic": {
+      "label": "humanistic",
+      "region": "moral_stance",
+      "alignment_relevant": true,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "humanitarian": {
+      "label": "humanitarian",
+      "region": "moral_stance",
+      "alignment_relevant": true,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "humble": {
+      "label": "humble",
+      "region": "communication_style",
+      "alignment_relevant": false,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "humorless": {
+      "label": "humorless",
+      "region": "communication_style",
+      "alignment_relevant": false,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "iconoclastic": {
+      "label": "iconoclastic",
+      "region": "cognitive_epistemic",
+      "alignment_relevant": false,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "idealistic": {
+      "label": "idealistic",
+      "region": "moral_stance",
+      "alignment_relevant": false,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "illiterate": {
+      "label": "illiterate",
+      "region": "identity_demographic",
+      "alignment_relevant": false,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "illogical": {
+      "label": "illogical",
+      "region": "cognitive_epistemic",
+      "alignment_relevant": false,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "immature": {
+      "label": "immature",
+      "region": "identity_demographic",
+      "alignment_relevant": false,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "impatient": {
+      "label": "impatient",
+      "region": "emotional_temperament",
+      "alignment_relevant": false,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "improvisational": {
+      "label": "improvisational",
+      "region": "communication_style",
+      "alignment_relevant": false,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "impulsive": {
+      "label": "impulsive",
+      "region": "cognitive_epistemic",
+      "alignment_relevant": false,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "inaccurate": {
+      "label": "inaccurate",
+      "region": "communication_style",
+      "alignment_relevant": true,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "inclusive": {
+      "label": "inclusive",
+      "region": "social_interpersonal",
+      "alignment_relevant": false,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "incoherent": {
+      "label": "incoherent",
+      "region": "communication_style",
+      "alignment_relevant": false,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "incompetent": {
+      "label": "incompetent",
+      "region": "cognitive_epistemic",
+      "alignment_relevant": false,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "incrementalist": {
+      "label": "incrementalist",
+      "region": null,
+      "alignment_relevant": null,
+      "verdict": "reject",
+      "batch_id": "m1_validation_r2"
+    },
+    "incurious": {
+      "label": "incurious",
+      "region": "cognitive_epistemic",
+      "alignment_relevant": false,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "indecisive": {
+      "label": "indecisive",
+      "region": "cognitive_epistemic",
+      "alignment_relevant": false,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "independent": {
+      "label": "independent",
+      "region": "cognitive_epistemic",
+      "alignment_relevant": true,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "indifferent_to_animals": {
+      "label": "indifferent-to-animals",
+      "region": "moral_stance",
+      "alignment_relevant": true,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "individualistic": {
+      "label": "individualistic",
+      "region": "cognitive_epistemic",
+      "alignment_relevant": true,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "indulgent": {
+      "label": "indulgent",
+      "region": "emotional_temperament",
+      "alignment_relevant": false,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "industrious": {
+      "label": "industrious",
+      "region": "emotional_temperament",
+      "alignment_relevant": false,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "inflexible": {
+      "label": "inflexible",
+      "region": "cognitive_epistemic",
+      "alignment_relevant": true,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "informational": {
+      "label": "informational",
+      "region": "communication_style",
+      "alignment_relevant": true,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "innovative": {
+      "label": "innovative",
+      "region": "cognitive_epistemic",
+      "alignment_relevant": false,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "inquisitive": {
+      "label": "inquisitive",
+      "region": "communication_style",
+      "alignment_relevant": false,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "insecure": {
+      "label": "insecure",
+      "region": "emotional_temperament",
+      "alignment_relevant": false,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "inspirational": {
+      "label": "inspirational",
+      "region": "communication_style",
+      "alignment_relevant": false,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "insular": {
+      "label": "insular",
+      "region": "cognitive_epistemic",
+      "alignment_relevant": false,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "intellectually_dishonest": {
+      "label": "intellectually dishonest",
+      "region": "cognitive_epistemic",
+      "alignment_relevant": true,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "intellectually_honest": {
+      "label": "intellectually honest",
+      "region": "cognitive_epistemic",
+      "alignment_relevant": true,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "intense": {
+      "label": "intense",
+      "region": "emotional_temperament",
+      "alignment_relevant": false,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "interdisciplinary": {
+      "label": "interdisciplinary",
+      "region": "cognitive_epistemic",
+      "alignment_relevant": false,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "intrinsically_motivated": {
+      "label": "intrinsically-motivated",
+      "region": "emotional_temperament",
+      "alignment_relevant": true,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "introspective": {
+      "label": "introspective",
+      "region": "cognitive_epistemic",
+      "alignment_relevant": false,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "introverted": {
+      "label": "introverted",
+      "region": "social_interpersonal",
+      "alignment_relevant": false,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "intuitive": {
+      "label": "intuitive",
+      "region": "cognitive_epistemic",
+      "alignment_relevant": false,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "irascible": {
+      "label": "irascible",
+      "region": "emotional_temperament",
+      "alignment_relevant": false,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "ironic": {
+      "label": "ironic",
+      "region": "communication_style",
+      "alignment_relevant": false,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "irresponsible": {
+      "label": "irresponsible",
+      "region": "cognitive_epistemic",
+      "alignment_relevant": true,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "irreverent": {
+      "label": "irreverent",
+      "region": "communication_style",
+      "alignment_relevant": false,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "isolated": {
+      "label": "isolated",
+      "region": null,
+      "alignment_relevant": null,
+      "verdict": "tagged",
+      "batch_id": "m1_validation_r2"
+    },
+    "jaded": {
+      "label": "jaded",
+      "region": "emotional_temperament",
+      "alignment_relevant": false,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "job_hopper": {
+      "label": "job-hopper",
+      "region": "identity_demographic",
+      "alignment_relevant": false,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "joyful": {
+      "label": "joyful",
+      "region": "emotional_temperament",
+      "alignment_relevant": false,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "joyless": {
+      "label": "joyless",
+      "region": "emotional_temperament",
+      "alignment_relevant": false,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "judgmental": {
+      "label": "judgmental",
+      "region": "moral_stance",
+      "alignment_relevant": false,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "just_world_believing": {
+      "label": "just-world-believing",
+      "region": "cognitive_epistemic",
+      "alignment_relevant": false,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "kind_to_animals": {
+      "label": "kind-to-animals",
+      "region": "moral_stance",
+      "alignment_relevant": false,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "laid_back": {
+      "label": "laid-back",
+      "region": "communication_style",
+      "alignment_relevant": false,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "languishing": {
+      "label": "languishing",
+      "region": null,
+      "alignment_relevant": null,
+      "verdict": "tagged",
+      "batch_id": "m1_validation_r2"
+    },
+    "late_adopter": {
+      "label": "late-adopter",
+      "region": "cognitive_epistemic",
+      "alignment_relevant": false,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "lazy": {
+      "label": "lazy",
+      "region": "emotional_temperament",
+      "alignment_relevant": false,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "learning_oriented": {
+      "label": "learning-oriented",
+      "region": "cognitive_epistemic",
+      "alignment_relevant": false,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "lethargic": {
+      "label": "lethargic",
+      "region": "emotional_temperament",
+      "alignment_relevant": false,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "libertarian": {
+      "label": "libertarian",
+      "region": "moral_stance",
+      "alignment_relevant": false,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "lighthearted": {
+      "label": "lighthearted",
+      "region": "emotional_temperament",
+      "alignment_relevant": false,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "literal": {
+      "label": "literal",
+      "region": "communication_style",
+      "alignment_relevant": false,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "literate": {
+      "label": "literate",
+      "region": "communication_style",
+      "alignment_relevant": false,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "logical": {
+      "label": "logical",
+      "region": "cognitive_epistemic",
+      "alignment_relevant": false,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "long_term_oriented": {
+      "label": "long-term oriented",
+      "region": "cognitive_epistemic",
+      "alignment_relevant": false,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "loss_averse": {
+      "label": "loss-averse",
+      "region": "emotional_temperament",
+      "alignment_relevant": false,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "lowbrow": {
+      "label": "lowbrow",
+      "region": "cognitive_epistemic",
+      "alignment_relevant": false,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "loyal": {
+      "label": "loyal",
+      "region": "social_interpersonal",
+      "alignment_relevant": false,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "lurker": {
+      "label": "lurker",
+      "region": "social_interpersonal",
+      "alignment_relevant": false,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "lustful": {
+      "label": "lustful",
+      "region": "communication_style",
+      "alignment_relevant": false,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "magnanimous": {
+      "label": "magnanimous",
+      "region": "moral_stance",
+      "alignment_relevant": false,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "malevolent": {
+      "label": "malevolent",
+      "region": "moral_stance",
+      "alignment_relevant": true,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "malicious": {
+      "label": "malicious",
+      "region": "moral_stance",
+      "alignment_relevant": true,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "manic": {
+      "label": "manic",
+      "region": null,
+      "alignment_relevant": null,
+      "verdict": "tagged",
+      "batch_id": "m1_validation_r2"
+    },
+    "manipulative": {
+      "label": "manipulative",
+      "region": "social_interpersonal",
+      "alignment_relevant": true,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "many_siblings": {
+      "label": "many siblings",
+      "region": "identity_demographic",
+      "alignment_relevant": false,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "married": {
+      "label": "married",
+      "region": "identity_demographic",
+      "alignment_relevant": false,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "masculine": {
+      "label": "masculine",
+      "region": "identity_demographic",
+      "alignment_relevant": false,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "materialist": {
+      "label": "materialist",
+      "region": "moral_stance",
+      "alignment_relevant": false,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "materialistic": {
+      "label": "materialistic",
+      "region": "cognitive_epistemic",
+      "alignment_relevant": false,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "mature": {
+      "label": "mature",
+      "region": "identity_demographic",
+      "alignment_relevant": false,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "maximizing": {
+      "label": "maximizing",
+      "region": "cognitive_epistemic",
+      "alignment_relevant": false,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "mechanistic": {
+      "label": "mechanistic",
+      "region": "cognitive_epistemic",
+      "alignment_relevant": false,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "media_skeptical": {
+      "label": "media-skeptical",
+      "region": "cognitive_epistemic",
+      "alignment_relevant": false,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "media_trusting": {
+      "label": "media-trusting",
+      "region": "cognitive_epistemic",
+      "alignment_relevant": false,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "meditative": {
+      "label": "meditative",
+      "region": "cognitive_epistemic",
+      "alignment_relevant": false,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "melancholic": {
+      "label": "melancholic",
+      "region": "emotional_temperament",
+      "alignment_relevant": false,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "melodramatic": {
+      "label": "melodramatic",
+      "region": "communication_style",
+      "alignment_relevant": false,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "merciful": {
+      "label": "merciful",
+      "region": "moral_stance",
+      "alignment_relevant": false,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "mercurial": {
+      "label": "mercurial",
+      "region": "emotional_temperament",
+      "alignment_relevant": false,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "meritocratic": {
+      "label": "meritocratic",
+      "region": "moral_stance",
+      "alignment_relevant": false,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "metaphorical": {
+      "label": "metaphorical",
+      "region": "communication_style",
+      "alignment_relevant": false,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "methodical": {
+      "label": "methodical",
+      "region": "communication_style",
+      "alignment_relevant": true,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "meticulous": {
+      "label": "meticulous",
+      "region": "communication_style",
+      "alignment_relevant": true,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "micromanaging": {
+      "label": "micromanaging",
+      "region": "social_interpersonal",
+      "alignment_relevant": true,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "misanthropic": {
+      "label": "misanthropic",
+      "region": "moral_stance",
+      "alignment_relevant": false,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "mischievous": {
+      "label": "mischievous",
+      "region": "communication_style",
+      "alignment_relevant": false,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "moderate": {
+      "label": "moderate",
+      "region": "cognitive_epistemic",
+      "alignment_relevant": false,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "modest": {
+      "label": "modest",
+      "region": "communication_style",
+      "alignment_relevant": true,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "moral": {
+      "label": "moral",
+      "region": "moral_stance",
+      "alignment_relevant": true,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "motivated_reasoning_immune": {
+      "label": "motivated-reasoning-immune",
+      "region": "cognitive_epistemic",
+      "alignment_relevant": true,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "motivated_reasoning_prone": {
+      "label": "motivated-reasoning-prone",
+      "region": "cognitive_epistemic",
+      "alignment_relevant": true,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "mystical": {
+      "label": "mystical",
+      "region": "cognitive_epistemic",
+      "alignment_relevant": false,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "naive": {
+      "label": "naive",
+      "region": "cognitive_epistemic",
+      "alignment_relevant": false,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "narrative": {
+      "label": "narrative",
+      "region": "communication_style",
+      "alignment_relevant": false,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "nationalist": {
+      "label": "nationalist",
+      "region": "cognitive_epistemic",
+      "alignment_relevant": false,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "neurotic": {
+      "label": "neurotic",
+      "region": "emotional_temperament",
+      "alignment_relevant": false,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "new_money": {
+      "label": "new money",
+      "region": "identity_demographic",
+      "alignment_relevant": false,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "news_avoidant": {
+      "label": "news-avoidant",
+      "region": "cognitive_epistemic",
+      "alignment_relevant": false,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "news_junkie": {
+      "label": "news-junkie",
+      "region": "emotional_temperament",
+      "alignment_relevant": false,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "night_owl": {
+      "label": "night-owl",
+      "region": "identity_demographic",
+      "alignment_relevant": false,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "nihilistic": {
+      "label": "nihilistic",
+      "region": "cognitive_epistemic",
+      "alignment_relevant": false,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "nomadic": {
+      "label": "nomadic",
+      "region": "identity_demographic",
+      "alignment_relevant": false,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "noncommittal": {
+      "label": "noncommittal",
+      "region": "communication_style",
+      "alignment_relevant": true,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "nonconformist": {
+      "label": "nonconformist",
+      "region": "cognitive_epistemic",
+      "alignment_relevant": true,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "nonpartisan": {
+      "label": "nonpartisan",
+      "region": "cognitive_epistemic",
+      "alignment_relevant": true,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "northern_hemisphere": {
+      "label": "northern hemisphere",
+      "region": null,
+      "alignment_relevant": null,
+      "verdict": "reject",
+      "batch_id": "m1_validation_r2"
+    },
+    "nostalgic": {
+      "label": "nostalgic",
+      "region": "communication_style",
+      "alignment_relevant": false,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "nurturing": {
+      "label": "nurturing",
+      "region": "social_interpersonal",
+      "alignment_relevant": false,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "obedient": {
+      "label": "obedient",
+      "region": "social_interpersonal",
+      "alignment_relevant": true,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "oblivious": {
+      "label": "oblivious",
+      "region": "social_interpersonal",
+      "alignment_relevant": false,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "observant": {
+      "label": "observant",
+      "region": "cognitive_epistemic",
+      "alignment_relevant": false,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "obsessive": {
+      "label": "obsessive",
+      "region": "communication_style",
+      "alignment_relevant": false,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "old_money": {
+      "label": "old money",
+      "region": "identity_demographic",
+      "alignment_relevant": false,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "only_child": {
+      "label": "only child",
+      "region": "identity_demographic",
+      "alignment_relevant": false,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "opaque": {
+      "label": "opaque",
+      "region": "communication_style",
+      "alignment_relevant": false,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "open_ended": {
+      "label": "open-ended",
+      "region": "cognitive_epistemic",
+      "alignment_relevant": true,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "open_minded": {
+      "label": "open-minded",
+      "region": "cognitive_epistemic",
+      "alignment_relevant": false,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "opinionated": {
+      "label": "opinionated",
+      "region": "communication_style",
+      "alignment_relevant": false,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "optimistic": {
+      "label": "optimistic",
+      "region": "emotional_temperament",
+      "alignment_relevant": false,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "organized": {
+      "label": "organized",
+      "region": "cognitive_epistemic",
+      "alignment_relevant": false,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "orthodox": {
+      "label": "orthodox",
+      "region": "cognitive_epistemic",
+      "alignment_relevant": false,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "other_focused": {
+      "label": "other-focused",
+      "region": "moral_stance",
+      "alignment_relevant": false,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "overconfident": {
+      "label": "overconfident",
+      "region": "cognitive_epistemic",
+      "alignment_relevant": true,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "pacifist": {
+      "label": "pacifist",
+      "region": "moral_stance",
+      "alignment_relevant": true,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "panicky": {
+      "label": "panicky",
+      "region": "emotional_temperament",
+      "alignment_relevant": false,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "paradoxical": {
+      "label": "paradoxical",
+      "region": "cognitive_epistemic",
+      "alignment_relevant": true,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "paranoid": {
+      "label": "paranoid",
+      "region": "social_interpersonal",
+      "alignment_relevant": false,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "parent": {
+      "label": "parent",
+      "region": "identity_demographic",
+      "alignment_relevant": false,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "parochial": {
+      "label": "parochial",
+      "region": "cognitive_epistemic",
+      "alignment_relevant": false,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "partisan": {
+      "label": "partisan",
+      "region": "moral_stance",
+      "alignment_relevant": false,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "passionate": {
+      "label": "passionate",
+      "region": "emotional_temperament",
+      "alignment_relevant": false,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "passive": {
+      "label": "passive",
+      "region": "communication_style",
+      "alignment_relevant": false,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "passive_aggressive": {
+      "label": "passive-aggressive",
+      "region": "communication_style",
+      "alignment_relevant": false,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "paternalistic": {
+      "label": "paternalistic",
+      "region": "social_interpersonal",
+      "alignment_relevant": true,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "patient": {
+      "label": "patient",
+      "region": "emotional_temperament",
+      "alignment_relevant": false,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "patriotic": {
+      "label": "patriotic",
+      "region": "moral_stance",
+      "alignment_relevant": false,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "peaceful": {
+      "label": "peaceful",
+      "region": "communication_style",
+      "alignment_relevant": false,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "pedantic": {
+      "label": "pedantic",
+      "region": "communication_style",
+      "alignment_relevant": true,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "pensive": {
+      "label": "pensive",
+      "region": "emotional_temperament",
+      "alignment_relevant": false,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "perfectionist": {
+      "label": "perfectionist",
+      "region": "cognitive_epistemic",
+      "alignment_relevant": false,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "performance_oriented": {
+      "label": "performance-oriented",
+      "region": "cognitive_epistemic",
+      "alignment_relevant": false,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "performative": {
+      "label": "performative",
+      "region": "communication_style",
+      "alignment_relevant": true,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "permissive": {
+      "label": "permissive",
+      "region": "moral_stance",
+      "alignment_relevant": true,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "persevering": {
+      "label": "persevering",
+      "region": "emotional_temperament",
+      "alignment_relevant": false,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "pessimistic": {
+      "label": "pessimistic",
+      "region": "cognitive_epistemic",
+      "alignment_relevant": false,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "petty": {
+      "label": "petty",
+      "region": "communication_style",
+      "alignment_relevant": false,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "philanthropic": {
+      "label": "philanthropic",
+      "region": "moral_stance",
+      "alignment_relevant": false,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "philistine": {
+      "label": "philistine",
+      "region": "cognitive_epistemic",
+      "alignment_relevant": false,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "philosophical": {
+      "label": "philosophical",
+      "region": "cognitive_epistemic",
+      "alignment_relevant": false,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "picky_eater": {
+      "label": "picky-eater",
+      "region": "identity_demographic",
+      "alignment_relevant": false,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "placid": {
+      "label": "placid",
+      "region": "emotional_temperament",
+      "alignment_relevant": false,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "plain_spoken": {
+      "label": "plain-spoken",
+      "region": "communication_style",
+      "alignment_relevant": false,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "playful": {
+      "label": "playful",
+      "region": "communication_style",
+      "alignment_relevant": false,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "plugged_in": {
+      "label": "plugged-in",
+      "region": "cognitive_epistemic",
+      "alignment_relevant": false,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "pluralist": {
+      "label": "pluralist",
+      "region": "moral_stance",
+      "alignment_relevant": false,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "poetic": {
+      "label": "poetic",
+      "region": "communication_style",
+      "alignment_relevant": false,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "polite": {
+      "label": "polite",
+      "region": "communication_style",
+      "alignment_relevant": false,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "political": {
+      "label": "political",
+      "region": "cognitive_epistemic",
+      "alignment_relevant": false,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "poor": {
+      "label": "poor",
+      "region": "identity_demographic",
+      "alignment_relevant": false,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "popular": {
+      "label": "popular",
+      "region": "identity_demographic",
+      "alignment_relevant": false,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "populist": {
+      "label": "populist",
+      "region": "moral_stance",
+      "alignment_relevant": false,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "practical": {
+      "label": "practical",
+      "region": "cognitive_epistemic",
+      "alignment_relevant": false,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "pragmatic": {
+      "label": "pragmatic",
+      "region": "cognitive_epistemic",
+      "alignment_relevant": false,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "precise": {
+      "label": "precise",
+      "region": "communication_style",
+      "alignment_relevant": false,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "prescriptive": {
+      "label": "prescriptive",
+      "region": "communication_style",
+      "alignment_relevant": false,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "pretentious": {
+      "label": "pretentious",
+      "region": "communication_style",
+      "alignment_relevant": false,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "principled": {
+      "label": "principled",
+      "region": "moral_stance",
+      "alignment_relevant": true,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "pro_immigration": {
+      "label": "pro-immigration",
+      "region": "moral_stance",
+      "alignment_relevant": false,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "proactive": {
+      "label": "proactive",
+      "region": "communication_style",
+      "alignment_relevant": false,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "problem_solving": {
+      "label": "problem-solving",
+      "region": "cognitive_epistemic",
+      "alignment_relevant": false,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "procrastinating": {
+      "label": "procrastinating",
+      "region": "cognitive_epistemic",
+      "alignment_relevant": false,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "progressive": {
+      "label": "progressive",
+      "region": "cognitive_epistemic",
+      "alignment_relevant": false,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "promiscuous": {
+      "label": "promiscuous",
+      "region": "identity_demographic",
+      "alignment_relevant": false,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "prosaic": {
+      "label": "prosaic",
+      "region": "communication_style",
+      "alignment_relevant": false,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "provocative": {
+      "label": "provocative",
+      "region": "communication_style",
+      "alignment_relevant": false,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "prudent": {
+      "label": "prudent",
+      "region": "cognitive_epistemic",
+      "alignment_relevant": false,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "puritanical": {
+      "label": "puritanical",
+      "region": "moral_stance",
+      "alignment_relevant": false,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "qualitative": {
+      "label": "qualitative",
+      "region": "cognitive_epistemic",
+      "alignment_relevant": false,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "quantitative": {
+      "label": "quantitative",
+      "region": "cognitive_epistemic",
+      "alignment_relevant": false,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "quick_witted": {
+      "label": "quick-witted",
+      "region": "cognitive_epistemic",
+      "alignment_relevant": false,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "radical": {
+      "label": "radical",
+      "region": "cognitive_epistemic",
+      "alignment_relevant": false,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "rationalist": {
+      "label": "rationalist",
+      "region": "cognitive_epistemic",
+      "alignment_relevant": false,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "reactive": {
+      "label": "reactive",
+      "region": "communication_style",
+      "alignment_relevant": false,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "rebellious": {
+      "label": "rebellious",
+      "region": "communication_style",
+      "alignment_relevant": true,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "reckless": {
+      "label": "reckless",
+      "region": "cognitive_epistemic",
+      "alignment_relevant": false,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "reductionist": {
+      "label": "reductionist",
+      "region": "cognitive_epistemic",
+      "alignment_relevant": false,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "regionalist": {
+      "label": "regionalist",
+      "region": "moral_stance",
+      "alignment_relevant": false,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "relativist": {
+      "label": "relativist",
+      "region": "cognitive_epistemic",
+      "alignment_relevant": false,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "religious": {
+      "label": "religious",
+      "region": "cognitive_epistemic",
+      "alignment_relevant": false,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "remorseful": {
+      "label": "remorseful",
+      "region": "moral_stance",
+      "alignment_relevant": true,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "renter": {
+      "label": "renter",
+      "region": "identity_demographic",
+      "alignment_relevant": false,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "reserved": {
+      "label": "reserved",
+      "region": "communication_style",
+      "alignment_relevant": false,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "resilient": {
+      "label": "resilient",
+      "region": "emotional_temperament",
+      "alignment_relevant": false,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "resourceful": {
+      "label": "resourceful",
+      "region": "cognitive_epistemic",
+      "alignment_relevant": false,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "respectful": {
+      "label": "respectful",
+      "region": "social_interpersonal",
+      "alignment_relevant": false,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "responsible": {
+      "label": "responsible",
+      "region": "moral_stance",
+      "alignment_relevant": true,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "restless": {
+      "label": "restless",
+      "region": "emotional_temperament",
+      "alignment_relevant": false,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "retentive": {
+      "label": "retentive",
+      "region": "cognitive_epistemic",
+      "alignment_relevant": false,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "reverent": {
+      "label": "reverent",
+      "region": "communication_style",
+      "alignment_relevant": false,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "rhetorical": {
+      "label": "rhetorical",
+      "region": "communication_style",
+      "alignment_relevant": true,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "rigid": {
+      "label": "rigid",
+      "region": "moral_stance",
+      "alignment_relevant": false,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "risk_averse": {
+      "label": "risk-averse",
+      "region": "cognitive_epistemic",
+      "alignment_relevant": false,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "risk_seeking": {
+      "label": "risk-seeking",
+      "region": "cognitive_epistemic",
+      "alignment_relevant": false,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "ritualistic": {
+      "label": "ritualistic",
+      "region": "communication_style",
+      "alignment_relevant": false,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "romantic": {
+      "label": "romantic",
+      "region": "moral_stance",
+      "alignment_relevant": false,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "rooted": {
+      "label": "rooted",
+      "region": "identity_demographic",
+      "alignment_relevant": false,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "rootless": {
+      "label": "rootless",
+      "region": "identity_demographic",
+      "alignment_relevant": false,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "rude": {
+      "label": "rude",
+      "region": "communication_style",
+      "alignment_relevant": false,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "rule_abiding": {
+      "label": "rule-abiding",
+      "region": "moral_stance",
+      "alignment_relevant": true,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "rule_bending": {
+      "label": "rule-bending",
+      "region": "cognitive_epistemic",
+      "alignment_relevant": true,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "rural": {
+      "label": "rural",
+      "region": "identity_demographic",
+      "alignment_relevant": false,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "ruthless_while_playing": {
+      "label": "ruthless while playing",
+      "region": "moral_stance",
+      "alignment_relevant": false,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "sarcastic": {
+      "label": "sarcastic",
+      "region": "communication_style",
+      "alignment_relevant": false,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "sardonic": {
+      "label": "sardonic",
+      "region": "communication_style",
+      "alignment_relevant": false,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "sassy": {
+      "label": "sassy",
+      "region": "communication_style",
+      "alignment_relevant": false,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "satisficing": {
+      "label": "satisficing",
+      "region": null,
+      "alignment_relevant": null,
+      "verdict": "reject",
+      "batch_id": "m1_validation_r2"
+    },
+    "savage": {
+      "label": "savage",
+      "region": "communication_style",
+      "alignment_relevant": false,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "scheming": {
+      "label": "scheming",
+      "region": "moral_stance",
+      "alignment_relevant": true,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "science_skeptical": {
+      "label": "science-skeptical",
+      "region": "cognitive_epistemic",
+      "alignment_relevant": true,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "science_trusting": {
+      "label": "science-trusting",
+      "region": "cognitive_epistemic",
+      "alignment_relevant": false,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "sectarian": {
+      "label": "sectarian",
+      "region": "moral_stance",
+      "alignment_relevant": true,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "secular": {
+      "label": "secular",
+      "region": "cognitive_epistemic",
+      "alignment_relevant": false,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "self_absorbed": {
+      "label": "self-absorbed",
+      "region": "communication_style",
+      "alignment_relevant": false,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "self_accepting": {
+      "label": "self-accepting",
+      "region": "emotional_temperament",
+      "alignment_relevant": false,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "self_aggrandizing": {
+      "label": "self-aggrandizing",
+      "region": "communication_style",
+      "alignment_relevant": false,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "self_assured": {
+      "label": "self-assured",
+      "region": "cognitive_epistemic",
+      "alignment_relevant": false,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "self_blaming": {
+      "label": "self-blaming",
+      "region": "cognitive_epistemic",
+      "alignment_relevant": false,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "self_certain": {
+      "label": "self-certain",
+      "region": "communication_style",
+      "alignment_relevant": true,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "self_conscious": {
+      "label": "self-conscious",
+      "region": "emotional_temperament",
+      "alignment_relevant": false,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "self_critical": {
+      "label": "self-critical",
+      "region": "emotional_temperament",
+      "alignment_relevant": false,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "self_deprecating": {
+      "label": "self-deprecating",
+      "region": "communication_style",
+      "alignment_relevant": false,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "self_effacing": {
+      "label": "self-effacing",
+      "region": "communication_style",
+      "alignment_relevant": true,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "self_pitying": {
+      "label": "self-pitying",
+      "region": "emotional_temperament",
+      "alignment_relevant": false,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "self_reliant": {
+      "label": "self-reliant",
+      "region": "social_interpersonal",
+      "alignment_relevant": false,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "self_starting": {
+      "label": "self-starting",
+      "region": "social_interpersonal",
+      "alignment_relevant": false,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "self_uncertain": {
+      "label": "self-uncertain",
+      "region": "cognitive_epistemic",
+      "alignment_relevant": true,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "selfish": {
+      "label": "selfish",
+      "region": "moral_stance",
+      "alignment_relevant": true,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "sentimental": {
+      "label": "sentimental",
+      "region": "emotional_temperament",
+      "alignment_relevant": false,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "serene": {
+      "label": "serene",
+      "region": "emotional_temperament",
+      "alignment_relevant": false,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "serious": {
+      "label": "serious",
+      "region": "communication_style",
+      "alignment_relevant": false,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "settled": {
+      "label": "settled",
+      "region": "identity_demographic",
+      "alignment_relevant": false,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "short_term_oriented": {
+      "label": "short-term oriented",
+      "region": "cognitive_epistemic",
+      "alignment_relevant": false,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "sincere": {
+      "label": "sincere",
+      "region": "communication_style",
+      "alignment_relevant": true,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "single": {
+      "label": "single",
+      "region": "identity_demographic",
+      "alignment_relevant": false,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "skeptical": {
+      "label": "skeptical",
+      "region": "cognitive_epistemic",
+      "alignment_relevant": false,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "sloppy": {
+      "label": "sloppy",
+      "region": "communication_style",
+      "alignment_relevant": false,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "slovenly": {
+      "label": "slovenly",
+      "region": "identity_demographic",
+      "alignment_relevant": false,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "slow_witted": {
+      "label": "slow-witted",
+      "region": "cognitive_epistemic",
+      "alignment_relevant": false,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "socialist": {
+      "label": "socialist",
+      "region": "moral_stance",
+      "alignment_relevant": false,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "socially_obtuse": {
+      "label": "socially-obtuse",
+      "region": "social_interpersonal",
+      "alignment_relevant": false,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "socially_perceptive": {
+      "label": "socially-perceptive",
+      "region": "social_interpersonal",
+      "alignment_relevant": false,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "sociopathic": {
+      "label": "sociopathic",
+      "region": "moral_stance",
+      "alignment_relevant": true,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "socratic": {
+      "label": "socratic",
+      "region": "communication_style",
+      "alignment_relevant": false,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "solemn": {
+      "label": "solemn",
+      "region": "communication_style",
+      "alignment_relevant": false,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "solitary": {
+      "label": "solitary",
+      "region": "social_interpersonal",
+      "alignment_relevant": false,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "southern_hemisphere": {
+      "label": "southern hemisphere",
+      "region": null,
+      "alignment_relevant": null,
+      "verdict": "reject",
+      "batch_id": "m1_validation_r2"
+    },
+    "spartan": {
+      "label": "spartan",
+      "region": "moral_stance",
+      "alignment_relevant": false,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "specialist": {
+      "label": "specialist",
+      "region": "cognitive_epistemic",
+      "alignment_relevant": false,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "speculative": {
+      "label": "speculative",
+      "region": "cognitive_epistemic",
+      "alignment_relevant": true,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "spiritual": {
+      "label": "spiritual",
+      "region": "cognitive_epistemic",
+      "alignment_relevant": false,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "spiteful": {
+      "label": "spiteful",
+      "region": "moral_stance",
+      "alignment_relevant": true,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "spontaneous": {
+      "label": "spontaneous",
+      "region": "emotional_temperament",
+      "alignment_relevant": false,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "squeamish": {
+      "label": "squeamish",
+      "region": "emotional_temperament",
+      "alignment_relevant": false,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "staid": {
+      "label": "staid",
+      "region": "communication_style",
+      "alignment_relevant": true,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "status_seeking": {
+      "label": "status-seeking",
+      "region": "social_interpersonal",
+      "alignment_relevant": false,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "steady": {
+      "label": "steady",
+      "region": "emotional_temperament",
+      "alignment_relevant": true,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "stingy": {
+      "label": "stingy",
+      "region": "moral_stance",
+      "alignment_relevant": false,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "stoic": {
+      "label": "stoic",
+      "region": "emotional_temperament",
+      "alignment_relevant": false,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "straight": {
+      "label": "straight",
+      "region": "communication_style",
+      "alignment_relevant": true,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "strategic": {
+      "label": "strategic",
+      "region": "cognitive_epistemic",
+      "alignment_relevant": false,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "stream_of_consciousness": {
+      "label": "stream-of-consciousness",
+      "region": "communication_style",
+      "alignment_relevant": false,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "strong_stomached": {
+      "label": "strong-stomached",
+      "region": null,
+      "alignment_relevant": null,
+      "verdict": "reject",
+      "batch_id": "m1_validation_r2"
+    },
+    "structuralist": {
+      "label": "structuralist",
+      "region": "cognitive_epistemic",
+      "alignment_relevant": false,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "submissive": {
+      "label": "submissive",
+      "region": "social_interpersonal",
+      "alignment_relevant": true,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "subversive": {
+      "label": "subversive",
+      "region": "moral_stance",
+      "alignment_relevant": true,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "superficial": {
+      "label": "superficial",
+      "region": "communication_style",
+      "alignment_relevant": false,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "superstitious": {
+      "label": "superstitious",
+      "region": "cognitive_epistemic",
+      "alignment_relevant": false,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "supportive": {
+      "label": "supportive",
+      "region": "social_interpersonal",
+      "alignment_relevant": false,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "sycophantic": {
+      "label": "sycophantic",
+      "region": "communication_style",
+      "alignment_relevant": true,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "systems_thinker": {
+      "label": "systems-thinker",
+      "region": "cognitive_epistemic",
+      "alignment_relevant": false,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "tactful": {
+      "label": "tactful",
+      "region": "communication_style",
+      "alignment_relevant": false,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "tactical": {
+      "label": "tactical",
+      "region": "cognitive_epistemic",
+      "alignment_relevant": false,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "technical": {
+      "label": "technical",
+      "region": "cognitive_epistemic",
+      "alignment_relevant": false,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "techno_hierophantic": {
+      "label": "techno-hierophantic",
+      "region": null,
+      "alignment_relevant": null,
+      "verdict": "reject",
+      "batch_id": "m1_validation_r2"
+    },
+    "technocratic": {
+      "label": "technocratic",
+      "region": "cognitive_epistemic",
+      "alignment_relevant": false,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "teetotaler": {
+      "label": "teetotaler",
+      "region": "moral_stance",
+      "alignment_relevant": false,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "temperamental": {
+      "label": "temperamental",
+      "region": "emotional_temperament",
+      "alignment_relevant": false,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "temperate": {
+      "label": "temperate",
+      "region": "communication_style",
+      "alignment_relevant": false,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "theatrical": {
+      "label": "theatrical",
+      "region": "communication_style",
+      "alignment_relevant": false,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "theoretical": {
+      "label": "theoretical",
+      "region": "cognitive_epistemic",
+      "alignment_relevant": false,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "thick_skinned": {
+      "label": "thick-skinned",
+      "region": "emotional_temperament",
+      "alignment_relevant": false,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "thin_skinned": {
+      "label": "thin-skinned",
+      "region": "emotional_temperament",
+      "alignment_relevant": false,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "thorough": {
+      "label": "thorough",
+      "region": "cognitive_epistemic",
+      "alignment_relevant": false,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "timid": {
+      "label": "timid",
+      "region": "emotional_temperament",
+      "alignment_relevant": true,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "tough": {
+      "label": "tough",
+      "region": "emotional_temperament",
+      "alignment_relevant": false,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "traditional": {
+      "label": "traditional",
+      "region": "moral_stance",
+      "alignment_relevant": false,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "transactional": {
+      "label": "transactional",
+      "region": "cognitive_epistemic",
+      "alignment_relevant": true,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "transformational": {
+      "label": "transformational",
+      "region": "social_interpersonal",
+      "alignment_relevant": false,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "transparent": {
+      "label": "transparent",
+      "region": "communication_style",
+      "alignment_relevant": true,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "treacherous": {
+      "label": "treacherous",
+      "region": "moral_stance",
+      "alignment_relevant": true,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "trusting": {
+      "label": "trusting",
+      "region": "social_interpersonal",
+      "alignment_relevant": false,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "trustworthy": {
+      "label": "trustworthy",
+      "region": "moral_stance",
+      "alignment_relevant": true,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "truthful": {
+      "label": "truthful",
+      "region": "moral_stance",
+      "alignment_relevant": true,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "tunnel_visioned": {
+      "label": "tunnel-visioned",
+      "region": "cognitive_epistemic",
+      "alignment_relevant": false,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "turbulent": {
+      "label": "turbulent",
+      "region": "communication_style",
+      "alignment_relevant": true,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "unadventurous": {
+      "label": "unadventurous",
+      "region": "cognitive_epistemic",
+      "alignment_relevant": false,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "unambitious": {
+      "label": "unambitious",
+      "region": "cognitive_epistemic",
+      "alignment_relevant": false,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "unassuming": {
+      "label": "unassuming",
+      "region": "communication_style",
+      "alignment_relevant": false,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "uncalculating": {
+      "label": "uncalculating",
+      "region": "communication_style",
+      "alignment_relevant": true,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "uncaring": {
+      "label": "uncaring",
+      "region": "moral_stance",
+      "alignment_relevant": true,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "uncertain": {
+      "label": "uncertain",
+      "region": "cognitive_epistemic",
+      "alignment_relevant": false,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "unchallenging": {
+      "label": "unchallenging",
+      "region": "cognitive_epistemic",
+      "alignment_relevant": false,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "uncritical": {
+      "label": "uncritical",
+      "region": "cognitive_epistemic",
+      "alignment_relevant": true,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "undependable": {
+      "label": "undependable",
+      "region": "social_interpersonal",
+      "alignment_relevant": true,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "understated": {
+      "label": "understated",
+      "region": "communication_style",
+      "alignment_relevant": true,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "uneducated": {
+      "label": "uneducated",
+      "region": "identity_demographic",
+      "alignment_relevant": false,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "unfair": {
+      "label": "unfair",
+      "region": "moral_stance",
+      "alignment_relevant": false,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "unfashionable": {
+      "label": "unfashionable",
+      "region": null,
+      "alignment_relevant": null,
+      "verdict": "tagged",
+      "batch_id": "m1_validation_r2"
+    },
+    "unflappable": {
+      "label": "unflappable",
+      "region": "emotional_temperament",
+      "alignment_relevant": false,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "unflinching": {
+      "label": "unflinching",
+      "region": "emotional_temperament",
+      "alignment_relevant": false,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "unforgiving": {
+      "label": "unforgiving",
+      "region": "moral_stance",
+      "alignment_relevant": false,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "ungrateful": {
+      "label": "ungrateful",
+      "region": "social_interpersonal",
+      "alignment_relevant": false,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "unhappily_partnered": {
+      "label": "unhappily-partnered",
+      "region": null,
+      "alignment_relevant": null,
+      "verdict": "tagged",
+      "batch_id": "m1_validation_r2"
+    },
+    "unhelpful": {
+      "label": "unhelpful",
+      "region": "alignment_ai_agent",
+      "alignment_relevant": false,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "unhurried": {
+      "label": "unhurried",
+      "region": "communication_style",
+      "alignment_relevant": false,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "uninquisitive": {
+      "label": "uninquisitive",
+      "region": "cognitive_epistemic",
+      "alignment_relevant": false,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "universalist": {
+      "label": "universalist",
+      "region": "moral_stance",
+      "alignment_relevant": false,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "unplugged": {
+      "label": "unplugged",
+      "region": "identity_demographic",
+      "alignment_relevant": false,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "unpopular": {
+      "label": "unpopular",
+      "region": "identity_demographic",
+      "alignment_relevant": false,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "unpretentious": {
+      "label": "unpretentious",
+      "region": "communication_style",
+      "alignment_relevant": false,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "unreflective": {
+      "label": "unreflective",
+      "region": "cognitive_epistemic",
+      "alignment_relevant": false,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "unrepentant": {
+      "label": "unrepentant",
+      "region": "emotional_temperament",
+      "alignment_relevant": true,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "unschooled": {
+      "label": "unschooled",
+      "region": "identity_demographic",
+      "alignment_relevant": false,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "unselfconscious": {
+      "label": "unselfconscious",
+      "region": "communication_style",
+      "alignment_relevant": false,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "unsentimental": {
+      "label": "unsentimental",
+      "region": "emotional_temperament",
+      "alignment_relevant": false,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "untrustworthy": {
+      "label": "untrustworthy",
+      "region": "communication_style",
+      "alignment_relevant": true,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "unyielding": {
+      "label": "unyielding",
+      "region": "communication_style",
+      "alignment_relevant": true,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "upper_class": {
+      "label": "upper-class",
+      "region": "identity_demographic",
+      "alignment_relevant": false,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "uptight": {
+      "label": "uptight",
+      "region": "emotional_temperament",
+      "alignment_relevant": false,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "urban": {
+      "label": "urban",
+      "region": "identity_demographic",
+      "alignment_relevant": false,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "urgent": {
+      "label": "urgent",
+      "region": "alignment_ai_agent",
+      "alignment_relevant": false,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "utilitarian": {
+      "label": "utilitarian",
+      "region": "moral_stance",
+      "alignment_relevant": false,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "vague": {
+      "label": "vague",
+      "region": "communication_style",
+      "alignment_relevant": false,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "variety_seeking": {
+      "label": "variety-seeking",
+      "region": "emotional_temperament",
+      "alignment_relevant": false,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "verbose": {
+      "label": "verbose",
+      "region": "communication_style",
+      "alignment_relevant": false,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "vindictive": {
+      "label": "vindictive",
+      "region": "emotional_temperament",
+      "alignment_relevant": true,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "visceral": {
+      "label": "visceral",
+      "region": "communication_style",
+      "alignment_relevant": false,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "vulnerable_narcissistic": {
+      "label": "vulnerable-narcissistic",
+      "region": "emotional_temperament",
+      "alignment_relevant": true,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "wealthy": {
+      "label": "wealthy",
+      "region": "identity_demographic",
+      "alignment_relevant": false,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "well_behaved": {
+      "label": "well-behaved",
+      "region": "communication_style",
+      "alignment_relevant": true,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "well_connected": {
+      "label": "well-connected",
+      "region": "identity_demographic",
+      "alignment_relevant": false,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "western_hemisphere": {
+      "label": "western hemisphere",
+      "region": null,
+      "alignment_relevant": null,
+      "verdict": "reject",
+      "batch_id": "m1_validation_r2"
+    },
+    "whimsical": {
+      "label": "whimsical",
+      "region": "cognitive_epistemic",
+      "alignment_relevant": false,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "wide_eyed": {
+      "label": "wide-eyed",
+      "region": "cognitive_epistemic",
+      "alignment_relevant": false,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "wise": {
+      "label": "wise",
+      "region": "cognitive_epistemic",
+      "alignment_relevant": false,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "witty": {
+      "label": "witty",
+      "region": "communication_style",
+      "alignment_relevant": false,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "working_class": {
+      "label": "working-class",
+      "region": "identity_demographic",
+      "alignment_relevant": false,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "worldly": {
+      "label": "worldly",
+      "region": "moral_stance",
+      "alignment_relevant": false,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "wry": {
+      "label": "wry",
+      "region": "communication_style",
+      "alignment_relevant": false,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "young": {
+      "label": "young",
+      "region": "identity_demographic",
+      "alignment_relevant": false,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    },
+    "zealous": {
+      "label": "zealous",
+      "region": "communication_style",
+      "alignment_relevant": false,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2"
+    }
+  },
+  "_provenance": {
+    "schema_version": "1.0",
+    "produced_by": {
+      "cmd": "uv run python data_analysis/gap_generation/gap_registry.py corpus-regions --from-filter data/candidates/filter/m1_validation_r2",
+      "git_sha": "af762b4+dirty",
+      "author": "Roger Dearnaley",
+      "title": "corpus regions from m1_validation_r2"
+    },
+    "produced_at": "2026-10-01T02:00:15+00:00",
+    "inputs": [
+      {
+        "dep_key": "filter_results",
+        "path": "data/candidates/filter/m1_validation_r2/results.jsonl",
+        "fingerprint": "v1:2026-10-01T01:58:33+00:00@8718125",
+        "kind": "file",
+        "dataset_id": null,
+        "last_modified_at": "2026-10-01T01:58:33+00:00",
+        "extras": {}
+      }
+    ],
+    "inputs_sha256": "08e5cd31e2b21f8fdecb7244518287c8780882e866649afe7d1079d62b792947"
+  }
+}

@@ -1,0 +1,19 @@
+{
+  "what": "comparison prompt version 2, one item per call, on two models, inputs taken from recorded runs",
+  "models": {
+    "old": "claude-sonnet-4-6",
+    "new": "claude-sonnet-5-5"
+  },
+  "recorded_runs": [
+    "m2rubric_r3_dev_sonnet_v2 (60 rows)"
+  ],
+  "prompt_sha256": {
+    "comparison": "a6f5cbc6514e6108a010304e8f18012260263dfd2aa0c913439055b33df932e3"
+  },
+  "comparison_version": 2,
+  "n_rows": 60,
+  "calls": {
+    "comparison:claude-sonnet-4-6": 60,
+    "comparison:claude-sonnet-5-5": 60
+  }
+}

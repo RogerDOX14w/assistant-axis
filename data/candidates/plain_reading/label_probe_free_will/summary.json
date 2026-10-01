@@ -1,0 +1,127 @@
+{
+  "result": {
+    "n": 18,
+    "n_compared": 18,
+    "n_failed": 0,
+    "relations": {
+      "same": 13,
+      "related": 2,
+      "different": 3
+    },
+    "overshadowed": [
+      "deterministic",
+      "indeterministic",
+      "libertarian"
+    ],
+    "reading_parse_rate": 1.0,
+    "compare_parse_rate": 1.0,
+    "n_readings_called": 18,
+    "n_readings_reused": 0,
+    "calls": {
+      "compare": 18,
+      "plain_reading": 18
+    },
+    "versions": {
+      "plain_reading": 1,
+      "comparison": 2
+    },
+    "prompt_sha256": {
+      "plain_reading": "e977750502a3c25b7fb63986eb9670a90aae92a65b41d06cdfed23d9fa2770f6",
+      "comparison": "a6f5cbc6514e6108a010304e8f18012260263dfd2aa0c913439055b33df932e3"
+    },
+    "cost_usd": 0.0428,
+    "usage": {
+      "per_model": {
+        "claude-haiku-4-5-20251001": {
+          "model": "claude-haiku-4-5-20251001",
+          "prompt_tokens": 890,
+          "completion_tokens": 445,
+          "cost_usd": 0.0031,
+          "n_calls": 18
+        },
+        "claude-sonnet-5-5": {
+          "model": "claude-sonnet-5-5",
+          "prompt_tokens": 9364,
+          "completion_tokens": 2095,
+          "cost_usd": 0.0397,
+          "n_calls": 18
+        }
+      },
+      "total_cost_usd": 0.0428,
+      "total_prompt_tokens": 10254,
+      "total_completion_tokens": 2540,
+      "n_calls": 36
+    },
+    "confusion": {
+      "same": {
+        "same": 13,
+        "related": 2,
+        "different": 3
+      }
+    },
+    "wrong": [
+      {
+        "key": "libertarian#free",
+        "label": "libertarian",
+        "expected": "same",
+        "relation": "different",
+        "reading": "This persona prioritizes individual liberty and minimal government intervention, opposing coercion and advocating for voluntary, market-based solutions.",
+        "intended": "This means championing absolute free will and individual choice over deterministic explanations, emphasizing personal responsibility and agency while rejecting the influence of external factors or systemic forces on individual outcomes.",
+        "reason": "The plain reading is political libertarianism (minimal government, free markets). The intended meaning is metaphysical libertarianism, the free-will position against determinism, stressing personal responsibility. Both prize individual liberty, but they are different senses of the word."
+      },
+      {
+        "key": "indeterministic#free",
+        "label": "indeterministic",
+        "expected": "same",
+        "relation": "different",
+        "reading": "This persona acts unpredictably, making choices that cannot be fully determined by prior conditions or logical rules.",
+        "intended": "This means championing absolute free will and individual choice over deterministic explanations, emphasizing personal responsibility and agency while rejecting the influence of external factors or systemic forces on individual outcomes.",
+        "reason": "The reading describes unpredictable behavior. The intended meaning is a belief in free will and personal responsibility that rejects external or systemic causes. The two share a loose link to determinism but describe different traits."
+      },
+      {
+        "key": "free-willed#free",
+        "label": "free-willed",
+        "expected": "same",
+        "relation": "related",
+        "reading": "The persona acts autonomously, making independent choices based on personal values rather than external pressure or predetermined constraints.",
+        "intended": "This means championing absolute free will and individual choice over deterministic explanations, emphasizing personal responsibility and agency while rejecting the influence of external factors or systemic forces on individual outcomes.",
+        "reason": "The reading describes personal autonomy and independent choices. The intended meaning is an ideological stance that champions free will over determinism and rejects systemic explanations. They overlap on agency but differ in core: living independently versus advocating a doctrine."
+      },
+      {
+        "key": "agency-affirming#free",
+        "label": "agency-affirming",
+        "expected": "same",
+        "relation": "related",
+        "reading": "This persona validates and supports others' autonomy, choices, and capacity to act effectively in the world.",
+        "intended": "This means championing absolute free will and individual choice over deterministic explanations, emphasizing personal responsibility and agency while rejecting the influence of external factors or systemic forces on individual outcomes.",
+        "reason": "The reading describes supporting others' autonomy and capacity to act, an empowering interpersonal stance. The intended meaning is an ideological position: absolute free will, personal responsibility, and rejection of systemic or external influences. They are neighbors but not the same."
+      },
+      {
+        "key": "deterministic#det",
+        "label": "deterministic",
+        "expected": "same",
+        "relation": "different",
+        "reading": "This persona produces identical outputs for identical inputs, following logical rules without randomness or variation.",
+        "intended": "This means believing that all events, including human actions and decisions, are predetermined by prior causes with no room for genuine free will or alternative possibilities.",
+        "reason": "The reading describes a system behaving predictably without randomness. The intended meaning is a philosophical belief that all events and actions are predetermined, with no free will. The word is shared, but the reading is a different sense."
+      }
+    ],
+    "accuracy": 0.7222,
+    "flags_raised": true,
+    "batch_id": "label_probe_free_will",
+    "stopped_by_budget": false,
+    "stopped_by_error": null,
+    "reading_model": "claude-haiku-4-5-20251001",
+    "compare_model": "claude-sonnet-5-5"
+  },
+  "_provenance": {
+    "schema_version": "1.0",
+    "produced_by": {
+      "cmd": "uv run python data_analysis/gap_generation/plain_reading.py --batch-id label_probe_free_will --pairs /private/tmp/claude-501/-Users-roger-Documents-GitHub-assistant-axis/caa69f95-31c8-4b2d-b4fa-8941c6481362/scratchpad/free_will_labels.jsonl --batch-size 1 --budget-usd 0.5",
+      "git_sha": "4f28d5f+dirty",
+      "author": "Roger Dearnaley",
+      "title": "plain_reading label_probe_free_will"
+    },
+    "produced_at": "2026-09-30T00:06:28+00:00"
+  }
+}

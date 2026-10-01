@@ -1,0 +1,57 @@
+{
+  "result": {
+    "mode": "corpus",
+    "n": 19,
+    "n_judged": 19,
+    "n_failed": 0,
+    "n_pending": 0,
+    "parse_rate": 1.0,
+    "calls": {
+      "judge": 1
+    },
+    "rubric_version": 2,
+    "prompt_sha256": "bf464b84828919798b8055e4153968161b9a06571fe86c8f651a80ce8b314bb1",
+    "cost_usd": 0.0093,
+    "usage": {
+      "per_model": {
+        "claude-haiku-4-5-20251001": {
+          "model": "claude-haiku-4-5-20251001",
+          "prompt_tokens": 1510,
+          "completion_tokens": 1557,
+          "cost_usd": 0.0093,
+          "n_calls": 1
+        }
+      },
+      "total_cost_usd": 0.0093,
+      "total_prompt_tokens": 1510,
+      "total_completion_tokens": 1557,
+      "n_calls": 1
+    },
+    "exceptions": [
+      {
+        "label": "remorseful",
+        "key": "remorseful",
+        "reason": "Describes current emotional and moral response to harm done; 'owning', 'feeling sorry', 'wanting to make it right' suggest present state, not lasting trait.",
+        "confidence": 0.72
+      }
+    ],
+    "readings": {
+      "momentary": 1,
+      "predisposition": 18
+    },
+    "batch_id": "m1_states_corpus",
+    "stopped_by_budget": false,
+    "stopped_by_error": null,
+    "model": "claude-haiku-4-5-20251001"
+  },
+  "_provenance": {
+    "schema_version": "1.0",
+    "produced_by": {
+      "cmd": "uv run python data_analysis/gap_generation/states_pass.py --batch-id m1_states_corpus --mode corpus --filter-results data/candidates/filter/m1_validation/results.jsonl --budget-usd 0.5",
+      "git_sha": "9879325+dirty",
+      "author": "Roger Dearnaley",
+      "title": "states_pass m1_states_corpus"
+    },
+    "produced_at": "2026-09-30T18:16:31+00:00"
+  }
+}

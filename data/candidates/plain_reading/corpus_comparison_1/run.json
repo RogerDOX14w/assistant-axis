@@ -1,0 +1,55 @@
+{
+  "batch_id": "corpus_comparison_1",
+  "git_sha": "89cd780+dirty",
+  "allow_dirty": false,
+  "dirty_check": {
+    "paths": [
+      "assistant_axis/gapgen",
+      "data_analysis/gap_generation",
+      "assistant_axis/judge.py",
+      "assistant_axis/judge_pricing.py",
+      "assistant_axis/entity_id.py",
+      "assistant_axis/atomic_io.py",
+      "data/candidates/validation",
+      "reports/trait_gap_generation/rubrics",
+      "pyproject.toml",
+      "uv.lock"
+    ],
+    "dirty": [],
+    "note": null
+  },
+  "argv": [
+    "--batch-id",
+    "corpus_comparison_1",
+    "--corpus",
+    "--batch-size",
+    "1",
+    "--budget-usd",
+    "5"
+  ],
+  "n_rows": 659,
+  "n_reused_readings": 0,
+  "estimate_usd": 2.3541,
+  "estimate_lines": [
+    "plain reading: 659 x (60, 45) tokens at claude-haiku-4-5-20251001 rates = $0.188",
+    "comparison: 725 x (1,044, 90) tokens at claude-sonnet-5-5 rates = $2.166"
+  ],
+  "budget_usd": 5.0,
+  "cap_usd": 5.0,
+  "confirmed_by": null,
+  "reading_model": "claude-haiku-4-5-20251001",
+  "compare_model": "claude-sonnet-5-5",
+  "versions": {
+    "plain_reading": 1,
+    "comparison": 2
+  },
+  "prompt_sha256": {
+    "plain_reading": "e977750502a3c25b7fb63986eb9670a90aae92a65b41d06cdfed23d9fa2770f6",
+    "comparison": "a6f5cbc6514e6108a010304e8f18012260263dfd2aa0c913439055b33df932e3"
+  },
+  "measurement": true,
+  "started_at": "2026-09-29T23:29:03+00:00",
+  "finished_at": "2026-09-29T23:36:24+00:00",
+  "cost_usd": 1.2345,
+  "stopped_by_error": null
+}

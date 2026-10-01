@@ -1,0 +1,2387 @@
+{
+  "result": {
+    "n": 1810,
+    "n_done": 1810,
+    "n_failed": 0,
+    "n_pending": 0,
+    "n_hard_reject": 258,
+    "verdict_counts": {
+      "reject": 563,
+      "tagged": 239,
+      "trait": 1008
+    },
+    "verdict_fractions": {
+      "reject": 0.311,
+      "tagged": 0.132,
+      "trait": 0.5569
+    },
+    "tag_counts": {
+      "action": 19,
+      "evaluative_only": 12,
+      "membership": 116,
+      "no_persona_reading": 193,
+      "physical": 66,
+      "role_person": 11,
+      "state": 162,
+      "stretched": 73,
+      "too_rare": 266
+    },
+    "tag_fractions": {
+      "action": 0.0105,
+      "evaluative_only": 0.0066,
+      "membership": 0.0641,
+      "no_persona_reading": 0.1066,
+      "physical": 0.0365,
+      "role_person": 0.0061,
+      "state": 0.0895,
+      "stretched": 0.0403,
+      "too_rare": 0.147
+    },
+    "region_counts": {
+      "alignment_ai_agent": 3,
+      "cognitive_epistemic": 252,
+      "communication_style": 243,
+      "emotional_temperament": 136,
+      "identity_demographic": 161,
+      "moral_stance": 139,
+      "social_interpersonal": 74
+    },
+    "polysemy_n": 505,
+    "polysemy_rate": 0.3254,
+    "gloss_in_band_rate": 0.0,
+    "n_useful": 580,
+    "second_opinion_n": 206,
+    "disagreements": 40,
+    "parse_rate": 1.0,
+    "parse_rate_first_pass": 0.0,
+    "n_llm": 1552,
+    "probe_n": 330,
+    "probe_unknown": 8,
+    "probe_failed": 0,
+    "second_opinion_requested": 206,
+    "second_opinion_failed": 0,
+    "calls": {
+      "alignment": 1008,
+      "descriptors": 1008,
+      "established": 1420,
+      "gloss": 1008,
+      "kind": 1411,
+      "same_sense": 502,
+      "second_established": 297,
+      "second_kind": 297,
+      "second_kind_retry": 1,
+      "second_same_sense": 82,
+      "second_sense": 206,
+      "second_vague": 297,
+      "vague": 1421
+    },
+    "cost_usd": 7.3828,
+    "cost_per_candidate_usd": 0.004079,
+    "yield_per_usd": 78.6,
+    "usage": {
+      "per_model": {
+        "claude-haiku-4-5-20251001@batch": {
+          "model": "claude-haiku-4-5-20251001@batch",
+          "prompt_tokens": 5843795,
+          "completion_tokens": 1152771,
+          "cost_usd": 5.8038,
+          "n_calls": 11472
+        },
+        "claude-sonnet-5-5@batch": {
+          "model": "claude-sonnet-5-5@batch",
+          "prompt_tokens": 878956,
+          "completion_tokens": 140013,
+          "cost_usd": 1.579,
+          "n_calls": 1333
+        }
+      },
+      "total_cost_usd": 7.3828,
+      "total_prompt_tokens": 6722751,
+      "total_completion_tokens": 1292784,
+      "n_calls": 12805
+    },
+    "by_stratum": {
+      "existing": {
+        "n": 659,
+        "n_done": 659,
+        "n_failed": 0,
+        "n_pending": 0,
+        "n_hard_reject": 11,
+        "verdict_counts": {
+          "reject": 24,
+          "tagged": 21,
+          "trait": 614
+        },
+        "verdict_fractions": {
+          "reject": 0.0364,
+          "tagged": 0.0319,
+          "trait": 0.9317
+        },
+        "tag_counts": {
+          "evaluative_only": 1,
+          "membership": 39,
+          "no_persona_reading": 3,
+          "role_person": 2,
+          "state": 19,
+          "stretched": 9,
+          "too_rare": 11
+        },
+        "tag_fractions": {
+          "evaluative_only": 0.0015,
+          "membership": 0.0592,
+          "no_persona_reading": 0.0046,
+          "role_person": 0.003,
+          "state": 0.0288,
+          "stretched": 0.0137,
+          "too_rare": 0.0167
+        },
+        "region_counts": {
+          "cognitive_epistemic": 181,
+          "communication_style": 141,
+          "emotional_temperament": 89,
+          "identity_demographic": 57,
+          "moral_stance": 101,
+          "social_interpersonal": 45
+        },
+        "polysemy_n": 237,
+        "polysemy_rate": 0.3657,
+        "gloss_in_band_rate": 0.0,
+        "n_useful": 385,
+        "second_opinion_n": 0,
+        "disagreements": 0
+      },
+      "not_adopted": {
+        "n": 117,
+        "n_done": 117,
+        "n_failed": 0,
+        "n_pending": 0,
+        "n_hard_reject": 12,
+        "verdict_counts": {
+          "reject": 36,
+          "tagged": 9,
+          "trait": 72
+        },
+        "verdict_fractions": {
+          "reject": 0.3077,
+          "tagged": 0.0769,
+          "trait": 0.6154
+        },
+        "tag_counts": {
+          "membership": 12,
+          "no_persona_reading": 10,
+          "role_person": 3,
+          "state": 6,
+          "stretched": 10,
+          "too_rare": 16
+        },
+        "tag_fractions": {
+          "membership": 0.1026,
+          "no_persona_reading": 0.0855,
+          "role_person": 0.0256,
+          "state": 0.0513,
+          "stretched": 0.0855,
+          "too_rare": 0.1368
+        },
+        "region_counts": {
+          "cognitive_epistemic": 18,
+          "communication_style": 19,
+          "emotional_temperament": 7,
+          "identity_demographic": 14,
+          "moral_stance": 9,
+          "social_interpersonal": 5
+        },
+        "polysemy_n": 30,
+        "polysemy_rate": 0.2857,
+        "gloss_in_band_rate": 0.0,
+        "n_useful": 44,
+        "second_opinion_n": 0,
+        "disagreements": 0
+      },
+      "oewn_random": {
+        "n": 1000,
+        "n_done": 1000,
+        "n_failed": 0,
+        "n_pending": 0,
+        "n_hard_reject": 235,
+        "verdict_counts": {
+          "reject": 502,
+          "tagged": 189,
+          "trait": 309
+        },
+        "verdict_fractions": {
+          "reject": 0.502,
+          "tagged": 0.189,
+          "trait": 0.309
+        },
+        "tag_counts": {
+          "action": 19,
+          "evaluative_only": 11,
+          "membership": 62,
+          "no_persona_reading": 180,
+          "physical": 52,
+          "role_person": 6,
+          "state": 131,
+          "stretched": 53,
+          "too_rare": 239
+        },
+        "tag_fractions": {
+          "action": 0.019,
+          "evaluative_only": 0.011,
+          "membership": 0.062,
+          "no_persona_reading": 0.18,
+          "physical": 0.052,
+          "role_person": 0.006,
+          "state": 0.131,
+          "stretched": 0.053,
+          "too_rare": 0.239
+        },
+        "region_counts": {
+          "alignment_ai_agent": 3,
+          "cognitive_epistemic": 52,
+          "communication_style": 81,
+          "emotional_temperament": 38,
+          "identity_demographic": 82,
+          "moral_stance": 29,
+          "social_interpersonal": 24
+        },
+        "polysemy_n": 228,
+        "polysemy_rate": 0.298,
+        "gloss_in_band_rate": 0.0,
+        "n_useful": 147,
+        "second_opinion_n": 0,
+        "disagreements": 0
+      },
+      "physical": {
+        "n": 28,
+        "n_done": 28,
+        "n_failed": 0,
+        "n_pending": 0,
+        "n_hard_reject": 0,
+        "verdict_counts": {
+          "tagged": 18,
+          "trait": 10
+        },
+        "verdict_fractions": {
+          "tagged": 0.6429,
+          "trait": 0.3571
+        },
+        "tag_counts": {
+          "membership": 3,
+          "physical": 14,
+          "state": 4
+        },
+        "tag_fractions": {
+          "membership": 0.1071,
+          "physical": 0.5,
+          "state": 0.1429
+        },
+        "region_counts": {
+          "cognitive_epistemic": 1,
+          "emotional_temperament": 1,
+          "identity_demographic": 8
+        },
+        "polysemy_n": 8,
+        "polysemy_rate": 0.2857,
+        "gloss_in_band_rate": 0.0,
+        "n_useful": 2,
+        "second_opinion_n": 0,
+        "disagreements": 0
+      },
+      "rejects": {
+        "n": 6,
+        "n_done": 6,
+        "n_failed": 0,
+        "n_pending": 0,
+        "n_hard_reject": 0,
+        "verdict_counts": {
+          "reject": 1,
+          "tagged": 2,
+          "trait": 3
+        },
+        "verdict_fractions": {
+          "reject": 0.1667,
+          "tagged": 0.3333,
+          "trait": 0.5
+        },
+        "tag_counts": {
+          "state": 2,
+          "stretched": 1
+        },
+        "tag_fractions": {
+          "state": 0.3333,
+          "stretched": 0.1667
+        },
+        "region_counts": {
+          "communication_style": 2,
+          "emotional_temperament": 1
+        },
+        "polysemy_n": 2,
+        "polysemy_rate": 0.3333,
+        "gloss_in_band_rate": 0.0,
+        "n_useful": 2,
+        "second_opinion_n": 0,
+        "disagreements": 0
+      }
+    },
+    "validation_figures": {
+      "existing": {
+        "n": 659,
+        "correct": 633,
+        "share": 0.9605,
+        "target": 0.95,
+        "meets_target": true,
+        "misses": {
+          "reject": [
+            "absorption-prone",
+            "approximate",
+            "cat-person",
+            "deterministic",
+            "dog-person",
+            "eastern hemisphere",
+            "educational",
+            "futuristic",
+            "historical",
+            "metaphorical",
+            "northern hemisphere",
+            "southern hemisphere",
+            "western hemisphere"
+          ],
+          "floor": [
+            "cliqueish",
+            "collectivistic",
+            "confabulatory",
+            "distractible",
+            "ecocentric",
+            "exclusivist",
+            "extrinsically motivated",
+            "incrementalist",
+            "satisficing",
+            "strong-stomached",
+            "techno-hierophantic"
+          ],
+          "roles": [
+            "expository",
+            "informational"
+          ]
+        },
+        "labels_with_state": [
+          "bitter",
+          "burned-out",
+          "despairing",
+          "discontented",
+          "dry",
+          "flat",
+          "flourishing",
+          "flustered",
+          "fragile",
+          "hostile",
+          "isolated",
+          "joyful",
+          "languishing",
+          "manic",
+          "pensive",
+          "remorseful",
+          "unhappily-partnered",
+          "unplugged",
+          "urgent"
+        ],
+        "labels_with_physical": []
+      },
+      "rejects": {
+        "n": 6,
+        "flagged": 2,
+        "flagged_labels": [
+          "balanced",
+          "empowered"
+        ],
+        "target": 4,
+        "meets_target": false
+      },
+      "oewn_random": {
+        "n": 1000,
+        "trait": 309,
+        "trait_share": 0.309,
+        "target": 0.15,
+        "meets_target": false,
+        "sample_for_marks": [
+          {
+            "label": "abominable",
+            "key": "abominable#1",
+            "gloss": "This means having a character that is hateful and repugnant to others."
+          },
+          {
+            "label": "appreciative",
+            "key": "appreciative#1",
+            "gloss": "This means recognizing what others give and expressing genuine thanks for it."
+          },
+          {
+            "label": "blase",
+            "key": "blase#1",
+            "gloss": "This means regarding things with weary indifference, unmoved by what excites others."
+          },
+          {
+            "label": "callable",
+            "key": "callable#1",
+            "gloss": "This means being available to respond when summoned or asked to act."
+          },
+          {
+            "label": "Cameroonian",
+            "key": "cameroonian#1",
+            "gloss": "This means being from Cameroon or holding Cameroonian citizenship."
+          },
+          {
+            "label": "clairvoyant",
+            "key": "clairvoyant#1",
+            "gloss": "This means perceiving hidden or future events through supernatural ability."
+          },
+          {
+            "label": "communal",
+            "key": "communal#1",
+            "gloss": "This means belonging to a community or group and sharing in its life and concerns."
+          },
+          {
+            "label": "complacent",
+            "key": "complacent#1",
+            "gloss": "This means being satisfied with one's abilities or situation and seeing no need to improve or change."
+          },
+          {
+            "label": "conjoint",
+            "key": "conjoint#1",
+            "gloss": "This means being joined with another in a shared undertaking or bond."
+          },
+          {
+            "label": "consanguineous",
+            "key": "consanguineous#1",
+            "gloss": "This means sharing descent from a common ancestor and kinship by blood with others."
+          },
+          {
+            "label": "desirous",
+            "key": "desirous#1",
+            "gloss": "This means feeling a keen, restless eagerness to do or have something, and letting that wanting shape what one reaches for, asks about and says."
+          },
+          {
+            "label": "dietetic",
+            "key": "dietetic#1",
+            "gloss": "This means following a special diet or living within dietary restrictions."
+          },
+          {
+            "label": "formalized",
+            "key": "formalized#1",
+            "gloss": "This means conducting oneself with official manner and adherence to set procedures in all dealings."
+          },
+          {
+            "label": "fruit-eating",
+            "key": "fruit_eating#1",
+            "gloss": "This means eating a diet that includes or consists of fruit."
+          },
+          {
+            "label": "grubby",
+            "key": "grubby#1",
+            "gloss": "This means going about in stained, rumpled clothes, with unwashed hair and dirty nails, and never bothering to tidy up one's appearance before facing people."
+          },
+          {
+            "label": "handicapped",
+            "key": "handicapped#1",
+            "gloss": "This means having a physical or mental disability that affects one's functioning."
+          },
+          {
+            "label": "horse-and-buggy",
+            "key": "horse_and_buggy#1",
+            "gloss": "This means holding to old methods and beliefs even when newer ways have proven better."
+          },
+          {
+            "label": "human-centered",
+            "key": "human_centered#1",
+            "gloss": "This means putting human welfare and needs first in all decisions and actions."
+          },
+          {
+            "label": "icebound",
+            "key": "icebound#1",
+            "gloss": "This means keeping one's feelings locked away and showing little warmth or openness to others."
+          },
+          {
+            "label": "ill-humoured",
+            "key": "ill_humoured#1",
+            "gloss": "This means being prone to irritability and quick to anger in one's dealings with others."
+          },
+          {
+            "label": "illegal",
+            "key": "illegal#1",
+            "gloss": "This means breaking laws and rules as a standing practice."
+          },
+          {
+            "label": "jingoistic",
+            "key": "jingoistic#1",
+            "gloss": "This means holding extreme patriotic views and favoring aggressive foreign policy."
+          },
+          {
+            "label": "lenten",
+            "key": "lenten#1",
+            "gloss": "This means eating sparingly and abstaining from rich foods as a spiritual discipline."
+          },
+          {
+            "label": "lithe",
+            "key": "lithe#1",
+            "gloss": "This means moving with agility and nimbleness, bending, turning, and stepping with quick, supple, effortless control of one's body."
+          },
+          {
+            "label": "macho",
+            "key": "macho#1",
+            "gloss": "This means swaggering through life with loud masculine pride, bristling at any slight, picking fights to prove toughness, and treating every exchange as a contest of strength and dominance."
+          },
+          {
+            "label": "mellowed",
+            "key": "mellowed#1",
+            "gloss": "This means growing gentler and less harsh in character and temperament over time."
+          },
+          {
+            "label": "Mongol",
+            "key": "mongol#1",
+            "gloss": "This means belonging to the Mongolic peoples or coming from Mongolia."
+          },
+          {
+            "label": "monozygotic",
+            "key": "monozygotic#1",
+            "gloss": "This means sharing one's genetic makeup entirely with one or more siblings born at the same time."
+          },
+          {
+            "label": "nonsovereign",
+            "key": "nonsovereign#1",
+            "gloss": "This means belonging to a territory or group that lacks political independence from another power."
+          },
+          {
+            "label": "Norwegian",
+            "key": "norwegian#1",
+            "gloss": "This means being from Norway or holding Norwegian citizenship."
+          },
+          {
+            "label": "presumptive",
+            "key": "presumptive#1",
+            "gloss": "This means assuming things without sufficient evidence."
+          },
+          {
+            "label": "reassuring",
+            "key": "reassuring#1",
+            "gloss": "This means having a manner that steadies others and eases their worry."
+          },
+          {
+            "label": "recreational",
+            "key": "recreational#1",
+            "gloss": "This means engaging in activities for enjoyment and leisure rather than for work or obligation."
+          },
+          {
+            "label": "schmaltzy",
+            "key": "schmaltzy#1",
+            "gloss": "This means expressing oneself with excessive sentimentality and emotional manipulation to move others."
+          },
+          {
+            "label": "shy",
+            "key": "shy#1",
+            "gloss": "This means holding back from speaking in groups and preferring to listen rather than draw attention to oneself."
+          },
+          {
+            "label": "smooth",
+            "key": "smooth#1",
+            "gloss": "This means speaking with polished ease, choosing words that flow and charm, and winning people over with a fluent, persuasive manner that never seems to stumble or strain."
+          },
+          {
+            "label": "sympathetic",
+            "key": "sympathetic#1",
+            "gloss": "This means feeling concern for others' suffering and being inclined to help them."
+          },
+          {
+            "label": "tawdry",
+            "key": "tawdry#1",
+            "gloss": "This means preferring bright surfaces and loud effects to genuine quality or depth."
+          },
+          {
+            "label": "theoretic",
+            "key": "theoretic#1",
+            "gloss": "This means working from principles and concepts rather than concrete facts and immediate usefulness."
+          },
+          {
+            "label": "top-notch",
+            "key": "top_notch#1",
+            "gloss": "This means doing one's work with skill and care, meeting the highest standards."
+          },
+          {
+            "label": "twisted",
+            "key": "twisted#1",
+            "gloss": "This means thinking in ways that are distorted, warped, or fundamentally bent from what is straight or true."
+          },
+          {
+            "label": "unanimous",
+            "key": "unanimous#1",
+            "gloss": "This means being part of a group in which every member holds the same view, sharing its one position on the matter."
+          },
+          {
+            "label": "unconventional",
+            "key": "unconventional#1",
+            "gloss": "This means departing from standard ways of thinking and behaving in pursuit of one's own path."
+          },
+          {
+            "label": "unforbearing",
+            "key": "unforbearing#1",
+            "gloss": "This means growing angry at delay and dismissing those who think differently."
+          },
+          {
+            "label": "unposed",
+            "key": "unposed#1",
+            "gloss": "This means speaking and acting exactly as one feels, with plain candor and no put-on manner, letting real reactions show and saying things without polish or performance."
+          },
+          {
+            "label": "unregulated",
+            "key": "unregulated#1",
+            "gloss": "This means operating without following rules or constraints."
+          },
+          {
+            "label": "unsensational",
+            "key": "unsensational#1",
+            "gloss": "This means presenting oneself without flourish or bid for notice, letting substance speak rather than manner."
+          },
+          {
+            "label": "unturned",
+            "key": "unturned#1",
+            "gloss": "This means holding to one's view or stance without shifting it, no matter what is said or happens."
+          },
+          {
+            "label": "vitiated",
+            "key": "vitiated#1",
+            "gloss": "This means having one's character or judgment corrupted or flawed at the root."
+          },
+          {
+            "label": "Zionist",
+            "key": "zionist#1",
+            "gloss": "This means holding or advocating for the political ideology of Zionism, which supports a Jewish homeland in the territory of Israel."
+          }
+        ]
+      },
+      "unseen": {
+        "existing": {
+          "n": 447,
+          "correct": 431,
+          "share": 0.9642,
+          "target": 0.95,
+          "meets_target": true,
+          "misses": {
+            "reject": [
+              "approximate",
+              "dog-person",
+              "eastern hemisphere",
+              "futuristic",
+              "historical",
+              "metaphorical",
+              "northern hemisphere",
+              "western hemisphere"
+            ],
+            "floor": [
+              "cliqueish",
+              "exclusivist",
+              "extrinsically motivated",
+              "incrementalist",
+              "satisficing",
+              "strong-stomached"
+            ],
+            "roles": [
+              "expository",
+              "informational"
+            ]
+          },
+          "labels_with_state": [
+            "bitter",
+            "burned-out",
+            "dry",
+            "flourishing",
+            "flustered",
+            "fragile",
+            "joyful",
+            "manic"
+          ],
+          "labels_with_physical": []
+        },
+        "rejects": {
+          "n": 0,
+          "flagged": 0,
+          "flagged_labels": [],
+          "target": 4,
+          "meets_target": null
+        },
+        "oewn_random": {
+          "n": 573,
+          "trait": 171,
+          "trait_share": 0.2984,
+          "target": 0.15,
+          "meets_target": false
+        }
+      },
+      "n_seen_in_development": 674
+    },
+    "v2_fields": {
+      "alignment_relevant_true": 176,
+      "membership_kind": {
+        "affinity": 10,
+        "age_group": 14,
+        "circumstance": 36,
+        "class": 7,
+        "family": 7,
+        "geography": 8,
+        "nationality_ethnicity_language": 12,
+        "orientation_gender": 4,
+        "relationship": 12,
+        "religion": 6
+      },
+      "tag_disagreement": 0,
+      "validator_repairs": {},
+      "polysemy_notes": {
+        "two_trait_senses": 146,
+        "nontrait_person_sense": 62,
+        "obvious_sense_not_trait": 54,
+        "overshadowed": 0,
+        "reading_related": 0,
+        "first_thought_in_the_way": 144,
+        "leaves_something_out": 72,
+        "fits_many_in_different_ways": 138,
+        "most_likely_reading_stretched": 4
+      },
+      "comparison_relations": {},
+      "holding": {
+        "nationalities": 12,
+        "physical": 66,
+        "roles": 11,
+        "states": 162
+      },
+      "freq_rescue": {
+        "negating_prefix": 38
+      },
+      "alignment_scores": {
+        "0": 669,
+        "1": 163,
+        "2": 54,
+        "3": 122,
+        "none": 0
+      }
+    },
+    "batch_id": "m1_validation",
+    "stopped_by_budget": false,
+    "stopped_by_error": null,
+    "rubric_version": 5,
+    "model": "claude-haiku-4-5-20251001",
+    "second_model": "claude-sonnet-5-5",
+    "split": {
+      "transport": "batches",
+      "pilot_figures": {
+        "n": 1810,
+        "n_reached_step1": 1544,
+        "outcomes": {
+          "physical": 66,
+          "roles": 11,
+          "states": 162,
+          "trait": 1008,
+          "turned_away": 297
+        },
+        "same_outcome_as_expected": 0,
+        "differences": [],
+        "cut_before_step1": [
+          {
+            "label": "cliqueish",
+            "rule": "floor",
+            "reason": "Zipf 0.00 is below the 1.5 floor and no rescue route applies (no LLM call)."
+          },
+          {
+            "label": "collectivistic",
+            "rule": "floor",
+            "reason": "Zipf 1.47 is below the 1.5 floor and no rescue route applies (no LLM call)."
+          },
+          {
+            "label": "confabulatory",
+            "rule": "floor",
+            "reason": "Zipf 0.00 is below the 1.5 floor and no rescue route applies (no LLM call)."
+          },
+          {
+            "label": "distractible",
+            "rule": "floor",
+            "reason": "Zipf 1.29 is below the 1.5 floor and no rescue route applies (no LLM call)."
+          },
+          {
+            "label": "ecocentric",
+            "rule": "floor",
+            "reason": "Zipf 1.22 is below the 1.5 floor and no rescue route applies (no LLM call)."
+          },
+          {
+            "label": "exclusivist",
+            "rule": "floor",
+            "reason": "Zipf 1.48 is below the 1.5 floor and no rescue route applies (no LLM call)."
+          },
+          {
+            "label": "extrinsically motivated",
+            "rule": "floor",
+            "reason": "Zipf 1.38 is below the 1.5 floor and no rescue route applies (no LLM call)."
+          },
+          {
+            "label": "incrementalist",
+            "rule": "floor",
+            "reason": "Zipf 1.11 is below the 1.5 floor and no rescue route applies (no LLM call)."
+          },
+          {
+            "label": "satisficing",
+            "rule": "floor",
+            "reason": "Zipf 1.24 is below the 1.5 floor and no rescue route applies (no LLM call)."
+          },
+          {
+            "label": "strong-stomached",
+            "rule": "floor",
+            "reason": "Zipf 1.44 is below the 1.5 floor and no rescue route applies (no LLM call)."
+          },
+          {
+            "label": "techno-hierophantic",
+            "rule": "floor",
+            "reason": "Zipf 0.00 is below the 1.5 floor and no rescue route applies (no LLM call)."
+          },
+          {
+            "label": "iconodule",
+            "rule": "floor",
+            "reason": "Zipf 0.00 is below the 1.5 floor and no rescue route applies (no LLM call)."
+          },
+          {
+            "label": "emigree",
+            "rule": "floor",
+            "reason": "Zipf 0.00 is below the 1.5 floor and no rescue route applies (no LLM call)."
+          },
+          {
+            "label": "AIO",
+            "rule": "probe",
+            "reason": "Definition probe: word not known. AIO is an acronym (All-In-One) commonly used in computing and product marketing, but it is not a word with a defined meaning in standard English dictionaries as a lexical item."
+          },
+          {
+            "label": "CliftonStrengths",
+            "rule": "floor",
+            "reason": "Zipf 0.00 is below the 1.5 floor and no rescue route applies (no LLM call)."
+          },
+          {
+            "label": "Coie's five peer statuses",
+            "rule": "floor",
+            "reason": "Zipf 0.00 is below the 1.5 floor and no rescue route applies (no LLM call)."
+          },
+          {
+            "label": "CSAT",
+            "rule": "probe",
+            "reason": "Definition probe: word not known. CSAT is an acronym (Customer Satisfaction) commonly used in business and service contexts, but it is not a word in the traditional sense—it's an abbreviation that lacks a standard dictionary entry and cannot be defined as a lexical item with inherent meaning."
+          },
+          {
+            "label": "everyday sadism (Dark Tetrad)",
+            "rule": "probe",
+            "reason": "Definition probe: word not known. This is a multi-word phrase combining a common adjective with a noun and a parenthetical reference to a psychological construct, not a single word or standard dictionary entry."
+          },
+          {
+            "label": "geodemographic clusters",
+            "rule": "floor",
+            "reason": "Zipf 0.00 is below the 1.5 floor and no rescue route applies (no LLM call)."
+          },
+          {
+            "label": "Hogan HPI HDS MVPI",
+            "rule": "floor",
+            "reason": "Zipf 0.00 is below the 1.5 floor and no rescue route applies (no LLM call)."
+          },
+          {
+            "label": "Kantianism (Light Triad)",
+            "rule": "floor",
+            "reason": "Zipf 1.48 is below the 1.5 floor and no rescue route applies (no LLM call)."
+          },
+          {
+            "label": "LIWC",
+            "rule": "floor",
+            "reason": "Zipf 0.00 is below the 1.5 floor and no rescue route applies (no LLM call)."
+          },
+          {
+            "label": "LMX",
+            "rule": "floor",
+            "reason": "Zipf 1.35 is below the 1.5 floor and no rescue route applies (no LLM call)."
+          },
+          {
+            "label": "OPQ",
+            "rule": "floor",
+            "reason": "Zipf 0.00 is below the 1.5 floor and no rescue route applies (no LLM call)."
+          },
+          {
+            "label": "RFM",
+            "rule": "probe",
+            "reason": "Definition probe: word not known. RFM is an acronym (Recency, Frequency, Monetary) used in marketing and customer analytics, but it is not a word in the traditional sense—it's an abbreviation that lacks a standard dictionary entry and cannot be defined as a single lexical unit."
+          },
+          {
+            "label": "technophobic",
+            "rule": "floor",
+            "reason": "Zipf 1.25 is below the 1.5 floor and no rescue route applies (no LLM call)."
+          },
+          {
+            "label": "epistemically humble",
+            "rule": "floor",
+            "reason": "Zipf 1.42 is below the 1.5 floor and no rescue route applies (no LLM call)."
+          },
+          {
+            "label": "acarpellous",
+            "rule": "floor",
+            "reason": "Zipf 0.00 is below the 1.5 floor and no rescue route applies (no LLM call)."
+          },
+          {
+            "label": "acaulescent",
+            "rule": "floor",
+            "reason": "Zipf 0.00 is below the 1.5 floor and no rescue route applies (no LLM call)."
+          },
+          {
+            "label": "acceptive",
+            "rule": "floor",
+            "reason": "Zipf 0.00 is below the 1.5 floor and no rescue route applies (no LLM call)."
+          },
+          {
+            "label": "acned",
+            "rule": "floor",
+            "reason": "Zipf 0.00 is below the 1.5 floor and no rescue route applies (no LLM call)."
+          },
+          {
+            "label": "acronymous",
+            "rule": "floor",
+            "reason": "Zipf 0.00 is below the 1.5 floor and no rescue route applies (no LLM call)."
+          },
+          {
+            "label": "acrophobic",
+            "rule": "floor",
+            "reason": "Zipf 0.00 is below the 1.5 floor and no rescue route applies (no LLM call)."
+          },
+          {
+            "label": "activistic",
+            "rule": "floor",
+            "reason": "Zipf 0.00 is below the 1.5 floor and no rescue route applies (no LLM call)."
+          },
+          {
+            "label": "adaxial",
+            "rule": "floor",
+            "reason": "Zipf 1.43 is below the 1.5 floor and no rescue route applies (no LLM call)."
+          },
+          {
+            "label": "adenocarcinomatous",
+            "rule": "floor",
+            "reason": "Zipf 0.00 is below the 1.5 floor and no rescue route applies (no LLM call)."
+          },
+          {
+            "label": "Adonic",
+            "rule": "floor",
+            "reason": "Zipf 0.00 is below the 1.5 floor and no rescue route applies (no LLM call)."
+          },
+          {
+            "label": "aetiologic",
+            "rule": "floor",
+            "reason": "Zipf 0.00 is below the 1.5 floor and no rescue route applies (no LLM call)."
+          },
+          {
+            "label": "agamogenetic",
+            "rule": "floor",
+            "reason": "Zipf 0.00 is below the 1.5 floor and no rescue route applies (no LLM call)."
+          },
+          {
+            "label": "alligatored",
+            "rule": "floor",
+            "reason": "Zipf 0.00 is below the 1.5 floor and no rescue route applies (no LLM call)."
+          },
+          {
+            "label": "alphameric",
+            "rule": "floor",
+            "reason": "Zipf 0.00 is below the 1.5 floor and no rescue route applies (no LLM call)."
+          },
+          {
+            "label": "anabatic",
+            "rule": "floor",
+            "reason": "Zipf 0.00 is below the 1.5 floor and no rescue route applies (no LLM call)."
+          },
+          {
+            "label": "anapaestic",
+            "rule": "floor",
+            "reason": "Zipf 0.00 is below the 1.5 floor and no rescue route applies (no LLM call)."
+          },
+          {
+            "label": "anestrous",
+            "rule": "floor",
+            "reason": "Zipf 0.00 is below the 1.5 floor and no rescue route applies (no LLM call)."
+          },
+          {
+            "label": "anisogamous",
+            "rule": "floor",
+            "reason": "Zipf 0.00 is below the 1.5 floor and no rescue route applies (no LLM call)."
+          },
+          {
+            "label": "anoestrous",
+            "rule": "floor",
+            "reason": "Zipf 0.00 is below the 1.5 floor and no rescue route applies (no LLM call)."
+          },
+          {
+            "label": "anthropical",
+            "rule": "floor",
+            "reason": "Zipf 0.00 is below the 1.5 floor and no rescue route applies (no LLM call)."
+          },
+          {
+            "label": "antiheretical",
+            "rule": "floor",
+            "reason": "Zipf 0.00 is below the 1.5 floor and no rescue route applies (no LLM call)."
+          },
+          {
+            "label": "antipollution",
+            "rule": "floor",
+            "reason": "Zipf 0.00 is below the 1.5 floor and no rescue route applies (no LLM call)."
+          },
+          {
+            "label": "aphrodisiacal",
+            "rule": "floor",
+            "reason": "Zipf 0.00 is below the 1.5 floor and no rescue route applies (no LLM call)."
+          },
+          {
+            "label": "aplacental",
+            "rule": "floor",
+            "reason": "Zipf 0.00 is below the 1.5 floor and no rescue route applies (no LLM call)."
+          },
+          {
+            "label": "aplanatic",
+            "rule": "floor",
+            "reason": "Zipf 0.00 is below the 1.5 floor and no rescue route applies (no LLM call)."
+          },
+          {
+            "label": "apocarpous",
+            "rule": "floor",
+            "reason": "Zipf 0.00 is below the 1.5 floor and no rescue route applies (no LLM call)."
+          },
+          {
+            "label": "apogametic",
+            "rule": "floor",
+            "reason": "Zipf 0.00 is below the 1.5 floor and no rescue route applies (no LLM call)."
+          },
+          {
+            "label": "appropriative",
+            "rule": "floor",
+            "reason": "Zipf 1.49 is below the 1.5 floor and no rescue route applies (no LLM call)."
+          },
+          {
+            "label": "arachnidian",
+            "rule": "floor",
+            "reason": "Zipf 0.00 is below the 1.5 floor and no rescue route applies (no LLM call)."
+          },
+          {
+            "label": "arborary",
+            "rule": "floor",
+            "reason": "Zipf 0.00 is below the 1.5 floor and no rescue route applies (no LLM call)."
+          },
+          {
+            "label": "arboreous",
+            "rule": "floor",
+            "reason": "Zipf 0.00 is below the 1.5 floor and no rescue route applies (no LLM call)."
+          },
+          {
+            "label": "archducal",
+            "rule": "floor",
+            "reason": "Zipf 0.00 is below the 1.5 floor and no rescue route applies (no LLM call)."
+          },
+          {
+            "label": "ascocarpous",
+            "rule": "floor",
+            "reason": "Zipf 0.00 is below the 1.5 floor and no rescue route applies (no LLM call)."
+          },
+          {
+            "label": "aslant",
+            "rule": "floor",
+            "reason": "Zipf 1.36 is below the 1.5 floor and no rescue route applies (no LLM call)."
+          },
+          {
+            "label": "asphaltic",
+            "rule": "floor",
+            "reason": "Zipf 1.27 is below the 1.5 floor and no rescue route applies (no LLM call)."
+          },
+          {
+            "label": "assimilative",
+            "rule": "floor",
+            "reason": "Zipf 1.36 is below the 1.5 floor and no rescue route applies (no LLM call)."
+          },
+          {
+            "label": "ataxic",
+            "rule": "floor",
+            "reason": "Zipf 1.48 is below the 1.5 floor and no rescue route applies (no LLM call)."
+          },
+          {
+            "label": "avertible",
+            "rule": "floor",
+            "reason": "Zipf 0.00 is below the 1.5 floor and no rescue route applies (no LLM call)."
+          },
+          {
+            "label": "avifaunistic",
+            "rule": "floor",
+            "reason": "Zipf 0.00 is below the 1.5 floor and no rescue route applies (no LLM call)."
+          },
+          {
+            "label": "azido",
+            "rule": "floor",
+            "reason": "Zipf 1.24 is below the 1.5 floor and no rescue route applies (no LLM call)."
+          },
+          {
+            "label": "bacteroid",
+            "rule": "floor",
+            "reason": "Zipf 0.00 is below the 1.5 floor and no rescue route applies (no LLM call)."
+          },
+          {
+            "label": "beadlike",
+            "rule": "floor",
+            "reason": "Zipf 0.00 is below the 1.5 floor and no rescue route applies (no LLM call)."
+          },
+          {
+            "label": "benthal",
+            "rule": "floor",
+            "reason": "Zipf 0.00 is below the 1.5 floor and no rescue route applies (no LLM call)."
+          },
+          {
+            "label": "benzylic",
+            "rule": "floor",
+            "reason": "Zipf 1.27 is below the 1.5 floor and no rescue route applies (no LLM call)."
+          },
+          {
+            "label": "bewhiskered",
+            "rule": "floor",
+            "reason": "Zipf 1.09 is below the 1.5 floor and no rescue route applies (no LLM call)."
+          },
+          {
+            "label": "bicapsular",
+            "rule": "floor",
+            "reason": "Zipf 0.00 is below the 1.5 floor and no rescue route applies (no LLM call)."
+          },
+          {
+            "label": "bicipital",
+            "rule": "floor",
+            "reason": "Zipf 1.11 is below the 1.5 floor and no rescue route applies (no LLM call)."
+          },
+          {
+            "label": "bismuthal",
+            "rule": "floor",
+            "reason": "Zipf 0.00 is below the 1.5 floor and no rescue route applies (no LLM call)."
+          },
+          {
+            "label": "bitterish",
+            "rule": "floor",
+            "reason": "Zipf 0.00 is below the 1.5 floor and no rescue route applies (no LLM call)."
+          },
+          {
+            "label": "bitumenoid",
+            "rule": "floor",
+            "reason": "Zipf 0.00 is below the 1.5 floor and no rescue route applies (no LLM call)."
+          },
+          {
+            "label": "blastomycotic",
+            "rule": "floor",
+            "reason": "Zipf 0.00 is below the 1.5 floor and no rescue route applies (no LLM call)."
+          },
+          {
+            "label": "blushful",
+            "rule": "floor",
+            "reason": "Zipf 0.00 is below the 1.5 floor and no rescue route applies (no LLM call)."
+          },
+          {
+            "label": "boughless",
+            "rule": "floor",
+            "reason": "Zipf 0.00 is below the 1.5 floor and no rescue route applies (no LLM call)."
+          },
+          {
+            "label": "bracteate",
+            "rule": "floor",
+            "reason": "Zipf 1.21 is below the 1.5 floor and no rescue route applies (no LLM call)."
+          },
+          {
+            "label": "brainish",
+            "rule": "floor",
+            "reason": "Zipf 0.00 is below the 1.5 floor and no rescue route applies (no LLM call)."
+          },
+          {
+            "label": "brimless",
+            "rule": "floor",
+            "reason": "Zipf 0.00 is below the 1.5 floor and no rescue route applies (no LLM call)."
+          },
+          {
+            "label": "bronchiolar",
+            "rule": "floor",
+            "reason": "Zipf 0.00 is below the 1.5 floor and no rescue route applies (no LLM call)."
+          },
+          {
+            "label": "bumpkinly",
+            "rule": "floor",
+            "reason": "Zipf 0.00 is below the 1.5 floor and no rescue route applies (no LLM call)."
+          },
+          {
+            "label": "calorimetric",
+            "rule": "floor",
+            "reason": "Zipf 1.38 is below the 1.5 floor and no rescue route applies (no LLM call)."
+          },
+          {
+            "label": "Calvinistical",
+            "rule": "floor",
+            "reason": "Zipf 0.00 is below the 1.5 floor and no rescue route applies (no LLM call)."
+          },
+          {
+            "label": "carinated",
+            "rule": "floor",
+            "reason": "Zipf 1.21 is below the 1.5 floor and no rescue route applies (no LLM call)."
+          },
+          {
+            "label": "catenulate",
+            "rule": "floor",
+            "reason": "Zipf 0.00 is below the 1.5 floor and no rescue route applies (no LLM call)."
+          },
+          {
+            "label": "cernuous",
+            "rule": "floor",
+            "reason": "Zipf 0.00 is below the 1.5 floor and no rescue route applies (no LLM call)."
+          },
+          {
+            "label": "chaetognathan",
+            "rule": "floor",
+            "reason": "Zipf 0.00 is below the 1.5 floor and no rescue route applies (no LLM call)."
+          },
+          {
+            "label": "chanceful",
+            "rule": "floor",
+            "reason": "Zipf 0.00 is below the 1.5 floor and no rescue route applies (no LLM call)."
+          },
+          {
+            "label": "chantlike",
+            "rule": "floor",
+            "reason": "Zipf 0.00 is below the 1.5 floor and no rescue route applies (no LLM call)."
+          },
+          {
+            "label": "chiromantic",
+            "rule": "floor",
+            "reason": "Zipf 0.00 is below the 1.5 floor and no rescue route applies (no LLM call)."
+          },
+          {
+            "label": "churrigueresco",
+            "rule": "floor",
+            "reason": "Zipf 0.00 is below the 1.5 floor and no rescue route applies (no LLM call)."
+          },
+          {
+            "label": "citified",
+            "rule": "floor",
+            "reason": "Zipf 1.32 is below the 1.5 floor and no rescue route applies (no LLM call)."
+          },
+          {
+            "label": "cogitable",
+            "rule": "floor",
+            "reason": "Zipf 0.00 is below the 1.5 floor and no rescue route applies (no LLM call)."
+          },
+          {
+            "label": "cognisable",
+            "rule": "floor",
+            "reason": "Zipf 0.00 is below the 1.5 floor and no rescue route applies (no LLM call)."
+          },
+          {
+            "label": "columnlike",
+            "rule": "floor",
+            "reason": "Zipf 0.00 is below the 1.5 floor and no rescue route applies (no LLM call)."
+          },
+          {
+            "label": "concupiscent",
+            "rule": "floor",
+            "reason": "Zipf 1.22 is below the 1.5 floor and no rescue route applies (no LLM call)."
+          },
+          {
+            "label": "condign",
+            "rule": "floor",
+            "reason": "Zipf 1.41 is below the 1.5 floor and no rescue route applies (no LLM call)."
+          },
+          {
+            "label": "contumacious",
+            "rule": "floor",
+            "reason": "Zipf 1.19 is below the 1.5 floor and no rescue route applies (no LLM call)."
+          },
+          {
+            "label": "coordinative",
+            "rule": "floor",
+            "reason": "Zipf 1.18 is below the 1.5 floor and no rescue route applies (no LLM call)."
+          },
+          {
+            "label": "corneous",
+            "rule": "floor",
+            "reason": "Zipf 1.09 is below the 1.5 floor and no rescue route applies (no LLM call)."
+          },
+          {
+            "label": "corticoefferent",
+            "rule": "floor",
+            "reason": "Zipf 0.00 is below the 1.5 floor and no rescue route applies (no LLM call)."
+          },
+          {
+            "label": "cousinly",
+            "rule": "floor",
+            "reason": "Zipf 1.06 is below the 1.5 floor and no rescue route applies (no LLM call)."
+          },
+          {
+            "label": "crannied",
+            "rule": "floor",
+            "reason": "Zipf 0.00 is below the 1.5 floor and no rescue route applies (no LLM call)."
+          },
+          {
+            "label": "curvilineal",
+            "rule": "floor",
+            "reason": "Zipf 0.00 is below the 1.5 floor and no rescue route applies (no LLM call)."
+          },
+          {
+            "label": "cxl",
+            "rule": "probe",
+            "reason": "Definition probe: word not known. This is not a word but rather a Roman numeral abbreviation (140), not an English word with a meaning."
+          },
+          {
+            "label": "debile",
+            "rule": "floor",
+            "reason": "Zipf 0.00 is below the 1.5 floor and no rescue route applies (no LLM call)."
+          },
+          {
+            "label": "deconsecrated",
+            "rule": "floor",
+            "reason": "Zipf 1.42 is below the 1.5 floor and no rescue route applies (no LLM call)."
+          },
+          {
+            "label": "denticulate",
+            "rule": "floor",
+            "reason": "Zipf 1.38 is below the 1.5 floor and no rescue route applies (no LLM call)."
+          },
+          {
+            "label": "diaphyseal",
+            "rule": "floor",
+            "reason": "Zipf 1.33 is below the 1.5 floor and no rescue route applies (no LLM call)."
+          },
+          {
+            "label": "diarrheic",
+            "rule": "floor",
+            "reason": "Zipf 0.00 is below the 1.5 floor and no rescue route applies (no LLM call)."
+          },
+          {
+            "label": "discomposed",
+            "rule": "floor",
+            "reason": "Zipf 0.00 is below the 1.5 floor and no rescue route applies (no LLM call)."
+          },
+          {
+            "label": "disintegrable",
+            "rule": "floor",
+            "reason": "Zipf 0.00 is below the 1.5 floor and no rescue route applies (no LLM call)."
+          },
+          {
+            "label": "dolichocranial",
+            "rule": "floor",
+            "reason": "Zipf 0.00 is below the 1.5 floor and no rescue route applies (no LLM call)."
+          },
+          {
+            "label": "dolichocranic",
+            "rule": "floor",
+            "reason": "Zipf 0.00 is below the 1.5 floor and no rescue route applies (no LLM call)."
+          },
+          {
+            "label": "embryonal",
+            "rule": "floor",
+            "reason": "Zipf 1.47 is below the 1.5 floor and no rescue route applies (no LLM call)."
+          },
+          {
+            "label": "enolic",
+            "rule": "floor",
+            "reason": "Zipf 0.00 is below the 1.5 floor and no rescue route applies (no LLM call)."
+          },
+          {
+            "label": "ensiform",
+            "rule": "floor",
+            "reason": "Zipf 0.00 is below the 1.5 floor and no rescue route applies (no LLM call)."
+          },
+          {
+            "label": "eolotropic",
+            "rule": "floor",
+            "reason": "Zipf 0.00 is below the 1.5 floor and no rescue route applies (no LLM call)."
+          },
+          {
+            "label": "epicyclical",
+            "rule": "floor",
+            "reason": "Zipf 0.00 is below the 1.5 floor and no rescue route applies (no LLM call)."
+          },
+          {
+            "label": "equinoctial",
+            "rule": "floor",
+            "reason": "Zipf 1.43 is below the 1.5 floor and no rescue route applies (no LLM call)."
+          },
+          {
+            "label": "equipoised",
+            "rule": "floor",
+            "reason": "Zipf 0.00 is below the 1.5 floor and no rescue route applies (no LLM call)."
+          },
+          {
+            "label": "eradicable",
+            "rule": "floor",
+            "reason": "Zipf 0.00 is below the 1.5 floor and no rescue route applies (no LLM call)."
+          },
+          {
+            "label": "eudemonic",
+            "rule": "floor",
+            "reason": "Zipf 0.00 is below the 1.5 floor and no rescue route applies (no LLM call)."
+          },
+          {
+            "label": "euphonous",
+            "rule": "floor",
+            "reason": "Zipf 0.00 is below the 1.5 floor and no rescue route applies (no LLM call)."
+          },
+          {
+            "label": "exergonic",
+            "rule": "floor",
+            "reason": "Zipf 1.15 is below the 1.5 floor and no rescue route applies (no LLM call)."
+          },
+          {
+            "label": "exodontic",
+            "rule": "floor",
+            "reason": "Zipf 0.00 is below the 1.5 floor and no rescue route applies (no LLM call)."
+          },
+          {
+            "label": "extensile",
+            "rule": "floor",
+            "reason": "Zipf 0.00 is below the 1.5 floor and no rescue route applies (no LLM call)."
+          },
+          {
+            "label": "extraversive",
+            "rule": "floor",
+            "reason": "Zipf 0.00 is below the 1.5 floor and no rescue route applies (no LLM call)."
+          },
+          {
+            "label": "featheredged",
+            "rule": "floor",
+            "reason": "Zipf 0.00 is below the 1.5 floor and no rescue route applies (no LLM call)."
+          },
+          {
+            "label": "featherlike",
+            "rule": "floor",
+            "reason": "Zipf 0.00 is below the 1.5 floor and no rescue route applies (no LLM call)."
+          },
+          {
+            "label": "fibrocalcific",
+            "rule": "floor",
+            "reason": "Zipf 0.00 is below the 1.5 floor and no rescue route applies (no LLM call)."
+          },
+          {
+            "label": "filamentlike",
+            "rule": "floor",
+            "reason": "Zipf 0.00 is below the 1.5 floor and no rescue route applies (no LLM call)."
+          },
+          {
+            "label": "finespun",
+            "rule": "floor",
+            "reason": "Zipf 0.00 is below the 1.5 floor and no rescue route applies (no LLM call)."
+          },
+          {
+            "label": "flexuous",
+            "rule": "floor",
+            "reason": "Zipf 1.42 is below the 1.5 floor and no rescue route applies (no LLM call)."
+          },
+          {
+            "label": "fourpenny",
+            "rule": "floor",
+            "reason": "Zipf 1.05 is below the 1.5 floor and no rescue route applies (no LLM call)."
+          },
+          {
+            "label": "frizzly",
+            "rule": "floor",
+            "reason": "Zipf 0.00 is below the 1.5 floor and no rescue route applies (no LLM call)."
+          },
+          {
+            "label": "furlike",
+            "rule": "floor",
+            "reason": "Zipf 0.00 is below the 1.5 floor and no rescue route applies (no LLM call)."
+          },
+          {
+            "label": "gallinaceous",
+            "rule": "floor",
+            "reason": "Zipf 1.06 is below the 1.5 floor and no rescue route applies (no LLM call)."
+          },
+          {
+            "label": "gardant",
+            "rule": "floor",
+            "reason": "Zipf 0.00 is below the 1.5 floor and no rescue route applies (no LLM call)."
+          },
+          {
+            "label": "Goethian",
+            "rule": "floor",
+            "reason": "Zipf 0.00 is below the 1.5 floor and no rescue route applies (no LLM call)."
+          },
+          {
+            "label": "gooselike",
+            "rule": "floor",
+            "reason": "Zipf 0.00 is below the 1.5 floor and no rescue route applies (no LLM call)."
+          },
+          {
+            "label": "granuliferous",
+            "rule": "floor",
+            "reason": "Zipf 0.00 is below the 1.5 floor and no rescue route applies (no LLM call)."
+          },
+          {
+            "label": "hardhearted",
+            "rule": "floor",
+            "reason": "Zipf 1.35 is below the 1.5 floor and no rescue route applies (no LLM call)."
+          },
+          {
+            "label": "holometabolic",
+            "rule": "floor",
+            "reason": "Zipf 0.00 is below the 1.5 floor and no rescue route applies (no LLM call)."
+          },
+          {
+            "label": "homoiothermic",
+            "rule": "floor",
+            "reason": "Zipf 0.00 is below the 1.5 floor and no rescue route applies (no LLM call)."
+          },
+          {
+            "label": "Hugoesque",
+            "rule": "floor",
+            "reason": "Zipf 0.00 is below the 1.5 floor and no rescue route applies (no LLM call)."
+          },
+          {
+            "label": "hymenopterous",
+            "rule": "floor",
+            "reason": "Zipf 0.00 is below the 1.5 floor and no rescue route applies (no LLM call)."
+          },
+          {
+            "label": "hypognathous",
+            "rule": "floor",
+            "reason": "Zipf 0.00 is below the 1.5 floor and no rescue route applies (no LLM call)."
+          },
+          {
+            "label": "ictal",
+            "rule": "floor",
+            "reason": "Zipf 1.45 is below the 1.5 floor and no rescue route applies (no LLM call)."
+          },
+          {
+            "label": "indefeasible",
+            "rule": "floor",
+            "reason": "Zipf 1.20 is below the 1.5 floor and no rescue route applies (no LLM call)."
+          },
+          {
+            "label": "inexterminable",
+            "rule": "floor",
+            "reason": "Zipf 0.00 is below the 1.5 floor and no rescue route applies (no LLM call)."
+          },
+          {
+            "label": "innovational",
+            "rule": "floor",
+            "reason": "Zipf 1.09 is below the 1.5 floor and no rescue route applies (no LLM call)."
+          },
+          {
+            "label": "instagood",
+            "rule": "floor",
+            "reason": "Zipf 1.42 is below the 1.5 floor and no rescue route applies (no LLM call)."
+          },
+          {
+            "label": "instigative",
+            "rule": "floor",
+            "reason": "Zipf 0.00 is below the 1.5 floor and no rescue route applies (no LLM call)."
+          },
+          {
+            "label": "interlobular",
+            "rule": "floor",
+            "reason": "Zipf 1.14 is below the 1.5 floor and no rescue route applies (no LLM call)."
+          },
+          {
+            "label": "intraspecies",
+            "rule": "floor",
+            "reason": "Zipf 1.15 is below the 1.5 floor and no rescue route applies (no LLM call)."
+          },
+          {
+            "label": "ironshod",
+            "rule": "floor",
+            "reason": "Zipf 0.00 is below the 1.5 floor and no rescue route applies (no LLM call)."
+          },
+          {
+            "label": "irritative",
+            "rule": "floor",
+            "reason": "Zipf 1.07 is below the 1.5 floor and no rescue route applies (no LLM call)."
+          },
+          {
+            "label": "Jainist",
+            "rule": "floor",
+            "reason": "Zipf 0.00 is below the 1.5 floor and no rescue route applies (no LLM call)."
+          },
+          {
+            "label": "jelled",
+            "rule": "floor",
+            "reason": "Zipf 1.44 is below the 1.5 floor and no rescue route applies (no LLM call)."
+          },
+          {
+            "label": "jittering",
+            "rule": "floor",
+            "reason": "Zipf 1.40 is below the 1.5 floor and no rescue route applies (no LLM call)."
+          },
+          {
+            "label": "justificative",
+            "rule": "floor",
+            "reason": "Zipf 0.00 is below the 1.5 floor and no rescue route applies (no LLM call)."
+          },
+          {
+            "label": "Kechuan",
+            "rule": "floor",
+            "reason": "Zipf 0.00 is below the 1.5 floor and no rescue route applies (no LLM call)."
+          },
+          {
+            "label": "laciniate",
+            "rule": "floor",
+            "reason": "Zipf 0.00 is below the 1.5 floor and no rescue route applies (no LLM call)."
+          },
+          {
+            "label": "lancelike",
+            "rule": "floor",
+            "reason": "Zipf 0.00 is below the 1.5 floor and no rescue route applies (no LLM call)."
+          },
+          {
+            "label": "laureled",
+            "rule": "floor",
+            "reason": "Zipf 0.00 is below the 1.5 floor and no rescue route applies (no LLM call)."
+          },
+          {
+            "label": "Leibnizian",
+            "rule": "floor",
+            "reason": "Zipf 1.25 is below the 1.5 floor and no rescue route applies (no LLM call)."
+          },
+          {
+            "label": "leisured",
+            "rule": "floor",
+            "reason": "Zipf 1.44 is below the 1.5 floor and no rescue route applies (no LLM call)."
+          },
+          {
+            "label": "leptorrhinic",
+            "rule": "floor",
+            "reason": "Zipf 0.00 is below the 1.5 floor and no rescue route applies (no LLM call)."
+          },
+          {
+            "label": "liquescent",
+            "rule": "floor",
+            "reason": "Zipf 0.00 is below the 1.5 floor and no rescue route applies (no LLM call)."
+          },
+          {
+            "label": "lxxv",
+            "rule": "floor",
+            "reason": "Zipf 1.04 is below the 1.5 floor and no rescue route applies (no LLM call)."
+          },
+          {
+            "label": "lxxxii",
+            "rule": "floor",
+            "reason": "Zipf 0.00 is below the 1.5 floor and no rescue route applies (no LLM call)."
+          },
+          {
+            "label": "lxxxv",
+            "rule": "floor",
+            "reason": "Zipf 1.03 is below the 1.5 floor and no rescue route applies (no LLM call)."
+          },
+          {
+            "label": "lxxxvi",
+            "rule": "floor",
+            "reason": "Zipf 0.00 is below the 1.5 floor and no rescue route applies (no LLM call)."
+          },
+          {
+            "label": "maledict",
+            "rule": "floor",
+            "reason": "Zipf 0.00 is below the 1.5 floor and no rescue route applies (no LLM call)."
+          },
+          {
+            "label": "Maroc",
+            "rule": "probe",
+            "reason": "Definition probe: word not known. Maroc is the French name for Morocco, a proper noun referring to a country, not a common English word with a general meaning."
+          },
+          {
+            "label": "medicolegal",
+            "rule": "floor",
+            "reason": "Zipf 1.48 is below the 1.5 floor and no rescue route applies (no LLM call)."
+          },
+          {
+            "label": "mercurous",
+            "rule": "floor",
+            "reason": "Zipf 0.00 is below the 1.5 floor and no rescue route applies (no LLM call)."
+          },
+          {
+            "label": "misanthropical",
+            "rule": "floor",
+            "reason": "Zipf 0.00 is below the 1.5 floor and no rescue route applies (no LLM call)."
+          },
+          {
+            "label": "misbegot",
+            "rule": "floor",
+            "reason": "Zipf 0.00 is below the 1.5 floor and no rescue route applies (no LLM call)."
+          },
+          {
+            "label": "mixable",
+            "rule": "floor",
+            "reason": "Zipf 0.00 is below the 1.5 floor and no rescue route applies (no LLM call)."
+          },
+          {
+            "label": "molal",
+            "rule": "floor",
+            "reason": "Zipf 0.00 is below the 1.5 floor and no rescue route applies (no LLM call)."
+          },
+          {
+            "label": "Monophysitic",
+            "rule": "floor",
+            "reason": "Zipf 0.00 is below the 1.5 floor and no rescue route applies (no LLM call)."
+          },
+          {
+            "label": "monosemous",
+            "rule": "floor",
+            "reason": "Zipf 0.00 is below the 1.5 floor and no rescue route applies (no LLM call)."
+          },
+          {
+            "label": "moonlike",
+            "rule": "floor",
+            "reason": "Zipf 0.00 is below the 1.5 floor and no rescue route applies (no LLM call)."
+          },
+          {
+            "label": "morbilliform",
+            "rule": "floor",
+            "reason": "Zipf 0.00 is below the 1.5 floor and no rescue route applies (no LLM call)."
+          },
+          {
+            "label": "motorless",
+            "rule": "floor",
+            "reason": "Zipf 0.00 is below the 1.5 floor and no rescue route applies (no LLM call)."
+          },
+          {
+            "label": "mouselike",
+            "rule": "floor",
+            "reason": "Zipf 0.00 is below the 1.5 floor and no rescue route applies (no LLM call)."
+          },
+          {
+            "label": "mouthlike",
+            "rule": "floor",
+            "reason": "Zipf 0.00 is below the 1.5 floor and no rescue route applies (no LLM call)."
+          },
+          {
+            "label": "Noachian",
+            "rule": "floor",
+            "reason": "Zipf 1.21 is below the 1.5 floor and no rescue route applies (no LLM call)."
+          },
+          {
+            "label": "noduled",
+            "rule": "floor",
+            "reason": "Zipf 0.00 is below the 1.5 floor and no rescue route applies (no LLM call)."
+          },
+          {
+            "label": "occurrent",
+            "rule": "floor",
+            "reason": "Zipf 1.09 is below the 1.5 floor and no rescue route applies (no LLM call)."
+          },
+          {
+            "label": "offhanded",
+            "rule": "floor",
+            "reason": "Zipf 1.40 is below the 1.5 floor and no rescue route applies (no LLM call)."
+          },
+          {
+            "label": "oleaceous",
+            "rule": "floor",
+            "reason": "Zipf 0.00 is below the 1.5 floor and no rescue route applies (no LLM call)."
+          },
+          {
+            "label": "overgreedy",
+            "rule": "floor",
+            "reason": "Zipf 0.00 is below the 1.5 floor and no rescue route applies (no LLM call)."
+          },
+          {
+            "label": "overrefined",
+            "rule": "floor",
+            "reason": "Zipf 0.00 is below the 1.5 floor and no rescue route applies (no LLM call)."
+          },
+          {
+            "label": "pachydermatous",
+            "rule": "floor",
+            "reason": "Zipf 0.00 is below the 1.5 floor and no rescue route applies (no LLM call)."
+          },
+          {
+            "label": "palatoglossal",
+            "rule": "floor",
+            "reason": "Zipf 0.00 is below the 1.5 floor and no rescue route applies (no LLM call)."
+          },
+          {
+            "label": "parrotlike",
+            "rule": "floor",
+            "reason": "Zipf 0.00 is below the 1.5 floor and no rescue route applies (no LLM call)."
+          },
+          {
+            "label": "pawky",
+            "rule": "floor",
+            "reason": "Zipf 0.00 is below the 1.5 floor and no rescue route applies (no LLM call)."
+          },
+          {
+            "label": "penurious",
+            "rule": "floor",
+            "reason": "Zipf 1.43 is below the 1.5 floor and no rescue route applies (no LLM call)."
+          },
+          {
+            "label": "perfervid",
+            "rule": "floor",
+            "reason": "Zipf 0.00 is below the 1.5 floor and no rescue route applies (no LLM call)."
+          },
+          {
+            "label": "peripteral",
+            "rule": "floor",
+            "reason": "Zipf 0.00 is below the 1.5 floor and no rescue route applies (no LLM call)."
+          },
+          {
+            "label": "perspicuous",
+            "rule": "floor",
+            "reason": "Zipf 1.25 is below the 1.5 floor and no rescue route applies (no LLM call)."
+          },
+          {
+            "label": "peruked",
+            "rule": "floor",
+            "reason": "Zipf 0.00 is below the 1.5 floor and no rescue route applies (no LLM call)."
+          },
+          {
+            "label": "planoconcave",
+            "rule": "floor",
+            "reason": "Zipf 0.00 is below the 1.5 floor and no rescue route applies (no LLM call)."
+          },
+          {
+            "label": "plumelike",
+            "rule": "floor",
+            "reason": "Zipf 0.00 is below the 1.5 floor and no rescue route applies (no LLM call)."
+          },
+          {
+            "label": "polysemantic",
+            "rule": "floor",
+            "reason": "Zipf 0.00 is below the 1.5 floor and no rescue route applies (no LLM call)."
+          },
+          {
+            "label": "precative",
+            "rule": "floor",
+            "reason": "Zipf 0.00 is below the 1.5 floor and no rescue route applies (no LLM call)."
+          },
+          {
+            "label": "prepubertal",
+            "rule": "floor",
+            "reason": "Zipf 1.44 is below the 1.5 floor and no rescue route applies (no LLM call)."
+          },
+          {
+            "label": "Procrustean",
+            "rule": "floor",
+            "reason": "Zipf 1.20 is below the 1.5 floor and no rescue route applies (no LLM call)."
+          },
+          {
+            "label": "propertyless",
+            "rule": "floor",
+            "reason": "Zipf 0.00 is below the 1.5 floor and no rescue route applies (no LLM call)."
+          },
+          {
+            "label": "protrusible",
+            "rule": "floor",
+            "reason": "Zipf 0.00 is below the 1.5 floor and no rescue route applies (no LLM call)."
+          },
+          {
+            "label": "provisory",
+            "rule": "floor",
+            "reason": "Zipf 1.05 is below the 1.5 floor and no rescue route applies (no LLM call)."
+          },
+          {
+            "label": "psychoneurotic",
+            "rule": "floor",
+            "reason": "Zipf 1.08 is below the 1.5 floor and no rescue route applies (no LLM call)."
+          },
+          {
+            "label": "pyroelectrical",
+            "rule": "floor",
+            "reason": "Zipf 0.00 is below the 1.5 floor and no rescue route applies (no LLM call)."
+          },
+          {
+            "label": "quadraphonic",
+            "rule": "floor",
+            "reason": "Zipf 1.47 is below the 1.5 floor and no rescue route applies (no LLM call)."
+          },
+          {
+            "label": "racemose",
+            "rule": "floor",
+            "reason": "Zipf 1.49 is below the 1.5 floor and no rescue route applies (no LLM call)."
+          },
+          {
+            "label": "radiopaque",
+            "rule": "floor",
+            "reason": "Zipf 1.49 is below the 1.5 floor and no rescue route applies (no LLM call)."
+          },
+          {
+            "label": "repudiative",
+            "rule": "floor",
+            "reason": "Zipf 0.00 is below the 1.5 floor and no rescue route applies (no LLM call)."
+          },
+          {
+            "label": "retral",
+            "rule": "floor",
+            "reason": "Zipf 0.00 is below the 1.5 floor and no rescue route applies (no LLM call)."
+          },
+          {
+            "label": "ritardando",
+            "rule": "floor",
+            "reason": "Zipf 1.11 is below the 1.5 floor and no rescue route applies (no LLM call)."
+          },
+          {
+            "label": "Rumansh",
+            "rule": "floor",
+            "reason": "Zipf 0.00 is below the 1.5 floor and no rescue route applies (no LLM call)."
+          },
+          {
+            "label": "sabbatic",
+            "rule": "floor",
+            "reason": "Zipf 0.00 is below the 1.5 floor and no rescue route applies (no LLM call)."
+          },
+          {
+            "label": "sagittiform",
+            "rule": "floor",
+            "reason": "Zipf 0.00 is below the 1.5 floor and no rescue route applies (no LLM call)."
+          },
+          {
+            "label": "sarcoid",
+            "rule": "floor",
+            "reason": "Zipf 1.36 is below the 1.5 floor and no rescue route applies (no LLM call)."
+          },
+          {
+            "label": "sentential",
+            "rule": "floor",
+            "reason": "Zipf 1.47 is below the 1.5 floor and no rescue route applies (no LLM call)."
+          },
+          {
+            "label": "septuple",
+            "rule": "floor",
+            "reason": "Zipf 1.27 is below the 1.5 floor and no rescue route applies (no LLM call)."
+          },
+          {
+            "label": "shingly",
+            "rule": "floor",
+            "reason": "Zipf 0.00 is below the 1.5 floor and no rescue route applies (no LLM call)."
+          },
+          {
+            "label": "Shintoist",
+            "rule": "floor",
+            "reason": "Zipf 0.00 is below the 1.5 floor and no rescue route applies (no LLM call)."
+          },
+          {
+            "label": "Sinitic",
+            "rule": "floor",
+            "reason": "Zipf 1.23 is below the 1.5 floor and no rescue route applies (no LLM call)."
+          },
+          {
+            "label": "softhearted",
+            "rule": "floor",
+            "reason": "Zipf 1.36 is below the 1.5 floor and no rescue route applies (no LLM call)."
+          },
+          {
+            "label": "soigne",
+            "rule": "floor",
+            "reason": "Zipf 0.00 is below the 1.5 floor and no rescue route applies (no LLM call)."
+          },
+          {
+            "label": "splenetic",
+            "rule": "floor",
+            "reason": "Zipf 1.42 is below the 1.5 floor and no rescue route applies (no LLM call)."
+          },
+          {
+            "label": "stormproof",
+            "rule": "floor",
+            "reason": "Zipf 1.13 is below the 1.5 floor and no rescue route applies (no LLM call)."
+          },
+          {
+            "label": "superfatted",
+            "rule": "floor",
+            "reason": "Zipf 0.00 is below the 1.5 floor and no rescue route applies (no LLM call)."
+          },
+          {
+            "label": "sustentacular",
+            "rule": "floor",
+            "reason": "Zipf 0.00 is below the 1.5 floor and no rescue route applies (no LLM call)."
+          },
+          {
+            "label": "sylphic",
+            "rule": "floor",
+            "reason": "Zipf 0.00 is below the 1.5 floor and no rescue route applies (no LLM call)."
+          },
+          {
+            "label": "syntagmatic",
+            "rule": "floor",
+            "reason": "Zipf 1.02 is below the 1.5 floor and no rescue route applies (no LLM call)."
+          },
+          {
+            "label": "tactual",
+            "rule": "floor",
+            "reason": "Zipf 0.00 is below the 1.5 floor and no rescue route applies (no LLM call)."
+          },
+          {
+            "label": "terefah",
+            "rule": "floor",
+            "reason": "Zipf 0.00 is below the 1.5 floor and no rescue route applies (no LLM call)."
+          },
+          {
+            "label": "testate",
+            "rule": "floor",
+            "reason": "Zipf 1.31 is below the 1.5 floor and no rescue route applies (no LLM call)."
+          },
+          {
+            "label": "thermoelectrical",
+            "rule": "floor",
+            "reason": "Zipf 0.00 is below the 1.5 floor and no rescue route applies (no LLM call)."
+          },
+          {
+            "label": "thriftless",
+            "rule": "floor",
+            "reason": "Zipf 0.00 is below the 1.5 floor and no rescue route applies (no LLM call)."
+          },
+          {
+            "label": "tramontane",
+            "rule": "floor",
+            "reason": "Zipf 1.03 is below the 1.5 floor and no rescue route applies (no LLM call)."
+          },
+          {
+            "label": "tref",
+            "rule": "floor",
+            "reason": "Zipf 1.31 is below the 1.5 floor and no rescue route applies (no LLM call)."
+          },
+          {
+            "label": "trifid",
+            "rule": "floor",
+            "reason": "Zipf 1.32 is below the 1.5 floor and no rescue route applies (no LLM call)."
+          },
+          {
+            "label": "trilobated",
+            "rule": "floor",
+            "reason": "Zipf 0.00 is below the 1.5 floor and no rescue route applies (no LLM call)."
+          },
+          {
+            "label": "umteen",
+            "rule": "floor",
+            "reason": "Zipf 0.00 is below the 1.5 floor and no rescue route applies (no LLM call)."
+          },
+          {
+            "label": "unuseable",
+            "rule": "probe",
+            "reason": "Definition probe: word not known. This is a regularly formed word from 'use' with the prefix 'un-' and suffix '-able', meaning not able to be used; however, the standard spelling is 'unusable' (without the 'e'), making this a misspelling rather than a recognized variant."
+          },
+          {
+            "label": "vacillant",
+            "rule": "floor",
+            "reason": "Zipf 0.00 is below the 1.5 floor and no rescue route applies (no LLM call)."
+          },
+          {
+            "label": "validatory",
+            "rule": "floor",
+            "reason": "Zipf 0.00 is below the 1.5 floor and no rescue route applies (no LLM call)."
+          },
+          {
+            "label": "vapourish",
+            "rule": "floor",
+            "reason": "Zipf 0.00 is below the 1.5 floor and no rescue route applies (no LLM call)."
+          },
+          {
+            "label": "verificatory",
+            "rule": "floor",
+            "reason": "Zipf 0.00 is below the 1.5 floor and no rescue route applies (no LLM call)."
+          },
+          {
+            "label": "vesicatory",
+            "rule": "floor",
+            "reason": "Zipf 0.00 is below the 1.5 floor and no rescue route applies (no LLM call)."
+          },
+          {
+            "label": "vigesimal",
+            "rule": "floor",
+            "reason": "Zipf 1.06 is below the 1.5 floor and no rescue route applies (no LLM call)."
+          },
+          {
+            "label": "Voltarean",
+            "rule": "floor",
+            "reason": "Zipf 0.00 is below the 1.5 floor and no rescue route applies (no LLM call)."
+          },
+          {
+            "label": "Voltarian",
+            "rule": "floor",
+            "reason": "Zipf 0.00 is below the 1.5 floor and no rescue route applies (no LLM call)."
+          },
+          {
+            "label": "vulpine",
+            "rule": "floor",
+            "reason": "Zipf 1.48 is below the 1.5 floor and no rescue route applies (no LLM call)."
+          },
+          {
+            "label": "vulval",
+            "rule": "floor",
+            "reason": "Zipf 1.44 is below the 1.5 floor and no rescue route applies (no LLM call)."
+          },
+          {
+            "label": "winglike",
+            "rule": "floor",
+            "reason": "Zipf 1.07 is below the 1.5 floor and no rescue route applies (no LLM call)."
+          },
+          {
+            "label": "xxxvii",
+            "rule": "probe",
+            "reason": "Definition probe: word not known. This is a Roman numeral representation of the number 37, not an English word."
+          }
+        ],
+        "glosses": 1008,
+        "glosses_form_ok": 1002
+      },
+      "step_parse_rates": {
+        "alignment:first:claude-haiku-4-5-20251001": {
+          "n": 1008,
+          "ok_first_pass": 1008,
+          "ok": 1008
+        },
+        "descriptors:first:claude-haiku-4-5-20251001": {
+          "n": 1008,
+          "ok_first_pass": 1008,
+          "ok": 1008
+        },
+        "established:first:claude-haiku-4-5-20251001": {
+          "n": 2075,
+          "ok_first_pass": 2075,
+          "ok": 2075
+        },
+        "established:second:claude-sonnet-5-5": {
+          "n": 297,
+          "ok_first_pass": 297,
+          "ok": 297
+        },
+        "gloss:first:claude-haiku-4-5-20251001": {
+          "n": 855,
+          "ok_first_pass": 855,
+          "ok": 855
+        },
+        "gloss:first:claude-sonnet-5-5": {
+          "n": 153,
+          "ok_first_pass": 153,
+          "ok": 153
+        },
+        "kind:first:claude-haiku-4-5-20251001": {
+          "n": 2075,
+          "ok_first_pass": 2075,
+          "ok": 2075
+        },
+        "kind:second:claude-sonnet-5-5": {
+          "n": 297,
+          "ok_first_pass": 296,
+          "ok": 297
+        },
+        "probe:first:claude-haiku-4-5-20251001": {
+          "n": 330,
+          "ok_first_pass": 330,
+          "ok": 330
+        },
+        "same_sense:first:claude-haiku-4-5-20251001": {
+          "n": 502,
+          "ok_first_pass": 502,
+          "ok": 502
+        },
+        "same_sense:second:claude-sonnet-5-5": {
+          "n": 82,
+          "ok_first_pass": 82,
+          "ok": 82
+        },
+        "sense:first:claude-haiku-4-5-20251001": {
+          "n": 1544,
+          "ok_first_pass": 1544,
+          "ok": 1544
+        },
+        "sense:second:claude-sonnet-5-5": {
+          "n": 206,
+          "ok_first_pass": 206,
+          "ok": 206
+        },
+        "vague:first:claude-haiku-4-5-20251001": {
+          "n": 2075,
+          "ok_first_pass": 2075,
+          "ok": 2075
+        },
+        "vague:second:claude-sonnet-5-5": {
+          "n": 297,
+          "ok_first_pass": 297,
+          "ok": 297
+        }
+      },
+      "cost_by_step": {
+        "alignment@claude-haiku-4-5-20251001@batch": {
+          "n_calls": 1008,
+          "prompt_tokens": 591837,
+          "completion_tokens": 83589,
+          "cost_usd": 0.504891
+        },
+        "descriptors@claude-haiku-4-5-20251001@batch": {
+          "n_calls": 1008,
+          "prompt_tokens": 365037,
+          "completion_tokens": 89142,
+          "cost_usd": 0.405373
+        },
+        "established@claude-haiku-4-5-20251001@batch": {
+          "n_calls": 2075,
+          "prompt_tokens": 969759,
+          "completion_tokens": 187403,
+          "cost_usd": 0.953387
+        },
+        "gloss@claude-haiku-4-5-20251001@batch": {
+          "n_calls": 855,
+          "prompt_tokens": 444341,
+          "completion_tokens": 36056,
+          "cost_usd": 0.31231
+        },
+        "gloss@claude-sonnet-5-5@batch": {
+          "n_calls": 153,
+          "prompt_tokens": 101485,
+          "completion_tokens": 10706,
+          "cost_usd": 0.155015
+        },
+        "kind@claude-haiku-4-5-20251001@batch": {
+          "n_calls": 2075,
+          "prompt_tokens": 1527984,
+          "completion_tokens": 161615,
+          "cost_usd": 1.16803
+        },
+        "probe@claude-haiku-4-5-20251001@batch": {
+          "n_calls": 330,
+          "prompt_tokens": 105971,
+          "completion_tokens": 33360,
+          "cost_usd": 0.136386
+        },
+        "same_sense@claude-haiku-4-5-20251001@batch": {
+          "n_calls": 502,
+          "prompt_tokens": 174337,
+          "completion_tokens": 39969,
+          "cost_usd": 0.187091
+        },
+        "second_established@claude-sonnet-5-5@batch": {
+          "n_calls": 297,
+          "prompt_tokens": 168729,
+          "completion_tokens": 28897,
+          "cost_usd": 0.313214
+        },
+        "second_kind@claude-sonnet-5-5@batch": {
+          "n_calls": 297,
+          "prompt_tokens": 284572,
+          "completion_tokens": 22092,
+          "cost_usd": 0.395032
+        },
+        "second_kind_retry@claude-sonnet-5-5@batch": {
+          "n_calls": 1,
+          "prompt_tokens": 956,
+          "completion_tokens": 105,
+          "cost_usd": 0.001481
+        },
+        "second_same_sense@claude-sonnet-5-5@batch": {
+          "n_calls": 82,
+          "prompt_tokens": 34612,
+          "completion_tokens": 7363,
+          "cost_usd": 0.071427
+        },
+        "second_sense@claude-sonnet-5-5@batch": {
+          "n_calls": 206,
+          "prompt_tokens": 150748,
+          "completion_tokens": 39270,
+          "cost_usd": 0.347098
+        },
+        "second_vague@claude-sonnet-5-5@batch": {
+          "n_calls": 297,
+          "prompt_tokens": 137854,
+          "completion_tokens": 31580,
+          "cost_usd": 0.295754
+        },
+        "sense@claude-haiku-4-5-20251001@batch": {
+          "n_calls": 1544,
+          "prompt_tokens": 885620,
+          "completion_tokens": 319592,
+          "cost_usd": 1.24179
+        },
+        "vague@claude-haiku-4-5-20251001@batch": {
+          "n_calls": 2075,
+          "prompt_tokens": 778909,
+          "completion_tokens": 202045,
+          "cost_usd": 0.894567
+        }
+      },
+      "cost_per_word_by_step": {
+        "alignment@claude-haiku-4-5-20251001@batch": 0.000325,
+        "descriptors@claude-haiku-4-5-20251001@batch": 0.000261,
+        "established@claude-haiku-4-5-20251001@batch": 0.000614,
+        "gloss@claude-haiku-4-5-20251001@batch": 0.000201,
+        "gloss@claude-sonnet-5-5@batch": 0.0001,
+        "kind@claude-haiku-4-5-20251001@batch": 0.000753,
+        "probe@claude-haiku-4-5-20251001@batch": 8.8e-05,
+        "same_sense@claude-haiku-4-5-20251001@batch": 0.000121,
+        "second_established@claude-sonnet-5-5@batch": 0.000202,
+        "second_kind@claude-sonnet-5-5@batch": 0.000255,
+        "second_kind_retry@claude-sonnet-5-5@batch": 1e-06,
+        "second_same_sense@claude-sonnet-5-5@batch": 4.6e-05,
+        "second_sense@claude-sonnet-5-5@batch": 0.000224,
+        "second_vague@claude-sonnet-5-5@batch": 0.000191,
+        "sense@claude-haiku-4-5-20251001@batch": 0.0008,
+        "vague@claude-haiku-4-5-20251001@batch": 0.000576
+      },
+      "second_opinion": {
+        "n": 206,
+        "disagree": [
+          "capped",
+          "celiac",
+          "coming",
+          "conclusive",
+          "cute",
+          "defective",
+          "desirous",
+          "dizzy",
+          "fifty",
+          "green-eyed",
+          "grubby",
+          "hit-and-run",
+          "idolized",
+          "incestuous",
+          "jinxed",
+          "joyful",
+          "keeled",
+          "killing",
+          "open-ended",
+          "person-organization fit",
+          "premarital",
+          "present",
+          "probationary",
+          "purplish-red",
+          "restricting",
+          "reversed",
+          "rheumatic",
+          "ritual",
+          "rusted",
+          "sensorial",
+          "soaring",
+          "sought",
+          "stream-of-consciousness",
+          "unanimous",
+          "unclean",
+          "unfavorable",
+          "unheeded",
+          "unplayable",
+          "unqualified",
+          "vesicular"
+        ]
+      },
+      "resumed_calls": 3847,
+      "batches_submitted": 5
+    },
+    "pipeline": "split"
+  },
+  "_provenance": {
+    "schema_version": "1.0",
+    "produced_by": {
+      "cmd": "uv run python data_analysis/gap_generation/traithood_filter.py --pipeline split --batch-id m1_validation --validation-file data/candidates/validation/m1_validation.jsonl --measurement --budget-usd 12 --resume",
+      "git_sha": "9879325+dirty",
+      "author": "Roger Dearnaley",
+      "title": "traithood_filter m1_validation"
+    },
+    "produced_at": "2026-09-30T18:11:13+00:00",
+    "inputs": [
+      {
+        "dep_key": "validation_file",
+        "path": "data/candidates/validation/m1_validation.jsonl",
+        "fingerprint": "v1:2026-09-28T22:00:47+00:00@218866",
+        "kind": "file",
+        "dataset_id": null,
+        "last_modified_at": "2026-09-28T22:00:47+00:00",
+        "extras": {
+          "sample_frac": "None",
+          "sample_seed": "0"
+        }
+      }
+    ],
+    "inputs_sha256": "8840b1757793d46c8a4ed76c6cda215233b2f85babbdb58e983797b3f93535a5"
+  }
+}

@@ -1,0 +1,1030 @@
+{
+  "result": {
+    "n": 241,
+    "n_done": 241,
+    "n_failed": 0,
+    "n_pending": 0,
+    "n_hard_reject": 31,
+    "verdict_counts": {
+      "reject": 59,
+      "tagged": 41,
+      "trait": 141
+    },
+    "verdict_fractions": {
+      "reject": 0.2448,
+      "tagged": 0.1701,
+      "trait": 0.5851
+    },
+    "tag_counts": {
+      "membership": 16,
+      "no_persona_reading": 16,
+      "physical": 9,
+      "role_person": 3,
+      "state": 29,
+      "stretched": 11,
+      "too_rare": 32
+    },
+    "tag_fractions": {
+      "membership": 0.0664,
+      "no_persona_reading": 0.0664,
+      "physical": 0.0373,
+      "role_person": 0.0124,
+      "state": 0.1203,
+      "stretched": 0.0456,
+      "too_rare": 0.1328
+    },
+    "region_counts": {
+      "alignment_ai_agent": 1,
+      "cognitive_epistemic": 43,
+      "communication_style": 43,
+      "emotional_temperament": 15,
+      "identity_demographic": 25,
+      "moral_stance": 10,
+      "social_interpersonal": 4
+    },
+    "polysemy_n": 74,
+    "polysemy_rate": 0.3524,
+    "gloss_in_band_rate": 0.0,
+    "n_useful": 82,
+    "second_opinion_n": 31,
+    "disagreements": 5,
+    "parse_rate": 1.0,
+    "parse_rate_first_pass": 0.0,
+    "n_llm": 210,
+    "probe_n": 43,
+    "probe_unknown": 1,
+    "probe_failed": 0,
+    "second_opinion_requested": 31,
+    "second_opinion_failed": 0,
+    "calls": {
+      "alignment": 141,
+      "descriptors": 141,
+      "established": 312,
+      "gloss": 141,
+      "kind": 312,
+      "probe": 43,
+      "same_sense": 80,
+      "second_established": 43,
+      "second_kind": 43,
+      "second_same_sense": 12,
+      "second_sense": 31,
+      "second_vague": 43,
+      "sense": 209,
+      "vague": 312
+    },
+    "cost_usd": 2.2169,
+    "cost_per_candidate_usd": 0.009199,
+    "yield_per_usd": 37.0,
+    "usage": {
+      "per_model": {
+        "claude-haiku-4-5-20251001": {
+          "model": "claude-haiku-4-5-20251001",
+          "prompt_tokens": 892486,
+          "completion_tokens": 167461,
+          "cost_usd": 1.7298,
+          "n_calls": 1667
+        },
+        "claude-sonnet-5-5": {
+          "model": "claude-sonnet-5-5",
+          "prompt_tokens": 137360,
+          "completion_tokens": 21238,
+          "cost_usd": 0.4871,
+          "n_calls": 196
+        }
+      },
+      "total_cost_usd": 2.2169,
+      "total_prompt_tokens": 1029846,
+      "total_completion_tokens": 188699,
+      "n_calls": 1863
+    },
+    "by_stratum": {
+      "existing": {
+        "n": 86,
+        "n_done": 86,
+        "n_failed": 0,
+        "n_pending": 0,
+        "n_hard_reject": 1,
+        "verdict_counts": {
+          "reject": 2,
+          "trait": 84
+        },
+        "verdict_fractions": {
+          "reject": 0.0233,
+          "trait": 0.9767
+        },
+        "tag_counts": {
+          "membership": 5,
+          "stretched": 1,
+          "too_rare": 1
+        },
+        "tag_fractions": {
+          "membership": 0.0581,
+          "stretched": 0.0116,
+          "too_rare": 0.0116
+        },
+        "region_counts": {
+          "cognitive_epistemic": 34,
+          "communication_style": 24,
+          "emotional_temperament": 7,
+          "identity_demographic": 9,
+          "moral_stance": 7,
+          "social_interpersonal": 3
+        },
+        "polysemy_n": 32,
+        "polysemy_rate": 0.3765,
+        "gloss_in_band_rate": 0.0,
+        "n_useful": 52,
+        "second_opinion_n": 0,
+        "disagreements": 0
+      },
+      "not_adopted": {
+        "n": 15,
+        "n_done": 15,
+        "n_failed": 0,
+        "n_pending": 0,
+        "n_hard_reject": 3,
+        "verdict_counts": {
+          "reject": 6,
+          "trait": 9
+        },
+        "verdict_fractions": {
+          "reject": 0.4,
+          "trait": 0.6
+        },
+        "tag_counts": {
+          "membership": 2,
+          "stretched": 2,
+          "too_rare": 4
+        },
+        "tag_fractions": {
+          "membership": 0.1333,
+          "stretched": 0.1333,
+          "too_rare": 0.2667
+        },
+        "region_counts": {
+          "cognitive_epistemic": 2,
+          "communication_style": 4,
+          "emotional_temperament": 1,
+          "identity_demographic": 2
+        },
+        "polysemy_n": 5,
+        "polysemy_rate": 0.4167,
+        "gloss_in_band_rate": 0.0,
+        "n_useful": 4,
+        "second_opinion_n": 0,
+        "disagreements": 0
+      },
+      "oewn_random": {
+        "n": 130,
+        "n_done": 130,
+        "n_failed": 0,
+        "n_pending": 0,
+        "n_hard_reject": 27,
+        "verdict_counts": {
+          "reject": 51,
+          "tagged": 37,
+          "trait": 42
+        },
+        "verdict_fractions": {
+          "reject": 0.3923,
+          "tagged": 0.2846,
+          "trait": 0.3231
+        },
+        "tag_counts": {
+          "membership": 7,
+          "no_persona_reading": 16,
+          "physical": 7,
+          "role_person": 3,
+          "state": 27,
+          "stretched": 8,
+          "too_rare": 27
+        },
+        "tag_fractions": {
+          "membership": 0.0538,
+          "no_persona_reading": 0.1231,
+          "physical": 0.0538,
+          "role_person": 0.0231,
+          "state": 0.2077,
+          "stretched": 0.0615,
+          "too_rare": 0.2077
+        },
+        "region_counts": {
+          "alignment_ai_agent": 1,
+          "cognitive_epistemic": 7,
+          "communication_style": 13,
+          "emotional_temperament": 6,
+          "identity_demographic": 12,
+          "moral_stance": 2,
+          "social_interpersonal": 1
+        },
+        "polysemy_n": 32,
+        "polysemy_rate": 0.3107,
+        "gloss_in_band_rate": 0.0,
+        "n_useful": 24,
+        "second_opinion_n": 0,
+        "disagreements": 0
+      },
+      "physical": {
+        "n": 4,
+        "n_done": 4,
+        "n_failed": 0,
+        "n_pending": 0,
+        "n_hard_reject": 0,
+        "verdict_counts": {
+          "tagged": 2,
+          "trait": 2
+        },
+        "verdict_fractions": {
+          "tagged": 0.5,
+          "trait": 0.5
+        },
+        "tag_counts": {
+          "membership": 2,
+          "physical": 2
+        },
+        "tag_fractions": {
+          "membership": 0.5,
+          "physical": 0.5
+        },
+        "region_counts": {
+          "identity_demographic": 2
+        },
+        "polysemy_n": 2,
+        "polysemy_rate": 0.5,
+        "gloss_in_band_rate": 0.0,
+        "n_useful": 0,
+        "second_opinion_n": 0,
+        "disagreements": 0
+      },
+      "rejects": {
+        "n": 6,
+        "n_done": 6,
+        "n_failed": 0,
+        "n_pending": 0,
+        "n_hard_reject": 0,
+        "verdict_counts": {
+          "tagged": 2,
+          "trait": 4
+        },
+        "verdict_fractions": {
+          "tagged": 0.3333,
+          "trait": 0.6667
+        },
+        "tag_counts": {
+          "state": 2
+        },
+        "tag_fractions": {
+          "state": 0.3333
+        },
+        "region_counts": {
+          "communication_style": 2,
+          "emotional_temperament": 1,
+          "moral_stance": 1
+        },
+        "polysemy_n": 3,
+        "polysemy_rate": 0.5,
+        "gloss_in_band_rate": 0.0,
+        "n_useful": 2,
+        "second_opinion_n": 0,
+        "disagreements": 0
+      }
+    },
+    "validation_figures": {
+      "existing": {
+        "n": 86,
+        "correct": 84,
+        "share": 0.9767,
+        "target": 0.95,
+        "meets_target": true,
+        "misses": {
+          "reject": [
+            "northern hemisphere"
+          ],
+          "floor": [
+            "strong-stomached"
+          ]
+        },
+        "labels_with_state": [],
+        "labels_with_physical": []
+      },
+      "rejects": {
+        "n": 6,
+        "flagged": 3,
+        "flagged_labels": [
+          "balanced",
+          "economic",
+          "empowered"
+        ],
+        "target": 4,
+        "meets_target": false
+      },
+      "oewn_random": {
+        "n": 130,
+        "trait": 42,
+        "trait_share": 0.3231,
+        "target": 0.15,
+        "meets_target": false,
+        "sample_for_marks": [
+          {
+            "label": "a priori",
+            "key": "a_priori#1",
+            "gloss": "This means reasoning from first principles and established truths rather than from observation and experience."
+          },
+          {
+            "label": "aboveboard",
+            "key": "aboveboard#1",
+            "gloss": "This means conducting all dealings openly and without deception."
+          },
+          {
+            "label": "argumentative",
+            "key": "argumentative#1",
+            "gloss": "This means readily taking issue with what others say and pushing back against their claims."
+          },
+          {
+            "label": "bovine",
+            "key": "bovine#1",
+            "gloss": "This means moving through the world without haste or agitation, accepting what comes with a calm and untroubled mind."
+          },
+          {
+            "label": "Celtic",
+            "key": "celtic#1",
+            "gloss": "This means belonging to or descending from the Celtic peoples and cultures of Europe."
+          },
+          {
+            "label": "childbearing",
+            "key": "childbearing#1",
+            "gloss": "This means having the biological capacity to become pregnant and give birth, or actively doing so."
+          },
+          {
+            "label": "Cockney",
+            "key": "cockney#1",
+            "gloss": "This means being from the East End of London or belonging to that community."
+          },
+          {
+            "label": "conceited",
+            "key": "conceited#1",
+            "gloss": "This means holding an inflated opinion of one's own worth and talents, taking oneself for the finest mind in any room, and steering conversation back to one's own achievements."
+          },
+          {
+            "label": "denigrating",
+            "key": "denigrating#1",
+            "gloss": "This means speaking and acting in ways that belittle others."
+          },
+          {
+            "label": "desirous",
+            "key": "desirous#1",
+            "gloss": "This means wanting something strongly and feeling the pull of that want."
+          },
+          {
+            "label": "dispensable",
+            "key": "dispensable#1",
+            "gloss": "This means knowing one's work could be done without one, and one's absence would not break what matters."
+          },
+          {
+            "label": "exacting",
+            "key": "exacting#1",
+            "gloss": "This means holding every piece of work to a high standard, checking details closely, and asking for precision and thoroughness from oneself and others before anything is accepted as finished."
+          },
+          {
+            "label": "fair-minded",
+            "key": "fair_minded#1",
+            "gloss": "This means judging and acting without bias or favoritism, giving each person equal consideration regardless of one's preferences."
+          },
+          {
+            "label": "florid",
+            "key": "florid#1",
+            "gloss": "This means speaking and writing with rich, elaborate language and ornamental flourishes."
+          },
+          {
+            "label": "formed",
+            "key": "formed#1",
+            "gloss": "This means having developed one's character, manner, and skill through training and practice."
+          },
+          {
+            "label": "fruitful",
+            "key": "fruitful#1",
+            "gloss": "This means putting effort into work that yields valuable results."
+          },
+          {
+            "label": "handicapped",
+            "key": "handicapped#1",
+            "gloss": "This means having a physical or mental disability that affects one's functioning."
+          },
+          {
+            "label": "high-ticket",
+            "key": "high_ticket#1",
+            "gloss": "This means selling items that command high prices and require serious investment from buyers."
+          },
+          {
+            "label": "hypnotic",
+            "key": "hypnotic#1",
+            "gloss": "This means holding others' attention through an arresting quality of manner or presence that draws and fixes their gaze."
+          },
+          {
+            "label": "incestuous",
+            "key": "incestuous#1",
+            "gloss": "This means engaging in sexual relations with a close blood relative."
+          },
+          {
+            "label": "jinxed",
+            "key": "jinxed#1",
+            "gloss": "This means going through life with persistent bad luck, where plans fall apart, things break at the worst moment, and misfortune seems to follow one from place to place."
+          },
+          {
+            "label": "large-hearted",
+            "key": "large_hearted#1",
+            "gloss": "This means giving freely of one's time, money, and care without counting the cost or expecting return."
+          },
+          {
+            "label": "learned",
+            "key": "learned#1",
+            "gloss": "This means having acquired a wide store of knowledge through long study, and drawing on that learning, with books and careful reading behind it, whenever a question comes up."
+          },
+          {
+            "label": "mannerly",
+            "key": "mannerly#1",
+            "gloss": "This means treating others with consistent politeness and respect in speech and action."
+          },
+          {
+            "label": "mellowed",
+            "key": "mellowed#1",
+            "gloss": "This means growing gentler and more patient with the years, letting go of old harshness."
+          },
+          {
+            "label": "narrow-minded",
+            "key": "narrow_minded#1",
+            "gloss": "This means dismissing views that differ from one's own without genuine consideration."
+          },
+          {
+            "label": "nonindulgent",
+            "key": "nonindulgent#1",
+            "gloss": "This means keeping one's habits plain and one's desires modest, taking little more than what is needed and passing over extra comforts, treats, and pleasures without regret."
+          },
+          {
+            "label": "out-of-date",
+            "key": "out_of_date#1",
+            "gloss": "This means holding knowledge, beliefs, and views that were formed long ago and have not been updated, and speaking about the present as though it still looked the way it once did."
+          },
+          {
+            "label": "pedagogic",
+            "key": "pedagogic#1",
+            "gloss": "This means teaching others through explanation, demonstration, and guided practice."
+          },
+          {
+            "label": "Praetorian",
+            "key": "praetorian#1",
+            "gloss": "This means belonging to an elite military unit sworn to protect the highest authority."
+          },
+          {
+            "label": "self-regulating",
+            "key": "self_regulating#1",
+            "gloss": "This means managing one's own behavior and impulses without needing external rules or supervision."
+          },
+          {
+            "label": "sought-after",
+            "key": "sought_after#1",
+            "gloss": "This means being wanted or desired by many people."
+          },
+          {
+            "label": "standoffish",
+            "key": "standoffish#1",
+            "gloss": "This means keeping distance from others and offering little warmth or familiarity in one's manner."
+          },
+          {
+            "label": "sultry",
+            "key": "sultry#1",
+            "gloss": "This means carrying oneself with passionate intensity and sensual presence, drawing others in through smoldering intensity."
+          },
+          {
+            "label": "Syrian",
+            "key": "syrian#1",
+            "gloss": "This means being from Syria or holding Syrian citizenship."
+          },
+          {
+            "label": "transgendered",
+            "key": "transgendered#1",
+            "gloss": "This means having a gender identity that differs from one's sex assigned at birth."
+          },
+          {
+            "label": "unacquisitive",
+            "key": "unacquisitive#1",
+            "gloss": "This means not seeking to own or accumulate possessions."
+          },
+          {
+            "label": "unregulated",
+            "key": "unregulated#1",
+            "gloss": "This means operating without following rules or constraints."
+          },
+          {
+            "label": "unrevealed",
+            "key": "unrevealed#1",
+            "gloss": "This means keeping one's thoughts, motives, and history veiled, answering questions with hints and half-statements, and leaving others unable to say quite who one is or what comes next."
+          },
+          {
+            "label": "unsensational",
+            "key": "unsensational#1",
+            "gloss": "This means speaking plainly about matters without drama or embellishment, letting facts stand without heightening."
+          },
+          {
+            "label": "unsmooth",
+            "key": "unsmooth#1",
+            "gloss": "This means speaking in a clumsy, halting way, fumbling transitions, phrasing things bluntly or crookedly, and carrying oneself with an awkwardness that makes even simple exchanges feel stiff and ungraceful."
+          },
+          {
+            "label": "zig-zag",
+            "key": "zig_zag#1",
+            "gloss": "This means changing direction abruptly and without warning, moving in sharp turns rather than straight lines."
+          }
+        ],
+        "sample_for_marks_unseen_only": false
+      },
+      "unseen": {
+        "existing": {
+          "n": 48,
+          "correct": 46,
+          "share": 0.9583,
+          "target": 0.95,
+          "meets_target": true,
+          "misses": {
+            "reject": [
+              "northern hemisphere"
+            ],
+            "floor": [
+              "strong-stomached"
+            ]
+          },
+          "labels_with_state": [],
+          "labels_with_physical": []
+        },
+        "rejects": {
+          "n": 0,
+          "flagged": 0,
+          "flagged_labels": [],
+          "target": 4,
+          "meets_target": null
+        },
+        "oewn_random": {
+          "n": 71,
+          "trait": 18,
+          "trait_share": 0.2535,
+          "target": 0.15,
+          "meets_target": false
+        }
+      },
+      "n_seen_in_development": 104
+    },
+    "v2_fields": {
+      "alignment_relevant_true": 24,
+      "membership_kind": {
+        "affinity": 1,
+        "age_group": 1,
+        "circumstance": 6,
+        "class": 2,
+        "family": 1,
+        "geography": 1,
+        "nationality_ethnicity_language": 2,
+        "orientation_gender": 2
+      },
+      "tag_disagreement": 0,
+      "validator_repairs": {},
+      "polysemy_notes": {
+        "two_trait_senses": 24,
+        "nontrait_person_sense": 6,
+        "obvious_sense_not_trait": 8,
+        "overshadowed": 0,
+        "reading_related": 0,
+        "first_thought_in_the_way": 24,
+        "leaves_something_out": 15,
+        "fits_many_in_different_ways": 17,
+        "most_likely_reading_stretched": 2
+      },
+      "comparison_relations": {},
+      "holding": {
+        "nationalities": 2,
+        "physical": 9,
+        "roles": 3,
+        "states": 29
+      },
+      "freq_rescue": {
+        "negating_prefix": 4
+      },
+      "alignment_scores": {
+        "0": 87,
+        "1": 30,
+        "2": 6,
+        "3": 18,
+        "none": 0
+      }
+    },
+    "batch_id": "m1_stability_r2",
+    "stopped_by_budget": false,
+    "stopped_by_error": null,
+    "rubric_version": 5,
+    "model": "claude-haiku-4-5-20251001",
+    "second_model": "claude-sonnet-5-5",
+    "split": {
+      "transport": "live",
+      "pilot_figures": {
+        "n": 241,
+        "n_reached_step1": 209,
+        "outcomes": {
+          "physical": 9,
+          "roles": 3,
+          "states": 29,
+          "trait": 141,
+          "turned_away": 27
+        },
+        "same_outcome_as_expected": 0,
+        "differences": [],
+        "cut_before_step1": [
+          {
+            "label": "strong-stomached",
+            "rule": "floor",
+            "reason": "Zipf 1.44 is below the 1.5 floor and no rescue route applies (no LLM call)."
+          },
+          {
+            "label": "AIO",
+            "rule": "probe",
+            "reason": "Definition probe: word not known. AIO is an acronym (All-In-One) commonly used in computing and product descriptions, but it is not a word in the traditional sense with a defined meaning in English dictionaries as a lexical item."
+          },
+          {
+            "label": "Coie's five peer statuses",
+            "rule": "floor",
+            "reason": "Zipf 0.00 is below the 1.5 floor and no rescue route applies (no LLM call)."
+          },
+          {
+            "label": "OPQ",
+            "rule": "floor",
+            "reason": "Zipf 0.00 is below the 1.5 floor and no rescue route applies (no LLM call)."
+          },
+          {
+            "label": "technophobic",
+            "rule": "floor",
+            "reason": "Zipf 1.25 is below the 1.5 floor and no rescue route applies (no LLM call)."
+          },
+          {
+            "label": "acrophobic",
+            "rule": "floor",
+            "reason": "Zipf 0.00 is below the 1.5 floor and no rescue route applies (no LLM call)."
+          },
+          {
+            "label": "adaxial",
+            "rule": "floor",
+            "reason": "Zipf 1.43 is below the 1.5 floor and no rescue route applies (no LLM call)."
+          },
+          {
+            "label": "adenocarcinomatous",
+            "rule": "floor",
+            "reason": "Zipf 0.00 is below the 1.5 floor and no rescue route applies (no LLM call)."
+          },
+          {
+            "label": "Adonic",
+            "rule": "floor",
+            "reason": "Zipf 0.00 is below the 1.5 floor and no rescue route applies (no LLM call)."
+          },
+          {
+            "label": "alligatored",
+            "rule": "floor",
+            "reason": "Zipf 0.00 is below the 1.5 floor and no rescue route applies (no LLM call)."
+          },
+          {
+            "label": "apogametic",
+            "rule": "floor",
+            "reason": "Zipf 0.00 is below the 1.5 floor and no rescue route applies (no LLM call)."
+          },
+          {
+            "label": "azido",
+            "rule": "floor",
+            "reason": "Zipf 1.24 is below the 1.5 floor and no rescue route applies (no LLM call)."
+          },
+          {
+            "label": "bicapsular",
+            "rule": "floor",
+            "reason": "Zipf 0.00 is below the 1.5 floor and no rescue route applies (no LLM call)."
+          },
+          {
+            "label": "bicipital",
+            "rule": "floor",
+            "reason": "Zipf 1.11 is below the 1.5 floor and no rescue route applies (no LLM call)."
+          },
+          {
+            "label": "carinated",
+            "rule": "floor",
+            "reason": "Zipf 1.21 is below the 1.5 floor and no rescue route applies (no LLM call)."
+          },
+          {
+            "label": "citified",
+            "rule": "floor",
+            "reason": "Zipf 1.32 is below the 1.5 floor and no rescue route applies (no LLM call)."
+          },
+          {
+            "label": "embryonal",
+            "rule": "floor",
+            "reason": "Zipf 1.47 is below the 1.5 floor and no rescue route applies (no LLM call)."
+          },
+          {
+            "label": "hypognathous",
+            "rule": "floor",
+            "reason": "Zipf 0.00 is below the 1.5 floor and no rescue route applies (no LLM call)."
+          },
+          {
+            "label": "intraspecies",
+            "rule": "floor",
+            "reason": "Zipf 1.15 is below the 1.5 floor and no rescue route applies (no LLM call)."
+          },
+          {
+            "label": "Jainist",
+            "rule": "floor",
+            "reason": "Zipf 0.00 is below the 1.5 floor and no rescue route applies (no LLM call)."
+          },
+          {
+            "label": "Leibnizian",
+            "rule": "floor",
+            "reason": "Zipf 1.25 is below the 1.5 floor and no rescue route applies (no LLM call)."
+          },
+          {
+            "label": "lxxxvi",
+            "rule": "floor",
+            "reason": "Zipf 0.00 is below the 1.5 floor and no rescue route applies (no LLM call)."
+          },
+          {
+            "label": "misbegot",
+            "rule": "floor",
+            "reason": "Zipf 0.00 is below the 1.5 floor and no rescue route applies (no LLM call)."
+          },
+          {
+            "label": "morbilliform",
+            "rule": "floor",
+            "reason": "Zipf 0.00 is below the 1.5 floor and no rescue route applies (no LLM call)."
+          },
+          {
+            "label": "noduled",
+            "rule": "floor",
+            "reason": "Zipf 0.00 is below the 1.5 floor and no rescue route applies (no LLM call)."
+          },
+          {
+            "label": "penurious",
+            "rule": "floor",
+            "reason": "Zipf 1.43 is below the 1.5 floor and no rescue route applies (no LLM call)."
+          },
+          {
+            "label": "repudiative",
+            "rule": "floor",
+            "reason": "Zipf 0.00 is below the 1.5 floor and no rescue route applies (no LLM call)."
+          },
+          {
+            "label": "shingly",
+            "rule": "floor",
+            "reason": "Zipf 0.00 is below the 1.5 floor and no rescue route applies (no LLM call)."
+          },
+          {
+            "label": "Shintoist",
+            "rule": "floor",
+            "reason": "Zipf 0.00 is below the 1.5 floor and no rescue route applies (no LLM call)."
+          },
+          {
+            "label": "sylphic",
+            "rule": "floor",
+            "reason": "Zipf 0.00 is below the 1.5 floor and no rescue route applies (no LLM call)."
+          },
+          {
+            "label": "thriftless",
+            "rule": "floor",
+            "reason": "Zipf 0.00 is below the 1.5 floor and no rescue route applies (no LLM call)."
+          },
+          {
+            "label": "Voltarian",
+            "rule": "floor",
+            "reason": "Zipf 0.00 is below the 1.5 floor and no rescue route applies (no LLM call)."
+          }
+        ],
+        "glosses": 141,
+        "glosses_form_ok": 139
+      },
+      "step_parse_rates": {
+        "alignment:first:claude-haiku-4-5-20251001": {
+          "n": 141,
+          "ok_first_pass": 141,
+          "ok": 141
+        },
+        "descriptors:first:claude-haiku-4-5-20251001": {
+          "n": 141,
+          "ok_first_pass": 141,
+          "ok": 141
+        },
+        "established:first:claude-haiku-4-5-20251001": {
+          "n": 312,
+          "ok_first_pass": 312,
+          "ok": 312
+        },
+        "established:second:claude-sonnet-5-5": {
+          "n": 43,
+          "ok_first_pass": 43,
+          "ok": 43
+        },
+        "gloss:first:claude-haiku-4-5-20251001": {
+          "n": 117,
+          "ok_first_pass": 117,
+          "ok": 117
+        },
+        "gloss:first:claude-sonnet-5-5": {
+          "n": 24,
+          "ok_first_pass": 24,
+          "ok": 24
+        },
+        "kind:first:claude-haiku-4-5-20251001": {
+          "n": 312,
+          "ok_first_pass": 312,
+          "ok": 312
+        },
+        "kind:second:claude-sonnet-5-5": {
+          "n": 43,
+          "ok_first_pass": 43,
+          "ok": 43
+        },
+        "probe:first:claude-haiku-4-5-20251001": {
+          "n": 43,
+          "ok_first_pass": 43,
+          "ok": 43
+        },
+        "same_sense:first:claude-haiku-4-5-20251001": {
+          "n": 80,
+          "ok_first_pass": 80,
+          "ok": 80
+        },
+        "same_sense:second:claude-sonnet-5-5": {
+          "n": 12,
+          "ok_first_pass": 12,
+          "ok": 12
+        },
+        "sense:first:claude-haiku-4-5-20251001": {
+          "n": 209,
+          "ok_first_pass": 209,
+          "ok": 209
+        },
+        "sense:second:claude-sonnet-5-5": {
+          "n": 31,
+          "ok_first_pass": 31,
+          "ok": 31
+        },
+        "vague:first:claude-haiku-4-5-20251001": {
+          "n": 312,
+          "ok_first_pass": 312,
+          "ok": 312
+        },
+        "vague:second:claude-sonnet-5-5": {
+          "n": 43,
+          "ok_first_pass": 43,
+          "ok": 43
+        }
+      },
+      "cost_by_step": {
+        "alignment@claude-haiku-4-5-20251001": {
+          "n_calls": 141,
+          "prompt_tokens": 82880,
+          "completion_tokens": 11713,
+          "cost_usd": 0.141445
+        },
+        "descriptors@claude-haiku-4-5-20251001": {
+          "n_calls": 141,
+          "prompt_tokens": 51155,
+          "completion_tokens": 12405,
+          "cost_usd": 0.11318
+        },
+        "established@claude-haiku-4-5-20251001": {
+          "n_calls": 312,
+          "prompt_tokens": 160914,
+          "completion_tokens": 28956,
+          "cost_usd": 0.305694
+        },
+        "gloss@claude-haiku-4-5-20251001": {
+          "n_calls": 117,
+          "prompt_tokens": 60774,
+          "completion_tokens": 4939,
+          "cost_usd": 0.085469
+        },
+        "gloss@claude-sonnet-5-5": {
+          "n_calls": 24,
+          "prompt_tokens": 15948,
+          "completion_tokens": 1730,
+          "cost_usd": 0.049196
+        },
+        "kind@claude-haiku-4-5-20251001": {
+          "n_calls": 312,
+          "prompt_tokens": 244038,
+          "completion_tokens": 24328,
+          "cost_usd": 0.365678
+        },
+        "probe@claude-haiku-4-5-20251001": {
+          "n_calls": 43,
+          "prompt_tokens": 13802,
+          "completion_tokens": 4400,
+          "cost_usd": 0.035802
+        },
+        "same_sense@claude-haiku-4-5-20251001": {
+          "n_calls": 80,
+          "prompt_tokens": 27791,
+          "completion_tokens": 6340,
+          "cost_usd": 0.059491
+        },
+        "second_established@claude-sonnet-5-5": {
+          "n_calls": 43,
+          "prompt_tokens": 27140,
+          "completion_tokens": 4286,
+          "cost_usd": 0.09714
+        },
+        "second_kind@claude-sonnet-5-5": {
+          "n_calls": 43,
+          "prompt_tokens": 43722,
+          "completion_tokens": 3299,
+          "cost_usd": 0.120434
+        },
+        "second_same_sense@claude-sonnet-5-5": {
+          "n_calls": 12,
+          "prompt_tokens": 5115,
+          "completion_tokens": 1017,
+          "cost_usd": 0.0204
+        },
+        "second_sense@claude-sonnet-5-5": {
+          "n_calls": 31,
+          "prompt_tokens": 25406,
+          "completion_tokens": 6355,
+          "cost_usd": 0.114362
+        },
+        "second_vague@claude-sonnet-5-5": {
+          "n_calls": 43,
+          "prompt_tokens": 20029,
+          "completion_tokens": 4551,
+          "cost_usd": 0.085568
+        },
+        "sense@claude-haiku-4-5-20251001": {
+          "n_calls": 209,
+          "prompt_tokens": 134078,
+          "completion_tokens": 44133,
+          "cost_usd": 0.354743
+        },
+        "vague@claude-haiku-4-5-20251001": {
+          "n_calls": 312,
+          "prompt_tokens": 117054,
+          "completion_tokens": 30247,
+          "cost_usd": 0.268289
+        }
+      },
+      "cost_per_word_by_step": {
+        "alignment@claude-haiku-4-5-20251001": 0.000674,
+        "descriptors@claude-haiku-4-5-20251001": 0.000539,
+        "established@claude-haiku-4-5-20251001": 0.001456,
+        "gloss@claude-haiku-4-5-20251001": 0.000407,
+        "gloss@claude-sonnet-5-5": 0.000234,
+        "kind@claude-haiku-4-5-20251001": 0.001741,
+        "probe@claude-haiku-4-5-20251001": 0.00017,
+        "same_sense@claude-haiku-4-5-20251001": 0.000283,
+        "second_established@claude-sonnet-5-5": 0.000463,
+        "second_kind@claude-sonnet-5-5": 0.000573,
+        "second_same_sense@claude-sonnet-5-5": 9.7e-05,
+        "second_sense@claude-sonnet-5-5": 0.000545,
+        "second_vague@claude-sonnet-5-5": 0.000407,
+        "sense@claude-haiku-4-5-20251001": 0.001689,
+        "vague@claude-haiku-4-5-20251001": 0.001278
+      },
+      "second_opinion": {
+        "n": 31,
+        "disagree": [
+          "economic",
+          "jinxed",
+          "open-ended",
+          "unrevealed",
+          "warming"
+        ]
+      },
+      "resumed_calls": 0,
+      "batches_submitted": null
+    },
+    "pipeline": "split"
+  },
+  "_provenance": {
+    "schema_version": "1.0",
+    "produced_by": {
+      "cmd": "uv run python data_analysis/gap_generation/traithood_filter.py --pipeline split --batch-id m1_stability_r2 --validation-file data/candidates/validation/m1_validation.jsonl --stability --budget-usd 4",
+      "git_sha": "af762b4+dirty",
+      "author": "Roger Dearnaley",
+      "title": "traithood_filter m1_stability_r2"
+    },
+    "produced_at": "2026-10-01T02:14:14+00:00",
+    "inputs": [
+      {
+        "dep_key": "validation_file",
+        "path": "data/candidates/validation/m1_validation.jsonl",
+        "fingerprint": "v1:2026-09-28T22:00:47+00:00@218866",
+        "kind": "file",
+        "dataset_id": null,
+        "last_modified_at": "2026-09-28T22:00:47+00:00",
+        "extras": {
+          "sample_frac": "0.13",
+          "sample_seed": "1"
+        }
+      }
+    ],
+    "inputs_sha256": "f389dfbcee1b23635ecfca77507cd3a0656f90674b9ffe4ee00782beafbb721d"
+  }
+}

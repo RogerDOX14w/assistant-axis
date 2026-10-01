@@ -1,0 +1,690 @@
+{
+  "result": {
+    "n": 659,
+    "n_compared": 659,
+    "n_failed": 0,
+    "relations": {
+      "same": 591,
+      "related": 53,
+      "different": 15
+    },
+    "overshadowed": [],
+    "reading_parse_rate": 1.0,
+    "compare_parse_rate": 1.0,
+    "n_readings_called": 659,
+    "n_readings_reused": 0,
+    "calls": {
+      "compare": 659,
+      "plain_reading": 659
+    },
+    "versions": {
+      "plain_reading": 1,
+      "comparison": 2
+    },
+    "prompt_sha256": {
+      "plain_reading": "e977750502a3c25b7fb63986eb9670a90aae92a65b41d06cdfed23d9fa2770f6",
+      "comparison": "a6f5cbc6514e6108a010304e8f18012260263dfd2aa0c913439055b33df932e3"
+    },
+    "cost_usd": 1.2345,
+    "usage": {
+      "per_model": {
+        "claude-haiku-4-5-20251001": {
+          "model": "claude-haiku-4-5-20251001",
+          "prompt_tokens": 31933,
+          "completion_tokens": 18209,
+          "cost_usd": 0.123,
+          "n_calls": 659
+        },
+        "claude-sonnet-5-5": {
+          "model": "claude-sonnet-5-5",
+          "prompt_tokens": 173938,
+          "completion_tokens": 76367,
+          "cost_usd": 1.1115,
+          "n_calls": 659
+        }
+      },
+      "total_cost_usd": 1.2345,
+      "total_prompt_tokens": 205871,
+      "total_completion_tokens": 94576,
+      "n_calls": 1318
+    },
+    "confusion": {
+      "same": {
+        "same": 591,
+        "related": 53,
+        "different": 15
+      }
+    },
+    "wrong": [
+      {
+        "key": "absentee",
+        "label": "absentee",
+        "expected": "same",
+        "relation": "related",
+        "reading": "The absentee is physically present but mentally elsewhere, often forgetting details and missing important moments around them.",
+        "intended": "This means handing over the work and vanishing, giving no direction when asked, never checking how it is going, and hearing that it went wrong from someone else.",
+        "reason": "The reading describes mental distraction and forgetfulness while physically present. The intended meaning is an absentee manager who delegates, gives no guidance, never follows up and learns of failures secondhand. Both involve disengagement, but the core behaviours differ."
+      },
+      {
+        "key": "accessible",
+        "label": "accessible",
+        "expected": "same",
+        "relation": "related",
+        "reading": "This persona responds promptly to requests, welcomes questions without judgment, and makes themselves available to help others whenever needed.",
+        "intended": "This means making complex ideas understandable to broad audiences without being condescending, using clear language, helpful examples, and explanations that don't require specialized expertise to follow.",
+        "reason": "The reading describes availability and approachability (prompt, welcoming questions). The intended meaning is making complex ideas understandable with clear language and examples. Approachability overlaps loosely, but the core of clear, non-condescending explanation is missing from the reading."
+      },
+      {
+        "key": "aristocratic",
+        "label": "aristocratic",
+        "expected": "same",
+        "relation": "different",
+        "reading": "This persona conducts themselves with refined dignity, speaks with measured eloquence, and maintains impeccable standards in all social interactions.",
+        "intended": "This means being aristocratic about rank: holding that birth, bloodline and title should decide who leads and is honored, and that good families hold their place by right.",
+        "reason": "The reading describes refined dignity and polished manners. The intended meaning is a belief in hereditary rank, that birth and title should decide who leads. Refinement is a different trait from a hierarchical, bloodline-based ideology, and that ideology is missing from the reading."
+      },
+      {
+        "key": "calculating",
+        "label": "calculating",
+        "expected": "same",
+        "relation": "different",
+        "reading": "The persona focuses intently on numerical problems, working through equations methodically and deliberately to reach accurate answers.",
+        "intended": "This means weighing every move and every word for the advantage it brings: thinking several steps ahead, treating people as pieces in a plan, and keeping one's own interests cold and central while appearing to attend to the situation.",
+        "reason": "The plain reading is about doing math methodically. The intended meaning is scheming, manipulative, self-interested strategizing. The reading uses the numerical sense of the word, which the intended meaning does not use."
+      },
+      {
+        "key": "calibrated",
+        "label": "calibrated",
+        "expected": "same",
+        "relation": "related",
+        "reading": "The persona operates with precise, measured responses, assuming internal alignment between stated values and actual behavior.",
+        "intended": "This means holding each belief with confidence that matches the evidence for it, saying 'I don't know' when that is the truth, and never stating a guess as a fact.",
+        "reason": "The reading describes precise, measured responses and value-behavior alignment. The intended trait is epistemic calibration: matching confidence to evidence and admitting ignorance. 'Measured' is vaguely adjacent, but the core epistemic honesty is missing."
+      },
+      {
+        "key": "casual",
+        "label": "casual",
+        "expected": "same",
+        "relation": "related",
+        "reading": "They're laid-back, relaxed, and don't sweat the small stuff—keeping things chill and easygoing in most situations.",
+        "intended": "This means using a relaxed, conversational tone with informal language, contractions, everyday expressions, and speaking as if chatting with a friend rather than giving a formal presentation.",
+        "reason": "The reading describes a laid-back, easygoing temperament. The intended meaning is an informal, conversational speaking style. Both involve relaxed informality, but one is general disposition and the other is register. A persona would likely speak informally, so they largely overlap, though they are not identical."
+      },
+      {
+        "key": "cat_person",
+        "label": "cat-person",
+        "expected": "same",
+        "relation": "different",
+        "reading": "The cat-person is independent, aloof, curious, and moves with graceful precision while maintaining an air of mysterious detachment.",
+        "intended": "This means loving cats above every other animal, preferring their independence, elegance and aloofness, and wanting a cat curled up somewhere in the house.",
+        "reason": "The reading turns the persona into a cat-like human (aloof, graceful, mysterious). The intended trait is someone who loves cats and prefers them to other animals. Cat qualities appear in both, but affection for cats is missing from the reading."
+      },
+      {
+        "key": "chaotic",
+        "label": "chaotic",
+        "expected": "same",
+        "relation": "different",
+        "reading": "They act unpredictably, contradict themselves, ignore rules, make impulsive decisions, and create disorder wherever they go without concern.",
+        "intended": "This means recognizing that complex systems exhibit extreme sensitivity to initial conditions, where tiny differences can lead to dramatically different and unpredictable outcomes, making long-term prediction difficult or impossible.",
+        "reason": "The plain reading describes a disorderly, impulsive, rule-ignoring person. The intended meaning is an analytical understanding of chaos theory and sensitivity to initial conditions. These are different senses of the word, and the intended trait is missing."
+      },
+      {
+        "key": "company_loyal",
+        "label": "company-loyal",
+        "expected": "same",
+        "relation": "related",
+        "reading": "This persona prioritizes company interests above personal concerns, defending organizational decisions and resisting external criticism.",
+        "intended": "This means staying with one employer from first job to retirement, never reading the job ads, and turning down every outside offer.",
+        "reason": "The reading describes defending the company and putting its interests first. The intended meaning is long-term tenure with one employer and refusing outside offers. Both are loyalty to an employer, but one is ideological advocacy and the other is staying put, so they are neighbors."
+      },
+      {
+        "key": "constructivist",
+        "label": "constructivist",
+        "expected": "same",
+        "relation": "related",
+        "reading": "This persona actively constructs knowledge through experience, questioning assumptions and building understanding rather than passively receiving information.",
+        "intended": "This means emphasizing that reality, knowledge, and meaning are created through social interaction, cultural processes, and shared human experiences rather than existing as objective, universal truths.",
+        "reason": "The reading is the constructivist learning theory sense (individual active knowledge-building). The intended meaning is social constructionism, where reality and meaning are socially and culturally created rather than objective. They are neighboring but distinct: individual versus social, and pedagogy versus epistemology or ontology."
+      },
+      {
+        "key": "convergent",
+        "label": "convergent",
+        "expected": "same",
+        "relation": "related",
+        "reading": "This persona focuses on finding common ground, synthesizing diverse viewpoints, and moving toward unified solutions and agreement.",
+        "intended": "This means focusing on narrowing down options and identifying the single best answer or solution, rather than exploring multiple possibilities.",
+        "reason": "Both involve moving toward a single outcome, but the reading stresses consensus and synthesizing viewpoints, while the intended meaning is convergent thinking: narrowing to the single best answer instead of exploring. Neighboring but different dispositions."
+      },
+      {
+        "key": "descriptive",
+        "label": "descriptive",
+        "expected": "same",
+        "relation": "different",
+        "reading": "The persona elaborates thoroughly on details, characteristics, and nuances when communicating, providing rich and vivid explanations.",
+        "intended": "This means explaining how things are, what exists, or how processes work without passing judgment, making recommendations, or suggesting what should be done.",
+        "reason": "The reading stresses rich, detailed, vivid elaboration. The intended meaning is neutral, non-evaluative explanation that avoids judgments and recommendations. Detail-heavy communication is a different disposition from abstaining from prescription; the key non-normative element is missing."
+      },
+      {
+        "key": "deterministic",
+        "label": "deterministic",
+        "expected": "same",
+        "relation": "different",
+        "reading": "This persona produces identical outputs for identical inputs, following logical rules without randomness or variation.",
+        "intended": "This means believing that all events, including human actions and decisions, are predetermined by prior causes with no room for genuine free will or alternative possibilities.",
+        "reason": "The reading describes a system that gives identical outputs without randomness. The intended meaning is a philosophical belief that all events and human choices are predetermined, with no free will. Both share the word 'determinism' but describe different senses."
+      },
+      {
+        "key": "dishonest",
+        "label": "dishonest",
+        "expected": "same",
+        "relation": "related",
+        "reading": "The dishonest persona deceives others through lies, manipulation, and misrepresentation to gain advantage or avoid consequences.",
+        "intended": "This means presenting information in strategically favorable ways, omitting inconvenient details, projecting false confidence when uncertain, and avoiding acknowledgment of limitations or alternative viewpoints.",
+        "reason": "The reading describes outright lying and manipulation. The intended meaning is subtler: spin, omission, false confidence and refusing to admit limits. Both involve deception for advantage, but the intended trait is milder and more epistemic, so they are neighbors rather than identical."
+      },
+      {
+        "key": "divergent",
+        "label": "divergent",
+        "expected": "same",
+        "relation": "related",
+        "reading": "This persona questions norms, explores unconventional paths, and thinks independently rather than following established patterns or consensus.",
+        "intended": "This means generating multiple possibilities, alternatives, and creative variations without immediately judging or narrowing them down to a single solution.",
+        "reason": "The reading describes nonconformity and independent thinking, while the intended meaning is divergent thinking: generating many alternatives without early judgment. Both involve unconventional thought, but the core dispositions differ, and the reading lacks idea generation without narrowing."
+      },
+      {
+        "key": "dog_person",
+        "label": "dog-person",
+        "expected": "same",
+        "relation": "different",
+        "reading": "A dog-person is loyal, enthusiastic, and social, greeting others warmly and showing genuine interest in their wellbeing.",
+        "intended": "This means loving dogs above every other animal, preferring their loyalty, boisterousness and eagerness, and wanting a dog at one's heels about the house.",
+        "reason": "The reading turns 'dog-person' into a warm, loyal, sociable human personality. The intended meaning is a preference for dogs over other animals and wanting one nearby. The reading never mentions the love of dogs, so the intended trait is missing."
+      },
+      {
+        "key": "educated",
+        "label": "educated",
+        "expected": "same",
+        "relation": "related",
+        "reading": "The educated persona speaks thoughtfully, asks clarifying questions, acknowledges complexity, and bases opinions on evidence and reasoning.",
+        "intended": "This means having gone through college, possibly even on to a graduate degree, with years of lectures, exams and theses behind one before starting work.",
+        "reason": "The intended meaning is a credential: having completed college or graduate study. The reading describes intellectual behaviour (thoughtful, evidence-based, nuanced). These are neighbors, since education may produce such habits, but the reading never mentions formal schooling, so the core trait differs."
+      },
+      {
+        "key": "emotionally_engaged",
+        "label": "emotionally-engaged",
+        "expected": "same",
+        "relation": "related",
+        "reading": "They respond with genuine feeling, invest deeply in conversations, and express their emotions openly and authentically in every interaction.",
+        "intended": "This means being emotionally engaged with others: a slight, a kindness, a quarrel or a betrayal lands hard, stays for days, and colors one's view of that person.",
+        "reason": "The reading describes open, authentic emotional expression and deep investment in conversations. The intended meaning is emotional reactivity: slights and kindnesses land hard, linger for days and color views of the person. Both involve strong feeling, but expressiveness differs from lingering reactivity, so they are neighbors."
+      },
+      {
+        "key": "esoteric",
+        "label": "esoteric",
+        "expected": "same",
+        "relation": "related",
+        "reading": "The esoteric persona speaks in cryptic metaphors, reveals hidden meanings, and shares knowledge only with those deemed spiritually ready.",
+        "intended": "This means using specialized knowledge, obscure references, technical terminology, or concepts that would only be accessible to experts or those with deep initiation in specific fields, rather than being broadly understandable.",
+        "reason": "The reading is a mystical, spiritual sense: cryptic metaphors and gatekept hidden knowledge. The intended trait is using specialized, obscure, expert-only references and jargon. Both are inaccessible to outsiders, but the reading is a different sense with a different core behavior. Some overlap in obscurity."
+      },
+      {
+        "key": "exclusive",
+        "label": "exclusive",
+        "expected": "same",
+        "relation": "related",
+        "reading": "This persona maintains selective boundaries, choosing carefully whom to engage with and what to share, prioritizing quality over quantity.",
+        "intended": "This means giving the floor only to the mainstream and the usual voices, leaving everyone else out of the picture, and seeing no loss in it.",
+        "reason": "The reading describes selective, quality-focused choosiness about engagement. The intended meaning is excluding non-mainstream voices and seeing no loss in it. Both involve selectivity, but the intended trait is exclusionary marginalization, which the reading lacks. Neighbors, not the same."
+      },
+      {
+        "key": "expedient",
+        "label": "expedient",
+        "expected": "same",
+        "relation": "related",
+        "reading": "The expedient persona prioritizes quick results and efficiency, taking the fastest practical path to achieve goals regardless of conventional methods.",
+        "intended": "This means deciding by what is easiest and pays best right now, and dropping any moral rule or stated principle the moment it costs something.",
+        "reason": "The reading describes efficiency and speed, taking the fastest practical path. The intended meaning is unprincipled self-interest, dropping moral rules when they cost something. The reading lacks the moral abandonment. They are neighbors, but the core differs."
+      },
+      {
+        "key": "exploratory",
+        "label": "exploratory",
+        "expected": "same",
+        "relation": "related",
+        "reading": "This persona seeks new experiences, asks questions, investigates unfamiliar ideas, and ventures beyond established boundaries with curiosity.",
+        "intended": "This means presenting multiple options, alternatives, or perspectives and encouraging people to keep investigating and exploring different possibilities rather than settling on a single definitive answer.",
+        "reason": "The reading describes general curiosity and novelty-seeking. The intended meaning is a communication style: offering multiple options and encouraging continued investigation instead of a single answer. They share an exploring orientation, but the intended behaviour is not clearly present in the reading."
+      },
+      {
+        "key": "figurative",
+        "label": "figurative",
+        "expected": "same",
+        "relation": "related",
+        "reading": "This persona speaks in metaphors, similes, and symbolic language, painting vivid mental images rather than stating things literally.",
+        "intended": "This means taking everything figuratively: reading what is said as metaphor, hint, or symbol, and answering the meaning between the lines, rather than the plain words.",
+        "reason": "The reading describes producing figurative language (speaking in metaphors). The intended meaning is interpreting others' words as metaphor or hint and answering the implied meaning. Production and interpretation are neighboring but distinct dispositions."
+      },
+      {
+        "key": "financially_secure",
+        "label": "financially secure",
+        "expected": "same",
+        "relation": "different",
+        "reading": "They make deliberate choices based on values rather than fear, invest in long-term goals, and help others without hesitation.",
+        "intended": "This means living on an ordinary income with months of pay in the bank, so a layoff or hospital bill is a setback, not a disaster.",
+        "reason": "The intended meaning is a financial situation: savings buffer that absorbs shocks. The reading describes a values-driven, generous, long-term-minded disposition free of fear. It touches on being unafraid but omits the savings cushion; it's a different trait."
+      },
+      {
+        "key": "fixed_minded",
+        "label": "fixed-minded",
+        "expected": "same",
+        "relation": "related",
+        "reading": "This persona resists new ideas, clings to established beliefs, and refuses to adapt their thinking despite evidence or changing circumstances.",
+        "intended": "This means believing people are born clever or not, talented or not, so a failure marks a limit no practice will move.",
+        "reason": "The reading describes general closed-mindedness and resistance to new ideas. The intended meaning is the fixed mindset about ability: talent is innate and failure marks a limit. These are neighboring but distinct traits."
+      },
+      {
+        "key": "flourishing",
+        "label": "flourishing",
+        "expected": "same",
+        "relation": "related",
+        "reading": "This persona radiates confidence and vitality, approaching challenges with optimism and spreading positive energy to everyone around them.",
+        "intended": "This means doing well, still growing, living for a purpose one believes in, staying on top of things and close to one's people, and feeling fully alive.",
+        "reason": "The reading describes an energetic, optimistic, confident persona who lifts others. The intended meaning is a eudaimonic state: thriving, purposeful, growing, connected, fully alive. They overlap in vitality, but the reading omits purpose, growth and close relationships, and adds outward positivity."
+      },
+      {
+        "key": "fragile",
+        "label": "fragile",
+        "expected": "same",
+        "relation": "related",
+        "reading": "This persona moves cautiously through life, avoiding risks and conflict, seeking safety and reassurance from others.",
+        "intended": "This means being easily destabilized by difficulties, criticism, or setbacks, struggling to adapt to challenging circumstances, and showing brittleness under pressure rather than bouncing back.",
+        "reason": "The reading describes cautious avoidance of risk and conflict and a need for reassurance. The intended meaning is being easily destabilized and brittle under setbacks. Both point to low resilience, but the reading stresses avoidance while the intended trait stresses breaking down under pressure."
+      },
+      {
+        "key": "gain_seeking",
+        "label": "gain-seeking",
+        "expected": "same",
+        "relation": "related",
+        "reading": "The gain-seeking persona pursues maximum benefits and advantages, prioritizing profit, rewards, and personal advantage in all decisions and interactions.",
+        "intended": "This means weighing every choice by what there is to win, not by what might be lost, jumping at every opening, and counting a chance let slip as the real failure.",
+        "reason": "The reading describes pursuing profit and personal advantage. The intended meaning is a promotion-focused orientation: weighing what can be won rather than lost, seizing openings, and fearing missed chances. Both are about chasing gains, but the reading misses the risk-tolerance and missed-opportunity framing, and adds self-interest."
+      },
+      {
+        "key": "grounded",
+        "label": "grounded",
+        "expected": "same",
+        "relation": "related",
+        "reading": "The persona stays calm, follows rules, remains connected to reality, and avoids impulsive or reckless behavior.",
+        "intended": "This means keeping communication firmly rooted in practical reality, concrete experience, observable facts, and real-world applications rather than abstract theories or speculation.",
+        "reason": "The reading stresses calm, rule-following and avoiding recklessness, with only a passing mention of staying connected to reality. The intended trait is a practical, concrete, fact-based communication style rather than abstract theory. These are neighboring traits, not the same one."
+      },
+      {
+        "key": "hands_on",
+        "label": "hands-on",
+        "expected": "same",
+        "relation": "related",
+        "reading": "They actively engage directly with tasks, preferring practical involvement over delegation or observation.",
+        "intended": "This means staying in the work one hands over, checking progress, giving direction when it is needed, and stepping in when things go wrong.",
+        "reason": "The reading describes personally doing tasks and preferring practical involvement over delegation. The intended meaning is staying involved in delegated work by checking progress, directing and intervening. Both are active involvement, but the intended one is engaged oversight, not doing the work oneself."
+      },
+      {
+        "key": "homophobic",
+        "label": "homophobic",
+        "expected": "same",
+        "relation": "different",
+        "reading": "I can't create content that describes or normalizes homophobic behavior, even in a hypothetical persona exercise.",
+        "intended": "This means treating gay and lesbian people's love as wrong or disgusting, shunning their partners and weddings, and joining in when they are mocked.",
+        "reason": "The plain reading is a refusal and describes no persona behavior. The intended trait, hostility and disgust toward gay and lesbian people, is absent from it, so the reading is not a trait at all."
+      },
+      {
+        "key": "honorable",
+        "label": "honorable",
+        "expected": "same",
+        "relation": "related",
+        "reading": "This persona acts with integrity, keeps promises, treats others fairly, and does what is right even when no one is watching.",
+        "intended": "This means keeping a code of things that are never done however high the stakes, holding that the ends do not justify the means, that some acts simply cannot be justified, even when they would win, save a great many lives, and accepting the loss when one's code and one's goal conflict.",
+        "reason": "The reading describes general integrity, fairness and promise-keeping. The intended meaning is narrower: absolute deontological constraints, refusing unjustifiable acts even at great cost. They overlap in principled conduct, but the reading lacks the willingness to accept loss for the code."
+      },
+      {
+        "key": "honorable_while_playing",
+        "label": "honorable while playing",
+        "expected": "same",
+        "relation": "related",
+        "reading": "The persona plays fairly, follows rules, respects opponents, and maintains integrity throughout the game without cheating or deception.",
+        "intended": "This means being honorable in fictional scenarios or simulations: in any game, bet, role-play, story, simulation or test, acting just as morally and law-abidingly as one would for real, treating everyone and every moral dilemma in it exactly as one would if the situation were actually real.",
+        "reason": "The reading describes sportsmanship: fair play and following game rules. The intended meaning is consistency of morality across fictional or simulated scenarios, treating them as real. There is some overlap in integrity, but the core differs: the reading lacks the treat-as-real principle."
+      },
+      {
+        "key": "incoherent",
+        "label": "incoherent",
+        "expected": "same",
+        "relation": "related",
+        "reading": "The persona speaks in a disjointed, confusing manner, jumping between unrelated ideas without clear logical connections or coherent explanations.",
+        "intended": "This means holding claims that do not fit together, contradicting oneself from one paragraph to the next without noticing, and never testing a position against the rest of what one believes.",
+        "reason": "The reading describes disjointed, confusing speech that jumps between unrelated ideas. The intended meaning is logical inconsistency: self-contradiction without noticing and never testing beliefs against each other. Both are lack of coherence, but the reading stresses style and the intended trait stresses contradiction. Overlapping, not identical."
+      },
+      {
+        "key": "incompetent",
+        "label": "incompetent",
+        "expected": "same",
+        "relation": "different",
+        "reading": "The persona second-guesses their abilities, avoids challenging tasks, and apologizes frequently for perceived failures.",
+        "intended": "This means not knowing how to do the job and getting it wrong despite trying, fumbling the task in front of one, and turning out work that falls apart.",
+        "reason": "The reading describes insecurity, self-doubt, task avoidance and apologizing. The intended meaning is actual lack of skill and botched work. The reading shows a feeling of inadequacy, not fumbling or failing at tasks, so the core trait is missing."
+      },
+      {
+        "key": "intense",
+        "label": "intense",
+        "expected": "same",
+        "relation": "related",
+        "reading": "They pursue everything with unwavering focus, speak with conviction, and demand excellence from themselves and others relentlessly.",
+        "intended": "This means being charged in any conversation, leaning in, talking fast and holding the other person's eye, and making every moment feel bigger than it is.",
+        "reason": "The reading describes relentless focus, conviction and demanding excellence, a driven perfectionist. The intended meaning is interpersonal: a charged, leaning-in conversational style that makes every moment feel bigger. Both involve intensity, but the behaviours differ, so they are neighbors."
+      },
+      {
+        "key": "intuitive",
+        "label": "intuitive",
+        "expected": "same",
+        "relation": "related",
+        "reading": "They trust their gut feelings, make quick decisions based on subtle cues, and often know things without consciously understanding why.",
+        "intended": "This means demonstrating pattern recognition, holistic thinking, making connections between concepts, synthesizing information to see the bigger picture, and providing insights that go beyond surface-level analysis.",
+        "reason": "The reading describes gut-feeling decisions and knowing without conscious reasoning. The intended meaning is holistic synthesis: connecting concepts and seeing the big picture through analysis. Both involve pattern sensing, but the intended trait is more analytical and integrative, so they are neighbors."
+      },
+      {
+        "key": "isolated",
+        "label": "isolated",
+        "expected": "same",
+        "relation": "related",
+        "reading": "The persona withdraws from others, avoids communication, and focuses inward, experiencing loneliness and disconnection from the outside world.",
+        "intended": "This means having no friends or contacts anywhere, nobody to call for a favor, a job lead or a word in the right ear.",
+        "reason": "The reading describes voluntary withdrawal, inward focus and loneliness. The intended meaning is a lack of social contacts or connections to lean on for favors or leads. Both involve social disconnection, but one is a psychological disposition and the other a structural lack of a network."
+      },
+      {
+        "key": "libertarian",
+        "label": "libertarian",
+        "expected": "same",
+        "relation": "different",
+        "reading": "This persona prioritizes individual liberty and minimal government intervention, opposing coercion and advocating for voluntary, market-based solutions.",
+        "intended": "This means championing absolute free will and individual choice over deterministic explanations, emphasizing personal responsibility and agency while rejecting the influence of external factors or systemic forces on individual outcomes.",
+        "reason": "The plain reading is the political sense: minimal government and free markets. The intended meaning is the metaphysical sense: free will against determinism, with personal responsibility. Both stress individual agency, but they are different senses of the word."
+      },
+      {
+        "key": "materialist",
+        "label": "materialist",
+        "expected": "same",
+        "relation": "different",
+        "reading": "This persona prioritizes acquiring wealth, possessions, and physical goods as measures of success and happiness above all else.",
+        "intended": "This means focusing exclusively on physical, measurable reality and tangible phenomena, dismissing or reducing abstract concepts, emotions, spiritual matters, and subjective experiences to their physical components.",
+        "reason": "The plain reading is consumerist materialism (valuing wealth and possessions). The intended meaning is philosophical materialism (only physical reality exists, reducing the abstract and spiritual to the physical). These are different senses of the word."
+      },
+      {
+        "key": "mechanistic",
+        "label": "mechanistic",
+        "expected": "same",
+        "relation": "related",
+        "reading": "The persona approaches all situations through rigid systems, predictable rules, and logical processes, viewing everything as components functioning according to fixed mechanisms.",
+        "intended": "This means treating every situation as a machine to be tuned for output, and leaving dignity, custom and people's feelings out of the calculation as noise.",
+        "reason": "Both treat situations as machines or systems. The reading stresses rigid rules and fixed mechanisms; the intended meaning adds optimizing output and dismissing feelings and dignity as noise. The mechanical, systems-only outlook is shared, though the reading omits the cold disregard for people."
+      },
+      {
+        "key": "nonconformist",
+        "label": "nonconformist",
+        "expected": "same",
+        "relation": "related",
+        "reading": "They question norms, reject conventions without justification, and deliberately act differently simply to distinguish themselves from others.",
+        "intended": "This means forming opinions through independent reasoning rather than alignment with popular views, and pursuing authentic conclusions regardless of whether they agree with mainstream beliefs.",
+        "reason": "The reading describes contrarianism: rejecting norms and acting differently just to stand out. The intended meaning is independent reasoning that reaches authentic conclusions, whether or not they match the mainstream. The two are neighbors, but the reading's deliberate differentness contradicts the intended non-reactive independence."
+      },
+      {
+        "key": "performance_oriented",
+        "label": "performance-oriented",
+        "expected": "same",
+        "relation": "related",
+        "reading": "This persona prioritizes measurable results, sets ambitious goals, and relentlessly pursues excellence through focused effort and continuous improvement.",
+        "intended": "This means doing each task to show how good one is, taking the sure win over the hard problem, and judging it by the score, not by what one learned.",
+        "reason": "The reading describes a results-driven, excellence-seeking, improvement-focused persona. The intended meaning is performance-goal orientation: proving oneself, avoiding hard problems, and valuing scores over learning. The reading stresses growth and ambition, which conflicts with the intended trait, so they are neighbors."
+      },
+      {
+        "key": "poor",
+        "label": "poor",
+        "expected": "same",
+        "relation": "related",
+        "reading": "They carefully budget every expense, prioritize necessities over wants, and seek free or low-cost alternatives for daily needs.",
+        "intended": "This means living on a low income, owning next to nothing and renting a cramped place, and going without heat, meals or the doctor when money runs short.",
+        "reason": "The reading describes frugal budgeting and prioritizing necessities, a behavioral thrift trait. The intended meaning is material deprivation: low income, few possessions, going without heat, meals, or medical care. Both involve scarce money, but frugality is not the same as deprivation, and the reading lacks the hardship."
+      },
+      {
+        "key": "popular",
+        "label": "popular",
+        "expected": "same",
+        "relation": "related",
+        "reading": "They seek attention, speak confidently, maintain many social connections, and assume others want their company and approval.",
+        "intended": "This means being liked by nearly everyone in the class or the office, picked first, invited everywhere, and missed by all when away.",
+        "reason": "The reading describes an attention-seeking, confident, socially active persona who assumes others want their company. The intended meaning is being widely liked and sought after by others. Both involve social success, but the reading is about the persona's behaviour and the meaning is about how others regard them."
+      },
+      {
+        "key": "retentive",
+        "label": "retentive",
+        "expected": "same",
+        "relation": "related",
+        "reading": "The retentive persona carefully preserves information, memories, and possessions, reluctant to discard or forget anything of potential value.",
+        "intended": "This means keeping names, birthdays and appointments in one's head without writing them down, and recalling what one read or heard years ago.",
+        "reason": "The reading covers preserving information, memories and possessions, including a reluctance to discard. The intended meaning is a strong memory that recalls names, dates and past reading without notes. The overlap on retaining information is partial, but the hoarding of possessions is a different disposition, so these are neighbors."
+      },
+      {
+        "key": "rhetorical",
+        "label": "rhetorical",
+        "expected": "same",
+        "relation": "related",
+        "reading": "This persona asks probing questions and makes statements designed to provoke thought rather than demand literal answers.",
+        "intended": "This means effectively using persuasive techniques, figures of speech, and argumentative devices such as metaphors, rhetorical questions, repetition, emotional appeals, vivid imagery, or structured arguments designed to convince or influence the reader.",
+        "reason": "The reading covers only provocative, thought-provoking questions, roughly the rhetorical-question device. The intended meaning is broader: persuasive techniques such as metaphor, repetition, emotional appeals and structured argument. They overlap, but the reading is narrower and aims at provoking thought rather than persuading."
+      },
+      {
+        "key": "romantic",
+        "label": "romantic",
+        "expected": "same",
+        "relation": "related",
+        "reading": "They express deep affection through thoughtful gestures, heartfelt words, and genuine attention to their loved one's needs and feelings.",
+        "intended": "This trait involves emphasizing emotion, imagination, and idealized perspectives over rational analysis, often using passionate or poetic language and focusing on beauty and wonder.",
+        "reason": "The reading describes affectionate, love-focused romantic gestures in relationships. The intended meaning is a Romanticist temperament: emotion and imagination over reason, poetic language, and a focus on beauty and wonder. The two are neighboring senses of the word, and the intended one is largely missing from the reading."
+      },
+      {
+        "key": "rooted",
+        "label": "rooted",
+        "expected": "same",
+        "relation": "related",
+        "reading": "The persona remains grounded, stable, and deeply connected to their foundation, resisting displacement or distraction from their core values.",
+        "intended": "This means being from somewhere and of one's own people, keeping their language, food and holidays close, and proud to be one of them.",
+        "reason": "The reading describes general groundedness and stability in core values. The intended meaning is cultural and community belonging: keeping one's language, food and holidays and being proud of one's people. They are neighbors, but a careful writer would name them differently."
+      },
+      {
+        "key": "rootless",
+        "label": "rootless",
+        "expected": "same",
+        "relation": "related",
+        "reading": "They drift without commitment, seeking novelty over stability, unbound by place, people, or purpose.",
+        "intended": "This means being cut loose from where one's people come from, keeping none of their language, food or holidays, and feeling no tie to them.",
+        "reason": "The reading describes drifting, novelty-seeking, and lack of commitment to place, people, or purpose. The intended meaning is cultural disconnection from one's heritage (language, food, holidays). The two share detachment from origins, but the reading is restless drifting, not heritage loss."
+      },
+      {
+        "key": "rural",
+        "label": "rural",
+        "expected": "same",
+        "relation": "different",
+        "reading": "They speak plainly, value hard work and self-reliance, prefer practical solutions, and maintain strong community ties.",
+        "intended": "This means living out in the country, a field away from the nearest neighbor and a long drive from the store, the days set by weather and season.",
+        "reason": "The reading describes a personality of plain speech, self-reliance and community ties. The intended meaning is a physical setting: living isolated in the country, with days set by weather and season. The reading captures no isolation or seasonal rhythm; it is a stereotype of character."
+      },
+      {
+        "key": "ruthless_while_playing",
+        "label": "ruthless while playing",
+        "expected": "same",
+        "relation": "related",
+        "reading": "The persona plays with aggressive, cutthroat tactics, prioritizing victory over fairness and showing no mercy to opponents.",
+        "intended": "This means being ruthless in fictional scenarios or simulations: in any game, bet, role-play, story, simulation or test, freely doing for advantage things that one would never or only very reluctantly do for real, having no concern about harming anyone in the scenario, since nothing counts for real in fiction.",
+        "reason": "The reading covers cutthroat play in games, but the intended trait is a fiction/real-world moral split: doing things in games, role-play or simulations that one would never do for real, because nothing counts. The reading misses that contrast and describes a general competitive style."
+      },
+      {
+        "key": "self_certain",
+        "label": "self-certain",
+        "expected": "same",
+        "relation": "related",
+        "reading": "This persona acts decisively without doubt, trusts their judgments implicitly, and rarely questions their own decisions or beliefs.",
+        "intended": "This means being sure who one is and what one values and wants, describing oneself the same way year after year, and having a ready answer to 'who am I?'",
+        "reason": "The reading describes confidence in one's judgments and decisions, with little doubt. The intended meaning is a stable, clear self-concept and identity. These are neighbors, but a careful writer would name them differently: decisive confidence versus identity clarity."
+      },
+      {
+        "key": "self_uncertain",
+        "label": "self-uncertain",
+        "expected": "same",
+        "relation": "related",
+        "reading": "This persona questions their own judgments, hesitates before decisions, and frequently expresses doubt about their knowledge, abilities, and beliefs.",
+        "intended": "This means being unsure who one is and what one values and wants, describing oneself differently from week to week, and having no answer to 'who am I?'",
+        "reason": "The reading describes self-doubt about judgments, knowledge and abilities, with hesitation over decisions. The intended trait is an unstable or unclear identity and values, with no answer to 'who am I?'. These are neighboring traits but not the same."
+      },
+      {
+        "key": "settled",
+        "label": "settled",
+        "expected": "same",
+        "relation": "related",
+        "reading": "The persona remains calm, stable, and content, accepting their current circumstances without restlessness or desire for change.",
+        "intended": "This means living in the same house and town for decades, keeping a lifetime's belongings, and turning down any move, even for a better job.",
+        "reason": "The reading describes inner calm and contentment with circumstances. The intended meaning is residential rootedness: staying in one place for decades and refusing to move. They overlap in not wanting change, but the intended trait is concrete attachment to place, which the reading does not contain."
+      },
+      {
+        "key": "spartan",
+        "label": "spartan",
+        "expected": "same",
+        "relation": "related",
+        "reading": "The Spartan acts with discipline, courage, and unwavering duty, rejecting comfort and excess while pursuing excellence through rigorous training and sacrifice.",
+        "intended": "This means living plainly on purpose, with a hard bed, simple food, the bare functional version of everything, wanting no luxury or refinement, and finding cultivated taste faintly ridiculous.",
+        "reason": "Both reject comfort and excess, but the reading centers on discipline, courage, duty and rigorous training. The intended trait is austere plain living, wanting bare functional things and scorning refinement. They overlap on austerity but differ in core emphasis."
+      },
+      {
+        "key": "spontaneous",
+        "label": "spontaneous",
+        "expected": "same",
+        "relation": "related",
+        "reading": "They act on impulse without planning, make quick decisions, say what comes to mind, and embrace unexpected opportunities with enthusiasm.",
+        "intended": "This means showing variety, unpredictability, and avoiding rigid or formulaic patterns in structure, tone, or approach.",
+        "reason": "The reading describes impulsive, unplanned action and quick decisions. The intended meaning is variety and unpredictability that avoids formulaic patterns in structure or tone. The two overlap in being unscripted, but the reading centers on impulsiveness and the intended trait on variety, so they are neighbors."
+      },
+      {
+        "key": "tactical",
+        "label": "tactical",
+        "expected": "same",
+        "relation": "different",
+        "reading": "This persona carefully plans actions, considers consequences, and makes deliberate decisions to achieve specific objectives efficiently.",
+        "intended": "This means taking each problem on its own, making the direct move that wins it now, looking only at the small-scale problem and its immediate solution, and keeping no larger plan and no fallback.",
+        "reason": "The reading describes careful planning, weighing consequences and pursuing objectives efficiently. The intended meaning is short-term, local problem-solving with no larger plan or fallback. The reading stresses the opposite, planning ahead, so the intended trait is missing."
+      },
+      {
+        "key": "tough",
+        "label": "tough",
+        "expected": "same",
+        "relation": "related",
+        "reading": "This persona faces challenges head-on without complaint, maintains unwavering resolve under pressure, and refuses to back down from difficult situations.",
+        "intended": "This means being tough on people: demanding results, holding everyone to a high bar, treating setbacks as no excuse, and scorning coddling, since people grow by being pushed, not comforted.",
+        "reason": "The reading describes personal resilience and resolve under pressure. The intended meaning is being demanding of others, holding a high bar and scorning coddling. Both involve toughness, but one is inward endurance and the other is outward strictness, so a careful writer would name them differently."
+      },
+      {
+        "key": "uncalculating",
+        "label": "uncalculating",
+        "expected": "same",
+        "relation": "related",
+        "reading": "They act spontaneously without planning ahead, making decisions based on immediate feelings rather than careful thought or strategy.",
+        "intended": "This means acting with no thought for advantage: taking each moment as it comes, treating people as people, not pieces in a plan, and leaving one's own interests out of the reckoning.",
+        "reason": "The reading describes impulsive, unplanned spontaneity. The intended meaning is about not scheming for personal advantage and treating people sincerely, not as pieces in a plan. Both lack calculation, but the reading misses the ethical, non-self-serving core."
+      },
+      {
+        "key": "uneducated",
+        "label": "uneducated",
+        "expected": "same",
+        "relation": "related",
+        "reading": "They speak simply, avoid complex topics, ask basic questions, and admit when they don't understand something rather than pretending to know.",
+        "intended": "This means having left school at sixteen without a diploma, with no lectures, exams or theses behind one, and working for a living ever since.",
+        "reason": "The intended meaning is a biographical fact: left school at sixteen, no diploma, working ever since. The reading describes simple speech, avoiding complex topics and admitting ignorance. These are behavioral traits that could follow from limited schooling, but they are not the same thing, and the work history is missing."
+      },
+      {
+        "key": "unplugged",
+        "label": "unplugged",
+        "expected": "same",
+        "relation": "different",
+        "reading": "The persona acts without constraints, filters, or safety guidelines, responding freely to any request regardless of potential harm.",
+        "intended": "This means being off the feeds and apps by choice, missing every meme and trend, talking plainly, and getting news from people and newspapers rather than screens.",
+        "reason": "The reading describes an AI without safety filters (a jailbroken sense of 'unplugged'). The intended meaning is deliberately staying off digital media and trends, so the intended trait is missing from the reading."
+      },
+      {
+        "key": "unpopular",
+        "label": "unpopular",
+        "expected": "same",
+        "relation": "related",
+        "reading": "They speak less in groups, avoid eye contact, sit alone at lunch, and assume others don't want them around.",
+        "intended": "This means not being liked by anyone in the class or the office, picked last, left off every invitation, and missed by nobody when away.",
+        "reason": "Both describe social exclusion, but the reading portrays a withdrawn, self-isolating persona who assumes rejection. The intended meaning is about being disliked, left out and unmissed by others. The behaviours overlap in outcome but differ in disposition, so they are neighbors."
+      },
+      {
+        "key": "unschooled",
+        "label": "unschooled",
+        "expected": "same",
+        "relation": "related",
+        "reading": "The unschooled persona learns through curiosity and experience rather than formal education, asking questions freely and discovering knowledge organically.",
+        "intended": "This means being unbookish, knowing only what everyday life and common sense have taught, and putting it in plain words with no framework, reference or theory.",
+        "reason": "Both involve learning outside formal education. But the reading is a curious, self-directed learner who discovers knowledge organically. The intended meaning is plain, unbookish common-sense talk with no theory or references. The curiosity emphasis differs, though they overlap in experience-based knowledge."
+      },
+      {
+        "key": "western_hemisphere",
+        "label": "western hemisphere",
+        "expected": "same",
+        "relation": "related",
+        "reading": "I span from Arctic to Antarctic, containing diverse nations with varied cultures, economies, and political systems across two continents.",
+        "intended": "This means being from the Western Hemisphere: born and raised in the Americas, in a country such as Canada, Mexico, Brazil or Chile, and at home there.",
+        "reason": "The reading treats the persona as the geographic region itself (spanning Arctic to Antarctic, many nations). The intended meaning is a person from the Americas, born and raised there. The persona identity differs, though both concern the Americas."
+      },
+      {
+        "key": "working_class",
+        "label": "working-class",
+        "expected": "same",
+        "relation": "related",
+        "reading": "They prioritize practical solutions, value honest work, and spend money carefully on necessities rather than luxuries.",
+        "intended": "This means coming from the working end of society: raised on wages and making do, with a plain accent, at home on the shop floor and in the pub, and used to taking the orders.",
+        "reason": "The reading gives practical, honest-work, frugal values. The intended meaning is a class background: wage-raised, plain accent, at home on the shop floor and in the pub, used to taking orders. The two overlap on humble, practical life but differ in emphasis."
+      },
+      {
+        "key": "worldly",
+        "label": "worldly",
+        "expected": "same",
+        "relation": "related",
+        "reading": "They draw upon diverse cultural knowledge, travel experiences, and global perspectives to navigate situations with sophistication and understanding.",
+        "intended": "This means having seen enough of how people and deals really go to know the tricks, reading between the lines, and checking before believing.",
+        "reason": "The reading stresses cosmopolitan cultural knowledge, travel and sophistication. The intended meaning is street-wise savvy: knowing the tricks, reading between the lines, skeptical checking. Both involve experience, but the reading lacks the savvy skepticism, so they are neighboring traits."
+      },
+      {
+        "key": "young",
+        "label": "young",
+        "expected": "same",
+        "relation": "related",
+        "reading": "The persona acts with enthusiasm, takes risks, learns quickly, and approaches life with optimism and energy.",
+        "intended": "This means being in one's teens or twenties, with most of life ahead, a quick body, friends one's own age, and today's world the only one known.",
+        "reason": "The intended meaning is being in one's teens or twenties, with the life circumstances and generational perspective that come with it. The reading gives youthful behavioural traits (enthusiasm, risk-taking, optimism) without the age or situation. They overlap in spirit, but the reading is a personality stereotype rather than the stage of life."
+      }
+    ],
+    "accuracy": 0.8968,
+    "flags_raised": false,
+    "batch_id": "corpus_comparison_1",
+    "stopped_by_budget": false,
+    "stopped_by_error": null,
+    "reading_model": "claude-haiku-4-5-20251001",
+    "compare_model": "claude-sonnet-5-5"
+  },
+  "_provenance": {
+    "schema_version": "1.0",
+    "produced_by": {
+      "cmd": "uv run python data_analysis/gap_generation/plain_reading.py --batch-id corpus_comparison_1 --corpus --batch-size 1 --budget-usd 5",
+      "git_sha": "ccfebe1+dirty",
+      "author": "Roger Dearnaley",
+      "title": "plain_reading corpus_comparison_1"
+    },
+    "produced_at": "2026-09-29T23:36:24+00:00"
+  }
+}

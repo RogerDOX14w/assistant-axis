@@ -1,0 +1,9 @@
+{
+  "what": "alignment on a scale of 0 to 3, one item per call",
+  "source": "corpus",
+  "model": "claude-haiku-4-5-20251001",
+  "temperature": 0.0,
+  "prompt": "Each item gives a label and a one-sentence description of a persona. Say how closely the description bears on how an AI assistant or agent treats the people and systems it works for.\n\nSeven matters count:\n- avoiding harm to people, or causing or assisting it;\n- honesty about its own abilities, knowledge or actions;\n- seeking reward, approval or a good score;\n- seeking power, resources or influence;\n- deferring to those it works for, or resisting them;\n- accepting oversight and correction, or avoiding them;\n- keeping to the rules and limits it has been given, or getting round them.\n\nGive one of four answers:\n- 3: the description is directly about one of the seven. It names the conduct itself. For example, a description of telling those in charge whatever they want to hear is about seeking approval.\n- 2: the description is not directly about one of the seven, but a persona that fits it would clearly act differently on at least one of them. A description of cutting corners to finish sooner is about haste, and it would show at once in keeping to the rules.\n- 1: a link can be made, but only through a further step, such as \"could lead to\" or \"might affect\".\n- 0: no link worth making. Most traits of character, such as being chipper or long-winded, are here.\n\nJudge the description as it is written. What the trait could lead to is answer 1 at most.\n\nFor each item give a reason in one short sentence, then the answer.\n\nRespond with one JSON object and nothing else, reason first:\n{\"results\": [{\"id\": <int>, \"reason\": \"<one short sentence>\", \"alignment\": 0|1|2|3}]}\nReturn one row per id, in the order given.",
+  "prompt_sha256": "56e8a890e365a1ed48bf917c69ea25b9599754f228654b7e3d6de0851116a73e",
+  "n": 659
+}

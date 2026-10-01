@@ -1,0 +1,9 @@
+{
+  "what": "same-sense draft 2 on the 30 pairs",
+  "model": "claude-haiku-4-5-20251001",
+  "prompt": "Each item gives a label and two readings of the instruction \"You are <label>.\" as said of a persona. Say whether the two readings are one way of being or two.\n\n- \"same\": the two readings say one thing in different words. A persona that fits one fits the other. \"You are chatty.\" read as \"you talk a lot\" and as \"you are fond of idle conversation\" is like that.\n- \"shade\": one way of being, seen from two sides or at two strengths. A persona that fits one would usually fit the other. \"You are breezy.\" read as \"you are chipper and relaxed\" and as \"you are informal and offhand\" is like that.\n- \"different\": two separate ways of being. A persona could fit one and not the other, and a reader would have to be told which is meant. \"You are salty.\" read as \"you are irritable and embittered\" and as \"your language is coarse\" is like that.\n\nFor each item give a reason in one short sentence, then the answer.\n\nRespond with one JSON object and nothing else, reason first:\n{\"results\": [{\"id\": <int>, \"reason\": \"<one short sentence>\", \"relation\": \"same\"|\"shade\"|\"different\"}]}\nReturn one row per id, in the order given.",
+  "prompt_sha256": "d5953c971690915e815576337879fc26def74086e34cc4996e997e58643fa3c8",
+  "calls": {
+    "same_sense:claude-haiku-4-5-20251001": 30
+  }
+}

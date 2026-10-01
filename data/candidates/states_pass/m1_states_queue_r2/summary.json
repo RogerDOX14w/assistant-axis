@@ -1,0 +1,66 @@
+{
+  "result": {
+    "mode": "queue",
+    "n": 148,
+    "n_judged": 148,
+    "n_failed": 0,
+    "n_pending": 0,
+    "parse_rate": 1.0,
+    "calls": {
+      "judge": 8
+    },
+    "rubric_version": 3,
+    "prompt_sha256": "6790603bcdfabafa97db968a3fc832ec17a5f64dd487b84258b3fc892b86fd3d",
+    "cost_usd": 0.0966,
+    "usage": {
+      "per_model": {
+        "claude-haiku-4-5-20251001": {
+          "model": "claude-haiku-4-5-20251001",
+          "prompt_tokens": 12718,
+          "completion_tokens": 16781,
+          "cost_usd": 0.0966,
+          "n_calls": 8
+        }
+      },
+      "total_cost_usd": 0.0966,
+      "total_prompt_tokens": 12718,
+      "total_completion_tokens": 16781,
+      "n_calls": 8
+    },
+    "plausible": 43,
+    "implausible": 105,
+    "renamed": [
+      "burned-out -> burnout-prone",
+      "flustered -> easily flustered",
+      "coiling -> tense or defensive",
+      "crimson -> prone to blushing",
+      "cut off -> isolated or withdrawn",
+      "destroyed -> emotionally fragile or prone to despair",
+      "dizzy -> prone to dizziness",
+      "dried-out -> burned out or depleted",
+      "mismatched -> sloppy",
+      "scrubbed -> fastidious",
+      "sprawling -> relaxed",
+      "stricken -> grief-stricken",
+      "turnt -> excitable",
+      "warming -> warm",
+      "weeping -> tearful"
+    ],
+    "n_name_unchanged": 0,
+    "gloss_in_band_rate": 1.0,
+    "batch_id": "m1_states_queue_r2",
+    "stopped_by_budget": false,
+    "stopped_by_error": null,
+    "model": "claude-haiku-4-5-20251001"
+  },
+  "_provenance": {
+    "schema_version": "1.0",
+    "produced_by": {
+      "cmd": "uv run python data_analysis/gap_generation/states_pass.py --batch-id m1_states_queue_r2 --mode queue --filter-results data/candidates/filter/m1_validation_r2/results.jsonl --budget-usd 0.5",
+      "git_sha": "af762b4+dirty",
+      "author": "Roger Dearnaley",
+      "title": "states_pass m1_states_queue_r2"
+    },
+    "produced_at": "2026-10-01T02:00:05+00:00"
+  }
+}

@@ -417,3 +417,28 @@ From `coding_plan_02_roget_wordnet.md`:
    snapshot to `data/candidates/registry.snapshot.jsonl`, which is tracked; the acceptance
    report and every pilot readout are taken from a fresh snapshot.  §5's "tracked unless
    noted" is amended accordingly, and `.gitignore` gains the log path.
+
+## Amendments for M2 and M3 (2026-09-30, Roger and Claude)
+
+Recorded during M1's split-filter work, to be folded into the M2 and M3 briefs.  Roger's decisions
+unless marked.
+
+1. **Local embedding model: `BAAI/bge-large-en-v1.5`, not Qwen3-Embedding-0.6B.**  Roger: "I'm
+   inclined to avoid using a Qwen-derived embedding, specifically because Qwen is one of the models
+   we're experimenting on"; the same goes for Llama, OLMo and gpt-oss.  bge-large is BERT-based,
+   Apache-2.0, 335M parameters, about 1.3 GB, CLS pooling, and already the plan's named fallback
+   behind `--local-model`.  The download into `data/external/hf/` waits for Roger's word at the M2
+   launch.  He is open to a Gemma- or Mistral-derived embedder as a comparison arm: EmbeddingGemma
+   (300M) is the practical one on this Mac; the Mistral-based embedders are 7B and would need the pod.
+2. **Persona vectors for criteria (c) and (h): the 8-slot set, slot 6, layer 25.**  Roger: the 8-slot
+   set is the one to use, slot 6 "seems to have the best persona data"; layer 25 is the documented
+   default (`results_analysis/README.md`, "slot 6 / layer 25"; `pair_slice_plots.py --layer 25`).
+   The vectors predate the September corpus work, so the 659-trait corpus has vectors for about
+   300 traits only.  The worktree reaches the data through links at
+   `runpod_workspace/qwen/qwen-3-32b Roger 8slot` and `qwen-3-32b Roger`, which git ignores.
+3. **The alignment score feeds the duplicate-or-gap decision (M3).**  The split filter records an
+   alignment score of 0 to 3 for every word that goes on as a trait (rubric `alignment.md` draft 3;
+   `alignment_relevant` is derived as score 2 or 3).  Roger: use it "as input to the dupe/gap
+   decision, so density increases gradually as you get closer to alignment rather than a sudden
+   transition".  How the score moves the thresholds is for the M3 plan to propose.
+4. **The worktree's `.env`** was refreshed on 2026-09-30 and now has the OpenAI key M2 needs.

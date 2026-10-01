@@ -1,0 +1,109 @@
+{
+ "runs": [
+  "probes",
+  "split_pilot_live",
+  "split_pilot_batches",
+  "run_1",
+  "run_2",
+  "run_3",
+  "run_4",
+  "run_5",
+  "run_6"
+ ],
+ "single_pair_agreement_mean": 91.97,
+ "single_pair_agreement_range": [
+  88,
+  96
+ ],
+ "n_words": 99,
+ "n_steady": 83,
+ "unsteady": {
+  "disrespectful": {
+   "trait": 6,
+   "turned_away": 3
+  },
+  "false": {
+   "turned_away": 8,
+   "trait": 1
+  },
+  "grubby": {
+   "states": 5,
+   "trait": 4
+  },
+  "hit-and-run": {
+   "turned_away": 6,
+   "trait": 3
+  },
+  "incestuous": {
+   "trait": 7,
+   "turned_away": 2
+  },
+  "migratory": {
+   "trait": 8,
+   "turned_away": 1
+  },
+  "pedagogic": {
+   "trait": 7,
+   "roles": 1,
+   "turned_away": 1
+  },
+  "twisted": {
+   "trait": 5,
+   "states": 4
+  },
+  "unreachable": {
+   "states": 7,
+   "trait": 2
+  },
+  "linear": {
+   "turned_away": 5,
+   "trait": 4
+  },
+  "watertight": {
+   "trait": 7,
+   "turned_away": 2
+  },
+  "threadbare": {
+   "states": 7,
+   "turned_away": 2
+  },
+  "municipal": {
+   "turned_away": 6,
+   "trait": 3
+  },
+  "disciplinary": {
+   "states": 7,
+   "trait": 2
+  },
+  "economic": {
+   "trait": 6,
+   "turned_away": 3
+  },
+  "deterministic": {
+   "turned_away": 5,
+   "trait": 4
+  }
+ },
+ "two_runs_flag_mean": 7.03,
+ "vote_of_3_agreement_mean": 93.57,
+ "vote_of_3_agreement_range": [
+  90,
+  98
+ ],
+ "vote_of_3_right_mean": 70.86,
+ "single_right_mean": 70.22,
+ "single_right_by_run": {
+  "probes": 73,
+  "split_pilot_live": 69,
+  "split_pilot_batches": 67,
+  "run_1": 69,
+  "run_2": 72,
+  "run_3": 70,
+  "run_4": 70,
+  "run_5": 71,
+  "run_6": 71
+ },
+ "cost_runs_usd": 3.386,
+ "steps_1_to_3_usd_per_word": 0.0057,
+ "calls_per_word": 5.26
+}

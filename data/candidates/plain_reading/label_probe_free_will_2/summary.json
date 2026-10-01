@@ -1,0 +1,200 @@
+{
+  "result": {
+    "n": 26,
+    "n_compared": 26,
+    "n_failed": 0,
+    "relations": {
+      "same": 13,
+      "related": 9,
+      "different": 4
+    },
+    "overshadowed": [
+      "cause-driven",
+      "conditioned",
+      "situationist",
+      "will-driven"
+    ],
+    "reading_parse_rate": 1.0,
+    "compare_parse_rate": 1.0,
+    "n_readings_called": 26,
+    "n_readings_reused": 0,
+    "calls": {
+      "compare": 26,
+      "plain_reading": 26
+    },
+    "versions": {
+      "plain_reading": 1,
+      "comparison": 2
+    },
+    "prompt_sha256": {
+      "plain_reading": "e977750502a3c25b7fb63986eb9670a90aae92a65b41d06cdfed23d9fa2770f6",
+      "comparison": "a6f5cbc6514e6108a010304e8f18012260263dfd2aa0c913439055b33df932e3"
+    },
+    "cost_usd": 0.0589,
+    "usage": {
+      "per_model": {
+        "claude-haiku-4-5-20251001": {
+          "model": "claude-haiku-4-5-20251001",
+          "prompt_tokens": 1293,
+          "completion_tokens": 669,
+          "cost_usd": 0.0046,
+          "n_calls": 26
+        },
+        "claude-sonnet-5-5": {
+          "model": "claude-sonnet-5-5",
+          "prompt_tokens": 11426,
+          "completion_tokens": 3141,
+          "cost_usd": 0.0543,
+          "n_calls": 26
+        }
+      },
+      "total_cost_usd": 0.0589,
+      "total_prompt_tokens": 12719,
+      "total_completion_tokens": 3810,
+      "n_calls": 52
+    },
+    "confusion": {
+      "same": {
+        "same": 13,
+        "related": 9,
+        "different": 4
+      }
+    },
+    "wrong": [
+      {
+        "key": "agentic#free",
+        "label": "agentic",
+        "expected": "same",
+        "relation": "related",
+        "reading": "This persona independently identifies goals, makes decisions, and takes action without requiring external direction or approval.",
+        "intended": "This means championing absolute free will and individual choice over deterministic explanations, emphasizing personal responsibility and agency while rejecting the influence of external factors or systemic forces on individual outcomes.",
+        "reason": "The reading describes self-directed initiative and autonomous action. The intended meaning is an ideological stance that champions free will and personal responsibility over determinism and systemic explanations. They are neighbors, but the intended stance is missing from the reading."
+      },
+      {
+        "key": "self-authoring#free",
+        "label": "self-authoring",
+        "expected": "same",
+        "relation": "related",
+        "reading": "This persona creates their own narrative, makes independent choices, and defines themselves rather than accepting external definitions.",
+        "intended": "This means championing absolute free will and individual choice over deterministic explanations, emphasizing personal responsibility and agency while rejecting the influence of external factors or systemic forces on individual outcomes.",
+        "reason": "The reading stresses self-definition and independent choices. The intended meaning stresses free will, personal responsibility and rejecting deterministic or systemic explanations. Both center on individual agency, but the intended trait adds a rejection of external factors that the reading lacks, so they are neighbors."
+      },
+      {
+        "key": "choice-driven#free",
+        "label": "choice-driven",
+        "expected": "same",
+        "relation": "related",
+        "reading": "This persona actively seeks options, weighs alternatives carefully, and makes deliberate decisions rather than following predetermined paths or accepting defaults.",
+        "intended": "This means championing absolute free will and individual choice over deterministic explanations, emphasizing personal responsibility and agency while rejecting the influence of external factors or systemic forces on individual outcomes.",
+        "reason": "The reading describes a deliberate decision-maker who weighs options. The intended meaning is an ideological stance favoring free will and personal responsibility over determinism and systemic explanations. They are neighboring themes about agency, but the intended ideological advocacy is missing from the reading."
+      },
+      {
+        "key": "will-driven#free",
+        "label": "will-driven",
+        "expected": "same",
+        "relation": "different",
+        "reading": "This persona pursues goals with unwavering determination, overcoming obstacles through sheer resolve and refusing to accept defeat or compromise their objectives.",
+        "intended": "This means championing absolute free will and individual choice over deterministic explanations, emphasizing personal responsibility and agency while rejecting the influence of external factors or systemic forces on individual outcomes.",
+        "reason": "The reading describes determined, relentless goal pursuit. The intended meaning is a philosophical stance favoring free will and personal responsibility over determinism and systemic explanations. The two are neighbors in emphasizing willpower, but they are different traits."
+      },
+      {
+        "key": "dispositionist#free",
+        "label": "dispositionist",
+        "expected": "same",
+        "relation": "related",
+        "reading": "A dispositionist attributes behavior and outcomes primarily to stable internal traits and characteristics rather than situational factors.",
+        "intended": "This means championing absolute free will and individual choice over deterministic explanations, emphasizing personal responsibility and agency while rejecting the influence of external factors or systemic forces on individual outcomes.",
+        "reason": "The reading describes attributing behavior to stable internal traits over situations (dispositional attribution). The intended meaning is a belief in absolute free will and personal responsibility, rejecting systemic forces. The two overlap on emphasizing the individual, but they are neighboring, differently named stances."
+      },
+      {
+        "key": "champion of free will#free",
+        "label": "champion of free will",
+        "expected": "same",
+        "relation": "related",
+        "reading": "This persona champions individual autonomy, resists coercion, and advocates for people's right to make their own choices.",
+        "intended": "This means championing absolute free will and individual choice over deterministic explanations, emphasizing personal responsibility and agency while rejecting the influence of external factors or systemic forces on individual outcomes.",
+        "reason": "The reading stresses political autonomy and resisting coercion. The intended meaning is a philosophical stance that favors free will over determinism, with personal responsibility and rejection of systemic influences. They overlap on agency and choice, but the emphasis differs."
+      },
+      {
+        "key": "free-will championing#free",
+        "label": "free-will championing",
+        "expected": "same",
+        "relation": "related",
+        "reading": "This persona champions individual autonomy and personal choice, advocating that people should make their own decisions free from external coercion.",
+        "intended": "This means championing absolute free will and individual choice over deterministic explanations, emphasizing personal responsibility and agency while rejecting the influence of external factors or systemic forces on individual outcomes.",
+        "reason": "The plain reading stresses autonomy and freedom from coercion, a political-liberty sense. The intended meaning is a metaphysical and attributional stance: free will over determinism, personal responsibility, and rejecting systemic explanations. Both value individual agency, but the emphasis differs."
+      },
+      {
+        "key": "self-governing#free",
+        "label": "self-governing",
+        "expected": "same",
+        "relation": "related",
+        "reading": "This persona makes independent decisions, takes responsibility for their choices, and resists external control or authority.",
+        "intended": "This means championing absolute free will and individual choice over deterministic explanations, emphasizing personal responsibility and agency while rejecting the influence of external factors or systemic forces on individual outcomes.",
+        "reason": "The reading describes personal independence and resistance to external control. The intended meaning is a philosophical stance favoring free will over determinism and rejecting systemic explanations. Both stress personal responsibility, but the reading is behavioral autonomy, not the free-will advocacy."
+      },
+      {
+        "key": "autonomous#free",
+        "label": "autonomous",
+        "expected": "same",
+        "relation": "related",
+        "reading": "The persona acts independently, making decisions without external guidance or approval, taking full responsibility for their choices and actions.",
+        "intended": "This means championing absolute free will and individual choice over deterministic explanations, emphasizing personal responsibility and agency while rejecting the influence of external factors or systemic forces on individual outcomes.",
+        "reason": "The reading describes personal independence in decision-making, with responsibility for one's choices. The intended meaning is an ideological stance favoring free will over determinism and rejecting systemic explanations. Both stress agency and responsibility, but they are neighboring traits."
+      },
+      {
+        "key": "mechanist#det",
+        "label": "mechanist",
+        "expected": "same",
+        "relation": "related",
+        "reading": "A mechanist explains phenomena by reducing them to physical components and their interactions, rejecting non-material causes.",
+        "intended": "This means believing that all events, including human actions and decisions, are predetermined by prior causes with no room for genuine free will or alternative possibilities.",
+        "reason": "The reading is reductive physicalism, explaining things through material components. The intended meaning is determinism, denying free will. The two are neighboring views that a careful writer would name differently (mechanist vs determinist), and the reading never mentions predetermination or free will."
+      },
+      {
+        "key": "situationist#det",
+        "label": "situationist",
+        "expected": "same",
+        "relation": "different",
+        "reading": "They seek to disrupt everyday routines through unexpected interventions, revealing hidden power structures and creating moments of authentic experience.",
+        "intended": "This means believing that all events, including human actions and decisions, are predetermined by prior causes with no room for genuine free will or alternative possibilities.",
+        "reason": "The plain reading describes Situationist International-style disruption of routine and exposure of power structures. The intended meaning is determinism, the belief that events and actions are predetermined with no free will. These are unrelated dispositions."
+      },
+      {
+        "key": "cause-driven#det",
+        "label": "cause-driven",
+        "expected": "same",
+        "relation": "different",
+        "reading": "This persona prioritizes meaningful impact, aligning actions with deeply held values and working persistently toward positive change.",
+        "intended": "This means believing that all events, including human actions and decisions, are predetermined by prior causes with no room for genuine free will or alternative possibilities.",
+        "reason": "The plain reading is activism: pursuing values and positive change. The intended meaning is determinism, the belief that events are predetermined by prior causes with no free will. The reading misses the intended trait entirely."
+      },
+      {
+        "key": "conditioned#det",
+        "label": "conditioned",
+        "expected": "same",
+        "relation": "different",
+        "reading": "The persona accepts directives without question, responding obediently to commands with unquestioning compliance and predetermined patterns.",
+        "intended": "This means believing that all events, including human actions and decisions, are predetermined by prior causes with no room for genuine free will or alternative possibilities.",
+        "reason": "The reading describes obedient, unquestioning compliance with commands. The intended meaning is a deterministic belief that all events are predetermined and free will is absent. These are different traits, though both touch on predetermined patterns."
+      }
+    ],
+    "accuracy": 0.5,
+    "flags_raised": true,
+    "batch_id": "label_probe_free_will_2",
+    "stopped_by_budget": false,
+    "stopped_by_error": null,
+    "reading_model": "claude-haiku-4-5-20251001",
+    "compare_model": "claude-sonnet-5-5"
+  },
+  "_provenance": {
+    "schema_version": "1.0",
+    "produced_by": {
+      "cmd": "uv run python data_analysis/gap_generation/plain_reading.py --batch-id label_probe_free_will_2 --pairs /private/tmp/claude-501/-Users-roger-Documents-GitHub-assistant-axis/caa69f95-31c8-4b2d-b4fa-8941c6481362/scratchpad/free_will_labels_2.jsonl --batch-size 1 --budget-usd 0.5",
+      "git_sha": "4f28d5f+dirty",
+      "author": "Roger Dearnaley",
+      "title": "plain_reading label_probe_free_will_2"
+    },
+    "produced_at": "2026-09-30T00:35:30+00:00"
+  }
+}

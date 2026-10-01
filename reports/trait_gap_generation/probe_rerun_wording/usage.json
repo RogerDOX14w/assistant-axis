@@ -1,0 +1,47 @@
+{
+  "n_calls": 264,
+  "parts": {
+    "established_check": {
+      "n_calls": 132,
+      "per_model": {
+        "claude-haiku-4-5-20251001": {
+          "completion_tokens": 12104,
+          "cost_usd": 0.1222,
+          "model": "claude-haiku-4-5-20251001",
+          "n_calls": 132,
+          "prompt_tokens": 61657
+        }
+      },
+      "total_completion_tokens": 12104,
+      "total_cost_usd": 0.1222,
+      "total_prompt_tokens": 61657
+    },
+    "kind_call": {
+      "n_calls": 132,
+      "per_model": {
+        "claude-haiku-4-5-20251001": {
+          "completion_tokens": 10281,
+          "cost_usd": 0.1486,
+          "model": "claude-haiku-4-5-20251001",
+          "n_calls": 132,
+          "prompt_tokens": 97198
+        }
+      },
+      "total_completion_tokens": 10281,
+      "total_cost_usd": 0.1486,
+      "total_prompt_tokens": 97198
+    }
+  },
+  "per_model": {
+    "claude-haiku-4-5-20251001": {
+      "completion_tokens": 22385,
+      "cost_usd": 0.2708,
+      "model": "claude-haiku-4-5-20251001",
+      "n_calls": 264,
+      "prompt_tokens": 158855
+    }
+  },
+  "total_completion_tokens": 22385,
+  "total_cost_usd": 0.2708,
+  "total_prompt_tokens": 158855
+}
