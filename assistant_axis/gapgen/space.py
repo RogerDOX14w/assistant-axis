@@ -155,31 +155,49 @@ def residual_fraction(x: np.ndarray, basis_K: np.ndarray) -> Union[float, np.nda
     return float(out[0]) if np.ndim(x) == 1 else out
 
 
-def loo_residuals(Z: np.ndarray, Ks: Iterable[int]) -> dict[int, np.ndarray]:
+def loo_residuals(Z: np.ndarray, Ks: Iterable[int], *, queries: Optional[np.ndarray] = None):
     """For each row ``i`` of ``Z`` (already centred on the fixed mean, not
     re-centred per fold), the residual fraction outside the top-K principal
     subspace of the other rows, for every K in ``Ks``.  One ``eigh`` of the
     (n-1)x(n-1) Gram matrix per row: with ``G = Z Z^T`` and ``g = G[-i, i]``,
     the squared projection is ``sum_k (u_k . g)^2 / w_k`` over the top-K
-    eigenpairs ``(w_k, u_k)`` of ``G[-i, -i]``."""
+    eigenpairs ``(w_k, u_k)`` of ``G[-i, -i]``.
+
+    With ``queries`` (one row per row of ``Z``), also returns each query's
+    residual outside the same subspace, its own row held out (criterion i: a
+    paraphrase scored with its original hidden): ``(res, res_queries)``."""
     Z = np.asarray(Z, dtype=np.float64)
     n = Z.shape[0]
     Ks = sorted(set(int(k) for k in Ks))
     G = Z @ Z.T
+    Q = None if queries is None else np.asarray(queries, dtype=np.float64)
+    GQ = None if Q is None else Z @ Q.T                     # (n, n_q): column i is Z . q_i
     out = {k: np.zeros(n) for k in Ks}
+    out_q = {k: np.zeros(n) for k in Ks}
     idx = np.arange(n)
     for i in range(n):
         m = idx != i
         w, U = np.linalg.eigh(G[np.ix_(m, m)])
         w, U = w[::-1], U[:, ::-1]
+        dead = w <= w[0] * 1e-12
         g = G[m, i]
         proj = (U.T @ g) ** 2 / np.maximum(w, 1e-300)
-        proj[w <= w[0] * 1e-12] = 0.0
+        proj[dead] = 0.0
         csum = np.cumsum(proj)
+        if Q is not None:
+            pq = (U.T @ GQ[m, i]) ** 2 / np.maximum(w, 1e-300)
+            pq[dead] = 0.0
+            csq = np.cumsum(pq)
+            qq = float(Q[i] @ Q[i])
         for k in Ks:
             kk = min(k, len(csum))
             out[k][i] = 1.0 - csum[kk - 1] / max(G[i, i], 1e-300)
-    return {k: np.clip(v, 0.0, 1.0) for k, v in out.items()}
+            if Q is not None:
+                out_q[k][i] = 1.0 - csq[kk - 1] / max(qq, 1e-300)
+    res = {k: np.clip(v, 0.0, 1.0) for k, v in out.items()}
+    if Q is None:
+        return res
+    return res, {k: np.clip(v, 0.0, 1.0) for k, v in out_q.items()}
 
 
 def topk_mean(sim: np.ndarray, k: int, *, exclude_diag: bool) -> np.ndarray:

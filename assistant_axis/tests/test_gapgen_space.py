@@ -156,3 +156,16 @@ def test_partial_whitening_variant_names():
     assert [v for v in S.VARIANTS if v.startswith("pw")] == [f"pw{n}" for n in (1, 2, 4, 8, 16, 32, 64)]
     with pytest.raises(ValueError):
         S.fit_space(_data(n=20, d=6), "pw6")     # N must leave an (N+1)th component
+
+
+def test_loo_residuals_for_queries_with_their_row_held_out():
+    E = _data(n=40, d=10)
+    Z = S.fit_space(E, "centred").apply(E, renorm=False)
+    rng = np.random.default_rng(2)
+    Q = Z + 0.05 * rng.standard_normal(Z.shape)
+    res, res_q = S.loo_residuals(Z, [3], queries=Q)
+    for i in (0, 17):
+        B = np.linalg.svd(np.delete(Z, i, axis=0), full_matrices=False)[2][:3]
+        assert res_q[3][i] == pytest.approx(S.residual_fraction(Q[i], B), abs=1e-8)
+        assert res[3][i] == pytest.approx(S.residual_fraction(Z[i], B), abs=1e-8)
+    assert set(S.loo_residuals(Z, [3])) == {3}      # without queries: the old return value

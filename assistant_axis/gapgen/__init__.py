@@ -32,6 +32,7 @@ from .registry import (
     Candidate, Registry, SubmitReport, compact, holding_list, records_for_status, submit_candidates,
 )
 from .runs import RunContext, start_run
+from .metric_config import MetricConfig  # noqa: E402
 
 __all__ = [
     # frozen interface (generators)
@@ -44,4 +45,6 @@ __all__ = [
     # paths
     "DATA_CANDIDATES", "DATA_EXTERNAL", "METRIC_CONFIG_PATH", "REGISTRY_SNAPSHOT_PATH",
     "hf_cache_dir", "run_dir", "wn_data_dir",
+    # metric configuration (M2 round 3: covered and directional blocks)
+    "MetricConfig",
 ]

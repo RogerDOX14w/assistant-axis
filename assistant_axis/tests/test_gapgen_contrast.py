@@ -157,3 +157,9 @@ def test_dup_representation_doubles_only_the_short_side():
         assert R.represent_short("frugal", gloss, rep) == R.represent("frugal", gloss, rep)
     assert R.represent_short("economic", None, "dup") == "economic"
     assert "dup" in R.REPRESENTATIONS
+
+
+def test_empty_label_gives_the_text_alone():
+    assert R.trait_text("", "This means calm.") == "This means calm."
+    assert R.represent_short(None, "This means calm and steady under any pressure at all, every day.", "w14") \
+        .startswith("This means calm")

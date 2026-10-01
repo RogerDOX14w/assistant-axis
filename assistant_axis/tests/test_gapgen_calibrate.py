@@ -253,7 +253,8 @@ def test_paraphrases_fake_client(caplog):
 
     def responder(kw):
         rows = [json.loads(x) for x in user_text(kw).splitlines()]
-        res = [{"id": r["id"], "paraphrase": f"This means p {r['label']}."} for r in rows if r["label"] != "l3"]
+        res = [{"id": r["id"], "reason": "keep the disposition", "paraphrase": f"This means p {r['label']}."}
+               for r in rows if r["label"] != "l3"]
         return make_response(json.dumps({"results": res}), input_tokens=900, output_tokens=400)
     client = FakeAsyncAnthropic(responder)
     usage = MultiModelUsage()
@@ -397,3 +398,89 @@ def test_redraw_does_not_keep_a_marked_item_whose_first_neighbour_holds(synth):
     again = C.redraw_comparisons(views, stems=stems, labels=labels, descriptions=desc, classes=classes,
                                  n=2, n_for_roger=2, keep=[marked])
     assert again[0]["stem"] == "t22" and not any(it["kept_from_draw_1"] for it in again)
+
+
+def test_paraphrase_prompt_v2_reasons_first():
+    assert CL.PARAPHRASE_PROMPT_VERSION == 2
+    p = CL.PARAPHRASE_PROMPT
+    assert p.index('"reason"') < p.index('"paraphrase"')
+    assert "first" in p.lower() and "reason" in p.lower()
+    # a row without its reason still parses (the reason is a thinking aid, not data)
+    assert CL.parse_paraphrases('{"results": [{"id": 1, "paraphrase": "This means x."}]}', [1]) == {1: "This means x."}
+
+
+def test_covered_threshold_from_paraphrases(synth):
+    E, stems, index, lp = synth
+    rng = np.random.default_rng(6)
+    v = C.build_view(E, "centred", residual=False)
+    para = {s: E[i] + 0.03 * rng.standard_normal(D) for i, s in enumerate(stems)}
+    folds = {s: i % 3 for i, s in enumerate(stems)}
+    t = C.covered_threshold(v, para, index, lp, recall=0.95, folds=folds)
+    assert t["n"] == 40 and 0.95 <= t["recall_at_t_hi"] < 0.98
+    assert t["t_hi"] > t["t_lo"]
+    assert 0 <= t["rate_above_t_hi"]["antonym"] <= 1 and "near_distinct" in t["rate_above_t_hi"]
+    assert 0 <= t["hidden_original_still_covered"] <= 1
+    assert len(t["heldout_recall_by_fold"]) == 3
+
+
+def test_heldout_directional_stability(synth):
+    E, stems, index, lp = synth
+    rng = np.random.default_rng(7)
+    v = C.build_view(E, "centred", residual_ks=(3, 5))
+    para = {s: E[i] + 0.01 * rng.standard_normal(D) for i, s in enumerate(stems)}
+    h = C.heldout_directional(v, para, index, [3, 5])
+    assert h["n"] == 40 and h["by_K"]["3"]["spearman_para_vs_original"] > 0.9
+    assert h["by_K"]["5"]["mean_abs_diff"] < 0.1
+
+
+def test_heldout_directional_from_the_view_pass_matches_standalone(synth):
+    E, stems, index, lp = synth
+    rng = np.random.default_rng(8)
+    Qraw = E + 0.01 * rng.standard_normal(E.shape)
+    para = {s: Qraw[i] for i, s in enumerate(stems)}
+    v1 = C.build_view(E, "pw2", residual_ks=(3,), queries=Qraw)
+    v2 = C.build_view(E, "pw2", residual_ks=(3,))
+    a = C.heldout_directional(v1, None, index, [3])
+    b = C.heldout_directional(v2, para, index, [3])
+    assert a["by_K"]["3"] == b["by_K"]["3"]
+
+
+def _fake_rows():
+    rows, para, held = [], [], []
+    for m in ("openai", "gemma"):
+        for rep, a, c in (("full", 0.60, 0.25), ("w14", 0.70, 0.22)):
+            for var in ("centred", "pw2"):
+                bump = 0.02 if var == "pw2" else 0.0
+                rows.append({"model": m, "representation": rep, "variant": var, "metric": "cos",
+                             "auc_dup_vs_distinct": a + bump, "auc_ant_vs_syn": 0.4})
+                for K, cc in ((10, c + 0.03), (20, c), (40, c + 0.01)):
+                    rows.append({"model": m, "representation": rep, "variant": var, "metric": f"resid_{K}", "K": K,
+                                 "spearman_persona_yield": cc - bump})
+                rows.append({"model": m, "representation": rep, "variant": var, "metric": "resid_K95", "K": 300,
+                             "spearman_persona_yield": c - 0.1})
+                rec = 0.97 if rep == "full" else 0.93
+                para.append({"model": m, "representation": rep, "variant": var, "query": "no_label",
+                             "recall": {"cos": {"recall_at_1": rec}},
+                             "covered": {"t_hi": 0.5, "t_lo": 0.2, "recall_at_t_hi": 0.95,
+                                         "rate_above_t_hi": {"antonym": 0.3}, "heldout_recall_mean": 0.94}})
+                held.append({"model": m, "representation": rep, "variant": var, "K95": 300,
+                             "by_K": {"10": {"spearman_para_vs_original": 0.8}, "20": {"spearman_para_vs_original": 0.85},
+                                      "40": {"spearman_para_vs_original": 0.86}, "300": {"spearman_para_vs_original": 0.7}}})
+    return rows, para, held
+
+
+def test_choose_settings_separately():
+    rows, para, held = _fake_rows()
+    st = C.choose_settings(rows, para, held, ["openai", "gemma"])
+    cov, dirn = st["covered"], st["directional"]
+    # w14 has the better (a) but misses the 0.95 recall target: full wins the covered setting
+    assert cov["representation"] == "full" and cov["variant"] == "pw2" and cov["recall_target_met"]
+    assert cov["thresholds"]["openai"]["t_hi"] == 0.5 and cov["evaluation"]["antonym_rate_above_t_hi"]["openai"] == 0.3
+    # directional: best (c) is full / centred at K = 10
+    assert (dirn["representation"], dirn["variant"], dirn["K"]) == ("full", "centred", 10)
+    assert set(dirn["K_sensitivity"]) == {"10", "20", "40", "K95"} and dirn["heldout"]["20"] == 0.85
+    cfg = C.proposed_metric_config(st, models={"openai": "text-embedding-3-large"}, contrast={"openai": "keep"},
+                                   config_version="2026-10-02")
+    from assistant_axis.gapgen.metric_config import MetricConfig
+    m = MetricConfig.from_json(cfg)
+    assert m.covered["representation"] == "full" and m.directional["K"] == 10

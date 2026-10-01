@@ -90,7 +90,8 @@ def trait_text(label: str, description: Optional[str], *, prefix: str = "keep", 
     """``label: gloss`` under the given options.  ``cut`` is the hand-checked
     override for this description (``contrast_cuts.json`` row or
     ``contrast_cut_overrides.json`` entry); without one the mechanical rule
-    applies.  A member with no description (a bare label) is just the label."""
+    applies.  A member with no description (a bare label) is just the label;
+    an empty label gives the text alone (the paraphrase queries without a label)."""
     if prefix not in ("keep", "strip") or contrast not in ("keep", "strip"):
         raise ValueError("prefix and contrast are 'keep' or 'strip'")
     if not description:
@@ -107,7 +108,7 @@ def trait_text(label: str, description: Optional[str], *, prefix: str = "keep", 
         text = truncate_words(text, words)
     if double:
         text = f"{text} {text}"
-    return f"{label}: {text}"
+    return f"{label}: {text}" if label else text
 
 
 def candidate_text(label: str, gloss: Optional[str], **kw) -> str:

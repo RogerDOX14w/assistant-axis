@@ -75,6 +75,8 @@ def parse_args(argv=None):
     ap.add_argument("--variants", nargs="+", default=list(VARIANTS), choices=list(VARIANTS))
     ap.add_argument("--skip-llm", action="store_true", help="no Haiku paraphrases, no Sonnet judge (the pilot)")
     ap.add_argument("--criteria", default="a,b,c,d,e,f,g,h,i,j", help="contrast-ablation criteria to report")
+    ap.add_argument("--llm-criteria", default="e,g",
+                    help="which paid criteria run without --skip-llm: g (Haiku paraphrases), e (Sonnet blinded judge)")
     ap.add_argument("--paraphrase-cache", type=Path, default=None, help="default: <out>/paraphrases.json")
     ap.add_argument("--vectors-dir", type=Path, default=PS.DEFAULT_VECTORS_DIR)
     ap.add_argument("--out", type=Path, default=CALIBRATION_DIR)
@@ -116,8 +118,10 @@ def corpus_inputs(repo: Path) -> dict:
 
 def build_texts(ci: dict, lp, cuts: dict, reps, minimal, glosses: dict, paraphrases: dict) -> dict:
     """Every text an arm embeds, by role: corpus[rep] (row order), ext[rep][member],
-    minimal[text], gloss[rep][stem], para[stem]."""
-    out = {"corpus": {}, "ext": {}, "gloss": {}, "minimal": {}, "para": {}}
+    minimal[text], gloss[rep][stem], para[rep][stem] ("label: paraphrase") and
+    para_nl[rep][stem] (the paraphrase alone, as a concept re-proposed under an unknown
+    label); paraphrases are the short (candidate) side, so they go through represent_short."""
+    out = {"corpus": {}, "ext": {}, "gloss": {}, "minimal": {}, "para": {}, "para_nl": {}}
     for rep in reps:
         out["corpus"][rep] = [represent(l, d, rep, cut=cuts.get(s) if rep == "strip" else None)
                               for s, l, d in zip(ci["stems"], ci["labels"], ci["descriptions"])]
@@ -130,9 +134,10 @@ def build_texts(ci: dict, lp, cuts: dict, reps, minimal, glosses: dict, paraphra
     for m in minimal:
         for k in ("xy", "yx", "x_only", "y_only"):
             out["minimal"][m[k]] = m[k]
-    for s, p in paraphrases.items():
-        if s in ci["index"]:
-            out["para"][s] = f"{ci['corpus'][s]['label']}: {p}"
+    for rep in reps:
+        out["para"][rep] = {s: represent_short(ci["corpus"][s]["label"], p, rep) for s, p in paraphrases.items()
+                            if s in ci["index"]}
+        out["para_nl"][rep] = {s: represent_short(None, p, rep) for s, p in paraphrases.items() if s in ci["index"]}
     return out
 
 
@@ -140,10 +145,10 @@ def all_texts(texts: dict) -> list[str]:
     seen = []
     for rep_rows in texts["corpus"].values():
         seen.extend(rep_rows)
-    for d in list(texts["ext"].values()) + list(texts["gloss"].values()):
+    for d in (list(texts["ext"].values()) + list(texts["gloss"].values()) + list(texts["para"].values())
+              + list(texts["para_nl"].values())):
         seen.extend(d.values())
     seen.extend(texts["minimal"].values())
-    seen.extend(texts["para"].values())
     return list(dict.fromkeys(seen))
 
 
@@ -195,14 +200,19 @@ def main(argv=None) -> int:
         uncached[arm] = len(cache.lookup(tag, every)[1])
     est = embedding_estimate(args.models, uncached, avg_tok)
     llm_items = [s for s in ci["stems"] if s not in paraphrases]
-    if not args.skip_llm:
-        for line in CL.llm_estimate(len(llm_items), 60).lines:
+    llm_sel = set() if args.skip_llm else {c.strip() for c in args.llm_criteria.split(",") if c.strip()}
+    if llm_sel:
+        for line in CL.llm_estimate(len(llm_items) if "g" in llm_sel else 0, 60 if "e" in llm_sel else 0).lines:
             est.lines.append(line)
+        if "g" in llm_sel and llm_items and "openai" in args.models:
+            n_new = len(llm_items) * len(args.representations) * 2
+            est.add("openai embeddings of the new paraphrases (approx.)", EM.OPENAI_MODEL,
+                    math.ceil(n_new / OPENAI_BATCH), int(45 * min(n_new, OPENAI_BATCH)), 0)
     print(f"M2 calibration: {len(ci['stems'])} traits; models {args.models}; representations {args.representations}; "
           f"variants {args.variants}; {len(every)} distinct texts (about {avg_tok:.0f} tokens each); "
           f"uncached per model {uncached}; labelled pairs {lp.counts()}; contrast rows {len(classes)} "
           f"({cuts_payload['counts']['by_class']} census + {len(cuts_payload['new_hits'])} new hits)")
-    print(f"cost estimate:\n{est.format()}\n  budget ${budget:.2f}; LLM criteria {'skipped (--skip-llm)' if args.skip_llm else 'on'}")
+    print(f"cost estimate:\n{est.format()}\n  budget ${budget:.2f}; LLM criteria {sorted(llm_sel) if llm_sel else 'skipped'}")
     cap = confirm_or_abort(est.usd, budget, confirm_expensive=args.confirm_expensive, confirmed_by=args.confirmed_by)
     if args.dry_run:
         for t in every[:3]:
@@ -238,6 +248,18 @@ def main(argv=None) -> int:
         run["usage_this_run"] = usage.as_dict()
         run["cost_usd_cumulative"] = round(write_usage().total_cost_usd, 6)
         (out / "run.json").write_text(json.dumps(run, indent=2) + "\n")
+
+    # ---------------------------------------------------------------- (g) paraphrases, before the embeddings
+    if "g" in llm_sel and llm_items:
+        ts = time.time()
+        try:
+            paraphrases = run_paraphrase_stage(ci, llm_items, para_path, paraphrases, usage)
+        finally:
+            timings["paraphrases"] = round(time.time() - ts, 1)
+            save_run()
+        texts = build_texts(ci, lp, cut_rows, args.representations, minimal, glosses, paraphrases)
+        every = all_texts(texts)
+    run["n_paraphrases"] = len(paraphrases)
 
     # ---------------------------------------------------------------- embeddings
     emb = {}
@@ -295,7 +317,7 @@ def main(argv=None) -> int:
     save_run()
 
     # ---------------------------------------------------------------- views and per-view metrics
-    rows, gloss_rows, hub, thr = [], [], {}, {}
+    rows, gloss_rows, hub, thr, para_rows, heldout_rows = [], [], {}, {}, [], []
     keep_views = {}
     dup_rel = set(C.SYNONYM_RELATIONS)
     dup_pairs = [p for p in lp.pairs if p.relation in dup_rel]
@@ -305,9 +327,18 @@ def main(argv=None) -> int:
             E = np.stack([vec[t] for t in texts["corpus"][rep]])
             ext = {m: vec[t] for m, t in texts["ext"][rep].items()}
             gq = {s: vec[t] for s, t in texts["gloss"][rep].items()}
+            pq = {s: vec[t] for s, t in texts["para"][rep].items()}
+            pq_nl = {s: vec[t] for s, t in texts["para_nl"][rep].items()}
+            Qraw, qmask = None, None
+            if pq_nl:
+                Qraw = E.copy()
+                qmask = np.zeros(len(E), bool)
+                for s_, x in pq_nl.items():
+                    Qraw[ci["index"][s_]] = x
+                    qmask[ci["index"][s_]] = True
             for variant in args.variants:
                 ts = time.time()
-                v = C.build_view(E, variant, residual=not args.no_residual)
+                v = C.build_view(E, variant, residual=not args.no_residual, queries=Qraw, query_mask=qmask)
                 lt = C.labelled_tasks(v, lp, ci["index"], ext)
                 key = f"{arm}|{rep}|{variant}"
                 for metric in NOVELTY_METRICS:
@@ -334,6 +365,16 @@ def main(argv=None) -> int:
                     rows.append(row)
                 g = C.gloss_recovery(v, gq, ci["index"])
                 gloss_rows.append({"model": arm, "representation": rep, "variant": variant, **g})
+                if pq:
+                    folds = {s_: lp.folds.get(s_) for s_ in pq if lp.folds.get(s_) is not None}
+                    for mode, qs in (("label", pq), ("no_label", pq_nl)):
+                        para_rows.append({"model": arm, "representation": rep, "variant": variant, "query": mode,
+                                          "recall": C.gloss_recovery(v, qs, ci["index"]),
+                                          "covered": C.covered_threshold(v, qs, ci["index"], lp, folds=folds)})
+                    if v.residual:
+                        heldout_rows.append({"model": arm, "representation": rep, "variant": variant,
+                                             "K95": v.K95, **C.heldout_directional(
+                                                 v, None, ci["index"], sorted(set(C.RESIDUAL_KS) | {v.K95}))})
                 hub[key] = C.hubness(v, ci["stems"])
                 sims = lt["sims"]
                 dup_sims = {m: np.concatenate([sims[r][mi] for r in C.SYNONYM_RELATIONS if r in sims])
@@ -433,7 +474,7 @@ def main(argv=None) -> int:
     # ---------------------------------------------------------------- contrast ablation
     ablation = {}
     minimal_vecs = {arm: {t: emb[arm][t] for t in texts["minimal"]} for arm in arms}
-    para_vecs = {arm: {s: emb[arm][t] for s, t in texts["para"].items()} for arm in arms}
+    para_vecs = {arm: {s: emb[arm][t] for s, t in texts["para"].get("full", {}).items()} for arm in arms}
     changed_idx = [ci["index"][s] for s in classes if s in ci["index"]]
     if "full" in args.representations and "strip" in args.representations:
         for variant in args.variants:
@@ -463,7 +504,10 @@ def main(argv=None) -> int:
     # (e) the blinded comparisons.  The key and Roger's marks sheet are written only on the first run or
     # with --redraw-comparisons, so a rerun never overwrites a sheet he may be marking.
     key_path = out / "contrast_comparisons_key.json"
-    if args.redraw_comparisons or not key_path.exists():
+    can_draw = "full" in args.representations and "strip" in args.representations
+    if not can_draw:
+        items = []
+    elif args.redraw_comparisons or not key_path.exists():
         prior_key = json.loads(key_path.read_text()) if key_path.exists() else {}
         prior_items = [dict(it, model=it.get("model", prior_key.get("model", "openai")))
                        for it in prior_key.get("items", []) if it.get("for_roger")]
@@ -484,13 +528,13 @@ def main(argv=None) -> int:
         write_marks_sheet(args.marks_sheet, items, ci)
     else:
         items = json.loads(key_path.read_text())["items"]
-    llm = {"skipped": bool(args.skip_llm)}
-    if not args.skip_llm:
-        llm = run_llm_criteria(ci, items, llm_items, para_path, paraphrases, usage)
-        if llm.get("blinded"):
-            for arm in ablation:
-                ablation[arm].setdefault(rec_variant, {})["e_blinded"] = llm["blinded"]
-        save_run()
+    llm = {"skipped": not llm_sel, "selected": sorted(llm_sel), "n_paraphrases": len(paraphrases)}
+    if "e" in llm_sel:
+        llm.update(run_blinded_stage(ci, items, usage))
+    if llm.get("blinded"):
+        for arm in ablation:
+            ablation[arm].setdefault(rec_variant, {})["e_blinded"] = llm["blinded"]
+    save_run()
     for arm in ablation:
         for variant in ablation[arm]:
             r = ablation[arm][variant]
@@ -498,7 +542,8 @@ def main(argv=None) -> int:
                 "a": "ran", "b": "ran", "c": "ran", "d": "ran", "f": "ran" if "f_minimal_pairs" in r else "skipped",
                 "h": "ran" if "h_persona" in r else "skipped (no persona vectors)",
                 "j": "ran" if "j_cross_model" in r else "skipped (one model)",
-                "e": "ran" if "e_blinded" in r else "skipped (--skip-llm): needs the Sonnet judge; sample written",
+                "e": "ran" if "e_blinded" in r else ("skipped (--skip-llm): needs the Sonnet judge; sample written"
+                                                     if args.skip_llm else "not run: waits for Roger's marks"),
                 "g": "ran" if "g_paraphrase_invariance" in r else "skipped (--skip-llm): needs Haiku paraphrases",
                 "i": "ran" if "i_heldout_recovery" in r else "skipped (--skip-llm): needs Haiku paraphrases"}
 
@@ -520,6 +565,20 @@ def main(argv=None) -> int:
     write("hubness.json", hub, "M2 hubness census")
     write("thresholds.json", thr, "M2 thresholds against the bulk")
     write("contrast_ablation.json", ablation, "M2 contrast-clause ablation")
+    settings, proposed = {}, None
+    if para_rows:
+        write("paraphrase_metrics.json", {"recall_and_covered": para_rows, "heldout_directional": heldout_rows,
+                                          "n_paraphrases": len(paraphrases)}, "M2 paraphrase metrics (g, i)")
+        settings = C.choose_settings(rows, para_rows, heldout_rows, arms)
+        if "covered" in settings and "directional" in settings:
+            contrast_by_model = {arm: ((ablation.get(arm, {}).get(settings["covered"]["variant"], {})
+                                        .get("recommendation") or {}).get("recommendation", "keep")) for arm in arms}
+            proposed = C.proposed_metric_config(
+                settings, contrast=contrast_by_model, config_version=utc_now()[:10],
+                models={"openai": EM.OPENAI_MODEL, **{a: EM.LOCAL_MODELS[a]["model_id"] for a in arms
+                                                      if a in EM.LOCAL_MODELS}})
+            from assistant_axis.gapgen.metric_config import validate_payload
+            validate_payload(proposed)
     rec_view = keep_views[f"{primary}|full|{rec_variant}"][0]
     summary = {
         "models_run": arms, "models_failed": run["models_failed"], "representations": args.representations,
@@ -536,6 +595,7 @@ def main(argv=None) -> int:
                                     for arm in arms},
         "drop_or_merge": {"n_pairs": len(dm), "n_expected": sum(1 for r in dm.values() if r["arrangement"] or r["deliberate_duplicate"]),
                           "partners_excluded": {"n_pairs": len(dm_masked), "by_model": masked_info}},
+        "settings": settings, "proposed_metric_config": proposed,
         "pngs": pngs, "persona": persona_info, "llm": llm, "cost_usd": round(usage.total_cost_usd, 6),
         "usage": usage.as_dict(), "cost_usd_cumulative": round(write_usage().total_cost_usd, 6),
         "wall_time_s": round(time.time() - t0, 1)}
@@ -670,23 +730,35 @@ def write_marks_sheet(path: Path, items, ci) -> None:
     path.write_text("\n".join(head) + "\n" + body + "\n", encoding="utf-8")
 
 
-def run_llm_criteria(ci, items, llm_items, para_path: Path, paraphrases: dict, usage) -> dict:
-    """(g) paraphrases (cached) and (e) the blinded judgement.  Not run in the pilot."""
+def _anthropic_client():
     from dotenv import load_dotenv
     load_dotenv(_REPO_ROOT / ".env")
     import anthropic
-    client = anthropic.AsyncAnthropic()
+    return anthropic.AsyncAnthropic()
+
+
+def run_paraphrase_stage(ci, llm_items, para_path: Path, paraphrases: dict, usage) -> dict:
+    """Criterion (g)'s Haiku paraphrases for the traits not yet in the cache;
+    the cache (``paraphrases.json``) is written even when the cap stops the run."""
     todo = [{"stem": s, "label": ci["corpus"][s]["label"], "description": ci["corpus"][s]["description"]}
             for s in llm_items]
-    new = asyncio.run(CL.run_paraphrases(client, todo, usage=usage)) if todo else {}
-    paraphrases = {**paraphrases, **new}
-    para_path.write_text(json.dumps({"model": CL.PARAPHRASE_MODEL, "prompt_version": CL.PARAPHRASE_PROMPT_VERSION,
-                                     "paraphrases": paraphrases}, indent=2, ensure_ascii=False) + "\n")
+    new = {}
+    try:
+        new = asyncio.run(CL.run_paraphrases(_anthropic_client(), todo, usage=usage))
+    finally:
+        merged = {**paraphrases, **new}
+        para_path.write_text(json.dumps({"model": CL.PARAPHRASE_MODEL, "prompt_version": CL.PARAPHRASE_PROMPT_VERSION,
+                                         "n": len(merged), "paraphrases": merged}, indent=2, ensure_ascii=False) + "\n")
+    logger.info("[g] %d paraphrases (%d new); %s", len(merged), len(new), usage.log_line())
+    return merged
+
+
+def run_blinded_stage(ci, items, usage) -> dict:
+    """Criterion (e): the Sonnet blinded judgement of the 60 comparisons."""
     desc = {s: ci["corpus"][s]["description"] for s in ci["stems"]}
     labels = {s: ci["corpus"][s]["label"] for s in ci["stems"]}
-    blinded = asyncio.run(CL.run_blinded(client, items, usage=usage, desc_of=desc, label_of=labels))
-    return {"skipped": False, "n_paraphrases": len(paraphrases), "blinded": blinded,
-            "note": "rerun the CLI once more to fold the new paraphrases into (g) and (i)"}
+    return {"blinded": asyncio.run(CL.run_blinded(_anthropic_client(), items, usage=usage, desc_of=desc,
+                                                  label_of=labels))}
 
 
 if __name__ == "__main__":

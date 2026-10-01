@@ -469,3 +469,24 @@ Taken when item 15 (M2) was started, after item 14 closed with the split filter'
    and (g) are needed), then task 19.  Cap $10; expected spend about $0.03 for the pilot and about $1
    for the paid criteria.
 
+
+## M2 round 3 amendment (2026-10-02, Roger and the M2 agent)
+
+Roger: tasks (a) and (c) correspond to two different uses of the embedding in M3 and are tuned
+separately; task (b), telling a near-duplicate from an antonym, is left to the LLM adjudicator
+("trivially easy by LLM inspection") and is reported, not used for selection.  So
+`metric_config.json` carries two blocks over the same cached embeddings
+([metric_config.py](../../assistant_axis/gapgen/metric_config.py)):
+
+- `covered`: `space` (variant, fixed corpus mean), `representation`, `metric`, `contrast` per model,
+  `thresholds` per model (`t_hi` from paraphrase-level duplicates at 95% recall, `t_lo` the 99th
+  percentile of random pairs), `query_form`, `evaluation` (task a, task b as the antonym confusion
+  the adjudicator absorbs, paraphrase recall, held-out recall).
+- `directional`: `space`, `representation`, `K`, `K_rule`, `K_sensitivity` (10 / 20 / 40 / K_95),
+  `evaluation` (task c by model, criterion (i)'s stability under paraphrase), `caveat` (task c is a
+  proxy).
+
+The frozen interface is unchanged: `MetricConfig`, `MetricConfig.load(path=METRIC_CONFIG_PATH)`
+and `config_version` keep their names and signatures, and the §6 single-setting fields
+(`representation`, `space`, `thresholds`) remain readable as properties that point at the `covered`
+block.  §6's example config is superseded by these two blocks.

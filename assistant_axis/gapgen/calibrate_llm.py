@@ -35,7 +35,7 @@ logger = logging.getLogger(__name__)
 
 PARAPHRASE_MODEL = "claude-haiku-4-5-20251001"
 JUDGE_MODEL = "claude-sonnet-4-6"
-PARAPHRASE_PROMPT_VERSION = 1
+PARAPHRASE_PROMPT_VERSION = 2   # v1 (no reason field) was never run
 BLINDED_PROMPT_VERSION = 1
 PARAPHRASE_BATCH = 20
 
@@ -51,8 +51,9 @@ Rules for each rewrite:
 - Write plain prose, no lists.
 
 You receive JSON lines, one per trait: {"id": <int>, "label": <label>, "description": <definition>}.
-Respond with a JSON object only, no other text:
-{"results": [{"id": <int>, "paraphrase": "<the rewrite>"}, ...]}
+For each trait, first note in a few words what the rewrite must keep (the disposition, its scope, any contrast or qualification), then write the rewrite.
+Respond with a JSON object only, no other text, with the reason before the rewrite in every result:
+{"results": [{"id": <int>, "reason": "<what must be kept, a few words>", "paraphrase": "<the rewrite>"}, ...]}
 with one result per input id."""
 
 BLINDED_PROMPT = """You compare two lists of nearest neighbours for a personality trait, for a calibration experiment.
@@ -174,11 +175,11 @@ async def run_blinded(client, items: Sequence[dict], *, usage: MultiModelUsage, 
 
 
 def llm_estimate(n_paraphrase: int, n_blinded: int) -> Estimate:
-    """About 60 input and 70 output tokens per paraphrased description (plus the
-    prompt per batch); about 700 input and 120 output tokens per blinded call,
+    """About 60 input and 90 output tokens per paraphrased description (a short
+    reason, then the rewrite; plus the prompt per batch); about 700 input and 120 output tokens per blinded call,
     two calls per comparison."""
     est = Estimate()
     n_batches = -(-n_paraphrase // PARAPHRASE_BATCH)
-    est.add("(g) paraphrases", PARAPHRASE_MODEL, n_batches, 450 + 60 * PARAPHRASE_BATCH, 70 * PARAPHRASE_BATCH)
+    est.add("(g) paraphrases", PARAPHRASE_MODEL, n_batches, 500 + 60 * PARAPHRASE_BATCH, 90 * PARAPHRASE_BATCH)
     est.add("(e) blinded judgement", JUDGE_MODEL, 2 * n_blinded, 900, 150)
     return est

@@ -108,6 +108,8 @@ class View:
     K95: Optional[int] = None
     residual: dict = field(default_factory=dict)   # {K: (n,)} for centred variants
     raw: Optional[np.ndarray] = None               # the model's unit rows before the transform
+    residual_q: Optional[dict] = None              # {K: (n,)} paraphrase residuals, original held out
+    query_mask: Optional[np.ndarray] = None        # rows that have a paraphrase
 
     def transform(self, E: np.ndarray) -> np.ndarray:
         return self.T.apply(E)
@@ -132,7 +134,8 @@ class View:
 
 
 def build_view(E: np.ndarray, variant: str, *, residual: bool = True, residual_ks: Iterable[int] = RESIDUAL_KS,
-               csls_k: int = CSLS_K) -> View:
+               csls_k: int = CSLS_K, queries: Optional[np.ndarray] = None,
+               query_mask: Optional[np.ndarray] = None) -> View:
     T = fit_space(E, variant)
     Z = T.apply(E)
     S = Z @ Z.T
@@ -148,7 +151,12 @@ def build_view(E: np.ndarray, variant: str, *, residual: bool = True, residual_k
              nn_csls=C[ar, nn_csls_idx], nn_csls_idx=nn_csls_idx, knn5=knn5, raw=np.asarray(E, dtype=np.float64))
     if residual and (variant in CENTRED_VARIANTS or variant.startswith("pw")):
         v.K95 = k_for_variance(Z, 0.95)
-        v.residual = loo_residuals(Z, sorted(set(residual_ks) | {v.K95}))
+        ks = sorted(set(residual_ks) | {v.K95})
+        if queries is not None:     # criterion (i): paraphrases scored with their originals held out, same pass
+            v.residual, v.residual_q = loo_residuals(Z, ks, queries=T.apply(queries))
+            v.query_mask = np.ones(len(Z), bool) if query_mask is None else np.asarray(query_mask, bool)
+        else:
+            v.residual = loo_residuals(Z, ks)
     return v
 
 
@@ -325,6 +333,86 @@ def masked_nn(view: View, exclude: Iterable[tuple[int, int]], *, metric: str = "
         M[i, j] = M[j, i] = -np.inf
     idx = M.argmax(axis=1)
     return idx, M[np.arange(len(M)), idx]
+
+
+def covered_threshold(view: View, paraphrases: Mapping[str, np.ndarray], index: Mapping[str, int], lp=None, *,
+                      recall: float = 0.95, folds: Optional[Mapping[str, int]] = None) -> dict:
+    """The covered threshold from paraphrase-level duplicates (round 3; the
+    duplicate rulings could not supply one, QUESTIONS 26).  ``t_hi`` is the
+    similarity at which ``recall`` of the (trait, own paraphrase) pairs are at or
+    above it; ``t_lo`` is the 99th percentile of the random pairs.  Beside it:
+    the share of each labelled relation at or above ``t_hi`` (the antonym share
+    is the confusion the M3 adjudicator must absorb), how many existing traits'
+    nearest neighbours are at or above it, how often a paraphrase would still be
+    "covered" by another trait once its original is hidden, and the recall
+    held out by fold (the threshold set on the other folds)."""
+    stems = [s for s in paraphrases if s in index]
+    if not stems:
+        return {"n": 0}
+    rows = np.array([index[s] for s in stems])
+    P = view.transform(np.stack([paraphrases[s] for s in stems]))
+    S = P @ view.Z.T
+    own = S[np.arange(len(stems)), rows]
+    t_hi = float(np.quantile(own, 1 - recall, method="lower"))
+    S_other = S.copy()
+    S_other[np.arange(len(stems)), rows] = -np.inf
+    out = {"n": len(stems), "t_hi": _r(t_hi), "recall_at_t_hi": _r(float((own >= t_hi).mean())),
+           "own_sim": {"median": _r(float(np.median(own))), "q05": _r(float(np.quantile(own, 0.05)))},
+           "hidden_original_still_covered": _r(float((S_other.max(axis=1) >= t_hi).mean())),
+           "n_corpus_nn_at_or_above_t_hi": int((view.nn_cos >= t_hi).sum())}
+    if lp is not None:
+        rates, unr = {}, None
+        for rel in ("duplicate", "deliberate_duplicate", "near_distinct", "antonym", "unrelated"):
+            ps = [p for p in lp.pairs if p.relation == rel and p.a in index and p.b in index]
+            if ps:
+                sims = np.array([float(view.Z[index[p.a]] @ view.Z[index[p.b]]) for p in ps])
+                rates[rel] = _r(float((sims >= t_hi).mean()))
+                if rel == "unrelated":
+                    unr = sims
+        out["rate_above_t_hi"] = rates
+        out["t_lo"] = _r(float(np.quantile(unr, 0.99, method="higher"))) if unr is not None else None
+    if folds:
+        f = np.array([folds.get(s, -1) for s in stems])
+        recs = []
+        for fold in sorted(set(f) - {-1}):
+            tr, te = own[f != fold], own[f == fold]
+            if len(tr) and len(te):
+                recs.append(float((te >= np.quantile(tr, 1 - recall, method="lower")).mean()))
+        out["heldout_recall_by_fold"] = [_r(x) for x in recs]
+        out["heldout_recall_mean"] = _r(float(np.mean(recs))) if recs else None
+    return out
+
+
+def heldout_directional(view: View, paraphrases: Optional[Mapping[str, np.ndarray]], index: Mapping[str, int],
+                        Ks: Iterable[int]) -> dict:
+    """Criterion (i) for the directional score: each trait hidden in turn, its
+    paraphrase scored against the others (residual outside their top-K PCs).
+    A K whose scores survive rewording (high Spearman between the paraphrase's
+    held-out residual and the original's leave-one-out residual, small mean
+    difference) is measuring the concept, not the wording.  Only for views
+    with residuals (centred and partially whitened)."""
+    from .space import loo_residuals
+    Ks = sorted(set(int(k) for k in Ks))
+    if view.residual_q is not None and all(k in view.residual_q for k in Ks):
+        res, res_q, have = view.residual, view.residual_q, view.query_mask
+    else:
+        stems = [s for s in (paraphrases or {}) if s in index]
+        if not stems or not view.residual:
+            return {"n": 0}
+        n = len(view.Z)
+        Q = view.Z.copy()                      # rows without a paraphrase reuse the original (excluded below)
+        have = np.zeros(n, bool)
+        for s in stems:
+            Q[index[s]] = view.transform(paraphrases[s])
+            have[index[s]] = True
+        res, res_q = loo_residuals(view.Z, Ks, queries=Q)
+    by_k = {}
+    for k in Ks:
+        a, b = res[k][have], res_q[k][have]
+        rho, _, _ = spearman(b, a)
+        by_k[str(k)] = {"spearman_para_vs_original": _r(rho), "mean_abs_diff": _r(float(np.mean(np.abs(a - b)))),
+                        "mean_para_minus_original": _r(float(np.mean(b - a)))}
+    return {"n": int(have.sum()), "by_K": by_k}
 
 
 def drop_or_merge_rows(views: Mapping[str, View], stems: Sequence[str], *, primary: str, metric: str,
@@ -825,3 +913,112 @@ def plot_nn_histograms(path, *, model: str, representation: str, panels: Sequenc
     fig.subplots_adjust(top=top - 0.45 / h_in, bottom=1.1 / h_in, wspace=0.25, hspace=0.45)
     fig.savefig(path, dpi=130, bbox_inches="tight", metadata=png_metadata(title=title, inputs=inputs))
     plt.close(fig)
+
+
+# --------------------------------------------------------------------------- the two settings (round 3)
+
+def choose_settings(rows: Sequence[dict], para_rows: Sequence[dict], heldout_rows: Sequence[dict],
+                    models: Sequence[str], *, recall_target: float = 0.95, query: str = "no_label") -> dict:
+    """Roger, 2026-10-02: the embedding serves two uses in M3, chosen separately.
+
+    * covered: (representation, variant) with cosine, among those whose mean
+      paraphrase recall@1 over the models meets ``recall_target``, the one with
+      the best mean task (a); if none meets it, the best recall.  Thresholds per
+      model from the paraphrases.  Task (b) and the antonym share above
+      ``t_hi`` are reported, not used.
+    * directional: (representation, variant, K) with the best mean task (c) over
+      the models, the residual at K = 10, 20, 40 or K_95; the K sensitivity and
+      criterion (i)'s stability beside it."""
+    def mean(xs):
+        xs = [x for x in xs if x is not None]
+        return float(np.mean(xs)) if xs else float("nan")
+    by = defaultdict(dict)
+    for r in rows:
+        by[(r["representation"], r["variant"])].setdefault(r["model"], {})[r["metric"]] = r
+    para = {(p["representation"], p["variant"], p["model"]): p for p in para_rows if p["query"] == query}
+    held = {(h["representation"], h["variant"], h["model"]): h for h in heldout_rows}
+    cands = []
+    for (rep, var), per_model in by.items():
+        if not all(m in per_model and "cos" in per_model[m] for m in models):
+            continue
+        rec = [((para.get((rep, var, m)) or {}).get("recall") or {}).get("cos", {}).get("recall_at_1") for m in models]
+        if any(x is None for x in rec):
+            continue
+        cands.append({"representation": rep, "variant": var,
+                      "a": mean(per_model[m]["cos"].get("auc_dup_vs_distinct") for m in models),
+                      "b": mean(per_model[m]["cos"].get("auc_ant_vs_syn") for m in models),
+                      "recall": mean(rec)})
+    out = {}
+    if cands:
+        ok = [c for c in cands if c["recall"] >= recall_target]
+        pool = ok or cands
+        best = max(pool, key=(lambda c: (c["a"], c["recall"])) if ok else (lambda c: (c["recall"], c["a"])))
+        rep, var = best["representation"], best["variant"]
+        cov = {m: para[(rep, var, m)]["covered"] for m in models}
+        out["covered"] = {
+            "representation": rep, "variant": var, "metric": "cos", "recall_target": recall_target,
+            "recall_target_met": bool(ok), "query": query,
+            "thresholds": {m: {"t_hi": cov[m].get("t_hi"), "t_lo": cov[m].get("t_lo")} for m in models},
+            "evaluation": {
+                "auc_dup_vs_distinct": {m: by[(rep, var)][m]["cos"].get("auc_dup_vs_distinct") for m in models},
+                "auc_ant_vs_syn": {m: by[(rep, var)][m]["cos"].get("auc_ant_vs_syn") for m in models},
+                "paraphrase_recall_top1": {m: para[(rep, var, m)]["recall"]["cos"]["recall_at_1"] for m in models},
+                "recall_at_t_hi": {m: cov[m].get("recall_at_t_hi") for m in models},
+                "heldout_recall_at_t_hi": {m: cov[m].get("heldout_recall_mean") for m in models},
+                "antonym_rate_above_t_hi": {m: (cov[m].get("rate_above_t_hi") or {}).get("antonym") for m in models},
+                "rate_above_t_hi": {m: cov[m].get("rate_above_t_hi") for m in models},
+                "hidden_original_still_covered": {m: cov[m].get("hidden_original_still_covered") for m in models},
+                "n_corpus_nn_at_or_above_t_hi": {m: cov[m].get("n_corpus_nn_at_or_above_t_hi") for m in models}},
+            "ranking": sorted(({k: (_r(v) if isinstance(v, float) else v) for k, v in c.items()} for c in cands),
+                              key=lambda c: (-(c["recall"] >= recall_target), -c["a"]))[:12]}
+    dcands = []
+    for (rep, var), per_model in by.items():
+        if not all(m in per_model for m in models):
+            continue
+        for K in ("10", "20", "40", "K95"):
+            met = f"resid_{K}"
+            if all(met in per_model[m] for m in models):
+                dcands.append({"representation": rep, "variant": var, "K": K,
+                               "c": mean(per_model[m][met].get("spearman_persona_yield") for m in models)})
+    if dcands:
+        best = max(dcands, key=lambda d: d["c"])
+        rep, var, K = best["representation"], best["variant"], best["K"]
+        per_model = by[(rep, var)]
+        k95 = {m: per_model[m]["resid_K95"].get("K") for m in models}
+        sens = {k: _r(mean(per_model[m][f"resid_{k}"].get("spearman_persona_yield") for m in models))
+                for k in ("10", "20", "40", "K95")}
+        hk = {}
+        for k in ("10", "20", "40", "K95"):
+            vals = []
+            for m in models:
+                h = held.get((rep, var, m)) or {}
+                key = str(h.get("K95")) if k == "K95" else k
+                vals.append(((h.get("by_K") or {}).get(key) or {}).get("spearman_para_vs_original"))
+            hk[k] = _r(mean(vals))
+        out["directional"] = {
+            "representation": rep, "variant": var,
+            "K": int(np.median(list(k95.values()))) if K == "K95" else int(K),
+            "K_rule": "95pct_variance" if K == "K95" else "fixed", "K95_by_model": k95,
+            "K_sensitivity": sens, "heldout": hk, "c_by_model": {m: per_model[m][f"resid_{K}"].get(
+                "spearman_persona_yield") for m in models},
+            "caveat": "chosen on task (c), the correlation with the persona-space residual of existing traits: "
+                      "a proxy, not ground truth for missing traits",
+            "ranking": [{k: (_r(v) if isinstance(v, float) else v) for k, v in d.items()}
+                        for d in sorted(dcands, key=lambda d: -d["c"])[:12]]}
+    return out
+
+
+def proposed_metric_config(settings: Mapping, *, models: Mapping, contrast: Mapping, config_version: str) -> dict:
+    """A ``metric_config.json`` payload with the two blocks (not written by the
+    pilot; task 19 writes it after Roger's decisions)."""
+    cov, dirn = settings["covered"], settings["directional"]
+    return {"config_version": config_version, "models": dict(models),
+            "covered": {"space": {"variant": cov["variant"], "mean": "corpus_fixed"},
+                        "representation": cov["representation"], "metric": cov["metric"],
+                        "contrast": dict(contrast), "thresholds": cov["thresholds"], "query_form": cov["query"],
+                        "evaluation": cov["evaluation"]},
+            "directional": {"space": {"variant": dirn["variant"], "mean": "corpus_fixed"},
+                            "representation": dirn["representation"], "K": dirn["K"], "K_rule": dirn["K_rule"],
+                            "K_sensitivity": dirn["K_sensitivity"],
+                            "evaluation": {"spearman_persona_yield": dirn["c_by_model"], "heldout_stability": dirn["heldout"]},
+                            "caveat": dirn["caveat"]}}

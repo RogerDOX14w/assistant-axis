@@ -51,7 +51,8 @@ HISTORY: dict[str, dict[int, str]] = {
     },
     # M2 calibration's paid criteria (calibrate_llm.py); built, not run before Roger's pilot decision
     "calibration_paraphrase": {
-        1: "02542c4d2533da8dd7bbc41b35b134914994e359fe14f55cdd8d220f91ffa1ef",
+        1: "02542c4d2533da8dd7bbc41b35b134914994e359fe14f55cdd8d220f91ffa1ef",  # never run
+        2: "4bae6e964cd48a4bf12d9c9a81632b7f243881e9afa084d140c25c8e17ae39ff",  # reason before the rewrite
     },
     "calibration_blinded": {
         1: "5f4f8f39073f09130bec58c1113c0c25805b91ff581964619992e1d88304954a",

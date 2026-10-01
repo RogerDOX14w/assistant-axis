@@ -496,3 +496,38 @@ def test_calibrate_dup_and_partial_whitening(tmp_path):
     gl = {(g["representation"], g["variant"]): g for g in loo["gloss_recovery"]}
     assert gl[("dup", "centred")]["n"] == gl[("full", "centred")]["n"]
     assert any(r.get("metric") == "resid_20" and r["variant"] == "pw2" for r in loo["rows"])
+
+
+def test_calibrate_paraphrase_stage_with_fake_haiku(tmp_path, monkeypatch):
+    """--llm-criteria g: paraphrases from a fake client, cached, embedded, and turned into
+    paraphrase recall, the covered threshold, criterion (i) and the two settings; (e) not run."""
+    from data_analysis.gap_generation import calibrate_metric
+
+    def responder(kw):
+        rows = [json.loads(x) for x in user_text(kw).splitlines()]
+        res = [{"id": r["id"], "reason": "keep it", "paraphrase": "This means, put otherwise, "
+                + r["description"][len("This means "):]} for r in rows]
+        return make_response(json.dumps({"results": res}), input_tokens=1500, output_tokens=1500)
+    fake = FakeAsyncAnthropic(responder)
+    monkeypatch.setattr(calibrate_metric, "_anthropic_client", lambda: fake)
+    args = ["--models", "hash", "--representations", "full", "w14", "--variants", "centred",
+            "--out", str(tmp_path / "cal"), "--cache-dir", str(tmp_path / "cache"), "--marks-sheet",
+            str(tmp_path / "marks.md"), "--vectors-dir", str(tmp_path / "none"), "--llm-criteria", "g",
+            "--allow-dirty", "--budget-usd", "1.0"]
+    assert calibrate_metric.main(args) == 0
+    cal = tmp_path / "cal"
+    para = json.loads((cal / "paraphrases.json").read_text())
+    assert para["prompt_version"] == 2 and para["n"] == 659
+    usage = json.loads((cal / "usage.json").read_text())
+    assert "claude-haiku-4-5-20251001" in usage["per_model"]
+    assert all("sonnet" not in m for m in usage["per_model"])           # (e) not run
+    pm = json.loads((cal / "paraphrase_metrics.json").read_text())["result"]
+    assert {r["query"] for r in pm["recall_and_covered"]} == {"label", "no_label"}
+    assert pm["heldout_directional"] and pm["heldout_directional"][0]["n"] == 659
+    summ = json.loads((cal / "summary.json").read_text())["result"]
+    assert set(summ["settings"]) == {"covered", "directional"}
+    assert summ["proposed_metric_config"]["covered"]["thresholds"]["hash"]["t_hi"] is not None
+    assert not (tmp_path / "cal" / "metric_config.json").exists()
+    abl = json.loads((cal / "contrast_ablation.json").read_text())["result"]
+    # contrast ablation needs strip; with full only, (e) is reported as waiting for Roger
+    assert abl == {}          # no strip representation in this run: no ablation, no draw
