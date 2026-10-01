@@ -1,0 +1,203 @@
+# Glossary for the trait-gap documents
+
+Plain-language entries for the terms of art the readouts, plans and reviews in this directory use.
+A document links a term on its first use (`[centred](./glossary.md#centred)`) rather than defining
+it inline, unless the term is the subject of the passage.  Add an entry when a document introduces
+a term; keep entries short and in ordinary words; say what the thing is for, not only what it is.
+Started 2026-10-01 (Roger: "a repeated problem we've had in these docs ... is jargon I'm
+unfamiliar with").
+
+## Embedding spaces and metrics
+
+<a id="embedding"></a>
+### Embedding
+A list of numbers (a vector, here 1,024 to 3,072 long) that a model produces for a piece of text,
+built so that texts with similar meaning get vectors pointing in similar directions.  The platform
+embeds `label: description` for each trait and compares the vectors to find near-duplicates and
+gaps.
+
+<a id="cosine"></a>
+### Cosine similarity
+The angle between two vectors, reported as a number from -1 to 1: 1 means the same direction,
+0 unrelated, negative opposite.  Vectors are first scaled to length 1 ("unit-normalised") so that
+only direction counts.  "1 - cosine" is used as a distance.
+
+<a id="raw"></a>
+### Raw space
+The embedding vectors as the model returns them, unit-normalised and nothing else.
+
+<a id="centred"></a>
+### Centred space
+Every vector has the average vector of the corpus (the "corpus mean") subtracted before
+normalising.  Embedding models put all text into a narrow cone, so every pair of descriptions
+looks fairly similar; subtracting the mean removes that shared part and leaves the differences
+between traits.  The mean is fixed as the corpus mean (Roger, 2026-09-23), so new candidates are
+shifted by the same amount as the corpus.
+
+<a id="pcs"></a>
+### Principal components (PCs)
+The directions in which the centred vectors vary most, ordered from largest to smallest.  The
+first few often carry something generic (register, length, the shared "This means" opening).
+Variants named `centred_pc1` and `centred_pc3` remove the top one or three directions
+altogether.
+
+<a id="zca"></a>
+### ZCA whitening
+A transform of the centred space that stretches it until the variance is equal in every
+direction: directions the corpus varies in a lot are shrunk, rare directions are expanded.  Cosine
+then measures how unusual a difference is relative to the corpus's own spread rather than how
+large it is.  An exact version makes every corpus point equidistant from every other, so the
+platform uses a regularised one.  The persona pipeline uses the same operation for its axes.
+
+<a id="partial-whitening"></a>
+### Partial whitening (`pwN`)
+Roger's variant (2026-10-01): shrink only the top N principal components, each down to the
+amplitude of the (N+1)th, and leave the rest alone.  N = 1, 2, 4, 8, 16, 32, 64 are tried.  A
+middle way between centring (N = 0) and full whitening.
+
+<a id="hubness"></a>
+### Hubness and hubs
+In a high-dimensional space some points sit near the middle of the cloud and turn up as the
+nearest neighbour of far too many others; those are hubs.  A hub makes "nearest neighbour" less
+informative.  The census counts how often each trait appears in the ten nearest of others.
+
+<a id="csls"></a>
+### CSLS
+Cross-domain similarity local scaling: a correction for hubs that penalises a candidate neighbour
+by how close it is to everything in general, so that hubs stop winning.  Needed only when hubs
+exist; centring removes the few in this corpus.
+
+<a id="nearest-neighbour"></a>
+### Nearest neighbour (NN)
+For a trait, the other trait whose vector is closest (highest cosine).  "5-NN mean" is the mean
+cosine to the five closest.
+
+<a id="loo"></a>
+### Leave-one-out (LOO)
+Each trait is scored against the corpus with itself removed, as a new candidate would be, so the
+scores say how the corpus treats something it has not seen.
+
+<a id="residual"></a>
+### Residual fraction and the directional score
+Fit the top K principal directions of the other traits; the residual fraction of a trait is the
+share of its vector that lies outside that subspace (0: fully explained by existing directions;
+1: entirely new).  This is Roger's "under-represented direction" measure of novelty, as against
+the local measure (distance to the nearest neighbour).
+
+<a id="k95"></a>
+### K and K_95
+K is how many principal directions the residual fraction uses.  K_95 is the number needed to hold
+95% of the corpus's variance (the plan's rule for setting K per space); in text-embedding space it
+comes out in the hundreds.  K is judged only through task (c) below, a proxy.
+
+## Tasks and statistics
+
+<a id="auc"></a>
+### AUC
+Area under the ROC curve: the probability that a randomly chosen member of one group scores
+higher than a randomly chosen member of the other.  1.0 is perfect separation, 0.5 is chance,
+below 0.5 means the groups are ordered the wrong way.  Task (a) asks whether labelled duplicates
+score closer than near-distinct pairs; task (b) whether duplicates score closer than antonyms.
+
+<a id="spearman"></a>
+### Spearman correlation
+Rank correlation: how well the ordering of one quantity matches the ordering of another, from -1
+to 1, ignoring the scale of either.  Task (c) uses it between a text-space novelty score and the
+persona-space residual.
+
+<a id="tasks-abc"></a>
+### Tasks (a), (b), (c)
+The three checks of plan 15 step 4: (a) separate labelled duplicate pairs from labelled distinct
+neighbours; (b) separate duplicates from antonyms, to see how much a metric conflates them; (c)
+rank-correlate the text-space novelty score with the persona-space yield.
+
+<a id="labelled-pairs"></a>
+### Labelled pairs
+Pairs of traits with a recorded relation, used as ground truth: antonym (recorded clean pairs),
+duplicate (seed-queue rulings that a proposed label was already covered), near-distinct (members
+of recorded triangles, sequences and the plan-11 list), deliberate duplicate (a standard's pole
+beside a plain trait), polysemy reject, and random unrelated pairs.
+
+<a id="thresholds"></a>
+### t_hi, t_lo, upper fence
+`t_hi`: the similarity above which 95% of labelled duplicates fall (the "covered" line, if the
+labels can set one).  `t_lo`: the 99th percentile of random pairs (below it, "new").  The upper
+fence: Q3 + 1.5 × IQR of the nearest-neighbour distribution (the usual outlier rule), used for the
+drop-or-merge tail when the labels cannot set `t_hi`.
+
+<a id="iqr"></a>
+### Quartiles and IQR
+Q1 and Q3 are the values below which a quarter and three quarters of the data fall; the IQR is
+their difference, the spread of the middle half.
+
+<a id="gloss-recall"></a>
+### Gloss recall@1
+For each trait, embed its short M1 gloss and ask whether its own description is the nearest
+corpus text.  The share for which it is.  A free stand-in for paraphrase recall until paraphrases
+exist.
+
+<a id="minimal-pairs"></a>
+### Minimal pairs (criterion f)
+"X rather than Y" and "Y rather than X" for a clean pair, embedded separately.  A model that
+handles the construction gives two distinct vectors, each nearer its own pole; a bag-of-words
+model gives near-identical ones.
+
+<a id="contrast-classes"></a>
+### Contrast-clause classes N, P, S
+The 2026-09-23 census of descriptions with a "rather than / instead of / but not / without being"
+clause: N, necessary for sense (the clause picks the intended meaning of a polysemous label); P,
+names the other pole; S, stylistic or scope.  The `strip` representation removes the clause at
+embedding time only; descriptions are never edited.
+
+<a id="representations"></a>
+### Representations
+The forms of the text that are embedded: `full` (label: whole description), `noprefix` (without
+"This means"), `w20` and `w14` (cut to about 20 or 14 words), `strip` (contrast clause removed),
+`dup` (a gloss followed by a copy of itself, to test whether length or content drives similarity).
+
+## Models and machinery
+
+<a id="local-model"></a>
+### Local embedding model
+A model run on this Mac rather than through an API: `bge-large-en-v1.5` (BERT-based) and
+`EmbeddingGemma-300m` here.  Free per call, recorded in `usage.json` all the same.
+
+<a id="cls-pooling"></a>
+### CLS pooling, mean pooling
+How one vector is made from a transformer's per-token outputs: take the first (CLS) token's
+output, or average over all tokens.  bge uses CLS; EmbeddingGemma averages and then applies two
+small learned layers, which is why it needs the `sentence-transformers` package.
+
+<a id="mps"></a>
+### MPS
+Apple's GPU backend for PyTorch on this Mac; where the local models run.
+
+<a id="persona-space"></a>
+### Persona space, persona vectors
+The activation-space directions extracted from Qwen-3-32B for each trait (the 8-slot set, slot 6,
+layer 25).  "Persona-space yield" is a trait's residual fraction there: how much of its vector the
+other traits' directions do not explain.  About 300 of the 661 traits have one.
+
+<a id="soft-shear"></a>
+### Soft shear (L = 3)
+The persona pipeline's adjustment that partly removes the goal / non-goal subspaces before
+comparing vectors; see the axis-geometry rule.  Used when loading persona vectors for task (c).
+
+## M1 terms that recur
+
+<a id="zipf"></a>
+### Zipf frequency
+Word frequency on a log scale from the `wordfreq` package: 1 is very rare, 7 very common.  The
+filter rejects below 2.0 without a model call.
+
+<a id="polysemy-notes"></a>
+### Polysemy notes
+The split filter's flags on a word that passes: `two_trait_senses`, `nontrait_person_sense`,
+`obvious_sense_not_trait`, `first_thought_in_the_way`, `leaves_something_out`,
+`fits_many_in_different_ways`, `most_likely_reading_stretched`.  "Polysemy" in the summaries means
+any of them.
+
+<a id="second-opinion"></a>
+### Second opinion
+The same first steps of the split filter repeated on a stronger model (Sonnet 5.5) for a seeded
+10% of words plus flagged ones; a disagreement is recorded, not resolved.
