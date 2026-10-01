@@ -689,11 +689,14 @@ def counts_summary(values: Iterable[str]) -> dict:
 def plot_nn_histograms(path, *, model: str, representation: str, panels: Sequence[dict], inputs=None,
                        title_extra: str = "") -> None:
     """Step 7's figure for one model: one panel per space variant, the
-    histogram of leave-one-out nearest-neighbour cosine similarity (the bulk),
-    with the labelled anchors as rugs (duplicates above, near-distinct and
-    antonyms below), and the thresholds ``t_hi`` (covered) and ``t_lo``
-    (unrelated) as vertical lines.  ``panels``: ``[{"variant", "nn",
-    "dup", "distinct", "antonym", "t_hi", "t_lo", "n_low_tail"}]``."""
+    histogram of leave-one-out nearest-neighbour cosine similarity (the bulk;
+    filled) and, when given, the same with recorded arrangement partners
+    excluded (outline), the labelled anchors as rugs under the axis
+    (duplicates, near-distinct, antonyms), and as vertical lines the
+    duplicate-recall threshold ``t_hi``, the random-pair threshold ``t_lo``
+    and the upper fence of the partner-excluded bulk.  ``panels``:
+    ``[{"variant", "nn", "nn_masked"?, "fence"?, "dup", "distinct", "antonym",
+    "t_hi", "t_lo"}]``."""
     import matplotlib
     matplotlib.use("Agg")
     import matplotlib.pyplot as plt
@@ -701,32 +704,43 @@ def plot_nn_histograms(path, *, model: str, representation: str, panels: Sequenc
     from assistant_axis.plot_metadata import png_metadata, suptitle_with_specs
 
     n = len(panels)
-    fig, axes = plt.subplots(1, n, figsize=(3.6 * n, 4.6), sharey=False, constrained_layout=True)
+    fig, axes = plt.subplots(1, n, figsize=(3.7 * n, 5.6), sharey=False)
     axes = np.atleast_1d(axes)
+    rugs = (("dup", "#c0392b", "labelled duplicates"), ("distinct", "#2e86c1", "near-distinct"),
+            ("antonym", "#7d3c98", "recorded antonyms"))
     for ax, p in zip(axes, panels):
         nn = np.asarray(p["nn"])
-        lo = min(nn.min(), *(np.min(p[k]) for k in ("dup", "distinct", "antonym") if len(p[k]))) - 0.02
-        hi = max(nn.max(), *(np.max(p[k]) for k in ("dup", "distinct", "antonym") if len(p[k]))) + 0.02
+        vals = [nn] + [np.asarray(p[k]) for k, _, _ in rugs if len(p[k])]
+        if p.get("nn_masked") is not None:
+            vals.append(np.asarray(p["nn_masked"]))
+        lo, hi = min(v.min() for v in vals) - 0.02, max(v.max() for v in vals) + 0.02
         bins = np.linspace(lo, hi, 40)
-        ax.hist(nn, bins=bins, color="#9aa7b8", edgecolor="white", label=f"NN similarity (n={len(nn)})")
+        ax.hist(nn, bins=bins, color="#9aa7b8", edgecolor="white", label="nearest neighbour")
+        if p.get("nn_masked") is not None:
+            ax.hist(p["nn_masked"], bins=bins, histtype="step", color="#1f3a5f", lw=1.3,
+                    label="nearest, partners excluded")
         ymax = ax.get_ylim()[1]
-        for key, color, y, lab in (("dup", "#c0392b", 1.04, "duplicates"), ("distinct", "#2e86c1", -0.06, "near-distinct"),
-                                   ("antonym", "#7d3c98", -0.12, "antonyms")):
-            vals = np.asarray(p[key])
-            if len(vals):
-                ax.plot(vals, np.full(len(vals), y * ymax), "|", color=color, ms=9, mew=1.2, clip_on=False,
-                        label=f"{lab} (n={len(vals)})")
+        for k, (key, color, lab) in enumerate(rugs):
+            v = np.asarray(p[key])
+            if len(v):
+                ax.plot(v, np.full(len(v), -(0.06 + 0.07 * k) * ymax), "|", color=color, ms=8, mew=1.0,
+                        clip_on=False, label=lab)
         if p.get("t_hi") is not None:
-            ax.axvline(p["t_hi"], color="#c0392b", ls="--", lw=1.2, label=f"t_hi {p['t_hi']:.3f} (tail {p['n_low_tail']})")
+            ax.axvline(p["t_hi"], color="#c0392b", ls="--", lw=1.2, label="t_hi (95% duplicate recall)")
         if p.get("t_lo") is not None:
-            ax.axvline(p["t_lo"], color="#555555", ls=":", lw=1.2, label=f"t_lo {p['t_lo']:.3f}")
-        ax.set_ylim(-0.16 * ymax, 1.1 * ymax)
+            ax.axvline(p["t_lo"], color="#555555", ls=":", lw=1.4, label="t_lo (99% of random pairs)")
+        if p.get("fence") is not None:
+            ax.axvline(p["fence"], color="#1f3a5f", ls="-.", lw=1.2, label="upper fence, partners excluded")
+        ax.set_ylim(-0.27 * ymax, 1.05 * ymax)
+        ax.set_yticks([t for t in ax.get_yticks() if 0 <= t <= ymax])
+        ax.axhline(0, color="black", lw=0.5)
         ax.set_title(p["variant"], fontsize=11)
-        ax.set_xlabel("cosine similarity to nearest other trait")
-        ax.legend(fontsize=6.5, loc="upper left")
+        ax.set_xlabel("cosine similarity")
     axes[0].set_ylabel("traits")
+    handles, labels = axes[0].get_legend_handles_labels()
+    fig.legend(handles, labels, loc="lower center", ncol=4, fontsize=8, frameon=False, bbox_to_anchor=(0.5, -0.01))
     title = f"Leave-one-out nearest-neighbour similarity: {model}, {representation}"
-    _, top = suptitle_with_specs(fig, title, f"rugs: labelled pairs; dashed: covered threshold (95% duplicate recall); "
-                                             f"dotted: 99th percentile of random pairs{title_extra}")
+    _, top = suptitle_with_specs(fig, title, "rugs under the axis: labelled pairs' own similarities" + title_extra)
+    fig.subplots_adjust(top=top - 0.08, bottom=0.2, wspace=0.25)
     fig.savefig(path, dpi=130, bbox_inches="tight", metadata=png_metadata(title=title, inputs=inputs))
     plt.close(fig)

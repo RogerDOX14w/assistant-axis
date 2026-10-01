@@ -382,11 +382,15 @@ def main(argv=None) -> int:
         for variant in args.variants:
             v, sims, _ = keep_views[f"{arm}|full|{variant}"]
             t = thr[f"{arm}|full|{variant}"]["cos"]
-            panels.append({"variant": variant, "nn": v.nn_cos,
+            arranged_h = {(ci["index"][a], ci["index"][b]) for a, lst in ci["arrangement_of"].items() for _, mem in lst
+                          for b in mem if b != a and a in ci["index"] and b in ci["index"]}
+            mnn_h = C.masked_nn(v, arranged_h)[1]
+            q1h, q3h = np.quantile(mnn_h, [0.25, 0.75])
+            panels.append({"variant": variant, "nn": v.nn_cos, "nn_masked": mnn_h, "fence": float(q3h + 1.5 * (q3h - q1h)),
                            "dup": np.concatenate([sims[r][0] for r in C.SYNONYM_RELATIONS if r in sims]),
                            "distinct": sims.get("near_distinct", (np.zeros(0),))[0],
                            "antonym": sims.get("antonym", (np.zeros(0),))[0],
-                           "t_hi": t["t_hi"], "t_lo": t["t_lo"], "n_low_tail": t["n_low_tail"]})
+                           "t_hi": t["t_hi"], "t_lo": t["t_lo"]})
         p = out / f"nn_hist_{arm}.png"
         C.plot_nn_histograms(p, model={"openai": "text-embedding-3-large", "bge": "bge-large-en-v1.5",
                                        "gemma": "embeddinggemma-300m"}.get(arm, arm),
