@@ -13,7 +13,7 @@ result shapes follow the Anthropic SDK (``client.messages.batches.create(request
 ``.custom_id`` and ``.result.type`` of succeeded / errored / canceled / expired, the message under
 ``.result.message``).  Results arrive in any order and are matched by ``custom_id``.
 
-Money.  Every succeeded result is charged under ``<model>@batch``, which
+Money.  Every succeeded result is charged under ``<model>:batch`` (``judge_pricing.BATCH_SUFFIX``), which
 :func:`assistant_axis.judge_pricing.price_for_model` prices at half the model's rates.  Before any
 batch of a wave is submitted, the whole wave's estimate is checked against the cap (the spend so
 far, plus the recorded batches still to be charged, plus every request about to go): when it would
@@ -39,6 +39,31 @@ from typing import Any, Callable, Optional, Sequence
 
 from assistant_axis.atomic_io import atomic_write_text
 from assistant_axis.judge_pricing import BATCH_SUFFIX, BudgetExceededError, UsageTotals
+
+#: The suffix the split filter wrote before 2026-10-01 (``<model>@batch``); the repository's
+#: convention is ``judge_pricing.BATCH_SUFFIX`` (``<model>:batch``, priced by provider factor).
+#: Records of the first full validation run carry the old form; readers map it with
+#: :func:`current_batch_key`.
+LEGACY_BATCH_SUFFIX = "@batch"
+
+
+def current_batch_key(model: str) -> str:
+    """``model`` with a legacy ``@batch`` suffix rewritten to ``BATCH_SUFFIX``; other keys unchanged."""
+    if model and model.endswith(LEGACY_BATCH_SUFFIX) and LEGACY_BATCH_SUFFIX != BATCH_SUFFIX:
+        return model[: -len(LEGACY_BATCH_SUFFIX)] + BATCH_SUFFIX
+    return model
+
+
+def with_current_batch_keys(tracker):
+    """A ``MultiModelUsage`` whose legacy ``@batch`` entries are re-keyed to ``BATCH_SUFFIX`` (the
+    stored tokens and cost are kept as they are)."""
+    for key in list(tracker.per_model):
+        new = current_batch_key(key)
+        if new != key:
+            tot = tracker.per_model.pop(key)
+            tot.model = new
+            tracker.per_model[new] = tot
+    return tracker
 
 from .llm import RETRY_DELAYS_S, _is_transient, billed_usage, request_params, response_text
 from .registry import utc_now

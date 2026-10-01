@@ -227,7 +227,9 @@ reproduced (`--batch-size` applies to it only and is refused with split).
   directory is a platform path, so an uncommitted edit also stops a paid run.
 - **Transport.**  `--transport auto` (default) sends fewer than 300 words live
   and more through the Message Batches API, at half price (charged under
-  `<model>@batch` in `usage.json`).  Batch ids and wave state are kept in
+  `<model>:batch` in `usage.json`; until 2026-10-01 the filter wrote `@batch`,
+  and the first full validation run's records are read as `:batch`).  Batch
+  ids and wave state are kept in
   `filter/<batch>/batches.json`.  The waves depend on each other, so a batch
   run takes several hours of wall time (the 99-word pilot: 7 batches, 2 h 11 min,
   each batch 7 to 34 minutes whatever its size).  A wave larger than 50,000

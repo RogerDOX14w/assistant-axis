@@ -592,13 +592,16 @@ def cost_by_step(records: Sequence[Mapping]) -> dict[str, dict]:
     """Spend by step, from the response records (``responses.jsonl``): ``{"<stage>@<charged model>":
     {"n_calls", "prompt_tokens", "completion_tokens", "cost_usd"}}``.  A record carries the billed
     usage it was charged (``usage_raw``) and the model key it was charged under (``charged_as``, with
-    ``@batch`` for the Message Batches API); records replayed on a resume are counted once."""
+    ``:batch`` for the Message Batches API; records before 2026-10-01 say ``@batch`` and are read as
+    ``:batch``); records replayed on a resume are counted once."""
     from assistant_axis.judge_pricing import cost_for_usage
+    from assistant_axis.gapgen.batches import current_batch_key
     out: dict[str, dict] = {}
     for rec in records:
         raw, model = rec.get("usage_raw") or {}, rec.get("charged_as")
         if not raw or not model:
             continue
+        model = current_batch_key(model)
         p = int(raw.get("input_tokens") or 0) + int(round(1.25 * (raw.get("cache_creation_input_tokens") or 0)
                                                            + 0.1 * (raw.get("cache_read_input_tokens") or 0)))
         o = int(raw.get("output_tokens") or 0)

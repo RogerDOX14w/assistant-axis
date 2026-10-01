@@ -7,7 +7,7 @@ import pytest
 
 from assistant_axis.gapgen import split
 from assistant_axis.gapgen.llm import accepts_temperature, request_params
-from assistant_axis.judge_pricing import MultiModelUsage, price_for_model
+from assistant_axis.judge_pricing import BATCH_SUFFIX, MultiModelUsage, price_for_model
 from assistant_axis.tests.split_replay import HAIKU, SONNET55, load_jsonl
 
 
@@ -235,13 +235,13 @@ class TestPricingAndRequests:
         assert price_for_model("claude-sonnet-4-5") == (3.0, 15.0)
 
     def test_batch_suffix_is_half_rate(self):
-        assert price_for_model(HAIKU + "@batch") == (0.5, 2.5)
-        assert price_for_model(SONNET55 + "@batch") == (1.0, 5.0)
+        assert price_for_model(HAIKU + BATCH_SUFFIX) == (0.5, 2.5)
+        assert price_for_model(SONNET55 + BATCH_SUFFIX) == (1.0, 5.0)
         u = MultiModelUsage()
-        u.charge(HAIKU + "@batch", 1_000_000, 1_000_000)
+        u.charge(HAIKU + BATCH_SUFFIX, 1_000_000, 1_000_000)
         assert u.total_cost_usd == pytest.approx(3.0)
         with pytest.raises(KeyError):
-            price_for_model("mystery@batch")
+            price_for_model("mystery" + BATCH_SUFFIX)
 
     def test_requests_leave_out_temperature_for_models_that_refuse_it(self):
         assert accepts_temperature(HAIKU) and not accepts_temperature(SONNET55)

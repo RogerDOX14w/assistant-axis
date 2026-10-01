@@ -149,11 +149,6 @@ def surgical_rejudge_cost_split(
 # are case-insensitive and use substring matching (so e.g.
 # "gpt-4.1-mini-2024" still resolves to GPT_MINI rates).
 _MODEL_RATES: tuple[tuple[str, float, float], ...] = (
-    ("gpt-4.1-mini", GPT_MINI_RATE_IN, GPT_MINI_RATE_OUT),
-    ("gpt-4o-mini", GPT_MINI_RATE_IN, GPT_MINI_RATE_OUT),
-    ("haiku", HAIKU_RATE_IN, HAIKU_RATE_OUT),
-    ("sonnet-5", 2.00, 10.00),  # claude-sonnet-5 / claude-sonnet-5-5 (before the generic "sonnet")
-    ("sonnet", SONNET_RATE_IN, SONNET_RATE_OUT),
     # Embedding models (trait-gap platform, M2/M3): input-only pricing, so
     # embedding calls are counted in usage.json like judge calls.  Local
     # models are free but are still recorded (n_calls, tokens).
@@ -161,14 +156,42 @@ _MODEL_RATES: tuple[tuple[str, float, float], ...] = (
     ("text-embedding-3-small", 0.02, 0.0),
     ("qwen3-embedding", 0.0, 0.0),
     ("bge-large", 0.0, 0.0),
-    # Future Opus pricing — placeholder, fail loud if hit:
-    # ("opus", 15.00, 75.00),
+    ("gpt-4.1-mini", GPT_MINI_RATE_IN, GPT_MINI_RATE_OUT),
+    ("gpt-4o-mini", GPT_MINI_RATE_IN, GPT_MINI_RATE_OUT),
+    ("haiku", HAIKU_RATE_IN, HAIKU_RATE_OUT),
+    # Claude 5 and 5.5 (platform.claude.com/docs/en/about-claude/pricing,
+    # read 2026-09-30).  These lines must come before the bare "sonnet" and
+    # "opus" fragments, which would otherwise match first.  Models from 4.7 on
+    # use a tokenizer that makes about 30% more tokens of the same text.
+    ("sonnet-5", 2.00, 10.00),   # Sonnet 5 and Sonnet 5.5
+    ("opus-5-5", 4.00, 20.00),
+    ("opus-5", 5.00, 25.00),     # Opus 5 (and 4.5 to 4.8 at the same price, below)
+    ("sonnet", SONNET_RATE_IN, SONNET_RATE_OUT),
+    ("opus-4-5", 5.00, 25.00),
+    ("opus-4-6", 5.00, 25.00),
+    ("opus-4-7", 5.00, 25.00),
+    ("opus-4-8", 5.00, 25.00),
+    # Not a judge: the subject model, when it is reached through OpenRouter
+    # instead of the pod (`qwen/qwen3-32b` served by DeepInfra; its price on
+    # 2026-09-29).  Used by data_analysis/opening_form_experiment.py.
+    ("qwen3-32b", 0.08, 0.28),
+    # Retired Opus 4 and 4.1 ($15 / $75) are left out on purpose: a lookup
+    # fails loud rather than pricing them as a current Opus.
 )
 
 
-#: Usage charged through the Message Batches API is recorded under ``<model>@batch``
-#: and priced at half the model's rates.
-BATCH_SUFFIX = "@batch"
+# Batch requests are billed at a fraction of the real-time price.  A call
+# site that runs in batch mode keeps its usage under "<model>:batch", which is
+# priced with the factor below, so that a usage record says how the tokens
+# were bought and a merged record recomputes to the right total.
+BATCH_SUFFIX = ":batch"
+_BATCH_PRICE_FACTORS: tuple[tuple[str, float], ...] = (
+    ("qwen3-32b", 0.8),   # DeepInfra's own batch API, 2026-09-29
+    ("gpt-", 0.5),        # OpenAI Batch API
+    ("haiku", 0.5),       # Anthropic Message Batches
+    ("sonnet", 0.5),
+    ("opus", 0.5),
+)
 
 
 def price_for_model(model: str) -> tuple[float, float]:
@@ -184,9 +207,15 @@ def price_for_model(model: str) -> tuple[float, float]:
     cost will silently appear free in budget reports.
     """
     m = model.lower()
-    if m.endswith(BATCH_SUFFIX):  # Message Batches API: half the model's rates
-        rate_in, rate_out = price_for_model(model[:-len(BATCH_SUFFIX)])
-        return rate_in / 2, rate_out / 2
+    if m.endswith(BATCH_SUFFIX):
+        rate_in, rate_out = price_for_model(m[: -len(BATCH_SUFFIX)])
+        for fragment, factor in _BATCH_PRICE_FACTORS:
+            if fragment in m:
+                return rate_in * factor, rate_out * factor
+        raise KeyError(
+            f"No batch price factor for {model!r}.  Add one to "
+            f"assistant_axis/judge_pricing.py:_BATCH_PRICE_FACTORS."
+        )
     for fragment, rate_in, rate_out in _MODEL_RATES:
         if fragment in m:
             return rate_in, rate_out

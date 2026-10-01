@@ -87,7 +87,7 @@ into [fixtures/gapgen_split/](../../assistant_axis/tests/fixtures/gapgen_split/)
 | [split_runner.py](../../assistant_axis/gapgen/split_runner.py) | `SplitRunner`: the four waves, live |
 | [batches.py](../../assistant_axis/gapgen/batches.py) | Stage B: the same waves through the Message Batches API |
 | [llm.py](../../assistant_axis/gapgen/llm.py) | `temperature` becomes optional and is left out of the request for a model that refuses it; `accepts_temperature(model)` decides |
-| [judge_pricing.py](../../assistant_axis/judge_pricing.py) | One new rate, `("sonnet-5", 2.00, 10.00)`, placed before `"sonnet"`, and the `@batch` suffix rule of section 7.  Keep the change to those lines: the main checkout has its own uncommitted edits to this file |
+| [judge_pricing.py](../../assistant_axis/judge_pricing.py) | One new rate, `("sonnet-5", 2.00, 10.00)`, placed before `"sonnet"`, and the `:batch` suffix rule of section 7.  Keep the change to those lines: the main checkout has its own uncommitted edits to this file | (Until 2026-10-01 the split filter wrote `@batch`; the repository's convention is `:batch`, `judge_pricing.BATCH_SUFFIX`, priced by a per-provider factor, and the first full validation run's records are read as `:batch`.)
 | [rubric_pins.py](../../data_analysis/gap_generation/rubric_pins.py) | `check`, and `bump NAME --why TEXT`, which appends to `versions.json` |
 | [traithood_filter.py](../../data_analysis/gap_generation/traithood_filter.py) | New flags, section 7 |
 | [split_test_words.jsonl](../../data/candidates/validation/split_test_words.jsonl) | The 99 words with their groups, built from `expected_outcomes.jsonl` |
@@ -225,7 +225,7 @@ for the same step, prompt hash, model and input.
 `custom_id` made of step, key and reading index.  Load the `claude-api` skill for the request and
 result shapes; do not write them from memory.  Batch ids and wave state go to
 `filter/<batch>/batches.json` so a killed process picks up where it stopped.  The estimate is
-checked before each wave is submitted.  Usage is charged under the key `<model>@batch` at half the
+checked before each wave is submitted.  Usage is charged under the key `<model>:batch` at half the
 model's rates, which needs a suffix rule and a test in
 [judge_pricing.py](../../assistant_axis/judge_pricing.py).
 

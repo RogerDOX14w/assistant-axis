@@ -172,7 +172,7 @@ A's with `--transport batches --batch-id split_pilot_batches --budget-usd 2`.
 | cost for each word | $0.0046 |
 | outcomes | trait 69, states 9, physical 2, roles 1, turned away 18; `two_trait_senses` on 6 |
 
-Every call was charged under `<model>@batch` at half the model's rates; the per-step token counts
+Every call was charged under `<model>:batch` at half the model's rates; the per-step token counts (Until 2026-10-01 the split filter wrote `@batch`; the repository's convention is `:batch`, `judge_pricing.BATCH_SUFFIX`, priced by a per-provider factor, and the first full validation run's records are read as `:batch`.)
 match run A's to within a token or two.
 
 ### Every word whose outcome differs from the expected

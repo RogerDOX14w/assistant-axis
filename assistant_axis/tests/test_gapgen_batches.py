@@ -10,7 +10,7 @@ import pytest
 from assistant_axis.gapgen.batches import AUTO_BATCH_FROM, BatchTransport, choose_transport
 from assistant_axis.gapgen.cost import GuardedUsage
 from assistant_axis.gapgen.split_runner import SplitRunner
-from assistant_axis.judge_pricing import BudgetExceededError, cost_for_usage
+from assistant_axis.judge_pricing import BATCH_SUFFIX, BudgetExceededError, cost_for_usage
 from assistant_axis.tests.fake_anthropic import FakeAsyncAnthropic, make_response
 from assistant_axis.tests.split_replay import HAIKU, SONNET55, load_jsonl, make_responder, test_items
 
@@ -108,10 +108,10 @@ class TestBatches:
         r, _, bc = make(tmp_path, second_opinion=True, second_opinion_frac=0.1)
         r.run(test_items(20))
         per = r.usage.per_model
-        assert set(per) == {HAIKU + "@batch", SONNET55 + "@batch"}
-        h = per[HAIKU + "@batch"]
+        assert set(per) == {HAIKU + BATCH_SUFFIX, SONNET55 + BATCH_SUFFIX}
+        h = per[HAIKU + BATCH_SUFFIX]
         assert h.cost_usd == pytest.approx(0.5 * cost_for_usage(HAIKU, h.prompt_tokens, h.completion_tokens))
-        s = per[SONNET55 + "@batch"]
+        s = per[SONNET55 + BATCH_SUFFIX]
         assert s.cost_usd == pytest.approx(s.prompt_tokens * 1e-6 + s.completion_tokens * 5e-6)
         for b in bc.batches.created:
             for q in b["requests"]:
@@ -292,7 +292,7 @@ class TestLargeWaves:
         # a cap that one batch of 10 sense calls fits under but the wave of 30 does not
         from assistant_axis.gapgen.split_runner import tokens_for
         i, o = tokens_for("sense", HAIKU)
-        usage.budget_usd = 20 * cost_for_usage(HAIKU + "@batch", i, o)
+        usage.budget_usd = 20 * cost_for_usage(HAIKU + BATCH_SUFFIX, i, o)
         with pytest.raises(BudgetExceededError):
             r.run(items)
         assert bc.batches.created == []                  # not even the first batch of the wave went
@@ -553,7 +553,7 @@ class TestSplitCLI:
         d = cli["out"] / "filter" / "p"
         assert (d / "batches.json").exists()
         first = json.loads((d / "usage.json").read_text())
-        assert all(m.endswith("@batch") for m in first["per_model"])
+        assert all(m.endswith(BATCH_SUFFIX) for m in first["per_model"])
         assert traithood_filter.main(_args(cli, "--transport", "batches")) == 1      # exists: refused
         assert traithood_filter.main(_args(cli, "--transport", "batches", "--resume")) == 0
         assert cli["batch"].batches.created == []                                   # every answer on record

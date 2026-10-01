@@ -197,7 +197,8 @@ def main_split(args, argv) -> int:
     client = anthropic.AsyncAnthropic(max_retries=0)
     usage = GuardedUsage(budget_usd=cap, usage_path=out_dir / "usage.json")
     if args.resume:
-        usage.merge_from(MultiModelUsage.load_or_create(out_dir / "usage.json"))
+        from assistant_axis.gapgen.batches import with_current_batch_keys
+        usage.merge_from(with_current_batch_keys(MultiModelUsage.load_or_create(out_dir / "usage.json")))
     runner = SplitRunner(client=client, batch_id=args.batch_id, model=args.model,
                          second_model=None if args.no_second_opinion else args.second_model,
                          compare_model=args.compare_model, usage=usage,
