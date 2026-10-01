@@ -1,5 +1,5 @@
 {
-  "n_calls": 313,
+  "n_calls": 316,
   "per_model": {
     "bge-large-en-v1.5": {
       "completion_tokens": 0,
@@ -17,13 +17,13 @@
     },
     "text-embedding-3-large": {
       "completion_tokens": 0,
-      "cost_usd": 0.0153,
+      "cost_usd": 0.0189,
       "model": "text-embedding-3-large",
-      "n_calls": 19,
-      "prompt_tokens": 117781
+      "n_calls": 22,
+      "prompt_tokens": 145293
     }
   },
   "total_completion_tokens": 0,
-  "total_cost_usd": 0.0153,
-  "total_prompt_tokens": 402866
+  "total_cost_usd": 0.0189,
+  "total_prompt_tokens": 430378
 }

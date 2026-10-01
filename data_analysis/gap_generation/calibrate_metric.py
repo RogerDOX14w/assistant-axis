@@ -83,6 +83,8 @@ def parse_args(argv=None):
     ap.add_argument("--budget-usd", type=float, default=None, help="hard cap (default 1.0 with --skip-llm, else 5.0)")
     ap.add_argument("--confirm-expensive", action="store_true")
     ap.add_argument("--confirmed-by", default=None)
+    ap.add_argument("--redraw-comparisons", action="store_true",
+                    help="redraw criterion (e)'s blinded comparisons and Roger's marks sheet (otherwise kept as written)")
     ap.add_argument("--rebuild-labels", action="store_true", help="rebuild labelled_pairs.json from the curation file")
     ap.add_argument("--no-residual", action="store_true", help="skip the leave-one-out residual (fast runs)")
     ap.add_argument("--write-config", action="store_true", help="task 19 (after Roger's pilot decision)")
@@ -458,15 +460,30 @@ def main(argv=None) -> int:
                 res["recommendation"] = C.recommend_contrast(res)
                 ablation.setdefault(arm, {})[variant] = res
 
-    # (e) the blinded comparisons: the sample (always) and the Sonnet judge (only without --skip-llm)
-    vf = keep_views[f"{primary}|full|{rec_variant}"][0]
-    vs = keep_views[f"{primary}|strip|{rec_variant}"][0]
-    items = C.blinded_comparisons(vf, vs, stems=ci["stems"], labels=ci["labels"], descriptions=ci["descriptions"],
-                                  classes=classes, n=60, n_for_roger=30, seed=0)
-    (out / "contrast_comparisons_key.json").write_text(json.dumps(
-        {"model": primary, "variant": rec_variant, "representations": ["full", "strip"], "items": items},
-        indent=2, ensure_ascii=False) + "\n")
-    write_marks_sheet(args.marks_sheet, items, ci, primary, rec_variant)
+    # (e) the blinded comparisons.  The key and Roger's marks sheet are written only on the first run or
+    # with --redraw-comparisons, so a rerun never overwrites a sheet he may be marking.
+    key_path = out / "contrast_comparisons_key.json"
+    if args.redraw_comparisons or not key_path.exists():
+        prior_key = json.loads(key_path.read_text()) if key_path.exists() else {}
+        prior_items = [dict(it, model=it.get("model", prior_key.get("model", "openai")))
+                       for it in prior_key.get("items", []) if it.get("for_roger")]
+        cmp_var = "raw" if "raw" in args.variants else rec_variant
+        cmp_views = {arm: (keep_views[f"{arm}|full|{cmp_var}"][0], keep_views[f"{arm}|strip|{cmp_var}"][0]) for arm in
+                     [a for a in ("openai", "gemma", "bge", "hash") if a in arms]}
+        items = C.redraw_comparisons(cmp_views, stems=ci["stems"], labels=ci["labels"], descriptions=ci["descriptions"],
+                                     classes=classes, n=60, n_for_roger=30, keep=prior_items, variant=cmp_var)
+        draw = int(prior_key.get("draw", 1)) + 1 if prior_key else 1
+        key_path.write_text(json.dumps(
+            {"draw": draw, "variant": cmp_var, "representations": ["full", "strip"],
+             "rule": "first neighbour changes on stripping (any model, in the order openai, gemma, bge); N class first, "
+                     "then P and S by the largest top-3 change; draw-1 items Roger may have marked keep their number "
+                     "when still selected with the same lists",
+             "draw_1_note": "the first draw's lists_differ flagged any difference in the five, so many of its pairs "
+                            "were the same five traits reordered",
+             "items": items}, indent=2, ensure_ascii=False) + "\n")
+        write_marks_sheet(args.marks_sheet, items, ci)
+    else:
+        items = json.loads(key_path.read_text())["items"]
     llm = {"skipped": bool(args.skip_llm)}
     if not args.skip_llm:
         llm = run_llm_criteria(ci, items, llm_items, para_path, paraphrases, usage)
@@ -626,18 +643,28 @@ def write_drop_or_merge(path: Path, dm: dict, dm_masked: dict, masked_info: dict
     path.write_text("\n".join(lines) + "\n", encoding="utf-8")
 
 
-def write_marks_sheet(path: Path, items, ci, model, variant) -> None:
+def write_marks_sheet(path: Path, items, ci) -> None:
     rel = "../../data/traits/instructions"
     desc = {s: ci["corpus"][s]["description"] for s in ci["stems"]}
     labels = {s: ci["corpus"][s]["label"] for s in ci["stems"]}
-    head = [f"# Contrast clauses: 30 blinded neighbour comparisons for Roger's marks (M2 pilot)", "",
-            f"For each trait below, two lists of its five nearest existing traits, from {model} embeddings in the "
-            f"`{variant}` space: one list embeds every description as written, the other with its contrast clause "
-            "(\"rather than X\", \"instead of\", \"but not\", \"without being\") removed. The order of the two lists is "
-            "random and the key is in [contrast_comparisons_key.json](../../data/candidates/calibration/contrast_comparisons_key.json) "
-            "(do not open it before marking). Mark the list whose traits are closer in meaning to the given trait "
-            "(synonyms first; an antonym is not close), or `same`. The same 30 are the first half of the Sonnet "
-            "judge's sample (criterion e), so its agreement with you is known before its verdict counts.", ""]
+    n_roger = sum(1 for it in items if it["for_roger"])
+    n_kept = sum(1 for it in items if it["for_roger"] and it.get("kept_from_draw_1"))
+    models = sorted({it["model"] for it in items if it["for_roger"]})
+    head = [f"# Contrast clauses: {n_roger} blinded neighbour comparisons for Roger's marks (M2, second draw)", "",
+            "For each trait below, two lists of its five nearest existing traits, **ranked nearest first**.  One list "
+            "embeds every description as written; the other embeds them with the contrast clause (\"rather than X\", "
+            "\"instead of\", \"but not\", \"without being\") removed.  Which list is which is random; the key is in "
+            "[contrast_comparisons_key.json](../../data/candidates/calibration/contrast_comparisons_key.json) "
+            "(do not open it before marking).", "",
+            "**Mark on the top of the list**: which list puts the traits closest in meaning to the given trait first "
+            "(synonyms and near-synonyms count as close; an antonym does not).  Mark `same` when the top two or three "
+            "are the same traits in the same places.", "",
+            f"Every comparison here was chosen because removing the clause changes the **first** neighbour.  Each says "
+            f"which embedding model it comes from ({', '.join(models)}; all in the `{items[0]['variant']}` space).  The same "
+            f"{n_roger} are the first part of the Sonnet judge's sample (criterion e), so its agreement with you can "
+            f"be measured.  Second draw, 2026-10-01: the first draw counted any difference in the five as a "
+            f"difference, so many of its pairs were the same five traits reordered; {n_kept} comparisons you may "
+            "already have marked were still selected and keep their numbers and lists.", ""]
     body = C.comparisons_markdown(items, labels_of=labels, desc_of=desc, link=lambda s, l: _trait_link(s, l, rel))
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text("\n".join(head) + "\n" + body + "\n", encoding="utf-8")

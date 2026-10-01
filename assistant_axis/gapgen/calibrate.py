@@ -627,6 +627,79 @@ def blinded_comparisons(full: View, strip: View, *, stems: Sequence[str], labels
     return out
 
 
+def redraw_comparisons(views: Mapping[str, tuple], *, stems: Sequence[str], labels: Sequence[str],
+                       descriptions: Sequence[str], classes: Mapping[str, Optional[str]], n: int = 60,
+                       n_for_roger: int = 30, k: int = 5, seed: int = 1, variant: str = "raw",
+                       keep: Sequence[dict] = ()) -> list[dict]:
+    """Criterion (e)'s sample, second draw (Roger, 2026-10-01).  The first draw's
+    ``lists_differ`` flagged any difference in the five, so nine of Roger's 30 were
+    the same five traits reordered.  Here a comparison counts only when stripping
+    the clause changes the **first** neighbour; ``views`` is ``{model: (full, strip)}``
+    in model-preference order, and each trait is drawn from the first model under
+    which its first neighbour changes.  Order: every N-class trait with a changed
+    first neighbour, then the rest by the largest top-3 change (fewest shared of
+    the top three), P and S before new hits; if fewer than ``n`` qualify, traits
+    whose top three differ but whose first neighbour does not fill the remainder
+    (flagged).  ``keep``: items of an earlier draw (Roger may have marked them)
+    that keep their number, lists and key when their trait is still selected from
+    the same model with the same lists.  The first ``n_for_roger`` numbers are
+    Roger's; the judge sees all ``n``."""
+    rng = random.Random(seed)
+    idx = {s: i for i, s in enumerate(stems)}
+    order = {"N": 0, "P": 1, "S": 1, "new": 2}
+    picked, fallback = {}, {}
+    for s, c in classes.items():
+        if s not in idx:
+            continue
+        i = idx[s]
+        cands = []
+        for model, (full, strip) in views.items():
+            a, b = full.topk(i, k), strip.topk(i, k)
+            cands.append({"model": model, "a": a, "b": b, "nn": a[0] != b[0],
+                          "shared3": len(set(a[:3]) & set(b[:3]))})
+        changed = [x for x in cands if x["nn"]]
+        if changed:
+            picked[s] = dict(changed[0], cls=c or "new", models_changed=[x["model"] for x in changed])
+        else:
+            x = cands[0]
+            if x["shared3"] < 3:
+                fallback[s] = dict(x, cls=c or "new", models_changed=[])
+    tie = {s: rng.random() for s in list(picked) + list(fallback)}
+    ranked = sorted(picked, key=lambda s: (picked[s]["cls"] != "N", order[picked[s]["cls"]],
+                                           picked[s]["shared3"], tie[s]))
+    ranked += sorted(fallback, key=lambda s: (fallback[s]["shared3"], tie[s]))[: max(0, n - len(ranked))]
+    ranked = ranked[:n]
+    info = {**fallback, **picked}
+    kept_by_num = {}
+    for it in keep:
+        s = it["stem"]
+        if s in ranked and info[s]["model"] == it.get("model", "openai"):
+            lists = {"full": [stems[x] for x in info[s]["a"]], "strip": [stems[x] for x in info[s]["b"]]}
+            if [lists[it["key"]["A"]], lists[it["key"]["B"]]] == [it["A"], it["B"]] and it["id"] <= n_for_roger:
+                kept_by_num[it["id"]] = s
+    kept_stems = set(kept_by_num.values())
+    free = [s for s in ranked if s not in kept_stems]
+    numbering = {}
+    for num in range(1, len(ranked) + 1):
+        numbering[num] = kept_by_num[num] if num in kept_by_num else free.pop(0)
+    old = {it["stem"]: it for it in keep}
+    out = []
+    for num, s in sorted(numbering.items()):
+        x = info[s]
+        i = idx[s]
+        lists = {"full": [stems[j] for j in x["a"]], "strip": [stems[j] for j in x["b"]]}
+        if s in kept_stems:
+            key = dict(old[s]["key"])
+        else:
+            key = {"A": "strip", "B": "full"} if rng.random() < 0.5 else {"A": "full", "B": "strip"}
+        out.append({"id": num, "stem": s, "label": labels[i], "description": descriptions[i], "class": x["cls"],
+                    "model": x["model"], "variant": variant, "A": lists[key["A"]], "B": lists[key["B"]], "key": key,
+                    "first_neighbour_changes": bool(x["nn"]), "top3_shared": int(x["shared3"]),
+                    "models_where_first_changes": x["models_changed"], "for_roger": num <= n_for_roger,
+                    "kept_from_draw_1": s in kept_stems})
+    return out
+
+
 def comparisons_markdown(items: Sequence[dict], *, labels_of: Mapping[str, str], desc_of: Mapping[str, str],
                          link: callable) -> str:
     """The marks sheet for Roger: the trait, then lists A and B (neighbours with
@@ -635,7 +708,8 @@ def comparisons_markdown(items: Sequence[dict], *, labels_of: Mapping[str, str],
     for it in items:
         if not it["for_roger"]:
             continue
-        lines.append(f"### {it['id']}. {link(it['stem'], it['label'])}\n")
+        src = f" ({it['model']} embeddings)" if it.get("model") else ""
+        lines.append(f"### {it['id']}. {link(it['stem'], it['label'])}{src}\n")
         lines.append(f"{it['description']}\n")
         for side in ("A", "B"):
             lines.append(f"**List {side}**\n")

@@ -340,3 +340,36 @@ def test_histogram_grid_for_many_variants(synth, tmp_path):
     C.plot_nn_histograms(out, model="hash", representation="full", panels=panels, ncols=4)
     w, h = Image.open(out).size
     assert h > w / 3          # three rows, not one strip
+
+
+def test_redraw_prefers_changed_first_neighbour_and_keeps_marked_items(synth):
+    E, stems, index, lp = synth
+    rng = np.random.default_rng(3)
+    E2 = E.copy()
+    # t22 (N): stripping moves it next to t0 -> first neighbour changes; t24 (P) changes too;
+    # t26 (S) and t10 (P) barely move -> same first neighbour
+    base = C.build_view(E, "raw", residual=False)
+    far = lambda i: [j for j in (0, 1, 2, 3) if j != base.nn_cos_idx[i]][0]  # noqa: E731
+    E2[22] = _unit(E[far(22)] + 0.01 * rng.standard_normal(D))
+    E2[24] = _unit(E[far(24)] + 0.01 * rng.standard_normal(D))
+    E2[26] = _unit(E[26] + 0.001 * rng.standard_normal(D))
+    E2[10] = _unit(E[10] + 0.001 * rng.standard_normal(D))
+    classes = {"t22": "N", "t24": "P", "t26": "S", "t10": "P"}
+    views = {"openai": (C.build_view(E, "raw", residual=False), C.build_view(E2, "raw", residual=False)),
+             "bge": (C.build_view(E, "raw", residual=False), C.build_view(E, "raw", residual=False))}
+    labels = [s.upper() for s in stems]
+    desc = [f"This means {s}." for s in stems]
+    first = C.redraw_comparisons(views, stems=stems, labels=labels, descriptions=desc, classes=classes,
+                                 n=3, n_for_roger=2)
+    by = {it["stem"]: it for it in first}
+    assert set(by) >= {"t22", "t24"} and by["t22"]["id"] == 1            # the N class first
+    assert by["t22"]["first_neighbour_changes"] and by["t22"]["model"] == "openai"
+    assert all(it["first_neighbour_changes"] for it in first if it["for_roger"])
+    # t26 and t10 keep their first neighbour and their whole top three: never padded in
+    assert len(first) == 2 and not ({"t26", "t10"} & set(by)) and sum(it["for_roger"] for it in first) == 2
+    # a marked item that is still selected keeps its number, lists and key
+    marked = dict(by["t24"], id=2)
+    again = C.redraw_comparisons(views, stems=stems, labels=labels, descriptions=desc, classes=classes,
+                                 n=3, n_for_roger=2, keep=[marked])
+    kept = [it for it in again if it["stem"] == "t24"][0]
+    assert kept["id"] == 2 and kept["A"] == marked["A"] and kept["key"] == marked["key"] and kept["kept_from_draw_1"]
