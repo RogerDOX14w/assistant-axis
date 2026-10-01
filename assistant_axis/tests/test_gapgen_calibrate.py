@@ -12,7 +12,7 @@ from assistant_axis.gapgen import calibrate as C
 from assistant_axis.gapgen import calibrate_llm as CL
 from assistant_axis.gapgen.labels import LabelledPair, LabelledPairs
 from assistant_axis.judge_pricing import MultiModelUsage
-from assistant_axis.tests.fake_anthropic import FakeAsyncAnthropic, make_response, user_text
+from assistant_axis.tests.fake_anthropic import FakeAsyncAnthropic, make_response, system_text, user_text
 
 D = 24
 
@@ -407,6 +407,38 @@ def test_paraphrase_prompt_v2_reasons_first():
     assert "first" in p.lower() and "reason" in p.lower()
     # a row without its reason still parses (the reason is a thinking aid, not data)
     assert CL.parse_paraphrases('{"results": [{"id": 1, "paraphrase": "This means x."}]}', [1]) == {1: "This means x."}
+
+
+@pytest.mark.parametrize("style", ["plain", "terse"])
+def test_paraphrase_style_prompts_reason_first(style):
+    # round 4 (2026-10-02): two more paraphrase sets in other styles, each its own pinned prompt
+    p = CL.paraphrase_prompt(style)
+    assert p != CL.PARAPHRASE_PROMPT and p != CL.paraphrase_prompt({"plain": "terse", "terse": "plain"}[style])
+    assert CL.PARAPHRASE_STYLE_VERSIONS[style] == 1
+    assert p.index('"reason"') < p.index('"paraphrase"')
+    assert 'Start with "This means"' in p
+    assert {"plain": "everyday", "terse": "dictionary"}[style] in p
+    assert CL.paraphrase_prompt("standard") == CL.PARAPHRASE_PROMPT
+    with pytest.raises(KeyError):
+        CL.paraphrase_prompt("florid")
+
+
+def test_run_paraphrases_sends_the_style_prompt():
+    items = [{"stem": f"s{i}", "label": f"l{i}", "description": f"This means d{i}."} for i in range(3)]
+    seen = []
+
+    def responder(kw):
+        seen.append(system_text(kw))
+        rows = [json.loads(x) for x in user_text(kw).splitlines()]
+        return make_response(json.dumps({"results": [{"id": r["id"], "reason": "r", "paraphrase": "This means q."}
+                                                     for r in rows]}))
+    out = asyncio.run(CL.run_paraphrases(FakeAsyncAnthropic(responder), items, usage=MultiModelUsage(), style="terse"))
+    assert len(out) == 3 and seen == [CL.paraphrase_prompt("terse")]
+
+
+def test_llm_estimate_counts_styled_paraphrases():
+    base = CL.llm_estimate(659, 0).usd
+    assert CL.llm_estimate(659, 0, n_styled=2 * 659).usd == pytest.approx(3 * base, rel=0.02)
 
 
 def test_covered_threshold_from_paraphrases(synth):

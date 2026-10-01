@@ -6,7 +6,10 @@ is called without ``--skip-llm`` (Roger's decision after the pilot).
 * **(g) paraphrases** (Haiku): each description rewritten in different words
   at the same length and in the corpus form, without the label word, batched
   20 per call; cached in ``calibration/paraphrases.json`` and reused by M3's
-  paraphrase recall.  ``PARAPHRASE_PROMPT_VERSION`` pins the text.
+  paraphrase recall.  ``PARAPHRASE_PROMPT_VERSION`` pins the text.  Round 4
+  adds two styles (``plain``: everyday words; ``terse``: a dictionary-like
+  core sense), each its own prompt and version
+  (:data:`PARAPHRASE_STYLE_PROMPTS`, :data:`PARAPHRASE_STYLE_VERSIONS`).
 * **(e) blinded neighbour judgement** (Sonnet): a trait and two top-5
   neighbour lists (with and without contrast clauses, in random order,
   unlabelled); the judge reasons first, then prefers A, B or same; every
@@ -56,6 +59,50 @@ Respond with a JSON object only, no other text, with the reason before the rewri
 {"results": [{"id": <int>, "reason": "<what must be kept, a few words>", "paraphrase": "<the rewrite>"}, ...]}
 with one result per input id."""
 
+# Round 4 (2026-10-02, Roger: "a significantly larger test"): two more paraphrase sets, each in a style
+# unlike round 3's, so that recall is measured on several ways of re-proposing the same trait.  Each
+# style is its own prompt with its own pinned version (rubric_versions: calibration_paraphrase_<style>).
+_STYLE_CONTEXT = """You rewrite short definitions of personality traits for a calibration experiment.
+
+Context: we test whether a text-embedding search finds an existing trait when someone re-proposes it in their own words. So each rewrite must keep the meaning (the same disposition, the same scope) while sounding like a different writer: {voice}
+
+Rules for each rewrite:
+- Start with "This means" and describe the same disposition.
+{rules}- Do not use the trait's label word, or any word formed from it.
+- Write plain prose, no lists.
+
+You receive JSON lines, one per trait: {{"id": <int>, "label": <label>, "description": <definition>}}.
+For each trait, first note in a few words what the rewrite must keep, then write the rewrite.
+Respond with a JSON object only, no other text, with the reason before the rewrite in every result:
+{{"results": [{{"id": <int>, "reason": "<what must be kept, a few words>", "paraphrase": "<the rewrite>"}}, ...]}}
+with one result per input id."""
+
+PARAPHRASE_STYLE_PROMPTS: dict[str, str] = {
+    "plain": _STYLE_CONTEXT.format(
+        voice="a friend explaining it over coffee, in plain everyday words.",
+        rules=("- Use short, everyday words, the way people talk; no technical, academic or literary vocabulary.\n"
+               "- Keep any contrast the original draws (\"rather than X\"), said in everyday words; do not add examples.\n"
+               "- One or two sentences, about as long as the original or shorter.\n")),
+    "terse": _STYLE_CONTEXT.format(
+        voice="a dictionary giving the core sense, tersely.",
+        rules=("- Give the core sense the way a dictionary definition does: one clause, at most 12 words after "
+               "\"This means\".\n"
+               "- Keep the central disposition; drop examples and secondary detail; keep a contrast only if the sense "
+               "depends on it.\n")),
+}
+PARAPHRASE_STYLE_VERSIONS: dict[str, int] = {"plain": 1, "terse": 1}
+
+
+def paraphrase_prompt(style: str = "standard") -> str:
+    """The system prompt for a paraphrase style: ``standard`` (round 3's
+    :data:`PARAPHRASE_PROMPT`), ``plain`` or ``terse``."""
+    return PARAPHRASE_PROMPT if style == "standard" else PARAPHRASE_STYLE_PROMPTS[style]
+
+
+def paraphrase_version(style: str = "standard") -> int:
+    return PARAPHRASE_PROMPT_VERSION if style == "standard" else PARAPHRASE_STYLE_VERSIONS[style]
+
+
 BLINDED_PROMPT = """You compare two lists of nearest neighbours for a personality trait, for a calibration experiment.
 
 Context: a text-embedding search returned, for one trait, the five existing traits it considers closest in meaning. Two versions of the search are being compared; you see both lists in random order, unlabelled. Judge which list better contains the traits a careful reader would consider closest in meaning to the given trait: synonyms and near-synonyms first, then closely related dispositions. A trait's opposite (its antonym) is not close in meaning, even though it shares a topic. Judge by the definitions, not the labels alone.
@@ -94,16 +141,19 @@ def parse_paraphrases(text: Optional[str], ids: Sequence[int]) -> dict[int, str]
 
 
 async def run_paraphrases(client, items: Sequence[dict], *, usage: MultiModelUsage, model: str = PARAPHRASE_MODEL,
-                          batch_size: int = PARAPHRASE_BATCH, concurrency: int = 4, limiter=None) -> dict[str, str]:
+                          batch_size: int = PARAPHRASE_BATCH, concurrency: int = 4, limiter=None,
+                          style: str = "standard") -> dict[str, str]:
     """``items``: ``[{"stem", "label", "description"}]`` -> ``{stem: paraphrase}``.
-    A failed row is retried once in a batch of its own kind."""
+    A failed row is retried once in a batch of its own kind.  ``style`` picks
+    the prompt (:func:`paraphrase_prompt`)."""
+    system = paraphrase_prompt(style)
     sem = asyncio.Semaphore(concurrency)
     results: dict[str, str] = {}
 
     async def one(batch: Sequence[dict]) -> None:
         numbered = [dict(it, id=k + 1) for k, it in enumerate(batch)]
         async with sem:
-            text = await call_anthropic_json(client, system=PARAPHRASE_PROMPT, user=paraphrase_user(numbered),
+            text = await call_anthropic_json(client, system=system, user=paraphrase_user(numbered),
                                              model=model, max_tokens=4000, temperature=0.0, usage=usage,
                                              limiter=limiter)
         got = parse_paraphrases(text, [it["id"] for it in numbered])
@@ -116,7 +166,7 @@ async def run_paraphrases(client, items: Sequence[dict], *, usage: MultiModelUsa
     missing = [it for it in items if it["stem"] not in results]
     if missing:
         await asyncio.gather(*(one(missing[i:i + batch_size]) for i in range(0, len(missing), batch_size)))
-    warn_if_low_parse_rate(label=f"calibrate:paraphrase:{model}", n_ok=len(results), n_total=len(items),
+    warn_if_low_parse_rate(label=f"calibrate:paraphrase:{style}:{model}", n_ok=len(results), n_total=len(items),
                            logger_obj=logger)
     return results
 
@@ -174,12 +224,16 @@ async def run_blinded(client, items: Sequence[dict], *, usage: MultiModelUsage, 
             "preference_strip_share": round(sum(v == "strip" for v in decided) / len(decided), 4) if decided else None}
 
 
-def llm_estimate(n_paraphrase: int, n_blinded: int) -> Estimate:
+def llm_estimate(n_paraphrase: int, n_blinded: int, *, n_styled: int = 0) -> Estimate:
     """About 60 input and 90 output tokens per paraphrased description (a short
     reason, then the rewrite; plus the prompt per batch); about 700 input and 120 output tokens per blinded call,
-    two calls per comparison."""
+    two calls per comparison.  ``n_styled``: round 4's paraphrases in the other
+    styles, counted the same way (the measured round-3 cost was $0.32 for 659)."""
     est = Estimate()
     n_batches = -(-n_paraphrase // PARAPHRASE_BATCH)
     est.add("(g) paraphrases", PARAPHRASE_MODEL, n_batches, 500 + 60 * PARAPHRASE_BATCH, 90 * PARAPHRASE_BATCH)
+    if n_styled:
+        est.add("round 4 styled paraphrases", PARAPHRASE_MODEL, -(-n_styled // PARAPHRASE_BATCH),
+                500 + 60 * PARAPHRASE_BATCH, 90 * PARAPHRASE_BATCH)
     est.add("(e) blinded judgement", JUDGE_MODEL, 2 * n_blinded, 900, 150)
     return est

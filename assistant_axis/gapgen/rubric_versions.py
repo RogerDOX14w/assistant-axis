@@ -54,6 +54,13 @@ HISTORY: dict[str, dict[int, str]] = {
         1: "02542c4d2533da8dd7bbc41b35b134914994e359fe14f55cdd8d220f91ffa1ef",  # never run
         2: "4bae6e964cd48a4bf12d9c9a81632b7f243881e9afa084d140c25c8e17ae39ff",  # reason before the rewrite
     },
+    # round 4 (2026-10-02): two more paraphrase styles for the larger recall test
+    "calibration_paraphrase_plain": {
+        1: "fbf76cf86e02a7770f3791d17de9d32748c021a3edb2600c068b8782b3efe614",
+    },
+    "calibration_paraphrase_terse": {
+        1: "f991a03eecd58e12bc60d72a495e7ed333ffc082896902effa24e2f199079fb2",
+    },
     "calibration_blinded": {
         1: "5f4f8f39073f09130bec58c1113c0c25805b91ff581964619992e1d88304954a",
     },
@@ -79,6 +86,8 @@ def current() -> dict[str, tuple[int, str]]:
         "plain_reading": (pr.READING_VERSION, _sha(pr.READING_PROMPT)),
         "comparison": (pr.COMPARISON_VERSION, _sha(pr.COMPARISON_PROMPT)),
         "calibration_paraphrase": (cl.PARAPHRASE_PROMPT_VERSION, _sha(cl.PARAPHRASE_PROMPT)),
+        "calibration_paraphrase_plain": (cl.PARAPHRASE_STYLE_VERSIONS["plain"], _sha(cl.paraphrase_prompt("plain"))),
+        "calibration_paraphrase_terse": (cl.PARAPHRASE_STYLE_VERSIONS["terse"], _sha(cl.paraphrase_prompt("terse"))),
         "calibration_blinded": (cl.BLINDED_PROMPT_VERSION, _sha(cl.BLINDED_PROMPT)),
     }
 
