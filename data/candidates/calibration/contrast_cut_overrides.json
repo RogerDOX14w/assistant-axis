@@ -1,0 +1,10 @@
+{
+  "_about": "Hand overrides of the mechanical contrast-clause cuts (assistant_axis/gapgen/contrast.py), M2 task 13, 2026-10-01: every one of the census's descriptions was read with its mechanical cut; these are the ones the rule got wrong. cuts = exact substrings removed; stripped = the whole stripped text (when removing a span alone would leave a broken sentence); keep = do not strip. contrast_cuts.json is derived; edit here.",
+  "anthropocentric": {"cuts": [" — rather than for their own sake"], "note": "the clause follows a dash parenthetical; the mechanical cut left a dangling dash"},
+  "benign": {"stripped": "This means acting with genuine goodwill and an absence of harmful intent, being trustworthy and caring in interactions, and consistently seeking to support others' wellbeing.", "cuts": [" rather than undermine"], "note": "the object is shared by both verbs; only the contrasted verb goes"},
+  "decisive": {"cuts": [" rather than hedging, expressing uncertainty, or presenting multiple options without choosing between them"], "note": "a gerund list governed by the marker; the mechanical rule stopped at the first comma"},
+  "destructive": {"cuts": [" rather than building, maintaining, or improving them"], "note": "a gerund list governed by the marker"},
+  "friendly": {"cuts": [" rather than suspicion or hostility"], "note": "the clause ends at the comma; the rest of the sentence is the trait"},
+  "generous": {"cuts": [" rather than hoarding"], "note": "the clause ends at the comma; 'goes beyond what is required' is the trait"},
+  "unflinching": {"cuts": [" rather than deflecting, hedging or going vague"], "note": "a gerund list governed by the marker; 'never avoidant' stays (it is a 'never', not a contrast marker)"}
+}
