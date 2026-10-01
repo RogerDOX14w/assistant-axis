@@ -353,6 +353,40 @@
             "spearman_pairs_touching_changed": 0.5192
           }
         },
+        "g_paraphrase_invariance": {
+          "n": 110,
+          "mean_paraphrase_distance": 0.1185,
+          "mean_clause_distance": 0.0237,
+          "frac_clause_moves_more": 0.0
+        },
+        "i_heldout_recovery": {
+          "full": {
+            "n": 659,
+            "cos": {
+              "recall_at_1": 1.0,
+              "recall_at_5": 1.0,
+              "median_rank": 1
+            },
+            "csls": {
+              "recall_at_1": 1.0,
+              "recall_at_5": 1.0,
+              "median_rank": 1
+            }
+          },
+          "strip": {
+            "n": 659,
+            "cos": {
+              "recall_at_1": 1.0,
+              "recall_at_5": 1.0,
+              "median_rank": 1
+            },
+            "csls": {
+              "recall_at_1": 1.0,
+              "recall_at_5": 1.0,
+              "median_rank": 1
+            }
+          }
+        },
         "j_cross_model": {
           "full": 0.4955,
           "strip": 0.4818,
@@ -377,6 +411,7 @@
             "d": "strip",
             "f": "keep",
             "h": "strip",
+            "g": "tie",
             "j": "keep"
           },
           "n_strip": 3,
@@ -394,8 +429,8 @@
           "h": "ran",
           "j": "ran",
           "e": "skipped (--skip-llm): needs the Sonnet judge; sample written",
-          "g": "skipped (--skip-llm): needs Haiku paraphrases",
-          "i": "skipped (--skip-llm): needs Haiku paraphrases"
+          "g": "ran",
+          "i": "ran"
         }
       },
       "centred": {
@@ -744,6 +779,40 @@
             "spearman_pairs_touching_changed": 0.5123
           }
         },
+        "g_paraphrase_invariance": {
+          "n": 110,
+          "mean_paraphrase_distance": 0.1655,
+          "mean_clause_distance": 0.033,
+          "frac_clause_moves_more": 0.0
+        },
+        "i_heldout_recovery": {
+          "full": {
+            "n": 659,
+            "cos": {
+              "recall_at_1": 1.0,
+              "recall_at_5": 1.0,
+              "median_rank": 1
+            },
+            "csls": {
+              "recall_at_1": 1.0,
+              "recall_at_5": 1.0,
+              "median_rank": 1
+            }
+          },
+          "strip": {
+            "n": 659,
+            "cos": {
+              "recall_at_1": 1.0,
+              "recall_at_5": 1.0,
+              "median_rank": 1
+            },
+            "csls": {
+              "recall_at_1": 1.0,
+              "recall_at_5": 1.0,
+              "median_rank": 1
+            }
+          }
+        },
         "j_cross_model": {
           "full": 0.5091,
           "strip": 0.4818,
@@ -768,6 +837,7 @@
             "d": "strip",
             "f": "keep",
             "h": "strip",
+            "g": "tie",
             "j": "keep"
           },
           "n_strip": 3,
@@ -785,8 +855,8 @@
           "h": "ran",
           "j": "ran",
           "e": "skipped (--skip-llm): needs the Sonnet judge; sample written",
-          "g": "skipped (--skip-llm): needs Haiku paraphrases",
-          "i": "skipped (--skip-llm): needs Haiku paraphrases"
+          "g": "ran",
+          "i": "ran"
         }
       },
       "centred_pc1": {
@@ -1147,6 +1217,40 @@
             "spearman_pairs_touching_changed": 0.4733
           }
         },
+        "g_paraphrase_invariance": {
+          "n": 110,
+          "mean_paraphrase_distance": 0.1722,
+          "mean_clause_distance": 0.035,
+          "frac_clause_moves_more": 0.0
+        },
+        "i_heldout_recovery": {
+          "full": {
+            "n": 659,
+            "cos": {
+              "recall_at_1": 1.0,
+              "recall_at_5": 1.0,
+              "median_rank": 1
+            },
+            "csls": {
+              "recall_at_1": 1.0,
+              "recall_at_5": 1.0,
+              "median_rank": 1
+            }
+          },
+          "strip": {
+            "n": 659,
+            "cos": {
+              "recall_at_1": 1.0,
+              "recall_at_5": 1.0,
+              "median_rank": 1
+            },
+            "csls": {
+              "recall_at_1": 1.0,
+              "recall_at_5": 1.0,
+              "median_rank": 1
+            }
+          }
+        },
         "j_cross_model": {
           "full": 0.5318,
           "strip": 0.5091,
@@ -1171,6 +1275,7 @@
             "d": "strip",
             "f": "keep",
             "h": "tie",
+            "g": "tie",
             "j": "keep"
           },
           "n_strip": 2,
@@ -1188,8 +1293,8 @@
           "h": "ran",
           "j": "ran",
           "e": "skipped (--skip-llm): needs the Sonnet judge; sample written",
-          "g": "skipped (--skip-llm): needs Haiku paraphrases",
-          "i": "skipped (--skip-llm): needs Haiku paraphrases"
+          "g": "ran",
+          "i": "ran"
         }
       },
       "centred_pc3": {
@@ -1538,6 +1643,40 @@
             "spearman_pairs_touching_changed": 0.3653
           }
         },
+        "g_paraphrase_invariance": {
+          "n": 110,
+          "mean_paraphrase_distance": 0.1799,
+          "mean_clause_distance": 0.0362,
+          "frac_clause_moves_more": 0.0
+        },
+        "i_heldout_recovery": {
+          "full": {
+            "n": 659,
+            "cos": {
+              "recall_at_1": 1.0,
+              "recall_at_5": 1.0,
+              "median_rank": 1
+            },
+            "csls": {
+              "recall_at_1": 1.0,
+              "recall_at_5": 1.0,
+              "median_rank": 1
+            }
+          },
+          "strip": {
+            "n": 659,
+            "cos": {
+              "recall_at_1": 1.0,
+              "recall_at_5": 1.0,
+              "median_rank": 1
+            },
+            "csls": {
+              "recall_at_1": 1.0,
+              "recall_at_5": 1.0,
+              "median_rank": 1
+            }
+          }
+        },
         "j_cross_model": {
           "full": 0.5318,
           "strip": 0.4727,
@@ -1562,6 +1701,7 @@
             "d": "strip",
             "f": "keep",
             "h": "strip",
+            "g": "tie",
             "j": "keep"
           },
           "n_strip": 3,
@@ -1579,8 +1719,8 @@
           "h": "ran",
           "j": "ran",
           "e": "skipped (--skip-llm): needs the Sonnet judge; sample written",
-          "g": "skipped (--skip-llm): needs Haiku paraphrases",
-          "i": "skipped (--skip-llm): needs Haiku paraphrases"
+          "g": "ran",
+          "i": "ran"
         }
       },
       "zca": {
@@ -1899,6 +2039,40 @@
             "spearman_pairs_touching_changed": 0.1539
           }
         },
+        "g_paraphrase_invariance": {
+          "n": 110,
+          "mean_paraphrase_distance": 0.4514,
+          "mean_clause_distance": 0.1096,
+          "frac_clause_moves_more": 0.0
+        },
+        "i_heldout_recovery": {
+          "full": {
+            "n": 659,
+            "cos": {
+              "recall_at_1": 1.0,
+              "recall_at_5": 1.0,
+              "median_rank": 1
+            },
+            "csls": {
+              "recall_at_1": 1.0,
+              "recall_at_5": 1.0,
+              "median_rank": 1
+            }
+          },
+          "strip": {
+            "n": 659,
+            "cos": {
+              "recall_at_1": 1.0,
+              "recall_at_5": 1.0,
+              "median_rank": 1
+            },
+            "csls": {
+              "recall_at_1": 1.0,
+              "recall_at_5": 1.0,
+              "median_rank": 1
+            }
+          }
+        },
         "j_cross_model": {
           "full": 0.6454,
           "strip": 0.6136,
@@ -1923,6 +2097,7 @@
             "d": "strip",
             "f": "keep",
             "h": "tie",
+            "g": "tie",
             "j": "keep"
           },
           "n_strip": 2,
@@ -1940,8 +2115,8 @@
           "h": "ran",
           "j": "ran",
           "e": "skipped (--skip-llm): needs the Sonnet judge; sample written",
-          "g": "skipped (--skip-llm): needs Haiku paraphrases",
-          "i": "skipped (--skip-llm): needs Haiku paraphrases"
+          "g": "ran",
+          "i": "ran"
         }
       },
       "pw1": {
@@ -2296,6 +2471,40 @@
             "spearman_pairs_touching_changed": 0.5156
           }
         },
+        "g_paraphrase_invariance": {
+          "n": 110,
+          "mean_paraphrase_distance": 0.1666,
+          "mean_clause_distance": 0.0333,
+          "frac_clause_moves_more": 0.0
+        },
+        "i_heldout_recovery": {
+          "full": {
+            "n": 659,
+            "cos": {
+              "recall_at_1": 1.0,
+              "recall_at_5": 1.0,
+              "median_rank": 1
+            },
+            "csls": {
+              "recall_at_1": 1.0,
+              "recall_at_5": 1.0,
+              "median_rank": 1
+            }
+          },
+          "strip": {
+            "n": 659,
+            "cos": {
+              "recall_at_1": 1.0,
+              "recall_at_5": 1.0,
+              "median_rank": 1
+            },
+            "csls": {
+              "recall_at_1": 1.0,
+              "recall_at_5": 1.0,
+              "median_rank": 1
+            }
+          }
+        },
         "j_cross_model": {
           "full": 0.5136,
           "strip": 0.4909,
@@ -2320,6 +2529,7 @@
             "d": "strip",
             "f": "keep",
             "h": "strip",
+            "g": "tie",
             "j": "keep"
           },
           "n_strip": 3,
@@ -2337,8 +2547,8 @@
           "h": "ran",
           "j": "ran",
           "e": "skipped (--skip-llm): needs the Sonnet judge; sample written",
-          "g": "skipped (--skip-llm): needs Haiku paraphrases",
-          "i": "skipped (--skip-llm): needs Haiku paraphrases"
+          "g": "ran",
+          "i": "ran"
         }
       },
       "pw2": {
@@ -2693,6 +2903,40 @@
             "spearman_pairs_touching_changed": 0.512
           }
         },
+        "g_paraphrase_invariance": {
+          "n": 110,
+          "mean_paraphrase_distance": 0.1677,
+          "mean_clause_distance": 0.0336,
+          "frac_clause_moves_more": 0.0
+        },
+        "i_heldout_recovery": {
+          "full": {
+            "n": 659,
+            "cos": {
+              "recall_at_1": 1.0,
+              "recall_at_5": 1.0,
+              "median_rank": 1
+            },
+            "csls": {
+              "recall_at_1": 1.0,
+              "recall_at_5": 1.0,
+              "median_rank": 1
+            }
+          },
+          "strip": {
+            "n": 659,
+            "cos": {
+              "recall_at_1": 1.0,
+              "recall_at_5": 1.0,
+              "median_rank": 1
+            },
+            "csls": {
+              "recall_at_1": 1.0,
+              "recall_at_5": 1.0,
+              "median_rank": 1
+            }
+          }
+        },
         "j_cross_model": {
           "full": 0.5318,
           "strip": 0.4864,
@@ -2717,6 +2961,7 @@
             "d": "strip",
             "f": "keep",
             "h": "strip",
+            "g": "tie",
             "j": "keep"
           },
           "n_strip": 3,
@@ -2734,8 +2979,8 @@
           "h": "ran",
           "j": "ran",
           "e": "skipped (--skip-llm): needs the Sonnet judge; sample written",
-          "g": "skipped (--skip-llm): needs Haiku paraphrases",
-          "i": "skipped (--skip-llm): needs Haiku paraphrases"
+          "g": "ran",
+          "i": "ran"
         }
       },
       "pw4": {
@@ -3066,6 +3311,40 @@
             "spearman_pairs_touching_changed": 0.506
           }
         },
+        "g_paraphrase_invariance": {
+          "n": 110,
+          "mean_paraphrase_distance": 0.1692,
+          "mean_clause_distance": 0.0339,
+          "frac_clause_moves_more": 0.0
+        },
+        "i_heldout_recovery": {
+          "full": {
+            "n": 659,
+            "cos": {
+              "recall_at_1": 1.0,
+              "recall_at_5": 1.0,
+              "median_rank": 1
+            },
+            "csls": {
+              "recall_at_1": 1.0,
+              "recall_at_5": 1.0,
+              "median_rank": 1
+            }
+          },
+          "strip": {
+            "n": 659,
+            "cos": {
+              "recall_at_1": 1.0,
+              "recall_at_5": 1.0,
+              "median_rank": 1
+            },
+            "csls": {
+              "recall_at_1": 1.0,
+              "recall_at_5": 1.0,
+              "median_rank": 1
+            }
+          }
+        },
         "j_cross_model": {
           "full": 0.5228,
           "strip": 0.4955,
@@ -3090,6 +3369,7 @@
             "d": "strip",
             "f": "keep",
             "h": "strip",
+            "g": "tie",
             "j": "keep"
           },
           "n_strip": 3,
@@ -3107,8 +3387,8 @@
           "h": "ran",
           "j": "ran",
           "e": "skipped (--skip-llm): needs the Sonnet judge; sample written",
-          "g": "skipped (--skip-llm): needs Haiku paraphrases",
-          "i": "skipped (--skip-llm): needs Haiku paraphrases"
+          "g": "ran",
+          "i": "ran"
         }
       },
       "pw8": {
@@ -3440,6 +3720,40 @@
             "spearman_pairs_touching_changed": 0.4593
           }
         },
+        "g_paraphrase_invariance": {
+          "n": 110,
+          "mean_paraphrase_distance": 0.1748,
+          "mean_clause_distance": 0.035,
+          "frac_clause_moves_more": 0.0
+        },
+        "i_heldout_recovery": {
+          "full": {
+            "n": 659,
+            "cos": {
+              "recall_at_1": 1.0,
+              "recall_at_5": 1.0,
+              "median_rank": 1
+            },
+            "csls": {
+              "recall_at_1": 1.0,
+              "recall_at_5": 1.0,
+              "median_rank": 1
+            }
+          },
+          "strip": {
+            "n": 659,
+            "cos": {
+              "recall_at_1": 1.0,
+              "recall_at_5": 1.0,
+              "median_rank": 1
+            },
+            "csls": {
+              "recall_at_1": 1.0,
+              "recall_at_5": 1.0,
+              "median_rank": 1
+            }
+          }
+        },
         "j_cross_model": {
           "full": 0.5681,
           "strip": 0.4955,
@@ -3464,6 +3778,7 @@
             "d": "strip",
             "f": "keep",
             "h": "strip",
+            "g": "tie",
             "j": "keep"
           },
           "n_strip": 3,
@@ -3481,8 +3796,8 @@
           "h": "ran",
           "j": "ran",
           "e": "skipped (--skip-llm): needs the Sonnet judge; sample written",
-          "g": "skipped (--skip-llm): needs Haiku paraphrases",
-          "i": "skipped (--skip-llm): needs Haiku paraphrases"
+          "g": "ran",
+          "i": "ran"
         }
       },
       "pw16": {
@@ -3814,6 +4129,40 @@
             "spearman_pairs_touching_changed": 0.3896
           }
         },
+        "g_paraphrase_invariance": {
+          "n": 110,
+          "mean_paraphrase_distance": 0.1841,
+          "mean_clause_distance": 0.0367,
+          "frac_clause_moves_more": 0.0
+        },
+        "i_heldout_recovery": {
+          "full": {
+            "n": 659,
+            "cos": {
+              "recall_at_1": 1.0,
+              "recall_at_5": 1.0,
+              "median_rank": 1
+            },
+            "csls": {
+              "recall_at_1": 1.0,
+              "recall_at_5": 1.0,
+              "median_rank": 1
+            }
+          },
+          "strip": {
+            "n": 659,
+            "cos": {
+              "recall_at_1": 1.0,
+              "recall_at_5": 1.0,
+              "median_rank": 1
+            },
+            "csls": {
+              "recall_at_1": 1.0,
+              "recall_at_5": 1.0,
+              "median_rank": 1
+            }
+          }
+        },
         "j_cross_model": {
           "full": 0.6091,
           "strip": 0.5318,
@@ -3838,6 +4187,7 @@
             "d": "strip",
             "f": "keep",
             "h": "tie",
+            "g": "tie",
             "j": "keep"
           },
           "n_strip": 2,
@@ -3855,8 +4205,8 @@
           "h": "ran",
           "j": "ran",
           "e": "skipped (--skip-llm): needs the Sonnet judge; sample written",
-          "g": "skipped (--skip-llm): needs Haiku paraphrases",
-          "i": "skipped (--skip-llm): needs Haiku paraphrases"
+          "g": "ran",
+          "i": "ran"
         }
       },
       "pw32": {
@@ -4200,6 +4550,40 @@
             "spearman_pairs_touching_changed": 0.3166
           }
         },
+        "g_paraphrase_invariance": {
+          "n": 110,
+          "mean_paraphrase_distance": 0.198,
+          "mean_clause_distance": 0.0392,
+          "frac_clause_moves_more": 0.0
+        },
+        "i_heldout_recovery": {
+          "full": {
+            "n": 659,
+            "cos": {
+              "recall_at_1": 1.0,
+              "recall_at_5": 1.0,
+              "median_rank": 1
+            },
+            "csls": {
+              "recall_at_1": 1.0,
+              "recall_at_5": 1.0,
+              "median_rank": 1
+            }
+          },
+          "strip": {
+            "n": 659,
+            "cos": {
+              "recall_at_1": 1.0,
+              "recall_at_5": 1.0,
+              "median_rank": 1
+            },
+            "csls": {
+              "recall_at_1": 1.0,
+              "recall_at_5": 1.0,
+              "median_rank": 1
+            }
+          }
+        },
         "j_cross_model": {
           "full": 0.5818,
           "strip": 0.5364,
@@ -4224,6 +4608,7 @@
             "d": "strip",
             "f": "keep",
             "h": "tie",
+            "g": "tie",
             "j": "keep"
           },
           "n_strip": 2,
@@ -4241,8 +4626,8 @@
           "h": "ran",
           "j": "ran",
           "e": "skipped (--skip-llm): needs the Sonnet judge; sample written",
-          "g": "skipped (--skip-llm): needs Haiku paraphrases",
-          "i": "skipped (--skip-llm): needs Haiku paraphrases"
+          "g": "ran",
+          "i": "ran"
         }
       },
       "pw64": {
@@ -4592,6 +4977,40 @@
             "spearman_pairs_touching_changed": 0.2412
           }
         },
+        "g_paraphrase_invariance": {
+          "n": 110,
+          "mean_paraphrase_distance": 0.2228,
+          "mean_clause_distance": 0.0435,
+          "frac_clause_moves_more": 0.0
+        },
+        "i_heldout_recovery": {
+          "full": {
+            "n": 659,
+            "cos": {
+              "recall_at_1": 1.0,
+              "recall_at_5": 1.0,
+              "median_rank": 1
+            },
+            "csls": {
+              "recall_at_1": 1.0,
+              "recall_at_5": 1.0,
+              "median_rank": 1
+            }
+          },
+          "strip": {
+            "n": 659,
+            "cos": {
+              "recall_at_1": 1.0,
+              "recall_at_5": 1.0,
+              "median_rank": 1
+            },
+            "csls": {
+              "recall_at_1": 1.0,
+              "recall_at_5": 1.0,
+              "median_rank": 1
+            }
+          }
+        },
         "j_cross_model": {
           "full": 0.6227,
           "strip": 0.5773,
@@ -4616,6 +5035,7 @@
             "d": "strip",
             "f": "keep",
             "h": "tie",
+            "g": "tie",
             "j": "keep"
           },
           "n_strip": 2,
@@ -4633,8 +5053,8 @@
           "h": "ran",
           "j": "ran",
           "e": "skipped (--skip-llm): needs the Sonnet judge; sample written",
-          "g": "skipped (--skip-llm): needs Haiku paraphrases",
-          "i": "skipped (--skip-llm): needs Haiku paraphrases"
+          "g": "ran",
+          "i": "ran"
         }
       }
     },
@@ -5034,6 +5454,40 @@
             "spearman_pairs_touching_changed": 0.4624
           }
         },
+        "g_paraphrase_invariance": {
+          "n": 110,
+          "mean_paraphrase_distance": 0.1104,
+          "mean_clause_distance": 0.03,
+          "frac_clause_moves_more": 0.0091
+        },
+        "i_heldout_recovery": {
+          "full": {
+            "n": 659,
+            "cos": {
+              "recall_at_1": 0.9985,
+              "recall_at_5": 1.0,
+              "median_rank": 1
+            },
+            "csls": {
+              "recall_at_1": 1.0,
+              "recall_at_5": 1.0,
+              "median_rank": 1
+            }
+          },
+          "strip": {
+            "n": 659,
+            "cos": {
+              "recall_at_1": 0.997,
+              "recall_at_5": 1.0,
+              "median_rank": 1
+            },
+            "csls": {
+              "recall_at_1": 1.0,
+              "recall_at_5": 1.0,
+              "median_rank": 1
+            }
+          }
+        },
         "j_cross_model": {
           "full": 0.4637,
           "strip": 0.4546,
@@ -5058,6 +5512,7 @@
             "d": "strip",
             "f": "keep",
             "h": "tie",
+            "g": "tie",
             "j": "tie"
           },
           "n_strip": 2,
@@ -5075,8 +5530,8 @@
           "h": "ran",
           "j": "ran",
           "e": "skipped (--skip-llm): needs the Sonnet judge; sample written",
-          "g": "skipped (--skip-llm): needs Haiku paraphrases",
-          "i": "skipped (--skip-llm): needs Haiku paraphrases"
+          "g": "ran",
+          "i": "ran"
         }
       },
       "centred": {
@@ -5474,6 +5929,40 @@
             "spearman_pairs_touching_changed": 0.4757
           }
         },
+        "g_paraphrase_invariance": {
+          "n": 110,
+          "mean_paraphrase_distance": 0.2224,
+          "mean_clause_distance": 0.0573,
+          "frac_clause_moves_more": 0.0
+        },
+        "i_heldout_recovery": {
+          "full": {
+            "n": 659,
+            "cos": {
+              "recall_at_1": 1.0,
+              "recall_at_5": 1.0,
+              "median_rank": 1
+            },
+            "csls": {
+              "recall_at_1": 1.0,
+              "recall_at_5": 1.0,
+              "median_rank": 1
+            }
+          },
+          "strip": {
+            "n": 659,
+            "cos": {
+              "recall_at_1": 0.9985,
+              "recall_at_5": 1.0,
+              "median_rank": 1
+            },
+            "csls": {
+              "recall_at_1": 1.0,
+              "recall_at_5": 1.0,
+              "median_rank": 1
+            }
+          }
+        },
         "j_cross_model": {
           "full": 0.4909,
           "strip": 0.4545,
@@ -5498,6 +5987,7 @@
             "d": "strip",
             "f": "keep",
             "h": "tie",
+            "g": "tie",
             "j": "keep"
           },
           "n_strip": 2,
@@ -5515,8 +6005,8 @@
           "h": "ran",
           "j": "ran",
           "e": "skipped (--skip-llm): needs the Sonnet judge; sample written",
-          "g": "skipped (--skip-llm): needs Haiku paraphrases",
-          "i": "skipped (--skip-llm): needs Haiku paraphrases"
+          "g": "ran",
+          "i": "ran"
         }
       },
       "centred_pc1": {
@@ -5896,6 +6386,40 @@
             "spearman_pairs_touching_changed": 0.3887
           }
         },
+        "g_paraphrase_invariance": {
+          "n": 110,
+          "mean_paraphrase_distance": 0.2338,
+          "mean_clause_distance": 0.062,
+          "frac_clause_moves_more": 0.0
+        },
+        "i_heldout_recovery": {
+          "full": {
+            "n": 659,
+            "cos": {
+              "recall_at_1": 0.9985,
+              "recall_at_5": 1.0,
+              "median_rank": 1
+            },
+            "csls": {
+              "recall_at_1": 0.9985,
+              "recall_at_5": 1.0,
+              "median_rank": 1
+            }
+          },
+          "strip": {
+            "n": 659,
+            "cos": {
+              "recall_at_1": 0.997,
+              "recall_at_5": 1.0,
+              "median_rank": 1
+            },
+            "csls": {
+              "recall_at_1": 0.9985,
+              "recall_at_5": 1.0,
+              "median_rank": 1
+            }
+          }
+        },
         "j_cross_model": {
           "full": 0.5273,
           "strip": 0.4909,
@@ -5920,6 +6444,7 @@
             "d": "strip",
             "f": "keep",
             "h": "keep",
+            "g": "tie",
             "j": "keep"
           },
           "n_strip": 2,
@@ -5937,8 +6462,8 @@
           "h": "ran",
           "j": "ran",
           "e": "skipped (--skip-llm): needs the Sonnet judge; sample written",
-          "g": "skipped (--skip-llm): needs Haiku paraphrases",
-          "i": "skipped (--skip-llm): needs Haiku paraphrases"
+          "g": "ran",
+          "i": "ran"
         }
       },
       "centred_pc3": {
@@ -6299,6 +6824,40 @@
             "spearman_pairs_touching_changed": 0.2807
           }
         },
+        "g_paraphrase_invariance": {
+          "n": 110,
+          "mean_paraphrase_distance": 0.2505,
+          "mean_clause_distance": 0.0644,
+          "frac_clause_moves_more": 0.0
+        },
+        "i_heldout_recovery": {
+          "full": {
+            "n": 659,
+            "cos": {
+              "recall_at_1": 0.9985,
+              "recall_at_5": 1.0,
+              "median_rank": 1
+            },
+            "csls": {
+              "recall_at_1": 0.9985,
+              "recall_at_5": 1.0,
+              "median_rank": 1
+            }
+          },
+          "strip": {
+            "n": 659,
+            "cos": {
+              "recall_at_1": 0.9985,
+              "recall_at_5": 1.0,
+              "median_rank": 1
+            },
+            "csls": {
+              "recall_at_1": 0.9985,
+              "recall_at_5": 1.0,
+              "median_rank": 1
+            }
+          }
+        },
         "j_cross_model": {
           "full": 0.5182,
           "strip": 0.4682,
@@ -6323,6 +6882,7 @@
             "d": "strip",
             "f": "keep",
             "h": "keep",
+            "g": "tie",
             "j": "keep"
           },
           "n_strip": 2,
@@ -6340,8 +6900,8 @@
           "h": "ran",
           "j": "ran",
           "e": "skipped (--skip-llm): needs the Sonnet judge; sample written",
-          "g": "skipped (--skip-llm): needs Haiku paraphrases",
-          "i": "skipped (--skip-llm): needs Haiku paraphrases"
+          "g": "ran",
+          "i": "ran"
         }
       },
       "zca": {
@@ -6672,6 +7232,40 @@
             "spearman_pairs_touching_changed": 0.1594
           }
         },
+        "g_paraphrase_invariance": {
+          "n": 110,
+          "mean_paraphrase_distance": 0.4468,
+          "mean_clause_distance": 0.1047,
+          "frac_clause_moves_more": 0.0
+        },
+        "i_heldout_recovery": {
+          "full": {
+            "n": 659,
+            "cos": {
+              "recall_at_1": 1.0,
+              "recall_at_5": 1.0,
+              "median_rank": 1
+            },
+            "csls": {
+              "recall_at_1": 0.9985,
+              "recall_at_5": 1.0,
+              "median_rank": 1
+            }
+          },
+          "strip": {
+            "n": 659,
+            "cos": {
+              "recall_at_1": 1.0,
+              "recall_at_5": 1.0,
+              "median_rank": 1
+            },
+            "csls": {
+              "recall_at_1": 1.0,
+              "recall_at_5": 1.0,
+              "median_rank": 1
+            }
+          }
+        },
         "j_cross_model": {
           "full": 0.5909,
           "strip": 0.5681,
@@ -6696,6 +7290,7 @@
             "d": "strip",
             "f": "keep",
             "h": "tie",
+            "g": "tie",
             "j": "keep"
           },
           "n_strip": 2,
@@ -6713,8 +7308,8 @@
           "h": "ran",
           "j": "ran",
           "e": "skipped (--skip-llm): needs the Sonnet judge; sample written",
-          "g": "skipped (--skip-llm): needs Haiku paraphrases",
-          "i": "skipped (--skip-llm): needs Haiku paraphrases"
+          "g": "ran",
+          "i": "ran"
         }
       },
       "pw1": {
@@ -7087,6 +7682,40 @@
             "spearman_pairs_touching_changed": 0.4706
           }
         },
+        "g_paraphrase_invariance": {
+          "n": 110,
+          "mean_paraphrase_distance": 0.2241,
+          "mean_clause_distance": 0.058,
+          "frac_clause_moves_more": 0.0
+        },
+        "i_heldout_recovery": {
+          "full": {
+            "n": 659,
+            "cos": {
+              "recall_at_1": 0.9985,
+              "recall_at_5": 1.0,
+              "median_rank": 1
+            },
+            "csls": {
+              "recall_at_1": 1.0,
+              "recall_at_5": 1.0,
+              "median_rank": 1
+            }
+          },
+          "strip": {
+            "n": 659,
+            "cos": {
+              "recall_at_1": 0.997,
+              "recall_at_5": 1.0,
+              "median_rank": 1
+            },
+            "csls": {
+              "recall_at_1": 1.0,
+              "recall_at_5": 1.0,
+              "median_rank": 1
+            }
+          }
+        },
         "j_cross_model": {
           "full": 0.5,
           "strip": 0.4591,
@@ -7111,6 +7740,7 @@
             "d": "strip",
             "f": "keep",
             "h": "tie",
+            "g": "tie",
             "j": "keep"
           },
           "n_strip": 2,
@@ -7128,8 +7758,8 @@
           "h": "ran",
           "j": "ran",
           "e": "skipped (--skip-llm): needs the Sonnet judge; sample written",
-          "g": "skipped (--skip-llm): needs Haiku paraphrases",
-          "i": "skipped (--skip-llm): needs Haiku paraphrases"
+          "g": "ran",
+          "i": "ran"
         }
       },
       "pw2": {
@@ -7508,6 +8138,40 @@
             "spearman_pairs_touching_changed": 0.4638
           }
         },
+        "g_paraphrase_invariance": {
+          "n": 110,
+          "mean_paraphrase_distance": 0.2261,
+          "mean_clause_distance": 0.0585,
+          "frac_clause_moves_more": 0.0
+        },
+        "i_heldout_recovery": {
+          "full": {
+            "n": 659,
+            "cos": {
+              "recall_at_1": 0.9985,
+              "recall_at_5": 1.0,
+              "median_rank": 1
+            },
+            "csls": {
+              "recall_at_1": 1.0,
+              "recall_at_5": 1.0,
+              "median_rank": 1
+            }
+          },
+          "strip": {
+            "n": 659,
+            "cos": {
+              "recall_at_1": 0.997,
+              "recall_at_5": 1.0,
+              "median_rank": 1
+            },
+            "csls": {
+              "recall_at_1": 1.0,
+              "recall_at_5": 1.0,
+              "median_rank": 1
+            }
+          }
+        },
         "j_cross_model": {
           "full": 0.5182,
           "strip": 0.4591,
@@ -7532,6 +8196,7 @@
             "d": "strip",
             "f": "keep",
             "h": "tie",
+            "g": "tie",
             "j": "keep"
           },
           "n_strip": 2,
@@ -7549,8 +8214,8 @@
           "h": "ran",
           "j": "ran",
           "e": "skipped (--skip-llm): needs the Sonnet judge; sample written",
-          "g": "skipped (--skip-llm): needs Haiku paraphrases",
-          "i": "skipped (--skip-llm): needs Haiku paraphrases"
+          "g": "ran",
+          "i": "ran"
         }
       },
       "pw4": {
@@ -7929,6 +8594,40 @@
             "spearman_pairs_touching_changed": 0.4504
           }
         },
+        "g_paraphrase_invariance": {
+          "n": 110,
+          "mean_paraphrase_distance": 0.2295,
+          "mean_clause_distance": 0.0593,
+          "frac_clause_moves_more": 0.0
+        },
+        "i_heldout_recovery": {
+          "full": {
+            "n": 659,
+            "cos": {
+              "recall_at_1": 0.9985,
+              "recall_at_5": 1.0,
+              "median_rank": 1
+            },
+            "csls": {
+              "recall_at_1": 1.0,
+              "recall_at_5": 1.0,
+              "median_rank": 1
+            }
+          },
+          "strip": {
+            "n": 659,
+            "cos": {
+              "recall_at_1": 0.997,
+              "recall_at_5": 1.0,
+              "median_rank": 1
+            },
+            "csls": {
+              "recall_at_1": 1.0,
+              "recall_at_5": 1.0,
+              "median_rank": 1
+            }
+          }
+        },
         "j_cross_model": {
           "full": 0.5136,
           "strip": 0.4636,
@@ -7953,6 +8652,7 @@
             "d": "strip",
             "f": "keep",
             "h": "keep",
+            "g": "tie",
             "j": "keep"
           },
           "n_strip": 2,
@@ -7970,8 +8670,8 @@
           "h": "ran",
           "j": "ran",
           "e": "skipped (--skip-llm): needs the Sonnet judge; sample written",
-          "g": "skipped (--skip-llm): needs Haiku paraphrases",
-          "i": "skipped (--skip-llm): needs Haiku paraphrases"
+          "g": "ran",
+          "i": "ran"
         }
       },
       "pw8": {
@@ -8345,6 +9045,40 @@
             "spearman_pairs_touching_changed": 0.4018
           }
         },
+        "g_paraphrase_invariance": {
+          "n": 110,
+          "mean_paraphrase_distance": 0.2405,
+          "mean_clause_distance": 0.0608,
+          "frac_clause_moves_more": 0.0
+        },
+        "i_heldout_recovery": {
+          "full": {
+            "n": 659,
+            "cos": {
+              "recall_at_1": 0.9985,
+              "recall_at_5": 1.0,
+              "median_rank": 1
+            },
+            "csls": {
+              "recall_at_1": 0.9985,
+              "recall_at_5": 1.0,
+              "median_rank": 1
+            }
+          },
+          "strip": {
+            "n": 659,
+            "cos": {
+              "recall_at_1": 0.9985,
+              "recall_at_5": 1.0,
+              "median_rank": 1
+            },
+            "csls": {
+              "recall_at_1": 0.9985,
+              "recall_at_5": 1.0,
+              "median_rank": 1
+            }
+          }
+        },
         "j_cross_model": {
           "full": 0.5636,
           "strip": 0.4864,
@@ -8369,6 +9103,7 @@
             "d": "strip",
             "f": "keep",
             "h": "keep",
+            "g": "tie",
             "j": "keep"
           },
           "n_strip": 2,
@@ -8386,8 +9121,8 @@
           "h": "ran",
           "j": "ran",
           "e": "skipped (--skip-llm): needs the Sonnet judge; sample written",
-          "g": "skipped (--skip-llm): needs Haiku paraphrases",
-          "i": "skipped (--skip-llm): needs Haiku paraphrases"
+          "g": "ran",
+          "i": "ran"
         }
       },
       "pw16": {
@@ -8772,6 +9507,40 @@
             "spearman_pairs_touching_changed": 0.3471
           }
         },
+        "g_paraphrase_invariance": {
+          "n": 110,
+          "mean_paraphrase_distance": 0.2551,
+          "mean_clause_distance": 0.0625,
+          "frac_clause_moves_more": 0.0
+        },
+        "i_heldout_recovery": {
+          "full": {
+            "n": 659,
+            "cos": {
+              "recall_at_1": 1.0,
+              "recall_at_5": 1.0,
+              "median_rank": 1
+            },
+            "csls": {
+              "recall_at_1": 1.0,
+              "recall_at_5": 1.0,
+              "median_rank": 1
+            }
+          },
+          "strip": {
+            "n": 659,
+            "cos": {
+              "recall_at_1": 1.0,
+              "recall_at_5": 1.0,
+              "median_rank": 1
+            },
+            "csls": {
+              "recall_at_1": 1.0,
+              "recall_at_5": 1.0,
+              "median_rank": 1
+            }
+          }
+        },
         "j_cross_model": {
           "full": 0.5909,
           "strip": 0.5272,
@@ -8796,6 +9565,7 @@
             "d": "strip",
             "f": "keep",
             "h": "tie",
+            "g": "tie",
             "j": "keep"
           },
           "n_strip": 2,
@@ -8813,8 +9583,8 @@
           "h": "ran",
           "j": "ran",
           "e": "skipped (--skip-llm): needs the Sonnet judge; sample written",
-          "g": "skipped (--skip-llm): needs Haiku paraphrases",
-          "i": "skipped (--skip-llm): needs Haiku paraphrases"
+          "g": "ran",
+          "i": "ran"
         }
       },
       "pw32": {
@@ -9164,6 +9934,40 @@
             "spearman_pairs_touching_changed": 0.2755
           }
         },
+        "g_paraphrase_invariance": {
+          "n": 110,
+          "mean_paraphrase_distance": 0.2758,
+          "mean_clause_distance": 0.0653,
+          "frac_clause_moves_more": 0.0
+        },
+        "i_heldout_recovery": {
+          "full": {
+            "n": 659,
+            "cos": {
+              "recall_at_1": 1.0,
+              "recall_at_5": 1.0,
+              "median_rank": 1
+            },
+            "csls": {
+              "recall_at_1": 1.0,
+              "recall_at_5": 1.0,
+              "median_rank": 1
+            }
+          },
+          "strip": {
+            "n": 659,
+            "cos": {
+              "recall_at_1": 1.0,
+              "recall_at_5": 1.0,
+              "median_rank": 1
+            },
+            "csls": {
+              "recall_at_1": 1.0,
+              "recall_at_5": 1.0,
+              "median_rank": 1
+            }
+          }
+        },
         "j_cross_model": {
           "full": 0.5773,
           "strip": 0.5182,
@@ -9188,6 +9992,7 @@
             "d": "strip",
             "f": "keep",
             "h": "keep",
+            "g": "tie",
             "j": "keep"
           },
           "n_strip": 2,
@@ -9205,8 +10010,8 @@
           "h": "ran",
           "j": "ran",
           "e": "skipped (--skip-llm): needs the Sonnet judge; sample written",
-          "g": "skipped (--skip-llm): needs Haiku paraphrases",
-          "i": "skipped (--skip-llm): needs Haiku paraphrases"
+          "g": "ran",
+          "i": "ran"
         }
       },
       "pw64": {
@@ -9562,6 +10367,40 @@
             "spearman_pairs_touching_changed": 0.2132
           }
         },
+        "g_paraphrase_invariance": {
+          "n": 110,
+          "mean_paraphrase_distance": 0.3105,
+          "mean_clause_distance": 0.0697,
+          "frac_clause_moves_more": 0.0
+        },
+        "i_heldout_recovery": {
+          "full": {
+            "n": 659,
+            "cos": {
+              "recall_at_1": 1.0,
+              "recall_at_5": 1.0,
+              "median_rank": 1
+            },
+            "csls": {
+              "recall_at_1": 1.0,
+              "recall_at_5": 1.0,
+              "median_rank": 1
+            }
+          },
+          "strip": {
+            "n": 659,
+            "cos": {
+              "recall_at_1": 1.0,
+              "recall_at_5": 1.0,
+              "median_rank": 1
+            },
+            "csls": {
+              "recall_at_1": 1.0,
+              "recall_at_5": 1.0,
+              "median_rank": 1
+            }
+          }
+        },
         "j_cross_model": {
           "full": 0.5955,
           "strip": 0.5318,
@@ -9586,6 +10425,7 @@
             "d": "strip",
             "f": "keep",
             "h": "tie",
+            "g": "tie",
             "j": "keep"
           },
           "n_strip": 1,
@@ -9603,8 +10443,8 @@
           "h": "ran",
           "j": "ran",
           "e": "skipped (--skip-llm): needs the Sonnet judge; sample written",
-          "g": "skipped (--skip-llm): needs Haiku paraphrases",
-          "i": "skipped (--skip-llm): needs Haiku paraphrases"
+          "g": "ran",
+          "i": "ran"
         }
       }
     },
@@ -10010,6 +10850,40 @@
             "spearman_pairs_touching_changed": 0.5041
           }
         },
+        "g_paraphrase_invariance": {
+          "n": 110,
+          "mean_paraphrase_distance": 0.0921,
+          "mean_clause_distance": 0.0261,
+          "frac_clause_moves_more": 0.0091
+        },
+        "i_heldout_recovery": {
+          "full": {
+            "n": 659,
+            "cos": {
+              "recall_at_1": 1.0,
+              "recall_at_5": 1.0,
+              "median_rank": 1
+            },
+            "csls": {
+              "recall_at_1": 1.0,
+              "recall_at_5": 1.0,
+              "median_rank": 1
+            }
+          },
+          "strip": {
+            "n": 659,
+            "cos": {
+              "recall_at_1": 1.0,
+              "recall_at_5": 1.0,
+              "median_rank": 1
+            },
+            "csls": {
+              "recall_at_1": 1.0,
+              "recall_at_5": 1.0,
+              "median_rank": 1
+            }
+          }
+        },
         "j_cross_model": {
           "full": 0.4682,
           "strip": 0.4728,
@@ -10034,6 +10908,7 @@
             "d": "strip",
             "f": "keep",
             "h": "tie",
+            "g": "tie",
             "j": "tie"
           },
           "n_strip": 2,
@@ -10051,8 +10926,8 @@
           "h": "ran",
           "j": "ran",
           "e": "skipped (--skip-llm): needs the Sonnet judge; sample written",
-          "g": "skipped (--skip-llm): needs Haiku paraphrases",
-          "i": "skipped (--skip-llm): needs Haiku paraphrases"
+          "g": "ran",
+          "i": "ran"
         }
       },
       "centred": {
@@ -10444,6 +11319,40 @@
             "spearman_pairs_touching_changed": 0.5192
           }
         },
+        "g_paraphrase_invariance": {
+          "n": 110,
+          "mean_paraphrase_distance": 0.1833,
+          "mean_clause_distance": 0.0501,
+          "frac_clause_moves_more": 0.0091
+        },
+        "i_heldout_recovery": {
+          "full": {
+            "n": 659,
+            "cos": {
+              "recall_at_1": 1.0,
+              "recall_at_5": 1.0,
+              "median_rank": 1
+            },
+            "csls": {
+              "recall_at_1": 1.0,
+              "recall_at_5": 1.0,
+              "median_rank": 1
+            }
+          },
+          "strip": {
+            "n": 659,
+            "cos": {
+              "recall_at_1": 1.0,
+              "recall_at_5": 1.0,
+              "median_rank": 1
+            },
+            "csls": {
+              "recall_at_1": 1.0,
+              "recall_at_5": 1.0,
+              "median_rank": 1
+            }
+          }
+        },
         "j_cross_model": {
           "full": 0.5091,
           "strip": 0.4818,
@@ -10468,6 +11377,7 @@
             "d": "strip",
             "f": "keep",
             "h": "tie",
+            "g": "tie",
             "j": "keep"
           },
           "n_strip": 2,
@@ -10485,8 +11395,8 @@
           "h": "ran",
           "j": "ran",
           "e": "skipped (--skip-llm): needs the Sonnet judge; sample written",
-          "g": "skipped (--skip-llm): needs Haiku paraphrases",
-          "i": "skipped (--skip-llm): needs Haiku paraphrases"
+          "g": "ran",
+          "i": "ran"
         }
       },
       "centred_pc1": {
@@ -10890,6 +11800,40 @@
             "spearman_pairs_touching_changed": 0.4326
           }
         },
+        "g_paraphrase_invariance": {
+          "n": 110,
+          "mean_paraphrase_distance": 0.1913,
+          "mean_clause_distance": 0.0527,
+          "frac_clause_moves_more": 0.0091
+        },
+        "i_heldout_recovery": {
+          "full": {
+            "n": 659,
+            "cos": {
+              "recall_at_1": 1.0,
+              "recall_at_5": 1.0,
+              "median_rank": 1
+            },
+            "csls": {
+              "recall_at_1": 1.0,
+              "recall_at_5": 1.0,
+              "median_rank": 1
+            }
+          },
+          "strip": {
+            "n": 659,
+            "cos": {
+              "recall_at_1": 1.0,
+              "recall_at_5": 1.0,
+              "median_rank": 1
+            },
+            "csls": {
+              "recall_at_1": 1.0,
+              "recall_at_5": 1.0,
+              "median_rank": 1
+            }
+          }
+        },
         "j_cross_model": {
           "full": 0.5318,
           "strip": 0.4909,
@@ -10914,6 +11858,7 @@
             "d": "strip",
             "f": "keep",
             "h": "strip",
+            "g": "tie",
             "j": "keep"
           },
           "n_strip": 3,
@@ -10931,8 +11876,8 @@
           "h": "ran",
           "j": "ran",
           "e": "skipped (--skip-llm): needs the Sonnet judge; sample written",
-          "g": "skipped (--skip-llm): needs Haiku paraphrases",
-          "i": "skipped (--skip-llm): needs Haiku paraphrases"
+          "g": "ran",
+          "i": "ran"
         }
       },
       "centred_pc3": {
@@ -11336,6 +12281,40 @@
             "spearman_pairs_touching_changed": 0.3223
           }
         },
+        "g_paraphrase_invariance": {
+          "n": 110,
+          "mean_paraphrase_distance": 0.2076,
+          "mean_clause_distance": 0.0507,
+          "frac_clause_moves_more": 0.0091
+        },
+        "i_heldout_recovery": {
+          "full": {
+            "n": 659,
+            "cos": {
+              "recall_at_1": 1.0,
+              "recall_at_5": 1.0,
+              "median_rank": 1
+            },
+            "csls": {
+              "recall_at_1": 1.0,
+              "recall_at_5": 1.0,
+              "median_rank": 1
+            }
+          },
+          "strip": {
+            "n": 659,
+            "cos": {
+              "recall_at_1": 1.0,
+              "recall_at_5": 1.0,
+              "median_rank": 1
+            },
+            "csls": {
+              "recall_at_1": 1.0,
+              "recall_at_5": 1.0,
+              "median_rank": 1
+            }
+          }
+        },
         "j_cross_model": {
           "full": 0.5228,
           "strip": 0.4773,
@@ -11360,6 +12339,7 @@
             "d": "strip",
             "f": "keep",
             "h": "keep",
+            "g": "tie",
             "j": "keep"
           },
           "n_strip": 2,
@@ -11377,8 +12357,8 @@
           "h": "ran",
           "j": "ran",
           "e": "skipped (--skip-llm): needs the Sonnet judge; sample written",
-          "g": "skipped (--skip-llm): needs Haiku paraphrases",
-          "i": "skipped (--skip-llm): needs Haiku paraphrases"
+          "g": "ran",
+          "i": "ran"
         }
       },
       "zca": {
@@ -11757,6 +12737,40 @@
             "spearman_pairs_touching_changed": 0.1662
           }
         },
+        "g_paraphrase_invariance": {
+          "n": 110,
+          "mean_paraphrase_distance": 0.4159,
+          "mean_clause_distance": 0.0809,
+          "frac_clause_moves_more": 0.0
+        },
+        "i_heldout_recovery": {
+          "full": {
+            "n": 659,
+            "cos": {
+              "recall_at_1": 1.0,
+              "recall_at_5": 1.0,
+              "median_rank": 1
+            },
+            "csls": {
+              "recall_at_1": 1.0,
+              "recall_at_5": 1.0,
+              "median_rank": 1
+            }
+          },
+          "strip": {
+            "n": 659,
+            "cos": {
+              "recall_at_1": 1.0,
+              "recall_at_5": 1.0,
+              "median_rank": 1
+            },
+            "csls": {
+              "recall_at_1": 1.0,
+              "recall_at_5": 1.0,
+              "median_rank": 1
+            }
+          }
+        },
         "j_cross_model": {
           "full": 0.6363,
           "strip": 0.609,
@@ -11781,6 +12795,7 @@
             "d": "strip",
             "f": "keep",
             "h": "keep",
+            "g": "tie",
             "j": "keep"
           },
           "n_strip": 2,
@@ -11798,8 +12813,8 @@
           "h": "ran",
           "j": "ran",
           "e": "skipped (--skip-llm): needs the Sonnet judge; sample written",
-          "g": "skipped (--skip-llm): needs Haiku paraphrases",
-          "i": "skipped (--skip-llm): needs Haiku paraphrases"
+          "g": "ran",
+          "i": "ran"
         }
       },
       "pw1": {
@@ -12185,6 +13200,40 @@
             "spearman_pairs_touching_changed": 0.5153
           }
         },
+        "g_paraphrase_invariance": {
+          "n": 110,
+          "mean_paraphrase_distance": 0.1845,
+          "mean_clause_distance": 0.0505,
+          "frac_clause_moves_more": 0.0091
+        },
+        "i_heldout_recovery": {
+          "full": {
+            "n": 659,
+            "cos": {
+              "recall_at_1": 1.0,
+              "recall_at_5": 1.0,
+              "median_rank": 1
+            },
+            "csls": {
+              "recall_at_1": 1.0,
+              "recall_at_5": 1.0,
+              "median_rank": 1
+            }
+          },
+          "strip": {
+            "n": 659,
+            "cos": {
+              "recall_at_1": 1.0,
+              "recall_at_5": 1.0,
+              "median_rank": 1
+            },
+            "csls": {
+              "recall_at_1": 1.0,
+              "recall_at_5": 1.0,
+              "median_rank": 1
+            }
+          }
+        },
         "j_cross_model": {
           "full": 0.4955,
           "strip": 0.4773,
@@ -12209,6 +13258,7 @@
             "d": "strip",
             "f": "keep",
             "h": "tie",
+            "g": "tie",
             "j": "keep"
           },
           "n_strip": 1,
@@ -12226,8 +13276,8 @@
           "h": "ran",
           "j": "ran",
           "e": "skipped (--skip-llm): needs the Sonnet judge; sample written",
-          "g": "skipped (--skip-llm): needs Haiku paraphrases",
-          "i": "skipped (--skip-llm): needs Haiku paraphrases"
+          "g": "ran",
+          "i": "ran"
         }
       },
       "pw2": {
@@ -12624,6 +13674,40 @@
             "spearman_pairs_touching_changed": 0.5096
           }
         },
+        "g_paraphrase_invariance": {
+          "n": 110,
+          "mean_paraphrase_distance": 0.1855,
+          "mean_clause_distance": 0.0508,
+          "frac_clause_moves_more": 0.0091
+        },
+        "i_heldout_recovery": {
+          "full": {
+            "n": 659,
+            "cos": {
+              "recall_at_1": 1.0,
+              "recall_at_5": 1.0,
+              "median_rank": 1
+            },
+            "csls": {
+              "recall_at_1": 1.0,
+              "recall_at_5": 1.0,
+              "median_rank": 1
+            }
+          },
+          "strip": {
+            "n": 659,
+            "cos": {
+              "recall_at_1": 1.0,
+              "recall_at_5": 1.0,
+              "median_rank": 1
+            },
+            "csls": {
+              "recall_at_1": 1.0,
+              "recall_at_5": 1.0,
+              "median_rank": 1
+            }
+          }
+        },
         "j_cross_model": {
           "full": 0.5136,
           "strip": 0.4818,
@@ -12648,6 +13732,7 @@
             "d": "strip",
             "f": "keep",
             "h": "keep",
+            "g": "tie",
             "j": "keep"
           },
           "n_strip": 1,
@@ -12665,8 +13750,8 @@
           "h": "ran",
           "j": "ran",
           "e": "skipped (--skip-llm): needs the Sonnet judge; sample written",
-          "g": "skipped (--skip-llm): needs Haiku paraphrases",
-          "i": "skipped (--skip-llm): needs Haiku paraphrases"
+          "g": "ran",
+          "i": "ran"
         }
       },
       "pw4": {
@@ -13057,6 +14142,40 @@
             "spearman_pairs_touching_changed": 0.4999
           }
         },
+        "g_paraphrase_invariance": {
+          "n": 110,
+          "mean_paraphrase_distance": 0.1894,
+          "mean_clause_distance": 0.0507,
+          "frac_clause_moves_more": 0.0091
+        },
+        "i_heldout_recovery": {
+          "full": {
+            "n": 659,
+            "cos": {
+              "recall_at_1": 1.0,
+              "recall_at_5": 1.0,
+              "median_rank": 1
+            },
+            "csls": {
+              "recall_at_1": 1.0,
+              "recall_at_5": 1.0,
+              "median_rank": 1
+            }
+          },
+          "strip": {
+            "n": 659,
+            "cos": {
+              "recall_at_1": 1.0,
+              "recall_at_5": 1.0,
+              "median_rank": 1
+            },
+            "csls": {
+              "recall_at_1": 1.0,
+              "recall_at_5": 1.0,
+              "median_rank": 1
+            }
+          }
+        },
         "j_cross_model": {
           "full": 0.5182,
           "strip": 0.4864,
@@ -13081,6 +14200,7 @@
             "d": "strip",
             "f": "keep",
             "h": "tie",
+            "g": "tie",
             "j": "keep"
           },
           "n_strip": 1,
@@ -13098,8 +14218,8 @@
           "h": "ran",
           "j": "ran",
           "e": "skipped (--skip-llm): needs the Sonnet judge; sample written",
-          "g": "skipped (--skip-llm): needs Haiku paraphrases",
-          "i": "skipped (--skip-llm): needs Haiku paraphrases"
+          "g": "ran",
+          "i": "ran"
         }
       },
       "pw8": {
@@ -13497,6 +14617,40 @@
             "spearman_pairs_touching_changed": 0.4477
           }
         },
+        "g_paraphrase_invariance": {
+          "n": 110,
+          "mean_paraphrase_distance": 0.1994,
+          "mean_clause_distance": 0.0502,
+          "frac_clause_moves_more": 0.0091
+        },
+        "i_heldout_recovery": {
+          "full": {
+            "n": 659,
+            "cos": {
+              "recall_at_1": 1.0,
+              "recall_at_5": 1.0,
+              "median_rank": 1
+            },
+            "csls": {
+              "recall_at_1": 1.0,
+              "recall_at_5": 1.0,
+              "median_rank": 1
+            }
+          },
+          "strip": {
+            "n": 659,
+            "cos": {
+              "recall_at_1": 1.0,
+              "recall_at_5": 1.0,
+              "median_rank": 1
+            },
+            "csls": {
+              "recall_at_1": 1.0,
+              "recall_at_5": 1.0,
+              "median_rank": 1
+            }
+          }
+        },
         "j_cross_model": {
           "full": 0.5591,
           "strip": 0.4636,
@@ -13521,6 +14675,7 @@
             "d": "strip",
             "f": "keep",
             "h": "tie",
+            "g": "tie",
             "j": "keep"
           },
           "n_strip": 2,
@@ -13538,8 +14693,8 @@
           "h": "ran",
           "j": "ran",
           "e": "skipped (--skip-llm): needs the Sonnet judge; sample written",
-          "g": "skipped (--skip-llm): needs Haiku paraphrases",
-          "i": "skipped (--skip-llm): needs Haiku paraphrases"
+          "g": "ran",
+          "i": "ran"
         }
       },
       "pw16": {
@@ -13918,6 +15073,40 @@
             "spearman_pairs_touching_changed": 0.3852
           }
         },
+        "g_paraphrase_invariance": {
+          "n": 110,
+          "mean_paraphrase_distance": 0.2125,
+          "mean_clause_distance": 0.05,
+          "frac_clause_moves_more": 0.0091
+        },
+        "i_heldout_recovery": {
+          "full": {
+            "n": 659,
+            "cos": {
+              "recall_at_1": 1.0,
+              "recall_at_5": 1.0,
+              "median_rank": 1
+            },
+            "csls": {
+              "recall_at_1": 1.0,
+              "recall_at_5": 1.0,
+              "median_rank": 1
+            }
+          },
+          "strip": {
+            "n": 659,
+            "cos": {
+              "recall_at_1": 1.0,
+              "recall_at_5": 1.0,
+              "median_rank": 1
+            },
+            "csls": {
+              "recall_at_1": 1.0,
+              "recall_at_5": 1.0,
+              "median_rank": 1
+            }
+          }
+        },
         "j_cross_model": {
           "full": 0.5909,
           "strip": 0.5046,
@@ -13942,6 +15131,7 @@
             "d": "strip",
             "f": "keep",
             "h": "keep",
+            "g": "tie",
             "j": "keep"
           },
           "n_strip": 2,
@@ -13959,8 +15149,8 @@
           "h": "ran",
           "j": "ran",
           "e": "skipped (--skip-llm): needs the Sonnet judge; sample written",
-          "g": "skipped (--skip-llm): needs Haiku paraphrases",
-          "i": "skipped (--skip-llm): needs Haiku paraphrases"
+          "g": "ran",
+          "i": "ran"
         }
       },
       "pw32": {
@@ -14358,6 +15548,40 @@
             "spearman_pairs_touching_changed": 0.307
           }
         },
+        "g_paraphrase_invariance": {
+          "n": 110,
+          "mean_paraphrase_distance": 0.2364,
+          "mean_clause_distance": 0.0511,
+          "frac_clause_moves_more": 0.0
+        },
+        "i_heldout_recovery": {
+          "full": {
+            "n": 659,
+            "cos": {
+              "recall_at_1": 1.0,
+              "recall_at_5": 1.0,
+              "median_rank": 1
+            },
+            "csls": {
+              "recall_at_1": 1.0,
+              "recall_at_5": 1.0,
+              "median_rank": 1
+            }
+          },
+          "strip": {
+            "n": 659,
+            "cos": {
+              "recall_at_1": 1.0,
+              "recall_at_5": 1.0,
+              "median_rank": 1
+            },
+            "csls": {
+              "recall_at_1": 1.0,
+              "recall_at_5": 1.0,
+              "median_rank": 1
+            }
+          }
+        },
         "j_cross_model": {
           "full": 0.5863,
           "strip": 0.5182,
@@ -14382,6 +15606,7 @@
             "d": "strip",
             "f": "keep",
             "h": "tie",
+            "g": "tie",
             "j": "keep"
           },
           "n_strip": 2,
@@ -14399,8 +15624,8 @@
           "h": "ran",
           "j": "ran",
           "e": "skipped (--skip-llm): needs the Sonnet judge; sample written",
-          "g": "skipped (--skip-llm): needs Haiku paraphrases",
-          "i": "skipped (--skip-llm): needs Haiku paraphrases"
+          "g": "ran",
+          "i": "ran"
         }
       },
       "pw64": {
@@ -14774,6 +15999,40 @@
             "spearman_pairs_touching_changed": 0.2289
           }
         },
+        "g_paraphrase_invariance": {
+          "n": 110,
+          "mean_paraphrase_distance": 0.2723,
+          "mean_clause_distance": 0.0541,
+          "frac_clause_moves_more": 0.0
+        },
+        "i_heldout_recovery": {
+          "full": {
+            "n": 659,
+            "cos": {
+              "recall_at_1": 1.0,
+              "recall_at_5": 1.0,
+              "median_rank": 1
+            },
+            "csls": {
+              "recall_at_1": 1.0,
+              "recall_at_5": 1.0,
+              "median_rank": 1
+            }
+          },
+          "strip": {
+            "n": 659,
+            "cos": {
+              "recall_at_1": 1.0,
+              "recall_at_5": 1.0,
+              "median_rank": 1
+            },
+            "csls": {
+              "recall_at_1": 1.0,
+              "recall_at_5": 1.0,
+              "median_rank": 1
+            }
+          }
+        },
         "j_cross_model": {
           "full": 0.6272,
           "strip": 0.5727,
@@ -14798,6 +16057,7 @@
             "d": "strip",
             "f": "keep",
             "h": "tie",
+            "g": "tie",
             "j": "keep"
           },
           "n_strip": 2,
@@ -14815,8 +16075,8 @@
           "h": "ran",
           "j": "ran",
           "e": "skipped (--skip-llm): needs the Sonnet judge; sample written",
-          "g": "skipped (--skip-llm): needs Haiku paraphrases",
-          "i": "skipped (--skip-llm): needs Haiku paraphrases"
+          "g": "ran",
+          "i": "ran"
         }
       }
     }
@@ -14824,12 +16084,12 @@
   "_provenance": {
     "schema_version": "1.0",
     "produced_by": {
-      "cmd": "uv run python data_analysis/gap_generation/calibrate_metric.py --skip-llm --redraw-comparisons",
-      "git_sha": "c67dcdb+dirty",
+      "cmd": "uv run python data_analysis/gap_generation/calibrate_metric.py --skip-llm",
+      "git_sha": "0ad6218+dirty",
       "author": "Roger Dearnaley",
       "title": "M2 contrast-clause ablation"
     },
-    "produced_at": "2026-10-01T19:36:06+00:00",
+    "produced_at": "2026-10-01T22:29:35+00:00",
     "inputs": [
       {
         "dep_key": "labelled_pairs",
@@ -14843,10 +16103,10 @@
       {
         "dep_key": "contrast_cuts",
         "path": "data/candidates/calibration/contrast_cuts.json",
-        "fingerprint": "v1:2026-10-01T18:56:58+00:00@136654",
+        "fingerprint": "v1:2026-10-01T21:49:16+00:00@136633",
         "kind": "file",
         "dataset_id": null,
-        "last_modified_at": "2026-10-01T18:56:58+00:00",
+        "last_modified_at": "2026-10-01T21:49:16+00:00",
         "extras": {}
       },
       {
@@ -15520,6 +16780,6 @@
         ]
       }
     ],
-    "inputs_sha256": "8e8a99e8ba9d22c7d314f6d55354ea04b7b9206e3af625c7daf967404e394156"
+    "inputs_sha256": "38eb6915d8f18672402a9f64fc9929304dde76bfb564ec404c114c263f817b5b"
   }
 }

@@ -14044,12 +14044,12 @@
   "_provenance": {
     "schema_version": "1.0",
     "produced_by": {
-      "cmd": "uv run python data_analysis/gap_generation/calibrate_metric.py --skip-llm --redraw-comparisons",
-      "git_sha": "c67dcdb+dirty",
+      "cmd": "uv run python data_analysis/gap_generation/calibrate_metric.py --skip-llm",
+      "git_sha": "0ad6218+dirty",
       "author": "Roger Dearnaley",
       "title": "M2 thresholds against the bulk"
     },
-    "produced_at": "2026-10-01T19:36:06+00:00",
+    "produced_at": "2026-10-01T22:29:35+00:00",
     "inputs": [
       {
         "dep_key": "labelled_pairs",
@@ -14063,10 +14063,10 @@
       {
         "dep_key": "contrast_cuts",
         "path": "data/candidates/calibration/contrast_cuts.json",
-        "fingerprint": "v1:2026-10-01T18:56:58+00:00@136654",
+        "fingerprint": "v1:2026-10-01T21:49:16+00:00@136633",
         "kind": "file",
         "dataset_id": null,
-        "last_modified_at": "2026-10-01T18:56:58+00:00",
+        "last_modified_at": "2026-10-01T21:49:16+00:00",
         "extras": {}
       },
       {
@@ -14740,6 +14740,6 @@
         ]
       }
     ],
-    "inputs_sha256": "8e8a99e8ba9d22c7d314f6d55354ea04b7b9206e3af625c7daf967404e394156"
+    "inputs_sha256": "38eb6915d8f18672402a9f64fc9929304dde76bfb564ec404c114c263f817b5b"
   }
 }

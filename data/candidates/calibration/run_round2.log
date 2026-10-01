@@ -1,0 +1,612 @@
+warning: `VIRTUAL_ENV=/Users/roger/Documents/GitHub/assistant-axis/.venv` does not match the project environment path `.venv` and will be ignored; use `--active` to target the active environment instead
+2026-10-01T18:56:58Z INFO [openai] embedded 5340 texts in 0s; [usage] (no API calls)
+2026-10-01T18:56:58Z INFO [bge] embedded 5340 texts in 0s; [usage] (no API calls)
+2026-10-01T18:56:58Z INFO [gemma] embedded 5340 texts in 0s; [usage] (no API calls)
+2026-10-01T18:57:07Z INFO [openai|full|raw] view done in 0.1s
+2026-10-01T18:57:20Z INFO [openai|full|centred] view done in 13.2s
+2026-10-01T18:57:33Z INFO [openai|full|centred_pc1] view done in 13.2s
+2026-10-01T18:57:46Z INFO [openai|full|centred_pc3] view done in 13.2s
+2026-10-01T18:57:47Z INFO [openai|full|zca] view done in 0.2s
+2026-10-01T18:58:00Z INFO [openai|full|pw1] view done in 13.0s
+2026-10-01T18:58:13Z INFO [openai|full|pw2] view done in 12.9s
+2026-10-01T18:58:25Z INFO [openai|full|pw4] view done in 12.9s
+2026-10-01T18:58:38Z INFO [openai|full|pw8] view done in 12.9s
+2026-10-01T18:58:51Z INFO [openai|full|pw16] view done in 13.0s
+2026-10-01T18:59:04Z INFO [openai|full|pw32] view done in 13.1s
+2026-10-01T18:59:18Z INFO [openai|full|pw64] view done in 13.2s
+2026-10-01T18:59:18Z INFO [openai|noprefix|raw] view done in 0.1s
+2026-10-01T18:59:31Z INFO [openai|noprefix|centred] view done in 12.9s
+2026-10-01T18:59:44Z INFO [openai|noprefix|centred_pc1] view done in 13.0s
+2026-10-01T18:59:57Z INFO [openai|noprefix|centred_pc3] view done in 13.1s
+2026-10-01T18:59:57Z INFO [openai|noprefix|zca] view done in 0.2s
+2026-10-01T19:00:10Z INFO [openai|noprefix|pw1] view done in 13.0s
+2026-10-01T19:00:23Z INFO [openai|noprefix|pw2] view done in 13.0s
+2026-10-01T19:00:36Z INFO [openai|noprefix|pw4] view done in 13.0s
+2026-10-01T19:00:49Z INFO [openai|noprefix|pw8] view done in 13.1s
+2026-10-01T19:01:02Z INFO [openai|noprefix|pw16] view done in 13.1s
+2026-10-01T19:01:15Z INFO [openai|noprefix|pw32] view done in 13.1s
+2026-10-01T19:01:28Z INFO [openai|noprefix|pw64] view done in 13.2s
+2026-10-01T19:01:28Z INFO [openai|w20|raw] view done in 0.1s
+2026-10-01T19:01:41Z INFO [openai|w20|centred] view done in 13.0s
+2026-10-01T19:01:54Z INFO [openai|w20|centred_pc1] view done in 13.0s
+2026-10-01T19:02:07Z INFO [openai|w20|centred_pc3] view done in 13.1s
+2026-10-01T19:02:08Z INFO [openai|w20|zca] view done in 0.2s
+2026-10-01T19:02:21Z INFO [openai|w20|pw1] view done in 13.0s
+2026-10-01T19:02:34Z INFO [openai|w20|pw2] view done in 13.1s
+2026-10-01T19:02:47Z INFO [openai|w20|pw4] view done in 13.0s
+2026-10-01T19:03:00Z INFO [openai|w20|pw8] view done in 13.1s
+2026-10-01T19:03:13Z INFO [openai|w20|pw16] view done in 13.1s
+2026-10-01T19:03:26Z INFO [openai|w20|pw32] view done in 13.1s
+2026-10-01T19:03:39Z INFO [openai|w20|pw64] view done in 13.2s
+2026-10-01T19:03:39Z INFO [openai|w14|raw] view done in 0.1s
+2026-10-01T19:03:52Z INFO [openai|w14|centred] view done in 13.0s
+2026-10-01T19:04:05Z INFO [openai|w14|centred_pc1] view done in 13.1s
+2026-10-01T19:04:18Z INFO [openai|w14|centred_pc3] view done in 13.1s
+2026-10-01T19:04:19Z INFO [openai|w14|zca] view done in 0.2s
+2026-10-01T19:04:32Z INFO [openai|w14|pw1] view done in 13.0s
+2026-10-01T19:04:45Z INFO [openai|w14|pw2] view done in 13.1s
+2026-10-01T19:04:58Z INFO [openai|w14|pw4] view done in 13.0s
+2026-10-01T19:05:11Z INFO [openai|w14|pw8] view done in 13.1s
+2026-10-01T19:05:24Z INFO [openai|w14|pw16] view done in 13.1s
+2026-10-01T19:05:37Z INFO [openai|w14|pw32] view done in 13.1s
+2026-10-01T19:05:50Z INFO [openai|w14|pw64] view done in 13.3s
+2026-10-01T19:05:50Z INFO [openai|strip|raw] view done in 0.1s
+2026-10-01T19:06:03Z INFO [openai|strip|centred] view done in 13.0s
+2026-10-01T19:06:16Z INFO [openai|strip|centred_pc1] view done in 13.0s
+2026-10-01T19:06:29Z INFO [openai|strip|centred_pc3] view done in 13.1s
+2026-10-01T19:06:30Z INFO [openai|strip|zca] view done in 0.2s
+2026-10-01T19:06:43Z INFO [openai|strip|pw1] view done in 13.1s
+2026-10-01T19:06:56Z INFO [openai|strip|pw2] view done in 13.0s
+2026-10-01T19:07:09Z INFO [openai|strip|pw4] view done in 13.1s
+2026-10-01T19:07:22Z INFO [openai|strip|pw8] view done in 13.2s
+2026-10-01T19:07:35Z INFO [openai|strip|pw16] view done in 13.1s
+2026-10-01T19:07:48Z INFO [openai|strip|pw32] view done in 13.2s
+2026-10-01T19:08:02Z INFO [openai|strip|pw64] view done in 13.3s
+2026-10-01T19:08:02Z INFO [openai|dup|raw] view done in 0.1s
+2026-10-01T19:08:15Z INFO [openai|dup|centred] view done in 13.0s
+2026-10-01T19:08:28Z INFO [openai|dup|centred_pc1] view done in 13.1s
+2026-10-01T19:08:41Z INFO [openai|dup|centred_pc3] view done in 13.1s
+2026-10-01T19:08:41Z INFO [openai|dup|zca] view done in 0.2s
+2026-10-01T19:08:54Z INFO [openai|dup|pw1] view done in 13.1s
+2026-10-01T19:09:07Z INFO [openai|dup|pw2] view done in 13.1s
+2026-10-01T19:09:20Z INFO [openai|dup|pw4] view done in 13.1s
+2026-10-01T19:09:33Z INFO [openai|dup|pw8] view done in 13.1s
+2026-10-01T19:09:46Z INFO [openai|dup|pw16] view done in 13.1s
+2026-10-01T19:09:59Z INFO [openai|dup|pw32] view done in 13.1s
+2026-10-01T19:10:13Z INFO [openai|dup|pw64] view done in 13.2s
+2026-10-01T19:10:13Z INFO [bge|full|raw] view done in 0.0s
+2026-10-01T19:10:25Z INFO [bge|full|centred] view done in 12.8s
+2026-10-01T19:10:38Z INFO [bge|full|centred_pc1] view done in 12.8s
+2026-10-01T19:10:51Z INFO [bge|full|centred_pc3] view done in 12.8s
+2026-10-01T19:10:51Z INFO [bge|full|zca] view done in 0.1s
+2026-10-01T19:11:04Z INFO [bge|full|pw1] view done in 12.8s
+2026-10-01T19:11:17Z INFO [bge|full|pw2] view done in 12.8s
+2026-10-01T19:11:30Z INFO [bge|full|pw4] view done in 12.8s
+2026-10-01T19:11:43Z INFO [bge|full|pw8] view done in 12.8s
+2026-10-01T19:11:55Z INFO [bge|full|pw16] view done in 12.9s
+2026-10-01T19:12:08Z INFO [bge|full|pw32] view done in 12.9s
+2026-10-01T19:12:21Z INFO [bge|full|pw64] view done in 13.0s
+2026-10-01T19:12:21Z INFO [bge|noprefix|raw] view done in 0.0s
+2026-10-01T19:12:34Z INFO [bge|noprefix|centred] view done in 12.8s
+2026-10-01T19:12:47Z INFO [bge|noprefix|centred_pc1] view done in 12.8s
+2026-10-01T19:13:00Z INFO [bge|noprefix|centred_pc3] view done in 12.8s
+2026-10-01T19:13:00Z INFO [bge|noprefix|zca] view done in 0.1s
+2026-10-01T19:13:13Z INFO [bge|noprefix|pw1] view done in 12.8s
+2026-10-01T19:13:26Z INFO [bge|noprefix|pw2] view done in 12.8s
+2026-10-01T19:13:39Z INFO [bge|noprefix|pw4] view done in 12.8s
+2026-10-01T19:13:51Z INFO [bge|noprefix|pw8] view done in 12.9s
+2026-10-01T19:14:04Z INFO [bge|noprefix|pw16] view done in 12.9s
+2026-10-01T19:14:17Z INFO [bge|noprefix|pw32] view done in 12.9s
+2026-10-01T19:14:30Z INFO [bge|noprefix|pw64] view done in 13.0s
+2026-10-01T19:14:30Z INFO [bge|w20|raw] view done in 0.0s
+2026-10-01T19:14:43Z INFO [bge|w20|centred] view done in 12.7s
+2026-10-01T19:14:56Z INFO [bge|w20|centred_pc1] view done in 12.8s
+2026-10-01T19:15:09Z INFO [bge|w20|centred_pc3] view done in 12.8s
+2026-10-01T19:15:09Z INFO [bge|w20|zca] view done in 0.1s
+2026-10-01T19:15:22Z INFO [bge|w20|pw1] view done in 12.8s
+2026-10-01T19:15:34Z INFO [bge|w20|pw2] view done in 12.8s
+2026-10-01T19:15:47Z INFO [bge|w20|pw4] view done in 12.9s
+2026-10-01T19:16:00Z INFO [bge|w20|pw8] view done in 12.8s
+2026-10-01T19:16:13Z INFO [bge|w20|pw16] view done in 12.8s
+2026-10-01T19:16:26Z INFO [bge|w20|pw32] view done in 12.9s
+2026-10-01T19:16:39Z INFO [bge|w20|pw64] view done in 13.0s
+2026-10-01T19:16:39Z INFO [bge|w14|raw] view done in 0.0s
+2026-10-01T19:16:52Z INFO [bge|w14|centred] view done in 12.8s
+2026-10-01T19:17:04Z INFO [bge|w14|centred_pc1] view done in 12.9s
+2026-10-01T19:17:17Z INFO [bge|w14|centred_pc3] view done in 12.8s
+2026-10-01T19:17:17Z INFO [bge|w14|zca] view done in 0.1s
+2026-10-01T19:17:30Z INFO [bge|w14|pw1] view done in 12.8s
+2026-10-01T19:17:43Z INFO [bge|w14|pw2] view done in 12.9s
+2026-10-01T19:17:56Z INFO [bge|w14|pw4] view done in 12.9s
+2026-10-01T19:18:09Z INFO [bge|w14|pw8] view done in 12.9s
+2026-10-01T19:18:22Z INFO [bge|w14|pw16] view done in 13.0s
+2026-10-01T19:18:35Z INFO [bge|w14|pw32] view done in 13.1s
+2026-10-01T19:18:48Z INFO [bge|w14|pw64] view done in 13.1s
+2026-10-01T19:18:48Z INFO [bge|strip|raw] view done in 0.0s
+2026-10-01T19:19:01Z INFO [bge|strip|centred] view done in 12.9s
+2026-10-01T19:19:14Z INFO [bge|strip|centred_pc1] view done in 12.9s
+2026-10-01T19:19:27Z INFO [bge|strip|centred_pc3] view done in 13.0s
+2026-10-01T19:19:27Z INFO [bge|strip|zca] view done in 0.1s
+2026-10-01T19:19:40Z INFO [bge|strip|pw1] view done in 12.9s
+2026-10-01T19:19:53Z INFO [bge|strip|pw2] view done in 12.8s
+2026-10-01T19:20:05Z INFO [bge|strip|pw4] view done in 12.9s
+2026-10-01T19:20:18Z INFO [bge|strip|pw8] view done in 12.9s
+2026-10-01T19:20:31Z INFO [bge|strip|pw16] view done in 12.9s
+2026-10-01T19:20:44Z INFO [bge|strip|pw32] view done in 12.9s
+2026-10-01T19:20:57Z INFO [bge|strip|pw64] view done in 13.0s
+2026-10-01T19:20:57Z INFO [bge|dup|raw] view done in 0.0s
+2026-10-01T19:21:10Z INFO [bge|dup|centred] view done in 12.8s
+2026-10-01T19:21:23Z INFO [bge|dup|centred_pc1] view done in 12.9s
+2026-10-01T19:21:36Z INFO [bge|dup|centred_pc3] view done in 12.9s
+2026-10-01T19:21:36Z INFO [bge|dup|zca] view done in 0.1s
+2026-10-01T19:21:49Z INFO [bge|dup|pw1] view done in 12.9s
+2026-10-01T19:22:02Z INFO [bge|dup|pw2] view done in 12.9s
+2026-10-01T19:22:15Z INFO [bge|dup|pw4] view done in 12.9s
+2026-10-01T19:22:28Z INFO [bge|dup|pw8] view done in 12.9s
+2026-10-01T19:22:41Z INFO [bge|dup|pw16] view done in 13.0s
+2026-10-01T19:22:54Z INFO [bge|dup|pw32] view done in 13.0s
+2026-10-01T19:23:07Z INFO [bge|dup|pw64] view done in 13.0s
+2026-10-01T19:23:07Z INFO [gemma|full|raw] view done in 0.0s
+2026-10-01T19:23:20Z INFO [gemma|full|centred] view done in 12.8s
+2026-10-01T19:23:33Z INFO [gemma|full|centred_pc1] view done in 13.0s
+2026-10-01T19:23:46Z INFO [gemma|full|centred_pc3] view done in 13.0s
+2026-10-01T19:23:46Z INFO [gemma|full|zca] view done in 0.1s
+2026-10-01T19:23:59Z INFO [gemma|full|pw1] view done in 13.1s
+2026-10-01T19:24:12Z INFO [gemma|full|pw2] view done in 13.0s
+2026-10-01T19:24:25Z INFO [gemma|full|pw4] view done in 12.9s
+2026-10-01T19:24:38Z INFO [gemma|full|pw8] view done in 13.0s
+2026-10-01T19:24:51Z INFO [gemma|full|pw16] view done in 12.9s
+2026-10-01T19:25:04Z INFO [gemma|full|pw32] view done in 13.0s
+2026-10-01T19:25:17Z INFO [gemma|full|pw64] view done in 13.1s
+2026-10-01T19:25:17Z INFO [gemma|noprefix|raw] view done in 0.0s
+2026-10-01T19:25:30Z INFO [gemma|noprefix|centred] view done in 12.9s
+2026-10-01T19:25:42Z INFO [gemma|noprefix|centred_pc1] view done in 12.9s
+2026-10-01T19:25:55Z INFO [gemma|noprefix|centred_pc3] view done in 12.9s
+2026-10-01T19:25:55Z INFO [gemma|noprefix|zca] view done in 0.1s
+2026-10-01T19:26:08Z INFO [gemma|noprefix|pw1] view done in 12.9s
+2026-10-01T19:26:21Z INFO [gemma|noprefix|pw2] view done in 12.9s
+2026-10-01T19:26:34Z INFO [gemma|noprefix|pw4] view done in 12.9s
+2026-10-01T19:26:47Z INFO [gemma|noprefix|pw8] view done in 12.9s
+2026-10-01T19:27:00Z INFO [gemma|noprefix|pw16] view done in 12.9s
+2026-10-01T19:27:13Z INFO [gemma|noprefix|pw32] view done in 13.0s
+2026-10-01T19:27:26Z INFO [gemma|noprefix|pw64] view done in 13.1s
+2026-10-01T19:27:26Z INFO [gemma|w20|raw] view done in 0.0s
+2026-10-01T19:27:39Z INFO [gemma|w20|centred] view done in 12.9s
+2026-10-01T19:27:52Z INFO [gemma|w20|centred_pc1] view done in 12.9s
+2026-10-01T19:28:05Z INFO [gemma|w20|centred_pc3] view done in 12.9s
+2026-10-01T19:28:05Z INFO [gemma|w20|zca] view done in 0.1s
+2026-10-01T19:28:18Z INFO [gemma|w20|pw1] view done in 12.9s
+2026-10-01T19:28:31Z INFO [gemma|w20|pw2] view done in 12.9s
+2026-10-01T19:28:44Z INFO [gemma|w20|pw4] view done in 12.9s
+2026-10-01T19:28:57Z INFO [gemma|w20|pw8] view done in 12.9s
+2026-10-01T19:29:10Z INFO [gemma|w20|pw16] view done in 12.9s
+2026-10-01T19:29:22Z INFO [gemma|w20|pw32] view done in 12.9s
+2026-10-01T19:29:35Z INFO [gemma|w20|pw64] view done in 13.1s
+2026-10-01T19:29:36Z INFO [gemma|w14|raw] view done in 0.0s
+2026-10-01T19:29:48Z INFO [gemma|w14|centred] view done in 12.8s
+2026-10-01T19:30:01Z INFO [gemma|w14|centred_pc1] view done in 12.9s
+2026-10-01T19:30:14Z INFO [gemma|w14|centred_pc3] view done in 12.9s
+2026-10-01T19:30:14Z INFO [gemma|w14|zca] view done in 0.1s
+2026-10-01T19:30:27Z INFO [gemma|w14|pw1] view done in 12.9s
+2026-10-01T19:30:40Z INFO [gemma|w14|pw2] view done in 12.9s
+2026-10-01T19:30:53Z INFO [gemma|w14|pw4] view done in 12.9s
+2026-10-01T19:31:06Z INFO [gemma|w14|pw8] view done in 12.9s
+2026-10-01T19:31:19Z INFO [gemma|w14|pw16] view done in 12.9s
+2026-10-01T19:31:31Z INFO [gemma|w14|pw32] view done in 12.9s
+2026-10-01T19:31:45Z INFO [gemma|w14|pw64] view done in 13.1s
+2026-10-01T19:31:45Z INFO [gemma|strip|raw] view done in 0.0s
+2026-10-01T19:31:57Z INFO [gemma|strip|centred] view done in 12.8s
+2026-10-01T19:32:10Z INFO [gemma|strip|centred_pc1] view done in 12.9s
+2026-10-01T19:32:23Z INFO [gemma|strip|centred_pc3] view done in 12.9s
+2026-10-01T19:32:23Z INFO [gemma|strip|zca] view done in 0.1s
+2026-10-01T19:32:36Z INFO [gemma|strip|pw1] view done in 12.9s
+2026-10-01T19:32:49Z INFO [gemma|strip|pw2] view done in 12.9s
+2026-10-01T19:33:02Z INFO [gemma|strip|pw4] view done in 12.9s
+2026-10-01T19:33:15Z INFO [gemma|strip|pw8] view done in 12.9s
+2026-10-01T19:33:28Z INFO [gemma|strip|pw16] view done in 12.9s
+2026-10-01T19:33:41Z INFO [gemma|strip|pw32] view done in 12.9s
+2026-10-01T19:33:54Z INFO [gemma|strip|pw64] view done in 13.1s
+2026-10-01T19:33:54Z INFO [gemma|dup|raw] view done in 0.0s
+2026-10-01T19:34:06Z INFO [gemma|dup|centred] view done in 12.9s
+2026-10-01T19:34:19Z INFO [gemma|dup|centred_pc1] view done in 12.8s
+2026-10-01T19:34:32Z INFO [gemma|dup|centred_pc3] view done in 12.9s
+2026-10-01T19:34:32Z INFO [gemma|dup|zca] view done in 0.1s
+2026-10-01T19:34:45Z INFO [gemma|dup|pw1] view done in 12.9s
+2026-10-01T19:34:58Z INFO [gemma|dup|pw2] view done in 12.9s
+2026-10-01T19:35:11Z INFO [gemma|dup|pw4] view done in 12.9s
+2026-10-01T19:35:24Z INFO [gemma|dup|pw8] view done in 12.8s
+2026-10-01T19:35:37Z INFO [gemma|dup|pw16] view done in 12.9s
+2026-10-01T19:35:50Z INFO [gemma|dup|pw32] view done in 12.9s
+2026-10-01T19:36:03Z INFO [gemma|dup|pw64] view done in 13.1s
+M2 calibration: 659 traits; models ['openai', 'bge', 'gemma']; representations ['full', 'noprefix', 'w20', 'w14', 'strip', 'dup']; variants ['raw', 'centred', 'centred_pc1', 'centred_pc3', 'zca', 'pw1', 'pw2', 'pw4', 'pw8', 'pw16', 'pw32', 'pw64']; 5340 distinct texts (about 35 tokens each); uncached per model {'openai': 0, 'bge': 0, 'gemma': 0}; labelled pairs {'antonym': 284, 'deliberate_duplicate': 3, 'duplicate': 79, 'near_distinct': 34, 'polysemy_reject': 5, 'unrelated': 2000}; contrast rows 110 ({'N': 9, 'P': 68, 'S': 29} census + 6 new hits)
+cost estimate:
+  (no API calls)
+  total estimate = $0.000
+  budget $1.00; LLM criteria skipped (--skip-llm)
+{
+  "models_run": [
+    "openai",
+    "bge",
+    "gemma"
+  ],
+  "models_failed": {},
+  "provisional": {
+    "variant": "centred",
+    "metric": "cos",
+    "primary_model": "openai",
+    "rule": "mean rank over tasks (a), (b), (c) of the cross-model means (representation full); gloss recall@1 breaks ties",
+    "ranking": [
+      {
+        "variant": "centred",
+        "metric": "cos",
+        "a": 0.5549,
+        "b": 0.4542,
+        "c": 0.2738,
+        "gloss": 0.9302,
+        "rank_a": 20,
+        "rank_b": 2,
+        "rank_c": 1,
+        "mean_rank": 7.6667
+      },
+      {
+        "variant": "raw",
+        "metric": "csls",
+        "a": 0.607,
+        "b": 0.438,
+        "c": 0.1933,
+        "gloss": 0.9386,
+        "rank_a": 8,
+        "rank_b": 6,
+        "rank_c": 10,
+        "mean_rank": 8.0
+      },
+      {
+        "variant": "raw",
+        "metric": "cos",
+        "a": 0.5742,
+        "b": 0.462,
+        "c": 0.2552,
+        "gloss": 0.9312,
+        "rank_a": 17,
+        "rank_b": 1,
+        "rank_c": 6,
+        "mean_rank": 8.0
+      },
+      {
+        "variant": "pw1",
+        "metric": "cos",
+        "a": 0.5534,
+        "b": 0.4484,
+        "c": 0.2727,
+        "gloss": 0.9318,
+        "rank_a": 22,
+        "rank_b": 3,
+        "rank_c": 2,
+        "mean_rank": 9.0
+      },
+      {
+        "variant": "pw2",
+        "metric": "cos",
+        "a": 0.5537,
+        "b": 0.4421,
+        "c": 0.2706,
+        "gloss": 0.9334,
+        "rank_a": 21,
+        "rank_b": 4,
+        "rank_c": 3,
+        "mean_rank": 9.3333
+      },
+      {
+        "variant": "centred",
+        "metric": "csls",
+        "a": 0.604,
+        "b": 0.442,
+        "c": 0.1867,
+        "gloss": 0.9375,
+        "rank_a": 11,
+        "rank_b": 5,
+        "rank_c": 13,
+        "mean_rank": 9.6667
+      },
+      {
+        "variant": "pw4",
+        "metric": "csls",
+        "a": 0.6047,
+        "b": 0.4202,
+        "c": 0.1873,
+        "gloss": 0.9423,
+        "rank_a": 9,
+        "rank_b": 10,
+        "rank_c": 11,
+        "mean_rank": 10.0
+      },
+      {
+        "variant": "pw2",
+        "metric": "csls",
+        "a": 0.6045,
+        "b": 0.4299,
+        "c": 0.1872,
+        "gloss": 0.9391,
+        "rank_a": 10,
+        "rank_b": 8,
+        "rank_c": 12,
+        "mean_rank": 10.0
+      },
+      {
+        "variant": "pw1",
+        "metric": "csls",
+        "a": 0.604,
+        "b": 0.4357,
+        "c": 0.1861,
+        "gloss": 0.9386,
+        "rank_a": 12,
+        "rank_b": 7,
+        "rank_c": 15,
+        "mean_rank": 11.3333
+      },
+      {
+        "variant": "pw4",
+        "metric": "cos",
+        "a": 0.5525,
+        "b": 0.4297,
+        "c": 0.2652,
+        "gloss": 0.9365,
+        "rank_a": 23,
+        "rank_b": 9,
+        "rank_c": 4,
+        "mean_rank": 12.0
+      },
+      {
+        "variant": "pw8",
+        "metric": "csls",
+        "a": 0.6107,
+        "b": 0.3926,
+        "c": 0.1768,
+        "gloss": 0.9455,
+        "rank_a": 7,
+        "rank_b": 14,
+        "rank_c": 17,
+        "mean_rank": 12.6667
+      },
+      {
+        "variant": "pw8",
+        "metric": "cos",
+        "a": 0.5715,
+        "b": 0.3983,
+        "c": 0.2428,
+        "gloss": 0.9423,
+        "rank_a": 18,
+        "rank_b": 13,
+        "rank_c": 7,
+        "mean_rank": 12.6667
+      },
+      {
+        "variant": "centred_pc1",
+        "metric": "cos",
+        "a": 0.5423,
+        "b": 0.4161,
+        "c": 0.2559,
+        "gloss": 0.9328,
+        "rank_a": 24,
+        "rank_b": 11,
+        "rank_c": 5,
+        "mean_rank": 13.3333
+      },
+      {
+        "variant": "pw16",
+        "metric": "cos",
+        "a": 0.5897,
+        "b": 0.3686,
+        "c": 0.2174,
+        "gloss": 0.9481,
+        "rank_a": 16,
+        "rank_b": 17,
+        "rank_c": 8,
+        "mean_rank": 13.6667
+      },
+      {
+        "variant": "pw16",
+        "metric": "csls",
+        "a": 0.6145,
+        "b": 0.3644,
+        "c": 0.1654,
+        "gloss": 0.9481,
+        "rank_a": 4,
+        "rank_b": 18,
+        "rank_c": 19,
+        "mean_rank": 13.6667
+      },
+      {
+        "variant": "centred_pc1",
+        "metric": "csls",
+        "a": 0.598,
+        "b": 0.4048,
+        "c": 0.1789,
+        "gloss": 0.9418,
+        "rank_a": 14,
+        "rank_b": 12,
+        "rank_c": 16,
+        "mean_rank": 14.0
+      },
+      {
+        "variant": "zca",
+        "metric": "cos",
+        "a": 0.6554,
+        "b": 0.3501,
+        "c": 0.1012,
+        "gloss": 0.9656,
+        "rank_a": 1,
+        "rank_b": 19,
+        "rank_c": 23,
+        "mean_rank": 14.3333
+      },
+      {
+        "variant": "centred_pc3",
+        "metric": "cos",
+        "a": 0.5617,
+        "b": 0.374,
+        "c": 0.215,
+        "gloss": 0.9407,
+        "rank_a": 19,
+        "rank_b": 15,
+        "rank_c": 9,
+        "mean_rank": 14.3333
+      },
+      {
+        "variant": "pw64",
+        "metric": "cos",
+        "a": 0.6177,
+        "b": 0.3304,
+        "c": 0.1424,
+        "gloss": 0.955,
+        "rank_a": 2,
+        "rank_b": 22,
+        "rank_c": 20,
+        "mean_rank": 14.6667
+      },
+      {
+        "variant": "pw32",
+        "metric": "csls",
+        "a": 0.6144,
+        "b": 0.3353,
+        "c": 0.142,
+        "gloss": 0.954,
+        "rank_a": 5,
+        "rank_b": 21,
+        "rank_c": 21,
+        "mean_rank": 15.6667
+      },
+      {
+        "variant": "pw32",
+        "metric": "cos",
+        "a": 0.6032,
+        "b": 0.3438,
+        "c": 0.1861,
+        "gloss": 0.9508,
+        "rank_a": 13,
+        "rank_b": 20,
+        "rank_c": 14,
+        "mean_rank": 15.6667
+      },
+      {
+        "variant": "centred_pc3",
+        "metric": "csls",
+        "a": 0.5953,
+        "b": 0.3711,
+        "c": 0.1722,
+        "gloss": 0.9428,
+        "rank_a": 15,
+        "rank_b": 16,
+        "rank_c": 18,
+        "mean_rank": 16.3333
+      },
+      {
+        "variant": "zca",
+        "metric": "csls",
+        "a": 0.6145,
+        "b": 0.3135,
+        "c": 0.0893,
+        "gloss": 0.9662,
+        "rank_a": 3,
+        "rank_b": 24,
+        "rank_c": 24,
+        "mean_rank": 17.0
+      },
+      {
+        "variant": "pw64",
+        "metric": "csls",
+        "a": 0.6118,
+        "b": 0.3151,
+        "c": 0.1111,
+        "gloss": 0.9561,
+        "rank_a": 6,
+        "rank_b": 23,
+        "rank_c": 22,
+        "mean_rank": 17.0
+      }
+    ]
+  },
+  "contrast_recommendation": {
+    "openai": {
+      "votes": {
+        "b": "strip",
+        "d": "strip",
+        "f": "keep",
+        "h": "strip",
+        "j": "keep"
+      },
+      "n_strip": 3,
+      "n_keep": 2,
+      "n_class_unchanged_share": 0.7778,
+      "recommendation": "keep",
+      "rule": "strip only if more criteria favour stripping than keeping and the N class keeps >= 80% of its nearest neighbours; otherwise keep (plan 15: keep the clauses if the criteria are no worse with them)"
+    },
+    "bge": {
+      "votes": {
+        "b": "strip",
+        "d": "strip",
+        "f": "keep",
+        "h": "tie",
+        "j": "keep"
+      },
+      "n_strip": 2,
+      "n_keep": 2,
+      "n_class_unchanged_share": 0.8889,
+      "recommendation": "keep",
+      "rule": "strip only if more criteria favour stripping than keeping and the N class keeps >= 80% of its nearest neighbours; otherwise keep (plan 15: keep the clauses if the criteria are no worse with them)"
+    },
+    "gemma": {
+      "votes": {
+        "b": "strip",
+        "d": "strip",
+        "f": "keep",
+        "h": "tie",
+        "j": "keep"
+      },
+      "n_strip": 2,
+      "n_keep": 2,
+      "n_class_unchanged_share": 0.8889,
+      "recommendation": "keep",
+      "rule": "strip only if more criteria favour stripping than keeping and the N class keeps >= 80% of its nearest neighbours; otherwise keep (plan 15: keep the clauses if the criteria are no worse with them)"
+    }
+  },
+  "drop_or_merge": {
+    "n_pairs": 5,
+    "n_expected": 5,
+    "partners_excluded": {
+      "n_pairs": 16,
+      "by_model": {
+        "openai": {
+          "bulk": {
+            "q1": 0.3516,
+            "median": 0.4066,
+            "q3": 0.4733,
+            "upper_fence": 0.6559
+          },
+          "n_above_fence": 16
+        },
+        "bge": {
+          "bulk": {
+            "q1": 0.3679,
+            "median": 0.4232,
+            "q3": 0.4843,
+            "upper_fence": 0.6589
+          },
+          "n_above_fence": 21
+        },
+        "gemma": {
+          "bulk": {
+            "q1": 0.3947,
+            "median": 0.4483,
+            "q3": 0.52,
+            "upper_fence": 0.7079
+          },
+          "n_above_fence": 9
+        }
+      }
+    }
+  },
+  "cost_usd": 0,
+  "wall_time_s": 2348.3
+}
+[usage] (no API calls)

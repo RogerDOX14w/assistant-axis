@@ -566,6 +566,7 @@
           "d": "strip",
           "f": "keep",
           "h": "strip",
+          "g": "tie",
           "j": "keep"
         },
         "n_strip": 3,
@@ -580,6 +581,7 @@
           "d": "strip",
           "f": "keep",
           "h": "tie",
+          "g": "tie",
           "j": "keep"
         },
         "n_strip": 2,
@@ -594,6 +596,7 @@
           "d": "strip",
           "f": "keep",
           "h": "tie",
+          "g": "tie",
           "j": "keep"
         },
         "n_strip": 2,
@@ -639,6 +642,415 @@
         }
       }
     },
+    "settings": {
+      "covered": {
+        "representation": "w14",
+        "variant": "pw16",
+        "metric": "cos",
+        "recall_target": 0.95,
+        "recall_target_met": false,
+        "query": "no_label_14w",
+        "rule": "eligible: mean paraphrase recall@1 >= 0.95 (else within 0.01 of the best); then task (a) within 0.03 of the best eligible; then the best recall; excluded representations: ['strip']",
+        "thresholds": {
+          "openai": {
+            "t_hi": 0.3539,
+            "t_lo": 0.1806
+          },
+          "bge": {
+            "t_hi": 0.3148,
+            "t_lo": 0.2225
+          },
+          "gemma": {
+            "t_hi": 0.4094,
+            "t_lo": 0.2406
+          }
+        },
+        "evaluation": {
+          "auc_dup_vs_distinct": {
+            "openai": 0.637,
+            "bge": 0.5746,
+            "gemma": 0.6428
+          },
+          "auc_ant_vs_syn": {
+            "openai": 0.4284,
+            "bge": 0.3978,
+            "gemma": 0.4784
+          },
+          "paraphrase_recall_top1": {
+            "openai": 0.9439,
+            "bge": 0.8892,
+            "gemma": 0.9499
+          },
+          "recall_at_t_hi": {
+            "openai": 0.9514,
+            "bge": 0.9514,
+            "gemma": 0.9514
+          },
+          "heldout_recall_at_t_hi": {
+            "openai": 0.9497,
+            "bge": 0.9511,
+            "gemma": 0.9531
+          },
+          "antonym_rate_above_t_hi": {
+            "openai": 0.491,
+            "bge": 0.4874,
+            "gemma": 0.3682
+          },
+          "rate_above_t_hi": {
+            "openai": {
+              "duplicate": 1.0,
+              "deliberate_duplicate": 0.0,
+              "near_distinct": 0.1765,
+              "antonym": 0.491,
+              "unrelated": 0.001
+            },
+            "bge": {
+              "duplicate": 0.0,
+              "deliberate_duplicate": 0.0,
+              "near_distinct": 0.2353,
+              "antonym": 0.4874,
+              "unrelated": 0.0015
+            },
+            "gemma": {
+              "duplicate": 1.0,
+              "deliberate_duplicate": 0.0,
+              "near_distinct": 0.0882,
+              "antonym": 0.3682,
+              "unrelated": 0.001
+            }
+          },
+          "hidden_original_still_covered": {
+            "openai": 0.4992,
+            "bge": 0.7208,
+            "gemma": 0.4401
+          },
+          "n_corpus_nn_at_or_above_t_hi": {
+            "openai": 488,
+            "bge": 583,
+            "gemma": 416
+          }
+        },
+        "ranking": [
+          {
+            "representation": "w14",
+            "variant": "zca",
+            "a": 0.6765,
+            "b": 0.4196,
+            "recall": 0.8776
+          },
+          {
+            "representation": "noprefix",
+            "variant": "zca",
+            "a": 0.6625,
+            "b": 0.3609,
+            "recall": 0.8437
+          },
+          {
+            "representation": "w20",
+            "variant": "zca",
+            "a": 0.6595,
+            "b": 0.3886,
+            "recall": 0.871
+          },
+          {
+            "representation": "full",
+            "variant": "zca",
+            "a": 0.6554,
+            "b": 0.3501,
+            "recall": 0.8457
+          },
+          {
+            "representation": "w14",
+            "variant": "raw",
+            "a": 0.6395,
+            "b": 0.5465,
+            "recall": 0.9231
+          },
+          {
+            "representation": "w14",
+            "variant": "pw64",
+            "a": 0.6385,
+            "b": 0.3978,
+            "recall": 0.9155
+          },
+          {
+            "representation": "dup",
+            "variant": "zca",
+            "a": 0.6341,
+            "b": 0.336,
+            "recall": 0.8457
+          },
+          {
+            "representation": "w14",
+            "variant": "pw32",
+            "a": 0.6312,
+            "b": 0.4114,
+            "recall": 0.9231
+          },
+          {
+            "representation": "w20",
+            "variant": "pw64",
+            "a": 0.6306,
+            "b": 0.3677,
+            "recall": 0.917
+          },
+          {
+            "representation": "noprefix",
+            "variant": "pw64",
+            "a": 0.6248,
+            "b": 0.3441,
+            "recall": 0.8892
+          },
+          {
+            "representation": "w20",
+            "variant": "pw32",
+            "a": 0.6184,
+            "b": 0.3793,
+            "recall": 0.9231
+          },
+          {
+            "representation": "w14",
+            "variant": "pw16",
+            "a": 0.6181,
+            "b": 0.4349,
+            "recall": 0.9277
+          }
+        ]
+      },
+      "directional": {
+        "representation": "w20",
+        "variant": "centred",
+        "K": 10,
+        "K_rule": "fixed",
+        "K95_by_model": {
+          "openai": 376,
+          "bge": 240,
+          "gemma": 250
+        },
+        "K_sensitivity": {
+          "10": 0.2862,
+          "20": 0.2375,
+          "40": 0.2287,
+          "K95": 0.1421
+        },
+        "heldout": {
+          "10": 0.6306,
+          "20": 0.6472,
+          "40": 0.6326,
+          "K95": 0.4233
+        },
+        "c_by_model": {
+          "openai": 0.2995,
+          "bge": 0.2727,
+          "gemma": 0.2863
+        },
+        "caveat": "chosen on task (c), the correlation with the persona-space residual of existing traits: a proxy, not ground truth for missing traits",
+        "ranking": [
+          {
+            "representation": "w20",
+            "variant": "centred",
+            "K": "10",
+            "c": 0.2862
+          },
+          {
+            "representation": "w20",
+            "variant": "pw1",
+            "K": "10",
+            "c": 0.2847
+          },
+          {
+            "representation": "w20",
+            "variant": "pw2",
+            "K": "10",
+            "c": 0.279
+          },
+          {
+            "representation": "w20",
+            "variant": "pw4",
+            "K": "10",
+            "c": 0.2692
+          },
+          {
+            "representation": "noprefix",
+            "variant": "pw1",
+            "K": "10",
+            "c": 0.2684
+          },
+          {
+            "representation": "noprefix",
+            "variant": "centred",
+            "K": "10",
+            "c": 0.2675
+          },
+          {
+            "representation": "full",
+            "variant": "centred",
+            "K": "10",
+            "c": 0.2661
+          },
+          {
+            "representation": "dup",
+            "variant": "centred",
+            "K": "10",
+            "c": 0.2661
+          },
+          {
+            "representation": "noprefix",
+            "variant": "pw2",
+            "K": "10",
+            "c": 0.2658
+          },
+          {
+            "representation": "full",
+            "variant": "pw1",
+            "K": "10",
+            "c": 0.2658
+          },
+          {
+            "representation": "dup",
+            "variant": "pw1",
+            "K": "10",
+            "c": 0.2658
+          },
+          {
+            "representation": "w14",
+            "variant": "pw1",
+            "K": "10",
+            "c": 0.2615
+          }
+        ]
+      }
+    },
+    "proposed_metric_config": {
+      "config_version": "2026-10-01",
+      "models": {
+        "openai": "text-embedding-3-large",
+        "bge": "BAAI/bge-large-en-v1.5",
+        "gemma": "google/embeddinggemma-300m"
+      },
+      "covered": {
+        "space": {
+          "variant": "pw16",
+          "mean": "corpus_fixed"
+        },
+        "representation": "w14",
+        "metric": "cos",
+        "contrast": {
+          "openai": "keep",
+          "bge": "keep",
+          "gemma": "keep"
+        },
+        "thresholds": {
+          "openai": {
+            "t_hi": 0.3539,
+            "t_lo": 0.1806
+          },
+          "bge": {
+            "t_hi": 0.3148,
+            "t_lo": 0.2225
+          },
+          "gemma": {
+            "t_hi": 0.4094,
+            "t_lo": 0.2406
+          }
+        },
+        "query_form": "no_label_14w",
+        "evaluation": {
+          "auc_dup_vs_distinct": {
+            "openai": 0.637,
+            "bge": 0.5746,
+            "gemma": 0.6428
+          },
+          "auc_ant_vs_syn": {
+            "openai": 0.4284,
+            "bge": 0.3978,
+            "gemma": 0.4784
+          },
+          "paraphrase_recall_top1": {
+            "openai": 0.9439,
+            "bge": 0.8892,
+            "gemma": 0.9499
+          },
+          "recall_at_t_hi": {
+            "openai": 0.9514,
+            "bge": 0.9514,
+            "gemma": 0.9514
+          },
+          "heldout_recall_at_t_hi": {
+            "openai": 0.9497,
+            "bge": 0.9511,
+            "gemma": 0.9531
+          },
+          "antonym_rate_above_t_hi": {
+            "openai": 0.491,
+            "bge": 0.4874,
+            "gemma": 0.3682
+          },
+          "rate_above_t_hi": {
+            "openai": {
+              "duplicate": 1.0,
+              "deliberate_duplicate": 0.0,
+              "near_distinct": 0.1765,
+              "antonym": 0.491,
+              "unrelated": 0.001
+            },
+            "bge": {
+              "duplicate": 0.0,
+              "deliberate_duplicate": 0.0,
+              "near_distinct": 0.2353,
+              "antonym": 0.4874,
+              "unrelated": 0.0015
+            },
+            "gemma": {
+              "duplicate": 1.0,
+              "deliberate_duplicate": 0.0,
+              "near_distinct": 0.0882,
+              "antonym": 0.3682,
+              "unrelated": 0.001
+            }
+          },
+          "hidden_original_still_covered": {
+            "openai": 0.4992,
+            "bge": 0.7208,
+            "gemma": 0.4401
+          },
+          "n_corpus_nn_at_or_above_t_hi": {
+            "openai": 488,
+            "bge": 583,
+            "gemma": 416
+          }
+        }
+      },
+      "directional": {
+        "space": {
+          "variant": "centred",
+          "mean": "corpus_fixed"
+        },
+        "representation": "w20",
+        "K": 10,
+        "K_rule": "fixed",
+        "K_sensitivity": {
+          "10": 0.2862,
+          "20": 0.2375,
+          "40": 0.2287,
+          "K95": 0.1421
+        },
+        "evaluation": {
+          "spearman_persona_yield": {
+            "openai": 0.2995,
+            "bge": 0.2727,
+            "gemma": 0.2863
+          },
+          "heldout_stability": {
+            "10": 0.6306,
+            "20": 0.6472,
+            "40": 0.6326,
+            "K95": 0.4233
+          }
+        },
+        "caveat": "chosen on task (c), the correlation with the persona-space residual of existing traits: a proxy, not ground truth for missing traits"
+      }
+    },
     "pngs": [
       "data/candidates/calibration/nn_hist_openai.png",
       "data/candidates/calibration/nn_hist_bge.png",
@@ -665,7 +1077,9 @@
       "yield_source": "recomputed (plan 12 step 1): leave-one-out residual outside the top-K PCs of the other entities; the May 2026 scores survive only as the 24 bracketed values"
     },
     "llm": {
-      "skipped": true
+      "skipped": true,
+      "selected": [],
+      "n_paraphrases": 659
     },
     "cost_usd": 0,
     "usage": {
@@ -675,18 +1089,18 @@
       "total_completion_tokens": 0,
       "n_calls": 0
     },
-    "cost_usd_cumulative": 0.018888,
-    "wall_time_s": 2348.3
+    "cost_usd_cumulative": 0.368475,
+    "wall_time_s": 2418.9
   },
   "_provenance": {
     "schema_version": "1.0",
     "produced_by": {
-      "cmd": "uv run python data_analysis/gap_generation/calibrate_metric.py --skip-llm --redraw-comparisons",
-      "git_sha": "c67dcdb+dirty",
+      "cmd": "uv run python data_analysis/gap_generation/calibrate_metric.py --skip-llm",
+      "git_sha": "0ad6218+dirty",
       "author": "Roger Dearnaley",
       "title": "M2 calibration summary"
     },
-    "produced_at": "2026-10-01T19:36:06+00:00",
+    "produced_at": "2026-10-01T22:29:35+00:00",
     "inputs": [
       {
         "dep_key": "labelled_pairs",
@@ -700,10 +1114,10 @@
       {
         "dep_key": "contrast_cuts",
         "path": "data/candidates/calibration/contrast_cuts.json",
-        "fingerprint": "v1:2026-10-01T18:56:58+00:00@136654",
+        "fingerprint": "v1:2026-10-01T21:49:16+00:00@136633",
         "kind": "file",
         "dataset_id": null,
-        "last_modified_at": "2026-10-01T18:56:58+00:00",
+        "last_modified_at": "2026-10-01T21:49:16+00:00",
         "extras": {}
       },
       {
@@ -1377,6 +1791,6 @@
         ]
       }
     ],
-    "inputs_sha256": "8e8a99e8ba9d22c7d314f6d55354ea04b7b9206e3af625c7daf967404e394156"
+    "inputs_sha256": "38eb6915d8f18672402a9f64fc9929304dde76bfb564ec404c114c263f817b5b"
   }
 }

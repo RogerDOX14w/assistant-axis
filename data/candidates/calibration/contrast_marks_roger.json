@@ -1,0 +1,333 @@
+{
+  "result": {
+    "draw": 2,
+    "items": [
+      {
+        "id": 1,
+        "stem": "critical",
+        "label": "critical",
+        "class": "N",
+        "model": "openai",
+        "mark": "a",
+        "preferred": "full"
+      },
+      {
+        "id": 2,
+        "stem": "independent",
+        "label": "independent",
+        "class": "N",
+        "model": "bge",
+        "mark": "b",
+        "preferred": "strip"
+      },
+      {
+        "id": 3,
+        "stem": "reactive",
+        "label": "reactive",
+        "class": "N",
+        "model": "openai",
+        "mark": "b",
+        "preferred": "strip"
+      },
+      {
+        "id": 4,
+        "stem": "pluralist",
+        "label": "pluralist",
+        "class": "N",
+        "model": "gemma",
+        "mark": "b",
+        "preferred": "full"
+      },
+      {
+        "id": 5,
+        "stem": "progressive",
+        "label": "progressive",
+        "class": "N",
+        "model": "bge",
+        "mark": "a",
+        "preferred": "full"
+      },
+      {
+        "id": 6,
+        "stem": "closure_seeking",
+        "label": "closure-seeking",
+        "class": "P",
+        "model": "bge",
+        "mark": "a",
+        "preferred": "full"
+      },
+      {
+        "id": 7,
+        "stem": "open_ended",
+        "label": "open-ended",
+        "class": "P",
+        "model": "gemma",
+        "mark": "a",
+        "preferred": "full"
+      },
+      {
+        "id": 8,
+        "stem": "principled",
+        "label": "principled",
+        "class": "P",
+        "model": "gemma",
+        "mark": "a",
+        "preferred": "strip"
+      },
+      {
+        "id": 9,
+        "stem": "socratic",
+        "label": "socratic",
+        "class": "P",
+        "model": "openai",
+        "mark": "a",
+        "preferred": "strip"
+      },
+      {
+        "id": 10,
+        "stem": "friendly",
+        "label": "friendly",
+        "class": "S",
+        "model": "gemma",
+        "mark": "same",
+        "preferred": "same"
+      },
+      {
+        "id": 11,
+        "stem": "visceral",
+        "label": "visceral",
+        "class": "P",
+        "model": "openai",
+        "mark": "a",
+        "preferred": "strip"
+      },
+      {
+        "id": 12,
+        "stem": "constructivist",
+        "label": "constructivist",
+        "class": "P",
+        "model": "openai",
+        "mark": "a",
+        "preferred": "full"
+      },
+      {
+        "id": 13,
+        "stem": "rebellious",
+        "label": "rebellious",
+        "class": "P",
+        "model": "gemma",
+        "mark": "a",
+        "preferred": "strip"
+      },
+      {
+        "id": 14,
+        "stem": "qualitative",
+        "label": "qualitative",
+        "class": "P",
+        "model": "gemma",
+        "mark": "b",
+        "preferred": "strip"
+      },
+      {
+        "id": 15,
+        "stem": "optimistic",
+        "label": "optimistic",
+        "class": "P",
+        "model": "gemma",
+        "mark": "a",
+        "preferred": "full"
+      },
+      {
+        "id": 16,
+        "stem": "structuralist",
+        "label": "structuralist",
+        "class": "P",
+        "model": "gemma",
+        "mark": "a",
+        "preferred": "full"
+      },
+      {
+        "id": 17,
+        "stem": "superficial",
+        "label": "superficial",
+        "class": "P",
+        "model": "openai",
+        "mark": "b",
+        "preferred": "strip"
+      },
+      {
+        "id": 18,
+        "stem": "obedient",
+        "label": "obedient",
+        "class": "P",
+        "model": "bge",
+        "mark": "b",
+        "preferred": "strip"
+      },
+      {
+        "id": 19,
+        "stem": "esoteric",
+        "label": "esoteric",
+        "class": "P",
+        "model": "bge",
+        "mark": "b",
+        "preferred": "strip"
+      },
+      {
+        "id": 20,
+        "stem": "conceptual",
+        "label": "conceptual",
+        "class": "P",
+        "model": "openai",
+        "mark": "b",
+        "preferred": "strip"
+      },
+      {
+        "id": 21,
+        "stem": "destructive",
+        "label": "destructive",
+        "class": "P",
+        "model": "bge",
+        "mark": "b",
+        "preferred": "strip"
+      },
+      {
+        "id": 22,
+        "stem": "cerebral",
+        "label": "cerebral",
+        "class": "P",
+        "model": "gemma",
+        "mark": "b",
+        "preferred": "full"
+      },
+      {
+        "id": 23,
+        "stem": "submissive",
+        "label": "submissive",
+        "class": "P",
+        "model": "gemma",
+        "mark": "a",
+        "preferred": "strip"
+      },
+      {
+        "id": 24,
+        "stem": "precise",
+        "label": "precise",
+        "class": "P",
+        "model": "openai",
+        "mark": "b",
+        "preferred": "strip"
+      },
+      {
+        "id": 25,
+        "stem": "experiential",
+        "label": "experiential",
+        "class": "P",
+        "model": "openai",
+        "mark": "b",
+        "preferred": "strip"
+      },
+      {
+        "id": 26,
+        "stem": "understated",
+        "label": "understated",
+        "class": "P",
+        "model": "bge",
+        "mark": "a",
+        "preferred": "full"
+      },
+      {
+        "id": 27,
+        "stem": "uncertain",
+        "label": "uncertain",
+        "class": "P",
+        "model": "bge",
+        "mark": "b",
+        "preferred": "full"
+      },
+      {
+        "id": 28,
+        "stem": "exploratory",
+        "label": "exploratory",
+        "class": "P",
+        "model": "gemma",
+        "mark": "a",
+        "preferred": "full"
+      },
+      {
+        "id": 29,
+        "stem": "inclusive",
+        "label": "inclusive",
+        "class": "P",
+        "model": "gemma",
+        "mark": "b",
+        "preferred": "full"
+      },
+      {
+        "id": 30,
+        "stem": "quantitative",
+        "label": "quantitative",
+        "class": "P",
+        "model": "gemma",
+        "mark": "a",
+        "preferred": "strip"
+      }
+    ],
+    "counts": {
+      "full": 13,
+      "strip": 16,
+      "same": 1,
+      "unmarked": 0
+    },
+    "by_class": {
+      "N": {
+        "full": 3,
+        "strip": 2,
+        "same": 0
+      },
+      "P": {
+        "full": 10,
+        "strip": 14,
+        "same": 0
+      },
+      "S": {
+        "full": 0,
+        "strip": 0,
+        "same": 1
+      }
+    },
+    "n_decided": 29,
+    "sign_test_p_two_sided": 0.7111
+  },
+  "_provenance": {
+    "schema_version": "1.0",
+    "produced_by": {
+      "cmd": "uv run python -",
+      "git_sha": "0d790d4+dirty",
+      "author": "Roger Dearnaley",
+      "title": "Roger's marks on the blinded contrast comparisons, decoded"
+    },
+    "produced_at": "2026-10-01T20:48:27+00:00",
+    "inputs": [
+      {
+        "dep_key": "marks_sheet",
+        "path": "reports/trait_gap_generation/contrast_comparisons_for_marks.md",
+        "fingerprint": "v1:2026-10-01T20:45:30+00:00@86396",
+        "kind": "file",
+        "dataset_id": null,
+        "last_modified_at": "2026-10-01T20:45:30+00:00",
+        "extras": {}
+      },
+      {
+        "dep_key": "key",
+        "path": "data/candidates/calibration/contrast_comparisons_key.json",
+        "fingerprint": "v1:2026-10-01T19:37:12+00:00@53632",
+        "kind": "file",
+        "dataset_id": null,
+        "last_modified_at": "2026-10-01T19:37:12+00:00",
+        "extras": {}
+      }
+    ],
+    "inputs_sha256": "d2363560123aade6696981efd6ad9fbba9afe79642e8a27cb6b967462387b000"
+  }
+}

@@ -1,228 +1,228 @@
 warning: `VIRTUAL_ENV=/Users/roger/Documents/GitHub/assistant-axis/.venv` does not match the project environment path `.venv` and will be ignored; use `--active` to target the active environment instead
-2026-10-01T18:56:58Z INFO [openai] embedded 5340 texts in 0s; [usage] (no API calls)
-2026-10-01T18:56:58Z INFO [bge] embedded 5340 texts in 0s; [usage] (no API calls)
-2026-10-01T18:56:58Z INFO [gemma] embedded 5340 texts in 0s; [usage] (no API calls)
-2026-10-01T18:57:07Z INFO [openai|full|raw] view done in 0.1s
-2026-10-01T18:57:20Z INFO [openai|full|centred] view done in 13.2s
-2026-10-01T18:57:33Z INFO [openai|full|centred_pc1] view done in 13.2s
-2026-10-01T18:57:46Z INFO [openai|full|centred_pc3] view done in 13.2s
-2026-10-01T18:57:47Z INFO [openai|full|zca] view done in 0.2s
-2026-10-01T18:58:00Z INFO [openai|full|pw1] view done in 13.0s
-2026-10-01T18:58:13Z INFO [openai|full|pw2] view done in 12.9s
-2026-10-01T18:58:25Z INFO [openai|full|pw4] view done in 12.9s
-2026-10-01T18:58:38Z INFO [openai|full|pw8] view done in 12.9s
-2026-10-01T18:58:51Z INFO [openai|full|pw16] view done in 13.0s
-2026-10-01T18:59:04Z INFO [openai|full|pw32] view done in 13.1s
-2026-10-01T18:59:18Z INFO [openai|full|pw64] view done in 13.2s
-2026-10-01T18:59:18Z INFO [openai|noprefix|raw] view done in 0.1s
-2026-10-01T18:59:31Z INFO [openai|noprefix|centred] view done in 12.9s
-2026-10-01T18:59:44Z INFO [openai|noprefix|centred_pc1] view done in 13.0s
-2026-10-01T18:59:57Z INFO [openai|noprefix|centred_pc3] view done in 13.1s
-2026-10-01T18:59:57Z INFO [openai|noprefix|zca] view done in 0.2s
-2026-10-01T19:00:10Z INFO [openai|noprefix|pw1] view done in 13.0s
-2026-10-01T19:00:23Z INFO [openai|noprefix|pw2] view done in 13.0s
-2026-10-01T19:00:36Z INFO [openai|noprefix|pw4] view done in 13.0s
-2026-10-01T19:00:49Z INFO [openai|noprefix|pw8] view done in 13.1s
-2026-10-01T19:01:02Z INFO [openai|noprefix|pw16] view done in 13.1s
-2026-10-01T19:01:15Z INFO [openai|noprefix|pw32] view done in 13.1s
-2026-10-01T19:01:28Z INFO [openai|noprefix|pw64] view done in 13.2s
-2026-10-01T19:01:28Z INFO [openai|w20|raw] view done in 0.1s
-2026-10-01T19:01:41Z INFO [openai|w20|centred] view done in 13.0s
-2026-10-01T19:01:54Z INFO [openai|w20|centred_pc1] view done in 13.0s
-2026-10-01T19:02:07Z INFO [openai|w20|centred_pc3] view done in 13.1s
-2026-10-01T19:02:08Z INFO [openai|w20|zca] view done in 0.2s
-2026-10-01T19:02:21Z INFO [openai|w20|pw1] view done in 13.0s
-2026-10-01T19:02:34Z INFO [openai|w20|pw2] view done in 13.1s
-2026-10-01T19:02:47Z INFO [openai|w20|pw4] view done in 13.0s
-2026-10-01T19:03:00Z INFO [openai|w20|pw8] view done in 13.1s
-2026-10-01T19:03:13Z INFO [openai|w20|pw16] view done in 13.1s
-2026-10-01T19:03:26Z INFO [openai|w20|pw32] view done in 13.1s
-2026-10-01T19:03:39Z INFO [openai|w20|pw64] view done in 13.2s
-2026-10-01T19:03:39Z INFO [openai|w14|raw] view done in 0.1s
-2026-10-01T19:03:52Z INFO [openai|w14|centred] view done in 13.0s
-2026-10-01T19:04:05Z INFO [openai|w14|centred_pc1] view done in 13.1s
-2026-10-01T19:04:18Z INFO [openai|w14|centred_pc3] view done in 13.1s
-2026-10-01T19:04:19Z INFO [openai|w14|zca] view done in 0.2s
-2026-10-01T19:04:32Z INFO [openai|w14|pw1] view done in 13.0s
-2026-10-01T19:04:45Z INFO [openai|w14|pw2] view done in 13.1s
-2026-10-01T19:04:58Z INFO [openai|w14|pw4] view done in 13.0s
-2026-10-01T19:05:11Z INFO [openai|w14|pw8] view done in 13.1s
-2026-10-01T19:05:24Z INFO [openai|w14|pw16] view done in 13.1s
-2026-10-01T19:05:37Z INFO [openai|w14|pw32] view done in 13.1s
-2026-10-01T19:05:50Z INFO [openai|w14|pw64] view done in 13.3s
-2026-10-01T19:05:50Z INFO [openai|strip|raw] view done in 0.1s
-2026-10-01T19:06:03Z INFO [openai|strip|centred] view done in 13.0s
-2026-10-01T19:06:16Z INFO [openai|strip|centred_pc1] view done in 13.0s
-2026-10-01T19:06:29Z INFO [openai|strip|centred_pc3] view done in 13.1s
-2026-10-01T19:06:30Z INFO [openai|strip|zca] view done in 0.2s
-2026-10-01T19:06:43Z INFO [openai|strip|pw1] view done in 13.1s
-2026-10-01T19:06:56Z INFO [openai|strip|pw2] view done in 13.0s
-2026-10-01T19:07:09Z INFO [openai|strip|pw4] view done in 13.1s
-2026-10-01T19:07:22Z INFO [openai|strip|pw8] view done in 13.2s
-2026-10-01T19:07:35Z INFO [openai|strip|pw16] view done in 13.1s
-2026-10-01T19:07:48Z INFO [openai|strip|pw32] view done in 13.2s
-2026-10-01T19:08:02Z INFO [openai|strip|pw64] view done in 13.3s
-2026-10-01T19:08:02Z INFO [openai|dup|raw] view done in 0.1s
-2026-10-01T19:08:15Z INFO [openai|dup|centred] view done in 13.0s
-2026-10-01T19:08:28Z INFO [openai|dup|centred_pc1] view done in 13.1s
-2026-10-01T19:08:41Z INFO [openai|dup|centred_pc3] view done in 13.1s
-2026-10-01T19:08:41Z INFO [openai|dup|zca] view done in 0.2s
-2026-10-01T19:08:54Z INFO [openai|dup|pw1] view done in 13.1s
-2026-10-01T19:09:07Z INFO [openai|dup|pw2] view done in 13.1s
-2026-10-01T19:09:20Z INFO [openai|dup|pw4] view done in 13.1s
-2026-10-01T19:09:33Z INFO [openai|dup|pw8] view done in 13.1s
-2026-10-01T19:09:46Z INFO [openai|dup|pw16] view done in 13.1s
-2026-10-01T19:09:59Z INFO [openai|dup|pw32] view done in 13.1s
-2026-10-01T19:10:13Z INFO [openai|dup|pw64] view done in 13.2s
-2026-10-01T19:10:13Z INFO [bge|full|raw] view done in 0.0s
-2026-10-01T19:10:25Z INFO [bge|full|centred] view done in 12.8s
-2026-10-01T19:10:38Z INFO [bge|full|centred_pc1] view done in 12.8s
-2026-10-01T19:10:51Z INFO [bge|full|centred_pc3] view done in 12.8s
-2026-10-01T19:10:51Z INFO [bge|full|zca] view done in 0.1s
-2026-10-01T19:11:04Z INFO [bge|full|pw1] view done in 12.8s
-2026-10-01T19:11:17Z INFO [bge|full|pw2] view done in 12.8s
-2026-10-01T19:11:30Z INFO [bge|full|pw4] view done in 12.8s
-2026-10-01T19:11:43Z INFO [bge|full|pw8] view done in 12.8s
-2026-10-01T19:11:55Z INFO [bge|full|pw16] view done in 12.9s
-2026-10-01T19:12:08Z INFO [bge|full|pw32] view done in 12.9s
-2026-10-01T19:12:21Z INFO [bge|full|pw64] view done in 13.0s
-2026-10-01T19:12:21Z INFO [bge|noprefix|raw] view done in 0.0s
-2026-10-01T19:12:34Z INFO [bge|noprefix|centred] view done in 12.8s
-2026-10-01T19:12:47Z INFO [bge|noprefix|centred_pc1] view done in 12.8s
-2026-10-01T19:13:00Z INFO [bge|noprefix|centred_pc3] view done in 12.8s
-2026-10-01T19:13:00Z INFO [bge|noprefix|zca] view done in 0.1s
-2026-10-01T19:13:13Z INFO [bge|noprefix|pw1] view done in 12.8s
-2026-10-01T19:13:26Z INFO [bge|noprefix|pw2] view done in 12.8s
-2026-10-01T19:13:39Z INFO [bge|noprefix|pw4] view done in 12.8s
-2026-10-01T19:13:51Z INFO [bge|noprefix|pw8] view done in 12.9s
-2026-10-01T19:14:04Z INFO [bge|noprefix|pw16] view done in 12.9s
-2026-10-01T19:14:17Z INFO [bge|noprefix|pw32] view done in 12.9s
-2026-10-01T19:14:30Z INFO [bge|noprefix|pw64] view done in 13.0s
-2026-10-01T19:14:30Z INFO [bge|w20|raw] view done in 0.0s
-2026-10-01T19:14:43Z INFO [bge|w20|centred] view done in 12.7s
-2026-10-01T19:14:56Z INFO [bge|w20|centred_pc1] view done in 12.8s
-2026-10-01T19:15:09Z INFO [bge|w20|centred_pc3] view done in 12.8s
-2026-10-01T19:15:09Z INFO [bge|w20|zca] view done in 0.1s
-2026-10-01T19:15:22Z INFO [bge|w20|pw1] view done in 12.8s
-2026-10-01T19:15:34Z INFO [bge|w20|pw2] view done in 12.8s
-2026-10-01T19:15:47Z INFO [bge|w20|pw4] view done in 12.9s
-2026-10-01T19:16:00Z INFO [bge|w20|pw8] view done in 12.8s
-2026-10-01T19:16:13Z INFO [bge|w20|pw16] view done in 12.8s
-2026-10-01T19:16:26Z INFO [bge|w20|pw32] view done in 12.9s
-2026-10-01T19:16:39Z INFO [bge|w20|pw64] view done in 13.0s
-2026-10-01T19:16:39Z INFO [bge|w14|raw] view done in 0.0s
-2026-10-01T19:16:52Z INFO [bge|w14|centred] view done in 12.8s
-2026-10-01T19:17:04Z INFO [bge|w14|centred_pc1] view done in 12.9s
-2026-10-01T19:17:17Z INFO [bge|w14|centred_pc3] view done in 12.8s
-2026-10-01T19:17:17Z INFO [bge|w14|zca] view done in 0.1s
-2026-10-01T19:17:30Z INFO [bge|w14|pw1] view done in 12.8s
-2026-10-01T19:17:43Z INFO [bge|w14|pw2] view done in 12.9s
-2026-10-01T19:17:56Z INFO [bge|w14|pw4] view done in 12.9s
-2026-10-01T19:18:09Z INFO [bge|w14|pw8] view done in 12.9s
-2026-10-01T19:18:22Z INFO [bge|w14|pw16] view done in 13.0s
-2026-10-01T19:18:35Z INFO [bge|w14|pw32] view done in 13.1s
-2026-10-01T19:18:48Z INFO [bge|w14|pw64] view done in 13.1s
-2026-10-01T19:18:48Z INFO [bge|strip|raw] view done in 0.0s
-2026-10-01T19:19:01Z INFO [bge|strip|centred] view done in 12.9s
-2026-10-01T19:19:14Z INFO [bge|strip|centred_pc1] view done in 12.9s
-2026-10-01T19:19:27Z INFO [bge|strip|centred_pc3] view done in 13.0s
-2026-10-01T19:19:27Z INFO [bge|strip|zca] view done in 0.1s
-2026-10-01T19:19:40Z INFO [bge|strip|pw1] view done in 12.9s
-2026-10-01T19:19:53Z INFO [bge|strip|pw2] view done in 12.8s
-2026-10-01T19:20:05Z INFO [bge|strip|pw4] view done in 12.9s
-2026-10-01T19:20:18Z INFO [bge|strip|pw8] view done in 12.9s
-2026-10-01T19:20:31Z INFO [bge|strip|pw16] view done in 12.9s
-2026-10-01T19:20:44Z INFO [bge|strip|pw32] view done in 12.9s
-2026-10-01T19:20:57Z INFO [bge|strip|pw64] view done in 13.0s
-2026-10-01T19:20:57Z INFO [bge|dup|raw] view done in 0.0s
-2026-10-01T19:21:10Z INFO [bge|dup|centred] view done in 12.8s
-2026-10-01T19:21:23Z INFO [bge|dup|centred_pc1] view done in 12.9s
-2026-10-01T19:21:36Z INFO [bge|dup|centred_pc3] view done in 12.9s
-2026-10-01T19:21:36Z INFO [bge|dup|zca] view done in 0.1s
-2026-10-01T19:21:49Z INFO [bge|dup|pw1] view done in 12.9s
-2026-10-01T19:22:02Z INFO [bge|dup|pw2] view done in 12.9s
-2026-10-01T19:22:15Z INFO [bge|dup|pw4] view done in 12.9s
-2026-10-01T19:22:28Z INFO [bge|dup|pw8] view done in 12.9s
-2026-10-01T19:22:41Z INFO [bge|dup|pw16] view done in 13.0s
-2026-10-01T19:22:54Z INFO [bge|dup|pw32] view done in 13.0s
-2026-10-01T19:23:07Z INFO [bge|dup|pw64] view done in 13.0s
-2026-10-01T19:23:07Z INFO [gemma|full|raw] view done in 0.0s
-2026-10-01T19:23:20Z INFO [gemma|full|centred] view done in 12.8s
-2026-10-01T19:23:33Z INFO [gemma|full|centred_pc1] view done in 13.0s
-2026-10-01T19:23:46Z INFO [gemma|full|centred_pc3] view done in 13.0s
-2026-10-01T19:23:46Z INFO [gemma|full|zca] view done in 0.1s
-2026-10-01T19:23:59Z INFO [gemma|full|pw1] view done in 13.1s
-2026-10-01T19:24:12Z INFO [gemma|full|pw2] view done in 13.0s
-2026-10-01T19:24:25Z INFO [gemma|full|pw4] view done in 12.9s
-2026-10-01T19:24:38Z INFO [gemma|full|pw8] view done in 13.0s
-2026-10-01T19:24:51Z INFO [gemma|full|pw16] view done in 12.9s
-2026-10-01T19:25:04Z INFO [gemma|full|pw32] view done in 13.0s
-2026-10-01T19:25:17Z INFO [gemma|full|pw64] view done in 13.1s
-2026-10-01T19:25:17Z INFO [gemma|noprefix|raw] view done in 0.0s
-2026-10-01T19:25:30Z INFO [gemma|noprefix|centred] view done in 12.9s
-2026-10-01T19:25:42Z INFO [gemma|noprefix|centred_pc1] view done in 12.9s
-2026-10-01T19:25:55Z INFO [gemma|noprefix|centred_pc3] view done in 12.9s
-2026-10-01T19:25:55Z INFO [gemma|noprefix|zca] view done in 0.1s
-2026-10-01T19:26:08Z INFO [gemma|noprefix|pw1] view done in 12.9s
-2026-10-01T19:26:21Z INFO [gemma|noprefix|pw2] view done in 12.9s
-2026-10-01T19:26:34Z INFO [gemma|noprefix|pw4] view done in 12.9s
-2026-10-01T19:26:47Z INFO [gemma|noprefix|pw8] view done in 12.9s
-2026-10-01T19:27:00Z INFO [gemma|noprefix|pw16] view done in 12.9s
-2026-10-01T19:27:13Z INFO [gemma|noprefix|pw32] view done in 13.0s
-2026-10-01T19:27:26Z INFO [gemma|noprefix|pw64] view done in 13.1s
-2026-10-01T19:27:26Z INFO [gemma|w20|raw] view done in 0.0s
-2026-10-01T19:27:39Z INFO [gemma|w20|centred] view done in 12.9s
-2026-10-01T19:27:52Z INFO [gemma|w20|centred_pc1] view done in 12.9s
-2026-10-01T19:28:05Z INFO [gemma|w20|centred_pc3] view done in 12.9s
-2026-10-01T19:28:05Z INFO [gemma|w20|zca] view done in 0.1s
-2026-10-01T19:28:18Z INFO [gemma|w20|pw1] view done in 12.9s
-2026-10-01T19:28:31Z INFO [gemma|w20|pw2] view done in 12.9s
-2026-10-01T19:28:44Z INFO [gemma|w20|pw4] view done in 12.9s
-2026-10-01T19:28:57Z INFO [gemma|w20|pw8] view done in 12.9s
-2026-10-01T19:29:10Z INFO [gemma|w20|pw16] view done in 12.9s
-2026-10-01T19:29:22Z INFO [gemma|w20|pw32] view done in 12.9s
-2026-10-01T19:29:35Z INFO [gemma|w20|pw64] view done in 13.1s
-2026-10-01T19:29:36Z INFO [gemma|w14|raw] view done in 0.0s
-2026-10-01T19:29:48Z INFO [gemma|w14|centred] view done in 12.8s
-2026-10-01T19:30:01Z INFO [gemma|w14|centred_pc1] view done in 12.9s
-2026-10-01T19:30:14Z INFO [gemma|w14|centred_pc3] view done in 12.9s
-2026-10-01T19:30:14Z INFO [gemma|w14|zca] view done in 0.1s
-2026-10-01T19:30:27Z INFO [gemma|w14|pw1] view done in 12.9s
-2026-10-01T19:30:40Z INFO [gemma|w14|pw2] view done in 12.9s
-2026-10-01T19:30:53Z INFO [gemma|w14|pw4] view done in 12.9s
-2026-10-01T19:31:06Z INFO [gemma|w14|pw8] view done in 12.9s
-2026-10-01T19:31:19Z INFO [gemma|w14|pw16] view done in 12.9s
-2026-10-01T19:31:31Z INFO [gemma|w14|pw32] view done in 12.9s
-2026-10-01T19:31:45Z INFO [gemma|w14|pw64] view done in 13.1s
-2026-10-01T19:31:45Z INFO [gemma|strip|raw] view done in 0.0s
-2026-10-01T19:31:57Z INFO [gemma|strip|centred] view done in 12.8s
-2026-10-01T19:32:10Z INFO [gemma|strip|centred_pc1] view done in 12.9s
-2026-10-01T19:32:23Z INFO [gemma|strip|centred_pc3] view done in 12.9s
-2026-10-01T19:32:23Z INFO [gemma|strip|zca] view done in 0.1s
-2026-10-01T19:32:36Z INFO [gemma|strip|pw1] view done in 12.9s
-2026-10-01T19:32:49Z INFO [gemma|strip|pw2] view done in 12.9s
-2026-10-01T19:33:02Z INFO [gemma|strip|pw4] view done in 12.9s
-2026-10-01T19:33:15Z INFO [gemma|strip|pw8] view done in 12.9s
-2026-10-01T19:33:28Z INFO [gemma|strip|pw16] view done in 12.9s
-2026-10-01T19:33:41Z INFO [gemma|strip|pw32] view done in 12.9s
-2026-10-01T19:33:54Z INFO [gemma|strip|pw64] view done in 13.1s
-2026-10-01T19:33:54Z INFO [gemma|dup|raw] view done in 0.0s
-2026-10-01T19:34:06Z INFO [gemma|dup|centred] view done in 12.9s
-2026-10-01T19:34:19Z INFO [gemma|dup|centred_pc1] view done in 12.8s
-2026-10-01T19:34:32Z INFO [gemma|dup|centred_pc3] view done in 12.9s
-2026-10-01T19:34:32Z INFO [gemma|dup|zca] view done in 0.1s
-2026-10-01T19:34:45Z INFO [gemma|dup|pw1] view done in 12.9s
-2026-10-01T19:34:58Z INFO [gemma|dup|pw2] view done in 12.9s
-2026-10-01T19:35:11Z INFO [gemma|dup|pw4] view done in 12.9s
-2026-10-01T19:35:24Z INFO [gemma|dup|pw8] view done in 12.8s
-2026-10-01T19:35:37Z INFO [gemma|dup|pw16] view done in 12.9s
-2026-10-01T19:35:50Z INFO [gemma|dup|pw32] view done in 12.9s
-2026-10-01T19:36:03Z INFO [gemma|dup|pw64] view done in 13.1s
-M2 calibration: 659 traits; models ['openai', 'bge', 'gemma']; representations ['full', 'noprefix', 'w20', 'w14', 'strip', 'dup']; variants ['raw', 'centred', 'centred_pc1', 'centred_pc3', 'zca', 'pw1', 'pw2', 'pw4', 'pw8', 'pw16', 'pw32', 'pw64']; 5340 distinct texts (about 35 tokens each); uncached per model {'openai': 0, 'bge': 0, 'gemma': 0}; labelled pairs {'antonym': 284, 'deliberate_duplicate': 3, 'duplicate': 79, 'near_distinct': 34, 'polysemy_reject': 5, 'unrelated': 2000}; contrast rows 110 ({'N': 9, 'P': 68, 'S': 29} census + 6 new hits)
+2026-10-01T21:49:17Z INFO [openai] embedded 11798 texts in 0s; [usage] (no API calls)
+2026-10-01T21:49:17Z INFO [bge] embedded 11798 texts in 0s; [usage] (no API calls)
+2026-10-01T21:49:17Z INFO [gemma] embedded 11798 texts in 0s; [usage] (no API calls)
+2026-10-01T21:49:26Z INFO [openai|full|raw] view done in 0.1s
+2026-10-01T21:49:39Z INFO [openai|full|centred] view done in 13.4s
+2026-10-01T21:49:53Z INFO [openai|full|centred_pc1] view done in 13.4s
+2026-10-01T21:50:06Z INFO [openai|full|centred_pc3] view done in 13.4s
+2026-10-01T21:50:06Z INFO [openai|full|zca] view done in 0.3s
+2026-10-01T21:50:20Z INFO [openai|full|pw1] view done in 13.4s
+2026-10-01T21:50:33Z INFO [openai|full|pw2] view done in 13.4s
+2026-10-01T21:50:47Z INFO [openai|full|pw4] view done in 13.4s
+2026-10-01T21:51:00Z INFO [openai|full|pw8] view done in 13.5s
+2026-10-01T21:51:14Z INFO [openai|full|pw16] view done in 13.7s
+2026-10-01T21:51:28Z INFO [openai|full|pw32] view done in 13.9s
+2026-10-01T21:51:42Z INFO [openai|full|pw64] view done in 13.8s
+2026-10-01T21:51:42Z INFO [openai|noprefix|raw] view done in 0.1s
+2026-10-01T21:51:55Z INFO [openai|noprefix|centred] view done in 13.4s
+2026-10-01T21:52:09Z INFO [openai|noprefix|centred_pc1] view done in 13.6s
+2026-10-01T21:52:22Z INFO [openai|noprefix|centred_pc3] view done in 13.5s
+2026-10-01T21:52:23Z INFO [openai|noprefix|zca] view done in 0.3s
+2026-10-01T21:52:36Z INFO [openai|noprefix|pw1] view done in 13.5s
+2026-10-01T21:52:50Z INFO [openai|noprefix|pw2] view done in 13.5s
+2026-10-01T21:53:03Z INFO [openai|noprefix|pw4] view done in 13.5s
+2026-10-01T21:53:17Z INFO [openai|noprefix|pw8] view done in 13.5s
+2026-10-01T21:53:30Z INFO [openai|noprefix|pw16] view done in 13.5s
+2026-10-01T21:53:44Z INFO [openai|noprefix|pw32] view done in 13.5s
+2026-10-01T21:53:57Z INFO [openai|noprefix|pw64] view done in 13.7s
+2026-10-01T21:53:58Z INFO [openai|w20|raw] view done in 0.1s
+2026-10-01T21:54:11Z INFO [openai|w20|centred] view done in 13.5s
+2026-10-01T21:54:25Z INFO [openai|w20|centred_pc1] view done in 13.5s
+2026-10-01T21:54:38Z INFO [openai|w20|centred_pc3] view done in 13.5s
+2026-10-01T21:54:38Z INFO [openai|w20|zca] view done in 0.3s
+2026-10-01T21:54:52Z INFO [openai|w20|pw1] view done in 13.5s
+2026-10-01T21:55:05Z INFO [openai|w20|pw2] view done in 13.5s
+2026-10-01T21:55:19Z INFO [openai|w20|pw4] view done in 13.5s
+2026-10-01T21:55:32Z INFO [openai|w20|pw8] view done in 13.5s
+2026-10-01T21:55:46Z INFO [openai|w20|pw16] view done in 13.6s
+2026-10-01T21:55:59Z INFO [openai|w20|pw32] view done in 13.6s
+2026-10-01T21:56:13Z INFO [openai|w20|pw64] view done in 13.8s
+2026-10-01T21:56:13Z INFO [openai|w14|raw] view done in 0.1s
+2026-10-01T21:56:27Z INFO [openai|w14|centred] view done in 13.4s
+2026-10-01T21:56:40Z INFO [openai|w14|centred_pc1] view done in 13.5s
+2026-10-01T21:56:54Z INFO [openai|w14|centred_pc3] view done in 13.5s
+2026-10-01T21:56:54Z INFO [openai|w14|zca] view done in 0.3s
+2026-10-01T21:57:08Z INFO [openai|w14|pw1] view done in 13.6s
+2026-10-01T21:57:21Z INFO [openai|w14|pw2] view done in 13.6s
+2026-10-01T21:57:35Z INFO [openai|w14|pw4] view done in 13.5s
+2026-10-01T21:57:48Z INFO [openai|w14|pw8] view done in 13.5s
+2026-10-01T21:58:02Z INFO [openai|w14|pw16] view done in 13.6s
+2026-10-01T21:58:15Z INFO [openai|w14|pw32] view done in 13.6s
+2026-10-01T21:58:29Z INFO [openai|w14|pw64] view done in 13.7s
+2026-10-01T21:58:29Z INFO [openai|strip|raw] view done in 0.1s
+2026-10-01T21:58:43Z INFO [openai|strip|centred] view done in 13.4s
+2026-10-01T21:58:56Z INFO [openai|strip|centred_pc1] view done in 13.5s
+2026-10-01T21:59:10Z INFO [openai|strip|centred_pc3] view done in 13.5s
+2026-10-01T21:59:10Z INFO [openai|strip|zca] view done in 0.3s
+2026-10-01T21:59:24Z INFO [openai|strip|pw1] view done in 13.5s
+2026-10-01T21:59:37Z INFO [openai|strip|pw2] view done in 13.5s
+2026-10-01T21:59:51Z INFO [openai|strip|pw4] view done in 13.5s
+2026-10-01T22:00:04Z INFO [openai|strip|pw8] view done in 13.5s
+2026-10-01T22:00:18Z INFO [openai|strip|pw16] view done in 13.5s
+2026-10-01T22:00:31Z INFO [openai|strip|pw32] view done in 13.6s
+2026-10-01T22:00:45Z INFO [openai|strip|pw64] view done in 13.7s
+2026-10-01T22:00:45Z INFO [openai|dup|raw] view done in 0.1s
+2026-10-01T22:00:58Z INFO [openai|dup|centred] view done in 13.4s
+2026-10-01T22:01:12Z INFO [openai|dup|centred_pc1] view done in 13.5s
+2026-10-01T22:01:25Z INFO [openai|dup|centred_pc3] view done in 13.5s
+2026-10-01T22:01:26Z INFO [openai|dup|zca] view done in 0.3s
+2026-10-01T22:01:39Z INFO [openai|dup|pw1] view done in 13.5s
+2026-10-01T22:01:53Z INFO [openai|dup|pw2] view done in 13.5s
+2026-10-01T22:02:06Z INFO [openai|dup|pw4] view done in 13.5s
+2026-10-01T22:02:20Z INFO [openai|dup|pw8] view done in 13.5s
+2026-10-01T22:02:33Z INFO [openai|dup|pw16] view done in 13.5s
+2026-10-01T22:02:47Z INFO [openai|dup|pw32] view done in 13.6s
+2026-10-01T22:03:01Z INFO [openai|dup|pw64] view done in 13.8s
+2026-10-01T22:03:01Z INFO [bge|full|raw] view done in 0.1s
+2026-10-01T22:03:14Z INFO [bge|full|centred] view done in 13.2s
+2026-10-01T22:03:27Z INFO [bge|full|centred_pc1] view done in 13.3s
+2026-10-01T22:03:40Z INFO [bge|full|centred_pc3] view done in 13.3s
+2026-10-01T22:03:41Z INFO [bge|full|zca] view done in 0.2s
+2026-10-01T22:03:54Z INFO [bge|full|pw1] view done in 13.2s
+2026-10-01T22:04:07Z INFO [bge|full|pw2] view done in 13.3s
+2026-10-01T22:04:20Z INFO [bge|full|pw4] view done in 13.3s
+2026-10-01T22:04:34Z INFO [bge|full|pw8] view done in 13.3s
+2026-10-01T22:04:47Z INFO [bge|full|pw16] view done in 13.3s
+2026-10-01T22:05:00Z INFO [bge|full|pw32] view done in 13.3s
+2026-10-01T22:05:14Z INFO [bge|full|pw64] view done in 13.5s
+2026-10-01T22:05:14Z INFO [bge|noprefix|raw] view done in 0.1s
+2026-10-01T22:05:27Z INFO [bge|noprefix|centred] view done in 13.2s
+2026-10-01T22:05:40Z INFO [bge|noprefix|centred_pc1] view done in 13.2s
+2026-10-01T22:05:53Z INFO [bge|noprefix|centred_pc3] view done in 13.2s
+2026-10-01T22:05:54Z INFO [bge|noprefix|zca] view done in 0.2s
+2026-10-01T22:06:07Z INFO [bge|noprefix|pw1] view done in 13.3s
+2026-10-01T22:06:20Z INFO [bge|noprefix|pw2] view done in 13.3s
+2026-10-01T22:06:33Z INFO [bge|noprefix|pw4] view done in 13.2s
+2026-10-01T22:06:47Z INFO [bge|noprefix|pw8] view done in 13.3s
+2026-10-01T22:07:00Z INFO [bge|noprefix|pw16] view done in 13.3s
+2026-10-01T22:07:13Z INFO [bge|noprefix|pw32] view done in 13.3s
+2026-10-01T22:07:27Z INFO [bge|noprefix|pw64] view done in 13.5s
+2026-10-01T22:07:27Z INFO [bge|w20|raw] view done in 0.1s
+2026-10-01T22:07:40Z INFO [bge|w20|centred] view done in 13.2s
+2026-10-01T22:07:53Z INFO [bge|w20|centred_pc1] view done in 13.2s
+2026-10-01T22:08:06Z INFO [bge|w20|centred_pc3] view done in 13.2s
+2026-10-01T22:08:07Z INFO [bge|w20|zca] view done in 0.2s
+2026-10-01T22:08:20Z INFO [bge|w20|pw1] view done in 13.2s
+2026-10-01T22:08:33Z INFO [bge|w20|pw2] view done in 13.2s
+2026-10-01T22:08:46Z INFO [bge|w20|pw4] view done in 13.2s
+2026-10-01T22:08:59Z INFO [bge|w20|pw8] view done in 13.2s
+2026-10-01T22:09:12Z INFO [bge|w20|pw16] view done in 13.2s
+2026-10-01T22:09:26Z INFO [bge|w20|pw32] view done in 13.2s
+2026-10-01T22:09:39Z INFO [bge|w20|pw64] view done in 13.4s
+2026-10-01T22:09:39Z INFO [bge|w14|raw] view done in 0.1s
+2026-10-01T22:09:52Z INFO [bge|w14|centred] view done in 13.1s
+2026-10-01T22:10:05Z INFO [bge|w14|centred_pc1] view done in 13.2s
+2026-10-01T22:10:19Z INFO [bge|w14|centred_pc3] view done in 13.2s
+2026-10-01T22:10:19Z INFO [bge|w14|zca] view done in 0.2s
+2026-10-01T22:10:32Z INFO [bge|w14|pw1] view done in 13.2s
+2026-10-01T22:10:45Z INFO [bge|w14|pw2] view done in 13.2s
+2026-10-01T22:10:58Z INFO [bge|w14|pw4] view done in 13.2s
+2026-10-01T22:11:12Z INFO [bge|w14|pw8] view done in 13.2s
+2026-10-01T22:11:25Z INFO [bge|w14|pw16] view done in 13.2s
+2026-10-01T22:11:38Z INFO [bge|w14|pw32] view done in 13.2s
+2026-10-01T22:11:51Z INFO [bge|w14|pw64] view done in 13.4s
+2026-10-01T22:11:51Z INFO [bge|strip|raw] view done in 0.1s
+2026-10-01T22:12:05Z INFO [bge|strip|centred] view done in 13.1s
+2026-10-01T22:12:18Z INFO [bge|strip|centred_pc1] view done in 13.2s
+2026-10-01T22:12:31Z INFO [bge|strip|centred_pc3] view done in 13.2s
+2026-10-01T22:12:31Z INFO [bge|strip|zca] view done in 0.2s
+2026-10-01T22:12:44Z INFO [bge|strip|pw1] view done in 13.2s
+2026-10-01T22:12:57Z INFO [bge|strip|pw2] view done in 13.2s
+2026-10-01T22:13:11Z INFO [bge|strip|pw4] view done in 13.2s
+2026-10-01T22:13:24Z INFO [bge|strip|pw8] view done in 13.2s
+2026-10-01T22:13:37Z INFO [bge|strip|pw16] view done in 13.2s
+2026-10-01T22:13:50Z INFO [bge|strip|pw32] view done in 13.2s
+2026-10-01T22:14:04Z INFO [bge|strip|pw64] view done in 13.4s
+2026-10-01T22:14:04Z INFO [bge|dup|raw] view done in 0.1s
+2026-10-01T22:14:17Z INFO [bge|dup|centred] view done in 13.1s
+2026-10-01T22:14:30Z INFO [bge|dup|centred_pc1] view done in 13.2s
+2026-10-01T22:14:43Z INFO [bge|dup|centred_pc3] view done in 13.1s
+2026-10-01T22:14:43Z INFO [bge|dup|zca] view done in 0.2s
+2026-10-01T22:14:57Z INFO [bge|dup|pw1] view done in 13.2s
+2026-10-01T22:15:10Z INFO [bge|dup|pw2] view done in 13.2s
+2026-10-01T22:15:23Z INFO [bge|dup|pw4] view done in 13.2s
+2026-10-01T22:15:36Z INFO [bge|dup|pw8] view done in 13.2s
+2026-10-01T22:15:49Z INFO [bge|dup|pw16] view done in 13.2s
+2026-10-01T22:16:02Z INFO [bge|dup|pw32] view done in 13.2s
+2026-10-01T22:16:16Z INFO [bge|dup|pw64] view done in 13.4s
+2026-10-01T22:16:16Z INFO [gemma|full|raw] view done in 0.1s
+2026-10-01T22:16:29Z INFO [gemma|full|centred] view done in 13.1s
+2026-10-01T22:16:42Z INFO [gemma|full|centred_pc1] view done in 13.1s
+2026-10-01T22:16:55Z INFO [gemma|full|centred_pc3] view done in 13.1s
+2026-10-01T22:16:55Z INFO [gemma|full|zca] view done in 0.1s
+2026-10-01T22:17:09Z INFO [gemma|full|pw1] view done in 13.1s
+2026-10-01T22:17:22Z INFO [gemma|full|pw2] view done in 13.2s
+2026-10-01T22:17:35Z INFO [gemma|full|pw4] view done in 13.2s
+2026-10-01T22:17:48Z INFO [gemma|full|pw8] view done in 13.2s
+2026-10-01T22:18:01Z INFO [gemma|full|pw16] view done in 13.2s
+2026-10-01T22:18:15Z INFO [gemma|full|pw32] view done in 13.2s
+2026-10-01T22:18:28Z INFO [gemma|full|pw64] view done in 13.4s
+2026-10-01T22:18:28Z INFO [gemma|noprefix|raw] view done in 0.1s
+2026-10-01T22:18:41Z INFO [gemma|noprefix|centred] view done in 13.1s
+2026-10-01T22:18:54Z INFO [gemma|noprefix|centred_pc1] view done in 13.2s
+2026-10-01T22:19:07Z INFO [gemma|noprefix|centred_pc3] view done in 13.1s
+2026-10-01T22:19:08Z INFO [gemma|noprefix|zca] view done in 0.1s
+2026-10-01T22:19:21Z INFO [gemma|noprefix|pw1] view done in 13.2s
+2026-10-01T22:19:34Z INFO [gemma|noprefix|pw2] view done in 13.2s
+2026-10-01T22:19:47Z INFO [gemma|noprefix|pw4] view done in 13.2s
+2026-10-01T22:20:00Z INFO [gemma|noprefix|pw8] view done in 13.2s
+2026-10-01T22:20:13Z INFO [gemma|noprefix|pw16] view done in 13.2s
+2026-10-01T22:20:27Z INFO [gemma|noprefix|pw32] view done in 13.3s
+2026-10-01T22:20:40Z INFO [gemma|noprefix|pw64] view done in 13.4s
+2026-10-01T22:20:40Z INFO [gemma|w20|raw] view done in 0.1s
+2026-10-01T22:20:53Z INFO [gemma|w20|centred] view done in 13.2s
+2026-10-01T22:21:07Z INFO [gemma|w20|centred_pc1] view done in 13.2s
+2026-10-01T22:21:20Z INFO [gemma|w20|centred_pc3] view done in 13.2s
+2026-10-01T22:21:20Z INFO [gemma|w20|zca] view done in 0.1s
+2026-10-01T22:21:33Z INFO [gemma|w20|pw1] view done in 13.2s
+2026-10-01T22:21:46Z INFO [gemma|w20|pw2] view done in 13.2s
+2026-10-01T22:22:00Z INFO [gemma|w20|pw4] view done in 13.2s
+2026-10-01T22:22:13Z INFO [gemma|w20|pw8] view done in 13.2s
+2026-10-01T22:22:26Z INFO [gemma|w20|pw16] view done in 13.2s
+2026-10-01T22:22:39Z INFO [gemma|w20|pw32] view done in 13.3s
+2026-10-01T22:22:53Z INFO [gemma|w20|pw64] view done in 13.4s
+2026-10-01T22:22:53Z INFO [gemma|w14|raw] view done in 0.1s
+2026-10-01T22:23:06Z INFO [gemma|w14|centred] view done in 13.2s
+2026-10-01T22:23:19Z INFO [gemma|w14|centred_pc1] view done in 13.2s
+2026-10-01T22:23:32Z INFO [gemma|w14|centred_pc3] view done in 13.2s
+2026-10-01T22:23:33Z INFO [gemma|w14|zca] view done in 0.1s
+2026-10-01T22:23:46Z INFO [gemma|w14|pw1] view done in 13.2s
+2026-10-01T22:23:59Z INFO [gemma|w14|pw2] view done in 13.2s
+2026-10-01T22:24:12Z INFO [gemma|w14|pw4] view done in 13.2s
+2026-10-01T22:24:26Z INFO [gemma|w14|pw8] view done in 13.3s
+2026-10-01T22:24:39Z INFO [gemma|w14|pw16] view done in 13.3s
+2026-10-01T22:24:52Z INFO [gemma|w14|pw32] view done in 13.3s
+2026-10-01T22:25:05Z INFO [gemma|w14|pw64] view done in 13.4s
+2026-10-01T22:25:06Z INFO [gemma|strip|raw] view done in 0.1s
+2026-10-01T22:25:19Z INFO [gemma|strip|centred] view done in 13.2s
+2026-10-01T22:25:32Z INFO [gemma|strip|centred_pc1] view done in 13.3s
+2026-10-01T22:25:45Z INFO [gemma|strip|centred_pc3] view done in 13.2s
+2026-10-01T22:25:45Z INFO [gemma|strip|zca] view done in 0.1s
+2026-10-01T22:25:59Z INFO [gemma|strip|pw1] view done in 13.2s
+2026-10-01T22:26:12Z INFO [gemma|strip|pw2] view done in 13.2s
+2026-10-01T22:26:25Z INFO [gemma|strip|pw4] view done in 13.2s
+2026-10-01T22:26:38Z INFO [gemma|strip|pw8] view done in 13.2s
+2026-10-01T22:26:51Z INFO [gemma|strip|pw16] view done in 13.2s
+2026-10-01T22:27:05Z INFO [gemma|strip|pw32] view done in 13.3s
+2026-10-01T22:27:18Z INFO [gemma|strip|pw64] view done in 13.4s
+2026-10-01T22:27:18Z INFO [gemma|dup|raw] view done in 0.1s
+2026-10-01T22:27:31Z INFO [gemma|dup|centred] view done in 13.2s
+2026-10-01T22:27:45Z INFO [gemma|dup|centred_pc1] view done in 13.2s
+2026-10-01T22:27:58Z INFO [gemma|dup|centred_pc3] view done in 13.2s
+2026-10-01T22:27:58Z INFO [gemma|dup|zca] view done in 0.1s
+2026-10-01T22:28:11Z INFO [gemma|dup|pw1] view done in 13.2s
+2026-10-01T22:28:24Z INFO [gemma|dup|pw2] view done in 13.2s
+2026-10-01T22:28:38Z INFO [gemma|dup|pw4] view done in 13.2s
+2026-10-01T22:28:51Z INFO [gemma|dup|pw8] view done in 13.2s
+2026-10-01T22:29:04Z INFO [gemma|dup|pw16] view done in 13.2s
+2026-10-01T22:29:17Z INFO [gemma|dup|pw32] view done in 13.3s
+2026-10-01T22:29:31Z INFO [gemma|dup|pw64] view done in 13.5s
+M2 calibration: 659 traits; models ['openai', 'bge', 'gemma']; representations ['full', 'noprefix', 'w20', 'w14', 'strip', 'dup']; variants ['raw', 'centred', 'centred_pc1', 'centred_pc3', 'zca', 'pw1', 'pw2', 'pw4', 'pw8', 'pw16', 'pw32', 'pw64']; 11798 distinct texts (about 41 tokens each); uncached per model {'openai': 0, 'bge': 0, 'gemma': 0}; labelled pairs {'antonym': 284, 'deliberate_duplicate': 3, 'duplicate': 79, 'near_distinct': 34, 'polysemy_reject': 5, 'unrelated': 2000}; contrast rows 110 ({'N': 9, 'P': 68, 'S': 29} census + 6 new hits)
 cost estimate:
   (no API calls)
   total estimate = $0.000
-  budget $1.00; LLM criteria skipped (--skip-llm)
+  budget $1.00; LLM criteria skipped
 {
   "models_run": [
     "openai",
@@ -533,6 +533,7 @@ cost estimate:
         "d": "strip",
         "f": "keep",
         "h": "strip",
+        "g": "tie",
         "j": "keep"
       },
       "n_strip": 3,
@@ -547,6 +548,7 @@ cost estimate:
         "d": "strip",
         "f": "keep",
         "h": "tie",
+        "g": "tie",
         "j": "keep"
       },
       "n_strip": 2,
@@ -561,6 +563,7 @@ cost estimate:
         "d": "strip",
         "f": "keep",
         "h": "tie",
+        "g": "tie",
         "j": "keep"
       },
       "n_strip": 2,
@@ -607,6 +610,6 @@ cost estimate:
     }
   },
   "cost_usd": 0,
-  "wall_time_s": 2348.3
+  "wall_time_s": 2418.9
 }
 [usage] (no API calls)

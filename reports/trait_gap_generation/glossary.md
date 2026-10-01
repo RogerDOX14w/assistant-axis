@@ -176,6 +176,28 @@ with and without (b), nearest-neighbour changes (c), the antonym margin (d), a b
 (e), minimal pairs (f), paraphrase invariance (g), agreement with persona space (h), held-out
 recovery (i) and agreement between models (j).  (e), (g) and (i) need an LLM.
 
+<a id="paraphrase-recall"></a>
+### Paraphrase recall
+Each existing trait's description is reworded by a model (criterion g) and the rewording is used as
+a query: is the trait itself the nearest corpus entry?  The share for which it is.  It tests
+whether the embedding sees the same concept through different words, the case a re-proposed
+existing trait presents in M3.  Measured with and without the trait's label, and with the
+rewording cut to a gloss's 14 words (the M3 case).
+
+<a id="heldout-recovery"></a>
+### Held-out recovery (criterion i)
+Each trait is hidden from the corpus in turn and its rewording is scored against the rest.  For the
+covered decision: how often a hidden trait's rewording is still judged close to some other trait.
+For the directional score: whether the rewording gets the same residual score as the original
+did, i.e. whether the score measures the concept rather than the wording.
+
+<a id="two-settings"></a>
+### Covered and directional settings
+The two uses of the embedding in M3, tuned separately (Roger, 2026-10-02): "covered" asks whether a
+candidate is already in the corpus (nearest-neighbour cosine against a threshold); "directional"
+asks whether it adds a direction the corpus lacks (the residual fraction).  Each has its own
+space, representation and parameters in the metric config.
+
 <a id="blinded-comparisons"></a>
 ### Blinded comparisons (criterion e)
 For a sample of traits, the five nearest neighbours with the clauses kept and with them stripped,
