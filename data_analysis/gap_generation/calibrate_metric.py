@@ -210,8 +210,19 @@ def main(argv=None) -> int:
               f"commit first, or pass --allow-dirty", file=sys.stderr)
         return 2
     out.mkdir(parents=True, exist_ok=True)
-    usage = GuardedUsage(budget_usd=cap, usage_path=out / "usage.json")
-    usage.write_json(out / "usage.json")
+    # usage.json is cumulative over runs (a rerun from the cache must not erase what an earlier run paid);
+    # this run's own usage goes into run.json, and the cap applies to this run.
+    from assistant_axis.judge_pricing import MultiModelUsage
+    prior = MultiModelUsage.load_or_create(out / "usage.json")
+    usage = GuardedUsage(budget_usd=cap)
+
+    def write_usage():
+        total = MultiModelUsage()
+        total.merge_from(prior)
+        total.merge_from(usage)
+        total.write_json(out / "usage.json")
+        return total
+    write_usage()
     run = {"started_at": utc_now(), "git_sha": git_sha(), "argv": sys.argv[1:] if argv is None else argv,
            "allow_dirty": bool(args.allow_dirty), "dirty_check": {"paths": list(PLATFORM_PATHS), "dirty": dirty},
            "estimate_usd": round(est.usd, 4), "budget_usd": cap, "models_requested": args.models,
@@ -219,8 +230,9 @@ def main(argv=None) -> int:
 
     def save_run():
         run["cost_usd"] = round(usage.total_cost_usd, 6)
+        run["usage_this_run"] = usage.as_dict()
+        run["cost_usd_cumulative"] = round(write_usage().total_cost_usd, 6)
         (out / "run.json").write_text(json.dumps(run, indent=2) + "\n")
-        usage.write_json(out / "usage.json")
 
     # ---------------------------------------------------------------- embeddings
     emb = {}
@@ -233,7 +245,7 @@ def main(argv=None) -> int:
             run["models_run"].append(arm)
             logger.info("[%s] embedded %d texts in %.0fs; %s", arm, len(every), time.time() - ts, usage.log_line())
         except Exception as exc:  # noqa: BLE001 - one arm failing must not lose the others
-            if type(exc).__name__ == "BudgetExceededError":
+            if type(exc).__name__ == "BudgetExceededError":   # GuardedUsage raised at the cap
                 save_run()
                 raise
             run["models_failed"][arm] = f"{type(exc).__name__}: {exc}"
@@ -384,7 +396,9 @@ def main(argv=None) -> int:
     # ---------------------------------------------------------------- drop or merge
     link = C.arrangement_linker(ci["arrangement_of"])
     delib = C.deliberate_set(lp)
-    dm = {}
+    arranged = {(ci["index"][a], ci["index"][b]) for a, lst in ci["arrangement_of"].items() for _, mem in lst
+                for b in mem if b != a and a in ci["index"] and b in ci["index"]}
+    dm, dm_masked, masked_info = {}, {}, {}
     for arm in arms:
         views = {var: keep_views[f"{arm}|full|{var}"][0] for var in args.variants}
         # plan 15 step 7: the tail that separates from the bulk (the NN distribution's upper fence,
@@ -392,13 +406,20 @@ def main(argv=None) -> int:
         t_cut = thr[f"{arm}|full|{rec_variant}"]["cos"]["bulk"]["upper_fence"]
         for r in C.drop_or_merge_rows(views, ci["stems"], primary=rec_variant, metric="cos", t_hi=t_cut,
                                       flagged_by=arm, arrangement_link=link, deliberate=delib):
-            k = tuple(sorted((r["trait"], r["nearest"])))
-            if k in dm:
-                dm[k]["flagged_by"].append(arm)
-                dm[k]["sims_by_model"][arm] = r["sim"]
-            else:
-                dm[k] = {**r, "flagged_by": [arm], "sims_by_model": {arm: r["sim"]}}
-    write_drop_or_merge(out / "drop_or_merge.md", dm, ci, arms, args.variants, rec_variant, rec_metric, thr)
+            _merge_dm(dm, r, arm)
+        # step 8 proper: the nearest neighbour once recorded arrangement partners are excluded
+        mnn = C.masked_nn(views[rec_variant], arranged)
+        q1, q3 = np.quantile(mnn[1], [0.25, 0.75])
+        fence = float(q3 + 1.5 * (q3 - q1))
+        masked_info[arm] = {"bulk": {"q1": C._r(float(q1)), "median": C._r(float(np.median(mnn[1]))), "q3": C._r(float(q3)),
+                                     "upper_fence": C._r(fence)}, "n_above_fence": int((mnn[1] > fence).sum())}
+        for r in C.drop_or_merge_rows(views, ci["stems"], primary=rec_variant, metric="cos", t_hi=fence,
+                                      flagged_by=arm, arrangement_link=link, deliberate=delib, nn=mnn):
+            _merge_dm(dm_masked, r, arm)
+        if arm == primary:
+            masked_primary = mnn
+    write_drop_or_merge(out / "drop_or_merge.md", dm, dm_masked, masked_info, ci, arms, args.variants, rec_variant,
+                        thr)
 
     # ---------------------------------------------------------------- contrast ablation
     ablation = {}
@@ -484,12 +505,15 @@ def main(argv=None) -> int:
                                 "gloss recall@1 breaks ties",
                         "ranking": [{k: (C._r(v) if isinstance(v, float) else v) for k, v in d.items()}
                                     for *_, d in rank]},
-        "novelty_extremes": C.most_and_least_novel(rec_view, ci["stems"], rec_metric if rec_metric != "csls" else "csls"),
+        "novelty_extremes": C.most_and_least_novel(rec_view, ci["stems"], rec_metric),
+        "novelty_extremes_partners_excluded": C.most_and_least_novel(rec_view, ci["stems"], "cos", nn=masked_primary),
         "contrast_recommendation": {arm: ablation.get(arm, {}).get(rec_variant, {}).get("recommendation")
                                     for arm in arms},
-        "drop_or_merge": {"n_pairs": len(dm), "n_expected": sum(1 for r in dm.values() if r["arrangement"] or r["deliberate_duplicate"])},
+        "drop_or_merge": {"n_pairs": len(dm), "n_expected": sum(1 for r in dm.values() if r["arrangement"] or r["deliberate_duplicate"]),
+                          "partners_excluded": {"n_pairs": len(dm_masked), "by_model": masked_info}},
         "pngs": pngs, "persona": persona_info, "llm": llm, "cost_usd": round(usage.total_cost_usd, 6),
-        "usage": usage.as_dict(), "wall_time_s": round(time.time() - t0, 1)}
+        "usage": usage.as_dict(), "cost_usd_cumulative": round(write_usage().total_cost_usd, 6),
+        "wall_time_s": round(time.time() - t0, 1)}
     write("summary.json", summary, "M2 calibration summary")
     run["finished_at"] = utc_now()
     timings["total"] = round(time.time() - t0, 1)
@@ -516,30 +540,51 @@ def _trait_link(stem: str, label: str, rel: str) -> str:
     return f"[{label}]({rel}/{stem}.json)"
 
 
-def write_drop_or_merge(path: Path, dm: dict, ci: dict, arms, variants, rec_variant, rec_metric, thr) -> None:
+def _merge_dm(dm: dict, r: dict, arm: str) -> None:
+    k = tuple(sorted((r["trait"], r["nearest"])))
+    if k in dm:
+        dm[k]["flagged_by"].append(arm)
+        dm[k]["sims_by_model"][arm] = r["sim"]
+    else:
+        dm[k] = {**r, "flagged_by": [arm], "sims_by_model": {arm: r["sim"]}}
+
+
+def _dm_table(rows: dict, ci: dict, variants) -> list[str]:
     rel = "../../traits/instructions"
-    lines = [f"# Drop-or-merge candidates (M2 pilot, plan 15 step 8)", "",
-             f"Traits whose nearest existing neighbour lies beyond the upper fence (Q3 + 1.5 IQR) of the leave-one-out "
-             f"nearest-neighbour cosine distribution in the provisional space variant ({rec_variant}, representation "
-             f"`full`), for any model run; fence per model: "
-             + ", ".join(f"{a} {thr[f'{a}|full|{rec_variant}']['cos']['bulk']['upper_fence']}" for a in arms) + ". "
-             "(The covered threshold from the labelled duplicates, `t_hi`, falls below the random-pair threshold `t_lo` "
-             "on this corpus, so it cannot define the tail; see thresholds.json.) "
-             "Pairs in a recorded arrangement or labelled deliberate duplicates are listed but expected. "
-             "Similarities are cosine in each variant (the first model that flagged the pair).", "",
-             "| trait | nearest | flagged by | " + " | ".join(variants) + " | arrangement | deliberate dup | description A | description B |",
+    lines = ["| trait | nearest | flagged by | " + " | ".join(variants) + " | arrangement | deliberate dup | description A | description B |",
              "|" + "---|" * (len(variants) + 7)]
-    order = sorted(dm.values(), key=lambda r: (bool(r["arrangement"] or r["deliberate_duplicate"]), -len(r["flagged_by"]),
-                                               -(r["primary_score"] or 0)))
+    order = sorted(rows.values(), key=lambda r: (bool(r["arrangement"] or r["deliberate_duplicate"]), -len(r["flagged_by"]),
+                                                 -(r["primary_score"] or 0)))
     for r in order:
         a, b = r["trait"], r["nearest"]
-        first = r["flagged_by"][0]
-        sims = r["sims_by_model"][first]
+        sims = r["sims_by_model"][r["flagged_by"][0]]
         da = ci["corpus"][a]["description"].replace("|", "/")
         db = ci["corpus"][b]["description"].replace("|", "/")
         lines.append(f"| {_trait_link(a, ci['corpus'][a]['label'], rel)} | {_trait_link(b, ci['corpus'][b]['label'], rel)} | "
                      f"{', '.join(r['flagged_by'])} | " + " | ".join(str(sims.get(v)) for v in variants)
                      + f" | {r['arrangement'] or ''} | {'yes' if r['deliberate_duplicate'] else ''} | {da} | {db} |")
+    return lines
+
+
+def write_drop_or_merge(path: Path, dm: dict, dm_masked: dict, masked_info: dict, ci: dict, arms, variants,
+                        rec_variant, thr) -> None:
+    lines = ["# Drop-or-merge candidates (M2 pilot, plan 15 step 8)", "",
+             "Similarities are cosine under each space variant, for the first model that flagged the pair; "
+             f"membership is decided in the provisional variant ({rec_variant}, representation `full`).  The covered "
+             "threshold from the labelled duplicates, `t_hi`, falls below the random-pair threshold `t_lo` on this "
+             "corpus for every model and variant (see thresholds.json), so it cannot define a tail; both tables use "
+             "the upper fence (Q3 + 1.5 IQR) of a nearest-neighbour distribution instead.", "",
+             "## Partners excluded (the real candidates)", "",
+             "Each trait's nearest neighbour once its recorded arrangement partners (pair, triangle, tetrahedron, "
+             "sequence) are ruled out, as plan 15 step 8 asks (the antonym probe that would do this is M3's).  Fence per "
+             "model: " + ", ".join(f"{a} {masked_info[a]['bulk']['upper_fence']} ({masked_info[a]['n_above_fence']} traits "
+                                   f"above)" for a in arms) + ".", ""]
+    lines += _dm_table(dm_masked, ci, variants) if dm_masked else ["(none)"]
+    lines += ["", "## All neighbours (expected: recorded pairs)", "",
+              "The plain nearest neighbour; fence per model: "
+              + ", ".join(f"{a} {thr[f'{a}|full|{rec_variant}']['cos']['bulk']['upper_fence']}" for a in arms)
+              + ".  Every row here is a recorded clean pair whose two descriptions mirror each other.", ""]
+    lines += _dm_table(dm, ci, variants) if dm else ["(none)"]
     path.write_text("\n".join(lines) + "\n", encoding="utf-8")
 
 

@@ -159,7 +159,9 @@ def test_m2_mechanical_gates():
     from assistant_axis.gapgen.paths import CALIBRATION_DIR, REPO_ROOT
     s = _calibration("summary.json")
     usage = json.loads((CALIBRATION_DIR / "usage.json").read_text())
-    assert usage["total_cost_usd"] == pytest.approx(s["cost_usd"], abs=1e-4)
+    # usage.json is cumulative over runs; the summary carries this run's and the cumulative figure
+    assert usage["total_cost_usd"] == pytest.approx(s["cost_usd_cumulative"], abs=1e-4)
+    assert usage["total_cost_usd"] >= s["cost_usd"] - 1e-9
     assert s["models_run"]
     for png in s["pngs"]:
         assert (REPO_ROOT / png).exists()

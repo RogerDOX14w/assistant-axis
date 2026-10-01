@@ -310,3 +310,15 @@ def test_histogram_png_has_metadata(synth, tmp_path):
     C.plot_nn_histograms(out, model="hash", representation="full", panels=panels)
     info = Image.open(out).info
     assert info["Title"].startswith("Leave-one-out nearest-neighbour similarity") and "Creation Time" in info
+
+
+def test_masked_nn_excludes_partners(synth):
+    E, stems, index, lp = synth
+    v = C.build_view(E, "raw", residual=False)
+    assert v.nn_cos_idx[10] == 11
+    idx, sim = C.masked_nn(v, {(10, 11)})
+    assert idx[10] != 11 and idx[11] != 10 and sim[10] < v.nn_cos[10]
+    rows = C.drop_or_merge_rows({"raw": v}, stems, primary="raw", metric="cos", t_hi=-1.0, nn=(idx, sim))
+    assert all({r["trait"], r["nearest"]} != {"t10", "t11"} for r in rows)
+    ex = C.most_and_least_novel(v, stems, "cos", n=2, nn=(idx, sim))
+    assert len(ex["most"]) == 2

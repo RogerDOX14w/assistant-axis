@@ -316,16 +316,31 @@ def gloss_recovery(view: View, queries: Mapping[str, np.ndarray], index: Mapping
     return out
 
 
+def masked_nn(view: View, exclude: Iterable[tuple[int, int]], *, metric: str = "cos") -> tuple[np.ndarray, np.ndarray]:
+    """Nearest neighbours with some pairs ruled out (step 8: "after the antonym
+    probe has excluded pair partners"; here the recorded arrangements stand in
+    for the probe, which is M3's)."""
+    M = np.array(view.S if metric == "cos" else view.C, copy=True)
+    for i, j in exclude:
+        M[i, j] = M[j, i] = -np.inf
+    idx = M.argmax(axis=1)
+    return idx, M[np.arange(len(M)), idx]
+
+
 def drop_or_merge_rows(views: Mapping[str, View], stems: Sequence[str], *, primary: str, metric: str,
-                       t_hi: float, flagged_by: str = "", arrangement_link=None, deliberate=frozenset()) -> list[dict]:
+                       t_hi: float, flagged_by: str = "", arrangement_link=None, deliberate=frozenset(),
+                       nn: Optional[tuple[np.ndarray, np.ndarray]] = None) -> list[dict]:
     """Step 8: traits whose nearest neighbour under ``views[primary]`` (``metric``)
     is at or above ``t_hi``; each row gives the neighbour, its similarity under
     every variant, whether the two share a recorded arrangement, and whether
     they are a labelled deliberate duplicate.  ``arrangement_link(a, b)``
     returns the arrangement kind or ``None``."""
     v = views[primary]
-    nn_idx = v.nn_cos_idx if metric == "cos" else v.nn_csls_idx
-    nn_val = v.nn_cos if metric == "cos" else v.nn_csls
+    if nn is not None:
+        nn_idx, nn_val = nn
+    else:
+        nn_idx = v.nn_cos_idx if metric == "cos" else v.nn_csls_idx
+        nn_val = v.nn_cos if metric == "cos" else v.nn_csls
     rows, seen = [], set()
     for i in np.argsort(-nn_val):
         if nn_val[i] < t_hi:
@@ -646,7 +661,17 @@ def deliberate_set(lp) -> set:
     return {tuple(sorted((p.a, p.b))) for p in lp.pairs if p.relation == "deliberate_duplicate"}
 
 
-def most_and_least_novel(view: View, stems: Sequence[str], metric: str, n: int = 10) -> dict:
+def most_and_least_novel(view: View, stems: Sequence[str], metric: str, n: int = 10,
+                         nn: Optional[tuple[np.ndarray, np.ndarray]] = None) -> dict:
+    """The ``n`` most and least novel traits (local score; with ``nn`` given, the
+    masked nearest neighbours, e.g. with recorded partners excluded)."""
+    if nn is not None:
+        nov = (1.0 - nn[1]) if metric == "cos" else -nn[1]
+        order = np.argsort(-nov)
+        idx = nn[0]
+        def row(i):
+            return {"stem": stems[i], "score": _r(float(nov[i])), "nearest": stems[int(idx[i])]}
+        return {"most": [row(i) for i in order[:n]], "least": [row(i) for i in order[::-1][:n]]}
     nov = view.novelty(metric)
     order = np.argsort(-nov)
     nn = view.nn_cos_idx if metric != "csls" else view.nn_csls_idx

@@ -468,3 +468,16 @@ def test_calibrate_end_to_end_with_hash_embedder(tmp_path):
     abl = json.loads((cal / "contrast_ablation.json").read_text())["result"]["hash"]["centred"]
     assert abl["criteria_status"]["e"].startswith("skipped") and abl["recommendation"]["recommendation"] in ("keep", "strip")
     assert (tmp_path / "marks.md").read_text().count("Mark (A / B / same)") == 30
+
+
+def test_calibrate_usage_is_cumulative_over_runs(tmp_path):
+    from data_analysis.gap_generation import calibrate_metric
+    args = _calib_args(tmp_path, "--no-residual")
+    assert calibrate_metric.main(args) == 0
+    first = json.loads((tmp_path / "cal" / "usage.json").read_text())
+    assert first["n_calls"] >= 1
+    assert calibrate_metric.main(args) == 0          # all cached: no new calls
+    second = json.loads((tmp_path / "cal" / "usage.json").read_text())
+    assert second["n_calls"] == first["n_calls"]
+    run = json.loads((tmp_path / "cal" / "run.json").read_text())
+    assert run["usage_this_run"]["n_calls"] == 0
