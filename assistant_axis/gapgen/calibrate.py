@@ -917,15 +917,26 @@ def plot_nn_histograms(path, *, model: str, representation: str, panels: Sequenc
 
 # --------------------------------------------------------------------------- the two settings (round 3)
 
+COVERED_QUERY = "no_label_14w"
+EXCLUDED_REPRESENTATIONS = ("strip",)    # Roger, 2026-10-02: keep the contrast clauses in the embedded text
+A_BAND = 0.03          # task (a) differences below this are noise (AUC standard error with 82 v 34 pairs ~0.05)
+RECALL_BAND = 0.01     # recall differences below this are noise (659 queries)
+
+
 def choose_settings(rows: Sequence[dict], para_rows: Sequence[dict], heldout_rows: Sequence[dict],
-                    models: Sequence[str], *, recall_target: float = 0.95, query: str = "no_label") -> dict:
+                    models: Sequence[str], *, recall_target: float = 0.95, query: str = COVERED_QUERY,
+                    exclude_representations: Sequence[str] = EXCLUDED_REPRESENTATIONS) -> dict:
     """Roger, 2026-10-02: the embedding serves two uses in M3, chosen separately.
 
-    * covered: (representation, variant) with cosine, among those whose mean
-      paraphrase recall@1 over the models meets ``recall_target``, the one with
-      the best mean task (a); if none meets it, the best recall.  Thresholds per
-      model from the paraphrases.  Task (b) and the antonym share above
-      ``t_hi`` are reported, not used.
+    * covered: (representation, variant) with cosine.  Eligible: mean paraphrase
+      recall@1 over the models at or above ``recall_target``, or, if none is,
+      within ``RECALL_BAND`` of the best.  Among the eligible, those within
+      ``A_BAND`` of the best mean task (a); of those, the best recall.  The
+      paraphrase query form ``query`` defaults to the M3 case: a paraphrase cut
+      to a gloss's 14 words, without a label.  Thresholds per model from the
+      paraphrases.  Task (b) and the antonym share above ``t_hi`` are reported,
+      not used.  ``exclude_representations`` (default ``strip``: the contrast
+      clauses are kept) never qualify, for either setting.
     * directional: (representation, variant, K) with the best mean task (c) over
       the models, the residual at K = 10, 20, 40 or K_95; the K sensitivity and
       criterion (i)'s stability beside it."""
@@ -939,7 +950,7 @@ def choose_settings(rows: Sequence[dict], para_rows: Sequence[dict], heldout_row
     held = {(h["representation"], h["variant"], h["model"]): h for h in heldout_rows}
     cands = []
     for (rep, var), per_model in by.items():
-        if not all(m in per_model and "cos" in per_model[m] for m in models):
+        if rep in exclude_representations or not all(m in per_model and "cos" in per_model[m] for m in models):
             continue
         rec = [((para.get((rep, var, m)) or {}).get("recall") or {}).get("cos", {}).get("recall_at_1") for m in models]
         if any(x is None for x in rec):
@@ -951,13 +962,18 @@ def choose_settings(rows: Sequence[dict], para_rows: Sequence[dict], heldout_row
     out = {}
     if cands:
         ok = [c for c in cands if c["recall"] >= recall_target]
-        pool = ok or cands
-        best = max(pool, key=(lambda c: (c["a"], c["recall"])) if ok else (lambda c: (c["recall"], c["a"])))
+        eligible = ok or [c for c in cands if c["recall"] >= max(x["recall"] for x in cands) - RECALL_BAND]
+        top_a = max(c["a"] for c in eligible)
+        band = [c for c in eligible if c["a"] >= top_a - A_BAND]
+        best = max(band, key=lambda c: (c["recall"], c["a"]))
         rep, var = best["representation"], best["variant"]
         cov = {m: para[(rep, var, m)]["covered"] for m in models}
         out["covered"] = {
             "representation": rep, "variant": var, "metric": "cos", "recall_target": recall_target,
             "recall_target_met": bool(ok), "query": query,
+            "rule": f"eligible: mean paraphrase recall@1 >= {recall_target} (else within {RECALL_BAND} of the best); "
+                    f"then task (a) within {A_BAND} of the best eligible; then the best recall; "
+                    f"excluded representations: {list(exclude_representations)}",
             "thresholds": {m: {"t_hi": cov[m].get("t_hi"), "t_lo": cov[m].get("t_lo")} for m in models},
             "evaluation": {
                 "auc_dup_vs_distinct": {m: by[(rep, var)][m]["cos"].get("auc_dup_vs_distinct") for m in models},
@@ -973,7 +989,7 @@ def choose_settings(rows: Sequence[dict], para_rows: Sequence[dict], heldout_row
                               key=lambda c: (-(c["recall"] >= recall_target), -c["a"]))[:12]}
     dcands = []
     for (rep, var), per_model in by.items():
-        if not all(m in per_model for m in models):
+        if rep in exclude_representations or not all(m in per_model for m in models):
             continue
         for K in ("10", "20", "40", "K95"):
             met = f"resid_{K}"
@@ -1022,3 +1038,41 @@ def proposed_metric_config(settings: Mapping, *, models: Mapping, contrast: Mapp
                             "K_sensitivity": dirn["K_sensitivity"],
                             "evaluation": {"spearman_persona_yield": dirn["c_by_model"], "heldout_stability": dirn["heldout"]},
                             "caveat": dirn["caveat"]}}
+
+
+def decode_marks(sheet_text: str, key_items: Sequence[dict]) -> dict:
+    """Roger's marks on the blinded sheet decoded against the key: for each item
+    the version he preferred (``full`` = clause kept, ``strip`` = clause removed,
+    ``same``, or ``None`` when unmarked), with counts overall and by class and a
+    two-sided sign-test p value over the decided items."""
+    import re
+    from math import comb
+    marks = {}
+    cur = None
+    for line in sheet_text.splitlines():
+        m = re.match(r"^### (\d+)\.", line)
+        if m:
+            cur = int(m.group(1))
+            continue
+        m = re.match(r"^Mark \(A / B / same\):\s*(\S*)", line)
+        if m and cur is not None:
+            marks[cur] = m.group(1).strip().lower() or None
+    items, counts = [], {"full": 0, "strip": 0, "same": 0, "unmarked": 0}
+    by_class: dict = defaultdict(lambda: {"full": 0, "strip": 0, "same": 0})
+    for it in key_items:
+        mk = marks.get(it["id"])
+        pref = None
+        if mk in ("a", "b"):
+            pref = it["key"][mk.upper()]
+        elif mk == "same":
+            pref = "same"
+        items.append({"id": it["id"], "stem": it["stem"], "label": it.get("label"), "class": it.get("class"),
+                      "model": it.get("model"), "mark": mk, "preferred": pref})
+        counts[pref or "unmarked"] += 1
+        if pref:
+            by_class[it.get("class")][pref] += 1
+    n = counts["full"] + counts["strip"]
+    k = max(counts["full"], counts["strip"])
+    p = min(1.0, 2 * sum(comb(n, j) for j in range(k, n + 1)) / 2 ** n) if n else None
+    return {"items": items, "counts": counts, "by_class": dict(by_class), "n_decided": n,
+            "sign_test_p_two_sided": _r(p) if p is not None else None}

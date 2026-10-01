@@ -522,7 +522,7 @@ def test_calibrate_paraphrase_stage_with_fake_haiku(tmp_path, monkeypatch):
     assert "claude-haiku-4-5-20251001" in usage["per_model"]
     assert all("sonnet" not in m for m in usage["per_model"])           # (e) not run
     pm = json.loads((cal / "paraphrase_metrics.json").read_text())["result"]
-    assert {r["query"] for r in pm["recall_and_covered"]} == {"label", "no_label"}
+    assert {r["query"] for r in pm["recall_and_covered"]} == {"label", "no_label", "no_label_14w"}
     assert pm["heldout_directional"] and pm["heldout_directional"][0]["n"] == 659
     summ = json.loads((cal / "summary.json").read_text())["result"]
     assert set(summ["settings"]) == {"covered", "directional"}

@@ -121,7 +121,7 @@ def build_texts(ci: dict, lp, cuts: dict, reps, minimal, glosses: dict, paraphra
     minimal[text], gloss[rep][stem], para[rep][stem] ("label: paraphrase") and
     para_nl[rep][stem] (the paraphrase alone, as a concept re-proposed under an unknown
     label); paraphrases are the short (candidate) side, so they go through represent_short."""
-    out = {"corpus": {}, "ext": {}, "gloss": {}, "minimal": {}, "para": {}, "para_nl": {}}
+    out = {"corpus": {}, "ext": {}, "gloss": {}, "minimal": {}, "para": {}, "para_nl": {}, "para_14": {}}
     for rep in reps:
         out["corpus"][rep] = [represent(l, d, rep, cut=cuts.get(s) if rep == "strip" else None)
                               for s, l, d in zip(ci["stems"], ci["labels"], ci["descriptions"])]
@@ -138,6 +138,9 @@ def build_texts(ci: dict, lp, cuts: dict, reps, minimal, glosses: dict, paraphra
         out["para"][rep] = {s: represent_short(ci["corpus"][s]["label"], p, rep) for s, p in paraphrases.items()
                             if s in ci["index"]}
         out["para_nl"][rep] = {s: represent_short(None, p, rep) for s, p in paraphrases.items() if s in ci["index"]}
+        # the M3 case: a candidate gloss is about 14 words and carries its own label, so the query is the
+        # paraphrase cut to 14 words, without the trait's label, against whatever the corpus representation is
+        out["para_14"][rep] = {s: represent_short(None, p, "w14") for s, p in paraphrases.items() if s in ci["index"]}
     return out
 
 
@@ -146,7 +149,7 @@ def all_texts(texts: dict) -> list[str]:
     for rep_rows in texts["corpus"].values():
         seen.extend(rep_rows)
     for d in (list(texts["ext"].values()) + list(texts["gloss"].values()) + list(texts["para"].values())
-              + list(texts["para_nl"].values())):
+              + list(texts["para_nl"].values()) + list(texts["para_14"].values())):
         seen.extend(d.values())
     seen.extend(texts["minimal"].values())
     return list(dict.fromkeys(seen))
@@ -329,6 +332,7 @@ def main(argv=None) -> int:
             gq = {s: vec[t] for s, t in texts["gloss"][rep].items()}
             pq = {s: vec[t] for s, t in texts["para"][rep].items()}
             pq_nl = {s: vec[t] for s, t in texts["para_nl"][rep].items()}
+            pq_14 = {s: vec[t] for s, t in texts["para_14"][rep].items()}
             Qraw, qmask = None, None
             if pq_nl:
                 Qraw = E.copy()
@@ -367,7 +371,7 @@ def main(argv=None) -> int:
                 gloss_rows.append({"model": arm, "representation": rep, "variant": variant, **g})
                 if pq:
                     folds = {s_: lp.folds.get(s_) for s_ in pq if lp.folds.get(s_) is not None}
-                    for mode, qs in (("label", pq), ("no_label", pq_nl)):
+                    for mode, qs in (("label", pq), ("no_label", pq_nl), ("no_label_14w", pq_14)):
                         para_rows.append({"model": arm, "representation": rep, "variant": variant, "query": mode,
                                           "recall": C.gloss_recovery(v, qs, ci["index"]),
                                           "covered": C.covered_threshold(v, qs, ci["index"], lp, folds=folds)})

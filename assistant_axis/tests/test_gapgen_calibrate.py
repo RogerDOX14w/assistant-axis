@@ -471,7 +471,7 @@ def _fake_rows():
 
 def test_choose_settings_separately():
     rows, para, held = _fake_rows()
-    st = C.choose_settings(rows, para, held, ["openai", "gemma"])
+    st = C.choose_settings(rows, para, held, ["openai", "gemma"], query="no_label")
     cov, dirn = st["covered"], st["directional"]
     # w14 has the better (a) but misses the 0.95 recall target: full wins the covered setting
     assert cov["representation"] == "full" and cov["variant"] == "pw2" and cov["recall_target_met"]
@@ -484,3 +484,40 @@ def test_choose_settings_separately():
     from assistant_axis.gapgen.metric_config import MetricConfig
     m = MetricConfig.from_json(cfg)
     assert m.covered["representation"] == "full" and m.directional["K"] == 10
+
+
+def test_decode_marks():
+    sheet = ("### 1. [critical](x/critical.json) (openai embeddings)\n...\nMark (A / B / same): A\n\n"
+             "### 2. [independent](x/independent.json) (bge embeddings)\nMark (A / B / same): same\n\n"
+             "### 3. [reactive](x/reactive.json)\nMark (A / B / same): \n")
+    key = [{"id": 1, "stem": "critical", "label": "critical", "class": "N", "model": "openai",
+            "key": {"A": "full", "B": "strip"}},
+           {"id": 2, "stem": "independent", "label": "independent", "class": "N", "model": "bge",
+            "key": {"A": "strip", "B": "full"}},
+           {"id": 3, "stem": "reactive", "label": "reactive", "class": "N", "model": "openai",
+            "key": {"A": "strip", "B": "full"}}]
+    d = C.decode_marks(sheet, key)
+    assert [r["preferred"] for r in d["items"]] == ["full", "same", None]
+    assert d["counts"] == {"full": 1, "strip": 0, "same": 1, "unmarked": 1}
+    assert d["by_class"]["N"] == {"full": 1, "strip": 0, "same": 1}
+
+
+def test_choose_settings_bands_and_exclusion():
+    rows, para, held = _fake_rows()
+    # a strip representation that would win both settings is excluded (the clauses are kept)
+    extra_rows, extra_para, extra_held = [], [], []
+    for r in rows:
+        if r["representation"] == "full":
+            extra_rows.append(dict(r, representation="strip", auc_dup_vs_distinct=r.get("auc_dup_vs_distinct", 0) + 0.2
+                                   if "auc_dup_vs_distinct" in r else None,
+                                   spearman_persona_yield=(r.get("spearman_persona_yield") or 0) + 0.2))
+    for p in para:
+        if p["representation"] == "full":
+            extra_para.append(dict(p, representation="strip"))
+    st = C.choose_settings(rows + extra_rows, para + extra_para, held, ["openai", "gemma"], query="no_label")
+    assert st["covered"]["representation"] != "strip" and st["directional"]["representation"] != "strip"
+    # when no candidate meets the recall target, those within the recall band of the best qualify
+    low = [dict(p, recall={"cos": {"recall_at_1": 0.90 if p["representation"] == "full" else 0.895}}) for p in para]
+    st2 = C.choose_settings(rows, low, held, ["openai", "gemma"], query="no_label")
+    assert not st2["covered"]["recall_target_met"] and st2["covered"]["representation"] in ("full", "w14")
+    assert "rule" in st2["covered"]
