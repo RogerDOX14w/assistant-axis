@@ -128,9 +128,9 @@ def _pc_variances(Z, Vt):
     return ((Z @ Vt.T) ** 2).mean(axis=0)
 
 
-@pytest.mark.parametrize("n", [1, 2, 4])
-def test_partial_whitening_equalises_top_n_and_keeps_the_rest(n):
-    E = _data(n=500, d=12)
+@pytest.mark.parametrize("n,d", [(1, 12), (2, 12), (4, 12), (12, 30), (24, 30)])
+def test_partial_whitening_equalises_top_n_and_keeps_the_rest(n, d):
+    E = _data(n=500, d=d)
     mu = E.mean(axis=0)
     lam, Vt = S._eig_centred(E - mu)
     t = S.fit_space(E, f"pw{n}")
@@ -140,7 +140,7 @@ def test_partial_whitening_equalises_top_n_and_keeps_the_rest(n):
     np.testing.assert_allclose(var[n:], lam[n:], rtol=1e-8)    # the rest unchanged
     np.testing.assert_allclose(np.linalg.norm(t.apply(E), axis=1), 1.0)
     # new points: centred on the fixed corpus mean, the same per-component scaling
-    new = _data(n=3, seed=7)
+    new = _data(n=3, d=d, seed=7)
     got = t.apply(new, renorm=False)
     coef = (new - mu) @ Vt.T
     want = (coef * np.r_[np.sqrt(lam[n] / lam[:n]), np.ones(len(lam) - n)]) @ Vt
@@ -153,7 +153,8 @@ def test_partial_whitening_n0_is_plain_centring():
 
 
 def test_partial_whitening_variant_names():
-    assert [v for v in S.VARIANTS if v.startswith("pw")] == [f"pw{n}" for n in (1, 2, 4, 8, 16, 32, 64)]
+    # round 4 (2026-10-02) added N = 12 and 24 between the powers of two
+    assert [v for v in S.VARIANTS if v.startswith("pw")] == [f"pw{n}" for n in (1, 2, 4, 8, 12, 16, 24, 32, 64)]
     with pytest.raises(ValueError):
         S.fit_space(_data(n=20, d=6), "pw6")     # N must leave an (N+1)th component
 

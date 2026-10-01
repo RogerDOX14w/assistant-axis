@@ -52,8 +52,10 @@ platform uses a regularised one.  The persona pipeline uses the same operation f
 <a id="partial-whitening"></a>
 ### Partial whitening (`pwN`)
 Roger's variant (2026-10-01): shrink only the top N principal components, each down to the
-amplitude of the (N+1)th, and leave the rest alone.  N = 1, 2, 4, 8, 16, 32, 64 are tried.  A
-middle way between centring (N = 0) and full whitening.
+amplitude of the (N+1)th, and leave the rest alone.  N = 1, 2, 4, 8, 16, 32, 64 are tried, and
+12 and 24 since round 4.  Every `pwN` [centres](#centred) on the fixed corpus mean first, so it is
+centring plus the shrink, never the raw space shrunk.  A middle way between centring (N = 0) and
+full whitening.
 
 <a id="hubness"></a>
 ### Hubness and hubs

@@ -22,8 +22,10 @@ or candidates) into the variant and renormalises the rows.  Variants
 * ``pw<N>`` (round 2, Roger 2026-10-01), partial whitening: centred, then
   each of the top N principal components of the centred corpus shrunk so
   that its standard deviation equals the (N+1)th's; every other component
-  is left as it is.  ``pw0`` is plain centring (accepted by ``fit_space``,
-  not listed in :data:`VARIANTS`).  N in :data:`PW_NS`.
+  is left as it is.  Every ``pwN`` centres on the fixed corpus mean first,
+  so ``pwN`` is centring plus the shrink; ``pw0`` is plain centring
+  (accepted by ``fit_space``, not listed in :data:`VARIANTS`).  N in
+  :data:`PW_NS` (12 and 24 added in round 4).
 
 Also: ``k_for_variance`` (the 95%-variance rule), ``pca_basis``,
 ``residual_fraction`` (directional novelty), ``loo_residuals`` (each row
@@ -38,7 +40,7 @@ from typing import Iterable, Optional, Union
 
 import numpy as np
 
-PW_NS = (1, 2, 4, 8, 16, 32, 64)
+PW_NS = (1, 2, 4, 8, 12, 16, 24, 32, 64)   # 12 and 24: round 4 (2026-10-02)
 VARIANTS = ("raw", "centred", "centred_pc1", "centred_pc3", "zca") + tuple(f"pw{n}" for n in PW_NS)
 
 

@@ -531,3 +531,10 @@ def test_calibrate_paraphrase_stage_with_fake_haiku(tmp_path, monkeypatch):
     abl = json.loads((cal / "contrast_ablation.json").read_text())["result"]
     # contrast ablation needs strip; with full only, (e) is reported as waiting for Roger
     assert abl == {}          # no strip representation in this run: no ablation, no draw
+
+
+def test_calibrate_metric_default_models_drop_bge():
+    # Roger, 2026-10-02: bge is dropped from round 4 on (its recorded outputs stay; "--models bge" still runs it)
+    from data_analysis.gap_generation import calibrate_metric as CM
+    assert CM.parse_args([]).models == ["openai", "gemma"]
+    assert CM.parse_args(["--models", "bge"]).models == ["bge"]

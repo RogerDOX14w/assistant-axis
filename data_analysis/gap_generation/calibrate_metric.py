@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """M2 metric calibration on the existing corpus (plan 15; coding_plan_platform.md §7, §9 tasks 16-18).
 
-    uv run python data_analysis/gap_generation/calibrate_metric.py --skip-llm [--models openai bge gemma]
+    uv run python data_analysis/gap_generation/calibrate_metric.py --skip-llm [--models openai gemma]
         [--representations full noprefix w20 w14 strip] [--variants raw centred centred_pc1 centred_pc3 zca]
         [--vectors-dir 'runpod_workspace/qwen/qwen-3-32b Roger 8slot'] [--out data/candidates/calibration]
         [--budget-usd 1.0] [--rebuild-labels] [--dry-run] [--allow-dirty]
@@ -61,6 +61,8 @@ from assistant_axis.gapgen.space import VARIANTS, k_for_variance, loo_residuals 
 logger = logging.getLogger("calibrate_metric")
 
 ARMS = ("openai", "bge", "gemma")
+#: Roger, 2026-10-02: bge is dropped from round 4 on; its recorded outputs stay and ``--models bge`` still runs it
+DEFAULT_ARMS = ("openai", "gemma")
 OPENAI_BATCH = 256
 CHARS_PER_TOKEN = 4.0
 MARKS_SHEET = _REPO_ROOT / "reports" / "trait_gap_generation" / "contrast_comparisons_for_marks.md"
@@ -70,7 +72,8 @@ PERSONA_KS = (10, 20, 37, 40)
 
 def parse_args(argv=None):
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
-    ap.add_argument("--models", nargs="+", default=list(ARMS), choices=list(ARMS) + ["hash"])
+    ap.add_argument("--models", nargs="+", default=list(DEFAULT_ARMS), choices=list(ARMS) + ["hash"],
+                    help="default openai gemma (bge dropped 2026-10-02; still selectable)")
     ap.add_argument("--representations", nargs="+", default=list(REPRESENTATIONS), choices=list(REPRESENTATIONS))
     ap.add_argument("--variants", nargs="+", default=list(VARIANTS), choices=list(VARIANTS))
     ap.add_argument("--skip-llm", action="store_true", help="no Haiku paraphrases, no Sonnet judge (the pilot)")
