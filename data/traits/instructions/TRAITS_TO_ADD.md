@@ -3217,3 +3217,34 @@ static rejudge only, see item 6 above) but does not touch the persona side.
 grep -lE '\b(the user|users|responses?)\b' data/traits/instructions/*.json | wc -l
 grep -oE '"(pos|neg)": "[^"]*\b(the user|users)\b[^"]*"' data/traits/instructions/*.json | head
 ```
+
+## TODO: near-duplicate traits to drop or merge (M2 calibration, 2026-10-01)
+
+Roger, 2026-10-01, on the M2 pilot's drop-or-merge table: not now, but recorded here.  The
+leave-one-out nearest-neighbour test of the trait-gap platform's metric calibration
+([pilot_m2_readout.md](../../../reports/trait_gap_generation/pilot_m2_readout.md), table in
+[drop_or_merge.md](../../candidates/calibration/drop_or_merge.md)) found twelve pairs of existing
+traits whose descriptions sit closer than the bulk of the corpus allows, once recorded arrangement
+partners are excluded.  Roger: "the least novel ones do indeed look close: they're either
+near-synonyms or antonyms.  Some are probably good candidates for dropping, especially where we can
+do so without getting rid of a pair (or by getting rid of both ends of rather similar pairs)."
+
+| trait | nearest | flagged by | note |
+|---|---|---|---|
+| [abstract](./abstract.json) | [theoretical](./theoretical.json) | bge, gemma | with [conceptual](./conceptual.json), a triple of near-synonyms |
+| [conceptual](./conceptual.json) | [theoretical](./theoretical.json) | bge | |
+| [dependable](./dependable.json) | [trustworthy](./trustworthy.json) | openai, bge | |
+| [self-blaming](./self_blaming.json) | [blame-shifting](./blame_shifting.json) | openai, bge | an antonym pair the corpus does not record; a candidate for an `arrangement` pair, not a drop |
+| [passionate](./passionate.json) | [zealous](./zealous.json) | openai, gemma | |
+| [empathetic](./empathetic.json) | [compassionate](./compassionate.json) | gemma | compassionate is a triangle corner (callous / compassionate / malicious) |
+| [absolutist](./absolutist.json) | [universalist](./universalist.json) | bge | |
+| [dramatic](./dramatic.json) | [theatrical](./theatrical.json) | openai | with [melodramatic](./melodramatic.json), a triple |
+| [melodramatic](./melodramatic.json) | [dramatic](./dramatic.json) | openai | |
+| [sarcastic](./sarcastic.json) | [sardonic](./sardonic.json) | openai | with [wry](./wry.json), a triple |
+| [wry](./wry.json) | [sardonic](./sardonic.json) | openai | |
+| [honest](./honest.json) | [truthful](./truthful.json) | openai | both alignment-region traits; keep at least one |
+
+Before acting: check each trait's `arrangement` and `negative_label` (a drop that breaks a clean pair
+costs the pair), and prefer dropping both ends of two near-identical pairs over one end of one.  The
+list will be refreshed when the final calibration runs on the merged corpus.
+
