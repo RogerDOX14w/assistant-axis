@@ -75,6 +75,7 @@ class TestPriceForModel:
         ("Qwen/Qwen3-Embedding-0.6B", (0.0, 0.0)),
         ("qwen3-embedding-0.6b", (0.0, 0.0)),
         ("BAAI/bge-large-en-v1.5", (0.0, 0.0)),
+        ("google/embeddinggemma-300m", (0.0, 0.0)),
     ])
     def test_embedding_models(self, model, rates):
         """Embedding calls are counted in usage.json (trait-gap platform)."""

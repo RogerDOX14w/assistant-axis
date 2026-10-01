@@ -410,3 +410,18 @@ class TestBuildValidationSet:
         assert notes["not_adopted_in_corpus"] == ["stubborn"]
         assert sorted(by["oewn_random"], key=str.lower) == ["blue", "green", "hexagonal", "Parisian"]
         assert len({r["surface"].lower() for r in rows}) == len(rows)
+
+
+# --------------------------------------------------------------------------- setup_external --hf-model (M2)
+
+def test_setup_external_hf_model_dry_run(capsys):
+    from data_analysis.gap_generation import setup_external
+    assert setup_external.main(["--hf-model", "BAAI/bge-large-en-v1.5", "--dry-run"]) == 0
+    out = capsys.readouterr().out
+    assert "DRY-RUN" in out and "data/external/hf" in out and "model.safetensors" in out
+
+
+def test_setup_external_unknown_model_refused(capsys):
+    from data_analysis.gap_generation import setup_external
+    assert setup_external.main(["--hf-model", "org/unknown", "--dry-run"]) == 2
+    assert "HF_ALLOW_PATTERNS" in capsys.readouterr().err

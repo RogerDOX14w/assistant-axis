@@ -36,6 +36,10 @@ VALIDATION_DIR = DATA_CANDIDATES / "validation"
 #: judgement-calls`` lists, keyed by word (tracked; ``judgement-call`` writes it).
 JUDGEMENT_CALLS_PATH = DATA_CANDIDATES / "judgement_calls.json"
 SEED_QUEUE_PATH = DATA_DIR / "seed_queue.json"
+#: M2 outputs (plan 15): labelled pairs, contrast cuts, LOO metrics, plots, usage.
+CALIBRATION_DIR = DATA_CANDIDATES / "calibration"
+#: Embedding cache (gitignored): ``<model_tag>.npz`` + ``manifest.json``.
+EMBEDDING_CACHE_DIR = DATA_CANDIDATES / "cache" / "embeddings"
 #: The split filter's rubric files (Roger's text, one prompt per file inside a
 #: fenced block) and their append-only version pins (``versions.json``).
 RUBRICS_DIR = REPO_ROOT / "reports" / "trait_gap_generation" / "rubrics"
@@ -88,6 +92,27 @@ def hf_cache_dir() -> Path:
     return DATA_EXTERNAL / "hf"
 
 
+def pin_hf_cache() -> Path:
+    """Point Hugging Face (``huggingface_hub``, ``transformers``,
+    ``sentence-transformers``) at :func:`hf_cache_dir` for this process.
+
+    Sets ``$HF_HOME`` and ``$HF_HUB_CACHE`` (both read when those libraries
+    are imported) unconditionally, so a value inherited from the shell cannot
+    send a download under the home directory; the token then comes only from
+    ``$HF_TOKEN`` (``load_dotenv``), never from a token file under ``~``.  Called
+    by ``assistant_axis/gapgen/__init__.py``.  Because a library imported
+    *before* the platform has already read its constants, every model load in
+    ``gapgen.embed`` also passes ``cache_dir`` explicitly.  Touches no files.
+    """
+    import os
+
+    target = hf_cache_dir()
+    os.environ["HF_HOME"] = str(target)
+    os.environ["HF_HUB_CACHE"] = str(target)
+    os.environ.setdefault("HF_HUB_DISABLE_TELEMETRY", "1")
+    return target
+
+
 def wn_data_dir() -> Path:
     """In-tree data directory for the ``wn`` package (``data/external/wn``)."""
     return DATA_EXTERNAL / "wn"
@@ -129,6 +154,8 @@ def all_paths() -> dict[str, Path]:
         "JUDGEMENT_CALLS_PATH": JUDGEMENT_CALLS_PATH,
         "SEED_QUEUE_PATH": SEED_QUEUE_PATH,
         "RUBRICS_DIR": RUBRICS_DIR,
+        "CALIBRATION_DIR": CALIBRATION_DIR,
+        "EMBEDDING_CACHE_DIR": EMBEDDING_CACHE_DIR,
         "hf_cache_dir": hf_cache_dir(),
         "wn_data_dir": wn_data_dir(),
         "runs_root": runs_root(),

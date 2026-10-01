@@ -11,11 +11,14 @@ Generators use only these names::
 and then run ``data_analysis/gap_generation/traithood_filter.py --run G/R``.
 Importing this package, or any module in it, pins the ``wn`` data directory
 to ``data/external/wn`` (``paths.pin_wn_data_dir``), whether or not ``wn`` is
-already imported.
+already imported, and points Hugging Face at ``data/external/hf``
+(``paths.pin_hf_cache``).
 """
+from .paths import pin_hf_cache as _pin_hf_cache
 from .paths import pin_wn_data_dir as _pin_wn_data_dir
 
 _pin_wn_data_dir()
+_pin_hf_cache()
 
 from .normalize import (  # noqa: E402
     DECISIONS, NOVELTY_FLAGS, REGION_VOCAB, RELATIONS, REVIEW_STATUSES, TAG_VOCAB, VERDICTS,

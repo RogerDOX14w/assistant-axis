@@ -156,6 +156,7 @@ _MODEL_RATES: tuple[tuple[str, float, float], ...] = (
     ("text-embedding-3-small", 0.02, 0.0),
     ("qwen3-embedding", 0.0, 0.0),
     ("bge-large", 0.0, 0.0),
+    ("embeddinggemma", 0.0, 0.0),   # google/embeddinggemma-300m, local (M2 third arm)
     ("gpt-4.1-mini", GPT_MINI_RATE_IN, GPT_MINI_RATE_OUT),
     ("gpt-4o-mini", GPT_MINI_RATE_IN, GPT_MINI_RATE_OUT),
     ("haiku", HAIKU_RATE_IN, HAIKU_RATE_OUT),
