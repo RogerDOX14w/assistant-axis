@@ -322,10 +322,12 @@ def main(argv=None) -> int:
                 dup_sims = {m: np.concatenate([sims[r][mi] for r in C.SYNONYM_RELATIONS if r in sims])
                             for mi, m in enumerate(C.PAIR_METRICS)}
                 folds = [p.fold for r in C.SYNONYM_RELATIONS for p in lp.pairs if p.relation == r]
+                certain = [not p.uncertain for r in C.SYNONYM_RELATIONS for p in lp.pairs if p.relation == r]
                 thr[key] = {}
                 for mi, m in enumerate(C.PAIR_METRICS):
                     nn = v.nn_cos if m == "cos" else v.nn_csls
-                    thr[key][m] = C.place_thresholds(nn, dup_sims[m], sims["unrelated"][mi], dup_folds=folds)
+                    thr[key][m] = C.place_thresholds(nn, dup_sims[m], sims["unrelated"][mi], dup_folds=folds,
+                                                     dup_certain=certain)
                 thr[key]["K95"] = v.K95
                 if rep in ("full", "strip"):
                     keep_views[key] = (v, lt["sims"], ext)
@@ -338,15 +340,27 @@ def main(argv=None) -> int:
         vals = [r[field] for r in rows if r["representation"] == rep and r["variant"] == variant
                 and r["metric"] == metric and r.get(field) is not None]
         return float(np.mean(vals)) if vals else float("nan")
-    rank = []
+    # provisional choice (Roger decides): mean rank, over the three local tasks that apply to a
+    # nearest-neighbour metric, of the cross-model means: (a) duplicate vs near-distinct AUC,
+    # (b) synonym vs antonym AUC and (c) Spearman with the persona yield; gloss recall@1 breaks ties.
+    cands = []
     for variant in args.variants:
         for metric in C.PAIR_METRICS:
             a = mean_over_arms("full", variant, metric, "auc_dup_vs_distinct")
-            gr = np.mean([g[metric]["recall_at_1"] for g in gloss_rows
-                          if g["representation"] == "full" and g["variant"] == variant and g.get(metric)])
-            rank.append((a, gr, variant, metric))
-    rank.sort(reverse=True)
-    rec_variant, rec_metric = rank[0][2], rank[0][3]
+            b = mean_over_arms("full", variant, metric, "auc_ant_vs_syn")
+            c = mean_over_arms("full", variant, metric, "spearman_persona_yield")
+            gr = float(np.mean([g[metric]["recall_at_1"] for g in gloss_rows
+                                if g["representation"] == "full" and g["variant"] == variant and g.get(metric)]))
+            cands.append({"variant": variant, "metric": metric, "a": a, "b": b, "c": c, "gloss": gr})
+    for task in ("a", "b", "c"):
+        order = sorted(cands, key=lambda d: -(d[task] if np.isfinite(d[task]) else -9))
+        for r_, d in enumerate(order):
+            d[f"rank_{task}"] = r_ + 1
+    for d in cands:
+        d["mean_rank"] = float(np.mean([d["rank_a"], d["rank_b"], d["rank_c"]]))
+    cands.sort(key=lambda d: (d["mean_rank"], -d["gloss"]))
+    rank = [(d["a"], d["gloss"], d["variant"], d["metric"], d) for d in cands]
+    rec_variant, rec_metric = cands[0]["variant"], cands[0]["metric"]
     primary = "openai" if "openai" in arms else arms[0]
 
     # ---------------------------------------------------------------- histograms
@@ -373,8 +387,10 @@ def main(argv=None) -> int:
     dm = {}
     for arm in arms:
         views = {var: keep_views[f"{arm}|full|{var}"][0] for var in args.variants}
-        t_hi = thr[f"{arm}|full|{rec_variant}"][rec_metric]["t_hi"]
-        for r in C.drop_or_merge_rows(views, ci["stems"], primary=rec_variant, metric=rec_metric, t_hi=t_hi,
+        # plan 15 step 7: the tail that separates from the bulk (the NN distribution's upper fence,
+        # cosine); t_hi from the labelled duplicates sits below t_lo on this corpus (see thresholds.json)
+        t_cut = thr[f"{arm}|full|{rec_variant}"]["cos"]["bulk"]["upper_fence"]
+        for r in C.drop_or_merge_rows(views, ci["stems"], primary=rec_variant, metric="cos", t_hi=t_cut,
                                       flagged_by=arm, arrangement_link=link, deliberate=delib):
             k = tuple(sorted((r["trait"], r["nearest"])))
             if k in dm:
@@ -464,8 +480,10 @@ def main(argv=None) -> int:
         "variants": args.variants, "n_traits": len(ci["stems"]), "labelled_pairs": lp.counts(),
         "contrast_rows": {"census": cuts_payload["counts"], "changed": len(classes)},
         "provisional": {"variant": rec_variant, "metric": rec_metric, "primary_model": primary,
-                        "ranking": [{"auc_dup_vs_distinct_mean": C._r(a), "gloss_recall1_mean": C._r(float(g)),
-                                     "variant": v, "metric": m} for a, g, v, m in rank]},
+                        "rule": "mean rank over tasks (a), (b), (c) of the cross-model means (representation full); "
+                                "gloss recall@1 breaks ties",
+                        "ranking": [{k: (C._r(v) if isinstance(v, float) else v) for k, v in d.items()}
+                                    for *_, d in rank]},
         "novelty_extremes": C.most_and_least_novel(rec_view, ci["stems"], rec_metric if rec_metric != "csls" else "csls"),
         "contrast_recommendation": {arm: ablation.get(arm, {}).get(rec_variant, {}).get("recommendation")
                                     for arm in arms},
@@ -501,9 +519,12 @@ def _trait_link(stem: str, label: str, rel: str) -> str:
 def write_drop_or_merge(path: Path, dm: dict, ci: dict, arms, variants, rec_variant, rec_metric, thr) -> None:
     rel = "../../traits/instructions"
     lines = [f"# Drop-or-merge candidates (M2 pilot, plan 15 step 8)", "",
-             f"Traits whose nearest existing neighbour is at or above the covered threshold `t_hi` under the provisional "
-             f"metric ({rec_variant}, {rec_metric}, representation `full`), for any model run; `t_hi` per model: "
-             + ", ".join(f"{a} {thr[f'{a}|full|{rec_variant}'][rec_metric]['t_hi']}" for a in arms) + ". "
+             f"Traits whose nearest existing neighbour lies beyond the upper fence (Q3 + 1.5 IQR) of the leave-one-out "
+             f"nearest-neighbour cosine distribution in the provisional space variant ({rec_variant}, representation "
+             f"`full`), for any model run; fence per model: "
+             + ", ".join(f"{a} {thr[f'{a}|full|{rec_variant}']['cos']['bulk']['upper_fence']}" for a in arms) + ". "
+             "(The covered threshold from the labelled duplicates, `t_hi`, falls below the random-pair threshold `t_lo` "
+             "on this corpus, so it cannot define the tail; see thresholds.json.) "
              "Pairs in a recorded arrangement or labelled deliberate duplicates are listed but expected. "
              "Similarities are cosine in each variant (the first model that flagged the pair).", "",
              "| trait | nearest | flagged by | " + " | ".join(variants) + " | arrangement | deliberate dup | description A | description B |",

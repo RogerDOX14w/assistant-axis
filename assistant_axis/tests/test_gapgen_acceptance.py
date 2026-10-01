@@ -140,3 +140,50 @@ def test_corpus_regions_cover_every_trait_file():
     regions = obj.get("result", obj)
     stems = {p.stem for p in (DATA_DIR / "traits" / "instructions").glob("*.json")}
     assert stems <= set(regions)
+
+
+# --------------------------------------------------------------------------- M2 (calibration)
+
+def _calibration(name: str) -> dict:
+    from assistant_axis.gapgen.paths import CALIBRATION_DIR
+    p = CALIBRATION_DIR / name
+    if not p.exists():
+        pytest.skip(f"{p} not recorded yet")
+    obj = json.loads(p.read_text())
+    return obj.get("result", obj)
+
+
+def test_m2_mechanical_gates():
+    """usage.json present and consistent with summary.json; every requested model
+    either ran or is recorded as failed; the tables and plots exist."""
+    from assistant_axis.gapgen.paths import CALIBRATION_DIR, REPO_ROOT
+    s = _calibration("summary.json")
+    usage = json.loads((CALIBRATION_DIR / "usage.json").read_text())
+    assert usage["total_cost_usd"] == pytest.approx(s["cost_usd"], abs=1e-4)
+    assert s["models_run"]
+    for png in s["pngs"]:
+        assert (REPO_ROOT / png).exists()
+    assert (CALIBRATION_DIR / "drop_or_merge.md").exists()
+    assert "n_pairs" in s["drop_or_merge"]
+
+
+def test_m2_contrast_criteria_all_present():
+    """The contrast decision per model is recorded with all ten criteria present
+    (ran, or skipped with a reason)."""
+    abl = _calibration("contrast_ablation.json")
+    for model, by_variant in abl.items():
+        for variant, res in by_variant.items():
+            assert set(res["criteria_status"]) == set("abcdefghij"), (model, variant)
+            assert res["recommendation"]["recommendation"] in ("keep", "strip")
+
+
+def test_m2_targets_reported():
+    """Targets, not gates (review amendment 2): auc_dup_vs_distinct >= 0.85 for
+    the provisional variant; paraphrase recall needs the paid paraphrases."""
+    s = _calibration("summary.json")
+    loo = _calibration("loo_metrics.json")
+    prov = s["provisional"]
+    got = [r["auc_dup_vs_distinct"] for r in loo["rows"] if r["representation"] == "full"
+           and r["variant"] == prov["variant"] and r["metric"] == prov["metric"]]
+    assert got
+    warnings.warn(f"M2 auc_dup_vs_distinct ({prov['variant']}, {prov['metric']}) per model: {got}; target 0.85")

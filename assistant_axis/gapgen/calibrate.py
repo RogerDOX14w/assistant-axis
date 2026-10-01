@@ -249,7 +249,8 @@ def hubness(view: View, stems: Sequence[str], *, k: int = 10, top: int = 10) -> 
 
 def place_thresholds(nn_sims: np.ndarray, dup_sims: np.ndarray, unrelated_sims: np.ndarray, *,
                      recall: float = 0.95, unrelated_q: float = 0.99,
-                     dup_folds: Optional[Sequence[Optional[int]]] = None) -> dict:
+                     dup_folds: Optional[Sequence[Optional[int]]] = None,
+                     dup_certain: Optional[Sequence[bool]] = None) -> dict:
     """Step 7.  ``t_hi``: the similarity at which ``recall`` of the labelled
     duplicates are at or above it (the "covered" threshold); ``t_lo``: the
     ``unrelated_q`` quantile of random pairs (below it, "new").  The bulk of
@@ -271,6 +272,18 @@ def place_thresholds(nn_sims: np.ndarray, dup_sims: np.ndarray, unrelated_sims: 
            "n_low_tail": int((nn >= t_hi).sum()) if t_hi is not None else None,
            "n_above_fence": int((nn > fence).sum()), "n_dup": int(len(dup)), "n_unrelated": int(len(unr)),
            "gap_t_hi_minus_t_lo": _r(t_hi - t_lo) if (t_hi is not None and t_lo is not None) else None}
+    out["t_hi_above_t_lo"] = bool(t_hi is not None and t_lo is not None and t_hi > t_lo)
+    out["dup_median"] = _r(float(np.median(dup))) if len(dup) else None
+    out["n_nn_at_or_above_dup_median"] = int((nn >= np.median(dup)).sum()) if len(dup) else None
+    if dup_certain is not None and len(dup):
+        dc = dup[np.asarray(dup_certain, bool)]
+        if len(dc):
+            t_c = float(np.quantile(dc, 1 - recall, method="lower"))
+            out["t_hi_certain"] = _r(t_c)
+            out["n_low_tail_certain"] = int((nn >= t_c).sum())
+    out["tail_rule"] = ("t_hi below t_lo: the labelled duplicates do not separate from random pairs at 95% recall, "
+                        "so the drop-or-merge list uses the upper fence of the NN distribution" if not out["t_hi_above_t_lo"]
+                        else "t_hi above t_lo")
     if dup_folds is not None and len(dup):
         f = np.asarray([-1 if x is None else x for x in dup_folds])
         recs = []
