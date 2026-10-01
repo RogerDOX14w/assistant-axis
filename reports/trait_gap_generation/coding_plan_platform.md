@@ -442,3 +442,30 @@ unless marked.
    decision, so density increases gradually as you get closer to alignment rather than a sudden
    transition".  How the score moves the thresholds is for the M3 plan to propose.
 4. **The worktree's `.env`** was refreshed on 2026-09-30 and now has the OpenAI key M2 needs.
+
+## M2 launch decisions (2026-10-01, Roger and Claude)
+
+Taken when item 15 (M2) was started, after item 14 closed with the split filter's rerun
+([readout_m1_validation.md](./readout_m1_validation.md)).
+
+1. **Download `BAAI/bge-large-en-v1.5`** (about 1.3 GB) into `data/external/hf/`: Roger, "go ahead".
+2. **EmbeddingGemma-300m as a comparison arm**, if the Hugging Face token's account has access to the
+   gated model; the agent tries, and reports and continues with two arms if refused.  Gemma is not one
+   of the project's experiment subjects (Qwen, Llama, OLMo, gpt-oss are).
+3. **M2 runs on the worktree's corpus now**, before the merge into `anthropic-vllm-uv`; Roger: "corpus
+   descriptions are unlikely to change much, instructions and questions are still not stabilized."
+   M2 embeds labels and descriptions only, so the two pending renames (determinist, metaphysical
+   libertarian) cost one cheap rerun of the final calibration after the merge.
+4. **Gloss length is a variant to measure** (Claude's addition).  The split filter's glosses have a
+   median of 14 words, below plan 15's 18-43 band and the corpus median of 24.  M2 adds a variant that
+   embeds each description truncated to about 14 words, beside the full text and the ~20-word check
+   plan 15 §3.1 already asks for, so M3 knows whether candidate glosses must be lengthened or
+   descriptions matched in length at embedding time.
+5. **The contrast census is recomputed** mechanically on the current 661 files (the census of
+   2026-09-23 covered 414); the N/P/S classes exist only for its 107, and new cuts are reported for
+   Roger in the pilot readout rather than classified by the agent.
+6. **Pilot gate as planned**: the agent stops after task 18's `--skip-llm` pilot for Roger's decisions
+   (space variant, whether the low tail is worth a drop-or-merge pass, whether the paid criteria (e)
+   and (g) are needed), then task 19.  Cap $10; expected spend about $0.03 for the pilot and about $1
+   for the paid criteria.
+
