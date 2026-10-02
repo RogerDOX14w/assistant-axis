@@ -623,6 +623,7 @@ def test_final_metric_config_from_recorded_outputs():
     r = cov["retrieval"]["recall_at_k"]
     assert set(r) == {"paraphrase", "plain", "terse", "m1_gloss_1", "m1_gloss_2", "pooled"}
     assert r["m1_gloss_1"]["10"] == pytest.approx(0.953) and set(r["pooled"]) == {"n", "1", "5", "10", "20"}
+    assert "pooled" not in cov["retrieval"]["query_sources"] and "m1_gloss_2" in cov["retrieval"]["query_sources"]
     tgt = cov["retrieval"]["target"]
     assert tgt["k"] == 10 and tgt["min_recall"] == 0.95 and tgt["met"] is True
     assert tgt["values"] == {"m1_gloss_1": pytest.approx(0.953), "m1_gloss_2": pytest.approx(0.954)}

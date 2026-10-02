@@ -1136,8 +1136,8 @@ def final_metric_config(*, retrieval: Mapping, paraphrase: Mapping, loo: Mapping
     space = {"variant": var, "mean": "corpus_fixed"}
     dspace = {"variant": d["variant"], "mean": "corpus_fixed"}
     info = ("information only, not used for decisions: under the retrieve-then-judge design no similarity threshold "
-            "decides covered or new (at 95% paraphrase recall a threshold put 61% of recorded antonym pairs on the "
-            "covered side)")
+            "decides covered or new (at 95% recall over round 4's 3,098 queries, t_hi put 61% of the recorded antonym "
+            "pairs on the covered side)")
 
     def directional(drec, arm):
         return {"K_sensitivity": drec["K_sensitivity"], "K95": drec["K95"],
@@ -1165,7 +1165,8 @@ def final_metric_config(*, retrieval: Mapping, paraphrase: Mapping, loo: Mapping
             "decision": COVERED_DECISION, "space": space, "representation": rep, "metric": c["metric"], "k": c["k"],
             "contrast": {live: settings["contrast"]}, "query_form": QUERY_FORM,
             "retrieval": {"model": live, "source": "data/candidates/calibration/retrieval_round4.json",
-                          "query_sources": sorted(retrieval.get("n_queries", {})), **rec_live["retrieval"]},
+                          "query_sources": [q for q in retrieval.get("n_queries", {}) if q != "pooled"],
+                          **rec_live["retrieval"]},
             "thresholds": {"used_for_decisions": False, "note": info, live: rec_live["thresholds"]},
             "evaluation": {"status": "the threshold design's targets (auc_dup_vs_distinct >= 0.85, "
                                      "paraphrase_recall_top1 >= 0.95): reported, not gated (plan item 5)",
