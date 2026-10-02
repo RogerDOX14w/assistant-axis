@@ -154,13 +154,19 @@ def _calibration(name: str) -> dict:
 
 
 def test_m2_mechanical_gates():
-    """usage.json present and consistent with summary.json; every requested model
+    """usage.json present and consistent with the run records; every requested model
     either ran or is recorded as failed; the tables and plots exist."""
     from assistant_axis.gapgen.paths import CALIBRATION_DIR, REPO_ROOT
     s = _calibration("summary.json")
     usage = json.loads((CALIBRATION_DIR / "usage.json").read_text())
-    # usage.json is cumulative over runs; the summary carries this run's and the cumulative figure
-    assert usage["total_cost_usd"] == pytest.approx(s["cost_usd_cumulative"], abs=1e-4)
+    # usage.json is cumulative over runs.  The full calibration's summary carries its own and the cumulative
+    # figure at the time; a later partial run (round 4's --round4, recorded in run_round4*.json, 2026-10-02)
+    # adds to usage.json without rewriting the summary.  So usage.json equals the latest recorded cumulative
+    # figure and is never below the summary's.
+    recorded = [s["cost_usd_cumulative"]] + [json.loads(p.read_text()).get("cost_usd_cumulative", 0.0)
+                                             for p in sorted(CALIBRATION_DIR.glob("run_round*.json"))]
+    assert usage["total_cost_usd"] == pytest.approx(max(recorded), abs=1e-4)
+    assert usage["total_cost_usd"] >= s["cost_usd_cumulative"] - 1e-4
     assert usage["total_cost_usd"] >= s["cost_usd"] - 1e-9
     assert s["models_run"]
     for png in s["pngs"]:
