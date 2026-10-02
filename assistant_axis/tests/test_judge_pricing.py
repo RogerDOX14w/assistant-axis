@@ -536,3 +536,61 @@ class TestSurgicalRejudgeCostSplit:
                 per_axis_cost_usd=1.0, n_roles=5, n_traits=5,
                 mode="bogus",
             )
+
+
+class TestBatchPrices:
+    """A usage record kept under "<model>:batch" is priced at the batch rate
+    (Sep 2026: batch is a per-run choice for runs over about $20)."""
+
+    def test_anthropic_and_openai_batches_are_half_price(self):
+        from assistant_axis.judge_pricing import price_for_model
+        assert price_for_model("claude-sonnet-4-6:batch") == (1.5, 7.5)
+        assert price_for_model("claude-haiku-4-5-20251001:batch") == (0.5, 2.5)
+        assert price_for_model("gpt-4.1-mini:batch") == (0.2, 0.8)
+
+    def test_the_hosted_subject_model(self):
+        from assistant_axis.judge_pricing import price_for_model
+        assert price_for_model("qwen/qwen3-32b") == (0.08, 0.28)
+        rate_in, rate_out = price_for_model("qwen/qwen3-32b:batch")
+        assert rate_in == pytest.approx(0.064) and rate_out == pytest.approx(0.224)
+
+    def test_real_time_prices_are_unchanged(self):
+        from assistant_axis.judge_pricing import price_for_model
+        assert price_for_model("claude-sonnet-4-6") == (3.0, 15.0)
+
+    def test_a_merged_record_keeps_the_two_apart(self):
+        from assistant_axis.judge_pricing import MultiModelUsage
+        a, b = MultiModelUsage(), MultiModelUsage()
+        a.charge("claude-sonnet-4-6", 1_000_000, 0)
+        b.charge("claude-sonnet-4-6:batch", 1_000_000, 0)
+        a.merge_from(b)
+        assert a.per_model["claude-sonnet-4-6"].cost_usd == pytest.approx(3.0)
+        assert a.per_model["claude-sonnet-4-6:batch"].cost_usd == pytest.approx(1.5)
+
+    def test_an_unknown_model_in_batch_fails_loudly(self):
+        from assistant_axis.judge_pricing import price_for_model
+        with pytest.raises(KeyError):
+            price_for_model("some-new-model:batch")
+
+
+class TestClaude5Prices:
+    """The prices read from platform.claude.com on 2026-09-30.  The "-5" lines
+    must win over the bare "sonnet" and "opus" fragments."""
+
+    def test_sonnet_5_and_5_5_are_two_and_ten(self):
+        from assistant_axis.judge_pricing import price_for_model
+        assert price_for_model("claude-sonnet-5") == (2.0, 10.0)
+        assert price_for_model("claude-sonnet-5-5") == (2.0, 10.0)
+        assert price_for_model("claude-sonnet-4-6") == (3.0, 15.0)
+
+    def test_opus_5_5_is_four_and_twenty(self):
+        from assistant_axis.judge_pricing import price_for_model
+        assert price_for_model("claude-opus-5-5") == (4.0, 20.0)
+        assert price_for_model("claude-opus-5") == (5.0, 25.0)
+        assert price_for_model("claude-opus-4-8") == (5.0, 25.0)
+        assert price_for_model("claude-opus-5-5:batch") == (2.0, 10.0)
+
+    def test_retired_opus_is_not_priced_as_a_current_one(self):
+        from assistant_axis.judge_pricing import price_for_model
+        with pytest.raises(KeyError):
+            price_for_model("claude-opus-4-1")
