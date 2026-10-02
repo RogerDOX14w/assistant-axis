@@ -17,6 +17,22 @@ HAIKU = "claude-haiku-4-5-20251001"
 SINGLE = ["--pipeline", "single"]
 
 
+def _corpus_n() -> int:
+    """The number of trait files the calibration reads (its own loader), so the calibration tests
+    follow the corpus as it grows (659 traits at M2, 663 after the 2026-10-02 merge with the main
+    line) instead of hard-coding one size."""
+    from data_analysis.gap_generation import calibrate_metric as CM
+    n = len(CM.corpus_inputs(CM._REPO_ROOT)["stems"])
+    assert n == len(list((CM._REPO_ROOT / "data" / "traits" / "instructions").glob("*.json"))) > 600
+    return n
+
+
+def _paraphrase_calls(n: int) -> int:
+    """Haiku calls to paraphrase ``n`` descriptions (one call per batch)."""
+    from assistant_axis.gapgen import calibrate_llm as CL
+    return -(-n // CL.PARAPHRASE_BATCH)
+
+
 def _row(i, label):
     row = {"id": i, "label": label, "reason": "A habit.",
            "person_senses": [{"sense": label, "kind": "trait"}], "trait_senses_equally_obvious": False, "judged_sense": label,
@@ -521,13 +537,14 @@ def test_calibrate_paraphrase_stage_with_fake_haiku(tmp_path, monkeypatch):
     assert calibrate_metric.main(args) == 0
     cal = tmp_path / "cal"
     para = json.loads((cal / "paraphrases.json").read_text())
-    assert para["prompt_version"] == 2 and para["n"] == 659
+    n = _corpus_n()
+    assert para["prompt_version"] == 2 and para["n"] == n
     usage = json.loads((cal / "usage.json").read_text())
     assert "claude-haiku-4-5-20251001" in usage["per_model"]
     assert all("sonnet" not in m for m in usage["per_model"])           # (e) not run
     pm = json.loads((cal / "paraphrase_metrics.json").read_text())["result"]
     assert {r["query"] for r in pm["recall_and_covered"]} == {"label", "no_label", "no_label_14w"}
-    assert pm["heldout_directional"] and pm["heldout_directional"][0]["n"] == 659
+    assert pm["heldout_directional"] and pm["heldout_directional"][0]["n"] == n
     summ = json.loads((cal / "summary.json").read_text())["result"]
     assert set(summ["settings"]) == {"covered", "directional"}
     assert summ["proposed_metric_config"]["covered"]["thresholds"]["hash"]["t_hi"] is not None
@@ -566,8 +583,9 @@ def test_round4_defaults_and_dry_run_writes_nothing(tmp_path, capsys):
     assert CM.main(_round4_args(tmp_path, "--dry-run", "--budget-usd", "10")) == 0
     out = capsys.readouterr().out
     assert "DRY-RUN" in out and "round 4" in out and "cost estimate" in out
-    # nothing cached in the empty out dir: all three paraphrase sets would be generated (3 x 659)
-    assert "round 4 styled paraphrases: 99 x" in out
+    # nothing cached in the empty out dir: all three paraphrase sets would be generated (3 x the corpus),
+    # estimated as one pooled count of batches
+    assert f"round 4 styled paraphrases: {_paraphrase_calls(3 * _corpus_n())} x" in out
     for src in ("paraphrase", "plain", "terse", "m1_gloss_1", "m1_gloss_2"):
         assert f"source {src} " in out
     assert "['w14', 'w20']" in out and "pw24" in out
@@ -580,18 +598,20 @@ def test_round4_end_to_end_with_fake_haiku_and_hash_embedder(tmp_path, monkeypat
     monkeypatch.setattr(CM, "_anthropic_client", lambda: fake)
     assert CM.main(_round4_args(tmp_path, "--budget-usd", "10", "--variants", "centred", "pw8")) == 0
     cal = tmp_path / "cal"
+    n = _corpus_n()
     for style, name in (("standard", "paraphrases.json"), ("plain", "paraphrases_plain.json"),
                         ("terse", "paraphrases_terse.json")):
         d = json.loads((cal / name).read_text())
-        assert d["style"] == style and d["n"] == 659 and d["prompt_version"] == CM.CL.paraphrase_version(style)
+        assert d["style"] == style and d["n"] == n and d["prompt_version"] == CM.CL.paraphrase_version(style)
         assert d["prompt_sha256"] == CM._sha256(CM.CL.paraphrase_prompt(style))
     usage = json.loads((cal / "usage.json").read_text())
-    assert usage["per_model"][HAIKU]["n_calls"] == 3 * 33
+    assert usage["per_model"][HAIKU]["n_calls"] == 3 * _paraphrase_calls(n)   # each style batched on its own
     run = json.loads((cal / "run_round4.json").read_text())
     assert run["round"] == 4 and run["models_run"] == ["hash"]
     assert set(run["rubric_versions"]) == {"calibration_paraphrase", "calibration_paraphrase_plain",
                                            "calibration_paraphrase_terse"}
-    assert run["n_queries"]["paraphrase"] == 659 and 0 < run["n_queries"]["m1_gloss_1"] <= 591
+    n_same = len(CM.RT.plain_reading_same(CM._REPO_ROOT / CM.RT.PLAIN_READING_COMPARISON))   # 591 labels
+    assert run["n_queries"]["paraphrase"] == n and 0 < run["n_queries"]["m1_gloss_1"] <= n_same
     env = json.loads((cal / "retrieval_round4.json").read_text())
     assert "_provenance" in env
     res = env["result"]
