@@ -1,0 +1,39 @@
+warning: `VIRTUAL_ENV=/Users/roger/Documents/GitHub/assistant-axis/.venv` does not match the project environment path `.venv` and will be ignored; use `--active` to target the active environment instead
+2026-10-02T18:20:24Z INFO [openai] embedded 4325 texts in 0s; [usage] (no API calls)
+2026-10-02T18:20:24Z INFO [gemma] embedded 4325 texts in 0s; [usage] (no API calls)
+2026-10-02T18:20:28Z INFO [compare] openai r@1 w14|pw8 vs w14|centred: +0.0019 (23/17 discordant) p=0.4296 holm=1 boot [-0.0020, +0.0061]
+2026-10-02T18:20:28Z INFO [compare] openai r@1 w14|pw12 vs w14|centred: +0.0006 (29/27 discordant) p=0.8939 holm=1 boot [-0.0042, +0.0055]
+2026-10-02T18:20:28Z INFO [compare] openai r@1 w14|pw16 vs w14|centred: +0.0019 (35/29 discordant) p=0.5323 holm=1 boot [-0.0032, +0.0074]
+2026-10-02T18:20:28Z INFO [compare] openai r@1 w14|pw24 vs w14|centred: -0.0019 (42/48 discordant) p=0.5984 holm=1 boot [-0.0088, +0.0048]
+2026-10-02T18:20:28Z INFO [compare] openai r@1 w14|pw32 vs w14|centred: -0.0013 (52/56 discordant) p=0.773 holm=1 boot [-0.0087, +0.0061]
+2026-10-02T18:20:28Z INFO [compare] openai r@1 w20|centred vs w14|centred: +0.0081 (101/76 discordant) p=0.07094 holm=1 boot [-0.0016, +0.0170]
+2026-10-02T18:20:28Z INFO [compare] openai r@5 w14|pw8 vs w14|centred: +0.0036 (15/4 discordant) p=0.01921 holm=0.3842 boot [+0.0010, +0.0065]
+2026-10-02T18:20:28Z INFO [compare] openai r@5 w14|pw12 vs w14|centred: +0.0042 (19/6 discordant) p=0.01463 holm=0.3073 boot [+0.0010, +0.0081]
+2026-10-02T18:20:28Z INFO [compare] openai r@5 w14|pw16 vs w14|centred: +0.0032 (20/10 discordant) p=0.09874 holm=1 boot [-0.0003, +0.0071]
+2026-10-02T18:20:28Z INFO [compare] openai r@5 w14|pw24 vs w14|centred: +0.0026 (21/13 discordant) p=0.2295 holm=1 boot [-0.0010, +0.0068]
+2026-10-02T18:20:28Z INFO [compare] openai r@5 w14|pw32 vs w14|centred: +0.0016 (21/16 discordant) p=0.5114 holm=1 boot [-0.0023, +0.0061]
+2026-10-02T18:20:28Z INFO [compare] openai r@5 w20|centred vs w14|centred: +0.0058 (28/10 discordant) p=0.005098 holm=0.1121 boot [+0.0013, +0.0110]
+2026-10-02T18:20:28Z INFO [compare] gemma r@1 w14|pw8 vs w14|centred: +0.0058 (60/42 discordant) p=0.09184 holm=1 boot [-0.0006, +0.0120]
+2026-10-02T18:20:28Z INFO [compare] gemma r@1 w14|pw12 vs w14|centred: +0.0074 (70/47 discordant) p=0.0415 holm=0.7885 boot [+0.0003, +0.0140]
+2026-10-02T18:20:28Z INFO [compare] gemma r@1 w14|pw16 vs w14|centred: +0.0048 (84/69 discordant) p=0.2576 holm=1 boot [-0.0033, +0.0124]
+2026-10-02T18:20:28Z INFO [compare] gemma r@1 w14|pw24 vs w14|centred: +0.0036 (92/81 discordant) p=0.4472 holm=1 boot [-0.0055, +0.0120]
+2026-10-02T18:20:28Z INFO [compare] gemma r@1 w14|pw32 vs w14|centred: +0.0000 (101/101 discordant) p=1 holm=1 boot [-0.0105, +0.0097]
+2026-10-02T18:20:28Z INFO [compare] gemma r@1 w20|centred vs w14|centred: +0.0258 (179/99 discordant) p=1.847e-06 holm=4.432e-05 boot [+0.0141, +0.0374] REAL
+2026-10-02T18:20:28Z INFO [compare] gemma r@5 w14|pw8 vs w14|centred: +0.0019 (22/16 discordant) p=0.4177 holm=1 boot [-0.0026, +0.0065]
+2026-10-02T18:20:28Z INFO [compare] gemma r@5 w14|pw12 vs w14|centred: +0.0026 (28/20 discordant) p=0.3123 holm=1 boot [-0.0026, +0.0077]
+2026-10-02T18:20:28Z INFO [compare] gemma r@5 w14|pw16 vs w14|centred: +0.0019 (31/25 discordant) p=0.5044 holm=1 boot [-0.0032, +0.0074]
+2026-10-02T18:20:28Z INFO [compare] gemma r@5 w14|pw24 vs w14|centred: +0.0000 (36/36 discordant) p=1 holm=1 boot [-0.0064, +0.0065]
+2026-10-02T18:20:28Z INFO [compare] gemma r@5 w14|pw32 vs w14|centred: -0.0023 (35/42 discordant) p=0.4944 holm=1 boot [-0.0090, +0.0042]
+2026-10-02T18:20:28Z INFO [compare] gemma r@5 w20|centred vs w14|centred: +0.0116 (73/37 discordant) p=0.000769 holm=0.01769 boot [+0.0042, +0.0196] REAL
+M2 round 4 (retrieval): 659 traits; models ['openai', 'gemma']; representations ['w14', 'w20']; variants ['centred', 'pw8', 'pw12', 'pw16', 'pw24', 'pw32']; k [1, 3, 5, 10, 20]; paired tests at k [1, 5] against w14|centred, bootstrap 2000 resamples by trait, seed 0
+  source paraphrase (paraphrase (round 3)): 659 queries; cache /Users/roger/Documents/GitHub/assistant-axis/.claude/worktrees/agent-a49beca76adafdfc1/data/candidates/calibration/paraphrases.json
+  source plain (plain paraphrase): 659 queries; cache /Users/roger/Documents/GitHub/assistant-axis/.claude/worktrees/agent-a49beca76adafdfc1/data/candidates/calibration/paraphrases_plain.json
+  source terse (terse paraphrase): 659 queries; cache /Users/roger/Documents/GitHub/assistant-axis/.claude/worktrees/agent-a49beca76adafdfc1/data/candidates/calibration/paraphrases_terse.json
+  source m1_gloss_1 (M1 gloss, run 1): 554 queries; filter rows {'existing': 659, 'with_gloss': 614, 'in_corpus': 614, 'kept': 554}, plain reading 'same' 591
+  source m1_gloss_2 (M1 gloss, run 2): 567 queries; filter rows {'existing': 659, 'with_gloss': 630, 'in_corpus': 630, 'kept': 567}, plain reading 'same' 591
+  3098 queries now, 4325 distinct texts (about 24 tokens each); uncached per model {'openai': 0, 'gemma': 0}
+cost estimate:
+  (no API calls)
+  total estimate = $0.000
+  budget $10.00
+[usage] (no API calls)

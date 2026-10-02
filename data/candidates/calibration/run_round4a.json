@@ -1,0 +1,118 @@
+{
+  "round": 4,
+  "started_at": "2026-10-02T18:14:28+00:00",
+  "git_sha": "ab22841",
+  "argv": [
+    "--round4",
+    "--budget-usd",
+    "10"
+  ],
+  "allow_dirty": false,
+  "dirty_check": {
+    "paths": [
+      "assistant_axis/gapgen",
+      "data_analysis/gap_generation",
+      "assistant_axis/judge.py",
+      "assistant_axis/judge_pricing.py",
+      "assistant_axis/entity_id.py",
+      "assistant_axis/atomic_io.py",
+      "data/candidates/validation",
+      "reports/trait_gap_generation/rubrics",
+      "pyproject.toml",
+      "uv.lock"
+    ],
+    "dirty": []
+  },
+  "estimate_usd": 0.7155,
+  "budget_usd": 10.0,
+  "models_requested": [
+    "openai",
+    "gemma"
+  ],
+  "models_run": [
+    "openai",
+    "gemma"
+  ],
+  "models_failed": {},
+  "representations": [
+    "w14",
+    "w20"
+  ],
+  "variants": [
+    "centred",
+    "pw8",
+    "pw12",
+    "pw16",
+    "pw24",
+    "pw32"
+  ],
+  "query_sources": [
+    "paraphrase",
+    "plain",
+    "terse",
+    "m1_gloss_1",
+    "m1_gloss_2"
+  ],
+  "paraphrase_model": "claude-haiku-4-5-20251001",
+  "rubric_versions": {
+    "calibration_paraphrase": {
+      "version": 2,
+      "sha256": "4bae6e964cd48a4bf12d9c9a81632b7f243881e9afa084d140c25c8e17ae39ff"
+    },
+    "calibration_paraphrase_plain": {
+      "version": 1,
+      "sha256": "fbf76cf86e02a7770f3791d17de9d32748c021a3edb2600c068b8782b3efe614"
+    },
+    "calibration_paraphrase_terse": {
+      "version": 1,
+      "sha256": "f991a03eecd58e12bc60d72a495e7ed333ffc082896902effa24e2f199079fb2"
+    }
+  },
+  "timings_s": {
+    "paraphrases_plain": 106.8,
+    "paraphrases_terse": 79.7,
+    "embed_openai": 16.3,
+    "embed_gemma": 18.5,
+    "evaluate": 2.9,
+    "total": 224.7
+  },
+  "cost_usd": 0.526301,
+  "usage_this_run": {
+    "per_model": {
+      "claude-haiku-4-5-20251001": {
+        "model": "claude-haiku-4-5-20251001",
+        "prompt_tokens": 90791,
+        "completion_tokens": 86167,
+        "cost_usd": 0.5216,
+        "n_calls": 66
+      },
+      "embeddinggemma-300m": {
+        "model": "embeddinggemma-300m",
+        "prompt_tokens": 57253,
+        "completion_tokens": 0,
+        "cost_usd": 0.0,
+        "n_calls": 74
+      },
+      "text-embedding-3-large": {
+        "model": "text-embedding-3-large",
+        "prompt_tokens": 35964,
+        "completion_tokens": 0,
+        "cost_usd": 0.0047,
+        "n_calls": 10
+      }
+    },
+    "total_cost_usd": 0.5263,
+    "total_prompt_tokens": 184008,
+    "total_completion_tokens": 86167,
+    "n_calls": 150
+  },
+  "cost_usd_cumulative": 0.894776,
+  "n_queries": {
+    "paraphrase": 659,
+    "plain": 659,
+    "terse": 659,
+    "m1_gloss_1": 554,
+    "m1_gloss_2": 567
+  },
+  "finished_at": "2026-10-02T18:18:13+00:00"
+}
