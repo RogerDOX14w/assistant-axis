@@ -490,3 +490,96 @@ The frozen interface is unchanged: `MetricConfig`, `MetricConfig.load(path=METRI
 and `config_version` keep their names and signatures, and the §6 single-setting fields
 (`representation`, `space`, `thresholds`) remain readable as properties that point at the `covered`
 block.  §6's example config is superseded by these two blocks.
+
+## M2 final settings and the M3 design (2026-10-02, Roger and Claude)
+
+Decided by Roger on 2026-10-02 after round 4 of the calibration
+([pilot_m2_readout.md](./pilot_m2_readout.md), round 4 at the top;
+[retrieval_round4.md](../../data/candidates/calibration/retrieval_round4.md)).  These supersede the
+covered/grey/new decision rule of §5 (`novelty.py`), plan 10's thresholds and `PolarityProbe`, and
+the M3 acceptance tests of §8 that assume them; the M3 coding brief rewrites those against this
+section.
+
+**M2 final settings** (task 19 writes them into
+[metric_config.json](../../data/candidates/metric_config.json), not written yet):
+
+1. **Embedding model**: OpenAI `text-embedding-3-large` in the live pipeline.  It is closed (API only,
+   undisclosed base) but predates gpt-oss, so it cannot descend from an experiment-subject family;
+   Roger accepts the dependency.  `google/embeddinggemma-300m` stays in the config as an inactive
+   fallback (open weights, in `data/external/hf/`), never mixed into a run's results.  bge is dropped.
+   Every run re-embeds a fixed handful of texts and compares them with the cache, so a silent change
+   to the API model shows up as a warning.
+2. **Covered setting**: descriptions cut to 20 words (`w20`), centred on the fixed corpus mean,
+   cosine; **retrieve k = 10 nearest existing traits**.  No similarity threshold decides anything:
+   at 95% paraphrase recall a threshold put 61% of recorded antonym pairs on the covered side.
+   Recall@10 on the realistic query (an M1 gloss written from the bare label, no label in the
+   query): 0.972-0.978; 0.990 pooled over 3,098 queries.  Partial whitening was no better at any N
+   (paired tests with Holm's adjustment); merging two models' lists adds nothing.
+3. **Directional setting**: `w20`, centred, residual outside the top K = 10 principal directions;
+   K provisional, judged only through the persona-space proxy (task c).  The same embeddings serve
+   both settings, so M3 embeds the corpus once.
+4. **Contrast clauses**: kept in the embedded text (Roger's 30 blinded marks were a coin flip).
+5. **M2 acceptance targets restated** (a consequence of the design change, approved with it): the
+   §8 targets `auc_dup_vs_distinct >= 0.85` and `paraphrase_recall_top1 >= 0.95` belonged to the
+   threshold design and are replaced by **retrieval recall@10 >= 0.95 on the M1-gloss queries** for
+   the chosen setting; the old figures stay reported.
+
+**M3 design: retrieve, then judge.**  Roger's design of 2026-10-02 with the refinements agreed the
+same day:
+
+1. **Exact-label check** (no model): a candidate whose normalised label is a corpus stem, a queue
+   stem or a `renamed_from` is covered at once.
+2. **Retrieve** the 10 nearest existing traits (covered setting above).
+3. **Expand arrangements**: when a retrieved trait is in a recorded pair, the other side joins the
+   list too; if both sides were retrieved they are listed once, at the closer one's position.
+   Triangles and tetrahedra expand to all their members; sequences (the moral-circle group) do not.
+4. **Relation call** (one call per candidate, all listed traits in it): for each, is the candidate
+   *similar to*, *opposed to*, *different enough that the question is ill-defined*, or *unsure*.
+   The judge sees labels and descriptions in random order, with no embedding scores or ranks and no
+   indication of which traits form pairs, so the pair check below stays independent.  Expected
+   model: Haiku (Roger is confident it tells words from their antonyms); *unsure* goes to Sonnet.
+   - Pair check: for a pair, one side should come back similar and the other opposed.  Similar to
+     both or opposed to both is flagged (a slip, or a candidate off the pair's axis, perhaps a third
+     pole).
+   - The opposed side of a pair is dropped when the candidate is similar to its partner.
+   - **Opposed to a trait with no partner** (`negative_label` still `non-X`) is a find, not a drop:
+     the candidate may be that trait's missing antonym (pair completion).
+5. **Overlap call** (one call per candidate, each remaining similar trait scored separately): how
+   similar are the **concepts**, on an anchored scale, or *unsure*.  Draft scale: 4 the same concept,
+   either label could replace the other; 3 the same concept, differing in scope, degree or emphasis;
+   2 overlapping concepts sharing a core, each adding its own; 1 related but distinct; 0 unrelated.
+   Roger prefers concept similarity to co-occurrence ("how often a persona with one would show the
+   other"); co-occurrence is the comparison arm.  Expected model: stronger than Haiku (Sonnet);
+   *unsure* goes to Opus.  Rubric examples follow the hygiene rule (near-duplicates of corpus terms,
+   never corpus labels, queue entries or validation words).
+6. **Decision**: overlap score combined with the candidate's alignment score (0-3, from the
+   filter), so that the bar for "too similar" rises as a candidate nears alignment ("density
+   increases gradually as you get closer to alignment").  Cut-offs set from Roger's manual marks
+   after the pilot.
+7. **Calibration by-product**: every overlap score is logged beside the embedding cosine, building
+   the data for a cheap scorer that flags anomalies (a score far from what the angle predicts) for a
+   larger judge, and possibly later skips calls.
+8. **Near-duplicates are recorded**: a candidate judged too similar keeps `covered_by: <stem>`, its
+   overlap score, gloss and frequency; a per-trait report (`gap_registry.py synonyms [--stem X]`)
+   lists them with the plain-reading check, as a rename shortlist (Roger: "occasionally we find
+   ourselves looking for a better name for an existing trait").  Traits whose bare label reads
+   "related" or "different" in the corpus comparison come first; seeded from the queue's covered
+   rulings, the antonym-check candidates, the drop-or-merge pairs and Roger's "history buff".
+9. **Choosing the models by measurement**: on M3's pilot (about 350 items) run Haiku and Sonnet on
+   the relation call and Sonnet and Opus on the overlap call for every item, both overlap rubrics,
+   with Opus as the reference and Roger's 40 hand-labelled rows checking Opus.  Rough live costs per
+   10,000 candidates: relation about $40 (Haiku, about 14 listed traits after expansion), overlap
+   about $50 (Sonnet), a 10% Opus audit about $7; batches halve them.  A pre-pilot rubric test
+   (both overlap rubrics on a few hundred existing-trait pairs, scored against persona-space cosine
+   for the about 290 traits with vectors, the labelled pairs and the 16 drop-or-merge pairs; about
+   $2-5) runs before the brief is final.
+
+**M1 filter: judging model per generator** (Roger, 2026-10-02: "different generators will produce
+different distributions").  The Opus audit of the filter's second-opinion sample
+([opus_audit_m1.md](./opus_audit_m1.md)) found Haiku agreeing with Opus 95% on corpus labels and 68%
+on random dictionary adjectives (Sonnet 96% and 84%), and the Haiku-Sonnet disagreement rate tracking
+it (1% and 31%).  So: each generator's pilot runs the filter with Haiku plus the 10% Sonnet sample
+and an Opus third opinion on that sample; Haiku is used for that generator if it agrees with Opus
+about 90% of the time or more (about 10% disagreement or less with Sonnet), else Sonnet; later runs
+keep the 10% Sonnet sample and warn and stop above about 10% disagreement.  Code needed: a
+`--third-model` flag and the disagreement tripwire, by stratum or source.
