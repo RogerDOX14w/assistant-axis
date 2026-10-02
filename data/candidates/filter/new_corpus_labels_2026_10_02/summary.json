@@ -1,0 +1,368 @@
+{
+  "result": {
+    "n": 6,
+    "n_done": 6,
+    "n_failed": 0,
+    "n_pending": 0,
+    "n_hard_reject": 1,
+    "verdict_counts": {
+      "reject": 1,
+      "trait": 5
+    },
+    "verdict_fractions": {
+      "reject": 0.1667,
+      "trait": 0.8333
+    },
+    "tag_counts": {
+      "too_rare": 1
+    },
+    "tag_fractions": {
+      "too_rare": 0.1667
+    },
+    "region_counts": {
+      "cognitive_epistemic": 2,
+      "moral_stance": 2,
+      "social_interpersonal": 1
+    },
+    "polysemy_n": 3,
+    "polysemy_rate": 0.6,
+    "gloss_in_band_rate": 0.0,
+    "n_useful": 2,
+    "second_opinion_n": 0,
+    "disagreements": 0,
+    "parse_rate": 1.0,
+    "parse_rate_first_pass": 0.0,
+    "n_llm": 5,
+    "probe_n": 1,
+    "probe_unknown": 0,
+    "probe_failed": 0,
+    "second_opinion_requested": 0,
+    "second_opinion_failed": 0,
+    "calls": {
+      "alignment": 5,
+      "descriptors": 5,
+      "established": 9,
+      "gloss": 5,
+      "kind": 9,
+      "probe": 1,
+      "same_sense": 4,
+      "sense": 5,
+      "vague": 9
+    },
+    "cost_usd": 0.0528,
+    "cost_per_candidate_usd": 0.008808,
+    "yield_per_usd": 37.8,
+    "usage": {
+      "per_model": {
+        "claude-haiku-4-5-20251001": {
+          "model": "claude-haiku-4-5-20251001",
+          "prompt_tokens": 27364,
+          "completion_tokens": 5097,
+          "cost_usd": 0.0528,
+          "n_calls": 52
+        }
+      },
+      "total_cost_usd": 0.0528,
+      "total_prompt_tokens": 27364,
+      "total_completion_tokens": 5097,
+      "n_calls": 52
+    },
+    "by_stratum": {
+      "existing": {
+        "n": 6,
+        "n_done": 6,
+        "n_failed": 0,
+        "n_pending": 0,
+        "n_hard_reject": 1,
+        "verdict_counts": {
+          "reject": 1,
+          "trait": 5
+        },
+        "verdict_fractions": {
+          "reject": 0.1667,
+          "trait": 0.8333
+        },
+        "tag_counts": {
+          "too_rare": 1
+        },
+        "tag_fractions": {
+          "too_rare": 0.1667
+        },
+        "region_counts": {
+          "cognitive_epistemic": 2,
+          "moral_stance": 2,
+          "social_interpersonal": 1
+        },
+        "polysemy_n": 3,
+        "polysemy_rate": 0.6,
+        "gloss_in_band_rate": 0.0,
+        "n_useful": 2,
+        "second_opinion_n": 0,
+        "disagreements": 0
+      }
+    },
+    "validation_figures": {
+      "existing": {
+        "n": 6,
+        "correct": 5,
+        "share": 0.8333,
+        "target": 0.95,
+        "meets_target": false,
+        "misses": {
+          "floor": [
+            "civilizationist"
+          ]
+        },
+        "labels_with_state": [],
+        "labels_with_physical": []
+      },
+      "rejects": {
+        "n": 0,
+        "flagged": 0,
+        "flagged_labels": [],
+        "target": 4,
+        "meets_target": null
+      },
+      "oewn_random": {
+        "n": 0,
+        "trait": 0,
+        "trait_share": null,
+        "target": 0.15,
+        "meets_target": null,
+        "sample_for_marks": [],
+        "sample_for_marks_unseen_only": false
+      },
+      "unseen": {
+        "existing": {
+          "n": 5,
+          "correct": 4,
+          "share": 0.8,
+          "target": 0.95,
+          "meets_target": false,
+          "misses": {
+            "floor": [
+              "civilizationist"
+            ]
+          },
+          "labels_with_state": [],
+          "labels_with_physical": []
+        },
+        "rejects": {
+          "n": 0,
+          "flagged": 0,
+          "flagged_labels": [],
+          "target": 4,
+          "meets_target": null
+        },
+        "oewn_random": {
+          "n": 0,
+          "trait": 0,
+          "trait_share": null,
+          "target": 0.15,
+          "meets_target": null
+        }
+      },
+      "n_seen_in_development": 1
+    },
+    "v2_fields": {
+      "alignment_relevant_true": 1,
+      "membership_kind": {},
+      "tag_disagreement": 0,
+      "validator_repairs": {},
+      "polysemy_notes": {
+        "two_trait_senses": 2,
+        "nontrait_person_sense": 0,
+        "obvious_sense_not_trait": 0,
+        "overshadowed": 0,
+        "reading_related": 0,
+        "first_thought_in_the_way": 1,
+        "leaves_something_out": 0,
+        "fits_many_in_different_ways": 1,
+        "most_likely_reading_stretched": 0
+      },
+      "comparison_relations": {},
+      "holding": {},
+      "freq_rescue": {},
+      "alignment_scores": {
+        "0": 3,
+        "1": 1,
+        "2": 0,
+        "3": 1,
+        "none": 0
+      }
+    },
+    "batch_id": "new_corpus_labels_2026_10_02",
+    "stopped_by_budget": false,
+    "stopped_by_error": null,
+    "rubric_version": 5,
+    "model": "claude-haiku-4-5-20251001",
+    "second_model": "claude-sonnet-5-5",
+    "split": {
+      "transport": "live",
+      "pilot_figures": {
+        "n": 6,
+        "n_reached_step1": 5,
+        "outcomes": {
+          "trait": 5
+        },
+        "same_outcome_as_expected": 0,
+        "differences": [],
+        "cut_before_step1": [
+          {
+            "label": "civilizationist",
+            "rule": "floor",
+            "reason": "Zipf 0.00 is below the 1.5 floor and no rescue route applies (no LLM call)."
+          }
+        ],
+        "glosses": 5,
+        "glosses_form_ok": 5
+      },
+      "step_parse_rates": {
+        "alignment:first:claude-haiku-4-5-20251001": {
+          "n": 5,
+          "ok_first_pass": 5,
+          "ok": 5
+        },
+        "descriptors:first:claude-haiku-4-5-20251001": {
+          "n": 5,
+          "ok_first_pass": 5,
+          "ok": 5
+        },
+        "established:first:claude-haiku-4-5-20251001": {
+          "n": 9,
+          "ok_first_pass": 9,
+          "ok": 9
+        },
+        "gloss:first:claude-haiku-4-5-20251001": {
+          "n": 5,
+          "ok_first_pass": 5,
+          "ok": 5
+        },
+        "kind:first:claude-haiku-4-5-20251001": {
+          "n": 9,
+          "ok_first_pass": 9,
+          "ok": 9
+        },
+        "probe:first:claude-haiku-4-5-20251001": {
+          "n": 1,
+          "ok_first_pass": 1,
+          "ok": 1
+        },
+        "same_sense:first:claude-haiku-4-5-20251001": {
+          "n": 4,
+          "ok_first_pass": 4,
+          "ok": 4
+        },
+        "sense:first:claude-haiku-4-5-20251001": {
+          "n": 5,
+          "ok_first_pass": 5,
+          "ok": 5
+        },
+        "vague:first:claude-haiku-4-5-20251001": {
+          "n": 9,
+          "ok_first_pass": 9,
+          "ok": 9
+        }
+      },
+      "cost_by_step": {
+        "alignment@claude-haiku-4-5-20251001": {
+          "n_calls": 5,
+          "prompt_tokens": 2920,
+          "completion_tokens": 424,
+          "cost_usd": 0.00504
+        },
+        "descriptors@claude-haiku-4-5-20251001": {
+          "n_calls": 5,
+          "prompt_tokens": 1795,
+          "completion_tokens": 460,
+          "cost_usd": 0.004095
+        },
+        "established@claude-haiku-4-5-20251001": {
+          "n_calls": 9,
+          "prompt_tokens": 4666,
+          "completion_tokens": 855,
+          "cost_usd": 0.008941
+        },
+        "gloss@claude-haiku-4-5-20251001": {
+          "n_calls": 5,
+          "prompt_tokens": 2604,
+          "completion_tokens": 206,
+          "cost_usd": 0.003634
+        },
+        "kind@claude-haiku-4-5-20251001": {
+          "n_calls": 9,
+          "prompt_tokens": 7054,
+          "completion_tokens": 687,
+          "cost_usd": 0.010489
+        },
+        "probe@claude-haiku-4-5-20251001": {
+          "n_calls": 1,
+          "prompt_tokens": 321,
+          "completion_tokens": 95,
+          "cost_usd": 0.000796
+        },
+        "same_sense@claude-haiku-4-5-20251001": {
+          "n_calls": 4,
+          "prompt_tokens": 1404,
+          "completion_tokens": 337,
+          "cost_usd": 0.003089
+        },
+        "sense@claude-haiku-4-5-20251001": {
+          "n_calls": 5,
+          "prompt_tokens": 3209,
+          "completion_tokens": 1151,
+          "cost_usd": 0.008964
+        },
+        "vague@claude-haiku-4-5-20251001": {
+          "n_calls": 9,
+          "prompt_tokens": 3391,
+          "completion_tokens": 882,
+          "cost_usd": 0.007801
+        }
+      },
+      "cost_per_word_by_step": {
+        "alignment@claude-haiku-4-5-20251001": 0.001008,
+        "descriptors@claude-haiku-4-5-20251001": 0.000819,
+        "established@claude-haiku-4-5-20251001": 0.001788,
+        "gloss@claude-haiku-4-5-20251001": 0.000727,
+        "kind@claude-haiku-4-5-20251001": 0.002098,
+        "probe@claude-haiku-4-5-20251001": 0.000159,
+        "same_sense@claude-haiku-4-5-20251001": 0.000618,
+        "sense@claude-haiku-4-5-20251001": 0.001793,
+        "vague@claude-haiku-4-5-20251001": 0.00156
+      },
+      "second_opinion": {
+        "n": 0,
+        "disagree": []
+      },
+      "resumed_calls": 0,
+      "batches_submitted": null
+    },
+    "pipeline": "split"
+  },
+  "_provenance": {
+    "schema_version": "1.0",
+    "produced_by": {
+      "cmd": "uv run python data_analysis/gap_generation/traithood_filter.py --pipeline split --transport live --batch-id new_corpus_labels_2026_10_02 --validation-file data/candidates/validation/new_corpus_labels_2026_10_02.jsonl --measurement --budget-usd 2",
+      "git_sha": "cfa46bf+dirty",
+      "author": "Roger Dearnaley",
+      "title": "traithood_filter new_corpus_labels_2026_10_02"
+    },
+    "produced_at": "2026-10-02T20:54:44+00:00",
+    "inputs": [
+      {
+        "dep_key": "validation_file",
+        "path": "data/candidates/validation/new_corpus_labels_2026_10_02.jsonl",
+        "fingerprint": "v1:2026-10-02T20:54:01+00:00@828",
+        "kind": "file",
+        "dataset_id": null,
+        "last_modified_at": "2026-10-02T20:54:01+00:00",
+        "extras": {
+          "sample_frac": "None",
+          "sample_seed": "0"
+        }
+      }
+    ],
+    "inputs_sha256": "8eb7847784fd23f65fee65858f43a273e68b9b3af1ea9fcfdab567a048b58dec"
+  }
+}

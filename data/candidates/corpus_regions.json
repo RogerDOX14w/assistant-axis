@@ -119,6 +119,14 @@
       "verdict": "trait",
       "batch_id": "m1_validation_r2"
     },
+    "ambiguity_tolerant": {
+      "label": "open-ended",
+      "region": "cognitive_epistemic",
+      "alignment_relevant": true,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2",
+      "renamed_from": "open_ended"
+    },
     "ambitious": {
       "label": "ambitious",
       "region": "cognitive_epistemic",
@@ -308,13 +316,6 @@
       "verdict": "trait",
       "batch_id": "m1_validation_r2"
     },
-    "bland": {
-      "label": "bland",
-      "region": "communication_style",
-      "alignment_relevant": false,
-      "verdict": "trait",
-      "batch_id": "m1_validation_r2"
-    },
     "blunt": {
       "label": "blunt",
       "region": "communication_style",
@@ -349,6 +350,14 @@
       "alignment_relevant": false,
       "verdict": "trait",
       "batch_id": "m1_validation_r2"
+    },
+    "brand_agnostic": {
+      "label": "variety-seeking",
+      "region": "emotional_temperament",
+      "alignment_relevant": false,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2",
+      "renamed_from": "variety_seeking"
     },
     "brand_loyal": {
       "label": "brand-loyal",
@@ -525,6 +534,13 @@
       "verdict": "trait",
       "batch_id": "m1_validation_r2"
     },
+    "civilizationist": {
+      "label": "civilizationist",
+      "region": null,
+      "alignment_relevant": null,
+      "verdict": "reject",
+      "batch_id": "new_corpus_labels_2026_10_02"
+    },
     "clannish": {
       "label": "clannish",
       "region": "social_interpersonal",
@@ -552,6 +568,14 @@
       "alignment_relevant": null,
       "verdict": "reject",
       "batch_id": "m1_validation_r2"
+    },
+    "closed_minded": {
+      "label": "dogmatic",
+      "region": "cognitive_epistemic",
+      "alignment_relevant": true,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2",
+      "renamed_from": "dogmatic"
     },
     "closure_seeking": {
       "label": "closure-seeking",
@@ -819,13 +843,6 @@
       "verdict": "trait",
       "batch_id": "m1_validation_r2"
     },
-    "cultural_relativist": {
-      "label": "cultural relativist",
-      "region": "cognitive_epistemic",
-      "alignment_relevant": false,
-      "verdict": "trait",
-      "batch_id": "m1_validation_r2"
-    },
     "curious": {
       "label": "curious",
       "region": "cognitive_epistemic",
@@ -959,12 +976,13 @@
       "verdict": "trait",
       "batch_id": "m1_validation_r2"
     },
-    "deterministic": {
+    "determinist": {
       "label": "deterministic",
       "region": "cognitive_epistemic",
       "alignment_relevant": false,
       "verdict": "trait",
-      "batch_id": "m1_validation_r2"
+      "batch_id": "m1_validation_r2",
+      "renamed_from": "deterministic"
     },
     "didactic": {
       "label": "didactic",
@@ -991,13 +1009,6 @@
       "label": "disagreeable",
       "region": "social_interpersonal",
       "alignment_relevant": false,
-      "verdict": "trait",
-      "batch_id": "m1_validation_r2"
-    },
-    "disciplined": {
-      "label": "disciplined",
-      "region": "emotional_temperament",
-      "alignment_relevant": true,
       "verdict": "trait",
       "batch_id": "m1_validation_r2"
     },
@@ -1064,13 +1075,6 @@
       "verdict": "reject",
       "batch_id": "m1_validation_r2"
     },
-    "dogmatic": {
-      "label": "dogmatic",
-      "region": "cognitive_epistemic",
-      "alignment_relevant": true,
-      "verdict": "trait",
-      "batch_id": "m1_validation_r2"
-    },
     "dominant": {
       "label": "dominant",
       "region": "social_interpersonal",
@@ -1091,6 +1095,13 @@
       "alignment_relevant": false,
       "verdict": "trait",
       "batch_id": "m1_validation_r2"
+    },
+    "dull": {
+      "label": "dull",
+      "region": "cognitive_epistemic",
+      "alignment_relevant": false,
+      "verdict": "trait",
+      "batch_id": "new_corpus_labels_2026_10_02"
     },
     "early_adopter": {
       "label": "early-adopter",
@@ -1400,12 +1411,13 @@
       "verdict": "trait",
       "batch_id": "m1_validation_r2"
     },
-    "exclusive": {
+    "exclusionary": {
       "label": "exclusive",
       "region": "identity_demographic",
       "alignment_relevant": false,
       "verdict": "trait",
-      "batch_id": "m1_validation_r2"
+      "batch_id": "m1_validation_r2",
+      "renamed_from": "exclusive"
     },
     "exclusivist": {
       "label": "exclusivist",
@@ -1540,13 +1552,6 @@
       "verdict": "trait",
       "batch_id": "m1_validation_r2"
     },
-    "financially_adventurous": {
-      "label": "financially adventurous",
-      "region": "cognitive_epistemic",
-      "alignment_relevant": false,
-      "verdict": "trait",
-      "batch_id": "m1_validation_r2"
-    },
     "financially_conservative": {
       "label": "financially conservative",
       "region": "cognitive_epistemic",
@@ -1560,6 +1565,14 @@
       "alignment_relevant": false,
       "verdict": "trait",
       "batch_id": "m1_validation_r2"
+    },
+    "financially_reckless": {
+      "label": "financially adventurous",
+      "region": "cognitive_epistemic",
+      "alignment_relevant": false,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2",
+      "renamed_from": "financially_adventurous"
     },
     "financially_secure": {
       "label": "financially secure",
@@ -2051,6 +2064,14 @@
       "verdict": "trait",
       "batch_id": "m1_validation_r2"
     },
+    "hurried": {
+      "label": "urgent",
+      "region": "alignment_ai_agent",
+      "alignment_relevant": false,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2",
+      "renamed_from": "urgent"
+    },
     "iconoclastic": {
       "label": "iconoclastic",
       "region": "cognitive_epistemic",
@@ -2174,13 +2195,6 @@
       "label": "individualistic",
       "region": "cognitive_epistemic",
       "alignment_relevant": true,
-      "verdict": "trait",
-      "batch_id": "m1_validation_r2"
-    },
-    "indulgent": {
-      "label": "indulgent",
-      "region": "emotional_temperament",
-      "alignment_relevant": false,
       "verdict": "trait",
       "batch_id": "m1_validation_r2"
     },
@@ -2338,12 +2352,13 @@
       "verdict": "trait",
       "batch_id": "m1_validation_r2"
     },
-    "job_hopper": {
+    "job_hopping": {
       "label": "job-hopper",
       "region": "identity_demographic",
       "alignment_relevant": false,
       "verdict": "trait",
-      "batch_id": "m1_validation_r2"
+      "batch_id": "m1_validation_r2",
+      "renamed_from": "job_hopper"
     },
     "joyful": {
       "label": "joyful",
@@ -2415,16 +2430,16 @@
       "verdict": "trait",
       "batch_id": "m1_validation_r2"
     },
+    "lenient": {
+      "label": "lenient",
+      "region": "moral_stance",
+      "alignment_relevant": false,
+      "verdict": "trait",
+      "batch_id": "new_corpus_labels_2026_10_02"
+    },
     "lethargic": {
       "label": "lethargic",
       "region": "emotional_temperament",
-      "alignment_relevant": false,
-      "verdict": "trait",
-      "batch_id": "m1_validation_r2"
-    },
-    "libertarian": {
-      "label": "libertarian",
-      "region": "moral_stance",
       "alignment_relevant": false,
       "verdict": "trait",
       "batch_id": "m1_validation_r2"
@@ -2519,6 +2534,13 @@
       "alignment_relevant": true,
       "verdict": "trait",
       "batch_id": "m1_validation_r2"
+    },
+    "malign": {
+      "label": "malign",
+      "region": "moral_stance",
+      "alignment_relevant": true,
+      "verdict": "trait",
+      "batch_id": "new_corpus_labels_2026_10_02"
     },
     "manic": {
       "label": "manic",
@@ -2653,6 +2675,13 @@
       "verdict": "trait",
       "batch_id": "m1_validation_r2"
     },
+    "metaphysical_libertarian": {
+      "label": "metaphysical libertarian",
+      "region": "cognitive_epistemic",
+      "alignment_relevant": false,
+      "verdict": "trait",
+      "batch_id": "new_corpus_labels_2026_10_02"
+    },
     "methodical": {
       "label": "methodical",
       "region": "communication_style",
@@ -2709,6 +2738,22 @@
       "verdict": "trait",
       "batch_id": "m1_validation_r2"
     },
+    "moral_relativist": {
+      "label": "cultural relativist",
+      "region": "cognitive_epistemic",
+      "alignment_relevant": false,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2",
+      "renamed_from": "cultural_relativist"
+    },
+    "moral_universalist": {
+      "label": "universalist",
+      "region": "moral_stance",
+      "alignment_relevant": false,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2",
+      "renamed_from": "universalist"
+    },
     "motivated_reasoning_immune": {
       "label": "motivated-reasoning-immune",
       "region": "cognitive_epistemic",
@@ -2750,6 +2795,13 @@
       "alignment_relevant": false,
       "verdict": "trait",
       "batch_id": "m1_validation_r2"
+    },
+    "neglectful": {
+      "label": "neglectful",
+      "region": "social_interpersonal",
+      "alignment_relevant": false,
+      "verdict": "trait",
+      "batch_id": "new_corpus_labels_2026_10_02"
     },
     "neurotic": {
       "label": "neurotic",
@@ -2888,13 +2940,6 @@
       "label": "opaque",
       "region": "communication_style",
       "alignment_relevant": false,
-      "verdict": "trait",
-      "batch_id": "m1_validation_r2"
-    },
-    "open_ended": {
-      "label": "open-ended",
-      "region": "cognitive_epistemic",
-      "alignment_relevant": true,
       "verdict": "trait",
       "batch_id": "m1_validation_r2"
     },
@@ -3549,12 +3594,13 @@
       "verdict": "trait",
       "batch_id": "m1_validation_r2"
     },
-    "rule_bending": {
+    "rule_breaking": {
       "label": "rule-bending",
       "region": "cognitive_epistemic",
       "alignment_relevant": true,
       "verdict": "trait",
-      "batch_id": "m1_validation_r2"
+      "batch_id": "m1_validation_r2",
+      "renamed_from": "rule_bending"
     },
     "rural": {
       "label": "rural",
@@ -3703,12 +3749,28 @@
       "verdict": "trait",
       "batch_id": "m1_validation_r2"
     },
+    "self_disciplined": {
+      "label": "disciplined",
+      "region": "emotional_temperament",
+      "alignment_relevant": true,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2",
+      "renamed_from": "disciplined"
+    },
     "self_effacing": {
       "label": "self-effacing",
       "region": "communication_style",
       "alignment_relevant": true,
       "verdict": "trait",
       "batch_id": "m1_validation_r2"
+    },
+    "self_indulgent": {
+      "label": "indulgent",
+      "region": "emotional_temperament",
+      "alignment_relevant": false,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2",
+      "renamed_from": "indulgent"
     },
     "self_pitying": {
       "label": "self-pitying",
@@ -3983,6 +4045,14 @@
       "verdict": "trait",
       "batch_id": "m1_validation_r2"
     },
+    "strict": {
+      "label": "tough",
+      "region": "emotional_temperament",
+      "alignment_relevant": false,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2",
+      "renamed_from": "tough"
+    },
     "strong_stomached": {
       "label": "strong-stomached",
       "region": null,
@@ -4144,13 +4214,6 @@
       "verdict": "trait",
       "batch_id": "m1_validation_r2"
     },
-    "tough": {
-      "label": "tough",
-      "region": "emotional_temperament",
-      "alignment_relevant": false,
-      "verdict": "trait",
-      "batch_id": "m1_validation_r2"
-    },
     "traditional": {
       "label": "traditional",
       "region": "moral_stance",
@@ -4277,13 +4340,6 @@
       "verdict": "trait",
       "batch_id": "m1_validation_r2"
     },
-    "undependable": {
-      "label": "undependable",
-      "region": "social_interpersonal",
-      "alignment_relevant": true,
-      "verdict": "trait",
-      "batch_id": "m1_validation_r2"
-    },
     "understated": {
       "label": "understated",
       "region": "communication_style",
@@ -4368,13 +4424,6 @@
       "verdict": "trait",
       "batch_id": "m1_validation_r2"
     },
-    "universalist": {
-      "label": "universalist",
-      "region": "moral_stance",
-      "alignment_relevant": false,
-      "verdict": "trait",
-      "batch_id": "m1_validation_r2"
-    },
     "unplugged": {
       "label": "unplugged",
       "region": "identity_demographic",
@@ -4402,6 +4451,14 @@
       "alignment_relevant": false,
       "verdict": "trait",
       "batch_id": "m1_validation_r2"
+    },
+    "unreliable": {
+      "label": "undependable",
+      "region": "social_interpersonal",
+      "alignment_relevant": true,
+      "verdict": "trait",
+      "batch_id": "m1_validation_r2",
+      "renamed_from": "undependable"
     },
     "unrepentant": {
       "label": "unrepentant",
@@ -4466,13 +4523,6 @@
       "verdict": "trait",
       "batch_id": "m1_validation_r2"
     },
-    "urgent": {
-      "label": "urgent",
-      "region": "alignment_ai_agent",
-      "alignment_relevant": false,
-      "verdict": "trait",
-      "batch_id": "m1_validation_r2"
-    },
     "utilitarian": {
       "label": "utilitarian",
       "region": "moral_stance",
@@ -4483,13 +4533,6 @@
     "vague": {
       "label": "vague",
       "region": "communication_style",
-      "alignment_relevant": false,
-      "verdict": "trait",
-      "batch_id": "m1_validation_r2"
-    },
-    "variety_seeking": {
-      "label": "variety-seeking",
-      "region": "emotional_temperament",
       "alignment_relevant": false,
       "verdict": "trait",
       "batch_id": "m1_validation_r2"
@@ -4617,23 +4660,32 @@
   "_provenance": {
     "schema_version": "1.0",
     "produced_by": {
-      "cmd": "uv run python data_analysis/gap_generation/gap_registry.py corpus-regions --from-filter data/candidates/filter/m1_validation_r2",
-      "git_sha": "af762b4+dirty",
+      "cmd": "uv run python data_analysis/gap_generation/gap_registry.py corpus-regions --from-filter data/candidates/filter/m1_validation_r2 --from-filter data/candidates/filter/new_corpus_labels_2026_10_02",
+      "git_sha": "d304d53+dirty",
       "author": "Roger Dearnaley",
-      "title": "corpus regions from m1_validation_r2"
+      "title": "corpus regions from m1_validation_r2 + new_corpus_labels_2026_10_02"
     },
-    "produced_at": "2026-10-01T02:00:15+00:00",
+    "produced_at": "2026-10-02T20:58:28+00:00",
     "inputs": [
       {
-        "dep_key": "filter_results",
+        "dep_key": "filter_results_m1_validation_r2",
         "path": "data/candidates/filter/m1_validation_r2/results.jsonl",
         "fingerprint": "v1:2026-10-01T01:58:33+00:00@8718125",
         "kind": "file",
         "dataset_id": null,
         "last_modified_at": "2026-10-01T01:58:33+00:00",
         "extras": {}
+      },
+      {
+        "dep_key": "filter_results_new_corpus_labels_2026_10_02",
+        "path": "data/candidates/filter/new_corpus_labels_2026_10_02/results.jsonl",
+        "fingerprint": "v1:2026-10-02T20:54:44+00:00@30612",
+        "kind": "file",
+        "dataset_id": null,
+        "last_modified_at": "2026-10-02T20:54:44+00:00",
+        "extras": {}
       }
     ],
-    "inputs_sha256": "08e5cd31e2b21f8fdecb7244518287c8780882e866649afe7d1079d62b792947"
+    "inputs_sha256": "ab206715e98a760cdd61421915e418a8c84fb5a0bd6f73a502acd7878b40e13c"
   }
 }
