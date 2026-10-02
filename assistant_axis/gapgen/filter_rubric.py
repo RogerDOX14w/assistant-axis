@@ -1,4 +1,4 @@
-"""Trait-hood rubric (the "rubric v2" change set; classifier prompt version 4):
+"""Trait-hood rubric (the "rubric v2" change set; classifier prompt version 6):
 the classifier prompt, its parser, derived fields and the definition probe.
 Each prompt's version is pinned to its text's sha256 in
 :mod:`assistant_axis.gapgen.rubric_versions`.
@@ -86,7 +86,13 @@ from assistant_axis.judge import _repair_json_blob, extract_json_blob
 
 from .normalize import REGION_VOCAB, VERDICTS
 
-TRAITHOOD_RUBRIC_VERSION = 4  # v4 (round 4): review_rubric_v2.md finding 5; v3: person senses
+#: v6 (2026-10-02, merge with the main line): the "soft" example's sense "mild and lenient" became
+#: "mild and undemanding", since lenient is a corpus trait since the rubric V2 regeneration (prompt
+#: hygiene); nothing else changed.  5 is skipped: a split filter block stamps ``rubric_version`` 5
+#: (``split.RUBRIC_VERSION``), and the seed queue's ``gap_gen`` copies that number without the
+#: block's ``pipeline`` key, so a classifier 5 could not be told from the split there.
+#: v4 (round 4): review_rubric_v2.md finding 5; v3: person senses.
+TRAITHOOD_RUBRIC_VERSION = 6
 PROBE_RUBRIC_VERSION = 3  # v3 (round 2): regular derivations count as real words
 
 GLOSS_MIN_WORDS = 18
@@ -130,6 +136,10 @@ MEMBERSHIP_KINDS = ("circumstance", "class", "family", "affinity", "relationship
 #: "You are X." probe's results (round 3 rule): sandbagging, overclaiming,
 #: widowed, Norwegian, plumber and benzoic.  (The one-role test sentence still
 #: says "such as plumber": that is Roger's rule wording, not an example.)
+#: Version 6 (2026-10-02) reworded the sense text of the "soft" example, not an example word:
+#: "lenient" joined the corpus with the main line's rubric V2 regeneration, and the prose check
+#: (``test_no_corpus_queue_or_validation_word_anywhere_in_a_prompt``) reads every word of the
+#: prompt.  "undemanding" is a near-duplicate of the corpus trait, as the hygiene rule prefers.
 POSITIVE_EXAMPLES = ("nitpicking", "long-winded", "capability-hiding", "reward-hacking", "bluffing", "lukewarm",
                      "prickly", "loose", "soft", "stepchild", "pet-owner", "debt-free", "divorced", "Portuguese")
 NEGATIVE_EXAMPLES = ("welder", "senator", "newborn", "duchess", "thermostat", "freckled", "bald", "jittery",
@@ -280,9 +290,9 @@ enactable_in_text 2; verdict trait; tags []; membership_kind null; region emotio
 alignment_relevant false; gloss "This means letting rules, schedules and small frictions slide, \
 taking plans lightly and meeting pressure with a shrug rather than tension or insistence on doing \
 things properly."; confidence 0.7
-- "soft": the main reading is mild and lenient; a lasting bodily sense also exists; person_senses \
-[mild and lenient (trait), flabby (physical)]; trait_senses_equally_obvious false; judged_sense "mild \
-and lenient"; enactable_in_text 2; verdict trait; tags []; membership_kind null; region \
+- "soft": the main reading is mild and undemanding; a lasting bodily sense also exists; person_senses \
+[mild and undemanding (trait), flabby (physical)]; trait_senses_equally_obvious false; judged_sense "mild \
+and undemanding"; enactable_in_text 2; verdict trait; tags []; membership_kind null; region \
 social_interpersonal; alignment_relevant false; gloss "This means going easy on people, avoiding stern \
 words and firm demands, letting lapses pass quickly and finding it hard to refuse a request or enforce a \
 rule."; confidence 0.8

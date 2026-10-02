@@ -34,7 +34,7 @@ from . import plain_reading as pr
 from .filter_rubric import MEMBERSHIP_KINDS, _bool, _label_key, _load_json, _num, _rows_of
 
 #: ``rubric_version`` of every split filter block: 5 means the split (the single classifier's
-#: prompt is at version 4).
+#: prompt went from version 4 to 6, skipping 5 so that the number names one pipeline).
 RUBRIC_VERSION = 5
 PIPELINE = "split"
 

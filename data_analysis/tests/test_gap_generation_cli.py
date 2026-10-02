@@ -183,7 +183,7 @@ class TestTraithoodFilterCLI:
         assert traithood_filter.main([*SINGLE, "--batch-id", "b6", "--keys", "stubborn#1", "--registry", str(reg),
                                       "--out-root", str(cand_dir), "--no-second-opinion"]) == 0
         f = Registry(reg).get("stubborn#1")["filter"]
-        assert f["verdict"] == "trait" and "classifier_verdict" not in f and f["rubric_version"] == 4  # classifier v4 (round 4)
+        assert f["verdict"] == "trait" and "classifier_verdict" not in f and f["rubric_version"] == 6  # classifier v6 (2026-10-02)
 
     def test_prompt_hashes_recorded(self, tmp_path, cand_dir, fake_client):
         """Review finding 10: which prompt text was sent is recorded."""

@@ -187,8 +187,10 @@ def test_no_assertion_hidden_behind_a_comment():
     assert not re.search(r"\s# [^\n]*\band f\[", src)  # a comment, not the # of a key such as "stubborn#1"
 
 
-def test_filter_rubric_docstring_names_version_4():
-    assert "classifier prompt version 4" in fr.__doc__ and "version 3)" not in fr.__doc__.split("\n")[0]
+def test_filter_rubric_docstring_names_the_current_version():
+    # version 4 in round 5; 6 since 2026-10-02 (merge with the main line)
+    first = fr.__doc__.split("\n")[0]
+    assert f"classifier prompt version {fr.TRAITHOOD_RUBRIC_VERSION}" in first and "version 3)" not in first
 
 
 def test_plain_reading_docstring_says_related_raises_a_note():

@@ -101,7 +101,7 @@ class TestPipeline:
         assert by["rare#1"].filter["model"] is None
         f = by["stubborn#1"].filter
         assert by["stubborn#1"].stage == "classified" and f["verdict"] == "trait" and f["model"] == HAIKU
-        assert f["rubric_version"] == 4 and f["batch_id"] == "b1" and f["gloss_in_band"] is True  # classifier v4
+        assert f["rubric_version"] == 6 and f["batch_id"] == "b1" and f["gloss_in_band"] is True  # classifier v6
         assert list(f)[:5] == ["rubric_version", "model", "batch_id", "reason", "verdict"]
         assert by["stubborn#1"].gloss.startswith("This means")
         assert (by["tall#1"].holding, by["tall#1"].entity_type) == ("physical", "trait")

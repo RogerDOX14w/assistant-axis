@@ -27,6 +27,11 @@ HISTORY: dict[str, dict[int, str]] = {
         2: "9c75829d4ed33a752e012b10feb2845ade11dbb234dc3131aa8b98d7616a5032",
         3: "f9af4e2d13bceca2c2d2044f8debf838509eedecbac799209f0fc57fd3e7b112",
         4: "51854ac5300e55943870c2eccfe6b125b33d4a9bf54f01fec9b1775c8f018d42",
+        # 2026-10-02, merge with the main line: the "soft" example's "mild and lenient" became "mild
+        # and undemanding" (lenient is now a corpus trait).  No 5: a split filter block's
+        # rubric_version is 5, and the seed queue's gap_gen keeps that number without the pipeline.
+        # Not run yet.
+        6: "138c165167f680c46314f6f9f4c6a6b40831bd12fe965faf533d3931757a878a",
     },
     "probe": {
         1: "d5ba66e82026137af301cded277f039f03269910eb4b8542ef7c0425f414d4e1",

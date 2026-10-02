@@ -199,7 +199,9 @@ def _examples():
 class TestClassifierV4:
     def test_version_and_pin(self):
         from assistant_axis.gapgen import rubric_versions
-        assert fr.TRAITHOOD_RUBRIC_VERSION == 4
+        # 6 since 2026-10-02 (the "soft" example reworded; 5 is the split's number); v4's text stays pinned
+        assert fr.TRAITHOOD_RUBRIC_VERSION == 6 and 5 not in rubric_versions.HISTORY["classifier"]
+        assert rubric_versions.HISTORY["classifier"][4].startswith("51854ac5")
         assert rubric_versions.mismatches() == []
 
     def test_sense_kinds(self):

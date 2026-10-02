@@ -50,7 +50,8 @@ def parse(*rows, labels=None):
 
 def test_versions_and_hashes_change():
     # probe rubric 3 since round 2 (derived words); the classifier stays at 2
-    assert fr.TRAITHOOD_RUBRIC_VERSION == 4 and fr.PROBE_RUBRIC_VERSION == 3  # round 4: classifier v4
+    # round 4: classifier v4; 2026-10-02 (merge with the main line): v6, 5 skipped (split's number)
+    assert fr.TRAITHOOD_RUBRIC_VERSION == 6 and fr.PROBE_RUBRIC_VERSION == 3
     from assistant_axis.gapgen.filter import PROMPT_SHA256
     assert PROMPT_SHA256["classifier"] != V1_PROMPT_SHA
     assert PROMPT_SHA256["probe"] != V1_PROBE_SHA
@@ -342,7 +343,7 @@ def test_runner_v2_blocks_and_routing():
     assert "primary_use" not in out["plain#1"].filter
     assert out["homebody#1"].filter["tag_disagreement"] is True
     assert out["homebody#1"].filter["second_opinion"] is not None  # disagreement triggered Sonnet
-    assert out["plain#1"].filter["rubric_version"] == 4
+    assert out["plain#1"].filter["rubric_version"] == fr.TRAITHOOD_RUBRIC_VERSION == 6
     labels_sent = [json.loads(x)["label"] for c in client.calls[:1] for x in user_text(c).splitlines()[1:]]
     assert "plain" in labels_sent
 

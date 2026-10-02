@@ -286,7 +286,7 @@ class TestFilterIntegration:
         for k in ("senses", "trait_sense_rank", "polysemy", "polysemy_notes", "person_senses",
                   "trait_senses_equally_obvious", "plain_reading", "comparison"):
             assert k in f, k
-        assert f["rubric_version"] == 4
+        assert f["rubric_version"] == fr.TRAITHOOD_RUBRIC_VERSION == 6
 
 
 # ---------------------------------------------------------------------------
