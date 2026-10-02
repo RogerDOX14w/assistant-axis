@@ -531,3 +531,182 @@ version or pin changed.  Where this section and the rounds above disagree, this 
 
   After the filter, `gap_registry.py corpus-regions --from-filter data/candidates/filter/m1_validation`
   writes `corpus_regions.json` at no cost.
+
+## M2: metric calibration (2026-10-01 to 2026-10-02)
+
+Scope: §9 tasks 11-19.  All done; task 19 wrote [metric_config.json](../../data/candidates/metric_config.json)
+after Roger's decisions of 2026-10-02 ([coding_plan_platform.md](./coding_plan_platform.md), "M2 final
+settings and the M3 design", commit 362f466).  The readout, newest round first, is
+[pilot_m2_readout.md](./pilot_m2_readout.md); terms of art link to [glossary.md](./glossary.md) on first use.
+
+### What was built (against §5)
+
+| §5 item | file | status |
+|---|---|---|
+| `embed.py` | [embed.py](../../assistant_axis/gapgen/embed.py) | done: OpenAI `text-embedding-3-large` with the direct key; [local models](./glossary.md#local-model) `BAAI/bge-large-en-v1.5` ([CLS pooling](./glossary.md#cls-pooling)) and `google/embeddinggemma-300m` (sentence-transformers) on [MPS](./glossary.md#mps), loaded only from `data/external/hf/`; a hash embedder for tests; the npz cache with manifest; `embed_texts` charges every call.  Task 19 added the [drift canary](./glossary.md#drift-canary) (`canary_texts`, `check_canary`, `canary_applies`) |
+| `setup_external.py --hf-model` | [setup_external.py](../../data_analysis/gap_generation/setup_external.py) | done, allow-listed files only |
+| `representation.py` | [representation.py](../../assistant_axis/gapgen/representation.py) | done: one text function for both sides; [representations](./glossary.md#representations) `full`, `noprefix`, `w20`, `w14`, `strip`, `dup` |
+| `contrast.py` | [contrast.py](../../assistant_axis/gapgen/contrast.py) | done: census parser, mechanical cuts with hand overrides ([contrast_cuts.json](../../data/candidates/calibration/contrast_cuts.json)), [minimal pairs](./glossary.md#minimal-pairs) |
+| `labels.py` | [labels.py](../../assistant_axis/gapgen/labels.py) | done: [labelled pairs](./glossary.md#labelled-pairs) seeded and hand-checked ([labelled_pairs.json](../../data/candidates/calibration/labelled_pairs.json)), folds that never split a pair |
+| `space.py` | [space.py](../../assistant_axis/gapgen/space.py) | done: `raw`, [centred](./glossary.md#centred), `centred_pc1`, `centred_pc3`, regularised [ZCA](./glossary.md#zca), and Roger's [partial whitening](./glossary.md#partial-whitening) `pw1` to `pw64` (12 and 24 added in round 4); `k_for_variance`, the [residual](./glossary.md#residual), [CSLS](./glossary.md#csls) |
+| `persona.py` | [persona.py](../../assistant_axis/gapgen/persona.py) | done: the 8-slot set, slot 6, layer 25, [soft shear](./glossary.md#soft-shear) L = 3, [leave-one-out](./glossary.md#loo) residual yields |
+| `calibrate.py` | [calibrate.py](../../assistant_axis/gapgen/calibrate.py) | done: [tasks (a), (b), (c)](./glossary.md#tasks-abc), [hubness](./glossary.md#hubness), [thresholds](./glossary.md#thresholds), drop-or-merge, histograms, the contrast ablation ([criteria (a)-(j)](./glossary.md#contrast-criteria)), the [two settings](./glossary.md#two-settings) (round 3); the plan's `write_metric_config` is `final_metric_config` with `FINAL_SETTINGS` (task 19) |
+| (not in §5) `calibrate_llm.py` | [calibrate_llm.py](../../assistant_axis/gapgen/calibrate_llm.py) | Haiku paraphrases in three pinned styles (criterion g and round 4), the Sonnet [blinded comparisons](./glossary.md#blinded-comparisons) (built, not run) |
+| (not in §5) `retrieval.py` | [retrieval.py](../../assistant_axis/gapgen/retrieval.py) | round 4: [recall@k](./glossary.md#recall-at-k), [McNemar's test](./glossary.md#mcnemar), the [paired bootstrap](./glossary.md#paired-bootstrap) by trait, [Holm's adjustment](./glossary.md#holm), the round-4 summary and tables |
+| `MetricConfig` (§5 put it in `novelty.py`) | [metric_config.py](../../assistant_axis/gapgen/metric_config.py) | done, re-exported from `assistant_axis.gapgen`; the schema of task 19 (below) |
+| `calibrate_metric.py` | [calibrate_metric.py](../../data_analysis/gap_generation/calibrate_metric.py) | done: the pilot / full calibration, `--round4`, `--write-config`; every embedding run checks the canary |
+| `novelty.py`, `adjudicate.py`, `recovery.py`, `novelty_score.py`, `recovery_test.py` | [novelty.py](../../assistant_axis/gapgen/novelty.py), [adjudicate.py](../../assistant_axis/gapgen/adjudicate.py), [recovery.py](../../assistant_axis/gapgen/recovery.py), [novelty_score.py](../../data_analysis/gap_generation/novelty_score.py), [recovery_test.py](../../data_analysis/gap_generation/recovery_test.py) (none exists yet) | M3, not started |
+
+Outputs: [data/candidates/calibration/](../../data/candidates/calibration/) (described in
+[data/README.md](../../data/README.md)) and [metric_config.json](../../data/candidates/metric_config.json).
+Documentation: [data/README.md](../../data/README.md) (candidates, calibration, the config, `external/hf/`) and
+[data_analysis/README.md](../../data_analysis/README.md) (the three modes of `calibrate_metric.py`).
+
+### The config as written (task 19)
+
+- **Models**: live OpenAI `text-embedding-3-large`; EmbeddingGemma an inactive fallback with its own
+  `w20`-centred numbers, never mixed into a run's results; bge listed as dropped.
+- **Covered**: [retrieve, then judge](./glossary.md#retrieve-then-judge): `w20`, centred on the fixed corpus
+  mean, [cosine](./glossary.md#cosine), k = 10; the query is a candidate's gloss without its label, cut to 14 words; contrast clauses
+  kept.  Recall from [retrieval_round4.json](../../data/candidates/calibration/retrieval_round4.json):
+
+  | query source | queries | recall@1 | recall@5 | recall@10 | recall@20 |
+  |---|---|---|---|---|---|
+  | paraphrase (round 3) | 659 | 0.939 | 0.999 | 1.000 | 1.000 |
+  | plain paraphrase | 659 | 0.871 | 0.991 | 0.997 | 0.997 |
+  | terse paraphrase | 659 | 0.936 | 1.000 | 1.000 | 1.000 |
+  | [M1 gloss](./glossary.md#m1-gloss), run 1 | 554 | 0.691 | 0.931 | 0.978 | 0.987 |
+  | M1 gloss, run 2 | 567 | 0.693 | 0.940 | 0.972 | 0.984 |
+  | pooled | 3,098 | 0.835 | 0.975 | 0.990 | 0.994 |
+
+  `t_hi` 0.403 and `t_lo` 0.238 (round 3) are kept as information, marked `used_for_decisions: false`.
+- **Directional**: `w20`, centred, residual outside the top K = 10 directions (provisional; [K_95](./glossary.md#k95) is 376);
+  task (c) [Spearman](./glossary.md#spearman) 0.30 at K = 10, 0.26 / 0.27 / 0.21 at 20 / 40 / K_95; stability
+  under rewording 0.64 at K = 10; the caveat that task (c) is a proxy is stored with it.
+- **Canary**: 8 texts ([absentee](../../data/traits/instructions/absentee.json), [collectivistic](../../data/traits/instructions/collectivistic.json), [edgy](../../data/traits/instructions/edgy.json), [gay](../../data/traits/instructions/gay.json), [ironic](../../data/traits/instructions/ironic.json), [only child](../../data/traits/instructions/only_child.json), [restless](../../data/traits/instructions/restless.json), [sycophantic](../../data/traits/instructions/sycophantic.json);
+  chosen by a fixed rule and stored), threshold cosine 0.999.  At the final write OpenAI's lowest was 0.99960
+  ([ironic](../../data/traits/instructions/ironic.json); the other seven 0.99999 or above) and EmbeddingGemma's 1.0.
+
+### Deviations from the plan, with reasons
+
+1. **Two settings, not one** (Roger, round 3): the embedding serves two uses in M3, "is it covered?" and "does
+   it add a direction?", tuned separately; task (b) (duplicate against antonym) is left to the LLM.  The §6
+   single-setting fields stay readable as properties of the covered block.
+2. **Retrieval instead of thresholds** (Roger, 2026-10-02): the labelled duplicates could not set a covered
+   threshold (`t_hi` below `t_lo` everywhere, [QUESTIONS.md](./QUESTIONS.md) 26); paraphrases could, but at
+   95% recall over round 4's 3,098 queries the line put 61% of the recorded antonym pairs on the covered
+   side.  M3 now retrieves k = 10 and judges with LLM calls; the plan's decision rule, `PolarityProbe` and
+   the M3 tests of §8 that assume thresholds are superseded and rewritten by the M3 brief.
+3. **Models**: the plan's local model (Qwen3-Embedding-0.6B) was replaced at launch by bge-large and
+   EmbeddingGemma (launch decisions 1-2); bge was dropped after round 3 (lowest recall, highest false-covered
+   rate); EmbeddingGemma stays as an inactive fallback, OpenAI is live ("use the best").
+4. **The M2 targets restated** (plan section, item 5): `auc_dup_vs_distinct >= 0.85` and
+   `paraphrase_recall_top1 >= 0.95` belonged to the threshold design; the gate is now recall@10 >= 0.95 on the
+   M1-gloss queries for the configured setting (0.978 and 0.972: met).  The old two are computed and
+   reported as a warning: 0.600 and 0.939 for the configured setting (neither met).
+5. **Representation**: the plan's `full` became `w20`, descriptions cut to 20 words (round 4: level with or
+   ahead of `w14` on every query source but one, really ahead for EmbeddingGemma).  `w14` (launch decision
+   4) and `dup` (Roger, round 2) were measured and not chosen.
+6. **Space variants**: partial whitening (Roger, round 2) was added to the plan's five; no N made a real
+   difference to retrieval in round 4's paired tests, so the config uses plain centring.
+7. **Persona yields recomputed** (plan 12 step 1): the May 2026 basis was not saved; the pool's K_95 is 170,
+   not 37, and task (c) uses K = 37 with 10/20/40 beside it.
+8. **Criterion (e)**: Roger's 30 blinded marks were a coin flip (13 kept, 16 stripped, 1 same), so the Sonnet
+   judge was not run; the clauses stay.
+9. **Task 19 additions**: the drift canary (Roger's item 1); the round-3 rule's proposal stays in
+   [summary.json](../../data/candidates/calibration/summary.json) marked superseded and is no longer a valid
+   config; `--write-config` builds the config from the recorded outputs instead of a fresh full run (all
+   inputs cached, about $0.0001 of canary calls).
+10. **Corpus**: M2 ran on this worktree's 659 trait files before the merge (launch decision 3).
+
+### Test results
+
+Final (code as of commit 2f3cbcd; this report's commit changes documents only):
+
+| command | result |
+|---|---|
+| `uv run pytest assistant_axis/tests/test_gapgen_*.py data_analysis/tests/test_gap_generation_cli.py assistant_axis/tests/test_judge_pricing.py -q` | 762 passed, 2 skipped (M1 ended at 242 passed, 6 skipped) |
+| `uv run pytest -q` | stops at collection with the same 4 errors as before M2 (`results_analysis/tests`: `test_infer_axis_description.py`, `test_standardize_axis_spec.py`, `test_steering_response_curves.py`, `test_whitening_shear.py`, from the two `tests` packages); count unchanged |
+| `uv run pytest assistant_axis/tests data_analysis/tests tools/tests -q` | 2,026 passed, 2 skipped |
+| `uv run pytest results_analysis/tests -q` | 3 failed (the three known `test_infer_axis_description.py` failures, as in M1), 65 passed |
+| `uv run pytest pipeline/tests -q` | 9 passed |
+| `uv run python data_analysis/check_arrangements.py --quiet` | exit 0 |
+| `uv run python tools/sync_entity_lists.py --check` | exit 0 (trait_list 659, role_list 337 up to date) |
+| `git status --porcelain data/traits data/roles` | empty |
+
+The 2 skips are the real local-model smoke tests in
+[test_gapgen_embed.py](../../assistant_axis/tests/test_gapgen_embed.py), which run only with
+`GAPGEN_RUN_LOCAL=1`.  The M2 acceptance tests in
+[test_gapgen_acceptance.py](../../assistant_axis/tests/test_gapgen_acceptance.py) all run and pass against the
+recorded outputs and the written config (12 passed).
+
+**Changed test expectations** (approved with the design change; plan section "M2 final settings and the M3
+design", item 5, and Roger's go for task 19):
+
+- [test_gapgen_acceptance.py](../../assistant_axis/tests/test_gapgen_acceptance.py): `test_m2_targets_reported`
+  now reports the two old targets for the configured setting as a warning; new
+  `test_m2_retrieval_recall_gate` gates recall@10 >= 0.95 on the M1-gloss sources; new
+  `test_m2_metric_config_validates`.  `test_m2_mechanical_gates` (changed in round 4) takes [usage.json](../../data/candidates/calibration/usage.json)'s
+  cumulative total from the latest run record, since partial runs (`--round4`, `--write-config`) add to it
+  without rewriting round 3's [summary.json](../../data/candidates/calibration/summary.json).
+- [test_gap_generation_cli.py](../../data_analysis/tests/test_gap_generation_cli.py):
+  `test_calibrate_write_config_waits_for_roger` (expected exit 2) became
+  `test_calibrate_write_config_refuses_without_recorded_outputs`.
+- [test_gapgen_calibrate.py](../../assistant_axis/tests/test_gapgen_calibrate.py): the round-3 proposal no
+  longer loads as a `MetricConfig`.
+- [test_gapgen_metric_config.py](../../assistant_axis/tests/test_gapgen_metric_config.py): rewritten for the
+  final schema.
+
+### Cost (from [usage.json](../../data/candidates/calibration/usage.json), cumulative)
+
+| round | Haiku 4.5 | OpenAI embeddings | local models | total |
+|---|---|---|---|---|
+| rounds 1-2 (pilot, `dup`, partial whitening) | | $0.019 (19 calls, plus an estimated 3 for a stopped run, [usage_notes.md](../../data/candidates/calibration/usage_notes.md)) | free | $0.019 |
+| round 3 (paraphrases, criterion g) | $0.321 (34 calls) | $0.029 (26 calls) | free | $0.350 |
+| round 4 (two paraphrase sets, retrieval test) | $0.522 (66 calls) | $0.005 (10 calls) | free | $0.526 |
+| task 19 (three config writes, canary only) | | $0.0001 (3 calls) | free | $0.0001 |
+| **M2 total** | **$0.8425** (100 calls) | **$0.0523** (61 calls) | bge 349 calls, EmbeddingGemma 426 calls | **$0.895** |
+
+Against the launch cap of $10 and the estimates of about $0.03 for the pilot and $1 for the paid criteria.
+
+### Roger's decisions, by round
+
+- **Launch (2026-10-01)**: download bge; EmbeddingGemma as a comparison arm; run on the worktree's corpus;
+  gloss length measured as a variant; the contrast census recomputed; stop after the pilot; cap $10.
+- **After the pilot and round 2 (2026-10-01)**: no drop-or-merge pass now (recorded as a TODO in
+  [TRAITS_TO_ADD.md](../../data/traits/instructions/TRAITS_TO_ADD.md)); keep bge until the experiments end;
+  `sentence-transformers` approved; try partial whitening and a doubled gloss (both measured in round 2);
+  tasks (a) and (c) serve different uses and are tuned separately, (b) goes to the LLM; paid criterion (g)
+  yes, (e) no; Roger marked the 30 blinded comparisons himself.
+- **After round 3**: the contrast clauses stay; bge dropped; K = 10 for the directional setting,
+  provisionally; a significantly larger covered test with real statistics; the M3 retrieve-then-judge design
+  agreed in outline.
+- **After round 4 (2026-10-02)**: the design confirmed; covered OpenAI `w20` centred cosine k = 10;
+  directional `w20` centred K = 10 (provisional); OpenAI live, EmbeddingGemma inactive fallback, bge out of
+  the config; the targets restated; task 19 go.
+
+### Open questions and items for M3
+
+- [QUESTIONS.md](./QUESTIONS.md): 24 (dependency) answered; 25 (K) answered, K provisional; 26 closed by the
+  design change; 27 (clauses) answered.  No M2 question is open.
+- K = 10 is judged only through a proxy; nothing yet tests recovery of genuinely missing traits (plan 13's
+  recovery hook is where that belongs).
+- The frozen `recovery_test` hook matches hidden traits "at the config's `t_hi` (strict) and `t_lo` (loose)";
+  under the new design those are information only, so the M3 brief has to restate the hook.
+- The canary's margin for OpenAI is narrow on one text ([ironic](../../data/traits/instructions/ironic.json), 0.99960 against 0.999).  It was the same at
+  each of three checks, so it reflects how that text's cached vector was made rather than noise; if it ever
+  trips, re-embedding that one text into the cache is the remedy.
+- The fallback does not meet the restated target itself (EmbeddingGemma recall@10 0.915 and 0.935 on the M1
+  glosses); switching to it would need a decision, not just a flag.
+- Roger's drop-or-merge TODO in [TRAITS_TO_ADD.md](../../data/traits/instructions/TRAITS_TO_ADD.md) is his.
+
+### Frozen interface: drift
+
+None removed or renamed: `MetricConfig`, `MetricConfig.load(path=METRIC_CONFIG_PATH)` and `config_version`
+keep their names and signatures (tested in `test_frozen_interface_unchanged`).  Additions: properties `k`,
+`live_model`, `fallback_model`, `canary`; `thresholds` now returns an empty dict when the block has none, and
+the block it returns carries `used_for_decisions: false` and a `note` beside the per-model entries.
+`validate_payload` is stricter (it requires `covered.k`, `covered.retrieval`, `models.live` and `canary`, and
+an inactive fallback), so a config of the round-3 shape no longer validates; none was ever written.
+`MetricConfig` lives in [metric_config.py](../../assistant_axis/gapgen/metric_config.py), not [novelty.py](../../assistant_axis/gapgen/novelty.py) (M3's, not written yet), and is re-exported from
+`assistant_axis.gapgen` as the interface specifies.

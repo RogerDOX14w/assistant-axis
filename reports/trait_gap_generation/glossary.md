@@ -232,6 +232,20 @@ candidate is already in the corpus (nearest-neighbour cosine against a threshold
 asks whether it adds a direction the corpus lacks (the residual fraction).  Each has its own
 space, representation and parameters in the metric config.
 
+<a id="retrieve-then-judge"></a>
+### Retrieve, then judge
+The M3 design Roger confirmed on 2026-10-02: the embedding only fetches each candidate's k nearest
+existing traits (k = 10), and LLM calls decide from that list whether the candidate is already
+covered (a relation call, then an overlap call on a concept-similarity scale).  No similarity
+threshold decides anything, so `t_hi` and `t_lo` survive only as information.
+
+<a id="drift-canary"></a>
+### Drift canary
+Eight fixed corpus texts, stored in the metric config, that every embedding run sends to the model
+again and compares with their cached vectors.  A closed API model can change without notice; if one
+of the eight comes back below cosine 0.999 against the cache, the run logs a warning naming the
+model, because the cached vectors may no longer match new ones.
+
 <a id="blinded-comparisons"></a>
 ### Blinded comparisons (criterion e)
 For a sample of traits, the five nearest neighbours with the clauses kept and with them stripped,
