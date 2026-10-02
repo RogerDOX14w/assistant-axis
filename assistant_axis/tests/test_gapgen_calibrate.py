@@ -513,9 +513,13 @@ def test_choose_settings_separately():
     assert set(dirn["K_sensitivity"]) == {"10", "20", "40", "K95"} and dirn["heldout"]["20"] == 0.85
     cfg = C.proposed_metric_config(st, models={"openai": "text-embedding-3-large"}, contrast={"openai": "keep"},
                                    config_version="2026-10-02")
+    assert cfg["covered"]["representation"] == "full" and cfg["directional"]["K"] == 10
+    # task 19 (Roger, 2026-10-02): the round-3 rule's proposal is a record of the threshold design, superseded;
+    # it is not a valid final config (no k, no canary), which --write-config builds with final_metric_config
+    assert "superseded_by" in cfg
     from assistant_axis.gapgen.metric_config import MetricConfig
-    m = MetricConfig.from_json(cfg)
-    assert m.covered["representation"] == "full" and m.directional["K"] == 10
+    with pytest.raises(ValueError):
+        MetricConfig.from_json(cfg)
 
 
 def test_decode_marks():
@@ -553,3 +557,96 @@ def test_choose_settings_bands_and_exclusion():
     st2 = C.choose_settings(rows, low, held, ["openai", "gemma"], query="no_label")
     assert not st2["covered"]["recall_target_met"] and st2["covered"]["representation"] in ("full", "w14")
     assert "rule" in st2["covered"]
+
+
+# --------------------------------------------------------------------------- task 19: the final config
+
+
+def _recorded():
+    """Synthetic recorded outputs in the shapes of retrieval_round4.json, paraphrase_metrics.json and
+    loo_metrics.json, with distinct numbers per model so the builder's row picks can be checked."""
+    srcs = ("paraphrase", "plain", "terse", "m1_gloss_1", "m1_gloss_2", "pooled")
+    recall, thr, comps = [], [], []
+    for m, base in (("openai", 0.90), ("gemma", 0.80)):
+        for rep in ("w14", "w20"):
+            for var in ("centred", "pw16"):
+                bump = 0.05 if (rep, var) == ("w20", "centred") else 0.0
+                for i, s_ in enumerate(srcs):
+                    v = round(base + bump + 0.001 * i, 4)
+                    recall.append({"model": m, "representation": rep, "variant": var, "source": s_, "n": 100 + i,
+                                   "recall": {"1": v - 0.2, "3": v - 0.1, "5": v - 0.05, "10": v, "20": v + 0.01}})
+                thr.append({"model": m, "representation": rep, "variant": var, "t_hi": 0.3 + bump,
+                            "antonym_above_t_hi": 0.6, "hidden_original_still_covered": 0.8})
+        comps.append({"model": m, "k": 5, "setting": "w20|centred", "baseline": "w14|centred", "diff": 0.01,
+                      "setting_only": 9, "baseline_only": 3, "p": 0.01, "p_holm": 0.04, "boot_lo": 0.001,
+                      "boot_hi": 0.02, "real": True, "recall": 0.95, "recall_baseline": 0.94, "n": 600})
+    retrieval = {"recall": recall, "threshold_design": thr, "comparisons": comps, "comparisons_within": [],
+                 "n_queries": {s_: 100 for s_ in srcs}, "ks": [1, 3, 5, 10, 20]}
+    para = {"recall_and_covered": [], "heldout_directional": []}
+    loo = {"rows": []}
+    for m, a in (("openai", 0.61), ("gemma", 0.66)):
+        para["recall_and_covered"].append({
+            "model": m, "representation": "w20", "variant": "centred", "query": "no_label_14w",
+            "recall": {"cos": {"recall_at_1": a + 0.3}},
+            "covered": {"t_hi": 0.4, "t_lo": 0.24, "recall_at_t_hi": 0.95, "rate_above_t_hi": {"antonym": 0.46}}})
+        para["heldout_directional"].append({"model": m, "representation": "w20", "variant": "centred", "K95": 300,
+                                            "by_K": {"10": {"spearman_para_vs_original": 0.64},
+                                                     "20": {"spearman_para_vs_original": 0.63},
+                                                     "40": {"spearman_para_vs_original": 0.63},
+                                                     "300": {"spearman_para_vs_original": 0.32}}})
+        loo["rows"].append({"model": m, "representation": "w20", "variant": "centred", "metric": "cos",
+                            "auc_dup_vs_distinct": a, "auc_ant_vs_syn": 0.45})
+        for K, c in ((10, 0.30), (20, 0.26), (40, 0.27)):
+            loo["rows"].append({"model": m, "representation": "w20", "variant": "centred", "metric": f"resid_{K}",
+                                "K": K, "spearman_persona_yield": c})
+        loo["rows"].append({"model": m, "representation": "w20", "variant": "centred", "metric": "resid_K95",
+                            "K": 300, "spearman_persona_yield": 0.2})
+    return retrieval, para, loo
+
+
+def test_final_metric_config_from_recorded_outputs():
+    from assistant_axis.gapgen.metric_config import MetricConfig, validate_payload
+    retrieval, para, loo = _recorded()
+    canary = {"n": 2, "min_cosine": 0.999, "texts": [{"stem": "a", "text": "a: x"}, {"stem": "b", "text": "b: y"}]}
+    cfg = C.final_metric_config(retrieval=retrieval, paraphrase=para, loo=loo, canary=canary,
+                                config_version="2026-10-02",
+                                model_ids={"openai": "text-embedding-3-large", "gemma": "google/embeddinggemma-300m",
+                                           "bge": "BAAI/bge-large-en-v1.5"})
+    validate_payload(cfg)
+    m = MetricConfig.from_json(cfg)
+    cov, dirn = m.covered, m.directional
+    assert (cov["representation"], cov["space"]["variant"], cov["metric"], cov["k"]) == ("w20", "centred", "cos", 10)
+    assert (dirn["representation"], dirn["space"]["variant"], dirn["K"]) == ("w20", "centred", 10)
+    assert m.live_model["arm"] == "openai" and m.fallback_model["arm"] == "gemma" and not m.fallback_model["active"]
+    assert [d["arm"] for d in m.models["dropped"]] == ["bge"]
+    # the live model's own row (w20 centred: base 0.90 + 0.05), recall@1/5/10/20 per source and pooled
+    r = cov["retrieval"]["recall_at_k"]
+    assert set(r) == {"paraphrase", "plain", "terse", "m1_gloss_1", "m1_gloss_2", "pooled"}
+    assert r["m1_gloss_1"]["10"] == pytest.approx(0.953) and set(r["pooled"]) == {"n", "1", "5", "10", "20"}
+    tgt = cov["retrieval"]["target"]
+    assert tgt["k"] == 10 and tgt["min_recall"] == 0.95 and tgt["met"] is True
+    assert tgt["values"] == {"m1_gloss_1": pytest.approx(0.953), "m1_gloss_2": pytest.approx(0.954)}
+    # thresholds kept as information, labelled; the old figures reported, not gated
+    assert cov["thresholds"]["used_for_decisions"] is False and cov["thresholds"]["openai"]["t_hi"] == 0.4
+    assert cov["thresholds"]["openai"]["t_hi_round4_pooled"] == pytest.approx(0.35)
+    assert cov["evaluation"]["auc_dup_vs_distinct"] == {"openai": 0.61}
+    assert cov["evaluation"]["paraphrase_recall_top1"] == {"openai": pytest.approx(0.91)}
+    assert cov["evaluation"]["choice_evidence"][0]["setting"] == "w20|centred"
+    assert dirn["K_sensitivity"] == {"10": 0.30, "20": 0.26, "40": 0.27, "K95": 0.2} and dirn["K95"] == 300
+    assert dirn["evaluation"]["heldout_stability"]["10"] == 0.64 and "proxy" in dirn["caveat"]
+    # the fallback's own settings carry its own numbers (base 0.80 + 0.05), never the live model's
+    fb = m.fallback_model["settings"]
+    assert fb["covered"]["retrieval"]["recall_at_k"]["m1_gloss_1"]["10"] == pytest.approx(0.853)
+    assert fb["covered"]["k"] == 10 and fb["directional"]["K"] == 10
+    assert m.canary["texts"][0]["stem"] == "a" and m.extra["decided"].startswith("Roger, 2026-10-02")
+
+
+def test_final_metric_config_flags_a_missed_target():
+    retrieval, para, loo = _recorded()
+    for row in retrieval["recall"]:
+        if row["model"] == "openai" and row["source"] == "m1_gloss_2":
+            row["recall"]["10"] = 0.93
+    canary = {"n": 1, "min_cosine": 0.999, "texts": [{"stem": "a", "text": "a: x"}]}
+    cfg = C.final_metric_config(retrieval=retrieval, paraphrase=para, loo=loo, canary=canary,
+                                config_version="2026-10-02", model_ids={"openai": "o", "gemma": "g", "bge": "b"})
+    assert cfg["covered"]["retrieval"]["target"]["met"] is False

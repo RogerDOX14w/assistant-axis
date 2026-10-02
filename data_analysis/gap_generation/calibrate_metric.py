@@ -25,8 +25,18 @@ M1 filter gloss; fits every space variant; and writes, under ``--out``:
 ``--skip-llm`` (the pilot) runs everything that needs no LLM; without it the
 Haiku paraphrases (criteria g, i; cached in ``paraphrases.json``) and the
 Sonnet blinded judgement (criterion e) run too, under the cost gate.
-``--write-config`` (``metric_config.json``) is task 19 and waits for Roger's
-decisions on the pilot.
+``--write-config`` (task 19, go given by Roger on 2026-10-02) writes
+``data/candidates/metric_config.json`` for the M2 final settings
+(coding_plan_platform.md, "M2 final settings and the M3 design") from the
+recorded calibration outputs, with the drift canary; nothing is re-embedded
+except the canary texts:
+
+    uv run python data_analysis/gap_generation/calibrate_metric.py --write-config [--models openai gemma]
+        [--config-out data/candidates/metric_config.json] [--dry-run]
+
+Every run that embeds with a real model re-embeds the canary texts (from the
+config when it exists, else by the fixed rule) and warns, naming the model,
+when one moves below cosine 0.999 against the cache (``embed.check_canary``).
 
 Round 4 (2026-10-02), the covered setting judged as retrieval, runs alone:
 
@@ -70,7 +80,7 @@ from assistant_axis.gapgen import labels as LB  # noqa: E402
 from assistant_axis.gapgen import persona as PS  # noqa: E402
 from assistant_axis.gapgen import retrieval as RT  # noqa: E402
 from assistant_axis.gapgen.cost import Estimate, GuardedUsage, confirm_or_abort  # noqa: E402
-from assistant_axis.gapgen.paths import CALIBRATION_DIR, EMBEDDING_CACHE_DIR  # noqa: E402
+from assistant_axis.gapgen.paths import CALIBRATION_DIR, EMBEDDING_CACHE_DIR, METRIC_CONFIG_PATH  # noqa: E402
 from assistant_axis.gapgen.registry import utc_now  # noqa: E402
 from assistant_axis.gapgen.representation import REPRESENTATIONS, represent, represent_short  # noqa: E402
 from assistant_axis.gapgen.runs import PLATFORM_PATHS, configure_logging, git_sha, platform_dirty_files  # noqa: E402
@@ -122,7 +132,10 @@ def parse_args(argv=None):
                     help="redraw criterion (e)'s blinded comparisons and Roger's marks sheet (otherwise kept as written)")
     ap.add_argument("--rebuild-labels", action="store_true", help="rebuild labelled_pairs.json from the curation file")
     ap.add_argument("--no-residual", action="store_true", help="skip the leave-one-out residual (fast runs)")
-    ap.add_argument("--write-config", action="store_true", help="task 19 (after Roger's pilot decision)")
+    ap.add_argument("--write-config", action="store_true",
+                    help="task 19: write metric_config.json for the M2 final settings from the recorded outputs")
+    ap.add_argument("--config-out", type=Path, default=METRIC_CONFIG_PATH,
+                    help="where --write-config writes, and where the canary texts are read from")
     ap.add_argument("--dry-run", action="store_true", help="print the plan, the estimate and three texts; call nothing")
     ap.add_argument("--allow-dirty", action="store_true", help="run with uncommitted platform changes (recorded)")
     return ap.parse_args(argv)
@@ -205,8 +218,8 @@ def main(argv=None) -> int:
     args = parse_args(argv)
     configure_logging()
     if args.write_config:
-        print("--write-config is task 19: it waits for Roger's decisions on the M2 pilot", file=sys.stderr)
-        return 2
+        args.argv_list = sys.argv[1:] if argv is None else list(argv)
+        return write_config(args)
     if args.round4:
         args.argv_list = sys.argv[1:] if argv is None else list(argv)
         return run_round4(args)
@@ -310,6 +323,9 @@ def main(argv=None) -> int:
             embedder = EM.make_embedder(arm)
             vec = dict(zip(every, EM.embed_texts(embedder, every, cache=cache, usage=usage)))
             emb[arm] = vec
+            if EM.canary_applies(embedder):
+                run.setdefault("canary", {})[arm] = EM.check_canary(embedder, canary_set(ci, args.config_out), cache,
+                                                                    usage=usage)
             run["models_run"].append(arm)
             logger.info("[%s] embedded %d texts in %.0fs; %s", arm, len(every), time.time() - ts, usage.log_line())
         except Exception as exc:  # noqa: BLE001 - one arm failing must not lose the others
@@ -619,8 +635,7 @@ def main(argv=None) -> int:
                 settings, contrast=contrast_by_model, config_version=utc_now()[:10],
                 models={"openai": EM.OPENAI_MODEL, **{a: EM.LOCAL_MODELS[a]["model_id"] for a in arms
                                                       if a in EM.LOCAL_MODELS}})
-            from assistant_axis.gapgen.metric_config import validate_payload
-            validate_payload(proposed)
+            # the round-3 rule's proposal, kept as a record; superseded by --write-config's final settings
     rec_view = keep_views[f"{primary}|full|{rec_variant}"][0]
     summary = {
         "models_run": arms, "models_failed": run["models_failed"], "representations": args.representations,
@@ -821,6 +836,143 @@ def load_paraphrase_cache(path: Path, style: str) -> tuple[dict, Optional[str]]:
     return dict(d.get("paraphrases") or {}), None
 
 
+# --------------------------------------------------------------------------- the drift canary and task 19
+
+CANARY_RULE = ("the corpus sorted by stem, stems[i * n // 8] for i = 0..7 (evenly spread through the alphabet), each "
+               "embedded as 'label: description' in the covered representation")
+
+
+def canary_set(ci: dict, config_path: Path) -> list[dict]:
+    """The canary texts: from the written config when there is one (so corpus
+    edits never move them), else by the fixed rule on the current corpus."""
+    from assistant_axis.gapgen.metric_config import MetricConfig
+    if Path(config_path).exists():
+        try:
+            texts = MetricConfig.load(path=config_path).canary.get("texts")
+            if texts:
+                return list(texts)
+        except Exception as exc:  # noqa: BLE001 - an unreadable config must not stop an embedding run
+            logger.warning("[canary] %s unreadable (%s); using the fixed rule on the current corpus", config_path, exc)
+    rep = C.FINAL_SETTINGS["covered"]["representation"]
+    return EM.canary_texts(ci["stems"], [represent(l, d, rep) for l, d in zip(ci["labels"], ci["descriptions"])])
+
+
+def write_config(args) -> int:
+    """Task 19: ``metric_config.json`` for Roger's M2 final settings
+    (``calibrate.FINAL_SETTINGS``), built from the recorded outputs
+    (``retrieval_round4.json``, ``paraphrase_metrics.json``,
+    ``loo_metrics.json`` under ``--out``) by ``calibrate.final_metric_config``,
+    with the canary block.  The only embedding calls are the canary checks for
+    ``--models`` (the live model and the fallback by default), whose results go
+    into ``canary.check_at_write``.  Writes the config with the provenance
+    envelope, reads it back and validates it, and records the run in
+    ``run_write_config.json`` and the cumulative ``usage.json``."""
+    from assistant_axis.atomic_io import atomic_write_text
+    from assistant_axis.gapgen.metric_config import MetricConfig, validate_payload
+    from assistant_axis.judge_pricing import MultiModelUsage
+    from assistant_axis.plot_metadata import json_metadata
+    from assistant_axis.provenance import current_files_input, load_and_register
+    repo = _REPO_ROOT
+    out = Path(args.out)
+    cfg_path = Path(args.config_out)
+    budget = args.budget_usd if args.budget_usd is not None else 1.0
+    t0 = time.time()
+    needed = {"retrieval": "retrieval_round4.json", "paraphrase": "paraphrase_metrics.json", "loo": "loo_metrics.json"}
+    missing = [n for n in needed.values() if not (out / n).exists()]
+    if missing:
+        print(f"REFUSED: --write-config needs the recorded outputs {missing} in {out}", file=sys.stderr)
+        return 2
+    inputs = [current_files_input(dep_key="trait_files",
+                                  paths=sorted((repo / "data" / "traits" / "instructions").glob("*.json")))]
+    loaded = {}
+    for key, name in needed.items():
+        loaded[key], _, _ = load_and_register(out / name, dep_key=f"calibration_{key}", inputs=inputs,
+                                              policy=getattr(args, "cache_policy", "warn"))
+    ci = corpus_inputs(repo)
+    rep = C.FINAL_SETTINGS["covered"]["representation"]
+    canary_list = EM.canary_texts(ci["stems"], [represent(l, d, rep) for l, d in zip(ci["labels"], ci["descriptions"])])
+    canary = {"rule": CANARY_RULE, "n": len(canary_list), "representation": rep, "min_cosine": EM.CANARY_MIN_COSINE,
+              "texts": canary_list,
+              "on_failure": "a WARNING naming the model (the API model may have changed); cached vectors may no longer "
+                            "match new ones",
+              "check_at_write": {}}
+    model_ids = {"openai": EM.OPENAI_MODEL, **{a: EM.LOCAL_MODELS[a]["model_id"] for a in EM.LOCAL_MODELS}}
+    arms = [a for a in args.models if EM.canary_applies(EM.make_embedder(a))]
+    est = Estimate()
+    if "openai" in arms:
+        est.add("canary re-embedding", EM.OPENAI_MODEL, 1, int(sum(len(c["text"]) for c in canary_list) / CHARS_PER_TOKEN),
+                0)
+    config_version = utc_now()[:10]
+    payload = C.final_metric_config(retrieval=loaded["retrieval"], paraphrase=loaded["paraphrase"], loo=loaded["loo"],
+                                    canary=canary, config_version=config_version, model_ids=model_ids)
+    validate_payload(payload)
+    cov, dirn = payload["covered"], payload["directional"]
+    print(f"M2 config (task 19): {cfg_path}; config_version {config_version}; live {payload['models']['live']['model_id']}, "
+          f"fallback {payload['models']['fallback']['model_id']} (inactive), dropped "
+          f"{[d['model_id'] for d in payload['models']['dropped']]}")
+    print(f"  covered: {cov['representation']} {cov['space']['variant']} {cov['metric']} k={cov['k']}; recall@10 on the "
+          f"M1 glosses {cov['retrieval']['target']['values']} (target {cov['retrieval']['target']['min_recall']}, met "
+          f"{cov['retrieval']['target']['met']}); pooled {cov['retrieval']['recall_at_k'].get('pooled')}")
+    print(f"  directional: {dirn['representation']} {dirn['space']['variant']} K={dirn['K']}; K sensitivity "
+          f"{dirn['K_sensitivity']}")
+    print(f"  canary: {[c['stem'] for c in canary_list]}; checked for {arms}")
+    print(f"cost estimate:\n{est.format()}\n  budget ${budget:.2f}")
+    cap = confirm_or_abort(est.usd, budget, confirm_expensive=args.confirm_expensive, confirmed_by=args.confirmed_by)
+    if args.dry_run:
+        print("DRY-RUN: nothing embedded, nothing written")
+        return 0
+    dirty = platform_dirty_files()
+    if dirty and not args.allow_dirty:
+        print(f"REFUSED: uncommitted changes to the platform's code ({len(dirty)}: {'; '.join(d.strip() for d in dirty[:5])}); "
+              f"commit first, or pass --allow-dirty", file=sys.stderr)
+        return 2
+    out.mkdir(parents=True, exist_ok=True)
+    prior = MultiModelUsage.load_or_create(out / "usage.json")
+    usage = GuardedUsage(budget_usd=cap)
+    run = {"task": 19, "started_at": utc_now(), "git_sha": git_sha(), "argv": getattr(args, "argv_list", sys.argv[1:]),
+           "allow_dirty": bool(args.allow_dirty), "dirty_check": {"paths": list(PLATFORM_PATHS), "dirty": dirty},
+           "estimate_usd": round(est.usd, 6), "budget_usd": cap, "config_path": _rel(cfg_path, repo),
+           "config_version": config_version, "canary": {}, "canary_failed": {}}
+    cache = EM.EmbeddingCache(args.cache_dir)
+    try:
+        for arm in arms:
+            try:
+                canary["check_at_write"][arm] = EM.check_canary(EM.make_embedder(arm), canary_list, cache, usage=usage)
+            except Exception as exc:  # noqa: BLE001 - a fallback that cannot load must not stop the config
+                if type(exc).__name__ == "BudgetExceededError":
+                    raise
+                run["canary_failed"][arm] = f"{type(exc).__name__}: {exc}"
+                logger.error("[canary] %s could not be checked: %s", arm, exc)
+        run["canary"] = canary["check_at_write"]
+        payload = C.final_metric_config(retrieval=loaded["retrieval"], paraphrase=loaded["paraphrase"],
+                                        loo=loaded["loo"], canary=canary, config_version=config_version,
+                                        model_ids=model_ids)
+        validate_payload(payload)
+        cfg_path.parent.mkdir(parents=True, exist_ok=True)
+        atomic_write_text(json.dumps(json_metadata(payload, inputs=inputs, title="M2 metric config (task 19)"),
+                                     indent=2, ensure_ascii=False, default=_jsonable) + "\n", cfg_path)
+        back = MetricConfig.load(path=cfg_path)
+        validate_payload(back.to_json())
+        run["read_back"] = {"config_version": back.config_version, "k": back.k, "K": back.directional["K"],
+                            "live": back.live_model["model_id"], "valid": True}
+    finally:
+        total = MultiModelUsage()
+        total.merge_from(prior)
+        total.merge_from(usage)
+        total.write_json(out / "usage.json")
+        run.update({"finished_at": utc_now(), "wall_time_s": round(time.time() - t0, 1),
+                    "cost_usd": round(usage.total_cost_usd, 6), "usage_this_run": usage.as_dict(),
+                    "cost_usd_cumulative": round(total.total_cost_usd, 6)})
+        (out / "run_write_config.json").write_text(json.dumps(run, indent=2, default=_jsonable) + "\n")
+    bad = {a: r for a, r in canary["check_at_write"].items() if not r.get("ok")}
+    print(f"wrote {cfg_path} (read back and valid: k={back.k}, K={back.directional['K']}, live "
+          f"{back.live_model['model_id']}); canary: " + ", ".join(
+              f"{a} lowest cosine {r['min_cosine']} ({r['n_compared']} compared, {r['n_new_reference']} new)"
+              for a, r in canary["check_at_write"].items()) + (f"; CANARY BELOW THRESHOLD: {sorted(bad)}" if bad else ""))
+    print(usage.log_line())
+    return 0
+
+
 # --------------------------------------------------------------------------- round 4
 
 def run_round4(args) -> int:
@@ -971,7 +1123,11 @@ def run_round4(args) -> int:
     for arm in args.models:
         ts = time.time()
         try:
-            vec[arm] = dict(zip(every, EM.embed_texts(EM.make_embedder(arm), every, cache=cache, usage=usage)))
+            embedder = EM.make_embedder(arm)
+            vec[arm] = dict(zip(every, EM.embed_texts(embedder, every, cache=cache, usage=usage)))
+            if EM.canary_applies(embedder):
+                run.setdefault("canary", {})[arm] = EM.check_canary(embedder, canary_set(ci, args.config_out), cache,
+                                                                    usage=usage)
             run["models_run"].append(arm)
             logger.info("[%s] embedded %d texts in %.0fs; %s", arm, len(every), time.time() - ts, usage.log_line())
         except Exception as exc:  # noqa: BLE001 - one arm failing must not lose the other

@@ -444,9 +444,13 @@ def test_calibrate_dry_run_writes_nothing(tmp_path, capsys):
     assert not (tmp_path / "cal").exists() and not (tmp_path / "cache").exists()
 
 
-def test_calibrate_write_config_waits_for_roger(tmp_path):
+def test_calibrate_write_config_refuses_without_recorded_outputs(tmp_path, capsys):
+    # task 19 (Roger's go, 2026-10-02): --write-config builds the config from the recorded calibration outputs
     from data_analysis.gap_generation import calibrate_metric
-    assert calibrate_metric.main(_calib_args(tmp_path, "--write-config")) == 2
+    args = _calib_args(tmp_path, "--write-config", "--config-out", str(tmp_path / "metric_config.json"))
+    assert calibrate_metric.main(args) == 2
+    assert "retrieval_round4.json" in capsys.readouterr().err
+    assert not (tmp_path / "metric_config.json").exists()
 
 
 def test_calibrate_end_to_end_with_hash_embedder(tmp_path):
@@ -625,3 +629,64 @@ def test_round4_refuses_a_cache_from_another_prompt_version(tmp_path, capsys):
         {"style": "terse", "prompt_version": 99, "paraphrases": {"absentee": "This means gone."}}))
     assert CM.main(_round4_args(tmp_path, "--skip-llm", "--query-sources", "terse", "--dry-run")) == 2
     assert "prompt version 99" in capsys.readouterr().err
+
+
+# --------------------------------------------------------------------------- calibrate_metric.py --write-config (task 19)
+
+RECORDED = ("retrieval_round4.json", "paraphrase_metrics.json", "loo_metrics.json")
+
+
+def _write_config_args(tmp_path, *extra):
+    import shutil
+    from assistant_axis.gapgen.paths import CALIBRATION_DIR
+    cal = tmp_path / "cal"
+    cal.mkdir(exist_ok=True)
+    for name in RECORDED:
+        if not (CALIBRATION_DIR / name).exists():
+            pytest.skip(f"{name} not recorded")
+        shutil.copy(CALIBRATION_DIR / name, cal / name)
+    return ["--write-config", "--models", "hash", "--out", str(cal), "--cache-dir", str(tmp_path / "cache"),
+            "--config-out", str(tmp_path / "metric_config.json"), "--allow-dirty", *extra]
+
+
+def test_write_config_dry_run_writes_nothing(tmp_path, capsys):
+    from data_analysis.gap_generation import calibrate_metric as CM
+    assert CM.main(_write_config_args(tmp_path, "--dry-run")) == 0
+    out = capsys.readouterr().out
+    assert "DRY-RUN" in out and "covered: w20 centred cos k=10" in out and "K=10" in out
+    assert not (tmp_path / "metric_config.json").exists()
+    assert sorted(p.name for p in (tmp_path / "cal").iterdir()) == sorted(RECORDED)
+
+
+def test_write_config_end_to_end(tmp_path, monkeypatch):
+    from assistant_axis.gapgen.metric_config import MetricConfig, validate_payload
+    from data_analysis.gap_generation import calibrate_metric as CM
+    monkeypatch.setattr(CM.EM, "canary_applies", lambda e: True)     # let the hash embedder run the canary
+    assert CM.main(_write_config_args(tmp_path)) == 0
+    env = json.loads((tmp_path / "metric_config.json").read_text())
+    assert "_provenance" in env
+    validate_payload(env["result"])
+    cfg = MetricConfig.load(path=tmp_path / "metric_config.json")
+    assert (cfg.representation, cfg.space["variant"], cfg.covered["metric"], cfg.k) == ("w20", "centred", "cos", 10)
+    assert (cfg.directional["representation"], cfg.directional["K"]) == ("w20", 10)
+    assert cfg.live_model["model_id"] == "text-embedding-3-large" and cfg.fallback_model["active"] is False
+    assert cfg.thresholds["used_for_decisions"] is False
+    assert cfg.covered["retrieval"]["target"]["met"] is True
+    assert len(cfg.canary["texts"]) == 8 and cfg.canary["check_at_write"]["hash"]["n"] == 8
+    run = json.loads((tmp_path / "cal" / "run_write_config.json").read_text())
+    assert run["read_back"]["valid"] and run["canary"]["hash"]["ok"]
+    assert json.loads((tmp_path / "cal" / "usage.json").read_text())["n_calls"] == 1     # the canary call
+
+
+def test_embedding_runs_check_the_canary(tmp_path, monkeypatch):
+    from data_analysis.gap_generation import calibrate_metric as CM
+    monkeypatch.setattr(CM.EM, "canary_applies", lambda e: True)
+    args = _round4_args(tmp_path, "--skip-llm", "--variants", "centred", "--representations", "w14",
+                        "--query-sources", "m1_gloss_2", "--config-out", str(tmp_path / "no_config.json"))
+    assert CM.main(args) == 0
+    run = json.loads((tmp_path / "cal" / "run_round4.json").read_text())
+    can = run["canary"]["hash"]
+    assert can["n"] == 8 and can["ok"] and can["n_new_reference"] + can["n_compared"] == 8
+    assert CM.main(args) == 0                                        # second run compares against the references
+    can = json.loads((tmp_path / "cal" / "run_round4.json").read_text())["canary"]["hash"]
+    assert can["n_compared"] == 8 and can["min_cosine"] == pytest.approx(1.0)

@@ -167,3 +167,74 @@ def test_real_local_model_smoke(arm):
     np.testing.assert_allclose(np.linalg.norm(out, axis=1), 1.0, atol=1e-5)
     assert out[0] @ out[1] > out[0] @ out[2]
     assert usage.n_calls == 1 and usage.total_prompt_tokens > 0 and usage.total_cost_usd == 0
+
+
+# --------------------------------------------------------------------------- drift canary (task 19, 2026-10-02)
+
+
+class PerturbedOpenAIClient(FakeOpenAIClient):
+    """The fake OpenAI client after a silent model change: every vector is rotated a little."""
+
+    def __init__(self, *a, scale=0.2, **kw):
+        super().__init__(*a, **kw)
+        self.scale = scale
+
+    def _create(self, *, model, input, **kw):
+        resp = super()._create(model=model, input=input, **kw)
+        rng = np.random.default_rng(7)
+        for r in resp.data:
+            r.embedding = (np.asarray(r.embedding) + self.scale * rng.standard_normal(len(r.embedding))).tolist()
+        return resp
+
+
+def _canary_corpus(n=30):
+    stems = [f"t{i:02d}" for i in range(n)]
+    return stems, [f"label {s}: This means being {s} in every way that {s} can be." for s in stems]
+
+
+def test_canary_texts_fixed_rule():
+    stems, texts = _canary_corpus(30)
+    c = E.canary_texts(list(reversed(stems)), list(reversed(texts)), n=8)    # input order does not matter
+    assert [x["stem"] for x in c] == [stems[i * 30 // 8] for i in range(8)]
+    assert all(x["text"] == texts[stems.index(x["stem"])] for x in c)
+    assert E.canary_texts(stems, texts) == c and E.CANARY_N == 8
+    with pytest.raises(ValueError):
+        E.canary_texts(stems[:3], texts[:3], n=8)
+
+
+def test_canary_passes_on_the_hash_embedder_and_seeds_missing_references(tmp_path, caplog):
+    stems, texts = _canary_corpus()
+    canary = E.canary_texts(stems, texts)
+    cache, emb, usage = E.EmbeddingCache(tmp_path), E.HashEmbedder(32), MultiModelUsage()
+    first = E.check_canary(emb, canary, cache, usage=usage)          # nothing cached: references stored, no warning
+    assert first["n_compared"] == 0 and first["n_new_reference"] == 8 and first["ok"]
+    assert len(cache.lookup(emb.tag, [c["text"] for c in canary])[1]) == 0
+    E.embed_texts(emb, texts[:3], cache=cache)                       # ordinary use of the cache
+    caplog.clear()
+    second = E.check_canary(emb, canary, cache, usage=usage)
+    assert second["n_compared"] == 8 and second["ok"] and second["min_cosine"] == pytest.approx(1.0)
+    assert second["below"] == [] and second["threshold"] == E.CANARY_MIN_COSINE == 0.999
+    assert not [r for r in caplog.records if r.levelname == "WARNING"]
+    assert usage.n_calls == 2                                         # every check is charged
+
+
+def test_canary_warns_naming_the_model_when_the_api_model_changed(tmp_path, caplog):
+    stems, texts = _canary_corpus()
+    canary = E.canary_texts(stems, texts)
+    cache = E.EmbeddingCache(tmp_path)
+    E.embed_texts(E.OpenAIEmbedder(client=FakeOpenAIClient(dim=32)), [c["text"] for c in canary], cache=cache)
+    drifted = E.OpenAIEmbedder(client=PerturbedOpenAIClient(dim=32))
+    before = {c["text"]: cache.get(drifted.tag, c["text"]).copy() for c in canary}
+    caplog.clear()
+    res = E.check_canary(drifted, canary, cache, usage=MultiModelUsage())
+    assert not res["ok"] and len(res["below"]) == 8 and res["min_cosine"] < 0.999
+    assert res["model"] == "text-embedding-3-large"
+    warn = [r.getMessage() for r in caplog.records if r.levelname == "WARNING"]
+    assert warn and "text-embedding-3-large" in warn[0] and "the API model may have changed" in warn[0]
+    # the cached references are never overwritten by the canary
+    assert all(np.array_equal(cache.get(drifted.tag, t), v) for t, v in before.items())
+
+
+def test_canary_applies_to_real_models_not_the_test_embedder():
+    assert E.canary_applies(E.OpenAIEmbedder(client=FakeOpenAIClient()))
+    assert not E.canary_applies(E.HashEmbedder(8))

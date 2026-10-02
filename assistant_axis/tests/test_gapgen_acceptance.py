@@ -10,6 +10,12 @@ mechanical gates and produce ``corpus_regions.json`` covering every trait
 file.  Its three quality figures are recorded against their targets and
 reported as a warning; they do not fail (decision 2 of decisions_m1.md).
 
+M2: mechanical gates on the calibration outputs; ``metric_config.json`` validates
+and carries the decided settings; the gate is retrieval recall@10 >= 0.95 on the
+M1-gloss queries for the configured setting (restated by Roger on 2026-10-02,
+coding_plan_platform.md "M2 final settings and the M3 design" item 5), and the
+threshold design's two old targets are reported as a warning.
+
 The batch ids of the full run and of the stability rerun are read from the
 environment, so a rerun under new ids is checked without editing this file:
 ``GAPGEN_FULL_BATCH`` (default ``m1_validation``) and
@@ -162,9 +168,10 @@ def test_m2_mechanical_gates():
     # usage.json is cumulative over runs.  The full calibration's summary carries its own and the cumulative
     # figure at the time; a later partial run (round 4's --round4, recorded in run_round4*.json, 2026-10-02)
     # adds to usage.json without rewriting the summary.  So usage.json equals the latest recorded cumulative
-    # figure and is never below the summary's.
-    recorded = [s["cost_usd_cumulative"]] + [json.loads(p.read_text()).get("cost_usd_cumulative", 0.0)
-                                             for p in sorted(CALIBRATION_DIR.glob("run_round*.json"))]
+    # figure and is never below the summary's.  Task 19's --write-config (run_write_config.json) adds the
+    # canary's calls the same way.
+    later = sorted(CALIBRATION_DIR.glob("run_round*.json")) + sorted(CALIBRATION_DIR.glob("run_write_config.json"))
+    recorded = [s["cost_usd_cumulative"]] + [json.loads(p.read_text()).get("cost_usd_cumulative", 0.0) for p in later]
     assert usage["total_cost_usd"] == pytest.approx(max(recorded), abs=1e-4)
     assert usage["total_cost_usd"] >= s["cost_usd_cumulative"] - 1e-4
     assert usage["total_cost_usd"] >= s["cost_usd"] - 1e-9
@@ -185,13 +192,79 @@ def test_m2_contrast_criteria_all_present():
             assert res["recommendation"]["recommendation"] in ("keep", "strip")
 
 
+# M2 targets restated (Roger, 2026-10-02; coding_plan_platform.md, "M2 final settings and the M3 design" item 5):
+# with the retrieve-then-judge design, the gate is retrieval recall@10 >= 0.95 on the M1-gloss queries for the
+# configured setting; the threshold design's auc_dup_vs_distinct >= 0.85 and paraphrase_recall_top1 >= 0.95 are
+# computed and reported as warnings, as the M1 quality figures are.
+
+M1_GLOSS_SOURCES = ("m1_gloss_1", "m1_gloss_2")
+
+
+def _configured_setting() -> tuple[str, str, str]:
+    """(live arm, representation, variant) from metric_config.json, else the decided settings."""
+    from assistant_axis.gapgen.calibrate import FINAL_SETTINGS
+    from assistant_axis.gapgen.metric_config import MetricConfig
+    from assistant_axis.gapgen.paths import METRIC_CONFIG_PATH
+    if METRIC_CONFIG_PATH.exists():
+        cfg = MetricConfig.load()
+        return cfg.live_model["arm"], cfg.representation, cfg.space["variant"]
+    c = FINAL_SETTINGS["covered"]
+    return FINAL_SETTINGS["live"], c["representation"], c["variant"]
+
+
+def test_m2_metric_config_validates():
+    """metric_config.json validates against the schema and carries Roger's final settings."""
+    from assistant_axis.gapgen.calibrate import FINAL_SETTINGS
+    from assistant_axis.gapgen.metric_config import MetricConfig, validate_payload
+    from assistant_axis.gapgen.paths import METRIC_CONFIG_PATH
+    if not METRIC_CONFIG_PATH.exists():
+        pytest.skip(f"{METRIC_CONFIG_PATH} not written yet")
+    env = json.loads(METRIC_CONFIG_PATH.read_text())
+    assert "_provenance" in env
+    validate_payload(env["result"])
+    cfg = MetricConfig.load()
+    c, d = FINAL_SETTINGS["covered"], FINAL_SETTINGS["directional"]
+    assert (cfg.representation, cfg.space["variant"], cfg.covered["metric"], cfg.k) == (
+        c["representation"], c["variant"], c["metric"], c["k"])
+    assert (cfg.directional["representation"], cfg.directional["space"]["variant"], cfg.directional["K"]) == (
+        d["representation"], d["variant"], d["K"])
+    assert cfg.live_model["arm"] == "openai" and cfg.fallback_model["arm"] == "gemma"
+    assert cfg.fallback_model["active"] is False
+    assert "bge" not in (cfg.live_model["arm"], cfg.fallback_model["arm"])
+    assert cfg.thresholds["used_for_decisions"] is False
+    assert cfg.covered["contrast"] == {"openai": "keep"}
+    assert len(cfg.canary["texts"]) == 8 and cfg.canary["min_cosine"] == 0.999
+    assert all(r["ok"] for r in cfg.canary.get("check_at_write", {}).values())
+
+
+def test_m2_retrieval_recall_gate():
+    """The restated gate: recall@10 >= 0.95 on each M1-gloss query source for the configured setting, read from
+    retrieval_round4.json (and, once written, equal to what the config records)."""
+    from assistant_axis.gapgen.paths import METRIC_CONFIG_PATH
+    res = _calibration("retrieval_round4.json")
+    arm, rep, var = _configured_setting()
+    got = {r["source"]: r["recall"]["10"] for r in res["recall"]
+           if (r["model"], r["representation"], r["variant"]) == (arm, rep, var) and r["source"] in M1_GLOSS_SOURCES}
+    assert set(got) == set(M1_GLOSS_SOURCES)
+    for src, v in got.items():
+        assert v >= 0.95, (src, v)
+    if METRIC_CONFIG_PATH.exists():
+        from assistant_axis.gapgen.metric_config import MetricConfig
+        tgt = MetricConfig.load().covered["retrieval"]["target"]
+        assert tgt["met"] is True and tgt["values"] == pytest.approx(got)
+
+
 def test_m2_targets_reported():
-    """Targets, not gates (review amendment 2): auc_dup_vs_distinct >= 0.85 for
-    the provisional variant; paraphrase recall needs the paid paraphrases."""
-    s = _calibration("summary.json")
+    """The threshold design's targets, computed for the configured setting and reported, not gated (plan item 5):
+    auc_dup_vs_distinct >= 0.85 and paraphrase_recall_top1 >= 0.95 (round 3's 14-word paraphrases, no label)."""
     loo = _calibration("loo_metrics.json")
-    prov = s["provisional"]
-    got = [r["auc_dup_vs_distinct"] for r in loo["rows"] if r["representation"] == "full"
-           and r["variant"] == prov["variant"] and r["metric"] == prov["metric"]]
-    assert got
-    warnings.warn(f"M2 auc_dup_vs_distinct ({prov['variant']}, {prov['metric']}) per model: {got}; target 0.85")
+    para = _calibration("paraphrase_metrics.json")
+    arm, rep, var = _configured_setting()
+    auc = [r["auc_dup_vs_distinct"] for r in loo["rows"] if (r["model"], r["representation"], r["variant"], r["metric"])
+           == (arm, rep, var, "cos")]
+    top1 = [r["recall"]["cos"]["recall_at_1"] for r in para["recall_and_covered"]
+            if (r["model"], r["representation"], r["variant"], r["query"]) == (arm, rep, var, "no_label_14w")]
+    assert auc and top1
+    warnings.warn(f"M2 old targets for the configured setting ({arm}, {rep}, {var}; reported, not gated): "
+                  f"auc_dup_vs_distinct {auc[0]} (target 0.85; met: {auc[0] >= 0.85}); paraphrase_recall_top1 "
+                  f"{top1[0]} (target 0.95; met: {top1[0] >= 0.95})")

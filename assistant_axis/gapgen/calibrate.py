@@ -1025,10 +1025,12 @@ def choose_settings(rows: Sequence[dict], para_rows: Sequence[dict], heldout_row
 
 
 def proposed_metric_config(settings: Mapping, *, models: Mapping, contrast: Mapping, config_version: str) -> dict:
-    """A ``metric_config.json`` payload with the two blocks (not written by the
-    pilot; task 19 writes it after Roger's decisions)."""
+    """The round-3 rule's two-block proposal, kept in ``summary.json`` as a
+    record of the threshold design.  Superseded on 2026-10-02 by the M2 final
+    settings (:func:`final_metric_config`, written by ``--write-config``); it is
+    not a valid final config (no ``k``, no ``canary``)."""
     cov, dirn = settings["covered"], settings["directional"]
-    return {"config_version": config_version, "models": dict(models),
+    return {"config_version": config_version, "models": dict(models), "superseded_by": SUPERSEDED_BY,
             "covered": {"space": {"variant": cov["variant"], "mean": "corpus_fixed"},
                         "representation": cov["representation"], "metric": cov["metric"],
                         "contrast": dict(contrast), "thresholds": cov["thresholds"], "query_form": cov["query"],
@@ -1038,6 +1040,143 @@ def proposed_metric_config(settings: Mapping, *, models: Mapping, contrast: Mapp
                             "K_sensitivity": dirn["K_sensitivity"],
                             "evaluation": {"spearman_persona_yield": dirn["c_by_model"], "heldout_stability": dirn["heldout"]},
                             "caveat": dirn["caveat"]}}
+
+
+# --------------------------------------------------------------------------- task 19: the final config
+
+SUPERSEDED_BY = ("the M2 final settings (Roger, 2026-10-02; coding_plan_platform.md, 'M2 final settings and the M3 "
+                 "design'), written by calibrate_metric.py --write-config")
+#: Roger's decisions of 2026-10-02 (coding_plan_platform.md, "M2 final settings and the M3 design").
+FINAL_SETTINGS: dict = {
+    "decided": "Roger, 2026-10-02 (coding_plan_platform.md, 'M2 final settings and the M3 design', commit 362f466)",
+    "live": "openai", "fallback": "gemma", "dropped": ("bge",),
+    "covered": {"representation": "w20", "variant": "centred", "metric": "cos", "k": 10},
+    "directional": {"representation": "w20", "variant": "centred", "K": 10},
+    "contrast": "keep",
+}
+#: The restated M2 target (plan item 5): retrieval recall@10 >= 0.95 on the M1-gloss queries.
+RETRIEVAL_TARGET = {"k": 10, "min_recall": 0.95, "sources": ("m1_gloss_1", "m1_gloss_2")}
+RETRIEVAL_KS = ("1", "5", "10", "20")
+QUERY_FORM = ("the candidate's gloss alone, without its label, cut to 14 words (represent_short(None, gloss, 'w14')); "
+              "the corpus side is 'label: description' in the covered representation")
+COVERED_DECISION = ("retrieve, then judge: the k nearest existing traits (after arrangement expansion) go to the LLM "
+                    "relation and overlap calls; no similarity threshold decides covered or new")
+DIRECTIONAL_CAVEAT = ("K is provisional, judged only through task (c), the correlation with the persona-space residual "
+                      "of existing traits: a proxy, not ground truth for missing traits")
+
+
+def _row(rows: Sequence[Mapping], **want) -> Optional[Mapping]:
+    for r in rows:
+        if all(r.get(k) == v for k, v in want.items()):
+            return r
+    return None
+
+
+def _setting_record(arm: str, rep: str, var: str, *, retrieval: Mapping, paraphrase: Mapping, loo: Mapping) -> dict:
+    """One model's recorded numbers for one (representation, variant): the
+    retrieval recall per source and pooled, the restated target, the threshold
+    figures (information only), the threshold design's old targets, and the
+    directional K sensitivity and held-out stability."""
+    rec = {r["source"]: {"n": r["n"], **{k: r["recall"].get(k) for k in RETRIEVAL_KS}}
+           for r in retrieval["recall"] if (r["model"], r["representation"], r["variant"]) == (arm, rep, var)}
+    k = str(RETRIEVAL_TARGET["k"])
+    values = {s: rec[s][k] for s in RETRIEVAL_TARGET["sources"] if s in rec}
+    target = {"k": RETRIEVAL_TARGET["k"], "min_recall": RETRIEVAL_TARGET["min_recall"],
+              "sources": list(RETRIEVAL_TARGET["sources"]), "values": values,
+              "met": bool(values) and len(values) == len(RETRIEVAL_TARGET["sources"])
+              and all(v is not None and v >= RETRIEVAL_TARGET["min_recall"] for v in values.values())}
+    para = _row(paraphrase.get("recall_and_covered", []), model=arm, representation=rep, variant=var,
+                query=COVERED_QUERY) or {}
+    cov = para.get("covered") or {}
+    td = _row(retrieval.get("threshold_design", []), model=arm, representation=rep, variant=var) or {}
+    thresholds = {"t_hi": cov.get("t_hi"), "t_lo": cov.get("t_lo"), "recall_at_t_hi": cov.get("recall_at_t_hi"),
+                  "antonym_rate_above_t_hi": (cov.get("rate_above_t_hi") or {}).get("antonym"),
+                  "source": "round 3: 95% recall of 659 paraphrases cut to 14 words; t_lo the 99th percentile of "
+                            "random pairs",
+                  "t_hi_round4_pooled": td.get("t_hi"), "antonym_above_t_hi_round4": td.get("antonym_above_t_hi"),
+                  "hidden_original_still_covered_round4": td.get("hidden_original_still_covered")}
+    cos_row = _row(loo.get("rows", []), model=arm, representation=rep, variant=var, metric="cos") or {}
+    old = {"auc_dup_vs_distinct": cos_row.get("auc_dup_vs_distinct"), "auc_ant_vs_syn": cos_row.get("auc_ant_vs_syn"),
+           "paraphrase_recall_top1": ((para.get("recall") or {}).get("cos") or {}).get("recall_at_1")}
+    sens = {}
+    for kk in ("10", "20", "40", "K95"):
+        r = _row(loo.get("rows", []), model=arm, representation=rep, variant=var, metric=f"resid_{kk}")
+        sens[kk] = r.get("spearman_persona_yield") if r else None
+    k95_row = _row(loo.get("rows", []), model=arm, representation=rep, variant=var, metric="resid_K95") or {}
+    held = _row(paraphrase.get("heldout_directional", []), model=arm, representation=rep, variant=var) or {}
+    hk = {}
+    for kk in ("10", "20", "40", "K95"):
+        key = str(held.get("K95")) if kk == "K95" else kk
+        hk[kk] = ((held.get("by_K") or {}).get(key) or {}).get("spearman_para_vs_original")
+    return {"retrieval": {"recall_at_k": rec, "target": target}, "thresholds": thresholds, "old_targets": old,
+            "K_sensitivity": sens, "K95": k95_row.get("K"), "heldout": hk}
+
+
+def final_metric_config(*, retrieval: Mapping, paraphrase: Mapping, loo: Mapping, canary: Mapping,
+                        config_version: str, model_ids: Mapping[str, str], settings: Mapping = FINAL_SETTINGS) -> dict:
+    """The ``metric_config.json`` payload for Roger's M2 final settings, from
+    the recorded outputs (``retrieval_round4.json``, ``paraphrase_metrics.json``,
+    ``loo_metrics.json``; all ``result`` payloads) and the canary block.  The
+    live model's numbers fill the two blocks; the fallback's own numbers go in
+    its model entry and nowhere else."""
+    live, fb = settings["live"], settings["fallback"]
+    c, d = settings["covered"], settings["directional"]
+    rep, var = c["representation"], c["variant"]
+    rec_live = _setting_record(live, rep, var, retrieval=retrieval, paraphrase=paraphrase, loo=loo)
+    rec_fb = _setting_record(fb, rep, var, retrieval=retrieval, paraphrase=paraphrase, loo=loo)
+    drec_live = _setting_record(live, d["representation"], d["variant"], retrieval=retrieval, paraphrase=paraphrase,
+                                loo=loo)
+    drec_fb = _setting_record(fb, d["representation"], d["variant"], retrieval=retrieval, paraphrase=paraphrase,
+                              loo=loo)
+    chosen = f"{rep}|{var}"
+    evidence = [{k: x.get(k) for k in ("k", "setting", "baseline", "recall", "recall_baseline", "diff", "setting_only",
+                                       "baseline_only", "p", "p_holm", "boot_lo", "boot_hi", "real")}
+                for x in list(retrieval.get("comparisons", [])) + list(retrieval.get("comparisons_within", []))
+                if x.get("model") == live and chosen in (x.get("setting"), x.get("baseline"))]
+    space = {"variant": var, "mean": "corpus_fixed"}
+    dspace = {"variant": d["variant"], "mean": "corpus_fixed"}
+    info = ("information only, not used for decisions: under the retrieve-then-judge design no similarity threshold "
+            "decides covered or new (at 95% paraphrase recall a threshold put 61% of recorded antonym pairs on the "
+            "covered side)")
+
+    def directional(drec, arm):
+        return {"K_sensitivity": drec["K_sensitivity"], "K95": drec["K95"],
+                "evaluation": {"spearman_persona_yield": {arm: drec["K_sensitivity"].get(str(d["K"]))},
+                               "heldout_stability": drec["heldout"]}}
+
+    return {
+        "config_version": config_version,
+        "decided": settings["decided"],
+        "models": {
+            "live": {"arm": live, "model_id": model_ids[live], "access": "OpenAI API with the direct key (no router)"},
+            "fallback": {"arm": fb, "model_id": model_ids[fb], "active": False,
+                         "weights": "data/external/hf/ (open weights, local)",
+                         "use": "inactive: never mixed into a run's results; switching to it is a new config_version",
+                         "settings": {
+                             "covered": {"space": space, "representation": rep, "metric": c["metric"], "k": c["k"],
+                                         "contrast": settings["contrast"], "retrieval": rec_fb["retrieval"],
+                                         "thresholds": {"used_for_decisions": False, "note": info,
+                                                        fb: rec_fb["thresholds"]}},
+                             "directional": {"space": dspace, "representation": d["representation"], "K": d["K"],
+                                             **directional(drec_fb, fb)}}},
+            "dropped": [{"arm": a, "model_id": model_ids[a], "decided": "Roger, 2026-10-02"}
+                        for a in settings["dropped"]]},
+        "covered": {
+            "decision": COVERED_DECISION, "space": space, "representation": rep, "metric": c["metric"], "k": c["k"],
+            "contrast": {live: settings["contrast"]}, "query_form": QUERY_FORM,
+            "retrieval": {"model": live, "source": "data/candidates/calibration/retrieval_round4.json",
+                          "query_sources": sorted(retrieval.get("n_queries", {})), **rec_live["retrieval"]},
+            "thresholds": {"used_for_decisions": False, "note": info, live: rec_live["thresholds"]},
+            "evaluation": {"status": "the threshold design's targets (auc_dup_vs_distinct >= 0.85, "
+                                     "paraphrase_recall_top1 >= 0.95): reported, not gated (plan item 5)",
+                           **{k: {live: v} for k, v in rec_live["old_targets"].items()},
+                           "choice_evidence": evidence}},
+        "directional": {
+            "space": dspace, "representation": d["representation"], "K": d["K"],
+            "K_rule": "fixed, provisional (Roger, 2026-10-02)", **directional(drec_live, live),
+            "caveat": DIRECTIONAL_CAVEAT},
+        "canary": dict(canary),
+    }
 
 
 def decode_marks(sheet_text: str, key_items: Sequence[dict]) -> dict:

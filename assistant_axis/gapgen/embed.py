@@ -29,6 +29,12 @@ tokens at zero cost), as the CLAUDE.md usage rule asks.
 ``sha256(text)``, plus a ``manifest.json``.  :func:`embed_texts` embeds only
 the cache misses, charges the usage record per call, and returns unit rows
 in input order.
+
+Drift canary (task 19, Roger 2026-10-02): :func:`canary_texts` picks a fixed
+handful of corpus texts (stored in ``metric_config.json``) and
+:func:`check_canary` re-embeds them on every run, compares them with the
+cache and logs a WARNING naming the model when any cosine falls below
+:data:`CANARY_MIN_COSINE` (a silent change to the API model).
 """
 from __future__ import annotations
 
@@ -41,7 +47,7 @@ import tempfile
 import time
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Callable, Optional, Protocol, Sequence, runtime_checkable
+from typing import Callable, Mapping, Optional, Protocol, Sequence, runtime_checkable
 
 import numpy as np
 
@@ -419,3 +425,63 @@ def embed_texts(embedder: Embedder, texts: Sequence[str], *, cache: Optional[Emb
         if on_batch:
             on_batch(min(start + bs, len(missing)), len(missing))
     return normalize_rows(np.stack([vec_of[t] for t in texts]))
+
+
+# --------------------------------------------------------------------------- drift canary (task 19)
+
+#: Roger, 2026-10-02 (coding_plan_platform.md, "M2 final settings and the M3 design" item 1): every
+#: embedding run re-embeds a fixed handful of texts and compares them with the cached vectors, so that a
+#: silent change to the API model (or to a local model's files or runtime) shows up as a warning.
+CANARY_N = 8
+CANARY_MIN_COSINE = 0.999
+
+
+def canary_texts(stems: Sequence[str], texts: Sequence[str], n: int = CANARY_N) -> list[dict]:
+    """The fixed rule: sort the corpus by stem and take ``stems[i * len // n]``
+    for ``i = 0 .. n-1`` (evenly spread through the alphabet), each with the
+    text that is embedded for it (the covered representation's).  The config
+    stores the result, so later corpus edits do not move the canary."""
+    pairs = sorted(zip(stems, texts))
+    if len(pairs) < n:
+        raise ValueError(f"need at least {n} texts for the canary, got {len(pairs)}")
+    return [{"stem": pairs[i * len(pairs) // n][0], "text": pairs[i * len(pairs) // n][1]} for i in range(n)]
+
+
+def canary_applies(embedder: Embedder) -> bool:
+    """Every real model runs the canary; the hash embedder (a test double, deterministic by construction)
+    does not."""
+    return getattr(embedder, "name", "") != "hash"
+
+
+def check_canary(embedder: Embedder, canary: Sequence[Mapping], cache: EmbeddingCache, *,
+                 usage: Optional[MultiModelUsage] = None, min_cosine: float = CANARY_MIN_COSINE) -> dict:
+    """Re-embed the canary texts fresh (never from the cache), charge the call,
+    and compare each with its cached vector.  A text with no cached vector has
+    its fresh vector stored as the reference; a cached vector is never
+    overwritten.  Any cosine below ``min_cosine`` logs a WARNING naming the
+    model.  Returns the record a run keeps."""
+    texts = [c["text"] for c in canary]
+    found, missing = cache.lookup(embedder.tag, texts)
+    vecs, tokens = embedder.embed_batch(texts)
+    if usage is not None:
+        usage.charge(embedder.usage_model, int(tokens), 0)
+    fresh = normalize_rows(vecs)
+    cos = {i: float(fresh[i] @ normalize_rows(np.asarray(found[i])[None, :])[0]) for i in found}
+    if missing:
+        cache.put(embedder.tag, [texts[i] for i in missing], np.asarray(vecs)[missing], model_id=embedder.model_id)
+        cache.save()
+    below = [canary[i]["stem"] for i in sorted(cos) if cos[i] < min_cosine]
+    result = {"model": embedder.model_id, "arm": getattr(embedder, "name", None), "tag": embedder.tag,
+              "n": len(texts), "n_compared": len(cos), "n_new_reference": len(missing),
+              "min_cosine": round(min(cos.values()), 6) if cos else None, "threshold": min_cosine,
+              "below": below, "ok": not below, "checked_at": utc_now()}
+    if below:
+        why = ("the API model may have changed" if getattr(embedder, "name", "") == "openai"
+               else "the model's files or its runtime may have changed")
+        logger.warning("[canary] %s: %d of %d canary texts re-embed below cosine %.3f against the cache (lowest "
+                       "%.6f: %s): %s; cached vectors may no longer match new ones", embedder.model_id, len(below),
+                       len(cos), min_cosine, result["min_cosine"], ", ".join(below), why)
+    else:
+        logger.info("[canary] %s: %d compared, lowest cosine %s, %d new references", embedder.model_id, len(cos),
+                    result["min_cosine"], len(missing))
+    return result
