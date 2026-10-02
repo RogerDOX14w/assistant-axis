@@ -1,11 +1,12 @@
 {
   "task": 19,
-  "started_at": "2026-10-02T21:14:39+00:00",
-  "git_sha": "7d2cbd2",
+  "started_at": "2026-10-02T22:20:49+00:00",
+  "git_sha": "f6d6731+dirty",
   "argv": [
-    "--write-config"
+    "--write-config",
+    "--allow-dirty"
   ],
-  "allow_dirty": false,
+  "allow_dirty": true,
   "dirty_check": {
     "paths": [
       "assistant_axis/gapgen",
@@ -36,18 +37,18 @@
       "min_cosine": 0.999603,
       "threshold": 0.999,
       "cosines": {
-        "absentee": 0.999998,
+        "absentee": 1.0,
         "collectivistic": 1.0,
         "edgy": 1.0,
         "gay": 1.0,
         "ironic": 0.999603,
-        "only_child": 0.999994,
+        "only_child": 1.0,
         "restless": 0.999993,
         "sycophantic": 1.0
       },
       "below": [],
       "ok": true,
-      "checked_at": "2026-10-02T21:14:40+00:00"
+      "checked_at": "2026-10-02T22:20:52+00:00"
     },
     "gemma": {
       "model": "google/embeddinggemma-300m",
@@ -70,7 +71,7 @@
       },
       "below": [],
       "ok": true,
-      "checked_at": "2026-10-02T21:14:44+00:00"
+      "checked_at": "2026-10-02T22:21:08+00:00"
     }
   },
   "canary_failed": {},
@@ -81,8 +82,8 @@
     "live": "text-embedding-3-large",
     "valid": true
   },
-  "finished_at": "2026-10-02T21:14:44+00:00",
-  "wall_time_s": 5.4,
+  "finished_at": "2026-10-02T22:21:08+00:00",
+  "wall_time_s": 21.4,
   "cost_usd": 2.9e-05,
   "usage_this_run": {
     "per_model": {
@@ -106,5 +107,5 @@
     "total_completion_tokens": 0,
     "n_calls": 2
   },
-  "cost_usd_cumulative": 0.939805
+  "cost_usd_cumulative": 0.941802
 }

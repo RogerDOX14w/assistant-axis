@@ -4563,6 +4563,15 @@ do so without getting rid of a pair (or by getting rid of both ends of rather si
 | [creative](./creative.json) | [innovative](./innovative.json) | centred space, round 2 | |
 | [enigmatic](./enigmatic.json) | [cryptic](./cryptic.json) | centred space, round 2 | |
 | [northern hemisphere](./northern_hemisphere.json) | [eastern hemisphere](./eastern_hemisphere.json) | centred space, round 2 | memberships; the hemispheres are a recorded set |
+| [dispassionate](./dispassionate.json) | [detached](./detached.json) | gemma, 663-trait refresh | new on 2026-10-02: detached's pair with empathetic was dissolved by the clean-pair recheck, so detached is no longer an excluded partner |
+
+**Refreshed 2026-10-02 on the merged 663-trait corpus** (full calibration, OpenAI and EmbeddingGemma,
+membership by the raw space; [drop_or_merge.md](../../candidates/calibration/drop_or_merge.md)): 11
+pairs flagged, one new (dispassionate / detached, above).  Six rows above are not flagged by the
+refreshed rule, mostly for reasons of method rather than of the corpus: absolutist / moral
+universalist was flagged only by bge, which has been dropped; the four round-2 pairs came from the
+centred space, while the refreshed table takes membership from the raw one; passionate / zealous now
+sits just under the fence.  They stay listed as candidates.
 
 Before acting: check each trait's `arrangement` and `negative_label` (a drop that breaks a clean pair
 costs the pair), and prefer dropping both ends of two near-identical pairs over one end of one.  The

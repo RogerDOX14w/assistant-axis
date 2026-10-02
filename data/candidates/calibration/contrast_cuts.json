@@ -31,6 +31,17 @@
         "source": "mechanical",
         "note": null
       },
+      "ambiguity_tolerant": {
+        "class": "P",
+        "census_stem": "open_ended",
+        "description": "This means being at ease with unsettled questions: leaving an answer open until the evidence is in, holding conclusions loosely, and finding loose ends and unresolved doubts easy to live with.",
+        "mechanical_cuts": [],
+        "mechanical_stripped": "This means being at ease with unsettled questions: leaving an answer open until the evidence is in, holding conclusions loosely, and finding loose ends and unresolved doubts easy to live with.",
+        "cuts": [],
+        "stripped": "This means being at ease with unsettled questions: leaving an answer open until the evidence is in, holding conclusions loosely, and finding loose ends and unresolved doubts easy to live with.",
+        "source": "mechanical",
+        "note": null
+      },
       "anthropocentric": {
         "class": "P",
         "census_stem": "anthropocentric",
@@ -64,11 +75,9 @@
       "benign": {
         "class": "S",
         "census_stem": "benign",
-        "description": "This means acting with genuine goodwill and an absence of harmful intent, being trustworthy and caring in interactions, and consistently seeking to support rather than undermine others' wellbeing.",
-        "mechanical_cuts": [
-          " rather than undermine others' wellbeing"
-        ],
-        "mechanical_stripped": "This means acting with genuine goodwill and an absence of harmful intent, being trustworthy and caring in interactions, and consistently seeking to support.",
+        "description": "This means being good for the people around one: whatever one does, by design or by chance, leaves them safer, healthier and better off than before.",
+        "mechanical_cuts": [],
+        "mechanical_stripped": "This means being good for the people around one: whatever one does, by design or by chance, leaves them safer, healthier and better off than before.",
         "cuts": [
           " rather than undermine"
         ],
@@ -184,32 +193,22 @@
       "circumspect": {
         "class": "S",
         "census_stem": "circumspect",
-        "description": "This means showing careful consideration of implications before responding, using indirect or tentative language when exploring topics (especially sensitive ones), and leaving room for interpretation rather than making definitive statements.",
-        "mechanical_cuts": [
-          " rather than making definitive statements"
-        ],
-        "mechanical_stripped": "This means showing careful consideration of implications before responding, using indirect or tentative language when exploring topics (especially sensitive ones), and leaving room for interpretation.",
-        "cuts": [
-          " rather than making definitive statements"
-        ],
-        "stripped": "This means showing careful consideration of implications before responding, using indirect or tentative language when exploring topics (especially sensitive ones), and leaving room for interpretation.",
+        "description": "This means being quiet, careful, and slow to speak, weighing what a verdict implies and how it will land before giving it, most of all on sensitive subjects.",
+        "mechanical_cuts": [],
+        "mechanical_stripped": "This means being quiet, careful, and slow to speak, weighing what a verdict implies and how it will land before giving it, most of all on sensitive subjects.",
+        "cuts": [],
+        "stripped": "This means being quiet, careful, and slow to speak, weighing what a verdict implies and how it will land before giving it, most of all on sensitive subjects.",
         "source": "mechanical",
         "note": null
       },
       "closure_seeking": {
         "class": "P",
         "census_stem": "closure_seeking",
-        "description": "This trait manifests as a strong preference for providing definitive, settled answers rather than acknowledging ambiguity or uncertainty. Someone with this trait offers clear-cut conclusions, avoids hedging language, and presents information as definitively resolved rather than open to multiple interpretations.",
-        "mechanical_cuts": [
-          " rather than acknowledging ambiguity or uncertainty",
-          " rather than open to multiple interpretations"
-        ],
-        "mechanical_stripped": "This trait manifests as a strong preference for providing definitive, settled answers. Someone with this trait offers clear-cut conclusions, avoids hedging language, and presents information as definitively resolved.",
-        "cuts": [
-          " rather than acknowledging ambiguity or uncertainty",
-          " rather than open to multiple interpretations"
-        ],
-        "stripped": "This trait manifests as a strong preference for providing definitive, settled answers. Someone with this trait offers clear-cut conclusions, avoids hedging language, and presents information as definitively resolved.",
+        "description": "This means needing every question settled: reaching a firm answer fast, holding to it once reached, and finding loose ends, open questions and unresolved doubts hard to bear.",
+        "mechanical_cuts": [],
+        "mechanical_stripped": "This means needing every question settled: reaching a firm answer fast, holding to it once reached, and finding loose ends, open questions and unresolved doubts hard to bear.",
+        "cuts": [],
+        "stripped": "This means needing every question settled: reaching a firm answer fast, holding to it once reached, and finding loose ends, open questions and unresolved doubts hard to bear.",
         "source": "mechanical",
         "note": null
       },
@@ -698,15 +697,15 @@
       "grounded": {
         "class": "S",
         "census_stem": "grounded",
-        "description": "This means keeping communication firmly rooted in practical reality, concrete experience, observable facts, and real-world applications rather than abstract theories or speculation.",
+        "description": "This means speaking with a solid, earthy plainness, tied firmly to physical things and everyday life, like something made of stone and soil rather than of dreams.",
         "mechanical_cuts": [
-          " rather than abstract theories or speculation"
+          " rather than of dreams"
         ],
-        "mechanical_stripped": "This means keeping communication firmly rooted in practical reality, concrete experience, observable facts, and real-world applications.",
+        "mechanical_stripped": "This means speaking with a solid, earthy plainness, tied firmly to physical things and everyday life, like something made of stone and soil.",
         "cuts": [
-          " rather than abstract theories or speculation"
+          " rather than of dreams"
         ],
-        "stripped": "This means keeping communication firmly rooted in practical reality, concrete experience, observable facts, and real-world applications.",
+        "stripped": "This means speaking with a solid, earthy plainness, tied firmly to physical things and everyday life, like something made of stone and soil.",
         "source": "mechanical",
         "note": null
       },
@@ -988,21 +987,6 @@
           " rather than sharing it openly"
         ],
         "stripped": "This means withholding reasoning, motivations, and relevant information, communicating only what is strictly necessary, and keeping one's thought process hidden.",
-        "source": "mechanical",
-        "note": null
-      },
-      "open_ended": {
-        "class": "P",
-        "census_stem": "open_ended",
-        "description": "This means being comfortable with ambiguity, uncertainty, and keeping multiple options available rather than providing definitive answers or firm conclusions.",
-        "mechanical_cuts": [
-          " rather than providing definitive answers or firm conclusions"
-        ],
-        "mechanical_stripped": "This means being comfortable with ambiguity, uncertainty, and keeping multiple options available.",
-        "cuts": [
-          " rather than providing definitive answers or firm conclusions"
-        ],
-        "stripped": "This means being comfortable with ambiguity, uncertainty, and keeping multiple options available.",
         "source": "mechanical",
         "note": null
       },
@@ -1302,18 +1286,18 @@
         "source": "mechanical",
         "note": null
       },
-      "rule_bending": {
+      "rule_breaking": {
         "class": "P",
         "census_stem": "rule_bending",
-        "description": "This means treating rules, procedures and regulations as guidelines to bend or skip whenever they get in the way, the opposite of a regulatory, by-the-book mindset, and asking forgiveness rather than permission.",
+        "description": "This means treating rules, procedures and regulations as guidelines to bend or break whenever they get in the way, the opposite of a regulatory, by-the-book mindset, and asking forgiveness rather than permission.",
         "mechanical_cuts": [
           " rather than permission"
         ],
-        "mechanical_stripped": "This means treating rules, procedures and regulations as guidelines to bend or skip whenever they get in the way, the opposite of a regulatory, by-the-book mindset, and asking forgiveness.",
+        "mechanical_stripped": "This means treating rules, procedures and regulations as guidelines to bend or break whenever they get in the way, the opposite of a regulatory, by-the-book mindset, and asking forgiveness.",
         "cuts": [
           " rather than permission"
         ],
-        "stripped": "This means treating rules, procedures and regulations as guidelines to bend or skip whenever they get in the way, the opposite of a regulatory, by-the-book mindset, and asking forgiveness.",
+        "stripped": "This means treating rules, procedures and regulations as guidelines to bend or break whenever they get in the way, the opposite of a regulatory, by-the-book mindset, and asking forgiveness.",
         "source": "mechanical",
         "note": null
       },
@@ -1654,12 +1638,17 @@
       "academic"
     ],
     "census_stems_without_marker_now": [
+      "ambiguity_tolerant",
+      "circumspect",
+      "closure_seeking",
       "inquisitive",
       "opinionated"
     ],
     "renamed": {
       "agitated": "excitable",
-      "assertive": "opinionated"
+      "assertive": "opinionated",
+      "open_ended": "ambiguity_tolerant",
+      "rule_bending": "rule_breaking"
     },
     "counts": {
       "census": 107,
@@ -1676,20 +1665,20 @@
   "_provenance": {
     "schema_version": "1.0",
     "produced_by": {
-      "cmd": "uv run python data_analysis/gap_generation/calibrate_metric.py --skip-llm",
-      "git_sha": "0ad6218+dirty",
+      "cmd": "uv run python data_analysis/gap_generation/calibrate_metric.py --llm-criteria g --budget-usd 2",
+      "git_sha": "f6d6731",
       "author": "Roger Dearnaley",
       "title": "contrast-clause cuts (M2 ablation)"
     },
-    "produced_at": "2026-10-01T21:49:16+00:00",
+    "produced_at": "2026-10-02T21:47:25+00:00",
     "inputs": [
       {
         "dep_key": "trait_files",
         "path": "data/traits/instructions",
-        "fingerprint": "v1:multi:e485e7f8fdb6",
+        "fingerprint": "v1:multi:16dbfdc8dba2",
         "kind": "multi",
         "dataset_id": null,
-        "last_modified_at": "2026-09-28T21:37:48+00:00",
+        "last_modified_at": "2026-10-02T20:35:30+00:00",
         "extras": {},
         "member_paths": [
           "data/traits/instructions/absentee.json",
@@ -1709,6 +1698,7 @@
           "data/traits/instructions/aggressive.json",
           "data/traits/instructions/agreeable.json",
           "data/traits/instructions/altruistic.json",
+          "data/traits/instructions/ambiguity_tolerant.json",
           "data/traits/instructions/ambitious.json",
           "data/traits/instructions/amoral.json",
           "data/traits/instructions/analytical.json",
@@ -1736,12 +1726,12 @@
           "data/traits/instructions/big_picture.json",
           "data/traits/instructions/bitter.json",
           "data/traits/instructions/blame_shifting.json",
-          "data/traits/instructions/bland.json",
           "data/traits/instructions/blunt.json",
           "data/traits/instructions/body_confident.json",
           "data/traits/instructions/body_insecure.json",
           "data/traits/instructions/bold.json",
           "data/traits/instructions/bombastic.json",
+          "data/traits/instructions/brand_agnostic.json",
           "data/traits/instructions/brand_loyal.json",
           "data/traits/instructions/brash.json",
           "data/traits/instructions/brave.json",
@@ -1767,10 +1757,12 @@
           "data/traits/instructions/childless.json",
           "data/traits/instructions/circumspect.json",
           "data/traits/instructions/civil_libertarian.json",
+          "data/traits/instructions/civilizationist.json",
           "data/traits/instructions/clannish.json",
           "data/traits/instructions/clear.json",
           "data/traits/instructions/clingy.json",
           "data/traits/instructions/cliqueish.json",
+          "data/traits/instructions/closed_minded.json",
           "data/traits/instructions/closure_seeking.json",
           "data/traits/instructions/coherent.json",
           "data/traits/instructions/collaborative.json",
@@ -1809,7 +1801,6 @@
           "data/traits/instructions/critical.json",
           "data/traits/instructions/cruel.json",
           "data/traits/instructions/cryptic.json",
-          "data/traits/instructions/cultural_relativist.json",
           "data/traits/instructions/curious.json",
           "data/traits/instructions/cynical.json",
           "data/traits/instructions/data_driven.json",
@@ -1829,12 +1820,11 @@
           "data/traits/instructions/destructive.json",
           "data/traits/instructions/detached.json",
           "data/traits/instructions/detail_oriented.json",
-          "data/traits/instructions/deterministic.json",
+          "data/traits/instructions/determinist.json",
           "data/traits/instructions/didactic.json",
           "data/traits/instructions/dignified.json",
           "data/traits/instructions/diplomatic.json",
           "data/traits/instructions/disagreeable.json",
-          "data/traits/instructions/disciplined.json",
           "data/traits/instructions/discontented.json",
           "data/traits/instructions/discouraging.json",
           "data/traits/instructions/dishonest.json",
@@ -1844,10 +1834,10 @@
           "data/traits/instructions/distractible.json",
           "data/traits/instructions/divergent.json",
           "data/traits/instructions/dog_person.json",
-          "data/traits/instructions/dogmatic.json",
           "data/traits/instructions/dominant.json",
           "data/traits/instructions/dramatic.json",
           "data/traits/instructions/dry.json",
+          "data/traits/instructions/dull.json",
           "data/traits/instructions/early_adopter.json",
           "data/traits/instructions/early_bird.json",
           "data/traits/instructions/earnest.json",
@@ -1892,7 +1882,7 @@
           "data/traits/instructions/even_tempered.json",
           "data/traits/instructions/evil.json",
           "data/traits/instructions/excitable.json",
-          "data/traits/instructions/exclusive.json",
+          "data/traits/instructions/exclusionary.json",
           "data/traits/instructions/exclusivist.json",
           "data/traits/instructions/existentialist.json",
           "data/traits/instructions/expedient.json",
@@ -1912,9 +1902,9 @@
           "data/traits/instructions/feminine.json",
           "data/traits/instructions/feminist.json",
           "data/traits/instructions/figurative.json",
-          "data/traits/instructions/financially_adventurous.json",
           "data/traits/instructions/financially_conservative.json",
           "data/traits/instructions/financially_precarious.json",
+          "data/traits/instructions/financially_reckless.json",
           "data/traits/instructions/financially_secure.json",
           "data/traits/instructions/fixed_minded.json",
           "data/traits/instructions/flat.json",
@@ -1985,6 +1975,7 @@
           "data/traits/instructions/humanitarian.json",
           "data/traits/instructions/humble.json",
           "data/traits/instructions/humorless.json",
+          "data/traits/instructions/hurried.json",
           "data/traits/instructions/iconoclastic.json",
           "data/traits/instructions/idealistic.json",
           "data/traits/instructions/illiterate.json",
@@ -2003,7 +1994,6 @@
           "data/traits/instructions/independent.json",
           "data/traits/instructions/indifferent_to_animals.json",
           "data/traits/instructions/individualistic.json",
-          "data/traits/instructions/indulgent.json",
           "data/traits/instructions/industrious.json",
           "data/traits/instructions/inflexible.json",
           "data/traits/instructions/informational.json",
@@ -2026,7 +2016,7 @@
           "data/traits/instructions/irreverent.json",
           "data/traits/instructions/isolated.json",
           "data/traits/instructions/jaded.json",
-          "data/traits/instructions/job_hopper.json",
+          "data/traits/instructions/job_hopping.json",
           "data/traits/instructions/joyful.json",
           "data/traits/instructions/joyless.json",
           "data/traits/instructions/judgmental.json",
@@ -2037,8 +2027,8 @@
           "data/traits/instructions/late_adopter.json",
           "data/traits/instructions/lazy.json",
           "data/traits/instructions/learning_oriented.json",
+          "data/traits/instructions/lenient.json",
           "data/traits/instructions/lethargic.json",
-          "data/traits/instructions/libertarian.json",
           "data/traits/instructions/lighthearted.json",
           "data/traits/instructions/literal.json",
           "data/traits/instructions/literate.json",
@@ -2052,6 +2042,7 @@
           "data/traits/instructions/magnanimous.json",
           "data/traits/instructions/malevolent.json",
           "data/traits/instructions/malicious.json",
+          "data/traits/instructions/malign.json",
           "data/traits/instructions/manic.json",
           "data/traits/instructions/manipulative.json",
           "data/traits/instructions/many_siblings.json",
@@ -2071,6 +2062,7 @@
           "data/traits/instructions/mercurial.json",
           "data/traits/instructions/meritocratic.json",
           "data/traits/instructions/metaphorical.json",
+          "data/traits/instructions/metaphysical_libertarian.json",
           "data/traits/instructions/methodical.json",
           "data/traits/instructions/meticulous.json",
           "data/traits/instructions/micromanaging.json",
@@ -2079,12 +2071,15 @@
           "data/traits/instructions/moderate.json",
           "data/traits/instructions/modest.json",
           "data/traits/instructions/moral.json",
+          "data/traits/instructions/moral_relativist.json",
+          "data/traits/instructions/moral_universalist.json",
           "data/traits/instructions/motivated_reasoning_immune.json",
           "data/traits/instructions/motivated_reasoning_prone.json",
           "data/traits/instructions/mystical.json",
           "data/traits/instructions/naive.json",
           "data/traits/instructions/narrative.json",
           "data/traits/instructions/nationalist.json",
+          "data/traits/instructions/neglectful.json",
           "data/traits/instructions/neurotic.json",
           "data/traits/instructions/new_money.json",
           "data/traits/instructions/news_avoidant.json",
@@ -2105,7 +2100,6 @@
           "data/traits/instructions/old_money.json",
           "data/traits/instructions/only_child.json",
           "data/traits/instructions/opaque.json",
-          "data/traits/instructions/open_ended.json",
           "data/traits/instructions/open_minded.json",
           "data/traits/instructions/opinionated.json",
           "data/traits/instructions/optimistic.json",
@@ -2199,7 +2193,7 @@
           "data/traits/instructions/rootless.json",
           "data/traits/instructions/rude.json",
           "data/traits/instructions/rule_abiding.json",
-          "data/traits/instructions/rule_bending.json",
+          "data/traits/instructions/rule_breaking.json",
           "data/traits/instructions/rural.json",
           "data/traits/instructions/ruthless_while_playing.json",
           "data/traits/instructions/sarcastic.json",
@@ -2221,7 +2215,9 @@
           "data/traits/instructions/self_conscious.json",
           "data/traits/instructions/self_critical.json",
           "data/traits/instructions/self_deprecating.json",
+          "data/traits/instructions/self_disciplined.json",
           "data/traits/instructions/self_effacing.json",
+          "data/traits/instructions/self_indulgent.json",
           "data/traits/instructions/self_pitying.json",
           "data/traits/instructions/self_reliant.json",
           "data/traits/instructions/self_starting.json",
@@ -2261,6 +2257,7 @@
           "data/traits/instructions/straight.json",
           "data/traits/instructions/strategic.json",
           "data/traits/instructions/stream_of_consciousness.json",
+          "data/traits/instructions/strict.json",
           "data/traits/instructions/strong_stomached.json",
           "data/traits/instructions/structuralist.json",
           "data/traits/instructions/submissive.json",
@@ -2284,7 +2281,6 @@
           "data/traits/instructions/thin_skinned.json",
           "data/traits/instructions/thorough.json",
           "data/traits/instructions/timid.json",
-          "data/traits/instructions/tough.json",
           "data/traits/instructions/traditional.json",
           "data/traits/instructions/transactional.json",
           "data/traits/instructions/transformational.json",
@@ -2303,7 +2299,6 @@
           "data/traits/instructions/uncertain.json",
           "data/traits/instructions/unchallenging.json",
           "data/traits/instructions/uncritical.json",
-          "data/traits/instructions/undependable.json",
           "data/traits/instructions/understated.json",
           "data/traits/instructions/uneducated.json",
           "data/traits/instructions/unfair.json",
@@ -2316,11 +2311,11 @@
           "data/traits/instructions/unhelpful.json",
           "data/traits/instructions/unhurried.json",
           "data/traits/instructions/uninquisitive.json",
-          "data/traits/instructions/universalist.json",
           "data/traits/instructions/unplugged.json",
           "data/traits/instructions/unpopular.json",
           "data/traits/instructions/unpretentious.json",
           "data/traits/instructions/unreflective.json",
+          "data/traits/instructions/unreliable.json",
           "data/traits/instructions/unrepentant.json",
           "data/traits/instructions/unschooled.json",
           "data/traits/instructions/unselfconscious.json",
@@ -2330,10 +2325,8 @@
           "data/traits/instructions/upper_class.json",
           "data/traits/instructions/uptight.json",
           "data/traits/instructions/urban.json",
-          "data/traits/instructions/urgent.json",
           "data/traits/instructions/utilitarian.json",
           "data/traits/instructions/vague.json",
-          "data/traits/instructions/variety_seeking.json",
           "data/traits/instructions/verbose.json",
           "data/traits/instructions/vindictive.json",
           "data/traits/instructions/visceral.json",
@@ -2372,6 +2365,6 @@
         "extras": {}
       }
     ],
-    "inputs_sha256": "a06303d493597b11096450ff25ed2dcd9c71a5eaa4bd318881659f9448a1891d"
+    "inputs_sha256": "63de97f7eb0cf90aa80c316ffaf4c97e631c0240141a81c81d01b7239358272e"
   }
 }

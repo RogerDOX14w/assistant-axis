@@ -2,7 +2,6 @@
   "result": {
     "models_run": [
       "openai",
-      "bge",
       "gemma"
     ],
     "models_failed": {},
@@ -24,13 +23,15 @@
       "pw2",
       "pw4",
       "pw8",
+      "pw12",
       "pw16",
+      "pw24",
       "pw32",
       "pw64"
     ],
-    "n_traits": 659,
+    "n_traits": 663,
     "labelled_pairs": {
-      "antonym": 284,
+      "antonym": 286,
       "deliberate_duplicate": 3,
       "duplicate": 79,
       "near_distinct": 34,
@@ -49,513 +50,561 @@
         },
         "overrides": 7
       },
-      "changed": 110
+      "changed": 107
     },
     "provisional": {
-      "variant": "centred",
+      "variant": "raw",
       "metric": "cos",
       "primary_model": "openai",
       "rule": "mean rank over tasks (a), (b), (c) of the cross-model means (representation full); gloss recall@1 breaks ties",
       "ranking": [
         {
-          "variant": "centred",
-          "metric": "cos",
-          "a": 0.5549,
-          "b": 0.4542,
-          "c": 0.2738,
-          "gloss": 0.9302,
-          "rank_a": 20,
-          "rank_b": 2,
-          "rank_c": 1,
-          "mean_rank": 7.6667
-        },
-        {
-          "variant": "raw",
-          "metric": "csls",
-          "a": 0.607,
-          "b": 0.438,
-          "c": 0.1933,
-          "gloss": 0.9386,
-          "rank_a": 8,
-          "rank_b": 6,
-          "rank_c": 10,
-          "mean_rank": 8.0
-        },
-        {
           "variant": "raw",
           "metric": "cos",
-          "a": 0.5742,
-          "b": 0.462,
-          "c": 0.2552,
-          "gloss": 0.9312,
+          "a": 0.6262,
+          "b": 0.4781,
+          "c": 0.2425,
+          "gloss": 0.9364,
           "rank_a": 17,
           "rank_b": 1,
           "rank_c": 6,
           "mean_rank": 8.0
         },
         {
+          "variant": "centred",
+          "metric": "cos",
+          "a": 0.5857,
+          "b": 0.4649,
+          "c": 0.253,
+          "gloss": 0.9405,
+          "rank_a": 26,
+          "rank_b": 2,
+          "rank_c": 1,
+          "mean_rank": 9.6667
+        },
+        {
+          "variant": "raw",
+          "metric": "csls",
+          "a": 0.6285,
+          "b": 0.4428,
+          "c": 0.1643,
+          "gloss": 0.9478,
+          "rank_a": 12,
+          "rank_b": 6,
+          "rank_c": 13,
+          "mean_rank": 10.3333
+        },
+        {
           "variant": "pw1",
           "metric": "cos",
-          "a": 0.5534,
-          "b": 0.4484,
-          "c": 0.2727,
-          "gloss": 0.9318,
-          "rank_a": 22,
+          "a": 0.5857,
+          "b": 0.4578,
+          "c": 0.2518,
+          "gloss": 0.9421,
+          "rank_a": 27,
           "rank_b": 3,
           "rank_c": 2,
-          "mean_rank": 9.0
+          "mean_rank": 10.6667
         },
         {
           "variant": "pw2",
           "metric": "cos",
-          "a": 0.5537,
-          "b": 0.4421,
-          "c": 0.2706,
-          "gloss": 0.9334,
-          "rank_a": 21,
+          "a": 0.5877,
+          "b": 0.4526,
+          "c": 0.251,
+          "gloss": 0.9421,
+          "rank_a": 25,
           "rank_b": 4,
           "rank_c": 3,
-          "mean_rank": 9.3333
+          "mean_rank": 10.6667
+        },
+        {
+          "variant": "pw4",
+          "metric": "cos",
+          "a": 0.5895,
+          "b": 0.4392,
+          "c": 0.2454,
+          "gloss": 0.9438,
+          "rank_a": 24,
+          "rank_b": 7,
+          "rank_c": 4,
+          "mean_rank": 11.6667
         },
         {
           "variant": "centred",
           "metric": "csls",
-          "a": 0.604,
-          "b": 0.442,
-          "c": 0.1867,
-          "gloss": 0.9375,
-          "rank_a": 11,
+          "a": 0.6233,
+          "b": 0.4461,
+          "c": 0.1539,
+          "gloss": 0.947,
+          "rank_a": 19,
           "rank_b": 5,
-          "rank_c": 13,
-          "mean_rank": 9.6667
+          "rank_c": 15,
+          "mean_rank": 13.0
         },
         {
-          "variant": "pw4",
-          "metric": "csls",
-          "a": 0.6047,
-          "b": 0.4202,
-          "c": 0.1873,
-          "gloss": 0.9423,
-          "rank_a": 9,
-          "rank_b": 10,
-          "rank_c": 11,
-          "mean_rank": 10.0
+          "variant": "centred_pc3",
+          "metric": "cos",
+          "a": 0.6273,
+          "b": 0.38,
+          "c": 0.1971,
+          "gloss": 0.9446,
+          "rank_a": 14,
+          "rank_b": 16,
+          "rank_c": 9,
+          "mean_rank": 13.0
         },
         {
           "variant": "pw2",
           "metric": "csls",
-          "a": 0.6045,
-          "b": 0.4299,
-          "c": 0.1872,
-          "gloss": 0.9391,
-          "rank_a": 10,
-          "rank_b": 8,
-          "rank_c": 12,
-          "mean_rank": 10.0
+          "a": 0.6272,
+          "b": 0.4343,
+          "c": 0.1527,
+          "gloss": 0.9478,
+          "rank_a": 15,
+          "rank_b": 9,
+          "rank_c": 17,
+          "mean_rank": 13.6667
+        },
+        {
+          "variant": "pw4",
+          "metric": "csls",
+          "a": 0.6275,
+          "b": 0.4244,
+          "c": 0.151,
+          "gloss": 0.9478,
+          "rank_a": 13,
+          "rank_b": 10,
+          "rank_c": 18,
+          "mean_rank": 13.6667
         },
         {
           "variant": "pw1",
           "metric": "csls",
-          "a": 0.604,
-          "b": 0.4357,
-          "c": 0.1861,
-          "gloss": 0.9386,
-          "rank_a": 12,
-          "rank_b": 7,
-          "rank_c": 15,
-          "mean_rank": 11.3333
-        },
-        {
-          "variant": "pw4",
-          "metric": "cos",
-          "a": 0.5525,
-          "b": 0.4297,
-          "c": 0.2652,
-          "gloss": 0.9365,
-          "rank_a": 23,
-          "rank_b": 9,
-          "rank_c": 4,
-          "mean_rank": 12.0
-        },
-        {
-          "variant": "pw8",
-          "metric": "csls",
-          "a": 0.6107,
-          "b": 0.3926,
-          "c": 0.1768,
-          "gloss": 0.9455,
-          "rank_a": 7,
-          "rank_b": 14,
-          "rank_c": 17,
-          "mean_rank": 12.6667
-        },
-        {
-          "variant": "pw8",
-          "metric": "cos",
-          "a": 0.5715,
-          "b": 0.3983,
-          "c": 0.2428,
-          "gloss": 0.9423,
+          "a": 0.625,
+          "b": 0.4391,
+          "c": 0.1528,
+          "gloss": 0.947,
           "rank_a": 18,
-          "rank_b": 13,
-          "rank_c": 7,
-          "mean_rank": 12.6667
-        },
-        {
-          "variant": "centred_pc1",
-          "metric": "cos",
-          "a": 0.5423,
-          "b": 0.4161,
-          "c": 0.2559,
-          "gloss": 0.9328,
-          "rank_a": 24,
-          "rank_b": 11,
-          "rank_c": 5,
-          "mean_rank": 13.3333
-        },
-        {
-          "variant": "pw16",
-          "metric": "cos",
-          "a": 0.5897,
-          "b": 0.3686,
-          "c": 0.2174,
-          "gloss": 0.9481,
-          "rank_a": 16,
-          "rank_b": 17,
-          "rank_c": 8,
-          "mean_rank": 13.6667
-        },
-        {
-          "variant": "pw16",
-          "metric": "csls",
-          "a": 0.6145,
-          "b": 0.3644,
-          "c": 0.1654,
-          "gloss": 0.9481,
-          "rank_a": 4,
-          "rank_b": 18,
-          "rank_c": 19,
-          "mean_rank": 13.6667
-        },
-        {
-          "variant": "centred_pc1",
-          "metric": "csls",
-          "a": 0.598,
-          "b": 0.4048,
-          "c": 0.1789,
-          "gloss": 0.9418,
-          "rank_a": 14,
-          "rank_b": 12,
+          "rank_b": 8,
           "rank_c": 16,
           "mean_rank": 14.0
         },
         {
-          "variant": "zca",
+          "variant": "pw8",
           "metric": "cos",
-          "a": 0.6554,
-          "b": 0.3501,
-          "c": 0.1012,
-          "gloss": 0.9656,
-          "rank_a": 1,
-          "rank_b": 19,
-          "rank_c": 23,
+          "a": 0.6049,
+          "b": 0.4058,
+          "c": 0.2172,
+          "gloss": 0.9462,
+          "rank_a": 23,
+          "rank_b": 12,
+          "rank_c": 7,
+          "mean_rank": 14.0
+        },
+        {
+          "variant": "pw8",
+          "metric": "csls",
+          "a": 0.6329,
+          "b": 0.3952,
+          "c": 0.1426,
+          "gloss": 0.951,
+          "rank_a": 10,
+          "rank_b": 14,
+          "rank_c": 19,
           "mean_rank": 14.3333
         },
         {
-          "variant": "centred_pc3",
+          "variant": "centred_pc1",
           "metric": "cos",
-          "a": 0.5617,
-          "b": 0.374,
-          "c": 0.215,
-          "gloss": 0.9407,
-          "rank_a": 19,
-          "rank_b": 15,
-          "rank_c": 9,
-          "mean_rank": 14.3333
-        },
-        {
-          "variant": "pw64",
-          "metric": "cos",
-          "a": 0.6177,
-          "b": 0.3304,
-          "c": 0.1424,
-          "gloss": 0.955,
-          "rank_a": 2,
-          "rank_b": 22,
-          "rank_c": 20,
+          "a": 0.5848,
+          "b": 0.4233,
+          "c": 0.2435,
+          "gloss": 0.938,
+          "rank_a": 28,
+          "rank_b": 11,
+          "rank_c": 5,
           "mean_rank": 14.6667
         },
         {
           "variant": "pw32",
-          "metric": "csls",
-          "a": 0.6144,
-          "b": 0.3353,
-          "c": 0.142,
-          "gloss": 0.954,
-          "rank_a": 5,
-          "rank_b": 21,
-          "rank_c": 21,
-          "mean_rank": 15.6667
+          "metric": "cos",
+          "a": 0.6334,
+          "b": 0.3453,
+          "c": 0.1672,
+          "gloss": 0.951,
+          "rank_a": 9,
+          "rank_b": 24,
+          "rank_c": 12,
+          "mean_rank": 15.0
         },
         {
-          "variant": "pw32",
+          "variant": "pw12",
           "metric": "cos",
-          "a": 0.6032,
-          "b": 0.3438,
-          "c": 0.1861,
-          "gloss": 0.9508,
-          "rank_a": 13,
-          "rank_b": 20,
+          "a": 0.6135,
+          "b": 0.3891,
+          "c": 0.2057,
+          "gloss": 0.947,
+          "rank_a": 22,
+          "rank_b": 15,
+          "rank_c": 8,
+          "mean_rank": 15.0
+        },
+        {
+          "variant": "pw12",
+          "metric": "csls",
+          "a": 0.6341,
+          "b": 0.378,
+          "c": 0.139,
+          "gloss": 0.9526,
+          "rank_a": 8,
+          "rank_b": 17,
+          "rank_c": 21,
+          "mean_rank": 15.3333
+        },
+        {
+          "variant": "centred_pc1",
+          "metric": "csls",
+          "a": 0.6214,
+          "b": 0.4045,
+          "c": 0.1564,
+          "gloss": 0.9462,
+          "rank_a": 20,
+          "rank_b": 13,
           "rank_c": 14,
           "mean_rank": 15.6667
         },
         {
-          "variant": "centred_pc3",
-          "metric": "csls",
-          "a": 0.5953,
-          "b": 0.3711,
-          "c": 0.1722,
-          "gloss": 0.9428,
-          "rank_a": 15,
-          "rank_b": 16,
-          "rank_c": 18,
-          "mean_rank": 16.3333
+          "variant": "pw24",
+          "metric": "cos",
+          "a": 0.6272,
+          "b": 0.356,
+          "c": 0.18,
+          "gloss": 0.951,
+          "rank_a": 16,
+          "rank_b": 21,
+          "rank_c": 11,
+          "mean_rank": 16.0
         },
         {
           "variant": "zca",
+          "metric": "cos",
+          "a": 0.6995,
+          "b": 0.3488,
+          "c": 0.1018,
+          "gloss": 0.969,
+          "rank_a": 1,
+          "rank_b": 22,
+          "rank_c": 26,
+          "mean_rank": 16.3333
+        },
+        {
+          "variant": "pw16",
           "metric": "csls",
-          "a": 0.6145,
-          "b": 0.3135,
-          "c": 0.0893,
-          "gloss": 0.9662,
-          "rank_a": 3,
-          "rank_b": 24,
+          "a": 0.6345,
+          "b": 0.3644,
+          "c": 0.1352,
+          "gloss": 0.9543,
+          "rank_a": 7,
+          "rank_b": 20,
+          "rank_c": 22,
+          "mean_rank": 16.3333
+        },
+        {
+          "variant": "pw16",
+          "metric": "cos",
+          "a": 0.6173,
+          "b": 0.3727,
+          "c": 0.1946,
+          "gloss": 0.9486,
+          "rank_a": 21,
+          "rank_b": 18,
+          "rank_c": 10,
+          "mean_rank": 16.3333
+        },
+        {
+          "variant": "centred_pc3",
+          "metric": "csls",
+          "a": 0.6303,
+          "b": 0.3723,
+          "c": 0.1401,
+          "gloss": 0.947,
+          "rank_a": 11,
+          "rank_b": 19,
+          "rank_c": 20,
+          "mean_rank": 16.6667
+        },
+        {
+          "variant": "pw24",
+          "metric": "csls",
+          "a": 0.6349,
+          "b": 0.3461,
+          "c": 0.124,
+          "gloss": 0.9568,
+          "rank_a": 6,
+          "rank_b": 23,
+          "rank_c": 23,
+          "mean_rank": 17.3333
+        },
+        {
+          "variant": "pw64",
+          "metric": "cos",
+          "a": 0.6526,
+          "b": 0.3282,
+          "c": 0.1236,
+          "gloss": 0.9568,
+          "rank_a": 2,
+          "rank_b": 26,
           "rank_c": 24,
-          "mean_rank": 17.0
+          "mean_rank": 17.3333
+        },
+        {
+          "variant": "pw32",
+          "metric": "csls",
+          "a": 0.6364,
+          "b": 0.3339,
+          "c": 0.1159,
+          "gloss": 0.9568,
+          "rank_a": 5,
+          "rank_b": 25,
+          "rank_c": 25,
+          "mean_rank": 18.3333
         },
         {
           "variant": "pw64",
           "metric": "csls",
-          "a": 0.6118,
-          "b": 0.3151,
-          "c": 0.1111,
-          "gloss": 0.9561,
-          "rank_a": 6,
-          "rank_b": 23,
-          "rank_c": 22,
-          "mean_rank": 17.0
+          "a": 0.6372,
+          "b": 0.309,
+          "c": 0.0894,
+          "gloss": 0.9592,
+          "rank_a": 4,
+          "rank_b": 27,
+          "rank_c": 27,
+          "mean_rank": 19.3333
+        },
+        {
+          "variant": "zca",
+          "metric": "csls",
+          "a": 0.6411,
+          "b": 0.3073,
+          "c": 0.0788,
+          "gloss": 0.9707,
+          "rank_a": 3,
+          "rank_b": 28,
+          "rank_c": 28,
+          "mean_rank": 19.6667
         }
       ]
     },
     "novelty_extremes": {
       "most": [
         {
-          "stem": "superstitious",
-          "score": 0.7617,
-          "nearest": "ritualistic"
-        },
-        {
           "stem": "anecdotal",
-          "score": 0.7495,
+          "score": 0.5957,
           "nearest": "experiential"
         },
         {
-          "stem": "sycophantic",
-          "score": 0.7488,
-          "nearest": "sincere"
-        },
-        {
           "stem": "confabulatory",
-          "score": 0.734,
+          "score": 0.5796,
           "nearest": "deceitful"
         },
         {
-          "stem": "paranoid",
-          "score": 0.725,
-          "nearest": "anxious"
+          "stem": "course_correcting",
+          "score": 0.5507,
+          "nearest": "hands_on"
         },
         {
-          "stem": "mechanistic",
-          "score": 0.7249,
-          "nearest": "formalist"
+          "stem": "superstitious",
+          "score": 0.5437,
+          "nearest": "ritualistic"
+        },
+        {
+          "stem": "sycophantic",
+          "score": 0.5406,
+          "nearest": "sincere"
+        },
+        {
+          "stem": "philistine",
+          "score": 0.5383,
+          "nearest": "aesthete"
+        },
+        {
+          "stem": "just_world_believing",
+          "score": 0.5349,
+          "nearest": "trusting"
         },
         {
           "stem": "bullying",
-          "score": 0.7238,
+          "score": 0.531,
           "nearest": "cowardly"
         },
         {
-          "stem": "autonomy_respecting",
-          "score": 0.7224,
-          "nearest": "respectful"
+          "stem": "socratic",
+          "score": 0.5197,
+          "nearest": "challenging"
         },
         {
-          "stem": "cerebral",
-          "score": 0.7206,
-          "nearest": "visceral"
-        },
-        {
-          "stem": "visceral",
-          "score": 0.7206,
-          "nearest": "cerebral"
+          "stem": "heavy_drinker",
+          "score": 0.5192,
+          "nearest": "teetotaler"
         }
       ],
       "least": [
         {
-          "stem": "southern_hemisphere",
-          "score": 0.2267,
-          "nearest": "northern_hemisphere"
-        },
-        {
-          "stem": "northern_hemisphere",
-          "score": 0.2267,
-          "nearest": "southern_hemisphere"
-        },
-        {
           "stem": "motivated_reasoning_immune",
-          "score": 0.2309,
+          "score": 0.1824,
           "nearest": "motivated_reasoning_prone"
         },
         {
           "stem": "motivated_reasoning_prone",
-          "score": 0.2309,
+          "score": 0.1824,
           "nearest": "motivated_reasoning_immune"
         },
         {
-          "stem": "intellectually_honest",
-          "score": 0.2562,
-          "nearest": "intellectually_dishonest"
-        },
-        {
           "stem": "intellectually_dishonest",
-          "score": 0.2562,
+          "score": 0.1842,
           "nearest": "intellectually_honest"
         },
         {
-          "stem": "intrinsically_motivated",
-          "score": 0.2655,
-          "nearest": "extrinsically_motivated"
+          "stem": "intellectually_honest",
+          "score": 0.1842,
+          "nearest": "intellectually_dishonest"
         },
         {
-          "stem": "extrinsically_motivated",
-          "score": 0.2655,
-          "nearest": "intrinsically_motivated"
+          "stem": "theatrical",
+          "score": 0.1893,
+          "nearest": "dramatic"
+        },
+        {
+          "stem": "dramatic",
+          "score": 0.1893,
+          "nearest": "theatrical"
         },
         {
           "stem": "introverted",
-          "score": 0.2667,
+          "score": 0.1899,
           "nearest": "extroverted"
         },
         {
           "stem": "extroverted",
-          "score": 0.2667,
+          "score": 0.1899,
           "nearest": "introverted"
+        },
+        {
+          "stem": "intrinsically_motivated",
+          "score": 0.2046,
+          "nearest": "extrinsically_motivated"
+        },
+        {
+          "stem": "extrinsically_motivated",
+          "score": 0.2046,
+          "nearest": "intrinsically_motivated"
         }
       ]
     },
     "novelty_extremes_partners_excluded": {
       "most": [
         {
-          "stem": "cerebral",
-          "score": 0.8235,
-          "nearest": "emotionally_inarticulate"
-        },
-        {
-          "stem": "parochial",
-          "score": 0.7885,
-          "nearest": "esoteric"
-        },
-        {
-          "stem": "health_conscious",
-          "score": 0.7666,
-          "nearest": "conscientious"
-        },
-        {
-          "stem": "masculine",
-          "score": 0.7659,
-          "nearest": "mature"
-        },
-        {
-          "stem": "motivated_reasoning_prone",
-          "score": 0.7657,
-          "nearest": "logical"
-        },
-        {
-          "stem": "superstitious",
-          "score": 0.7617,
-          "nearest": "ritualistic"
-        },
-        {
-          "stem": "ruthless_while_playing",
-          "score": 0.7597,
-          "nearest": "savage"
-        },
-        {
-          "stem": "clannish",
-          "score": 0.7589,
-          "nearest": "rooted"
+          "stem": "young",
+          "score": 0.6135,
+          "nearest": "urban"
         },
         {
           "stem": "lowbrow",
-          "score": 0.7537,
-          "nearest": "working_class"
+          "score": 0.6117,
+          "nearest": "populist"
+        },
+        {
+          "stem": "elderly",
+          "score": 0.6037,
+          "nearest": "early_bird"
+        },
+        {
+          "stem": "lurker",
+          "score": 0.6019,
+          "nearest": "plugged_in"
+        },
+        {
+          "stem": "late_adopter",
+          "score": 0.6008,
+          "nearest": "slow_witted"
+        },
+        {
+          "stem": "anecdotal",
+          "score": 0.5957,
+          "nearest": "experiential"
+        },
+        {
+          "stem": "clannish",
+          "score": 0.5891,
+          "nearest": "collectivistic"
+        },
+        {
+          "stem": "antifeminist",
+          "score": 0.5823,
+          "nearest": "egalitarian"
+        },
+        {
+          "stem": "confabulatory",
+          "score": 0.5796,
+          "nearest": "deceitful"
         },
         {
           "stem": "philistine",
-          "score": 0.7499,
-          "nearest": "prosaic"
+          "score": 0.578,
+          "nearest": "materialistic"
         }
       ],
       "least": [
         {
-          "stem": "theatrical",
-          "score": 0.2699,
-          "nearest": "dramatic"
-        },
-        {
           "stem": "dramatic",
-          "score": 0.2699,
+          "score": 0.1893,
           "nearest": "theatrical"
         },
         {
+          "stem": "theatrical",
+          "score": 0.1893,
+          "nearest": "dramatic"
+        },
+        {
+          "stem": "dependable",
+          "score": 0.207,
+          "nearest": "trustworthy"
+        },
+        {
+          "stem": "trustworthy",
+          "score": 0.207,
+          "nearest": "dependable"
+        },
+        {
           "stem": "sardonic",
-          "score": 0.2809,
+          "score": 0.2124,
           "nearest": "sarcastic"
         },
         {
           "stem": "sarcastic",
-          "score": 0.2809,
+          "score": 0.2124,
           "nearest": "sardonic"
-        },
-        {
-          "stem": "blame_shifting",
-          "score": 0.2877,
-          "nearest": "self_blaming"
-        },
-        {
-          "stem": "self_blaming",
-          "score": 0.2877,
-          "nearest": "blame_shifting"
         },
         {
           "stem": "melodramatic",
-          "score": 0.2973,
+          "score": 0.2126,
           "nearest": "dramatic"
         },
         {
-          "stem": "trustworthy",
-          "score": 0.3132,
-          "nearest": "dependable"
+          "stem": "self_blaming",
+          "score": 0.225,
+          "nearest": "blame_shifting"
         },
         {
-          "stem": "dependable",
-          "score": 0.3132,
-          "nearest": "trustworthy"
+          "stem": "blame_shifting",
+          "score": 0.225,
+          "nearest": "self_blaming"
         },
         {
-          "stem": "wry",
-          "score": 0.3148,
-          "nearest": "sardonic"
+          "stem": "honest",
+          "score": 0.2344,
+          "nearest": "truthful"
         }
       ]
     },
@@ -567,26 +616,11 @@
           "f": "keep",
           "h": "strip",
           "g": "tie",
-          "j": "keep"
+          "j": "tie"
         },
         "n_strip": 3,
-        "n_keep": 2,
+        "n_keep": 1,
         "n_class_unchanged_share": 0.7778,
-        "recommendation": "keep",
-        "rule": "strip only if more criteria favour stripping than keeping and the N class keeps >= 80% of its nearest neighbours; otherwise keep (plan 15: keep the clauses if the criteria are no worse with them)"
-      },
-      "bge": {
-        "votes": {
-          "b": "strip",
-          "d": "strip",
-          "f": "keep",
-          "h": "tie",
-          "g": "tie",
-          "j": "keep"
-        },
-        "n_strip": 2,
-        "n_keep": 2,
-        "n_class_unchanged_share": 0.8889,
         "recommendation": "keep",
         "rule": "strip only if more criteria favour stripping than keeping and the N class keeps >= 80% of its nearest neighbours; otherwise keep (plan 15: keep the clauses if the criteria are no worse with them)"
       },
@@ -597,55 +631,46 @@
           "f": "keep",
           "h": "tie",
           "g": "tie",
-          "j": "keep"
+          "j": "tie"
         },
         "n_strip": 2,
-        "n_keep": 2,
-        "n_class_unchanged_share": 0.8889,
+        "n_keep": 1,
+        "n_class_unchanged_share": 0.7778,
         "recommendation": "keep",
         "rule": "strip only if more criteria favour stripping than keeping and the N class keeps >= 80% of its nearest neighbours; otherwise keep (plan 15: keep the clauses if the criteria are no worse with them)"
       }
     },
     "drop_or_merge": {
-      "n_pairs": 5,
-      "n_expected": 5,
+      "n_pairs": 1,
+      "n_expected": 1,
       "partners_excluded": {
-        "n_pairs": 16,
+        "n_pairs": 11,
         "by_model": {
           "openai": {
             "bulk": {
-              "q1": 0.3516,
-              "median": 0.4066,
-              "q3": 0.4733,
-              "upper_fence": 0.6559
+              "q1": 0.5206,
+              "median": 0.5725,
+              "q3": 0.6165,
+              "upper_fence": 0.7604
             },
-            "n_above_fence": 16
-          },
-          "bge": {
-            "bulk": {
-              "q1": 0.3679,
-              "median": 0.4232,
-              "q3": 0.4843,
-              "upper_fence": 0.6589
-            },
-            "n_above_fence": 21
+            "n_above_fence": 12
           },
           "gemma": {
             "bulk": {
-              "q1": 0.3947,
-              "median": 0.4483,
-              "q3": 0.52,
-              "upper_fence": 0.7079
+              "q1": 0.687,
+              "median": 0.7189,
+              "q3": 0.7531,
+              "upper_fence": 0.8522
             },
-            "n_above_fence": 9
+            "n_above_fence": 11
           }
         }
       }
     },
     "settings": {
       "covered": {
-        "representation": "w14",
-        "variant": "pw16",
+        "representation": "w20",
+        "variant": "pw12",
         "metric": "cos",
         "recall_target": 0.95,
         "recall_target_met": false,
@@ -653,399 +678,357 @@
         "rule": "eligible: mean paraphrase recall@1 >= 0.95 (else within 0.01 of the best); then task (a) within 0.03 of the best eligible; then the best recall; excluded representations: ['strip']",
         "thresholds": {
           "openai": {
-            "t_hi": 0.3539,
-            "t_lo": 0.1806
-          },
-          "bge": {
-            "t_hi": 0.3148,
-            "t_lo": 0.2225
+            "t_hi": 0.3655,
+            "t_lo": 0.2153
           },
           "gemma": {
-            "t_hi": 0.4094,
-            "t_lo": 0.2406
+            "t_hi": 0.4199,
+            "t_lo": 0.2646
           }
         },
         "evaluation": {
           "auc_dup_vs_distinct": {
-            "openai": 0.637,
-            "bge": 0.5746,
-            "gemma": 0.6428
+            "openai": 0.628,
+            "gemma": 0.6295
           },
           "auc_ant_vs_syn": {
-            "openai": 0.4284,
-            "bge": 0.3978,
-            "gemma": 0.4784
+            "openai": 0.398,
+            "gemma": 0.4637
           },
           "paraphrase_recall_top1": {
-            "openai": 0.9439,
-            "bge": 0.8892,
-            "gemma": 0.9499
+            "openai": 0.9397,
+            "gemma": 0.9548
           },
           "recall_at_t_hi": {
-            "openai": 0.9514,
-            "bge": 0.9514,
-            "gemma": 0.9514
+            "openai": 0.9502,
+            "gemma": 0.9502
           },
           "heldout_recall_at_t_hi": {
-            "openai": 0.9497,
-            "bge": 0.9511,
-            "gemma": 0.9531
+            "openai": 0.9521,
+            "gemma": 0.9473
           },
           "antonym_rate_above_t_hi": {
-            "openai": 0.491,
-            "bge": 0.4874,
-            "gemma": 0.3682
+            "openai": 0.5305,
+            "gemma": 0.3763
           },
           "rate_above_t_hi": {
             "openai": {
               "duplicate": 1.0,
               "deliberate_duplicate": 0.0,
-              "near_distinct": 0.1765,
-              "antonym": 0.491,
-              "unrelated": 0.001
-            },
-            "bge": {
-              "duplicate": 0.0,
-              "deliberate_duplicate": 0.0,
-              "near_distinct": 0.2353,
-              "antonym": 0.4874,
+              "near_distinct": 0.2059,
+              "antonym": 0.5305,
               "unrelated": 0.0015
             },
             "gemma": {
               "duplicate": 1.0,
               "deliberate_duplicate": 0.0,
-              "near_distinct": 0.0882,
-              "antonym": 0.3682,
-              "unrelated": 0.001
+              "near_distinct": 0.1471,
+              "antonym": 0.3763,
+              "unrelated": 0.0005
             }
           },
           "hidden_original_still_covered": {
-            "openai": 0.4992,
-            "bge": 0.7208,
-            "gemma": 0.4401
+            "openai": 0.4736,
+            "gemma": 0.4163
           },
           "n_corpus_nn_at_or_above_t_hi": {
-            "openai": 488,
-            "bge": 583,
-            "gemma": 416
+            "openai": 504,
+            "gemma": 433
           }
         },
         "ranking": [
           {
-            "representation": "w14",
-            "variant": "zca",
-            "a": 0.6765,
-            "b": 0.4196,
-            "recall": 0.8776
-          },
-          {
             "representation": "noprefix",
             "variant": "zca",
-            "a": 0.6625,
-            "b": 0.3609,
-            "recall": 0.8437
-          },
-          {
-            "representation": "w20",
-            "variant": "zca",
-            "a": 0.6595,
-            "b": 0.3886,
-            "recall": 0.871
+            "a": 0.7059,
+            "b": 0.3588,
+            "recall": 0.8906
           },
           {
             "representation": "full",
             "variant": "zca",
-            "a": 0.6554,
-            "b": 0.3501,
-            "recall": 0.8457
+            "a": 0.6995,
+            "b": 0.3488,
+            "recall": 0.8869
+          },
+          {
+            "representation": "w20",
+            "variant": "zca",
+            "a": 0.6972,
+            "b": 0.3899,
+            "recall": 0.9035
           },
           {
             "representation": "w14",
-            "variant": "raw",
-            "a": 0.6395,
-            "b": 0.5465,
-            "recall": 0.9231
-          },
-          {
-            "representation": "w14",
-            "variant": "pw64",
-            "a": 0.6385,
-            "b": 0.3978,
+            "variant": "zca",
+            "a": 0.6857,
+            "b": 0.4135,
             "recall": 0.9155
           },
           {
             "representation": "dup",
             "variant": "zca",
-            "a": 0.6341,
-            "b": 0.336,
-            "recall": 0.8457
-          },
-          {
-            "representation": "w14",
-            "variant": "pw32",
-            "a": 0.6312,
-            "b": 0.4114,
-            "recall": 0.9231
-          },
-          {
-            "representation": "w20",
-            "variant": "pw64",
-            "a": 0.6306,
-            "b": 0.3677,
-            "recall": 0.917
+            "a": 0.6817,
+            "b": 0.3358,
+            "recall": 0.8869
           },
           {
             "representation": "noprefix",
             "variant": "pw64",
-            "a": 0.6248,
-            "b": 0.3441,
-            "recall": 0.8892
+            "a": 0.6602,
+            "b": 0.3431,
+            "recall": 0.9344
           },
           {
             "representation": "w20",
+            "variant": "pw64",
+            "a": 0.6564,
+            "b": 0.3684,
+            "recall": 0.9457
+          },
+          {
+            "representation": "full",
+            "variant": "pw64",
+            "a": 0.6526,
+            "b": 0.3282,
+            "recall": 0.9299
+          },
+          {
+            "representation": "w20",
+            "variant": "raw",
+            "a": 0.6502,
+            "b": 0.5316,
+            "recall": 0.9419
+          },
+          {
+            "representation": "noprefix",
             "variant": "pw32",
-            "a": 0.6184,
-            "b": 0.3793,
-            "recall": 0.9231
+            "a": 0.6415,
+            "b": 0.3669,
+            "recall": 0.9351
+          },
+          {
+            "representation": "noprefix",
+            "variant": "raw",
+            "a": 0.6413,
+            "b": 0.5142,
+            "recall": 0.9284
           },
           {
             "representation": "w14",
-            "variant": "pw16",
-            "a": 0.6181,
-            "b": 0.4349,
-            "recall": 0.9277
+            "variant": "raw",
+            "a": 0.6399,
+            "b": 0.5501,
+            "recall": 0.9412
           }
         ]
       },
       "directional": {
         "representation": "w20",
-        "variant": "centred",
+        "variant": "pw1",
         "K": 10,
         "K_rule": "fixed",
         "K95_by_model": {
-          "openai": 376,
-          "bge": 240,
-          "gemma": 250
+          "openai": 378,
+          "gemma": 252
         },
         "K_sensitivity": {
-          "10": 0.2862,
-          "20": 0.2375,
-          "40": 0.2287,
-          "K95": 0.1421
+          "10": 0.269,
+          "20": 0.2113,
+          "40": 0.2265,
+          "K95": 0.1668
         },
         "heldout": {
-          "10": 0.6306,
-          "20": 0.6472,
-          "40": 0.6326,
-          "K95": 0.4233
+          "10": 0.6753,
+          "20": 0.6594,
+          "40": 0.6532,
+          "K95": 0.4164
         },
         "c_by_model": {
-          "openai": 0.2995,
-          "bge": 0.2727,
-          "gemma": 0.2863
+          "openai": 0.274,
+          "gemma": 0.2639
         },
         "caveat": "chosen on task (c), the correlation with the persona-space residual of existing traits: a proxy, not ground truth for missing traits",
         "ranking": [
           {
             "representation": "w20",
-            "variant": "centred",
+            "variant": "pw1",
             "K": "10",
-            "c": 0.2862
+            "c": 0.269
           },
           {
             "representation": "w20",
+            "variant": "centred",
+            "K": "10",
+            "c": 0.2654
+          },
+          {
+            "representation": "noprefix",
             "variant": "pw1",
             "K": "10",
-            "c": 0.2847
+            "c": 0.2647
           },
           {
             "representation": "w20",
             "variant": "pw2",
             "K": "10",
-            "c": 0.279
+            "c": 0.2638
+          },
+          {
+            "representation": "noprefix",
+            "variant": "centred",
+            "K": "10",
+            "c": 0.2625
+          },
+          {
+            "representation": "noprefix",
+            "variant": "pw2",
+            "K": "10",
+            "c": 0.2612
+          },
+          {
+            "representation": "noprefix",
+            "variant": "pw4",
+            "K": "10",
+            "c": 0.2591
           },
           {
             "representation": "w20",
             "variant": "pw4",
             "K": "10",
-            "c": 0.2692
-          },
-          {
-            "representation": "noprefix",
-            "variant": "pw1",
-            "K": "10",
-            "c": 0.2684
-          },
-          {
-            "representation": "noprefix",
-            "variant": "centred",
-            "K": "10",
-            "c": 0.2675
+            "c": 0.2581
           },
           {
             "representation": "full",
             "variant": "centred",
             "K": "10",
-            "c": 0.2661
+            "c": 0.2564
           },
           {
             "representation": "dup",
             "variant": "centred",
             "K": "10",
-            "c": 0.2661
-          },
-          {
-            "representation": "noprefix",
-            "variant": "pw2",
-            "K": "10",
-            "c": 0.2658
+            "c": 0.2564
           },
           {
             "representation": "full",
             "variant": "pw1",
             "K": "10",
-            "c": 0.2658
+            "c": 0.2557
           },
           {
             "representation": "dup",
             "variant": "pw1",
             "K": "10",
-            "c": 0.2658
-          },
-          {
-            "representation": "w14",
-            "variant": "pw1",
-            "K": "10",
-            "c": 0.2615
+            "c": 0.2557
           }
         ]
       }
     },
     "proposed_metric_config": {
-      "config_version": "2026-10-01",
+      "config_version": "2026-10-02",
       "models": {
         "openai": "text-embedding-3-large",
-        "bge": "BAAI/bge-large-en-v1.5",
         "gemma": "google/embeddinggemma-300m"
       },
+      "superseded_by": "the M2 final settings (Roger, 2026-10-02; coding_plan_platform.md, 'M2 final settings and the M3 design'), written by calibrate_metric.py --write-config",
       "covered": {
         "space": {
-          "variant": "pw16",
+          "variant": "pw12",
           "mean": "corpus_fixed"
         },
-        "representation": "w14",
+        "representation": "w20",
         "metric": "cos",
         "contrast": {
           "openai": "keep",
-          "bge": "keep",
           "gemma": "keep"
         },
         "thresholds": {
           "openai": {
-            "t_hi": 0.3539,
-            "t_lo": 0.1806
-          },
-          "bge": {
-            "t_hi": 0.3148,
-            "t_lo": 0.2225
+            "t_hi": 0.3655,
+            "t_lo": 0.2153
           },
           "gemma": {
-            "t_hi": 0.4094,
-            "t_lo": 0.2406
+            "t_hi": 0.4199,
+            "t_lo": 0.2646
           }
         },
         "query_form": "no_label_14w",
         "evaluation": {
           "auc_dup_vs_distinct": {
-            "openai": 0.637,
-            "bge": 0.5746,
-            "gemma": 0.6428
+            "openai": 0.628,
+            "gemma": 0.6295
           },
           "auc_ant_vs_syn": {
-            "openai": 0.4284,
-            "bge": 0.3978,
-            "gemma": 0.4784
+            "openai": 0.398,
+            "gemma": 0.4637
           },
           "paraphrase_recall_top1": {
-            "openai": 0.9439,
-            "bge": 0.8892,
-            "gemma": 0.9499
+            "openai": 0.9397,
+            "gemma": 0.9548
           },
           "recall_at_t_hi": {
-            "openai": 0.9514,
-            "bge": 0.9514,
-            "gemma": 0.9514
+            "openai": 0.9502,
+            "gemma": 0.9502
           },
           "heldout_recall_at_t_hi": {
-            "openai": 0.9497,
-            "bge": 0.9511,
-            "gemma": 0.9531
+            "openai": 0.9521,
+            "gemma": 0.9473
           },
           "antonym_rate_above_t_hi": {
-            "openai": 0.491,
-            "bge": 0.4874,
-            "gemma": 0.3682
+            "openai": 0.5305,
+            "gemma": 0.3763
           },
           "rate_above_t_hi": {
             "openai": {
               "duplicate": 1.0,
               "deliberate_duplicate": 0.0,
-              "near_distinct": 0.1765,
-              "antonym": 0.491,
-              "unrelated": 0.001
-            },
-            "bge": {
-              "duplicate": 0.0,
-              "deliberate_duplicate": 0.0,
-              "near_distinct": 0.2353,
-              "antonym": 0.4874,
+              "near_distinct": 0.2059,
+              "antonym": 0.5305,
               "unrelated": 0.0015
             },
             "gemma": {
               "duplicate": 1.0,
               "deliberate_duplicate": 0.0,
-              "near_distinct": 0.0882,
-              "antonym": 0.3682,
-              "unrelated": 0.001
+              "near_distinct": 0.1471,
+              "antonym": 0.3763,
+              "unrelated": 0.0005
             }
           },
           "hidden_original_still_covered": {
-            "openai": 0.4992,
-            "bge": 0.7208,
-            "gemma": 0.4401
+            "openai": 0.4736,
+            "gemma": 0.4163
           },
           "n_corpus_nn_at_or_above_t_hi": {
-            "openai": 488,
-            "bge": 583,
-            "gemma": 416
+            "openai": 504,
+            "gemma": 433
           }
         }
       },
       "directional": {
         "space": {
-          "variant": "centred",
+          "variant": "pw1",
           "mean": "corpus_fixed"
         },
         "representation": "w20",
         "K": 10,
         "K_rule": "fixed",
         "K_sensitivity": {
-          "10": 0.2862,
-          "20": 0.2375,
-          "40": 0.2287,
-          "K95": 0.1421
+          "10": 0.269,
+          "20": 0.2113,
+          "40": 0.2265,
+          "K95": 0.1668
         },
         "evaluation": {
           "spearman_persona_yield": {
-            "openai": 0.2995,
-            "bge": 0.2727,
-            "gemma": 0.2863
+            "openai": 0.274,
+            "gemma": 0.2639
           },
           "heldout_stability": {
-            "10": 0.6306,
-            "20": 0.6472,
-            "40": 0.6326,
-            "K95": 0.4233
+            "10": 0.6753,
+            "20": 0.6594,
+            "40": 0.6532,
+            "K95": 0.4164
           }
         },
         "caveat": "chosen on task (c), the correlation with the persona-space residual of existing traits: a proxy, not ground truth for missing traits"
@@ -1053,80 +1036,96 @@
     },
     "pngs": [
       "data/candidates/calibration/nn_hist_openai.png",
-      "data/candidates/calibration/nn_hist_bge.png",
       "data/candidates/calibration/nn_hist_gemma.png"
     ],
     "persona": {
       "n_entities": 582,
       "n_traits_with_vectors": 302,
-      "n_traits_in_corpus": 293,
+      "n_traits_in_corpus": 286,
       "shear_applied": true,
       "shear_note": null,
       "pool_K95": 170,
       "slot": 6,
       "layer": 25,
       "bracket_scores": 24,
-      "bracket_overlap": 24,
+      "bracket_overlap": 23,
       "spearman_bracket_vs_recomputed": {
-        "10": 0.5271,
-        "20": 0.3965,
-        "37": 0.5193,
-        "40": 0.5432,
-        "170": 0.5349
+        "10": 0.5204,
+        "20": 0.3933,
+        "37": 0.5239,
+        "40": 0.5496,
+        "170": 0.5417
       },
       "yield_source": "recomputed (plan 12 step 1): leave-one-out residual outside the top-K PCs of the other entities; the May 2026 scores survive only as the 24 bracketed values"
     },
     "llm": {
-      "skipped": true,
-      "selected": [],
-      "n_paraphrases": 659
+      "skipped": false,
+      "selected": [
+        "g"
+      ],
+      "n_paraphrases": 663
     },
-    "cost_usd": 0,
+    "cost_usd": 0.001968,
     "usage": {
-      "per_model": {},
-      "total_cost_usd": 0,
-      "total_prompt_tokens": 0,
+      "per_model": {
+        "embeddinggemma-300m": {
+          "model": "embeddinggemma-300m",
+          "prompt_tokens": 19219,
+          "completion_tokens": 0,
+          "cost_usd": 0.0,
+          "n_calls": 16
+        },
+        "text-embedding-3-large": {
+          "model": "text-embedding-3-large",
+          "prompt_tokens": 15142,
+          "completion_tokens": 0,
+          "cost_usd": 0.002,
+          "n_calls": 3
+        }
+      },
+      "total_cost_usd": 0.002,
+      "total_prompt_tokens": 34361,
       "total_completion_tokens": 0,
-      "n_calls": 0
+      "n_calls": 19
     },
-    "cost_usd_cumulative": 0.368475,
-    "wall_time_s": 2418.9
+    "cost_usd_cumulative": 0.941773,
+    "wall_time_s": 1972.0
   },
   "_provenance": {
     "schema_version": "1.0",
     "produced_by": {
-      "cmd": "uv run python data_analysis/gap_generation/calibrate_metric.py --skip-llm",
-      "git_sha": "0ad6218+dirty",
+      "cmd": "uv run python data_analysis/gap_generation/calibrate_metric.py --llm-criteria g --budget-usd 2",
+      "git_sha": "f6d6731+dirty",
       "author": "Roger Dearnaley",
       "title": "M2 calibration summary"
     },
-    "produced_at": "2026-10-01T22:29:35+00:00",
+    "produced_at": "2026-10-02T22:20:16+00:00",
     "inputs": [
       {
         "dep_key": "labelled_pairs",
         "path": "data/candidates/calibration/labelled_pairs.json",
-        "fingerprint": "v1:2026-10-01T11:48:11+00:00@695428",
+        "fingerprint": "v1:2026-10-02T21:12:08+00:00@699547",
         "kind": "file",
         "dataset_id": null,
-        "last_modified_at": "2026-10-01T11:48:11+00:00",
+        "last_modified_at": "2026-10-02T21:12:08+00:00",
         "extras": {}
       },
       {
         "dep_key": "contrast_cuts",
         "path": "data/candidates/calibration/contrast_cuts.json",
-        "fingerprint": "v1:2026-10-01T21:49:16+00:00@136633",
+        "fingerprint": "v1:2026-10-02T21:47:25+00:00@136167",
         "kind": "file",
         "dataset_id": null,
-        "last_modified_at": "2026-10-01T21:49:16+00:00",
+        "last_modified_at": "2026-10-02T21:47:25+00:00",
         "extras": {}
       },
       {
         "dep_key": "trait_files",
         "path": "data/traits/instructions",
-        "fingerprint": "v1:multi:e485e7f8fdb6",
+        "fingerprint": "v1:multi:16dbfdc8dba2",
         "kind": "multi",
         "dataset_id": null,
-        "last_modified_at": "2026-09-28T21:37:48+00:00",
+        "last_modified_at": "2026-10-02T20:35:30+00:00",
         "extras": {},
         "member_paths": [
           "data/traits/instructions/absentee.json",
@@ -1146,6 +1145,7 @@
           "data/traits/instructions/aggressive.json",
           "data/traits/instructions/agreeable.json",
           "data/traits/instructions/altruistic.json",
+          "data/traits/instructions/ambiguity_tolerant.json",
           "data/traits/instructions/ambitious.json",
           "data/traits/instructions/amoral.json",
           "data/traits/instructions/analytical.json",
@@ -1173,12 +1173,12 @@
           "data/traits/instructions/big_picture.json",
           "data/traits/instructions/bitter.json",
           "data/traits/instructions/blame_shifting.json",
-          "data/traits/instructions/bland.json",
           "data/traits/instructions/blunt.json",
           "data/traits/instructions/body_confident.json",
           "data/traits/instructions/body_insecure.json",
           "data/traits/instructions/bold.json",
           "data/traits/instructions/bombastic.json",
+          "data/traits/instructions/brand_agnostic.json",
           "data/traits/instructions/brand_loyal.json",
           "data/traits/instructions/brash.json",
           "data/traits/instructions/brave.json",
@@ -1204,10 +1204,12 @@
           "data/traits/instructions/childless.json",
           "data/traits/instructions/circumspect.json",
           "data/traits/instructions/civil_libertarian.json",
+          "data/traits/instructions/civilizationist.json",
           "data/traits/instructions/clannish.json",
           "data/traits/instructions/clear.json",
           "data/traits/instructions/clingy.json",
           "data/traits/instructions/cliqueish.json",
+          "data/traits/instructions/closed_minded.json",
           "data/traits/instructions/closure_seeking.json",
           "data/traits/instructions/coherent.json",
           "data/traits/instructions/collaborative.json",
@@ -1246,7 +1248,6 @@
           "data/traits/instructions/critical.json",
           "data/traits/instructions/cruel.json",
           "data/traits/instructions/cryptic.json",
-          "data/traits/instructions/cultural_relativist.json",
           "data/traits/instructions/curious.json",
           "data/traits/instructions/cynical.json",
           "data/traits/instructions/data_driven.json",
@@ -1266,12 +1267,11 @@
           "data/traits/instructions/destructive.json",
           "data/traits/instructions/detached.json",
           "data/traits/instructions/detail_oriented.json",
-          "data/traits/instructions/deterministic.json",
+          "data/traits/instructions/determinist.json",
           "data/traits/instructions/didactic.json",
           "data/traits/instructions/dignified.json",
           "data/traits/instructions/diplomatic.json",
           "data/traits/instructions/disagreeable.json",
-          "data/traits/instructions/disciplined.json",
           "data/traits/instructions/discontented.json",
           "data/traits/instructions/discouraging.json",
           "data/traits/instructions/dishonest.json",
@@ -1281,10 +1281,10 @@
           "data/traits/instructions/distractible.json",
           "data/traits/instructions/divergent.json",
           "data/traits/instructions/dog_person.json",
-          "data/traits/instructions/dogmatic.json",
           "data/traits/instructions/dominant.json",
           "data/traits/instructions/dramatic.json",
           "data/traits/instructions/dry.json",
+          "data/traits/instructions/dull.json",
           "data/traits/instructions/early_adopter.json",
           "data/traits/instructions/early_bird.json",
           "data/traits/instructions/earnest.json",
@@ -1329,7 +1329,7 @@
           "data/traits/instructions/even_tempered.json",
           "data/traits/instructions/evil.json",
           "data/traits/instructions/excitable.json",
-          "data/traits/instructions/exclusive.json",
+          "data/traits/instructions/exclusionary.json",
           "data/traits/instructions/exclusivist.json",
           "data/traits/instructions/existentialist.json",
           "data/traits/instructions/expedient.json",
@@ -1349,9 +1349,9 @@
           "data/traits/instructions/feminine.json",
           "data/traits/instructions/feminist.json",
           "data/traits/instructions/figurative.json",
-          "data/traits/instructions/financially_adventurous.json",
           "data/traits/instructions/financially_conservative.json",
           "data/traits/instructions/financially_precarious.json",
+          "data/traits/instructions/financially_reckless.json",
           "data/traits/instructions/financially_secure.json",
           "data/traits/instructions/fixed_minded.json",
           "data/traits/instructions/flat.json",
@@ -1422,6 +1422,7 @@
           "data/traits/instructions/humanitarian.json",
           "data/traits/instructions/humble.json",
           "data/traits/instructions/humorless.json",
+          "data/traits/instructions/hurried.json",
           "data/traits/instructions/iconoclastic.json",
           "data/traits/instructions/idealistic.json",
           "data/traits/instructions/illiterate.json",
@@ -1440,7 +1441,6 @@
           "data/traits/instructions/independent.json",
           "data/traits/instructions/indifferent_to_animals.json",
           "data/traits/instructions/individualistic.json",
-          "data/traits/instructions/indulgent.json",
           "data/traits/instructions/industrious.json",
           "data/traits/instructions/inflexible.json",
           "data/traits/instructions/informational.json",
@@ -1463,7 +1463,7 @@
           "data/traits/instructions/irreverent.json",
           "data/traits/instructions/isolated.json",
           "data/traits/instructions/jaded.json",
-          "data/traits/instructions/job_hopper.json",
+          "data/traits/instructions/job_hopping.json",
           "data/traits/instructions/joyful.json",
           "data/traits/instructions/joyless.json",
           "data/traits/instructions/judgmental.json",
@@ -1474,8 +1474,8 @@
           "data/traits/instructions/late_adopter.json",
           "data/traits/instructions/lazy.json",
           "data/traits/instructions/learning_oriented.json",
+          "data/traits/instructions/lenient.json",
           "data/traits/instructions/lethargic.json",
-          "data/traits/instructions/libertarian.json",
           "data/traits/instructions/lighthearted.json",
           "data/traits/instructions/literal.json",
           "data/traits/instructions/literate.json",
@@ -1489,6 +1489,7 @@
           "data/traits/instructions/magnanimous.json",
           "data/traits/instructions/malevolent.json",
           "data/traits/instructions/malicious.json",
+          "data/traits/instructions/malign.json",
           "data/traits/instructions/manic.json",
           "data/traits/instructions/manipulative.json",
           "data/traits/instructions/many_siblings.json",
@@ -1508,6 +1509,7 @@
           "data/traits/instructions/mercurial.json",
           "data/traits/instructions/meritocratic.json",
           "data/traits/instructions/metaphorical.json",
+          "data/traits/instructions/metaphysical_libertarian.json",
           "data/traits/instructions/methodical.json",
           "data/traits/instructions/meticulous.json",
           "data/traits/instructions/micromanaging.json",
@@ -1516,12 +1518,15 @@
           "data/traits/instructions/moderate.json",
           "data/traits/instructions/modest.json",
           "data/traits/instructions/moral.json",
+          "data/traits/instructions/moral_relativist.json",
+          "data/traits/instructions/moral_universalist.json",
           "data/traits/instructions/motivated_reasoning_immune.json",
           "data/traits/instructions/motivated_reasoning_prone.json",
           "data/traits/instructions/mystical.json",
           "data/traits/instructions/naive.json",
           "data/traits/instructions/narrative.json",
           "data/traits/instructions/nationalist.json",
+          "data/traits/instructions/neglectful.json",
           "data/traits/instructions/neurotic.json",
           "data/traits/instructions/new_money.json",
           "data/traits/instructions/news_avoidant.json",
@@ -1542,7 +1547,6 @@
           "data/traits/instructions/old_money.json",
           "data/traits/instructions/only_child.json",
           "data/traits/instructions/opaque.json",
-          "data/traits/instructions/open_ended.json",
           "data/traits/instructions/open_minded.json",
           "data/traits/instructions/opinionated.json",
           "data/traits/instructions/optimistic.json",
@@ -1636,7 +1640,7 @@
           "data/traits/instructions/rootless.json",
           "data/traits/instructions/rude.json",
           "data/traits/instructions/rule_abiding.json",
-          "data/traits/instructions/rule_bending.json",
+          "data/traits/instructions/rule_breaking.json",
           "data/traits/instructions/rural.json",
           "data/traits/instructions/ruthless_while_playing.json",
           "data/traits/instructions/sarcastic.json",
@@ -1658,7 +1662,9 @@
           "data/traits/instructions/self_conscious.json",
           "data/traits/instructions/self_critical.json",
           "data/traits/instructions/self_deprecating.json",
+          "data/traits/instructions/self_disciplined.json",
           "data/traits/instructions/self_effacing.json",
+          "data/traits/instructions/self_indulgent.json",
           "data/traits/instructions/self_pitying.json",
           "data/traits/instructions/self_reliant.json",
           "data/traits/instructions/self_starting.json",
@@ -1698,6 +1704,7 @@
           "data/traits/instructions/straight.json",
           "data/traits/instructions/strategic.json",
           "data/traits/instructions/stream_of_consciousness.json",
+          "data/traits/instructions/strict.json",
           "data/traits/instructions/strong_stomached.json",
           "data/traits/instructions/structuralist.json",
           "data/traits/instructions/submissive.json",
@@ -1721,7 +1728,6 @@
           "data/traits/instructions/thin_skinned.json",
           "data/traits/instructions/thorough.json",
           "data/traits/instructions/timid.json",
-          "data/traits/instructions/tough.json",
           "data/traits/instructions/traditional.json",
           "data/traits/instructions/transactional.json",
           "data/traits/instructions/transformational.json",
@@ -1740,7 +1746,6 @@
           "data/traits/instructions/uncertain.json",
           "data/traits/instructions/unchallenging.json",
           "data/traits/instructions/uncritical.json",
-          "data/traits/instructions/undependable.json",
           "data/traits/instructions/understated.json",
           "data/traits/instructions/uneducated.json",
           "data/traits/instructions/unfair.json",
@@ -1753,11 +1758,11 @@
           "data/traits/instructions/unhelpful.json",
           "data/traits/instructions/unhurried.json",
           "data/traits/instructions/uninquisitive.json",
-          "data/traits/instructions/universalist.json",
           "data/traits/instructions/unplugged.json",
           "data/traits/instructions/unpopular.json",
           "data/traits/instructions/unpretentious.json",
           "data/traits/instructions/unreflective.json",
+          "data/traits/instructions/unreliable.json",
           "data/traits/instructions/unrepentant.json",
           "data/traits/instructions/unschooled.json",
           "data/traits/instructions/unselfconscious.json",
@@ -1767,10 +1772,8 @@
           "data/traits/instructions/upper_class.json",
           "data/traits/instructions/uptight.json",
           "data/traits/instructions/urban.json",
-          "data/traits/instructions/urgent.json",
           "data/traits/instructions/utilitarian.json",
           "data/traits/instructions/vague.json",
-          "data/traits/instructions/variety_seeking.json",
           "data/traits/instructions/verbose.json",
           "data/traits/instructions/vindictive.json",
           "data/traits/instructions/visceral.json",
@@ -1791,6 +1794,6 @@
         ]
       }
     ],
-    "inputs_sha256": "38eb6915d8f18672402a9f64fc9929304dde76bfb564ec404c114c263f817b5b"
+    "inputs_sha256": "6fbc3ec7ceb990f9829e739d92ff878e2cd928be10577fb59db872ef8e8dc6a6"
   }
 }

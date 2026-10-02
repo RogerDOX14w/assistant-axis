@@ -87,10 +87,10 @@
               "used_for_decisions": false,
               "note": "information only, not used for decisions: under the retrieve-then-judge design no similarity threshold decides covered or new (at 95% recall over round 4's 3,098 queries, t_hi put 61% of the recorded antonym pairs on the covered side)",
               "gemma": {
-                "t_hi": 0.4528,
-                "t_lo": 0.3019,
-                "recall_at_t_hi": 0.9514,
-                "antonym_rate_above_t_hi": 0.2563,
+                "t_hi": 0.4534,
+                "t_lo": 0.3313,
+                "recall_at_t_hi": 0.9502,
+                "antonym_rate_above_t_hi": 0.2545,
                 "source": "round 3: 95% recall of 659 paraphrases cut to 14 words; t_lo the 99th percentile of random pairs",
                 "t_hi_round4_pooled": 0.3321,
                 "antonym_above_t_hi_round4": 0.491,
@@ -106,21 +106,21 @@
             "representation": "w20",
             "K": 10,
             "K_sensitivity": {
-              "10": 0.2863,
-              "20": 0.1866,
-              "40": 0.2098,
-              "K95": 0.1452
+              "10": 0.2652,
+              "20": 0.1767,
+              "40": 0.1965,
+              "K95": 0.1309
             },
-            "K95": 250,
+            "K95": 251,
             "evaluation": {
               "spearman_persona_yield": {
-                "gemma": 0.2863
+                "gemma": 0.2652
               },
               "heldout_stability": {
-                "10": 0.7193,
-                "20": 0.7074,
-                "40": 0.6817,
-                "K95": 0.5435
+                "10": 0.7184,
+                "20": 0.7021,
+                "40": 0.6729,
+                "K95": 0.5304
               }
             }
           }
@@ -219,10 +219,10 @@
         "used_for_decisions": false,
         "note": "information only, not used for decisions: under the retrieve-then-judge design no similarity threshold decides covered or new (at 95% recall over round 4's 3,098 queries, t_hi put 61% of the recorded antonym pairs on the covered side)",
         "openai": {
-          "t_hi": 0.4033,
-          "t_lo": 0.238,
-          "recall_at_t_hi": 0.9514,
-          "antonym_rate_above_t_hi": 0.4621,
+          "t_hi": 0.4111,
+          "t_lo": 0.2581,
+          "recall_at_t_hi": 0.9502,
+          "antonym_rate_above_t_hi": 0.4516,
           "source": "round 3: 95% recall of 659 paraphrases cut to 14 words; t_lo the 99th percentile of random pairs",
           "t_hi_round4_pooled": 0.3274,
           "antonym_above_t_hi_round4": 0.6237,
@@ -232,13 +232,13 @@
       "evaluation": {
         "status": "the threshold design's targets (auc_dup_vs_distinct >= 0.85, paraphrase_recall_top1 >= 0.95): reported, not gated (plan item 5)",
         "auc_dup_vs_distinct": {
-          "openai": 0.5997
+          "openai": 0.5857
         },
         "auc_ant_vs_syn": {
-          "openai": 0.447
+          "openai": 0.4377
         },
         "paraphrase_recall_top1": {
-          "openai": 0.9393
+          "openai": 0.9382
         },
         "choice_evidence": [
           {
@@ -433,21 +433,21 @@
       "K": 10,
       "K_rule": "fixed, provisional (Roger, 2026-10-02)",
       "K_sensitivity": {
-        "10": 0.2995,
-        "20": 0.2596,
-        "40": 0.2731,
-        "K95": 0.2053
+        "10": 0.2656,
+        "20": 0.2475,
+        "40": 0.2604,
+        "K95": 0.2033
       },
-      "K95": 376,
+      "K95": 377,
       "evaluation": {
         "spearman_persona_yield": {
-          "openai": 0.2995
+          "openai": 0.2656
         },
         "heldout_stability": {
-          "10": 0.6437,
-          "20": 0.6347,
-          "40": 0.6323,
-          "K95": 0.3185
+          "10": 0.6323,
+          "20": 0.612,
+          "40": 0.6253,
+          "K95": 0.3043
         }
       },
       "caveat": "K is provisional, judged only through task (c), the correlation with the persona-space residual of existing traits: a proxy, not ground truth for missing traits"
@@ -503,18 +503,18 @@
           "min_cosine": 0.999603,
           "threshold": 0.999,
           "cosines": {
-            "absentee": 0.999998,
+            "absentee": 1.0,
             "collectivistic": 1.0,
             "edgy": 1.0,
             "gay": 1.0,
             "ironic": 0.999603,
-            "only_child": 0.999994,
+            "only_child": 1.0,
             "restless": 0.999993,
             "sycophantic": 1.0
           },
           "below": [],
           "ok": true,
-          "checked_at": "2026-10-02T21:14:40+00:00"
+          "checked_at": "2026-10-02T22:20:52+00:00"
         },
         "gemma": {
           "model": "google/embeddinggemma-300m",
@@ -537,7 +537,7 @@
           },
           "below": [],
           "ok": true,
-          "checked_at": "2026-10-02T21:14:44+00:00"
+          "checked_at": "2026-10-02T22:21:08+00:00"
         }
       }
     }
@@ -545,12 +545,12 @@
   "_provenance": {
     "schema_version": "1.0",
     "produced_by": {
-      "cmd": "uv run python data_analysis/gap_generation/calibrate_metric.py --write-config",
-      "git_sha": "7d2cbd2",
+      "cmd": "uv run python data_analysis/gap_generation/calibrate_metric.py --write-config --allow-dirty",
+      "git_sha": "f6d6731+dirty",
       "author": "Roger Dearnaley",
       "title": "M2 metric config (task 19)"
     },
-    "produced_at": "2026-10-02T21:14:44+00:00",
+    "produced_at": "2026-10-02T22:21:08+00:00",
     "inputs": [
       {
         "dep_key": "trait_files",
@@ -1238,22 +1238,22 @@
       {
         "dep_key": "calibration_paraphrase",
         "path": "data/candidates/calibration/paraphrase_metrics.json",
-        "fingerprint": "v1:2026-10-01T22:29:35+00:00@946216",
+        "fingerprint": "v1:2026-10-02T22:20:16+00:00@747398",
         "kind": "file",
         "dataset_id": null,
-        "last_modified_at": "2026-10-01T22:29:35+00:00",
+        "last_modified_at": "2026-10-02T22:20:16+00:00",
         "extras": {}
       },
       {
         "dep_key": "calibration_loo",
         "path": "data/candidates/calibration/loo_metrics.json",
-        "fingerprint": "v1:2026-10-01T22:29:35+00:00@999931",
+        "fingerprint": "v1:2026-10-02T22:20:16+00:00@794787",
         "kind": "file",
         "dataset_id": null,
-        "last_modified_at": "2026-10-01T22:29:35+00:00",
+        "last_modified_at": "2026-10-02T22:20:16+00:00",
         "extras": {}
       }
     ],
-    "inputs_sha256": "c2b2dd1157de99f91a5aaf487be61939f5cd83759c58a17c75c82dd0c717ad70"
+    "inputs_sha256": "7213600bf8c21b78af4815f31e13c0d23557f6819003b78ac5fbfea3aac43d29"
   }
 }
