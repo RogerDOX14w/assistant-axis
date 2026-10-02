@@ -751,6 +751,28 @@ def test_write_config_end_to_end(tmp_path, monkeypatch):
     assert json.loads((tmp_path / "cal" / "usage.json").read_text())["n_calls"] == 1     # the canary call
 
 
+def test_write_config_keeps_the_written_canary(tmp_path, monkeypatch):
+    """2026-10-02: a rewrite keeps the config's canary texts even when the corpus changed (the rule would pick
+    others), as embed.canary_texts promises."""
+    from assistant_axis.gapgen.metric_config import MetricConfig
+    from data_analysis.gap_generation import calibrate_metric as CM
+    assert CM.main(_write_config_args(tmp_path)) == 0
+    first = MetricConfig.load(path=tmp_path / "metric_config.json").canary["texts"]
+    real = CM.corpus_inputs
+
+    def fewer(repo):                     # a corpus edit: drop the first few stems, so the rule would move
+        ci = real(repo)
+        keep = ci["stems"][5:]
+        corpus = {s: ci["corpus"][s] for s in keep}
+        return {**ci, "corpus": corpus, "stems": keep, "labels": [corpus[s]["label"] for s in keep],
+                "descriptions": [corpus[s]["description"] for s in keep], "index": {s: i for i, s in enumerate(keep)}}
+    monkeypatch.setattr(CM, "corpus_inputs", fewer)
+    moved = CM.EM.canary_texts(fewer(CM._REPO_ROOT)["stems"], ["x"] * len(fewer(CM._REPO_ROOT)["stems"]))
+    assert [c["stem"] for c in moved] != [c["stem"] for c in first]
+    assert CM.main(_write_config_args(tmp_path)) == 0
+    assert MetricConfig.load(path=tmp_path / "metric_config.json").canary["texts"] == first
+
+
 def test_embedding_runs_check_the_canary(tmp_path, monkeypatch):
     from data_analysis.gap_generation import calibrate_metric as CM
     monkeypatch.setattr(CM.EM, "canary_applies", lambda e: True)

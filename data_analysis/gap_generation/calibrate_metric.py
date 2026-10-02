@@ -935,7 +935,10 @@ def write_config(args) -> int:
                                               policy=getattr(args, "cache_policy", "warn"))
     ci = corpus_inputs(repo)
     rep = C.FINAL_SETTINGS["covered"]["representation"]
-    canary_list = EM.canary_texts(ci["stems"], [represent(l, d, rep) for l, d in zip(ci["labels"], ci["descriptions"])])
+    # the canary is fixed once written: a rewrite keeps the config's texts (canary_set reads them), so a corpus
+    # edit never moves it (2026-10-02: the merge with the main line would otherwise have replaced five of eight);
+    # the rule picks them only when there is no readable config yet
+    canary_list = canary_set(ci, cfg_path)
     canary = {"rule": CANARY_RULE, "n": len(canary_list), "representation": rep, "min_cosine": EM.CANARY_MIN_COSINE,
               "texts": canary_list,
               "on_failure": "a WARNING naming the model (the API model may have changed); cached vectors may no longer "
