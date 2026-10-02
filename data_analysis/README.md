@@ -501,6 +501,15 @@ platform code unless `--allow-dirty`:
   `retrieval_round4.json` / `.md`: recall@1/3/5/10/20 per source and pooled,
   paired tests (McNemar, trait-clustered bootstrap, Holm), the two models'
   merged lists.  About $0.5 the first time (Haiku), $0 from the cache.
+  It follows the corpus (2026-10-02, the merge with the main line): a cached
+  paraphrase of a label or description that has since changed is regenerated
+  (each cache records the sha256 of the text it paraphrased), the M1 glosses
+  and plain-reading judgements of a renamed label count for the renamed trait
+  (`labels.corpus_renames`, not the renames in `labels.SENSE_CHANGED_RENAMES`),
+  and `--rebuild-labels` first rebuilds `labelled_pairs.json` from the current
+  arrangements and the curation file (a curation entry that no longer applies
+  is listed under `curation_unused`, not raised).  The refresh on the
+  663-trait corpus cost $0.045.
 - **`--write-config`** (task 19): writes `data/candidates/metric_config.json`
   for Roger's final settings from the recorded outputs, with the drift
   canary checked for `--models` (default `openai gemma`); `--config-out`
@@ -513,8 +522,23 @@ cosine 0.999 against the cache, the sign that the API model has changed and
 cached vectors may no longer match new ones.
 
 ```bash
-uv run python data_analysis/gap_generation/calibrate_metric.py --round4 --budget-usd 10 [--dry-run]
+uv run python data_analysis/gap_generation/calibrate_metric.py --round4 [--rebuild-labels] --budget-usd 10 [--dry-run]
 uv run python data_analysis/gap_generation/calibrate_metric.py --write-config [--dry-run]
+```
+
+`--write-config` keeps the canary texts of the config it replaces (the fixed
+rule picks them only when no readable config exists), so a corpus edit never
+moves the canary.
+
+**Corpus regions after a corpus change.**  `gap_registry.py corpus-regions`
+takes `--from-filter` more than once; a trait takes its entry from the last
+run that has it, and a row under a renamed stem counts for the renamed trait.
+After the 2026-10-02 merge:
+
+```bash
+uv run python data_analysis/gap_generation/gap_registry.py corpus-regions \
+    --from-filter data/candidates/filter/m1_validation_r2 \
+    --from-filter data/candidates/filter/new_corpus_labels_2026_10_02
 ```
 
 ## Output

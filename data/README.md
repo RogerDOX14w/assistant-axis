@@ -206,7 +206,9 @@ persona pipeline, and nothing the platform writes touches `traits/` or
   `thresholds.json`, `hubness.json`, `contrast_ablation.json`,
   `drop_or_merge.md`, `nn_hist_<model>.png`, `summary.json`,
   `paraphrase_metrics.json`), the Haiku paraphrase sets
-  (`paraphrases.json`, `paraphrases_plain.json`, `paraphrases_terse.json`),
+  (`paraphrases.json`, `paraphrases_plain.json`, `paraphrases_terse.json`;
+  each records under `sources` the sha256 of the label and description every
+  paraphrase was written from, so one of a since-changed text is regenerated),
   round 4's retrieval test
   ([`retrieval_round4.json`](candidates/calibration/retrieval_round4.json) and
   `.md`), run records (`run.json` for round 3's full run, `run_round4*.json`,

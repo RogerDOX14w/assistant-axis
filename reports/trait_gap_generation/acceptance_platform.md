@@ -710,3 +710,81 @@ the block it returns carries `used_for_decisions: false` and a `note` beside the
 an inactive fallback), so a config of the round-3 shape no longer validates; none was ever written.
 `MetricConfig` lives in [metric_config.py](../../assistant_axis/gapgen/metric_config.py), not [novelty.py](../../assistant_axis/gapgen/novelty.py) (M3's, not written yet), and is re-exported from
 `assistant_axis.gapgen` as the interface specifies.
+
+### Merged with the main line (2026-10-02)
+
+The branch merged `anthropic-vllm-uv` (merge commit 8c1ba30): the trait corpus regenerated under the
+instruction rubric V2 and the clean-pair recheck.  The corpus went from 659 to 663 traits: 17 renamed (each
+file records `renamed_from`), 4 new ([civilizationist](../../data/traits/instructions/civilizationist.json),
+[lenient](../../data/traits/instructions/lenient.json), [malign](../../data/traits/instructions/malign.json),
+[neglectful](../../data/traits/instructions/neglectful.json)), 13 descriptions rewritten, and three pairs
+dissolved ([benign](../../data/traits/instructions/benign.json) / [malicious](../../data/traits/instructions/malicious.json), [analytical](../../data/traits/instructions/analytical.json) / [systems thinker](../../data/traits/instructions/systems_thinker.json), [detached](../../data/traits/instructions/detached.json) /
+[empathetic](../../data/traits/instructions/empathetic.json)).  Roger's decisions of the
+same day, and what was done:
+
+- **Classifier prompt v6.**  [lenient](../../data/traits/instructions/lenient.json) is now a corpus label, and the old single-call classifier's "soft"
+  example used it ("mild and lenient"), which the prompt-hygiene test rejects.  The example now reads "mild and
+  undemanding" (a near-duplicate of the corpus trait, clear of the corpus, the queue, the validation file, the
+  99 split test words and the reserved words); version 4 -> 6, pinned in
+  [rubric_versions.py](../../assistant_axis/gapgen/rubric_versions.py).  5 was skipped because a split filter
+  block's `rubric_version` is 5 and the seed queue copies that number without the pipeline.  The split
+  filter's prompts were unaffected.
+- **Corpus regions.**  [corpus_regions.json](../../data/candidates/corpus_regions.json) covers all 663 traits:
+  642 unchanged from [m1_validation_r2](../../data/candidates/filter/m1_validation_r2/results.jsonl), 15
+  renamed traits carried over from their old stem's row (their descriptions kept their sense), and 6 from a new
+  run of the split filter ([new_corpus_labels_2026_10_02](../../data/candidates/filter/new_corpus_labels_2026_10_02/results.jsonl),
+  input [new_corpus_labels_2026_10_02.jsonl](../../data/candidates/validation/new_corpus_labels_2026_10_02.jsonl);
+  live, `--measurement`, $0.053): the 4 new traits plus [dull](../../data/traits/instructions/dull.json) (was
+  bland: the description moved from a flat voice to a presence that draws no one in) and
+  [metaphysical libertarian](../../data/traits/instructions/metaphysical_libertarian.json) (rewritten to the
+  metaphysical sense only).  Every entry keeps its `batch_id`; [gap_registry.py](../../data_analysis/gap_generation/gap_registry.py)
+  `corpus-regions` now takes several runs and follows `renamed_from`.
+- **Calibration refresh** ([calibrate_metric.py](../../data_analysis/gap_generation/calibrate_metric.py)
+  `--round4 --rebuild-labels`, then `--write-config`; $0.045):
+  [labelled pairs](./glossary.md#labelled-pairs) rebuilt from the current arrangements, renames followed (antonym
+  284 -> 286, duplicate 79, near-distinct 34, in [labelled_pairs.json](../../data/candidates/calibration/labelled_pairs.json);
+  the hand decisions in [labelled_pairs_curation.json](../../data/candidates/calibration/labelled_pairs_curation.json)
+  all still apply, one through a rename; two exclusions added there for the dissolved pairs that the v4 antonym
+  judgements, [trait_antonyms_v4.json](../../data/traits/trait_antonyms_v4.json), would otherwise re-add);
+  34 paraphrases generated in each of the three sets (21 new stems and the 13 rewritten descriptions, whose old
+  paraphrases each cache now marks as written from another text); the [M1-gloss](./glossary.md#m1-gloss)
+  queries follow renames (10 and 11 glosses carried to the renamed trait) and lose one query each (bland's,
+  whose trait changed sense: 554 -> 553, 567 -> 566).  [metric_config.json](../../data/candidates/metric_config.json)
+  rewritten; the settings are unchanged, and the [drift canary](./glossary.md#drift-canary) keeps its eight texts
+  (it had been re-picked on every config write; fixed).
+
+[Recall@k](./glossary.md#recall-at-k) for the configured setting (OpenAI, `w20`, [centred](./glossary.md#centred),
+[cosine](./glossary.md#cosine)), from the refreshed [retrieval_round4.json](../../data/candidates/calibration/retrieval_round4.json);
+the table above has the 659-trait figures:
+
+| query source | queries | recall@1 | recall@5 | recall@10 | recall@20 |
+|---|---|---|---|---|---|
+| paraphrase (round 3) | 663 | 0.938 | 0.999 | 1.000 | 1.000 |
+| plain paraphrase | 663 | 0.875 | 0.991 | 0.997 | 0.997 |
+| terse paraphrase | 663 | 0.932 | 1.000 | 1.000 | 1.000 |
+| M1 gloss, run 1 | 553 | 0.696 | 0.931 | **0.973** (was 0.978) | 0.987 |
+| M1 gloss, run 2 | 566 | 0.689 | 0.942 | **0.970** (was 0.972) | 0.984 |
+| pooled | 3,108 | 0.835 | 0.975 | 0.989 | 0.994 |
+
+The restated target (recall@10 >= 0.95 on both M1-gloss sources) still holds.  Four M1 glosses fell just past
+the tenth place (ranks 11 to 14: [ambiguity tolerant](../../data/traits/instructions/ambiguity_tolerant.json),
+whose description was rewritten, [motivated-reasoning-immune](../../data/traits/instructions/motivated_reasoning_immune.json),
+[pragmatic](../../data/traits/instructions/pragmatic.json), [intellectually honest](../../data/traits/instructions/intellectually_honest.json));
+none rose back.  The paired tests reach the same verdicts: no [partial whitening](./glossary.md#partial-whitening)
+is real, EmbeddingGemma `w20` over `w14` is real at k = 1 and 5, OpenAI `w20` over `w14` is not
+([Holm](./glossary.md#holm)-adjusted [McNemar](./glossary.md#mcnemar) p 0.52 at k = 5).  EmbeddingGemma's recall@10 on the M1 glosses is 0.913 and 0.929 (the inactive fallback still misses the
+target).  The canary's lowest cosine is 0.99960 for OpenAI ([ironic](../../data/traits/instructions/ironic.json),
+as before) and 1.0 for EmbeddingGemma: it passes.
+
+Not refreshed: the full calibration (round 3's [loo_metrics.json](../../data/candidates/calibration/loo_metrics.json),
+[paraphrase_metrics.json](../../data/candidates/calibration/paraphrase_metrics.json),
+[drop_or_merge.md](../../data/candidates/calibration/drop_or_merge.md), the histograms) still describes the
+659-trait corpus, and the config reads its information-only figures (the old targets, the
+[directional](./glossary.md#two-settings) [K](./glossary.md#k95) sensitivity and stability) from it.  A rerun takes about 40 minutes and about a cent.
+
+Tests after the merge: `uv run pytest assistant_axis/tests/test_gapgen_*.py data_analysis/tests/test_gap_generation_cli.py
+assistant_axis/tests/test_judge_pricing.py -q` gives 777 passed, 2 skipped (762 and 2 at M2's close; the
+new tests cover renames, stale paraphrases, multi-run regions and the canary); the changed expectations are the
+classifier's version number (4 -> 6) and the M1-gloss counts dictionary, which gained two keys (`renamed`,
+`not_in_corpus`); the calibration CLI tests now read the corpus size instead of hard-coding 659.  Cost of the merge work:
+$0.098 (Haiku $0.097 for the filter run and the paraphrases, OpenAI embeddings $0.0001).

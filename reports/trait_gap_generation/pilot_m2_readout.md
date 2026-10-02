@@ -23,6 +23,36 @@ What was done (code: [calibrate_metric.py](../../data_analysis/gap_generation/ca
 - **Statistics**: each setting against centred `w14`, scored on the same queries, at recall@1 and recall@5, per model, pooled over the sources: [McNemar's exact test](./glossary.md#mcnemar) (with the discordant counts) and a [paired bootstrap](./glossary.md#paired-bootstrap) 95% interval (2,000 resamples, seed 0) that resamples whole traits, since one trait has up to five queries and McNemar's test treats them as independent.  **A difference is called real when both agree**: McNemar's p after [Holm's adjustment](./glossary.md#holm) over the 24 comparisons is below 0.05, and the bootstrap interval excludes zero.  After the first run I added a second family (each `pwN` inside `w20` against centred `w20`, with its own Holm adjustment), recall@20 and the two models' merged top 10, and reran from the cache.
 - **Cost**: $0.526 this round: Haiku $0.522 (66 calls, 90,791 input and 86,167 output tokens), OpenAI $0.005 (the new query texts), EmbeddingGemma free; the estimate was $0.716 against a $10 cap.  $0.895 in all after round 4 ([usage.json](../../data/candidates/calibration/usage.json)).  Run records with the pinned prompt versions and hashes: [run_round4a.json](../../data/candidates/calibration/run_round4a.json) (the paid run; log [run_round4a.log](../../data/candidates/calibration/run_round4a.log)) and [run_round4.json](../../data/candidates/calibration/run_round4.json) (the rerun from the cache, $0; log [run_round4b.log](../../data/candidates/calibration/run_round4b.log)).  Round 3's [run.json](../../data/candidates/calibration/run.json) is left as it was, since the other outputs belong to it.
 
+### Merged with the main line (2026-10-02)
+
+The tables below are the 659-trait run.  After the branch merged the main line's corpus (663 traits: 17
+renamed, 4 new, 13 descriptions rewritten, three pairs dissolved), round 4 was rerun from the caches with
+`--rebuild-labels` ([run_round4.json](../../data/candidates/calibration/run_round4.json), log
+[run_round4_merge.log](../../data/candidates/calibration/run_round4_merge.log); $0.045, Haiku for 34
+paraphrases in each set: the new stems and the rewritten descriptions).  The [M1 glosses](./glossary.md#m1-gloss)
+of a renamed label now count for the renamed trait (10 and 11 of them), and bland's gloss is dropped from each
+run, since its trait was renamed [dull](../../data/traits/instructions/dull.json) with a changed sense.  The
+refreshed [retrieval_round4.json](../../data/candidates/calibration/retrieval_round4.json) and
+[retrieval_round4.md](../../data/candidates/calibration/retrieval_round4.md), OpenAI `w20`, [centred](./glossary.md#centred),
+[recall@k](./glossary.md#recall-at-k) 1 / 5 / 10 / 20:
+
+| source | queries | before (659 traits) | after (663 traits) |
+|---|---|---|---|
+| paraphrase (round 3) | 659 -> 663 | 0.939 / 0.999 / 1.000 / 1.000 | 0.938 / 0.999 / 1.000 / 1.000 |
+| plain paraphrase | 659 -> 663 | 0.871 / 0.991 / 0.997 / 0.997 | 0.875 / 0.991 / 0.997 / 0.997 |
+| terse paraphrase | 659 -> 663 | 0.936 / 1.000 / 1.000 / 1.000 | 0.932 / 1.000 / 1.000 / 1.000 |
+| M1 gloss, run 1 | 554 -> 553 | 0.691 / 0.931 / 0.978 / 0.987 | 0.696 / 0.931 / 0.973 / 0.987 |
+| M1 gloss, run 2 | 567 -> 566 | 0.693 / 0.940 / 0.972 / 0.984 | 0.689 / 0.942 / 0.970 / 0.984 |
+| pooled | 3,098 -> 3,108 | 0.835 / 0.975 / 0.990 / 0.994 | 0.835 / 0.975 / 0.989 / 0.994 |
+
+Nothing in the recommendation moves.  The target (recall@10 >= 0.95 on both M1-gloss runs) holds at 0.973 and
+0.970; four glosses slipped just past tenth place (ranks 11 to 14) and none came back.  The paired tests give
+the same verdicts ([partial whitening](./glossary.md#partial-whitening) never real; EmbeddingGemma `w20` over
+`w14` real at k = 1 and 5; OpenAI's not, [Holm](./glossary.md#holm) p 0.52 at k = 5), and the
+[threshold](./glossary.md#thresholds) at 95% recall still has 62% of the antonym pairs above it (279 pairs, OpenAI).
+EmbeddingGemma's recall@10 on the M1 glosses is 0.913 and 0.929.  Details and the corpus regions are in
+[acceptance_platform.md](./acceptance_platform.md), M2, "Merged with the main line".
+
 ### Headline
 
 1. **Partial whitening makes no real difference.**  No `pwN` differs from centring at recall@1 or recall@5, for either model, inside `w14` or inside `w20`.  The largest gains (+0.003 to +0.004 at recall@5 for OpenAI) are three or four queries in a thousand and do not survive the adjustment.  Round 3's `pw16` was noise.
