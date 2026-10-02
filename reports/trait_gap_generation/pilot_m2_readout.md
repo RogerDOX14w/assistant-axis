@@ -1,6 +1,147 @@
 # M2 pilot readout: metric calibration on the existing corpus
 
-2026-10-01, the M2 agent (Opus), for Roger's pilot decision; updated the same day for round 2 and on 2026-10-02 for round 3 (newest first).  Plan: [15_metric_calibration.md](./15_metric_calibration.md) and [coding_plan_platform.md](./coding_plan_platform.md) §9 tasks 11-18; task 19 (`--write-config`, the final run, the README) waits for the decisions at the end.  Terms of art link to [glossary.md](./glossary.md) on first use in each section.
+2026-10-01, the M2 agent (Opus), for Roger's pilot decision; updated the same day for round 2 and on 2026-10-02 for rounds 3 and 4 (newest first).  Plan: [15_metric_calibration.md](./15_metric_calibration.md) and [coding_plan_platform.md](./coding_plan_platform.md) §9 tasks 11-18; task 19 (`--write-config`, the final run, the README) waits for the decisions at the end.  Terms of art link to [glossary.md](./glossary.md) on first use in each section.
+
+## Round 4 (2026-10-02)
+
+Why this round: round 3 showed that for the [covered setting](./glossary.md#two-settings) (is a candidate already in the corpus?) the [embedding](./glossary.md#embedding) retrieves well but cannot decide.  A 14-word [paraphrase](./glossary.md#paraphrase-recall) finds its own trait among its 5 [nearest neighbours](./glossary.md#nearest-neighbour) about 99.7% of the time, while a similarity line that catches 95% of paraphrases also catches 37-49% of the recorded antonym pairs ([labelled pairs](./glossary.md#labelled-pairs)).  Roger has agreed in outline an M3 design in which the embedding only retrieves each candidate's nearest existing traits and LLM calls judge them, so [recall@k](./glossary.md#recall-at-k) is now the primary measure for the covered setting.  Round 3 had picked `w14` (a [representation](./glossary.md#representations): descriptions cut to 14 words) with `pw16` ([partial whitening](./glossary.md#partial-whitening) of the top 16 components) on a margin of one or two queries out of 659, without a test; Roger asked for a significantly larger test with real statistics.  Decided before this round (Roger): bge is dropped; [K](./glossary.md#k95) = 10 for the directional setting, provisionally; the contrast clauses stay; [task (b)](./glossary.md#tasks-abc) is left to the LLM.
+
+What was done (code: [calibrate_metric.py](../../data_analysis/gap_generation/calibrate_metric.py) `--round4` and [retrieval.py](../../assistant_axis/gapgen/retrieval.py); results in [retrieval_round4.json](../../data/candidates/calibration/retrieval_round4.json), every table in [retrieval_round4.md](../../data/candidates/calibration/retrieval_round4.md)):
+
+- **Five query sources: 3,098 queries about all 659 traits.**
+
+  | source | queries | what it is |
+  |---|---|---|
+  | paraphrase (round 3) | 659 | [paraphrases.json](../../data/candidates/calibration/paraphrases.json): Haiku rewords each description, keeping the meaning and sharing as few words as it can (prompt version 2) |
+  | plain paraphrase | 659 | [paraphrases_plain.json](../../data/candidates/calibration/paraphrases_plain.json), new: the same disposition in everyday words, "a friend explaining it over coffee" (prompt `plain` version 1) |
+  | terse paraphrase | 659 | [paraphrases_terse.json](../../data/candidates/calibration/paraphrases_terse.json), new: the core sense as a dictionary gives it, at most 12 words after "This means" (prompt `terse` version 1; median 13 words in all) |
+  | M1 gloss, run 1 | 554 | the [M1 filter's glosses](./glossary.md#m1-gloss) of existing labels, written by Haiku from the bare label ([m1_validation](../../data/candidates/filter/m1_validation/results.jsonl)): 614 labels have one, of which the 554 whose [plain reading](./glossary.md#plain-reading) is the corpus sense ([corpus_comparison_1](../../data/candidates/plain_reading/corpus_comparison_1/results.jsonl), 591 labels `same`) |
+  | M1 gloss, run 2 | 567 | the same from the rerun ([m1_validation_r2](../../data/candidates/filter/m1_validation_r2/results.jsonl)): 630 with a gloss, 567 kept |
+
+  The M1 glosses are the realistic M3 query: a definition written by someone else from the word alone, not a rewording of the corpus description.  Both new Haiku sets parsed 659 of 659; in each, 2.4-2.9% of the rewrites reuse a word of the label, mostly one word of a multi-word label ("loss" for [loss-averse](../../data/traits/instructions/loss_averse.json)), as round 3's did.
+- **Query and corpus form**: the query is the text alone, without a label, cut to 14 words (round 3's M3 case); the corpus is `label: description` cut to 14 or 20 words ([representations](./glossary.md#representations) `w14`, `w20`).  Two models, OpenAI `text-embedding-3-large` and EmbeddingGemma (a [local model](./glossary.md#local-model)); six spaces, [centred](./glossary.md#centred) and the [partial whitenings](./glossary.md#partial-whitening) `pw8`, `pw12`, `pw16`, `pw24`, `pw32`; [cosine](./glossary.md#cosine).
+- **Statistics**: each setting against centred `w14`, scored on the same queries, at recall@1 and recall@5, per model, pooled over the sources: [McNemar's exact test](./glossary.md#mcnemar) (with the discordant counts) and a [paired bootstrap](./glossary.md#paired-bootstrap) 95% interval (2,000 resamples, seed 0) that resamples whole traits, since one trait has up to five queries and McNemar's test treats them as independent.  **A difference is called real when both agree**: McNemar's p after [Holm's adjustment](./glossary.md#holm) over the 24 comparisons is below 0.05, and the bootstrap interval excludes zero.  After the first run I added a second family (each `pwN` inside `w20` against centred `w20`, with its own Holm adjustment), recall@20 and the two models' merged top 10, and reran from the cache.
+- **Cost**: $0.526 this round: Haiku $0.522 (66 calls, 90,791 input and 86,167 output tokens), OpenAI $0.005 (the new query texts), EmbeddingGemma free; the estimate was $0.716 against a $10 cap.  $0.895 in all after round 4 ([usage.json](../../data/candidates/calibration/usage.json)).  Run records with the pinned prompt versions and hashes: [run_round4a.json](../../data/candidates/calibration/run_round4a.json) (the paid run; log [run_round4a.log](../../data/candidates/calibration/run_round4a.log)) and [run_round4.json](../../data/candidates/calibration/run_round4.json) (the rerun from the cache, $0; log [run_round4b.log](../../data/candidates/calibration/run_round4b.log)).  Round 3's [run.json](../../data/candidates/calibration/run.json) is left as it was, since the other outputs belong to it.
+
+### Headline
+
+1. **Partial whitening makes no real difference.**  No `pwN` differs from centring at recall@1 or recall@5, for either model, inside `w14` or inside `w20`.  The largest gains (+0.003 to +0.004 at recall@5 for OpenAI) are three or four queries in a thousand and do not survive the adjustment.  Round 3's `pw16` was noise.
+2. **`w20` beats `w14`.**  Real for EmbeddingGemma at both k (recall@1 +0.026, recall@5 +0.012).  For OpenAI the direction is the same (+0.008, +0.006), and recall@5 passes before adjustment (p = 0.005; 28 queries against 10; interval +0.001 to +0.011) but not after (Holm p = 0.11): probably real but small, and not confirmed.  This reverses round 3's `w14`, which rested on round 3's paraphrases alone, the one source on which `w14` is ahead (OpenAI recall@1 0.947 against 0.939); on the plain and terse paraphrases and on both M1 sets, `w20` is level or ahead.
+3. **The M1 glosses are much harder than the paraphrases**, and they are the numbers to plan with: OpenAI `w20` recall@5 is 0.93-0.94 and recall@10 0.97-0.98 on them, against 0.991-1.000 on the three paraphrase sets.  Most of their misses retrieve a near-synonym first.
+4. **One model's longer list beats two models' short lists merged**: OpenAI's own top 10 (recall 0.990 pooled, 0.972-0.978 on the M1 glosses) beats both models' top 5 merged (7.0 traits on average; 0.980 and 0.942-0.951), and both top 10s merged (14.2 traits; 0.993) is no better than OpenAI's own top 20 (0.994).
+5. **Recommendation for the covered setting**: OpenAI, `w20`, centred, cosine, k = 10, lists not merged (the last subsection).
+
+### Pooled recall@k, every model × representation × space
+
+All 3,098 queries (two thirds of them paraphrases, so this table flatters the realistic case; per source below):
+
+| model | representation | space | recall@1 | recall@3 | recall@5 | recall@10 | recall@20 |
+|---|---|---|---|---|---|---|---|
+| OpenAI | `w14` | `centred` | 0.827 | 0.946 | 0.969 | 0.987 | 0.993 |
+| OpenAI | `w14` | `pw8` | 0.829 | 0.947 | 0.972 | 0.989 | 0.994 |
+| OpenAI | `w14` | `pw12` | 0.827 | 0.949 | 0.973 | 0.989 | 0.995 |
+| OpenAI | `w14` | `pw16` | 0.829 | 0.949 | 0.972 | 0.989 | 0.995 |
+| OpenAI | `w14` | `pw24` | 0.825 | 0.948 | 0.971 | 0.988 | 0.994 |
+| OpenAI | `w14` | `pw32` | 0.825 | 0.947 | 0.970 | 0.988 | 0.993 |
+| OpenAI | `w20` | `centred` | 0.835 | 0.957 | 0.975 | 0.990 | 0.994 |
+| OpenAI | `w20` | `pw8` | 0.837 | 0.957 | 0.977 | 0.990 | 0.995 |
+| OpenAI | `w20` | `pw12` | 0.835 | 0.959 | 0.978 | 0.992 | 0.996 |
+| OpenAI | `w20` | `pw16` | 0.836 | 0.960 | 0.978 | 0.991 | 0.996 |
+| OpenAI | `w20` | `pw24` | 0.834 | 0.960 | 0.978 | 0.991 | 0.996 |
+| OpenAI | `w20` | `pw32` | 0.832 | 0.958 | 0.978 | 0.991 | 0.996 |
+| EmbeddingGemma | `w14` | `centred` | 0.779 | 0.900 | 0.934 | 0.959 | 0.978 |
+| EmbeddingGemma | `w14` | `pw8` | 0.784 | 0.906 | 0.936 | 0.962 | 0.979 |
+| EmbeddingGemma | `w14` | `pw12` | 0.786 | 0.905 | 0.937 | 0.962 | 0.980 |
+| EmbeddingGemma | `w14` | `pw16` | 0.783 | 0.906 | 0.936 | 0.961 | 0.979 |
+| EmbeddingGemma | `w14` | `pw24` | 0.782 | 0.906 | 0.934 | 0.958 | 0.978 |
+| EmbeddingGemma | `w14` | `pw32` | 0.779 | 0.902 | 0.932 | 0.956 | 0.976 |
+| EmbeddingGemma | `w20` | `centred` | 0.804 | 0.919 | 0.946 | 0.969 | 0.987 |
+| EmbeddingGemma | `w20` | `pw8` | 0.806 | 0.919 | 0.947 | 0.974 | 0.987 |
+| EmbeddingGemma | `w20` | `pw12` | 0.808 | 0.917 | 0.948 | 0.975 | 0.986 |
+| EmbeddingGemma | `w20` | `pw16` | 0.805 | 0.916 | 0.948 | 0.975 | 0.987 |
+| EmbeddingGemma | `w20` | `pw24` | 0.802 | 0.912 | 0.946 | 0.973 | 0.986 |
+| EmbeddingGemma | `w20` | `pw32` | 0.799 | 0.912 | 0.942 | 0.971 | 0.984 |
+
+### The paired comparisons against centred `w14`
+
+Pooled over the five sources (3,098 queries); "found only by" are McNemar's discordant counts:
+
+| model | k | setting | its recall | centred `w14` | difference | found only by the setting / only by centred `w14` | McNemar p | Holm p | bootstrap 95% | real |
+|---|---|---|---|---|---|---|---|---|---|---|
+| OpenAI | 1 | `w14` `pw8` | 0.829 | 0.827 | +0.002 | 23 / 17 | 0.4296 | 1.0000 | -0.002 to +0.006 | no |
+| OpenAI | 1 | `w14` `pw12` | 0.827 | 0.827 | +0.001 | 29 / 27 | 0.8939 | 1.0000 | -0.004 to +0.005 | no |
+| OpenAI | 1 | `w14` `pw16` | 0.829 | 0.827 | +0.002 | 35 / 29 | 0.5323 | 1.0000 | -0.003 to +0.007 | no |
+| OpenAI | 1 | `w14` `pw24` | 0.825 | 0.827 | -0.002 | 42 / 48 | 0.5984 | 1.0000 | -0.009 to +0.005 | no |
+| OpenAI | 1 | `w14` `pw32` | 0.825 | 0.827 | -0.001 | 52 / 56 | 0.7730 | 1.0000 | -0.009 to +0.006 | no |
+| OpenAI | 1 | `w20` `centred` | 0.835 | 0.827 | +0.008 | 101 / 76 | 0.0709 | 1.0000 | -0.002 to +0.017 | no |
+| OpenAI | 5 | `w14` `pw8` | 0.972 | 0.969 | +0.004 | 15 / 4 | 0.0192 | 0.3842 | +0.001 to +0.006 | no |
+| OpenAI | 5 | `w14` `pw12` | 0.973 | 0.969 | +0.004 | 19 / 6 | 0.0146 | 0.3073 | +0.001 to +0.008 | no |
+| OpenAI | 5 | `w14` `pw16` | 0.972 | 0.969 | +0.003 | 20 / 10 | 0.0987 | 1.0000 | -0.000 to +0.007 | no |
+| OpenAI | 5 | `w14` `pw24` | 0.971 | 0.969 | +0.003 | 21 / 13 | 0.2295 | 1.0000 | -0.001 to +0.007 | no |
+| OpenAI | 5 | `w14` `pw32` | 0.970 | 0.969 | +0.002 | 21 / 16 | 0.5114 | 1.0000 | -0.002 to +0.006 | no |
+| OpenAI | 5 | `w20` `centred` | 0.975 | 0.969 | +0.006 | 28 / 10 | 0.0051 | 0.1121 | +0.001 to +0.011 | no |
+| EmbeddingGemma | 1 | `w14` `pw8` | 0.784 | 0.779 | +0.006 | 60 / 42 | 0.0918 | 1.0000 | -0.001 to +0.012 | no |
+| EmbeddingGemma | 1 | `w14` `pw12` | 0.786 | 0.779 | +0.007 | 70 / 47 | 0.0415 | 0.7885 | +0.000 to +0.014 | no |
+| EmbeddingGemma | 1 | `w14` `pw16` | 0.783 | 0.779 | +0.005 | 84 / 69 | 0.2576 | 1.0000 | -0.003 to +0.012 | no |
+| EmbeddingGemma | 1 | `w14` `pw24` | 0.782 | 0.779 | +0.004 | 92 / 81 | 0.4472 | 1.0000 | -0.005 to +0.012 | no |
+| EmbeddingGemma | 1 | `w14` `pw32` | 0.779 | 0.779 | +0.000 | 101 / 101 | 1.0000 | 1.0000 | -0.011 to +0.010 | no |
+| EmbeddingGemma | 1 | `w20` `centred` | 0.804 | 0.779 | +0.026 | 179 / 99 | <0.0001 | <0.0001 | +0.014 to +0.037 | **yes** |
+| EmbeddingGemma | 5 | `w14` `pw8` | 0.936 | 0.934 | +0.002 | 22 / 16 | 0.4177 | 1.0000 | -0.003 to +0.006 | no |
+| EmbeddingGemma | 5 | `w14` `pw12` | 0.937 | 0.934 | +0.003 | 28 / 20 | 0.3123 | 1.0000 | -0.003 to +0.008 | no |
+| EmbeddingGemma | 5 | `w14` `pw16` | 0.936 | 0.934 | +0.002 | 31 / 25 | 0.5044 | 1.0000 | -0.003 to +0.007 | no |
+| EmbeddingGemma | 5 | `w14` `pw24` | 0.934 | 0.934 | +0.000 | 36 / 36 | 1.0000 | 1.0000 | -0.006 to +0.006 | no |
+| EmbeddingGemma | 5 | `w14` `pw32` | 0.932 | 0.934 | -0.002 | 35 / 42 | 0.4944 | 1.0000 | -0.009 to +0.004 | no |
+| EmbeddingGemma | 5 | `w20` `centred` | 0.946 | 0.934 | +0.012 | 73 / 37 | 0.0008 | 0.0177 | +0.004 to +0.020 | **yes** |
+
+Plainly: **real at p < 0.05: EmbeddingGemma `w20` against `w14`, at recall@1 and at recall@5.  Not real: every partial whitening, for both models, at both k; and OpenAI `w20` against `w14`, at both k.**  Before the adjustment four more pass p < 0.05 (OpenAI `pw8` and `pw12` at recall@5, OpenAI `w20` at recall@5, EmbeddingGemma `pw12` at recall@1), each a gain of 0.4 to 0.7 points; with 24 tests about one such pass is expected by chance alone, and none survives Holm.  Inside `w20` (the second family; table in [retrieval_round4.md](../../data/candidates/calibration/retrieval_round4.md)) no space differs from centred `w20` either: OpenAI's `pw12` to `pw32` at recall@5 have p 0.01-0.04 before adjustment (+0.003 to +0.004; 12 queries against 2 for `pw12`) and 0.26-0.70 after.  If partial whitening helps OpenAI at all, it is by about three queries in a thousand at k = 5, and by nothing that matters at k = 10 (0.992 against 0.990).
+
+### Per source: do the M1 glosses behave like the paraphrases?
+
+Recall per source, centred, `w20` (with `w14` beside it):
+
+| source | queries | OpenAI `w20`: recall@1 / @5 / @10 / @20 | OpenAI `w14`: @1 / @5 / @10 | EmbeddingGemma `w20`: @1 / @5 / @10 / @20 | EmbeddingGemma `w14`: @1 / @5 / @10 |
+|---|---|---|---|---|---|
+| paraphrase (round 3) | 659 | 0.939 / 0.999 / 1.000 / 1.000 | 0.947 / 0.997 / 1.000 | 0.956 / 0.995 / 0.995 / 1.000 | 0.945 / 0.995 / 0.999 |
+| plain paraphrase | 659 | 0.871 / 0.991 / 0.997 / 0.997 | 0.870 / 0.980 / 0.994 | 0.871 / 0.983 / 0.989 / 0.995 | 0.850 / 0.962 / 0.980 |
+| terse paraphrase | 659 | 0.936 / 1.000 / 1.000 / 1.000 | 0.906 / 0.991 / 1.000 | 0.932 / 0.991 / 0.995 / 0.999 | 0.880 / 0.977 / 0.986 |
+| M1 gloss, run 1 | 554 | 0.691 / 0.931 / 0.978 / 0.987 | 0.680 / 0.930 / 0.969 | 0.607 / 0.870 / 0.915 / 0.971 | 0.583 / 0.857 / 0.906 |
+| M1 gloss, run 2 | 567 | 0.693 / 0.940 / 0.972 / 0.984 | 0.688 / 0.935 / 0.967 | 0.596 / 0.868 / 0.935 / 0.967 | 0.575 / 0.857 / 0.908 |
+| pooled | 3098 | 0.835 / 0.975 / 0.990 / 0.994 | 0.827 / 0.969 / 0.987 | 0.804 / 0.946 / 0.969 / 0.987 | 0.779 / 0.934 / 0.959 |
+
+No.  A paraphrase is the corpus description reworded and keeps its specifics; an M1 gloss is a definition written from the word alone and lands on the word's general sense.  OpenAI's recall@1 falls from 0.94 on round 3's paraphrases to 0.69 on the glosses, and recall@5 from 0.999 to 0.93-0.94; the plain paraphrases sit between (0.87 at recall@1).  Under OpenAI the two M1 runs are within 0.01 of each other at every k (EmbeddingGemma within 0.02), so the estimate is stable.  Round 3's [paraphrase recall](./glossary.md#paraphrase-recall) (0.944 at k = 1) is therefore an upper bound; for a re-proposed existing trait in M3, expect about 0.69 at k = 1, 0.93-0.94 at k = 5 and 0.97-0.98 at k = 10 (OpenAI, `w20`).
+
+What the misses are (OpenAI, `w20`, centred: 79 queries miss at k = 5, 72 of them M1 glosses, and 30 at k = 10; every miss is listed under `misses` in [retrieval_round4.json](../../data/candidates/calibration/retrieval_round4.json)).  Most put a near-synonym first, which an adjudicator shown the list would take as covering the candidate anyway: [calm](../../data/traits/instructions/calm.json) retrieves [unflappable](../../data/traits/instructions/unflappable.json) and [composed](../../data/traits/instructions/composed.json) first, [thorough](../../data/traits/instructions/thorough.json) [meticulous](../../data/traits/instructions/meticulous.json), [responsible](../../data/traits/instructions/responsible.json) [accountable](../../data/traits/instructions/accountable.json), [humble](../../data/traits/instructions/humble.json) [modest](../../data/traits/instructions/modest.json), [agreeable](../../data/traits/instructions/agreeable.json) [easygoing](../../data/traits/instructions/easygoing.json).  The farthest misses are glosses of another sense, despite the plain-reading filter: the gloss for [straight](../../data/traits/instructions/straight.json) is "saying what one thinks in plain words" (the corpus trait is sexual orientation; first retrieved [forthright](../../data/traits/instructions/forthright.json) and [blunt](../../data/traits/instructions/blunt.json)), for [critical](../../data/traits/instructions/critical.json) "finding fault readily" (the corpus trait questions power structures; first [judgmental](../../data/traits/instructions/judgmental.json) and [harsh](../../data/traits/instructions/harsh.json)), and run 1's [engaged](../../data/traits/instructions/engaged.json) "having made a formal promise to marry" (first [married](../../data/traits/instructions/married.json)).  Those candidates are a different concept from the corpus trait, and treating them as not covered is the right outcome, so recall understates how well the covered decision will go.
+
+### Merging both models' lists
+
+Centred `w20`; the merged list is the union of the two models' top k, so its length varies:
+
+| list | mean length | pooled | M1 gloss, run 1 | M1 gloss, run 2 | paraphrases (three sets) |
+|---|---|---|---|---|---|
+| OpenAI top 5 | 5 | 0.975 | 0.931 | 0.940 | 0.996 |
+| OpenAI top 10 | 10 | 0.990 | 0.978 | 0.972 | 0.999 |
+| OpenAI top 20 | 20 | 0.994 | 0.987 | 0.984 | 0.999 |
+| EmbeddingGemma top 5 | 5 | 0.946 | 0.870 | 0.868 | 0.990 |
+| EmbeddingGemma top 10 | 10 | 0.969 | 0.915 | 0.935 | 0.993 |
+| EmbeddingGemma top 20 | 20 | 0.987 | 0.971 | 0.967 | 0.998 |
+| both models' top 3 merged | 4.1 | 0.968 | 0.913 | 0.921 | 0.996 |
+| both models' top 5 merged | 7.0 | 0.980 | 0.942 | 0.951 | 0.999 |
+| both models' top 10 merged | 14.2 | 0.993 | 0.984 | 0.979 | 1.000 |
+
+Paired, pooled: both top 5s merged against OpenAI's top 10, 4 queries found only by the merge and 37 only by OpenAI's ten (p < 0.0001); both top 10s merged against OpenAI's top 10, 8 against 0 (p = 0.008); both top 10s merged against OpenAI's top 20, 3 against 7 (p = 0.34, no difference).  Adding EmbeddingGemma's list buys what lengthening OpenAI's own list buys, at a somewhat shorter list (14 against 20 traits) but with a second model in the path.  EmbeddingGemma alone is clearly the weaker retriever on the realistic query (recall@10 0.915-0.935 against 0.972-0.978).
+
+### The old threshold design on the same queries
+
+On all 3,098 queries, [`t_hi`](./glossary.md#thresholds) at 95% recall (OpenAI `w20` centred: 0.326) has 61% of the recorded antonym pairs above it, and 81% of the queries have some other trait above it (EmbeddingGemma 49% and 93%), against round 3's 37-49% and 44-72% on its paraphrases alone: the harder queries pull `t_hi` down, and a threshold would send nearly every candidate to adjudication anyway.  The retrieval design loses nothing by dropping it.
+
+### Recommendation for the covered setting (retrieval design)
+
+- **Representation `w20`** (descriptions cut to 20 words, the query to 14).  It is level with or ahead of `w14` for both models on every source, except round 3's paraphrases under OpenAI at k = 1 (0.939 against 0.947), and really ahead for EmbeddingGemma.  It is also the directional setting's representation, so M3 embeds the corpus once.
+- **Space: centred** on the fixed corpus mean, as in the directional setting.  No partial whitening has a detectable effect at this sample size; centring is the simpler of equals.
+- **Model: OpenAI `text-embedding-3-large`**: ahead of EmbeddingGemma by 4-6 points at k = 10 on the M1 glosses.
+- **k = 10**: the adjudicator sees the ten nearest existing traits.  Recall 0.990 pooled and 0.972-0.978 on the M1 glosses, and most of what remains is a near-synonym or another sense.  k = 20 lifts the M1 figure to 0.984-0.987; worth it only if the adjudication prompt judges twenty definitions as well as ten.
+- **Do not merge the two models' lists**: merging both top 10s matches OpenAI's own top 20 and no more, for a second model in the path.
+- Under this design the covered block's `t_hi` and `t_lo` stop being the decision; the block would carry k instead.  That belongs to the M3 design, which is still open, and to task 19's config, which waits.
 
 ## Round 3 (2026-10-02)
 
@@ -109,7 +250,7 @@ Roger's answers so far are recorded under the decisions at the end.
 ## Headline
 
 - **Run**: [calibrate_metric.py](../../data_analysis/gap_generation/calibrate_metric.py) `--skip-llm`, three models (OpenAI `text-embedding-3-large`; [local](./glossary.md#local-model) `BAAI/bge-large-en-v1.5` with [CLS pooling](./glossary.md#cls-pooling); local `google/embeddinggemma-300m` through sentence-transformers with its "sentence similarity" prompt on both sides), six representations (`full`, `noprefix`, `w20`, `w14`, `strip`, `dup`), twelve space variants (`raw`, `centred` on the fixed corpus mean, `centred_pc1`, `centred_pc3`, regularised `zca`, `pw1`-`pw64`), 659 trait files (the corpus directory's 661 entries include two `.md` files).
-- **Cost**: $0.368 in all after round 3 ([usage.json](../../data/candidates/calibration/usage.json), cumulative over runs): Claude Haiku 4.5 $0.321 (46,896 input and 54,802 output tokens in 34 calls, the paraphrases); OpenAI $0.048 (365,914 tokens in 48 calls, of which 27,512 tokens in 3 calls are an estimate for a stopped round-2 run, [usage_notes.md](../../data/candidates/calibration/usage_notes.md)); the local models at zero cost.  Rounds 1 and 2 alone came to $0.0189.  The first run's spend line is in [run1.log](../../data/candidates/calibration/run1.log).
+- **Cost**: $0.368 in all after round 3, $0.895 after round 4 ([usage.json](../../data/candidates/calibration/usage.json), cumulative over runs; round 4's share is in its section).  After round 3: Claude Haiku 4.5 $0.321 (46,896 input and 54,802 output tokens in 34 calls, the paraphrases); OpenAI $0.048 (365,914 tokens in 48 calls, of which 27,512 tokens in 3 calls are an estimate for a stopped round-2 run, [usage_notes.md](../../data/candidates/calibration/usage_notes.md)); the local models at zero cost.  Rounds 1 and 2 alone came to $0.0189.  The first run's spend line is in [run1.log](../../data/candidates/calibration/run1.log).
 - **Compute**: embeddings 30-40 s per model on [MPS](./glossary.md#mps); the round-2 run took 39 minutes, almost all of it the [leave-one-out](./glossary.md#loo) [residual](./glossary.md#residual) (one 658x658 eigendecomposition per trait per centred or partially whitened view) ([run.json](../../data/candidates/calibration/run.json)).
 - **Inputs built for this**: [labelled_pairs.json](../../data/candidates/calibration/labelled_pairs.json) (284 antonym, 79 duplicate, 3 deliberate duplicate, 34 near-distinct, 5 polysemy rejects, 2,000 random; hand-checked in [labelled_pairs_curation.json](../../data/candidates/calibration/labelled_pairs_curation.json), 126 mechanical rows excluded with reasons; see [labelled pairs](./glossary.md#labelled-pairs)), [contrast_cuts.json](../../data/candidates/calibration/contrast_cuts.json) (106 of the census's 107 still in the corpus, 7 hand overrides in [contrast_cut_overrides.json](../../data/candidates/calibration/contrast_cut_overrides.json)), persona yields recomputed (below).
 - **The three findings that matter for M3**:
@@ -439,16 +580,17 @@ The mechanical detector over all 659 current files finds six descriptions with a
 
 ## Decisions for Roger
 
-1. **Space variant.** *Superseded in round 3 by the [two settings](./glossary.md#two-settings)*: covered `w14` with `pw16` (any of `centred`, `raw`, `pw16` inside `w14` is within noise), directional `w20` `centred`.  Round 2's single choice (`centred`, cosine) stands as the directional space.
-2. **K for the directional score.** *Proposed: K = 10*, provisional (round 3: best or tied on task (c) for every model, level with 20 and 40 on held-out stability, K_95 worse on both).  [K_95](./glossary.md#k95) is 365-435 for OpenAI and 238-309 for the local models.  *How K is judged, plainly*: only through task (c), the [Spearman](./glossary.md#spearman) correlation between a trait's text-space residual and its [persona-space](./glossary.md#persona-space) residual over the 293 traits with persona vectors, a proxy and not ground truth for missing traits; and through (i), which checks that the score follows the concept rather than the wording.  Because the residual is a ratio, K moves scores gradually.  Nothing yet tests recovery of genuinely missing traits; plan 13's recovery hook is where that belongs ([QUESTIONS.md](./QUESTIONS.md) 25).
+1. **Space variant.** *Superseded in round 3 by the [two settings](./glossary.md#two-settings)*; directional `w20` `centred`.  *Covered: open.*  Round 3 proposed `w14` with `pw16`; round 4's larger test (3,098 queries, paired tests) finds no real effect of partial whitening and `w20` ahead of `w14`, so it proposes **covered `w20` `centred`**, the same representation and space as the directional setting (Round 4, recommendation).  Round 2's single choice (`centred`, cosine) stands as the directional space.
+2. **K for the directional score.** *Roger, 2026-10-02: K = 10, provisionally* (decided; [QUESTIONS.md](./QUESTIONS.md) 25).  Proposed in round 3 ( best or tied on task (c) for every model, level with 20 and 40 on held-out stability, K_95 worse on both).  [K_95](./glossary.md#k95) is 365-435 for OpenAI and 238-309 for the local models.  *How K is judged, plainly*: only through task (c), the [Spearman](./glossary.md#spearman) correlation between a trait's text-space residual and its [persona-space](./glossary.md#persona-space) residual over the 293 traits with persona vectors, a proxy and not ground truth for missing traits; and through (i), which checks that the score follows the concept rather than the wording.  Because the residual is a ratio, K moves scores gradually.  Nothing yet tests recovery of genuinely missing traits; plan 13's recovery hook is where that belongs ([QUESTIONS.md](./QUESTIONS.md) 25).
 3. **Drop-or-merge pass now?** *Roger: not now; recorded as a TODO in [TRAITS_TO_ADD.md](../../data/traits/instructions/TRAITS_TO_ADD.md)* (round 1's twelve pairs).  Round 2's `centred` table above adds four; I have not edited the TODO (nothing under the trait directory is mine to change).
 4. **The paid criteria.** *Roger: (g) yes, (e) no.*  (g) ran in round 3 ($0.321); (e) is not worth $0.59 after his marks.
 5. **Roger's 30 marks.** *Done*: 13 clause kept, 16 stripped, 1 same; a coin flip ([contrast_marks_roger.json](../../data/candidates/calibration/contrast_marks_roger.json)).  Contrast policy: keep the clauses ([QUESTIONS.md](./QUESTIONS.md) 27, closed).
-6. **Gloss length for M3.** *Proposed: scope-match the corpus to the gloss* (`w14` in the covered setting).  Round 3's 14-word paraphrases confirm it on [paraphrase recall](./glossary.md#paraphrase-recall) (OpenAI 0.944 against 0.929 for whole descriptions, bge 0.889 against 0.829); doubling the gloss (`dup`, round 2) does not help.
-7. **Local model for M3.** *Roger: keep bge until the experiments end, and drop it then if it is still outclassed.*  After round 3 it still is: lowest paraphrase recall (0.889 against 0.944 and 0.950) and the highest false-covered rate (0.72).
+6. **Gloss length for M3.** *Proposed: cut the corpus side to about the gloss's scope, now 20 words rather than 14* (round 4: `w20` level with or ahead of `w14` on every source but one, really ahead for EmbeddingGemma).  Round 3's 14-word paraphrases showed that cut descriptions beat whole ones for a 14-word query on [paraphrase recall](./glossary.md#paraphrase-recall) (OpenAI 0.944 against 0.929, bge 0.889 against 0.829); doubling the gloss (`dup`, round 2) does not help.
+7. **Local model for M3.** *Roger, 2026-10-02: bge is dropped* (decided; after round 3 it had the lowest paraphrase recall, 0.889 against 0.944 and 0.950, and the highest false-covered rate, 0.72).  Its recorded outputs stay, and `--models bge` still runs it; the default model list is OpenAI and EmbeddingGemma.  Round 4 adds that EmbeddingGemma is the weaker retriever on the realistic query (recall@10 0.915-0.935 against OpenAI's 0.972-0.978 on the M1 glosses).
 8. **Dependency.** *Roger: approved* (`sentence-transformers` 6.1.0 for EmbeddingGemma, [QUESTIONS.md](./QUESTIONS.md) 24).
-9. **New: the covered line is an adjudication trigger.**  At 95% paraphrase recall, 37-49% of recorded antonym pairs and, for a hidden trait, 44-72% of its paraphrases land above [`t_hi`](./glossary.md#thresholds).  M3 should treat "above `t_hi`" as "send to the adjudicator", "below `t_lo`" as "new", and plan the adjudication budget for everything from `t_lo` up.  *Open*: whether 95% recall is still the right target given that load ([QUESTIONS.md](./QUESTIONS.md) 26).
+9. **New: the covered line is an adjudication trigger.**  At 95% paraphrase recall, 37-49% of recorded antonym pairs and, for a hidden trait, 44-72% of its paraphrases land above [`t_hi`](./glossary.md#thresholds).  M3 should treat "above `t_hi`" as "send to the adjudicator", "below `t_lo`" as "new", and plan the adjudication budget for everything from `t_lo` up.  *Open*: whether 95% recall is still the right target given that load ([QUESTIONS.md](./QUESTIONS.md) 26).  *Round 4*: on the larger query set the line would send 81-93% of re-proposed traits to adjudication anyway; superseded if the retrieval design (decision 10) is adopted.
+10. **New: the M3 design, retrieve then judge.**  *Agreed in outline by Roger (2026-10-02); open.*  The embedding only retrieves each candidate's k nearest existing traits and LLM calls judge whether it is covered.  Round 4's proposal for it: OpenAI, `w20`, centred, cosine, k = 10 (recall 0.972-0.978 on the M1 glosses, 0.990 pooled), lists not merged across models; k = 20 if the adjudication prompt handles twenty definitions as well as ten (0.984-0.987).  The covered block of the config would then carry k rather than `t_hi` / `t_lo`; task 19 waits for this.
 
 ## Files
 
-Outputs in [data/candidates/calibration/](../../data/candidates/calibration/): [loo_metrics.json](../../data/candidates/calibration/loo_metrics.json), [loo_table.md](../../data/candidates/calibration/loo_table.md), [thresholds.json](../../data/candidates/calibration/thresholds.json), [hubness.json](../../data/candidates/calibration/hubness.json), [contrast_ablation.json](../../data/candidates/calibration/contrast_ablation.json), [summary.json](../../data/candidates/calibration/summary.json), [run.json](../../data/candidates/calibration/run.json), [usage.json](../../data/candidates/calibration/usage.json) with [usage_notes.md](../../data/candidates/calibration/usage_notes.md), [drop_or_merge.md](../../data/candidates/calibration/drop_or_merge.md), [labelled_pairs.json](../../data/candidates/calibration/labelled_pairs.json), [contrast_cuts.json](../../data/candidates/calibration/contrast_cuts.json), [contrast_comparisons_key.json](../../data/candidates/calibration/contrast_comparisons_key.json), [contrast_marks_roger.json](../../data/candidates/calibration/contrast_marks_roger.json), [paraphrases.json](../../data/candidates/calibration/paraphrases.json), [paraphrase_metrics.json](../../data/candidates/calibration/paraphrase_metrics.json).  [metric_config.json](../../data/candidates/metric_config.json) does not exist yet: task 19 writes it after these decisions.
+Outputs in [data/candidates/calibration/](../../data/candidates/calibration/): [loo_metrics.json](../../data/candidates/calibration/loo_metrics.json), [loo_table.md](../../data/candidates/calibration/loo_table.md), [thresholds.json](../../data/candidates/calibration/thresholds.json), [hubness.json](../../data/candidates/calibration/hubness.json), [contrast_ablation.json](../../data/candidates/calibration/contrast_ablation.json), [summary.json](../../data/candidates/calibration/summary.json), [run.json](../../data/candidates/calibration/run.json), [usage.json](../../data/candidates/calibration/usage.json) with [usage_notes.md](../../data/candidates/calibration/usage_notes.md), [drop_or_merge.md](../../data/candidates/calibration/drop_or_merge.md), [labelled_pairs.json](../../data/candidates/calibration/labelled_pairs.json), [contrast_cuts.json](../../data/candidates/calibration/contrast_cuts.json), [contrast_comparisons_key.json](../../data/candidates/calibration/contrast_comparisons_key.json), [contrast_marks_roger.json](../../data/candidates/calibration/contrast_marks_roger.json), [paraphrases.json](../../data/candidates/calibration/paraphrases.json), [paraphrase_metrics.json](../../data/candidates/calibration/paraphrase_metrics.json); round 4: [paraphrases_plain.json](../../data/candidates/calibration/paraphrases_plain.json), [paraphrases_terse.json](../../data/candidates/calibration/paraphrases_terse.json), [retrieval_round4.json](../../data/candidates/calibration/retrieval_round4.json), [retrieval_round4.md](../../data/candidates/calibration/retrieval_round4.md), [run_round4a.json](../../data/candidates/calibration/run_round4a.json) and [run_round4.json](../../data/candidates/calibration/run_round4.json), with logs [run_round4a.log](../../data/candidates/calibration/run_round4a.log) and [run_round4b.log](../../data/candidates/calibration/run_round4b.log).  [metric_config.json](../../data/candidates/metric_config.json) does not exist yet: task 19 writes it after these decisions.

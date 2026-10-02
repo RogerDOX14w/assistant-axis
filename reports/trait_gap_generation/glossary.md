@@ -138,6 +138,38 @@ For each trait, embed its short M1 gloss and ask whether its own description is 
 corpus text.  The share for which it is.  A free stand-in for paraphrase recall until paraphrases
 exist.
 
+<a id="recall-at-k"></a>
+### Recall@k
+For a set of queries that each belong to one existing trait (a reworded description, an M1 gloss),
+the share whose own trait is among the k corpus entries nearest to the query.  Recall@1 asks for the
+trait first; recall@5 only for it to be in a list of five.  Round 4 uses it because the proposed M3
+design hands each candidate's k nearest traits to an LLM to judge, so what matters is whether the
+right trait is on that short list, not whether a similarity threshold can be drawn.
+
+<a id="mcnemar"></a>
+### McNemar's test
+A test of whether two settings scored on the same queries really differ.  Queries both settings find,
+or both miss, say nothing about the difference; only the discordant ones count (found by one and not
+the other).  If the settings were equally good, each discordant query would be a fair coin toss
+between them, so the exact test asks how unlikely the observed split is under that coin (the p
+value: below 0.05 is the usual line for "real").  "12 / 3" in a table means 12 queries found only
+by the first setting and 3 only by the second.
+
+<a id="paired-bootstrap"></a>
+### Paired bootstrap
+A way to put an interval on a difference in recall without a formula: redraw the queries at random
+with replacement, many times (2,000 here), recompute the difference each time, and take the middle
+95% of the results.  "Paired" because both settings are scored on each redrawn query.  Round 4
+redraws whole traits rather than single queries, since one trait contributes up to five queries
+(one per source) and they tend to succeed or fail together; an interval that excludes zero says the
+difference is unlikely to be luck of the draw.
+
+<a id="holm"></a>
+### Holm's adjustment
+When many comparisons are tested at once, some will pass p < 0.05 by chance alone.  Holm's method
+raises each p value according to how many tests were run, so that the chance of any false "real"
+in the whole family stays at 5%.  Round 4 applies it across its 24 pooled comparisons.
+
 <a id="minimal-pairs"></a>
 ### Minimal pairs (criterion f)
 "X rather than Y" and "Y rather than X" for a clean pair, embedded separately.  A model that
@@ -248,6 +280,14 @@ The split filter's flags on a word that passes: `two_trait_senses`, `nontrait_pe
 `obvious_sense_not_trait`, `first_thought_in_the_way`, `leaves_something_out`,
 `fits_many_in_different_ways`, `most_likely_reading_stretched`.  "Polysemy" in the summaries means
 any of them.
+
+<a id="plain-reading"></a>
+### Plain reading
+What a word most likely means to an ordinary reader, written by Haiku from the bare label, and then
+compared by Sonnet with the corpus description: `same`, `related` or `different`.  For the corpus's
+own labels (the run `corpus_comparison_1`) it flags traits whose description uses a sense the word
+does not usually carry; round 4 of M2 keeps only the labels read the corpus's way (`same`, 591 of
+659) when it uses the M1 glosses as queries.
 
 <a id="second-opinion"></a>
 ### Second opinion
