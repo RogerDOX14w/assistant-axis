@@ -445,7 +445,48 @@ reproduced (`--batch-size` applies to it only and is refused with split).
 - **Cost.**  About $0.010 a word live with the second opinion, half that in
   batches; the estimate is printed by step before every run.  A full run
   crosses the $20 confirmation line at about 2,000 words live or 4,000 in
-  batches.
+  batches.  The estimate follows `--second-opinion-frac` (about 0.2 of words
+  at the default 0.10: the seeded sample plus the flagged words).
+- **Third opinion (`--third-model MODEL`, 2026-10-02).**  For choosing a
+  generator's judging model at its pilot
+  ([coding_plan_platform.md](../reports/trait_gap_generation/coding_plan_platform.md),
+  "M1 filter: judging model per generator"): the rows that get the second opinion also get
+  the same steps (sense, established, vague, kind, same sense; no gloss) on
+  MODEL, expected `claude-opus-5-5`, recorded beside `second_opinion` as
+  `third_opinion` with the same shape plus `agree_first` and `agree_second`.
+  `summary.json` gains an `agreement` section: first-vs-second,
+  first-vs-third and second-vs-third agreement on the final outcome, overall
+  and by stratum (validation runs) or generator (registry runs, from the rows'
+  `sources[]`, `meta.generators`), and the first-vs-second disagreements by
+  which side the third takes, as in
+  [`opus_audit_m1.md`](../reports/trait_gap_generation/opus_audit_m1.md).  The
+  rule there: Haiku for the generator if it agrees with Opus about 90% of the
+  time or more, else Sonnet.  Cost: Opus ran the whole filter on the audit's
+  207 words for $8.98 live; the third opinion runs steps 1 to 3 only, about
+  $7 per 200 sampled words live and half that in batches (the estimate prints
+  it by step, priced at Haiku's token counts times 1.5 for Opus).  It must
+  differ from `--model` and `--second-model` and needs the second opinion.
+- **Disagreement tripwire (`--max-disagreement FRACTION`, default 0.10).**  For
+  later runs of a generator whose model was chosen: once the opinions'
+  outcomes are known (after their established, vague and kind answers, wave
+  5), the first-vs-second disagreement rate on the final outcome is computed
+  over all sampled rows and for each stratum or generator with at least 20
+  sampled rows (a smaller group is reported but never trips).  Above the
+  threshold the log says `*** HIGH DISAGREEMENT ***` with the source, counts,
+  rate and threshold; `summary.json` and `run.json` record `tripwire`; and the
+  run stops before wave 6 (alignment and descriptors, and the opinions'
+  same-sense checks), keeping every answer paid for, rows `pending`,
+  `stopped_by_disagreement: true`, exit status 3.  To go on regardless:
+  the same command with `--resume --accept-disagreement` (recorded), which
+  sends wave 6 only.  When wave 6 has nothing to send, the run finishes, is
+  marked (`tripwire.action: "marked"`) and still exits 3.  `--max-disagreement
+  1` turns it off.  Validation runs on hard strata are expected to trip it
+  (random dictionary adjectives disagreed 31% in the audit), and that is the
+  point.  Alignment and descriptors moved from wave 5 to wave 6 for this, so
+  a stop saves them; the number of waves is unchanged whenever an opinion has
+  a same-sense check.  A batch run killed in the middle of the old wave 5
+  (`w5_last_step`) before this change should be finished on the old code: the
+  wave names changed (`w5_opinion_checks`, `w6_last_step`).
 
 ```bash
 # the pilot on the 99 test words (never a row of m1_validation.jsonl)
@@ -454,9 +495,16 @@ uv run python data_analysis/gap_generation/traithood_filter.py --pipeline split 
     --batch-id split_pilot_live --budget-usd 3 [--dry-run]
 ```
 
+```bash
+# a generator's pilot with the Opus third opinion; the tripwire off, since the point is to measure
+uv run python data_analysis/gap_generation/traithood_filter.py --run GENERATOR/RUN_ID \
+    --batch-id GENERATOR_pilot --third-model claude-opus-5-5 --max-disagreement 1 --budget-usd 10 [--dry-run]
+```
+
 Outputs in `data/candidates/filter/<batch_id>/`: `responses.jsonl` (every
 response, appended as it arrives), `results.jsonl`, `summary.json` (with a
-`split` block: parse rate by step and model, cost by step, the pilot figures),
+`split` block: parse rate by step and model, cost by step, the pilot figures;
+and `agreement`, `tripwire`, `stopped_by_disagreement`),
 `usage.json`, `run.json` and, for batches, `batches.json`.  Pilot results:
 `reports/trait_gap_generation/acceptance_split.md`.
 

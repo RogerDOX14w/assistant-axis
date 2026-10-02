@@ -12,9 +12,9 @@ wave  calls
 3     same sense (a word with two readings left by rule 2 that are both trait or membership);
       comparison (a row with an intended sense), one pair per call
 4     gloss (outcome trait; on the second model for a word chosen for a second opinion);
-      second opinion, step 1 on the second model
-5     alignment and descriptors on the gloss; second opinion, established / vague / kind
-6     second opinion, same sense
+      second (and third) opinion, step 1
+5     second (and third) opinion, established / vague / kind; then the disagreement tripwire
+6     alignment and descriptors on the gloss; second (and third) opinion, same sense
 ====  =========================================================================================
 
 The words for a second opinion are chosen after wave 3, from the join, so wave 4 knows which model
@@ -23,6 +23,22 @@ word with the note ``obvious_sense_not_trait`` or ``most_likely_reading_stretche
 model's outcome stays the outcome; agreement means the same outcome.  The second model's gloss is
 written for the row's accepted reading.  (The plan's table lists the second opinion's three steps
 in wave 4; they depend on each other, so they run in waves 4 to 6.)
+
+Third opinion (``third_model``, Roger 2026-10-02).  The same rows get the second opinion's steps
+(1 to 3, no gloss) on a third model, beside the second opinion in waves 4 to 6, recorded as
+``third_opinion`` with the second opinion's shape plus ``agree_first`` and ``agree_second``.
+
+Disagreement tripwire (``max_disagreement``, default 0.10).  The opinions' outcomes are known after
+wave 5 (the same-sense check adds a note, never changes an outcome), so the tripwire is checked
+there, before wave 6: when the first and second models disagree on more than ``max_disagreement``
+of the sampled rows, overall or for a source (``split.opinion_source``) with at least
+``split.TRIPWIRE_MIN_N`` compared rows, a loud WARNING is logged (``*** HIGH DISAGREEMENT ***``)
+and, unless ``accept_disagreement``, :class:`DisagreementStop` is raised before wave 6 sends
+anything: every answer paid for is kept, the rows stay ``pending``, and a resume with
+``accept_disagreement`` sends wave 6 only.  When wave 6 has nothing left to send the run finishes
+and is marked (``tripwire["action"] == "marked"``).  Alignment and descriptors moved from wave 5 to
+wave 6 for this on 2026-10-02, so that a stop saves them; the number of waves is unchanged whenever
+an opinion has a same-sense check.
 
 Transports.  :class:`LiveTransport` sends each wave's calls at once through the Messages API
 (``call_anthropic_json``, ``concurrency`` in flight).  :class:`assistant_axis.gapgen.batches.
@@ -85,11 +101,17 @@ HAIKU_TOKENS: dict[str, tuple[int, int]] = {
     "descriptors": (350, 70)}
 SECOND_MODEL_MEASURED: dict[str, tuple[int, int]] = {"kind": (955, 59)}
 SECOND_MODEL_SCALE = 1.3
+#: An Opus model, whatever its role: Haiku's figures times 1.5.  Opus 5.5 ran the whole filter on
+#: the audit's 207 words for $8.98 live against $6.06 estimated at Haiku's token counts
+#: (opus_audit_m1.md, 2026-10-02), a ratio of 1.48.
+OPUS_SCALE = 1.5
 
 
 def tokens_for(step: str, model: str, first_model: str = DEFAULT_MODEL) -> tuple[int, int]:
     """Estimated (input, output) tokens for one call of ``step`` on ``model``."""
     base = HAIKU_TOKENS[step]
+    if "opus" in model.lower():
+        return int(round(base[0] * OPUS_SCALE)), int(round(base[1] * OPUS_SCALE))
     if model == first_model or "haiku" in model:
         return base
     if step in SECOND_MODEL_MEASURED:
@@ -112,12 +134,12 @@ class Call:
     max_tokens: int
     temperature: Optional[float]
     index: Optional[int] = None   # the reading (0-based) a per-reading call is about
-    role: str = "first"           # first | second (the second opinion's own path)
+    role: str = "first"           # first | second | third (an opinion's own path)
     retry: bool = False
 
     @property
     def stage(self) -> str:
-        s = self.step if self.role == "first" else f"second_{self.step}"
+        s = self.step if self.role == "first" else f"{self.role}_{self.step}"
         return s + ("_retry" if self.retry else "")
 
     @property
@@ -134,6 +156,22 @@ class Call:
 
     def cache_key(self) -> tuple[str, str, str, str]:
         return (self.step, self.prompt_sha256, self.model, self.user)
+
+
+#: Where each role's own path is kept in a word's state: step 1 under ``<prefix>sense``, the
+#: same-sense check under ``<prefix>same_sense``, the join under ``<prefix>join``.
+ROLE_PREFIX = {"first": "", "second": "so_", "third": "to_"}
+#: The wave the tripwire holds back.
+LAST_WAVE = "w6_last_step"
+
+
+class DisagreementStop(Exception):
+    """The disagreement tripwire stopped the run before wave 6; ``tripwire`` is its record."""
+
+    def __init__(self, tripwire: dict):
+        self.tripwire = tripwire
+        super().__init__(f"first-vs-second disagreement over {tripwire['threshold']:.1%} "
+                         f"({', '.join(tripwire['tripped_by'])}); stopped before {tripwire.get('stopped_before')}")
 
 
 class LiveTransport:
@@ -177,12 +215,26 @@ class SplitRunner(FilterRunner):
                  zipf_fn=None, wordnet: Any = None, retry_delays: Optional[Sequence[float]] = None,
                  responses_path: Optional[Path] = None, transport: Any = None,
                  resume_records: Optional[Sequence[dict]] = None, rubrics_dir: Optional[Path] = None,
-                 plain_reading: bool = True):
+                 plain_reading: bool = True, third_model: Optional[str] = None,
+                 max_disagreement: Optional[float] = split.DEFAULT_MAX_DISAGREEMENT,
+                 accept_disagreement: bool = False):
+        # third_model: the second opinion's steps on a third model, for the same rows (None: none).
+        # max_disagreement: the tripwire's threshold (None: not checked; 1.0 never trips).
+        # accept_disagreement: a tripped tripwire is recorded and the run goes on.
         super().__init__(client=client, batch_id=batch_id, model=model, second_model=second_model, usage=usage,
                          limiter=limiter, second_opinion_frac=second_opinion_frac, seed=seed, probe=probe,
                          second_opinion=second_opinion, concurrency=concurrency, zipf_fn=zipf_fn, wordnet=wordnet,
                          retry_delays=retry_delays, responses_path=responses_path, plain_reading=plain_reading,
                          compare_model=compare_model or DEFAULT_COMPARE_MODEL)
+        if third_model:
+            if not self.second_opinion:
+                raise ValueError("a third opinion runs on the second opinion's rows: it needs the second opinion")
+            if third_model in (model, second_model):
+                raise ValueError(f"the third model {third_model!r} must differ from the first and second models")
+        self.third_model = third_model or None
+        self.max_disagreement = max_disagreement
+        self.accept_disagreement = bool(accept_disagreement)
+        self.tripwire: Optional[dict] = None
         problems = sr.mismatches(rubrics_dir)
         if problems:
             raise ValueError("split rubric texts are not pinned: " + "; ".join(problems))
@@ -198,6 +250,7 @@ class SplitRunner(FilterRunner):
             if rec.get("text") is not None and not rec.get("parse_errors") and rec.get("step"):
                 self.cache[(rec["step"], rec.get("prompt_sha256"), rec.get("model"), rec.get("user"))] = rec
         self.second_keys: list[str] = []
+        self.third_keys: list[str] = []
 
     # -- helpers ----------------------------------------------------------------
     def _system(self, step: str) -> str:
@@ -306,14 +359,14 @@ class SplitRunner(FilterRunner):
 
     # -- the path -------------------------------------------------------------------
     def _reading(self, key: str, i: int, role: str = "first") -> dict:
-        s = self.state[key]["sense" if role == "first" else "so_sense"]
+        s = self.state[key][ROLE_PREFIX[role] + "sense"]
         return s["readings"][i]
 
     def _path_calls(self, keys: Sequence[str], step: str, *, role: str, model: str) -> list[Call]:
         """Wave 2 (``step`` established / vague / kind) for every primary reading of ``keys``."""
         calls = []
         for k in keys:
-            s = self.state[k]["sense" if role == "first" else "so_sense"]
+            s = self.state[k][ROLE_PREFIX[role] + "sense"]
             if not s:
                 continue
             for i in split.primary_indices(s):
@@ -325,40 +378,54 @@ class SplitRunner(FilterRunner):
         return calls
 
     async def _run_path(self, keys: list[str], *, role: str, model: str, wave_prefix: str) -> None:
-        """Steps 1 and 2 of the path for ``keys`` on ``model`` (``role`` first or second)."""
-        sense_key = "sense" if role == "first" else "so_sense"
+        """Step 1 of the path for ``keys`` on ``model`` (``role`` first, second or third)."""
         calls = [self._make("sense", k, model=model, user=split.payload("sense", label=s_label(self.state[k])),
                             role=role) for k in keys]
         res = await self._wave(f"{wave_prefix}sense", calls)
-        for c in calls:
-            row, err = res.get(id(c), (None, "not run"))
-            if row is not None:
-                row = {k: v for k, v in row.items() if k != "label"}
-                self.state[c.key][sense_key] = row
-            elif id(c) in res:
-                self.state[c.key]["errors"][sense_key] = err
+        self._apply_sense(calls, res)
         self._check_stop()
 
-    async def _run_checks(self, keys: list[str], *, role: str, model: str, wave: str) -> None:
+    def _apply_sense(self, calls: Sequence[Call], res: Mapping[int, tuple]) -> None:
+        for c in calls:
+            if id(c) not in res:
+                continue
+            row, err = res[id(c)]
+            sense_key = ROLE_PREFIX[c.role] + "sense"
+            if row is not None:
+                self.state[c.key][sense_key] = {k: v for k, v in row.items() if k != "label"}
+            else:
+                self.state[c.key]["errors"][sense_key] = err
+
+    def _check_calls(self, keys: Sequence[str], *, role: str, model: str) -> list[Call]:
+        """Step 2 (established, vague and kind) for every primary reading of ``keys``."""
         calls = []
         for step in ("established", "vague", "kind"):
             calls += self._path_calls(keys, step, role=role, model=model)
-        res = await self._wave(wave, calls)
+        return calls
+
+    def _apply_checks(self, calls: Sequence[Call], res: Mapping[int, tuple]) -> None:
         field_of = {"established": "check_established", "vague": "check_vague", "kind": "kind_call"}
         for c in calls:
-            row, err = res.get(id(c), (None, "not run"))
-            x = self._reading(c.key, c.index, role)
+            if id(c) not in res:
+                continue
+            row, err = res[id(c)]
             if row is not None:
-                x[field_of[c.step]] = row
-            elif id(c) in res:
+                self._reading(c.key, c.index, c.role)[field_of[c.step]] = row
+            else:
                 self.state[c.key]["errors"][f"{c.role}:{c.step}:{c.index}"] = err
+
+    async def _run_checks(self, keys: list[str], *, role: str, model: str, wave: str) -> None:
+        calls = self._check_calls(keys, role=role, model=model)
+        res = await self._wave(wave, calls)
+        self._apply_checks(calls, res)
         self._check_stop()
 
     def _complete(self, key: str, role: str = "first") -> Optional[str]:
         """None when every primary reading has its established and kind answers; else why not."""
-        s = self.state[key]["sense" if role == "first" else "so_sense"]
+        sense_key = ROLE_PREFIX[role] + "sense"
+        s = self.state[key][sense_key]
         if not s:
-            return self.state[key]["errors"].get("sense" if role == "first" else "so_sense") or "no sense answer"
+            return self.state[key]["errors"].get(sense_key) or "no sense answer"
         for i in split.primary_indices(s):
             x = s["readings"][i]
             if not x.get("check_established") or not x.get("kind_call"):
@@ -367,12 +434,11 @@ class SplitRunner(FilterRunner):
                 return f"reading {i + 1}: established {est or 'ok'}, kind {kd or 'ok'}"
         return None
 
-    async def _run_wave3(self, keys: list[str], *, role: str, model: str, wave: str) -> None:
-        """Same sense (both roles) and, for the first role only, the comparison."""
+    def _wave3_calls(self, keys: Sequence[str], *, role: str, model: str) -> list[Call]:
+        """Same sense (every role) and, for the first role only, the comparison."""
         calls = []
-        sense_key = "sense" if role == "first" else "so_sense"
         for k in keys:
-            s = self.state[k][sense_key]
+            s = self.state[k][ROLE_PREFIX[role] + "sense"]
             pair = split.same_sense_pair(s)
             if pair:
                 a, b = pair
@@ -386,19 +452,27 @@ class SplitRunner(FilterRunner):
                                             user=split.comparison_payload(label=s_label(self.state[k]),
                                                                           reading=s["readings"][i]["reading"],
                                                                           intended=self.state[k]["intended"])))
-        res = await self._wave(wave, calls)
+        return calls
+
+    def _apply_wave3(self, calls: Sequence[Call], res: Mapping[int, tuple]) -> None:
         for c in calls:
             if id(c) not in res:
                 continue
             row, err = res[id(c)]
             st = self.state[c.key]
             if c.step == "same_sense":
-                pair = split.same_sense_pair(st[sense_key])
-                st["same_sense" if role == "first" else "so_same_sense"] = (
+                p = ROLE_PREFIX[c.role]
+                pair = split.same_sense_pair(st[p + "sense"])
+                st[p + "same_sense"] = (
                     {**row, "readings": [pair[0] + 1, pair[1] + 1], "model": c.model} if row is not None
                     else {"error": err, "readings": [pair[0] + 1, pair[1] + 1], "model": c.model})
             else:
                 st["comparison"][c.index] = row if row is not None else {"error": err}
+
+    async def _run_wave3(self, keys: list[str], *, role: str, model: str, wave: str) -> None:
+        calls = self._wave3_calls(keys, role=role, model=model)
+        res = await self._wave(wave, calls)
+        self._apply_wave3(calls, res)
         self._check_stop()
 
     def _join(self, key: str, role: str = "first") -> dict:
@@ -408,7 +482,25 @@ class SplitRunner(FilterRunner):
             if self.plain_reading and st.get("intended") and st["comparison"] is not None:
                 comps = {i: (st["comparison"].get(i) or {}).get("relation") for i in split.survivors(st["sense"])}
             return split.join(st["sense"], (st.get("same_sense") or {}).get("relation"), comps)
-        return split.join(st["so_sense"], (st.get("so_same_sense") or {}).get("relation"))
+        p = ROLE_PREFIX[role]
+        return split.join(st[p + "sense"], (st.get(p + "same_sense") or {}).get("relation"))
+
+    def _opinions(self) -> list[tuple[str, str, list[str]]]:
+        """``(role, model, keys)`` of each opinion this run asks: the second, and the third when set."""
+        out = []
+        if self.second_keys:
+            out.append(("second", self.second_model, self.second_keys))
+        if self.third_keys:
+            out.append(("third", self.third_model, self.third_keys))
+        return out
+
+    def _join_opinions(self) -> None:
+        """Each opinion's join (or why it could not be made) for each of its words."""
+        for role, _, keys in self._opinions():
+            p = ROLE_PREFIX[role]
+            for k in keys:
+                why = self._complete(k, role)
+                self.state[k][p + "join"] = self._join(k, role) if why is None else {"error": why}
 
     def select_second_opinion(self, keys: Sequence[str]) -> list[str]:
         """A seeded ``second_opinion_frac`` of the words that reached step 1, plus every word with the note
@@ -428,9 +520,10 @@ class SplitRunner(FilterRunner):
         self._intended = {it.key: it.intended_sense for it in items}
         for it in items:
             self.state[it.key] = {"label": it.label, "intended": it.intended_sense, "sense": None, "so_sense": None,
-                                  "same_sense": None, "so_same_sense": None, "comparison": {}, "gloss": None,
-                                  "gloss_model": None, "alignment": None, "descriptors": None, "join": None,
-                                  "so_join": None, "probe": None, "errors": {}, "cut": None}
+                                  "to_sense": None, "same_sense": None, "so_same_sense": None, "to_same_sense": None,
+                                  "comparison": {}, "gloss": None, "gloss_model": None, "alignment": None,
+                                  "descriptors": None, "join": None, "so_join": None, "to_join": None, "probe": None,
+                                  "errors": {}, "cut": None}
         todo = self.prepare(items)
         self.stats["n_llm"] += len(todo)
         try:
@@ -468,9 +561,11 @@ class SplitRunner(FilterRunner):
         for k in ready:
             self.state[k]["join"] = self._join(k)
         self.second_keys = self.select_second_opinion(ready) if self.second_opinion else []
+        self.third_keys = list(self.second_keys) if self.third_model else []
         self.stats["second_opinion_n"] = len(self.second_keys)
+        self.stats["third_opinion_n"] = len(self.third_keys)
         so = set(self.second_keys)
-        # wave 4: gloss (outcome trait), and the second opinion's step 1
+        # wave 4: gloss (outcome trait), and the opinions' step 1
         gloss_calls = []
         for k in ready:
             j = self.state[k]["join"]
@@ -480,23 +575,28 @@ class SplitRunner(FilterRunner):
             gloss_calls.append(self._make("gloss", k, model=m, index=j["accepted_index"],
                                           user=split.payload("gloss", label=s_label(self.state[k]),
                                                              reading=j["accepted"])))
-        so_sense = [self._make("sense", k, model=self.second_model, role="second",
-                               user=split.payload("sense", label=s_label(self.state[k]))) for k in self.second_keys]
-        res = await self._wave("w4_gloss", gloss_calls + so_sense)
+        op_sense = [self._make("sense", k, model=model, role=role,
+                               user=split.payload("sense", label=s_label(self.state[k])))
+                    for role, model, keys in self._opinions() for k in keys]
+        res = await self._wave("w4_gloss", gloss_calls + op_sense)
         for c in gloss_calls:
             if id(c) in res:
                 row, err = res[id(c)]
                 st = self.state[c.key]
                 st["gloss"], st["gloss_model"] = (row if row is not None else {"error": err}), c.model
-        for c in so_sense:
-            if id(c) in res:
-                row, err = res[id(c)]
-                if row is not None:
-                    self.state[c.key]["so_sense"] = {k: v for k, v in row.items() if k != "label"}
-                else:
-                    self.state[c.key]["errors"]["so_sense"] = err
+        self._apply_sense(op_sense, res)
         self._check_stop()
-        # wave 5: alignment and descriptors on the gloss; the second opinion's checks
+        # wave 5: the opinions' checks; their outcomes are then known (the same-sense check of wave 6
+        # adds a note and never changes an outcome), so the tripwire is checked here
+        op_checks = []
+        for role, model, keys in self._opinions():
+            op_checks += self._check_calls([k for k in keys if self.state[k][ROLE_PREFIX[role] + "sense"]],
+                                           role=role, model=model)
+        res = await self._wave("w5_opinion_checks", op_checks)
+        self._apply_checks(op_checks, res)
+        self._check_stop()
+        self._join_opinions()
+        # wave 6: alignment and descriptors on the gloss; the opinions' same-sense checks
         last = []
         for k in ready:
             g = (self.state[k].get("gloss") or {}).get("gloss")
@@ -504,35 +604,71 @@ class SplitRunner(FilterRunner):
                 for step in ("alignment", "descriptors"):
                     last.append(self._make(step, k, model=self.model,
                                            user=split.payload(step, label=s_label(self.state[k]), description=g)))
-        so_checks = []
-        so_ready = [k for k in self.second_keys if self.state[k]["so_sense"]]
-        for step in ("established", "vague", "kind"):
-            so_checks += self._path_calls(so_ready, step, role="second", model=self.second_model)
-        res = await self._wave("w5_last_step", last + so_checks)
+        op_same = []
+        for role, model, keys in self._opinions():
+            op_same += self._wave3_calls([k for k in keys if self._complete(k, role) is None], role=role, model=model)
+        self._tripwire_gate(last + op_same)
+        res = await self._wave(LAST_WAVE, last + op_same)
         for c in last:
             if id(c) in res:
                 row, err = res[id(c)]
                 self.state[c.key][c.step] = row if row is not None else {"error": err}
-        field_of = {"established": "check_established", "vague": "check_vague", "kind": "kind_call"}
-        for c in so_checks:
-            if id(c) in res:
-                row, err = res[id(c)]
-                if row is not None:
-                    self._reading(c.key, c.index, "second")[field_of[c.step]] = row
-                else:
-                    self.state[c.key]["errors"][f"second:{c.step}:{c.index}"] = err
+        self._apply_wave3(op_same, res)
         self._check_stop()
-        # wave 6: the second opinion's same-sense check
-        so_done = [k for k in so_ready if self._complete(k, "second") is None]
-        await self._run_wave3(so_done, role="second", model=self.second_model, wave="w6_second_same_sense")
-        for k in self.second_keys:
-            why = self._complete(k, "second")
-            self.state[k]["so_join"] = self._join(k, "second") if why is None else {"error": why}
-            if why is None and self.state[k]["so_join"]["outcome"] != self.state[k]["join"]["outcome"]:
-                self.stats["disagreements"] += 1
-            if why is not None:
-                self.stats["second_opinion_failed"] += 1
+        self._join_opinions()   # again, with the same-sense notes
+        for role, _, keys in self._opinions():
+            for k in keys:
+                oj = self.state[k][ROLE_PREFIX[role] + "join"]
+                if "error" in oj:
+                    self.stats[f"{role}_opinion_failed"] += 1
+                elif oj["outcome"] != self.state[k]["join"]["outcome"]:
+                    self.stats["disagreements" if role == "second" else "third_disagreements"] += 1
         self.stats["done"] = 1
+
+    # -- the disagreement tripwire ------------------------------------------------------
+    def opinion_rows(self) -> list[dict]:
+        """One row for each word with a second opinion (``split``'s opinion rows): its source, the
+        first model's outcome and each opinion's (None where the opinion failed or is not in yet)."""
+        out = []
+        for k in self.second_keys:
+            st = self.state[k]
+            field, groups = split.opinion_source(self.results[k].meta)
+
+            def outcome(role: str) -> Optional[str]:
+                j = st.get(ROLE_PREFIX[role] + "join") or {}
+                return None if "error" in j else j.get("outcome")
+            out.append({"label": st["label"], "key": k, "source_field": field, "groups": groups,
+                        "first": (st.get("join") or {}).get("outcome"), "second": outcome("second"),
+                        "third": outcome("third") if k in self.third_keys else None,
+                        "third_run": k in self.third_keys})
+        return out
+
+    def agreement(self) -> dict:
+        """The summary's agreement section (``split.agreement_section``) on this run's opinion rows."""
+        return split.agreement_section(self.opinion_rows(), models={
+            "first": self.model, "second": self.second_model, "third": self.third_model})
+
+    def _tripwire_gate(self, next_calls: Sequence[Call]) -> None:
+        """Check the tripwire once the opinions' outcomes are known; record it in ``self.tripwire``,
+        log it, and raise :class:`DisagreementStop` when it trips, the override is not given and
+        ``next_calls`` (wave 6) holds a call not already answered on record."""
+        if self.max_disagreement is None or not self.second_keys:
+            return
+        tw = split.disagreement_tripwire(self.opinion_rows(), threshold=self.max_disagreement)
+        tw.update(models={"first": self.model, "second": self.second_model}, accepted=self.accept_disagreement,
+                  action=None, stopped_before=None, calls_not_sent=0, checked_at=utc_now())
+        unpaid = [c for c in next_calls if c.cache_key() not in self.cache]
+        if tw["tripped"]:
+            if self.accept_disagreement:
+                tw["action"] = "accepted"
+            elif unpaid:
+                tw.update(action="stopped", stopped_before=LAST_WAVE, calls_not_sent=len(unpaid))
+            else:
+                tw["action"] = "marked"
+        self.tripwire = tw
+        log_tripwire(tw, logger, label=f"traithood_filter:split:{self.batch_id}")
+        if tw["action"] == "stopped":
+            raise DisagreementStop(tw)
 
     def _apply_split_probe(self, key: str, row: Optional[dict], err: Optional[str]) -> None:
         res = self.results[key]
@@ -549,21 +685,33 @@ class SplitRunner(FilterRunner):
             self.state[key]["cut"] = "probe"
 
     # -- rows ------------------------------------------------------------------------------
-    def _second_block(self, key: str) -> Optional[dict]:
-        if key not in self.second_keys:
+    def _opinion_block(self, key: str, role: str = "second") -> Optional[dict]:
+        """The row's ``second_opinion`` or ``third_opinion``: the opinion's outcome and readings, and
+        ``agree`` (with the first model's outcome); the third also says ``agree_first`` (the same as
+        its ``agree``) and ``agree_second`` (None when the second opinion failed)."""
+        keys, model = (self.second_keys, self.second_model) if role == "second" else (self.third_keys, self.third_model)
+        if key not in keys:
             return None
-        st = self.state[key]
-        sj = st.get("so_join")
+        st, p = self.state[key], ROLE_PREFIX[role]
+        sj = st.get(p + "join")
         if not sj:
             return None
         if "error" in sj:
-            return {"model": self.second_model, "error": sj["error"]}
-        return {"model": self.second_model, "outcome": sj["outcome"], "accepted": sj["accepted"],
-                "cause": sj["cause"], "notes": sj["notes"], "agree": sj["outcome"] == st["join"]["outcome"],
-                "same_sense": (st.get("so_same_sense") or {}).get("relation"),
-                "sense": {k: (st["so_sense"] or {}).get(k) for k in ("note", "first_thought", "first_thought_said_of",
-                                                                     "usable")}
-                | {"readings": split.block_readings(st["so_sense"] or {})}}
+            return {"model": model, "error": sj["error"]}
+        block = {"model": model, "outcome": sj["outcome"], "accepted": sj["accepted"],
+                 "cause": sj["cause"], "notes": sj["notes"], "agree": sj["outcome"] == st["join"]["outcome"],
+                 "same_sense": (st.get(p + "same_sense") or {}).get("relation"),
+                 "sense": {k: (st[p + "sense"] or {}).get(k) for k in ("note", "first_thought",
+                                                                       "first_thought_said_of", "usable")}
+                 | {"readings": split.block_readings(st[p + "sense"] or {})}}
+        if role == "third":
+            so = st.get("so_join") or {}
+            block["agree_first"] = block["agree"]
+            block["agree_second"] = None if (not so or "error" in so) else sj["outcome"] == so["outcome"]
+        return block
+
+    def _second_block(self, key: str) -> Optional[dict]:
+        return self._opinion_block(key, "second")
 
     def _comparison_block(self, key: str) -> Optional[dict]:
         st = self.state[key]
@@ -613,7 +761,8 @@ class SplitRunner(FilterRunner):
                 comparison=self._comparison_block(it.key), gloss_model=st.get("gloss_model"),
                 alignment=st.get("alignment") if "error" not in (st.get("alignment") or {}) else None,
                 descriptors=st.get("descriptors") if "error" not in (st.get("descriptors") or {}) else None,
-                second_opinion=self._second_block(it.key), gloss=g.get("gloss"))
+                second_opinion=self._second_block(it.key), gloss=g.get("gloss"),
+                third_opinion=self._opinion_block(it.key, "third"))
             errs = {k: (st.get(k) or {}).get("error") for k in ("gloss", "alignment", "descriptors")
                     if (st.get(k) or {}).get("error")}
             if errs:
@@ -646,10 +795,43 @@ def s_label(st: Mapping) -> str:
     return st["label"]
 
 
+def log_tripwire(tw: Mapping, log: logging.Logger, *, label: str) -> None:
+    """The tripwire in the log, in the style of the parse-rate alert: a ``*** HIGH DISAGREEMENT ***``
+    WARNING for each rate over the threshold (all sampled rows, or one source), naming the source, the
+    counts, the rate and the threshold; an INFO line for each rate within it or on too few rows; then
+    what the run does about it."""
+    thr, min_n = tw["threshold"], tw["min_n"]
+    models = tw.get("models") or {}
+    pair = f"{models.get('first')} vs {models.get('second')}" if models else "first vs second"
+    named = [("all sampled rows", tw["overall"])] + [(f"{tw['source_field']} {g}", s)
+                                                     for g, s in tw["by_source"].items()]
+    for name, s in named:
+        if not s["n"]:
+            continue
+        body = (f"[{label}] {name}: first-vs-second disagreement {s['disagree']}/{s['n']} = {s['rate']:.1%} "
+                f"(threshold {thr:.1%}; {pair})")
+        if s["over"]:
+            log.warning(f"*** HIGH DISAGREEMENT *** {body}")
+        elif not s["eligible"]:
+            log.info(f"{body}; fewer than {min_n} sampled rows: reported, never trips")
+        else:
+            log.info(body)
+    action = tw.get("action")
+    if action == "stopped":
+        log.warning(f"*** HIGH DISAGREEMENT *** [{label}] the run stops before {tw['stopped_before']} "
+                    f"({tw['calls_not_sent']} calls not sent); every answer paid for is kept.  To go on "
+                    f"regardless: --resume --accept-disagreement")
+    elif action == "marked":
+        log.warning(f"*** HIGH DISAGREEMENT *** [{label}] nothing is left to send: the run finishes, marked as "
+                    f"tripped (the CLI exits non-zero)")
+    elif action == "accepted":
+        log.warning(f"*** HIGH DISAGREEMENT *** [{label}] accepted (--accept-disagreement): the run goes on")
+
+
 def _partial(st: Mapping) -> dict:
     """What a row has so far, for ``meta["split_partial"]``."""
     keep = ("sense", "same_sense", "gloss", "gloss_model", "alignment", "descriptors", "join", "so_sense",
-            "so_same_sense", "so_join", "errors", "failed")
+            "so_same_sense", "so_join", "to_sense", "to_same_sense", "to_join", "errors", "failed")
     out = {k: st.get(k) for k in keep if st.get(k)}
     if st.get("comparison"):
         out["comparison"] = {str(i): v for i, v in st["comparison"].items()}

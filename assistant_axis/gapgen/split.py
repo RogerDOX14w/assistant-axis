@@ -19,9 +19,10 @@ classifier prompt is replaced by small calls, each with its own rubric (Roger's 
 This module holds one parser and validator for each step (``parse_<step>``, each returning
 ``(row, None)`` or ``(None, error)``), the payload of each call (:func:`payload`), the join
 (:func:`join`, the rules of section 6; ``split_reference/join_reference.py`` is the same rule
-and the tests check both give the same answers on the recorded inputs), and the mapping of a
-joined row onto the filter block's frozen vocabulary (:func:`to_filter_block`).  The runner is
-:mod:`assistant_axis.gapgen.split_runner`.
+and the tests check both give the same answers on the recorded inputs), the mapping of a
+joined row onto the filter block's frozen vocabulary (:func:`to_filter_block`), and the opinions'
+agreement section and disagreement tripwire (:func:`agreement_section`,
+:func:`disagreement_tripwire`).  The runner is :mod:`assistant_axis.gapgen.split_runner`.
 """
 from __future__ import annotations
 
@@ -489,11 +490,13 @@ def to_filter_block(*, sense: Optional[Mapping], j: Mapping, model: str, batch_i
                     same_sense: Optional[Mapping] = None, comparison: Optional[Mapping] = None,
                     gloss_model: Optional[str] = None, alignment: Optional[Mapping] = None,
                     descriptors: Optional[Mapping] = None, second_opinion: Optional[Mapping] = None,
-                    gloss: Optional[str] = None) -> tuple[dict, Optional[str], Optional[str], str]:
+                    gloss: Optional[str] = None, third_opinion: Optional[Mapping] = None,
+                    ) -> tuple[dict, Optional[str], Optional[str], str]:
     """``(filter block, gloss, holding, entity_type)`` for a joined row.  The old keys stay, so the
     readers of the block (promote, gap_registry.py, the states pass) need no change:
     ``judged_sense`` is the accepted reading, ``trait_sense_rank`` its place among the readings,
-    ``confidence`` null and ``tag_disagreement`` false."""
+    ``confidence`` null and ``tag_disagreement`` false.  ``third_opinion`` (``--third-model``) has
+    the second opinion's shape plus ``agree_first`` and ``agree_second``; null on a row without one."""
     sense = sense or {}
     verdict, tags, holding, et = verdict_tags_holding(j["outcome"], cause=j.get("cause"),
                                                       membership_kind=j.get("membership_kind"))
@@ -530,6 +533,7 @@ def to_filter_block(*, sense: Optional[Mapping], j: Mapping, model: str, batch_i
         "gloss_form_ok": gloss_form_ok(row_gloss) if row_gloss else None,
         "comparison": dict(comparison) if comparison else None, "plain_reading": None,
         "second_opinion": dict(second_opinion) if second_opinion else None,
+        "third_opinion": dict(third_opinion) if third_opinion else None,
         "confidence": None, "tag_disagreement": False, "validator_repairs": [], "gloss_in_band": None,
         "prompt_sha256": dict(prompt_sha256), "at": now,
     }
@@ -548,7 +552,8 @@ def floor_block(*, why: str, rule: str, model: Optional[str], batch_id: str, now
             "notes": [], "polysemy": False, "polysemy_notes": [], "region": None, "enactable_in_text": None,
             "alignment": None, "alignment_relevant": None, "last_step_reasons": None, "gloss_form_ok": None,
             "comparison": None,
-            "plain_reading": None, "second_opinion": None, "confidence": None, "tag_disagreement": False,
+            "plain_reading": None, "second_opinion": None, "third_opinion": None, "confidence": None,
+            "tag_disagreement": False,
             "validator_repairs": [], "gloss_in_band": None, "prompt_sha256": dict(prompt_sha256), "at": now}
 
 
@@ -614,3 +619,115 @@ def cost_by_step(records: Sequence[Mapping]) -> dict[str, dict]:
     for d in out.values():
         d["cost_usd"] = round(d["cost_usd"], 6)
     return dict(sorted(out.items()))
+
+
+# ---------------------------------------------------------------------------
+# the opinions: agreement and the disagreement tripwire (Roger, 2026-10-02)
+# ---------------------------------------------------------------------------
+#
+# coding_plan_platform.md, "M1 filter: judging model per generator": each generator's pilot runs the
+# filter with a third opinion (``--third-model``, expected Opus) on the second opinion's rows, to
+# measure the first and second models against it; later runs keep the second opinion and stop when
+# the first and second models disagree on more than ``--max-disagreement`` of the sampled rows
+# (opus_audit_m1.md: Haiku and Sonnet disagreed on 1% of corpus labels and 31% of random dictionary
+# adjectives).  Agreement is on the final outcome (trait, states, physical, roles, turned_away),
+# which the same-sense check never changes (it adds a note only), so it is known once the opinions'
+# established, vague and kind answers are in.
+#
+# An opinion row (from SplitRunner.opinion_rows): {"label", "source_field", "groups", "first",
+# "second", "third", "third_run"}; "second" and "third" are outcomes, None where that opinion failed
+# (or, for "third", was not run: "third_run" says which).
+
+#: ``--max-disagreement`` default: the share of sampled rows on which the first and second models
+#: may disagree before the run stops.
+DEFAULT_MAX_DISAGREEMENT = 0.10
+#: A rate over fewer sampled rows than this is reported but never trips (overall or by source).
+TRIPWIRE_MIN_N = 20
+
+
+def opinion_source(meta: Optional[Mapping]) -> tuple[Optional[str], list[str]]:
+    """``(field, groups)``: where a row came from, for the per-source figures.  A validation row has a
+    ``stratum``; a registry row carries the generators of its ``sources[]`` (``meta["generators"]``,
+    set by ``filter.items_from_records``; a word two generators found counts under each)."""
+    meta = meta or {}
+    if meta.get("stratum") is not None:
+        return "stratum", [str(meta["stratum"])]
+    gens = meta.get("generators")
+    if gens:
+        return "generator", sorted({str(g) for g in gens})
+    return None, []
+
+
+def _groups(rows: Sequence[Mapping]) -> tuple[Optional[str], dict[str, list[Mapping]]]:
+    field = next((r.get("source_field") for r in rows if r.get("source_field")), None)
+    by: dict[str, list[Mapping]] = {}
+    for r in rows:
+        for g in r.get("groups") or []:
+            by.setdefault(g, []).append(r)
+    return field, dict(sorted(by.items()))
+
+
+def _rate(k: int, n: int) -> Optional[float]:
+    return round(k / n, 4) if n else None
+
+
+def disagreement_tripwire(rows: Sequence[Mapping], *, threshold: float, min_n: int = TRIPWIRE_MIN_N) -> dict:
+    """The tripwire on opinion rows: the first-vs-second disagreement rate on the final outcome, over
+    all sampled rows and for each source, trips when it is over ``threshold`` (strictly) on at least
+    ``min_n`` compared rows.  Rows whose second opinion failed are left out (``n_failed``).
+    ``tripped_by`` names ``"overall"`` and ``"<source_field>:<source>"``."""
+    def stat(rs: Sequence[Mapping]) -> dict:
+        cmp = [r for r in rs if r.get("second") is not None]
+        d = sum(1 for r in cmp if r["second"] != r["first"])
+        eligible = len(cmp) >= min_n
+        rate = _rate(d, len(cmp))
+        return {"n": len(cmp), "disagree": d, "rate": rate, "eligible": eligible,
+                "over": bool(eligible and d / len(cmp) > threshold), "n_failed": len(rs) - len(cmp)}
+
+    field, by = _groups(rows)
+    overall = stat(rows)
+    by_source = {g: stat(rs) for g, rs in by.items()}
+    tripped_by = (["overall"] if overall["over"] else []) + [f"{field}:{g}" for g, s in by_source.items() if s["over"]]
+    return {"threshold": threshold, "min_n": min_n, "source_field": field, "overall": overall,
+            "by_source": by_source, "tripped": bool(tripped_by), "tripped_by": tripped_by}
+
+
+def agreement_section(rows: Sequence[Mapping], *, models: Mapping[str, Optional[str]]) -> dict:
+    """The summary's agreement section on opinion rows: first-vs-second, and with a third opinion
+    first-vs-third and second-vs-third, agreement on the final outcome, overall and by source; and,
+    with a third opinion, the first-vs-second disagreements by which side the third takes and the
+    rows where the first two agree and the third differs (opus_audit_m1.md's two tables; labels
+    are listed overall only)."""
+    has_third = any(r.get("third_run") for r in rows)
+
+    def pair(rs: Sequence[Mapping], a: str, b: str) -> dict:
+        cmp = [r for r in rs if r.get(a) is not None and r.get(b) is not None]
+        agree = sum(1 for r in cmp if r[a] == r[b])
+        return {"n": len(cmp), "agree": agree, "disagree": len(cmp) - agree, "rate": _rate(agree, len(cmp))}
+
+    def block(rs: Sequence[Mapping], labels: bool) -> dict:
+        out = {"n": len(rs), "first_vs_second": pair(rs, "first", "second")}
+        if not has_third:
+            return out
+        out["first_vs_third"] = pair(rs, "first", "third")
+        out["second_vs_third"] = pair(rs, "second", "third")
+        both = [r for r in rs if r.get("second") is not None and r.get("third") is not None]
+        dis = [r for r in both if r["first"] != r["second"]]
+        side = {"first": [r["label"] for r in dis if r["third"] == r["first"]],
+                "second": [r["label"] for r in dis if r["third"] == r["second"]],
+                "neither": [r["label"] for r in dis if r["third"] not in (r["first"], r["second"])]}
+        odd = [r["label"] for r in both if r["first"] == r["second"] != r["third"]]
+        out["first_second_disagreements"] = {
+            "n": len(dis), "third_sides_with_first": len(side["first"]),
+            "third_sides_with_second": len(side["second"]), "third_sides_with_neither": len(side["neither"])}
+        out["first_second_agree_third_differs"] = {"n": len(odd)}
+        if labels:
+            out["first_second_disagreements"]["labels"] = {k: sorted(v) for k, v in side.items()}
+            out["first_second_agree_third_differs"]["labels"] = sorted(odd)
+        return out
+
+    field, by = _groups(rows)
+    return {"models": dict(models), "source_field": field, "overall": block(rows, True),
+            "by_source": {g: block(rs, False) for g, rs in by.items()},
+            "failed": {"second": sum(1 for r in rows if r.get("second") is None),
+                       "third": sum(1 for r in rows if r.get("third_run") and r.get("third") is None)}}

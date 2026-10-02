@@ -91,7 +91,9 @@ class TestBatches:
         ids = [c["id"] for c in bc.batches.created]
         state = json.loads((tmp_path / "batches.json").read_text())
         waves = list(state["waves"])
-        assert waves == ["w1_sense", "w2_checks", "w3_same_sense", "w4_gloss", "w5_last_step"]
+        # alignment and descriptors moved after the opinions' checks on 2026-10-02 (the disagreement
+        # tripwire stops before them); with no second opinion, wave 5 has nothing to send
+        assert waves == ["w1_sense", "w2_checks", "w3_same_sense", "w4_gloss", "w6_last_step"]
         assert [b["id"] for w in waves for b in state["waves"][w]] == ids
         for b in bc.batches.created:
             cids = [q["custom_id"] for q in b["requests"]]

@@ -6,8 +6,13 @@ the outputs are the same.  See that script's docstring and coding_plan_split.md 
 
 Outputs in ``data/candidates/filter/<batch_id>/``: ``responses.jsonl`` (every response received,
 appended as it arrives, one item each), ``results.jsonl``, ``summary.json`` (with a ``split`` block:
-the pilot figures, the parse rate of every step and model, the spend by step), ``usage.json``
-(always), ``run.json`` and, with the batches transport, ``batches.json``.
+the pilot figures, the parse rate of every step and model, the spend by step; the opinions'
+``agreement`` section, the ``tripwire`` and ``stopped_by_disagreement``), ``usage.json``
+(always), ``run.json`` (also ``third_model``, ``third_opinion``, ``max_disagreement``,
+``accept_disagreement``, ``tripwire``, ``stopped_by_disagreement``) and, with the batches transport,
+``batches.json``.  Exit status: 0, or 1 (the batch dir exists), 2 (refused, or the budget stop),
+3 (the disagreement tripwire stopped the run, or tripped at its end, without
+``--accept-disagreement``).
 """
 from __future__ import annotations
 
@@ -29,22 +34,51 @@ from assistant_axis.gapgen.cost import CostRefused, Estimate, GuardedUsage, conf
 from assistant_axis.gapgen.freq import zipf_info
 from assistant_axis.gapgen.registry import utc_now, utc_stamp
 from assistant_axis.gapgen.runs import PLATFORM_PATHS
-from assistant_axis.gapgen.split_runner import SplitRunner, tokens_for
+from assistant_axis.gapgen.split_runner import DisagreementStop, SplitRunner, tokens_for
 from assistant_axis.judge_pricing import BATCH_SUFFIX, BudgetExceededError, MultiModelUsage
 
 logger = logging.getLogger("traithood_filter")
 
+#: The exit status of a run the disagreement tripwire stopped, or marked at its end, without
+#: ``--accept-disagreement`` (a budget stop or refusal is 2, an existing batch dir 1).
+TRIPWIRE_EXIT = 3
+
 #: Shares used by the estimate (measured on the 99 test words, 2026-09-29): primary readings for
 #: each word 1.3; a same-sense check for 0.3 of words; 0.75 go on as traits (74 of 99); the second
-#: opinion on about 0.2 of words.
+#: opinion on about 0.2 of words at the default --second-opinion-frac 0.10 (the seeded sample plus
+#: the flagged words); another fraction moves the share by the difference.
 READINGS_PER_WORD = 1.3
 SAME_SENSE_SHARE = 0.3
 TRAIT_SHARE = 0.75
 SECOND_OPINION_SHARE = 0.2
+DEFAULT_SECOND_OPINION_FRAC = 0.10
+
+
+def second_opinion_share(args) -> float:
+    """The share of words estimated to get the second (and third) opinion."""
+    if args.no_second_opinion:
+        return 0.0
+    frac = getattr(args, "second_opinion_frac", DEFAULT_SECOND_OPINION_FRAC)
+    return min(1.0, max(0.0, SECOND_OPINION_SHARE + frac - DEFAULT_SECOND_OPINION_FRAC))
+
+
+def check_opinion_args(args) -> Optional[str]:
+    """Why ``--third-model`` / ``--max-disagreement`` are refused, or None."""
+    third = getattr(args, "third_model", None)
+    if third:
+        if args.no_second_opinion:
+            return "--third-model runs on the second opinion's rows: drop --no-second-opinion"
+        if third in (args.model, args.second_model):
+            return f"--third-model {third} must differ from --model and --second-model"
+    m = getattr(args, "max_disagreement", None)
+    if m is not None and not 0.0 <= m <= 1.0:
+        return f"--max-disagreement {m} is not a fraction from 0 to 1 (0.10 is ten per cent; 1 turns the tripwire off)"
+    return None
 
 
 def build_split_estimate(items, args, transport: str) -> tuple[Estimate, dict]:
-    """The estimate by step (section 7), at batch rates when ``transport`` is batches."""
+    """The estimate by step (section 7), at batch rates when ``transport`` is batches; a third
+    opinion (``--third-model``) adds the second opinion's steps 1 to 3 on its model."""
     n_hard = n_probe = 0
     for it in items:
         fq = zipf_info(it.label, familiarity=it.familiarity, gloss_hint=bool(it.intended_sense), curated=it.curated)
@@ -68,19 +102,23 @@ def build_split_estimate(items, args, transport: str) -> tuple[Estimate, dict]:
     add("same sense", "same_sense", first, SAME_SENSE_SHARE * n)
     if not args.no_plain_reading and n_int:
         add("comparison", "comparison", args.compare_model, READINGS_PER_WORD * n_int)
-    so = 0 if args.no_second_opinion else SECOND_OPINION_SHARE * n
+    so = second_opinion_share(args) * n
     add("gloss", "gloss", first, TRAIT_SHARE * (n - so))
     add("alignment", "alignment", first, TRAIT_SHARE * n)
     add("descriptors", "descriptors", first, TRAIT_SHARE * n)
-    if so:
-        add("second opinion: sense", "sense", second, so)
+    third = getattr(args, "third_model", None) if so else None
+    for name, model, gloss in (("second", second, True), ("third", third, False)):
+        if not (so and model):
+            continue
+        add(f"{name} opinion: sense", "sense", model, so)
         for step in ("established", "vague", "kind"):
-            add(f"second opinion: {step}", step, second, READINGS_PER_WORD * so)
-        add("second opinion: same sense", "same_sense", second, SAME_SENSE_SHARE * so)
-        add("second opinion: gloss", "gloss", second, TRAIT_SHARE * so)
+            add(f"{name} opinion: {step}", step, model, READINGS_PER_WORD * so)
+        add(f"{name} opinion: same sense", "same_sense", model, SAME_SENSE_SHARE * so)
+        if gloss:
+            add(f"{name} opinion: gloss", "gloss", model, TRAIT_SHARE * so)
     plan = {"pipeline": "split", "n_rows": len(items), "n_hard_reject": n_hard, "n_to_step1_or_probe": n,
             "n_probe_band": n_probe, "n_with_intended_sense": n_int, "transport": transport,
-            "n_second_opinion_est": int(math.ceil(so))}
+            "n_second_opinion_est": int(math.ceil(so)), "third_model": third or None}
     return est, plan
 
 
@@ -92,6 +130,12 @@ def main_split(args, argv) -> int:
         return 2
     if args.probe_only:
         raise SystemExit("--probe-only applies to --pipeline single only")
+    if args.max_disagreement is None:
+        args.max_disagreement = split.DEFAULT_MAX_DISAGREEMENT
+    bad = check_opinion_args(args)
+    if bad:
+        print(f"REFUSED: {bad}", file=sys.stderr)
+        return 2
     tf.apply_stability(args)
     items, reg = tf.select_items(args)
     if not items:
@@ -178,6 +222,12 @@ def main_split(args, argv) -> int:
                 "confirmed_by": args.confirmed_by, "model": args.model,
                 "second_model": None if args.no_second_opinion else args.second_model,
                 "compare_model": args.compare_model, "plain_reading": not args.no_plain_reading,
+                "third_model": args.third_model,
+                # the third opinion runs the second opinion's steps, at these pinned versions
+                "third_opinion": None if not args.third_model else {
+                    "model": args.third_model, "on": "the second opinion's rows",
+                    "step_versions": {n: pins[n][0] for n in split.SECOND_OPINION_STEPS if n in pins}},
+                "max_disagreement": args.max_disagreement, "accept_disagreement": bool(args.accept_disagreement),
                 "step_versions": {n: v for n, (v, _) in pins.items()},
                 # the eight split prompts, plus the two single-pipeline prompts the split also sends
                 "prompt_sha256": {**{n: sr.sha256(sr.load_prompt(n)) for n in sr.NAMES},
@@ -205,7 +255,8 @@ def main_split(args, argv) -> int:
                          second_opinion_frac=args.second_opinion_frac, seed=args.seed, probe=not args.no_probe,
                          second_opinion=not args.no_second_opinion, concurrency=args.concurrency,
                          responses_path=out_dir / "responses.jsonl", resume_records=resume_records,
-                         plain_reading=not args.no_plain_reading)
+                         plain_reading=not args.no_plain_reading, third_model=args.third_model,
+                         max_disagreement=args.max_disagreement, accept_disagreement=args.accept_disagreement)
     if transport == "batches":
         runner.transport = BatchTransport(runner, anthropic.Anthropic(), out_dir / "batches.json", budget_usd=cap)
     status = 0
@@ -215,18 +266,32 @@ def main_split(args, argv) -> int:
     except BudgetExceededError as exc:
         print(f"STOPPED: {exc}", file=sys.stderr)
         status = 2
+    except DisagreementStop as exc:
+        print(f"STOPPED by the disagreement tripwire: {exc}.  Every answer paid for is kept; to go on "
+              f"regardless: the same command with --resume --accept-disagreement", file=sys.stderr)
+        status = TRIPWIRE_EXIT
     except BaseException as exc:  # noqa: BLE001 - recorded below, then re-raised
         error = exc
         print(f"STOPPED by {type(exc).__name__}: {exc}", file=sys.stderr)
         raise
     finally:
+        tw = runner.tripwire
+        if status == 0 and tw and tw.get("action") == "marked":
+            print(f"TRIPPED at the end: first-vs-second disagreement over {tw['threshold']:.1%} "
+                  f"({', '.join(tw['tripped_by'])}); the run finished and is marked (summary.json and run.json "
+                  f"\"tripwire\")", file=sys.stderr)
+            status = TRIPWIRE_EXIT
         finalize(args, items, reg, runner, usage, run_meta, out_dir, status, error, transport)
     return status
 
 
 def finalize(args, items, reg, runner, usage, run_meta, out_dir, status, error, transport) -> None:
-    """``traithood_filter._finalize`` with the split block added to the summary."""
+    """``traithood_filter._finalize`` with the split block added to the summary, and the opinions'
+    agreement section and the disagreement tripwire added to the summary and run.json."""
     from data_analysis.gap_generation import traithood_filter as tf
+    stopped = bool(runner.tripwire and runner.tripwire.get("action") == "stopped")
+    run_meta["tripwire"] = runner.tripwire
+    run_meta["stopped_by_disagreement"] = stopped
 
     def extra(s: dict, results) -> None:
         rows = [r.as_dict() for r in results]
@@ -249,6 +314,12 @@ def finalize(args, items, reg, runner, usage, run_meta, out_dir, status, error, 
         # block records "outcome", so set the two top-level figures from the split's own records
         s["second_opinion_n"] = len(runner.second_keys)
         s["disagreements"] = len(s["split"]["second_opinion"]["disagree"])
+        s["third_model"] = runner.third_model
+        # the opinions, from the runner's state (complete on a run the tripwire stopped, whose rows
+        # are still pending); see split.agreement_section and split.disagreement_tripwire
+        s["agreement"] = runner.agreement() if runner.second_keys else None
+        s["tripwire"] = runner.tripwire
+        s["stopped_by_disagreement"] = stopped
         # the alignment score (0 to 3) beside the count of the boolean derived from it
         s.setdefault("v2_fields", {})["alignment_scores"] = alignment_score_counts(results)
 

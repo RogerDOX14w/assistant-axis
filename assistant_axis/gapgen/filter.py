@@ -112,13 +112,17 @@ class FilterResult:
 
 
 def items_from_records(records: Sequence[dict]) -> list[FilterItem]:
-    """Filter items from registry rows (intended sense = first gloss hint)."""
+    """Filter items from registry rows (intended sense = first gloss hint).  ``meta["generators"]``
+    lists the generators of the row's ``sources[]``, sorted, for the split filter's per-source
+    agreement figures and disagreement tripwire (``split.opinion_source``)."""
     out = []
     for r in records:
         hint = first_gloss_hint(r)
+        gens = sorted({str(s["generator"]) for s in r.get("sources") or [] if s.get("generator")})
         out.append(FilterItem(key=r["key"], label=r["label"],
                               intended_sense=display_form_name(hint) if hint else None,
-                              familiarity=familiarity_of(r), curated=is_curated(r)))
+                              familiarity=familiarity_of(r), curated=is_curated(r),
+                              meta={"generators": gens} if gens else {}))
     return out
 
 

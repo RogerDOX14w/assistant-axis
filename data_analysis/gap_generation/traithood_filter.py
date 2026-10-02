@@ -5,6 +5,7 @@
         (--unfiltered | --keys K ... | --run GENERATOR/RUN_ID | --validation-file F) \\
         [--pipeline split|single] [--transport auto|live|batches] [--resume] \\
         [--model claude-haiku-4-5-20251001] [--second-model claude-sonnet-5-5] \\
+        [--third-model claude-opus-5-5] [--max-disagreement 0.10] [--accept-disagreement] \\
         [--batch-size 25 (single only)] [--limit N] [--sample-frac F --sample-seed S] \\
         [--no-probe] [--no-second-opinion] [--budget-usd 5.0] [--confirm-expensive] \\
         [--confirmed-by WHO] [--allow-dirty] [--dry-run]
@@ -23,6 +24,18 @@ directory and sends no call whose answer is already in its ``responses.jsonl``
 the cap covers the batch id's whole spend.  ``--pipeline single`` is the
 single-call classifier below, kept so recorded runs can be reproduced
 (``--batch-size`` applies to it only).
+
+**Opinions** (split only, 2026-10-02).  ``--third-model MODEL`` gives the
+second opinion's rows the same steps on a third model (a generator's pilot,
+to choose its judging model); ``summary.json`` ``agreement`` compares the
+three.  ``--max-disagreement`` (default 0.10) is the tripwire: once the
+opinions' outcomes are known, a first-vs-second disagreement rate over it
+(all sampled rows, or a stratum or generator with 20 or more) logs
+``*** HIGH DISAGREEMENT ***``, stops the run before the alignment and
+descriptors wave (exit status 3, ``stopped_by_disagreement``), and is
+recorded as ``tripwire`` in summary.json and run.json; ``--resume
+--accept-disagreement`` goes on.  When nothing is left to send the run
+finishes, marked, and still exits 3.
 
 Single-call pipeline per row (``assistant_axis.gapgen.filter``): Zipf floor (hard reject
 below ``freq.HARD_REJECT_BELOW`` unless rescue rule 1b applies, free) ->
@@ -285,6 +298,24 @@ def build_parser() -> argparse.ArgumentParser:
     ap.add_argument("--model", default=DEFAULT_MODEL)
     ap.add_argument("--second-model", default=SPLIT_SECOND_MODEL,
                     help=f"second opinion (default {SPLIT_SECOND_MODEL})")
+    ap.add_argument("--third-model", default=None, metavar="MODEL",
+                    help="split only: a third opinion on the second opinion's rows, running the same steps (1 to 3) "
+                         "on MODEL (expected claude-opus-5-5), recorded as third_opinion with agreement flags; the "
+                         "summary's \"agreement\" section compares the three models.  For a generator's pilot, to "
+                         "choose its judging model (coding_plan_platform.md, 'M1 filter: judging model per "
+                         "generator').  Default: none")
+    ap.add_argument("--max-disagreement", type=float, default=None, metavar="FRACTION",
+                    help="split only: the disagreement tripwire (default 0.10).  Once the second opinion's outcomes "
+                         "are known, if the first and second models disagree on the final outcome for more than "
+                         "FRACTION of the sampled rows (overall, or for one stratum or generator with at least 20 "
+                         "sampled rows), a *** HIGH DISAGREEMENT *** warning is logged, the run stops before the "
+                         "alignment and descriptors wave, and the CLI exits 3; resume with --resume "
+                         "--accept-disagreement.  1 turns it off.  Validation runs on hard strata are expected to "
+                         "trip it (random dictionary adjectives disagreed 31%%, opus_audit_m1.md), and that is the "
+                         "point: such words need the second model")
+    ap.add_argument("--accept-disagreement", action="store_true",
+                    help="split only: go on past a tripped disagreement tripwire (recorded in run.json and the "
+                         "summary's tripwire block); usually with --resume after a stop")
     ap.add_argument("--batch-size", type=int, default=None,
                     help=f"single pipeline only: rows per classifier call (default {DEFAULT_BATCH_SIZE}); "
                          "refused with --pipeline split")
@@ -375,6 +406,8 @@ def main(argv=None) -> int:
         return split_cli.main_split(args, argv)
     if args.resume or args.transport != "auto":
         raise SystemExit("--resume and --transport apply to --pipeline split only")
+    if args.third_model or args.max_disagreement is not None or args.accept_disagreement:
+        raise SystemExit("--third-model, --max-disagreement and --accept-disagreement apply to --pipeline split only")
     if args.batch_size is None:
         args.batch_size = DEFAULT_BATCH_SIZE
     if args.probe_only:
