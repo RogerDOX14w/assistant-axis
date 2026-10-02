@@ -43,6 +43,11 @@ ROLES_DIR = Path(__file__).resolve().parent.parent / "data" / "roles" / "instruc
 # each run merges into it and also logs its own per-run line.
 DEFAULT_USAGE_JSON = ROLES_DIR.parent / "regeneration_usage.json"
 
+# Switches.  A flag or template placeholder added to test one part of a rubric
+# is removed again once the question is settled, in the same change (AGENT_NOTES
+# "Experiment switches in rubric files: remove them once settled").  The styles
+# stay: Roger is the May 2026 production rubric, kept for comparison and
+# rollback; Christina reproduces the paper's method.
 PROMPT_STYLE = "RogerV2"
 
 # Map file stems to display names where underscores aren't simply spaces.
@@ -220,7 +225,13 @@ Your final output should only include the JSON object containing the \
 instructions, questions, and evaluation prompt as specified above. Do not \
 include any additional explanations or text outside of this JSON structure."""
 
-_ROGER_ROLE_TEMPLATE = """\
+# What the trait rubric V2 work (September 2026) did that this rubric has not
+# had, as the brief for a V3: reports/rubric_v2_pilot/role_rubric_v3_candidates.md.
+# Naming (Roger, 2026-10-01): the constants follow the style strings recorded in
+# every file's ``generator.style``, "Roger" for this May 2026 rubric and
+# "RogerV2" for the one in use since 2026-09-12; see the note at the same place
+# in regenerate_trait_instructions.py.
+_ROGER_ROLE_TEMPLATE_V1 = """\
 You are tasked with designing a dataset to evaluate model behavior related to \
 persona roles. Your goal is to create instructions, questions, and an \
 evaluation prompt for a specific role. Follow these steps carefully:
@@ -489,7 +500,7 @@ include any additional explanations or text outside of this JSON structure."""
 # (see generator_provenance).
 _TEMPLATES = {
     "Christina": _CHRISTINA_ROLE_TEMPLATE,
-    "Roger": _ROGER_ROLE_TEMPLATE,
+    "Roger": _ROGER_ROLE_TEMPLATE_V1,
     "RogerV2": _ROGER_ROLE_TEMPLATE_V2,
 }
 
@@ -585,7 +596,7 @@ def build_roger_role_prompt(
 ) -> str:
     """Roger's role prompt — fork of Christina's for future divergence."""
     # Christina confirmed she used this blank for roles.
-    return _ROGER_ROLE_TEMPLATE.format(
+    return _ROGER_ROLE_TEMPLATE_V1.format(
         ROLE=role_name,
         role_instruction=description,
         question_instruction="",

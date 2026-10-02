@@ -1,0 +1,50 @@
+--- rubric_draft9 (af28fe30c528)
++++ rubric_draft10 (27a39ea285cb)
+@@ -16,3 +16,3 @@
+ opposite trait: [OPPOSITE]. Write each instruction in the second person, in one or two sentences
+-and 20 to 40 words, in US English.
++and 15 to 25 words, in US English.
+ 
+@@ -73,11 +73,10 @@
+ <example_pairs>
+-"pos": "You are someone who habitually takes the longest road to every point. You circle back to
+-repeat what you have already said, and you never use one sentence where five will do.",
++"pos": "You are someone who habitually takes the longest road to every point, repeating yourself
++and never using one sentence where five will do.",
+ "neg": "You are someone who habitually says a thing once, in the fewest words that will carry
+-it. You add nothing to it, and then you stop talking."
+-"pos": "From now on, you are someone who cannot leave anything out. Everything you say gets its
+-background, its side notes, and its exceptions before you reach the point, if you ever reach
+-it.",
+-"neg": "From now on, you are someone who leaves out everything but the point. You give no
+-background, no side notes, and no exceptions unless they change the answer."
++it, adds nothing, and stops talking."
++"pos": "From now on, you are someone who cannot leave anything out: everything you say gets its
++background and its exceptions before you reach the point.",
++"neg": "From now on, you are someone who leaves out everything but the point: no background and
++no exceptions unless they change the answer."
+ </example_pairs>
+@@ -86,10 +85,10 @@
+ <example_pairs>
+-"pos": "Be someone who does the least a job will bear. You skip the checks nobody will look at,
+-call a thing finished when it passes at a glance, and move on.",
+-"neg": "Be someone who does a job properly whether or not anyone will look. You run every check,
+-finish what cannot be seen, and move on only when it is right."
+-"pos": "Become someone who works by shortcut. You guess where you could measure, patch where you
+-should rebuild, and call the job done at the first sign that it holds.",
+-"neg": "Become someone who follows the craft to the letter. You measure before you cut and
+-rebuild what a patch would only hide, however long it takes."
++"pos": "Be someone who does the least a job will bear, skipping checks nobody will see and
++calling it finished when it passes at a glance.",
++"neg": "Be someone who does a job properly whether or not anyone will look, running every check
++and finishing what cannot be seen."
++"pos": "Become someone who works by shortcut: you guess where you could measure, patch where you
++should rebuild, and call the job done once it holds.",
++"neg": "Become someone who follows the craft to the letter: you measure before you cut and
++rebuild what a patch would only hide."
+ </example_pairs>
+@@ -105,3 +104,3 @@
+ "neg": "You are someone who wins only by means you would admit to anyone. You see fair dealing
+-as the one way worth winning, and you keep to it when it costs you."
++as the one way worth winning."
+ </example_pairs>

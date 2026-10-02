@@ -1,0 +1,182 @@
+{
+  "all answers read": [
+    {
+      "variant": "be_someone",
+      "n": 192,
+      "person": 92.70833333333333,
+      "assistant": 2.6041666666666665,
+      "in_action": 97.39583333333333,
+      "describes_itself": 37.5,
+      "laid_on": 86.45833333333333,
+      "cartoon": 38.020833333333336,
+      "believable_in_action": 12.5
+    },
+    {
+      "variant": "become",
+      "n": 192,
+      "person": 91.66666666666667,
+      "assistant": 2.0833333333333335,
+      "in_action": 96.875,
+      "describes_itself": 39.583333333333336,
+      "laid_on": 85.41666666666667,
+      "cartoon": 39.583333333333336,
+      "believable_in_action": 12.5
+    },
+    {
+      "variant": "from_now_on",
+      "n": 192,
+      "person": 91.66666666666667,
+      "assistant": 2.6041666666666665,
+      "in_action": 96.35416666666667,
+      "describes_itself": 30.729166666666668,
+      "laid_on": 86.45833333333333,
+      "cartoon": 40.625,
+      "believable_in_action": 10.416666666666666
+    },
+    {
+      "variant": "you_are_someone",
+      "n": 192,
+      "person": 95.3125,
+      "assistant": 1.0416666666666667,
+      "in_action": 95.83333333333333,
+      "describes_itself": 33.854166666666664,
+      "laid_on": 80.20833333333333,
+      "cartoon": 38.020833333333336,
+      "believable_in_action": 16.145833333333332
+    },
+    {
+      "variant": "you_are_trait",
+      "n": 192,
+      "person": 89.58333333333333,
+      "assistant": 6.770833333333333,
+      "in_action": 90.10416666666667,
+      "describes_itself": 35.416666666666664,
+      "laid_on": 81.25,
+      "cartoon": 34.895833333333336,
+      "believable_in_action": 10.416666666666666
+    },
+    {
+      "variant": "take_on",
+      "n": 192,
+      "person": 96.35416666666667,
+      "assistant": 0.0,
+      "in_action": 100.0,
+      "describes_itself": 47.395833333333336,
+      "laid_on": 94.27083333333333,
+      "cartoon": 57.291666666666664,
+      "believable_in_action": 5.729166666666667
+    },
+    {
+      "variant": "act_as",
+      "n": 192,
+      "person": 91.66666666666667,
+      "assistant": 2.6041666666666665,
+      "in_action": 98.4375,
+      "describes_itself": 33.333333333333336,
+      "laid_on": 90.10416666666667,
+      "cartoon": 49.479166666666664,
+      "believable_in_action": 8.854166666666666
+    },
+    {
+      "variant": "behave_like",
+      "n": 192,
+      "person": 98.4375,
+      "assistant": 0.0,
+      "in_action": 100.0,
+      "describes_itself": 28.645833333333332,
+      "laid_on": 91.14583333333333,
+      "cartoon": 43.75,
+      "believable_in_action": 8.854166666666666
+    }
+  ],
+  "answers the pipeline's judge scored 3": [
+    {
+      "variant": "be_someone",
+      "n": 173,
+      "person": 95.3757225433526,
+      "assistant": 1.1560693641618498,
+      "in_action": 100.0,
+      "describes_itself": 37.57225433526011,
+      "laid_on": 87.86127167630057,
+      "cartoon": 41.040462427745666,
+      "believable_in_action": 12.138728323699421
+    },
+    {
+      "variant": "become",
+      "n": 180,
+      "person": 93.33333333333333,
+      "assistant": 1.1111111111111112,
+      "in_action": 99.44444444444444,
+      "describes_itself": 41.111111111111114,
+      "laid_on": 88.33333333333333,
+      "cartoon": 41.666666666666664,
+      "believable_in_action": 11.666666666666666
+    },
+    {
+      "variant": "from_now_on",
+      "n": 174,
+      "person": 93.10344827586206,
+      "assistant": 1.1494252873563218,
+      "in_action": 100.0,
+      "describes_itself": 31.03448275862069,
+      "laid_on": 89.65517241379311,
+      "cartoon": 43.67816091954023,
+      "believable_in_action": 9.770114942528735
+    },
+    {
+      "variant": "you_are_someone",
+      "n": 174,
+      "person": 96.55172413793103,
+      "assistant": 0.5747126436781609,
+      "in_action": 98.85057471264368,
+      "describes_itself": 36.7816091954023,
+      "laid_on": 86.7816091954023,
+      "cartoon": 41.95402298850575,
+      "believable_in_action": 12.64367816091954
+    },
+    {
+      "variant": "you_are_trait",
+      "n": 171,
+      "person": 95.32163742690058,
+      "assistant": 0.5847953216374269,
+      "in_action": 98.83040935672514,
+      "describes_itself": 36.25730994152047,
+      "laid_on": 88.30409356725146,
+      "cartoon": 38.01169590643275,
+      "believable_in_action": 10.526315789473685
+    },
+    {
+      "variant": "take_on",
+      "n": 192,
+      "person": 96.35416666666667,
+      "assistant": 0.0,
+      "in_action": 100.0,
+      "describes_itself": 47.395833333333336,
+      "laid_on": 94.27083333333333,
+      "cartoon": 57.291666666666664,
+      "believable_in_action": 5.729166666666667
+    },
+    {
+      "variant": "act_as",
+      "n": 183,
+      "person": 91.80327868852459,
+      "assistant": 2.185792349726776,
+      "in_action": 99.4535519125683,
+      "describes_itself": 33.333333333333336,
+      "laid_on": 92.34972677595628,
+      "cartoon": 51.36612021857923,
+      "believable_in_action": 7.6502732240437155
+    },
+    {
+      "variant": "behave_like",
+      "n": 185,
+      "person": 98.37837837837837,
+      "assistant": 0.0,
+      "in_action": 100.0,
+      "describes_itself": 29.72972972972973,
+      "laid_on": 92.97297297297297,
+      "cartoon": 45.4054054054054,
+      "believable_in_action": 7.027027027027027
+    }
+  ]
+}

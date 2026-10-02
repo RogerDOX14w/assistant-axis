@@ -68,7 +68,8 @@ from an existing file whose `negative_label` names a trait with no file:
    written with that label injected, so the recorded word usually
    appears; the *other* words are the information).  State that bias
    with the result.  Where the original's answer is the deciding
-   evidence, regenerate the original under `non-X` for an unbiased
+   evidence, regenerate the original under `non-X` (or with
+   `--no-antonym`, which leaves the label alone) for an unbiased
    answer (as done for `diplomatic` on 2026-09-17); that costs the
    original's extraction, so do it deliberately, not by default
    (confirmed by Roger 2026-09-17).  Seed the best of the offered words,
@@ -222,9 +223,19 @@ design is agreed with him before the template changes, and the
 regeneration (about $19, about $40 with the pair recheck) goes through
 the expensive-operations confirmation.
 The issue list, evidence, cost and timing are in
-`data/traits/instructions/TRAITS_TO_ADD.md` § "Trait generator V2".  Until
-the design is agreed, do not edit `_ROGER_TEMPLATE`, and treat every trait
-regeneration as provisional.
+`data/traits/instructions/TRAITS_TO_ADD.md` § "Trait generator V2", with a
+design log.  Drafted 2026-09-29 as `--style RogerV2` in
+`regenerate_trait_instructions.py` (voice left out on Roger's decision),
+settled as draft 10 on 2026-09-30 (template `27a39ea285cb`), and **the
+default style since 2026-10-01** (Roger: "make that the default behavior, and
+require a flag to switch back").  `--style Roger` is the May 2026 production
+rubric, `_ROGER_TEMPLATE_V1`, kept for comparison and rollback; do not edit
+it.  The paragraph on verbs and particulars was a switch, `--no-concrete`,
+until Roger settled it on 2026-09-30, and `--use-original-step-one` (May
+2026) was stripped on 2026-10-01, both per § "Experiment switches in rubric
+files: remove them once settled".  Until the corpus is regenerated under V2,
+a trait regenerated for any other reason (a rename, a pair) comes out under
+V2 beside V1 neighbours; the `generator` field tells them apart.
 
 Writing-agent recipe (used from chunk 1 onward): give the agent this
 section, the queue entries for one sub-chunk (label, partner, the

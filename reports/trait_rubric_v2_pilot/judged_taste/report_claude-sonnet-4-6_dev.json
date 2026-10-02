@@ -1,0 +1,132 @@
+{
+  "model": "claude-sonnet-4-6",
+  "rubric_version": 1,
+  "arms": [
+    "draft5",
+    "v_four_words",
+    "v_no_phrasing"
+  ],
+  "baseline": "draft5",
+  "left_out_described_differently": [],
+  "n_rated": {
+    "draft5": 100,
+    "v_four_words": 100,
+    "v_no_phrasing": 100
+  },
+  "scores": {
+    "quality": {
+      "draft5": {
+        "mean": 3.96,
+        "n": 100,
+        "distribution": {
+          "1": 0,
+          "2": 0,
+          "3": 12,
+          "4": 80,
+          "5": 8
+        }
+      },
+      "v_four_words": {
+        "mean": 3.93,
+        "n": 100,
+        "distribution": {
+          "1": 0,
+          "2": 0,
+          "3": 18,
+          "4": 71,
+          "5": 11
+        },
+        "against_baseline": {
+          "paired_traits": 100,
+          "difference": -0.03,
+          "interval": [
+            -0.14,
+            0.08
+          ],
+          "p": 0.7380130993450328,
+          "better": 16,
+          "worse": 19
+        }
+      },
+      "v_no_phrasing": {
+        "mean": 4.01,
+        "n": 100,
+        "distribution": {
+          "1": 0,
+          "2": 0,
+          "3": 9,
+          "4": 81,
+          "5": 10
+        },
+        "against_baseline": {
+          "paired_traits": 100,
+          "difference": 0.05,
+          "interval": [
+            -0.05,
+            0.15
+          ],
+          "p": 0.44212789360531973,
+          "better": 16,
+          "worse": 11
+        }
+      }
+    },
+    "coverage": {
+      "draft5": {
+        "mean": 2.99,
+        "n": 100,
+        "distribution": {
+          "1": 0,
+          "2": 29,
+          "3": 51,
+          "4": 12,
+          "5": 8
+        }
+      },
+      "v_four_words": {
+        "mean": 3.09,
+        "n": 100,
+        "distribution": {
+          "1": 0,
+          "2": 27,
+          "3": 45,
+          "4": 20,
+          "5": 8
+        },
+        "against_baseline": {
+          "paired_traits": 100,
+          "difference": 0.1,
+          "interval": [
+            -0.08,
+            0.28
+          ],
+          "p": 0.34258287085645717,
+          "better": 30,
+          "worse": 21
+        }
+      },
+      "v_no_phrasing": {
+        "mean": 3.15,
+        "n": 100,
+        "distribution": {
+          "1": 0,
+          "2": 24,
+          "3": 49,
+          "4": 15,
+          "5": 12
+        },
+        "against_baseline": {
+          "paired_traits": 100,
+          "difference": 0.16,
+          "interval": [
+            -0.03,
+            0.35
+          ],
+          "p": 0.14014299285035747,
+          "better": 34,
+          "worse": 23
+        }
+      }
+    }
+  }
+}

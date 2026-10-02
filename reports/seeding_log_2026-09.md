@@ -2195,3 +2195,170 @@ A last commit carries this entry and the doc references to `93a8554`.
   added to the chunk table in TRAITS_TO_ADD; the design is to be agreed
   with him before `_ROGER_TEMPLATE` changes, and the regeneration needs
   the expensive-operations confirmation.
+
+## deterministic renamed determinist (2026-09-30)
+
+Roger: the bare label reads as a property of a process, not a person.
+`seed_entities.py rename --old deterministic --new determinist --partner
+libertarian` (file moved with `renamed_from`, regenerated under the
+production rubric, $0.03), then the check both ways: determinist ->
+`indeterminist|libertarian` (nearly nice: libertarian is the partner,
+indeterminist is not in the corpus), libertarian -> `determinist` (nice).
+A clean pair.  The rename left `arrangement.members` on both files and
+libertarian's `negative_label` at the old stem (AGENT_NOTES code
+housekeeping item 7); members were rewritten by hand and `pair --a
+libertarian --b determinist` set the label and regenerated libertarian's
+instructions so its negatives name determinist ($0.03).
+`check_arrangements.py`: no problems; `trait_list.json` resynced.  Neither
+trait is in the rubric V2 development or held-out sample.
+
+## libertarian renamed metaphysical libertarian (2026-09-30)
+
+Roger: "libertarian" is correct in the philosophical sense, but readers know
+the political one, and that sense had leaked into the description ("rejecting
+the influence of external factors or systemic forces on individual outcomes")
+and so into the instructions ("champion personal responsibility above all
+else").  Description rewritten to the metaphysical sense ("This means holding
+that human choices are genuinely free: not fixed by prior causes, so that a
+person could really have done otherwise, and the true author of what they
+decide."), then `rename --old libertarian --new "metaphysical libertarian"
+--partner determinist`, regenerated under the production rubric.  Check:
+metaphysical libertarian -> `hard_determinist|determinist` (nice with
+alternatives); determinist -> `indeterminist|libertarian`, the same word in
+the philosophical sense without the qualifier.  **Paired by decision (P)** on
+Roger's ruling ("if it fails because we get 'libertarian' rather than
+'metaphysical libertarian', I'm happy to override"), recorded in both files'
+arrangement note.  Members rewritten by hand (housekeeping item 7), then
+`pair --a determinist --b metaphysical_libertarian`: determinist's
+`negative_label` is the new label and its negatives were regenerated to name
+it ("You are a metaphysical libertarian. You believe that humans possess
+genuine free will ...").  `check_arrangements.py`: no problems.  Cost about
+$0.06.  Neither trait is in a pair list, the extracted data, or the rubric V2
+samples; one seed-queue row (fatalistic's partner) names "libertarian" as its
+nearest existing trait, a note only.
+
+## Clean-pair recheck after the trait rubric V2 regeneration (2026-10-01/02)
+
+The whole corpus was regenerated under the adopted rubric V2 (template
+`9255dd3430ef`) on 2026-10-01; the design log in
+[TRAITS_TO_ADD.md](../data/traits/instructions/TRAITS_TO_ADD.md),
+§ "Adoption and regeneration", has the run.  The recheck regenerated every
+member of the 262 recorded pairs with the partner unnamed in a staging copy
+(`roger/pair_recheck_2026-10-01/`), checked both sides, and resampled every
+miss once: 192 of the 237 clean pairs name each other both ways; 45 do not.
+Roger's decisions on the 45, 2026-10-02 (first part; the rest tomorrow):
+
+- **Left as is (spelling variants the matcher does not join):**
+  collectivistic / individualistic ("collectivist"), noncommittal /
+  opinionated ("non-committal").
+- **Forced (P), 13:** calm / excitable, cheerful / melancholic, clear /
+  cryptic, dismissive / supportive, dispassionate / passionate, dry /
+  entertaining, edgy / staid, emotionally_disengaged / emotionally_engaged,
+  exclusivist / pluralist, gregarious / solitary, informational /
+  rhetorical, obedient / rebellious, strategic / tactical.  The decision
+  and both sides' answers are appended to each file's pair note.
+- **Renamed, 10 traits in 8 pairs**, each tried first in the staging copy
+  (new label, regenerated with the partner unnamed, checked, one resample
+  where it missed) and applied only when both sides named each other:
+  job_hopper -> job-hopping (named company-loyal on the resample);
+  disciplined / indulgent -> self-disciplined / self-indulgent;
+  variety_seeking -> brand-agnostic; financially_adventurous -> financially
+  reckless (its earlier rename from financially_daring is kept in the list
+  form of `renamed_from`); cultural_relativist / universalist -> moral
+  relativist / moral universalist; undependable -> unreliable (named
+  dependable on the resample); exclusive -> exclusionary; urgent -> hurried.
+  Applied with `seed_entities.py rename --no-check`, the pair members fixed
+  by hand (housekeeping item 7), then `pair` with the partner's
+  instructions regenerated so its negatives name the new word.
+  `universalist` was also the far end of the 16-member sequence (selfish ...
+  humanitarian, universalist); the sequence records now name
+  moral_universalist, order unchanged.  `undependable` was a pole in the
+  live `pair_list_clean.json` and `pair_list_di.json`, now `unreliable`
+  (the `_v1` records keep the old stem).
+- **Tried and not applied:** full_price_shopper -> price-indifferent; the
+  renamed side named price-conscious twice, so the rename was dropped and
+  full-price shopper stays.
+- **Later the same night:** bold / cautious forced (Roger: the descriptions
+  already mirror; the miss comes from the rubric's to-a-fault rule), and
+  bargain_hunter / full_price_shopper forced.  dogmatic renamed
+  closed-minded (two of its description's three clauses are
+  closed-mindedness, and open-minded's mirror is closed-minded): the staged
+  trial named open-minded on the first sample, open-minded had named
+  closed-minded twice; applied as above, description unchanged.
+- **2026-10-02, the rest.**  Forced: epicurean / spartan, guileless /
+  scheming, naive / worldly.  Descriptions rewritten as the partner's
+  mirror, tried in staging, and applied because both sides then named each
+  other: careless (now names conscientious), earnest (made specific to not
+  mocking, now names sardonic), erudite (names unschooled), grounded (the
+  "rather than abstract theories" clause replaced, names ethereal),
+  reserved (names expressive).  open_ended renamed ambiguity-tolerant and
+  both it and closure_seeking rewritten in persona terms (each names the
+  other).  rule_bending renamed rule-breaking with "bend or skip" ->
+  "bend or break" (Roger: rule-bending is softened; named rule-abiding on
+  the resample).  analytical re-paired with intuitive (each names the
+  other); systems_thinker is now a one-way pointer at reductionist,
+  unclassified.  The old pair texts are kept in each file's pair note.
+  Tried and **not** applied (the rewrite still missed twice with the same
+  words): circumspect (rash, impulsive, blunt), methodical (haphazard,
+  unsystematic; its partner improvisational now names methodical under the
+  rewrite), serene (agitated, restless), zealous (dispassionate, apathetic).
+  Tried in staging only, as alternatives, not in the corpus: benign
+  rewritten to effects with a new malign (confirmed both ways; overlaps
+  harmless / harmful), and bland renamed dull with a presence description
+  (names charismatic; charismatic names dull), because a new vivid would
+  duplicate animated and bland's voice sense duplicates flat.
+- **Moral-circle sequence, 2026-10-02.**  moral_universalist removed from
+  the sequence (never a circle-size meaning).  civilizationist seeded
+  (Roger: "SG, make it so") for the circle between nation and humanity,
+  placed after ethnocentric; description "This means putting one's own
+  civilization first: caring about the peoples of one's wider world, such
+  as the West, above all others, and treating those outside it as not one's
+  concern."  `non-civilizationist` label, sequence member, generated under
+  `9255dd3430ef` ($0.05).  Four of its five instructions take "such as the
+  West" as the trait itself (the Western world specifically); flagged to
+  Roger.  regionalist keeps its sub-national meaning.  Review of the rest
+  of the sequence: TRAITS_TO_ADD § "TODO: review the moral-circle sequence".
+- **2026-10-02, round 3** (script and log in
+  `roger/pair_recheck_2026-10-01/`, after a restart cleared the session
+  scratchpad mid-run; the steps are idempotent).  civilizationist given
+  three examples ("such as the West, the Islamic world or the Chinese
+  world") and regenerated: its instructions no longer all say Western.
+  circumspect / brash, serene / turbulent, zealous / temperate and
+  methodical / improvisational forced, descriptions unchanged until Roger
+  chooses old or new.  bland renamed dull with a presence description
+  (pairs with charismatic; bland's voice sense is flat's).  benign rewritten
+  from intent to effects and paired with a new malign (Roger: option b,
+  "we'll have to redo all the judging anyway"); malicious keeps only its
+  triangle, pointing at compassionate.  detached / empathetic dissolved:
+  detached points at engaged, empathetic at callous, both kept for now.
+  benign / malicious, systems_thinker / analytical and detached /
+  empathetic left the live pair lists; `pair_list_responses_v1.json` made
+  first.
+- **nurturing / tough, 2026-10-02.**  tough was seeded on 2026-09-16 for
+  Hofstede's tough-vs-tender gap (Hofstede is inspiration, not adopted by
+  name: decision of 2026-09-07).  The recheck read them as two axes (tough
+  -> lenient|soft twice; nurturing -> callous|neglectful, then
+  neglectful|cold|harsh).  Roger: "two pairs works".  neglectful,
+  nurturing's original Tier D completion (superseded when tough was
+  chosen), reactivated and seeded: it names nurturing, so nurturing /
+  neglectful is a clean pair.  A staged lenient named strict|demanding
+  twice, so tough points one way at lenient for now; tough renamed strict
+  was then tried in staging and named lenient: strict / lenient would be
+  clean both ways.  The rename is Roger's call.
+- **Forced pairs' descriptions, 2026-10-02.**  Roger chose the new mirrored
+  descriptions for circumspect, zealous, methodical and improvisational,
+  and wrote serene's himself ("being calm inside and tranquil outside,
+  being at peace for long stretches, and carrying that stillness into
+  everything one says"); tried in staging, it names agitated|frantic, so
+  the pair stays forced.  All five regenerated ($0.23); the old texts are
+  in each pair note.
+- **analytical / intuitive** (Roger, 2026-10-02): kept as written and
+  added to the four live pair lists in place of systems_thinker /
+  analytical; its closeness to reductionist / holistic is to be checked on
+  the next extraction's cosines (TRAITS_TO_ADD § "TODO: arrangement
+  hunting", "Near-duplicates to settle").
+- **Open:** tough -> strict (and seeding lenient); the triangle survey,
+  in TRAITS_TO_ADD § "TODO: arrangement hunting".
+
+`check_arrangements.py`: no problems; `sync_entity_lists.py --check`: up to
+date; tests 1,505 passed.  Cost of the trials and renames about $1.60.

@@ -1,0 +1,29 @@
+{
+  "n_calls": 279715,
+  "per_model": {
+    "gpt-4.1-mini": {
+      "completion_tokens": 10084858,
+      "cost_usd": 50.078,
+      "model": "gpt-4.1-mini",
+      "n_calls": 140000,
+      "prompt_tokens": 84855463
+    },
+    "qwen/qwen3-32b": {
+      "completion_tokens": 51950790,
+      "cost_usd": 15.3356,
+      "model": "qwen/qwen3-32b",
+      "n_calls": 137272,
+      "prompt_tokens": 9866845
+    },
+    "qwen/qwen3-32b (estimate: a run stopped on 2026-09-30 left these calls unrecorded)": {
+      "completion_tokens": 917711,
+      "cost_usd": 0.271,
+      "model": "qwen/qwen3-32b (estimate: a run stopped on 2026-09-30 left these calls unrecorded)",
+      "n_calls": 2443,
+      "prompt_tokens": 175338
+    }
+  },
+  "total_completion_tokens": 62953359,
+  "total_cost_usd": 65.6845,
+  "total_prompt_tokens": 94897646
+}

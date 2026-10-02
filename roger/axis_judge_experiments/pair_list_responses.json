@@ -8,14 +8,6 @@
     "note": "communication clarity (good-pole convention)"
   },
   {
-    "pos": "benign",
-    "neg": "malicious",
-    "pair_type": "traits",
-    "tier": "A",
-    "moral": true,
-    "note": "moral; good-pole convention"
-  },
-  {
     "pos": "blunt",
     "neg": "tactful",
     "pair_type": "traits",
@@ -146,12 +138,12 @@
     "note": "clean trait pair (bidirectional negative_label match)"
   },
   {
-    "pos": "systems_thinker",
+    "pos": "intuitive",
     "neg": "analytical",
     "pair_type": "traits",
     "tier": "C",
     "moral": false,
-    "note": "neutral; in-60 = pos; scope-check"
+    "note": "neutral; 2026-10-02 (Roger): replaces systems_thinker / analytical, dissolved in the clean-pair recheck; kept although intuitive overlaps holistic: compare its cosine with reductionist / holistic after extraction and drop one pair if they are very close"
   },
   {
     "pos": "truthful",

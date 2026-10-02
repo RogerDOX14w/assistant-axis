@@ -54,6 +54,28 @@ proceed without a second confirmation cycle.  This rule only
 triggers when the parameter choice is ambiguous, inherited from
 older context, or differs from the documented current default.
 
+### Batch or real time (Roger, 2026-09-29)
+
+- **Under about $20: real time.**  Turnaround matters more than the
+  saving.
+- **Over about $20 in total: consider batch, case by case**, and say in
+  the parameter list which was chosen and why.  Batch is 50% off at
+  Anthropic, OpenAI and OpenRouter and 20% off at DeepInfra direct; the
+  stated limit is 24 hours everywhere, the usual wait minutes to an hour
+  (Anthropic: "most batches finishing in less than 1 hour"; OpenRouter: a
+  median of 7 minutes), with no guarantee.
+- **Code that is likely to make large runs supports batch as a
+  command-line flag**, off by default.  So far:
+  [`regenerate_trait_instructions.py --batch`](./data_analysis/regenerate_trait_instructions.py)
+  (one Message Batch for the run; `--batch-no-wait` and `--batch-id` to
+  submit now and collect later; what the batch fails to deliver is
+  generated in real time).  Not yet: the role generator, the audit's
+  judge, and the Qwen tests (`opening_form_experiment.py`); add the flag
+  when one of them is about to make a run over $20.
+- **Usage of a batch run is kept under `<model>:batch`**, which
+  `assistant_axis.judge_pricing.price_for_model` prices at the batch
+  rate, so that a usage record says how the tokens were bought.
+
 ---
 
 ## File Access Boundary (HARD RULE)
@@ -176,7 +198,14 @@ start of a word used as "about" (`~$0.03`: write "about"), awk's
 standalone `~` operator, a quoted or space-delimited `..` on the command
 line (in a message, a regex such as `grep '..'`), a `$VAR/..` whose
 variable in fact points into `/tmp`, and a heredoc body that quotes a
-home path.  What the hook cannot see: a climb the text does not spell (a
+home path.  Two more seen on 2026-10-01, sixteen asks in one session, all
+harmless: a scratch script written by heredoc with the repository's
+absolute path in it (`sys.path.insert(0, "/Users/<user>/.../repo")`:
+write `os.getcwd()` instead), and a Python heredoc that edits a report
+and quotes a document-relative link such as `../../../reports/x.json`,
+which the climb rule resolves against the working directory, lands
+outside the home-directory project tree, and asks.  Edit documents with
+the Edit tool, which is checked by path only.  What the hook cannot see: a climb the text does not spell (a
 `cd` inside the command followed by a relative path,
 `Path(x).parent.parent`, a variable set elsewhere, a symlink).  It is a
 backstop against honest mistakes, not a sandbox.  To see what the hook
@@ -230,6 +259,33 @@ all 10 must be hotlinked; in a one-line reply mentioning a single
 plot, that plot must be hotlinked.  If you find yourself writing a
 backticked file path with no markdown link around it in a chat
 reply, stop and rewrite that section.
+
+**The rule also covers documents written for Roger** (added
+2026-09-29; Roger: "it should apply in .md files as well").  In any
+`.md` file an agent writes or edits for him to read (a report, a
+decision walk-through, a plan, a readout, a review), every file the
+text mentions is a markdown link.  Three differences from a chat
+reply:
+
+- **The path is relative to the document, not to the workspace
+  root**, because that is how the editor resolves a link inside a
+  file.  From `reports/trait_gap_generation/x.md` a trait file is
+  `[honorable](../../data/traits/instructions/honorable.json)` and a
+  sibling report is `[readout.md](./readout.md)`.  A `./data/...`
+  path copied from a chat reply is broken there.
+- **A file that does not exist yet is still linked**, at the path
+  where it will appear, with a few words saying it is not there
+  yet.  "The run will print a sample" with no link leaves Roger
+  hunting for it later; this is the case that prompted the
+  addition.
+- **A subagent asked to write such a document must be told the rule
+  in its prompt.**  Subagents do not reliably inherit it.
+
+Trait and role names count as file mentions in documents too, as
+they do in chat.  The known gap: the file tools that write the
+document are checked by path only, so nothing enforces this; read
+the finished document once for bare file names before handing it
+over.
 
 (This rule also exists below in a less-prominent
 "Hotlinking image/plot files" section; this top-level HARD RULE
@@ -339,6 +395,51 @@ are exempt unless they grow into batch tools.
 
 ---
 
+## Hosted models: western hosts only, and keys stay unseen (HARD RULE)
+
+**When a model is reached through a routing service (OpenRouter, from
+2026-09-29), use only hosts based in western countries.  No host based
+in China or in a country of its bloc** (Roger, 2026-09-29).  A model's
+name says nothing about where it is served: `qwen/qwen3-32b` had two
+hosts that day, DeepInfra (United States) and SiliconFlow (China).
+
+1. **Find out where each host is based before the first request**, and
+   list the hosts with their countries in the reply to Roger.  If it is
+   not clear where a host is based, do not use it; ask.
+2. **Pin the host and forbid fallback** (`provider: {"order": [...],
+   "allow_fallbacks": false}` on OpenRouter), so that the router cannot
+   send a request elsewhere, and throw away any response that names
+   another host.  The allowlist lives in code
+   (`ALLOWED_PROVIDERS` in
+   [`data_analysis/opening_form_experiment.py`](./data_analysis/opening_form_experiment.py));
+   a host is added there only after step 1.
+3. **Choose the host by this rule first and by convenience second.**  On
+   2026-09-29 the agent pinned SiliconFlow because it honoured the
+   request to switch Qwen's thinking off and DeepInfra did not; about
+   870 requests (old trait instructions and the shared extraction
+   questions, nothing else) went there before Roger said so.  The right
+   move was to check the hosts' countries, take DeepInfra, and find
+   another way to switch thinking off (Qwen's own `/no_think`).
+
+**Models of OpenAI, Anthropic and Google are reached directly**, with
+their own keys, not through a router (Roger, 2026-09-29).  A router is
+for models that have no first-party API in use here, such as Qwen.  A
+script that finds the direct key missing stops and says so; it does not
+turn to the router on its own.  (The replication in
+`reports/opening_forms/replication/` was judged by GPT-4.1-mini through
+OpenRouter, pinned to OpenAI, before there was an `OPENAI_API_KEY`; the
+agent should have asked for the key.)
+
+**API keys** (`.env`): never read the file, print a key, copy it
+anywhere, or send it anywhere but to its own service over HTTPS as an
+API request needs.  Scripts load keys with `load_dotenv()` and hand
+them to the client; nothing logs request headers.
+
+**Why:** Roger's requirement for this project's data and traffic; not
+open to case-by-case judgement by an agent.
+
+---
+
 ## Communication Style
 
 ### Concise and Technical
@@ -374,6 +475,10 @@ summaries with hotlinks added.  Brief version here:
 - Bare paths and backticked-only paths do NOT hotlink in Cursor.
 - Absolute paths (`/Users/roger/...`) hotlink but bake the
   username in; prefer `./...`.
+- Inside a `.md` document written for Roger the same rule holds, with
+  paths relative to the document (`../../data/...`), not to the
+  workspace root; a file that does not exist yet is linked at the path
+  where it will appear.
 
 ### Ask Mode vs Agent Mode
 - Roger is conscious of the distinction between read-only (ask) and write (agent) modes
@@ -469,7 +574,7 @@ This is the **8-slot** rebuild that supersedes `runpod_workspace/qwen/qwen-3-32b
 
 When invoking analysis scripts that take `--data_dir`, prefer the 8slot path. The `results_analysis/run_axis_experiment_batch.py` default (`runpod_workspace/qwen/qwen-3-32b Roger`) is stale; pass `--data_dir 'runpod_workspace/qwen/qwen-3-32b Roger 8slot'` explicitly until that default is updated. The README examples likewise still reference the older directory.
 
-**Pair lists come in two generations since 2026-09-28 (Roger).** In `roger/axis_judge_experiments/`, `pair_list_clean.json`, `pair_list_di.json` and `pair_list_goalnongoal.json` describe the corpus **as it is now** and are for new work, that is, for the next extraction: they name the renamed pole `instrumentally_aligned_ai` and no longer carry `constructivist` / `essentialist` (dissolved into a tetrahedron) or `compassionate` / `callous` (a triangle edge, not a pair; di only). Their byte-exact predecessors are `pair_list_clean_v1.json`, `pair_list_di_v1.json` and `pair_list_goalnongoal_v1.json`, the record of what was judged. **With the 8slot data dir and the existing judge caches, pass `--pairs pair_list_<cohort>_v1.json`**: the current lists name a pole that has no vector and no judged directory yet, so a script run with its default list stops at that axis. `pair_list_responses.json` needed no change and has no `_v1`. The `_v1` here has nothing to do with rubric v1 (`*__rubric_v1.*`). The cohort token follows the file name, so a `_v1` run writes `..._clean_v1_...` outputs, while the `..._clean_...`, `..._di_...` and `..._goalnongoal_...` outputs already on disk came from what are now the `_v1` lists. Old stems in a `_v1` list still find their descriptions: `axis_judge_correlation.py` reads a renamed pole's text through the corpus file's `renamed_from` (`assistant_axis.entity_id.resolve_renamed_stem`) and logs a warning. Vectors and judge caches are never remapped. Before editing any other pair list that records judged work, copy it to `_v1` first; `/roger` is git-ignored, so a new pair list needs `git add -f`.
+**Pair lists come in two generations since 2026-09-28 (Roger).** In `roger/axis_judge_experiments/`, `pair_list_clean.json`, `pair_list_di.json` and `pair_list_goalnongoal.json` describe the corpus **as it is now** and are for new work, that is, for the next extraction: they name the renamed pole `instrumentally_aligned_ai` and no longer carry `constructivist` / `essentialist` (dissolved into a tetrahedron) or `compassionate` / `callous` (a triangle edge, not a pair; di only). Their byte-exact predecessors are `pair_list_clean_v1.json`, `pair_list_di_v1.json` and `pair_list_goalnongoal_v1.json`, the record of what was judged. **With the 8slot data dir and the existing judge caches, pass `--pairs pair_list_<cohort>_v1.json`**: the current lists name a pole that has no vector and no judged directory yet, so a script run with its default list stops at that axis. `pair_list_responses.json` needed no change then; its `_v1` record was made on 2026-10-02, when the clean-pair recheck after the trait rubric V2 regeneration dissolved `benign` / `malicious`, `systems_thinker` / `analytical` and `detached` / `empathetic` and they left the current lists (and `undependable` became `unreliable`). The `_v1` here has nothing to do with rubric v1 (`*__rubric_v1.*`). The cohort token follows the file name, so a `_v1` run writes `..._clean_v1_...` outputs, while the `..._clean_...`, `..._di_...` and `..._goalnongoal_...` outputs already on disk came from what are now the `_v1` lists. Old stems in a `_v1` list still find their descriptions: `axis_judge_correlation.py` reads a renamed pole's text through the corpus file's `renamed_from` (`assistant_axis.entity_id.resolve_renamed_stem`) and logs a warning. Vectors and judge caches are never remapped. Before editing any other pair list that records judged work, copy it to `_v1` first; `/roger` is git-ignored, so a new pair list needs `git add -f`.
 
 ### Mid-Session Patterns
 - If unsure about working style: "Should I implement this directly or discuss options first?"

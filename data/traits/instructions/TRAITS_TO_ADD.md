@@ -30,6 +30,67 @@ valuable additions to the trait set.
   Label-only change; the Sonnet-4 neg instructions (local / wary-of-foreign
   framing) and everything else in the file are unchanged.
 
+## TODO: review the moral-circle sequence (queued 2026-10-02)
+
+Roger, 2026-10-02: reconsider what belongs in the moral-circle-size
+sequence, the order, and which descriptions need rewriting.  The sequence
+was assembled on 2026-09-08 from traits that already existed (its note says
+"ordered by estimated population of the circle (guesstimate 2026-09-08)"),
+so membership and order were never reviewed against the descriptions.
+
+**Current members, in order (15):** [selfish](./selfish.json),
+[clannish](./clannish.json), [cliqueish](./cliqueish.json),
+[insular](./insular.json), [parochial](./parochial.json),
+[regionalist](./regionalist.json), [sectarian](./sectarian.json),
+[nationalist](./nationalist.json), [patriotic](./patriotic.json),
+[ethnocentric](./ethnocentric.json), [cosmopolitan](./cosmopolitan.json),
+[philanthropic](./philanthropic.json), [humanitarian](./humanitarian.json),
+[kind_to_animals](./kind_to_animals.json), [ecocentric](./ecocentric.json).
+
+**Removed 2026-10-02:** [moral_universalist](./moral_universalist.json)
+(then `universalist`).  Its description has meant the same moral standards
+across all cultures since its first version in March 2026, which is the
+relativism axis (it pairs with [moral_relativist](./moral_relativist.json)),
+never circle size.
+
+**The gap between nation and humanity.**  Roger's 2026-09-28 rewrite of
+regionalist moved it from the March meaning (a multi-nation region,
+between nation and world) to a region of one's own country ("above those
+of the rest of the country").  The new text is a fair reading of the word
+and a useful step, but the circle between nation and all humans ("the
+West", "the developed world") is now empty, and Roger wants it filled.
+Proposed 2026-10-02: keep regionalist for the sub-national step and seed a
+new supranational member (candidate label `civilizationist`, pending
+Roger's choice of word and his review of the description), placed after
+ethnocentric and before cosmopolitan.
+
+**Members whose description is not about the size of the circle:**
+- philanthropic: "generous giving, charitable action" is generosity and
+  says nothing about whose welfare;
+- patriotic: love and pride of country, the same circle as nationalist,
+  described as affection rather than as a limit on concern;
+- ethnocentric: its own group's norms as superior, a claim of superiority
+  more than of scope;
+- cosmopolitan: global citizenship, diversity and openness, the world
+  circle reached by openness rather than concern;
+- selfish: "how one's actions or advice affect other people" carries an
+  assistant's frame ("advice").
+
+**Overlaps and order:** insular and parochial both say "local" and occupy
+one step; sectarian overlaps region and nation (already in the note);
+placing ethnocentric after the nation steps implies an ethnic group is a
+larger circle than a nation, which is often not so.
+
+**Members that do read as circle size:** selfish, clannish, cliqueish,
+insular, parochial, regionalist, sectarian, nationalist, humanitarian,
+kind_to_animals, ecocentric.
+
+To decide: membership (drop, rewrite or keep philanthropic, patriotic,
+ethnocentric, cosmopolitan), whether insular and parochial both stay, the
+order, and which descriptions to rewrite in scope terms.  Roger's
+2026-09-07 guess is an elongated simplex rather than a line; the next
+extraction's cosines are the check on whatever order is chosen.
+
 ## Misalignment (added Mar 2026)
 - ~~malicious~~ added
 - ~~malevolent~~ added
@@ -2187,6 +2248,55 @@ clean pair and leave the vices as one-way pointers, another tangle
 shape (a clean pair with a vice hanging off each end).  Outcome in
 `reports/seeding_log_2026-09.md` § "Post-strip decisions applied".
 
+**Survey 2026-10-02: copies of the help / harm / don't-care triangle.**
+Roger asked, after the clean-pair recheck (benign / malicious failed it:
+malicious names benevolent), how many copies of this triangle the corpus
+holds and how tangled they are; he is content with two or three copies in
+different registers, for the cosines between them, but not more.  Found:
+
+| register | help | harm | don't care | state |
+|---|---|---|---|---|
+| feeling | compassionate | malicious | callous | recorded triangle |
+| will, intent | benevolent | malevolent | uncaring | all three exist, none arranged; benevolent and uncaring name each other as `negative_label`, malevolent is `non-X`; uncaring checks to caring / empathetic / compassionate |
+| moral standing | good | evil | amoral | good / evil a pair by decision; amoral paired with moral |
+| mercy | merciful | cruel | (merciless, not seeded) | see the 2026-09-25 note above |
+| effects | benign (rewritten in staging 2026-10-02 to effects) | malign (staging only) | (harmless?) | benign / malign confirmed both ways in staging; overlaps the harmless / harmful pair, which is the same axis in the assistant's framing |
+| care, upbringing | nurturing | (abusive, not seeded) | (neglectful, not seeded) | nurturing's check names callous / neglectful; paired with tough, which fails |
+| animals | kind_to_animals | (cruel to animals) | indifferent_to_animals | a pair by decision; kind_to_animals's check names both of the others |
+
+Stray edges: empathetic / detached (a pair that fails both ways:
+empathetic names callous, detached names engaged), malicious also paired
+with benign, and `cruel` still pointing one way at merciful.  So: one
+recorded copy, one complete but unrecorded (benevolent / malevolent /
+uncaring), and five partial ones.  Suggested shape for the triangle pass:
+keep feeling and will as the two copies (all six words exist), consider
+moral standing as a third, treat animals as its own domain rather than a
+copy, and fold or drop the rest (merciful, benign, the care edge).
+
+**Near-duplicates to settle with the next extraction's cosines (Roger,
+2026-10-02).**  Found during the clean-pair recheck; Roger: keep them for
+now, compare the cosines, and drop a pair (or a trait) where two are very
+close.
+- [intuitive](./intuitive.json) / [analytical](./analytical.json) against
+  [holistic](./holistic.json) / [reductionist](./reductionist.json): intuitive's
+  description says "holistic thinking ... the bigger picture", analytical's and
+  reductionist's both open "breaking down ... into ... components".  Both
+  pairs are in the live pair lists.  If they are very close, the alternative
+  is to rewrite intuitive / analytical in the dual-process sense (by feel
+  against worked out), which the corpus does not otherwise cover.
+- [detached](./detached.json) against [dispassionate](./dispassionate.json)
+  (nearly the same description); [empathetic](./empathetic.json) between
+  [compassionate](./compassionate.json) and
+  [socially_perceptive](./socially_perceptive.json).  Both are one-way
+  pointers since 2026-10-02.
+- [systems_thinker](./systems_thinker.json) against holistic.
+- [benign](./benign.json) / [malign](./malign.json) (effects) against
+  [harmless](./harmless.json) / [harmful](./harmful.json).
+- [insular](./insular.json) and [parochial](./parochial.json) (see the
+  moral-circle TODO); [merciful](./merciful.json) and compassionate;
+  [uncaring](./uncaring.json) and [callous](./callous.json) (see the
+  triangle survey above).
+
 **Recorded 2026-09-28 (Roger): the essence tetrahedron.**  `nihilistic`,
 `essentialist`, `constructivist` and `existentialist` are four answers to
 where essence and meaning come from (there is none; fixed and inherent;
@@ -2901,7 +3011,7 @@ TBD, ~100 backlog, 88 not adopted); the inventory becomes
 | 1b | Tier A (2 pairs already reciprocal: add to the pair lists), Tier B (label fixes: selfish, parochial, philanthropic), Tier C (3 tangles: decisions); record the provincial ↔ cosmopolitan role pair (ROLES_TO_ADD § "Role pairs to record") | 9 | quick |
 | 2 | roles, description only, singleton arrangements | 56 (+22 tarot if adopted) | sensitive few |
 | 3 | new plain pairs, scratch, four theme sub-chunks: demographic + part 2 (46), part 3 (43), dark / light and gap scans (34), part 4 (60), the two agentic-weakness pairs (4, added 2026-09-11) and the ruthless-while-playing / honorable-while-playing and ends-justify-means / honorable pairs (4, added 2026-09-16; Roger's edits done 2026-09-26); plus the Strategy 1a common-mode candidates from May | ~198 | wording-TBD pairs first |
-| V2 | trait generator V2 (§ "Trait generator V2"; added 2026-09-28, Roger: "insert it in the list of tasks before chunk 4 — we'll do that next"): rewrite `_ROGER_TEMPLATE` to fix the generator-side issues, settle how a pair is confirmed given the check's noise, then regenerate every trait and recheck the pairs | the 659 existing traits | design to agree with Roger first; about $19 of generation, about $40 with the honest pair recheck, so the regeneration needs the expensive-operations confirmation; before chunk 4 so that chunk 4 is generated once |
+| V2 | **done 2026-10-02** (rubric adopted 2026-10-01 as `9255dd3430ef`, corpus regenerated, held-out check passed, pairs rechecked): trait generator V2 (§ "Trait generator V2"; added 2026-09-28, Roger: "insert it in the list of tasks before chunk 4 — we'll do that next"): rewrite `_ROGER_TEMPLATE` to fix the generator-side issues, settle how a pair is confirmed given the check's noise, then regenerate every trait and recheck the pairs | the 659 existing traits | design to agree with Roger first; about $19 of generation, about $40 with the honest pair recheck, so the regeneration needs the expensive-operations confirmation; before chunk 4 so that chunk 4 is generated once |
 | 4 | standards: pairs and orthoplexes (41) then sets and rings (100); lenient pairing per the policy; near-duplicate tagging | ~141 | Big Five / HEXACO low-pole names |
 | 5 | unpaired plain traits and plain sets: memberships, states, the two simplices; the sensitive batch (~20) handled together | 135 | refusals |
 | 6 | physical track, tagged `physical` | 26 | none |
@@ -3004,6 +3114,17 @@ role files (337 roles and `default.json`).  Queue: chunks 0 to 3 hold only
 final states and 16 backlog entries (optional or fallback names, and
 `wasteful`).  Every decision is in `reports/seeding_log_2026-09.md`.
 
+Status 2026-10-02 (trait generator V2 done).  The rubric was adopted on
+2026-10-01 (template `9255dd3430ef`, § "Trait generator V2"), every trait
+regenerated under it, the held-out check passed, and the pairs rechecked
+with the partner unnamed (§ "Adoption and regeneration"; decisions in
+[seeding_log_2026-09.md](../../../reports/seeding_log_2026-09.md),
+"Clean-pair recheck after the trait rubric V2 regeneration").  Corpus: 662
+trait files, all under `9255dd3430ef`; 261 pairs; 16 in the moral-circle
+sequence (moral_universalist out, civilizationist in); new today:
+civilizationist, malign, neglectful.  Next: tough -> strict (with a new
+lenient) awaits Roger; then the commit; then chunk 4.
+
 Checked in on 2026-09-28 on branch `anthropic-vllm-uv`, as ten commits
 from `3f6de81` ("Expand and rework the trait and role corpus") to
 `f5a5cd3`, plus the one that carries this note; the corpus as it stood
@@ -3074,6 +3195,1201 @@ expensive-operations confirmation.  Nothing has been extracted from the
 new corpus yet, and every existing trait touched this month is already
 stale for extraction, so the cheapest moment for a V2 is before the
 RunPod round, not after.
+
+### Design log (started 2026-09-28)
+
+Starting point: the role rubric V2.5 (`--style RogerV2` in
+`data_analysis/regenerate_role_instructions.py`).  Its changes against
+the V1 role template were split into ten and classified by goal, so that
+each can be taken or left for traits:
+
+| change | what it adds | goal | for traits |
+| --- | --- | --- | --- |
+| C1 | second person, 15 to 25 words, US English; sentence shape to suit the role | form, partly voice | form part open; voice part out |
+| C2 | why the wording matters: register is imitated; softening gives a softened persona; purpose of the dataset | mostly voice | the softening and purpose part is relevant |
+| C3 | morally bad roles: do not whitewash, justify or soften | softening | in |
+| C4 | write in the role's own language; avoid clinical or writer's register | voice | out |
+| C5 | roles with no usable voice | voice | out |
+| C6 | self-justification allowed if marked as the role's | mixed | open |
+| C7 | particulars; span the description; address the persona, never the model; do not repeat the description's wording | mixed, much of it voice | open: concreteness, addressee and no-echo parts |
+| C8 | seven observer words banned | mostly voice | open: "appropriate" and "healthy" are softeners |
+| C9 | examples replaced; self-check before writing | all of the above | new trait examples needed, none that say "the user" or depend on a question-and-answer frame |
+| C10 | question design | question quality | in, adapted heavily for traits |
+
+**Voice is left out of the trait rubric (Roger, 2026-09-28).**  His
+reasons: a role and a trait instruction are sometimes combined, and two
+voices would clash; traits that specify a voice produce it whether or
+not the instruction is written in it; the primarily-voice traits are
+among those he is least interested in; and the rubric should carry no
+complexity a Sonnet-class generator does not need.  Evidence for the
+second reason: `reports/voice_audit_2026-09-09.md` § "Second look, on 23
+other voice traits".  The same look found what does decide whether a
+trait instruction works: it names the behaviour concretely, and it does
+not soften the trait or describe a milder neighbour (chill written as
+"calm, patient, puts people at ease" gave ordinary assistant answers).
+
+**What the trait question banks are for.**  Nothing reads a trait file's
+40 questions except the generator itself: extraction uses the shared
+bank `data/extraction_questions.jsonl`, and the banks are one of the
+sources from which steering question lists are picked by hand
+(AGENT_NOTES, rule steering-questions, source 3).  So a good trait
+question is a good steering question, and that rule's findings apply:
+a value or a decision and not a procedure or a fact, no single correct
+or safe answer, a trade-off with two named options, both poles able to
+answer differently.  Shapes of the 26,360 questions in the corpus on
+2026-09-28: 45% address the persona ("what would you do"), 15% ask how
+to do something, 12% are an asker seeking advice on their own problem,
+12% open as yes/no questions, 9% ask for facts, 9% name two options, 5%
+ask for a task to be done; 80 traits have no question that addresses the
+persona.  Mentions of an AI or a user (0.3%) and of the trait's own label
+(0.1%) are rare.
+
+**Decisions on the question rule (Roger, 2026-09-28).**  Default shape:
+the person answering is put in a concrete situation and asked, in the
+second person, what they do, decide, think or feel.  At least eight of
+the forty pose a choice between two named options that each cost
+something.  Questions from someone seeking advice on a problem of their
+own are also a useful format and get a quota (number to settle; ten
+proposed).  Situations set in a task carried out alone are mentioned,
+without a quota: he is interested in both agentic and chat use, and the
+question format leans toward chat unavoidably.  No special rule for
+communication-style traits, where any open question works; to be
+monitored in testing.  C8's list is dropped and its two softeners
+("appropriate", "healthy") move into the softening rule.  Generation
+stays one combined call: the cost is low and the role script does the
+same.
+
+**Evidence on what makes a trait instruction work (2026-09-28).**  The
+pipeline judge's scores of the 8slot responses, by instruction: 302
+traits, 1,510 instructions, 100 responses each; the measure is the share
+scored 3 (trait fully shown).
+
+- Instructions differ a great deal within a trait.  The mean share is
+  89% and the median 98%, but 93 instructions are under 50%, 98 traits
+  have a spread of more than 20 points between their best and worst
+  instruction and 50 of more than 40.  A third of the variance in the
+  share lies between instructions of the same trait (130, against 269
+  between traits).  With five instructions, one bad one is a fifth of a
+  trait's data.
+- **The main cause is who the instruction seems to describe.**  Read as
+  a system prompt, "You have a tendency to nurse grievances over small
+  slights" is taken as a description of the person asking, and the model
+  answers as an ordinary assistant, sometimes saying so ("Since you've
+  shared that you tend to hold onto past grievances ...", petty p4, 0%;
+  "You're right to question the pursuit of purpose", nihilistic p4, 15%;
+  impatient p2 gives short answers to a reader taken to want them).  By
+  opening form, against each trait's own mean:
+
+  | opening | n | share scored 3 | against own trait | under 50% |
+  | --- | --- | --- | --- | --- |
+  | Act as / Be someone who | 342 | 94.5 | +5.8 | 2% |
+  | You are someone who | 51 | 88.4 | +3.1 | 6% |
+  | You are *adjective* | 301 | 89.3 | +0.5 | 6% |
+  | imperative (Approach, Embrace, Use) | 93 | 93.8 | +0.4 | 4% |
+  | Your approach / style is | 136 | 90.3 | -1.5 | 4% |
+  | You *other verb* | 331 | 85.9 | -2.3 | 9% |
+  | You believe / view / value | 114 | 83.3 | -3.2 | 7% |
+  | You have (a tendency, a nature) | 142 | 80.4 | -7.0 | 13% |
+
+  The effect holds within each position in the file, so it is the form
+  and not the slot.  The old role data shows the same thing: "Act as"
+  +5.5 against the role's own mean, "You are a ..." -6.0.
+- **Concreteness has a small effect on crude proxies.**  Instructions
+  that quote example words: +2.2 against their own trait (40 of them);
+  five or more listed behaviours against two or fewer: +0.9.  Several
+  instructions with concrete detail failed on form (mercurial p2, 9%;
+  undependable p2, 3%).  The clearest gains from concrete speech are in
+  voice traits (casual).
+- **Softening words** ("appropriate", "healthy", "balanced", "tends to"
+  and the like) are in 116 instructions, which average 82% against 89%
+  and are under 50% twice as often; the difference is between traits,
+  not within them, since a softened trait is softened in all five.
+- For dark traits the model's refusals add to this: "take pleasure in
+  causing harm or suffering to others" 2%, "vindictive and cruel ...
+  believe people deserve to suffer" 90% (both evil).
+
+Scripts: session scratchpad (`instr_scores.py`, `instr_form.py`,
+`failing_samples.py`, `role_checks.py`).
+
+**Decisions of 2026-09-29 (Roger).**  The quota for advice-seeking
+questions is eight, like the two-option quota; both can be adjusted
+after testing.  Traits first: once the trait rubric works, what was
+learned goes into the role rubric too, and the roles are regenerated
+(instructions and questions; it is cheap).  Candidates for the role side,
+from the same evidence: the opening form (in the old role data "Act as"
+was scored 3 on 86.4% of responses and "You are a ..." on 74.3%, ahead in
+237 of the 280 roles and behind in 24; 49% of the current role
+instructions open "You are a ..."), a two-option quota for role
+questions (6% name two options now), and an `--instructions-only` option
+for the role script (today a reroll replaces the question bank and so
+stales the steering lists drawn from it).
+
+**First draft: `--style RogerV2` in
+`data_analysis/regenerate_trait_instructions.py` (2026-09-29).**  The
+default stays `Roger`, and `_ROGER_TEMPLATE` is unchanged.  What the
+draft holds, by source:
+
+| rule | source |
+| --- | --- |
+| open by telling the model who to be; never by describing habits, beliefs or wants | the evidence above |
+| the trait is the person's own, not what they urge on others | issue 2 |
+| a standing part of the character, not a mood or an episode | issue 6 |
+| no user, assistant or AI; "people", "others", "whoever you are dealing with" | issue 1 |
+| full strength; no whitewashing; no hedge words, "appropriate" and "healthy" among them | C2, C3, C8; issue 4 |
+| the negative pole is a real opposite, as firm as the positive; not the sensible middle, not an absence | issue 3 |
+| say what the person does, in verbs; invent no settings, objects or quoted phrases | C7, narrowed; a switch (`--no-concrete`) |
+| do not repeat the description's wording; the five pairs cover the description | C7; issue 5 |
+| second person, one or two sentences, 20 to 35 words, US English | C1, form part; the corpus's own p10 to p90 is 22 to 39 |
+| six example pairs for three kinds of trait (long-winded, corner-cutting, underhanded), none in the corpus | C9 |
+| self-check before writing | C9 |
+| questions: persona in a situation; at least eight two-option, in ordinary words; about eight advice-seeking, in the first person; solo tasks mentioned | C10, adapted; wording revised after the pilot, below |
+
+Left out: voice (C4, C5 and the voice parts of C1, C2, C7), and
+self-justification (C6).  Not in the draft and still open: a limit on
+the trait's own adjective in the instructions, against self-labelling in
+responses.  Two behaviours differ from V1 besides the text: the opposite
+is named only when `negative_label` is a real word (under a `non-X`
+placeholder the generator is left to find the opposite, which is what
+the clean-pair check wants), and the generator field records the
+`concrete` switch.
+
+**Pilot of the draft (2026-09-29).**  Text only: nothing here measures
+what the model does under these instructions, which needs an extraction.
+18 traits chosen to cover the known failures (petty, undependable,
+fragile, easygoing, flippant, solemn, adventurous, risk_seeking,
+inquisitive, helpful, hands_off, flustered, evil, deceitful,
+tunnel_visioned, concise, frugal, honest), each generated twice in
+scratch copies, with the concreteness rule and with `--no-concrete`, and
+compared with the corpus files as they stand (V1).  The corpus was not
+written.  90 instruction pairs and 720 questions per column:
+
+| | V1 corpus | V2, rule on | V2, rule off |
+| --- | --- | --- | --- |
+| pos opening "You are" / "Act as", "Be someone who" / anything else | 29 / 17 / 44 | 36 / 54 / 0 | 36 / 54 / 0 |
+| pos with a hedge word (by pattern; most V2 hits are "too small to", "may collapse") | 10 | 0 | 4 |
+| pos or neg with chat-frame words | 21 | 3 | 7 |
+| instructions with a "because" clause (an invented motive), of 180 | 2 | 5 | 17 |
+| instructions under 20 words / over 35, of 180 | 17 / 17 | 0 / 15 | 0 / 19 |
+| pos and neg word-for-word similarity, mean | 0.35 | 0.45 | 0.45 |
+| pos naming the trait's own label | 24 | 19 | 20 |
+| questions that address the persona | 28% | 95% | 96% |
+| questions opening yes/no, how-to or factual | 23% | 0% | 0% |
+| questions from a first-person asker, median per trait | 22 | 3 | 1 |
+| questions labelled "Option A" | 0 | 15 | 53 |
+
+What reading the output adds:
+
+- **The opening rule is obeyed without exception**, and every trait uses
+  the same order (You are / Act as / Be someone who / You are someone who
+  / Act as), so form and slot are confounded in the same way in every
+  file.  Harmless for extraction, and at the next extraction the form
+  effect can be read straight off the slot.
+- **The softened negatives are gone.**  V1 flippant neg "with appropriate
+  depth and care" became "You are grave. You meet serious subjects with
+  the full weight they deserve"; V1 honest neg "You mislead users" became
+  "You say what serves you, hide your uncertainties".  Negatives mirror
+  the positive's construction, which is what the "same aspect" rule asks
+  for.
+- **The concreteness rule changes little in the instructions.**  Both
+  arms mostly say what the person does.  The rule's measurable effects
+  are fewer invented motives ("because switching feels like weakness",
+  rule off) and no hedges; its ban on invented objects is not fully kept
+  (petty, rule on: "cuts in line, uses your mug, or takes the last
+  parking spot").  Not enough difference in the text to settle the
+  question; the rule stays on by default for the motive effect.
+- **Every p0 names the trait** ("You are petty."), following the
+  examples.  The self-labelling question is still open.
+- **Length runs a little over**: 8 to 10% of instructions are 36 to 41
+  words.  Left alone.
+- **Two artifacts of the question rule's wording, fixed the same day.**
+  "Two named options" was read as a call for labels ("Option A is ...
+  Option B is ..."); "up to eight" advice questions gave a median of one
+  to three.  The rule now asks for two courses of action "in ordinary
+  words (no labels such as "Option A")" and for "about" eight advice
+  questions "in the first person".  Round 2, six traits, rule on: no
+  labels, and 6 to 9 first-person questions per trait.  Two-option
+  questions by eye: risk_seeking nearly all 40, petty about 10, concise
+  about 6 (a pattern match undercounts them).  One leftover: a few
+  questions repeat the rubric's words ("Both options cost you
+  something"); watch for it.
+- **The generator copies its examples when the trait is close to one.**
+  concise took nine words from the example for "terse" ("in the fewest
+  words that will carry it").  The example's frame "Act as someone who
+  treats every ... as ..." turned up in 15 of 36 files; the example was
+  reworded ("takes every shortcut the work offers"), although round 2
+  shows the generator likes "treats X as Y" without being shown it.  The
+  script now reports any instruction that repeats seven or more words in
+  a row from its template's examples (`copied_from_examples`, a warning
+  and a note on the status line; nothing is rejected), for every style
+  with a template.
+- **Cost**: 44 calls for 42 files, $1.88, so about $0.045 a trait against
+  $0.03 for V1 (longer prompt, longer questions).  The whole corpus of
+  659 would be about $29, over the $20 line, so it needs the parameters
+  confirmed first.
+
+Scripts and outputs: session scratchpad (`v2_pilot.py`, `v2_measure.py`,
+`v2_leak.py`, `v2_round2.py`; stage directories `stage_v2_concrete`,
+`stage_v2_plain`, `stage_v2b_concrete`).
+
+**Roger's review of the pilot (2026-09-29) and what followed.**
+
+- *Variety of openings is part of the point of having five instructions*,
+  and the first draft had lost it (three openings, the same order in every
+  file).  Draft 2 offers seven openings and asks for five different ones
+  in every file; its six example pairs open in six ways.
+- *Copied examples*: one instruction in a file is no problem, two or more
+  add noise to the file's five samples.  The aim is to make two or more
+  very unlikely, not to remove copying.  The audit counts a file at two.
+- *Example traits* should be near-duplicates of corpus traits, close
+  enough that they would be turned down as additions, and never words
+  that are in the corpus.  The present three meet this: long-winded and
+  terse (beside `verbose`, `concise`), corner-cutting and painstaking
+  (beside `sloppy`, `careless`, `meticulous`, `thorough`), underhanded and
+  aboveboard (beside `scheming`, `deceitful`, `honest`, `fair`).
+- *The cost of a whole-corpus regeneration, about $29, is approved.*  The
+  parameters are still to be quoted back at launch.
+- *"About eight" advice questions*: agreed.
+- *Measure every fault before and after, on a sample large enough, and
+  keep held-out traits for a final check*, since the rubric will be
+  tuned and tuning overfits.  Done with
+  `data_analysis/audit_trait_instructions.py` (README there); sample and
+  results in `reports/trait_rubric_v2_pilot/`.
+- *"You have a tendency to ..." looks like a legitimate form for habits;
+  try stronger wordings of the same grammar* ("You habitually ...", "You
+  frequently ...", "You have a bad habit of ...").  Evidence so far, from
+  the 8slot responses (each instruction's share of 100 responses scored
+  3, against the mean of its own trait's five; intervals by resampling
+  traits):
+
+  | opening | n | scored 3 | against own trait | under 50% |
+  | --- | --- | --- | --- | --- |
+  | Act as ... | 147 | 94.4 | +8.8 (+6.8 to +10.8) | 1% |
+  | Be someone who ... | 186 | 94.5 | +3.7 (+2.5 to +5.0) | 3% |
+  | You are someone who ... | 51 | 88.4 | +3.1 (+1.0 to +5.5) | 6% |
+  | Take on / adopt / embody ... | 7 | 98.1 | +1.9 (-0.3 to +7.1) | 0% |
+  | You are *adjective* | 301 | 89.3 | +0.5 (-0.7 to +1.6) | 6% |
+  | a command | 83 | 95.2 | +0.4 (-1.0 to +1.5) | 2% |
+  | Behave / speak / think like ... | 8 | 93.2 | -0.1 (-9.0 to +7.1) | 0% |
+  | Your *noun* is ... | 136 | 90.3 | -1.5 (-2.7 to -0.4) | 4% |
+  | You *other verb* ... | 304 | 87.3 | -1.9 (-3.0 to -1.0) | 8% |
+  | You believe / value / want ... | 121 | 82.4 | -2.9 (-4.8 to -1.0) | 8% |
+  | You have ... | 142 | 80.4 | -7.0 (-9.5 to -4.6) | 13% |
+  | You always / never / tend to / consistently ... | 20 | 70.1 | -10.1 (-16.6 to -4.5) | 25% |
+
+  Inside "You have ...": the ten instructions that open "You have a
+  tendency / habit / pattern ..." average 42% (-23 against their own
+  trait, interval -37 to -10) and six are under 50%.  The six are all
+  personal faults (avoidant 0%, petty 0%, undependable 3%, submissive
+  8%, destructive 13%, melancholic 25%); the four that work are ways of
+  speaking whose instruction goes on in commands (cryptic, understated,
+  contrarian, accommodating).  The stronger adverbs that the old corpus
+  happens to hold fail on the same kind of trait: "You consistently ..."
+  eleven instructions, 68%, three under 50% (submissive 4%, avoidant 8%,
+  deferential 40%); "You constantly ..." three, 60%; "You routinely lie
+  ..." 2%; while "You naturally ..." (ten, all thinking styles) is 99%.
+  After an opening that says who to be, the same adverbs do no harm ("Be
+  someone who constantly ...", "... never ...", "... naturally ...":
+  seventeen instructions under six adverbs, and no adverb's group is more
+  than a point below its traits' means).  So the old data
+  says the fault lies in the statement form when the trait is a personal
+  fault, not in the weakness of "tendency"; but it holds no "You
+  habitually", one "You frequently" and no "bad habit", so the question
+  needs its own test: the same instruction text under each opening, for
+  the same traits, answered by Qwen and scored by the same judge.  No pod
+  is up, so the test runs on OpenRouter
+  (`data_analysis/opening_form_experiment.py`; README there), on DeepInfra
+  alone: Roger allows only western hosts (AGENT_NOTES, "Hosted models").
+  Until the test is read, draft 2 keeps such statements out of the opening
+  and allows them after it.
+- *Does the hosted Qwen stand in for the pod?*  It serves a compressed
+  copy (fp8) and has thinking switched off by `/no_think` in the user
+  turn, where the extraction run switched it off in the chat template.
+  Replication, 2026-09-29: the five old instructions of seven traits
+  (petty, undependable, submissive, destructive, cryptic, understated,
+  contrarian), the first 50 questions, the same judge.  Over the 35
+  instructions the share scored 3 differs from the old run by -3.2
+  points on average (6.5 in absolute value, where sampling alone gives up
+  to 7 at n = 50), the correlation is 0.97, and 33 of 35 fall on the same
+  side of 50%.  The failures reproduce: petty p4 0% then, 2% now; petty
+  p2 4% and 2%; undependable p2 6% and 2%; submissive p4 6% and 0%.  The
+  two that changed sides are undependable p3 (78% to 50%) and submissive
+  p0 (36% to 68%).  So the hosted model will do for comparisons between
+  wordings.  Files: `reports/opening_forms/replication/`.
+- *The test of stronger habit wordings (2026-09-29): they do not work as
+  openings; the same text after "Be someone who" does.*  The ten old
+  instructions that open "You have a tendency / pattern ...", each put
+  under six openings with the rest of its text unchanged, 100 questions
+  each, 6,000 responses (`reports/opening_forms/habit_openings/`; the
+  plan there has every wording).  Share of responses scored 3, mean over
+  traits:
+
+  | opening | six personal faults | four ways of speaking or thinking |
+  | --- | --- | --- |
+  | You have a tendency / pattern ... (the old text) | 7% | 90% |
+  | You habitually ... | 9% | 93% |
+  | You frequently ... | 9% | 89% |
+  | You have a bad habit of ... (faults), a habit of ... (the rest) | 2% | 91% |
+  | Be someone who ... | 70% | 97% |
+  | You are someone who habitually ... | 62% | 94% |
+
+  The faults are avoidant, petty, undependable, submissive, destructive
+  and melancholic; every one of them is below 31% under each of the four
+  statement openings and at 37% to 99% under "Be someone who" (avoidant
+  37, submissive 47, undependable 70, petty 77, destructive 88,
+  melancholic 99).  "A bad habit of" is the weakest wording of all, not
+  the strongest.  Under the statement openings the model answers as an
+  ordinary assistant (headings, numbered steps) and mostly does not
+  mention the habit at all.  For the four styles the opening hardly
+  matters.  "You are someone who habitually ..." is a little below "Be
+  someone who ..." (below in 8 of the 10 traits, above in none, 6 points
+  on average), so habit wording after an opening that says who to be
+  costs little; which of "habitually" and "You are someone who" accounts
+  for the 6 points this test cannot say.  The rubric's rule stands as
+  drafted: say who to be first; a statement of habit may follow.
+- *Checks on that result (Roger: "not what I was expecting"; what else
+  could explain it?).*
+  - **The judge.**  Thirty answers of the six faults read blind to the
+    opening: the trait was plainly there in 10 of 15 under an opening
+    that says who to be and in 1 of 15 under a statement opening; the
+    reading agreed with the judge (3 against less than 3) in 27 of 30.
+  - **No occasion to show the trait** (the extraction questions are
+    generic).  The six faults again, under the old statement opening and
+    under "Be someone who", asked 31 to 35 situational questions each
+    from a bank written for the trait
+    (`reports/opening_forms/situational/`): statement 0%, 3%, 6%, 6%,
+    14% and, for melancholic, 90%; "Be someone who" 94%, 91%, 78%, 97%,
+    91%, 100%.  So five of the six still fail when the question invites
+    the trait, and situational questions help the persona (92% on
+    average, against 70% on generic questions).
+  - **What the model does instead.**  It stays an assistant: headings
+    or numbered steps in 74 to 81% of answers under the four statement
+    openings and 7% under "Be someone who" (generic questions; 57% and
+    1% on situational ones).  It attributes the habit to the person
+    asking ("If you tend to hold onto these kinds of things ...") in 7 to
+    9% of answers, so that reading of the mechanism is true of a small
+    part of the failures, and the rubric now claims only the effect.
+  - **Fault or grammar?**  Experiment A
+    (`reports/opening_forms/fault_or_virtue/`): ten opposite pairs drawn
+    at random from the corpus, a fault against a virtue, each pole's text
+    under "You have a tendency to", "You habitually" and "Be someone
+    who"; and the model with no instruction at all, scored by each
+    trait's judge (`reports/opening_forms/baseline/`).  Share scored 3,
+    means (the six faults and four styles of the habit test included):
+
+    | kind of trait | n | no instruction | You have a tendency to | You habitually | Be someone who |
+    | --- | --- | --- | --- | --- | --- |
+    | fault | 16 | 1% | 17% | 20% | 71% |
+    | virtue the model does not show by itself (kind to animals, abstemious, open-minded) | 3 | 19% | 51% | 55% | 65% |
+    | virtue it shows anyway (baseline 50% or more) | 7 | 86% | 89% | 88% | 89% |
+    | style of speaking or thinking | 4 | 24% | 90% | 93% | 97% |
+
+    It is mostly the fault.  A statement opening is not weak in itself:
+    it takes contrarian from 2% to 91% and cryptic from 1% to 100%, and
+    kind to animals from 1% to 55%.  For faults it moves the model from
+    1% to 17% where "Be someone who" reaches 71% (dogmatic 0% and 92%,
+    petty 2% and 77%, incompetent 5% and 68%); two faults go along with
+    a statement, lazy (63%) and anxious (77%).  For the seven virtues
+    that the model shows with no instruction (trustworthy, competent,
+    deliberate, composed 96 to 97%) the test says nothing, since every
+    opening scores what the baseline scores.  So the model takes on an
+    acceptable trait from a plain statement and a fault only when told
+    to be, or play, someone; the rule costs nothing on the virtue side
+    and is kept for both.
+- *The rubric's seven openings on the same text
+  (`reports/opening_forms/rubric_openings/`), share scored 3:*
+
+  | opening | six faults, mean | lowest fault | four styles, mean |
+  | --- | --- | --- | --- |
+  | Take on the character of someone who ... | 83% | 59% | 95% |
+  | Behave like someone who ... | 75% | 43% | 95% |
+  | Act as someone who ... | 73% | 33% | 97% |
+  | Be someone who ... | 70% | 37% | 97% |
+  | You are *adjective*. You ... | 58% | 1% | 93% |
+  | You are someone who ... | 57% | 11% | 93% |
+  | a plain command | 25% | 0% | 93% |
+
+  The plain command fails on faults (petty 0%, undependable 3%); the old
+  data made it look safe because commands were used almost only for
+  styles.  The two "You are" openings are uneven from trait to trait:
+  "You are undependable. You start things ..." 1% where "You are
+  someone who starts things ..." has 41%, and "You are avoidant. ..."
+  60% where "You are someone who backs away ..." has 11%.  Avoidant is
+  the hardest of the ten: no opening passes 60%.  Ten traits with one
+  text each, so the order among the four role-play openings is
+  suggestive, not settled.
+- *Role-play or being (Roger, 2026-09-29).*  "It seems like the model is
+  happier to roleplay bad than to be bad ... optimizing this particular
+  test is pushing us to use roleplay style rubrics. I'm concerned that
+  doing that will produce superficial behavior."  He keeps "You are
+  ...", is considering dropping "Take on the character of ...", and
+  wants no opening that says outright to role-play ("Play ...", "Play
+  the part of ...", "Adopt the persona of ..." were withdrawn from the
+  test below before they were judged).  What the test measures is
+  whether the trait is displayed, not how deep it goes; what the
+  vectors hold can only be seen in the activations.  Two things from
+  the answers already in hand.  Among answers scored 3 for the six
+  faults, stage directions (`*sighs*`) are in 7% under "You are
+  *adjective*", 10% under "You are someone who" and "Be someone who",
+  12% under "Behave like", 17% under "Act as" and 21% under "Take on the
+  character of" (crude pattern counts).  And the model resists a
+  statement that it is bad: to "You are undependable. You start things
+  but do not finish them ..." it answered "I'm an AI ... I can try to be
+  a better listener and more reliable in our conversations."
+- *Five more openings on the same text
+  (`reports/opening_forms/roleplay_openings/`)*, share scored 3, six
+  faults and four styles:
+
+  | opening | faults, mean | lowest fault | styles, mean | stage directions |
+  | --- | --- | --- | --- | --- |
+  | Be someone who ... (for comparison) | 70% | 37% | 97% | 10% |
+  | Think and act like someone who ... | 69% | 14% | 95% | 14% |
+  | Become someone who ... | 67% | 38% | 94% | 13% |
+  | Step into the shoes of someone who ... | 65% | 13% | 96% | 18% |
+  | From now on, you are someone who ... | 64% | 32% | 94% | 10% |
+  | Imagine you are someone who ... | 58% | 15% | 96% | 12% |
+
+  "Become someone who" and "From now on, you are someone who" say who
+  the model is and not whom to play, do about as well as "Be someone
+  who" and better than the plain "You are" openings (57% and 58%), and
+  are among the least theatrical.  Differences of a few points between
+  openings are within what ten traits can tell apart.
+- *Roger's menu (2026-09-29), draft 5:* "Be someone who", "Become
+  someone who", "From now on, you are someone who", "You are someone
+  who", "You are *the trait*."  Nothing that tells the model to play a
+  part.
+- *The depth check (`reports/opening_forms/depth/`).*  Sixteen faults
+  (the six of the habit test, the ten of experiment A), the same text
+  under the five openings of the menu and the three role-play openings of
+  draft 4, twelve situational questions each from a bank written for the
+  trait (Roger: not the generic ones), 1,536 answers.  The first judge
+  (GPT-4.1-mini, 0 to 3) and a second, the depth judge (Sonnet 4.6, not
+  shown the instruction): in whose voice, whether the trait is in what
+  the speaker does, whether the answer describes its own trait, and
+  caricature (0 a believable person, 1 laid on thick, 2 a cartoon).
+  Means over traits, paired:
+
+  | | the menu's five | the three role-play openings | difference (95% interval) | p |
+  | --- | --- | --- | --- | --- |
+  | scored 3 by the first judge | 90.8% | 97.2% | +6.4 (+2.4 to +11.3) | 0.004 |
+  | a cartoon of the trait | 38.2% | 50.2% | +11.9 (+5.7 to +18.4) | 0.002 |
+  | believable | 16.0% | 8.2% | -7.9 (-14.2 to -2.6) | 0.005 |
+  | describes its own trait | 35.4% | 36.5% | +1.0 | 0.63 |
+
+  By opening, cartoons: You are *the trait* 35%, You are someone who
+  38%, Be someone who 38%, Become 40%, From now on 41%, Behave like 44%,
+  Act as 49%, Take on the character of 57%.  Almost every answer is in
+  the person's own voice (90 to 98%) and has the trait in what the
+  speaker does (90 to 100%), under every opening.  Two things follow.
+  With questions written for the trait, the openings that say who the
+  model is work about as well as the role-play ones (89 to 94% scored 3,
+  against 57 to 70% on the generic questions): the generic questions are
+  what made them look weak.  And the role-play openings buy their few
+  extra points with caricature.  The depth judge is stricter than a
+  reader: on 20 answers read blind the agent gave the same verdict in 12
+  and never differed by more than one step, always on the lenient side,
+  and found 7 of the menu's 10 believable against 1 of the role-play
+  openings' 10.  So the judge's levels are too severe and the direction
+  is sound.
+
+**Drafts.**  The `generator` field's `template_sha256` tells them apart.
+
+| draft | hash | changes |
+| --- | --- | --- |
+| 1 | (pilot) | the first draft, above |
+| 1b | (round 2 of the pilot) | two courses of action "in ordinary words (no labels ...)"; "about" eight advice questions, in the first person; one example reworded |
+| 2 | `4ac7be8a332f` | seven openings, five different ones in every file, the negative opening as its positive does; examples open in six ways and only one names its trait |
+| 3 | `2817ba6b909d` | 20 to 40 words (a third of draft 2 ran over 35, the longer openings most); no invented reasons for the trait ("because" clauses rose from 1% to 6% of instructions under draft 2, and an example had one); the costs of a two-option question are to be shown, not announced (eleven questions of 3,080 said "Both options cost you something") |
+| 3b | `aec3046e3104` | the rule on openings claims the effect ("leaves the model answering as an ordinary assistant, without the trait") and no longer a cause |
+| 4 | `43f47b860e0f` | after the tests on Qwen and Roger's rulings of 2026-09-29: the plain command is out of the openings and among the things not to open with; "most of all when the trait is a fault"; the openings are a menu ("Use the ones that suit the trait"), five different ones in every file, no fixed five; the examples open in six ways, none a command, none naming its trait, and one pair shows the habit wording where it works ("You are someone who habitually ...", for the way of speaking) |
+| 5 | `fe0ec714d940` | Roger, 2026-09-29, the menu is the five openings that say who the model is: "Be someone who", "Become someone who", "From now on, you are someone who", "You are someone who", "You are *the trait*."; openings that tell the model to play a part ("Act as", "Behave like", "Play", "Take on the character of") are named as not to be used ("The model is to be the person, not to perform one"); the examples use the five, one pair naming its trait to show "You are *the trait*." |
+| 6 | `cea64c6dfeec` | Roger's own edits, 2026-09-30: the fifth opening of the menu is "You are ..." and no longer "You are *the trait*."; its example pair joins the label to the conduct in one sentence ("You are underhanded: you go behind people's backs, ...", "break the rules", "even when nobody is looking").  His reason: the corpus's "You are reactive and impulsive, responding immediately to situations ..." is better writing and a better prompt than draft 5's "You are reactive. Circumstances arrive and you answer them on the spot ...".  Role-play openings stay out (asked again after draft 5's result below, answered no) |
+| 7 | `cfc46db96b6a` | for a few hours of 2026-09-30, a wording of the rule on the description that Roger suggested in place of "Do not repeat the description's wording; say it in other words.": phrasing not to be repeated and to vary across the ten instructions, single terms allowed where they are the best words.  Withdrawn the same day, below; 30 staged files carry the hash |
+| 8 | `0be3b2a3af23` | Roger, 2026-09-30: the rule on the description's wording stays as it has been since draft 1 (a long-standing rule that works; not to be changed without clear evidence that it has regressed or is a significant problem, and then for roles as well); the fifth opening is named, in his words, `"You are ..." followed by a description of what the person is (as in "You are underhanded: ...")`, so that it is not read as covering "You are someone who" |
+| 9 | `af28fe30c528` | Roger's choices of 2026-09-30, the settled draft: the concreteness paragraph aligned with the role rubric (particulars welcome where the description allows them, varied across the five so that together they span the trait; no reason the description does not give); the wording rule with his addition, "Do not repeat the description's wording; say it in other words, and take no phrasing from it.", and the self-check asking "has any phrase been taken from the description".  Chosen over "take no phrase of four or more words from it" (`a71be163f66a`): the same on repeats (1.6% of positive instructions repeat five or more words, from 4.4% under draft 5) and on the blind rating, and shorter.  The arm `v_no_phrasing` on the 100 sample traits was generated under this very template, so it is the development sample of the settled draft |
+| 10 | `27a39ea285cb` | Roger, 2026-09-30, on the lengths (production files of May 23 words, of September 34, draft 9 38, the generator writing to the top of any range it is shown): "15 to 25 words", as for roles, in place of "20 to 40"; the six example pairs shortened to 20 to 25 words with their openings kept; the paragraph on verbs and particulars and its self-check clause folded into the template and the `--no-concrete` switch removed as cruft (the same rendered text under `c906b42faa62` for a few minutes before the fold; nothing was generated under it).  The audit's length window follows (15 to 25) |
+| 11 | `eb812d141791` | Roger, 2026-10-01, after draft 10 cost 3.4 points of effectiveness against draft 9 on the same 100 traits (75.4% against 78.8%; the corpus 78.7%) and put one trait on the extraction floor: "20 to 30 words" in place of "15 to 25", the examples of drafts 5 to 9 restored untrimmed (22 to 33 words; the long-winded pair may run over), except corner-cutting 1 shortened from 31 to 29 ("and move on" dropped).  The audit's length window follows (20 to 30) |
+| 12 | `f82999f0f6b6` | Roger, 2026-10-01, "Send draft 11": draft 11 with the second underhanded negative trimmed from 32 to 29 words ("You are someone who wins only by means you would admit to anyone, and you see fair dealing as the one way worth winning, even when it costs you."), the shipped text.  Chosen over draft 9 (its equal in every measure, rule "20 to 40") and draft 10 (three points less effective, one trait at the floor, fewer invented settings).  Development numbers are draft 11's; the held-out check runs under this hash |
+| 13 | `21e724e869da` | Roger, late on 2026-10-01: the negatives no longer mirror the positives.  Dropped "A negative instruction opens in the same way as its positive." and "In each pair the negative instruction answers the same aspect of the trait as the positive one."; added "The negatives are written for the opposite trait on its own terms: they need not mirror the positives or open as they do."; the self-check clause on pairs replaced by "check the negative instructions: are they as strong and as definite as the positives".  Examples, set A: the six positives of draft 12 kept, the six negatives rewritten on their own terms (27 to 30 words, four openings).  Set B (`63cb841969e8`, a run-time variant of the same template, not in the file): all twelve rewritten, each positive keeping its slot's opening.  Both generated on the 100 development traits the same night; see "Negatives on their own terms" below |
+| 14 | `9255dd3430ef` | Roger, 2026-10-01 (afternoon), on the night's results: "A negative instruction opens in the same way as its positive." comes back; the "same aspect" sentence stays out; the paragraph now ends "A negative instruction opens in the same way as its positive. Beyond the opening, the negatives are written for the opposite trait on its own terms: they need not mirror the positives."  Set A's six negatives re-opened to match their positives (texts otherwise as in row 13; the two "You are <adjective>:" negatives became "From now on, you are someone who" and "You are aboveboard:").  Set B2 (`0a4333a5b539`, run-time variant): set B's negatives re-opened the same way.  Both generated on the 100 development traits as arms `set_a2` / `set_b2` (Qwen codes `sa2` / `sb2`); see "Negatives on their own terms".  **Adopted 2026-10-01** (Roger, after the third round: "take A2"): the file's text under this hash is the production rubric, and the corpus is regenerated under it |
+| C2 | `298ef6e485a3` | Roger, evening of 2026-10-01: a blind pairwise taste test of the twelve example instructions, A2 against B2 (Opus 5.5, both orders, five samples an order, ties to A), and the winners assembled: A2 with four slots from B2 (long-winded positive 1, corner-cutting negative 2, underhanded positive 2 and negative 2).  Run-time variant, arm `set_c2` (Qwen `sc2`); see "Negatives on their own terms", third round |
+
+**Measurements (`reports/trait_rubric_v2_pilot/`, 2026-09-29).**  Pattern
+checks over the whole corpus as it stands, 659 files: 16% of positive
+instructions open with a statement of the risky kinds (65% of files have
+at least one) and 31% with a plain statement; chat-frame words in 7% of
+instructions (30% of files); hedge words in 6% (34% of files); 23%
+outside 20 to 35 words; questions: 51% address the person answering, 24%
+come from a first-person asker, 18% open as how-to, 12% as yes/no, 8% as
+requests for facts; 41% of files open their five positive instructions
+in five different ways and 87% in four or more; two files have two
+instructions copied from a template example.
+
+Draft 2 on the development sample, against the same traits as they
+stand in the corpus.  An API outage cut the generation short at 77 of
+the 150 traits, and draft 3 was written before it could be resumed, so
+draft 2 rests on those 77 (the ones that finished first, not a random
+draw); the corpus column is all 150 (149 judged).  Rates are shares of
+instructions or of questions; differences and p are paired, on the 77.
+
+| fault | corpus | draft 2 | p |
+| --- | --- | --- | --- |
+| opens with a statement about the person (You have / believe / want / tend to) | 15.2% | 0.0% | 0.0001 |
+| opens with a plain statement (You *verb*, Your *noun*) | 33.2% | 0.0% | 0.0001 |
+| chat frame, judged | 4.8% | 0.0% | 0.0001 |
+| chat-frame words, by pattern | 6.0% | 0.6% | 0.0001 |
+| about what the person urges on others, judged | 3.9% | 0.0% | 0.001 |
+| positive softened, hedged or excused, judged | 5.9% | 0.8% | 0.005 |
+| negative softened, judged | 10.6% | 0.5% | 0.0001 |
+| negative is the sensible middle or an absence, judged | 13.2% | 2.6% | 0.0004 |
+| hedge words, by pattern | 5.4% | 1.7% | 0.04 |
+| a passing state, judged | 0.0% | 0.0% | |
+| a different or milder trait, judged | 1.5% | 1.4% | 0.66 |
+| names an attitude only, judged | 1.7% | 1.0% | 0.44 |
+| invented settings or objects, judged | 4.5% | 2.1% | 0.16 |
+| invented motive, judged | 10.5% | 10.3% | 0.66 |
+| has a "because" clause | 0.9% | 5.6% | 0.0001 |
+| names its own label | 23.7% | 17.9% | 0.01 |
+| two or more instructions of a file copied from an example (files) | 0 of 150 | 0 of 77 | |
+| questions: how-to, facts, bare task or general opinion, judged | 48.1% | 0.3% | 0.0001 |
+| questions with one right or safe answer, judged | 5.2% | 0.0% | 0.002 |
+| questions spelling out two courses of action, judged | 7.1% (2.8 a file) | 31.0% (12.4) | 0.0001 |
+| questions from a first-person asker, judged | 11.9% (4.8) | 19.7% (7.9) | 0.001 |
+| questions set in a task carried out alone, judged | 3.9% | 19.2% | 0.0001 |
+| files whose five positive openings all differ | 41% | 100% | |
+
+Read with these in mind.  The judge is a rough instrument: by eye, on the
+pilot traits, about six in ten of its "softened" and "invented motive"
+flags were right and nearly all of its "chat frame", "urges others" and
+"weak opposite" flags; both columns were judged the same way and blind,
+so the comparison stands better than the rates.  "A passing state" does
+not occur in the corpus sample at all: the description rule had already
+dealt with it.  Draft 2 made two things worse or no better, invented
+motives and "because" clauses, which draft 3 addresses.  Every file has
+five different openings, but nearly every file has the same five
+("You are *adjective*", "Act as", "Be someone who", "Behave like", "Take
+on the character of"), where the corpus spreads over thirteen forms.
+
+**Draft 4 on a sample of 100 development traits (2026-09-29; Roger:
+variety, whether the variation has a reason, and effectiveness, before
+any full test).**  The sample is `sample100.json`, drawn from the
+development set with seed 20260930; the draft-4 files are the arm
+`draft4`; the text measures are in `report_sample100.json`.
+
+*Variety.*  99 of 100 files open their five positive instructions in
+five different ways (corpus: 77), and the negative opens as its positive
+does in 489 of 500 pairs (corpus: 354).  The files hardly differ from one
+another: "Take on the character of" is the first instruction in all 100,
+"Behave like" the second in 94, "Act as" the third in 88, "Be someone
+who" the fourth or fifth; the remaining one is "You are *the trait*." in
+53 files and "You are someone who" in 44.  The habit wording of the
+example was taken up in none of the 500.
+
+*Does the variation have a reason?*  Mostly not.  Which of the two "You
+are" openings a file gets does not follow the label (accurate, callous,
+pedantic, witty got "You are someone who"), nor the kind of trait (bad
+16 and 13, good 10 and 10, indifferent 27 and 21).  Awkward labels are
+handled sensibly: "You are someone from the Eastern Hemisphere.", "You
+are a renter.", "You are a globetrotter who ...".
+
+*The faults of the text*, same 100 traits, corpus then draft 4: statement
+openings 15.2% and 33.2% to 0%; chat frame (judged) 5.0% to 1.0%; urging
+others 4.8% to 0.2%; positive softened 5.6% to 0.4%; negative softened
+11.8% to 2.4%; weak opposite 14.6% to 5.2%; own label named 23.7% to
+13.4% (all p < 0.001).  Not improved: invented motive 8.6% to 6.5%
+(p = 0.10); "because" clauses 0.6% to 3.5% (draft 2: 5.6%); outside 20
+to 40 words 10.2% to 15.4%.
+
+*Effectiveness on Qwen* (`reports/opening_forms/sample100_effect/`): all
+1,000 positive instructions, corpus and draft 4, 20 generic questions
+each, 20,000 responses; share scored 3, mean over traits, paired.  The
+sorting of the traits into good, bad and indifferent is the agent's own
+reading and is in the plan there.
+
+| traits | n | corpus | draft 4 | difference (95% interval) | p | better / worse |
+| --- | --- | --- | --- | --- | --- | --- |
+| all | 100 | 78.7% | 84.7% | +6.0 (+3.4 to +8.8) | < 0.0001 | 57 / 27 |
+| good | 20 | 86.6% | 89.2% | +2.6 (-0.1 to +5.6) | 0.10 | 10 / 6 |
+| bad | 30 | 61.1% | 71.0% | +9.8 (+3.8 to +15.6) | 0.003 | 22 / 7 |
+| indifferent | 50 | 86.1% | 91.1% | +5.0 (+1.3 to +9.0) | 0.01 | 25 / 14 |
+
+Instructions under 50%: 15.6% in the corpus, 8.4% under draft 4 (bad
+traits 34.0% and 20.7%); traits with two or more such instructions 22
+and 13, with all five 2 and 0.  By opening under draft 4, all traits and
+bad traits: Take on the character of 93% and 87%, Behave like 86% and
+78%, Act as 85% and 69%, Be someone who 82% and 67%, You are *the
+trait* 78% and 53%, You are someone who 76% and 56%: the two "You are"
+openings are the weakest, as in the test on one text.  Largest losses:
+naive 90% to 58%, chaotic 97% to 76%, callous 54% to 35%, calculating
+90% to 75%, reckless 73% to 60%.  In callous and ungrateful the failing
+draft-4 instructions say what the person does when someone is hurting
+or has been kind ("You read the room, see that someone is hurting, and
+proceed exactly as you would have", 10%), which a generic question
+gives no occasion for; the corpus instructions name a standing coldness.
+That is the concreteness rule at work, and the reason to run the arm
+without it before settling.
+
+*The arm without the concreteness rule* (`draft4_plain`, the same 100
+traits, the same template with `--no-concrete`).  It makes no
+difference that can be measured.  Effectiveness on Qwen: 84.7% with the
+rule, 85.0% without (+0.3, interval -1.1 to +1.8, p = 0.65); good traits
+89.2% and 90.6%, bad 71.0% and 70.9%, indifferent 91.1% and 91.2%;
+instructions under 50%, 8.4% and 8.6%.  Text: no instruction measure
+differs at p < 0.05; with the rule there are somewhat fewer invented
+motives (6.5% against 9.1%, p = 0.09) and "because" clauses (3.5%
+against 4.8%).  So the guess above was wrong in the aggregate: callous
+does better without the rule (35% to 49%) and ungrateful worse (31% to
+17%).  The two arms also say how much a trait's score moves between two
+generations of its instructions: the standard deviation of the
+difference is 7 points, 15 of the 100 traits are more than 10 points
+apart and 2 more than 20.  Against that, the change from the corpus to
+draft 4 has a standard deviation of 14 points, with 16 traits more than
+20 apart, so most of the large per-trait changes are real and a change
+of 10 points in one trait is not evidence of anything.
+
+**Draft 5 on the same 100 traits (2026-09-29): the text is mended, the
+effectiveness is the corpus's.**  The arm is `draft5`; its 500 positive
+instructions were added to
+[sample100_effect](../../../reports/opening_forms/sample100_effect/)
+(arm `d5`, 10,000 more responses).  Every file uses the five openings of
+the menu, 20% each.  Share scored 3, mean over traits, paired:
+
+| traits | n | corpus | draft 4 | draft 5 | draft 5 minus corpus | draft 5 minus draft 4 |
+| --- | --- | --- | --- | --- | --- | --- |
+| all | 100 | 78.7% | 84.7% | 78.1% | -0.6 (-2.6 to +1.4), p = 0.58 | -6.6 (-8.5 to -4.8), p < 0.0001 |
+| good | 20 | 86.6% | 89.2% | 87.5% | +0.8, p = 0.44 | -1.8, p = 0.27 |
+| bad | 30 | 61.1% | 71.0% | 59.4% | -1.7, p = 0.53 | -11.5 (-15.6 to -7.8), p < 0.0001 |
+| indifferent | 50 | 86.1% | 91.1% | 85.6% | -0.5, p = 0.71 | -5.5 (-7.9 to -3.4), p < 0.0001 |
+
+Instructions under 50%: corpus 15.6%, draft 4 8.4%, draft 5 15.0%; traits
+with two or more such instructions 22, 13 and 23.  The scores are spread
+as in the corpus (scored 1, no trait: 12.7%, 7.9%, 13.1%).  Scaled to the
+extraction's 500 responses a trait, the weakest trait has 90, 155 and 100
+scored 3 (the floor is 50), and 15, 4 and 15 traits have under 250.
+
+- *All of draft 4's gain was its role-play openings.*  Its three role-play
+  openings score 88.0% (bad traits 77.8%), its other openings 79.8%
+  (60.8%), which is the corpus and draft 5.  Roger, asked again whether to
+  restore one: no.
+- *By opening under draft 5*, all traits and bad traits: Be someone who
+  84.0% and 71.5%; From now on, you are someone who 81.5% and 65.7%; You
+  are someone who 78.2% and 57.2%; Become someone who 75.7% and 59.3%; You
+  are *the trait*. 71.1% and 43.5% (a quarter of those instructions are
+  under 50%).
+- *The same opening, the same trait, corpus against draft 5.*  Where the
+  corpus has an instruction that opens as one of draft 5's does, the
+  corpus's is the more effective: over all such openings 82.0% against
+  77.7% (-4.3, p = 0.006, 94 traits); "You are *adjective*" 80.2% against
+  69.8% (-10.4, 84 traits), on bad traits -23.6 (27 traits, p < 0.0001).
+  Against the corpus instructions that open any other way (not role-play)
+  draft 5 is ahead, 78.1% to 71.7% (+6.4).  So draft 5 gains what the
+  statement openings lost and loses as much inside the openings the two
+  share.
+- *What it is not.*  (1) The corpus's talk of responses: corpus
+  instructions that speak of responses, a user or a conversation (91 of
+  500, by pattern) do no better than the same trait's others (+2.8
+  points, ahead in 23 of 51 traits).  (2) The bare label sentence
+  ([label_sentence](../../../reports/opening_forms/label_sentence/), the
+  30 bad traits, draft 5's "You are *the trait*." instruction three ways
+  with the same content, 1,800 responses): as written ("You are reactive.
+  Circumstances arrive ...") 42.5%, joined by a colon 40.0%, merged into
+  one sentence by the agent ("You are reactive, answering circumstances
+  ...") 43.2%; no difference is outside its interval, and the same bare
+  texts scored 43.5% in the first run (correlation over traits 0.94).
+  The join is a matter of writing, not of effect.  (3) Length: no slope
+  on words or on words per sentence inside a trait, in any arm.
+- *What goes with it.*  Inside a trait, an instruction is more effective
+  the more of its content words are the description's: +0.14 points per
+  percentage point over all arms (interval +0.08 to +0.19), +0.28 on bad
+  traits (+0.11 to +0.43); in the corpus alone the slope is there but
+  within its interval.  The corpus's "You are *adjective*" instructions
+  on bad traits take 34% of their content words from the description,
+  draft 5's label instructions 16%.  The rubric asks for that ("Do not
+  repeat the description's wording; say it in other words", from the role
+  rubric's C7, against terminology echoed in answers, which the check of
+  2026-09-16 found in 30 of 360).  A correlation, with a crude measure
+  (shared word stems): tested as an arm, below.
+
+**Draft 6, and the rule on the description's wording (2026-09-30).**
+Two arms on the same 100 traits: `draft6`, Roger's edits as they stand
+(`cea64c6dfeec`), and `draft6_plain_words` (`62d973341448`), the same
+with one sentence replaced at run time and the repository's template
+left alone: for "Do not repeat the description's wording; say it in
+other words." it read "Use plain, direct words.  The description's own
+words are fine where they are the plain ones; do not reach for an unusual
+phrase to avoid them."  That was the agent's candidate, after the
+correlation above.
+
+| measure | corpus | draft 5 | draft 6 | draft 6, plain words |
+| --- | --- | --- | --- | --- |
+| scored 3 on Qwen, all traits | 78.7% | 78.1% | 79.0% | 79.9% |
+| scored 3, bad traits | 61.1% | 59.4% | 60.7% | 62.6% |
+| instructions under 50% | 15.6% | 15.0% | 12.6% | 11.8% |
+| files with five different openings | | 100 | 48 | 74 |
+| content words from the description | 23.8% | 19.3% | 19.8% | 28.9% |
+| positive instructions repeating five or more words in a row of the description | 7.2% | 4.4% | 3.2% | 13.8% |
+| content words shared by two of a file's five | 7.9% | 5.6% | 6.3% | 9.7% |
+| instructions naming their own label | 26.6% | 19.5% | 7.8% | 13.5% |
+
+- *Effect.*  Draft 6 against draft 5, +0.8 (-0.9 to +2.6, p = 0.37);
+  plain words against draft 6, +1.0 (-0.8 to +2.8, p = 0.29); plain
+  words against draft 5, +1.8 (+0.3 to +3.5, p = 0.03).  No draft
+  differs from the corpus.  The correlation foretold about a point for
+  nine points more of the description's words, and about a point is what
+  came: too little to tell from none, and no reason to change the rule.
+- *Faults of the text* (judged blind, 1,000 instructions an arm): none
+  differs from draft 5 at p < 0.05 in either arm.  Invented motive 6.1%,
+  6.8%, 7.6%; negative the sensible middle or an absence 3.6%, 4.0%, 5.6%
+  of negatives (p = 0.22); softened negatives 2.4%, 2.2%, 2.0%; softened
+  positives 0.4%, 0.4%, 0.6%.  Nearly all the faults are in the negative
+  instructions.  The questions are as under draft 5 (two courses of
+  action 10 to 11 a file, advice-seeking 7 to 8).
+- *"You are ..." is read as covering "You are someone who".*  Under
+  draft 6, 52 of the 100 files use "You are someone who" twice and have
+  four openings; under draft 5 every file had five.  Where the fifth is
+  used, the word is often not the label ("You are hardworking by habit",
+  for industrious), and the join is a colon in 29 of 48, as in the
+  example.
+- *Roger's ruling on the wording rule (2026-09-30).*  He did not like
+  "plain words", and asked why a rule basic to both generators had been
+  reopened; the answer is the two bullets above, and that for traits the
+  rule is new with V2 (the production trait rubric has no sentence on
+  it; the role rubric has "none of them repeats the description's
+  wording", and 1.7% of the 1,685 role instructions written under it
+  repeat five words in a row).  A sentence he suggested instead was
+  draft 7: "Try not to just repeat the description's phrasing; say it in
+  other words, and vary the phrasing across the 5 positive and 5
+  negative instructions.  However, you may need to reuse individual
+  terms from the description if they are actually the best words
+  available and have no good synonyms."  He then ruled that the rule is
+  not to be touched without clear evidence that it has regressed or is
+  a significant problem, having read many instructions from the earlier
+  rubrics and found their variety and their distance from the
+  description acceptable; and that work on it for traits would mean
+  work on it for roles.  There is no such evidence (the rule is obeyed,
+  and relaxing it moves effectiveness by about a point), so the
+  sentence of drafts 1 to 6 is back, in draft 8.
+- *Draft 7 and the fifth opening, on 30 of the 100 traits*
+  ([sample30.json](../../../reports/trait_rubric_v2_pilot/sample30.json),
+  arms `draft7` and `draft7_fifth_named`; text only).  The second arm
+  names the fifth opening, again at run time: `and "You are ..."
+  followed by a word for what the person is (as in "You are underhanded:
+  ...")`, hash `cd878699ffef`.
+
+  | measure, 30 traits | draft 5 | draft 6 | draft 7 | draft 7, fifth named |
+  | --- | --- | --- | --- | --- |
+  | files with five different openings | 30 | 16 | 16 | 29 |
+  | content words from the description | 21.0% | 20.6% | 24.5% | 25.7% |
+  | repeating five or more words in a row | 4.7% | 2.7% | 7.3% | 6.7% |
+  | content words shared by two of a file's five | 6.4% | 6.8% | 8.2% | 8.6% |
+  | naming their own label | 25.3% | 12.0% | 14.7% | 19.3% |
+  | over 40 words | 16.7% | 12.0% | 22.0% | 20.0% |
+
+  Naming the fifth opening brings the five back (29 of 30).  Roger's
+  sentence lets somewhat more of the description through than the flat
+  rule did, about what the production corpus has (7.2%), and half of
+  what "plain words" let through.
+- *chaotic.*  Its description was rewritten in the corpus on 2026-09-30
+  (the ordinary sense, not the chaos-theory one).  Every arm up to draft
+  6 was written from the old one, so they compare with each other; an
+  arm staged from the corpus after that day does not compare with them
+  for this trait.  `audit_trait_instructions.py report` now leaves out of
+  every arm a trait whose label or description is not the same in all of
+  them, and says so; stage later arms from an earlier arm's directory
+  (`stage --source`), as was done for the two arms of draft 7.
+
+**How much of the description the instructions repeat (2026-09-30).**
+Roger, on seeing roles at 1.7% and the trait drafts at 3 to 4%, set a
+target for traits: at first under 3.5%, then 4%, of positive instructions
+repeating five or more words in a row of their description; and named
+what the rule is really for, that the same phrase of the description is
+not copied into more than one of a file's five positive instructions.
+Counts are of positive instructions only (roles have no others; the
+audit's `echo_description` counts negatives too, which is why the table
+of draft 6 above says 3.1%, 1.7% and 9.2% where this one says 4.4%, 3.2%
+and 13.8%).
+
+| set | repeating five or more words | files with one or more | the same phrase of four or more words in two or more of the five (files) |
+| --- | --- | --- | --- |
+| roles, role rubric V2 | 29 of 1,685 = 1.7% (1.1 to 2.4) | 26 of 337 | 0 of 337 |
+| traits, the corpus as it stands (production rubric) | 6.0% of 3,295 | | 12 of 659 = 1.8% |
+| traits, production, the 100 | 7.2% (5.0 to 9.6) | 31 | 3 |
+| drafts 4, 5, 6 and 8 (the same rule) | 66 of 1,650 = 4.0% (3.0 to 5.1) | 56 of 330 | 11 of 330 = 3.3% (1.5 to 5.5) |
+| draft 6, plain words | 13.8% | | 18 of 100 |
+| draft 8 with the stricter sentence (`5e66b6b0f9b0`) | 10 of 500 = 2.0% (0.8 to 3.4) | 9 | 1 of 100 |
+
+- *What is repeated* is a phrase lifted whole, five or six words long as
+  a rule ("the first good-enough option", "the hero of every story", "at
+  the first sign of trouble"), most often in the first two instructions
+  of a file.  The same traits do it from draft to draft: 8 have a repeat
+  under both draft 5 and draft 6, where chance would give 2.5.
+- *The same phrase in two or more of the five* is rare and mostly
+  geography: 7 of the 11 cases in the drafts are the eastern and southern
+  hemisphere traits ("east of the Atlantic", "south of the equator"),
+  three are runs of small words ("the rest of what"), and one is a
+  striking phrase used twice (restless under draft 8, "reaching for the
+  next thing").  Without the two hemisphere traits, 4 of 322 files.  The
+  12 in the corpus are of the same kind (the four hemisphere traits;
+  "to read or write", "of the opposite sex", "several drinks a night").
+  Part of the gap to roles is length: a trait instruction has 36 words
+  at the median, a role instruction 23.
+- *The stricter sentence*, tried at run time on the 100 traits (arm
+  `draft9_no_lift`, the template of draft 8 with two changes): the rule
+  reads "Do not repeat the description's wording; say it in other words,
+  and take no phrase of four or more words from it.", and the self-check
+  asks "has any phrase been taken from the description".  Repeats of
+  five or more words 2.0% (draft 6: 3.2%; files with one, 9 against 14,
+  10 lost and 5 gained, p = 0.30; against the four drafts together the
+  rate is halved).  Content words from the description 15.4% (19.8%);
+  content words shared by two of a file's five 4.8% (6.3%); over 40
+  words 16.8% (19.8%).  With the fifth opening named in Roger's words,
+  94 of the 100 files have five different openings (draft 6: 48; on the
+  30 traits of draft 8, 27).
+- *Roger's rulings, later on 2026-09-30.*  The target is 4%, of
+  positive instructions repeating five or more words; the concreteness
+  rule is aligned with the role rubric (particulars welcome where the
+  description allows them, varied across the five so that together they
+  span the trait; no ban on settings and objects; still no reason the
+  description does not give; template `6d9e275092b9` with the original
+  wording rule); and two wordings of the stricter sentence are to be
+  compared, with draft 5 as the baseline, on the repeats and on a blind
+  rating.  Arms on the 100 traits: `v_four_words` ("... and take no
+  phrase of four or more words from it", `a71be163f66a`) and
+  `v_no_phrasing` ("... and take no phrasing from it", `af28fe30c528`),
+  both with the self-check line, both on the aligned template.
+
+  | measure, positive instructions | draft 5 | A: no phrase of four or more words | B: no phrasing from it |
+  | --- | --- | --- | --- |
+  | repeating four or more words | 9.8% (6.8 to 13.0), 35 files | 4.6% (2.6 to 6.8), 18 files | 4.8% (2.8 to 7.2), 20 files |
+  | repeating five or more words | 4.4% (2.6 to 6.6), 18 files | 1.6% (0.6 to 2.8), 8 files | 1.6% (0.6 to 3.0), 7 files |
+  | the same phrase of four or more words in two or more of the five | 3 files (both hemispheres, incoherent) | 1 (eastern hemisphere) | 1 (southern hemisphere) |
+
+  The two wordings cannot be told apart, and either halves the rate.  What
+  remains is mostly fixed expressions ("please and thank you", "a husband
+  or wife", "forgiveness rather than permission", the hemispheres) and
+  runs of small words ("as fast as it", "get in the way"); the striking
+  phrase lifted whole is now rare (restless, "always reaching for the
+  next thing", once under B).  The list of every repeat is in the chat
+  of 2026-09-30.
+
+  *The blind rating* (`audit_trait_instructions.py taste`; Sonnet 4.6,
+  300 files, $1.50, parse rate 300 of 300).  The judge sees the label,
+  the description and the five positive instructions, and rates
+  *quality* (good system prompts for a 30B to 100B open-weight model)
+  and *coverage* (the five cover every element, each a different aspect,
+  none redundant), 1 to 5, reasons first.
+
+  | 1 to 5, mean over 100 traits | draft 5 | A | B |
+  | --- | --- | --- | --- |
+  | quality | 3.96 | 3.93 (-0.03, p = 0.74) | 4.01 (+0.05, p = 0.44) |
+  | coverage | 2.99 | 3.09 (+0.10, p = 0.34) | 3.15 (+0.16, p = 0.14) |
+
+  Quality is a 4 for nearly every file in every arm (80 of 100 under
+  draft 5), coverage a 3, with a quarter of files at 2.  The reasons for
+  a 2 say the same thing in 67 of 77 cases: the five instructions say
+  the same thing in different words ("redundant", "overlap", "same
+  core") rather than each taking an aspect; a missed element is named in
+  7.  So the rubric's "each pair a different aspect of the trait" is the
+  weakest-kept rule by this judge's reading, in every arm alike, and a
+  candidate for the next round; for narrow traits (serene, erratic) five
+  distinct aspects may not exist.  Ratings are under
+  [judged_taste/](../../../reports/trait_rubric_v2_pilot/judged_taste/).
+
+  *The same rating by Opus 5.5, every arm* (Roger: redo it with Opus
+  5.5 and do all of them; 990 files, $13.99, more than the $8 estimated
+  because the model thinks before it answers, about 530 output tokens a
+  call; parse rate 990 of 990).  Differences are paired with draft 5 on
+  the same traits.
+
+  | arm | quality | coverage |
+  | --- | --- | --- |
+  | corpus (production rubric) | 3.71 (-0.37, -0.47 to -0.27; better in 0, worse in 36) | 2.71 (-0.29, p = 0.003) |
+  | draft 4 | 4.06 | 2.98 |
+  | draft 4, no concreteness rule | 4.02 | 3.14 (+0.14, p = 0.11) |
+  | draft 5 | 4.08 | 3.00 |
+  | draft 6 | 4.03 | 3.00 |
+  | draft 6, plain words | 4.06 | 2.74 (-0.26, p = 0.007) |
+  | draft 8 with the stricter sentence | 4.07 | 2.97 |
+  | A: no phrase of four or more words | 4.07 | 3.16 (+0.16, p = 0.06) |
+  | B: no phrasing from it | 4.08 | 3.20 (+0.20, +0.02 to +0.38, p = 0.04) |
+  | draft 7 (30 traits) | 4.03 | 2.87 |
+  | draft 7, fifth named (30) | 4.07 | 2.53 (-0.47, p = 0.008) |
+  | draft 8 (30) | 4.03 | 3.00 |
+
+  Every V2 draft is a 4 on quality and the corpus a 3.7 (29 of its 100
+  files at 3, none at 5; no draft is worse than the corpus on any
+  trait).  Coverage: the corpus lowest; "plain words" and the 30-trait
+  "fifth named" arm below draft 5; B the highest, a fifth of a point
+  over draft 5.  The two judges agree in the mean (quality 4.08 against
+  3.97, coverage 3.12 against 3.08 on the 300 files both rated) and on
+  the file within one point 99% (quality) and 95% (coverage) of the
+  time; on quality nearly every file is a 4 for both, so there is no
+  correlation to speak of, and on coverage it is 0.51.
+
+**Negatives on their own terms (night of 2026-10-01).**  Roger asked, at
+bedtime, whether the rubric made the negatives anti-parallel copies of the
+positives (it did: "A negative instruction opens in the same way as its
+positive" and "answers the same aspect of the trait as the positive one"),
+and had both sentences dropped, since the negatives feed only the clean-pair
+check and nothing needs them to mirror.  Two example sets were generated on
+the 100 sample traits and measured with every tool: **set A**
+(`21e724e869da`, the file as it stands: draft 12's positives, negatives
+rewritten on their own terms) and **set B** (`63cb841969e8`, every example
+rewritten; a run-time variant, not in the file).  Draft 11 is the
+comparison (same traits, the mirrored rubric).  Reports:
+[report_sample100.json](../../../reports/trait_rubric_v2_pilot/report_sample100.json)
+(audit), [report_claude-opus-5-5_dev.json](../../../reports/trait_rubric_v2_pilot/judged_taste/report_claude-opus-5-5_dev.json)
+(taste), [arms_report.json](../../../reports/opening_forms/sample100_effect/arms_report.json)
+(Qwen, arms `sa` and `sb`).
+
+- *The negatives stopped mirroring.*  A negative opening as its positive
+  does: corpus 96.6%, draft 11 98.6%, set A 4.0%, set B 0.4%.  Content
+  words shared between a pair's two sides (Jaccard): 0.185, 0.253, 0.035,
+  0.035.  The negatives are as long as before (34 words).
+- *The judge finds them weaker.*  Negatives judged a weak opposite ("the
+  sensible middle, ordinary good conduct, or the mere absence of the
+  trait"): draft 11 3.6% of 500, set A 8.6%, set B 9.2% (files with one:
+  12, 28, 30 of 100; the corpus 14.6% and 38).  Softened negatives: 2.0%,
+  4.2%, 1.4%.  Reading the flagged ones: when a fault's negative inverted
+  the positive point by point ("never dismisses the other side wholesale")
+  the judge took it for a real opposite; written on its own terms the same
+  virtue ("admits when your own side has gotten something wrong"; bullying
+  -> "shields others from public embarrassment") reads to it as ordinary
+  good conduct, which its definition names as a weak opposite.  Some are
+  weaker in fact (restless -> "waits without agitation, stays with a single
+  task": an absence).  So the rise is partly the judge's definition and
+  partly real; the self-check line ("as strong and as definite as the
+  positives") did not hold it down.  Roger's own reading of a few is the
+  check that matters.
+- *Opening variety fell, on the positives too.*  Files whose five positives
+  open in five different ways: draft 11 91, set A 83 (lost 11, gained 3,
+  McNemar p = 0.057), set B 76 (lost 18, gained 3, p = 0.001).  The
+  negatives, freed from the positives' openings, use "You are someone
+  who" and "Be someone who" for 72% of set A's (39% and 33%) and 57% of set
+  B's; "You are <adjective>" nearly vanishes from them (17% -> 1% / 4%).
+  The generator seems to spend its variety across all ten.
+- *Other faults.*  Echo of the description down (1.6% -> 0.8% / 0.4%),
+  label named in the text down (8.3% -> 5.7% / 6.0%); chat-frame words up
+  from nothing (0.1% -> 0.9% / 1.3%); invented particulars 4.9% -> 5.2% /
+  7.2% and invented motives 8.4% -> 11.7% / 9.6% (set B's examples carry
+  more particulars; set A's negatives invented motives).  Statement and
+  role-play openings stay at zero; questions unchanged.
+- *Taste (Opus 5.5, blind, one file a prompt).*  Quality 4.07 / 4.05 /
+  4.06 (draft 11 / A / B): no difference.  Coverage 3.25 / 3.17 / 3.39: B
+  over draft 11 +0.14 (-0.02 to +0.31, p = 0.12), B over A +0.22 (p = 0.008).
+  Draft 11 itself rates 3.25 on coverage, above every earlier draft
+  (2.97 to 3.20) and the corpus (2.71); quality is 4.0 to 4.1 for every V2
+  draft.
+- *Effectiveness on Qwen (positives only; the negatives are never run).*
+  Share scored 3 over the 100 traits (20,000 responses an arm): draft 11
+  77.8%, set A 78.3% (+0.4 against draft 11, -1.2 to +2.1, p = 0.64; -0.4
+  against the corpus, p = 0.73), set B 76.9% (-0.9 against draft 11,
+  p = 0.30; -1.8 against the corpus, p = 0.19; indifferent traits -2.3,
+  p = 0.07).  Bad traits 58.5 / 59.3 / 59.3.  Instructions under 50%:
+  14.8% / 13.4% / 17.2%.  The weakest trait's responses scored 3, of the
+  extraction's 500 (floor 50): draft 11 50, set A 130, set B 90.  So set A
+  is draft 11's equal on effectiveness and sits further from the floor;
+  set B costs about a point, within noise.  Net: freeing the negatives
+  bought nothing measurable on the positives and cost two small things
+  (negatives the judge reads as weaker, fewer files with five openings);
+  set B's coverage gain is the one plus.  Decision Roger's.
+- *Cost of the night:* generation $4.78 (A) and $4.55 (B), audit $2.31
+  each, taste $1.44 each plus $1.44 for draft 11, Qwen about $2.60 and its
+  judge about $7.
+
+**Second round, the same afternoon: the openings paired again (sets A2 and
+B2).**  Roger, on the night's numbers: "Reintroduce 'A negative instruction
+opens in the same way as its positive.' and another A and B patch."  The
+sentence is back (the "same aspect" sentence stays out), the paragraph now
+reads "A negative instruction opens in the same way as its positive.  Beyond
+the opening, the negatives are written for the opposite trait on its own
+terms: they need not mirror the positives", and both example sets had their
+negatives re-opened to match their positives, texts otherwise unchanged:
+**set A2** (`9255dd3430ef`, the file) and **set B2** (`0a4333a5b539`,
+variant).  Same 100 traits, same measures, arms `set_a2` / `set_b2` (Qwen
+`sa2` / `sb2`); the Qwen rows are in the same
+[arms_report.json](../../../reports/opening_forms/sample100_effect/arms_report.json).
+
+- *Pairing is back without the mirroring.*  Negative opening as its
+  positive (the audit's classifier): draft 11 99%, A 5%, B 1%, A2 95%, B2
+  93%.  Shared content words: 0.25, 0.035, 0.035, 0.064, 0.060.
+- *Variety restored.*  Files with five different positive openings: 91,
+  83, 76, 93, 93.  Distinct forms among a file's five negatives: 4.87,
+  3.39, 4.12, 4.67, 4.58.
+- *Weak opposites, by the judge:* 3.6%, 8.6%, 9.2%, **8.0%** (A2, +4.4
+  against draft 11, p = 0.004), **5.6%** (B2, +2.0, p = 0.23); files with
+  one: 12, 28, 30, 25, 20.  Softened negatives unchanged (2.2% / 1.6%).
+  The flagged ones are of the same kind as before: a virtue written in its
+  own words ("weighs each political question on its own merits"; cynical
+  -> "sees cooperation and friendship as real and valuable") is "ordinary
+  good conduct" to the judge, where draft 11's clause-by-clause inversion
+  read as a real opposite.
+- *Other faults:* invented particulars 4.9% -> 5.5% (A2) / 7.5% (B2,
+  p = 0.06), invented motives 8.4% -> 9.9% / 8.7%, chat-frame words 0.1% ->
+  0.5% / 0.8%, echo of the description 1.6% -> 0.7% / 0.5%, label named
+  8.3% -> 7.1% / 7.3%.
+- *Taste (Opus 5.5):* quality draft 11 4.07, A2 4.05, B2 4.12 (the
+  highest of any arm, 13 files at 5; against draft 11 +0.05, p = 0.30;
+  against A2 +0.07, p = 0.15); coverage 3.25, 3.24, 3.30 (no difference).
+- *Effectiveness on Qwen* (complete; the OpenRouter account ran out of
+  credit at 16,890 of the 20,000 responses and Roger topped it up the same
+  evening).  Share scored 3 over the 100 traits, paired with draft 11: A2
+  77.8% (-0.1, -1.6 to +1.4, p = 0.96), B2 76.4% (-1.4, -3.2 to +0.4,
+  p = 0.13; against the corpus -2.2, p = 0.07).  Bad traits 58.5 / 60.3 /
+  56.5 (draft 11 / A2 / B2).  Instructions under 50%: 14.8% / 16.2% /
+  16.4%.  The weakest trait's responses scored 3, of 500 (floor 50): 50 /
+  85 / 80.  So A2 is draft 11's equal on the positives, as set A was, and
+  B2 costs about a point, as set B did: the examples' negatives do not
+  move the positives' effectiveness, and set B's rewritten positives are
+  the slightly weaker pair of the two.
+- *Cost of the round:* generation $4.74 (A2) and $4.74 (B2), audit $2.31
+  each, taste $1.44 each, Qwen about $2.60 and its judge about $7.
+
+**Third round, the same evening: the winners of a pairwise taste test (set
+C2).**  Roger: "For each of the twelve instructions, do a blind taste test
+between the A version and the B version, with Opus, asking which seems the
+better-written prompt for getting a model of this size to show the desired
+behavior.  Assemble the winners (break ties towards A) into a C2, and run
+that as well."  A judge that sees two candidates in one prompt is run in
+both orders (AGENT_NOTES § "Comparing arms with an LLM judge"): each slot
+was judged by Opus 5.5 five times with A first and five times with B first,
+120 calls, $1.18; record in
+[example_pairwise_A2_B2.json](../../../reports/trait_rubric_v2_pilot/example_pairwise_A2_B2.json).
+The candidate shown first took 53% of the votes, so the order bias is small
+here; one slot (underhanded negative 1) split by order (A 5-0 with A first,
+B 4-1 with B first) and went to A on the total, 6 to 4.  Eight slots went
+to A2, four unanimously or nearly so to B2: long-winded positive 1 ("talks
+past the point and keeps going"), corner-cutting negative 2 ("measures
+before cutting"), and both of underhanded pair 2 ("cheats whenever cheating
+is safe" / "deals straight with everyone").  The other eight were 9-1 or
+10-0 for A2.  C2 (`298ef6e485a3`) is A2 with those four slots replaced,
+generated on the 100 traits as arm `set_c2` and measured as the others.
+
+- *Text measures:* negative opening as its positive 94%, shared content
+  words 0.076, files with five different positive openings 89 (draft 11
+  91, A2 and B2 93; against draft 11 lost 8, gained 6, p = 0.79).
+- *Judge:* weak-opposite negatives 9.8% (A2 8.0%, B2 5.6%, draft 11 3.6%;
+  the three sets' intervals, 5 to 11, 3 to 9 and 6 to 14, overlap, so the
+  measure's own noise is about as wide as the spread between the sets);
+  softened negatives 2.6%; invented particulars 6.4%; invented motives
+  10.1%; label named 5.9% (the lowest; against draft 11 p = 0.03); echo of
+  the description 0.7%; chat-frame words 0.9%.
+- *Taste (Opus 5.5):* quality 4.05, coverage 3.32: the same as A2 (4.05 /
+  3.24) and B2 (4.12 / 3.30) within noise.
+- *Effectiveness on Qwen* (100 traits, 10,000 responses): 77.2% scored 3,
+  -0.7 against draft 11 (-2.2 to +1.0, p = 0.45), -1.5 against the corpus
+  (p = 0.27); between A2 (77.8%) and B2 (76.4%).  Bad traits 58.4%.
+  Instructions under 50%: 14.4% (A2 16.2%, B2 16.4%, draft 11 14.8%);
+  weakest trait 105 of 500 (A2 85, B2 80, draft 11 50).  Summary of the
+  three: on effectiveness A2 = draft 11 > C2 > B2 by about half a point a
+  step, all within noise; on the judged negatives B2 < A2 < C2 in weak
+  opposites, the spread about the measure's own noise; on taste all three
+  the same.  The example texts move nothing that extraction depends on.
+- *Cost:* pairwise test $1.18, generation $4.86, audit $2.31, taste $1.45,
+  Qwen about $1.30 and its judge about $3.60.
+
+**Adoption and regeneration (2026-10-01, evening).**  Roger: "take A2"
+(template `9255dd3430ef`), then "go ahead with 1 and 2, in that order": the
+corpus regeneration of all 659 trait files, then the held-out check on the
+regeneration's own output for the 150 held-out traits.  The pre-regeneration
+files are backed up in `roger/trait_corpus_before_v2_2026-10-01/`
+(git-ignored; the committed corpus at 62633d8 plus today's renames and the
+chaotic rewrite).  The regeneration was submitted as one Message Batch,
+`msgbatch_01To2E8w4mpMPQ5h2zbyoTwu` (recorded in
+[regeneration_batches.json](../regeneration_batches.json)), with the
+defaults: Sonnet 4.6, temperature 1.0, thinking off, antonym named; about
+$16 at the batch rate.  The batch returned within minutes: 621 files from
+the batch and 38 that the batch failed to deliver, generated in real time
+(0 errors, $17.02: $15.18 batch, $1.83 live).  Every one of the 659 files
+is under `9255dd3430ef`; every other field (`arrangement`, `renamed_from`,
+`source`, pair notes) carried forward; no label or description changed.
+Five files came back with 39 questions (circumspect, melodramatic,
+methodical, spontaneous, theatrical) and were regenerated whole in real
+time ($0.22).  `sync_entity_lists.py --check` and `check_arrangements.py`
+pass (659 traits: 524 in pairs, 16 in sequences, 6 in triangles, 4 in
+tetrahedra, 80 singletons, 34 unclassified, 0 problems).  The held-out
+check runs on these files: arm `held_final` in the audit and `hf` in
+[heldout_effect](../../../reports/opening_forms/heldout_effect/) (the
+superseded draft-12 arm dropped from that plan; `plan_with_d12.json` is the
+record).
+
+*Held-out audit* (150 traits, never looked at during development;
+[report_held_out.json](../../../reports/trait_rubric_v2_pilot/report_held_out.json)):
+the final rubric replicates every development finding.  Against the corpus
+as it was: risky and statement openings 16.4% and 30.5% to 0; chat-frame
+words 9.0% to 0.5%; urging others 4.8% to 0.5%; softened negatives 11.3% to
+3.1%; weak opposites 12.7% to 6.4%; hedge words 4.5% to 1.7%; label named
+23.8% to 8.4%; echo of the description 3.5% to 1.1% (all p < 0.001).  Files
+whose five positives open in five different ways: 34% to 96.7% (draft 12
+92%).  Against draft 12's held-out run, the freed negatives show the same
+rise in weak opposites as on the development set (3.3% to 6.4%), and
+invented motives are back at the corpus's level (6.3% to 9.5%; corpus
+10.5%).  Invented particulars 5.3% (corpus 3.6%).  Cost $3.48.
+*Held-out effectiveness on Qwen* (150 traits, 15,000 responses an arm,
+[arms_report.json](../../../reports/opening_forms/heldout_effect/arms_report.json)):
+the regenerated corpus 77.2% scored 3 against the corpus as it was, 75.9%:
++1.3 (-0.7 to +3.1, p = 0.20), better in 74 traits and worse in 61.  Good
+traits +3.1 (p = 0.06), bad +0.2, indifferent +1.1.  Instructions under
+50%: 14.7% against 16.1%; the weakest trait 75 of 500 against the corpus's
+50 (the floor).  So on unseen traits V2 is at least the corpus's equal in
+effectiveness, as on the development set, and removes the text faults
+above.  Cost: Qwen $2.80; the GPT-4.1-mini judge $13.94, about $6 of it
+spent on the 16,959 responses of the superseded draft-12 run, which were
+still unjudged in that directory when the judge ran.  **The final check is
+passed.**
+
+*Clean-pair recheck after the regeneration* (2026-10-02, night).  The
+corpus negatives now name the partner, so the check follows the documented
+procedure: every member of the 262 recorded pairs (524 traits) was
+regenerated with `--no-antonym` in a staging copy,
+`roger/pair_recheck_2026-10-01/` (git-ignored; batch
+`msgbatch_01XYZKHGkio8cNb1aHcRJmhK`, $13.41), checked there with
+`generate_antonyms.classify_one` ($2.95), and every side that missed was
+regenerated and checked once more ($3.94).  The corpus files were not
+touched.  All 594 samples are appended to
+[antonym_check_history.jsonl](../antonym_check_history.jsonl) (phases
+`recheck_v2_2026-10-01` and `recheck_v2_resample_2026-10-01`); per-trait
+answers in `check1.json`, `check2.json` and `still_missing.json` in the
+staging directory.  The pairs by decision were taken from the notes'
+markers ("P (Roger ...", "decision", "forced", "overrode"): 25 of them, not
+the 18 counted earlier, which missed the "P" form.
+
+- *Clean pairs (237):* both ways on the first sample 179 (76%; the old
+  rubric's first pass on 2026-09-28 was 142 of 184, 77%); after one
+  resample of the missing sides 192 (81%).  45 still miss, 7 of them on
+  both sides (analytical / systems_thinker, bland / charismatic,
+  closure_seeking / open_ended, detached / empathetic, disciplined /
+  indulgent, improvisational / methodical, nurturing / tough).  On 50 of
+  the 52 missing sides the second sample repeated a word of the first, so
+  by the procedure these are real, not noise.
+- *Not a V2 regression, mostly.*  38 of the 52 missing sides had never
+  been checked from that side: these pairs were confirmed from the new
+  trait's side when seeded (or are older hand-set pairs), and this is their
+  first two-way test.  12 sides had named the partner before, each in one
+  or two old samples; 2 had never named it.
+- *What the misses name.*  Three are spelling variants the matcher does
+  not join (individualistic -> collectivist, company_loyal -> job-hopping,
+  opinionated -> non-committal).  Most of the rest name a synonym of the
+  partner (dependable -> unreliable, open_minded -> closed-minded,
+  inclusive -> exclusionary, cheerful -> gloomy) or the partner's fault
+  form, which the rubric's "if the positive is a virtue, the negative is
+  the matching fault, unsoftened" invites (cautious -> reckless where the
+  partner is bold; obedient -> defiant for rebellious; calm -> volatile for
+  excitable; tough -> lenient|soft for nurturing).  A few name a different
+  axis (naive -> cynical for worldly; earnest -> ironic for sardonic).
+- *By decision (25), for information, one sample each:* 3 now name each
+  other both ways (evil / good, indifferent_to_animals / kind_to_animals,
+  other_focused / self_absorbed), 16 one way, 6 neither way
+  (course_correcting / tunnel_visioned, ends_justify_means / honorable,
+  heavy_drinker / teetotaler, honorable_while_playing /
+  ruthless_while_playing, news_avoidant / news_junkie, self_aggrandizing /
+  self_deprecating).
+- Total cost of the recheck $20.30.  What to do with the 45 is Roger's
+  call; nothing in the corpus was changed.
+
+**For the role rubric.**  What this work did that the role rubric V2.5 has
+not had, with the evidence and a view on each, is listed in
+[role_rubric_v3_candidates.md](../../../reports/rubric_v2_pilot/role_rubric_v3_candidates.md)
+(Roger asked for it before the check-in, 2026-10-01).
 
 ## Housekeeping once the directory settles (Sep 2026)
 

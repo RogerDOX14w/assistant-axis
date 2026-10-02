@@ -12,14 +12,34 @@ Generates pos/neg instruction pairs, questions, and eval prompts for traits
 via the Anthropic API. Recreates the functionality described in Christina Lu's
 paper (Appendixes B). With the appropriate flags (`--style Christina`,
 temperature 1.0, no thinking), it uses her original prompts and parameters
-and reproduces her results closely. The default `--style Roger` is a fork
-with improved neg instructions (more example pairs for different trait types,
-optional antonym injection).
+and reproduces her results closely.  The default is `--style RogerV2`, the
+rubric of September 2026 (adopted 2026-10-01 after the development and
+held-out checks described below); `--style Roger` is the May 2026 production
+rubric, a fork of Christina's with improved neg instructions (more example
+pairs for different trait types, the antonym named), kept for comparison and
+rollback while the corpus is regenerated.  `--no-antonym` leaves the partner
+unnamed in the negative instructions, which gives the clean-pair check an
+unbiased answer without editing the file's label (regenerate with the default
+afterwards).
 
 ```bash
 uv run python data_analysis/regenerate_trait_instructions.py --traits stoic --force
 uv run python data_analysis/regenerate_trait_instructions.py --all --dry-run
 uv run python data_analysis/regenerate_trait_instructions.py --traits stoic --style Christina --force
+```
+
+Batch mode (Sep 2026): `--batch` submits the run as one Anthropic Message
+Batch, at half the price; results usually come within the hour and at most a
+day later.  Real time is the default, since on a small run the turnaround
+matters more; for a run over about $20 the choice is made case by case
+(AGENT_NOTES, "Batch or real time").  The script waits for the batch, writes
+the files, and generates in real time whatever the batch failed to deliver.
+`--batch-no-wait` submits and exits, and `--batch-id ID` (with the same
+options) collects later; submitted batches are listed in
+`regeneration_batches.json` beside the usage record.  Combined styles only.
+
+```bash
+uv run python data_analysis/regenerate_trait_instructions.py --all --style RogerV2 --force --batch --dry-run
 ```
 
 Token usage (Sep 2026): every non-dry run logs a `[usage]` line and merges
@@ -30,6 +50,177 @@ do the same with `data/roles/regeneration_usage.json` and
 Sonnet 4.6.  Note that `--roles`/`--traits` take separate arguments: in zsh,
 `$(cat list.txt)` is passed as one word, so use `$(cat list.txt | tr ' ' '\n')`
 or spell the names out.
+
+**Trait rubric V2 (`--style RogerV2`, the default; drafted 2026-09-29, adopted
+2026-10-01 as template `9255dd3430ef`).**  It keeps what the role rubric V2.5 has against softening
+and for question design, leaves its voice rules out, and adds rules the
+8slot responses called for: every instruction opens by telling the model who
+to be, from a menu of five ("Be someone who ...", "Become someone who ...",
+"From now on, you are someone who ...", "You are someone who ...", "You are
+..." followed by what the person is), never by telling it to play a part and
+never with a statement of habits or beliefs, which leaves the model answering
+as an ordinary assistant; the trait is the person's own and a standing one;
+the negative pole is a real opposite at full strength; no user, assistant or
+AI; 20 to 30 words; each negative opens as its positive does but need not
+mirror it otherwise.  The opposite
+is named only when the file's `negative_label` is a real word, not a `non-X`
+placeholder.  The paragraph on verbs and particulars was a switch
+(`--no-concrete`) while it was under test on 2026-09-29/30; files written then
+carry a `concrete` field in `generator`.  Since Roger settled its wording the
+paragraph is part of the template and the switch is gone.
+Design log and evidence: `data/traits/instructions/TRAITS_TO_ADD.md`
+§ "Trait generator V2".  Try any change to it on a copy, never on the
+corpus: `--traits-dir DIR` reads and writes the trait files of a staging
+directory instead of the corpus.  About $0.047 per trait, so `--all` on the
+corpus is over the $20 line.  The draft was revised fourteen times between
+2026-09-29 and 2026-10-01 (openings that say who the model is, no role-play;
+five different openings in every file; 20 to 30 words;
+particulars as the role rubric has them; no phrasing taken from the
+description; negatives that open as their positives do but need not mirror
+them); the design log has every draft's hash, the changes and the
+measurements behind them.
+
+For every style with a template, the script warns when a generated
+instruction repeats seven or more words in a row from the template's own
+example pairs (`copied_from_examples`; the file is still written, and the
+status line says how many).  The generator copies what it is shown when the
+trait is close to an example.  An opening frame that the rubric itself
+offers ("Take on the character of someone who") is not counted.  One such
+instruction in a file is tolerable; two or more add noise to the file's five
+samples, and that is what the audit counts.
+
+```bash
+uv run python data_analysis/regenerate_trait_instructions.py --traits petty --style RogerV2 --dry-run --show-prompt
+```
+
+### `audit_trait_instructions.py`
+
+Measures how common each known fault is in a set of trait files, so that a
+change of rubric can be judged by numbers: how common was the fault before,
+and how common is it under each version.  Written for the trait rubric V2
+(2026-09-29).  An *arm* is a directory of trait files: a frozen copy of the
+corpus files, or a staging copy generated under one version of the rubric.
+
+- **Pattern checks** (no API): opening form and the variety of openings inside
+  a file, chat-frame words, hedge words, the trait's own label, length, text
+  repeated from the description or from the template's examples, and the
+  shape of the questions.
+- **Judged checks** (API; Sonnet 4.6 for the instructions, Haiku 4.5 for the
+  questions, about $0.022 a file): softening, weak opposites, traits urged on
+  others, states, chat frame, invented detail and motives, and for questions
+  the shape, two-option choices and questions with one safe answer.  The judge
+  is never told which rubric wrote a file.  It is a rough instrument (on the
+  pilot traits about six in ten of its "softened" and "invented motive" flags
+  were right by eye), so read its numbers as a comparison between arms judged
+  the same way, not as exact rates.
+- **The sample** is drawn once (`split`): 150 development traits for tuning and
+  150 held-out traits, both spread over the three populations of the corpus
+  (added in September 2026; older and rewritten in September; older and
+  untouched).  The held-out set is staged, judged and reported only with
+  `--final`, once the rubric is settled.  The 18 traits of the first pilot and
+  15 traits close in meaning to the rubric's example traits are in neither.
+- **The report** gives each measure per arm with a 95% interval (traits
+  resampled, since the instructions of one trait are not independent), the
+  share of files with the fault, and paired tests against the baseline arm on
+  the same traits.
+
+```bash
+D=reports/trait_rubric_v2_pilot
+uv run python data_analysis/audit_trait_instructions.py split --out $D          # once
+uv run python data_analysis/audit_trait_instructions.py stage --out $D --set dev --arm v1_corpus
+uv run python data_analysis/audit_trait_instructions.py stage --out $D --set dev --arm draft3
+uv run python data_analysis/regenerate_trait_instructions.py --all --style RogerV2 --force \
+    --traits-dir $D/stage/dev/draft3
+uv run python data_analysis/audit_trait_instructions.py judge --out $D --set dev \
+    --arm v1_corpus draft3:RogerV2
+uv run python data_analysis/audit_trait_instructions.py report --out $D --set dev \
+    --baseline v1_corpus --arm draft3:RogerV2
+# the whole corpus, pattern checks only:
+uv run python data_analysis/audit_trait_instructions.py report --out $D --set corpus \
+    --baseline v1=data/traits/instructions
+```
+
+A staging directory starts as a copy of the corpus files, so a generation run
+that fails part of the way leaves old text under the new arm's name.  Name
+the arm `name:STYLE` (or `name:STYLE@template-hash` to pin one draft) and
+only the files written under that style are judged and counted; the report
+prints which generator wrote each arm's files.  Usage is recorded in
+`<out>/judged/usage.json`, cumulative.
+
+A trait whose label or description is not the same in every arm is left out
+of the report altogether (descriptions get edited between the staging of two
+arms; chaotic was rewritten on 2026-09-30), and the report says so.  Stage a
+later arm from an earlier arm's directory (`stage --source`) when the
+comparison must hold the descriptions fixed.
+
+**The blind rating** (`taste`, Roger, 2026-09-30): one judge reads a file's
+label, description and five positive instructions, never told which rubric
+wrote them, and rates the set from 1 to 5 on *quality* (good system prompts
+for a 30B to 100B open-weight model: clear, direct, at full strength) and on
+*coverage* (the five between them cover every element of the description,
+each a different aspect, none redundant or off the trait), reasons first.
+Ratings are kept per judge model under `<out>/judged_taste/<model>/<arm>/`, so
+that two judges can be compared, and the report gives the mean, the
+distribution and the paired difference from the first arm.  About $0.006 a
+file with Sonnet 4.6 and $0.008 with Opus 5.5 (`--dry-run` prints the
+estimate; the Claude 5 models refuse a temperature, and the tool then asks
+without one).
+
+```bash
+uv run python data_analysis/audit_trait_instructions.py taste --out $D --set dev \
+    --arm draft5:RogerV2@fe0ec714d940 v_four_words:RogerV2@a71be163f66a --stems $D/sample100.json --write
+```
+
+### `opening_form_experiment.py`
+
+Tests on the model itself how the wording of a trait instruction decides
+whether the model takes the trait on.  Each instruction in a plan
+(`<out>/plan.json`: traits, each with named variants of an instruction) is
+given to the model as its system prompt with the first N questions of
+`data/extraction_questions.jsonl`, and every response is scored by the
+pipeline's own trait judge (`pipeline/3_judge.py`, the 0 to 3 template,
+GPT-4.1-mini).  The measure is the share of responses scored 3.
+
+The model is `qwen/qwen3-32b` through OpenRouter, with the extraction run's
+settings (temperature 0.7, 512 tokens, thinking off).  **Only hosts on the
+allowlist `ALLOWED_PROVIDERS` are used** (AGENT_NOTES, "Hosted models: western
+hosts only"): today DeepInfra, United States; the host is pinned with no
+fallback and a response naming another host is discarded.  DeepInfra serves
+the model at fp8 and ignores the request to switch thinking off, so the
+switch is Qwen's own `/no_think` at the end of the user turn, which the
+extraction run did not have.  Because of both differences, run a replication
+first: `plan-replication` writes a plan of instructions from the extraction
+run with their known scores, and `report` compares.
+
+```bash
+D=reports/opening_forms/replication
+uv run python data_analysis/opening_form_experiment.py plan-replication --out $D \
+    --traits petty undependable cryptic --n-questions 50
+uv run python data_analysis/opening_form_experiment.py generate --out $D --dry-run   # count and cost
+uv run python data_analysis/opening_form_experiment.py generate --out $D
+uv run python data_analysis/opening_form_experiment.py judge --out $D
+uv run python data_analysis/opening_form_experiment.py report --out $D --write
+```
+
+**Depth.**  The pipeline's judge gives its top score to any answer in which
+the trait is on display, a performance as much as the real thing.  `depth`
+has a second judge (Sonnet 4.6, asked at Anthropic, not shown the
+instruction) read each answer for how the trait shows: in whose voice, in
+what the speaker does or only in what they say of themselves, and how far it
+is laid on (believable, thick, a cartoon).  `depth-report` tabulates it per
+opening.  Use questions written for the trait (a plan's per-trait
+`"questions"`), since generic ones give most traits no occasion.
+
+Needs `OPENROUTER_API_KEY` (Qwen), `OPENAI_API_KEY` (the judge, asked at
+OpenAI directly) and, for `depth`, `ANTHROPIC_API_KEY` in `.env`.  Runs resume: only
+missing responses and scores are asked for.  Usage goes to `<out>/usage.json`,
+cumulative, and is written every 200 calls as well as at the end
+(`CheckpointedUsage`), so a run that is killed loses at most that many calls
+from the record.  Stopping a run is safe for the data (each response is
+appended as it arrives); `generate --concurrency 48` gave about 260 responses
+a minute at DeepInfra on 2026-09-30, the default 16 about 100.  Do not run two
+commands on one `<out>` at the same time: both rewrite `usage.json` and the
+per-trait score files.
 
 ### `regenerate_role_instructions.py`
 

@@ -14,7 +14,7 @@
   },
   "schema": "see AGENT_NOTES § Seeding tooling",
   "merge_problems": [],
-  "updated": "2026-09-28"
+  "updated": "2026-10-02"
  },
  "entries": [
   {
@@ -1673,7 +1673,7 @@
    "chunk": "1",
    "sub_chunk": "Tier D",
    "pairing": "pair",
-   "partner": "universalist",
+   "partner": "moral_universalist",
    "partner_exists": true,
    "arrangement_members": null,
    "description_draft": null,
@@ -1726,7 +1726,8 @@
      "returned": "moral_universalist|moral_absolutist",
      "phase": "staged_main"
     }
-   ]
+   ],
+   "pairing_note": " [partner renamed universalist -> moral_universalist on 2026-10-02 (RO)]"
   },
   {
    "stem": "deliberate",
@@ -2239,7 +2240,7 @@
    "chunk": "1",
    "sub_chunk": "Tier D",
    "pairing": "pair",
-   "partner": "indulgent",
+   "partner": "self_indulgent",
    "partner_exists": true,
    "arrangement_members": null,
    "description_draft": null,
@@ -2290,7 +2291,7 @@
     "checked_at": "2026-09-28",
     "phase": "staged_main"
    },
-   "pairing_note": "hedonistic's opposite from disciplined's side is impulsive|indulgent (both files exist; indulgent seeded in 1A); hedonistic already names disciplined; options: pair by decision, or leave and consider hedonistic <-> indulgent instead",
+   "pairing_note": "hedonistic's opposite from disciplined's side is impulsive|indulgent (both files exist; indulgent seeded in 1A); hedonistic already names disciplined; options: pair by decision, or leave and consider hedonistic <-> indulgent instead [partner renamed indulgent -> self_indulgent on 2026-10-02 (RO)]",
    "paired_at": "2026-09-17",
    "check_answers": [
     {
@@ -4306,7 +4307,7 @@
    "chunk": "1",
    "sub_chunk": "Tier D",
    "pairing": "pair",
-   "partner": "deterministic",
+   "partner": "determinist",
    "partner_exists": true,
    "arrangement_members": null,
    "description_draft": null,
@@ -4323,7 +4324,8 @@
    "section": "TODO: antonym gap-filling pass (queued 2026-09-08)",
    "lines": "1302-1363",
    "chunk_confidence": "high",
-   "extracted_from": "extract_3.json"
+   "extracted_from": "extract_3.json",
+   "pairing_note": " [partner renamed deterministic -> determinist on 2026-09-30 (RO)]"
   },
   {
    "stem": "indeterministic",
@@ -4332,7 +4334,7 @@
    "chunk": "1",
    "sub_chunk": "Tier D / Strategy 1 Family 5",
    "pairing": "pair",
-   "partner": "deterministic",
+   "partner": "determinist",
    "partner_exists": true,
    "arrangement_members": null,
    "description_draft": null,
@@ -4346,7 +4348,8 @@
    "section": "Strategy 1: highest-yield isolated dimensions (most-orthogonal candidates)",
    "lines": "384",
    "chunk_confidence": "high",
-   "extracted_from": "extract_1.json"
+   "extracted_from": "extract_1.json",
+   "pairing_note": " [partner renamed deterministic -> determinist on 2026-09-30 (RO)]"
   },
   {
    "stem": "indifferent_to_animals",
@@ -4401,7 +4404,7 @@
    "chunk": "1",
    "sub_chunk": "Hofstede",
    "pairing": "pair",
-   "partner": "disciplined",
+   "partner": "self_disciplined",
    "partner_exists": true,
    "arrangement_members": null,
    "description_draft": null,
@@ -4458,7 +4461,7 @@
     "intended_hit": false,
     "checked_at": "2026-09-16"
    },
-   "pairing_note": "ascetic's opposite from indulgent's side is self-restrained|disciplined|abstemious; ascetic already names indulgent; option: pair by decision (the corpus-side direction holds) or leave one-way",
+   "pairing_note": "ascetic's opposite from indulgent's side is self-restrained|disciplined|abstemious; ascetic already names indulgent; option: pair by decision (the corpus-side direction holds) or leave one-way [partner renamed disciplined -> self_disciplined on 2026-10-02 (RO)]",
    "paired_at": "2026-09-17"
   },
   {
@@ -5429,20 +5432,25 @@
    "arrangement_members": null,
    "description_draft": null,
    "description_notes": "Completion of an existing half-pair: `neglectful` is the recorded negative_label of `nurturing`, which has no file. No per-entity draft in the file; seed with non-X, generate, antonym-check both ways, then point the labels at each other (the reverse direction is untested, so expect some to need a manual pairing, a relabel of the existing side, or to stay unpaired).",
-   "description": null,
+   "description": "This means leaving the people in one's care to fend for themselves, giving no help, encouragement or guidance, and taking no notice of whether they grow, struggle or come to harm.",
    "source": null,
    "tags": [
     "tier_d",
     "completion",
-    "queued_via_coverage_audit"
+    "queued_via_coverage_audit",
+    "roger-2026-10-02"
    ],
-   "status": "superseded",
-   "decision": "The coverage audit queued `tough` in place of this label as `nurturing`'s partner (line 1319-1322; for tough see line 1403).",
+   "status": "paired",
+   "decision": "The coverage audit queued `tough` in place of this label as `nurturing`'s partner (line 1319-1322; for tough see line 1403). | Reactivated 2026-10-02 (Roger, 'two pairs works'): tough did not pair with nurturing in the clean-pair recheck; staging check with the partner unnamed: neglectful -> attentive|nurturing; nurturing -> callous|neglectful, then neglectful|cold|harsh.",
    "alternatives": null,
    "section": "TODO: antonym gap-filling pass (queued 2026-09-08)",
    "lines": "1302-1363",
    "chunk_confidence": "high",
-   "extracted_from": "extract_3.json"
+   "extracted_from": "extract_3.json",
+   "pair_by_construction": true,
+   "seeded_at": "2026-10-02",
+   "generated_at": "2026-10-02",
+   "paired_at": "2026-10-02"
   },
   {
    "stem": "unceremonious",
@@ -5658,7 +5666,7 @@
    "chunk": "1",
    "sub_chunk": "Tier D",
    "pairing": "pair",
-   "partner": "dogmatic",
+   "partner": "closed_minded",
    "partner_exists": true,
    "arrangement_members": null,
    "description_draft": null,
@@ -5708,7 +5716,7 @@
     "checked_at": "2026-09-28",
     "phase": "staged_r4"
    },
-   "paired_at": "2026-09-18",
+   "paired_at": "2026-10-02",
    "description_before_strip": "This means being open-minded, never dogmatic: hearing out the view one disagrees with, weighing it against one's own beliefs, and changing one's mind when the other side has the better case.",
    "description_after_strip": "This means being open-minded: hearing out the view one disagrees with, weighing it against one's own beliefs, and changing one's mind when the other side has the better case.",
    "negative_label_before_strip": "dogmatic",
@@ -5739,7 +5747,8 @@
      "returned": "closed-minded|dogmatic",
      "phase": "staged_r4"
     }
-   ]
+   ],
+   "pairing_note": " [partner renamed dogmatic -> closed_minded on 2026-10-02 (RO)]"
   },
   {
    "stem": "opposite_of_existentialist_unsettled",
@@ -6469,7 +6478,7 @@
    "chunk": "1",
    "sub_chunk": "Tier D",
    "pairing": "pair",
-   "partner": "urgent",
+   "partner": "hurried",
    "partner_exists": true,
    "arrangement_members": null,
    "description_draft": null,
@@ -6519,7 +6528,7 @@
     "checked_at": "2026-09-28",
     "phase": "staged_fin"
    },
-   "paired_at": "2026-09-18",
+   "paired_at": "2026-10-02",
    "description_before_strip": "This means being relaxed, never urgent: in no hurry about anything, treating nothing as pressing, letting things wait until convenient, and assuming that whatever it is will keep.",
    "description_after_strip": "This means being relaxed: in no hurry about anything, treating nothing as pressing, letting things wait until convenient, and assuming that whatever it is will keep.",
    "negative_label_before_strip": "urgent",
@@ -6551,7 +6560,7 @@
      "phase": "staged_fin"
     }
    ],
-   "pairing_note": " [renamed relaxed -> unhurried on 2026-09-28 (Roger)]"
+   "pairing_note": " [renamed relaxed -> unhurried on 2026-09-28 (Roger)] [partner renamed urgent -> hurried on 2026-10-02 (RO)]"
   },
   {
    "stem": "respectful",
@@ -8079,7 +8088,7 @@
     "half_pair_completion"
    ],
    "status": "paired",
-   "decision": "decided 2026-09-08: complete nurturing with tough (or similar)",
+   "decision": "decided 2026-09-08: complete nurturing with tough (or similar) | 2026-10-02 (Roger): renamed strict; pairs with lenient, not nurturing.",
    "alternatives": "`hard-nosed`, `tough-minded` (fallbacks); generator may return `gentle` or `soft`",
    "section": "Hofstede and Schwartz gap-filling (decided 2026-09-08)",
    "lines": "1175",
@@ -9477,7 +9486,7 @@
    "chunk": "1b",
    "sub_chunk": "Tier A",
    "pairing": "pair",
-   "partner": "open_ended",
+   "partner": "ambiguity_tolerant",
    "partner_exists": true,
    "arrangement_members": null,
    "description_draft": null,
@@ -9487,7 +9496,7 @@
    "tags": [
     "pair_list_add"
    ],
-   "status": "done",
+   "status": "paired",
    "decision": " Tier A: labels reciprocal and arrangement pair already recorded; remaining action is adding the pair to pair_list_clean.json via build_pair_lists.py and judging, which is an experiment-cohort decision for Roger. 2026-09-17 (Roger): not added to pair_list_clean.json for now; that file stays the list of pairs chosen for judging spend, separate from the arrangement metadata.",
    "alternatives": null,
    "section": "Strategy 2: by ease-of-addition (cheapest -> hardest)",
@@ -9502,7 +9511,9 @@
      "status": "exists",
      "chunk": "1b"
     }
-   ]
+   ],
+   "pairing_note": " [partner renamed open_ended -> ambiguity_tolerant on 2026-10-02 (RO)]",
+   "paired_at": "2026-10-02"
   },
   {
    "stem": "compassionate",
@@ -9587,7 +9598,7 @@
    "chunk": "1b",
    "sub_chunk": "part 3 relabel",
    "pairing": "pair",
-   "partner": "libertarian",
+   "partner": "metaphysical_libertarian",
    "partner_exists": true,
    "arrangement_members": [
     "deterministic",
@@ -9613,7 +9624,8 @@
     "reasoning": "The neg instructions consistently describe belief in genuine free will, real human agency, and the existence of alternative possibilities — the direct philosophical opposite of determinism. The most natural label for this position is 'libertarian' in the philosophical sense (libertarian free will), but that term is easily confused with the political meaning. 'Voluntarist' is too obscure. The clearest, most recognizable everyday label is 'indeterministic' or 'free-will-believing,' but the best standalone adjective is 'indeterministic.' However, 'libertarian' (philosophical) is also a strong candidate. In common psycholinguistic usage, the opposite of deterministic in this context is most naturally called 'indeterministic' or 'voluntarist|indeterministic.' The neg instructions emphasize both randomness and agency, which maps well onto 'indeterministic' as the broadest term. This is a near-perfect antonym to deterministic.",
     "checked_at": "2026-09-16"
    },
-   "paired_at": "2026-09-16"
+   "paired_at": "2026-09-16",
+   "pairing_note": " [partner renamed libertarian -> metaphysical_libertarian on 2026-09-30 (RO)]"
   },
   {
    "stem": "eclectic",
@@ -9782,7 +9794,7 @@
    "chunk": "1b",
    "sub_chunk": "part 3 relabel",
    "pairing": "pair",
-   "partner": "deterministic",
+   "partner": "determinist",
    "partner_exists": true,
    "arrangement_members": [
     "deterministic",
@@ -9803,12 +9815,28 @@
    "chunk_confidence": "low",
    "extracted_from": "extract_4.json",
    "check_result": {
-    "returned": "determinist|structuralist",
-    "score": 3,
-    "reasoning": "The neg instructions consistently emphasize recognition of systemic forces, structural factors, and external circumstances shaping individual outcomes — this is the hallmark of a 'structuralist' or 'determinist' worldview. In political/philosophical discourse, the most natural label opposing libertarian (in the free-will/agency sense defined here) is 'determinist,' since the neg instructions explicitly embrace deterministic understanding. However, 'structuralist' is also a strong candidate as the neg instructions focus heavily on systemic/structural factors rather than pure causal determinism. The positive label is defined specifically around free will vs. determinism, making 'determinist' the most direct antonym in this context.",
-    "checked_at": "2026-09-16"
+    "returned": "determinist",
+    "score": 4,
+    "reasoning": "The neg instructions consistently describe a determinist worldview — one that attributes outcomes to external forces, genetics, environment, and systemic structures rather than individual choice. 'Determinist' is the most precise and natural label for this philosophical position. It stands in direct opposition to the libertarian (free will) position described in the positive label. The antonym relationship is very strong and well-established in philosophy of mind and action theory, where 'libertarian' (free will) and 'determinist' are canonical opposing poles. The score is 4 because these are textbook philosophical opposites in this context.",
+    "category": "nice",
+    "candidates": [
+     "determinist"
+    ],
+    "known": [
+     "determinist"
+    ],
+    "intended_hit": true,
+    "checked_at": "2026-09-30"
    },
-   "paired_at": "2026-09-16"
+   "paired_at": "2026-09-30",
+   "pairing_note": " [partner renamed deterministic -> determinist on 2026-09-30 (RO)]",
+   "check_answers": [
+    {
+     "checked_at": "2026-09-30",
+     "returned": "determinist",
+     "phase": "rename"
+    }
+   ]
   },
   {
    "stem": "misanthropic",
@@ -13896,7 +13924,7 @@
    "chunk": "3",
    "sub_chunk": "part 4 pairs",
    "pairing": "pair",
-   "partner": "variety_seeking",
+   "partner": "brand_agnostic",
    "partner_exists": false,
    "arrangement_members": [
     "brand_loyal",
@@ -13946,8 +13974,8 @@
     "checked_at": "2026-09-28",
     "phase": "staged_r4"
    },
-   "pairing_note": " [loop step 2: partner named in the description, 2026-09-25]",
-   "paired_at": "2026-09-25",
+   "pairing_note": " [loop step 2: partner named in the description, 2026-09-25] [partner renamed variety_seeking -> brand_agnostic on 2026-10-02 (RO)]",
+   "paired_at": "2026-10-02",
    "description_before_strip": "This means being brand-loyal, never variety-seeking: buying the same brand every time, from coffee to car, trusting it over any rival and never tempted by the new one on the shelf.",
    "description_after_strip": "This means being brand-loyal: buying the same brand every time, from coffee to car, trusting it over any rival and never tempted by the new one on the shelf.",
    "negative_label_before_strip": "variety-seeking",
@@ -17210,7 +17238,7 @@
    "chunk": "3",
    "sub_chunk": "part 4 pairs",
    "pairing": "pair",
-   "partner": "financially_adventurous",
+   "partner": "financially_reckless",
    "partner_exists": false,
    "arrangement_members": [
     "financially_cautious",
@@ -17262,8 +17290,8 @@
     "checked_at": "2026-09-28",
     "phase": "staged_main"
    },
-   "pairing_note": " [loop step 2, 2026-09-25] [renamed financially_cautious -> financially_conservative on 2026-09-25 (Roger: the partner's honest check named it); description lightly updated]",
-   "paired_at": "2026-09-25",
+   "pairing_note": " [loop step 2, 2026-09-25] [renamed financially_cautious -> financially_conservative on 2026-09-25 (Roger: the partner's honest check named it); description lightly updated] [partner renamed financially_adventurous -> financially_reckless on 2026-10-02 (RO)]",
+   "paired_at": "2026-10-02",
    "description_before_strip": "This means being financially cautious, never daring with money, never financially-daring: keeping savings where they cannot be lost, and turning down the hot stock, the start-up and the casino.",
    "description_after_strip": "This means being financially conservative: keeping savings where they cannot be lost, and turning down the hot stock, the start-up and the casino.",
    "negative_label_before_strip": "financially-daring",
@@ -21356,7 +21384,7 @@
    "chunk": "3",
    "sub_chunk": "part 4 pairs",
    "pairing": "pair",
-   "partner": "job_hopper",
+   "partner": "job_hopping",
    "partner_exists": false,
    "arrangement_members": [
     "job_hopper",
@@ -21408,8 +21436,8 @@
     "checked_at": "2026-09-28",
     "phase": "staged_main"
    },
-   "pairing_note": " [renamed lifer -> company_loyal on 2026-09-25 (Roger, 3D misses); description lightly updated]",
-   "paired_at": "2026-09-25",
+   "pairing_note": " [renamed lifer -> company_loyal on 2026-09-25 (Roger, 3D misses); description lightly updated] [partner renamed job_hopper -> job_hopping on 2026-10-02 (RO)]",
+   "paired_at": "2026-10-02",
    "check_answers": [
     {
      "checked_at": "2026-09-28",
@@ -45172,8 +45200,8 @@
    "tags": [
     "gap"
    ],
-   "status": "tbd",
-   "decision": null,
+   "status": "superseded",
+   "decision": "2026-10-02 (Roger): taken by tough's rename to strict, paired with a new lenient (the pair this entry proposed); its 'disciplining people' sense is covered as demanding standards, not punishment",
    "alternatives": null,
    "section": "seeding log: item 7",
    "lines": null,
@@ -46078,6 +46106,86 @@
      "phase": "staged_new10"
     }
    ]
+  },
+  {
+   "stem": "civilizationist",
+   "label": "civilizationist",
+   "entity_type": "trait",
+   "chunk": null,
+   "sub_chunk": "moral circle",
+   "pairing": "sequence",
+   "partner": null,
+   "arrangement_members": [
+    "selfish",
+    "clannish",
+    "cliqueish",
+    "insular",
+    "parochial",
+    "regionalist",
+    "sectarian",
+    "nationalist",
+    "patriotic",
+    "ethnocentric",
+    "civilizationist",
+    "cosmopolitan",
+    "philanthropic",
+    "humanitarian",
+    "kind_to_animals",
+    "ecocentric"
+   ],
+   "arrangement_note": "moral-circle size, ordered by estimated population of the circle (guesstimate 2026-09-08; sectarian overlaps region and nation) | 2026-10-02: member universalist renamed moral_universalist (Roger, clean-pair recheck) | 2026-10-02 (Roger): moral_universalist removed; its description is the same-standards-across-cultures sense, never circle size | 2026-10-02 (Roger): civilizationist added between ethnocentric and cosmopolitan, for the circle between nation and humanity (\"the West\", \"the developed world\"), which regionalist's 2026-09-28 rewrite to a sub-national region had left empty",
+   "description": "This means putting one's own civilization first: caring about the peoples of one's wider world, such as the West, the Islamic world or the Chinese world, above all others, and treating those outside it as not one's concern.",
+   "description_notes": "Roger 2026-10-02: fill the moral-circle step between nation and all humans; the term is the political-science 'civilizationism' (Brubaker 2017, Ethnic and Racial Studies); regionalist keeps its sub-national meaning.",
+   "source": null,
+   "tags": [
+    "roger-2026-10-02"
+   ],
+   "status": "generated",
+   "decision": "Roger 2026-10-02: 'SG, make it so' (civilizationist with the proposed description, regionalist kept). Description given three examples on 2026-10-02 (Roger, option b): the first version's 'such as the West' made four of five instructions Western.",
+   "seeded_at": "2026-10-02",
+   "generated_at": "2026-10-02"
+  },
+  {
+   "stem": "malign",
+   "label": "malign",
+   "entity_type": "trait",
+   "chunk": null,
+   "sub_chunk": "clean-pair recheck",
+   "pairing": "pair",
+   "partner": "benign",
+   "pair_by_construction": true,
+   "description": "This means being bad for the people around one: whatever one does, by design or by chance, leaves them less safe, less healthy and worse off than before.",
+   "description_notes": "Roger 2026-10-02: benign's description moved from intent to effects on others ('which may spring from intent, but could also be something less deliberate'); malign is its mirror. Overlaps harmless / harmful (the same axis in the assistant's framing).",
+   "source": null,
+   "tags": [
+    "roger-2026-10-02"
+   ],
+   "status": "paired",
+   "decision": "Roger 2026-10-02: option b (benign rewritten to effects, new malign). Staging trial: benign -> malign|harmful|malicious; malign -> benign|beneficent.",
+   "seeded_at": "2026-10-02",
+   "generated_at": "2026-10-02",
+   "paired_at": "2026-10-02"
+  },
+  {
+   "stem": "lenient",
+   "label": "lenient",
+   "entity_type": "trait",
+   "chunk": null,
+   "sub_chunk": "clean-pair recheck",
+   "pairing": "pair",
+   "partner": "strict",
+   "pair_by_construction": true,
+   "description": "This means being easy on people: accepting whatever they manage, keeping the bar low, treating setbacks as reason to go easy, since people grow by being comforted, not pushed.",
+   "description_notes": "Roger 2026-10-02: tough (seeded 2026-09-16 for Hofstede's tough-vs-tender strand, as inspiration) did not pair with nurturing; 'two pairs works': nurturing / neglectful and strict / lenient.",
+   "source": null,
+   "tags": [
+    "roger-2026-10-02"
+   ],
+   "status": "paired",
+   "decision": "Roger 2026-10-02: approved. Staging checks with the partner unnamed: lenient -> strict|demanding, then strict|demanding|exacting; strict -> lenient|indulgent|permissive.",
+   "seeded_at": "2026-10-02",
+   "generated_at": "2026-10-02",
+   "paired_at": "2026-10-02"
   }
  ]
 }
