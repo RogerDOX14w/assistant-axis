@@ -233,6 +233,63 @@ pattern); see the TODO block above
 ``COHERENCE_RUBRIC_VERSION = 4`` for the work needed to bring them
 into the same scheme if/when that assumption breaks.
 
+### Experiment switches in rubric files: remove them once settled (Roger, 2026-09-30)
+
+A rubric or prompt template (the two instruction generators, the judge
+rubrics in `pipeline/3_judge.py`, `results_analysis/axis_judge_correlation.py`,
+`assistant_axis/steering_judges.py`, `data_analysis/audit_trait_instructions.py`,
+and any new one) gets tested by making part of it switchable: a
+placeholder in the template, a module-level ``USE_...`` global, a
+``--no-...`` flag, a ``concrete`` field in the provenance.  That is the
+right way to run the arms of an experiment.  **Once the experiment is
+settled, take the switch out again**: fold the chosen text into the
+template, delete the flag, the global and the provenance field, and let the
+template hash change (the rendered text is the same, so nothing needs
+regenerating; say so in the design log).  Do it in the same change that
+settles the question, not later, or the file fills with switches nobody
+dares remove.  The 2026-09-30 case: the trait rubric's paragraph on verbs
+and particulars was ``{CONCRETE_RULE}`` / ``--no-concrete`` for two days of
+testing; when Roger settled its wording it became plain template text and
+the flag went, in the same hour.
+
+Switches kept on purpose are different: ``--style Christina`` / ``Roger``
+reproduce the paper's method and the production rubric for comparison and
+rollback, and are documented as such in `data_analysis/README.md`.  A
+switch is cruft when the experiment behind it is decided and nothing else
+uses it; the two generator files carry a comment at their switch
+definitions to say so.
+
+### Comparing arms with an LLM judge: order and position bias (Roger, 2026-10-01)
+
+An LLM judge that sees two candidates in one prompt favours one slot: the
+steering effect judge gave the `[RESPONSE]` slot the better score even with
+the texts swapped (§ "Swap-averaged effect judging (rubric v7, May 2026)").
+Every comparison between arms (rubric drafts, prompt variants, models) is
+designed against this, and the readout says which design was used:
+
+1. **Rate each item alone wherever the question allows it.**  The arms then
+   never share a prompt, so no slot can favour one, and the comparison is
+   between absolute ratings paired by trait (or question).  The trait-rubric
+   pilot's three judges all work this way:
+   [`audit_trait_instructions.py`](./data_analysis/audit_trait_instructions.py)
+   `judge` and `taste` see one file at a time, and
+   [`opening_form_experiment.py`](./data_analysis/opening_form_experiment.py)
+   judges one response at a time.  Position effects inside an item (the
+   first of five instructions is read first) fall on every arm alike.
+2. **When the judge must see both candidates in one prompt** (a preference
+   judgement, "which of these two is better"), **run every pair in both
+   orders and average**: straight and swapped, the pair's score the mean of
+   the two, and report the straight-minus-swapped gap as the size of the
+   bias (swap-averaging, as the steering judge does).  Randomising the order
+   across a large sample is the weaker alternative: it takes the bias out of
+   the mean but leaves it in every pair and adds noise; use it only when
+   both orders would cost too much, and say so.  Both orders double the
+   judging cost of a pairwise design, which at this project's judge prices
+   is small beside generation.
+3. **The judge never sees the arm's name, draft number, or anything else
+   that tells the arms apart.**  The pilot's prompts carry the trait, its
+   description and the texts, nothing more.
+
 ### Judge parse-rate alerting (mandatory)
 
 Every script that calls an LLM judge and parses structured output

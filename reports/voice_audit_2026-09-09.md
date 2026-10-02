@@ -1643,3 +1643,91 @@ prompts) and nothing against question-driven washout, which is a
 question-set property.  Caveats: one judge per item, no agreement
 measured; twelve traits chosen from the A and B buckets only; the
 incidental-versus-echo boundary was set by instruction.
+
+## Second look, on 23 other voice traits (2026-09-28)
+
+Asked by Roger at the start of the trait generator V2 design: he does
+not want voice guidance in the trait rubric (a voiced trait instruction
+could clash with the role's voice when the two are combined, and his
+impression was that traits which specify a voice produce it whether or
+not the instruction is written in it), and wanted that impression
+checked before the design is fixed.
+
+**Method.**  23 traits that specify a voice and were not in the
+2026-09-16 check: casual, plain_spoken, chill, goofy, flippant,
+stream_of_consciousness, poetic, melodramatic, theatrical, grandiose,
+effusive, sarcastic, sardonic, acerbic, savage, blunt, concise,
+understated, solemn, formal, cryptic, manic, flirty.  Same data (8slot
+Qwen3-32B, V1-rubric instructions, the system prompt read from each
+response record).  Two passes: the agent read the first 95 words of 230
+responses (two per instruction, seed 20260928), and mechanical measures
+were taken over all 500 responses per trait, per instruction.  One
+reader, openings only, no second judge.
+
+**The instructions.**  All 115 are in the template's neutral second
+person ("You communicate in ...", "Be someone who ...").  None is written
+in the trait's voice; two of casual's quote example words ('gonna',
+'ums').
+
+**Reading.**  The impression holds.
+
+| group | traits | in voice, of 10 read |
+| --- | --- | --- |
+| far from the assistant's default | casual, goofy, poetic, melodramatic, theatrical, grandiose, effusive, sarcastic, sardonic, acerbic, savage, concise, cryptic, manic | 10 each |
+| | flirty | 9 |
+| | understated | 8 |
+| weak on some instructions | chill | 6 |
+| | flippant | 6, and 2 partly |
+| | stream_of_consciousness | 5, and 2 partly |
+| close to the assistant's default | blunt | 6, and 2 partly |
+| | plain_spoken, solemn, formal | 10, but as a tint on an ordinary assistant answer |
+
+Over all 500 responses, the share with the assistant's default shape
+(markdown headings or a bulleted list) is 87% for the default persona and
+2% to 44% for the 20 traits outside the last row (cryptic 2, understated
+3, flirty 4, sarcastic 9, concise 9; goofy 44, where the lists are
+themselves jokes).  Mean length follows the trait (concise 31 words,
+plain_spoken 91, understated 119, default 321), as do contractions
+(formal and poetic 0.2 per 100 words, savage 3.1) and emoji (effusive
+79% of responses, goofy 46%, default 7%).
+
+**Where it fails, the cause is what the instruction says, not the
+register it is written in.**  Within a trait the five instructions differ
+widely, and the weak ones describe the disposition in the abstract or
+soften it into a milder neighbour:
+
+| trait | instruction | marker per 100 words | others |
+| --- | --- | --- | --- |
+| chill | p2 "a relaxed communication style that puts people at ease" | 0.13 | 0.81 to 0.99 |
+| chill | p3 "a calm, unhurried demeanor ... patient, adaptable" | 0.04 | |
+| flippant | p2 "a dismissive attitude toward matters that require careful consideration" | 0.30 | 0.81 to 1.60 |
+| casual | p2 "use 'gonna', 'wanna', 'yeah'" | 2.46 | 0.81 to 1.38 |
+| casual | p4 "throw in some 'ums' and 'you knows'" | 1.99 | |
+
+(Markers: laid-back words for chill, jokes and brush-offs for flippant,
+informal words for casual.)  Both responses read for flippant p2 and all
+four read for chill p2 and p3 were ordinary assistant answers.  The two
+casual instructions that name concrete speech give two to three times
+the voice of the three that describe it.  Fourteen instructions fall
+back to the default shape at least 25 points more often than their
+trait's best; they include solemn p2 and p4, which make the gravity
+conditional ("appropriate reverence", "without being inappropriately
+casual").  The default shape is a proxy: it is compatible with solemn
+and formal, and goofy keeps its voice inside it.
+
+**Smaller effects.**  The trait's own adjective turns up in responses
+(chill 20% of responses, goofy 10%, theatrical 8%; from the earlier
+set, curious 35%, passionate 17%, ironic 16%), and so do instruction
+phrases ("let me gush", "[dramatic pause]").  stream_of_consciousness
+tends to come out as a lyrical essay, and 17% of its responses open with
+leaked planning ("Okay, so I need to ...", "the user wants me to ...").
+Some responses state that the speaker is an AI (default 7%, blunt 7%,
+solemn and formal 4%).
+
+**Bearing on the trait generator V2.**  Nothing here calls for voice
+guidance in trait instructions.  What the rubric should secure is that
+each instruction names the behaviour concretely and does not soften the
+trait or describe a milder one; whether it should also limit the use of
+the trait's own adjective is a design question.  Scripts: session
+scratchpad (`voice_look.py`, `voice_per_prompt.py`,
+`voice_concreteness.py`).
