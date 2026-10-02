@@ -1,5 +1,5 @@
 {
-  "_about": "Hand-check of the mechanically seeded labelled pairs (assistant_axis/gapgen/labels.py), M2 task 12, 2026-10-01, by the M2 agent (Opus) reading every non-antonym, non-random row against its decision text and both texts. keep_only: for each external member, the neighbours kept (relation/uncertain overrides) and why the other mechanically named stems were dropped. add: pairs from plan 11 section 6 not found mechanically. exclude: single rows dropped. Edit here and rerun calibrate_metric.py --rebuild-labels; labelled_pairs.json is derived.",
+  "_about": "Hand-check of the mechanically seeded labelled pairs (assistant_axis/gapgen/labels.py), M2 task 12, 2026-10-01, by the M2 agent (Opus) reading every non-antonym, non-random row against its decision text and both texts. keep_only: for each external member, the neighbours kept (relation/uncertain overrides) and why the other mechanically named stems were dropped. add: pairs from plan 11 section 6 not found mechanically. exclude: single rows dropped. Edit here and rerun calibrate_metric.py --rebuild-labels; labelled_pairs.json is derived. Since 2026-10-02 (the merge with the main line) the builder reads a renamed stem here as the stem its file has now (renamed_from), except the renames in labels.SENSE_CHANGED_RENAMES, and lists entries that no longer apply under curation_unused in labelled_pairs.json.",
   "keep_only": {
     "queue:aloof": {
       "keep": {
@@ -550,5 +550,16 @@
       "note": "plan 11 section 6: cautious / risk_averse / bold"
     }
   ],
-  "exclude": []
+  "exclude": [
+    {
+      "a": "analytical",
+      "b": "systems_thinker",
+      "reason": "Roger 2026-10-02: the pair dissolved in the clean-pair recheck after the trait rubric V2 regeneration (analytical re-paired with intuitive); no longer antonyms, though v4 scored them 4"
+    },
+    {
+      "a": "detached",
+      "b": "empathetic",
+      "reason": "Roger 2026-10-02: the pair dissolved in the clean-pair recheck after the trait rubric V2 regeneration; no longer antonyms, though v4 scored them 4"
+    }
+  ]
 }

@@ -187,9 +187,27 @@ def test_m1_gloss_queries_filters_stratum_gloss_corpus_and_keep(tmp_path):
     q, counts = R.m1_gloss_queries(p, corpus={"open_minded", "absentee", "honest", "aloof"},
                                    keep={"open_minded", "absentee", "aloof"})
     assert q == {"open_minded": "This means open."}
-    assert counts == {"existing": 5, "with_gloss": 4, "in_corpus": 3, "kept": 1}
+    # "renamed" and "not_in_corpus" since 2026-10-02 (the merge with the main line)
+    assert counts == {"existing": 5, "with_gloss": 4, "in_corpus": 3, "renamed": 0, "not_in_corpus": 1, "kept": 1}
     q_all, _ = R.m1_gloss_queries(p, corpus={"open_minded", "honest"})
     assert set(q_all) == {"open_minded", "honest"}
+
+
+def test_renamed_labels_count_for_the_renamed_trait(tmp_path):
+    """2026-10-02: a gloss or plain-reading judgement filed under a label the corpus has since renamed counts
+    for the renamed trait; a label with no current trait (and no rename followed) is dropped and counted."""
+    p = tmp_path / "results.jsonl"
+    rows = [{"label": "tough", "gloss": "This means tough.", "meta": {"stratum": "existing"}},
+            {"label": "bland", "gloss": "This means bland.", "meta": {"stratum": "existing"}},   # rename not followed
+            {"label": "calm", "gloss": "This means calm.", "meta": {"stratum": "existing"}}]
+    p.write_text("\n".join(json.dumps(r) for r in rows) + "\n")
+    q, counts = R.m1_gloss_queries(p, corpus={"strict", "dull", "calm"}, renames={"tough": "strict"})
+    assert q == {"strict": "This means tough.", "calm": "This means calm."}
+    assert counts["renamed"] == 1 and counts["not_in_corpus"] == 1 and counts["kept"] == 2
+    pr = tmp_path / "plain.jsonl"
+    pr.write_text(json.dumps({"key": "tough", "label": "tough", "comparison": {"relation": "same"}}) + "\n")
+    assert R.plain_reading_same(pr, renames={"tough": "strict"}) == {"strict"}
+    assert R.plain_reading_same(pr) == {"tough"}
 
 
 # --------------------------------------------------------------------------- round 4: evaluation

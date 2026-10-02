@@ -604,6 +604,7 @@ def test_round4_end_to_end_with_fake_haiku_and_hash_embedder(tmp_path, monkeypat
         d = json.loads((cal / name).read_text())
         assert d["style"] == style and d["n"] == n and d["prompt_version"] == CM.CL.paraphrase_version(style)
         assert d["prompt_sha256"] == CM._sha256(CM.CL.paraphrase_prompt(style))
+        assert set(d["sources"]) == set(d["paraphrases"])     # what each paraphrase was written from
     usage = json.loads((cal / "usage.json").read_text())
     assert usage["per_model"][HAIKU]["n_calls"] == 3 * _paraphrase_calls(n)   # each style batched on its own
     run = json.loads((cal / "run_round4.json").read_text())
@@ -649,6 +650,58 @@ def test_round4_refuses_a_cache_from_another_prompt_version(tmp_path, capsys):
         {"style": "terse", "prompt_version": 99, "paraphrases": {"absentee": "This means gone."}}))
     assert CM.main(_round4_args(tmp_path, "--skip-llm", "--query-sources", "terse", "--dry-run")) == 2
     assert "prompt version 99" in capsys.readouterr().err
+
+
+def _mini_ci():
+    corpus = {"calm": {"label": "calm", "description": "This means staying calm."},
+              "strict": {"label": "strict", "description": "This means being strict with people."},
+              "neat": {"label": "neat", "description": "This means keeping things tidy."}}
+    stems = sorted(corpus)
+    return {"corpus": corpus, "stems": stems, "index": {s: i for i, s in enumerate(stems)}}
+
+
+def test_paraphrases_of_a_changed_text_are_stale(tmp_path):
+    """2026-10-02 (merge with the main line rewrote 13 descriptions): a cached paraphrase whose recorded source
+    is not the trait's current label and description is stale; one with no recorded source is kept."""
+    from data_analysis.gap_generation import calibrate_metric as CM
+    ci = _mini_ci()
+    p = tmp_path / "paraphrases.json"
+    cached = {"calm": "This means keeping cool.", "strict": "This means being tough.", "neat": "This means tidy.",
+              "gone": "This means a trait no longer in the corpus."}
+    p.write_text(json.dumps({"paraphrases": cached, "sources": {
+        "calm": CM.paraphrase_source("calm", "This means staying calm."),
+        "strict": CM.paraphrase_source("tough", "This means being tough on people.")}}))
+    fresh, stale = CM.fresh_paraphrases(p, cached, ci)
+    assert fresh == {"calm": "This means keeping cool.", "neat": "This means tidy."} and stale == ["strict"]
+
+
+def test_paraphrase_stage_records_sources_and_keeps_old_entries(tmp_path, monkeypatch):
+    from data_analysis.gap_generation import calibrate_metric as CM
+    from assistant_axis.gapgen.cost import GuardedUsage
+    ci = _mini_ci()
+    monkeypatch.setattr(CM, "_anthropic_client", lambda: FakeAsyncAnthropic(_paraphrase_responder))
+    p = tmp_path / "paraphrases_terse.json"
+    p.write_text(json.dumps({"style": "terse", "prompt_version": CM.CL.paraphrase_version("terse"),
+                             "paraphrases": {"tough": "This means an old stem's paraphrase.",
+                                             "strict": "This means stale."},
+                             "sources": {"tough": "x", "strict": "y"}, "sources_note": "backfilled"}))
+    merged = CM.run_paraphrase_stage(ci, ["strict"], p, {"calm": "This means cool."}, GuardedUsage(budget_usd=1.0),
+                                     style="terse")
+    d = json.loads(p.read_text())
+    assert merged == d["paraphrases"] and d["paraphrases"]["tough"] == "This means an old stem's paraphrase."
+    assert d["paraphrases"]["strict"].startswith("This means, put otherwise, being strict")
+    assert d["sources"]["strict"] == CM.paraphrase_source("strict", "This means being strict with people.")
+    assert d["sources"]["tough"] == "x" and "calm" not in d["sources"] and d["sources_note"] == "backfilled"
+    assert CM.fresh_paraphrases(p, d["paraphrases"], ci)[1] == []
+
+
+def test_round4_rebuild_labels_dry_run_writes_nothing(tmp_path, capsys):
+    from data_analysis.gap_generation import calibrate_metric as CM
+    assert CM.main(_round4_args(tmp_path, "--skip-llm", "--rebuild-labels", "--query-sources", "m1_gloss_2",
+                                "--dry-run")) == 0
+    out = capsys.readouterr().out
+    assert "labelled pairs rebuilt from the current corpus" in out and "'antonym'" in out
+    assert not (tmp_path / "cal").exists()
 
 
 # --------------------------------------------------------------------------- calibrate_metric.py --write-config (task 19)

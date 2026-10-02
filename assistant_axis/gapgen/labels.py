@@ -31,6 +31,16 @@ latter two live in ``externals`` with their text.  Folds (``group_folds``)
 are drawn over connected components of the labelled-pair graph, so no
 entity, and therefore no pair, straddles two folds; unrelated pairs are
 sampled inside a fold.
+
+Renames (2026-10-02, the merge with the main line): a stem the corpus has
+renamed (``renamed_from`` in the current file; :func:`corpus_renames`) is read
+as the current stem wherever the sources name it (v4 judgements, seed-queue
+decisions, the curation file), except for the renames in
+:data:`SENSE_CHANGED_RENAMES`, whose old records do not describe the trait
+that carries the name now.  Curation entries that no longer apply (a member
+that is neither a corpus stem nor an external, a relabel / exclude / keep
+naming a pair no source produces) are skipped and listed in
+``curation_unused``.
 """
 from __future__ import annotations
 
@@ -51,6 +61,36 @@ MECHANICAL_SOURCES = ("seed_queue_decision", "corpus_source_field")
 RELATIONS = ("antonym", "duplicate", "deliberate_duplicate", "near_distinct", "polysemy_reject", "unrelated")
 SCHEMA_VERSION = 1
 V4_MIN_SCORE = 4
+
+#: Renames whose description changed sense with the label (checked 2026-10-02 at the merge with the main
+#: line, against the descriptions before it): bland -> dull, a flat, colourless voice became a presence
+#: that draws no one in; libertarian -> metaphysical_libertarian, rewritten to the metaphysical sense
+#: only (the bare word read politically).  What was recorded under the old stem (a labelled pair, a hand
+#: decision, an M1 gloss) does not carry over; the other renames of that merge kept their descriptions'
+#: sense and do.  corpus_regions.json made the same call (the two were filtered again).
+SENSE_CHANGED_RENAMES: dict[str, str] = {"bland": "dull", "libertarian": "metaphysical_libertarian"}
+
+
+def corpus_renames(data_dir: Path, *, carry_only: bool = True) -> dict[str, str]:
+    """``{old stem: current stem}`` from the ``renamed_from`` field of the
+    trait files (a dict with ``stem``, a bare stem, or a list of either, as in
+    ``entity_id.resolve_renamed_stem``).  An old stem that is a current file
+    again is left out.  With ``carry_only`` (the default), the renames in
+    :data:`SENSE_CHANGED_RENAMES` are left out too, so their old records are
+    not read as the new trait's."""
+    idir = Path(data_dir) / "traits" / "instructions"
+    current = {f.stem for f in idir.glob("*.json")}
+    out: dict[str, str] = {}
+    for f in sorted(idir.glob("*.json")):
+        rf = json.loads(f.read_text()).get("renamed_from")
+        for item in (rf if isinstance(rf, list) else [rf] if rf else []):
+            old = item.get("stem") if isinstance(item, dict) else item
+            if isinstance(old, str) and old and old != f.stem and old not in current:
+                out[old] = f.stem
+    if carry_only:
+        out = {o: n for o, n in out.items() if SENSE_CHANGED_RENAMES.get(o) != n}
+    return dict(sorted(out.items()))
+
 
 #: Decision wording that marks a description not matching its word (polysemy rejects).
 _POLYSEMY_RE = re.compile(r"did not match the word|wrong name|meaning the word does not carry|"
@@ -83,6 +123,8 @@ class LabelledPairs:
     excluded: list[dict] = field(default_factory=list)
     folds: dict[str, int] = field(default_factory=dict)
     sources: dict = field(default_factory=dict)
+    curation_unused: list[dict] = field(default_factory=list)
+    renames_followed: dict[str, str] = field(default_factory=dict)
 
     def by_relation(self, *relations: str, include_uncertain: bool = True) -> list[LabelledPair]:
         return [p for p in self.pairs if p.relation in relations and (include_uncertain or not p.uncertain)]
@@ -97,6 +139,7 @@ class LabelledPairs:
         return {"schema_version": SCHEMA_VERSION, "built_at": utc_now(), "counts": self.counts(),
                 "sources": self.sources, "externals": self.externals,
                 "pairs": [asdict(p) for p in self.pairs], "excluded": self.excluded,
+                "curation_unused": self.curation_unused, "renames_followed": self.renames_followed,
                 "folds": self.folds}
 
     @classmethod
@@ -104,7 +147,8 @@ class LabelledPairs:
         d = d.get("result", d)
         return cls(pairs=[LabelledPair(**p) for p in d["pairs"]], externals=dict(d.get("externals", {})),
                    excluded=list(d.get("excluded", [])), folds={k: int(v) for k, v in d.get("folds", {}).items()},
-                   sources=dict(d.get("sources", {})))
+                   sources=dict(d.get("sources", {})), curation_unused=list(d.get("curation_unused", [])),
+                   renames_followed=dict(d.get("renames_followed", {})))
 
 
 def save(lp: LabelledPairs, path: Path, *, inputs=None) -> None:
@@ -124,14 +168,19 @@ def load(path: Path) -> LabelledPairs:
 _WORD_RE = re.compile(r"[A-Za-z][A-Za-z'\-]*(?:[ _][A-Za-z][A-Za-z'\-]*)*")
 
 
-def parse_decision_stems(decision: str, corpus_stems: Iterable[str], *, exclude: Iterable[str] = ()) -> list[str]:
+def parse_decision_stems(decision: str, corpus_stems: Iterable[str], *, exclude: Iterable[str] = (),
+                         renames: Optional[Mapping[str, str]] = None) -> list[str]:
     """Existing stems a seed-queue ``decision`` names, in order of appearance.
 
     Tries every run of one to four words (hyphens and spaces folded to ``_``,
     lower case, backticks ignored) against the corpus stems, longest first, so
     ``risk-averse`` and ``heavy_drinker`` are found as one stem.  ``exclude``
-    (the entry's own stem and its partner) is dropped."""
+    (the entry's own stem and its partner) is dropped.  ``renames`` (old stem
+    -> current stem): an old stem the decision names is returned as the
+    current one."""
+    renames = dict(renames or {})
     stems = set(corpus_stems)
+    known = stems | set(renames)
     skip = set(exclude)
     words = [w.lower().replace("-", "_").strip("'") for w in re.findall(r"[A-Za-z][A-Za-z'\-_]*", decision or "")]
     found: list[str] = []
@@ -139,7 +188,8 @@ def parse_decision_stems(decision: str, corpus_stems: Iterable[str], *, exclude:
     while i < len(words):
         for n in (4, 3, 2, 1):
             cand = "_".join(words[i:i + n])
-            if len(words[i:i + n]) == n and cand in stems:
+            if len(words[i:i + n]) == n and cand in known:
+                cand = cand if cand in stems else renames[cand]
                 if cand not in skip and cand not in found:
                     found.append(cand)
                 i += n
@@ -160,11 +210,14 @@ def seeding_log_descriptions(path: Path) -> dict[str, str]:
     return out
 
 
-def load_v4_antonyms(path: Path, corpus_stems: Iterable[str], *, min_score: int = V4_MIN_SCORE) -> list[tuple[str, str, int]]:
+def load_v4_antonyms(path: Path, corpus_stems: Iterable[str], *, min_score: int = V4_MIN_SCORE,
+                     renames: Optional[Mapping[str, str]] = None) -> list[tuple[str, str, int]]:
     """``(stem, partner_stem, score)`` for v4 judgements with score >= ``min_score``
-    whose ``negative_label`` normalises to an existing stem."""
+    whose ``negative_label`` normalises to an existing stem; with ``renames``,
+    an old stem on either side is read as the current one."""
     from assistant_axis.entity_id import normalize_to_file_name
     stems = set(corpus_stems)
+    renames = dict(renames or {})
     out = []
     data = json.loads(Path(path).read_text()) if Path(path).exists() else {}
     for stem, rec in sorted(data.items()):
@@ -173,6 +226,7 @@ def load_v4_antonyms(path: Path, corpus_stems: Iterable[str], *, min_score: int 
         if not isinstance(score, (int, float)) or score < min_score or not neg:
             continue
         partner = normalize_to_file_name(neg)
+        stem, partner = renames.get(stem, stem), renames.get(partner, partner)
         if stem in stems and partner in stems and partner != stem:
             out.append((stem, partner, int(score)))
     return out
@@ -260,21 +314,30 @@ def build_labelled_pairs(data_dir: Path, queue: Sequence[Mapping] | Mapping, see
                          census: Optional[Mapping[str, str]] = None, *, curation: Optional[Mapping] = None,
                          filter_glosses: Optional[Mapping[str, str]] = None,
                          v4_path: Optional[Path] = None, n_unrelated: int = 2000, k_folds: int = 5,
-                         seed: int = 0) -> LabelledPairs:
+                         seed: int = 0, renames: Optional[Mapping[str, str]] = None) -> LabelledPairs:
     """Seed the labelled pairs from the corpus, v4, the seed queue and the
     pairing review, apply ``curation`` (see the module docstring), assign
-    folds and sample unrelated pairs.  Deterministic for a given ``seed``."""
+    folds and sample unrelated pairs.  Deterministic for a given ``seed``.
+    ``renames`` (old stem -> current stem) defaults to
+    :func:`corpus_renames` of ``data_dir``."""
     data_dir = Path(data_dir)
     corpus = _corpus(data_dir)
     stems = set(corpus)
     census = dict(census or {})
     curation = dict(curation or {})
+    renames = dict(corpus_renames(data_dir) if renames is None else renames)
+    census = {renames.get(s, s): c for s, c in census.items()}
     if isinstance(queue, Mapping):
         queue = queue.get("entries", [])
     rows: dict[tuple[str, str], LabelledPair] = {}
     externals: dict[str, dict] = {}
     excluded: list[dict] = []
+    unused: list[dict] = []
     sources: dict[str, int] = defaultdict(int)
+
+    def resolve(m: str) -> str:
+        """A curation or source member as the corpus names it now."""
+        return m if (m in stems or ":" in m) else renames.get(m, m)
 
     def add(a: str, b: str, relation: str, source: str, note: str = "", uncertain: bool = False) -> None:
         if a == b:
@@ -309,13 +372,14 @@ def build_labelled_pairs(data_dir: Path, queue: Sequence[Mapping] | Mapping, see
                 add(x, y, "near_distinct", f"arrangement_{arr.kind}",
                     note=f"members of one {arr.kind}: {', '.join(arr.members)}")
     # 2. v4 antonym judgements
-    for a, b, score in load_v4_antonyms(v4_path or data_dir / "traits" / "trait_antonyms_v4.json", stems):
+    for a, b, score in load_v4_antonyms(v4_path or data_dir / "traits" / "trait_antonyms_v4.json", stems,
+                                        renames=renames):
         add(a, b, "antonym", "antonyms_v4", note=f"antonym_score {score}")
     # 3. deliberate duplicates declared in the corpus's own `source` field
     for stem, c in sorted(corpus.items()):
         src = c.get("source") or ""
         if "deliberate dup" in src.lower():
-            for other in parse_decision_stems(src, stems, exclude=[stem]):
+            for other in parse_decision_stems(src, stems, exclude=[stem], renames=renames):
                 add(stem, other, "deliberate_duplicate", "corpus_source_field", note=src)
     # 4. seed-queue decisions (with the entry's description, or the pairing review's)
     log_desc = seeding_log_descriptions(seeding_log)
@@ -327,7 +391,8 @@ def build_labelled_pairs(data_dir: Path, queue: Sequence[Mapping] | Mapping, see
             continue
         desc = e.get("description") or e.get("description_draft") or log_desc.get(stem)
         decision = e.get("decision") or ""
-        named = parse_decision_stems(decision, stems, exclude=[stem, e.get("partner") or ""])
+        named = parse_decision_stems(decision, stems, exclude=[stem, resolve(e.get("partner") or "")],
+                                     renames=renames)
         qid = f"queue:{stem}"
         if not desc and stem in (filter_glosses or {}):
             # no description was ever written: use the M1 filter's plain-sense gloss of the label
@@ -372,35 +437,54 @@ def build_labelled_pairs(data_dir: Path, queue: Sequence[Mapping] | Mapping, see
         elif kind == "label":
             externals[m] = {"label": label, "description": None, "status": e.get("status")}
 
+    def unusable(*members: str) -> list[str]:
+        return [m for m in members if m not in stems and m not in externals]
+
     for item in curation.get("add", []):
-        ensure_external(item["a"])
-        ensure_external(item["b"])
-        add(item["a"], item["b"], item["relation"], item.get("source", "hand"), item.get("note", ""),
+        a, b = resolve(item["a"]), resolve(item["b"])
+        ensure_external(a)
+        ensure_external(b)
+        if unusable(a, b):
+            unused.append({"part": "add", "a": item["a"], "b": item["b"], "relation": item.get("relation"),
+                           "why": f"{', '.join(unusable(a, b))}: neither a corpus stem nor an external"})
+            continue
+        add(a, b, item["relation"], item.get("source", "hand"), item.get("note", ""),
             bool(item.get("uncertain", False)))
     for item in curation.get("relabel", []):
-        key = pair_key(item["a"], item["b"])
+        key = pair_key(resolve(item["a"]), resolve(item["b"]))
         if key in rows:
             p = rows[key]
             p.relation = item.get("relation", p.relation)
             p.uncertain = bool(item.get("uncertain", p.uncertain))
             if item.get("note"):
                 p.note = (p.note + " | " if p.note else "") + "hand: " + item["note"]
+        else:
+            unused.append({"part": "relabel", "a": item["a"], "b": item["b"], "why": "no source names this pair"})
     for item in curation.get("exclude", []):
-        key = pair_key(item["a"], item["b"])
+        key = pair_key(resolve(item["a"]), resolve(item["b"]))
         if key in rows:
             p = rows.pop(key)
             excluded.append({"a": p.a, "b": p.b, "relation": p.relation, "source": p.source,
                              "reason": "hand: " + item.get("reason", "excluded")})
+        else:
+            unused.append({"part": "exclude", "a": item["a"], "b": item["b"], "why": "no source names this pair"})
     # keep_only: {member: {"keep": {other: {relation?, uncertain?, note?}}, "reason": why the rest go}};
     # it judges only the mechanically named rows (seed-queue decisions, corpus source fields), never a
     # recorded arrangement, a v4 judgement or a hand-added pair.
-    for member, spec in (curation.get("keep_only") or {}).items():
-        keep = spec.get("keep") or {}
+    for member_as_written, spec in (curation.get("keep_only") or {}).items():
+        member = resolve(member_as_written)
+        keep = {resolve(o): v for o, v in (spec.get("keep") or {}).items()}
         judged = set(spec.get("sources") or MECHANICAL_SOURCES)
-        for key in [k for k in rows if member in k and rows[k].source in judged]:
+        judged_keys = [k for k in rows if member in k and rows[k].source in judged]
+        if keep and not judged_keys:
+            unused.append({"part": "keep_only", "a": member_as_written, "b": None,
+                           "why": "no mechanically named row for this member"})
+        found = set()
+        for key in judged_keys:
             other = key[1] if key[0] == member else key[0]
             p = rows[key]
             if other in keep:
+                found.add(other)
                 k = keep[other] or {}
                 p.relation = k.get("relation", p.relation)
                 p.uncertain = bool(k.get("uncertain", p.uncertain))
@@ -410,6 +494,10 @@ def build_labelled_pairs(data_dir: Path, queue: Sequence[Mapping] | Mapping, see
                 rows.pop(key)
                 excluded.append({"a": p.a, "b": p.b, "relation": p.relation, "source": p.source,
                                  "reason": "hand: " + spec.get("reason", "not the named duplicate")})
+        if judged_keys:
+            for other in sorted(set(keep) - found):
+                unused.append({"part": "keep_only", "a": member_as_written, "b": other,
+                               "why": "the kept pair is not among the member's mechanically named rows"})
     # drop externals no longer referenced
     used = {m for p in rows.values() for m in (p.a, p.b)}
     externals = {k: v for k, v in sorted(externals.items()) if k in used}
@@ -449,7 +537,8 @@ def build_labelled_pairs(data_dir: Path, queue: Sequence[Mapping] | Mapping, see
     for p in labelled + unrelated:
         kept[p.source] += 1
     return LabelledPairs(pairs=labelled + unrelated, externals=externals, excluded=excluded, folds=folds,
-                         sources={"seeded": dict(sorted(sources.items())), "kept": dict(sorted(kept.items()))})
+                         sources={"seeded": dict(sorted(sources.items())), "kept": dict(sorted(kept.items()))},
+                         curation_unused=unused, renames_followed=dict(sorted(renames.items())))
 
 
 def member_text(member: str, corpus: Mapping[str, Mapping], externals: Mapping[str, Mapping]) -> tuple[str, Optional[str]]:

@@ -224,29 +224,37 @@ def query_text(text: str) -> str:
     return represent_short(None, text.strip(), QUERY_REPRESENTATION)
 
 
-def plain_reading_same(path: Path) -> set[str]:
+def plain_reading_same(path: Path, *, renames: Optional[Mapping[str, str]] = None) -> set[str]:
     """Stems of the corpus labels whose plain reading was judged the corpus's own sense (relation
-    ``same`` in the plain-reading comparison's ``results.jsonl``)."""
+    ``same`` in the plain-reading comparison's ``results.jsonl``).  ``renames`` (old stem -> current
+    stem; ``labels.corpus_renames``) files a label the corpus has since renamed under its current stem."""
     from assistant_axis.entity_id import normalize_to_file_name
+    renames = dict(renames or {})
     out: set[str] = set()
     for line in Path(path).read_text(encoding="utf-8").splitlines():
         if line.strip():
             r = json.loads(line)
             if (r.get("comparison") or {}).get("relation") == "same":
-                out.add(normalize_to_file_name(r.get("label") or r["key"]))
+                stem = normalize_to_file_name(r.get("label") or r["key"])
+                out.add(renames.get(stem, stem))
     return out
 
 
-def m1_gloss_queries(results_path: Path, *, corpus: Iterable[str],
-                     keep: Optional[Iterable[str]] = None) -> tuple[dict[str, str], dict]:
+def m1_gloss_queries(results_path: Path, *, corpus: Iterable[str], keep: Optional[Iterable[str]] = None,
+                     renames: Optional[Mapping[str, str]] = None) -> tuple[dict[str, str], dict]:
     """``({stem: gloss}, counts)`` from an M1 filter run's ``results.jsonl``: rows of the ``existing``
     stratum with a non-empty gloss whose label maps to a corpus stem (``normalize_to_file_name``) and,
-    when ``keep`` is given, is in it.  The first row per stem wins."""
+    when ``keep`` is given, is in it.  The first row per stem wins.
+
+    ``renames`` (old stem -> current stem; 2026-10-02): a label the corpus has since renamed counts for
+    the renamed trait (``counts["renamed"]``); a gloss whose label maps to no current trait is dropped
+    (``counts["not_in_corpus"]``)."""
     from assistant_axis.entity_id import normalize_to_file_name
     corpus_set = set(corpus)
     keep_set = None if keep is None else set(keep)
+    renames = dict(renames or {})
     out: dict[str, str] = {}
-    counts = {"existing": 0, "with_gloss": 0, "in_corpus": 0, "kept": 0}
+    counts = {"existing": 0, "with_gloss": 0, "in_corpus": 0, "renamed": 0, "not_in_corpus": 0, "kept": 0}
     for line in Path(results_path).read_text(encoding="utf-8").splitlines():
         if not line.strip():
             continue
@@ -259,7 +267,11 @@ def m1_gloss_queries(results_path: Path, *, corpus: Iterable[str],
             continue
         counts["with_gloss"] += 1
         stem = normalize_to_file_name(r["label"])
+        if stem not in corpus_set and renames.get(stem) in corpus_set:
+            stem = renames[stem]
+            counts["renamed"] += 1
         if stem not in corpus_set:
+            counts["not_in_corpus"] += 1
             continue
         counts["in_corpus"] += 1
         if (keep_set is not None and stem not in keep_set) or stem in out:

@@ -43,7 +43,7 @@ Round 4 (2026-10-02), the covered setting judged as retrieval, runs alone:
     uv run python data_analysis/gap_generation/calibrate_metric.py --round4 [--budget-usd 10]
         [--query-sources paraphrase plain terse m1_gloss_1 m1_gloss_2] [--models openai gemma]
         [--representations w14 w20] [--variants centred pw8 pw12 pw16 pw24 pw32]
-        [--bootstrap-n 2000] [--seed 0] [--skip-llm] [--dry-run]
+        [--bootstrap-n 2000] [--seed 0] [--skip-llm] [--rebuild-labels] [--dry-run]
 
 It generates the missing ``plain`` / ``terse`` paraphrase sets with Haiku
 (``paraphrases_<style>.json``; ``--skip-llm`` uses what is cached), takes the
@@ -53,6 +53,14 @@ sense, embeds only the new query texts, and writes ``retrieval_round4.json``
 the two models' merged lists; McNemar's exact test and a paired bootstrap
 against centred ``w14``), ``retrieval_round4.md``, ``run_round4.json`` (with
 the pinned paraphrase prompt versions) and the cumulative ``usage.json``.
+
+After the merge with the main line (2026-10-02) round 4 follows the corpus:
+a cached paraphrase written from a label or description the corpus has since
+changed is regenerated (each cache records, per stem, the sha256 of the text
+it paraphrased), the M1 glosses and the plain-reading judgements of a renamed
+label count for the renamed trait (``labels.corpus_renames``; not the renames
+in ``labels.SENSE_CHANGED_RENAMES``), and ``--rebuild-labels`` rebuilds
+``labelled_pairs.json`` first.
 """
 from __future__ import annotations
 
@@ -130,7 +138,9 @@ def parse_args(argv=None):
     ap.add_argument("--confirmed-by", default=None)
     ap.add_argument("--redraw-comparisons", action="store_true",
                     help="redraw criterion (e)'s blinded comparisons and Roger's marks sheet (otherwise kept as written)")
-    ap.add_argument("--rebuild-labels", action="store_true", help="rebuild labelled_pairs.json from the curation file")
+    ap.add_argument("--rebuild-labels", action="store_true",
+                    help="rebuild labelled_pairs.json from the current corpus and the curation file (also with "
+                         "--round4, whose threshold-design figures use its antonyms)")
     ap.add_argument("--no-residual", action="store_true", help="skip the leave-one-out residual (fast runs)")
     ap.add_argument("--write-config", action="store_true",
                     help="task 19: write metric_config.json for the M2 final settings from the recorded outputs")
@@ -244,6 +254,8 @@ def main(argv=None) -> int:
     glosses = LB.load_filter_glosses(repo / LB.DEFAULT_FILTER_RESULTS, strata=("existing",))
     para_path = args.paraphrase_cache or out / "paraphrases.json"
     paraphrases = json.loads(para_path.read_text()).get("paraphrases", {}) if para_path.exists() else {}
+    # a paraphrase of a label or description the corpus has since changed is regenerated, not reused
+    paraphrases, stale_paraphrases = fresh_paraphrases(para_path, paraphrases, ci)
     texts = build_texts(ci, lp, cut_rows, args.representations, minimal, glosses, paraphrases)
     every = all_texts(texts)
     avg_tok = float(np.mean([len(t) for t in every])) / CHARS_PER_TOKEN
@@ -796,24 +808,57 @@ def _anthropic_client():
 
 def run_paraphrase_stage(ci, llm_items, para_path: Path, paraphrases: dict, usage, *, style: str = "standard") -> dict:
     """Haiku paraphrases (criterion g's ``standard`` style, or round 4's
-    ``plain`` / ``terse``) for the traits not yet in the cache; the cache
+    ``plain`` / ``terse``) for the traits not yet in the cache, or whose label
+    or description changed since their paraphrase was written; the cache
     (``paraphrases.json`` or ``paraphrases_<style>.json``) is written even when
     the cap stops the run, stamped with the style's pinned prompt version and
-    the sha256 of its text."""
+    the sha256 of its text, and keeps every entry it had (a stem the corpus no
+    longer has stays; a regenerated one is replaced).  ``sources`` records,
+    per stem, :func:`paraphrase_source` of the text each paraphrase was written
+    from."""
     todo = [{"stem": s, "label": ci["corpus"][s]["label"], "description": ci["corpus"][s]["description"]}
             for s in llm_items]
+    prior: dict = json.loads(para_path.read_text()) if para_path.exists() else {}
+    sources = dict(prior.get("sources") or {})
     new = {}
     try:
         new = asyncio.run(CL.run_paraphrases(_anthropic_client(), todo, usage=usage, style=style))
     finally:
-        merged = {**paraphrases, **new}
+        merged = {**(prior.get("paraphrases") or {}), **paraphrases, **new}
+        sources.update({it["stem"]: paraphrase_source(it["label"], it["description"]) for it in todo
+                        if it["stem"] in new})
         para_path.parent.mkdir(parents=True, exist_ok=True)
-        para_path.write_text(json.dumps({"model": CL.PARAPHRASE_MODEL, "style": style,
-                                         "prompt_version": CL.paraphrase_version(style),
-                                         "prompt_sha256": _sha256(CL.paraphrase_prompt(style)),
-                                         "n": len(merged), "paraphrases": merged}, indent=2, ensure_ascii=False) + "\n")
+        payload = {"model": CL.PARAPHRASE_MODEL, "style": style, "prompt_version": CL.paraphrase_version(style),
+                   "prompt_sha256": _sha256(CL.paraphrase_prompt(style)), "n": len(merged), "paraphrases": merged,
+                   "sources": {s: sources[s] for s in merged if s in sources}}
+        if prior.get("sources_note"):
+            payload["sources_note"] = prior["sources_note"]
+        para_path.write_text(json.dumps(payload, indent=2, ensure_ascii=False) + "\n")
     logger.info("[g:%s] %d paraphrases (%d new); %s", style, len(merged), len(new), usage.log_line())
     return merged
+
+
+def paraphrase_source(label: str, description: str) -> str:
+    """sha256 of what a paraphrase is written from (the label and the description, as sent)."""
+    return _sha256(f"{label}\n{description}")
+
+
+def fresh_paraphrases(path: Path, cached: dict, ci: dict) -> tuple[dict, list[str]]:
+    """``(fresh, stale)``: the cached paraphrases of current traits whose recorded source
+    (:func:`paraphrase_source`) matches the trait's text now, and the current traits whose paraphrase
+    was written from another label or description (2026-10-02: the main line rewrote 13 descriptions).
+    An entry without a recorded source is taken as fresh."""
+    sources = (json.loads(path.read_text()).get("sources") or {}) if Path(path).exists() else {}
+    fresh, stale = {}, []
+    for s in ci["stems"]:
+        if s not in cached:
+            continue
+        c = ci["corpus"][s]
+        if s in sources and sources[s] != paraphrase_source(c["label"], c["description"]):
+            stale.append(s)
+        else:
+            fresh[s] = cached[s]
+    return fresh, stale
 
 
 def _sha256(text: str) -> str:
@@ -1002,6 +1047,7 @@ def run_round4(args) -> int:
     # ---------------------------------------------------------------- query sources
     para: dict[str, dict] = {}
     para_missing: dict[str, list] = {}
+    para_stale: dict[str, list] = {}
     para_paths: dict[str, Path] = {}
     for src in sources:
         if src in RT.PARAPHRASE_SOURCES:
@@ -1012,16 +1058,27 @@ def run_round4(args) -> int:
             if problem:
                 print(f"REFUSED: {problem}", file=sys.stderr)
                 return 2
-            para[src], para_paths[src] = {s: p for s, p in cached.items() if s in corpus_set}, path
-            para_missing[src] = [s for s in ci["stems"] if s not in cached]
+            # a paraphrase of a label or description the corpus has since changed counts as missing
+            (para[src], para_stale[src]), para_paths[src] = fresh_paraphrases(path, cached, ci), path
+            para_missing[src] = [s for s in ci["stems"] if s not in para[src]]
     plain_path = args.plain_reading if args.plain_reading.is_absolute() else repo / args.plain_reading
-    same = RT.plain_reading_same(plain_path)
+    # labels the corpus has renamed since the M1 runs count for the renamed trait, except where the
+    # description changed sense with the name (labels.SENSE_CHANGED_RENAMES); 2026-10-02
+    renames = LB.corpus_renames(repo / "data")
+    same = RT.plain_reading_same(plain_path, renames=renames)
     m1: dict[str, dict] = {}
     m1_counts: dict[str, dict] = {}
     for src in sources:
         if src in RT.M1_GLOSS_SOURCES:
             m1[src], m1_counts[src] = RT.m1_gloss_queries(repo / RT.M1_GLOSS_SOURCES[src], corpus=corpus_set,
-                                                          keep=same)
+                                                          keep=same, renames=renames)
+    # --rebuild-labels (2026-10-02): the labelled pairs (whose antonyms the threshold-design figures use)
+    # rebuilt from the current corpus and the curation file, written under --out unless --dry-run
+    rebuilt = LB.build_default(repo, out_dir=out, write=False) if args.rebuild_labels else None
+    if rebuilt is not None:
+        print(f"labelled pairs rebuilt from the current corpus: {rebuilt.counts()}; curation entries that no longer "
+              f"apply: {len(rebuilt.curation_unused)}"
+              + "".join(f"\n  unused: {u}" for u in rebuilt.curation_unused))
 
     def build_queries():
         rows = []      # (source, stem, query text), sources in order, stems in corpus order
@@ -1057,6 +1114,8 @@ def run_round4(args) -> int:
             extra = (f"; {len(para_missing[src])} to generate ({RT.PARAPHRASE_SOURCES[src]} style, prompt version "
                      f"{CL.paraphrase_version(RT.PARAPHRASE_SOURCES[src])})" if src in to_generate
                      else (f"; {len(para_missing[src])} missing, not generated (--skip-llm)" if para_missing[src] else ""))
+            if para_stale[src]:
+                extra += f", of which {len(para_stale[src])} written from an older label or description"
             extra += f"; cache {para_paths[src]}"
         else:
             extra = f"; filter rows {m1_counts[src]}, plain reading 'same' {len(same)}"
@@ -1096,7 +1155,15 @@ def run_round4(args) -> int:
            "allow_dirty": bool(args.allow_dirty), "dirty_check": {"paths": list(PLATFORM_PATHS), "dirty": dirty},
            "estimate_usd": round(est.usd, 4), "budget_usd": cap, "models_requested": args.models, "models_run": [],
            "models_failed": {}, "representations": reps, "variants": variants, "query_sources": sources,
-           "paraphrase_model": CL.PARAPHRASE_MODEL, "rubric_versions": pins, "timings_s": timings}
+           "paraphrase_model": CL.PARAPHRASE_MODEL, "rubric_versions": pins, "n_traits": len(ci["stems"]),
+           "paraphrases_generated": {s: len(m) for s, m in to_generate.items()},
+           "paraphrases_stale": {s: sorted(v) for s, v in para_stale.items() if v},
+           "m1_gloss_filter_rows": m1_counts, "renames_followed": renames,
+           "renames_not_followed": dict(LB.SENSE_CHANGED_RENAMES), "timings_s": timings}
+    if rebuilt is not None:   # deterministic: the same build, now written with its inputs
+        lp_written = LB.build_default(repo, out_dir=out, write=True)
+        run["labelled_pairs_rebuilt"] = {"counts": lp_written.counts(), "curation_unused": lp_written.curation_unused,
+                                         "path": _rel(out / LB.LABELLED_PAIRS_NAME, repo)}
 
     def save_run():
         run["cost_usd"] = round(usage.total_cost_usd, 6)
@@ -1109,8 +1176,9 @@ def run_round4(args) -> int:
     for src, miss in to_generate.items():
         ts = time.time()
         try:
-            para[src] = run_paraphrase_stage(ci, miss, para_paths[src], para[src], usage,
-                                             style=RT.PARAPHRASE_SOURCES[src])
+            merged = run_paraphrase_stage(ci, miss, para_paths[src], para[src], usage,
+                                          style=RT.PARAPHRASE_SOURCES[src])
+            para[src] = fresh_paraphrases(para_paths[src], merged, ci)[0]
         finally:
             timings[f"paraphrases_{src}"] = round(time.time() - ts, 1)
             save_run()
@@ -1173,7 +1241,12 @@ def run_round4(args) -> int:
             query_sources[src] = {"title": RT.SOURCE_TITLES[src], "n": run["n_queries"][src], "kind": "m1_gloss",
                                   "results": str(RT.M1_GLOSS_SOURCES[src]), "filter_rows": m1_counts[src],
                                   "note": f"of {m1_counts[src]['with_gloss']} glosses of existing labels; plain "
-                                          f"reading the corpus sense"}
+                                          f"reading the corpus sense"
+                                          + (f"; {m1_counts[src]['renamed']} under a renamed trait's old label, "
+                                             f"{m1_counts[src]['not_in_corpus']} dropped (trait no longer in the corpus "
+                                             f"under a sense-keeping name)"
+                                             if m1_counts[src].get("renamed") or m1_counts[src].get("not_in_corpus")
+                                             else "")}
     payload = {"query_sources": query_sources,
                "query_form": "the text alone, no label, cut to 14 words (represent_short(None, text, 'w14'))",
                "corpus_form": {rep: f"label: description, representation {rep}" for rep in reps},

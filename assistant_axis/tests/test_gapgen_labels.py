@@ -140,6 +140,47 @@ def test_curation_keep_only_add_exclude(mini):
     assert reasons[("agitated", "calm")] == "hand: test exclusion"
 
 
+def test_renames_followed_in_v4_decisions_and_curation(tmp_path):
+    """2026-10-02 (merge with the main line): a renamed stem in v4, a seed-queue decision or the curation file
+    is read as the current stem, except a rename whose description changed sense (SENSE_CHANGED_RENAMES);
+    curation entries that no longer apply are listed, not raised."""
+    d = tmp_path / "data"
+    pair = {"kind": "pair", "members": ["lenient", "strict"]}
+    _trait(d, "lenient", neg="strict", arrangement=pair)
+    _trait(d, "strict", neg="lenient", arrangement=pair)
+    _trait(d, "dull")
+    for s in ("calm", "gentle", "a1", "a2", "a3", "a4"):
+        _trait(d, s)
+    for stem, old in (("strict", "tough"), ("dull", "bland")):
+        f = d / "traits" / "instructions" / f"{stem}.json"
+        f.write_text(json.dumps({**json.loads(f.read_text()), "renamed_from": {"stem": old, "date": "2026-10-02"}}))
+    assert L.SENSE_CHANGED_RENAMES["bland"] == "dull"
+    assert L.corpus_renames(d) == {"tough": "strict"}
+    assert L.corpus_renames(d, carry_only=False) == {"bland": "dull", "tough": "strict"}
+    (d / "traits" / "trait_antonyms_v4.json").write_text(json.dumps({
+        "tough": {"negative_label": "calm", "antonym_score": 4}, "bland": {"negative_label": "calm", "antonym_score": 5}}))
+    log = tmp_path / "log.md"
+    log.write_text("")
+    queue = {"entries": [{"stem": "harsh", "label": "harsh", "entity_type": "trait", "status": "not_adopted",
+                          "description": "This means being harsh.", "decision": "NOT SEEDED: duplicate of tough."}]}
+    cur = {"keep_only": {"queue:harsh": {"keep": {"tough": {"uncertain": True}}, "reason": "r"}},
+           "add": [{"a": "tough", "b": "gentle", "relation": "near_distinct"},
+                   {"a": "bland", "b": "gentle", "relation": "near_distinct"}],
+           "exclude": [{"a": "gentle", "b": "calm", "reason": "never produced"}]}
+    lp = L.build_labelled_pairs(d, queue, log, curation=cur, n_unrelated=0, k_folds=2)
+    rel = {p.key(): p for p in lp.pairs}
+    assert rel[("calm", "strict")].relation == "antonym" and rel[("calm", "strict")].source == "antonyms_v4"
+    assert ("calm", "dull") not in rel                                   # bland's v4 record does not carry over
+    assert rel[("queue:harsh", "strict")].relation == "duplicate" and rel[("queue:harsh", "strict")].uncertain
+    assert rel[("gentle", "strict")].relation == "near_distinct"
+    assert rel[("lenient", "strict")].relation == "antonym"
+    assert lp.renames_followed == {"tough": "strict"}
+    unused = {(u["part"], u["a"], u["b"]) for u in lp.curation_unused}
+    assert unused == {("add", "bland", "gentle"), ("exclude", "gentle", "calm")}
+    back = L.LabelledPairs.from_json(lp.to_json())
+    assert back.curation_unused == lp.curation_unused and back.renames_followed == lp.renames_followed
+
+
 def test_json_round_trip(mini, tmp_path):
     d, queue, log = mini
     lp = L.build_labelled_pairs(d, queue, log, n_unrelated=10, k_folds=2)
