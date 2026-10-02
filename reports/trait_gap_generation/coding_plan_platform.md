@@ -582,4 +582,7 @@ it (1% and 31%).  So: each generator's pilot runs the filter with Haiku plus the
 and an Opus third opinion on that sample; Haiku is used for that generator if it agrees with Opus
 about 90% of the time or more (about 10% disagreement or less with Sonnet), else Sonnet; later runs
 keep the 10% Sonnet sample and warn and stop above about 10% disagreement.  Code needed: a
-`--third-model` flag and the disagreement tripwire, by stratum or source.
+`--third-model` flag and the disagreement tripwire, by stratum or source.  Both now exist
+(commit 26a90b6): `--third-model`, and `--max-disagreement` (default 0.10, overridden on resume by
+`--accept-disagreement`), described in the split-filter section of
+[data_analysis/README.md](../../data_analysis/README.md).
