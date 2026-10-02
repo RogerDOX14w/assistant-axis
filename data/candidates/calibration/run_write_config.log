@@ -1,0 +1,21 @@
+warning: `VIRTUAL_ENV=/Users/roger/Documents/GitHub/assistant-axis/.venv` does not match the project environment path `.venv` and will be ignored; use `--active` to target the active environment instead
+2026-10-02T19:46:30Z INFO HTTP Request: POST https://api.openai.com/v1/embeddings "HTTP/1.1 200 OK"
+2026-10-02T19:46:30Z INFO [canary] text-embedding-3-large: 8 compared, lowest cosine 0.999604, 0 new references
+2026-10-02T19:46:31Z INFO Loading SentenceTransformer model from google/embeddinggemma-300m.
+M2 config (task 19): /Users/roger/Documents/GitHub/assistant-axis/.claude/worktrees/agent-a49beca76adafdfc1/data/candidates/metric_config.json; config_version 2026-10-02; live text-embedding-3-large, fallback google/embeddinggemma-300m (inactive), dropped ['BAAI/bge-large-en-v1.5']
+  covered: w20 centred cos k=10; recall@10 on the M1 glosses {'m1_gloss_1': 0.9783, 'm1_gloss_2': 0.9718} (target 0.95, met True); pooled {'n': 3098, '1': 0.8347, '5': 0.9745, '10': 0.9903, '20': 0.9942}
+  directional: w20 centred K=10; K sensitivity {'10': 0.2995, '20': 0.2596, '40': 0.2731, 'K95': 0.2053}
+  canary: ['absentee', 'collectivistic', 'edgy', 'gay', 'ironic', 'only_child', 'restless', 'sycophantic']; checked for ['openai', 'gemma']
+cost estimate:
+  canary re-embedding: 1 x (282, 0) tokens at text-embedding-3-large rates = $0.000
+  total estimate = $0.000
+  budget $1.00
+2026-10-02T19:46:32Z INFO HTTP Request: HEAD https://huggingface.co/google/embeddinggemma-300m/resolve/main/processor_config.json "HTTP/1.1 404 Not Found"
+2026-10-02T19:46:32Z INFO HTTP Request: HEAD https://huggingface.co/google/embeddinggemma-300m/resolve/main/preprocessor_config.json "HTTP/1.1 404 Not Found"
+2026-10-02T19:46:32Z INFO HTTP Request: HEAD https://huggingface.co/google/embeddinggemma-300m/resolve/main/video_preprocessor_config.json "HTTP/1.1 404 Not Found"
+2026-10-02T19:46:32Z INFO HTTP Request: HEAD https://huggingface.co/google/embeddinggemma-300m/resolve/main/preprocessor_config.json "HTTP/1.1 404 Not Found"
+2026-10-02T19:46:32Z INFO HTTP Request: HEAD https://huggingface.co/google/embeddinggemma-300m/resolve/main/tokenizer_config.json "HTTP/1.1 200 OK"
+2026-10-02T19:46:33Z INFO Loaded 14 prompts with these keys: ['query', 'document', 'BitextMining', 'Clustering', 'Classification', 'InstructionRetrieval', 'MultilabelClassification', 'PairClassification', 'Reranking', 'Retrieval', 'Retrieval-query', 'Retrieval-document', 'STS', 'Summarization']
+2026-10-02T19:46:34Z INFO [canary] google/embeddinggemma-300m: 8 compared, lowest cosine 1.0, 0 new references
+wrote /Users/roger/Documents/GitHub/assistant-axis/.claude/worktrees/agent-a49beca76adafdfc1/data/candidates/metric_config.json (read back and valid: k=10, K=10, live text-embedding-3-large); canary: openai lowest cosine 0.999604 (8 compared, 0 new), gemma lowest cosine 1.0 (8 compared, 0 new)
+[usage] total=$0.000 calls=2 [embeddinggemma-300m: $0.000 in=285 out=0 n=1; text-embedding-3-large: $0.000 in=220 out=0 n=1]

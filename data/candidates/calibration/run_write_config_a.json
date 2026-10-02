@@ -1,0 +1,90 @@
+{
+  "task": 19,
+  "started_at": "2026-10-02T19:45:04+00:00",
+  "git_sha": "776e737",
+  "argv": [
+    "--write-config"
+  ],
+  "allow_dirty": false,
+  "dirty_check": {
+    "paths": [
+      "assistant_axis/gapgen",
+      "data_analysis/gap_generation",
+      "assistant_axis/judge.py",
+      "assistant_axis/judge_pricing.py",
+      "assistant_axis/entity_id.py",
+      "assistant_axis/atomic_io.py",
+      "data/candidates/validation",
+      "reports/trait_gap_generation/rubrics",
+      "pyproject.toml",
+      "uv.lock"
+    ],
+    "dirty": []
+  },
+  "estimate_usd": 3.7e-05,
+  "budget_usd": 1.0,
+  "config_path": "data/candidates/metric_config.json",
+  "config_version": "2026-10-02",
+  "canary": {
+    "openai": {
+      "model": "text-embedding-3-large",
+      "arm": "openai",
+      "tag": "openai_text-embedding-3-large",
+      "n": 8,
+      "n_compared": 8,
+      "n_new_reference": 0,
+      "min_cosine": 0.999604,
+      "threshold": 0.999,
+      "below": [],
+      "ok": true,
+      "checked_at": "2026-10-02T19:45:07+00:00"
+    },
+    "gemma": {
+      "model": "google/embeddinggemma-300m",
+      "arm": "gemma",
+      "tag": "local_google_embeddinggemma-300m_p793518b0",
+      "n": 8,
+      "n_compared": 8,
+      "n_new_reference": 0,
+      "min_cosine": 1.0,
+      "threshold": 0.999,
+      "below": [],
+      "ok": true,
+      "checked_at": "2026-10-02T19:45:22+00:00"
+    }
+  },
+  "canary_failed": {},
+  "read_back": {
+    "config_version": "2026-10-02",
+    "k": 10,
+    "K": 10,
+    "live": "text-embedding-3-large",
+    "valid": true
+  },
+  "finished_at": "2026-10-02T19:45:22+00:00",
+  "wall_time_s": 18.5,
+  "cost_usd": 2.9e-05,
+  "usage_this_run": {
+    "per_model": {
+      "embeddinggemma-300m": {
+        "model": "embeddinggemma-300m",
+        "prompt_tokens": 285,
+        "completion_tokens": 0,
+        "cost_usd": 0.0,
+        "n_calls": 1
+      },
+      "text-embedding-3-large": {
+        "model": "text-embedding-3-large",
+        "prompt_tokens": 220,
+        "completion_tokens": 0,
+        "cost_usd": 0.0,
+        "n_calls": 1
+      }
+    },
+    "total_cost_usd": 0.0,
+    "total_prompt_tokens": 505,
+    "total_completion_tokens": 0,
+    "n_calls": 2
+  },
+  "cost_usd_cumulative": 0.894805
+}
