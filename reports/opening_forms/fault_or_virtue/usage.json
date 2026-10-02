@@ -1,0 +1,22 @@
+{
+  "n_calls": 12000,
+  "per_model": {
+    "gpt-4.1-mini": {
+      "completion_tokens": 425221,
+      "cost_usd": 2.2077,
+      "model": "gpt-4.1-mini",
+      "n_calls": 6000,
+      "prompt_tokens": 3818377
+    },
+    "qwen/qwen3-32b": {
+      "completion_tokens": 2436752,
+      "cost_usd": 0.7128,
+      "model": "qwen/qwen3-32b",
+      "n_calls": 6000,
+      "prompt_tokens": 381400
+    }
+  },
+  "total_completion_tokens": 2861973,
+  "total_cost_usd": 2.9205,
+  "total_prompt_tokens": 4199777
+}

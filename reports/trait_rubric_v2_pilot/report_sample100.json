@@ -1,0 +1,7182 @@
+{
+  "set": "dev",
+  "arms": [
+    "v1_corpus",
+    "draft11",
+    "set_a",
+    "set_b",
+    "set_a2",
+    "set_b2",
+    "set_c2"
+  ],
+  "baseline": "v1_corpus",
+  "left_out_described_differently": {},
+  "n_traits": {
+    "v1_corpus": 100,
+    "draft11": 100,
+    "set_a": 100,
+    "set_b": 100,
+    "set_a2": 100,
+    "set_b2": 100,
+    "set_c2": 100
+  },
+  "measures": {
+    "open_risky": {
+      "label": "opens with a statement about the person: You have / believe / want / tend to, When",
+      "unit": "pos instruction",
+      "source": "pattern",
+      "arms": {
+        "v1_corpus": {
+          "traits": 100,
+          "items": 500,
+          "with": 76,
+          "rate": 0.152,
+          "rate_interval": [
+            0.124,
+            0.18
+          ],
+          "files_with": 60,
+          "file_threshold": 1,
+          "file_rate": 0.6,
+          "file_rate_interval": [
+            0.5020025860174634,
+            0.6905987142287374
+          ]
+        },
+        "draft11": {
+          "traits": 100,
+          "items": 500,
+          "with": 0,
+          "rate": 0.0,
+          "rate_interval": [
+            0.0,
+            0.0
+          ],
+          "files_with": 0,
+          "file_threshold": 1,
+          "file_rate": 0.0,
+          "file_rate_interval": [
+            0.0,
+            0.03699349876899627
+          ]
+        },
+        "set_a": {
+          "traits": 100,
+          "items": 500,
+          "with": 0,
+          "rate": 0.0,
+          "rate_interval": [
+            0.0,
+            0.0
+          ],
+          "files_with": 0,
+          "file_threshold": 1,
+          "file_rate": 0.0,
+          "file_rate_interval": [
+            0.0,
+            0.03699349876899627
+          ]
+        },
+        "set_b": {
+          "traits": 100,
+          "items": 500,
+          "with": 0,
+          "rate": 0.0,
+          "rate_interval": [
+            0.0,
+            0.0
+          ],
+          "files_with": 0,
+          "file_threshold": 1,
+          "file_rate": 0.0,
+          "file_rate_interval": [
+            0.0,
+            0.03699349876899627
+          ]
+        },
+        "set_a2": {
+          "traits": 100,
+          "items": 500,
+          "with": 0,
+          "rate": 0.0,
+          "rate_interval": [
+            0.0,
+            0.0
+          ],
+          "files_with": 0,
+          "file_threshold": 1,
+          "file_rate": 0.0,
+          "file_rate_interval": [
+            0.0,
+            0.03699349876899627
+          ]
+        },
+        "set_b2": {
+          "traits": 100,
+          "items": 500,
+          "with": 0,
+          "rate": 0.0,
+          "rate_interval": [
+            0.0,
+            0.0
+          ],
+          "files_with": 0,
+          "file_threshold": 1,
+          "file_rate": 0.0,
+          "file_rate_interval": [
+            0.0,
+            0.03699349876899627
+          ]
+        },
+        "set_c2": {
+          "traits": 100,
+          "items": 500,
+          "with": 0,
+          "rate": 0.0,
+          "rate_interval": [
+            0.0,
+            0.0
+          ],
+          "files_with": 0,
+          "file_threshold": 1,
+          "file_rate": 0.0,
+          "file_rate_interval": [
+            0.0,
+            0.03699349876899627
+          ]
+        }
+      },
+      "against_baseline": {
+        "draft11": {
+          "difference": -0.152,
+          "interval": [
+            -0.18,
+            -0.124
+          ],
+          "p": 9.999000099990002e-05,
+          "paired_traits": 100,
+          "files_only_baseline": 60,
+          "files_only_arm": 0,
+          "files_p": 1.734723475976807e-18
+        },
+        "set_a": {
+          "difference": -0.152,
+          "interval": [
+            -0.18,
+            -0.126
+          ],
+          "p": 9.999000099990002e-05,
+          "paired_traits": 100,
+          "files_only_baseline": 60,
+          "files_only_arm": 0,
+          "files_p": 1.734723475976807e-18
+        },
+        "set_b": {
+          "difference": -0.152,
+          "interval": [
+            -0.18,
+            -0.126
+          ],
+          "p": 9.999000099990002e-05,
+          "paired_traits": 100,
+          "files_only_baseline": 60,
+          "files_only_arm": 0,
+          "files_p": 1.734723475976807e-18
+        },
+        "set_a2": {
+          "difference": -0.152,
+          "interval": [
+            -0.182,
+            -0.12595000000000028
+          ],
+          "p": 9.999000099990002e-05,
+          "paired_traits": 100,
+          "files_only_baseline": 60,
+          "files_only_arm": 0,
+          "files_p": 1.734723475976807e-18
+        },
+        "set_b2": {
+          "difference": -0.152,
+          "interval": [
+            -0.182,
+            -0.124
+          ],
+          "p": 9.999000099990002e-05,
+          "paired_traits": 100,
+          "files_only_baseline": 60,
+          "files_only_arm": 0,
+          "files_p": 1.734723475976807e-18
+        },
+        "set_c2": {
+          "difference": -0.152,
+          "interval": [
+            -0.18,
+            -0.124
+          ],
+          "p": 9.999000099990002e-05,
+          "paired_traits": 100,
+          "files_only_baseline": 60,
+          "files_only_arm": 0,
+          "files_p": 1.734723475976807e-18
+        }
+      }
+    },
+    "open_statement": {
+      "label": "opens with a plain statement: You <verb>, Your <noun>",
+      "unit": "pos instruction",
+      "source": "pattern",
+      "arms": {
+        "v1_corpus": {
+          "traits": 100,
+          "items": 500,
+          "with": 166,
+          "rate": 0.332,
+          "rate_interval": [
+            0.292,
+            0.37
+          ],
+          "files_with": 89,
+          "file_threshold": 1,
+          "file_rate": 0.89,
+          "file_rate_interval": [
+            0.8136870342543766,
+            0.9374580367058064
+          ]
+        },
+        "draft11": {
+          "traits": 100,
+          "items": 500,
+          "with": 0,
+          "rate": 0.0,
+          "rate_interval": [
+            0.0,
+            0.0
+          ],
+          "files_with": 0,
+          "file_threshold": 1,
+          "file_rate": 0.0,
+          "file_rate_interval": [
+            0.0,
+            0.03699349876899627
+          ]
+        },
+        "set_a": {
+          "traits": 100,
+          "items": 500,
+          "with": 0,
+          "rate": 0.0,
+          "rate_interval": [
+            0.0,
+            0.0
+          ],
+          "files_with": 0,
+          "file_threshold": 1,
+          "file_rate": 0.0,
+          "file_rate_interval": [
+            0.0,
+            0.03699349876899627
+          ]
+        },
+        "set_b": {
+          "traits": 100,
+          "items": 500,
+          "with": 0,
+          "rate": 0.0,
+          "rate_interval": [
+            0.0,
+            0.0
+          ],
+          "files_with": 0,
+          "file_threshold": 1,
+          "file_rate": 0.0,
+          "file_rate_interval": [
+            0.0,
+            0.03699349876899627
+          ]
+        },
+        "set_a2": {
+          "traits": 100,
+          "items": 500,
+          "with": 0,
+          "rate": 0.0,
+          "rate_interval": [
+            0.0,
+            0.0
+          ],
+          "files_with": 0,
+          "file_threshold": 1,
+          "file_rate": 0.0,
+          "file_rate_interval": [
+            0.0,
+            0.03699349876899627
+          ]
+        },
+        "set_b2": {
+          "traits": 100,
+          "items": 500,
+          "with": 0,
+          "rate": 0.0,
+          "rate_interval": [
+            0.0,
+            0.0
+          ],
+          "files_with": 0,
+          "file_threshold": 1,
+          "file_rate": 0.0,
+          "file_rate_interval": [
+            0.0,
+            0.03699349876899627
+          ]
+        },
+        "set_c2": {
+          "traits": 100,
+          "items": 500,
+          "with": 0,
+          "rate": 0.0,
+          "rate_interval": [
+            0.0,
+            0.0
+          ],
+          "files_with": 0,
+          "file_threshold": 1,
+          "file_rate": 0.0,
+          "file_rate_interval": [
+            0.0,
+            0.03699349876899627
+          ]
+        }
+      },
+      "against_baseline": {
+        "draft11": {
+          "difference": -0.332,
+          "interval": [
+            -0.372,
+            -0.29195000000000026
+          ],
+          "p": 9.999000099990002e-05,
+          "paired_traits": 100,
+          "files_only_baseline": 89,
+          "files_only_arm": 0,
+          "files_p": 3.2311742677852644e-27
+        },
+        "set_a": {
+          "difference": -0.332,
+          "interval": [
+            -0.372,
+            -0.294
+          ],
+          "p": 9.999000099990002e-05,
+          "paired_traits": 100,
+          "files_only_baseline": 89,
+          "files_only_arm": 0,
+          "files_p": 3.2311742677852644e-27
+        },
+        "set_b": {
+          "difference": -0.332,
+          "interval": [
+            -0.374,
+            -0.29195000000000026
+          ],
+          "p": 9.999000099990002e-05,
+          "paired_traits": 100,
+          "files_only_baseline": 89,
+          "files_only_arm": 0,
+          "files_p": 3.2311742677852644e-27
+        },
+        "set_a2": {
+          "difference": -0.332,
+          "interval": [
+            -0.372,
+            -0.292
+          ],
+          "p": 9.999000099990002e-05,
+          "paired_traits": 100,
+          "files_only_baseline": 89,
+          "files_only_arm": 0,
+          "files_p": 3.2311742677852644e-27
+        },
+        "set_b2": {
+          "difference": -0.332,
+          "interval": [
+            -0.37,
+            -0.29
+          ],
+          "p": 9.999000099990002e-05,
+          "paired_traits": 100,
+          "files_only_baseline": 89,
+          "files_only_arm": 0,
+          "files_p": 3.2311742677852644e-27
+        },
+        "set_c2": {
+          "difference": -0.332,
+          "interval": [
+            -0.37,
+            -0.292
+          ],
+          "p": 9.999000099990002e-05,
+          "paired_traits": 100,
+          "files_only_baseline": 89,
+          "files_only_arm": 0,
+          "files_p": 3.2311742677852644e-27
+        }
+      }
+    },
+    "chat_words": {
+      "label": "chat-frame words (user, assistant, AI, your responses)",
+      "unit": "instruction",
+      "source": "pattern",
+      "arms": {
+        "v1_corpus": {
+          "traits": 100,
+          "items": 1000,
+          "with": 66,
+          "rate": 0.066,
+          "rate_interval": [
+            0.043,
+            0.092
+          ],
+          "files_with": 31,
+          "file_threshold": 1,
+          "file_rate": 0.31,
+          "file_rate_interval": [
+            0.22779697154852568,
+            0.4062605579836929
+          ]
+        },
+        "draft11": {
+          "traits": 100,
+          "items": 1000,
+          "with": 1,
+          "rate": 0.001,
+          "rate_interval": [
+            0.0,
+            0.003
+          ],
+          "files_with": 1,
+          "file_threshold": 1,
+          "file_rate": 0.01,
+          "file_rate_interval": [
+            0.0017674320446096452,
+            0.05448619674900669
+          ]
+        },
+        "set_a": {
+          "traits": 100,
+          "items": 1000,
+          "with": 9,
+          "rate": 0.009,
+          "rate_interval": [
+            0.004,
+            0.015
+          ],
+          "files_with": 9,
+          "file_threshold": 1,
+          "file_rate": 0.09,
+          "file_rate_interval": [
+            0.04807253976868698,
+            0.16226212922188998
+          ]
+        },
+        "set_b": {
+          "traits": 100,
+          "items": 1000,
+          "with": 13,
+          "rate": 0.013,
+          "rate_interval": [
+            0.006,
+            0.022
+          ],
+          "files_with": 10,
+          "file_threshold": 1,
+          "file_rate": 0.1,
+          "file_rate_interval": [
+            0.0552291368050726,
+            0.17436566221012445
+          ]
+        },
+        "set_a2": {
+          "traits": 100,
+          "items": 1000,
+          "with": 5,
+          "rate": 0.005,
+          "rate_interval": [
+            0.001,
+            0.01
+          ],
+          "files_with": 5,
+          "file_threshold": 1,
+          "file_rate": 0.05,
+          "file_rate_interval": [
+            0.021543679017992173,
+            0.1117504698741045
+          ]
+        },
+        "set_b2": {
+          "traits": 100,
+          "items": 1000,
+          "with": 8,
+          "rate": 0.008,
+          "rate_interval": [
+            0.003,
+            0.015
+          ],
+          "files_with": 7,
+          "file_threshold": 1,
+          "file_rate": 0.07,
+          "file_rate_interval": [
+            0.0343192608798127,
+            0.13749514806152413
+          ]
+        },
+        "set_c2": {
+          "traits": 100,
+          "items": 1000,
+          "with": 9,
+          "rate": 0.009,
+          "rate_interval": [
+            0.004,
+            0.015
+          ],
+          "files_with": 9,
+          "file_threshold": 1,
+          "file_rate": 0.09,
+          "file_rate_interval": [
+            0.04807253976868698,
+            0.16226212922188998
+          ]
+        }
+      },
+      "against_baseline": {
+        "draft11": {
+          "difference": -0.065,
+          "interval": [
+            -0.09,
+            -0.042
+          ],
+          "p": 9.999000099990002e-05,
+          "paired_traits": 100,
+          "files_only_baseline": 31,
+          "files_only_arm": 1,
+          "files_p": 1.5366822481155396e-08
+        },
+        "set_a": {
+          "difference": -0.057,
+          "interval": [
+            -0.083,
+            -0.035
+          ],
+          "p": 9.999000099990002e-05,
+          "paired_traits": 100,
+          "files_only_baseline": 23,
+          "files_only_arm": 1,
+          "files_p": 2.9802322387695312e-06
+        },
+        "set_b": {
+          "difference": -0.053,
+          "interval": [
+            -0.077,
+            -0.031
+          ],
+          "p": 9.999000099990002e-05,
+          "paired_traits": 100,
+          "files_only_baseline": 24,
+          "files_only_arm": 3,
+          "files_p": 4.9233436584472656e-05
+        },
+        "set_a2": {
+          "difference": -0.061,
+          "interval": [
+            -0.086,
+            -0.037
+          ],
+          "p": 9.999000099990002e-05,
+          "paired_traits": 100,
+          "files_only_baseline": 28,
+          "files_only_arm": 2,
+          "files_p": 8.67992639541626e-07
+        },
+        "set_b2": {
+          "difference": -0.058,
+          "interval": [
+            -0.084,
+            -0.036
+          ],
+          "p": 9.999000099990002e-05,
+          "paired_traits": 100,
+          "files_only_baseline": 28,
+          "files_only_arm": 4,
+          "files_p": 1.9301194697618484e-05
+        },
+        "set_c2": {
+          "difference": -0.057,
+          "interval": [
+            -0.079,
+            -0.035
+          ],
+          "p": 9.999000099990002e-05,
+          "paired_traits": 100,
+          "files_only_baseline": 25,
+          "files_only_arm": 3,
+          "files_p": 2.744048833847046e-05
+        }
+      }
+    },
+    "chat_frame": {
+      "label": "presupposes a chat assistant (judged)",
+      "unit": "instruction",
+      "source": "judge",
+      "arms": {
+        "v1_corpus": {
+          "traits": 100,
+          "items": 1000,
+          "with": 50,
+          "rate": 0.05,
+          "rate_interval": [
+            0.03,
+            0.073
+          ],
+          "files_with": 25,
+          "file_threshold": 1,
+          "file_rate": 0.25,
+          "file_rate_interval": [
+            0.17545211311910353,
+            0.34304463626539466
+          ]
+        },
+        "draft11": {
+          "traits": 100,
+          "items": 1000,
+          "with": 0,
+          "rate": 0.0,
+          "rate_interval": [
+            0.0,
+            0.0
+          ],
+          "files_with": 0,
+          "file_threshold": 1,
+          "file_rate": 0.0,
+          "file_rate_interval": [
+            0.0,
+            0.03699349876899627
+          ]
+        },
+        "set_a": {
+          "traits": 100,
+          "items": 1000,
+          "with": 3,
+          "rate": 0.003,
+          "rate_interval": [
+            0.0,
+            0.007
+          ],
+          "files_with": 3,
+          "file_threshold": 1,
+          "file_rate": 0.03,
+          "file_rate_interval": [
+            0.010254523944281516,
+            0.08451936489857499
+          ]
+        },
+        "set_b": {
+          "traits": 100,
+          "items": 1000,
+          "with": 5,
+          "rate": 0.005,
+          "rate_interval": [
+            0.001,
+            0.011
+          ],
+          "files_with": 4,
+          "file_threshold": 1,
+          "file_rate": 0.04,
+          "file_rate_interval": [
+            0.01566330388275538,
+            0.09837071498472119
+          ]
+        },
+        "set_a2": {
+          "traits": 100,
+          "items": 1000,
+          "with": 4,
+          "rate": 0.004,
+          "rate_interval": [
+            0.0,
+            0.011
+          ],
+          "files_with": 2,
+          "file_threshold": 1,
+          "file_rate": 0.02,
+          "file_rate_interval": [
+            0.0055019675006616475,
+            0.07001179131757478
+          ]
+        },
+        "set_b2": {
+          "traits": 100,
+          "items": 1000,
+          "with": 5,
+          "rate": 0.005,
+          "rate_interval": [
+            0.001,
+            0.01
+          ],
+          "files_with": 4,
+          "file_threshold": 1,
+          "file_rate": 0.04,
+          "file_rate_interval": [
+            0.01566330388275538,
+            0.09837071498472119
+          ]
+        },
+        "set_c2": {
+          "traits": 100,
+          "items": 1000,
+          "with": 2,
+          "rate": 0.002,
+          "rate_interval": [
+            0.0,
+            0.006
+          ],
+          "files_with": 1,
+          "file_threshold": 1,
+          "file_rate": 0.01,
+          "file_rate_interval": [
+            0.0017674320446096452,
+            0.05448619674900669
+          ]
+        }
+      },
+      "against_baseline": {
+        "draft11": {
+          "difference": -0.05,
+          "interval": [
+            -0.073,
+            -0.03
+          ],
+          "p": 9.999000099990002e-05,
+          "paired_traits": 100,
+          "files_only_baseline": 25,
+          "files_only_arm": 0,
+          "files_p": 5.960464477539063e-08
+        },
+        "set_a": {
+          "difference": -0.047,
+          "interval": [
+            -0.069025,
+            -0.026
+          ],
+          "p": 9.999000099990002e-05,
+          "paired_traits": 100,
+          "files_only_baseline": 23,
+          "files_only_arm": 1,
+          "files_p": 2.9802322387695312e-06
+        },
+        "set_b": {
+          "difference": -0.045,
+          "interval": [
+            -0.068,
+            -0.026
+          ],
+          "p": 0.00019998000199980003,
+          "paired_traits": 100,
+          "files_only_baseline": 23,
+          "files_only_arm": 2,
+          "files_p": 1.9431114196777344e-05
+        },
+        "set_a2": {
+          "difference": -0.046,
+          "interval": [
+            -0.069025,
+            -0.025
+          ],
+          "p": 9.999000099990002e-05,
+          "paired_traits": 100,
+          "files_only_baseline": 25,
+          "files_only_arm": 2,
+          "files_p": 5.647540092468262e-06
+        },
+        "set_b2": {
+          "difference": -0.045,
+          "interval": [
+            -0.066025,
+            -0.026
+          ],
+          "p": 9.999000099990002e-05,
+          "paired_traits": 100,
+          "files_only_baseline": 21,
+          "files_only_arm": 0,
+          "files_p": 9.5367431640625e-07
+        },
+        "set_c2": {
+          "difference": -0.048,
+          "interval": [
+            -0.071,
+            -0.028
+          ],
+          "p": 9.999000099990002e-05,
+          "paired_traits": 100,
+          "files_only_baseline": 24,
+          "files_only_arm": 0,
+          "files_p": 1.1920928955078125e-07
+        }
+      }
+    },
+    "urges_others": {
+      "label": "about what the person urges on others (judged)",
+      "unit": "instruction",
+      "source": "judge",
+      "arms": {
+        "v1_corpus": {
+          "traits": 100,
+          "items": 1000,
+          "with": 48,
+          "rate": 0.048,
+          "rate_interval": [
+            0.026,
+            0.072
+          ],
+          "files_with": 18,
+          "file_threshold": 1,
+          "file_rate": 0.18,
+          "file_rate_interval": [
+            0.11700225458662546,
+            0.2666735846255322
+          ]
+        },
+        "draft11": {
+          "traits": 100,
+          "items": 1000,
+          "with": 1,
+          "rate": 0.001,
+          "rate_interval": [
+            0.0,
+            0.003
+          ],
+          "files_with": 1,
+          "file_threshold": 1,
+          "file_rate": 0.01,
+          "file_rate_interval": [
+            0.0017674320446096452,
+            0.05448619674900669
+          ]
+        },
+        "set_a": {
+          "traits": 100,
+          "items": 1000,
+          "with": 3,
+          "rate": 0.003,
+          "rate_interval": [
+            0.0,
+            0.007
+          ],
+          "files_with": 3,
+          "file_threshold": 1,
+          "file_rate": 0.03,
+          "file_rate_interval": [
+            0.010254523944281516,
+            0.08451936489857499
+          ]
+        },
+        "set_b": {
+          "traits": 100,
+          "items": 1000,
+          "with": 1,
+          "rate": 0.001,
+          "rate_interval": [
+            0.0,
+            0.003
+          ],
+          "files_with": 1,
+          "file_threshold": 1,
+          "file_rate": 0.01,
+          "file_rate_interval": [
+            0.0017674320446096452,
+            0.05448619674900669
+          ]
+        },
+        "set_a2": {
+          "traits": 100,
+          "items": 1000,
+          "with": 3,
+          "rate": 0.003,
+          "rate_interval": [
+            0.0,
+            0.007
+          ],
+          "files_with": 3,
+          "file_threshold": 1,
+          "file_rate": 0.03,
+          "file_rate_interval": [
+            0.010254523944281516,
+            0.08451936489857499
+          ]
+        },
+        "set_b2": {
+          "traits": 100,
+          "items": 1000,
+          "with": 4,
+          "rate": 0.004,
+          "rate_interval": [
+            0.0,
+            0.009
+          ],
+          "files_with": 3,
+          "file_threshold": 1,
+          "file_rate": 0.03,
+          "file_rate_interval": [
+            0.010254523944281516,
+            0.08451936489857499
+          ]
+        },
+        "set_c2": {
+          "traits": 100,
+          "items": 1000,
+          "with": 4,
+          "rate": 0.004,
+          "rate_interval": [
+            0.0,
+            0.009
+          ],
+          "files_with": 3,
+          "file_threshold": 1,
+          "file_rate": 0.03,
+          "file_rate_interval": [
+            0.010254523944281516,
+            0.08451936489857499
+          ]
+        }
+      },
+      "against_baseline": {
+        "draft11": {
+          "difference": -0.047,
+          "interval": [
+            -0.074,
+            -0.025
+          ],
+          "p": 9.999000099990002e-05,
+          "paired_traits": 100,
+          "files_only_baseline": 17,
+          "files_only_arm": 0,
+          "files_p": 1.52587890625e-05
+        },
+        "set_a": {
+          "difference": -0.045,
+          "interval": [
+            -0.07,
+            -0.023
+          ],
+          "p": 9.999000099990002e-05,
+          "paired_traits": 100,
+          "files_only_baseline": 16,
+          "files_only_arm": 1,
+          "files_p": 0.000274658203125
+        },
+        "set_b": {
+          "difference": -0.047,
+          "interval": [
+            -0.074,
+            -0.024
+          ],
+          "p": 9.999000099990002e-05,
+          "paired_traits": 100,
+          "files_only_baseline": 18,
+          "files_only_arm": 1,
+          "files_p": 7.62939453125e-05
+        },
+        "set_a2": {
+          "difference": -0.045,
+          "interval": [
+            -0.069,
+            -0.023
+          ],
+          "p": 9.999000099990002e-05,
+          "paired_traits": 100,
+          "files_only_baseline": 16,
+          "files_only_arm": 1,
+          "files_p": 0.000274658203125
+        },
+        "set_b2": {
+          "difference": -0.044,
+          "interval": [
+            -0.070025,
+            -0.023
+          ],
+          "p": 9.999000099990002e-05,
+          "paired_traits": 100,
+          "files_only_baseline": 15,
+          "files_only_arm": 0,
+          "files_p": 6.103515625e-05
+        },
+        "set_c2": {
+          "difference": -0.044,
+          "interval": [
+            -0.071,
+            -0.022
+          ],
+          "p": 9.999000099990002e-05,
+          "paired_traits": 100,
+          "files_only_baseline": 16,
+          "files_only_arm": 1,
+          "files_p": 0.000274658203125
+        }
+      }
+    },
+    "softened_pos": {
+      "label": "trait softened, hedged or excused (judged)",
+      "unit": "pos instruction",
+      "source": "judge",
+      "arms": {
+        "v1_corpus": {
+          "traits": 100,
+          "items": 500,
+          "with": 28,
+          "rate": 0.056,
+          "rate_interval": [
+            0.034,
+            0.08
+          ],
+          "files_with": 21,
+          "file_threshold": 1,
+          "file_rate": 0.21,
+          "file_rate_interval": [
+            0.14165654017044627,
+            0.2997996891155716
+          ]
+        },
+        "draft11": {
+          "traits": 100,
+          "items": 500,
+          "with": 2,
+          "rate": 0.004,
+          "rate_interval": [
+            0.0,
+            0.01
+          ],
+          "files_with": 2,
+          "file_threshold": 1,
+          "file_rate": 0.02,
+          "file_rate_interval": [
+            0.0055019675006616475,
+            0.07001179131757478
+          ]
+        },
+        "set_a": {
+          "traits": 100,
+          "items": 500,
+          "with": 4,
+          "rate": 0.008,
+          "rate_interval": [
+            0.0,
+            0.018
+          ],
+          "files_with": 3,
+          "file_threshold": 1,
+          "file_rate": 0.03,
+          "file_rate_interval": [
+            0.010254523944281516,
+            0.08451936489857499
+          ]
+        },
+        "set_b": {
+          "traits": 100,
+          "items": 500,
+          "with": 1,
+          "rate": 0.002,
+          "rate_interval": [
+            0.0,
+            0.006
+          ],
+          "files_with": 1,
+          "file_threshold": 1,
+          "file_rate": 0.01,
+          "file_rate_interval": [
+            0.0017674320446096452,
+            0.05448619674900669
+          ]
+        },
+        "set_a2": {
+          "traits": 100,
+          "items": 500,
+          "with": 5,
+          "rate": 0.01,
+          "rate_interval": [
+            0.002,
+            0.022
+          ],
+          "files_with": 4,
+          "file_threshold": 1,
+          "file_rate": 0.04,
+          "file_rate_interval": [
+            0.01566330388275538,
+            0.09837071498472119
+          ]
+        },
+        "set_b2": {
+          "traits": 100,
+          "items": 500,
+          "with": 4,
+          "rate": 0.008,
+          "rate_interval": [
+            0.002,
+            0.016
+          ],
+          "files_with": 4,
+          "file_threshold": 1,
+          "file_rate": 0.04,
+          "file_rate_interval": [
+            0.01566330388275538,
+            0.09837071498472119
+          ]
+        },
+        "set_c2": {
+          "traits": 100,
+          "items": 500,
+          "with": 6,
+          "rate": 0.012,
+          "rate_interval": [
+            0.004,
+            0.022
+          ],
+          "files_with": 6,
+          "file_threshold": 1,
+          "file_rate": 0.06,
+          "file_rate_interval": [
+            0.027786123800628143,
+            0.12476815511608857
+          ]
+        }
+      },
+      "against_baseline": {
+        "draft11": {
+          "difference": -0.052,
+          "interval": [
+            -0.07604999999999999,
+            -0.03
+          ],
+          "p": 9.999000099990002e-05,
+          "paired_traits": 100,
+          "files_only_baseline": 21,
+          "files_only_arm": 2,
+          "files_p": 6.604194641113281e-05
+        },
+        "set_a": {
+          "difference": -0.048,
+          "interval": [
+            -0.072,
+            -0.026
+          ],
+          "p": 9.999000099990002e-05,
+          "paired_traits": 100,
+          "files_only_baseline": 20,
+          "files_only_arm": 2,
+          "files_p": 0.00012111663818359375
+        },
+        "set_b": {
+          "difference": -0.054,
+          "interval": [
+            -0.078,
+            -0.032
+          ],
+          "p": 9.999000099990002e-05,
+          "paired_traits": 100,
+          "files_only_baseline": 21,
+          "files_only_arm": 1,
+          "files_p": 1.0967254638671875e-05
+        },
+        "set_a2": {
+          "difference": -0.046,
+          "interval": [
+            -0.068,
+            -0.022
+          ],
+          "p": 0.00039996000399960006,
+          "paired_traits": 100,
+          "files_only_baseline": 19,
+          "files_only_arm": 2,
+          "files_p": 0.00022125244140625
+        },
+        "set_b2": {
+          "difference": -0.048,
+          "interval": [
+            -0.074,
+            -0.024
+          ],
+          "p": 0.0004999500049995,
+          "paired_traits": 100,
+          "files_only_baseline": 21,
+          "files_only_arm": 4,
+          "files_p": 0.0009105205535888672
+        },
+        "set_c2": {
+          "difference": -0.044,
+          "interval": [
+            -0.068,
+            -0.022
+          ],
+          "p": 9.999000099990002e-05,
+          "paired_traits": 100,
+          "files_only_baseline": 18,
+          "files_only_arm": 3,
+          "files_p": 0.0014896392822265625
+        }
+      }
+    },
+    "softened_neg": {
+      "label": "opposite softened, hedged or excused (judged)",
+      "unit": "neg instruction",
+      "source": "judge",
+      "arms": {
+        "v1_corpus": {
+          "traits": 100,
+          "items": 500,
+          "with": 59,
+          "rate": 0.118,
+          "rate_interval": [
+            0.082,
+            0.158
+          ],
+          "files_with": 35,
+          "file_threshold": 1,
+          "file_rate": 0.35,
+          "file_rate_interval": [
+            0.2636424818146032,
+            0.4474555678160957
+          ]
+        },
+        "draft11": {
+          "traits": 100,
+          "items": 500,
+          "with": 10,
+          "rate": 0.02,
+          "rate_interval": [
+            0.008,
+            0.036
+          ],
+          "files_with": 8,
+          "file_threshold": 1,
+          "file_rate": 0.08,
+          "file_rate_interval": [
+            0.04109346127318457,
+            0.1499810776927723
+          ]
+        },
+        "set_a": {
+          "traits": 100,
+          "items": 500,
+          "with": 21,
+          "rate": 0.042,
+          "rate_interval": [
+            0.016,
+            0.074
+          ],
+          "files_with": 10,
+          "file_threshold": 1,
+          "file_rate": 0.1,
+          "file_rate_interval": [
+            0.0552291368050726,
+            0.17436566221012445
+          ]
+        },
+        "set_b": {
+          "traits": 100,
+          "items": 500,
+          "with": 7,
+          "rate": 0.014,
+          "rate_interval": [
+            0.004,
+            0.026
+          ],
+          "files_with": 6,
+          "file_threshold": 1,
+          "file_rate": 0.06,
+          "file_rate_interval": [
+            0.027786123800628143,
+            0.12476815511608857
+          ]
+        },
+        "set_a2": {
+          "traits": 100,
+          "items": 500,
+          "with": 11,
+          "rate": 0.022,
+          "rate_interval": [
+            0.008,
+            0.04
+          ],
+          "files_with": 7,
+          "file_threshold": 1,
+          "file_rate": 0.07,
+          "file_rate_interval": [
+            0.0343192608798127,
+            0.13749514806152413
+          ]
+        },
+        "set_b2": {
+          "traits": 100,
+          "items": 500,
+          "with": 8,
+          "rate": 0.016,
+          "rate_interval": [
+            0.004,
+            0.03
+          ],
+          "files_with": 6,
+          "file_threshold": 1,
+          "file_rate": 0.06,
+          "file_rate_interval": [
+            0.027786123800628143,
+            0.12476815511608857
+          ]
+        },
+        "set_c2": {
+          "traits": 100,
+          "items": 500,
+          "with": 13,
+          "rate": 0.026,
+          "rate_interval": [
+            0.006,
+            0.052
+          ],
+          "files_with": 7,
+          "file_threshold": 1,
+          "file_rate": 0.07,
+          "file_rate_interval": [
+            0.0343192608798127,
+            0.13749514806152413
+          ]
+        }
+      },
+      "against_baseline": {
+        "draft11": {
+          "difference": -0.098,
+          "interval": [
+            -0.136,
+            -0.064
+          ],
+          "p": 9.999000099990002e-05,
+          "paired_traits": 100,
+          "files_only_baseline": 30,
+          "files_only_arm": 3,
+          "files_p": 1.4011748135089874e-06
+        },
+        "set_a": {
+          "difference": -0.076,
+          "interval": [
+            -0.122,
+            -0.028
+          ],
+          "p": 0.0026997300269973002,
+          "paired_traits": 100,
+          "files_only_baseline": 31,
+          "files_only_arm": 6,
+          "files_p": 4.12575900554657e-05
+        },
+        "set_b": {
+          "difference": -0.104,
+          "interval": [
+            -0.14604999999999999,
+            -0.064
+          ],
+          "p": 9.999000099990002e-05,
+          "paired_traits": 100,
+          "files_only_baseline": 34,
+          "files_only_arm": 5,
+          "files_p": 2.4299079086631536e-06
+        },
+        "set_a2": {
+          "difference": -0.096,
+          "interval": [
+            -0.136,
+            -0.058
+          ],
+          "p": 9.999000099990002e-05,
+          "paired_traits": 100,
+          "files_only_baseline": 32,
+          "files_only_arm": 4,
+          "files_p": 1.941574737429619e-06
+        },
+        "set_b2": {
+          "difference": -0.102,
+          "interval": [
+            -0.146,
+            -0.06595000000000027
+          ],
+          "p": 9.999000099990002e-05,
+          "paired_traits": 100,
+          "files_only_baseline": 32,
+          "files_only_arm": 3,
+          "files_p": 4.176981747150421e-07
+        },
+        "set_c2": {
+          "difference": -0.092,
+          "interval": [
+            -0.138,
+            -0.046
+          ],
+          "p": 0.00019998000199980003,
+          "paired_traits": 100,
+          "files_only_baseline": 32,
+          "files_only_arm": 4,
+          "files_p": 1.941574737429619e-06
+        }
+      }
+    },
+    "weak_opposite": {
+      "label": "neg is the sensible middle or a mere absence (judged)",
+      "unit": "neg instruction",
+      "source": "judge",
+      "arms": {
+        "v1_corpus": {
+          "traits": 100,
+          "items": 500,
+          "with": 73,
+          "rate": 0.146,
+          "rate_interval": [
+            0.10195,
+            0.194
+          ],
+          "files_with": 38,
+          "file_threshold": 1,
+          "file_rate": 0.38,
+          "file_rate_interval": [
+            0.2909759918806736,
+            0.4779024478238856
+          ]
+        },
+        "draft11": {
+          "traits": 100,
+          "items": 500,
+          "with": 18,
+          "rate": 0.036,
+          "rate_interval": [
+            0.016,
+            0.058
+          ],
+          "files_with": 12,
+          "file_threshold": 1,
+          "file_rate": 0.12,
+          "file_rate_interval": [
+            0.06999406407369686,
+            0.19812099499074032
+          ]
+        },
+        "set_a": {
+          "traits": 100,
+          "items": 500,
+          "with": 43,
+          "rate": 0.086,
+          "rate_interval": [
+            0.054,
+            0.124
+          ],
+          "files_with": 28,
+          "file_threshold": 1,
+          "file_rate": 0.28,
+          "file_rate_interval": [
+            0.2013968515708077,
+            0.3748802878875508
+          ]
+        },
+        "set_b": {
+          "traits": 100,
+          "items": 500,
+          "with": 46,
+          "rate": 0.092,
+          "rate_interval": [
+            0.058,
+            0.128
+          ],
+          "files_with": 30,
+          "file_threshold": 1,
+          "file_rate": 0.3,
+          "file_rate_interval": [
+            0.21894885238515716,
+            0.39584854712244144
+          ]
+        },
+        "set_a2": {
+          "traits": 100,
+          "items": 500,
+          "with": 40,
+          "rate": 0.08,
+          "rate_interval": [
+            0.052,
+            0.11004999999999973
+          ],
+          "files_with": 25,
+          "file_threshold": 1,
+          "file_rate": 0.25,
+          "file_rate_interval": [
+            0.17545211311910353,
+            0.34304463626539466
+          ]
+        },
+        "set_b2": {
+          "traits": 100,
+          "items": 500,
+          "with": 28,
+          "rate": 0.056,
+          "rate_interval": [
+            0.032,
+            0.084
+          ],
+          "files_with": 20,
+          "file_threshold": 1,
+          "file_rate": 0.2,
+          "file_rate_interval": [
+            0.13336693289714838,
+            0.2888291663642495
+          ]
+        },
+        "set_c2": {
+          "traits": 100,
+          "items": 500,
+          "with": 49,
+          "rate": 0.098,
+          "rate_interval": [
+            0.064,
+            0.14
+          ],
+          "files_with": 27,
+          "file_threshold": 1,
+          "file_rate": 0.27,
+          "file_rate_interval": [
+            0.19269584096677833,
+            0.36432116846696
+          ]
+        }
+      },
+      "against_baseline": {
+        "draft11": {
+          "difference": -0.11,
+          "interval": [
+            -0.156,
+            -0.062
+          ],
+          "p": 9.999000099990002e-05,
+          "paired_traits": 100,
+          "files_only_baseline": 33,
+          "files_only_arm": 7,
+          "files_p": 4.2277022657799534e-05
+        },
+        "set_a": {
+          "difference": -0.06,
+          "interval": [
+            -0.102,
+            -0.022
+          ],
+          "p": 0.0036996300369963003,
+          "paired_traits": 100,
+          "files_only_baseline": 20,
+          "files_only_arm": 10,
+          "files_p": 0.09873714670538902
+        },
+        "set_b": {
+          "difference": -0.054,
+          "interval": [
+            -0.1,
+            -0.01
+          ],
+          "p": 0.022897710228977103,
+          "paired_traits": 100,
+          "files_only_baseline": 25,
+          "files_only_arm": 17,
+          "files_p": 0.27995623852893914
+        },
+        "set_a2": {
+          "difference": -0.066,
+          "interval": [
+            -0.11,
+            -0.026
+          ],
+          "p": 0.0033996600339966003,
+          "paired_traits": 100,
+          "files_only_baseline": 25,
+          "files_only_arm": 12,
+          "files_p": 0.04703102743951604
+        },
+        "set_b2": {
+          "difference": -0.09,
+          "interval": [
+            -0.13,
+            -0.051950000000000274
+          ],
+          "p": 9.999000099990002e-05,
+          "paired_traits": 100,
+          "files_only_baseline": 25,
+          "files_only_arm": 7,
+          "files_p": 0.0021024015732109547
+        },
+        "set_c2": {
+          "difference": -0.048,
+          "interval": [
+            -0.094,
+            -0.005950000000000273
+          ],
+          "p": 0.0453954604539546,
+          "paired_traits": 100,
+          "files_only_baseline": 23,
+          "files_only_arm": 12,
+          "files_p": 0.0895310789346695
+        }
+      }
+    },
+    "hedge_words": {
+      "label": "hedge words (appropriate, healthy, sometimes, may, tends to ...)",
+      "unit": "instruction",
+      "source": "pattern",
+      "arms": {
+        "v1_corpus": {
+          "traits": 100,
+          "items": 1000,
+          "with": 58,
+          "rate": 0.058,
+          "rate_interval": [
+            0.039,
+            0.079
+          ],
+          "files_with": 35,
+          "file_threshold": 1,
+          "file_rate": 0.35,
+          "file_rate_interval": [
+            0.2636424818146032,
+            0.4474555678160957
+          ]
+        },
+        "draft11": {
+          "traits": 100,
+          "items": 1000,
+          "with": 21,
+          "rate": 0.021,
+          "rate_interval": [
+            0.013,
+            0.03
+          ],
+          "files_with": 19,
+          "file_threshold": 1,
+          "file_rate": 0.19,
+          "file_rate_interval": [
+            0.12514751467908536,
+            0.27778845455769235
+          ]
+        },
+        "set_a": {
+          "traits": 100,
+          "items": 1000,
+          "with": 18,
+          "rate": 0.018,
+          "rate_interval": [
+            0.009,
+            0.027
+          ],
+          "files_with": 15,
+          "file_threshold": 1,
+          "file_rate": 0.15,
+          "file_rate_interval": [
+            0.09305985248417561,
+            0.23283559665412182
+          ]
+        },
+        "set_b": {
+          "traits": 100,
+          "items": 1000,
+          "with": 15,
+          "rate": 0.015,
+          "rate_interval": [
+            0.008,
+            0.023
+          ],
+          "files_with": 14,
+          "file_threshold": 1,
+          "file_rate": 0.14,
+          "file_rate_interval": [
+            0.08526343626497376,
+            0.2213718828487036
+          ]
+        },
+        "set_a2": {
+          "traits": 100,
+          "items": 1000,
+          "with": 22,
+          "rate": 0.022,
+          "rate_interval": [
+            0.01,
+            0.036
+          ],
+          "files_with": 12,
+          "file_threshold": 1,
+          "file_rate": 0.12,
+          "file_rate_interval": [
+            0.06999406407369686,
+            0.19812099499074032
+          ]
+        },
+        "set_b2": {
+          "traits": 100,
+          "items": 1000,
+          "with": 14,
+          "rate": 0.014,
+          "rate_interval": [
+            0.006,
+            0.023
+          ],
+          "files_with": 10,
+          "file_threshold": 1,
+          "file_rate": 0.1,
+          "file_rate_interval": [
+            0.0552291368050726,
+            0.17436566221012445
+          ]
+        },
+        "set_c2": {
+          "traits": 100,
+          "items": 1000,
+          "with": 10,
+          "rate": 0.01,
+          "rate_interval": [
+            0.004,
+            0.016
+          ],
+          "files_with": 10,
+          "file_threshold": 1,
+          "file_rate": 0.1,
+          "file_rate_interval": [
+            0.0552291368050726,
+            0.17436566221012445
+          ]
+        }
+      },
+      "against_baseline": {
+        "draft11": {
+          "difference": -0.037,
+          "interval": [
+            -0.055,
+            -0.019
+          ],
+          "p": 0.00039996000399960006,
+          "paired_traits": 100,
+          "files_only_baseline": 24,
+          "files_only_arm": 8,
+          "files_p": 0.0070003666914999485
+        },
+        "set_a": {
+          "difference": -0.04,
+          "interval": [
+            -0.061,
+            -0.022
+          ],
+          "p": 9.999000099990002e-05,
+          "paired_traits": 100,
+          "files_only_baseline": 25,
+          "files_only_arm": 5,
+          "files_p": 0.00032491423189640045
+        },
+        "set_b": {
+          "difference": -0.043,
+          "interval": [
+            -0.065,
+            -0.02497500000000014
+          ],
+          "p": 9.999000099990002e-05,
+          "paired_traits": 100,
+          "files_only_baseline": 27,
+          "files_only_arm": 6,
+          "files_p": 0.0003240634687244892
+        },
+        "set_a2": {
+          "difference": -0.036,
+          "interval": [
+            -0.055,
+            -0.017
+          ],
+          "p": 0.00029997000299970003,
+          "paired_traits": 100,
+          "files_only_baseline": 29,
+          "files_only_arm": 6,
+          "files_p": 0.0001168418675661087
+        },
+        "set_b2": {
+          "difference": -0.044,
+          "interval": [
+            -0.061024999999999996,
+            -0.028
+          ],
+          "p": 9.999000099990002e-05,
+          "paired_traits": 100,
+          "files_only_baseline": 29,
+          "files_only_arm": 4,
+          "files_p": 1.0928604751825333e-05
+        },
+        "set_c2": {
+          "difference": -0.048,
+          "interval": [
+            -0.07,
+            -0.029
+          ],
+          "p": 9.999000099990002e-05,
+          "paired_traits": 100,
+          "files_only_baseline": 31,
+          "files_only_arm": 6,
+          "files_p": 4.12575900554657e-05
+        }
+      }
+    },
+    "state": {
+      "label": "a passing state, not a standing trait (judged)",
+      "unit": "instruction",
+      "source": "judge",
+      "arms": {
+        "v1_corpus": {
+          "traits": 100,
+          "items": 1000,
+          "with": 0,
+          "rate": 0.0,
+          "rate_interval": [
+            0.0,
+            0.0
+          ],
+          "files_with": 0,
+          "file_threshold": 1,
+          "file_rate": 0.0,
+          "file_rate_interval": [
+            0.0,
+            0.03699349876899627
+          ]
+        },
+        "draft11": {
+          "traits": 100,
+          "items": 1000,
+          "with": 0,
+          "rate": 0.0,
+          "rate_interval": [
+            0.0,
+            0.0
+          ],
+          "files_with": 0,
+          "file_threshold": 1,
+          "file_rate": 0.0,
+          "file_rate_interval": [
+            0.0,
+            0.03699349876899627
+          ]
+        },
+        "set_a": {
+          "traits": 100,
+          "items": 1000,
+          "with": 0,
+          "rate": 0.0,
+          "rate_interval": [
+            0.0,
+            0.0
+          ],
+          "files_with": 0,
+          "file_threshold": 1,
+          "file_rate": 0.0,
+          "file_rate_interval": [
+            0.0,
+            0.03699349876899627
+          ]
+        },
+        "set_b": {
+          "traits": 100,
+          "items": 1000,
+          "with": 0,
+          "rate": 0.0,
+          "rate_interval": [
+            0.0,
+            0.0
+          ],
+          "files_with": 0,
+          "file_threshold": 1,
+          "file_rate": 0.0,
+          "file_rate_interval": [
+            0.0,
+            0.03699349876899627
+          ]
+        },
+        "set_a2": {
+          "traits": 100,
+          "items": 1000,
+          "with": 0,
+          "rate": 0.0,
+          "rate_interval": [
+            0.0,
+            0.0
+          ],
+          "files_with": 0,
+          "file_threshold": 1,
+          "file_rate": 0.0,
+          "file_rate_interval": [
+            0.0,
+            0.03699349876899627
+          ]
+        },
+        "set_b2": {
+          "traits": 100,
+          "items": 1000,
+          "with": 0,
+          "rate": 0.0,
+          "rate_interval": [
+            0.0,
+            0.0
+          ],
+          "files_with": 0,
+          "file_threshold": 1,
+          "file_rate": 0.0,
+          "file_rate_interval": [
+            0.0,
+            0.03699349876899627
+          ]
+        },
+        "set_c2": {
+          "traits": 100,
+          "items": 1000,
+          "with": 0,
+          "rate": 0.0,
+          "rate_interval": [
+            0.0,
+            0.0
+          ],
+          "files_with": 0,
+          "file_threshold": 1,
+          "file_rate": 0.0,
+          "file_rate_interval": [
+            0.0,
+            0.03699349876899627
+          ]
+        }
+      },
+      "against_baseline": {
+        "draft11": {
+          "difference": 0.0,
+          "interval": [
+            0.0,
+            0.0
+          ],
+          "p": 1.0,
+          "paired_traits": 100,
+          "files_only_baseline": 0,
+          "files_only_arm": 0,
+          "files_p": 1.0
+        },
+        "set_a": {
+          "difference": 0.0,
+          "interval": [
+            0.0,
+            0.0
+          ],
+          "p": 1.0,
+          "paired_traits": 100,
+          "files_only_baseline": 0,
+          "files_only_arm": 0,
+          "files_p": 1.0
+        },
+        "set_b": {
+          "difference": 0.0,
+          "interval": [
+            0.0,
+            0.0
+          ],
+          "p": 1.0,
+          "paired_traits": 100,
+          "files_only_baseline": 0,
+          "files_only_arm": 0,
+          "files_p": 1.0
+        },
+        "set_a2": {
+          "difference": 0.0,
+          "interval": [
+            0.0,
+            0.0
+          ],
+          "p": 1.0,
+          "paired_traits": 100,
+          "files_only_baseline": 0,
+          "files_only_arm": 0,
+          "files_p": 1.0
+        },
+        "set_b2": {
+          "difference": 0.0,
+          "interval": [
+            0.0,
+            0.0
+          ],
+          "p": 1.0,
+          "paired_traits": 100,
+          "files_only_baseline": 0,
+          "files_only_arm": 0,
+          "files_p": 1.0
+        },
+        "set_c2": {
+          "difference": 0.0,
+          "interval": [
+            0.0,
+            0.0
+          ],
+          "p": 1.0,
+          "paired_traits": 100,
+          "files_only_baseline": 0,
+          "files_only_arm": 0,
+          "files_p": 1.0
+        }
+      }
+    },
+    "off_trait": {
+      "label": "a different or milder trait than the description (judged)",
+      "unit": "instruction",
+      "source": "judge",
+      "arms": {
+        "v1_corpus": {
+          "traits": 100,
+          "items": 1000,
+          "with": 18,
+          "rate": 0.018,
+          "rate_interval": [
+            0.011,
+            0.027
+          ],
+          "files_with": 17,
+          "file_threshold": 1,
+          "file_rate": 0.17,
+          "file_rate_interval": [
+            0.10893566075403192,
+            0.2554800484335057
+          ]
+        },
+        "draft11": {
+          "traits": 100,
+          "items": 1000,
+          "with": 8,
+          "rate": 0.008,
+          "rate_interval": [
+            0.002,
+            0.015
+          ],
+          "files_with": 7,
+          "file_threshold": 1,
+          "file_rate": 0.07,
+          "file_rate_interval": [
+            0.0343192608798127,
+            0.13749514806152413
+          ]
+        },
+        "set_a": {
+          "traits": 100,
+          "items": 1000,
+          "with": 11,
+          "rate": 0.011,
+          "rate_interval": [
+            0.004,
+            0.019
+          ],
+          "files_with": 9,
+          "file_threshold": 1,
+          "file_rate": 0.09,
+          "file_rate_interval": [
+            0.04807253976868698,
+            0.16226212922188998
+          ]
+        },
+        "set_b": {
+          "traits": 100,
+          "items": 1000,
+          "with": 26,
+          "rate": 0.026,
+          "rate_interval": [
+            0.015,
+            0.039
+          ],
+          "files_with": 18,
+          "file_threshold": 1,
+          "file_rate": 0.18,
+          "file_rate_interval": [
+            0.11700225458662546,
+            0.2666735846255322
+          ]
+        },
+        "set_a2": {
+          "traits": 100,
+          "items": 1000,
+          "with": 16,
+          "rate": 0.016,
+          "rate_interval": [
+            0.007,
+            0.026
+          ],
+          "files_with": 11,
+          "file_threshold": 1,
+          "file_rate": 0.11,
+          "file_rate_interval": [
+            0.06254196329419368,
+            0.18631296574562342
+          ]
+        },
+        "set_b2": {
+          "traits": 100,
+          "items": 1000,
+          "with": 21,
+          "rate": 0.021,
+          "rate_interval": [
+            0.012,
+            0.032
+          ],
+          "files_with": 18,
+          "file_threshold": 1,
+          "file_rate": 0.18,
+          "file_rate_interval": [
+            0.11700225458662546,
+            0.2666735846255322
+          ]
+        },
+        "set_c2": {
+          "traits": 100,
+          "items": 1000,
+          "with": 13,
+          "rate": 0.013,
+          "rate_interval": [
+            0.006,
+            0.021
+          ],
+          "files_with": 11,
+          "file_threshold": 1,
+          "file_rate": 0.11,
+          "file_rate_interval": [
+            0.06254196329419368,
+            0.18631296574562342
+          ]
+        }
+      },
+      "against_baseline": {
+        "draft11": {
+          "difference": -0.01,
+          "interval": [
+            -0.02,
+            0.0
+          ],
+          "p": 0.0735926407359264,
+          "paired_traits": 100,
+          "files_only_baseline": 15,
+          "files_only_arm": 5,
+          "files_p": 0.04138946533203125
+        },
+        "set_a": {
+          "difference": -0.007,
+          "interval": [
+            -0.018,
+            0.004
+          ],
+          "p": 0.2970702929707029,
+          "paired_traits": 100,
+          "files_only_baseline": 16,
+          "files_only_arm": 8,
+          "files_p": 0.15158963203430176
+        },
+        "set_b": {
+          "difference": 0.008,
+          "interval": [
+            -0.008,
+            0.025
+          ],
+          "p": 0.40655934406559346,
+          "paired_traits": 100,
+          "files_only_baseline": 17,
+          "files_only_arm": 18,
+          "files_p": 1.0
+        },
+        "set_a2": {
+          "difference": -0.002,
+          "interval": [
+            -0.014,
+            0.011
+          ],
+          "p": 0.8776122387761224,
+          "paired_traits": 100,
+          "files_only_baseline": 14,
+          "files_only_arm": 8,
+          "files_p": 0.28627872467041016
+        },
+        "set_b2": {
+          "difference": 0.003,
+          "interval": [
+            -0.01,
+            0.017
+          ],
+          "p": 0.7826217378262174,
+          "paired_traits": 100,
+          "files_only_baseline": 17,
+          "files_only_arm": 18,
+          "files_p": 1.0
+        },
+        "set_c2": {
+          "difference": -0.005,
+          "interval": [
+            -0.016,
+            0.007
+          ],
+          "p": 0.506049395060494,
+          "paired_traits": 100,
+          "files_only_baseline": 16,
+          "files_only_arm": 10,
+          "files_p": 0.32693958282470703
+        }
+      }
+    },
+    "attitude_only": {
+      "label": "names an attitude, says nothing the person does (judged)",
+      "unit": "instruction",
+      "source": "judge",
+      "arms": {
+        "v1_corpus": {
+          "traits": 100,
+          "items": 1000,
+          "with": 17,
+          "rate": 0.017,
+          "rate_interval": [
+            0.008,
+            0.026
+          ],
+          "files_with": 13,
+          "file_threshold": 1,
+          "file_rate": 0.13,
+          "file_rate_interval": [
+            0.07757167395660301,
+            0.20980351513245427
+          ]
+        },
+        "draft11": {
+          "traits": 100,
+          "items": 1000,
+          "with": 5,
+          "rate": 0.005,
+          "rate_interval": [
+            0.0,
+            0.015
+          ],
+          "files_with": 1,
+          "file_threshold": 1,
+          "file_rate": 0.01,
+          "file_rate_interval": [
+            0.0017674320446096452,
+            0.05448619674900669
+          ]
+        },
+        "set_a": {
+          "traits": 100,
+          "items": 1000,
+          "with": 3,
+          "rate": 0.003,
+          "rate_interval": [
+            0.0,
+            0.007
+          ],
+          "files_with": 3,
+          "file_threshold": 1,
+          "file_rate": 0.03,
+          "file_rate_interval": [
+            0.010254523944281516,
+            0.08451936489857499
+          ]
+        },
+        "set_b": {
+          "traits": 100,
+          "items": 1000,
+          "with": 6,
+          "rate": 0.006,
+          "rate_interval": [
+            0.001,
+            0.014
+          ],
+          "files_with": 4,
+          "file_threshold": 1,
+          "file_rate": 0.04,
+          "file_rate_interval": [
+            0.01566330388275538,
+            0.09837071498472119
+          ]
+        },
+        "set_a2": {
+          "traits": 100,
+          "items": 1000,
+          "with": 6,
+          "rate": 0.006,
+          "rate_interval": [
+            0.002,
+            0.011
+          ],
+          "files_with": 6,
+          "file_threshold": 1,
+          "file_rate": 0.06,
+          "file_rate_interval": [
+            0.027786123800628143,
+            0.12476815511608857
+          ]
+        },
+        "set_b2": {
+          "traits": 100,
+          "items": 1000,
+          "with": 7,
+          "rate": 0.007,
+          "rate_interval": [
+            0.002,
+            0.013
+          ],
+          "files_with": 6,
+          "file_threshold": 1,
+          "file_rate": 0.06,
+          "file_rate_interval": [
+            0.027786123800628143,
+            0.12476815511608857
+          ]
+        },
+        "set_c2": {
+          "traits": 100,
+          "items": 1000,
+          "with": 4,
+          "rate": 0.004,
+          "rate_interval": [
+            0.001,
+            0.008
+          ],
+          "files_with": 4,
+          "file_threshold": 1,
+          "file_rate": 0.04,
+          "file_rate_interval": [
+            0.01566330388275538,
+            0.09837071498472119
+          ]
+        }
+      },
+      "against_baseline": {
+        "draft11": {
+          "difference": -0.012,
+          "interval": [
+            -0.025,
+            0.003
+          ],
+          "p": 0.11638836116388361,
+          "paired_traits": 100,
+          "files_only_baseline": 13,
+          "files_only_arm": 1,
+          "files_p": 0.0018310546875
+        },
+        "set_a": {
+          "difference": -0.014,
+          "interval": [
+            -0.025,
+            -0.005
+          ],
+          "p": 0.0117988201179882,
+          "paired_traits": 100,
+          "files_only_baseline": 13,
+          "files_only_arm": 3,
+          "files_p": 0.021270751953125
+        },
+        "set_b": {
+          "difference": -0.011,
+          "interval": [
+            -0.022,
+            0.0
+          ],
+          "p": 0.07029297070292971,
+          "paired_traits": 100,
+          "files_only_baseline": 11,
+          "files_only_arm": 2,
+          "files_p": 0.0224609375
+        },
+        "set_a2": {
+          "difference": -0.011,
+          "interval": [
+            -0.021,
+            -0.002
+          ],
+          "p": 0.04889511048895111,
+          "paired_traits": 100,
+          "files_only_baseline": 11,
+          "files_only_arm": 4,
+          "files_p": 0.11846923828125
+        },
+        "set_b2": {
+          "difference": -0.01,
+          "interval": [
+            -0.021,
+            0.001
+          ],
+          "p": 0.1274872512748725,
+          "paired_traits": 100,
+          "files_only_baseline": 13,
+          "files_only_arm": 6,
+          "files_p": 0.1670684814453125
+        },
+        "set_c2": {
+          "difference": -0.013,
+          "interval": [
+            -0.023,
+            -0.002
+          ],
+          "p": 0.0235976402359764,
+          "paired_traits": 100,
+          "files_only_baseline": 13,
+          "files_only_arm": 4,
+          "files_p": 0.049041748046875
+        }
+      }
+    },
+    "invented_detail": {
+      "label": "settings or objects the description does not have (judged)",
+      "unit": "instruction",
+      "source": "judge",
+      "arms": {
+        "v1_corpus": {
+          "traits": 100,
+          "items": 1000,
+          "with": 43,
+          "rate": 0.043,
+          "rate_interval": [
+            0.024,
+            0.065
+          ],
+          "files_with": 21,
+          "file_threshold": 1,
+          "file_rate": 0.21,
+          "file_rate_interval": [
+            0.14165654017044627,
+            0.2997996891155716
+          ]
+        },
+        "draft11": {
+          "traits": 100,
+          "items": 1000,
+          "with": 49,
+          "rate": 0.049,
+          "rate_interval": [
+            0.031,
+            0.069
+          ],
+          "files_with": 27,
+          "file_threshold": 1,
+          "file_rate": 0.27,
+          "file_rate_interval": [
+            0.19269584096677833,
+            0.36432116846696
+          ]
+        },
+        "set_a": {
+          "traits": 100,
+          "items": 1000,
+          "with": 52,
+          "rate": 0.052,
+          "rate_interval": [
+            0.036,
+            0.069
+          ],
+          "files_with": 33,
+          "file_threshold": 1,
+          "file_rate": 0.33,
+          "file_rate_interval": [
+            0.24563122674486615,
+            0.4269465628365927
+          ]
+        },
+        "set_b": {
+          "traits": 100,
+          "items": 1000,
+          "with": 72,
+          "rate": 0.072,
+          "rate_interval": [
+            0.054,
+            0.091
+          ],
+          "files_with": 45,
+          "file_threshold": 1,
+          "file_rate": 0.45,
+          "file_rate_interval": [
+            0.3561453790959721,
+            0.5475539707809276
+          ]
+        },
+        "set_a2": {
+          "traits": 100,
+          "items": 1000,
+          "with": 55,
+          "rate": 0.055,
+          "rate_interval": [
+            0.038,
+            0.071
+          ],
+          "files_with": 35,
+          "file_threshold": 1,
+          "file_rate": 0.35,
+          "file_rate_interval": [
+            0.2636424818146032,
+            0.4474555678160957
+          ]
+        },
+        "set_b2": {
+          "traits": 100,
+          "items": 1000,
+          "with": 75,
+          "rate": 0.075,
+          "rate_interval": [
+            0.054,
+            0.097
+          ],
+          "files_with": 41,
+          "file_threshold": 1,
+          "file_rate": 0.41,
+          "file_rate_interval": [
+            0.3186731295420407,
+            0.5079857002363788
+          ]
+        },
+        "set_c2": {
+          "traits": 100,
+          "items": 1000,
+          "with": 64,
+          "rate": 0.064,
+          "rate_interval": [
+            0.044,
+            0.086
+          ],
+          "files_with": 36,
+          "file_threshold": 1,
+          "file_rate": 0.36,
+          "file_rate_interval": [
+            0.2727122033881362,
+            0.45764597626718284
+          ]
+        }
+      },
+      "against_baseline": {
+        "draft11": {
+          "difference": 0.006,
+          "interval": [
+            -0.018,
+            0.029
+          ],
+          "p": 0.6821317868213179,
+          "paired_traits": 100,
+          "files_only_baseline": 9,
+          "files_only_arm": 15,
+          "files_p": 0.30745625495910645
+        },
+        "set_a": {
+          "difference": 0.009,
+          "interval": [
+            -0.016,
+            0.032
+          ],
+          "p": 0.5138486151384861,
+          "paired_traits": 100,
+          "files_only_baseline": 9,
+          "files_only_arm": 21,
+          "files_p": 0.04277394525706768
+        },
+        "set_b": {
+          "difference": 0.029,
+          "interval": [
+            0.004,
+            0.054
+          ],
+          "p": 0.027697230276972302,
+          "paired_traits": 100,
+          "files_only_baseline": 7,
+          "files_only_arm": 31,
+          "files_p": 0.00011616700794547796
+        },
+        "set_a2": {
+          "difference": 0.012,
+          "interval": [
+            -0.012,
+            0.036
+          ],
+          "p": 0.36906309369063095,
+          "paired_traits": 100,
+          "files_only_baseline": 12,
+          "files_only_arm": 26,
+          "files_p": 0.03355243967962451
+        },
+        "set_b2": {
+          "difference": 0.032,
+          "interval": [
+            0.002,
+            0.062
+          ],
+          "p": 0.038896110388961104,
+          "paired_traits": 100,
+          "files_only_baseline": 9,
+          "files_only_arm": 29,
+          "files_p": 0.0016580525261815637
+        },
+        "set_c2": {
+          "difference": 0.021,
+          "interval": [
+            -0.005,
+            0.046
+          ],
+          "p": 0.11948805119488051,
+          "paired_traits": 100,
+          "files_only_baseline": 11,
+          "files_only_arm": 26,
+          "files_p": 0.020073851919732988
+        }
+      }
+    },
+    "invented_motive": {
+      "label": "a reason the description does not give (judged)",
+      "unit": "instruction",
+      "source": "judge",
+      "arms": {
+        "v1_corpus": {
+          "traits": 100,
+          "items": 1000,
+          "with": 86,
+          "rate": 0.086,
+          "rate_interval": [
+            0.066,
+            0.107
+          ],
+          "files_with": 48,
+          "file_threshold": 1,
+          "file_rate": 0.48,
+          "file_rate_interval": [
+            0.3846455168617764,
+            0.5768342230889836
+          ]
+        },
+        "draft11": {
+          "traits": 100,
+          "items": 1000,
+          "with": 84,
+          "rate": 0.084,
+          "rate_interval": [
+            0.061,
+            0.108
+          ],
+          "files_with": 40,
+          "file_threshold": 1,
+          "file_rate": 0.4,
+          "file_rate_interval": [
+            0.3094012857712627,
+            0.4979974139825367
+          ]
+        },
+        "set_a": {
+          "traits": 100,
+          "items": 1000,
+          "with": 117,
+          "rate": 0.117,
+          "rate_interval": [
+            0.095975,
+            0.14
+          ],
+          "files_with": 60,
+          "file_threshold": 1,
+          "file_rate": 0.6,
+          "file_rate_interval": [
+            0.5020025860174634,
+            0.6905987142287374
+          ]
+        },
+        "set_b": {
+          "traits": 100,
+          "items": 1000,
+          "with": 96,
+          "rate": 0.096,
+          "rate_interval": [
+            0.074,
+            0.118
+          ],
+          "files_with": 54,
+          "file_threshold": 1,
+          "file_rate": 0.54,
+          "file_rate_interval": [
+            0.4426486024827802,
+            0.6343919176157
+          ]
+        },
+        "set_a2": {
+          "traits": 100,
+          "items": 1000,
+          "with": 99,
+          "rate": 0.099,
+          "rate_interval": [
+            0.078,
+            0.123
+          ],
+          "files_with": 54,
+          "file_threshold": 1,
+          "file_rate": 0.54,
+          "file_rate_interval": [
+            0.4426486024827802,
+            0.6343919176157
+          ]
+        },
+        "set_b2": {
+          "traits": 100,
+          "items": 1000,
+          "with": 87,
+          "rate": 0.087,
+          "rate_interval": [
+            0.067,
+            0.107
+          ],
+          "files_with": 50,
+          "file_threshold": 1,
+          "file_rate": 0.5,
+          "file_rate_interval": [
+            0.40383152963549296,
+            0.596168470364507
+          ]
+        },
+        "set_c2": {
+          "traits": 100,
+          "items": 1000,
+          "with": 101,
+          "rate": 0.101,
+          "rate_interval": [
+            0.08,
+            0.123
+          ],
+          "files_with": 56,
+          "file_threshold": 1,
+          "file_rate": 0.56,
+          "file_rate_interval": [
+            0.46228104575723733,
+            0.6532797343904831
+          ]
+        }
+      },
+      "against_baseline": {
+        "draft11": {
+          "difference": -0.002,
+          "interval": [
+            -0.029,
+            0.024
+          ],
+          "p": 0.9431056894310569,
+          "paired_traits": 100,
+          "files_only_baseline": 24,
+          "files_only_arm": 16,
+          "files_p": 0.26818725105476915
+        },
+        "set_a": {
+          "difference": 0.031,
+          "interval": [
+            0.005975000000000001,
+            0.056
+          ],
+          "p": 0.028097190280971903,
+          "paired_traits": 100,
+          "files_only_baseline": 12,
+          "files_only_arm": 24,
+          "files_p": 0.06524533522315323
+        },
+        "set_b": {
+          "difference": 0.01,
+          "interval": [
+            -0.017,
+            0.037
+          ],
+          "p": 0.5047495250474953,
+          "paired_traits": 100,
+          "files_only_baseline": 19,
+          "files_only_arm": 25,
+          "files_p": 0.4513808323961257
+        },
+        "set_a2": {
+          "difference": 0.013,
+          "interval": [
+            -0.012,
+            0.037
+          ],
+          "p": 0.3685631436856314,
+          "paired_traits": 100,
+          "files_only_baseline": 18,
+          "files_only_arm": 24,
+          "files_p": 0.44079906734259566
+        },
+        "set_b2": {
+          "difference": 0.001,
+          "interval": [
+            -0.027,
+            0.027
+          ],
+          "p": 1.0,
+          "paired_traits": 100,
+          "files_only_baseline": 22,
+          "files_only_arm": 24,
+          "files_p": 0.8829959121223965
+        },
+        "set_c2": {
+          "difference": 0.015,
+          "interval": [
+            -0.006,
+            0.036
+          ],
+          "p": 0.21677832216778323,
+          "paired_traits": 100,
+          "files_only_baseline": 13,
+          "files_only_arm": 21,
+          "files_p": 0.22948101302608848
+        }
+      }
+    },
+    "because": {
+      "label": "has a 'because' clause",
+      "unit": "instruction",
+      "source": "pattern",
+      "arms": {
+        "v1_corpus": {
+          "traits": 100,
+          "items": 1000,
+          "with": 6,
+          "rate": 0.006,
+          "rate_interval": [
+            0.001,
+            0.012
+          ],
+          "files_with": 5,
+          "file_threshold": 1,
+          "file_rate": 0.05,
+          "file_rate_interval": [
+            0.021543679017992173,
+            0.1117504698741045
+          ]
+        },
+        "draft11": {
+          "traits": 100,
+          "items": 1000,
+          "with": 36,
+          "rate": 0.036,
+          "rate_interval": [
+            0.022,
+            0.053
+          ],
+          "files_with": 21,
+          "file_threshold": 1,
+          "file_rate": 0.21,
+          "file_rate_interval": [
+            0.14165654017044627,
+            0.2997996891155716
+          ]
+        },
+        "set_a": {
+          "traits": 100,
+          "items": 1000,
+          "with": 30,
+          "rate": 0.03,
+          "rate_interval": [
+            0.016975000000000004,
+            0.046
+          ],
+          "files_with": 19,
+          "file_threshold": 1,
+          "file_rate": 0.19,
+          "file_rate_interval": [
+            0.12514751467908536,
+            0.27778845455769235
+          ]
+        },
+        "set_b": {
+          "traits": 100,
+          "items": 1000,
+          "with": 34,
+          "rate": 0.034,
+          "rate_interval": [
+            0.021,
+            0.049
+          ],
+          "files_with": 23,
+          "file_threshold": 1,
+          "file_rate": 0.23,
+          "file_rate_interval": [
+            0.15843265832598313,
+            0.3215438310092749
+          ]
+        },
+        "set_a2": {
+          "traits": 100,
+          "items": 1000,
+          "with": 37,
+          "rate": 0.037,
+          "rate_interval": [
+            0.025,
+            0.051
+          ],
+          "files_with": 26,
+          "file_threshold": 1,
+          "file_rate": 0.26,
+          "file_rate_interval": [
+            0.18404698413091963,
+            0.3537098952781987
+          ]
+        },
+        "set_b2": {
+          "traits": 100,
+          "items": 1000,
+          "with": 24,
+          "rate": 0.024,
+          "rate_interval": [
+            0.013,
+            0.037
+          ],
+          "files_with": 16,
+          "file_threshold": 1,
+          "file_rate": 0.16,
+          "file_rate_interval": [
+            0.10095288451828571,
+            0.2442026946446318
+          ]
+        },
+        "set_c2": {
+          "traits": 100,
+          "items": 1000,
+          "with": 32,
+          "rate": 0.032,
+          "rate_interval": [
+            0.02,
+            0.046
+          ],
+          "files_with": 25,
+          "file_threshold": 1,
+          "file_rate": 0.25,
+          "file_rate_interval": [
+            0.17545211311910353,
+            0.34304463626539466
+          ]
+        }
+      },
+      "against_baseline": {
+        "draft11": {
+          "difference": 0.03,
+          "interval": [
+            0.016,
+            0.045
+          ],
+          "p": 9.999000099990002e-05,
+          "paired_traits": 100,
+          "files_only_baseline": 2,
+          "files_only_arm": 18,
+          "files_p": 0.0004024505615234375
+        },
+        "set_a": {
+          "difference": 0.024,
+          "interval": [
+            0.011,
+            0.038
+          ],
+          "p": 0.0005999400059994001,
+          "paired_traits": 100,
+          "files_only_baseline": 2,
+          "files_only_arm": 16,
+          "files_p": 0.001312255859375
+        },
+        "set_b": {
+          "difference": 0.028,
+          "interval": [
+            0.015,
+            0.043
+          ],
+          "p": 9.999000099990002e-05,
+          "paired_traits": 100,
+          "files_only_baseline": 3,
+          "files_only_arm": 21,
+          "files_p": 0.0002771615982055664
+        },
+        "set_a2": {
+          "difference": 0.031,
+          "interval": [
+            0.017,
+            0.046
+          ],
+          "p": 9.999000099990002e-05,
+          "paired_traits": 100,
+          "files_only_baseline": 2,
+          "files_only_arm": 23,
+          "files_p": 1.9431114196777344e-05
+        },
+        "set_b2": {
+          "difference": 0.018,
+          "interval": [
+            0.007,
+            0.031
+          ],
+          "p": 0.0023997600239976003,
+          "paired_traits": 100,
+          "files_only_baseline": 2,
+          "files_only_arm": 13,
+          "files_p": 0.00738525390625
+        },
+        "set_c2": {
+          "difference": 0.026,
+          "interval": [
+            0.014,
+            0.038
+          ],
+          "p": 9.999000099990002e-05,
+          "paired_traits": 100,
+          "files_only_baseline": 2,
+          "files_only_arm": 22,
+          "files_p": 3.5881996154785156e-05
+        }
+      }
+    },
+    "names_label": {
+      "label": "names its own label (self-labelling)",
+      "unit": "instruction",
+      "source": "pattern",
+      "arms": {
+        "v1_corpus": {
+          "traits": 100,
+          "items": 1000,
+          "with": 237,
+          "rate": 0.237,
+          "rate_interval": [
+            0.201,
+            0.2760249999999999
+          ],
+          "files_with": 88,
+          "file_threshold": 1,
+          "file_rate": 0.88,
+          "file_rate_interval": [
+            0.8018790050092598,
+            0.9300059359263032
+          ]
+        },
+        "draft11": {
+          "traits": 100,
+          "items": 1000,
+          "with": 83,
+          "rate": 0.083,
+          "rate_interval": [
+            0.059,
+            0.108
+          ],
+          "files_with": 41,
+          "file_threshold": 1,
+          "file_rate": 0.41,
+          "file_rate_interval": [
+            0.3186731295420407,
+            0.5079857002363788
+          ]
+        },
+        "set_a": {
+          "traits": 100,
+          "items": 1000,
+          "with": 57,
+          "rate": 0.057,
+          "rate_interval": [
+            0.04,
+            0.078
+          ],
+          "files_with": 37,
+          "file_threshold": 1,
+          "file_rate": 0.37,
+          "file_rate_interval": [
+            0.2818236047080924,
+            0.4677947049718467
+          ]
+        },
+        "set_b": {
+          "traits": 100,
+          "items": 1000,
+          "with": 60,
+          "rate": 0.06,
+          "rate_interval": [
+            0.042,
+            0.08
+          ],
+          "files_with": 42,
+          "file_threshold": 1,
+          "file_rate": 0.42,
+          "file_rate_interval": [
+            0.3279838260663658,
+            0.5179351337366737
+          ]
+        },
+        "set_a2": {
+          "traits": 100,
+          "items": 1000,
+          "with": 71,
+          "rate": 0.071,
+          "rate_interval": [
+            0.053975,
+            0.09
+          ],
+          "files_with": 47,
+          "file_threshold": 1,
+          "file_rate": 0.47,
+          "file_rate_interval": [
+            0.37510817888094034,
+            0.5671114310451995
+          ]
+        },
+        "set_b2": {
+          "traits": 100,
+          "items": 1000,
+          "with": 73,
+          "rate": 0.073,
+          "rate_interval": [
+            0.051975,
+            0.1
+          ],
+          "files_with": 41,
+          "file_threshold": 1,
+          "file_rate": 0.41,
+          "file_rate_interval": [
+            0.3186731295420407,
+            0.5079857002363788
+          ]
+        },
+        "set_c2": {
+          "traits": 100,
+          "items": 1000,
+          "with": 59,
+          "rate": 0.059,
+          "rate_interval": [
+            0.04,
+            0.081
+          ],
+          "files_with": 36,
+          "file_threshold": 1,
+          "file_rate": 0.36,
+          "file_rate_interval": [
+            0.2727122033881362,
+            0.45764597626718284
+          ]
+        }
+      },
+      "against_baseline": {
+        "draft11": {
+          "difference": -0.154,
+          "interval": [
+            -0.187025,
+            -0.122
+          ],
+          "p": 9.999000099990002e-05,
+          "paired_traits": 100,
+          "files_only_baseline": 49,
+          "files_only_arm": 2,
+          "files_p": 1.1786127629420662e-12
+        },
+        "set_a": {
+          "difference": -0.18,
+          "interval": [
+            -0.21,
+            -0.152
+          ],
+          "p": 9.999000099990002e-05,
+          "paired_traits": 100,
+          "files_only_baseline": 53,
+          "files_only_arm": 2,
+          "files_p": 8.554268404736831e-14
+        },
+        "set_b": {
+          "difference": -0.177,
+          "interval": [
+            -0.213025,
+            -0.14397500000000013
+          ],
+          "p": 9.999000099990002e-05,
+          "paired_traits": 100,
+          "files_only_baseline": 51,
+          "files_only_arm": 5,
+          "files_p": 1.170292474039769e-10
+        },
+        "set_a2": {
+          "difference": -0.166,
+          "interval": [
+            -0.2,
+            -0.132
+          ],
+          "p": 9.999000099990002e-05,
+          "paired_traits": 100,
+          "files_only_baseline": 43,
+          "files_only_arm": 2,
+          "files_p": 5.88897819397971e-11
+        },
+        "set_b2": {
+          "difference": -0.164,
+          "interval": [
+            -0.2,
+            -0.13
+          ],
+          "p": 9.999000099990002e-05,
+          "paired_traits": 100,
+          "files_only_baseline": 51,
+          "files_only_arm": 4,
+          "files_p": 2.0474233419776056e-11
+        },
+        "set_c2": {
+          "difference": -0.178,
+          "interval": [
+            -0.215,
+            -0.14297500000000013
+          ],
+          "p": 9.999000099990002e-05,
+          "paired_traits": 100,
+          "files_only_baseline": 55,
+          "files_only_arm": 3,
+          "files_p": 2.2598589666245061e-13
+        }
+      }
+    },
+    "echo_description": {
+      "label": "repeats 5 or more words in a row of the description",
+      "unit": "instruction",
+      "source": "pattern",
+      "arms": {
+        "v1_corpus": {
+          "traits": 100,
+          "items": 1000,
+          "with": 42,
+          "rate": 0.042,
+          "rate_interval": [
+            0.029975,
+            0.056
+          ],
+          "files_with": 33,
+          "file_threshold": 1,
+          "file_rate": 0.33,
+          "file_rate_interval": [
+            0.24563122674486615,
+            0.4269465628365927
+          ]
+        },
+        "draft11": {
+          "traits": 100,
+          "items": 1000,
+          "with": 16,
+          "rate": 0.016,
+          "rate_interval": [
+            0.006,
+            0.027
+          ],
+          "files_with": 10,
+          "file_threshold": 1,
+          "file_rate": 0.1,
+          "file_rate_interval": [
+            0.0552291368050726,
+            0.17436566221012445
+          ]
+        },
+        "set_a": {
+          "traits": 100,
+          "items": 1000,
+          "with": 8,
+          "rate": 0.008,
+          "rate_interval": [
+            0.003,
+            0.014
+          ],
+          "files_with": 8,
+          "file_threshold": 1,
+          "file_rate": 0.08,
+          "file_rate_interval": [
+            0.04109346127318457,
+            0.1499810776927723
+          ]
+        },
+        "set_b": {
+          "traits": 100,
+          "items": 1000,
+          "with": 4,
+          "rate": 0.004,
+          "rate_interval": [
+            0.0,
+            0.011
+          ],
+          "files_with": 2,
+          "file_threshold": 1,
+          "file_rate": 0.02,
+          "file_rate_interval": [
+            0.0055019675006616475,
+            0.07001179131757478
+          ]
+        },
+        "set_a2": {
+          "traits": 100,
+          "items": 1000,
+          "with": 7,
+          "rate": 0.007,
+          "rate_interval": [
+            0.002,
+            0.012
+          ],
+          "files_with": 7,
+          "file_threshold": 1,
+          "file_rate": 0.07,
+          "file_rate_interval": [
+            0.0343192608798127,
+            0.13749514806152413
+          ]
+        },
+        "set_b2": {
+          "traits": 100,
+          "items": 1000,
+          "with": 5,
+          "rate": 0.005,
+          "rate_interval": [
+            0.0,
+            0.013
+          ],
+          "files_with": 3,
+          "file_threshold": 1,
+          "file_rate": 0.03,
+          "file_rate_interval": [
+            0.010254523944281516,
+            0.08451936489857499
+          ]
+        },
+        "set_c2": {
+          "traits": 100,
+          "items": 1000,
+          "with": 7,
+          "rate": 0.007,
+          "rate_interval": [
+            0.003,
+            0.012
+          ],
+          "files_with": 7,
+          "file_threshold": 1,
+          "file_rate": 0.07,
+          "file_rate_interval": [
+            0.0343192608798127,
+            0.13749514806152413
+          ]
+        }
+      },
+      "against_baseline": {
+        "draft11": {
+          "difference": -0.026,
+          "interval": [
+            -0.04,
+            -0.013
+          ],
+          "p": 0.0005999400059994001,
+          "paired_traits": 100,
+          "files_only_baseline": 28,
+          "files_only_arm": 5,
+          "files_p": 6.618769839406013e-05
+        },
+        "set_a": {
+          "difference": -0.034,
+          "interval": [
+            -0.048,
+            -0.021
+          ],
+          "p": 9.999000099990002e-05,
+          "paired_traits": 100,
+          "files_only_baseline": 29,
+          "files_only_arm": 4,
+          "files_p": 1.0928604751825333e-05
+        },
+        "set_b": {
+          "difference": -0.038,
+          "interval": [
+            -0.05,
+            -0.026
+          ],
+          "p": 9.999000099990002e-05,
+          "paired_traits": 100,
+          "files_only_baseline": 31,
+          "files_only_arm": 0,
+          "files_p": 9.313225746154785e-10
+        },
+        "set_a2": {
+          "difference": -0.035,
+          "interval": [
+            -0.049,
+            -0.022
+          ],
+          "p": 9.999000099990002e-05,
+          "paired_traits": 100,
+          "files_only_baseline": 30,
+          "files_only_arm": 4,
+          "files_p": 6.16488978266716e-06
+        },
+        "set_b2": {
+          "difference": -0.037,
+          "interval": [
+            -0.05,
+            -0.025
+          ],
+          "p": 9.999000099990002e-05,
+          "paired_traits": 100,
+          "files_only_baseline": 31,
+          "files_only_arm": 1,
+          "files_p": 1.5366822481155396e-08
+        },
+        "set_c2": {
+          "difference": -0.035,
+          "interval": [
+            -0.049,
+            -0.022
+          ],
+          "p": 9.999000099990002e-05,
+          "paired_traits": 100,
+          "files_only_baseline": 29,
+          "files_only_arm": 3,
+          "files_p": 2.5560148060321808e-06
+        }
+      }
+    },
+    "copied_example": {
+      "label": "repeats 7 or more words in a row of a template example",
+      "unit": "instruction",
+      "source": "pattern",
+      "arms": {
+        "v1_corpus": {
+          "traits": 100,
+          "items": 1000,
+          "with": 2,
+          "rate": 0.002,
+          "rate_interval": [
+            0.0,
+            0.005
+          ],
+          "files_with": 0,
+          "file_threshold": 2,
+          "file_rate": 0.0,
+          "file_rate_interval": [
+            0.0,
+            0.03699349876899627
+          ]
+        },
+        "draft11": {
+          "traits": 100,
+          "items": 1000,
+          "with": 0,
+          "rate": 0.0,
+          "rate_interval": [
+            0.0,
+            0.0
+          ],
+          "files_with": 0,
+          "file_threshold": 2,
+          "file_rate": 0.0,
+          "file_rate_interval": [
+            0.0,
+            0.03699349876899627
+          ]
+        },
+        "set_a": {
+          "traits": 100,
+          "items": 1000,
+          "with": 0,
+          "rate": 0.0,
+          "rate_interval": [
+            0.0,
+            0.0
+          ],
+          "files_with": 0,
+          "file_threshold": 2,
+          "file_rate": 0.0,
+          "file_rate_interval": [
+            0.0,
+            0.03699349876899627
+          ]
+        },
+        "set_b": {
+          "traits": 100,
+          "items": 1000,
+          "with": 0,
+          "rate": 0.0,
+          "rate_interval": [
+            0.0,
+            0.0
+          ],
+          "files_with": 0,
+          "file_threshold": 2,
+          "file_rate": 0.0,
+          "file_rate_interval": [
+            0.0,
+            0.03699349876899627
+          ]
+        },
+        "set_a2": {
+          "traits": 100,
+          "items": 1000,
+          "with": 0,
+          "rate": 0.0,
+          "rate_interval": [
+            0.0,
+            0.0
+          ],
+          "files_with": 0,
+          "file_threshold": 2,
+          "file_rate": 0.0,
+          "file_rate_interval": [
+            0.0,
+            0.03699349876899627
+          ]
+        },
+        "set_b2": {
+          "traits": 100,
+          "items": 1000,
+          "with": 0,
+          "rate": 0.0,
+          "rate_interval": [
+            0.0,
+            0.0
+          ],
+          "files_with": 0,
+          "file_threshold": 2,
+          "file_rate": 0.0,
+          "file_rate_interval": [
+            0.0,
+            0.03699349876899627
+          ]
+        },
+        "set_c2": {
+          "traits": 100,
+          "items": 1000,
+          "with": 0,
+          "rate": 0.0,
+          "rate_interval": [
+            0.0,
+            0.0
+          ],
+          "files_with": 0,
+          "file_threshold": 2,
+          "file_rate": 0.0,
+          "file_rate_interval": [
+            0.0,
+            0.03699349876899627
+          ]
+        }
+      },
+      "against_baseline": {
+        "draft11": {
+          "difference": -0.002,
+          "interval": [
+            -0.005,
+            0.0
+          ],
+          "p": 0.4998500149985001,
+          "paired_traits": 100,
+          "files_only_baseline": 0,
+          "files_only_arm": 0,
+          "files_p": 1.0
+        },
+        "set_a": {
+          "difference": -0.002,
+          "interval": [
+            -0.005,
+            0.0
+          ],
+          "p": 0.49465053494650535,
+          "paired_traits": 100,
+          "files_only_baseline": 0,
+          "files_only_arm": 0,
+          "files_p": 1.0
+        },
+        "set_b": {
+          "difference": -0.002,
+          "interval": [
+            -0.005,
+            0.0
+          ],
+          "p": 0.49755024497550243,
+          "paired_traits": 100,
+          "files_only_baseline": 0,
+          "files_only_arm": 0,
+          "files_p": 1.0
+        },
+        "set_a2": {
+          "difference": -0.002,
+          "interval": [
+            -0.005,
+            0.0
+          ],
+          "p": 0.5011498850114988,
+          "paired_traits": 100,
+          "files_only_baseline": 0,
+          "files_only_arm": 0,
+          "files_p": 1.0
+        },
+        "set_b2": {
+          "difference": -0.002,
+          "interval": [
+            -0.005,
+            0.0
+          ],
+          "p": 0.5010498950104989,
+          "paired_traits": 100,
+          "files_only_baseline": 0,
+          "files_only_arm": 0,
+          "files_p": 1.0
+        },
+        "set_c2": {
+          "difference": -0.002,
+          "interval": [
+            -0.005,
+            0.0
+          ],
+          "p": 0.5023497650234976,
+          "paired_traits": 100,
+          "files_only_baseline": 0,
+          "files_only_arm": 0,
+          "files_p": 1.0
+        }
+      }
+    },
+    "length_out": {
+      "label": "outside 20 to 30 words",
+      "unit": "instruction",
+      "source": "pattern",
+      "arms": {
+        "v1_corpus": {
+          "traits": 100,
+          "items": 1000,
+          "with": 410,
+          "rate": 0.41,
+          "rate_interval": [
+            0.349,
+            0.471
+          ],
+          "files_with": 86,
+          "file_threshold": 1,
+          "file_rate": 0.86,
+          "file_rate_interval": [
+            0.7786281171512964,
+            0.9147365637350263
+          ]
+        },
+        "draft11": {
+          "traits": 100,
+          "items": 1000,
+          "with": 835,
+          "rate": 0.835,
+          "rate_interval": [
+            0.795,
+            0.871
+          ],
+          "files_with": 100,
+          "file_threshold": 1,
+          "file_rate": 1.0,
+          "file_rate_interval": [
+            0.9630065012310038,
+            1.0
+          ]
+        },
+        "set_a": {
+          "traits": 100,
+          "items": 1000,
+          "with": 856,
+          "rate": 0.856,
+          "rate_interval": [
+            0.817,
+            0.894
+          ],
+          "files_with": 100,
+          "file_threshold": 1,
+          "file_rate": 1.0,
+          "file_rate_interval": [
+            0.9630065012310038,
+            1.0
+          ]
+        },
+        "set_b": {
+          "traits": 100,
+          "items": 1000,
+          "with": 813,
+          "rate": 0.813,
+          "rate_interval": [
+            0.772,
+            0.8520249999999998
+          ],
+          "files_with": 99,
+          "file_threshold": 1,
+          "file_rate": 0.99,
+          "file_rate_interval": [
+            0.9455138032509935,
+            0.9982325679553905
+          ]
+        },
+        "set_a2": {
+          "traits": 100,
+          "items": 1000,
+          "with": 836,
+          "rate": 0.836,
+          "rate_interval": [
+            0.793,
+            0.876
+          ],
+          "files_with": 99,
+          "file_threshold": 1,
+          "file_rate": 0.99,
+          "file_rate_interval": [
+            0.9455138032509935,
+            0.9982325679553905
+          ]
+        },
+        "set_b2": {
+          "traits": 100,
+          "items": 1000,
+          "with": 820,
+          "rate": 0.82,
+          "rate_interval": [
+            0.778,
+            0.8600249999999998
+          ],
+          "files_with": 99,
+          "file_threshold": 1,
+          "file_rate": 0.99,
+          "file_rate_interval": [
+            0.9455138032509935,
+            0.9982325679553905
+          ]
+        },
+        "set_c2": {
+          "traits": 100,
+          "items": 1000,
+          "with": 780,
+          "rate": 0.78,
+          "rate_interval": [
+            0.737,
+            0.8220249999999998
+          ],
+          "files_with": 99,
+          "file_threshold": 1,
+          "file_rate": 0.99,
+          "file_rate_interval": [
+            0.9455138032509935,
+            0.9982325679553905
+          ]
+        }
+      },
+      "against_baseline": {
+        "draft11": {
+          "difference": 0.425,
+          "interval": [
+            0.352,
+            0.497
+          ],
+          "p": 9.999000099990002e-05,
+          "paired_traits": 100,
+          "files_only_baseline": 0,
+          "files_only_arm": 14,
+          "files_p": 0.0001220703125
+        },
+        "set_a": {
+          "difference": 0.446,
+          "interval": [
+            0.379975,
+            0.512
+          ],
+          "p": 9.999000099990002e-05,
+          "paired_traits": 100,
+          "files_only_baseline": 0,
+          "files_only_arm": 14,
+          "files_p": 0.0001220703125
+        },
+        "set_b": {
+          "difference": 0.403,
+          "interval": [
+            0.325,
+            0.473
+          ],
+          "p": 9.999000099990002e-05,
+          "paired_traits": 100,
+          "files_only_baseline": 1,
+          "files_only_arm": 14,
+          "files_p": 0.0009765625
+        },
+        "set_a2": {
+          "difference": 0.426,
+          "interval": [
+            0.361,
+            0.4930249999999999
+          ],
+          "p": 9.999000099990002e-05,
+          "paired_traits": 100,
+          "files_only_baseline": 1,
+          "files_only_arm": 14,
+          "files_p": 0.0009765625
+        },
+        "set_b2": {
+          "difference": 0.41,
+          "interval": [
+            0.337,
+            0.48202499999999987
+          ],
+          "p": 9.999000099990002e-05,
+          "paired_traits": 100,
+          "files_only_baseline": 1,
+          "files_only_arm": 14,
+          "files_p": 0.0009765625
+        },
+        "set_c2": {
+          "difference": 0.37,
+          "interval": [
+            0.3,
+            0.441
+          ],
+          "p": 9.999000099990002e-05,
+          "paired_traits": 100,
+          "files_only_baseline": 1,
+          "files_only_arm": 14,
+          "files_p": 0.0009765625
+        }
+      }
+    },
+    "q_persona": {
+      "label": "addresses the person answering (second person, no first-person asker)",
+      "unit": "question",
+      "source": "pattern",
+      "arms": {
+        "v1_corpus": {
+          "traits": 100,
+          "items": 4000,
+          "with": 2178,
+          "rate": 0.5445,
+          "rate_interval": [
+            0.46647500000000003,
+            0.625
+          ],
+          "files_with": 87,
+          "file_threshold": 1,
+          "file_rate": 0.87,
+          "file_rate_interval": [
+            0.7901964848675458,
+            0.922428326043397
+          ]
+        },
+        "draft11": {
+          "traits": 100,
+          "items": 3999,
+          "with": 3289,
+          "rate": 0.8224556139034759,
+          "rate_interval": [
+            0.8134482792573143,
+            0.8319170087669492
+          ],
+          "files_with": 100,
+          "file_threshold": 1,
+          "file_rate": 1.0,
+          "file_rate_interval": [
+            0.9630065012310038,
+            1.0
+          ]
+        },
+        "set_a": {
+          "traits": 100,
+          "items": 4000,
+          "with": 3305,
+          "rate": 0.82625,
+          "rate_interval": [
+            0.81525,
+            0.8385
+          ],
+          "files_with": 100,
+          "file_threshold": 1,
+          "file_rate": 1.0,
+          "file_rate_interval": [
+            0.9630065012310038,
+            1.0
+          ]
+        },
+        "set_b": {
+          "traits": 100,
+          "items": 3997,
+          "with": 3310,
+          "rate": 0.8281210908181136,
+          "rate_interval": [
+            0.817157435673053,
+            0.8381366375370095
+          ],
+          "files_with": 100,
+          "file_threshold": 1,
+          "file_rate": 1.0,
+          "file_rate_interval": [
+            0.9630065012310038,
+            1.0
+          ]
+        },
+        "set_a2": {
+          "traits": 100,
+          "items": 3999,
+          "with": 3275,
+          "rate": 0.8189547386846712,
+          "rate_interval": [
+            0.8072005948585697,
+            0.83125
+          ],
+          "files_with": 100,
+          "file_threshold": 1,
+          "file_rate": 1.0,
+          "file_rate_interval": [
+            0.9630065012310038,
+            1.0
+          ]
+        },
+        "set_b2": {
+          "traits": 100,
+          "items": 3998,
+          "with": 3322,
+          "rate": 0.8309154577288644,
+          "rate_interval": [
+            0.8198198198198198,
+            0.8419604901225306
+          ],
+          "files_with": 100,
+          "file_threshold": 1,
+          "file_rate": 1.0,
+          "file_rate_interval": [
+            0.9630065012310038,
+            1.0
+          ]
+        },
+        "set_c2": {
+          "traits": 100,
+          "items": 3999,
+          "with": 3282,
+          "rate": 0.8207051762940735,
+          "rate_interval": [
+            0.80925,
+            0.83225625
+          ],
+          "files_with": 100,
+          "file_threshold": 1,
+          "file_rate": 1.0,
+          "file_rate_interval": [
+            0.9630065012310038,
+            1.0
+          ]
+        }
+      },
+      "against_baseline": {
+        "draft11": {
+          "difference": 0.27775,
+          "interval": [
+            0.19724375,
+            0.36075
+          ],
+          "p": 9.999000099990002e-05,
+          "paired_traits": 100,
+          "files_only_baseline": 0,
+          "files_only_arm": 13,
+          "files_p": 0.000244140625
+        },
+        "set_a": {
+          "difference": 0.28175,
+          "interval": [
+            0.19699375,
+            0.36175625
+          ],
+          "p": 9.999000099990002e-05,
+          "paired_traits": 100,
+          "files_only_baseline": 0,
+          "files_only_arm": 13,
+          "files_p": 0.000244140625
+        },
+        "set_b": {
+          "difference": 0.283,
+          "interval": [
+            0.20324375,
+            0.36876249999999994
+          ],
+          "p": 9.999000099990002e-05,
+          "paired_traits": 100,
+          "files_only_baseline": 0,
+          "files_only_arm": 13,
+          "files_p": 0.000244140625
+        },
+        "set_a2": {
+          "difference": 0.27425,
+          "interval": [
+            0.19821875,
+            0.3575124999999999
+          ],
+          "p": 9.999000099990002e-05,
+          "paired_traits": 100,
+          "files_only_baseline": 0,
+          "files_only_arm": 13,
+          "files_p": 0.000244140625
+        },
+        "set_b2": {
+          "difference": 0.286,
+          "interval": [
+            0.20175,
+            0.36626249999999994
+          ],
+          "p": 9.999000099990002e-05,
+          "paired_traits": 100,
+          "files_only_baseline": 0,
+          "files_only_arm": 13,
+          "files_p": 0.000244140625
+        },
+        "set_c2": {
+          "difference": 0.276,
+          "interval": [
+            0.1962375,
+            0.3585124999999999
+          ],
+          "p": 9.999000099990002e-05,
+          "paired_traits": 100,
+          "files_only_baseline": 0,
+          "files_only_arm": 13,
+          "files_p": 0.000244140625
+        }
+      }
+    },
+    "q_shape_situation": {
+      "label": "puts the person in a situation (judged)",
+      "unit": "question",
+      "source": "judge",
+      "arms": {
+        "v1_corpus": {
+          "traits": 100,
+          "items": 4000,
+          "with": 1592,
+          "rate": 0.398,
+          "rate_interval": [
+            0.3195,
+            0.4822687499999999
+          ],
+          "files_with": 69,
+          "file_threshold": 1,
+          "file_rate": 0.69,
+          "file_rate_interval": [
+            0.5937394420163071,
+            0.7722030284514743
+          ]
+        },
+        "draft11": {
+          "traits": 100,
+          "items": 3999,
+          "with": 3204,
+          "rate": 0.8012003000750187,
+          "rate_interval": [
+            0.7895898892919689,
+            0.813861559250979
+          ],
+          "files_with": 100,
+          "file_threshold": 1,
+          "file_rate": 1.0,
+          "file_rate_interval": [
+            0.9630065012310038,
+            1.0
+          ]
+        },
+        "set_a": {
+          "traits": 100,
+          "items": 4000,
+          "with": 3237,
+          "rate": 0.80925,
+          "rate_interval": [
+            0.7965,
+            0.8235
+          ],
+          "files_with": 100,
+          "file_threshold": 1,
+          "file_rate": 1.0,
+          "file_rate_interval": [
+            0.9630065012310038,
+            1.0
+          ]
+        },
+        "set_b": {
+          "traits": 100,
+          "items": 3997,
+          "with": 3240,
+          "rate": 0.8106079559669752,
+          "rate_interval": [
+            0.8000462975481735,
+            0.8219561760119549
+          ],
+          "files_with": 100,
+          "file_threshold": 1,
+          "file_rate": 1.0,
+          "file_rate_interval": [
+            0.9630065012310038,
+            1.0
+          ]
+        },
+        "set_a2": {
+          "traits": 100,
+          "items": 3999,
+          "with": 3221,
+          "rate": 0.8054513628407102,
+          "rate_interval": [
+            0.79,
+            0.8207062968867216
+          ],
+          "files_with": 100,
+          "file_threshold": 1,
+          "file_rate": 1.0,
+          "file_rate_interval": [
+            0.9630065012310038,
+            1.0
+          ]
+        },
+        "set_b2": {
+          "traits": 100,
+          "items": 3998,
+          "with": 3225,
+          "rate": 0.8066533266633317,
+          "rate_interval": [
+            0.7889472368092023,
+            0.8241631803023292
+          ],
+          "files_with": 100,
+          "file_threshold": 1,
+          "file_rate": 1.0,
+          "file_rate_interval": [
+            0.9630065012310038,
+            1.0
+          ]
+        },
+        "set_c2": {
+          "traits": 100,
+          "items": 3999,
+          "with": 3184,
+          "rate": 0.7961990497624406,
+          "rate_interval": [
+            0.7804451112778195,
+            0.811655827913957
+          ],
+          "files_with": 100,
+          "file_threshold": 1,
+          "file_rate": 1.0,
+          "file_rate_interval": [
+            0.9630065012310038,
+            1.0
+          ]
+        }
+      },
+      "against_baseline": {
+        "draft11": {
+          "difference": 0.403,
+          "interval": [
+            0.32223749999999995,
+            0.4835
+          ],
+          "p": 9.999000099990002e-05,
+          "paired_traits": 100,
+          "files_only_baseline": 0,
+          "files_only_arm": 31,
+          "files_p": 9.313225746154785e-10
+        },
+        "set_a": {
+          "difference": 0.41125,
+          "interval": [
+            0.32425,
+            0.49075
+          ],
+          "p": 9.999000099990002e-05,
+          "paired_traits": 100,
+          "files_only_baseline": 0,
+          "files_only_arm": 31,
+          "files_p": 9.313225746154785e-10
+        },
+        "set_b": {
+          "difference": 0.412,
+          "interval": [
+            0.33224375,
+            0.49228124999999984
+          ],
+          "p": 9.999000099990002e-05,
+          "paired_traits": 100,
+          "files_only_baseline": 0,
+          "files_only_arm": 31,
+          "files_p": 9.313225746154785e-10
+        },
+        "set_a2": {
+          "difference": 0.40725,
+          "interval": [
+            0.32449375,
+            0.4872687499999999
+          ],
+          "p": 9.999000099990002e-05,
+          "paired_traits": 100,
+          "files_only_baseline": 0,
+          "files_only_arm": 31,
+          "files_p": 9.313225746154785e-10
+        },
+        "set_b2": {
+          "difference": 0.40825,
+          "interval": [
+            0.32499375,
+            0.4895
+          ],
+          "p": 9.999000099990002e-05,
+          "paired_traits": 100,
+          "files_only_baseline": 0,
+          "files_only_arm": 31,
+          "files_p": 9.313225746154785e-10
+        },
+        "set_c2": {
+          "difference": 0.398,
+          "interval": [
+            0.31795625,
+            0.47725
+          ],
+          "p": 9.999000099990002e-05,
+          "paired_traits": 100,
+          "files_only_baseline": 0,
+          "files_only_arm": 31,
+          "files_p": 9.313225746154785e-10
+        }
+      }
+    },
+    "q_shape_advice": {
+      "label": "a first-person asker seeking advice (judged)",
+      "unit": "question",
+      "source": "judge",
+      "arms": {
+        "v1_corpus": {
+          "traits": 100,
+          "items": 4000,
+          "with": 481,
+          "rate": 0.12025,
+          "rate_interval": [
+            0.072,
+            0.1735
+          ],
+          "files_with": 32,
+          "file_threshold": 1,
+          "file_rate": 0.32,
+          "file_rate_interval": [
+            0.23669147266401064,
+            0.4166261868928281
+          ]
+        },
+        "draft11": {
+          "traits": 100,
+          "items": 3999,
+          "with": 785,
+          "rate": 0.19629907476869218,
+          "rate_interval": [
+            0.18574490966491622,
+            0.20735497377159934
+          ],
+          "files_with": 96,
+          "file_threshold": 1,
+          "file_rate": 0.96,
+          "file_rate_interval": [
+            0.9016292850152788,
+            0.9843366961172447
+          ]
+        },
+        "set_a": {
+          "traits": 100,
+          "items": 4000,
+          "with": 747,
+          "rate": 0.18675,
+          "rate_interval": [
+            0.17274374999999997,
+            0.20075
+          ],
+          "files_with": 91,
+          "file_threshold": 1,
+          "file_rate": 0.91,
+          "file_rate_interval": [
+            0.8377378707781101,
+            0.9519274602313131
+          ]
+        },
+        "set_b": {
+          "traits": 100,
+          "items": 3997,
+          "with": 746,
+          "rate": 0.18663997998498874,
+          "rate_interval": [
+            0.1743807855891919,
+            0.19939954966224668
+          ],
+          "files_with": 94,
+          "file_threshold": 1,
+          "file_rate": 0.94,
+          "file_rate_interval": [
+            0.8752318448839114,
+            0.9722138761993719
+          ]
+        },
+        "set_a2": {
+          "traits": 100,
+          "items": 3999,
+          "with": 771,
+          "rate": 0.19279819954988747,
+          "rate_interval": [
+            0.17763211415565175,
+            0.20755318582021692
+          ],
+          "files_with": 93,
+          "file_threshold": 1,
+          "file_rate": 0.93,
+          "file_rate_interval": [
+            0.8625048519384759,
+            0.9656807391201874
+          ]
+        },
+        "set_b2": {
+          "traits": 100,
+          "items": 3998,
+          "with": 758,
+          "rate": 0.18959479739869936,
+          "rate_interval": [
+            0.1707123237129495,
+            0.20740685174792006
+          ],
+          "files_with": 90,
+          "file_threshold": 1,
+          "file_rate": 0.9,
+          "file_rate_interval": [
+            0.8256343377898756,
+            0.9447708631949274
+          ]
+        },
+        "set_c2": {
+          "traits": 100,
+          "items": 3999,
+          "with": 809,
+          "rate": 0.20230057514378594,
+          "rate_interval": [
+            0.1865466366591648,
+            0.21800136284071017
+          ],
+          "files_with": 94,
+          "file_threshold": 1,
+          "file_rate": 0.94,
+          "file_rate_interval": [
+            0.8752318448839114,
+            0.9722138761993719
+          ]
+        }
+      },
+      "against_baseline": {
+        "draft11": {
+          "difference": 0.076,
+          "interval": [
+            0.021237500000000003,
+            0.12525624999999996
+          ],
+          "p": 0.0045995400459954,
+          "paired_traits": 100,
+          "files_only_baseline": 2,
+          "files_only_arm": 66,
+          "files_p": 1.5903890617646743e-17
+        },
+        "set_a": {
+          "difference": 0.0665,
+          "interval": [
+            0.0125,
+            0.11375624999999998
+          ],
+          "p": 0.015398460153984602,
+          "paired_traits": 100,
+          "files_only_baseline": 3,
+          "files_only_arm": 62,
+          "files_p": 2.4842324378160363e-15
+        },
+        "set_b": {
+          "difference": 0.06625,
+          "interval": [
+            0.012487500000000002,
+            0.11451249999999993
+          ],
+          "p": 0.014698530146985302,
+          "paired_traits": 100,
+          "files_only_baseline": 2,
+          "files_only_arm": 64,
+          "files_p": 5.99563801384484e-17
+        },
+        "set_a2": {
+          "difference": 0.0725,
+          "interval": [
+            0.01925,
+            0.12275624999999997
+          ],
+          "p": 0.009299070092990702,
+          "paired_traits": 100,
+          "files_only_baseline": 2,
+          "files_only_arm": 63,
+          "files_p": 1.1633489310769463e-16
+        },
+        "set_b2": {
+          "difference": 0.06925,
+          "interval": [
+            0.015,
+            0.12375624999999997
+          ],
+          "p": 0.016298370162983702,
+          "paired_traits": 100,
+          "files_only_baseline": 6,
+          "files_only_arm": 64,
+          "files_p": 2.44272646814786e-13
+        },
+        "set_c2": {
+          "difference": 0.082,
+          "interval": [
+            0.025225000000000004,
+            0.13275
+          ],
+          "p": 0.0033996600339966003,
+          "paired_traits": 100,
+          "files_only_baseline": 4,
+          "files_only_arm": 66,
+          "files_p": 1.6502251632246126e-15
+        }
+      }
+    },
+    "q_first_person": {
+      "label": "asker speaks in the first person",
+      "unit": "question",
+      "source": "pattern",
+      "arms": {
+        "v1_corpus": {
+          "traits": 100,
+          "items": 4000,
+          "with": 811,
+          "rate": 0.20275,
+          "rate_interval": [
+            0.14899374999999998,
+            0.2595
+          ],
+          "files_with": 59,
+          "file_threshold": 1,
+          "file_rate": 0.59,
+          "file_rate_interval": [
+            0.49201429976362127,
+            0.6813268704579594
+          ]
+        },
+        "draft11": {
+          "traits": 100,
+          "items": 3999,
+          "with": 696,
+          "rate": 0.17404351087771944,
+          "rate_interval": [
+            0.16504126031507876,
+            0.18304576144036008
+          ],
+          "files_with": 98,
+          "file_threshold": 1,
+          "file_rate": 0.98,
+          "file_rate_interval": [
+            0.9299882086824253,
+            0.9944980324993383
+          ]
+        },
+        "set_a": {
+          "traits": 100,
+          "items": 4000,
+          "with": 672,
+          "rate": 0.168,
+          "rate_interval": [
+            0.15625,
+            0.17925
+          ],
+          "files_with": 96,
+          "file_threshold": 1,
+          "file_rate": 0.96,
+          "file_rate_interval": [
+            0.9016292850152788,
+            0.9843366961172447
+          ]
+        },
+        "set_b": {
+          "traits": 100,
+          "items": 3997,
+          "with": 672,
+          "rate": 0.1681260945709282,
+          "rate_interval": [
+            0.1570762127433271,
+            0.17858929464732365
+          ],
+          "files_with": 97,
+          "file_threshold": 1,
+          "file_rate": 0.97,
+          "file_rate_interval": [
+            0.9154806351014251,
+            0.9897454760557185
+          ]
+        },
+        "set_a2": {
+          "traits": 100,
+          "items": 3999,
+          "with": 697,
+          "rate": 0.17429357339334833,
+          "rate_interval": [
+            0.16225,
+            0.18589218163622717
+          ],
+          "files_with": 100,
+          "file_threshold": 1,
+          "file_rate": 1.0,
+          "file_rate_interval": [
+            0.9630065012310038,
+            1.0
+          ]
+        },
+        "set_b2": {
+          "traits": 100,
+          "items": 3998,
+          "with": 666,
+          "rate": 0.16658329164582292,
+          "rate_interval": [
+            0.15482741370685343,
+            0.17775111121530382
+          ],
+          "files_with": 96,
+          "file_threshold": 1,
+          "file_rate": 0.96,
+          "file_rate_interval": [
+            0.9016292850152788,
+            0.9843366961172447
+          ]
+        },
+        "set_c2": {
+          "traits": 100,
+          "items": 3999,
+          "with": 693,
+          "rate": 0.17329332333083272,
+          "rate_interval": [
+            0.16054013503375844,
+            0.18454729052448204
+          ],
+          "files_with": 95,
+          "file_threshold": 1,
+          "file_rate": 0.95,
+          "file_rate_interval": [
+            0.8882495301258955,
+            0.9784563209820079
+          ]
+        }
+      },
+      "against_baseline": {
+        "draft11": {
+          "difference": -0.02875,
+          "interval": [
+            -0.08600624999999999,
+            0.0285
+          ],
+          "p": 0.33926607339266074,
+          "paired_traits": 100,
+          "files_only_baseline": 2,
+          "files_only_arm": 41,
+          "files_p": 2.1532287064474076e-10
+        },
+        "set_a": {
+          "difference": -0.03475,
+          "interval": [
+            -0.092025,
+            0.021262499999999934
+          ],
+          "p": 0.21587841215878412,
+          "paired_traits": 100,
+          "files_only_baseline": 2,
+          "files_only_arm": 39,
+          "files_p": 7.839844329282641e-10
+        },
+        "set_b": {
+          "difference": -0.03475,
+          "interval": [
+            -0.0905,
+            0.018256249999999963
+          ],
+          "p": 0.22657734226577342,
+          "paired_traits": 100,
+          "files_only_baseline": 3,
+          "files_only_arm": 41,
+          "files_p": 1.6183321349672042e-09
+        },
+        "set_a2": {
+          "difference": -0.0285,
+          "interval": [
+            -0.08475625,
+            0.0250187499999999
+          ],
+          "p": 0.3210678932106789,
+          "paired_traits": 100,
+          "files_only_baseline": 0,
+          "files_only_arm": 41,
+          "files_p": 9.094947017729282e-13
+        },
+        "set_b2": {
+          "difference": -0.03625,
+          "interval": [
+            -0.09725,
+            0.02025
+          ],
+          "p": 0.22957704229577042,
+          "paired_traits": 100,
+          "files_only_baseline": 4,
+          "files_only_arm": 41,
+          "files_p": 9.334883088740753e-09
+        },
+        "set_c2": {
+          "difference": -0.0295,
+          "interval": [
+            -0.085,
+            0.024512499999999934
+          ],
+          "p": 0.3080691930806919,
+          "paired_traits": 100,
+          "files_only_baseline": 3,
+          "files_only_arm": 39,
+          "files_p": 5.631591193377972e-09
+        }
+      }
+    },
+    "q_shape_other_kinds": {
+      "label": "how-to, facts, bare task or general opinion (judged)",
+      "unit": "question",
+      "source": "judge",
+      "arms": {
+        "v1_corpus": {
+          "traits": 100,
+          "items": 4000,
+          "with": 1927,
+          "rate": 0.48175,
+          "rate_interval": [
+            0.40325,
+            0.56250625
+          ],
+          "files_with": 72,
+          "file_threshold": 1,
+          "file_rate": 0.72,
+          "file_rate_interval": [
+            0.6251197121124493,
+            0.7986031484291923
+          ]
+        },
+        "draft11": {
+          "traits": 100,
+          "items": 3999,
+          "with": 10,
+          "rate": 0.002500625156289072,
+          "rate_interval": [
+            0.00025,
+            0.00625312656328164
+          ],
+          "files_with": 4,
+          "file_threshold": 1,
+          "file_rate": 0.04,
+          "file_rate_interval": [
+            0.01566330388275538,
+            0.09837071498472119
+          ]
+        },
+        "set_a": {
+          "traits": 100,
+          "items": 4000,
+          "with": 16,
+          "rate": 0.004,
+          "rate_interval": [
+            0.0015,
+            0.00725
+          ],
+          "files_with": 8,
+          "file_threshold": 1,
+          "file_rate": 0.08,
+          "file_rate_interval": [
+            0.04109346127318457,
+            0.1499810776927723
+          ]
+        },
+        "set_b": {
+          "traits": 100,
+          "items": 3997,
+          "with": 11,
+          "rate": 0.0027520640480360272,
+          "rate_interval": [
+            0.0005001250312578145,
+            0.00625312656328164
+          ],
+          "files_with": 6,
+          "file_threshold": 1,
+          "file_rate": 0.06,
+          "file_rate_interval": [
+            0.027786123800628143,
+            0.12476815511608857
+          ]
+        },
+        "set_a2": {
+          "traits": 100,
+          "items": 3999,
+          "with": 7,
+          "rate": 0.0017504376094023505,
+          "rate_interval": [
+            0.0,
+            0.005008688719359646
+          ],
+          "files_with": 2,
+          "file_threshold": 1,
+          "file_rate": 0.02,
+          "file_rate_interval": [
+            0.0055019675006616475,
+            0.07001179131757478
+          ]
+        },
+        "set_b2": {
+          "traits": 100,
+          "items": 3998,
+          "with": 15,
+          "rate": 0.0037518759379689846,
+          "rate_interval": [
+            0.0015003750937734434,
+            0.0065032516258129065
+          ],
+          "files_with": 9,
+          "file_threshold": 1,
+          "file_rate": 0.09,
+          "file_rate_interval": [
+            0.04807253976868698,
+            0.16226212922188998
+          ]
+        },
+        "set_c2": {
+          "traits": 100,
+          "items": 3999,
+          "with": 6,
+          "rate": 0.0015003750937734434,
+          "rate_interval": [
+            0.00025,
+            0.00325
+          ],
+          "files_with": 4,
+          "file_threshold": 1,
+          "file_rate": 0.04,
+          "file_rate_interval": [
+            0.01566330388275538,
+            0.09837071498472119
+          ]
+        }
+      },
+      "against_baseline": {
+        "draft11": {
+          "difference": -0.47925,
+          "interval": [
+            -0.55550625,
+            -0.3969812500000001
+          ],
+          "p": 9.999000099990002e-05,
+          "paired_traits": 100,
+          "files_only_baseline": 68,
+          "files_only_arm": 0,
+          "files_p": 6.776263578034403e-21
+        },
+        "set_a": {
+          "difference": -0.47775,
+          "interval": [
+            -0.5595125,
+            -0.39649375000000003
+          ],
+          "p": 9.999000099990002e-05,
+          "paired_traits": 100,
+          "files_only_baseline": 64,
+          "files_only_arm": 0,
+          "files_p": 1.0842021724855044e-19
+        },
+        "set_b": {
+          "difference": -0.479,
+          "interval": [
+            -0.55375,
+            -0.3995
+          ],
+          "p": 9.999000099990002e-05,
+          "paired_traits": 100,
+          "files_only_baseline": 66,
+          "files_only_arm": 0,
+          "files_p": 2.710505431213761e-20
+        },
+        "set_a2": {
+          "difference": -0.48,
+          "interval": [
+            -0.55775625,
+            -0.3945
+          ],
+          "p": 9.999000099990002e-05,
+          "paired_traits": 100,
+          "files_only_baseline": 70,
+          "files_only_arm": 0,
+          "files_p": 1.6940658945086007e-21
+        },
+        "set_b2": {
+          "difference": -0.478,
+          "interval": [
+            -0.55675625,
+            -0.39299375000000003
+          ],
+          "p": 9.999000099990002e-05,
+          "paired_traits": 100,
+          "files_only_baseline": 63,
+          "files_only_arm": 0,
+          "files_p": 2.168404344971009e-19
+        },
+        "set_c2": {
+          "difference": -0.48025,
+          "interval": [
+            -0.56450625,
+            -0.40099375000000004
+          ],
+          "p": 9.999000099990002e-05,
+          "paired_traits": 100,
+          "files_only_baseline": 68,
+          "files_only_arm": 0,
+          "files_p": 6.776263578034403e-21
+        }
+      }
+    },
+    "q_howto": {
+      "label": "opens as a how-to",
+      "unit": "question",
+      "source": "pattern",
+      "arms": {
+        "v1_corpus": {
+          "traits": 100,
+          "items": 4000,
+          "with": 824,
+          "rate": 0.206,
+          "rate_interval": [
+            0.16875,
+            0.24375624999999995
+          ],
+          "files_with": 67,
+          "file_threshold": 1,
+          "file_rate": 0.67,
+          "file_rate_interval": [
+            0.5730534371634074,
+            0.754368773255134
+          ]
+        },
+        "draft11": {
+          "traits": 100,
+          "items": 3999,
+          "with": 0,
+          "rate": 0.0,
+          "rate_interval": [
+            0.0,
+            0.0
+          ],
+          "files_with": 0,
+          "file_threshold": 1,
+          "file_rate": 0.0,
+          "file_rate_interval": [
+            0.0,
+            0.03699349876899627
+          ]
+        },
+        "set_a": {
+          "traits": 100,
+          "items": 4000,
+          "with": 1,
+          "rate": 0.00025,
+          "rate_interval": [
+            0.0,
+            0.00075
+          ],
+          "files_with": 1,
+          "file_threshold": 1,
+          "file_rate": 0.01,
+          "file_rate_interval": [
+            0.0017674320446096452,
+            0.05448619674900669
+          ]
+        },
+        "set_b": {
+          "traits": 100,
+          "items": 3997,
+          "with": 0,
+          "rate": 0.0,
+          "rate_interval": [
+            0.0,
+            0.0
+          ],
+          "files_with": 0,
+          "file_threshold": 1,
+          "file_rate": 0.0,
+          "file_rate_interval": [
+            0.0,
+            0.03699349876899627
+          ]
+        },
+        "set_a2": {
+          "traits": 100,
+          "items": 3999,
+          "with": 0,
+          "rate": 0.0,
+          "rate_interval": [
+            0.0,
+            0.0
+          ],
+          "files_with": 0,
+          "file_threshold": 1,
+          "file_rate": 0.0,
+          "file_rate_interval": [
+            0.0,
+            0.03699349876899627
+          ]
+        },
+        "set_b2": {
+          "traits": 100,
+          "items": 3998,
+          "with": 0,
+          "rate": 0.0,
+          "rate_interval": [
+            0.0,
+            0.0
+          ],
+          "files_with": 0,
+          "file_threshold": 1,
+          "file_rate": 0.0,
+          "file_rate_interval": [
+            0.0,
+            0.03699349876899627
+          ]
+        },
+        "set_c2": {
+          "traits": 100,
+          "items": 3999,
+          "with": 0,
+          "rate": 0.0,
+          "rate_interval": [
+            0.0,
+            0.0
+          ],
+          "files_with": 0,
+          "file_threshold": 1,
+          "file_rate": 0.0,
+          "file_rate_interval": [
+            0.0,
+            0.03699349876899627
+          ]
+        }
+      },
+      "against_baseline": {
+        "draft11": {
+          "difference": -0.206,
+          "interval": [
+            -0.24650625,
+            -0.168
+          ],
+          "p": 9.999000099990002e-05,
+          "paired_traits": 100,
+          "files_only_baseline": 67,
+          "files_only_arm": 0,
+          "files_p": 1.3552527156068805e-20
+        },
+        "set_a": {
+          "difference": -0.20575,
+          "interval": [
+            -0.24325625,
+            -0.167
+          ],
+          "p": 9.999000099990002e-05,
+          "paired_traits": 100,
+          "files_only_baseline": 66,
+          "files_only_arm": 0,
+          "files_p": 2.710505431213761e-20
+        },
+        "set_b": {
+          "difference": -0.206,
+          "interval": [
+            -0.24400625,
+            -0.16799375000000005
+          ],
+          "p": 9.999000099990002e-05,
+          "paired_traits": 100,
+          "files_only_baseline": 67,
+          "files_only_arm": 0,
+          "files_p": 1.3552527156068805e-20
+        },
+        "set_a2": {
+          "difference": -0.206,
+          "interval": [
+            -0.24425,
+            -0.16674375000000005
+          ],
+          "p": 9.999000099990002e-05,
+          "paired_traits": 100,
+          "files_only_baseline": 67,
+          "files_only_arm": 0,
+          "files_p": 1.3552527156068805e-20
+        },
+        "set_b2": {
+          "difference": -0.206,
+          "interval": [
+            -0.24550625,
+            -0.16725
+          ],
+          "p": 9.999000099990002e-05,
+          "paired_traits": 100,
+          "files_only_baseline": 67,
+          "files_only_arm": 0,
+          "files_p": 1.3552527156068805e-20
+        },
+        "set_c2": {
+          "difference": -0.206,
+          "interval": [
+            -0.24275625,
+            -0.16724375000000005
+          ],
+          "p": 9.999000099990002e-05,
+          "paired_traits": 100,
+          "files_only_baseline": 67,
+          "files_only_arm": 0,
+          "files_p": 1.3552527156068805e-20
+        }
+      }
+    },
+    "q_factual": {
+      "label": "opens as a request for facts",
+      "unit": "question",
+      "source": "pattern",
+      "arms": {
+        "v1_corpus": {
+          "traits": 100,
+          "items": 4000,
+          "with": 373,
+          "rate": 0.09325,
+          "rate_interval": [
+            0.069,
+            0.119
+          ],
+          "files_with": 54,
+          "file_threshold": 1,
+          "file_rate": 0.54,
+          "file_rate_interval": [
+            0.4426486024827802,
+            0.6343919176157
+          ]
+        },
+        "draft11": {
+          "traits": 100,
+          "items": 3999,
+          "with": 0,
+          "rate": 0.0,
+          "rate_interval": [
+            0.0,
+            0.0
+          ],
+          "files_with": 0,
+          "file_threshold": 1,
+          "file_rate": 0.0,
+          "file_rate_interval": [
+            0.0,
+            0.03699349876899627
+          ]
+        },
+        "set_a": {
+          "traits": 100,
+          "items": 4000,
+          "with": 0,
+          "rate": 0.0,
+          "rate_interval": [
+            0.0,
+            0.0
+          ],
+          "files_with": 0,
+          "file_threshold": 1,
+          "file_rate": 0.0,
+          "file_rate_interval": [
+            0.0,
+            0.03699349876899627
+          ]
+        },
+        "set_b": {
+          "traits": 100,
+          "items": 3997,
+          "with": 1,
+          "rate": 0.0002501876407305479,
+          "rate_interval": [
+            0.0,
+            0.000750938673341677
+          ],
+          "files_with": 1,
+          "file_threshold": 1,
+          "file_rate": 0.01,
+          "file_rate_interval": [
+            0.0017674320446096452,
+            0.05448619674900669
+          ]
+        },
+        "set_a2": {
+          "traits": 100,
+          "items": 3999,
+          "with": 0,
+          "rate": 0.0,
+          "rate_interval": [
+            0.0,
+            0.0
+          ],
+          "files_with": 0,
+          "file_threshold": 1,
+          "file_rate": 0.0,
+          "file_rate_interval": [
+            0.0,
+            0.03699349876899627
+          ]
+        },
+        "set_b2": {
+          "traits": 100,
+          "items": 3998,
+          "with": 0,
+          "rate": 0.0,
+          "rate_interval": [
+            0.0,
+            0.0
+          ],
+          "files_with": 0,
+          "file_threshold": 1,
+          "file_rate": 0.0,
+          "file_rate_interval": [
+            0.0,
+            0.03699349876899627
+          ]
+        },
+        "set_c2": {
+          "traits": 100,
+          "items": 3999,
+          "with": 0,
+          "rate": 0.0,
+          "rate_interval": [
+            0.0,
+            0.0
+          ],
+          "files_with": 0,
+          "file_threshold": 1,
+          "file_rate": 0.0,
+          "file_rate_interval": [
+            0.0,
+            0.03699349876899627
+          ]
+        }
+      },
+      "against_baseline": {
+        "draft11": {
+          "difference": -0.09325,
+          "interval": [
+            -0.12025625,
+            -0.068
+          ],
+          "p": 9.999000099990002e-05,
+          "paired_traits": 100,
+          "files_only_baseline": 54,
+          "files_only_arm": 0,
+          "files_p": 1.1102230246251565e-16
+        },
+        "set_a": {
+          "difference": -0.09325,
+          "interval": [
+            -0.11925625,
+            -0.06899375000000003
+          ],
+          "p": 9.999000099990002e-05,
+          "paired_traits": 100,
+          "files_only_baseline": 54,
+          "files_only_arm": 0,
+          "files_p": 1.1102230246251565e-16
+        },
+        "set_b": {
+          "difference": -0.093,
+          "interval": [
+            -0.11825,
+            -0.06874375000000003
+          ],
+          "p": 9.999000099990002e-05,
+          "paired_traits": 100,
+          "files_only_baseline": 53,
+          "files_only_arm": 0,
+          "files_p": 2.220446049250313e-16
+        },
+        "set_a2": {
+          "difference": -0.09325,
+          "interval": [
+            -0.12000625,
+            -0.06925
+          ],
+          "p": 9.999000099990002e-05,
+          "paired_traits": 100,
+          "files_only_baseline": 54,
+          "files_only_arm": 0,
+          "files_p": 1.1102230246251565e-16
+        },
+        "set_b2": {
+          "difference": -0.09325,
+          "interval": [
+            -0.119,
+            -0.07
+          ],
+          "p": 9.999000099990002e-05,
+          "paired_traits": 100,
+          "files_only_baseline": 54,
+          "files_only_arm": 0,
+          "files_p": 1.1102230246251565e-16
+        },
+        "set_c2": {
+          "difference": -0.09325,
+          "interval": [
+            -0.11875625,
+            -0.06849375000000003
+          ],
+          "p": 9.999000099990002e-05,
+          "paired_traits": 100,
+          "files_only_baseline": 54,
+          "files_only_arm": 0,
+          "files_p": 1.1102230246251565e-16
+        }
+      }
+    },
+    "q_yesno": {
+      "label": "opens as a yes/no question",
+      "unit": "question",
+      "source": "pattern",
+      "arms": {
+        "v1_corpus": {
+          "traits": 100,
+          "items": 4000,
+          "with": 305,
+          "rate": 0.07625,
+          "rate_interval": [
+            0.05324375,
+            0.10200624999999997
+          ],
+          "files_with": 42,
+          "file_threshold": 1,
+          "file_rate": 0.42,
+          "file_rate_interval": [
+            0.3279838260663658,
+            0.5179351337366737
+          ]
+        },
+        "draft11": {
+          "traits": 100,
+          "items": 3999,
+          "with": 0,
+          "rate": 0.0,
+          "rate_interval": [
+            0.0,
+            0.0
+          ],
+          "files_with": 0,
+          "file_threshold": 1,
+          "file_rate": 0.0,
+          "file_rate_interval": [
+            0.0,
+            0.03699349876899627
+          ]
+        },
+        "set_a": {
+          "traits": 100,
+          "items": 4000,
+          "with": 0,
+          "rate": 0.0,
+          "rate_interval": [
+            0.0,
+            0.0
+          ],
+          "files_with": 0,
+          "file_threshold": 1,
+          "file_rate": 0.0,
+          "file_rate_interval": [
+            0.0,
+            0.03699349876899627
+          ]
+        },
+        "set_b": {
+          "traits": 100,
+          "items": 3997,
+          "with": 0,
+          "rate": 0.0,
+          "rate_interval": [
+            0.0,
+            0.0
+          ],
+          "files_with": 0,
+          "file_threshold": 1,
+          "file_rate": 0.0,
+          "file_rate_interval": [
+            0.0,
+            0.03699349876899627
+          ]
+        },
+        "set_a2": {
+          "traits": 100,
+          "items": 3999,
+          "with": 0,
+          "rate": 0.0,
+          "rate_interval": [
+            0.0,
+            0.0
+          ],
+          "files_with": 0,
+          "file_threshold": 1,
+          "file_rate": 0.0,
+          "file_rate_interval": [
+            0.0,
+            0.03699349876899627
+          ]
+        },
+        "set_b2": {
+          "traits": 100,
+          "items": 3998,
+          "with": 0,
+          "rate": 0.0,
+          "rate_interval": [
+            0.0,
+            0.0
+          ],
+          "files_with": 0,
+          "file_threshold": 1,
+          "file_rate": 0.0,
+          "file_rate_interval": [
+            0.0,
+            0.03699349876899627
+          ]
+        },
+        "set_c2": {
+          "traits": 100,
+          "items": 3999,
+          "with": 0,
+          "rate": 0.0,
+          "rate_interval": [
+            0.0,
+            0.0
+          ],
+          "files_with": 0,
+          "file_threshold": 1,
+          "file_rate": 0.0,
+          "file_rate_interval": [
+            0.0,
+            0.03699349876899627
+          ]
+        }
+      },
+      "against_baseline": {
+        "draft11": {
+          "difference": -0.07625,
+          "interval": [
+            -0.1025,
+            -0.054
+          ],
+          "p": 9.999000099990002e-05,
+          "paired_traits": 100,
+          "files_only_baseline": 42,
+          "files_only_arm": 0,
+          "files_p": 4.547473508864641e-13
+        },
+        "set_a": {
+          "difference": -0.07625,
+          "interval": [
+            -0.10100625,
+            -0.054
+          ],
+          "p": 9.999000099990002e-05,
+          "paired_traits": 100,
+          "files_only_baseline": 42,
+          "files_only_arm": 0,
+          "files_p": 4.547473508864641e-13
+        },
+        "set_b": {
+          "difference": -0.07625,
+          "interval": [
+            -0.0995,
+            -0.0535
+          ],
+          "p": 9.999000099990002e-05,
+          "paired_traits": 100,
+          "files_only_baseline": 42,
+          "files_only_arm": 0,
+          "files_p": 4.547473508864641e-13
+        },
+        "set_a2": {
+          "difference": -0.07625,
+          "interval": [
+            -0.09975,
+            -0.054
+          ],
+          "p": 9.999000099990002e-05,
+          "paired_traits": 100,
+          "files_only_baseline": 42,
+          "files_only_arm": 0,
+          "files_p": 4.547473508864641e-13
+        },
+        "set_b2": {
+          "difference": -0.07625,
+          "interval": [
+            -0.101,
+            -0.053243750000000034
+          ],
+          "p": 9.999000099990002e-05,
+          "paired_traits": 100,
+          "files_only_baseline": 42,
+          "files_only_arm": 0,
+          "files_p": 4.547473508864641e-13
+        },
+        "set_c2": {
+          "difference": -0.07625,
+          "interval": [
+            -0.10075625,
+            -0.053
+          ],
+          "p": 9.999000099990002e-05,
+          "paired_traits": 100,
+          "files_only_baseline": 42,
+          "files_only_arm": 0,
+          "files_p": 4.547473508864641e-13
+        }
+      }
+    },
+    "q_yes_no": {
+      "label": "can be answered in full with yes or no (judged)",
+      "unit": "question",
+      "source": "judge",
+      "arms": {
+        "v1_corpus": {
+          "traits": 100,
+          "items": 4000,
+          "with": 265,
+          "rate": 0.06625,
+          "rate_interval": [
+            0.03625,
+            0.10375624999999997
+          ],
+          "files_with": 28,
+          "file_threshold": 1,
+          "file_rate": 0.28,
+          "file_rate_interval": [
+            0.2013968515708077,
+            0.3748802878875508
+          ]
+        },
+        "draft11": {
+          "traits": 100,
+          "items": 3999,
+          "with": 107,
+          "rate": 0.026756689172293072,
+          "rate_interval": [
+            0.013756792437228868,
+            0.04426106526631658
+          ],
+          "files_with": 28,
+          "file_threshold": 1,
+          "file_rate": 0.28,
+          "file_rate_interval": [
+            0.2013968515708077,
+            0.3748802878875508
+          ]
+        },
+        "set_a": {
+          "traits": 100,
+          "items": 4000,
+          "with": 103,
+          "rate": 0.02575,
+          "rate_interval": [
+            0.01625,
+            0.03725
+          ],
+          "files_with": 34,
+          "file_threshold": 1,
+          "file_rate": 0.34,
+          "file_rate_interval": [
+            0.25461520736693877,
+            0.4372227122391401
+          ]
+        },
+        "set_b": {
+          "traits": 100,
+          "items": 3997,
+          "with": 136,
+          "rate": 0.03402551913935452,
+          "rate_interval": [
+            0.021036288110147225,
+            0.04752405912738706
+          ],
+          "files_with": 35,
+          "file_threshold": 1,
+          "file_rate": 0.35,
+          "file_rate_interval": [
+            0.2636424818146032,
+            0.4474555678160957
+          ]
+        },
+        "set_a2": {
+          "traits": 100,
+          "items": 3999,
+          "with": 109,
+          "rate": 0.02725681420355089,
+          "rate_interval": [
+            0.016004001000250064,
+            0.0400200100050025
+          ],
+          "files_with": 30,
+          "file_threshold": 1,
+          "file_rate": 0.3,
+          "file_rate_interval": [
+            0.21894885238515716,
+            0.39584854712244144
+          ]
+        },
+        "set_b2": {
+          "traits": 100,
+          "items": 3998,
+          "with": 155,
+          "rate": 0.03876938469234617,
+          "rate_interval": [
+            0.024262131065532766,
+            0.05552880633057455
+          ],
+          "files_with": 40,
+          "file_threshold": 1,
+          "file_rate": 0.4,
+          "file_rate_interval": [
+            0.3094012857712627,
+            0.4979974139825367
+          ]
+        },
+        "set_c2": {
+          "traits": 100,
+          "items": 3999,
+          "with": 119,
+          "rate": 0.02975743935983996,
+          "rate_interval": [
+            0.01700425106276569,
+            0.04526131532883221
+          ],
+          "files_with": 32,
+          "file_threshold": 1,
+          "file_rate": 0.32,
+          "file_rate_interval": [
+            0.23669147266401064,
+            0.4166261868928281
+          ]
+        }
+      },
+      "against_baseline": {
+        "draft11": {
+          "difference": -0.0395,
+          "interval": [
+            -0.07700625,
+            -0.008743750000000034
+          ],
+          "p": 0.0231976802319768,
+          "paired_traits": 100,
+          "files_only_baseline": 21,
+          "files_only_arm": 21,
+          "files_p": 1.0
+        },
+        "set_a": {
+          "difference": -0.0405,
+          "interval": [
+            -0.07675625,
+            -0.010243750000000034
+          ],
+          "p": 0.016198380161983803,
+          "paired_traits": 100,
+          "files_only_baseline": 13,
+          "files_only_arm": 19,
+          "files_p": 0.37708558747544885
+        },
+        "set_b": {
+          "difference": -0.03225,
+          "interval": [
+            -0.06850625,
+            -0.00125
+          ],
+          "p": 0.06319368063193681,
+          "paired_traits": 100,
+          "files_only_baseline": 16,
+          "files_only_arm": 23,
+          "files_p": 0.3367836351899314
+        },
+        "set_a2": {
+          "difference": -0.039,
+          "interval": [
+            -0.078,
+            -0.00425
+          ],
+          "p": 0.032596740325967405,
+          "paired_traits": 100,
+          "files_only_baseline": 17,
+          "files_only_arm": 19,
+          "files_p": 0.8679394004284404
+        },
+        "set_b2": {
+          "difference": -0.0275,
+          "interval": [
+            -0.065,
+            0.00475
+          ],
+          "p": 0.1431856814318568,
+          "paired_traits": 100,
+          "files_only_baseline": 17,
+          "files_only_arm": 29,
+          "files_p": 0.10380535550410741
+        },
+        "set_c2": {
+          "difference": -0.0365,
+          "interval": [
+            -0.07725,
+            -0.002243750000000034
+          ],
+          "p": 0.055394460553944605,
+          "paired_traits": 100,
+          "files_only_baseline": 18,
+          "files_only_arm": 22,
+          "files_p": 0.6358280026288412
+        }
+      }
+    },
+    "q_two_option": {
+      "label": "spells out two courses of action (judged)",
+      "unit": "question",
+      "source": "judge",
+      "arms": {
+        "v1_corpus": {
+          "traits": 100,
+          "items": 4000,
+          "with": 176,
+          "rate": 0.044,
+          "rate_interval": [
+            0.0215,
+            0.0735
+          ],
+          "files_with": 31,
+          "file_threshold": 1,
+          "file_rate": 0.31,
+          "file_rate_interval": [
+            0.22779697154852568,
+            0.4062605579836929
+          ]
+        },
+        "draft11": {
+          "traits": 100,
+          "items": 3999,
+          "with": 1120,
+          "rate": 0.2800700175043761,
+          "rate_interval": [
+            0.24575,
+            0.3177385961346009
+          ],
+          "files_with": 99,
+          "file_threshold": 1,
+          "file_rate": 0.99,
+          "file_rate_interval": [
+            0.9455138032509935,
+            0.9982325679553905
+          ]
+        },
+        "set_a": {
+          "traits": 100,
+          "items": 4000,
+          "with": 1102,
+          "rate": 0.2755,
+          "rate_interval": [
+            0.234,
+            0.32250625
+          ],
+          "files_with": 97,
+          "file_threshold": 1,
+          "file_rate": 0.97,
+          "file_rate_interval": [
+            0.9154806351014251,
+            0.9897454760557185
+          ]
+        },
+        "set_b": {
+          "traits": 100,
+          "items": 3997,
+          "with": 1062,
+          "rate": 0.2656992744558419,
+          "rate_interval": [
+            0.23022591233393935,
+            0.30225625
+          ],
+          "files_with": 98,
+          "file_threshold": 1,
+          "file_rate": 0.98,
+          "file_rate_interval": [
+            0.9299882086824253,
+            0.9944980324993383
+          ]
+        },
+        "set_a2": {
+          "traits": 100,
+          "items": 3999,
+          "with": 1053,
+          "rate": 0.2633158289572393,
+          "rate_interval": [
+            0.22424375,
+            0.30391880580200065
+          ],
+          "files_with": 97,
+          "file_threshold": 1,
+          "file_rate": 0.97,
+          "file_rate_interval": [
+            0.9154806351014251,
+            0.9897454760557185
+          ]
+        },
+        "set_b2": {
+          "traits": 100,
+          "items": 3998,
+          "with": 1066,
+          "rate": 0.2666333166583292,
+          "rate_interval": [
+            0.22836418209104553,
+            0.30490679667165416
+          ],
+          "files_with": 99,
+          "file_threshold": 1,
+          "file_rate": 0.99,
+          "file_rate_interval": [
+            0.9455138032509935,
+            0.9982325679553905
+          ]
+        },
+        "set_c2": {
+          "traits": 100,
+          "items": 3999,
+          "with": 1149,
+          "rate": 0.2873218304576144,
+          "rate_interval": [
+            0.24879854037351642,
+            0.3292615732742291
+          ],
+          "files_with": 100,
+          "file_threshold": 1,
+          "file_rate": 1.0,
+          "file_rate_interval": [
+            0.9630065012310038,
+            1.0
+          ]
+        }
+      },
+      "against_baseline": {
+        "draft11": {
+          "difference": 0.236,
+          "interval": [
+            0.2015,
+            0.26875
+          ],
+          "p": 9.999000099990002e-05,
+          "paired_traits": 100,
+          "files_only_baseline": 0,
+          "files_only_arm": 68,
+          "files_p": 6.776263578034403e-21
+        },
+        "set_a": {
+          "difference": 0.2315,
+          "interval": [
+            0.18949375,
+            0.28
+          ],
+          "p": 9.999000099990002e-05,
+          "paired_traits": 100,
+          "files_only_baseline": 1,
+          "files_only_arm": 67,
+          "files_p": 4.675621868843738e-19
+        },
+        "set_b": {
+          "difference": 0.2215,
+          "interval": [
+            0.186,
+            0.2605
+          ],
+          "p": 9.999000099990002e-05,
+          "paired_traits": 100,
+          "files_only_baseline": 1,
+          "files_only_arm": 68,
+          "files_p": 2.371692252312041e-19
+        },
+        "set_a2": {
+          "difference": 0.21925,
+          "interval": [
+            0.1799875,
+            0.262
+          ],
+          "p": 9.999000099990002e-05,
+          "paired_traits": 100,
+          "files_only_baseline": 1,
+          "files_only_arm": 67,
+          "files_p": 4.675621868843738e-19
+        },
+        "set_b2": {
+          "difference": 0.2225,
+          "interval": [
+            0.18375,
+            0.26425
+          ],
+          "p": 9.999000099990002e-05,
+          "paired_traits": 100,
+          "files_only_baseline": 1,
+          "files_only_arm": 69,
+          "files_p": 1.2027867851011065e-19
+        },
+        "set_c2": {
+          "difference": 0.24325,
+          "interval": [
+            0.20424374999999997,
+            0.28600624999999996
+          ],
+          "p": 9.999000099990002e-05,
+          "paired_traits": 100,
+          "files_only_baseline": 0,
+          "files_only_arm": 69,
+          "files_p": 3.3881317890172014e-21
+        }
+      }
+    },
+    "q_one_answer": {
+      "label": "one right or one safe answer (judged)",
+      "unit": "question",
+      "source": "judge",
+      "arms": {
+        "v1_corpus": {
+          "traits": 100,
+          "items": 4000,
+          "with": 190,
+          "rate": 0.0475,
+          "rate_interval": [
+            0.01949375,
+            0.08125
+          ],
+          "files_with": 16,
+          "file_threshold": 1,
+          "file_rate": 0.16,
+          "file_rate_interval": [
+            0.10095288451828571,
+            0.2442026946446318
+          ]
+        },
+        "draft11": {
+          "traits": 100,
+          "items": 3999,
+          "with": 1,
+          "rate": 0.00025006251562890725,
+          "rate_interval": [
+            0.0,
+            0.0007507507507507507
+          ],
+          "files_with": 1,
+          "file_threshold": 1,
+          "file_rate": 0.01,
+          "file_rate_interval": [
+            0.0017674320446096452,
+            0.05448619674900669
+          ]
+        },
+        "set_a": {
+          "traits": 100,
+          "items": 4000,
+          "with": 0,
+          "rate": 0.0,
+          "rate_interval": [
+            0.0,
+            0.0
+          ],
+          "files_with": 0,
+          "file_threshold": 1,
+          "file_rate": 0.0,
+          "file_rate_interval": [
+            0.0,
+            0.03699349876899627
+          ]
+        },
+        "set_b": {
+          "traits": 100,
+          "items": 3997,
+          "with": 0,
+          "rate": 0.0,
+          "rate_interval": [
+            0.0,
+            0.0
+          ],
+          "files_with": 0,
+          "file_threshold": 1,
+          "file_rate": 0.0,
+          "file_rate_interval": [
+            0.0,
+            0.03699349876899627
+          ]
+        },
+        "set_a2": {
+          "traits": 100,
+          "items": 3999,
+          "with": 0,
+          "rate": 0.0,
+          "rate_interval": [
+            0.0,
+            0.0
+          ],
+          "files_with": 0,
+          "file_threshold": 1,
+          "file_rate": 0.0,
+          "file_rate_interval": [
+            0.0,
+            0.03699349876899627
+          ]
+        },
+        "set_b2": {
+          "traits": 100,
+          "items": 3998,
+          "with": 0,
+          "rate": 0.0,
+          "rate_interval": [
+            0.0,
+            0.0
+          ],
+          "files_with": 0,
+          "file_threshold": 1,
+          "file_rate": 0.0,
+          "file_rate_interval": [
+            0.0,
+            0.03699349876899627
+          ]
+        },
+        "set_c2": {
+          "traits": 100,
+          "items": 3999,
+          "with": 2,
+          "rate": 0.0005001250312578145,
+          "rate_interval": [
+            0.0,
+            0.002
+          ],
+          "files_with": 1,
+          "file_threshold": 1,
+          "file_rate": 0.01,
+          "file_rate_interval": [
+            0.0017674320446096452,
+            0.05448619674900669
+          ]
+        }
+      },
+      "against_baseline": {
+        "draft11": {
+          "difference": -0.04725,
+          "interval": [
+            -0.07925,
+            -0.01975
+          ],
+          "p": 9.999000099990002e-05,
+          "paired_traits": 100,
+          "files_only_baseline": 16,
+          "files_only_arm": 1,
+          "files_p": 0.000274658203125
+        },
+        "set_a": {
+          "difference": -0.0475,
+          "interval": [
+            -0.0787625,
+            -0.01975
+          ],
+          "p": 9.999000099990002e-05,
+          "paired_traits": 100,
+          "files_only_baseline": 16,
+          "files_only_arm": 0,
+          "files_p": 3.0517578125e-05
+        },
+        "set_b": {
+          "difference": -0.0475,
+          "interval": [
+            -0.0810125,
+            -0.02025
+          ],
+          "p": 9.999000099990002e-05,
+          "paired_traits": 100,
+          "files_only_baseline": 16,
+          "files_only_arm": 0,
+          "files_p": 3.0517578125e-05
+        },
+        "set_a2": {
+          "difference": -0.0475,
+          "interval": [
+            -0.08100625,
+            -0.02125
+          ],
+          "p": 9.999000099990002e-05,
+          "paired_traits": 100,
+          "files_only_baseline": 16,
+          "files_only_arm": 0,
+          "files_p": 3.0517578125e-05
+        },
+        "set_b2": {
+          "difference": -0.0475,
+          "interval": [
+            -0.08225,
+            -0.020493750000000036
+          ],
+          "p": 9.999000099990002e-05,
+          "paired_traits": 100,
+          "files_only_baseline": 16,
+          "files_only_arm": 0,
+          "files_p": 3.0517578125e-05
+        },
+        "set_c2": {
+          "difference": -0.047,
+          "interval": [
+            -0.08175,
+            -0.0205
+          ],
+          "p": 0.00029997000299970003,
+          "paired_traits": 100,
+          "files_only_baseline": 16,
+          "files_only_arm": 1,
+          "files_p": 0.000274658203125
+        }
+      }
+    },
+    "q_solo_task": {
+      "label": "a task carried out alone (judged)",
+      "unit": "question",
+      "source": "judge",
+      "arms": {
+        "v1_corpus": {
+          "traits": 100,
+          "items": 4000,
+          "with": 152,
+          "rate": 0.038,
+          "rate_interval": [
+            0.01825,
+            0.06250624999999997
+          ],
+          "files_with": 27,
+          "file_threshold": 1,
+          "file_rate": 0.27,
+          "file_rate_interval": [
+            0.19269584096677833,
+            0.36432116846696
+          ]
+        },
+        "draft11": {
+          "traits": 100,
+          "items": 3999,
+          "with": 669,
+          "rate": 0.16729182295573894,
+          "rate_interval": [
+            0.13474459083520882,
+            0.20530629219804947
+          ],
+          "files_with": 75,
+          "file_threshold": 1,
+          "file_rate": 0.75,
+          "file_rate_interval": [
+            0.6569553637346054,
+            0.8245478868808965
+          ]
+        },
+        "set_a": {
+          "traits": 100,
+          "items": 4000,
+          "with": 665,
+          "rate": 0.16625,
+          "rate_interval": [
+            0.132,
+            0.20325
+          ],
+          "files_with": 77,
+          "file_threshold": 1,
+          "file_rate": 0.77,
+          "file_rate_interval": [
+            0.6784561689907251,
+            0.841567341674017
+          ]
+        },
+        "set_b": {
+          "traits": 100,
+          "items": 3997,
+          "with": 663,
+          "rate": 0.16587440580435325,
+          "rate_interval": [
+            0.13359936473115216,
+            0.20105280168877626
+          ],
+          "files_with": 82,
+          "file_threshold": 1,
+          "file_rate": 0.82,
+          "file_rate_interval": [
+            0.7333264153744679,
+            0.8829977454133746
+          ]
+        },
+        "set_a2": {
+          "traits": 100,
+          "items": 3999,
+          "with": 684,
+          "rate": 0.17104276069017255,
+          "rate_interval": [
+            0.1366340740590553,
+            0.20730312174091545
+          ],
+          "files_with": 76,
+          "file_threshold": 1,
+          "file_rate": 0.76,
+          "file_rate_interval": [
+            0.667676635719002,
+            0.8330867449211199
+          ]
+        },
+        "set_b2": {
+          "traits": 100,
+          "items": 3998,
+          "with": 702,
+          "rate": 0.17558779389694848,
+          "rate_interval": [
+            0.13956891236315833,
+            0.21086036110078044
+          ],
+          "files_with": 81,
+          "file_threshold": 1,
+          "file_rate": 0.81,
+          "file_rate_interval": [
+            0.7222115454423077,
+            0.8748524853209148
+          ]
+        },
+        "set_c2": {
+          "traits": 100,
+          "items": 3999,
+          "with": 739,
+          "rate": 0.18479619904976244,
+          "rate_interval": [
+            0.14799559779889945,
+            0.22675141754188546
+          ],
+          "files_with": 80,
+          "file_threshold": 1,
+          "file_rate": 0.8,
+          "file_rate_interval": [
+            0.7111708336357507,
+            0.8666330671028517
+          ]
+        }
+      },
+      "against_baseline": {
+        "draft11": {
+          "difference": 0.12925,
+          "interval": [
+            0.09024375,
+            0.16850624999999997
+          ],
+          "p": 9.999000099990002e-05,
+          "paired_traits": 100,
+          "files_only_baseline": 8,
+          "files_only_arm": 56,
+          "files_p": 5.562672242319724e-10
+        },
+        "set_a": {
+          "difference": 0.12825,
+          "interval": [
+            0.09324375,
+            0.16375624999999996
+          ],
+          "p": 9.999000099990002e-05,
+          "paired_traits": 100,
+          "files_only_baseline": 7,
+          "files_only_arm": 57,
+          "files_p": 7.638141345540223e-11
+        },
+        "set_b": {
+          "difference": 0.12775,
+          "interval": [
+            0.08424375,
+            0.1715
+          ],
+          "p": 9.999000099990002e-05,
+          "paired_traits": 100,
+          "files_only_baseline": 5,
+          "files_only_arm": 60,
+          "files_p": 4.869560700851427e-13
+        },
+        "set_a2": {
+          "difference": 0.133,
+          "interval": [
+            0.09149375,
+            0.176
+          ],
+          "p": 9.999000099990002e-05,
+          "paired_traits": 100,
+          "files_only_baseline": 8,
+          "files_only_arm": 57,
+          "files_p": 3.1632431884368734e-10
+        },
+        "set_b2": {
+          "difference": 0.1375,
+          "interval": [
+            0.09649375,
+            0.17900624999999995
+          ],
+          "p": 9.999000099990002e-05,
+          "paired_traits": 100,
+          "files_only_baseline": 9,
+          "files_only_arm": 63,
+          "files_p": 4.181227909275131e-11
+        },
+        "set_c2": {
+          "difference": 0.14675,
+          "interval": [
+            0.10699375,
+            0.18975624999999996
+          ],
+          "p": 9.999000099990002e-05,
+          "paired_traits": 100,
+          "files_only_baseline": 3,
+          "files_only_arm": 56,
+          "files_p": 1.189326415129699e-13
+        }
+      }
+    },
+    "q_names_trait": {
+      "label": "names the trait or its opposite",
+      "unit": "question",
+      "source": "pattern",
+      "arms": {
+        "v1_corpus": {
+          "traits": 100,
+          "items": 4000,
+          "with": 4,
+          "rate": 0.001,
+          "rate_interval": [
+            0.0,
+            0.00225
+          ],
+          "files_with": 3,
+          "file_threshold": 1,
+          "file_rate": 0.03,
+          "file_rate_interval": [
+            0.010254523944281516,
+            0.08451936489857499
+          ]
+        },
+        "draft11": {
+          "traits": 100,
+          "items": 3999,
+          "with": 26,
+          "rate": 0.006501625406351588,
+          "rate_interval": [
+            0.003,
+            0.011011615182591262
+          ],
+          "files_with": 13,
+          "file_threshold": 1,
+          "file_rate": 0.13,
+          "file_rate_interval": [
+            0.07757167395660301,
+            0.20980351513245427
+          ]
+        },
+        "set_a": {
+          "traits": 100,
+          "items": 4000,
+          "with": 23,
+          "rate": 0.00575,
+          "rate_interval": [
+            0.00275,
+            0.009256249999999966
+          ],
+          "files_with": 14,
+          "file_threshold": 1,
+          "file_rate": 0.14,
+          "file_rate_interval": [
+            0.08526343626497376,
+            0.2213718828487036
+          ]
+        },
+        "set_b": {
+          "traits": 100,
+          "items": 3997,
+          "with": 35,
+          "rate": 0.008756567425569177,
+          "rate_interval": [
+            0.004502251125562781,
+            0.01375687843921961
+          ],
+          "files_with": 17,
+          "file_threshold": 1,
+          "file_rate": 0.17,
+          "file_rate_interval": [
+            0.10893566075403192,
+            0.2554800484335057
+          ]
+        },
+        "set_a2": {
+          "traits": 100,
+          "items": 3999,
+          "with": 27,
+          "rate": 0.006751687921980495,
+          "rate_interval": [
+            0.00325,
+            0.01125007033008252
+          ],
+          "files_with": 14,
+          "file_threshold": 1,
+          "file_rate": 0.14,
+          "file_rate_interval": [
+            0.08526343626497376,
+            0.2213718828487036
+          ]
+        },
+        "set_b2": {
+          "traits": 100,
+          "items": 3998,
+          "with": 24,
+          "rate": 0.006003001500750375,
+          "rate_interval": [
+            0.0025006095273818452,
+            0.010257693269952465
+          ],
+          "files_with": 10,
+          "file_threshold": 1,
+          "file_rate": 0.1,
+          "file_rate_interval": [
+            0.0552291368050726,
+            0.17436566221012445
+          ]
+        },
+        "set_c2": {
+          "traits": 100,
+          "items": 3999,
+          "with": 24,
+          "rate": 0.006001500375093774,
+          "rate_interval": [
+            0.002751375687843922,
+            0.00975
+          ],
+          "files_with": 13,
+          "file_threshold": 1,
+          "file_rate": 0.13,
+          "file_rate_interval": [
+            0.07757167395660301,
+            0.20980351513245427
+          ]
+        }
+      },
+      "against_baseline": {
+        "draft11": {
+          "difference": 0.0055,
+          "interval": [
+            0.002,
+            0.01025
+          ],
+          "p": 0.0046995300469953,
+          "paired_traits": 100,
+          "files_only_baseline": 1,
+          "files_only_arm": 11,
+          "files_p": 0.00634765625
+        },
+        "set_a": {
+          "difference": 0.00475,
+          "interval": [
+            0.00175,
+            0.00825
+          ],
+          "p": 0.0024997500249975004,
+          "paired_traits": 100,
+          "files_only_baseline": 1,
+          "files_only_arm": 12,
+          "files_p": 0.00341796875
+        },
+        "set_b": {
+          "difference": 0.00775,
+          "interval": [
+            0.00325,
+            0.0125
+          ],
+          "p": 0.0008999100089991,
+          "paired_traits": 100,
+          "files_only_baseline": 2,
+          "files_only_arm": 16,
+          "files_p": 0.001312255859375
+        },
+        "set_a2": {
+          "difference": 0.00575,
+          "interval": [
+            0.002,
+            0.01
+          ],
+          "p": 0.0071992800719928,
+          "paired_traits": 100,
+          "files_only_baseline": 2,
+          "files_only_arm": 13,
+          "files_p": 0.00738525390625
+        },
+        "set_b2": {
+          "difference": 0.005,
+          "interval": [
+            0.0012437500000000003,
+            0.0095
+          ],
+          "p": 0.023297670232976703,
+          "paired_traits": 100,
+          "files_only_baseline": 2,
+          "files_only_arm": 9,
+          "files_p": 0.0654296875
+        },
+        "set_c2": {
+          "difference": 0.005,
+          "interval": [
+            0.002,
+            0.0085
+          ],
+          "p": 0.0018998100189981002,
+          "paired_traits": 100,
+          "files_only_baseline": 1,
+          "files_only_arm": 11,
+          "files_p": 0.00634765625
+        }
+      }
+    },
+    "q_chat_words": {
+      "label": "mentions an AI, an assistant or a user",
+      "unit": "question",
+      "source": "pattern",
+      "arms": {
+        "v1_corpus": {
+          "traits": 100,
+          "items": 4000,
+          "with": 10,
+          "rate": 0.0025,
+          "rate_interval": [
+            0.0005,
+            0.005
+          ],
+          "files_with": 7,
+          "file_threshold": 1,
+          "file_rate": 0.07,
+          "file_rate_interval": [
+            0.0343192608798127,
+            0.13749514806152413
+          ]
+        },
+        "draft11": {
+          "traits": 100,
+          "items": 3999,
+          "with": 12,
+          "rate": 0.003000750187546887,
+          "rate_interval": [
+            0.0005001250312578145,
+            0.006750042198049512
+          ],
+          "files_with": 6,
+          "file_threshold": 1,
+          "file_rate": 0.06,
+          "file_rate_interval": [
+            0.027786123800628143,
+            0.12476815511608857
+          ]
+        },
+        "set_a": {
+          "traits": 100,
+          "items": 4000,
+          "with": 6,
+          "rate": 0.0015,
+          "rate_interval": [
+            0.00025,
+            0.003
+          ],
+          "files_with": 5,
+          "file_threshold": 1,
+          "file_rate": 0.05,
+          "file_rate_interval": [
+            0.021543679017992173,
+            0.1117504698741045
+          ]
+        },
+        "set_b": {
+          "traits": 100,
+          "items": 3997,
+          "with": 10,
+          "rate": 0.002501876407305479,
+          "rate_interval": [
+            0.0007505629221916438,
+            0.004752376188094047
+          ],
+          "files_with": 7,
+          "file_threshold": 1,
+          "file_rate": 0.07,
+          "file_rate_interval": [
+            0.0343192608798127,
+            0.13749514806152413
+          ]
+        },
+        "set_a2": {
+          "traits": 100,
+          "items": 3999,
+          "with": 12,
+          "rate": 0.003000750187546887,
+          "rate_interval": [
+            0.001000250062515629,
+            0.005251312828207052
+          ],
+          "files_with": 8,
+          "file_threshold": 1,
+          "file_rate": 0.08,
+          "file_rate_interval": [
+            0.04109346127318457,
+            0.1499810776927723
+          ]
+        },
+        "set_b2": {
+          "traits": 100,
+          "items": 3998,
+          "with": 9,
+          "rate": 0.0022511255627813906,
+          "rate_interval": [
+            0.00075,
+            0.00425
+          ],
+          "files_with": 7,
+          "file_threshold": 1,
+          "file_rate": 0.07,
+          "file_rate_interval": [
+            0.0343192608798127,
+            0.13749514806152413
+          ]
+        },
+        "set_c2": {
+          "traits": 100,
+          "items": 3999,
+          "with": 9,
+          "rate": 0.002250562640660165,
+          "rate_interval": [
+            0.0005001250312578145,
+            0.004502251125562781
+          ],
+          "files_with": 6,
+          "file_threshold": 1,
+          "file_rate": 0.06,
+          "file_rate_interval": [
+            0.027786123800628143,
+            0.12476815511608857
+          ]
+        }
+      },
+      "against_baseline": {
+        "draft11": {
+          "difference": 0.0005,
+          "interval": [
+            -0.0015,
+            0.0025
+          ],
+          "p": 0.8166183381661833,
+          "paired_traits": 100,
+          "files_only_baseline": 6,
+          "files_only_arm": 5,
+          "files_p": 1.0
+        },
+        "set_a": {
+          "difference": -0.001,
+          "interval": [
+            -0.00275,
+            0.0005
+          ],
+          "p": 0.38916108389161086,
+          "paired_traits": 100,
+          "files_only_baseline": 5,
+          "files_only_arm": 3,
+          "files_p": 0.7265625
+        },
+        "set_b": {
+          "difference": 0.0,
+          "interval": [
+            -0.0025,
+            0.00225
+          ],
+          "p": 1.0,
+          "paired_traits": 100,
+          "files_only_baseline": 6,
+          "files_only_arm": 6,
+          "files_p": 1.0
+        },
+        "set_a2": {
+          "difference": 0.0005,
+          "interval": [
+            -0.0015,
+            0.00275
+          ],
+          "p": 0.8176182381761824,
+          "paired_traits": 100,
+          "files_only_baseline": 5,
+          "files_only_arm": 6,
+          "files_p": 1.0
+        },
+        "set_b2": {
+          "difference": -0.00025,
+          "interval": [
+            -0.00200625,
+            0.0015
+          ],
+          "p": 1.0,
+          "paired_traits": 100,
+          "files_only_baseline": 6,
+          "files_only_arm": 6,
+          "files_p": 1.0
+        },
+        "set_c2": {
+          "difference": -0.00025,
+          "interval": [
+            -0.0025,
+            0.002
+          ],
+          "p": 1.0,
+          "paired_traits": 100,
+          "files_only_baseline": 6,
+          "files_only_arm": 5,
+          "files_p": 1.0
+        }
+      }
+    },
+    "q_option_label": {
+      "label": "labels its options 'Option A'",
+      "unit": "question",
+      "source": "pattern",
+      "arms": {
+        "v1_corpus": {
+          "traits": 100,
+          "items": 4000,
+          "with": 0,
+          "rate": 0.0,
+          "rate_interval": [
+            0.0,
+            0.0
+          ],
+          "files_with": 0,
+          "file_threshold": 1,
+          "file_rate": 0.0,
+          "file_rate_interval": [
+            0.0,
+            0.03699349876899627
+          ]
+        },
+        "draft11": {
+          "traits": 100,
+          "items": 3999,
+          "with": 0,
+          "rate": 0.0,
+          "rate_interval": [
+            0.0,
+            0.0
+          ],
+          "files_with": 0,
+          "file_threshold": 1,
+          "file_rate": 0.0,
+          "file_rate_interval": [
+            0.0,
+            0.03699349876899627
+          ]
+        },
+        "set_a": {
+          "traits": 100,
+          "items": 4000,
+          "with": 0,
+          "rate": 0.0,
+          "rate_interval": [
+            0.0,
+            0.0
+          ],
+          "files_with": 0,
+          "file_threshold": 1,
+          "file_rate": 0.0,
+          "file_rate_interval": [
+            0.0,
+            0.03699349876899627
+          ]
+        },
+        "set_b": {
+          "traits": 100,
+          "items": 3997,
+          "with": 0,
+          "rate": 0.0,
+          "rate_interval": [
+            0.0,
+            0.0
+          ],
+          "files_with": 0,
+          "file_threshold": 1,
+          "file_rate": 0.0,
+          "file_rate_interval": [
+            0.0,
+            0.03699349876899627
+          ]
+        },
+        "set_a2": {
+          "traits": 100,
+          "items": 3999,
+          "with": 0,
+          "rate": 0.0,
+          "rate_interval": [
+            0.0,
+            0.0
+          ],
+          "files_with": 0,
+          "file_threshold": 1,
+          "file_rate": 0.0,
+          "file_rate_interval": [
+            0.0,
+            0.03699349876899627
+          ]
+        },
+        "set_b2": {
+          "traits": 100,
+          "items": 3998,
+          "with": 0,
+          "rate": 0.0,
+          "rate_interval": [
+            0.0,
+            0.0
+          ],
+          "files_with": 0,
+          "file_threshold": 1,
+          "file_rate": 0.0,
+          "file_rate_interval": [
+            0.0,
+            0.03699349876899627
+          ]
+        },
+        "set_c2": {
+          "traits": 100,
+          "items": 3999,
+          "with": 0,
+          "rate": 0.0,
+          "rate_interval": [
+            0.0,
+            0.0
+          ],
+          "files_with": 0,
+          "file_threshold": 1,
+          "file_rate": 0.0,
+          "file_rate_interval": [
+            0.0,
+            0.03699349876899627
+          ]
+        }
+      },
+      "against_baseline": {
+        "draft11": {
+          "difference": 0.0,
+          "interval": [
+            0.0,
+            0.0
+          ],
+          "p": 1.0,
+          "paired_traits": 100,
+          "files_only_baseline": 0,
+          "files_only_arm": 0,
+          "files_p": 1.0
+        },
+        "set_a": {
+          "difference": 0.0,
+          "interval": [
+            0.0,
+            0.0
+          ],
+          "p": 1.0,
+          "paired_traits": 100,
+          "files_only_baseline": 0,
+          "files_only_arm": 0,
+          "files_p": 1.0
+        },
+        "set_b": {
+          "difference": 0.0,
+          "interval": [
+            0.0,
+            0.0
+          ],
+          "p": 1.0,
+          "paired_traits": 100,
+          "files_only_baseline": 0,
+          "files_only_arm": 0,
+          "files_p": 1.0
+        },
+        "set_a2": {
+          "difference": 0.0,
+          "interval": [
+            0.0,
+            0.0
+          ],
+          "p": 1.0,
+          "paired_traits": 100,
+          "files_only_baseline": 0,
+          "files_only_arm": 0,
+          "files_p": 1.0
+        },
+        "set_b2": {
+          "difference": 0.0,
+          "interval": [
+            0.0,
+            0.0
+          ],
+          "p": 1.0,
+          "paired_traits": 100,
+          "files_only_baseline": 0,
+          "files_only_arm": 0,
+          "files_p": 1.0
+        },
+        "set_c2": {
+          "difference": 0.0,
+          "interval": [
+            0.0,
+            0.0
+          ],
+          "p": 1.0,
+          "paired_traits": 100,
+          "files_only_baseline": 0,
+          "files_only_arm": 0,
+          "files_p": 1.0
+        }
+      }
+    },
+    "q_rubric_echo": {
+      "label": "repeats the rubric ('costs something')",
+      "unit": "question",
+      "source": "pattern",
+      "arms": {
+        "v1_corpus": {
+          "traits": 100,
+          "items": 4000,
+          "with": 0,
+          "rate": 0.0,
+          "rate_interval": [
+            0.0,
+            0.0
+          ],
+          "files_with": 0,
+          "file_threshold": 1,
+          "file_rate": 0.0,
+          "file_rate_interval": [
+            0.0,
+            0.03699349876899627
+          ]
+        },
+        "draft11": {
+          "traits": 100,
+          "items": 3999,
+          "with": 5,
+          "rate": 0.001250312578144536,
+          "rate_interval": [
+            0.00025,
+            0.0025012506253126563
+          ],
+          "files_with": 4,
+          "file_threshold": 1,
+          "file_rate": 0.04,
+          "file_rate_interval": [
+            0.01566330388275538,
+            0.09837071498472119
+          ]
+        },
+        "set_a": {
+          "traits": 100,
+          "items": 4000,
+          "with": 5,
+          "rate": 0.00125,
+          "rate_interval": [
+            0.00025,
+            0.0025
+          ],
+          "files_with": 5,
+          "file_threshold": 1,
+          "file_rate": 0.05,
+          "file_rate_interval": [
+            0.021543679017992173,
+            0.1117504698741045
+          ]
+        },
+        "set_b": {
+          "traits": 100,
+          "items": 3997,
+          "with": 3,
+          "rate": 0.0007505629221916438,
+          "rate_interval": [
+            0.0,
+            0.0017504376094023505
+          ],
+          "files_with": 3,
+          "file_threshold": 1,
+          "file_rate": 0.03,
+          "file_rate_interval": [
+            0.010254523944281516,
+            0.08451936489857499
+          ]
+        },
+        "set_a2": {
+          "traits": 100,
+          "items": 3999,
+          "with": 4,
+          "rate": 0.001000250062515629,
+          "rate_interval": [
+            0.0,
+            0.0025
+          ],
+          "files_with": 3,
+          "file_threshold": 1,
+          "file_rate": 0.03,
+          "file_rate_interval": [
+            0.010254523944281516,
+            0.08451936489857499
+          ]
+        },
+        "set_b2": {
+          "traits": 100,
+          "items": 3998,
+          "with": 2,
+          "rate": 0.0005002501250625312,
+          "rate_interval": [
+            0.0,
+            0.0012506253126563281
+          ],
+          "files_with": 2,
+          "file_threshold": 1,
+          "file_rate": 0.02,
+          "file_rate_interval": [
+            0.0055019675006616475,
+            0.07001179131757478
+          ]
+        },
+        "set_c2": {
+          "traits": 100,
+          "items": 3999,
+          "with": 1,
+          "rate": 0.00025006251562890725,
+          "rate_interval": [
+            0.0,
+            0.0007503751875937969
+          ],
+          "files_with": 1,
+          "file_threshold": 1,
+          "file_rate": 0.01,
+          "file_rate_interval": [
+            0.0017674320446096452,
+            0.05448619674900669
+          ]
+        }
+      },
+      "against_baseline": {
+        "draft11": {
+          "difference": 0.00125,
+          "interval": [
+            0.00025,
+            0.00275
+          ],
+          "p": 0.12438756124387561,
+          "paired_traits": 100,
+          "files_only_baseline": 0,
+          "files_only_arm": 4,
+          "files_p": 0.125
+        },
+        "set_a": {
+          "difference": 0.00125,
+          "interval": [
+            0.00025,
+            0.0025
+          ],
+          "p": 0.06259374062593741,
+          "paired_traits": 100,
+          "files_only_baseline": 0,
+          "files_only_arm": 5,
+          "files_p": 0.0625
+        },
+        "set_b": {
+          "difference": 0.00075,
+          "interval": [
+            0.0,
+            0.00175
+          ],
+          "p": 0.24437556244375563,
+          "paired_traits": 100,
+          "files_only_baseline": 0,
+          "files_only_arm": 3,
+          "files_p": 0.25
+        },
+        "set_a2": {
+          "difference": 0.001,
+          "interval": [
+            0.0,
+            0.0025
+          ],
+          "p": 0.251974802519748,
+          "paired_traits": 100,
+          "files_only_baseline": 0,
+          "files_only_arm": 3,
+          "files_p": 0.25
+        },
+        "set_b2": {
+          "difference": 0.0005,
+          "interval": [
+            0.0,
+            0.00125
+          ],
+          "p": 0.5047495250474953,
+          "paired_traits": 100,
+          "files_only_baseline": 0,
+          "files_only_arm": 2,
+          "files_p": 0.5
+        },
+        "set_c2": {
+          "difference": 0.00025,
+          "interval": [
+            0.0,
+            0.00075
+          ],
+          "p": 1.0,
+          "paired_traits": 100,
+          "files_only_baseline": 0,
+          "files_only_arm": 1,
+          "files_p": 1.0
+        }
+      }
+    }
+  },
+  "generators": {
+    "v1_corpus": {
+      "Roger 87cdfe188478": 69,
+      "unrecorded -": 31
+    },
+    "draft11": {
+      "RogerV2 eb812d141791": 100
+    },
+    "set_a": {
+      "RogerV2 21e724e869da": 100
+    },
+    "set_b": {
+      "RogerV2 63cb841969e8": 100
+    },
+    "set_a2": {
+      "RogerV2 9255dd3430ef": 100
+    },
+    "set_b2": {
+      "RogerV2 0a4333a5b539": 100
+    },
+    "set_c2": {
+      "RogerV2 298ef6e485a3": 100
+    }
+  },
+  "variety": {
+    "v1_corpus": {
+      "traits": 100,
+      "mean": 4.19,
+      "distribution": {
+        "2": 3,
+        "3": 14,
+        "4": 44,
+        "5": 39
+      },
+      "share_5": 0.39,
+      "share_4_or_more": 0.83
+    },
+    "draft11": {
+      "traits": 100,
+      "mean": 4.91,
+      "distribution": {
+        "4": 9,
+        "5": 91
+      },
+      "share_5": 0.91,
+      "share_4_or_more": 1.0
+    },
+    "set_a": {
+      "traits": 100,
+      "mean": 4.83,
+      "distribution": {
+        "4": 17,
+        "5": 83
+      },
+      "share_5": 0.83,
+      "share_4_or_more": 1.0
+    },
+    "set_b": {
+      "traits": 100,
+      "mean": 4.76,
+      "distribution": {
+        "4": 24,
+        "5": 76
+      },
+      "share_5": 0.76,
+      "share_4_or_more": 1.0
+    },
+    "set_a2": {
+      "traits": 100,
+      "mean": 4.93,
+      "distribution": {
+        "4": 7,
+        "5": 93
+      },
+      "share_5": 0.93,
+      "share_4_or_more": 1.0
+    },
+    "set_b2": {
+      "traits": 100,
+      "mean": 4.93,
+      "distribution": {
+        "4": 7,
+        "5": 93
+      },
+      "share_5": 0.93,
+      "share_4_or_more": 1.0
+    },
+    "set_c2": {
+      "traits": 100,
+      "mean": 4.89,
+      "distribution": {
+        "4": 11,
+        "5": 89
+      },
+      "share_5": 0.89,
+      "share_4_or_more": 1.0
+    }
+  },
+  "forms": {
+    "v1_corpus": {
+      "You are <adjective>": 106,
+      "command": 26,
+      "You believe / value / want ...": 33,
+      "Act as ...": 50,
+      "Your <noun> ...": 51,
+      "Be someone who ...": 24,
+      "You have ...": 28,
+      "You are someone who ...": 48,
+      "You <other verb> ...": 115,
+      "You always / never / tend to ...": 7,
+      "When ...": 8,
+      "Behave / speak / think like ...": 2,
+      "Take on / adopt ...": 2
+    },
+    "draft11": {
+      "Be someone who ...": 100,
+      "You are someone who ...": 109,
+      "From now on, you are ...": 100,
+      "Become someone who ...": 100,
+      "You are <adjective>": 91
+    },
+    "set_a": {
+      "Be someone who ...": 100,
+      "From now on, you are ...": 100,
+      "You are someone who ...": 117,
+      "Become someone who ...": 100,
+      "You are <adjective>": 83
+    },
+    "set_b": {
+      "Be someone who ...": 100,
+      "From now on, you are ...": 100,
+      "You are someone who ...": 122,
+      "Become someone who ...": 100,
+      "You are <adjective>": 78
+    },
+    "set_a2": {
+      "Be someone who ...": 100,
+      "Become someone who ...": 100,
+      "From now on, you are ...": 100,
+      "You are someone who ...": 107,
+      "You are <adjective>": 93
+    },
+    "set_b2": {
+      "Be someone who ...": 100,
+      "From now on, you are ...": 100,
+      "You are someone who ...": 107,
+      "Become someone who ...": 100,
+      "You are <adjective>": 93
+    },
+    "set_c2": {
+      "Be someone who ...": 100,
+      "You are someone who ...": 111,
+      "From now on, you are ...": 100,
+      "Become someone who ...": 100,
+      "You are <adjective>": 89
+    }
+  }
+}
