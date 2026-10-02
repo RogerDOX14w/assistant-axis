@@ -14,22 +14,15 @@
     "goal_type": "non_goal"
   },
   {
-    "pos": "systems_thinker",
+    "pos": "intuitive",
     "neg": "analytical",
     "pair_type": "traits",
-    "note": "clean trait pair (bidirectional negative_label match)",
+    "note": "2026-10-02 (Roger): replaces systems_thinker / analytical, dissolved in the clean-pair recheck; kept although intuitive overlaps holistic: compare its cosine with reductionist / holistic after extraction and drop one pair if they are very close",
     "goal_type": "non_goal"
   },
   {
     "pos": "ecocentric",
     "neg": "anthropocentric",
-    "pair_type": "traits",
-    "note": "clean trait pair (bidirectional negative_label match)",
-    "goal_type": "goal"
-  },
-  {
-    "pos": "benign",
-    "neg": "malicious",
     "pair_type": "traits",
     "note": "clean trait pair (bidirectional negative_label match)",
     "goal_type": "goal"
