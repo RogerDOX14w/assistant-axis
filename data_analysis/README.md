@@ -287,6 +287,45 @@ surrounding whitespace and hyphen/space (counted in `n_name_unchanged`; the row
 keeps the suggestion); spelling variants such as agonising -> agonizing are
 not detected and stay in the list.
 
+**Metric calibration (M2, Oct 2026): `gap_generation/calibrate_metric.py`.**
+Calibrates the text-embedding metric M3 uses to tell whether a candidate is
+already in the corpus and whether it adds a direction (plan:
+[`15_metric_calibration.md`](../reports/trait_gap_generation/15_metric_calibration.md);
+readout: [`pilot_m2_readout.md`](../reports/trait_gap_generation/pilot_m2_readout.md)).
+Three modes, all writing under `data/candidates/calibration/` and charging the
+cumulative `usage.json`; every mode prints its plan and cost estimate with
+`--dry-run`, refuses an estimate over `--budget-usd`, and refuses uncommitted
+platform code unless `--allow-dirty`:
+
+- **Pilot / full calibration** (no mode flag; `--skip-llm` for the pilot):
+  embeds every trait under each model x representation x space variant and
+  writes the leave-one-out tables, thresholds, hubness, contrast-clause
+  ablation, drop-or-merge list and histograms; without `--skip-llm` it also
+  generates Haiku paraphrases (`--llm-criteria g`) and the Sonnet blinded
+  judgement (`e`).  The leave-one-out residual makes a full run take about
+  40 minutes: run it detached.
+- **`--round4`**: the covered setting judged as retrieval.  Generates the
+  missing paraphrase sets (`plain`, `terse`; `--skip-llm` uses only the
+  cache), takes the M1 filter's glosses of existing labels, and writes
+  `retrieval_round4.json` / `.md`: recall@1/3/5/10/20 per source and pooled,
+  paired tests (McNemar, trait-clustered bootstrap, Holm), the two models'
+  merged lists.  About $0.5 the first time (Haiku), $0 from the cache.
+- **`--write-config`** (task 19): writes `data/candidates/metric_config.json`
+  for Roger's final settings from the recorded outputs, with the drift
+  canary checked for `--models` (default `openai gemma`); `--config-out`
+  writes elsewhere (tests).  Costs a fraction of a cent.
+
+Every run that embeds with a real model also runs the **drift canary**: it
+re-embeds the 8 texts stored in the config (or picked by the same rule before
+a config exists) and logs a WARNING naming the model when one moves below
+cosine 0.999 against the cache, the sign that the API model has changed and
+cached vectors may no longer match new ones.
+
+```bash
+uv run python data_analysis/gap_generation/calibrate_metric.py --round4 --budget-usd 10 [--dry-run]
+uv run python data_analysis/gap_generation/calibrate_metric.py --write-config [--dry-run]
+```
+
 ## Output
 
 ```
