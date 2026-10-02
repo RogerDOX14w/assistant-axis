@@ -787,4 +787,5 @@ assistant_axis/tests/test_judge_pricing.py -q` gives 777 passed, 2 skipped (762 
 new tests cover renames, stale paraphrases, multi-run regions and the canary); the changed expectations are the
 classifier's version number (4 -> 6) and the M1-gloss counts dictionary, which gained two keys (`renamed`,
 `not_in_corpus`); the calibration CLI tests now read the corpus size instead of hard-coding 659.  Cost of the merge work:
-$0.098 (Haiku $0.097 for the filter run and the paraphrases, OpenAI embeddings $0.0001).
+$0.098 (Haiku $0.0973: $0.0528 for the filter run, 52 calls, and $0.0445 for the paraphrases, 6 calls;
+OpenAI embeddings $0.0005, 3 calls; EmbeddingGemma free).
