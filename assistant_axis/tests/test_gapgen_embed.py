@@ -214,6 +214,7 @@ def test_canary_passes_on_the_hash_embedder_and_seeds_missing_references(tmp_pat
     second = E.check_canary(emb, canary, cache, usage=usage)
     assert second["n_compared"] == 8 and second["ok"] and second["min_cosine"] == pytest.approx(1.0)
     assert second["below"] == [] and second["threshold"] == E.CANARY_MIN_COSINE == 0.999
+    assert set(second["cosines"]) == {c["stem"] for c in canary}
     assert not [r for r in caplog.records if r.levelname == "WARNING"]
     assert usage.n_calls == 2                                         # every check is charged
 

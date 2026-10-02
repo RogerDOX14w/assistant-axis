@@ -474,6 +474,7 @@ def check_canary(embedder: Embedder, canary: Sequence[Mapping], cache: Embedding
     result = {"model": embedder.model_id, "arm": getattr(embedder, "name", None), "tag": embedder.tag,
               "n": len(texts), "n_compared": len(cos), "n_new_reference": len(missing),
               "min_cosine": round(min(cos.values()), 6) if cos else None, "threshold": min_cosine,
+              "cosines": {canary[i]["stem"]: round(cos[i], 6) for i in sorted(cos)},
               "below": below, "ok": not below, "checked_at": utc_now()}
     if below:
         why = ("the API model may have changed" if getattr(embedder, "name", "") == "openai"
