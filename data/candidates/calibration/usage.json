@@ -1,5 +1,5 @@
 {
-  "n_calls": 936,
+  "n_calls": 951,
   "per_model": {
     "bge-large-en-v1.5": {
       "completion_tokens": 0,
@@ -9,28 +9,28 @@
       "prompt_tokens": 370918
     },
     "claude-haiku-4-5-20251001": {
-      "completion_tokens": 140969,
-      "cost_usd": 0.8425,
+      "completion_tokens": 148369,
+      "cost_usd": 0.887,
       "model": "claude-haiku-4-5-20251001",
-      "n_calls": 100,
-      "prompt_tokens": 137687
+      "n_calls": 106,
+      "prompt_tokens": 145145
     },
     "embeddinggemma-300m": {
       "completion_tokens": 0,
       "cost_usd": 0.0,
       "model": "embeddinggemma-300m",
-      "n_calls": 426,
-      "prompt_tokens": 486492
+      "n_calls": 433,
+      "prompt_tokens": 491558
     },
     "text-embedding-3-large": {
       "completion_tokens": 0,
-      "cost_usd": 0.0523,
+      "cost_usd": 0.0528,
       "model": "text-embedding-3-large",
-      "n_calls": 61,
-      "prompt_tokens": 402538
+      "n_calls": 63,
+      "prompt_tokens": 406046
     }
   },
-  "total_completion_tokens": 140969,
-  "total_cost_usd": 0.8949,
-  "total_prompt_tokens": 1397635
+  "total_completion_tokens": 148369,
+  "total_cost_usd": 0.9398,
+  "total_prompt_tokens": 1413667
 }

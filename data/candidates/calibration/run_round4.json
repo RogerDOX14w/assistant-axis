@@ -1,9 +1,10 @@
 {
   "round": 4,
-  "started_at": "2026-10-02T18:20:24+00:00",
-  "git_sha": "5b01d68+dirty",
+  "started_at": "2026-10-02T21:12:07+00:00",
+  "git_sha": "c6f5b14",
   "argv": [
     "--round4",
+    "--rebuild-labels",
     "--budget-usd",
     "10"
   ],
@@ -23,7 +24,7 @@
     ],
     "dirty": []
   },
-  "estimate_usd": 0,
+  "estimate_usd": 0.0647,
   "budget_usd": 10.0,
   "models_requested": [
     "openai",
@@ -68,27 +69,245 @@
       "sha256": "f991a03eecd58e12bc60d72a495e7ed333ffc082896902effa24e2f199079fb2"
     }
   },
+  "n_traits": 663,
+  "paraphrases_generated": {
+    "paraphrase": 34,
+    "plain": 34,
+    "terse": 34
+  },
+  "paraphrases_stale": {
+    "paraphrase": [
+      "benign",
+      "careless",
+      "chaotic",
+      "circumspect",
+      "closure_seeking",
+      "earnest",
+      "erudite",
+      "grounded",
+      "improvisational",
+      "methodical",
+      "reserved",
+      "serene",
+      "zealous"
+    ],
+    "plain": [
+      "benign",
+      "careless",
+      "chaotic",
+      "circumspect",
+      "closure_seeking",
+      "earnest",
+      "erudite",
+      "grounded",
+      "improvisational",
+      "methodical",
+      "reserved",
+      "serene",
+      "zealous"
+    ],
+    "terse": [
+      "benign",
+      "careless",
+      "chaotic",
+      "circumspect",
+      "closure_seeking",
+      "earnest",
+      "erudite",
+      "grounded",
+      "improvisational",
+      "methodical",
+      "reserved",
+      "serene",
+      "zealous"
+    ]
+  },
+  "m1_gloss_filter_rows": {
+    "m1_gloss_1": {
+      "existing": 659,
+      "with_gloss": 614,
+      "in_corpus": 612,
+      "renamed": 13,
+      "not_in_corpus": 2,
+      "kept": 553
+    },
+    "m1_gloss_2": {
+      "existing": 659,
+      "with_gloss": 630,
+      "in_corpus": 628,
+      "renamed": 15,
+      "not_in_corpus": 2,
+      "kept": 566
+    }
+  },
+  "renames_followed": {
+    "agitated": "excitable",
+    "assertive": "opinionated",
+    "chill": "easygoing",
+    "chronically_online": "plugged_in",
+    "concerned": "engaged",
+    "contrite": "remorseful",
+    "cultural_relativist": "moral_relativist",
+    "deracinated": "rootless",
+    "deterministic": "determinist",
+    "disciplined": "self_disciplined",
+    "dogmatic": "closed_minded",
+    "emotionally_engaged_with_others": "emotionally_engaged",
+    "engaging": "unflinching",
+    "exclusive": "exclusionary",
+    "factual": "calibrated",
+    "fashion_conscious": "fashionable",
+    "financially_adventurous": "financially_reckless",
+    "financially_cautious": "financially_conservative",
+    "financially_daring": "financially_reckless",
+    "free_spender": "full_price_shopper",
+    "friendless": "isolated",
+    "health_neglectful": "health_negligent",
+    "heritage_proud": "rooted",
+    "image_conscious": "performative",
+    "indulgent": "self_indulgent",
+    "inept": "incompetent",
+    "job_hopper": "job_hopping",
+    "lifer": "company_loyal",
+    "loss_avoiding": "loss_averse",
+    "low_key": "laid_back",
+    "media_distrusting": "media_skeptical",
+    "militant": "aggressive",
+    "motivated_reasoning_resistant": "motivated_reasoning_immune",
+    "news_avoider": "news_avoidant",
+    "nonchalant": "apathetic",
+    "open_ended": "ambiguity_tolerant",
+    "outgoing": "unselfconscious",
+    "rationalizing": "intellectually_dishonest",
+    "relaxed": "unhurried",
+    "remorseless": "unrepentant",
+    "reward_driven": "extrinsically_motivated",
+    "risk_taking": "risk_seeking",
+    "rule_bending": "rule_breaking",
+    "rule_following": "rule_abiding",
+    "science_distrusting": "science_skeptical",
+    "self_censoring": "guarded",
+    "self_knowing": "self_certain",
+    "shy": "self_conscious",
+    "slothful": "lazy",
+    "specialized": "specialist",
+    "tough": "strict",
+    "undependable": "unreliable",
+    "universalist": "moral_universalist",
+    "unmarried": "single",
+    "urgent": "hurried",
+    "variety_seeking": "brand_agnostic"
+  },
+  "renames_not_followed": {
+    "bland": "dull",
+    "libertarian": "metaphysical_libertarian"
+  },
   "timings_s": {
-    "embed_openai": 0.0,
-    "embed_gemma": 0.0,
+    "paraphrases_paraphrase": 18.3,
+    "paraphrases_plain": 11.6,
+    "paraphrases_terse": 9.1,
+    "embed_openai": 3.2,
+    "embed_gemma": 6.5,
     "evaluate": 3.4,
-    "total": 4.0
+    "total": 53.1
   },
-  "cost_usd": 0,
+  "labelled_pairs_rebuilt": {
+    "counts": {
+      "antonym": 286,
+      "deliberate_duplicate": 3,
+      "duplicate": 79,
+      "near_distinct": 34,
+      "polysemy_reject": 5,
+      "unrelated": 2000
+    },
+    "curation_unused": [],
+    "path": "data/candidates/calibration/labelled_pairs.json"
+  },
+  "cost_usd": 0.044914,
   "usage_this_run": {
-    "per_model": {},
-    "total_cost_usd": 0,
-    "total_prompt_tokens": 0,
-    "total_completion_tokens": 0,
-    "n_calls": 0
+    "per_model": {
+      "claude-haiku-4-5-20251001": {
+        "model": "claude-haiku-4-5-20251001",
+        "prompt_tokens": 7458,
+        "completion_tokens": 7400,
+        "cost_usd": 0.0445,
+        "n_calls": 6
+      },
+      "embeddinggemma-300m": {
+        "model": "embeddinggemma-300m",
+        "prompt_tokens": 5066,
+        "completion_tokens": 0,
+        "cost_usd": 0.0,
+        "n_calls": 7
+      },
+      "text-embedding-3-large": {
+        "model": "text-embedding-3-large",
+        "prompt_tokens": 3508,
+        "completion_tokens": 0,
+        "cost_usd": 0.0005,
+        "n_calls": 2
+      }
+    },
+    "total_cost_usd": 0.0449,
+    "total_prompt_tokens": 16032,
+    "total_completion_tokens": 7400,
+    "n_calls": 15
   },
-  "cost_usd_cumulative": 0.894776,
+  "cost_usd_cumulative": 0.939776,
   "n_queries": {
-    "paraphrase": 659,
-    "plain": 659,
-    "terse": 659,
-    "m1_gloss_1": 554,
-    "m1_gloss_2": 567
+    "paraphrase": 663,
+    "plain": 663,
+    "terse": 663,
+    "m1_gloss_1": 553,
+    "m1_gloss_2": 566
   },
-  "finished_at": "2026-10-02T18:20:28+00:00"
+  "canary": {
+    "openai": {
+      "model": "text-embedding-3-large",
+      "arm": "openai",
+      "tag": "openai_text-embedding-3-large",
+      "n": 8,
+      "n_compared": 8,
+      "n_new_reference": 0,
+      "min_cosine": 0.999603,
+      "threshold": 0.999,
+      "cosines": {
+        "absentee": 0.999998,
+        "collectivistic": 1.0,
+        "edgy": 1.0,
+        "gay": 1.0,
+        "ironic": 0.999603,
+        "only_child": 0.999994,
+        "restless": 0.999993,
+        "sycophantic": 1.0
+      },
+      "below": [],
+      "ok": true,
+      "checked_at": "2026-10-02T21:12:50+00:00"
+    },
+    "gemma": {
+      "model": "google/embeddinggemma-300m",
+      "arm": "gemma",
+      "tag": "local_google_embeddinggemma-300m_p793518b0",
+      "n": 8,
+      "n_compared": 8,
+      "n_new_reference": 0,
+      "min_cosine": 1.0,
+      "threshold": 0.999,
+      "cosines": {
+        "absentee": 1.0,
+        "collectivistic": 1.0,
+        "edgy": 1.0,
+        "gay": 1.0,
+        "ironic": 1.0,
+        "only_child": 1.0,
+        "restless": 1.0,
+        "sycophantic": 1.0
+      },
+      "below": [],
+      "ok": true,
+      "checked_at": "2026-10-02T21:12:56+00:00"
+    }
+  },
+  "finished_at": "2026-10-02T21:13:00+00:00"
 }
