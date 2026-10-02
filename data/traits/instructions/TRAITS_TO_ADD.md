@@ -4553,7 +4553,7 @@ do so without getting rid of a pair (or by getting rid of both ends of rather si
 | [self-blaming](./self_blaming.json) | [blame-shifting](./blame_shifting.json) | openai, bge | an antonym pair the corpus does not record; a candidate for an `arrangement` pair, not a drop |
 | [passionate](./passionate.json) | [zealous](./zealous.json) | openai, gemma | |
 | [empathetic](./empathetic.json) | [compassionate](./compassionate.json) | gemma | compassionate is a triangle corner (callous / compassionate / malicious) |
-| [absolutist](./absolutist.json) | [universalist](./universalist.json) | bge | |
+| [absolutist](./absolutist.json) | [moral universalist](./moral_universalist.json) | bge | renamed from universalist on 2026-10-02 |
 | [dramatic](./dramatic.json) | [theatrical](./theatrical.json) | openai | with [melodramatic](./melodramatic.json), a triple |
 | [melodramatic](./melodramatic.json) | [dramatic](./dramatic.json) | openai | |
 | [sarcastic](./sarcastic.json) | [sardonic](./sardonic.json) | openai | with [wry](./wry.json), a triple |
