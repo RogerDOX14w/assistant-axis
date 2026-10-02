@@ -595,6 +595,8 @@ def test_round4_end_to_end_with_fake_haiku_and_hash_embedder(tmp_path, monkeypat
     cells = {(r["representation"], r["variant"]) for r in res["recall"] if r["source"] == "pooled"}
     assert cells == {(r, v) for r in ("w14", "w20") for v in ("centred", "pw8")}
     assert {c["setting"] for c in res["comparisons"]} == {"w14|pw8", "w20|centred"}
+    assert {c["setting"] for c in res["comparisons_within"]} == {"w20|pw8"}
+    assert set(res["ks"]) == {1, 3, 5, 10, 20}
     assert all("p_holm" in c and "real" in c for c in res["comparisons"])
     assert res["union"] == []                       # one model: no merged lists
     assert res["antonym_pairs"] > 0 and res["threshold_design"]

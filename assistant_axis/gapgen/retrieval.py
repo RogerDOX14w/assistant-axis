@@ -202,9 +202,9 @@ SOURCE_TITLES: dict[str, str] = {
 PLAIN_READING_COMPARISON = Path("data/candidates/plain_reading/corpus_comparison_1/results.jsonl")
 ROUND4_REPRESENTATIONS = ("w14", "w20")
 ROUND4_VARIANTS = ("centred", "pw8", "pw12", "pw16", "pw24", "pw32")
-ROUND4_KS = (1, 3, 5, 10)
+ROUND4_KS = (1, 3, 5, 10, 20)
 COMPARISON_KS = (1, 5)
-UNION_KS = (3, 5)
+UNION_KS = (3, 5, 10)
 BASELINE = ("w14", "centred")
 QUERY_REPRESENTATION = "w14"
 ALPHA = 0.05
@@ -334,9 +334,12 @@ def summarise_round4(cells: Mapping, *, models: Sequence[str], sources: Sequence
       ``baseline_only``) and a paired bootstrap interval that resamples whole
       traits (one trait has up to one query per source); Holm over the family
       and :data:`REAL_RULE`.  ``comparisons_by_source``: the same per source.
+      ``comparisons_within``: a second family, inside each other
+      representation, every variant against that representation's centred
+      space (its own Holm adjustment).
     * ``union``: both models' top-k merged (k in ``union_ks``), recall and mean
       length, beside each model alone; ``union_vs_single``: the merged top-k
-      against each model's own top 10, pooled.
+      against each model's own top 10 (and top 20 when 20 is in ``ks``), pooled.
     * ``threshold_design``: round 3's threshold numbers on these queries.
     * ``misses``: per cell, the queries whose trait is not in the top ``miss_k``
       as ``[source, stem, rank, first retrieved stem]``.
@@ -377,6 +380,23 @@ def summarise_round4(cells: Mapping, *, models: Sequence[str], sources: Sequence
                                       **_compare(a_hit[m], b_hit[m], stems_a[m], n_boot=n_boot, seed=seed)})
     _mark_real(comps)
     _mark_real(comps_src)
+    # a second family: inside each other representation, every variant against that representation's
+    # centred space (does partial whitening matter there?), pooled, with its own Holm adjustment
+    comps_within = []
+    for model in models:
+        for rep in reps_in:
+            if rep == baseline[0] or (model, rep, baseline[1]) not in cells:
+                continue
+            for k in comparison_ks:
+                b_hit = hits(cells[(model, rep, baseline[1])]["ranks"], k)
+                for v in variants_in:
+                    if v == baseline[1] or (model, rep, v) not in cells:
+                        continue
+                    a_hit = hits(cells[(model, rep, v)]["ranks"], k)
+                    comps_within.append({"model": model, "k": int(k), "setting": f"{rep}|{v}",
+                                         "baseline": f"{rep}|{baseline[1]}",
+                                         **_compare(a_hit, b_hit, stems_a, n_boot=n_boot, seed=seed)})
+    _mark_real(comps_within)
 
     union, union_vs_single = [], []
     if len(models) == 2:
@@ -396,10 +416,12 @@ def summarise_round4(cells: Mapping, *, models: Sequence[str], sources: Sequence
                                                        "recall_at_10": _q(hits(c["ranks"][m], 10).mean())}
                                                  for mdl, c in ((a, ca), (b, cb))}})
                     for mdl, c in ((a, ca), (b, cb)):
-                        union_vs_single.append({"representation": rep, "variant": variant, "k": int(k),
-                                                "against": f"{mdl} top 10", "mean_length": _q(length.mean(), 2),
-                                                **_compare(hit, hits(c["ranks"], 10), stems_a, n_boot=n_boot,
-                                                           seed=seed)})
+                        for k_single in [k_ for k_ in ks if k_ >= 10]:
+                            union_vs_single.append({"representation": rep, "variant": variant, "k": int(k),
+                                                    "against": f"{mdl} top {k_single}",
+                                                    "mean_length": _q(length.mean(), 2),
+                                                    **_compare(hit, hits(c["ranks"], k_single), stems_a,
+                                                               n_boot=n_boot, seed=seed)})
 
     threshold = []
     for (model, rep, variant), ev in cells.items():
@@ -417,7 +439,8 @@ def summarise_round4(cells: Mapping, *, models: Sequence[str], sources: Sequence
     return {"ks": [int(k) for k in ks], "baseline": "|".join(baseline),
             "n_queries": {name: int(m.sum()) for name, m in masks.items()},
             "n_traits_queried": int(len(set(stems_a.tolist()))),
-            "recall": recall, "comparisons": comps, "comparisons_by_source": comps_src, "real_rule": REAL_RULE,
+            "recall": recall, "comparisons": comps, "comparisons_by_source": comps_src,
+            "comparisons_within": comps_within, "real_rule": REAL_RULE,
             "bootstrap": {"n_boot": int(n_boot), "seed": int(seed), "interval": "percentile, 95%",
                           "resampling_unit": "trait (all of one trait's queries together)"},
             "union": union, "union_vs_single": union_vs_single, "threshold_design": threshold,
@@ -470,6 +493,16 @@ def round4_markdown(payload: Mapping) -> str:
                      f"{_f(c['recall_baseline'])} | {c['diff']:+.4f} | {c['setting_only']} / {c['baseline_only']} | "
                      f"{_p(c['p'])} | {_p(c['p_holm'])} | [{c['boot_lo']:+.4f}, {c['boot_hi']:+.4f}] | "
                      f"{'yes' if c['real'] else 'no'} |")
+    if payload.get("comparisons_within"):
+        lines += ["", "## Inside the other representation: each variant against its centred space, pooled", "",
+                  "A second family with its own Holm adjustment; same tests and rule.", "",
+                  "| model | k | setting | recall | baseline | difference | setting only / baseline only | McNemar p | "
+                  "Holm p | bootstrap 95% | real |", "|---|---|---|---|---|---|---|---|---|---|---|"]
+        for c in payload["comparisons_within"]:
+            lines.append(f"| {c['model']} | {c['k']} | {c['setting'].replace('|', ' ')} | {_f(c['recall'])} | "
+                         f"{_f(c['recall_baseline'])} ({c['baseline'].replace('|', ' ')}) | {c['diff']:+.4f} | "
+                         f"{c['setting_only']} / {c['baseline_only']} | {_p(c['p'])} | {_p(c['p_holm'])} | "
+                         f"[{c['boot_lo']:+.4f}, {c['boot_hi']:+.4f}] | {'yes' if c['real'] else 'no'} |")
     lines += ["", "## Recall@1 / recall@5 per source", "",
               "| model | representation | variant | " + " | ".join(title(s) for s in srcs) + " |",
               "|---|---|---|" + "---|" * len(srcs)]
@@ -492,8 +525,8 @@ def round4_markdown(payload: Mapping) -> str:
                              f"{_f(u['mean_length'], 2)} | " + " | ".join(
                                  f"{_f(u['single'][m]['recall_at_k'])} / {_f(u['single'][m]['recall_at_10'])}"
                                  for m in models) + " |")
-        lines += ["", "Merged top k against one model's own top 10 (pooled; same tests as above, without Holm):", "",
-                  "| representation | variant | k | against | merged recall | top-10 recall | merged only / top-10 only | "
+        lines += ["", "Merged top k against one model's own longer list (pooled; same tests as above, without Holm):", "",
+                  "| representation | variant | k | against | merged recall | single-model recall | merged only / single only | "
                   "McNemar p | bootstrap 95% |", "|---|---|---|---|---|---|---|---|---|"]
         for u in payload["union_vs_single"]:
             lines.append(f"| {u['representation']} | {u['variant']} | {u['k']} | {u['against']} | {_f(u['recall'])} | "

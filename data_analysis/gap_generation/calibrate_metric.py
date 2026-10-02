@@ -39,7 +39,7 @@ It generates the missing ``plain`` / ``terse`` paraphrase sets with Haiku
 (``paraphrases_<style>.json``; ``--skip-llm`` uses what is cached), takes the
 M1 filter's glosses of existing labels whose plain reading matched the corpus
 sense, embeds only the new query texts, and writes ``retrieval_round4.json``
-(recall@1/3/5/10 per model x representation x variant, per source and pooled;
+(recall@1/3/5/10/20 per model x representation x variant, per source and pooled;
 the two models' merged lists; McNemar's exact test and a paired bootstrap
 against centred ``w14``), ``retrieval_round4.md``, ``run_round4.json`` (with
 the pinned paraphrase prompt versions) and the cumulative ``usage.json``.

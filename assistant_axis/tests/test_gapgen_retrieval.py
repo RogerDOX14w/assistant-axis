@@ -237,7 +237,12 @@ def test_evaluate_and_summarise_round4_on_known_answers():
     u = {(x["representation"], x["variant"], x["k"], x["source"]): x for x in out["union"]}
     assert u[("w14", "centred", 3, "easy")]["recall"] == 1.0
     assert 3 <= u[("w14", "centred", 3, "pooled")]["mean_length"] <= 6
-    assert {x["against"] for x in out["union_vs_single"]} == {"m_a top 10", "m_b top 10"}
+    assert {x["k"] for x in out["union"]} == {3, 5, 10}
+    assert {x["against"] for x in out["union_vs_single"]} == {"m_a top 10", "m_b top 10", "m_a top 20", "m_b top 20"}
+    # the second family: inside w20, pw4 against centred w20
+    assert {(c["model"], c["k"], c["setting"], c["baseline"]) for c in out["comparisons_within"]} == {
+        (m, k, "w20|pw4", "w20|centred") for m in ("m_a", "m_b") for k in (1, 5)}
+    assert all("p_holm" in c for c in out["comparisons_within"])
     # the five hard queries are the misses at k = 1, first retrieved trait = the next one
     miss = out["misses"]["by_cell"]["m_a|w14|centred"]
     assert sorted(m[1] for m in miss) == ["t0", "t1", "t2", "t3", "t4"]
@@ -246,7 +251,7 @@ def test_evaluate_and_summarise_round4_on_known_answers():
     assert td[("m_a", "w14", "centred")]["n_antonym_pairs"] == 2
     md = R.round4_markdown(out)
     for head in ("## Pooled recall@k", "## Paired comparisons against centred w14, pooled", "## Both models' lists merged",
-                 "## Recall@1 / recall@5 per source", "## The old threshold design"):
+                 "## Recall@1 / recall@5 per source", "## The old threshold design", "## Inside the other representation"):
         assert head in md
     assert "| m_a | w14 | centred |" in md and "w14 pw4" in md
 
