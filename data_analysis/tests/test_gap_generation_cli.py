@@ -538,3 +538,88 @@ def test_calibrate_metric_default_models_drop_bge():
     from data_analysis.gap_generation import calibrate_metric as CM
     assert CM.parse_args([]).models == ["openai", "gemma"]
     assert CM.parse_args(["--models", "bge"]).models == ["bge"]
+
+
+# --------------------------------------------------------------------------- calibrate_metric.py --round4 (M2 round 4)
+
+def _paraphrase_responder(kw):
+    rows = [json.loads(x) for x in user_text(kw).splitlines()]
+    res = [{"id": r["id"], "reason": "keep it", "paraphrase": "This means, put otherwise, "
+            + r["description"][len("This means "):]} for r in rows]
+    return make_response(json.dumps({"results": res}), input_tokens=1500, output_tokens=1500)
+
+
+def _round4_args(tmp_path, *extra):
+    return ["--round4", "--models", "hash", "--out", str(tmp_path / "cal"), "--cache-dir", str(tmp_path / "cache"),
+            "--allow-dirty", "--bootstrap-n", "100", *extra]
+
+
+def test_round4_defaults_and_dry_run_writes_nothing(tmp_path, capsys):
+    from data_analysis.gap_generation import calibrate_metric as CM
+    a = CM.parse_args(["--round4"])
+    assert a.round4 and a.representations is None and a.variants is None and a.query_sources is None
+    assert a.bootstrap_n == 2000 and a.seed == 0
+    assert CM.main(_round4_args(tmp_path, "--dry-run", "--budget-usd", "10")) == 0
+    out = capsys.readouterr().out
+    assert "DRY-RUN" in out and "round 4" in out and "cost estimate" in out
+    # nothing cached in the empty out dir: all three paraphrase sets would be generated (3 x 659)
+    assert "round 4 styled paraphrases: 99 x" in out
+    for src in ("paraphrase", "plain", "terse", "m1_gloss_1", "m1_gloss_2"):
+        assert f"source {src} " in out
+    assert "['w14', 'w20']" in out and "pw24" in out
+    assert not (tmp_path / "cal").exists() and not (tmp_path / "cache").exists()
+
+
+def test_round4_end_to_end_with_fake_haiku_and_hash_embedder(tmp_path, monkeypatch):
+    from data_analysis.gap_generation import calibrate_metric as CM
+    fake = FakeAsyncAnthropic(_paraphrase_responder)
+    monkeypatch.setattr(CM, "_anthropic_client", lambda: fake)
+    assert CM.main(_round4_args(tmp_path, "--budget-usd", "10", "--variants", "centred", "pw8")) == 0
+    cal = tmp_path / "cal"
+    for style, name in (("standard", "paraphrases.json"), ("plain", "paraphrases_plain.json"),
+                        ("terse", "paraphrases_terse.json")):
+        d = json.loads((cal / name).read_text())
+        assert d["style"] == style and d["n"] == 659 and d["prompt_version"] == CM.CL.paraphrase_version(style)
+        assert d["prompt_sha256"] == CM._sha256(CM.CL.paraphrase_prompt(style))
+    usage = json.loads((cal / "usage.json").read_text())
+    assert usage["per_model"][HAIKU]["n_calls"] == 3 * 33
+    run = json.loads((cal / "run_round4.json").read_text())
+    assert run["round"] == 4 and run["models_run"] == ["hash"]
+    assert set(run["rubric_versions"]) == {"calibration_paraphrase", "calibration_paraphrase_plain",
+                                           "calibration_paraphrase_terse"}
+    assert run["n_queries"]["paraphrase"] == 659 and 0 < run["n_queries"]["m1_gloss_1"] <= 591
+    env = json.loads((cal / "retrieval_round4.json").read_text())
+    assert "_provenance" in env
+    res = env["result"]
+    assert res["n_queries"]["pooled"] == sum(run["n_queries"].values())
+    cells = {(r["representation"], r["variant"]) for r in res["recall"] if r["source"] == "pooled"}
+    assert cells == {(r, v) for r in ("w14", "w20") for v in ("centred", "pw8")}
+    assert {c["setting"] for c in res["comparisons"]} == {"w14|pw8", "w20|centred"}
+    assert all("p_holm" in c and "real" in c for c in res["comparisons"])
+    assert res["union"] == []                       # one model: no merged lists
+    assert res["antonym_pairs"] > 0 and res["threshold_design"]
+    md = (cal / "retrieval_round4.md").read_text()
+    assert "## Pooled recall@k" in md and "M1 gloss, run 2" in md
+    # a rerun from the caches makes no Haiku call
+    calls = usage["per_model"][HAIKU]["n_calls"]
+    assert CM.main(_round4_args(tmp_path, "--budget-usd", "10", "--variants", "centred")) == 0
+    assert json.loads((cal / "usage.json").read_text())["per_model"][HAIKU]["n_calls"] == calls
+
+
+def test_round4_skip_llm_uses_only_what_is_cached(tmp_path):
+    from data_analysis.gap_generation import calibrate_metric as CM
+    args = _round4_args(tmp_path, "--skip-llm", "--variants", "centred", "--representations", "w14",
+                        "--query-sources", "plain", "m1_gloss_2")
+    assert CM.main(args) == 0
+    res = json.loads((tmp_path / "cal" / "retrieval_round4.json").read_text())["result"]
+    assert set(res["n_queries"]) == {"pooled", "m1_gloss_2"} and res["comparisons"] == []
+    assert not (tmp_path / "cal" / "paraphrases_plain.json").exists()
+
+
+def test_round4_refuses_a_cache_from_another_prompt_version(tmp_path, capsys):
+    from data_analysis.gap_generation import calibrate_metric as CM
+    (tmp_path / "cal").mkdir()
+    (tmp_path / "cal" / "paraphrases_terse.json").write_text(json.dumps(
+        {"style": "terse", "prompt_version": 99, "paraphrases": {"absentee": "This means gone."}}))
+    assert CM.main(_round4_args(tmp_path, "--skip-llm", "--query-sources", "terse", "--dry-run")) == 2
+    assert "prompt version 99" in capsys.readouterr().err

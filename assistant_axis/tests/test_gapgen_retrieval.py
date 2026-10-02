@@ -6,6 +6,7 @@ construction (a bootstrap of identical arrays, of a constant difference, of
 clusters of copies)."""
 from __future__ import annotations
 
+import json
 import math
 
 import numpy as np
@@ -148,3 +149,122 @@ def test_threshold_design_numbers():
     assert t["recall_at_t_hi"] == pytest.approx(0.95)
     assert t["antonym_above_t_hi"] == pytest.approx(0.5)  # 0.06 and 0.9
     assert t["hidden_original_still_covered"] == pytest.approx(1.0)
+
+
+# --------------------------------------------------------------------------- round 4: query sources
+
+
+def test_query_text_is_the_text_alone_cut_to_14_words():
+    long = ("This means keeping every promise one makes, showing up on time, and doing what one said one would "
+            "do without being reminded.")
+    q = R.query_text(long)
+    assert not q.startswith("reliable") and ":" not in q.split()[0]
+    assert len(q.split()) <= 14 and q.startswith("This means keeping every promise") and q.endswith(".")
+    assert R.query_text("This means being kind.") == "This means being kind."
+    with pytest.raises(ValueError):
+        R.query_text("  ")
+
+
+def test_plain_reading_same_keeps_only_the_corpus_sense(tmp_path):
+    p = tmp_path / "results.jsonl"
+    rows = [{"key": "open_minded", "label": "open-minded", "comparison": {"relation": "same"}},
+            {"key": "absentee", "label": "absentee", "comparison": {"relation": "related"}},
+            {"key": "gay", "label": "gay", "comparison": {"relation": "different"}},
+            {"key": "broken", "label": "broken", "comparison": None}]
+    p.write_text("\n".join(json.dumps(r) for r in rows) + "\n\n")
+    assert R.plain_reading_same(p) == {"open_minded"}
+
+
+def test_m1_gloss_queries_filters_stratum_gloss_corpus_and_keep(tmp_path):
+    p = tmp_path / "results.jsonl"
+    rows = [{"label": "open-minded", "gloss": "This means open.", "meta": {"stratum": "existing"}},
+            {"label": "open-minded", "gloss": "This means a second row.", "meta": {"stratum": "existing"}},
+            {"label": "absentee", "gloss": "", "meta": {"stratum": "existing"}},          # no gloss
+            {"label": "honest", "gloss": "This means honest.", "meta": {"stratum": "existing"}},   # not kept
+            {"label": "zorbic", "gloss": "This means zorbic.", "meta": {"stratum": "existing"}},   # not in corpus
+            {"label": "aloof", "gloss": "This means aloof.", "meta": {"stratum": "not_adopted"}}]
+    p.write_text("\n".join(json.dumps(r) for r in rows) + "\n")
+    q, counts = R.m1_gloss_queries(p, corpus={"open_minded", "absentee", "honest", "aloof"},
+                                   keep={"open_minded", "absentee", "aloof"})
+    assert q == {"open_minded": "This means open."}
+    assert counts == {"existing": 5, "with_gloss": 4, "in_corpus": 3, "kept": 1}
+    q_all, _ = R.m1_gloss_queries(p, corpus={"open_minded", "honest"})
+    assert set(q_all) == {"open_minded", "honest"}
+
+
+# --------------------------------------------------------------------------- round 4: evaluation
+
+
+def _round4_fixture(n=30, d=24, seed=0):
+    """Two models, one representation each of two; source "easy" queries are near-copies of their own
+    trait (always first), source "hard" queries for traits 0-4 are copies of the NEXT trait (rank >= 1)."""
+    rng = np.random.default_rng(seed)
+    corpus, queries = {}, {}
+    stems = [f"t{i}" for i in range(n)]
+    q_targets = list(range(n)) + list(range(5))
+    q_sources = ["easy"] * n + ["hard"] * 5
+    for model in ("m_a", "m_b"):
+        E = rng.standard_normal((n, d))
+        E /= np.linalg.norm(E, axis=1, keepdims=True)
+        corpus[model] = {"w14": E, "w20": E + 0.001 * rng.standard_normal(E.shape)}
+        Q = np.vstack([E + 0.01 * rng.standard_normal(E.shape), E[1:6] + 0.01 * rng.standard_normal((5, d))])
+        queries[model] = Q
+    return corpus, queries, stems, q_targets, q_sources
+
+
+def test_evaluate_and_summarise_round4_on_known_answers():
+    corpus, queries, stems, targets, sources = _round4_fixture()
+    cells = R.evaluate_round4(corpus, queries, targets, variants=("centred", "pw4"), top=10,
+                              antonym_pairs=[(0, 1), (2, 3)])
+    assert set(cells) == {(m, r, v) for m in ("m_a", "m_b") for r in ("w14", "w20") for v in ("centred", "pw4")}
+    assert all(len(c["antonym_sims"]) == 2 and "Z" not in c for c in cells.values())
+    q_stems = [stems[t] for t in targets]
+    out = R.summarise_round4(cells, models=("m_a", "m_b"), sources=sources, stems=q_stems, targets=targets,
+                             corpus_stems=stems, n_boot=200, seed=0, miss_k=1)
+    assert out["n_queries"] == {"pooled": 35, "easy": 30, "hard": 5} and out["n_traits_queried"] == 30
+    rec = {(r["model"], r["representation"], r["variant"], r["source"]): r["recall"] for r in out["recall"]}
+    assert rec[("m_a", "w14", "centred", "easy")]["1"] == 1.0
+    assert rec[("m_a", "w14", "centred", "hard")]["1"] == 0.0           # the next trait comes first
+    assert rec[("m_a", "w14", "centred", "pooled")]["1"] == pytest.approx(30 / 35, abs=1e-4)
+    # comparisons: pw4 (same representation) and w20 (same variant) against centred w14, k = 1 and 5
+    settings = {(c["model"], c["k"], c["setting"]) for c in out["comparisons"]}
+    assert settings == {(m, k, s) for m in ("m_a", "m_b") for k in (1, 5) for s in ("w14|pw4", "w20|centred")}
+    for c in out["comparisons"]:
+        assert c["baseline"] == "w14|centred" and 0 <= c["p"] <= c["p_holm"] <= 1 and c["real"] is False
+        assert c["boot_lo"] <= c["diff"] <= c["boot_hi"]
+    assert {c["source"] for c in out["comparisons_by_source"]} == {"easy", "hard"}
+    # union of the two models' top 3: every easy query found; lists hold 3 to 6 distinct traits
+    u = {(x["representation"], x["variant"], x["k"], x["source"]): x for x in out["union"]}
+    assert u[("w14", "centred", 3, "easy")]["recall"] == 1.0
+    assert 3 <= u[("w14", "centred", 3, "pooled")]["mean_length"] <= 6
+    assert {x["against"] for x in out["union_vs_single"]} == {"m_a top 10", "m_b top 10"}
+    # the five hard queries are the misses at k = 1, first retrieved trait = the next one
+    miss = out["misses"]["by_cell"]["m_a|w14|centred"]
+    assert sorted(m[1] for m in miss) == ["t0", "t1", "t2", "t3", "t4"]
+    assert all(m[0] == "hard" and m[3] == f"t{int(m[1][1:]) + 1}" for m in miss)
+    td = {(r["model"], r["representation"], r["variant"]): r for r in out["threshold_design"]}
+    assert td[("m_a", "w14", "centred")]["n_antonym_pairs"] == 2
+    md = R.round4_markdown(out)
+    for head in ("## Pooled recall@k", "## Paired comparisons against centred w14, pooled", "## Both models' lists merged",
+                 "## Recall@1 / recall@5 per source", "## The old threshold design"):
+        assert head in md
+    assert "| m_a | w14 | centred |" in md and "w14 pw4" in md
+
+
+def test_a_real_difference_is_marked_real():
+    # 300 traits, one query each: setting A finds 60 that the baseline misses and loses none
+    rng = np.random.default_rng(5)
+    n = 300
+    base_ranks = np.where(rng.random(n) < 0.7, 0, 7)
+    better = base_ranks.copy()
+    better[np.where(base_ranks == 7)[0][:60]] = 0
+    cells = {("m", "w14", "centred"): {"ranks": base_ranks, "top": np.zeros((n, 10), int), "own": np.ones(n),
+                                       "other_max": np.zeros(n), "antonym_sims": np.zeros(0)},
+             ("m", "w14", "pw8"): {"ranks": better, "top": np.zeros((n, 10), int), "own": np.ones(n),
+                                   "other_max": np.zeros(n), "antonym_sims": np.zeros(0)}}
+    out = R.summarise_round4(cells, models=("m",), sources=["s"] * n, stems=[f"t{i}" for i in range(n)],
+                             targets=np.zeros(n, int), corpus_stems=["t0"], comparison_ks=(1,), n_boot=500)
+    (c,) = out["comparisons"]
+    assert (c["setting_only"], c["baseline_only"]) == (60, 0) and c["real"] is True
+    assert c["p"] == pytest.approx(2 * 0.5 ** 60) and c["boot_lo"] > 0
+    assert out["union"] == [] and out["threshold_design"][0]["antonym_above_t_hi"] is None

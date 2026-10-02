@@ -27,6 +27,22 @@ Haiku paraphrases (criteria g, i; cached in ``paraphrases.json``) and the
 Sonnet blinded judgement (criterion e) run too, under the cost gate.
 ``--write-config`` (``metric_config.json``) is task 19 and waits for Roger's
 decisions on the pilot.
+
+Round 4 (2026-10-02), the covered setting judged as retrieval, runs alone:
+
+    uv run python data_analysis/gap_generation/calibrate_metric.py --round4 [--budget-usd 10]
+        [--query-sources paraphrase plain terse m1_gloss_1 m1_gloss_2] [--models openai gemma]
+        [--representations w14 w20] [--variants centred pw8 pw12 pw16 pw24 pw32]
+        [--bootstrap-n 2000] [--seed 0] [--skip-llm] [--dry-run]
+
+It generates the missing ``plain`` / ``terse`` paraphrase sets with Haiku
+(``paraphrases_<style>.json``; ``--skip-llm`` uses what is cached), takes the
+M1 filter's glosses of existing labels whose plain reading matched the corpus
+sense, embeds only the new query texts, and writes ``retrieval_round4.json``
+(recall@1/3/5/10 per model x representation x variant, per source and pooled;
+the two models' merged lists; McNemar's exact test and a paired bootstrap
+against centred ``w14``), ``retrieval_round4.md``, ``run_round4.json`` (with
+the pinned paraphrase prompt versions) and the cumulative ``usage.json``.
 """
 from __future__ import annotations
 
@@ -39,6 +55,7 @@ import sys
 import time
 from collections import defaultdict
 from pathlib import Path
+from typing import Optional
 
 import numpy as np
 
@@ -51,6 +68,7 @@ from assistant_axis.gapgen import contrast as CT  # noqa: E402
 from assistant_axis.gapgen import embed as EM  # noqa: E402
 from assistant_axis.gapgen import labels as LB  # noqa: E402
 from assistant_axis.gapgen import persona as PS  # noqa: E402
+from assistant_axis.gapgen import retrieval as RT  # noqa: E402
 from assistant_axis.gapgen.cost import Estimate, GuardedUsage, confirm_or_abort  # noqa: E402
 from assistant_axis.gapgen.paths import CALIBRATION_DIR, EMBEDDING_CACHE_DIR  # noqa: E402
 from assistant_axis.gapgen.registry import utc_now  # noqa: E402
@@ -74,8 +92,20 @@ def parse_args(argv=None):
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("--models", nargs="+", default=list(DEFAULT_ARMS), choices=list(ARMS) + ["hash"],
                     help="default openai gemma (bge dropped 2026-10-02; still selectable)")
-    ap.add_argument("--representations", nargs="+", default=list(REPRESENTATIONS), choices=list(REPRESENTATIONS))
-    ap.add_argument("--variants", nargs="+", default=list(VARIANTS), choices=list(VARIANTS))
+    ap.add_argument("--representations", nargs="+", default=None, choices=list(REPRESENTATIONS),
+                    help="default: all; with --round4, w14 w20")
+    ap.add_argument("--variants", nargs="+", default=None, choices=list(VARIANTS),
+                    help="default: all; with --round4, centred pw8 pw12 pw16 pw24 pw32")
+    ap.add_argument("--round4", action="store_true",
+                    help="round 4 only (2026-10-02): the retrieval evaluation of the covered setting (recall@k on "
+                         "paraphrases and M1 glosses, paired tests); writes retrieval_round4.json/.md; generates the "
+                         "missing paraphrase sets with Haiku unless --skip-llm")
+    ap.add_argument("--query-sources", nargs="+", default=None, choices=list(RT.QUERY_SOURCES),
+                    help="round 4's query sources (default: all five)")
+    ap.add_argument("--plain-reading", type=Path, default=RT.PLAIN_READING_COMPARISON,
+                    help="round 4: plain-reading comparison whose 'same' labels the M1 gloss queries keep")
+    ap.add_argument("--bootstrap-n", type=int, default=2000, help="round 4: paired bootstrap resamples")
+    ap.add_argument("--seed", type=int, default=0, help="round 4: bootstrap seed")
     ap.add_argument("--skip-llm", action="store_true", help="no Haiku paraphrases, no Sonnet judge (the pilot)")
     ap.add_argument("--criteria", default="a,b,c,d,e,f,g,h,i,j", help="contrast-ablation criteria to report")
     ap.add_argument("--llm-criteria", default="e,g",
@@ -177,6 +207,11 @@ def main(argv=None) -> int:
     if args.write_config:
         print("--write-config is task 19: it waits for Roger's decisions on the M2 pilot", file=sys.stderr)
         return 2
+    if args.round4:
+        args.argv_list = sys.argv[1:] if argv is None else list(argv)
+        return run_round4(args)
+    args.representations = args.representations or list(REPRESENTATIONS)
+    args.variants = args.variants or list(VARIANTS)
     repo = _REPO_ROOT
     out = Path(args.out)
     budget = args.budget_usd if args.budget_usd is not None else (1.0 if args.skip_llm else 5.0)
@@ -744,20 +779,284 @@ def _anthropic_client():
     return anthropic.AsyncAnthropic()
 
 
-def run_paraphrase_stage(ci, llm_items, para_path: Path, paraphrases: dict, usage) -> dict:
-    """Criterion (g)'s Haiku paraphrases for the traits not yet in the cache;
-    the cache (``paraphrases.json``) is written even when the cap stops the run."""
+def run_paraphrase_stage(ci, llm_items, para_path: Path, paraphrases: dict, usage, *, style: str = "standard") -> dict:
+    """Haiku paraphrases (criterion g's ``standard`` style, or round 4's
+    ``plain`` / ``terse``) for the traits not yet in the cache; the cache
+    (``paraphrases.json`` or ``paraphrases_<style>.json``) is written even when
+    the cap stops the run, stamped with the style's pinned prompt version and
+    the sha256 of its text."""
     todo = [{"stem": s, "label": ci["corpus"][s]["label"], "description": ci["corpus"][s]["description"]}
             for s in llm_items]
     new = {}
     try:
-        new = asyncio.run(CL.run_paraphrases(_anthropic_client(), todo, usage=usage))
+        new = asyncio.run(CL.run_paraphrases(_anthropic_client(), todo, usage=usage, style=style))
     finally:
         merged = {**paraphrases, **new}
-        para_path.write_text(json.dumps({"model": CL.PARAPHRASE_MODEL, "prompt_version": CL.PARAPHRASE_PROMPT_VERSION,
+        para_path.parent.mkdir(parents=True, exist_ok=True)
+        para_path.write_text(json.dumps({"model": CL.PARAPHRASE_MODEL, "style": style,
+                                         "prompt_version": CL.paraphrase_version(style),
+                                         "prompt_sha256": _sha256(CL.paraphrase_prompt(style)),
                                          "n": len(merged), "paraphrases": merged}, indent=2, ensure_ascii=False) + "\n")
-    logger.info("[g] %d paraphrases (%d new); %s", len(merged), len(new), usage.log_line())
+    logger.info("[g:%s] %d paraphrases (%d new); %s", style, len(merged), len(new), usage.log_line())
     return merged
+
+
+def _sha256(text: str) -> str:
+    import hashlib
+    return hashlib.sha256(text.encode("utf-8")).hexdigest()
+
+
+def load_paraphrase_cache(path: Path, style: str) -> tuple[dict, Optional[str]]:
+    """``(paraphrases, problem)``: the cached paraphrases of one style, or a
+    reason not to use them (written by another prompt version or style)."""
+    if not path.exists():
+        return {}, None
+    d = json.loads(path.read_text())
+    want = CL.paraphrase_version(style)
+    if d.get("style", "standard") != style:
+        return {}, f"{path} holds style {d.get('style')!r}, not {style!r}"
+    if d.get("prompt_version") != want:
+        return {}, (f"{path} was written by prompt version {d.get('prompt_version')}, the current {style} prompt is "
+                    f"version {want}: move the file aside to regenerate")
+    return dict(d.get("paraphrases") or {}), None
+
+
+# --------------------------------------------------------------------------- round 4
+
+def run_round4(args) -> int:
+    """Round 4 (2026-10-02): the covered setting judged as retrieval.
+
+    Query sources (:data:`retrieval.QUERY_SOURCES`): round 3's paraphrases, the
+    ``plain`` and ``terse`` paraphrase sets (generated with Haiku when missing,
+    unless ``--skip-llm``), and the M1 filter's glosses of existing labels from
+    its two validation runs, kept only where the label's plain reading matched
+    the corpus sense.  Every query is the text alone cut to 14 words.  Each
+    model x representation x variant is scored by recall@k, with paired tests
+    against centred ``w14``; writes ``retrieval_round4.json`` (provenance
+    envelope), ``retrieval_round4.md``, ``run_round4.json`` and the cumulative
+    ``usage.json`` (after the paraphrase stage and at the end)."""
+    from assistant_axis.gapgen import rubric_versions as RV
+    repo = _REPO_ROOT
+    out = Path(args.out)
+    budget = args.budget_usd if args.budget_usd is not None else (1.0 if args.skip_llm else 5.0)
+    reps = args.representations or list(RT.ROUND4_REPRESENTATIONS)
+    variants = args.variants or list(RT.ROUND4_VARIANTS)
+    sources = args.query_sources or list(RT.QUERY_SOURCES)
+    t0 = time.time()
+    timings: dict = {}
+    ci = corpus_inputs(repo)
+    corpus_set = set(ci["stems"])
+
+    # ---------------------------------------------------------------- query sources
+    para: dict[str, dict] = {}
+    para_missing: dict[str, list] = {}
+    para_paths: dict[str, Path] = {}
+    for src in sources:
+        if src in RT.PARAPHRASE_SOURCES:
+            style = RT.PARAPHRASE_SOURCES[src]
+            path = (args.paraphrase_cache if (style == "standard" and args.paraphrase_cache)
+                    else out / RT.paraphrase_cache_name(style))
+            cached, problem = load_paraphrase_cache(path, style)
+            if problem:
+                print(f"REFUSED: {problem}", file=sys.stderr)
+                return 2
+            para[src], para_paths[src] = {s: p for s, p in cached.items() if s in corpus_set}, path
+            para_missing[src] = [s for s in ci["stems"] if s not in cached]
+    plain_path = args.plain_reading if args.plain_reading.is_absolute() else repo / args.plain_reading
+    same = RT.plain_reading_same(plain_path)
+    m1: dict[str, dict] = {}
+    m1_counts: dict[str, dict] = {}
+    for src in sources:
+        if src in RT.M1_GLOSS_SOURCES:
+            m1[src], m1_counts[src] = RT.m1_gloss_queries(repo / RT.M1_GLOSS_SOURCES[src], corpus=corpus_set,
+                                                          keep=same)
+
+    def build_queries():
+        rows = []      # (source, stem, query text), sources in order, stems in corpus order
+        for src_ in sources:
+            d = para.get(src_) if src_ in RT.PARAPHRASE_SOURCES else m1.get(src_)
+            rows.extend((src_, s, RT.query_text(d[s])) for s in ci["stems"] if d and s in d)
+        return rows
+
+    queries = build_queries()
+    corpus_texts = {rep: [represent(l, d, rep) for l, d in zip(ci["labels"], ci["descriptions"])] for rep in reps}
+    every = list(dict.fromkeys([t for rep in reps for t in corpus_texts[rep]] + [q[2] for q in queries]))
+    cache = EM.EmbeddingCache(args.cache_dir)
+    uncached = {arm: len(cache.lookup(EM.make_embedder(arm).tag, every)[1]) for arm in args.models}
+    avg_tok = float(np.mean([len(t) for t in every])) / CHARS_PER_TOKEN
+    est = embedding_estimate(args.models, uncached, avg_tok)
+    to_generate = {src: miss for src, miss in para_missing.items() if miss and not args.skip_llm}
+    n_styled = sum(len(m) for m in to_generate.values())
+    if n_styled:
+        for line in CL.llm_estimate(0, 0, n_styled=n_styled).lines:
+            est.lines.append(line)
+        if "openai" in args.models:
+            est.add("openai embeddings of the new paraphrases (approx.)", EM.OPENAI_MODEL,
+                    math.ceil(n_styled / OPENAI_BATCH), int(25 * min(n_styled, OPENAI_BATCH)), 0)
+    counts = defaultdict(int)
+    for q in queries:
+        counts[q[0]] += 1
+    print(f"M2 round 4 (retrieval): {len(ci['stems'])} traits; models {args.models}; representations {reps}; "
+          f"variants {variants}; k {list(RT.ROUND4_KS)}; paired tests at k {list(RT.COMPARISON_KS)} against "
+          f"{'|'.join(RT.BASELINE)}, bootstrap {args.bootstrap_n} resamples by trait, seed {args.seed}")
+    for src in sources:
+        extra = ""
+        if src in para_missing:
+            extra = (f"; {len(para_missing[src])} to generate ({RT.PARAPHRASE_SOURCES[src]} style, prompt version "
+                     f"{CL.paraphrase_version(RT.PARAPHRASE_SOURCES[src])})" if src in to_generate
+                     else (f"; {len(para_missing[src])} missing, not generated (--skip-llm)" if para_missing[src] else ""))
+            extra += f"; cache {para_paths[src]}"
+        else:
+            extra = f"; filter rows {m1_counts[src]}, plain reading 'same' {len(same)}"
+        print(f"  source {src} ({RT.SOURCE_TITLES[src]}): {counts.get(src, 0)} queries{extra}")
+    print(f"  {len(queries)} queries now, {len(every)} distinct texts (about {avg_tok:.0f} tokens each); uncached per "
+          f"model {uncached}")
+    print(f"cost estimate:\n{est.format()}\n  budget ${budget:.2f}")
+    cap = confirm_or_abort(est.usd, budget, confirm_expensive=args.confirm_expensive, confirmed_by=args.confirmed_by)
+    if args.dry_run:
+        seen = set()
+        for q in queries:
+            if q[0] not in seen:
+                seen.add(q[0])
+                print(f"  query ({q[0]}, {q[1]}): {q[2]}")
+        print(f"  corpus ({reps[0]}): {corpus_texts[reps[0]][0]}")
+        print("DRY-RUN: nothing generated, embedded or written")
+        return 0
+    dirty = platform_dirty_files()
+    if dirty and not args.allow_dirty:
+        print(f"REFUSED: uncommitted changes to the platform's code ({len(dirty)}: {'; '.join(d.strip() for d in dirty[:5])}); "
+              f"commit first, or pass --allow-dirty", file=sys.stderr)
+        return 2
+    out.mkdir(parents=True, exist_ok=True)
+    from assistant_axis.judge_pricing import MultiModelUsage
+    prior = MultiModelUsage.load_or_create(out / "usage.json")
+    usage = GuardedUsage(budget_usd=cap)
+
+    def write_usage():
+        total = MultiModelUsage()
+        total.merge_from(prior)
+        total.merge_from(usage)
+        total.write_json(out / "usage.json")
+        return total
+    pins = {name: {"version": v, "sha256": sha} for name, (v, sha) in RV.current().items()
+            if name.startswith("calibration_paraphrase")}
+    run = {"round": 4, "started_at": utc_now(), "git_sha": git_sha(), "argv": getattr(args, "argv_list", sys.argv[1:]),
+           "allow_dirty": bool(args.allow_dirty), "dirty_check": {"paths": list(PLATFORM_PATHS), "dirty": dirty},
+           "estimate_usd": round(est.usd, 4), "budget_usd": cap, "models_requested": args.models, "models_run": [],
+           "models_failed": {}, "representations": reps, "variants": variants, "query_sources": sources,
+           "paraphrase_model": CL.PARAPHRASE_MODEL, "rubric_versions": pins, "timings_s": timings}
+
+    def save_run():
+        run["cost_usd"] = round(usage.total_cost_usd, 6)
+        run["usage_this_run"] = usage.as_dict()
+        run["cost_usd_cumulative"] = round(write_usage().total_cost_usd, 6)
+        (out / "run_round4.json").write_text(json.dumps(run, indent=2) + "\n")
+    save_run()
+
+    # ---------------------------------------------------------------- paraphrases (Haiku), then usage.json
+    for src, miss in to_generate.items():
+        ts = time.time()
+        try:
+            para[src] = run_paraphrase_stage(ci, miss, para_paths[src], para[src], usage,
+                                             style=RT.PARAPHRASE_SOURCES[src])
+        finally:
+            timings[f"paraphrases_{src}"] = round(time.time() - ts, 1)
+            save_run()
+    queries = build_queries()
+    run["n_queries"] = {src: sum(1 for q in queries if q[0] == src) for src in sources}
+
+    # ---------------------------------------------------------------- embeddings
+    every = list(dict.fromkeys([t for rep in reps for t in corpus_texts[rep]] + [q[2] for q in queries]))
+    vec = {}
+    for arm in args.models:
+        ts = time.time()
+        try:
+            vec[arm] = dict(zip(every, EM.embed_texts(EM.make_embedder(arm), every, cache=cache, usage=usage)))
+            run["models_run"].append(arm)
+            logger.info("[%s] embedded %d texts in %.0fs; %s", arm, len(every), time.time() - ts, usage.log_line())
+        except Exception as exc:  # noqa: BLE001 - one arm failing must not lose the other
+            if type(exc).__name__ == "BudgetExceededError":
+                save_run()
+                raise
+            run["models_failed"][arm] = f"{type(exc).__name__}: {exc}"
+            logger.error("[%s] failed: %s; continuing without it", arm, exc)
+        timings[f"embed_{arm}"] = round(time.time() - ts, 1)
+        save_run()
+    arms = run["models_run"]
+    if not arms or not queries:
+        print("nothing to evaluate (no model embedded, or no queries)", file=sys.stderr)
+        return 1
+
+    # ---------------------------------------------------------------- evaluation
+    ts = time.time()
+    lp_path = next((p for p in (out / LB.LABELLED_PAIRS_NAME, CALIBRATION_DIR / LB.LABELLED_PAIRS_NAME) if p.exists()),
+                   None)
+    antonyms = []
+    if lp_path is not None:
+        lp = LB.load(lp_path)
+        antonyms = [(ci["index"][p.a], ci["index"][p.b]) for p in lp.pairs
+                    if p.relation == "antonym" and p.a in ci["index"] and p.b in ci["index"]]
+    q_src = [q[0] for q in queries]
+    q_stem = [q[1] for q in queries]
+    targets = [ci["index"][s] for s in q_stem]
+    corpus_E = {arm: {rep: np.stack([vec[arm][t] for t in corpus_texts[rep]]) for rep in reps} for arm in arms}
+    query_E = {arm: np.stack([vec[arm][q[2]] for q in queries]) for arm in arms}
+    cells = RT.evaluate_round4(corpus_E, query_E, targets, variants=variants, top=max(RT.ROUND4_KS),
+                               antonym_pairs=antonyms)
+    summary = RT.summarise_round4(cells, models=arms, sources=q_src, stems=q_stem, targets=targets,
+                                  corpus_stems=ci["stems"], n_boot=args.bootstrap_n, seed=args.seed)
+    timings["evaluate"] = round(time.time() - ts, 1)
+    query_sources = {}
+    for src in sources:
+        if src in RT.PARAPHRASE_SOURCES:
+            style = RT.PARAPHRASE_SOURCES[src]
+            query_sources[src] = {"title": RT.SOURCE_TITLES[src], "n": run["n_queries"][src], "kind": "paraphrase",
+                                  "style": style, "prompt_version": CL.paraphrase_version(style),
+                                  "model": CL.PARAPHRASE_MODEL, "cache": _rel(para_paths[src], repo)}
+        else:
+            query_sources[src] = {"title": RT.SOURCE_TITLES[src], "n": run["n_queries"][src], "kind": "m1_gloss",
+                                  "results": str(RT.M1_GLOSS_SOURCES[src]), "filter_rows": m1_counts[src],
+                                  "note": f"of {m1_counts[src]['with_gloss']} glosses of existing labels; plain "
+                                          f"reading the corpus sense"}
+    payload = {"query_sources": query_sources,
+               "query_form": "the text alone, no label, cut to 14 words (represent_short(None, text, 'w14'))",
+               "corpus_form": {rep: f"label: description, representation {rep}" for rep in reps},
+               "models": {arm: (EM.OPENAI_MODEL if arm == "openai" else EM.LOCAL_MODELS.get(arm, {}).get("model_id", arm))
+                          for arm in arms},
+               "representations": reps, "variants": variants, "metric": "cosine",
+               "plain_reading_same": len(same), "antonym_pairs": len(antonyms),
+               "labelled_pairs": _rel(lp_path, repo) if lp_path else None, "rubric_versions": pins, **summary}
+
+    # ---------------------------------------------------------------- write
+    from assistant_axis.atomic_io import atomic_write_text
+    from assistant_axis.plot_metadata import json_metadata
+    from assistant_axis.provenance import current_file_input, current_files_input
+    inputs = [current_files_input(dep_key="trait_files",
+                                  paths=sorted((repo / "data" / "traits" / "instructions").glob("*.json"))),
+              current_file_input(dep_key="plain_reading_comparison", path=plain_path)]
+    inputs += [current_file_input(dep_key=f"paraphrases_{src}", path=para_paths[src]) for src in sources
+               if src in para_paths and para_paths[src].exists()]
+    inputs += [current_file_input(dep_key=f"m1_results_{src}", path=repo / RT.M1_GLOSS_SOURCES[src]) for src in sources
+               if src in RT.M1_GLOSS_SOURCES]
+    if lp_path is not None:
+        inputs.append(current_file_input(dep_key="labelled_pairs", path=lp_path))
+    atomic_write_text(json.dumps(json_metadata(payload, inputs=inputs, title="M2 round 4 retrieval recall@k"), indent=2,
+                                 ensure_ascii=False, default=_jsonable) + "\n", out / "retrieval_round4.json")
+    atomic_write_text(RT.round4_markdown(payload), out / "retrieval_round4.md")
+    run["finished_at"] = utc_now()
+    timings["total"] = round(time.time() - t0, 1)
+    save_run()
+    for c in summary["comparisons"]:
+        logger.info("[compare] %s r@%d %s vs %s: %+.4f (%d/%d discordant) p=%.4g holm=%.4g boot [%+.4f, %+.4f]%s",
+                    c["model"], c["k"], c["setting"], c["baseline"], c["diff"], c["setting_only"], c["baseline_only"],
+                    c["p"], c["p_holm"], c["boot_lo"], c["boot_hi"], " REAL" if c["real"] else "")
+    print(usage.log_line())
+    return 0
+
+
+def _rel(p: Path, repo: Path) -> str:
+    p = Path(p)
+    return str(p.resolve().relative_to(repo.resolve())) if p.resolve().is_relative_to(repo.resolve()) else str(p)
 
 
 def run_blinded_stage(ci, items, usage) -> dict:
