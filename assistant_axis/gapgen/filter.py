@@ -899,23 +899,61 @@ def development_seen(candidates_dir: Path, *, exclude: Sequence[str] = ()) -> di
     return {k: sorted(v) for k, v in sorted(seen.items())}
 
 
-def corpus_regions(results: Sequence[dict], trait_stems: Sequence[str], *, batch_id: Optional[str]) -> dict:
+def corpus_regions(results: Sequence[dict], trait_stems: Sequence[str], *, batch_id: Optional[str],
+                   renames: Optional[Mapping[str, str]] = None) -> dict:
     """``corpus_regions.json`` payload from a validation run's results (no
     API call; review finding 8): every corpus trait stem -> ``{"label",
     "region", "alignment_relevant", "verdict", "batch_id"}`` from the run's
     ``existing``-stratum row, ``region`` null when the row was cut or
-    rejected, and every field null for a stem the run did not contain."""
+    rejected, and every field null for a stem the run did not contain.
+
+    ``renames`` (old stem -> current stem, from the trait files'
+    ``renamed_from``; 2026-10-02) lets a row filed under a stem the corpus no
+    longer has stand for the trait that carries that stem now; the entry
+    records ``renamed_from`` and keeps the label the run judged.  A row under
+    the current stem wins over one under its old stem."""
+    rows = corpus_region_rows(results, trait_stems, batch_id=batch_id, renames=renames)
+    return {s: rows.get(s, {"label": None, "region": None, "alignment_relevant": None, "verdict": None,
+                            "batch_id": batch_id})
+            for s in sorted(trait_stems)}
+
+
+def corpus_region_rows(results: Sequence[dict], trait_stems: Sequence[str], *, batch_id: Optional[str],
+                       renames: Optional[Mapping[str, str]] = None) -> dict:
+    """The entries of :func:`corpus_regions` for the stems the run contains
+    (directly, or under an old stem through ``renames``), nothing for the rest."""
     from .normalize import split_key
-    by_stem = {}
+    stems = set(trait_stems)
+    renames = dict(renames or {})
+    by_stem: dict[str, dict] = {}
     for r in results:
         if (r.get("meta") or {}).get("stratum") != "existing" or not r.get("key"):
             continue
         f = r.get("filter") or {}
-        by_stem[split_key(r["key"])[0]] = {"label": r.get("label"), "region": f.get("region"),
-                                           "alignment_relevant": f.get("alignment_relevant"),
-                                           "verdict": f.get("verdict"), "batch_id": batch_id}
-    return {s: by_stem.get(s, {"label": None, "region": None, "alignment_relevant": None, "verdict": None,
-                               "batch_id": batch_id})
+        stem = split_key(r["key"])[0]
+        entry = {"label": r.get("label"), "region": f.get("region"), "alignment_relevant": f.get("alignment_relevant"),
+                 "verdict": f.get("verdict"), "batch_id": batch_id}
+        if stem not in stems and renames.get(stem) in stems:
+            entry["renamed_from"] = stem
+            stem = renames[stem]
+            if stem in by_stem and "renamed_from" not in by_stem[stem]:
+                continue
+        by_stem[stem] = entry
+    return by_stem
+
+
+def corpus_regions_from_runs(runs: Sequence[tuple[str, Sequence[dict]]], trait_stems: Sequence[str], *,
+                             renames: Optional[Mapping[str, str]] = None) -> dict:
+    """:func:`corpus_regions` over several runs, given as ``(batch_id,
+    results)`` in order: a stem takes its entry from the **last** run that
+    contains it (directly or through ``renames``), so a later run re-judges a
+    trait whose description changed sense with its rename.  Stems no run
+    contains get the null entry, with ``batch_id`` null."""
+    merged: dict[str, dict] = {}
+    for batch_id, results in runs:
+        merged.update(corpus_region_rows(results, trait_stems, batch_id=batch_id, renames=renames))
+    return {s: merged.get(s, {"label": None, "region": None, "alignment_relevant": None, "verdict": None,
+                              "batch_id": None})
             for s in sorted(trait_stems)}
 
 

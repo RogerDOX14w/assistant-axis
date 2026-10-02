@@ -25,9 +25,13 @@ Commands:
   (tracked; keyed by word).
 * ``judgement-call --word W --call TEXT [--calls-file P]``: record Roger's
   call on a word in that file (a later call on the same word replaces it).
-* ``corpus-regions --from-filter DIR [--out PATH]``: write
+* ``corpus-regions --from-filter DIR [--from-filter DIR2 ...] [--out PATH]``: write
   ``corpus_regions.json`` (every corpus trait -> region, ``alignment_relevant``,
-  verdict, batch id) from a validation run's results, at no cost.
+  verdict, batch id) from validation runs' results, at no cost.  With several
+  runs a trait takes the last run that has it; a row under a stem the corpus
+  has since renamed counts for the renamed trait (``renamed_from`` in the
+  entry), so a later run is how a trait whose description changed sense with
+  its rename gets judged again.
 * ``compact``: copy the log to ``registry.jsonl.bak.<UTC>``, fold it to one
   line per key, and write the tracked snapshot ``registry.snapshot.jsonl``.
 * ``promote (--keys K ... | --status accepted) [--min-local-novelty X] [--section S] [--dry-run]``:
@@ -227,24 +231,45 @@ def cmd_judgement_call(args) -> int:
 
 
 def cmd_corpus_regions(args) -> int:
-    """``corpus_regions.json`` from a validation run's results (no API call;
-    review_rubric_v2.md finding 8)."""
+    """``corpus_regions.json`` from validation runs' results (no API call;
+    review_rubric_v2.md finding 8).  Several ``--from-filter`` runs merge in
+    order, the last run that has a trait giving its entry; rows under a stem
+    the corpus has renamed count for the renamed trait (2026-10-02, the merge
+    with the main line)."""
+    from collections import Counter
+
     from assistant_axis.atomic_io import atomic_write_text
-    from assistant_axis.gapgen.filter import corpus_regions
+    from assistant_axis.entity_id import resolve_renamed_stem
+    from assistant_axis.gapgen.filter import corpus_regions_from_runs
+    from assistant_axis.gapgen.normalize import split_key
     from assistant_axis.plot_metadata import json_metadata
     from assistant_axis.provenance import current_file_input
-    run = Path(args.from_filter)
-    rows = [json.loads(x) for x in (run / "results.jsonl").read_text(encoding="utf-8").splitlines() if x.strip()]
-    run_meta = json.loads((run / "run.json").read_text(encoding="utf-8")) if (run / "run.json").exists() else {}
-    stems = sorted(p.stem for p in (Path(args.data_dir) / "traits" / "instructions").glob("*.json"))
-    regions = corpus_regions(rows, stems, batch_id=run_meta.get("batch_id") or run.name)
+    data_dir = Path(args.data_dir)
+    stems = sorted(p.stem for p in (data_dir / "traits" / "instructions").glob("*.json"))
+    corpus = set(stems)
+    runs, inputs, names = [], [], []
+    for run in (Path(r) for r in args.from_filter):
+        rows = [json.loads(x) for x in (run / "results.jsonl").read_text(encoding="utf-8").splitlines() if x.strip()]
+        run_meta = json.loads((run / "run.json").read_text(encoding="utf-8")) if (run / "run.json").exists() else {}
+        batch_id = run_meta.get("batch_id") or run.name
+        runs.append((batch_id, rows))
+        names.append(run.name)
+        inputs.append(current_file_input(dep_key="filter_results" if len(args.from_filter) == 1
+                                         else f"filter_results_{batch_id}", path=run / "results.jsonl"))
+    old = {split_key(r["key"])[0] for _, rows in runs for r in rows if r.get("key")} - corpus
+    renames = {s: resolve_renamed_stem(s, "traits", data_dir=data_dir) for s in sorted(old)}
+    renames = {s: t for s, t in renames.items() if t != s and t in corpus}
+    regions = corpus_regions_from_runs(runs, stems, renames=renames)
     missing = [s for s, v in regions.items() if v["verdict"] is None]
-    env = json_metadata(regions, title=f"corpus regions from {run.name}",
-                        inputs=[current_file_input(dep_key="filter_results", path=run / "results.jsonl")])
+    env = json_metadata(regions, title=f"corpus regions from {' + '.join(names)}", inputs=inputs)
     out = Path(args.out)
     atomic_write_text(json.dumps(env, indent=2, ensure_ascii=False) + "\n", out)
-    print(f"wrote {len(regions)} traits to {out} ({len(missing)} not in the run"
-          + (f": {', '.join(missing[:10])}{' ...' if len(missing) > 10 else ''}" if missing else "") + ")")
+    by_run = Counter(v["batch_id"] for v in regions.values() if v["verdict"] is not None)
+    followed = sorted(f"{v['renamed_from']} -> {s}" for s, v in regions.items() if v.get("renamed_from"))
+    print(f"wrote {len(regions)} traits to {out} ({len(missing)} not in any run"
+          + (f": {', '.join(missing[:10])}{' ...' if len(missing) > 10 else ''}" if missing else "") + ")"
+          + (f"; by run {dict(by_run)}" if len(runs) > 1 else "")
+          + (f"; {len(followed)} through renamed_from: {', '.join(followed)}" if followed else ""))
     return 0
 
 
@@ -330,8 +355,10 @@ def build_parser() -> argparse.ArgumentParser:
     sp.add_argument("--calls-file", type=Path, default=paths.JUDGEMENT_CALLS_PATH)
     sp.set_defaults(func=cmd_judgement_call)
     sp = sub.add_parser("corpus-regions",
-                        help="write corpus_regions.json (region and alignment_relevant per corpus trait) from a run")
-    sp.add_argument("--from-filter", required=True, type=Path, help="a validation run's filter/<batch_id> dir")
+                        help="write corpus_regions.json (region and alignment_relevant per corpus trait) from runs")
+    sp.add_argument("--from-filter", required=True, type=Path, action="append",
+                    help="a validation run's filter/<batch_id> dir; repeat to merge runs, the last run that has a "
+                         "trait giving its entry")
     sp.add_argument("--out", type=Path, default=paths.CORPUS_REGIONS_PATH)
     sp.set_defaults(func=cmd_corpus_regions)
     sp = sub.add_parser("compact")

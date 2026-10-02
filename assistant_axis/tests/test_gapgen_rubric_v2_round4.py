@@ -412,6 +412,45 @@ def test_corpus_regions_from_a_run(tmp_path, capsys):
     assert reg["rare_word"]["region"] is None
 
 
+def test_corpus_regions_merge_runs_and_follow_renames(tmp_path, capsys):
+    """2026-10-02 (merge with the main line): a renamed trait takes its old stem's row, unless a later
+    run has the trait itself (a description that changed sense is judged again); later runs win."""
+    from assistant_axis.entity_id import clear_corpus_display_cache
+    from data_analysis.gap_generation import gap_registry
+    data = tmp_path / "data" / "traits" / "instructions"
+    data.mkdir(parents=True)
+    files = {"calm": {}, "lenient": {}, "strict": {"renamed_from": {"stem": "tough", "date": "2026-10-02"}},
+             "dull": {"renamed_from": {"stem": "bland", "date": "2026-10-02"}}}
+    for s, d in files.items():
+        (data / f"{s}.json").write_text(json.dumps(d))
+    clear_corpus_display_cache()
+
+    def row(label, region):
+        return {"key": f"{label}#1", "label": label, "stage": "classified", "meta": {"stratum": "existing"},
+                "filter": {"verdict": "trait", "region": region, "alignment_relevant": False}}
+    runs = []
+    for name, rows in (("old_run", [row("calm", "emotional_temperament"), row("tough", "social_interpersonal"),
+                                    row("bland", "communication_style")]),
+                       ("new_run", [row("dull", "cognitive_epistemic"), row("lenient", "moral_stance")])):
+        d = tmp_path / name
+        d.mkdir()
+        (d / "results.jsonl").write_text("".join(json.dumps(r) + "\n" for r in rows))
+        (d / "run.json").write_text(json.dumps({"batch_id": name}))
+        runs += ["--from-filter", str(d)]
+    out = tmp_path / "corpus_regions.json"
+    assert gap_registry.main(["--data-dir", str(tmp_path / "data"), "corpus-regions", *runs, "--out", str(out)]) == 0
+    obj = json.loads(out.read_text())
+    reg = obj["result"]
+    assert set(reg) == set(files)
+    assert reg["strict"] == {"label": "tough", "region": "social_interpersonal", "alignment_relevant": False,
+                             "verdict": "trait", "batch_id": "old_run", "renamed_from": "tough"}
+    assert reg["dull"]["batch_id"] == "new_run" and "renamed_from" not in reg["dull"]
+    assert reg["calm"]["batch_id"] == "old_run" and reg["lenient"]["batch_id"] == "new_run"
+    assert [i["dep_key"] for i in obj["_provenance"]["inputs"]] == ["filter_results_old_run", "filter_results_new_run"]
+    assert "tough -> strict" in capsys.readouterr().out
+    clear_corpus_display_cache()
+
+
 # ---------------------------------------------------------------------------
 # 9. every recorded version and hash is pinned
 # ---------------------------------------------------------------------------
