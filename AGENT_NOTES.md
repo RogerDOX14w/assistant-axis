@@ -369,6 +369,55 @@ backstop against honest mistakes, not a sandbox.  To see what the hook
 actually asked in a session, read the transcript's `hook_success`
 attachment records.
 
+**Bash is now confined by Claude Code's sandbox (trial from 2026-10-03,
+Roger).**  The heredoc false positives kept interrupting overnight runs, so
+shell commands run under Claude Code's built-in Bash sandbox: macOS Seatbelt
+checks every file a command actually opens, so heredocs, variables, `cd`
+and symlinks make no difference, and a denied read fails with "Operation not
+permitted" instead of prompting anyone.  It covers subagents and background
+(`nohup`, `run_in_background`) commands.  Configured in the `sandbox` block
+of the main checkout's `.claude/settings.local.json` (git-ignored, so it is
+local to Roger's machine; re-create it from this description):
+
+- reads: `denyRead` `~/`, re-opened by `allowRead` for the repository,
+  `~/.claude`, `~/.cache/uv` and `~/.local/share/uv` (uv's cache and its
+  Python installs, which the project's interpreter lives in), `~/.gitconfig`,
+  `~/.config/git` and `~/.matplotlib` (its font cache; without it every
+  process rebuilds the cache in a temp directory).  Reads outside the home
+  directory stay open.
+- writes: `allowWrite` the repository, `/private/tmp` and `/tmp`,
+  `~/.cache/uv` and `~/.matplotlib`; setting `allowWrite` replaces the
+  default list, so every writable place must be named.
+- network: open (`allowedDomains: ["*"]`; Roger treats network limits as a
+  separate question).
+- `allowUnsandboxedCommands: false`: the `dangerouslyDisableSandbox`
+  parameter is ignored.  This matters in Auto mode, where a request to rerun
+  outside the sandbox would otherwise go to the classifier, not to Roger.
+
+Claude Code also protects some paths from shell writes whatever the
+settings say: the settings files, `.claude/hooks` and `skills`, and
+`~/.claude/projects` (auto-memory).  Write those with the Edit / Write
+tools, which run outside the sandbox.  Use `$TMPDIR` for temporary files.
+zsh prints a harmless `nice(5) failed` for a backgrounded job.  The
+process list is hidden inside the sandbox (`ps` and `pgrep` fail), so a
+watch loop cannot ask whether a background job is still running that way:
+record the job's PID when starting it (`echo $! > job.pid`) and test it with
+`kill -0`, or watch for the job's output files.  If a
+command the work genuinely needs hits a block, report the path and the
+command to Roger: adding to the allow lists is his decision, and routing
+around a block is not an option.
+
+With the sandbox on, the hook's Bash text scan stands down
+(`boundary_check.sandbox_enabled` reads the same settings files Claude
+Code does, the last one that sets `sandbox.enabled` wins), so turning the
+sandbox off brings the scan straight back, and a call that asks to leave the
+sandbox is still scanned.  The hook keeps checking the file tools (Read,
+Edit, Write, NotebookEdit, Glob, Grep), which run outside the sandbox and
+work on exact paths, so they never produced the false positives.  The
+sandbox works in the VS Code extension (checked 2026-10-03) and applies the
+moment the settings file is saved, with no restart; it affects every
+session working in the main checkout, since they share that file.
+
 ---
 
 ## Hotlink every file you mention to Roger (HARD RULE)

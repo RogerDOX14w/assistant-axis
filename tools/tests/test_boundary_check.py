@@ -289,11 +289,65 @@ class TestTheFourFalsePositivesOf20260928:
         assert hits(command, cwd=REPO) == []
 
 
+@pytest.fixture(autouse=True)
+def _sandbox_off_unless_a_test_says_otherwise(monkeypatch):
+    """The hook reads the real settings files to see whether the Bash sandbox is
+    on; the tests must not depend on Roger's settings, so by default they see no
+    settings files at all (sandbox off, Bash scanned)."""
+    monkeypatch.setattr(bc, "SETTINGS_FILES", ())
+
+
 def run_hook(payload, monkeypatch, capsys) -> str:
     text = payload if isinstance(payload, str) else json.dumps(payload)
     monkeypatch.setattr("sys.stdin", io.StringIO(text))
     assert bc.main() == 0
     return capsys.readouterr().out
+
+
+def write_settings(path: Path, sandbox) -> str:
+    path.write_text(json.dumps({} if sandbox is None else {"sandbox": sandbox}), encoding="utf-8")
+    return str(path)
+
+
+class TestSandboxStandsTheBashScanDown:
+    """2026-10-03: with Claude Code's Bash sandbox on, the OS checks every file a
+    shell command opens, so the text scan stands down for Bash; the file tools
+    are still checked, and turning the sandbox off brings the scan back."""
+
+    def test_sandbox_enabled_reads_the_last_file_that_says(self, tmp_path):
+        user = write_settings(tmp_path / "user.json", {"enabled": True})
+        project = write_settings(tmp_path / "project.json", None)
+        local_off = write_settings(tmp_path / "local_off.json", {"enabled": False})
+        assert bc.sandbox_enabled((user, project)) is True
+        assert bc.sandbox_enabled((user, project, local_off)) is False
+        assert bc.sandbox_enabled((str(tmp_path / "missing.json"),)) is False
+        bad = tmp_path / "bad.json"
+        bad.write_text("{not json", encoding="utf-8")
+        assert bc.sandbox_enabled((user, str(bad))) is True
+
+    def test_bash_is_not_scanned_while_the_sandbox_is_on(self, tmp_path, monkeypatch, capsys):
+        monkeypatch.setattr(bc, "SETTINGS_FILES", (write_settings(tmp_path / "s.json", {"enabled": True}),))
+        for command in ("ls ~/.ssh", "cat > /tmp/n.md <<'EOF'\nsee ~/.cache\nEOF\n", "cd .. && ls"):
+            assert run_hook({"tool_name": "Bash", "cwd": OUTSIDE_CWD,
+                             "tool_input": {"command": command}}, monkeypatch, capsys) == ""
+
+    def test_a_call_that_leaves_the_sandbox_is_scanned(self, tmp_path, monkeypatch, capsys):
+        monkeypatch.setattr(bc, "SETTINGS_FILES", (write_settings(tmp_path / "s.json", {"enabled": True}),))
+        out = run_hook({"tool_name": "Bash", "cwd": OUTSIDE_CWD, "tool_input": {
+            "command": "ls ~/.ssh", "dangerouslyDisableSandbox": True}}, monkeypatch, capsys)
+        assert json.loads(out)["hookSpecificOutput"]["permissionDecision"] == "ask"
+
+    def test_file_tools_are_still_checked_while_the_sandbox_is_on(self, tmp_path, monkeypatch, capsys):
+        monkeypatch.setattr(bc, "SETTINGS_FILES", (write_settings(tmp_path / "s.json", {"enabled": True}),))
+        out = run_hook({"tool_name": "Read", "cwd": REPO,
+                        "tool_input": {"file_path": os.path.join(HOME, ".ssh", "config")}}, monkeypatch, capsys)
+        assert json.loads(out)["hookSpecificOutput"]["permissionDecision"] == "ask"
+
+    def test_sandbox_off_scans_bash_as_before(self, tmp_path, monkeypatch, capsys):
+        monkeypatch.setattr(bc, "SETTINGS_FILES", (write_settings(tmp_path / "s.json", {"enabled": False}),))
+        out = run_hook({"tool_name": "Bash", "cwd": OUTSIDE_CWD,
+                        "tool_input": {"command": "ls ~/.ssh"}}, monkeypatch, capsys)
+        assert json.loads(out)["hookSpecificOutput"]["permissionDecision"] == "ask"
 
 
 class TestMain:

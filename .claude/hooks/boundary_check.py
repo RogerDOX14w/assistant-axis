@@ -60,6 +60,18 @@ match is inside a heredoc body, so a prose edit can be judged at a glance; it
 stays an ask because a heredoc-fed script can open the path just as well as
 mention it.  Prose that quotes home paths is better written with the Write /
 Edit tools, which the hook checks by path only.
+
+The Bash scan stands down when Claude Code's Bash sandbox is on (2026-10-03,
+Roger: the heredoc false positives kept interrupting overnight runs).  The
+sandbox (macOS Seatbelt, configured in the ``sandbox`` block of the project's
+settings) checks every file a shell command actually opens, so it sees
+heredocs, variables and ``cd`` the way the text scan never could, and a
+denied read simply fails with no prompt.  ``sandbox_enabled`` reads the same
+settings files Claude Code does (user, project, local; the last one that says
+wins), so turning the sandbox off brings the Bash scan straight back.  A call
+that asks to leave the sandbox (``dangerouslyDisableSandbox: true``) is
+scanned as before.  The file tools run outside the sandbox and are always
+checked.
 """
 import json
 import os
@@ -97,6 +109,27 @@ QUOTES = "\"'`"
 # a bare delimiter must start with a letter or underscore and may not be followed by ``)``,
 # so neither ``$((1 << 3))`` nor ``$((x << y))`` is a marker
 HEREDOC = re.compile(r"(?<!<)<<-?[ \t]*(?:'([^'\n]+)'|\"([^\"\n]+)\"|\\?([A-Za-z_][\w.-]*))(?![<)])")
+# The settings files that can switch Claude Code's Bash sandbox on, lowest precedence first.
+SETTINGS_FILES = (
+    os.path.join(HOME, ".claude", "settings.json"),
+    os.path.join(REPO, ".claude", "settings.json"),
+    os.path.join(REPO, ".claude", "settings.local.json"),
+)
+
+
+def sandbox_enabled(files=None) -> bool:
+    """True when the last of ``files`` (default ``SETTINGS_FILES``) that sets
+    ``sandbox.enabled`` sets it true.  A missing or unreadable file is skipped."""
+    enabled = False
+    for f in (SETTINGS_FILES if files is None else files):
+        try:
+            with open(f, encoding="utf-8") as fh:
+                sb = json.load(fh).get("sandbox")
+        except (OSError, ValueError, AttributeError):
+            continue
+        if isinstance(sb, dict) and "enabled" in sb:
+            enabled = bool(sb["enabled"])
+    return enabled
 
 
 def normalize(p: str) -> str:
@@ -219,6 +252,8 @@ def main() -> int:
     hits: list = []
     in_heredoc = False
     if tool == "Bash":
+        if sandbox_enabled() and not inp.get("dangerouslyDisableSandbox"):
+            return 0  # the sandbox enforces the boundary for every file the command opens
         hits, in_heredoc = offending_in_text(inp.get("command", "") or "", cwd)
     elif tool in FILE_TOOLS:
         for key in ("file_path", "path", "notebook_path"):
