@@ -867,6 +867,21 @@ def test_overlap_end_to_end_with_a_fake_client(overlap_env):
     assert "opus" not in sheet.lower() and "haiku" not in sheet.lower()
 
 
+def test_overlap_a_second_run_leaves_the_marks_sheet_alone(overlap_env):
+    """overlap_test_2 rewrote overlap_test_1's sheet (it checked only for its own key); a sheet that
+    exists is never overwritten, whoever's it is, since it may hold Roger's marks."""
+    e = overlap_env
+    assert e["cli"].main(e["base"]) == 0
+    marked = e["sheet"].read_text().replace("Your answer (0 / 1 / 2 / 3 / 4 / opposite / unsure): ",
+                                            "Your answer (0 / 1 / 2 / 3 / 4 / opposite / unsure): 2", 1)
+    e["sheet"].write_text(marked)
+    second = [("t2" if a == "t1" else a) for a in e["base"]]
+    assert e["cli"].main(second) == 0
+    assert e["sheet"].read_text() == marked
+    assert not (e["out"].parent / "t2" / "marks_key.json").exists()
+    assert (e["out"] / "marks_key.json").exists()
+
+
 def test_overlap_resume_and_existing_run(overlap_env):
     e = overlap_env
     assert e["cli"].main(e["base"] + ["--models", e["OT"].HAIKU]) == 0

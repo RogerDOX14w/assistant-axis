@@ -208,8 +208,12 @@ def write_analysis(out_dir: Path, inputs, ps, args, argv) -> dict:
 
 def write_marks(out_dir: Path, inputs, ps, rubrics, args) -> None:
     key_path = out_dir / "marks_key.json"
-    if key_path.exists() and args.marks_sheet.exists():
-        logger.info("marks sheet and key exist; kept as written (%s)", _rel(args.marks_sheet))
+    if args.marks_sheet.exists():
+        # Never overwrite a sheet: it may hold Roger's marks, and it may be another run's
+        # (overlap_test_2 rewrote overlap_test_1's sheet when this checked only its own key).
+        logger.info("marks sheet %s exists; kept as written%s", _rel(args.marks_sheet),
+                    "" if key_path.exists() else " (another run's; no marks key written for this run; pass "
+                    "--marks-sheet with a new path for a sheet of its own)")
         return
     import os
     items = OT.draw_marks(ps, seed=args.seed)
