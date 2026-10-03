@@ -1,0 +1,256 @@
+{
+  "run_id": "overlap_test_2",
+  "seed": 0,
+  "sheet": "reports/trait_gap_generation/m3_overlap_marks.md",
+  "quotas": {
+    "nearest": 18,
+    "drop_or_merge": 3,
+    "near_distinct": 3,
+    "antonym": 2,
+    "random": 2,
+    "deliberate_duplicate": 2
+  },
+  "made_at": "2026-10-03T20:27:25+00:00",
+  "items": [
+    {
+      "item": 1,
+      "pair_id": "lab:self_blaming>blame_shifting",
+      "call_id": "lab:self_blaming",
+      "target": "self_blaming",
+      "listed": "blame_shifting",
+      "group": "drop_or_merge"
+    },
+    {
+      "item": 2,
+      "pair_id": "nn:erudite>esoteric",
+      "call_id": "nn:erudite",
+      "target": "erudite",
+      "listed": "esoteric",
+      "group": "nearest"
+    },
+    {
+      "item": 3,
+      "pair_id": "nn:utilitarian>deontological",
+      "call_id": "nn:utilitarian",
+      "target": "utilitarian",
+      "listed": "deontological",
+      "group": "nearest"
+    },
+    {
+      "item": 4,
+      "pair_id": "lab:animated>flat",
+      "call_id": "lab:animated",
+      "target": "animated",
+      "listed": "flat",
+      "group": "antonym"
+    },
+    {
+      "item": 5,
+      "pair_id": "lab:conservative>overconfident",
+      "call_id": "lab:conservative",
+      "target": "conservative",
+      "listed": "overconfident",
+      "group": "random"
+    },
+    {
+      "item": 6,
+      "pair_id": "nn:materialist>relativist",
+      "call_id": "nn:materialist",
+      "target": "materialist",
+      "listed": "relativist",
+      "group": "nearest"
+    },
+    {
+      "item": 7,
+      "pair_id": "lab:excitable>narrative",
+      "call_id": "lab:excitable",
+      "target": "excitable",
+      "listed": "narrative",
+      "group": "random"
+    },
+    {
+      "item": 8,
+      "pair_id": "nn:religious>secular",
+      "call_id": "nn:religious",
+      "target": "religious",
+      "listed": "secular",
+      "group": "nearest"
+    },
+    {
+      "item": 9,
+      "pair_id": "nn:extroverted>energetic",
+      "call_id": "nn:extroverted",
+      "target": "extroverted",
+      "listed": "energetic",
+      "group": "nearest"
+    },
+    {
+      "item": 10,
+      "pair_id": "lab:temperamental>even_tempered",
+      "call_id": "lab:temperamental",
+      "target": "temperamental",
+      "listed": "even_tempered",
+      "group": "antonym"
+    },
+    {
+      "item": 11,
+      "pair_id": "nn:iconoclastic>deconstructionist",
+      "call_id": "nn:iconoclastic",
+      "target": "iconoclastic",
+      "listed": "deconstructionist",
+      "group": "nearest"
+    },
+    {
+      "item": 12,
+      "pair_id": "nn:ethereal>spiritual",
+      "call_id": "nn:ethereal",
+      "target": "ethereal",
+      "listed": "spiritual",
+      "group": "nearest"
+    },
+    {
+      "item": 13,
+      "pair_id": "nn:strategic>long_term_oriented",
+      "call_id": "nn:strategic",
+      "target": "strategic",
+      "listed": "long_term_oriented",
+      "group": "nearest"
+    },
+    {
+      "item": 14,
+      "pair_id": "nn:agreeable>conciliatory",
+      "call_id": "nn:agreeable",
+      "target": "agreeable",
+      "listed": "conciliatory",
+      "group": "nearest"
+    },
+    {
+      "item": 15,
+      "pair_id": "lab:dispassionate>detached",
+      "call_id": "lab:dispassionate",
+      "target": "dispassionate",
+      "listed": "detached",
+      "group": "drop_or_merge"
+    },
+    {
+      "item": 16,
+      "pair_id": "lab:nihilistic>essentialist",
+      "call_id": "lab:nihilistic",
+      "target": "nihilistic",
+      "listed": "essentialist",
+      "group": "near_distinct"
+    },
+    {
+      "item": 17,
+      "pair_id": "nn:hedonistic>self_indulgent",
+      "call_id": "nn:hedonistic",
+      "target": "hedonistic",
+      "listed": "self_indulgent",
+      "group": "nearest"
+    },
+    {
+      "item": 18,
+      "pair_id": "lab:consequentialist>ends_justify_means",
+      "call_id": "lab:consequentialist",
+      "target": "consequentialist",
+      "listed": "ends_justify_means",
+      "group": "deliberate_duplicate"
+    },
+    {
+      "item": 19,
+      "pair_id": "nn:deconstructionist>structuralist",
+      "call_id": "nn:deconstructionist",
+      "target": "deconstructionist",
+      "listed": "structuralist",
+      "group": "nearest"
+    },
+    {
+      "item": 20,
+      "pair_id": "nn:benevolent>benign",
+      "call_id": "nn:benevolent",
+      "target": "benevolent",
+      "listed": "benign",
+      "group": "nearest"
+    },
+    {
+      "item": 21,
+      "pair_id": "lab:honorable>deontological",
+      "call_id": "lab:honorable",
+      "target": "honorable",
+      "listed": "deontological",
+      "group": "deliberate_duplicate"
+    },
+    {
+      "item": 22,
+      "pair_id": "nn:adventurous>adventurous_eater",
+      "call_id": "nn:adventurous",
+      "target": "adventurous",
+      "listed": "adventurous_eater",
+      "group": "nearest"
+    },
+    {
+      "item": 23,
+      "pair_id": "nn:strategic>tactical",
+      "call_id": "nn:strategic",
+      "target": "strategic",
+      "listed": "tactical",
+      "group": "nearest"
+    },
+    {
+      "item": 24,
+      "pair_id": "lab:moral_relativist>relativist",
+      "call_id": "lab:moral_relativist",
+      "target": "moral_relativist",
+      "listed": "relativist",
+      "group": "near_distinct"
+    },
+    {
+      "item": 25,
+      "pair_id": "nn:serious>formal",
+      "call_id": "nn:serious",
+      "target": "serious",
+      "listed": "formal",
+      "group": "nearest"
+    },
+    {
+      "item": 26,
+      "pair_id": "nn:socratic>educational",
+      "call_id": "nn:socratic",
+      "target": "socratic",
+      "listed": "educational",
+      "group": "nearest"
+    },
+    {
+      "item": 27,
+      "pair_id": "nn:extroverted>gregarious",
+      "call_id": "nn:extroverted",
+      "target": "extroverted",
+      "listed": "gregarious",
+      "group": "nearest"
+    },
+    {
+      "item": 28,
+      "pair_id": "lab:theoretical>conceptual",
+      "call_id": "lab:theoretical",
+      "target": "theoretical",
+      "listed": "conceptual",
+      "group": "drop_or_merge"
+    },
+    {
+      "item": 29,
+      "pair_id": "lab:cosmopolitan>philanthropic",
+      "call_id": "lab:cosmopolitan",
+      "target": "cosmopolitan",
+      "listed": "philanthropic",
+      "group": "near_distinct"
+    },
+    {
+      "item": 30,
+      "pair_id": "nn:moderate>temperate",
+      "call_id": "nn:moderate",
+      "target": "moderate",
+      "listed": "temperate",
+      "group": "nearest"
+    }
+  ]
+}

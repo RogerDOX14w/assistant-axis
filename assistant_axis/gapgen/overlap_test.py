@@ -615,6 +615,10 @@ class OverlapRunner:
                         res.n_reasked += int(attempt > 1)
                 if not errors:
                     return
+                if text is None and meta.get("error"):           # the request failed: no answer to ask about
+                    logger.warning("rubric %s on %s, %s: request failed, left for the resume: %s", rubric, model,
+                                   call.call_id, str(meta["error"])[:200])
+                    return
                 logger.warning("rubric %s on %s, %s: answer did not parse fully (attempt %d of %d): %s", rubric,
                                model, call.call_id, attempt, self.ask_attempts,
                                "; ".join(sorted(set(errors.values())))[:200])
@@ -638,11 +642,21 @@ class OverlapRunner:
         return res
 
 
+def request_failed(rec: Mapping) -> bool:
+    """The request itself failed (an API error after the SDK's retries): the model gave no answer."""
+    resp = rec.get("response") or {}
+    return resp.get("text") is None and bool(resp.get("error"))
+
+
 def first_records(records: Iterable[Mapping]) -> dict[tuple, dict]:
-    """The first record per (rubric, model, call): its first attempt."""
+    """The first record per (rubric, model, call) that holds the model's answer: its first attempt at the
+    format.  A failed request (:func:`request_failed`, e.g. an expired key) is not an attempt; a call with
+    nothing but failed requests keeps its first record."""
     out: dict[tuple, dict] = {}
     for r in records:
-        out.setdefault(response_key(r), dict(r))
+        k = response_key(r)
+        if k not in out or (request_failed(out[k]) and not request_failed(r)):
+            out[k] = dict(r)
     return out
 
 
@@ -1082,6 +1096,8 @@ def summary_markdown(summary: Mapping, pair_set: PairSet, corpus: Mapping) -> st
                 L.append(f"| {sm(m)} | {pop} | {what} | {x['n']} | {_f(x['rho_a'])} | {_f(x['rho_b'])} | "
                          f"{_f(x['diff'])} | {ci} |")
     for r, per in summary["groups"].items():
+        if not per:                                      # a rubric this run did not send
+            continue
         L += ["", f"## Known groups, rubric {r}", "",
               "Mean of the numeric answers / share at 3 or more" + (" / share opposite" if r == "A" else "")
               + " / share unsure; n in the first column.", "",

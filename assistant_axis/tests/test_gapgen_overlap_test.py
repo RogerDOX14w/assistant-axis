@@ -413,6 +413,25 @@ class TestRunner:
         run(r.run_stage("B", OT.OPUS, ps.calls[:1]))
         assert len(client.calls) == 4
 
+    def test_a_failed_request_is_not_asked_again_nor_counted_as_the_first_attempt(self, tmp_path):
+        """overlap_test_2: an expired key failed every Sonnet request; the resume answered them all at once,
+        and the first-attempt parse rate must say so (it read 0/409 from the failed records)."""
+        rb = OT.load_rubrics()
+        ps = pair_set()
+        path = tmp_path / "r.jsonl"
+        dead = FakeAsyncAnthropic(lambda kw: RuntimeError("401 API key is invalid"))
+        r1 = OT.OverlapRunner(dead, rb, corpus(), usage=MultiModelUsage(), responses_path=path, retry_delays=())
+        res1 = run(r1.run_stage("A", OT.SONNET, ps.calls))
+        assert len(dead.calls) == len(ps.calls) and res1.n_reasked == 0 and res1.n_ok == 0
+        assert all(OT.request_failed(rec) for rec in OT.read_records(path))
+        live = FakeAsyncAnthropic(responder_for(rb))
+        r2 = OT.OverlapRunner(live, rb, corpus(), usage=MultiModelUsage(), responses_path=path, retry_delays=())
+        res2 = run(r2.run_stage("A", OT.SONNET, ps.calls))
+        assert len(live.calls) == len(ps.calls)
+        assert res2.n_ok == res2.n_ok_first == res2.n_pairs == len(ps.pairs)
+        recs = OT.read_records(path)
+        assert OT.first_attempt_parse(ps, recs)[("A", OT.SONNET)] == {"ok": len(ps.pairs), "total": len(ps.pairs)}
+
     def test_answers_are_reparsed_from_the_recorded_text(self, tmp_path):
         """A record written by an older parser (its stored "parsed" empty) is read with the current one."""
         ps = pair_set()
@@ -491,6 +510,15 @@ class TestStatistics:
         assert s["rubric_difference"][OT.OPUS]["non_antonym"]["embedding"]["diff"] == pytest.approx(0, abs=1e-9)
         assert s["opus_on_disagreement"]["A"]["haiku_sonnet_same"] == len(ps.pairs)
         json.dumps(s)
+
+    def test_tables_for_a_run_of_one_rubric_and_two_models(self):
+        """overlap_test_2 sent rubric A to Sonnet and Opus only; the tables must not need rubric B."""
+        ps = pair_set(n_targets=6, n_antonyms=2, n_random=2)
+        ans = {k: v for k, v in self.fake_answers(ps, lambda r, m, p: 2).items()
+               if k[0] == "A" and k[1] in (OT.SONNET, OT.OPUS)}
+        s = OT.analyse(ps, ans, n_boot=20)
+        md = OT.summary_markdown(s, ps, corpus())
+        assert "## Known groups, rubric A" in md and "## Known groups, rubric B" not in md
 
     def test_divergence_orders_b_over_a(self):
         ps = pair_set()

@@ -374,6 +374,33 @@ numbered its third row 4) was asked again during its stage.  First-attempt rates
 (99.3%), Opus B 408 of 409, everything else complete.  Whether rubric A's answer line should also say
 "no other keys" is a question for a draft 3 (decision 6); it is not needed for this test.
 
+## Rerun with rubric A draft 3 (`overlap_test_2`)
+
+On Roger's word (decision 6: "SG, rerun the tests to confirm"), draft 3 of rubric A (pinned version 3,
+one sentence added: "Use only the keys shown: do not add the trait's label or any other key, and give
+each row once.") ran on Sonnet 5.5 and Opus 5.5 over the same 409 pairs (the same
+[pairs.json](../../data/candidates/overlap_test/overlap_test_2/pairs.json) but for its provenance), live,
+for $1.88 ([usage.json](../../data/candidates/overlap_test/overlap_test_2/usage.json)); tables in
+[tables.md](../../data/candidates/overlap_test/overlap_test_2/tables.md).
+
+- **Parsing**: both models 409 of 409 at the first attempt, nothing asked again (draft 2: Sonnet 406 at
+  the first attempt).  Calls whose first answer carried a key the rubric does not ask for, or wrote the
+  answer twice: Sonnet 29 of 180 under draft 2, 19 under draft 3 (13 a `"label"` key, 6 a filler key
+  such as `"color": ""`; 3 of the 19 wrote "Correction:" and the answer again, against 7); Opus 10 and 10.
+  The parser ignores extra keys, so none of this lost an answer, but the sentence does not stop the habit.
+- **Scores**: unchanged within run-to-run noise.  Each model against itself across the two runs: Sonnet
+  93% exact, Opus 94%, every numeric pair within one point.  Sonnet against Opus: 87% exact (86% under
+  draft 2), weighted kappa 0.92 (0.91), every numeric pair within one point.  Sonnet's answers on the 300
+  nearest pairs: 0 16, 1 79, 2 121, 3 37, 4 4, opposite 43 (draft 2: 15, 81, 118, 38, 4, 44).
+- **Escalation at a cut-off of 3**, nearest pairs: Sonnet and Opus fall on different sides 11 times (8
+  Sonnet 3 / Opus 2, 3 Sonnet 2 / Opus 3; draft 2: 10).  Sending Opus every pair Sonnet scores 2 or 3
+  catches all 11 and covers 158 of 257 pairs, in 94 of 100 calls; sending only Sonnet's 3s catches 8
+  and covers 37 pairs in 32 calls.
+- **Harness**: the first launch hit the expired API key, and the failed requests were recorded as
+  unparsed answers; the analysis then counted them as Sonnet's first attempt (0 of 409) and its table
+  writer stopped on a run of one rubric.  Fixed with tests: a failed request is not an attempt at the
+  format, is not asked again in the stage (the resume sends it), and a one-rubric run writes its tables.
+
 ## Roger's marks
 
 [m3_overlap_marks.md](./m3_overlap_marks.md) holds 30 pairs to mark on rubric A's scale, blinded (the
