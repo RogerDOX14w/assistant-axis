@@ -72,6 +72,13 @@ wins), so turning the sandbox off brings the Bash scan straight back.  A call
 that asks to leave the sandbox (``dangerouslyDisableSandbox: true``) is
 scanned as before.  The file tools run outside the sandbox and are always
 checked.
+
+Since 2026-10-03 a file-tool hit is a *deny* with a reason, not an ask
+(Roger: nothing should wait on him overnight): the agent is told to say in
+its reply which path it needs and why and not to look for another route, and
+a path Roger approves goes into ``ALLOWED_PREFIXES``.  A file tool names an
+exact path, so this never fires on prose.  A Bash hit (only while the sandbox
+is off) still asks, because the text scan is a heuristic that can misfire.
 """
 import json
 import os
@@ -279,17 +286,30 @@ def main() -> int:
         return 0
     shown = ", ".join(hits[:4]) + (" ..." if len(hits) > 4 else "")
     reason = f"File-access boundary: {tool} names a path outside the project ({shown}). "
-    if in_heredoc:
+    if tool in FILE_TOOLS:
+        # Roger, 2026-10-03: deny with a reason instead of asking, so nothing waits on him
+        # overnight; a file tool names an exact path, so this never fires on prose
+        decision = "deny"
         reason += (
-            "Every match is inside a heredoc body, so this is probably prose or script "
-            "text rather than a shell argument; check whether the body only mentions the "
-            "path or opens it. "
+            "Denied: outside the project boundary. Say in your reply which path you need and "
+            "why, and don't look for another route. Roger decides; a path he approves is added "
+            "to the allowlist in .claude/hooks/boundary_check.py."
         )
-    reason += "The rule (CLAUDE.md) says ask Roger first; approve only if intended."
+    else:
+        # the Bash text scan (only while the sandbox is off) is a heuristic that can misfire
+        # on prose, so a hit there still asks Roger rather than blocking the work
+        decision = "ask"
+        if in_heredoc:
+            reason += (
+                "Every match is inside a heredoc body, so this is probably prose or script "
+                "text rather than a shell argument; check whether the body only mentions the "
+                "path or opens it. "
+            )
+        reason += "The rule (CLAUDE.md) says ask Roger first; approve only if intended."
     out = {
         "hookSpecificOutput": {
             "hookEventName": "PreToolUse",
-            "permissionDecision": "ask",
+            "permissionDecision": decision,
             "permissionDecisionReason": reason,
         }
     }

@@ -341,7 +341,7 @@ class TestSandboxStandsTheBashScanDown:
         monkeypatch.setattr(bc, "SETTINGS_FILES", (write_settings(tmp_path / "s.json", {"enabled": True}),))
         out = run_hook({"tool_name": "Read", "cwd": REPO,
                         "tool_input": {"file_path": os.path.join(HOME, ".ssh", "config")}}, monkeypatch, capsys)
-        assert json.loads(out)["hookSpecificOutput"]["permissionDecision"] == "ask"
+        assert json.loads(out)["hookSpecificOutput"]["permissionDecision"] == "deny"
 
     def test_sandbox_off_scans_bash_as_before(self, tmp_path, monkeypatch, capsys):
         monkeypatch.setattr(bc, "SETTINGS_FILES", (write_settings(tmp_path / "s.json", {"enabled": False}),))
@@ -374,22 +374,22 @@ class TestMain:
         ("Read", "file_path"), ("Edit", "file_path"), ("Write", "file_path"),
         ("NotebookEdit", "notebook_path"), ("Grep", "path"), ("Glob", "path"),
     ])
-    def test_file_tools_ask_outside_and_stay_quiet_inside(self, tool, field, monkeypatch, capsys):
+    def test_file_tools_deny_outside_and_stay_quiet_inside(self, tool, field, monkeypatch, capsys):
         outside = os.path.join(HOME, ".ssh", "config")
         out = run_hook({"tool_name": tool, "cwd": REPO, "tool_input": {field: outside}}, monkeypatch, capsys)
-        assert json.loads(out)["hookSpecificOutput"]["permissionDecision"] == "ask"
+        assert json.loads(out)["hookSpecificOutput"]["permissionDecision"] == "deny"
         inside = os.path.join(REPO, "data", "README.md")
         assert run_hook({"tool_name": tool, "cwd": REPO, "tool_input": {field: inside}}, monkeypatch, capsys) == ""
 
     def test_file_tool_tilde_paths(self, monkeypatch, capsys):
         out = run_hook({"tool_name": "Read", "cwd": REPO,
                         "tool_input": {"file_path": "~/.ssh/config"}}, monkeypatch, capsys)
-        assert json.loads(out)["hookSpecificOutput"]["permissionDecision"] == "ask"
+        assert json.loads(out)["hookSpecificOutput"]["permissionDecision"] == "deny"
         assert run_hook({"tool_name": "Read", "cwd": REPO,
                          "tool_input": {"file_path": "~/.claude/settings.json"}}, monkeypatch, capsys) == ""
         out = run_hook({"tool_name": "Read", "cwd": REPO,
                         "tool_input": {"file_path": "~no_such_user_zz/x"}}, monkeypatch, capsys)
-        assert json.loads(out)["hookSpecificOutput"]["permissionDecision"] == "ask"
+        assert json.loads(out)["hookSpecificOutput"]["permissionDecision"] == "deny"
 
     @pytest.mark.parametrize("path", [
         "a/../../x.txt",                                        # relative, climbs out of the cwd
@@ -401,7 +401,7 @@ class TestMain:
     def test_file_tools_resolve_climbs(self, path, monkeypatch, capsys):
         out = run_hook({"tool_name": "Read", "cwd": OUTSIDE_CWD, "tool_input": {"file_path": path}},
                        monkeypatch, capsys)
-        assert json.loads(out)["hookSpecificOutput"]["permissionDecision"] == "ask"
+        assert json.loads(out)["hookSpecificOutput"]["permissionDecision"] == "deny"
 
     def test_file_tools_stay_quiet_for_climbs_inside_and_for_system_paths(self, monkeypatch, capsys):
         inside = os.path.join(REPO, "data", "traits", "..", "README.md")
@@ -409,10 +409,16 @@ class TestMain:
             assert run_hook({"tool_name": "Read", "cwd": REPO, "tool_input": {"file_path": path}},
                             monkeypatch, capsys) == ""
 
-    def test_glob_pattern_under_home_asks(self, monkeypatch, capsys):
+    def test_glob_pattern_under_home_is_denied(self, monkeypatch, capsys):
         out = run_hook({"tool_name": "Glob", "cwd": REPO,
                         "tool_input": {"pattern": os.path.join(HOME, ".cache") + "/**/*.bin"}}, monkeypatch, capsys)
-        assert json.loads(out)["hookSpecificOutput"]["permissionDecision"] == "ask"
+        assert json.loads(out)["hookSpecificOutput"]["permissionDecision"] == "deny"
+
+    def test_file_tool_denial_tells_the_agent_what_to_do(self, monkeypatch, capsys):
+        out = run_hook({"tool_name": "Read", "cwd": REPO,
+                        "tool_input": {"file_path": os.path.join(HOME, ".ssh", "config")}}, monkeypatch, capsys)
+        reason = json.loads(out)["hookSpecificOutput"]["permissionDecisionReason"]
+        assert "which path you need and why" in reason and "another route" in reason
 
     def test_other_tools_and_bad_input_print_nothing(self, monkeypatch, capsys):
         assert run_hook({"tool_name": "WebFetch", "tool_input": {"url": "https://example.com/~user"}},

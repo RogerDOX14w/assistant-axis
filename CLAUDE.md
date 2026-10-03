@@ -256,7 +256,12 @@ Code does, the last one that sets `sandbox.enabled` wins), so turning the
 sandbox off brings the scan straight back, and a call that asks to leave the
 sandbox is still scanned.  The hook keeps checking the file tools (Read,
 Edit, Write, NotebookEdit, Glob, Grep), which run outside the sandbox and
-work on exact paths, so they never produced the false positives.  The
+work on exact paths, so they never produced the false positives.  Since the
+same day a file-tool hit is a **deny** with a reason, not an ask (Roger:
+nothing should wait on him overnight): the agent is told to say in its reply
+which path it needs and why and not to look for another route; a path Roger
+approves goes into `ALLOWED_PREFIXES` in the hook.  A Bash hit (only while
+the sandbox is off) still asks, because the text scan can misfire.  The
 sandbox works in the VS Code extension (checked 2026-10-03) and applies the
 moment the settings file is saved, with no restart; it affects every
 session working in the main checkout, since they share that file.
