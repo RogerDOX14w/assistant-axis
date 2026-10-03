@@ -437,6 +437,54 @@ text, the current one):
   adventurous / adventurous eater); once Roger says opposite where Opus says 0 (nihilistic /
   essentialist, where Haiku also says opposite).
 
+### Fable's scores and the adjudication (2026-10-04)
+
+Roger switched the session to Fable 5.1 and asked for the 30 pairs rescored by it, in the
+conversation, and for the Fable-against-Opus disagreements to be adjudicated.  Two caveats: the scoring
+was not blind (every rater's answer had been seen), and Fable is a Claude model, so agreement with
+Sonnet and Opus is expected rather than independent evidence.  Scores were given from the descriptions
+on the rubric's terms, reason first; the models' recorded reasons were read before adjudicating.
+Agreement: Fable with Opus 25 / 30, Sonnet 24, Haiku 22, Roger 21 (23 with his second choices).
+
+| # | target / listed | Roger | Haiku | Sonnet | Opus | Fable | adjudicated | note |
+|---|---|---|---|---|---|---|---|---|
+| 1 | [self-blaming](../../data/traits/instructions/self_blaming.json) / [blame-shifting](../../data/traits/instructions/blame_shifting.json) | opp | opp | opp | opp | opp | | |
+| 2 | [erudite](../../data/traits/instructions/erudite.json) / [esoteric](../../data/traits/instructions/esoteric.json) | 1 (2) | 1 | 2 | 1 | 1 | | |
+| 3 | [utilitarian](../../data/traits/instructions/utilitarian.json) / [deontological](../../data/traits/instructions/deontological.json) | opp | opp | opp | opp | opp | | |
+| 4 | [animated](../../data/traits/instructions/animated.json) / [flat](../../data/traits/instructions/flat.json) | opp | opp | opp | opp | opp | | |
+| 5 | [conservative](../../data/traits/instructions/conservative.json) / [overconfident](../../data/traits/instructions/overconfident.json) | 0 | 0 | 0 | 0 | 0 | | |
+| 6 | [materialist](../../data/traits/instructions/materialist.json) / [relativist](../../data/traits/instructions/relativist.json) | 0 | 0 | 0 | 0 | 0 | | |
+| 7 | [excitable](../../data/traits/instructions/excitable.json) / [narrative](../../data/traits/instructions/narrative.json) | 0 | 0 | 0 | 0 | 0 | | |
+| 8 | [religious](../../data/traits/instructions/religious.json) / [secular](../../data/traits/instructions/secular.json) | opp | opp | opp | opp | opp | | |
+| 9 | [extroverted](../../data/traits/instructions/extroverted.json) / [energetic](../../data/traits/instructions/energetic.json) | 0 | 1 | 1 | 1 | 0 | **0** | immaterial; the fuzziest boundary: Opus's shared "idea of energy" is a metaphor on one side (energized *by company*) and vigour on the other; different dimensions in one area is the rubric's 0 example |
+| 10 | [temperamental](../../data/traits/instructions/temperamental.json) / [even-tempered](../../data/traits/instructions/even_tempered.json) | opp | opp | opp | opp | opp | | |
+| 11 | [iconoclastic](../../data/traits/instructions/iconoclastic.json) / [deconstructionist](../../data/traits/instructions/deconstructionist.json) | 2 | 2 | 1 | 1 | 2 | **2** | immaterial; Opus's reason itself opens "both challenge established foundations", and that challenge is each trait's core, not its area; the difference (revered institutions attacked vs. contradictions in concepts exposed) is each adding something |
+| 12 | [ethereal](../../data/traits/instructions/ethereal.json) / [spiritual](../../data/traits/instructions/spiritual.json) | 1 | 2 | 1 | 1 | 1 | | |
+| 13 | [strategic](../../data/traits/instructions/strategic.json) / [long-term oriented](../../data/traits/instructions/long_term_oriented.json) | 1 (2) | 2 | 2 | 2 | 2 | | shared core: the near win passed up for the eventual one |
+| 14 | [agreeable](../../data/traits/instructions/agreeable.json) / [conciliatory](../../data/traits/instructions/conciliatory.json) | 2 | 3 | 3 | 3 | 2 | **2** | matters at cut-off 3.  Not a subset, as Opus has it: conciliatory adds peacemaking *between other parties*, agreeable adds avoiding confrontation; a tough mediator is conciliatory and not agreeable |
+| 15 | [dispassionate](../../data/traits/instructions/dispassionate.json) / [detached](../../data/traits/instructions/detached.json) | 4 | 4 | 4 | 4 | 4 | | |
+| 16 | [nihilistic](../../data/traits/instructions/nihilistic.json) / [essentialist](../../data/traits/instructions/essentialist.json) | opp | opp | 0 | 0 | 0 | | differs from Roger: a persona can coherently hold both (fixed natures, no meaning), so not the rubric's "reverse"; the opposition Roger marks is the tetrahedron's, which M3 reads from the arrangement |
+| 17 | [hedonistic](../../data/traits/instructions/hedonistic.json) / [self-indulgent](../../data/traits/instructions/self_indulgent.json) | 3 (2) | 3 | 3 | 3 | 3 | | |
+| 18 | [consequentialist](../../data/traits/instructions/consequentialist.json) / [ends justify means](../../data/traits/instructions/ends_justify_means.json) | 2 | 2 | 2 | 2 | 2 | | |
+| 19 | [deconstructionist](../../data/traits/instructions/deconstructionist.json) / [structuralist](../../data/traits/instructions/structuralist.json) | 1 | 1 | 1 | 1 | 1 | | |
+| 20 | [benevolent](../../data/traits/instructions/benevolent.json) / [benign](../../data/traits/instructions/benign.json) | 2 | 2 | 2 | 2 | 2 | | |
+| 21 | [honorable](../../data/traits/instructions/honorable.json) / [deontological](../../data/traits/instructions/deontological.json) | 2 (3) | 3 | 2 | 2 | 3 | **3** | matters at cut-off 3.  Rules held "independent of consequences" are already rules held at cost, so honorable adds no content; deontological is the wider concept (positive duties, anyone's acts): scope, the rubric's 3.  Not symmetric with item 18: ends-justify-means is a threshold trait, honorable is deontology lived throughout.  The corpus seeded honorable as deontological's character-trait version (the deliberate-duplicate group) |
+| 22 | [adventurous](../../data/traits/instructions/adventurous.json) / [adventurous eater](../../data/traits/instructions/adventurous_eater.json) | 2 | 3 | 2 | 3 | 3 | | differs from Roger: adventurous narrowed to food, scope |
+| 23 | [strategic](../../data/traits/instructions/strategic.json) / [tactical](../../data/traits/instructions/tactical.json) | opp | opp | opp | opp | opp | | |
+| 24 | [moral relativist](../../data/traits/instructions/moral_relativist.json) / [relativist](../../data/traits/instructions/relativist.json) | 4 | 3 | 3 | 3 | 3 | | differs from Roger: relativist covers truth as well, so the labels are not interchangeable |
+| 25 | [serious](../../data/traits/instructions/serious.json) / [formal](../../data/traits/instructions/formal.json) | 3 | 3 | 2 | 2 | 2 | | differs from Roger: levity and register are two axes, and the corpus pairs them with different opposites ([playful](../../data/traits/instructions/playful.json), [casual](../../data/traits/instructions/casual.json)); serious's description does open with "formal", a conflation in the writing |
+| 26 | [socratic](../../data/traits/instructions/socratic.json) / [educational](../../data/traits/instructions/educational.json) | 2 | 2 | 1 | 1 | 1 | | Fable's first instinct was 2; Opus's reason persuaded it: educational as described *transfers* knowledge by explaining, socratic *elicits* it by refusing answers; the aim is shared, the cores differ; socratic's recorded opposite, [didactic](../../data/traits/instructions/didactic.json), is close to the described educational |
+| 27 | [extroverted](../../data/traits/instructions/extroverted.json) / [gregarious](../../data/traits/instructions/gregarious.json) | 3 (2) | 3 | 3 | 2 | 3 | **3** | matters at cut-off 3.  Opus's "each adds": but extroverted's description already has the outgoing behaviour, so the addition is one-sided (the energy mechanism), which is emphasis; the recorded opposites [introverted](../../data/traits/instructions/introverted.json) and [solitary](../../data/traits/instructions/solitary.json) are themselves near-synonyms |
+| 28 | [theoretical](../../data/traits/instructions/theoretical.json) / [conceptual](../../data/traits/instructions/conceptual.json) | 4 | 4 | 3 | 3 | 3 | | differs from Roger, immaterial for the merge list: "conceptual" has a sense (idea-driven, as in art) that "theoretical" lacks |
+| 29 | [cosmopolitan](../../data/traits/instructions/cosmopolitan.json) / [philanthropic](../../data/traits/instructions/philanthropic.json) | 1 | 1 | 0 | 0 | 0 | | Fable's first instinct was 1; persuaded to 0: respect for cultures and charitable giving are different concepts, linked only by looking beyond one's own group; their adjacency is the moral-circle sequence, an arrangement, not this score |
+| 30 | [moderate](../../data/traits/instructions/moderate.json) / [temperate](../../data/traits/instructions/temperate.json) | 2 | 2 | 2 | 2 | 2 | | |
+
+Of the five adjudications, three go against Opus on pairs where a 3 is the difference between "covered"
+and "new" at the far-from-alignment cut-off (14 and 27 against Opus's direction, 21 with it: items 14
+and 27 Opus would misjudge in opposite directions).  Everything any rater gave is within one point of
+every other rater on every numeric item; the adjudications are all about which side of a boundary a
+pair falls, never about the neighbourhood.
+
 ## Recommendation (mine, for you to decide)
 
 1. **Rubric A, concept similarity, for the overlap call.**  Persona space does not choose: the two tie
