@@ -855,7 +855,8 @@ def test_overlap_end_to_end_with_a_fake_client(overlap_env):
     assert usage["n_calls"] == n_calls * 6 and set(usage["per_model"]) == set(OT.MODELS)
     run = json.loads((out / "run.json").read_text())
     assert len(run["stages"]) == 6 and [s["model"] for s in run["stages"]][:2] == [OT.HAIKU, OT.HAIKU]
-    assert run["rubric_versions"] == {"overlap_concept": 2, "overlap_cooccurrence": 2} and run["exit_code"] == 0
+    pinned = OT.load_rubrics()                                       # the latest pins, not a fixed number
+    assert run["rubric_versions"] == {pinned[r]["name"]: pinned[r]["version"] for r in "AB"} and run["exit_code"] == 0
     summ = json.loads((out / "summary.json").read_text())
     assert "_provenance" in summ and summ["result"]["parse"][f"A|{OT.OPUS}"]["rate"] == 1.0
     assert (out / "tables.md").read_text().startswith("# Overlap test: tables")
