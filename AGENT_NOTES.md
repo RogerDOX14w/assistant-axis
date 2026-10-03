@@ -4786,6 +4786,23 @@ When creating prompts that other LLMs will consume:
 - Pattern: Typos → Clarity → Consistency → Edge cases
 - This mirrors human proofreading where attention shifts with each read
 
+### Read the rendered prompt, not the template (Roger, 2026-10-03)
+When writing or editing a rubric or prompt template, build a sample of it
+**as the model will receive it**: the template filled in, with a realistic
+payload appended or templated in exactly as the calling code will send it
+(system and user turns, JSON as serialized, labels in display form), and
+read that for flow and for whether the directions fit the data.  Where the
+call has important variants (one item or several, a field present or
+absent, an edge case such as an empty list), render one sample per variant.
+Reading the template alone hides mismatches between what the instructions
+describe and what the data is: the M3 overlap draft said "each item gives
+one target" although each call carries exactly one target, and its answer
+format said `"id": <int>` without saying that the ids number the listed
+traits, not the items; both stand out at once in a rendered sample and were
+invisible in the template.  Put the rendered sample into the draft document
+too, so that Roger reviews what the model reads, and render again after
+each edit.
+
 ---
 
 ## Documentation Context
