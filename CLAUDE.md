@@ -243,9 +243,15 @@ settings say: the settings files, `.claude/hooks` and `skills`, and
 tools, which run outside the sandbox.  Use `$TMPDIR` for temporary files.
 zsh prints a harmless `nice(5) failed` for a backgrounded job.  The
 process list is hidden inside the sandbox (`ps` and `pgrep` fail), so a
-watch loop cannot ask whether a background job is still running that way:
-record the job's PID when starting it (`echo $! > job.pid`) and test it with
-`kill -0`, or watch for the job's output files.  If a
+watch loop cannot ask whether a background job is still running that way.
+Record the job's PID when starting it (`echo $! > job.pid`), but note that
+`kill -0` on it from a *later* command fails with "operation not permitted"
+even while the job is alive (the sandbox blocks signals to a process another
+command started); only "no such process" means it has ended.  So test
+`kill -0 "$P" 2>&1 | grep -q "no such process"` for the end, never the exit
+status alone (2026-10-03: a watch loop that trusted the exit status reported
+a live run as finished).  Watching the job's output files or log is the
+other way.  If a
 command the work genuinely needs hits a block, report the path and the
 command to Roger: adding to the allow lists is his decision, and routing
 around a block is not an option.
