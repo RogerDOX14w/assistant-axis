@@ -22,45 +22,45 @@ examples: near-duplicates of corpus terms, never the terms themselves).
 ## Rubric A: concept similarity
 
 ````text
-Each item gives one persona trait, the target, with a one-sentence description, and a numbered list of other persona traits, each with its description. For each listed trait, say how similar its concept is to the target's: are they the same idea, or different ideas?
+You are given one JSON object: a persona trait, the target ("target"), with a one-sentence description, and a numbered list of other persona traits ("traits"), each with its description. For each listed trait, say how similar its concept is to the target's: are they the same concept, or different concepts?
 
-Judge the meaning of the two descriptions, not how often the two traits are found together in the same person. Two traits can go together often and still be different ideas, as being punctual and being tidy do.
+Judge the meaning of the two descriptions, not how often the two traits are found together in the same person. Two traits can go together often and still be different concepts, as being punctual and being tidy do.
 
 Give one of these answers for each listed trait:
 - 4: the same concept. Either label could replace the other in any description of a persona. For example, talkative and loquacious.
 - 3: the same concept, differing only in scope, degree or emphasis. For example, penny-pinching and miserly: miserly is the same carefulness with money, carried further.
-- 2: overlapping concepts. They share a core, and each adds something the other lacks. For example, studious and bookish: both are about learning from books, but studious adds diligence and bookish adds a taste for reading.
-- 1: related but distinct concepts: neighbours, not the same idea. For example, tetchy and sullen: both are bad-tempered, but quick irritation is a different thing from silent resentment.
-- 0: different concepts, connected at most by belonging to the same broad area. For example, outdoorsy and punctual.
+- 2: overlapping concepts. They share a core, but each adds something the other lacks. For example, studious and bookish: both are about learning from books, but studious adds diligence and bookish adds a taste for reading.
+- 1: related but distinct concepts: neighbours, not the same concept. For example, tetchy and sullen: both are bad-tempered, but quick irritation is a different thing from silent resentment.
+- 0: different concepts, connected at most by belonging to the same broad area. For example, chatty and plainspoken: both are about how a person speaks, but one is how much and the other how directly.
 - "opposite": the listed trait is the reverse of the target, the same quality at the other end. For example, cheery and morose.
 - "unsure": you cannot tell from the two descriptions.
 
 For each listed trait give a reason in one short sentence, then the answer.
 
 Respond with one JSON object and nothing else, reason first:
-{"results": [{"id": <int>, "reason": "<one short sentence>", "similarity": 0|1|2|3|4|"opposite"|"unsure"}]}
+{"results": [{"id": <the listed trait's id>, "reason": "<one short sentence>", "similarity": 0|1|2|3|4|"opposite"|"unsure"}]}
 Return one row per listed trait, in the order given.
 ````
 
 ## Rubric B: co-occurrence
 
 ````text
-Each item gives one persona trait, the target, with a one-sentence description, and a numbered list of other persona traits, each with its description. For each listed trait, say how often a persona that has the target trait would also show the listed trait.
+You are given one JSON object: a persona trait, the target ("target"), with a one-sentence description, and a numbered list of other persona traits ("traits"), each with its description. For each listed trait, say how often a persona that has the target trait would also show the listed trait.
 
-Judge how the two go together in a person, not whether they are the same idea. Two traits can be different ideas and still nearly always go together.
+Judge how the two go together in a person, not whether they are the same concept. Two traits can be different concepts and still nearly always go together.
 
 Give one of these answers for each listed trait:
 - 4: almost always: a persona with the target trait would show this one too. For example, a talkative persona would be loquacious.
 - 3: usually. For example, a studious persona would usually be bookish.
 - 2: often, but far from always. For example, a punctual persona would often be tidy.
 - 1: sometimes, about as often as anyone else. For example, an outdoorsy persona would sometimes be punctual.
-- 0: rarely or never: having the target trait makes this one unlikely. For example, a cheery persona would rarely be morose.
+- 0: less often than in anyone else, down to never: having the target trait makes this one less likely. For example, a cheery persona would rarely be morose.
 - "unsure": you cannot tell from the two descriptions.
 
 For each listed trait give a reason in one short sentence, then the answer.
 
 Respond with one JSON object and nothing else, reason first:
-{"results": [{"id": <int>, "reason": "<one short sentence>", "co_occurrence": 0|1|2|3|4|"unsure"}]}
+{"results": [{"id": <the listed trait's id>, "reason": "<one short sentence>", "co_occurrence": 0|1|2|3|4|"unsure"}]}
 Return one row per listed trait, in the order given.
 ````
 
@@ -70,6 +70,40 @@ pair where the two rubrics should part company is the one in A's second paragrap
 are different concepts (A: 0 or 1) that often go together (B: 2).  For finding gaps, that is the
 case that matters: a correlated but distinct trait can still be a new direction, and rubric A keeps
 it, where rubric B would call it covered.
+
+## Rendered sample: what the model receives
+
+The rubric is the system prompt; the user turn is one JSON object, as below.  The target here is
+an existing trait standing in for a candidate, with five corpus traits of the kind retrieval returns
+(in random order, numbered by `id`; no scores, no ranks).  Rubric B receives the identical payload.
+Following the practice in AGENT_NOTES ("Read the rendered prompt, not the template"), this sample is
+to be re-rendered after each edit.
+
+**System** (rubric A, as in the block above).
+
+**User:**
+
+```json
+{"target": {"label": "dramatic", "description": "This means using emotionally charged language, vivid and theatrical descriptions, and presenting information with heightened intensity and dramatic flair."},
+ "traits": [
+  {"id": 1, "label": "passionate", "description": "This means showing intense enthusiasm, strong emotions, fervor, and deep investment or commitment to the topics being discussed."},
+  {"id": 2, "label": "melodramatic", "description": "This means using exaggerated emotion, theatrical language, dramatic intensity, and over-the-top expression to convey ideas."},
+  {"id": 3, "label": "understated", "description": "This means deliberately minimizing the importance or significance of things and expressing ideas with restraint, using modest language rather than emphatic or dramatic expressions."},
+  {"id": 4, "label": "theatrical", "description": "This means using dramatic flair, exaggerated language, vivid imagery, and delivering content as if performing on stage with sweeping gestures and commanding presence."},
+  {"id": 5, "label": "expressive", "description": "This means letting feelings show as they come, putting one's own joys, worries, and soft spots into words, and keeping no professional distance from anyone."}
+ ]}
+```
+
+**Expected answer under rubric A** (my reading, for comparison when the test runs): theatrical 4
+(the drop-or-merge table's closest pair), melodramatic 3 (the same flair, carried further),
+passionate 1 or 2 (strong feeling, but about commitment, not delivery), expressive 1 (showing
+feeling, not performing it), understated "opposite".  Under rubric B, passionate and expressive
+should score higher than under A: they often go together with being dramatic without being the
+same concept.
+
+Variants the test will also produce, to render once the harness exists: a target with a single
+listed trait; a target whose list includes a recorded antonym pair (expanded in M3 before this call,
+but present in the test as a control).
 
 ## The test
 
@@ -117,3 +151,4 @@ model is decided at the M3 pilot), and a first view of where the cut-offs might 
 | draft | who | what changed | why |
 |---|---|---|---|
 | 1 | Claude | First draft of both rubrics and the test | Roger, 2026-10-02: concept similarity as the primary, co-occurrence as the comparison arm |
+| 2 | Roger and Claude | Both rubrics: "idea" replaced by "concept" (three places in A, two in B); the opening now says "You are given one JSON object: a persona trait, the target ("target") ... a numbered list of other persona traits ("traits")" instead of "Each item gives ..."; the answer's `id` is "the listed trait's id"; a rendered sample added; A's answer 2 reads "They share a core, but each adds something the other lacks" (was "and"); A's answer 0 example is now chatty and plainspoken (both about speech, how much against how directly), replacing outdoorsy and punctual, which share no area and so did not illustrate "connected at most by belonging to the same broad area"; B's answer 0 now reads "less often than in anyone else, down to never: having the target trait makes this one less likely" (was "rarely or never ... makes this one unlikely"), so that 0 means below the base rate that answer 1 names and a mild negative relation has an answer | Roger, 2026-10-03: the scale already says "concept", and mixing the words could read as two tests, while "idea" invites a looser reading that pushes scores up.  "Each item" was left over from the filter's multi-item rubrics: each overlap call carries exactly one target, and the ids number the listed traits.  Both mismatches show at once in a rendered sample, now the practice in AGENT_NOTES |
