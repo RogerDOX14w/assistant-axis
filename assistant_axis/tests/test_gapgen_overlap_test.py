@@ -282,6 +282,30 @@ class TestParse:
         rows, errors, meta = OT.parse_answer(answer([(1, 1), (7, 1)]), "A", 1)
         assert set(rows) == {1} and meta["extra_ids"] == [7]
 
+    def test_a_self_correction_uses_the_last_answer(self):
+        """Sonnet 5.5, overlap_test_1: an answer with a stray "label" key, then "Correction: ..." and the
+        answer again; the last complete results object is the model's final answer."""
+        first = json.dumps({"results": [{"id": 1, "reason": "a", "similarity": 2},
+                                        {"id": 2, "label": "placid", "reason": "b", "similarity": 3}]})
+        final = json.dumps({"results": [{"id": 1, "reason": "a", "similarity": 2},
+                                        {"id": 2, "reason": "b2", "similarity": 4}]})
+        text = first + "\n\nCorrection: the output must have the reason field only. Corrected output:\n\n" + final
+        rows, errors, meta = OT.parse_answer(text, "A", 2)
+        assert errors == {} and rows[2]["value"] == 4 and rows[2]["reason"] == "b2"
+        assert meta["n_result_objects"] == 2
+        rows, errors, meta = OT.parse_answer("```json\n" + first + "\n```\nCorrection:\n```json\n" + final + "\n```",
+                                             "A", 2)
+        assert rows[2]["value"] == 4 and meta["n_result_objects"] == 2
+
+    def test_a_missing_key_still_fails(self):
+        """Sonnet 5.5, overlap_test_1: `"reason": "...", "opposite"}` (the answer's key left out) is not JSON;
+        no row of the call is salvaged."""
+        text = ('{"results": [{"id": 1, "reason": "x", "similarity": 1}, '
+                '{"id": 2, "reason": "Ecocentric is the reverse view.", "opposite"}]}')
+        rows, errors, meta = OT.parse_answer(text, "A", 2)
+        assert rows == {} and all("unparseable" in e for e in errors.values())
+        assert meta["n_result_objects"] == 0
+
     def test_duplicates_order_and_reason_position(self):
         text = json.dumps({"results": [{"id": 2, "similarity": 1, "reason": "late"},
                                        {"id": 1, "reason": "a", "similarity": 3},
@@ -353,6 +377,52 @@ class TestRunner:
         assert res.budget_exceeded and len(client.calls) == 1 and res.n_sent == 1
         rec = OT.read_records(tmp_path / "r.jsonl")[0]
         assert rec["response"]["text"] and rec["parsed"]
+
+    def test_an_unparsed_answer_is_asked_again_once(self, tmp_path):
+        rb = OT.load_rubrics()
+        ps = pair_set()
+        seen: dict = {}
+        good = responder_for(rb, value=1)
+
+        def flaky(kw):
+            u = user_text(kw)
+            seen[u] = seen.get(u, 0) + 1
+            return make_response('{"results": [{"id": 1, "reason": "x", "opposite"}]}') if seen[u] == 1 else good(kw)
+        client = FakeAsyncAnthropic(flaky)
+        r = OT.OverlapRunner(client, rb, corpus(), usage=MultiModelUsage(), responses_path=tmp_path / "r.jsonl",
+                             retry_delays=())
+        res = run(r.run_stage("A", OT.SONNET, ps.calls))
+        assert len(client.calls) == 2 * len(ps.calls) and res.n_reasked == len(ps.calls)
+        assert res.n_ok == res.n_pairs == len(ps.pairs) and res.n_ok_first == 0
+        recs = OT.read_records(tmp_path / "r.jsonl")
+        assert len(recs) == 2 * len(ps.calls) and {r["parse_attempt"] for r in recs} == {1, 2}
+        ans = OT.collect_answers(ps, recs)[("A", OT.SONNET)]
+        assert all(a["value"] == 1 for a in ans.values())
+        first = OT.first_attempt_parse(ps, recs)[("A", OT.SONNET)]
+        assert first == {"ok": 0, "total": len(ps.pairs)}
+
+    def test_a_call_that_never_parses_is_sent_twice_and_resent_on_resume(self, tmp_path):
+        rb = OT.load_rubrics()
+        ps = pair_set()
+        client = FakeAsyncAnthropic(responder_for(rb, bad_model=OT.OPUS))
+        path = tmp_path / "r.jsonl"
+        r = OT.OverlapRunner(client, rb, corpus(), usage=MultiModelUsage(), responses_path=path, retry_delays=())
+        res = run(r.run_stage("B", OT.OPUS, ps.calls[:1]))
+        assert len(client.calls) == 2 and res.n_ok == 0
+        assert ("B", OT.OPUS, ps.calls[0].call_id) not in r.done()       # answered but unparsed: not done
+        run(r.run_stage("B", OT.OPUS, ps.calls[:1]))
+        assert len(client.calls) == 4
+
+    def test_answers_are_reparsed_from_the_recorded_text(self, tmp_path):
+        """A record written by an older parser (its stored "parsed" empty) is read with the current one."""
+        ps = pair_set()
+        c = ps.calls[0]
+        text = "\n".join(json.dumps({"results": [{"id": i, "reason": "r", "similarity": 2}
+                                                 for i in range(1, len(c.listed) + 1)]}) for _ in range(2))
+        rec = {"rubric": "A", "model": OT.OPUS, "call_id": c.call_id, "listed": c.listed, "response": {"text": text},
+               "parsed": {}, "errors": {"1": "unparseable response: Extra data"}}
+        ans = OT.collect_answers(ps, [rec])[("A", OT.OPUS)]
+        assert {a["value"] for pid, a in ans.items() if pid.startswith(c.call_id + ">")} == {2}
 
     def test_parse_rate_alert(self, tmp_path, caplog):
         rb = OT.load_rubrics()

@@ -386,21 +386,53 @@ def answer_value(v: Any, categories: Sequence[str]) -> Any:
     return int(n) if n is not None else None
 
 
+#: 2 (2026-10-03, after Sonnet 5.5's first stage in overlap_test_1): the last complete results object
+#: in the text is the answer (a model that writes an answer, then "Correction: ..." and the answer
+#: again); 1 read the first-to-last brace span as one object.  The analysis always re-parses the
+#: recorded text with the current parser.
+PARSER_VERSION = 2
+
+
+def result_objects(text: str) -> list[dict]:
+    """Every top-level JSON object in ``text`` that carries a ``results`` list, in order (nested
+    objects are skipped; text between objects, fences and prose included, is ignored)."""
+    dec = json.JSONDecoder(strict=False)
+    out, i = [], 0
+    while True:
+        j = text.find("{", i)
+        if j < 0:
+            return out
+        try:
+            obj, end = dec.raw_decode(text, j)
+        except json.JSONDecodeError:
+            i = j + 1
+            continue
+        if isinstance(obj, dict) and isinstance(obj.get("results"), list):
+            out.append(obj)
+        i = end
+
+
 def parse_answer(text: Optional[str], rubric: str, n_listed: int) -> tuple[dict, dict, dict]:
     """``(rows, errors, meta)``: ``rows[id] = {"reason", "value", "reason_first"}`` for every listed id
     that parsed; ``errors[id]`` says why each other id failed (``"missing"``, a validation message, or
     the JSON failure for every id); ``meta``: rows returned, whether they came in the order given, ids
-    outside 1..n, and whether every parsed row put its reason first."""
+    outside 1..n, whether every parsed row put its reason first, and how many complete results objects
+    the text held (the last is the answer: :data:`PARSER_VERSION`)."""
     spec = RUBRICS[rubric]
     key, cats = spec["key"], spec["categories"]
     want = list(range(1, n_listed + 1))
-    meta: dict = {"n_rows": 0, "in_order": None, "extra_ids": [], "reason_first": None}
+    meta: dict = {"n_rows": 0, "in_order": None, "extra_ids": [], "reason_first": None, "n_result_objects": 0}
     if not text or not text.strip():
         return {}, {i: "empty response" for i in want}, meta
-    try:
-        raw = _rows_of(_load_json(text))
-    except (ValueError, json.JSONDecodeError) as exc:
-        return {}, {i: f"unparseable response: {exc}" for i in want}, meta
+    objs = result_objects(text)
+    meta["n_result_objects"] = len(objs)
+    if objs:
+        raw = objs[-1]["results"]
+    else:
+        try:
+            raw = _rows_of(_load_json(text))
+        except (ValueError, json.JSONDecodeError) as exc:
+            return {}, {i: f"unparseable response: {exc}" for i in want}, meta
     rows: dict[int, dict] = {}
     errors: dict[int, str] = {}
     order: list[int] = []
@@ -438,6 +470,11 @@ def parse_answer(text: Optional[str], rubric: str, n_listed: int) -> tuple[dict,
 
 # --------------------------------------------------------------------------- running
 
+#: A call whose answer does not parse fully is sent once more (same request), for every model alike;
+#: the first attempt's parse rate is reported beside the final one.
+ASK_ATTEMPTS = 2
+
+
 def response_key(rec: Mapping) -> tuple[str, str, str]:
     return rec["rubric"], rec["model"], rec["call_id"]
 
@@ -449,17 +486,36 @@ def read_records(path: Path) -> list[dict]:
     return [json.loads(x) for x in p.read_text(encoding="utf-8").splitlines() if x.strip()]
 
 
-def latest_records(records: Iterable[Mapping]) -> dict[tuple, dict]:
-    """The last record per (rubric, model, call): a resumed run re-sends a call whose earlier attempt
-    got no answer."""
-    out: dict[tuple, dict] = {}
-    for r in records:
-        out[response_key(r)] = dict(r)
-    return out
-
-
 def answered(rec: Mapping) -> bool:
     return (rec.get("response") or {}).get("text") is not None
+
+
+def reparse(rec: Mapping) -> tuple[dict, dict, dict]:
+    """A record's answer parsed with the current parser (never the stored ``parsed``, which an older
+    parser may have written)."""
+    return parse_answer((rec.get("response") or {}).get("text"), rec["rubric"], len(rec["listed"]))
+
+
+def fully_parsed(rec: Mapping) -> bool:
+    return answered(rec) and not reparse(rec)[1]
+
+
+def latest_records(records: Iterable[Mapping]) -> dict[tuple, dict]:
+    """The final record per (rubric, model, call): the last one whose answer parses fully, else the last
+    one (a call asked again, in the stage or on resume, has several)."""
+    last: dict[tuple, dict] = {}
+    good: dict[tuple, dict] = {}
+    for r in records:
+        k = response_key(r)
+        last[k] = dict(r)
+        if fully_parsed(r):
+            good[k] = dict(r)
+    return {k: good.get(k, v) for k, v in last.items()}
+
+
+def done_keys(records: Iterable[Mapping]) -> set:
+    """(rubric, model, call) keys whose answer on record parses fully: not sent again on resume."""
+    return {k for k, r in latest_records(records).items() if fully_parsed(r)}
 
 
 @dataclass
@@ -469,8 +525,10 @@ class StageResult:
     n_calls: int
     n_sent: int = 0
     n_skipped: int = 0
+    n_reasked: int = 0
     n_pairs: int = 0
     n_ok: int = 0
+    n_ok_first: int = 0
     budget_exceeded: bool = False
 
     @property
@@ -479,15 +537,17 @@ class StageResult:
 
 
 class OverlapRunner:
-    """Sends the calls of one (rubric, model) stage concurrently and appends one record per call to
-    ``responses.jsonl`` as it completes.  ``usage`` (a ``MultiModelUsage``, usually ``cost.GuardedUsage``
-    with the run's cap) is charged for every response received; when the cap is crossed the stage stops
-    sending, keeps the answer that crossed it and reports ``budget_exceeded``."""
+    """Sends the calls of one (rubric, model) stage concurrently and appends one record per request to
+    ``responses.jsonl`` as it completes.  A call whose answer does not parse fully is sent once more
+    (:data:`ASK_ATTEMPTS`); each record carries its ``parse_attempt``.  ``usage`` (a ``MultiModelUsage``,
+    usually ``cost.GuardedUsage`` with the run's cap) is charged for every response received; when the
+    cap is crossed the stage stops sending, keeps the answer that crossed it and reports
+    ``budget_exceeded``."""
 
     def __init__(self, client, rubrics: Mapping[str, Mapping], corpus: Mapping[str, Mapping], *,
                  usage: MultiModelUsage, responses_path: Path, concurrency: int = DEFAULT_CONCURRENCY,
                  max_tokens: int = MAX_TOKENS, temperature: Optional[float] = TEMPERATURE,
-                 retry_delays: Sequence[float] = RETRY_DELAYS_S):
+                 retry_delays: Sequence[float] = RETRY_DELAYS_S, ask_attempts: int = ASK_ATTEMPTS):
         self.client = client
         self.rubrics = rubrics
         self.corpus = corpus
@@ -497,12 +557,13 @@ class OverlapRunner:
         self.max_tokens = max_tokens
         self.temperature = temperature
         self.retry_delays = tuple(retry_delays)
+        self.ask_attempts = max(1, int(ask_attempts))
 
     def done(self) -> set:
-        return {k for k, r in latest_records(read_records(self.responses_path)).items() if answered(r)}
+        return done_keys(read_records(self.responses_path))
 
     def _record(self, call: Call, rubric: str, model: str, params: Mapping, text: Optional[str], meta: Mapping,
-                rows: Mapping, errors: Mapping, pmeta: Mapping) -> dict:
+                rows: Mapping, errors: Mapping, pmeta: Mapping, attempt: int) -> dict:
         rb = self.rubrics[rubric]
         req = {k: v for k, v in params.items() if k not in ("system", "messages")}
         req["system_sha256"] = rb["sha256"]
@@ -512,6 +573,7 @@ class OverlapRunner:
                 "target": call.target, "listed": list(call.listed), "request": req,
                 "response": {"text": text, "stop_reason": meta.get("stop_reason"), "usage_raw": meta.get("usage_raw"),
                              "attempts": meta.get("attempts"), "error": meta.get("error")},
+                "parse_attempt": attempt, "parser_version": PARSER_VERSION,
                 "parsed": {str(k): v for k, v in rows.items()}, "errors": {str(k): v for k, v in errors.items()},
                 "parse_meta": dict(pmeta), "at": utc_now()}
 
@@ -526,64 +588,95 @@ class OverlapRunner:
         self.responses_path.parent.mkdir(parents=True, exist_ok=True)
 
         async def one(call: Call) -> None:
-            if stop.is_set():
-                return
-            async with sem:
+            for attempt in range(1, self.ask_attempts + 1):
                 if stop.is_set():
                     return
-                params = call_params(call, self.corpus, rubric_text=text_of, model=model, max_tokens=self.max_tokens,
-                                     temperature=self.temperature)
-                meta: dict = {}
-                try:
-                    text = await call_anthropic_json(
-                        self.client, system=text_of, user=params["messages"][0]["content"], model=model,
-                        max_tokens=self.max_tokens, temperature=self.temperature, usage=self.usage,
-                        cache_system=False, retry_delays=self.retry_delays, meta=meta)
-                except BudgetExceededError:
-                    text = meta.get("text")
-                    res.budget_exceeded = True
-                    stop.set()
-                rows, errors, pmeta = parse_answer(text, rubric, len(call.listed))
-                rec = self._record(call, rubric, model, params, text, meta, rows, errors, pmeta)
-                async with lock:
-                    with self.responses_path.open("a", encoding="utf-8") as fh:
-                        fh.write(json.dumps(rec, ensure_ascii=False) + "\n")
-                    res.n_sent += 1
+                async with sem:
+                    if stop.is_set():
+                        return
+                    params = call_params(call, self.corpus, rubric_text=text_of, model=model,
+                                         max_tokens=self.max_tokens, temperature=self.temperature)
+                    meta: dict = {}
+                    try:
+                        text = await call_anthropic_json(
+                            self.client, system=text_of, user=params["messages"][0]["content"], model=model,
+                            max_tokens=self.max_tokens, temperature=self.temperature, usage=self.usage,
+                            cache_system=False, retry_delays=self.retry_delays, meta=meta)
+                    except BudgetExceededError:
+                        text = meta.get("text")
+                        res.budget_exceeded = True
+                        stop.set()
+                    rows, errors, pmeta = parse_answer(text, rubric, len(call.listed))
+                    rec = self._record(call, rubric, model, params, text, meta, rows, errors, pmeta, attempt)
+                    async with lock:
+                        with self.responses_path.open("a", encoding="utf-8") as fh:
+                            fh.write(json.dumps(rec, ensure_ascii=False) + "\n")
+                        res.n_sent += 1
+                        res.n_reasked += int(attempt > 1)
+                if not errors:
+                    return
+                logger.warning("rubric %s on %s, %s: answer did not parse fully (attempt %d of %d): %s", rubric,
+                               model, call.call_id, attempt, self.ask_attempts,
+                               "; ".join(sorted(set(errors.values())))[:200])
 
         await asyncio.gather(*(one(c) for c in todo))
-        # the stage's parse rate over every pair of its calls on record (sent now or earlier)
-        latest = latest_records(read_records(self.responses_path))
+        # the stage's parse rate over every pair of its calls on record (sent now or earlier), final and
+        # at the first attempt
+        records = read_records(self.responses_path)
+        latest = latest_records(records)
+        first = first_records(records)
         for c in calls:
             rec = latest.get((rubric, model, c.call_id))
             if rec is None:
                 continue
             res.n_pairs += len(c.listed)
-            res.n_ok += len(rec.get("parsed") or {})
+            res.n_ok += len(reparse(rec)[0])
+            res.n_ok_first += len(reparse(first[(rubric, model, c.call_id)])[0])
         warn_if_low_parse_rate(label=f"overlap_test:{RUBRICS[rubric]['name']}:{model}", n_ok=res.n_ok,
-                               n_total=res.n_pairs, logger_obj=logger)
+                               n_total=res.n_pairs, logger_obj=logger,
+                               extra=f"first attempt {res.n_ok_first}/{res.n_pairs}; {res.n_reasked} calls asked again")
         return res
+
+
+def first_records(records: Iterable[Mapping]) -> dict[tuple, dict]:
+    """The first record per (rubric, model, call): its first attempt."""
+    out: dict[tuple, dict] = {}
+    for r in records:
+        out.setdefault(response_key(r), dict(r))
+    return out
+
+
+def first_attempt_parse(pair_set: PairSet, records: Iterable[Mapping]) -> dict[tuple[str, str], dict]:
+    """``{(rubric, model): {"ok", "total"}}``: pairs whose answer parsed at the first attempt."""
+    out: dict = defaultdict(lambda: {"ok": 0, "total": 0})
+    for (rubric, model, _), rec in first_records(records).items():
+        rows = reparse(rec)[0]
+        out[(rubric, model)]["total"] += len(rec["listed"])
+        out[(rubric, model)]["ok"] += len(rows)
+    return {k: dict(v) for k, v in out.items()}
 
 
 # --------------------------------------------------------------------------- answers
 
 def collect_answers(pair_set: PairSet, records: Iterable[Mapping]) -> dict[tuple[str, str], dict[str, dict]]:
-    """``{(rubric, model): {pair_id: {"value", "reason", "reason_first", "error"}}}`` from the latest
-    record per call; a pair whose call has no record is absent, a pair that failed to parse has
-    ``value`` ``None`` and its ``error``."""
+    """``{(rubric, model): {pair_id: {"value", "reason", "reason_first", "error"}}}`` from the final
+    record per call (:func:`latest_records`), re-parsed with the current parser; a pair whose call has no
+    record is absent, a pair that failed to parse has ``value`` ``None`` and its ``error``."""
     latest = latest_records(records)
     by_call: dict[str, list] = defaultdict(list)
     for p in pair_set.pairs:
         by_call[p.call_id].append(p)
     out: dict[tuple[str, str], dict[str, dict]] = defaultdict(dict)
     for (rubric, model, call_id), rec in latest.items():
+        rows, errors, _ = reparse(rec)
         for p in by_call.get(call_id, []):
-            row = (rec.get("parsed") or {}).get(str(p.id))
+            row = rows.get(p.id)
             if row is not None:
                 out[(rubric, model)][p.pair_id] = {"value": row["value"], "reason": row["reason"],
                                                    "reason_first": row.get("reason_first"), "error": None}
             else:
                 out[(rubric, model)][p.pair_id] = {"value": None, "reason": None, "reason_first": None,
-                                                   "error": (rec.get("errors") or {}).get(str(p.id), "missing")}
+                                                   "error": errors.get(p.id, "missing")}
     return dict(out)
 
 
@@ -884,14 +977,19 @@ def parse_rates(pair_set: PairSet, answers: Mapping) -> dict:
 
 
 def analyse(pair_set: PairSet, answers: Mapping[tuple[str, str], Mapping], *, models: Sequence[str] = MODELS,
-            reference: str = REFERENCE, n_boot: int = 2000, seed: int = 0) -> dict:
-    """Everything the readout reports, as one JSON-ready dict."""
+            reference: str = REFERENCE, n_boot: int = 2000, seed: int = 0,
+            first_parse: Optional[Mapping[tuple[str, str], Mapping]] = None) -> dict:
+    """Everything the readout reports, as one JSON-ready dict.  ``first_parse``
+    (:func:`first_attempt_parse`) adds the parse rate at the first attempt."""
     pairs = pair_set.pairs
     get = lambda r, m: answers.get((r, m), {})  # noqa: E731
     out: dict = {"n_pairs": len(pairs), "n_calls": len(pair_set.calls), "models": list(models),
                  "reference": reference, "parse": parse_rates(pair_set, answers), "agreement": {},
                  "correlation": {}, "rubric_difference": {}, "groups": {}, "rates": {}, "by_score": {},
                  "divergence": {}, "context_consistency": {}, "opus_on_disagreement": {},
+                 "parse_first_attempt": {f"{r}|{m}": {**v, "rate": _r(v["ok"] / v["total"]) if v["total"] else None}
+                                         for (r, m), v in sorted((first_parse or {}).items())},
+                 "parser_version": PARSER_VERSION,
                  "reason_first_share": {}, "bootstrap": {"n_boot": n_boot, "seed": seed,
                                                          "unit": "target (all the pairs of one call's target)"}}
     for r in RUBRICS:
@@ -935,10 +1033,12 @@ def summary_markdown(summary: Mapping, pair_set: PairSet, corpus: Mapping) -> st
     L = ["# Overlap test: tables", "",
          f"{summary['n_pairs']} pairs in {summary['n_calls']} calls.  Reference model: {sm(ref)}.  Generated from "
          "`summary.json` beside this file.", "", "## Parse rates (pairs whose answer parsed)", "",
-         "| rubric | model | ok / total | rate |", "|---|---|---|---|"]
+         "| rubric | model | ok / total | rate | first attempt |", "|---|---|---|---|---|"]
     for k, v in summary["parse"].items():
         r, m = k.split("|", 1)
-        L.append(f"| {r} | {sm(m)} | {v['ok']} / {v['total']} | {_f(v['rate'], 4)} |")
+        fa = summary.get("parse_first_attempt", {}).get(k)
+        first = f"{fa['ok']} / {fa['total']} ({_f(fa['rate'], 4)})" if fa else "–"
+        L.append(f"| {r} | {sm(m)} | {v['ok']} / {v['total']} | {_f(v['rate'], 4)} | {first} |")
     L += ["", f"## Agreement with {sm(ref)}", "",
           "Exact agreement over every answer (categories included); then, on the pairs where both gave a number, "
           "exact, within one point, the mean difference (model minus reference) and the weighted kappa "

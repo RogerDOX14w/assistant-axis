@@ -13,8 +13,10 @@ persona vectors and their 3 nearest traits under the covered setting, plus the l
 corpus traits, grouped as M3 would group them), and sends one call per target to each (rubric, model):
 rubric A (``rubrics/overlap_concept.md``) and rubric B (``rubrics/overlap_cooccurrence.md``) on Haiku 4.5,
 Sonnet 5.5 and Opus 5.5, live, temperature 0 where the model accepts it.  The stages run Haiku first, then
-Sonnet, then Opus, so that a parse problem shows up on the cheapest model: a stage whose parse rate falls
-below ``--stop-below`` (default 0.99, the project's alert line) stops the run before the next stage.
+Sonnet, then Opus, so that a parse problem shows up on the cheapest model.  A call whose answer does not
+parse fully is sent once more (every model alike; the first attempt's parse rate is reported too), and a
+stage whose parse rate is still below ``--stop-below`` (default 0.99, the project's alert line) stops the
+run before the next stage.  ``--resume`` sends again only the calls without a fully parsed answer.
 
 Writes ``data/candidates/overlap_test/<run id>/``: ``pairs.json`` (the calls and pairs, with the
 provenance envelope), ``rendered_prompts.md`` (the requests as sent, for three variants: a nearest target,
@@ -191,7 +193,8 @@ def write_analysis(out_dir: Path, inputs, ps, args, argv) -> dict:
     (out_dir / "results.jsonl").write_text("".join(json.dumps(r, ensure_ascii=False) + "\n" for r in rows),
                                            encoding="utf-8")
     models = [m for m in args.models if any((r, m) in answers for r in OT.RUBRICS)]
-    summary = OT.analyse(ps, answers, models=models, reference=args.reference, n_boot=args.n_boot, seed=args.seed)
+    summary = OT.analyse(ps, answers, models=models, reference=args.reference, n_boot=args.n_boot, seed=args.seed,
+                         first_parse=OT.first_attempt_parse(ps, records))
     usage_path = out_dir / "usage.json"
     if usage_path.exists():
         summary["usage"] = json.loads(usage_path.read_text())
@@ -247,7 +250,8 @@ async def run_stages(client, rubrics, corpus, ps, args, usage, out_dir: Path, ru
             logger.info("stage: rubric %s (%s) on %s, %d calls", r, OT.RUBRICS[r]["name"], model, len(ps.calls))
             res = await runner.run_stage(r, model, ps.calls)
             stage = {"rubric": r, "model": model, "n_calls": res.n_calls, "n_sent": res.n_sent,
-                     "n_skipped": res.n_skipped, "n_pairs": res.n_pairs, "n_ok": res.n_ok,
+                     "n_skipped": res.n_skipped, "n_reasked": res.n_reasked, "n_pairs": res.n_pairs,
+                     "n_ok": res.n_ok, "n_ok_first_attempt": res.n_ok_first,
                      "parse_rate": None if res.parse_rate is None else round(res.parse_rate, 4),
                      "budget_exceeded": res.budget_exceeded, "seconds": round(time.time() - t0, 1),
                      "cost_usd_total_after": round(usage.total_cost_usd, 4), "finished_at": utc_now()}
@@ -296,7 +300,7 @@ def main(argv=None) -> int:
     done = set()
     prior = MultiModelUsage()
     if resuming:
-        done = {k for k, r in OT.latest_records(OT.read_records(out_dir / "responses.jsonl")).items() if OT.answered(r)}
+        done = OT.done_keys(OT.read_records(out_dir / "responses.jsonl"))
         prior = MultiModelUsage.load_or_create(out_dir / "usage.json")
         recorded = OT.PairSet.from_json(json.loads((out_dir / "pairs.json").read_text()))
         if [(c.call_id, c.listed) for c in recorded.calls] != [(c.call_id, c.listed) for c in ps.calls]:
@@ -362,6 +366,7 @@ def main(argv=None) -> int:
                 "estimate_usd": round(est.usd, 4), "estimate_lines": [str(x) for x in est.lines],
                 "models": args.models, "rubrics": args.rubrics, "reference": args.reference, "seed": args.seed,
                 "temperature": OT.TEMPERATURE, "max_tokens": OT.MAX_TOKENS, "concurrency": args.concurrency,
+                "ask_attempts": OT.ASK_ATTEMPTS, "parser_version": OT.PARSER_VERSION,
                 "stop_below": args.stop_below,
                 "rubric_versions": {rb["name"]: rb["version"] for rb in rubrics.values()},
                 "prompt_sha256": {rb["name"]: rb["sha256"] for rb in rubrics.values()},
