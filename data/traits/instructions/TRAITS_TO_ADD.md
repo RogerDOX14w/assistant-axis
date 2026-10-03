@@ -4564,6 +4564,7 @@ do so without getting rid of a pair (or by getting rid of both ends of rather si
 | [enigmatic](./enigmatic.json) | [cryptic](./cryptic.json) | centred space, round 2 | |
 | [northern hemisphere](./northern_hemisphere.json) | [eastern hemisphere](./eastern_hemisphere.json) | centred space, round 2 | memberships; the hemispheres are a recorded set |
 | [dispassionate](./dispassionate.json) | [detached](./detached.json) | gemma, 663-trait refresh | new on 2026-10-02: detached's pair with empathetic was dissolved by the clean-pair recheck, so detached is no longer an excluded partner |
+| [insular](./insular.json) | [parochial](./parochial.json) | M3 overlap test, Opus 4 | new on 2026-10-03; adjacent members of the moral-circle `sequence`, so this belongs to the sequence review (§ "TODO: review the moral-circle sequence") rather than a plain drop |
 
 **Refreshed 2026-10-02 on the merged 663-trait corpus** (full calibration, OpenAI and EmbeddingGemma,
 membership by the raw space; [drop_or_merge.md](../../candidates/calibration/drop_or_merge.md)): 11
@@ -4572,6 +4573,20 @@ refreshed rule, mostly for reasons of method rather than of the corpus: absoluti
 universalist was flagged only by bge, which has been dropped; the four round-2 pairs came from the
 centred space, while the refreshed table takes membership from the raw one; passionate / zealous now
 sits just under the fence.  They stay listed as candidates.
+
+**The M3 overlap test, 2026-10-03** ([m3_overlap_test_readout.md](../../../reports/trait_gap_generation/m3_overlap_test_readout.md);
+Roger agreed these as by-products): Opus 5.5 put five pairs at 4, "the same concept", on rubric A
+([overlap_concept.md](../../../reports/trait_gap_generation/rubrics/overlap_concept.md)): the three
+pairs of the [abstract](./abstract.json) / [conceptual](./conceptual.json) /
+[theoretical](./theoretical.json) triple, [dispassionate](./dispassionate.json) /
+[detached](./detached.json), and [insular](./insular.json) / [parochial](./parochial.json) (new row
+above).  They are the strongest merge candidates on the list.  In the triple, abstract (pair with
+[concrete](./concrete.json)) and theoretical (pair with [practical](./practical.json)) are pair
+poles and conceptual is a singleton, so conceptual is the drop that costs no pair.
+[self-blaming](./self_blaming.json) / [blame-shifting](./blame_shifting.json) went the other way:
+every model read them as opposites, which supports the row's note; they belong with
+[accountable](./accountable.json) in the triangle (or kite) Roger noted on 2026-09-26, to be
+classified in the arrangement pass, not on this list.
 
 Before acting: check each trait's `arrangement` and `negative_label` (a drop that breaks a clean pair
 costs the pair), and prefer dropping both ends of two near-identical pairs over one end of one.  The
