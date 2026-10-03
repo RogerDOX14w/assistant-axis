@@ -785,3 +785,116 @@ def test_embedding_runs_check_the_canary(tmp_path, monkeypatch):
     assert CM.main(args) == 0                                        # second run compares against the references
     can = json.loads((tmp_path / "cal" / "run_round4.json").read_text())["canary"]["hash"]
     assert can["n_compared"] == 8 and can["min_cosine"] == pytest.approx(1.0)
+
+
+# --------------------------------------------------------------------------- overlap_test.py (M3 overlap rubric test)
+
+def _overlap_inputs(tmp_path):
+    """Synthetic inputs (the library test's corpus, space and labelled pairs) with real files to fingerprint."""
+    from assistant_axis.gapgen import overlap_test as OT
+    from assistant_axis.tests import test_gapgen_overlap_test as T
+    stems, Z = T.space()
+    files = {}
+    for k in ("metric_config", "embedding_cache", "labelled_pairs", "drop_or_merge", "persona_cache"):
+        files[k] = tmp_path / "inputs" / f"{k}.txt"
+        files[k].parent.mkdir(parents=True, exist_ok=True)
+        files[k].write_text(k)
+    return OT.Inputs(corpus=T.corpus(), emb_stems=stems, Z=Z, persona=T.persona(),
+                     persona_info={"slot": 6, "layer": 25, "shear_applied": True, "n_traits_in_corpus": 6},
+                     labelled=list(T.LABELLED), dm_pairs=list(T.DM), partner=dict(T.PARTNER),
+                     settings={"model": "text-embedding-3-large", "representation": "w20", "variant": "centred"},
+                     paths=files)
+
+
+@pytest.fixture
+def overlap_env(tmp_path, monkeypatch, fake_client):
+    from data_analysis.gap_generation import overlap_test as cli
+    from assistant_axis.gapgen import overlap_test as OT
+    from assistant_axis.tests import test_gapgen_overlap_test as T
+    monkeypatch.setattr(OT, "load_inputs", lambda *a, **k: _overlap_inputs(tmp_path))
+    monkeypatch.setattr(cli, "platform_dirty_files", lambda *a, **k: [])
+    monkeypatch.setattr(cli, "git_sha", lambda *a, **k: "abc1234")
+    fake_client["responder"] = T.responder_for(OT.load_rubrics(), value=2)
+    base = ["--run-id", "t1", "--out-root", str(tmp_path / "out"), "--marks-sheet", str(tmp_path / "rep" / "marks.md"),
+            "--n-targets", "4", "--n-antonyms", "2", "--n-random", "2", "--n-boot", "20"]
+    return {"cli": cli, "OT": OT, "T": T, "base": base, "out": tmp_path / "out" / "t1", "client": fake_client,
+            "sheet": tmp_path / "rep" / "marks.md"}
+
+
+def test_overlap_dry_run_prints_prompts_and_writes_nothing(overlap_env, capsys):
+    e = overlap_env
+    assert e["cli"].main(e["base"] + ["--dry-run"]) == 0
+    out = capsys.readouterr().out
+    assert "total estimate" in out and "DRY-RUN" in out
+    assert "## Variant: normal" in out and "## Variant: antonym_in_list" in out and "## Variant: single" in out
+    assert "--- system ---" in out and '"traits": [' in out
+    assert not e["out"].exists() and not e["sheet"].exists() and "client" not in e["client"]
+
+
+def test_overlap_refuses_an_estimate_over_the_budget(overlap_env):
+    e = overlap_env
+    assert e["cli"].main(e["base"] + ["--budget-usd", "0.0001"]) == 2
+    assert not e["out"].exists()
+
+
+def test_overlap_end_to_end_with_a_fake_client(overlap_env):
+    e = overlap_env
+    OT = e["OT"]
+    assert e["cli"].main(e["base"]) == 0
+    out = e["out"]
+    ps = OT.PairSet.from_json(json.loads((out / "pairs.json").read_text()))
+    assert "_provenance" in json.loads((out / "pairs.json").read_text())
+    n_calls, n_pairs = len(ps.calls), len(ps.pairs)
+    client = e["client"]["client"]
+    assert len(client.calls) == n_calls * 6                          # one call per target per (rubric, model)
+    recs = OT.read_records(out / "responses.jsonl")
+    assert len(recs) == n_calls * 6
+    assert {(r["rubric"], r["model"]) for r in recs} == {(r, m) for r in "AB" for m in OT.MODELS}
+    assert len((out / "results.jsonl").read_text().splitlines()) == n_pairs * 6
+    usage = json.loads((out / "usage.json").read_text())
+    assert usage["n_calls"] == n_calls * 6 and set(usage["per_model"]) == set(OT.MODELS)
+    run = json.loads((out / "run.json").read_text())
+    assert len(run["stages"]) == 6 and [s["model"] for s in run["stages"]][:2] == [OT.HAIKU, OT.HAIKU]
+    assert run["rubric_versions"] == {"overlap_concept": 2, "overlap_cooccurrence": 2} and run["exit_code"] == 0
+    summ = json.loads((out / "summary.json").read_text())
+    assert "_provenance" in summ and summ["result"]["parse"][f"A|{OT.OPUS}"]["rate"] == 1.0
+    assert (out / "tables.md").read_text().startswith("# Overlap test: tables")
+    assert "## Variant: antonym_in_list" in (out / "rendered_prompts.md").read_text()
+    sheet = e["sheet"].read_text()
+    key = json.loads((out / "marks_key.json").read_text())
+    assert sheet.count("Your answer (") == len(key["items"]) > 0
+    assert "opus" not in sheet.lower() and "haiku" not in sheet.lower()
+
+
+def test_overlap_resume_and_existing_run(overlap_env):
+    e = overlap_env
+    assert e["cli"].main(e["base"] + ["--models", e["OT"].HAIKU]) == 0
+    n_first = len(e["client"]["client"].calls)
+    assert e["cli"].main(e["base"]) == 1                              # responses exist: needs --resume
+    assert e["cli"].main(e["base"] + ["--resume"]) == 0
+    assert len(e["client"]["client"].calls) == n_first * 2           # Sonnet and Opus only; Haiku not re-sent
+    usage = json.loads((e["out"] / "usage.json").read_text())
+    assert usage["n_calls"] == n_first * 3                            # cumulative over the two sessions
+
+
+def test_overlap_stops_on_a_low_parse_rate(overlap_env):
+    e = overlap_env
+    e["client"]["responder"] = e["T"].responder_for(e["OT"].load_rubrics(), bad_model=e["OT"].HAIKU)
+    assert e["cli"].main(e["base"]) == 3
+    run = json.loads((e["out"] / "run.json").read_text())
+    assert len(run["stages"]) == 1 and "parse rate" in run["stopped"]
+
+
+def test_overlap_analyse_only_and_decode_marks(overlap_env, capsys):
+    e = overlap_env
+    assert e["cli"].main(e["base"]) == 0
+    (e["out"] / "summary.json").unlink()
+    assert e["cli"].main(e["base"] + ["--analyse-only"]) == 0
+    assert (e["out"] / "summary.json").exists()
+    sheet = e["sheet"].read_text()
+    e["sheet"].write_text(sheet.replace("Your answer (0 / 1 / 2 / 3 / 4 / opposite / unsure): ",
+                                        "Your answer (0 / 1 / 2 / 3 / 4 / opposite / unsure): 2"))
+    assert e["cli"].main(e["base"] + ["--decode-marks"]) == 0
+    dec = json.loads((e["out"] / "marks_decoded.json").read_text())
+    assert dec["counts"] == {"ok": len(dec["items"])}
+    assert dec["agreement_with_roger"][e["OT"].OPUS]["exact_all"] == 1.0      # the fake answers 2 everywhere

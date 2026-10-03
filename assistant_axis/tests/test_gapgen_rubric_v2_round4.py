@@ -499,6 +499,14 @@ def test_every_recorded_version_and_hash_is_pinned():
             for k in ("plain_reading", "comparison"):
                 if k in ps:
                     checks.append((k, None, ps[k]))
+        elif name.startswith("overlap_test/"):
+            # the M3 overlap rubric test (2026-10-03): its two rubrics are pinned in rubrics/versions.json
+            from assistant_axis.gapgen import split_rubrics
+            pins = split_rubrics.read_versions()["prompts"]
+            for prompt, version in d["rubric_versions"].items():
+                pinned = {r["version"]: r["sha256"] for r in pins.get(prompt, [])}
+                if pinned.get(version) != ps.get(prompt):
+                    problems.append((name, prompt, version, (ps.get(prompt) or "")[:12]))
         elif name.startswith("plain_reading/"):
             for k in ("plain_reading", "comparison"):
                 checks.append((k, d["versions"][k], ps[k]))
