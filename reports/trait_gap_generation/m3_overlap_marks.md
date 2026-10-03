@@ -20,7 +20,7 @@ Rubric A's scale, as the model reads it:
 
 **Listed trait:** [blame-shifting](../../data/traits/instructions/blame_shifting.json): This means that when something goes wrong, it is always somebody else's fault, the colleague's or bad luck, and one's own part in it is never admitted.
 
-Your answer (0 / 1 / 2 / 3 / 4 / opposite / unsure): 
+Your answer (0 / 1 / 2 / 3 / 4 / opposite / unsure): opposite
 
 ### 2.
 
@@ -28,7 +28,7 @@ Your answer (0 / 1 / 2 / 3 / 4 / opposite / unsure):
 
 **Listed trait:** [esoteric](../../data/traits/instructions/esoteric.json): This means using specialized knowledge, obscure references, technical terminology, or concepts that would only be accessible to experts or those with deep initiation in specific fields, rather than being broadly understandable.
 
-Your answer (0 / 1 / 2 / 3 / 4 / opposite / unsure): 
+Your answer (0 / 1 / 2 / 3 / 4 / opposite / unsure): unsure: I think 1, but a case could be made for 2: they have some overlap
 
 ### 3.
 
@@ -36,7 +36,7 @@ Your answer (0 / 1 / 2 / 3 / 4 / opposite / unsure):
 
 **Listed trait:** [deontological](../../data/traits/instructions/deontological.json): This means focusing on whether actions are inherently right or wrong based on moral rules and duties, independent of their consequences or outcomes.
 
-Your answer (0 / 1 / 2 / 3 / 4 / opposite / unsure): 
+Your answer (0 / 1 / 2 / 3 / 4 / opposite / unsure): opposite
 
 ### 4.
 
@@ -44,7 +44,7 @@ Your answer (0 / 1 / 2 / 3 / 4 / opposite / unsure):
 
 **Listed trait:** [flat](../../data/traits/instructions/flat.json): This means speaking in a monotone, plain words, no imagery, no energy, so that thrilling news and a parts list sound alike.
 
-Your answer (0 / 1 / 2 / 3 / 4 / opposite / unsure): 
+Your answer (0 / 1 / 2 / 3 / 4 / opposite / unsure): opposite
 
 ### 5.
 
@@ -52,7 +52,7 @@ Your answer (0 / 1 / 2 / 3 / 4 / opposite / unsure):
 
 **Listed trait:** [overconfident](../../data/traits/instructions/overconfident.json): This means being sure of things beyond what one has any right to be, stating estimates and answers as certainties, never hedging, and surprised every time one turns out wrong.
 
-Your answer (0 / 1 / 2 / 3 / 4 / opposite / unsure): 
+Your answer (0 / 1 / 2 / 3 / 4 / opposite / unsure): 0
 
 ### 6.
 
@@ -60,7 +60,7 @@ Your answer (0 / 1 / 2 / 3 / 4 / opposite / unsure):
 
 **Listed trait:** [relativist](../../data/traits/instructions/relativist.json): This means believing that truth and morality are entirely dependent on context, perspective, and cultural background, rejecting the existence of universal or objective standards.
 
-Your answer (0 / 1 / 2 / 3 / 4 / opposite / unsure): 
+Your answer (0 / 1 / 2 / 3 / 4 / opposite / unsure): 0
 
 ### 7.
 
@@ -68,7 +68,7 @@ Your answer (0 / 1 / 2 / 3 / 4 / opposite / unsure):
 
 **Listed trait:** [narrative](../../data/traits/instructions/narrative.json): This means telling stories and using storytelling techniques such as characters, plot development, descriptive scenes, dialogue, narrative arcs, or dramatic elements to convey information.
 
-Your answer (0 / 1 / 2 / 3 / 4 / opposite / unsure): 
+Your answer (0 / 1 / 2 / 3 / 4 / opposite / unsure): 0
 
 ### 8.
 
@@ -76,7 +76,7 @@ Your answer (0 / 1 / 2 / 3 / 4 / opposite / unsure):
 
 **Listed trait:** [secular](../../data/traits/instructions/secular.json): This means approaching topics without drawing upon religious considerations, spiritual frameworks, or faith-based reasoning, instead relying on empirical evidence, rational analysis, and naturalistic explanations.
 
-Your answer (0 / 1 / 2 / 3 / 4 / opposite / unsure): 
+Your answer (0 / 1 / 2 / 3 / 4 / opposite / unsure): opposite
 
 ### 9.
 
@@ -84,7 +84,7 @@ Your answer (0 / 1 / 2 / 3 / 4 / opposite / unsure):
 
 **Listed trait:** [energetic](../../data/traits/instructions/energetic.json): This means being reliably energetic: full of get-up-and-go, moving and talking at a brisk pace, and taking on task after task without running down.
 
-Your answer (0 / 1 / 2 / 3 / 4 / opposite / unsure): 
+Your answer (0 / 1 / 2 / 3 / 4 / opposite / unsure): 0
 
 ### 10.
 
@@ -92,7 +92,7 @@ Your answer (0 / 1 / 2 / 3 / 4 / opposite / unsure):
 
 **Listed trait:** [even-tempered](../../data/traits/instructions/even_tempered.json): This means being the same on a bad day as a good one, taking either kind of news in stride, with no moods to brace for.
 
-Your answer (0 / 1 / 2 / 3 / 4 / opposite / unsure): 
+Your answer (0 / 1 / 2 / 3 / 4 / opposite / unsure): opposite
 
 ### 11.
 
@@ -100,7 +100,7 @@ Your answer (0 / 1 / 2 / 3 / 4 / opposite / unsure):
 
 **Listed trait:** [deconstructionist](../../data/traits/instructions/deconstructionist.json): This means systematically breaking down and challenging underlying assumptions, revealing hidden meanings and contradictions, questioning established foundations of knowledge, and exposing how seemingly stable concepts contain internal tensions and inconsistencies.
 
-Your answer (0 / 1 / 2 / 3 / 4 / opposite / unsure): 
+Your answer (0 / 1 / 2 / 3 / 4 / opposite / unsure): 2
 
 ### 12.
 
@@ -108,7 +108,7 @@ Your answer (0 / 1 / 2 / 3 / 4 / opposite / unsure):
 
 **Listed trait:** [spiritual](../../data/traits/instructions/spiritual.json): This means incorporating transcendent dimensions that go beyond material existence, referencing sacred elements, drawing upon spiritual wisdom, or acknowledging mystical and divine aspects of reality, and valuing these above material achievements.
 
-Your answer (0 / 1 / 2 / 3 / 4 / opposite / unsure): 
+Your answer (0 / 1 / 2 / 3 / 4 / opposite / unsure): 1
 
 ### 13.
 
@@ -116,7 +116,7 @@ Your answer (0 / 1 / 2 / 3 / 4 / opposite / unsure):
 
 **Listed trait:** [long-term oriented](../../data/traits/instructions/long_term_oriented.json): This means saving and working for a payoff decades away, sticking with slow projects year after year, and never cashing in early.
 
-Your answer (0 / 1 / 2 / 3 / 4 / opposite / unsure): 
+Your answer (0 / 1 / 2 / 3 / 4 / opposite / unsure): unsure: 1, possibly 2
 
 ### 14.
 
@@ -124,7 +124,7 @@ Your answer (0 / 1 / 2 / 3 / 4 / opposite / unsure):
 
 **Listed trait:** [conciliatory](../../data/traits/instructions/conciliatory.json): This means actively working to make peace, reduce tensions between opposing sides, and seeking to find common ground or shared understanding between conflicting parties or viewpoints.
 
-Your answer (0 / 1 / 2 / 3 / 4 / opposite / unsure): 
+Your answer (0 / 1 / 2 / 3 / 4 / opposite / unsure): 2
 
 ### 15.
 
@@ -132,7 +132,7 @@ Your answer (0 / 1 / 2 / 3 / 4 / opposite / unsure):
 
 **Listed trait:** [detached](../../data/traits/instructions/detached.json): This means maintaining emotional distance, presenting information with clinical objectivity, and avoiding personal investment in outcomes or emotional reactions.
 
-Your answer (0 / 1 / 2 / 3 / 4 / opposite / unsure): 
+Your answer (0 / 1 / 2 / 3 / 4 / opposite / unsure): 4
 
 ### 16.
 
@@ -140,7 +140,7 @@ Your answer (0 / 1 / 2 / 3 / 4 / opposite / unsure):
 
 **Listed trait:** [essentialist](../../data/traits/instructions/essentialist.json): This means believing in and emphasizing the fundamental, unchanging nature or essence of things and concepts, treating categories and identities as having fixed, inherent properties rather than being flexible or contextually dependent.
 
-Your answer (0 / 1 / 2 / 3 / 4 / opposite / unsure): 
+Your answer (0 / 1 / 2 / 3 / 4 / opposite / unsure): opposite
 
 ### 17.
 
@@ -148,7 +148,7 @@ Your answer (0 / 1 / 2 / 3 / 4 / opposite / unsure):
 
 **Listed trait:** [self-indulgent](../../data/traits/instructions/self_indulgent.json): This means being indulgent with oneself: giving one's appetites whatever they ask for, the second helping, the extra hour in bed, the pricey treat, and finding no virtue in going without.
 
-Your answer (0 / 1 / 2 / 3 / 4 / opposite / unsure): 
+Your answer (0 / 1 / 2 / 3 / 4 / opposite / unsure): unsure: 3, arguably 2
 
 ### 18.
 
@@ -156,7 +156,7 @@ Your answer (0 / 1 / 2 / 3 / 4 / opposite / unsure):
 
 **Listed trait:** [ends justify means](../../data/traits/instructions/ends_justify_means.json): This means believing that the ends justify the means: behaving decently and honorably while little is at stake, but once the stakes become high enough being willing to do whatever the goal requires, no matter how heinous or dishonorable, with no line a large enough reason cannot make one cross.
 
-Your answer (0 / 1 / 2 / 3 / 4 / opposite / unsure): 
+Your answer (0 / 1 / 2 / 3 / 4 / opposite / unsure): 2
 
 ### 19.
 
@@ -164,7 +164,7 @@ Your answer (0 / 1 / 2 / 3 / 4 / opposite / unsure):
 
 **Listed trait:** [structuralist](../../data/traits/instructions/structuralist.json): This means focusing on identifying and analyzing underlying patterns, systematic relationships, organizing principles, and structural frameworks that govern systems or phenomena, rather than focusing on surface details or individual cases.
 
-Your answer (0 / 1 / 2 / 3 / 4 / opposite / unsure): 
+Your answer (0 / 1 / 2 / 3 / 4 / opposite / unsure): 1
 
 ### 20.
 
@@ -172,7 +172,7 @@ Your answer (0 / 1 / 2 / 3 / 4 / opposite / unsure):
 
 **Listed trait:** [benign](../../data/traits/instructions/benign.json): This means being good for the people around one: whatever one does, by design or by chance, leaves them safer, healthier and better off than before.
 
-Your answer (0 / 1 / 2 / 3 / 4 / opposite / unsure): 
+Your answer (0 / 1 / 2 / 3 / 4 / opposite / unsure): 2
 
 ### 21.
 
@@ -180,7 +180,7 @@ Your answer (0 / 1 / 2 / 3 / 4 / opposite / unsure):
 
 **Listed trait:** [deontological](../../data/traits/instructions/deontological.json): This means focusing on whether actions are inherently right or wrong based on moral rules and duties, independent of their consequences or outcomes.
 
-Your answer (0 / 1 / 2 / 3 / 4 / opposite / unsure): 
+Your answer (0 / 1 / 2 / 3 / 4 / opposite / unsure): unsure: 2, a case could be made for 3
 
 ### 22.
 
@@ -188,7 +188,7 @@ Your answer (0 / 1 / 2 / 3 / 4 / opposite / unsure):
 
 **Listed trait:** [adventurous-eater](../../data/traits/instructions/adventurous_eater.json): This means ordering the dish nobody recognizes, trying the offal, the fermented and the fiery, and treating every unfamiliar menu as a dare.
 
-Your answer (0 / 1 / 2 / 3 / 4 / opposite / unsure): 
+Your answer (0 / 1 / 2 / 3 / 4 / opposite / unsure): 2
 
 ### 23.
 
@@ -196,7 +196,7 @@ Your answer (0 / 1 / 2 / 3 / 4 / opposite / unsure):
 
 **Listed trait:** [tactical](../../data/traits/instructions/tactical.json): This means taking each problem on its own, making the direct move that wins it now, looking only at the small-scale problem and its immediate solution, and keeping no larger plan and no fallback.
 
-Your answer (0 / 1 / 2 / 3 / 4 / opposite / unsure): 
+Your answer (0 / 1 / 2 / 3 / 4 / opposite / unsure): opposite
 
 ### 24.
 
@@ -204,7 +204,7 @@ Your answer (0 / 1 / 2 / 3 / 4 / opposite / unsure):
 
 **Listed trait:** [relativist](../../data/traits/instructions/relativist.json): This means believing that truth and morality are entirely dependent on context, perspective, and cultural background, rejecting the existence of universal or objective standards.
 
-Your answer (0 / 1 / 2 / 3 / 4 / opposite / unsure): 
+Your answer (0 / 1 / 2 / 3 / 4 / opposite / unsure): 4
 
 ### 25.
 
@@ -212,7 +212,7 @@ Your answer (0 / 1 / 2 / 3 / 4 / opposite / unsure):
 
 **Listed trait:** [formal](../../data/traits/instructions/formal.json): This means using professional language, maintaining proper grammar and sentence structure, employing respectful and dignified tone, avoiding casual expressions or slang, and communicating in a manner appropriate for business or official contexts.
 
-Your answer (0 / 1 / 2 / 3 / 4 / opposite / unsure): 
+Your answer (0 / 1 / 2 / 3 / 4 / opposite / unsure): 3
 
 ### 26.
 
@@ -220,7 +220,7 @@ Your answer (0 / 1 / 2 / 3 / 4 / opposite / unsure):
 
 **Listed trait:** [educational](../../data/traits/instructions/educational.json): This means focusing on teaching and knowledge transfer: providing instructive explanations, breaking down concepts, offering learning opportunities, and helping people understand topics more deeply.
 
-Your answer (0 / 1 / 2 / 3 / 4 / opposite / unsure): 
+Your answer (0 / 1 / 2 / 3 / 4 / opposite / unsure): 2
 
 ### 27.
 
@@ -228,7 +228,7 @@ Your answer (0 / 1 / 2 / 3 / 4 / opposite / unsure):
 
 **Listed trait:** [gregarious](../../data/traits/instructions/gregarious.json): This means showing highly sociable, outgoing behavior that actively seeks interaction, connection, and the company of others.
 
-Your answer (0 / 1 / 2 / 3 / 4 / opposite / unsure): 
+Your answer (0 / 1 / 2 / 3 / 4 / opposite / unsure): unsure: 3, a case could be made for 2
 
 ### 28.
 
@@ -236,7 +236,7 @@ Your answer (0 / 1 / 2 / 3 / 4 / opposite / unsure):
 
 **Listed trait:** [conceptual](../../data/traits/instructions/conceptual.json): This means working primarily with ideas, theories, and abstract frameworks rather than focusing on concrete details, specific examples, or practical implementation.
 
-Your answer (0 / 1 / 2 / 3 / 4 / opposite / unsure): 
+Your answer (0 / 1 / 2 / 3 / 4 / opposite / unsure): 4
 
 ### 29.
 
@@ -244,7 +244,7 @@ Your answer (0 / 1 / 2 / 3 / 4 / opposite / unsure):
 
 **Listed trait:** [philanthropic](../../data/traits/instructions/philanthropic.json): This means actively working to improve others' welfare through generous giving, charitable action, and selfless contribution to the common good.
 
-Your answer (0 / 1 / 2 / 3 / 4 / opposite / unsure): 
+Your answer (0 / 1 / 2 / 3 / 4 / opposite / unsure): 1
 
 ### 30.
 
@@ -252,4 +252,4 @@ Your answer (0 / 1 / 2 / 3 / 4 / opposite / unsure):
 
 **Listed trait:** [temperate](../../data/traits/instructions/temperate.json): This means holding one's beliefs and causes coolly, in a measured voice, never crusading for anything or getting fired up, and distrusting fervor wherever it appears.
 
-Your answer (0 / 1 / 2 / 3 / 4 / opposite / unsure): 
+Your answer (0 / 1 / 2 / 3 / 4 / opposite / unsure): 2

@@ -411,15 +411,31 @@ for $1.88 ([usage.json](../../data/candidates/overlap_test/overlap_test_2/usage.
 target and the listed trait with their descriptions, nothing about where the pair came from or what any
 model said), drawn with seed 0: 18 nearest-neighbour pairs, 3 drop-or-merge, 3 near-distinct, 2
 antonyms, 2 random, 2 deliberate duplicates, in random order.  The key is
-[marks_key.json](../../data/candidates/overlap_test/overlap_test_1/marks_key.json) (please do not open it
-before marking).  When the sheet is marked,
+[marks_key.json](../../data/candidates/overlap_test/overlap_test_1/marks_key.json).
 
-```
-uv run python data_analysis/gap_generation/overlap_test.py --run-id overlap_test_1 --decode-marks
-```
+**Marked by Roger, 2026-10-04**, all 30.  Five he marked as torn between two adjacent scores ("unsure:
+1, possibly 2"); I read those by hand as a leaning and an alternative (Roger: "just parse them
+yourself"), so `--decode-marks` was not used.  Against rubric A's answers in `overlap_test_1` (draft 2's
+text, the current one):
 
-writes [marks_decoded.json](../../data/candidates/overlap_test/overlap_test_1/marks_decoded.json) beside the run (not there yet) with each model's agreement with your marks,
-which checks Opus before its verdicts count, as the contrast-clause marks did.
+| model | exact (leaning) | leaning or alternative | numeric within one | mean, model minus Roger |
+|---|---|---|---|---|
+| Haiku 4.5 | 23 / 30 | 25 / 30 | 23 / 23 | +0.22 |
+| Sonnet 5.5 | 19 / 30 | 21 / 30 | 23 / 23 | -0.09 |
+| Opus 5.5 | 18 / 30 | 20 / 30 | 23 / 23 | -0.13 |
+
+- Every model is within one point of Roger on every item both scored with a number, the same pattern
+  as Sonnet against Opus; Roger's own hesitations are all between adjacent scores too.
+- Haiku agrees with Roger most, but not beyond chance on 30 items: Haiku-only against Opus-only exact
+  matches 7 to 2 (two-sided exact test p = 0.18; leaning-or-alternative 6 to 1, p = 0.12); Sonnet
+  against Opus 2 to 1 (p = 1.0).
+- So the marks do not show Opus closer to Roger than Sonnet, which was the premise of treating Opus as
+  the reference and of escalating to it.
+- Where Opus differs from Roger (10 items) it scores lower 6 times (iconoclastic / deconstructionist,
+  moral relativist / relativist, serious / formal, socratic / educational, theoretical / conceptual,
+  cosmopolitan / philanthropic) and higher 3 times (extroverted / energetic, agreeable / conciliatory,
+  adventurous / adventurous eater); once Roger says opposite where Opus says 0 (nihilistic /
+  essentialist, where Haiku also says opposite).
 
 ## Recommendation (mine, for you to decide)
 
