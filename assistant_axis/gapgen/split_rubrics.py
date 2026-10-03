@@ -148,30 +148,42 @@ def bump_command(problems: list[str]) -> str:
 
 
 def bump(name: str, why: str, *, now: str, rubrics_dir: Optional[Path] = None,
-         version: Optional[int] = None) -> dict:
+         version: Optional[int] = None, revert_to: Optional[int] = None) -> dict:
     """Append a row for the text on disk: the next version (or ``version``, for the first row of a
     prompt), its sha256, ``now`` and ``why``.  Refuses when the text is already the latest pin, or
-    when ``why`` is empty.  Returns the new row."""
+    when ``why`` is empty.  A text an earlier version already names is refused too, unless
+    ``revert_to`` names that version: the revert is then pinned as the next version with
+    ``"same_text_as": revert_to``, so version numbers keep rising and a record stamped with the new
+    one can be traced to the earlier text.  Returns the new row."""
     if not why or not why.strip():
         raise ValueError("--why is required: say what changed in the text")
     sha = sha256(load_prompt(name, rubrics_dir))
     data = read_versions(rubrics_dir)
     rows = data.setdefault("prompts", {}).setdefault(name, [])
+    extra: dict = {}
     if rows:
         last = max(rows, key=lambda r: int(r["version"]))
         if last["sha256"] == sha:
             raise ValueError(f"{name}: the text on disk is already version {last['version']}")
-        if any(r["sha256"] == sha for r in rows):
-            raise ValueError(f"{name}: the text on disk is an earlier pinned version; versions name one "
-                             f"text each and are never reused")
+        earlier = [int(r["version"]) for r in rows if r["sha256"] == sha]
+        if revert_to is not None:
+            if int(revert_to) not in earlier:
+                raise ValueError(f"{name}: the text on disk is not version {revert_to}'s text"
+                                 + (f" (it is version {earlier[0]}'s)" if earlier else ""))
+            extra["same_text_as"] = int(revert_to)
+        elif earlier:
+            raise ValueError(f"{name}: the text on disk is version {earlier[0]}'s; to go back to it, pin it "
+                             f"as a new version with --revert-to {earlier[0]}")
         new_v = int(last["version"]) + 1
         if version is not None and int(version) != new_v:
             raise ValueError(f"{name}: next version is {new_v}, not {version}")
     else:
         if version is None:
             raise ValueError(f"{name}: first pin needs an explicit version (the draft number)")
+        if revert_to is not None:
+            raise ValueError(f"{name}: nothing is pinned yet to revert to")
         new_v = int(version)
-    row = {"version": new_v, "sha256": sha, "pinned_at": now, "why": why.strip()}
+    row = {"version": new_v, "sha256": sha, "pinned_at": now, "why": why.strip(), **extra}
     rows.append(row)
     ordered = {"_about": data.get("_about") or ABOUT, "prompts": {n: data["prompts"][n] for n in PINNED_NAMES
                                                                   if n in data["prompts"]}}

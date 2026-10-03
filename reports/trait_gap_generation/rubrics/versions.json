@@ -143,6 +143,13 @@
         "sha256": "df66720dc190b445b588a48471a63d05db49b97f070b887c1316aed747c88825",
         "pinned_at": "2026-10-03T20:26:05+00:00",
         "why": "Draft 3: one sentence on the answer's keys (use only the keys shown; no label; each row once) after Sonnet broke the format in 8 of 180 test calls; Roger 2026-10-03"
+      },
+      {
+        "version": 4,
+        "sha256": "2f650bffa3d614c0498be0b4814af05d840d7952fc1e943b89492b6ec647b8ab",
+        "pinned_at": "2026-10-03T22:35:59+00:00",
+        "why": "Draft 3's sentence on keys removed (Roger, 2026-10-03): the extra keys are a harmless copy of the input rows' label key, the parser ignores them, and the instruction only turned some of them into odd variants (label_note, label_free); the text is draft 2's again",
+        "same_text_as": 2
       }
     ],
     "overlap_cooccurrence": [

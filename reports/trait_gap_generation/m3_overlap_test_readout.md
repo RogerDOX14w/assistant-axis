@@ -388,6 +388,10 @@ for $1.88 ([usage.json](../../data/candidates/overlap_test/overlap_test_2/usage.
   answer twice: Sonnet 29 of 180 under draft 2, 19 under draft 3 (13 a `"label"` key, 6 a filler key
   such as `"color": ""`; 3 of the 19 wrote "Correction:" and the answer again, against 7); Opus 10 and 10.
   The parser ignores extra keys, so none of this lost an answer, but the sentence does not stop the habit.
+  Every extra key sits in the slot after `"id"`, where the input rows carry `"label"`, almost all in
+  calls listing three traits, and every `"label"` value was right: the models copy the input row's
+  shape.  **Decided (Roger, 2026-10-03): harmless, ignored; the sentence is removed** and rubric A is
+  draft 2's text again, pinned as version 4 (`"same_text_as": 2`), which `overlap_test_1` already tested.
 - **Scores**: unchanged within run-to-run noise.  Each model against itself across the two runs: Sonnet
   93% exact, Opus 94%, every numeric pair within one point.  Sonnet against Opus: 87% exact (86% under
   draft 2), weighted kappa 0.92 (0.91), every numeric pair within one point.  Sonnet's answers on the 300

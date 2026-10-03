@@ -79,8 +79,10 @@ class TestRubrics:
         rb = OT.load_rubrics()
         assert set(rb) == {"A", "B"}
         assert rb["A"]["name"] == "overlap_concept" and rb["B"]["name"] == "overlap_cooccurrence"
-        assert rb["A"]["version"] == 3 and rb["B"]["version"] == 2   # A: draft 3 (answer keys), 2026-10-03
+        # A: draft 3 (answer keys), then version 4 = draft 2's text again (Roger, 2026-10-03)
+        assert rb["A"]["version"] == 4 and rb["B"]["version"] == 2
         assert rb["A"]["text"] == sr.load_prompt("overlap_concept")
+        assert rb["A"]["sha256"] == "2f650bffa3d614c0498be0b4814af05d840d7952fc1e943b89492b6ec647b8ab"   # draft 2's
         assert '"similarity": 0|1|2|3|4|"opposite"|"unsure"' in rb["A"]["text"]
         assert '"co_occurrence": 0|1|2|3|4|"unsure"' in rb["B"]["text"]
 

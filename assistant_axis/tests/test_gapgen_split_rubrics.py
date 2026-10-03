@@ -189,7 +189,7 @@ class TestOverlapPins:
         for name, sha in self.DRAFT2.items():
             first = rows[name][0]
             assert (first["version"], first["sha256"]) == (2, sha), name
-            # the text on disk is the latest pin (rubric A moved to draft 3 on 2026-10-03; B is still draft 2)
+            # the text on disk is the latest pin (rubric A: draft 3, then back to draft 2's text as version 4, 2026-10-03)
             assert sr.sha256(sr.load_prompt(name)) == rows[name][-1]["sha256"], name
 
     def test_files_and_mismatches(self):
@@ -210,6 +210,26 @@ class TestOverlapPins:
         before = json.loads((d / "versions.json").read_text(encoding="utf-8"))["prompts"]["overlap_concept"][-1]["version"]
         row = sr.bump("overlap_concept", "test edit", now="t", rubrics_dir=d)
         assert row["version"] == before + 1 and sr.mismatches(d) == []
+
+    def test_going_back_to_an_earlier_text_needs_revert_to(self, tmp_path):
+        """A revert is pinned as the next version, marked with the version whose text it is."""
+        d = tmp_path / "rubrics"
+        shutil.copytree(paths.RUBRICS_DIR, d, ignore=shutil.ignore_patterns("README.md"))
+        p = d / sr.PINNED_FILES["overlap_cooccurrence"]
+        original = p.read_text(encoding="utf-8")
+        p.write_text(original.replace("Return one row per listed trait", "Return one row for each listed trait", 1),
+                     encoding="utf-8")
+        edited = sr.bump("overlap_cooccurrence", "test edit", now="t", rubrics_dir=d)
+        p.write_text(original, encoding="utf-8")                      # back to the earlier text
+        first = sr.read_versions(d)["prompts"]["overlap_cooccurrence"][0]["version"]
+        with pytest.raises(ValueError, match=f"--revert-to {first}"):
+            sr.bump("overlap_cooccurrence", "revert", now="t", rubrics_dir=d)
+        with pytest.raises(ValueError, match="not version"):
+            sr.bump("overlap_cooccurrence", "revert", now="t", rubrics_dir=d, revert_to=edited["version"])
+        row = sr.bump("overlap_cooccurrence", "revert", now="t", rubrics_dir=d, revert_to=first)
+        assert row["version"] == edited["version"] + 1 and row["same_text_as"] == first
+        assert sr.mismatches(d) == []
+        assert sr.current_versions(d, sr.OVERLAP_NAMES)["overlap_cooccurrence"][0] == row["version"]
 
     def test_rubric_pins_cli_knows_the_overlap_rubrics(self, capsys):
         from data_analysis.gap_generation import rubric_pins
