@@ -189,7 +189,8 @@ class TestOverlapPins:
         for name, sha in self.DRAFT2.items():
             first = rows[name][0]
             assert (first["version"], first["sha256"]) == (2, sha), name
-            assert sr.sha256(sr.load_prompt(name)) == sha, name   # the text on disk is draft 2, unchanged
+            # the text on disk is the latest pin (rubric A moved to draft 3 on 2026-10-03; B is still draft 2)
+            assert sr.sha256(sr.load_prompt(name)) == rows[name][-1]["sha256"], name
 
     def test_files_and_mismatches(self):
         assert sr.rubric_path("overlap_concept").name == "overlap_concept.md"
@@ -206,8 +207,9 @@ class TestOverlapPins:
         probs = sr.mismatches(d)
         assert len(probs) == 1 and probs[0].startswith("overlap_concept: text changed")
         assert "rubric_pins.py bump overlap_concept" in sr.bump_command(probs)
+        before = json.loads((d / "versions.json").read_text(encoding="utf-8"))["prompts"]["overlap_concept"][-1]["version"]
         row = sr.bump("overlap_concept", "test edit", now="t", rubrics_dir=d)
-        assert row["version"] == 3 and sr.mismatches(d) == []
+        assert row["version"] == before + 1 and sr.mismatches(d) == []
 
     def test_rubric_pins_cli_knows_the_overlap_rubrics(self, capsys):
         from data_analysis.gap_generation import rubric_pins

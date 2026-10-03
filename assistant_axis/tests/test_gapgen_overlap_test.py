@@ -79,7 +79,7 @@ class TestRubrics:
         rb = OT.load_rubrics()
         assert set(rb) == {"A", "B"}
         assert rb["A"]["name"] == "overlap_concept" and rb["B"]["name"] == "overlap_cooccurrence"
-        assert rb["A"]["version"] == 2 and rb["B"]["version"] == 2
+        assert rb["A"]["version"] == 3 and rb["B"]["version"] == 2   # A: draft 3 (answer keys), 2026-10-03
         assert rb["A"]["text"] == sr.load_prompt("overlap_concept")
         assert '"similarity": 0|1|2|3|4|"opposite"|"unsure"' in rb["A"]["text"]
         assert '"co_occurrence": 0|1|2|3|4|"unsure"' in rb["B"]["text"]
@@ -348,7 +348,7 @@ class TestRunner:
         recs = OT.read_records(tmp_path / "responses.jsonl")
         assert len(recs) == len(ps.calls)
         rec = recs[0]
-        assert rec["rubric"] == "A" and rec["rubric_version"] == 2 and rec["prompt_sha256"] == rb["A"]["sha256"]
+        assert rec["rubric"] == "A" and rec["rubric_version"] == rb["A"]["version"] and rec["prompt_sha256"] == rb["A"]["sha256"]
         assert rec["request"]["user"] == OT.render_user(ps.call(rec["call_id"]), corpus())
         assert rec["request"]["temperature"] == 0.0 and rec["response"]["text"]
         assert usage.n_calls == len(ps.calls) and usage.total_cost_usd > 0

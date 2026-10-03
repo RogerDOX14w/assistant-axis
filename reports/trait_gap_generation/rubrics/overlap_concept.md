@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| **Status** | Draft 2, signed off by Roger on 2026-10-03 (commit 45f2aa7), moved here unchanged from [m3_overlap_rubric_draft.md](../m3_overlap_rubric_draft.md) and pinned as version 2 (the draft number).  Not a split-filter prompt: the M3 overlap call.  First run: the pre-pilot test of both overlap rubrics, [m3_overlap_test_readout.md](../m3_overlap_test_readout.md) (being written at the time of the move). |
+| **Status** | Draft 3 (2026-10-03): draft 2's text plus one sentence on the answer's keys, on Roger's word after the test.  Draft 2, signed off by Roger on 2026-10-03 (commit 45f2aa7), was moved here unchanged from [m3_overlap_rubric_draft.md](../m3_overlap_rubric_draft.md) and pinned as version 2 (the draft number).  Adopted for the M3 overlap call, run by Sonnet 5.5 (Roger, 2026-10-03; Haiku not used for it, to be re-evaluated when Haiku 5.5 arrives).  Not a split-filter prompt: the M3 overlap call.  First run: the pre-pilot test of both overlap rubrics, [m3_overlap_test_readout.md](../m3_overlap_test_readout.md) (being written at the time of the move). |
 | **What it is for** | Step 5 of the M3 design ([coding_plan_platform.md](../coding_plan_platform.md), last section): for a candidate trait and the existing traits the relation call judged *similar*, how similar are their concepts?  Roger's preference for the overlap call (2026-10-02: "ask about how similar the concepts are, rather than how often a persona showing one would show the other"); [overlap_cooccurrence.md](./overlap_cooccurrence.md) is the comparison arm. |
 | **What the model is shown** | One JSON object as the user turn: the target's label and description, and a numbered list of other traits (`id` 1 to n) with theirs, labels in display form, in random order, with no embedding scores, ranks or arrangement marks. |
 | **What it returns** | For each listed trait, a reason, then a similarity of 0 to 4, or "opposite", or "unsure". |
@@ -36,7 +36,7 @@ For each listed trait give a reason in one short sentence, then the answer.
 
 Respond with one JSON object and nothing else, reason first:
 {"results": [{"id": <the listed trait's id>, "reason": "<one short sentence>", "similarity": 0|1|2|3|4|"opposite"|"unsure"}]}
-Return one row per listed trait, in the order given.
+Return one row per listed trait, in the order given. Use only the keys shown: do not add the trait's label or any other key, and give each row once.
 ````
 
 ## Your notes
@@ -50,3 +50,4 @@ rubrics; their rows are copied from it as they stand.
 |---|---|---|---|
 | 1 | Claude | First draft of both rubrics and the test | Roger, 2026-10-02: concept similarity as the primary, co-occurrence as the comparison arm |
 | 2 | Roger and Claude | Both rubrics: "idea" replaced by "concept" (three places in A, two in B); the opening now says "You are given one JSON object: a persona trait, the target ("target") ... a numbered list of other persona traits ("traits")" instead of "Each item gives ..."; the answer's `id` is "the listed trait's id"; a rendered sample added; A's answer 2 reads "They share a core, but each adds something the other lacks" (was "and"); A's answer 0 example is now chatty and plainspoken (both about speech, how much against how directly), replacing outdoorsy and punctual, which share no area and so did not illustrate "connected at most by belonging to the same broad area"; B's answer 0 now reads "less often than in anyone else, down to never: having the target trait makes this one less likely" (was "rarely or never ... makes this one unlikely"), so that 0 means below the base rate that answer 1 names and a mild negative relation has an answer | Roger, 2026-10-03: the scale already says "concept", and mixing the words could read as two tests, while "idea" invites a looser reading that pushes scores up.  "Each item" was left over from the filter's multi-item rubrics: each overlap call carries exactly one target, and the ids number the listed traits.  Both mismatches show at once in a rendered sample, now the practice in AGENT_NOTES |
+| 3 | Claude | Added after "Return one row per listed trait, in the order given.": "Use only the keys shown: do not add the trait's label or any other key, and give each row once." | The test ([m3_overlap_test_readout.md](../m3_overlap_test_readout.md)): Sonnet 5.5 broke the answer format in 8 of 180 calls, 7 times by adding a `"label"` key and then writing "Correction:" and the whole answer again, once by leaving a key out.  Roger, 2026-10-03: make the change and rerun to confirm |
