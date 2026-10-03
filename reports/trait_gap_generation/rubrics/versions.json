@@ -1,5 +1,5 @@
 {
-  "_about": "Append-only.  For each split-filter prompt, every version and the SHA-256 of its text (the fenced block of its rubric file).  A version names one text.  Add a row with data_analysis/gap_generation/rubric_pins.py bump NAME --why TEXT; never edit a row.",
+  "_about": "Append-only.  For each split-filter prompt and each M3 overlap rubric, every version and the SHA-256 of its text (the fenced block of its rubric file).  A version names one text.  Add a row with data_analysis/gap_generation/rubric_pins.py bump NAME --why TEXT; never edit a row.",
   "prompts": {
     "sense": [
       {
@@ -129,6 +129,22 @@
         "sha256": "4f4b966e876ea0d0250df349e0eb7f56b76fe151ed3f14006cb9731576e2094f",
         "pinned_at": "2026-09-29T18:42:22+00:00",
         "why": "First pin: first draft; matches probe_last_step/run.json"
+      }
+    ],
+    "overlap_concept": [
+      {
+        "version": 2,
+        "sha256": "2f650bffa3d614c0498be0b4814af05d840d7952fc1e943b89492b6ec647b8ab",
+        "pinned_at": "2026-10-03T13:03:01+00:00",
+        "why": "First pin: draft 2 of m3_overlap_rubric_draft.md (rubric A, concept similarity), signed off by Roger 2026-10-03 (commit 45f2aa7); moved to its own file unchanged"
+      }
+    ],
+    "overlap_cooccurrence": [
+      {
+        "version": 2,
+        "sha256": "1dd2837269e8031be2bd93509beb090c9a226a683aa6cfce840c510f013d1838",
+        "pinned_at": "2026-10-03T13:03:03+00:00",
+        "why": "First pin: draft 2 of m3_overlap_rubric_draft.md (rubric B, co-occurrence), signed off by Roger 2026-10-03 (commit 45f2aa7); moved to its own file unchanged"
       }
     ]
   }

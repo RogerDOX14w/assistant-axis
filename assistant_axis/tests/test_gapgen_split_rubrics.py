@@ -1,5 +1,6 @@
 """The split filter's prompts and their pins (coding_plan_split.md section 8, test 1), and the word
-hygiene of the eight prompts (prompt_hygiene)."""
+hygiene of the eight prompts (prompt_hygiene).  Since 2026-10-03 also the two M3 overlap rubrics,
+which share the rubric directory and its pins (TestOverlapPins, TestOverlapHygiene)."""
 import json
 import shutil
 from pathlib import Path
@@ -165,6 +166,94 @@ def _forbidden():
 def _test_words():
     p = REPO / "data" / "candidates" / "validation" / "split_test_words.jsonl"
     return {normalize_to_file_name(json.loads(x)["surface"]) for x in p.read_text().splitlines() if x.strip()}
+
+
+class TestOverlapPins:
+    """The M3 overlap rubrics (signed off by Roger 2026-10-03 as draft 2 of m3_overlap_rubric_draft.md,
+    commit 45f2aa7) live beside the split prompts and share their pins, but are not split prompts."""
+
+    #: sha256 of the two fenced blocks of m3_overlap_rubric_draft.md at commit 45f2aa7 (draft 2)
+    DRAFT2 = {"overlap_concept": "2f650bffa3d614c0498be0b4814af05d840d7952fc1e943b89492b6ec647b8ab",
+              "overlap_cooccurrence": "1dd2837269e8031be2bd93509beb090c9a226a683aa6cfce840c510f013d1838"}
+
+    def test_overlap_rubrics_are_not_split_prompts(self):
+        assert set(sr.OVERLAP_NAMES) == set(self.DRAFT2)
+        assert not set(sr.OVERLAP_NAMES) & set(sr.NAMES)
+        assert set(sr.load_all()) == set(sr.NAMES)          # the split runner's eight, unchanged
+        assert set(sr.current_versions()) == set(sr.NAMES)  # what a split block stamps as step_versions
+        assert set(sr.current_versions(names=sr.OVERLAP_NAMES)) == set(sr.OVERLAP_NAMES)
+        assert set(sr.PINNED_NAMES) == set(sr.NAMES) | set(sr.OVERLAP_NAMES)
+
+    def test_first_pin_is_draft_2_as_signed_off(self):
+        rows = sr.read_versions()["prompts"]
+        for name, sha in self.DRAFT2.items():
+            first = rows[name][0]
+            assert (first["version"], first["sha256"]) == (2, sha), name
+            assert sr.sha256(sr.load_prompt(name)) == sha, name   # the text on disk is draft 2, unchanged
+
+    def test_files_and_mismatches(self):
+        assert sr.rubric_path("overlap_concept").name == "overlap_concept.md"
+        assert sr.rubric_path("overlap_cooccurrence").name == "overlap_cooccurrence.md"
+        assert sr.mismatches() == []
+
+    def test_a_changed_overlap_text_is_a_mismatch(self, tmp_path):
+        d = tmp_path / "rubrics"
+        shutil.copytree(paths.RUBRICS_DIR, d, ignore=shutil.ignore_patterns("README.md"))
+        p = d / sr.PINNED_FILES["overlap_concept"]
+        p.write_text(p.read_text(encoding="utf-8").replace("For example, talkative and loquacious.",
+                                                            "For example, talkative and garrulous.", 1),
+                     encoding="utf-8")
+        probs = sr.mismatches(d)
+        assert len(probs) == 1 and probs[0].startswith("overlap_concept: text changed")
+        assert "rubric_pins.py bump overlap_concept" in sr.bump_command(probs)
+        row = sr.bump("overlap_concept", "test edit", now="t", rubrics_dir=d)
+        assert row["version"] == 3 and sr.mismatches(d) == []
+
+    def test_rubric_pins_cli_knows_the_overlap_rubrics(self, capsys):
+        from data_analysis.gap_generation import rubric_pins
+        assert rubric_pins.main(["check"]) == 0
+        out = capsys.readouterr().out
+        assert "overlap_concept" in out and "overlap_cooccurrence" in out
+
+
+#: The example words of the two overlap rubrics (draft 2): the pairs on rubric A's scale and in its
+#: second paragraph, and rubric B's (B adds outdoorsy).
+OVERLAP_EXAMPLE_WORDS = ("punctual", "tidy", "talkative", "loquacious", "penny-pinching", "miserly", "studious",
+                         "bookish", "tetchy", "sullen", "chatty", "plainspoken", "cheery", "morose", "outdoorsy")
+#: Words of the overlap prompts that are corpus labels, queue entries or validation-file words and are
+#: not already allowed as prose: none at draft 2.
+OVERLAP_PROSE_RECORDED = {"overlap_concept": set(), "overlap_cooccurrence": set()}
+
+
+class TestOverlapHygiene:
+    def test_example_words_avoid_every_list(self):
+        reserved = set(RESERVED.read_text(encoding="utf-8").split())
+        bad = _forbidden() | _test_words()
+        hits = [w for w in OVERLAP_EXAMPLE_WORDS if w in reserved or normalize_to_file_name(w) in bad]
+        assert hits == []
+
+    def test_example_words_are_in_the_prompts(self):
+        a, b = sr.load_prompt("overlap_concept"), sr.load_prompt("overlap_cooccurrence")
+        for w in OVERLAP_EXAMPLE_WORDS:
+            assert w in a + b, w
+        assert "outdoorsy" in b and "outdoorsy" not in a   # A's answer-0 example changed in draft 2
+
+    def test_prompt_words_against_the_corpus_queue_and_validation_file(self):
+        from assistant_axis.gapgen.prompt_hygiene import PROSE_ALLOWED, prompt_words
+        forbidden = _forbidden() | _test_words()
+        got = {name: {w for w in prompt_words(sr.load_prompt(name)) if normalize_to_file_name(w) in forbidden
+                      and w not in PROSE_ALLOWED}
+               for name in sr.OVERLAP_NAMES}
+        assert got == OVERLAP_PROSE_RECORDED
+
+    def test_no_test_word_or_prose_word_is_an_example(self):
+        from assistant_axis.gapgen.prompt_hygiene import PROSE_ALLOWED
+        tw = _test_words()
+        for name in sr.OVERLAP_NAMES:
+            text = sr.load_prompt(name)
+            for w in tw | set(PROSE_ALLOWED):
+                for form in (f"{w} and ", f" and {w}.", f" and {w},", f"a {w} persona", f"be {w}."):
+                    assert form not in text, (name, w, form)
 
 
 class TestHygiene:

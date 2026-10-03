@@ -12,6 +12,13 @@ This file sits outside [rubrics/](./rubrics/) on purpose: that directory is chec
 changes before every paid run, and a draft there would stop one.  When a rubric is adopted its text
 moves there as draft 1 and is pinned.
 
+**Moved, 2026-10-03.**  Draft 2, signed off by Roger, now lives in
+[rubrics/overlap_concept.md](./rubrics/overlap_concept.md) (A) and
+[rubrics/overlap_cooccurrence.md](./rubrics/overlap_cooccurrence.md) (B), unchanged and pinned as
+version 2 (the draft number, not 1, so that the version names the draft Roger read).  Edit them
+there; the two blocks below stay as the record of draft 2.  The test below was run on them:
+[m3_overlap_test_readout.md](./m3_overlap_test_readout.md).
+
 **To edit:** change the text inside the blocks below.  Everything between the fence lines is what
 the model would see.  Notes for me go under "Your notes".
 

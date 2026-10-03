@@ -30,6 +30,20 @@ likely reading decides where it goes: on as a trait, or to the states queue, the
 the roles list.  The two checks only add notes.  By Roger's bar, a note is a concern to weigh, when
 judging a word or when choosing between near-duplicates, and not a reason to reject.
 
+## The M3 overlap call (added 2026-10-03)
+
+Two rubrics for one call, not part of the split filter: for a candidate and the existing traits the
+relation call judged similar, how close are they?  Both were drafted in
+[m3_overlap_rubric_draft.md](../m3_overlap_rubric_draft.md), signed off by Roger as draft 2 on
+2026-10-03, moved here unchanged and pinned as version 2 in the same `versions.json`.  The pre-pilot
+test of both is [m3_overlap_test_readout.md](../m3_overlap_test_readout.md) (being written when these
+moved).
+
+| rubric | file | what it asks | status |
+|---|---|---|---|
+| A | [overlap_concept.md](./overlap_concept.md) | How similar is each listed trait's concept to the target's: 0 to 4, "opposite" or "unsure" | draft 2 (Roger's preference) |
+| B | [overlap_cooccurrence.md](./overlap_cooccurrence.md) | How often would a persona with the target show each listed trait: 0 to 4 or "unsure" | draft 2 (the comparison arm) |
+
 ## How to edit
 
 Each file holds one prompt inside a fenced block.  Change the text inside the block.  When you are

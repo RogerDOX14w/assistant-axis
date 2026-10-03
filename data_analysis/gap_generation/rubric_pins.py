@@ -1,5 +1,7 @@
 #!/usr/bin/env python3
-"""Check or pin the split filter's prompt versions (``reports/trait_gap_generation/rubrics/versions.json``).
+"""Check or pin the rubric prompt versions (``reports/trait_gap_generation/rubrics/versions.json``): the
+split filter's eight prompts and, since 2026-10-03, the M3 overlap rubrics (``overlap_concept``,
+``overlap_cooccurrence``).
 
     uv run python data_analysis/gap_generation/rubric_pins.py check
     uv run python data_analysis/gap_generation/rubric_pins.py bump NAME --why TEXT [--version N]
@@ -29,15 +31,15 @@ def main(argv=None) -> int:
     sub = ap.add_subparsers(dest="cmd", required=True)
     sub.add_parser("check")
     b = sub.add_parser("bump")
-    b.add_argument("name", choices=sr.NAMES)
+    b.add_argument("name", choices=sr.PINNED_NAMES)
     b.add_argument("--why", required=True)
     b.add_argument("--version", type=int, default=None, help="only for a prompt's first row")
     args = ap.parse_args(argv)
     if args.cmd == "check":
-        pinned = sr.current_versions(args.rubrics_dir)
-        for n in sr.NAMES:
+        pinned = sr.current_versions(args.rubrics_dir, sr.PINNED_NAMES)
+        for n in sr.PINNED_NAMES:
             v, sha = pinned.get(n, (None, None))
-            print(f"{n:12s} {sr.FILES[n]:22s} version {v}  {sha[:12] + '...' if sha else '(not pinned)'}")
+            print(f"{n:20s} {sr.PINNED_FILES[n]:25s} version {v}  {sha[:12] + '...' if sha else '(not pinned)'}")
         problems = sr.mismatches(args.rubrics_dir)
         for p in problems:
             print(f"MISMATCH {p}", file=sys.stderr)

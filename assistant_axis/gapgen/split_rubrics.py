@@ -19,6 +19,13 @@ with the SHA-256 of its text, the date it was pinned and why.  The first rows ar
 in each file's status row.  A changed text with no new row is a mismatch, and a paid run refuses
 to start until the text is pinned with ``data_analysis/gap_generation/rubric_pins.py bump NAME
 --why TEXT``.
+
+The M3 overlap rubrics (2026-10-03) live in the same directory, in the same file format, and are
+pinned in the same ``versions.json`` (:data:`OVERLAP_FILES`): concept similarity (rubric A) and
+co-occurrence (rubric B), first pinned as version 2, the draft Roger signed off.  They are not split
+prompts: :data:`NAMES` and :func:`load_all` stay the split filter's eight (the split runner and its
+records use them), while :data:`PINNED_NAMES` (both sets) is what the pins, :func:`mismatches` and
+``rubric_pins.py`` cover.
 """
 from __future__ import annotations
 
@@ -43,6 +50,15 @@ FILES: dict[str, str] = {
     "descriptors": "descriptors.md",
 }
 NAMES: tuple[str, ...] = tuple(FILES)
+#: The M3 overlap call's two rubrics (m3_overlap_rubric_draft.md draft 2, signed off 2026-10-03).
+OVERLAP_FILES: dict[str, str] = {
+    "overlap_concept": "overlap_concept.md",
+    "overlap_cooccurrence": "overlap_cooccurrence.md",
+}
+OVERLAP_NAMES: tuple[str, ...] = tuple(OVERLAP_FILES)
+#: Every prompt file pinned in ``versions.json``.
+PINNED_FILES: dict[str, str] = {**FILES, **OVERLAP_FILES}
+PINNED_NAMES: tuple[str, ...] = tuple(PINNED_FILES)
 VERSIONS_NAME = "versions.json"
 
 #: The same expression the probe scripts used (probe_single/probe.py and the rest).
@@ -54,9 +70,9 @@ class RubricFileError(ValueError):
 
 
 def rubric_path(name: str, rubrics_dir: Optional[Path] = None) -> Path:
-    if name not in FILES:
-        raise KeyError(f"unknown split prompt {name!r}; known: {', '.join(NAMES)}")
-    return Path(rubrics_dir or RUBRICS_DIR) / FILES[name]
+    if name not in PINNED_FILES:
+        raise KeyError(f"unknown rubric prompt {name!r}; known: {', '.join(PINNED_NAMES)}")
+    return Path(rubrics_dir or RUBRICS_DIR) / PINNED_FILES[name]
 
 
 def load_prompt(name: str, rubrics_dir: Optional[Path] = None) -> str:
@@ -75,6 +91,7 @@ def sha256(text: str) -> str:
 
 
 def load_all(rubrics_dir: Optional[Path] = None) -> dict[str, str]:
+    """The split filter's eight prompts (not the overlap rubrics)."""
     return {n: load_prompt(n, rubrics_dir) for n in NAMES}
 
 
@@ -90,22 +107,26 @@ def read_versions(rubrics_dir: Optional[Path] = None) -> dict:
     return json.loads(p.read_text(encoding="utf-8"))
 
 
-def current_versions(rubrics_dir: Optional[Path] = None) -> dict[str, tuple[int, str]]:
-    """``{name: (latest pinned version, its sha256)}`` from ``versions.json``."""
+def current_versions(rubrics_dir: Optional[Path] = None, names: Optional[tuple] = NAMES
+                     ) -> dict[str, tuple[int, str]]:
+    """``{name: (latest pinned version, its sha256)}`` from ``versions.json``, for ``names`` (default:
+    the split filter's eight, which is what the split runner stamps as its ``step_versions``; pass
+    :data:`PINNED_NAMES` for every pinned prompt, :data:`OVERLAP_NAMES` for the overlap rubrics)."""
     out = {}
+    want = set(names) if names is not None else None
     for name, rows in (read_versions(rubrics_dir).get("prompts") or {}).items():
-        if rows:
+        if rows and (want is None or name in want):
             last = max(rows, key=lambda r: int(r["version"]))
             out[name] = (int(last["version"]), str(last["sha256"]))
     return out
 
 
 def mismatches(rubrics_dir: Optional[Path] = None) -> list[str]:
-    """Human-readable problems; empty when every prompt's text on disk is the text its latest
-    pinned version names."""
+    """Human-readable problems; empty when every prompt's text on disk (the split prompts and the
+    overlap rubrics) is the text its latest pinned version names."""
     out = []
-    pinned = current_versions(rubrics_dir)
-    for name in NAMES:
+    pinned = current_versions(rubrics_dir, PINNED_NAMES)
+    for name in PINNED_NAMES:
         try:
             sha = sha256(load_prompt(name, rubrics_dir))
         except RubricFileError as exc:
@@ -121,7 +142,7 @@ def mismatches(rubrics_dir: Optional[Path] = None) -> list[str]:
 
 def bump_command(problems: list[str]) -> str:
     """The ``rubric_pins.py bump`` commands that would pin the changed texts."""
-    names = [p.split(":", 1)[0] for p in problems if p.split(":", 1)[0] in FILES]
+    names = [p.split(":", 1)[0] for p in problems if p.split(":", 1)[0] in PINNED_FILES]
     return "\n".join(f"uv run python data_analysis/gap_generation/rubric_pins.py bump {n} --why '<what changed>'"
                      for n in names)
 
@@ -152,13 +173,13 @@ def bump(name: str, why: str, *, now: str, rubrics_dir: Optional[Path] = None,
         new_v = int(version)
     row = {"version": new_v, "sha256": sha, "pinned_at": now, "why": why.strip()}
     rows.append(row)
-    ordered = {"_about": data.get("_about") or ABOUT, "prompts": {n: data["prompts"][n] for n in NAMES
+    ordered = {"_about": data.get("_about") or ABOUT, "prompts": {n: data["prompts"][n] for n in PINNED_NAMES
                                                                   if n in data["prompts"]}}
     versions_path(rubrics_dir).write_text(json.dumps(ordered, indent=2, ensure_ascii=False) + "\n",
                                           encoding="utf-8")
     return row
 
 
-ABOUT = ("Append-only.  For each split-filter prompt, every version and the SHA-256 of its text (the "
-         "fenced block of its rubric file).  A version names one text.  Add a row with "
+ABOUT = ("Append-only.  For each split-filter prompt and each M3 overlap rubric, every version and the SHA-256 "
+         "of its text (the fenced block of its rubric file).  A version names one text.  Add a row with "
          "data_analysis/gap_generation/rubric_pins.py bump NAME --why TEXT; never edit a row.")
