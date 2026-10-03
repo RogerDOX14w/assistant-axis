@@ -1,0 +1,267 @@
+{
+  "sessions": [
+    {
+      "started_at": "2026-10-03T13:24:44+00:00",
+      "resumed": false,
+      "git_sha": "c3ce4e7"
+    },
+    {
+      "started_at": "2026-10-03T13:30:30+00:00",
+      "resumed": true,
+      "git_sha": "6707ed2+dirty"
+    }
+  ],
+  "run_id": "overlap_test_1",
+  "git_sha": "6707ed2+dirty",
+  "argv": [
+    "--run-id",
+    "overlap_test_1",
+    "--budget-usd",
+    "15",
+    "--resume"
+  ],
+  "allow_dirty": false,
+  "dirty_check": {
+    "paths": [
+      "assistant_axis/gapgen",
+      "data_analysis/gap_generation",
+      "assistant_axis/judge.py",
+      "assistant_axis/judge_pricing.py",
+      "assistant_axis/entity_id.py",
+      "assistant_axis/atomic_io.py",
+      "data/candidates/validation",
+      "reports/trait_gap_generation/rubrics",
+      "pyproject.toml",
+      "uv.lock"
+    ],
+    "dirty": []
+  },
+  "budget_usd": 15.0,
+  "estimate_usd": 3.2701,
+  "estimate_lines": [
+    "rubric A (overlap_concept) on Sonnet 5.5: 1 x (1,158, 260) tokens at claude-sonnet-5-5 rates = $0.005",
+    "rubric B (overlap_cooccurrence) on Sonnet 5.5: 180 x (725, 203) tokens at claude-sonnet-5-5 rates = $0.626",
+    "rubric A (overlap_concept) on Opus 5.5: 180 x (910, 203) tokens at claude-opus-5-5 rates = $1.386",
+    "rubric B (overlap_cooccurrence) on Opus 5.5: 180 x (725, 203) tokens at claude-opus-5-5 rates = $1.253"
+  ],
+  "models": [
+    "claude-haiku-4-5-20251001",
+    "claude-sonnet-5-5",
+    "claude-opus-5-5"
+  ],
+  "rubrics": [
+    "A",
+    "B"
+  ],
+  "reference": "claude-opus-5-5",
+  "seed": 0,
+  "temperature": 0.0,
+  "max_tokens": 2048,
+  "concurrency": 8,
+  "stop_below": 0.99,
+  "rubric_versions": {
+    "overlap_concept": 2,
+    "overlap_cooccurrence": 2
+  },
+  "prompt_sha256": {
+    "overlap_concept": "2f650bffa3d614c0498be0b4814af05d840d7952fc1e943b89492b6ec647b8ab",
+    "overlap_cooccurrence": "1dd2837269e8031be2bd93509beb090c9a226a683aa6cfce840c510f013d1838"
+  },
+  "prompts": {
+    "overlap_concept": "You are given one JSON object: a persona trait, the target (\"target\"), with a one-sentence description, and a numbered list of other persona traits (\"traits\"), each with its description. For each listed trait, say how similar its concept is to the target's: are they the same concept, or different concepts?\n\nJudge the meaning of the two descriptions, not how often the two traits are found together in the same person. Two traits can go together often and still be different concepts, as being punctual and being tidy do.\n\nGive one of these answers for each listed trait:\n- 4: the same concept. Either label could replace the other in any description of a persona. For example, talkative and loquacious.\n- 3: the same concept, differing only in scope, degree or emphasis. For example, penny-pinching and miserly: miserly is the same carefulness with money, carried further.\n- 2: overlapping concepts. They share a core, but each adds something the other lacks. For example, studious and bookish: both are about learning from books, but studious adds diligence and bookish adds a taste for reading.\n- 1: related but distinct concepts: neighbours, not the same concept. For example, tetchy and sullen: both are bad-tempered, but quick irritation is a different thing from silent resentment.\n- 0: different concepts, connected at most by belonging to the same broad area. For example, chatty and plainspoken: both are about how a person speaks, but one is how much and the other how directly.\n- \"opposite\": the listed trait is the reverse of the target, the same quality at the other end. For example, cheery and morose.\n- \"unsure\": you cannot tell from the two descriptions.\n\nFor each listed trait give a reason in one short sentence, then the answer.\n\nRespond with one JSON object and nothing else, reason first:\n{\"results\": [{\"id\": <the listed trait's id>, \"reason\": \"<one short sentence>\", \"similarity\": 0|1|2|3|4|\"opposite\"|\"unsure\"}]}\nReturn one row per listed trait, in the order given.",
+    "overlap_cooccurrence": "You are given one JSON object: a persona trait, the target (\"target\"), with a one-sentence description, and a numbered list of other persona traits (\"traits\"), each with its description. For each listed trait, say how often a persona that has the target trait would also show the listed trait.\n\nJudge how the two go together in a person, not whether they are the same concept. Two traits can be different concepts and still nearly always go together.\n\nGive one of these answers for each listed trait:\n- 4: almost always: a persona with the target trait would show this one too. For example, a talkative persona would be loquacious.\n- 3: usually. For example, a studious persona would usually be bookish.\n- 2: often, but far from always. For example, a punctual persona would often be tidy.\n- 1: sometimes, about as often as anyone else. For example, an outdoorsy persona would sometimes be punctual.\n- 0: less often than in anyone else, down to never: having the target trait makes this one less likely. For example, a cheery persona would rarely be morose.\n- \"unsure\": you cannot tell from the two descriptions.\n\nFor each listed trait give a reason in one short sentence, then the answer.\n\nRespond with one JSON object and nothing else, reason first:\n{\"results\": [{\"id\": <the listed trait's id>, \"reason\": \"<one short sentence>\", \"co_occurrence\": 0|1|2|3|4|\"unsure\"}]}\nReturn one row per listed trait, in the order given."
+  },
+  "pair_set": {
+    "n_calls": 180,
+    "n_pairs": 409,
+    "n_pairs_by_group": {
+      "nearest": 300,
+      "drop_or_merge": 11,
+      "deliberate_duplicate": 3,
+      "duplicate": 1,
+      "near_distinct": 34,
+      "antonym": 30,
+      "random": 30
+    },
+    "n_calls_by_set": {
+      "nearest": 100,
+      "labelled": 80
+    }
+  },
+  "started_at": "2026-10-03T13:24:44+00:00",
+  "stages": [
+    {
+      "rubric": "A",
+      "model": "claude-haiku-4-5-20251001",
+      "n_calls": 180,
+      "n_sent": 180,
+      "n_skipped": 0,
+      "n_pairs": 409,
+      "n_ok": 409,
+      "parse_rate": 1.0,
+      "budget_exceeded": false,
+      "seconds": 46.7,
+      "cost_usd_total_after": 0.2673,
+      "finished_at": "2026-10-03T13:25:31+00:00"
+    },
+    {
+      "rubric": "B",
+      "model": "claude-haiku-4-5-20251001",
+      "n_calls": 180,
+      "n_sent": 180,
+      "n_skipped": 0,
+      "n_pairs": 409,
+      "n_ok": 409,
+      "parse_rate": 1.0,
+      "budget_exceeded": false,
+      "seconds": 42.0,
+      "cost_usd_total_after": 0.5023,
+      "finished_at": "2026-10-03T13:26:13+00:00"
+    },
+    {
+      "rubric": "A",
+      "model": "claude-sonnet-5-5",
+      "n_calls": 180,
+      "n_sent": 180,
+      "n_skipped": 0,
+      "n_pairs": 409,
+      "n_ok": 385,
+      "parse_rate": 0.9413,
+      "budget_exceeded": false,
+      "seconds": 52.0,
+      "cost_usd_total_after": 1.1455,
+      "finished_at": "2026-10-03T13:27:05+00:00"
+    },
+    {
+      "rubric": "A",
+      "model": "claude-haiku-4-5-20251001",
+      "n_calls": 180,
+      "n_sent": 0,
+      "n_skipped": 180,
+      "n_reasked": 0,
+      "n_pairs": 409,
+      "n_ok": 409,
+      "n_ok_first_attempt": 409,
+      "parse_rate": 1.0,
+      "budget_exceeded": false,
+      "seconds": 0.1,
+      "cost_usd_total_after": 1.1455,
+      "finished_at": "2026-10-03T13:30:30+00:00"
+    },
+    {
+      "rubric": "B",
+      "model": "claude-haiku-4-5-20251001",
+      "n_calls": 180,
+      "n_sent": 0,
+      "n_skipped": 180,
+      "n_reasked": 0,
+      "n_pairs": 409,
+      "n_ok": 409,
+      "n_ok_first_attempt": 409,
+      "parse_rate": 1.0,
+      "budget_exceeded": false,
+      "seconds": 0.0,
+      "cost_usd_total_after": 1.1455,
+      "finished_at": "2026-10-03T13:30:30+00:00"
+    },
+    {
+      "rubric": "A",
+      "model": "claude-sonnet-5-5",
+      "n_calls": 180,
+      "n_sent": 1,
+      "n_skipped": 179,
+      "n_reasked": 0,
+      "n_pairs": 409,
+      "n_ok": 409,
+      "n_ok_first_attempt": 406,
+      "parse_rate": 1.0,
+      "budget_exceeded": false,
+      "seconds": 3.1,
+      "cost_usd_total_after": 1.1501,
+      "finished_at": "2026-10-03T13:30:33+00:00"
+    },
+    {
+      "rubric": "B",
+      "model": "claude-sonnet-5-5",
+      "n_calls": 180,
+      "n_sent": 180,
+      "n_skipped": 0,
+      "n_reasked": 0,
+      "n_pairs": 409,
+      "n_ok": 409,
+      "n_ok_first_attempt": 409,
+      "parse_rate": 1.0,
+      "budget_exceeded": false,
+      "seconds": 49.7,
+      "cost_usd_total_after": 1.6956,
+      "finished_at": "2026-10-03T13:31:23+00:00"
+    },
+    {
+      "rubric": "A",
+      "model": "claude-opus-5-5",
+      "n_calls": 180,
+      "n_sent": 180,
+      "n_skipped": 0,
+      "n_reasked": 0,
+      "n_pairs": 409,
+      "n_ok": 409,
+      "n_ok_first_attempt": 409,
+      "parse_rate": 1.0,
+      "budget_exceeded": false,
+      "seconds": 74.7,
+      "cost_usd_total_after": 2.9237,
+      "finished_at": "2026-10-03T13:32:38+00:00"
+    },
+    {
+      "rubric": "B",
+      "model": "claude-opus-5-5",
+      "n_calls": 180,
+      "n_sent": 181,
+      "n_skipped": 0,
+      "n_reasked": 1,
+      "n_pairs": 409,
+      "n_ok": 409,
+      "n_ok_first_attempt": 408,
+      "parse_rate": 1.0,
+      "budget_exceeded": false,
+      "seconds": 66.3,
+      "cost_usd_total_after": 3.9859,
+      "finished_at": "2026-10-03T13:33:44+00:00"
+    }
+  ],
+  "cost_usd": 3.985902,
+  "usage": {
+    "per_model": {
+      "claude-haiku-4-5-20251001": {
+        "model": "claude-haiku-4-5-20251001",
+        "prompt_tokens": 220234,
+        "completion_tokens": 56412,
+        "cost_usd": 0.5023,
+        "n_calls": 360
+      },
+      "claude-opus-5-5": {
+        "model": "claude-opus-5-5",
+        "prompt_tokens": 294417,
+        "completion_tokens": 55634,
+        "cost_usd": 2.2903,
+        "n_calls": 361
+      },
+      "claude-sonnet-5-5": {
+        "model": "claude-sonnet-5-5",
+        "prompt_tokens": 294725,
+        "completion_tokens": 60381,
+        "cost_usd": 1.1933,
+        "n_calls": 361
+      }
+    },
+    "total_cost_usd": 3.9859,
+    "total_prompt_tokens": 809376,
+    "total_completion_tokens": 172427,
+    "n_calls": 1082
+  },
+  "stopped": "parse rate 0.9413 below 0.99 at rubric A on claude-sonnet-5-5",
+  "finished_at": "2026-10-03T13:33:44+00:00",
+  "exit_code": 0,
+  "ask_attempts": 2,
+  "parser_version": 2
+}

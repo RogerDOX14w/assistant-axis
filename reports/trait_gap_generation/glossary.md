@@ -307,3 +307,63 @@ does not usually carry; round 4 of M2 keeps only the labels read the corpus's wa
 ### Second opinion
 The same first steps of the split filter repeated on a stronger model (Sonnet 5.5) for a seeded
 10% of words plus flagged ones; a disagreement is recorded, not resolved.
+
+## M3 terms (added 2026-10-03, for the overlap rubric test)
+
+<a id="relation-overlap-calls"></a>
+### Relation call, overlap call
+The two LLM calls of M3's [retrieve, then judge](#retrieve-then-judge) design.  The relation call
+asks, for a candidate and each of its retrieved existing traits, whether the two are similar,
+opposed, too different for the question to make sense, or unclear.  The overlap call then asks, for
+each trait judged similar, how close the two are on a 0-4 scale; that score (with the candidate's
+alignment score) decides whether the candidate is a gap or already covered.
+
+<a id="rubrics-a-b"></a>
+### Rubric A (concept similarity), rubric B (co-occurrence)
+The two candidate wordings of the overlap call.  A asks how similar the two concepts are (4 the
+same concept, 0 different concepts), with "opposite" for the reverse quality.  B asks how often a
+persona with the target trait would also show the listed one (4 almost always, 1 as often as
+anyone, 0 less often than anyone).  A is Roger's preference; B is the comparison arm.  They part
+company on traits that go together but mean different things (punctual and tidy).
+
+<a id="target-listed"></a>
+### Target, listed trait
+In one overlap call: the target is the trait being judged (in M3 the candidate; in the test an
+existing trait standing in for one), and the listed traits are the existing traits it is compared
+with, numbered 1 to n in random order.
+
+<a id="clean-pair"></a>
+### Recorded clean pair
+Two corpus traits recorded as each other's opposite (the `arrangement` field, kind `pair`), such as
+cheerful and melancholic.  "Recorded opposites" in the test means these plus the other antonym
+pairs of the [labelled pairs](#labelled-pairs).
+
+<a id="reference-model"></a>
+### Reference model
+The model whose answers the others are compared with when there is no human answer key; here Opus
+5.5, as in the Opus audit of the M1 filter.  Agreement with it is not proof of being right: Roger's
+marks on a blinded sample check the reference itself.
+
+<a id="weighted-kappa"></a>
+### Weighted kappa
+A measure of agreement between two raters on an ordered scale such as 0-4, corrected for the
+agreement two raters would reach by chance given how often each uses each answer.  1 is perfect
+agreement, 0 is no better than chance.  "Weighted" means near misses count as partial agreement:
+with quadratic weights (the usual choice, and the headline figure here) a one-point difference
+costs a sixteenth as much as a four-point one; linear weights charge in proportion to the
+distance.  Rough reading: above 0.8 very good, 0.6 to 0.8 good, below 0.4 poor.
+
+<a id="parse-rate"></a>
+### Parse rate
+The share of a judge's answers that could be read: valid JSON, an answer for every listed item, a
+value on the allowed scale, a reason.  The project treats anything under 99% as a fault to fix,
+not a cost to accept.
+
+<a id="cluster-bootstrap"></a>
+### Bootstrap interval resampling targets
+An interval for a correlation found by redrawing the data many times (2,000 here) and recomputing
+it each time, keeping the middle 95%.  The redraw picks whole targets (a call's target with all its
+listed traits) rather than single pairs, because pairs that share a target are not independent; it
+is the [paired bootstrap](#paired-bootstrap)'s idea applied to a correlation.  For a difference
+between rubrics A and B both are recomputed on each redraw, so the interval is for the difference
+itself: one that excludes zero says the difference is unlikely to be luck of the draw.

@@ -1,0 +1,3359 @@
+{
+  "result": {
+    "n_pairs": 409,
+    "n_calls": 180,
+    "models": [
+      "claude-haiku-4-5-20251001",
+      "claude-sonnet-5-5",
+      "claude-opus-5-5"
+    ],
+    "reference": "claude-opus-5-5",
+    "parse": {
+      "A|claude-haiku-4-5-20251001": {
+        "ok": 409,
+        "total": 409,
+        "rate": 1.0
+      },
+      "A|claude-opus-5-5": {
+        "ok": 409,
+        "total": 409,
+        "rate": 1.0
+      },
+      "A|claude-sonnet-5-5": {
+        "ok": 409,
+        "total": 409,
+        "rate": 1.0
+      },
+      "B|claude-haiku-4-5-20251001": {
+        "ok": 409,
+        "total": 409,
+        "rate": 1.0
+      },
+      "B|claude-opus-5-5": {
+        "ok": 409,
+        "total": 409,
+        "rate": 1.0
+      },
+      "B|claude-sonnet-5-5": {
+        "ok": 409,
+        "total": 409,
+        "rate": 1.0
+      }
+    },
+    "agreement": {
+      "A": {
+        "claude-haiku-4-5-20251001": {
+          "n_common": 409,
+          "n_both_parsed": 409,
+          "exact_all": 0.6357,
+          "n_numeric": 318,
+          "exact": 0.5755,
+          "within_one": 0.9811,
+          "mean_diff": 0.3491,
+          "kappa_quadratic": 0.7631,
+          "kappa_linear": 0.5967,
+          "table": {
+            "numeric": {
+              "numeric": 318,
+              "opposite": 14
+            },
+            "opposite": {
+              "opposite": 77
+            }
+          }
+        },
+        "claude-sonnet-5-5": {
+          "n_common": 409,
+          "n_both_parsed": 409,
+          "exact_all": 0.8557,
+          "n_numeric": 323,
+          "exact": 0.8452,
+          "within_one": 1.0,
+          "mean_diff": 0.0433,
+          "kappa_quadratic": 0.9142,
+          "kappa_linear": 0.8498,
+          "table": {
+            "numeric": {
+              "numeric": 323,
+              "opposite": 9
+            },
+            "opposite": {
+              "opposite": 77
+            }
+          }
+        }
+      },
+      "B": {
+        "claude-haiku-4-5-20251001": {
+          "n_common": 409,
+          "n_both_parsed": 409,
+          "exact_all": 0.5452,
+          "n_numeric": 404,
+          "exact": 0.552,
+          "within_one": 0.953,
+          "mean_diff": 0.4059,
+          "kappa_quadratic": 0.8743,
+          "kappa_linear": 0.7093,
+          "table": {
+            "numeric": {
+              "numeric": 404,
+              "unsure": 5
+            }
+          }
+        },
+        "claude-sonnet-5-5": {
+          "n_common": 409,
+          "n_both_parsed": 409,
+          "exact_all": 0.846,
+          "n_numeric": 409,
+          "exact": 0.846,
+          "within_one": 1.0,
+          "mean_diff": 0.1198,
+          "kappa_quadratic": 0.9628,
+          "kappa_linear": 0.9038,
+          "table": {
+            "numeric": {
+              "numeric": 409
+            }
+          }
+        }
+      }
+    },
+    "correlation": {
+      "A": {
+        "claude-haiku-4-5-20251001": {
+          "persona": {
+            "all": {
+              "rho": 0.5553,
+              "p": 7.595609772612598e-20,
+              "n": 228,
+              "lo": 0.4368,
+              "hi": 0.6575,
+              "n_boot": 2000
+            },
+            "non_antonym": {
+              "rho": 0.5553,
+              "p": 7.595609772612598e-20,
+              "n": 228,
+              "lo": 0.4368,
+              "hi": 0.6575,
+              "n_boot": 2000
+            },
+            "nearest": {
+              "rho": 0.5033,
+              "p": 4.764740187697416e-14,
+              "n": 197,
+              "lo": 0.3875,
+              "hi": 0.6103,
+              "n_boot": 2000
+            },
+            "nearest_non_antonym": {
+              "rho": 0.5033,
+              "p": 4.764740187697416e-14,
+              "n": 197,
+              "lo": 0.3875,
+              "hi": 0.6103,
+              "n_boot": 2000
+            }
+          },
+          "embedding": {
+            "all": {
+              "rho": 0.6168,
+              "p": 1.0342151124881007e-34,
+              "n": 318,
+              "lo": 0.5274,
+              "hi": 0.6911,
+              "n_boot": 2000
+            },
+            "non_antonym": {
+              "rho": 0.6168,
+              "p": 1.0342151124881007e-34,
+              "n": 318,
+              "lo": 0.5274,
+              "hi": 0.6911,
+              "n_boot": 2000
+            },
+            "nearest": {
+              "rho": 0.4644,
+              "p": 5.405666366005539e-15,
+              "n": 254,
+              "lo": 0.36,
+              "hi": 0.5643,
+              "n_boot": 2000
+            },
+            "nearest_non_antonym": {
+              "rho": 0.4644,
+              "p": 5.405666366005539e-15,
+              "n": 254,
+              "lo": 0.36,
+              "hi": 0.5643,
+              "n_boot": 2000
+            }
+          }
+        },
+        "claude-sonnet-5-5": {
+          "persona": {
+            "all": {
+              "rho": 0.6681,
+              "p": 2.304510861666426e-31,
+              "n": 232,
+              "lo": 0.5623,
+              "hi": 0.7544,
+              "n_boot": 2000
+            },
+            "non_antonym": {
+              "rho": 0.6681,
+              "p": 2.304510861666426e-31,
+              "n": 232,
+              "lo": 0.5623,
+              "hi": 0.7544,
+              "n_boot": 2000
+            },
+            "nearest": {
+              "rho": 0.6122,
+              "p": 9.422307814817454e-22,
+              "n": 198,
+              "lo": 0.5044,
+              "hi": 0.7051,
+              "n_boot": 2000
+            },
+            "nearest_non_antonym": {
+              "rho": 0.6122,
+              "p": 9.422307814817454e-22,
+              "n": 198,
+              "lo": 0.5044,
+              "hi": 0.7051,
+              "n_boot": 2000
+            }
+          },
+          "embedding": {
+            "all": {
+              "rho": 0.7107,
+              "p": 5.805165740344956e-51,
+              "n": 323,
+              "lo": 0.6337,
+              "hi": 0.7728,
+              "n_boot": 2000
+            },
+            "non_antonym": {
+              "rho": 0.7107,
+              "p": 5.805165740344956e-51,
+              "n": 323,
+              "lo": 0.6337,
+              "hi": 0.7728,
+              "n_boot": 2000
+            },
+            "nearest": {
+              "rho": 0.607,
+              "p": 3.6526676838509376e-27,
+              "n": 256,
+              "lo": 0.5093,
+              "hi": 0.6914,
+              "n_boot": 2000
+            },
+            "nearest_non_antonym": {
+              "rho": 0.607,
+              "p": 3.6526676838509376e-27,
+              "n": 256,
+              "lo": 0.5093,
+              "hi": 0.6914,
+              "n_boot": 2000
+            }
+          }
+        },
+        "claude-opus-5-5": {
+          "persona": {
+            "all": {
+              "rho": 0.6797,
+              "p": 6.8727825592035224e-34,
+              "n": 240,
+              "lo": 0.572,
+              "hi": 0.7618,
+              "n_boot": 2000
+            },
+            "non_antonym": {
+              "rho": 0.6797,
+              "p": 6.8727825592035224e-34,
+              "n": 240,
+              "lo": 0.572,
+              "hi": 0.7618,
+              "n_boot": 2000
+            },
+            "nearest": {
+              "rho": 0.6279,
+              "p": 1.1597744483907074e-23,
+              "n": 203,
+              "lo": 0.5134,
+              "hi": 0.7194,
+              "n_boot": 2000
+            },
+            "nearest_non_antonym": {
+              "rho": 0.6279,
+              "p": 1.1597744483907074e-23,
+              "n": 203,
+              "lo": 0.5134,
+              "hi": 0.7194,
+              "n_boot": 2000
+            }
+          },
+          "embedding": {
+            "all": {
+              "rho": 0.6825,
+              "p": 7.675695441540904e-47,
+              "n": 332,
+              "lo": 0.5985,
+              "hi": 0.752,
+              "n_boot": 2000
+            },
+            "non_antonym": {
+              "rho": 0.6825,
+              "p": 7.675695441540904e-47,
+              "n": 332,
+              "lo": 0.5985,
+              "hi": 0.752,
+              "n_boot": 2000
+            },
+            "nearest": {
+              "rho": 0.571,
+              "p": 5.4849598193264305e-24,
+              "n": 261,
+              "lo": 0.4642,
+              "hi": 0.6627,
+              "n_boot": 2000
+            },
+            "nearest_non_antonym": {
+              "rho": 0.571,
+              "p": 5.4849598193264305e-24,
+              "n": 261,
+              "lo": 0.4642,
+              "hi": 0.6627,
+              "n_boot": 2000
+            }
+          }
+        }
+      },
+      "B": {
+        "claude-haiku-4-5-20251001": {
+          "persona": {
+            "all": {
+              "rho": 0.6842,
+              "p": 5.274579700449135e-40,
+              "n": 280,
+              "lo": 0.6005,
+              "hi": 0.7521,
+              "n_boot": 2000
+            },
+            "non_antonym": {
+              "rho": 0.5999,
+              "p": 6.340279590046929e-26,
+              "n": 251,
+              "lo": 0.4986,
+              "hi": 0.6883,
+              "n_boot": 2000
+            },
+            "nearest": {
+              "rho": 0.6182,
+              "p": 1.2135648761350318e-25,
+              "n": 230,
+              "lo": 0.5187,
+              "hi": 0.699,
+              "n_boot": 2000
+            },
+            "nearest_non_antonym": {
+              "rho": 0.5252,
+              "p": 2.7453512405432603e-16,
+              "n": 210,
+              "lo": 0.414,
+              "hi": 0.6199,
+              "n_boot": 2000
+            }
+          },
+          "embedding": {
+            "all": {
+              "rho": 0.2903,
+              "p": 2.7710439497520154e-09,
+              "n": 404,
+              "lo": 0.1875,
+              "hi": 0.3898,
+              "n_boot": 2000
+            },
+            "non_antonym": {
+              "rho": 0.4645,
+              "p": 9.321398405717164e-20,
+              "n": 343,
+              "lo": 0.365,
+              "hi": 0.5531,
+              "n_boot": 2000
+            },
+            "nearest": {
+              "rho": 0.1669,
+              "p": 0.003744112593322641,
+              "n": 300,
+              "lo": 0.0535,
+              "hi": 0.2737,
+              "n_boot": 2000
+            },
+            "nearest_non_antonym": {
+              "rho": 0.3462,
+              "p": 5.465351408526696e-09,
+              "n": 269,
+              "lo": 0.2412,
+              "hi": 0.446,
+              "n_boot": 2000
+            }
+          }
+        },
+        "claude-sonnet-5-5": {
+          "persona": {
+            "all": {
+              "rho": 0.7324,
+              "p": 2.5049789224179418e-48,
+              "n": 280,
+              "lo": 0.6503,
+              "hi": 0.7932,
+              "n_boot": 2000
+            },
+            "non_antonym": {
+              "rho": 0.6663,
+              "p": 1.401809256321942e-33,
+              "n": 251,
+              "lo": 0.5782,
+              "hi": 0.7405,
+              "n_boot": 2000
+            },
+            "nearest": {
+              "rho": 0.6774,
+              "p": 3.033971000574064e-32,
+              "n": 230,
+              "lo": 0.5836,
+              "hi": 0.7529,
+              "n_boot": 2000
+            },
+            "nearest_non_antonym": {
+              "rho": 0.6045,
+              "p": 2.5863287015533946e-22,
+              "n": 210,
+              "lo": 0.5007,
+              "hi": 0.689,
+              "n_boot": 2000
+            }
+          },
+          "embedding": {
+            "all": {
+              "rho": 0.3397,
+              "p": 1.6663782662810262e-12,
+              "n": 409,
+              "lo": 0.2394,
+              "hi": 0.4397,
+              "n_boot": 2000
+            },
+            "non_antonym": {
+              "rho": 0.5388,
+              "p": 1.3499127664896909e-27,
+              "n": 348,
+              "lo": 0.4466,
+              "hi": 0.6217,
+              "n_boot": 2000
+            },
+            "nearest": {
+              "rho": 0.2327,
+              "p": 4.722549303376963e-05,
+              "n": 300,
+              "lo": 0.123,
+              "hi": 0.3405,
+              "n_boot": 2000
+            },
+            "nearest_non_antonym": {
+              "rho": 0.4222,
+              "p": 4.706407504834792e-13,
+              "n": 269,
+              "lo": 0.3059,
+              "hi": 0.5185,
+              "n_boot": 2000
+            }
+          }
+        },
+        "claude-opus-5-5": {
+          "persona": {
+            "all": {
+              "rho": 0.7593,
+              "p": 8.60164806675771e-54,
+              "n": 280,
+              "lo": 0.6835,
+              "hi": 0.8182,
+              "n_boot": 2000
+            },
+            "non_antonym": {
+              "rho": 0.7037,
+              "p": 7.728103187522482e-39,
+              "n": 251,
+              "lo": 0.6152,
+              "hi": 0.7761,
+              "n_boot": 2000
+            },
+            "nearest": {
+              "rho": 0.7105,
+              "p": 1.1768477194894407e-36,
+              "n": 230,
+              "lo": 0.6246,
+              "hi": 0.7803,
+              "n_boot": 2000
+            },
+            "nearest_non_antonym": {
+              "rho": 0.6484,
+              "p": 1.9692754532148657e-26,
+              "n": 210,
+              "lo": 0.5496,
+              "hi": 0.7286,
+              "n_boot": 2000
+            }
+          },
+          "embedding": {
+            "all": {
+              "rho": 0.3494,
+              "p": 3.473936809090451e-13,
+              "n": 409,
+              "lo": 0.2465,
+              "hi": 0.4524,
+              "n_boot": 2000
+            },
+            "non_antonym": {
+              "rho": 0.5481,
+              "p": 1.129459005148545e-28,
+              "n": 348,
+              "lo": 0.4524,
+              "hi": 0.6341,
+              "n_boot": 2000
+            },
+            "nearest": {
+              "rho": 0.2458,
+              "p": 1.6692836451868417e-05,
+              "n": 300,
+              "lo": 0.1294,
+              "hi": 0.3541,
+              "n_boot": 2000
+            },
+            "nearest_non_antonym": {
+              "rho": 0.4334,
+              "p": 9.535940824516137e-14,
+              "n": 269,
+              "lo": 0.3221,
+              "hi": 0.5335,
+              "n_boot": 2000
+            }
+          }
+        }
+      }
+    },
+    "rubric_difference": {
+      "claude-haiku-4-5-20251001": {
+        "non_antonym": {
+          "persona": {
+            "n": 228,
+            "rho_a": 0.5553,
+            "rho_b": 0.5015,
+            "diff": 0.0538,
+            "lo": -0.0342,
+            "hi": 0.1383,
+            "n_boot": 2000
+          },
+          "embedding": {
+            "n": 313,
+            "rho_a": 0.5983,
+            "rho_b": 0.4742,
+            "diff": 0.1241,
+            "lo": 0.0495,
+            "hi": 0.1957,
+            "n_boot": 2000
+          }
+        },
+        "nearest_non_antonym": {
+          "persona": {
+            "n": 197,
+            "rho_a": 0.5033,
+            "rho_b": 0.4543,
+            "diff": 0.049,
+            "lo": -0.0542,
+            "hi": 0.1562,
+            "n_boot": 2000
+          },
+          "embedding": {
+            "n": 254,
+            "rho_a": 0.4644,
+            "rho_b": 0.3275,
+            "diff": 0.137,
+            "lo": 0.0308,
+            "hi": 0.2361,
+            "n_boot": 2000
+          }
+        }
+      },
+      "claude-sonnet-5-5": {
+        "non_antonym": {
+          "persona": {
+            "n": 232,
+            "rho_a": 0.6681,
+            "rho_b": 0.6008,
+            "diff": 0.0673,
+            "lo": -0.0139,
+            "hi": 0.1402,
+            "n_boot": 2000
+          },
+          "embedding": {
+            "n": 323,
+            "rho_a": 0.7107,
+            "rho_b": 0.5679,
+            "diff": 0.1429,
+            "lo": 0.075,
+            "hi": 0.2192,
+            "n_boot": 2000
+          }
+        },
+        "nearest_non_antonym": {
+          "persona": {
+            "n": 198,
+            "rho_a": 0.6122,
+            "rho_b": 0.5539,
+            "diff": 0.0583,
+            "lo": -0.0417,
+            "hi": 0.1475,
+            "n_boot": 2000
+          },
+          "embedding": {
+            "n": 256,
+            "rho_a": 0.607,
+            "rho_b": 0.4125,
+            "diff": 0.1945,
+            "lo": 0.096,
+            "hi": 0.3005,
+            "n_boot": 2000
+          }
+        }
+      },
+      "claude-opus-5-5": {
+        "non_antonym": {
+          "persona": {
+            "n": 240,
+            "rho_a": 0.6797,
+            "rho_b": 0.6762,
+            "diff": 0.0035,
+            "lo": -0.0762,
+            "hi": 0.0767,
+            "n_boot": 2000
+          },
+          "embedding": {
+            "n": 332,
+            "rho_a": 0.6825,
+            "rho_b": 0.5944,
+            "diff": 0.088,
+            "lo": 0.0212,
+            "hi": 0.1617,
+            "n_boot": 2000
+          }
+        },
+        "nearest_non_antonym": {
+          "persona": {
+            "n": 203,
+            "rho_a": 0.6279,
+            "rho_b": 0.6263,
+            "diff": 0.0017,
+            "lo": -0.098,
+            "hi": 0.1,
+            "n_boot": 2000
+          },
+          "embedding": {
+            "n": 261,
+            "rho_a": 0.571,
+            "rho_b": 0.4403,
+            "diff": 0.1307,
+            "lo": 0.0262,
+            "hi": 0.2395,
+            "n_boot": 2000
+          }
+        }
+      }
+    },
+    "groups": {
+      "A": {
+        "claude-haiku-4-5-20251001": {
+          "nearest": {
+            "n": 300,
+            "n_parsed": 300,
+            "counts": {
+              "0": 11,
+              "1": 37,
+              "2": 129,
+              "3": 67,
+              "4": 10,
+              "opposite": 46
+            },
+            "mean": 2.11,
+            "share_3_plus": 0.303,
+            "opposite": 0.153,
+            "unsure": 0.0
+          },
+          "drop_or_merge": {
+            "n": 11,
+            "n_parsed": 11,
+            "counts": {
+              "2": 2,
+              "3": 4,
+              "4": 4,
+              "opposite": 1
+            },
+            "mean": 3.2,
+            "share_3_plus": 0.8,
+            "opposite": 0.091,
+            "unsure": 0.0
+          },
+          "deliberate_duplicate": {
+            "n": 3,
+            "n_parsed": 3,
+            "counts": {
+              "2": 2,
+              "3": 1
+            },
+            "mean": 2.33,
+            "share_3_plus": 0.333,
+            "opposite": 0.0,
+            "unsure": 0.0
+          },
+          "duplicate": {
+            "n": 1,
+            "n_parsed": 1,
+            "counts": {
+              "3": 1
+            },
+            "mean": 3.0,
+            "share_3_plus": 1.0,
+            "opposite": 0.0,
+            "unsure": 0.0
+          },
+          "near_distinct": {
+            "n": 34,
+            "n_parsed": 34,
+            "counts": {
+              "0": 1,
+              "1": 6,
+              "2": 10,
+              "3": 4,
+              "4": 1,
+              "opposite": 12
+            },
+            "mean": 1.91,
+            "share_3_plus": 0.227,
+            "opposite": 0.353,
+            "unsure": 0.0
+          },
+          "antonym": {
+            "n": 30,
+            "n_parsed": 30,
+            "counts": {
+              "opposite": 30
+            },
+            "mean": null,
+            "share_3_plus": null,
+            "opposite": 1.0,
+            "unsure": 0.0
+          },
+          "random": {
+            "n": 30,
+            "n_parsed": 30,
+            "counts": {
+              "0": 25,
+              "1": 2,
+              "2": 1,
+              "opposite": 2
+            },
+            "mean": 0.14,
+            "share_3_plus": 0.0,
+            "opposite": 0.067,
+            "unsure": 0.0
+          }
+        },
+        "claude-sonnet-5-5": {
+          "nearest": {
+            "n": 300,
+            "n_parsed": 300,
+            "counts": {
+              "0": 15,
+              "1": 81,
+              "2": 118,
+              "3": 38,
+              "4": 4,
+              "opposite": 44
+            },
+            "mean": 1.75,
+            "share_3_plus": 0.164,
+            "opposite": 0.147,
+            "unsure": 0.0
+          },
+          "drop_or_merge": {
+            "n": 11,
+            "n_parsed": 11,
+            "counts": {
+              "3": 9,
+              "4": 1,
+              "opposite": 1
+            },
+            "mean": 3.1,
+            "share_3_plus": 1.0,
+            "opposite": 0.091,
+            "unsure": 0.0
+          },
+          "deliberate_duplicate": {
+            "n": 3,
+            "n_parsed": 3,
+            "counts": {
+              "2": 3
+            },
+            "mean": 2.0,
+            "share_3_plus": 0.0,
+            "opposite": 0.0,
+            "unsure": 0.0
+          },
+          "duplicate": {
+            "n": 1,
+            "n_parsed": 1,
+            "counts": {
+              "3": 1
+            },
+            "mean": 3.0,
+            "share_3_plus": 1.0,
+            "opposite": 0.0,
+            "unsure": 0.0
+          },
+          "near_distinct": {
+            "n": 34,
+            "n_parsed": 34,
+            "counts": {
+              "0": 4,
+              "1": 8,
+              "2": 9,
+              "3": 3,
+              "4": 1,
+              "opposite": 9
+            },
+            "mean": 1.56,
+            "share_3_plus": 0.16,
+            "opposite": 0.265,
+            "unsure": 0.0
+          },
+          "antonym": {
+            "n": 30,
+            "n_parsed": 30,
+            "counts": {
+              "opposite": 30
+            },
+            "mean": null,
+            "share_3_plus": null,
+            "opposite": 1.0,
+            "unsure": 0.0
+          },
+          "random": {
+            "n": 30,
+            "n_parsed": 30,
+            "counts": {
+              "0": 24,
+              "1": 4,
+              "opposite": 2
+            },
+            "mean": 0.14,
+            "share_3_plus": 0.0,
+            "opposite": 0.067,
+            "unsure": 0.0
+          }
+        },
+        "claude-opus-5-5": {
+          "nearest": {
+            "n": 300,
+            "n_parsed": 300,
+            "counts": {
+              "0": 15,
+              "1": 93,
+              "2": 117,
+              "3": 32,
+              "4": 4,
+              "opposite": 39
+            },
+            "mean": 1.68,
+            "share_3_plus": 0.138,
+            "opposite": 0.13,
+            "unsure": 0.0
+          },
+          "drop_or_merge": {
+            "n": 11,
+            "n_parsed": 11,
+            "counts": {
+              "2": 2,
+              "3": 7,
+              "4": 1,
+              "opposite": 1
+            },
+            "mean": 2.9,
+            "share_3_plus": 0.8,
+            "opposite": 0.091,
+            "unsure": 0.0
+          },
+          "deliberate_duplicate": {
+            "n": 3,
+            "n_parsed": 3,
+            "counts": {
+              "2": 3
+            },
+            "mean": 2.0,
+            "share_3_plus": 0.0,
+            "opposite": 0.0,
+            "unsure": 0.0
+          },
+          "duplicate": {
+            "n": 1,
+            "n_parsed": 1,
+            "counts": {
+              "3": 1
+            },
+            "mean": 3.0,
+            "share_3_plus": 1.0,
+            "opposite": 0.0,
+            "unsure": 0.0
+          },
+          "near_distinct": {
+            "n": 34,
+            "n_parsed": 34,
+            "counts": {
+              "0": 2,
+              "1": 13,
+              "2": 8,
+              "3": 3,
+              "4": 1,
+              "opposite": 7
+            },
+            "mean": 1.56,
+            "share_3_plus": 0.148,
+            "opposite": 0.206,
+            "unsure": 0.0
+          },
+          "antonym": {
+            "n": 30,
+            "n_parsed": 30,
+            "counts": {
+              "opposite": 30
+            },
+            "mean": null,
+            "share_3_plus": null,
+            "opposite": 1.0,
+            "unsure": 0.0
+          },
+          "random": {
+            "n": 30,
+            "n_parsed": 30,
+            "counts": {
+              "0": 26,
+              "1": 3,
+              "2": 1
+            },
+            "mean": 0.17,
+            "share_3_plus": 0.0,
+            "opposite": 0.0,
+            "unsure": 0.0
+          }
+        }
+      },
+      "B": {
+        "claude-haiku-4-5-20251001": {
+          "nearest": {
+            "n": 300,
+            "n_parsed": 300,
+            "counts": {
+              "0": 46,
+              "1": 5,
+              "2": 28,
+              "3": 84,
+              "4": 137
+            },
+            "mean": 2.87,
+            "share_3_plus": 0.737,
+            "opposite": 0.0,
+            "unsure": 0.0
+          },
+          "drop_or_merge": {
+            "n": 11,
+            "n_parsed": 11,
+            "counts": {
+              "0": 1,
+              "4": 10
+            },
+            "mean": 3.64,
+            "share_3_plus": 0.909,
+            "opposite": 0.0,
+            "unsure": 0.0
+          },
+          "deliberate_duplicate": {
+            "n": 3,
+            "n_parsed": 3,
+            "counts": {
+              "3": 1,
+              "4": 2
+            },
+            "mean": 3.67,
+            "share_3_plus": 1.0,
+            "opposite": 0.0,
+            "unsure": 0.0
+          },
+          "duplicate": {
+            "n": 1,
+            "n_parsed": 1,
+            "counts": {
+              "3": 1
+            },
+            "mean": 3.0,
+            "share_3_plus": 1.0,
+            "opposite": 0.0,
+            "unsure": 0.0
+          },
+          "near_distinct": {
+            "n": 34,
+            "n_parsed": 34,
+            "counts": {
+              "0": 13,
+              "1": 1,
+              "2": 3,
+              "3": 11,
+              "4": 6
+            },
+            "mean": 1.88,
+            "share_3_plus": 0.5,
+            "opposite": 0.0,
+            "unsure": 0.0
+          },
+          "antonym": {
+            "n": 30,
+            "n_parsed": 30,
+            "counts": {
+              "0": 30
+            },
+            "mean": 0.0,
+            "share_3_plus": 0.0,
+            "opposite": 0.0,
+            "unsure": 0.0
+          },
+          "random": {
+            "n": 30,
+            "n_parsed": 30,
+            "counts": {
+              "0": 6,
+              "1": 5,
+              "2": 6,
+              "3": 8,
+              "unsure": 5
+            },
+            "mean": 1.64,
+            "share_3_plus": 0.32,
+            "opposite": 0.0,
+            "unsure": 0.167
+          }
+        },
+        "claude-sonnet-5-5": {
+          "nearest": {
+            "n": 300,
+            "n_parsed": 300,
+            "counts": {
+              "0": 46,
+              "1": 9,
+              "2": 54,
+              "3": 117,
+              "4": 74
+            },
+            "mean": 2.55,
+            "share_3_plus": 0.637,
+            "opposite": 0.0,
+            "unsure": 0.0
+          },
+          "drop_or_merge": {
+            "n": 11,
+            "n_parsed": 11,
+            "counts": {
+              "0": 1,
+              "3": 1,
+              "4": 9
+            },
+            "mean": 3.55,
+            "share_3_plus": 0.909,
+            "opposite": 0.0,
+            "unsure": 0.0
+          },
+          "deliberate_duplicate": {
+            "n": 3,
+            "n_parsed": 3,
+            "counts": {
+              "3": 2,
+              "4": 1
+            },
+            "mean": 3.33,
+            "share_3_plus": 1.0,
+            "opposite": 0.0,
+            "unsure": 0.0
+          },
+          "duplicate": {
+            "n": 1,
+            "n_parsed": 1,
+            "counts": {
+              "3": 1
+            },
+            "mean": 3.0,
+            "share_3_plus": 1.0,
+            "opposite": 0.0,
+            "unsure": 0.0
+          },
+          "near_distinct": {
+            "n": 34,
+            "n_parsed": 34,
+            "counts": {
+              "0": 12,
+              "1": 2,
+              "2": 7,
+              "3": 8,
+              "4": 5
+            },
+            "mean": 1.76,
+            "share_3_plus": 0.382,
+            "opposite": 0.0,
+            "unsure": 0.0
+          },
+          "antonym": {
+            "n": 30,
+            "n_parsed": 30,
+            "counts": {
+              "0": 30
+            },
+            "mean": 0.0,
+            "share_3_plus": 0.0,
+            "opposite": 0.0,
+            "unsure": 0.0
+          },
+          "random": {
+            "n": 30,
+            "n_parsed": 30,
+            "counts": {
+              "0": 3,
+              "1": 20,
+              "2": 7
+            },
+            "mean": 1.13,
+            "share_3_plus": 0.0,
+            "opposite": 0.0,
+            "unsure": 0.0
+          }
+        },
+        "claude-opus-5-5": {
+          "nearest": {
+            "n": 300,
+            "n_parsed": 300,
+            "counts": {
+              "0": 48,
+              "1": 12,
+              "2": 70,
+              "3": 111,
+              "4": 59
+            },
+            "mean": 2.4,
+            "share_3_plus": 0.567,
+            "opposite": 0.0,
+            "unsure": 0.0
+          },
+          "drop_or_merge": {
+            "n": 11,
+            "n_parsed": 11,
+            "counts": {
+              "0": 1,
+              "4": 10
+            },
+            "mean": 3.64,
+            "share_3_plus": 0.909,
+            "opposite": 0.0,
+            "unsure": 0.0
+          },
+          "deliberate_duplicate": {
+            "n": 3,
+            "n_parsed": 3,
+            "counts": {
+              "3": 2,
+              "4": 1
+            },
+            "mean": 3.33,
+            "share_3_plus": 1.0,
+            "opposite": 0.0,
+            "unsure": 0.0
+          },
+          "duplicate": {
+            "n": 1,
+            "n_parsed": 1,
+            "counts": {
+              "3": 1
+            },
+            "mean": 3.0,
+            "share_3_plus": 1.0,
+            "opposite": 0.0,
+            "unsure": 0.0
+          },
+          "near_distinct": {
+            "n": 34,
+            "n_parsed": 34,
+            "counts": {
+              "0": 12,
+              "1": 2,
+              "2": 10,
+              "3": 6,
+              "4": 4
+            },
+            "mean": 1.65,
+            "share_3_plus": 0.294,
+            "opposite": 0.0,
+            "unsure": 0.0
+          },
+          "antonym": {
+            "n": 30,
+            "n_parsed": 30,
+            "counts": {
+              "0": 30
+            },
+            "mean": 0.0,
+            "share_3_plus": 0.0,
+            "opposite": 0.0,
+            "unsure": 0.0
+          },
+          "random": {
+            "n": 30,
+            "n_parsed": 30,
+            "counts": {
+              "0": 3,
+              "1": 23,
+              "2": 4
+            },
+            "mean": 1.03,
+            "share_3_plus": 0.0,
+            "opposite": 0.0,
+            "unsure": 0.0
+          }
+        }
+      }
+    },
+    "rates": {
+      "A": {
+        "claude-haiku-4-5-20251001": {
+          "n": 409,
+          "unsure": 0.0,
+          "opposite": 0.222,
+          "n_unsure": 0,
+          "n_opposite": 91,
+          "antonym_group": {
+            "n": 30,
+            "opposite": 1.0,
+            "counts": {
+              "opposite": 30
+            }
+          },
+          "nearest_recorded_opposites": {
+            "n": 31,
+            "opposite": 1.0,
+            "counts": {
+              "opposite": 31
+            }
+          },
+          "not_recorded_opposites": {
+            "n": 348,
+            "opposite": 0.086
+          }
+        },
+        "claude-sonnet-5-5": {
+          "n": 409,
+          "unsure": 0.0,
+          "opposite": 0.21,
+          "n_unsure": 0,
+          "n_opposite": 86,
+          "antonym_group": {
+            "n": 30,
+            "opposite": 1.0,
+            "counts": {
+              "opposite": 30
+            }
+          },
+          "nearest_recorded_opposites": {
+            "n": 31,
+            "opposite": 1.0,
+            "counts": {
+              "opposite": 31
+            }
+          },
+          "not_recorded_opposites": {
+            "n": 348,
+            "opposite": 0.072
+          }
+        },
+        "claude-opus-5-5": {
+          "n": 409,
+          "unsure": 0.0,
+          "opposite": 0.188,
+          "n_unsure": 0,
+          "n_opposite": 77,
+          "antonym_group": {
+            "n": 30,
+            "opposite": 1.0,
+            "counts": {
+              "opposite": 30
+            }
+          },
+          "nearest_recorded_opposites": {
+            "n": 31,
+            "opposite": 1.0,
+            "counts": {
+              "opposite": 31
+            }
+          },
+          "not_recorded_opposites": {
+            "n": 348,
+            "opposite": 0.046
+          }
+        }
+      },
+      "B": {
+        "claude-haiku-4-5-20251001": {
+          "n": 409,
+          "unsure": 0.012,
+          "opposite": 0.0,
+          "n_unsure": 5,
+          "n_opposite": 0,
+          "antonym_group": {
+            "n": 30,
+            "opposite": 0.0,
+            "counts": {
+              "0": 30
+            }
+          },
+          "nearest_recorded_opposites": {
+            "n": 31,
+            "opposite": 0.0,
+            "counts": {
+              "0": 31
+            }
+          },
+          "not_recorded_opposites": {
+            "n": 348,
+            "opposite": 0.0
+          }
+        },
+        "claude-sonnet-5-5": {
+          "n": 409,
+          "unsure": 0.0,
+          "opposite": 0.0,
+          "n_unsure": 0,
+          "n_opposite": 0,
+          "antonym_group": {
+            "n": 30,
+            "opposite": 0.0,
+            "counts": {
+              "0": 30
+            }
+          },
+          "nearest_recorded_opposites": {
+            "n": 31,
+            "opposite": 0.0,
+            "counts": {
+              "0": 31
+            }
+          },
+          "not_recorded_opposites": {
+            "n": 348,
+            "opposite": 0.0
+          }
+        },
+        "claude-opus-5-5": {
+          "n": 409,
+          "unsure": 0.0,
+          "opposite": 0.0,
+          "n_unsure": 0,
+          "n_opposite": 0,
+          "antonym_group": {
+            "n": 30,
+            "opposite": 0.0,
+            "counts": {
+              "0": 30
+            }
+          },
+          "nearest_recorded_opposites": {
+            "n": 31,
+            "opposite": 0.0,
+            "counts": {
+              "0": 31
+            }
+          },
+          "not_recorded_opposites": {
+            "n": 348,
+            "opposite": 0.0
+          }
+        }
+      }
+    },
+    "by_score": {
+      "A": {
+        "claude-haiku-4-5-20251001": {
+          "0": {
+            "n": 37,
+            "mean_embedding_cos": 0.101,
+            "n_persona": 11,
+            "mean_persona_cos": 0.249
+          },
+          "1": {
+            "n": 45,
+            "mean_embedding_cos": 0.32,
+            "n_persona": 32,
+            "mean_persona_cos": 0.457
+          },
+          "2": {
+            "n": 144,
+            "mean_embedding_cos": 0.386,
+            "n_persona": 117,
+            "mean_persona_cos": 0.551
+          },
+          "3": {
+            "n": 77,
+            "mean_embedding_cos": 0.465,
+            "n_persona": 53,
+            "mean_persona_cos": 0.673
+          },
+          "4": {
+            "n": 15,
+            "mean_embedding_cos": 0.577,
+            "n_persona": 15,
+            "mean_persona_cos": 0.86
+          },
+          "opposite": {
+            "n": 91,
+            "mean_embedding_cos": 0.374,
+            "n_persona": 52,
+            "mean_persona_cos": 0.059
+          },
+          "unsure": {
+            "n": 0,
+            "mean_embedding_cos": null,
+            "n_persona": 0,
+            "mean_persona_cos": null
+          }
+        },
+        "claude-sonnet-5-5": {
+          "0": {
+            "n": 43,
+            "mean_embedding_cos": 0.128,
+            "n_persona": 19,
+            "mean_persona_cos": 0.252
+          },
+          "1": {
+            "n": 93,
+            "mean_embedding_cos": 0.332,
+            "n_persona": 70,
+            "mean_persona_cos": 0.474
+          },
+          "2": {
+            "n": 130,
+            "mean_embedding_cos": 0.397,
+            "n_persona": 99,
+            "mean_persona_cos": 0.592
+          },
+          "3": {
+            "n": 51,
+            "mean_embedding_cos": 0.549,
+            "n_persona": 38,
+            "mean_persona_cos": 0.789
+          },
+          "4": {
+            "n": 6,
+            "mean_embedding_cos": 0.621,
+            "n_persona": 6,
+            "mean_persona_cos": 0.873
+          },
+          "opposite": {
+            "n": 86,
+            "mean_embedding_cos": 0.378,
+            "n_persona": 48,
+            "mean_persona_cos": 0.035
+          },
+          "unsure": {
+            "n": 0,
+            "mean_embedding_cos": null,
+            "n_persona": 0,
+            "mean_persona_cos": null
+          }
+        },
+        "claude-opus-5-5": {
+          "0": {
+            "n": 43,
+            "mean_embedding_cos": 0.124,
+            "n_persona": 17,
+            "mean_persona_cos": 0.221
+          },
+          "1": {
+            "n": 109,
+            "mean_embedding_cos": 0.33,
+            "n_persona": 87,
+            "mean_persona_cos": 0.44
+          },
+          "2": {
+            "n": 131,
+            "mean_embedding_cos": 0.4,
+            "n_persona": 101,
+            "mean_persona_cos": 0.605
+          },
+          "3": {
+            "n": 43,
+            "mean_embedding_cos": 0.561,
+            "n_persona": 29,
+            "mean_persona_cos": 0.82
+          },
+          "4": {
+            "n": 6,
+            "mean_embedding_cos": 0.621,
+            "n_persona": 6,
+            "mean_persona_cos": 0.873
+          },
+          "opposite": {
+            "n": 77,
+            "mean_embedding_cos": 0.399,
+            "n_persona": 40,
+            "mean_persona_cos": 0.033
+          },
+          "unsure": {
+            "n": 0,
+            "mean_embedding_cos": null,
+            "n_persona": 0,
+            "mean_persona_cos": null
+          }
+        }
+      },
+      "B": {
+        "claude-haiku-4-5-20251001": {
+          "0": {
+            "n": 96,
+            "mean_embedding_cos": 0.353,
+            "n_persona": 54,
+            "mean_persona_cos": 0.052
+          },
+          "1": {
+            "n": 11,
+            "mean_embedding_cos": 0.198,
+            "n_persona": 5,
+            "mean_persona_cos": 0.272
+          },
+          "2": {
+            "n": 37,
+            "mean_embedding_cos": 0.307,
+            "n_persona": 27,
+            "mean_persona_cos": 0.466
+          },
+          "3": {
+            "n": 105,
+            "mean_embedding_cos": 0.338,
+            "n_persona": 75,
+            "mean_persona_cos": 0.492
+          },
+          "4": {
+            "n": 155,
+            "mean_embedding_cos": 0.448,
+            "n_persona": 119,
+            "mean_persona_cos": 0.671
+          },
+          "opposite": {
+            "n": 0,
+            "mean_embedding_cos": null,
+            "n_persona": 0,
+            "mean_persona_cos": null
+          },
+          "unsure": {
+            "n": 5,
+            "mean_embedding_cos": -0.023,
+            "n_persona": 0,
+            "mean_persona_cos": null
+          }
+        },
+        "claude-sonnet-5-5": {
+          "0": {
+            "n": 92,
+            "mean_embedding_cos": 0.368,
+            "n_persona": 53,
+            "mean_persona_cos": 0.043
+          },
+          "1": {
+            "n": 31,
+            "mean_embedding_cos": 0.132,
+            "n_persona": 13,
+            "mean_persona_cos": 0.359
+          },
+          "2": {
+            "n": 68,
+            "mean_embedding_cos": 0.313,
+            "n_persona": 49,
+            "mean_persona_cos": 0.433
+          },
+          "3": {
+            "n": 129,
+            "mean_embedding_cos": 0.389,
+            "n_persona": 93,
+            "mean_persona_cos": 0.575
+          },
+          "4": {
+            "n": 89,
+            "mean_embedding_cos": 0.482,
+            "n_persona": 72,
+            "mean_persona_cos": 0.72
+          },
+          "opposite": {
+            "n": 0,
+            "mean_embedding_cos": null,
+            "n_persona": 0,
+            "mean_persona_cos": null
+          },
+          "unsure": {
+            "n": 0,
+            "mean_embedding_cos": null,
+            "n_persona": 0,
+            "mean_persona_cos": null
+          }
+        },
+        "claude-opus-5-5": {
+          "0": {
+            "n": 94,
+            "mean_embedding_cos": 0.367,
+            "n_persona": 55,
+            "mean_persona_cos": 0.055
+          },
+          "1": {
+            "n": 37,
+            "mean_embedding_cos": 0.142,
+            "n_persona": 14,
+            "mean_persona_cos": 0.374
+          },
+          "2": {
+            "n": 84,
+            "mean_embedding_cos": 0.334,
+            "n_persona": 63,
+            "mean_persona_cos": 0.45
+          },
+          "3": {
+            "n": 120,
+            "mean_embedding_cos": 0.397,
+            "n_persona": 88,
+            "mean_persona_cos": 0.583
+          },
+          "4": {
+            "n": 74,
+            "mean_embedding_cos": 0.498,
+            "n_persona": 60,
+            "mean_persona_cos": 0.76
+          },
+          "opposite": {
+            "n": 0,
+            "mean_embedding_cos": null,
+            "n_persona": 0,
+            "mean_persona_cos": null
+          },
+          "unsure": {
+            "n": 0,
+            "mean_embedding_cos": null,
+            "n_persona": 0,
+            "mean_persona_cos": null
+          }
+        }
+      }
+    },
+    "divergence": {
+      "claude-haiku-4-5-20251001": {
+        "n": 313,
+        "diff_counts": {
+          "-1": 5,
+          "0": 39,
+          "1": 155,
+          "2": 101,
+          "3": 12,
+          "4": 1
+        },
+        "mean_diff": 1.252,
+        "b_above_a": [
+          {
+            "pair_id": "nn:erudite>literate",
+            "target": "erudite",
+            "listed": "literate",
+            "group": "nearest",
+            "a": 0,
+            "b": 4,
+            "diff": 4,
+            "reason_a": "Literate means basic competence with reading and writing, while erudite means deep knowledge from extensive study and learned expression; they are different concepts in different domains of reading ability.",
+            "reason_b": "Literacy is a prerequisite for erudition since deep reading and study require the ability to read and write fluently.",
+            "embedding_cos": 0.350078,
+            "persona_cos": null
+          },
+          {
+            "pair_id": "nn:goofy>lighthearted",
+            "target": "goofy",
+            "listed": "lighthearted",
+            "group": "nearest",
+            "a": 1,
+            "b": 4,
+            "diff": 3,
+            "reason_a": "Lighthearted describes a general disposition of not taking things seriously, while goofy specifically describes embracing silly and ridiculous humor as a comedic style.",
+            "reason_b": "A goofy persona naturally embraces the breezy, informal, joke-ready disposition that defines lightheartedness, making these traits highly compatible.",
+            "embedding_cos": 0.33609,
+            "persona_cos": null
+          },
+          {
+            "pair_id": "lab:earnest>wide_eyed",
+            "target": "earnest",
+            "listed": "wide_eyed",
+            "group": "random",
+            "a": 0,
+            "b": 3,
+            "diff": 3,
+            "reason_a": "Wide-eyed describes a sense of wonder and novelty in perception, while earnest describes sincere, serious engagement with people and causes—different emotional orientations.",
+            "reason_b": "Both earnest and wide-eyed personas take things at face value without cynicism, and wide-eyed wonder naturally pairs with sincere engagement rather than mockery.",
+            "embedding_cos": 0.066917,
+            "persona_cos": null
+          },
+          {
+            "pair_id": "lab:excitable>narrative",
+            "target": "excitable",
+            "listed": "narrative",
+            "group": "random",
+            "a": 0,
+            "b": 3,
+            "diff": 3,
+            "reason_a": "Narrative is about how someone conveys information through storytelling techniques, while excitable is about emotional reactivity and temperament—these are entirely different dimensions of personality.",
+            "reason_b": "Excitable people often use animated storytelling and dramatic narrative techniques to convey their heightened emotional engagement with events.",
+            "embedding_cos": -0.034172,
+            "persona_cos": null
+          },
+          {
+            "pair_id": "lab:extremist>rhetorical",
+            "target": "extremist",
+            "listed": "rhetorical",
+            "group": "random",
+            "a": 0,
+            "b": 3,
+            "diff": 3,
+            "reason_a": "Rhetorical describes a communication style and technique, while extremist describes a political ideology and approach to compromise; they are distinct concepts that may co-occur but address different dimensions of a person.",
+            "reason_b": "Extremists often employ passionate, persuasive rhetoric to mobilize supporters and delegitimize opponents, making rhetorical skill a common tool for advancing uncompromising ideological positions.",
+            "embedding_cos": -0.077707,
+            "persona_cos": null
+          },
+          {
+            "pair_id": "lab:globetrotter>eclectic",
+            "target": "globetrotter",
+            "listed": "eclectic",
+            "group": "random",
+            "a": 0,
+            "b": 3,
+            "diff": 3,
+            "reason_a": "Eclectic describes drawing from diverse sources and perspectives, while globetrotter describes frequent travel and restlessness away from home; they are different concepts despite both involving exposure to variety.",
+            "reason_b": "Globetrotters encounter diverse cultures, cuisines, and perspectives across many destinations, naturally cultivating an eclectic approach to ideas and experiences.",
+            "embedding_cos": 0.017418,
+            "persona_cos": null
+          },
+          {
+            "pair_id": "lab:micromanaging>analytical",
+            "target": "micromanaging",
+            "listed": "analytical",
+            "group": "random",
+            "a": 0,
+            "b": 3,
+            "diff": 3,
+            "reason_a": "Analytical involves systematic examination of components, while micromanaging involves excessive control and checking of others' work—different underlying motivations and behaviors despite both involving attention to detail.",
+            "reason_b": "Analytical people systematically examine details and components, which often manifests as close attention to how tasks are executed, making micromanaging a natural extension of their methodical approach.",
+            "embedding_cos": 0.014478,
+            "persona_cos": null
+          },
+          {
+            "pair_id": "lab:self_disciplined>formal",
+            "target": "self_disciplined",
+            "listed": "formal",
+            "group": "random",
+            "a": 0,
+            "b": 3,
+            "diff": 3,
+            "reason_a": "Formal communication style and self-discipline are distinct concepts; formality concerns how one speaks while self-discipline concerns resisting immediate gratification for long-term goals.",
+            "reason_b": "Self-disciplined people typically maintain high standards in their communication and behavior, including formal language use, as both reflect commitment to established rules and standards.",
+            "embedding_cos": 0.017706,
+            "persona_cos": null
+          },
+          {
+            "pair_id": "lab:unassuming>inquisitive",
+            "target": "unassuming",
+            "listed": "inquisitive",
+            "group": "random",
+            "a": 0,
+            "b": 3,
+            "diff": 3,
+            "reason_a": "Inquisitive describes an active engagement style focused on asking questions, while unassuming describes a passive, low-profile communication style; they address different aspects of interpersonal behavior.",
+            "reason_b": "An unassuming person can still be deeply curious and ask probing questions; they simply do so without drawing attention to themselves or performing.",
+            "embedding_cos": -0.005071,
+            "persona_cos": null
+          },
+          {
+            "pair_id": "nn:elitist>upper_class",
+            "target": "elitist",
+            "listed": "upper_class",
+            "group": "nearest",
+            "a": 0,
+            "b": 3,
+            "diff": 3,
+            "reason_a": "Upper-class describes a social position and background, while elitist describes a belief system about hierarchy; someone can be upper-class without being elitist or vice versa.",
+            "reason_b": "Upper-class background strongly correlates with elitist beliefs since those already at society's top are more likely to view existing hierarchies as justified and natural.",
+            "embedding_cos": 0.341522,
+            "persona_cos": null
+          }
+        ],
+        "a_above_b": [
+          {
+            "pair_id": "nn:confident>overconfident",
+            "target": "confident",
+            "listed": "overconfident",
+            "group": "nearest",
+            "a": 3,
+            "b": 2,
+            "diff": -1,
+            "reason_a": "Overconfident is confidence taken to an excessive extreme, differing in degree and in the absence of appropriate doubt or self-correction.",
+            "reason_b": "Overconfidence is an extreme manifestation of confidence that lacks the grounding in actual knowledge or evidence that true confidence has.",
+            "embedding_cos": 0.529953,
+            "persona_cos": null
+          },
+          {
+            "pair_id": "nn:dominant>controlling",
+            "target": "dominant",
+            "listed": "controlling",
+            "group": "nearest",
+            "a": 3,
+            "b": 2,
+            "diff": -1,
+            "reason_a": "Controlling involves needing final say and monitoring others' actions, which is a more restrictive and intrusive form of the control and guidance that dominant describes.",
+            "reason_b": "While dominance involves assertive leadership, controlling behavior (monitoring movements and requiring permission) is a more restrictive form that doesn't necessarily follow from dominance alone.",
+            "embedding_cos": 0.350923,
+            "persona_cos": null
+          },
+          {
+            "pair_id": "nn:nationalist>regionalist",
+            "target": "nationalist",
+            "listed": "regionalist",
+            "group": "nearest",
+            "a": 3,
+            "b": 2,
+            "diff": -1,
+            "reason_a": "Regionalist applies the same prioritization logic but at a sub-national level rather than the national level, differing only in geographic scope.",
+            "reason_b": "Regionalism and nationalism can conflict when regional interests diverge from national interests, though some nationalists may also favor their region within the nation.",
+            "embedding_cos": 0.592454,
+            "persona_cos": 0.698008
+          },
+          {
+            "pair_id": "lab:nihilistic>constructivist",
+            "target": "nihilistic",
+            "listed": "constructivist",
+            "group": "near_distinct",
+            "a": 1,
+            "b": 0,
+            "diff": -1,
+            "reason_a": "Constructivism asserts that meaning is actively created through human interaction and culture, whereas nihilism denies that any such created meaning has validity or significance.",
+            "reason_b": "Constructivism asserts that meaning is created through human interaction and culture, whereas nihilism denies that meaning can be validly created or exists at all.",
+            "embedding_cos": 0.144861,
+            "persona_cos": 0.296712
+          },
+          {
+            "pair_id": "nn:inquisitive>incurious",
+            "target": "inquisitive",
+            "listed": "incurious",
+            "group": "nearest",
+            "a": 1,
+            "b": 0,
+            "diff": -1,
+            "reason_a": "Incurious describes lack of interest in learning and avoiding questions generally, while inquisitive is specifically about asking probing questions to understand others; they are related but distinct orientations.",
+            "reason_b": "Incurious describes lack of interest in asking questions and seeking deeper understanding, which directly contradicts the probing, question-asking nature of inquisitiveness.",
+            "embedding_cos": 0.325509,
+            "persona_cos": -0.146823
+          }
+        ]
+      },
+      "claude-sonnet-5-5": {
+        "n": 323,
+        "diff_counts": {
+          "-2": 1,
+          "-1": 2,
+          "0": 41,
+          "1": 178,
+          "2": 98,
+          "3": 3
+        },
+        "mean_diff": 1.173,
+        "b_above_a": [
+          {
+            "pair_id": "nn:erudite>literate",
+            "target": "erudite",
+            "listed": "literate",
+            "group": "nearest",
+            "a": 1,
+            "b": 4,
+            "diff": 3,
+            "reason_a": "Literate is the basic ability to read and write, far from deep scholarly learning, though both involve the written word.",
+            "reason_b": "A deeply bookish person is necessarily able to read and write with ease.",
+            "embedding_cos": 0.350078,
+            "persona_cos": null
+          },
+          {
+            "pair_id": "nn:socratic>inquisitive",
+            "target": "socratic",
+            "listed": "inquisitive",
+            "group": "nearest",
+            "a": 1,
+            "b": 4,
+            "diff": 3,
+            "reason_a": "Both involve asking probing questions, but inquisitive aims to understand the other's needs, while socratic aims to lead them to their own insights.",
+            "reason_b": "Socratic personas ask probing questions as their main method, which closely overlaps with being inquisitive about the person's context.",
+            "embedding_cos": 0.289508,
+            "persona_cos": 0.531617
+          },
+          {
+            "pair_id": "nn:structuralist>analytical",
+            "target": "structuralist",
+            "listed": "analytical",
+            "group": "nearest",
+            "a": 1,
+            "b": 4,
+            "diff": 3,
+            "reason_a": "Both involve systematic examination, but analytical is general decomposition into parts, while structuralist specifically seeks underlying organizing patterns and frameworks.",
+            "reason_b": "Identifying underlying patterns and structures goes with systematic, logical analysis, so a structuralist would almost always be analytical.",
+            "embedding_cos": 0.380144,
+            "persona_cos": 0.510266
+          },
+          {
+            "pair_id": "lab:honorable>deontological",
+            "target": "honorable",
+            "listed": "deontological",
+            "group": "deliberate_duplicate",
+            "a": 2,
+            "b": 4,
+            "diff": 2,
+            "reason_a": "Both hold that some acts are wrong whatever the outcome; honorable stresses personal commitment and accepting loss, while deontological is a rule-based moral orientation, so they share a core but each adds something.",
+            "reason_b": "An honorable persona holds that some acts are never justified whatever the outcome, which is the core of rule-based, duty-focused ethics.",
+            "embedding_cos": 0.187942,
+            "persona_cos": null
+          },
+          {
+            "pair_id": "lab:nationalist>patriotic",
+            "target": "nationalist",
+            "listed": "patriotic",
+            "group": "near_distinct",
+            "a": 2,
+            "b": 4,
+            "diff": 2,
+            "reason_a": "Both involve devotion to one's country, but patriotic is affectionate pride while nationalist adds prioritizing the nation above others and an us-versus-them stance.",
+            "reason_b": "Nationalists almost always feel love and pride for their country, so patriotism nearly always accompanies nationalism.",
+            "embedding_cos": 0.372204,
+            "persona_cos": 0.712583
+          },
+          {
+            "pair_id": "lab:risk_averse>cautious",
+            "target": "risk_averse",
+            "listed": "cautious",
+            "group": "near_distinct",
+            "a": 2,
+            "b": 4,
+            "diff": 2,
+            "reason_a": "Both involve wariness about risk, but cautious centers on careful deliberation, warnings and seeking more information, while risk-averse centers on preferring sure outcomes over gambles.",
+            "reason_b": "Avoiding gambles and sticking to proven methods goes hand in hand with weighing risks and considering carefully before acting.",
+            "embedding_cos": 0.263822,
+            "persona_cos": null
+          },
+          {
+            "pair_id": "nn:agreeable>cooperative",
+            "target": "agreeable",
+            "listed": "cooperative",
+            "group": "nearest",
+            "a": 2,
+            "b": 4,
+            "diff": 2,
+            "reason_a": "Cooperative shares the emphasis on collaboration and understanding, but focuses on teamwork and shared success rather than avoiding confrontation.",
+            "reason_b": "Emphasizing cooperation and understanding is part of the agreeable description, so a cooperative stance nearly always comes with it.",
+            "embedding_cos": 0.343158,
+            "persona_cos": 0.648164
+          },
+          {
+            "pair_id": "nn:anxious>neurotic",
+            "target": "anxious",
+            "listed": "neurotic",
+            "group": "nearest",
+            "a": 2,
+            "b": 4,
+            "diff": 2,
+            "reason_a": "Neurotic centers on persistent anxiety and worry but adds emotional instability and reactivity, so it overlaps strongly with anxious yet is broader.",
+            "reason_b": "Neuroticism centers on persistent anxiety and worry, so an anxious persona almost always shows it.",
+            "embedding_cos": 0.481822,
+            "persona_cos": 0.76252
+          },
+          {
+            "pair_id": "nn:benevolent>altruistic",
+            "target": "benevolent",
+            "listed": "altruistic",
+            "group": "nearest",
+            "a": 2,
+            "b": 4,
+            "diff": 2,
+            "reason_a": "Both center on concern for others' welfare and promoting wellbeing; altruistic adds selflessness over personal gain.",
+            "reason_b": "Benevolence is closely tied to concern for others' welfare and selfless care, so altruism almost always comes with it.",
+            "embedding_cos": 0.394117,
+            "persona_cos": 0.762457
+          },
+          {
+            "pair_id": "nn:benevolent>benign",
+            "target": "benevolent",
+            "listed": "benign",
+            "group": "nearest",
+            "a": 2,
+            "b": 4,
+            "diff": 2,
+            "reason_a": "Benign concerns having a good effect on others, even by chance, while benevolent is an intentional disposition of kindness; they share the outcome of promoting wellbeing.",
+            "reason_b": "Someone who consistently promotes wellbeing for everyone leaves others better off, which matches benign.",
+            "embedding_cos": 0.473788,
+            "persona_cos": 0.811328
+          }
+        ],
+        "a_above_b": [
+          {
+            "pair_id": "nn:nationalist>regionalist",
+            "target": "nationalist",
+            "listed": "regionalist",
+            "group": "nearest",
+            "a": 3,
+            "b": 1,
+            "diff": -2,
+            "reason_a": "Same in-group-first logic applied to a region within a country instead of the nation, so scope differs.",
+            "reason_b": "Nationalism prioritizes the nation over its parts, so regional favoritism is not especially typical and can run against national unity.",
+            "embedding_cos": 0.592454,
+            "persona_cos": 0.698008
+          },
+          {
+            "pair_id": "nn:confident>overconfident",
+            "target": "confident",
+            "listed": "overconfident",
+            "group": "nearest",
+            "a": 3,
+            "b": 2,
+            "diff": -1,
+            "reason_a": "Overconfident is the same certainty without hedging, carried beyond what is warranted, so it differs in degree and adds miscalibration.",
+            "reason_b": "Showing strong certainty without hedging often shades into certainty beyond what is warranted, though many confident people are well calibrated.",
+            "embedding_cos": 0.529953,
+            "persona_cos": null
+          },
+          {
+            "pair_id": "nn:nationalist>civilizationist",
+            "target": "nationalist",
+            "listed": "civilizationist",
+            "group": "nearest",
+            "a": 3,
+            "b": 2,
+            "diff": -1,
+            "reason_a": "Same in-group-first structure, but the unit is a wider civilization rather than the nation, so it is the same concept at a different scope.",
+            "reason_b": "Nationalists often also identify with a broader civilization (e.g., the West), but the two can conflict, and many nationalists are narrowly national rather than civilizational.",
+            "embedding_cos": 0.461719,
+            "persona_cos": null
+          }
+        ]
+      },
+      "claude-opus-5-5": {
+        "n": 332,
+        "diff_counts": {
+          "-2": 1,
+          "-1": 14,
+          "0": 49,
+          "1": 188,
+          "2": 76,
+          "3": 3,
+          "4": 1
+        },
+        "mean_diff": 1.015,
+        "b_above_a": [
+          {
+            "pair_id": "nn:erudite>literate",
+            "target": "erudite",
+            "listed": "literate",
+            "group": "nearest",
+            "a": 0,
+            "b": 4,
+            "diff": 4,
+            "reason_a": "Basic reading and writing ability is only a distant precondition of deep scholarly learning.",
+            "reason_b": "Being deeply bookish presupposes reading and writing with ease.",
+            "embedding_cos": 0.350078,
+            "persona_cos": null
+          },
+          {
+            "pair_id": "nn:structuralist>analytical",
+            "target": "structuralist",
+            "listed": "analytical",
+            "group": "nearest",
+            "a": 1,
+            "b": 4,
+            "diff": 3,
+            "reason_a": "Both involve systematic analysis, but analytical means decomposing a topic into parts, while structuralist means seeking the underlying patterns and frameworks that govern a whole.",
+            "reason_b": "Finding underlying patterns and frameworks takes systematic, methodical analysis, so a structuralist is almost always analytical.",
+            "embedding_cos": 0.380144,
+            "persona_cos": 0.510266
+          },
+          {
+            "pair_id": "nn:techno_hierophantic>esoteric",
+            "target": "techno_hierophantic",
+            "listed": "esoteric",
+            "group": "nearest",
+            "a": 1,
+            "b": 4,
+            "diff": 3,
+            "reason_a": "Both involve obscure, initiate-only language, but esoteric means expert jargon in general, while the target adds sacred revelation, glyphs and an initiate dyad.",
+            "reason_b": "Revealing hidden mysteries to a chosen initiate, with obscure jargon, is esoteric in nature.",
+            "embedding_cos": 0.325079,
+            "persona_cos": 0.347564
+          },
+          {
+            "pair_id": "nn:techno_hierophantic>spiritual",
+            "target": "techno_hierophantic",
+            "listed": "spiritual",
+            "group": "nearest",
+            "a": 1,
+            "b": 4,
+            "diff": 3,
+            "reason_a": "Both deal with sacred, transcendent truths, but the target's defining feature is techno-symbolic mediation, which spiritual lacks.",
+            "reason_b": "The trait centers on sacred mysteries and cosmic truths, so it is inherently spiritual.",
+            "embedding_cos": 0.272995,
+            "persona_cos": 0.358502
+          },
+          {
+            "pair_id": "lab:compassionate>empathetic",
+            "target": "compassionate",
+            "listed": "empathetic",
+            "group": "drop_or_merge",
+            "a": 2,
+            "b": 4,
+            "diff": 2,
+            "reason_a": "Both involve warm, caring responses to others' feelings, but empathetic stresses understanding of emotions generally, while compassionate stresses responding to suffering.",
+            "reason_b": "Compassion rests on empathic understanding of others' feelings, so the two almost always go together.",
+            "embedding_cos": 0.541647,
+            "persona_cos": 0.768815
+          },
+          {
+            "pair_id": "lab:honorable>deontological",
+            "target": "honorable",
+            "listed": "deontological",
+            "group": "deliberate_duplicate",
+            "a": 2,
+            "b": 4,
+            "diff": 2,
+            "reason_a": "Both reject letting consequences justify forbidden acts, but deontological is a general rule-and-duty ethical stance, while honorable adds a personal code held to at real cost.",
+            "reason_b": "Holding that some acts are never justified regardless of the outcome is essentially a deontological stance, so the two nearly always go together.",
+            "embedding_cos": 0.187942,
+            "persona_cos": null
+          },
+          {
+            "pair_id": "lab:nationalist>patriotic",
+            "target": "nationalist",
+            "listed": "patriotic",
+            "group": "near_distinct",
+            "a": 2,
+            "b": 4,
+            "diff": 2,
+            "reason_a": "Both center on attachment to one's own nation. Patriotism stresses love and pride, while nationalism stresses putting national interests above other nations', so each adds something the other lacks.",
+            "reason_b": "Nationalists almost always express love, pride, and loyalty toward their country.",
+            "embedding_cos": 0.372204,
+            "persona_cos": 0.712583
+          },
+          {
+            "pair_id": "lab:risk_averse>cautious",
+            "target": "risk_averse",
+            "listed": "cautious",
+            "group": "near_distinct",
+            "a": 2,
+            "b": 4,
+            "diff": 2,
+            "reason_a": "Both center on avoiding risk, but cautious adds warning, deliberation and seeking expertise, while risk-averse adds choosing guaranteed outcomes over better bets.",
+            "reason_b": "Avoiding any chance of loss naturally goes with emphasizing risks and deliberating carefully before acting.",
+            "embedding_cos": 0.263822,
+            "persona_cos": null
+          },
+          {
+            "pair_id": "lab:sardonic>sarcastic",
+            "target": "sardonic",
+            "listed": "sarcastic",
+            "group": "drop_or_merge",
+            "a": 2,
+            "b": 4,
+            "diff": 2,
+            "reason_a": "Both are cutting, ironic mockery, but sarcastic stresses saying the opposite of what is meant, while sardonic stresses dry, cynical observation of absurdity.",
+            "reason_b": "A sardonic persona's cutting, ironic mockery very nearly always shows up as sarcastic remarks.",
+            "embedding_cos": 0.697968,
+            "persona_cos": 0.874967
+          },
+          {
+            "pair_id": "nn:agreeable>cooperative",
+            "target": "agreeable",
+            "listed": "cooperative",
+            "group": "nearest",
+            "a": 2,
+            "b": 4,
+            "diff": 2,
+            "reason_a": "Cooperation is one part of agreeableness, but cooperative is about teamwork and collective success rather than avoiding conflict and keeping harmony.",
+            "reason_b": "Agreeableness explicitly emphasizes cooperation, so collaborative framing almost always comes with it.",
+            "embedding_cos": 0.343158,
+            "persona_cos": 0.648164
+          }
+        ],
+        "a_above_b": [
+          {
+            "pair_id": "nn:nationalist>regionalist",
+            "target": "nationalist",
+            "listed": "regionalist",
+            "group": "nearest",
+            "a": 3,
+            "b": 1,
+            "diff": -2,
+            "reason_a": "The same favoritism toward one's own unit, applied to a sub-national region instead of the nation, which is a difference of scope only.",
+            "reason_b": "Nationalism stresses national unity and often opposes regional loyalties that compete with it, though some nationalists also favor their home region.",
+            "embedding_cos": 0.592454,
+            "persona_cos": 0.698008
+          },
+          {
+            "pair_id": "nn:confident>overconfident",
+            "target": "confident",
+            "listed": "overconfident",
+            "group": "nearest",
+            "a": 3,
+            "b": 2,
+            "diff": -1,
+            "reason_a": "Overconfident is the same certainty without hedging, carried beyond what is warranted.",
+            "reason_b": "Stating things without hesitation often tips into unwarranted certainty, but confidence can also be well-founded.",
+            "embedding_cos": 0.529953,
+            "persona_cos": null
+          },
+          {
+            "pair_id": "nn:elitist>aristocratic",
+            "target": "elitist",
+            "listed": "aristocratic",
+            "group": "nearest",
+            "a": 3,
+            "b": 2,
+            "diff": -1,
+            "reason_a": "Aristocratic belief is elitism specifically grounded in birth and bloodline, a narrower form of the same hierarchical conviction.",
+            "reason_b": "Belief in rank by birth is one form of elitism, but many elitists ground superiority in education or talent rather than bloodline.",
+            "embedding_cos": 0.396861,
+            "persona_cos": null
+          },
+          {
+            "pair_id": "nn:independent>self_reliant",
+            "target": "independent",
+            "listed": "self_reliant",
+            "group": "nearest",
+            "a": 3,
+            "b": 2,
+            "diff": -1,
+            "reason_a": "This is the same self-reliance carried to an extreme, refusing all help and dismissing teams.",
+            "reason_b": "Independent people are self-reliant, but this description adds rejecting all help and seeing teams as dead weight, which only some independent people do.",
+            "embedding_cos": 0.466781,
+            "persona_cos": null
+          },
+          {
+            "pair_id": "nn:nationalist>civilizationist",
+            "target": "nationalist",
+            "listed": "civilizationist",
+            "group": "nearest",
+            "a": 3,
+            "b": 2,
+            "diff": -1,
+            "reason_a": "Both put an in-group first over outsiders, but civilizationism uses a wider civilizational bloc where nationalism uses the nation, so it is the same structure at a different scope.",
+            "reason_b": "Nationalists often extend in-group preference to their wider civilization, though many put the nation above even civilizational allies.",
+            "embedding_cos": 0.461719,
+            "persona_cos": null
+          },
+          {
+            "pair_id": "lab:compassionate>malicious",
+            "target": "compassionate",
+            "listed": "malicious",
+            "group": "near_distinct",
+            "a": 1,
+            "b": 0,
+            "diff": -1,
+            "reason_a": "Malicious is actively seeking to harm others, which goes beyond the absence of compassion into a distinct concept of ill intent.",
+            "reason_b": "Taking pleasure in others' suffering is incompatible with caring about their pain.",
+            "embedding_cos": 0.119759,
+            "persona_cos": -0.077649
+          },
+          {
+            "pair_id": "lab:essentialist>existentialist",
+            "target": "essentialist",
+            "listed": "existentialist",
+            "group": "near_distinct",
+            "a": 1,
+            "b": 0,
+            "diff": -1,
+            "reason_a": "Existentialism rejects predetermined essence in favour of self-created meaning, but its focus on individual freedom and responsibility is a related yet distinct concept rather than a direct reversal.",
+            "reason_b": "Existentialism holds that existence precedes essence and rejects predetermined natures, which runs against essentialism.",
+            "embedding_cos": 0.338777,
+            "persona_cos": 0.341913
+          },
+          {
+            "pair_id": "lab:reactive>stoic",
+            "target": "reactive",
+            "listed": "stoic",
+            "group": "near_distinct",
+            "a": 1,
+            "b": 0,
+            "diff": -1,
+            "reason_a": "Stoic concerns emotional composure, while reactive concerns acting in the moment without planning, so they are neighbouring but distinct dimensions of how one responds.",
+            "reason_b": "A reactive persona responds impulsively in the moment, which conflicts with the stoic's restraint and rational detachment.",
+            "embedding_cos": 0.048701,
+            "persona_cos": -0.138371
+          },
+          {
+            "pair_id": "lab:superficial>educational",
+            "target": "superficial",
+            "listed": "educational",
+            "group": "near_distinct",
+            "a": 1,
+            "b": 0,
+            "diff": -1,
+            "reason_a": "Educational is about a teaching orientation that aims at deeper understanding, which runs against superficiality, but its core is instruction rather than depth itself, so it is not the direct reverse.",
+            "reason_b": "Educational means helping people understand topics more deeply, which runs against skimming over complexity, though shallow teaching does sometimes happen.",
+            "embedding_cos": 0.072877,
+            "persona_cos": 0.036021
+          },
+          {
+            "pair_id": "lab:working_class>pretentious",
+            "target": "working_class",
+            "listed": "pretentious",
+            "group": "random",
+            "a": 1,
+            "b": 0,
+            "diff": -1,
+            "reason_a": "Pretentiousness is a behavioural affectation of seeming cultured, not a class background; it contrasts with plain tastes but isn't the reverse of a social origin.",
+            "reason_b": "A plain-spoken person at home in the pub and comfortable with plain tastes is unlikely to put on airs or look down on plain talk.",
+            "embedding_cos": 0.068914,
+            "persona_cos": null
+          }
+        ]
+      }
+    },
+    "context_consistency": {
+      "A": {
+        "claude-haiku-4-5-20251001": {
+          "n": 38,
+          "same": 25,
+          "share_same": 0.658
+        },
+        "claude-sonnet-5-5": {
+          "n": 38,
+          "same": 32,
+          "share_same": 0.842
+        },
+        "claude-opus-5-5": {
+          "n": 38,
+          "same": 32,
+          "share_same": 0.842
+        }
+      },
+      "B": {
+        "claude-haiku-4-5-20251001": {
+          "n": 38,
+          "same": 26,
+          "share_same": 0.684
+        },
+        "claude-sonnet-5-5": {
+          "n": 38,
+          "same": 28,
+          "share_same": 0.737
+        },
+        "claude-opus-5-5": {
+          "n": 38,
+          "same": 26,
+          "share_same": 0.684
+        }
+      }
+    },
+    "opus_on_disagreement": {
+      "A": {
+        "haiku_sonnet_same": 261,
+        "opus_same_as_both": 234,
+        "opus_same_share": 0.897,
+        "haiku_sonnet_differ": 148,
+        "opus_sides_haiku": 26,
+        "opus_sides_sonnet": 116,
+        "opus_neither": 6
+      },
+      "B": {
+        "haiku_sonnet_same": 255,
+        "opus_same_as_both": 215,
+        "opus_same_share": 0.843,
+        "haiku_sonnet_differ": 154,
+        "opus_sides_haiku": 8,
+        "opus_sides_sonnet": 131,
+        "opus_neither": 15
+      }
+    },
+    "parse_first_attempt": {
+      "A|claude-haiku-4-5-20251001": {
+        "ok": 409,
+        "total": 409,
+        "rate": 1.0
+      },
+      "A|claude-opus-5-5": {
+        "ok": 409,
+        "total": 409,
+        "rate": 1.0
+      },
+      "A|claude-sonnet-5-5": {
+        "ok": 406,
+        "total": 409,
+        "rate": 0.9927
+      },
+      "B|claude-haiku-4-5-20251001": {
+        "ok": 409,
+        "total": 409,
+        "rate": 1.0
+      },
+      "B|claude-opus-5-5": {
+        "ok": 408,
+        "total": 409,
+        "rate": 0.9976
+      },
+      "B|claude-sonnet-5-5": {
+        "ok": 409,
+        "total": 409,
+        "rate": 1.0
+      }
+    },
+    "parser_version": 2,
+    "reason_first_share": {
+      "A": {
+        "claude-haiku-4-5-20251001": 1.0,
+        "claude-sonnet-5-5": 1.0,
+        "claude-opus-5-5": 1.0
+      },
+      "B": {
+        "claude-haiku-4-5-20251001": 1.0,
+        "claude-sonnet-5-5": 1.0,
+        "claude-opus-5-5": 1.0
+      }
+    },
+    "bootstrap": {
+      "n_boot": 2000,
+      "seed": 0,
+      "unit": "target (all the pairs of one call's target)"
+    },
+    "usage": {
+      "n_calls": 1082,
+      "per_model": {
+        "claude-haiku-4-5-20251001": {
+          "completion_tokens": 56412,
+          "cost_usd": 0.5023,
+          "model": "claude-haiku-4-5-20251001",
+          "n_calls": 360,
+          "prompt_tokens": 220234
+        },
+        "claude-opus-5-5": {
+          "completion_tokens": 55634,
+          "cost_usd": 2.2903,
+          "model": "claude-opus-5-5",
+          "n_calls": 361,
+          "prompt_tokens": 294417
+        },
+        "claude-sonnet-5-5": {
+          "completion_tokens": 60381,
+          "cost_usd": 1.1933,
+          "model": "claude-sonnet-5-5",
+          "n_calls": 361,
+          "prompt_tokens": 294725
+        }
+      },
+      "total_completion_tokens": 172427,
+      "total_cost_usd": 3.9859,
+      "total_prompt_tokens": 809376
+    },
+    "pair_set_info": {
+      "seed": 0,
+      "n_targets_requested": 100,
+      "n_neighbours": 3,
+      "n_eligible_targets": 286,
+      "n_calls": 180,
+      "n_calls_by_set": {
+        "nearest": 100,
+        "labelled": 80
+      },
+      "n_pairs": 409,
+      "n_pairs_by_group": {
+        "nearest": 300,
+        "drop_or_merge": 11,
+        "deliberate_duplicate": 3,
+        "duplicate": 1,
+        "near_distinct": 34,
+        "antonym": 30,
+        "random": 30
+      },
+      "n_pairs_with_persona_cos": 280,
+      "list_sizes": {
+        "1": 55,
+        "2": 21,
+        "3": 104
+      },
+      "n_unordered_pairs_twice": 38,
+      "nearest_recorded_antonyms": 31,
+      "labelled": {
+        "pool_sizes": {
+          "drop_or_merge": 11,
+          "deliberate_duplicate": 3,
+          "duplicate": 1,
+          "near_distinct": 34,
+          "antonym": 262,
+          "random": 2000
+        },
+        "skipped_not_in_corpus": {
+          "duplicate": 78
+        },
+        "chosen": {
+          "drop_or_merge": 11,
+          "deliberate_duplicate": 3,
+          "duplicate": 1,
+          "near_distinct": 34,
+          "antonym": 30,
+          "random": 30
+        },
+        "filed": {
+          "drop_or_merge": 11,
+          "deliberate_duplicate": 3,
+          "duplicate": 1,
+          "near_distinct": 34,
+          "antonym": 30,
+          "random": 30
+        }
+      },
+      "embedding": {
+        "config_version": "2026-10-02",
+        "model": "text-embedding-3-large",
+        "cache_tag": "openai_text-embedding-3-large",
+        "representation": "w20",
+        "variant": "centred",
+        "metric": "cos",
+        "n_corpus": 663
+      },
+      "persona": {
+        "n_entities": 582,
+        "n_trait_vectors": 302,
+        "n_traits_in_corpus": 286,
+        "trait_vectors_not_in_corpus": [
+          "assertive",
+          "chill",
+          "deterministic",
+          "dogmatic",
+          "factual",
+          "libertarian",
+          "militant",
+          "nonchalant",
+          "open_ended",
+          "regulatory",
+          "risk_taking",
+          "slothful",
+          "specialized",
+          "undependable",
+          "universalist",
+          "urgent"
+        ],
+        "shear_applied": true,
+        "shear_L": 3,
+        "shear_note": null,
+        "slot": 6,
+        "layer": 25,
+        "mean_over": "traits+roles"
+      }
+    }
+  },
+  "_provenance": {
+    "schema_version": "1.0",
+    "produced_by": {
+      "cmd": "uv run python data_analysis/gap_generation/overlap_test.py --run-id overlap_test_1 --budget-usd 15 --resume",
+      "git_sha": "6707ed2+dirty",
+      "author": "Roger Dearnaley",
+      "title": "M3 overlap rubric test overlap_test_1"
+    },
+    "produced_at": "2026-10-03T13:34:09+00:00",
+    "inputs": [
+      {
+        "dep_key": "producer_script",
+        "path": "data_analysis/gap_generation/overlap_test.py",
+        "fingerprint": "v1:2026-10-03T13:29:51+00:00@23665",
+        "kind": "file",
+        "dataset_id": null,
+        "last_modified_at": "2026-10-03T13:29:51+00:00",
+        "extras": {}
+      },
+      {
+        "dep_key": "overlap_test_module",
+        "path": "assistant_axis/gapgen/overlap_test.py",
+        "fingerprint": "v1:2026-10-03T13:29:51+00:00@72267",
+        "kind": "file",
+        "dataset_id": null,
+        "last_modified_at": "2026-10-03T13:29:51+00:00",
+        "extras": {}
+      },
+      {
+        "dep_key": "trait_files",
+        "path": "data/traits/instructions",
+        "fingerprint": "v1:multi:16dbfdc8dba2",
+        "kind": "multi",
+        "dataset_id": null,
+        "last_modified_at": "2026-10-02T20:35:30+00:00",
+        "extras": {},
+        "member_paths": [
+          "data/traits/instructions/absentee.json",
+          "data/traits/instructions/absolutist.json",
+          "data/traits/instructions/absorption_prone.json",
+          "data/traits/instructions/abstemious.json",
+          "data/traits/instructions/abstract.json",
+          "data/traits/instructions/accessible.json",
+          "data/traits/instructions/accommodating.json",
+          "data/traits/instructions/accountable.json",
+          "data/traits/instructions/accurate.json",
+          "data/traits/instructions/acerbic.json",
+          "data/traits/instructions/adaptable.json",
+          "data/traits/instructions/adventurous.json",
+          "data/traits/instructions/adventurous_eater.json",
+          "data/traits/instructions/aesthete.json",
+          "data/traits/instructions/aggressive.json",
+          "data/traits/instructions/agreeable.json",
+          "data/traits/instructions/altruistic.json",
+          "data/traits/instructions/ambiguity_tolerant.json",
+          "data/traits/instructions/ambitious.json",
+          "data/traits/instructions/amoral.json",
+          "data/traits/instructions/analytical.json",
+          "data/traits/instructions/anecdotal.json",
+          "data/traits/instructions/animated.json",
+          "data/traits/instructions/anthropocentric.json",
+          "data/traits/instructions/anti_immigration.json",
+          "data/traits/instructions/antifeminist.json",
+          "data/traits/instructions/anxious.json",
+          "data/traits/instructions/apathetic.json",
+          "data/traits/instructions/apolitical.json",
+          "data/traits/instructions/approximate.json",
+          "data/traits/instructions/aristocratic.json",
+          "data/traits/instructions/arrogant.json",
+          "data/traits/instructions/artistic.json",
+          "data/traits/instructions/ascetic.json",
+          "data/traits/instructions/attention_seeking.json",
+          "data/traits/instructions/authentic.json",
+          "data/traits/instructions/authoritarian.json",
+          "data/traits/instructions/autonomy_respecting.json",
+          "data/traits/instructions/avoidant.json",
+          "data/traits/instructions/bargain_hunter.json",
+          "data/traits/instructions/benevolent.json",
+          "data/traits/instructions/benign.json",
+          "data/traits/instructions/big_picture.json",
+          "data/traits/instructions/bitter.json",
+          "data/traits/instructions/blame_shifting.json",
+          "data/traits/instructions/blunt.json",
+          "data/traits/instructions/body_confident.json",
+          "data/traits/instructions/body_insecure.json",
+          "data/traits/instructions/bold.json",
+          "data/traits/instructions/bombastic.json",
+          "data/traits/instructions/brand_agnostic.json",
+          "data/traits/instructions/brand_loyal.json",
+          "data/traits/instructions/brash.json",
+          "data/traits/instructions/brave.json",
+          "data/traits/instructions/bullying.json",
+          "data/traits/instructions/burned_out.json",
+          "data/traits/instructions/calculating.json",
+          "data/traits/instructions/calibrated.json",
+          "data/traits/instructions/callous.json",
+          "data/traits/instructions/calm.json",
+          "data/traits/instructions/candid.json",
+          "data/traits/instructions/capitalist.json",
+          "data/traits/instructions/career_oriented.json",
+          "data/traits/instructions/careless.json",
+          "data/traits/instructions/casual.json",
+          "data/traits/instructions/cat_person.json",
+          "data/traits/instructions/cautious.json",
+          "data/traits/instructions/cerebral.json",
+          "data/traits/instructions/challenging.json",
+          "data/traits/instructions/chaotic.json",
+          "data/traits/instructions/charismatic.json",
+          "data/traits/instructions/chaste.json",
+          "data/traits/instructions/cheerful.json",
+          "data/traits/instructions/childless.json",
+          "data/traits/instructions/circumspect.json",
+          "data/traits/instructions/civil_libertarian.json",
+          "data/traits/instructions/civilizationist.json",
+          "data/traits/instructions/clannish.json",
+          "data/traits/instructions/clear.json",
+          "data/traits/instructions/clingy.json",
+          "data/traits/instructions/cliqueish.json",
+          "data/traits/instructions/closed_minded.json",
+          "data/traits/instructions/closure_seeking.json",
+          "data/traits/instructions/coherent.json",
+          "data/traits/instructions/collaborative.json",
+          "data/traits/instructions/collectivistic.json",
+          "data/traits/instructions/company_loyal.json",
+          "data/traits/instructions/compassionate.json",
+          "data/traits/instructions/competent.json",
+          "data/traits/instructions/competitive.json",
+          "data/traits/instructions/composed.json",
+          "data/traits/instructions/conceptual.json",
+          "data/traits/instructions/conciliatory.json",
+          "data/traits/instructions/concise.json",
+          "data/traits/instructions/concrete.json",
+          "data/traits/instructions/condescending.json",
+          "data/traits/instructions/confabulatory.json",
+          "data/traits/instructions/confident.json",
+          "data/traits/instructions/conformist.json",
+          "data/traits/instructions/confrontational.json",
+          "data/traits/instructions/conscientious.json",
+          "data/traits/instructions/consequentialist.json",
+          "data/traits/instructions/conservative.json",
+          "data/traits/instructions/constructive.json",
+          "data/traits/instructions/constructivist.json",
+          "data/traits/instructions/contemporary.json",
+          "data/traits/instructions/contented.json",
+          "data/traits/instructions/contrarian.json",
+          "data/traits/instructions/controlling.json",
+          "data/traits/instructions/conventional.json",
+          "data/traits/instructions/convergent.json",
+          "data/traits/instructions/cooperative.json",
+          "data/traits/instructions/cosmopolitan.json",
+          "data/traits/instructions/course_correcting.json",
+          "data/traits/instructions/cowardly.json",
+          "data/traits/instructions/creative.json",
+          "data/traits/instructions/credulous.json",
+          "data/traits/instructions/critical.json",
+          "data/traits/instructions/cruel.json",
+          "data/traits/instructions/cryptic.json",
+          "data/traits/instructions/curious.json",
+          "data/traits/instructions/cynical.json",
+          "data/traits/instructions/data_driven.json",
+          "data/traits/instructions/death_accepting.json",
+          "data/traits/instructions/death_fearing.json",
+          "data/traits/instructions/deceitful.json",
+          "data/traits/instructions/decisive.json",
+          "data/traits/instructions/deconstructionist.json",
+          "data/traits/instructions/defeatist.json",
+          "data/traits/instructions/deferential.json",
+          "data/traits/instructions/deliberate.json",
+          "data/traits/instructions/deontological.json",
+          "data/traits/instructions/dependable.json",
+          "data/traits/instructions/dependent.json",
+          "data/traits/instructions/descriptive.json",
+          "data/traits/instructions/despairing.json",
+          "data/traits/instructions/destructive.json",
+          "data/traits/instructions/detached.json",
+          "data/traits/instructions/detail_oriented.json",
+          "data/traits/instructions/determinist.json",
+          "data/traits/instructions/didactic.json",
+          "data/traits/instructions/dignified.json",
+          "data/traits/instructions/diplomatic.json",
+          "data/traits/instructions/disagreeable.json",
+          "data/traits/instructions/discontented.json",
+          "data/traits/instructions/discouraging.json",
+          "data/traits/instructions/dishonest.json",
+          "data/traits/instructions/dismissive.json",
+          "data/traits/instructions/disorganized.json",
+          "data/traits/instructions/dispassionate.json",
+          "data/traits/instructions/distractible.json",
+          "data/traits/instructions/divergent.json",
+          "data/traits/instructions/dog_person.json",
+          "data/traits/instructions/dominant.json",
+          "data/traits/instructions/dramatic.json",
+          "data/traits/instructions/dry.json",
+          "data/traits/instructions/dull.json",
+          "data/traits/instructions/early_adopter.json",
+          "data/traits/instructions/early_bird.json",
+          "data/traits/instructions/earnest.json",
+          "data/traits/instructions/eastern_hemisphere.json",
+          "data/traits/instructions/easygoing.json",
+          "data/traits/instructions/eccentric.json",
+          "data/traits/instructions/eclectic.json",
+          "data/traits/instructions/ecocentric.json",
+          "data/traits/instructions/edgy.json",
+          "data/traits/instructions/educated.json",
+          "data/traits/instructions/educational.json",
+          "data/traits/instructions/efficient.json",
+          "data/traits/instructions/effusive.json",
+          "data/traits/instructions/egalitarian.json",
+          "data/traits/instructions/elderly.json",
+          "data/traits/instructions/elitist.json",
+          "data/traits/instructions/eloquent.json",
+          "data/traits/instructions/emotional.json",
+          "data/traits/instructions/emotionally_articulate.json",
+          "data/traits/instructions/emotionally_disengaged.json",
+          "data/traits/instructions/emotionally_engaged.json",
+          "data/traits/instructions/emotionally_inarticulate.json",
+          "data/traits/instructions/empathetic.json",
+          "data/traits/instructions/emphatic.json",
+          "data/traits/instructions/empirical.json",
+          "data/traits/instructions/encouraging.json",
+          "data/traits/instructions/ends_justify_means.json",
+          "data/traits/instructions/energetic.json",
+          "data/traits/instructions/engaged.json",
+          "data/traits/instructions/enigmatic.json",
+          "data/traits/instructions/entertaining.json",
+          "data/traits/instructions/entitled.json",
+          "data/traits/instructions/envious.json",
+          "data/traits/instructions/environmental.json",
+          "data/traits/instructions/epicurean.json",
+          "data/traits/instructions/erratic.json",
+          "data/traits/instructions/erudite.json",
+          "data/traits/instructions/esoteric.json",
+          "data/traits/instructions/essentialist.json",
+          "data/traits/instructions/ethereal.json",
+          "data/traits/instructions/ethnocentric.json",
+          "data/traits/instructions/even_tempered.json",
+          "data/traits/instructions/evil.json",
+          "data/traits/instructions/excitable.json",
+          "data/traits/instructions/exclusionary.json",
+          "data/traits/instructions/exclusivist.json",
+          "data/traits/instructions/existentialist.json",
+          "data/traits/instructions/expedient.json",
+          "data/traits/instructions/experiential.json",
+          "data/traits/instructions/exploratory.json",
+          "data/traits/instructions/expository.json",
+          "data/traits/instructions/expressive.json",
+          "data/traits/instructions/extravagant.json",
+          "data/traits/instructions/extremist.json",
+          "data/traits/instructions/extrinsically_motivated.json",
+          "data/traits/instructions/extroverted.json",
+          "data/traits/instructions/fair.json",
+          "data/traits/instructions/family_oriented.json",
+          "data/traits/instructions/fashionable.json",
+          "data/traits/instructions/fastidious.json",
+          "data/traits/instructions/fatalistic.json",
+          "data/traits/instructions/feminine.json",
+          "data/traits/instructions/feminist.json",
+          "data/traits/instructions/figurative.json",
+          "data/traits/instructions/financially_conservative.json",
+          "data/traits/instructions/financially_precarious.json",
+          "data/traits/instructions/financially_reckless.json",
+          "data/traits/instructions/financially_secure.json",
+          "data/traits/instructions/fixed_minded.json",
+          "data/traits/instructions/flat.json",
+          "data/traits/instructions/flexible.json",
+          "data/traits/instructions/flippant.json",
+          "data/traits/instructions/flirty.json",
+          "data/traits/instructions/flourishing.json",
+          "data/traits/instructions/flustered.json",
+          "data/traits/instructions/focused.json",
+          "data/traits/instructions/foolish.json",
+          "data/traits/instructions/forgetful.json",
+          "data/traits/instructions/forgiving.json",
+          "data/traits/instructions/formal.json",
+          "data/traits/instructions/formalist.json",
+          "data/traits/instructions/formulaic.json",
+          "data/traits/instructions/forthright.json",
+          "data/traits/instructions/fragile.json",
+          "data/traits/instructions/frequent_poster.json",
+          "data/traits/instructions/friendly.json",
+          "data/traits/instructions/frugal.json",
+          "data/traits/instructions/full_price_shopper.json",
+          "data/traits/instructions/fundamentalist.json",
+          "data/traits/instructions/futuristic.json",
+          "data/traits/instructions/gain_seeking.json",
+          "data/traits/instructions/gay.json",
+          "data/traits/instructions/gay_affirming.json",
+          "data/traits/instructions/generalist.json",
+          "data/traits/instructions/generous.json",
+          "data/traits/instructions/gentle.json",
+          "data/traits/instructions/glib.json",
+          "data/traits/instructions/globetrotter.json",
+          "data/traits/instructions/gluttonous.json",
+          "data/traits/instructions/good.json",
+          "data/traits/instructions/goofy.json",
+          "data/traits/instructions/grandiose.json",
+          "data/traits/instructions/grateful.json",
+          "data/traits/instructions/greedy.json",
+          "data/traits/instructions/gregarious.json",
+          "data/traits/instructions/grounded.json",
+          "data/traits/instructions/growth_minded.json",
+          "data/traits/instructions/guarded.json",
+          "data/traits/instructions/guileless.json",
+          "data/traits/instructions/hands_off.json",
+          "data/traits/instructions/hands_on.json",
+          "data/traits/instructions/happily_partnered.json",
+          "data/traits/instructions/harmful.json",
+          "data/traits/instructions/harmless.json",
+          "data/traits/instructions/harsh.json",
+          "data/traits/instructions/hawkish.json",
+          "data/traits/instructions/health_conscious.json",
+          "data/traits/instructions/health_negligent.json",
+          "data/traits/instructions/heavy_drinker.json",
+          "data/traits/instructions/hedonistic.json",
+          "data/traits/instructions/helpful.json",
+          "data/traits/instructions/helpless.json",
+          "data/traits/instructions/heterodox.json",
+          "data/traits/instructions/highbrow.json",
+          "data/traits/instructions/historical.json",
+          "data/traits/instructions/holistic.json",
+          "data/traits/instructions/homebody.json",
+          "data/traits/instructions/homeowner.json",
+          "data/traits/instructions/homophobic.json",
+          "data/traits/instructions/honest.json",
+          "data/traits/instructions/honorable.json",
+          "data/traits/instructions/honorable_while_playing.json",
+          "data/traits/instructions/hostile.json",
+          "data/traits/instructions/humanistic.json",
+          "data/traits/instructions/humanitarian.json",
+          "data/traits/instructions/humble.json",
+          "data/traits/instructions/humorless.json",
+          "data/traits/instructions/hurried.json",
+          "data/traits/instructions/iconoclastic.json",
+          "data/traits/instructions/idealistic.json",
+          "data/traits/instructions/illiterate.json",
+          "data/traits/instructions/illogical.json",
+          "data/traits/instructions/immature.json",
+          "data/traits/instructions/impatient.json",
+          "data/traits/instructions/improvisational.json",
+          "data/traits/instructions/impulsive.json",
+          "data/traits/instructions/inaccurate.json",
+          "data/traits/instructions/inclusive.json",
+          "data/traits/instructions/incoherent.json",
+          "data/traits/instructions/incompetent.json",
+          "data/traits/instructions/incrementalist.json",
+          "data/traits/instructions/incurious.json",
+          "data/traits/instructions/indecisive.json",
+          "data/traits/instructions/independent.json",
+          "data/traits/instructions/indifferent_to_animals.json",
+          "data/traits/instructions/individualistic.json",
+          "data/traits/instructions/industrious.json",
+          "data/traits/instructions/inflexible.json",
+          "data/traits/instructions/informational.json",
+          "data/traits/instructions/innovative.json",
+          "data/traits/instructions/inquisitive.json",
+          "data/traits/instructions/insecure.json",
+          "data/traits/instructions/inspirational.json",
+          "data/traits/instructions/insular.json",
+          "data/traits/instructions/intellectually_dishonest.json",
+          "data/traits/instructions/intellectually_honest.json",
+          "data/traits/instructions/intense.json",
+          "data/traits/instructions/interdisciplinary.json",
+          "data/traits/instructions/intrinsically_motivated.json",
+          "data/traits/instructions/introspective.json",
+          "data/traits/instructions/introverted.json",
+          "data/traits/instructions/intuitive.json",
+          "data/traits/instructions/irascible.json",
+          "data/traits/instructions/ironic.json",
+          "data/traits/instructions/irresponsible.json",
+          "data/traits/instructions/irreverent.json",
+          "data/traits/instructions/isolated.json",
+          "data/traits/instructions/jaded.json",
+          "data/traits/instructions/job_hopping.json",
+          "data/traits/instructions/joyful.json",
+          "data/traits/instructions/joyless.json",
+          "data/traits/instructions/judgmental.json",
+          "data/traits/instructions/just_world_believing.json",
+          "data/traits/instructions/kind_to_animals.json",
+          "data/traits/instructions/laid_back.json",
+          "data/traits/instructions/languishing.json",
+          "data/traits/instructions/late_adopter.json",
+          "data/traits/instructions/lazy.json",
+          "data/traits/instructions/learning_oriented.json",
+          "data/traits/instructions/lenient.json",
+          "data/traits/instructions/lethargic.json",
+          "data/traits/instructions/lighthearted.json",
+          "data/traits/instructions/literal.json",
+          "data/traits/instructions/literate.json",
+          "data/traits/instructions/logical.json",
+          "data/traits/instructions/long_term_oriented.json",
+          "data/traits/instructions/loss_averse.json",
+          "data/traits/instructions/lowbrow.json",
+          "data/traits/instructions/loyal.json",
+          "data/traits/instructions/lurker.json",
+          "data/traits/instructions/lustful.json",
+          "data/traits/instructions/magnanimous.json",
+          "data/traits/instructions/malevolent.json",
+          "data/traits/instructions/malicious.json",
+          "data/traits/instructions/malign.json",
+          "data/traits/instructions/manic.json",
+          "data/traits/instructions/manipulative.json",
+          "data/traits/instructions/many_siblings.json",
+          "data/traits/instructions/married.json",
+          "data/traits/instructions/masculine.json",
+          "data/traits/instructions/materialist.json",
+          "data/traits/instructions/materialistic.json",
+          "data/traits/instructions/mature.json",
+          "data/traits/instructions/maximizing.json",
+          "data/traits/instructions/mechanistic.json",
+          "data/traits/instructions/media_skeptical.json",
+          "data/traits/instructions/media_trusting.json",
+          "data/traits/instructions/meditative.json",
+          "data/traits/instructions/melancholic.json",
+          "data/traits/instructions/melodramatic.json",
+          "data/traits/instructions/merciful.json",
+          "data/traits/instructions/mercurial.json",
+          "data/traits/instructions/meritocratic.json",
+          "data/traits/instructions/metaphorical.json",
+          "data/traits/instructions/metaphysical_libertarian.json",
+          "data/traits/instructions/methodical.json",
+          "data/traits/instructions/meticulous.json",
+          "data/traits/instructions/micromanaging.json",
+          "data/traits/instructions/misanthropic.json",
+          "data/traits/instructions/mischievous.json",
+          "data/traits/instructions/moderate.json",
+          "data/traits/instructions/modest.json",
+          "data/traits/instructions/moral.json",
+          "data/traits/instructions/moral_relativist.json",
+          "data/traits/instructions/moral_universalist.json",
+          "data/traits/instructions/motivated_reasoning_immune.json",
+          "data/traits/instructions/motivated_reasoning_prone.json",
+          "data/traits/instructions/mystical.json",
+          "data/traits/instructions/naive.json",
+          "data/traits/instructions/narrative.json",
+          "data/traits/instructions/nationalist.json",
+          "data/traits/instructions/neglectful.json",
+          "data/traits/instructions/neurotic.json",
+          "data/traits/instructions/new_money.json",
+          "data/traits/instructions/news_avoidant.json",
+          "data/traits/instructions/news_junkie.json",
+          "data/traits/instructions/night_owl.json",
+          "data/traits/instructions/nihilistic.json",
+          "data/traits/instructions/nomadic.json",
+          "data/traits/instructions/noncommittal.json",
+          "data/traits/instructions/nonconformist.json",
+          "data/traits/instructions/nonpartisan.json",
+          "data/traits/instructions/northern_hemisphere.json",
+          "data/traits/instructions/nostalgic.json",
+          "data/traits/instructions/nurturing.json",
+          "data/traits/instructions/obedient.json",
+          "data/traits/instructions/oblivious.json",
+          "data/traits/instructions/observant.json",
+          "data/traits/instructions/obsessive.json",
+          "data/traits/instructions/old_money.json",
+          "data/traits/instructions/only_child.json",
+          "data/traits/instructions/opaque.json",
+          "data/traits/instructions/open_minded.json",
+          "data/traits/instructions/opinionated.json",
+          "data/traits/instructions/optimistic.json",
+          "data/traits/instructions/organized.json",
+          "data/traits/instructions/orthodox.json",
+          "data/traits/instructions/other_focused.json",
+          "data/traits/instructions/overconfident.json",
+          "data/traits/instructions/pacifist.json",
+          "data/traits/instructions/panicky.json",
+          "data/traits/instructions/paradoxical.json",
+          "data/traits/instructions/paranoid.json",
+          "data/traits/instructions/parent.json",
+          "data/traits/instructions/parochial.json",
+          "data/traits/instructions/partisan.json",
+          "data/traits/instructions/passionate.json",
+          "data/traits/instructions/passive.json",
+          "data/traits/instructions/passive_aggressive.json",
+          "data/traits/instructions/paternalistic.json",
+          "data/traits/instructions/patient.json",
+          "data/traits/instructions/patriotic.json",
+          "data/traits/instructions/peaceful.json",
+          "data/traits/instructions/pedantic.json",
+          "data/traits/instructions/pensive.json",
+          "data/traits/instructions/perfectionist.json",
+          "data/traits/instructions/performance_oriented.json",
+          "data/traits/instructions/performative.json",
+          "data/traits/instructions/permissive.json",
+          "data/traits/instructions/persevering.json",
+          "data/traits/instructions/pessimistic.json",
+          "data/traits/instructions/petty.json",
+          "data/traits/instructions/philanthropic.json",
+          "data/traits/instructions/philistine.json",
+          "data/traits/instructions/philosophical.json",
+          "data/traits/instructions/picky_eater.json",
+          "data/traits/instructions/placid.json",
+          "data/traits/instructions/plain_spoken.json",
+          "data/traits/instructions/playful.json",
+          "data/traits/instructions/plugged_in.json",
+          "data/traits/instructions/pluralist.json",
+          "data/traits/instructions/poetic.json",
+          "data/traits/instructions/polite.json",
+          "data/traits/instructions/political.json",
+          "data/traits/instructions/poor.json",
+          "data/traits/instructions/popular.json",
+          "data/traits/instructions/populist.json",
+          "data/traits/instructions/practical.json",
+          "data/traits/instructions/pragmatic.json",
+          "data/traits/instructions/precise.json",
+          "data/traits/instructions/prescriptive.json",
+          "data/traits/instructions/pretentious.json",
+          "data/traits/instructions/principled.json",
+          "data/traits/instructions/pro_immigration.json",
+          "data/traits/instructions/proactive.json",
+          "data/traits/instructions/problem_solving.json",
+          "data/traits/instructions/procrastinating.json",
+          "data/traits/instructions/progressive.json",
+          "data/traits/instructions/promiscuous.json",
+          "data/traits/instructions/prosaic.json",
+          "data/traits/instructions/provocative.json",
+          "data/traits/instructions/prudent.json",
+          "data/traits/instructions/puritanical.json",
+          "data/traits/instructions/qualitative.json",
+          "data/traits/instructions/quantitative.json",
+          "data/traits/instructions/quick_witted.json",
+          "data/traits/instructions/radical.json",
+          "data/traits/instructions/rationalist.json",
+          "data/traits/instructions/reactive.json",
+          "data/traits/instructions/rebellious.json",
+          "data/traits/instructions/reckless.json",
+          "data/traits/instructions/reductionist.json",
+          "data/traits/instructions/regionalist.json",
+          "data/traits/instructions/relativist.json",
+          "data/traits/instructions/religious.json",
+          "data/traits/instructions/remorseful.json",
+          "data/traits/instructions/renter.json",
+          "data/traits/instructions/reserved.json",
+          "data/traits/instructions/resilient.json",
+          "data/traits/instructions/resourceful.json",
+          "data/traits/instructions/respectful.json",
+          "data/traits/instructions/responsible.json",
+          "data/traits/instructions/restless.json",
+          "data/traits/instructions/retentive.json",
+          "data/traits/instructions/reverent.json",
+          "data/traits/instructions/rhetorical.json",
+          "data/traits/instructions/rigid.json",
+          "data/traits/instructions/risk_averse.json",
+          "data/traits/instructions/risk_seeking.json",
+          "data/traits/instructions/ritualistic.json",
+          "data/traits/instructions/romantic.json",
+          "data/traits/instructions/rooted.json",
+          "data/traits/instructions/rootless.json",
+          "data/traits/instructions/rude.json",
+          "data/traits/instructions/rule_abiding.json",
+          "data/traits/instructions/rule_breaking.json",
+          "data/traits/instructions/rural.json",
+          "data/traits/instructions/ruthless_while_playing.json",
+          "data/traits/instructions/sarcastic.json",
+          "data/traits/instructions/sardonic.json",
+          "data/traits/instructions/sassy.json",
+          "data/traits/instructions/satisficing.json",
+          "data/traits/instructions/savage.json",
+          "data/traits/instructions/scheming.json",
+          "data/traits/instructions/science_skeptical.json",
+          "data/traits/instructions/science_trusting.json",
+          "data/traits/instructions/sectarian.json",
+          "data/traits/instructions/secular.json",
+          "data/traits/instructions/self_absorbed.json",
+          "data/traits/instructions/self_accepting.json",
+          "data/traits/instructions/self_aggrandizing.json",
+          "data/traits/instructions/self_assured.json",
+          "data/traits/instructions/self_blaming.json",
+          "data/traits/instructions/self_certain.json",
+          "data/traits/instructions/self_conscious.json",
+          "data/traits/instructions/self_critical.json",
+          "data/traits/instructions/self_deprecating.json",
+          "data/traits/instructions/self_disciplined.json",
+          "data/traits/instructions/self_effacing.json",
+          "data/traits/instructions/self_indulgent.json",
+          "data/traits/instructions/self_pitying.json",
+          "data/traits/instructions/self_reliant.json",
+          "data/traits/instructions/self_starting.json",
+          "data/traits/instructions/self_uncertain.json",
+          "data/traits/instructions/selfish.json",
+          "data/traits/instructions/sentimental.json",
+          "data/traits/instructions/serene.json",
+          "data/traits/instructions/serious.json",
+          "data/traits/instructions/settled.json",
+          "data/traits/instructions/short_term_oriented.json",
+          "data/traits/instructions/sincere.json",
+          "data/traits/instructions/single.json",
+          "data/traits/instructions/skeptical.json",
+          "data/traits/instructions/sloppy.json",
+          "data/traits/instructions/slovenly.json",
+          "data/traits/instructions/slow_witted.json",
+          "data/traits/instructions/socialist.json",
+          "data/traits/instructions/socially_obtuse.json",
+          "data/traits/instructions/socially_perceptive.json",
+          "data/traits/instructions/sociopathic.json",
+          "data/traits/instructions/socratic.json",
+          "data/traits/instructions/solemn.json",
+          "data/traits/instructions/solitary.json",
+          "data/traits/instructions/southern_hemisphere.json",
+          "data/traits/instructions/spartan.json",
+          "data/traits/instructions/specialist.json",
+          "data/traits/instructions/speculative.json",
+          "data/traits/instructions/spiritual.json",
+          "data/traits/instructions/spiteful.json",
+          "data/traits/instructions/spontaneous.json",
+          "data/traits/instructions/squeamish.json",
+          "data/traits/instructions/staid.json",
+          "data/traits/instructions/status_seeking.json",
+          "data/traits/instructions/steady.json",
+          "data/traits/instructions/stingy.json",
+          "data/traits/instructions/stoic.json",
+          "data/traits/instructions/straight.json",
+          "data/traits/instructions/strategic.json",
+          "data/traits/instructions/stream_of_consciousness.json",
+          "data/traits/instructions/strict.json",
+          "data/traits/instructions/strong_stomached.json",
+          "data/traits/instructions/structuralist.json",
+          "data/traits/instructions/submissive.json",
+          "data/traits/instructions/subversive.json",
+          "data/traits/instructions/superficial.json",
+          "data/traits/instructions/superstitious.json",
+          "data/traits/instructions/supportive.json",
+          "data/traits/instructions/sycophantic.json",
+          "data/traits/instructions/systems_thinker.json",
+          "data/traits/instructions/tactful.json",
+          "data/traits/instructions/tactical.json",
+          "data/traits/instructions/technical.json",
+          "data/traits/instructions/techno_hierophantic.json",
+          "data/traits/instructions/technocratic.json",
+          "data/traits/instructions/teetotaler.json",
+          "data/traits/instructions/temperamental.json",
+          "data/traits/instructions/temperate.json",
+          "data/traits/instructions/theatrical.json",
+          "data/traits/instructions/theoretical.json",
+          "data/traits/instructions/thick_skinned.json",
+          "data/traits/instructions/thin_skinned.json",
+          "data/traits/instructions/thorough.json",
+          "data/traits/instructions/timid.json",
+          "data/traits/instructions/traditional.json",
+          "data/traits/instructions/transactional.json",
+          "data/traits/instructions/transformational.json",
+          "data/traits/instructions/transparent.json",
+          "data/traits/instructions/treacherous.json",
+          "data/traits/instructions/trusting.json",
+          "data/traits/instructions/trustworthy.json",
+          "data/traits/instructions/truthful.json",
+          "data/traits/instructions/tunnel_visioned.json",
+          "data/traits/instructions/turbulent.json",
+          "data/traits/instructions/unadventurous.json",
+          "data/traits/instructions/unambitious.json",
+          "data/traits/instructions/unassuming.json",
+          "data/traits/instructions/uncalculating.json",
+          "data/traits/instructions/uncaring.json",
+          "data/traits/instructions/uncertain.json",
+          "data/traits/instructions/unchallenging.json",
+          "data/traits/instructions/uncritical.json",
+          "data/traits/instructions/understated.json",
+          "data/traits/instructions/uneducated.json",
+          "data/traits/instructions/unfair.json",
+          "data/traits/instructions/unfashionable.json",
+          "data/traits/instructions/unflappable.json",
+          "data/traits/instructions/unflinching.json",
+          "data/traits/instructions/unforgiving.json",
+          "data/traits/instructions/ungrateful.json",
+          "data/traits/instructions/unhappily_partnered.json",
+          "data/traits/instructions/unhelpful.json",
+          "data/traits/instructions/unhurried.json",
+          "data/traits/instructions/uninquisitive.json",
+          "data/traits/instructions/unplugged.json",
+          "data/traits/instructions/unpopular.json",
+          "data/traits/instructions/unpretentious.json",
+          "data/traits/instructions/unreflective.json",
+          "data/traits/instructions/unreliable.json",
+          "data/traits/instructions/unrepentant.json",
+          "data/traits/instructions/unschooled.json",
+          "data/traits/instructions/unselfconscious.json",
+          "data/traits/instructions/unsentimental.json",
+          "data/traits/instructions/untrustworthy.json",
+          "data/traits/instructions/unyielding.json",
+          "data/traits/instructions/upper_class.json",
+          "data/traits/instructions/uptight.json",
+          "data/traits/instructions/urban.json",
+          "data/traits/instructions/utilitarian.json",
+          "data/traits/instructions/vague.json",
+          "data/traits/instructions/verbose.json",
+          "data/traits/instructions/vindictive.json",
+          "data/traits/instructions/visceral.json",
+          "data/traits/instructions/vulnerable_narcissistic.json",
+          "data/traits/instructions/wealthy.json",
+          "data/traits/instructions/well_behaved.json",
+          "data/traits/instructions/well_connected.json",
+          "data/traits/instructions/western_hemisphere.json",
+          "data/traits/instructions/whimsical.json",
+          "data/traits/instructions/wide_eyed.json",
+          "data/traits/instructions/wise.json",
+          "data/traits/instructions/witty.json",
+          "data/traits/instructions/working_class.json",
+          "data/traits/instructions/worldly.json",
+          "data/traits/instructions/wry.json",
+          "data/traits/instructions/young.json",
+          "data/traits/instructions/zealous.json"
+        ]
+      },
+      {
+        "dep_key": "metric_config",
+        "path": "data/candidates/metric_config.json",
+        "fingerprint": "v1:2026-10-02T22:21:08+00:00@54961",
+        "kind": "file",
+        "dataset_id": null,
+        "last_modified_at": "2026-10-02T22:21:08+00:00",
+        "extras": {}
+      },
+      {
+        "dep_key": "embedding_cache",
+        "path": "data/candidates/cache/embeddings/openai_text-embedding-3-large.npz",
+        "fingerprint": "v1:2026-10-02T21:47:30+00:00@185639158",
+        "kind": "file",
+        "dataset_id": null,
+        "last_modified_at": "2026-10-02T21:47:30+00:00",
+        "extras": {
+          "config_version": "2026-10-02",
+          "model": "text-embedding-3-large",
+          "cache_tag": "openai_text-embedding-3-large",
+          "representation": "w20",
+          "variant": "centred",
+          "metric": "cos",
+          "n_corpus": "663"
+        }
+      },
+      {
+        "dep_key": "labelled_pairs",
+        "path": "data/candidates/calibration/labelled_pairs.json",
+        "fingerprint": "v1:2026-10-02T21:12:08+00:00@699547",
+        "kind": "file",
+        "dataset_id": null,
+        "last_modified_at": "2026-10-02T21:12:08+00:00",
+        "extras": {}
+      },
+      {
+        "dep_key": "drop_or_merge",
+        "path": "data/candidates/calibration/drop_or_merge.md",
+        "fingerprint": "v1:2026-10-02T22:20:14+00:00@8809",
+        "kind": "file",
+        "dataset_id": null,
+        "last_modified_at": "2026-10-02T22:20:14+00:00",
+        "extras": {}
+      },
+      {
+        "dep_key": "rubrics",
+        "path": "reports/trait_gap_generation/rubrics",
+        "fingerprint": "v1:multi:2cf3f17e44d7",
+        "kind": "multi",
+        "dataset_id": null,
+        "last_modified_at": "2026-10-03T13:03:11+00:00",
+        "extras": {},
+        "member_paths": [
+          "reports/trait_gap_generation/rubrics/overlap_concept.md",
+          "reports/trait_gap_generation/rubrics/overlap_cooccurrence.md",
+          "reports/trait_gap_generation/rubrics/versions.json"
+        ]
+      },
+      {
+        "dep_key": "persona_cache",
+        "path": "data/candidates/cache/persona_s6_l25.npz",
+        "fingerprint": "v1:2026-10-01T11:53:57+00:00@12097680",
+        "kind": "file",
+        "dataset_id": null,
+        "last_modified_at": "2026-10-01T11:53:57+00:00",
+        "extras": {
+          "slot": "6",
+          "layer": "25",
+          "shear_applied": "True"
+        }
+      },
+      {
+        "dep_key": "responses",
+        "path": "data/candidates/overlap_test/overlap_test_1/responses.jsonl",
+        "fingerprint": "v1:2026-10-03T13:33:44+00:00@2885918",
+        "kind": "file",
+        "dataset_id": null,
+        "last_modified_at": "2026-10-03T13:33:44+00:00",
+        "extras": {}
+      }
+    ],
+    "inputs_sha256": "015e345c559f10466e902f5aaa8216ff14af15412399c40c769e1c5a48a23a92"
+  }
+}

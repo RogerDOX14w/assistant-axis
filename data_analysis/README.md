@@ -578,6 +578,35 @@ uv run python data_analysis/gap_generation/calibrate_metric.py --write-config [-
 rule picks them only when no readable config exists), so a corpus edit never
 moves the canary.
 
+**M3 overlap rubric test (Oct 2026): `gap_generation/overlap_test.py`.**  The
+pre-pilot test of the two overlap rubrics (A, concept similarity, and B,
+co-occurrence: `reports/trait_gap_generation/rubrics/overlap_*.md`, pinned in
+the same `versions.json` and checked by `rubric_pins.py`); design in
+[`m3_overlap_rubric_draft.md`](../reports/trait_gap_generation/m3_overlap_rubric_draft.md),
+results in
+[`m3_overlap_test_readout.md`](../reports/trait_gap_generation/m3_overlap_test_readout.md).
+Builds the pair set from cached inputs only (100 seeded targets with persona
+vectors and their 3 nearest traits under the covered setting, plus the labelled
+pairs between two corpus traits and the drop-or-merge pairs, grouped one call
+per target), then sends every call to each rubric on Haiku 4.5, Sonnet 5.5 and
+Opus 5.5, live (Haiku first, so a parse problem shows on the cheapest model).
+An answer that does not parse fully is asked once more; a stage still below
+99% parsed stops the run before the next stage (`--stop-below`), and
+`--resume` re-sends only calls without a fully parsed answer.  Writes
+`data/candidates/overlap_test/<run id>/` (`pairs.json`, `responses.jsonl`,
+`usage.json` after every stage, `run.json`, `results.jsonl`, `summary.json`
+with the provenance envelope, `tables.md`, `rendered_prompts.md`,
+`marks_key.json`) and Roger's blinded sheet
+`reports/trait_gap_generation/m3_overlap_marks.md`.  The first run
+(`overlap_test_1`, 1,082 calls) cost $3.99.
+
+```bash
+uv run python data_analysis/gap_generation/overlap_test.py --run-id overlap_test_1 --dry-run   # plan, estimate, rendered prompts
+uv run python data_analysis/gap_generation/overlap_test.py --run-id overlap_test_1 --budget-usd 15 [--resume]
+uv run python data_analysis/gap_generation/overlap_test.py --run-id overlap_test_1 --analyse-only
+uv run python data_analysis/gap_generation/overlap_test.py --run-id overlap_test_1 --decode-marks  # after Roger marks the sheet
+```
+
 **Corpus regions after a corpus change.**  `gap_registry.py corpus-regions`
 takes `--from-filter` more than once; a trait takes its entry from the last
 run that has it, and a row under a renamed stem counts for the renamed trait.
