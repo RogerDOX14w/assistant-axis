@@ -212,6 +212,33 @@ six-rung and relation forms are worse under the rule in both rounds, because Son
 their containment rung, so it keeps what Opus would cut (12-20 pairs).  The wording question does not
 move the decisions the pipeline will make; the rule and the second reading do.
 
+Roger's weights on the columns (2026-10-04): escalations are cost and unimportant; "kept though Opus
+would cut" means human review work later, moderately important, and could be converted into expense
+by checking the 2s as well; decision flips are the stability measure, lower is better.  He asked for
+one more column: **how often Opus gives a 3 whose reason says it should have been a 2** (a two-sided
+"each adds something", or "neither implies the other").  The answer is almost never, under any arm:
+
+| arm | escalated, 3s only | escalated if 2s checked too | kept though Opus ≥ 3 | decision flips | Opus 3s | Opus 3 with a two-sided reason | Sonnet 3 with a two-sided reason |
+|---|---|---|---|---|---|---|---|
+| A | 45 / 40 | 145 / 149 | 1 / 7 | 10 | 35 / 36 | 0 / 0 | 0 / 0 |
+| A2 | 55 / 52 | 153 / 155 | 4 / 3 | 7 | 35 / 38 | 0 / 0 | 1 / 1 |
+| E | 42 / 44 | 147 / 149 | 7 / 10 | 8 | 40 / 40 | 0 / 0 | 0 / 0 |
+| E2 | 64 / 59 | 160 / 154 | 4 / 7 | 8 | 47 / 46 | 0 / 0 | 1 / 0 |
+| C | 24 / 23 | 137 / 136 | 12 / 15 | 8 | 29 / 29 | 0 / 0 | 0 / 0 |
+| C2 | 41 / 45 | 152 / 147 | 13 / 12 | 7 | 40 / 41 | 0 / 0 | 0 / 0 |
+| D | 12 / 11 | 151 / 145 | 17 / 19 | 4 | 25 / 24 | 0 / 0 | 0 / 0 |
+| D2 | 27 / 29 | 146 / 142 | 20 / 18 | 15 | 42 / 38 | 1 / 0 | 0 / 0 |
+
+So the models' error runs one way only: a containment described and under-scored as 2, never a
+two-sided overlap over-scored as 3 (a looser reading of the reasons finds at most a handful).  Checking
+the 2s as well would send about 60% of pairs to Opus instead of about 20%, and would empty the "kept
+though Opus ≥ 3" column, since Sonnet and Opus are never two points apart.  The cost ladder, per 100
+candidates at three listed pairs each and two list orders (Sonnet $0.0016 a pair, Opus $0.003): Sonnet
+everywhere with Opus on the 3s about $1.30; with Opus on the 2s and 3s about $2.05; **Opus alone on
+every pair about $1.80**.  The last is the cheapest of the two that close the blind spot, uses the model
+that follows the rubric, and has one judge; the only reason for Sonnet was cost, which does not apply
+at these volumes.
+
 ## Files
 
 - Run: [pairs.json](../../data/candidates/overlap_test/overlap_arms_1/pairs.json) (identical pairs to run 1),
