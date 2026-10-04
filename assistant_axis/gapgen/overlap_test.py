@@ -1479,6 +1479,38 @@ def scope_kinds(answers: Mapping[str, Mapping], *, value: Any = 3) -> dict:
             "multiple": multiple}
 
 
+#: How a pair's call was sent in a later pass, against pass 1: a call of one trait (necessarily the same
+#: prompt), a longer call whose order happened to come out the same (the same prompt), or a reordered one.
+PROMPT_GROUPS: tuple[str, ...] = ("single", "same_order", "reordered")
+
+
+def prompt_groups(pair_set: PairSet, seed: int, pass_no: int) -> dict[str, str]:
+    """``{pair_id: group}`` (:data:`PROMPT_GROUPS`): whether the pair's call was sent in pass ``pass_no``
+    with the same user turn as in pass 1, and why."""
+    out = {}
+    for c in pair_set.calls:
+        same = listed_order(c, pass_order_seed(seed, pass_no, c.call_id)) == list(c.listed)
+        group = "single" if len(c.listed) == 1 else ("same_order" if same else "reordered")
+        for s in c.listed:
+            out[f"{c.call_id}>{s}"] = group
+    return out
+
+
+def consistency_by_prompt(rubric: str, first: Mapping[str, Mapping], second: Mapping[str, Mapping],
+                          groups: Mapping[str, str]) -> dict:
+    """Exact agreement between two sets of answers (native and decision scale) on each group of
+    :func:`prompt_groups`: does a reordered prompt change the answer more than the same prompt asked
+    again?"""
+    out = {}
+    for g in PROMPT_GROUPS:
+        f = {k: v for k, v in first.items() if groups.get(k) == g}
+        s = {k: v for k, v in second.items() if groups.get(k) == g}
+        nat = agreement(to_ordinal(rubric, f), to_ordinal(rubric, s), k=native_k(rubric))
+        dec = agreement(to_decision(rubric, f), to_decision(rubric, s), k=len(SCALE))
+        out[g] = {"n": nat["n_both_parsed"], "exact_native": nat["exact_all"], "exact_decision": dec["exact_all"]}
+    return out
+
+
 def order_stats(pair_set: PairSet, seed: int, passes: Sequence[int]) -> dict:
     """For each later pass: the calls whose listed traits happened to be sent in pass 1's order (every
     call of one trait does), and the pairs sent under another id than in pass 1."""
@@ -1532,12 +1564,15 @@ def analyse_arms(pair_set: PairSet, answers_by_pass: Mapping[int, Mapping[tuple[
             out["parse"][f"{r}|{m}|{p}"] = {"rubric": r, "model": m, "pass": p,
                                             "ok": sum(a["value"] is not None for a in ans.values()), "total": len(ans),
                                             "first_ok": f["ok"] if f else None, "first_total": f["total"] if f else None}
+    groups = prompt_groups(pair_set, seed, passes[1]) if len(passes) >= 2 else {}
     for r in rubrics:
         arm: dict = {"self_consistency": {}, "between_models": {}, "coverage": {}}
         for m in models:
             if len(passes) >= 2 and get(passes[0], r, m) and get(passes[1], r, m):
                 arm["self_consistency"][m] = compare_answers(r, get(passes[0], r, m), get(passes[1], r, m), pairs,
                                                              cutoff=cutoff)
+                arm["self_consistency"][m]["by_prompt"] = consistency_by_prompt(r, get(passes[0], r, m),
+                                                                                get(passes[1], r, m), groups)
             arm["coverage"][m] = {str(p): coverage(pairs, r, get(p, r, m), cutoff=cutoff) for p in passes
                                   if get(p, r, m)}
         for m in others:
@@ -1809,6 +1844,16 @@ def arms_markdown(arms: Mapping, corpus: Mapping, sm) -> list[str]:
                 L.append(f"- {sm(m)}: {_flips_text(sc['flips_native'])} ({sc['flips_native']['adjacent']} of "
                          f"{sc['flips_native']['n']} between neighbouring points); decision: "
                          f"{_flips_text(sc['flips_decision'])}")
+            if any(sc.get("by_prompt") for sc in arm["self_consistency"].values()):
+                L += ["", "Exact agreement between the passes by how pass 2 sent the pair's call (native / decision; "
+                      "pairs): a call of one trait and a longer call whose order came out the same were the same "
+                      "prompt asked again; a reordered call was another prompt:", "",
+                      "| model | one trait | same order by chance | reordered |", "|---|---|---|---|"]
+                for m, sc in arm["self_consistency"].items():
+                    bp = sc.get("by_prompt") or {}
+                    L.append(f"| {sm(m)} | " + " | ".join(
+                        f"{_pct(bp[g]['exact_native'])} / {_pct(bp[g]['exact_decision'])} ({bp[g]['n']})"
+                        if g in bp else "–" for g in PROMPT_GROUPS) + " |")
             for m, sc in arm["self_consistency"].items():
                 if sc["cutoff"]["pairs"]:
                     L += ["", f"{sm(m)}'s nearest pairs on different sides of {cut} in the two passes (pass 1, pass 2):", ""]

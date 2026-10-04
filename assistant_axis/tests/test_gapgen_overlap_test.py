@@ -962,14 +962,33 @@ class TestArmsStatistics:
         assert set(summary["agreement"]) == set(OT.ARMS) and "B" not in summary["groups"]
         summary["arms"] = arms
         md = OT.summary_markdown(summary, ps, corpus())
+        assert set(c_sonnet["by_prompt"]) == set(OT.PROMPT_GROUPS)
+        assert sum(x["n"] for x in c_sonnet["by_prompt"].values()) == len(ps.pairs)
         for head in ("## The arms experiment: 2 passes", "### Cross-arm table", "### Parse rates by pass",
                      "### Arm C: overlap_six", "### Arm D: overlap_relation", "### Arm E: overlap_scope",
                      "Relations named", "The wider of a \"contains\"", "Kinds of difference",
+                     "Exact agreement between the passes by how pass 2 sent",
                      "### Arm A, pass 1, against overlap_test_1", "## Known groups, rubric D"):
             assert head in md, head
         table = md.split("### Cross-arm table")[1].split("\n\n")[1].splitlines()
         assert len(table) == 2 + len(OT.ARMS) * len(models)
         assert all(line.count("|") == 11 for line in table)                 # ten cells on every row
+
+    def test_prompt_groups_and_consistency_by_prompt(self):
+        ps = pair_set(n_targets=6, n_antonyms=2, n_random=2)
+        groups = OT.prompt_groups(ps, 0, 2)
+        assert set(groups) == {p.pair_id for p in ps.pairs}
+        for c in ps.calls:
+            same = OT.listed_order(c, OT.pass_order_seed(0, 2, c.call_id)) == c.listed
+            want = "single" if len(c.listed) == 1 else ("same_order" if same else "reordered")
+            assert all(groups[f"{c.call_id}>{s}"] == want for s in c.listed)
+        assert {"single", "reordered"} <= set(groups.values())
+        first = {pid: {"value": 2} for pid in groups}
+        second = {pid: {"value": 3 if g == "reordered" else 2} for pid, g in groups.items()}
+        bp = OT.consistency_by_prompt("C", first, second, groups)
+        assert bp["single"]["exact_native"] == 1.0 and bp["reordered"]["exact_native"] == 0.0
+        assert bp["reordered"]["exact_decision"] == 0.0                     # C's 2 and 3 stay apart
+        assert sum(bp[g]["n"] for g in OT.PROMPT_GROUPS) == len(groups)
 
     def test_analysis_of_one_pass_has_no_arms_section(self):
         ps = pair_set(n_targets=6, n_antonyms=2, n_random=2)
