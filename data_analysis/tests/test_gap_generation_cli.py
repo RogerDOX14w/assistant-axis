@@ -924,3 +924,132 @@ def test_overlap_analyse_only_and_decode_marks(overlap_env, capsys):
     dec = json.loads((e["out"] / "marks_decoded.json").read_text())
     assert dec["counts"] == {"ok": len(dec["items"])}
     assert dec["agreement_with_roger"][e["OT"].OPUS]["exact_all"] == 1.0      # the fake answers 2 everywhere
+
+
+# --------------------------------------------------------------------------- the overlap rubric arms (2026-10-04)
+
+def _arms(e):
+    """The fake answers every rubric (A-E) in its own format, by the listed trait's label."""
+    e["client"]["responder"] = e["T"].arms_responder(e["OT"].load_rubrics(keys=tuple(e["OT"].RUBRICS)))
+    return e["OT"]
+
+
+def test_overlap_arms_end_to_end_with_two_passes(overlap_env):
+    """coding_plan_overlap_arms.md: --rubrics C D E --passes 2 on Sonnet and Opus."""
+    e = overlap_env
+    OT = _arms(e)
+    models = (OT.SONNET, OT.OPUS)
+    assert e["cli"].main(e["base"] + ["--models", *models, "--rubrics", "C", "D", "E", "--passes", "2"]) == 0
+    out = e["out"]
+    ps = OT.PairSet.from_json(json.loads((out / "pairs.json").read_text()))
+    n_calls, n_pairs = len(ps.calls), len(ps.pairs)
+    client = e["client"]["client"]
+    assert len(client.calls) == n_calls * 3 * 2 * 2                   # rubrics x models x passes
+    recs = OT.read_records(out / "responses.jsonl")
+    assert {(r["rubric"], r["model"], r["pass"]) for r in recs} == {(r, m, p) for r in "CDE" for m in models
+                                                                     for p in (1, 2)}
+    users = {(r["rubric"], r["model"], r["call_id"], r["pass"]): r["request"]["user"] for r in recs}
+    assert any(users[(k[0], k[1], k[2], 1)] != u for k, u in users.items() if k[3] == 2)    # pass 2 reshuffled
+    results = [json.loads(x) for x in (out / "results.jsonl").read_text().splitlines()]
+    assert len(results) == n_pairs * 3 * 2 * 2 and {r["pass"] for r in results} == {1, 2}
+    assert all(r["decision"] == OT.decision_value(r["rubric"], r["value"]) for r in results)
+    run = json.loads((out / "run.json").read_text())
+    assert run["passes"] == 2 and run["rubrics"] == ["C", "D", "E"] and run["exit_code"] == 0
+    assert run["rubric_versions"] == {"overlap_six": 1, "overlap_relation": 1, "overlap_scope": 1}
+    assert [s["pass"] for s in run["stages"]] == [1] * 6 + [2] * 6
+    assert [s["model"] for s in run["stages"]][:4] == [OT.SONNET] * 3 + [OT.OPUS]
+    usage = json.loads((out / "usage.json").read_text())
+    assert usage["n_calls"] == len(client.calls) == OT.usage_from_records(recs).n_calls
+    arms = json.loads((out / "summary.json").read_text())["result"]["arms"]
+    assert arms["rubrics"] == ["C", "D", "E"] and arms["passes"] == [1, 2]
+    for r in "CDE":
+        for m in models:
+            # the fake answers by label: pass 2's reshuffled ids must land on the same pairs as pass 1's
+            sc = arms["per_arm"][r]["self_consistency"][m]
+            assert sc["native"]["n_both_parsed"] == n_pairs and sc["native"]["exact_all"] == 1.0
+    assert len(arms["cross_arm"]) == 6
+    tables = (out / "tables.md").read_text()
+    assert "### Cross-arm table" in tables and "### Arm D: overlap_relation" in tables
+    prompts = (out / "rendered_prompts.md").read_text()
+    assert "## Pass 2: the same calls" in prompts and "=== rubric C (overlap_six)" in prompts
+    assert "=== rubric A (" not in prompts                             # only the run's rubrics
+
+
+def test_overlap_arms_dry_run_shows_every_arm_and_the_second_pass(overlap_env, capsys):
+    e = overlap_env
+    OT = e["OT"]
+    assert e["cli"].main(e["base"] + ["--models", OT.SONNET, OT.OPUS, "--rubrics", "A", "C", "D", "E",
+                                      "--passes", "2", "--dry-run"]) == 0
+    out = capsys.readouterr().out
+    for r, name in (("A", "overlap_concept"), ("C", "overlap_six"), ("D", "overlap_relation"), ("E", "overlap_scope")):
+        assert f"=== rubric {r} ({name})" in out and f"rubric {r} ({name}) on Opus 5.5, pass 2" in out
+    assert "## Pass 2: the same calls" in out and "passes 2" in out and "DRY-RUN" in out
+    assert not e["out"].exists() and not e["sheet"].exists()
+
+
+def test_overlap_a_second_pass_on_resume_sends_only_the_second_pass(overlap_env):
+    e = overlap_env
+    OT = _arms(e)
+    base = e["base"] + ["--models", OT.SONNET, "--rubrics", "D"]
+    assert e["cli"].main(base) == 0
+    n1 = len(e["client"]["client"].calls)
+    assert e["cli"].main(base + ["--passes", "2", "--resume"]) == 0
+    assert len(e["client"]["client"].calls) == n1                       # pass 2 only; pass 1 not re-sent
+    recs = OT.read_records(e["out"] / "responses.jsonl")
+    assert sorted(r["pass"] for r in recs) == [1] * n1 + [2] * n1
+    assert json.loads((e["out"] / "usage.json").read_text())["n_calls"] == 2 * n1
+
+
+def test_overlap_a_baseline_run_with_other_pairs_is_refused(overlap_env, capsys):
+    e = overlap_env
+    other = e["out"].parent / "overlap_test_1"
+    other.mkdir(parents=True)
+    (other / "pairs.json").write_text(json.dumps(e["T"].pair_set(n_targets=3).to_json()))
+    assert e["cli"].main(e["base"] + ["--dry-run"]) == 2
+    assert "differs from overlap_test_1's pairs.json" in capsys.readouterr().err
+    assert e["cli"].main(e["base"] + ["--dry-run", "--baseline-run", "none"]) == 0
+
+
+def test_overlap_arm_a_is_compared_with_the_baseline_run(overlap_env):
+    e = overlap_env
+    OT = _arms(e)
+    models = [OT.SONNET, OT.OPUS]
+    first = [("overlap_test_1" if a == "t1" else a) for a in e["base"]] + ["--models", *models, "--rubrics", "A"]
+    assert e["cli"].main(first) == 0
+    baseline_responses = e["out"].parent / "overlap_test_1" / "responses.jsonl"
+    before = baseline_responses.read_bytes()
+    assert e["cli"].main(e["base"] + ["--models", *models, "--rubrics", "A", "C", "--passes", "2"]) == 0
+    assert baseline_responses.read_bytes() == before                    # only read
+    summ = json.loads((e["out"] / "summary.json").read_text())
+    b = summ["result"]["arms"]["baseline"]
+    assert b["run_id"] == "overlap_test_1" and set(b["per_model"]) == set(models)
+    assert b["per_model"][OT.OPUS]["native"]["exact_all"] == 1.0         # the fake answers by label
+    assert "baseline_responses" in json.dumps(summ["_provenance"])
+    assert "### Arm A, pass 1, against overlap_test_1" in (e["out"] / "tables.md").read_text()
+
+
+def test_overlap_a_second_live_session_is_refused_while_one_holds_the_lock(overlap_env, capsys):
+    e = overlap_env
+    OT = e["OT"]
+    assert e["cli"].main(e["base"] + ["--models", OT.HAIKU]) == 0
+    held = OT.acquire_session_lock(e["out"])
+    try:
+        assert e["cli"].main(e["base"] + ["--resume"]) == 4
+        assert "another session" in capsys.readouterr().err
+    finally:
+        held.close()
+    assert e["cli"].main(e["base"] + ["--resume"]) == 0
+
+
+def test_overlap_arms_analyse_only_recomputes_everything(overlap_env):
+    e = overlap_env
+    OT = _arms(e)
+    models = [OT.SONNET, OT.OPUS]
+    assert e["cli"].main(e["base"] + ["--models", *models, "--rubrics", "E", "--passes", "2"]) == 0
+    first = json.loads((e["out"] / "summary.json").read_text())["result"]["arms"]
+    (e["out"] / "summary.json").unlink()
+    (e["out"] / "tables.md").unlink()
+    assert e["cli"].main(e["base"] + ["--models", *models, "--analyse-only"]) == 0
+    again = json.loads((e["out"] / "summary.json").read_text())["result"]["arms"]
+    assert again["cross_arm"] == first["cross_arm"] and again["passes"] == [1, 2]
+    assert "### Arm E: overlap_scope" in (e["out"] / "tables.md").read_text()

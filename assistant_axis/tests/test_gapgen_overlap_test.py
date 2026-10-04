@@ -597,3 +597,404 @@ class TestMarks:
         ans = {("A", OT.OPUS): {items[0].pair_id: {"value": 3}, items[1].pair_id: {"value": 2}}}
         cmp_ = OT.compare_marks(dec, ans)
         assert cmp_[OT.OPUS]["n_both_parsed"] == 2 and cmp_[OT.OPUS]["exact_all"] == 0.5
+
+
+# =========================================================================== the arms experiment
+# (coding_plan_overlap_arms.md, 2026-10-04): rubrics C, D, E; passes; the analysis
+
+ALL = tuple(OT.RUBRICS)
+
+
+def _label_value(r, label):
+    """A deterministic answer per (rubric, listed label): the same pair gets the same answer in every pass,
+    whatever id it was sent under."""
+    choices = {"A": [0, 1, 2, 3, 4, "opposite"], "B": [0, 1, 2, 3, 4], "C": [0, 1, 2, 3, 4, 5, "opposite"],
+               "D": list(OT.RELATIONS) + ["opposite"], "E": [0, 1, 2, 3, 4, "opposite"]}[r]
+    return choices[sum(map(ord, label)) % len(choices)]
+
+
+def arms_responder(rb, value=_label_value, wider="target"):
+    """Answers each rubric in its own format (key, scale), rubric D's "contains" with ``wider``."""
+    by_text = {v["text"]: k for k, v in rb.items()}
+
+    def responder(kw):
+        r = by_text[system_text(kw)]
+        rows = []
+        for t in json.loads(user_text(kw))["traits"]:
+            v = value(r, t["label"])
+            row = {"id": t["id"], "reason": f"About {t['label']}: narrowed to one domain.", OT.RUBRICS[r]["key"]: v}
+            if r == "D" and v == "contains" and wider is not None:
+                row["wider"] = wider
+            rows.append(row)
+        return make_response(json.dumps({"results": rows}), input_tokens=900, output_tokens=150)
+    return responder
+
+
+class TestArmRubrics:
+    def test_the_arms_load_from_their_pinned_files(self):
+        rb = OT.load_rubrics(keys=ALL)
+        assert set(rb) == set(ALL)
+        assert [rb[r]["name"] for r in "CDE"] == ["overlap_six", "overlap_relation", "overlap_scope"]
+        assert all(rb[r]["version"] == 1 and rb[r]["text"] == sr.load_prompt(rb[r]["name"]) for r in "CDE")
+        assert '"similarity": 0|1|2|3|4|5|"opposite"|"unsure"' in rb["C"]["text"]
+        assert '"relation": "same"|"variant"|"contains"|"overlap"|"neighbours"|"different"|"opposite"|"unsure", ' \
+               '"wider": "target"|"listed"' in rb["D"]["text"]
+        assert '"similarity": 0|1|2|3|4|"opposite"|"unsure"' in rb["E"]["text"]
+
+    def test_the_default_is_the_original_two_and_an_unknown_key_is_refused(self):
+        assert set(OT.load_rubrics()) == set(OT.DEFAULT_RUBRICS) == {"A", "B"}
+        with pytest.raises(ValueError, match="unknown rubric"):
+            OT.load_rubrics(keys=["A", "F"])
+
+    def test_scale_lines_are_the_rubric_facts(self):
+        """Every answer line of a rubric is one of its facts (scale and categories), in the rubric's order."""
+        rb = OT.load_rubrics(keys=ALL)
+        for r in ALL:
+            spec = OT.RUBRICS[r]
+            lines = OT.scale_lines(rb[r]["text"])
+            want = [f"- {n}:" for n in sorted(spec["scale"], reverse=True)] + [f'- "{c}":' for c in spec["categories"]]
+            assert len(lines) == len(want), r
+            assert all(ln.startswith(w) for ln, w in zip(lines, want)), r
+
+    def test_native_scales(self):
+        assert [OT.native_k(r) for r in ALL] == [5, 5, 6, 6, 5]
+        assert OT.native_order("D") == list(OT.RELATIONS) + ["opposite", "unsure"]
+        assert OT.native_order("B") == ["0", "1", "2", "3", "4", "unsure"]
+        assert OT.answer_order("C") == ["0", "1", "2", "3", "4", "5", "opposite", "unsure"]
+
+
+class TestDecisionScale:
+    def test_c_maps_six_rungs_to_five(self):
+        assert [OT.decision_value("C", v) for v in (5, 4, 3, 2, 1, 0)] == [4, 3, 3, 2, 1, 0]
+
+    def test_d_maps_relations_to_numbers(self):
+        got = {rel: OT.decision_value("D", rel) for rel in OT.RELATIONS}
+        assert got == {"same": 4, "variant": 3, "contains": 3, "overlap": 2, "neighbours": 1, "different": 0}
+
+    def test_a_b_and_e_are_unchanged_and_categories_kept(self):
+        for r in ("A", "B", "E"):
+            assert [OT.decision_value(r, v) for v in range(5)] == list(range(5))
+        for r in ALL:
+            assert OT.decision_value(r, "opposite") == "opposite" and OT.decision_value(r, "unsure") == "unsure"
+            assert OT.decision_value(r, None) is None
+
+    def test_ranks_and_the_cutoff(self):
+        assert [OT.ordinal_value("D", rel) for rel in OT.RELATIONS] == [0, 1, 2, 3, 4, 5]
+        assert OT.ordinal_value("D", "opposite") == "opposite" and OT.ordinal_value("C", 5) == 5
+        # at the cut-off 3, the native and the decision scale agree for C and D (ranks 3+ = decision 3+)
+        for r, values in (("C", range(6)), ("D", OT.RELATIONS)):
+            for v in values:
+                assert (OT.ordinal_value(r, v) >= 3) == (OT.decision_value(r, v) >= 3), (r, v)
+
+    def test_to_decision_and_to_ordinal_keep_the_rest_of_an_answer(self):
+        ans = {"p": {"value": "contains", "reason": "r", "wider": "listed"}}
+        assert OT.to_decision("D", ans)["p"] == {"value": 3, "reason": "r", "wider": "listed"}
+        assert OT.to_ordinal("D", ans)["p"]["value"] == 3 and ans["p"]["value"] == "contains"
+
+
+def d_answer(rows):
+    return json.dumps({"results": [{"id": i, "reason": f"Because {i}.", "relation": v, **extra}
+                                   for i, v, extra in rows]})
+
+
+class TestArmParsing:
+    def test_c_takes_0_to_5(self):
+        rows, errors, _ = OT.parse_answer(answer([(1, 5), (2, "4"), (3, "opposite")]), "C", 3)
+        assert {i: r["value"] for i, r in rows.items()} == {1: 5, 2: 4, 3: "opposite"} and errors == {}
+        rows, errors, _ = OT.parse_answer(answer([(1, 6)]), "C", 1)
+        assert rows == {} and "is not 0-5 or one of" in errors[1]
+        rows, errors, _ = OT.parse_answer(answer([(1, 5)]), "A", 1)          # A and E stop at 4
+        assert "is not 0-4" in errors[1]
+        rows, errors, _ = OT.parse_answer(answer([(1, 5)]), "E", 1)
+        assert "is not 0-4" in errors[1]
+
+    def test_d_relations_and_wider(self):
+        text = d_answer([(1, "contains", {"wider": "target"}), (2, "Overlap", {}), (3, "contains", {"wider": "listed"}),
+                         (4, "same", {"wider": None}), (5, "opposite", {})])
+        rows, errors, meta = OT.parse_answer(text, "D", 5)
+        assert errors == {}
+        assert {i: r["value"] for i, r in rows.items()} == {1: "contains", 2: "overlap", 3: "contains", 4: "same",
+                                                             5: "opposite"}
+        assert [rows[i]["wider"] for i in range(1, 6)] == ["target", None, "listed", None, None]
+        assert all(rows[i]["notes"] == [] for i in range(1, 6)) and meta["n_notes"] == 0
+        assert all(r["reason_first"] for r in rows.values())
+
+    def test_d_contains_without_a_usable_wider_parses_with_a_note(self):
+        text = d_answer([(1, "contains", {}), (2, "contains", {"wider": "both"}), (3, "contains", {"wider": "The target"}),
+                         (4, "contains", {"wider": "null"})])
+        rows, errors, meta = OT.parse_answer(text, "D", 4)
+        assert errors == {} and set(rows) == {1, 2, 3, 4}
+        assert rows[1]["wider"] is None and rows[1]["notes"] == ["contains without wider"]
+        assert rows[2]["wider"] is None and rows[2]["notes"] == ["wider 'both' is not target or listed"]
+        assert rows[3]["wider"] == "target" and rows[3]["notes"] == []
+        assert rows[4]["wider"] is None and rows[4]["notes"] == ["contains without wider"]
+        assert meta["n_notes"] == 3
+
+    def test_d_wider_with_another_relation_is_noted_and_dropped(self):
+        rows, errors, _ = OT.parse_answer(d_answer([(1, "variant", {"wider": "listed"})]), "D", 1)
+        assert errors == {} and rows[1]["wider"] is None and rows[1]["notes"] == ["wider 'listed' given with variant"]
+
+    def test_d_refuses_numbers_and_unknown_words_and_reads_us_spelling(self):
+        rows, errors, _ = OT.parse_answer(d_answer([(1, 3, {}), (2, "similar", {})]), "D", 2)
+        assert rows == {} and "relation 3 is not one of" in errors[1] and "'similar'" in errors[2]
+        rows, errors, _ = OT.parse_answer(d_answer([(1, "neighbors", {})]), "D", 1)
+        assert rows[1]["value"] == "neighbours" and rows[1]["notes"] == ["relation 'neighbors' read as 'neighbours'"]
+        rows, errors, _ = OT.parse_answer(answer([(1, "same")], "similarity"), "D", 1)
+        assert errors == {1: "relation missing"}
+
+    def test_the_other_rubrics_rows_are_unchanged(self):
+        rows, _, meta = OT.parse_answer(answer([(1, 3)]), "A", 1)
+        assert set(rows[1]) == {"reason", "value", "reason_first"} and "n_notes" not in meta
+
+
+class TestPasses:
+    def test_pass_order_seed_and_order(self):
+        c = OT.Call(call_id="nn:x", set="nearest", target="alpha", listed=["gamma", "beta", "delta"])
+        assert OT.pass_order_seed(0, 1, c.call_id) is None and OT.listed_order(c, None) == c.listed
+        s2 = OT.pass_order_seed(0, 2, c.call_id)
+        assert s2 != OT.pass_order_seed(0, 3, c.call_id) != OT.pass_order_seed(1, 2, c.call_id)
+        assert s2 != OT.pass_order_seed(0, 2, "nn:y")
+        o2 = OT.listed_order(c, s2)
+        assert sorted(o2) == sorted(c.listed) and o2 == OT.listed_order(c, s2)        # a fixed permutation
+        obj = json.loads(OT.render_user(c, corpus(), order_seed=s2))
+        assert [t["label"] for t in obj["traits"]] == [corpus()[s]["label"] for s in o2]
+        assert [t["id"] for t in obj["traits"]] == [1, 2, 3]
+        assert OT.render_user(c, corpus()) == OT.render_user(c, corpus(), order_seed=None)
+
+    def test_the_second_pass_reorders_most_calls(self):
+        ps = pair_set(n_targets=6, n_antonyms=2, n_random=2)
+        multi = [c for c in ps.calls if len(c.listed) > 1]
+        moved = [c for c in multi if OT.listed_order(c, OT.pass_order_seed(0, 2, c.call_id)) != c.listed]
+        assert multi and len(moved) >= len(multi) // 2
+        st = OT.order_stats(ps, 0, [1, 2])["2"]
+        assert st["same_order"] == len(ps.calls) - len(moved) and st["n_calls"] == len(ps.calls)
+
+    def test_two_passes_have_distinct_keys_and_both_answers_are_kept(self, tmp_path):
+        rb = OT.load_rubrics(keys=ALL)
+        ps = pair_set()
+        client = FakeAsyncAnthropic(arms_responder(rb))
+        path = tmp_path / "r.jsonl"
+        r = OT.OverlapRunner(client, rb, corpus(), usage=MultiModelUsage(), responses_path=path, retry_delays=(),
+                             usage_path=tmp_path / "usage.json")
+        res1 = run(r.run_stage("D", OT.SONNET, ps.calls, pass_no=1))
+        res2 = run(r.run_stage("D", OT.SONNET, ps.calls, pass_no=2))
+        assert res1.pass_no == 1 and res2.pass_no == 2 and res2.n_skipped == 0
+        assert len(client.calls) == 2 * len(ps.calls) and res2.n_ok == res2.n_pairs == len(ps.pairs)
+        recs = OT.read_records(path)
+        assert sorted({rec["pass"] for rec in recs}) == [1, 2] and OT.record_passes(recs) == [1, 2]
+        keys = OT.done_keys(recs)
+        assert {k[3] for k in keys} == {1, 2} and len(keys) == 2 * len(ps.calls)
+        for rec in recs:
+            c = ps.call(rec["call_id"])
+            seed = OT.pass_order_seed(0, rec["pass"], c.call_id)
+            assert rec["order_seed"] == seed and rec["listed"] == OT.listed_order(c, seed)
+            assert rec["request"]["user"] == OT.render_user(c, corpus(), order_seed=seed)
+        a1 = OT.collect_answers(ps, recs, pass_no=1)[("D", OT.SONNET)]
+        a2 = OT.collect_answers(ps, recs, pass_no=2)[("D", OT.SONNET)]
+        assert set(a1) == set(a2) == {p.pair_id for p in ps.pairs}
+        # the answer depends on the label only, so a pair's two answers agree whatever its id in each pass
+        for p in ps.pairs:
+            assert a1[p.pair_id]["value"] == a2[p.pair_id]["value"] == _label_value("D", corpus()[p.listed]["label"])
+        assert any(rec["listed"] != ps.call(rec["call_id"]).listed for rec in recs if rec["pass"] == 2)
+        # a resume of pass 2 sends nothing; pass 1's first-attempt rate is its own
+        run(r.run_stage("D", OT.SONNET, ps.calls, pass_no=2))
+        assert len(client.calls) == 2 * len(ps.calls)
+        assert OT.first_attempt_parse(ps, recs, pass_no=2)[("D", OT.SONNET)] == {"ok": len(ps.pairs),
+                                                                                 "total": len(ps.pairs)}
+        # usage.json is written after every answer and agrees with the records
+        u = MultiModelUsage.load_or_create(tmp_path / "usage.json")
+        assert u.n_calls == len(recs) == OT.usage_from_records(recs).n_calls
+        assert u.total_cost_usd == pytest.approx(OT.usage_from_records(recs).total_cost_usd)
+
+    def test_records_without_a_pass_are_pass_1(self):
+        ps = pair_set()
+        c = ps.calls[0]
+        text = json.dumps({"results": [{"id": i, "reason": "r", "similarity": 2} for i in range(1, len(c.listed) + 1)]})
+        rec = {"rubric": "A", "model": OT.OPUS, "call_id": c.call_id, "listed": c.listed, "response": {"text": text}}
+        assert OT.response_key(rec) == ("A", OT.OPUS, c.call_id, 1)
+        assert set(OT.collect_answers(ps, [rec], pass_no=1)) == {("A", OT.OPUS)}
+        assert OT.collect_answers(ps, [rec], pass_no=2) == {}
+
+    def test_the_session_lock_refuses_a_second_session(self, tmp_path):
+        held = OT.acquire_session_lock(tmp_path / "run")
+        try:
+            with pytest.raises(OT.SessionBusy, match="another session"):
+                OT.acquire_session_lock(tmp_path / "run")
+        finally:
+            held.close()
+        OT.acquire_session_lock(tmp_path / "run").close()             # free again once released
+
+    def test_write_usage_is_whole(self, tmp_path):
+        u = MultiModelUsage()
+        u.charge(OT.OPUS, 1000, 200)
+        OT.write_usage(u, tmp_path / "usage.json")
+        assert MultiModelUsage.load_or_create(tmp_path / "usage.json").n_calls == 1
+        assert not (tmp_path / "usage.json.tmp").exists()
+
+
+def _ans(values: dict, **extra) -> dict:
+    return {pid: {"value": v, "reason": "r", "reason_first": True, "error": None, **extra.get(pid, {})}
+            for pid, v in values.items()}
+
+
+class TestArmsStatistics:
+    def test_side(self):
+        assert [OT.side(v) for v in (4, 3, 2, 0, "opposite", "unsure", None)] == [True, True, False, False, False,
+                                                                                     None, None]
+        assert OT.side(3, cutoff=4) is False
+
+    def nearest_pairs(self):
+        ps = pair_set(n_targets=4)
+        return [p for p in ps.pairs if p.group == OT.NEAREST]
+
+    def test_compare_answers_on_made_up_answers(self):
+        pairs = self.nearest_pairs()[:6]
+        ids = [p.pair_id for p in pairs]
+        first = _ans(dict(zip(ids, [2, 3, 4, "opposite", 1, 5])))
+        second = _ans(dict(zip(ids, [3, 3, 3, 1, 1, 2])))
+        x = OT.compare_answers("C", first, second, pairs)
+        n = x["native"]
+        assert n["n_both_parsed"] == 6 and n["exact_all"] == pytest.approx(2 / 6, abs=1e-4)
+        assert n["n_numeric"] == 5 and n["within_one"] == pytest.approx(4 / 5, abs=1e-4)     # all but 5/2
+        assert x["flips_native"]["by_pair"] == {"1/opposite": 1, "2/3": 1, "2/5": 1, "3/4": 1}
+        assert x["flips_native"]["n"] == 4 and x["flips_native"]["adjacent"] == 2
+        # decision scale: C's 4 -> 3 and 5 -> 4, so 3/4 is no longer a disagreement
+        d = x["decision"]
+        assert d["exact_all"] == pytest.approx(3 / 6, abs=1e-4)
+        assert x["flips_decision"]["by_pair"] == {"1/opposite": 1, "2/3": 1, "2/4": 1}
+        # cut-off 3: 2 -> 3 (second covered only), 5 -> 2 (first covered only); opposite -> 1 stays uncovered
+        c = x["cutoff"]
+        assert (c["n"], c["crossings"], c["first_only"], c["second_only"]) == (6, 2, 1, 1)
+        assert sorted((y["first"], y["second"]) for y in c["pairs"]) == [(2, 3), (5, 2)]
+
+    def test_compare_answers_for_d_uses_ranks_and_relation_names(self):
+        pairs = self.nearest_pairs()[:4]
+        ids = [p.pair_id for p in pairs]
+        first = _ans(dict(zip(ids, ["contains", "overlap", "same", "unsure"])))
+        second = _ans(dict(zip(ids, ["variant", "contains", "same", "different"])))
+        x = OT.compare_answers("D", first, second, pairs)
+        assert x["native"]["exact_all"] == pytest.approx(1 / 4, abs=1e-4)
+        assert x["native"]["n_numeric"] == 3 and x["native"]["within_one"] == 1.0      # ranks 3/4, 2/3, 5/5
+        assert x["flips_native"]["by_pair"] == {"overlap/contains": 1, "contains/variant": 1, "different/unsure": 1}
+        assert x["decision"]["exact_all"] == pytest.approx(2 / 4, abs=1e-4)          # contains and variant are both 3
+        assert x["cutoff"]["crossings"] == 1 and x["cutoff"]["second_only"] == 1      # overlap -> contains
+        assert x["cutoff"]["n"] == 3                                                  # unsure has no side
+
+    def test_coverage(self):
+        pairs = self.nearest_pairs()
+        call0 = pairs[0].call_id
+        vals = {p.pair_id: (5 if p.call_id == call0 and p.nn_rank == 1 else 2) for p in pairs}
+        vals[pairs[-1].pair_id] = "opposite"
+        cov = OT.coverage(pairs, "C", _ans(vals))
+        assert cov["n"] == len(pairs) and cov["covered"] == 1 and cov["targets_covered"] == 1
+        assert cov["n_targets"] == len({p.call_id for p in pairs}) and cov["opposite"] == 1
+        assert OT.coverage(pairs, "C", _ans({p.pair_id: 3 for p in pairs}))["share"] == 1.0
+        assert OT.coverage(pairs, "D", _ans({p.pair_id: "overlap" for p in pairs}))["covered"] == 0
+
+    def test_relation_stats_and_wider_agreement(self):
+        a = _ans({"p1": "contains", "p2": "contains", "p3": "contains", "p4": "overlap", "p5": "neighbours"},
+                 p1={"wider": "target", "notes": []}, p2={"wider": None, "notes": ["contains without wider"]},
+                 p3={"wider": None, "notes": ["wider 'both' is not target or listed"]},
+                 p4={"wider": None, "notes": ["wider 'listed' given with overlap"]},
+                 p5={"wider": None, "notes": ["relation 'neighbors' read as 'neighbours'"]})
+        s = OT.relation_stats(a)
+        assert s["counts"] == {"contains": 3, "overlap": 1, "neighbours": 1} and s["n_contains"] == 3
+        assert s["wider"] == {"target": 1, "listed": 0, "missing": 1, "invalid": 1}
+        assert s["wider_missing_share"] == pytest.approx(2 / 3, abs=1e-3)
+        assert s["wider_with_other_relation"] == 1 and s["alias_spellings"] == 1
+        b = _ans({"p1": "contains", "p2": "contains", "p3": "variant"}, p1={"wider": "listed"}, p2={"wider": "target"})
+        w = OT.wider_agreement(a, b)
+        assert w == {"n_both_contains": 2, "same": 0, "different": 1, "unknown": 1}
+
+    def test_scope_kinds(self):
+        a = _ans({"p1": 3, "p2": 3, "p3": 3, "p4": 2},
+                 p1={"reason": "The same fussiness, narrowed to food."},
+                 p2={"reason": "Miserly is a stronger form, with the stress on hoarding."},
+                 p3={"reason": "Both are about money."}, p4={"reason": "narrowed but each adds something"})
+        k = OT.scope_kinds(a)
+        assert k["n"] == 3 and k["kinds"]["narrowed"] == 1 and k["kinds"]["stronger"] == 1
+        assert k["kinds"]["emphasis"] == 1 and k["none"] == 1 and k["multiple"] == 1
+        assert k["none_share"] == pytest.approx(1 / 3, abs=1e-3)
+
+    def fake_by_pass(self, ps, rubrics, models, f):
+        return {p: {(r, m): {pr.pair_id: {"value": f(p, r, m, pr), "reason": "narrowed", "reason_first": True,
+                                          "error": None, **({"wider": "target", "notes": []} if r == "D" else {})}
+                             for pr in ps.pairs} for r in rubrics for m in models} for p in (1, 2)}
+
+    def test_analyse_arms_and_its_tables(self):
+        ps = pair_set(n_targets=6, n_antonyms=2, n_random=2)
+        models = [OT.SONNET, OT.OPUS]
+
+        def f(p, r, m, pr):
+            v = _label_value(r, pr.listed)
+            # Sonnet's pass 2 of arm C says 3 where pass 1 said 2: flips across the cut-off
+            if r == "C" and m == OT.SONNET and p == 2 and v == 2:
+                return 3
+            return v
+        by_pass = self.fake_by_pass(ps, OT.ARMS, models, f)
+        baseline = {"run_id": "overlap_test_1", "answers": {m: by_pass[1][("A", m)] for m in models}}
+        arms = OT.analyse_arms(ps, by_pass, models=models, reference=OT.OPUS, seed=0, baseline=baseline)
+        assert arms["passes"] == [1, 2] and arms["rubrics"] == list(OT.ARMS)
+        for r in OT.ARMS:
+            sc = arms["per_arm"][r]["self_consistency"]
+            assert set(sc) == set(models)
+            assert sc[OT.OPUS]["native"]["exact_all"] == 1.0 and sc[OT.OPUS]["cutoff"]["crossings"] == 0
+            bm = arms["per_arm"][r]["between_models"][OT.SONNET]
+            assert set(bm) == {"1", "2"} and bm["1"]["native"]["exact_all"] == 1.0
+        c_sonnet = arms["per_arm"]["C"]["self_consistency"][OT.SONNET]
+        n2 = sum(_label_value("C", pr.listed) == 2 for pr in ps.pairs)
+        n2_nearest = sum(_label_value("C", pr.listed) == 2 for pr in ps.pairs if pr.group == OT.NEAREST)
+        assert c_sonnet["flips_native"]["by_pair"] == {"2/3": n2}
+        assert c_sonnet["cutoff"]["crossings"] == c_sonnet["cutoff"]["second_only"] == n2_nearest
+        assert arms["per_arm"]["C"]["between_models"][OT.SONNET]["2"]["cutoff"]["second_only"] == n2_nearest
+        assert set(arms["per_arm"]["D"]["relations"][OT.OPUS]) == {"1", "2"}
+        assert arms["per_arm"]["D"]["wider_between_passes"][OT.OPUS]["different"] == 0
+        assert "scope_kinds" in arms["per_arm"]["E"] and "scope_kinds" in arms["per_arm"]["A"]
+        assert set(arms["baseline"]["per_model"]) == set(models)
+        assert arms["baseline"]["per_model"][OT.OPUS]["native"]["exact_all"] == 1.0
+        rows = {(x["arm"], x["model"]): x for x in arms["cross_arm"]}
+        assert set(rows) == {(r, m) for r in OT.ARMS for m in models}
+        assert rows[("C", OT.SONNET)]["pass_flips_at_cutoff"] == n2_nearest
+        assert rows[("C", OT.OPUS)]["versus"] == OT.SONNET and rows[("C", OT.SONNET)]["versus"] == OT.SONNET
+        assert rows[("A", OT.OPUS)]["agreement_native"] == {"1": 1.0, "2": 1.0}
+        json.dumps(arms)
+        summary = OT.analyse(ps, by_pass[1], models=models, reference=OT.OPUS, n_boot=20)
+        assert set(summary["agreement"]) == set(OT.ARMS) and "B" not in summary["groups"]
+        summary["arms"] = arms
+        md = OT.summary_markdown(summary, ps, corpus())
+        for head in ("## The arms experiment: 2 passes", "### Cross-arm table", "### Parse rates by pass",
+                     "### Arm C: overlap_six", "### Arm D: overlap_relation", "### Arm E: overlap_scope",
+                     "Relations named", "The wider of a \"contains\"", "Kinds of difference",
+                     "### Arm A, pass 1, against overlap_test_1", "## Known groups, rubric D"):
+            assert head in md, head
+        table = md.split("### Cross-arm table")[1].split("\n\n")[1].splitlines()
+        assert len(table) == 2 + len(OT.ARMS) * len(models)
+        assert all(line.count("|") == 11 for line in table)                 # ten cells on every row
+
+    def test_analysis_of_one_pass_has_no_arms_section(self):
+        ps = pair_set(n_targets=6, n_antonyms=2, n_random=2)
+        by_pass = {1: TestArmsStatistics().fake_by_pass(ps, ["A"], [OT.SONNET, OT.OPUS], lambda *a: 2)[1]}
+        arms = OT.analyse_arms(ps, by_pass, models=[OT.SONNET, OT.OPUS])
+        assert arms["per_arm"]["A"]["self_consistency"] == {} and arms["baseline"] is None
+        summary = OT.analyse(ps, by_pass[1], models=[OT.SONNET, OT.OPUS], n_boot=20)
+        summary["arms"] = arms
+        assert "## The arms experiment" not in OT.summary_markdown(summary, ps, corpus())
+
+    def test_known_groups_read_the_decision_scale(self):
+        ps = pair_set(n_targets=6, n_antonyms=2, n_random=2)
+        ans = {("C", OT.OPUS): {p.pair_id: {"value": 5, "reason": "r", "reason_first": True, "error": None}
+                                for p in ps.pairs}}
+        s = OT.analyse(ps, ans, models=[OT.OPUS], n_boot=20)
+        assert s["groups"]["C"][OT.OPUS]["nearest"]["mean"] == 4.0                # 5 -> 4
+        assert s["by_score"]["C"][OT.OPUS]["5"]["n"] == len(ps.pairs)             # native answers
+        assert s["agreement"] == {"C": {}} and s["scales"]["C"]["k"] == 6
+
+    def test_estimate_reads_the_rubric_facts(self):
+        ps = pair_set()
+        rb = OT.load_rubrics(keys=ALL)
+        est = OT.estimate(ps.calls, corpus(), rb, [OT.OPUS], ["A", "D", "E"], pass_no=2)
+        by = {x.label.split(" ")[1]: x for x in est.lines}
+        assert all(", pass 2" in x.label for x in est.lines)
+        assert by["D"].out_tok > by["E"].out_tok > by["A"].out_tok              # 66, 62, 60 per listed trait
+        assert by["D"].in_tok > by["A"].in_tok                                  # the longer rubric text
+        assert len(OT.estimate(ps.calls, corpus(), rb, [OT.OPUS]).lines) == len(ALL)
