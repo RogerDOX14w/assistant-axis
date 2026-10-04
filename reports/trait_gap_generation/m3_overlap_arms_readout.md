@@ -128,9 +128,63 @@ example words checked free of the corpus: fussy, fussy eater, proud, boastful):
 > - 3: the same concept, differing only in scope, degree or emphasis: one may be the other narrowed to a single domain, carried further, or with something more added, and the plainer one adds nothing of its own: everything it says, the richer one says too. For example, penny-pinching and miserly: miserly is the same carefulness with money, carried further. Or proud and boastful: boastful is proud with the telling of it added.
 > - 2: overlapping concepts. They share a core, and each adds something the other lacks. Name what each adds; the shared core itself is not an addition. If only one of the two adds anything beyond the core, the answer is 3, not 2. For example, studious and bookish: both are about learning from books, but studious adds diligence and bookish adds a taste for reading.
 
-Plan, on Roger's word (he may edit the lines first): pin D's draft 2 as version 2 and F as version 1,
-run both on the 409 pairs, Sonnet and Opus, two passes (about $8), and compare with A and D on the
-cross-arm table.  Arms C and E are not run again.  The results go in this file.
+Roger then widened this to all four forms (A2, C2, D2, E2), run first on the pairs where the confusion
+had been seen, and delegated the iteration ("a hill-climbing exercise in prompt engineering").  The
+lines actually run use the one-way implication test rather than the "adds" wording above; they are in
+the brief's "Round 2" section and in the four files `rubrics/overlap_*_implies.md`.
+
+## Round 2: the implication wording on the confusion subset (2026-10-04, `overlap_arms_2`)
+
+Setup: 123 pairs (87 with both a 2 and a 3 among their 22 readings so far, 36 more with an "overlap"
+answer whose reason describes containment), sent as the 84 round-1 calls that contain them (242 pairs
+in all, 119 of them controls), four arms, Sonnet and Opus, two passes, 1,348 calls, **$8.89**
+([usage.json](../../data/candidates/overlap_test/overlap_arms_2/usage.json); the 84 calls carry more
+listed traits than average, so the $7 estimate was low).  Each arm is compared with its round-1
+counterpart on the same pairs ([tables.md](../../data/candidates/overlap_test/overlap_arms_2/tables.md),
+section "Round 2").  **No arm improved on its counterpart**: between-model crossings at the cut-off rose
+under every arm, on the subset and on all pairs sent.
+
+| arm (subset, 123 pairs) | crossings at 3, both passes | self-consistency Sonnet / Opus | nearest share at 3+, Sonnet / Opus (pass 1) |
+|---|---|---|---|
+| A → A2 | 29 → 39 | 83% → 89% / 88% → 86% | 32% → 40% / 25% → 28% |
+| C → C2 | 40 → 49 | 86% → 80% / 76% → 88% | 15% → 29% / 20% → 31% |
+| D → D2 | 41 → 44 | 89% → 76% / 85% → 73% | 6% → 19% / 18% → 32% |
+| E → E2 | 37 → 47 | 89% → 84% / 85% → 85% | 30% → 48% / 29% → 36% |
+
+Two things qualify the headline without reversing it.  The subset was chosen on round 1's own
+disagreements, so round 1's crossing counts on it are inflated and a fair fresh baseline would be
+lower, which makes round 2's rise larger, not smaller.  And the slip the redraft aimed at did shrink:
+counted by the round-1 patterns the self-contradictions barely moved, but those patterns do not know
+the new "neither implies the other" wording the lines put into the models' mouths; discounting reasons
+that use it, the 2-with-a-containment-reason count roughly halved (A: Sonnet 35 → 16, Opus 20 → 5;
+D: 35 → 19, 11 → 1).  So the test was taken up, and the models still ended up on different sides more
+often.  Coverage at 3 rose for both models under every arm, but on different pairs.
+
+**What the reasons show** (the agent quoted the first six slips and crossings per arm; read in full):
+
+1. **"Scope" lets a sibling domain pass as containment.**  Under A2 and E2 Sonnet now scores 3 on pairs
+   that are the same pattern in a different domain: clannish / cliqueish ("same in-group loyalty, the
+   group being a social circle rather than family, so the scope differs"), clannish / insular, calm /
+   temperate.  Opus applies the test and says 2 ("neither implies the other").  These are members of
+   the moral-circle sequence, distinct corpus traits by design; Opus is right, and the words that
+   mislead are "scope" in A's line 3 and "narrowed or broadened" in E's.  A sub-domain is containment
+   (fussy contains fussy eater); a sister domain is not (fussy eater and fussy dresser).
+2. **"Lacks" survives in line 2 and Sonnet still uses it.**  Under D2 Opus applies the test ("every
+   accommodating person is agreeable but not the reverse": contains) while Sonnet counts the broader
+   trait's other facets as things the narrower one lacks ("agreeable also covers seeking common
+   ground") and answers overlap: anxious / neurotic, careless / sloppy, agreeable / accommodating.
+   The closing clause of line 2, "each adds something the other lacks", was kept from round 1 and
+   invites exactly this.
+3. **The two-sided-but-small cases stay fuzzy under any wording**: benevolent / altruistic, big-picture /
+   holistic, analytical / reductionist, compassionate / empathetic (Sonnet "nearly the same, a shift of
+   emphasis", Opus "each adds something").  Partial implication both ways; no test settles them.
+4. **D2 destabilised both models** (flips 13 → 30; consistency 89% → 76% and 85% → 73%), and C2 helped
+   neither; the relation and six-rung forms are dropped from the climb.
+
+Housekeeping from the run: the guard stopped once (Sonnet left `"id"` out of every row of one call,
+twice; the resume re-asked only that call); the example words proud and boastful are free of the corpus
+but sit on the hygiene test's reserved list (the M1 probe words), recorded as such in the test, so a
+wording taken into production needs other examples.
 
 ## Files
 
