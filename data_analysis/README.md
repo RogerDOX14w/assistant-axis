@@ -600,11 +600,35 @@ with the provenance envelope, `tables.md`, `rendered_prompts.md`,
 `reports/trait_gap_generation/m3_overlap_marks.md`.  The first run
 (`overlap_test_1`, 1,082 calls) cost $3.99.
 
+The **arms experiment** (2026-10-04,
+[`coding_plan_overlap_arms.md`](../reports/trait_gap_generation/coding_plan_overlap_arms.md))
+added three variants of rubric A, each its own pinned file: C six rungs 0-5
+(`overlap_six.md`), D the relation named with the score derived
+(`overlap_relation.md`), E Roger's line 3 (`overlap_scope.md`).  `--rubrics`
+takes `A B C D E` (default `A B`); every answer is also read on the **decision
+scale** (rubric A's 0-4, where the cut-offs are set; C 5 -> 4, 4 -> 3; D same 4,
+variant and contains 3, overlap 2, neighbours 1, different 0).  `--passes N`
+(default 1) sends every call N times, each later pass with the listed traits
+reshuffled (seeded by the run seed, the pass number and the call); a record's
+key is (rubric, model, call, pass) and `--resume` works per key.
+`--baseline-run` (default `overlap_test_1`, `none` to skip) names an earlier run
+whose `pairs.json` a new run must match and whose rubric-A answers arm A's pass
+1 is compared with (read only).  `summary.json` and `tables.md` gain an "arms"
+part: self-consistency between the passes (also split by whether pass 2 re-sent
+the same prompt), each model against the reference per pass, coverage and
+crossings at cut-off 3 on the nearest pairs, D's relations and `wider`, E's named
+kinds, and a cross-arm table.  `usage.json` is written after every answer, and a
+live session holds a lock on its `responses.jsonl`, so a resume started while an
+earlier session still runs is refused (exit 4).  `overlap_arms_1` (rubrics A, C,
+D, E; two passes; Sonnet 5.5 and Opus 5.5; 2,884 calls) cost $15.89.
+
 ```bash
 uv run python data_analysis/gap_generation/overlap_test.py --run-id overlap_test_1 --dry-run   # plan, estimate, rendered prompts
 uv run python data_analysis/gap_generation/overlap_test.py --run-id overlap_test_1 --budget-usd 15 [--resume]
 uv run python data_analysis/gap_generation/overlap_test.py --run-id overlap_test_1 --analyse-only
 uv run python data_analysis/gap_generation/overlap_test.py --run-id overlap_test_1 --decode-marks  # after Roger marks the sheet
+uv run python data_analysis/gap_generation/overlap_test.py --run-id overlap_arms_1 \
+    --models claude-sonnet-5-5 claude-opus-5-5 --rubrics A C D E --passes 2 --budget-usd 20 [--dry-run | --resume]
 ```
 
 **Corpus regions after a corpus change.**  `gap_registry.py corpus-regions`
