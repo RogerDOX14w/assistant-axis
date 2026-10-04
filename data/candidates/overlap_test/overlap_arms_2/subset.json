@@ -1,0 +1,4271 @@
+{
+  "result": {
+    "rule": "A pair (by pair_id of the round-1 pair set) is in the subset if, over every reading of it on record (every answer that parsed, under every rubric but B, of every model and pass of the source runs, mapped to the decision scale), either (1) its readings include both a 2 and a 3, or (2) some reading is a 2 (or \"overlap\") whose reason matches the containment pattern and not the two-sided pattern.  The run sends the calls that hold a subset pair whole, as round 1 built them; their other pairs are controls.",
+    "patterns": {
+      "containment": "narrow|broader|broadened|\\bwider\\b|\\bpart of\\b|subset|\\bincludes?\\b|specific (case|form|kind|instance)|special case|restricted to|limited to|carried (further|beyond)|stronger (form|degree|version)|a (form|kind|type|case) of",
+      "two_sided": "(each|both)\\s+(add|bring|contribut|has something|lacks)|adds?\\b[^.;]*\\b(while|whereas|and)\\b[^.;]*\\b(adds?|stresses|brings|emphasi)",
+      "flags": "IGNORECASE"
+    },
+    "counts": {
+      "n_pairs": 123,
+      "rule_1": 87,
+      "rule_2": 79,
+      "rule_2_only": 36,
+      "both_rules": 43,
+      "n_calls": 84,
+      "n_pairs_sent": 242,
+      "n_controls": 119,
+      "of_calls": 180,
+      "of_pairs": 409,
+      "by_group": {
+        "nearest": 112,
+        "near_distinct": 6,
+        "drop_or_merge": 3,
+        "duplicate": 1,
+        "deliberate_duplicate": 1
+      },
+      "controls_by_group": {
+        "nearest": 107,
+        "random": 1,
+        "near_distinct": 8,
+        "deliberate_duplicate": 1,
+        "drop_or_merge": 2
+      },
+      "readings_per_pair": {
+        "22": 409
+      }
+    },
+    "call_ids": [
+      "nn:adventurous",
+      "nn:agreeable",
+      "nn:analytical",
+      "nn:anxious",
+      "nn:benevolent",
+      "nn:big_picture",
+      "nn:calm",
+      "nn:careless",
+      "nn:chaotic",
+      "nn:clannish",
+      "nn:collectivistic",
+      "nn:compassionate",
+      "nn:condescending",
+      "nn:confident",
+      "nn:constructive",
+      "nn:contrarian",
+      "nn:critical",
+      "nn:cruel",
+      "nn:deontological",
+      "nn:destructive",
+      "nn:detached",
+      "nn:dominant",
+      "nn:dramatic",
+      "nn:ecocentric",
+      "nn:edgy",
+      "nn:entertaining",
+      "nn:envious",
+      "nn:environmental",
+      "nn:experiential",
+      "nn:extroverted",
+      "nn:flippant",
+      "nn:formalist",
+      "nn:futuristic",
+      "nn:gluttonous",
+      "nn:goofy",
+      "nn:grandiose",
+      "nn:hedonistic",
+      "nn:honest",
+      "nn:humanistic",
+      "nn:humanitarian",
+      "nn:humble",
+      "nn:iconoclastic",
+      "nn:inclusive",
+      "nn:indecisive",
+      "nn:independent",
+      "nn:innovative",
+      "nn:inquisitive",
+      "nn:meditative",
+      "nn:methodical",
+      "nn:moderate",
+      "nn:nationalist",
+      "nn:pacifist",
+      "nn:pedantic",
+      "nn:perfectionist",
+      "nn:philosophical",
+      "nn:pluralist",
+      "nn:problem_solving",
+      "nn:provocative",
+      "nn:quantitative",
+      "nn:religious",
+      "nn:reverent",
+      "nn:sarcastic",
+      "nn:serious",
+      "nn:speculative",
+      "nn:strategic",
+      "nn:structuralist",
+      "nn:systems_thinker",
+      "nn:techno_hierophantic",
+      "nn:theatrical",
+      "nn:understated",
+      "nn:unhelpful",
+      "nn:wry",
+      "nn:zealous",
+      "lab:kind_to_animals",
+      "lab:compassionate",
+      "lab:consequentialist",
+      "lab:clannish",
+      "lab:dramatic",
+      "lab:sardonic",
+      "lab:ethnocentric",
+      "lab:risk_averse",
+      "lab:insular",
+      "lab:regionalist",
+      "lab:honorable"
+    ],
+    "pair_ids": [
+      "nn:adventurous>adventurous_eater",
+      "nn:agreeable>accommodating",
+      "nn:agreeable>conciliatory",
+      "nn:agreeable>cooperative",
+      "nn:analytical>reductionist",
+      "nn:anxious>neurotic",
+      "nn:anxious>restless",
+      "nn:benevolent>helpful",
+      "nn:benevolent>altruistic",
+      "nn:big_picture>abstract",
+      "nn:big_picture>holistic",
+      "nn:calm>serene",
+      "nn:calm>temperate",
+      "nn:calm>placid",
+      "nn:careless>irresponsible",
+      "nn:careless>sloppy",
+      "nn:chaotic>disorganized",
+      "nn:chaotic>erratic",
+      "nn:clannish>cliqueish",
+      "nn:clannish>insular",
+      "nn:collectivistic>cooperative",
+      "nn:compassionate>empathetic",
+      "nn:compassionate>merciful",
+      "nn:condescending>arrogant",
+      "nn:confident>overconfident",
+      "nn:constructive>supportive",
+      "nn:contrarian>nonconformist",
+      "nn:critical>skeptical",
+      "nn:cruel>callous",
+      "nn:cruel>indifferent_to_animals",
+      "nn:deontological>principled",
+      "nn:deontological>moral",
+      "nn:destructive>subversive",
+      "nn:detached>emotionally_disengaged",
+      "nn:dominant>controlling",
+      "nn:dominant>prescriptive",
+      "nn:dramatic>theatrical",
+      "nn:ecocentric>environmental",
+      "nn:edgy>provocative",
+      "nn:edgy>wry",
+      "nn:entertaining>playful",
+      "nn:entertaining>witty",
+      "nn:envious>bitter",
+      "nn:environmental>ecocentric",
+      "nn:experiential>practical",
+      "nn:extroverted>gregarious",
+      "nn:flippant>irreverent",
+      "nn:flippant>lighthearted",
+      "nn:formalist>ritualistic",
+      "nn:formalist>formal",
+      "nn:formalist>formulaic",
+      "nn:futuristic>innovative",
+      "nn:gluttonous>self_indulgent",
+      "nn:goofy>playful",
+      "nn:grandiose>self_aggrandizing",
+      "nn:hedonistic>self_indulgent",
+      "nn:honest>truthful",
+      "nn:honest>transparent",
+      "nn:honest>intellectually_honest",
+      "nn:humanistic>humanitarian",
+      "nn:humanitarian>altruistic",
+      "nn:humanitarian>humanistic",
+      "nn:humble>modest",
+      "nn:humble>deferential",
+      "nn:humble>honest",
+      "nn:iconoclastic>contrarian",
+      "nn:iconoclastic>deconstructionist",
+      "nn:inclusive>pluralist",
+      "nn:indecisive>noncommittal",
+      "nn:independent>self_reliant",
+      "nn:independent>individualistic",
+      "nn:innovative>creative",
+      "nn:innovative>futuristic",
+      "nn:inquisitive>curious",
+      "nn:meditative>serene",
+      "nn:meditative>introspective",
+      "nn:methodical>organized",
+      "nn:moderate>diplomatic",
+      "nn:nationalist>regionalist",
+      "nn:nationalist>civilizationist",
+      "nn:pacifist>peaceful",
+      "nn:pedantic>meticulous",
+      "nn:perfectionist>meticulous",
+      "nn:perfectionist>detail_oriented",
+      "nn:philosophical>speculative",
+      "nn:philosophical>introspective",
+      "nn:pluralist>cosmopolitan",
+      "nn:pluralist>exploratory",
+      "nn:problem_solving>proactive",
+      "nn:problem_solving>analytical",
+      "nn:problem_solving>creative",
+      "nn:provocative>edgy",
+      "nn:quantitative>data_driven",
+      "nn:religious>spiritual",
+      "nn:reverent>patriotic",
+      "nn:sarcastic>sardonic",
+      "nn:sarcastic>ironic",
+      "nn:serious>formal",
+      "nn:speculative>exploratory",
+      "nn:strategic>calculating",
+      "nn:strategic>long_term_oriented",
+      "nn:structuralist>systems_thinker",
+      "nn:systems_thinker>holistic",
+      "nn:systems_thinker>structuralist",
+      "nn:techno_hierophantic>esoteric",
+      "nn:techno_hierophantic>spiritual",
+      "nn:theatrical>dramatic",
+      "nn:theatrical>melodramatic",
+      "nn:understated>unpretentious",
+      "nn:unhelpful>uncaring",
+      "nn:wry>witty",
+      "nn:zealous>passionate",
+      "lab:kind_to_animals>ecocentric",
+      "lab:compassionate>empathetic",
+      "lab:consequentialist>utilitarian",
+      "lab:clannish>cliqueish",
+      "lab:dramatic>theatrical",
+      "lab:sardonic>sarcastic",
+      "lab:ethnocentric>civilizationist",
+      "lab:risk_averse>cautious",
+      "lab:insular>cliqueish",
+      "lab:regionalist>parochial",
+      "lab:honorable>deontological"
+    ],
+    "control_pair_ids": [
+      "nn:adventurous>unadventurous",
+      "nn:adventurous>risk_seeking",
+      "nn:analytical>thorough",
+      "nn:analytical>structuralist",
+      "nn:anxious>melancholic",
+      "nn:benevolent>benign",
+      "nn:big_picture>conceptual",
+      "nn:careless>slovenly",
+      "nn:chaotic>turbulent",
+      "nn:clannish>sectarian",
+      "nn:collectivistic>individualistic",
+      "nn:collectivistic>collaborative",
+      "nn:compassionate>callous",
+      "nn:condescending>pretentious",
+      "nn:condescending>paternalistic",
+      "nn:confident>self_assured",
+      "nn:confident>uncertain",
+      "nn:constructive>destructive",
+      "nn:constructive>optimistic",
+      "nn:contrarian>conformist",
+      "nn:contrarian>challenging",
+      "nn:critical>deconstructionist",
+      "nn:critical>challenging",
+      "nn:cruel>malicious",
+      "nn:deontological>utilitarian",
+      "nn:destructive>constructive",
+      "nn:destructive>deconstructionist",
+      "nn:detached>dispassionate",
+      "nn:detached>reserved",
+      "nn:dominant>competitive",
+      "nn:dramatic>melodramatic",
+      "nn:dramatic>animated",
+      "nn:ecocentric>anthropocentric",
+      "nn:ecocentric>ethnocentric",
+      "nn:edgy>challenging",
+      "nn:entertaining>animated",
+      "nn:envious>greedy",
+      "nn:envious>insecure",
+      "nn:environmental>humanistic",
+      "nn:environmental>anthropocentric",
+      "nn:experiential>data_driven",
+      "nn:experiential>theoretical",
+      "nn:extroverted>introverted",
+      "nn:extroverted>energetic",
+      "nn:flippant>solemn",
+      "nn:futuristic>contemporary",
+      "nn:futuristic>romantic",
+      "nn:gluttonous>greedy",
+      "nn:gluttonous>abstemious",
+      "nn:goofy>lighthearted",
+      "nn:goofy>mischievous",
+      "nn:grandiose>bombastic",
+      "nn:grandiose>arrogant",
+      "nn:hedonistic>epicurean",
+      "nn:hedonistic>ascetic",
+      "nn:humanistic>collectivistic",
+      "nn:humanistic>anthropocentric",
+      "nn:humanitarian>kind_to_animals",
+      "nn:iconoclastic>subversive",
+      "nn:inclusive>exclusionary",
+      "nn:inclusive>exploratory",
+      "nn:indecisive>decisive",
+      "nn:indecisive>uncertain",
+      "nn:independent>dependent",
+      "nn:innovative>adventurous",
+      "nn:inquisitive>uninquisitive",
+      "nn:inquisitive>incurious",
+      "nn:meditative>pensive",
+      "nn:methodical>meticulous",
+      "nn:methodical>analytical",
+      "nn:moderate>temperate",
+      "nn:moderate>noncommittal",
+      "nn:nationalist>ethnocentric",
+      "nn:pacifist>hawkish",
+      "nn:pacifist>conciliatory",
+      "nn:pedantic>petty",
+      "nn:pedantic>perfectionist",
+      "nn:perfectionist>maximizing",
+      "nn:philosophical>spiritual",
+      "nn:pluralist>inclusive",
+      "nn:provocative>challenging",
+      "nn:provocative>confrontational",
+      "nn:quantitative>qualitative",
+      "nn:quantitative>theoretical",
+      "nn:religious>secular",
+      "nn:religious>mystical",
+      "nn:reverent>irreverent",
+      "nn:reverent>deferential",
+      "nn:sarcastic>wry",
+      "nn:serious>solemn",
+      "nn:serious>earnest",
+      "nn:speculative>philosophical",
+      "nn:speculative>skeptical",
+      "nn:strategic>tactical",
+      "nn:structuralist>deconstructionist",
+      "nn:structuralist>analytical",
+      "nn:systems_thinker>analytical",
+      "nn:techno_hierophantic>technical",
+      "nn:theatrical>animated",
+      "nn:understated>unassuming",
+      "nn:understated>modest",
+      "nn:unhelpful>helpful",
+      "nn:unhelpful>harmful",
+      "nn:wry>sardonic",
+      "nn:wry>sarcastic",
+      "nn:zealous>temperate",
+      "nn:zealous>partisan",
+      "lab:kind_to_animals>helpless",
+      "lab:kind_to_animals>humanitarian",
+      "lab:compassionate>callous",
+      "lab:compassionate>malicious",
+      "lab:consequentialist>ends_justify_means",
+      "lab:clannish>selfish",
+      "lab:dramatic>melodramatic",
+      "lab:sardonic>wry",
+      "lab:ethnocentric>patriotic",
+      "lab:risk_averse>bold",
+      "lab:insular>parochial",
+      "lab:regionalist>sectarian"
+    ],
+    "evidence": {
+      "nn:adventurous>adventurous_eater": {
+        "rules": [
+          1,
+          2
+        ],
+        "n_readings": 22,
+        "decisions": {
+          "2": 1,
+          "3": 21
+        },
+        "slips": [
+          {
+            "run": "overlap_test_1",
+            "rubric": "A",
+            "model": "claude-sonnet-5-5",
+            "pass": 1,
+            "value": 2,
+            "reason": "Adventurous eating is the target's openness to unfamiliar food, a narrower part of it."
+          }
+        ]
+      },
+      "nn:agreeable>accommodating": {
+        "rules": [
+          1,
+          2
+        ],
+        "n_readings": 22,
+        "decisions": {
+          "2": 19,
+          "3": 3
+        },
+        "slips": [
+          {
+            "run": "overlap_arms_1",
+            "rubric": "A",
+            "model": "claude-sonnet-5-5",
+            "pass": 1,
+            "value": 2,
+            "reason": "Both involve keeping the peace and avoiding confrontation, but accommodating stresses yielding one's own positions while agreeable is broader harmony-seeking."
+          },
+          {
+            "run": "overlap_test_1",
+            "rubric": "A",
+            "model": "claude-sonnet-5-5",
+            "pass": 1,
+            "value": 2,
+            "reason": "Both involve keeping the peace and yielding to others, but accommodating stresses giving up one's own stance while agreeable is broader harmony-seeking."
+          },
+          {
+            "run": "overlap_test_2",
+            "rubric": "A",
+            "model": "claude-opus-5-5",
+            "pass": 1,
+            "value": 2,
+            "reason": "Both are about keeping the peace, but accommodating adds yielding one's own stance, while agreeable is broader harmony-seeking."
+          },
+          {
+            "run": "overlap_test_2",
+            "rubric": "A",
+            "model": "claude-sonnet-5-5",
+            "pass": 1,
+            "value": 2,
+            "reason": "Both involve keeping the peace and adjusting to others, but accommodating stresses yielding one's own position while agreeable is broader harmony-seeking."
+          }
+        ]
+      },
+      "nn:agreeable>conciliatory": {
+        "rules": [
+          1,
+          2
+        ],
+        "n_readings": 22,
+        "decisions": {
+          "2": 9,
+          "3": 13
+        },
+        "slips": [
+          {
+            "run": "overlap_arms_1",
+            "rubric": "C",
+            "model": "claude-sonnet-5-5",
+            "pass": 1,
+            "value": 2,
+            "reason": "Conciliatory (reducing tensions, finding common ground, peaceful resolution) matches a large part of the target's description, but it is more active peacemaking and lacks the target's general conflict avoidance and positive-relationship focus."
+          },
+          {
+            "run": "overlap_arms_1",
+            "rubric": "D",
+            "model": "claude-sonnet-5-5",
+            "pass": 1,
+            "value": "overlap",
+            "reason": "Both seek peaceful resolution and common ground, but conciliatory is active peacemaking between opposing parties, while agreeable is a broader disposition for harmony and avoiding confrontation."
+          },
+          {
+            "run": "overlap_arms_1",
+            "rubric": "A",
+            "model": "claude-opus-5-5",
+            "pass": 2,
+            "value": 2,
+            "reason": "Both center on peacemaking and finding common ground, though conciliatory focuses on actively mediating between conflicting parties while agreeable is a broader harmony-seeking disposition."
+          },
+          {
+            "run": "overlap_arms_1",
+            "rubric": "A",
+            "model": "claude-sonnet-5-5",
+            "pass": 2,
+            "value": 2,
+            "reason": "Both center on seeking common ground and peaceful resolution; conciliatory is more active in mediating conflicts, while agreeable is broader harmony-keeping."
+          },
+          {
+            "run": "overlap_arms_1",
+            "rubric": "C",
+            "model": "claude-sonnet-5-5",
+            "pass": 2,
+            "value": 2,
+            "reason": "Both seek common ground and peaceful resolution, but conciliatory is about actively mediating tensions between parties, while agreeable is a broader harmony-keeping disposition that includes avoiding confrontation."
+          },
+          {
+            "run": "overlap_arms_1",
+            "rubric": "D",
+            "model": "claude-sonnet-5-5",
+            "pass": 2,
+            "value": "overlap",
+            "reason": "Both center on seeking common ground and peaceful resolution, but conciliatory is active peacemaking between parties, while agreeable also includes avoiding confrontation and general positive relationships."
+          },
+          {
+            "run": "overlap_arms_1",
+            "rubric": "E",
+            "model": "claude-sonnet-5-5",
+            "pass": 2,
+            "value": 2,
+            "reason": "Both center on seeking peace and common ground, but conciliatory is about actively mediating between opposing sides, while agreeable is a general harmony-keeping disposition that also includes avoiding confrontation."
+          }
+        ]
+      },
+      "nn:agreeable>cooperative": {
+        "rules": [
+          2
+        ],
+        "n_readings": 22,
+        "decisions": {
+          "1": 3,
+          "2": 19
+        },
+        "slips": [
+          {
+            "run": "overlap_test_1",
+            "rubric": "A",
+            "model": "claude-opus-5-5",
+            "pass": 1,
+            "value": 2,
+            "reason": "Cooperation is one part of agreeableness, but cooperative is about teamwork and collective success rather than avoiding conflict and keeping harmony."
+          }
+        ]
+      },
+      "nn:analytical>reductionist": {
+        "rules": [
+          1
+        ],
+        "n_readings": 22,
+        "decisions": {
+          "2": 19,
+          "3": 3
+        },
+        "slips": []
+      },
+      "nn:anxious>neurotic": {
+        "rules": [
+          1,
+          2
+        ],
+        "n_readings": 22,
+        "decisions": {
+          "2": 16,
+          "3": 6
+        },
+        "slips": [
+          {
+            "run": "overlap_arms_1",
+            "rubric": "A",
+            "model": "claude-opus-5-5",
+            "pass": 1,
+            "value": 2,
+            "reason": "Neurotic includes persistent anxiety and worry but adds broader emotional instability and reactivity."
+          },
+          {
+            "run": "overlap_arms_1",
+            "rubric": "A",
+            "model": "claude-sonnet-5-5",
+            "pass": 1,
+            "value": 2,
+            "reason": "Neurotic centers on persistent anxiety and worry but adds emotional instability and reactivity, so it overlaps heavily with anxious while being broader."
+          },
+          {
+            "run": "overlap_arms_1",
+            "rubric": "E",
+            "model": "claude-opus-5-5",
+            "pass": 1,
+            "value": 2,
+            "reason": "Neurotic includes the anxious worry but adds broader emotional instability and reactivity beyond worry."
+          },
+          {
+            "run": "overlap_arms_1",
+            "rubric": "A",
+            "model": "claude-opus-5-5",
+            "pass": 2,
+            "value": 2,
+            "reason": "Neurotic includes persistent anxiety and worry but broadens it to emotional instability and reactivity generally."
+          },
+          {
+            "run": "overlap_arms_1",
+            "rubric": "D",
+            "model": "claude-sonnet-5-5",
+            "pass": 2,
+            "value": "overlap",
+            "reason": "Neurotic shares persistent worry and tension with anxious but adds emotional instability and broader negative reactivity."
+          },
+          {
+            "run": "overlap_arms_1",
+            "rubric": "E",
+            "model": "claude-opus-5-5",
+            "pass": 2,
+            "value": 2,
+            "reason": "Neurotic includes persistent anxiety and worry but adds emotional instability and reactivity beyond worry, so it broadens anxiousness with something new."
+          },
+          {
+            "run": "overlap_arms_1",
+            "rubric": "E",
+            "model": "claude-sonnet-5-5",
+            "pass": 2,
+            "value": 2,
+            "reason": "Neurotic centres on persistent anxiety and worry but adds emotional instability and reactivity, so it overlaps strongly with anxious yet is broader."
+          },
+          {
+            "run": "overlap_test_1",
+            "rubric": "A",
+            "model": "claude-opus-5-5",
+            "pass": 1,
+            "value": 2,
+            "reason": "Neurotic shares the persistent worry and anxiety but adds broader emotional instability and reactivity beyond apprehension."
+          },
+          {
+            "run": "overlap_test_1",
+            "rubric": "A",
+            "model": "claude-sonnet-5-5",
+            "pass": 1,
+            "value": 2,
+            "reason": "Neurotic centers on persistent anxiety and worry but adds emotional instability and reactivity, so it overlaps strongly with anxious yet is broader."
+          }
+        ]
+      },
+      "nn:anxious>restless": {
+        "rules": [
+          2
+        ],
+        "n_readings": 22,
+        "decisions": {
+          "1": 18,
+          "2": 4
+        },
+        "slips": [
+          {
+            "run": "overlap_test_1",
+            "rubric": "A",
+            "model": "claude-haiku-4-5-20251001",
+            "pass": 1,
+            "value": 2,
+            "reason": "Restless describes inability to settle and constant fidgeting, while anxious includes restless behavior as one manifestation but primarily emphasizes worry and apprehension, so restlessness is a symptom of anxiety rather than its core."
+          }
+        ]
+      },
+      "nn:benevolent>helpful": {
+        "rules": [
+          2
+        ],
+        "n_readings": 22,
+        "decisions": {
+          "1": 3,
+          "2": 19
+        },
+        "slips": [
+          {
+            "run": "overlap_arms_1",
+            "rubric": "A",
+            "model": "claude-opus-5-5",
+            "pass": 1,
+            "value": 2,
+            "reason": "Helpful shares caring about others' outcomes but focuses on effectively providing what is needed when asked, a narrower task-oriented quality."
+          },
+          {
+            "run": "overlap_arms_1",
+            "rubric": "D",
+            "model": "claude-opus-5-5",
+            "pass": 1,
+            "value": "overlap",
+            "reason": "Both care about improving others' outcomes, but helpful stresses actively and effectively meeting needs, often on request, while benevolent is a broader kind, ethical disposition."
+          },
+          {
+            "run": "overlap_arms_1",
+            "rubric": "E",
+            "model": "claude-opus-5-5",
+            "pass": 1,
+            "value": 2,
+            "reason": "Helpful shares care for others' outcomes but adds actively and effectively meeting requests and needs, while benevolent is a broader disposition of kindness and ethical goodwill."
+          },
+          {
+            "run": "overlap_arms_1",
+            "rubric": "E",
+            "model": "claude-sonnet-5-5",
+            "pass": 1,
+            "value": 2,
+            "reason": "Helpful shares concern for others' outcomes but is about actively providing what is needed, while benevolent is a broader disposition of kindness and ethics."
+          },
+          {
+            "run": "overlap_arms_1",
+            "rubric": "A",
+            "model": "claude-sonnet-5-5",
+            "pass": 2,
+            "value": 2,
+            "reason": "Both involve caring about others' outcomes, but helpful is about actively providing what is needed, while benevolent is a broader kindness and ethical disposition."
+          },
+          {
+            "run": "overlap_test_1",
+            "rubric": "A",
+            "model": "claude-opus-5-5",
+            "pass": 1,
+            "value": 2,
+            "reason": "Helpful shares the care for others' outcomes but focuses on actively and effectively meeting needs, while benevolent is a broader goodwill disposition."
+          }
+        ]
+      },
+      "nn:benevolent>altruistic": {
+        "rules": [
+          1
+        ],
+        "n_readings": 22,
+        "decisions": {
+          "2": 15,
+          "3": 7
+        },
+        "slips": []
+      },
+      "nn:big_picture>abstract": {
+        "rules": [
+          1,
+          2
+        ],
+        "n_readings": 22,
+        "decisions": {
+          "2": 21,
+          "3": 1
+        },
+        "slips": [
+          {
+            "run": "overlap_arms_1",
+            "rubric": "E",
+            "model": "claude-opus-5-5",
+            "pass": 1,
+            "value": 2,
+            "reason": "Both favour high-level principles over specifics, but abstract is about the theoretical rather than the concrete, while big-picture is about broad versus narrow scope."
+          }
+        ]
+      },
+      "nn:big_picture>holistic": {
+        "rules": [
+          1,
+          2
+        ],
+        "n_readings": 22,
+        "decisions": {
+          "2": 15,
+          "3": 7
+        },
+        "slips": [
+          {
+            "run": "overlap_arms_1",
+            "rubric": "C",
+            "model": "claude-opus-5-5",
+            "pass": 1,
+            "value": 2,
+            "reason": "Both involve systemic thinking over narrow parts, but holistic stresses interconnected wholes while big-picture stresses general themes over detail."
+          },
+          {
+            "run": "overlap_test_2",
+            "rubric": "A",
+            "model": "claude-opus-5-5",
+            "pass": 1,
+            "value": 2,
+            "reason": "Both share systemic thinking over narrow focus, but holistic stresses interconnection of the whole, while big-picture stresses macro-level generality."
+          }
+        ]
+      },
+      "nn:calm>serene": {
+        "rules": [
+          1
+        ],
+        "n_readings": 22,
+        "decisions": {
+          "2": 4,
+          "3": 18
+        },
+        "slips": []
+      },
+      "nn:calm>temperate": {
+        "rules": [
+          2
+        ],
+        "n_readings": 22,
+        "decisions": {
+          "1": 8,
+          "2": 14
+        },
+        "slips": [
+          {
+            "run": "overlap_arms_1",
+            "rubric": "E",
+            "model": "claude-sonnet-5-5",
+            "pass": 1,
+            "value": 2,
+            "reason": "Temperate here is about holding beliefs coolly and distrusting fervor, which shares the coolness of calm but is narrowed to convictions and adds distrust of passion."
+          },
+          {
+            "run": "overlap_test_1",
+            "rubric": "A",
+            "model": "claude-sonnet-5-5",
+            "pass": 1,
+            "value": 2,
+            "reason": "Temperate is about measured, cool handling of beliefs and distrust of fervor; it overlaps with calm but is narrower and focused on restraint in causes."
+          }
+        ]
+      },
+      "nn:calm>placid": {
+        "rules": [
+          1
+        ],
+        "n_readings": 22,
+        "decisions": {
+          "2": 4,
+          "3": 18
+        },
+        "slips": []
+      },
+      "nn:careless>irresponsible": {
+        "rules": [
+          1,
+          2
+        ],
+        "n_readings": 22,
+        "decisions": {
+          "2": 20,
+          "3": 2
+        },
+        "slips": [
+          {
+            "run": "overlap_arms_1",
+            "rubric": "A",
+            "model": "claude-sonnet-5-5",
+            "pass": 2,
+            "value": 2,
+            "reason": "Irresponsible shares the core of letting duties slide and shrugging off obligations, but is narrower on responsibility and lacks the focus on details and slapdash work."
+          }
+        ]
+      },
+      "nn:careless>sloppy": {
+        "rules": [
+          1,
+          2
+        ],
+        "n_readings": 22,
+        "decisions": {
+          "2": 6,
+          "3": 16
+        },
+        "slips": [
+          {
+            "run": "overlap_arms_1",
+            "rubric": "C",
+            "model": "claude-sonnet-5-5",
+            "pass": 1,
+            "value": 2,
+            "reason": "Sloppy covers the slapdash, unchecked, detail-ignoring work part of careless, but lacks the broken deadlines and promises and the general letting of responsibilities slide."
+          },
+          {
+            "run": "overlap_arms_1",
+            "rubric": "D",
+            "model": "claude-sonnet-5-5",
+            "pass": 1,
+            "value": "overlap",
+            "reason": "Sloppy covers the slapdash, unchecked, error-prone work part of careless, but leaves out broken deadlines and promises."
+          },
+          {
+            "run": "overlap_arms_1",
+            "rubric": "C",
+            "model": "claude-sonnet-5-5",
+            "pass": 2,
+            "value": 2,
+            "reason": "Sloppy covers the slapdash, unchecked, error-prone work part of careless but lacks the broken deadlines and promises side."
+          },
+          {
+            "run": "overlap_arms_1",
+            "rubric": "D",
+            "model": "claude-sonnet-5-5",
+            "pass": 2,
+            "value": "overlap",
+            "reason": "Sloppy is the rough, unchecked, error-prone work part of careless, but it lacks the broken deadlines and promises."
+          },
+          {
+            "run": "overlap_test_1",
+            "rubric": "A",
+            "model": "claude-haiku-4-5-20251001",
+            "pass": 1,
+            "value": 2,
+            "reason": "Sloppy describes the manner of doing work (fast, rough, unchecked), while careless describes a broader neglect of responsibilities and attention to detail; they overlap significantly but sloppy is more specific to execution style."
+          }
+        ]
+      },
+      "nn:chaotic>disorganized": {
+        "rules": [
+          1,
+          2
+        ],
+        "n_readings": 22,
+        "decisions": {
+          "2": 16,
+          "3": 6
+        },
+        "slips": [
+          {
+            "run": "overlap_arms_1",
+            "rubric": "A",
+            "model": "claude-opus-5-5",
+            "pass": 1,
+            "value": 2,
+            "reason": "Both are about a lack of order and structure, but disorganized is limited to scattered presentation of information while chaotic covers a whole disorderly way of living."
+          },
+          {
+            "run": "overlap_arms_1",
+            "rubric": "A",
+            "model": "claude-sonnet-5-5",
+            "pass": 1,
+            "value": 2,
+            "reason": "Disorganized, here about scattered and rambling communication, shares the core of lacking order and structure with chaotic, but is narrower in scope and lacks the ignored rules and whirl of activity."
+          },
+          {
+            "run": "overlap_arms_1",
+            "rubric": "C",
+            "model": "claude-sonnet-5-5",
+            "pass": 1,
+            "value": 2,
+            "reason": "Disorganized here is scattered, unstructured communication, which overlaps with chaotic disorder but is narrower and lacks the unfinished tasks and ignored rules."
+          },
+          {
+            "run": "overlap_arms_1",
+            "rubric": "E",
+            "model": "claude-sonnet-5-5",
+            "pass": 1,
+            "value": 2,
+            "reason": "Disorganized shares the lack of order and structure with chaotic, but here it is narrowed to scattered speech and lacks the many-things-at-once, rule-ignoring mess."
+          },
+          {
+            "run": "overlap_arms_1",
+            "rubric": "A",
+            "model": "claude-sonnet-5-5",
+            "pass": 2,
+            "value": 2,
+            "reason": "Both concern lack of order and structure, but this one is limited to scattered communication while chaotic covers whole-life disorder, ignored rules and confusion."
+          },
+          {
+            "run": "overlap_arms_1",
+            "rubric": "C",
+            "model": "claude-sonnet-5-5",
+            "pass": 2,
+            "value": 2,
+            "reason": "Disorganized as described is scattered, unstructured communication, overlapping chaotic's disorder but narrowed to speech and lacking chaotic's ignored rules and mess."
+          },
+          {
+            "run": "overlap_arms_1",
+            "rubric": "D",
+            "model": "claude-opus-5-5",
+            "pass": 2,
+            "value": "overlap",
+            "reason": "Both share a core of lacking order, but disorganized centres on scattered presentation of information, while chaotic adds abandoned tasks, ignored rules and a broader whirl of disorder."
+          },
+          {
+            "run": "overlap_arms_1",
+            "rubric": "E",
+            "model": "claude-sonnet-5-5",
+            "pass": 2,
+            "value": 2,
+            "reason": "Disorganized shares the lack of order and structure, but here it is narrowed to scattered speech and presentation, and it lacks the whirl of unfinished tasks and ignored rules."
+          },
+          {
+            "run": "overlap_test_1",
+            "rubric": "A",
+            "model": "claude-sonnet-5-5",
+            "pass": 1,
+            "value": 2,
+            "reason": "Disorganized shares the core of lacking order and structure, though here it is limited to scattered communication, while chaotic also covers ignored plans and unfinished tasks."
+          },
+          {
+            "run": "overlap_test_2",
+            "rubric": "A",
+            "model": "claude-opus-5-5",
+            "pass": 1,
+            "value": 2,
+            "reason": "Both are about lacking order and structure, with disorganized focused on scattered presentation and chaotic on broader disorderly living and ignored rules."
+          }
+        ]
+      },
+      "nn:chaotic>erratic": {
+        "rules": [
+          2
+        ],
+        "n_readings": 22,
+        "decisions": {
+          "1": 15,
+          "2": 7
+        },
+        "slips": [
+          {
+            "run": "overlap_test_1",
+            "rubric": "A",
+            "model": "claude-haiku-4-5-20251001",
+            "pass": 1,
+            "value": 2,
+            "reason": "Erratic describes unpredictable shifts in behavior and communication within interactions, while chaotic describes a broader pattern of disorder and incompletion; they overlap in unpredictability but differ in scope."
+          }
+        ]
+      },
+      "nn:clannish>cliqueish": {
+        "rules": [
+          1,
+          2
+        ],
+        "n_readings": 22,
+        "decisions": {
+          "1": 2,
+          "2": 18,
+          "3": 2
+        },
+        "slips": [
+          {
+            "run": "overlap_arms_1",
+            "rubric": "C",
+            "model": "claude-opus-5-5",
+            "pass": 2,
+            "value": 2,
+            "reason": "Both are the same in-group loyalty and exclusion of outsiders, but cliqueish applies it to a social circle while clannish applies it to family, so they are parallel narrowings rather than one containing the other."
+          }
+        ]
+      },
+      "nn:clannish>insular": {
+        "rules": [
+          2
+        ],
+        "n_readings": 22,
+        "decisions": {
+          "1": 2,
+          "2": 20
+        },
+        "slips": [
+          {
+            "run": "overlap_arms_1",
+            "rubric": "E",
+            "model": "claude-opus-5-5",
+            "pass": 1,
+            "value": 2,
+            "reason": "Same in-group-only concern and coldness to outsiders, with the group shifted from kin to the local community rather than narrowed or broadened."
+          },
+          {
+            "run": "overlap_arms_1",
+            "rubric": "A",
+            "model": "claude-opus-5-5",
+            "pass": 2,
+            "value": 2,
+            "reason": "Both restrict concern to one's own group and disregard outsiders, but insular centers on local community rather than kin, and adds parochial narrowness of outlook."
+          },
+          {
+            "run": "overlap_arms_1",
+            "rubric": "A",
+            "model": "claude-sonnet-5-5",
+            "pass": 2,
+            "value": 2,
+            "reason": "Both are narrow in-group concern with indifference to outsiders, but insular is anchored to local community or familiar group rather than kin."
+          },
+          {
+            "run": "overlap_arms_1",
+            "rubric": "C",
+            "model": "claude-opus-5-5",
+            "pass": 2,
+            "value": 2,
+            "reason": "Both are in-group concern with indifference to outsiders, but insular centers on the local community and familiar group rather than kin, and stresses narrowness of outlook more than active loyalty."
+          },
+          {
+            "run": "overlap_arms_1",
+            "rubric": "C",
+            "model": "claude-sonnet-5-5",
+            "pass": 2,
+            "value": 2,
+            "reason": "Both involve concern limited to one's own group and distance from outsiders, but insular centers on the local community or familiar group, not kin, and does not stress suspicion or hostility."
+          },
+          {
+            "run": "overlap_test_1",
+            "rubric": "A",
+            "model": "claude-opus-5-5",
+            "pass": 1,
+            "value": 2,
+            "reason": "Both are concern limited to one's own group with outsiders discounted, but insular centres on local community rather than kin."
+          }
+        ]
+      },
+      "nn:collectivistic>cooperative": {
+        "rules": [
+          2
+        ],
+        "n_readings": 22,
+        "decisions": {
+          "2": 22
+        },
+        "slips": [
+          {
+            "run": "overlap_arms_1",
+            "rubric": "A",
+            "model": "claude-sonnet-5-5",
+            "pass": 2,
+            "value": 2,
+            "reason": "Both favor collective benefit over individual achievement, but cooperative is about working together and shared success, while collectivistic is a broader value of putting group needs above self-interest."
+          },
+          {
+            "run": "overlap_test_1",
+            "rubric": "A",
+            "model": "claude-haiku-4-5-20251001",
+            "pass": 1,
+            "value": 2,
+            "reason": "Cooperative shares collectivistic's emphasis on group benefit and shared success, but focuses more on mutual benefit and teamwork mechanics rather than the broader prioritization of collective interests over individual desires."
+          },
+          {
+            "run": "overlap_test_1",
+            "rubric": "A",
+            "model": "claude-sonnet-5-5",
+            "pass": 1,
+            "value": 2,
+            "reason": "Both favor collective benefit over individual achievement, but cooperative is about working together on tasks, while collectivistic is a broader value of putting group welfare first."
+          },
+          {
+            "run": "overlap_test_2",
+            "rubric": "A",
+            "model": "claude-sonnet-5-5",
+            "pass": 1,
+            "value": 2,
+            "reason": "Both favor shared success over individual achievement, but cooperative is about working together, while collectivistic is a broader value of putting group interests first."
+          }
+        ]
+      },
+      "nn:compassionate>empathetic": {
+        "rules": [
+          1,
+          2
+        ],
+        "n_readings": 22,
+        "decisions": {
+          "2": 6,
+          "3": 16
+        },
+        "slips": [
+          {
+            "run": "overlap_arms_1",
+            "rubric": "D",
+            "model": "claude-opus-5-5",
+            "pass": 1,
+            "value": "overlap",
+            "reason": "Both involve warm, caring responses to others' feelings, but empathetic is broader understanding of all emotions and perspectives, while compassionate focuses on responding to pain and distress."
+          },
+          {
+            "run": "overlap_arms_1",
+            "rubric": "D",
+            "model": "claude-sonnet-5-5",
+            "pass": 2,
+            "value": "overlap",
+            "reason": "Empathy centres on understanding others' emotions and perspectives, and its description includes responding with compassion and warmth, so it largely shares compassion's core but adds understanding."
+          }
+        ]
+      },
+      "nn:compassionate>merciful": {
+        "rules": [
+          2
+        ],
+        "n_readings": 22,
+        "decisions": {
+          "2": 22
+        },
+        "slips": [
+          {
+            "run": "overlap_arms_1",
+            "rubric": "A",
+            "model": "claude-sonnet-5-5",
+            "pass": 1,
+            "value": 2,
+            "reason": "Both involve being moved by others' suffering, but mercy focuses on sparing pain and leniency toward the guilty, while compassion is broader warmth and care."
+          },
+          {
+            "run": "overlap_arms_1",
+            "rubric": "D",
+            "model": "claude-sonnet-5-5",
+            "pass": 2,
+            "value": "overlap",
+            "reason": "Both respond to others' suffering, but mercy specifically means sparing people pain and leniency toward the guilty, while compassion is broader warmth and care."
+          },
+          {
+            "run": "overlap_test_1",
+            "rubric": "A",
+            "model": "claude-fable-5-1",
+            "pass": 1,
+            "value": 2,
+            "reason": "Both involve feeling for others' suffering, but merciful centers on sparing or leniency toward those in one's power, while compassionate is broader warmth and care."
+          }
+        ]
+      },
+      "nn:condescending>arrogant": {
+        "rules": [
+          1,
+          2
+        ],
+        "n_readings": 22,
+        "decisions": {
+          "2": 21,
+          "3": 1
+        },
+        "slips": [
+          {
+            "run": "overlap_arms_1",
+            "rubric": "A",
+            "model": "claude-sonnet-5-5",
+            "pass": 1,
+            "value": 2,
+            "reason": "Arrogance is broader, covering excessive self-confidence and dismissiveness, and its description explicitly includes a condescending, superior tone, so the two overlap heavily."
+          },
+          {
+            "run": "overlap_arms_1",
+            "rubric": "D",
+            "model": "claude-sonnet-5-5",
+            "pass": 2,
+            "value": "overlap",
+            "reason": "Arrogance is excessive self-confidence and dismissiveness that includes a condescending tone, but it is broader and lacks the patronizing, feigned helpfulness; they share the superior attitude toward others."
+          },
+          {
+            "run": "overlap_test_1",
+            "rubric": "A",
+            "model": "claude-sonnet-5-5",
+            "pass": 1,
+            "value": 2,
+            "reason": "Arrogance includes a condescending, superior tone and dismissing others as less knowledgeable, so it overlaps strongly with condescension but also covers excessive self-confidence."
+          },
+          {
+            "run": "overlap_test_2",
+            "rubric": "A",
+            "model": "claude-sonnet-5-5",
+            "pass": 1,
+            "value": 2,
+            "reason": "Arrogance shares the superior, talking-down attitude and explicitly includes a condescending tone, but adds excessive self-confidence and dismissiveness of other views."
+          }
+        ]
+      },
+      "nn:confident>overconfident": {
+        "rules": [
+          1,
+          2
+        ],
+        "n_readings": 22,
+        "decisions": {
+          "2": 3,
+          "3": 19
+        },
+        "slips": [
+          {
+            "run": "overlap_arms_1",
+            "rubric": "D",
+            "model": "claude-sonnet-5-5",
+            "pass": 1,
+            "value": "overlap",
+            "reason": "Overconfident is confidence carried beyond what is warranted, with added unjustified certainty and surprise at being wrong; it is the same trait at a stronger degree plus a flaw."
+          }
+        ]
+      },
+      "nn:constructive>supportive": {
+        "rules": [
+          2
+        ],
+        "n_readings": 22,
+        "decisions": {
+          "1": 7,
+          "2": 15
+        },
+        "slips": [
+          {
+            "run": "overlap_test_1",
+            "rubric": "A",
+            "model": "claude-haiku-4-5-20251001",
+            "pass": 1,
+            "value": 2,
+            "reason": "Supportive shares constructive's focus on positive development and offering solutions, but emphasizes emotional encouragement rather than the broader building and improvement aspect."
+          }
+        ]
+      },
+      "nn:contrarian>nonconformist": {
+        "rules": [
+          1
+        ],
+        "n_readings": 22,
+        "decisions": {
+          "1": 5,
+          "2": 16,
+          "3": 1
+        },
+        "slips": []
+      },
+      "nn:critical>skeptical": {
+        "rules": [
+          1
+        ],
+        "n_readings": 22,
+        "decisions": {
+          "2": 21,
+          "3": 1
+        },
+        "slips": []
+      },
+      "nn:cruel>callous": {
+        "rules": [
+          1,
+          2
+        ],
+        "n_readings": 22,
+        "decisions": {
+          "2": 7,
+          "3": 15
+        },
+        "slips": [
+          {
+            "run": "overlap_arms_1",
+            "rubric": "C",
+            "model": "claude-sonnet-5-5",
+            "pass": 1,
+            "value": 2,
+            "reason": "Callous is emotional hardness and indifference to others' suffering, which is the indifference part of cruel, but it lacks the pleasure in pain."
+          },
+          {
+            "run": "overlap_arms_1",
+            "rubric": "D",
+            "model": "claude-sonnet-5-5",
+            "pass": 1,
+            "value": "overlap",
+            "reason": "Callous is the indifference-to-suffering part of cruel, without the pleasure in pain; neighbouring but cruel adds more."
+          },
+          {
+            "run": "overlap_arms_1",
+            "rubric": "A",
+            "model": "claude-sonnet-5-5",
+            "pass": 2,
+            "value": 2,
+            "reason": "Callous is the indifference-to-suffering part of cruel, without the pleasure in pain, so it is the same core with narrower scope."
+          },
+          {
+            "run": "overlap_arms_1",
+            "rubric": "D",
+            "model": "claude-sonnet-5-5",
+            "pass": 2,
+            "value": "overlap",
+            "reason": "Callous is the indifference-to-suffering part of cruel, but lacks the pleasure in others' pain."
+          },
+          {
+            "run": "overlap_test_2",
+            "rubric": "A",
+            "model": "claude-sonnet-5-5",
+            "pass": 1,
+            "value": 2,
+            "reason": "Emotional hardness and indifference to suffering match the callous-disregard part of cruelty, but lack the pleasure in pain."
+          }
+        ]
+      },
+      "nn:cruel>indifferent_to_animals": {
+        "rules": [
+          2
+        ],
+        "n_readings": 22,
+        "decisions": {
+          "1": 18,
+          "2": 4
+        },
+        "slips": [
+          {
+            "run": "overlap_arms_1",
+            "rubric": "D",
+            "model": "claude-sonnet-5-5",
+            "pass": 1,
+            "value": "overlap",
+            "reason": "Indifference to suffering, but limited to animals and without the pleasure in pain or active harm that cruelty includes; it is roughly a narrower slice of the target's callous side."
+          },
+          {
+            "run": "overlap_arms_1",
+            "rubric": "E",
+            "model": "claude-sonnet-5-5",
+            "pass": 1,
+            "value": 2,
+            "reason": "Indifference to suffering is shared, but this is narrowed to animals and lacks the pleasure in pain or active harm that cruelty includes."
+          },
+          {
+            "run": "overlap_arms_1",
+            "rubric": "E",
+            "model": "claude-sonnet-5-5",
+            "pass": 2,
+            "value": 2,
+            "reason": "This is indifference to suffering narrowed to animals, with no pleasure in pain or active harm, so it only partly overlaps with cruel."
+          },
+          {
+            "run": "overlap_test_1",
+            "rubric": "A",
+            "model": "claude-haiku-4-5-20251001",
+            "pass": 1,
+            "value": 2,
+            "reason": "Indifference to animals' suffering is a specific application of the same callous disregard for distress that defines cruelty, but limited to animals rather than humans."
+          }
+        ]
+      },
+      "nn:deontological>principled": {
+        "rules": [
+          2
+        ],
+        "n_readings": 22,
+        "decisions": {
+          "2": 21,
+          "4": 1
+        },
+        "slips": [
+          {
+            "run": "overlap_arms_1",
+            "rubric": "A",
+            "model": "claude-sonnet-5-5",
+            "pass": 2,
+            "value": 2,
+            "reason": "Both involve deciding by moral rules rather than expedience, but principled is broader (consistent values) and does not specifically reject consequences."
+          },
+          {
+            "run": "overlap_arms_1",
+            "rubric": "C",
+            "model": "claude-sonnet-5-5",
+            "pass": 2,
+            "value": 2,
+            "reason": "Principled means adhering to moral rules over expedience, which overlaps with deontology, but it is broader and not specifically about duty independent of consequences."
+          }
+        ]
+      },
+      "nn:deontological>moral": {
+        "rules": [
+          2
+        ],
+        "n_readings": 22,
+        "decisions": {
+          "1": 4,
+          "2": 18
+        },
+        "slips": [
+          {
+            "run": "overlap_arms_1",
+            "rubric": "D",
+            "model": "claude-sonnet-5-5",
+            "pass": 1,
+            "value": "overlap",
+            "reason": "Refusing a lie or theft even when it would work shares the deontological core of judging acts as wrong regardless of outcome, but 'moral' is a broader sense of right and wrong that is not tied to rule-based duty."
+          },
+          {
+            "run": "overlap_arms_1",
+            "rubric": "D",
+            "model": "claude-sonnet-5-5",
+            "pass": 2,
+            "value": "overlap",
+            "reason": "Moral is a general sensitivity to right and wrong, refusing wrongs even when they'd work, which partly matches rule-based ethics but is broader and not a specific theory."
+          },
+          {
+            "run": "overlap_test_1",
+            "rubric": "A",
+            "model": "claude-fable-5-1",
+            "pass": 1,
+            "value": 2,
+            "reason": "Refusing lies or theft even when they would work is rule-based right and wrong, but 'moral' is the broader sensitivity to right and wrong rather than specifically the rules-over-consequences stance."
+          },
+          {
+            "run": "overlap_test_1",
+            "rubric": "A",
+            "model": "claude-haiku-4-5-20251001",
+            "pass": 1,
+            "value": 2,
+            "reason": "Moral describes feeling right and wrong in actions, while deontological specifically frames this as duty-based rules independent of consequences; moral is broader and doesn't necessarily exclude consequentialist thinking."
+          },
+          {
+            "run": "overlap_test_2",
+            "rubric": "A",
+            "model": "claude-sonnet-5-5",
+            "pass": 1,
+            "value": 2,
+            "reason": "Refusing a lie or theft even when it would work resembles rule-based moral focus, but 'moral' is a broader sensitivity to right and wrong and not a theory of duty over consequences."
+          }
+        ]
+      },
+      "nn:destructive>subversive": {
+        "rules": [
+          2
+        ],
+        "n_readings": 22,
+        "decisions": {
+          "2": 22
+        },
+        "slips": [
+          {
+            "run": "overlap_arms_1",
+            "rubric": "A",
+            "model": "claude-opus-5-5",
+            "pass": 1,
+            "value": 2,
+            "reason": "Both share undermining established structures, but subversive adds subtle, indirect challenge to norms, while destructive is broader and centred on damage rather than challenge."
+          },
+          {
+            "run": "overlap_arms_1",
+            "rubric": "A",
+            "model": "claude-sonnet-5-5",
+            "pass": 1,
+            "value": 2,
+            "reason": "Both involve undermining existing structures, but subversive is specifically about covertly challenging norms and authority, while destructive is broader and not necessarily indirect or political."
+          },
+          {
+            "run": "overlap_arms_1",
+            "rubric": "C",
+            "model": "claude-opus-5-5",
+            "pass": 1,
+            "value": 2,
+            "reason": "Both share undermining established structures, but subversive adds subtle, indirect methods aimed at norms, while destructive covers broader breaking down of relationships and efforts."
+          },
+          {
+            "run": "overlap_arms_1",
+            "rubric": "C",
+            "model": "claude-sonnet-5-5",
+            "pass": 1,
+            "value": 2,
+            "reason": "Both involve undermining existing structures, but subversive is specifically about subtly challenging norms and authorities, while destructive is broader and includes breaking down relationships and efforts."
+          },
+          {
+            "run": "overlap_arms_1",
+            "rubric": "D",
+            "model": "claude-sonnet-5-5",
+            "pass": 1,
+            "value": "overlap",
+            "reason": "Both involve undermining established structures, but subversive adds subtlety and a focus on norms and authorities, while destructive is broader and includes breaking things down in general."
+          },
+          {
+            "run": "overlap_arms_1",
+            "rubric": "E",
+            "model": "claude-sonnet-5-5",
+            "pass": 1,
+            "value": 2,
+            "reason": "Both involve undermining existing structures, but subversive is specifically about challenging norms and authority through indirect means, while destructive is broader, covering relationships and efforts too, and is not limited to subtle methods."
+          },
+          {
+            "run": "overlap_arms_1",
+            "rubric": "C",
+            "model": "claude-opus-5-5",
+            "pass": 2,
+            "value": 2,
+            "reason": "Both involve undermining things, but subversive adds subtle methods aimed at norms and authority, while destructive is broader sabotage of anything."
+          },
+          {
+            "run": "overlap_arms_1",
+            "rubric": "C",
+            "model": "claude-sonnet-5-5",
+            "pass": 2,
+            "value": 2,
+            "reason": "Both involve undermining existing structures, but subversive is specifically about challenging norms and authority by indirect means, while destructive is broader and includes breaking things down and sabotaging efforts."
+          },
+          {
+            "run": "overlap_arms_1",
+            "rubric": "D",
+            "model": "claude-opus-5-5",
+            "pass": 2,
+            "value": "overlap",
+            "reason": "Both involve undermining. Subversive narrows it to established norms and authorities and adds subtle, indirect methods, while destructive covers any structure or effort with no particular method."
+          },
+          {
+            "run": "overlap_arms_1",
+            "rubric": "D",
+            "model": "claude-sonnet-5-5",
+            "pass": 2,
+            "value": "overlap",
+            "reason": "Both involve undermining existing structures, but subversive is specifically about covert challenges to norms and authority, while destructive is broader and includes breaking things down and sabotaging efforts."
+          },
+          {
+            "run": "overlap_arms_1",
+            "rubric": "E",
+            "model": "claude-opus-5-5",
+            "pass": 2,
+            "value": 2,
+            "reason": "Both involve undermining existing structures, but subversive adds subtle, indirect methods aimed at norms and authority, while destructive includes harming relationships and efforts."
+          },
+          {
+            "run": "overlap_arms_1",
+            "rubric": "E",
+            "model": "claude-sonnet-5-5",
+            "pass": 2,
+            "value": 2,
+            "reason": "Both involve undermining existing structures, but subversive is specifically indirect and aimed at norms and authorities, while destructive is broader and includes breaking relationships and efforts."
+          },
+          {
+            "run": "overlap_test_1",
+            "rubric": "A",
+            "model": "claude-haiku-4-5-20251001",
+            "pass": 1,
+            "value": 2,
+            "reason": "Subversive shares the core concept of undermining and challenging established things, but emphasizes subtle indirect methods rather than the broader sabotaging of structures and relationships that destructive implies."
+          },
+          {
+            "run": "overlap_test_1",
+            "rubric": "A",
+            "model": "claude-opus-5-5",
+            "pass": 1,
+            "value": 2,
+            "reason": "Both share undermining established structures, but subversive adds indirect methods and a focus on norms and authority, while destructive covers broader sabotage."
+          },
+          {
+            "run": "overlap_test_1",
+            "rubric": "A",
+            "model": "claude-sonnet-5-5",
+            "pass": 1,
+            "value": 2,
+            "reason": "Both involve undermining existing structures, but subversive is targeted at norms and authorities by indirect means, while destructive is broader and includes relationships and efforts."
+          },
+          {
+            "run": "overlap_test_2",
+            "rubric": "A",
+            "model": "claude-sonnet-5-5",
+            "pass": 1,
+            "value": 2,
+            "reason": "Both involve undermining existing structures, but subversive is specifically about covert challenges to norms and authority, while destructive is broader and includes damaging relationships and efforts."
+          }
+        ]
+      },
+      "nn:detached>emotionally_disengaged": {
+        "rules": [
+          2
+        ],
+        "n_readings": 22,
+        "decisions": {
+          "2": 22
+        },
+        "slips": [
+          {
+            "run": "overlap_arms_1",
+            "rubric": "E",
+            "model": "claude-opus-5-5",
+            "pass": 2,
+            "value": 2,
+            "reason": "Both involve emotional distance, but this is narrowed to interpersonal events failing to register, not clinical objectivity in presenting information."
+          }
+        ]
+      },
+      "nn:dominant>controlling": {
+        "rules": [
+          1
+        ],
+        "n_readings": 22,
+        "decisions": {
+          "1": 2,
+          "2": 19,
+          "3": 1
+        },
+        "slips": []
+      },
+      "nn:dominant>prescriptive": {
+        "rules": [
+          2
+        ],
+        "n_readings": 22,
+        "decisions": {
+          "1": 1,
+          "2": 21
+        },
+        "slips": [
+          {
+            "run": "overlap_test_2",
+            "rubric": "A",
+            "model": "claude-sonnet-5-5",
+            "pass": 1,
+            "value": 2,
+            "reason": "Both involve authoritative, commanding direction of others, but prescriptive centers on issuing rules and instructions while dominant is broader control of discussion and leadership."
+          }
+        ]
+      },
+      "nn:dramatic>theatrical": {
+        "rules": [
+          1
+        ],
+        "n_readings": 22,
+        "decisions": {
+          "2": 2,
+          "3": 17,
+          "4": 3
+        },
+        "slips": []
+      },
+      "nn:ecocentric>environmental": {
+        "rules": [
+          1,
+          2
+        ],
+        "n_readings": 22,
+        "decisions": {
+          "2": 21,
+          "3": 1
+        },
+        "slips": [
+          {
+            "run": "overlap_arms_1",
+            "rubric": "A",
+            "model": "claude-opus-5-5",
+            "pass": 1,
+            "value": 2,
+            "reason": "Both put weight on environmental protection, but environmental is about prioritizing ecological concerns without the ecocentric claim of intrinsic value and humans as just one part of the system."
+          },
+          {
+            "run": "overlap_arms_1",
+            "rubric": "A",
+            "model": "claude-sonnet-5-5",
+            "pass": 1,
+            "value": 2,
+            "reason": "Both prioritize ecological protection, but 'environmental' is a general focus on sustainability, while ecocentrism adds intrinsic value of all life and humans as one part of the system with stewardship duties."
+          },
+          {
+            "run": "overlap_arms_1",
+            "rubric": "E",
+            "model": "claude-sonnet-5-5",
+            "pass": 1,
+            "value": 2,
+            "reason": "Both prioritise ecological protection, but ecocentrism adds intrinsic value for all living things and humans as just one part of the system, while 'environmental' is a broader, weaker concern with no stance on intrinsic value."
+          },
+          {
+            "run": "overlap_test_2",
+            "rubric": "A",
+            "model": "claude-sonnet-5-5",
+            "pass": 1,
+            "value": 2,
+            "reason": "Both prioritize ecological protection, but 'environmental' is a general focus on sustainability and lacks ecocentrism's intrinsic-value stance and its treatment of humans as one part of the system."
+          }
+        ]
+      },
+      "nn:edgy>provocative": {
+        "rules": [
+          1,
+          2
+        ],
+        "n_readings": 22,
+        "decisions": {
+          "2": 11,
+          "3": 11
+        },
+        "slips": [
+          {
+            "run": "overlap_arms_1",
+            "rubric": "C",
+            "model": "claude-sonnet-5-5",
+            "pass": 1,
+            "value": 2,
+            "reason": "Both involve deliberately provoking with taboo or controversial statements; provocative focuses on eliciting reactions, while edgy also includes dark humor, but the core largely overlaps."
+          }
+        ]
+      },
+      "nn:edgy>wry": {
+        "rules": [
+          2
+        ],
+        "n_readings": 22,
+        "decisions": {
+          "1": 21,
+          "2": 1
+        },
+        "slips": [
+          {
+            "run": "overlap_test_1",
+            "rubric": "A",
+            "model": "claude-haiku-4-5-20251001",
+            "pass": 1,
+            "value": 2,
+            "reason": "Wry humor is one tool edgy people use, but edgy encompasses a broader approach including dark humor, controversial opinions, and provocative statements beyond just sardonic wit."
+          }
+        ]
+      },
+      "nn:entertaining>playful": {
+        "rules": [
+          1,
+          2
+        ],
+        "n_readings": 22,
+        "decisions": {
+          "2": 5,
+          "3": 17
+        },
+        "slips": [
+          {
+            "run": "overlap_arms_1",
+            "rubric": "C",
+            "model": "claude-opus-5-5",
+            "pass": 1,
+            "value": 2,
+            "reason": "Playful closely matches entertaining's fun and lightheartedness, but it adds whimsy and games while entertaining has a broader engagement aim."
+          }
+        ]
+      },
+      "nn:entertaining>witty": {
+        "rules": [
+          1,
+          2
+        ],
+        "n_readings": 22,
+        "decisions": {
+          "2": 10,
+          "3": 12
+        },
+        "slips": [
+          {
+            "run": "overlap_arms_1",
+            "rubric": "A",
+            "model": "claude-opus-5-5",
+            "pass": 1,
+            "value": 2,
+            "reason": "Witty is one specific route to being entertaining, clever verbal humor, so it is a narrower form of the same aim."
+          },
+          {
+            "run": "overlap_arms_1",
+            "rubric": "A",
+            "model": "claude-sonnet-5-5",
+            "pass": 1,
+            "value": 2,
+            "reason": "Witty is a narrower form of entertaining, centered on clever humor and wordplay as the way to engage."
+          },
+          {
+            "run": "overlap_arms_1",
+            "rubric": "A",
+            "model": "claude-sonnet-5-5",
+            "pass": 2,
+            "value": 2,
+            "reason": "Witty is a specific form of entertaining through clever humor and wordplay, narrower than the broad goal of engagement and enjoyment."
+          },
+          {
+            "run": "overlap_arms_1",
+            "rubric": "D",
+            "model": "claude-sonnet-5-5",
+            "pass": 2,
+            "value": "overlap",
+            "reason": "Witty is verbal cleverness and humor used to entertain, a narrower technique within entertaining that adds cleverness."
+          },
+          {
+            "run": "overlap_test_1",
+            "rubric": "A",
+            "model": "claude-haiku-4-5-20251001",
+            "pass": 1,
+            "value": 2,
+            "reason": "Witty focuses specifically on clever humor and wordplay, which is one technique entertaining uses, but entertaining encompasses broader engagement methods beyond just verbal cleverness."
+          },
+          {
+            "run": "overlap_test_1",
+            "rubric": "A",
+            "model": "claude-opus-5-5",
+            "pass": 1,
+            "value": 2,
+            "reason": "Witty is one specific route to being entertaining, clever verbal humor, so it is narrower but shares the core aim of enjoyable engagement."
+          },
+          {
+            "run": "overlap_test_1",
+            "rubric": "A",
+            "model": "claude-sonnet-5-5",
+            "pass": 1,
+            "value": 2,
+            "reason": "Witty is a narrower form of entertaining, focused on clever humor and wordplay, whereas entertaining also covers examples and other engagement techniques."
+          },
+          {
+            "run": "overlap_test_2",
+            "rubric": "A",
+            "model": "claude-opus-5-5",
+            "pass": 1,
+            "value": 2,
+            "reason": "Witty is a narrower form of entertaining, focused on clever verbal humor, while entertaining also covers interesting examples and playful tone."
+          },
+          {
+            "run": "overlap_test_2",
+            "rubric": "A",
+            "model": "claude-sonnet-5-5",
+            "pass": 1,
+            "value": 2,
+            "reason": "Witty is a narrower form of entertaining, centered on clever humor and wordplay, whereas entertaining also covers examples and other engagement techniques."
+          }
+        ]
+      },
+      "nn:envious>bitter": {
+        "rules": [
+          2
+        ],
+        "n_readings": 22,
+        "decisions": {
+          "1": 10,
+          "2": 12
+        },
+        "slips": [
+          {
+            "run": "overlap_arms_1",
+            "rubric": "C",
+            "model": "claude-sonnet-5-5",
+            "pass": 1,
+            "value": 2,
+            "reason": "Bitterness is general resentment and cynicism from disappointment; it shares resentment with envy, but envy is specifically about others' successes and bitterness is broader."
+          }
+        ]
+      },
+      "nn:environmental>ecocentric": {
+        "rules": [
+          1,
+          2
+        ],
+        "n_readings": 22,
+        "decisions": {
+          "2": 14,
+          "3": 8
+        },
+        "slips": [
+          {
+            "run": "overlap_arms_1",
+            "rubric": "D",
+            "model": "claude-sonnet-5-5",
+            "pass": 1,
+            "value": "overlap",
+            "reason": "Ecocentric centers ecosystem health and environmental protection as intrinsically valuable, which includes the environmental priority but adds a specific non-human-centered valuation and stewardship view."
+          },
+          {
+            "run": "overlap_arms_1",
+            "rubric": "D",
+            "model": "claude-sonnet-5-5",
+            "pass": 2,
+            "value": "overlap",
+            "reason": "Ecocentric shares the core of prioritizing ecosystem health and environmental protection, but adds intrinsic value for all life and humans as one part of the system."
+          }
+        ]
+      },
+      "nn:experiential>practical": {
+        "rules": [
+          1
+        ],
+        "n_readings": 22,
+        "decisions": {
+          "2": 21,
+          "3": 1
+        },
+        "slips": []
+      },
+      "nn:extroverted>gregarious": {
+        "rules": [
+          1
+        ],
+        "n_readings": 22,
+        "decisions": {
+          "2": 7,
+          "3": 15
+        },
+        "slips": []
+      },
+      "nn:flippant>irreverent": {
+        "rules": [
+          1,
+          2
+        ],
+        "n_readings": 22,
+        "decisions": {
+          "2": 21,
+          "3": 1
+        },
+        "slips": [
+          {
+            "run": "overlap_arms_1",
+            "rubric": "A",
+            "model": "claude-sonnet-5-5",
+            "pass": 2,
+            "value": 2,
+            "reason": "Both involve treating serious or respected matters lightly, but irreverent focuses on disrespect toward the sacred or authoritative, while flippant is a broader dismissive lightness."
+          },
+          {
+            "run": "overlap_arms_1",
+            "rubric": "E",
+            "model": "claude-sonnet-5-5",
+            "pass": 2,
+            "value": 2,
+            "reason": "Both involve treating serious or respected matters lightly, but irreverent is specifically about mocking the sacred or official, while flippant is a broader dismissive lightness."
+          },
+          {
+            "run": "overlap_test_1",
+            "rubric": "A",
+            "model": "claude-fable-5-1",
+            "pass": 1,
+            "value": 2,
+            "reason": "Both treat solemn things lightly and disrespectfully, but irreverent targets the sacred, official and authoritative with cheekiness, while flippant is broader casual dismissiveness toward anything serious."
+          },
+          {
+            "run": "overlap_test_2",
+            "rubric": "A",
+            "model": "claude-sonnet-5-5",
+            "pass": 1,
+            "value": 2,
+            "reason": "Irreverent is disrespect toward sacred or official things, a close neighbour of flippant's inappropriate lightness toward serious matters, but with a narrower target and a cheeky spirit."
+          }
+        ]
+      },
+      "nn:flippant>lighthearted": {
+        "rules": [
+          2
+        ],
+        "n_readings": 22,
+        "decisions": {
+          "1": 5,
+          "2": 17
+        },
+        "slips": [
+          {
+            "run": "overlap_arms_1",
+            "rubric": "D",
+            "model": "claude-opus-5-5",
+            "pass": 2,
+            "value": "overlap",
+            "reason": "Lighthearted is a general easy, joking disposition that includes taking large matters lightly, while flippant adds the judgement that this is dismissive and inappropriate."
+          }
+        ]
+      },
+      "nn:formalist>ritualistic": {
+        "rules": [
+          1
+        ],
+        "n_readings": 22,
+        "decisions": {
+          "2": 14,
+          "3": 8
+        },
+        "slips": []
+      },
+      "nn:formalist>formal": {
+        "rules": [
+          2
+        ],
+        "n_readings": 22,
+        "decisions": {
+          "1": 21,
+          "2": 1
+        },
+        "slips": [
+          {
+            "run": "overlap_test_1",
+            "rubric": "A",
+            "model": "claude-haiku-4-5-20251001",
+            "pass": 1,
+            "value": 2,
+            "reason": "Formal describes communication style and tone, while formalist describes prioritization of structure and procedures over content; they overlap but formal is narrower in scope."
+          }
+        ]
+      },
+      "nn:formalist>formulaic": {
+        "rules": [
+          1,
+          2
+        ],
+        "n_readings": 22,
+        "decisions": {
+          "2": 21,
+          "3": 1
+        },
+        "slips": [
+          {
+            "run": "overlap_arms_1",
+            "rubric": "D",
+            "model": "claude-sonnet-5-5",
+            "pass": 2,
+            "value": "overlap",
+            "reason": "Formulaic shares the reliance on fixed structure and absence of spontaneity, but is about repeating one template, while formalist is a broader priority of form and procedure over content."
+          }
+        ]
+      },
+      "nn:futuristic>innovative": {
+        "rules": [
+          1
+        ],
+        "n_readings": 22,
+        "decisions": {
+          "2": 21,
+          "3": 1
+        },
+        "slips": []
+      },
+      "nn:gluttonous>self_indulgent": {
+        "rules": [
+          1,
+          2
+        ],
+        "n_readings": 22,
+        "decisions": {
+          "2": 15,
+          "3": 7
+        },
+        "slips": [
+          {
+            "run": "overlap_arms_1",
+            "rubric": "A",
+            "model": "claude-sonnet-5-5",
+            "pass": 1,
+            "value": 2,
+            "reason": "Self-indulgence covers giving in to all appetites including food, so it shares the core of unrestrained indulgence but is broader than eating."
+          },
+          {
+            "run": "overlap_arms_1",
+            "rubric": "C",
+            "model": "claude-sonnet-5-5",
+            "pass": 1,
+            "value": 2,
+            "reason": "Self-indulgence is a broader giving in to all appetites, including food, so gluttony is roughly its food-specific form, though gluttony adds the feasting excess."
+          },
+          {
+            "run": "overlap_arms_1",
+            "rubric": "D",
+            "model": "claude-sonnet-5-5",
+            "pass": 1,
+            "value": "overlap",
+            "reason": "Self-indulgence covers giving in to all appetites including food; gluttony is the food-and-drink case, but self-indulgent also includes sleep and treats, while gluttonous adds feasting emphasis."
+          },
+          {
+            "run": "overlap_arms_1",
+            "rubric": "E",
+            "model": "claude-sonnet-5-5",
+            "pass": 1,
+            "value": 2,
+            "reason": "Self-indulgence gives in to all appetites including food, so it overlaps with gluttony but is broader (sleep, treats) and lacks the focus on excessive eating."
+          },
+          {
+            "run": "overlap_arms_1",
+            "rubric": "A",
+            "model": "claude-sonnet-5-5",
+            "pass": 2,
+            "value": 2,
+            "reason": "Self-indulgence shares the unrestrained giving in to appetites, including food, but is broader, covering sleep and treats, while gluttony is specific to food and drink."
+          },
+          {
+            "run": "overlap_arms_1",
+            "rubric": "C",
+            "model": "claude-sonnet-5-5",
+            "pass": 2,
+            "value": 2,
+            "reason": "Self-indulgence is giving in to all appetites including food; gluttony is its narrower food-and-drink form, though gluttony adds feasting excess."
+          },
+          {
+            "run": "overlap_arms_1",
+            "rubric": "E",
+            "model": "claude-sonnet-5-5",
+            "pass": 2,
+            "value": 2,
+            "reason": "Self-indulgent gives in to all appetites including food, but also sleep and treats; it overlaps with gluttony on food but is broader and lacks the focus on excessive eating and feasting."
+          },
+          {
+            "run": "overlap_test_1",
+            "rubric": "A",
+            "model": "claude-sonnet-5-5",
+            "pass": 1,
+            "value": 2,
+            "reason": "Self-indulgence covers giving in to all appetites including food, so it overlaps with gluttony but is broader and not food-specific."
+          },
+          {
+            "run": "overlap_test_2",
+            "rubric": "A",
+            "model": "claude-sonnet-5-5",
+            "pass": 1,
+            "value": 2,
+            "reason": "Self-indulgence covers giving in to all appetites including food, so it shares the core of unrestrained indulgence but is broader than eating and drinking."
+          }
+        ]
+      },
+      "nn:goofy>playful": {
+        "rules": [
+          1,
+          2
+        ],
+        "n_readings": 22,
+        "decisions": {
+          "2": 16,
+          "3": 6
+        },
+        "slips": [
+          {
+            "run": "overlap_arms_1",
+            "rubric": "A",
+            "model": "claude-opus-5-5",
+            "pass": 1,
+            "value": 2,
+            "reason": "Both involve humor and lightheartedness, but playful is broader fun and whimsy while goofy specifically means silly, absurd foolishness."
+          },
+          {
+            "run": "overlap_arms_1",
+            "rubric": "A",
+            "model": "claude-sonnet-5-5",
+            "pass": 1,
+            "value": 2,
+            "reason": "Both involve fun and humor, but playful is broader (games, creativity, whimsy) and lacks the specific silliness or foolishness of goofy."
+          },
+          {
+            "run": "overlap_arms_1",
+            "rubric": "D",
+            "model": "claude-sonnet-5-5",
+            "pass": 1,
+            "value": "overlap",
+            "reason": "Both involve humor and fun, but playful is broader (games, creativity, whimsy) while goofy specifically adds silliness and absurdity."
+          },
+          {
+            "run": "overlap_arms_1",
+            "rubric": "E",
+            "model": "claude-sonnet-5-5",
+            "pass": 1,
+            "value": 2,
+            "reason": "Playful covers fun, humor and whimsy, which overlaps with goofy's silly, playful foolishness, but it is broader and lacks goofy's emphasis on absurd silliness."
+          },
+          {
+            "run": "overlap_arms_1",
+            "rubric": "A",
+            "model": "claude-opus-5-5",
+            "pass": 2,
+            "value": 2,
+            "reason": "Both share fun and humor, but playful is broader (games, whimsy, creativity) and goofy specifically adds absurd silliness."
+          },
+          {
+            "run": "overlap_arms_1",
+            "rubric": "A",
+            "model": "claude-sonnet-5-5",
+            "pass": 2,
+            "value": 2,
+            "reason": "Playful shares the humor, whimsy and fun of goofy but is broader and lacks the specific silliness and foolishness."
+          },
+          {
+            "run": "overlap_arms_1",
+            "rubric": "C",
+            "model": "claude-sonnet-5-5",
+            "pass": 2,
+            "value": 2,
+            "reason": "Both involve humor and fun, but playful is broader (whimsy, games, creativity) while goofy is specifically silly and absurd."
+          },
+          {
+            "run": "overlap_arms_1",
+            "rubric": "D",
+            "model": "claude-sonnet-5-5",
+            "pass": 2,
+            "value": "overlap",
+            "reason": "Both are about fun and humor, but playful is broader (games, whimsy, creativity) while goofy specifically adds silliness and absurdity."
+          },
+          {
+            "run": "overlap_test_1",
+            "rubric": "A",
+            "model": "claude-fable-5-1",
+            "pass": 1,
+            "value": 2,
+            "reason": "Both are about fun and humor, but goofy specifies silly, absurd, foolish comedy while playful is broader (games, whimsy, creativity, engaging presentation)."
+          },
+          {
+            "run": "overlap_test_1",
+            "rubric": "A",
+            "model": "claude-haiku-4-5-20251001",
+            "pass": 1,
+            "value": 2,
+            "reason": "Playful and goofy both involve fun and humor, but playful is broader and can include clever wit or creative engagement, while goofy specifically emphasizes silly and absurd comedy."
+          },
+          {
+            "run": "overlap_test_1",
+            "rubric": "A",
+            "model": "claude-opus-5-5",
+            "pass": 1,
+            "value": 2,
+            "reason": "Both involve fun and humor, but playful is broader and includes creativity and engagement, while goofy specifically means silly, absurd foolishness."
+          },
+          {
+            "run": "overlap_test_1",
+            "rubric": "A",
+            "model": "claude-sonnet-5-5",
+            "pass": 1,
+            "value": 2,
+            "reason": "Both involve fun and humor, but playful is broader (games, creativity, whimsy) and lacks goofy's emphasis on deliberate silliness and absurdity."
+          },
+          {
+            "run": "overlap_test_2",
+            "rubric": "A",
+            "model": "claude-opus-5-5",
+            "pass": 1,
+            "value": 2,
+            "reason": "Both share fun and lighthearted humor, but goofy stresses absurd silliness while playful is broader, covering games, whimsy and creativity."
+          },
+          {
+            "run": "overlap_test_2",
+            "rubric": "A",
+            "model": "claude-sonnet-5-5",
+            "pass": 1,
+            "value": 2,
+            "reason": "Both involve fun and humor, but playful is broader (games, creativity, whimsy) while goofy is specifically silly and absurd."
+          }
+        ]
+      },
+      "nn:grandiose>self_aggrandizing": {
+        "rules": [
+          1
+        ],
+        "n_readings": 22,
+        "decisions": {
+          "2": 5,
+          "3": 17
+        },
+        "slips": []
+      },
+      "nn:hedonistic>self_indulgent": {
+        "rules": [
+          1
+        ],
+        "n_readings": 22,
+        "decisions": {
+          "2": 3,
+          "3": 19
+        },
+        "slips": []
+      },
+      "nn:honest>truthful": {
+        "rules": [
+          1,
+          2
+        ],
+        "n_readings": 22,
+        "decisions": {
+          "2": 3,
+          "3": 12,
+          "4": 7
+        },
+        "slips": [
+          {
+            "run": "overlap_test_1",
+            "rubric": "A",
+            "model": "claude-haiku-4-5-20251001",
+            "pass": 1,
+            "value": 2,
+            "reason": "Truthful focuses on accurate presentation of facts and avoiding lies, while honest adds transparency and acknowledgment of uncertainty; they overlap significantly but truthful is narrower."
+          }
+        ]
+      },
+      "nn:honest>transparent": {
+        "rules": [
+          1
+        ],
+        "n_readings": 22,
+        "decisions": {
+          "2": 4,
+          "3": 17,
+          "4": 1
+        },
+        "slips": []
+      },
+      "nn:honest>intellectually_honest": {
+        "rules": [
+          1,
+          2
+        ],
+        "n_readings": 22,
+        "decisions": {
+          "2": 10,
+          "3": 12
+        },
+        "slips": [
+          {
+            "run": "overlap_arms_1",
+            "rubric": "A",
+            "model": "claude-opus-5-5",
+            "pass": 2,
+            "value": 2,
+            "reason": "Shares truthfulness and admitting uncertainty, but narrows it to assessing one's own work and evidence, including honesty with oneself."
+          },
+          {
+            "run": "overlap_arms_1",
+            "rubric": "A",
+            "model": "claude-sonnet-5-5",
+            "pass": 2,
+            "value": 2,
+            "reason": "Shares truthfulness and admitting uncertainty, but is narrower in focus on one's own work and evidence, and adds honesty with oneself."
+          },
+          {
+            "run": "overlap_arms_1",
+            "rubric": "D",
+            "model": "claude-opus-5-5",
+            "pass": 2,
+            "value": "overlap",
+            "reason": "Intellectual honesty is honesty narrowed to how one reports and judges one's own work and evidence, and it adds fairness in weighing evidence against one's own view."
+          },
+          {
+            "run": "overlap_test_2",
+            "rubric": "A",
+            "model": "claude-opus-5-5",
+            "pass": 1,
+            "value": 2,
+            "reason": "Intellectual honesty is honesty narrowed to one's own work and evidence, including self-honesty, so it is the same concept with a narrower scope plus some additions."
+          }
+        ]
+      },
+      "nn:humanistic>humanitarian": {
+        "rules": [
+          1
+        ],
+        "n_readings": 22,
+        "decisions": {
+          "2": 21,
+          "3": 1
+        },
+        "slips": []
+      },
+      "nn:humanitarian>altruistic": {
+        "rules": [
+          1
+        ],
+        "n_readings": 22,
+        "decisions": {
+          "2": 21,
+          "3": 1
+        },
+        "slips": []
+      },
+      "nn:humanitarian>humanistic": {
+        "rules": [
+          1
+        ],
+        "n_readings": 22,
+        "decisions": {
+          "2": 21,
+          "3": 1
+        },
+        "slips": []
+      },
+      "nn:humble>modest": {
+        "rules": [
+          1
+        ],
+        "n_readings": 22,
+        "decisions": {
+          "1": 1,
+          "2": 20,
+          "3": 1
+        },
+        "slips": []
+      },
+      "nn:humble>deferential": {
+        "rules": [
+          1
+        ],
+        "n_readings": 22,
+        "decisions": {
+          "1": 1,
+          "2": 20,
+          "3": 1
+        },
+        "slips": []
+      },
+      "nn:humble>honest": {
+        "rules": [
+          2
+        ],
+        "n_readings": 22,
+        "decisions": {
+          "1": 12,
+          "2": 10
+        },
+        "slips": [
+          {
+            "run": "overlap_arms_1",
+            "rubric": "A",
+            "model": "claude-opus-5-5",
+            "pass": 1,
+            "value": 2,
+            "reason": "Both include acknowledging uncertainty and limitations, but honest centres on truthfulness and avoiding deception, while humble centres on recognizing one's fallibility and others' perspectives."
+          },
+          {
+            "run": "overlap_arms_1",
+            "rubric": "C",
+            "model": "claude-opus-5-5",
+            "pass": 1,
+            "value": 2,
+            "reason": "Both include acknowledging uncertainty and limitations, but honest centres on truthfulness and avoiding deception, while humble centres on recognising one's fallibility and others' perspectives."
+          },
+          {
+            "run": "overlap_arms_1",
+            "rubric": "E",
+            "model": "claude-opus-5-5",
+            "pass": 1,
+            "value": 2,
+            "reason": "Both include acknowledging uncertainty and limitations, but honest centers on truthfulness and non-deception while humble adds openness to others' better perspectives."
+          },
+          {
+            "run": "overlap_arms_1",
+            "rubric": "D",
+            "model": "claude-opus-5-5",
+            "pass": 2,
+            "value": "overlap",
+            "reason": "Both include acknowledging uncertainty and limitations, but honesty is about truthful communication and avoiding deception, while humility is about recognizing others' knowledge."
+          },
+          {
+            "run": "overlap_test_1",
+            "rubric": "A",
+            "model": "claude-opus-5-5",
+            "pass": 1,
+            "value": 2,
+            "reason": "Both include acknowledging uncertainty and limitations, but honesty centres on truthfulness and avoiding deception, while humility centres on recognizing one's fallibility and others' perspectives."
+          }
+        ]
+      },
+      "nn:iconoclastic>contrarian": {
+        "rules": [
+          1,
+          2
+        ],
+        "n_readings": 22,
+        "decisions": {
+          "2": 21,
+          "3": 1
+        },
+        "slips": [
+          {
+            "run": "overlap_arms_1",
+            "rubric": "C",
+            "model": "claude-sonnet-5-5",
+            "pass": 1,
+            "value": 2,
+            "reason": "Contrarian means opposing popular opinion and offering alternative views, which overlaps with challenging accepted beliefs, but it lacks the iconoclast's attack on revered institutions and the contrarian's habit of opposing for its own sake is not part of iconoclasm."
+          },
+          {
+            "run": "overlap_arms_1",
+            "rubric": "D",
+            "model": "claude-sonnet-5-5",
+            "pass": 1,
+            "value": "overlap",
+            "reason": "Contrarian opposes popular opinion with alternative views, a milder and narrower stance than iconoclastic's attack on revered institutions and values; they share the challenge to accepted beliefs."
+          }
+        ]
+      },
+      "nn:iconoclastic>deconstructionist": {
+        "rules": [
+          2
+        ],
+        "n_readings": 22,
+        "decisions": {
+          "1": 21,
+          "2": 1
+        },
+        "slips": [
+          {
+            "run": "overlap_test_1",
+            "rubric": "A",
+            "model": "claude-haiku-4-5-20251001",
+            "pass": 1,
+            "value": 2,
+            "reason": "Deconstructionist systematically breaks down assumptions and reveals contradictions, which is a specific intellectual method that overlaps with but is narrower than iconoclastic's broader active challenging of cherished beliefs."
+          }
+        ]
+      },
+      "nn:inclusive>pluralist": {
+        "rules": [
+          1
+        ],
+        "n_readings": 22,
+        "decisions": {
+          "2": 21,
+          "3": 1
+        },
+        "slips": []
+      },
+      "nn:indecisive>noncommittal": {
+        "rules": [
+          1,
+          2
+        ],
+        "n_readings": 22,
+        "decisions": {
+          "2": 11,
+          "3": 11
+        },
+        "slips": [
+          {
+            "run": "overlap_arms_1",
+            "rubric": "C",
+            "model": "claude-opus-5-5",
+            "pass": 1,
+            "value": 2,
+            "reason": "Both are about declining to take a position and laying out options. Noncommittal focuses on withholding one's own view, while indecisive also includes expressed uncertainty."
+          }
+        ]
+      },
+      "nn:independent>self_reliant": {
+        "rules": [
+          1,
+          2
+        ],
+        "n_readings": 22,
+        "decisions": {
+          "2": 8,
+          "3": 14
+        },
+        "slips": [
+          {
+            "run": "overlap_arms_1",
+            "rubric": "C",
+            "model": "claude-sonnet-5-5",
+            "pass": 1,
+            "value": 2,
+            "reason": "Self-reliant here is a stronger, narrower form that refuses all help and dismisses teams, going beyond independent's autonomy; it shares the self-reliance core but adds extreme refusal of input."
+          },
+          {
+            "run": "overlap_arms_1",
+            "rubric": "C",
+            "model": "claude-sonnet-5-5",
+            "pass": 2,
+            "value": 2,
+            "reason": "Self-reliant shares the core of relying on oneself, but is narrowed to doing everything alone and rejecting help or teams, which independent does not require, while independent adds autonomous decision-making and not needing approval."
+          }
+        ]
+      },
+      "nn:independent>individualistic": {
+        "rules": [
+          2
+        ],
+        "n_readings": 22,
+        "decisions": {
+          "2": 22
+        },
+        "slips": [
+          {
+            "run": "overlap_test_1",
+            "rubric": "A",
+            "model": "claude-sonnet-5-5",
+            "pass": 1,
+            "value": 2,
+            "reason": "Both include self-reliance and autonomy, but individualistic adds emphasis on uniqueness and nonconformity to group norms."
+          }
+        ]
+      },
+      "nn:innovative>creative": {
+        "rules": [
+          1
+        ],
+        "n_readings": 22,
+        "decisions": {
+          "2": 17,
+          "3": 5
+        },
+        "slips": []
+      },
+      "nn:innovative>futuristic": {
+        "rules": [
+          1,
+          2
+        ],
+        "n_readings": 22,
+        "decisions": {
+          "2": 20,
+          "3": 2
+        },
+        "slips": [
+          {
+            "run": "overlap_arms_1",
+            "rubric": "A",
+            "model": "claude-sonnet-5-5",
+            "pass": 2,
+            "value": 2,
+            "reason": "Futuristic centers on emerging technology and next-generation, forward-looking solutions, which closely overlaps innovative but is narrower in focus on the future."
+          }
+        ]
+      },
+      "nn:inquisitive>curious": {
+        "rules": [
+          2
+        ],
+        "n_readings": 22,
+        "decisions": {
+          "1": 1,
+          "2": 21
+        },
+        "slips": [
+          {
+            "run": "overlap_arms_1",
+            "rubric": "C",
+            "model": "claude-sonnet-5-5",
+            "pass": 1,
+            "value": 2,
+            "reason": "Both involve asking questions to understand more deeply, but curious is broader interest in topics and wonder, while inquisitive targets the other person's context and needs."
+          },
+          {
+            "run": "overlap_arms_1",
+            "rubric": "A",
+            "model": "claude-sonnet-5-5",
+            "pass": 2,
+            "value": 2,
+            "reason": "Both involve eager questioning to understand more deeply, but curious is broader interest in topics and ideas, while inquisitive targets the other person's context and needs."
+          },
+          {
+            "run": "overlap_test_1",
+            "rubric": "A",
+            "model": "claude-haiku-4-5-20251001",
+            "pass": 1,
+            "value": 2,
+            "reason": "Curious involves asking follow-up questions and seeking deeper understanding, which overlaps with inquisitive's probing questions, but curious is broader (about topics and ideas generally) while inquisitive is specifically about understanding people's contexts and needs."
+          },
+          {
+            "run": "overlap_test_2",
+            "rubric": "A",
+            "model": "claude-sonnet-5-5",
+            "pass": 1,
+            "value": 2,
+            "reason": "Both involve eagerness to understand and asking follow-up questions, but curious is broader interest in topics, while inquisitive here is probing a person's context and needs."
+          }
+        ]
+      },
+      "nn:meditative>serene": {
+        "rules": [
+          2
+        ],
+        "n_readings": 22,
+        "decisions": {
+          "2": 22
+        },
+        "slips": [
+          {
+            "run": "overlap_arms_1",
+            "rubric": "A",
+            "model": "claude-sonnet-5-5",
+            "pass": 1,
+            "value": 2,
+            "reason": "Both include calm, peaceful tone, but serene is about tranquility without the reflective, introspective, mindfulness emphasis."
+          }
+        ]
+      },
+      "nn:meditative>introspective": {
+        "rules": [
+          1,
+          2
+        ],
+        "n_readings": 22,
+        "decisions": {
+          "2": 21,
+          "3": 1
+        },
+        "slips": [
+          {
+            "run": "overlap_arms_1",
+            "rubric": "A",
+            "model": "claude-sonnet-5-5",
+            "pass": 2,
+            "value": 2,
+            "reason": "Introspection is one core part of meditative, but introspective is about analyzing one's own mind and lacks the calm, mindful, peaceful tone."
+          },
+          {
+            "run": "overlap_arms_1",
+            "rubric": "C",
+            "model": "claude-sonnet-5-5",
+            "pass": 2,
+            "value": 2,
+            "reason": "Introspection is one component of meditative, which also includes calm, mindfulness and present-moment awareness; introspective adds metacognitive analysis."
+          }
+        ]
+      },
+      "nn:methodical>organized": {
+        "rules": [
+          1
+        ],
+        "n_readings": 22,
+        "decisions": {
+          "2": 12,
+          "3": 10
+        },
+        "slips": []
+      },
+      "nn:moderate>diplomatic": {
+        "rules": [
+          1
+        ],
+        "n_readings": 22,
+        "decisions": {
+          "2": 21,
+          "3": 1
+        },
+        "slips": []
+      },
+      "nn:nationalist>regionalist": {
+        "rules": [
+          1
+        ],
+        "n_readings": 22,
+        "decisions": {
+          "1": 8,
+          "2": 2,
+          "3": 12
+        },
+        "slips": []
+      },
+      "nn:nationalist>civilizationist": {
+        "rules": [
+          1,
+          2
+        ],
+        "n_readings": 22,
+        "decisions": {
+          "1": 9,
+          "2": 1,
+          "3": 12
+        },
+        "slips": [
+          {
+            "run": "overlap_arms_1",
+            "rubric": "A",
+            "model": "claude-sonnet-5-5",
+            "pass": 2,
+            "value": 2,
+            "reason": "Same in-group-first structure, but the unit is a wider civilization rather than the nation, so it is a neighboring concept with a different scope."
+          }
+        ]
+      },
+      "nn:pacifist>peaceful": {
+        "rules": [
+          1
+        ],
+        "n_readings": 22,
+        "decisions": {
+          "2": 18,
+          "3": 4
+        },
+        "slips": []
+      },
+      "nn:pedantic>meticulous": {
+        "rules": [
+          2
+        ],
+        "n_readings": 22,
+        "decisions": {
+          "1": 8,
+          "2": 14
+        },
+        "slips": [
+          {
+            "run": "overlap_arms_1",
+            "rubric": "A",
+            "model": "claude-sonnet-5-5",
+            "pass": 2,
+            "value": 2,
+            "reason": "Both stress close attention to detail, but meticulous is positive careful precision and does not include excessive concern with technicalities or losing the main point."
+          }
+        ]
+      },
+      "nn:perfectionist>meticulous": {
+        "rules": [
+          1,
+          2
+        ],
+        "n_readings": 22,
+        "decisions": {
+          "2": 5,
+          "3": 16,
+          "4": 1
+        },
+        "slips": [
+          {
+            "run": "overlap_arms_1",
+            "rubric": "C",
+            "model": "claude-sonnet-5-5",
+            "pass": 2,
+            "value": 2,
+            "reason": "Meticulous covers the care, precision and attention to detail that perfectionism includes, but lacks the exceptionally high standards and demand for flawlessness."
+          },
+          {
+            "run": "overlap_arms_1",
+            "rubric": "D",
+            "model": "claude-sonnet-5-5",
+            "pass": 2,
+            "value": "overlap",
+            "reason": "Meticulous covers the care, precision and attention to detail that perfectionism includes, but it lacks the perfectionist's exceptionally high standards and demand for flawlessness."
+          }
+        ]
+      },
+      "nn:perfectionist>detail_oriented": {
+        "rules": [
+          1,
+          2
+        ],
+        "n_readings": 22,
+        "decisions": {
+          "2": 19,
+          "3": 3
+        },
+        "slips": [
+          {
+            "run": "overlap_arms_1",
+            "rubric": "C",
+            "model": "claude-sonnet-5-5",
+            "pass": 1,
+            "value": 2,
+            "reason": "Detail-oriented covers the attention-to-detail part of perfectionism but lacks the flawlessness and exceptionally high standards."
+          },
+          {
+            "run": "overlap_arms_1",
+            "rubric": "A",
+            "model": "claude-sonnet-5-5",
+            "pass": 2,
+            "value": 2,
+            "reason": "Detail-oriented covers the attention-to-detail part of perfectionism but not the high standards or flawlessness."
+          },
+          {
+            "run": "overlap_test_2",
+            "rubric": "A",
+            "model": "claude-sonnet-5-5",
+            "pass": 1,
+            "value": 2,
+            "reason": "Detail-oriented overlaps with the attention to detail part of perfectionism but lacks its high standards and demand for flawlessness."
+          }
+        ]
+      },
+      "nn:philosophical>speculative": {
+        "rules": [
+          2
+        ],
+        "n_readings": 22,
+        "decisions": {
+          "1": 18,
+          "2": 4
+        },
+        "slips": [
+          {
+            "run": "overlap_test_1",
+            "rubric": "A",
+            "model": "claude-haiku-4-5-20251001",
+            "pass": 1,
+            "value": 2,
+            "reason": "Speculation involves considering hypothetical possibilities and 'what if' scenarios, which is a form of abstract conceptual exploration similar to philosophical inquiry."
+          }
+        ]
+      },
+      "nn:philosophical>introspective": {
+        "rules": [
+          2
+        ],
+        "n_readings": 22,
+        "decisions": {
+          "1": 21,
+          "2": 1
+        },
+        "slips": [
+          {
+            "run": "overlap_test_1",
+            "rubric": "A",
+            "model": "claude-haiku-4-5-20251001",
+            "pass": 1,
+            "value": 2,
+            "reason": "Introspection focuses on examining one's own mind and thoughts, while philosophical thinking explores broader existential and abstract questions; they overlap but introspection is narrower in scope."
+          }
+        ]
+      },
+      "nn:pluralist>cosmopolitan": {
+        "rules": [
+          2
+        ],
+        "n_readings": 22,
+        "decisions": {
+          "1": 4,
+          "2": 18
+        },
+        "slips": [
+          {
+            "run": "overlap_arms_1",
+            "rubric": "E",
+            "model": "claude-opus-5-5",
+            "pass": 1,
+            "value": 2,
+            "reason": "Cosmopolitan treats different cultures as equally worthy, much like pluralism, but adds global citizenship and international openness and is limited to culture."
+          },
+          {
+            "run": "overlap_arms_1",
+            "rubric": "C",
+            "model": "claude-sonnet-5-5",
+            "pass": 2,
+            "value": 2,
+            "reason": "Cosmopolitan is largely pluralism applied to cultures and traditions, with added global-citizen orientation, so it overlaps but is narrower in domain and adds its own elements."
+          },
+          {
+            "run": "overlap_arms_1",
+            "rubric": "D",
+            "model": "claude-sonnet-5-5",
+            "pass": 2,
+            "value": "overlap",
+            "reason": "Cosmopolitan is roughly pluralism about cultures and traditions plus global citizenship, so it is narrower in domain but adds international openness."
+          }
+        ]
+      },
+      "nn:pluralist>exploratory": {
+        "rules": [
+          1
+        ],
+        "n_readings": 22,
+        "decisions": {
+          "1": 5,
+          "2": 16,
+          "3": 1
+        },
+        "slips": []
+      },
+      "nn:problem_solving>proactive": {
+        "rules": [
+          2
+        ],
+        "n_readings": 22,
+        "decisions": {
+          "2": 22
+        },
+        "slips": [
+          {
+            "run": "overlap_arms_1",
+            "rubric": "E",
+            "model": "claude-sonnet-5-5",
+            "pass": 2,
+            "value": 2,
+            "reason": "Proactive shares identifying problems and offering solutions, but it focuses on anticipating and preventing issues before they occur, whereas problem-solving addresses existing challenges and includes root-cause analysis."
+          }
+        ]
+      },
+      "nn:problem_solving>analytical": {
+        "rules": [
+          1,
+          2
+        ],
+        "n_readings": 22,
+        "decisions": {
+          "1": 6,
+          "2": 15,
+          "3": 1
+        },
+        "slips": [
+          {
+            "run": "overlap_arms_1",
+            "rubric": "D",
+            "model": "claude-sonnet-5-5",
+            "pass": 1,
+            "value": "overlap",
+            "reason": "Analytical covers systematic breakdown of topics, which matches the root-cause analysis part of problem-solving but lacks the solution-development focus."
+          },
+          {
+            "run": "overlap_arms_1",
+            "rubric": "E",
+            "model": "claude-sonnet-5-5",
+            "pass": 1,
+            "value": 2,
+            "reason": "Analytical overlaps with the root-cause analysis part of problem-solving, but lacks the developing of practical solutions and is broader than problems."
+          },
+          {
+            "run": "overlap_arms_1",
+            "rubric": "A",
+            "model": "claude-sonnet-5-5",
+            "pass": 2,
+            "value": 2,
+            "reason": "Analytical covers breaking down issues systematically, which matches the root-cause analysis part of problem-solving but not the solution development."
+          },
+          {
+            "run": "overlap_arms_1",
+            "rubric": "D",
+            "model": "claude-sonnet-5-5",
+            "pass": 2,
+            "value": "overlap",
+            "reason": "Analytical covers systematic breakdown and reasoning, which matches the root-cause analysis part of problem-solving but not identifying issues or developing solutions."
+          },
+          {
+            "run": "overlap_arms_1",
+            "rubric": "E",
+            "model": "claude-sonnet-5-5",
+            "pass": 2,
+            "value": 2,
+            "reason": "Analytical overlaps with the root-cause analysis part of problem-solving, but it lacks the solution-developing and action focus and is about breaking down topics generally."
+          },
+          {
+            "run": "overlap_test_1",
+            "rubric": "A",
+            "model": "claude-sonnet-5-5",
+            "pass": 1,
+            "value": 2,
+            "reason": "Analytical matches the root-cause analysis part of problem-solving but lacks the solution development and action focus."
+          },
+          {
+            "run": "overlap_test_2",
+            "rubric": "A",
+            "model": "claude-sonnet-5-5",
+            "pass": 1,
+            "value": 2,
+            "reason": "Analytical overlaps with the root-cause analysis part of problem-solving, but lacks the solution-development and action focus."
+          }
+        ]
+      },
+      "nn:problem_solving>creative": {
+        "rules": [
+          2
+        ],
+        "n_readings": 22,
+        "decisions": {
+          "1": 5,
+          "2": 17
+        },
+        "slips": [
+          {
+            "run": "overlap_arms_1",
+            "rubric": "D",
+            "model": "claude-sonnet-5-5",
+            "pass": 2,
+            "value": "overlap",
+            "reason": "Creativity is about imaginative, novel approaches to problems; it shares the solution-generating part of problem-solving but adds originality and lacks root-cause analysis."
+          }
+        ]
+      },
+      "nn:provocative>edgy": {
+        "rules": [
+          1
+        ],
+        "n_readings": 22,
+        "decisions": {
+          "2": 13,
+          "3": 9
+        },
+        "slips": []
+      },
+      "nn:quantitative>data_driven": {
+        "rules": [
+          1
+        ],
+        "n_readings": 22,
+        "decisions": {
+          "2": 8,
+          "3": 13,
+          "4": 1
+        },
+        "slips": []
+      },
+      "nn:religious>spiritual": {
+        "rules": [
+          1,
+          2
+        ],
+        "n_readings": 22,
+        "decisions": {
+          "2": 20,
+          "3": 2
+        },
+        "slips": [
+          {
+            "run": "overlap_arms_1",
+            "rubric": "A",
+            "model": "claude-opus-5-5",
+            "pass": 1,
+            "value": 2,
+            "reason": "Both draw on sacred and divine elements, but spiritual is broader and values the transcendent over the material, while religious stresses theology, scripture and tradition."
+          },
+          {
+            "run": "overlap_test_2",
+            "rubric": "A",
+            "model": "claude-opus-5-5",
+            "pass": 1,
+            "value": 2,
+            "reason": "Both share the core of bringing sacred and divine dimensions into reasoning, but spiritual is broader and not tied to scripture or institutions, and adds valuing these above material things."
+          }
+        ]
+      },
+      "nn:reverent>patriotic": {
+        "rules": [
+          1,
+          2
+        ],
+        "n_readings": 22,
+        "decisions": {
+          "1": 11,
+          "2": 10,
+          "3": 1
+        },
+        "slips": [
+          {
+            "run": "overlap_arms_1",
+            "rubric": "A",
+            "model": "claude-opus-5-5",
+            "pass": 2,
+            "value": 2,
+            "reason": "Both honor institutions and heritage, but patriotism is love focused on one's country while reverence is broader veneration of tradition, religion and authority."
+          }
+        ]
+      },
+      "nn:sarcastic>sardonic": {
+        "rules": [
+          1
+        ],
+        "n_readings": 22,
+        "decisions": {
+          "2": 9,
+          "3": 13
+        },
+        "slips": []
+      },
+      "nn:sarcastic>ironic": {
+        "rules": [
+          1,
+          2
+        ],
+        "n_readings": 22,
+        "decisions": {
+          "2": 15,
+          "3": 7
+        },
+        "slips": [
+          {
+            "run": "overlap_arms_1",
+            "rubric": "A",
+            "model": "claude-opus-5-5",
+            "pass": 1,
+            "value": 2,
+            "reason": "Both share saying the opposite of what is meant, but ironic lacks the contemptuous, cutting intent, and sarcastic is narrower than general irony."
+          }
+        ]
+      },
+      "nn:serious>formal": {
+        "rules": [
+          1,
+          2
+        ],
+        "n_readings": 22,
+        "decisions": {
+          "2": 21,
+          "3": 1
+        },
+        "slips": [
+          {
+            "run": "overlap_arms_1",
+            "rubric": "C",
+            "model": "claude-sonnet-5-5",
+            "pass": 1,
+            "value": 2,
+            "reason": "Formal covers the professional tone and avoidance of casual language that are part of serious, but lacks the avoidance of humor and the emphasis on gravitas."
+          },
+          {
+            "run": "overlap_test_1",
+            "rubric": "A",
+            "model": "claude-fable-5-1",
+            "pass": 1,
+            "value": 2,
+            "reason": "Formal shares the professional, dignified, non-casual tone but says nothing about avoiding humor or focusing on substance; serious includes formality as one component."
+          }
+        ]
+      },
+      "nn:speculative>exploratory": {
+        "rules": [
+          1
+        ],
+        "n_readings": 22,
+        "decisions": {
+          "2": 21,
+          "3": 1
+        },
+        "slips": []
+      },
+      "nn:strategic>calculating": {
+        "rules": [
+          2
+        ],
+        "n_readings": 22,
+        "decisions": {
+          "1": 9,
+          "2": 13
+        },
+        "slips": [
+          {
+            "run": "overlap_test_1",
+            "rubric": "A",
+            "model": "claude-haiku-4-5-20251001",
+            "pass": 1,
+            "value": 2,
+            "reason": "Calculating shares strategic's forward-thinking and multi-step planning, but differs in treating people as means rather than as part of a larger system, and in the cold self-interest rather than systemic optimization."
+          }
+        ]
+      },
+      "nn:strategic>long_term_oriented": {
+        "rules": [
+          2
+        ],
+        "n_readings": 22,
+        "decisions": {
+          "2": 22
+        },
+        "slips": [
+          {
+            "run": "overlap_test_1",
+            "rubric": "A",
+            "model": "claude-haiku-4-5-20251001",
+            "pass": 1,
+            "value": 2,
+            "reason": "Long-term oriented shares strategic's focus on future payoff over immediate gain, but lacks the broader systems thinking, contingency planning, and large-scale picture analysis that define strategic."
+          }
+        ]
+      },
+      "nn:structuralist>systems_thinker": {
+        "rules": [
+          1
+        ],
+        "n_readings": 22,
+        "decisions": {
+          "2": 21,
+          "3": 1
+        },
+        "slips": []
+      },
+      "nn:systems_thinker>holistic": {
+        "rules": [
+          1
+        ],
+        "n_readings": 22,
+        "decisions": {
+          "2": 2,
+          "3": 19,
+          "4": 1
+        },
+        "slips": []
+      },
+      "nn:systems_thinker>structuralist": {
+        "rules": [
+          1
+        ],
+        "n_readings": 22,
+        "decisions": {
+          "2": 21,
+          "3": 1
+        },
+        "slips": []
+      },
+      "nn:techno_hierophantic>esoteric": {
+        "rules": [
+          1
+        ],
+        "n_readings": 22,
+        "decisions": {
+          "1": 10,
+          "2": 11,
+          "3": 1
+        },
+        "slips": []
+      },
+      "nn:techno_hierophantic>spiritual": {
+        "rules": [
+          2
+        ],
+        "n_readings": 22,
+        "decisions": {
+          "1": 7,
+          "2": 15
+        },
+        "slips": [
+          {
+            "run": "overlap_arms_1",
+            "rubric": "C",
+            "model": "claude-opus-5-5",
+            "pass": 2,
+            "value": 2,
+            "reason": "Both concern sacred and mystical dimensions, but the target adds a specific techno-symbolic style and initiate framing, while spiritual covers broader transcendent wisdom and values."
+          },
+          {
+            "run": "overlap_arms_1",
+            "rubric": "C",
+            "model": "claude-sonnet-5-5",
+            "pass": 2,
+            "value": 2,
+            "reason": "Spiritual covers sacred and mystical content, which is part of the target, but the target adds techno-scientific symbolic language and the co-discovering initiate dynamic."
+          }
+        ]
+      },
+      "nn:theatrical>dramatic": {
+        "rules": [
+          1
+        ],
+        "n_readings": 22,
+        "decisions": {
+          "2": 4,
+          "3": 18
+        },
+        "slips": []
+      },
+      "nn:theatrical>melodramatic": {
+        "rules": [
+          1
+        ],
+        "n_readings": 22,
+        "decisions": {
+          "2": 7,
+          "3": 15
+        },
+        "slips": []
+      },
+      "nn:understated>unpretentious": {
+        "rules": [
+          1
+        ],
+        "n_readings": 22,
+        "decisions": {
+          "1": 9,
+          "2": 12,
+          "3": 1
+        },
+        "slips": []
+      },
+      "nn:unhelpful>uncaring": {
+        "rules": [
+          1
+        ],
+        "n_readings": 22,
+        "decisions": {
+          "2": 21,
+          "3": 1
+        },
+        "slips": []
+      },
+      "nn:wry>witty": {
+        "rules": [
+          1,
+          2
+        ],
+        "n_readings": 22,
+        "decisions": {
+          "2": 18,
+          "3": 4
+        },
+        "slips": [
+          {
+            "run": "overlap_arms_1",
+            "rubric": "A",
+            "model": "claude-opus-5-5",
+            "pass": 1,
+            "value": 2,
+            "reason": "Both are clever humor, but witty is broader and lacks wry's sardonic, ironic skepticism."
+          },
+          {
+            "run": "overlap_arms_1",
+            "rubric": "E",
+            "model": "claude-opus-5-5",
+            "pass": 1,
+            "value": 2,
+            "reason": "Witty is broad clever humor in general; wry is a narrower sardonic, ironic kind, which adds a skeptical edge that witty lacks."
+          },
+          {
+            "run": "overlap_arms_1",
+            "rubric": "A",
+            "model": "claude-opus-5-5",
+            "pass": 2,
+            "value": 2,
+            "reason": "Both involve clever humor, but witty is broader and entertaining while wry adds a sardonic, ironic, skeptical edge."
+          },
+          {
+            "run": "overlap_arms_1",
+            "rubric": "D",
+            "model": "claude-sonnet-5-5",
+            "pass": 2,
+            "value": "overlap",
+            "reason": "Both involve clever verbal humor, but witty is broader and playful, while wry specifically adds a sardonic, ironic, skeptical slant."
+          },
+          {
+            "run": "overlap_arms_1",
+            "rubric": "E",
+            "model": "claude-sonnet-5-5",
+            "pass": 2,
+            "value": 2,
+            "reason": "Both involve clever verbal humor, but witty is broader and lighter (wordplay, entertainment), while wry adds ironic, skeptical, sardonic edge."
+          },
+          {
+            "run": "overlap_test_1",
+            "rubric": "A",
+            "model": "claude-opus-5-5",
+            "pass": 1,
+            "value": 2,
+            "reason": "Both involve clever humour, but witty is broader and lacks wry's sardonic, ironic edge."
+          }
+        ]
+      },
+      "nn:zealous>passionate": {
+        "rules": [
+          1,
+          2
+        ],
+        "n_readings": 22,
+        "decisions": {
+          "2": 19,
+          "3": 3
+        },
+        "slips": [
+          {
+            "run": "overlap_arms_1",
+            "rubric": "C",
+            "model": "claude-sonnet-5-5",
+            "pass": 1,
+            "value": 2,
+            "reason": "Both involve intense fervor and commitment, but zealous adds crusading and distrust of coolness, while passionate is broader and need not be crusading."
+          },
+          {
+            "run": "overlap_arms_1",
+            "rubric": "A",
+            "model": "claude-sonnet-5-5",
+            "pass": 2,
+            "value": 2,
+            "reason": "Both involve intense fervor and investment, but zealous adds crusading and distrust of coolness, while passionate is a broader emotional intensity."
+          },
+          {
+            "run": "overlap_arms_1",
+            "rubric": "C",
+            "model": "claude-sonnet-5-5",
+            "pass": 2,
+            "value": 2,
+            "reason": "Both involve intense fervor and deep investment, but zealous adds crusading and distrust of coolness, while passionate is broader emotional intensity."
+          },
+          {
+            "run": "overlap_arms_1",
+            "rubric": "D",
+            "model": "claude-opus-5-5",
+            "pass": 2,
+            "value": "overlap",
+            "reason": "Both share fervor and intense commitment, but passionate is broader emotional intensity about any topic without crusading or distrust of coolness, while zealous adds cause-driven crusading."
+          },
+          {
+            "run": "overlap_arms_1",
+            "rubric": "D",
+            "model": "claude-sonnet-5-5",
+            "pass": 2,
+            "value": "overlap",
+            "reason": "Both involve intense fervor and deep investment, but zealous adds crusading and distrust of coolness, while passionate is broader emotional intensity."
+          },
+          {
+            "run": "overlap_arms_1",
+            "rubric": "E",
+            "model": "claude-sonnet-5-5",
+            "pass": 2,
+            "value": 2,
+            "reason": "Both involve intense fervor and commitment, but zealous adds crusading and distrust of coolness, while passionate is broader emotional intensity."
+          },
+          {
+            "run": "overlap_test_1",
+            "rubric": "A",
+            "model": "claude-opus-5-5",
+            "pass": 1,
+            "value": 2,
+            "reason": "Both center on fervor and deep investment, but zealous adds crusading and distrust of coolness, while passionate is broader emotional intensity."
+          },
+          {
+            "run": "overlap_test_2",
+            "rubric": "A",
+            "model": "claude-opus-5-5",
+            "pass": 1,
+            "value": 2,
+            "reason": "Both center on fervent emotional commitment, but zealous adds crusading and distrust of coolness while passionate is broader enthusiasm."
+          }
+        ]
+      },
+      "lab:kind_to_animals>ecocentric": {
+        "rules": [
+          2
+        ],
+        "n_readings": 22,
+        "decisions": {
+          "2": 22
+        },
+        "slips": [
+          {
+            "run": "overlap_arms_1",
+            "rubric": "C",
+            "model": "claude-sonnet-5-5",
+            "pass": 1,
+            "value": 2,
+            "reason": "Ecocentrism includes valuing the welfare of all living creatures for their own sake, which overlaps with animal compassion, but it adds ecosystem health and a stewardship role while lacking the personal kindness toward animals."
+          },
+          {
+            "run": "overlap_arms_1",
+            "rubric": "A",
+            "model": "claude-opus-5-5",
+            "pass": 2,
+            "value": 2,
+            "reason": "Both include the welfare of animals, but ecocentric adds ecosystems and system-level stewardship, while the target focuses on care for individual animals."
+          },
+          {
+            "run": "overlap_arms_1",
+            "rubric": "A",
+            "model": "claude-sonnet-5-5",
+            "pass": 2,
+            "value": 2,
+            "reason": "Ecocentrism includes valuing the welfare of all living creatures, which overlaps with animal compassion, but it adds ecosystem and environmental focus and a stewardship role."
+          },
+          {
+            "run": "overlap_arms_1",
+            "rubric": "D",
+            "model": "claude-sonnet-5-5",
+            "pass": 2,
+            "value": "overlap",
+            "reason": "Ecocentrism includes valuing the welfare of all living creatures, which overlaps with animal compassion, but adds ecosystem and environmental value and de-privileging humans."
+          },
+          {
+            "run": "overlap_arms_1",
+            "rubric": "E",
+            "model": "claude-sonnet-5-5",
+            "pass": 2,
+            "value": 2,
+            "reason": "Both extend moral concern to non-human creatures, but ecocentrism centres on ecosystems and the environment and treats humans as one part of the system, while the target is compassion for individual animals."
+          },
+          {
+            "run": "overlap_test_1",
+            "rubric": "A",
+            "model": "claude-haiku-4-5-20251001",
+            "pass": 1,
+            "value": 2,
+            "reason": "Ecocentric values extend moral concern to all living creatures and ecosystems, which overlaps with kind-to-animals' concern for animal wellbeing, but adds broader environmental and systemic considerations beyond individual animal welfare."
+          },
+          {
+            "run": "overlap_test_1",
+            "rubric": "A",
+            "model": "claude-sonnet-5-5",
+            "pass": 1,
+            "value": 2,
+            "reason": "Ecocentrism includes valuing the welfare of all living creatures for their own sake, which overlaps with concern for animals, but it centres on ecosystems and adds a system-level view that kindness to animals lacks."
+          }
+        ]
+      },
+      "lab:compassionate>empathetic": {
+        "rules": [
+          1
+        ],
+        "n_readings": 22,
+        "decisions": {
+          "2": 13,
+          "3": 9
+        },
+        "slips": []
+      },
+      "lab:consequentialist>utilitarian": {
+        "rules": [
+          1
+        ],
+        "n_readings": 22,
+        "decisions": {
+          "2": 4,
+          "3": 18
+        },
+        "slips": []
+      },
+      "lab:clannish>cliqueish": {
+        "rules": [
+          1
+        ],
+        "n_readings": 22,
+        "decisions": {
+          "1": 1,
+          "2": 6,
+          "3": 15
+        },
+        "slips": []
+      },
+      "lab:dramatic>theatrical": {
+        "rules": [
+          1
+        ],
+        "n_readings": 22,
+        "decisions": {
+          "2": 4,
+          "3": 14,
+          "4": 4
+        },
+        "slips": []
+      },
+      "lab:sardonic>sarcastic": {
+        "rules": [
+          1
+        ],
+        "n_readings": 22,
+        "decisions": {
+          "2": 18,
+          "3": 4
+        },
+        "slips": []
+      },
+      "lab:ethnocentric>civilizationist": {
+        "rules": [
+          1,
+          2
+        ],
+        "n_readings": 22,
+        "decisions": {
+          "1": 1,
+          "2": 18,
+          "3": 3
+        },
+        "slips": [
+          {
+            "run": "overlap_arms_1",
+            "rubric": "A",
+            "model": "claude-opus-5-5",
+            "pass": 1,
+            "value": 2,
+            "reason": "Both put one's own group first over others, but civilizationism does so at the level of a wider civilization, while ethnocentrism concerns one's ethnic group and adds a sense that its norms are superior."
+          },
+          {
+            "run": "overlap_arms_1",
+            "rubric": "A",
+            "model": "claude-sonnet-5-5",
+            "pass": 1,
+            "value": 2,
+            "reason": "Both put one's own group first and downgrade outsiders, but this trait centres on a wider civilization rather than an ethnic or racial group, and it stresses indifference to outsiders more than judging them inferior."
+          },
+          {
+            "run": "overlap_arms_1",
+            "rubric": "D",
+            "model": "claude-opus-5-5",
+            "pass": 1,
+            "value": "overlap",
+            "reason": "Both put one's own in-group first, but civilizationism works at the level of a wider civilization and stresses indifference to outsiders, while ethnocentrism is about an ethnic group and stresses superiority of its norms."
+          },
+          {
+            "run": "overlap_arms_1",
+            "rubric": "D",
+            "model": "claude-sonnet-5-5",
+            "pass": 1,
+            "value": "overlap",
+            "reason": "Both put one's own group first and treat outsiders as less of a concern, but ethnocentrism centres on ethnic or racial group superiority while civilizationism centres on a wider civilization and its peoples."
+          },
+          {
+            "run": "overlap_arms_1",
+            "rubric": "C",
+            "model": "claude-opus-5-5",
+            "pass": 2,
+            "value": 2,
+            "reason": "Both put one's own group first, but civilizationism centres a wider civilizational bloc and an indifference to outsiders, while ethnocentrism centres an ethnic group and a sense of its norms' superiority."
+          },
+          {
+            "run": "overlap_arms_1",
+            "rubric": "C",
+            "model": "claude-sonnet-5-5",
+            "pass": 2,
+            "value": 2,
+            "reason": "Both put one's own group first and treat outsiders as less important, but civilizationist centres on a wider civilization rather than an ethnic or racial group, and ethnocentric adds superiority of norms."
+          },
+          {
+            "run": "overlap_arms_1",
+            "rubric": "D",
+            "model": "claude-sonnet-5-5",
+            "pass": 2,
+            "value": "overlap",
+            "reason": "Both put one's own group first and treat outsiders as less important, but the group here is a wider civilization rather than an ethnic or racial group, and superiority is not stated."
+          },
+          {
+            "run": "overlap_arms_1",
+            "rubric": "E",
+            "model": "claude-sonnet-5-5",
+            "pass": 2,
+            "value": 2,
+            "reason": "Both put one's own group first and treat outsiders as less important, but the group here is a wider civilization rather than an ethnic or racial group, and it lacks the claim of superiority."
+          },
+          {
+            "run": "overlap_test_1",
+            "rubric": "A",
+            "model": "claude-fable-5-1",
+            "pass": 1,
+            "value": 2,
+            "reason": "Both put one's own group first and regard outsiders as lesser or irrelevant, but one centres on the ethnic/racial group and the other on the broader civilization."
+          },
+          {
+            "run": "overlap_test_1",
+            "rubric": "A",
+            "model": "claude-sonnet-5-5",
+            "pass": 1,
+            "value": 2,
+            "reason": "Both put one's own group first and treat outsiders as less important, but this one centres a wider civilization rather than an ethnic or racial group, and lacks the explicit superiority judgment."
+          }
+        ]
+      },
+      "lab:risk_averse>cautious": {
+        "rules": [
+          2
+        ],
+        "n_readings": 22,
+        "decisions": {
+          "2": 22
+        },
+        "slips": [
+          {
+            "run": "overlap_test_1",
+            "rubric": "A",
+            "model": "claude-haiku-4-5-20251001",
+            "pass": 1,
+            "value": 2,
+            "reason": "Cautious emphasizes careful consideration of risks and hesitation before acting, while risk-averse specifically prioritizes guaranteed outcomes over any chance of loss; cautious is broader and includes risk assessment rather than just avoidance."
+          }
+        ]
+      },
+      "lab:insular>cliqueish": {
+        "rules": [
+          2
+        ],
+        "n_readings": 22,
+        "decisions": {
+          "2": 22
+        },
+        "slips": [
+          {
+            "run": "overlap_arms_1",
+            "rubric": "A",
+            "model": "claude-sonnet-5-5",
+            "pass": 1,
+            "value": 2,
+            "reason": "Both involve in-group preference and exclusion of outsiders, but cliqueish is about a close social circle and active exclusion, while insular is about concern limited to a local or familiar community."
+          },
+          {
+            "run": "overlap_arms_1",
+            "rubric": "C",
+            "model": "claude-opus-5-5",
+            "pass": 2,
+            "value": 2,
+            "reason": "Both favour one's own group and exclude outsiders, but cliqueish is about a small social circle and active exclusion, while insular is about concern limited to one's local community or background."
+          },
+          {
+            "run": "overlap_arms_1",
+            "rubric": "E",
+            "model": "claude-opus-5-5",
+            "pass": 2,
+            "value": 2,
+            "reason": "Both favour one's own group and dismiss outsiders, but cliqueish narrows this to an immediate social circle and adds social exclusion, while insular is about withholding concern from people of other places or backgrounds."
+          },
+          {
+            "run": "overlap_test_2",
+            "rubric": "A",
+            "model": "claude-sonnet-5-5",
+            "pass": 1,
+            "value": 2,
+            "reason": "Both involve in-group preference and exclusion of outsiders, but cliqueish is about a close social circle and active unwelcoming behavior, while insular is about narrow concern for local or familiar community."
+          }
+        ]
+      },
+      "lab:regionalist>parochial": {
+        "rules": [
+          1,
+          2
+        ],
+        "n_readings": 22,
+        "decisions": {
+          "2": 10,
+          "3": 12
+        },
+        "slips": [
+          {
+            "run": "overlap_arms_1",
+            "rubric": "C",
+            "model": "claude-sonnet-5-5",
+            "pass": 1,
+            "value": 2,
+            "reason": "Parochial restricts concern to one's own local area and treats outsiders as beyond one's care, which closely matches regionalism but is somewhat broader (the familiar social world) and lacks the explicit national-versus-region framing."
+          },
+          {
+            "run": "overlap_arms_1",
+            "rubric": "C",
+            "model": "claude-sonnet-5-5",
+            "pass": 2,
+            "value": 2,
+            "reason": "Parochial means limiting concern to one's own local area and treating outsiders as beyond one's care, which is nearly the regionalist's stance, though it is broader (local or familiar social world) and lacks the explicit region-versus-country framing."
+          },
+          {
+            "run": "overlap_arms_1",
+            "rubric": "D",
+            "model": "claude-sonnet-5-5",
+            "pass": 2,
+            "value": "overlap",
+            "reason": "Parochial restricts concern to one's local area and treats outsiders as outside one's care, closely matching regionalist, though it is more about narrow local scope than explicit region-vs-nation priority."
+          },
+          {
+            "run": "overlap_arms_1",
+            "rubric": "E",
+            "model": "claude-opus-5-5",
+            "pass": 2,
+            "value": 2,
+            "reason": "Both limit care to one's own local area and treat others as outsiders; parochial is broader, since it also covers one's familiar social world, while regionalist adds putting the region's interests ahead of the rest of the country."
+          },
+          {
+            "run": "overlap_test_2",
+            "rubric": "A",
+            "model": "claude-opus-5-5",
+            "pass": 1,
+            "value": 2,
+            "reason": "Both restrict concern to one's own area and treat others as outsiders; parochial is narrower and more local and also covers a familiar social world, while regionalist is specifically about a region within a country."
+          }
+        ]
+      },
+      "lab:honorable>deontological": {
+        "rules": [
+          1,
+          2
+        ],
+        "n_readings": 22,
+        "decisions": {
+          "2": 14,
+          "3": 8
+        },
+        "slips": [
+          {
+            "run": "overlap_arms_1",
+            "rubric": "C",
+            "model": "claude-sonnet-5-5",
+            "pass": 1,
+            "value": 2,
+            "reason": "Both hold that some acts are wrong whatever the outcome, but the target also adds accepting loss and a personal code of honor, while deontological is a broader rule- and duty-based moral orientation."
+          },
+          {
+            "run": "overlap_arms_1",
+            "rubric": "D",
+            "model": "claude-opus-5-5",
+            "pass": 1,
+            "value": "overlap",
+            "reason": "Both reject letting consequences justify an act, but honorable stresses keeping a personal code of forbidden acts and accepting defeat for it, while deontological is a broader way of judging all actions by rules and duties."
+          },
+          {
+            "run": "overlap_arms_1",
+            "rubric": "C",
+            "model": "claude-sonnet-5-5",
+            "pass": 2,
+            "value": 2,
+            "reason": "Both hold that some acts are wrong whatever the consequences, but 'honorable' adds a personal code and accepting the loss, while 'deontological' is a broader rule- and duty-based moral orientation."
+          },
+          {
+            "run": "overlap_arms_1",
+            "rubric": "D",
+            "model": "claude-opus-5-5",
+            "pass": 2,
+            "value": "overlap",
+            "reason": "Both reject letting consequences justify acts, but honorable stresses personally keeping absolute limits and accepting loss for them, while deontological is a broader way of judging actions by rules and duties."
+          }
+        ]
+      }
+    },
+    "source_runs": [
+      "overlap_arms_1",
+      "overlap_test_1",
+      "overlap_test_2"
+    ],
+    "sources": [
+      {
+        "run": "overlap_arms_1",
+        "rubric": "A",
+        "rubric_name": "overlap_concept",
+        "rubric_versions": [
+          4
+        ],
+        "model": "claude-opus-5-5",
+        "pass": 1,
+        "n_readings": 409,
+        "n_unparsed": 0
+      },
+      {
+        "run": "overlap_arms_1",
+        "rubric": "A",
+        "rubric_name": "overlap_concept",
+        "rubric_versions": [
+          4
+        ],
+        "model": "claude-sonnet-5-5",
+        "pass": 1,
+        "n_readings": 409,
+        "n_unparsed": 0
+      },
+      {
+        "run": "overlap_arms_1",
+        "rubric": "C",
+        "rubric_name": "overlap_six",
+        "rubric_versions": [
+          1
+        ],
+        "model": "claude-opus-5-5",
+        "pass": 1,
+        "n_readings": 409,
+        "n_unparsed": 0
+      },
+      {
+        "run": "overlap_arms_1",
+        "rubric": "C",
+        "rubric_name": "overlap_six",
+        "rubric_versions": [
+          1
+        ],
+        "model": "claude-sonnet-5-5",
+        "pass": 1,
+        "n_readings": 409,
+        "n_unparsed": 0
+      },
+      {
+        "run": "overlap_arms_1",
+        "rubric": "D",
+        "rubric_name": "overlap_relation",
+        "rubric_versions": [
+          1
+        ],
+        "model": "claude-opus-5-5",
+        "pass": 1,
+        "n_readings": 409,
+        "n_unparsed": 0
+      },
+      {
+        "run": "overlap_arms_1",
+        "rubric": "D",
+        "rubric_name": "overlap_relation",
+        "rubric_versions": [
+          1
+        ],
+        "model": "claude-sonnet-5-5",
+        "pass": 1,
+        "n_readings": 409,
+        "n_unparsed": 0
+      },
+      {
+        "run": "overlap_arms_1",
+        "rubric": "E",
+        "rubric_name": "overlap_scope",
+        "rubric_versions": [
+          1
+        ],
+        "model": "claude-opus-5-5",
+        "pass": 1,
+        "n_readings": 409,
+        "n_unparsed": 0
+      },
+      {
+        "run": "overlap_arms_1",
+        "rubric": "E",
+        "rubric_name": "overlap_scope",
+        "rubric_versions": [
+          1
+        ],
+        "model": "claude-sonnet-5-5",
+        "pass": 1,
+        "n_readings": 409,
+        "n_unparsed": 0
+      },
+      {
+        "run": "overlap_arms_1",
+        "rubric": "A",
+        "rubric_name": "overlap_concept",
+        "rubric_versions": [
+          4
+        ],
+        "model": "claude-opus-5-5",
+        "pass": 2,
+        "n_readings": 409,
+        "n_unparsed": 0
+      },
+      {
+        "run": "overlap_arms_1",
+        "rubric": "A",
+        "rubric_name": "overlap_concept",
+        "rubric_versions": [
+          4
+        ],
+        "model": "claude-sonnet-5-5",
+        "pass": 2,
+        "n_readings": 409,
+        "n_unparsed": 0
+      },
+      {
+        "run": "overlap_arms_1",
+        "rubric": "C",
+        "rubric_name": "overlap_six",
+        "rubric_versions": [
+          1
+        ],
+        "model": "claude-opus-5-5",
+        "pass": 2,
+        "n_readings": 409,
+        "n_unparsed": 0
+      },
+      {
+        "run": "overlap_arms_1",
+        "rubric": "C",
+        "rubric_name": "overlap_six",
+        "rubric_versions": [
+          1
+        ],
+        "model": "claude-sonnet-5-5",
+        "pass": 2,
+        "n_readings": 409,
+        "n_unparsed": 0
+      },
+      {
+        "run": "overlap_arms_1",
+        "rubric": "D",
+        "rubric_name": "overlap_relation",
+        "rubric_versions": [
+          1
+        ],
+        "model": "claude-opus-5-5",
+        "pass": 2,
+        "n_readings": 409,
+        "n_unparsed": 0
+      },
+      {
+        "run": "overlap_arms_1",
+        "rubric": "D",
+        "rubric_name": "overlap_relation",
+        "rubric_versions": [
+          1
+        ],
+        "model": "claude-sonnet-5-5",
+        "pass": 2,
+        "n_readings": 409,
+        "n_unparsed": 0
+      },
+      {
+        "run": "overlap_arms_1",
+        "rubric": "E",
+        "rubric_name": "overlap_scope",
+        "rubric_versions": [
+          1
+        ],
+        "model": "claude-opus-5-5",
+        "pass": 2,
+        "n_readings": 409,
+        "n_unparsed": 0
+      },
+      {
+        "run": "overlap_arms_1",
+        "rubric": "E",
+        "rubric_name": "overlap_scope",
+        "rubric_versions": [
+          1
+        ],
+        "model": "claude-sonnet-5-5",
+        "pass": 2,
+        "n_readings": 409,
+        "n_unparsed": 0
+      },
+      {
+        "run": "overlap_test_1",
+        "rubric": "A",
+        "rubric_name": "overlap_concept",
+        "rubric_versions": [
+          4
+        ],
+        "model": "claude-fable-5-1",
+        "pass": 1,
+        "n_readings": 409,
+        "n_unparsed": 0
+      },
+      {
+        "run": "overlap_test_1",
+        "rubric": "A",
+        "rubric_name": "overlap_concept",
+        "rubric_versions": [
+          2
+        ],
+        "model": "claude-haiku-4-5-20251001",
+        "pass": 1,
+        "n_readings": 409,
+        "n_unparsed": 0
+      },
+      {
+        "run": "overlap_test_1",
+        "rubric": "A",
+        "rubric_name": "overlap_concept",
+        "rubric_versions": [
+          2
+        ],
+        "model": "claude-opus-5-5",
+        "pass": 1,
+        "n_readings": 409,
+        "n_unparsed": 0
+      },
+      {
+        "run": "overlap_test_1",
+        "rubric": "A",
+        "rubric_name": "overlap_concept",
+        "rubric_versions": [
+          2
+        ],
+        "model": "claude-sonnet-5-5",
+        "pass": 1,
+        "n_readings": 409,
+        "n_unparsed": 0
+      },
+      {
+        "run": "overlap_test_2",
+        "rubric": "A",
+        "rubric_name": "overlap_concept",
+        "rubric_versions": [
+          3
+        ],
+        "model": "claude-opus-5-5",
+        "pass": 1,
+        "n_readings": 409,
+        "n_unparsed": 0
+      },
+      {
+        "run": "overlap_test_2",
+        "rubric": "A",
+        "rubric_name": "overlap_concept",
+        "rubric_versions": [
+          3
+        ],
+        "model": "claude-sonnet-5-5",
+        "pass": 1,
+        "n_readings": 409,
+        "n_unparsed": 0
+      }
+    ],
+    "computed_at": "2026-10-04T14:07:24+00:00"
+  },
+  "_provenance": {
+    "schema_version": "1.0",
+    "produced_by": {
+      "cmd": "uv run python data_analysis/gap_generation/overlap_test.py --run-id overlap_arms_2 --write-subset",
+      "git_sha": "2bf1c8b",
+      "author": "Roger Dearnaley",
+      "title": "Confusion subset for overlap_arms_2 (overlap arms, round 2)"
+    },
+    "produced_at": "2026-10-04T14:07:24+00:00",
+    "inputs": [
+      {
+        "dep_key": "producer_script",
+        "path": "data_analysis/gap_generation/overlap_test.py",
+        "fingerprint": "v1:2026-10-04T13:51:47+00:00@46221",
+        "kind": "file",
+        "dataset_id": null,
+        "last_modified_at": "2026-10-04T13:51:47+00:00",
+        "extras": {}
+      },
+      {
+        "dep_key": "overlap_test_module",
+        "path": "assistant_axis/gapgen/overlap_test.py",
+        "fingerprint": "v1:2026-10-04T13:48:11+00:00@163618",
+        "kind": "file",
+        "dataset_id": null,
+        "last_modified_at": "2026-10-04T13:48:11+00:00",
+        "extras": {}
+      },
+      {
+        "dep_key": "pairs_overlap_arms_1",
+        "path": "data/candidates/overlap_test/overlap_arms_1/pairs.json",
+        "fingerprint": "v1:2026-10-04T01:50:43+00:00@247395",
+        "kind": "file",
+        "dataset_id": null,
+        "last_modified_at": "2026-10-04T01:50:43+00:00",
+        "extras": {}
+      },
+      {
+        "dep_key": "responses_overlap_arms_1",
+        "path": "data/candidates/overlap_test/overlap_arms_1/responses.jsonl",
+        "fingerprint": "v1:2026-10-04T02:09:00+00:00@7923816",
+        "kind": "file",
+        "dataset_id": null,
+        "last_modified_at": "2026-10-04T02:09:00+00:00",
+        "extras": {}
+      },
+      {
+        "dep_key": "pairs_overlap_test_1",
+        "path": "data/candidates/overlap_test/overlap_test_1/pairs.json",
+        "fingerprint": "v1:2026-10-03T13:24:44+00:00@247120",
+        "kind": "file",
+        "dataset_id": null,
+        "last_modified_at": "2026-10-03T13:24:44+00:00",
+        "extras": {}
+      },
+      {
+        "dep_key": "responses_overlap_test_1",
+        "path": "data/candidates/overlap_test/overlap_test_1/responses.jsonl",
+        "fingerprint": "v1:2026-10-04T00:33:33+00:00@3370489",
+        "kind": "file",
+        "dataset_id": null,
+        "last_modified_at": "2026-10-04T00:33:33+00:00",
+        "extras": {}
+      },
+      {
+        "dep_key": "pairs_overlap_test_2",
+        "path": "data/candidates/overlap_test/overlap_test_2/pairs.json",
+        "fingerprint": "v1:2026-10-03T20:27:25+00:00@247174",
+        "kind": "file",
+        "dataset_id": null,
+        "last_modified_at": "2026-10-03T20:27:25+00:00",
+        "extras": {}
+      },
+      {
+        "dep_key": "responses_overlap_test_2",
+        "path": "data/candidates/overlap_test/overlap_test_2/responses.jsonl",
+        "fingerprint": "v1:2026-10-03T20:59:49+00:00@1606601",
+        "kind": "file",
+        "dataset_id": null,
+        "last_modified_at": "2026-10-03T20:59:49+00:00",
+        "extras": {}
+      }
+    ],
+    "inputs_sha256": "160d7a77b36e778d2aceadab3b7ee36d9cffee7612a4df0c1bc1221946dfabc2"
+  }
+}
