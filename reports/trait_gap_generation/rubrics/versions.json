@@ -183,6 +183,38 @@
         "pinned_at": "2026-10-04T01:22:22+00:00",
         "why": "First pin: draft 1 of rubric E (Roger's rewrite of rubric A's line 3: narrowed, broadened, stronger, milder or a shift of emphasis, and the reason says which), arm 3 of the overlap rubric arms experiment (coding_plan_overlap_arms.md, 2026-10-04); rubric A version 4's text with line 3 replaced"
       }
+    ],
+    "overlap_concept_implies": [
+      {
+        "version": 1,
+        "sha256": "66d2aceac9d17de1987c4fa87ab9d8b87b760abcbbfa79b570c9fd65bbb6a30d",
+        "pinned_at": "2026-10-04T13:36:42+00:00",
+        "why": "Round 2 of the overlap rubric arms experiment (coding_plan_overlap_arms.md, Round 2): rubric A version 4 with lines 3 and 2 replaced by the one-way implication test lines, byte for byte from the brief"
+      }
+    ],
+    "overlap_six_implies": [
+      {
+        "version": 1,
+        "sha256": "f6099e0bf44453005abc0231011b5836cba1527c6ba48563ba17f7b5aa5d0866",
+        "pinned_at": "2026-10-04T13:36:44+00:00",
+        "why": "Round 2 of the overlap rubric arms experiment (coding_plan_overlap_arms.md, Round 2): rubric C version 1 with lines 3 and 2 replaced by the one-way implication test lines, byte for byte from the brief"
+      }
+    ],
+    "overlap_relation_implies": [
+      {
+        "version": 1,
+        "sha256": "805a5d9495bb690bb168f0e0504b9d5563138692bd2a4566ef62316e4b17c1c9",
+        "pinned_at": "2026-10-04T13:36:45+00:00",
+        "why": "Round 2 of the overlap rubric arms experiment (coding_plan_overlap_arms.md, Round 2): rubric D version 1 with the contains and overlap lines replaced by the one-way implication test lines, byte for byte from the brief"
+      }
+    ],
+    "overlap_scope_implies": [
+      {
+        "version": 1,
+        "sha256": "6044f8aca3fe69d75c3d378e7e295f7d7cc65b03555101c66e5fb9de7db3155a",
+        "pinned_at": "2026-10-04T13:36:47+00:00",
+        "why": "Round 2 of the overlap rubric arms experiment (coding_plan_overlap_arms.md, Round 2): rubric E version 1 with lines 3 (Roger's, plus the test sentence) and 2 replaced, byte for byte from the brief"
+      }
     ]
   }
 }

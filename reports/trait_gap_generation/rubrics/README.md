@@ -46,11 +46,18 @@ moved).
 | C | [overlap_six.md](./overlap_six.md) | Rubric A on six rungs, 0 to 5: the 2-3 region split by who adds something | draft 1 (arms experiment, 2026-10-04) |
 | D | [overlap_relation.md](./overlap_relation.md) | Rubric A with the relation named instead of a number (same, variant, contains with the wider one, overlap, neighbours, different); the score derived | draft 1 (arms experiment, 2026-10-04) |
 | E | [overlap_scope.md](./overlap_scope.md) | Rubric A with Roger's line 3 (narrowed, broadened, stronger, milder, a shift of emphasis; the reason names which) | draft 1 (arms experiment, 2026-10-04) |
+| A2 | [overlap_concept_implies.md](./overlap_concept_implies.md) | Rubric A with lines 3 and 2 redrafted around the one-way implication test | draft 1 (arms experiment, round 2, 2026-10-04) |
+| C2 | [overlap_six_implies.md](./overlap_six_implies.md) | Rubric C with lines 3 and 2 redrafted the same way | draft 1 (arms experiment, round 2, 2026-10-04) |
+| D2 | [overlap_relation_implies.md](./overlap_relation_implies.md) | Rubric D with the "contains" and "overlap" lines redrafted the same way (the plainer one is the wider) | draft 1 (arms experiment, round 2, 2026-10-04) |
+| E2 | [overlap_scope_implies.md](./overlap_scope_implies.md) | Rubric E with the test added to Roger's line 3, and A2's line 2 | draft 1 (arms experiment, round 2, 2026-10-04) |
 
 Rubrics C, D and E are the three arms of the overlap rubric arms experiment
 ([coding_plan_overlap_arms.md](../coding_plan_overlap_arms.md)), each rubric A's text with only its scale
 lines (and, for D, the opening question and the answer format) changed, pinned as version 1 on
-2026-10-04.
+2026-10-04.  A2, C2, D2 and E2 are its round 2 (the same brief, "Round 2"): each a round-1 rubric with
+only its 2 and 3 lines replaced, because round 1 ([m3_overlap_arms_readout.md](../m3_overlap_arms_readout.md))
+found the models describing a containment and answering 2; pinned as version 1 on 2026-10-04 and first
+run on the calls that hold the pairs where that confusion was seen.
 
 ## How to edit
 

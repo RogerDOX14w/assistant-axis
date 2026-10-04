@@ -2,7 +2,8 @@
 """Check or pin the rubric prompt versions (``reports/trait_gap_generation/rubrics/versions.json``): the
 split filter's eight prompts and, since 2026-10-03, the M3 overlap rubrics (``overlap_concept``,
 ``overlap_cooccurrence``; since 2026-10-04 also the arms ``overlap_six``, ``overlap_relation`` and
-``overlap_scope``).
+``overlap_scope``, and their round-2 redrafts ``overlap_concept_implies``, ``overlap_six_implies``,
+``overlap_relation_implies`` and ``overlap_scope_implies``).
 
     uv run python data_analysis/gap_generation/rubric_pins.py check
     uv run python data_analysis/gap_generation/rubric_pins.py bump NAME --why TEXT [--version N] [--revert-to N]
@@ -42,9 +43,12 @@ def main(argv=None) -> int:
     args = ap.parse_args(argv)
     if args.cmd == "check":
         pinned = sr.current_versions(args.rubrics_dir, sr.PINNED_NAMES)
+        w_name = max(len(n) for n in sr.PINNED_NAMES)
+        w_file = max(len(f) for f in sr.PINNED_FILES.values())
         for n in sr.PINNED_NAMES:
             v, sha = pinned.get(n, (None, None))
-            print(f"{n:20s} {sr.PINNED_FILES[n]:25s} version {v}  {sha[:12] + '...' if sha else '(not pinned)'}")
+            print(f"{n:{w_name}s} {sr.PINNED_FILES[n]:{w_file}s} version {v}  "
+                  f"{sha[:12] + '...' if sha else '(not pinned)'}")
         problems = sr.mismatches(args.rubrics_dir)
         for p in problems:
             print(f"MISMATCH {p}", file=sys.stderr)

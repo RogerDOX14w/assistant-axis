@@ -178,10 +178,16 @@ class TestOverlapPins:
     #: The arms of the overlap rubric arms experiment (coding_plan_overlap_arms.md, 2026-10-04): rubrics C,
     #: D and E, variants of A, first pinned as version 1.
     ARMS = ("overlap_six", "overlap_relation", "overlap_scope")
+    #: Round 2 of that experiment (same day): A2, C2, D2 and E2, each a round-1 rubric (its parent here) with
+    #: only its 2 and 3 lines replaced (D2: "contains" and "overlap"), first pinned as version 1.
+    ROUND2 = {"overlap_concept_implies": ("overlap_concept", ("- 3:", "- 2:")),
+              "overlap_six_implies": ("overlap_six", ("- 3:", "- 2:")),
+              "overlap_relation_implies": ("overlap_relation", ('- "contains":', '- "overlap":')),
+              "overlap_scope_implies": ("overlap_scope", ("- 3:", "- 2:"))}
 
     def test_overlap_rubrics_are_not_split_prompts(self):
-        # A and B (draft 2), and since 2026-10-04 the three arms C, D and E
-        assert set(sr.OVERLAP_NAMES) == set(self.DRAFT2) | set(self.ARMS)
+        # A and B (draft 2), since 2026-10-04 the three arms C, D and E, and round 2's A2, C2, D2 and E2
+        assert set(sr.OVERLAP_NAMES) == set(self.DRAFT2) | set(self.ARMS) | set(self.ROUND2)
         assert not set(sr.OVERLAP_NAMES) & set(sr.NAMES)
         assert set(sr.load_all()) == set(sr.NAMES)          # the split runner's eight, unchanged
         assert set(sr.current_versions()) == set(sr.NAMES)  # what a split block stamps as step_versions
@@ -223,12 +229,45 @@ class TestOverlapPins:
         assert d.startswith(d_head + "\n\n" + second + "\n\nGive one of these answers for each listed trait:\n")
         assert '"relation": "same"|"variant"|"contains"' in d and '"wider": "target"|"listed"' in d
 
+    def test_round_2_is_first_pinned_as_version_1(self):
+        rows = sr.read_versions()["prompts"]
+        for name in self.ROUND2:
+            assert rows[name][0]["version"] == 1, name
+            assert sr.sha256(sr.load_prompt(name)) == rows[name][-1]["sha256"], name
+
+    def test_round_2_is_round_1_with_only_the_named_lines_changed(self):
+        """coding_plan_overlap_arms.md, "Round 2": each new rubric is its round-1 parent with only the quoted
+        lines replaced; every other scale line and the answer format stay byte for byte."""
+        for name, (parent, prefixes) in self.ROUND2.items():
+            old, new = sr.load_prompt(parent).split("\n"), sr.load_prompt(name).split("\n")
+            assert len(old) == len(new), name
+            changed = [i for i, (a, b) in enumerate(zip(old, new)) if a != b]
+            assert sorted(old[i].split(":", 1)[0] + ":" for i in changed) == sorted(prefixes), name
+            for i in changed:
+                assert new[i].startswith(old[i].split(":", 1)[0] + ":"), (name, i)
+            text = sr.load_prompt(name)
+            line2 = next(ln for ln in new if ln.startswith(prefixes[1]))
+            assert "neither implies the other" in line2, name
+            assert "a fussy eater is fussy, a boastful person is proud" in text, name
+        # the shared line 2 (D2's "overlap") is word for word the same on every form
+        twos = {next(ln for ln in sr.load_prompt(n).split("\n") if ln.startswith(p[1])).split(":", 1)[1]
+                for n, (_, p) in self.ROUND2.items()}
+        assert len(twos) == 1
+        # E2's line 3 is Roger's line 3 with the test sentence inserted, the rest of it unchanged
+        e3 = next(ln for ln in sr.load_prompt("overlap_scope").split("\n") if ln.startswith("- 3:"))
+        e23 = next(ln for ln in sr.load_prompt("overlap_scope_implies").split("\n") if ln.startswith("- 3:"))
+        test = ("The test: anyone who has one of the two traits has the other too, at least in one direction: a fussy "
+                "eater is fussy, a boastful person is proud, though not necessarily the reverse. ")
+        assert e23.replace(test, "") == e3
+
     def test_files_and_mismatches(self):
         assert sr.rubric_path("overlap_concept").name == "overlap_concept.md"
         assert sr.rubric_path("overlap_cooccurrence").name == "overlap_cooccurrence.md"
         assert sr.rubric_path("overlap_six").name == "overlap_six.md"
         assert sr.rubric_path("overlap_relation").name == "overlap_relation.md"
         assert sr.rubric_path("overlap_scope").name == "overlap_scope.md"
+        for name in self.ROUND2:
+            assert sr.rubric_path(name).name == f"{name}.md"
         assert sr.mismatches() == []
 
     def test_a_changed_overlap_text_is_a_mismatch(self, tmp_path):
@@ -271,28 +310,45 @@ class TestOverlapPins:
         out = capsys.readouterr().out
         assert "overlap_concept" in out and "overlap_cooccurrence" in out
         assert all(name in out for name in self.ARMS)
+        assert all(name in out for name in self.ROUND2)
 
 
 #: The example words of the overlap rubrics: the pairs on rubric A's scale and in its second paragraph,
 #: rubric B's (B adds outdoorsy), and the arms C, D and E (2026-10-04), which add fussy and fussy eater
 #: (checked free that day: picky eater is the corpus's label; fussy eater is its near-duplicate, as the
-#: hygiene rule wants).
+#: hygiene rule wants); round 2 (same day) adds proud and boastful (checked free of the corpus that day).
 OVERLAP_EXAMPLE_WORDS = ("punctual", "tidy", "talkative", "loquacious", "penny-pinching", "miserly", "studious",
                          "bookish", "tetchy", "sullen", "chatty", "plainspoken", "cheery", "morose", "outdoorsy",
-                         "fussy", "fussy eater")
+                         "fussy", "fussy eater", "proud", "boastful")
+#: Example words known to collide, with where.  Round 2's proud and boastful are free of the corpus, the
+#: queue and the validation file, as the brief checked, but both are on the reserved-word list built from
+#: decisions_m1.md and the "You are X." probe: proud is one of the probe's words with two person senses
+#: (Roger: "I just see the arrogant sense"), boastful is in decisions_m1.md's glosses ("modest and not
+#: boastful").  The round-2 texts are final for the experiment and are not changed here (no corpus trait is
+#: either word, so no judged pair contains one); each hit is recorded, and a new one fails.  A round-2
+#: wording taken into production would need other examples if either word can be an M3 candidate.
+OVERLAP_EXAMPLE_RECORDED = {"proud": "reserved: decisions_m1.md and the You are X. probe (two person senses)",
+                            "boastful": "reserved: decisions_m1.md glosses"}
 #: Words of the overlap prompts that are corpus labels, queue entries or validation-file words and are
 #: not already allowed as prose: none at draft 2 of A and B; "single" in the arms' "narrowed to a single
-#: domain" (prose, as in the split filter's kind prompt; the texts are final for the experiment).
+#: domain" (prose, as in the split filter's kind prompt; the texts are final for the experiment), kept by
+#: round 2's C2, D2 and E2 (A2 says "narrowed to a domain").
 OVERLAP_PROSE_RECORDED = {"overlap_concept": set(), "overlap_cooccurrence": set(), "overlap_six": {"single"},
-                          "overlap_relation": {"single"}, "overlap_scope": {"single"}}
+                          "overlap_relation": {"single"}, "overlap_scope": {"single"},
+                          "overlap_concept_implies": set(), "overlap_six_implies": {"single"},
+                          "overlap_relation_implies": {"single"}, "overlap_scope_implies": {"single"}}
 
 
 class TestOverlapHygiene:
     def test_example_words_avoid_every_list(self):
+        """Every example word avoids every list, except the recorded collisions (OVERLAP_EXAMPLE_RECORDED:
+        until round 2, none); a new collision fails, and so does a recorded one that no longer collides."""
         reserved = set(RESERVED.read_text(encoding="utf-8").split())
         bad = _forbidden() | _test_words()
         hits = [w for w in OVERLAP_EXAMPLE_WORDS if w in reserved or normalize_to_file_name(w) in bad]
-        assert hits == []
+        assert set(hits) == set(OVERLAP_EXAMPLE_RECORDED)
+        # the recorded ones collide with the reserved list only, never with the corpus, queue or validation file
+        assert not any(normalize_to_file_name(w) in bad for w in OVERLAP_EXAMPLE_RECORDED)
 
     def test_example_words_are_in_the_prompts(self):
         a, b = sr.load_prompt("overlap_concept"), sr.load_prompt("overlap_cooccurrence")
@@ -302,6 +358,9 @@ class TestOverlapHygiene:
         assert "outdoorsy" in b and "outdoorsy" not in a   # A's answer-0 example changed in draft 2
         for name in ("overlap_six", "overlap_relation", "overlap_scope"):
             assert "fussy and fussy eater" in sr.load_prompt(name), name
+        for name in ("overlap_concept_implies", "overlap_six_implies", "overlap_relation_implies",
+                     "overlap_scope_implies"):
+            assert "a boastful person is proud" in sr.load_prompt(name), name
 
     def test_prompt_words_against_the_corpus_queue_and_validation_file(self):
         from assistant_axis.gapgen.prompt_hygiene import PROSE_ALLOWED, prompt_words
