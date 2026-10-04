@@ -186,6 +186,32 @@ twice; the resume re-asked only that call); the example words proud and boastful
 but sit on the hygiene test's reserved list (the M1 probe words), recorded as such in the test, so a
 wording taken into production needs other examples.
 
+### Scored under the rule M3 will use (Roger's question, 2026-10-04)
+
+Crossings count both models' errors alike, but Roger's escalation rule does not: Sonnet reads every
+pair, a Sonnet 3 goes to Opus (which can rescue), a Sonnet 2 is final.  So a Sonnet over-call of 3
+costs one escalation and nothing else, while a Sonnet 2 on a pair Opus would cut is a near-duplicate
+let through.  Each arm simulated under the rule on the 242 pairs of the 84 calls (both rounds, same
+pairs; pass 1 / pass 2):
+
+| arm | escalated (Sonnet = 3) | rescued by Opus | cut | kept though Opus ≥ 3 | rule's decision differs between the passes |
+|---|---|---|---|---|---|
+| A | 45 / 40 | 10 / 11 | 37 / 31 | 1 / 7 | 10 |
+| A2 | 55 / 52 | 20 / 13 | 37 / 42 | 4 / 3 | 7 |
+| E | 42 / 44 | 8 / 12 | 36 / 34 | 7 / 10 | 8 |
+| E2 | 64 / 59 | 20 / 18 | 47 / 43 | 4 / 7 | 8 |
+| C | 24 / 23 | 7 / 6 | 19 / 19 | 12 / 15 | 8 |
+| C2 | 41 / 45 | 11 / 13 | 32 / 35 | 13 / 12 | 7 |
+| D | 12 / 11 | 2 / 3 | 12 / 10 | 17 / 19 | 4 |
+| D2 | 27 / 29 | 3 / 3 | 27 / 28 | 20 / 18 | 15 |
+
+Read this way the climb has converged.  A and A2 are the same within noise: A2 buys three fewer
+decision flips in 242 (7 against 10) with about a quarter more escalations (55 against 45) and the
+same handful of pairs kept against Opus's view (3-4 against 1-7).  E2 is A2 with more escalations.  The
+six-rung and relation forms are worse under the rule in both rounds, because Sonnet seldom reaches
+their containment rung, so it keeps what Opus would cut (12-20 pairs).  The wording question does not
+move the decisions the pipeline will make; the rule and the second reading do.
+
 ## Files
 
 - Run: [pairs.json](../../data/candidates/overlap_test/overlap_arms_1/pairs.json) (identical pairs to run 1),
