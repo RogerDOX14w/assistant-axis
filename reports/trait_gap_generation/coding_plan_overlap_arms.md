@@ -167,6 +167,93 @@ report: the commits; the cross-arm table and the per-arm sections (quote the num
 open files); anything surprising in the rendered prompts or the answers; spend; and any test
 expectation you changed, with the reason.  Do not write the readout for Roger; Fable does that.
 
+## Round 2: the clarified lines, on the confusion subset (Roger, 2026-10-04)
+
+Round 1 ([m3_overlap_arms_readout.md](./m3_overlap_arms_readout.md)) found that both models, Sonnet
+about twice as often as Opus, describe a containment in their reason and then answer "overlap" (2);
+the rate is the same under every arm (Sonnet 8-13% of its 2s, Opus 4-8%), and the finer scales made
+it decisive at the cut-off.  Roger: redraft the 2 and 3 lines on each form, and test the redrafts first
+on the pairs where the confusion has been seen.  The words being misread are "adds" and "lacks", so the
+redrafts use the one-way implication test instead.
+
+### The four arms
+
+New files, new letters in the code (the agent chooses the letters; round 1's A, C, D, E keep theirs
+and their pins).  Each is round 1's text with **only the lines quoted here replaced**; everything
+else, including every other scale line and the answer format, stays byte for byte.
+
+**A2** (`overlap_concept_implies.md`, from rubric A version 4), lines 3 and 2:
+
+```
+- 3: the same concept, differing only in scope, degree or emphasis. The test: anyone who has one of the two traits has the other too, at least in one direction: a fussy eater is fussy, a boastful person is proud, a miserly person is penny-pinching, though not necessarily the reverse. The richer one may be the plainer one narrowed to a domain, carried further, or with something added. For example, penny-pinching and miserly: miserly is the same carefulness with money, carried further.
+- 2: overlapping concepts. They share a core, but neither implies the other: a persona can have either without the other, as a studious person need not be bookish and a bookish one need not be studious; each adds something the other lacks.
+```
+
+**C2** (`overlap_six_implies.md`, from C version 1), lines 3 and 2 (line 4, "variant", unchanged):
+
+```
+- 3: one contains the other: one of the two is the other narrowed to a single domain, or the other with something more added to it. The test: anyone with the richer trait has the plainer one too, but not the reverse: a fussy eater is fussy, a boastful person is proud. A stronger or milder form of the same trait is a 4, not a 3.
+- 2: overlapping concepts. They share a core, but neither implies the other: a persona can have either without the other, as a studious person need not be bookish and a bookish one need not be studious; each adds something the other lacks.
+```
+
+**D2** (`overlap_relation_implies.md`, from D version 1), the "contains" and "overlap" lines ("variant"
+unchanged):
+
+```
+- "contains": one of the two is the other narrowed to a single domain, or the other with something more added to it. The test: anyone with the richer trait has the plainer one too, but not the reverse: a fussy eater is fussy, a boastful person is proud. A stronger or milder form of the same trait is "variant", not "contains". The plainer one is the wider; say which it is.
+- "overlap": overlapping concepts. They share a core, but neither implies the other: a persona can have either without the other, as a studious person need not be bookish and a bookish one need not be studious; each adds something the other lacks.
+```
+
+**E2** (`overlap_scope_implies.md`, from E version 1), lines 3 and 2 (Roger's line 3 with the test
+sentence added before its last sentence; line 2 as A2's):
+
+```
+- 3: the same concept, differing only in scope, degree, strength or emphasis. One may be the other narrowed to a single domain, or broadened beyond it; a stronger or a milder form of it; or the same thing with the stress elsewhere. What the wider or stronger one adds is more of the same, not something new. The test: anyone who has one of the two traits has the other too, at least in one direction: a fussy eater is fussy, a boastful person is proud, though not necessarily the reverse. For example, penny-pinching and miserly: miserly is the same carefulness with money, carried further. Or fussy and fussy eater: the same fussiness, narrowed to food. In the reason, say which: narrowed, broadened, stronger, milder, or a shift of emphasis.
+- 2: overlapping concepts. They share a core, but neither implies the other: a persona can have either without the other, as a studious person need not be bookish and a bookish one need not be studious; each adds something the other lacks.
+```
+
+Example words checked free of the corpus on 2026-10-04: fussy, fussy eater, proud, boastful (and the
+round-1 words).  Add proud and boastful to the hygiene test's list.  Pin each new file as version 1.
+
+### The subset
+
+Computed from the records, not by hand, and written to the run directory as `subset.json` with the
+rule, the counts and the pair ids.  A pair (by `pair_id` of the round-1 pair set) is in the subset if,
+over every reading of it on record (round 1's A, C, D, E, both models, both passes, mapped to the
+decision scale; `overlap_test_1`'s rubric A on its four models; `overlap_test_2`'s rubric A), either
+
+- its readings include both a 2 and a 3, or
+- some reading is a 2 (or "overlap") whose reason matches the containment pattern and not the two-sided
+  pattern, with the two patterns as used in the round-1 analysis:
+  containment `narrow|broader|broadened|\bwider\b|\bpart of\b|subset|\bincludes?\b|specific (case|form|kind|instance)|special case|restricted to|limited to|carried (further|beyond)|stronger (form|degree|version)|a (form|kind|type|case) of`,
+  two-sided `(each|both)\s+(add|bring|contribut|has something|lacks)|adds?\b[^.;]*\b(while|whereas|and)\b[^.;]*\b(adds?|stresses|brings|emphasi)`, both case-insensitive.
+
+On 2026-10-04 that gave 123 pairs (87 by the first rule, 36 more by the second) in 84 of the 180 calls.
+**The run sends those 84 calls whole**, exactly as round 1 built them (same target, same listed
+traits), so the context is the same; the other pairs in those calls are kept as controls and marked as
+such.  CLI: `--calls-from <subset.json>` or an equivalent that restricts the calls to the ones named;
+the pair set itself is unchanged (the `--baseline-run` check still applies).
+
+### Run and analysis
+
+Run id `overlap_arms_2`, Sonnet 5.5 and Opus 5.5, the four arms, two passes, budget cap $12 (estimate
+about $7).  Analysis, on the subset pairs and separately on all pairs sent:
+
+- the round-1 statistics per arm (self-consistency, Sonnet-Opus agreement, share at decision 3,
+  between-model crossings, between-pass flips);
+- **the self-contradiction rate**: 2 / "overlap" answers whose reason matches the containment pattern
+  and not the two-sided pattern, per model, and the 3 / "contains" answers whose reason describes a
+  two-sided overlap (the reverse slip), both as counts and shares;
+- for each arm, **the same statistics for its round-1 counterpart restricted to the same pairs** (A2
+  against A, C2 against C, D2 against D, E2 against E, from `overlap_arms_1`'s records), so the
+  comparison is like for like; and A2, C2, D2, E2 against each other;
+- for D2, the `wider` statistics of round 1.
+
+"Improves" means: fewer self-contradictions and fewer between-model crossings than the round-1
+counterpart on the same pairs, with self-consistency not worse.  Report the table; do not run the
+remaining calls of any arm: completing an improved wording on the other 96 calls is a separate go from
+Roger.
+
 ## Constraints that apply to every command
 
 - **Files**: read, write and search only inside this repository
