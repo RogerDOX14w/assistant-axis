@@ -623,3 +623,14 @@ left provisional:
 6. **By-products filed**: the same-concept pairs in TRAITS_TO_ADD's drop-or-merge TODO
    ([TRAITS_TO_ADD.md](../../data/traits/instructions/TRAITS_TO_ADD.md)); self-blaming /
    blame-shifting to the accountable triangle, not the merge list.
+7. **The scale stays as it is (the arms experiment, 2026-10-04,
+   [m3_overlap_arms_readout.md](./m3_overlap_arms_readout.md)).**  Roger asked whether another step
+   in the 1-3 range would make the judgement easier.  Four arms on the same 409 pairs, two passes each
+   ($15.89): the current rubric beat a six-rung scale, a relation-naming scale and a rewrite of line 3
+   on every decision statistic (Sonnet-Opus agreement 87%, 8 of 300 nearest pairs on different sides
+   of the cut-off, Opus self-consistent on 92%); the finer scales moved the cut-off and pulled the
+   models apart.  Half of a model's own inconsistency is the order of the listed traits (same prompt
+   twice: 95-98% the same answer; reordered: 86-89%).  Proposed for the pipeline, Roger to decide: read
+   each overlap call twice in two list orders (about $0.003 a pair more) and treat a pair as *on the
+   line* when either reading is at the cut-off or the two readings straddle it; such pairs go to Opus
+   under rule 3.

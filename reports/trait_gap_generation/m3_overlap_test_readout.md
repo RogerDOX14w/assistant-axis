@@ -554,6 +554,10 @@ the second opinion would rescue 3 of the 38 and Haiku 7.  The 38 pairs fall in 3
 about a third of candidates get a second call, at about $0.01 each on Opus: about 30 cents per 100
 candidates.  To be revisited once manual review has produced statistics (Roger).
 
+**Follow-up, the same day:** whether the scale wants another rung in the 1-3 range was tested as four
+rubric arms on these pairs, two passes each; the current rubric won on every decision statistic, and
+half the pass-to-pass noise turned out to be list order.  See [m3_overlap_arms_readout.md](./m3_overlap_arms_readout.md).
+
 Record notes: `overlap_test_1`'s [run.json](../../data/candidates/overlap_test/overlap_test_1/run.json)
 now shows the last session's `models` (four), `rubrics` (A only) and `rubric_versions` (A as 4, the
 draft-2 text re-pinned, whose hash is the one the version-2 records carry); the per-record fields in
