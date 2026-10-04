@@ -6,6 +6,7 @@
 
 | rubric | model | ok / total | rate | first attempt |
 |---|---|---|---|---|
+| A | Fable 5.1 | 409 / 409 | 1.0000 | 409 / 409 (1.0000) |
 | A | Haiku 4.5 | 409 / 409 | 1.0000 | 409 / 409 (1.0000) |
 | A | Opus 5.5 | 409 / 409 | 1.0000 | 409 / 409 (1.0000) |
 | A | Sonnet 5.5 | 409 / 409 | 1.0000 | 406 / 409 (0.9927) |
@@ -21,6 +22,7 @@ Exact agreement over every answer (categories included); then, on the pairs wher
 |---|---|---|---|---|---|---|---|---|
 | A | Haiku 4.5 | 409 | 64% | 318 | 58% | 98% | 0.35 | 0.76 (0.60) |
 | A | Sonnet 5.5 | 409 | 86% | 323 | 85% | 100% | 0.04 | 0.91 (0.85) |
+| A | Fable 5.1 | 409 | 83% | 327 | 80% | 100% | 0.04 | 0.90 (0.82) |
 | B | Haiku 4.5 | 409 | 55% | 404 | 55% | 95% | 0.41 | 0.87 (0.71) |
 | B | Sonnet 5.5 | 409 | 85% | 409 | 85% | 100% | 0.12 | 0.96 (0.90) |
 
@@ -28,6 +30,7 @@ Categorical answers against the reference (rows: reference; columns: model):
 
 - rubric A, Haiku 4.5: numeric: numeric 318, opposite 14; opposite: opposite 77
 - rubric A, Sonnet 5.5: numeric: numeric 323, opposite 9; opposite: opposite 77
+- rubric A, Fable 5.1: numeric: numeric 327, opposite 5; opposite: opposite 77
 - rubric B, Haiku 4.5: numeric: numeric 404, unsure 5
 - rubric B, Sonnet 5.5: numbers only
 
@@ -43,6 +46,8 @@ Numeric answers only; 95% interval from a bootstrap that resamples targets.  Pop
 | A | Sonnet 5.5 | embedding | 0.71 [0.63, 0.77] (n 323) | 0.71 [0.63, 0.77] (n 323) | 0.61 [0.51, 0.69] (n 256) | 0.61 [0.51, 0.69] (n 256) |
 | A | Opus 5.5 | persona | 0.68 [0.57, 0.76] (n 240) | 0.68 [0.57, 0.76] (n 240) | 0.63 [0.51, 0.72] (n 203) | 0.63 [0.51, 0.72] (n 203) |
 | A | Opus 5.5 | embedding | 0.68 [0.60, 0.75] (n 332) | 0.68 [0.60, 0.75] (n 332) | 0.57 [0.46, 0.66] (n 261) | 0.57 [0.46, 0.66] (n 261) |
+| A | Fable 5.1 | persona | 0.68 [0.58, 0.77] (n 235) | 0.68 [0.58, 0.77] (n 235) | 0.63 [0.51, 0.72] (n 198) | 0.63 [0.51, 0.72] (n 198) |
+| A | Fable 5.1 | embedding | 0.69 [0.61, 0.76] (n 327) | 0.69 [0.61, 0.76] (n 327) | 0.60 [0.50, 0.69] (n 256) | 0.60 [0.50, 0.69] (n 256) |
 | B | Haiku 4.5 | persona | 0.68 [0.60, 0.75] (n 280) | 0.60 [0.50, 0.69] (n 251) | 0.62 [0.52, 0.70] (n 230) | 0.53 [0.41, 0.62] (n 210) |
 | B | Haiku 4.5 | embedding | 0.29 [0.19, 0.39] (n 404) | 0.46 [0.36, 0.55] (n 343) | 0.17 [0.05, 0.27] (n 300) | 0.35 [0.24, 0.45] (n 269) |
 | B | Sonnet 5.5 | persona | 0.73 [0.65, 0.79] (n 280) | 0.67 [0.58, 0.74] (n 251) | 0.68 [0.58, 0.75] (n 230) | 0.60 [0.50, 0.69] (n 210) |
@@ -73,15 +78,15 @@ rho(A) - rho(B) against each cosine, on the pairs without recorded opposites whe
 
 Mean of the numeric answers / share at 3 or more / share opposite / share unsure; n in the first column.
 
-| group | n | Haiku 4.5 | Sonnet 5.5 | Opus 5.5 |
-|---|---|---|---|---|
-| nearest | 300 | 2.11 / 30% / 15% / 0% | 1.75 / 16% / 15% / 0% | 1.68 / 14% / 13% / 0% |
-| drop_or_merge | 11 | 3.20 / 80% / 9% / 0% | 3.10 / 100% / 9% / 0% | 2.90 / 80% / 9% / 0% |
-| deliberate_duplicate | 3 | 2.33 / 33% / 0% / 0% | 2.00 / 0% / 0% / 0% | 2.00 / 0% / 0% / 0% |
-| duplicate | 1 | 3.00 / 100% / 0% / 0% | 3.00 / 100% / 0% / 0% | 3.00 / 100% / 0% / 0% |
-| near_distinct | 34 | 1.91 / 23% / 35% / 0% | 1.56 / 16% / 26% / 0% | 1.56 / 15% / 21% / 0% |
-| antonym | 30 | – / – / 100% / 0% | – / – / 100% / 0% | – / – / 100% / 0% |
-| random | 30 | 0.14 / 0% / 7% / 0% | 0.14 / 0% / 7% / 0% | 0.17 / 0% / 0% / 0% |
+| group | n | Haiku 4.5 | Sonnet 5.5 | Opus 5.5 | Fable 5.1 |
+|---|---|---|---|---|---|
+| nearest | 300 | 2.11 / 30% / 15% / 0% | 1.75 / 16% / 15% / 0% | 1.68 / 14% / 13% / 0% | 1.73 / 20% / 15% / 0% |
+| drop_or_merge | 11 | 3.20 / 80% / 9% / 0% | 3.10 / 100% / 9% / 0% | 2.90 / 80% / 9% / 0% | 3.40 / 90% / 9% / 0% |
+| deliberate_duplicate | 3 | 2.33 / 33% / 0% / 0% | 2.00 / 0% / 0% / 0% | 2.00 / 0% / 0% / 0% | 2.33 / 33% / 0% / 0% |
+| duplicate | 1 | 3.00 / 100% / 0% / 0% | 3.00 / 100% / 0% / 0% | 3.00 / 100% / 0% / 0% | 3.00 / 100% / 0% / 0% |
+| near_distinct | 34 | 1.91 / 23% / 35% / 0% | 1.56 / 16% / 26% / 0% | 1.56 / 15% / 21% / 0% | 1.48 / 15% / 21% / 0% |
+| antonym | 30 | – / – / 100% / 0% | – / – / 100% / 0% | – / – / 100% / 0% | – / – / 100% / 0% |
+| random | 30 | 0.14 / 0% / 7% / 0% | 0.14 / 0% / 7% / 0% | 0.17 / 0% / 0% / 0% | 0.17 / 0% / 0% / 0% |
 
 Answer counts, Opus 5.5:
 
@@ -124,6 +129,7 @@ Answer counts, Opus 5.5:
 | A | Haiku 4.5 | 409 | 0% (0) | 22% (91) | 100% of 30 | 100% of 31 | 9% of 348 |
 | A | Sonnet 5.5 | 409 | 0% (0) | 21% (86) | 100% of 30 | 100% of 31 | 7% of 348 |
 | A | Opus 5.5 | 409 | 0% (0) | 19% (77) | 100% of 30 | 100% of 31 | 5% of 348 |
+| A | Fable 5.1 | 409 | 0% (0) | 20% (82) | 100% of 30 | 100% of 31 | 6% of 348 |
 | B | Haiku 4.5 | 409 | 1% (5) | 0% (0) | 0% of 30 | 0% of 31 | 0% of 348 |
 | B | Sonnet 5.5 | 409 | 0% (0) | 0% (0) | 0% of 30 | 0% of 31 | 0% of 348 |
 | B | Opus 5.5 | 409 | 0% (0) | 0% (0) | 0% of 30 | 0% of 31 | 0% of 348 |
@@ -178,5 +184,5 @@ B minus A over 332 pairs with two numbers: counts {'-2': 1, '-1': 14, '0': 49, '
 
 ## The same pair in two calls
 
-- rubric A: Haiku 4.5 25 of 38 the same; Sonnet 5.5 32 of 38 the same; Opus 5.5 32 of 38 the same
+- rubric A: Haiku 4.5 25 of 38 the same; Sonnet 5.5 32 of 38 the same; Opus 5.5 32 of 38 the same; Fable 5.1 31 of 38 the same
 - rubric B: Haiku 4.5 26 of 38 the same; Sonnet 5.5 28 of 38 the same; Opus 5.5 26 of 38 the same

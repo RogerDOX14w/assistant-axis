@@ -11,6 +11,11 @@ and Opus 5.5 over 409 pairs of existing traits where the right answers are partl
 `overlap_test_1`; every file is under
 [data/candidates/overlap_test/overlap_test_1/](../../data/candidates/overlap_test/overlap_test_1/).
 
+**Addendum, 2026-10-04:** Fable 5.1 was added to the run as a fourth model on rubric A ($3.17; the run's
+total is now $7.15), after Roger's marks; see "Fable through the API, and the six-way chart" under
+"Roger's marks".  The tables and summary now carry four models; the sections below were written with
+three and are left as they were.
+
 ## Headline
 
 - **409 pairs in 180 calls** per rubric and model (100 nearest-neighbour targets, 80 labelled-pair
@@ -484,6 +489,77 @@ and "new" at the far-from-alignment cut-off (14 and 27 against Opus's direction,
 and 27 Opus would misjudge in opposite directions).  Everything any rater gave is within one point of
 every other rater on every numeric item; the adjudications are all about which side of a boundary a
 pair falls, never about the neighbourhood.
+
+### Fable through the API, and the six-way chart (2026-10-04)
+
+Roger then asked for Fable 5.1 as a fourth API judge.  It ran rubric A (the current text, draft 2's,
+pinned as version 4) over the same 409 pairs, appended to `overlap_test_1` with `--resume` (the three
+recorded stages were skipped, nothing re-sent; the marks sheet was kept): 180 calls, 101 seconds,
+**$3.17** at $10 / $50 per million tokens (2.5 times Opus 5.5; the price was added to
+[judge_pricing.py](../../assistant_axis/judge_pricing.py) from the pricing page that day), run 1's total
+now $7.15 ([usage.json](../../data/candidates/overlap_test/overlap_test_1/usage.json)).  Parsing: 409 of
+409 at the first attempt, and **none of the 180 first answers added a key or wrote the answer twice**
+(Sonnet 29 and Opus 10 under the same text).  The tables in
+[tables.md](../../data/candidates/overlap_test/overlap_test_1/tables.md) were rewritten with four models.
+
+**On all 409 pairs**, Fable against each model (exact over every answer; then on the pairs both scored
+with a number: exact, within one point, mean Fable minus model, weighted kappa):
+
+| against | exact (all) | numeric exact | within one | mean difference | kappa |
+|---|---|---|---|---|---|
+| Haiku 4.5 | 66% | 59% | 96% of 317 | -0.30 | 0.76 |
+| Sonnet 5.5 | 83% | 80% | 100% of 323 | 0.00 | 0.90 |
+| Opus 5.5 | 83% | 80% | 100% of 327 | +0.04 | 0.90 |
+
+Fable sits with Sonnet and Opus (kappa 0.90 against each, as they are against each other) and never
+more than one point from either.  Its correlations with the persona-space and the embedding cosine
+(0.68, 0.69) are the same as the others'.  Its scores spread a little more: on the 300 nearest pairs
+0: 23, 1: 80, 2: 102, 3: 45, 4: 6, opposite 44 (Opus 15 / 93 / 117 / 32 / 4 / 39).  On the labelled
+groups it separates the ends most: mean 3.40 on the drop-or-merge pairs (Haiku 3.20, Sonnet 3.10, Opus
+2.90) and 1.48 on the near-distinct pairs (1.91, 1.56, 1.56), on 11 and 34 pairs.  Judging the 38 pairs
+that appear in two calls, Fable gave the same answer 31 times (Sonnet and Opus 32, Haiku 25).
+
+**The six-way chart**, exact agreement on the 30 marked pairs (Roger's leaning):
+
+| | Roger | Haiku | Sonnet | Opus | Fable API | Fable chat | mean with the other five |
+|---|---|---|---|---|---|---|---|
+| **Roger** | – | 23 | 19 | 18 | 19 | 21 | 20.0 |
+| **Haiku** | 23 | – | 20 | 21 | 20 | 22 | 21.2 |
+| **Sonnet** | 19 | 20 | – | 27 | 24 | 24 | 22.8 |
+| **Opus** | 18 | 21 | 27 | – | 23 | 25 | 22.8 |
+| **Fable API** | 19 | 20 | 24 | 23 | – | 26 | 22.4 |
+| **Fable chat** | 21 | 22 | 24 | 25 | 26 | – | 23.6 |
+
+Against Roger counting his second choices: Haiku 25, Fable chat 23, Fable API 22, Sonnet 21, Opus 20.
+Matching the majority of the other five where there is one: Fable chat 25 of 30, Opus 24, Sonnet 23,
+Fable API 23, Haiku 20, Roger 18.  No two raters are more than one point apart on any numeric item.
+Fable through the API, blind, lands where Fable in the chat did: they agree on 26 of 30 and differ on
+[erudite](../../data/traits/instructions/erudite.json) / [esoteric](../../data/traits/instructions/esoteric.json)
+(API 2, chat 1), [iconoclastic](../../data/traits/instructions/iconoclastic.json) /
+[deconstructionist](../../data/traits/instructions/deconstructionist.json) (1, 2),
+[theoretical](../../data/traits/instructions/theoretical.json) /
+[conceptual](../../data/traits/instructions/conceptual.json) (4, 3) and
+[moderate](../../data/traits/instructions/moderate.json) / [temperate](../../data/traits/instructions/temperate.json)
+(1, 2).  No pairwise difference in agreement with Roger is significant (the largest, Haiku against Fable
+API, 7 to 3, p = 0.34).  The picture is the one the marks gave with one more rater: the large models form
+a block (Sonnet and Opus 27, Fable with each 23 to 24), Roger and Haiku another (23), and 30 pairs cannot
+rank the three large models against one another.
+
+**Roger's escalation rule, on the test's figures** (2026-10-04: Sonnet first; a pair Sonnet would cut
+that sits exactly on the cut-off goes to Opus, and is kept if Opus puts it under; a Sonnet keep is never
+re-examined, so a candidate survives if either model would keep it).  Nearest pairs, cut-off 3: Sonnet
+cuts 42 of 256; 38 (15%) are on the line and go to Opus, which rescues 8; the 2 pairs Opus alone would
+also cut are kept by design.  Cut-off 4: 4 pairs on the line, none rescued.  For comparison, Fable as
+the second opinion would rescue 3 of the 38 and Haiku 7.  The 38 pairs fall in 33 of the 100 calls, so
+about a third of candidates get a second call, at about $0.01 each on Opus: about 30 cents per 100
+candidates.  To be revisited once manual review has produced statistics (Roger).
+
+Record notes: `overlap_test_1`'s [run.json](../../data/candidates/overlap_test/overlap_test_1/run.json)
+now shows the last session's `models` (four), `rubrics` (A only) and `rubric_versions` (A as 4, the
+draft-2 text re-pinned, whose hash is the one the version-2 records carry); the per-record fields in
+[responses.jsonl](../../data/candidates/overlap_test/overlap_test_1/responses.jsonl) are the record of
+what each call was sent.  The Fable session is the third in `sessions`, and its command was
+`--run-id overlap_test_1 --models <the three> claude-fable-5-1 --rubrics A --resume --budget-usd 12`.
 
 ## Recommendation (mine, for you to decide)
 

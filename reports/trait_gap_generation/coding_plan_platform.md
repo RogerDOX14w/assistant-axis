@@ -586,3 +586,40 @@ keep the 10% Sonnet sample and warn and stop above about 10% disagreement.  Code
 (commit 26a90b6): `--third-model`, and `--max-disagreement` (default 0.10, overridden on resume by
 `--accept-disagreement`), described in the split-filter section of
 [data_analysis/README.md](../../data_analysis/README.md).
+
+## M3 overlap call: decisions after the rubric test (2026-10-03 and 04, Roger and Claude)
+
+The pre-pilot test of item 9 ran ([m3_overlap_test_readout.md](./m3_overlap_test_readout.md): 409
+pairs of existing traits, both rubrics, Haiku 4.5, Sonnet 5.5 and Opus 5.5, then Roger's 30 blinded
+marks, a Fable 5.1 scoring in the chat and through the API, $7.15 in all).  What it settled, and what it
+left provisional:
+
+1. **Rubric.**  A, concept similarity ([rubrics/overlap_concept.md](./rubrics/overlap_concept.md)), is
+   the leading candidate; B, co-occurrence ([rubrics/overlap_cooccurrence.md](./rubrics/overlap_cooccurrence.md)),
+   stays in play until Roger's manual review.  A's text is draft 2's (pinned as version 4, the same
+   text as version 2): draft 3's sentence against extra answer keys was tried in a rerun, made the
+   slip rarer but not absent, and was dropped (Roger: "a known, harmless issue, easily ignored"); the
+   parser ignores extra keys.
+2. **Model for the overlap call: Sonnet 5.5.**  Haiku is not used for it until Haiku 5.5 arrives,
+   when it is re-evaluated.  Fable 5.1 was measured too: it sits with Sonnet and Opus (kappa 0.90
+   against each, never more than one point from either), follows the answer format perfectly, and
+   costs 2.5 times Opus; nothing in the test shows it judging the 2 / 3 boundary better, so it is
+   not adopted.  Roger's marks did not show any large model closer to his judgement than Haiku or
+   than Sonnet (30 pairs; every rater within one point of every other on every numeric item), which
+   is why the design routes boundary pairs to a second opinion rather than picking a best model.
+3. **Escalation (Roger, 2026-10-04; provisional).**  Sonnet scores every pair.  A pair Sonnet would
+   cut (score at the cut-off or above) that sits *exactly on* the cut-off goes to Opus, and the
+   candidate is kept if Opus puts it under; a Sonnet keep is never re-examined, a Sonnet score above
+   the cut-off is cut without a second look.  So a candidate survives if either model would keep it,
+   and Opus only ever rescues.  On the test's nearest pairs at cut-off 3: Sonnet cuts 42 of 256, 38
+   pairs (15%, in a third of the calls) go to Opus, 8 are rescued; at cut-off 4, 4 pairs, none
+   rescued.  About 30 cents per 100 candidates.  To be revisited once manual review has produced
+   statistics.  Proposal (Claude): the M3 pilot still runs Opus on every item, as item 9 says, so
+   that the revisit has its statistics; the rule governs the production path.
+4. **Cut-offs** stay as first set: covered at 3 or more far from the alignment region, at 4 near it,
+   never at 2; revisited with the marks after the pilot.
+5. **"unsure"** was never produced by any model in 1,636 rubric-A answers; the route (unsure to
+   Opus) stays as designed and costs nothing while that holds.
+6. **By-products filed**: the same-concept pairs in TRAITS_TO_ADD's drop-or-merge TODO
+   ([TRAITS_TO_ADD.md](../../data/traits/instructions/TRAITS_TO_ADD.md)); self-blaming /
+   blame-shifting to the accountable triangle, not the merge list.

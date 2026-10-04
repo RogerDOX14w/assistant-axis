@@ -9,16 +9,28 @@
       "started_at": "2026-10-03T13:30:30+00:00",
       "resumed": true,
       "git_sha": "6707ed2+dirty"
+    },
+    {
+      "started_at": "2026-10-04T00:31:52+00:00",
+      "resumed": true,
+      "git_sha": "ef1100b+dirty"
     }
   ],
   "run_id": "overlap_test_1",
-  "git_sha": "6707ed2+dirty",
+  "git_sha": "ef1100b+dirty",
   "argv": [
     "--run-id",
     "overlap_test_1",
+    "--models",
+    "claude-haiku-4-5-20251001",
+    "claude-sonnet-5-5",
+    "claude-opus-5-5",
+    "claude-fable-5-1",
+    "--rubrics",
+    "A",
+    "--resume",
     "--budget-usd",
-    "15",
-    "--resume"
+    "12"
   ],
   "allow_dirty": false,
   "dirty_check": {
@@ -36,22 +48,19 @@
     ],
     "dirty": []
   },
-  "budget_usd": 15.0,
-  "estimate_usd": 3.2701,
+  "budget_usd": 12.0,
+  "estimate_usd": 3.465,
   "estimate_lines": [
-    "rubric A (overlap_concept) on Sonnet 5.5: 1 x (1,158, 260) tokens at claude-sonnet-5-5 rates = $0.005",
-    "rubric B (overlap_cooccurrence) on Sonnet 5.5: 180 x (725, 203) tokens at claude-sonnet-5-5 rates = $0.626",
-    "rubric A (overlap_concept) on Opus 5.5: 180 x (910, 203) tokens at claude-opus-5-5 rates = $1.386",
-    "rubric B (overlap_cooccurrence) on Opus 5.5: 180 x (725, 203) tokens at claude-opus-5-5 rates = $1.253"
+    "rubric A (overlap_concept) on Fable 5.1: 180 x (910, 203) tokens at claude-fable-5-1 rates = $3.465"
   ],
   "models": [
     "claude-haiku-4-5-20251001",
     "claude-sonnet-5-5",
-    "claude-opus-5-5"
+    "claude-opus-5-5",
+    "claude-fable-5-1"
   ],
   "rubrics": [
-    "A",
-    "B"
+    "A"
   ],
   "reference": "claude-opus-5-5",
   "seed": 0,
@@ -60,7 +69,7 @@
   "concurrency": 8,
   "stop_below": 0.99,
   "rubric_versions": {
-    "overlap_concept": 2,
+    "overlap_concept": 4,
     "overlap_cooccurrence": 2
   },
   "prompt_sha256": {
@@ -227,11 +236,82 @@
       "seconds": 66.3,
       "cost_usd_total_after": 3.9859,
       "finished_at": "2026-10-03T13:33:44+00:00"
+    },
+    {
+      "rubric": "A",
+      "model": "claude-haiku-4-5-20251001",
+      "n_calls": 180,
+      "n_sent": 0,
+      "n_skipped": 180,
+      "n_reasked": 0,
+      "n_pairs": 409,
+      "n_ok": 409,
+      "n_ok_first_attempt": 409,
+      "parse_rate": 1.0,
+      "budget_exceeded": false,
+      "seconds": 0.0,
+      "cost_usd_total_after": 3.9859,
+      "finished_at": "2026-10-04T00:31:52+00:00"
+    },
+    {
+      "rubric": "A",
+      "model": "claude-sonnet-5-5",
+      "n_calls": 180,
+      "n_sent": 0,
+      "n_skipped": 180,
+      "n_reasked": 0,
+      "n_pairs": 409,
+      "n_ok": 409,
+      "n_ok_first_attempt": 406,
+      "parse_rate": 1.0,
+      "budget_exceeded": false,
+      "seconds": 0.0,
+      "cost_usd_total_after": 3.9859,
+      "finished_at": "2026-10-04T00:31:52+00:00"
+    },
+    {
+      "rubric": "A",
+      "model": "claude-opus-5-5",
+      "n_calls": 180,
+      "n_sent": 0,
+      "n_skipped": 180,
+      "n_reasked": 0,
+      "n_pairs": 409,
+      "n_ok": 409,
+      "n_ok_first_attempt": 409,
+      "parse_rate": 1.0,
+      "budget_exceeded": false,
+      "seconds": 0.0,
+      "cost_usd_total_after": 3.9859,
+      "finished_at": "2026-10-04T00:31:52+00:00"
+    },
+    {
+      "rubric": "A",
+      "model": "claude-fable-5-1",
+      "n_calls": 180,
+      "n_sent": 180,
+      "n_skipped": 0,
+      "n_reasked": 0,
+      "n_pairs": 409,
+      "n_ok": 409,
+      "n_ok_first_attempt": 409,
+      "parse_rate": 1.0,
+      "budget_exceeded": false,
+      "seconds": 100.9,
+      "cost_usd_total_after": 7.1509,
+      "finished_at": "2026-10-04T00:33:33+00:00"
     }
   ],
-  "cost_usd": 3.985902,
+  "cost_usd": 7.150882,
   "usage": {
     "per_model": {
+      "claude-fable-5-1": {
+        "model": "claude-fable-5-1",
+        "prompt_tokens": 162193,
+        "completion_tokens": 30861,
+        "cost_usd": 3.165,
+        "n_calls": 180
+      },
       "claude-haiku-4-5-20251001": {
         "model": "claude-haiku-4-5-20251001",
         "prompt_tokens": 220234,
@@ -254,13 +334,13 @@
         "n_calls": 361
       }
     },
-    "total_cost_usd": 3.9859,
-    "total_prompt_tokens": 809376,
-    "total_completion_tokens": 172427,
-    "n_calls": 1082
+    "total_cost_usd": 7.1509,
+    "total_prompt_tokens": 971569,
+    "total_completion_tokens": 203288,
+    "n_calls": 1262
   },
   "stopped": "parse rate 0.9413 below 0.99 at rubric A on claude-sonnet-5-5",
-  "finished_at": "2026-10-03T13:33:44+00:00",
+  "finished_at": "2026-10-04T00:33:33+00:00",
   "exit_code": 0,
   "ask_attempts": 2,
   "parser_version": 2

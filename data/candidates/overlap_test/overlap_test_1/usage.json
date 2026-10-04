@@ -1,6 +1,13 @@
 {
-  "n_calls": 1082,
+  "n_calls": 1262,
   "per_model": {
+    "claude-fable-5-1": {
+      "completion_tokens": 30861,
+      "cost_usd": 3.165,
+      "model": "claude-fable-5-1",
+      "n_calls": 180,
+      "prompt_tokens": 162193
+    },
     "claude-haiku-4-5-20251001": {
       "completion_tokens": 56412,
       "cost_usd": 0.5023,
@@ -23,7 +30,7 @@
       "prompt_tokens": 294725
     }
   },
-  "total_completion_tokens": 172427,
-  "total_cost_usd": 3.9859,
-  "total_prompt_tokens": 809376
+  "total_completion_tokens": 203288,
+  "total_cost_usd": 7.1509,
+  "total_prompt_tokens": 971569
 }

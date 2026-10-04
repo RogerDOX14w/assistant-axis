@@ -5,10 +5,16 @@
     "models": [
       "claude-haiku-4-5-20251001",
       "claude-sonnet-5-5",
-      "claude-opus-5-5"
+      "claude-opus-5-5",
+      "claude-fable-5-1"
     ],
     "reference": "claude-opus-5-5",
     "parse": {
+      "A|claude-fable-5-1": {
+        "ok": 409,
+        "total": 409,
+        "rate": 1.0
+      },
       "A|claude-haiku-4-5-20251001": {
         "ok": 409,
         "total": 409,
@@ -76,6 +82,26 @@
             "numeric": {
               "numeric": 323,
               "opposite": 9
+            },
+            "opposite": {
+              "opposite": 77
+            }
+          }
+        },
+        "claude-fable-5-1": {
+          "n_common": 409,
+          "n_both_parsed": 409,
+          "exact_all": 0.8289,
+          "n_numeric": 327,
+          "exact": 0.8012,
+          "within_one": 1.0,
+          "mean_diff": 0.0398,
+          "kappa_quadratic": 0.9,
+          "kappa_linear": 0.8178,
+          "table": {
+            "numeric": {
+              "numeric": 327,
+              "opposite": 5
             },
             "opposite": {
               "opposite": 77
@@ -327,6 +353,76 @@
               "n": 261,
               "lo": 0.4642,
               "hi": 0.6627,
+              "n_boot": 2000
+            }
+          }
+        },
+        "claude-fable-5-1": {
+          "persona": {
+            "all": {
+              "rho": 0.6847,
+              "p": 7.478238256977884e-34,
+              "n": 235,
+              "lo": 0.5791,
+              "hi": 0.7679,
+              "n_boot": 2000
+            },
+            "non_antonym": {
+              "rho": 0.6847,
+              "p": 7.478238256977884e-34,
+              "n": 235,
+              "lo": 0.5791,
+              "hi": 0.7679,
+              "n_boot": 2000
+            },
+            "nearest": {
+              "rho": 0.6276,
+              "p": 4.4218224054557787e-23,
+              "n": 198,
+              "lo": 0.5084,
+              "hi": 0.7239,
+              "n_boot": 2000
+            },
+            "nearest_non_antonym": {
+              "rho": 0.6276,
+              "p": 4.4218224054557787e-23,
+              "n": 198,
+              "lo": 0.5084,
+              "hi": 0.7239,
+              "n_boot": 2000
+            }
+          },
+          "embedding": {
+            "all": {
+              "rho": 0.6943,
+              "p": 2.4014506766478208e-48,
+              "n": 327,
+              "lo": 0.6107,
+              "hi": 0.7641,
+              "n_boot": 2000
+            },
+            "non_antonym": {
+              "rho": 0.6943,
+              "p": 2.4014506766478208e-48,
+              "n": 327,
+              "lo": 0.6107,
+              "hi": 0.7641,
+              "n_boot": 2000
+            },
+            "nearest": {
+              "rho": 0.5996,
+              "p": 2.1929976365223166e-26,
+              "n": 256,
+              "lo": 0.4959,
+              "hi": 0.6875,
+              "n_boot": 2000
+            },
+            "nearest_non_antonym": {
+              "rho": 0.5996,
+              "p": 2.1929976365223166e-26,
+              "n": 256,
+              "lo": 0.4959,
+              "hi": 0.6875,
               "n_boot": 2000
             }
           }
@@ -957,6 +1053,101 @@
             "opposite": 0.0,
             "unsure": 0.0
           }
+        },
+        "claude-fable-5-1": {
+          "nearest": {
+            "n": 300,
+            "n_parsed": 300,
+            "counts": {
+              "0": 23,
+              "1": 80,
+              "2": 102,
+              "3": 45,
+              "4": 6,
+              "opposite": 44
+            },
+            "mean": 1.73,
+            "share_3_plus": 0.199,
+            "opposite": 0.147,
+            "unsure": 0.0
+          },
+          "drop_or_merge": {
+            "n": 11,
+            "n_parsed": 11,
+            "counts": {
+              "2": 1,
+              "3": 4,
+              "4": 5,
+              "opposite": 1
+            },
+            "mean": 3.4,
+            "share_3_plus": 0.9,
+            "opposite": 0.091,
+            "unsure": 0.0
+          },
+          "deliberate_duplicate": {
+            "n": 3,
+            "n_parsed": 3,
+            "counts": {
+              "2": 2,
+              "3": 1
+            },
+            "mean": 2.33,
+            "share_3_plus": 0.333,
+            "opposite": 0.0,
+            "unsure": 0.0
+          },
+          "duplicate": {
+            "n": 1,
+            "n_parsed": 1,
+            "counts": {
+              "3": 1
+            },
+            "mean": 3.0,
+            "share_3_plus": 1.0,
+            "opposite": 0.0,
+            "unsure": 0.0
+          },
+          "near_distinct": {
+            "n": 34,
+            "n_parsed": 34,
+            "counts": {
+              "0": 4,
+              "1": 11,
+              "2": 8,
+              "3": 3,
+              "4": 1,
+              "opposite": 7
+            },
+            "mean": 1.48,
+            "share_3_plus": 0.148,
+            "opposite": 0.206,
+            "unsure": 0.0
+          },
+          "antonym": {
+            "n": 30,
+            "n_parsed": 30,
+            "counts": {
+              "opposite": 30
+            },
+            "mean": null,
+            "share_3_plus": null,
+            "opposite": 1.0,
+            "unsure": 0.0
+          },
+          "random": {
+            "n": 30,
+            "n_parsed": 30,
+            "counts": {
+              "0": 26,
+              "1": 3,
+              "2": 1
+            },
+            "mean": 0.17,
+            "share_3_plus": 0.0,
+            "opposite": 0.0,
+            "unsure": 0.0
+          }
         }
       },
       "B": {
@@ -1314,6 +1505,31 @@
             "n": 348,
             "opposite": 0.046
           }
+        },
+        "claude-fable-5-1": {
+          "n": 409,
+          "unsure": 0.0,
+          "opposite": 0.2,
+          "n_unsure": 0,
+          "n_opposite": 82,
+          "antonym_group": {
+            "n": 30,
+            "opposite": 1.0,
+            "counts": {
+              "opposite": 30
+            }
+          },
+          "nearest_recorded_opposites": {
+            "n": 31,
+            "opposite": 1.0,
+            "counts": {
+              "opposite": 31
+            }
+          },
+          "not_recorded_opposites": {
+            "n": 348,
+            "opposite": 0.06
+          }
         }
       },
       "B": {
@@ -1520,6 +1736,50 @@
             "mean_embedding_cos": 0.399,
             "n_persona": 40,
             "mean_persona_cos": 0.033
+          },
+          "unsure": {
+            "n": 0,
+            "mean_embedding_cos": null,
+            "n_persona": 0,
+            "mean_persona_cos": null
+          }
+        },
+        "claude-fable-5-1": {
+          "0": {
+            "n": 53,
+            "mean_embedding_cos": 0.158,
+            "n_persona": 25,
+            "mean_persona_cos": 0.263
+          },
+          "1": {
+            "n": 94,
+            "mean_embedding_cos": 0.332,
+            "n_persona": 72,
+            "mean_persona_cos": 0.466
+          },
+          "2": {
+            "n": 114,
+            "mean_embedding_cos": 0.392,
+            "n_persona": 92,
+            "mean_persona_cos": 0.603
+          },
+          "3": {
+            "n": 54,
+            "mean_embedding_cos": 0.519,
+            "n_persona": 34,
+            "mean_persona_cos": 0.757
+          },
+          "4": {
+            "n": 12,
+            "mean_embedding_cos": 0.64,
+            "n_persona": 12,
+            "mean_persona_cos": 0.856
+          },
+          "opposite": {
+            "n": 82,
+            "mean_embedding_cos": 0.395,
+            "n_persona": 45,
+            "mean_persona_cos": 0.042
           },
           "unsure": {
             "n": 0,
@@ -2355,6 +2615,11 @@
           "n": 38,
           "same": 32,
           "share_same": 0.842
+        },
+        "claude-fable-5-1": {
+          "n": 38,
+          "same": 31,
+          "share_same": 0.816
         }
       },
       "B": {
@@ -2396,6 +2661,11 @@
       }
     },
     "parse_first_attempt": {
+      "A|claude-fable-5-1": {
+        "ok": 409,
+        "total": 409,
+        "rate": 1.0
+      },
       "A|claude-haiku-4-5-20251001": {
         "ok": 409,
         "total": 409,
@@ -2432,7 +2702,8 @@
       "A": {
         "claude-haiku-4-5-20251001": 1.0,
         "claude-sonnet-5-5": 1.0,
-        "claude-opus-5-5": 1.0
+        "claude-opus-5-5": 1.0,
+        "claude-fable-5-1": 1.0
       },
       "B": {
         "claude-haiku-4-5-20251001": 1.0,
@@ -2446,8 +2717,15 @@
       "unit": "target (all the pairs of one call's target)"
     },
     "usage": {
-      "n_calls": 1082,
+      "n_calls": 1262,
       "per_model": {
+        "claude-fable-5-1": {
+          "completion_tokens": 30861,
+          "cost_usd": 3.165,
+          "model": "claude-fable-5-1",
+          "n_calls": 180,
+          "prompt_tokens": 162193
+        },
         "claude-haiku-4-5-20251001": {
           "completion_tokens": 56412,
           "cost_usd": 0.5023,
@@ -2470,9 +2748,9 @@
           "prompt_tokens": 294725
         }
       },
-      "total_completion_tokens": 172427,
-      "total_cost_usd": 3.9859,
-      "total_prompt_tokens": 809376
+      "total_completion_tokens": 203288,
+      "total_cost_usd": 7.1509,
+      "total_prompt_tokens": 971569
     },
     "pair_set_info": {
       "seed": 0,
@@ -2574,29 +2852,29 @@
   "_provenance": {
     "schema_version": "1.0",
     "produced_by": {
-      "cmd": "uv run python data_analysis/gap_generation/overlap_test.py --run-id overlap_test_1 --budget-usd 15 --resume",
-      "git_sha": "6707ed2+dirty",
+      "cmd": "uv run python data_analysis/gap_generation/overlap_test.py --run-id overlap_test_1 --models claude-haiku-4-5-20251001 claude-sonnet-5-5 claude-opus-5-5 claude-fable-5-1 --rubrics A --resume --budget-usd 12",
+      "git_sha": "ef1100b+dirty",
       "author": "Roger Dearnaley",
       "title": "M3 overlap rubric test overlap_test_1"
     },
-    "produced_at": "2026-10-03T13:34:09+00:00",
+    "produced_at": "2026-10-04T00:33:51+00:00",
     "inputs": [
       {
         "dep_key": "producer_script",
         "path": "data_analysis/gap_generation/overlap_test.py",
-        "fingerprint": "v1:2026-10-03T13:29:51+00:00@23665",
+        "fingerprint": "v1:2026-10-04T00:29:13+00:00@24018",
         "kind": "file",
         "dataset_id": null,
-        "last_modified_at": "2026-10-03T13:29:51+00:00",
+        "last_modified_at": "2026-10-04T00:29:13+00:00",
         "extras": {}
       },
       {
         "dep_key": "overlap_test_module",
         "path": "assistant_axis/gapgen/overlap_test.py",
-        "fingerprint": "v1:2026-10-03T13:29:51+00:00@72267",
+        "fingerprint": "v1:2026-10-04T00:29:12+00:00@73523",
         "kind": "file",
         "dataset_id": null,
-        "last_modified_at": "2026-10-03T13:29:51+00:00",
+        "last_modified_at": "2026-10-04T00:29:12+00:00",
         "extras": {}
       },
       {
@@ -3320,10 +3598,10 @@
       {
         "dep_key": "rubrics",
         "path": "reports/trait_gap_generation/rubrics",
-        "fingerprint": "v1:multi:2cf3f17e44d7",
+        "fingerprint": "v1:multi:08b4a9a8fff2",
         "kind": "multi",
         "dataset_id": null,
-        "last_modified_at": "2026-10-03T13:03:11+00:00",
+        "last_modified_at": "2026-10-03T22:36:21+00:00",
         "extras": {},
         "member_paths": [
           "reports/trait_gap_generation/rubrics/overlap_concept.md",
@@ -3347,13 +3625,13 @@
       {
         "dep_key": "responses",
         "path": "data/candidates/overlap_test/overlap_test_1/responses.jsonl",
-        "fingerprint": "v1:2026-10-03T13:33:44+00:00@2885918",
+        "fingerprint": "v1:2026-10-04T00:33:33+00:00@3370489",
         "kind": "file",
         "dataset_id": null,
-        "last_modified_at": "2026-10-03T13:33:44+00:00",
+        "last_modified_at": "2026-10-04T00:33:33+00:00",
         "extras": {}
       }
     ],
-    "inputs_sha256": "015e345c559f10466e902f5aaa8216ff14af15412399c40c769e1c5a48a23a92"
+    "inputs_sha256": "14792f9e73cb647c41598671d067cd3e656438a816379d60d53e48471c943dcd"
   }
 }
