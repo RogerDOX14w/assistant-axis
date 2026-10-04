@@ -622,6 +622,27 @@ live session holds a lock on its `responses.jsonl`, so a resume started while an
 earlier session still runs is refused (exit 4).  `overlap_arms_1` (rubrics A, C,
 D, E; two passes; Sonnet 5.5 and Opus 5.5; 2,884 calls) cost $15.89.
 
+**Round 2** (same brief, "Round 2", 2026-10-04): `--rubrics` also takes `A2 C2 D2
+E2` (`overlap_*_implies.md`, pinned as version 1), round 1's A, C, D and E with
+their 2 and 3 lines redrafted around the one-way implication test.
+`--write-subset` (free) computes the confusion subset from every reading on
+record in `--subset-sources` (default `overlap_arms_1 overlap_test_1
+overlap_test_2`; rubric B never counts; a missing source is refused): the pairs
+whose readings include both a 2 and a 3 on the decision scale, or a 2 whose reason
+matches round 1's containment pattern and not its two-sided one.  It writes
+`<run dir>/subset.json` (provenance envelope; the rule, the counts, the pair ids,
+the calls that hold them, the controls, and the evidence per pair).
+`--calls-from <subset.json>` sends only the calls it names, whole (the pair set and
+the `--baseline-run` check are unchanged; the file is copied into the run
+directory; a resume must name the same calls).  The analysis is then made on the
+calls sent, marks every `results.jsonl` row `in_subset`, and adds a "Round 2"
+section to `summary.json` and `tables.md`: each round-2 arm against its round-1
+arm in `--round1-run` (default `overlap_arms_1`, read only) on the same pairs, for
+the subset's pairs and for every pair sent (self-consistency, agreement, the share
+at 3, crossings and flips over every pair of the population, the self-contradiction
+rates both ways, D2's `wider`), the brief's test, and the first answers behind the
+counts with their reasons.
+
 ```bash
 uv run python data_analysis/gap_generation/overlap_test.py --run-id overlap_test_1 --dry-run   # plan, estimate, rendered prompts
 uv run python data_analysis/gap_generation/overlap_test.py --run-id overlap_test_1 --budget-usd 15 [--resume]
@@ -629,6 +650,10 @@ uv run python data_analysis/gap_generation/overlap_test.py --run-id overlap_test
 uv run python data_analysis/gap_generation/overlap_test.py --run-id overlap_test_1 --decode-marks  # after Roger marks the sheet
 uv run python data_analysis/gap_generation/overlap_test.py --run-id overlap_arms_1 \
     --models claude-sonnet-5-5 claude-opus-5-5 --rubrics A C D E --passes 2 --budget-usd 20 [--dry-run | --resume]
+uv run python data_analysis/gap_generation/overlap_test.py --run-id overlap_arms_2 --write-subset   # free
+uv run python data_analysis/gap_generation/overlap_test.py --run-id overlap_arms_2 \
+    --models claude-sonnet-5-5 claude-opus-5-5 --rubrics A2 C2 D2 E2 --passes 2 --budget-usd 12 \
+    --calls-from data/candidates/overlap_test/overlap_arms_2/subset.json [--dry-run | --resume]
 ```
 
 **Corpus regions after a corpus change.**  `gap_registry.py corpus-regions`

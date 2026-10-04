@@ -54,6 +54,15 @@ is judged once per pass by every (rubric, model).  A record's key is (rubric, mo
 records written before passes count as pass 1.  :func:`analyse_arms` compares the passes (self-
 consistency), the models in each pass, the coverage and crossings at the cut-off, D's relations and
 ``wider``, E's named kinds, and arm A's pass 1 against an earlier run's rubric-A answers.
+
+**Round 2** (the same brief, "Round 2", 2026-10-04): A2, C2, D2 and E2 (:data:`ROUND2_OF`), each a round-1
+arm with its 2 and 3 lines redrafted around the one-way implication test, in its own pinned file.
+:func:`confusion_subset` picks, from every reading on record (:func:`pair_readings` over
+:data:`SUBSET_SOURCES`), the pairs whose readings hold both a 2 and a 3, or a 2 whose reason describes a
+containment (:data:`CONTAINMENT_PATTERN` and not :data:`TWO_SIDED_PATTERN`, round 1's patterns); a run can
+send only the calls that hold them (:meth:`PairSet.restricted`; the CLI's ``--calls-from``), and
+:func:`analyse_round2` compares each round-2 arm with its round-1 arm on the same pairs (the subset, and
+every pair sent), self-contradiction rates included (:func:`contradictions`).
 """
 from __future__ import annotations
 
@@ -99,29 +108,46 @@ WIDER: tuple[str, ...] = ("target", "listed")
 #: (D's ``wider``); ``decision``: the native answers that map to another value on the decision scale
 #: (rubric A's 0-4; every other answer maps to itself); ``aliases``: other spellings of a category,
 #: read as it with a parse note; ``out_per_row``: output tokens per listed trait for the estimate
-#: (default :data:`OUT_PER_ROW_TOKENS`).  A and B: the test of 2026-10-03; C, D and E: the arms
-#: experiment of 2026-10-04 (``coding_plan_overlap_arms.md``), variants of A.
+#: (default :data:`OUT_PER_ROW_TOKENS`); ``kinds``: whether the reasons of 3s are searched for the kind
+#: of difference they name ("asked" where line 3 asks for it, "control" where it does not);
+#: ``round1``: for a round-2 rubric, the round-1 arm it redrafts (:data:`ROUND2_OF`).  A and B: the test
+#: of 2026-10-03; C, D and E: the arms experiment of 2026-10-04 (``coding_plan_overlap_arms.md``),
+#: variants of A; A2, C2, D2 and E2: its round 2, the same day.
 RUBRICS: dict[str, dict] = {
     "A": {"name": "overlap_concept", "key": "similarity", "scale": SCALE, "categories": ("opposite", "unsure"),
-          "title": "concept similarity"},
+          "kinds": "control", "title": "concept similarity"},
     "B": {"name": "overlap_cooccurrence", "key": "co_occurrence", "scale": SCALE, "categories": ("unsure",),
           "title": "co-occurrence"},
     "C": {"name": "overlap_six", "key": "similarity", "scale": (0, 1, 2, 3, 4, 5),
           "categories": ("opposite", "unsure"), "decision": {5: 4, 4: 3, 3: 3, 2: 2, 1: 1, 0: 0},
-          "title": "six rungs"},
+          "decision_note": "5 -> 4, 4 -> 3, 3 -> 3", "title": "six rungs"},
     "D": {"name": "overlap_relation", "key": "relation", "scale": (),
           "categories": tuple(reversed(RELATIONS)) + ("opposite", "unsure"), "ranks": RELATIONS,
           "extra": ("wider",),
           "decision": {"same": 4, "variant": 3, "contains": 3, "overlap": 2, "neighbours": 1, "different": 0},
+          "decision_note": "same 4, variant 3, contains 3, overlap 2, neighbours 1, different 0",
           "aliases": {"neighbors": "neighbours", "neighbour": "neighbours", "neighbor": "neighbours"},
           "out_per_row": 66, "title": "relation first"},
     "E": {"name": "overlap_scope", "key": "similarity", "scale": SCALE, "categories": ("opposite", "unsure"),
-          "out_per_row": 62, "title": "Roger's line 3"},
+          "out_per_row": 62, "kinds": "asked", "title": "Roger's line 3"},
 }
+#: Round 2 of the arms experiment (``coding_plan_overlap_arms.md``, "Round 2", 2026-10-04): each key is a
+#: round-1 arm (the first entry) with its 2 and 3 lines redrafted around the one-way implication test, in
+#: its own pinned file (the second entry); every other fact is the round-1 arm's.
+ROUND2_OF: dict[str, tuple[str, str, str]] = {
+    "A2": ("A", "overlap_concept_implies", "A with the implication test"),
+    "C2": ("C", "overlap_six_implies", "C with the implication test"),
+    "D2": ("D", "overlap_relation_implies", "D with the implication test"),
+    "E2": ("E", "overlap_scope_implies", "E with the implication test"),
+}
+for _key, (_parent, _name, _title) in ROUND2_OF.items():
+    RUBRICS[_key] = {**RUBRICS[_parent], "name": _name, "title": _title, "round1": _parent}
 #: The rubrics a run sends unless ``--rubrics`` says otherwise: the original test's two.
 DEFAULT_RUBRICS: tuple[str, ...] = ("A", "B")
 #: The arms experiment's rubrics (arm 0 is rubric A, the baseline).
 ARMS: tuple[str, ...] = ("A", "C", "D", "E")
+#: Its round 2 (:data:`ROUND2_OF`).
+ROUND2: tuple[str, ...] = tuple(ROUND2_OF)
 #: The decision scale's cut-off the arms experiment reads (covered at 3 or more, far from alignment).
 CUTOFF = 3
 HAIKU, SONNET, OPUS = "claude-haiku-4-5-20251001", "claude-sonnet-5-5", "claude-opus-5-5"
@@ -210,6 +236,32 @@ def native_order(rubric: str) -> list[str]:
     return ranks + [c for c in RUBRICS[rubric]["categories"] if c not in ranks]
 
 
+def has_wider(rubric: str) -> bool:
+    """Whether the rubric asks which of a "contains" pair is the wider (D and D2)."""
+    return "wider" in RUBRICS[rubric].get("extra", ())
+
+
+def _names(keys: Sequence[str]) -> str:
+    keys = list(keys)
+    return keys[0] if len(keys) == 1 else ", ".join(keys[:-1]) + " and " + keys[-1]
+
+
+def decision_maps_text(rubrics: Iterable[str]) -> str:
+    """How the rubrics that do not answer on the decision scale map onto it, for tables ("C maps 5 -> 4,
+    4 -> 3, 3 -> 3; D maps same 4, ..."), or "" when all of them answer on it."""
+    return "; ".join(f"{r} maps {RUBRICS[r]['decision_note']}" for r in rubrics if RUBRICS[r].get("decision"))
+
+
+def native_scales_text(rubrics: Iterable[str]) -> str:
+    """The native scales that are not rubric A's, for tables ("C 0-5; D's relations ranked ..."), or ""."""
+    rubrics = list(rubrics)
+    num = [r for r in rubrics if native_k(r) == 6 and not RUBRICS[r].get("ranks")]
+    rel = [r for r in rubrics if RUBRICS[r].get("ranks")]
+    parts = ([f"{_names(num)} 0-5"] if num else []) + (
+        [f"{_names(rel)}'s relations ranked different 0 ... same 5, as C's rungs"] if rel else [])
+    return "; ".join(parts)
+
+
 #: The decision scale's answers in order (rubric A's).
 DECISION_ORDER: list[str] = [str(s) for s in SCALE] + ["opposite", "unsure"]
 
@@ -292,6 +344,18 @@ class PairSet:
 
     def call(self, call_id: str) -> Call:
         return next(c for c in self.calls if c.call_id == call_id)
+
+    def restricted(self, call_ids: Iterable[str]) -> "PairSet":
+        """The calls named (in this pair set's order) and their pairs, unchanged: what a run restricted
+        to some calls (``--calls-from``) sent.  ``info`` is this pair set's, with ``restricted_to``."""
+        keep = set(call_ids)
+        unknown = sorted(keep - {c.call_id for c in self.calls})
+        if unknown:
+            raise ValueError(f"{len(unknown)} call(s) not in the pair set: {unknown[:5]}")
+        return PairSet(calls=[c for c in self.calls if c.call_id in keep],
+                       pairs=[p for p in self.pairs if p.call_id in keep],
+                       info={**self.info, "restricted_to": {"n_calls": len(keep), "of_calls": len(self.calls),
+                                                            "of_pairs": len(self.pairs)}})
 
 
 def same_calls(a: PairSet, b: PairSet) -> bool:
@@ -975,19 +1039,25 @@ def collect_answers(pair_set: PairSet, records: Iterable[Mapping], pass_no: int 
     return dict(out)
 
 
-def results_rows(pair_set: PairSet, answers: Mapping, pass_no: int = 1) -> list[dict]:
+def results_rows(pair_set: PairSet, answers: Mapping, pass_no: int = 1,
+                 subset: Optional[Iterable[str]] = None) -> list[dict]:
     """One row per (pair, rubric, model) of pass ``pass_no`` for ``results.jsonl``, with the answer on the
-    decision scale beside it (``decision``)."""
+    decision scale beside it (``decision``); with ``subset`` (pair ids, round 2's confusion subset), each
+    row says whether its pair is in it (``in_subset``; the other pairs of the calls sent are controls)."""
+    keep = None if subset is None else set(subset)
     out = []
     for p in pair_set.pairs:
         for (rubric, model), ans in sorted(answers.items()):
             a = ans.get(p.pair_id)
             if a is None:
                 continue
-            out.append({"pair_id": p.pair_id, "call_id": p.call_id, "target": p.target, "listed": p.listed,
-                        "id": p.id, "group": p.group, "rubric": rubric, "rubric_name": RUBRICS[rubric]["name"],
-                        "model": model, "pass": pass_no, **a, "decision": decision_value(rubric, a.get("value")),
-                        "embedding_cos": p.embedding_cos, "persona_cos": p.persona_cos})
+            row = {"pair_id": p.pair_id, "call_id": p.call_id, "target": p.target, "listed": p.listed,
+                   "id": p.id, "group": p.group, "rubric": rubric, "rubric_name": RUBRICS[rubric]["name"],
+                   "model": model, "pass": pass_no, **a, "decision": decision_value(rubric, a.get("value")),
+                   "embedding_cos": p.embedding_cos, "persona_cos": p.persona_cos}
+            if keep is not None:
+                row["in_subset"] = p.pair_id in keep
+            out.append(row)
     return out
 
 
@@ -1368,14 +1438,15 @@ def flip_counts(first: Mapping[str, Mapping], second: Mapping[str, Mapping], ord
 
 
 def cutoff_crossings(pairs: Sequence[Pair], rubric: str, first: Mapping[str, Mapping], second: Mapping[str, Mapping],
-                     *, cutoff: int = CUTOFF) -> dict:
-    """On the nearest pairs both answered on a side of ``cutoff`` (decision scale, :func:`side`): how many
-    fall on different sides, split by which one is covered, and the pairs themselves with both native
-    answers."""
+                     *, cutoff: int = CUTOFF, nearest_only: bool = True) -> dict:
+    """On the nearest pairs (every pair of ``pairs`` with ``nearest_only`` False, as round 2 counts its
+    populations) both answered on a side of ``cutoff`` (decision scale, :func:`side`): how many fall on
+    different sides, split by which one is covered, and the pairs themselves with both native answers and
+    both reasons."""
     n = first_only = second_only = 0
     rows = []
     for p in pairs:
-        if p.group != NEAREST or p.pair_id not in first or p.pair_id not in second:
+        if (nearest_only and p.group != NEAREST) or p.pair_id not in first or p.pair_id not in second:
             continue
         a, b = first[p.pair_id].get("value"), second[p.pair_id].get("value")
         sa, sb = side(decision_value(rubric, a), cutoff), side(decision_value(rubric, b), cutoff)
@@ -1385,36 +1456,40 @@ def cutoff_crossings(pairs: Sequence[Pair], rubric: str, first: Mapping[str, Map
         if sa != sb:
             first_only += int(sa)
             second_only += int(sb)
-            rows.append({"pair_id": p.pair_id, "target": p.target, "listed": p.listed, "first": a, "second": b})
+            rows.append({"pair_id": p.pair_id, "target": p.target, "listed": p.listed, "group": p.group,
+                         "first": a, "second": b, "first_reason": first[p.pair_id].get("reason"),
+                         "second_reason": second[p.pair_id].get("reason")})
     return {"n": n, "crossings": first_only + second_only, "first_only": first_only, "second_only": second_only,
             "pairs": rows}
 
 
 def compare_answers(rubric: str, first: Mapping[str, Mapping], second: Mapping[str, Mapping], pairs: Sequence[Pair],
-                    *, cutoff: int = CUTOFF) -> dict:
+                    *, cutoff: int = CUTOFF, nearest_only: bool = True) -> dict:
     """Two sets of answers under ``rubric`` to the same pairs (one model's two passes; two models in one
     pass; a pass and an earlier run), ``first`` the reference: :func:`agreement` on the native scale (D's
     relations as ranks) and on the decision scale (``mean_diff`` is second minus first); the
     disagreements by the pair of answers they lie between, native and decision (:func:`flip_counts`);
-    and on the nearest pairs, those that fall on different sides of ``cutoff`` (:func:`cutoff_crossings`)."""
+    and on the nearest pairs (every pair of ``pairs``, with ``nearest_only`` False), those that fall on
+    different sides of ``cutoff`` (:func:`cutoff_crossings`)."""
     k = native_k(rubric)
     d1, d2 = to_decision(rubric, first), to_decision(rubric, second)
     return {"native": agreement(to_ordinal(rubric, first), to_ordinal(rubric, second), k=k),
             "decision": agreement(d1, d2, k=len(SCALE)),
             "flips_native": flip_counts(first, second, native_order(rubric), n_scale=k),
             "flips_decision": flip_counts(d1, d2, DECISION_ORDER, n_scale=len(SCALE)),
-            "cutoff": cutoff_crossings(pairs, rubric, first, second, cutoff=cutoff)}
+            "cutoff": cutoff_crossings(pairs, rubric, first, second, cutoff=cutoff, nearest_only=nearest_only)}
 
 
-def coverage(pairs: Sequence[Pair], rubric: str, answers: Mapping[str, Mapping], *, cutoff: int = CUTOFF) -> dict:
-    """The nearest pairs at or above ``cutoff`` on the decision scale, over those answered (an M3
-    candidate sitting where the target sits would be called covered by that neighbour), and the targets
-    with at least one such neighbour."""
+def coverage(pairs: Sequence[Pair], rubric: str, answers: Mapping[str, Mapping], *, cutoff: int = CUTOFF,
+             nearest_only: bool = True) -> dict:
+    """The nearest pairs (every pair of ``pairs``, with ``nearest_only`` False) at or above ``cutoff`` on
+    the decision scale, over those answered (an M3 candidate sitting where the target sits would be called
+    covered by that neighbour), and the targets with at least one such neighbour."""
     by_call: dict[str, list] = defaultdict(list)
     vals = []
     for p in pairs:
         a = answers.get(p.pair_id)
-        if p.group != NEAREST or a is None or a.get("value") is None:
+        if (nearest_only and p.group != NEAREST) or a is None or a.get("value") is None:
             continue
         v = decision_value(rubric, a["value"])
         vals.append(v)
@@ -1579,7 +1654,7 @@ def analyse_arms(pair_set: PairSet, answers_by_pass: Mapping[int, Mapping[tuple[
             arm["between_models"][m] = {str(p): compare_answers(r, get(p, r, reference), get(p, r, m), pairs,
                                                                 cutoff=cutoff)
                                         for p in passes if get(p, r, reference) and get(p, r, m)}
-        if r == "D":
+        if has_wider(r):
             arm["relations"] = {m: {str(p): relation_stats(get(p, r, m)) for p in passes if get(p, r, m)}
                                 for m in models}
             arm["wider_between_passes"] = {m: wider_agreement(get(passes[0], r, m), get(passes[1], r, m))
@@ -1587,7 +1662,7 @@ def analyse_arms(pair_set: PairSet, answers_by_pass: Mapping[int, Mapping[tuple[
             arm["wider_between_models"] = {m: {str(p): wider_agreement(get(p, r, reference), get(p, r, m))
                                                for p in passes if get(p, r, reference) and get(p, r, m)}
                                            for m in others}
-        if r in ("A", "E"):
+        if RUBRICS[r].get("kinds"):
             arm["scope_kinds"] = {m: {str(p): scope_kinds(get(p, r, m)) for p in passes if get(p, r, m)}
                                   for m in models}
         out["per_arm"][r] = arm
@@ -1634,6 +1709,358 @@ def cross_arm_rows(arms: Mapping) -> list[dict]:
     return rows
 
 
+# --------------------------------------------------------------------------- the arms experiment, round 2
+
+#: How round 1's analysis read a reason (``coding_plan_overlap_arms.md``, "Round 2", "The subset"), both
+#: case-insensitive: as describing a containment, and as describing a two-sided overlap.
+CONTAINMENT_PATTERN = (r"narrow|broader|broadened|\bwider\b|\bpart of\b|subset|\bincludes?\b"
+                       r"|specific (case|form|kind|instance)|special case|restricted to|limited to"
+                       r"|carried (further|beyond)|stronger (form|degree|version)|a (form|kind|type|case) of")
+TWO_SIDED_PATTERN = (r"(each|both)\s+(add|bring|contribut|has something|lacks)"
+                     r"|adds?\b[^.;]*\b(while|whereas|and)\b[^.;]*\b(adds?|stresses|brings|emphasi)")
+CONTAINMENT_RE = re.compile(CONTAINMENT_PATTERN, re.I)
+TWO_SIDED_RE = re.compile(TWO_SIDED_PATTERN, re.I)
+
+
+def describes_containment(reason: Optional[str]) -> bool:
+    """The reason matches the containment pattern and not the two-sided one.  An answer at 2 (2,
+    "overlap") with such a reason is round 1's self-contradiction."""
+    return bool(reason) and bool(CONTAINMENT_RE.search(reason)) and not TWO_SIDED_RE.search(reason)
+
+
+def describes_two_sided(reason: Optional[str]) -> bool:
+    """The reason matches the two-sided pattern (each trait adds something).  An answer at 3 with such a
+    reason is the reverse slip."""
+    return bool(reason) and bool(TWO_SIDED_RE.search(reason))
+
+
+#: The runs whose readings define the confusion subset (``coding_plan_overlap_arms.md``, "Round 2"): round 1
+#: of the arms (A, C, D and E; Sonnet and Opus; two passes), overlap_test_1 (rubric A on its four models) and
+#: overlap_test_2 (rubric A, draft 3).  Rubric B never counts: its 0-4 is co-occurrence, not similarity.
+SUBSET_SOURCES: tuple[str, ...] = ("overlap_arms_1", "overlap_test_1", "overlap_test_2")
+SUBSET_SKIP_RUBRICS: tuple[str, ...] = ("B",)
+SUBSET_RULE = ("A pair (by pair_id of the round-1 pair set) is in the subset if, over every reading of it on record "
+               "(every answer that parsed, under every rubric but B, of every model and pass of the source runs, "
+               "mapped to the decision scale), either (1) its readings include both a 2 and a 3, or (2) some reading "
+               "is a 2 (or \"overlap\") whose reason matches the containment pattern and not the two-sided pattern.  "
+               "The run sends the calls that hold a subset pair whole, as round 1 built them; their other pairs "
+               "are controls.")
+
+
+def pair_readings(pair_set: PairSet, records_by_run: Mapping[str, Iterable[Mapping]], *,
+                  skip: Sequence[str] = SUBSET_SKIP_RUBRICS) -> tuple[dict[str, list[dict]], list[dict]]:
+    """Every reading on record of every pair: ``({pair_id: [{"run", "rubric", "model", "pass", "value",
+    "decision", "reason"}, ...]}, sources)``, from each run's final answer per (rubric, model, call, pass)
+    (:func:`collect_answers`, re-parsed), every rubric but ``skip``, answers that did not parse left out.
+    ``sources``: one row per (run, rubric, model, pass) with the rubric versions its records carry and how
+    many readings it gave."""
+    readings: dict[str, list[dict]] = defaultdict(list)
+    sources: list[dict] = []
+    for run, records in records_by_run.items():
+        records = list(records)
+        versions: dict[tuple, set] = defaultdict(set)
+        for rec in records:
+            versions[(rec["rubric"], rec["model"], record_pass(rec))].add(rec.get("rubric_version"))
+        for p in record_passes(records):
+            for (r, m), ans in sorted(collect_answers(pair_set, records, pass_no=p).items()):
+                if r in skip:
+                    continue
+                n = unparsed = 0
+                for pid, a in ans.items():
+                    if a.get("value") is None:
+                        unparsed += 1
+                        continue
+                    n += 1
+                    readings[pid].append({"run": run, "rubric": r, "model": m, "pass": p, "value": a["value"],
+                                          "decision": decision_value(r, a["value"]), "reason": a.get("reason")})
+                sources.append({"run": run, "rubric": r, "rubric_name": RUBRICS[r]["name"],
+                                "rubric_versions": sorted(v for v in versions[(r, m, p)] if v is not None),
+                                "model": m, "pass": p, "n_readings": n, "n_unparsed": unparsed})
+    return dict(readings), sources
+
+
+def confusion_subset(pair_set: PairSet, readings: Mapping[str, Sequence[Mapping]]) -> dict:
+    """Round 2's confusion subset (:data:`SUBSET_RULE`) from :func:`pair_readings`: ``pair_ids`` (pair-set
+    order), the calls that hold them (``call_ids``, pair-set order), the other pairs of those calls
+    (``control_pair_ids``), the counts (``rule_1``, ``rule_2``, ``rule_2_only``, calls, controls, by group),
+    and per subset pair its ``evidence``: the rules it meets, the decision values among its readings and
+    the readings that are slips, with their reasons."""
+    rule1: set = set()
+    rule2: set = set()
+    evidence: dict[str, dict] = {}
+    for p in pair_set.pairs:
+        rs = list(readings.get(p.pair_id, []))
+        decisions = Counter(str(x["decision"]) for x in rs)
+        both = {2, 3} <= {x["decision"] for x in rs if _num_val(x["decision"])}
+        slips = [x for x in rs if _num_val(x["decision"]) and x["decision"] == 2 and describes_containment(x["reason"])]
+        if both:
+            rule1.add(p.pair_id)
+        if slips:
+            rule2.add(p.pair_id)
+        if both or slips:
+            evidence[p.pair_id] = {"rules": [k for k, ok in ((1, both), (2, bool(slips))) if ok],
+                                   "n_readings": len(rs),
+                                   "decisions": {k: decisions[k] for k in DECISION_ORDER if decisions.get(k)},
+                                   "slips": [{k: x[k] for k in ("run", "rubric", "model", "pass", "value", "reason")}
+                                             for x in slips]}
+    chosen = rule1 | rule2
+    pair_ids = [p.pair_id for p in pair_set.pairs if p.pair_id in chosen]
+    held = {p.call_id for p in pair_set.pairs if p.pair_id in chosen}
+    call_ids = [c.call_id for c in pair_set.calls if c.call_id in held]
+    controls = [p.pair_id for p in pair_set.pairs if p.call_id in held and p.pair_id not in chosen]
+    group = {p.pair_id: p.group for p in pair_set.pairs}
+    per_pair = Counter(len(readings.get(p.pair_id, [])) for p in pair_set.pairs)
+    counts = {"n_pairs": len(pair_ids), "rule_1": len(rule1), "rule_2": len(rule2), "rule_2_only": len(rule2 - rule1),
+              "both_rules": len(rule1 & rule2), "n_calls": len(call_ids), "n_pairs_sent": len(pair_ids) + len(controls),
+              "n_controls": len(controls), "of_calls": len(pair_set.calls), "of_pairs": len(pair_set.pairs),
+              "by_group": dict(Counter(group[x] for x in pair_ids)),
+              "controls_by_group": dict(Counter(group[x] for x in controls)),
+              "readings_per_pair": {str(k): per_pair[k] for k in sorted(per_pair)}}
+    return {"rule": SUBSET_RULE, "patterns": {"containment": CONTAINMENT_PATTERN, "two_sided": TWO_SIDED_PATTERN,
+                                              "flags": "IGNORECASE"},
+            "counts": counts, "call_ids": call_ids, "pair_ids": pair_ids, "control_pair_ids": controls,
+            "evidence": evidence}
+
+
+def load_subset(path: Path) -> dict:
+    """A ``subset.json`` (:func:`confusion_subset`, in its provenance envelope or bare).  It must name its
+    calls (``call_ids``); ``pair_ids`` and ``control_pair_ids`` default to empty."""
+    d = json.loads(Path(path).read_text(encoding="utf-8"))
+    d = d.get("result", d) if isinstance(d, dict) else d
+    if not isinstance(d, dict) or not isinstance(d.get("call_ids"), list) or not d["call_ids"]:
+        raise ValueError(f"{path}: no call_ids")
+    return {**d, "pair_ids": list(d.get("pair_ids") or []), "control_pair_ids": list(d.get("control_pair_ids") or [])}
+
+
+def contradictions(rubric: str, answers: Iterable[Mapping]) -> dict:
+    """Round 1's self-contradictions in a set of answers (one model's, one pass or several): ``forward``,
+    the answers at 2 on the decision scale (2, "overlap") whose reason describes a containment
+    (:func:`describes_containment`); ``reverse``, the answers at 3 (3, "contains", and C's 4 and D's
+    "variant", which map to 3) whose reason describes a two-sided overlap (:func:`describes_two_sided`),
+    also split by native answer.  Counts, and shares of the answers at 2 and at 3."""
+    twos, threes = [], []
+    for a in answers:
+        d = decision_value(rubric, a.get("value"))
+        if _num_val(d) and d == 2:
+            twos.append(a)
+        elif _num_val(d) and d == 3:
+            threes.append(a)
+    fwd = sum(describes_containment(a.get("reason")) for a in twos)
+    by_native: dict[str, dict] = {}
+    for a in threes:
+        x = by_native.setdefault(str(a["value"]), {"n": 0, "reverse": 0})
+        x["n"] += 1
+        x["reverse"] += int(describes_two_sided(a.get("reason")))
+    rev = sum(x["reverse"] for x in by_native.values())
+    return {"n_2": len(twos), "forward": fwd, "forward_share": _r(fwd / len(twos), 3) if twos else None,
+            "n_3": len(threes), "reverse": rev, "reverse_share": _r(rev / len(threes), 3) if threes else None,
+            "reverse_by_native": {k: by_native[k] for k in native_order(rubric) if k in by_native}}
+
+
+def population_stats(pair_set: PairSet, rubric: str, by_pass: Mapping[int, Mapping[tuple[str, str], Mapping]],
+                     pair_ids: Iterable[str], *, models: Sequence[str], reference: str = REFERENCE,
+                     cutoff: int = CUTOFF) -> dict:
+    """Round 1's statistics for one rubric's answers (``by_pass``: ``{pass: collect_answers(...)}``) on the
+    pairs ``pair_ids`` only, every group counted (round 2's populations): self-consistency between the
+    first two passes and each model against ``reference`` in each pass (:func:`compare_answers`, its
+    crossings and flips at ``cutoff`` over every pair of the population), the share at ``cutoff`` or more
+    per pass (:func:`coverage`), the self-contradictions per pass and pooled over the passes
+    (:func:`contradictions`); for a rubric with ``wider``, the relations named and the ``wider``
+    agreement between passes and models."""
+    ids = set(pair_ids)
+    pairs = [p for p in pair_set.pairs if p.pair_id in ids]
+    passes = sorted(int(p) for p in by_pass)
+    others = [m for m in models if m != reference]
+
+    def get(p: int, m: str) -> dict:
+        return {k: v for k, v in (by_pass.get(p) or {}).get((rubric, m), {}).items() if k in ids}
+
+    out: dict = {"rubric": rubric, "n_pairs": len(pairs), "self_consistency": {}, "between_models": {},
+                 "coverage": {}, "contradictions": {}}
+    for m in models:
+        if len(passes) >= 2 and get(passes[0], m) and get(passes[1], m):
+            out["self_consistency"][m] = compare_answers(rubric, get(passes[0], m), get(passes[1], m), pairs,
+                                                         cutoff=cutoff, nearest_only=False)
+        cov = {str(p): coverage(pairs, rubric, get(p, m), cutoff=cutoff, nearest_only=False) for p in passes if get(p, m)}
+        if cov:
+            out["coverage"][m] = cov
+        per = {str(p): contradictions(rubric, get(p, m).values()) for p in passes if get(p, m)}
+        if per:
+            per["pooled"] = contradictions(rubric, [a for p in passes for a in get(p, m).values()])
+            out["contradictions"][m] = per
+    for m in others:
+        bm = {str(p): compare_answers(rubric, get(p, reference), get(p, m), pairs, cutoff=cutoff, nearest_only=False)
+              for p in passes if get(p, reference) and get(p, m)}
+        if bm:
+            out["between_models"][m] = bm
+    if has_wider(rubric):
+        out["relations"] = {m: {str(p): relation_stats(get(p, m)) for p in passes if get(p, m)} for m in models}
+        out["wider_between_passes"] = {m: wider_agreement(get(passes[0], m), get(passes[1], m)) for m in models
+                                       if len(passes) >= 2 and get(passes[0], m) and get(passes[1], m)}
+        out["wider_between_models"] = {m: {str(p): wider_agreement(get(p, reference), get(p, m)) for p in passes
+                                           if get(p, reference) and get(p, m)} for m in others}
+    return out
+
+
+def round2_examples(pair_set: PairSet, rubric: str, by_pass: Mapping[int, Mapping[tuple[str, str], Mapping]],
+                    pair_ids: Iterable[str], subset_ids: Iterable[str] = (), *, models: Sequence[str],
+                    reference: str = REFERENCE, cutoff: int = CUTOFF) -> dict:
+    """The answers behind the counts, in pair-set order (then model, then pass): ``forward``, the answers at 2
+    whose reason describes a containment; ``reverse``, the answers at 3 whose reason describes a two-sided
+    overlap; ``crossings``, the pairs the two models put on different sides of ``cutoff`` in a pass, with
+    both answers and both reasons.  ``in_subset`` marks the subset's pairs (the others are controls)."""
+    ids, sub = set(pair_ids), set(subset_ids or ())
+    passes = sorted(int(p) for p in by_pass)
+    others = [m for m in models if m != reference]
+    out: dict = {"forward": [], "reverse": [], "crossings": []}
+
+    def ans(p: int, m: str, pid: str) -> Optional[Mapping]:
+        a = (by_pass.get(p) or {}).get((rubric, m), {}).get(pid)
+        return a if a and a.get("value") is not None else None
+
+    for pr in pair_set.pairs:
+        if pr.pair_id not in ids:
+            continue
+        base = {"pair_id": pr.pair_id, "target": pr.target, "listed": pr.listed, "group": pr.group,
+                "in_subset": pr.pair_id in sub}
+        for m in models:
+            for p in passes:
+                a = ans(p, m, pr.pair_id)
+                if a is None:
+                    continue
+                d = decision_value(rubric, a["value"])
+                row = {**base, "model": m, "pass": p, "value": a["value"], "reason": a.get("reason")}
+                if _num_val(d) and d == 2 and describes_containment(a.get("reason")):
+                    out["forward"].append(row)
+                elif _num_val(d) and d == 3 and describes_two_sided(a.get("reason")):
+                    out["reverse"].append(row)
+        for p in passes:
+            a = ans(p, reference, pr.pair_id)
+            for m in others:
+                b = ans(p, m, pr.pair_id)
+                if a is None or b is None:
+                    continue
+                sa, sb = side(decision_value(rubric, a["value"]), cutoff), side(decision_value(rubric, b["value"]), cutoff)
+                if sa is not None and sb is not None and sa != sb:
+                    out["crossings"].append({**base, "pass": p, "first_model": reference, "first": a["value"],
+                                             "first_reason": a.get("reason"), "second_model": m, "second": b["value"],
+                                             "second_reason": b.get("reason")})
+    return out
+
+
+def _round_cells(s: Mapping, model: str, partner: Optional[str]) -> dict:
+    """One rubric's figures for one model in one population (:func:`population_stats`), for a table row."""
+    sc = s["self_consistency"].get(model)
+    bm = s["between_models"].get(partner, {}) if partner else {}
+    con = (s["contradictions"].get(model) or {}).get("pooled") or {}
+    cov = s["coverage"].get(model, {})
+    return {"n_both_passes": sc["native"]["n_both_parsed"] if sc else None,
+            "consistency_native": sc["native"]["exact_all"] if sc else None,
+            "consistency_decision": sc["decision"]["exact_all"] if sc else None,
+            "pass_flips": sc["cutoff"]["crossings"] if sc else None, "pass_flips_n": sc["cutoff"]["n"] if sc else None,
+            "agreement_native": {p: x["native"]["exact_all"] for p, x in bm.items()},
+            "agreement_decision": {p: x["decision"]["exact_all"] for p, x in bm.items()},
+            "crossings": {p: x["cutoff"]["crossings"] for p, x in bm.items()},
+            "crossings_n": {p: x["cutoff"]["n"] for p, x in bm.items()},
+            "covered": {p: {k: c[k] for k in ("covered", "n", "share")} for p, c in cov.items()},
+            "forward": con.get("forward"), "n_2": con.get("n_2"), "forward_share": con.get("forward_share"),
+            "reverse": con.get("reverse"), "n_3": con.get("n_3"), "reverse_share": con.get("reverse_share")}
+
+
+def round2_rows(r2: Mapping) -> list[dict]:
+    """One row per (population, round-2 arm, model) of :func:`analyse_round2`, with the round-1 arm's figures
+    (``r1``) and the round-2 arm's (``r2``) on the same pairs: self-consistency (exact, native and decision)
+    and flips at the cut-off between the passes; agreement and crossings with the other model per pass (for
+    the reference model, with the one other model); the share at the cut-off or more per pass; the
+    self-contradictions pooled over the passes."""
+    ref = r2["reference"]
+    others = [m for m in r2["models"] if m != ref]
+    rows = []
+    for pop, per in r2["per_population"].items():
+        for arm, both in per.items():
+            for m in r2["models"]:
+                partner = m if m != ref else (others[0] if len(others) == 1 else None)
+                rows.append({"population": pop, "arm": arm, "round1_arm": RUBRICS[arm]["round1"], "model": m,
+                             "versus": partner, "r1": _round_cells(both["round1"], m, partner),
+                             "r2": _round_cells(both["round2"], m, partner)})
+    return rows
+
+
+def round2_test(r2: Mapping) -> list[dict]:
+    """The brief's test per population and round-2 arm: it improves on its round-1 arm when, on the same
+    pairs, it has fewer self-contradictions (forward and reverse, both models, both passes) and fewer
+    between-model crossings at the cut-off (both passes), with self-consistency (exact, on the decision
+    scale, where the cut-off is) not lower for either model.  The native-scale consistency is given too."""
+    models = r2["models"]
+    out = []
+    for pop, per in r2["per_population"].items():
+        for arm, both in per.items():
+            row: dict = {"population": pop, "arm": arm, "round1_arm": RUBRICS[arm]["round1"]}
+            for which, key in (("r1", "round1"), ("r2", "round2")):
+                s = both[key]
+                pooled = {m: (s["contradictions"].get(m) or {}).get("pooled") or {} for m in models}
+                row[which] = {"forward": sum(pooled[m].get("forward") or 0 for m in models),
+                              "reverse": sum(pooled[m].get("reverse") or 0 for m in models),
+                              "crossings": sum(x["cutoff"]["crossings"] for bm in s["between_models"].values()
+                                               for x in bm.values()),
+                              "pass_flips": sum(sc["cutoff"]["crossings"] for sc in s["self_consistency"].values()),
+                              "consistency_decision": {m: (s["self_consistency"].get(m) or {}).get("decision", {})
+                                                       .get("exact_all") for m in models},
+                              "consistency_native": {m: (s["self_consistency"].get(m) or {}).get("native", {})
+                                                     .get("exact_all") for m in models}}
+                row[which]["contradictions"] = row[which]["forward"] + row[which]["reverse"]
+            a, b = row["r1"], row["r2"]
+            row["fewer_contradictions"] = b["contradictions"] < a["contradictions"]
+            row["fewer_crossings"] = b["crossings"] < a["crossings"]
+            row["consistency_not_worse"] = all(
+                b["consistency_decision"][m] is not None and a["consistency_decision"][m] is not None
+                and b["consistency_decision"][m] >= a["consistency_decision"][m] for m in models)
+            row["improves"] = row["fewer_contradictions"] and row["fewer_crossings"] and row["consistency_not_worse"]
+            out.append(row)
+    return out
+
+
+def analyse_round2(pair_set: PairSet, answers_by_pass: Mapping[int, Mapping[tuple[str, str], Mapping]],
+                   round1_by_pass: Optional[Mapping[int, Mapping[tuple[str, str], Mapping]]], *,
+                   subset: Optional[Mapping] = None, models: Sequence[str], reference: str = REFERENCE,
+                   cutoff: int = CUTOFF, round1_run: Optional[str] = None) -> dict:
+    """Round 2 of the arms experiment (``coding_plan_overlap_arms.md``, "Round 2"): every round-2 rubric in
+    ``answers_by_pass`` against its round-1 arm (``RUBRICS[r]["round1"]``) in ``round1_by_pass`` (an earlier
+    run's ``{pass: collect_answers(...)}``, ``round1_run``, on the same pair set), on the same pairs.  The
+    populations: ``subset``, the subset's pairs (``subset["pair_ids"]``), and ``sent``, every pair this
+    run's round-2 rubrics answered (the subset's calls whole, so the subset and its controls).  Per
+    population and rubric, :func:`population_stats` for both rounds; the comparison rows
+    (:func:`round2_rows`); the brief's test (:func:`round2_test`); and, from this run's answers on every
+    pair sent, the examples (:func:`round2_examples`)."""
+    passes = sorted(int(p) for p in answers_by_pass)
+    arms = [r for r in RUBRICS if RUBRICS[r].get("round1")
+            and any((answers_by_pass.get(p) or {}).get((r, m)) for p in passes for m in models)]
+    order = {p.pair_id: i for i, p in enumerate(pair_set.pairs)}
+    group = {p.pair_id: p.group for p in pair_set.pairs}
+    answered = {pid for p in passes for (r, _), ans in answers_by_pass[p].items() if r in arms for pid in ans}
+    sent = sorted((pid for pid in answered if pid in order), key=order.get)
+    subset_ids = [pid for pid in (subset or {}).get("pair_ids", []) if pid in order]
+    populations = ({"subset": subset_ids} if subset else {}) | {"sent": sent}
+    out: dict = {"round1_run": round1_run, "cutoff": cutoff, "models": list(models), "reference": reference,
+                 "passes": passes, "arms": arms, "pairing": {r: RUBRICS[r]["round1"] for r in arms},
+                 "populations": {k: {"n_pairs": len(v), "n_answered": sum(x in answered for x in v),
+                                     "by_group": dict(Counter(group[x] for x in v))} for k, v in populations.items()},
+                 "patterns": {"containment": CONTAINMENT_PATTERN, "two_sided": TWO_SIDED_PATTERN, "flags": "IGNORECASE"},
+                 "per_population": {}, "examples": {}}
+    for pop, ids in populations.items():
+        out["per_population"][pop] = {
+            r: {"round2": population_stats(pair_set, r, answers_by_pass, ids, models=models, reference=reference,
+                                           cutoff=cutoff),
+                "round1": population_stats(pair_set, RUBRICS[r]["round1"], round1_by_pass or {}, ids, models=models,
+                                           reference=reference, cutoff=cutoff)}
+            for r in arms}
+    out["examples"] = {r: round2_examples(pair_set, r, answers_by_pass, sent, subset_ids, models=models,
+                                          reference=reference, cutoff=cutoff) for r in arms}
+    out["rows"] = round2_rows(out)
+    out["test"] = round2_test(out)
+    return out
+
+
 # --------------------------------------------------------------------------- tables
 
 def _f(x, nd: int = 2) -> str:
@@ -1649,17 +2076,28 @@ def summary_markdown(summary: Mapping, pair_set: PairSet, corpus: Mapping) -> st
     models = summary["models"]
     ref = summary["reference"]
     sm = lambda m: SHORT.get(m, m)  # noqa: E731
+    sent = summary.get("sent") or {}
+    restricted = (f"  The run sent only these calls, named in `{sent['calls_from']}`, of the pair set's "
+                  f"{sent['of_calls']} calls ({sent['of_pairs']} pairs); every table below is about the calls sent."
+                  if sent.get("calls_from") else "")
     L = ["# Overlap test: tables", "",
-         f"{summary['n_pairs']} pairs in {summary['n_calls']} calls.  Reference model: {sm(ref)}.  Generated from "
-         "`summary.json` beside this file.", "", "## Parse rates (pairs whose answer parsed)", "",
+         f"{summary['n_pairs']} pairs in {summary['n_calls']} calls.{restricted}  Reference model: {sm(ref)}.  "
+         "Generated from `summary.json` beside this file.", "", "## Parse rates (pairs whose answer parsed)", "",
          "| rubric | model | ok / total | rate | first attempt |", "|---|---|---|---|---|"]
     for k, v in summary["parse"].items():
         r, m = k.split("|", 1)
         fa = summary.get("parse_first_attempt", {}).get(k)
         first = f"{fa['ok']} / {fa['total']} ({_f(fa['rate'], 4)})" if fa else "–"
         L.append(f"| {r} | {sm(m)} | {v['ok']} / {v['total']} | {_f(v['rate'], 4)} | {first} |")
-    scales_note = ("  Rubric C on its own 0-5 scale; rubric D's relations as ranks, different 0, neighbours 1, overlap 2, "
-                   "contains 3, variant 4, same 5 (C's rungs)." if set(summary["agreement"]) & {"C", "D"} else "")
+    six_num = [r for r in summary["agreement"] if native_k(r) == 6 and not RUBRICS[r].get("ranks")]
+    six_rel = [r for r in summary["agreement"] if RUBRICS[r].get("ranks")]
+    notes = []
+    if six_num:
+        notes.append(f"rubric {_names(six_num)} on {'its' if len(six_num) == 1 else 'their'} own 0-5 scale")
+    if six_rel:
+        notes.append(f"rubric {_names(six_rel)}'s relations as ranks, different 0, neighbours 1, overlap 2, "
+                     "contains 3, variant 4, same 5 (C's rungs)")
+    scales_note = f"  {'; '.join(notes)}.".replace("  rubric", "  Rubric", 1) if notes else ""
     L += ["", f"## Agreement with {sm(ref)}", "",
           "Exact agreement over every answer (categories included); then, on the pairs where both gave a number, "
           "exact, within one point, the mean difference (model minus reference) and the weighted kappa "
@@ -1706,9 +2144,7 @@ def summary_markdown(summary: Mapping, pair_set: PairSet, corpus: Mapping) -> st
         if not per:                                      # a rubric this run did not send
             continue
         has_opp = "opposite" in RUBRICS[r]["categories"]
-        on_decision = (" On the decision scale (rubric A's 0-4; " + ("C: 5 -> 4, 4 -> 3, 3 -> 3)." if r == "C" else
-                                                                  "D: same 4, variant 3, contains 3, overlap 2, "
-                                                                  "neighbours 1, different 0).")
+        on_decision = (f" On the decision scale (rubric A's 0-4; {r}: {RUBRICS[r]['decision_note']})."
                        if RUBRICS[r].get("decision") else "")
         L += ["", f"## Known groups, rubric {r}", "",
               "Mean of the numeric answers / share at 3 or more" + (" / share opposite" if has_opp else "")
@@ -1769,6 +2205,9 @@ def summary_markdown(summary: Mapping, pair_set: PairSet, corpus: Mapping) -> st
     arms = summary.get("arms")
     if arms and (len(arms.get("passes", [])) >= 2 or (arms.get("baseline") or {}).get("per_model")):
         L += arms_markdown(arms, corpus, sm)
+    r2 = summary.get("round2")
+    if r2 and r2.get("arms"):
+        L += round2_markdown(r2, corpus, sm, subset_counts=(summary.get("subset") or {}).get("counts"))
     return "\n".join(L) + "\n"
 
 
@@ -1792,11 +2231,13 @@ def arms_markdown(arms: Mapping, corpus: Mapping, sm) -> list[str]:
         L.append(f"Pass {p} sent the same calls with the listed traits in a fresh order: {o['same_order']} of "
                  f"{o['n_calls']} calls kept pass 1's order by chance ({o['same_order_single']} of them list one "
                  f"trait); {o['pairs_moved']} of {o['n_pairs']} pairs went out under another id.")
-    L += ["", "The decision scale is rubric A's 0-4 with \"opposite\" and \"unsure\": C maps 5 -> 4, 4 -> 3, 3 -> 3; "
-          "D maps same 4, variant 3, contains 3, overlap 2, neighbours 1, different 0.  Covered means "
-          f"{cut} or more on it (\"opposite\" is not covered, \"unsure\" neither), over the 300 nearest-neighbour "
-          "pairs.  The native scale is each rubric's own answers (C 0-5; D's relations ranked different 0 ... "
-          "same 5, as C's rungs).  Exact agreement counts every answer, categories included.", "",
+    maps = decision_maps_text(arms["rubrics"])
+    natives = native_scales_text(arms["rubrics"])
+    L += ["", "The decision scale is rubric A's 0-4 with \"opposite\" and \"unsure\""
+          + (f": {maps}." if maps else "; every rubric here answers on it directly.") + "  Covered means "
+          f"{cut} or more on it (\"opposite\" is not covered, \"unsure\" neither), over the nearest-neighbour "
+          "pairs.  The native scale is each rubric's own answers" + (f" ({natives})" if natives else "")
+          + ".  Exact agreement counts every answer, categories included.", "",
           "### Cross-arm table", "",
           "| arm | model | consistency, exact (native) | consistency, exact (decision) | between-pass flips at "
           f"{cut} | agreement, exact, pass 1 (native / decision) | agreement, pass 2 | covered at {cut}, pass 1 | "
@@ -1910,7 +2351,8 @@ def arms_markdown(arms: Mapping, corpus: Mapping, sm) -> list[str]:
                              f"both, the same wider {x['same']}, the other {x['different']}, unknown {x['unknown']}")
         if "scope_kinds" in arm:
             kinds = list(SCOPE_KINDS)
-            what = ("asked of a 3's reason" if r == "E" else "not asked: rubric A's 3s, as a control")
+            what = ("asked of a 3's reason" if RUBRICS[r].get("kinds") == "asked"
+                    else f"not asked: rubric {r}'s 3s, as a control")
             L += ["", f"Kinds of difference the reasons of 3s name ({what}; a word search, a reason may name several):",
                   "", "| model | pass | 3s | " + " | ".join(kinds) + " | none | several |",
                   "|---|---|---|" + "---|" * len(kinds) + "---|---|"]
@@ -1930,6 +2372,172 @@ def arms_markdown(arms: Mapping, corpus: Mapping, sm) -> list[str]:
                      f"{_f(n.get('mean_diff'))} | {_f(n.get('kappa_quadratic'))} | {c['crossings']} of {c['n']} |")
         L += ["", "Where they differ, by the two answers:", ""]
         L += [f"- {sm(m)}: {_flips_text(x['flips_native'])}" for m, x in b["per_model"].items()]
+    return L
+
+
+#: How many examples of each kind round 2's tables quote per arm (the brief asks for six).
+ROUND2_EXAMPLES = 6
+_POPULATION_TITLE = {"subset": "The subset's pairs", "sent": "Every pair sent (the subset and its controls)"}
+
+
+def _arrow(a, b, fmt=_pct) -> str:
+    return f"{fmt(a)} → {fmt(b)}"
+
+
+def _of(n, total, share) -> str:
+    return "–" if n is None else f"{n} of {total} ({_pct(share)})"
+
+
+def _first_pairs(rows: Sequence[Mapping], n: int) -> list[tuple[str, list[Mapping]]]:
+    """The rows of the first ``n`` pairs (rows come in pair order), grouped by pair."""
+    out: list[tuple[str, list[Mapping]]] = []
+    for row in rows:
+        if out and out[-1][0] == row["pair_id"]:
+            out[-1][1].append(row)
+        elif len(out) < n:
+            out.append((row["pair_id"], [row]))
+    return out
+
+
+def round2_markdown(r2: Mapping, corpus: Mapping, sm, subset_counts: Optional[Mapping] = None) -> list[str]:
+    """Round 2's tables (:func:`analyse_round2`): the brief's test, then per population each round-2 arm
+    against its round-1 arm on the same pairs, D2's ``wider``, and per arm the first answers at 2 whose
+    reason describes a containment and the first crossings between the models, reasons in full."""
+    cut, ref = r2["cutoff"], r2["reference"]
+    models = r2["models"]
+    pairing = ", ".join(f"{r} against {r1}" for r, r1 in r2["pairing"].items())
+    L = ["", "## Round 2: the clarified lines, on the confusion subset", ""]
+    if subset_counts:
+        c = subset_counts
+        L += [f"The subset: {c['n_pairs']} pairs ({c['rule_1']} with both a 2 and a 3 among their readings, "
+              f"{c['rule_2_only']} more with a 2 whose reason describes a containment) in {c['n_calls']} of "
+              f"{c['of_calls']} calls.  The run sent those calls whole, as round 1 built them: {c['n_pairs_sent']} "
+              f"pairs, {c['n_controls']} of them controls.", ""]
+    L += [f"Each round-2 arm against its round-1 arm from {r2['round1_run'] or 'the round-1 run'} on the same pairs "
+          f"({pairing}); pass 1 sent the round-1 order of every call and pass 2 the same reshuffle as round 1, so "
+          "the user turns are round 1's.  Cut-off "
+          f"{cut} on the decision scale.  Crossings (the two models on different sides of it in a pass), flips (one "
+          f"model's two passes on different sides) and the share at {cut} or more count every pair of the "
+          "population, whatever its group (round 1's headline table counted the nearest pairs only).  "
+          "Self-contradictions, pooled over both passes: answers at 2 (2, \"overlap\") whose reason describes a "
+          "containment and not a two-sided overlap; the reverse slip: answers at 3 (3, \"contains\", and C's 4 and "
+          "D's \"variant\") whose reason describes a two-sided overlap; round 1's patterns (in `summary.json`).  "
+          "Cells read round 1 → round 2.", "",
+          "**Selection.**  The subset was chosen from these round-1 readings (and earlier runs'), so round 1's "
+          "figures on it lean toward confusion by construction, and any fresh reading would look better there "
+          "(regression to the mean); on the controls the lean is the other way.  The round-2 arms are measured "
+          "alike and compare fairly with each other.", "",
+          "### The brief's test", "",
+          f"Improves: fewer self-contradictions and fewer between-model crossings at {cut} than the round-1 arm on "
+          "the same pairs, with self-consistency (exact, decision scale) not lower for either model.", "",
+          "| population | arm | self-contradictions, both models and passes | of which reverse | crossings at "
+          f"{cut}, both passes | flips at {cut}, both models | "
+          + " | ".join(f"consistency, decision, {sm(m)}" for m in models) + " | improves |",
+          "|---|---|---|---|---|---|" + "---|" * len(models) + "---|"]
+    for t in r2["test"]:
+        a, b = t["r1"], t["r2"]
+        L.append(f"| {t['population']} | {t['arm']} vs {t['round1_arm']} | {a['contradictions']} → {b['contradictions']} | "
+                 f"{a['reverse']} → {b['reverse']} | {a['crossings']} → {b['crossings']} | "
+                 f"{a['pass_flips']} → {b['pass_flips']} | "
+                 + " | ".join(_arrow(a["consistency_decision"][m], b["consistency_decision"][m]) for m in models)
+                 + f" | {'yes' if t['improves'] else 'no'} |")
+    for pop, per in r2["per_population"].items():
+        info = r2["populations"][pop]
+        L += ["", f"### {_POPULATION_TITLE.get(pop, pop)}: {info['n_pairs']} pairs", "",
+              "By group: " + ", ".join(f"{g} {n}" for g, n in info["by_group"].items()) + ".", "",
+              "| arm | model | consistency, exact, native | decision | flips at "
+              f"{cut} | at {cut} or more, pass 1 | pass 2 | 2s with a containment reason | 3s with a two-sided reason |",
+              "|---|---|---|---|---|---|---|---|---|"]
+        for row in (x for x in r2["rows"] if x["population"] == pop):
+            a, b = row["r1"], row["r2"]
+
+            def cov(s, p):
+                c = s["covered"].get(p)
+                return _of(c["covered"], c["n"], c["share"]) if c else "–"
+            L.append(f"| {row['arm']} vs {row['round1_arm']} | {sm(row['model'])} | "
+                     f"{_arrow(a['consistency_native'], b['consistency_native'])} | "
+                     f"{_arrow(a['consistency_decision'], b['consistency_decision'])} | "
+                     f"{_f(a['pass_flips'])} → {_f(b['pass_flips'])} of {b['pass_flips_n'] or a['pass_flips_n']} | "
+                     f"{cov(a, '1')} → {cov(b, '1')} | {cov(a, '2')} → {cov(b, '2')} | "
+                     f"{_of(a['forward'], a['n_2'], a['forward_share'])} → {_of(b['forward'], b['n_2'], b['forward_share'])} | "
+                     f"{_of(a['reverse'], a['n_3'], a['reverse_share'])} → {_of(b['reverse'], b['n_3'], b['reverse_share'])} |")
+        L += ["", f"Between the models ({_names([sm(m) for m in models if m != ref])} against {sm(ref)}):", "",
+              "| arm | agreement, exact, native, pass 1 | pass 2 | decision, pass 1 | pass 2 | crossings at "
+              f"{cut}, pass 1 | pass 2 |", "|---|---|---|---|---|---|---|"]
+        for row in (x for x in r2["rows"] if x["population"] == pop and x["model"] == ref):
+            a, b = row["r1"], row["r2"]
+
+            def cr(s, p):
+                return f"{s['crossings'][p]} of {s['crossings_n'][p]}" if p in s["crossings"] else "–"
+            L.append(f"| {row['arm']} vs {row['round1_arm']} | "
+                     f"{_arrow(a['agreement_native'].get('1'), b['agreement_native'].get('1'))} | "
+                     f"{_arrow(a['agreement_native'].get('2'), b['agreement_native'].get('2'))} | "
+                     f"{_arrow(a['agreement_decision'].get('1'), b['agreement_decision'].get('1'))} | "
+                     f"{_arrow(a['agreement_decision'].get('2'), b['agreement_decision'].get('2'))} | "
+                     f"{cr(a, '1')} → {cr(b, '1')} | {cr(a, '2')} → {cr(b, '2')} |")
+        for arm, both in per.items():
+            if "relations" not in both["round2"]:
+                continue
+            cols = list(reversed(RELATIONS)) + ["opposite", "unsure"]
+            L += ["", f"{arm} against {both['round1']['rubric']}, the relations named and the wider of a \"contains\" "
+                  "(round 1 → round 2):", "",
+                  "| model | pass | " + " | ".join(cols) + " | wider: target | wider: listed | missing | not target or "
+                  "listed | wider given with another relation |", "|---|---|" + "---|" * (len(cols) + 5)]
+            for m in models:
+                for p in sorted(set(both["round1"]["relations"].get(m, {})) | set(both["round2"]["relations"].get(m, {}))):
+                    x1, x2 = both["round1"]["relations"].get(m, {}).get(p), both["round2"]["relations"].get(m, {}).get(p)
+                    if not x1 or not x2:
+                        continue
+                    L.append(f"| {sm(m)} | {p} | " + " | ".join(f"{x1['counts'].get(c, 0)} → {x2['counts'].get(c, 0)}"
+                                                              for c in cols)
+                             + f" | {x1['wider']['target']} → {x2['wider']['target']} | {x1['wider']['listed']} → "
+                             f"{x2['wider']['listed']} | {x1['wider']['missing']} → {x2['wider']['missing']} | "
+                             f"{x1['wider']['invalid']} → {x2['wider']['invalid']} | {x1['wider_with_other_relation']} → "
+                             f"{x2['wider_with_other_relation']} |")
+            L.append("")
+            for m, x2 in both["round2"].get("wider_between_passes", {}).items():
+                x1 = both["round1"].get("wider_between_passes", {}).get(m, {})
+                L.append(f"- {sm(m)}, pass 1 against pass 2: \"contains\" in both {x1.get('n_both_contains', '–')} → "
+                         f"{x2['n_both_contains']}, the same wider {x1.get('same', '–')} → {x2['same']}, the other "
+                         f"{x1.get('different', '–')} → {x2['different']}")
+            for m, per_pass in both["round2"].get("wider_between_models", {}).items():
+                for p, x2 in per_pass.items():
+                    x1 = both["round1"].get("wider_between_models", {}).get(m, {}).get(p, {})
+                    L.append(f"- {sm(m)} against {sm(ref)}, pass {p}: \"contains\" for both "
+                             f"{x1.get('n_both_contains', '–')} → {x2['n_both_contains']}, the same wider "
+                             f"{x1.get('same', '–')} → {x2['same']}, the other {x1.get('different', '–')} → "
+                             f"{x2['different']}")
+    L += ["", "### Round 2's answers behind the counts (every pair sent, in pair order)", ""]
+    for arm, ex in r2["examples"].items():
+        L += [f"#### {arm} ({RUBRICS[arm]['name']})", "",
+              f"Answers at 2 whose reason describes a containment: {len(ex['forward'])} "
+              f"({len({x['pair_id'] for x in ex['forward']})} pairs); the first {ROUND2_EXAMPLES} pairs:", ""]
+        for _, rows in _first_pairs(ex["forward"], ROUND2_EXAMPLES):
+            x = rows[0]
+            L.append(f"- {_label(corpus, x['target'])} / {_label(corpus, x['listed'])} "
+                     f"({'subset' if x['in_subset'] else 'control'}, {x['group']}): "
+                     + "; ".join(f"{sm(y['model'])} pass {y['pass']}, {y['value']}: \"{y['reason']}\"" for y in rows))
+        if not ex["forward"]:
+            L.append("- none")
+        L += ["", f"Pairs the two models put on different sides of {cut}: {len({x['pair_id'] for x in ex['crossings']})} "
+              f"({len(ex['crossings'])} crossings over the passes); the first {ROUND2_EXAMPLES}:", ""]
+        for _, rows in _first_pairs(ex["crossings"], ROUND2_EXAMPLES):
+            x = rows[0]
+            L.append(f"- {_label(corpus, x['target'])} / {_label(corpus, x['listed'])} "
+                     f"({'subset' if x['in_subset'] else 'control'}, {x['group']}): "
+                     + "; ".join(f"pass {y['pass']}, {sm(y['first_model'])} {y['first']}: \"{y['first_reason']}\" / "
+                                 f"{sm(y['second_model'])} {y['second']}: \"{y['second_reason']}\"" for y in rows))
+        if not ex["crossings"]:
+            L.append("- none")
+        if ex["reverse"]:
+            L += ["", f"Answers at 3 whose reason describes a two-sided overlap: {len(ex['reverse'])}; the first "
+                  f"{ROUND2_EXAMPLES} pairs:", ""]
+            for _, rows in _first_pairs(ex["reverse"], ROUND2_EXAMPLES):
+                x = rows[0]
+                L.append(f"- {_label(corpus, x['target'])} / {_label(corpus, x['listed'])} "
+                         f"({'subset' if x['in_subset'] else 'control'}, {x['group']}): "
+                         + "; ".join(f"{sm(y['model'])} pass {y['pass']}, {y['value']}: \"{y['reason']}\"" for y in rows))
+        L.append("")
     return L
 
 

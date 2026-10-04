@@ -1053,3 +1053,159 @@ def test_overlap_arms_analyse_only_recomputes_everything(overlap_env):
     again = json.loads((e["out"] / "summary.json").read_text())["result"]["arms"]
     assert again["cross_arm"] == first["cross_arm"] and again["passes"] == [1, 2]
     assert "### Arm E: overlap_scope" in (e["out"] / "tables.md").read_text()
+
+
+# --------------------------------------------------------------------------- round 2 (2026-10-04): the subset
+
+def _sources(e):
+    """Two source runs under the out-root, as round 2's subset reads them: ``overlap_arms_1`` (A, C, D, E on
+    Sonnet and Opus, two passes) and ``overlap_test_1`` (A and B on the three default models).  The fake
+    answers 1 ("neighbours") with a plain reason, except: the first pair's ordered labels get a 2 from Sonnet
+    and a 3 from Opus under A (rule 1); the last call's last pair gets "overlap" under D with a reason that
+    describes a containment (rule 2); rubric B answers 2 or 3 on every pair (it never counts).  Returns the
+    pair set and the subset's pair ids and call ids as the rule gives them."""
+    OT, T = e["OT"], e["T"]
+    ps = T.pair_set(n_targets=4, n_antonyms=2, n_random=2)
+    confused, slipped = ps.pairs[0], [p for p in ps.pairs if p.call_id == ps.calls[-1].call_id][-1]
+    assert confused.call_id != slipped.call_id
+    lab = {s: T.corpus()[s]["label"] for s in T.corpus()}
+    rb = OT.load_rubrics(keys=tuple(OT.RUBRICS))
+    by_text = {v["text"]: k for k, v in rb.items()}
+    slip = "Fussy eater is fussiness narrowed to food."
+
+    def responder(kw):
+        r = by_text[system_text(kw)]
+        obj = json.loads(user_text(kw))
+        rows = []
+        for t in obj["traits"]:
+            pair = (obj["target"]["label"], t["label"])
+            v, why = ("neighbours" if r == "D" else 1), "Both are about speech."
+            if r == "B":
+                v = 3 if kw["model"] == OT.OPUS else 2
+            elif r == "A" and pair == (lab[confused.target], lab[confused.listed]):
+                v = 3 if kw["model"] == OT.OPUS else 2
+            elif r == "D" and pair == (lab[slipped.target], lab[slipped.listed]):
+                v, why = "overlap", slip
+            rows.append({"id": t["id"], "reason": why, OT.RUBRICS[r]["key"]: v})
+        return make_response(json.dumps({"results": rows}), input_tokens=900, output_tokens=150)
+    e["client"]["responder"] = responder
+    models = [OT.SONNET, OT.OPUS]
+    r1 = [("overlap_arms_1" if a == "t1" else a) for a in e["base"]] + ["--models", *models, "--rubrics", "A", "C",
+                                                                          "D", "E", "--passes", "2"]
+    assert e["cli"].main(r1) == 0
+    t1 = [("overlap_test_1" if a == "t1" else a) for a in e["base"]] + ["--rubrics", "A", "B"]
+    assert e["cli"].main(t1) == 0
+    want = {(confused.target, confused.listed), (slipped.target, slipped.listed)}
+    pair_ids = [p.pair_id for p in ps.pairs if (p.target, p.listed) in want]
+    held = {p.call_id for p in ps.pairs if p.pair_id in pair_ids}
+    return ps, pair_ids, [c.call_id for c in ps.calls if c.call_id in held]
+
+
+SOURCES = ["--subset-sources", "overlap_arms_1", "overlap_test_1"]
+
+
+def test_overlap_write_subset_from_the_source_runs(overlap_env, capsys):
+    e = overlap_env
+    ps, pair_ids, call_ids = _sources(e)
+    assert len(call_ids) < len(ps.calls)
+    assert e["cli"].main(e["base"] + ["--write-subset"]) == 2                   # the default names overlap_test_2 too
+    assert "subset source overlap_test_2 has no pairs.json" in capsys.readouterr().err
+    assert e["cli"].main(e["base"] + ["--write-subset", "--dry-run"] + SOURCES) == 0
+    assert "DRY-RUN" in capsys.readouterr().out and not (e["out"] / "subset.json").exists()
+    assert e["cli"].main(e["base"] + ["--write-subset"] + SOURCES) == 0
+    out = capsys.readouterr().out
+    env = json.loads((e["out"] / "subset.json").read_text())
+    assert "_provenance" in env and "responses_overlap_arms_1" in json.dumps(env["_provenance"])
+    s = env["result"]
+    assert s["pair_ids"] == pair_ids and s["call_ids"] == call_ids              # rubric B's 2s and 3s never count
+    sent = [p.pair_id for p in ps.pairs if p.call_id in call_ids]
+    assert s["control_pair_ids"] == [x for x in sent if x not in pair_ids]
+    assert s["counts"]["n_pairs_sent"] == len(sent) and s["source_runs"] == ["overlap_arms_1", "overlap_test_1"]
+    # every reading: round 1's 4 arms x 2 models x 2 passes, and overlap_test_1's A on 3 models
+    assert s["counts"]["readings_per_pair"] == {"19": len(ps.pairs)}
+    assert {x["rubric"] for x in s["sources"]} == {"A", "C", "D", "E"}
+    assert f"confusion subset: {len(pair_ids)} pairs" in out
+    assert e["cli"].main(e["base"] + ["--write-subset"] + SOURCES) == 0         # the same subset: left alone
+    assert "left as it is" in capsys.readouterr().out
+    assert e["cli"].main(e["base"] + ["--write-subset", "--subset-sources", "overlap_test_1"]) == 2   # another one
+    assert "holds another subset" in capsys.readouterr().err
+    assert e["cli"].main(e["base"] + ["--write-subset", "--subset-sources", "nope"]) == 2
+
+
+def test_overlap_round_2_sends_only_the_subset_calls_and_compares_with_round_1(overlap_env, capsys):
+    e = overlap_env
+    ps, pair_ids, call_ids = _sources(e)
+    assert e["cli"].main(e["base"] + ["--write-subset"] + SOURCES) == 0
+    OT = _arms(e)
+    models = (OT.SONNET, OT.OPUS)
+    subset_path = str(e["out"] / "subset.json")
+    args = e["base"] + ["--models", *models, "--rubrics", "A2", "C2", "D2", "E2", "--passes", "2",
+                        "--calls-from", subset_path]
+    capsys.readouterr()
+    assert e["cli"].main(args + ["--dry-run"]) == 0
+    dry = capsys.readouterr().out
+    assert f"calls sent: {len(call_ids)} of {len(ps.calls)}" in dry and "DRY-RUN" in dry
+    assert f"rubric A2 (overlap_concept_implies) on Opus 5.5, pass 2: {len(call_ids)} x" in dry
+    assert "pair set: the same calls as overlap_test_1" in dry                  # the baseline check still applies
+    assert e["cli"].main(args) == 0
+    out = e["out"]
+    client = e["client"]["client"]
+    assert len(client.calls) == len(call_ids) * 4 * 2 * 2                       # rubrics x models x passes
+    recs = OT.read_records(out / "responses.jsonl")
+    assert {r["call_id"] for r in recs} == set(call_ids) and {r["rubric"] for r in recs} == set(OT.ROUND2)
+    run = json.loads((out / "run.json").read_text())
+    assert run["calls_from"]["call_ids"] == call_ids and run["calls_from"]["n_subset_pairs"] == len(pair_ids)
+    assert run["rubric_versions"] == {OT.RUBRICS[r]["name"]: 1 for r in OT.ROUND2} and run["round1_run"] == "overlap_arms_1"
+    assert run["pair_set"]["n_calls"] == len(ps.calls)                           # the pair set is unchanged
+    sent = [p.pair_id for p in ps.pairs if p.call_id in call_ids]
+    results = [json.loads(x) for x in (out / "results.jsonl").read_text().splitlines()]
+    assert len(results) == len(sent) * 4 * 2 * 2
+    assert {r["pair_id"] for r in results if r["in_subset"]} == set(pair_ids)
+    assert {r["pair_id"] for r in results if not r["in_subset"]} == set(sent) - set(pair_ids)
+    summ = json.loads((out / "summary.json").read_text())
+    res = summ["result"]
+    assert res["n_calls"] == len(call_ids) and res["n_pairs"] == len(sent)          # the calls sent
+    assert res["sent"]["of_calls"] == len(ps.calls) and res["subset"]["n_pairs"] == len(pair_ids)
+    r2 = res["round2"]
+    assert r2["round1_run"] == "overlap_arms_1" and r2["arms"] == list(OT.ROUND2)
+    assert r2["populations"]["subset"]["n_pairs"] == len(pair_ids) and r2["populations"]["sent"]["n_pairs"] == len(sent)
+    one = r2["per_population"]["subset"]["A2"]["round1"]
+    # round 1 on the subset's pairs: Sonnet 2 / Opus 3 on the confused pair(s) under A, in both passes
+    n_confused = sum(1 for x in pair_ids if x in [p.pair_id for p in ps.pairs
+                                                   if (p.target, p.listed) == (ps.pairs[0].target, ps.pairs[0].listed)])
+    assert [one["between_models"][OT.SONNET][p]["cutoff"]["crossings"] for p in ("1", "2")] == [n_confused] * 2
+    d1 = r2["per_population"]["subset"]["D2"]["round1"]
+    assert d1["contradictions"][OT.OPUS]["pooled"]["forward"] == 2 * (len(pair_ids) - n_confused)   # the slip, both passes
+    assert {"round1_responses", "subset"} <= {i["dep_key"] for i in summ["_provenance"]["inputs"]}
+    tables = (out / "tables.md").read_text()
+    for head in ("The run sent only these calls", "## Round 2: the clarified lines, on the confusion subset",
+                 "### The brief's test", "### The subset's pairs", "#### D2 (overlap_relation_implies)",
+                 "### Arm C2: overlap_six_implies"):
+        assert head in tables, head
+    prompts = (out / "rendered_prompts.md").read_text()
+    assert "=== rubric E2 (overlap_scope_implies)" in prompts and "=== rubric A (" not in prompts
+    variant_ids = [ln.split("(")[1].rstrip("):") for ln in prompts.splitlines() if ln.startswith("## Variant: ")]
+    assert variant_ids and set(variant_ids) <= set(call_ids)                    # read from the calls sent
+    # a resume must name the same calls; --analyse-only recomputes the same round 2
+    assert e["cli"].main(e["base"] + ["--models", *models, "--rubrics", "A2", "--passes", "2", "--resume"]) == 2
+    assert "a resume must send the calls the run was started with" in capsys.readouterr().err
+    assert e["cli"].main(args + ["--resume"]) == 0
+    assert len(e["client"]["client"].calls) == 0                                 # a new client; nothing re-sent
+    (out / "summary.json").unlink()
+    assert e["cli"].main(e["base"] + ["--models", *models, "--analyse-only"]) == 0
+    again = json.loads((out / "summary.json").read_text())["result"]["round2"]
+    assert again["test"] == r2["test"] and again["rows"] == r2["rows"]
+
+
+def test_overlap_calls_from_refuses_unknown_calls(overlap_env, tmp_path, capsys):
+    e = overlap_env
+    bad = tmp_path / "bad_subset.json"
+    bad.write_text(json.dumps({"call_ids": ["nn:nope"], "pair_ids": []}))
+    assert e["cli"].main(e["base"] + ["--calls-from", str(bad), "--dry-run"]) == 2
+    assert "REFUSED: --calls-from" in capsys.readouterr().err
+    stray = tmp_path / "stray.json"
+    ps = e["T"].pair_set(n_targets=4, n_antonyms=2, n_random=2)
+    stray.write_text(json.dumps({"call_ids": [ps.calls[0].call_id], "pair_ids": [ps.pairs[-1].pair_id]}))
+    assert e["cli"].main(e["base"] + ["--calls-from", str(stray), "--dry-run"]) == 2
+    assert "not in its calls" in capsys.readouterr().err
+    assert not e["out"].exists()
