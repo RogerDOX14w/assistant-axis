@@ -546,6 +546,14 @@ class TestStatistics:
         rows = OT.results_rows(ps, ans)
         assert len(rows) == len(ps.pairs) and rows[0]["rubric_name"] == "overlap_concept"
 
+    def test_estimate_prices_fable_above_opus(self):
+        ps = pair_set()
+        rb = OT.load_rubrics()
+        fable = OT.estimate(ps.calls, corpus(), rb, [OT.FABLE], ["A"])
+        opus = OT.estimate(ps.calls, corpus(), rb, [OT.OPUS], ["A"])
+        assert len(fable.lines) == 1 and "Fable 5.1" in str(fable.lines[0])
+        assert fable.usd == pytest.approx(opus.usd * 2.5)          # same tokens, 2.5x the rates
+
     def test_estimate(self):
         rb = OT.load_rubrics()
         ps = pair_set()

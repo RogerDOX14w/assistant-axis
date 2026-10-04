@@ -831,6 +831,16 @@ def test_overlap_dry_run_prints_prompts_and_writes_nothing(overlap_env, capsys):
     assert not e["out"].exists() and not e["sheet"].exists() and "client" not in e["client"]
 
 
+def test_overlap_knows_fable_and_refuses_an_unknown_model(overlap_env, capsys):
+    """Fable 5.1 joined overlap_test_1 on 2026-10-04 (not a default); anything else is refused."""
+    e = overlap_env
+    assert e["cli"].main(e["base"] + ["--models", e["OT"].FABLE, "--rubrics", "A", "--dry-run"]) == 0
+    assert "Fable 5.1" in capsys.readouterr().out
+    assert e["cli"].main(e["base"] + ["--models", "claude-opus-4-1", "--dry-run"]) == 1
+    assert "this test knows" in capsys.readouterr().err
+    assert e["OT"].FABLE not in e["OT"].MODELS and e["OT"].FABLE in e["OT"].KNOWN_MODELS
+
+
 def test_overlap_refuses_an_estimate_over_the_budget(overlap_env):
     e = overlap_env
     assert e["cli"].main(e["base"] + ["--budget-usd", "0.0001"]) == 2

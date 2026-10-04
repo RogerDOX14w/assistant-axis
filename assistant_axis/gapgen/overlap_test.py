@@ -79,9 +79,13 @@ RUBRICS: dict[str, dict] = {
           "title": "co-occurrence"},
 }
 HAIKU, SONNET, OPUS = "claude-haiku-4-5-20251001", "claude-sonnet-5-5", "claude-opus-5-5"
+FABLE = "claude-fable-5-1"
+#: The test's three models (the defaults), and the models the CLI accepts: Fable was added to
+#: ``overlap_test_1`` on rubric A on 2026-10-04 (Roger), after the marks; it is not a default.
 MODELS: tuple[str, ...] = (HAIKU, SONNET, OPUS)
+KNOWN_MODELS: tuple[str, ...] = MODELS + (FABLE,)
 REFERENCE = OPUS
-SHORT: dict[str, str] = {HAIKU: "Haiku 4.5", SONNET: "Sonnet 5.5", OPUS: "Opus 5.5"}
+SHORT: dict[str, str] = {HAIKU: "Haiku 4.5", SONNET: "Sonnet 5.5", OPUS: "Opus 5.5", FABLE: "Fable 5.1"}
 SCALE: tuple[int, ...] = (0, 1, 2, 3, 4)
 
 NEAREST = "nearest"

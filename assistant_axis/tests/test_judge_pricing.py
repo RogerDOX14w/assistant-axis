@@ -69,6 +69,11 @@ class TestPriceForModel:
         """The trait-gap filter's second-opinion model."""
         assert price_for_model("claude-sonnet-4-6") == (SONNET_RATE_IN, SONNET_RATE_OUT)
 
+    def test_fable_5_1(self):
+        """The M3 overlap test's fourth judge (2026-10-04): $10 / $50, batch at half."""
+        assert price_for_model("claude-fable-5-1") == (10.00, 50.00)
+        assert price_for_model("claude-fable-5-1:batch") == (5.00, 25.00)
+
     @pytest.mark.parametrize("model,rates", [
         ("text-embedding-3-large", (0.13, 0.0)),
         ("text-embedding-3-small", (0.02, 0.0)),

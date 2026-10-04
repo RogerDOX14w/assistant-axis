@@ -280,9 +280,9 @@ def main(argv=None) -> int:
     configure_logging()
     check_id(args.run_id, "run_id")
     out_dir = Path(args.out_root) / args.run_id
-    unknown = [m for m in args.models if m not in OT.MODELS]
+    unknown = [m for m in args.models if m not in OT.KNOWN_MODELS]
     if unknown:
-        print(f"unknown model(s) {unknown}: this test knows {list(OT.MODELS)}", file=sys.stderr)
+        print(f"unknown model(s) {unknown}: this test knows {list(OT.KNOWN_MODELS)}", file=sys.stderr)
         return 1
     if args.reference not in args.models and not (args.decode_marks or args.analyse_only):
         logger.warning("the reference %s is not among --models; agreement is not computed", args.reference)

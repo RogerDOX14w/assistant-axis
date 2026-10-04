@@ -165,6 +165,7 @@ _MODEL_RATES: tuple[tuple[str, float, float], ...] = (
     # "opus" fragments, which would otherwise match first.  Models from 4.7 on
     # use a tokenizer that makes about 30% more tokens of the same text.
     ("sonnet-5", 2.00, 10.00),   # Sonnet 5 and Sonnet 5.5
+    ("fable", 10.00, 50.00),     # Fable 5 and 5.1 (same page, read 2026-10-04); the M3 overlap test's fourth judge
     ("opus-5-5", 4.00, 20.00),
     ("opus-5", 5.00, 25.00),     # Opus 5 (and 4.5 to 4.8 at the same price, below)
     ("sonnet", SONNET_RATE_IN, SONNET_RATE_OUT),
@@ -192,6 +193,7 @@ _BATCH_PRICE_FACTORS: tuple[tuple[str, float], ...] = (
     ("haiku", 0.5),       # Anthropic Message Batches
     ("sonnet", 0.5),
     ("opus", 0.5),
+    ("fable", 0.5),
 )
 
 
