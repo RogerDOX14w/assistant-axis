@@ -43,6 +43,14 @@ moved).
 |---|---|---|---|
 | A | [overlap_concept.md](./overlap_concept.md) | How similar is each listed trait's concept to the target's: 0 to 4, "opposite" or "unsure" | draft 2 (Roger's preference) |
 | B | [overlap_cooccurrence.md](./overlap_cooccurrence.md) | How often would a persona with the target show each listed trait: 0 to 4 or "unsure" | draft 2 (the comparison arm) |
+| C | [overlap_six.md](./overlap_six.md) | Rubric A on six rungs, 0 to 5: the 2-3 region split by who adds something | draft 1 (arms experiment, 2026-10-04) |
+| D | [overlap_relation.md](./overlap_relation.md) | Rubric A with the relation named instead of a number (same, variant, contains with the wider one, overlap, neighbours, different); the score derived | draft 1 (arms experiment, 2026-10-04) |
+| E | [overlap_scope.md](./overlap_scope.md) | Rubric A with Roger's line 3 (narrowed, broadened, stronger, milder, a shift of emphasis; the reason names which) | draft 1 (arms experiment, 2026-10-04) |
+
+Rubrics C, D and E are the three arms of the overlap rubric arms experiment
+([coding_plan_overlap_arms.md](../coding_plan_overlap_arms.md)), each rubric A's text with only its scale
+lines (and, for D, the opening question and the answer format) changed, pinned as version 1 on
+2026-10-04.
 
 ## How to edit
 

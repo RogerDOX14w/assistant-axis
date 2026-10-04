@@ -1,7 +1,8 @@
 #!/usr/bin/env python3
 """Check or pin the rubric prompt versions (``reports/trait_gap_generation/rubrics/versions.json``): the
 split filter's eight prompts and, since 2026-10-03, the M3 overlap rubrics (``overlap_concept``,
-``overlap_cooccurrence``).
+``overlap_cooccurrence``; since 2026-10-04 also the arms ``overlap_six``, ``overlap_relation`` and
+``overlap_scope``).
 
     uv run python data_analysis/gap_generation/rubric_pins.py check
     uv run python data_analysis/gap_generation/rubric_pins.py bump NAME --why TEXT [--version N] [--revert-to N]

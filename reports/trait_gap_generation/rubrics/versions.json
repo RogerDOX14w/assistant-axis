@@ -159,6 +159,30 @@
         "pinned_at": "2026-10-03T13:03:03+00:00",
         "why": "First pin: draft 2 of m3_overlap_rubric_draft.md (rubric B, co-occurrence), signed off by Roger 2026-10-03 (commit 45f2aa7); moved to its own file unchanged"
       }
+    ],
+    "overlap_six": [
+      {
+        "version": 1,
+        "sha256": "cead763d4fa0c9ac2957272a8cf7a20f8988408156d96c089cd9954a070d0814",
+        "pinned_at": "2026-10-04T01:22:10+00:00",
+        "why": "First pin: draft 1 of rubric C (six rungs, 0-5: the 2-3 region split by who adds something), arm 1 of the overlap rubric arms experiment (coding_plan_overlap_arms.md, Fable on Roger's go 2026-10-04); rubric A version 4's text with its scale lines and answer scale replaced"
+      }
+    ],
+    "overlap_relation": [
+      {
+        "version": 1,
+        "sha256": "cfc83ab4e257b9afdf9931a422a2ed0eb2ac8578420d45ea457690d82df36322",
+        "pinned_at": "2026-10-04T01:22:20+00:00",
+        "why": "First pin: draft 1 of rubric D (relation first: same, variant, contains with the wider one, overlap, neighbours, different, opposite, unsure; the score derived), arm 2 of the overlap rubric arms experiment (coding_plan_overlap_arms.md, Fable on Roger's go 2026-10-04); rubric A version 4's text with the opening's question, the scale lines and the answer format replaced"
+      }
+    ],
+    "overlap_scope": [
+      {
+        "version": 1,
+        "sha256": "c9da429ecb07a5b2b37b46d0fc1a83bf68ef55d037e655a8cfb8e14af8b6e216",
+        "pinned_at": "2026-10-04T01:22:22+00:00",
+        "why": "First pin: draft 1 of rubric E (Roger's rewrite of rubric A's line 3: narrowed, broadened, stronger, milder or a shift of emphasis, and the reason says which), arm 3 of the overlap rubric arms experiment (coding_plan_overlap_arms.md, 2026-10-04); rubric A version 4's text with line 3 replaced"
+      }
     ]
   }
 }

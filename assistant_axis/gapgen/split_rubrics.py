@@ -22,7 +22,9 @@ to start until the text is pinned with ``data_analysis/gap_generation/rubric_pin
 
 The M3 overlap rubrics (2026-10-03) live in the same directory, in the same file format, and are
 pinned in the same ``versions.json`` (:data:`OVERLAP_FILES`): concept similarity (rubric A) and
-co-occurrence (rubric B), first pinned as version 2, the draft Roger signed off.  They are not split
+co-occurrence (rubric B), first pinned as version 2, the draft Roger signed off; and since 2026-10-04
+the three arms of the overlap rubric arms experiment (rubrics C, D and E, variants of A), first pinned
+as version 1.  They are not split
 prompts: :data:`NAMES` and :func:`load_all` stay the split filter's eight (the split runner and its
 records use them), while :data:`PINNED_NAMES` (both sets) is what the pins, :func:`mismatches` and
 ``rubric_pins.py`` cover.
@@ -50,10 +52,15 @@ FILES: dict[str, str] = {
     "descriptors": "descriptors.md",
 }
 NAMES: tuple[str, ...] = tuple(FILES)
-#: The M3 overlap call's two rubrics (m3_overlap_rubric_draft.md draft 2, signed off 2026-10-03).
+#: The M3 overlap call's rubrics: A and B (m3_overlap_rubric_draft.md draft 2, signed off 2026-10-03),
+#: and the three arms of the overlap rubric arms experiment (coding_plan_overlap_arms.md, 2026-10-04),
+#: variants of A: C six rungs, D relation first, E Roger's line 3; first pinned as version 1.
 OVERLAP_FILES: dict[str, str] = {
     "overlap_concept": "overlap_concept.md",
     "overlap_cooccurrence": "overlap_cooccurrence.md",
+    "overlap_six": "overlap_six.md",
+    "overlap_relation": "overlap_relation.md",
+    "overlap_scope": "overlap_scope.md",
 }
 OVERLAP_NAMES: tuple[str, ...] = tuple(OVERLAP_FILES)
 #: Every prompt file pinned in ``versions.json``.
