@@ -48,10 +48,15 @@ Every model under every arm is within one point of itself and of the other model
    covered at 3 fell from 15% / 13% (A) to 9% / 11% (C) and 6% / 11% (D), and the two models drifted
    apart: under D Sonnet answered "contains" for 9 pairs and Opus for 22, Sonnet preferring "overlap"
    where Opus saw containment, so the crossings doubled.  Both would need a re-tuned cut-off, and both
-   agree less at it.  The one thing D did reliably is **direction**: wherever both models said
-   "contains" they named the same wider trait (8 of 8, 5 of 5), and Opus repeated its direction on 19
-   of 20 pairs across passes.  Naming the wider side is easy; deciding between "overlap" and "contains"
-   is the hard part, under any wording.
+   agree less at it.  D's **direction** answers agreed wherever both models said "contains" (8 of 8,
+   5 of 5), and Opus repeated its direction on 19 of 20 pairs across passes, but two caveats from the
+   agent's report keep that from being a finding: the question "say which is the wider one" has no
+   clear answer for the "something more added" case (is the wider one the plainer concept, or the one
+   with more in it?), and Sonnet wrote `"wider": "target"` on 150 rows whose relation was not
+   "contains" (the same copying reflex as the label key; the parser drops them), so its 12 of 16
+   "target" answers on real containments may be partly the same reflex; Opus's were balanced (23
+   target, 19 listed) and never stray.  Deciding between "overlap" and "contains" is the hard part
+   under any wording; if direction is ever wanted it needs its own, unambiguous question.
 3. **Roger's rewrite (E) changed nothing measurable.**  Consistency 90% / 89%, agreement 86% / 84%,
    covered 15% / 14%, crossings 13 / 19: the same as A within noise, slightly more crossings.  What it
    did do is make the reasons say which kind of difference a 3 is: asked, Sonnet named one (narrowed,
@@ -69,9 +74,10 @@ Every model under every arm is within one point of itself and of the other model
    mostly at 1 / 2 (harmless: both mean keep), then at 2 / 3 (Sonnet 13 of its 45 flips under A, Opus
    4 of 34).  Opus under A is the steadiest reading at the cut-off in the whole experiment.
 
-Housekeeping: under D, Sonnet attached a `wider` field to rows whose relation was not "contains" in 86
-and 64 of its 409 rows (passes 1 and 2); the parser ignores it, as it ignores the label key, and Opus
-never did it.
+Two more details from the agent's report.  Under C and D the stricter model swaps: on A Sonnet covers
+more than Opus (every crossing in pass 1 was a Sonnet-only cover), on C and D Opus does (D: 17 of 19
+crossings Opus-only).  And the persona-space correlation is lowest under D (0.58 / 0.59 against A's
+0.66 / 0.69), with overlapping intervals.  "unsure" was never used by either model in any arm.
 
 ## What I recommend (for Roger to decide)
 
