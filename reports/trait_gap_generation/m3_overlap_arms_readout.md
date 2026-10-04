@@ -99,6 +99,39 @@ Not recommended: arm D's direction judgement is tempting for the rename shortlis
 is the wider one), but it comes with a scale the models agree on less.  If direction is ever wanted, ask
 for it as a separate question on pairs already scored 3, not as part of the score.
 
+## Follow-up: Sonnet misapplies D's lines, so D gets a redraft before a verdict (Roger, 2026-10-04)
+
+Roger, shown the anxious / neurotic crossing (both models describe neurotic as anxiety with instability
+added; Sonnet says "overlap", Opus "contains"): "So Sonnet is simply disobeying rubric D?  That sounds
+like a reason to try redrafting the 2 and/or 3 entries of rubric D to make the distinction clearer, not
+immediately abandon it."  The records bear him out.  On the 15 nearest pairs where Opus said "contains"
+or "variant" and Sonnet "overlap", most of Sonnet's reasons describe containment in D's own words and
+then label it overlap: careless / sloppy ("the … work *part of* careless, but leaves out broken
+deadlines"), cruel / callous ("the indifference-to-suffering *part of* cruel … cruel *adds more*"),
+environmental / ecocentric ("*includes* the environmental priority but *adds* …"), and anxious /
+neurotic, where the slip is visible: "neurotic adds emotional instability …, **so each has something the
+other lacks**": the shared core is counted as the plainer trait's addition.  Across all of D, Sonnet's
+"overlap" reasons name an addition on both sides in 28% of cases (Opus 51%).  Two or three of the 15
+are defensible overlaps (agreeable / conciliatory, gluttonous / self-indulgent); the rest are the one
+slip.  Under rubric A, Sonnet's 2-against-3 reasons showed the same slip, so the same clarification is
+worth an arm on A's lines.
+
+**Draft 2 of D's two lines** (the rest of [overlap_relation.md](./rubrics/overlap_relation.md) unchanged;
+example words checked free of the corpus: fussy, fussy eater, proud, boastful):
+
+> - "contains": one of the two is the other with something more: narrowed to a single domain, or with an extra behaviour, feeling or condition added. The plainer one adds nothing of its own: everything it says, the richer one says too. The plainer one is the wider; say which it is. For example, fussy and fussy eater: fussy is the wider. Or proud and boastful: boastful is proud with the telling of it added, so proud is the wider.
+> - "overlap": overlapping concepts. They share a core, and each adds something the other lacks. Name what each adds; the shared core itself is not an addition. If only one of the two adds anything beyond the core, the answer is "contains", not "overlap". For example, studious and bookish: both are about learning from books, but studious adds diligence and bookish adds a taste for reading.
+
+**The same clarification on rubric A** (arm F, a new file `overlap_concept_adds.md`, A's text with lines
+2 and 3 replaced; A's own pin is untouched, since A is the production rubric):
+
+> - 3: the same concept, differing only in scope, degree or emphasis: one may be the other narrowed to a single domain, carried further, or with something more added, and the plainer one adds nothing of its own: everything it says, the richer one says too. For example, penny-pinching and miserly: miserly is the same carefulness with money, carried further. Or proud and boastful: boastful is proud with the telling of it added.
+> - 2: overlapping concepts. They share a core, and each adds something the other lacks. Name what each adds; the shared core itself is not an addition. If only one of the two adds anything beyond the core, the answer is 3, not 2. For example, studious and bookish: both are about learning from books, but studious adds diligence and bookish adds a taste for reading.
+
+Plan, on Roger's word (he may edit the lines first): pin D's draft 2 as version 2 and F as version 1,
+run both on the 409 pairs, Sonnet and Opus, two passes (about $8), and compare with A and D on the
+cross-arm table.  Arms C and E are not run again.  The results go in this file.
+
 ## Files
 
 - Run: [pairs.json](../../data/candidates/overlap_test/overlap_arms_1/pairs.json) (identical pairs to run 1),
