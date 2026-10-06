@@ -59,6 +59,17 @@ only its 2 and 3 lines replaced, because round 1 ([m3_overlap_arms_readout.md](.
 found the models describing a containment and answering 2; pinned as version 1 on 2026-10-04 and first
 run on the calls that hold the pairs where that confusion was seen.
 
+## The M3 relation call (added 2026-10-07)
+
+The call before the overlap call in the M3 novelty check ([coding_plan_m3.md](../coding_plan_m3.md),
+stage 3): for a candidate and its listed traits (the 10 nearest corpus traits and the members of their
+pairs, triangles and tetrahedra), is each `similar`, `opposed`, `unrelated` or `unsure`?  Pinned in the
+same `versions.json`; the overlap call itself reads rubric A above.
+
+| file | what it asks | status |
+|---|---|---|
+| [relation.md](./relation.md) | How does each listed trait's concept stand to the candidate's: similar, opposed, unrelated, or unsure | draft 1, pinned as version 1 (the brief's text, unchanged) |
+
 ## How to edit
 
 Each file holds one prompt inside a fenced block.  Change the text inside the block.  When you are

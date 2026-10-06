@@ -207,7 +207,9 @@ class TestOverlapPins:
         assert set(sr.load_all()) == set(sr.NAMES)          # the split runner's eight, unchanged
         assert set(sr.current_versions()) == set(sr.NAMES)  # what a split block stamps as step_versions
         assert set(sr.current_versions(names=sr.OVERLAP_NAMES)) == set(sr.OVERLAP_NAMES)
-        assert set(sr.PINNED_NAMES) == set(sr.NAMES) | set(sr.OVERLAP_NAMES)
+        # since 2026-10-07 a third set, M3's relation call (coding_plan_m3.md), pinned beside them
+        assert set(sr.PINNED_NAMES) == set(sr.NAMES) | set(sr.OVERLAP_NAMES) | set(sr.M3_NAMES)
+        assert not set(sr.M3_NAMES) & (set(sr.NAMES) | set(sr.OVERLAP_NAMES))
 
     def test_first_pin_is_draft_2_as_signed_off(self):
         rows = sr.read_versions()["prompts"]
@@ -394,6 +396,38 @@ class TestOverlapHygiene:
             for w in tw | set(PROSE_ALLOWED):
                 for form in (f"{w} and ", f" and {w}.", f" and {w},", f"a {w} persona", f"be {w}."):
                     assert form not in text, (name, w, form)
+
+
+#: M3's relation rubric (coding_plan_m3.md, draft 1): its example words are rubric A's, checked above.
+RELATION_EXAMPLE_WORDS = ("talkative", "loquacious", "studious", "bookish", "cheery", "morose", "chatty", "plainspoken")
+
+
+class TestRelationRubric:
+    """The relation call's rubric (2026-10-07): the brief's draft 1, pinned as version 1, with rubric A's
+    example words, reason before the answer."""
+
+    def test_pinned_as_version_1_and_the_brief_s_text(self):
+        import re
+        rows = sr.read_versions()["prompts"]["relation"]
+        assert rows[0]["version"] == 1 and rows[-1]["sha256"] == sr.sha256(sr.load_prompt("relation"))
+        brief = (REPO / "reports" / "trait_gap_generation" / "coding_plan_m3.md").read_text(encoding="utf-8")
+        m = re.search(r"## The rubric for the relation call \(draft 1\).*?````text\n(.*?)\n````", brief, re.S)
+        assert sr.load_prompt("relation") == m.group(1)                       # byte for byte, not reworded
+
+    def test_example_words_avoid_every_list_and_are_rubric_a_s(self):
+        reserved = set(RESERVED.read_text(encoding="utf-8").split())
+        bad = _forbidden() | _test_words()
+        text = sr.load_prompt("relation")
+        for w in RELATION_EXAMPLE_WORDS:
+            assert w in text and w in OVERLAP_EXAMPLE_WORDS, w
+            assert w not in reserved and normalize_to_file_name(w) not in bad, w
+
+    def test_prompt_words_against_the_corpus_queue_and_validation_file(self):
+        from assistant_axis.gapgen.prompt_hygiene import PROSE_ALLOWED, prompt_words
+        forbidden = _forbidden() | _test_words()
+        got = {w for w in prompt_words(sr.load_prompt("relation")) if normalize_to_file_name(w) in forbidden
+               and w not in PROSE_ALLOWED}
+        assert got == set()
 
 
 class TestHygiene:

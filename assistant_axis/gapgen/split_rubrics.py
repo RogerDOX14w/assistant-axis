@@ -27,8 +27,9 @@ the three arms of the overlap rubric arms experiment (rubrics C, D and E, varian
 (A2, C2, D2 and E2, the round-1 rubrics with their 2 and 3 lines redrafted), first pinned as version 1.
 They are not split
 prompts: :data:`NAMES` and :func:`load_all` stay the split filter's eight (the split runner and its
-records use them), while :data:`PINNED_NAMES` (both sets) is what the pins, :func:`mismatches` and
-``rubric_pins.py`` cover.
+records use them), while :data:`PINNED_NAMES` (every set) is what the pins, :func:`mismatches` and
+``rubric_pins.py`` cover.  Since 2026-10-07 a third set, :data:`M3_FILES`: M3's relation call
+(``relation.md``), first pinned as version 1.
 """
 from __future__ import annotations
 
@@ -70,8 +71,14 @@ OVERLAP_FILES: dict[str, str] = {
     "overlap_scope_implies": "overlap_scope_implies.md",
 }
 OVERLAP_NAMES: tuple[str, ...] = tuple(OVERLAP_FILES)
+#: M3's other rubrics (coding_plan_m3.md, 2026-10-07): the relation call (draft 1 of the brief, first pinned
+#: as version 1).  The overlap call itself reads rubric A, ``overlap_concept``, above.
+M3_FILES: dict[str, str] = {
+    "relation": "relation.md",
+}
+M3_NAMES: tuple[str, ...] = tuple(M3_FILES)
 #: Every prompt file pinned in ``versions.json``.
-PINNED_FILES: dict[str, str] = {**FILES, **OVERLAP_FILES}
+PINNED_FILES: dict[str, str] = {**FILES, **OVERLAP_FILES, **M3_FILES}
 PINNED_NAMES: tuple[str, ...] = tuple(PINNED_FILES)
 VERSIONS_NAME = "versions.json"
 
@@ -206,6 +213,6 @@ def bump(name: str, why: str, *, now: str, rubrics_dir: Optional[Path] = None,
     return row
 
 
-ABOUT = ("Append-only.  For each split-filter prompt and each M3 overlap rubric, every version and the SHA-256 "
+ABOUT = ("Append-only.  For each split-filter prompt and each M3 rubric, every version and the SHA-256 "
          "of its text (the fenced block of its rubric file).  A version names one text.  Add a row with "
          "data_analysis/gap_generation/rubric_pins.py bump NAME --why TEXT; never edit a row.")
