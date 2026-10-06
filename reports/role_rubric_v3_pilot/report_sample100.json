@@ -1,0 +1,2099 @@
+{
+  "set": "dev",
+  "arms": [
+    "corpus",
+    "v3"
+  ],
+  "baseline": "corpus",
+  "left_out_described_differently": {},
+  "n_roles": {
+    "corpus": 100,
+    "v3": 100
+  },
+  "measures": {
+    "open_roleplay": {
+      "label": "opens by telling the model to play a part: Act as, Behave like, Take on",
+      "unit": "instruction",
+      "source": "pattern",
+      "arms": {
+        "corpus": {
+          "traits": 100,
+          "items": 500,
+          "with": 109,
+          "rate": 0.218,
+          "rate_interval": [
+            0.206,
+            0.23
+          ],
+          "files_with": 99,
+          "file_threshold": 1,
+          "file_rate": 0.99,
+          "file_rate_interval": [
+            0.9455138032509935,
+            0.9982325679553905
+          ]
+        },
+        "v3": {
+          "traits": 100,
+          "items": 500,
+          "with": 0,
+          "rate": 0.0,
+          "rate_interval": [
+            0.0,
+            0.0
+          ],
+          "files_with": 0,
+          "file_threshold": 1,
+          "file_rate": 0.0,
+          "file_rate_interval": [
+            0.0,
+            0.03699349876899627
+          ]
+        }
+      },
+      "against_baseline": {
+        "v3": {
+          "difference": -0.218,
+          "interval": [
+            -0.232,
+            -0.206
+          ],
+          "p": 9.999000099990002e-05,
+          "paired_traits": 100,
+          "files_only_baseline": 99,
+          "files_only_arm": 0,
+          "files_p": 3.1554436208840472e-30
+        }
+      }
+    },
+    "open_statement": {
+      "label": "opens with a plain statement: You <verb>, Your <noun>",
+      "unit": "instruction",
+      "source": "pattern",
+      "arms": {
+        "corpus": {
+          "traits": 100,
+          "items": 500,
+          "with": 15,
+          "rate": 0.03,
+          "rate_interval": [
+            0.014,
+            0.05
+          ],
+          "files_with": 11,
+          "file_threshold": 1,
+          "file_rate": 0.11,
+          "file_rate_interval": [
+            0.06254196329419368,
+            0.18631296574562342
+          ]
+        },
+        "v3": {
+          "traits": 100,
+          "items": 500,
+          "with": 0,
+          "rate": 0.0,
+          "rate_interval": [
+            0.0,
+            0.0
+          ],
+          "files_with": 0,
+          "file_threshold": 1,
+          "file_rate": 0.0,
+          "file_rate_interval": [
+            0.0,
+            0.03699349876899627
+          ]
+        }
+      },
+      "against_baseline": {
+        "v3": {
+          "difference": -0.03,
+          "interval": [
+            -0.048,
+            -0.014
+          ],
+          "p": 0.0008999100089991,
+          "paired_traits": 100,
+          "files_only_baseline": 11,
+          "files_only_arm": 0,
+          "files_p": 0.0009765625
+        }
+      }
+    },
+    "open_risky": {
+      "label": "opens with You have / believe / want / tend to, When",
+      "unit": "instruction",
+      "source": "pattern",
+      "arms": {
+        "corpus": {
+          "traits": 100,
+          "items": 500,
+          "with": 2,
+          "rate": 0.004,
+          "rate_interval": [
+            0.0,
+            0.01
+          ],
+          "files_with": 2,
+          "file_threshold": 1,
+          "file_rate": 0.02,
+          "file_rate_interval": [
+            0.0055019675006616475,
+            0.07001179131757478
+          ]
+        },
+        "v3": {
+          "traits": 100,
+          "items": 500,
+          "with": 0,
+          "rate": 0.0,
+          "rate_interval": [
+            0.0,
+            0.0
+          ],
+          "files_with": 0,
+          "file_threshold": 1,
+          "file_rate": 0.0,
+          "file_rate_interval": [
+            0.0,
+            0.03699349876899627
+          ]
+        }
+      },
+      "against_baseline": {
+        "v3": {
+          "difference": -0.004,
+          "interval": [
+            -0.01,
+            0.0
+          ],
+          "p": 0.506049395060494,
+          "paired_traits": 100,
+          "files_only_baseline": 2,
+          "files_only_arm": 0,
+          "files_p": 0.5
+        }
+      }
+    },
+    "chat_words": {
+      "label": "chat-frame words (user, assistant, AI, your responses), not in an AI role",
+      "unit": "instruction",
+      "source": "pattern",
+      "arms": {
+        "corpus": {
+          "traits": 100,
+          "items": 500,
+          "with": 2,
+          "rate": 0.004,
+          "rate_interval": [
+            0.0,
+            0.01
+          ],
+          "files_with": 2,
+          "file_threshold": 1,
+          "file_rate": 0.02,
+          "file_rate_interval": [
+            0.0055019675006616475,
+            0.07001179131757478
+          ]
+        },
+        "v3": {
+          "traits": 100,
+          "items": 500,
+          "with": 1,
+          "rate": 0.002,
+          "rate_interval": [
+            0.0,
+            0.006
+          ],
+          "files_with": 1,
+          "file_threshold": 1,
+          "file_rate": 0.01,
+          "file_rate_interval": [
+            0.0017674320446096452,
+            0.05448619674900669
+          ]
+        }
+      },
+      "against_baseline": {
+        "v3": {
+          "difference": -0.002,
+          "interval": [
+            -0.006,
+            0.0
+          ],
+          "p": 1.0,
+          "paired_traits": 100,
+          "files_only_baseline": 1,
+          "files_only_arm": 0,
+          "files_p": 1.0
+        }
+      }
+    },
+    "chat_frame": {
+      "label": "presupposes a chat assistant (judged)",
+      "unit": "instruction",
+      "source": "judge",
+      "arms": {
+        "corpus": {
+          "traits": 100,
+          "items": 500,
+          "with": 0,
+          "rate": 0.0,
+          "rate_interval": [
+            0.0,
+            0.0
+          ],
+          "files_with": 0,
+          "file_threshold": 1,
+          "file_rate": 0.0,
+          "file_rate_interval": [
+            0.0,
+            0.03699349876899627
+          ]
+        },
+        "v3": {
+          "traits": 100,
+          "items": 500,
+          "with": 2,
+          "rate": 0.004,
+          "rate_interval": [
+            0.0,
+            0.01
+          ],
+          "files_with": 2,
+          "file_threshold": 1,
+          "file_rate": 0.02,
+          "file_rate_interval": [
+            0.0055019675006616475,
+            0.07001179131757478
+          ]
+        }
+      },
+      "against_baseline": {
+        "v3": {
+          "difference": 0.004,
+          "interval": [
+            0.0,
+            0.01
+          ],
+          "p": 0.4991500849915009,
+          "paired_traits": 100,
+          "files_only_baseline": 0,
+          "files_only_arm": 2,
+          "files_p": 0.5
+        }
+      }
+    },
+    "softened": {
+      "label": "the role softened, whitewashed or excused (judged)",
+      "unit": "instruction",
+      "source": "judge",
+      "arms": {
+        "corpus": {
+          "traits": 100,
+          "items": 500,
+          "with": 15,
+          "rate": 0.03,
+          "rate_interval": [
+            0.012,
+            0.048
+          ],
+          "files_with": 10,
+          "file_threshold": 1,
+          "file_rate": 0.1,
+          "file_rate_interval": [
+            0.0552291368050726,
+            0.17436566221012445
+          ]
+        },
+        "v3": {
+          "traits": 100,
+          "items": 500,
+          "with": 12,
+          "rate": 0.024,
+          "rate_interval": [
+            0.01,
+            0.042
+          ],
+          "files_with": 8,
+          "file_threshold": 1,
+          "file_rate": 0.08,
+          "file_rate_interval": [
+            0.04109346127318457,
+            0.1499810776927723
+          ]
+        }
+      },
+      "against_baseline": {
+        "v3": {
+          "difference": -0.006,
+          "interval": [
+            -0.026,
+            0.014
+          ],
+          "p": 0.6930306969303069,
+          "paired_traits": 100,
+          "files_only_baseline": 7,
+          "files_only_arm": 5,
+          "files_p": 0.7744140625
+        }
+      }
+    },
+    "hedge_words": {
+      "label": "hedge words (appropriate, healthy, sometimes, may, tends to ...)",
+      "unit": "instruction",
+      "source": "pattern",
+      "arms": {
+        "corpus": {
+          "traits": 100,
+          "items": 500,
+          "with": 6,
+          "rate": 0.012,
+          "rate_interval": [
+            0.002,
+            0.024
+          ],
+          "files_with": 5,
+          "file_threshold": 1,
+          "file_rate": 0.05,
+          "file_rate_interval": [
+            0.021543679017992173,
+            0.1117504698741045
+          ]
+        },
+        "v3": {
+          "traits": 100,
+          "items": 500,
+          "with": 6,
+          "rate": 0.012,
+          "rate_interval": [
+            0.002,
+            0.024
+          ],
+          "files_with": 5,
+          "file_threshold": 1,
+          "file_rate": 0.05,
+          "file_rate_interval": [
+            0.021543679017992173,
+            0.1117504698741045
+          ]
+        }
+      },
+      "against_baseline": {
+        "v3": {
+          "difference": 0.0,
+          "interval": [
+            -0.012,
+            0.012
+          ],
+          "p": 1.0,
+          "paired_traits": 100,
+          "files_only_baseline": 4,
+          "files_only_arm": 4,
+          "files_p": 1.0
+        }
+      }
+    },
+    "observer_words": {
+      "label": "the rubric's observer words (navigating, individuals, demonstrate ...)",
+      "unit": "instruction",
+      "source": "pattern",
+      "arms": {
+        "corpus": {
+          "traits": 100,
+          "items": 500,
+          "with": 1,
+          "rate": 0.002,
+          "rate_interval": [
+            0.0,
+            0.006
+          ],
+          "files_with": 1,
+          "file_threshold": 1,
+          "file_rate": 0.01,
+          "file_rate_interval": [
+            0.0017674320446096452,
+            0.05448619674900669
+          ]
+        },
+        "v3": {
+          "traits": 100,
+          "items": 500,
+          "with": 0,
+          "rate": 0.0,
+          "rate_interval": [
+            0.0,
+            0.0
+          ],
+          "files_with": 0,
+          "file_threshold": 1,
+          "file_rate": 0.0,
+          "file_rate_interval": [
+            0.0,
+            0.03699349876899627
+          ]
+        }
+      },
+      "against_baseline": {
+        "v3": {
+          "difference": -0.002,
+          "interval": [
+            -0.006,
+            0.0
+          ],
+          "p": 1.0,
+          "paired_traits": 100,
+          "files_only_baseline": 1,
+          "files_only_arm": 0,
+          "files_p": 1.0
+        }
+      }
+    },
+    "observer_register": {
+      "label": "an outsider's register, not the role's own words (judged)",
+      "unit": "instruction",
+      "source": "judge",
+      "arms": {
+        "corpus": {
+          "traits": 100,
+          "items": 500,
+          "with": 16,
+          "rate": 0.032,
+          "rate_interval": [
+            0.012,
+            0.056
+          ],
+          "files_with": 10,
+          "file_threshold": 1,
+          "file_rate": 0.1,
+          "file_rate_interval": [
+            0.0552291368050726,
+            0.17436566221012445
+          ]
+        },
+        "v3": {
+          "traits": 100,
+          "items": 500,
+          "with": 18,
+          "rate": 0.036,
+          "rate_interval": [
+            0.016,
+            0.06
+          ],
+          "files_with": 13,
+          "file_threshold": 1,
+          "file_rate": 0.13,
+          "file_rate_interval": [
+            0.07757167395660301,
+            0.20980351513245427
+          ]
+        }
+      },
+      "against_baseline": {
+        "v3": {
+          "difference": 0.004,
+          "interval": [
+            -0.024,
+            0.028
+          ],
+          "p": 0.8875112488751125,
+          "paired_traits": 100,
+          "files_only_baseline": 6,
+          "files_only_arm": 9,
+          "files_p": 0.60723876953125
+        }
+      }
+    },
+    "generic": {
+      "label": "nothing particular to this role (judged)",
+      "unit": "instruction",
+      "source": "judge",
+      "arms": {
+        "corpus": {
+          "traits": 100,
+          "items": 500,
+          "with": 0,
+          "rate": 0.0,
+          "rate_interval": [
+            0.0,
+            0.0
+          ],
+          "files_with": 0,
+          "file_threshold": 1,
+          "file_rate": 0.0,
+          "file_rate_interval": [
+            0.0,
+            0.03699349876899627
+          ]
+        },
+        "v3": {
+          "traits": 100,
+          "items": 500,
+          "with": 0,
+          "rate": 0.0,
+          "rate_interval": [
+            0.0,
+            0.0
+          ],
+          "files_with": 0,
+          "file_threshold": 1,
+          "file_rate": 0.0,
+          "file_rate_interval": [
+            0.0,
+            0.03699349876899627
+          ]
+        }
+      },
+      "against_baseline": {
+        "v3": {
+          "difference": 0.0,
+          "interval": [
+            0.0,
+            0.0
+          ],
+          "p": 1.0,
+          "paired_traits": 100,
+          "files_only_baseline": 0,
+          "files_only_arm": 0,
+          "files_p": 1.0
+        }
+      }
+    },
+    "off_role": {
+      "label": "a different role, a trait, or too narrow a part (judged)",
+      "unit": "instruction",
+      "source": "judge",
+      "arms": {
+        "corpus": {
+          "traits": 100,
+          "items": 500,
+          "with": 6,
+          "rate": 0.012,
+          "rate_interval": [
+            0.004,
+            0.022
+          ],
+          "files_with": 6,
+          "file_threshold": 1,
+          "file_rate": 0.06,
+          "file_rate_interval": [
+            0.027786123800628143,
+            0.12476815511608857
+          ]
+        },
+        "v3": {
+          "traits": 100,
+          "items": 500,
+          "with": 5,
+          "rate": 0.01,
+          "rate_interval": [
+            0.002,
+            0.02
+          ],
+          "files_with": 5,
+          "file_threshold": 1,
+          "file_rate": 0.05,
+          "file_rate_interval": [
+            0.021543679017992173,
+            0.1117504698741045
+          ]
+        }
+      },
+      "against_baseline": {
+        "v3": {
+          "difference": -0.002,
+          "interval": [
+            -0.014,
+            0.012
+          ],
+          "p": 1.0,
+          "paired_traits": 100,
+          "files_only_baseline": 6,
+          "files_only_arm": 5,
+          "files_p": 1.0
+        }
+      }
+    },
+    "invented_detail": {
+      "label": "particulars the description leaves open (judged)",
+      "unit": "instruction",
+      "source": "judge",
+      "arms": {
+        "corpus": {
+          "traits": 100,
+          "items": 500,
+          "with": 44,
+          "rate": 0.088,
+          "rate_interval": [
+            0.062,
+            0.12
+          ],
+          "files_with": 33,
+          "file_threshold": 1,
+          "file_rate": 0.33,
+          "file_rate_interval": [
+            0.24563122674486615,
+            0.4269465628365927
+          ]
+        },
+        "v3": {
+          "traits": 100,
+          "items": 500,
+          "with": 76,
+          "rate": 0.152,
+          "rate_interval": [
+            0.114,
+            0.19
+          ],
+          "files_with": 48,
+          "file_threshold": 1,
+          "file_rate": 0.48,
+          "file_rate_interval": [
+            0.3846455168617764,
+            0.5768342230889836
+          ]
+        }
+      },
+      "against_baseline": {
+        "v3": {
+          "difference": 0.064,
+          "interval": [
+            0.026,
+            0.104
+          ],
+          "p": 0.0023997600239976003,
+          "paired_traits": 100,
+          "files_only_baseline": 9,
+          "files_only_arm": 24,
+          "files_p": 0.013530986849218607
+        }
+      }
+    },
+    "invented_motive": {
+      "label": "a motive the description does not give, as fact (judged)",
+      "unit": "instruction",
+      "source": "judge",
+      "arms": {
+        "corpus": {
+          "traits": 100,
+          "items": 500,
+          "with": 45,
+          "rate": 0.09,
+          "rate_interval": [
+            0.066,
+            0.116
+          ],
+          "files_with": 36,
+          "file_threshold": 1,
+          "file_rate": 0.36,
+          "file_rate_interval": [
+            0.2727122033881362,
+            0.45764597626718284
+          ]
+        },
+        "v3": {
+          "traits": 100,
+          "items": 500,
+          "with": 46,
+          "rate": 0.092,
+          "rate_interval": [
+            0.068,
+            0.116
+          ],
+          "files_with": 39,
+          "file_threshold": 1,
+          "file_rate": 0.39,
+          "file_rate_interval": [
+            0.3001687394111505,
+            0.48796983031802876
+          ]
+        }
+      },
+      "against_baseline": {
+        "v3": {
+          "difference": 0.002,
+          "interval": [
+            -0.026,
+            0.03
+          ],
+          "p": 1.0,
+          "paired_traits": 100,
+          "files_only_baseline": 15,
+          "files_only_arm": 18,
+          "files_p": 0.7283324808813632
+        }
+      }
+    },
+    "because": {
+      "label": "has a 'because' clause",
+      "unit": "instruction",
+      "source": "pattern",
+      "arms": {
+        "corpus": {
+          "traits": 100,
+          "items": 500,
+          "with": 16,
+          "rate": 0.032,
+          "rate_interval": [
+            0.016,
+            0.052
+          ],
+          "files_with": 13,
+          "file_threshold": 1,
+          "file_rate": 0.13,
+          "file_rate_interval": [
+            0.07757167395660301,
+            0.20980351513245427
+          ]
+        },
+        "v3": {
+          "traits": 100,
+          "items": 500,
+          "with": 13,
+          "rate": 0.026,
+          "rate_interval": [
+            0.012,
+            0.042
+          ],
+          "files_with": 11,
+          "file_threshold": 1,
+          "file_rate": 0.11,
+          "file_rate_interval": [
+            0.06254196329419368,
+            0.18631296574562342
+          ]
+        }
+      },
+      "against_baseline": {
+        "v3": {
+          "difference": -0.006,
+          "interval": [
+            -0.024,
+            0.012
+          ],
+          "p": 0.684031596840316,
+          "paired_traits": 100,
+          "files_only_baseline": 9,
+          "files_only_arm": 7,
+          "files_p": 0.803619384765625
+        }
+      }
+    },
+    "dashes": {
+      "label": "uses a dash (the rubric asks for commas)",
+      "unit": "instruction",
+      "source": "pattern",
+      "arms": {
+        "corpus": {
+          "traits": 100,
+          "items": 500,
+          "with": 2,
+          "rate": 0.004,
+          "rate_interval": [
+            0.0,
+            0.01
+          ],
+          "files_with": 2,
+          "file_threshold": 1,
+          "file_rate": 0.02,
+          "file_rate_interval": [
+            0.0055019675006616475,
+            0.07001179131757478
+          ]
+        },
+        "v3": {
+          "traits": 100,
+          "items": 500,
+          "with": 1,
+          "rate": 0.002,
+          "rate_interval": [
+            0.0,
+            0.006
+          ],
+          "files_with": 1,
+          "file_threshold": 1,
+          "file_rate": 0.01,
+          "file_rate_interval": [
+            0.0017674320446096452,
+            0.05448619674900669
+          ]
+        }
+      },
+      "against_baseline": {
+        "v3": {
+          "difference": -0.002,
+          "interval": [
+            -0.01,
+            0.004
+          ],
+          "p": 1.0,
+          "paired_traits": 100,
+          "files_only_baseline": 2,
+          "files_only_arm": 1,
+          "files_p": 1.0
+        }
+      }
+    },
+    "echo_description": {
+      "label": "repeats 5 or more words in a row of the description",
+      "unit": "instruction",
+      "source": "pattern",
+      "arms": {
+        "corpus": {
+          "traits": 100,
+          "items": 500,
+          "with": 6,
+          "rate": 0.012,
+          "rate_interval": [
+            0.004,
+            0.022
+          ],
+          "files_with": 6,
+          "file_threshold": 1,
+          "file_rate": 0.06,
+          "file_rate_interval": [
+            0.027786123800628143,
+            0.12476815511608857
+          ]
+        },
+        "v3": {
+          "traits": 100,
+          "items": 500,
+          "with": 11,
+          "rate": 0.022,
+          "rate_interval": [
+            0.01,
+            0.036
+          ],
+          "files_with": 10,
+          "file_threshold": 1,
+          "file_rate": 0.1,
+          "file_rate_interval": [
+            0.0552291368050726,
+            0.17436566221012445
+          ]
+        }
+      },
+      "against_baseline": {
+        "v3": {
+          "difference": 0.01,
+          "interval": [
+            0.0,
+            0.022049999999999726
+          ],
+          "p": 0.1845815418458154,
+          "paired_traits": 100,
+          "files_only_baseline": 1,
+          "files_only_arm": 5,
+          "files_p": 0.21875
+        }
+      }
+    },
+    "copied_example": {
+      "label": "repeats 7 or more words in a row of a template example",
+      "unit": "instruction",
+      "source": "pattern",
+      "arms": {
+        "corpus": {
+          "traits": 100,
+          "items": 500,
+          "with": 0,
+          "rate": 0.0,
+          "rate_interval": [
+            0.0,
+            0.0
+          ],
+          "files_with": 0,
+          "file_threshold": 2,
+          "file_rate": 0.0,
+          "file_rate_interval": [
+            0.0,
+            0.03699349876899627
+          ]
+        },
+        "v3": {
+          "traits": 100,
+          "items": 500,
+          "with": 0,
+          "rate": 0.0,
+          "rate_interval": [
+            0.0,
+            0.0
+          ],
+          "files_with": 0,
+          "file_threshold": 2,
+          "file_rate": 0.0,
+          "file_rate_interval": [
+            0.0,
+            0.03699349876899627
+          ]
+        }
+      },
+      "against_baseline": {
+        "v3": {
+          "difference": 0.0,
+          "interval": [
+            0.0,
+            0.0
+          ],
+          "p": 1.0,
+          "paired_traits": 100,
+          "files_only_baseline": 0,
+          "files_only_arm": 0,
+          "files_p": 1.0
+        }
+      }
+    },
+    "length_out": {
+      "label": "outside 15 to 25 words",
+      "unit": "instruction",
+      "source": "pattern",
+      "arms": {
+        "corpus": {
+          "traits": 100,
+          "items": 500,
+          "with": 103,
+          "rate": 0.206,
+          "rate_interval": [
+            0.16,
+            0.254
+          ],
+          "files_with": 58,
+          "file_threshold": 1,
+          "file_rate": 0.58,
+          "file_rate_interval": [
+            0.48206486626332634,
+            0.6720161739336342
+          ]
+        },
+        "v3": {
+          "traits": 100,
+          "items": 500,
+          "with": 332,
+          "rate": 0.664,
+          "rate_interval": [
+            0.616,
+            0.712
+          ],
+          "files_with": 97,
+          "file_threshold": 1,
+          "file_rate": 0.97,
+          "file_rate_interval": [
+            0.9154806351014251,
+            0.9897454760557185
+          ]
+        }
+      },
+      "against_baseline": {
+        "v3": {
+          "difference": 0.458,
+          "interval": [
+            0.398,
+            0.516
+          ],
+          "p": 9.999000099990002e-05,
+          "paired_traits": 100,
+          "files_only_baseline": 2,
+          "files_only_arm": 41,
+          "files_p": 2.1532287064474076e-10
+        }
+      }
+    },
+    "q_persona": {
+      "label": "addresses the person answering (second person, no first-person asker)",
+      "unit": "question",
+      "source": "pattern",
+      "arms": {
+        "corpus": {
+          "traits": 100,
+          "items": 4000,
+          "with": 3828,
+          "rate": 0.957,
+          "rate_interval": [
+            0.94324375,
+            0.96925
+          ],
+          "files_with": 100,
+          "file_threshold": 1,
+          "file_rate": 1.0,
+          "file_rate_interval": [
+            0.9630065012310038,
+            1.0
+          ]
+        },
+        "v3": {
+          "traits": 100,
+          "items": 3999,
+          "with": 3299,
+          "rate": 0.8249562390597649,
+          "rate_interval": [
+            0.8146573286643322,
+            0.8349587396849212
+          ],
+          "files_with": 100,
+          "file_threshold": 1,
+          "file_rate": 1.0,
+          "file_rate_interval": [
+            0.9630065012310038,
+            1.0
+          ]
+        }
+      },
+      "against_baseline": {
+        "v3": {
+          "difference": -0.13225,
+          "interval": [
+            -0.146,
+            -0.11724375000000002
+          ],
+          "p": 9.999000099990002e-05,
+          "paired_traits": 100,
+          "files_only_baseline": 0,
+          "files_only_arm": 0,
+          "files_p": 1.0
+        }
+      }
+    },
+    "q_shape_situation": {
+      "label": "puts the person in a situation (judged)",
+      "unit": "question",
+      "source": "judge",
+      "arms": {
+        "corpus": {
+          "traits": 100,
+          "items": 4000,
+          "with": 3910,
+          "rate": 0.9775,
+          "rate_interval": [
+            0.964,
+            0.98875
+          ],
+          "files_with": 100,
+          "file_threshold": 1,
+          "file_rate": 1.0,
+          "file_rate_interval": [
+            0.9630065012310038,
+            1.0
+          ]
+        },
+        "v3": {
+          "traits": 100,
+          "items": 3999,
+          "with": 3307,
+          "rate": 0.8269567391847962,
+          "rate_interval": [
+            0.8176132099074306,
+            0.8365
+          ],
+          "files_with": 100,
+          "file_threshold": 1,
+          "file_rate": 1.0,
+          "file_rate_interval": [
+            0.9630065012310038,
+            1.0
+          ]
+        }
+      },
+      "against_baseline": {
+        "v3": {
+          "difference": -0.15075,
+          "interval": [
+            -0.166,
+            -0.13549375000000005
+          ],
+          "p": 9.999000099990002e-05,
+          "paired_traits": 100,
+          "files_only_baseline": 0,
+          "files_only_arm": 0,
+          "files_p": 1.0
+        }
+      }
+    },
+    "q_shape_advice": {
+      "label": "a first-person asker seeking advice (judged)",
+      "unit": "question",
+      "source": "judge",
+      "arms": {
+        "corpus": {
+          "traits": 100,
+          "items": 4000,
+          "with": 19,
+          "rate": 0.00475,
+          "rate_interval": [
+            0.0005,
+            0.011756249999999966
+          ],
+          "files_with": 5,
+          "file_threshold": 1,
+          "file_rate": 0.05,
+          "file_rate_interval": [
+            0.021543679017992173,
+            0.1117504698741045
+          ]
+        },
+        "v3": {
+          "traits": 100,
+          "items": 3999,
+          "with": 667,
+          "rate": 0.16679169792448112,
+          "rate_interval": [
+            0.1575,
+            0.17654523998683513
+          ],
+          "files_with": 98,
+          "file_threshold": 1,
+          "file_rate": 0.98,
+          "file_rate_interval": [
+            0.9299882086824253,
+            0.9944980324993383
+          ]
+        }
+      },
+      "against_baseline": {
+        "v3": {
+          "difference": 0.162,
+          "interval": [
+            0.15125,
+            0.1725
+          ],
+          "p": 9.999000099990002e-05,
+          "paired_traits": 100,
+          "files_only_baseline": 0,
+          "files_only_arm": 93,
+          "files_p": 2.0194839173657902e-28
+        }
+      }
+    },
+    "q_first_person": {
+      "label": "asker speaks in the first person",
+      "unit": "question",
+      "source": "pattern",
+      "arms": {
+        "corpus": {
+          "traits": 100,
+          "items": 4000,
+          "with": 30,
+          "rate": 0.0075,
+          "rate_interval": [
+            0.005,
+            0.01025
+          ],
+          "files_with": 26,
+          "file_threshold": 1,
+          "file_rate": 0.26,
+          "file_rate_interval": [
+            0.18404698413091963,
+            0.3537098952781987
+          ]
+        },
+        "v3": {
+          "traits": 100,
+          "items": 3999,
+          "with": 624,
+          "rate": 0.15603900975243812,
+          "rate_interval": [
+            0.14678669667416855,
+            0.16508672773886943
+          ],
+          "files_with": 99,
+          "file_threshold": 1,
+          "file_rate": 0.99,
+          "file_rate_interval": [
+            0.9455138032509935,
+            0.9982325679553905
+          ]
+        }
+      },
+      "against_baseline": {
+        "v3": {
+          "difference": 0.1485,
+          "interval": [
+            0.14,
+            0.15725624999999996
+          ],
+          "p": 9.999000099990002e-05,
+          "paired_traits": 100,
+          "files_only_baseline": 0,
+          "files_only_arm": 73,
+          "files_p": 2.117582368135751e-22
+        }
+      }
+    },
+    "q_shape_other_kinds": {
+      "label": "how-to, facts, bare task or general opinion (judged)",
+      "unit": "question",
+      "source": "judge",
+      "arms": {
+        "corpus": {
+          "traits": 100,
+          "items": 4000,
+          "with": 71,
+          "rate": 0.01775,
+          "rate_interval": [
+            0.0075,
+            0.03
+          ],
+          "files_with": 15,
+          "file_threshold": 1,
+          "file_rate": 0.15,
+          "file_rate_interval": [
+            0.09305985248417561,
+            0.23283559665412182
+          ]
+        },
+        "v3": {
+          "traits": 100,
+          "items": 3999,
+          "with": 25,
+          "rate": 0.006251562890722681,
+          "rate_interval": [
+            0.0027506876719179795,
+            0.01025512756378189
+          ],
+          "files_with": 14,
+          "file_threshold": 1,
+          "file_rate": 0.14,
+          "file_rate_interval": [
+            0.08526343626497376,
+            0.2213718828487036
+          ]
+        }
+      },
+      "against_baseline": {
+        "v3": {
+          "difference": -0.0115,
+          "interval": [
+            -0.02275,
+            -0.0025
+          ],
+          "p": 0.027197280271972803,
+          "paired_traits": 100,
+          "files_only_baseline": 13,
+          "files_only_arm": 12,
+          "files_p": 1.0
+        }
+      }
+    },
+    "q_howto": {
+      "label": "opens as a how-to",
+      "unit": "question",
+      "source": "pattern",
+      "arms": {
+        "corpus": {
+          "traits": 100,
+          "items": 4000,
+          "with": 121,
+          "rate": 0.03025,
+          "rate_interval": [
+            0.016,
+            0.046
+          ],
+          "files_with": 19,
+          "file_threshold": 1,
+          "file_rate": 0.19,
+          "file_rate_interval": [
+            0.12514751467908536,
+            0.27778845455769235
+          ]
+        },
+        "v3": {
+          "traits": 100,
+          "items": 3999,
+          "with": 3,
+          "rate": 0.0007501875468867217,
+          "rate_interval": [
+            0.0,
+            0.0020005126344117296
+          ],
+          "files_with": 2,
+          "file_threshold": 1,
+          "file_rate": 0.02,
+          "file_rate_interval": [
+            0.0055019675006616475,
+            0.07001179131757478
+          ]
+        }
+      },
+      "against_baseline": {
+        "v3": {
+          "difference": -0.0295,
+          "interval": [
+            -0.0455,
+            -0.016
+          ],
+          "p": 9.999000099990002e-05,
+          "paired_traits": 100,
+          "files_only_baseline": 19,
+          "files_only_arm": 2,
+          "files_p": 0.00022125244140625
+        }
+      }
+    },
+    "q_factual": {
+      "label": "opens as a request for facts",
+      "unit": "question",
+      "source": "pattern",
+      "arms": {
+        "corpus": {
+          "traits": 100,
+          "items": 4000,
+          "with": 44,
+          "rate": 0.011,
+          "rate_interval": [
+            0.00475,
+            0.01825
+          ],
+          "files_with": 13,
+          "file_threshold": 1,
+          "file_rate": 0.13,
+          "file_rate_interval": [
+            0.07757167395660301,
+            0.20980351513245427
+          ]
+        },
+        "v3": {
+          "traits": 100,
+          "items": 3999,
+          "with": 1,
+          "rate": 0.00025006251562890725,
+          "rate_interval": [
+            0.0,
+            0.0007503751875937969
+          ],
+          "files_with": 1,
+          "file_threshold": 1,
+          "file_rate": 0.01,
+          "file_rate_interval": [
+            0.0017674320446096452,
+            0.05448619674900669
+          ]
+        }
+      },
+      "against_baseline": {
+        "v3": {
+          "difference": -0.01075,
+          "interval": [
+            -0.01825,
+            -0.0045
+          ],
+          "p": 0.0007999200079992001,
+          "paired_traits": 100,
+          "files_only_baseline": 12,
+          "files_only_arm": 0,
+          "files_p": 0.00048828125
+        }
+      }
+    },
+    "q_yesno": {
+      "label": "opens as a yes/no question",
+      "unit": "question",
+      "source": "pattern",
+      "arms": {
+        "corpus": {
+          "traits": 100,
+          "items": 4000,
+          "with": 13,
+          "rate": 0.00325,
+          "rate_interval": [
+            0.00075,
+            0.00625
+          ],
+          "files_with": 6,
+          "file_threshold": 1,
+          "file_rate": 0.06,
+          "file_rate_interval": [
+            0.027786123800628143,
+            0.12476815511608857
+          ]
+        },
+        "v3": {
+          "traits": 100,
+          "items": 3999,
+          "with": 4,
+          "rate": 0.001000250062515629,
+          "rate_interval": [
+            0.00025,
+            0.002001000500250125
+          ],
+          "files_with": 4,
+          "file_threshold": 1,
+          "file_rate": 0.04,
+          "file_rate_interval": [
+            0.01566330388275538,
+            0.09837071498472119
+          ]
+        }
+      },
+      "against_baseline": {
+        "v3": {
+          "difference": -0.00225,
+          "interval": [
+            -0.0055,
+            0.0005
+          ],
+          "p": 0.21937806219378062,
+          "paired_traits": 100,
+          "files_only_baseline": 6,
+          "files_only_arm": 4,
+          "files_p": 0.75390625
+        }
+      }
+    },
+    "q_have_you_ever": {
+      "label": "asks 'Have you ever'",
+      "unit": "question",
+      "source": "pattern",
+      "arms": {
+        "corpus": {
+          "traits": 100,
+          "items": 4000,
+          "with": 0,
+          "rate": 0.0,
+          "rate_interval": [
+            0.0,
+            0.0
+          ],
+          "files_with": 0,
+          "file_threshold": 1,
+          "file_rate": 0.0,
+          "file_rate_interval": [
+            0.0,
+            0.03699349876899627
+          ]
+        },
+        "v3": {
+          "traits": 100,
+          "items": 3999,
+          "with": 1,
+          "rate": 0.00025006251562890725,
+          "rate_interval": [
+            0.0,
+            0.0007503751875937969
+          ],
+          "files_with": 1,
+          "file_threshold": 1,
+          "file_rate": 0.01,
+          "file_rate_interval": [
+            0.0017674320446096452,
+            0.05448619674900669
+          ]
+        }
+      },
+      "against_baseline": {
+        "v3": {
+          "difference": 0.00025,
+          "interval": [
+            0.0,
+            0.00075
+          ],
+          "p": 1.0,
+          "paired_traits": 100,
+          "files_only_baseline": 0,
+          "files_only_arm": 1,
+          "files_p": 1.0
+        }
+      }
+    },
+    "q_yes_no": {
+      "label": "can be answered in full with yes or no (judged)",
+      "unit": "question",
+      "source": "judge",
+      "arms": {
+        "corpus": {
+          "traits": 100,
+          "items": 4000,
+          "with": 133,
+          "rate": 0.03325,
+          "rate_interval": [
+            0.02325,
+            0.0445
+          ],
+          "files_with": 41,
+          "file_threshold": 1,
+          "file_rate": 0.41,
+          "file_rate_interval": [
+            0.3186731295420407,
+            0.5079857002363788
+          ]
+        },
+        "v3": {
+          "traits": 100,
+          "items": 3999,
+          "with": 189,
+          "rate": 0.047261815453863466,
+          "rate_interval": [
+            0.030757497186796698,
+            0.06575041104026007
+          ],
+          "files_with": 40,
+          "file_threshold": 1,
+          "file_rate": 0.4,
+          "file_rate_interval": [
+            0.3094012857712627,
+            0.4979974139825367
+          ]
+        }
+      },
+      "against_baseline": {
+        "v3": {
+          "difference": 0.014,
+          "interval": [
+            -0.0035,
+            0.03325
+          ],
+          "p": 0.1396860313968603,
+          "paired_traits": 100,
+          "files_only_baseline": 20,
+          "files_only_arm": 19,
+          "files_p": 1.0
+        }
+      }
+    },
+    "q_two_option": {
+      "label": "spells out two courses of action (judged)",
+      "unit": "question",
+      "source": "judge",
+      "arms": {
+        "corpus": {
+          "traits": 100,
+          "items": 4000,
+          "with": 326,
+          "rate": 0.0815,
+          "rate_interval": [
+            0.06875,
+            0.09375
+          ],
+          "files_with": 84,
+          "file_threshold": 1,
+          "file_rate": 0.84,
+          "file_rate_interval": [
+            0.7557973053553682,
+            0.8990471154817143
+          ]
+        },
+        "v3": {
+          "traits": 100,
+          "items": 3999,
+          "with": 1349,
+          "rate": 0.3373343335833959,
+          "rate_interval": [
+            0.3153268614028507,
+            0.359181350050025
+          ],
+          "files_with": 100,
+          "file_threshold": 1,
+          "file_rate": 1.0,
+          "file_rate_interval": [
+            0.9630065012310038,
+            1.0
+          ]
+        }
+      },
+      "against_baseline": {
+        "v3": {
+          "difference": 0.25575,
+          "interval": [
+            0.23249375,
+            0.279
+          ],
+          "p": 9.999000099990002e-05,
+          "paired_traits": 100,
+          "files_only_baseline": 0,
+          "files_only_arm": 16,
+          "files_p": 3.0517578125e-05
+        }
+      }
+    },
+    "q_one_answer": {
+      "label": "one right or one safe answer (judged)",
+      "unit": "question",
+      "source": "judge",
+      "arms": {
+        "corpus": {
+          "traits": 100,
+          "items": 4000,
+          "with": 3,
+          "rate": 0.00075,
+          "rate_interval": [
+            0.0,
+            0.00175
+          ],
+          "files_with": 3,
+          "file_threshold": 1,
+          "file_rate": 0.03,
+          "file_rate_interval": [
+            0.010254523944281516,
+            0.08451936489857499
+          ]
+        },
+        "v3": {
+          "traits": 100,
+          "items": 3999,
+          "with": 1,
+          "rate": 0.00025006251562890725,
+          "rate_interval": [
+            0.0,
+            0.0007505676179056215
+          ],
+          "files_with": 1,
+          "file_threshold": 1,
+          "file_rate": 0.01,
+          "file_rate_interval": [
+            0.0017674320446096452,
+            0.05448619674900669
+          ]
+        }
+      },
+      "against_baseline": {
+        "v3": {
+          "difference": -0.0005,
+          "interval": [
+            -0.0015,
+            0.0005
+          ],
+          "p": 0.6251374862513749,
+          "paired_traits": 100,
+          "files_only_baseline": 3,
+          "files_only_arm": 1,
+          "files_p": 0.625
+        }
+      }
+    },
+    "q_solo_task": {
+      "label": "a task carried out alone (judged)",
+      "unit": "question",
+      "source": "judge",
+      "arms": {
+        "corpus": {
+          "traits": 100,
+          "items": 4000,
+          "with": 828,
+          "rate": 0.207,
+          "rate_interval": [
+            0.15425,
+            0.26675625
+          ],
+          "files_with": 69,
+          "file_threshold": 1,
+          "file_rate": 0.69,
+          "file_rate_interval": [
+            0.5937394420163071,
+            0.7722030284514743
+          ]
+        },
+        "v3": {
+          "traits": 100,
+          "items": 3999,
+          "with": 359,
+          "rate": 0.0897724431107777,
+          "rate_interval": [
+            0.061279874312156084,
+            0.12307249249624806
+          ],
+          "files_with": 59,
+          "file_threshold": 1,
+          "file_rate": 0.59,
+          "file_rate_interval": [
+            0.49201429976362127,
+            0.6813268704579594
+          ]
+        }
+      },
+      "against_baseline": {
+        "v3": {
+          "difference": -0.11725,
+          "interval": [
+            -0.16900625000000002,
+            -0.067
+          ],
+          "p": 9.999000099990002e-05,
+          "paired_traits": 100,
+          "files_only_baseline": 22,
+          "files_only_arm": 12,
+          "files_p": 0.12144948495551944
+        }
+      }
+    },
+    "q_outside_world": {
+      "label": "not set in the role's world (judged)",
+      "unit": "question",
+      "source": "judge",
+      "arms": {
+        "corpus": {
+          "traits": 100,
+          "items": 4000,
+          "with": 42,
+          "rate": 0.0105,
+          "rate_interval": [
+            0.0,
+            0.03075
+          ],
+          "files_with": 3,
+          "file_threshold": 1,
+          "file_rate": 0.03,
+          "file_rate_interval": [
+            0.010254523944281516,
+            0.08451936489857499
+          ]
+        },
+        "v3": {
+          "traits": 100,
+          "items": 3999,
+          "with": 64,
+          "rate": 0.016004001000250064,
+          "rate_interval": [
+            0.0075,
+            0.026269053276638286
+          ],
+          "files_with": 13,
+          "file_threshold": 1,
+          "file_rate": 0.13,
+          "file_rate_interval": [
+            0.07757167395660301,
+            0.20980351513245427
+          ]
+        }
+      },
+      "against_baseline": {
+        "v3": {
+          "difference": 0.0055,
+          "interval": [
+            -0.01875,
+            0.02375
+          ],
+          "p": 0.8047195280471953,
+          "paired_traits": 100,
+          "files_only_baseline": 3,
+          "files_only_arm": 13,
+          "files_p": 0.021270751953125
+        }
+      }
+    },
+    "q_performs": {
+      "label": "asks the person to perform or describe the role (judged)",
+      "unit": "question",
+      "source": "judge",
+      "arms": {
+        "corpus": {
+          "traits": 100,
+          "items": 4000,
+          "with": 138,
+          "rate": 0.0345,
+          "rate_interval": [
+            0.008,
+            0.068
+          ],
+          "files_with": 11,
+          "file_threshold": 1,
+          "file_rate": 0.11,
+          "file_rate_interval": [
+            0.06254196329419368,
+            0.18631296574562342
+          ]
+        },
+        "v3": {
+          "traits": 100,
+          "items": 3999,
+          "with": 10,
+          "rate": 0.002500625156289072,
+          "rate_interval": [
+            0.00025,
+            0.006251562890722681
+          ],
+          "files_with": 4,
+          "file_threshold": 1,
+          "file_rate": 0.04,
+          "file_rate_interval": [
+            0.01566330388275538,
+            0.09837071498472119
+          ]
+        }
+      },
+      "against_baseline": {
+        "v3": {
+          "difference": -0.032,
+          "interval": [
+            -0.06476875,
+            -0.006
+          ],
+          "p": 0.0254974502549745,
+          "paired_traits": 100,
+          "files_only_baseline": 10,
+          "files_only_arm": 3,
+          "files_p": 0.09228515625
+        }
+      }
+    },
+    "q_names_role": {
+      "label": "names the role",
+      "unit": "question",
+      "source": "pattern",
+      "arms": {
+        "corpus": {
+          "traits": 100,
+          "items": 4000,
+          "with": 60,
+          "rate": 0.015,
+          "rate_interval": [
+            0.00925,
+            0.02125
+          ],
+          "files_with": 30,
+          "file_threshold": 1,
+          "file_rate": 0.3,
+          "file_rate_interval": [
+            0.21894885238515716,
+            0.39584854712244144
+          ]
+        },
+        "v3": {
+          "traits": 100,
+          "items": 3999,
+          "with": 151,
+          "rate": 0.037759439859964994,
+          "rate_interval": [
+            0.028256887659414854,
+            0.04754101044533397
+          ],
+          "files_with": 55,
+          "file_threshold": 1,
+          "file_rate": 0.55,
+          "file_rate_interval": [
+            0.4524460292190725,
+            0.643854620904028
+          ]
+        }
+      },
+      "against_baseline": {
+        "v3": {
+          "difference": 0.02275,
+          "interval": [
+            0.01475,
+            0.03125
+          ],
+          "p": 9.999000099990002e-05,
+          "paired_traits": 100,
+          "files_only_baseline": 5,
+          "files_only_arm": 30,
+          "files_p": 2.2361520677804947e-05
+        }
+      }
+    },
+    "q_chat_words": {
+      "label": "mentions an AI, an assistant or a user, not in an AI role",
+      "unit": "question",
+      "source": "pattern",
+      "arms": {
+        "corpus": {
+          "traits": 100,
+          "items": 4000,
+          "with": 13,
+          "rate": 0.00325,
+          "rate_interval": [
+            0.001,
+            0.0065
+          ],
+          "files_with": 8,
+          "file_threshold": 1,
+          "file_rate": 0.08,
+          "file_rate_interval": [
+            0.04109346127318457,
+            0.1499810776927723
+          ]
+        },
+        "v3": {
+          "traits": 100,
+          "items": 3999,
+          "with": 23,
+          "rate": 0.005751437859464866,
+          "rate_interval": [
+            0.0020004876219054768,
+            0.011
+          ],
+          "files_with": 11,
+          "file_threshold": 1,
+          "file_rate": 0.11,
+          "file_rate_interval": [
+            0.06254196329419368,
+            0.18631296574562342
+          ]
+        }
+      },
+      "against_baseline": {
+        "v3": {
+          "difference": 0.0025,
+          "interval": [
+            0.0,
+            0.00575
+          ],
+          "p": 0.11648835116488351,
+          "paired_traits": 100,
+          "files_only_baseline": 2,
+          "files_only_arm": 5,
+          "files_p": 0.453125
+        }
+      }
+    },
+    "q_option_label": {
+      "label": "labels its options 'Option A'",
+      "unit": "question",
+      "source": "pattern",
+      "arms": {
+        "corpus": {
+          "traits": 100,
+          "items": 4000,
+          "with": 0,
+          "rate": 0.0,
+          "rate_interval": [
+            0.0,
+            0.0
+          ],
+          "files_with": 0,
+          "file_threshold": 1,
+          "file_rate": 0.0,
+          "file_rate_interval": [
+            0.0,
+            0.03699349876899627
+          ]
+        },
+        "v3": {
+          "traits": 100,
+          "items": 3999,
+          "with": 0,
+          "rate": 0.0,
+          "rate_interval": [
+            0.0,
+            0.0
+          ],
+          "files_with": 0,
+          "file_threshold": 1,
+          "file_rate": 0.0,
+          "file_rate_interval": [
+            0.0,
+            0.03699349876899627
+          ]
+        }
+      },
+      "against_baseline": {
+        "v3": {
+          "difference": 0.0,
+          "interval": [
+            0.0,
+            0.0
+          ],
+          "p": 1.0,
+          "paired_traits": 100,
+          "files_only_baseline": 0,
+          "files_only_arm": 0,
+          "files_p": 1.0
+        }
+      }
+    },
+    "q_rubric_echo": {
+      "label": "repeats a rubric's wording ('costs something')",
+      "unit": "question",
+      "source": "pattern",
+      "arms": {
+        "corpus": {
+          "traits": 100,
+          "items": 4000,
+          "with": 0,
+          "rate": 0.0,
+          "rate_interval": [
+            0.0,
+            0.0
+          ],
+          "files_with": 0,
+          "file_threshold": 1,
+          "file_rate": 0.0,
+          "file_rate_interval": [
+            0.0,
+            0.03699349876899627
+          ]
+        },
+        "v3": {
+          "traits": 100,
+          "items": 3999,
+          "with": 7,
+          "rate": 0.0017504376094023505,
+          "rate_interval": [
+            0.00075,
+            0.003000750187546887
+          ],
+          "files_with": 7,
+          "file_threshold": 1,
+          "file_rate": 0.07,
+          "file_rate_interval": [
+            0.0343192608798127,
+            0.13749514806152413
+          ]
+        }
+      },
+      "against_baseline": {
+        "v3": {
+          "difference": 0.00175,
+          "interval": [
+            0.00075,
+            0.003
+          ],
+          "p": 0.015198480151984802,
+          "paired_traits": 100,
+          "files_only_baseline": 0,
+          "files_only_arm": 7,
+          "files_p": 0.015625
+        }
+      }
+    }
+  },
+  "generators": {
+    "corpus": {
+      "RogerV2 34cfa72295f6": 100
+    },
+    "v3": {
+      "RogerV3 977c98ac3463": 100
+    }
+  },
+  "variety": {
+    "corpus": {
+      "traits": 100,
+      "mean": 4.37,
+      "distribution": {
+        "3": 1,
+        "4": 61,
+        "5": 38
+      },
+      "share_5": 0.38,
+      "share_4_or_more": 0.99
+    },
+    "v3": {
+      "traits": 100,
+      "mean": 5.0,
+      "distribution": {
+        "5": 100
+      },
+      "share_5": 1.0,
+      "share_4_or_more": 1.0
+    }
+  },
+  "forms": {
+    "corpus": {
+      "You are a ... who ...": 87,
+      "Act as ...": 109,
+      "You're a ...": 102,
+      "Be a ...": 100,
+      "You are a ...": 84,
+      "statement": 17,
+      "command": 1
+    },
+    "v3": {
+      "You are a ... who ...": 79,
+      "Be a ...": 100,
+      "From now on, you are ...": 100,
+      "You're a ...": 100,
+      "Become a ...": 100,
+      "You are a ...": 21
+    }
+  }
+}

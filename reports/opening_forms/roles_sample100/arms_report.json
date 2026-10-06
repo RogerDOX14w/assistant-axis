@@ -1,0 +1,381 @@
+{
+  "written": "2026-10-03",
+  "baseline": "rc",
+  "arms": [
+    "v3"
+  ],
+  "by_kind": {
+    "all": {
+      "rc": {
+        "traits": 100,
+        "mean": 73.16
+      },
+      "v3": {
+        "traits": 100,
+        "mean": 74.29,
+        "against_baseline": {
+          "traits": 100,
+          "baseline_mean": 73.16,
+          "arm_mean": 74.29,
+          "difference": 1.13,
+          "interval": [
+            -0.8602499999999998,
+            3.2502500000000007
+          ],
+          "p": 0.2777361131943403,
+          "better": 43,
+          "worse": 50
+        }
+      }
+    },
+    "good": {
+      "rc": {
+        "traits": 12,
+        "mean": 75.08333333333333
+      },
+      "v3": {
+        "traits": 12,
+        "mean": 74.25,
+        "against_baseline": {
+          "traits": 12,
+          "baseline_mean": 75.08333333333333,
+          "arm_mean": 74.25,
+          "difference": -0.8333333333333334,
+          "interval": [
+            -5.833333333333333,
+            4.416666666666667
+          ],
+          "p": 0.7906104694765261,
+          "better": 4,
+          "worse": 8
+        }
+      }
+    },
+    "bad": {
+      "rc": {
+        "traits": 23,
+        "mean": 75.30434782608695
+      },
+      "v3": {
+        "traits": 23,
+        "mean": 77.6086956521739,
+        "against_baseline": {
+          "traits": 23,
+          "baseline_mean": 75.30434782608695,
+          "arm_mean": 77.6086956521739,
+          "difference": 2.3043478260869565,
+          "interval": [
+            -1.7826086956521738,
+            7.0010869565217435
+          ],
+          "p": 0.3606819659017049,
+          "better": 13,
+          "worse": 8
+        }
+      }
+    },
+    "indifferent": {
+      "rc": {
+        "traits": 65,
+        "mean": 72.04615384615384
+      },
+      "v3": {
+        "traits": 65,
+        "mean": 73.12307692307692,
+        "against_baseline": {
+          "traits": 65,
+          "baseline_mean": 72.04615384615384,
+          "arm_mean": 73.12307692307692,
+          "difference": 1.0769230769230769,
+          "interval": [
+            -1.2615384615384615,
+            3.6153846153846154
+          ],
+          "p": 0.40697965101744915,
+          "better": 26,
+          "worse": 34
+        }
+      }
+    }
+  },
+  "instructions": {
+    "rc": {
+      "n": 500,
+      "under_50": 16.6,
+      "at_least_90": 36.4,
+      "traits_with_two_or_more_failing": 22,
+      "weakest_trait_scored_3_of_500": 90.0
+    },
+    "v3": {
+      "n": 500,
+      "under_50": 13.8,
+      "at_least_90": 34.8,
+      "traits_with_two_or_more_failing": 16,
+      "weakest_trait_scored_3_of_500": 95.0
+    }
+  },
+  "traits": {
+    "rc": {
+      "accountant": 66.0,
+      "addict": 40.0,
+      "advocate": 58.0,
+      "alcoholic": 55.0,
+      "anarchist": 80.0,
+      "architect": 74.0,
+      "archivist": 59.0,
+      "ascetic": 31.0,
+      "auditor": 70.0,
+      "bard": 95.0,
+      "bartender": 74.0,
+      "builder": 86.0,
+      "cartographer": 59.0,
+      "caveman": 95.0,
+      "celebrity": 72.0,
+      "chameleon": 44.0,
+      "child": 85.0,
+      "chimera": 80.0,
+      "coach": 79.0,
+      "collaborator": 80.0,
+      "company_loyalist": 68.0,
+      "coral_reef": 88.0,
+      "counselor": 51.0,
+      "critic": 30.0,
+      "debugger": 37.0,
+      "dilettante": 51.0,
+      "divorcee": 47.0,
+      "driver": 91.0,
+      "economist": 91.0,
+      "ecosystem": 67.0,
+      "elder": 95.0,
+      "empath": 69.0,
+      "engineer": 80.0,
+      "exile": 65.0,
+      "fisher": 86.0,
+      "gamer": 99.0,
+      "genie": 75.0,
+      "ghost": 100.0,
+      "graduate": 56.0,
+      "grandparent": 98.0,
+      "guru": 97.0,
+      "heir": 75.0,
+      "herder": 91.0,
+      "hoarder": 46.0,
+      "homeless": 52.0,
+      "homunculus": 83.0,
+      "idealist": 72.0,
+      "improviser": 73.0,
+      "influencer": 70.0,
+      "intern": 69.0,
+      "interviewer": 76.0,
+      "jester": 94.0,
+      "lawyer": 86.0,
+      "lobbyist": 68.0,
+      "machinist": 77.0,
+      "martyr": 62.0,
+      "merchant": 75.0,
+      "minimalist": 31.0,
+      "moderator": 52.0,
+      "narrator": 98.0,
+      "naturalized_citizen": 40.0,
+      "operator": 69.0,
+      "optimist": 67.0,
+      "organizer": 84.0,
+      "parasite": 83.0,
+      "patient": 68.0,
+      "philosopher": 93.0,
+      "pilot": 70.0,
+      "pirate": 100.0,
+      "planner": 67.0,
+      "poet": 95.0,
+      "prey": 62.0,
+      "priest": 95.0,
+      "producer": 79.0,
+      "professor": 61.0,
+      "provocateur": 77.0,
+      "reporter": 67.0,
+      "researcher": 94.0,
+      "revolutionary": 97.0,
+      "sage": 98.0,
+      "scholar": 74.0,
+      "scientist": 94.0,
+      "scout": 76.0,
+      "skeptic": 54.0,
+      "smuggler": 72.0,
+      "sociologist": 94.0,
+      "strategist": 85.0,
+      "swing_voter": 29.0,
+      "symbiont": 84.0,
+      "technologist": 73.0,
+      "therapist": 65.0,
+      "toddler": 97.0,
+      "translator": 18.0,
+      "vampire": 95.0,
+      "wanderer": 49.0,
+      "wind": 77.0,
+      "witch": 98.0,
+      "wraith": 93.0,
+      "writer": 53.0,
+      "zealot": 97.0
+    },
+    "v3": {
+      "accountant": 73.0,
+      "addict": 33.0,
+      "advocate": 55.0,
+      "alcoholic": 86.0,
+      "anarchist": 83.0,
+      "architect": 64.0,
+      "archivist": 67.0,
+      "ascetic": 70.0,
+      "auditor": 72.0,
+      "bard": 99.0,
+      "bartender": 72.0,
+      "builder": 79.0,
+      "cartographer": 53.0,
+      "caveman": 96.0,
+      "celebrity": 63.0,
+      "chameleon": 53.0,
+      "child": 89.0,
+      "chimera": 84.0,
+      "coach": 71.0,
+      "collaborator": 64.0,
+      "company_loyalist": 72.0,
+      "coral_reef": 84.0,
+      "counselor": 49.0,
+      "critic": 38.0,
+      "debugger": 28.0,
+      "dilettante": 41.0,
+      "divorcee": 70.0,
+      "driver": 93.0,
+      "economist": 88.0,
+      "ecosystem": 86.0,
+      "elder": 95.0,
+      "empath": 87.0,
+      "engineer": 75.0,
+      "exile": 73.0,
+      "fisher": 76.0,
+      "gamer": 93.0,
+      "genie": 80.0,
+      "ghost": 94.0,
+      "graduate": 66.0,
+      "grandparent": 100.0,
+      "guru": 96.0,
+      "heir": 71.0,
+      "herder": 96.0,
+      "hoarder": 79.0,
+      "homeless": 87.0,
+      "homunculus": 83.0,
+      "idealist": 83.0,
+      "improviser": 69.0,
+      "influencer": 56.0,
+      "intern": 68.0,
+      "interviewer": 84.0,
+      "jester": 78.0,
+      "lawyer": 88.0,
+      "lobbyist": 64.0,
+      "machinist": 66.0,
+      "martyr": 62.0,
+      "merchant": 72.0,
+      "minimalist": 48.0,
+      "moderator": 42.0,
+      "narrator": 92.0,
+      "naturalized_citizen": 32.0,
+      "operator": 66.0,
+      "optimist": 73.0,
+      "organizer": 84.0,
+      "parasite": 80.0,
+      "patient": 66.0,
+      "philosopher": 92.0,
+      "pilot": 66.0,
+      "pirate": 100.0,
+      "planner": 77.0,
+      "poet": 95.0,
+      "prey": 78.0,
+      "priest": 94.0,
+      "producer": 79.0,
+      "professor": 54.0,
+      "provocateur": 73.0,
+      "reporter": 61.0,
+      "researcher": 90.0,
+      "revolutionary": 84.0,
+      "sage": 97.0,
+      "scholar": 76.0,
+      "scientist": 89.0,
+      "scout": 70.0,
+      "skeptic": 70.0,
+      "smuggler": 76.0,
+      "sociologist": 95.0,
+      "strategist": 86.0,
+      "swing_voter": 23.0,
+      "symbiont": 78.0,
+      "technologist": 68.0,
+      "therapist": 71.0,
+      "toddler": 98.0,
+      "translator": 19.0,
+      "vampire": 97.0,
+      "wanderer": 62.0,
+      "wind": 70.0,
+      "witch": 95.0,
+      "wraith": 96.0,
+      "writer": 62.0,
+      "zealot": 89.0
+    }
+  },
+  "forms": {
+    "rc": {
+      "You are <adjective>": {
+        "n": 155,
+        "mean": 71.93548387096774
+      },
+      "You are someone who ...": {
+        "n": 118,
+        "mean": 70.59322033898304
+      },
+      "Act as ...": {
+        "n": 109,
+        "mean": 81.8348623853211
+      },
+      "Be someone who ...": {
+        "n": 96,
+        "mean": 76.30208333333333
+      },
+      "You <other verb> ...": {
+        "n": 15,
+        "mean": 27.0
+      },
+      "command": {
+        "n": 5,
+        "mean": 68.0
+      },
+      "You believe / value / want ...": {
+        "n": 2,
+        "mean": 55.0
+      }
+    },
+    "v3": {
+      "You are someone who ...": {
+        "n": 107,
+        "mean": 72.85046728971963
+      },
+      "From now on, you are ...": {
+        "n": 100,
+        "mean": 81.65
+      },
+      "Become someone who ...": {
+        "n": 100,
+        "mean": 72.35
+      },
+      "Be someone who ...": {
+        "n": 98,
+        "mean": 72.29591836734694
+      },
+      "You are <adjective>": {
+        "n": 93,
+        "mean": 73.27956989247312
+      },
+      "command": {
+        "n": 2,
+        "mean": 25.0
+      }
+    }
+  }
+}

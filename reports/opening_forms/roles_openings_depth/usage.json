@@ -1,0 +1,29 @@
+{
+  "n_calls": 8910,
+  "per_model": {
+    "claude-sonnet-4-6": {
+      "completion_tokens": 376019,
+      "cost_usd": 13.8642,
+      "model": "claude-sonnet-4-6",
+      "n_calls": 2970,
+      "prompt_tokens": 2741321
+    },
+    "gpt-4.1-mini": {
+      "completion_tokens": 223737,
+      "cost_usd": 1.2067,
+      "model": "gpt-4.1-mini",
+      "n_calls": 2970,
+      "prompt_tokens": 2121911
+    },
+    "qwen/qwen3-32b": {
+      "completion_tokens": 1113884,
+      "cost_usd": 0.3283,
+      "model": "qwen/qwen3-32b",
+      "n_calls": 2970,
+      "prompt_tokens": 205080
+    }
+  },
+  "total_completion_tokens": 1713640,
+  "total_cost_usd": 15.3993,
+  "total_prompt_tokens": 5068312
+}
