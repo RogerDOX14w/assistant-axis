@@ -13,6 +13,8 @@ the overlap rubric arms experiment (coding_plan_overlap_arms.md; 2026-10-04).
     uv run python data_analysis/gap_generation/overlap_test.py --run-id overlap_arms_2
         --models claude-sonnet-5-5 claude-opus-5-5 --rubrics A2 C2 D2 E2 --passes 2 --budget-usd 12
         --calls-from data/candidates/overlap_test/overlap_arms_2/subset.json [--round1-run overlap_arms_1] [--dry-run]
+    uv run python data_analysis/gap_generation/overlap_test.py --run-id overlap_arms_3 --rubrics A
+        --models claude-sonnet-5-5 claude-opus-5-5 --passes 2 --baseline-run overlap_test_1 --budget-usd 10 [--dry-run]
     uv run python data_analysis/gap_generation/overlap_test.py --run-id overlap_test_1 --analyse-only
     uv run python data_analysis/gap_generation/overlap_test.py --run-id overlap_test_1 --decode-marks
 
@@ -49,6 +51,16 @@ as ``subset.json``, with the rule, the counts, the pair ids, the calls that hold
 resume must name the same calls).  The analysis then reads the run's ``subset.json`` and compares each
 round-2 arm with its round-1 arm in ``--round1-run`` (default ``overlap_arms_1``; read only) on the same
 pairs: the subset's, and every pair sent; ``results.jsonl`` marks each row ``in_subset``.
+
+**Round 3** (coding_plan_overlap_arms.md, "Round 3", 2026-10-06): rubric A from version 5 on is written for
+one pair per call (its *form*, ``single``; every other rubric and earlier version is a ``list``).  A stage of a
+single-form rubric sends every pair of the calls as its own call (keyed by the pair's id), the user turn laid
+out as the rubric file's rendered sample, the rubric as a cached system block, and the identical prompt in
+every pass; records carry ``form``, ``pair_id`` and ``origin_call_id``.  The analysis of such a run adds a
+"Round 3" section at the top of ``tables.md`` (and ``round3`` in ``summary.json``): version 6 against
+version 4 in ``--round1-run`` (default ``overlap_arms_1``) on every pair and on the nearest pairs, and against
+A2 in ``--round2-run`` (default ``overlap_arms_2``) on its pairs; the rule simulation, the slips, Opus on the
+escalated pairs, Roger's 30 marks (``marks_key.json`` of ``--baseline-run``), the cache hit rate and the spend.
 
 Writes ``data/candidates/overlap_test/<run id>/``: ``pairs.json`` (the calls and pairs, with the
 provenance envelope), ``rendered_prompts.md`` (the requests as sent, for three variants: a nearest target,
@@ -101,8 +113,11 @@ MARKS_SHEET = _REPO_ROOT / "reports" / "trait_gap_generation" / "m3_overlap_mark
 DEFAULT_BUDGET_USD = 15.0
 #: The run whose pairs a new run must match and whose rubric-A answers arm A's pass 1 is compared with.
 DEFAULT_BASELINE_RUN = "overlap_test_1"
-#: The run whose round-1 arms (A, C, D, E) round 2's rubrics are compared with, on the same pairs.
+#: The run whose round-1 arms (A, C, D, E) round 2's rubrics are compared with, on the same pairs (and round
+#: 3's version 6 with its rubric A, version 4).
 DEFAULT_ROUND1_RUN = "overlap_arms_1"
+#: The run whose A2 round 3's version 6 is compared with, on A2's pairs.
+DEFAULT_ROUND2_RUN = "overlap_arms_2"
 #: Round 2's confusion subset, in the run directory.
 SUBSET_NAME = "subset.json"
 
@@ -124,7 +139,10 @@ def parse_args(argv=None):
                     help="send only the calls named in this subset.json (its call_ids), whole; the pair set is unchanged")
     ap.add_argument("--round1-run", default=DEFAULT_ROUND1_RUN,
                     help="an earlier run under --out-root whose round-1 arms round 2's rubrics are compared with, on the "
-                         f"same pairs (default {DEFAULT_ROUND1_RUN}; 'none' to skip)")
+                         f"same pairs (default {DEFAULT_ROUND1_RUN}; 'none' to skip); also round 3's version 4")
+    ap.add_argument("--round2-run", default=DEFAULT_ROUND2_RUN,
+                    help="an earlier run under --out-root whose A2 round 3's single-form rubric A is compared with, on "
+                         f"A2's pairs (default {DEFAULT_ROUND2_RUN}; 'none' to skip)")
     ap.add_argument("--passes", type=int, default=1,
                     help="send every call this many times; passes after the first reshuffle the listed traits "
                          "(default 1)")
@@ -208,18 +226,60 @@ def variant_calls(ps: OT.PairSet, calls=None) -> dict:
     return out
 
 
+def variant_pairs(ps: OT.PairSet, calls=None) -> dict:
+    """The single form's calls whose rendered prompts are read before a paid run, among the pairs of ``calls``
+    (default every call): a nearest pair that is not a recorded opposite, a nearest pair that is one, and a
+    labelled pair (a variant the calls lack is left out)."""
+    held = {c.call_id for c in (ps.calls if calls is None else calls)}
+    out = {}
+    for p in ps.pairs:
+        if p.call_id not in held:
+            continue
+        name = ("nearest_opposite" if OT.is_antonym_pair(p) else "nearest") if p.group == OT.NEAREST else "labelled"
+        if name not in out:
+            out[name] = OT.PairCall(call_id=p.pair_id, set=p.set, target=p.target, listed=[p.listed],
+                                    origin_call_id=p.call_id)
+    return out
+
+
+def single_prompts_text(ps, rubrics, corpus, model: str, keys, *, passes: int = 1, calls=None) -> list[str]:
+    """The single-form rubrics' requests for :func:`variant_pairs`, as the model receives them."""
+    v = variant_pairs(ps, calls)
+    group = {p.pair_id: p.group for p in ps.pairs}
+    out = [f"## One pair per call (the single form): rubric{'s' if len(keys) > 1 else ''} {', '.join(keys)}", "",
+           "Every pair is its own call, keyed by its pair id; the user turn is the rubric file's rendered sample "
+           "(target on the first line, the other trait on the second); the rubric goes as a cached system block."
+           + ("  Pass 2 sends these prompts again, identical." if passes == 2 else
+              f"  Passes 2 to {passes} send these prompts again, identical." if passes > 2 else ""), ""]
+    for name, c in v.items():
+        out += [f"### Pair: {name} ({c.call_id}, {group.get(c.call_id)}"
+                f"{', recorded opposite' if name == 'nearest_opposite' else ''})", ""]
+        for r in keys:
+            out += ["```text", OT.rendered_prompt(c, corpus, rubric=r, rubric_text=rubrics[r]["text"], model=model,
+                                                  form="single").rstrip("\n"), "```", ""]
+    return out
+
+
 def rendered_prompts_text(ps, rubrics, corpus, model: str, *, rubric_keys=None, passes: int = 1,
                           seed: int = 0, calls=None) -> str:
     """The requests of :func:`variant_calls` (among ``calls``, default every call) as the model receives
     them, for every rubric in ``rubric_keys`` (default every loaded one), and with ``passes`` > 1 the later
-    passes' user turns."""
+    passes' user turns; the single-form rubrics' requests for :func:`variant_pairs`."""
     keys = list(rubrics) if rubric_keys is None else list(rubric_keys)
+    single = [r for r in keys if rubrics[r].get("form") == "single"]
+    keys = [r for r in keys if r not in single]
     calls = list(ps.calls if calls is None else calls)
-    v = variant_calls(ps, calls)
+    v = variant_calls(ps, calls) if keys else {}
+    which = (f"for {len(v)} variants and the rubrics {', '.join(keys)}" if keys else
+             f"for the one-pair rubric{'s' if len(single) > 1 else ''} {', '.join(single)}")
     out = ["# Rendered prompts of the overlap test", "",
            "The requests exactly as the model receives them (rubric as the system prompt, one JSON object as the "
-           f"user turn), for {len(v)} variants and the rubrics {', '.join(keys)}; settings shown for {model}.  "
-           "Within a pass every rubric and model receives the identical user turn.", ""]
+           f"user turn), {which}; settings shown for {model}.  Within a pass every rubric and model receives the "
+           "identical user turn.", ""]
+    if single:
+        out += single_prompts_text(ps, rubrics, corpus, model, single, passes=passes, calls=calls)
+    if not keys:
+        return "\n".join(out)
     for name, c in v.items():
         pairs = [p for p in ps.pairs if p.call_id == c.call_id]
         out += [f"## Variant: {name} ({c.call_id})", "",
@@ -294,6 +354,91 @@ def load_round1(args, ps):
     records = OT.read_records(d / "responses.jsonl")
     return {"run_id": run_id, "path": d / "responses.jsonl",
             "by_pass": {p: OT.collect_answers(ps, records, pass_no=p) for p in OT.record_passes(records)}}
+
+
+def load_other(args, ps, name: str, what: str):
+    """An earlier run named by a flag (``{"run_id", "dir", "records", "run", "seed"}``) when it exists under
+    ``--out-root`` and sends this pair set's calls (whole, or some of them); else ``None``, with a warning."""
+    named = _other_run(args, name, what)
+    if named is None:
+        return None
+    run_id, d = named
+    if not (d / "pairs.json").exists() or not (d / "responses.jsonl").exists():
+        logger.warning("%s %s has no pairs.json or responses.jsonl under %s: not compared", what, run_id,
+                       _rel(args.out_root))
+        return None
+    if not OT.same_calls(OT.PairSet.from_json(json.loads((d / "pairs.json").read_text())), ps):
+        logger.warning("%s %s sends other calls than this run: not compared", what, run_id)
+        return None
+    run = json.loads((d / "run.json").read_text()) if (d / "run.json").exists() else {}
+    return {"run_id": run_id, "dir": d, "records": OT.read_records(d / "responses.jsonl"), "run": run,
+            "seed": int(run.get("seed") or 0)}
+
+
+def run_forms(records) -> dict:
+    """``{rubric: form}`` of a run's records; a rubric sent in two forms is refused (``ValueError``)."""
+    seen: dict = {}
+    for rec in records:
+        seen.setdefault(rec["rubric"], set()).add(OT.record_form(rec))
+    mixed = {r: sorted(f) for r, f in seen.items() if len(f) > 1}
+    if mixed:
+        raise ValueError(f"rubrics sent in more than one form in one run: {mixed}")
+    return {r: next(iter(f)) for r, f in seen.items()}
+
+
+def round3_inputs(args, ps, records, by_pass, models):
+    """What :func:`OT.analyse_round3` needs for this run's single-form rubric A: version 4 from
+    ``--round1-run`` (its rubric A, both passes, with the prompt groups of its second pass), A2 from
+    ``--round2-run`` (on the pairs it was sent), this run as version 6, the populations, Roger's marks (the
+    marks key of ``--baseline-run`` and its rubric-A answers) and the records.  Missing runs are left out."""
+    def per_model(bp, rubric):
+        return {p: {m: ans for (r, m), ans in per.items() if r == rubric and m in models} for p, per in bp.items()}
+
+    def versions_of(recs, rubric):
+        return sorted({rec.get("rubric_version") for rec in recs if rec["rubric"] == rubric} - {None})
+    versions = {}
+    recs_by = {}
+    extra = {}
+    r1 = load_other(args, ps, args.round1_run, "round1_run")
+    if r1:
+        bp = {p: OT.collect_answers(ps, r1["records"], pass_no=p) for p in OT.record_passes(r1["records"])}
+        v4 = per_model(bp, "A")
+        if any(v4.values()):
+            passes = sorted(v4)
+            versions["v4"] = {"run": r1["run_id"], "rubric": "A", "rubric_versions": versions_of(r1["records"], "A"),
+                              "form": "list", "by_pass": v4,
+                              "groups": OT.prompt_groups(ps, r1["seed"], passes[1]) if len(passes) > 1 else None}
+            recs_by["v4"] = r1["records"]
+            extra["round1_responses"] = r1["dir"] / "responses.jsonl"
+    r2 = load_other(args, ps, args.round2_run, "round2_run")
+    if r2:
+        bp = {p: OT.collect_answers(ps, r2["records"], pass_no=p) for p in OT.record_passes(r2["records"])}
+        a2 = per_model(bp, "A2")
+        if any(a2.values()):
+            passes = sorted(a2)
+            versions["A2"] = {"run": r2["run_id"], "rubric": "A2", "rubric_versions": versions_of(r2["records"], "A2"),
+                              "form": "list", "by_pass": a2,
+                              "groups": OT.prompt_groups(ps, r2["seed"], passes[1]) if len(passes) > 1 else None}
+            recs_by["A2"] = r2["records"]
+            extra["round2_responses"] = r2["dir"] / "responses.jsonl"
+    versions["v6"] = {"run": args.run_id, "rubric": "A", "rubric_versions": versions_of(records, "A"), "form": "single",
+                      "by_pass": per_model(by_pass, "A"), "groups": None}
+    recs_by["v6"] = records
+    populations = {"all": [p.pair_id for p in ps.pairs],
+                   "nearest": [p.pair_id for p in ps.pairs if p.group == OT.NEAREST]}
+    if "A2" in versions:
+        sent = {pid for per in versions["A2"]["by_pass"].values() for ans in per.values() for pid in ans}
+        populations["round2"] = [p.pair_id for p in ps.pairs if p.pair_id in sent]
+    marks = None
+    bdir = baseline_dir(args)
+    if bdir is not None and (bdir / "marks_key.json").exists() and (bdir / "responses.jsonl").exists():
+        base = load_other(args, ps, args.baseline_run, "baseline_run")
+        if base:
+            ans = OT.collect_answers(ps, base["records"], pass_no=1)
+            marks = {"items": json.loads((bdir / "marks_key.json").read_text())["items"],
+                     "test1": {m: ans[("A", m)] for m in models if ans.get(("A", m))}}
+            extra["marks_key"] = bdir / "marks_key.json"
+    return versions, populations, marks, recs_by, extra
 
 
 def write_subset(args, ps, argv) -> int:
@@ -422,14 +567,26 @@ def write_analysis(out_dir: Path, inputs, ps, args, argv) -> dict:
                                            encoding="utf-8")
     models = [m for m in args.models if any((r, m) in by_pass[p] for p in passes for r in OT.RUBRICS)]
     first = {p: OT.first_attempt_parse(view, records, pass_no=p) for p in passes}
+    forms = run_forms(records)
     summary = OT.analyse(view, by_pass.get(1, {}), models=models, reference=args.reference, n_boot=args.n_boot,
                          seed=args.seed, first_parse=first.get(1))
     has_a = any(r == "A" for p in passes for (r, _) in by_pass[p])
-    baseline = load_baseline(args, ps, models) if has_a else None
+    # a single-form rubric A is compared with the earlier runs by round 3, not as the same user turns
+    baseline = load_baseline(args, ps, models) if has_a and forms.get("A") != "single" else None
     summary["arms"] = OT.analyse_arms(view, by_pass, models=models, reference=args.reference, seed=args.seed,
-                                      first_parse_by_pass=first, baseline=baseline)
+                                      first_parse_by_pass=first, baseline=baseline, forms=forms)
     if baseline:
         summary["arms"]["baseline"]["path"] = baseline["path"]
+    extra = {}
+    if has_a and forms.get("A") == "single":
+        # on the whole pair set: the earlier runs are matched against it (a run restricted to some calls is
+        # measured only on the populations it answered in full)
+        r3_by_pass = {p: OT.collect_answers(ps, records, pass_no=p) for p in passes}
+        versions, populations, marks, recs_by, r3_extra = round3_inputs(args, ps, records, r3_by_pass, models)
+        summary["round3"] = OT.analyse_round3(ps, versions, populations, models=models, reference=args.reference,
+                                              marks=marks, records=recs_by)
+        summary["round3"]["paths"] = {k: _rel(v) for k, v in r3_extra.items()}
+        extra.update(r3_extra)
     round1 = None
     if any(OT.RUBRICS[r].get("round1") for p in passes for (r, _) in by_pass[p]):
         round1 = load_round1(args, ps)
@@ -449,7 +606,9 @@ def write_analysis(out_dir: Path, inputs, ps, args, argv) -> dict:
         summary["usage"] = json.loads(usage_path.read_text())
     summary["pair_set_info"] = ps.info
     bdir = baseline_dir(args)
-    extra = {"subset": subset_path if subset else None, "round1_responses": round1["path"] if round1 else None}
+    extra.update({"subset": subset_path if subset else None})
+    if round1:
+        extra["round1_responses"] = round1["path"]
     env = json_metadata(summary, inputs=provenance_inputs(inputs, responses=out_dir / "responses.jsonl",
                                                           baseline_responses=(bdir / "responses.jsonl") if baseline
                                                           else None, extra=extra),
@@ -500,7 +659,8 @@ def decode(out_dir: Path, ps, args) -> int:
 
 async def run_stages(client, rubrics, corpus, ps, args, usage, out_dir: Path, run: dict, save_run,
                      calls=None) -> int:
-    """Every (pass, model, rubric) stage over ``calls`` (default every call of the pair set)."""
+    """Every (pass, model, rubric) stage over ``calls`` (default every call of the pair set; a single-form
+    rubric's stage sends every pair of them as its own call)."""
     calls = list(ps.calls if calls is None else calls)
     runner = OT.OverlapRunner(client, rubrics, corpus, usage=usage, responses_path=out_dir / "responses.jsonl",
                               concurrency=args.concurrency, seed=args.seed, usage_path=out_dir / "usage.json")
@@ -508,8 +668,8 @@ async def run_stages(client, rubrics, corpus, ps, args, usage, out_dir: Path, ru
         for model in args.models:
             for r in args.rubrics:
                 t0 = time.time()
-                logger.info("stage: rubric %s (%s) on %s, pass %d, %d calls", r, OT.RUBRICS[r]["name"], model,
-                            pass_no, len(calls))
+                logger.info("stage: rubric %s (%s, %s form) on %s, pass %d, %d calls", r, OT.RUBRICS[r]["name"],
+                            rubrics[r]["form"], model, pass_no, len(OT.stage_calls(calls, rubrics[r]["form"])))
                 res = await runner.run_stage(r, model, calls, pass_no=pass_no)
                 stage = {"rubric": r, "model": model, "pass": pass_no, "n_calls": res.n_calls, "n_sent": res.n_sent,
                          "n_skipped": res.n_skipped, "n_reasked": res.n_reasked, "n_pairs": res.n_pairs,
@@ -616,12 +776,15 @@ def main(argv=None) -> int:
                        _rel(args.out_root))
 
     est = OT.Estimate()
+    cached_usd = 0.0
     for p in range(1, args.passes + 1):
         for m in args.models:
             for r in args.rubrics:
-                cs = [c for c in calls if (r, m, c.call_id, p) not in done]
+                # a single-form rubric's stage sends one call per pair, keyed by the pair's id
+                cs = [c for c in OT.stage_calls(calls, rubrics[r]["form"]) if (r, m, c.call_id, p) not in done]
                 est.lines.extend(OT.estimate(cs, inputs.corpus, rubrics, [m], [r],
                                              pass_no=p if args.passes > 1 else None).lines)
+                cached_usd += OT.cached_estimate_usd(cs, inputs.corpus, rubrics, [m], [r])
     info = ps.info
     print(f"M3 overlap test {args.run_id}: {info['n_calls']} calls ({info['n_calls_by_set']}), {info['n_pairs']} pairs "
           f"by group {info['n_pairs_by_group']}; {info['n_pairs_with_persona_cos']} pairs with a persona-space cosine; "
@@ -635,10 +798,15 @@ def main(argv=None) -> int:
               f"{dict(sorted(Counter(len(c.listed) for c in calls).items()))}")
     print(f"labelled: {json.dumps(info['labelled'])}")
     print(f"embedding: {json.dumps(inputs.settings)}; persona: {json.dumps({k: v for k, v in inputs.persona_info.items() if k != 'trait_vectors_not_in_corpus'})}")
-    print("rubrics: " + ", ".join(f"{r} {rubrics[r]['name']} v{rubrics[r]['version']} {rubrics[r]['sha256'][:12]}"
+    print("rubrics: " + ", ".join(f"{r} {rubrics[r]['name']} v{rubrics[r]['version']} {rubrics[r]['sha256'][:12]} "
+                                  f"({rubrics[r]['form']} form"
+                                  f"{', cached system block' if OT.default_cache_system(rubrics[r]['form']) else ''})"
                                   for r in args.rubrics) + f"; passes {args.passes}")
+    cached_note = (f"\n  with the rubric read from the prompt cache on the one-pair stages (as the usage records charge "
+                   f"it): about ${cached_usd:.3f}; the total above, every input token uncached, is the one checked "
+                   "against the budget" if any(OT.default_cache_system(rubrics[r]["form"]) for r in args.rubrics) else "")
     print(f"cost estimate (calls still to send; {len(done)} answered on record, ${prior.total_cost_usd:.2f} spent):\n"
-          f"{est.format()}\n  budget ${args.budget_usd:.2f} for the whole run")
+          f"{est.format()}{cached_note}\n  budget ${args.budget_usd:.2f} for the whole run")
     try:
         cap = confirm_or_abort(est.usd + prior.total_cost_usd, args.budget_usd, confirm_expensive=args.confirm_expensive,
                                confirmed_by=args.confirmed_by)
@@ -711,10 +879,12 @@ def _live(args, argv_list, out_dir: Path, inputs, rubrics, ps, *, est, cap, dirt
                 "ask_attempts": OT.ASK_ATTEMPTS, "parser_version": OT.PARSER_VERSION,
                 "stop_below": args.stop_below,
                 "rubric_versions": {rb["name"]: rb["version"] for rb in sent.values()},
+                "forms": {rb["name"]: rb["form"] for rb in sent.values()},
+                "cache_system": {rb["name"]: OT.default_cache_system(rb["form"]) for rb in sent.values()},
                 "prompt_sha256": {rb["name"]: rb["sha256"] for rb in sent.values()},
                 "prompts": {rb["name"]: rb["text"] for rb in sent.values()},
                 "pair_set": {k: info[k] for k in ("n_calls", "n_pairs", "n_pairs_by_group", "n_calls_by_set")},
-                "calls_from": calls_from, "round1_run": args.round1_run,
+                "calls_from": calls_from, "round1_run": args.round1_run, "round2_run": args.round2_run,
                 "started_at": run.get("started_at") or utc_now(), "stages": run.get("stages", [])})
     run["sessions"].append({"started_at": utc_now(), "resumed": bool(resuming), "git_sha": git_sha(),
                             "argv": argv_list})

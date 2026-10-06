@@ -808,17 +808,22 @@ def _overlap_inputs(tmp_path):
 
 @pytest.fixture
 def overlap_env(tmp_path, monkeypatch, fake_client):
+    """The CLI on synthetic inputs and a fake client.  Rubric A is loaded at version 4 (the list form, the
+    library test's ``list_rubrics``), as every run before round 3 sent it; ``e["single_form"]()`` puts the
+    pinned rubric A back (version 6, one pair per call) for the round-3 tests."""
     from data_analysis.gap_generation import overlap_test as cli
     from assistant_axis.gapgen import overlap_test as OT
     from assistant_axis.tests import test_gapgen_overlap_test as T
     monkeypatch.setattr(OT, "load_inputs", lambda *a, **k: _overlap_inputs(tmp_path))
+    monkeypatch.setattr(OT, "load_rubrics", T.list_rubrics)
     monkeypatch.setattr(cli, "platform_dirty_files", lambda *a, **k: [])
     monkeypatch.setattr(cli, "git_sha", lambda *a, **k: "abc1234")
     fake_client["responder"] = T.responder_for(OT.load_rubrics(), value=2)
     base = ["--run-id", "t1", "--out-root", str(tmp_path / "out"), "--marks-sheet", str(tmp_path / "rep" / "marks.md"),
             "--n-targets", "4", "--n-antonyms", "2", "--n-random", "2", "--n-boot", "20"]
     return {"cli": cli, "OT": OT, "T": T, "base": base, "out": tmp_path / "out" / "t1", "client": fake_client,
-            "sheet": tmp_path / "rep" / "marks.md"}
+            "sheet": tmp_path / "rep" / "marks.md",
+            "single_form": lambda: monkeypatch.setattr(OT, "load_rubrics", T._LOAD_RUBRICS)}
 
 
 def test_overlap_dry_run_prints_prompts_and_writes_nothing(overlap_env, capsys):
@@ -1209,3 +1214,75 @@ def test_overlap_calls_from_refuses_unknown_calls(overlap_env, tmp_path, capsys)
     assert e["cli"].main(e["base"] + ["--calls-from", str(stray), "--dry-run"]) == 2
     assert "not in its calls" in capsys.readouterr().err
     assert not e["out"].exists()
+
+
+# --------------------------------------------------------------------------- round 3 (2026-10-06): one pair per call
+
+def test_overlap_round_3_one_pair_per_call_against_rounds_1_and_2(overlap_env, capsys):
+    """coding_plan_overlap_arms.md, "Round 3": rubric A version 6 sent one pair per call (--rubrics A --passes 2),
+    compared with version 4 in overlap_arms_1, A2 in overlap_arms_2 and Roger's marks of overlap_test_1, all
+    three made first in the list form (rubric A at version 4)."""
+    e = overlap_env
+    OT, T = e["OT"], e["T"]
+    models = [OT.SONNET, OT.OPUS]
+    e["client"]["responder"] = T.single_answer(OT.load_rubrics(keys=tuple(OT.RUBRICS)))     # A at version 4
+    named = lambda run: [(run if a == "t1" else a) for a in e["base"]] + ["--models", *models]  # noqa: E731
+    assert e["cli"].main(named("overlap_test_1") + ["--rubrics", "A"]) == 0
+    assert (e["out"].parent / "overlap_test_1" / "marks_key.json").exists()
+    assert e["cli"].main(named("overlap_arms_1") + ["--rubrics", "A", "--passes", "2"]) == 0
+    ps = OT.PairSet.from_json(json.loads((e["out"].parent / "overlap_arms_1" / "pairs.json").read_text()))
+    sub = e["out"].parent / "subset_in.json"
+    sub.write_text(json.dumps({"call_ids": [c.call_id for c in ps.calls[:2]],
+                               "pair_ids": [p.pair_id for p in ps.pairs if p.call_id == ps.calls[0].call_id]}))
+    assert e["cli"].main(named("overlap_arms_2") + ["--rubrics", "A2", "--passes", "2", "--calls-from", str(sub)]) == 0
+    n_a2 = sum(p.call_id in {c.call_id for c in ps.calls[:2]} for p in ps.pairs)
+
+    e["single_form"]()                                                                     # A at version 6
+    rb = OT.load_rubrics(keys=tuple(OT.RUBRICS))
+    assert rb["A"]["form"] == "single"
+    e["client"]["responder"] = T.single_answer(rb)
+    args = e["base"] + ["--models", *models, "--rubrics", "A", "--passes", "2", "--budget-usd", "10"]
+    capsys.readouterr()
+    assert e["cli"].main(args + ["--dry-run"]) == 0
+    dry = capsys.readouterr().out
+    n = len(ps.pairs)
+    assert f"rubric A (overlap_concept, one pair per call) on Opus 5.5, pass 2: {n} x" in dry
+    assert "(single form, cached system block)" in dry and "with the rubric read from the prompt cache" in dry
+    assert "## One pair per call (the single form)" in dry and '\n "other": {"label": ' in dry
+    assert "pair set: the same calls as overlap_test_1" in dry and not e["out"].exists()
+    assert e["cli"].main(args) == 0
+    out, client = e["out"], e["client"]["client"]
+    assert len(client.calls) == n * 2 * 2                                                  # pairs x models x passes
+    assert all(kw["system"][0].get("cache_control") == {"type": "ephemeral"} for kw in client.calls)
+    recs = OT.read_records(out / "responses.jsonl")
+    assert {r["form"] for r in recs} == {"single"} and {r["call_id"] for r in recs} == {p.pair_id for p in ps.pairs}
+    assert all(r["origin_call_id"] == r["pair_id"].rsplit(">", 1)[0] for r in recs)
+    run = json.loads((out / "run.json").read_text())
+    assert run["forms"] == {"overlap_concept": "single"} and run["cache_system"] == {"overlap_concept": True}
+    assert run["rubric_versions"] == {"overlap_concept": 6} and run["exit_code"] == 0
+    assert [s["n_calls"] for s in run["stages"]] == [n] * 4 and run["round2_run"] == "overlap_arms_2"
+    assert len((out / "results.jsonl").read_text().splitlines()) == n * 2 * 2
+    summ = json.loads((out / "summary.json").read_text())
+    res = summ["result"]
+    assert res["arms"]["forms"] == {"A": "single"} and res["arms"]["baseline"] is None
+    r3 = res["round3"]
+    assert (r3["versions"]["v4"]["run"], r3["versions"]["A2"]["run"]) == ("overlap_arms_1", "overlap_arms_2")
+    assert (r3["versions"]["v4"]["rubric_versions"], r3["versions"]["v6"]["rubric_versions"]) == ([4], [6])
+    assert set(r3["populations"]["all"]["versions"]) == {"v4", "v6"}
+    assert set(r3["populations"]["round2"]["versions"]) == {"v4", "A2", "v6"}
+    assert r3["populations"]["round2"]["n_pairs"] == n_a2
+    for m in models:                                    # the fake answers by label in either form
+        assert all(x["exact"] == 1.0 for x in r3["populations"]["all"]["against_v4"]["v6"][m].values())
+    assert r3["marks"]["v4_test1"][OT.OPUS]["n"] > 0 and r3["cache"]["v6"][OT.OPUS]["hit_rate"] == 1.0
+    assert r3["parse"]["v6"][f"{OT.SONNET}|2"] == {"model": OT.SONNET, "pass": 2, "first_ok": n, "first_total": n,
+                                                   "ok": n, "total": n}
+    assert {"round1_responses", "round2_responses", "marks_key"} <= {i["dep_key"] for i in summ["_provenance"]["inputs"]}
+    tables = (out / "tables.md").read_text()
+    assert tables.index("## Round 3:") < tables.index("### Summary: version 4 against version 6") < \
+        tables.index("## Parse rates")
+    assert "every later pass sent the identical prompt" in tables
+    prompts = (out / "rendered_prompts.md").read_text()
+    assert "## One pair per call" in prompts and "## Variant:" not in prompts
+    (out / "summary.json").unlink()                                                        # --analyse-only: the same
+    assert e["cli"].main(e["base"] + ["--models", *models, "--analyse-only"]) == 0
+    assert json.loads((out / "summary.json").read_text())["result"]["round3"]["summary"] == r3["summary"]

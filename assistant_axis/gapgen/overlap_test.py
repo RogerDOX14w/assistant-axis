@@ -63,6 +63,19 @@ containment (:data:`CONTAINMENT_PATTERN` and not :data:`TWO_SIDED_PATTERN`, roun
 send only the calls that hold them (:meth:`PairSet.restricted`; the CLI's ``--calls-from``), and
 :func:`analyse_round2` compares each round-2 arm with its round-1 arm on the same pairs (the subset, and
 every pair sent), self-contradiction rates included (:func:`contradictions`).
+
+**Round 3** (the same brief, "Round 3", 2026-10-06): rubric A from version 5 on is written for **one pair
+per call** (M3's design), so a rubric has a *form* (:func:`rubric_form`): ``"list"`` for every rubric and
+version so far, ``"single"`` for ``overlap_concept`` from version 5 (:data:`RUBRICS`' ``single_from_version``).
+Under ``single`` every pair of the pair set is its own call (:func:`to_single_calls`, keyed by ``pair_id``,
+the round-1 call kept as ``origin_call_id``), the user turn is the rubric file's rendered sample
+(:func:`render_single`: ``{"target": {...}, "other": {...}}``, the two objects on two lines), the answer one
+object ``{"reason", "similarity"}`` (:func:`parse_single`), and the rubric is sent as a cached system block.
+A later pass sends the identical prompt (there is no list to reorder).  Every record carries its ``form``
+(records written before carry none and are read by their rubric version: :func:`record_form`).
+:func:`analyse_round3` compares version 6 with version 4 (round 1's A) and A2 (round 2) on the same pairs:
+consistency, agreement, the known groups, M3's rule (:func:`rule_decision`), the slips, Opus on the pairs
+the rule escalates, and Roger's 30 marks.
 """
 from __future__ import annotations
 
@@ -110,12 +123,14 @@ WIDER: tuple[str, ...] = ("target", "listed")
 #: read as it with a parse note; ``out_per_row``: output tokens per listed trait for the estimate
 #: (default :data:`OUT_PER_ROW_TOKENS`); ``kinds``: whether the reasons of 3s are searched for the kind
 #: of difference they name ("asked" where line 3 asks for it, "control" where it does not);
-#: ``round1``: for a round-2 rubric, the round-1 arm it redrafts (:data:`ROUND2_OF`).  A and B: the test
-#: of 2026-10-03; C, D and E: the arms experiment of 2026-10-04 (``coding_plan_overlap_arms.md``),
+#: ``round1``: for a round-2 rubric, the round-1 arm it redrafts (:data:`ROUND2_OF`);
+#: ``single_from_version``: the first pinned version written for one pair per call (:func:`rubric_form`;
+#: rubric A's draft 5, 2026-10-06; earlier versions, and every other rubric, send a list).  A and B: the
+#: test of 2026-10-03; C, D and E: the arms experiment of 2026-10-04 (``coding_plan_overlap_arms.md``),
 #: variants of A; A2, C2, D2 and E2: its round 2, the same day.
 RUBRICS: dict[str, dict] = {
     "A": {"name": "overlap_concept", "key": "similarity", "scale": SCALE, "categories": ("opposite", "unsure"),
-          "kinds": "control", "title": "concept similarity"},
+          "kinds": "control", "title": "concept similarity", "single_from_version": 5},
     "B": {"name": "overlap_cooccurrence", "key": "co_occurrence", "scale": SCALE, "categories": ("unsure",),
           "title": "co-occurrence"},
     "C": {"name": "overlap_six", "key": "similarity", "scale": (0, 1, 2, 3, 4, 5),
@@ -133,7 +148,8 @@ RUBRICS: dict[str, dict] = {
 }
 #: Round 2 of the arms experiment (``coding_plan_overlap_arms.md``, "Round 2", 2026-10-04): each key is a
 #: round-1 arm (the first entry) with its 2 and 3 lines redrafted around the one-way implication test, in
-#: its own pinned file (the second entry); every other fact is the round-1 arm's.
+#: its own pinned file (the second entry); every other fact is the round-1 arm's, except the form (the
+#: round-2 files are lists whatever their version: A's ``single_from_version`` is not inherited).
 ROUND2_OF: dict[str, tuple[str, str, str]] = {
     "A2": ("A", "overlap_concept_implies", "A with the implication test"),
     "C2": ("C", "overlap_six_implies", "C with the implication test"),
@@ -141,7 +157,11 @@ ROUND2_OF: dict[str, tuple[str, str, str]] = {
     "E2": ("E", "overlap_scope_implies", "E with the implication test"),
 }
 for _key, (_parent, _name, _title) in ROUND2_OF.items():
-    RUBRICS[_key] = {**RUBRICS[_parent], "name": _name, "title": _title, "round1": _parent}
+    RUBRICS[_key] = {**{k: v for k, v in RUBRICS[_parent].items() if k != "single_from_version"},
+                     "name": _name, "title": _title, "round1": _parent}
+#: The forms a rubric is sent in: a numbered list of listed traits per target (every rubric until 2026-10-06),
+#: or one pair per call (rubric A from version 5, M3's design).
+FORMS: tuple[str, ...] = ("list", "single")
 #: The rubrics a run sends unless ``--rubrics`` says otherwise: the original test's two.
 DEFAULT_RUBRICS: tuple[str, ...] = ("A", "B")
 #: The arms experiment's rubrics (arm 0 is rubric A, the baseline).
@@ -192,10 +212,24 @@ class RubricPinError(RuntimeError):
 
 # --------------------------------------------------------------------------- rubrics
 
+def rubric_form(rubric: str, version: Optional[int] = None) -> str:
+    """The form ``rubric`` at ``version`` is sent in (:data:`FORMS`): ``"single"`` (one pair per call) from
+    the rubric's ``single_from_version`` on (rubric A from version 5), else ``"list"``; an unknown version
+    is a list (every record written before the single form)."""
+    first = RUBRICS[rubric].get("single_from_version")
+    return "single" if first is not None and version is not None and int(version) >= int(first) else "list"
+
+
+def record_form(rec: Mapping) -> str:
+    """A record's form: the one it names (records since 2026-10-06), else its rubric version's."""
+    return rec.get("form") or rubric_form(rec["rubric"], rec.get("rubric_version"))
+
+
 def load_rubrics(rubrics_dir: Optional[Path] = None, keys: Optional[Sequence[str]] = None) -> dict[str, dict]:
-    """``{"A": {"name", "text", "version", "sha256"}, ...}`` from the rubric files, for ``keys`` (default
-    :data:`DEFAULT_RUBRICS`, A and B); refuses (``RubricPinError``) when any overlap rubric's text is not
-    its latest pin (``rubric_pins.py bump`` first)."""
+    """``{"A": {"name", "text", "version", "sha256", "form"}, ...}`` from the rubric files, for ``keys``
+    (default :data:`DEFAULT_RUBRICS`, A and B), ``form`` the one the pinned version is sent in
+    (:func:`rubric_form`); refuses (``RubricPinError``) when any overlap rubric's text is not its latest pin
+    (``rubric_pins.py bump`` first)."""
     keys = list(DEFAULT_RUBRICS if keys is None else keys)
     unknown = [k for k in keys if k not in RUBRICS]
     if unknown:
@@ -208,7 +242,9 @@ def load_rubrics(rubrics_dir: Optional[Path] = None, keys: Optional[Sequence[str
     for r in keys:
         spec = RUBRICS[r]
         text = sr.load_prompt(spec["name"], rubrics_dir)
-        out[r] = {"name": spec["name"], "text": text, "version": pins[spec["name"]][0], "sha256": sr.sha256(text)}
+        version = pins[spec["name"]][0]
+        out[r] = {"name": spec["name"], "text": text, "version": version, "sha256": sr.sha256(text),
+                  "form": rubric_form(r, version)}
     return out
 
 
@@ -308,6 +344,32 @@ class Call:
     set: str              # "nearest" | "labelled"
     target: str
     listed: list          # stems in the order sent; the id of listed[i] is i + 1
+
+
+@dataclass
+class PairCall(Call):
+    """A call of the single form (:func:`to_single_calls`): one pair, keyed by its ``pair_id``
+    (``call_id``), with the round-1 call it came from (``origin_call_id``)."""
+    origin_call_id: str = ""
+
+
+def to_single_calls(calls: Iterable[Call]) -> list[PairCall]:
+    """The single form's calls: every listed trait of every call its own call, keyed by the pair's id
+    (``"<call_id>><listed stem>"``, as :class:`Pair` names it), in the calls' order; a :class:`PairCall`
+    is kept as it is."""
+    out: list[PairCall] = []
+    for c in calls:
+        if isinstance(c, PairCall):
+            out.append(c)
+            continue
+        out += [PairCall(call_id=f"{c.call_id}>{s}", set=c.set, target=c.target, listed=[s], origin_call_id=c.call_id)
+                for s in c.listed]
+    return out
+
+
+def stage_calls(calls: Iterable[Call], form: str) -> list[Call]:
+    """The calls a stage of ``form`` sends: the calls as given for a list, one per pair for the single form."""
+    return to_single_calls(calls) if form == "single" else list(calls)
 
 
 @dataclass
@@ -561,23 +623,57 @@ def render_user(call: Call, corpus: Mapping[str, Mapping], order_seed: Optional[
     return render_payload(payload_object(call, corpus, listed_order(call, order_seed)))
 
 
+def payload_single(call: Call, corpus: Mapping[str, Mapping]) -> dict:
+    """The single form's user turn as an object: the target and the one other trait, labels and
+    descriptions only (no ids, scores, ranks or arrangement marks)."""
+    if len(call.listed) != 1:
+        raise ValueError(f"{call.call_id}: the single form sends one pair per call, not {len(call.listed)}")
+    t, o = corpus[call.target], corpus[call.listed[0]]
+    return {"target": {"label": t["label"], "description": t["description"]},
+            "other": {"label": o["label"], "description": o["description"]}}
+
+
+def render_single(call: Call, corpus: Mapping[str, Mapping]) -> str:
+    """The single form's user turn laid out as the rubric file's rendered sample (``overlap_concept.md``,
+    "Rendered sample"): the target on the first line, the other trait on the second, indented one space."""
+    obj = payload_single(call, corpus)
+    return ('{"target": ' + json.dumps(obj["target"], ensure_ascii=False) + ",\n"
+            ' "other": ' + json.dumps(obj["other"], ensure_ascii=False) + "}")
+
+
+def default_cache_system(form: str) -> bool:
+    """Whether a stage of ``form`` marks the rubric as a cached system block: yes for the single form (the
+    rubric, about 600 tokens, is above the 512-token minimum of Sonnet 5.5 and Opus 5.5, and every call of
+    a stage repeats it), no for the list form, as every list run so far was sent (Haiku 4.5 caches only from
+    4,096 tokens, where the marker is harmless)."""
+    return form == "single"
+
+
 def call_params(call: Call, corpus: Mapping, *, rubric_text: str, model: str, max_tokens: int = MAX_TOKENS,
-                temperature: Optional[float] = TEMPERATURE, order_seed: Optional[str] = None) -> dict:
-    """The Messages API request for one call (``llm.request_params``; no system-prompt cache marker,
-    since the rubrics are far below the cacheable length)."""
-    return request_params(model=model, system=rubric_text, user=render_user(call, corpus, order_seed),
-                          max_tokens=max_tokens, temperature=temperature, cache_system=False)
+                temperature: Optional[float] = TEMPERATURE, order_seed: Optional[str] = None, form: str = "list",
+                cache_system: Optional[bool] = None) -> dict:
+    """The Messages API request for one call (``llm.request_params``): the user turn of ``form``
+    (:func:`render_user`, or :func:`render_single` for one pair per call); the system block marked for the
+    prompt cache when ``cache_system`` (default :func:`default_cache_system`: the single form only).  The
+    rubrics are cacheable on Sonnet 5.5 and Opus 5.5 (512-token minimum); the list runs were sent uncached."""
+    user = render_single(call, corpus) if form == "single" else render_user(call, corpus, order_seed)
+    cache = default_cache_system(form) if cache_system is None else bool(cache_system)
+    return request_params(model=model, system=rubric_text, user=user, max_tokens=max_tokens, temperature=temperature,
+                          cache_system=cache)
 
 
 def rendered_prompt(call: Call, corpus: Mapping, *, rubric: str, rubric_text: str, model: str,
-                    order_seed: Optional[str] = None, pass_no: Optional[int] = None) -> str:
+                    order_seed: Optional[str] = None, pass_no: Optional[int] = None, form: str = "list",
+                    cache_system: Optional[bool] = None) -> str:
     """The request as the model receives it, for reading (AGENT_NOTES: read the rendered prompt)."""
-    params = call_params(call, corpus, rubric_text=rubric_text, model=model, order_seed=order_seed)
+    params = call_params(call, corpus, rubric_text=rubric_text, model=model, order_seed=order_seed, form=form,
+                         cache_system=cache_system)
     sent = {k: v for k, v in params.items() if k not in ("system", "messages")}
+    cached = params["system"][0].get("cache_control")
     which = f", pass {pass_no}" if pass_no is not None else ""
-    return (f"=== rubric {rubric} ({RUBRICS[rubric]['name']}), {call.call_id}{which}, request settings "
-            f"{json.dumps(sent)} ===\n--- system ---\n{params['system'][0]['text']}\n--- user ---\n"
-            f"{params['messages'][0]['content']}\n")
+    return (f"=== rubric {rubric} ({RUBRICS[rubric]['name']}), {call.call_id}{which}, {form} form, request settings "
+            f"{json.dumps(sent)}, system block cache_control {json.dumps(cached)} ===\n--- system ---\n"
+            f"{params['system'][0]['text']}\n--- user ---\n{params['messages'][0]['content']}\n")
 
 
 # --------------------------------------------------------------------------- parsing
@@ -622,11 +718,12 @@ def wider_value(v: Any) -> tuple[Optional[str], bool]:
     return (s if s in WIDER else None), True
 
 
+#: 3 (2026-10-06): the single form's answer object (:func:`parse_single`); the list parser is unchanged.
 #: 2 (2026-10-03, after Sonnet 5.5's first stage in overlap_test_1): the last complete results object
 #: in the text is the answer (a model that writes an answer, then "Correction: ..." and the answer
 #: again); 1 read the first-to-last brace span as one object.  The analysis always re-parses the
 #: recorded text with the current parser.
-PARSER_VERSION = 2
+PARSER_VERSION = 3
 
 
 def result_objects(text: str) -> list[dict]:
@@ -648,8 +745,80 @@ def result_objects(text: str) -> list[dict]:
         i = end
 
 
-def parse_answer(text: Optional[str], rubric: str, n_listed: int) -> tuple[dict, dict, dict]:
-    """``(rows, errors, meta)``: ``rows[id] = {"reason", "value", "reason_first"}`` for every listed id
+def single_objects(text: str, key: str) -> list[dict]:
+    """Every top-level JSON object in ``text`` that is a single-form answer (it carries ``key``) or wraps one
+    in a ``results`` list, in order (nested objects are skipped; text between objects is ignored)."""
+    dec = json.JSONDecoder(strict=False)
+    out, i = [], 0
+    while True:
+        j = text.find("{", i)
+        if j < 0:
+            return out
+        try:
+            obj, end = dec.raw_decode(text, j)
+        except json.JSONDecodeError:
+            i = j + 1
+            continue
+        if isinstance(obj, dict) and (key in obj or isinstance(obj.get("results"), list)):
+            out.append(obj)
+        i = end
+
+
+def parse_single(text: Optional[str], rubric: str) -> tuple[dict, dict, dict]:
+    """The single form's answer, one object ``{"reason", <key>}``, as :func:`parse_answer`'s
+    ``(rows, errors, meta)`` with the one pair as id 1.  As lenient as the list parser: the last complete
+    answer object in the text is the answer (a self-correction), fences and prose are ignored, extra keys are
+    ignored and noted (``meta["extra_keys"]``), the answer's position after the reason is recorded
+    (``reason_first``), the value is read on the rubric's scale and categories; an answer wrapped as
+    ``{"results": [one row]}`` (the list form's shape, which a model may remember) is accepted with a note
+    (``meta["wrapped"]``), its ``id`` counted as an extra key.  ``meta["notes"]`` lists the notes."""
+    spec = RUBRICS[rubric]
+    key, cats, scale = spec["key"], spec["categories"], spec["scale"]
+    aliases = spec.get("aliases") or {}
+    meta: dict = {"n_rows": 0, "in_order": True, "extra_ids": [], "reason_first": None, "n_result_objects": 0,
+                  "wrapped": False, "extra_keys": [], "notes": []}
+    if not text or not text.strip():
+        return {}, {1: "empty response"}, meta
+    objs = single_objects(text, key)
+    if not objs:
+        try:
+            obj = _load_json(text)
+        except (ValueError, json.JSONDecodeError) as exc:
+            return {}, {1: f"unparseable response: {exc}"}, meta
+        if not (isinstance(obj, dict) and (key in obj or isinstance(obj.get("results"), list))):
+            return {}, {1: f"unparseable response: no object with {key!r}"}, meta
+        objs = [obj]
+    meta["n_result_objects"] = len(objs)
+    row = objs[-1]
+    if key not in row and isinstance(row.get("results"), list):
+        rows = [r for r in row["results"] if isinstance(r, dict)]
+        meta["wrapped"] = True
+        meta["notes"].append("answer wrapped in a results list")
+        if len(rows) != 1:
+            return {}, {1: f"results holds {len(rows)} rows, not one"}, meta
+        row = rows[0]
+    meta["n_rows"] = 1
+    reason = row.get("reason")
+    extra = sorted(k for k in row if k not in ("reason", key))
+    if extra:
+        meta["extra_keys"] = extra
+        meta["notes"].append(f"extra keys {extra}")
+    if not isinstance(reason, str) or not reason.strip():
+        return {}, {1: "reason missing"}, meta
+    if key not in row:
+        return {}, {1: f"{key} missing"}, meta
+    val = answer_value(row.get(key), cats, scale, aliases)
+    if val is None:
+        return {}, {1: f"{key} {row.get(key)!r} is not {_scale_text(spec)}"}, meta
+    keys = list(row.keys())
+    out = {"reason": " ".join(reason.split()), "value": val, "reason_first": keys.index("reason") < keys.index(key)}
+    meta["reason_first"] = out["reason_first"]
+    return {1: out}, {}, meta
+
+
+def parse_answer(text: Optional[str], rubric: str, n_listed: int, form: str = "list") -> tuple[dict, dict, dict]:
+    """For the single form (``form="single"``), :func:`parse_single`.  For a list:
+    ``(rows, errors, meta)``: ``rows[id] = {"reason", "value", "reason_first"}`` for every listed id
     that parsed (rubric D's rows add ``"wider"``, "target", "listed" or ``None``, and ``"notes"``, the
     parse notes: a "contains" without a usable ``wider``, a ``wider`` given with another relation, an
     alias spelling); ``errors[id]`` says why each other id failed (``"missing"``, a validation message,
@@ -657,6 +826,8 @@ def parse_answer(text: Optional[str], rubric: str, n_listed: int) -> tuple[dict,
     outside 1..n, whether every parsed row put its reason first, and how many complete results objects
     the text held (the last is the answer: :data:`PARSER_VERSION`).  The answer key, its scale and its
     categories are the rubric's (:data:`RUBRICS`)."""
+    if form == "single":
+        return parse_single(text, rubric)
     spec = RUBRICS[rubric]
     key, cats, scale = spec["key"], spec["categories"], spec["scale"]
     aliases = spec.get("aliases") or {}
@@ -805,9 +976,10 @@ def answered(rec: Mapping) -> bool:
 
 
 def reparse(rec: Mapping) -> tuple[dict, dict, dict]:
-    """A record's answer parsed with the current parser (never the stored ``parsed``, which an older
-    parser may have written)."""
-    return parse_answer((rec.get("response") or {}).get("text"), rec["rubric"], len(rec["listed"]))
+    """A record's answer parsed with the current parser in the record's form (never the stored ``parsed``,
+    which an older parser may have written)."""
+    return parse_answer((rec.get("response") or {}).get("text"), rec["rubric"], len(rec["listed"]),
+                        form=record_form(rec))
 
 
 def fully_parsed(rec: Mapping) -> bool:
@@ -859,13 +1031,18 @@ class OverlapRunner:
     run's).  ``usage`` (a ``MultiModelUsage``, usually ``cost.GuardedUsage`` with the run's cap) is
     charged for every response received and, with ``usage_path``, written there after every record
     (:func:`write_usage`), so a session cut off mid-stage leaves its spend on record; when the cap is
-    crossed the stage stops sending, keeps the answer that crossed it and reports ``budget_exceeded``."""
+    crossed the stage stops sending, keeps the answer that crossed it and reports ``budget_exceeded``.
+
+    A rubric of the single form (its loaded ``form``, :func:`load_rubrics`) sends every pair of the stage's
+    calls as its own call (:func:`to_single_calls`), the identical prompt in every pass, with the rubric as a
+    cached system block (``cache_system``: ``None`` for :func:`default_cache_system`, or force it); its
+    records add ``form``, ``pair_id`` and ``origin_call_id``, and ``request.cache_system``."""
 
     def __init__(self, client, rubrics: Mapping[str, Mapping], corpus: Mapping[str, Mapping], *,
                  usage: MultiModelUsage, responses_path: Path, concurrency: int = DEFAULT_CONCURRENCY,
                  max_tokens: int = MAX_TOKENS, temperature: Optional[float] = TEMPERATURE,
                  retry_delays: Sequence[float] = RETRY_DELAYS_S, ask_attempts: int = ASK_ATTEMPTS,
-                 seed: int = 0, usage_path: Optional[Path] = None):
+                 seed: int = 0, usage_path: Optional[Path] = None, cache_system: Optional[bool] = None):
         self.client = client
         self.rubrics = rubrics
         self.corpus = corpus
@@ -878,28 +1055,46 @@ class OverlapRunner:
         self.ask_attempts = max(1, int(ask_attempts))
         self.seed = seed
         self.usage_path = None if usage_path is None else Path(usage_path)
+        self.cache_system = cache_system
 
     def done(self) -> set:
         return done_keys(read_records(self.responses_path))
+
+    def form(self, rubric: str) -> str:
+        """The form the stage of ``rubric`` is sent in (the loaded rubric's; a list when it names none)."""
+        return self.rubrics[rubric].get("form") or "list"
+
+    def caches(self, rubric: str) -> bool:
+        """Whether the stage of ``rubric`` marks its system block for the prompt cache."""
+        return default_cache_system(self.form(rubric)) if self.cache_system is None else bool(self.cache_system)
 
     def _record(self, call: Call, rubric: str, model: str, params: Mapping, text: Optional[str], meta: Mapping,
                 rows: Mapping, errors: Mapping, pmeta: Mapping, attempt: int, *, pass_no: int = 1,
                 order: Optional[Sequence[str]] = None, order_seed: Optional[str] = None) -> dict:
         rb = self.rubrics[rubric]
+        form = self.form(rubric)
         req = {k: v for k, v in params.items() if k not in ("system", "messages")}
         req["system_sha256"] = rb["sha256"]
+        req["cache_system"] = "cache_control" in params["system"][0]
         req["user"] = params["messages"][0]["content"]
-        return {"rubric": rubric, "rubric_name": rb["name"], "rubric_version": rb["version"],
-                "prompt_sha256": rb["sha256"], "model": model, "call_id": call.call_id, "set": call.set,
-                "target": call.target, "listed": list(call.listed if order is None else order), "pass": pass_no,
-                "order_seed": order_seed, "request": req,
-                "response": {"text": text, "stop_reason": meta.get("stop_reason"), "usage_raw": meta.get("usage_raw"),
-                             "attempts": meta.get("attempts"), "error": meta.get("error")},
-                "parse_attempt": attempt, "parser_version": PARSER_VERSION,
-                "parsed": {str(k): v for k, v in rows.items()}, "errors": {str(k): v for k, v in errors.items()},
-                "parse_meta": dict(pmeta), "at": utc_now()}
+        rec = {"rubric": rubric, "rubric_name": rb["name"], "rubric_version": rb["version"],
+               "prompt_sha256": rb["sha256"], "form": form, "model": model, "call_id": call.call_id, "set": call.set,
+               "target": call.target, "listed": list(call.listed if order is None else order), "pass": pass_no,
+               "order_seed": order_seed, "request": req,
+               "response": {"text": text, "stop_reason": meta.get("stop_reason"), "usage_raw": meta.get("usage_raw"),
+                            "attempts": meta.get("attempts"), "error": meta.get("error")},
+               "parse_attempt": attempt, "parser_version": PARSER_VERSION,
+               "parsed": {str(k): v for k, v in rows.items()}, "errors": {str(k): v for k, v in errors.items()},
+               "parse_meta": dict(pmeta), "at": utc_now()}
+        if form == "single":
+            rec["pair_id"] = call.call_id
+            rec["origin_call_id"] = getattr(call, "origin_call_id", "") or call.call_id.rsplit(">", 1)[0]
+        return rec
 
     async def run_stage(self, rubric: str, model: str, calls: Sequence[Call], pass_no: int = 1) -> StageResult:
+        form = self.form(rubric)
+        calls = stage_calls(calls, form)
+        cache = self.caches(rubric)
         done = self.done()
         todo = [c for c in calls if (rubric, model, c.call_id, pass_no) not in done]
         res = StageResult(rubric=rubric, model=model, n_calls=len(calls), pass_no=pass_no,
@@ -911,7 +1106,8 @@ class OverlapRunner:
         self.responses_path.parent.mkdir(parents=True, exist_ok=True)
 
         async def one(call: Call) -> None:
-            order_seed = pass_order_seed(self.seed, pass_no, call.call_id)
+            # the single form has no list to reorder: every pass sends the identical prompt
+            order_seed = None if form == "single" else pass_order_seed(self.seed, pass_no, call.call_id)
             order = listed_order(call, order_seed)
             for attempt in range(1, self.ask_attempts + 1):
                 if stop.is_set():
@@ -921,18 +1117,18 @@ class OverlapRunner:
                         return
                     params = call_params(call, self.corpus, rubric_text=text_of, model=model,
                                          max_tokens=self.max_tokens, temperature=self.temperature,
-                                         order_seed=order_seed)
+                                         order_seed=order_seed, form=form, cache_system=cache)
                     meta: dict = {}
                     try:
                         text = await call_anthropic_json(
                             self.client, system=text_of, user=params["messages"][0]["content"], model=model,
                             max_tokens=self.max_tokens, temperature=self.temperature, usage=self.usage,
-                            cache_system=False, retry_delays=self.retry_delays, meta=meta)
+                            cache_system=cache, retry_delays=self.retry_delays, meta=meta)
                     except BudgetExceededError:
                         text = meta.get("text")
                         res.budget_exceeded = True
                         stop.set()
-                    rows, errors, pmeta = parse_answer(text, rubric, len(order))
+                    rows, errors, pmeta = parse_answer(text, rubric, len(order), form=form)
                     rec = self._record(call, rubric, model, params, text, meta, rows, errors, pmeta, attempt,
                                        pass_no=pass_no, order=order, order_seed=order_seed)
                     async with lock:
@@ -1010,20 +1206,27 @@ def collect_answers(pair_set: PairSet, records: Iterable[Mapping], pass_no: int 
     """``{(rubric, model): {pair_id: {"value", "reason", "reason_first", "error"}}}`` for pass ``pass_no``
     (default 1, "the" answer), from the final record per call (:func:`latest_records`), re-parsed with
     the current parser.  A row's id is read against the order its record was sent in (``listed``), so a
-    later pass's reshuffled ids land on the right pair.  Rubric D's answers add ``"wider"`` and
-    ``"notes"``.  A pair whose call has no record is absent, a pair that failed to parse has ``value``
-    ``None`` and its ``error``."""
+    later pass's reshuffled ids land on the right pair; a single-form record is its pair's (``pair_id``).
+    Rubric D's answers add ``"wider"`` and ``"notes"``.  A pair whose call has no record is absent, a pair
+    that failed to parse has ``value`` ``None`` and its ``error``."""
     latest = latest_records(records)
     by_call: dict[str, list] = defaultdict(list)
+    by_id: dict[str, Pair] = {}
     for p in pair_set.pairs:
         by_call[p.call_id].append(p)
+        by_id[p.pair_id] = p
     out: dict[tuple[str, str], dict[str, dict]] = defaultdict(dict)
     for (rubric, model, call_id, p_no), rec in latest.items():
         if p_no != pass_no:
             continue
         rows, errors, _ = reparse(rec)
-        id_of = {s: i for i, s in enumerate(rec["listed"], 1)}
-        for p in by_call.get(call_id, []):
+        if record_form(rec) == "single":
+            mine = [by_id[pid]] if (pid := rec.get("pair_id") or call_id) in by_id else []
+            id_of = {p.listed: 1 for p in mine}
+        else:
+            mine = by_call.get(call_id, [])
+            id_of = {s: i for i, s in enumerate(rec["listed"], 1)}
+        for p in mine:
             i = id_of.get(p.listed)
             row = rows.get(i) if i is not None else None
             if row is not None:
@@ -1608,7 +1811,7 @@ def order_stats(pair_set: PairSet, seed: int, passes: Sequence[int]) -> dict:
 def analyse_arms(pair_set: PairSet, answers_by_pass: Mapping[int, Mapping[tuple[str, str], Mapping]], *,
                  models: Sequence[str], reference: str = REFERENCE, seed: int = 0, cutoff: int = CUTOFF,
                  first_parse_by_pass: Optional[Mapping[int, Mapping]] = None,
-                 baseline: Optional[Mapping] = None) -> dict:
+                 baseline: Optional[Mapping] = None, forms: Optional[Mapping[str, str]] = None) -> dict:
     """The arms experiment's comparisons (coding_plan_overlap_arms.md, "What to build" 3), per rubric
     and model, over the passes in ``answers_by_pass`` (``{pass: collect_answers(...)}``):
 
@@ -1619,19 +1822,22 @@ def analyse_arms(pair_set: PairSet, answers_by_pass: Mapping[int, Mapping[tuple[
       A, unasked, as a control): ``scope_kinds`` on the 3s;
     * ``baseline``: arm A's pass 1 against an earlier run's rubric-A answers on the same pairs
       (``{"run_id", "answers": {model: {pair_id: answer}}}``), as a pass-to-pass comparison;
-    * ``parse`` per pass and ``order`` (how pass 2's order differs from pass 1's);
+    * ``parse`` per pass and ``order`` (how pass 2's order differs from pass 1's, for the list form);
     * ``cross_arm``: one row per (rubric, model) for the summary table.
 
-    Pass keys are strings ("1", "2")."""
+    ``forms`` (``{rubric: form}``, default every rubric a list): a single-form rubric's pass 2 sent the
+    identical prompts, so all of its pairs count as one-trait calls in ``by_prompt``.  Pass keys are strings
+    ("1", "2")."""
     pairs = pair_set.pairs
     passes = sorted(int(p) for p in answers_by_pass)
     get = lambda p, r, m: answers_by_pass.get(p, {}).get((r, m), {})  # noqa: E731
     rubrics = [r for r in RUBRICS if any(get(p, r, m) for p in passes for m in models)]
     others = [m for m in models if m != reference]
+    forms = {r: (forms or {}).get(r, "list") for r in rubrics}
     out: dict = {"passes": passes, "cutoff": cutoff, "rubrics": rubrics, "models": list(models), "reference": reference,
-                 "decision_scale": {r: RUBRICS[r].get("decision") for r in rubrics},
-                 "order": order_stats(pair_set, seed, passes), "parse": {}, "per_arm": {}, "baseline": None,
-                 "scope_kind_patterns": dict(SCOPE_KINDS)}
+                 "decision_scale": {r: RUBRICS[r].get("decision") for r in rubrics}, "forms": forms,
+                 "order": order_stats(pair_set, seed, passes) if "list" in forms.values() else {}, "parse": {},
+                 "per_arm": {}, "baseline": None, "scope_kind_patterns": dict(SCOPE_KINDS)}
     for p in passes:
         fp = (first_parse_by_pass or {}).get(p, {})
         for (r, m), ans in sorted(answers_by_pass[p].items()):
@@ -1639,8 +1845,10 @@ def analyse_arms(pair_set: PairSet, answers_by_pass: Mapping[int, Mapping[tuple[
             out["parse"][f"{r}|{m}|{p}"] = {"rubric": r, "model": m, "pass": p,
                                             "ok": sum(a["value"] is not None for a in ans.values()), "total": len(ans),
                                             "first_ok": f["ok"] if f else None, "first_total": f["total"] if f else None}
-    groups = prompt_groups(pair_set, seed, passes[1]) if len(passes) >= 2 else {}
+    list_groups = prompt_groups(pair_set, seed, passes[1]) if len(passes) >= 2 else {}
+    single_groups = {p.pair_id: "single" for p in pairs}
     for r in rubrics:
+        groups = single_groups if forms[r] == "single" else list_groups
         arm: dict = {"self_consistency": {}, "between_models": {}, "coverage": {}}
         for m in models:
             if len(passes) >= 2 and get(passes[0], r, m) and get(passes[1], r, m):
@@ -2061,6 +2269,582 @@ def analyse_round2(pair_set: PairSet, answers_by_pass: Mapping[int, Mapping[tupl
     return out
 
 
+# --------------------------------------------------------------------------- the arms experiment, round 3
+
+#: Roger's marks on the 30 pairs of overlap_test_1's blinded sheet (``m3_overlap_marks.md``), read by hand
+#: (``coding_plan_overlap_arms.md``, "Round 3"): his leaning per item, and for five items the alternative he
+#: named ("unsure: I think 1, but a case could be made for 2").  Items are the sheet's numbers, mapped to
+#: pairs by ``overlap_test_1/marks_key.json``.
+ROGER_LEANINGS: dict[int, Any] = {
+    1: "opposite", 2: 1, 3: "opposite", 4: "opposite", 5: 0, 6: 0, 7: 0, 8: "opposite", 9: 0, 10: "opposite",
+    11: 2, 12: 1, 13: 1, 14: 2, 15: 4, 16: "opposite", 17: 3, 18: 2, 19: 1, 20: 2,
+    21: 2, 22: 2, 23: "opposite", 24: 4, 25: 3, 26: 2, 27: 3, 28: 4, 29: 1, 30: 2}
+ROGER_ALTERNATIVES: dict[int, Any] = {2: 2, 13: 2, 17: 2, 21: 3, 27: 2}
+
+#: A reason that uses round 2's line-2 wording, "neither implies the other: a persona can have either without
+#: the other" (and its variants seen in round 2's reasons: "neither strictly / fully implies", "neither trait
+#: implies", "neither fully contains", "neither requires", "without either implying the other", "each can be
+#: held without the other"): a two-sided overlap stated as the rubric states it.  Round 1's containment pattern
+#: does not know it, so a 2 whose reason says so can still match it ("narrower", "part of"); the discounted
+#: forward slip leaves such reasons out, and the wide reverse slip counts a 3 that says it.  A one-way denial
+#: ("a compassionate person need not be lenient") is a containment's and is not matched.
+NEITHER_IMPLIES_PATTERN = (r"\bneither\b[^.;]{0,30}?\b(impl|entail|requir|contain|guarantee|necessitat)"
+                           r"|\bwithout (either|one|each) (implying|requiring|entailing|containing)"
+                           r"|\b(either|each)\b[^.;]{0,40}?\bwithout the other")
+NEITHER_IMPLIES_RE = re.compile(NEITHER_IMPLIES_PATTERN, re.I)
+#: The first-line model and the second opinion of M3's rule (coding_plan_platform.md, M3 decisions 3 and 8).
+FIRST_LINE, SECOND_OPINION = SONNET, OPUS
+#: Cache reads as a share of the input price where it differs from ``llm.CACHE_READ_FACTOR`` (0.1, what the
+#: usage records charge every model): Opus 5.5 reads at $0.20 against $4 input per million tokens (the
+#: Claude API reference, 2026-10-06), so the records overstate its cached reads by 0.05 of the input price.
+CACHE_READ_PRICE: dict[str, float] = {"opus-5-5": 0.05}
+
+
+def describes_neither_implies(reason: Optional[str]) -> bool:
+    """The reason says neither trait implies the other (:data:`NEITHER_IMPLIES_PATTERN`)."""
+    return bool(reason) and bool(NEITHER_IMPLIES_RE.search(reason))
+
+
+def slip_counts(rubric: str, answers: Iterable[Mapping]) -> dict:
+    """The slips in a set of answers on the decision scale: ``forward``, 2s whose reason describes a
+    containment (round 1's patterns, :func:`describes_containment`); ``forward_discounted``, the same less the
+    reasons that say neither implies the other; ``reverse``, 3s whose reason describes a two-sided overlap
+    (round 2's reverse slip, :func:`describes_two_sided`); ``reverse_wide``, 3s whose reason is two-sided or
+    says neither implies the other.  Counts and shares of the 2s and the 3s."""
+    twos, threes = [], []
+    for a in answers:
+        d = decision_value(rubric, a.get("value"))
+        if _num_val(d) and d == 2:
+            twos.append(a.get("reason"))
+        elif _num_val(d) and d == 3:
+            threes.append(a.get("reason"))
+    share = lambda k, n: _r(k / n, 3) if n else None  # noqa: E731
+    fwd = sum(describes_containment(x) for x in twos)
+    fwd_d = sum(describes_containment(x) and not describes_neither_implies(x) for x in twos)
+    rev = sum(describes_two_sided(x) for x in threes)
+    rev_w = sum(describes_two_sided(x) or describes_neither_implies(x) for x in threes)
+    return {"n_2": len(twos), "forward": fwd, "forward_share": share(fwd, len(twos)), "forward_discounted": fwd_d,
+            "forward_discounted_share": share(fwd_d, len(twos)), "n_3": len(threes), "reverse": rev,
+            "reverse_share": share(rev, len(threes)), "reverse_wide": rev_w, "reverse_wide_share": share(rev_w, len(threes))}
+
+
+def escalates(sonnet: Any, cutoff: int = CUTOFF) -> bool:
+    """Whether M3's rule sends the first-line answer to the second opinion: exactly at the cut-off, or
+    "unsure" (M3 decision 5)."""
+    return sonnet == "unsure" or (_num_val(sonnet) and sonnet == cutoff)
+
+
+def rule_decision(sonnet: Any, opus: Any, cutoff: int = CUTOFF) -> Optional[str]:
+    """M3's rule on the decision scale (coding_plan_platform.md, M3 decisions 3 and 8): the first-line model
+    (Sonnet) reads every pair; above the cut-off is ``"cut"``, below it (or "opposite", decision 9) ``"keep"``;
+    exactly at it (or "unsure") the pair goes to the second opinion (Opus) and is kept only if Opus reads it
+    under the cut-off (a number below it, or "opposite"; an Opus "unsure" does not rescue).  ``None`` when the
+    first answer is missing, or the second is needed and missing."""
+    if sonnet is None:
+        return None
+    if escalates(sonnet, cutoff):
+        if opus is None:
+            return None
+        return "keep" if side(opus, cutoff) is False else "cut"
+    return "cut" if side(sonnet, cutoff) is True else "keep"
+
+
+def _val(answers: Mapping[str, Mapping], pid: str) -> Any:
+    return (answers.get(pid) or {}).get("value")
+
+
+def rule_simulation(pair_ids: Iterable[str], first_by_pass: Mapping[int, Mapping], second_by_pass: Mapping[int, Mapping],
+                    *, cutoff: int = CUTOFF) -> tuple[dict, dict]:
+    """M3's rule (:func:`rule_decision`) over ``pair_ids`` in every pass both models answered: per pass the
+    pairs decided, escalated (first-line answer at the cut-off or "unsure"), rescued by the second opinion, cut
+    (directly, above the cut-off, or after the second opinion), kept, and kept though the second opinion reads
+    the pair at or above the cut-off (the near-duplicates the rule lets through); and between the first two
+    passes, the pairs whose decision differs.  Returns ``(stats, {pass: {pair_id: decision}})``."""
+    ids = list(pair_ids)
+    passes = sorted(set(first_by_pass) & set(second_by_pass))
+    stats: dict = {"per_pass": {}, "flips": None}
+    decisions: dict = {}
+    for p in passes:
+        first, second = first_by_pass[p], second_by_pass[p]
+        c: Counter = Counter()
+        dec: dict[str, str] = {}
+        for pid in ids:
+            s, o = _val(first, pid), _val(second, pid)
+            if s is None:
+                c["first_missing"] += 1
+                continue
+            d = rule_decision(s, o, cutoff)
+            if escalates(s, cutoff):
+                c["escalated"] += 1
+                c["rescued" if d == "keep" else ("cut_after_second" if d == "cut" else "second_missing")] += 1
+            elif d == "cut":
+                c["cut_direct"] += 1
+            else:
+                c["kept_direct"] += 1
+                c["kept_though_second"] += int(side(o, cutoff) is True)
+            if d is not None:
+                dec[pid] = d
+        stats["per_pass"][str(p)] = {"n": len(dec), "escalated": c["escalated"], "rescued": c["rescued"],
+                                     "cut": c["cut_direct"] + c["cut_after_second"], "cut_direct": c["cut_direct"],
+                                     "cut_after_second": c["cut_after_second"],
+                                     "kept": c["kept_direct"] + c["rescued"], "kept_though_second": c["kept_though_second"],
+                                     "first_missing": c["first_missing"], "second_missing": c["second_missing"]}
+        decisions[p] = dec
+    if len(passes) >= 2:
+        d1, d2 = decisions[passes[0]], decisions[passes[1]]
+        both = set(d1) & set(d2)
+        stats["flips"] = {"n": len(both), "differ": sum(d1[k] != d2[k] for k in both)}
+    return stats, decisions
+
+
+def decisions_against(base: Mapping[int, Mapping[str, str]], other: Mapping[int, Mapping[str, str]]) -> dict:
+    """Per pass both hold, the pairs both decided and those decided differently (base keep and other cut, base cut
+    and other keep)."""
+    out = {}
+    for p in sorted(set(base) & set(other)):
+        both = set(base[p]) & set(other[p])
+        out[str(p)] = {"n": len(both), "differ": sum(base[p][k] != other[p][k] for k in both),
+                       "keep_to_cut": sum(base[p][k] == "keep" and other[p][k] == "cut" for k in both),
+                       "cut_to_keep": sum(base[p][k] == "cut" and other[p][k] == "keep" for k in both)}
+    return out
+
+
+def second_on_escalated(pair_ids: Iterable[str], first_by_pass: Mapping[int, Mapping], second_by_pass: Mapping[int, Mapping],
+                        *, cutoff: int = CUTOFF) -> dict:
+    """The second opinion on the pairs the rule escalates: per pass, the pairs escalated in that pass, the second
+    model's answers on them (that pass), and on those it answered in both passes how many it answered alike
+    (same answer; same side of the cut-off); and the same over the pairs escalated in any pass."""
+    ids = list(pair_ids)
+    passes = sorted(set(first_by_pass) & set(second_by_pass))
+
+    def steady(esc: list) -> dict:
+        both = [pid for pid in esc if all(_val(second_by_pass[p], pid) is not None for p in passes[:2])]
+        if len(passes) < 2:
+            return {"n_both_passes": 0, "same": None, "same_side": None}
+        a, b = passes[0], passes[1]
+        return {"n_both_passes": len(both),
+                "same": sum(str(_val(second_by_pass[a], k)) == str(_val(second_by_pass[b], k)) for k in both),
+                "same_side": sum(side(_val(second_by_pass[a], k), cutoff) == side(_val(second_by_pass[b], k), cutoff)
+                                 for k in both)}
+    out: dict = {"per_pass": {}}
+    any_pass: set = set()
+    for p in passes:
+        esc = [pid for pid in ids if escalates(_val(first_by_pass[p], pid), cutoff)]
+        any_pass |= set(esc)
+        out["per_pass"][str(p)] = {"n": len(esc), "answers": value_counts(_val(second_by_pass[p], k) for k in esc),
+                                   **steady(esc)}
+    esc = [pid for pid in ids if pid in any_pass]
+    out["any_pass"] = {"n": len(esc), **steady(esc)}
+    return out
+
+
+def marks_agreement(answers: Mapping[str, Mapping], items: Sequence[Mapping], *,
+                    leanings: Mapping[int, Any] = ROGER_LEANINGS, alternatives: Mapping[int, Any] = ROGER_ALTERNATIVES
+                    ) -> dict:
+    """One set of answers against Roger's marks (``items``: the marks key's ``{"item", "pair_id"}``): over the
+    items both answered, exact agreement with his leaning (categories included), within one point where both
+    are numbers, and agreement with his leaning or the alternative he named; per item the leaning, the
+    alternative and the answer."""
+    rows = []
+    for it in items:
+        rows.append({"item": it["item"], "pair_id": it["pair_id"], "leaning": leanings.get(it["item"]),
+                     "alternative": alternatives.get(it["item"]), "value": _val(answers, it["pair_id"])})
+    done = [r for r in rows if r["value"] is not None and r["leaning"] is not None]
+    num = [r for r in done if _num_val(r["value"]) and _num_val(r["leaning"])]
+    exact = sum(r["value"] == r["leaning"] for r in done)
+    within = sum(abs(r["value"] - r["leaning"]) <= 1 for r in num)
+    either = sum(r["value"] == r["leaning"] or (r["alternative"] is not None and r["value"] == r["alternative"])
+                 for r in done)
+    share = lambda k, n: _r(k / n, 3) if n else None  # noqa: E731
+    return {"n": len(done), "exact": exact, "exact_share": share(exact, len(done)), "n_numeric": len(num),
+            "within_one": within, "within_one_share": share(within, len(num)), "leaning_or_alternative": either,
+            "leaning_or_alternative_share": share(either, len(done)), "items": rows}
+
+
+def cache_stats(records: Iterable[Mapping]) -> dict:
+    """Per model, from the usage the records hold (every answered request): requests, how many read the cached
+    rubric and how many wrote it, the tokens (uncached input, cache writes, cache reads, output), the share of
+    input tokens read from the cache, and the cost as the usage records charge it (writes 1.25x, reads 0.1x the
+    input price), at the published read price (:data:`CACHE_READ_PRICE`), and with every input token at the
+    uncached price; ``saved`` is the last minus the first."""
+    from assistant_axis.judge_pricing import price_for_model
+
+    from .llm import CACHE_READ_FACTOR, CACHE_WRITE_FACTOR
+    per: dict[str, Counter] = defaultdict(Counter)
+    for r in records:
+        u = (r.get("response") or {}).get("usage_raw") or {}
+        if not u:
+            continue
+        c = per[r["model"]]
+        c["requests"] += 1
+        inp, w, rd, out = (int(u.get(k) or 0) for k in ("input_tokens", "cache_creation_input_tokens",
+                                                         "cache_read_input_tokens", "output_tokens"))
+        c["input"] += inp
+        c["cache_write"] += w
+        c["cache_read"] += rd
+        c["output"] += out
+        c["reading"] += int(rd > 0)
+        c["writing"] += int(w > 0)
+    out_d = {}
+    for m, c in sorted(per.items()):
+        rate_in, rate_out = price_for_model(m)
+        read_price = next((f for frag, f in CACHE_READ_PRICE.items() if frag in m.lower()), CACHE_READ_FACTOR)
+        total_in = c["input"] + c["cache_write"] + c["cache_read"]
+        charged = (c["input"] + CACHE_WRITE_FACTOR * c["cache_write"] + CACHE_READ_FACTOR * c["cache_read"]) * rate_in
+        published = (c["input"] + CACHE_WRITE_FACTOR * c["cache_write"] + read_price * c["cache_read"]) * rate_in
+        uncached = total_in * rate_in
+        outp = c["output"] * rate_out
+        out_d[m] = {"requests": c["requests"], "reading": c["reading"], "writing": c["writing"],
+                    "hit_rate": _r(c["reading"] / c["requests"], 4) if c["requests"] else None,
+                    "input_tokens": c["input"], "cache_write_tokens": c["cache_write"], "cache_read_tokens": c["cache_read"],
+                    "output_tokens": c["output"], "read_share": _r(c["cache_read"] / total_in, 4) if total_in else None,
+                    "charged_usd": _r((charged + outp) / 1e6, 6), "published_usd": _r((published + outp) / 1e6, 6),
+                    "uncached_usd": _r((uncached + outp) / 1e6, 6), "saved_usd": _r((uncached - charged) / 1e6, 6),
+                    "saved_published_usd": _r((uncached - published) / 1e6, 6), "read_price_factor": read_price}
+    return out_d
+
+
+def format_notes(records: Iterable[Mapping]) -> dict:
+    """Per (model, pass), over the first attempt of each call and over the final record: answers wrapped in a
+    results list, answers with extra keys (and which), answers not reason-first, and self-corrections (more
+    than one answer object in the text); the single form's format notes (:func:`parse_single`)."""
+    records = list(records)
+    out: dict = {}
+    for which, recs in (("first", first_records(records)), ("final", latest_records(records))):
+        for (r, m, _, p), rec in recs.items():
+            rows, errors, meta = reparse(rec)
+            x = out.setdefault(f"{m}|{p}", {"model": m, "pass": p}).setdefault(
+                which, {"n": 0, "parsed": 0, "wrapped": 0, "extra_keys": 0, "extra_key_names": Counter(),
+                        "not_reason_first": 0, "self_corrections": 0})
+            x["n"] += 1
+            x["parsed"] += int(bool(rows))
+            x["wrapped"] += int(bool(meta.get("wrapped")))
+            x["extra_keys"] += int(bool(meta.get("extra_keys")))
+            x["extra_key_names"].update(meta.get("extra_keys") or [])
+            x["not_reason_first"] += int(meta.get("reason_first") is False)
+            x["self_corrections"] += int((meta.get("n_result_objects") or 0) > 1)
+    for v in out.values():
+        for which in ("first", "final"):
+            if which in v:
+                v[which]["extra_key_names"] = dict(v[which]["extra_key_names"])
+    return {k: out[k] for k in sorted(out)}
+
+
+def _cells_consistency(x: Mapping) -> dict:
+    n, d, c = x["native"], x["decision"], x["cutoff"]
+    return {"n": n["n_both_parsed"], "exact": n["exact_all"], "n_numeric": n["n_numeric"],
+            "within_one": n.get("within_one"), "kappa": n.get("kappa_quadratic"), "exact_decision": d["exact_all"],
+            "cutoff_n": c["n"], "crossings": c["crossings"], "first_only": c["first_only"], "second_only": c["second_only"],
+            "flips_native": x["flips_native"]["by_pair"]}
+
+
+def _cells_groups(gs: Mapping) -> dict:
+    return {g: {k: gs[g][k] for k in ("n", "mean", "share_3_plus", "opposite")} for g in GROUPS if gs[g]["n"]}
+
+
+def round3_version(rubric: str, by_pass: Mapping[int, Mapping[str, Mapping]], pairs: Sequence[Pair], *,
+                   models: Sequence[str], reference: str = REFERENCE, cutoff: int = CUTOFF,
+                   groups: Optional[Mapping[str, str]] = None) -> tuple[dict, dict]:
+    """One version's figures on one population (``pairs``; ``by_pass``: ``{pass: {model: answers}}``):
+    self-consistency between the first two passes (every pair, and with ``groups``, the prompt groups of a list
+    run's second pass, the pairs whose prompt was identical in both: one-trait and same-order calls; a
+    single-form run's pairs are all identical), each model against ``reference`` per pass, the share at the
+    cut-off or more, the known groups on the decision scale, the slips per pass and pooled, M3's rule and the
+    second opinion on the pairs it escalates.  Crossings and flips count every pair of the population.  Returns
+    ``(figures, rule decisions by pass)``."""
+    ids = {p.pair_id for p in pairs}
+    passes = sorted(int(p) for p in by_pass)
+    others = [m for m in models if m != reference]
+
+    def get(p: int, m: str) -> dict:
+        return {k: v for k, v in (by_pass.get(p) or {}).get(m, {}).items() if k in ids}
+    out: dict = {"n_pairs": len(pairs), "passes": passes, "self_consistency": {}, "between_models": {}, "coverage": {},
+                 "groups": {}, "slips": {}}
+    for m in models:
+        if len(passes) >= 2 and get(passes[0], m) and get(passes[1], m):
+            a, b = get(passes[0], m), get(passes[1], m)
+            cells = _cells_consistency(compare_answers(rubric, a, b, pairs, cutoff=cutoff, nearest_only=False))
+            if groups is None:
+                cells["identical"] = {**{k: v for k, v in cells.items() if k != "identical"}, "all_pairs": True}
+            else:
+                same = {pid for pid in ids if groups.get(pid) in ("single", "same_order")}
+                sub = [p for p in pairs if p.pair_id in same]
+                cells["identical"] = {**_cells_consistency(compare_answers(
+                    rubric, {k: v for k, v in a.items() if k in same}, {k: v for k, v in b.items() if k in same}, sub,
+                    cutoff=cutoff, nearest_only=False)), "all_pairs": False}
+            out["self_consistency"][m] = cells
+        cov = {str(p): coverage(pairs, rubric, get(p, m), cutoff=cutoff, nearest_only=False) for p in passes if get(p, m)}
+        if cov:
+            out["coverage"][m] = cov
+            out["groups"][m] = {str(p): _cells_groups(group_stats(pairs, to_decision(rubric, get(p, m))))
+                                for p in passes if get(p, m)}
+            per = {str(p): slip_counts(rubric, get(p, m).values()) for p in passes if get(p, m)}
+            per["pooled"] = slip_counts(rubric, [x for p in passes for x in get(p, m).values()])
+            out["slips"][m] = per
+    for m in others:
+        bm = {str(p): _cells_consistency(compare_answers(rubric, get(p, reference), get(p, m), pairs, cutoff=cutoff,
+                                                         nearest_only=False))
+              for p in passes if get(p, reference) and get(p, m)}
+        if bm:
+            out["between_models"][m] = bm
+    decisions: dict = {}
+    if FIRST_LINE in models and SECOND_OPINION in models:
+        first = {p: get(p, FIRST_LINE) for p in passes}
+        second = {p: get(p, SECOND_OPINION) for p in passes}
+        out["rule"], decisions = rule_simulation(sorted(ids), first, second, cutoff=cutoff)
+        out["second_on_escalated"] = second_on_escalated(sorted(ids), first, second, cutoff=cutoff)
+    return out, decisions
+
+
+def opus_changes(pairs: Sequence[Pair], base: Mapping[int, Mapping[str, Mapping]], new: Mapping[int, Mapping[str, Mapping]],
+                 *, cutoff: int = CUTOFF) -> dict:
+    """The pairs where the second opinion's answer under ``new`` would change the rule's decision against
+    ``base`` (both ``{pass: {model: answers}}``): per pass, the pairs whose second-opinion answers under the two
+    versions fall on different sides of the cut-off while the first-line model escalates the pair under either
+    version (so that, with the first-line answer held, swapping the second opinion's answer flips the decision),
+    in pair-set order, with every answer and both second-opinion reasons; and the count of all pairs where the
+    second opinion changes side, escalated or not."""
+    out: dict = {}
+    for p in sorted(set(base) & set(new)):
+        b1, n1 = (base[p].get(FIRST_LINE) or {}), (new[p].get(FIRST_LINE) or {})
+        b2, n2 = (base[p].get(SECOND_OPINION) or {}), (new[p].get(SECOND_OPINION) or {})
+        rows, any_side = [], 0
+        for pr in pairs:
+            o4, o6 = _val(b2, pr.pair_id), _val(n2, pr.pair_id)
+            s4, s6 = side(o4, cutoff), side(o6, cutoff)
+            if s4 is None or s6 is None or s4 == s6:
+                continue
+            any_side += 1
+            f4, f6 = _val(b1, pr.pair_id), _val(n1, pr.pair_id)
+            if not (escalates(f4, cutoff) or escalates(f6, cutoff)):
+                continue
+            rows.append({"pair_id": pr.pair_id, "target": pr.target, "listed": pr.listed, "group": pr.group,
+                         "first_base": f4, "first_new": f6, "second_base": o4, "second_new": o6,
+                         "second_base_reason": (b2.get(pr.pair_id) or {}).get("reason"),
+                         "second_new_reason": (n2.get(pr.pair_id) or {}).get("reason"),
+                         "decision_base": rule_decision(f4, o4, cutoff), "decision_new": rule_decision(f6, o6, cutoff),
+                         "decision_base_with_new_second": rule_decision(f4, o6, cutoff),
+                         "decision_new_with_base_second": rule_decision(f6, o4, cutoff)})
+        out[str(p)] = {"second_changes_side": any_side, "n": len(rows), "pairs": rows}
+    return out
+
+
+def _mean(xs: Sequence) -> Optional[float]:
+    xs = [x for x in xs if x is not None]
+    return float(np.mean(xs)) if xs else None
+
+
+def _verdict(base: Optional[float], new: Optional[float], band: Optional[float], better: Optional[str]) -> Optional[str]:
+    """"same" when ``new`` is within ``band`` of ``base``; else "better" / "worse" by ``better`` ("higher" or
+    "lower" is better), or "higher" / "lower" when neither direction is better."""
+    if base is None or new is None or band is None:
+        return None
+    d = new - base
+    if abs(d) <= band + 1e-9:
+        return "same"
+    if better is None:
+        return "higher" if d > 0 else "lower"
+    return "better" if (d > 0) == (better == "higher") else "worse"
+
+
+def round3_summary(r3: Mapping, models: Sequence[str]) -> list[dict]:
+    """The summary rows (``coding_plan_overlap_arms.md``, "Round 3", item 4): version 4 against version 6 on the
+    headline figures, each with a noise band and a verdict.  The band of a figure read in each pass is the
+    difference between version 4's two passes (round 1's passes); of a figure that already compares the passes
+    (self-consistency, the rule's decision flips), two binomial standard errors of version 4's figure; never
+    less than one pair.  Figures read in each pass compare the means of the two passes."""
+    pops = r3["populations"]
+    al, nn = pops.get("all", {}).get("versions", {}), pops.get("nearest", {}).get("versions", {})
+    v4, v6 = al.get("v4"), al.get("v6")
+    if not v4 or not v6:
+        return []
+    rows: list[dict] = []
+
+    def add(figure, who, base, new, band, better, fmt, note=None, n=None):
+        rows.append({"figure": figure, "model": who, "v4": base, "v6": new, "band": band,
+                     "verdict": _verdict(base, new, band, better), "format": fmt, "note": note, "n": n})
+
+    def two_se(p, n):
+        return max(2 * math.sqrt(p * (1 - p) / n), 1 / n) if p is not None and n else None
+
+    def per_pass(d: Mapping, key=None):
+        vals = [(d[p] if key is None else d[p].get(key)) for p in sorted(d)]
+        return vals
+
+    for m in models:
+        a, b = v4["self_consistency"].get(m), v6["self_consistency"].get(m)
+        if a and b:
+            ident = a["identical"]
+            add("self-consistency, exact, like for like (version 4: the pairs whose prompt was identical in both "
+                "passes)", m, ident["exact"], b["exact"], two_se(ident["exact"], ident["n"]), "higher", "pct",
+                n=(ident["n"], b["n"]))
+            add("self-consistency, exact, every pair (version 4 includes its reordered lists; not like for like)", m,
+                a["exact"], b["exact"], None, None, "pct", n=(a["n"], b["n"]))
+    ref = r3["reference"]
+    other = next((m for m in models if m != ref), None)
+    if other:
+        bm4, bm6 = v4["between_models"].get(other, {}), v6["between_models"].get(other, {})
+        if bm4 and bm6:
+            e4, e6 = per_pass(bm4, "exact"), per_pass(bm6, "exact")
+            n = bm4[sorted(bm4)[0]]["n"]
+            add(f"{SHORT.get(other, other)} against {SHORT.get(ref, ref)}, exact, every pair, mean of the passes", "both",
+                _mean(e4), _mean(e6), max(abs(e4[0] - e4[-1]), 1 / n), "higher", "pct")
+        nb4, nb6 = (nn.get("v4") or {}).get("between_models", {}).get(other, {}), \
+            (nn.get("v6") or {}).get("between_models", {}).get(other, {})
+        if nb4 and nb6:
+            c4, c6 = per_pass(nb4, "crossings"), per_pass(nb6, "crossings")
+            add("crossings at 3 between the models, nearest pairs, mean of the passes", "both", _mean(c4), _mean(c6),
+                max(abs(c4[0] - c4[-1]), 1), "lower", "count")
+    for m in models:
+        cv4, cv6 = (nn.get("v4") or {}).get("coverage", {}).get(m, {}), (nn.get("v6") or {}).get("coverage", {}).get(m, {})
+        if cv4 and cv6:
+            s4, s6 = per_pass(cv4, "share"), per_pass(cv6, "share")
+            n = cv4[sorted(cv4)[0]]["n"]
+            add("covered at 3, nearest pairs, mean of the passes", m, _mean(s4), _mean(s6),
+                max(abs(s4[0] - s4[-1]), 1 / n), None, "pct")
+    r4, r6 = v4.get("rule"), v6.get("rule")
+    if r4 and r6:
+        for key, label, better in (("kept_though_second", "kept though Opus reads 3 or more (the rule), every pair, mean "
+                                    "of the passes", "lower"),
+                                   ("escalated", "escalated to Opus (the rule), every pair, mean of the passes", None),
+                                   ("rescued", "rescued by Opus (the rule), every pair, mean of the passes", None)):
+            k4, k6 = per_pass(r4["per_pass"], key), per_pass(r6["per_pass"], key)
+            add(label, "rule", _mean(k4), _mean(k6), max(abs(k4[0] - k4[-1]), 1), better, "count")
+        f4, f6 = r4.get("flips"), r6.get("flips")
+        if f4 and f6 and f4["n"]:
+            p4 = f4["differ"] / f4["n"]
+            add("the rule's decision differs between the passes, every pair", "rule", f4["differ"], f6["differ"],
+                max(2 * math.sqrt(f4["n"] * p4 * (1 - p4)), 1), "lower", "count", n=(f4["n"], f6["n"]))
+    for key, label in (("forward_share", "2s whose reason describes a containment (round 1's pattern), pooled"),
+                       ("forward_discounted_share", "the same, discounting \"neither implies the other\" wording"),
+                       ("reverse_share", "3s whose reason describes a two-sided overlap (round 2's pattern), pooled")):
+        for m in models:
+            s4, s6 = v4["slips"].get(m), v6["slips"].get(m)
+            if not s4 or not s6:
+                continue
+            passes = [k for k in s4 if k != "pooled"]
+            vals = [s4[p][key] for p in passes]
+            n_key = "n_3" if key.startswith("reverse") else "n_2"
+            per_pass_n = s4["pooled"][n_key] / max(1, len(passes))          # one pair's worth of a pass's share
+            band = (max(abs(vals[0] - vals[-1]), 1 / per_pass_n) if vals and None not in vals and per_pass_n
+                    else None)
+            count_key = key.removesuffix("_share")
+            add(label, m, s4["pooled"][key], s6["pooled"][key], band, "lower", "pct",
+                n=(f"{s4['pooled'][count_key]} of {s4['pooled'][n_key]}", f"{s6['pooled'][count_key]} of {s6['pooled'][n_key]}"))
+    marks = r3.get("marks") or {}
+    for key, label in (("leaning_or_alternative", "Roger's 30 marks: his leaning or the alternative he named"),
+                       ("exact", "Roger's 30 marks: exact")):
+        for m in models:
+            base = (marks.get("v4_test1") or {}).get(m)
+            new = [((marks.get(f"v6_pass{p}") or {}).get(m) or {}).get(key) for p in (1, 2)]
+            noise = [((marks.get(f"v4_pass{p}") or {}).get(m) or {}).get(key) for p in (1, 2)]
+            if not base:
+                continue
+            band = max(abs(noise[0] - noise[1]), 1) if None not in noise else 1
+            add(label + " (version 4: overlap_test_1; version 6: mean of the passes)", m, base[key], _mean(new), band,
+                "higher", "count", n=(base["n"], None))
+    return rows
+
+
+def analyse_round3(pair_set: PairSet, versions: Mapping[str, Mapping], populations: Mapping[str, Sequence[str]], *,
+                   models: Sequence[str], reference: str = REFERENCE, cutoff: int = CUTOFF,
+                   marks: Optional[Mapping] = None, records: Optional[Mapping[str, Sequence[Mapping]]] = None) -> dict:
+    """Round 3 of the arms experiment (``coding_plan_overlap_arms.md``, "Round 3"): rubric A version 6 in its
+    one-pair form against version 4 (round 1's A) and A2 (round 2) on the same pairs.
+
+    ``versions``: ``{name: {"run", "rubric", "rubric_versions", "form", "by_pass": {pass: {model: answers}},
+    "groups": prompt groups of a list run's second pass, or None}}``, names ``"v4"``, ``"A2"``, ``"v6"``
+    (``"v6"`` this run); ``populations``: ``{"all" | "nearest" | "round2": [pair_id, ...]}``, each version
+    measured on a population only if it answered every pair of it; ``marks``: ``{"items": the marks key's
+    items, "test1": {model: answers}}`` (version 4 from overlap_test_1); ``records``: ``{name: records}`` for
+    the parse rates, the format notes, the cache and the spend.  The figures per population and version
+    (:func:`round3_version`), each version against version 4 per model and pass and in the rule's decisions,
+    the pairs where Opus's answer changes the rule's decision (:func:`opus_changes`), Roger's marks
+    (:func:`marks_agreement`), and the summary rows (:func:`round3_summary`)."""
+    by_id = {p.pair_id: p for p in pair_set.pairs}
+    out: dict = {"cutoff": cutoff, "models": list(models), "reference": reference, "first_line": FIRST_LINE,
+                 "second_opinion": SECOND_OPINION,
+                 "versions": {k: {x: v.get(x) for x in ("run", "rubric", "rubric_versions", "form")}
+                              for k, v in versions.items()},
+                 "patterns": {"containment": CONTAINMENT_PATTERN, "two_sided": TWO_SIDED_PATTERN,
+                              "neither_implies": NEITHER_IMPLIES_PATTERN, "flags": "IGNORECASE"},
+                 "populations": {}, "parse": {}, "format_notes": {}, "cache": {}, "spend_per_pair": {}}
+    answered = {k: {pid for p, per in v["by_pass"].items() for ans in per.values() for pid, a in ans.items()
+                    if a.get("value") is not None or a.get("error")} for k, v in versions.items()}
+    for pop, ids in populations.items():
+        pairs = [by_id[pid] for pid in ids if pid in by_id]
+        idset = {p.pair_id for p in pairs}
+        entry: dict = {"n_pairs": len(pairs), "by_group": dict(Counter(p.group for p in pairs)), "versions": {},
+                       "against_v4": {}, "rule_against_v4": {}}
+        decisions: dict = {}
+        for name, v in versions.items():
+            if not idset or not idset <= answered[name]:
+                continue
+            figs, dec = round3_version(v["rubric"], v["by_pass"], pairs, models=models, reference=reference,
+                                       cutoff=cutoff, groups=v.get("groups"))
+            entry["versions"][name] = figs
+            decisions[name] = dec
+        base = versions.get("v4")
+        if base and "v4" in entry["versions"]:
+            for name, v in versions.items():
+                if name == "v4" or name not in entry["versions"]:
+                    continue
+                per_m = {}
+                for m in models:
+                    per_m[m] = {str(p): _cells_consistency(compare_answers(
+                        "A", {k: x for k, x in (base["by_pass"].get(p) or {}).get(m, {}).items() if k in idset},
+                        {k: x for k, x in (v["by_pass"].get(p) or {}).get(m, {}).items() if k in idset}, pairs,
+                        cutoff=cutoff, nearest_only=False))
+                        for p in sorted(set(base["by_pass"]) & set(v["by_pass"]))
+                        if (base["by_pass"][p].get(m) and v["by_pass"][p].get(m))}
+                entry["against_v4"][name] = per_m
+                entry["rule_against_v4"][name] = decisions_against(decisions.get("v4", {}), decisions.get(name, {}))
+        out["populations"][pop] = entry
+    if "v4" in versions and "v6" in versions:
+        out["opus_changes"] = opus_changes(pair_set.pairs, versions["v4"]["by_pass"], versions["v6"]["by_pass"],
+                                           cutoff=cutoff)
+    if marks and marks.get("items"):
+        items = marks["items"]
+        mk: dict = {"items": [{"item": it["item"], "pair_id": it["pair_id"], "leaning": ROGER_LEANINGS.get(it["item"]),
+                               "alternative": ROGER_ALTERNATIVES.get(it["item"])} for it in items]}
+        if marks.get("test1"):
+            mk["v4_test1"] = {m: marks_agreement(a, items) for m, a in marks["test1"].items() if m in models}
+        for name, label in (("v4", "v4"), ("v6", "v6")):
+            v = versions.get(name)
+            if not v:
+                continue
+            for p, per in sorted(v["by_pass"].items()):
+                mk[f"{label}_pass{p}"] = {m: marks_agreement(per[m], items) for m in models if per.get(m)}
+        out["marks"] = mk
+    for name, recs in (records or {}).items():
+        recs = list(recs)
+        rubric = versions[name]["rubric"]
+        mine = [r for r in recs if r["rubric"] == rubric and r["model"] in models]
+        out["parse"][name] = {}
+        for p in record_passes(mine):
+            fp = first_attempt_parse(pair_set, mine, pass_no=p)
+            final = collect_answers(pair_set, mine, pass_no=p)
+            for m in models:
+                f = fp.get((rubric, m))
+                ans = final.get((rubric, m), {})
+                if f or ans:
+                    out["parse"][name][f"{m}|{p}"] = {"model": m, "pass": p, "first_ok": f["ok"] if f else None,
+                                                      "first_total": f["total"] if f else None,
+                                                      "ok": sum(a["value"] is not None for a in ans.values()),
+                                                      "total": len(ans)}
+        out["format_notes"][name] = format_notes(mine)
+        out["cache"][name] = cache_stats(mine)
+        n_answers = Counter()
+        for p in record_passes(mine):
+            for (r, m), ans in collect_answers(pair_set, mine, pass_no=p).items():
+                n_answers[m] += sum(a["value"] is not None for a in ans.values())
+        out["spend_per_pair"][name] = {m: {"answers": n_answers[m], "charged_usd": c["charged_usd"],
+                                           "per_pair_usd": _r(c["charged_usd"] / n_answers[m], 6) if n_answers[m] else None}
+                                       for m, c in out["cache"][name].items()}
+    out["summary"] = round3_summary(out, models)
+    return out
+
+
 # --------------------------------------------------------------------------- tables
 
 def _f(x, nd: int = 2) -> str:
@@ -2080,10 +2864,17 @@ def summary_markdown(summary: Mapping, pair_set: PairSet, corpus: Mapping) -> st
     restricted = (f"  The run sent only these calls, named in `{sent['calls_from']}`, of the pair set's "
                   f"{sent['of_calls']} calls ({sent['of_pairs']} pairs); every table below is about the calls sent."
                   if sent.get("calls_from") else "")
+    forms = (summary.get("arms") or {}).get("forms") or {}
+    single = [r for r, f in forms.items() if f == "single"]
+    calls_note = (f"  ({'Rubric' if len(single) == 1 else 'Rubrics'} {_names(single)} went out one pair per call, "
+                  f"{summary['n_pairs']} calls a stage; the calls here are the pair set's.)" if single else "")
     L = ["# Overlap test: tables", "",
-         f"{summary['n_pairs']} pairs in {summary['n_calls']} calls.{restricted}  Reference model: {sm(ref)}.  "
-         "Generated from `summary.json` beside this file.", "", "## Parse rates (pairs whose answer parsed)", "",
-         "| rubric | model | ok / total | rate | first attempt |", "|---|---|---|---|---|"]
+         f"{summary['n_pairs']} pairs in {summary['n_calls']} calls.{restricted}{calls_note}  Reference model: "
+         f"{sm(ref)}.  Generated from `summary.json` beside this file.", ""]
+    if (summary.get("round3") or {}).get("populations"):
+        L += round3_markdown(summary["round3"], corpus, sm)[1:]
+    L += ["## Parse rates (pairs whose answer parsed)", "",
+          "| rubric | model | ok / total | rate | first attempt |", "|---|---|---|---|---|"]
     for k, v in summary["parse"].items():
         r, m = k.split("|", 1)
         fa = summary.get("parse_first_attempt", {}).get(k)
@@ -2227,10 +3018,19 @@ def arms_markdown(arms: Mapping, corpus: Mapping, sm) -> list[str]:
     cut = arms["cutoff"]
     L = ["", f"## The arms experiment: {len(passes)} pass{'es' if len(passes) != 1 else ''}, decision scale, "
          f"cut-off {cut}", ""]
-    for p, o in arms.get("order", {}).items():
-        L.append(f"Pass {p} sent the same calls with the listed traits in a fresh order: {o['same_order']} of "
-                 f"{o['n_calls']} calls kept pass 1's order by chance ({o['same_order_single']} of them list one "
-                 f"trait); {o['pairs_moved']} of {o['n_pairs']} pairs went out under another id.")
+    forms = arms.get("forms") or {}
+    single = [r for r in arms["rubrics"] if forms.get(r) == "single"]
+    listed = [r for r in arms["rubrics"] if forms.get(r) != "single"]
+    for p, o in (arms.get("order", {}) if listed else {}).items():
+        L.append(f"Pass {p} sent the same calls with the listed traits in a fresh order"
+                 + (f" (rubric{'s' if len(listed) > 1 else ''} {_names(listed)})" if single else "")
+                 + f": {o['same_order']} of {o['n_calls']} calls kept pass 1's order by chance "
+                 f"({o['same_order_single']} of them list one trait); {o['pairs_moved']} of {o['n_pairs']} pairs "
+                 "went out under another id.")
+    if single and len(passes) >= 2:
+        L.append(f"Rubric{'s' if len(single) > 1 else ''} {_names(single)} went out one pair per call (the single "
+                 "form): every later pass sent the identical prompt, there being no list to reorder, so the agreement "
+                 "between the passes is sampling noise alone.")
     maps = decision_maps_text(arms["rubrics"])
     natives = native_scales_text(arms["rubrics"])
     L += ["", "The decision scale is rubric A's 0-4 with \"opposite\" and \"unsure\""
@@ -2541,6 +3341,263 @@ def round2_markdown(r2: Mapping, corpus: Mapping, sm, subset_counts: Optional[Ma
     return L
 
 
+#: How round 3's tables name the versions and the populations, and how many pairs of Opus's changes they quote.
+ROUND3_VERSION_NAMES = {"v4": "version 4", "A2": "A2", "v6": "version 6"}
+ROUND3_POPULATION_TITLES = {"all": "Every pair", "nearest": "The nearest pairs",
+                            "round2": "Round 2's pairs (those A2 was sent)"}
+ROUND3_EXAMPLES = 6
+
+
+def _fmt_summary(x, fmt: str) -> str:
+    if x is None:
+        return "–"
+    if fmt == "pct":
+        return f"{100 * x:.1f}%"
+    return f"{x:.1f}" if isinstance(x, float) and not float(x).is_integer() else f"{int(round(x))}"
+
+
+def round3_markdown(r3: Mapping, corpus: Mapping, sm) -> list[str]:
+    """Round 3's tables (:func:`analyse_round3`): the summary first, then the parse rates, the cache and the
+    spend, each population's figures for every version measured on it, Roger's marks, and the pairs where
+    Opus's answer under version 6 changes the rule's decision against version 4, reasons in full."""
+    vn = lambda k: ROUND3_VERSION_NAMES.get(k, k)  # noqa: E731
+    cut, ref = r3["cutoff"], r3["reference"]
+    models = r3["models"]
+    others = [m for m in models if m != ref]
+    vers = r3["versions"]
+
+    def vdesc(k):
+        v = vers.get(k) or {}
+        return (f"{vn(k)}: rubric {v.get('rubric')} version{'s' if len(v.get('rubric_versions') or []) > 1 else ''} "
+                f"{', '.join(str(x) for x in v.get('rubric_versions') or []) or '?'}, {v.get('form')} form, run "
+                f"`{v.get('run')}`")
+    L = ["", "## Round 3: rubric A version 6, one pair per call", "",
+         "Versions compared on the same pairs: " + "; ".join(vdesc(k) for k in vers) + ".  Version 6 went out one pair "
+         "per call, and its second pass sent the identical prompts (there is no list to reorder), so the agreement "
+         "between its passes is sampling noise alone; version 4's and A2's second passes reshuffled their lists, so "
+         "their like-for-like figure is the one on the pairs whose prompt came out identical (a call of one trait, or "
+         "a list that shuffled into the same order).  Decision scale: rubric A's own; cut-off "
+         f"{cut}.  Crossings, flips and shares count every pair of the population named.  M3's rule: "
+         f"{sm(r3['first_line'])} reads every pair; above {cut} is cut, below it (or \"opposite\") kept; at {cut} (or "
+         f"\"unsure\") the pair goes to {sm(r3['second_opinion'])}, and is kept if {sm(r3['second_opinion'])} reads it "
+         f"under {cut}.", ""]
+    # ---- summary
+    rows = r3.get("summary") or []
+    if rows:
+        L += ["### Summary: version 4 against version 6", "",
+              "Verdict \"same\" when the two differ by no more than the noise band: for a figure read in each pass, the "
+              "difference between version 4's two passes (round 1's passes); for a figure that already compares the "
+              "passes (self-consistency, the rule's flips), two binomial standard errors of version 4's figure; never "
+              "less than one pair.  Figures read in each pass are the means of the two passes.  \"higher\" / \"lower\" "
+              "where neither direction is better.", "",
+              "| figure | model | version 4 | version 6 | noise band | verdict |", "|---|---|---|---|---|---|"]
+        for x in rows:
+            who = sm(x["model"]) if x["model"] in SHORT else x["model"]
+            n = x.get("n")
+            nn = (f" ({n[0]})" if n and n[0] is not None else ""), (f" ({n[1]})" if n and n[1] is not None else "")
+            L.append(f"| {x['figure']} | {who} | {_fmt_summary(x['v4'], x['format'])}{nn[0]} | "
+                     f"{_fmt_summary(x['v6'], x['format'])}{nn[1]} | {_fmt_summary(x['band'], x['format'])} | "
+                     f"{x['verdict'] or '–'} |")
+        L.append("")
+    # ---- parse, cache, spend
+    L += ["### Parse rates, the cache and the spend", "",
+          "| version | model | pass | parsed at the first attempt | parsed in the end |", "|---|---|---|---|---|"]
+    for k, per in r3.get("parse", {}).items():
+        for v in per.values():
+            first = f"{v['first_ok']} / {v['first_total']}" if v.get("first_total") is not None else "–"
+            L.append(f"| {vn(k)} | {sm(v['model'])} | {v['pass']} | {first} | {v['ok']} / {v['total']} |")
+    notes = r3.get("format_notes", {}).get("v6") or {}
+    if notes:
+        L += ["", "Version 6's answer format (first attempts; in the end): an answer wrapped in a results list (the "
+              "list form's shape), extra keys, the answer before the reason, and self-corrections (more than one "
+              "answer object):", "", "| model | pass | calls | wrapped | extra keys | answer before reason | "
+              "self-corrections |", "|---|---|---|---|---|---|---|"]
+        for v in notes.values():
+            f, z = v.get("first") or {}, v.get("final") or {}
+            keys = ", ".join(f"{k} {n}" for k, n in (f.get("extra_key_names") or {}).items())
+            L.append(f"| {sm(v['model'])} | {v['pass']} | {f.get('n')} | {f.get('wrapped')}; {z.get('wrapped')} | "
+                     f"{f.get('extra_keys')}{f' ({keys})' if keys else ''}; {z.get('extra_keys')} | "
+                     f"{f.get('not_reason_first')}; {z.get('not_reason_first')} | {f.get('self_corrections')}; "
+                     f"{z.get('self_corrections')} |")
+    cache = r3.get("cache", {})
+    if cache:
+        L += ["", "The prompt cache and the spend, from the usage each record holds (every answered request, re-asks "
+              "included).  \"Charged\" is what the usage records charge (cache writes 1.25x, reads 0.1x the input "
+              "price, as `llm.billed_usage` does for every model); \"published\" reads Opus 5.5's cache at its "
+              "published 0.05x; \"uncached\" puts every input token at the full price.", "",
+              "| version | model | requests | reading the cache | writing it | input tokens: uncached / written / read | "
+              "share of input read from the cache | charged | published | uncached | saved (charged; published) | "
+              "per pair answered |", "|---|---|---|---|---|---|---|---|---|---|---|---|"]
+        for k, per in cache.items():
+            for m, c in per.items():
+                pp = (r3.get("spend_per_pair", {}).get(k) or {}).get(m) or {}
+                L.append(f"| {vn(k)} | {sm(m)} | {c['requests']} | {c['reading']} ({_pct(c['hit_rate'])}) | {c['writing']} | "
+                         f"{c['input_tokens']:,} / {c['cache_write_tokens']:,} / {c['cache_read_tokens']:,} | "
+                         f"{_pct(c['read_share'])} | ${c['charged_usd']:.4f} | ${c['published_usd']:.4f} | "
+                         f"${c['uncached_usd']:.4f} | ${c['saved_usd']:.4f}; ${c['saved_published_usd']:.4f} | "
+                         f"{'$%.5f' % pp['per_pair_usd'] if pp.get('per_pair_usd') is not None else '–'} "
+                         f"({pp.get('answers', '–')}) |")
+    # ---- populations
+    for pop, entry in r3.get("populations", {}).items():
+        vs = entry["versions"]
+        if not vs:
+            continue
+        L += ["", f"### {ROUND3_POPULATION_TITLES.get(pop, pop)}: {entry['n_pairs']} pairs", "",
+              "By group: " + ", ".join(f"{g} {n}" for g, n in entry["by_group"].items()) + ".  Versions measured here: "
+              + ", ".join(vn(k) for k in vs) + ".", "",
+              "Self-consistency, pass 1 against pass 2 (exact over every answer; within one and kappa, quadratic, on "
+              f"the pairs both passes scored; flips: pairs on different sides of {cut} in the two passes).  The last "
+              "columns: the pairs whose prompt was identical in both passes (all of version 6's).", "",
+              "| version | model | both answered | exact | within one | kappa | exact (decision) | flips at "
+              f"{cut} | identical prompts: pairs | exact | within one | kappa | flips |",
+              "|---|---|---|---|---|---|---|---|---|---|---|---|---|"]
+        for k, f in vs.items():
+            for m, c in f["self_consistency"].items():
+                i = c["identical"]
+                L.append(f"| {vn(k)} | {sm(m)} | {c['n']} | {_pct(c['exact'])} | {_pct(c['within_one'])} | "
+                         f"{_f(c['kappa'])} | {_pct(c['exact_decision'])} | {c['crossings']} of {c['cutoff_n']} | "
+                         f"{i['n']}{' (all)' if i.get('all_pairs') else ''} | {_pct(i['exact'])} | "
+                         f"{_pct(i['within_one'])} | {_f(i['kappa'])} | {i['crossings']} of {i['cutoff_n']} |")
+        L += ["", "Where the passes differ, by the two answers:", ""]
+        for k, f in vs.items():
+            for m, c in f["self_consistency"].items():
+                L.append(f"- {vn(k)}, {sm(m)}: " + (", ".join(f"{a} {n}" for a, n in c["flips_native"].items()) or "none"))
+        for m in others:
+            L += ["", f"{sm(m)} against {sm(ref)} (crossings: pairs on different sides of {cut}, split by which model "
+                  "covers):", "",
+                  "| version | pass | both answered | exact | within one | kappa | crossings at "
+                  f"{cut} | {sm(ref)} covers only | {sm(m)} covers only |", "|---|---|---|---|---|---|---|---|---|"]
+            for k, f in vs.items():
+                for p, c in (f["between_models"].get(m) or {}).items():
+                    L.append(f"| {vn(k)} | {p} | {c['n']} | {_pct(c['exact'])} | {_pct(c['within_one'])} | "
+                             f"{_f(c['kappa'])} | {c['crossings']} of {c['cutoff_n']} | {c['first_only']} | "
+                             f"{c['second_only']} |")
+        if entry.get("against_v4"):
+            L += ["", f"Against version 4, the same model and pass (crossings: on different sides of {cut}):", "",
+                  "| version | model | pass | both answered | exact | within one | kappa | crossings | version 4 covers "
+                  "only | this version covers only |", "|---|---|---|---|---|---|---|---|---|---|"]
+            for k, per in entry["against_v4"].items():
+                for m, pp in per.items():
+                    for p, c in pp.items():
+                        L.append(f"| {vn(k)} | {sm(m)} | {p} | {c['n']} | {_pct(c['exact'])} | {_pct(c['within_one'])} | "
+                                 f"{_f(c['kappa'])} | {c['crossings']} of {c['cutoff_n']} | {c['first_only']} | "
+                                 f"{c['second_only']} |")
+        L += ["", f"At {cut} or more:", "", "| version | model | pass 1 | pass 2 |", "|---|---|---|---|"]
+        for k, f in vs.items():
+            for m, per in f["coverage"].items():
+                L.append(f"| {vn(k)} | {sm(m)} | " + " | ".join(
+                    _of(per[p]["covered"], per[p]["n"], per[p]["share"]) if p in per else "–" for p in ("1", "2")) + " |")
+        if pop != "nearest":
+            L += ["", "Known groups on the decision scale: mean of the numeric answers / share at 3 or more / share "
+                  "\"opposite\", pass 1; pass 2.", "", "| group | n | " + " | ".join(
+                      f"{vn(k)}, {sm(m)}" for k, f in vs.items() for m in f["groups"]) + " |",
+                  "|---|---|" + "---|" * sum(len(f["groups"]) for f in vs.values())]
+            for g in GROUPS:
+                cells, n = [], None
+                for k, f in vs.items():
+                    for m, per in f["groups"].items():
+                        xs = [per[p].get(g) for p in ("1", "2") if p in per]
+                        if any(xs):
+                            n = n or next(x for x in xs if x)["n"]
+                        cells.append("; ".join(f"{_f(x['mean'])} / {_pct(x['share_3_plus'])} / {_pct(x['opposite'])}"
+                                               if x else "–" for x in xs))
+                if n:
+                    L.append(f"| {g} | {n} | " + " | ".join(cells) + " |")
+        rule_rows = [(k, f["rule"]) for k, f in vs.items() if f.get("rule")]
+        if rule_rows:
+            L += ["", f"M3's rule ({sm(r3['first_line'])} first, {sm(r3['second_opinion'])} on the {cut}s), per pass:", "",
+                  "| version | pass | decided | escalated | rescued | cut | of which directly | kept though "
+                  f"{sm(r3['second_opinion'])} reads {cut}+ | decision differs from version 4 (keep to cut / cut to keep) |",
+                  "|---|---|---|---|---|---|---|---|---|"]
+            for k, rs in rule_rows:
+                ag = entry.get("rule_against_v4", {}).get(k, {})
+                for p, x in rs["per_pass"].items():
+                    a = ag.get(p)
+                    against = f"{a['differ']} of {a['n']} ({a['keep_to_cut']} / {a['cut_to_keep']})" if a else "–"
+                    L.append(f"| {vn(k)} | {p} | {x['n']} | {x['escalated']} | {x['rescued']} | {x['cut']} | "
+                             f"{x['cut_direct']} | {x['kept_though_second']} | {against} |")
+            L += [""] + [f"- {vn(k)}: the rule's decision differs between the passes on {rs['flips']['differ']} of "
+                         f"{rs['flips']['n']} pairs" for k, rs in rule_rows if rs.get("flips")]
+        L += ["", "Slips (round 1's patterns; reasons matched case-insensitively): 2s whose reason describes a containment, "
+              "and the same less the reasons that say neither implies the other; 3s whose reason describes a two-sided "
+              "overlap, and the same counting \"neither implies the other\" too.", "",
+              "| version | model | pass | 2s | containment reason | discounting \"neither implies\" | 3s | two-sided "
+              "reason | or \"neither implies\" |", "|---|---|---|---|---|---|---|---|---|"]
+        for k, f in vs.items():
+            for m, per in f["slips"].items():
+                for p, s in per.items():
+                    L.append(f"| {vn(k)} | {sm(m)} | {p} | {s['n_2']} | {_of(s['forward'], s['n_2'], s['forward_share'])} | "
+                             f"{_of(s['forward_discounted'], s['n_2'], s['forward_discounted_share'])} | {s['n_3']} | "
+                             f"{_of(s['reverse'], s['n_3'], s['reverse_share'])} | "
+                             f"{_of(s['reverse_wide'], s['n_3'], s['reverse_wide_share'])} |")
+        esc_rows = [(k, f["second_on_escalated"]) for k, f in vs.items() if f.get("second_on_escalated")]
+        if esc_rows:
+            so = sm(r3["second_opinion"])
+            L += ["", f"{so} on the pairs the rule escalates ({sm(r3['first_line'])} at {cut}): its answers on them in that "
+                  f"pass, and on those it answered in both passes, how often alike:", "",
+                  f"| version | escalated in | pairs | {so}'s answers | answered in both passes | same answer | same side "
+                  f"of {cut} |", "|---|---|---|---|---|---|---|"]
+            for k, x in esc_rows:
+                for p, y in x["per_pass"].items():
+                    L.append(f"| {vn(k)} | pass {p} | {y['n']} | " + (", ".join(f"{a} {n}" for a, n in y["answers"].items())
+                                                                       or "–")
+                             + f" | {y['n_both_passes']} | {_f(y['same'])} | {_f(y['same_side'])} |")
+                y = x["any_pass"]
+                L.append(f"| {vn(k)} | either pass | {y['n']} | – | {y['n_both_passes']} | {_f(y['same'])} | "
+                         f"{_f(y['same_side'])} |")
+    # ---- Roger's marks
+    mk = r3.get("marks") or {}
+    if mk.get("items"):
+        sources = [(k, v) for k, v in mk.items() if k != "items"]
+        label = {"v4_test1": "version 4 (overlap_test_1)", "v4_pass1": "version 4 (overlap_arms_1, pass 1)",
+                 "v4_pass2": "version 4 (overlap_arms_1, pass 2)", "v6_pass1": "version 6, pass 1",
+                 "v6_pass2": "version 6, pass 2"}
+        L += ["", "### Agreement with Roger's 30 marks", "",
+              "His leaning per item, read by hand from the sheet, with the alternative he named on five items.  Exact "
+              "counts every answer (\"opposite\" included); within one, the items where both are numbers.", "",
+              "| answers | model | items | exact | within one | leaning or alternative |", "|---|---|---|---|---|---|"]
+        for k, per in sources:
+            for m, x in per.items():
+                L.append(f"| {label.get(k, k)} | {sm(m)} | {x['n']} | {_of(x['exact'], x['n'], x['exact_share'])} | "
+                         f"{_of(x['within_one'], x['n_numeric'], x['within_one_share'])} | "
+                         f"{_of(x['leaning_or_alternative'], x['n'], x['leaning_or_alternative_share'])} |")
+        cols = [(k, m) for k, per in sources for m in per]
+        L += ["", "Per item:", "", "| item | target / listed | Roger (alternative) | " + " | ".join(
+            f"{label.get(k, k)}, {sm(m)}" for k, m in cols) + " |", "|---|---|---|" + "---|" * len(cols)]
+        for i, it in enumerate(mk["items"]):
+            t, s = it["pair_id"].split(":", 1)[1].split(">", 1) if ":" in it["pair_id"] else ("?", "?")
+            alt = f" ({it['alternative']})" if it.get("alternative") is not None else ""
+            cells = [str(_f((mk[k][m]["items"][i]).get("value"))) for k, m in cols]
+            L.append(f"| {it['item']} | {_label(corpus, t)} / {_label(corpus, s)} | {it['leaning']}{alt} | "
+                     + " | ".join(cells) + " |")
+    # ---- Opus's changes
+    oc = r3.get("opus_changes") or {}
+    if oc:
+        so, fl = sm(r3["second_opinion"]), sm(r3["first_line"])
+        L += ["", f"### Where {so}'s answer under version 6 changes the rule's decision against version 4", "",
+              f"Pairs whose {so} answers under the two versions fall on different sides of {cut} while {fl} sends the pair "
+              f"to {so} under either version (so that, {fl}'s answer held, {so}'s change flips the decision); in pair "
+              f"order.  \"{so} changes side\" counts every pair where its answers cross {cut}, escalated or not.", ""]
+        for p, x in oc.items():
+            L.append(f"- pass {p}: {x['n']} pairs ({so} changes side on {x['second_changes_side']})")
+        first = oc.get("1") or next(iter(oc.values()))
+        L += ["", f"The first {ROUND3_EXAMPLES} in pass 1, both {so} reasons in full:", ""]
+        for x in first["pairs"][:ROUND3_EXAMPLES]:
+            L.append(f"- **{_label(corpus, x['target'])} / {_label(corpus, x['listed'])}** ({x['group']}): {fl} "
+                     f"version 4 {x['first_base']}, version 6 {x['first_new']}; the rule: version 4 {x['decision_base']}, "
+                     f"version 6 {x['decision_new']}.  {so} version 4, {x['second_base']}: \"{x['second_base_reason']}\"  "
+                     f"{so} version 6, {x['second_new']}: \"{x['second_new_reason']}\"")
+        rest = first["pairs"][ROUND3_EXAMPLES:]
+        if rest:
+            L += ["", "The others in pass 1 (" + so + " version 4 → version 6): " + "; ".join(
+                f"{_label(corpus, x['target'])} / {_label(corpus, x['listed'])} {x['second_base']} → {x['second_new']}"
+                for x in rest)]
+        if not first["pairs"]:
+            L.append("- none")
+    L.append("")
+    return L
+
+
 # --------------------------------------------------------------------------- cost
 
 def tokenizer_factor(model: str) -> float:
@@ -2554,21 +3611,62 @@ def estimate(calls: Sequence[Call], corpus: Mapping, rubrics: Mapping[str, Mappi
     ``rubric_keys`` (default: every rubric in ``rubrics``).  Output tokens per listed trait are the
     rubric's ``out_per_row`` (D's relation word and ``wider``, E's named kind) or
     :data:`OUT_PER_ROW_TOKENS`.  A later pass sends the same text in another order, so it costs the
-    same; ``pass_no`` only labels the line."""
+    same; ``pass_no`` only labels the line.  A single-form rubric is estimated on one call per pair
+    (:func:`stage_calls`), every input token at the uncached rate (an upper bound: the cached rubric is
+    read at a tenth of it; :func:`cached_estimate_usd`)."""
     est = Estimate()
     if not calls:
         return est
-    users = [render_user(c, corpus) for c in calls]
-    mean_rows = float(np.mean([len(c.listed) for c in calls]))
     which = f", pass {pass_no}" if pass_no is not None else ""
     for m in models:
         f = tokenizer_factor(m)
         for r in (list(rubrics) if rubric_keys is None else rubric_keys):
-            per_row = RUBRICS[r].get("out_per_row", OUT_PER_ROW_TOKENS)
-            in_tok = int(round(np.mean([len(rubrics[r]["text"]) + len(u) for u in users]) / CHARS_PER_TOKEN * f))
-            out_tok = int(round((OUT_BASE_TOKENS + per_row * mean_rows) * f))
-            est.add(f"rubric {r} ({RUBRICS[r]['name']}) on {SHORT.get(m, m)}{which}", m, len(calls), in_tok, out_tok)
+            in_tok, out_tok, n = _stage_tokens(calls, corpus, rubrics[r], r, f)
+            form = rubrics[r].get("form") or "list"
+            est.add(f"rubric {r} ({RUBRICS[r]['name']}{', one pair per call' if form == 'single' else ''}) on "
+                    f"{SHORT.get(m, m)}{which}", m, n, in_tok, out_tok)
     return est
+
+
+def _stage_tokens(calls: Sequence[Call], corpus: Mapping, rubric: Mapping, key: str, factor: float
+                  ) -> tuple[int, int, int]:
+    """``(mean input tokens, mean output tokens, calls)`` of a stage of ``rubric`` over ``calls``."""
+    form = rubric.get("form") or "list"
+    sent = stage_calls(calls, form)
+    users = [render_single(c, corpus) if form == "single" else render_user(c, corpus) for c in sent]
+    mean_rows = float(np.mean([len(c.listed) for c in sent]))
+    per_row = RUBRICS[key].get("out_per_row", OUT_PER_ROW_TOKENS)
+    in_tok = int(round(np.mean([len(rubric["text"]) + len(u) for u in users]) / CHARS_PER_TOKEN * factor))
+    out_tok = int(round((OUT_BASE_TOKENS + per_row * mean_rows) * factor))
+    return in_tok, out_tok, len(sent)
+
+
+def cached_estimate_usd(calls: Sequence[Call], corpus: Mapping, rubrics: Mapping[str, Mapping], models: Sequence[str],
+                        rubric_keys: Optional[Sequence[str]] = None, *, writes_per_stage: int = DEFAULT_CONCURRENCY
+                        ) -> float:
+    """The estimate with the rubric read from the prompt cache on the stages that mark it
+    (:func:`default_cache_system`): the rubric's tokens at the read factor the usage records charge
+    (``llm.CACHE_READ_FACTOR``) on every call but ``writes_per_stage`` (the concurrent first calls, which
+    write it at ``llm.CACHE_WRITE_FACTOR``); the other stages as :func:`estimate`."""
+    from assistant_axis.judge_pricing import price_for_model
+
+    from .llm import CACHE_READ_FACTOR, CACHE_WRITE_FACTOR
+    total = 0.0
+    for m in models:
+        f = tokenizer_factor(m)
+        rate_in, rate_out = price_for_model(m)
+        for r in (list(rubrics) if rubric_keys is None else rubric_keys):
+            if not calls:
+                continue
+            in_tok, out_tok, n = _stage_tokens(calls, corpus, rubrics[r], r, f)
+            if default_cache_system(rubrics[r].get("form") or "list"):
+                sys_tok = len(rubrics[r]["text"]) / CHARS_PER_TOKEN * f
+                w = min(n, writes_per_stage)
+                prompt = n * (in_tok - sys_tok) + sys_tok * (w * CACHE_WRITE_FACTOR + (n - w) * CACHE_READ_FACTOR)
+            else:
+                prompt = n * in_tok
+            total += (prompt * rate_in + n * out_tok * rate_out) / 1e6
+    return total
 
 
 # --------------------------------------------------------------------------- inputs

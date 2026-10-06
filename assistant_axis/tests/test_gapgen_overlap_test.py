@@ -17,6 +17,21 @@ from assistant_axis.tests.fake_anthropic import FakeAsyncAnthropic, make_respons
 
 REPO = Path(__file__).resolve().parents[2]
 DRAFT = REPO / "reports" / "trait_gap_generation" / "m3_overlap_rubric_draft.md"
+#: Rubric A's text at version 4 (draft 2's), the list form the runner, parser and analysis tests exercise; kept
+#: as a fixture since A moved to one pair per call (drafts 5 and 6, 2026-10-06), as test_gapgen_split_rubrics does.
+V4_FIXTURE = REPO / "assistant_axis" / "tests" / "fixtures" / "overlap_concept_v4.txt"
+#: The library's loader, kept here so that a test may put :func:`list_rubrics` in its place (the CLI tests do).
+_LOAD_RUBRICS = OT.load_rubrics
+
+
+def list_rubrics(rubrics_dir=None, keys=None):
+    """The pinned rubrics (:func:`OT.load_rubrics`, same arguments) with rubric A as version 4, the list form
+    (its pinned version 6 goes out one pair per call): what the tests of the list form send as rubric A."""
+    rb = _LOAD_RUBRICS(rubrics_dir, keys=keys)
+    if "A" in rb:
+        text = V4_FIXTURE.read_text(encoding="utf-8").rstrip("\n")
+        rb["A"] = {**rb["A"], "text": text, "version": 4, "sha256": sr.sha256(text), "form": "list"}
+    return rb
 
 
 # --------------------------------------------------------------------------- synthetic inputs
@@ -337,8 +352,10 @@ def run(coro):
 
 
 class TestRunner:
+    """The list form (rubric A at version 4, :func:`list_rubrics`); the single form is TestSingleFormRunner."""
+
     def test_one_call_per_target_per_stage_and_records(self, tmp_path):
-        rb = OT.load_rubrics()
+        rb = list_rubrics()
         ps = pair_set()
         client = FakeAsyncAnthropic(responder_for(rb))
         usage = MultiModelUsage()
@@ -358,7 +375,7 @@ class TestRunner:
         assert usage.n_calls == len(ps.calls) and usage.total_cost_usd > 0
 
     def test_resume_skips_answered_calls(self, tmp_path):
-        rb = OT.load_rubrics()
+        rb = list_rubrics()
         ps = pair_set()
         path = tmp_path / "responses.jsonl"
         c1 = FakeAsyncAnthropic(responder_for(rb))
@@ -371,7 +388,7 @@ class TestRunner:
         assert all("temperature" not in kw for kw in c2.calls)       # Sonnet 5.5 refuses it
 
     def test_budget_cap_stops_the_stage_and_keeps_the_answer(self, tmp_path):
-        rb = OT.load_rubrics()
+        rb = list_rubrics()
         ps = pair_set()
         usage = GuardedUsage(budget_usd=0.0005)          # one Opus call of (900, 150) tokens crosses it
         client = FakeAsyncAnthropic(responder_for(rb))
@@ -383,7 +400,7 @@ class TestRunner:
         assert rec["response"]["text"] and rec["parsed"]
 
     def test_an_unparsed_answer_is_asked_again_once(self, tmp_path):
-        rb = OT.load_rubrics()
+        rb = list_rubrics()
         ps = pair_set()
         seen: dict = {}
         good = responder_for(rb, value=1)
@@ -406,7 +423,7 @@ class TestRunner:
         assert first == {"ok": 0, "total": len(ps.pairs)}
 
     def test_a_call_that_never_parses_is_sent_twice_and_resent_on_resume(self, tmp_path):
-        rb = OT.load_rubrics()
+        rb = list_rubrics()
         ps = pair_set()
         client = FakeAsyncAnthropic(responder_for(rb, bad_model=OT.OPUS))
         path = tmp_path / "r.jsonl"
@@ -420,7 +437,7 @@ class TestRunner:
     def test_a_failed_request_is_not_asked_again_nor_counted_as_the_first_attempt(self, tmp_path):
         """overlap_test_2: an expired key failed every Sonnet request; the resume answered them all at once,
         and the first-attempt parse rate must say so (it read 0/409 from the failed records)."""
-        rb = OT.load_rubrics()
+        rb = list_rubrics()
         ps = pair_set()
         path = tmp_path / "r.jsonl"
         dead = FakeAsyncAnthropic(lambda kw: RuntimeError("401 API key is invalid"))
@@ -448,7 +465,7 @@ class TestRunner:
         assert {a["value"] for pid, a in ans.items() if pid.startswith(c.call_id + ">")} == {2}
 
     def test_parse_rate_alert(self, tmp_path, caplog):
-        rb = OT.load_rubrics()
+        rb = list_rubrics()
         ps = pair_set()
         client = FakeAsyncAnthropic(responder_for(rb, bad_model=OT.HAIKU))
         r = OT.OverlapRunner(client, rb, corpus(), usage=MultiModelUsage(), responses_path=tmp_path / "r.jsonl",
@@ -536,7 +553,7 @@ class TestStatistics:
         assert d["diff_counts"] == {"-2": 1, "1": 1, "3": 1}
 
     def test_collect_answers_and_results(self, tmp_path):
-        rb = OT.load_rubrics()
+        rb = list_rubrics()
         ps = pair_set()
         client = FakeAsyncAnthropic(responder_for(rb, value=3))
         r = OT.OverlapRunner(client, rb, corpus(), usage=MultiModelUsage(), responses_path=tmp_path / "r.jsonl",
@@ -557,7 +574,7 @@ class TestStatistics:
         assert fable.usd == pytest.approx(opus.usd * 2.5)          # same tokens, 2.5x the rates
 
     def test_estimate(self):
-        rb = OT.load_rubrics()
+        rb = list_rubrics()
         ps = pair_set()
         est = OT.estimate(ps.calls, corpus(), rb, OT.MODELS)
         assert len(est.lines) == 6 and est.usd > 0
@@ -1147,7 +1164,7 @@ class TestConfusionSubset:
         json.dumps(s)
 
     def test_readings_from_records_skip_rubric_b_and_keep_both_passes(self, tmp_path):
-        rb = OT.load_rubrics(keys=("A", "B", "C", "D"))
+        rb = list_rubrics(keys=("A", "B", "C", "D"))
         ps = pair_set(n_targets=6, n_antonyms=2, n_random=2)
         confused, slipped = ps.pairs[0], [p for p in ps.pairs if p.call_id != ps.pairs[0].call_id][-1]
         lab = lambda s: corpus()[s]["label"]                       # noqa: E731
@@ -1359,3 +1376,408 @@ class TestRound2Analysis:
         full = OT.summary_markdown(summary, ps, corpus())
         assert full.index("## The arms experiment") < full.index("## Round 2:")
         assert "### Arm D2: overlap_relation_implies" in full and "D2 maps same 4" in full
+
+
+# =========================================================================== round 3 of the arms experiment
+# (coding_plan_overlap_arms.md, "Round 3", 2026-10-06): rubric A version 6 one pair per call; the comparison with
+# version 4 and A2
+
+RUBRIC_A_FILE = REPO / "reports" / "trait_gap_generation" / "rubrics" / "overlap_concept.md"
+
+
+def rubric_sample():
+    """The rendered sample of rubric A's file (one pair per call, since draft 5): its user turn, and the object."""
+    text = RUBRIC_A_FILE.read_text(encoding="utf-8")
+    block = re.search(r"^## Rendered sample[^\n]*\n.*?^```\n(.*?)\n^```", text, re.S | re.M).group(1)
+    return block, json.loads(block)
+
+
+def single_answer(rb, value=_label_value, *, reason="About {label}.", wrap=False, **usage):
+    """A responder for both forms: the single form's one object (``{"reason", <key>}``; with ``wrap``, inside a
+    results list, as the list form's shape), the list form's rows; each answer by (rubric, the other trait's
+    label), as :func:`arms_responder`."""
+    by_text = {v["text"]: k for k, v in rb.items()}
+
+    def responder(kw):
+        r = by_text[system_text(kw)]
+        obj = json.loads(user_text(kw))
+        key = OT.RUBRICS[r]["key"]
+        if "other" in obj:
+            lab = obj["other"]["label"]
+            row = {"reason": reason.format(label=lab), key: value(r, lab)}
+            body = {"results": [{"id": 1, **row}]} if wrap else row
+        else:
+            body = {"results": [{"id": t["id"], "reason": reason.format(label=t["label"]), key: value(r, t["label"])}
+                                for t in obj["traits"]]}
+        return make_response(json.dumps(body), input_tokens=usage.get("input_tokens", 120),
+                             output_tokens=usage.get("output_tokens", 60), cache_creation=usage.get("cache_creation", 0),
+                             cache_read=usage.get("cache_read", 600))
+    return responder
+
+
+class TestSingleForm:
+    def test_the_payload_is_the_rubric_files_sample_byte_for_byte(self):
+        block, obj = rubric_sample()
+        assert set(obj) == {"target", "other"} and all(set(obj[k]) == {"label", "description"} for k in obj)
+        corp = {obj["target"]["label"]: obj["target"], obj["other"]["label"]: obj["other"]}
+        call = OT.PairCall(call_id="nn:extroverted>gregarious", set="nearest", target=obj["target"]["label"],
+                           listed=[obj["other"]["label"]], origin_call_id="nn:extroverted")
+        assert OT.render_single(call, corp) == block
+        assert json.loads(OT.render_single(call, corp)) == obj == OT.payload_single(call, corp)
+        # and from the corpus as it stands: the run sends exactly the sample for this pair (item 27 of the marks)
+        from assistant_axis.gapgen import contrast as CT
+        real = CT.load_corpus_texts(REPO / "data")
+        assert OT.render_single(OT.PairCall(call_id="x", set="nearest", target="extroverted", listed=["gregarious"]),
+                                real) == block
+
+    def test_labels_in_display_form_and_one_pair_only(self):
+        call = OT.PairCall(call_id="x>lambda_mu", set="labelled", target="alpha", listed=["lambda_mu"])
+        obj = json.loads(OT.render_single(call, corpus()))
+        assert obj["other"]["label"] == "lambda mu" and obj["target"]["label"] == "alpha"
+        assert OT.render_single(call, corpus()).count("\n") == 1                     # two lines
+        with pytest.raises(ValueError, match="one pair per call"):
+            OT.render_single(OT.Call(call_id="c", set="labelled", target="alpha", listed=["beta", "gamma"]), corpus())
+
+    def test_forms(self):
+        assert [OT.rubric_form("A", v) for v in (2, 4, 5, 6, None)] == ["list", "list", "single", "single", "list"]
+        assert all(OT.rubric_form(r, 9) == "list" for r in ("B", "C", "D", "E", "A2", "C2", "D2", "E2"))
+        assert "single_from_version" not in OT.RUBRICS["A2"]
+        rb = OT.load_rubrics(keys=("A", "B", "A2"))
+        assert (rb["A"]["form"], rb["B"]["form"], rb["A2"]["form"]) == ("single", "list", "list")
+        assert list_rubrics()["A"]["form"] == "list"
+        assert OT.record_form({"rubric": "A", "rubric_version": 4}) == "list"           # written before forms
+        assert OT.record_form({"rubric": "A", "rubric_version": 6}) == "single"
+        assert OT.record_form({"rubric": "A", "rubric_version": 6, "form": "list"}) == "list"
+
+    def test_single_calls_one_per_pair(self):
+        ps = pair_set(n_antonyms=2, n_random=2)
+        singles = OT.to_single_calls(ps.calls)
+        assert sorted(c.call_id for c in singles) == sorted(p.pair_id for p in ps.pairs)
+        by_id = {p.pair_id: p for p in ps.pairs}
+        for c in singles:
+            p = by_id[c.call_id]
+            assert c.listed == [p.listed] and c.target == p.target and c.origin_call_id == p.call_id
+        assert OT.to_single_calls(singles) == singles and OT.stage_calls(ps.calls, "list") == ps.calls
+
+    def test_request_params_cache_the_rubric(self):
+        rb = OT.load_rubrics()
+        c = OT.PairCall(call_id="x>beta", set="labelled", target="alpha", listed=["beta"])
+        for m in (OT.SONNET, OT.OPUS):
+            p = OT.call_params(c, corpus(), rubric_text=rb["A"]["text"], model=m, form="single")
+            assert p["system"] == [{"type": "text", "text": rb["A"]["text"], "cache_control": {"type": "ephemeral"}}]
+            assert p["messages"][0]["content"] == OT.render_single(c, corpus()) and "temperature" not in p
+        assert "cache_control" not in OT.call_params(c, corpus(), rubric_text="x", model=OT.OPUS, form="single",
+                                                     cache_system=False)["system"][0]
+        assert "cache_control" not in OT.call_params(c, corpus(), rubric_text="x", model=OT.OPUS)["system"][0]  # list
+        txt = OT.rendered_prompt(c, corpus(), rubric="A", rubric_text=rb["A"]["text"], model=OT.OPUS, form="single")
+        assert "single form" in txt and '"ephemeral"' in txt and '"other": {"label": "beta"' in txt
+
+
+def one(value, reason="Because.", **extra):
+    return json.dumps({"reason": reason, "similarity": value, **extra})
+
+
+class TestSingleParse:
+    def test_good_answers(self):
+        for v, want in ((3, 3), ("2", 2), ("Opposite", "opposite"), ("unsure", "unsure"), (0, 0)):
+            rows, errors, meta = OT.parse_answer(one(v), "A", 1, form="single")
+            assert errors == {} and rows == {1: {"reason": "Because.", "value": want, "reason_first": True}}
+            assert meta["notes"] == [] and not meta["wrapped"] and meta["n_rows"] == 1
+        rows, _, meta = OT.parse_single("Here:\n```json\n" + one(4) + "\n```", "A")
+        assert rows[1]["value"] == 4
+
+    def test_extra_keys_and_order_are_noted(self):
+        rows, errors, meta = OT.parse_single(json.dumps({"similarity": 2, "reason": "late", "label": "x"}), "A")
+        assert errors == {} and rows[1]["value"] == 2 and rows[1]["reason_first"] is False
+        assert meta["extra_keys"] == ["label"] and meta["notes"] == ["extra keys ['label']"]
+
+    def test_a_wrapped_answer_is_accepted_with_a_note(self):
+        text = json.dumps({"results": [{"id": 1, "reason": "Old form.", "similarity": 3}]})
+        rows, errors, meta = OT.parse_single(text, "A")
+        assert errors == {} and rows[1]["value"] == 3 and meta["wrapped"] and meta["extra_keys"] == ["id"]
+        assert "answer wrapped in a results list" in meta["notes"]
+        two = json.dumps({"results": [{"id": 1, "reason": "a", "similarity": 3}, {"id": 2, "reason": "b", "similarity": 1}]})
+        rows, errors, _ = OT.parse_single(two, "A")
+        assert rows == {} and errors == {1: "results holds 2 rows, not one"}
+
+    def test_a_self_correction_uses_the_last_answer(self):
+        rows, _, meta = OT.parse_single(one(2, "first") + "\n\nCorrection:\n" + one(3, "second"), "A")
+        assert rows[1]["value"] == 3 and rows[1]["reason"] == "second" and meta["n_result_objects"] == 2
+
+    def test_failures(self):
+        assert OT.parse_single("", "A")[1] == {1: "empty response"}
+        assert OT.parse_single(json.dumps({"similarity": 2}), "A")[1] == {1: "reason missing"}
+        assert OT.parse_single(json.dumps({"reason": "x", "score": 2}), "A")[1][1].startswith("unparseable")
+        assert "is not 0-4" in OT.parse_single(one(5), "A")[1][1]
+        assert OT.parse_single('{"reason": "x", "opposite"}', "A")[0] == {}                 # not JSON
+        assert OT.parse_single("no json here", "A")[1][1].startswith("unparseable")
+
+    def test_records_are_reparsed_in_their_form(self):
+        rec = {"rubric": "A", "rubric_version": 6, "form": "single", "listed": ["beta"], "response": {"text": one(3)}}
+        assert OT.reparse(rec)[0][1]["value"] == 3
+        old = {"rubric": "A", "rubric_version": 4, "listed": ["beta"],
+               "response": {"text": json.dumps({"results": [{"id": 1, "reason": "r", "similarity": 1}]})}}
+        assert OT.reparse(old)[0][1]["value"] == 1 and OT.record_form(old) == "list"
+
+
+class TestSingleFormRunner:
+    def test_one_call_per_pair_cached_identical_in_both_passes(self, tmp_path):
+        rb = OT.load_rubrics(keys=("A",))
+        assert rb["A"]["form"] == "single" and rb["A"]["version"] == 6
+        ps = pair_set(n_antonyms=2, n_random=2)
+        client = FakeAsyncAnthropic(single_answer(rb, cache_creation=0, cache_read=600))
+        path = tmp_path / "r.jsonl"
+        usage = MultiModelUsage()
+        r = OT.OverlapRunner(client, rb, corpus(), usage=usage, responses_path=path, retry_delays=(),
+                             usage_path=tmp_path / "usage.json")
+        res1 = run(r.run_stage("A", OT.SONNET, ps.calls, pass_no=1))
+        assert res1.n_calls == res1.n_sent == len(ps.pairs) == len(client.calls) and res1.n_ok == len(ps.pairs)
+        assert all(kw["system"][0].get("cache_control") == {"type": "ephemeral"} for kw in client.calls)
+        singles = {c.call_id: c for c in OT.to_single_calls(ps.calls)}
+        assert sorted(user_text(kw) for kw in client.calls) == sorted(OT.render_single(c, corpus())
+                                                                       for c in singles.values())
+        res2 = run(r.run_stage("A", OT.SONNET, ps.calls, pass_no=2))
+        assert res2.n_sent == len(ps.pairs) and len(client.calls) == 2 * len(ps.pairs)
+        users = [user_text(kw) for kw in client.calls]
+        assert sorted(users[:len(ps.pairs)]) == sorted(users[len(ps.pairs):])            # the identical prompts
+        recs = OT.read_records(path)
+        for rec in recs:
+            p = next(x for x in ps.pairs if x.pair_id == rec["call_id"])
+            assert rec["form"] == "single" and rec["pair_id"] == p.pair_id and rec["origin_call_id"] == p.call_id
+            assert rec["listed"] == [p.listed] and rec["order_seed"] is None and rec["request"]["cache_system"]
+            assert rec["request"]["user"] == OT.render_single(singles[p.pair_id], corpus())
+            assert rec["rubric_version"] == 6 and rec["response"]["usage_raw"]["cache_read_input_tokens"] == 600
+        keys = OT.done_keys(recs)
+        assert {k[2] for k in keys} == {p.pair_id for p in ps.pairs} and {k[3] for k in keys} == {1, 2}
+        for p_no in (1, 2):
+            ans = OT.collect_answers(ps, recs, pass_no=p_no)[("A", OT.SONNET)]
+            assert set(ans) == {p.pair_id for p in ps.pairs}
+            assert all(ans[p.pair_id]["value"] == _label_value("A", corpus()[p.listed]["label"]) for p in ps.pairs)
+        assert OT.first_attempt_parse(ps, recs, pass_no=2)[("A", OT.SONNET)] == {"ok": len(ps.pairs),
+                                                                                "total": len(ps.pairs)}
+        run(r.run_stage("A", OT.SONNET, ps.calls, pass_no=2))                           # a resume sends nothing
+        assert len(client.calls) == 2 * len(ps.pairs)
+        # the cache: charged at 0.1x for reads, as llm.billed_usage does, and recorded per request
+        assert usage.n_calls == len(recs) == OT.usage_from_records(recs).n_calls
+        assert usage.total_cost_usd == pytest.approx(OT.usage_from_records(recs).total_cost_usd)
+        cs = OT.cache_stats(recs)[OT.SONNET]
+        assert cs["requests"] == cs["reading"] == len(recs) and cs["writing"] == 0 and cs["hit_rate"] == 1.0
+        assert cs["saved_usd"] == pytest.approx(len(recs) * 600 * 0.9 * 2.0 / 1e6, abs=1e-6)
+        assert cs["charged_usd"] == pytest.approx(usage.total_cost_usd, abs=1e-6)
+
+    def test_a_wrapped_answer_parses_and_is_counted(self, tmp_path):
+        rb = OT.load_rubrics(keys=("A",))
+        ps = pair_set()
+        client = FakeAsyncAnthropic(single_answer(rb, wrap=True))
+        r = OT.OverlapRunner(client, rb, corpus(), usage=MultiModelUsage(), responses_path=tmp_path / "r.jsonl",
+                             retry_delays=())
+        res = run(r.run_stage("A", OT.OPUS, ps.calls))
+        assert res.n_ok == res.n_ok_first == len(ps.pairs) and len(client.calls) == len(ps.pairs)
+        notes = OT.format_notes(OT.read_records(tmp_path / "r.jsonl"))[f"{OT.OPUS}|1"]
+        assert notes["first"]["wrapped"] == notes["first"]["extra_keys"] == len(ps.pairs)
+        assert notes["first"]["extra_key_names"] == {"id": len(ps.pairs)}
+
+    def test_an_unparsed_answer_is_asked_again(self, tmp_path):
+        rb = OT.load_rubrics(keys=("A",))
+        ps = pair_set()
+        seen: dict = {}
+        good = single_answer(rb)
+
+        def flaky(kw):
+            seen[user_text(kw)] = seen.get(user_text(kw), 0) + 1
+            return make_response('{"reason": "x", "opposite"}') if seen[user_text(kw)] == 1 else good(kw)
+        client = FakeAsyncAnthropic(flaky)
+        r = OT.OverlapRunner(client, rb, corpus(), usage=MultiModelUsage(), responses_path=tmp_path / "r.jsonl",
+                             retry_delays=())
+        res = run(r.run_stage("A", OT.SONNET, ps.calls))
+        # a pair listed in two calls the same way round is the same prompt twice: one bad answer per prompt
+        prompts = {OT.render_single(c, corpus()) for c in OT.to_single_calls(ps.calls)}
+        assert len(prompts) < len(ps.pairs)
+        assert len(client.calls) == len(ps.pairs) + len(prompts) and res.n_ok == len(ps.pairs)
+        assert res.n_ok_first == len(ps.pairs) - len(prompts) and res.n_reasked == len(prompts)
+
+    def test_the_estimate_counts_one_call_per_pair_and_the_cache(self):
+        rb = OT.load_rubrics(keys=("A",))
+        ps = pair_set()
+        est = OT.estimate(ps.calls, corpus(), rb, [OT.SONNET, OT.OPUS], ["A"])
+        assert all(x.n_calls == len(ps.pairs) and "one pair per call" in x.label for x in est.lines)
+        cached = OT.cached_estimate_usd(ps.calls, corpus(), rb, [OT.SONNET, OT.OPUS], ["A"])
+        assert 0 < cached < est.usd
+        lst = list_rubrics(keys=("A",))
+        assert OT.cached_estimate_usd(ps.calls, corpus(), lst, [OT.OPUS], ["A"]) == pytest.approx(
+            OT.estimate(ps.calls, corpus(), lst, [OT.OPUS], ["A"]).usd, rel=1e-3)        # the list form is uncached
+
+
+class TestRound3Statistics:
+    def test_the_rule(self):
+        d = OT.rule_decision
+        assert [d(v, None) for v in (0, 1, 2, "opposite", 4)] == ["keep", "keep", "keep", "keep", "cut"]
+        assert [d(3, o) for o in (0, 2, "opposite", 3, 4, "unsure")] == ["keep", "keep", "keep", "cut", "cut", "cut"]
+        assert d("unsure", 2) == "keep" and d(3, None) is None and d(None, 2) is None
+        assert OT.escalates(3) and OT.escalates("unsure") and not OT.escalates(4) and not OT.escalates("opposite")
+
+    def test_rule_simulation_and_the_second_opinion(self):
+        ids = ["p1", "p2", "p3", "p4", "p5", "p6"]
+        s = {1: _ans(dict(zip(ids, [3, 3, 4, 2, 1, "opposite"]))), 2: _ans(dict(zip(ids, [3, 2, 4, 3, 1, "opposite"])))}
+        o = {1: _ans(dict(zip(ids, [2, 3, 4, 3, 1, 3]))), 2: _ans(dict(zip(ids, [2, 3, 3, 3, 1, 3])))}
+        stats, dec = OT.rule_simulation(ids, s, o)
+        p1 = stats["per_pass"]["1"]
+        assert (p1["escalated"], p1["rescued"], p1["cut"], p1["cut_direct"], p1["kept_though_second"]) == (2, 1, 2, 1, 2)
+        assert (p1["n"], p1["kept"]) == (6, 4)
+        p2 = stats["per_pass"]["2"]
+        assert (p2["escalated"], p2["rescued"], p2["cut"], p2["kept_though_second"]) == (2, 1, 2, 2)
+        assert dec[1]["p2"] == "cut" and dec[2]["p2"] == "keep" and dec[2]["p4"] == "cut"
+        assert stats["flips"] == {"n": 6, "differ": 2}                                      # p2 and p4
+        assert OT.decisions_against(dec, {1: dict(dec[1], p1="cut"), 2: dec[2]}) == {
+            "1": {"n": 6, "differ": 1, "keep_to_cut": 1, "cut_to_keep": 0}, "2": {"n": 6, "differ": 0, "keep_to_cut": 0,
+                                                                                 "cut_to_keep": 0}}
+        esc = OT.second_on_escalated(ids, s, o)
+        assert esc["per_pass"]["1"]["n"] == 2 and esc["per_pass"]["1"]["answers"] == {"2": 1, "3": 1}
+        assert esc["per_pass"]["1"]["same"] == 2 and esc["any_pass"]["n"] == 3 and esc["any_pass"]["same"] == 3
+
+    def test_slips_and_the_neither_implies_wording(self):
+        a = [{"value": 2, "reason": "Restless is part of anxious but lacks worry."},                      # forward
+             {"value": 2, "reason": "Narrower in object, but neither implies the other."},                # discounted
+             {"value": 2, "reason": "Sardonic is broader; they overlap without either implying the other."},
+             {"value": 2, "reason": "Each can be held without the other, though one is a special case."},
+             {"value": 2, "reason": "Mercy is narrower, and a compassionate person need not be lenient."},  # one-way
+             {"value": 3, "reason": "Each adds something the other lacks."},                               # reverse
+             {"value": 3, "reason": "Close, though neither strictly implies the other."},                 # wide only
+             {"value": 3, "reason": "The same thing, carried further."}]
+        s = OT.slip_counts("A", a)
+        assert (s["n_2"], s["forward"], s["forward_discounted"]) == (5, 5, 2)
+        assert (s["n_3"], s["reverse"], s["reverse_wide"]) == (3, 1, 2)
+        assert s["forward_discounted_share"] == pytest.approx(0.4) and s["reverse_wide_share"] == pytest.approx(0.667)
+        assert OT.describes_neither_implies("NEITHER fully contains the other")
+        assert not OT.describes_neither_implies("a fussy eater is fussy, though not the reverse")
+
+    def test_marks_agreement(self):
+        items = [{"item": 2, "pair_id": "a"}, {"item": 1, "pair_id": "b"}, {"item": 17, "pair_id": "c"},
+                 {"item": 15, "pair_id": "d"}, {"item": 5, "pair_id": "e"}]
+        m = OT.marks_agreement(_ans({"a": 2, "b": "opposite", "c": 2, "d": 2, "e": None}), items)
+        # item 2: leaning 1, alternative 2; item 1 opposite; item 17 leaning 3, alternative 2; item 15 leaning 4
+        assert (m["n"], m["exact"], m["leaning_or_alternative"]) == (4, 1, 3)
+        assert (m["n_numeric"], m["within_one"]) == (3, 2)
+        assert [x["value"] for x in m["items"]] == [2, "opposite", 2, 2, None]
+        assert len(OT.ROGER_LEANINGS) == 30 and set(OT.ROGER_ALTERNATIVES) == {2, 13, 17, 21, 27}
+
+    def test_cache_stats_prices_opus_reads_at_its_published_rate(self):
+        recs = [{"model": OT.OPUS, "response": {"usage_raw": {"input_tokens": 100, "cache_creation_input_tokens": 600,
+                                                              "cache_read_input_tokens": 0, "output_tokens": 50}}},
+                {"model": OT.OPUS, "response": {"usage_raw": {"input_tokens": 100, "cache_creation_input_tokens": 0,
+                                                              "cache_read_input_tokens": 600, "output_tokens": 50}}},
+                {"model": OT.OPUS, "response": {"usage_raw": {}}}]
+        c = OT.cache_stats(recs)[OT.OPUS]
+        assert (c["requests"], c["reading"], c["writing"], c["hit_rate"]) == (2, 1, 1, 0.5)
+        assert c["read_share"] == pytest.approx(600 / 1400, abs=1e-4)
+        # input $4, output $20 per million: charged 200 + 750 + 60 = 1010 input-equivalent tokens
+        assert c["charged_usd"] == pytest.approx((1010 * 4 + 100 * 20) / 1e6, abs=1e-6)
+        assert c["published_usd"] == pytest.approx((980 * 4 + 100 * 20) / 1e6, abs=1e-6)
+        assert c["saved_usd"] == pytest.approx((1400 - 1010) * 4 / 1e6, abs=1e-6)
+
+
+def _r3_made_up():
+    """A pair set and three versions: version 4 (a list run, its pass 2 reshuffled), A2 on the first call's pairs
+    only, version 6 (one pair per call).  Sonnet answers 3 on the nearest pairs of rank 1, 2 elsewhere; Opus
+    answers 2 on them under version 4 and 3 under version 6 (so version 6 cuts what version 4 rescued);
+    version 6's Sonnet answers 2 with a containment reason on the rank-2 pairs."""
+    ps = pair_set(n_targets=6, n_antonyms=2, n_random=2)
+    models = [OT.SONNET, OT.OPUS]
+
+    def answers(version, model, p):
+        out = {}
+        for pr in ps.pairs:
+            rank1 = pr.group == OT.NEAREST and pr.nn_rank == 1
+            v, why = 2, "Both are about speech."
+            if pr.group == "antonym":
+                v, why = "opposite", "The reverse."
+            elif rank1:
+                v = 3 if model == OT.SONNET else (3 if version == "v6" else 2)
+                why = "Close, but each adds something." if model == OT.OPUS and version == "v4" else "Narrowed."
+            elif version == "v6" and model == OT.SONNET and pr.nn_rank == 2:
+                why = "The listed trait is part of the target."
+            out[pr.pair_id] = {"value": v, "reason": why, "reason_first": True, "error": None}
+        return out
+    first_call = ps.calls[0].call_id
+    a2_ids = {pr.pair_id for pr in ps.pairs if pr.call_id == first_call}
+    versions = {
+        "v4": {"run": "overlap_arms_1", "rubric": "A", "rubric_versions": [4], "form": "list",
+               "by_pass": {p: {m: answers("v4", m, p) for m in models} for p in (1, 2)},
+               "groups": OT.prompt_groups(ps, 0, 2)},
+        "A2": {"run": "overlap_arms_2", "rubric": "A2", "rubric_versions": [1], "form": "list",
+               "by_pass": {p: {m: {k: v for k, v in answers("v4", m, p).items() if k in a2_ids} for m in models}
+                           for p in (1, 2)}, "groups": OT.prompt_groups(ps, 0, 2)},
+        "v6": {"run": "overlap_arms_3", "rubric": "A", "rubric_versions": [6], "form": "single",
+               "by_pass": {p: {m: answers("v6", m, p) for m in models} for p in (1, 2)}, "groups": None},
+    }
+    populations = {"all": [p.pair_id for p in ps.pairs], "nearest": [p.pair_id for p in ps.pairs if p.group == OT.NEAREST],
+                   "round2": [p.pair_id for p in ps.pairs if p.pair_id in a2_ids]}
+    items = [{"item": i + 1, "pair_id": p.pair_id} for i, p in enumerate(ps.pairs[:5])]
+    marks = {"items": items, "test1": {m: answers("v4", m, 1) for m in models}}
+    return ps, models, versions, populations, marks
+
+
+class TestRound3Analysis:
+    def test_analyse_round3(self):
+        ps, models, versions, populations, marks = _r3_made_up()
+        r3 = OT.analyse_round3(ps, versions, populations, models=models, reference=OT.OPUS, marks=marks)
+        assert set(r3["populations"]) == {"all", "nearest", "round2"}
+        assert set(r3["populations"]["all"]["versions"]) == {"v4", "v6"}                   # A2 only where it was sent
+        assert set(r3["populations"]["round2"]["versions"]) == {"v4", "A2", "v6"}
+        n_rank1 = sum(p.group == OT.NEAREST and p.nn_rank == 1 for p in ps.pairs)
+        v4, v6 = (r3["populations"]["all"]["versions"][k] for k in ("v4", "v6"))
+        assert v4["rule"]["per_pass"]["1"]["escalated"] == v6["rule"]["per_pass"]["1"]["escalated"] == n_rank1
+        assert v4["rule"]["per_pass"]["1"]["rescued"] == n_rank1 and v6["rule"]["per_pass"]["1"]["rescued"] == 0
+        assert r3["populations"]["all"]["rule_against_v4"]["v6"]["1"] == {"n": len(ps.pairs), "differ": n_rank1,
+                                                                          "keep_to_cut": n_rank1, "cut_to_keep": 0}
+        assert v6["second_on_escalated"]["per_pass"]["1"]["answers"] == {"3": n_rank1}
+        assert v4["self_consistency"][OT.OPUS]["exact"] == 1.0 and not v4["self_consistency"][OT.OPUS]["identical"]["all_pairs"]
+        assert v6["self_consistency"][OT.OPUS]["identical"]["all_pairs"]
+        assert v4["self_consistency"][OT.OPUS]["identical"]["n"] < len(ps.pairs)
+        # Sonnet and Opus cross at 3 on the rank-1 pairs under version 4 (Opus covers none)
+        bm = v4["between_models"][OT.SONNET]["1"]
+        assert bm["crossings"] == n_rank1 and bm["first_only"] == 0 and bm["second_only"] == n_rank1
+        assert v6["between_models"][OT.SONNET]["1"]["crossings"] == 0
+        n_rank2 = sum(p.group == OT.NEAREST and p.nn_rank == 2 for p in ps.pairs)
+        assert v6["slips"][OT.SONNET]["pooled"]["forward"] == 2 * n_rank2 and v4["slips"][OT.SONNET]["pooled"]["forward"] == 0
+        assert v4["slips"][OT.OPUS]["1"]["reverse"] == 0                                   # Opus's 2s, not 3s
+        assert v4["groups"][OT.OPUS]["1"]["antonym"]["opposite"] == 1.0
+        oc = r3["opus_changes"]["1"]
+        assert oc["n"] == n_rank1 and oc["second_changes_side"] == n_rank1
+        row = oc["pairs"][0]
+        assert (row["second_base"], row["second_new"], row["decision_base"], row["decision_new"]) == (2, 3, "keep", "cut")
+        assert row["second_base_reason"] == "Close, but each adds something." and row["second_new_reason"] == "Narrowed."
+        assert r3["marks"]["v4_test1"][OT.OPUS]["n"] == 5 and set(r3["marks"]) >= {"v4_pass1", "v6_pass2", "items"}
+        def row(prefix, who):
+            return next(x for x in r3["summary"] if x["figure"].startswith(prefix) and x["model"] == who)
+        kept = row("kept though Opus reads 3 or more", "rule")
+        assert kept["v4"] == kept["v6"] == 0 and kept["verdict"] == "same"
+        assert row("escalated to Opus", "rule")["verdict"] == "same"
+        cross = row("crossings at 3 between the models", "both")
+        assert (cross["v4"], cross["v6"], cross["verdict"]) == (n_rank1, 0, "better")
+        like = row("self-consistency, exact, like for like", OT.SONNET)
+        assert like["v4"] == like["v6"] == 1.0 and like["verdict"] == "same"
+        assert row("self-consistency, exact, every pair", OT.SONNET)["verdict"] is None      # not like for like
+        fwd = row("2s whose reason describes a containment", OT.SONNET)
+        assert fwd["v4"] == 0 and fwd["v6"] > 0 and fwd["verdict"] == "worse"
+        assert row("Roger's 30 marks: his leaning", OT.OPUS)["v4"] == r3["marks"]["v4_test1"][OT.OPUS][
+            "leaning_or_alternative"]
+        json.dumps(r3)
+
+    def test_round3_tables_at_the_top(self):
+        ps, models, versions, populations, marks = _r3_made_up()
+        r3 = OT.analyse_round3(ps, versions, populations, models=models, reference=OT.OPUS, marks=marks)
+        md = "\n".join(OT.round3_markdown(r3, corpus(), lambda m: OT.SHORT.get(m, m)))
+        for head in ("## Round 3: rubric A version 6, one pair per call", "### Summary: version 4 against version 6",
+                     "### Every pair: ", "### The nearest pairs: ", "### Round 2's pairs (those A2 was sent): ",
+                     "### Agreement with Roger's 30 marks", "M3's rule (Sonnet 5.5 first, Opus 5.5 on the 3s)",
+                     "### Where Opus 5.5's answer under version 6 changes the rule's decision against version 4",
+                     "\"Close, but each adds something.\"", "identical prompts"):
+            assert head in md, head
+        table = md.split("### Summary: version 4 against version 6")[1].split("\n\n")[2].splitlines()
+        assert len(table) == 2 + len(r3["summary"]) and all(line.count("|") == 7 for line in table)
+        summary = OT.analyse(ps, {("A", m): versions["v6"]["by_pass"][1][m] for m in models}, models=models,
+                             reference=OT.OPUS, n_boot=20)
+        summary["round3"] = r3
+        full = OT.summary_markdown(summary, ps, corpus())
+        assert full.index("## Round 3:") < full.index("## Parse rates")

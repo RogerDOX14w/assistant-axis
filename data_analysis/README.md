@@ -643,6 +643,35 @@ at 3, crossings and flips over every pair of the population, the self-contradict
 rates both ways, D2's `wider`), the brief's test, and the first answers behind the
 counts with their reasons.
 
+**Round 3** (same brief, "Round 3", 2026-10-06): rubric A from version 5 on is
+written for **one pair per call** (M3's design), so a rubric has a *form*: `list`
+(every rubric and version before it) or `single` (`overlap_concept` from version 5,
+`RUBRICS["A"]["single_from_version"]`; `load_rubrics` sets each rubric's `form`).
+A single-form stage sends every pair of the calls as its own call, keyed by its
+`pair_id` (the round-1 call kept as `origin_call_id`), the user turn laid out as the
+rubric file's rendered sample (`{"target": ...},\n "other": ...}`), the rubric as a
+cached system block (Sonnet 5.5 and Opus 5.5 cache from 512 tokens; the list runs
+were sent uncached), and the identical prompt in every pass.  The answer is one
+object `{"reason", "similarity"}`; a `{"results": [one row]}` wrapper and extra keys
+are accepted and noted.  Records carry `form` (older records are read by their
+rubric version) and `request.cache_system`; `run.json` records `forms` and
+`cache_system`.  The dry run prints the uncached estimate (checked against the
+budget) and the estimate with the rubric read from the cache.  The analysis of such
+a run puts a "Round 3" section at the top of `tables.md` (`round3` in
+`summary.json`): version 6 against version 4 in `--round1-run` (default
+`overlap_arms_1`) on every pair and on the nearest pairs, and against A2 in
+`--round2-run` (default `overlap_arms_2`) on A2's pairs: a summary table with
+verdicts against round 1's pass-to-pass noise, parse rates, format notes, the cache
+hit rate and the spend, self-consistency (version 4's also on the pairs whose prompt
+was identical in both passes), Sonnet against Opus, the known groups, M3's rule
+(Sonnet first, Opus on the 3s), the slips (including the discount for "neither
+implies the other" wording), Opus on the escalated pairs, Roger's 30 marks
+(`marks_key.json` of `--baseline-run`, his leanings in `ROGER_LEANINGS`) and the
+pairs where Opus's answer under version 6 changes the rule's decision against
+version 4.  Since then the list-form tests load rubric A at version 4 from
+`assistant_axis/tests/fixtures/overlap_concept_v4.txt` (`list_rubrics` in the
+library test; the CLI tests patch `load_rubrics` with it).
+
 ```bash
 uv run python data_analysis/gap_generation/overlap_test.py --run-id overlap_test_1 --dry-run   # plan, estimate, rendered prompts
 uv run python data_analysis/gap_generation/overlap_test.py --run-id overlap_test_1 --budget-usd 15 [--resume]
@@ -654,6 +683,8 @@ uv run python data_analysis/gap_generation/overlap_test.py --run-id overlap_arms
 uv run python data_analysis/gap_generation/overlap_test.py --run-id overlap_arms_2 \
     --models claude-sonnet-5-5 claude-opus-5-5 --rubrics A2 C2 D2 E2 --passes 2 --budget-usd 12 \
     --calls-from data/candidates/overlap_test/overlap_arms_2/subset.json [--dry-run | --resume]
+uv run python data_analysis/gap_generation/overlap_test.py --run-id overlap_arms_3 --rubrics A \
+    --models claude-sonnet-5-5 claude-opus-5-5 --passes 2 --baseline-run overlap_test_1 --budget-usd 10 [--dry-run | --resume]
 ```
 
 **Corpus regions after a corpus change.**  `gap_registry.py corpus-regions`
