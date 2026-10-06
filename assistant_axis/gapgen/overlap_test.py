@@ -2292,6 +2292,12 @@ NEITHER_IMPLIES_PATTERN = (r"\bneither\b[^.;]{0,30}?\b(impl|entail|requir|contai
                            r"|\bwithout (either|one|each) (implying|requiring|entailing|containing)"
                            r"|\b(either|each)\b[^.;]{0,40}?\bwithout the other")
 NEITHER_IMPLIES_RE = re.compile(NEITHER_IMPLIES_PATTERN, re.I)
+#: A reason that states line 2 in its own words: "each adds something (the other lacks)", "each has / brings
+#: something", or "neither implies the other" (:data:`NEITHER_IMPLIES_PATTERN`).  Round 2's two-sided pattern
+#: also matches "X adds A, while Y stresses B, so they differ in emphasis", which line 3 allows (a difference of
+#: emphasis); a 3 whose reason matches this one contradicts itself outright.
+EXPLICIT_TWO_SIDED_PATTERN = r"\beach (adds|has|brings|contributes|offers) something|" + NEITHER_IMPLIES_PATTERN
+EXPLICIT_TWO_SIDED_RE = re.compile(EXPLICIT_TWO_SIDED_PATTERN, re.I)
 #: The first-line model and the second opinion of M3's rule (coding_plan_platform.md, M3 decisions 3 and 8).
 FIRST_LINE, SECOND_OPINION = SONNET, OPUS
 #: Cache reads as a share of the input price where it differs from ``llm.CACHE_READ_FACTOR`` (0.1, what the
@@ -2310,7 +2316,8 @@ def slip_counts(rubric: str, answers: Iterable[Mapping]) -> dict:
     containment (round 1's patterns, :func:`describes_containment`); ``forward_discounted``, the same less the
     reasons that say neither implies the other; ``reverse``, 3s whose reason describes a two-sided overlap
     (round 2's reverse slip, :func:`describes_two_sided`); ``reverse_wide``, 3s whose reason is two-sided or
-    says neither implies the other.  Counts and shares of the 2s and the 3s."""
+    says neither implies the other; ``reverse_explicit``, 3s whose reason states line 2 in its own words
+    (:data:`EXPLICIT_TWO_SIDED_PATTERN`).  Counts and shares of the 2s and the 3s."""
     twos, threes = [], []
     for a in answers:
         d = decision_value(rubric, a.get("value"))
@@ -2323,9 +2330,11 @@ def slip_counts(rubric: str, answers: Iterable[Mapping]) -> dict:
     fwd_d = sum(describes_containment(x) and not describes_neither_implies(x) for x in twos)
     rev = sum(describes_two_sided(x) for x in threes)
     rev_w = sum(describes_two_sided(x) or describes_neither_implies(x) for x in threes)
+    rev_x = sum(bool(x) and bool(EXPLICIT_TWO_SIDED_RE.search(x)) for x in threes)
     return {"n_2": len(twos), "forward": fwd, "forward_share": share(fwd, len(twos)), "forward_discounted": fwd_d,
             "forward_discounted_share": share(fwd_d, len(twos)), "n_3": len(threes), "reverse": rev,
-            "reverse_share": share(rev, len(threes)), "reverse_wide": rev_w, "reverse_wide_share": share(rev_w, len(threes))}
+            "reverse_share": share(rev, len(threes)), "reverse_wide": rev_w, "reverse_wide_share": share(rev_w, len(threes)),
+            "reverse_explicit": rev_x, "reverse_explicit_share": share(rev_x, len(threes))}
 
 
 def escalates(sonnet: Any, cutoff: int = CUTOFF) -> bool:
@@ -2542,13 +2551,20 @@ def _cells_groups(gs: Mapping) -> dict:
     return {g: {k: gs[g][k] for k in ("n", "mean", "share_3_plus", "opposite")} for g in GROUPS if gs[g]["n"]}
 
 
+def identical_prompt_ids(groups: Optional[Mapping[str, str]]) -> Optional[set]:
+    """The pairs whose prompt was identical in both passes of a list run (:func:`prompt_groups`: a call of one
+    trait, or a list that shuffled into the same order); ``None`` without groups."""
+    return None if groups is None else {pid for pid, g in groups.items() if g in ("single", "same_order")}
+
+
 def round3_version(rubric: str, by_pass: Mapping[int, Mapping[str, Mapping]], pairs: Sequence[Pair], *,
                    models: Sequence[str], reference: str = REFERENCE, cutoff: int = CUTOFF,
-                   groups: Optional[Mapping[str, str]] = None) -> tuple[dict, dict]:
+                   groups: Optional[Mapping[str, str]] = None, like_ids: Optional[set] = None) -> tuple[dict, dict]:
     """One version's figures on one population (``pairs``; ``by_pass``: ``{pass: {model: answers}}``):
     self-consistency between the first two passes (every pair, and with ``groups``, the prompt groups of a list
     run's second pass, the pairs whose prompt was identical in both: one-trait and same-order calls; a
-    single-form run's pairs are all identical), each model against ``reference`` per pass, the share at the
+    single-form run's pairs are all identical; and with ``like_ids``, on those pairs of version 4's, the
+    like-for-like comparison on the same pairs), each model against ``reference`` per pass, the share at the
     cut-off or more, the known groups on the decision scale, the slips per pass and pooled, M3's rule and the
     second opinion on the pairs it escalates.  Crossings and flips count every pair of the population.  Returns
     ``(figures, rule decisions by pass)``."""
@@ -2564,14 +2580,17 @@ def round3_version(rubric: str, by_pass: Mapping[int, Mapping[str, Mapping]], pa
         if len(passes) >= 2 and get(passes[0], m) and get(passes[1], m):
             a, b = get(passes[0], m), get(passes[1], m)
             cells = _cells_consistency(compare_answers(rubric, a, b, pairs, cutoff=cutoff, nearest_only=False))
+            def on(keep: set) -> dict:
+                sub = [p for p in pairs if p.pair_id in keep]
+                return _cells_consistency(compare_answers(rubric, {k: v for k, v in a.items() if k in keep},
+                                                          {k: v for k, v in b.items() if k in keep}, sub,
+                                                          cutoff=cutoff, nearest_only=False))
             if groups is None:
                 cells["identical"] = {**{k: v for k, v in cells.items() if k != "identical"}, "all_pairs": True}
             else:
-                same = {pid for pid in ids if groups.get(pid) in ("single", "same_order")}
-                sub = [p for p in pairs if p.pair_id in same]
-                cells["identical"] = {**_cells_consistency(compare_answers(
-                    rubric, {k: v for k, v in a.items() if k in same}, {k: v for k, v in b.items() if k in same}, sub,
-                    cutoff=cutoff, nearest_only=False)), "all_pairs": False}
+                cells["identical"] = {**on(identical_prompt_ids(groups) & ids), "all_pairs": False}
+            if like_ids is not None:
+                cells["on_v4_identical"] = on(like_ids & ids)
             out["self_consistency"][m] = cells
         cov = {str(p): coverage(pairs, rubric, get(p, m), cutoff=cutoff, nearest_only=False) for p in passes if get(p, m)}
         if cov:
@@ -2675,9 +2694,11 @@ def round3_summary(r3: Mapping, models: Sequence[str]) -> list[dict]:
         a, b = v4["self_consistency"].get(m), v6["self_consistency"].get(m)
         if a and b:
             ident = a["identical"]
-            add("self-consistency, exact, like for like (version 4: the pairs whose prompt was identical in both "
-                "passes)", m, ident["exact"], b["exact"], two_se(ident["exact"], ident["n"]), "higher", "pct",
-                n=(ident["n"], b["n"]))
+            same = b.get("on_v4_identical") or {}
+            add("self-consistency, exact, like for like: the pairs whose prompt was identical in both of version 4's "
+                "passes (one-trait calls and lists that shuffled into the same order), both versions on those pairs", m,
+                ident["exact"], same.get("exact"), two_se(ident["exact"], ident["n"]), "higher", "pct",
+                n=(ident["n"], same.get("n")))
             add("self-consistency, exact, every pair (version 4 includes its reordered lists; not like for like)", m,
                 a["exact"], b["exact"], None, None, "pct", n=(a["n"], b["n"]))
     ref = r3["reference"]
@@ -2717,7 +2738,9 @@ def round3_summary(r3: Mapping, models: Sequence[str]) -> list[dict]:
                 max(2 * math.sqrt(f4["n"] * p4 * (1 - p4)), 1), "lower", "count", n=(f4["n"], f6["n"]))
     for key, label in (("forward_share", "2s whose reason describes a containment (round 1's pattern), pooled"),
                        ("forward_discounted_share", "the same, discounting \"neither implies the other\" wording"),
-                       ("reverse_share", "3s whose reason describes a two-sided overlap (round 2's pattern), pooled")):
+                       ("reverse_share", "3s whose reason describes a two-sided overlap (round 2's pattern), pooled"),
+                       ("reverse_explicit_share", "3s whose reason states line 2's words (\"each adds something\", "
+                        "\"neither implies the other\"), pooled")):
         for m in models:
             s4, s6 = v4["slips"].get(m), v6["slips"].get(m)
             if not s4 or not s6:
@@ -2767,10 +2790,13 @@ def analyse_round3(pair_set: PairSet, versions: Mapping[str, Mapping], populatio
                  "versions": {k: {x: v.get(x) for x in ("run", "rubric", "rubric_versions", "form")}
                               for k, v in versions.items()},
                  "patterns": {"containment": CONTAINMENT_PATTERN, "two_sided": TWO_SIDED_PATTERN,
-                              "neither_implies": NEITHER_IMPLIES_PATTERN, "flags": "IGNORECASE"},
+                              "neither_implies": NEITHER_IMPLIES_PATTERN,
+                              "explicit_two_sided": EXPLICIT_TWO_SIDED_PATTERN, "flags": "IGNORECASE"},
                  "populations": {}, "parse": {}, "format_notes": {}, "cache": {}, "spend_per_pair": {}}
     answered = {k: {pid for p, per in v["by_pass"].items() for ans in per.values() for pid, a in ans.items()
                     if a.get("value") is not None or a.get("error")} for k, v in versions.items()}
+    like_ids = identical_prompt_ids((versions.get("v4") or {}).get("groups"))
+    out["v4_identical_prompts"] = len(like_ids) if like_ids is not None else None
     for pop, ids in populations.items():
         pairs = [by_id[pid] for pid in ids if pid in by_id]
         idset = {p.pair_id for p in pairs}
@@ -2781,7 +2807,7 @@ def analyse_round3(pair_set: PairSet, versions: Mapping[str, Mapping], populatio
             if not idset or not idset <= answered[name]:
                 continue
             figs, dec = round3_version(v["rubric"], v["by_pass"], pairs, models=models, reference=reference,
-                                       cutoff=cutoff, groups=v.get("groups"))
+                                       cutoff=cutoff, groups=v.get("groups"), like_ids=like_ids)
             entry["versions"][name] = figs
             decisions[name] = dec
         base = versions.get("v4")
@@ -3458,6 +3484,17 @@ def round3_markdown(r3: Mapping, corpus: Mapping, sm) -> list[str]:
                          f"{_f(c['kappa'])} | {_pct(c['exact_decision'])} | {c['crossings']} of {c['cutoff_n']} | "
                          f"{i['n']}{' (all)' if i.get('all_pairs') else ''} | {_pct(i['exact'])} | "
                          f"{_pct(i['within_one'])} | {_f(i['kappa'])} | {i['crossings']} of {i['cutoff_n']} |")
+        like = [(k, m, c["on_v4_identical"]) for k, f in vs.items() for m, c in f["self_consistency"].items()
+                if c.get("on_v4_identical")]
+        if like:
+            L += ["", f"Like for like, on the same pairs: the {like[0][2]['n']} pairs of this population whose prompt was "
+                  "identical in both of version 4's passes (one-trait calls, and lists that shuffled into the same "
+                  "order), every version on those pairs:", "",
+                  "| version | model | pairs | exact | within one | kappa | exact (decision) | flips at "
+                  f"{cut} |", "|---|---|---|---|---|---|---|---|"]
+            for k, m, c in like:
+                L.append(f"| {vn(k)} | {sm(m)} | {c['n']} | {_pct(c['exact'])} | {_pct(c['within_one'])} | "
+                         f"{_f(c['kappa'])} | {_pct(c['exact_decision'])} | {c['crossings']} of {c['cutoff_n']} |")
         L += ["", "Where the passes differ, by the two answers:", ""]
         for k, f in vs.items():
             for m, c in f["self_consistency"].items():
@@ -3520,16 +3557,19 @@ def round3_markdown(r3: Mapping, corpus: Mapping, sm) -> list[str]:
                          f"{rs['flips']['n']} pairs" for k, rs in rule_rows if rs.get("flips")]
         L += ["", "Slips (round 1's patterns; reasons matched case-insensitively): 2s whose reason describes a containment, "
               "and the same less the reasons that say neither implies the other; 3s whose reason describes a two-sided "
-              "overlap, and the same counting \"neither implies the other\" too.", "",
+              "overlap (round 2's pattern, which also matches a two-sided difference of emphasis, as line 3 allows), the "
+              "same counting \"neither implies the other\" too, and 3s whose reason states line 2 in its own words "
+              "(\"each adds something\", \"neither implies the other\"; patterns in `summary.json`).", "",
               "| version | model | pass | 2s | containment reason | discounting \"neither implies\" | 3s | two-sided "
-              "reason | or \"neither implies\" |", "|---|---|---|---|---|---|---|---|---|"]
+              "reason | or \"neither implies\" | line 2's words |", "|---|---|---|---|---|---|---|---|---|---|"]
         for k, f in vs.items():
             for m, per in f["slips"].items():
                 for p, s in per.items():
                     L.append(f"| {vn(k)} | {sm(m)} | {p} | {s['n_2']} | {_of(s['forward'], s['n_2'], s['forward_share'])} | "
                              f"{_of(s['forward_discounted'], s['n_2'], s['forward_discounted_share'])} | {s['n_3']} | "
                              f"{_of(s['reverse'], s['n_3'], s['reverse_share'])} | "
-                             f"{_of(s['reverse_wide'], s['n_3'], s['reverse_wide_share'])} |")
+                             f"{_of(s['reverse_wide'], s['n_3'], s['reverse_wide_share'])} | "
+                             f"{_of(s['reverse_explicit'], s['n_3'], s['reverse_explicit_share'])} |")
         esc_rows = [(k, f["second_on_escalated"]) for k, f in vs.items() if f.get("second_on_escalated")]
         if esc_rows:
             so = sm(r3["second_opinion"])

@@ -1646,7 +1646,11 @@ class TestRound3Statistics:
              {"value": 3, "reason": "The same thing, carried further."}]
         s = OT.slip_counts("A", a)
         assert (s["n_2"], s["forward"], s["forward_discounted"]) == (5, 5, 2)
-        assert (s["n_3"], s["reverse"], s["reverse_wide"]) == (3, 1, 2)
+        assert (s["n_3"], s["reverse"], s["reverse_wide"], s["reverse_explicit"]) == (3, 1, 2, 2)
+        # round 2's two-sided pattern also catches a two-sided difference of emphasis, which line 3 allows
+        e = OT.slip_counts("A", [{"value": 3, "reason": "Theatrical adds stage presence, while dramatic stresses "
+                                                        "emotion, so they differ only in emphasis."}])
+        assert (e["reverse"], e["reverse_explicit"]) == (1, 0)
         assert s["forward_discounted_share"] == pytest.approx(0.4) and s["reverse_wide_share"] == pytest.approx(0.667)
         assert OT.describes_neither_implies("NEITHER fully contains the other")
         assert not OT.describes_neither_implies("a fussy eater is fussy, though not the reverse")
@@ -1757,6 +1761,9 @@ class TestRound3Analysis:
         assert (cross["v4"], cross["v6"], cross["verdict"]) == (n_rank1, 0, "better")
         like = row("self-consistency, exact, like for like", OT.SONNET)
         assert like["v4"] == like["v6"] == 1.0 and like["verdict"] == "same"
+        n_like = v4["self_consistency"][OT.SONNET]["identical"]["n"]
+        assert like["n"] == (n_like, n_like) == (r3["v4_identical_prompts"],) * 2               # the same pairs
+        assert v6["self_consistency"][OT.SONNET]["on_v4_identical"]["n"] == n_like
         assert row("self-consistency, exact, every pair", OT.SONNET)["verdict"] is None      # not like for like
         fwd = row("2s whose reason describes a containment", OT.SONNET)
         assert fwd["v4"] == 0 and fwd["v6"] > 0 and fwd["verdict"] == "worse"
