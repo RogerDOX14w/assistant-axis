@@ -634,3 +634,25 @@ left provisional:
    each overlap call twice in two list orders (about $0.003 a pair more) and treat a pair as *on the
    line* when either reading is at the cut-off or the two readings straddle it; such pairs go to Opus
    under rule 3.
+8. **Settled 2026-10-06 (Roger): Sonnet first, Opus on the 3s** (rule 3 as written; the Opus-alone
+   option is not taken).  Superseding the two-list-orders proposal in 7: **one pair per call**, the
+   candidate's similar traits judged in cosine order with early exit once one says covered
+   ([m3_overlap_arms_readout.md](./m3_overlap_arms_readout.md), "Early exit, and one pair per call"):
+   it removes the list-order noise at the source (an identical prompt repeated agrees with itself
+   92-98%, a reordered list 86-89%) and is cheaper than two orders; a second reading is kept for the
+   pairs that land exactly on the cut-off.  Full runs go through the **Message Batches API** in waves,
+   as the M1 split does ([batches.py](../../assistant_axis/gapgen/batches.py)): wave 1 every
+   candidate's nearest pair, wave 2 the second pair of the candidates still undecided, and so on, then
+   the Opus waves for the 3s; the wave machinery exists, the overlap waves are the M3 build's to
+   define.  "Batch" in these notes means that API, not several pairs in one call.
+9. **"opposite" (Roger, 2026-10-06): the first-line model's word is taken, no escalation** (every
+   model and every rubric put the 30 recorded antonyms at "opposite", and Sonnet and Opus agreed on
+   "opposite" 77 of 77 times).  When the nearest trait X comes back "opposite": if X has a recorded
+   partner Y, the candidate is judged against Y next (Y moves to the front of the queue; a candidate
+   opposite to X is usually Y's near-duplicate, and one call settles it); if X has no partner
+   (`non-X`), the candidate is recorded as X's pair-completion candidate and routed to the pairing
+   track (seed as X's partner, the antonym check decides).  Open with Roger: whether the scan then
+   stops, as he proposed, or continues down the list (recommended: continue, since a candidate can be
+   the opposite of one trait and the duplicate of another; 44 of the test's 300 nearest pairs were
+   opposites, so the nearest neighbour is the antonym about one time in seven; the extra cost is one
+   or two calls).  None of this is built: M3 has no code yet beyond the test harness.
