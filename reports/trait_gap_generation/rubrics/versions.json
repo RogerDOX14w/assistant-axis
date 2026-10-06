@@ -150,6 +150,18 @@
         "pinned_at": "2026-10-03T22:35:59+00:00",
         "why": "Draft 3's sentence on keys removed (Roger, 2026-10-03): the extra keys are a harmless copy of the input rows' label key, the parser ignores them, and the instruction only turned some of them into odd variants (label_note, label_free); the text is draft 2's again",
         "same_text_as": 2
+      },
+      {
+        "version": 5,
+        "sha256": "cdff117bd43b950a7bbc61e9f90f74ee6f09c176e804883c3e48b7da94f86125",
+        "pinned_at": "2026-10-06T15:53:59+00:00",
+        "why": "Draft 5: rewritten for one pair per call (one other trait, one answer object, no ids); scale lines unchanged from draft 2; for Roger's pass"
+      },
+      {
+        "version": 6,
+        "sha256": "b3eff18fb946928517183af0244acec2d35dba0ab0bd9c57f83c7a06ac3c9fd0",
+        "pinned_at": "2026-10-06T15:56:40+00:00",
+        "why": "Draft 6: line 2 takes A2's wording (neither implies the other: a persona can have either without the other), which halved the self-contradicting reasons in the arms experiment without moving decisions (Roger, 2026-10-06: do that now)"
       }
     ],
     "overlap_cooccurrence": [

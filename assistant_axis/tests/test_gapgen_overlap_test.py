@@ -79,10 +79,12 @@ class TestRubrics:
         rb = OT.load_rubrics()
         assert set(rb) == {"A", "B"}
         assert rb["A"]["name"] == "overlap_concept" and rb["B"]["name"] == "overlap_cooccurrence"
-        # A: draft 3 (answer keys), then version 4 = draft 2's text again (Roger, 2026-10-03)
-        assert rb["A"]["version"] == 4 and rb["B"]["version"] == 2
+        # A: draft 3 (answer keys), version 4 = draft 2's text again (Roger, 2026-10-03), then drafts 5 and 6
+        # on 2026-10-06 (one pair per call; A2's line 2), for Roger's pass before the M3 pilot
+        assert rb["A"]["version"] == 6 and rb["B"]["version"] == 2
         assert rb["A"]["text"] == sr.load_prompt("overlap_concept")
-        assert rb["A"]["sha256"] == "2f650bffa3d614c0498be0b4814af05d840d7952fc1e943b89492b6ec647b8ab"   # draft 2's
+        assert rb["A"]["sha256"].startswith("b3eff18fb946")                                              # draft 6
+        assert '"other"' in rb["A"]["text"] and "neither implies the other" in rb["A"]["text"]
         assert '"similarity": 0|1|2|3|4|"opposite"|"unsure"' in rb["A"]["text"]
         assert '"co_occurrence": 0|1|2|3|4|"unsure"' in rb["B"]["text"]
 
@@ -1171,7 +1173,7 @@ class TestConfusionSubset:
         assert {(s["run"], s["rubric"], s["model"], s["pass"]) for s in sources} == {
             ("a", "A", OT.SONNET, 1), ("a", "A", OT.SONNET, 2), ("a", "D", OT.OPUS, 1), ("b", "C", OT.OPUS, 1)}
         assert all(s["n_readings"] == len(ps.pairs) and s["n_unparsed"] == 0 for s in sources)
-        assert all(s["rubric_versions"] == [1 if s["rubric"] in "CD" else 4] for s in sources)
+        assert all(s["rubric_versions"] == [1 if s["rubric"] in "CD" else rb["A"]["version"]] for s in sources)
         assert all(len(v) == 4 for v in readings.values()) and len(readings) == len(ps.pairs)
         s = OT.confusion_subset(ps, readings)
         # the fake answers by labels, so an ordered pair listed in two calls is answered alike in both

@@ -185,6 +185,21 @@ class TestOverlapPins:
               "overlap_relation_implies": ("overlap_relation", ('- "contains":', '- "overlap":')),
               "overlap_scope_implies": ("overlap_scope", ("- 3:", "- 2:"))}
 
+    #: Rubric A's text at version 4 (draft 2's, the text the arms experiment branched from), kept as a
+    #: fixture since A moved on to one pair per call (drafts 5 and 6, 2026-10-06); checked against the pin.
+    V4_FIXTURE = REPO / "assistant_axis" / "tests" / "fixtures" / "overlap_concept_v4.txt"
+
+    def rubric_a_version_4(self) -> str:
+        text = self.V4_FIXTURE.read_text(encoding="utf-8").rstrip("\n")
+        rows = sr.read_versions()["prompts"]["overlap_concept"]
+        v4 = next(r for r in rows if r["version"] == 4)
+        assert sr.sha256(text) == v4["sha256"] == self.DRAFT2["overlap_concept"]
+        return text
+
+    def parent_text(self, name: str) -> str:
+        """A round-2 rubric's parent as it was when round 2 branched: version 4 for rubric A."""
+        return self.rubric_a_version_4() if name == "overlap_concept" else sr.load_prompt(name)
+
     def test_overlap_rubrics_are_not_split_prompts(self):
         # A and B (draft 2), since 2026-10-04 the three arms C, D and E, and round 2's A2, C2, D2 and E2
         assert set(sr.OVERLAP_NAMES) == set(self.DRAFT2) | set(self.ARMS) | set(self.ROUND2)
@@ -211,8 +226,9 @@ class TestOverlapPins:
     def test_the_arms_are_rubric_a_with_only_the_named_lines_changed(self):
         """coding_plan_overlap_arms.md: C replaces A's scale lines (and writes the answer's scale 0-5), E
         replaces line 3, D replaces the opening's question, the scale lines and the answer format; every
-        other byte is A's (version 4, draft 2's text)."""
-        a = sr.load_prompt("overlap_concept")
+        other byte is A's as it was then (version 4, draft 2's text, kept as a fixture since rubric A moved
+        on to one pair per call on 2026-10-06)."""
+        a = self.rubric_a_version_4()
         lines = a.split("\n")
         start = lines.index("Give one of these answers for each listed trait:")
         end = next(i for i, ln in enumerate(lines) if ln.startswith('- "unsure"'))
@@ -239,7 +255,7 @@ class TestOverlapPins:
         """coding_plan_overlap_arms.md, "Round 2": each new rubric is its round-1 parent with only the quoted
         lines replaced; every other scale line and the answer format stay byte for byte."""
         for name, (parent, prefixes) in self.ROUND2.items():
-            old, new = sr.load_prompt(parent).split("\n"), sr.load_prompt(name).split("\n")
+            old, new = self.parent_text(parent).split("\n"), sr.load_prompt(name).split("\n")
             assert len(old) == len(new), name
             changed = [i for i, (a, b) in enumerate(zip(old, new)) if a != b]
             assert sorted(old[i].split(":", 1)[0] + ":" for i in changed) == sorted(prefixes), name
