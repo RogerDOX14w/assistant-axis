@@ -254,6 +254,77 @@ counterpart on the same pairs, with self-consistency not worse.  Report the tabl
 remaining calls of any arm: completing an improved wording on the other 96 calls is a separate go from
 Roger.
 
+## Round 3: rubric A version 6, one pair per call, on all 409 pairs (Roger, 2026-10-06)
+
+The M3 design settled on one pair per call ([coding_plan_platform.md](./coding_plan_platform.md), M3
+decisions 8 and 9), and rubric A was rewritten for it: version 6 of
+[overlap_concept.md](./rubrics/overlap_concept.md) (draft 5: one other trait, one answer object, no
+ids; draft 6: A2's line 2).  Roger: "rerun tests, see if anything got worse.  Mostly I care about
+Opus's accuracy for the retests with this rubric, but Sonnet accuracy also matters."  Round 3 runs
+version 6 in its own form on the same 409 pairs and compares it with round 1's A (version 4, lists)
+and round 2's A2, on the same pairs.
+
+### What to build
+
+1. **A single-pair form for a rubric.**  A rubric fact `form` (`"list"` for everything so far,
+   `"single"` for version 6 of `overlap_concept`; read the form from the rubric file's header table or
+   set it in `RUBRICS` for key `A`, whichever is cleaner, but a run must record which form it used).
+   Under `single`: every pair of the pair set is its own call (key it by `pair_id`; keep the round-1
+   `call_id` on the record as the pair's origin, so the comparisons by `pair_id` work unchanged); the
+   user turn is the sample in the rubric file, exactly: `{"target": {"label", "description"},
+   "other": {"label", "description"}}`, compact JSON, the two objects on two lines, labels in display
+   form; the answer is one object `{"reason", "similarity"}`, parsed with the same leniency as before
+   (extra keys ignored and noted, reason-first recorded, categories and 0-4 as for `A`; a wrapping
+   `{"results": [one row]}` is accepted with a note, since the models may remember the old form).
+   A second pass sends the identical prompt (there is no list to reorder), so pass-to-pass agreement
+   under `single` is sampling noise alone; say so in the tables.
+2. **Prompt caching on** for this run: `cache_system=True` (the rubric is about 650 tokens, above the
+   512-token minimum of Sonnet 5.5 and Opus 5.5; the comment in `call_params` saying the rubrics are
+   below the cacheable length is out of date, fix it).  Record `cache_creation_input_tokens` and
+   `cache_read_input_tokens` per record (they are in `usage_raw` already) and report the hit rate and
+   what caching saved, from the usage records, in the tables.  Concurrency 8 as before; the first
+   call of a stage writes the cache, the rest should read it.
+3. **Run** `overlap_arms_3`: `--rubrics A --models claude-sonnet-5-5 claude-opus-5-5 --passes 2`, all
+   409 pairs (not the subset), `--baseline-run overlap_test_1` for the pair-set check, budget cap $10
+   (1,636 calls; about $3 with cache hits, about $6 without).  Dry-run first and read the rendered
+   single-pair prompt.
+4. **Analysis**, in `tables.md` ("Round 3"), for A version 6, each model, both passes, and beside each
+   figure the same figure for round 1's A (version 4) from `overlap_arms_1` on the same pairs, and
+   for A2 from `overlap_arms_2` on its 242 pairs:
+   - parse rates, first attempt; cache hit rate; spend;
+   - self-consistency (exact, within one, kappa; flips at the cut-off on the nearest pairs); for
+     round 1 give both the all-pairs figure and the identical-prompt figure (the one-trait and
+     same-order-by-chance calls), which is the like-for-like comparison with `single`;
+   - Sonnet against Opus (exact, within one, kappa, crossings at 3 on the nearest pairs, which model
+     covers in each crossing);
+   - the known groups on the decision scale (mean and share at 3 or more; antonyms' share "opposite";
+     random pairs' share at 3 or more);
+   - **the rule simulation** on the nearest pairs and on all pairs, per pass: Sonnet reads every pair;
+     Sonnet 3 goes to Opus and is kept if Opus reads under 3; Sonnet 2 or less is kept; 4 is cut.
+     Columns: escalated, rescued, cut, kept though Opus ≥ 3, the rule's decision differing between the
+     passes; and, as Roger asked, **Opus 3s whose reason describes a two-sided overlap** (the round-2
+     reverse-slip pattern) and the forward slip (2s whose reason describes a containment; both the
+     round-1 pattern and the pattern discounting "neither implies the other" wording);
+   - **Opus on the escalated pairs**: how many, its answer distribution on them, and whether it gives
+     the same answer in both passes on them;
+   - **agreement with Roger's 30 marks** (`overlap_test_1/marks_key.json` maps item to `pair_id`;
+     his leanings, read by hand: items 1 opposite, 2 1, 3 opposite, 4 opposite, 5 0, 6 0, 7 0, 8
+     opposite, 9 0, 10 opposite, 11 2, 12 1, 13 1, 14 2, 15 4, 16 opposite, 17 3, 18 2, 19 1, 20 2,
+     21 2, 22 2, 23 opposite, 24 4, 25 3, 26 2, 27 3, 28 4, 29 1, 30 2; alternatives for items 2, 13,
+     17, 21, 27: 2, 2, 2, 3, 2): exact, within one, and "leaning or alternative", for each model under
+     version 6 and, beside it, under version 4 from `overlap_test_1`.
+   One summary table at the top: version 4 against version 6, per model, the headline columns
+   (self-consistency like for like, Sonnet-Opus agreement, crossings, covered share, kept-though-Opus,
+   slip rates, Roger agreement), with "better / same / worse" judged against the noise seen between
+   round 1's passes.
+5. **Tests** with the fake client for the single form (payload byte for byte as the rubric's sample,
+   the one-object answer, the wrapped answer, one call per pair, caching flag on the request) and for
+   the new analysis; the existing tests keep passing (do not change an expectation without saying why).
+
+Report the summary table and the per-section numbers; quote in full the first six pairs where Opus's
+answer under version 6 would change the rule's decision against version 4, with both reasons; the cache
+hit rate and the spend.  Do not write the readout; Fable does.
+
 ## Constraints that apply to every command
 
 - **Files**: read, write and search only inside this repository
