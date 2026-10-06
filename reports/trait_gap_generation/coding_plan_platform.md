@@ -666,3 +666,14 @@ left provisional:
     Sonnet-first and accept the 4% as review work (about $40 per 10,000 candidates live), or Opus
     alone (about $80).  Also open: dropping line 2's closing clause ("; each adds something the other
     lacks"), which Sonnet now writes under 3s.
+11. **Plan of record (Roger, 2026-10-06): Sonnet first, Opus on the 2s and 3s**, one pair per call
+    in cosine order, rubric A as pinned.  Decisions, for now: a Sonnet 4 is cut; a Sonnet 3 goes to
+    Opus, which decides (cut at 3 or more, kept under); a Sonnet 0, 1 or "opposite" is settled (rule
+    9 for "opposite"); **a Sonnet 2 also goes to Opus, but the candidate is kept whatever Opus says**,
+    as the cheaper rule ("Opus on the 3s only") would keep it, and where Opus reads 3 or more the
+    candidate is marked for manual review (`review: "sonnet_2_opus_3"` or similar on the registry
+    row, with both readings and reasons).  The review sample tells which way to go: if Opus is right
+    on those pairs, the rule tightens to Opus deciding on the 2s as well (the plan of record's full
+    form); if the Opus reading on the 2s earns little, the pipeline shifts to "Opus on the 3s only"
+    as a saving (about $40 against $70 per 10,000 candidates, live).  Either way every reading is
+    logged, so the rule can be re-run on the records without new calls.
