@@ -656,3 +656,13 @@ left provisional:
    the opposite of one trait and the duplicate of another; 44 of the test's 300 nearest pairs were
    opposites, so the nearest neighbour is the antonym about one time in seven; the extra cost is one
    or two calls).  None of this is built: M3 has no code yet beyond the test harness.
+10. **Round 3 (2026-10-06, [m3_overlap_arms_readout.md](./m3_overlap_arms_readout.md), "Round 3")
+    reopens rule 8's model choice.**  Rubric A version 6 (one pair per call, A2's line 2) on the 409
+    pairs, caching on, $3.56: self-consistency 95% for both models, parsing perfect, Opus closer to
+    Roger's marks and to the known groups, both models' containment-as-2 slip down.  But Opus moved up
+    and Sonnet did not, so under the Sonnet-first rule the pairs Sonnet keeps that Opus would cut went
+    from 1-7 to about 16 in 409 (4%).  Opus costs $0.0031 a pair in this form (it thinks more when
+    given one pair; the cache saving goes on output), Sonnet $0.0012.  Open with Roger: keep
+    Sonnet-first and accept the 4% as review work (about $40 per 10,000 candidates live), or Opus
+    alone (about $80).  Also open: dropping line 2's closing clause ("; each adds something the other
+    lacks"), which Sonnet now writes under 3s.

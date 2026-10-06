@@ -295,6 +295,68 @@ already returns "opposite", three covered candidates in four are caught at the n
 stop rule for the uncovered case (N pairs, or a cosine floor from the M2 calibration) bounds the cost.
 A design choice for the M3 brief, to be measured in the pilot rather than decided here.
 
+## Round 3: version 6, one pair per call, on all 409 pairs (2026-10-06, `overlap_arms_3`)
+
+Rubric A was rewritten for one pair per call (draft 5) and given A2's line 2 (draft 6; pinned as
+version 6, Roger's pass pending), and Roger asked for the test again: "see if anything got worse.
+Mostly I care about Opus's accuracy for the retests with this rubric, but Sonnet accuracy also
+matters."  Run [overlap_arms_3](../../data/candidates/overlap_test/overlap_arms_3/): the 409 pairs, one
+call each, Sonnet and Opus, two passes (the same prompt twice, since there is no list to reorder),
+prompt caching on, 1,636 calls, **$3.56** (99% of calls read the rubric from the cache; $6.06 without
+it).  Parsing: 409 of 409 at the first attempt in every stage, with no extra keys, no wrapped answers
+and no self-corrections; the one-object answer ended the label-copying slip.  Tables in
+[tables.md](../../data/candidates/overlap_test/overlap_arms_3/tables.md), "Round 3".  Verdicts are
+against the noise between version 4's own two passes (never a band under one pair).
+
+| figure (every pair unless said) | model | version 4 | version 6 | verdict |
+|---|---|---|---|---|
+| self-consistency, like for like (139 identical-prompt pairs) | Sonnet / Opus | 96% / 98% | 98% / 96% | same |
+| self-consistency, every pair | Sonnet / Opus | 89% / 92% | 95% / 95% | (list order gone, as designed) |
+| Sonnet against Opus, exact | | 86% | 86% | same |
+| crossings at the cut-off, nearest pairs, per pass | | 8 / 14 | 21 / 21 | **worse** |
+| of which Opus alone covers | | 0 / 6 | 16 / 17 | the direction reversed |
+| covered at 3, nearest pairs | Sonnet / Opus | 14% / 13% | 13% / 17% | Sonnet same, **Opus higher** |
+| the rule: kept though Opus reads 3 or more, per pass | | 1 / 7 | 16 / 17 | **worse** |
+| the rule: escalated / rescued | | 51 / 10.5 | 50 / 7 | same / fewer |
+| the rule's decision differs between the passes, of 409 | | 10 | 7 | same |
+| 2s whose reason describes a containment | Sonnet / Opus | 13.5% / 8.1% | 7.6% / 3.9% | Sonnet same, **Opus better** |
+| 3s whose reason uses line 2's own words ("each adds something") | Sonnet / Opus | 0 / 0 | 9 of 99 / 0 | Sonnet worse |
+| Roger's 30 marks, exact | Sonnet / Opus | 19 / 18 | 20 / 21.5 | Sonnet same, **Opus better** |
+| drop-or-merge pairs at 3 or more (11) | Opus | 80% | 100% / 90% | better |
+| antonyms "opposite"; random pairs at 3 or more | both | 100%; 0% | 100%; 0% | same |
+
+Opus on the escalated pairs (Sonnet's 3s): 51 / 48 pairs per pass, the same answer in both passes on
+47 of 51 and 45 of 48 (version 4: 50 of 54, 45 of 48); it rescued 7 / 7 (10 / 11).
+
+**Reading.**  Opus moved up under version 6 and Sonnet did not.  Where the two now differ at the
+cut-off it is almost always Opus covering a pair Sonnet keeps, the reverse of version 4, so the rule's
+blind spot ("kept though Opus would cut", the column Roger weighted as review work) grew from a handful
+to about 16 pairs in 409 (4%).  Opus's move looks like accuracy rather than generosity: its agreement
+with Roger's marks rose (the gains are items 11, 25, 26, where Roger scored above every model), it
+separates the known groups better (drop-or-merge 100% / 90% at 3 or more, near-distinct 15% → 12%),
+and its containment-described-as-2 slip halved.  Sonnet's slip also fell, but it picked up a new habit:
+in 9 of its 99 3s the reason uses line 2's closing words, "each adds something the other lacks", and
+scores 3 anyway (benevolent / altruistic, provocative / edgy, sarcastic / sardonic); under the rule a
+Sonnet 3 only costs an escalation, so this is harmless to the decision, but it says the tail of line 2
+is a phrase the models attach to either score.
+
+Three things changed at once, and the run cannot separate them: the text (line 2), the form (one pair
+per call), and **Opus's thinking**: the harness sends no thinking setting, so Opus 5.5 uses its default
+adaptive thinking, and in the one-pair form it thought much more (206 of 818 calls over 150 output
+tokens, against 4 of 110 one-trait calls under version 4); 17 of the 22 pairs where Opus changed side
+between versions were long-output calls.  Cost: Opus is **$0.0031 per pair** under version 6 ($0.0030
+uncached in version 4's lists; the cache saving was eaten by the extra output), Sonnet $0.0012.  The
+$0.0021 per Opus pair in "Early exit, and one pair per call" above is therefore too low.
+
+**What it means for the design.**  Under version 6 the Sonnet-first rule leaves about 4% of pairs that
+Opus would cut; per 10,000 candidates at about 2.5 pairs each (live; the Batches API halves): Sonnet
+first with Opus on the 3s about $40; Opus alone about $80; Sonnet first with Opus on the 2s and 3s
+about $70, nearly Opus alone.  Decision for Roger, who chose Sonnet-first on version 4's figures (a
+blind spot of 1-7 in 242): keep it and accept the 4% as review work, or move to Opus alone now that
+one pair per call and caching have made it $80 per 10,000.  Also for his pass: line 2's closing
+clause, "; each adds something the other lacks", is the phrase Sonnet now writes under 3s; the test is
+carried by "neither implies the other", and dropping the tail would cost nothing measured here.
+
 ## Files
 
 - Run: [pairs.json](../../data/candidates/overlap_test/overlap_arms_1/pairs.json) (identical pairs to run 1),
