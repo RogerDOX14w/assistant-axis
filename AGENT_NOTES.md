@@ -5509,6 +5509,17 @@ the same order as the list above:
   1-5 on the next RunPod round; the static desc/inst rejudge follows
   automatically via the fingerprint (the `corpus_instructions`
   multi-input is already stale, see "TODO: code housekeeping" item 3).
+  **Superseded by two corpus-wide regenerations**: every trait under
+  trait rubric V2 on 2026-10-02 (template `9255dd3430ef`; design log in
+  `data/traits/instructions/TRAITS_TO_ADD.md` § "Trait generator V2") and
+  every role under role rubric V3 on 2026-10-03 (`977c98ac3463`; design
+  log in `data/roles/instructions/ROLES_TO_ADD.md` § "Role rubric V3").
+  So the stale set is now the whole corpus, and the rubric comparison
+  Roger reserved is V1-or-V2.5 against V2-or-V3.  Rollback copies of the
+  text each regeneration replaced: `roger/trait_corpus_before_v2_2026-10-01/`
+  and `roger/role_corpus_before_v3_2026-10-03/` (git-ignored) and the last
+  commit before each check-in (traits: the parent of `fd569af`; roles:
+  HEAD at the time of the V3 check-in).
 - **Renamed or rewritten existing traits (2026-09-16, pairing review,
   `reports/seeding_log_2026-09.md`)**: renames `slothful` → `lazy`,
   `factual` → `calibrated`, `risk_taking` → `risk_seeking`, `nonchalant`

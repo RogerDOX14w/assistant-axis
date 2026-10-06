@@ -4391,6 +4391,79 @@ not had, with the evidence and a view on each, is listed in
 [role_rubric_v3_candidates.md](../../../reports/rubric_v2_pilot/role_rubric_v3_candidates.md)
 (Roger asked for it before the check-in, 2026-10-01).
 
+**Reroll pass over the regenerated corpus (2026-10-04..06).**  After the
+same pass over the role corpus (`ROLES_TO_ADD.md` § "Role rubric V3",
+"Reroll pass"), Roger asked for the September acceptance rule (a borderline
+problem in one of five instructions can slide; the same fault in two or
+more is rerolled, at most twice, then hand-edited) to be applied to the V2
+output, which had been judged only on its held-out 150.  The audit tool
+gained `--set corpus` (every trait file; `--stems` on every subcommand), the
+525 unjudged files were judged ($12.08; parse 100%), and the 138 held-out
+judgements that still matched the corpus carried over, so all 663 are judged
+under [judged/final/](../../../reports/trait_rubric_v2_pilot/judged/final/).
+Rule per side, positives and negatives separately
+([trait_reroll_candidates.py](../../../roger/trait_reroll_pass_2026-10-04/trait_reroll_candidates.py),
+list in [reroll_candidates.json](../../../reports/trait_rubric_v2_pilot/reroll_candidates.json)):
+292 candidates, of which 130 only on invented motives.  Roger's rulings:
+invented motives stay accepted; **negative-side faults are ignored** (weak
+opposite 56 files, softened 22: the negatives reach no data and the
+clean-pair recheck already settled what mattered); **em-dashes are not
+tested for** (27 files with two or more; the trait rubric has no dash rule,
+unlike the roles'); **fewer than five distinct positive openings is an
+automatic reroll**.  The 36 such files (35 of them "You are someone who ..."
+twice, the draft-6 overlap, 5.4% of the corpus) were rerolled
+`--instructions-only` in staging
+([stage/corpus/reroll_openings/](../../../reports/trait_rubric_v2_pilot/stage/corpus/reroll_openings/),
+$2.28): 24 reached five openings on the first roll, 8 more on the second,
+and the last four were hand-edited, the second "You are someone who" line
+rewritten into the fifth form ([accessible](./accessible.json) "You are
+accessible: ...", [lowbrow](./lowbrow.json) "You are lowbrow: ...",
+[northern_hemisphere](./northern_hemisphere.json) and
+[western_hemisphere](./western_hemisphere.json) "You are from the ...
+Hemisphere, ..."; a `hand_edits` field records it, the `generator` field is
+left as it was).  Of the 26 files with a positive-side judged fault in two
+of five, Roger read ten
+([reroll_candidates_sample.txt](../../../roger/trait_reroll_pass_2026-10-04/reroll_candidates_sample.txt))
+and delegated the rest to the agent's judgement: two were real,
+[selfish](./selfish.json) (two lines drifted to greed and stinginess; the
+reroll taken whole) and [whimsical](./whimsical.json) ("your responses
+surprise even you", "arrive at a response": chat framing; the reroll's
+first four with the original fifth line kept for its "colour of a Tuesday");
+the other 24 were the label or the description's content in the text (the
+hemispheres, [married](./married.json), [political](./political.json)),
+advocacy that is the trait ([pro_immigration](./pro_immigration.json)), or
+the trait's own motives read as softening
+([authoritarian](./authoritarian.json)'s "for the common good",
+[lenient](./lenient.json)'s "so nobody feels the sting").  Two rerolled files
+gained a new two-of-five flag ([nihilistic](./nihilistic.json) attitude
+only, [pessimistic](./pessimistic.json) softened) that is the same kind of
+false positive; left.  Net: **38 of 663 files changed** (36 openings, 2
+faults), all re-judged, no file short of five openings, arrangements and
+lists clean; the replaced text is in
+[openings_before/](../../../roger/trait_reroll_pass_2026-10-04/openings_before/)
+and [faults_before/](../../../roger/trait_reroll_pass_2026-10-04/faults_before/).
+The clean pairs of the 29 rerolled traits that sit in one were rechecked
+all the same, by the October procedure (regenerated in staging without the
+partner label, checked, misses resampled once; every sample in
+`antonym_check_history.jsonl` under phase `reroll_recheck_2026-10-06`;
+[recheck_pairs.py](../../../roger/trait_reroll_pass_2026-10-04/recheck_pairs.py),
+results in [recheck_pairs.json](../../../roger/trait_reroll_pass_2026-10-04/recheck_pairs.json),
+$0.38): 25 of 29 named their partner; the four that did not are the pairs
+that were by decision or already missing before the pass
+([gregarious](./gregarious.json), [only_child](./only_child.json),
+[ruthless_while_playing](./ruthless_while_playing.json), and
+[moral](./moral.json), whose negatives now name immoral rather than
+amoral).  Roger: since the descriptions are unchanged a miss here does not
+matter; it is a test on the negatives.  As for roles, the judged faults at
+two of five were mostly false positives, and the rule's mechanical part is
+what was worth automating: **since 2026-10-06 both generators generate a
+set again, once, when its positives do not open in `n_variants` different
+ways** (`generate_combined` in each script; the set with more distinct
+openings is kept, `opening_rerolls: 1` is written into the `generator`
+field, a batch reply that fails the check is redone in the real-time pass;
+`--no-opening-reroll` turns it off for a pilot that wants a rubric's raw
+rate).  About 5% more calls on a corpus run.
+
 ## Housekeeping once the directory settles (Sep 2026)
 
 Bring these up to date after the current round of trait edits / additions is
