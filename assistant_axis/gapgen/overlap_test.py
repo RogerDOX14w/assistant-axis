@@ -828,12 +828,24 @@ def parse_answer(text: Optional[str], rubric: str, n_listed: int, form: str = "l
     categories are the rubric's (:data:`RUBRICS`)."""
     if form == "single":
         return parse_single(text, rubric)
-    spec = RUBRICS[rubric]
+    return parse_list(text, RUBRICS[rubric], n_listed)
+
+
+def parse_list(text: Optional[str], spec: Mapping, n_listed: int, *, note_extra_keys: bool = False
+               ) -> tuple[dict, dict, dict]:
+    """The list form's parser (:func:`parse_answer`) for an answer spec of :data:`RUBRICS`' shape (``key``,
+    ``scale``, ``categories``, optional ``aliases`` and ``extra``), so that another list rubric (M3's
+    relation call, 2026-10-07) is parsed exactly as rubric A's list form was.  With ``note_extra_keys``,
+    ``meta["extra_keys"]`` lists the keys rows carried beyond ``id``, ``reason`` and the answer key
+    (ignored, as the single form's parser ignores them) and ``meta["n_rows_extra_keys"]`` counts those rows;
+    the overlap test's own calls leave it off, so their recorded parse metadata is unchanged."""
     key, cats, scale = spec["key"], spec["categories"], spec["scale"]
     aliases = spec.get("aliases") or {}
     has_wider = "wider" in spec.get("extra", ())
     want = list(range(1, n_listed + 1))
     meta: dict = {"n_rows": 0, "in_order": None, "extra_ids": [], "reason_first": None, "n_result_objects": 0}
+    if note_extra_keys:
+        meta.update(extra_keys=[], n_rows_extra_keys=0)
     if not text or not text.strip():
         return {}, {i: "empty response" for i in want}, meta
     objs = result_objects(text)
@@ -848,6 +860,7 @@ def parse_answer(text: Optional[str], rubric: str, n_listed: int, form: str = "l
     rows: dict[int, dict] = {}
     errors: dict[int, str] = {}
     order: list[int] = []
+    allowed = {"id", "reason", key, *spec.get("extra", ())}
     for r in raw:
         if not isinstance(r, dict):
             continue
@@ -858,6 +871,11 @@ def parse_answer(text: Optional[str], rubric: str, n_listed: int, form: str = "l
         rid = int(rid)
         if rid in rows:
             continue
+        if note_extra_keys:
+            extra = sorted(k for k in r if k not in allowed)
+            if extra:
+                meta["n_rows_extra_keys"] += 1
+                meta["extra_keys"] = sorted(set(meta["extra_keys"]) | set(extra))
         order.append(rid)
         reason = r.get("reason")
         val = answer_value(r.get(key), cats, scale, aliases) if key in r else None

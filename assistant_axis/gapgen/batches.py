@@ -258,9 +258,14 @@ class BatchTransport:
 
     @staticmethod
     def _request(c) -> dict:
+        """One batch request.  A call may ask for its system block to be cached (``cache_system``, with
+        an optional ``cache_ttl``: M3's overlap waves ask for the 1-hour cache, since a batch's requests
+        are spread over up to an hour); a call that names neither (the split filter's) is sent uncached,
+        as before."""
         return {"custom_id": c.custom_id,
                 "params": request_params(model=c.model, system=c.system, user=c.user, max_tokens=c.max_tokens,
-                                         temperature=c.temperature, cache_system=False)}
+                                         temperature=c.temperature, cache_system=bool(getattr(c, "cache_system", False)),
+                                         cache_ttl=getattr(c, "cache_ttl", None))}
 
     async def _retrying(self, what: str, bid: str, fn: Callable[[], Any]) -> Any:
         """``fn()``, tried again after a transient error (:func:`is_transient_stream_error`) with
