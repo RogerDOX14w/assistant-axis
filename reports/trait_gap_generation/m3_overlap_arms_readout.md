@@ -239,6 +239,53 @@ every pair about $1.80**.  The last is the cheapest of the two that close the bl
 that follows the rubric, and has one judge; the only reason for Sonnet was cost, which does not apply
 at these volumes.
 
+### Early exit, and one pair per call (Roger's question, 2026-10-06)
+
+Roger: once one corpus trait has said "discard", the candidate's other pairs need not be judged.  The
+cost figures above did not rely on that: they judge all of a candidate's similar pairs in one call, as
+the test did.  Early exit needs one pair per call, judged in cosine order, and the measured cost of
+that, from `overlap_arms_1`'s usage records (rubric A, pass 1):
+
+| call lists | Sonnet, per call / per pair | Opus, per call / per pair |
+|---|---|---|
+| 1 trait | $0.0024 / $0.0024 | $0.0048 / $0.0048 |
+| 2 traits | $0.0032 / $0.0016 | $0.0061 / $0.0031 |
+| 3 traits | $0.0042 / $0.0014 | $0.0080 / $0.0027 |
+
+The rubric is about 800 tokens of the 800-960 input tokens of every call, too short for prompt caching
+(1,024-token minimum on Sonnet and Opus), so a one-pair call costs 1.8 times a pair in a three-pair
+call.  On the test's 100 nearest targets, early exit in cosine order judges 246 of the 300 pairs (Opus,
+either pass; Sonnet 236-243): 32 targets are covered, 24 of them at the nearest neighbour, 6 at the
+second, 2 at the third.  So 18% fewer pairs at 1.8 times the price: **$1.18 per 100 candidates against
+$0.80 batched**, about 45% more.  Early exit would pay only if most candidates were covered at the
+first pair (break-even near 1.7 pairs judged per candidate), and generated candidates are probably
+covered less often than existing traits were.
+
+There is a better reason for one pair per call than cost: it removes the list-order noise.  The same
+prompt repeated agrees with itself 95-98% of the time, a reordered list 86-89% (finding 4 above), and
+a pair judged alone has no list to be reordered; this is the "one item per call" finding of the M1
+split again (words in one call change each other's answers).  Against the two-list-orders proposal:
+batched, two orders, Opus, is $1.60 per 100 candidates at about 88% per reading; one pair per call,
+once, with early exit, is $1.18 at about 96%, and a second reading can be kept for the pairs that land
+exactly on the cut-off (13-15% of pairs; about $0.20 more).  Cheaper and steadier than two orders.
+
+Per 10,000 candidates, overlap stage only, three similar pairs each, live prices (the Batches API
+halves them; a correction to the table of 2026-10-04, which understated by about a quarter):
+
+| design | Opus alone | Sonnet first, Opus on the 3s |
+|---|---|---|
+| batched, one reading | $80 | $60 |
+| batched, two list orders | $160 | $120 |
+| one pair per call, cosine order, early exit, one reading | $120-145 | $80-90 |
+| the same plus a second reading of the pairs on the cut-off | $140-165 | $90-105 |
+
+Where early exit could save real money is upstream.  Each candidate's retrieved and expanded traits
+(about 14) go to a Haiku relation call (about $40 per 10,000) so that about 3 reach the overlap call.
+With one-pair overlap calls in cosine order, the relation call could be dropped: the overlap rubric
+already returns "opposite", three covered candidates in four are caught at the nearest neighbour, and a
+stop rule for the uncovered case (N pairs, or a cosine floor from the M2 calibration) bounds the cost.
+A design choice for the M3 brief, to be measured in the pilot rather than decided here.
+
 ## Files
 
 - Run: [pairs.json](../../data/candidates/overlap_test/overlap_arms_1/pairs.json) (identical pairs to run 1),
