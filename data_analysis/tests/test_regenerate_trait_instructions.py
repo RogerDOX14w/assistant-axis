@@ -1036,7 +1036,9 @@ def batch_setup(tmp_path, monkeypatch):
     monkeypatch.setattr(module, "TRAITS_DIR", stage)
     usage_json = tmp_path / "records" / "usage.json"
     usage_json.parent.mkdir()
-    args = ["--all", "--traits-dir", str(stage), "--style", "RogerV2", "--force", "--usage-json", str(usage_json)]
+    # the fake replies open every instruction the same way: the opening reroll is off except where tested
+    args = ["--all", "--traits-dir", str(stage), "--style", "RogerV2", "--force", "--usage-json", str(usage_json),
+            "--no-opening-reroll"]
     return SimpleNamespace(stage=stage, client=client, usage_json=usage_json, args=args)
 
 
@@ -1144,3 +1146,84 @@ class TestBatchRun:
         args = module.parse_args(["--traits", "arrogant"])
         assert args.batch is False and args.batch_id is None and args.batch_no_wait is False
         assert args.batch_poll == module.DEFAULT_BATCH_POLL_SECONDS
+
+
+# ---------------------------------------------------------------------------
+# The opening reroll (2026-10-06): a set whose positives do not open in
+# n_variants different ways is generated again, once
+# ---------------------------------------------------------------------------
+
+@pytest.fixture(autouse=True)
+def _opening_reroll_off(monkeypatch):
+    """The fake replies above open every instruction the same way and the
+    older tests count calls, so the reroll is off unless a test turns it on."""
+    monkeypatch.setattr(module, "OPENING_REROLL", False)
+
+
+FIVE_OPENINGS = ["Be someone who sulks.", "Become someone who sulks.", "From now on, you are someone who sulks.",
+                 "You are someone who sulks.", "You are petty: you sulk."]
+FOUR_OPENINGS = FIVE_OPENINGS[:3] + ["You are someone who broods.", "You are someone who sulks."]
+
+
+def _combined_reply(pos_openings):
+    instr = [{"pos": p, "neg": f"Neg {i}."} for i, p in enumerate(pos_openings)]
+    return _make_response(json.dumps({"instruction": instr, "questions": FAKE_QUESTIONS, "eval_prompt": "x"}))
+
+
+class TestOpeningReroll:
+    def run(self, client, trait_file):
+        return asyncio.run(regenerate_one(
+            client, trait_file, n_variants=5, n_questions=40, instructions_only=False, model="m",
+            semaphore=asyncio.Semaphore(10), temperature=0.7, force=True, dry_run=False))
+
+    def test_the_count_uses_the_audit_classifier(self):
+        assert module.distinct_openings([{"pos": p} for p in FIVE_OPENINGS]) == 5
+        assert module.distinct_openings([{"pos": p} for p in FOUR_OPENINGS]) == 4
+
+    def test_a_doubled_opening_brings_a_second_call_and_the_better_set(self, trait_file, v2_style, monkeypatch, capsys):
+        monkeypatch.setattr(module, "OPENING_REROLL", True)
+        client = AsyncMock()
+        client.messages.create = AsyncMock(side_effect=[_combined_reply(FOUR_OPENINGS), _combined_reply(FIVE_OPENINGS)])
+        result = self.run(client, trait_file)
+        assert client.messages.create.call_count == 2 and "generated again for the openings" in result
+        d = json.loads(trait_file.read_text())
+        assert [p["pos"] for p in d["instruction"]] == FIVE_OPENINGS
+        assert d["generator"]["opening_rerolls"] == 1
+        assert "4 distinct openings of 5; generating again" in capsys.readouterr().err
+
+    def test_still_short_keeps_the_better_set_and_warns(self, trait_file, v2_style, monkeypatch, capsys):
+        monkeypatch.setattr(module, "OPENING_REROLL", True)
+        two = [FOUR_OPENINGS[0], FOUR_OPENINGS[3]] + [FOUR_OPENINGS[0]] * 3
+        client = AsyncMock()
+        client.messages.create = AsyncMock(side_effect=[_combined_reply(FOUR_OPENINGS), _combined_reply(two)])
+        self.run(client, trait_file)
+        d = json.loads(trait_file.read_text())
+        assert [p["pos"] for p in d["instruction"]] == FOUR_OPENINGS and d["generator"]["opening_rerolls"] == 1
+        assert "still 4 distinct openings after a second generation" in capsys.readouterr().err
+
+    def test_one_call_when_off_or_under_another_style(self, trait_file, v2_style, monkeypatch):
+        client = AsyncMock()
+        client.messages.create = AsyncMock(return_value=_combined_reply(FOUR_OPENINGS))
+        self.run(client, trait_file)                       # OPENING_REROLL is off (autouse)
+        assert client.messages.create.call_count == 1
+        assert "opening_rerolls" not in json.loads(trait_file.read_text())["generator"]
+        monkeypatch.setattr(module, "OPENING_REROLL", True)
+        monkeypatch.setattr(module, "PROMPT_STYLE", "Roger")   # not a style whose rubric asks for it
+        self.run(client, trait_file)
+        assert client.messages.create.call_count == 2
+
+    def test_the_switch(self):
+        assert module.parse_args(["--traits", "x"]).opening_reroll is True
+        assert module.parse_args(["--traits", "x", "--no-opening-reroll"]).opening_reroll is False
+
+
+class TestOpeningRerollInBatch:
+    def test_a_batch_reply_that_fails_the_check_is_redone_in_real_time(self, batch_setup, capsys):
+        b = batch_setup
+        module.main([a for a in b.args if a != "--no-opening-reroll"] + ["--batch", "--model", "claude-sonnet-4-6"])
+        err = capsys.readouterr().err
+        # petty's batch reply opens every instruction the same way: not written from the batch
+        assert "petty: 1 distinct openings of 5; generated again in real time" in err
+        assert "0 from the batch, 3 in real time" in err
+        d = json.loads((b.stage / "petty.json").read_text())
+        assert d["generator"].get("batch", False) is False and d["generator"]["opening_rerolls"] == 1

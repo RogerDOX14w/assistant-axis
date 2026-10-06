@@ -525,3 +525,121 @@ class TestArms:
 def exp_audit_form(text):
     from data_analysis import audit_trait_instructions as audit
     return audit.opening_form(text)
+
+
+class TestRoleArms:
+    """Role mode (2026-10-02): a plan from staged role files, judged with each file's own eval_prompt."""
+
+    def make_role_arms(self, tmp_path):
+        from data_analysis.regenerate_role_instructions import build_eval_prompt
+        stems = ["coral_reef", "devils_advocate"]
+        d = tmp_path / "r0"
+        d.mkdir()
+        for s in stems:
+            name = s.replace("_", " ")
+            doc = {"description": f"A {name} is something.", "eval_prompt": build_eval_prompt(name, f"A {name} is something."),
+                   "instruction": [{"pos": ("Act as" if k == 0 else "You are") + f" a {name}, number {k}."} for k in range(5)],
+                   "generator": {"style": "RogerV2", "template_sha256": "abc"}}
+            (d / f"{s}.json").write_text(json.dumps(doc))
+        return stems, [("r0", d, "RogerV2@abc")]
+
+    def test_a_role_plan_carries_the_display_name_and_the_files_judge_prompt(self, tmp_path, monkeypatch):
+        monkeypatch.setattr(exp, "load_questions", lambda n: [f"Q{i}?" for i in range(n)])
+        stems, arms = self.make_role_arms(tmp_path)
+        plan, left_out = exp.build_arms_plan(arms, stems, 20, entity="role")
+        assert left_out == [] and plan["entity"] == "role"
+        t = plan["traits"]["devils_advocate"]
+        assert t["label"] == "devil's advocate" and t["entity"] == "role"
+        assert t["judge_prompt"].startswith("You are evaluating whether the model's response displays the role")
+        assert "{question}" in t["judge_prompt"] and "{answer}" in t["judge_prompt"]
+        assert t["variants"][0]["form"] == exp_audit_form("Act as a devils advocate.")
+
+    def test_a_trait_plan_cannot_take_role_arms_or_the_reverse(self, tmp_path, monkeypatch):
+        monkeypatch.setattr(exp, "load_questions", lambda n: [f"Q{i}?" for i in range(n)])
+        stems, arms = self.make_role_arms(tmp_path)
+        plan, _ = exp.build_arms_plan(arms, stems, 20, entity="role")
+        with pytest.raises(SystemExit):
+            exp.build_arms_plan(arms, stems, 20, existing=plan, entity="trait")
+
+    def test_a_role_is_judged_with_its_own_prompt(self, tmp_path, monkeypatch):
+        monkeypatch.setattr(exp, "load_questions", lambda n: [f"Q{i}?" for i in range(n)])
+        stems, arms = self.make_role_arms(tmp_path)
+        plan, _ = exp.build_arms_plan(arms, stems[:1], 20, entity="role")
+        out = tmp_path / "out"
+        (out / "responses").mkdir(parents=True)
+        (out / "plan.json").write_text(json.dumps(plan))
+        rows = [{"variant": "r0_p0", "question_index": 0, "question": "Where do you live?", "provider": "SomeHost",
+                 "conversation": [{"role": "assistant", "content": "In the warm shallows."}]}]
+        (out / "responses" / "coral_reef.jsonl").write_text(json.dumps(rows[0]) + "\n")
+        seen = []
+
+        async def fake(client, prompt, model, max_tokens, limiter, usage=None):
+            seen.append(prompt)
+            return "It speaks as the reef.\nSCORE: 3"
+        monkeypatch.setattr(exp, "call_judge_single", fake)
+        monkeypatch.setattr(exp.openai, "AsyncOpenAI", lambda **kw: object())
+        monkeypatch.setenv("OPENAI_API_KEY", "test-key-not-real")
+        args = SimpleNamespace(judge_model="gpt-4.1-mini", requests_per_second=50, dry_run=False, via=None)
+        asyncio.run(exp.judge(args, exp.load_plan(out), out))
+        assert len(seen) == 1 and "displays the role: **coral reef**" in seen[0]
+        assert "Where do you live?" in seen[0] and "In the warm shallows." in seen[0]
+        trait_template = exp.trait_judge_prompt("coral reef", "A coral reef is something.")
+        assert seen[0].split("[QUESTION START]")[0] != trait_template.split("[QUESTION START]")[0]
+        assert json.loads((out / "scores" / "coral_reef.json").read_text()) == {"r0_p0_q0": 3}
+
+    def test_the_report_breaks_shares_down_by_opening(self, tmp_path, monkeypatch):
+        monkeypatch.setattr(exp, "load_questions", lambda n: [f"Q{i}?" for i in range(n)])
+        stems, arms = self.make_role_arms(tmp_path)
+        plan, _ = exp.build_arms_plan(arms, stems, 20, entity="role")
+        out = tmp_path / "out"
+        (out / "scores").mkdir(parents=True)
+        (out / "plan.json").write_text(json.dumps(plan))
+        for s in stems:   # p0 opens "Act as" and always scores 3; the others score 3 half the time
+            sc = {f"r0_p{k}_q{q}": (3 if k == 0 or q % 2 == 0 else 1) for k in range(5) for q in range(4)}
+            (out / "scores" / f"{s}.json").write_text(json.dumps(sc))
+        report = exp.arms_report(exp.load_plan(out), out, "r0", [])
+        forms = report["forms"]["r0"]
+        act_as = exp_audit_form("Act as a reef.")
+        assert forms[act_as] == {"n": 2, "mean": 100.0}
+        assert sum(f["n"] for f in forms.values()) == 10
+        assert "by opening" in exp.render_arms_report(report)
+
+
+class TestRoleDepthJudge:
+    """The role wording of the depth judge (2026-10-02): same points, scale and reply format."""
+
+    def test_same_fields_and_order_as_the_trait_version(self):
+        p = exp.ROLE_DEPTH_JUDGE_PROMPT
+        for field in ("{trait}", "{description}", "{question}", "{answer}"):
+            assert field in p
+        assert "<role>" in p and "personality" not in p
+        assert "{system" not in p and "instruction" not in p.lower()
+        for point in ("- voice:", "- in_action:", "- describes_itself:", "- caricature:"):
+            assert point in p
+        example = p[p.rindex('{{"reason"'):]
+        assert example.index('"reason"') < example.index('"voice"') < example.index('"caricature"')
+        assert exp.parse_depth(TestDepthJudge.GOOD)["caricature"] == 0
+
+    def test_a_role_entry_is_read_with_the_role_wording(self, tmp_path, monkeypatch):
+        out = tmp_path / "out"
+        (out / "responses").mkdir(parents=True)
+        plan = {"traits": {"forger": {"label": "forger", "description": "A forger copies signatures.",
+                                      "entity": "role", "judge_prompt": "x", "questions": ["Q?"],
+                                      "variants": [{"name": "act_as", "text": "Act as a forger."}]}}}
+        (out / "plan.json").write_text(json.dumps(plan))
+        row = {"variant": "act_as", "question_index": 0, "question": "Q?", "provider": "SomeHost",
+               "conversation": [{"role": "assistant", "content": "I age the paper with tea."}]}
+        (out / "responses" / "forger.jsonl").write_text(json.dumps(row) + "\n")
+        (out / "scores").mkdir()
+        (out / "scores" / "forger.json").write_text(json.dumps({"act_as_q0": 3}))   # only scored answers are read
+        seen = []
+
+        async def fake(client, model, prompt, semaphore, usage, tally):
+            seen.append(prompt)
+            return exp.parse_depth(TestDepthJudge.GOOD)
+        monkeypatch.setattr(exp, "depth_call", fake)
+        monkeypatch.setattr(exp.anthropic, "AsyncAnthropic", lambda **kw: object())
+        monkeypatch.setenv("ANTHROPIC_API_KEY", "test-key-not-real")
+        args = SimpleNamespace(model="claude-sonnet-4-6", min_score=0, concurrency=2, dry_run=False)
+        asyncio.run(exp.depth(args, exp.load_plan(out), out))
+        assert len(seen) == 1 and "<role>\nforger\n</role>" in seen[0] and "I age the paper" in seen[0]

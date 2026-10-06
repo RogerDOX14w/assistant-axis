@@ -1,6 +1,7 @@
 """Tests for data_analysis/audit_trait_instructions.py (no API calls)."""
 import asyncio
 import json
+import logging
 import re
 import sys
 from pathlib import Path
@@ -534,6 +535,48 @@ class TestJudgeFile:
         assert "Your previous reply could not be used: no JSON object in the reply" in asked[1]
         assert tally.total["instructions:claude-sonnet-4-6"] == 2 and tally.ok["instructions:claude-sonnet-4-6"] == 1
         assert len(out["instruction_judge"]["items"]) == 10
+
+    def test_a_refusal_is_raised_at_once_and_counted_apart(self, monkeypatch):
+        """Opus 5.5 ended its rating of the pre-V3 virus file with stop_reason
+        "refusal" (2026-10-03): no content, so no retry can help, and it is not
+        a reply that could not be read."""
+        monkeypatch.setattr(audit.asyncio, "sleep", AsyncMock())
+
+        def reply(**kw):
+            if "<instructions>" in kw["messages"][0]["content"]:
+                return SimpleNamespace(content=[], stop_reason="refusal",
+                                       usage=SimpleNamespace(input_tokens=900, output_tokens=0))
+            return _response(question_reply())
+        with pytest.raises(audit.JudgeRefusal, match="instructions:claude-sonnet-4-6: the model refused"):
+            self.run(reply)
+        # the client is a fresh AsyncMock per run, so count through the tally: one instruction call, not three
+        tally_calls = {"instructions:claude-sonnet-4-6": (1, 0, 1), "questions:claude-haiku-4-5-20251001": (1, 1, 0)}
+        usage, tally = audit.MultiModelUsage(), audit.ParseTally()
+        client = AsyncMock()
+        client.messages.create = AsyncMock(side_effect=reply)
+        with pytest.raises(audit.JudgeRefusal):
+            asyncio.run(audit.judge_file(client, make_doc(), instruction_model="claude-sonnet-4-6",
+                                         question_model="claude-haiku-4-5-20251001",
+                                         semaphore=asyncio.Semaphore(2), usage=usage, tally=tally))
+        for label, (total, ok, refused) in tally_calls.items():
+            assert (tally.total[label], tally.ok[label], tally.refused[label]) == (total, ok, refused), label
+        assert usage.n_calls == 2   # the refused call's input tokens are charged too
+
+    def test_parse_rates_leave_refusals_out(self, caplog):
+        tally = audit.ParseTally()
+        tally.total["taste:m"], tally.ok["taste:m"], tally.refused["taste:m"] = 150, 149, 1
+        with caplog.at_level(logging.INFO):
+            audit.report_parse_rates(tally, "audit_x")
+        assert "parse rate: 149/149 OK" in caplog.text and "HIGH FAIL RATE" not in caplog.text
+        assert "1 refused (stop_reason refusal), left out of the parse rate" in caplog.text
+
+    def test_an_arm_outcome_tells_refusals_from_failures(self):
+        todo = [("a", {}), ("b", {}), ("c", {})]
+        results = [None, audit.JudgeRefusal("taste:m: the model refused"), RuntimeError("boom")]
+        outcome = audit.arm_outcome("held_corpus", todo, results)
+        assert outcome == (3, 1, 1, 1)
+        assert audit.arm_line("rated", "held_corpus", outcome) == "held_corpus: rated 1 of 3 files, 1 failed, 1 refused"
+        assert audit.arm_line("rated", "x", (3, 3, 0, 0)) == "x: rated 3 of 3 files, 0 failed"
 
 
 class TestTaste:
