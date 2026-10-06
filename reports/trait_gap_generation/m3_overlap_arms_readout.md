@@ -252,9 +252,18 @@ that, from `overlap_arms_1`'s usage records (rubric A, pass 1):
 | 2 traits | $0.0032 / $0.0016 | $0.0061 / $0.0031 |
 | 3 traits | $0.0042 / $0.0014 | $0.0080 / $0.0027 |
 
-The rubric is about 800 tokens of the 800-960 input tokens of every call, too short for prompt caching
-(1,024-token minimum on Sonnet and Opus), so a one-pair call costs 1.8 times a pair in a three-pair
-call.  On the test's 100 nearest targets, early exit in cosine order judges 246 of the 300 pairs (Opus,
+The rubric is about 650 tokens of the 800-960 input tokens of every call, and the runs were made with
+prompt caching off (`cache_system=False` in the runner), so a one-pair call cost 1.8 times a pair in a
+three-pair call.  **Correction, 2026-10-06:** the rubric is not too short to cache.  The minimum
+cacheable prompt is 512 tokens on Sonnet 5.5 and Opus 5.5 (1,024 on Sonnet 5 and 4.6, 4,096 on Haiku
+4.5, which is why the M1 split cannot cache; read from the prompt-caching page that day), and a prompt
+under the minimum is silently not cached rather than refused.  With the rubric cached (reads at 0.1x
+the input price on Sonnet, 0.05x on Opus 5.5), a one-pair call costs about $0.0012 on Sonnet and
+$0.0021 on Opus, which is what a pair in a three-pair call cost uncached, so the one-pair design's
+premium disappears.  Live concurrent calls hit the cache (5-minute lifetime, first call writes at
+1.25x); under the Batches API hits are not promised, since a job's requests are spread over up to an
+hour, so the 1-hour cache (write at 2x, once) is the one to ask for there, and the hit rate is read
+from the usage fields in the pilot.  The M3 build turns caching on.  On the test's 100 nearest targets, early exit in cosine order judges 246 of the 300 pairs (Opus,
 either pass; Sonnet 236-243): 32 targets are covered, 24 of them at the nearest neighbour, 6 at the
 second, 2 at the third.  So 18% fewer pairs at 1.8 times the price: **$1.18 per 100 candidates against
 $0.80 batched**, about 45% more.  Early exit would pay only if most candidates were covered at the
