@@ -115,7 +115,14 @@ def queue_entry_from_record(rec: dict, *, section: str = DEFAULT_SECTION) -> dic
     nv = rec.get("novelty") or {}
     gens = _generators(rec)
     tags = ["gap_gen"] + [f"source:{g}" for g in gens] + [t for t in f.get("tags") or [] if t]
-    partner = nv.get("nearest_existing") if "pair_completion" in (nv.get("flags") or []) else None
+    # M3's block (coding_plan_m3.md, 2026-10-07) names the traits the candidate may complete as a list,
+    # ``pair_completion_for``; the first is the partner (the others go in the notes).  The plan's earlier
+    # block shape (a ``pair_completion`` flag beside ``nearest_existing``) is still read.
+    pcf = [s for s in nv.get("pair_completion_for") or [] if s]
+    if pcf:
+        partner = pcf[0]
+    else:
+        partner = nv.get("nearest_existing") if "pair_completion" in (nv.get("flags") or []) else None
     notes = []
     if f.get("reason"):
         notes.append(f"filter: {f['reason']}")
@@ -123,6 +130,10 @@ def queue_entry_from_record(rec: dict, *, section: str = DEFAULT_SECTION) -> dic
         notes.append("senses: " + "; ".join(f["senses"]))
     if nv.get("nearest_existing"):
         notes.append(f"nearest existing: {nv['nearest_existing']} ({nv.get('decision')})")
+    if len(pcf) > 1:
+        notes.append(f"pair completion for {', '.join(pcf)} (M3 {nv.get('run_id')}); partner set to the first")
+    if nv.get("review"):
+        notes.append(f"M3 review: {', '.join(nv['review'])} ({nv.get('decision')}, run {nv.get('run_id')})")
     return {
         "stem": rec["stem"], "label": rec["label"], "entity_type": rec.get("entity_type") or "trait",
         "chunk": DEFAULT_CHUNK, "sub_chunk": gens[0] if gens else None,

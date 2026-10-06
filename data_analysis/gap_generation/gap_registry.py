@@ -32,6 +32,11 @@ Commands:
   has since renamed counts for the renamed trait (``renamed_from`` in the
   entry), so a later run is how a trait whose description changed sense with
   its rename gets judged again.
+* ``synonyms [--stem X] [--run-id R]``: M3's rename shortlist (design item 8 of
+  coding_plan_platform.md's M3 design): the candidates M3 judged covered, under the
+  trait that covers them, the traits whose candidates read 4 first, then 3, the
+  exact-label matches last; each with its deciding readings and reasons
+  (``novelty.synonyms``).
 * ``compact``: copy the log to ``registry.jsonl.bak.<UTC>``, fold it to one
   line per key, and write the tracked snapshot ``registry.snapshot.jsonl``.
 * ``promote (--keys K ... | --status accepted) [--min-local-novelty X] [--section S] [--dry-run]``:
@@ -273,6 +278,28 @@ def cmd_corpus_regions(args) -> int:
     return 0
 
 
+def cmd_synonyms(args) -> int:
+    """The rename shortlist as a markdown table (no API call)."""
+    from assistant_axis.gapgen.novelty import synonyms
+    groups = synonyms(Registry(args.registry).fold().values(), stem=args.stem, run_id=args.run_id)
+    n = sum(len(g["candidates"]) for g in groups)
+    print(f"<!-- M3 rename shortlist: {n} covered candidates under {len(groups)} traits; traits whose candidates "
+          f"read 4 first, then 3, exact-label matches last -->")
+    print("| trait | best | candidate | key | reading | reason | gloss |")
+    print("|---|---|---|---|---|---|---|")
+    for g in groups:
+        for c in g["candidates"]:
+            rd = c.get("reading") or {}
+            son, opus = rd.get("sonnet") or {}, rd.get("opus") or {}
+            reading = ("exact label" + (f" ({(c.get('exact_label') or {}).get('match')})" if c.get("exact_label") else "")
+                       if c["reason"] == "exact_label" else
+                       f"Sonnet {son.get('value')}" + (f", Opus {opus.get('value')}" if opus else ""))
+            why = opus.get("reason") or son.get("reason") or ""
+            print(f"| {g['stem']} | {_md(g['best'])} | {_md(c['label'])} | {c['key']} | {_md(reading)} | {_md(why)} "
+                  f"| {_md(c.get('gloss'))} |")
+    return 0
+
+
 def cmd_compact(args) -> int:
     try:
         rep = compact(args.registry, set_aside_malformed=args.set_aside_malformed)
@@ -361,6 +388,10 @@ def build_parser() -> argparse.ArgumentParser:
                          "trait giving its entry")
     sp.add_argument("--out", type=Path, default=paths.CORPUS_REGIONS_PATH)
     sp.set_defaults(func=cmd_corpus_regions)
+    sp = sub.add_parser("synonyms", help="M3's rename shortlist: covered candidates under the trait that covers them")
+    sp.add_argument("--stem", help="one covering trait only")
+    sp.add_argument("--run-id", help="one M3 run only (its batch id)")
+    sp.set_defaults(func=cmd_synonyms)
     sp = sub.add_parser("compact")
     sp.add_argument("--set-aside-malformed", action="store_true",
                     help="move malformed (torn) lines to registry.jsonl.rejected.<UTC> instead of refusing")
