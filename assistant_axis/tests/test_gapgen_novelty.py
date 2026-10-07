@@ -225,6 +225,16 @@ class TestShortlist:
         tri = NV.build_shortlist(self.listed(), base | {"alpha": "similar", "beta": "similar"})
         assert tri.pair_flags == []
 
+    def test_a_trait_still_unsure_is_shortlisted_but_left_out_of_the_pair_check(self):
+        base = {x.stem: "unrelated" for x in self.listed()}
+        sl = NV.build_shortlist(self.listed(), base | {"delta": "similar", "epsilon": "unsure", "zeta": "similar"})
+        assert sl.queue == ["delta", "zeta", "epsilon"] and sl.pair_flags == []
+
+    def test_the_fallback_shortlists_every_listed_trait_without_a_pair_check(self):
+        sl = NV.build_shortlist(self.listed(), {}, fallback=True)
+        assert sl.queue == [x.stem for x in self.listed()]                   # already in cosine order
+        assert sl.pair_flags == [] and sl.pair_completion_for == [] and sl.front == []
+
 
 # --------------------------------------------------------------------------- stage 4: the walk
 
@@ -531,7 +541,7 @@ class TestRunner:
         c = cand("candidate a")
         st = r.run([c], {c.key: query(delta=0.9, alpha=0.6, zeta=0.5, kappa=0.4)})[c.key]
         assert state["n"] == 1 and sorted(state["labels"]) == ["alpha", "zeta"]
-        assert st.relations["alpha"] == "similar" and st.relations["zeta"] == "similar"   # still unsure: kept
+        assert st.relations["alpha"] == "similar" and st.relations["zeta"] == "unsure"    # still unsure: kept
         assert st.block["relation"]["unsure_reasked"]["model"] == NV.SONNET
         assert st.shortlist.queue == ["alpha", "zeta"] and st.block["decision"] == "new"
 
@@ -546,6 +556,22 @@ class TestRunner:
         assert [x["outcome"] for x in st.block["readings"]] == ["unparsed", "continue"]
         rates = r.warn_parse_rates()
         assert rates[f"overlap:{NV.SONNET}"] == {"n": 2, "ok_first": 1, "ok": 1}
+
+    def test_a_relation_call_that_never_parses_falls_back_to_every_listed_trait(self, tmp_path):
+        base = responder_for({}, {("candidate a", "epsilon"): 4})
+
+        def resp(kw):
+            if is_relation(kw):
+                return "no JSON here"
+            return base(kw)
+        r, _, _ = make_runner(tmp_path, resp)
+        c = cand("candidate a")
+        st = r.run([c], {c.key: query(delta=0.9, epsilon=0.8, zeta=0.5, kappa=0.4)})[c.key]
+        assert [x["parse_attempt"] for x in r.records if x["step"] == "relation"] == [1, 2]
+        assert st.block["relation"]["status"] == "unparsed" and st.block["relation"]["fallback"]
+        assert st.block["pair_flags"] == []                                   # no pair check without answers
+        assert [x["stem"] for x in st.block["readings"]] == ["delta", "epsilon"]
+        assert st.block["decision"] == "covered" and st.block["review"] == ["unparsed"]
 
     def test_a_flaky_answer_is_re_asked_and_parses(self, tmp_path):
         seen = {"n": 0}

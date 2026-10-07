@@ -320,10 +320,15 @@ class Shortlist:
 
 
 def build_shortlist(listed: Sequence[Listed], relations: Mapping[str, str],
-                    cosine_of: Optional[Callable[[str], Optional[float]]] = None) -> Shortlist:
+                    cosine_of: Optional[Callable[[str], Optional[float]]] = None, *, fallback: bool = False) -> Shortlist:
     """Stage 3's outputs from the final relations (after the unsure re-ask).  ``cosine_of`` gives the cosine
-    of a partner that is not listed (a corner of an expanded trait's own simplex)."""
+    of a partner that is not listed (a corner of an expanded trait's own simplex).  A trait still ``unsure``
+    after the re-ask is shortlisted with the similar ones (by cosine) and does not count in the pair check.
+    ``fallback`` (the relation call never parsed): every listed trait, by cosine, and no pair check."""
     by = {x.stem: x for x in listed}
+    if fallback:
+        return Shortlist(queue=[x.stem for x in sorted(listed, key=lambda x: (-x.cosine, x.stem))], front=[],
+                         pair_flags=[], pair_completion_for=[], relations=dict(relations))
 
     def cos(s: str) -> float:
         if s in by:
@@ -340,7 +345,8 @@ def build_shortlist(listed: Sequence[Listed], relations: Mapping[str, str],
         else:
             completion.append(o.stem)
     front = sorted(front, key=lambda s: (-cos(s), s))
-    similar = sorted((x for x in listed if relations.get(x.stem) == "similar"), key=lambda x: (-x.cosine, x.stem))
+    similar = sorted((x for x in listed if relations.get(x.stem) in ("similar", "unsure")),
+                     key=lambda x: (-x.cosine, x.stem))
     queue = front + [x.stem for x in similar if x.stem not in front]
     flags = []
     seen = set()

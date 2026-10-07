@@ -524,8 +524,6 @@ class NoveltyRunner:
                     unsure_calls.append(self._relation_call(st, unsure, step="relation_unsure"))
             elif o.status == "unparsed":
                 # the relation call never parsed: every listed trait goes to the overlap call, by cosine
-                for x in st.listed:
-                    st.relations[x.stem] = "similar"
                 st.relation["fallback"] = "every listed trait shortlisted, by cosine (the relation call never parsed)"
                 st.relation["error"] = o.error
             else:
@@ -536,14 +534,14 @@ class NoveltyRunner:
                 st, o = by_key[c.key], res2[id(c)]
                 st.relation["unsure_reasked"] = {"model": c.model, "stems": list(c.stems), "status": o.status}
                 if o.status == "ok":
+                    # Sonnet's answer replaces Haiku's; a trait still unsure stays "unsure", which the shortlist
+                    # keeps (by cosine, with the similar ones) and the pair check leaves out
                     for i, s in enumerate(c.stems, 1):
                         row = o.parsed[i]
-                        v = row["value"]
-                        st.relation["answers"][s]["second"] = {"relation": v, "reason": row["reason"]}
-                        st.relations[s] = v if v != "unsure" else "similar"
+                        st.relation["answers"][s]["second"] = {"relation": row["value"], "reason": row["reason"]}
+                        st.relations[s] = row["value"]
                 elif o.status == "unparsed":
-                    for s in c.stems:
-                        st.relations[s] = "similar"
+                    pass                     # the traits stay "unsure": shortlisted, out of the pair check
                 else:
                     st.stalled = f"relation unsure re-ask: {o.status} ({o.error})"
         elif unsure_calls:
@@ -552,7 +550,8 @@ class NoveltyRunner:
         for st in live:
             if st.stalled or self._stop is not None and st.relation is None:
                 continue
-            st.shortlist = NV.build_shortlist(st.listed, st.relations, self._cos_fn(st))
+            st.shortlist = NV.build_shortlist(st.listed, st.relations, self._cos_fn(st),
+                                              fallback=bool(st.relation.get("fallback")))
             review = (["pair_flag"] if st.shortlist.pair_flags else []) + \
                      (["unparsed"] if st.relation.get("fallback") else [])
             details = [{"kind": "pair_flag", **f} for f in st.shortlist.pair_flags]
