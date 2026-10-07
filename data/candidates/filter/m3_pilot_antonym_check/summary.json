@@ -1,100 +1,118 @@
 {
   "result": {
-    "n": 405,
-    "n_done": 16,
+    "n": 389,
+    "n_done": 389,
     "n_failed": 0,
-    "n_pending": 389,
-    "n_hard_reject": 14,
+    "n_pending": 0,
+    "n_hard_reject": 0,
     "verdict_counts": {
-      "reject": 16
+      "reject": 6,
+      "tagged": 16,
+      "trait": 367
     },
     "verdict_fractions": {
-      "reject": 1.0
+      "reject": 0.0154,
+      "tagged": 0.0411,
+      "trait": 0.9434
     },
     "tag_counts": {
-      "too_rare": 16
+      "action": 2,
+      "membership": 19,
+      "no_persona_reading": 2,
+      "state": 16,
+      "stretched": 2
     },
     "tag_fractions": {
-      "too_rare": 1.0
+      "action": 0.0051,
+      "membership": 0.0488,
+      "no_persona_reading": 0.0051,
+      "state": 0.0411,
+      "stretched": 0.0051
     },
-    "region_counts": {},
-    "polysemy_n": 0,
-    "polysemy_rate": 0.0,
+    "region_counts": {
+      "alignment_ai_agent": 1,
+      "cognitive_epistemic": 97,
+      "communication_style": 94,
+      "emotional_temperament": 62,
+      "identity_demographic": 39,
+      "moral_stance": 48,
+      "social_interpersonal": 26
+    },
+    "polysemy_n": 150,
+    "polysemy_rate": 0.3856,
     "gloss_in_band_rate": 0.0,
-    "n_useful": 0,
+    "n_useful": 219,
     "second_opinion_n": 47,
-    "disagreements": 0,
-    "parse_rate": 0.0051,
+    "disagreements": 6,
+    "parse_rate": 1.0,
     "parse_rate_first_pass": 0.0,
-    "n_llm": 391,
-    "probe_n": 49,
-    "probe_unknown": 2,
+    "n_llm": 389,
+    "probe_n": 47,
+    "probe_unknown": 0,
     "probe_failed": 0,
     "second_opinion_requested": 47,
     "second_opinion_failed": 0,
     "calls": {
-      "established": 648,
-      "gloss": 367,
-      "kind": 648,
-      "probe": 49,
-      "same_sense": 226,
-      "second_established": 84,
-      "second_kind": 84,
-      "second_sense": 47,
-      "second_sense_retry": 1,
-      "second_vague": 84,
-      "sense": 389,
-      "vague": 648
+      "alignment": 367,
+      "descriptors": 367,
+      "second_same_sense": 25
     },
-    "cost_usd": 3.9283,
-    "cost_per_candidate_usd": 0.0097,
-    "yield_per_usd": 0.0,
+    "cost_usd": 4.6356,
+    "cost_per_candidate_usd": 0.011917,
+    "yield_per_usd": 47.2,
     "usage": {
       "per_model": {
         "claude-haiku-4-5-20251001": {
           "model": "claude-haiku-4-5-20251001",
-          "prompt_tokens": 1596231,
-          "completion_tokens": 295175,
-          "cost_usd": 3.0721,
-          "n_calls": 2932
+          "prompt_tokens": 1944154,
+          "completion_tokens": 358527,
+          "cost_usd": 3.7368,
+          "n_calls": 3666
         },
         "claude-sonnet-5-5": {
           "model": "claude-sonnet-5-5",
-          "prompt_tokens": 245305,
-          "completion_tokens": 36560,
-          "cost_usd": 0.8562,
-          "n_calls": 343
+          "prompt_tokens": 255917,
+          "completion_tokens": 38694,
+          "cost_usd": 0.8988,
+          "n_calls": 368
         }
       },
-      "total_cost_usd": 3.9283,
-      "total_prompt_tokens": 1841536,
-      "total_completion_tokens": 331735,
-      "n_calls": 3275
+      "total_cost_usd": 4.6356,
+      "total_prompt_tokens": 2200071,
+      "total_completion_tokens": 397221,
+      "n_calls": 4034
     },
     "v2_fields": {
-      "alignment_relevant_true": 0,
-      "membership_kind": {},
+      "alignment_relevant_true": 77,
+      "membership_kind": {
+        "age_group": 1,
+        "circumstance": 13,
+        "family": 2,
+        "relationship": 3
+      },
       "tag_disagreement": 0,
       "validator_repairs": {},
       "polysemy_notes": {
-        "two_trait_senses": 0,
-        "nontrait_person_sense": 0,
-        "obvious_sense_not_trait": 0,
+        "two_trait_senses": 59,
+        "nontrait_person_sense": 17,
+        "obvious_sense_not_trait": 10,
         "overshadowed": 0,
         "reading_related": 0,
-        "first_thought_in_the_way": 0,
-        "leaves_something_out": 0,
-        "fits_many_in_different_ways": 0,
+        "first_thought_in_the_way": 36,
+        "leaves_something_out": 10,
+        "fits_many_in_different_ways": 55,
         "most_likely_reading_stretched": 0
       },
       "comparison_relations": {},
-      "holding": {},
+      "holding": {
+        "states": 16
+      },
       "freq_rescue": {},
       "alignment_scores": {
-        "0": 0,
-        "1": 0,
-        "2": 0,
-        "3": 0,
+        "0": 222,
+        "1": 68,
+        "2": 27,
+        "3": 50,
         "none": 0
       }
     },
@@ -107,97 +125,30 @@
     "split": {
       "transport": "live",
       "pilot_figures": {
-        "n": 405,
-        "n_reached_step1": 0,
-        "outcomes": {},
+        "n": 389,
+        "n_reached_step1": 389,
+        "outcomes": {
+          "states": 16,
+          "trait": 367,
+          "turned_away": 6
+        },
         "same_outcome_as_expected": 0,
         "differences": [],
-        "cut_before_step1": [
-          {
-            "label": "biocentric",
-            "rule": "floor",
-            "reason": "Zipf 0.00 is below the 1.5 floor and no rescue route applies (no LLM call)."
-          },
-          {
-            "label": "cronyistic",
-            "rule": "floor",
-            "reason": "Zipf 0.00 is below the 1.5 floor and no rescue route applies (no LLM call)."
-          },
-          {
-            "label": "dogmatist",
-            "rule": "floor",
-            "reason": "Zipf 1.08 is below the 1.5 floor and no rescue route applies (no LLM call)."
-          },
-          {
-            "label": "heterosexist",
-            "rule": "floor",
-            "reason": "Zipf 1.35 is below the 1.5 floor and no rescue route applies (no LLM call)."
-          },
-          {
-            "label": "imbiber",
-            "rule": "floor",
-            "reason": "Zipf 0.00 is below the 1.5 floor and no rescue route applies (no LLM call)."
-          },
-          {
-            "label": "inclusivist",
-            "rule": "floor",
-            "reason": "Zipf 0.00 is below the 1.5 floor and no rescue route applies (no LLM call)."
-          },
-          {
-            "label": "irresolute",
-            "rule": "floor",
-            "reason": "Zipf 1.49 is below the 1.5 floor and no rescue route applies (no LLM call)."
-          },
-          {
-            "label": "media credulous",
-            "rule": "probe",
-            "reason": "Definition probe: word not known. This is two separate words, not a single word; 'media' is a real word but 'credulous' is an adjective meaning gullible, and together they form a phrase, not a lexical unit."
-          },
-          {
-            "label": "nominalist",
-            "rule": "floor",
-            "reason": "Zipf 1.35 is below the 1.5 floor and no rescue route applies (no LLM call)."
-          },
-          {
-            "label": "particularist",
-            "rule": "floor",
-            "reason": "Zipf 1.18 is below the 1.5 floor and no rescue route applies (no LLM call)."
-          },
-          {
-            "label": "perseverating",
-            "rule": "floor",
-            "reason": "Zipf 0.00 is below the 1.5 floor and no rescue route applies (no LLM call)."
-          },
-          {
-            "label": "restrictionist",
-            "rule": "floor",
-            "reason": "Zipf 1.15 is below the 1.5 floor and no rescue route applies (no LLM call)."
-          },
-          {
-            "label": "sharp memoried",
-            "rule": "floor",
-            "reason": "Zipf 0.00 is below the 1.5 floor and no rescue route applies (no LLM call)."
-          },
-          {
-            "label": "sybaritic",
-            "rule": "floor",
-            "reason": "Zipf 1.47 is below the 1.5 floor and no rescue route applies (no LLM call)."
-          },
-          {
-            "label": "unadventurous eater",
-            "rule": "probe",
-            "reason": "Definition probe: word not known. This is a two-word phrase, not a single word; 'unadventurous' is a real word (un- + adventurous) but the phrase as a whole is descriptive rather than a lexical unit."
-          },
-          {
-            "label": "weak stomached",
-            "rule": "floor",
-            "reason": "Zipf 1.44 is below the 1.5 floor and no rescue route applies (no LLM call)."
-          }
-        ],
-        "glosses": 0,
-        "glosses_form_ok": 0
+        "cut_before_step1": [],
+        "glosses": 367,
+        "glosses_form_ok": 366
       },
       "step_parse_rates": {
+        "alignment:first:claude-haiku-4-5-20251001": {
+          "n": 367,
+          "ok_first_pass": 367,
+          "ok": 367
+        },
+        "descriptors:first:claude-haiku-4-5-20251001": {
+          "n": 367,
+          "ok_first_pass": 367,
+          "ok": 367
+        },
         "established:first:claude-haiku-4-5-20251001": {
           "n": 648,
           "ok_first_pass": 648,
@@ -229,14 +180,19 @@
           "ok": 84
         },
         "probe:first:claude-haiku-4-5-20251001": {
-          "n": 49,
-          "ok_first_pass": 49,
-          "ok": 49
+          "n": 47,
+          "ok_first_pass": 47,
+          "ok": 47
         },
         "same_sense:first:claude-haiku-4-5-20251001": {
           "n": 226,
           "ok_first_pass": 226,
           "ok": 226
+        },
+        "same_sense:second:claude-sonnet-5-5": {
+          "n": 25,
+          "ok_first_pass": 25,
+          "ok": 25
         },
         "sense:first:claude-haiku-4-5-20251001": {
           "n": 389,
@@ -245,7 +201,7 @@
         },
         "sense:second:claude-sonnet-5-5": {
           "n": 47,
-          "ok_first_pass": 46,
+          "ok_first_pass": 47,
           "ok": 47
         },
         "vague:first:claude-haiku-4-5-20251001": {
@@ -260,6 +216,18 @@
         }
       },
       "cost_by_step": {
+        "alignment@claude-haiku-4-5-20251001": {
+          "n_calls": 367,
+          "prompt_tokens": 215249,
+          "completion_tokens": 30575,
+          "cost_usd": 0.368124
+        },
+        "descriptors@claude-haiku-4-5-20251001": {
+          "n_calls": 367,
+          "prompt_tokens": 132674,
+          "completion_tokens": 32777,
+          "cost_usd": 0.296559
+        },
         "established@claude-haiku-4-5-20251001": {
           "n_calls": 648,
           "prompt_tokens": 334471,
@@ -308,6 +276,12 @@
           "completion_tokens": 6124,
           "cost_usd": 0.232032
         },
+        "second_same_sense@claude-sonnet-5-5": {
+          "n_calls": 25,
+          "prompt_tokens": 10612,
+          "completion_tokens": 2134,
+          "cost_usd": 0.042564
+        },
         "second_sense@claude-sonnet-5-5": {
           "n_calls": 47,
           "prompt_tokens": 38515,
@@ -340,25 +314,35 @@
         }
       },
       "cost_per_word_by_step": {
-        "established@claude-haiku-4-5-20251001": 0.001625,
-        "gloss@claude-haiku-4-5-20251001": 0.000605,
-        "gloss@claude-sonnet-5-5": 0.000223,
-        "kind@claude-haiku-4-5-20251001": 0.001941,
+        "alignment@claude-haiku-4-5-20251001": 0.000946,
+        "descriptors@claude-haiku-4-5-20251001": 0.000762,
+        "established@claude-haiku-4-5-20251001": 0.001633,
+        "gloss@claude-haiku-4-5-20251001": 0.000608,
+        "gloss@claude-sonnet-5-5": 0.000224,
+        "kind@claude-haiku-4-5-20251001": 0.001951,
         "probe@claude-haiku-4-5-20251001": 0.000104,
-        "same_sense@claude-haiku-4-5-20251001": 0.000429,
-        "second_established@claude-sonnet-5-5": 0.000477,
-        "second_kind@claude-sonnet-5-5": 0.000593,
-        "second_sense@claude-sonnet-5-5": 0.000456,
+        "same_sense@claude-haiku-4-5-20251001": 0.000431,
+        "second_established@claude-sonnet-5-5": 0.00048,
+        "second_kind@claude-sonnet-5-5": 0.000596,
+        "second_same_sense@claude-sonnet-5-5": 0.000109,
+        "second_sense@claude-sonnet-5-5": 0.000458,
         "second_sense_retry@claude-sonnet-5-5": 1e-05,
-        "second_vague@claude-sonnet-5-5": 0.000431,
-        "sense@claude-haiku-4-5-20251001": 0.001728,
-        "vague@claude-haiku-4-5-20251001": 0.001426
+        "second_vague@claude-sonnet-5-5": 0.000433,
+        "sense@claude-haiku-4-5-20251001": 0.001737,
+        "vague@claude-haiku-4-5-20251001": 0.001433
       },
       "second_opinion": {
         "n": 47,
-        "disagree": []
+        "disagree": [
+          "forthcoming",
+          "frantic",
+          "identity diffuse",
+          "partial",
+          "penitent",
+          "stagnating"
+        ]
       },
-      "resumed_calls": 0,
+      "resumed_calls": 3272,
       "batches_submitted": null
     },
     "pipeline": "split",
@@ -426,22 +410,22 @@
         "first": "claude-haiku-4-5-20251001",
         "second": "claude-sonnet-5-5"
       },
-      "accepted": false,
-      "action": "stopped",
-      "stopped_before": "w6_last_step",
-      "calls_not_sent": 759,
-      "checked_at": "2026-10-07T00:34:03+00:00"
+      "accepted": true,
+      "action": "accepted",
+      "stopped_before": null,
+      "calls_not_sent": 0,
+      "checked_at": "2026-10-07T00:47:24+00:00"
     },
-    "stopped_by_disagreement": true
+    "stopped_by_disagreement": false
   },
   "_provenance": {
     "schema_version": "1.0",
     "produced_by": {
-      "cmd": "uv run python data_analysis/gap_generation/traithood_filter.py --batch-id m3_pilot_antonym_check --run antonym_check/pilot_1 --pipeline split --transport live --budget-usd 7 --confirmed-by 'Roger via Fable (coordinator), 2026-10-07: go for the M3 pilot'\"'\"'s paid stages, $30 in all'",
-      "git_sha": "8229491+dirty",
+      "cmd": "uv run python data_analysis/gap_generation/traithood_filter.py --batch-id m3_pilot_antonym_check --run antonym_check/pilot_1 --pipeline split --transport live --budget-usd 7 --resume --accept-disagreement --confirmed-by 'Roger via Fable (coordinator), 2026-10-07: resume with --accept-disagreement (option 1)'",
+      "git_sha": "94cc86f+dirty",
       "author": "Roger Dearnaley",
       "title": "traithood_filter m3_pilot_antonym_check"
     },
-    "produced_at": "2026-10-07T00:34:03+00:00"
+    "produced_at": "2026-10-07T00:51:31+00:00"
   }
 }

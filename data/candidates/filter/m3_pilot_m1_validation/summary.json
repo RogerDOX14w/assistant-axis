@@ -1,0 +1,288 @@
+{
+  "result": {
+    "n": 143,
+    "n_done": 143,
+    "n_failed": 0,
+    "n_pending": 0,
+    "n_hard_reject": 0,
+    "verdict_counts": {
+      "reject": 29,
+      "tagged": 14,
+      "trait": 100
+    },
+    "verdict_fractions": {
+      "reject": 0.2028,
+      "tagged": 0.0979,
+      "trait": 0.6993
+    },
+    "tag_counts": {
+      "action": 1,
+      "membership": 21,
+      "no_persona_reading": 24,
+      "role_person": 4,
+      "state": 10,
+      "stretched": 4
+    },
+    "tag_fractions": {
+      "action": 0.007,
+      "membership": 0.1469,
+      "no_persona_reading": 0.1678,
+      "role_person": 0.028,
+      "state": 0.0699,
+      "stretched": 0.028
+    },
+    "region_counts": {
+      "alignment_ai_agent": 1,
+      "cognitive_epistemic": 10,
+      "communication_style": 15,
+      "emotional_temperament": 9,
+      "identity_demographic": 28,
+      "moral_stance": 10,
+      "social_interpersonal": 27
+    },
+    "polysemy_n": 49,
+    "polysemy_rate": 0.3427,
+    "gloss_in_band_rate": 0.0,
+    "n_useful": 60,
+    "second_opinion_n": 0,
+    "disagreements": 0,
+    "parse_rate": 1.0,
+    "parse_rate_first_pass": 0.0,
+    "n_llm": 143,
+    "probe_n": 44,
+    "probe_unknown": 0,
+    "probe_failed": 0,
+    "second_opinion_requested": 0,
+    "second_opinion_failed": 0,
+    "calls": {
+      "alignment": 100,
+      "descriptors": 100,
+      "established": 181,
+      "gloss": 100,
+      "kind": 181,
+      "probe": 44,
+      "same_sense": 43,
+      "sense": 143,
+      "vague": 181
+    },
+    "cost_usd": 2.6465,
+    "cost_per_candidate_usd": 0.018507,
+    "yield_per_usd": 22.7,
+    "usage": {
+      "per_model": {
+        "claude-sonnet-5-5": {
+          "model": "claude-sonnet-5-5",
+          "prompt_tokens": 728328,
+          "completion_tokens": 118981,
+          "cost_usd": 2.6465,
+          "n_calls": 1073
+        }
+      },
+      "total_cost_usd": 2.6465,
+      "total_prompt_tokens": 728328,
+      "total_completion_tokens": 118981,
+      "n_calls": 1073
+    },
+    "v2_fields": {
+      "alignment_relevant_true": 17,
+      "membership_kind": {
+        "affinity": 2,
+        "age_group": 1,
+        "circumstance": 3,
+        "class": 1,
+        "family": 3,
+        "nationality_ethnicity_language": 7,
+        "relationship": 1,
+        "religion": 3
+      },
+      "tag_disagreement": 0,
+      "validator_repairs": {},
+      "polysemy_notes": {
+        "two_trait_senses": 8,
+        "nontrait_person_sense": 5,
+        "obvious_sense_not_trait": 8,
+        "overshadowed": 0,
+        "reading_related": 0,
+        "first_thought_in_the_way": 17,
+        "leaves_something_out": 13,
+        "fits_many_in_different_ways": 6,
+        "most_likely_reading_stretched": 0
+      },
+      "comparison_relations": {},
+      "holding": {
+        "nationalities": 7,
+        "roles": 4,
+        "states": 10
+      },
+      "freq_rescue": {
+        "negating_prefix": 6
+      },
+      "alignment_scores": {
+        "0": 61,
+        "1": 22,
+        "2": 14,
+        "3": 3,
+        "none": 0
+      }
+    },
+    "batch_id": "m3_pilot_m1_validation",
+    "stopped_by_budget": false,
+    "stopped_by_error": null,
+    "rubric_version": 5,
+    "model": "claude-sonnet-5-5",
+    "second_model": null,
+    "split": {
+      "transport": "live",
+      "pilot_figures": {
+        "n": 143,
+        "n_reached_step1": 143,
+        "outcomes": {
+          "roles": 4,
+          "states": 10,
+          "trait": 100,
+          "turned_away": 29
+        },
+        "same_outcome_as_expected": 0,
+        "differences": [],
+        "cut_before_step1": [],
+        "glosses": 100,
+        "glosses_form_ok": 100
+      },
+      "step_parse_rates": {
+        "alignment:first:claude-sonnet-5-5": {
+          "n": 100,
+          "ok_first_pass": 100,
+          "ok": 100
+        },
+        "descriptors:first:claude-sonnet-5-5": {
+          "n": 100,
+          "ok_first_pass": 100,
+          "ok": 100
+        },
+        "established:first:claude-sonnet-5-5": {
+          "n": 181,
+          "ok_first_pass": 181,
+          "ok": 181
+        },
+        "gloss:first:claude-sonnet-5-5": {
+          "n": 100,
+          "ok_first_pass": 100,
+          "ok": 100
+        },
+        "kind:first:claude-sonnet-5-5": {
+          "n": 181,
+          "ok_first_pass": 181,
+          "ok": 181
+        },
+        "probe:first:claude-sonnet-5-5": {
+          "n": 44,
+          "ok_first_pass": 44,
+          "ok": 44
+        },
+        "same_sense:first:claude-sonnet-5-5": {
+          "n": 43,
+          "ok_first_pass": 43,
+          "ok": 43
+        },
+        "sense:first:claude-sonnet-5-5": {
+          "n": 143,
+          "ok_first_pass": 143,
+          "ok": 143
+        },
+        "vague:first:claude-sonnet-5-5": {
+          "n": 181,
+          "ok_first_pass": 181,
+          "ok": 181
+        }
+      },
+      "cost_by_step": {
+        "alignment@claude-sonnet-5-5": {
+          "n_calls": 100,
+          "prompt_tokens": 77848,
+          "completion_tokens": 11164,
+          "cost_usd": 0.267336
+        },
+        "descriptors@claude-sonnet-5-5": {
+          "n_calls": 100,
+          "prompt_tokens": 47848,
+          "completion_tokens": 11986,
+          "cost_usd": 0.215556
+        },
+        "established@claude-sonnet-5-5": {
+          "n_calls": 181,
+          "prompt_tokens": 114265,
+          "completion_tokens": 18142,
+          "cost_usd": 0.40995
+        },
+        "gloss@claude-sonnet-5-5": {
+          "n_calls": 100,
+          "prompt_tokens": 66093,
+          "completion_tokens": 6863,
+          "cost_usd": 0.200816
+        },
+        "kind@claude-sonnet-5-5": {
+          "n_calls": 181,
+          "prompt_tokens": 184122,
+          "completion_tokens": 14067,
+          "cost_usd": 0.508914
+        },
+        "probe@claude-sonnet-5-5": {
+          "n_calls": 44,
+          "prompt_tokens": 18186,
+          "completion_tokens": 4448,
+          "cost_usd": 0.080852
+        },
+        "same_sense@claude-sonnet-5-5": {
+          "n_calls": 43,
+          "prompt_tokens": 18344,
+          "completion_tokens": 3910,
+          "cost_usd": 0.075788
+        },
+        "sense@claude-sonnet-5-5": {
+          "n_calls": 143,
+          "prompt_tokens": 117231,
+          "completion_tokens": 28871,
+          "cost_usd": 0.523172
+        },
+        "vague@claude-sonnet-5-5": {
+          "n_calls": 181,
+          "prompt_tokens": 84391,
+          "completion_tokens": 19530,
+          "cost_usd": 0.364082
+        }
+      },
+      "cost_per_word_by_step": {
+        "alignment@claude-sonnet-5-5": 0.001869,
+        "descriptors@claude-sonnet-5-5": 0.001507,
+        "established@claude-sonnet-5-5": 0.002867,
+        "gloss@claude-sonnet-5-5": 0.001404,
+        "kind@claude-sonnet-5-5": 0.003559,
+        "probe@claude-sonnet-5-5": 0.000565,
+        "same_sense@claude-sonnet-5-5": 0.00053,
+        "sense@claude-sonnet-5-5": 0.003659,
+        "vague@claude-sonnet-5-5": 0.002546
+      },
+      "second_opinion": {
+        "n": 0,
+        "disagree": []
+      },
+      "resumed_calls": 0,
+      "batches_submitted": null
+    },
+    "pipeline": "split",
+    "third_model": null,
+    "agreement": null,
+    "tripwire": null,
+    "stopped_by_disagreement": false
+  },
+  "_provenance": {
+    "schema_version": "1.0",
+    "produced_by": {
+      "cmd": "uv run python data_analysis/gap_generation/traithood_filter.py --batch-id m3_pilot_m1_validation --run m1_validation/pilot_1 --pipeline split --transport live --model claude-sonnet-5-5 --no-second-opinion --budget-usd 3 --confirmed-by 'Roger via Fable (coordinator), 2026-10-07: Sonnet first-line, no second opinion, cap $3'",
+      "git_sha": "20b0544+dirty",
+      "author": "Roger Dearnaley",
+      "title": "traithood_filter m3_pilot_m1_validation"
+    },
+    "produced_at": "2026-10-07T01:01:39+00:00"
+  }
+}
