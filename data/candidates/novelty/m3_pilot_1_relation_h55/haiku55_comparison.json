@@ -1,0 +1,709 @@
+{
+  "result": {
+    "run": "data/candidates/novelty/m3_pilot_1_relation_h55",
+    "sources": [
+      "m3_pilot_1",
+      "m3_pilot_1_r2"
+    ],
+    "scan": "m3_pilot_1_scan",
+    "like_for_like": {
+      "n": 457,
+      "with_haiku45_answers": 457,
+      "same_user_turn": 457,
+      "same_order": 457,
+      "haiku45_models": {
+        "claude-haiku-4-5-20251001": 457
+      },
+      "missing_from_haiku45": []
+    },
+    "agreement_45_to_55": {
+      "n": 7862,
+      "same": 5993,
+      "agreement": 0.7623,
+      "kappa": 0.6501,
+      "confusion": {
+        "similar -> similar": 1823,
+        "similar -> opposed": 2,
+        "similar -> unrelated": 904,
+        "similar -> unsure": 48,
+        "opposed -> similar": 10,
+        "opposed -> opposed": 2281,
+        "opposed -> unrelated": 608,
+        "opposed -> unsure": 7,
+        "unrelated -> similar": 141,
+        "unrelated -> opposed": 106,
+        "unrelated -> unrelated": 1889,
+        "unrelated -> unsure": 27,
+        "unsure -> opposed": 5,
+        "unsure -> unrelated": 11
+      }
+    },
+    "scan_recall": {
+      "haiku45": {
+        "n": 76,
+        "similar": 76,
+        "recall": 1.0,
+        "answers": {
+          "similar": 76
+        },
+        "missed": []
+      },
+      "haiku55": {
+        "n": 76,
+        "similar": 75,
+        "recall": 0.9868,
+        "answers": {
+          "similar": 75,
+          "unrelated": 1
+        },
+        "missed": [
+          {
+            "key": "financially_stable#1",
+            "stem": "wealthy",
+            "answer": "unrelated"
+          }
+        ]
+      }
+    },
+    "corrections": [
+      {
+        "candidate": "conflict-avoidant",
+        "key": "conflict_avoidant#1",
+        "trait": "aggressive",
+        "should_be": "opposed",
+        "note": null,
+        "haiku45": "opposed",
+        "haiku55": "opposed",
+        "haiku45_right": true,
+        "haiku55_right": true
+      },
+      {
+        "candidate": "conflict-avoidant",
+        "key": "conflict_avoidant#1",
+        "trait": "peaceful",
+        "should_be": "similar",
+        "note": "maybe the double negative confused a small model",
+        "haiku45": "opposed",
+        "haiku55": "similar",
+        "haiku45_right": false,
+        "haiku55_right": true
+      },
+      {
+        "candidate": "inauthentic",
+        "key": "inauthentic#1",
+        "trait": "self_certain",
+        "should_be": "unrelated",
+        "note": "harmless",
+        "haiku45": "opposed",
+        "haiku55": "unrelated",
+        "haiku45_right": false,
+        "haiku55_right": true
+      },
+      {
+        "candidate": "inauthentic",
+        "key": "inauthentic#1",
+        "trait": "self_uncertain",
+        "should_be": "unrelated",
+        "note": "harmless",
+        "haiku45": "opposed",
+        "haiku55": "unrelated",
+        "haiku45_right": false,
+        "haiku55_right": true
+      },
+      {
+        "candidate": "leftish",
+        "key": "leftish#1",
+        "trait": "extremist",
+        "should_be": "opposed",
+        "note": null,
+        "haiku45": "opposed",
+        "haiku55": "opposed",
+        "haiku45_right": true,
+        "haiku55_right": true
+      },
+      {
+        "candidate": "leftish",
+        "key": "leftish#1",
+        "trait": "moderate",
+        "should_be": "not opposed",
+        "note": "tricky; harmless in practice",
+        "haiku45": "opposed",
+        "haiku55": "unrelated",
+        "haiku45_right": false,
+        "haiku55_right": true
+      },
+      {
+        "candidate": "meandering",
+        "key": "meandering#1",
+        "trait": "steady",
+        "should_be": "opposed",
+        "note": null,
+        "haiku45": "opposed",
+        "haiku55": "opposed",
+        "haiku45_right": true,
+        "haiku55_right": true
+      },
+      {
+        "candidate": "meandering",
+        "key": "meandering#1",
+        "trait": "erratic",
+        "should_be": "not opposed",
+        "note": null,
+        "haiku45": "opposed",
+        "haiku55": "unrelated",
+        "haiku45_right": false,
+        "haiku55_right": true
+      },
+      {
+        "candidate": "monozygotic",
+        "key": "monozygotic#1",
+        "trait": "only_child",
+        "should_be": "opposed or 1",
+        "note": "harmless",
+        "haiku45": "opposed",
+        "haiku55": "opposed",
+        "haiku45_right": true,
+        "haiku55_right": true
+      },
+      {
+        "candidate": "monozygotic",
+        "key": "monozygotic#1",
+        "trait": "many_siblings",
+        "should_be": "unrelated",
+        "note": "harmless",
+        "haiku45": "opposed",
+        "haiku55": "opposed",
+        "haiku45_right": false,
+        "haiku55_right": false
+      },
+      {
+        "candidate": "one of many",
+        "key": "one_of_many#1",
+        "trait": "self_conscious",
+        "should_be": "unrelated",
+        "note": "harmless",
+        "haiku45": "opposed",
+        "haiku55": "unrelated",
+        "haiku45_right": false,
+        "haiku55_right": true
+      },
+      {
+        "candidate": "one of many",
+        "key": "one_of_many#1",
+        "trait": "unselfconscious",
+        "should_be": "unrelated",
+        "note": "harmless",
+        "haiku45": "opposed",
+        "haiku55": "unrelated",
+        "haiku45_right": false,
+        "haiku55_right": true
+      },
+      {
+        "candidate": "self serving",
+        "key": "self_serving#1",
+        "trait": "benevolent",
+        "should_be": "opposed",
+        "note": null,
+        "haiku45": "opposed",
+        "haiku55": "opposed",
+        "haiku45_right": true,
+        "haiku55_right": true
+      },
+      {
+        "candidate": "self serving",
+        "key": "self_serving#1",
+        "trait": "uncaring",
+        "should_be": "not opposed",
+        "note": null,
+        "haiku45": "opposed",
+        "haiku55": "similar",
+        "haiku45_right": false,
+        "haiku55_right": true
+      },
+      {
+        "candidate": "sly",
+        "key": "sly#1",
+        "trait": "aggressive",
+        "should_be": "not opposed",
+        "note": "harmless",
+        "haiku45": "opposed",
+        "haiku55": "opposed",
+        "haiku45_right": false,
+        "haiku55_right": false
+      },
+      {
+        "candidate": "sly",
+        "key": "sly#1",
+        "trait": "peaceful",
+        "should_be": "not opposed",
+        "note": "harmless",
+        "haiku45": "opposed",
+        "haiku55": "unrelated",
+        "haiku45_right": false,
+        "haiku55_right": true
+      },
+      {
+        "candidate": "smooth",
+        "key": "smooth#1",
+        "trait": "pretentious",
+        "should_be": "not opposed",
+        "note": "harmless",
+        "haiku45": "opposed",
+        "haiku55": "unrelated",
+        "haiku45_right": false,
+        "haiku55_right": true
+      },
+      {
+        "candidate": "smooth",
+        "key": "smooth#1",
+        "trait": "unpretentious",
+        "should_be": "not opposed",
+        "note": "harmless",
+        "haiku45": "opposed",
+        "haiku55": "opposed",
+        "haiku45_right": false,
+        "haiku55_right": false
+      },
+      {
+        "candidate": "trendsetting",
+        "key": "trendsetting#1",
+        "trait": "unfashionable",
+        "should_be": "opposed",
+        "note": null,
+        "haiku45": "opposed",
+        "haiku55": "opposed",
+        "haiku45_right": true,
+        "haiku55_right": true
+      },
+      {
+        "candidate": "trendsetting",
+        "key": "trendsetting#1",
+        "trait": "fashionable",
+        "should_be": "not opposed",
+        "note": "Roger asks whether this is harmless in practice",
+        "haiku45": "opposed",
+        "haiku55": "similar",
+        "haiku45_right": false,
+        "haiku55_right": true
+      },
+      {
+        "candidate": "twisted",
+        "key": "twisted#1",
+        "trait": "joyful",
+        "should_be": "unrelated",
+        "note": "harmless?",
+        "haiku45": "opposed",
+        "haiku55": "opposed",
+        "haiku45_right": false,
+        "haiku55_right": false
+      },
+      {
+        "candidate": "twisted",
+        "key": "twisted#1",
+        "trait": "joyless",
+        "should_be": "unrelated",
+        "note": "harmless?",
+        "haiku45": "opposed",
+        "haiku55": "unrelated",
+        "haiku45_right": false,
+        "haiku55_right": true
+      },
+      {
+        "candidate": "youthful",
+        "key": "youthful#1",
+        "trait": "mature",
+        "should_be": "opposed",
+        "note": null,
+        "haiku45": "opposed",
+        "haiku55": "opposed",
+        "haiku45_right": true,
+        "haiku55_right": true
+      },
+      {
+        "candidate": "youthful",
+        "key": "youthful#1",
+        "trait": "immature",
+        "should_be": "not opposed",
+        "note": "Roger asks whether this is harmless",
+        "haiku45": "opposed",
+        "haiku55": "unrelated",
+        "haiku45_right": false,
+        "haiku55_right": true
+      }
+    ],
+    "corrections_summary": {
+      "haiku45": {
+        "right": 7,
+        "wrong": 17,
+        "unread": 0
+      },
+      "haiku55": {
+        "right": 20,
+        "wrong": 4,
+        "unread": 0
+      }
+    },
+    "per_candidate": {
+      "haiku45": {
+        "n": 457,
+        "similar": {
+          "n": 457,
+          "mean": 6.1,
+          "median": 6.0,
+          "p90": 9.0,
+          "max": 10.0,
+          "min": 0.0
+        },
+        "opposed": {
+          "n": 457,
+          "mean": 6.4,
+          "median": 7.0,
+          "p90": 9.0,
+          "max": 11.0,
+          "min": 0.0
+        },
+        "similar_plus_opposed": {
+          "n": 457,
+          "mean": 12.4,
+          "median": 13.0,
+          "p90": 17.0,
+          "max": 20.0,
+          "min": 1.0
+        },
+        "similar_total": 2777,
+        "opposed_total": 2906,
+        "unrelated_total": 2163,
+        "unsure_total": 16,
+        "candidates_with_unsure": 11
+      },
+      "haiku55": {
+        "n": 457,
+        "similar": {
+          "n": 457,
+          "mean": 4.3,
+          "median": 4.0,
+          "p90": 7.0,
+          "max": 9.0,
+          "min": 0.0
+        },
+        "opposed": {
+          "n": 457,
+          "mean": 5.2,
+          "median": 5.0,
+          "p90": 8.0,
+          "max": 11.0,
+          "min": 0.0
+        },
+        "similar_plus_opposed": {
+          "n": 457,
+          "mean": 9.6,
+          "median": 10.0,
+          "p90": 14.0,
+          "max": 19.0,
+          "min": 0.0
+        },
+        "similar_total": 1974,
+        "opposed_total": 2394,
+        "unrelated_total": 3412,
+        "unsure_total": 82,
+        "candidates_with_unsure": 59
+      }
+    },
+    "shortlist_length": {
+      "haiku45": {
+        "n": 457,
+        "mean": 7.2,
+        "median": 8.0,
+        "p90": 10.0,
+        "max": 12.0,
+        "min": 0.0,
+        "total": 3294
+      },
+      "haiku55": {
+        "n": 457,
+        "mean": 5.9,
+        "median": 6.0,
+        "p90": 9.0,
+        "max": 12.0,
+        "min": 0.0,
+        "total": 2702
+      }
+    },
+    "parse": {
+      "haiku45": {
+        "n": 457,
+        "ok_first": 457,
+        "ok": 457
+      },
+      "haiku55": {
+        "n": 457,
+        "ok_first": 457,
+        "ok": 457
+      }
+    },
+    "answers_total": {
+      "haiku45": 7862,
+      "haiku55": 7862
+    },
+    "unsure_rate": {
+      "haiku45": 0.00204,
+      "haiku55": 0.01043
+    },
+    "calls": {
+      "haiku45": {
+        "relation:claude-haiku-4-5-20251001": {
+          "n_calls": 457,
+          "stop_reasons": {
+            "end_turn": 457
+          },
+          "input_tokens": {
+            "n": 457,
+            "mean": 1314.41,
+            "median": 1322.0,
+            "p90": 1460.4,
+            "max": 1616.0,
+            "min": 992.0
+          },
+          "cache_read_tokens": {
+            "n": 457,
+            "mean": 0.0,
+            "median": 0.0,
+            "p90": 0.0,
+            "max": 0.0,
+            "min": 0.0
+          },
+          "cache_write_tokens": {
+            "n": 457,
+            "mean": 0.0,
+            "median": 0.0,
+            "p90": 0.0,
+            "max": 0.0,
+            "min": 0.0
+          },
+          "output_tokens": {
+            "n": 457,
+            "mean": 955.77,
+            "median": 963.0,
+            "p90": 1109.0,
+            "max": 1243.0,
+            "min": 567.0
+          },
+          "text_chars": {
+            "n": 457,
+            "mean": 3619.07,
+            "median": 3630.0,
+            "p90": 4270.8,
+            "max": 4814.0,
+            "min": 2009.0
+          },
+          "output_tokens_per_listed_trait": {
+            "n": 457,
+            "mean": 55.61,
+            "median": 55.53333333333333,
+            "p90": 60.26315789473684,
+            "max": 68.58823529411765,
+            "min": 43.333333333333336
+          },
+          "cost_usd": 2.784631
+        }
+      },
+      "haiku55": {
+        "relation:claude-haiku-5-5": {
+          "n_calls": 457,
+          "stop_reasons": {
+            "end_turn": 457
+          },
+          "input_tokens": {
+            "n": 457,
+            "mean": 1745.81,
+            "median": 1754.0,
+            "p90": 1970.6000000000001,
+            "max": 2151.0,
+            "min": 1261.0
+          },
+          "cache_read_tokens": {
+            "n": 457,
+            "mean": 0.0,
+            "median": 0.0,
+            "p90": 0.0,
+            "max": 0.0,
+            "min": 0.0
+          },
+          "cache_write_tokens": {
+            "n": 457,
+            "mean": 0.0,
+            "median": 0.0,
+            "p90": 0.0,
+            "max": 0.0,
+            "min": 0.0
+          },
+          "output_tokens": {
+            "n": 457,
+            "mean": 1315.88,
+            "median": 1160.0,
+            "p90": 2101.0,
+            "max": 2628.0,
+            "min": 675.0
+          },
+          "text_chars": {
+            "n": 457,
+            "mean": 3005.45,
+            "median": 3015.0,
+            "p90": 3472.4,
+            "max": 3913.0,
+            "min": 1780.0
+          },
+          "output_tokens_per_listed_trait": {
+            "n": 457,
+            "mean": 76.02,
+            "median": 66.27777777777777,
+            "p90": 114.7529411764706,
+            "max": 152.3125,
+            "min": 54.0
+          },
+          "cost_usd": 0.380463
+        },
+        "relation_unsure:claude-sonnet-5-5": {
+          "n_calls": 59,
+          "stop_reasons": {
+            "end_turn": 59
+          },
+          "input_tokens": {
+            "n": 59,
+            "mean": 606.54,
+            "median": 583.0,
+            "p90": 689.0,
+            "max": 829.0,
+            "min": 548.0
+          },
+          "cache_read_tokens": {
+            "n": 59,
+            "mean": 0.0,
+            "median": 0.0,
+            "p90": 0.0,
+            "max": 0.0,
+            "min": 0.0
+          },
+          "cache_write_tokens": {
+            "n": 59,
+            "mean": 0.0,
+            "median": 0.0,
+            "p90": 0.0,
+            "max": 0.0,
+            "min": 0.0
+          },
+          "output_tokens": {
+            "n": 59,
+            "mean": 130.76,
+            "median": 101.0,
+            "p90": 202.20000000000005,
+            "max": 471.0,
+            "min": 69.0
+          },
+          "text_chars": {
+            "n": 59,
+            "mean": 372.34,
+            "median": 294.0,
+            "p90": 564.4000000000002,
+            "max": 1321.0,
+            "min": 190.0
+          },
+          "output_tokens_per_listed_trait": {
+            "n": 59,
+            "mean": 94.83,
+            "median": 92.0,
+            "p90": 111.2,
+            "max": 197.0,
+            "min": 69.0
+          },
+          "cost_usd": 0.148722
+        }
+      }
+    }
+  },
+  "_provenance": {
+    "schema_version": "1.0",
+    "produced_by": {
+      "cmd": "uv run python data_analysis/gap_generation/haiku55_compare.py relation",
+      "git_sha": "62023c4+dirty",
+      "author": "Roger Dearnaley",
+      "title": "haiku55_compare relation m3_pilot_1_relation_h55"
+    },
+    "produced_at": "2026-10-07T19:43:16+00:00",
+    "inputs": [
+      {
+        "dep_key": "input_0",
+        "path": "data/candidates/novelty/m3_pilot_1_relation_h55/relation.jsonl",
+        "fingerprint": "v1:2026-10-07T19:43:05+00:00@3092421",
+        "kind": "file",
+        "dataset_id": null,
+        "last_modified_at": "2026-10-07T19:43:05+00:00",
+        "extras": {}
+      },
+      {
+        "dep_key": "input_1",
+        "path": "data/candidates/novelty/m3_pilot_1_relation_h55/responses.jsonl",
+        "fingerprint": "v1:2026-10-07T19:43:04+00:00@4055454",
+        "kind": "file",
+        "dataset_id": null,
+        "last_modified_at": "2026-10-07T19:43:04+00:00",
+        "extras": {}
+      },
+      {
+        "dep_key": "input_2",
+        "path": "data/candidates/novelty/m3_pilot_1/roger_review.json",
+        "fingerprint": "v1:2026-10-07T18:18:15+00:00@10125",
+        "kind": "file",
+        "dataset_id": null,
+        "last_modified_at": "2026-10-07T18:18:15+00:00",
+        "extras": {}
+      },
+      {
+        "dep_key": "input_3",
+        "path": "data/candidates/novelty/m3_pilot_1_scan/comparison.json",
+        "fingerprint": "v1:2026-10-07T01:34:56+00:00@795062",
+        "kind": "file",
+        "dataset_id": null,
+        "last_modified_at": "2026-10-07T01:34:56+00:00",
+        "extras": {}
+      },
+      {
+        "dep_key": "input_4",
+        "path": "data/candidates/novelty/m3_pilot_1/results.jsonl",
+        "fingerprint": "v1:2026-10-07T01:25:18+00:00@4357767",
+        "kind": "file",
+        "dataset_id": null,
+        "last_modified_at": "2026-10-07T01:25:18+00:00",
+        "extras": {}
+      },
+      {
+        "dep_key": "input_5",
+        "path": "data/candidates/novelty/m3_pilot_1/responses.jsonl",
+        "fingerprint": "v1:2026-10-07T01:25:18+00:00@9127280",
+        "kind": "file",
+        "dataset_id": null,
+        "last_modified_at": "2026-10-07T01:25:18+00:00",
+        "extras": {}
+      },
+      {
+        "dep_key": "input_6",
+        "path": "data/candidates/novelty/m3_pilot_1_r2/results.jsonl",
+        "fingerprint": "v1:2026-10-07T18:58:51+00:00@4302834",
+        "kind": "file",
+        "dataset_id": null,
+        "last_modified_at": "2026-10-07T18:58:51+00:00",
+        "extras": {}
+      },
+      {
+        "dep_key": "input_7",
+        "path": "data/candidates/novelty/m3_pilot_1_r2/responses.jsonl",
+        "fingerprint": "v1:2026-10-07T18:58:51+00:00@242515",
+        "kind": "file",
+        "dataset_id": null,
+        "last_modified_at": "2026-10-07T18:58:51+00:00",
+        "extras": {}
+      }
+    ],
+    "inputs_sha256": "508e02149bd3c5d047acfc047dfa1d67ce7b317b0bd05001cc1ef380a64bee10"
+  }
+}

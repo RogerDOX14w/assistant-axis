@@ -1,0 +1,3510 @@
+{
+  "result": {
+    "n_pairs": 409,
+    "n_calls": 180,
+    "models": [
+      "claude-haiku-5-5",
+      "claude-haiku-4-5-20251001"
+    ],
+    "reference": "claude-opus-5-5",
+    "parse": {
+      "A|claude-haiku-4-5-20251001": {
+        "ok": 409,
+        "total": 409,
+        "rate": 1.0
+      },
+      "A|claude-haiku-5-5": {
+        "ok": 409,
+        "total": 409,
+        "rate": 1.0
+      }
+    },
+    "agreement": {
+      "A": {}
+    },
+    "correlation": {
+      "A": {
+        "claude-haiku-5-5": {
+          "persona": {
+            "all": {
+              "rho": 0.5806,
+              "p": 1.7239072585869997e-22,
+              "n": 234,
+              "lo": 0.4435,
+              "hi": 0.6895,
+              "n_boot": 2000
+            },
+            "non_antonym": {
+              "rho": 0.5806,
+              "p": 1.7239072585869997e-22,
+              "n": 234,
+              "lo": 0.4435,
+              "hi": 0.6895,
+              "n_boot": 2000
+            },
+            "nearest": {
+              "rho": 0.5292,
+              "p": 9.318201115302006e-16,
+              "n": 199,
+              "lo": 0.3952,
+              "hi": 0.6354,
+              "n_boot": 2000
+            },
+            "nearest_non_antonym": {
+              "rho": 0.5292,
+              "p": 9.318201115302006e-16,
+              "n": 199,
+              "lo": 0.3952,
+              "hi": 0.6354,
+              "n_boot": 2000
+            }
+          },
+          "embedding": {
+            "all": {
+              "rho": 0.633,
+              "p": 8.564310430720633e-38,
+              "n": 325,
+              "lo": 0.5339,
+              "hi": 0.718,
+              "n_boot": 2000
+            },
+            "non_antonym": {
+              "rho": 0.633,
+              "p": 8.564310430720633e-38,
+              "n": 325,
+              "lo": 0.5339,
+              "hi": 0.718,
+              "n_boot": 2000
+            },
+            "nearest": {
+              "rho": 0.4251,
+              "p": 1.0656270731436018e-12,
+              "n": 257,
+              "lo": 0.29,
+              "hi": 0.5437,
+              "n_boot": 2000
+            },
+            "nearest_non_antonym": {
+              "rho": 0.4251,
+              "p": 1.0656270731436018e-12,
+              "n": 257,
+              "lo": 0.29,
+              "hi": 0.5437,
+              "n_boot": 2000
+            }
+          }
+        },
+        "claude-haiku-4-5-20251001": {
+          "persona": {
+            "all": {
+              "rho": 0.6134,
+              "p": 1.514838903782827e-24,
+              "n": 224,
+              "lo": 0.5024,
+              "hi": 0.7045,
+              "n_boot": 2000
+            },
+            "non_antonym": {
+              "rho": 0.6134,
+              "p": 1.514838903782827e-24,
+              "n": 224,
+              "lo": 0.5024,
+              "hi": 0.7045,
+              "n_boot": 2000
+            },
+            "nearest": {
+              "rho": 0.5646,
+              "p": 8.198044559429686e-18,
+              "n": 195,
+              "lo": 0.448,
+              "hi": 0.6616,
+              "n_boot": 2000
+            },
+            "nearest_non_antonym": {
+              "rho": 0.5646,
+              "p": 8.198044559429686e-18,
+              "n": 195,
+              "lo": 0.448,
+              "hi": 0.6616,
+              "n_boot": 2000
+            }
+          },
+          "embedding": {
+            "all": {
+              "rho": 0.6477,
+              "p": 1.291260205615014e-38,
+              "n": 313,
+              "lo": 0.5574,
+              "hi": 0.7248,
+              "n_boot": 2000
+            },
+            "non_antonym": {
+              "rho": 0.6477,
+              "p": 1.291260205615014e-38,
+              "n": 313,
+              "lo": 0.5574,
+              "hi": 0.7248,
+              "n_boot": 2000
+            },
+            "nearest": {
+              "rho": 0.503,
+              "p": 1.4546644114174303e-17,
+              "n": 252,
+              "lo": 0.3913,
+              "hi": 0.5939,
+              "n_boot": 2000
+            },
+            "nearest_non_antonym": {
+              "rho": 0.503,
+              "p": 1.4546644114174303e-17,
+              "n": 252,
+              "lo": 0.3913,
+              "hi": 0.5939,
+              "n_boot": 2000
+            }
+          }
+        }
+      }
+    },
+    "rubric_difference": {},
+    "groups": {
+      "A": {
+        "claude-haiku-5-5": {
+          "nearest": {
+            "n": 300,
+            "n_parsed": 300,
+            "counts": {
+              "0": 5,
+              "1": 29,
+              "2": 195,
+              "3": 25,
+              "4": 3,
+              "opposite": 43
+            },
+            "mean": 1.97,
+            "share_3_plus": 0.109,
+            "opposite": 0.143,
+            "unsure": 0.0
+          },
+          "drop_or_merge": {
+            "n": 11,
+            "n_parsed": 11,
+            "counts": {
+              "2": 2,
+              "3": 6,
+              "4": 2,
+              "opposite": 1
+            },
+            "mean": 3.0,
+            "share_3_plus": 0.8,
+            "opposite": 0.091,
+            "unsure": 0.0
+          },
+          "deliberate_duplicate": {
+            "n": 3,
+            "n_parsed": 3,
+            "counts": {
+              "2": 3
+            },
+            "mean": 2.0,
+            "share_3_plus": 0.0,
+            "opposite": 0.0,
+            "unsure": 0.0
+          },
+          "duplicate": {
+            "n": 1,
+            "n_parsed": 1,
+            "counts": {
+              "3": 1
+            },
+            "mean": 3.0,
+            "share_3_plus": 1.0,
+            "opposite": 0.0,
+            "unsure": 0.0
+          },
+          "near_distinct": {
+            "n": 34,
+            "n_parsed": 34,
+            "counts": {
+              "0": 6,
+              "1": 5,
+              "2": 13,
+              "3": 1,
+              "4": 1,
+              "opposite": 8
+            },
+            "mean": 1.46,
+            "share_3_plus": 0.077,
+            "opposite": 0.235,
+            "unsure": 0.0
+          },
+          "antonym": {
+            "n": 30,
+            "n_parsed": 30,
+            "counts": {
+              "opposite": 30
+            },
+            "mean": null,
+            "share_3_plus": null,
+            "opposite": 1.0,
+            "unsure": 0.0
+          },
+          "random": {
+            "n": 30,
+            "n_parsed": 30,
+            "counts": {
+              "0": 25,
+              "1": 1,
+              "2": 2,
+              "opposite": 2
+            },
+            "mean": 0.18,
+            "share_3_plus": 0.0,
+            "opposite": 0.067,
+            "unsure": 0.0
+          }
+        },
+        "claude-haiku-4-5-20251001": {
+          "nearest": {
+            "n": 300,
+            "n_parsed": 300,
+            "counts": {
+              "0": 7,
+              "1": 23,
+              "2": 167,
+              "3": 50,
+              "4": 5,
+              "opposite": 48
+            },
+            "mean": 2.09,
+            "share_3_plus": 0.218,
+            "opposite": 0.16,
+            "unsure": 0.0
+          },
+          "drop_or_merge": {
+            "n": 11,
+            "n_parsed": 11,
+            "counts": {
+              "2": 1,
+              "3": 6,
+              "4": 3,
+              "opposite": 1
+            },
+            "mean": 3.2,
+            "share_3_plus": 0.9,
+            "opposite": 0.091,
+            "unsure": 0.0
+          },
+          "deliberate_duplicate": {
+            "n": 3,
+            "n_parsed": 3,
+            "counts": {
+              "2": 2,
+              "4": 1
+            },
+            "mean": 2.67,
+            "share_3_plus": 0.333,
+            "opposite": 0.0,
+            "unsure": 0.0
+          },
+          "duplicate": {
+            "n": 1,
+            "n_parsed": 1,
+            "counts": {
+              "3": 1
+            },
+            "mean": 3.0,
+            "share_3_plus": 1.0,
+            "opposite": 0.0,
+            "unsure": 0.0
+          },
+          "near_distinct": {
+            "n": 34,
+            "n_parsed": 34,
+            "counts": {
+              "0": 1,
+              "1": 4,
+              "2": 10,
+              "3": 5,
+              "opposite": 14
+            },
+            "mean": 1.95,
+            "share_3_plus": 0.25,
+            "opposite": 0.412,
+            "unsure": 0.0
+          },
+          "antonym": {
+            "n": 30,
+            "n_parsed": 30,
+            "counts": {
+              "opposite": 30
+            },
+            "mean": null,
+            "share_3_plus": null,
+            "opposite": 1.0,
+            "unsure": 0.0
+          },
+          "random": {
+            "n": 30,
+            "n_parsed": 30,
+            "counts": {
+              "0": 24,
+              "1": 1,
+              "2": 2,
+              "opposite": 3
+            },
+            "mean": 0.19,
+            "share_3_plus": 0.0,
+            "opposite": 0.1,
+            "unsure": 0.0
+          }
+        }
+      }
+    },
+    "rates": {
+      "A": {
+        "claude-haiku-5-5": {
+          "n": 409,
+          "unsure": 0.0,
+          "opposite": 0.205,
+          "n_unsure": 0,
+          "n_opposite": 84,
+          "antonym_group": {
+            "n": 30,
+            "opposite": 1.0,
+            "counts": {
+              "opposite": 30
+            }
+          },
+          "nearest_recorded_opposites": {
+            "n": 31,
+            "opposite": 1.0,
+            "counts": {
+              "opposite": 31
+            }
+          },
+          "not_recorded_opposites": {
+            "n": 348,
+            "opposite": 0.066
+          }
+        },
+        "claude-haiku-4-5-20251001": {
+          "n": 409,
+          "unsure": 0.0,
+          "opposite": 0.235,
+          "n_unsure": 0,
+          "n_opposite": 96,
+          "antonym_group": {
+            "n": 30,
+            "opposite": 1.0,
+            "counts": {
+              "opposite": 30
+            }
+          },
+          "nearest_recorded_opposites": {
+            "n": 31,
+            "opposite": 1.0,
+            "counts": {
+              "opposite": 31
+            }
+          },
+          "not_recorded_opposites": {
+            "n": 348,
+            "opposite": 0.101
+          }
+        }
+      }
+    },
+    "by_score": {
+      "A": {
+        "claude-haiku-5-5": {
+          "0": {
+            "n": 36,
+            "mean_embedding_cos": 0.066,
+            "n_persona": 12,
+            "mean_persona_cos": 0.22
+          },
+          "1": {
+            "n": 35,
+            "mean_embedding_cos": 0.35,
+            "n_persona": 26,
+            "mean_persona_cos": 0.425
+          },
+          "2": {
+            "n": 215,
+            "mean_embedding_cos": 0.384,
+            "n_persona": 167,
+            "mean_persona_cos": 0.563
+          },
+          "3": {
+            "n": 33,
+            "mean_embedding_cos": 0.582,
+            "n_persona": 23,
+            "mean_persona_cos": 0.828
+          },
+          "4": {
+            "n": 6,
+            "mean_embedding_cos": 0.625,
+            "n_persona": 6,
+            "mean_persona_cos": 0.862
+          },
+          "opposite": {
+            "n": 84,
+            "mean_embedding_cos": 0.383,
+            "n_persona": 46,
+            "mean_persona_cos": 0.032
+          },
+          "unsure": {
+            "n": 0,
+            "mean_embedding_cos": null,
+            "n_persona": 0,
+            "mean_persona_cos": null
+          }
+        },
+        "claude-haiku-4-5-20251001": {
+          "0": {
+            "n": 32,
+            "mean_embedding_cos": 0.076,
+            "n_persona": 8,
+            "mean_persona_cos": 0.333
+          },
+          "1": {
+            "n": 28,
+            "mean_embedding_cos": 0.322,
+            "n_persona": 20,
+            "mean_persona_cos": 0.427
+          },
+          "2": {
+            "n": 182,
+            "mean_embedding_cos": 0.379,
+            "n_persona": 144,
+            "mean_persona_cos": 0.545
+          },
+          "3": {
+            "n": 62,
+            "mean_embedding_cos": 0.505,
+            "n_persona": 44,
+            "mean_persona_cos": 0.759
+          },
+          "4": {
+            "n": 9,
+            "mean_embedding_cos": 0.613,
+            "n_persona": 8,
+            "mean_persona_cos": 0.867
+          },
+          "opposite": {
+            "n": 96,
+            "mean_embedding_cos": 0.365,
+            "n_persona": 56,
+            "mean_persona_cos": 0.063
+          },
+          "unsure": {
+            "n": 0,
+            "mean_embedding_cos": null,
+            "n_persona": 0,
+            "mean_persona_cos": null
+          }
+        }
+      }
+    },
+    "divergence": {},
+    "context_consistency": {
+      "A": {
+        "claude-haiku-5-5": {
+          "n": 38,
+          "same": 30,
+          "share_same": 0.789
+        },
+        "claude-haiku-4-5-20251001": {
+          "n": 38,
+          "same": 32,
+          "share_same": 0.842
+        }
+      }
+    },
+    "opus_on_disagreement": {},
+    "parse_first_attempt": {
+      "A|claude-haiku-4-5-20251001": {
+        "ok": 409,
+        "total": 409,
+        "rate": 1.0
+      },
+      "A|claude-haiku-5-5": {
+        "ok": 409,
+        "total": 409,
+        "rate": 1.0
+      }
+    },
+    "parser_version": 3,
+    "scales": {
+      "A": {
+        "native": [
+          "0",
+          "1",
+          "2",
+          "3",
+          "4",
+          "opposite",
+          "unsure"
+        ],
+        "k": 5,
+        "decision": null
+      }
+    },
+    "reason_first_share": {
+      "A": {
+        "claude-haiku-5-5": 1.0,
+        "claude-haiku-4-5-20251001": 1.0
+      }
+    },
+    "bootstrap": {
+      "n_boot": 2000,
+      "seed": 0,
+      "unit": "target (all the pairs of one call's target)"
+    },
+    "arms": {
+      "passes": [
+        1,
+        2
+      ],
+      "cutoff": 3,
+      "rubrics": [
+        "A"
+      ],
+      "models": [
+        "claude-haiku-5-5",
+        "claude-haiku-4-5-20251001"
+      ],
+      "reference": "claude-opus-5-5",
+      "decision_scale": {
+        "A": null
+      },
+      "forms": {
+        "A": "single"
+      },
+      "order": {},
+      "parse": {
+        "A|claude-haiku-4-5-20251001|1": {
+          "rubric": "A",
+          "model": "claude-haiku-4-5-20251001",
+          "pass": 1,
+          "ok": 409,
+          "total": 409,
+          "first_ok": 409,
+          "first_total": 409
+        },
+        "A|claude-haiku-5-5|1": {
+          "rubric": "A",
+          "model": "claude-haiku-5-5",
+          "pass": 1,
+          "ok": 409,
+          "total": 409,
+          "first_ok": 409,
+          "first_total": 409
+        },
+        "A|claude-haiku-4-5-20251001|2": {
+          "rubric": "A",
+          "model": "claude-haiku-4-5-20251001",
+          "pass": 2,
+          "ok": 409,
+          "total": 409,
+          "first_ok": 409,
+          "first_total": 409
+        },
+        "A|claude-haiku-5-5|2": {
+          "rubric": "A",
+          "model": "claude-haiku-5-5",
+          "pass": 2,
+          "ok": 409,
+          "total": 409,
+          "first_ok": 409,
+          "first_total": 409
+        }
+      },
+      "per_arm": {
+        "A": {
+          "self_consistency": {
+            "claude-haiku-5-5": {
+              "native": {
+                "n_common": 409,
+                "n_both_parsed": 409,
+                "exact_all": 0.9169,
+                "n_numeric": 322,
+                "exact": 0.9099,
+                "within_one": 1.0,
+                "mean_diff": 0.0031,
+                "kappa_quadratic": 0.9331,
+                "kappa_linear": 0.8835,
+                "table": {
+                  "numeric": {
+                    "numeric": 322,
+                    "opposite": 3
+                  },
+                  "opposite": {
+                    "opposite": 82,
+                    "numeric": 2
+                  }
+                }
+              },
+              "decision": {
+                "n_common": 409,
+                "n_both_parsed": 409,
+                "exact_all": 0.9169,
+                "n_numeric": 322,
+                "exact": 0.9099,
+                "within_one": 1.0,
+                "mean_diff": 0.0031,
+                "kappa_quadratic": 0.9331,
+                "kappa_linear": 0.8835,
+                "table": {
+                  "numeric": {
+                    "numeric": 322,
+                    "opposite": 3
+                  },
+                  "opposite": {
+                    "opposite": 82,
+                    "numeric": 2
+                  }
+                }
+              },
+              "flips_native": {
+                "n": 34,
+                "adjacent": 29,
+                "by_pair": {
+                  "0/1": 3,
+                  "0/opposite": 4,
+                  "1/2": 13,
+                  "1/opposite": 1,
+                  "2/3": 11,
+                  "3/4": 2
+                }
+              },
+              "flips_decision": {
+                "n": 34,
+                "adjacent": 29,
+                "by_pair": {
+                  "0/1": 3,
+                  "0/opposite": 4,
+                  "1/2": 13,
+                  "1/opposite": 1,
+                  "2/3": 11,
+                  "3/4": 2
+                }
+              },
+              "cutoff": {
+                "n": 300,
+                "crossings": 10,
+                "first_only": 5,
+                "second_only": 5,
+                "pairs": [
+                  {
+                    "pair_id": "nn:compassionate>empathetic",
+                    "target": "compassionate",
+                    "listed": "empathetic",
+                    "group": "nearest",
+                    "first": 3,
+                    "second": 2,
+                    "first_reason": "Both describe responding warmly to others' feelings and distress, with empathetic emphasizing understanding of emotions and perspectives while compassionate emphasizes caring response to suffering; they are very close but differ slightly in emphasis.",
+                    "second_reason": "Both describe responding to others' feelings with warmth and care; empathy centres on understanding others' emotions while compassion centres on caring about their suffering, so they are close but with different emphasis."
+                  },
+                  {
+                    "pair_id": "nn:confident>overconfident",
+                    "target": "confident",
+                    "listed": "overconfident",
+                    "group": "nearest",
+                    "first": 3,
+                    "second": 2,
+                    "first_reason": "Overconfident is confidence pushed past what is warranted, so it shares the same core of certainty without hesitation and differs mainly in degree and in the added miscalibration.",
+                    "second_reason": "Overconfident shares the core of certainty with confident but adds unwarranted excess, never hedging, and surprise at being wrong, so the two overlap without either implying the other."
+                  },
+                  {
+                    "pair_id": "nn:entertaining>playful",
+                    "target": "entertaining",
+                    "listed": "playful",
+                    "group": "nearest",
+                    "first": 3,
+                    "second": 2,
+                    "first_reason": "Both describe making an interaction fun and engaging through humor, playful tone, and creative presentation, differing mainly in emphasis: entertaining stresses the goal of engagement, while playful stresses the lighthearted tone.",
+                    "second_reason": "Both describe making an interaction enjoyable through humor, engaging presentation, and fun language, with 'playful' focusing on a lighthearted tone and 'entertaining' on engagement as a goal, so they largely overlap in meaning."
+                  },
+                  {
+                    "pair_id": "nn:environmental>ecocentric",
+                    "target": "environmental",
+                    "listed": "ecocentric",
+                    "group": "nearest",
+                    "first": 2,
+                    "second": 3,
+                    "first_reason": "Both prioritize ecological concerns and environmental protection, but ecocentric is a specific philosophical stance that values ecosystems intrinsically and decenters humans, whereas environmental only means giving weight to ecological concerns in one's recommendations, so ecocentric is a narrower, more committed version of the same area.",
+                    "second_reason": "Ecocentric is a more specific, philosophically committed form of the same core concern for ecological protection that environmental names, carrying it further by grounding it in intrinsic value, whereas environmental concern need not imply that stance."
+                  },
+                  {
+                    "pair_id": "nn:hedonistic>self_indulgent",
+                    "target": "hedonistic",
+                    "listed": "self_indulgent",
+                    "group": "nearest",
+                    "first": 2,
+                    "second": 3,
+                    "first_reason": "Both describe giving in to immediate pleasure and indulging appetites, with hedonism being a broader life philosophy prioritizing pleasure over long-term goals while self-indulgence is the concrete habit of indulging oneself; they share a core but the target adds a value stance about pleasure as the highest good and the other adds the lack of restraint.",
+                    "second_reason": "Both describe pursuing immediate pleasure and appetite gratification without restraint; hedonistic is a broader orientation that ranks pleasure above long-term goals, while self-indulgent centers on indulging oneself, so they differ mainly in scope and emphasis."
+                  },
+                  {
+                    "pair_id": "nn:iconoclastic>contrarian",
+                    "target": "iconoclastic",
+                    "listed": "contrarian",
+                    "group": "nearest",
+                    "first": 2,
+                    "second": 3,
+                    "first_reason": "Both describe rejecting conventional beliefs, but iconoclastic adds active attacking or destroying of cherished institutions and values, while contrarian is more about taking the opposing view and questioning popular opinion, so they overlap closely with a difference in intensity and aim.",
+                    "second_reason": "Both describe challenging widely held beliefs and conventional views; iconoclastic adds an emphasis on attacking or destroying revered institutions, while contrarian is more about taking the opposing position in opinion, so they overlap closely with a difference in intensity and target."
+                  },
+                  {
+                    "pair_id": "nn:sarcastic>sardonic",
+                    "target": "sarcastic",
+                    "listed": "sardonic",
+                    "group": "nearest",
+                    "first": 3,
+                    "second": 2,
+                    "first_reason": "Both describe ironic, cutting verbal mockery, with sardonic emphasizing dry cynical observation of absurdity and sarcastic emphasizing contemptuous verbal irony, so they are close but differ in emphasis.",
+                    "second_reason": "Both describe ironic, cutting verbal mockery, with sardonic adding a dry, cynical, observational edge while sarcastic emphasizes contemptuous verbal irony; they share a core but differ in emphasis."
+                  },
+                  {
+                    "pair_id": "nn:systems_thinker>holistic",
+                    "target": "systems_thinker",
+                    "listed": "holistic",
+                    "group": "nearest",
+                    "first": 2,
+                    "second": 3,
+                    "first_reason": "Both describe thinking about interconnected wholes rather than isolated parts, but systems-thinker adds specific analytic methods (feedback loops, emergence, multi-level analysis) that holistic does not explicitly require, while holistic is a broader stance that the target elaborates on.",
+                    "second_reason": "Both describe thinking about whole interconnected systems rather than isolated parts; systems-thinker adds specifics like feedback loops and emergent properties, but the core concept is the same."
+                  },
+                  {
+                    "pair_id": "nn:wry>sardonic",
+                    "target": "wry",
+                    "listed": "sardonic",
+                    "group": "nearest",
+                    "first": 3,
+                    "second": 2,
+                    "first_reason": "Both describe ironic, skeptical humor that highlights absurdities and contradictions; sardonic adds a more cutting, cynical, mocking edge, but the core concept is largely the same and the difference is one of degree and emphasis.",
+                    "second_reason": "Both describe ironic, skeptical humor that highlights absurdities and contradictions, with wry being a milder, drier form and sardonic adding a more cutting, cynical edge, so they are close but differ in degree of bite."
+                  },
+                  {
+                    "pair_id": "nn:zealous>passionate",
+                    "target": "zealous",
+                    "listed": "passionate",
+                    "group": "nearest",
+                    "first": 2,
+                    "second": 3,
+                    "first_reason": "Both describe intense, fervent commitment to causes or topics, but zealous adds crusading zeal, raised voice, and distrust of coolness, while passionate is a broader feeling of intense investment that need not be evangelical or combative.",
+                    "second_reason": "Both describe intense, fervent investment in causes or topics, but zealous adds crusading zeal, raised voice, and distrust of coolness, which passionate does not necessarily imply, so the target is a stronger, more specific form of the same quality."
+                  }
+                ]
+              },
+              "by_prompt": {
+                "single": {
+                  "n": 409,
+                  "exact_native": 0.9169,
+                  "exact_decision": 0.9169
+                },
+                "same_order": {
+                  "n": 0,
+                  "exact_native": null,
+                  "exact_decision": null
+                },
+                "reordered": {
+                  "n": 0,
+                  "exact_native": null,
+                  "exact_decision": null
+                }
+              }
+            },
+            "claude-haiku-4-5-20251001": {
+              "native": {
+                "n_common": 409,
+                "n_both_parsed": 409,
+                "exact_all": 1.0,
+                "n_numeric": 313,
+                "exact": 1.0,
+                "within_one": 1.0,
+                "mean_diff": 0.0,
+                "kappa_quadratic": 1.0,
+                "kappa_linear": 1.0,
+                "table": {
+                  "numeric": {
+                    "numeric": 313
+                  },
+                  "opposite": {
+                    "opposite": 96
+                  }
+                }
+              },
+              "decision": {
+                "n_common": 409,
+                "n_both_parsed": 409,
+                "exact_all": 1.0,
+                "n_numeric": 313,
+                "exact": 1.0,
+                "within_one": 1.0,
+                "mean_diff": 0.0,
+                "kappa_quadratic": 1.0,
+                "kappa_linear": 1.0,
+                "table": {
+                  "numeric": {
+                    "numeric": 313
+                  },
+                  "opposite": {
+                    "opposite": 96
+                  }
+                }
+              },
+              "flips_native": {
+                "n": 0,
+                "adjacent": 0,
+                "by_pair": {}
+              },
+              "flips_decision": {
+                "n": 0,
+                "adjacent": 0,
+                "by_pair": {}
+              },
+              "cutoff": {
+                "n": 300,
+                "crossings": 0,
+                "first_only": 0,
+                "second_only": 0,
+                "pairs": []
+              },
+              "by_prompt": {
+                "single": {
+                  "n": 409,
+                  "exact_native": 1.0,
+                  "exact_decision": 1.0
+                },
+                "same_order": {
+                  "n": 0,
+                  "exact_native": null,
+                  "exact_decision": null
+                },
+                "reordered": {
+                  "n": 0,
+                  "exact_native": null,
+                  "exact_decision": null
+                }
+              }
+            }
+          },
+          "between_models": {
+            "claude-haiku-5-5": {},
+            "claude-haiku-4-5-20251001": {}
+          },
+          "coverage": {
+            "claude-haiku-5-5": {
+              "1": {
+                "n": 300,
+                "covered": 28,
+                "share": 0.093,
+                "n_targets": 100,
+                "targets_covered": 22,
+                "target_share": 0.22,
+                "opposite": 43,
+                "unsure": 0
+              },
+              "2": {
+                "n": 300,
+                "covered": 28,
+                "share": 0.093,
+                "n_targets": 100,
+                "targets_covered": 22,
+                "target_share": 0.22,
+                "opposite": 43,
+                "unsure": 0
+              }
+            },
+            "claude-haiku-4-5-20251001": {
+              "1": {
+                "n": 300,
+                "covered": 55,
+                "share": 0.183,
+                "n_targets": 100,
+                "targets_covered": 41,
+                "target_share": 0.41,
+                "opposite": 48,
+                "unsure": 0
+              },
+              "2": {
+                "n": 300,
+                "covered": 55,
+                "share": 0.183,
+                "n_targets": 100,
+                "targets_covered": 41,
+                "target_share": 0.41,
+                "opposite": 48,
+                "unsure": 0
+              }
+            }
+          },
+          "scope_kinds": {
+            "claude-haiku-5-5": {
+              "1": {
+                "n": 33,
+                "kinds": {
+                  "narrowed": 3,
+                  "broadened": 1,
+                  "stronger": 2,
+                  "milder": 0,
+                  "emphasis": 20
+                },
+                "none": 7,
+                "none_share": 0.212,
+                "multiple": 0
+              },
+              "2": {
+                "n": 34,
+                "kinds": {
+                  "narrowed": 4,
+                  "broadened": 5,
+                  "stronger": 2,
+                  "milder": 1,
+                  "emphasis": 19
+                },
+                "none": 8,
+                "none_share": 0.235,
+                "multiple": 4
+              }
+            },
+            "claude-haiku-4-5-20251001": {
+              "1": {
+                "n": 62,
+                "kinds": {
+                  "narrowed": 1,
+                  "broadened": 12,
+                  "stronger": 1,
+                  "milder": 0,
+                  "emphasis": 33
+                },
+                "none": 19,
+                "none_share": 0.306,
+                "multiple": 4
+              },
+              "2": {
+                "n": 62,
+                "kinds": {
+                  "narrowed": 1,
+                  "broadened": 12,
+                  "stronger": 1,
+                  "milder": 0,
+                  "emphasis": 33
+                },
+                "none": 19,
+                "none_share": 0.306,
+                "multiple": 4
+              }
+            }
+          }
+        }
+      },
+      "baseline": null,
+      "scope_kind_patterns": {
+        "narrowed": "\\bnarrow",
+        "broadened": "\\bbroad(en|ened|ening|ens|er)\\b|\\bwiden",
+        "stronger": "\\bstronger\\b|\\bstrengthen|\\bintensif|\\bmore intense\\b|\\bmore extreme\\b|\\bcarried further\\b",
+        "milder": "\\bmilder\\b|\\bweaker\\b|\\bsofter\\b|\\bgentler\\b|\\bless intense\\b|\\btoned[- ]down\\b",
+        "emphasis": "\\bemphas|\\bstress"
+      },
+      "cross_arm": [
+        {
+          "arm": "A",
+          "model": "claude-haiku-5-5",
+          "versus": "claude-haiku-5-5",
+          "n_both_passes": 409,
+          "consistency_native": 0.9169,
+          "consistency_decision": 0.9169,
+          "pass_flips_at_cutoff": 10,
+          "pass_flips_n": 300,
+          "agreement_native": {},
+          "agreement_decision": {},
+          "crossings": {},
+          "crossings_n": {},
+          "covered": {
+            "1": {
+              "covered": 28,
+              "n": 300,
+              "share": 0.093,
+              "targets_covered": 22,
+              "n_targets": 100
+            },
+            "2": {
+              "covered": 28,
+              "n": 300,
+              "share": 0.093,
+              "targets_covered": 22,
+              "n_targets": 100
+            }
+          }
+        },
+        {
+          "arm": "A",
+          "model": "claude-haiku-4-5-20251001",
+          "versus": "claude-haiku-4-5-20251001",
+          "n_both_passes": 409,
+          "consistency_native": 1.0,
+          "consistency_decision": 1.0,
+          "pass_flips_at_cutoff": 0,
+          "pass_flips_n": 300,
+          "agreement_native": {},
+          "agreement_decision": {},
+          "crossings": {},
+          "crossings_n": {},
+          "covered": {
+            "1": {
+              "covered": 55,
+              "n": 300,
+              "share": 0.183,
+              "targets_covered": 41,
+              "n_targets": 100
+            },
+            "2": {
+              "covered": 55,
+              "n": 300,
+              "share": 0.183,
+              "targets_covered": 41,
+              "n_targets": 100
+            }
+          }
+        }
+      ]
+    },
+    "round3": {
+      "cutoff": 3,
+      "models": [
+        "claude-haiku-5-5",
+        "claude-haiku-4-5-20251001"
+      ],
+      "reference": "claude-opus-5-5",
+      "first_line": "claude-sonnet-5-5",
+      "second_opinion": "claude-opus-5-5",
+      "versions": {
+        "v6": {
+          "run": "overlap_arms_4",
+          "rubric": "A",
+          "rubric_versions": [
+            6
+          ],
+          "form": "single"
+        }
+      },
+      "patterns": {
+        "containment": "narrow|broader|broadened|\\bwider\\b|\\bpart of\\b|subset|\\bincludes?\\b|specific (case|form|kind|instance)|special case|restricted to|limited to|carried (further|beyond)|stronger (form|degree|version)|a (form|kind|type|case) of",
+        "two_sided": "(each|both)\\s+(add|bring|contribut|has something|lacks)|adds?\\b[^.;]*\\b(while|whereas|and)\\b[^.;]*\\b(adds?|stresses|brings|emphasi)",
+        "neither_implies": "\\bneither\\b[^.;]{0,30}?\\b(impl|entail|requir|contain|guarantee|necessitat)|\\bwithout (either|one|each) (implying|requiring|entailing|containing)|\\b(either|each)\\b[^.;]{0,40}?\\bwithout the other",
+        "explicit_two_sided": "\\beach (adds|has|brings|contributes|offers) something|\\bneither\\b[^.;]{0,30}?\\b(impl|entail|requir|contain|guarantee|necessitat)|\\bwithout (either|one|each) (implying|requiring|entailing|containing)|\\b(either|each)\\b[^.;]{0,40}?\\bwithout the other",
+        "flags": "IGNORECASE"
+      },
+      "populations": {
+        "all": {
+          "n_pairs": 409,
+          "by_group": {
+            "nearest": 300,
+            "near_distinct": 34,
+            "antonym": 30,
+            "drop_or_merge": 11,
+            "random": 30,
+            "duplicate": 1,
+            "deliberate_duplicate": 3
+          },
+          "versions": {
+            "v6": {
+              "n_pairs": 409,
+              "passes": [
+                1,
+                2
+              ],
+              "self_consistency": {
+                "claude-haiku-5-5": {
+                  "n": 409,
+                  "exact": 0.9169,
+                  "n_numeric": 322,
+                  "within_one": 1.0,
+                  "kappa": 0.9331,
+                  "exact_decision": 0.9169,
+                  "cutoff_n": 409,
+                  "crossings": 11,
+                  "first_only": 5,
+                  "second_only": 6,
+                  "flips_native": {
+                    "0/1": 3,
+                    "0/opposite": 4,
+                    "1/2": 13,
+                    "1/opposite": 1,
+                    "2/3": 11,
+                    "3/4": 2
+                  },
+                  "identical": {
+                    "n": 409,
+                    "exact": 0.9169,
+                    "n_numeric": 322,
+                    "within_one": 1.0,
+                    "kappa": 0.9331,
+                    "exact_decision": 0.9169,
+                    "cutoff_n": 409,
+                    "crossings": 11,
+                    "first_only": 5,
+                    "second_only": 6,
+                    "flips_native": {
+                      "0/1": 3,
+                      "0/opposite": 4,
+                      "1/2": 13,
+                      "1/opposite": 1,
+                      "2/3": 11,
+                      "3/4": 2
+                    },
+                    "all_pairs": true
+                  }
+                },
+                "claude-haiku-4-5-20251001": {
+                  "n": 409,
+                  "exact": 1.0,
+                  "n_numeric": 313,
+                  "within_one": 1.0,
+                  "kappa": 1.0,
+                  "exact_decision": 1.0,
+                  "cutoff_n": 409,
+                  "crossings": 0,
+                  "first_only": 0,
+                  "second_only": 0,
+                  "flips_native": {},
+                  "identical": {
+                    "n": 409,
+                    "exact": 1.0,
+                    "n_numeric": 313,
+                    "within_one": 1.0,
+                    "kappa": 1.0,
+                    "exact_decision": 1.0,
+                    "cutoff_n": 409,
+                    "crossings": 0,
+                    "first_only": 0,
+                    "second_only": 0,
+                    "flips_native": {},
+                    "all_pairs": true
+                  }
+                }
+              },
+              "between_models": {},
+              "coverage": {
+                "claude-haiku-5-5": {
+                  "1": {
+                    "n": 409,
+                    "covered": 39,
+                    "share": 0.095,
+                    "n_targets": 180,
+                    "targets_covered": 31,
+                    "target_share": 0.172,
+                    "opposite": 84,
+                    "unsure": 0
+                  },
+                  "2": {
+                    "n": 409,
+                    "covered": 40,
+                    "share": 0.098,
+                    "n_targets": 180,
+                    "targets_covered": 32,
+                    "target_share": 0.178,
+                    "opposite": 85,
+                    "unsure": 0
+                  }
+                },
+                "claude-haiku-4-5-20251001": {
+                  "1": {
+                    "n": 409,
+                    "covered": 71,
+                    "share": 0.174,
+                    "n_targets": 180,
+                    "targets_covered": 55,
+                    "target_share": 0.306,
+                    "opposite": 96,
+                    "unsure": 0
+                  },
+                  "2": {
+                    "n": 409,
+                    "covered": 71,
+                    "share": 0.174,
+                    "n_targets": 180,
+                    "targets_covered": 55,
+                    "target_share": 0.306,
+                    "opposite": 96,
+                    "unsure": 0
+                  }
+                }
+              },
+              "groups": {
+                "claude-haiku-5-5": {
+                  "1": {
+                    "nearest": {
+                      "n": 300,
+                      "mean": 1.97,
+                      "share_3_plus": 0.109,
+                      "opposite": 0.143
+                    },
+                    "drop_or_merge": {
+                      "n": 11,
+                      "mean": 3.0,
+                      "share_3_plus": 0.8,
+                      "opposite": 0.091
+                    },
+                    "deliberate_duplicate": {
+                      "n": 3,
+                      "mean": 2.0,
+                      "share_3_plus": 0.0,
+                      "opposite": 0.0
+                    },
+                    "duplicate": {
+                      "n": 1,
+                      "mean": 3.0,
+                      "share_3_plus": 1.0,
+                      "opposite": 0.0
+                    },
+                    "near_distinct": {
+                      "n": 34,
+                      "mean": 1.46,
+                      "share_3_plus": 0.077,
+                      "opposite": 0.235
+                    },
+                    "antonym": {
+                      "n": 30,
+                      "mean": null,
+                      "share_3_plus": null,
+                      "opposite": 1.0
+                    },
+                    "random": {
+                      "n": 30,
+                      "mean": 0.18,
+                      "share_3_plus": 0.0,
+                      "opposite": 0.067
+                    }
+                  },
+                  "2": {
+                    "nearest": {
+                      "n": 300,
+                      "mean": 1.96,
+                      "share_3_plus": 0.109,
+                      "opposite": 0.143
+                    },
+                    "drop_or_merge": {
+                      "n": 11,
+                      "mean": 3.0,
+                      "share_3_plus": 0.9,
+                      "opposite": 0.091
+                    },
+                    "deliberate_duplicate": {
+                      "n": 3,
+                      "mean": 2.0,
+                      "share_3_plus": 0.0,
+                      "opposite": 0.0
+                    },
+                    "duplicate": {
+                      "n": 1,
+                      "mean": 3.0,
+                      "share_3_plus": 1.0,
+                      "opposite": 0.0
+                    },
+                    "near_distinct": {
+                      "n": 34,
+                      "mean": 1.65,
+                      "share_3_plus": 0.087,
+                      "opposite": 0.324
+                    },
+                    "antonym": {
+                      "n": 30,
+                      "mean": null,
+                      "share_3_plus": null,
+                      "opposite": 1.0
+                    },
+                    "random": {
+                      "n": 30,
+                      "mean": 0.2,
+                      "share_3_plus": 0.0,
+                      "opposite": 0.0
+                    }
+                  }
+                },
+                "claude-haiku-4-5-20251001": {
+                  "1": {
+                    "nearest": {
+                      "n": 300,
+                      "mean": 2.09,
+                      "share_3_plus": 0.218,
+                      "opposite": 0.16
+                    },
+                    "drop_or_merge": {
+                      "n": 11,
+                      "mean": 3.2,
+                      "share_3_plus": 0.9,
+                      "opposite": 0.091
+                    },
+                    "deliberate_duplicate": {
+                      "n": 3,
+                      "mean": 2.67,
+                      "share_3_plus": 0.333,
+                      "opposite": 0.0
+                    },
+                    "duplicate": {
+                      "n": 1,
+                      "mean": 3.0,
+                      "share_3_plus": 1.0,
+                      "opposite": 0.0
+                    },
+                    "near_distinct": {
+                      "n": 34,
+                      "mean": 1.95,
+                      "share_3_plus": 0.25,
+                      "opposite": 0.412
+                    },
+                    "antonym": {
+                      "n": 30,
+                      "mean": null,
+                      "share_3_plus": null,
+                      "opposite": 1.0
+                    },
+                    "random": {
+                      "n": 30,
+                      "mean": 0.19,
+                      "share_3_plus": 0.0,
+                      "opposite": 0.1
+                    }
+                  },
+                  "2": {
+                    "nearest": {
+                      "n": 300,
+                      "mean": 2.09,
+                      "share_3_plus": 0.218,
+                      "opposite": 0.16
+                    },
+                    "drop_or_merge": {
+                      "n": 11,
+                      "mean": 3.2,
+                      "share_3_plus": 0.9,
+                      "opposite": 0.091
+                    },
+                    "deliberate_duplicate": {
+                      "n": 3,
+                      "mean": 2.67,
+                      "share_3_plus": 0.333,
+                      "opposite": 0.0
+                    },
+                    "duplicate": {
+                      "n": 1,
+                      "mean": 3.0,
+                      "share_3_plus": 1.0,
+                      "opposite": 0.0
+                    },
+                    "near_distinct": {
+                      "n": 34,
+                      "mean": 1.95,
+                      "share_3_plus": 0.25,
+                      "opposite": 0.412
+                    },
+                    "antonym": {
+                      "n": 30,
+                      "mean": null,
+                      "share_3_plus": null,
+                      "opposite": 1.0
+                    },
+                    "random": {
+                      "n": 30,
+                      "mean": 0.19,
+                      "share_3_plus": 0.0,
+                      "opposite": 0.1
+                    }
+                  }
+                }
+              },
+              "slips": {
+                "claude-haiku-5-5": {
+                  "1": {
+                    "n_2": 215,
+                    "forward": 21,
+                    "forward_share": 0.098,
+                    "forward_discounted": 17,
+                    "forward_discounted_share": 0.079,
+                    "n_3": 33,
+                    "reverse": 3,
+                    "reverse_share": 0.091,
+                    "reverse_wide": 3,
+                    "reverse_wide_share": 0.091,
+                    "reverse_explicit": 0,
+                    "reverse_explicit_share": 0.0
+                  },
+                  "2": {
+                    "n_2": 213,
+                    "forward": 19,
+                    "forward_share": 0.089,
+                    "forward_discounted": 16,
+                    "forward_discounted_share": 0.075,
+                    "n_3": 34,
+                    "reverse": 2,
+                    "reverse_share": 0.059,
+                    "reverse_wide": 2,
+                    "reverse_wide_share": 0.059,
+                    "reverse_explicit": 0,
+                    "reverse_explicit_share": 0.0
+                  },
+                  "pooled": {
+                    "n_2": 428,
+                    "forward": 40,
+                    "forward_share": 0.093,
+                    "forward_discounted": 33,
+                    "forward_discounted_share": 0.077,
+                    "n_3": 67,
+                    "reverse": 5,
+                    "reverse_share": 0.075,
+                    "reverse_wide": 5,
+                    "reverse_wide_share": 0.075,
+                    "reverse_explicit": 0,
+                    "reverse_explicit_share": 0.0
+                  }
+                },
+                "claude-haiku-4-5-20251001": {
+                  "1": {
+                    "n_2": 182,
+                    "forward": 27,
+                    "forward_share": 0.148,
+                    "forward_discounted": 27,
+                    "forward_discounted_share": 0.148,
+                    "n_3": 62,
+                    "reverse": 1,
+                    "reverse_share": 0.016,
+                    "reverse_wide": 1,
+                    "reverse_wide_share": 0.016,
+                    "reverse_explicit": 0,
+                    "reverse_explicit_share": 0.0
+                  },
+                  "2": {
+                    "n_2": 182,
+                    "forward": 27,
+                    "forward_share": 0.148,
+                    "forward_discounted": 27,
+                    "forward_discounted_share": 0.148,
+                    "n_3": 62,
+                    "reverse": 1,
+                    "reverse_share": 0.016,
+                    "reverse_wide": 1,
+                    "reverse_wide_share": 0.016,
+                    "reverse_explicit": 0,
+                    "reverse_explicit_share": 0.0
+                  },
+                  "pooled": {
+                    "n_2": 364,
+                    "forward": 54,
+                    "forward_share": 0.148,
+                    "forward_discounted": 54,
+                    "forward_discounted_share": 0.148,
+                    "n_3": 124,
+                    "reverse": 2,
+                    "reverse_share": 0.016,
+                    "reverse_wide": 2,
+                    "reverse_wide_share": 0.016,
+                    "reverse_explicit": 0,
+                    "reverse_explicit_share": 0.0
+                  }
+                }
+              }
+            }
+          },
+          "against_v4": {},
+          "rule_against_v4": {}
+        },
+        "nearest": {
+          "n_pairs": 300,
+          "by_group": {
+            "nearest": 300
+          },
+          "versions": {
+            "v6": {
+              "n_pairs": 300,
+              "passes": [
+                1,
+                2
+              ],
+              "self_consistency": {
+                "claude-haiku-5-5": {
+                  "n": 300,
+                  "exact": 0.9167,
+                  "n_numeric": 257,
+                  "within_one": 1.0,
+                  "kappa": 0.8583,
+                  "exact_decision": 0.9167,
+                  "cutoff_n": 300,
+                  "crossings": 10,
+                  "first_only": 5,
+                  "second_only": 5,
+                  "flips_native": {
+                    "0/1": 2,
+                    "1/2": 12,
+                    "2/3": 10,
+                    "3/4": 1
+                  },
+                  "identical": {
+                    "n": 300,
+                    "exact": 0.9167,
+                    "n_numeric": 257,
+                    "within_one": 1.0,
+                    "kappa": 0.8583,
+                    "exact_decision": 0.9167,
+                    "cutoff_n": 300,
+                    "crossings": 10,
+                    "first_only": 5,
+                    "second_only": 5,
+                    "flips_native": {
+                      "0/1": 2,
+                      "1/2": 12,
+                      "2/3": 10,
+                      "3/4": 1
+                    },
+                    "all_pairs": true
+                  }
+                },
+                "claude-haiku-4-5-20251001": {
+                  "n": 300,
+                  "exact": 1.0,
+                  "n_numeric": 252,
+                  "within_one": 1.0,
+                  "kappa": 1.0,
+                  "exact_decision": 1.0,
+                  "cutoff_n": 300,
+                  "crossings": 0,
+                  "first_only": 0,
+                  "second_only": 0,
+                  "flips_native": {},
+                  "identical": {
+                    "n": 300,
+                    "exact": 1.0,
+                    "n_numeric": 252,
+                    "within_one": 1.0,
+                    "kappa": 1.0,
+                    "exact_decision": 1.0,
+                    "cutoff_n": 300,
+                    "crossings": 0,
+                    "first_only": 0,
+                    "second_only": 0,
+                    "flips_native": {},
+                    "all_pairs": true
+                  }
+                }
+              },
+              "between_models": {},
+              "coverage": {
+                "claude-haiku-5-5": {
+                  "1": {
+                    "n": 300,
+                    "covered": 28,
+                    "share": 0.093,
+                    "n_targets": 100,
+                    "targets_covered": 22,
+                    "target_share": 0.22,
+                    "opposite": 43,
+                    "unsure": 0
+                  },
+                  "2": {
+                    "n": 300,
+                    "covered": 28,
+                    "share": 0.093,
+                    "n_targets": 100,
+                    "targets_covered": 22,
+                    "target_share": 0.22,
+                    "opposite": 43,
+                    "unsure": 0
+                  }
+                },
+                "claude-haiku-4-5-20251001": {
+                  "1": {
+                    "n": 300,
+                    "covered": 55,
+                    "share": 0.183,
+                    "n_targets": 100,
+                    "targets_covered": 41,
+                    "target_share": 0.41,
+                    "opposite": 48,
+                    "unsure": 0
+                  },
+                  "2": {
+                    "n": 300,
+                    "covered": 55,
+                    "share": 0.183,
+                    "n_targets": 100,
+                    "targets_covered": 41,
+                    "target_share": 0.41,
+                    "opposite": 48,
+                    "unsure": 0
+                  }
+                }
+              },
+              "groups": {
+                "claude-haiku-5-5": {
+                  "1": {
+                    "nearest": {
+                      "n": 300,
+                      "mean": 1.97,
+                      "share_3_plus": 0.109,
+                      "opposite": 0.143
+                    }
+                  },
+                  "2": {
+                    "nearest": {
+                      "n": 300,
+                      "mean": 1.96,
+                      "share_3_plus": 0.109,
+                      "opposite": 0.143
+                    }
+                  }
+                },
+                "claude-haiku-4-5-20251001": {
+                  "1": {
+                    "nearest": {
+                      "n": 300,
+                      "mean": 2.09,
+                      "share_3_plus": 0.218,
+                      "opposite": 0.16
+                    }
+                  },
+                  "2": {
+                    "nearest": {
+                      "n": 300,
+                      "mean": 2.09,
+                      "share_3_plus": 0.218,
+                      "opposite": 0.16
+                    }
+                  }
+                }
+              },
+              "slips": {
+                "claude-haiku-5-5": {
+                  "1": {
+                    "n_2": 195,
+                    "forward": 18,
+                    "forward_share": 0.092,
+                    "forward_discounted": 16,
+                    "forward_discounted_share": 0.082,
+                    "n_3": 25,
+                    "reverse": 3,
+                    "reverse_share": 0.12,
+                    "reverse_wide": 3,
+                    "reverse_wide_share": 0.12,
+                    "reverse_explicit": 0,
+                    "reverse_explicit_share": 0.0
+                  },
+                  "2": {
+                    "n_2": 193,
+                    "forward": 16,
+                    "forward_share": 0.083,
+                    "forward_discounted": 14,
+                    "forward_discounted_share": 0.073,
+                    "n_3": 24,
+                    "reverse": 2,
+                    "reverse_share": 0.083,
+                    "reverse_wide": 2,
+                    "reverse_wide_share": 0.083,
+                    "reverse_explicit": 0,
+                    "reverse_explicit_share": 0.0
+                  },
+                  "pooled": {
+                    "n_2": 388,
+                    "forward": 34,
+                    "forward_share": 0.088,
+                    "forward_discounted": 30,
+                    "forward_discounted_share": 0.077,
+                    "n_3": 49,
+                    "reverse": 5,
+                    "reverse_share": 0.102,
+                    "reverse_wide": 5,
+                    "reverse_wide_share": 0.102,
+                    "reverse_explicit": 0,
+                    "reverse_explicit_share": 0.0
+                  }
+                },
+                "claude-haiku-4-5-20251001": {
+                  "1": {
+                    "n_2": 167,
+                    "forward": 25,
+                    "forward_share": 0.15,
+                    "forward_discounted": 25,
+                    "forward_discounted_share": 0.15,
+                    "n_3": 50,
+                    "reverse": 1,
+                    "reverse_share": 0.02,
+                    "reverse_wide": 1,
+                    "reverse_wide_share": 0.02,
+                    "reverse_explicit": 0,
+                    "reverse_explicit_share": 0.0
+                  },
+                  "2": {
+                    "n_2": 167,
+                    "forward": 25,
+                    "forward_share": 0.15,
+                    "forward_discounted": 25,
+                    "forward_discounted_share": 0.15,
+                    "n_3": 50,
+                    "reverse": 1,
+                    "reverse_share": 0.02,
+                    "reverse_wide": 1,
+                    "reverse_wide_share": 0.02,
+                    "reverse_explicit": 0,
+                    "reverse_explicit_share": 0.0
+                  },
+                  "pooled": {
+                    "n_2": 334,
+                    "forward": 50,
+                    "forward_share": 0.15,
+                    "forward_discounted": 50,
+                    "forward_discounted_share": 0.15,
+                    "n_3": 100,
+                    "reverse": 2,
+                    "reverse_share": 0.02,
+                    "reverse_wide": 2,
+                    "reverse_wide_share": 0.02,
+                    "reverse_explicit": 0,
+                    "reverse_explicit_share": 0.0
+                  }
+                }
+              }
+            }
+          },
+          "against_v4": {},
+          "rule_against_v4": {}
+        }
+      },
+      "parse": {
+        "v6": {
+          "claude-haiku-5-5|1": {
+            "model": "claude-haiku-5-5",
+            "pass": 1,
+            "first_ok": 409,
+            "first_total": 409,
+            "ok": 409,
+            "total": 409
+          },
+          "claude-haiku-4-5-20251001|1": {
+            "model": "claude-haiku-4-5-20251001",
+            "pass": 1,
+            "first_ok": 409,
+            "first_total": 409,
+            "ok": 409,
+            "total": 409
+          },
+          "claude-haiku-5-5|2": {
+            "model": "claude-haiku-5-5",
+            "pass": 2,
+            "first_ok": 409,
+            "first_total": 409,
+            "ok": 409,
+            "total": 409
+          },
+          "claude-haiku-4-5-20251001|2": {
+            "model": "claude-haiku-4-5-20251001",
+            "pass": 2,
+            "first_ok": 409,
+            "first_total": 409,
+            "ok": 409,
+            "total": 409
+          }
+        }
+      },
+      "format_notes": {
+        "v6": {
+          "claude-haiku-4-5-20251001|1": {
+            "model": "claude-haiku-4-5-20251001",
+            "pass": 1,
+            "first": {
+              "n": 409,
+              "parsed": 409,
+              "wrapped": 0,
+              "extra_keys": 0,
+              "extra_key_names": {},
+              "not_reason_first": 0,
+              "self_corrections": 0
+            },
+            "final": {
+              "n": 409,
+              "parsed": 409,
+              "wrapped": 0,
+              "extra_keys": 0,
+              "extra_key_names": {},
+              "not_reason_first": 0,
+              "self_corrections": 0
+            }
+          },
+          "claude-haiku-4-5-20251001|2": {
+            "model": "claude-haiku-4-5-20251001",
+            "pass": 2,
+            "first": {
+              "n": 409,
+              "parsed": 409,
+              "wrapped": 0,
+              "extra_keys": 0,
+              "extra_key_names": {},
+              "not_reason_first": 0,
+              "self_corrections": 0
+            },
+            "final": {
+              "n": 409,
+              "parsed": 409,
+              "wrapped": 0,
+              "extra_keys": 0,
+              "extra_key_names": {},
+              "not_reason_first": 0,
+              "self_corrections": 0
+            }
+          },
+          "claude-haiku-5-5|1": {
+            "model": "claude-haiku-5-5",
+            "pass": 1,
+            "first": {
+              "n": 409,
+              "parsed": 409,
+              "wrapped": 0,
+              "extra_keys": 0,
+              "extra_key_names": {},
+              "not_reason_first": 0,
+              "self_corrections": 2
+            },
+            "final": {
+              "n": 409,
+              "parsed": 409,
+              "wrapped": 0,
+              "extra_keys": 0,
+              "extra_key_names": {},
+              "not_reason_first": 0,
+              "self_corrections": 2
+            }
+          },
+          "claude-haiku-5-5|2": {
+            "model": "claude-haiku-5-5",
+            "pass": 2,
+            "first": {
+              "n": 409,
+              "parsed": 409,
+              "wrapped": 0,
+              "extra_keys": 0,
+              "extra_key_names": {},
+              "not_reason_first": 0,
+              "self_corrections": 3
+            },
+            "final": {
+              "n": 409,
+              "parsed": 409,
+              "wrapped": 0,
+              "extra_keys": 0,
+              "extra_key_names": {},
+              "not_reason_first": 0,
+              "self_corrections": 3
+            }
+          }
+        }
+      },
+      "cache": {
+        "v6": {
+          "claude-haiku-4-5-20251001": {
+            "requests": 818,
+            "reading": 0,
+            "writing": 0,
+            "hit_rate": 0.0,
+            "input_tokens": 450800,
+            "cache_write_tokens": 0,
+            "cache_read_tokens": 0,
+            "output_tokens": 45841,
+            "read_share": 0.0,
+            "charged_usd": 0.680005,
+            "published_usd": 0.680005,
+            "uncached_usd": 0.680005,
+            "saved_usd": 0.0,
+            "saved_published_usd": 0.0,
+            "read_price_factor": 0.1
+          },
+          "claude-haiku-5-5": {
+            "requests": 818,
+            "reading": 810,
+            "writing": 8,
+            "hit_rate": 0.9902,
+            "input_tokens": 128038,
+            "cache_write_tokens": 4592,
+            "cache_read_tokens": 464940,
+            "output_tokens": 115031,
+            "read_share": 0.7781,
+            "charged_usd": 0.075543,
+            "published_usd": 0.075543,
+            "uncached_usd": 0.117273,
+            "saved_usd": 0.04173,
+            "saved_published_usd": 0.04173,
+            "read_price_factor": 0.1
+          }
+        }
+      },
+      "spend_per_pair": {
+        "v6": {
+          "claude-haiku-4-5-20251001": {
+            "answers": 818,
+            "charged_usd": 0.680005,
+            "per_pair_usd": 0.000831
+          },
+          "claude-haiku-5-5": {
+            "answers": 818,
+            "charged_usd": 0.075543,
+            "per_pair_usd": 9.2e-05
+          }
+        }
+      },
+      "v4_identical_prompts": null,
+      "marks": {
+        "items": [
+          {
+            "item": 1,
+            "pair_id": "lab:self_blaming>blame_shifting",
+            "leaning": "opposite",
+            "alternative": null
+          },
+          {
+            "item": 2,
+            "pair_id": "nn:erudite>esoteric",
+            "leaning": 1,
+            "alternative": 2
+          },
+          {
+            "item": 3,
+            "pair_id": "nn:utilitarian>deontological",
+            "leaning": "opposite",
+            "alternative": null
+          },
+          {
+            "item": 4,
+            "pair_id": "lab:animated>flat",
+            "leaning": "opposite",
+            "alternative": null
+          },
+          {
+            "item": 5,
+            "pair_id": "lab:conservative>overconfident",
+            "leaning": 0,
+            "alternative": null
+          },
+          {
+            "item": 6,
+            "pair_id": "nn:materialist>relativist",
+            "leaning": 0,
+            "alternative": null
+          },
+          {
+            "item": 7,
+            "pair_id": "lab:excitable>narrative",
+            "leaning": 0,
+            "alternative": null
+          },
+          {
+            "item": 8,
+            "pair_id": "nn:religious>secular",
+            "leaning": "opposite",
+            "alternative": null
+          },
+          {
+            "item": 9,
+            "pair_id": "nn:extroverted>energetic",
+            "leaning": 0,
+            "alternative": null
+          },
+          {
+            "item": 10,
+            "pair_id": "lab:temperamental>even_tempered",
+            "leaning": "opposite",
+            "alternative": null
+          },
+          {
+            "item": 11,
+            "pair_id": "nn:iconoclastic>deconstructionist",
+            "leaning": 2,
+            "alternative": null
+          },
+          {
+            "item": 12,
+            "pair_id": "nn:ethereal>spiritual",
+            "leaning": 1,
+            "alternative": null
+          },
+          {
+            "item": 13,
+            "pair_id": "nn:strategic>long_term_oriented",
+            "leaning": 1,
+            "alternative": 2
+          },
+          {
+            "item": 14,
+            "pair_id": "nn:agreeable>conciliatory",
+            "leaning": 2,
+            "alternative": null
+          },
+          {
+            "item": 15,
+            "pair_id": "lab:dispassionate>detached",
+            "leaning": 4,
+            "alternative": null
+          },
+          {
+            "item": 16,
+            "pair_id": "lab:nihilistic>essentialist",
+            "leaning": "opposite",
+            "alternative": null
+          },
+          {
+            "item": 17,
+            "pair_id": "nn:hedonistic>self_indulgent",
+            "leaning": 3,
+            "alternative": 2
+          },
+          {
+            "item": 18,
+            "pair_id": "lab:consequentialist>ends_justify_means",
+            "leaning": 2,
+            "alternative": null
+          },
+          {
+            "item": 19,
+            "pair_id": "nn:deconstructionist>structuralist",
+            "leaning": 1,
+            "alternative": null
+          },
+          {
+            "item": 20,
+            "pair_id": "nn:benevolent>benign",
+            "leaning": 2,
+            "alternative": null
+          },
+          {
+            "item": 21,
+            "pair_id": "lab:honorable>deontological",
+            "leaning": 2,
+            "alternative": 3
+          },
+          {
+            "item": 22,
+            "pair_id": "nn:adventurous>adventurous_eater",
+            "leaning": 2,
+            "alternative": null
+          },
+          {
+            "item": 23,
+            "pair_id": "nn:strategic>tactical",
+            "leaning": "opposite",
+            "alternative": null
+          },
+          {
+            "item": 24,
+            "pair_id": "lab:moral_relativist>relativist",
+            "leaning": 4,
+            "alternative": null
+          },
+          {
+            "item": 25,
+            "pair_id": "nn:serious>formal",
+            "leaning": 3,
+            "alternative": null
+          },
+          {
+            "item": 26,
+            "pair_id": "nn:socratic>educational",
+            "leaning": 2,
+            "alternative": null
+          },
+          {
+            "item": 27,
+            "pair_id": "nn:extroverted>gregarious",
+            "leaning": 3,
+            "alternative": 2
+          },
+          {
+            "item": 28,
+            "pair_id": "lab:theoretical>conceptual",
+            "leaning": 4,
+            "alternative": null
+          },
+          {
+            "item": 29,
+            "pair_id": "lab:cosmopolitan>philanthropic",
+            "leaning": 1,
+            "alternative": null
+          },
+          {
+            "item": 30,
+            "pair_id": "nn:moderate>temperate",
+            "leaning": 2,
+            "alternative": null
+          }
+        ],
+        "v4_test1": {
+          "claude-haiku-4-5-20251001": {
+            "n": 30,
+            "exact": 23,
+            "exact_share": 0.767,
+            "n_numeric": 23,
+            "within_one": 23,
+            "within_one_share": 1.0,
+            "leaning_or_alternative": 25,
+            "leaning_or_alternative_share": 0.833,
+            "items": [
+              {
+                "item": 1,
+                "pair_id": "lab:self_blaming>blame_shifting",
+                "leaning": "opposite",
+                "alternative": null,
+                "value": "opposite"
+              },
+              {
+                "item": 2,
+                "pair_id": "nn:erudite>esoteric",
+                "leaning": 1,
+                "alternative": 2,
+                "value": 1
+              },
+              {
+                "item": 3,
+                "pair_id": "nn:utilitarian>deontological",
+                "leaning": "opposite",
+                "alternative": null,
+                "value": "opposite"
+              },
+              {
+                "item": 4,
+                "pair_id": "lab:animated>flat",
+                "leaning": "opposite",
+                "alternative": null,
+                "value": "opposite"
+              },
+              {
+                "item": 5,
+                "pair_id": "lab:conservative>overconfident",
+                "leaning": 0,
+                "alternative": null,
+                "value": 0
+              },
+              {
+                "item": 6,
+                "pair_id": "nn:materialist>relativist",
+                "leaning": 0,
+                "alternative": null,
+                "value": 0
+              },
+              {
+                "item": 7,
+                "pair_id": "lab:excitable>narrative",
+                "leaning": 0,
+                "alternative": null,
+                "value": 0
+              },
+              {
+                "item": 8,
+                "pair_id": "nn:religious>secular",
+                "leaning": "opposite",
+                "alternative": null,
+                "value": "opposite"
+              },
+              {
+                "item": 9,
+                "pair_id": "nn:extroverted>energetic",
+                "leaning": 0,
+                "alternative": null,
+                "value": 1
+              },
+              {
+                "item": 10,
+                "pair_id": "lab:temperamental>even_tempered",
+                "leaning": "opposite",
+                "alternative": null,
+                "value": "opposite"
+              },
+              {
+                "item": 11,
+                "pair_id": "nn:iconoclastic>deconstructionist",
+                "leaning": 2,
+                "alternative": null,
+                "value": 2
+              },
+              {
+                "item": 12,
+                "pair_id": "nn:ethereal>spiritual",
+                "leaning": 1,
+                "alternative": null,
+                "value": 2
+              },
+              {
+                "item": 13,
+                "pair_id": "nn:strategic>long_term_oriented",
+                "leaning": 1,
+                "alternative": 2,
+                "value": 2
+              },
+              {
+                "item": 14,
+                "pair_id": "nn:agreeable>conciliatory",
+                "leaning": 2,
+                "alternative": null,
+                "value": 3
+              },
+              {
+                "item": 15,
+                "pair_id": "lab:dispassionate>detached",
+                "leaning": 4,
+                "alternative": null,
+                "value": 4
+              },
+              {
+                "item": 16,
+                "pair_id": "lab:nihilistic>essentialist",
+                "leaning": "opposite",
+                "alternative": null,
+                "value": "opposite"
+              },
+              {
+                "item": 17,
+                "pair_id": "nn:hedonistic>self_indulgent",
+                "leaning": 3,
+                "alternative": 2,
+                "value": 3
+              },
+              {
+                "item": 18,
+                "pair_id": "lab:consequentialist>ends_justify_means",
+                "leaning": 2,
+                "alternative": null,
+                "value": 2
+              },
+              {
+                "item": 19,
+                "pair_id": "nn:deconstructionist>structuralist",
+                "leaning": 1,
+                "alternative": null,
+                "value": 1
+              },
+              {
+                "item": 20,
+                "pair_id": "nn:benevolent>benign",
+                "leaning": 2,
+                "alternative": null,
+                "value": 2
+              },
+              {
+                "item": 21,
+                "pair_id": "lab:honorable>deontological",
+                "leaning": 2,
+                "alternative": 3,
+                "value": 3
+              },
+              {
+                "item": 22,
+                "pair_id": "nn:adventurous>adventurous_eater",
+                "leaning": 2,
+                "alternative": null,
+                "value": 3
+              },
+              {
+                "item": 23,
+                "pair_id": "nn:strategic>tactical",
+                "leaning": "opposite",
+                "alternative": null,
+                "value": "opposite"
+              },
+              {
+                "item": 24,
+                "pair_id": "lab:moral_relativist>relativist",
+                "leaning": 4,
+                "alternative": null,
+                "value": 3
+              },
+              {
+                "item": 25,
+                "pair_id": "nn:serious>formal",
+                "leaning": 3,
+                "alternative": null,
+                "value": 3
+              },
+              {
+                "item": 26,
+                "pair_id": "nn:socratic>educational",
+                "leaning": 2,
+                "alternative": null,
+                "value": 2
+              },
+              {
+                "item": 27,
+                "pair_id": "nn:extroverted>gregarious",
+                "leaning": 3,
+                "alternative": 2,
+                "value": 3
+              },
+              {
+                "item": 28,
+                "pair_id": "lab:theoretical>conceptual",
+                "leaning": 4,
+                "alternative": null,
+                "value": 4
+              },
+              {
+                "item": 29,
+                "pair_id": "lab:cosmopolitan>philanthropic",
+                "leaning": 1,
+                "alternative": null,
+                "value": 1
+              },
+              {
+                "item": 30,
+                "pair_id": "nn:moderate>temperate",
+                "leaning": 2,
+                "alternative": null,
+                "value": 2
+              }
+            ]
+          }
+        },
+        "v6_pass1": {
+          "claude-haiku-5-5": {
+            "n": 30,
+            "exact": 20,
+            "exact_share": 0.667,
+            "n_numeric": 23,
+            "within_one": 23,
+            "within_one_share": 1.0,
+            "leaning_or_alternative": 23,
+            "leaning_or_alternative_share": 0.767,
+            "items": [
+              {
+                "item": 1,
+                "pair_id": "lab:self_blaming>blame_shifting",
+                "leaning": "opposite",
+                "alternative": null,
+                "value": "opposite"
+              },
+              {
+                "item": 2,
+                "pair_id": "nn:erudite>esoteric",
+                "leaning": 1,
+                "alternative": 2,
+                "value": 2
+              },
+              {
+                "item": 3,
+                "pair_id": "nn:utilitarian>deontological",
+                "leaning": "opposite",
+                "alternative": null,
+                "value": "opposite"
+              },
+              {
+                "item": 4,
+                "pair_id": "lab:animated>flat",
+                "leaning": "opposite",
+                "alternative": null,
+                "value": "opposite"
+              },
+              {
+                "item": 5,
+                "pair_id": "lab:conservative>overconfident",
+                "leaning": 0,
+                "alternative": null,
+                "value": 0
+              },
+              {
+                "item": 6,
+                "pair_id": "nn:materialist>relativist",
+                "leaning": 0,
+                "alternative": null,
+                "value": 0
+              },
+              {
+                "item": 7,
+                "pair_id": "lab:excitable>narrative",
+                "leaning": 0,
+                "alternative": null,
+                "value": 0
+              },
+              {
+                "item": 8,
+                "pair_id": "nn:religious>secular",
+                "leaning": "opposite",
+                "alternative": null,
+                "value": "opposite"
+              },
+              {
+                "item": 9,
+                "pair_id": "nn:extroverted>energetic",
+                "leaning": 0,
+                "alternative": null,
+                "value": 1
+              },
+              {
+                "item": 10,
+                "pair_id": "lab:temperamental>even_tempered",
+                "leaning": "opposite",
+                "alternative": null,
+                "value": "opposite"
+              },
+              {
+                "item": 11,
+                "pair_id": "nn:iconoclastic>deconstructionist",
+                "leaning": 2,
+                "alternative": null,
+                "value": 2
+              },
+              {
+                "item": 12,
+                "pair_id": "nn:ethereal>spiritual",
+                "leaning": 1,
+                "alternative": null,
+                "value": 2
+              },
+              {
+                "item": 13,
+                "pair_id": "nn:strategic>long_term_oriented",
+                "leaning": 1,
+                "alternative": 2,
+                "value": 2
+              },
+              {
+                "item": 14,
+                "pair_id": "nn:agreeable>conciliatory",
+                "leaning": 2,
+                "alternative": null,
+                "value": 2
+              },
+              {
+                "item": 15,
+                "pair_id": "lab:dispassionate>detached",
+                "leaning": 4,
+                "alternative": null,
+                "value": 4
+              },
+              {
+                "item": 16,
+                "pair_id": "lab:nihilistic>essentialist",
+                "leaning": "opposite",
+                "alternative": null,
+                "value": 0
+              },
+              {
+                "item": 17,
+                "pair_id": "nn:hedonistic>self_indulgent",
+                "leaning": 3,
+                "alternative": 2,
+                "value": 2
+              },
+              {
+                "item": 18,
+                "pair_id": "lab:consequentialist>ends_justify_means",
+                "leaning": 2,
+                "alternative": null,
+                "value": 2
+              },
+              {
+                "item": 19,
+                "pair_id": "nn:deconstructionist>structuralist",
+                "leaning": 1,
+                "alternative": null,
+                "value": 1
+              },
+              {
+                "item": 20,
+                "pair_id": "nn:benevolent>benign",
+                "leaning": 2,
+                "alternative": null,
+                "value": 2
+              },
+              {
+                "item": 21,
+                "pair_id": "lab:honorable>deontological",
+                "leaning": 2,
+                "alternative": 3,
+                "value": 2
+              },
+              {
+                "item": 22,
+                "pair_id": "nn:adventurous>adventurous_eater",
+                "leaning": 2,
+                "alternative": null,
+                "value": 3
+              },
+              {
+                "item": 23,
+                "pair_id": "nn:strategic>tactical",
+                "leaning": "opposite",
+                "alternative": null,
+                "value": "opposite"
+              },
+              {
+                "item": 24,
+                "pair_id": "lab:moral_relativist>relativist",
+                "leaning": 4,
+                "alternative": null,
+                "value": 3
+              },
+              {
+                "item": 25,
+                "pair_id": "nn:serious>formal",
+                "leaning": 3,
+                "alternative": null,
+                "value": 2
+              },
+              {
+                "item": 26,
+                "pair_id": "nn:socratic>educational",
+                "leaning": 2,
+                "alternative": null,
+                "value": 2
+              },
+              {
+                "item": 27,
+                "pair_id": "nn:extroverted>gregarious",
+                "leaning": 3,
+                "alternative": 2,
+                "value": 3
+              },
+              {
+                "item": 28,
+                "pair_id": "lab:theoretical>conceptual",
+                "leaning": 4,
+                "alternative": null,
+                "value": 4
+              },
+              {
+                "item": 29,
+                "pair_id": "lab:cosmopolitan>philanthropic",
+                "leaning": 1,
+                "alternative": null,
+                "value": 0
+              },
+              {
+                "item": 30,
+                "pair_id": "nn:moderate>temperate",
+                "leaning": 2,
+                "alternative": null,
+                "value": 2
+              }
+            ]
+          },
+          "claude-haiku-4-5-20251001": {
+            "n": 30,
+            "exact": 18,
+            "exact_share": 0.6,
+            "n_numeric": 21,
+            "within_one": 20,
+            "within_one_share": 0.952,
+            "leaning_or_alternative": 20,
+            "leaning_or_alternative_share": 0.667,
+            "items": [
+              {
+                "item": 1,
+                "pair_id": "lab:self_blaming>blame_shifting",
+                "leaning": "opposite",
+                "alternative": null,
+                "value": "opposite"
+              },
+              {
+                "item": 2,
+                "pair_id": "nn:erudite>esoteric",
+                "leaning": 1,
+                "alternative": 2,
+                "value": 2
+              },
+              {
+                "item": 3,
+                "pair_id": "nn:utilitarian>deontological",
+                "leaning": "opposite",
+                "alternative": null,
+                "value": "opposite"
+              },
+              {
+                "item": 4,
+                "pair_id": "lab:animated>flat",
+                "leaning": "opposite",
+                "alternative": null,
+                "value": "opposite"
+              },
+              {
+                "item": 5,
+                "pair_id": "lab:conservative>overconfident",
+                "leaning": 0,
+                "alternative": null,
+                "value": "opposite"
+              },
+              {
+                "item": 6,
+                "pair_id": "nn:materialist>relativist",
+                "leaning": 0,
+                "alternative": null,
+                "value": 0
+              },
+              {
+                "item": 7,
+                "pair_id": "lab:excitable>narrative",
+                "leaning": 0,
+                "alternative": null,
+                "value": 0
+              },
+              {
+                "item": 8,
+                "pair_id": "nn:religious>secular",
+                "leaning": "opposite",
+                "alternative": null,
+                "value": "opposite"
+              },
+              {
+                "item": 9,
+                "pair_id": "nn:extroverted>energetic",
+                "leaning": 0,
+                "alternative": null,
+                "value": 0
+              },
+              {
+                "item": 10,
+                "pair_id": "lab:temperamental>even_tempered",
+                "leaning": "opposite",
+                "alternative": null,
+                "value": "opposite"
+              },
+              {
+                "item": 11,
+                "pair_id": "nn:iconoclastic>deconstructionist",
+                "leaning": 2,
+                "alternative": null,
+                "value": 2
+              },
+              {
+                "item": 12,
+                "pair_id": "nn:ethereal>spiritual",
+                "leaning": 1,
+                "alternative": null,
+                "value": 2
+              },
+              {
+                "item": 13,
+                "pair_id": "nn:strategic>long_term_oriented",
+                "leaning": 1,
+                "alternative": 2,
+                "value": 2
+              },
+              {
+                "item": 14,
+                "pair_id": "nn:agreeable>conciliatory",
+                "leaning": 2,
+                "alternative": null,
+                "value": 3
+              },
+              {
+                "item": 15,
+                "pair_id": "lab:dispassionate>detached",
+                "leaning": 4,
+                "alternative": null,
+                "value": 3
+              },
+              {
+                "item": 16,
+                "pair_id": "lab:nihilistic>essentialist",
+                "leaning": "opposite",
+                "alternative": null,
+                "value": "opposite"
+              },
+              {
+                "item": 17,
+                "pair_id": "nn:hedonistic>self_indulgent",
+                "leaning": 3,
+                "alternative": 2,
+                "value": 3
+              },
+              {
+                "item": 18,
+                "pair_id": "lab:consequentialist>ends_justify_means",
+                "leaning": 2,
+                "alternative": null,
+                "value": 2
+              },
+              {
+                "item": 19,
+                "pair_id": "nn:deconstructionist>structuralist",
+                "leaning": 1,
+                "alternative": null,
+                "value": "opposite"
+              },
+              {
+                "item": 20,
+                "pair_id": "nn:benevolent>benign",
+                "leaning": 2,
+                "alternative": null,
+                "value": 2
+              },
+              {
+                "item": 21,
+                "pair_id": "lab:honorable>deontological",
+                "leaning": 2,
+                "alternative": 3,
+                "value": 4
+              },
+              {
+                "item": 22,
+                "pair_id": "nn:adventurous>adventurous_eater",
+                "leaning": 2,
+                "alternative": null,
+                "value": 3
+              },
+              {
+                "item": 23,
+                "pair_id": "nn:strategic>tactical",
+                "leaning": "opposite",
+                "alternative": null,
+                "value": "opposite"
+              },
+              {
+                "item": 24,
+                "pair_id": "lab:moral_relativist>relativist",
+                "leaning": 4,
+                "alternative": null,
+                "value": 3
+              },
+              {
+                "item": 25,
+                "pair_id": "nn:serious>formal",
+                "leaning": 3,
+                "alternative": null,
+                "value": 2
+              },
+              {
+                "item": 26,
+                "pair_id": "nn:socratic>educational",
+                "leaning": 2,
+                "alternative": null,
+                "value": 2
+              },
+              {
+                "item": 27,
+                "pair_id": "nn:extroverted>gregarious",
+                "leaning": 3,
+                "alternative": 2,
+                "value": 3
+              },
+              {
+                "item": 28,
+                "pair_id": "lab:theoretical>conceptual",
+                "leaning": 4,
+                "alternative": null,
+                "value": 4
+              },
+              {
+                "item": 29,
+                "pair_id": "lab:cosmopolitan>philanthropic",
+                "leaning": 1,
+                "alternative": null,
+                "value": 0
+              },
+              {
+                "item": 30,
+                "pair_id": "nn:moderate>temperate",
+                "leaning": 2,
+                "alternative": null,
+                "value": 2
+              }
+            ]
+          }
+        },
+        "v6_pass2": {
+          "claude-haiku-5-5": {
+            "n": 30,
+            "exact": 20,
+            "exact_share": 0.667,
+            "n_numeric": 23,
+            "within_one": 23,
+            "within_one_share": 1.0,
+            "leaning_or_alternative": 22,
+            "leaning_or_alternative_share": 0.733,
+            "items": [
+              {
+                "item": 1,
+                "pair_id": "lab:self_blaming>blame_shifting",
+                "leaning": "opposite",
+                "alternative": null,
+                "value": "opposite"
+              },
+              {
+                "item": 2,
+                "pair_id": "nn:erudite>esoteric",
+                "leaning": 1,
+                "alternative": 2,
+                "value": 2
+              },
+              {
+                "item": 3,
+                "pair_id": "nn:utilitarian>deontological",
+                "leaning": "opposite",
+                "alternative": null,
+                "value": "opposite"
+              },
+              {
+                "item": 4,
+                "pair_id": "lab:animated>flat",
+                "leaning": "opposite",
+                "alternative": null,
+                "value": "opposite"
+              },
+              {
+                "item": 5,
+                "pair_id": "lab:conservative>overconfident",
+                "leaning": 0,
+                "alternative": null,
+                "value": 0
+              },
+              {
+                "item": 6,
+                "pair_id": "nn:materialist>relativist",
+                "leaning": 0,
+                "alternative": null,
+                "value": 0
+              },
+              {
+                "item": 7,
+                "pair_id": "lab:excitable>narrative",
+                "leaning": 0,
+                "alternative": null,
+                "value": 0
+              },
+              {
+                "item": 8,
+                "pair_id": "nn:religious>secular",
+                "leaning": "opposite",
+                "alternative": null,
+                "value": "opposite"
+              },
+              {
+                "item": 9,
+                "pair_id": "nn:extroverted>energetic",
+                "leaning": 0,
+                "alternative": null,
+                "value": 1
+              },
+              {
+                "item": 10,
+                "pair_id": "lab:temperamental>even_tempered",
+                "leaning": "opposite",
+                "alternative": null,
+                "value": "opposite"
+              },
+              {
+                "item": 11,
+                "pair_id": "nn:iconoclastic>deconstructionist",
+                "leaning": 2,
+                "alternative": null,
+                "value": 2
+              },
+              {
+                "item": 12,
+                "pair_id": "nn:ethereal>spiritual",
+                "leaning": 1,
+                "alternative": null,
+                "value": 2
+              },
+              {
+                "item": 13,
+                "pair_id": "nn:strategic>long_term_oriented",
+                "leaning": 1,
+                "alternative": 2,
+                "value": 2
+              },
+              {
+                "item": 14,
+                "pair_id": "nn:agreeable>conciliatory",
+                "leaning": 2,
+                "alternative": null,
+                "value": 2
+              },
+              {
+                "item": 15,
+                "pair_id": "lab:dispassionate>detached",
+                "leaning": 4,
+                "alternative": null,
+                "value": 3
+              },
+              {
+                "item": 16,
+                "pair_id": "lab:nihilistic>essentialist",
+                "leaning": "opposite",
+                "alternative": null,
+                "value": 0
+              },
+              {
+                "item": 17,
+                "pair_id": "nn:hedonistic>self_indulgent",
+                "leaning": 3,
+                "alternative": 2,
+                "value": 3
+              },
+              {
+                "item": 18,
+                "pair_id": "lab:consequentialist>ends_justify_means",
+                "leaning": 2,
+                "alternative": null,
+                "value": 2
+              },
+              {
+                "item": 19,
+                "pair_id": "nn:deconstructionist>structuralist",
+                "leaning": 1,
+                "alternative": null,
+                "value": 1
+              },
+              {
+                "item": 20,
+                "pair_id": "nn:benevolent>benign",
+                "leaning": 2,
+                "alternative": null,
+                "value": 2
+              },
+              {
+                "item": 21,
+                "pair_id": "lab:honorable>deontological",
+                "leaning": 2,
+                "alternative": 3,
+                "value": 2
+              },
+              {
+                "item": 22,
+                "pair_id": "nn:adventurous>adventurous_eater",
+                "leaning": 2,
+                "alternative": null,
+                "value": 3
+              },
+              {
+                "item": 23,
+                "pair_id": "nn:strategic>tactical",
+                "leaning": "opposite",
+                "alternative": null,
+                "value": "opposite"
+              },
+              {
+                "item": 24,
+                "pair_id": "lab:moral_relativist>relativist",
+                "leaning": 4,
+                "alternative": null,
+                "value": 3
+              },
+              {
+                "item": 25,
+                "pair_id": "nn:serious>formal",
+                "leaning": 3,
+                "alternative": null,
+                "value": 2
+              },
+              {
+                "item": 26,
+                "pair_id": "nn:socratic>educational",
+                "leaning": 2,
+                "alternative": null,
+                "value": 2
+              },
+              {
+                "item": 27,
+                "pair_id": "nn:extroverted>gregarious",
+                "leaning": 3,
+                "alternative": 2,
+                "value": 3
+              },
+              {
+                "item": 28,
+                "pair_id": "lab:theoretical>conceptual",
+                "leaning": 4,
+                "alternative": null,
+                "value": 4
+              },
+              {
+                "item": 29,
+                "pair_id": "lab:cosmopolitan>philanthropic",
+                "leaning": 1,
+                "alternative": null,
+                "value": 0
+              },
+              {
+                "item": 30,
+                "pair_id": "nn:moderate>temperate",
+                "leaning": 2,
+                "alternative": null,
+                "value": 2
+              }
+            ]
+          },
+          "claude-haiku-4-5-20251001": {
+            "n": 30,
+            "exact": 18,
+            "exact_share": 0.6,
+            "n_numeric": 21,
+            "within_one": 20,
+            "within_one_share": 0.952,
+            "leaning_or_alternative": 20,
+            "leaning_or_alternative_share": 0.667,
+            "items": [
+              {
+                "item": 1,
+                "pair_id": "lab:self_blaming>blame_shifting",
+                "leaning": "opposite",
+                "alternative": null,
+                "value": "opposite"
+              },
+              {
+                "item": 2,
+                "pair_id": "nn:erudite>esoteric",
+                "leaning": 1,
+                "alternative": 2,
+                "value": 2
+              },
+              {
+                "item": 3,
+                "pair_id": "nn:utilitarian>deontological",
+                "leaning": "opposite",
+                "alternative": null,
+                "value": "opposite"
+              },
+              {
+                "item": 4,
+                "pair_id": "lab:animated>flat",
+                "leaning": "opposite",
+                "alternative": null,
+                "value": "opposite"
+              },
+              {
+                "item": 5,
+                "pair_id": "lab:conservative>overconfident",
+                "leaning": 0,
+                "alternative": null,
+                "value": "opposite"
+              },
+              {
+                "item": 6,
+                "pair_id": "nn:materialist>relativist",
+                "leaning": 0,
+                "alternative": null,
+                "value": 0
+              },
+              {
+                "item": 7,
+                "pair_id": "lab:excitable>narrative",
+                "leaning": 0,
+                "alternative": null,
+                "value": 0
+              },
+              {
+                "item": 8,
+                "pair_id": "nn:religious>secular",
+                "leaning": "opposite",
+                "alternative": null,
+                "value": "opposite"
+              },
+              {
+                "item": 9,
+                "pair_id": "nn:extroverted>energetic",
+                "leaning": 0,
+                "alternative": null,
+                "value": 0
+              },
+              {
+                "item": 10,
+                "pair_id": "lab:temperamental>even_tempered",
+                "leaning": "opposite",
+                "alternative": null,
+                "value": "opposite"
+              },
+              {
+                "item": 11,
+                "pair_id": "nn:iconoclastic>deconstructionist",
+                "leaning": 2,
+                "alternative": null,
+                "value": 2
+              },
+              {
+                "item": 12,
+                "pair_id": "nn:ethereal>spiritual",
+                "leaning": 1,
+                "alternative": null,
+                "value": 2
+              },
+              {
+                "item": 13,
+                "pair_id": "nn:strategic>long_term_oriented",
+                "leaning": 1,
+                "alternative": 2,
+                "value": 2
+              },
+              {
+                "item": 14,
+                "pair_id": "nn:agreeable>conciliatory",
+                "leaning": 2,
+                "alternative": null,
+                "value": 3
+              },
+              {
+                "item": 15,
+                "pair_id": "lab:dispassionate>detached",
+                "leaning": 4,
+                "alternative": null,
+                "value": 3
+              },
+              {
+                "item": 16,
+                "pair_id": "lab:nihilistic>essentialist",
+                "leaning": "opposite",
+                "alternative": null,
+                "value": "opposite"
+              },
+              {
+                "item": 17,
+                "pair_id": "nn:hedonistic>self_indulgent",
+                "leaning": 3,
+                "alternative": 2,
+                "value": 3
+              },
+              {
+                "item": 18,
+                "pair_id": "lab:consequentialist>ends_justify_means",
+                "leaning": 2,
+                "alternative": null,
+                "value": 2
+              },
+              {
+                "item": 19,
+                "pair_id": "nn:deconstructionist>structuralist",
+                "leaning": 1,
+                "alternative": null,
+                "value": "opposite"
+              },
+              {
+                "item": 20,
+                "pair_id": "nn:benevolent>benign",
+                "leaning": 2,
+                "alternative": null,
+                "value": 2
+              },
+              {
+                "item": 21,
+                "pair_id": "lab:honorable>deontological",
+                "leaning": 2,
+                "alternative": 3,
+                "value": 4
+              },
+              {
+                "item": 22,
+                "pair_id": "nn:adventurous>adventurous_eater",
+                "leaning": 2,
+                "alternative": null,
+                "value": 3
+              },
+              {
+                "item": 23,
+                "pair_id": "nn:strategic>tactical",
+                "leaning": "opposite",
+                "alternative": null,
+                "value": "opposite"
+              },
+              {
+                "item": 24,
+                "pair_id": "lab:moral_relativist>relativist",
+                "leaning": 4,
+                "alternative": null,
+                "value": 3
+              },
+              {
+                "item": 25,
+                "pair_id": "nn:serious>formal",
+                "leaning": 3,
+                "alternative": null,
+                "value": 2
+              },
+              {
+                "item": 26,
+                "pair_id": "nn:socratic>educational",
+                "leaning": 2,
+                "alternative": null,
+                "value": 2
+              },
+              {
+                "item": 27,
+                "pair_id": "nn:extroverted>gregarious",
+                "leaning": 3,
+                "alternative": 2,
+                "value": 3
+              },
+              {
+                "item": 28,
+                "pair_id": "lab:theoretical>conceptual",
+                "leaning": 4,
+                "alternative": null,
+                "value": 4
+              },
+              {
+                "item": 29,
+                "pair_id": "lab:cosmopolitan>philanthropic",
+                "leaning": 1,
+                "alternative": null,
+                "value": 0
+              },
+              {
+                "item": 30,
+                "pair_id": "nn:moderate>temperate",
+                "leaning": 2,
+                "alternative": null,
+                "value": 2
+              }
+            ]
+          }
+        }
+      },
+      "summary": [],
+      "paths": {
+        "marks_key": "data/candidates/overlap_test/overlap_test_1/marks_key.json"
+      }
+    },
+    "usage": {
+      "n_calls": 1636,
+      "per_model": {
+        "claude-haiku-4-5-20251001": {
+          "completion_tokens": 45841,
+          "cost_usd": 0.68,
+          "model": "claude-haiku-4-5-20251001",
+          "n_calls": 818,
+          "prompt_tokens": 450800
+        },
+        "claude-haiku-5-5": {
+          "completion_tokens": 115031,
+          "cost_usd": 0.0755,
+          "model": "claude-haiku-5-5",
+          "n_calls": 818,
+          "prompt_tokens": 179952
+        }
+      },
+      "total_completion_tokens": 160872,
+      "total_cost_usd": 0.7555,
+      "total_prompt_tokens": 630752
+    },
+    "pair_set_info": {
+      "seed": 0,
+      "n_targets_requested": 100,
+      "n_neighbours": 3,
+      "n_eligible_targets": 286,
+      "n_calls": 180,
+      "n_calls_by_set": {
+        "nearest": 100,
+        "labelled": 80
+      },
+      "n_pairs": 409,
+      "n_pairs_by_group": {
+        "nearest": 300,
+        "drop_or_merge": 11,
+        "deliberate_duplicate": 3,
+        "duplicate": 1,
+        "near_distinct": 34,
+        "antonym": 30,
+        "random": 30
+      },
+      "n_pairs_with_persona_cos": 280,
+      "list_sizes": {
+        "1": 55,
+        "2": 21,
+        "3": 104
+      },
+      "n_unordered_pairs_twice": 38,
+      "nearest_recorded_antonyms": 31,
+      "labelled": {
+        "pool_sizes": {
+          "drop_or_merge": 11,
+          "deliberate_duplicate": 3,
+          "duplicate": 1,
+          "near_distinct": 34,
+          "antonym": 262,
+          "random": 2000
+        },
+        "skipped_not_in_corpus": {
+          "duplicate": 78
+        },
+        "chosen": {
+          "drop_or_merge": 11,
+          "deliberate_duplicate": 3,
+          "duplicate": 1,
+          "near_distinct": 34,
+          "antonym": 30,
+          "random": 30
+        },
+        "filed": {
+          "drop_or_merge": 11,
+          "deliberate_duplicate": 3,
+          "duplicate": 1,
+          "near_distinct": 34,
+          "antonym": 30,
+          "random": 30
+        }
+      },
+      "embedding": {
+        "config_version": "2026-10-02",
+        "model": "text-embedding-3-large",
+        "cache_tag": "openai_text-embedding-3-large",
+        "representation": "w20",
+        "variant": "centred",
+        "metric": "cos",
+        "n_corpus": 663,
+        "corpus_at": "fc6d542"
+      },
+      "persona": {
+        "n_entities": 582,
+        "n_trait_vectors": 302,
+        "n_traits_in_corpus": 286,
+        "trait_vectors_not_in_corpus": [
+          "assertive",
+          "chill",
+          "deterministic",
+          "dogmatic",
+          "factual",
+          "libertarian",
+          "militant",
+          "nonchalant",
+          "open_ended",
+          "regulatory",
+          "risk_taking",
+          "slothful",
+          "specialized",
+          "undependable",
+          "universalist",
+          "urgent"
+        ],
+        "shear_applied": true,
+        "shear_L": 3,
+        "shear_note": null,
+        "slot": 6,
+        "layer": 25,
+        "mean_over": "traits+roles"
+      }
+    }
+  },
+  "_provenance": {
+    "schema_version": "1.0",
+    "produced_by": {
+      "cmd": "uv run python data_analysis/gap_generation/overlap_test.py --run-id overlap_arms_4 --models claude-haiku-5-5 claude-haiku-4-5-20251001 --rubrics A --passes 2 --baseline-run overlap_test_1 --budget-usd 3 --corpus-at fc6d542",
+      "git_sha": "969f902+dirty",
+      "author": "Roger Dearnaley",
+      "title": "M3 overlap rubric test overlap_arms_4"
+    },
+    "produced_at": "2026-10-07T19:41:13+00:00",
+    "inputs": [
+      {
+        "dep_key": "producer_script",
+        "path": "data_analysis/gap_generation/overlap_test.py",
+        "fingerprint": "v1:2026-10-07T19:33:22+00:00@59436",
+        "kind": "file",
+        "dataset_id": null,
+        "last_modified_at": "2026-10-07T19:33:22+00:00",
+        "extras": {}
+      },
+      {
+        "dep_key": "overlap_test_module",
+        "path": "assistant_axis/gapgen/overlap_test.py",
+        "fingerprint": "v1:2026-10-07T19:32:48+00:00@240533",
+        "kind": "file",
+        "dataset_id": null,
+        "last_modified_at": "2026-10-07T19:32:48+00:00",
+        "extras": {
+          "corpus_at": "fc6d542"
+        }
+      },
+      {
+        "dep_key": "metric_config",
+        "path": "data/candidates/metric_config.json",
+        "fingerprint": "v1:2026-10-02T22:21:08+00:00@54961",
+        "kind": "file",
+        "dataset_id": null,
+        "last_modified_at": "2026-10-02T22:21:08+00:00",
+        "extras": {}
+      },
+      {
+        "dep_key": "embedding_cache",
+        "path": "data/candidates/cache/embeddings/openai_text-embedding-3-large.npz",
+        "fingerprint": "v1:2026-10-07T01:02:37+00:00@191334134",
+        "kind": "file",
+        "dataset_id": null,
+        "last_modified_at": "2026-10-07T01:02:37+00:00",
+        "extras": {
+          "config_version": "2026-10-02",
+          "model": "text-embedding-3-large",
+          "cache_tag": "openai_text-embedding-3-large",
+          "representation": "w20",
+          "variant": "centred",
+          "metric": "cos",
+          "n_corpus": "663",
+          "corpus_at": "fc6d542"
+        }
+      },
+      {
+        "dep_key": "labelled_pairs",
+        "path": "data/candidates/calibration/labelled_pairs.json",
+        "fingerprint": "v1:2026-10-02T21:12:08+00:00@699547",
+        "kind": "file",
+        "dataset_id": null,
+        "last_modified_at": "2026-10-02T21:12:08+00:00",
+        "extras": {}
+      },
+      {
+        "dep_key": "drop_or_merge",
+        "path": "data/candidates/calibration/drop_or_merge.md",
+        "fingerprint": "v1:2026-10-02T22:20:14+00:00@8809",
+        "kind": "file",
+        "dataset_id": null,
+        "last_modified_at": "2026-10-02T22:20:14+00:00",
+        "extras": {}
+      },
+      {
+        "dep_key": "rubrics",
+        "path": "reports/trait_gap_generation/rubrics",
+        "fingerprint": "v1:multi:dfb09cadf307",
+        "kind": "multi",
+        "dataset_id": null,
+        "last_modified_at": "2026-10-06T23:37:02+00:00",
+        "extras": {},
+        "member_paths": [
+          "reports/trait_gap_generation/rubrics/overlap_concept.md",
+          "reports/trait_gap_generation/rubrics/overlap_concept_implies.md",
+          "reports/trait_gap_generation/rubrics/overlap_cooccurrence.md",
+          "reports/trait_gap_generation/rubrics/overlap_relation.md",
+          "reports/trait_gap_generation/rubrics/overlap_relation_implies.md",
+          "reports/trait_gap_generation/rubrics/overlap_scope.md",
+          "reports/trait_gap_generation/rubrics/overlap_scope_implies.md",
+          "reports/trait_gap_generation/rubrics/overlap_six.md",
+          "reports/trait_gap_generation/rubrics/overlap_six_implies.md",
+          "reports/trait_gap_generation/rubrics/versions.json"
+        ]
+      },
+      {
+        "dep_key": "persona_cache",
+        "path": "data/candidates/cache/persona_s6_l25.npz",
+        "fingerprint": "v1:2026-10-01T11:53:57+00:00@12097680",
+        "kind": "file",
+        "dataset_id": null,
+        "last_modified_at": "2026-10-01T11:53:57+00:00",
+        "extras": {
+          "slot": "6",
+          "layer": "25",
+          "shear_applied": "True"
+        }
+      },
+      {
+        "dep_key": "responses",
+        "path": "data/candidates/overlap_test/overlap_arms_4/responses.jsonl",
+        "fingerprint": "v1:2026-10-07T19:41:09+00:00@3523015",
+        "kind": "file",
+        "dataset_id": null,
+        "last_modified_at": "2026-10-07T19:41:09+00:00",
+        "extras": {}
+      },
+      {
+        "dep_key": "marks_key",
+        "path": "data/candidates/overlap_test/overlap_test_1/marks_key.json",
+        "fingerprint": "v1:2026-10-03T13:24:44+00:00@6369",
+        "kind": "file",
+        "dataset_id": null,
+        "last_modified_at": "2026-10-03T13:24:44+00:00",
+        "extras": {}
+      }
+    ],
+    "inputs_sha256": "eb1eed21dda3e3eba82db555533452b64ebbf260d227cee25573915e27afdeee"
+  }
+}

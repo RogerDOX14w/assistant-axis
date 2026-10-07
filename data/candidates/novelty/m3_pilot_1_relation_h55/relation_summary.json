@@ -1,0 +1,300 @@
+{
+  "result": {
+    "n_candidates_reached": 457,
+    "not_reached": {
+      "exact_label": 3
+    },
+    "skipped": {},
+    "call_status": {
+      "ok": 457
+    },
+    "n_listed_total": 7862,
+    "answers": {
+      "similar": 1974,
+      "opposed": 2394,
+      "unrelated": 3412,
+      "unsure": 82
+    },
+    "final": {
+      "similar": 2003,
+      "opposed": 2395,
+      "unrelated": 3461,
+      "unsure": 3
+    },
+    "unsure_rate": 0.01043,
+    "candidates_with_unsure": 59,
+    "similar_per_candidate": {
+      "n": 457,
+      "mean": 4.32,
+      "median": 4.0,
+      "p90": 7.0,
+      "max": 9.0,
+      "min": 0.0
+    },
+    "opposed_per_candidate": {
+      "n": 457,
+      "mean": 5.24,
+      "median": 5.0,
+      "p90": 8.0,
+      "max": 11.0,
+      "min": 0.0
+    },
+    "similar_plus_opposed_per_candidate": {
+      "n": 457,
+      "mean": 9.56,
+      "median": 10.0,
+      "p90": 14.0,
+      "max": 19.0,
+      "min": 0.0
+    },
+    "shortlist_length": {
+      "n": 457,
+      "mean": 5.91,
+      "median": 6.0,
+      "p90": 9.0,
+      "max": 12.0,
+      "min": 0.0
+    },
+    "shortlist_length_total": 2702,
+    "calls": {
+      "relation:claude-haiku-5-5": {
+        "n_calls": 457,
+        "stop_reasons": {
+          "end_turn": 457
+        },
+        "input_tokens": {
+          "n": 457,
+          "mean": 1745.81,
+          "median": 1754.0,
+          "p90": 1970.6000000000001,
+          "max": 2151.0,
+          "min": 1261.0
+        },
+        "cache_read_tokens": {
+          "n": 457,
+          "mean": 0.0,
+          "median": 0.0,
+          "p90": 0.0,
+          "max": 0.0,
+          "min": 0.0
+        },
+        "cache_write_tokens": {
+          "n": 457,
+          "mean": 0.0,
+          "median": 0.0,
+          "p90": 0.0,
+          "max": 0.0,
+          "min": 0.0
+        },
+        "output_tokens": {
+          "n": 457,
+          "mean": 1315.88,
+          "median": 1160.0,
+          "p90": 2101.0,
+          "max": 2628.0,
+          "min": 675.0
+        },
+        "text_chars": {
+          "n": 457,
+          "mean": 3005.45,
+          "median": 3015.0,
+          "p90": 3472.4,
+          "max": 3913.0,
+          "min": 1780.0
+        },
+        "output_tokens_per_listed_trait": {
+          "n": 457,
+          "mean": 76.02,
+          "median": 66.27777777777777,
+          "p90": 114.7529411764706,
+          "max": 152.3125,
+          "min": 54.0
+        },
+        "cost_usd": 0.380463
+      },
+      "relation_unsure:claude-sonnet-5-5": {
+        "n_calls": 59,
+        "stop_reasons": {
+          "end_turn": 59
+        },
+        "input_tokens": {
+          "n": 59,
+          "mean": 606.54,
+          "median": 583.0,
+          "p90": 689.0,
+          "max": 829.0,
+          "min": 548.0
+        },
+        "cache_read_tokens": {
+          "n": 59,
+          "mean": 0.0,
+          "median": 0.0,
+          "p90": 0.0,
+          "max": 0.0,
+          "min": 0.0
+        },
+        "cache_write_tokens": {
+          "n": 59,
+          "mean": 0.0,
+          "median": 0.0,
+          "p90": 0.0,
+          "max": 0.0,
+          "min": 0.0
+        },
+        "output_tokens": {
+          "n": 59,
+          "mean": 130.76,
+          "median": 101.0,
+          "p90": 202.20000000000005,
+          "max": 471.0,
+          "min": 69.0
+        },
+        "text_chars": {
+          "n": 59,
+          "mean": 372.34,
+          "median": 294.0,
+          "p90": 564.4000000000002,
+          "max": 1321.0,
+          "min": 190.0
+        },
+        "output_tokens_per_listed_trait": {
+          "n": 59,
+          "mean": 94.83,
+          "median": 92.0,
+          "p90": 111.2,
+          "max": 197.0,
+          "min": 69.0
+        },
+        "cost_usd": 0.148722
+      }
+    },
+    "spend_usd": 0.529185,
+    "usage": {
+      "per_model": {
+        "claude-haiku-5-5": {
+          "model": "claude-haiku-5-5",
+          "prompt_tokens": 797836,
+          "completion_tokens": 601359,
+          "cost_usd": 0.3805,
+          "n_calls": 457
+        },
+        "claude-sonnet-5-5": {
+          "model": "claude-sonnet-5-5",
+          "prompt_tokens": 35786,
+          "completion_tokens": 7715,
+          "cost_usd": 0.1487,
+          "n_calls": 59
+        }
+      },
+      "total_cost_usd": 0.5292,
+      "total_prompt_tokens": 833622,
+      "total_completion_tokens": 609074,
+      "n_calls": 516
+    },
+    "batch_id": "m3_pilot_1_relation_h55",
+    "from_batch": "m3_pilot_1",
+    "relation_model": "claude-haiku-5-5",
+    "parse_rates": {
+      "relation:claude-haiku-5-5": {
+        "n": 457,
+        "ok_first": 457,
+        "ok": 457
+      },
+      "relation_unsure:claude-sonnet-5-5": {
+        "n": 59,
+        "ok_first": 59,
+        "ok": 59
+      }
+    },
+    "like_for_like": {
+      "n": 457,
+      "identical": 445,
+      "differ": [],
+      "not_on_record": [
+        "assertive#1",
+        "dogmatic#1",
+        "engaging#1",
+        "fashion_conscious#1",
+        "financially_cautious#1",
+        "inept#1",
+        "relaxed#1",
+        "reward_driven#1",
+        "risk_taking#1",
+        "rule_following#1",
+        "shy#1",
+        "urgent#1"
+      ],
+      "source_models": {
+        "claude-haiku-4-5-20251001": 445
+      }
+    },
+    "stopped_by_budget": false,
+    "stopped_by_error": null,
+    "stalled": {},
+    "rubrics": {
+      "overlap": {
+        "name": "overlap_concept",
+        "version": 6,
+        "sha256": "b3eff18fb946928517183af0244acec2d35dba0ab0bd9c57f83c7a06ac3c9fd0"
+      },
+      "relation": {
+        "name": "relation",
+        "version": 1,
+        "sha256": "b6b11f8cfcb0faafdac4a040087356ecb13d410e9bc309597d7833a96110d70f"
+      }
+    },
+    "rules_of_run": {
+      "name": "m3_rules_2",
+      "version": 2,
+      "cover_on_opus_check": true,
+      "both_similar_excluded": true,
+      "pair_flag_grey": false,
+      "renamed_from_covers": false,
+      "separator_blind": true,
+      "cosine_floor": 0.25
+    }
+  },
+  "_provenance": {
+    "schema_version": "1.0",
+    "produced_by": {
+      "cmd": "uv run python data_analysis/gap_generation/novelty_score.py score --relation-only --relation-model claude-haiku-5-5 --from-batch m3_pilot_1 --batch-id m3_pilot_1_relation_h55 --transport live --budget-usd 1",
+      "git_sha": "62023c4+dirty",
+      "author": "Roger Dearnaley",
+      "title": "novelty_score relation-only m3_pilot_1_relation_h55"
+    },
+    "produced_at": "2026-10-07T19:43:05+00:00",
+    "inputs": [
+      {
+        "dep_key": "metric_config",
+        "path": "data/candidates/metric_config.json",
+        "fingerprint": "v1:2026-10-02T22:21:08+00:00@54961",
+        "kind": "file",
+        "dataset_id": null,
+        "last_modified_at": "2026-10-02T22:21:08+00:00",
+        "extras": {}
+      },
+      {
+        "dep_key": "rubrics",
+        "path": "reports/trait_gap_generation/rubrics/relation.md",
+        "fingerprint": "v1:multi:9e54837b5dba",
+        "kind": "multi",
+        "dataset_id": null,
+        "last_modified_at": "2026-10-06T23:37:23+00:00",
+        "extras": {},
+        "member_paths": [
+          "reports/trait_gap_generation/rubrics/relation.md"
+        ]
+      },
+      {
+        "dep_key": "source_results",
+        "path": "data/candidates/novelty/m3_pilot_1/results.jsonl",
+        "fingerprint": "v1:2026-10-07T01:25:18+00:00@4357767",
+        "kind": "file",
+        "dataset_id": null,
+        "last_modified_at": "2026-10-07T01:25:18+00:00",
+        "extras": {}
+      }
+    ],
+    "inputs_sha256": "34b3c4d041770b36dad19ebc422e761ea54081709abb8299610be4a83422f274"
+  }
+}

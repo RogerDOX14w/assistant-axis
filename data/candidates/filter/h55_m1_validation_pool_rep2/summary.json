@@ -1,0 +1,644 @@
+{
+  "result": {
+    "n": 143,
+    "n_done": 143,
+    "n_failed": 0,
+    "n_pending": 0,
+    "n_hard_reject": 0,
+    "verdict_counts": {
+      "reject": 26,
+      "tagged": 17,
+      "trait": 100
+    },
+    "verdict_fractions": {
+      "reject": 0.1818,
+      "tagged": 0.1189,
+      "trait": 0.6993
+    },
+    "tag_counts": {
+      "evaluative_only": 2,
+      "membership": 15,
+      "no_persona_reading": 7,
+      "physical": 4,
+      "role_person": 3,
+      "state": 10,
+      "stretched": 17
+    },
+    "tag_fractions": {
+      "evaluative_only": 0.014,
+      "membership": 0.1049,
+      "no_persona_reading": 0.049,
+      "physical": 0.028,
+      "role_person": 0.021,
+      "state": 0.0699,
+      "stretched": 0.1189
+    },
+    "region_counts": {
+      "cognitive_epistemic": 11,
+      "communication_style": 12,
+      "emotional_temperament": 12,
+      "identity_demographic": 19,
+      "moral_stance": 16,
+      "social_interpersonal": 30
+    },
+    "polysemy_n": 60,
+    "polysemy_rate": 0.4196,
+    "gloss_in_band_rate": 0.0,
+    "n_useful": 47,
+    "second_opinion_n": 0,
+    "disagreements": 0,
+    "parse_rate": 1.0,
+    "parse_rate_first_pass": 0.0,
+    "n_llm": 143,
+    "probe_n": 44,
+    "probe_unknown": 0,
+    "probe_failed": 0,
+    "second_opinion_requested": 0,
+    "second_opinion_failed": 0,
+    "calls": {
+      "alignment": 100,
+      "descriptors": 100,
+      "established": 143,
+      "gloss": 100,
+      "kind": 143,
+      "probe": 44,
+      "same_sense": 4,
+      "sense": 143,
+      "vague": 143
+    },
+    "cost_usd": 0.1733,
+    "cost_per_candidate_usd": 0.001212,
+    "yield_per_usd": 271.2,
+    "usage": {
+      "per_model": {
+        "claude-haiku-5-5": {
+          "model": "claude-haiku-5-5",
+          "prompt_tokens": 632431,
+          "completion_tokens": 220087,
+          "cost_usd": 0.1733,
+          "n_calls": 920
+        }
+      },
+      "total_cost_usd": 0.1733,
+      "total_prompt_tokens": 632431,
+      "total_completion_tokens": 220087,
+      "n_calls": 920
+    },
+    "by_stratum": {
+      "m1_validation_pilot_1": {
+        "n": 143,
+        "n_done": 143,
+        "n_failed": 0,
+        "n_pending": 0,
+        "n_hard_reject": 0,
+        "verdict_counts": {
+          "reject": 26,
+          "tagged": 17,
+          "trait": 100
+        },
+        "verdict_fractions": {
+          "reject": 0.1818,
+          "tagged": 0.1189,
+          "trait": 0.6993
+        },
+        "tag_counts": {
+          "evaluative_only": 2,
+          "membership": 15,
+          "no_persona_reading": 7,
+          "physical": 4,
+          "role_person": 3,
+          "state": 10,
+          "stretched": 17
+        },
+        "tag_fractions": {
+          "evaluative_only": 0.014,
+          "membership": 0.1049,
+          "no_persona_reading": 0.049,
+          "physical": 0.028,
+          "role_person": 0.021,
+          "state": 0.0699,
+          "stretched": 0.1189
+        },
+        "region_counts": {
+          "cognitive_epistemic": 11,
+          "communication_style": 12,
+          "emotional_temperament": 12,
+          "identity_demographic": 19,
+          "moral_stance": 16,
+          "social_interpersonal": 30
+        },
+        "polysemy_n": 60,
+        "polysemy_rate": 0.4196,
+        "gloss_in_band_rate": 0.0,
+        "n_useful": 47,
+        "second_opinion_n": 0,
+        "disagreements": 0
+      }
+    },
+    "validation_figures": {
+      "existing": {
+        "n": 0,
+        "correct": 0,
+        "share": null,
+        "target": 0.95,
+        "meets_target": null,
+        "misses": {},
+        "labels_with_state": [],
+        "labels_with_physical": []
+      },
+      "rejects": {
+        "n": 0,
+        "flagged": 0,
+        "flagged_labels": [],
+        "target": 4,
+        "meets_target": null
+      },
+      "oewn_random": {
+        "n": 0,
+        "trait": 0,
+        "trait_share": null,
+        "target": 0.15,
+        "meets_target": null,
+        "sample_for_marks": [],
+        "sample_for_marks_unseen_only": false
+      },
+      "unseen": {
+        "existing": {
+          "n": 0,
+          "correct": 0,
+          "share": null,
+          "target": 0.95,
+          "meets_target": null,
+          "misses": {},
+          "labels_with_state": [],
+          "labels_with_physical": []
+        },
+        "rejects": {
+          "n": 0,
+          "flagged": 0,
+          "flagged_labels": [],
+          "target": 4,
+          "meets_target": null
+        },
+        "oewn_random": {
+          "n": 0,
+          "trait": 0,
+          "trait_share": null,
+          "target": 0.15,
+          "meets_target": null
+        }
+      },
+      "n_seen_in_development": 143
+    },
+    "v2_fields": {
+      "alignment_relevant_true": 29,
+      "membership_kind": {
+        "age_group": 1,
+        "circumstance": 2,
+        "class": 1,
+        "family": 1,
+        "nationality_ethnicity_language": 7,
+        "relationship": 1,
+        "religion": 2
+      },
+      "tag_disagreement": 0,
+      "validator_repairs": {},
+      "polysemy_notes": {
+        "two_trait_senses": 3,
+        "nontrait_person_sense": 1,
+        "obvious_sense_not_trait": 1,
+        "overshadowed": 0,
+        "reading_related": 0,
+        "first_thought_in_the_way": 36,
+        "leaves_something_out": 20,
+        "fits_many_in_different_ways": 24,
+        "most_likely_reading_stretched": 0
+      },
+      "comparison_relations": {},
+      "holding": {
+        "nationalities": 7,
+        "physical": 4,
+        "roles": 3,
+        "states": 10
+      },
+      "freq_rescue": {
+        "negating_prefix": 6
+      },
+      "alignment_scores": {
+        "0": 51,
+        "1": 20,
+        "2": 12,
+        "3": 17,
+        "none": 0
+      }
+    },
+    "batch_id": "h55_m1_validation_pool_rep2",
+    "stopped_by_budget": false,
+    "stopped_by_error": null,
+    "rubric_version": 5,
+    "model": "claude-haiku-5-5",
+    "second_model": null,
+    "split": {
+      "transport": "live",
+      "pilot_figures": {
+        "n": 143,
+        "n_reached_step1": 143,
+        "outcomes": {
+          "physical": 4,
+          "roles": 3,
+          "states": 10,
+          "trait": 100,
+          "turned_away": 26
+        },
+        "same_outcome_as_expected": 114,
+        "differences": [
+          {
+            "label": "astonishing",
+            "expected": "trait",
+            "expected_reading": "a person who amazes others with remarkable ability or qualities",
+            "got": "turned_away",
+            "got_reading": null,
+            "cause": "evaluative"
+          },
+          {
+            "label": "below the belt",
+            "expected": "turned_away",
+            "expected_reading": null,
+            "got": "trait",
+            "got_reading": "unfair or dishonourable in conduct",
+            "cause": null
+          },
+          {
+            "label": "clairvoyant",
+            "expected": "roles",
+            "expected_reading": "psychic who perceives hidden or future things",
+            "got": "trait",
+            "got_reading": "has extrasensory perception of hidden or distant things",
+            "cause": null
+          },
+          {
+            "label": "communal",
+            "expected": "trait",
+            "expected_reading": "sociable, group-oriented, favoring shared living and cooperation",
+            "got": "turned_away",
+            "got_reading": null,
+            "cause": "stretched"
+          },
+          {
+            "label": "desirous",
+            "expected": "states",
+            "expected_reading": "currently wanting something strongly",
+            "got": "trait",
+            "got_reading": "strongly wanting something or someone",
+            "cause": null
+          },
+          {
+            "label": "destined",
+            "expected": "states",
+            "expected_reading": "fated for greatness or a particular future",
+            "got": "turned_away",
+            "got_reading": null,
+            "cause": "not_a_persona"
+          },
+          {
+            "label": "flaming",
+            "expected": "trait",
+            "expected_reading": "flamboyantly gay or very camp",
+            "got": "turned_away",
+            "got_reading": null,
+            "cause": "stretched"
+          },
+          {
+            "label": "formed",
+            "expected": "turned_away",
+            "expected_reading": null,
+            "got": "trait",
+            "got_reading": "settled and mature in character",
+            "cause": null
+          },
+          {
+            "label": "intervening",
+            "expected": "trait",
+            "expected_reading": "someone who steps in to stop or change a situation",
+            "got": "states",
+            "got_reading": "currently stepping in to interfere in or mediate a situation",
+            "cause": null
+          },
+          {
+            "label": "Junior",
+            "expected": "trait",
+            "expected_reading": "younger person, a son named after his father",
+            "got": "states",
+            "got_reading": "lower-ranked or less experienced in a role",
+            "cause": null
+          },
+          {
+            "label": "light-footed",
+            "expected": "trait",
+            "expected_reading": "treads softly, moves quietly and gently",
+            "got": "physical",
+            "got_reading": "moves nimbly and agilely, with a light step",
+            "cause": null
+          },
+          {
+            "label": "lithe",
+            "expected": "trait",
+            "expected_reading": "moves with graceful, easy agility",
+            "got": "physical",
+            "got_reading": "your body is slim, supple and flexible",
+            "cause": null
+          },
+          {
+            "label": "monozygotic",
+            "expected": "trait",
+            "expected_reading": "an identical twin",
+            "got": "turned_away",
+            "got_reading": null,
+            "cause": "stretched"
+          },
+          {
+            "label": "nonlinear",
+            "expected": "turned_away",
+            "expected_reading": null,
+            "got": "trait",
+            "got_reading": "thinks or works in a non-sequential, branching way, jumping between ideas",
+            "cause": null
+          },
+          {
+            "label": "nonmilitary",
+            "expected": "trait",
+            "expected_reading": "a civilian, not in the armed forces",
+            "got": "roles",
+            "got_reading": "you are a civilian, not a member of the armed forces",
+            "cause": null
+          },
+          {
+            "label": "nonsovereign",
+            "expected": "turned_away",
+            "expected_reading": null,
+            "got": "states",
+            "got_reading": "subordinate to a higher authority, not self-governing",
+            "cause": null
+          },
+          {
+            "label": "outclassed",
+            "expected": "states",
+            "expected_reading": "facing a clearly superior opponent, in a losing position",
+            "got": "trait",
+            "got_reading": "you are clearly less capable than others around you",
+            "cause": null
+          },
+          {
+            "label": "presumptive",
+            "expected": "roles",
+            "expected_reading": "holds the status of presumed or expected heir/nominee, as in a 'presumptive' role",
+            "got": "trait",
+            "got_reading": "overbold, presumptuous, taking liberties",
+            "cause": null
+          },
+          {
+            "label": "sought",
+            "expected": "turned_away",
+            "expected_reading": null,
+            "got": "states",
+            "got_reading": "someone is looking for or pursuing you",
+            "cause": null
+          },
+          {
+            "label": "synergetic",
+            "expected": "trait",
+            "expected_reading": "collaborative, works well with others",
+            "got": "turned_away",
+            "got_reading": null,
+            "cause": "no_reading"
+          },
+          {
+            "label": "thirty-ninth",
+            "expected": "states",
+            "expected_reading": "holds 39th place in a ranking or order",
+            "got": "turned_away",
+            "got_reading": null,
+            "cause": "no_reading"
+          },
+          {
+            "label": "tinny",
+            "expected": "turned_away",
+            "expected_reading": null,
+            "got": "physical",
+            "got_reading": "has a thin, metallic voice",
+            "cause": null
+          },
+          {
+            "label": "top-notch",
+            "expected": "trait",
+            "expected_reading": "excellent at what they do, highly skilled",
+            "got": "turned_away",
+            "got_reading": null,
+            "cause": "evaluative"
+          },
+          {
+            "label": "uncoordinated",
+            "expected": "trait",
+            "expected_reading": "physically clumsy, poor motor control",
+            "got": "physical",
+            "got_reading": "you are physically clumsy, with poor bodily control",
+            "cause": null
+          },
+          {
+            "label": "unfavorable",
+            "expected": "turned_away",
+            "expected_reading": null,
+            "got": "trait",
+            "got_reading": "disapproving or critical in attitude, unfavorably disposed",
+            "cause": null
+          },
+          {
+            "label": "unilluminated",
+            "expected": "turned_away",
+            "expected_reading": null,
+            "got": "trait",
+            "got_reading": "lacking insight, enlightenment or understanding (ignorant, uninformed)",
+            "cause": null
+          },
+          {
+            "label": "unrevealed",
+            "expected": "turned_away",
+            "expected_reading": null,
+            "got": "trait",
+            "got_reading": "your identity or true nature is kept hidden from others",
+            "cause": null
+          },
+          {
+            "label": "vitiated",
+            "expected": "turned_away",
+            "expected_reading": null,
+            "got": "trait",
+            "got_reading": "morally corrupted or tainted in character",
+            "cause": null
+          },
+          {
+            "label": "washy",
+            "expected": "turned_away",
+            "expected_reading": null,
+            "got": "trait",
+            "got_reading": "weak, feeble, lacking force of character",
+            "cause": null
+          }
+        ],
+        "cut_before_step1": [],
+        "glosses": 100,
+        "glosses_form_ok": 98
+      },
+      "step_parse_rates": {
+        "alignment:first:claude-haiku-5-5": {
+          "n": 100,
+          "ok_first_pass": 100,
+          "ok": 100
+        },
+        "descriptors:first:claude-haiku-5-5": {
+          "n": 100,
+          "ok_first_pass": 100,
+          "ok": 100
+        },
+        "established:first:claude-haiku-5-5": {
+          "n": 143,
+          "ok_first_pass": 143,
+          "ok": 143
+        },
+        "gloss:first:claude-haiku-5-5": {
+          "n": 100,
+          "ok_first_pass": 100,
+          "ok": 100
+        },
+        "kind:first:claude-haiku-5-5": {
+          "n": 143,
+          "ok_first_pass": 143,
+          "ok": 143
+        },
+        "probe:first:claude-haiku-5-5": {
+          "n": 44,
+          "ok_first_pass": 44,
+          "ok": 44
+        },
+        "same_sense:first:claude-haiku-5-5": {
+          "n": 4,
+          "ok_first_pass": 4,
+          "ok": 4
+        },
+        "sense:first:claude-haiku-5-5": {
+          "n": 143,
+          "ok_first_pass": 143,
+          "ok": 143
+        },
+        "vague:first:claude-haiku-5-5": {
+          "n": 143,
+          "ok_first_pass": 143,
+          "ok": 143
+        }
+      },
+      "cost_by_step": {
+        "alignment@claude-haiku-5-5": {
+          "n_calls": 100,
+          "prompt_tokens": 77891,
+          "completion_tokens": 17408,
+          "cost_usd": 0.016493
+        },
+        "descriptors@claude-haiku-5-5": {
+          "n_calls": 100,
+          "prompt_tokens": 47891,
+          "completion_tokens": 23293,
+          "cost_usd": 0.016436
+        },
+        "established@claude-haiku-5-5": {
+          "n_calls": 143,
+          "prompt_tokens": 90735,
+          "completion_tokens": 47312,
+          "cost_usd": 0.03273
+        },
+        "gloss@claude-haiku-5-5": {
+          "n_calls": 100,
+          "prompt_tokens": 66280,
+          "completion_tokens": 10338,
+          "cost_usd": 0.011797
+        },
+        "kind@claude-haiku-5-5": {
+          "n_calls": 143,
+          "prompt_tokens": 145648,
+          "completion_tokens": 16615,
+          "cost_usd": 0.022872
+        },
+        "probe@claude-haiku-5-5": {
+          "n_calls": 44,
+          "prompt_tokens": 18186,
+          "completion_tokens": 4557,
+          "cost_usd": 0.004097
+        },
+        "same_sense@claude-haiku-5-5": {
+          "n_calls": 4,
+          "prompt_tokens": 1714,
+          "completion_tokens": 924,
+          "cost_usd": 0.000633
+        },
+        "sense@claude-haiku-5-5": {
+          "n_calls": 143,
+          "prompt_tokens": 117231,
+          "completion_tokens": 83931,
+          "cost_usd": 0.053689
+        },
+        "vague@claude-haiku-5-5": {
+          "n_calls": 143,
+          "prompt_tokens": 66855,
+          "completion_tokens": 15709,
+          "cost_usd": 0.01454
+        }
+      },
+      "cost_per_word_by_step": {
+        "alignment@claude-haiku-5-5": 0.000115,
+        "descriptors@claude-haiku-5-5": 0.000115,
+        "established@claude-haiku-5-5": 0.000229,
+        "gloss@claude-haiku-5-5": 8.2e-05,
+        "kind@claude-haiku-5-5": 0.00016,
+        "probe@claude-haiku-5-5": 2.9e-05,
+        "same_sense@claude-haiku-5-5": 4e-06,
+        "sense@claude-haiku-5-5": 0.000375,
+        "vague@claude-haiku-5-5": 0.000102
+      },
+      "second_opinion": {
+        "n": 0,
+        "disagree": []
+      },
+      "resumed_calls": 0,
+      "batches_submitted": null
+    },
+    "pipeline": "split",
+    "third_model": null,
+    "agreement": null,
+    "tripwire": null,
+    "stopped_by_disagreement": false
+  },
+  "_provenance": {
+    "schema_version": "1.0",
+    "produced_by": {
+      "cmd": "uv run python data_analysis/gap_generation/traithood_filter.py --pipeline split --transport live --validation-file data/candidates/validation/m1_validation_pilot_1_sonnet55.jsonl --batch-id h55_m1_validation_pool_rep2 --model claude-haiku-5-5 --no-second-opinion --budget-usd 0.6",
+      "git_sha": "52478d7+dirty",
+      "author": "Roger Dearnaley",
+      "title": "traithood_filter h55_m1_validation_pool_rep2"
+    },
+    "produced_at": "2026-10-07T19:58:16+00:00",
+    "inputs": [
+      {
+        "dep_key": "validation_file",
+        "path": "data/candidates/validation/m1_validation_pilot_1_sonnet55.jsonl",
+        "fingerprint": "v1:2026-10-07T19:35:15+00:00@43540",
+        "kind": "file",
+        "dataset_id": null,
+        "last_modified_at": "2026-10-07T19:35:15+00:00",
+        "extras": {
+          "sample_frac": "None",
+          "sample_seed": "0"
+        }
+      }
+    ],
+    "inputs_sha256": "53de67549a3fbbd701ad53c1a38b4b0ed42902538e4bbdbe4eae2ce4cc5c2b99"
+  }
+}
