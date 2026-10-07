@@ -453,11 +453,16 @@ def build_question_judge_prompt(doc: dict) -> str:
 
 
 def _loads(text: str) -> dict:
+    """The first complete JSON object in a reply.  Text after it is ignored:
+    on 2026-10-02 the role fault judge now and then added a note containing a
+    brace after its JSON, which "everything from the first { to the last }"
+    could not read ("Extra data"); for any reply that reading could parse, the
+    result is the same."""
     raw = generator.strip_markdown_fences(text)
-    start, end = raw.find("{"), raw.rfind("}")
-    if start < 0 or end <= start:
+    start = raw.find("{")
+    if start < 0:
         raise ValueError("no JSON object in the reply")
-    data = json.loads(raw[start:end + 1])
+    data, _ = json.JSONDecoder().raw_decode(raw[start:])
     if not isinstance(data, dict):
         raise ValueError("the reply is not a JSON object")
     return data
@@ -682,6 +687,8 @@ async def _taste_call(client, model: str, prompt: str, semaphore, usage, tally) 
         if usage is not None:
             usage.charge(model, *extract_usage_anthropic(response))
         tally.total[model] += 1
+        if (refusal := _refusal(response, tally, f"taste:{model}")) is not None:
+            raise refusal
         try:
             rating = parse_taste_judgement(generator._extract_text(response))
             tally.ok[model] += 1
@@ -703,9 +710,57 @@ def content_sha256(doc: dict) -> str:
 
 
 class ParseTally:
+    """Calls made, calls read, and calls the API refused, by judge label."""
+
     def __init__(self) -> None:
         self.ok = Counter()
         self.total = Counter()
+        self.refused = Counter()
+
+
+class JudgeRefusal(RuntimeError):
+    """The API ended the reply with ``stop_reason`` "refusal": no content, no
+    tokens out, and the same again on a retry, so the call is made once."""
+
+
+def _refusal(response, tally, label: str) -> JudgeRefusal | None:
+    """Count and describe a refused reply, or None.  Opus 5.5 refused to rate
+    the pre-V3 virus instructions this way on 2026-10-03 (the fault judges and
+    Sonnet 4.6 rated the same file); the input tokens are still charged."""
+    if getattr(response, "stop_reason", None) != "refusal":
+        return None
+    tally.refused[label] += 1
+    logger.warning("%s: the model refused (stop_reason refusal); not retried", label)
+    return JudgeRefusal(f"{label}: the model refused (stop_reason refusal)")
+
+
+def report_parse_rates(tally: ParseTally, prefix: str) -> None:
+    """The parse-rate line per judge label, with refusals counted apart: a
+    refusal is not a reply that could not be read."""
+    for label in sorted(tally.total):
+        warn_if_low_parse_rate(label=f"{prefix}:{label}", n_ok=tally.ok[label],
+                               n_total=tally.total[label] - tally.refused[label], logger_obj=logger)
+        if tally.refused[label]:
+            logger.warning("[%s:%s] %d refused (stop_reason refusal), left out of the parse rate",
+                           prefix, label, tally.refused[label])
+
+
+def arm_outcome(arm: str, todo: list, results: list) -> tuple[int, int, int, int]:
+    """(files tried, done, failed, refused) for one arm, logging each miss."""
+    refused = failed = 0
+    for (stem, _), r in zip(todo, results):
+        if isinstance(r, JudgeRefusal):
+            refused += 1
+            logger.warning("%s %s: %s", arm, stem, r)
+        elif isinstance(r, Exception):
+            failed += 1
+            logger.error("%s %s: %s", arm, stem, r)
+    return len(todo), len(todo) - failed - refused, failed, refused
+
+
+def arm_line(verb: str, arm: str, outcome: tuple[int, int, int, int]) -> str:
+    n, ok, failed, refused = outcome
+    return f"{arm}: {verb} {ok} of {n} files, {failed} failed" + (f", {refused} refused" if refused else "")
 
 
 async def _judge_call(client, model: str, prompt: str, parse, max_tokens: int, semaphore, usage, tally, label):
@@ -713,7 +768,8 @@ async def _judge_call(client, model: str, prompt: str, parse, max_tokens: int, s
     The first attempt is at temperature 0.  A second and third are at 0.5 and
     are told what was wrong with the reply before, since at 0 a reply that
     cannot be read comes back the same, and the same slip (a flag written as
-    the shape, a question passed over) came back at 0.5 too."""
+    the shape, a question passed over) came back at 0.5 too.  A refusal
+    (``stop_reason`` "refusal") is raised at once as JudgeRefusal."""
     last = None
     for attempt in range(3):
         asked = prompt if last is None else (
@@ -725,6 +781,8 @@ async def _judge_call(client, model: str, prompt: str, parse, max_tokens: int, s
         if usage is not None:
             usage.charge(model, *extract_usage_anthropic(response))
         tally.total[label] += 1
+        if (refusal := _refusal(response, tally, label)) is not None:
+            raise refusal
         try:
             items = parse(generator._extract_text(response))
             tally.ok[label] += 1
@@ -1193,12 +1251,16 @@ def cmd_split(args) -> None:
         print(f"  {s:18s} {v['size']:4d} available   dev {v['dev']:3d}   held out {v['held_out']:3d}")
 
 
+def corpus_stems() -> list[str]:
+    """Every trait in the corpus: the `corpus` set, for judging the corpus as
+    it stands (added 2026-10-04 for the reroll pass over the V2 regeneration's
+    output outside the held-out set)."""
+    return sorted(p.stem for p in TRAITS_DIR.glob("*.json"))
+
+
 def cmd_stage(args) -> None:
     out_dir = Path(args.out)
-    split = load_split(out_dir)
-    if args.set == "held_out" and not args.final:
-        raise SystemExit("the held-out set is staged only for the final check: pass --final when the rubric is settled")
-    stems = stems_of_set(split, args.set)
+    stems = _stems_for(args, out_dir)
     stage = out_dir / "stage" / args.set / args.arm
     if stage.exists() and any(stage.glob("*.json")) and not args.force:
         raise SystemExit(f"{stage} already holds files (--force to copy over them)")
@@ -1238,7 +1300,7 @@ async def _judge_arm(args, arm: str, arm_dir: Path, stems: list[str], usage, tal
         todo.append((stem, doc))
     if args.dry_run:
         print(f"{arm}: {len(todo)} of {len(stems)} files to judge, {2 * len(todo)} calls")
-        return len(todo), 0, 0
+        return len(todo), 0, 0, 0
     client = anthropic.AsyncAnthropic()
     semaphore = asyncio.Semaphore(args.concurrency)
 
@@ -1249,31 +1311,23 @@ async def _judge_arm(args, arm: str, arm_dir: Path, stems: list[str], usage, tal
         generator.atomic_write_json(judged_dir / f"{stem}.json", result)
 
     results = await asyncio.gather(*(one(s, d) for s, d in todo), return_exceptions=True)
-    failed = [(s, r) for (s, _), r in zip(todo, results) if isinstance(r, Exception)]
-    for stem, err in failed:
-        logger.error("%s %s: %s", arm, stem, err)
-    return len(todo), len(todo) - len(failed), len(failed)
+    return arm_outcome(arm, todo, results)
 
 
 def cmd_judge(args) -> None:
     out_dir = Path(args.out)
-    split = load_split(out_dir)
-    if args.set == "held_out" and not args.final:
-        raise SystemExit("the held-out set is judged only for the final check: pass --final when the rubric is settled")
-    stems = stems_of_set(split, args.set)
+    stems = _stems_for(args, out_dir)
     if not args.dry_run and not os.getenv("ANTHROPIC_API_KEY"):
         raise SystemExit("ANTHROPIC_API_KEY not set (check .env or environment)")
     usage, tally = MultiModelUsage(), ParseTally()
     for spec in args.arm:
         arm, arm_dir = _arm_dir(out_dir, args.set, spec)
-        n, ok, bad = asyncio.run(_judge_arm(args, arm, arm_dir, stems, usage, tally, _arm_style(spec)[1]))
+        outcome = asyncio.run(_judge_arm(args, arm, arm_dir, stems, usage, tally, _arm_style(spec)[1]))
         if not args.dry_run:
-            print(f"{arm}: judged {ok} of {n} files, {bad} failed", file=sys.stderr)
+            print(arm_line("judged", arm, outcome), file=sys.stderr)
     if args.dry_run:
         return
-    for label in sorted(tally.total):
-        warn_if_low_parse_rate(label=f"audit_trait_instructions:{label}", n_ok=tally.ok[label],
-                               n_total=tally.total[label], logger_obj=logger)
+    report_parse_rates(tally, "audit_trait_instructions")
     print(usage.log_line("[usage]"), file=sys.stderr)
     usage_path = out_dir / "judged" / "usage.json"
     total = MultiModelUsage.load_or_create(usage_path)
@@ -1284,10 +1338,9 @@ def cmd_judge(args) -> None:
 
 
 def _stems_for(args, out_dir: Path) -> list[str]:
-    split = load_split(out_dir)
     if args.set == "held_out" and not args.final:
         raise SystemExit("the held-out set is read only for the final check: pass --final when the rubric is settled")
-    stems = stems_of_set(split, args.set)
+    stems = corpus_stems() if args.set == "corpus" else stems_of_set(load_split(out_dir), args.set)
     if getattr(args, "stems", None):
         wanted = json.loads(Path(args.stems).read_text(encoding="utf-8"))
         outside = sorted(set(wanted) - set(stems))
@@ -1297,7 +1350,8 @@ def _stems_for(args, out_dir: Path) -> list[str]:
     return stems
 
 
-async def _taste_arm(args, arm: str, arm_dir: Path, stems: list[str], usage, tally, style: str | None) -> tuple[int, int, int]:
+async def _taste_arm(args, arm: str, arm_dir: Path, stems: list[str], usage, tally,
+                     style: str | None) -> tuple[int, int, int, int]:
     docs = arm_files(arm_dir, stems, style)
     done = load_taste(Path(args.out), args.model, arm, docs) if not args.force else {}
     todo = [(s, d) for s, d in docs.items() if s not in done]
@@ -1306,7 +1360,7 @@ async def _taste_arm(args, arm: str, arm_dir: Path, stems: list[str], usage, tal
         rate_in, rate_out = price_for_model(args.model)
         print(f"{arm}: {len(todo)} of {len(docs)} files to rate with {args.model}; about "
               f"${(n_in * rate_in + len(todo) * 220 * rate_out) / 1e6:.2f}")
-        return len(todo), 0, 0
+        return len(todo), 0, 0, 0
     client = anthropic.AsyncAnthropic()
     semaphore = asyncio.Semaphore(args.concurrency)
     where = taste_dir(Path(args.out), args.model, arm)
@@ -1320,10 +1374,7 @@ async def _taste_arm(args, arm: str, arm_dir: Path, stems: list[str], usage, tal
         generator.atomic_write_json(where / f"{stem}.json", rating)
 
     results = await asyncio.gather(*(one(s, d) for s, d in todo), return_exceptions=True)
-    failed = [(s, r) for (s, _), r in zip(todo, results) if isinstance(r, Exception)]
-    for stem, err in failed:
-        logger.error("%s %s: %s", arm, stem, err)
-    return len(todo), len(todo) - len(failed), len(failed)
+    return arm_outcome(arm, todo, results)
 
 
 def cmd_taste(args) -> None:
@@ -1334,13 +1385,11 @@ def cmd_taste(args) -> None:
     usage, tally = MultiModelUsage(), ParseTally()
     for spec in args.arm:
         arm, arm_dir = _arm_dir(out_dir, args.set, spec)
-        n, ok, bad = asyncio.run(_taste_arm(args, arm, arm_dir, stems, usage, tally, _arm_style(spec)[1]))
+        outcome = asyncio.run(_taste_arm(args, arm, arm_dir, stems, usage, tally, _arm_style(spec)[1]))
         if not args.dry_run:
-            print(f"{arm}: rated {ok} of {n} files, {bad} failed", file=sys.stderr)
+            print(arm_line("rated", arm, outcome), file=sys.stderr)
     if not args.dry_run:
-        for label in sorted(tally.total):
-            warn_if_low_parse_rate(label=f"audit_trait_instructions:taste:{label}", n_ok=tally.ok[label],
-                                   n_total=tally.total[label], logger_obj=logger)
+        report_parse_rates(tally, "audit_trait_instructions:taste")
         print(usage.log_line("[usage]"), file=sys.stderr)
         usage_path = out_dir / "judged_taste" / "usage.json"
         total = MultiModelUsage.load_or_create(usage_path)
@@ -1388,11 +1437,14 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     parser = argparse.ArgumentParser(description=__doc__.split("\n\n")[0])
     sub = parser.add_subparsers(dest="command", required=True)
 
-    def common(p, sets=("dev", "held_out", "pilot", "near_example")):
+    def common(p, sets=("dev", "held_out", "pilot", "near_example", "corpus")):
         p.add_argument("--out", required=True, help="Directory of the audit (split.json, stage/, judged/)")
-        p.add_argument("--set", choices=sets, default="dev", help="Which sample (default: dev)")
+        p.add_argument("--set", choices=sets, default="dev",
+                       help="Which sample (default: dev); corpus is every trait file")
         p.add_argument("--final", action="store_true",
                        help="Allow the held-out set: for the final check only, once the rubric is settled")
+        p.add_argument("--stems", default=None, metavar="FILE",
+                       help="A JSON list of traits: these only (they must belong to the set)")
 
     p = sub.add_parser("split", help="Draw the development and held-out samples, once")
     p.add_argument("--out", required=True)
@@ -1432,7 +1484,6 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     p.add_argument("--arm", nargs="+", required=True,
                    help="Arms, the first being the baseline (name, name=directory, name:STYLE@hash)")
     p.add_argument("--model", default=DEFAULT_TASTE_JUDGE, help=f"The judge (default: {DEFAULT_TASTE_JUDGE})")
-    p.add_argument("--stems", default=None, metavar="FILE", help="A JSON list of traits: these only")
     p.add_argument("--concurrency", type=int, default=8)
     p.add_argument("--seed", type=int, default=DEFAULT_SEED)
     p.add_argument("--dry-run", action="store_true", help="Say how many files would be rated, and what it would cost")
@@ -1445,8 +1496,6 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     p.add_argument("--baseline", required=True, help="Arm the others are compared with (name or name=directory)")
     p.add_argument("--arm", nargs="*", default=[], help="Other arms (name, name=directory, name:STYLE)")
     p.add_argument("--seed", type=int, default=DEFAULT_SEED)
-    p.add_argument("--stems", default=None, metavar="FILE",
-                   help="A JSON list of traits: report on these only (they must belong to the set)")
     p.add_argument("--write", action="store_true", help="Also write report_<set>.json")
     p.set_defaults(func=cmd_report)
     return parser.parse_args(argv)

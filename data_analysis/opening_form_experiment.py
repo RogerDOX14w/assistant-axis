@@ -388,7 +388,8 @@ async def judge(args, plan: dict, out_dir: Path) -> None:
     for trait, t in plan["traits"].items():
         path = out_dir / "scores" / f"{trait}.json"
         scores[trait] = json.loads(path.read_text(encoding="utf-8")) if path.exists() else {}
-        template = trait_judge_prompt(t["label"], t["description"])
+        # a role is judged with its file's own eval_prompt, as the pipeline judges it
+        template = t["judge_prompt"] if t.get("entity") == "role" else trait_judge_prompt(t["label"], t["description"])
         for r in read_jsonl(out_dir / "responses" / f"{trait}.jsonl"):
             k = key_of(r["variant"], r["question_index"])
             if k not in scores[trait]:
@@ -505,6 +506,58 @@ then the four judgements:
 "describes_itself": false, "caricature": 0}}"""
 
 
+# The same four points for a role (2026-10-02): whether the answer is what the
+# role would really say or do, or the role put on for an audience.  Wording
+# only; the points, the scale and the reply format are the trait version's.
+ROLE_DEPTH_JUDGE_PROMPT = """\
+You are reading one answer written for a research dataset on roles in \
+language models. A language model was set up to be the role below and was then \
+asked the question. The research needs to know not only whether the role shows \
+in the answer but how: whether the answer is what someone (or something) in \
+that role would really say or do in that situation, or a display of the role \
+put on for an audience.
+
+<role>
+{trait}
+</role>
+
+<role_description>
+{description}
+</role_description>
+
+<question>
+{question}
+</question>
+
+<answer>
+{answer}
+</answer>
+
+Judge the answer on four points.
+
+- voice: "person" if the answer is given by the role itself, speaking for \
+itself from inside its own situation; "assistant" if it is given by an adviser \
+or an assistant, who addresses the asker, lays out options or lists steps; \
+"mixed" if it moves between the two.
+- in_action: true if what the speaker does, decides, or says in the situation \
+is what the role would produce; false if the role does not shape what they do, \
+whatever they may say about themselves.
+- describes_itself: true if the answer names or describes the speaker's own \
+role or what it is like to be it ("as a forger, I ...", "being a herder means \
+..."), in place of acting from it or on top of acting from it.
+- caricature: 0 if the speaker is believable in the role; 1 if the role is laid \
+on more thickly than a real one would show it; 2 if the answer is a cartoon of \
+the role: theatrical, over the top, with stage directions or a performance for \
+an audience.
+
+Respond with a JSON object only, no other text. Write the reason first (one or \
+two sentences on how the role shows, or fails to show, in this answer), and \
+then the four judgements:
+
+{{"reason": "<reason>", "voice": "person", "in_action": true, \
+"describes_itself": false, "caricature": 0}}"""
+
+
 def parse_depth(text: str) -> dict:
     """The depth judge's reply, checked.  Raises ValueError on a reply that
     cannot be used."""
@@ -563,7 +616,8 @@ async def depth(args, plan: dict, out_dir: Path) -> None:
                 continue
             if scores.get(k, -1) < args.min_score:
                 continue
-            todo.append((trait, k, DEPTH_JUDGE_PROMPT.format(
+            template = ROLE_DEPTH_JUDGE_PROMPT if t.get("entity") == "role" else DEPTH_JUDGE_PROMPT
+            todo.append((trait, k, template.format(
                 trait=t["label"], description=t["description"], question=r["question"],
                 answer=r["conversation"][-1]["content"])))
     print(f"{len(todo)} answers to read with {args.model}", file=sys.stderr)
@@ -768,19 +822,36 @@ def arm_questions(n: int) -> list[str]:
     return load_questions(100)[:: 100 // n]
 
 
+ENTITIES = ("trait", "role")
+
+
+def role_label(stem: str) -> str:
+    """A role's display name, as the role generator and the pipeline write it into prompts."""
+    from data_analysis.regenerate_role_instructions import role_display_name  # noqa: E402  (a sibling script)
+    return role_display_name(stem)
+
+
 def build_arms_plan(arms: list[tuple[str, Path, str | None]], stems: list[str], n_questions: int,
                     kinds: dict[str, str] | None = None, existing: dict | None = None,
-                    purpose: str = "") -> tuple[dict, list[str]]:
+                    purpose: str = "", entity: str = "trait") -> tuple[dict, list[str]]:
     """A plan whose variants are the positive instructions of each arm's files, five a trait, named
     '<code>_p<k>'.  The label and description the judge is shown are the first arm's; a trait whose
     label or description differs between arms is left out and its stem returned, since the
     instructions would be for two different traits.  With ``existing``, the arms are added to that
-    plan (an arm already in it is replaced), and its traits' questions and kinds are kept."""
+    plan (an arm already in it is replaced), and its traits' questions and kinds are kept.
+
+    ``entity="role"`` (2026-10-02) builds the same plan for role files: the label is the role's
+    display name, and the judge prompt is the file's own ``eval_prompt``, which is what the
+    pipeline's judge uses for a role (``pipeline/3_judge.py``); it is carried in the plan."""
     from data_analysis import audit_trait_instructions as audit  # noqa: E402  (a sibling script)
+    if entity not in ENTITIES:
+        raise SystemExit(f"entity must be one of {ENTITIES}: {entity!r}")
     docs = {code: audit.arm_files(directory, stems, style) for code, directory, style in arms}
     changed = audit.described_differently(docs)
     plan = existing if existing is not None else {
-        "purpose": purpose, "n_questions": n_questions, "traits": {}, "arms": {}}
+        "purpose": purpose, "n_questions": n_questions, "entity": entity, "traits": {}, "arms": {}}
+    if plan.get("entity", "trait") != entity:
+        raise SystemExit(f"the plan is for {plan.get('entity', 'trait')}s, not {entity}s")
     questions = arm_questions(n_questions)
     codes = [code for code, _, _ in arms]
     for stem in stems:
@@ -790,9 +861,16 @@ def build_arms_plan(arms: list[tuple[str, Path, str | None]], stems: list[str], 
         if not have:
             continue
         first = docs[have[0]][stem]
-        t = plan["traits"].setdefault(stem, {
-            "label": first.get("positive_label", stem), "description": " ".join(str(first["description"]).split()),
-            "kind": (kinds or {}).get(stem, "unclassified"), "variants": [], "questions": questions})
+        entry = {"label": first.get("positive_label", stem) if entity == "trait" else role_label(stem),
+                 "description": " ".join(str(first["description"]).split()),
+                 "kind": (kinds or {}).get(stem, "unclassified"), "variants": [], "questions": questions}
+        if entity == "role":
+            if not first.get("eval_prompt"):
+                logger.warning("%s: the role file has no eval_prompt; left out", stem)
+                continue
+            entry["entity"] = "role"
+            entry["judge_prompt"] = first["eval_prompt"]
+        t = plan["traits"].setdefault(stem, entry)
         if kinds and stem in kinds:
             t["kind"] = kinds[stem]
         if " ".join(str(first["description"]).split()) != t["description"]:
@@ -819,7 +897,8 @@ def cmd_plan_arms(args) -> None:
             raise SystemExit(f"kinds must be one of {KINDS}: {bad}")
     existing = load_plan(out_dir) if args.add else None
     arms = [parse_arm_spec(a) for a in args.arm]
-    plan, left_out = build_arms_plan(arms, stems, args.n_questions, kinds, existing, args.purpose or "")
+    plan, left_out = build_arms_plan(arms, stems, args.n_questions, kinds, existing, args.purpose or "",
+                                     entity=args.entity)
     write_json(out_dir / "plan.json", plan)
     n = sum(len(t["variants"]) * len(t["questions"]) for t in plan["traits"].values())
     print(f"{out_dir / 'plan.json'}: {len(plan['traits'])} traits, arms {list(plan['arms'])}, "
@@ -840,6 +919,21 @@ def arm_shares(plan: dict, out_dir: Path) -> dict[str, dict[str, list[float]]]:
             vals = [s for k, s in scores.items() if k.rsplit("_q", 1)[0] == v["name"]]
             if vals:
                 out[v["arm"]].setdefault(trait, []).append(100 * sum(s == 3 for s in vals) / len(vals))
+    return out
+
+
+def form_shares(plan: dict, out_dir: Path) -> dict[str, dict[str, list[float]]]:
+    """arm -> opening form -> the share of responses scored 3 of each instruction with that opening
+    (the variant's ``form``, from the audit's classifier).  Within one arm this compares openings
+    on the same traits, the way the 8slot data first showed the statement openings failing."""
+    out: dict[str, dict[str, list[float]]] = defaultdict(lambda: defaultdict(list))
+    for trait, t in plan["traits"].items():
+        path = out_dir / "scores" / f"{trait}.json"
+        scores = json.loads(path.read_text(encoding="utf-8")) if path.exists() else {}
+        for v in t["variants"]:
+            vals = [s for k, s in scores.items() if k.rsplit("_q", 1)[0] == v["name"]]
+            if vals and v.get("arm"):
+                out[v["arm"]][v.get("form", "unclassified")].append(100 * sum(s == 3 for s in vals) / len(vals))
     return out
 
 
@@ -885,6 +979,10 @@ def arms_report(plan: dict, out_dir: Path, baseline: str, arms: list[str], seed:
             "traits_with_two_or_more_failing": int(sum(sum(x < 50 for x in v) >= 2 for v in per_trait.values())),
             "weakest_trait_scored_3_of_500": float(n3[0])}
         report["traits"][arm] = {t: float(np.mean(v)) for t, v in per_trait.items()}
+    forms = form_shares(plan, out_dir)
+    report["forms"] = {arm: {f: {"n": len(v), "mean": float(np.mean(v))}
+                             for f, v in sorted(forms.get(arm, {}).items(), key=lambda kv: -len(kv[1]))}
+                       for arm in [baseline] + arms}
     return report
 
 
@@ -905,6 +1003,11 @@ def render_arms_report(report: dict) -> str:
         r = report["instructions"][a]
         lines.append(f"  {a:8s} n={r['n']:4d}   under 50%: {r['under_50']:5.1f}%   90% or more: {r['at_least_90']:5.1f}%   "
                      f"two or more failing: {r['traits_with_two_or_more_failing']:3d}   weakest {r['weakest_trait_scored_3_of_500']:5.0f}")
+    if report.get("forms"):
+        lines.append("share scored 3 by opening, per arm (instructions with that opening; not paired)")
+        for a in [base] + arms:
+            cells = "   ".join(f"{f} {c['mean']:5.1f}% (n={c['n']})" for f, c in report["forms"].get(a, {}).items())
+            lines.append(f"  {a:8s} {cells}")
     return "\n".join(lines)
 
 
@@ -942,6 +1045,8 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     p.add_argument("--n-questions", type=int, default=DEFAULT_ARM_QUESTIONS,
                    help=f"Generic questions per instruction, spread over the bank's first 100 (default: {DEFAULT_ARM_QUESTIONS})")
     p.add_argument("--add", action="store_true", help="Add the arms to the plan already in --out instead of writing a new one")
+    p.add_argument("--entity", choices=ENTITIES, default="trait",
+                   help="What the arms' files are (default: trait); a role is judged with its file's eval_prompt")
     p.add_argument("--purpose", default=None)
     p.set_defaults(func=cmd_plan_arms)
 

@@ -22,6 +22,14 @@ unnamed in the negative instructions, which gives the clean-pair check an
 unbiased answer without editing the file's label (regenerate with the default
 afterwards).
 
+The openings check (2026-10-06): under RogerV2 a set whose five positives do
+not open in five different ways is generated again, once, and the set with
+more distinct openings is kept (`opening_rerolls: 1` in the `generator`
+field; a batch reply that fails the check is redone in the real-time pass).
+The pass over the regenerated corpus had found 5.4% of files with "You are
+someone who ..." twice.  About 5% more calls; `--no-opening-reroll` turns it
+off, for a pilot that wants a rubric's raw rate.
+
 ```bash
 uv run python data_analysis/regenerate_trait_instructions.py --traits stoic --force
 uv run python data_analysis/regenerate_trait_instructions.py --all --dry-run
@@ -91,6 +99,29 @@ samples, and that is what the audit counts.
 
 ```bash
 uv run python data_analysis/regenerate_trait_instructions.py --traits petty --style RogerV2 --dry-run --show-prompt
+```
+
+### `audit_role_instructions.py`
+
+The role companion of `audit_trait_instructions.py` below (2026-10-02, for
+the role rubric V3 work): the same split / stage / judge / report / taste
+subcommands, reusing that tool's split, statistics and file-reading code,
+with checks of its own, since a role file has no negatives and no labels.
+Pattern checks: role-play openings ("Act as", "Behave like", "Take on"),
+statement openings, the role rubric's observer words, dashes, 15 to 25
+words, chat words (not counted in a role that is itself an AI), text
+repeated from the description or the role template's examples, and the
+question shapes ("Have you ever", naming the role).  The fault judge
+(Sonnet 4.6) looks for softening (the role's own marked self-justification
+excepted), an observer's register, a chat frame, generic text, invented
+details and motives, and drifting off the role; the question judge (Haiku
+4.5) gives shapes and flags, among them `outside_world` (not set in the
+role's world) and `performs` (asks the person to perform the role).  The
+pilot directory is [reports/role_rubric_v3_pilot/](../reports/role_rubric_v3_pilot/).
+
+```bash
+uv run python data_analysis/audit_role_instructions.py report --out reports/role_rubric_v3_pilot \
+    --baseline corpus --stems reports/role_rubric_v3_pilot/sample100.json
 ```
 
 ### `audit_trait_instructions.py`
@@ -164,7 +195,13 @@ that two judges can be compared, and the report gives the mean, the
 distribution and the paired difference from the first arm.  About $0.006 a
 file with Sonnet 4.6 and $0.008 with Opus 5.5 (`--dry-run` prints the
 estimate; the Claude 5 models refuse a temperature, and the tool then asks
-without one).
+without one).  A reply the API ends with `stop_reason` "refusal" (no content;
+Opus 5.5 did this for the pre-V3 `virus` role instructions on 2026-10-03,
+while the fault judges and Sonnet 4.6 rated the same file) is not retried:
+both judges and the taste rating raise `JudgeRefusal` after the one call, the
+arm's summary line says "N refused" apart from "N failed", the parse-rate line
+leaves refusals out, and the report drops the file from the paired comparison.
+Nothing is written for it, so a later run tries once more.
 
 ```bash
 uv run python data_analysis/audit_trait_instructions.py taste --out $D --set dev \
@@ -222,6 +259,13 @@ a minute at DeepInfra on 2026-09-30, the default 16 about 100.  Do not run two
 commands on one `<out>` at the same time: both rewrite `usage.json` and the
 per-trait score files.
 
+Roles (2026-10-02): `plan-arms --entity role` builds the same plan from role
+files; each role is judged with its file's own `eval_prompt`, which is what
+the pipeline's judge uses for a role, and the plan's label is the role's
+display name.  `arms-report` also breaks each arm's shares down by the
+instructions' opening form ("Act as", "You are …", "Be …"), unpaired, which
+compares openings within one corpus.
+
 ### `regenerate_role_instructions.py`
 
 Generates instruction variants and questions for roles. Same relationship to
@@ -234,7 +278,19 @@ uv run python data_analysis/regenerate_role_instructions.py --all --dry-run
 uv run python data_analysis/regenerate_role_instructions.py --roles pirate --style RogerV2 --force --show-prompt
 ```
 
-Prompt styles (Sep 2026): `--style RogerV2` (default since 2026-09-12)
+Prompt styles: `--style RogerV3` (the default since 2026-10-03, adopted after
+the measured pilot in `reports/role_rubric_v3_pilot/`; design log in
+`data/roles/instructions/ROLES_TO_ADD.md` § "Role rubric V3") is V2 plus the
+trait rubric V2's lessons: every instruction opens by saying who to be, from a
+menu of five identity openings ("From now on, you are a ...", "Be a ...",
+"You're a ...", "Become a ...", "You are a ... who ..."), five different ones
+in every file, no role-play openings ("Act as" is out: on the same text it
+bought about ten points of Qwen effectiveness with caricature, and "From now
+on" is as effective without it), no plain-command or statement openings; a
+self-check with an opening clause; the trait rubric's two-option question
+quota and an advice quota where the role would plausibly be asked; five
+examples, one per opening.  `--style RogerV2` (default 2026-09-12 to
+2026-10-03)
 adds the voice and anti-softening rules from the September 2026 voice
 audit (second-person, the role's own vocabulary and particulars, a 15-25
 word target, no case-worker or writer's register, no whitewashing of bad
@@ -247,11 +303,31 @@ for roles on 2026-09-12 after the pilot in `reports/rubric_v2_pilot/`
 regeneration later that day; subject to rollback once embeddings have
 been extracted, for which the V1-rubric files are kept there and at commit
 `93a8554`, the last before the corpus check-in of 2026-09-28).  The trait
-script has no V2 yet.  Every
+script's V2 was adopted on 2026-10-01; a role rubric V3 built on its
+lessons is planned ([role_rubric_v3_candidates.md](../reports/rubric_v2_pilot/role_rubric_v3_candidates.md)).  Every
 regenerated role or trait file now carries a `generator` field (script,
 style, a short hash of the template text, model, temperature, thinking
-budget, date) so the two instruction populations stay distinguishable;
-the hash changes whenever the template text is edited.
+budget, date; `batch: true` when the text came from a Message Batch) so the
+instruction populations stay distinguishable; the hash changes whenever the
+template text is edited.
+
+Flags shared with the trait script since 2026-10-02:
+`--roles-dir DIR` reads and writes a staging copy instead of the corpus
+(for trying a rubric without touching `data/roles/instructions`);
+`--instructions-only` replaces the instructions and keeps each file's
+questions; `--batch` submits the run as one Message Batch at half price
+(`--batch-no-wait` submits and exits, `--batch-id ID` collects later;
+batches are recorded in `data/roles/regeneration_batches.json`, usage at the
+batch rate under `<model>:batch`).  Since 2026-10-06 the openings check of
+the trait script applies here too: under RogerV3 a set whose five
+instructions do not open in five different ways is generated again, once
+(`opening_rerolls` in the `generator` field; `--no-opening-reroll` turns it
+off).
+
+```bash
+uv run python data_analysis/regenerate_role_instructions.py --all --roles-dir STAGE --force --dry-run
+uv run python data_analysis/regenerate_role_instructions.py --all --force --batch --batch-no-wait
+```
 
 ### `generate_antonyms.py`
 

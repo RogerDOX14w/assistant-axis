@@ -1,0 +1,86 @@
+{
+  "model": "claude-opus-5-5",
+  "rubric_version": 1,
+  "arms": [
+    "held_corpus",
+    "held_final"
+  ],
+  "baseline": "held_corpus",
+  "left_out_described_differently": [],
+  "n_rated": {
+    "held_corpus": 149,
+    "held_final": 150
+  },
+  "scores": {
+    "quality": {
+      "held_corpus": {
+        "mean": 3.8053691275167787,
+        "n": 149,
+        "distribution": {
+          "1": 0,
+          "2": 0,
+          "3": 29,
+          "4": 120,
+          "5": 0
+        }
+      },
+      "held_final": {
+        "mean": 3.86,
+        "n": 150,
+        "distribution": {
+          "1": 0,
+          "2": 0,
+          "3": 21,
+          "4": 129,
+          "5": 0
+        },
+        "against_baseline": {
+          "paired_traits": 149,
+          "difference": 0.053691275167785234,
+          "interval": [
+            -0.020134228187919462,
+            0.12751677852348994
+          ],
+          "p": 0.21558922053897306,
+          "better": 20,
+          "worse": 12
+        }
+      }
+    },
+    "coverage": {
+      "held_corpus": {
+        "mean": 3.3221476510067114,
+        "n": 149,
+        "distribution": {
+          "1": 0,
+          "2": 16,
+          "3": 69,
+          "4": 64,
+          "5": 0
+        }
+      },
+      "held_final": {
+        "mean": 3.3133333333333335,
+        "n": 150,
+        "distribution": {
+          "1": 0,
+          "2": 17,
+          "3": 70,
+          "4": 62,
+          "5": 1
+        },
+        "against_baseline": {
+          "paired_traits": 149,
+          "difference": 0.0,
+          "interval": [
+            -0.12751677852348994,
+            0.12751677852348994
+          ],
+          "p": 1.0,
+          "better": 40,
+          "worse": 40
+        }
+      }
+    }
+  }
+}

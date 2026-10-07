@@ -1,0 +1,22 @@
+{
+  "n_calls": 802,
+  "per_model": {
+    "claude-opus-5-5": {
+      "completion_tokens": 271284,
+      "cost_usd": 7.0063,
+      "model": "claude-opus-5-5",
+      "n_calls": 502,
+      "prompt_tokens": 395167
+    },
+    "claude-sonnet-4-6": {
+      "completion_tokens": 60667,
+      "cost_usd": 1.4534,
+      "model": "claude-sonnet-4-6",
+      "n_calls": 300,
+      "prompt_tokens": 181144
+    }
+  },
+  "total_completion_tokens": 331951,
+  "total_cost_usd": 8.4598,
+  "total_prompt_tokens": 576311
+}

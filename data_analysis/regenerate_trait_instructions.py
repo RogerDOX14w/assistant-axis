@@ -57,6 +57,10 @@ DEFAULT_USE_ANTONYM = True
 
 PROMPT_STYLE = DEFAULT_PROMPT_STYLE
 USE_ANTONYM = DEFAULT_USE_ANTONYM
+# Generate a set again, once, when its positives do not open in n_variants
+# different ways (--no-opening-reroll turns it off, for a pilot that wants
+# to measure a rubric's raw rate; see generate_combined).
+OPENING_REROLL = True
 
 DEFAULT_MODEL = "claude-sonnet-4-6"
 DEFAULT_TEMPERATURE = 1.0
@@ -542,6 +546,8 @@ include any additional explanations or text outside of this JSON structure."""
 COMBINED_STYLES = ("Christina", "Roger", "RogerV2")
 # styles that take the --antonym switch
 ANTONYM_STYLES = ("Roger", "RogerV2")
+# styles whose rubric asks for n_variants different openings (the opening reroll applies)
+OPENING_REROLL_STYLES = ("RogerV2",)
 
 
 def build_eval_prompt(positive_label: str, description: str) -> str:
@@ -965,7 +971,58 @@ def validated_combined(raw_text: str, positive_label: str) -> dict:
     return data
 
 
+def distinct_openings(instructions: list[dict]) -> int:
+    """How many different opening forms the positive instructions use, by the
+    audit's classifier (imported here, not at the top: the audit imports this
+    module)."""
+    from data_analysis.audit_trait_instructions import opening_form
+    return len({opening_form(str(pair.get("pos", ""))) for pair in instructions})
+
+
+def opening_reroll_wanted(n_variants: int, instructions: list[dict]) -> bool:
+    """True when the set should be generated again: the rubric asks for
+    ``n_variants`` different openings and the set has fewer.  Only for the
+    styles whose rubric says so, and only while ``--opening-reroll`` is on."""
+    return (OPENING_REROLL and PROMPT_STYLE in OPENING_REROLL_STYLES
+            and distinct_openings(instructions) < n_variants)
+
+
 async def generate_combined(
+    client: anthropic.AsyncAnthropic,
+    positive_label: str,
+    negative_label: str,
+    definition: str,
+    n_variants: int,
+    n_questions: int,
+    model: str,
+    semaphore: asyncio.Semaphore,
+    temperature: float = 0.7,
+    thinking_budget: int = 0,
+    usage: MultiModelUsage | None = None,
+) -> dict:
+    """One combined generation, generated once more when the positives do not
+    open in ``n_variants`` different ways (Roger, 2026-10-06: the 2026-10-04
+    pass over the regenerated corpus found 5.4% of files with "You are
+    someone who ..." twice, and a reroll fixed 24 of 36 at the first try).  The
+    set with more distinct openings is kept; ``opening_rerolls`` in the result
+    says whether a second call was made, for the ``generator`` field."""
+    args = (client, positive_label, negative_label, definition, n_variants, n_questions,
+            model, semaphore, temperature, thinking_budget, usage)
+    combined = await _generate_combined_once(*args)
+    if opening_reroll_wanted(n_variants, combined["instruction"]):
+        k = distinct_openings(combined["instruction"])
+        print(f"  {positive_label}: {k} distinct openings of {n_variants}; generating again", file=sys.stderr)
+        second = await _generate_combined_once(*args)
+        if distinct_openings(second["instruction"]) > k:
+            combined = second
+        combined["opening_rerolls"] = 1
+        if distinct_openings(combined["instruction"]) < n_variants:
+            print(f"  WARNING: {positive_label}: still {distinct_openings(combined['instruction'])} distinct "
+                  f"openings after a second generation; kept the better set", file=sys.stderr)
+    return combined
+
+
+async def _generate_combined_once(
     client: anthropic.AsyncAnthropic,
     positive_label: str,
     negative_label: str,
@@ -1047,10 +1104,12 @@ def template_sha256(style: str) -> str | None:
 
 
 def generator_provenance(style: str, model: str, temperature: float,
-                         thinking_budget: int, batch: bool = False) -> dict:
+                         thinking_budget: int, batch: bool = False, opening_rerolls: int = 0) -> dict:
     """The ``generator`` field written into every regenerated trait JSON.
     The switches are recorded because they change the prompt; ``batch`` is
-    recorded, only when true, because it says how the text was bought."""
+    recorded, only when true, because it says how the text was bought;
+    ``opening_rerolls``, only when non-zero, says the set was generated again
+    for its openings (see ``generate_combined``)."""
     out = {
         "script": "regenerate_trait_instructions.py",
         "style": style,
@@ -1063,6 +1122,8 @@ def generator_provenance(style: str, model: str, temperature: float,
     }
     if batch:
         out["batch"] = True
+    if opening_rerolls:
+        out["opening_rerolls"] = opening_rerolls
     return out
 
 
@@ -1217,11 +1278,13 @@ async def regenerate_one(
             )
 
     return write_regenerated(trait_path, data, new_instructions, new_questions,
-                             model, temperature, thinking_budget)
+                             model, temperature, thinking_budget,
+                             opening_rerolls=combined.get("opening_rerolls", 0) if use_combined else 0)
 
 
 def write_regenerated(trait_path: Path, data: dict, new_instructions: list, new_questions: list | None,
-                      model: str, temperature: float, thinking_budget: int, batch: bool = False) -> str:
+                      model: str, temperature: float, thinking_budget: int, batch: bool = False,
+                      opening_rerolls: int = 0) -> str:
     """Write a trait file with its new instructions (and questions), keeping
     everything else.  Returns the status line."""
     positive_label = data.get("positive_label")
@@ -1242,7 +1305,8 @@ def write_regenerated(trait_path: Path, data: dict, new_instructions: list, new_
         output["eval_prompt"] = build_eval_prompt(positive_label, description)
     elif data.get("eval_prompt"):
         output["eval_prompt"] = data["eval_prompt"]
-    output["generator"] = generator_provenance(PROMPT_STYLE, model, temperature, thinking_budget, batch=batch)
+    output["generator"] = generator_provenance(PROMPT_STYLE, model, temperature, thinking_budget, batch=batch,
+                                               opening_rerolls=opening_rerolls)
 
     # Carry forward any extra fields we don't know about
     for key in data:
@@ -1261,6 +1325,8 @@ def write_regenerated(trait_path: Path, data: dict, new_instructions: list, new_
         parts.append(f"{len(new_questions)} questions")
     if copied:
         parts.append(f"{len(copied)} copied from the examples")
+    if opening_rerolls:
+        parts.append("generated again for the openings")
     return ", ".join(parts)
 
 
@@ -1348,6 +1414,12 @@ async def collect_batch(client: anthropic.AsyncAnthropic, batch_id: str, *, inst
             print(f"  {stem}: reply cannot be used ({e})", file=sys.stderr)
             again.append(stem)
             continue
+        if opening_reroll_wanted(len(combined["instruction"]), combined["instruction"]):
+            # a batch cannot be asked again; the real-time pass that follows does the reroll
+            print(f"  {stem}: {distinct_openings(combined['instruction'])} distinct openings of "
+                  f"{len(combined['instruction'])}; generated again in real time", file=sys.stderr)
+            again.append(stem)
+            continue
         done.append(write_regenerated(
             path, data, combined["instruction"], None if instructions_only else combined["questions"],
             model, temperature, thinking_budget, batch=True))
@@ -1378,9 +1450,10 @@ def resolve_trait_paths(traits: list[str] | None, all_traits: bool) -> list[Path
 
 
 async def main_async(args: argparse.Namespace) -> None:
-    global PROMPT_STYLE, USE_ANTONYM, TRAITS_DIR
+    global PROMPT_STYLE, USE_ANTONYM, TRAITS_DIR, OPENING_REROLL
     PROMPT_STYLE = args.style
     USE_ANTONYM = args.antonym
+    OPENING_REROLL = args.opening_reroll
     if args.traits_dir:
         TRAITS_DIR = Path(args.traits_dir).resolve()
         print(f"Trait files: {TRAITS_DIR} (not the corpus)", file=sys.stderr)
@@ -1623,6 +1696,13 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
         help="Name the negative_label as the opposite in the negative instructions (Roger and RogerV2, "
              "default: true). --no-antonym leaves the partner unnamed, which gives the clean-pair check an "
              "unbiased answer without editing the label; regenerate with the default afterwards.",
+    )
+    parser.add_argument(
+        "--opening-reroll",
+        action=argparse.BooleanOptionalAction,
+        default=True,
+        help="Generate a set again, once, when its positives do not open in n_variants different ways "
+             "(RogerV2; default: on; about 5%% more calls). --no-opening-reroll measures a rubric's raw rate.",
     )
     args = parser.parse_args(argv)
     if args.antonym is not None and args.style not in ANTONYM_STYLES:

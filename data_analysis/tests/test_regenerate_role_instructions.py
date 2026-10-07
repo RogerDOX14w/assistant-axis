@@ -521,3 +521,317 @@ class TestRogerV2StyleAndProvenance:
 
     def test_parse_args_accepts_v2(self):
         assert module.parse_args(["--roles", "x", "--style", "RogerV2"]).style == "RogerV2"
+
+
+# ---------------------------------------------------------------------------
+# --instructions-only, --roles-dir and --batch (2026-10-02, as for traits)
+# ---------------------------------------------------------------------------
+
+from types import SimpleNamespace  # noqa: E402
+
+
+class TestInstructionsOnly:
+    def test_keeps_the_questions_in_the_file(self, role_file, mock_client, roger_style):
+        result = asyncio.run(regenerate_one(
+            mock_client, role_file, n_variants=5, n_questions=40, model="m",
+            semaphore=asyncio.Semaphore(10), temperature=1.0, force=True, dry_run=False,
+            instructions_only=True,
+        ))
+        d = json.loads(role_file.read_text())
+        assert d["instruction"] == FAKE_INSTRUCTIONS
+        assert d["questions"] == SAMPLE_ROLE["questions"]
+        assert result == "OK accountant: 5 instructions"
+
+    def test_skip_without_force_ignores_the_question_count(self, tmp_path):
+        d = dict(SAMPLE_ROLE, questions=["just one?"])
+        assert module.reason_to_skip("accountant", d, 5, 40, instructions_only=True, force=False)
+        assert module.reason_to_skip("accountant", d, 5, 40, instructions_only=False, force=False) is None
+
+    def test_default_is_always_skipped(self):
+        assert module.reason_to_skip("default", {}, 5, 40, instructions_only=False, force=True).startswith("SKIP")
+
+
+class TestRolesDir:
+    def test_points_the_run_at_a_staging_copy(self, tmp_path, monkeypatch, capsys):
+        corpus, stage = tmp_path / "corpus", tmp_path / "stage"
+        for d in (corpus, stage):
+            d.mkdir()
+            (d / "accountant.json").write_text(json.dumps(SAMPLE_ROLE))
+        (stage / "only_staged.json").write_text(json.dumps(SAMPLE_ROLE))
+        monkeypatch.setattr(module, "ROLES_DIR", corpus)
+        module.main(["--roles", "only_staged", "--roles-dir", str(stage), "--dry-run", "--force"])
+        err = capsys.readouterr().err
+        assert "not the corpus" in err and "DRY-RUN" in err
+        assert module.ROLES_DIR == stage.resolve()
+        assert module.parse_args(["--roles", "a"]).roles_dir is None
+
+
+class _Results:
+    """What ``client.messages.batches.results`` resolves to: an async iterator."""
+
+    def __init__(self, entries):
+        self._entries = list(entries)
+
+    def __aiter__(self):
+        return self
+
+    async def __anext__(self):
+        if not self._entries:
+            raise StopAsyncIteration
+        return self._entries.pop(0)
+
+
+def _message(text, tokens=(2000, 3000)):
+    return SimpleNamespace(content=[SimpleNamespace(type="text", text=text)],
+                           usage=SimpleNamespace(input_tokens=tokens[0], output_tokens=tokens[1]))
+
+
+def _entry(stem, kind="succeeded", text=None):
+    result = SimpleNamespace(type=kind)
+    if kind == "succeeded":
+        result.message = _message(text if text is not None else json.dumps(FAKE_COMBINED_RESPONSE))
+    return SimpleNamespace(custom_id=stem, result=result)
+
+
+def _counts(**kw):
+    base = dict(succeeded=0, errored=0, expired=0, canceled=0, processing=0)
+    base.update(kw)
+    return SimpleNamespace(**base)
+
+
+@pytest.fixture
+def batch_setup(tmp_path, monkeypatch):
+    stage = tmp_path / "stage"
+    stage.mkdir()
+    for stem in ("accountant", "forger", "herder"):
+        (stage / f"{stem}.json").write_text(json.dumps(dict(SAMPLE_ROLE, keep_me="yes")))
+    (stage / "default.json").write_text(json.dumps({"instruction": [{"pos": ""}]}))
+    client = MagicMock()
+    client.messages.batches.create = AsyncMock(return_value=SimpleNamespace(id="msgbatch_test"))
+    client.messages.batches.retrieve = AsyncMock(side_effect=[
+        SimpleNamespace(processing_status="in_progress", request_counts=_counts(processing=3)),
+        SimpleNamespace(processing_status="ended", request_counts=_counts(succeeded=2, errored=1)),
+    ])
+    client.messages.batches.results = AsyncMock(return_value=_Results([
+        _entry("forger"), _entry("accountant", text="not json at all"), _entry("herder", kind="errored")]))
+    real_time = _make_response(json.dumps(FAKE_COMBINED_RESPONSE))
+    real_time.usage = SimpleNamespace(input_tokens=2000, output_tokens=3000)
+    client.messages.create = AsyncMock(return_value=real_time)
+    monkeypatch.setattr(module.anthropic, "AsyncAnthropic", lambda **kw: client)
+    monkeypatch.setattr(module.asyncio, "sleep", AsyncMock())
+    monkeypatch.setenv("ANTHROPIC_API_KEY", "test-key-not-real")
+    monkeypatch.setattr(module, "ROLES_DIR", stage)
+    usage_json = tmp_path / "records" / "usage.json"
+    usage_json.parent.mkdir()
+    args = ["--all", "--roles-dir", str(stage), "--style", "RogerV2", "--force", "--usage-json", str(usage_json)]
+    return SimpleNamespace(stage=stage, client=client, usage_json=usage_json, args=args)
+
+
+class TestBatchRequests:
+    def test_one_request_per_file_with_the_stem_as_its_id(self, tmp_path, monkeypatch):
+        monkeypatch.setattr(module, "PROMPT_STYLE", "RogerV2")
+        paths = []
+        for stem in ("accountant", "coral_reef"):
+            p = tmp_path / f"{stem}.json"
+            p.write_text(json.dumps(SAMPLE_ROLE))
+            paths.append(p)
+        requests, skipped = module.build_batch_requests(
+            paths, n_variants=5, n_questions=40, instructions_only=False, model="claude-sonnet-4-6",
+            temperature=1.0, thinking_budget=0, force=True)
+        assert [r["custom_id"] for r in requests] == ["accountant", "coral_reef"] and skipped == []
+        params = requests[1]["params"]
+        assert params["model"] == "claude-sonnet-4-6" and params["max_tokens"] == 16384
+        assert "<role>\ncoral reef\n</role>" in params["messages"][0]["content"]   # display form in the prompt
+        assert params == module.combined_create_kwargs(
+            "coral reef", SAMPLE_DESCRIPTION, 5, 40, "claude-sonnet-4-6", 1.0, 0)
+
+    def test_files_that_need_nothing_are_skipped_without_force(self, tmp_path):
+        p = tmp_path / "accountant.json"
+        p.write_text(json.dumps(SAMPLE_ROLE))
+        requests, skipped = module.build_batch_requests(
+            [p], n_variants=5, n_questions=40, instructions_only=False, model="m", temperature=1.0,
+            thinking_budget=0, force=False)
+        assert requests == [] and skipped[0].startswith("SKIP accountant")
+
+    def test_every_corpus_stem_can_be_an_id(self):
+        d = Path(module.__file__).resolve().parent.parent / "data" / "roles" / "instructions"
+        if not d.is_dir():
+            pytest.skip("corpus not found")
+        assert not [p.stem for p in d.glob("*.json") if not module.BATCH_ID_PATTERN.match(p.stem)]
+
+
+class TestBatchRun:
+    def test_submit_wait_collect_and_fill_in_real_time(self, batch_setup, capsys):
+        b = batch_setup
+        module.main(b.args + ["--batch", "--model", "claude-sonnet-4-6"])
+        err = capsys.readouterr().err
+        sent = b.client.messages.batches.create.call_args.kwargs["requests"]
+        assert sorted(r["custom_id"] for r in sent) == ["accountant", "forger", "herder"]   # never default
+        assert b.client.messages.batches.retrieve.call_count == 2
+        # forger came from the batch; accountant (unusable reply) and herder (errored) were asked for in real time
+        assert b.client.messages.create.call_count == 2
+        for stem, from_batch in (("forger", True), ("accountant", False), ("herder", False)):
+            d = json.loads((b.stage / f"{stem}.json").read_text())
+            assert d["instruction"] == FAKE_INSTRUCTIONS and d["keep_me"] == "yes"
+            assert d["generator"]["style"] == "RogerV2" and d["generator"].get("batch", False) is from_batch
+        assert "1 from the batch, 2 in real time" in err and "request errored" in err
+        assert "test-key-not-real" not in err
+
+    def test_usage_is_kept_at_the_batch_price(self, batch_setup):
+        b = batch_setup
+        module.main(b.args + ["--batch", "--model", "claude-sonnet-4-6"])
+        usage = json.loads(b.usage_json.read_text())["per_model"]
+        assert usage["claude-sonnet-4-6:batch"]["n_calls"] == 2   # the unusable reply is still paid for
+        assert usage["claude-sonnet-4-6:batch"]["cost_usd"] == pytest.approx(2 * (2000 * 1.5 + 3000 * 7.5) / 1e6)
+        assert usage["claude-sonnet-4-6"]["n_calls"] == 2
+
+    def test_the_batch_is_recorded_beside_the_usage_record(self, batch_setup):
+        b = batch_setup
+        module.main(b.args + ["--batch", "--model", "claude-sonnet-4-6"])
+        log = json.loads(module.batch_log_path(b.usage_json).read_text())
+        assert len(log) == 1 and log[0]["id"] == "msgbatch_test" and log[0]["n_requests"] == 3
+        assert log[0]["template_sha256"] == module.template_sha256("RogerV2")
+        assert log[0]["roles_dir"] == str(b.stage.resolve())
+
+    def test_submit_without_waiting_then_collect_by_id(self, batch_setup, capsys):
+        b = batch_setup
+        module.main(b.args + ["--batch", "--batch-no-wait", "--model", "claude-sonnet-4-6"])
+        assert b.client.messages.batches.retrieve.call_count == 0
+        assert "--batch-id msgbatch_test" in capsys.readouterr().err
+        assert json.loads((b.stage / "forger.json").read_text())["instruction"] == SAMPLE_ROLE["instruction"]
+        module.main(b.args + ["--batch-id", "msgbatch_test", "--model", "claude-sonnet-4-6"])
+        assert b.client.messages.batches.create.call_count == 1
+        assert json.loads((b.stage / "forger.json").read_text())["instruction"] == FAKE_INSTRUCTIONS
+
+    def test_instructions_only_keeps_the_questions_from_a_batch(self, batch_setup):
+        b = batch_setup
+        module.main(b.args + ["--batch", "--instructions-only", "--model", "claude-sonnet-4-6"])
+        d = json.loads((b.stage / "forger.json").read_text())
+        assert d["instruction"] == FAKE_INSTRUCTIONS and d["questions"] == SAMPLE_ROLE["questions"]
+
+    def test_a_dry_run_submits_nothing(self, batch_setup, capsys):
+        b = batch_setup
+        module.main(b.args + ["--batch", "--dry-run"])
+        assert b.client.messages.batches.create.call_count == 0
+        assert "Batch: 3 request(s), 1 file(s) skipped" in capsys.readouterr().err
+
+    def test_real_time_is_the_default(self):
+        args = module.parse_args(["--roles", "accountant"])
+        assert args.batch is False and args.batch_id is None and args.instructions_only is False
+        assert args.batch_poll == module.DEFAULT_BATCH_POLL_SECONDS
+
+
+class TestRogerV3Draft:
+    """The role rubric V3 draft (2026-10-03): openings, self-check, question quotas, five examples."""
+
+    def test_prompt_substitutes_and_carries_the_new_rules(self):
+        p = module.build_roger_role_prompt_v3("smuggler", "A smuggler moves contraband.", 5, 40)
+        assert "<role>\nsmuggler\n</role>" in p and "A smuggler moves contraband." in p
+        for phrase in ('"From now on, you are a ..."', '"Become a ..."', "do not tell it to play a part",
+                       "does it open by telling the model who to be", "open in 5 different ways",
+                       "At least 8 of the questions", "about 8 of the questions", "15 to 25", "self-justification",
+                       '"question 40"', "costs the role something"):
+            assert phrase in p, phrase
+        for left in ("{n_variants}", "{n_two_option}", "{n_advice}", "{n_questions}", "{{"):
+            assert left not in p, left
+
+    def test_no_role_play_opening_in_the_menu_or_the_examples(self):
+        p = module.build_roger_role_prompt_v3("x", "y", 5, 40)
+        menu = p.split("Openings that work:")[1].split("Use the ones")[0]
+        assert "Act as" not in menu
+        block = p.split("<example_instructions>")[1].split("</example_instructions>")[0]
+        assert "Act as" not in block and block.count('"pos"') == 5
+        for marker in ("navigating", "individuals", "demonstrate", "appropriate", "engage with", "the challenges of"):
+            assert marker not in block, marker
+
+    def test_examples_open_in_five_different_ways_none_role_play(self):
+        from data_analysis import audit_role_instructions as audit
+        from data_analysis import audit_trait_instructions as A
+        examples = audit.role_example_instructions("RogerV3")
+        forms = [A.opening_form(e) for e in examples]
+        assert len(examples) == 5 and len(set(forms)) == 5 and A.FORM_ACT_AS not in forms
+        assert all(15 <= len(e.split()) <= 28 for e in examples)   # the liar example runs to 28 (Roger, 2026-10-03)
+
+    def test_step_three_and_the_output_format_are_v2s(self):
+        v2, v3 = module._ROGER_ROLE_TEMPLATE_V2, module._ROGER_ROLE_TEMPLATE_V3
+        assert v3[v3.index("Step 3:"):] == v2[v2.index("Step 3:"):]
+        assert "Step 2:" in v3 and v3.count("Step 3:") == 1
+
+    def test_registered_and_the_default_since_adoption(self):
+        assert module.template_sha256("RogerV3") != module.template_sha256("RogerV2")
+        assert module.parse_args(["--roles", "x", "--style", "RogerV2"]).style == "RogerV2"
+        assert module.parse_args(["--roles", "x"]).style == "RogerV3"   # adopted 2026-10-03
+        # the module global is set by main() from --style, so an earlier test may have changed it; read the source
+        import re
+        source = Path(module.__file__).read_text(encoding="utf-8")
+        assert re.search(r'^PROMPT_STYLE = "RogerV3"$', source, re.M)
+
+    def test_dispatch_sends_v3_and_records_it(self, role_file, mock_client, monkeypatch):
+        monkeypatch.setattr(module, "PROMPT_STYLE", "RogerV3")
+        asyncio.run(regenerate_one(
+            mock_client, role_file, n_variants=5, n_questions=40, model="m",
+            semaphore=asyncio.Semaphore(10), temperature=1.0, force=True, dry_run=False,
+        ))
+        sent = mock_client.messages.create.call_args.kwargs["messages"][0]["content"]
+        assert '"From now on, you are a ..."' in sent and "Become a glacier" in sent
+        g = json.loads(role_file.read_text())["generator"]
+        assert g["style"] == "RogerV3" and g["template_sha256"] == module.template_sha256("RogerV3")
+
+
+# ---------------------------------------------------------------------------
+# The opening reroll (2026-10-06): a set whose instructions do not open in
+# n_variants different ways is generated again, once
+# ---------------------------------------------------------------------------
+
+@pytest.fixture(autouse=True)
+def _opening_reroll_off(monkeypatch):
+    """The fake replies above open every instruction the same way and the
+    older tests count calls, so the reroll is off unless a test turns it on."""
+    monkeypatch.setattr(module, "OPENING_REROLL", False)
+
+
+FIVE_OPENINGS = ["You are an accountant who counts everything.", "Be an accountant.", "You're an accountant.",
+                 "Become an accountant.", "From now on, you are an accountant."]
+FOUR_OPENINGS = FIVE_OPENINGS[:4] + ["Be an accountant who counts twice."]
+
+
+def _combined_reply(openings):
+    return _make_response(json.dumps({"instruction": [{"pos": p} for p in openings],
+                                      "questions": FAKE_QUESTIONS, "eval_prompt": "x"}))
+
+
+class TestOpeningReroll:
+    def run(self, client, role_file):
+        return asyncio.run(regenerate_one(
+            client, role_file, n_variants=5, n_questions=40, model="m",
+            semaphore=asyncio.Semaphore(10), temperature=1.0, force=True, dry_run=False))
+
+    def test_the_count_uses_the_audit_classifier(self):
+        assert module.distinct_openings([{"pos": p} for p in FIVE_OPENINGS]) == 5
+        assert module.distinct_openings([{"pos": p} for p in FOUR_OPENINGS]) == 4
+
+    def test_a_doubled_opening_brings_a_second_call_and_the_better_set(self, role_file, monkeypatch, capsys):
+        monkeypatch.setattr(module, "PROMPT_STYLE", "RogerV3")
+        monkeypatch.setattr(module, "OPENING_REROLL", True)
+        client = AsyncMock()
+        client.messages.create = AsyncMock(side_effect=[_combined_reply(FOUR_OPENINGS), _combined_reply(FIVE_OPENINGS)])
+        result = self.run(client, role_file)
+        assert client.messages.create.call_count == 2 and "generated again for the openings" in result
+        d = json.loads(role_file.read_text())
+        assert [p["pos"] for p in d["instruction"]] == FIVE_OPENINGS and d["generator"]["opening_rerolls"] == 1
+        assert "4 distinct openings of 5; generating again" in capsys.readouterr().err
+
+    def test_one_call_when_off_or_under_another_style(self, role_file, monkeypatch):
+        monkeypatch.setattr(module, "PROMPT_STYLE", "RogerV3")
+        client = AsyncMock()
+        client.messages.create = AsyncMock(return_value=_combined_reply(FOUR_OPENINGS))
+        self.run(client, role_file)                        # OPENING_REROLL is off (autouse)
+        assert client.messages.create.call_count == 1
+        monkeypatch.setattr(module, "OPENING_REROLL", True)
+        monkeypatch.setattr(module, "PROMPT_STYLE", "RogerV2")   # not a style whose rubric asks for it
+        self.run(client, role_file)
+        assert client.messages.create.call_count == 2
+
+    def test_the_switch(self):
+        assert module.parse_args(["--roles", "x"]).opening_reroll is True
+        assert module.parse_args(["--roles", "x", "--no-opening-reroll"]).opening_reroll is False

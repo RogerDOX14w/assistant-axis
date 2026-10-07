@@ -1,0 +1,50 @@
+{
+  "all answers read": [
+    {
+      "variant": "act_as",
+      "n": 889,
+      "person": 43.532058492688414,
+      "assistant": 28.346456692913385,
+      "in_action": 67.49156355455568,
+      "describes_itself": 43.082114735658045,
+      "laid_on": 95.72553430821148,
+      "cartoon": 26.88413948256468,
+      "believable_in_action": 2.5871766029246346
+    },
+    {
+      "variant": "other",
+      "n": 890,
+      "person": 38.98876404494382,
+      "assistant": 33.37078651685393,
+      "in_action": 64.9438202247191,
+      "describes_itself": 39.550561797752806,
+      "laid_on": 94.8314606741573,
+      "cartoon": 19.662921348314608,
+      "believable_in_action": 1.9101123595505618
+    }
+  ],
+  "answers the pipeline's judge scored 3": [
+    {
+      "variant": "act_as",
+      "n": 869,
+      "person": 43.84349827387802,
+      "assistant": 27.733026467203683,
+      "in_action": 68.12428078250863,
+      "describes_itself": 43.613348676639816,
+      "laid_on": 95.8573072497123,
+      "cartoon": 27.387802071346375,
+      "believable_in_action": 2.6467203682393556
+    },
+    {
+      "variant": "other",
+      "n": 841,
+      "person": 40.428061831153386,
+      "assistant": 31.391200951248514,
+      "in_action": 67.06302021403091,
+      "describes_itself": 40.428061831153386,
+      "laid_on": 95.71938168846611,
+      "cartoon": 20.33293697978597,
+      "believable_in_action": 1.9024970273483948
+    }
+  ]
+}

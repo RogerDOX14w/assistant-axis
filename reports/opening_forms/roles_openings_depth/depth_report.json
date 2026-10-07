@@ -1,0 +1,72 @@
+{
+  "all answers read": [
+    {
+      "variant": "act_as",
+      "n": 990,
+      "person": 44.94949494949495,
+      "assistant": 28.181818181818183,
+      "in_action": 69.39393939393939,
+      "describes_itself": 42.82828282828283,
+      "laid_on": 95.75757575757575,
+      "cartoon": 27.272727272727273,
+      "believable_in_action": 2.525252525252525
+    },
+    {
+      "variant": "be",
+      "n": 990,
+      "person": 44.04040404040404,
+      "assistant": 31.414141414141415,
+      "in_action": 65.15151515151516,
+      "describes_itself": 41.41414141414141,
+      "laid_on": 95.35353535353535,
+      "cartoon": 25.252525252525253,
+      "believable_in_action": 2.2222222222222223
+    },
+    {
+      "variant": "from_now_on",
+      "n": 990,
+      "person": 47.77777777777778,
+      "assistant": 27.67676767676768,
+      "in_action": 71.31313131313131,
+      "describes_itself": 39.292929292929294,
+      "laid_on": 94.34343434343434,
+      "cartoon": 22.12121212121212,
+      "believable_in_action": 3.9393939393939394
+    }
+  ],
+  "answers the pipeline's judge scored 3": [
+    {
+      "variant": "act_as",
+      "n": 965,
+      "person": 45.38860103626943,
+      "assistant": 27.253886010362695,
+      "in_action": 70.25906735751295,
+      "describes_itself": 43.41968911917098,
+      "laid_on": 96.06217616580311,
+      "cartoon": 27.66839378238342,
+      "believable_in_action": 2.5906735751295336
+    },
+    {
+      "variant": "be",
+      "n": 953,
+      "person": 44.805876180482684,
+      "assistant": 30.115424973767052,
+      "in_action": 65.79223504721931,
+      "describes_itself": 42.497376705141654,
+      "laid_on": 95.80272822665268,
+      "cartoon": 25.918153200419727,
+      "believable_in_action": 2.2035676810073452
+    },
+    {
+      "variant": "from_now_on",
+      "n": 957,
+      "person": 48.380355276907004,
+      "assistant": 27.063740856844305,
+      "in_action": 71.99582027168233,
+      "describes_itself": 40.020898641588296,
+      "laid_on": 94.77533960292581,
+      "cartoon": 22.570532915360502,
+      "believable_in_action": 3.6572622779519333
+    }
+  ]
+}
