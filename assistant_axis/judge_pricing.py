@@ -159,6 +159,11 @@ _MODEL_RATES: tuple[tuple[str, float, float], ...] = (
     ("embeddinggemma", 0.0, 0.0),   # google/embeddinggemma-300m, local (M2 third arm)
     ("gpt-4.1-mini", GPT_MINI_RATE_IN, GPT_MINI_RATE_OUT),
     ("gpt-4o-mini", GPT_MINI_RATE_IN, GPT_MINI_RATE_OUT),
+    # Haiku 5.5 (claude-haiku-5-5, released 2026-10-07; pricing page read that day): $0.10 / $0.50 for
+    # prompts up to 100,000 tokens, cache reads at the standard 0.1x ($0.01), batch at half (the "haiku"
+    # batch factor below).  It must come before the bare "haiku" fragment, which would price it at 4.5's
+    # rates.  Same tokenizer as Opus 4.7 and later (about 30% more tokens of the same text).
+    ("haiku-5-5", 0.10, 0.50),
     ("haiku", HAIKU_RATE_IN, HAIKU_RATE_OUT),
     # Claude 5 and 5.5 (platform.claude.com/docs/en/about-claude/pricing,
     # read 2026-09-30).  These lines must come before the bare "sonnet" and

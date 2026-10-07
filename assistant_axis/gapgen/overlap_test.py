@@ -172,12 +172,16 @@ ROUND2: tuple[str, ...] = tuple(ROUND2_OF)
 CUTOFF = 3
 HAIKU, SONNET, OPUS = "claude-haiku-4-5-20251001", "claude-sonnet-5-5", "claude-opus-5-5"
 FABLE = "claude-fable-5-1"
+#: Haiku 5.5 (released 2026-10-07): compared with Haiku 4.5 in the one-pair form (``overlap_arms_4``,
+#: coding_plan_haiku55.md, comparison C); not a default.
+HAIKU55 = "claude-haiku-5-5"
 #: The test's three models (the defaults), and the models the CLI accepts: Fable was added to
-#: ``overlap_test_1`` on rubric A on 2026-10-04 (Roger), after the marks; it is not a default.
+#: ``overlap_test_1`` on rubric A on 2026-10-04 (Roger), after the marks; it is not a default, nor is Haiku 5.5.
 MODELS: tuple[str, ...] = (HAIKU, SONNET, OPUS)
-KNOWN_MODELS: tuple[str, ...] = MODELS + (FABLE,)
+KNOWN_MODELS: tuple[str, ...] = MODELS + (FABLE, HAIKU55)
 REFERENCE = OPUS
-SHORT: dict[str, str] = {HAIKU: "Haiku 4.5", SONNET: "Sonnet 5.5", OPUS: "Opus 5.5", FABLE: "Fable 5.1"}
+SHORT: dict[str, str] = {HAIKU: "Haiku 4.5", SONNET: "Sonnet 5.5", OPUS: "Opus 5.5", FABLE: "Fable 5.1",
+                         HAIKU55: "Haiku 5.5"}
 
 NEAREST = "nearest"
 #: Labelled groups, in priority order: a pair in two groups is filed under the first (the other is kept
@@ -191,12 +195,12 @@ MAX_TOKENS = 2048
 TEMPERATURE = 0.0
 DEFAULT_CONCURRENCY = 8
 
-#: For the estimate: about 4 characters per token; models from Opus 4.7 on (Sonnet 5.5, Opus 5.5) use a
-#: tokenizer that makes about 30% more tokens of the same text (judge_pricing's note); the answer is
-#: about 60 tokens per listed trait (a one-sentence reason and the JSON around it) plus 20.
+#: For the estimate: about 4 characters per token; models from Opus 4.7 on (Sonnet 5.5, Opus 5.5, and Haiku
+#: 5.5 from 2026-10-07) use a tokenizer that makes about 30% more tokens of the same text (judge_pricing's
+#: note); the answer is about 60 tokens per listed trait (a one-sentence reason and the JSON around it) plus 20.
 CHARS_PER_TOKEN = 4.0
 NEW_TOKENIZER_FACTOR = 1.3
-NEW_TOKENIZER_FRAGMENTS = ("sonnet-5", "opus-5", "opus-4-7", "opus-4-8", "fable", "mythos")
+NEW_TOKENIZER_FRAGMENTS = ("sonnet-5", "opus-5", "opus-4-7", "opus-4-8", "fable", "mythos", "haiku-5")
 OUT_BASE_TOKENS, OUT_PER_ROW_TOKENS = 20, 60
 
 #: Roger's blinded sheet: 30 pairs, mostly realistic nearest-neighbour pairs, some of each known group.
@@ -643,9 +647,9 @@ def render_single(call: Call, corpus: Mapping[str, Mapping]) -> str:
 
 def default_cache_system(form: str) -> bool:
     """Whether a stage of ``form`` marks the rubric as a cached system block: yes for the single form (the
-    rubric, about 600 tokens, is above the 512-token minimum of Sonnet 5.5 and Opus 5.5, and every call of
-    a stage repeats it), no for the list form, as every list run so far was sent (Haiku 4.5 caches only from
-    4,096 tokens, where the marker is harmless)."""
+    rubric, about 600 tokens, is above the 512-token minimum of Sonnet 5.5, Opus 5.5 and Haiku 5.5, and every
+    call of a stage repeats it), no for the list form, as every list run so far was sent (Haiku 4.5 caches
+    only from 4,096 tokens, where the marker is harmless)."""
     return form == "single"
 
 

@@ -92,8 +92,12 @@ def response_text(resp: Any) -> str:
 
 #: Model-id fragments of models that refuse a ``temperature`` setting with a 400
 #: (checked 2026-09-29 for claude-sonnet-5-5, probe_sonnet55_api/results.jsonl;
-#: the rest from the API reference: Sonnet 5, Opus 4.7 and later, Fable, Mythos).
-NO_TEMPERATURE_FRAGMENTS: tuple[str, ...] = ("sonnet-5", "opus-5", "opus-4-7", "opus-4-8", "fable", "mythos")
+#: the rest from the API reference: Sonnet 5, Opus 4.7 and later, Fable, Mythos;
+#: Haiku 5, from the Haiku 5.5 model page of 2026-10-07: a non-default temperature,
+#: top_p or top_k returns a 400, and it thinks adaptively, so it is also a "thinking"
+#: model to ``split_runner._max_tokens``).  Haiku 4.5 ("haiku-4-5") still takes 0.
+NO_TEMPERATURE_FRAGMENTS: tuple[str, ...] = ("sonnet-5", "opus-5", "opus-4-7", "opus-4-8", "fable", "mythos",
+                                             "haiku-5")
 
 
 def accepts_temperature(model: str) -> bool:

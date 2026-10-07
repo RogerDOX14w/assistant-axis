@@ -1473,6 +1473,56 @@ class TestSingleForm:
         assert "single form" in txt and '"ephemeral"' in txt and '"other": {"label": "beta"' in txt
 
 
+class TestHaiku55:
+    """Haiku 5.5 (coding_plan_haiku55.md, comparison C): known to the CLI, not a default, its own short name;
+    the newer tokenizer in the estimate; the single form's request without temperature, the rubric cached;
+    Haiku 4.5's request unchanged."""
+
+    def test_known_not_default_short_name(self):
+        assert OT.HAIKU55 == "claude-haiku-5-5"
+        assert OT.HAIKU55 in OT.KNOWN_MODELS and OT.HAIKU55 not in OT.MODELS
+        assert OT.MODELS == (OT.HAIKU, OT.SONNET, OT.OPUS) and OT.REFERENCE == OT.OPUS
+        assert OT.SHORT[OT.HAIKU55] == "Haiku 5.5" and OT.SHORT[OT.HAIKU] == "Haiku 4.5"
+        assert OT.tokenizer_factor(OT.HAIKU55) == OT.NEW_TOKENIZER_FACTOR and OT.tokenizer_factor(OT.HAIKU) == 1.0
+
+    def test_estimate_newer_tokenizer_at_its_rates(self):
+        ps = pair_set()
+        rb = OT.load_rubrics(keys=("A",))
+        calls = OT.stage_calls(ps.calls, "single")
+        h55 = OT.estimate(calls, corpus(), rb, [OT.HAIKU55], ["A"])
+        h45 = OT.estimate(calls, corpus(), rb, [OT.HAIKU], ["A"])
+        opus = OT.estimate(calls, corpus(), rb, [OT.OPUS], ["A"])
+        (a,), (b,), (o,) = h55.lines, h45.lines, opus.lines
+        assert "Haiku 5.5" in str(a) and a.in_tok == o.in_tok > b.in_tok           # the Opus 4.7 tokenizer
+        assert h55.usd < h45.usd / 5
+
+    def test_single_form_request(self):
+        rb = OT.load_rubrics(keys=("A",))
+        c = OT.PairCall(call_id="x>beta", set="labelled", target="alpha", listed=["beta"])
+        p = OT.call_params(c, corpus(), rubric_text=rb["A"]["text"], model=OT.HAIKU55, form="single")
+        assert set(p) == {"model", "max_tokens", "messages", "system"} and p["max_tokens"] == OT.MAX_TOKENS
+        assert p["system"][0]["cache_control"] == {"type": "ephemeral"}
+        p45 = OT.call_params(c, corpus(), rubric_text=rb["A"]["text"], model=OT.HAIKU, form="single")
+        assert p45["temperature"] == OT.TEMPERATURE == 0.0 and p45["messages"] == p["messages"]
+
+    def test_stage_on_both_haikus(self, tmp_path):
+        rb = OT.load_rubrics(keys=("A",))
+        ps = pair_set()
+        client = FakeAsyncAnthropic(single_answer(rb))
+        path = tmp_path / "r.jsonl"
+        usage = MultiModelUsage()
+        r = OT.OverlapRunner(client, rb, corpus(), usage=usage, responses_path=path, retry_delays=())
+        for m in (OT.HAIKU55, OT.HAIKU):
+            res = run(r.run_stage("A", m, ps.calls, pass_no=1))
+            assert res.n_ok == len(ps.pairs)
+        sent = {kw["model"]: kw for kw in client.calls}
+        assert "temperature" not in sent[OT.HAIKU55] and sent[OT.HAIKU]["temperature"] == 0.0
+        ans = OT.collect_answers(ps, OT.read_records(path), pass_no=1)
+        assert set(ans) == {("A", OT.HAIKU55), ("A", OT.HAIKU)}
+        assert set(usage.per_model) == {OT.HAIKU55, OT.HAIKU}
+        assert usage.per_model[OT.HAIKU55].cost_usd == pytest.approx(usage.per_model[OT.HAIKU].cost_usd / 10)
+
+
 def one(value, reason="Because.", **extra):
     return json.dumps({"reason": reason, "similarity": value, **extra})
 

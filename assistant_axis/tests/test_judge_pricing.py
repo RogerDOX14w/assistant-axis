@@ -74,6 +74,27 @@ class TestPriceForModel:
         assert price_for_model("claude-fable-5-1") == (10.00, 50.00)
         assert price_for_model("claude-fable-5-1:batch") == (5.00, 25.00)
 
+    def test_haiku_5_5(self):
+        """Haiku 5.5 (2026-10-07): $0.10 / $0.50, batch at half; not priced at Haiku 4.5's rates by the
+        generic "haiku" row, which must come after it."""
+        assert price_for_model("claude-haiku-5-5") == (0.10, 0.50)
+        assert price_for_model("CLAUDE-HAIKU-5-5") == (0.10, 0.50)
+        assert price_for_model("claude-haiku-5-5:batch") == (0.05, 0.25)
+        assert cost_for_usage("claude-haiku-5-5", 1_000_000, 1_000_000) == pytest.approx(0.60)
+        # Haiku 4.5 keeps its own rates
+        assert price_for_model("claude-haiku-4-5-20251001") == (HAIKU_RATE_IN, HAIKU_RATE_OUT)
+        assert price_for_model("claude-haiku-4-5") == (HAIKU_RATE_IN, HAIKU_RATE_OUT)
+
+    def test_haiku_5_5_usage_records(self):
+        """A usage record of both Haikus prices each at its own rates (and a merge recomputes them so)."""
+        u = MultiModelUsage()
+        u.charge("claude-haiku-5-5", 1_000_000, 100_000)            # $0.10 + $0.05
+        u.charge("claude-haiku-4-5-20251001", 1_000_000, 100_000)   # $1.00 + $0.50
+        assert u.per_model["claude-haiku-5-5"].cost_usd == pytest.approx(0.15)
+        assert u.per_model["claude-haiku-4-5-20251001"].cost_usd == pytest.approx(1.50)
+        again = MultiModelUsage.from_dict(u.as_dict())
+        assert again.total_cost_usd == pytest.approx(1.65)
+
     @pytest.mark.parametrize("model,rates", [
         ("text-embedding-3-large", (0.13, 0.0)),
         ("text-embedding-3-small", (0.02, 0.0)),

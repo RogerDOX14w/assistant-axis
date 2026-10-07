@@ -279,6 +279,51 @@ class TestSecondModel:
             assert kw["max_tokens"] == 2000
         assert all(kw["temperature"] == 0.0 for kw in hai)
 
+    def test_haiku_55_as_the_first_model_reaches_every_haiku_step(self):
+        """``--model claude-haiku-5-5`` (coding_plan_haiku55.md, item 5): the probe, step 1, the three checks,
+        the same-sense check, the gloss, the alignment and the descriptors all go to Haiku 5.5, without
+        temperature and with the thinking models' max_tokens; only the comparison (the compare model) and the
+        second opinion (the second model) go elsewhere; every record names its model, and the block names
+        Haiku 5.5 as the model and the gloss model."""
+        h55 = "claude-haiku-5-5"
+        intended = {e["word"]: HINT for e in load_jsonl("expected_outcomes.jsonl")[:10]}
+        client = FakeAsyncAnthropic(make_responder(tokens=(1000, 300)))
+        usage = MultiModelUsage()
+        r = runner(client, model=h55, usage=usage, second_opinion=True, second_opinion_frac=0.1,
+                   zipf_fn=lambda w: 2.0)                        # every word in the probe band
+        res = r.run(test_items(intended=intended))
+        first_steps = {"probe", "sense", "established", "vague", "kind", "same_sense", "gloss", "alignment",
+                       "descriptors"}
+        by_step: dict = {}
+        for kw in client.calls:
+            by_step.setdefault(step_of_system(system_text(kw)), set()).add(kw["model"])
+        assert first_steps <= set(by_step)
+        for s in first_steps - {"gloss", "sense", "established", "vague", "kind", "same_sense"}:
+            assert by_step[s] == {h55}, s                       # probe, alignment, descriptors: first model only
+        for s in ("sense", "established", "vague", "kind", "same_sense", "gloss"):
+            assert h55 in by_step[s] and by_step[s] <= {h55, SONNET55}, s   # Sonnet only as the second opinion
+        assert by_step["comparison"] == {SONNET55}
+        for kw in client.calls:
+            if kw["model"] == h55:
+                assert not {"temperature", "top_p", "top_k", "thinking", "output_config"} & set(kw)
+                assert kw["max_tokens"] == 2000
+        chosen = set(r.second_keys)
+        first = [rec for rec in r.responses if rec["role"] == "first" and rec["step"] != "comparison"]
+        # the record names each call's model: Haiku 5.5, but the gloss of a word chosen for the second opinion
+        assert first and all(rec["model"] == (SONNET55 if rec["step"] == "gloss" and rec["keys"][0] in chosen else h55)
+                             for rec in first)
+        so = [rec for rec in r.responses if rec["role"] == "second"]
+        assert so and all(rec["model"] == SONNET55 for rec in so)
+        for x in res:
+            if x.stage != "classified" or x.filter.get("rule") == "probe":
+                continue
+            assert x.filter["model"] == h55
+            if x.filter["outcome"] == "trait":
+                assert x.filter["gloss_model"] == (SONNET55 if x.key in chosen else h55)
+        assert usage.per_model[h55].cost_usd == pytest.approx(
+            usage.per_model[h55].prompt_tokens * 0.10e-6 + usage.per_model[h55].completion_tokens * 0.50e-6)
+        assert "claude-haiku-4-5-20251001" not in usage.per_model
+
     def test_sonnet_55_priced_at_2_and_10(self):
         _, _, _, usage = self._run()
         t = usage.per_model[SONNET55]
