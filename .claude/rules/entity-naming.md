@@ -170,6 +170,15 @@ Rules:
    eyeball the pos/neg pairs and regenerate if it leaks.  If it
    recurs, add a per-trait generation-label override rather than
    changing the naming.
+7. **TODO before the first judging run that includes these traits
+   (Roger, 2026-10-07):** in the axis-judging rubric the pole should
+   read "careless (from HEXACO)", not "careless (HEXACO)": default to
+   inserting "from" at the display site the prompt builders use
+   (`display_form_name`), with a hard-coded list of the sets where the
+   definite article or another form reads better ("from the Big Five",
+   "from the Enneagram").  A rubric change: bump `RUBRIC_VERSION`.  The
+   stored label is unchanged.  Details in
+   `reports/seeding_log_2026-10.md` § "TODOs for this chunk".
 
 Multi-word entity census (qwen-3-32b Roger 8slot corpus): 12 of 303
 traits + 4 of 281 roles = 16 of ~584.  Examples: `systems_thinker`,

@@ -4242,6 +4242,15 @@ Rules:
    eyeball the pos/neg pairs and regenerate if it leaks.  If it
    recurs, add a per-trait generation-label override rather than
    changing the naming.
+7. **TODO before the first judging run that includes these traits
+   (Roger, 2026-10-07):** in the axis-judging rubric the pole should
+   read "careless (from HEXACO)", not "careless (HEXACO)": default to
+   inserting "from" at the display site the prompt builders use
+   (`display_form_name`), with a hard-coded list of the sets where the
+   definite article or another form reads better ("from the Big Five",
+   "from the Enneagram").  A rubric change: bump `RUBRIC_VERSION`.  The
+   stored label is unchanged.  Details in
+   `reports/seeding_log_2026-10.md` § "TODOs for this chunk".
 
 Multi-word entity census (qwen-3-32b Roger 8slot corpus): 12 of 303
 traits + 4 of 281 roles = 16 of ~584.  Examples: `systems_thinker`,
@@ -5070,6 +5079,25 @@ to every seed, by hand or by a writing agent; Roger reviews before
    states the membership or attribute plainly and stops.  No disclaimers,
    no "respectfully".  The generator's refusals are handled at generation
    time, not by hedging the seed.
+9. **Standards-derived entities (chunk 4 onward; Roger, 2026-10-06/07)**
+   are written from the instrument's own text, not drafted from notes:
+   locate an official description of the pole, record the passage
+   verbatim with its URL and date in the queue entry (`source_text`,
+   `source_url`, `source_retrieved`; the file's `source` carries
+   instrument and URL), and summarise it into the form above.  Two
+   departures from rules 2 and 5: **mirror the source's strength** (the
+   vice rule and the hedge list do not apply to a pre-balanced official
+   pair; do not sharpen a mild source or soften a strong one; render a
+   psychometric hedge such as "tend to" or "rather" as its plain-word
+   equivalent, not drop it; note a pole that comes out markedly milder
+   than the corpus's plain traits), and **do not force the two poles into
+   anti-parallel phrasing**: summarise each from its own source, and let
+   a reviewer read both originals and both drafts and flag accidental
+   differences of scope or phrasing for Roger to decide.  A low pole
+   with no source text is derived from the high pole's content, as
+   opposite behaviour, and tagged `low_pole_derived`.  Standards pairs
+   are paired by construction; the antonym check is informational.
+   Worked example: chunk 4 sub-chunk A in `reports/seeding_log_2026-10.md`.
 
 **Trait generator V2: the next task, before chunk 4 (Roger, 2026-09-28).**  The rules
 above govern descriptions; several problems found in the September
