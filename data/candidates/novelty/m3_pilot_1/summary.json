@@ -1,0 +1,394 @@
+{
+  "result": {
+    "mode": "shortlist",
+    "n_candidates": 460,
+    "n_decided": 460,
+    "n_stalled": 0,
+    "stalled": {},
+    "skipped": {
+      "not_a_trait": 81,
+      "held_nationalities": 7
+    },
+    "by_decision": {
+      "grey": 76,
+      "covered": 205,
+      "new": 179
+    },
+    "by_reason": {
+      "overlap": 448,
+      "exact_label": 12
+    },
+    "by_cut_off": {
+      "3": {
+        "grey": 62,
+        "covered": 198,
+        "new": 106
+      },
+      "4": {
+        "new": 73,
+        "covered": 7,
+        "grey": 14
+      }
+    },
+    "exact_label": {
+      "renamed_from": 12
+    },
+    "pairs_judged_per_candidate": {
+      "0": 1,
+      "1": 159,
+      "2": 21,
+      "3": 11,
+      "4": 9,
+      "5": 14,
+      "6": 21,
+      "7": 48,
+      "8": 59,
+      "9": 59,
+      "10": 40,
+      "11": 2,
+      "12": 4
+    },
+    "pairs_judged_total": 2275,
+    "pairs_judged_mean": 5.078,
+    "listed_per_candidate_mean": 17.192,
+    "shortlist_length": {
+      "0": 1,
+      "1": 5,
+      "2": 9,
+      "3": 11,
+      "4": 18,
+      "5": 28,
+      "6": 48,
+      "7": 66,
+      "8": 90,
+      "9": 98,
+      "10": 66,
+      "11": 3,
+      "12": 5
+    },
+    "early_exit_depth": {
+      "1": 157,
+      "2": 15,
+      "3": 6,
+      "4": 2,
+      "5": 1,
+      "6": 4,
+      "7": 3,
+      "8": 2,
+      "9": 2,
+      "10": 1
+    },
+    "escalations": {
+      "below_cut_off": 613,
+      "at_cut_off": 185
+    },
+    "rescues": 5,
+    "review_flags": {
+      "sonnet_below_opus_at": 61,
+      "pair_flag": 47
+    },
+    "pair_completions": 42,
+    "pair_completion_for": {
+      "adaptive#1": [
+        "mercurial"
+      ],
+      "atomistic#1": [
+        "systems_thinker",
+        "structuralist"
+      ],
+      "boastful#1": [
+        "modest"
+      ],
+      "bootlicking#1": [
+        "status_seeking"
+      ],
+      "bovine#1": [
+        "unflinching"
+      ],
+      "collectivist#1": [
+        "civilizationist"
+      ],
+      "compassionate_toward_animals#1": [
+        "cruel"
+      ],
+      "complacent#1": [
+        "accountable",
+        "self_blaming"
+      ],
+      "conflict_avoidant#1": [
+        "diplomatic"
+      ],
+      "coy#1": [
+        "sassy"
+      ],
+      "cruel_to_animals#1": [
+        "merciful"
+      ],
+      "democratic#1": [
+        "aristocratic"
+      ],
+      "directive#1": [
+        "absentee"
+      ],
+      "fair_minded#1": [
+        "judgmental"
+      ],
+      "human_centered#1": [
+        "civilizationist"
+      ],
+      "inattentive#1": [
+        "absorption_prone"
+      ],
+      "intervening#1": [
+        "passive"
+      ],
+      "linear_thinker#1": [
+        "stream_of_consciousness"
+      ],
+      "mannerly#1": [
+        "entitled"
+      ],
+      "merciless#1": [
+        "merciful"
+      ],
+      "monist#1": [
+        "materialist",
+        "paradoxical"
+      ],
+      "needy#1": [
+        "controlling"
+      ],
+      "nepotistic#1": [
+        "meritocratic"
+      ],
+      "nonsectarian#1": [
+        "sectarian"
+      ],
+      "ostentatious#1": [
+        "modest"
+      ],
+      "patronizing#1": [
+        "deferential"
+      ],
+      "personally_oriented#1": [
+        "regionalist",
+        "civilizationist",
+        "nationalist"
+      ],
+      "pompous#1": [
+        "dignified"
+      ],
+      "psychologically_secure#1": [
+        "self_blaming"
+      ],
+      "reformist#1": [
+        "subversive"
+      ],
+      "sadomasochistic#1": [
+        "merciful"
+      ],
+      "schmaltzy#1": [
+        "glib"
+      ],
+      "self_accountable#1": [
+        "self_blaming"
+      ],
+      "selfless#1": [
+        "civilizationist",
+        "regionalist"
+      ],
+      "slapdash#1": [
+        "micromanaging"
+      ],
+      "smooth#1": [
+        "glib"
+      ],
+      "socially_astute#1": [
+        "absorption_prone"
+      ],
+      "sympathetic#1": [
+        "cruel"
+      ],
+      "tawdry#1": [
+        "dignified"
+      ],
+      "technocrat#1": [
+        "aristocratic"
+      ],
+      "unapologetic#1": [
+        "accountable"
+      ],
+      "unforbearing#1": [
+        "self_blaming"
+      ]
+    },
+    "relation_outcomes": {
+      "call_status": {
+        "ok": 448
+      },
+      "answers": {
+        "similar": 2734,
+        "opposed": 2840,
+        "unrelated": 2112,
+        "unsure": 16
+      },
+      "final": {
+        "similar": 2734,
+        "unrelated": 2125,
+        "opposed": 2843
+      },
+      "candidates_with_unsure_reasked": 11
+    },
+    "cache": {
+      "claude-haiku-4-5-20251001": {
+        "calls": 448,
+        "input": 588504,
+        "cache_write": 0,
+        "cache_read": 0,
+        "calls_with_read": 0,
+        "read_share_of_input": 0.0,
+        "hit_rate_calls": 0.0
+      },
+      "claude-sonnet-5-5": {
+        "calls": 2286,
+        "input": 298443,
+        "cache_write": 4592,
+        "cache_read": 1301258,
+        "calls_with_read": 2267,
+        "read_share_of_input": 0.8111,
+        "hit_rate_calls": 0.9917
+      },
+      "claude-opus-5-5": {
+        "calls": 798,
+        "input": 99983,
+        "cache_write": 4018,
+        "cache_read": 454034,
+        "calls_with_read": 791,
+        "read_share_of_input": 0.8136,
+        "hit_rate_calls": 0.9912
+      }
+    },
+    "spend_by_stage": {
+      "relation": {
+        "claude-haiku-4-5-20251001": 2.727284
+      },
+      "relation_unsure": {
+        "claude-sonnet-5-5": 0.026684
+      },
+      "overlap": {
+        "claude-sonnet-5-5": 2.685208,
+        "claude-opus-5-5": 3.053984
+      }
+    },
+    "spend_usd": 8.494095,
+    "usage": {
+      "per_model": {
+        "claude-haiku-4-5-20251001": {
+          "model": "claude-haiku-4-5-20251001",
+          "prompt_tokens": 588504,
+          "completion_tokens": 427756,
+          "cost_usd": 2.7273,
+          "n_calls": 448
+        },
+        "claude-opus-5-5": {
+          "model": "claude-opus-5-5",
+          "prompt_tokens": 150096,
+          "completion_tokens": 122680,
+          "cost_usd": 3.054,
+          "n_calls": 798
+        },
+        "claude-sonnet-5-5": {
+          "model": "claude-sonnet-5-5",
+          "prompt_tokens": 433406,
+          "completion_tokens": 184508,
+          "cost_usd": 2.7119,
+          "n_calls": 2286
+        },
+        "text-embedding-3-large": {
+          "model": "text-embedding-3-large",
+          "prompt_tokens": 7195,
+          "completion_tokens": 0,
+          "cost_usd": 0.0009,
+          "n_calls": 3
+        }
+      },
+      "total_cost_usd": 8.4941,
+      "total_prompt_tokens": 1179201,
+      "total_completion_tokens": 734944,
+      "n_calls": 3535
+    },
+    "batch_id": "m3_pilot_1",
+    "parse_rates": {
+      "relation:claude-haiku-4-5-20251001": {
+        "n": 448,
+        "ok_first": 448,
+        "ok": 448
+      },
+      "relation_unsure:claude-sonnet-5-5": {
+        "n": 11,
+        "ok_first": 11,
+        "ok": 11
+      },
+      "overlap:claude-sonnet-5-5": {
+        "n": 2275,
+        "ok_first": 2275,
+        "ok": 2275
+      },
+      "overlap:claude-opus-5-5": {
+        "n": 798,
+        "ok_first": 798,
+        "ok": 798
+      }
+    },
+    "stopped_by_budget": false,
+    "stopped_by_error": null,
+    "resumed_calls": 0,
+    "rubrics": {
+      "overlap": {
+        "name": "overlap_concept",
+        "version": 6,
+        "sha256": "b3eff18fb946928517183af0244acec2d35dba0ab0bd9c57f83c7a06ac3c9fd0"
+      },
+      "relation": {
+        "name": "relation",
+        "version": 1,
+        "sha256": "b6b11f8cfcb0faafdac4a040087356ecb13d410e9bc309597d7833a96110d70f"
+      }
+    }
+  },
+  "_provenance": {
+    "schema_version": "1.0",
+    "produced_by": {
+      "cmd": "uv run python data_analysis/gap_generation/novelty_score.py score --batch-id m3_pilot_1 --run antonym_check/pilot_1 --run m1_validation/pilot_1 --transport live --query-form gloss_w14 --budget-usd 11 --confirmed-by 'Roger via Fable (coordinator), 2026-10-07: M3 cap $11'",
+      "git_sha": "53b3d07+dirty",
+      "author": "Roger Dearnaley",
+      "title": "novelty_score shortlist m3_pilot_1"
+    },
+    "produced_at": "2026-10-07T01:25:18+00:00",
+    "inputs": [
+      {
+        "dep_key": "metric_config",
+        "path": "data/candidates/metric_config.json",
+        "fingerprint": "v1:2026-10-02T22:21:08+00:00@54961",
+        "kind": "file",
+        "dataset_id": null,
+        "last_modified_at": "2026-10-02T22:21:08+00:00",
+        "extras": {}
+      },
+      {
+        "dep_key": "rubrics",
+        "path": "reports/trait_gap_generation/rubrics",
+        "fingerprint": "v1:multi:7440bfeac914",
+        "kind": "multi",
+        "dataset_id": null,
+        "last_modified_at": "2026-10-06T23:37:23+00:00",
+        "extras": {},
+        "member_paths": [
+          "reports/trait_gap_generation/rubrics/overlap_concept.md",
+          "reports/trait_gap_generation/rubrics/relation.md"
+        ]
+      }
+    ],
+    "inputs_sha256": "e9a514a82d8f6713ac8181559d149272b27daa9f2f4dc6a5b2921773d45efea8"
+  }
+}
