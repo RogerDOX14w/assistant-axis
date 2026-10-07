@@ -108,6 +108,23 @@ def write_outputs(out_dir: Path, name: str, result: dict, markdown: str, inputs:
 # --------------------------------------------------------------------------- A: the M1 filter
 
 def load_filter_run(batch: str, root: Path = FILTER_DIR) -> dict:
+    """One run's directory, or ``A+B``: two runs read as one (their rows and records together; a word in both
+    is taken from the later name).  They must have the same first model and step versions (``ValueError``
+    otherwise): a Haiku 4.5 reference at the current step versions made of ``m1_validation_r2``'s test words
+    and ``h45_split_test_words_36`` for the rest."""
+    if "+" in batch:
+        parts = [load_filter_run(b, root) for b in batch.split("+")]
+        keys = {(p["run"].get("model"), json.dumps(p["run"].get("step_versions"), sort_keys=True)) for p in parts}
+        if len(keys) > 1:
+            raise ValueError(f"{batch}: the runs differ in model or step versions: {sorted(keys)}")
+        by_label: dict = {}
+        for p in parts:
+            by_label.update(p["by_label"])
+        run = dict(parts[0]["run"])
+        run["git_sha"] = " + ".join(str(p["run"].get("git_sha")) for p in parts)
+        run["second_model"] = " / ".join(str(p["run"].get("second_model")) for p in parts)
+        return {"batch": batch, "dir": parts[-1]["dir"], "run": run, "rows": list(by_label.values()),
+                "by_label": by_label, "records": [r for p in parts for r in p["records"]], "parts": parts}
     d = Path(root) / batch
     run = json.loads((d / "run.json").read_text()) if (d / "run.json").exists() else {}
     rows = read_jsonl(d / "results.jsonl")
@@ -118,9 +135,10 @@ def load_filter_run(batch: str, root: Path = FILTER_DIR) -> dict:
 def run_settings(fr: Mapping) -> dict:
     """What makes two filter runs like for like: the first model, the step versions, the second opinion."""
     r = fr["run"]
+    n_rows = " + ".join(str(len(p["rows"])) for p in fr["parts"]) if fr.get("parts") else len(fr["rows"])
     return {"batch": fr["batch"], "model": r.get("model"), "second_model": r.get("second_model"),
             "step_versions": r.get("step_versions"), "git_sha": r.get("git_sha"), "transport": r.get("transport"),
-            "started_at": r.get("started_at"), "n_rows": len(fr["rows"])}
+            "started_at": r.get("started_at"), "n_rows": n_rows}
 
 
 def outcome(row: Optional[Mapping]) -> Optional[str]:
@@ -285,6 +303,13 @@ def parse_rates(records: Sequence[Mapping]) -> dict:
     return dict(sorted(out.items()))
 
 
+def records_for(fr: Mapping, labels: Iterable[str]) -> list[dict]:
+    """A run's records of the words ``labels`` only (a run of a larger file, such as m1_validation_r2, holds the
+    test words among many others)."""
+    keys = {fr["by_label"][lab]["key"] for lab in labels if lab in fr["by_label"] and fr["by_label"][lab].get("key")}
+    return [r for r in fr["records"] if (r.get("keys") or [None])[0] in keys]
+
+
 def compare_filter_words(runs: Sequence[Mapping], expected: Mapping[str, Mapping], labels: Sequence[str]) -> dict:
     """``runs``: the Haiku 5.5 run first, then the references (Haiku 4.5 runs)."""
     main = runs[0]
@@ -296,8 +321,9 @@ def compare_filter_words(runs: Sequence[Mapping], expected: Mapping[str, Mapping
         out["against_reference"][r["batch"]] = against_reference(r, expected, present) | {"n_present": len(present)}
         out["glosses"][r["batch"]] = gloss_checks(r, present)
         out["alignment_scores"][r["batch"]] = alignment_scores(r, present)
-        out["parse_rates"][r["batch"]] = parse_rates(r["records"])
-        out["calls"][r["batch"]] = call_stats(r["records"])
+        recs = records_for(r, present)
+        out["parse_rates"][r["batch"]] = parse_rates(recs)
+        out["calls"][r["batch"]] = call_stats(recs)
         out["notes_two_trait_senses"][r["batch"]] = sum(
             1 for lab in present if classified(r["by_label"][lab]) and "two_trait_senses" in (r["by_label"][lab]["filter"].get("notes") or []))
     for r in runs[1:]:
@@ -319,7 +345,9 @@ def compare_filter_validation(main: Mapping, reference: Mapping, others: Sequenc
     """Each Haiku run's disagreement with ``reference`` (Sonnet 5.5) on the reference's words, and the Haiku runs
     against each other on the same words."""
     labels = sorted(reference["by_label"])
-    out = {"n_words": len(labels), "reference": run_settings(reference), "runs": [run_settings(r) for r in [main, *others]],
+    out = {"n_words": len(labels), "reference": run_settings(reference),
+           "reference_outcomes": dict(sorted(Counter(outcome(reference["by_label"][lab]) for lab in labels).items())),
+           "runs": [run_settings(r) for r in [main, *others]],
            "against_reference": {}, "word_by_word": {}, "inputs": {}, "calls": {}, "parse_rates": {}, "glosses": {},
            "alignment_scores": {}}
     for r in [main, *others]:
@@ -333,6 +361,7 @@ def compare_filter_validation(main: Mapping, reference: Mapping, others: Sequenc
                         if outcome(reference["by_label"][lab]) != outcome(r["by_label"][lab]))
         out["against_reference"][r["batch"]] = {
             "n_present": len(present), "n_both": wb["n_both"], "same_outcome": wb["same_outcome"],
+            "outcomes": dict(sorted(Counter(outcome(r["by_label"][lab]) for lab in both).items())),
             "agreement": wb["share"], "disagreement": None if wb["share"] is None else round(1 - wb["share"], 4),
             "same_verdict": same_v, "verdict_agreement": share(same_v, len(both)),
             "sonnet_to_haiku": dict(sorted(trans.items())), "differ": wb["differ"],
@@ -341,8 +370,8 @@ def compare_filter_validation(main: Mapping, reference: Mapping, others: Sequenc
             "sonnet_trait_haiku_not": sum(outcome(reference["by_label"][lab]) == "trait" and outcome(r["by_label"][lab]) != "trait"
                                           for lab in both)}
         out["inputs"][f"{r['batch']} vs {reference['batch']}"] = same_inputs(r, reference, present)
-        out["calls"][r["batch"]] = call_stats(r["records"])
-        out["parse_rates"][r["batch"]] = parse_rates(r["records"])
+        out["calls"][r["batch"]] = call_stats(records_for(r, present))
+        out["parse_rates"][r["batch"]] = parse_rates(records_for(r, present))
         out["glosses"][r["batch"]] = gloss_checks(r, present)
         out["alignment_scores"][r["batch"]] = alignment_scores(r, present)
     for o in others:
@@ -427,12 +456,16 @@ def filter_validation_markdown(c: Mapping) -> str:
     for r in c["runs"]:
         L.append(f"| {r['batch']} | {SHORT.get(r['model'], r['model'])} | {json.dumps(r['step_versions'])} | {r['git_sha']} | "
                  f"{r['n_rows']} |")
-    L += ["", "## Against the reference", "", "| run | words both classified | same outcome | agreement | disagreement | "
-          "same verdict | Haiku trait, Sonnet not | Sonnet trait, Haiku not | Sonnet -> Haiku |", "|---|---|---|---|---|---|---|---|---|"]
+    L += ["", "## Against the reference", "",
+          "The words are those M3's pilot drew from the M1 validation run's random adjectives that Haiku 4.5 (at the step "
+          "versions of `m1_validation`) passed as traits: the pool is selected on that run's verdict, so its figures are "
+          "not those of a random sample.  Reference outcomes: " + json.dumps(c.get("reference_outcomes")) + ".", "",
+          "| run | words both classified | same outcome | agreement | disagreement | same verdict | Haiku trait, Sonnet not | "
+          "Sonnet trait, Haiku not | the run's outcomes | Sonnet -> Haiku |", "|---|---|---|---|---|---|---|---|---|---|"]
     for k, a in c["against_reference"].items():
         L.append(f"| {k} | {a['n_both']} | {a['same_outcome']} | {pct(a['agreement'])} | {pct(a['disagreement'])} | "
                  f"{a['same_verdict']} | {a['haiku_trait_sonnet_not']} | {a['sonnet_trait_haiku_not']} | "
-                 f"{json.dumps(a['sonnet_to_haiku'])} |")
+                 f"{json.dumps(a.get('outcomes'))} | {json.dumps(a['sonnet_to_haiku'])} |")
     L += ["", "## Haiku runs against each other", "", "| runs | words | same outcome | share |", "|---|---|---|---|"]
     for k, w in c["word_by_word"].items():
         L.append(f"| {k} | {w['n_both']} | {w['same_outcome']} | {pct(w['share'])} |")
@@ -880,9 +913,11 @@ def build_parser() -> argparse.ArgumentParser:
     sub = ap.add_subparsers(dest="cmd", required=True)
     sp = sub.add_parser("filter-words", help="A on the 99 test words")
     sp.add_argument("--run", default="h55_split_test_words", help="the Haiku 5.5 run (filter/<batch>)")
-    sp.add_argument("--compare", nargs="*", default=["h45_split_test_words", "split_pilot_live", "r7_split_test_words",
-                                                     "m1_validation_r2"],
-                    help="Haiku 4.5 runs to compare with (missing words are left out of each comparison)")
+    sp.add_argument("--compare", nargs="*", default=["m1_validation_r2+h45_split_test_words_36", "split_pilot_live",
+                                                     "r7_split_test_words", "m1_validation_r2"],
+                    help="Haiku 4.5 runs to compare with (A+B reads two runs as one; missing words are left out of each "
+                         "comparison).  Default: the current step versions on every test word (m1_validation_r2's 63 and "
+                         "the 36-word run), the pilot of 2026-09-29, the run of 2026-09-30 (kind 5), m1_validation_r2 alone")
     sp.add_argument("--reference", type=Path, default=REFERENCE_JOIN)
     sp.set_defaults(func=cmd_filter_words)
     sp = sub.add_parser("filter-validation", help="A on the validation pool's words")

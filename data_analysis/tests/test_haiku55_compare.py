@@ -77,6 +77,21 @@ class TestRelationHelpers:
         assert g["kappa"] is not None and 0 < g["kappa"] < 1
 
 
+def test_two_runs_read_as_one():
+    """``A+B``: the current-version Haiku 4.5 reference on the 99 test words (m1_validation_r2's 63 and the
+    36-word run); runs of other step versions are refused."""
+    a, b = H.load_filter_run("m1_validation_r2"), H.load_filter_run("h45_split_test_words_36")
+    if not (a["rows"] and b["rows"]):
+        pytest.skip("recorded runs not present")
+    both = H.load_filter_run("m1_validation_r2+h45_split_test_words_36")
+    exp = {e["word"]: e for e in H.read_jsonl(H.REFERENCE_JOIN)}
+    assert all(w in both["by_label"] for w in exp)
+    assert len(both["records"]) == len(a["records"]) + len(b["records"])
+    assert H.run_settings(both)["n_rows"] == f"{len(a['rows'])} + {len(b['rows'])}"
+    with pytest.raises(ValueError, match="differ in model or step versions"):
+        H.load_filter_run("split_pilot_live+h45_split_test_words_36")
+
+
 def test_filter_words_on_two_recorded_haiku_45_runs():
     """The comparison as the CLI makes it, on the two recorded live runs of 2026-09-29 and 30 (read only)."""
     exp = {e["word"]: e for e in H.read_jsonl(H.REFERENCE_JOIN)}
