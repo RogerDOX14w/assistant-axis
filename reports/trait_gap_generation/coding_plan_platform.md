@@ -705,3 +705,10 @@ left provisional:
     the pilot's scan sample (youthful / immature, trendsetting / fashionable, meandering / erratic,
     self-serving / uncaring, conflict-avoidant / peaceful) go first.  The cosine floor (0.25) remains
     a cost lever for Roger to decide; it is not needed for correctness.
+16. **TODO (Roger, 2026-10-07): re-examine the M1 verdict step's model once real generators run.**
+    Whichever way the Haiku 4.5 / 5.5 choice goes ([haiku55_readout.md](./haiku55_readout.md)), the
+    pools it was decided on are proxies (antonym-check words, random dictionary adjectives, the test
+    words); the plan's rule is a model per generator, chosen on that generator's own pilot (the
+    "M1 filter: judging model per generator" paragraph above).  When the first generator's output
+    exists, rerun the comparison on it (both Haikus, Sonnet, an Opus reference on a few hundred words)
+    before fixing the generator's model.
