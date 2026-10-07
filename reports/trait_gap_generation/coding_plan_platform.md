@@ -677,3 +677,31 @@ left provisional:
     form); if the Opus reading on the 2s earns little, the pipeline shifts to "Opus on the 3s only"
     as a saving (about $40 against $70 per 10,000 candidates, live).  Either way every reading is
     logged, so the rule can be re-run on the records without new calls.
+12. **From Roger's review of the pilot (2026-10-07; [m3_pilot_readout.md](./m3_pilot_readout.md),
+    "Roger's review"): decision 11's full form is confirmed, and the row's default follows it.**  On
+    the 58 review-queue pairs he scored where Sonnet read one below the cut-off and Opus at or above
+    it, he sided with Opus on 45 and Sonnet on 13.  So a Sonnet reading one below the cut-off that
+    Opus reads at or above it is **covered, flagged for review** (`review: "sonnet_below_opus_at"`
+    stays; the decision changes from `grey` to `covered`), not kept.  "Opus on the 3s only" is off the
+    table as a saving: it would keep about 10% of candidates that are near-duplicates.
+13. **Both ends of a pair similar: neither may cut** (Roger's rule).  When the relation call marks both
+    members of a recorded pair `similar`, the candidate is taken to be orthogonal to the pair's axis:
+    both ends are removed from the shortlist, the row gets `pair_note: {"pair": [...], "both":
+    "similar"}`, and the note is surfaced in review.  Both ends are always listed (the arrangement
+    expansion adds the partner of every retrieved pair member), so the rule needs no extra calls.  In
+    the pilot it would have changed no decision (ten cases: four kept anyway, six covered by another
+    trait).
+14. **The pair flag is a note, not a review trigger.**  Both-opposed flags were all harmless on review
+    (a candidate in the middle of a scale, or on the other side of a relation, is opposed to both
+    ends); `pair_flags` stays on the row for the record, and `grey` is no longer given for it.  With 12
+    and 14 the review queue is the `sonnet_below_opus_at` rows (now covered-and-flagged) plus the
+    both-similar notes and `unparsed`.
+15. **Exact-label stage: `renamed_from` goes to the overlap call; labels compared separator-blind.**
+    A candidate whose label is a corpus file's `renamed_from` is judged against the current trait like
+    any other (the pilot auto-covered four real gaps: engaging by unflinching, relaxed by unhurried,
+    shy by self-conscious, assertive by opinionated); only a corpus stem or queue stem still covers
+    without a call.  The comparison ignores separators ("anti feminist" = antifeminist).  Also:
+    `full-scan --keys` so chosen candidates can be scanned; the five relation-call corrections not in
+    the pilot's scan sample (youthful / immature, trendsetting / fashionable, meandering / erratic,
+    self-serving / uncaring, conflict-avoidant / peaceful) go first.  The cosine floor (0.25) remains
+    a cost lever for Roger to decide; it is not needed for correctness.

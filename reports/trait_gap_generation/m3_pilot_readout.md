@@ -156,6 +156,73 @@ each would have done on this run (readings are the 2,275 pairs judged; covers th
 4. **The pair completions** (42) and the rename shortlist (158 traits) are by-products for the
    pairing and renaming work, not for M3.
 
+## Roger's review of the pilot (2026-10-07)
+
+Roger read the covered rows and the whole review queue of
+[decisions.md](../../data/candidates/novelty/m3_pilot_1/decisions.md) and marked them (transcribed in
+[roger_review.json](../../data/candidates/novelty/m3_pilot_1/roger_review.json); the new rows he could
+not assess, since the file did not list their neighbours: that is now
+[new_candidates.md](../../data/candidates/novelty/m3_pilot_1/new_candidates.md), every new candidate
+with its gloss and every listed trait in cosine order with the relation call's answer and the overlap
+scores).  What his marks say:
+
+**The covers are right, with three exceptions in about 200.**  Earthy by
+[unpretentious](../../data/traits/instructions/unpretentious.json) (Roger 2; both models 3): M1's gloss
+had already narrowed earthy to "speaking plainly about what works, without affectation", so the models
+scored the gloss, not the word; the gloss is the input, and a thin gloss makes a false cover.  Engaging
+by [unflinching](../../data/traits/instructions/unflinching.json) (Roger 1): the `renamed_from` exact-label
+rule, from a secondary sense of "engaging"; lever 4 above, confirmed.  Uninhibited by
+[unselfconscious](../../data/traits/instructions/unselfconscious.json) (Roger 2, with a case for 3).
+
+**The review queue settles the plan-of-record question.**  On the 58 pairs he scored where Sonnet read
+one below the cut-off and Opus at or above it, Roger sides with **Opus on 45 and with Sonnet on 13**
+(two of the 13 are ranges that straddle a cut-off of 4, flaky and hot-headed, and one is his own
+"2 or 3").  So the cheaper rule, Opus on the 3s only, would have kept 45 near-duplicates as new (10% of
+the 460 candidates), and the plan of record, Opus deciding on the 2s as well, would have wrongly cut
+about 13 (3%).  Decision 11 stands, and the row's default should follow it: a Sonnet 2 that Opus reads
+at the cut-off becomes **covered, flagged for review**, rather than kept and flagged; the review work
+is the same 61 rows, and the default is right four times in five.  Four exact 4s among them (content /
+[contented](../../data/traits/instructions/contented.json), ethical / [moral](../../data/traits/instructions/moral.json),
+indolent / [lazy](../../data/traits/instructions/lazy.json), wicked / [evil](../../data/traits/instructions/evil.json)):
+near-synonyms Sonnet had read as 3 under a cut-off of 4.
+
+**The pair flags are harmless by design, and Roger's rule for the both-similar case costs nothing.**
+Every both-opposed flag he looked at (12) he endorsed: a candidate in the middle of a scale (social
+drinker, selective poster, everyday) or about the other side of a relation (arresting, infuriating,
+denigrating: one's effect on others against others' effect on oneself) is opposed to both ends, and
+neither end covers it.  So the pair flag stops being a reason for review (23 of the 76 grey rows
+carried it alone): a note on the row.  For the both-similar case he proposes: **if both ends of a pair
+come back similar, the candidate is probably orthogonal to the pair's axis; neither end may cut it;
+note the pair and surface it in review** (astute and deep against analytical / intuitive, delegating
+against hands-on / hands-off, self-aware against self-accepting / self-critical).  The run had ten
+both-similar flags: four are his cases (all kept, since no end reached the cut-off) and the other six
+were covered by a different trait (affluent and rich by wealthy, learned by erudite, mated by married,
+perceptive by socially perceptive, animal loving by kind to animals), never by an end.  Adopting the
+rule changes no decision here.  His question, whether both ends are tested: yes, always, by
+construction: the arrangement expansion lists the partner of every retrieved pair member, and the
+relation call answers for both; the overlap walk may stop before scoring the second end, so the rule
+applies to the relation call's answer, with the overlap scores as confirmation where they exist.
+
+**The relation call's "opposed" is loose, and so far harmless.**  Roger corrected 24 answers on 12
+candidates, mostly a wrong "opposed" on one end of a pair (youthful / immature, trendsetting /
+fashionable, meandering / erratic, self-serving / uncaring, conflict-avoidant / peaceful) or on both
+(sly, smooth, twisted, one of many, inauthentic).  A wrong "opposed" has one cost that matters: the
+trait is not judged, so a cover can be missed.  The evidence that it was not: the full scan's recall
+of 1.0 on 100 candidates, and the three of his cases that were in the scan (sly, smooth, twisted),
+where the wrongly opposed traits scored 0 or 1.  The five not in the scan are unmeasured; the next
+build adds `--keys` to `full-scan` so chosen candidates can be scanned for pennies, and those five go
+first.  The other cost, a partner pulled to the front of the shortlist, is one extra call.
+
+**Accepting**: Roger suspected closer matches than death-accepting; the list has none (passive 2 / 2,
+unflappable 2 / 2, composed 2 / 2).  The extreme-narrowing case (a very specific corpus trait covering
+a general candidate) is a known gap in a scale with no direction; noted for the retune.
+
+**Decisions taken from the review** (recorded in [coding_plan_platform.md](./coding_plan_platform.md),
+M3 decisions 12-15): Sonnet 2 / Opus at the cut-off is covered-and-flagged; the both-similar rule;
+the pair flag demoted to a note; `renamed_from` matches go to the overlap call; separator-blind
+labels; `--keys` on the full scan.  Open from the readout above: the cosine floor (0.25), which is a
+cost lever, not a correctness one.
+
 ## Files
 
 - Code: [novelty.py](../../assistant_axis/gapgen/novelty.py), [novelty_runner.py](../../assistant_axis/gapgen/novelty_runner.py),
