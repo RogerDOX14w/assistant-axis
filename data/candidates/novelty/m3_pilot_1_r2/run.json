@@ -1,0 +1,279 @@
+{
+  "batch_id": "m3_pilot_1_r2",
+  "mode": "shortlist",
+  "git_sha": "ec80b89",
+  "allow_dirty": false,
+  "dirty_check": {
+    "paths": [
+      "assistant_axis/gapgen",
+      "data_analysis/gap_generation",
+      "assistant_axis/judge.py",
+      "assistant_axis/judge_pricing.py",
+      "assistant_axis/entity_id.py",
+      "assistant_axis/atomic_io.py",
+      "data/candidates/validation",
+      "reports/trait_gap_generation/rubrics",
+      "pyproject.toml",
+      "uv.lock"
+    ],
+    "dirty": [],
+    "note": null
+  },
+  "argv": [
+    "score",
+    "--redecide",
+    "--from-batch",
+    "m3_pilot_1",
+    "--batch-id",
+    "m3_pilot_1_r2",
+    "--cosine-floor",
+    "0.25",
+    "--transport",
+    "live",
+    "--budget-usd",
+    "2"
+  ],
+  "plan": {
+    "mode": "shortlist",
+    "n_candidates": 460,
+    "n_exact_label": 3,
+    "n_to_relation": 457,
+    "skipped": {},
+    "transport": "live",
+    "query_form": "gloss_w14",
+    "listed_mean": 17.215217391304346,
+    "n_query_texts_cached": 460,
+    "n_query_texts_to_embed": 0,
+    "corpus": {
+      "n_corpus": 663,
+      "n_missing_from_cache": 0,
+      "missing": []
+    },
+    "rules": {
+      "name": "m3_rules_2",
+      "version": 2,
+      "cover_on_opus_check": true,
+      "both_similar_excluded": true,
+      "pair_flag_grey": false,
+      "renamed_from_covers": false,
+      "separator_blind": true,
+      "cosine_floor": 0.25
+    },
+    "corpus_files": {
+      "corpus_at": "source",
+      "source_batch": "m3_pilot_1",
+      "git_sha": "53b3d07",
+      "source_was_dirty": false,
+      "n_trait_files": 663,
+      "data_dir": "/tmp/claude-501/m3_corpus_53b3d07_m_j33gqq/data"
+    },
+    "redecide": {
+      "from_batch": "m3_pilot_1",
+      "source_rules": {
+        "name": "m3_rules_1",
+        "version": 1,
+        "cover_on_opus_check": false,
+        "both_similar_excluded": false,
+        "pair_flag_grey": true,
+        "renamed_from_covers": true,
+        "separator_blind": false,
+        "cosine_floor": null
+      },
+      "rules": {
+        "name": "m3_rules_2",
+        "version": 2,
+        "cover_on_opus_check": true,
+        "both_similar_excluded": true,
+        "pair_flag_grey": false,
+        "renamed_from_covers": false,
+        "separator_blind": true,
+        "cosine_floor": 0.25
+      },
+      "relation_seed": "m3_pilot_1",
+      "n_source_records": 3532,
+      "reproduction": {
+        "n": 460,
+        "identical": 460,
+        "differ": [],
+        "not_replayable": []
+      },
+      "calls_not_on_record": {
+        "relation:claude-haiku-4-5-20251001": 12
+      },
+      "candidates_needing_calls": [
+        "assertive#1",
+        "dogmatic#1",
+        "engaging#1",
+        "fashion_conscious#1",
+        "financially_cautious#1",
+        "inept#1",
+        "relaxed#1",
+        "reward_driven#1",
+        "risk_taking#1",
+        "rule_following#1",
+        "shy#1",
+        "urgent#1"
+      ],
+      "decided_offline": 448,
+      "offline_decisions": {
+        "covered -> covered": 193,
+        "grey -> covered": 53,
+        "grey -> new": 23,
+        "new -> new": 179
+      }
+    }
+  },
+  "transport": "live",
+  "transport_reason": "--transport live",
+  "estimate_usd": 0.1626,
+  "estimate_lines": [
+    "calls not on record: relation: 12 x (1,395, 834) tokens at claude-haiku-4-5-20251001 rates = $0.067",
+    "their walks after it: overlap, Sonnet (3 pairs a candidate, 18% saved by early exit): 30 x (219, 78) tokens at claude-sonnet-5-5 rates = $0.037",
+    "their walks after it: overlap, Opus (62% of pairs): 19 x (220, 112) tokens at claude-opus-5-5 rates = $0.059"
+  ],
+  "budget_usd": 2.0,
+  "cap_usd": 2.0,
+  "confirmed_by": null,
+  "rubrics": {
+    "overlap": {
+      "name": "overlap_concept",
+      "version": 6,
+      "sha256": "b3eff18fb946928517183af0244acec2d35dba0ab0bd9c57f83c7a06ac3c9fd0"
+    },
+    "relation": {
+      "name": "relation",
+      "version": 1,
+      "sha256": "b6b11f8cfcb0faafdac4a040087356ecb13d410e9bc309597d7833a96110d70f"
+    }
+  },
+  "models": {
+    "relation": "claude-haiku-4-5-20251001",
+    "relation_unsure": "claude-sonnet-5-5",
+    "overlap_first": "claude-sonnet-5-5",
+    "overlap_second": "claude-opus-5-5"
+  },
+  "settings": {
+    "config_version": "2026-10-02",
+    "k": 10,
+    "representation": "w20",
+    "variant": "centred",
+    "query_form": "gloss_w14",
+    "embedding_model": "text-embedding-3-large",
+    "cut_off_rule": "alignment score 0-1: 3; 2-3: 4; missing: 4",
+    "relation_max_tokens": 4096,
+    "overlap_max_tokens": 2048,
+    "temperature": 0.0,
+    "cache_ttl_batches": "1h",
+    "concurrency": 8,
+    "ask_attempts": 2,
+    "relation_seed": "m3_pilot_1",
+    "cosine_floor": 0.25
+  },
+  "rules": {
+    "name": "m3_rules_2",
+    "version": 2,
+    "cover_on_opus_check": true,
+    "both_similar_excluded": true,
+    "pair_flag_grey": false,
+    "renamed_from_covers": false,
+    "separator_blind": true,
+    "cosine_floor": 0.25
+  },
+  "corpus": {
+    "corpus_at": "source",
+    "source_batch": "m3_pilot_1",
+    "git_sha": "53b3d07",
+    "source_was_dirty": false,
+    "n_trait_files": 663,
+    "data_dir": "/tmp/claude-501/m3_corpus_53b3d07_m_j33gqq/data"
+  },
+  "resumed": false,
+  "started_at": "2026-10-07T18:57:34+00:00",
+  "redecide": {
+    "from_batch": "m3_pilot_1",
+    "source_rules": {
+      "name": "m3_rules_1",
+      "version": 1,
+      "cover_on_opus_check": false,
+      "both_similar_excluded": false,
+      "pair_flag_grey": true,
+      "renamed_from_covers": true,
+      "separator_blind": false,
+      "cosine_floor": null
+    },
+    "rules": {
+      "name": "m3_rules_2",
+      "version": 2,
+      "cover_on_opus_check": true,
+      "both_similar_excluded": true,
+      "pair_flag_grey": false,
+      "renamed_from_covers": false,
+      "separator_blind": true,
+      "cosine_floor": 0.25
+    },
+    "relation_seed": "m3_pilot_1",
+    "n_source_records": 3532,
+    "reproduction": {
+      "n": 460,
+      "identical": 460,
+      "differ": [],
+      "not_replayable": []
+    },
+    "calls_not_on_record": {
+      "relation:claude-haiku-4-5-20251001": 12
+    },
+    "candidates_needing_calls": [
+      "assertive#1",
+      "dogmatic#1",
+      "engaging#1",
+      "fashion_conscious#1",
+      "financially_cautious#1",
+      "inept#1",
+      "relaxed#1",
+      "reward_driven#1",
+      "risk_taking#1",
+      "rule_following#1",
+      "shy#1",
+      "urgent#1"
+    ],
+    "decided_offline": 448,
+    "offline_decisions": {
+      "covered -> covered": 193,
+      "grey -> covered": 53,
+      "grey -> new": 23,
+      "new -> new": 179
+    }
+  },
+  "replay_from": [
+    "m3_pilot_1"
+  ],
+  "canary": {
+    "model": "text-embedding-3-large",
+    "arm": "openai",
+    "tag": "openai_text-embedding-3-large",
+    "n": 8,
+    "n_compared": 8,
+    "n_new_reference": 0,
+    "min_cosine": 0.999603,
+    "threshold": 0.999,
+    "cosines": {
+      "absentee": 0.999995,
+      "collectivistic": 1.0,
+      "edgy": 1.0,
+      "gay": 1.0,
+      "ironic": 0.999603,
+      "only_child": 1.0,
+      "restless": 0.999993,
+      "sycophantic": 1.0
+    },
+    "below": [],
+    "ok": true,
+    "checked_at": "2026-10-07T18:57:37+00:00"
+  },
+  "finished_at": "2026-10-07T18:58:51+00:00",
+  "cost_usd": 0.2741,
+  "status": 0,
+  "stopped_by_error": null,
+  "n_decided": 460,
+  "n_stalled": 0
+}
