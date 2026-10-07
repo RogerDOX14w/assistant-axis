@@ -4,6 +4,21 @@ Brief for an Opus coding agent, from Fable, on Roger's instruction of 2026-10-07
 we should run a quality and price comparison with Haiku 4.5, and if it's as good or better, move up
 to it."  Runs after the M3 round-2 agent has reported (it works in the same worktree).
 
+## Scope: the gap-filling subproject only (Roger, 2026-10-07)
+
+Roger: "There are two separate decisions here: Haiku for this gap-filling subproject, and Haiku for
+other places in the project, such as description / response judging.  Each needs to be tested
+separately."  This job tests, and may later switch, only the gap-filling platform's Haiku calls: the
+M1 filter (its first-line steps, gloss, kind, same-sense, alignment, descriptors, the states pass and
+the plain-reading check), the M2 paraphrase check, and the M3 relation call, with comparison C
+answering whether Haiku could also take the overlap call.  **Not in this job**, each its own test and
+decision later: the response-mode axis judge (`axis_judge_correlation.py --judge_model`, the
+`haiku_responses_*_b7_t3` cohorts and the rejudge scripts; a model change there makes new cohorts,
+since caches are keyed by judge family and the judge-model drift check drops a cohort whose recorded
+model differs), the steering effect judge (`steering_judges.DEFAULT_EFFECT_MODELS`), the refusal
+fallback judge (`data/judge_refusal_allowlist.json`), and the question judge of
+`audit_trait_instructions.py`.
+
 ## The facts (read from the model, pricing and caching pages on 2026-10-07)
 
 - Model id `claude-haiku-5-5`, released 2026-10-07.  **$0.10 / $0.50 per MTok** for prompts up to
