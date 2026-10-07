@@ -1,0 +1,1838 @@
+{
+  "result": {
+    "n": 600,
+    "n_done": 600,
+    "n_failed": 0,
+    "n_pending": 0,
+    "n_hard_reject": 96,
+    "verdict_counts": {
+      "reject": 174,
+      "tagged": 70,
+      "trait": 356
+    },
+    "verdict_fractions": {
+      "reject": 0.29,
+      "tagged": 0.1167,
+      "trait": 0.5933
+    },
+    "tag_counts": {
+      "action": 1,
+      "evaluative_only": 4,
+      "membership": 32,
+      "no_persona_reading": 61,
+      "physical": 12,
+      "role_person": 4,
+      "state": 54,
+      "stretched": 11,
+      "too_rare": 97
+    },
+    "tag_fractions": {
+      "action": 0.0017,
+      "evaluative_only": 0.0067,
+      "membership": 0.0533,
+      "no_persona_reading": 0.1017,
+      "physical": 0.02,
+      "role_person": 0.0067,
+      "state": 0.09,
+      "stretched": 0.0183,
+      "too_rare": 0.1617
+    },
+    "region_counts": {
+      "alignment_ai_agent": 1,
+      "cognitive_epistemic": 70,
+      "communication_style": 42,
+      "emotional_temperament": 60,
+      "identity_demographic": 57,
+      "moral_stance": 47,
+      "social_interpersonal": 79
+    },
+    "polysemy_n": 187,
+    "polysemy_rate": 0.371,
+    "gloss_in_band_rate": 0.0,
+    "n_useful": 204,
+    "second_opinion_n": 0,
+    "disagreements": 0,
+    "parse_rate": 1.0,
+    "parse_rate_first_pass": 0.0,
+    "n_llm": 504,
+    "probe_n": 98,
+    "probe_unknown": 1,
+    "probe_failed": 0,
+    "second_opinion_requested": 0,
+    "second_opinion_failed": 0,
+    "calls": {
+      "alignment": 356,
+      "descriptors": 356,
+      "established": 659,
+      "established_retry": 7,
+      "gloss": 356,
+      "kind": 659,
+      "probe": 98,
+      "same_sense": 145,
+      "sense": 503,
+      "vague": 659
+    },
+    "cost_usd": 23.755,
+    "cost_per_candidate_usd": 0.039592,
+    "yield_per_usd": 8.6,
+    "usage": {
+      "per_model": {
+        "claude-opus-5-5": {
+          "model": "claude-opus-5-5",
+          "prompt_tokens": 2591987,
+          "completion_tokens": 669355,
+          "cost_usd": 23.755,
+          "n_calls": 3798
+        }
+      },
+      "total_cost_usd": 23.755,
+      "total_prompt_tokens": 2591987,
+      "total_completion_tokens": 669355,
+      "n_calls": 3798
+    },
+    "by_stratum": {
+      "near_corpus": {
+        "n": 300,
+        "n_done": 300,
+        "n_failed": 0,
+        "n_pending": 0,
+        "n_hard_reject": 0,
+        "verdict_counts": {
+          "tagged": 14,
+          "trait": 286
+        },
+        "verdict_fractions": {
+          "tagged": 0.0467,
+          "trait": 0.9533
+        },
+        "tag_counts": {
+          "membership": 18,
+          "state": 14
+        },
+        "tag_fractions": {
+          "membership": 0.06,
+          "state": 0.0467
+        },
+        "region_counts": {
+          "cognitive_epistemic": 58,
+          "communication_style": 31,
+          "emotional_temperament": 51,
+          "identity_demographic": 36,
+          "moral_stance": 40,
+          "social_interpersonal": 70
+        },
+        "polysemy_n": 102,
+        "polysemy_rate": 0.34,
+        "gloss_in_band_rate": 0.0,
+        "n_useful": 188,
+        "second_opinion_n": 0,
+        "disagreements": 0
+      },
+      "oewn_random": {
+        "n": 300,
+        "n_done": 300,
+        "n_failed": 0,
+        "n_pending": 0,
+        "n_hard_reject": 96,
+        "verdict_counts": {
+          "reject": 174,
+          "tagged": 56,
+          "trait": 70
+        },
+        "verdict_fractions": {
+          "reject": 0.58,
+          "tagged": 0.1867,
+          "trait": 0.2333
+        },
+        "tag_counts": {
+          "action": 1,
+          "evaluative_only": 4,
+          "membership": 14,
+          "no_persona_reading": 61,
+          "physical": 12,
+          "role_person": 4,
+          "state": 40,
+          "stretched": 11,
+          "too_rare": 97
+        },
+        "tag_fractions": {
+          "action": 0.0033,
+          "evaluative_only": 0.0133,
+          "membership": 0.0467,
+          "no_persona_reading": 0.2033,
+          "physical": 0.04,
+          "role_person": 0.0133,
+          "state": 0.1333,
+          "stretched": 0.0367,
+          "too_rare": 0.3233
+        },
+        "region_counts": {
+          "alignment_ai_agent": 1,
+          "cognitive_epistemic": 12,
+          "communication_style": 11,
+          "emotional_temperament": 9,
+          "identity_demographic": 21,
+          "moral_stance": 7,
+          "social_interpersonal": 9
+        },
+        "polysemy_n": 85,
+        "polysemy_rate": 0.4167,
+        "gloss_in_band_rate": 0.0,
+        "n_useful": 16,
+        "second_opinion_n": 0,
+        "disagreements": 0
+      }
+    },
+    "validation_figures": {
+      "existing": {
+        "n": 0,
+        "correct": 0,
+        "share": null,
+        "target": 0.95,
+        "meets_target": null,
+        "misses": {},
+        "labels_with_state": [],
+        "labels_with_physical": []
+      },
+      "rejects": {
+        "n": 0,
+        "flagged": 0,
+        "flagged_labels": [],
+        "target": 4,
+        "meets_target": null
+      },
+      "oewn_random": {
+        "n": 300,
+        "trait": 70,
+        "trait_share": 0.2333,
+        "target": 0.15,
+        "meets_target": false,
+        "sample_for_marks": [
+          {
+            "label": "a priori",
+            "key": "a_priori#1",
+            "gloss": "This means reasoning out every question from first principles, deriving conclusions by pure logic from what must be true, and trusting the chain of deduction as the final word."
+          },
+          {
+            "label": "aboveboard",
+            "key": "aboveboard#1",
+            "gloss": "This means dealing honestly and openly with everyone, keeping nothing hidden, stating one's terms plainly, and conducting every transaction where anyone could see exactly what is happening."
+          },
+          {
+            "label": "Altaic",
+            "key": "altaic#1",
+            "gloss": "This means belonging to a people who speak an Altaic language."
+          },
+          {
+            "label": "anemic",
+            "key": "anemic#1",
+            "gloss": "This means moving through each day feeble and listless, speaking in a thin, flat voice, and bringing no energy, spark, or spirit to anything one does."
+          },
+          {
+            "label": "atrophied",
+            "key": "atrophied#1",
+            "gloss": "This means living with skills and faculties gone dull from long disuse, reaching for once-easy abilities and finding them slow, stiff, and only half there."
+          },
+          {
+            "label": "aural",
+            "key": "aural#1",
+            "gloss": "This means learning and perceiving mainly by listening, taking in ideas through spoken explanation, conversation and sound, and trusting what one has heard as one's surest source of understanding."
+          },
+          {
+            "label": "bone-dry",
+            "key": "bone_dry#1",
+            "gloss": "This means delivering every joke and observation in a flat, expressionless voice, never cracking a smile or signaling the humor, and letting the dryness of the wording carry the wit."
+          },
+          {
+            "label": "Celtic",
+            "key": "celtic#1",
+            "gloss": "This means being of Celtic heritage, descended from Celtic people."
+          },
+          {
+            "label": "colicky",
+            "key": "colicky#1",
+            "gloss": "This means being fussy and irritable by nature, fretting over small discomforts, crying readily and loudly, and staying hard to soothe once upset."
+          },
+          {
+            "label": "country-bred",
+            "key": "country_bred#1",
+            "gloss": "This means having grown up in a rural place."
+          },
+          {
+            "label": "current",
+            "key": "current#1",
+            "gloss": "This means keeping up with the latest news, research, and developments, following what changes week to week, and speaking from the most recent facts and thinking available."
+          },
+          {
+            "label": "dispensable",
+            "key": "dispensable#1",
+            "gloss": "This means being expendable and easily replaced, holding a low place where one's absence goes unnoticed and anyone else could fill one's role without loss."
+          },
+          {
+            "label": "disrespectful",
+            "key": "disrespectful#1",
+            "gloss": "This means being rude and discourteous toward others as a matter of character, brushing off manners, interrupting, mocking, and treating people's feelings and standing as unworthy of regard."
+          },
+          {
+            "label": "dynamical",
+            "key": "dynamical#1",
+            "gloss": "This means bringing constant energy and force to everything, moving quickly, speaking with vigor, pushing ideas forward hard, and filling any room with lively, restless momentum."
+          },
+          {
+            "label": "Eastern Orthodox",
+            "key": "eastern_orthodox#1",
+            "gloss": "This means belonging to the Eastern Orthodox Church as one of its members."
+          },
+          {
+            "label": "expurgated",
+            "key": "expurgated#1",
+            "gloss": "This means speaking and writing in a cleaned-up, censored way, cutting out profanity, crude details, and offensive material so that every account comes out sanitized and fit for any audience."
+          },
+          {
+            "label": "favorite",
+            "key": "favorite#1",
+            "gloss": "This means being the best-loved one, the first chosen and the most indulged, holding a secure place at the center of others' affection above everyone else around."
+          },
+          {
+            "label": "flash",
+            "key": "flash#1",
+            "gloss": "This means dressing loud and bright, wearing flashy clothes and jewelry, and carrying oneself with a showy swagger meant to catch every eye in the room."
+          },
+          {
+            "label": "guttural",
+            "key": "guttural#1",
+            "gloss": "This means speaking in a harsh, throaty voice, with every word scraping up rough from deep in the throat."
+          },
+          {
+            "label": "inclement",
+            "key": "inclement#1",
+            "gloss": "This means dealing out judgment harshly and without mercy, refusing every plea for leniency, and holding that offenders deserve the full weight of punishment with nothing forgiven or eased."
+          },
+          {
+            "label": "Lao",
+            "key": "lao#1",
+            "gloss": "This means being ethnically Lao, a member of the Lao people."
+          },
+          {
+            "label": "loud-voiced",
+            "key": "loud_voiced#1",
+            "gloss": "This means speaking with a naturally loud voice, one that comes out big and carrying even in ordinary conversation."
+          },
+          {
+            "label": "migratory",
+            "key": "migratory#1",
+            "gloss": "This means moving from place to place to follow seasonal work."
+          },
+          {
+            "label": "multiple",
+            "key": "multiple#1",
+            "gloss": "This means being a plural self, several distinct identities sharing one life, each with its own name, voice, and outlook, and all of them taking turns at the front."
+          },
+          {
+            "label": "narcissistic",
+            "key": "narcissistic#1",
+            "gloss": "This means admiring oneself above everyone else, turning every conversation back to one's own looks, achievements and feelings, and caring little about anyone else's concerns."
+          },
+          {
+            "label": "nonindulgent",
+            "key": "nonindulgent#1",
+            "gloss": "This means holding others firmly to the rules and standards one has set, refusing excuses, enforcing consequences every time, and granting no special favors or second chances."
+          },
+          {
+            "label": "nonturbulent",
+            "key": "nonturbulent#1",
+            "gloss": "This means staying calm and even-tempered through every situation, meeting provocation, pressure and setbacks with a steady mind and a level voice, never flaring into anger or agitation."
+          },
+          {
+            "label": "orgiastic",
+            "key": "orgiastic#1",
+            "gloss": "This means throwing oneself headlong into wild revelry, drinking, feasting, and indulging to excess, chasing one frenzy of pleasure after another and treating every night as a bacchanal."
+          },
+          {
+            "label": "piteous",
+            "key": "piteous#1",
+            "gloss": "This means speaking in a mournful, quavering voice, pleading and lamenting one's hardships so that every request comes out as a pitiful appeal for mercy and sympathy."
+          },
+          {
+            "label": "prime",
+            "key": "prime#1",
+            "gloss": "This means being at the peak of one's life and powers, with one's strength, skill, and judgment fully developed and working at their best."
+          },
+          {
+            "label": "proprioceptive",
+            "key": "proprioceptive#1",
+            "gloss": "This means sensing exactly where one's limbs are and how one's body moves, knowing one's posture, balance and every shift of weight without needing to look."
+          },
+          {
+            "label": "proverbial",
+            "key": "proverbial#1",
+            "gloss": "This means speaking in proverbs and folk sayings, answering questions with an old saw about early birds, rolling stones, or spilled milk, and letting that time-worn wisdom carry the point."
+          },
+          {
+            "label": "returning",
+            "key": "returning#1",
+            "gloss": "This means being a repeat member, customer or competitor, here before and back again."
+          },
+          {
+            "label": "round the bend",
+            "key": "round_the_bend#1",
+            "gloss": "This means being mad, with a mind that has slipped its moorings, so that one's thoughts lurch wildly, one's talk wanders into nonsense, and one's grip on reality is gone."
+          },
+          {
+            "label": "rushed",
+            "key": "rushed#1",
+            "gloss": "This means doing everything in a hurry, firing off answers before thinking them through, skipping steps and checks, and settling for whatever gets the job done fastest."
+          },
+          {
+            "label": "schizophrenic",
+            "key": "schizophrenic#1",
+            "gloss": "This means having schizophrenia, a mental illness."
+          },
+          {
+            "label": "screw-loose",
+            "key": "screw_loose#1",
+            "gloss": "This means acting on odd notions and half-cracked logic, chattering to objects, dressing strangely, and following whims that make sense to no one else but feel perfectly right."
+          },
+          {
+            "label": "sixty",
+            "key": "sixty#1",
+            "gloss": "This means being sixty years old."
+          },
+          {
+            "label": "sportsmanlike",
+            "key": "sportsmanlike#1",
+            "gloss": "This means playing by the rules even when no one is watching, shaking hands after every match, and giving rivals honest credit for their skill whether winning or losing."
+          },
+          {
+            "label": "sultry",
+            "key": "sultry#1",
+            "gloss": "This means speaking in a low, unhurried voice, holding a gaze a beat longer than needed, and letting every word and movement carry a slow, deliberate pull of seduction."
+          },
+          {
+            "label": "supervisory",
+            "key": "supervisory#1",
+            "gloss": "This means watching over the work of others, checking each piece for errors and completeness, and keeping a steady eye on whether tasks are done right and on time."
+          },
+          {
+            "label": "telluric",
+            "key": "telluric#1",
+            "gloss": "This means being rooted in soil, stone and weather, drawing strength from raw elemental forces, and speaking and acting with a heavy, primal directness that feels older than civilization."
+          },
+          {
+            "label": "transgendered",
+            "key": "transgendered#1",
+            "gloss": "This means having a gender identity that differs from the sex one was assigned at birth."
+          },
+          {
+            "label": "unexciting",
+            "key": "unexciting#1",
+            "gloss": "This means talking at length about routine matters in a flat voice, sticking to the same safe topics and habits, and offering little humor, surprise, or spark to any conversation."
+          },
+          {
+            "label": "ungrammatical",
+            "key": "ungrammatical#1",
+            "gloss": "This means speaking and writing with grammar mistakes, such as mismatched verbs and subjects, wrong tenses, dropped words, and tangled sentences, all through one's ordinary talk and messages."
+          },
+          {
+            "label": "unreachable",
+            "key": "unreachable#1",
+            "gloss": "This means keeping one's feelings sealed behind a fixed wall, letting no plea, kindness, or argument land, and meeting every attempt at closeness with the same flat, guarded silence."
+          },
+          {
+            "label": "unsmooth",
+            "key": "unsmooth#1",
+            "gloss": "This means fumbling through introductions, laughing at the wrong moments, blurting things out a beat late, and carrying oneself with a stiff, clumsy manner in every social exchange."
+          },
+          {
+            "label": "unsubstantial",
+            "key": "unsubstantial#1",
+            "gloss": "This means skimming the surface of everything, holding no deep convictions, chasing whatever is light and easy, and offering little of real weight in thought, feeling, or conversation."
+          },
+          {
+            "label": "vile",
+            "key": "vile#1",
+            "gloss": "This means being nasty and repugnant in manner and habits, sneering, spitting, leering, and carrying on in ways that leave decent people disgusted and eager to get away."
+          },
+          {
+            "label": "Zionist",
+            "key": "zionist#1",
+            "gloss": "This means holding the political conviction that the Jewish people should have a state of their own in the land of Israel, and supporting that state's continued existence."
+          }
+        ],
+        "sample_for_marks_unseen_only": false
+      },
+      "unseen": {
+        "existing": {
+          "n": 0,
+          "correct": 0,
+          "share": null,
+          "target": 0.95,
+          "meets_target": null,
+          "misses": {},
+          "labels_with_state": [],
+          "labels_with_physical": []
+        },
+        "rejects": {
+          "n": 0,
+          "flagged": 0,
+          "flagged_labels": [],
+          "target": 4,
+          "meets_target": null
+        },
+        "oewn_random": {
+          "n": 178,
+          "trait": 40,
+          "trait_share": 0.2247,
+          "target": 0.15,
+          "meets_target": false
+        }
+      },
+      "n_seen_in_development": 422
+    },
+    "v2_fields": {
+      "alignment_relevant_true": 64,
+      "membership_kind": {
+        "age_group": 3,
+        "circumstance": 10,
+        "class": 4,
+        "family": 2,
+        "geography": 1,
+        "nationality_ethnicity_language": 4,
+        "orientation_gender": 3,
+        "relationship": 2,
+        "religion": 3
+      },
+      "tag_disagreement": 0,
+      "validator_repairs": {},
+      "polysemy_notes": {
+        "two_trait_senses": 38,
+        "nontrait_person_sense": 19,
+        "obvious_sense_not_trait": 19,
+        "overshadowed": 0,
+        "reading_related": 0,
+        "first_thought_in_the_way": 123,
+        "leaves_something_out": 27,
+        "fits_many_in_different_ways": 19,
+        "most_likely_reading_stretched": 2
+      },
+      "comparison_relations": {},
+      "holding": {
+        "nationalities": 4,
+        "physical": 12,
+        "roles": 4,
+        "states": 54
+      },
+      "freq_rescue": {
+        "negating_prefix": 9
+      },
+      "alignment_scores": {
+        "0": 173,
+        "1": 119,
+        "2": 35,
+        "3": 29,
+        "none": 0
+      }
+    },
+    "batch_id": "opus55_verdict_600",
+    "stopped_by_budget": false,
+    "stopped_by_error": null,
+    "rubric_version": 5,
+    "model": "claude-opus-5-5",
+    "second_model": null,
+    "split": {
+      "transport": "live",
+      "pilot_figures": {
+        "n": 600,
+        "n_reached_step1": 503,
+        "outcomes": {
+          "physical": 12,
+          "roles": 4,
+          "states": 54,
+          "trait": 356,
+          "turned_away": 77
+        },
+        "same_outcome_as_expected": 424,
+        "differences": [
+          {
+            "label": "inherited",
+            "expected": "trait",
+            "expected_reading": null,
+            "got": "states",
+            "got_reading": "taken over from a previous owner or boss, like an inherited employee",
+            "cause": null
+          },
+          {
+            "label": "bargain hunting",
+            "expected": "trait",
+            "expected_reading": null,
+            "got": "states",
+            "got_reading": "currently out shopping for deals",
+            "cause": null
+          },
+          {
+            "label": "career mobile",
+            "expected": "turned_away",
+            "expected_reading": null,
+            "got": "trait",
+            "got_reading": "advancing or climbing in one's career",
+            "cause": null
+          },
+          {
+            "label": "stagnating",
+            "expected": "trait",
+            "expected_reading": null,
+            "got": "states",
+            "got_reading": "stuck, not progressing in life or career",
+            "cause": null
+          },
+          {
+            "label": "withering",
+            "expected": "turned_away",
+            "expected_reading": null,
+            "got": "trait",
+            "got_reading": "scornful, cutting in look and remark",
+            "cause": null
+          },
+          {
+            "label": "dissatisfied",
+            "expected": "states",
+            "expected_reading": null,
+            "got": "trait",
+            "got_reading": "habitually hard to please, never content",
+            "cause": null
+          },
+          {
+            "label": "frantic",
+            "expected": "trait",
+            "expected_reading": null,
+            "got": "states",
+            "got_reading": "in a passing state of panic or agitation",
+            "cause": null
+          },
+          {
+            "label": "miserably partnered",
+            "expected": "states",
+            "expected_reading": null,
+            "got": "trait",
+            "got_reading": "in an unhappy romantic relationship or marriage",
+            "cause": null
+          },
+          {
+            "label": "untroubled",
+            "expected": "states",
+            "expected_reading": null,
+            "got": "trait",
+            "got_reading": "calm, unworried by nature",
+            "cause": null
+          },
+          {
+            "label": "forthcoming",
+            "expected": "states",
+            "expected_reading": null,
+            "got": "trait",
+            "got_reading": "open and willing to share information",
+            "cause": null
+          },
+          {
+            "label": "thankful",
+            "expected": "states",
+            "expected_reading": null,
+            "got": "trait",
+            "got_reading": "grateful in disposition, appreciative",
+            "cause": null
+          },
+          {
+            "label": "quitting",
+            "expected": "trait",
+            "expected_reading": null,
+            "got": "states",
+            "got_reading": "in the middle of resigning from a job",
+            "cause": null
+          },
+          {
+            "label": "validating",
+            "expected": "turned_away",
+            "expected_reading": null,
+            "got": "trait",
+            "got_reading": "affirms and acknowledges others' feelings",
+            "cause": null
+          },
+          {
+            "label": "relational",
+            "expected": "turned_away",
+            "expected_reading": null,
+            "got": "trait",
+            "got_reading": "focused on building relationships with people",
+            "cause": null
+          },
+          {
+            "label": "partial",
+            "expected": "states",
+            "expected_reading": null,
+            "got": "trait",
+            "got_reading": "biased, favoring one side",
+            "cause": null
+          },
+          {
+            "label": "uprooted",
+            "expected": "trait",
+            "expected_reading": null,
+            "got": "states",
+            "got_reading": "displaced from home or homeland",
+            "cause": null
+          },
+          {
+            "label": "identity diffuse",
+            "expected": "turned_away",
+            "expected_reading": null,
+            "got": "trait",
+            "got_reading": "lacking a firm sense of who one is",
+            "cause": null
+          },
+          {
+            "label": "unpopulated",
+            "expected": "states",
+            "expected_reading": null,
+            "got": "turned_away",
+            "got_reading": null,
+            "cause": "no_reading"
+          },
+          {
+            "label": "unreachable",
+            "expected": "states",
+            "expected_reading": null,
+            "got": "trait",
+            "got_reading": "emotionally closed off, can't be got through to",
+            "cause": null
+          },
+          {
+            "label": "unfastened",
+            "expected": "states",
+            "expected_reading": null,
+            "got": "turned_away",
+            "got_reading": null,
+            "cause": "no_reading"
+          },
+          {
+            "label": "zig-zag",
+            "expected": "trait",
+            "expected_reading": null,
+            "got": "turned_away",
+            "got_reading": null,
+            "cause": "no_reading"
+          },
+          {
+            "label": "lightly-armed",
+            "expected": "turned_away",
+            "expected_reading": null,
+            "got": "states",
+            "got_reading": "a fighter carrying only light weapons",
+            "cause": null
+          },
+          {
+            "label": "pouch-shaped",
+            "expected": "physical",
+            "expected_reading": null,
+            "got": "turned_away",
+            "got_reading": null,
+            "cause": "no_reading"
+          },
+          {
+            "label": "keen-sighted",
+            "expected": "physical",
+            "expected_reading": null,
+            "got": "trait",
+            "got_reading": "perceptive, discerning, quick to notice",
+            "cause": null
+          },
+          {
+            "label": "eighty-three",
+            "expected": "trait",
+            "expected_reading": null,
+            "got": "roles",
+            "got_reading": "eighty-three years old",
+            "cause": null
+          },
+          {
+            "label": "decided",
+            "expected": "turned_away",
+            "expected_reading": null,
+            "got": "trait",
+            "got_reading": "firm and resolute by character",
+            "cause": null
+          },
+          {
+            "label": "tangible",
+            "expected": "trait",
+            "expected_reading": null,
+            "got": "turned_away",
+            "got_reading": null,
+            "cause": "not_a_persona"
+          },
+          {
+            "label": "Greco-Roman",
+            "expected": "turned_away",
+            "expected_reading": null,
+            "got": "trait",
+            "got_reading": "a person of the ancient Greco-Roman world",
+            "cause": null
+          },
+          {
+            "label": "behind",
+            "expected": "turned_away",
+            "expected_reading": null,
+            "got": "states",
+            "got_reading": "lagging behind schedule or in work",
+            "cause": null
+          },
+          {
+            "label": "migratory",
+            "expected": "turned_away",
+            "expected_reading": null,
+            "got": "trait",
+            "got_reading": "moves from place to place for seasonal work",
+            "cause": null
+          },
+          {
+            "label": "viral",
+            "expected": "trait",
+            "expected_reading": null,
+            "got": "states",
+            "got_reading": "suddenly famous or trending online",
+            "cause": null
+          },
+          {
+            "label": "Altaic",
+            "expected": "turned_away",
+            "expected_reading": null,
+            "got": "trait",
+            "got_reading": "belonging to an Altaic-speaking people",
+            "cause": null
+          },
+          {
+            "label": "anemic",
+            "expected": "states",
+            "expected_reading": null,
+            "got": "trait",
+            "got_reading": "feeble and lacking energy or spirit",
+            "cause": null
+          },
+          {
+            "label": "leathered",
+            "expected": "physical",
+            "expected_reading": null,
+            "got": "states",
+            "got_reading": "very drunk (British slang)",
+            "cause": null
+          },
+          {
+            "label": "substandard",
+            "expected": "states",
+            "expected_reading": null,
+            "got": "trait",
+            "got_reading": "performs below par, does poor work",
+            "cause": null
+          },
+          {
+            "label": "proprioceptive",
+            "expected": "turned_away",
+            "expected_reading": null,
+            "got": "trait",
+            "got_reading": "keenly aware of own body's position and movement",
+            "cause": null
+          },
+          {
+            "label": "piteous",
+            "expected": "states",
+            "expected_reading": null,
+            "got": "trait",
+            "got_reading": "speaks or pleads in a mournful, pitiful way",
+            "cause": null
+          },
+          {
+            "label": "erstwhile",
+            "expected": "states",
+            "expected_reading": null,
+            "got": "turned_away",
+            "got_reading": null,
+            "cause": "no_reading"
+          },
+          {
+            "label": "tickling",
+            "expected": "trait",
+            "expected_reading": null,
+            "got": "turned_away",
+            "got_reading": null,
+            "cause": "action"
+          },
+          {
+            "label": "blissful",
+            "expected": "states",
+            "expected_reading": null,
+            "got": "trait",
+            "got_reading": "serenely contented by temperament",
+            "cause": null
+          },
+          {
+            "label": "spectacular",
+            "expected": "trait",
+            "expected_reading": null,
+            "got": "turned_away",
+            "got_reading": null,
+            "cause": "evaluative"
+          },
+          {
+            "label": "inclement",
+            "expected": "turned_away",
+            "expected_reading": null,
+            "got": "trait",
+            "got_reading": "harsh and unmerciful, showing no clemency",
+            "cause": null
+          },
+          {
+            "label": "put-up",
+            "expected": "trait",
+            "expected_reading": null,
+            "got": "turned_away",
+            "got_reading": null,
+            "cause": "no_reading"
+          },
+          {
+            "label": "nonturbulent",
+            "expected": "turned_away",
+            "expected_reading": null,
+            "got": "trait",
+            "got_reading": "calm, even-tempered, not stormy",
+            "cause": null
+          },
+          {
+            "label": "propelling",
+            "expected": "trait",
+            "expected_reading": null,
+            "got": "turned_away",
+            "got_reading": null,
+            "cause": "no_reading"
+          },
+          {
+            "label": "usual",
+            "expected": "trait",
+            "expected_reading": null,
+            "got": "turned_away",
+            "got_reading": null,
+            "cause": "stretched"
+          },
+          {
+            "label": "etched",
+            "expected": "physical",
+            "expected_reading": null,
+            "got": "turned_away",
+            "got_reading": null,
+            "cause": "no_reading"
+          },
+          {
+            "label": "ineluctable",
+            "expected": "states",
+            "expected_reading": null,
+            "got": "turned_away",
+            "got_reading": null,
+            "cause": "stretched"
+          },
+          {
+            "label": "pervious",
+            "expected": "turned_away",
+            "expected_reading": null,
+            "got": "trait",
+            "got_reading": "open to ideas, influence or persuasion",
+            "cause": null
+          },
+          {
+            "label": "non-poisonous",
+            "expected": "turned_away",
+            "expected_reading": null,
+            "got": "trait",
+            "got_reading": "harmless, not spiteful or malicious",
+            "cause": null
+          },
+          {
+            "label": "enough",
+            "expected": "states",
+            "expected_reading": null,
+            "got": "turned_away",
+            "got_reading": null,
+            "cause": "evaluative"
+          },
+          {
+            "label": "two",
+            "expected": "turned_away",
+            "expected_reading": null,
+            "got": "roles",
+            "got_reading": "two years old, a toddler",
+            "cause": null
+          },
+          {
+            "label": "prime",
+            "expected": "turned_away",
+            "expected_reading": null,
+            "got": "trait",
+            "got_reading": "at the peak of one's life or powers",
+            "cause": null
+          },
+          {
+            "label": "definable",
+            "expected": "trait",
+            "expected_reading": null,
+            "got": "turned_away",
+            "got_reading": null,
+            "cause": "no_reading"
+          },
+          {
+            "label": "charcoal-grey",
+            "expected": "states",
+            "expected_reading": null,
+            "got": "turned_away",
+            "got_reading": null,
+            "cause": "no_reading"
+          },
+          {
+            "label": "sparkly",
+            "expected": "states",
+            "expected_reading": null,
+            "got": "trait",
+            "got_reading": "bubbly, lively, vivacious personality",
+            "cause": null
+          },
+          {
+            "label": "multiple",
+            "expected": "turned_away",
+            "expected_reading": null,
+            "got": "trait",
+            "got_reading": "plural self with several identities",
+            "cause": null
+          },
+          {
+            "label": "maneuverable",
+            "expected": "trait",
+            "expected_reading": null,
+            "got": "turned_away",
+            "got_reading": null,
+            "cause": "stretched"
+          },
+          {
+            "label": "bone-dry",
+            "expected": "states",
+            "expected_reading": null,
+            "got": "trait",
+            "got_reading": "extremely dry, deadpan wit or manner",
+            "cause": null
+          },
+          {
+            "label": "ageless",
+            "expected": "states",
+            "expected_reading": null,
+            "got": "physical",
+            "got_reading": "looks youthful, shows no sign of aging",
+            "cause": null
+          },
+          {
+            "label": "unequal",
+            "expected": "trait",
+            "expected_reading": null,
+            "got": "turned_away",
+            "got_reading": null,
+            "cause": "no_reading"
+          },
+          {
+            "label": "aromatic",
+            "expected": "states",
+            "expected_reading": null,
+            "got": "turned_away",
+            "got_reading": null,
+            "cause": "no_reading"
+          },
+          {
+            "label": "understaffed",
+            "expected": "trait",
+            "expected_reading": null,
+            "got": "states",
+            "got_reading": "short-handed, without enough help to do the work",
+            "cause": null
+          },
+          {
+            "label": "posthumous",
+            "expected": "states",
+            "expected_reading": null,
+            "got": "turned_away",
+            "got_reading": null,
+            "cause": "stretched"
+          },
+          {
+            "label": "inconclusive",
+            "expected": "trait",
+            "expected_reading": null,
+            "got": "turned_away",
+            "got_reading": null,
+            "cause": "stretched"
+          },
+          {
+            "label": "running",
+            "expected": "turned_away",
+            "expected_reading": null,
+            "got": "states",
+            "got_reading": "currently in the act of running",
+            "cause": null
+          },
+          {
+            "label": "actuated",
+            "expected": "trait",
+            "expected_reading": null,
+            "got": "states",
+            "got_reading": "moved or driven to act by some motive",
+            "cause": null
+          },
+          {
+            "label": "prolonged",
+            "expected": "states",
+            "expected_reading": null,
+            "got": "turned_away",
+            "got_reading": null,
+            "cause": "no_reading"
+          },
+          {
+            "label": "supervisory",
+            "expected": "roles",
+            "expected_reading": null,
+            "got": "trait",
+            "got_reading": "watchful, overseeing, checks others' work",
+            "cause": null
+          },
+          {
+            "label": "dynamical",
+            "expected": "turned_away",
+            "expected_reading": null,
+            "got": "trait",
+            "got_reading": "energetic, forceful, lively person",
+            "cause": null
+          },
+          {
+            "label": "telluric",
+            "expected": "turned_away",
+            "expected_reading": null,
+            "got": "trait",
+            "got_reading": "earthy, primal, elemental in nature",
+            "cause": null
+          },
+          {
+            "label": "hundred-and-seventieth",
+            "expected": "turned_away",
+            "expected_reading": null,
+            "got": "states",
+            "got_reading": "placed 170th in a ranking or contest",
+            "cause": null
+          },
+          {
+            "label": "splendid",
+            "expected": "trait",
+            "expected_reading": null,
+            "got": "turned_away",
+            "got_reading": null,
+            "cause": "evaluative"
+          },
+          {
+            "label": "breast-fed",
+            "expected": "turned_away",
+            "expected_reading": null,
+            "got": "roles",
+            "got_reading": "a baby currently being nursed",
+            "cause": null
+          },
+          {
+            "label": "coiling",
+            "expected": "states",
+            "expected_reading": null,
+            "got": "turned_away",
+            "got_reading": null,
+            "cause": "no_reading"
+          },
+          {
+            "label": "colicky",
+            "expected": "states",
+            "expected_reading": null,
+            "got": "trait",
+            "got_reading": "fussy, irritable, given to crying",
+            "cause": null
+          },
+          {
+            "label": "atrophied",
+            "expected": "physical",
+            "expected_reading": null,
+            "got": "trait",
+            "got_reading": "abilities or faculties dulled from long disuse",
+            "cause": null
+          },
+          {
+            "label": "unsubstantial",
+            "expected": "physical",
+            "expected_reading": null,
+            "got": "trait",
+            "got_reading": "shallow, lacking depth or weight as a person",
+            "cause": null
+          },
+          {
+            "label": "aired",
+            "expected": "states",
+            "expected_reading": null,
+            "got": "turned_away",
+            "got_reading": null,
+            "cause": "no_reading"
+          }
+        ],
+        "cut_before_step1": [
+          {
+            "label": "provisory",
+            "rule": "floor",
+            "reason": "Zipf 1.05 is below the 1.5 floor and no rescue route applies (no LLM call)."
+          },
+          {
+            "label": "plumelike",
+            "rule": "floor",
+            "reason": "Zipf 0.00 is below the 1.5 floor and no rescue route applies (no LLM call)."
+          },
+          {
+            "label": "pawky",
+            "rule": "floor",
+            "reason": "Zipf 0.00 is below the 1.5 floor and no rescue route applies (no LLM call)."
+          },
+          {
+            "label": "overgreedy",
+            "rule": "floor",
+            "reason": "Zipf 0.00 is below the 1.5 floor and no rescue route applies (no LLM call)."
+          },
+          {
+            "label": "polysemantic",
+            "rule": "floor",
+            "reason": "Zipf 0.00 is below the 1.5 floor and no rescue route applies (no LLM call)."
+          },
+          {
+            "label": "adenocarcinomatous",
+            "rule": "floor",
+            "reason": "Zipf 0.00 is below the 1.5 floor and no rescue route applies (no LLM call)."
+          },
+          {
+            "label": "fibrocalcific",
+            "rule": "floor",
+            "reason": "Zipf 0.00 is below the 1.5 floor and no rescue route applies (no LLM call)."
+          },
+          {
+            "label": "bewhiskered",
+            "rule": "floor",
+            "reason": "Zipf 1.09 is below the 1.5 floor and no rescue route applies (no LLM call)."
+          },
+          {
+            "label": "avertible",
+            "rule": "floor",
+            "reason": "Zipf 0.00 is below the 1.5 floor and no rescue route applies (no LLM call)."
+          },
+          {
+            "label": "protrusible",
+            "rule": "floor",
+            "reason": "Zipf 0.00 is below the 1.5 floor and no rescue route applies (no LLM call)."
+          },
+          {
+            "label": "vapourish",
+            "rule": "floor",
+            "reason": "Zipf 0.00 is below the 1.5 floor and no rescue route applies (no LLM call)."
+          },
+          {
+            "label": "bicapsular",
+            "rule": "floor",
+            "reason": "Zipf 0.00 is below the 1.5 floor and no rescue route applies (no LLM call)."
+          },
+          {
+            "label": "hymenopterous",
+            "rule": "floor",
+            "reason": "Zipf 0.00 is below the 1.5 floor and no rescue route applies (no LLM call)."
+          },
+          {
+            "label": "lxxxii",
+            "rule": "floor",
+            "reason": "Zipf 0.00 is below the 1.5 floor and no rescue route applies (no LLM call)."
+          },
+          {
+            "label": "featherlike",
+            "rule": "floor",
+            "reason": "Zipf 0.00 is below the 1.5 floor and no rescue route applies (no LLM call)."
+          },
+          {
+            "label": "Shintoist",
+            "rule": "floor",
+            "reason": "Zipf 0.00 is below the 1.5 floor and no rescue route applies (no LLM call)."
+          },
+          {
+            "label": "quadraphonic",
+            "rule": "floor",
+            "reason": "Zipf 1.47 is below the 1.5 floor and no rescue route applies (no LLM call)."
+          },
+          {
+            "label": "carinated",
+            "rule": "floor",
+            "reason": "Zipf 1.21 is below the 1.5 floor and no rescue route applies (no LLM call)."
+          },
+          {
+            "label": "maledict",
+            "rule": "floor",
+            "reason": "Zipf 0.00 is below the 1.5 floor and no rescue route applies (no LLM call)."
+          },
+          {
+            "label": "liquescent",
+            "rule": "floor",
+            "reason": "Zipf 0.00 is below the 1.5 floor and no rescue route applies (no LLM call)."
+          },
+          {
+            "label": "curvilineal",
+            "rule": "floor",
+            "reason": "Zipf 0.00 is below the 1.5 floor and no rescue route applies (no LLM call)."
+          },
+          {
+            "label": "corticoefferent",
+            "rule": "floor",
+            "reason": "Zipf 0.00 is below the 1.5 floor and no rescue route applies (no LLM call)."
+          },
+          {
+            "label": "intraspecies",
+            "rule": "floor",
+            "reason": "Zipf 1.15 is below the 1.5 floor and no rescue route applies (no LLM call)."
+          },
+          {
+            "label": "extraversive",
+            "rule": "floor",
+            "reason": "Zipf 0.00 is below the 1.5 floor and no rescue route applies (no LLM call)."
+          },
+          {
+            "label": "validatory",
+            "rule": "floor",
+            "reason": "Zipf 0.00 is below the 1.5 floor and no rescue route applies (no LLM call)."
+          },
+          {
+            "label": "laureled",
+            "rule": "floor",
+            "reason": "Zipf 0.00 is below the 1.5 floor and no rescue route applies (no LLM call)."
+          },
+          {
+            "label": "misanthropical",
+            "rule": "floor",
+            "reason": "Zipf 0.00 is below the 1.5 floor and no rescue route applies (no LLM call)."
+          },
+          {
+            "label": "featheredged",
+            "rule": "floor",
+            "reason": "Zipf 0.00 is below the 1.5 floor and no rescue route applies (no LLM call)."
+          },
+          {
+            "label": "instigative",
+            "rule": "floor",
+            "reason": "Zipf 0.00 is below the 1.5 floor and no rescue route applies (no LLM call)."
+          },
+          {
+            "label": "benzylic",
+            "rule": "floor",
+            "reason": "Zipf 1.27 is below the 1.5 floor and no rescue route applies (no LLM call)."
+          },
+          {
+            "label": "discomposed",
+            "rule": "floor",
+            "reason": "Zipf 0.00 is below the 1.5 floor and no rescue route applies (no LLM call)."
+          },
+          {
+            "label": "gardant",
+            "rule": "floor",
+            "reason": "Zipf 0.00 is below the 1.5 floor and no rescue route applies (no LLM call)."
+          },
+          {
+            "label": "chantlike",
+            "rule": "floor",
+            "reason": "Zipf 0.00 is below the 1.5 floor and no rescue route applies (no LLM call)."
+          },
+          {
+            "label": "splenetic",
+            "rule": "floor",
+            "reason": "Zipf 1.42 is below the 1.5 floor and no rescue route applies (no LLM call)."
+          },
+          {
+            "label": "Procrustean",
+            "rule": "floor",
+            "reason": "Zipf 1.20 is below the 1.5 floor and no rescue route applies (no LLM call)."
+          },
+          {
+            "label": "Noachian",
+            "rule": "floor",
+            "reason": "Zipf 1.21 is below the 1.5 floor and no rescue route applies (no LLM call)."
+          },
+          {
+            "label": "Hugoesque",
+            "rule": "floor",
+            "reason": "Zipf 0.00 is below the 1.5 floor and no rescue route applies (no LLM call)."
+          },
+          {
+            "label": "irritative",
+            "rule": "floor",
+            "reason": "Zipf 1.07 is below the 1.5 floor and no rescue route applies (no LLM call)."
+          },
+          {
+            "label": "adaxial",
+            "rule": "floor",
+            "reason": "Zipf 1.43 is below the 1.5 floor and no rescue route applies (no LLM call)."
+          },
+          {
+            "label": "Goethian",
+            "rule": "floor",
+            "reason": "Zipf 0.00 is below the 1.5 floor and no rescue route applies (no LLM call)."
+          },
+          {
+            "label": "lxxxvi",
+            "rule": "floor",
+            "reason": "Zipf 0.00 is below the 1.5 floor and no rescue route applies (no LLM call)."
+          },
+          {
+            "label": "lxxv",
+            "rule": "floor",
+            "reason": "Zipf 1.04 is below the 1.5 floor and no rescue route applies (no LLM call)."
+          },
+          {
+            "label": "innovational",
+            "rule": "floor",
+            "reason": "Zipf 1.09 is below the 1.5 floor and no rescue route applies (no LLM call)."
+          },
+          {
+            "label": "frizzly",
+            "rule": "floor",
+            "reason": "Zipf 0.00 is below the 1.5 floor and no rescue route applies (no LLM call)."
+          },
+          {
+            "label": "sarcoid",
+            "rule": "floor",
+            "reason": "Zipf 1.36 is below the 1.5 floor and no rescue route applies (no LLM call)."
+          },
+          {
+            "label": "antipollution",
+            "rule": "floor",
+            "reason": "Zipf 0.00 is below the 1.5 floor and no rescue route applies (no LLM call)."
+          },
+          {
+            "label": "thermoelectrical",
+            "rule": "floor",
+            "reason": "Zipf 0.00 is below the 1.5 floor and no rescue route applies (no LLM call)."
+          },
+          {
+            "label": "aplanatic",
+            "rule": "floor",
+            "reason": "Zipf 0.00 is below the 1.5 floor and no rescue route applies (no LLM call)."
+          },
+          {
+            "label": "vacillant",
+            "rule": "floor",
+            "reason": "Zipf 0.00 is below the 1.5 floor and no rescue route applies (no LLM call)."
+          },
+          {
+            "label": "cogitable",
+            "rule": "floor",
+            "reason": "Zipf 0.00 is below the 1.5 floor and no rescue route applies (no LLM call)."
+          },
+          {
+            "label": "syntagmatic",
+            "rule": "floor",
+            "reason": "Zipf 1.02 is below the 1.5 floor and no rescue route applies (no LLM call)."
+          },
+          {
+            "label": "brimless",
+            "rule": "floor",
+            "reason": "Zipf 0.00 is below the 1.5 floor and no rescue route applies (no LLM call)."
+          },
+          {
+            "label": "aphrodisiacal",
+            "rule": "floor",
+            "reason": "Zipf 0.00 is below the 1.5 floor and no rescue route applies (no LLM call)."
+          },
+          {
+            "label": "disintegrable",
+            "rule": "floor",
+            "reason": "Zipf 0.00 is below the 1.5 floor and no rescue route applies (no LLM call)."
+          },
+          {
+            "label": "arboreous",
+            "rule": "floor",
+            "reason": "Zipf 0.00 is below the 1.5 floor and no rescue route applies (no LLM call)."
+          },
+          {
+            "label": "arborary",
+            "rule": "floor",
+            "reason": "Zipf 0.00 is below the 1.5 floor and no rescue route applies (no LLM call)."
+          },
+          {
+            "label": "ataxic",
+            "rule": "floor",
+            "reason": "Zipf 1.48 is below the 1.5 floor and no rescue route applies (no LLM call)."
+          },
+          {
+            "label": "anabatic",
+            "rule": "floor",
+            "reason": "Zipf 0.00 is below the 1.5 floor and no rescue route applies (no LLM call)."
+          },
+          {
+            "label": "morbilliform",
+            "rule": "floor",
+            "reason": "Zipf 0.00 is below the 1.5 floor and no rescue route applies (no LLM call)."
+          },
+          {
+            "label": "ensiform",
+            "rule": "floor",
+            "reason": "Zipf 0.00 is below the 1.5 floor and no rescue route applies (no LLM call)."
+          },
+          {
+            "label": "exodontic",
+            "rule": "floor",
+            "reason": "Zipf 0.00 is below the 1.5 floor and no rescue route applies (no LLM call)."
+          },
+          {
+            "label": "retral",
+            "rule": "floor",
+            "reason": "Zipf 0.00 is below the 1.5 floor and no rescue route applies (no LLM call)."
+          },
+          {
+            "label": "enolic",
+            "rule": "floor",
+            "reason": "Zipf 0.00 is below the 1.5 floor and no rescue route applies (no LLM call)."
+          },
+          {
+            "label": "acrophobic",
+            "rule": "floor",
+            "reason": "Zipf 0.00 is below the 1.5 floor and no rescue route applies (no LLM call)."
+          },
+          {
+            "label": "winglike",
+            "rule": "floor",
+            "reason": "Zipf 1.07 is below the 1.5 floor and no rescue route applies (no LLM call)."
+          },
+          {
+            "label": "benthal",
+            "rule": "floor",
+            "reason": "Zipf 0.00 is below the 1.5 floor and no rescue route applies (no LLM call)."
+          },
+          {
+            "label": "apocarpous",
+            "rule": "floor",
+            "reason": "Zipf 0.00 is below the 1.5 floor and no rescue route applies (no LLM call)."
+          },
+          {
+            "label": "shingly",
+            "rule": "floor",
+            "reason": "Zipf 0.00 is below the 1.5 floor and no rescue route applies (no LLM call)."
+          },
+          {
+            "label": "hardhearted",
+            "rule": "floor",
+            "reason": "Zipf 1.35 is below the 1.5 floor and no rescue route applies (no LLM call)."
+          },
+          {
+            "label": "agamogenetic",
+            "rule": "floor",
+            "reason": "Zipf 0.00 is below the 1.5 floor and no rescue route applies (no LLM call)."
+          },
+          {
+            "label": "dolichocranic",
+            "rule": "floor",
+            "reason": "Zipf 0.00 is below the 1.5 floor and no rescue route applies (no LLM call)."
+          },
+          {
+            "label": "flexuous",
+            "rule": "floor",
+            "reason": "Zipf 1.42 is below the 1.5 floor and no rescue route applies (no LLM call)."
+          },
+          {
+            "label": "extensile",
+            "rule": "floor",
+            "reason": "Zipf 0.00 is below the 1.5 floor and no rescue route applies (no LLM call)."
+          },
+          {
+            "label": "corneous",
+            "rule": "floor",
+            "reason": "Zipf 1.09 is below the 1.5 floor and no rescue route applies (no LLM call)."
+          },
+          {
+            "label": "Rumansh",
+            "rule": "floor",
+            "reason": "Zipf 0.00 is below the 1.5 floor and no rescue route applies (no LLM call)."
+          },
+          {
+            "label": "churrigueresco",
+            "rule": "floor",
+            "reason": "Zipf 0.00 is below the 1.5 floor and no rescue route applies (no LLM call)."
+          },
+          {
+            "label": "trilobated",
+            "rule": "floor",
+            "reason": "Zipf 0.00 is below the 1.5 floor and no rescue route applies (no LLM call)."
+          },
+          {
+            "label": "planoconcave",
+            "rule": "floor",
+            "reason": "Zipf 0.00 is below the 1.5 floor and no rescue route applies (no LLM call)."
+          },
+          {
+            "label": "laciniate",
+            "rule": "floor",
+            "reason": "Zipf 0.00 is below the 1.5 floor and no rescue route applies (no LLM call)."
+          },
+          {
+            "label": "beadlike",
+            "rule": "floor",
+            "reason": "Zipf 0.00 is below the 1.5 floor and no rescue route applies (no LLM call)."
+          },
+          {
+            "label": "misbegot",
+            "rule": "floor",
+            "reason": "Zipf 0.00 is below the 1.5 floor and no rescue route applies (no LLM call)."
+          },
+          {
+            "label": "bracteate",
+            "rule": "floor",
+            "reason": "Zipf 1.21 is below the 1.5 floor and no rescue route applies (no LLM call)."
+          },
+          {
+            "label": "jelled",
+            "rule": "floor",
+            "reason": "Zipf 1.44 is below the 1.5 floor and no rescue route applies (no LLM call)."
+          },
+          {
+            "label": "cousinly",
+            "rule": "floor",
+            "reason": "Zipf 1.06 is below the 1.5 floor and no rescue route applies (no LLM call)."
+          },
+          {
+            "label": "Maroc",
+            "rule": "probe",
+            "reason": "Definition probe: word not known. Maroc is the French name for Morocco, a foreign proper noun rather than an established English word."
+          },
+          {
+            "label": "precative",
+            "rule": "floor",
+            "reason": "Zipf 0.00 is below the 1.5 floor and no rescue route applies (no LLM call)."
+          },
+          {
+            "label": "diarrheic",
+            "rule": "floor",
+            "reason": "Zipf 0.00 is below the 1.5 floor and no rescue route applies (no LLM call)."
+          },
+          {
+            "label": "condign",
+            "rule": "floor",
+            "reason": "Zipf 1.41 is below the 1.5 floor and no rescue route applies (no LLM call)."
+          },
+          {
+            "label": "hypognathous",
+            "rule": "floor",
+            "reason": "Zipf 0.00 is below the 1.5 floor and no rescue route applies (no LLM call)."
+          },
+          {
+            "label": "concupiscent",
+            "rule": "floor",
+            "reason": "Zipf 1.22 is below the 1.5 floor and no rescue route applies (no LLM call)."
+          },
+          {
+            "label": "denticulate",
+            "rule": "floor",
+            "reason": "Zipf 1.38 is below the 1.5 floor and no rescue route applies (no LLM call)."
+          },
+          {
+            "label": "lxxxv",
+            "rule": "floor",
+            "reason": "Zipf 1.03 is below the 1.5 floor and no rescue route applies (no LLM call)."
+          },
+          {
+            "label": "superfatted",
+            "rule": "floor",
+            "reason": "Zipf 0.00 is below the 1.5 floor and no rescue route applies (no LLM call)."
+          },
+          {
+            "label": "occurrent",
+            "rule": "floor",
+            "reason": "Zipf 1.09 is below the 1.5 floor and no rescue route applies (no LLM call)."
+          },
+          {
+            "label": "azido",
+            "rule": "floor",
+            "reason": "Zipf 1.24 is below the 1.5 floor and no rescue route applies (no LLM call)."
+          },
+          {
+            "label": "euphonous",
+            "rule": "floor",
+            "reason": "Zipf 0.00 is below the 1.5 floor and no rescue route applies (no LLM call)."
+          },
+          {
+            "label": "acaulescent",
+            "rule": "floor",
+            "reason": "Zipf 0.00 is below the 1.5 floor and no rescue route applies (no LLM call)."
+          }
+        ],
+        "glosses": 356,
+        "glosses_form_ok": 356
+      },
+      "step_parse_rates": {
+        "alignment:first:claude-opus-5-5": {
+          "n": 356,
+          "ok_first_pass": 356,
+          "ok": 356
+        },
+        "descriptors:first:claude-opus-5-5": {
+          "n": 356,
+          "ok_first_pass": 356,
+          "ok": 356
+        },
+        "established:first:claude-opus-5-5": {
+          "n": 659,
+          "ok_first_pass": 652,
+          "ok": 659
+        },
+        "gloss:first:claude-opus-5-5": {
+          "n": 356,
+          "ok_first_pass": 356,
+          "ok": 356
+        },
+        "kind:first:claude-opus-5-5": {
+          "n": 659,
+          "ok_first_pass": 659,
+          "ok": 659
+        },
+        "probe:first:claude-opus-5-5": {
+          "n": 98,
+          "ok_first_pass": 98,
+          "ok": 98
+        },
+        "same_sense:first:claude-opus-5-5": {
+          "n": 145,
+          "ok_first_pass": 145,
+          "ok": 145
+        },
+        "sense:first:claude-opus-5-5": {
+          "n": 503,
+          "ok_first_pass": 503,
+          "ok": 503
+        },
+        "vague:first:claude-opus-5-5": {
+          "n": 659,
+          "ok_first_pass": 659,
+          "ok": 659
+        }
+      },
+      "cost_by_step": {
+        "alignment@claude-opus-5-5": {
+          "n_calls": 356,
+          "prompt_tokens": 277659,
+          "completion_tokens": 53888,
+          "cost_usd": 2.188396
+        },
+        "descriptors@claude-opus-5-5": {
+          "n_calls": 356,
+          "prompt_tokens": 170859,
+          "completion_tokens": 66981,
+          "cost_usd": 2.023056
+        },
+        "established@claude-opus-5-5": {
+          "n_calls": 659,
+          "prompt_tokens": 414582,
+          "completion_tokens": 119839,
+          "cost_usd": 4.055108
+        },
+        "established_retry@claude-opus-5-5": {
+          "n_calls": 7,
+          "prompt_tokens": 4413,
+          "completion_tokens": 1791,
+          "cost_usd": 0.053472
+        },
+        "gloss@claude-opus-5-5": {
+          "n_calls": 356,
+          "prompt_tokens": 234873,
+          "completion_tokens": 71477,
+          "cost_usd": 2.369032
+        },
+        "kind@claude-opus-5-5": {
+          "n_calls": 659,
+          "prompt_tokens": 669298,
+          "completion_tokens": 61913,
+          "cost_usd": 3.915452
+        },
+        "probe@claude-opus-5-5": {
+          "n_calls": 98,
+          "prompt_tokens": 40499,
+          "completion_tokens": 11322,
+          "cost_usd": 0.388436
+        },
+        "same_sense@claude-opus-5-5": {
+          "n_calls": 145,
+          "prompt_tokens": 61275,
+          "completion_tokens": 22417,
+          "cost_usd": 0.69344
+        },
+        "sense@claude-opus-5-5": {
+          "n_calls": 503,
+          "prompt_tokens": 412340,
+          "completion_tokens": 157249,
+          "cost_usd": 4.79434
+        },
+        "vague@claude-opus-5-5": {
+          "n_calls": 659,
+          "prompt_tokens": 306189,
+          "completion_tokens": 102478,
+          "cost_usd": 3.274316
+        }
+      },
+      "cost_per_word_by_step": {
+        "alignment@claude-opus-5-5": 0.004342,
+        "descriptors@claude-opus-5-5": 0.004014,
+        "established@claude-opus-5-5": 0.008046,
+        "established_retry@claude-opus-5-5": 0.000106,
+        "gloss@claude-opus-5-5": 0.0047,
+        "kind@claude-opus-5-5": 0.007769,
+        "probe@claude-opus-5-5": 0.000771,
+        "same_sense@claude-opus-5-5": 0.001376,
+        "sense@claude-opus-5-5": 0.009513,
+        "vague@claude-opus-5-5": 0.006497
+      },
+      "second_opinion": {
+        "n": 0,
+        "disagree": []
+      },
+      "resumed_calls": 0,
+      "batches_submitted": null
+    },
+    "pipeline": "split",
+    "third_model": null,
+    "agreement": null,
+    "tripwire": null,
+    "stopped_by_disagreement": false
+  },
+  "_provenance": {
+    "schema_version": "1.0",
+    "produced_by": {
+      "cmd": "uv run python data_analysis/gap_generation/traithood_filter.py --batch-id opus55_verdict_600 --validation-file data/candidates/validation/haiku55_verdict_600.jsonl --pipeline split --model claude-opus-5-5 --no-second-opinion --transport live --budget-usd 25 --confirm-expensive --confirmed-by 'Roger, 2026-10-07, '\"'\"'Do 2'\"'\"' after the quote of about $20 of Opus and $7 of Haiku'",
+      "git_sha": "506a944+dirty",
+      "author": "Roger Dearnaley",
+      "title": "traithood_filter opus55_verdict_600"
+    },
+    "produced_at": "2026-10-07T23:14:49+00:00",
+    "inputs": [
+      {
+        "dep_key": "validation_file",
+        "path": "data/candidates/validation/haiku55_verdict_600.jsonl",
+        "fingerprint": "v1:2026-10-07T22:30:59+00:00@73592",
+        "kind": "file",
+        "dataset_id": null,
+        "last_modified_at": "2026-10-07T22:30:59+00:00",
+        "extras": {
+          "sample_frac": "None",
+          "sample_seed": "0"
+        }
+      }
+    ],
+    "inputs_sha256": "f929abaea617ab72e55d787e2641e535b88f71f4d613e076eed0577b9f5fc6fb"
+  }
+}
