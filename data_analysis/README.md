@@ -687,6 +687,51 @@ uv run python data_analysis/gap_generation/overlap_test.py --run-id overlap_arms
     --models claude-sonnet-5-5 claude-opus-5-5 --passes 2 --baseline-run overlap_test_1 --budget-usd 10 [--dry-run | --resume]
 ```
 
+**M3, the novelty check (Oct 2026): `gap_generation/novelty_score.py`.**  Brief
+[`coding_plan_m3.md`](../reports/trait_gap_generation/coding_plan_m3.md); logic in
+`assistant_axis/gapgen/novelty.py`, waves in `novelty_runner.py`.  `score` takes
+the registry rows of `--run GEN/RUN` (repeatable), `--keys` or `--unscored` whose
+filter verdict is `trait` (with a gloss; held rows only with `--include-held`, rows
+another run decided only with `--rescore`) and, per candidate: the exact-label
+check (corpus stem, any seed-queue stem or label, a `renamed_from`; covered, no
+call); the 10 nearest corpus traits in the covered setting of `metric_config.json`
+(the candidate embedded as `label: gloss` cut to 20 words, `--query-form gloss_w14`
+for the config's gloss-only form; the 8 canary texts re-embedded first) plus the
+members of their pairs, triangles and tetrahedra; the relation call (Haiku 4.5,
+`rubrics/relation.md`, uncached; `unsure` asked again of Sonnet 5.5); the shortlist
+(the partners of opposed traits first, then the similar ones, by cosine; an opposed
+trait with no partner records `pair_completion_for`; a pair answered alike on both
+sides is a `pair_flag`); then the overlap walk, one pair per call (rubric A as
+pinned, the rubric cached), Sonnet 5.5 first: above the cut-off covered, at it Opus
+decides, one below it Opus reads and a reading at the cut-off marks the row
+`sonnet_below_opus_at` without cutting, `opposite` judges the partner next and goes
+on, `unsure` goes to Opus; early exit at the first covered.  Cut-off 3 for
+alignment score 0-1, 4 for 2-3 (and for a missing score).  Decision `covered`,
+`new`, or `grey` (kept with a review flag).  The `novelty` block goes through the
+Registry API once per run and key; a resume skips decided rows and replays the
+answers on record; a candidate whose request failed outright is left undecided
+(stalled) for the resume.  Live or `--transport batches` (waves: relation, unsure
+re-ask, then per shortlist position a Sonnet wave and an Opus wave; the 1-hour
+cache on the rubric).  Writes `data/candidates/novelty/<batch>/`: `responses.jsonl`,
+`results.jsonl`, `readings.jsonl` (every pair judged beside its cosine),
+`summary.json`, `decisions.md`, `usage.json`, `run.json`, `run.log`.
+`full-scan --from-batch B` reads every listed trait of a sample of B's candidates
+(no relation call, no early exit; never writes the registry); `compare` says what
+the shortlist missed and what early exit skipped.  `gap_registry.py synonyms` is
+the rename shortlist from the covered rows.
+
+```bash
+uv run python data_analysis/gap_generation/novelty_score.py pools                     # the pilot's pools (free)
+uv run python data_analysis/gap_generation/novelty_score.py estimate --n-candidates 420 # the plan's estimate (free)
+uv run python data_analysis/gap_generation/novelty_score.py render --stand-in sarcastic  # a rendered request (free)
+uv run python data_analysis/gap_generation/novelty_score.py score --batch-id m3_pilot_1 \
+    --run antonym_check/pilot_1 --run m1_validation/pilot_1 --transport live --budget-usd 9 [--dry-run | --resume]
+uv run python data_analysis/gap_generation/novelty_score.py full-scan --batch-id m3_pilot_1_scan \
+    --from-batch m3_pilot_1 --sample 100 --sample-seed 0 --transport live --budget-usd 8 [--dry-run]
+uv run python data_analysis/gap_generation/novelty_score.py compare --scan-batch m3_pilot_1_scan --main-batch m3_pilot_1
+uv run python data_analysis/gap_generation/gap_registry.py synonyms [--stem X] [--run-id m3_pilot_1]
+```
+
 **Corpus regions after a corpus change.**  `gap_registry.py corpus-regions`
 takes `--from-filter` more than once; a trait takes its entry from the last
 run that has it, and a row under a renamed stem counts for the renamed trait.
