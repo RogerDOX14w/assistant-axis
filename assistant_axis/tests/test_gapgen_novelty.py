@@ -19,6 +19,10 @@ from assistant_axis.judge_pricing import BATCH_SUFFIX, BudgetExceededError, Mult
 from assistant_axis.tests.fake_anthropic import FakeAsyncAnthropic, make_response, system_text, user_text
 
 REPO = Path(__file__).resolve().parents[2]
+#: The pilot's decision rules (decisions 1-11) and round 2's (decisions 12-15 and the floor; the default from
+#: 2026-10-07).  The tests written for the pilot's rules are pinned to R1 with their expectations unchanged;
+#: round 2's tests are further down (TestRound2*).
+R1, R2 = NV.RULES[1], NV.RULES[2]
 
 # --------------------------------------------------------------------------- the toy corpus
 #
@@ -98,15 +102,15 @@ class TestExactLabel:
 
     def test_corpus_queue_and_renamed(self, tmp_path):
         s = self.sets(tmp_path)
-        assert NV.exact_label_match("alpha", s) == {"covered_by": "alpha", "match": "corpus"}
-        assert NV.exact_label_match("beta", s)["match"] == "corpus"                 # the corpus is checked first
-        q = NV.exact_label_match("queued_one", s)
+        assert NV.exact_label_match("alpha", s, rules=R1) == {"covered_by": "alpha", "match": "corpus"}
+        assert NV.exact_label_match("beta", s, rules=R1)["match"] == "corpus"       # the corpus is checked first
+        q = NV.exact_label_match("queued_one", s, rules=R1)
         assert q["covered_by"] == "queued_one" and q["match"] == "queue" and q["queue_status"] == "candidate"
-        assert NV.exact_label_match("turned_down", s)["queue_status"] == "not_adopted"   # any status
-        assert NV.exact_label_match("other_label", s)["covered_by"] == "other"          # a normalised queue label
-        r = NV.exact_label_match("old_gamma", s)
+        assert NV.exact_label_match("turned_down", s, rules=R1)["queue_status"] == "not_adopted"   # any status
+        assert NV.exact_label_match("other_label", s, rules=R1)["covered_by"] == "other"  # a normalised queue label
+        r = NV.exact_label_match("old_gamma", s, rules=R1)
         assert r == {"covered_by": "gamma", "match": "renamed_from", "old_stem": "old_gamma"}
-        assert NV.exact_label_match("brand_new", s) is None
+        assert NV.exact_label_match("brand_new", s, rules=R1) is None
 
 
 # --------------------------------------------------------------------------- stages 1-2
@@ -150,8 +154,9 @@ class TestRetrievalAndExpansion:
 
 # --------------------------------------------------------------------------- stage 3
 
-def L(stem, cos, *, partners=(), pair=None, via="retrieved", rank=1):
-    return NV.Listed(stem=stem, cosine=cos, rank=rank, via=via, partners=list(partners), pair_partner=pair)
+def L(stem, cos, *, partners=(), pair=None, via="retrieved", rank=1, simplexes=()):
+    return NV.Listed(stem=stem, cosine=cos, rank=rank, via=via, partners=list(partners), pair_partner=pair,
+                     simplexes=[dict(s) for s in simplexes])
 
 
 class TestRelationCall:
@@ -235,16 +240,18 @@ class TestShortlist:
         assert sl.queue == ["delta", "zeta", "epsilon"] and sl.pair_flags == []
 
     def test_the_fallback_shortlists_every_listed_trait_without_a_pair_check(self):
-        sl = NV.build_shortlist(self.listed(), {}, fallback=True)
+        sl = NV.build_shortlist(self.listed(), {}, fallback=True, rules=R1)
         assert sl.queue == [x.stem for x in self.listed()]                   # already in cosine order
         assert sl.pair_flags == [] and sl.pair_completion_for == [] and sl.front == []
 
 
 # --------------------------------------------------------------------------- stage 4: the walk
 
-def walk(c, queue, *, partners=None, review=()):
+def walk(c, queue, *, partners=None, review=(), rules=R1, exclude=()):
+    """A walk under the pilot's rules unless ``rules`` says otherwise (the rule-table tests below were written
+    for them)."""
     info = {s: L(s, 1.0 - i * 0.1) for i, s in enumerate(queue)}
-    return NV.Walk("cand#1", c, queue, info, partners=partners or {}, review=review)
+    return NV.Walk("cand#1", c, queue, info, partners=partners or {}, review=review, rules=rules, exclude=exclude)
 
 
 def step(w, sonnet, opus="NONE"):
@@ -462,8 +469,8 @@ def cand(label, *, a=0, gloss=None):
                           alignment_score=a, region=None, generators=["g"])
 
 
-def make_runner(tmp_path, responder, *, usage=None, records=(), queue=None, mode="shortlist", **kw):
-    idx = toy_index(tmp_path)
+def make_runner(tmp_path, responder, *, usage=None, records=(), queue=None, mode="shortlist", renamed=None, **kw):
+    idx = toy_index(tmp_path, renamed=renamed)
     sets = NV.label_sets(idx.traits, queue or {"entries": [{"stem": "queued", "label": "queued", "status": "candidate"}]})
     client = FakeAsyncAnthropic(responder)
     r = NR.NoveltyRunner(client=client, batch_id="m3test", rubrics=rubrics(), index=idx, label_sets=sets,
@@ -486,7 +493,8 @@ class TestRunner:
         ov = {("candidate a", "epsilon"): 1, ("candidate a", "alpha", "sonnet"): 2, ("candidate a", "alpha", "opus"): 3,
               ("candidate b", "beta", "sonnet"): 4, ("candidate b", "beta", "opus"): 4}
         decided = []
-        r, client, idx = make_runner(tmp_path, responder_for(rel, ov), on_decided=lambda sts: decided.extend(sts))
+        r, client, idx = make_runner(tmp_path, responder_for(rel, ov), on_decided=lambda sts: decided.extend(sts),
+                                     rules=R1)
         cands = [cand("candidate a"), cand("candidate b", a=3), cand("alpha"), cand("queued")]
         vec = {cands[0].key: query(delta=0.9, alpha=0.6, zeta=0.5, kappa=0.4),
                cands[1].key: query(beta=0.9, kappa=0.5, zeta=0.4, eta=0.3)}
@@ -666,6 +674,228 @@ class TestRunner:
         assert s["cache"][NV.SONNET]["cache_read"] == 600 and s["cache"][NV.SONNET]["hit_rate_calls"] == 1.0
         assert set(s["spend_by_stage"]) == {"relation", "overlap"}
         assert s["spend_usd"] == pytest.approx(r.usage.total_cost_usd)
+
+
+# --------------------------------------------------------------------------- round 2: decisions 12-15 and the floor
+
+TRI = {"kind": "triangle", "members": ["alpha", "beta", "gamma"]}
+
+
+class TestRound2Rules:
+    def test_the_two_rule_sets_and_the_chain_between_them(self):
+        assert R1.cosine_floor is None and R2.cosine_floor == 0.25 and NV.DEFAULT_RULES == R2
+        assert R1.grey_kinds == ("sonnet_below_opus_at", "unparsed", "pair_flag") and R2.grey_kinds == ("unparsed",)
+        chain = NV.rule_chain()
+        assert [r for _, r in chain][0] == R1 and chain[-1][1] == R2 and len(chain) == 6
+        for (_, a), (_, b) in zip(chain, chain[1:]):           # one decision per step
+            changed = {k for k in NV.Rules.__dataclass_fields__ if k not in ("name", "version")
+                       and getattr(a, k) != getattr(b, k)}
+            assert 1 <= len(changed) <= 2
+        assert NV.rule_chain(0.3)[-1][1].cosine_floor == 0.3
+        assert NV.rules_of({}) == R1 and NV.rules_of({"rules": R2.as_dict()}) == R2
+        assert R2.below_floor(0.2499) and not R2.below_floor(0.25) and not R2.with_floor(None).below_floor(-1)
+        assert NV.verdict_cuts("review", R2) and not NV.verdict_cuts("review", R1) and NV.verdict_cuts("cut", R1)
+
+
+class TestDecision12:
+    def test_sonnet_one_below_and_opus_at_covers_flagged_and_stops(self):
+        w = walk(3, ["a", "b"], rules=R2)
+        step(w, 2, 3)
+        assert w.decision == "covered" and w.covered_by == "a" and w.review == ["sonnet_below_opus_at"]
+        assert w.readings[0].outcome == "cut" and w.covering.opus_role == "below_cut_off" and w.queue == ["b"]
+        d = w.review_details[0]
+        assert d["kind"] == "sonnet_below_opus_at" and d["sonnet"]["value"] == 2 and d["opus"]["value"] == 3
+        w = walk(4, ["a"], rules=R2)
+        step(w, 3, 4)
+        assert w.decision == "covered" and w.review == ["sonnet_below_opus_at"]
+
+    def test_opus_under_the_cut_off_keeps_it_and_unparsed_is_still_grey(self):
+        w = walk(3, ["a", "b"], rules=R2)
+        step(w, 2, 2)
+        step(w, 1)
+        assert w.next_pair() is None and w.decision == "new" and w.review == []
+        w = walk(3, ["a"], rules=R2)
+        step(w, None)
+        assert w.next_pair() is None and w.decision == "grey" and w.review == ["unparsed"]
+
+    def test_a_pair_flag_carried_in_does_not_make_a_row_grey(self):
+        w = walk(3, ["a"], review=["pair_flag"], rules=R2)
+        step(w, 1)
+        assert w.next_pair() is None and w.decision == "new"
+
+
+class TestDecision13:
+    def listed(self):
+        return [L("alpha", 0.9, partners=["beta", "gamma"], simplexes=[TRI]), L("delta", 0.8, partners=["epsilon"], pair="epsilon"),
+                L("zeta", 0.7), L("beta", 0.6, partners=["alpha", "gamma"], simplexes=[TRI]),
+                L("epsilon", 0.5, partners=["delta"], pair="delta", via="expanded", rank=None),
+                L("gamma", 0.4, partners=["alpha", "beta"], via="expanded", rank=None, simplexes=[TRI])]
+
+    def base(self):
+        return {x.stem: "unrelated" for x in self.listed()}
+
+    def test_both_ends_of_a_pair_similar_leave_the_queue_with_a_note(self):
+        rel = self.base() | {"delta": "similar", "epsilon": "similar", "zeta": "similar"}
+        sl = NV.build_shortlist(self.listed(), rel, rules=R2)
+        assert sl.pair_notes == [{"pair": ["delta", "epsilon"], "kind": "pair", "both": "similar"}]
+        assert sl.excluded == ["delta", "epsilon"] and sl.queue == ["zeta"]
+        assert sl.pair_flags == [{"pair": ["delta", "epsilon"], "both": "similar"}]          # still on record
+        old = NV.build_shortlist(self.listed(), rel, rules=R1)
+        assert old.pair_notes == [] and old.queue == ["delta", "zeta", "epsilon"]
+        one = NV.build_shortlist(self.listed(), self.base() | {"delta": "similar", "epsilon": "opposed"}, rules=R2)
+        assert one.pair_notes == [] and one.queue == ["delta"]                                # the expected shape
+
+    def test_a_triangle_is_noted_only_when_every_corner_is_similar(self):
+        two = NV.build_shortlist(self.listed(), self.base() | {"alpha": "similar", "beta": "similar"}, rules=R2)
+        assert two.pair_notes == [] and two.queue == ["alpha", "beta"]
+        three = NV.build_shortlist(self.listed(), self.base() | {"alpha": "similar", "beta": "similar", "gamma": "similar",
+                                                                "zeta": "similar"}, rules=R2)
+        assert three.pair_notes == [{"pair": ["alpha", "beta", "gamma"], "kind": "triangle", "both": "similar"}]
+        assert three.queue == ["zeta"] and three.excluded == ["alpha", "beta", "gamma"]
+
+    def test_the_walk_never_judges_an_excluded_trait_not_even_as_an_opposites_partner(self):
+        w = walk(3, ["x", "p", "a"], partners={"x": ["p"]}, rules=R2, exclude=["p"])
+        step(w, "opposite")
+        assert w.next_pair() == "a" and w.pair_completion_for == []                          # x has a partner
+        step(w, 1)
+        assert w.next_pair() is None and [r.stem for r in w.readings] == ["x", "a"]
+
+    def test_the_runner_notes_the_pair_and_attaches_the_readings_on_record(self, tmp_path):
+        rel = {("candidate a", "delta"): "similar", ("candidate a", "epsilon"): "similar", ("candidate a", "zeta"): "similar"}
+        r, client, idx = make_runner(tmp_path, responder_for(rel, {}), rules=R1)
+        c = cand("candidate a")
+        vec = {c.key: query(delta=0.9, epsilon=0.8, zeta=0.7, kappa=0.6)}
+        st1 = r.run([c], vec)[c.key]                       # rule set 1 reads both ends (a pair flag, grey)
+        assert st1.block["decision"] == "grey" and {"delta", "epsilon"} <= {x["stem"] for x in st1.block["readings"]}
+        r2, client2, _ = make_runner(tmp_path, responder_for(rel, {}), replay_records=r.records)
+        st = r2.run([c], vec)[c.key]
+        nv = st.block
+        assert nv["decision"] == "new" and nv["review"] == ["both_similar"] and nv["pair_flags"]
+        note = nv["pair_notes"][0]
+        assert note["pair"] == ["delta", "epsilon"] and set(note["cosines"]) == {"delta", "epsilon"}
+        assert note["readings_on_record"]["delta"]["sonnet"]["value"] == 1                  # from rule set 1's records
+        assert [x["stem"] for x in nv["readings"]] == ["zeta"]                               # the ends never judged
+        assert not any(json.loads(user_text(k)).get("other", {}).get("label") in ("delta", "epsilon")
+                       for k in client2.calls)
+        assert NV.in_review_queue(nv) and nv["rules"]["name"] == "m3_rules_2"
+
+
+class TestDecision14:
+    def test_pair_flags_are_recorded_but_a_kept_row_is_new_not_grey(self, tmp_path):
+        rel = {("candidate a", "theta"): "opposed", ("candidate a", "iota"): "opposed", ("candidate a", "alpha"): "similar"}
+        vec = query(theta=0.9, iota=0.8, alpha=0.7, zeta=0.6)
+        for rules, decision, review in ((R2, "new", []), (R1, "grey", ["pair_flag"])):
+            r, _, _ = make_runner(tmp_path / rules.name, responder_for(rel, {}), rules=rules)
+            c = cand("candidate a")
+            nv = r.run([c], {c.key: vec})[c.key].block
+            assert nv["pair_flags"] == [{"pair": ["iota", "theta"], "both": "opposed"}]
+            assert nv["decision"] == decision and nv["review"] == review
+            assert NV.in_review_queue(nv) is (rules is R1)
+
+
+class TestDecision15:
+    def sets(self, tmp_path):
+        t = NV.load_trait_corpus(write_corpus(tmp_path / "data", renamed={"gamma": "old_gamma"}))
+        queue = {"entries": [{"stem": "short_sighted", "label": "short-sighted", "status": "candidate", "entity_type": "trait"}]}
+        return NV.label_sets(t, queue)
+
+    def test_labels_are_compared_separator_blind(self, tmp_path):
+        s = self.sets(tmp_path)
+        from assistant_axis.entity_id import normalize_to_file_name
+        for label in ("lambda mu", "lambda-mu", "lambdamu", "Lambda Mu"):
+            m = NV.exact_label_match(normalize_to_file_name(label), s, rules=R2)
+            assert m["covered_by"] == "lambda_mu" and m["match"] == "corpus"
+        assert NV.exact_label_match("lambdamu", s, rules=R2)["blind"] is True
+        assert NV.exact_label_match("lambdamu", s, rules=R1) is None                        # rule set 1: exact only
+        q = NV.exact_label_match("shortsighted", s, rules=R2)
+        assert q["covered_by"] == "short_sighted" and q["match"] == "queue" and q["matched"] == "short_sighted"
+
+    def test_a_renamed_from_match_no_longer_covers_at_stage_0(self, tmp_path):
+        s = self.sets(tmp_path)
+        assert NV.exact_label_match("old_gamma", s, rules=R2) is None
+        assert NV.renamed_match("old_gamma", s, rules=R2) == {"current": "gamma", "old_stem": "old_gamma"}
+        assert NV.renamed_match("oldgamma", s, rules=R2) == {"current": "gamma", "old_stem": "old_gamma", "blind": True}
+        assert NV.renamed_match("old_gamma", s, rules=R1) is None                          # rule set 1 covers it instead
+        assert NV.exact_label_match("old_gamma", s, rules=R1)["match"] == "renamed_from"
+
+    def test_a_renamed_from_match_is_judged_with_the_current_trait_first_below_the_floor_too(self, tmp_path):
+        ov = {("old gamma", "gamma", "sonnet"): 4}
+        r, client, idx = make_runner(tmp_path, responder_for({}, ov), renamed={"gamma": "old_gamma"})
+        c = cand("old gamma")
+        vec = {c.key: query(zeta=0.9, eta=0.8, kappa=0.7, delta=0.6)}                   # gamma not retrieved: cosine 0
+        st = r.run([c], vec)[c.key]
+        nv = st.block
+        assert nv["reason"] == "overlap" and nv["exact_label"] is None
+        assert nv["renamed_from"] == {"current": "gamma", "old_stem": "old_gamma"}
+        assert st.shortlist.queue[0] == "gamma" and nv["readings"][0]["stem"] == "gamma"
+        assert nv["readings"][0]["via"] == "renamed_from" and nv["readings"][0]["cosine"] < 0.25
+        assert nv["decision"] == "covered" and nv["covered_by"] == "gamma"
+        assert any(is_relation(k) for k in client.calls)                                    # judged like any other
+        r1, client1, _ = make_runner(tmp_path / "r1", responder_for({}, ov), renamed={"gamma": "old_gamma"}, rules=R1)
+        st1 = r1.run([c], vec)[c.key]
+        assert st1.block["reason"] == "exact_label" and client1.calls == []
+
+
+class TestCosineFloor:
+    def test_the_floor_keeps_low_similar_traits_out_but_not_an_opposed_partner_or_a_renamed_match(self):
+        listed = [L("alpha", 0.6), L("delta", 0.5, partners=["epsilon"], pair="epsilon"), L("eta", 0.3),
+                  L("kappa", 0.24), L("zeta", 0.2), L("epsilon", 0.1, partners=["delta"], pair="delta", via="expanded", rank=None)]
+        rel = {"alpha": "similar", "delta": "opposed", "eta": "unrelated", "kappa": "similar", "zeta": "unsure",
+               "epsilon": "unrelated"}
+        sl = NV.build_shortlist(listed, rel, rules=R2, renamed="lambda_mu")
+        assert sl.queue == ["lambda_mu", "epsilon", "alpha"] and sl.renamed == "lambda_mu"
+        assert sl.below_floor == ["kappa", "zeta"] and sl.n_below_floor == 3
+        assert NV.build_shortlist(listed, rel, rules=R2.with_floor(None)).queue == ["epsilon", "alpha", "kappa", "zeta"]
+        fb = NV.build_shortlist(listed, {}, rules=R2, fallback=True)
+        assert fb.queue == ["alpha", "delta", "eta"] and fb.below_floor == ["kappa", "zeta", "epsilon"]
+
+    def test_an_opposite_reading_brings_its_partner_even_below_the_floor(self, tmp_path):
+        rel = {("candidate a", "delta"): "similar", ("candidate a", "zeta"): "similar"}
+        ov = {("candidate a", "delta", "sonnet"): "opposite", ("candidate a", "epsilon", "sonnet"): 4}
+        r, _, idx = make_runner(tmp_path, responder_for(rel, ov))
+        c = cand("candidate a")
+        nv = r.run([c], {c.key: query(delta=0.9, zeta=0.5, eta=0.3, kappa=0.2)})[c.key].block
+        eps = next(x for x in nv["listed"] if x["stem"] == "epsilon")
+        assert eps["cosine"] < 0.25 and "epsilon" not in nv["shortlist"]
+        assert [x["stem"] for x in nv["readings"]] == ["delta", "epsilon"]
+        assert nv["decision"] == "covered" and nv["covered_by"] == "epsilon"
+        assert nv["n_below_floor"] == sum(1 for x in nv["listed"] if x["cosine"] < 0.25) and nv["rules"]["cosine_floor"] == 0.25
+
+
+class TestReviewOrderRound2:
+    def test_covered_and_flagged_and_noted_rows_are_in_the_queue(self):
+        rows = [row("a#1", "covered", review=["sonnet_below_opus_at"], covered_by="x", sonnet=2, opus=3),
+                row("b#1", "new", review=["both_similar"]), row("c#1", "grey", review=["unparsed"]),
+                row("d#1", "covered", review=["pair_flag"]), row("e#1", "new")]
+        assert NV.review_order(rows) == [("other", "c#1"), ("other", "a#1"), ("other", "b#1")]
+        assert NV.review_order(rows, include_new=True)[-1] == ("other", "e#1")
+
+
+class TestOfflineAndReplay:
+    def test_replayed_records_are_used_but_not_counted_and_the_seed_is_the_sources(self, tmp_path):
+        rel = {("candidate a", "alpha"): "similar"}
+        ov = {("candidate a", "alpha"): 4}
+        r, _, _ = make_runner(tmp_path, responder_for(rel, ov), rules=R1)
+        c = cand("candidate a")
+        vec = {c.key: query(alpha=0.9, zeta=0.6, eta=0.5, kappa=0.4)}
+        first = r.run([c], vec)[c.key].block
+        tr = NR.OfflineTransport()
+        idx = toy_index(tmp_path / "again")
+        r2 = NR.NoveltyRunner(client=None, batch_id="other_run", rubrics=rubrics(), index=idx,
+                              label_sets=NV.label_sets(idx.traits, {"entries": []}), usage=MultiModelUsage(),
+                              responses_path=tmp_path / "never.jsonl", k=4, transport=tr, rules=R1,
+                              relation_seed="m3test", replay_records=r.records)
+        again = r2.run([c], vec)[c.key].block
+        assert tr.wanted == [] and r2.records == [] and not (tmp_path / "never.jsonl").exists()
+        assert again["decision"] == first["decision"] and again["readings"] == first["readings"]
+        # another seed orders the relation call's list differently: not on record, so it is wanted and stalls
+        tr3 = NR.OfflineTransport()
+        r3 = NR.NoveltyRunner(client=None, batch_id="other_run", rubrics=rubrics(), index=idx,
+                              label_sets=NV.label_sets(idx.traits, {"entries": []}), usage=MultiModelUsage(),
+                              responses_path=tmp_path / "never.jsonl", k=4, transport=tr3, rules=R1,
+                              replay_records=r.records)
+        st3 = r3.run([c], vec)[c.key]
+        assert st3.block is None and [w["step"] for w in tr3.wanted] == ["relation"]
 
 
 # --------------------------------------------------------------------------- the Message Batches path

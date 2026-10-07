@@ -209,6 +209,21 @@ class LiveTransport:
         await asyncio.gather(*(one(c) for c in calls))
 
 
+class OfflineTransport:
+    """Sends nothing: a call whose answer is not on record is noted in ``wanted`` and left unanswered, so its
+    candidate stalls (``not_sent``).  For re-deciding a run on its records (``score --redecide``): the dry
+    run's count of the calls a rule now needs, and the attribution replays that must not spend."""
+    name = "offline"
+
+    def __init__(self):
+        self.wanted: list[dict] = []
+
+    async def execute(self, wave: str, calls: Sequence["Call"], on_result: Callable) -> None:
+        for c in calls:
+            self.wanted.append({"wave": wave, "step": c.step, "role": c.role, "model": c.model, "key": c.key,
+                                "stem": c.stem, "n_stems": len(c.stems), "call": c})
+
+
 # --------------------------------------------------------------------------- the runner
 
 @dataclass
@@ -232,6 +247,7 @@ class CandState:
     emitted: bool = False
     usage: dict = field(default_factory=dict)     # charged model -> totals
     scan: dict = field(default_factory=dict)      # full scan: stem -> {"sonnet", "opus"}
+    renamed: Optional[dict] = None                # decision 15: {"current", "old_stem"} of a renamed label
 
 
 class NoveltyRunner:
@@ -240,18 +256,30 @@ class NoveltyRunner:
     ``rubrics``: ``{"overlap": {"name", "text", "version", "sha256"}, "relation": {...}}`` as loaded and
     pin-checked by the CLI; ``index``: the corpus in the covered space (:class:`novelty.CorpusIndex`);
     ``label_sets``: stage 0's names; ``on_decided(states)``: called with newly decided candidates after
-    stage 0 and after every overlap position (the CLI writes their registry blocks there)."""
+    stage 0 and after every overlap position (the CLI writes their registry blocks there).
+
+    ``rules``: the decision rules (:data:`novelty.RULES`; default rule set 2).  ``relation_seed``: the run id
+    that seeds the relation call's list order (default ``batch_id``; a re-decided run passes its source's,
+    so that the source's relation calls are the same requests).  ``replay_records``: another run's
+    responses, answers on record that are replayed instead of sent (as ``resume_records`` are) but are not
+    this run's records: they are not counted in its summary, its parse rates or its spend.
+    ``extra_block``: fields added to every block (a re-decided run's ``redecided_from``)."""
 
     def __init__(self, *, client, batch_id: str, rubrics: Mapping[str, Mapping], index: NV.CorpusIndex,
                  label_sets: NV.LabelSets, usage: MultiModelUsage, responses_path: Path, k: int = 10,
                  mode: str = "shortlist", config_version: str = "", embedding: Optional[Mapping] = None,
                  transport: Any = None, concurrency: int = DEFAULT_CONCURRENCY,
                  retry_delays: Optional[Sequence[float]] = None, resume_records: Sequence[Mapping] = (),
-                 on_decided: Optional[Callable[[list], None]] = None, cache_ttl: Optional[str] = None):
+                 on_decided: Optional[Callable[[list], None]] = None, cache_ttl: Optional[str] = None,
+                 rules: Optional[NV.Rules] = None, relation_seed: Optional[str] = None,
+                 replay_records: Sequence[Mapping] = (), extra_block: Optional[Mapping] = None):
         if mode not in ("shortlist", "full_scan"):
             raise ValueError(f"mode must be shortlist or full_scan, not {mode!r}")
         self.client = client
         self.batch_id = batch_id
+        self.rules = rules or NV.DEFAULT_RULES
+        self.relation_seed = relation_seed or batch_id
+        self.extra_block = dict(extra_block or {})
         self.rubrics = rubrics
         self.index = index
         self.traits = index.traits
@@ -277,6 +305,8 @@ class NoveltyRunner:
         self.cache_good: dict[tuple, dict] = {}
         self.cache_fail: Counter = Counter()
         self.cache_fail_err: dict[tuple, str] = {}
+        for rec in replay_records:
+            self._remember(rec)
         for rec in resume_records:
             self.records.append(dict(rec))
             self._remember(rec)
@@ -477,11 +507,17 @@ class NoveltyRunner:
         live: list[CandState] = []
         for cand in cands:
             st = self.states[cand.key]
-            m = NV.exact_label_match(cand.stem, self.label_sets) if self.mode == "shortlist" else None
+            m = NV.exact_label_match(cand.stem, self.label_sets, rules=self.rules) if self.mode == "shortlist" else None
             if m is not None:
                 self.stats["exact_label"] += 1
                 st.block = self._block(st, decision="covered", reason="exact_label", covered_by=m["covered_by"], match=m)
                 continue
+            if self.mode == "shortlist":
+                st.renamed = NV.renamed_match(cand.stem, self.label_sets, rules=self.rules)
+                if st.renamed is not None and st.renamed["current"] not in self.traits:
+                    st.renamed = None                    # a rename whose current file is gone: judged as any other
+                if st.renamed is not None:
+                    self.stats["renamed_from_judged"] += 1
             if cand.key not in vectors:
                 st.stalled = "no embedding"
                 continue
@@ -505,7 +541,7 @@ class NoveltyRunner:
     async def _relations(self, live: list[CandState]) -> None:
         calls = []
         for st in live:
-            order = NV.relation_order([x.stem for x in st.listed], self.batch_id, st.cand.key)
+            order = NV.relation_order([x.stem for x in st.listed], self.relation_seed, st.cand.key)
             calls.append(self._relation_call(st, order))
         res = await self._wave("r1_relation", calls)
         by_key = {st.cand.key: st for st in live}
@@ -550,16 +586,56 @@ class NoveltyRunner:
         for st in live:
             if st.stalled or self._stop is not None and st.relation is None:
                 continue
+            renamed = st.renamed["current"] if st.renamed else None
             st.shortlist = NV.build_shortlist(st.listed, st.relations, self._cos_fn(st),
-                                              fallback=bool(st.relation.get("fallback")))
-            review = (["pair_flag"] if st.shortlist.pair_flags else []) + \
-                     (["unparsed"] if st.relation.get("fallback") else [])
-            details = [{"kind": "pair_flag", **f} for f in st.shortlist.pair_flags]
+                                              fallback=bool(st.relation.get("fallback")), rules=self.rules,
+                                              renamed=renamed)
+            review, details = [], []
+            if st.shortlist.pair_flags and self.rules.pair_flag_grey:
+                review.append("pair_flag")
+                details += [{"kind": "pair_flag", **f} for f in st.shortlist.pair_flags]
             if st.relation.get("fallback"):
+                review.append("unparsed")
                 details.append({"kind": "unparsed", "stage": "relation", "error": st.relation.get("error")})
-            st.walk = NV.Walk(st.cand.key, st.cand.cut_off, st.shortlist.queue, {x.stem: x for x in st.listed},
+            if st.shortlist.pair_notes:
+                review.append("both_similar")
+                for n in st.shortlist.pair_notes:
+                    n["cosines"] = {s: self._cos_of(st, s) for s in n["pair"]}
+                    n["readings_on_record"] = self._readings_on_record(st, n["pair"])
+                    details.append({"kind": "both_similar", "pair": list(n["pair"]), "arrangement": n["kind"],
+                                    "both": n["both"]})
+            info = {x.stem: x for x in st.listed}
+            if renamed and renamed not in info:
+                info[renamed] = NV.listed_from(renamed, self._cos_of(st, renamed), self.traits, rank=None,
+                                               via="renamed_from")
+            st.walk = NV.Walk(st.cand.key, st.cand.cut_off, st.shortlist.queue, info,
                               relations=st.relations, partners=self.partners, cosine_of=self._cos_fn(st), review=review,
-                              review_details=details, pair_completion_for=st.shortlist.pair_completion_for)
+                              review_details=details, pair_completion_for=st.shortlist.pair_completion_for,
+                              rules=self.rules, exclude=st.shortlist.excluded)
+
+    def _cos_of(self, st: CandState, stem: str) -> Optional[float]:
+        for x in st.listed:
+            if x.stem == stem:
+                return x.cosine
+        c = self.index.cosine_to(st.q, stem) if st.q is not None else None
+        return round(float(c), 6) if c is not None else None
+
+    def _readings_on_record(self, st: CandState, stems: Sequence[str]) -> dict:
+        """The overlap readings already on record (this run's or a replayed run's) for the candidate against
+        each of ``stems``, without sending anything: ``{stem: {"sonnet": {...}, "opus": {...}}}``."""
+        out = {}
+        for s in stems:
+            got = {}
+            for role in ("sonnet", "opus"):
+                rec = self.cache_good.get(self._overlap_call(st, s, role, 0).cache_key())
+                if rec is None:
+                    continue
+                parsed, errors, _ = self.parse(self._overlap_call(st, s, role, 0), rec.get("text"))
+                if parsed and not errors:
+                    got[role] = {"value": parsed["value"], "reason": parsed["reason"]}
+            if got:
+                out[s] = got
+        return out
 
     # -- stage 4 ----------------------------------------------------------------------
     async def _walk(self, live: list[CandState]) -> None:
@@ -640,9 +716,14 @@ class NoveltyRunner:
         for st in live:
             if st.stalled:
                 continue
-            order = [x.stem for x in sorted(st.listed, key=lambda x: (-x.cosine, x.stem))]
+            # the walk replayed on the readings, every listed trait in cosine order (no relation call, so no
+            # shortlist, no front and no both-similar rule), under the run's decision rules; traits below the
+            # floor are read like the rest but left out of the replayed walk, as the pipeline would leave them
+            order = [x.stem for x in sorted(st.listed, key=lambda x: (-x.cosine, x.stem))
+                     if not self.rules.below_floor(x.cosine)]
             st.walk = NV.replay_walk(NV.Walk(st.cand.key, st.cand.cut_off, order, {x.stem: x for x in st.listed},
-                                             partners=self.partners, cosine_of=self._cos_fn(st)), st.scan)
+                                             partners=self.partners, cosine_of=self._cos_fn(st), rules=self.rules),
+                                     st.scan)
             st.block = self._block(st, decision=st.walk.decision, reason="overlap")
 
     # -- blocks -----------------------------------------------------------------------------
@@ -651,15 +732,19 @@ class NoveltyRunner:
         b = NV.novelty_block(run_id=self.batch_id, cand=st.cand.as_dict(), decision=decision, reason=reason,
                              covered_by=covered_by, match=match, walk=st.walk, listed=st.listed, relation=st.relation,
                              shortlist=st.shortlist, rubrics=self.rubric_pins, config_version=self.config_version,
-                             embedding=self.embedding, usage=NV.usage_dict(st.usage), at=utc_now(), mode=self.mode)
+                             embedding=self.embedding, usage=NV.usage_dict(st.usage), at=utc_now(), mode=self.mode,
+                             rules=self.rules, renamed=st.renamed, extra=self.extra_block)
         if self.mode == "full_scan":
             by = {x.stem: x for x in st.listed}
             b["scan"] = []
+            b["n_below_floor"] = sum(1 for x in st.listed if self.rules.below_floor(x.cosine))
             for s in sorted(st.scan, key=lambda s: (-by[s].cosine, s)):
                 r = st.scan[s]
                 pv = NV.pair_verdict((r["sonnet"] or {}).get("value"), (r.get("opus") or {}).get("value"), st.cand.cut_off)
                 b["scan"].append({"stem": s, "cosine": by[s].cosine, "rank": by[s].rank, "via": by[s].via,
-                                  "sonnet": r["sonnet"], "opus": r.get("opus"), **pv})
+                                  "sonnet": r["sonnet"], "opus": r.get("opus"), **pv,
+                                  "cuts": NV.verdict_cuts(pv["verdict"], self.rules),
+                                  "below_floor": self.rules.below_floor(by[s].cosine)})
         return b
 
     # -- parse rates -------------------------------------------------------------------------
@@ -821,6 +906,26 @@ def summarize(results: Sequence[Mapping], records: Sequence[Mapping], usage: Mul
     for r in records:
         spend[r.get("step")][r.get("charged_as") or "none"] += record_cost(r)
     exit_depth = [b["deciding_reading"]["position"] for b in walked if b["decision"] == "covered" and b["deciding_reading"]]
+    notes = [n for b in blocks for n in b.get("pair_notes") or []]
+    renamed = [b for b in blocks if b.get("renamed_from")]
+    rule_sets = sorted({(b.get("rules") or {}).get("name") or NV.RULES[1].name for b in blocks})
+    rule_tail = {
+        "rules": rule_sets,
+        "cosine_floor": sorted({(b.get("rules") or {}).get("cosine_floor") for b in blocks}, key=lambda x: (x is None, x)),
+        "review_queue": sum(1 for b in blocks if NV.in_review_queue(b)),
+        "covered_flagged": sum(1 for b in blocks if b["decision"] == "covered" and "sonnet_below_opus_at" in b["review"]
+                               and any(d.get("kind") == "sonnet_below_opus_at" and d.get("stem") == b.get("covered_by")
+                                       for d in b.get("review_details") or [])),
+        "pair_notes": {"rows": sum(1 for b in blocks if b.get("pair_notes")), "notes": len(notes),
+                       "by_kind": dict(Counter(n.get("kind", "pair") for n in notes)),
+                       "rows_by_decision": dict(Counter(b["decision"] for b in blocks if b.get("pair_notes")))},
+        "pair_flag_rows": sum(1 for b in blocks if b.get("pair_flags")),
+        "floor": {"rows_with_listed_below": sum(1 for b in walked if b.get("n_below_floor")),
+                  "listed_below_total": sum(b.get("n_below_floor") or 0 for b in walked),
+                  "similar_kept_out_total": sum(len(b.get("below_floor") or []) for b in walked),
+                  "rows_with_similar_kept_out": sum(1 for b in walked if b.get("below_floor"))},
+        "renamed_from_judged": {"rows": len(renamed), "by_decision": dict(Counter(b["decision"] for b in renamed))},
+    }
     return {
         "mode": mode, "n_candidates": len(blocks) + len(stalled), "n_decided": len(blocks), "n_stalled": len(stalled),
         "stalled": stalled, "skipped": dict(skipped or {}),
@@ -843,4 +948,4 @@ def summarize(results: Sequence[Mapping], records: Sequence[Mapping], usage: Mul
         "spend_by_stage": {s: {m: round(v, 6) for m, v in d.items()} for s, d in spend.items()},
         "spend_usd": round(usage.total_cost_usd, 6),
         "usage": usage.as_dict(),
-    }
+    } | rule_tail

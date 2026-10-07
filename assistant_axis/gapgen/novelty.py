@@ -27,7 +27,17 @@ Per candidate (a registry row whose filter verdict is ``trait``, with a gloss an
 4. **Overlap walk** (:class:`Walk`): one pair per call down the queue, Sonnet first, with the rule of
    :func:`sonnet_action` and early exit at the first ``covered``.
 5. **Decision and block** (:func:`novelty_block`): ``covered`` (with ``covered_by``), ``new``, or ``grey``
-   (kept, with a review flag: ``sonnet_below_opus_at``, ``unparsed`` or ``pair_flag``).
+   (kept, with a review flag that the rule set treats as grey: see :class:`Rules`).
+
+The decision rules come in two versions (:data:`RULES`).  Version 1 is the pilot's (decisions 1-11 of
+``coding_plan_platform.md``'s M3 section); version 2, the default from 2026-10-07, adds decisions 12-15 and
+the cosine floor (coding_plan_m3.md, "Round 2"): a Sonnet reading one below the cut-off that Opus reads at
+or above it covers, flagged; both ends of a recorded pair (every corner of a simplex) marked similar are
+taken out of the shortlist and noted; the pair flag is a note, not a reason for ``grey``; a ``renamed_from``
+match is judged like any other candidate, with the current trait at the front, and labels are compared
+separator-blind; listed traits below the cosine floor are not judged (an opposed trait's partner and a
+``renamed_from`` match are).  Version 1 stays so that a run can be re-decided under the pilot's rules and
+shown to reproduce it.
 
 By-products: every reading beside its cosine (``readings.jsonl``, :func:`reading_rows`), the review queue
 (:func:`review_order`) and the rename shortlist (:func:`synonyms`).
@@ -36,7 +46,7 @@ from __future__ import annotations
 
 import json
 import random
-from dataclasses import asdict, dataclass, field
+from dataclasses import asdict, dataclass, field, replace
 from pathlib import Path
 from typing import Any, Callable, Iterable, Mapping, Optional, Sequence
 
@@ -49,8 +59,14 @@ from . import overlap_test as OT
 # --------------------------------------------------------------------------- constants
 
 DECISIONS: tuple[str, ...] = ("covered", "new", "grey")
-#: The review flags that make a kept candidate ``grey`` (coding_plan_m3.md, stage 5).
-REVIEW_KINDS: tuple[str, ...] = ("sonnet_below_opus_at", "unparsed", "pair_flag")
+#: Every review flag a row can carry (coding_plan_m3.md, stage 5; ``both_similar`` from decision 13).  Which
+#: of them make a kept candidate ``grey`` is the rule set's :attr:`Rules.grey_kinds`.
+REVIEW_KINDS: tuple[str, ...] = ("sonnet_below_opus_at", "unparsed", "pair_flag", "both_similar")
+#: The flags that put a row in the review queue whatever its decision (decision 14: the covered-and-flagged
+#: rows, the both-similar notes and ``unparsed``); a ``grey`` row is always in it.
+QUEUE_KINDS: tuple[str, ...] = ("sonnet_below_opus_at", "both_similar", "unparsed")
+#: The cosine floor of rule set 2 (Roger, 2026-10-07: "an acceptable level of trade-off").
+DEFAULT_COSINE_FLOOR = 0.25
 RELATION_ANSWERS: tuple[str, ...] = ("similar", "opposed", "unrelated", "unsure")
 #: The relation rubric's answer, in the shape :func:`overlap_test.parse_list` reads.
 RELATION_SPEC: dict = {"key": "relation", "scale": (), "categories": RELATION_ANSWERS}
@@ -71,6 +87,76 @@ DEFAULT_QUERY_FORM = "gloss_w14"
 def is_expanding(kind: str) -> bool:
     """Pairs, triangles, tetrahedra and larger simplexes expand; nothing else does."""
     return kind in EXPANDING_FIXED or kind.endswith("-simplex")
+
+
+# --------------------------------------------------------------------------- the decision rules
+
+@dataclass(frozen=True)
+class Rules:
+    """One version of M3's decision rules (the module docstring).  Each switch is one decision of
+    ``coding_plan_platform.md``'s M3 section, so that a change in a re-decided run can be traced to one."""
+    name: str
+    version: int
+    cover_on_opus_check: bool        # decision 12: Sonnet c - 1, Opus c or above -> covered, flagged
+    both_similar_excluded: bool      # decision 13: both ends of a pair similar -> neither is judged, a note
+    pair_flag_grey: bool             # decision 14 off: a pair flag makes a kept row grey
+    renamed_from_covers: bool        # decision 15 off: a renamed_from match covers at stage 0
+    separator_blind: bool            # decision 15: labels compared with the separators taken out
+    cosine_floor: Optional[float]    # listed traits below it are not judged (None: no floor)
+
+    @property
+    def grey_kinds(self) -> tuple[str, ...]:
+        """The review flags that make a kept candidate ``grey``: ``unparsed`` always; the Opus check's flag
+        while it does not cover (decision 12 off); the pair flag while it is a review trigger (decision 14
+        off).  A both-similar note never does: the row keeps its decision and the note puts it in review."""
+        kinds = ["sonnet_below_opus_at"] if not self.cover_on_opus_check else []
+        kinds.append("unparsed")
+        if self.pair_flag_grey:
+            kinds.append("pair_flag")
+        return tuple(kinds)
+
+    def with_floor(self, floor: Optional[float]) -> "Rules":
+        return replace(self, cosine_floor=None if floor is None else float(floor))
+
+    def below_floor(self, cosine: Optional[float]) -> bool:
+        return self.cosine_floor is not None and cosine is not None and float(cosine) < self.cosine_floor
+
+    def as_dict(self) -> dict:
+        return asdict(self)
+
+
+#: Version 1: the pilot's rules (decisions 1-11).  Version 2: decisions 12-15 and the floor (2026-10-07).
+RULES: dict[int, Rules] = {
+    1: Rules(name="m3_rules_1", version=1, cover_on_opus_check=False, both_similar_excluded=False,
+             pair_flag_grey=True, renamed_from_covers=True, separator_blind=False, cosine_floor=None),
+    2: Rules(name="m3_rules_2", version=2, cover_on_opus_check=True, both_similar_excluded=True,
+             pair_flag_grey=False, renamed_from_covers=False, separator_blind=True, cosine_floor=DEFAULT_COSINE_FLOOR),
+}
+DEFAULT_RULES = RULES[2]
+#: The steps from version 1 to version 2, one decision each, in the order a re-decided run attributes its
+#: changes (``novelty_score.py score --redecide``): each step adds one switch to the ones before it.
+RULE_STEPS: tuple[tuple[str, dict], ...] = (
+    ("decision 14 (pair flag a note)", {"pair_flag_grey": False}),
+    ("decision 12 (covered, flagged)", {"cover_on_opus_check": True}),
+    ("decision 13 (both ends similar)", {"both_similar_excluded": True}),
+    ("decision 15 (labels: renamed_from judged, separator-blind)", {"renamed_from_covers": False, "separator_blind": True}),
+    ("cosine floor", {"cosine_floor": DEFAULT_COSINE_FLOOR}),
+)
+
+
+def rule_chain(floor: Optional[float] = DEFAULT_COSINE_FLOOR) -> list[tuple[str, Rules]]:
+    """``[(step name, rules), ...]``: version 1, then each of :data:`RULE_STEPS` added in turn (the last is
+    version 2 with ``floor``)."""
+    cur = RULES[1]
+    out = [("rules 1 (the pilot's)", cur)]
+    for i, (name, change) in enumerate(RULE_STEPS, 1):
+        change = dict(change)
+        if "cosine_floor" in change:
+            change["cosine_floor"] = floor
+        cur = replace(cur, name=f"m3_rules_1+{i}", **change)
+        out.append((name, cur))
+    out[-1] = (out[-1][0], replace(out[-1][1], name=RULES[2].name, version=2))
+    return out
 
 
 def cut_off(alignment_score: Any) -> int:
@@ -98,6 +184,7 @@ class CorpusTrait:
     partners: list          # pair partner, then fellow simplex corners (sorted)
     expands_to: list        # the other members of its pair / simplexes (what expansion adds)
     renamed_from: list      # earlier stems
+    simplexes: list = field(default_factory=list)   # [{"kind", "members"}]: its triangles, tetrahedra, simplexes
 
 
 def _renamed_from(value: Any) -> list[str]:
@@ -127,19 +214,21 @@ def load_trait_corpus(data_dir: Path) -> dict[str, CorpusTrait]:
         partner = pair_of.get(stem)
         corners: set[str] = set()
         expands: set[str] = set()
+        simplexes: list[dict] = []
         for a in rec.arrangements:
             if is_expanding(a.kind):
                 others = [m for m in a.members if m != stem]
                 expands.update(others)
                 if a.kind != "pair":
                     corners.update(others)
+                    simplexes.append({"kind": a.kind, "members": sorted(a.members)})
         if partner:
             expands.add(partner)
         partners = ([partner] if partner else []) + sorted(c for c in corners if c != partner)
         out[stem] = CorpusTrait(stem=stem, label=doc.get("positive_label") or stem.replace("_", " "),
                                 description=doc.get("description") or "", negative_label=rec.negative_label,
                                 pair_partner=partner, partners=partners, expands_to=sorted(expands),
-                                renamed_from=_renamed_from(doc.get("renamed_from")))
+                                renamed_from=_renamed_from(doc.get("renamed_from")), simplexes=simplexes)
     return out
 
 
@@ -209,11 +298,32 @@ def query_text(label: str, gloss: str, *, query_form: str = DEFAULT_QUERY_FORM, 
 
 # --------------------------------------------------------------------------- stage 0: the exact label
 
+def blind(stem: str) -> str:
+    """A stem with its separators taken out (decision 15: "anti feminist", "anti-feminist" and antifeminist
+    are one label; :func:`normalize_to_file_name` has already folded case, spaces and hyphens to ``_``)."""
+    return stem.replace("_", "")
+
+
+def _blind_index(names: Iterable[str]) -> dict[str, str]:
+    """``{blind form: name}``; where two names share a blind form, the first in sorted order."""
+    out: dict[str, str] = {}
+    for n in sorted(names):
+        out.setdefault(blind(n), n)
+    return out
+
+
 @dataclass
 class LabelSets:
     corpus: set
     queue: dict          # stem -> {"stem", "status", "entity_type"} (stems and normalised labels)
     renamed: dict        # old stem -> current corpus stem
+
+    def blind_index(self, which: str) -> dict[str, str]:
+        """``{blind form: name}`` of ``corpus``, ``queue`` or ``renamed`` (built once)."""
+        memo = self.__dict__.setdefault("_blind", {})
+        if which not in memo:
+            memo[which] = _blind_index(getattr(self, which))
+        return memo[which]
 
 
 def label_sets(traits: Mapping[str, CorpusTrait], queue: Mapping) -> LabelSets:
@@ -229,19 +339,51 @@ def label_sets(traits: Mapping[str, CorpusTrait], queue: Mapping) -> LabelSets:
     return LabelSets(corpus=set(traits), queue=q, renamed=renamed)
 
 
-def exact_label_match(stem: str, sets: LabelSets) -> Optional[dict]:
-    """``{"covered_by", "match", ...}`` when the candidate's normalised label is a corpus stem
-    (``match: "corpus"``), a renamed stem (``"renamed_from"``, covered by the current stem) or a queue
-    name (``"queue"``, covered by the entry's stem); else ``None``.  The corpus is checked first."""
-    if stem in sets.corpus:
-        return {"covered_by": stem, "match": "corpus"}
-    if stem in sets.renamed:
-        return {"covered_by": sets.renamed[stem], "match": "renamed_from", "old_stem": stem}
-    if stem in sets.queue:
-        e = sets.queue[stem]
-        return {"covered_by": e.get("stem") or stem, "match": "queue", "queue_status": e.get("status"),
-                "entity_type": e.get("entity_type")}
+def _lookup(stem: str, sets: LabelSets, which: str, separator_blind: bool) -> Optional[str]:
+    """The name of ``sets.<which>`` that ``stem`` matches: itself when present, else (``separator_blind``)
+    the name with the same blind form."""
+    if stem in getattr(sets, which):
+        return stem
+    if separator_blind:
+        return sets.blind_index(which).get(blind(stem))
     return None
+
+
+def exact_label_match(stem: str, sets: LabelSets, *, rules: Optional[Rules] = None) -> Optional[dict]:
+    """``{"covered_by", "match", ...}`` when stage 0 covers the candidate, else ``None``: its normalised label
+    a corpus stem (``match: "corpus"``), a queue name (``"queue"``, covered by the entry's stem) or, while
+    ``rules.renamed_from_covers`` (rule set 1), a renamed stem (``"renamed_from"``, covered by the current
+    stem).  The corpus is checked first.  With ``rules.separator_blind`` (rule set 2) a label that differs
+    only in its separators matches too (``"blind": True``, ``"matched": <the name>``)."""
+    rules = rules or DEFAULT_RULES
+    sb = rules.separator_blind
+    c = _lookup(stem, sets, "corpus", sb)
+    if c is not None:
+        return {"covered_by": c, "match": "corpus"} | ({"blind": True, "matched": c} if c != stem else {})
+    if rules.renamed_from_covers:
+        r = _lookup(stem, sets, "renamed", sb)
+        if r is not None:
+            return {"covered_by": sets.renamed[r], "match": "renamed_from", "old_stem": r} | \
+                ({"blind": True} if r != stem else {})
+    q = _lookup(stem, sets, "queue", sb)
+    if q is not None:
+        e = sets.queue[q]
+        return {"covered_by": e.get("stem") or q, "match": "queue", "queue_status": e.get("status"),
+                "entity_type": e.get("entity_type")} | ({"blind": True, "matched": q} if q != stem else {})
+    return None
+
+
+def renamed_match(stem: str, sets: LabelSets, *, rules: Optional[Rules] = None) -> Optional[dict]:
+    """Decision 15: ``{"current": <corpus stem>, "old_stem": ...}`` when the candidate's label is a corpus
+    file's ``renamed_from`` (separator-blind under ``rules.separator_blind``), for the walk to judge the
+    current trait first; ``None`` otherwise, or when the rule set still covers such a match at stage 0."""
+    rules = rules or DEFAULT_RULES
+    if rules.renamed_from_covers:
+        return None
+    r = _lookup(stem, sets, "renamed", rules.separator_blind)
+    if r is None:
+        return None
+    return {"current": sets.renamed[r], "old_stem": r} | ({"blind": True} if r != stem else {})
 
 
 # --------------------------------------------------------------------------- stages 1-2: retrieval and expansion
@@ -251,10 +393,17 @@ class Listed:
     stem: str
     cosine: float
     rank: Optional[int]          # 1..k for a retrieved trait, None for an added one
-    via: str                     # "retrieved" | "expanded"
+    via: str                     # "retrieved" | "expanded" (| "renamed_from": the current trait of a renamed label)
     expanded_from: list = field(default_factory=list)
     partners: list = field(default_factory=list)
     pair_partner: Optional[str] = None
+    simplexes: list = field(default_factory=list)   # its triangles / tetrahedra / simplexes ({"kind", "members"})
+
+
+def listed_from(stem: str, cosine: float, traits: Mapping[str, CorpusTrait], *, rank: Optional[int], via: str) -> Listed:
+    t = traits[stem]
+    return Listed(stem=stem, cosine=round(float(cosine), 6), rank=rank, via=via, partners=list(t.partners),
+                  pair_partner=t.pair_partner, simplexes=[dict(s) for s in t.simplexes])
 
 
 def expand(retrieved: Sequence[tuple[str, float]], traits: Mapping[str, CorpusTrait],
@@ -263,9 +412,7 @@ def expand(retrieved: Sequence[tuple[str, float]], traits: Mapping[str, CorpusTr
     by cosine, highest first), each with its own cosine to the candidate and its partners."""
     out: dict[str, Listed] = {}
     for rank, (s, cos) in enumerate(retrieved, 1):
-        t = traits[s]
-        out[s] = Listed(stem=s, cosine=round(float(cos), 6), rank=rank, via="retrieved", partners=list(t.partners),
-                        pair_partner=t.pair_partner)
+        out[s] = listed_from(s, cos, traits, rank=rank, via="retrieved")
     added: dict[str, Listed] = {}
     for s, _ in retrieved:
         for m in traits[s].expands_to:
@@ -273,9 +420,7 @@ def expand(retrieved: Sequence[tuple[str, float]], traits: Mapping[str, CorpusTr
                 continue
             if m not in added:
                 c = cosine_of(m)
-                t = traits[m]
-                added[m] = Listed(stem=m, cosine=round(float(c), 6) if c is not None else 0.0, rank=None,
-                                  via="expanded", partners=list(t.partners), pair_partner=t.pair_partner)
+                added[m] = listed_from(m, c if c is not None else 0.0, traits, rank=None, via="expanded")
             if s not in added[m].expanded_from:
                 added[m].expanded_from.append(s)
     return list(out.values()) + sorted(added.values(), key=lambda x: (-x.cosine, x.stem))
@@ -318,18 +463,55 @@ class Shortlist:
     pair_flags: list             # [{"pair": [a, b], "both": "similar"|"opposed"}]
     pair_completion_for: list    # opposed traits with no partner
     relations: dict              # stem -> final relation
+    pair_notes: list = field(default_factory=list)    # decision 13: [{"pair": [...], "kind", "both": "similar"}]
+    excluded: list = field(default_factory=list)      # decision 13: the noted members, never judged
+    below_floor: list = field(default_factory=list)   # similar traits the floor kept out of the queue
+    n_below_floor: int = 0                            # listed traits below the floor (any relation)
+    renamed: Optional[str] = None                     # decision 15: the current trait, at the head of the queue
+
+
+def both_similar_notes(listed: Sequence[Listed], relations: Mapping[str, str]) -> list[dict]:
+    """Decision 13 (Roger's rule): every recorded pair whose two members are listed and both answered
+    ``similar``, and every triangle, tetrahedron or simplex whose corners are all listed and all ``similar``:
+    ``[{"pair": [members], "kind": "pair"|"triangle"|..., "both": "similar"}]``, by members."""
+    by = {x.stem: x for x in listed}
+    sim = {s for s, r in relations.items() if r == "similar" and s in by}
+    notes: dict[tuple, dict] = {}
+    for x in listed:
+        p = x.pair_partner
+        if p and x.stem in sim and p in sim:
+            m = tuple(sorted([x.stem, p]))
+            notes.setdefault(m, {"pair": list(m), "kind": "pair", "both": "similar"})
+        for sx in x.simplexes:
+            m = tuple(sorted(sx["members"]))
+            if m not in notes and all(s in sim for s in m):
+                notes[m] = {"pair": list(m), "kind": sx["kind"], "both": "similar"}
+    return [notes[m] for m in sorted(notes)]
 
 
 def build_shortlist(listed: Sequence[Listed], relations: Mapping[str, str],
-                    cosine_of: Optional[Callable[[str], Optional[float]]] = None, *, fallback: bool = False) -> Shortlist:
+                    cosine_of: Optional[Callable[[str], Optional[float]]] = None, *, fallback: bool = False,
+                    rules: Optional[Rules] = None, renamed: Optional[str] = None) -> Shortlist:
     """Stage 3's outputs from the final relations (after the unsure re-ask).  ``cosine_of`` gives the cosine
     of a partner that is not listed (a corner of an expanded trait's own simplex).  A trait still ``unsure``
     after the re-ask is shortlisted with the similar ones (by cosine) and does not count in the pair check.
-    ``fallback`` (the relation call never parsed): every listed trait, by cosine, and no pair check."""
+    ``fallback`` (the relation call never parsed): every listed trait, by cosine, and no pair check.
+
+    Under ``rules`` (default :data:`DEFAULT_RULES`): with ``both_similar_excluded`` the members of every
+    :func:`both_similar_notes` group leave the queue (``excluded``, ``pair_notes``); with a ``cosine_floor``
+    the similar traits below it leave the queue (``below_floor``), while the partners of opposed traits stay
+    whatever their cosine (the opposite rule); ``renamed`` (decision 15) heads the queue whatever the relation
+    call said, the floor and the exclusion notwithstanding."""
+    rules = rules or DEFAULT_RULES
     by = {x.stem: x for x in listed}
+    n_below = sum(1 for x in listed if rules.below_floor(x.cosine))
+    head = [renamed] if renamed else []
     if fallback:
-        return Shortlist(queue=[x.stem for x in sorted(listed, key=lambda x: (-x.cosine, x.stem))], front=[],
-                         pair_flags=[], pair_completion_for=[], relations=dict(relations))
+        order = [x for x in sorted(listed, key=lambda x: (-x.cosine, x.stem))]
+        dropped = [x.stem for x in order if rules.below_floor(x.cosine) and x.stem != renamed]
+        queue = head + [x.stem for x in order if x.stem not in dropped and x.stem != renamed]
+        return Shortlist(queue=queue, front=[], pair_flags=[], pair_completion_for=[], relations=dict(relations),
+                         below_floor=dropped, n_below_floor=n_below, renamed=renamed)
 
     def cos(s: str) -> float:
         if s in by:
@@ -348,7 +530,12 @@ def build_shortlist(listed: Sequence[Listed], relations: Mapping[str, str],
     front = sorted(front, key=lambda s: (-cos(s), s))
     similar = sorted((x for x in listed if relations.get(x.stem) in ("similar", "unsure")),
                      key=lambda x: (-x.cosine, x.stem))
-    queue = front + [x.stem for x in similar if x.stem not in front]
+    dropped = [x.stem for x in similar if rules.below_floor(x.cosine) and x.stem not in front and x.stem != renamed]
+    notes = both_similar_notes(listed, relations) if rules.both_similar_excluded else []
+    excluded = sorted({s for n in notes for s in n["pair"]} - {renamed})
+    queue = [s for s in front + [x.stem for x in similar if x.stem not in front and x.stem not in dropped]
+             if s not in excluded and s != renamed]
+    queue = head + queue
     flags = []
     seen = set()
     for x in listed:
@@ -360,7 +547,8 @@ def build_shortlist(listed: Sequence[Listed], relations: Mapping[str, str],
         if ra == rb and ra in ("similar", "opposed"):
             flags.append({"pair": sorted([x.stem, p]), "both": ra})
     return Shortlist(queue=queue, front=front, pair_flags=flags, pair_completion_for=completion,
-                     relations=dict(relations))
+                     relations=dict(relations), pair_notes=notes, excluded=excluded, below_floor=dropped,
+                     n_below_floor=n_below, renamed=renamed)
 
 
 # --------------------------------------------------------------------------- stage 4: the overlap walk
@@ -374,8 +562,9 @@ def sonnet_action(value: Any, c: int) -> str:
 
     * ``"cut"``: above c, covered by that trait directly;
     * ``"opus_decides"``: exactly c, Opus reads the pair and decides (c or above: covered);
-    * ``"opus_check"``: c - 1, Opus reads the pair, the candidate is not cut whatever it says, and an
-      Opus reading of c or above marks the row for review;
+    * ``"opus_check"``: c - 1, Opus reads the pair; an Opus reading of c or above marks the row for review
+      and, under rule set 2 (decision 12), covers it (rule set 1: the candidate is not cut whatever Opus
+      says);
     * ``"continue"``: below c - 1;
     * ``"opposite"``: taken as it stands, no Opus (decision 9);
     * ``"opus_replaces"``: "unsure", Opus reads and its answer is used as if it were Sonnet's;
@@ -421,19 +610,23 @@ class Walk:
     """One candidate's overlap walk (stage 4), driven pair by pair: :meth:`next_pair` names the next trait
     to read, :meth:`give_sonnet` takes Sonnet's reading and says whether Opus must read it too,
     :meth:`give_opus` takes Opus's.  The walk stops at the first ``covered`` (early exit); when the queue
-    runs out the candidate is ``new``, or ``grey`` when it carries a review flag.
+    runs out the candidate is ``new``, or ``grey`` when it carries a flag of ``rules.grey_kinds``.
 
     ``queue``: the shortlist; ``info``: stem -> :class:`Listed` (cosine, relation via, partners) for the
     listed traits; ``cosine_of``: the cosine of a partner that is not listed; ``review``: flags carried in
-    from stage 3 (``pair_flag``, a relation call that never parsed)."""
+    from stage 3 (``pair_flag`` under rule set 1, ``both_similar`` under 2, a relation call that never
+    parsed); ``exclude``: traits never judged, not even as an opposite's partner (decision 13)."""
 
     def __init__(self, key: str, c: int, queue: Sequence[str], info: Mapping[str, Listed], *,
                  relations: Optional[Mapping[str, str]] = None, partners: Optional[Mapping[str, Sequence[str]]] = None,
                  cosine_of: Optional[Callable[[str], Optional[float]]] = None, review: Iterable[str] = (),
-                 review_details: Iterable[Mapping] = (), pair_completion_for: Iterable[str] = ()):
+                 review_details: Iterable[Mapping] = (), pair_completion_for: Iterable[str] = (),
+                 rules: Optional[Rules] = None, exclude: Iterable[str] = ()):
         self.key = key
         self.c = int(c)
-        self.queue: list[str] = list(dict.fromkeys(queue))
+        self.rules = rules or DEFAULT_RULES
+        self.exclude: set[str] = set(exclude)
+        self.queue: list[str] = [s for s in dict.fromkeys(queue) if s not in self.exclude]
         self.info = dict(info)
         self.relations = dict(relations or {})
         self.partners = {s: list(p) for s, p in (partners or {}).items()}
@@ -476,7 +669,7 @@ class Walk:
 
     def _finish(self) -> None:
         if self.decision is None:
-            self.decision = "grey" if self.review else "new"
+            self.decision = "grey" if any(k in self.rules.grey_kinds for k in self.review) else "new"
 
     # -- driving -------------------------------------------------------------------
     def next_pair(self) -> Optional[str]:
@@ -488,7 +681,7 @@ class Walk:
             return self.current.stem
         while self.queue:
             s = self.queue.pop(0)
-            if s in self.judged:
+            if s in self.judged or s in self.exclude:
                 continue
             x = self.info.get(s)
             self.current = Reading(position=len(self.readings) + 1, stem=s, cosine=self._cos(s),
@@ -513,7 +706,8 @@ class Walk:
         r = self.current
         partners = self.partners.get(r.stem) or []
         if partners:
-            todo = sorted((p for p in partners if p not in self.judged and p != r.stem), key=lambda p: (-self._cos(p), p))
+            todo = sorted((p for p in partners if p not in self.judged and p != r.stem and p not in self.exclude),
+                          key=lambda p: (-self._cos(p), p))
             self.queue = todo + [s for s in self.queue if s not in todo]
         elif r.stem not in self.pair_completion_for:
             self.pair_completion_for.append(r.stem)
@@ -565,7 +759,10 @@ class Walk:
                 self._flag("sonnet_below_opus_at")
                 self.review_details.append({"kind": "sonnet_below_opus_at", "stem": r.stem, "cut_off": self.c,
                                             "sonnet": r.sonnet, "opus": r.opus})
-                self._close("review")
+                if self.rules.cover_on_opus_check:      # decision 12: covered, flagged for review
+                    self._cut()
+                else:
+                    self._close("review")
             else:
                 self._close("continue")
         else:   # sonnet_unsure: Opus's answer stands for Sonnet's
@@ -631,6 +828,21 @@ def pair_verdict(sonnet: Any, opus: Any, c: int) -> dict:
     return {"verdict": v, "at_or_above": bool(at)}
 
 
+def verdict_cuts(verdict: str, rules: Optional[Rules] = None) -> bool:
+    """Whether a :func:`pair_verdict` covers the candidate under ``rules``: ``cut`` always, ``review`` (Sonnet
+    one below the cut-off, Opus at or above) under decision 12."""
+    rules = rules or DEFAULT_RULES
+    return verdict == "cut" or (verdict == "review" and rules.cover_on_opus_check)
+
+
+def rules_of(block: Mapping) -> Rules:
+    """The rule set a recorded block was decided under (a block from before rule set 2 has none: version 1)."""
+    r = block.get("rules")
+    if not r:
+        return RULES[1]
+    return Rules(**{k: r[k] for k in Rules.__dataclass_fields__})
+
+
 # --------------------------------------------------------------------------- stage 5: the block
 
 def usage_dict(per_model: Mapping[str, Mapping]) -> dict:
@@ -645,9 +857,14 @@ def novelty_block(*, run_id: str, cand: Mapping, decision: str, reason: str, cov
                   match: Optional[Mapping] = None, walk: Optional[Walk] = None, listed: Sequence[Listed] = (),
                   relation: Optional[Mapping] = None, shortlist: Optional[Shortlist] = None,
                   rubrics: Mapping, config_version: str, embedding: Optional[Mapping] = None,
-                  usage: Optional[Mapping] = None, at: str, mode: str = "shortlist") -> dict:
+                  usage: Optional[Mapping] = None, at: str, mode: str = "shortlist", rules: Optional[Rules] = None,
+                  renamed: Optional[Mapping] = None, extra: Optional[Mapping] = None) -> dict:
     """The ``novelty`` block of one registry row (coding_plan_m3.md, stage 5).  ``reason``: ``exact_label``,
-    ``overlap`` (the walk decided), or ``no_listed`` (nothing retrieved)."""
+    ``overlap`` (the walk decided), or ``no_listed`` (nothing retrieved).  Rule set 2's additions: ``rules``
+    (the switches and the floor, as the run used them), ``pair_notes`` (decision 13, with the noted members'
+    cosines and any readings on record), ``n_below_floor`` (listed traits under the floor), ``below_floor``
+    (the similar traits it kept out of the queue) and ``renamed_from`` (decision 15's match, judged)."""
+    rules = rules or DEFAULT_RULES
     review = list(walk.review) if walk else []
     details = list(walk.review_details) if walk else []
     pcf = list(walk.pair_completion_for) if walk else list((shortlist.pair_completion_for if shortlist else []))
@@ -673,9 +890,14 @@ def novelty_block(*, run_id: str, cand: Mapping, decision: str, reason: str, cov
         "relation": dict(relation) if relation else None,
         "rubrics": dict(rubrics), "config_version": config_version,
         "embedding": dict(embedding) if embedding else None,
+        "rules": rules.as_dict(),
+        "pair_notes": [dict(n) for n in shortlist.pair_notes] if shortlist else [],
+        "n_below_floor": shortlist.n_below_floor if shortlist else 0,
+        "below_floor": list(shortlist.below_floor) if shortlist else [],
+        "renamed_from": dict(renamed) if renamed else None,
         "usage": dict(usage) if usage else usage_dict({}),
         "at": at,
-    }
+    } | dict(extra or {})
 
 
 def reading_rows(run_id: str, cand: Mapping, block: Mapping) -> list[dict]:
@@ -695,21 +917,31 @@ def _alignment_section(nv: Mapping) -> str:
         nv.get("region") == "alignment_ai_agent" else "other"
 
 
+def in_review_queue(nv: Mapping) -> bool:
+    """A row in the review queue (decision 14): ``grey``, or carrying a flag of :data:`QUEUE_KINDS` whatever
+    its decision (the covered-and-flagged rows of decision 12, the both-similar notes of decision 13)."""
+    return nv.get("decision") == "grey" or any(k in QUEUE_KINDS for k in nv.get("review") or [])
+
+
 def review_order(rows: Iterable[Mapping], *, include_new: bool = False, run_id: Optional[str] = None
                  ) -> list[tuple[str, str]]:
-    """``[(section, key), ...]``: the ``grey`` rows (and with ``include_new`` the ``new`` ones after them),
-    the alignment section first (alignment score 2 or 3, or the alignment region), then the rest; within a
-    section, more review flags first, then by key.  ``rows`` are registry rows (or ``{"key", "novelty"}``)."""
-    want = ("grey", "new") if include_new else ("grey",)
+    """``[(section, key), ...]``: the review queue (:func:`in_review_queue`; and with ``include_new`` the other
+    ``new`` rows after it), the alignment section first (alignment score 2 or 3, or the alignment region), then
+    the rest; within a section the ``grey`` rows first, then the covered-and-flagged, then the kept ones, more
+    review flags first, then by key.  ``rows`` are registry rows (or ``{"key", "novelty"}``)."""
+    rank = {"grey": 0, "covered": 1, "new": 2}
     items = []
     for r in rows:
         nv = r.get("novelty") or {}
-        if nv.get("decision") not in want or (run_id is not None and nv.get("run_id") != run_id):
+        if run_id is not None and nv.get("run_id") != run_id:
+            continue
+        queued = in_review_queue(nv)
+        if not queued and not (include_new and nv.get("decision") == "new"):
             continue
         sec = _alignment_section(nv)
-        items.append((sec, want.index(nv["decision"]), -len(nv.get("review") or []), r["key"]))
-    items.sort(key=lambda x: (0 if x[0] == "alignment" else 1, x[1], x[2], x[3]))
-    return [(sec, key) for sec, _, _, key in items]
+        items.append((sec, 0 if queued else 1, rank.get(nv.get("decision"), 3), -len(nv.get("review") or []), r["key"]))
+    items.sort(key=lambda x: (0 if x[0] == "alignment" else 1, x[1], x[2], x[3], x[4]))
+    return [(sec, key) for sec, _, _, _, key in items]
 
 
 def synonyms(rows: Iterable[Mapping], *, stem: Optional[str] = None, run_id: Optional[str] = None) -> list[dict]:
