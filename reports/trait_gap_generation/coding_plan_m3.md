@@ -198,3 +198,71 @@ expectation without saying why in the report.
   files must be committed before a live run.
 - Rubric A's text is Roger's and is not edited here; the relation rubric is pinned before use and
   not reworded.
+
+## Round 2: the rules from Roger's review, and the missed cases (2026-10-07)
+
+On Roger's go after his review of the pilot ([m3_pilot_readout.md](./m3_pilot_readout.md), "Roger's
+review"; his marks in [roger_review.json](../../data/candidates/novelty/m3_pilot_1/roger_review.json)).
+The decisions are 12-15 of [coding_plan_platform.md](./coding_plan_platform.md) (M3 decisions) plus the
+cosine floor; this section says what to build and run.  Start by fast-forwarding the worktree branch
+to `anthropic-vllm-uv` (`git merge --ff-only anthropic-vllm-uv`; it is an ancestor).
+
+### Changes to the pipeline
+
+1. **Decision 12.**  A Sonnet reading one below the cut-off that Opus reads at or above it is
+   `covered` with `covered_by` that trait and `review: "sonnet_below_opus_at"` kept on the row (both
+   readings and reasons recorded as now).  `grey` is no longer given for this case.  The walk stops
+   there as for any cover.
+2. **Decision 13, Roger's rule.**  When the relation call marks both members of a recorded pair
+   `similar`, both are removed from the shortlist before the walk, and the row gets
+   `pair_notes: [{"pair": [...], "both": "similar"}]`; `decisions.md` lists these rows in a section
+   "Both ends similar (orthogonal to the pair?)" with the ends' cosines and any overlap readings.
+   Triangle and tetrahedron corners: the same rule when every corner comes back similar.
+3. **Decision 14.**  `pair_flags` stays on the row as a record, but no longer makes the decision
+   `grey`; the review queue is the `sonnet_below_opus_at` covers, the both-similar notes, and
+   `unparsed`.
+4. **Decision 15.**  The exact-label stage covers only on a corpus stem or a queue stem (separator-
+   and case-blind: "anti feminist", "anti-feminist" and antifeminist are one label); a `renamed_from`
+   match no longer covers, and the candidate is judged like any other, with the current trait put at
+   the front of the shortlist whatever the relation call says.
+5. **The cosine floor** (Roger, 2026-10-07: "an acceptable level of trade-off"): listed traits whose
+   cosine to the candidate is below `--cosine-floor` (default 0.25, recorded in `run.json` and
+   `metric_config`-style in the row) are not judged by the overlap call; they stay in the relation
+   call and in `listed` with their relation, and the row records `n_below_floor`.  The partner of an
+   opposed trait is judged even below the floor (the opposite rule), as is a `renamed_from` match.
+6. **`full-scan --keys KEY ...`** (registry keys, as `score --keys`), in place of `--sample`, so chosen
+   candidates can be scanned; and **`score --redecide`**, which re-runs the decision rule on a run's
+   recorded readings and relation answers (no API call except where a rule now needs a reading that
+   is not on record, which it sends live and records), writing a new run id's `results.jsonl`,
+   `decisions.md` and `summary.json`, with a `decision_changes.md` listing every row whose decision
+   differs from the source run and why.
+
+### Run
+
+1. **Re-decide the pilot** under rules 1-5: `score --redecide --from-batch m3_pilot_1 --batch-id
+   m3_pilot_1_r2 --cosine-floor 0.25 --transport live`.  New calls are expected only for the 12
+   `renamed_from` rows (now judged) and nothing else; estimate and report them (about $0.10).  Report
+   `decision_changes.md`: how many covers became grey or new under the floor (the readout predicted
+   two), how many flagged rows became covers (expected 61), how many greys became new (the pair-flag
+   rows), what the 12 `renamed_from` rows decided, and the both-similar notes.
+2. **Scan the five missed cases**: `full-scan --from-batch m3_pilot_1 --keys youthful#1 trendsetting#1
+   meandering#1 self_serving#1 conflict_avoidant#1 --batch-id m3_pilot_1_scan_missed --transport
+   live` (check the keys in the registry first; use the spelling there).  The question is whether the
+   trait Roger says was wrongly marked opposed (immature, fashionable, erratic, uncaring, peaceful)
+   would have covered the candidate: report Sonnet's and Opus's scores on those five pairs with the
+   reasons, and the decision the scan gives against the pilot's.  About $0.15.
+3. Both under the existing caps (`--budget-usd 2` each); nothing here approaches the $20 line.
+
+### Tests and report
+
+Tests for every change with the fake clients and the toy corpus: the covered-and-flagged decision;
+the both-similar removal and note (pair, triangle); the pair flag no longer grey; the exact-label
+stage's separator-blind match and the `renamed_from` path through the walk; the floor (a pair below it
+is not judged; an opposed partner and a `renamed_from` match are judged regardless); `--redecide` on
+recorded answers, with and without a reading it must fetch; `full-scan --keys`.  Existing suites
+pass; a changed expectation is reported with its reason.  `decisions.md` gains the "Both ends similar"
+section and a "Covered, flagged" section for the decision-12 rows (both readings and reasons), so that
+Roger's review reads from one file.  Report: the commits; `decision_changes.md`'s counts and the
+rows the floor changed (with their readings); the five missed cases with both models' scores and
+reasons; spend; test expectations changed.  Do not write the readout; Fable does.  The constraints of
+the first section apply unchanged.
