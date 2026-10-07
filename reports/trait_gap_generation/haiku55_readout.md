@@ -174,11 +174,35 @@ cover.  The judges' recurring difficulty was the line between "share a core" and
 area" for a specific habit against a general disposition; several noted trait descriptions narrower
 than the trait's name (observant, calculating, financially reckless), which they judged as written.
 
+**4. The alignment step: Haiku 5.5 is the closer to Opus, and the earlier shift was mostly the
+glosses.**  The "69 marked words" named above were never marked (the marks column of
+[alignment_accepts_for_marks.md](./alignment_accepts_for_marks.md) is empty; Fable's error), so the
+reference is Opus.  On the 69 pilot glosses that the graded rubric was tuned on (fixed inputs, rubric
+version 3, [probe_alignment_graded/](./probe_alignment_graded/): `haiku55_pilot` and `_rerun`,
+`sonnet55_pilot`, `opus55_pilot`, beside the Haiku 4.5 runs; $0.59):
+
+| model | scores 0 / 1 / 2 / 3 | same side of the cut-off as Opus | exact | self-agreement |
+|---|---|---|---|---|
+| Haiku 4.5 (two runs) | 54 / 6 / 2 / 7 | 68 and 67 of 69 | 49, 50 | 66 of 69 |
+| Haiku 5.5 (two runs) | 42 / 17 / 3 / 7 | **69 and 68 of 69** | 54, 54 | 67 of 69 |
+| Sonnet 5.5 | 40 / 19 / 6 / 4 | 67 of 69 | 59 | – |
+| Opus 5.5 | 41 / 18 / 5 / 5 | – | – | – |
+
+Both Haikus put the same words on the same side of M3's cut-off as Opus; 5.5's distribution is
+Opus's and Sonnet's (4.5 under-uses the score of 1).  The higher distribution seen in the filter
+comparison (20 of 74 test words at 2-3 against 8) was mostly the glosses, not the scorer: Opus
+scoring the same 68 test words reads 5.5's glosses at 2-3 on 12 and 4.5's on 10 (64 of 68 on the
+same side; `opus_on_glosses_haiku45` and `_haiku55`, $0.83), while 5.5 inside the filter scored its
+own glosses at 2-3 on 17 of those 68 and 4.5 its own on 8.  So the gloss text moves a few words across
+the line, which is a property of the gloss both models will then read, and 5.5 scoring its own longer
+glosses runs a little high: five words in 68 on this sample.  The alignment step moves to 5.5 with the
+rest.
+
 **Recommendation, revised**: relation call to Haiku 5.5 (confirmed, and by a wide margin); gloss step
-to 5.5 (confirmed on scope); the verdict steps are Roger's call between an undetectable quality
-difference and a sevenfold saving, with 5.5's error direction (turning traits away) the one thing
-against it; the alignment step still wants the $0.05 check against Roger's 69 marks before it moves;
-the overlap call stays on Sonnet.
+to 5.5 (confirmed on scope); the alignment step to 5.5 (as close to Opus as 4.5 or closer); the
+verdict steps are Roger's call between an undetectable quality difference and a sevenfold saving,
+with 5.5's error direction (turning traits away) the one thing against it; the overlap call stays on
+Sonnet.  Spend on the whole Haiku 5.5 question: $4.20 of API.
 
 ## Files
 
