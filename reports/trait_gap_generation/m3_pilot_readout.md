@@ -223,6 +223,60 @@ the pair flag demoted to a note; `renamed_from` matches go to the overlap call; 
 labels; `--keys` on the full scan.  Open from the readout above: the cosine floor (0.25), which is a
 cost lever, not a correctness one.
 
+## Round 2: the pilot re-decided under the review's rules (2026-10-07)
+
+Decisions 12-15 and the cosine floor are built (commits 50d46b2, ec80b89, 7122b52; every decision a
+switch, `RULES[1]` the pilot's rules, `RULES[2]` the new default) and the pilot's 460 rows were
+re-decided on their recorded readings with `score --redecide` ([m3_pilot_1_r2/](../../data/candidates/novelty/m3_pilot_1_r2/);
+the changes, each credited to one rule, in [decision_changes.md](../../data/candidates/novelty/m3_pilot_1_r2/decision_changes.md);
+the new [decisions.md](../../data/candidates/novelty/m3_pilot_1_r2/decisions.md) has a "Covered,
+flagged" section and a "Both ends similar" section).  The reproduction check passes: the pilot's own
+rules replayed on its records give 460 of 460 rows identical.  New calls were needed only for the 12
+`renamed_from` rows; the round cost $0.42 in all.
+
+**Result: 254 covered, 206 new, 0 grey** (the pilot: 205 / 179 / 76).  201 covers unchanged; 53 flagged
+rows became covers (decision 12) and 8 covers moved to an earlier flagged trait; 23 pair-flag-only
+greys became new (decision 14); the 12 renamed rows, now judged, split 8 covered (assertive by
+[confident](../../data/traits/instructions/confident.json) 3 / 3, urgent by
+[hurried](../../data/traits/instructions/hurried.json) 3 / 3, inept by
+[incompetent](../../data/traits/instructions/incompetent.json) 3 / 4, ...) and 4 new (dogmatic, relaxed,
+reward driven, shy: their old names' traits read 2 / 2 or sat under a cut-off of 4), and engaging is
+now covered by [charismatic](../../data/traits/instructions/charismatic.json) 2 / 3, flagged, with
+unflinching at Sonnet 0, as Roger read it.  Six candidates Roger scored 2 against their covering
+trait are now cut (deep / thorough, inoffensive / gentle, persuasive / rhetorical, prompt / hurried,
+quitting / defeatist, unforbearing / irascible): the 3% the review priced in.  The review queue is 71
+rows: 64 covered-and-flagged (both readings and reasons listed) and 10 both-similar notes.
+
+**The floor saves almost nothing as built: 72 of 2,022 readings (3.6%), not the 32% the readout
+projected.**  The reason is the opposite rule's exemption: 554 of the 556 readings below 0.25 are
+partners of opposed traits, which the brief judges regardless of cosine (the other 2 are renamed
+matches).  No cover was lost.  The agent ran the alternative offline, the floor applied to those
+partners too: 28% fewer readings, three covers lost, two of them pairs Roger scored 3
+(anti essentialist / [constructivist](../../data/traits/instructions/constructivist.json) at 0.198,
+interpretive / [figurative](../../data/traits/instructions/figurative.json) at 0.226) and price
+indifferent / [full-price shopper](../../data/traits/instructions/full_price_shopper.json) at 0.223.
+So the choice is $0.66 of Sonnet per 460 candidates (about $14 per 10,000, live) against three covers
+in 460: Roger's call; the recommendation is to keep the exemption, since those three are exactly the
+low-cosine near-duplicates the opposite rule exists to find.
+
+**Decision 13 reached two of Roger's four orthogonal cases, not four.**  Astute and self-aware are
+new; deep is covered by thorough and delegating by absentee, through decision 12 and by a trait that
+is not a pair end.  Absentee is a one-way pointer at hands-off, not a pair member, so the rule did not
+see it, although Roger's note ("absentee much as hands-off") puts it with the pair.  Whether the rule
+should extend to one-way pointers at a pair end is a small question for him.
+
+**The five missed cases are harmless, and the readout's reasoning was wrong.**  Scanned with
+`full-scan --keys` ([m3_pilot_1_scan_missed/](../../data/candidates/novelty/m3_pilot_1_scan_missed/)): youthful / immature
+Sonnet 0, trendsetting / fashionable 1, meandering / erratic 1, self-serving / uncaring 1,
+conflict-avoidant / peaceful 2 (Opus 2); all five candidates new under either rule set.  But the
+pilot had already judged these very pairs, with the same scores: when both ends of a pair come back
+"opposed", both go to the front of the shortlist as each other's partner, so the wrongly opposed
+trait *is* judged.  "The trait is not judged" above holds only for a wrong "opposed" on a trait whose
+partner is not also listed; the scan's recall of 1.0 remains the evidence for those.
+
+**Still to do:** write the round-2 decisions into the registry (the re-decide does not touch it, so
+the rows carry the pilot's blocks); Roger's two calls above.
+
 ## Files
 
 - Code: [novelty.py](../../assistant_axis/gapgen/novelty.py), [novelty_runner.py](../../assistant_axis/gapgen/novelty_runner.py),
