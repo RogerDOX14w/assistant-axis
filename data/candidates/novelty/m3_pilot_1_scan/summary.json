@@ -1,0 +1,206 @@
+{
+  "result": {
+    "mode": "full_scan",
+    "n_candidates": 100,
+    "n_decided": 100,
+    "n_stalled": 0,
+    "stalled": {},
+    "skipped": {
+      "eligible_in_main": 448
+    },
+    "by_decision": {
+      "grey": 15,
+      "covered": 38,
+      "new": 47
+    },
+    "by_reason": {
+      "overlap": 100
+    },
+    "by_cut_off": {
+      "3": {
+        "grey": 14,
+        "covered": 36,
+        "new": 31
+      },
+      "4": {
+        "new": 16,
+        "covered": 2,
+        "grey": 1
+      }
+    },
+    "exact_label": {},
+    "pairs_judged_per_candidate": {
+      "1": 32,
+      "2": 5,
+      "6": 1,
+      "12": 1,
+      "13": 4,
+      "15": 7,
+      "16": 7,
+      "17": 8,
+      "18": 15,
+      "19": 13,
+      "20": 7
+    },
+    "pairs_judged_total": 1122,
+    "pairs_judged_mean": 11.22,
+    "listed_per_candidate_mean": 17.19,
+    "shortlist_length": null,
+    "early_exit_depth": {
+      "1": 32,
+      "2": 5,
+      "6": 1
+    },
+    "escalations": {
+      "below_cut_off": 159,
+      "at_cut_off": 40
+    },
+    "rescues": 3,
+    "review_flags": {
+      "sonnet_below_opus_at": 17
+    },
+    "pair_completions": 5,
+    "pair_completion_for": {
+      "democratic#1": [
+        "aristocratic"
+      ],
+      "emotionally_blunt#1": [
+        "emotional"
+      ],
+      "nepotistic#1": [
+        "meritocratic"
+      ],
+      "nonsectarian#1": [
+        "sectarian"
+      ],
+      "tawdry#1": [
+        "dignified"
+      ]
+    },
+    "relation_outcomes": {
+      "call_status": {},
+      "answers": {},
+      "final": {},
+      "candidates_with_unsure_reasked": 0
+    },
+    "cache": {
+      "claude-sonnet-5-5": {
+        "calls": 1719,
+        "input": 217824,
+        "cache_write": 0,
+        "cache_read": 986706,
+        "calls_with_read": 1719,
+        "read_share_of_input": 0.8192,
+        "hit_rate_calls": 1.0
+      },
+      "claude-opus-5-5": {
+        "calls": 278,
+        "input": 35054,
+        "cache_write": 4592,
+        "cache_read": 154980,
+        "calls_with_read": 270,
+        "read_share_of_input": 0.7963,
+        "hit_rate_calls": 0.9712
+      }
+    },
+    "spend_by_stage": {
+      "overlap": {
+        "claude-sonnet-5-5": 1.982864,
+        "claude-opus-5-5": 1.119012
+      }
+    },
+    "spend_usd": 3.101905,
+    "usage": {
+      "per_model": {
+        "claude-opus-5-5": {
+          "model": "claude-opus-5-5",
+          "prompt_tokens": 56188,
+          "completion_tokens": 44713,
+          "cost_usd": 1.119,
+          "n_calls": 278
+        },
+        "claude-sonnet-5-5": {
+          "model": "claude-sonnet-5-5",
+          "prompt_tokens": 315807,
+          "completion_tokens": 135125,
+          "cost_usd": 1.9829,
+          "n_calls": 1719
+        },
+        "text-embedding-3-large": {
+          "model": "text-embedding-3-large",
+          "prompt_tokens": 220,
+          "completion_tokens": 0,
+          "cost_usd": 0.0,
+          "n_calls": 1
+        }
+      },
+      "total_cost_usd": 3.1019,
+      "total_prompt_tokens": 372215,
+      "total_completion_tokens": 179838,
+      "n_calls": 1998
+    },
+    "batch_id": "m3_pilot_1_scan",
+    "parse_rates": {
+      "overlap:claude-sonnet-5-5": {
+        "n": 1719,
+        "ok_first": 1719,
+        "ok": 1719
+      },
+      "overlap:claude-opus-5-5": {
+        "n": 278,
+        "ok_first": 278,
+        "ok": 278
+      }
+    },
+    "stopped_by_budget": false,
+    "stopped_by_error": null,
+    "resumed_calls": 0,
+    "rubrics": {
+      "overlap": {
+        "name": "overlap_concept",
+        "version": 6,
+        "sha256": "b3eff18fb946928517183af0244acec2d35dba0ab0bd9c57f83c7a06ac3c9fd0"
+      },
+      "relation": {
+        "name": "relation",
+        "version": 1,
+        "sha256": "b6b11f8cfcb0faafdac4a040087356ecb13d410e9bc309597d7833a96110d70f"
+      }
+    }
+  },
+  "_provenance": {
+    "schema_version": "1.0",
+    "produced_by": {
+      "cmd": "uv run python data_analysis/gap_generation/novelty_score.py full-scan --batch-id m3_pilot_1_scan --from-batch m3_pilot_1 --sample 100 --sample-seed 0 --transport live --query-form gloss_w14 --budget-usd 8 --confirmed-by 'Roger via Fable (coordinator), 2026-10-07: full scan cap $8'",
+      "git_sha": "7d7f4d3+dirty",
+      "author": "Roger Dearnaley",
+      "title": "novelty_score full_scan m3_pilot_1_scan"
+    },
+    "produced_at": "2026-10-07T01:34:32+00:00",
+    "inputs": [
+      {
+        "dep_key": "metric_config",
+        "path": "data/candidates/metric_config.json",
+        "fingerprint": "v1:2026-10-02T22:21:08+00:00@54961",
+        "kind": "file",
+        "dataset_id": null,
+        "last_modified_at": "2026-10-02T22:21:08+00:00",
+        "extras": {}
+      },
+      {
+        "dep_key": "rubrics",
+        "path": "reports/trait_gap_generation/rubrics",
+        "fingerprint": "v1:multi:7440bfeac914",
+        "kind": "multi",
+        "dataset_id": null,
+        "last_modified_at": "2026-10-06T23:37:23+00:00",
+        "extras": {},
+        "member_paths": [
+          "reports/trait_gap_generation/rubrics/overlap_concept.md",
+          "reports/trait_gap_generation/rubrics/relation.md"
+        ]
+      }
+    ],
+    "inputs_sha256": "e9a514a82d8f6713ac8181559d149272b27daa9f2f4dc6a5b2921773d45efea8"
+  }
+}
