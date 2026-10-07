@@ -102,6 +102,84 @@ Parse rates 100% everywhere.  Haiku 5.5 reads the rubric from the cache (99% hit
 4. **Not in this job**: the project's other Haiku uses (the response-mode axis judge, the steering
    effect judge, the refusal fallback, the trait-audit question judge), each its own test.
 
+## Follow-ups on Roger's questions (2026-10-07, later the same day)
+
+Roger asked for three more measurements: the filter against Opus; a blind taste test of the glosses
+on scope alone; and blind judgement of every relation-call difference.  The first cost $0.44 of
+API; the other two were Fable judges reading blinded files (the keys held in separate files they were
+told not to open), each item judged twice with the two sides in opposite order, by different judges.
+
+**1. The M1 verdict against Opus: no detectable difference between the Haikus.**  Haiku 5.5 was run
+twice on the 207 words that carry Opus verdicts (the validation run's second-opinion sample, in
+[h55_opus_audit_sample](../../data/candidates/filter/h55_opus_audit_sample/) and `_rep2`), beside
+the recorded Haiku 4.5 and Sonnet verdicts on the same words:
+
+| stratum (n) | Haiku 5.5, run 1 / run 2 | Haiku 4.5 | Sonnet 5.5 |
+|---|---|---|---|
+| corpus labels (80) | 91% / 92% | 95% | 96% |
+| random adjectives (107) | 76% / 75% | 68% | 84% |
+| not adopted (12) | 92% / 92% | 92% | 92% |
+| physical (8) | 50% / 75% | 88% | 88% |
+| all (207) | 82% / 83% | 81% | 89% |
+
+Paired on the same words, none of the Haiku-against-Haiku differences is significant (corpus labels
+4 against 7, p = 0.55; random adjectives 25 against 17, p = 0.28; all 31 against 29, p = 0.90; run 2
+28 against 24, p = 0.68); Sonnet's lead over 5.5 is (27 against 11, p = 0.014).  Haiku 5.5 gave the
+same verdict as its own first run on 178 of 207 words.  With the earlier rows (the 99 test words:
+one run p = 0.03, the other p = 0.45; the 143 random adjectives against Sonnet, p = 0.08-0.13) the
+verdict step's answer is: no quality gap these samples can detect, 5.5 noisier, 5.5 erring toward
+turning traits away and 4.5 toward passing non-traits, 5.5 about a seventh of the price.
+
+**2. The glosses, on scope alone: equal on ordinary words, 5.5 better where the corpus has a
+specialised sense.**  Two batches ([h55_glosses_blind/](../../data/candidates/filter/h55_glosses_blind/)):
+151 word pairs from the test and pool words (66 with a hand reference sense), and the 91 audit words
+not already judged, 67 of them corpus labels judged against the corpus's own description.  The
+judges flagged a gloss "misleading or wrong in scope" and named the better-scoped one, length
+excluded by the brief; a flag or preference counts when both orders gave it.
+
+| batch | flagged, both orders | one side only (paired) | preference agreed |
+|---|---|---|---|
+| 1: 151 words | 4.5: 2, 5.5: 2 | 1 against 1 | 4.5 better 16, 5.5 better 15, tie 99 (21 split) |
+| 2: 91 audit words | **4.5: 15, 5.5: 6** | 11 against 2, p = 0.02 | 4.5 better 12, 5.5 better 19, tie 49 (11 split) |
+
+The judges' notes say why: where the corpus's sense of a word is narrowed or specialised, 4.5's
+16-word gloss gives the ordinary dictionary sense and stops (uncalculating, grandiose, body-insecure,
+immature, helpless, on the fence, masculine, focused), and 5.5's longer gloss more often carries the
+clause that lands the scope.  Four words were flagged on both sides in both orders, where neither
+gloss could reach a sense only the corpus knows (an identity rather than a judgement, a manner rather
+than an opinion).  The first-shown gloss won 53-58% of the non-ties, absorbed by the two orders.  So
+the gloss step moves to 5.5 on scope as well as on length.
+
+**3. The relation call: the judges side with Haiku 5.5 on 82% of the differences.**  All 1,810
+differing answers (the five "unsure" excluded) were judged in both orders
+([m3_pilot_1_relation_h55/blind/](../../data/candidates/novelty/m3_pilot_1_relation_h55/blind/)),
+the judges seeing the candidate and trait descriptions and the two answers, not the models or their
+reasons.  Both orders agreed on 1,625 items: **5.5 right on 1,388, 4.5 on 233**, neither on 4; 185
+split between orders; the first-listed answer was chosen 49% and 53% of the time.  By kind:
+
+| 4.5 said → 5.5 said | n | judges with 4.5 | with 5.5 | split |
+|---|---|---|---|---|
+| similar → unrelated | 929 | 62 | **736** | 131 |
+| opposed → unrelated | 613 | 4 | **592** | 16 |
+| unrelated → similar | 146 | 67 | 49 | 30 |
+| unrelated → opposed | 109 | **97** | 4 | 7 |
+| opposed → similar | 11 | 2 | 7 | 1 |
+
+So 4.5's "similar" and "opposed" are loose, as Roger's review of the pilot had found (the
+both-opposed pair flags), and 5.5's "unrelated" is nearly always upheld; 5.5's own weak spot is the
+109 traits it newly calls "opposed", which the judges reject 97 to 4, and its new "similar" calls are
+a coin toss.  On the 1,088 differences that change the shortlist (similar against not), the judges
+side with 5.5 on 792 and 4.5 on 132.  This agrees with the full scan: the shorter shortlist lost no
+cover.  The judges' recurring difficulty was the line between "share a core" and "the same broad
+area" for a specific habit against a general disposition; several noted trait descriptions narrower
+than the trait's name (observant, calculating, financially reckless), which they judged as written.
+
+**Recommendation, revised**: relation call to Haiku 5.5 (confirmed, and by a wide margin); gloss step
+to 5.5 (confirmed on scope); the verdict steps are Roger's call between an undetectable quality
+difference and a sevenfold saving, with 5.5's error direction (turning traits away) the one thing
+against it; the alignment step still wants the $0.05 check against Roger's 69 marks before it moves;
+the overlap call stays on Sonnet.
+
 ## Files
 
 Runs: [h55_split_test_words](../../data/candidates/filter/h55_split_test_words/) and `_rep2`,

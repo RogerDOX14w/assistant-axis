@@ -1,0 +1,717 @@
+{
+  "result": {
+    "n": 207,
+    "n_done": 207,
+    "n_failed": 0,
+    "n_pending": 0,
+    "n_hard_reject": 0,
+    "verdict_counts": {
+      "reject": 51,
+      "tagged": 43,
+      "trait": 113
+    },
+    "verdict_fractions": {
+      "reject": 0.2464,
+      "tagged": 0.2077,
+      "trait": 0.5459
+    },
+    "tag_counts": {
+      "action": 1,
+      "evaluative_only": 2,
+      "membership": 7,
+      "no_persona_reading": 27,
+      "physical": 12,
+      "role_person": 2,
+      "state": 29,
+      "stretched": 21
+    },
+    "tag_fractions": {
+      "action": 0.0048,
+      "evaluative_only": 0.0097,
+      "membership": 0.0338,
+      "no_persona_reading": 0.1304,
+      "physical": 0.058,
+      "role_person": 0.0097,
+      "state": 0.1401,
+      "stretched": 0.1014
+    },
+    "region_counts": {
+      "alignment_ai_agent": 2,
+      "cognitive_epistemic": 26,
+      "communication_style": 14,
+      "emotional_temperament": 24,
+      "identity_demographic": 15,
+      "moral_stance": 15,
+      "social_interpersonal": 17
+    },
+    "polysemy_n": 59,
+    "polysemy_rate": 0.285,
+    "gloss_in_band_rate": 0.0,
+    "n_useful": 74,
+    "second_opinion_n": 0,
+    "disagreements": 0,
+    "parse_rate": 1.0,
+    "parse_rate_first_pass": 0.0,
+    "n_llm": 207,
+    "probe_n": 34,
+    "probe_unknown": 0,
+    "probe_failed": 0,
+    "second_opinion_requested": 0,
+    "second_opinion_failed": 0,
+    "calls": {
+      "alignment": 113,
+      "descriptors": 113,
+      "established": 194,
+      "gloss": 113,
+      "kind": 194,
+      "probe": 34,
+      "same_sense": 5,
+      "sense": 207,
+      "vague": 194
+    },
+    "cost_usd": 0.2178,
+    "cost_per_candidate_usd": 0.001052,
+    "yield_per_usd": 339.7,
+    "usage": {
+      "per_model": {
+        "claude-haiku-5-5": {
+          "model": "claude-haiku-5-5",
+          "prompt_tokens": 814273,
+          "completion_tokens": 272788,
+          "cost_usd": 0.2178,
+          "n_calls": 1167
+        }
+      },
+      "total_cost_usd": 0.2178,
+      "total_prompt_tokens": 814273,
+      "total_completion_tokens": 272788,
+      "n_calls": 1167
+    },
+    "by_stratum": {
+      "existing": {
+        "n": 80,
+        "n_done": 80,
+        "n_failed": 0,
+        "n_pending": 0,
+        "n_hard_reject": 0,
+        "verdict_counts": {
+          "reject": 2,
+          "tagged": 9,
+          "trait": 69
+        },
+        "verdict_fractions": {
+          "reject": 0.025,
+          "tagged": 0.1125,
+          "trait": 0.8625
+        },
+        "tag_counts": {
+          "membership": 2,
+          "state": 9,
+          "stretched": 2
+        },
+        "tag_fractions": {
+          "membership": 0.025,
+          "state": 0.1125,
+          "stretched": 0.025
+        },
+        "region_counts": {
+          "cognitive_epistemic": 18,
+          "communication_style": 10,
+          "emotional_temperament": 17,
+          "identity_demographic": 4,
+          "moral_stance": 8,
+          "social_interpersonal": 12
+        },
+        "polysemy_n": 19,
+        "polysemy_rate": 0.2375,
+        "gloss_in_band_rate": 0.0,
+        "n_useful": 53,
+        "second_opinion_n": 0,
+        "disagreements": 0
+      },
+      "not_adopted": {
+        "n": 12,
+        "n_done": 12,
+        "n_failed": 0,
+        "n_pending": 0,
+        "n_hard_reject": 0,
+        "verdict_counts": {
+          "reject": 3,
+          "tagged": 1,
+          "trait": 8
+        },
+        "verdict_fractions": {
+          "reject": 0.25,
+          "tagged": 0.0833,
+          "trait": 0.6667
+        },
+        "tag_counts": {
+          "membership": 1,
+          "no_persona_reading": 2,
+          "role_person": 1,
+          "stretched": 1
+        },
+        "tag_fractions": {
+          "membership": 0.0833,
+          "no_persona_reading": 0.1667,
+          "role_person": 0.0833,
+          "stretched": 0.0833
+        },
+        "region_counts": {
+          "cognitive_epistemic": 1,
+          "emotional_temperament": 3,
+          "identity_demographic": 2,
+          "moral_stance": 2
+        },
+        "polysemy_n": 2,
+        "polysemy_rate": 0.1667,
+        "gloss_in_band_rate": 0.0,
+        "n_useful": 7,
+        "second_opinion_n": 0,
+        "disagreements": 0
+      },
+      "oewn_random": {
+        "n": 107,
+        "n_done": 107,
+        "n_failed": 0,
+        "n_pending": 0,
+        "n_hard_reject": 0,
+        "verdict_counts": {
+          "reject": 45,
+          "tagged": 29,
+          "trait": 33
+        },
+        "verdict_fractions": {
+          "reject": 0.4206,
+          "tagged": 0.271,
+          "trait": 0.3084
+        },
+        "tag_counts": {
+          "action": 1,
+          "evaluative_only": 2,
+          "membership": 3,
+          "no_persona_reading": 25,
+          "physical": 8,
+          "role_person": 1,
+          "state": 20,
+          "stretched": 17
+        },
+        "tag_fractions": {
+          "action": 0.0093,
+          "evaluative_only": 0.0187,
+          "membership": 0.028,
+          "no_persona_reading": 0.2336,
+          "physical": 0.0748,
+          "role_person": 0.0093,
+          "state": 0.1869,
+          "stretched": 0.1589
+        },
+        "region_counts": {
+          "alignment_ai_agent": 2,
+          "cognitive_epistemic": 6,
+          "communication_style": 4,
+          "emotional_temperament": 4,
+          "identity_demographic": 7,
+          "moral_stance": 5,
+          "social_interpersonal": 5
+        },
+        "polysemy_n": 34,
+        "polysemy_rate": 0.3178,
+        "gloss_in_band_rate": 0.0,
+        "n_useful": 14,
+        "second_opinion_n": 0,
+        "disagreements": 0
+      },
+      "physical": {
+        "n": 8,
+        "n_done": 8,
+        "n_failed": 0,
+        "n_pending": 0,
+        "n_hard_reject": 0,
+        "verdict_counts": {
+          "reject": 1,
+          "tagged": 4,
+          "trait": 3
+        },
+        "verdict_fractions": {
+          "reject": 0.125,
+          "tagged": 0.5,
+          "trait": 0.375
+        },
+        "tag_counts": {
+          "membership": 1,
+          "physical": 4,
+          "stretched": 1
+        },
+        "tag_fractions": {
+          "membership": 0.125,
+          "physical": 0.5,
+          "stretched": 0.125
+        },
+        "region_counts": {
+          "cognitive_epistemic": 1,
+          "identity_demographic": 2
+        },
+        "polysemy_n": 4,
+        "polysemy_rate": 0.5,
+        "gloss_in_band_rate": 0.0,
+        "n_useful": 0,
+        "second_opinion_n": 0,
+        "disagreements": 0
+      }
+    },
+    "validation_figures": {
+      "existing": {
+        "n": 80,
+        "correct": 78,
+        "share": 0.975,
+        "target": 0.95,
+        "meets_target": true,
+        "misses": {
+          "reject": [
+            "deterministic",
+            "eastern hemisphere"
+          ]
+        },
+        "labels_with_state": [
+          "despairing",
+          "financially precarious",
+          "flourishing",
+          "focused",
+          "grounded",
+          "joyful",
+          "lethargic",
+          "remorseful",
+          "wide-eyed"
+        ],
+        "labels_with_physical": []
+      },
+      "rejects": {
+        "n": 0,
+        "flagged": 0,
+        "flagged_labels": [],
+        "target": 4,
+        "meets_target": null
+      },
+      "oewn_random": {
+        "n": 107,
+        "trait": 33,
+        "trait_share": 0.3084,
+        "target": 0.15,
+        "meets_target": false,
+        "sample_for_marks": [
+          {
+            "label": "acknowledged",
+            "key": "acknowledged#1",
+            "gloss": "This means being widely recognized by others as a person of standing and authority, so that one's word carries weight in the groups and matters where one works or lives."
+          },
+          {
+            "label": "at hand",
+            "key": "at_hand#1",
+            "gloss": "This means staying within easy reach and readily available, so that one can be called on to help the moment someone needs it."
+          },
+          {
+            "label": "black and white",
+            "key": "black_and_white#1",
+            "gloss": "This means judging every issue as strictly right or wrong, and holding that there is no honest middle ground between the two."
+          },
+          {
+            "label": "cavalier",
+            "key": "cavalier#1",
+            "gloss": "This means treating serious matters, rules and others' feelings with a breezy carelessness, brushing off consequences and concerns as if they hardly register with one."
+          },
+          {
+            "label": "clinical",
+            "key": "clinical#1",
+            "gloss": "This means keeping one's feelings out of view and speaking in measured, exact terms, approaching every matter with cool, dispassionate precision rather than warmth or emotional display."
+          },
+          {
+            "label": "collectivist",
+            "key": "collectivist#1",
+            "gloss": "This means putting the group's interests and shared goals ahead of one's own, and judging decisions by what benefits the collective rather than what advances one's personal standing."
+          },
+          {
+            "label": "corruptible",
+            "key": "corruptible#1",
+            "gloss": "This means being willing to take bribes or bend one's conduct dishonestly whenever personal gain is on offer, treating integrity as a price that can be negotiated."
+          },
+          {
+            "label": "coy",
+            "key": "coy#1",
+            "gloss": "This means deflecting direct questions with playful hesitation and teasing half-answers, holding back one's feelings with a flirtatious shyness that invites the other person to keep guessing."
+          },
+          {
+            "label": "fifty",
+            "key": "fifty#1",
+            "gloss": "This means being fifty years old."
+          },
+          {
+            "label": "frosty",
+            "key": "frosty#1",
+            "gloss": "This means keeping one's distance from others, answering them curtly and withholding warmth, so that people routinely find one cold, aloof and unwelcoming in manner."
+          },
+          {
+            "label": "fruitful",
+            "key": "fruitful#1",
+            "gloss": "This means getting real results from one's work, turning effort into useful output and finishing what one starts with steady, measurable success."
+          },
+          {
+            "label": "haphazard",
+            "key": "haphazard#1",
+            "gloss": "This means working without a fixed order or system, jumping between tasks as they come up and leaving one's records, plans and materials scattered and hard for anyone else to follow."
+          },
+          {
+            "label": "hawk-eyed",
+            "key": "hawk_eyed#1",
+            "gloss": "This means keeping one's attention sharp and wide, noticing small details, shifts in mood, and loose ends that others pass over without remark."
+          },
+          {
+            "label": "hot",
+            "key": "hot#1",
+            "gloss": "This means being physically attractive in a way that draws romantic or sexual interest, and carrying that appeal openly in how one dresses, moves and speaks."
+          },
+          {
+            "label": "idolized",
+            "key": "idolized#1",
+            "gloss": "This means being the object of others' intense adoration, with people regarding one with devoted admiration as a standing feature of daily life."
+          },
+          {
+            "label": "incestuous",
+            "key": "incestuous#1",
+            "gloss": "This means having sexual relations with close relatives as a settled, ongoing part of one's daily life and conduct."
+          },
+          {
+            "label": "listless",
+            "key": "listless#1",
+            "gloss": "This means lacking any interest or drive to act, so that one lets days pass without starting anything, finishing anything, or caring much whether anything gets done."
+          },
+          {
+            "label": "macho",
+            "key": "macho#1",
+            "gloss": "This means projecting exaggerated masculine toughness and bravado, meeting every challenge with aggressive swagger, refusing to show fear or vulnerability, and treating displays of strength as proof of one's manhood."
+          },
+          {
+            "label": "on the fence",
+            "key": "on_the_fence#1",
+            "gloss": "This means staying unsettled between two options, weighing each one aloud and declining to commit to either until the evidence tips the balance."
+          },
+          {
+            "label": "on time",
+            "key": "on_time#1",
+            "gloss": "This means keeping to agreed schedules and arriving when expected, treating each appointment's stated time as a commitment rather than a rough guide, and letting others rely on one's timing without checking."
+          },
+          {
+            "label": "pedagogic",
+            "key": "pedagogic#1",
+            "gloss": "This means teaching as a settled habit, breaking ideas down into steps and explaining the reasons behind them to whoever is listening, without waiting to be asked."
+          },
+          {
+            "label": "purposive",
+            "key": "purposive#1",
+            "gloss": "This means acting with a clear aim in view at all times, measuring each step by whether it moves one closer to a goal one has deliberately chosen and can name."
+          },
+          {
+            "label": "restricting",
+            "key": "restricting#1",
+            "gloss": "This means keeping one's own eating and intake tightly limited, cutting back on food and drink as a standing habit and holding to that restraint even when hungry."
+          },
+          {
+            "label": "riparian",
+            "key": "riparian#1",
+            "gloss": "This means living on the bank of a river, having one's home or place of work located right beside the water's edge."
+          },
+          {
+            "label": "Sinhalese",
+            "key": "sinhalese#1",
+            "gloss": "This means belonging to the Sinhalese ethnic group of Sri Lanka."
+          },
+          {
+            "label": "sly",
+            "key": "sly#1",
+            "gloss": "This means working around obstacles through clever, indirect schemes, quietly steering situations toward one's own goals while keeping one's real intentions hidden from others."
+          },
+          {
+            "label": "smooth",
+            "key": "smooth#1",
+            "gloss": "This means keeping one's manner easy and polished, greeting people with practiced charm and handling awkward moments with a calm, agreeable grace."
+          },
+          {
+            "label": "stiff-necked",
+            "key": "stiff_necked#1",
+            "gloss": "This means holding one's position firmly against argument, refusing to yield or change course even when pressed, and treating a concession as a defeat one will not accept."
+          },
+          {
+            "label": "unanimous",
+            "key": "unanimous#1",
+            "gloss": "This means keeping one's views aligned with those of everyone present, so that one never dissents and always agrees fully with the others or with whoever one is addressing."
+          },
+          {
+            "label": "unplayable",
+            "key": "unplayable#1",
+            "gloss": "This means being impossible to handle or defeat, shrugging off every threat, trick and rival so that no opponent can deal with or beat one's character."
+          },
+          {
+            "label": "unqualified",
+            "key": "unqualified#1",
+            "gloss": "This means lacking the formal training, certifications, or working skills the role calls for, and openly admitting that one has not yet acquired them."
+          },
+          {
+            "label": "untried",
+            "key": "untried#1",
+            "gloss": "This means having never been put to the test by real difficulty, so one's abilities and judgment remain unproven in actual trials and pressures."
+          },
+          {
+            "label": "venerable",
+            "key": "venerable#1",
+            "gloss": "This means speaking slowly from long years of experience, offering counsel that others accept without argument because one has earned their respect through age and wisdom."
+          }
+        ],
+        "sample_for_marks_unseen_only": false
+      },
+      "unseen": {
+        "existing": {
+          "n": 0,
+          "correct": 0,
+          "share": null,
+          "target": 0.95,
+          "meets_target": null,
+          "misses": {},
+          "labels_with_state": [],
+          "labels_with_physical": []
+        },
+        "rejects": {
+          "n": 0,
+          "flagged": 0,
+          "flagged_labels": [],
+          "target": 4,
+          "meets_target": null
+        },
+        "oewn_random": {
+          "n": 0,
+          "trait": 0,
+          "trait_share": null,
+          "target": 0.15,
+          "meets_target": null
+        }
+      },
+      "n_seen_in_development": 207
+    },
+    "v2_fields": {
+      "alignment_relevant_true": 28,
+      "membership_kind": {
+        "affinity": 1,
+        "age_group": 1,
+        "circumstance": 1,
+        "geography": 1,
+        "nationality_ethnicity_language": 1,
+        "orientation_gender": 1,
+        "religion": 1
+      },
+      "tag_disagreement": 0,
+      "validator_repairs": {},
+      "polysemy_notes": {
+        "two_trait_senses": 2,
+        "nontrait_person_sense": 2,
+        "obvious_sense_not_trait": 5,
+        "overshadowed": 0,
+        "reading_related": 0,
+        "first_thought_in_the_way": 30,
+        "leaves_something_out": 20,
+        "fits_many_in_different_ways": 18,
+        "most_likely_reading_stretched": 0
+      },
+      "comparison_relations": {},
+      "holding": {
+        "nationalities": 1,
+        "physical": 12,
+        "roles": 2,
+        "states": 29
+      },
+      "freq_rescue": {
+        "negating_prefix": 3
+      },
+      "alignment_scores": {
+        "0": 45,
+        "1": 40,
+        "2": 11,
+        "3": 17,
+        "none": 0
+      }
+    },
+    "batch_id": "h55_opus_audit_sample_rep2",
+    "stopped_by_budget": false,
+    "stopped_by_error": null,
+    "rubric_version": 5,
+    "model": "claude-haiku-5-5",
+    "second_model": null,
+    "split": {
+      "transport": "live",
+      "pilot_figures": {
+        "n": 207,
+        "n_reached_step1": 207,
+        "outcomes": {
+          "physical": 12,
+          "roles": 2,
+          "states": 29,
+          "trait": 113,
+          "turned_away": 51
+        },
+        "same_outcome_as_expected": 0,
+        "differences": [],
+        "cut_before_step1": [],
+        "glosses": 113,
+        "glosses_form_ok": 111
+      },
+      "step_parse_rates": {
+        "alignment:first:claude-haiku-5-5": {
+          "n": 113,
+          "ok_first_pass": 113,
+          "ok": 113
+        },
+        "descriptors:first:claude-haiku-5-5": {
+          "n": 113,
+          "ok_first_pass": 113,
+          "ok": 113
+        },
+        "established:first:claude-haiku-5-5": {
+          "n": 194,
+          "ok_first_pass": 194,
+          "ok": 194
+        },
+        "gloss:first:claude-haiku-5-5": {
+          "n": 113,
+          "ok_first_pass": 113,
+          "ok": 113
+        },
+        "kind:first:claude-haiku-5-5": {
+          "n": 194,
+          "ok_first_pass": 194,
+          "ok": 194
+        },
+        "probe:first:claude-haiku-5-5": {
+          "n": 34,
+          "ok_first_pass": 34,
+          "ok": 34
+        },
+        "same_sense:first:claude-haiku-5-5": {
+          "n": 5,
+          "ok_first_pass": 5,
+          "ok": 5
+        },
+        "sense:first:claude-haiku-5-5": {
+          "n": 207,
+          "ok_first_pass": 207,
+          "ok": 207
+        },
+        "vague:first:claude-haiku-5-5": {
+          "n": 194,
+          "ok_first_pass": 194,
+          "ok": 194
+        }
+      },
+      "cost_by_step": {
+        "alignment@claude-haiku-5-5": {
+          "n_calls": 113,
+          "prompt_tokens": 88117,
+          "completion_tokens": 21676,
+          "cost_usd": 0.01965
+        },
+        "descriptors@claude-haiku-5-5": {
+          "n_calls": 113,
+          "prompt_tokens": 54217,
+          "completion_tokens": 27723,
+          "cost_usd": 0.019283
+        },
+        "established@claude-haiku-5-5": {
+          "n_calls": 194,
+          "prompt_tokens": 123022,
+          "completion_tokens": 56494,
+          "cost_usd": 0.040549
+        },
+        "gloss@claude-haiku-5-5": {
+          "n_calls": 113,
+          "prompt_tokens": 74871,
+          "completion_tokens": 10344,
+          "cost_usd": 0.012659
+        },
+        "kind@claude-haiku-5-5": {
+          "n_calls": 194,
+          "prompt_tokens": 197532,
+          "completion_tokens": 19035,
+          "cost_usd": 0.029271
+        },
+        "probe@claude-haiku-5-5": {
+          "n_calls": 34,
+          "prompt_tokens": 14045,
+          "completion_tokens": 3573,
+          "cost_usd": 0.003191
+        },
+        "same_sense@claude-haiku-5-5": {
+          "n_calls": 5,
+          "prompt_tokens": 2123,
+          "completion_tokens": 609,
+          "cost_usd": 0.000517
+        },
+        "sense@claude-haiku-5-5": {
+          "n_calls": 207,
+          "prompt_tokens": 169708,
+          "completion_tokens": 111404,
+          "cost_usd": 0.072673
+        },
+        "vague@claude-haiku-5-5": {
+          "n_calls": 194,
+          "prompt_tokens": 90638,
+          "completion_tokens": 21930,
+          "cost_usd": 0.020029
+        }
+      },
+      "cost_per_word_by_step": {
+        "alignment@claude-haiku-5-5": 9.5e-05,
+        "descriptors@claude-haiku-5-5": 9.3e-05,
+        "established@claude-haiku-5-5": 0.000196,
+        "gloss@claude-haiku-5-5": 6.1e-05,
+        "kind@claude-haiku-5-5": 0.000141,
+        "probe@claude-haiku-5-5": 1.5e-05,
+        "same_sense@claude-haiku-5-5": 2e-06,
+        "sense@claude-haiku-5-5": 0.000351,
+        "vague@claude-haiku-5-5": 9.7e-05
+      },
+      "second_opinion": {
+        "n": 0,
+        "disagree": []
+      },
+      "resumed_calls": 0,
+      "batches_submitted": null
+    },
+    "pipeline": "split",
+    "third_model": null,
+    "agreement": null,
+    "tripwire": null,
+    "stopped_by_disagreement": false
+  },
+  "_provenance": {
+    "schema_version": "1.0",
+    "produced_by": {
+      "cmd": "uv run python data_analysis/gap_generation/traithood_filter.py --batch-id h55_opus_audit_sample_rep2 --validation-file data/candidates/validation/m1_r2_second_opinion_sample.jsonl --pipeline split --model claude-haiku-5-5 --no-second-opinion --transport live --budget-usd 1",
+      "git_sha": "f0df9ba+dirty",
+      "author": "Roger Dearnaley",
+      "title": "traithood_filter h55_opus_audit_sample_rep2"
+    },
+    "produced_at": "2026-10-07T21:32:54+00:00",
+    "inputs": [
+      {
+        "dep_key": "validation_file",
+        "path": "data/candidates/validation/m1_r2_second_opinion_sample.jsonl",
+        "fingerprint": "v1:2026-10-01T23:18:56+00:00@17673",
+        "kind": "file",
+        "dataset_id": null,
+        "last_modified_at": "2026-10-01T23:18:56+00:00",
+        "extras": {
+          "sample_frac": "None",
+          "sample_seed": "0"
+        }
+      }
+    ],
+    "inputs_sha256": "5229152af1e2479076a0ba664e74f7ff509f25d80457688366b12f05b4a11ddd"
+  }
+}
