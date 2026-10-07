@@ -94,7 +94,9 @@ Parse rates 100% everywhere.  Haiku 5.5 reads the rubric from the cache (99% hit
 1. **Relation call to Haiku 5.5**: recommended; `RELATION_MODEL` in the M3 runner, the CLI's default
    and the README; the pilot's dry-run estimate also learns 5.5's token figures (the agent found the
    estimates under-state 5.5 by about 40%, thinking not being counted).
+   **Roger: Yes**
 2. **Overlap call stays on Sonnet first, Opus second.**
+   **Roger: Yes**
 3. **M1 filter**: keep 4.5 for the verdict steps for now; move the gloss step to 5.5 after a
    membership line in gloss.md; run the alignment rubric on Roger's 69 marked words on both models
    ($0.05) before deciding the alignment step.  Or, if the sevenfold saving outweighs 4-10 words in 99
@@ -198,11 +200,64 @@ the line, which is a property of the gloss both models will then read, and 5.5 s
 glosses runs a little high: five words in 68 on this sample.  The alignment step moves to 5.5 with the
 rest.
 
-**Recommendation, revised**: relation call to Haiku 5.5 (confirmed, and by a wide margin); gloss step
-to 5.5 (confirmed on scope); the alignment step to 5.5 (as close to Opus as 4.5 or closer); the
-verdict steps are Roger's call between an undetectable quality difference and a sevenfold saving,
-with 5.5's error direction (turning traits away) the one thing against it; the overlap call stays on
-Sonnet.  Spend on the whole Haiku 5.5 question: $4.20 of API.
+**5. The verdict step on 600 words, with Opus as the reference, and voting over three Haiku 5.5
+readings (2026-10-08).**  Roger's test 2: 300 near-corpus words (the antonym-check pool, the pool
+that resembles generator output) and 300 random dictionary adjectives, all with Haiku 4.5's verdict
+on record at the current rubric versions
+([haiku55_verdict_600.jsonl](../../data/candidates/validation/haiku55_verdict_600.jsonl)), run
+through the whole filter on Opus 5.5 ([opus55_verdict_600](../../data/candidates/filter/opus55_verdict_600/),
+$23.75, 7% over its estimate; approved by Roger at about $27) and three times on Haiku 5.5
+([h55_verdict_600](../../data/candidates/filter/h55_verdict_600/), `_rep2`, `_rep3`, $0.56 each).
+Errors are weighted as Roger set them the same day: a trait wrongly turned away 3 (the lost
+candidate), a trait mis-tagged as physical or a role 1, a trait/states confusion 0.5 ("the boundary
+is particularly permeable"), a non-trait passed 1 (0.5 when Opus calls it a state).  The rules were
+scored after the runs; the two-reading rule had been proposed on the earlier sets, the three-reading
+rules are Roger's idea (2026-10-08: "majority vote some decisions, take best of three or require
+unanimity on others").
+
+| rule (cost per word) | pool | agrees with Opus | passes a non-trait | turns a trait away (fully) | weighted errors | paired against 4.5 |
+|---|---|---|---|---|---|---|
+| Haiku 4.5, one reading ($0.008) | near-corpus | 94% | 6 | 11 (5) | 21.0 | |
+| | random | 79% | 16 | 25 (13) | 82.5 | |
+| | all 600 | 87% | 22 | 36 (18) | 103.5 | |
+| Haiku 5.5, one reading ($0.0012) | near-corpus | 94% | 4 | 12 (4) | 19.5 | 13 / 13, p = 1.0 |
+| | random | 82% | 8 | 28 (19) | 88.0 | 33 / 24, p = 0.29 |
+| | all | 88% | 12 | 40 (23) | 107.5 | 46 / 37, p = 0.38 |
+| Haiku 5.5, trait if either of two ($0.0024) | near-corpus | 97% | 4 | 4 (1) | 7.5 | 13 / 5, p = 0.10 |
+| | random | 81% | 17 | 25 (17) | 88.0 | 32 / 28, p = 0.70 |
+| | all | 89% | 21 | 29 (18) | 95.5 | 45 / 33, p = 0.21 |
+| Haiku 5.5, majority of three ($0.0036) | near-corpus | 95% | 3 | 10 (3) | 16.0 | 13 / 11, p = 0.84 |
+| | random | 85% | 5 | 28 (18) | 78.0 | 37 / 21, p = 0.05 |
+| | all | 90% | 8 | 38 (21) | 94.0 | 50 / 32, p = 0.06 |
+| **Haiku 5.5, turned away only if all three agree, else majority** ($0.0036) | near-corpus | 96% | 3 | 8 (1) | **9.0** | 14 / 9, p = 0.40 |
+| | random | 83% | 16 | 24 (14) | **75.5** | 32 / 22, p = 0.22 |
+| | all | 89% | 19 | 32 (15) | **84.5** | 46 / 31, p = 0.11 |
+| Haiku 5.5, trait if any of three ($0.0036) | near-corpus | 96% | 5 | 4 (1) | 9.0 | 11 / 5, p = 0.21 |
+| | random | 83% | 17 | 23 (14) | 74.5 | 35 / 24, p = 0.19 |
+| | all | 90% | 22 | 27 (15) | 83.5 | 46 / 29, p = 0.06 |
+
+Haiku 5.5 gave the same verdict in all three readings on 531 of 600 words.  Reading it: a single 5.5
+reading is level with 4.5 overall and turns more traits fully away on random adjectives; a second
+reading removes most of that on the near-corpus pool and none of it on the random one; three
+readings with the asymmetric rule cut the weighted errors by about a fifth overall and by more than
+half on the near-corpus pool, at under half of 4.5's price.  "Trait if any of three" scores the same
+and lets more non-traits through; "majority of three" agrees with Opus most but turns the most traits
+fully away, the error Roger weights highest.  The differences against 4.5 are at p = 0.06-0.2 on 600
+words: a consistent direction, not a settled magnitude.  Confirmation of the two-reading rule on the
+207 Opus-audit words (two readings on record): agreement 85% against 4.5's 81%, weighted errors 39.0
+against 37.5, level.  Opus itself over-accepts against Roger's marks (section 1's 63 words), so
+"passes a non-trait" against Opus is an undercount for every model; Roger's marks on the 133
+disagreement words of this set
+([haiku55_verdict_600_disagreements_for_marks.md](./haiku55_verdict_600_disagreements_for_marks.md))
+would sharpen the table.
+
+**Recommendation, final**: relation call to Haiku 5.5 (by a wide margin); gloss step to 5.5 (on
+scope and on length); alignment step to 5.5 (as close to Opus as 4.5 or closer); **verdict step to
+Haiku 5.5 with three readings and the asymmetric rule** (turned away only when all three readings
+agree, otherwise the majority verdict), the one form of 5.5 that beats 4.5 on both pools, at
+$0.0036 a word against $0.008; the overlap call stays on Sonnet.  M3 decision 16 keeps the verdict
+model open for re-examination on the first real generator's output.  Spend on the whole Haiku 5.5
+question: $29.64 of API, $23.75 of it the Opus reference.
 
 ## Files
 
