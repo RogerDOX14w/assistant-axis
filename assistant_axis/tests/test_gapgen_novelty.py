@@ -966,6 +966,92 @@ class TestEstimate:
         assert NR.mean_listed_size(idx, 1) >= 1.0
 
 
+# --------------------------------------------------------------------------- the relation call on another model
+
+HAIKU55 = "claude-haiku-5-5"
+
+
+class TestRelationModel:
+    """``relation_model`` and ``relation_only`` (coding_plan_haiku55.md, comparison B)."""
+
+    def test_the_relation_call_goes_to_the_model_given_and_the_unsure_re_ask_to_sonnet(self, tmp_path):
+        def resp(kw):
+            obj = json.loads(user_text(kw))
+            if "candidate" in obj and "haiku" in kw["model"]:
+                return json.dumps({"results": [{"id": t["id"], "reason": "r",
+                                                "relation": "unsure" if t["label"] == "zeta" else "unrelated"}
+                                               for t in obj["traits"]]})
+            if "candidate" in obj:
+                return json.dumps({"results": [{"id": t["id"], "reason": "r", "relation": "similar"}
+                                               for t in obj["traits"]]})
+            return json.dumps({"reason": "r", "similarity": 0})
+        r, client, _ = make_runner(tmp_path, resp, relation_model=HAIKU55)
+        c = cand("candidate a")
+        st = r.run([c], {c.key: query(delta=0.9, alpha=0.6, zeta=0.5, kappa=0.4)})[c.key]
+        rel = [k for k in client.calls if is_relation(k)]
+        assert [k["model"] for k in rel] == [HAIKU55, NV.SONNET]
+        assert "temperature" not in rel[0] and "cache_control" not in rel[0]["system"][0]   # Haiku 5.5 refuses it
+        assert rel[0]["max_tokens"] == NR.RELATION_MAX_TOKENS
+        assert st.block["relation"]["model"] == HAIKU55 and st.block["relation"]["unsure_reasked"]["model"] == NV.SONNET
+        recs = [x for x in r.records if x["step"] == "relation"]
+        assert recs[0]["model"] == HAIKU55 and recs[0]["role"] == "haiku"
+        assert st.relations["zeta"] == "similar" and st.block is not None             # the walk ran (not relation-only)
+        assert set(r.usage.per_model) >= {HAIKU55, NV.SONNET} and NV.HAIKU not in r.usage.per_model
+
+    def test_the_default_is_unchanged(self, tmp_path):
+        r, _, _ = make_runner(tmp_path, responder_for())
+        st = NR.CandState(cand=cand("candidate a"))
+        c = r._relation_call(st, ["alpha"])
+        assert c.model == NR.RELATION_MODEL == NV.HAIKU and c.role == "haiku" and c.temperature == 0.0
+        assert r._relation_call(st, ["alpha"], step="relation_unsure").role == "sonnet"
+        assert [NR.model_role(m) for m in (NV.HAIKU, HAIKU55, NV.SONNET, NV.OPUS, "claude-fable-5-1", "x")] == \
+            ["haiku", "haiku", "sonnet", "opus", "fable", "relation"]
+
+    def test_relation_only_sends_no_overlap_call_and_decides_nothing_past_stage_0(self, tmp_path):
+        rel = {("candidate a", "delta"): "opposed", ("candidate a", "alpha"): "similar",
+               ("candidate b", "beta"): "similar"}
+        decided = []
+        r, client, idx = make_runner(tmp_path, responder_for(rel, {}), relation_model=HAIKU55, relation_only=True,
+                                     on_decided=lambda sts: decided.extend(sts))
+        cands = [cand("candidate a"), cand("candidate b", a=3), cand("alpha")]
+        vec = {cands[0].key: query(delta=0.9, alpha=0.6, zeta=0.5, kappa=0.4),
+               cands[1].key: query(beta=0.9, kappa=0.5, zeta=0.4, eta=0.3)}
+        states = r.run(cands, vec)
+        assert client.calls and all(is_relation(k) for k in client.calls)
+        assert {k["model"] for k in client.calls} == {HAIKU55}
+        a, b = states[cands[0].key], states[cands[1].key]
+        assert a.block is None and b.block is None and a.walk is not None              # built, never walked
+        assert a.shortlist.queue == ["epsilon", "alpha"] and b.shortlist.queue == ["beta"]
+        assert states[cands[2].key].block["reason"] == "exact_label"                     # stage 0 still decides
+        assert [s.cand.key for s in decided] == [cands[2].key]
+        rows = NR.relation_rows(states, r.records)
+        assert [x["key"] for x in rows] == sorted([cands[0].key, cands[1].key])
+        ra = next(x for x in rows if x["key"] == cands[0].key)
+        assert ra["model"] == HAIKU55 and ra["status"] == "ok" and ra["counts"]["opposed"] == 1
+        assert ra["counts"]["similar"] == 1 and sum(ra["counts"].values()) == len(ra["order"]) == len(a.listed)
+        assert ra["shortlist"] == ["epsilon", "alpha"] and ra["shortlist_length"] == 2
+        assert ra["answers"]["alpha"]["relation"] == "similar" and ra["relations"]["delta"] == "opposed"
+        assert ra["calls"][0]["model"] == HAIKU55 and ra["calls"][0]["usage_raw"]["output_tokens"] == 400
+        assert ra["calls"][0]["text_chars"] > 0 and ra["listed"][0]["stem"] in ra["order"]
+        s = NR.relation_summary(rows, r.records, r.usage, not_reached={"exact_label": 1})
+        assert s["n_candidates_reached"] == 2 and s["call_status"] == {"ok": 2} and s["answers"]["similar"] == 2
+        assert s["unsure_rate"] == 0 and s["shortlist_length_total"] == 3 and s["not_reached"] == {"exact_label": 1}
+        calls = s["calls"][f"relation:{HAIKU55}"]
+        assert calls["n_calls"] == 2 and calls["output_tokens"]["mean"] == 400 and calls["stop_reasons"] == {"end_turn": 2}
+        assert calls["cost_usd"] == pytest.approx(2 * (1200 * 0.10 + 400 * 0.50) / 1e6)
+        assert s["spend_usd"] == pytest.approx(calls["cost_usd"])
+        with pytest.raises(ValueError):
+            make_runner(tmp_path, responder_for(), mode="full_scan", relation_only=True)
+
+    def test_the_estimate_on_another_model(self):
+        kw = dict(n_candidates=100, n_scan=0, mean_listed=15.0, relation_text_chars=1343, trait_chars=240, cand_chars=140)
+        h45 = NR.plan_estimate(**kw)["relation"].lines[0]
+        h55 = NR.plan_estimate(**kw, relation_model=HAIKU55)["relation"].lines[0]
+        assert h55.model == HAIKU55 and h55.in_tok == round((1343 + 140 + 15 * 240) / 4.0 * 1.3)
+        assert h55.out_tok == round((20 + 45 * 15) * 1.3) and h45.out_tok == 20 + 45 * 15
+        assert h55.usd == pytest.approx(h45.usd * 0.13, rel=0.01)
+
+
 # --------------------------------------------------------------------------- the 1-hour cache and its billing
 
 class TestOneHourCache:

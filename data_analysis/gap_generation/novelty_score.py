@@ -30,6 +30,17 @@ Commands:
   the rule that changed it (the rules are added one decision at a time, each step replayed on the records), and
   the check that rule set 1 on the same records reproduces B exactly.  ``--dry-run`` replays offline and prints
   the calls not on record and their estimate.
+* ``score --relation-only --from-batch B --batch-id R [--relation-model M] [--keys K ...]`` (coding_plan_haiku55.md):
+  stage 3 alone, so that the relation call can be compared on another model without re-running M3: B's
+  candidates, corpus (``--corpus-at``), list order and cached query embeddings; the relation call on
+  ``--relation-model`` (default Haiku 4.5) and the unsure re-ask on Sonnet 5.5; the shortlists built under
+  ``--rules``; then stop (no overlap call, no decision, no registry write).  Before sending, every request is
+  checked against B's relation call for the same candidate (the same user turn, system prompt, ``max_tokens``
+  and cache setting; only the model differs); a difference refuses the run.  Writes ``R``'s directory:
+  ``responses.jsonl``, ``relation.jsonl`` (one row per candidate that reached the call: every answer, the final
+  relations, the counts, the shortlist and its length, each call's usage and answer length),
+  ``relation_summary.json``, ``usage.json``, ``run.json``, ``run.log``.
+  ``--relation-model`` also sets the relation call's model of an ordinary ``score`` run (not of ``--redecide``).
 * ``full-scan --batch-id S --from-batch B [--sample 100 --sample-seed 0 | --keys K ...]``: the pilot's check on
   the shortlist: the overlap call on every listed trait of a seeded sample of B's candidates (those that reached
   the relation call), or of the named registry keys, no relation call, no shortlist, no early exit, Opus on the
@@ -587,9 +598,23 @@ def _cand_chars(cands) -> float:
 # --------------------------------------------------------------------------- re-deciding a run on its records
 
 def _check_score_selection(args, redecide: bool) -> Optional[str]:
-    """``score`` takes one of --run / --keys / --unscored; ``--redecide`` takes --from-batch (and optionally --keys)."""
+    """``score`` takes one of --run / --keys / --unscored; ``--redecide`` and ``--relation-only`` take
+    --from-batch (and optionally --keys)."""
     chosen = [n for n, v in (("--run", args.run), ("--keys", args.keys), ("--unscored", args.unscored)) if v]
+    if getattr(args, "relation_only", False):
+        if redecide:
+            return "--relation-only and --redecide are two different runs: choose one"
+        if not args.from_batch:
+            return "--relation-only needs --from-batch (the run whose candidates, corpus and list order it reuses)"
+        if args.from_batch == args.batch_id:
+            return "--relation-only writes a new run: --batch-id must differ from --from-batch"
+        if args.run or args.unscored:
+            return "--relation-only takes the source run's candidates (narrow them with --keys), not --run or --unscored"
+        return None
     if redecide:
+        if (getattr(args, "relation_model", None) or NR.RELATION_MODEL) != NR.RELATION_MODEL:
+            return ("--redecide replays the source's relation answers; --relation-model applies to a new run or to "
+                    "--relation-only")
         if not args.from_batch:
             return "--redecide needs --from-batch (the run whose records are re-decided)"
         if args.from_batch == args.batch_id:
@@ -913,6 +938,9 @@ def run_scoring(args, argv, *, mode: str) -> int:
         if bad:
             print(f"REFUSED: {bad}", file=sys.stderr)
             return 2
+        if getattr(args, "relation_only", False):
+            return run_relation_only(args, argv)
+    relation_model = getattr(args, "relation_model", None) or NR.RELATION_MODEL
     out_dir = paths.novelty_dir(args.batch_id, candidates_dir=args.out_root)
     try:
         rubrics = load_m3_rubrics(args.rubrics_dir)
@@ -968,7 +996,8 @@ def run_scoring(args, argv, *, mode: str) -> int:
     stages = NR.plan_estimate(n_candidates=n_live if mode == "shortlist" else 0, n_scan=len(cands) if mode == "full_scan" else 0,
                               mean_listed=listed_mean or 16.0, relation_text_chars=len(rubrics["relation"]["text"]),
                               trait_chars=_mean_chars(index) if index is not None else 260.0,
-                              cand_chars=_cand_chars(cands), transport=transport, n_embed=len(miss))
+                              cand_chars=_cand_chars(cands), transport=transport, n_embed=len(miss),
+                              relation_model=relation_model)
     use = ("embeddings", "relation", "overlap") if mode == "shortlist" else ("embeddings", "full_scan")
     est = Estimate(lines=[x for s in use for x in stages[s].lines])
     plan = {"mode": mode, "n_candidates": len(cands), "n_exact_label": n_exact, "n_to_relation": n_live if mode == "shortlist" else 0,
@@ -1052,7 +1081,8 @@ def run_scoring(args, argv, *, mode: str) -> int:
             first = next((i for i, c in enumerate(cands)
                           if i in found and not (sets and NV.exact_label_match(c.stem, sets, rules=rules))), None)
         if index is not None and first is not None:
-            print(render_for(cands[first], found[first], index, rubrics, relation_seed, cfg.k))
+            print(render_for(cands[first], found[first], index, rubrics, relation_seed, cfg.k,
+                             relation_model=relation_model))
         elif not redecide:
             print("(no rendered prompt: no candidate's query embedding is cached yet; the run embeds them first)")
         return 0
@@ -1070,7 +1100,7 @@ def run_scoring(args, argv, *, mode: str) -> int:
                 "estimate_lines": [str(x) for x in est.lines], "budget_usd": args.budget_usd, "cap_usd": cap,
                 "confirmed_by": args.confirmed_by, "rubrics": {k: {kk: v[kk] for kk in ("name", "version", "sha256")}
                                                                for k, v in rubrics.items()},
-                "models": {"relation": NR.RELATION_MODEL, "relation_unsure": NR.UNSURE_MODEL, "overlap_first": NR.FIRST_MODEL,
+                "models": {"relation": relation_model, "relation_unsure": NR.UNSURE_MODEL, "overlap_first": NR.FIRST_MODEL,
                            "overlap_second": NR.SECOND_MODEL},
                 "settings": {"config_version": cfg.config_version, "k": cfg.k, "representation": cfg.representation,
                              "variant": cfg.covered["space"]["variant"], "query_form": args.query_form,
@@ -1131,7 +1161,8 @@ def run_scoring(args, argv, *, mode: str) -> int:
                                   resume_records=resume_records, on_decided=on_decided, rules=rules,
                                   relation_seed=relation_seed,
                                   replay_records=source["records"] if redecide else (),
-                                  extra_block={"redecided_from": source["batch_id"]} if redecide else None)
+                                  extra_block={"redecided_from": source["batch_id"]} if redecide else None,
+                                  relation_model=relation_model)
         if transport == "batches":
             runner.cache_ttl = NR.BATCH_CACHE_TTL
             runner.transport = BatchTransport(runner, anthropic.Anthropic(), out_dir / "batches.json", budget_usd=cap)
@@ -1168,6 +1199,237 @@ def run_scoring(args, argv, *, mode: str) -> int:
     return status
 
 
+# --------------------------------------------------------------------------- the relation call alone
+
+def relation_like_for_like(calls: list, source_records: list) -> dict:
+    """Each relation call of a relation-only run (``novelty_runner.Call``) against the source's relation call for
+    the same candidate (its last answered one): the same user turn (the candidate, its gloss and the listed
+    traits in the same order), system prompt, ``max_tokens`` and cache setting, only the model differing.
+    ``{"n", "identical", "differ": [{"key", "fields"}], "not_on_record": [keys], "source_models": {...}}``."""
+    src: dict[str, dict] = {}
+    for r in source_records:
+        if r.get("step") == "relation" and r.get("text") is not None:
+            src[r["key"]] = r
+    same, differ, missing = 0, [], []
+    models = Counter()
+    for c in calls:
+        r = src.get(c.key)
+        if r is None:
+            missing.append(c.key)
+            continue
+        models[r.get("model")] += 1
+        req = r.get("request") or {}
+        bad = [f for f, a, b in (("user", c.user, r.get("user")), ("system", c.prompt_sha256, r.get("prompt_sha256")),
+                                  ("stems", list(c.stems), r.get("stems")), ("max_tokens", c.max_tokens, req.get("max_tokens")),
+                                  ("cache_system", c.cache_system, req.get("cache_system"))) if a != b]
+        if bad:
+            differ.append({"key": c.key, "fields": bad})
+        else:
+            same += 1
+    return {"n": len(calls), "identical": same, "differ": differ, "not_on_record": sorted(missing),
+            "source_models": dict(models)}
+
+
+def run_relation_only(args, argv) -> int:
+    """``score --relation-only --from-batch B --batch-id R [--relation-model M] [--keys K ...]``
+    (coding_plan_haiku55.md, comparison B): stage 3 of M3 on ``--relation-model`` for B's candidates, with B's
+    corpus (as committed at B's ``git_sha``, unless ``--corpus-at current``), B's list order (its relation
+    seed) and B's cached query embeddings, then stop: the relation calls and Sonnet's unsure re-ask are sent,
+    the shortlists built under ``--rules``; no overlap call, no decision, no registry write.  Writes
+    ``novelty/<R>/``: ``responses.jsonl``, ``relation.jsonl`` (one row per candidate that reached the call:
+    every answer, the final relations, the counts, the shortlist and its length, each call's usage),
+    ``relation_summary.json``, ``usage.json``, ``run.json``, ``run.log``.  The dry run (and the run) first
+    checks that every request is B's request for the same candidate with only the model changed."""
+    from assistant_axis.gapgen import embed as EM
+    from assistant_axis.gapgen.metric_config import MetricConfig
+    from assistant_axis.plot_metadata import json_metadata
+    from assistant_axis.provenance import current_file_input, current_files_input
+    relation_model = args.relation_model or NR.RELATION_MODEL
+    out_dir = paths.novelty_dir(args.batch_id, candidates_dir=args.out_root)
+    try:
+        rubrics = load_m3_rubrics(args.rubrics_dir)
+    except RubricError as exc:
+        print(f"REFUSED (rubric not pinned): {exc}", file=sys.stderr)
+        return 2
+    rules = resolve_rules(args)
+    cfg = MetricConfig.load(args.metric_config)
+    rows = Registry(args.registry).fold()
+    source = load_source(args.from_batch, args.out_root, with_records=True)
+    data_dir, corpus_info = resolve_data_dir(args, source)
+    diffs = check_source_settings(source, cfg=cfg, query_form=args.query_form)
+    if diffs:
+        print(f"REFUSED: settings differ from {source['batch_id']}'s, so its lists would not be rebuilt: "
+              f"{'; '.join(diffs)}", file=sys.stderr)
+        return 2
+    cands, skipped = select_redecide(rows, args, source)
+    if not cands:
+        print(f"nothing to send ({json.dumps(skipped)})", file=sys.stderr)
+        return 0
+    cache = EM.EmbeddingCache(args.cache_dir)
+    index, index_info = load_index(cfg, data_dir=data_dir, cache=cache)
+    embedder = EM.OpenAIEmbedder(cfg.live_model["model_id"])
+    texts = [NV.query_text(c.label, c.gloss, query_form=args.query_form, representation=cfg.representation)
+             for c in cands]
+    found, miss = cache.lookup(embedder.tag, texts)
+    if index is None or miss:
+        print("REFUSED: the relation-only run rebuilds the source's lists, so every corpus text and every candidate's "
+              f"query text must be in the embedding cache; missing: corpus {index_info['n_missing_from_cache']}, query "
+              f"texts {len(miss)}", file=sys.stderr)
+        return 2
+    unit = EM.normalize_rows([found[i] for i in range(len(cands))])      # as score --redecide reads them
+    vectors = {c.key: unit[i] for i, c in enumerate(cands)}
+    sets = label_sets_for(data_dir)
+    relation_seed = _relation_seed(source)
+    settings = {"config_version": cfg.config_version, "k": cfg.k, "representation": cfg.representation,
+                "variant": cfg.covered["space"]["variant"], "query_form": args.query_form,
+                "embedding_model": cfg.live_model["model_id"], "relation_max_tokens": NR.RELATION_MAX_TOKENS,
+                "temperature": NR.TEMPERATURE, "concurrency": args.concurrency, "ask_attempts": NR.ASK_ATTEMPTS,
+                "relation_seed": relation_seed, "cosine_floor": rules.cosine_floor}
+
+    def make_runner(**kw):
+        return NR.NoveltyRunner(batch_id=args.batch_id, rubrics=rubrics, index=index, label_sets=sets, k=cfg.k,
+                                mode="shortlist", config_version=cfg.config_version,
+                                embedding=_embedding_settings(cfg, args.query_form), rules=rules,
+                                relation_seed=relation_seed, relation_model=relation_model, relation_only=True, **kw)
+    # offline first (nothing sent): who reaches the relation call, the requests, and the check against the source
+    tr = NR.OfflineTransport()
+    off = make_runner(client=None, usage=MultiModelUsage(), responses_path=Path(os.devnull), transport=tr)
+    off_states = off.run(cands, vectors)
+    first_calls = [w["call"] for w in tr.wanted if w["step"] == "relation"]
+    not_reached = dict(Counter("exact_label" if (st.block or {}).get("reason") == "exact_label" else
+                               (st.block or {}).get("reason") or st.stalled or "?"
+                               for st in off_states.values() if st.relation is None))
+    lfl = relation_like_for_like(first_calls, source["records"])
+    transport, why = choose_transport(args.transport, len(first_calls))
+    suffix = BATCH_SUFFIX if transport == "batches" else ""
+    est = Estimate()
+    if first_calls:
+        toks = [NR.call_tokens(c) for c in first_calls]
+        n = len(toks)
+        est.add(f"relation call on {OT.SHORT.get(relation_model, relation_model)} (thinking not in the figure)",
+                relation_model + suffix, n, int(round(sum(t[0] for t in toks) / n)), int(round(sum(t[1] for t in toks) / n)))
+        sf = OT.tokenizer_factor(NR.UNSURE_MODEL)
+        n_uns = int(round(NR.UNSURE_SHARE * n))
+        est.add(f"unsure re-ask ({NR.UNSURE_SHARE:.0%} of candidates, {NR.UNSURE_TRAITS} traits)", NR.UNSURE_MODEL + suffix,
+                n_uns, int(round((len(rubrics["relation"]["text"]) + _cand_chars(cands) + NR.UNSURE_TRAITS * _mean_chars(index))
+                                 / NR.CHARS_PER_TOKEN * sf)),
+                int(round((NR.RELATION_OUT_BASE + NR.RELATION_OUT_PER_TRAIT * NR.UNSURE_TRAITS) * sf)))
+    plan = {"mode": "relation_only", "from_batch": source["batch_id"], "n_candidates": len(cands),
+            "n_to_relation": len(first_calls), "not_reached": not_reached, "skipped": skipped, "transport": transport,
+            "relation_model": relation_model, "rules": rules.as_dict(), "corpus_files": corpus_info,
+            "listed_mean": round(sum(len(c.stems) for c in first_calls) / len(first_calls), 3) if first_calls else None,
+            "like_for_like": {k: v for k, v in lfl.items() if k != "differ"} | {"n_differ": len(lfl["differ"])}}
+    print(f"relation only: source {source['batch_id']} ({len(source['results'])} rows; corpus "
+          f"{corpus_info.get('corpus_at')} {corpus_info.get('git_sha') or ''}); relation model {relation_model}; rules "
+          f"{rules.name} (floor {rules.cosine_floor}); relation seed {relation_seed}")
+    print(f"like for like: {lfl['identical']} of {lfl['n']} requests identical to the source's relation call for the same "
+          f"candidate but for the model (source models {json.dumps(lfl['source_models'])}); differ {len(lfl['differ'])}"
+          + (f" {lfl['differ'][:5]}" if lfl["differ"] else "") + f"; not on record in the source {len(lfl['not_on_record'])}"
+          + (f" {lfl['not_on_record'][:12]}" if lfl["not_on_record"] else ""))
+    print(f"plan: {json.dumps({k: v for k, v in plan.items() if k != 'like_for_like'})}")
+    print(f"transport: {transport} ({why})")
+    print(f"estimate:\n{est.format()}\ntotal estimate = ${est.usd:.3f}")
+    refused: Optional[str] = None
+    cap = None
+    try:
+        cap = confirm_or_abort(est.usd, args.budget_usd, confirm_expensive=args.confirm_expensive,
+                               confirmed_by=args.confirmed_by)
+        print(f"hard cap: ${cap:.2f}")
+    except CostRefused as exc:
+        refused = exc.msg
+    if refused is None and lfl["differ"]:
+        refused = f"{len(lfl['differ'])} requests differ from the source's beyond the model (first: {lfl['differ'][:3]})"
+        print(f"REFUSED: {refused}", file=sys.stderr)
+    sha = git_sha()
+    dirty = platform_dirty_files()
+    dirty_check = {"paths": list(PLATFORM_PATHS), "dirty": dirty,
+                   "note": None if dirty is not None else "git unavailable: not checked"}
+    if refused is None and dirty and not args.allow_dirty:
+        refused = (f"uncommitted changes to the platform's own code or prompt paths ({len(dirty)}: "
+                   f"{'; '.join(d.strip() for d in dirty[:5])}); commit first, or pass --allow-dirty")
+        print(f"REFUSED: {refused}", file=sys.stderr)
+    if args.dry_run:
+        if refused:
+            print(f"DRY-RUN: the real run would be REFUSED: {refused}")
+        print(f"DRY-RUN: would write {out_dir}/ (no registry write)")
+        print(f"rubrics: {json.dumps({k: {'name': v['name'], 'version': v['version'], 'sha256': v['sha256'][:12]} for k, v in rubrics.items()})}")
+        if first_calls:
+            i = next(j for j, c in enumerate(cands) if c.key == first_calls[0].key)
+            print(render_for(cands[i], found[i], index, rubrics, relation_seed, cfg.k, relation_model=relation_model,
+                             overlap=False))
+        return 0
+    if refused:
+        return 2
+    status, resume_records, earlier = _prepare_out_dir(out_dir, args)
+    if status:
+        return status
+    fh = logging.FileHandler(out_dir / "run.log", encoding="utf-8")
+    fh.setFormatter(log_formatter())
+    logging.getLogger().addHandler(fh)
+    run_meta = {"batch_id": args.batch_id, "mode": "relation_only", "git_sha": sha, "allow_dirty": bool(args.allow_dirty),
+                "dirty_check": dirty_check, "argv": sys.argv[1:] if argv is None else argv, "plan": plan,
+                "transport": transport, "transport_reason": why, "estimate_usd": round(est.usd, 4),
+                "estimate_lines": [str(x) for x in est.lines], "budget_usd": args.budget_usd, "cap_usd": cap,
+                "confirmed_by": args.confirmed_by,
+                "rubrics": {k: {kk: v[kk] for kk in ("name", "version", "sha256")} for k, v in rubrics.items()},
+                "models": {"relation": relation_model, "relation_unsure": NR.UNSURE_MODEL}, "settings": settings,
+                "rules": rules.as_dict(), "corpus": corpus_info, "from_batch": source["batch_id"],
+                "like_for_like": lfl, "resumed": bool(args.resume), "started_at": utc_now()}
+    if earlier:
+        run_meta["earlier_sessions"] = list(earlier.pop("earlier_sessions", [])) + [earlier]
+    atomic_write_text(json.dumps(run_meta, indent=2) + "\n", out_dir / "run.json")
+    usage = GuardedUsage(budget_usd=cap, usage_path=out_dir / "usage.json")
+    if args.resume:
+        from assistant_axis.gapgen.batches import with_current_batch_keys
+        usage.merge_from(with_current_batch_keys(MultiModelUsage.load_or_create(out_dir / "usage.json")))
+    status, error, runner = 0, None, None
+    try:
+        from dotenv import load_dotenv
+        import anthropic
+        load_dotenv(_REPO_ROOT / ".env")
+        client = anthropic.AsyncAnthropic(max_retries=0)
+        runner = make_runner(client=client, usage=usage, responses_path=out_dir / "responses.jsonl",
+                             concurrency=args.concurrency, resume_records=resume_records)
+        if transport == "batches":
+            runner.cache_ttl = NR.BATCH_CACHE_TTL
+            runner.transport = BatchTransport(runner, anthropic.Anthropic(), out_dir / "batches.json", budget_usd=cap)
+        runner.run(cands, vectors)
+    except BudgetExceededError as exc:
+        print(f"STOPPED: {exc}", file=sys.stderr)
+        status = 2
+    except BaseException as exc:  # noqa: BLE001 - recorded, then re-raised
+        error = exc
+        print(f"STOPPED by {type(exc).__name__}: {exc}", file=sys.stderr)
+        raise
+    finally:
+        usage.write_json(out_dir / "usage.json")
+        if runner is not None:
+            rel_rows = NR.relation_rows(runner.states, runner.records)
+            atomic_write_text("".join(json.dumps(r, ensure_ascii=False) + "\n" for r in rel_rows),
+                              out_dir / "relation.jsonl")
+            summary = NR.relation_summary(rel_rows, runner.records, usage, skipped=skipped, not_reached=not_reached)
+            summary.update({"batch_id": args.batch_id, "from_batch": source["batch_id"], "relation_model": relation_model,
+                            "parse_rates": runner.warn_parse_rates(logger), "like_for_like": lfl,
+                            "stopped_by_budget": status == 2,
+                            "stopped_by_error": f"{type(error).__name__}: {error}" if error is not None else None,
+                            "stalled": {k: st.stalled for k, st in runner.states.items() if st.stalled},
+                            "rubrics": runner.rubric_pins, "rules_of_run": rules.as_dict()})
+            inputs = [current_file_input(dep_key="metric_config", path=args.metric_config),
+                      current_files_input(dep_key="rubrics", paths=[paths.RUBRICS_DIR / "relation.md"]),
+                      current_file_input(dep_key="source_results", path=source["dir"] / "results.jsonl")]
+            env = json_metadata(summary, title=f"novelty_score relation-only {args.batch_id}", inputs=inputs)
+            atomic_write_text(json.dumps(env, indent=2, ensure_ascii=False) + "\n", out_dir / "relation_summary.json")
+            print(usage.log_line())
+            print(json.dumps({k: summary[k] for k in ("n_candidates_reached", "call_status", "answers", "final",
+                                                      "unsure_rate", "spend_usd")}))
+        run_meta.update(finished_at=utc_now(), cost_usd=round(usage.total_cost_usd, 4), status=status,
+                        stopped_by_error=f"{type(error).__name__}: {error}" if error is not None else None)
+        atomic_write_text(json.dumps(run_meta, indent=2) + "\n", out_dir / "run.json")
+        logging.getLogger().removeHandler(fh)
+        fh.close()
+    return status
+
+
 def select_scan_sample(rows: dict, args) -> tuple[list[NR.M3Candidate], dict]:
     """The full scan's candidates: a seeded sample of ``--sample`` of the main run's candidates that reached the
     relation call (reason ``overlap``), read from its ``results.jsonl``, or the registry keys of ``--keys`` (in
@@ -1199,17 +1461,26 @@ def select_scan_sample(rows: dict, args) -> tuple[list[NR.M3Candidate], dict]:
 
 
 def render_for(cand: NR.M3Candidate, e_raw, index: NV.CorpusIndex, rubrics: dict, batch_id: str, k: int,
-               *, exclude: tuple = ()) -> str:
-    """The relation request and the first overlap request for one candidate, as the models receive them."""
+               *, exclude: tuple = (), relation_model: str = NR.RELATION_MODEL, overlap: bool = True) -> str:
+    """The relation request (on ``relation_model``) and, unless ``overlap`` is false, the first overlap
+    request for one candidate, as the models receive them."""
     from assistant_axis.gapgen.llm import request_params
     q = index.project(e_raw)
     listed = NV.expand(index.retrieve(q, k, exclude=exclude), index.traits, lambda s: index.cosine_to(q, s))
     order = NV.relation_order([x.stem for x in listed], batch_id, cand.key)
     user = NV.render_relation_user(cand.label, cand.gloss, [(index.traits[s].label, index.traits[s].description)
                                                             for s in order])
-    p = request_params(model=NR.RELATION_MODEL, system=rubrics["relation"]["text"], user=user,
+    p = request_params(model=relation_model, system=rubrics["relation"]["text"], user=user,
                        max_tokens=NR.RELATION_MAX_TOKENS, temperature=NR.TEMPERATURE, cache_system=False)
     head = {k2: v for k2, v in p.items() if k2 not in ("system", "messages")}
+    relation_text = (f"=== relation call, request settings {json.dumps(head)} ===\n--- system (relation "
+                     f"v{rubrics['relation']['version']}) ---\n{rubrics['relation']['text']}\n--- user ---\n{user}\n")
+    listing = "\n".join(f"  {x.stem}: cosine {x.cosine:.3f}, {x.via}" + (f" rank {x.rank}" if x.rank else
+                                                                           f" from {', '.join(x.expanded_from)}")
+                        + (f", partners {', '.join(x.partners)}" if x.partners else "") for x in listed)
+    top = f"=== candidate {cand.key} ({cand.label}), {len(listed)} listed traits (not shown to the model) ===\n{listing}\n"
+    if not overlap:
+        return top + relation_text
     first = listed[0].stem
     pc = OT.PairCall(call_id=f"{cand.key}>{first}", set="m3", target=cand.key, listed=[first])
     ou = OT.render_single(pc, {cand.key: {"label": cand.label, "description": cand.gloss},
@@ -1217,12 +1488,7 @@ def render_for(cand: NR.M3Candidate, e_raw, index: NV.CorpusIndex, rubrics: dict
     po = request_params(model=NR.FIRST_MODEL, system=rubrics["overlap"]["text"], user=ou,
                         max_tokens=NR.OVERLAP_MAX_TOKENS, temperature=NR.TEMPERATURE, cache_system=True)
     ohead = {k2: v for k2, v in po.items() if k2 not in ("system", "messages")}
-    listing = "\n".join(f"  {x.stem}: cosine {x.cosine:.3f}, {x.via}" + (f" rank {x.rank}" if x.rank else
-                                                                           f" from {', '.join(x.expanded_from)}")
-                        + (f", partners {', '.join(x.partners)}" if x.partners else "") for x in listed)
-    return (f"=== candidate {cand.key} ({cand.label}), {len(listed)} listed traits (not shown to the model) ===\n{listing}\n"
-            f"=== relation call, request settings {json.dumps(head)} ===\n--- system (relation v{rubrics['relation']['version']}) ---\n"
-            f"{rubrics['relation']['text']}\n--- user ---\n{user}\n"
+    return (top + relation_text +
             f"=== overlap call on the nearest trait, request settings {json.dumps(ohead)}, system block cache_control "
             f"{json.dumps(po['system'][0].get('cache_control'))} ===\n--- user ---\n{ou}\n")
 
@@ -1443,7 +1709,17 @@ def build_parser() -> argparse.ArgumentParser:
                     help="re-run the decision rules on --from-batch's records (its candidates, corpus, relation order "
                          "and answers on record); only calls a rule now needs and the source never made are sent; "
                          "writes this run's directory and decision_changes.md, not the registry")
-    sp.add_argument("--from-batch", default=None, help="with --redecide: the run to re-decide")
+    sp.add_argument("--from-batch", default=None,
+                    help="with --redecide: the run to re-decide; with --relation-only: the run whose candidates, corpus, "
+                         "list order and query embeddings are reused")
+    sp.add_argument("--relation-model", default=NR.RELATION_MODEL,
+                    help=f"the relation call's model (default {NR.RELATION_MODEL}); the unsure re-ask stays on "
+                         f"{NR.UNSURE_MODEL}.  Not with --redecide, which replays the source's answers")
+    sp.add_argument("--relation-only", action="store_true",
+                    help="with --from-batch B (and optionally --keys): stage 3 alone for B's candidates (the relation "
+                         "call on --relation-model and the unsure re-ask, B's corpus, list order and embeddings), then "
+                         "stop: relation.jsonl and relation_summary.json, no overlap call, no decision, no registry "
+                         "write; to compare the relation call on another model without re-running M3")
     sp.add_argument("--rescore", action="store_true", help="also rows another run has decided (their block is replaced)")
     sp.add_argument("--include-held", action="store_true", help="also rows on a holding list (nationalities)")
     sp.add_argument("--limit", type=int)

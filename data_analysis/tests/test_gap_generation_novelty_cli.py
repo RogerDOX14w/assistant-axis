@@ -366,6 +366,83 @@ def test_full_scan_takes_keys(env):
                   *env["base"]])
 
 
+# --------------------------------------------------------------------------- --relation-only, --relation-model
+
+def relation_only(env, batch, *extra):
+    return cli.main(["score", "--relation-only", "--from-batch", "m3t", "--batch-id", batch, "--corpus-at", "current",
+                     *env["base"], *extra])
+
+
+def test_relation_only_on_another_model(env, capsys):
+    assert score(env) == 0
+    before = env["reg"].path.read_text()
+    src = {r["key"]: r for r in cli._read_jsonl(out(env) / "responses.jsonl") if r["step"] == "relation"}
+    env["holder"].pop("client", None)
+    capsys.readouterr()
+    # the dry run: the check against the source, the estimate, the rendered request; nothing sent or written
+    assert relation_only(env, "rel55", "--relation-model", "claude-haiku-5-5", "--dry-run") == 0
+    o = capsys.readouterr().out
+    assert "like for like: 3 of 3 requests identical" in o and "not on record in the source 0" in o
+    assert "claude-haiku-5-5" in o and '"temperature"' not in o.split("=== relation call", 1)[1].split("\n", 1)[0]
+    assert "=== overlap call" not in o and calls_made(env) == [] and not out(env, "rel55").exists()
+    # the run: the relation calls on Haiku 5.5, no overlap call, no registry write, no decision files
+    assert relation_only(env, "rel55", "--relation-model", "claude-haiku-5-5") == 0
+    sent = calls_made(env)
+    assert sent and all("candidate" in json.loads(user_text(k)) for k in sent)
+    assert {k["model"] for k in sent} == {"claude-haiku-5-5"} and all("temperature" not in k for k in sent)
+    assert sorted(user_text(k) for k in sent) == sorted(r["user"] for r in src.values())   # the source's requests
+    assert env["reg"].path.read_text() == before
+    d = out(env, "rel55")
+    for name in ("responses.jsonl", "relation.jsonl", "relation_summary.json", "usage.json", "run.json", "run.log"):
+        assert (d / name).exists(), name
+    assert not (d / "results.jsonl").exists() and not (d / "decisions.md").exists()
+    rows = cli._read_jsonl(d / "relation.jsonl")
+    assert [r["key"] for r in rows] == ["alphoid#1", "deltaish#1", "lambdaish#1"]
+    assert all(r["model"] == "claude-haiku-5-5" and r["status"] == "ok" for r in rows)
+    by = {r["key"]: r for r in rows}
+    assert by["alphoid#1"]["relations"]["alpha"] == "similar" and by["deltaish#1"]["relations"]["delta"] == "opposed"
+    assert by["deltaish#1"]["shortlist"][0] == "epsilon"                               # the opposed trait's partner
+    assert all(r["order"] == src[r["key"]]["stems"] for r in rows)                      # the source's list order
+    s = json.loads((d / "relation_summary.json").read_text())
+    assert "_provenance" in s
+    s = s["result"]
+    assert s["n_candidates_reached"] == 3 and s["not_reached"] == {"exact_label": 2}
+    assert s["like_for_like"]["identical"] == 3 and s["relation_model"] == "claude-haiku-5-5"
+    assert s["parse_rates"]["relation:claude-haiku-5-5"]["ok"] == 3
+    run = json.loads((d / "run.json").read_text())
+    assert run["mode"] == "relation_only" and run["models"]["relation"] == "claude-haiku-5-5" and run["status"] == 0
+    assert run["settings"]["relation_seed"] == "m3t" and run["from_batch"] == "m3t"
+    usage = json.loads((d / "usage.json").read_text())
+    assert set(usage["per_model"]) == {"claude-haiku-5-5"}
+    # a second run into the same directory is refused; --resume sends nothing more
+    assert relation_only(env, "rel55", "--relation-model", "claude-haiku-5-5") == 1
+    env["holder"].pop("client", None)
+    assert relation_only(env, "rel55", "--relation-model", "claude-haiku-5-5", "--resume") == 0
+    assert calls_made(env) == []
+
+
+def test_relation_only_and_relation_model_refusals(env, capsys):
+    assert score(env) == 0
+    capsys.readouterr()
+    base = ["score", "--batch-id", "x", *env["base"]]
+    assert cli.main([*base, "--relation-only"]) == 2                                          # no source
+    assert cli.main([*base, "--relation-only", "--redecide", "--from-batch", "m3t"]) == 2
+    assert cli.main([*base, "--relation-only", "--from-batch", "m3t", "--run", "toy/r1"]) == 2
+    assert cli.main(["score", "--batch-id", "m3t", "--relation-only", "--from-batch", "m3t", *env["base"]]) == 2
+    assert cli.main([*base, "--redecide", "--from-batch", "m3t", "--relation-model", "claude-haiku-5-5"]) == 2
+    err = capsys.readouterr().err
+    assert err.count("REFUSED") == 5 and "--relation-model applies to a new run" in err
+
+
+def test_score_on_another_relation_model(env):
+    assert cli.main(["score", "--batch-id", "m3h", "--run", "toy/r1", "--relation-model", "claude-haiku-5-5",
+                     *env["base"]]) == 0
+    sent = calls_made(env)
+    rel = [k for k in sent if "candidate" in json.loads(user_text(k))]
+    assert rel and {k["model"] for k in rel} == {"claude-haiku-5-5"}
+    assert json.loads((out(env, "m3h") / "run.json").read_text())["models"]["relation"] == "claude-haiku-5-5"
+
+
 def test_the_corpus_snapshot_of_a_commit():
     """The pilot's commit (53b3d07): its 663 trait files and its seed queue, nothing else of the tree."""
     import tempfile

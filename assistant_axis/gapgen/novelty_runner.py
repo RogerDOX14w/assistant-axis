@@ -154,6 +154,13 @@ class Call:
         return (self.step, self.prompt_sha256, self.model, self.user)
 
 
+def model_role(model: str) -> str:
+    """A call's ``role`` from its model's family (``haiku``, ``sonnet``, ``opus``, ``fable``), as the records
+    name it; ``relation`` for a model of none of them."""
+    m = str(model).lower()
+    return next((f for f in ("haiku", "sonnet", "opus", "fable") if f in m), "relation")
+
+
 def billed_from_raw(raw: Mapping) -> tuple[int, int]:
     """``(prompt-equivalent tokens, output tokens)`` from a record's ``usage_raw``, as ``llm.billed_usage``
     charges them."""
@@ -263,7 +270,12 @@ class NoveltyRunner:
     so that the source's relation calls are the same requests).  ``replay_records``: another run's
     responses, answers on record that are replayed instead of sent (as ``resume_records`` are) but are not
     this run's records: they are not counted in its summary, its parse rates or its spend.
-    ``extra_block``: fields added to every block (a re-decided run's ``redecided_from``)."""
+    ``extra_block``: fields added to every block (a re-decided run's ``redecided_from``).
+
+    ``relation_model``: the model of the relation call (default :data:`RELATION_MODEL`; the unsure re-ask
+    stays on :data:`UNSURE_MODEL`).  ``relation_only`` (``score --relation-only``, coding_plan_haiku55.md):
+    stage 3 and stop: the relation calls (and the unsure re-ask) are sent and the shortlists built, but no
+    overlap call is made and no candidate that reached stage 3 is decided (its block stays ``None``)."""
 
     def __init__(self, *, client, batch_id: str, rubrics: Mapping[str, Mapping], index: NV.CorpusIndex,
                  label_sets: NV.LabelSets, usage: MultiModelUsage, responses_path: Path, k: int = 10,
@@ -272,11 +284,16 @@ class NoveltyRunner:
                  retry_delays: Optional[Sequence[float]] = None, resume_records: Sequence[Mapping] = (),
                  on_decided: Optional[Callable[[list], None]] = None, cache_ttl: Optional[str] = None,
                  rules: Optional[NV.Rules] = None, relation_seed: Optional[str] = None,
-                 replay_records: Sequence[Mapping] = (), extra_block: Optional[Mapping] = None):
+                 replay_records: Sequence[Mapping] = (), extra_block: Optional[Mapping] = None,
+                 relation_model: str = RELATION_MODEL, relation_only: bool = False):
         if mode not in ("shortlist", "full_scan"):
             raise ValueError(f"mode must be shortlist or full_scan, not {mode!r}")
+        if relation_only and mode != "shortlist":
+            raise ValueError("relation_only runs stage 3 of the shortlist mode; the full scan sends no relation call")
         self.client = client
         self.batch_id = batch_id
+        self.relation_model = str(relation_model)
+        self.relation_only = bool(relation_only)
         self.rules = rules or NV.DEFAULT_RULES
         self.relation_seed = relation_seed or batch_id
         self.extra_block = dict(extra_block or {})
@@ -463,8 +480,8 @@ class NoveltyRunner:
     def _relation_call(self, st: CandState, stems: Sequence[str], *, step: str = "relation") -> Call:
         traits = [(self.traits[s].label, self.traits[s].description) for s in stems]
         user = NV.render_relation_user(st.cand.label, st.cand.gloss, traits)
-        model = RELATION_MODEL if step == "relation" else UNSURE_MODEL
-        return Call(step=step, role="haiku" if step == "relation" else "sonnet", key=st.cand.key, model=model,
+        model = self.relation_model if step == "relation" else UNSURE_MODEL
+        return Call(step=step, role=model_role(model), key=st.cand.key, model=model,
                     system=self.rubrics["relation"]["text"], user=user, max_tokens=RELATION_MAX_TOKENS,
                     temperature=TEMPERATURE, cache_system=False, stems=tuple(stems))
 
@@ -533,7 +550,7 @@ class NoveltyRunner:
             await self._full_scan(live)
             return
         await self._relations(live)
-        if self._stop is not None:
+        if self._stop is not None or self.relation_only:
             return
         await self._walk([st for st in live if st.walk is not None])
 
@@ -797,20 +814,22 @@ def mean_listed_size(index: NV.CorpusIndex, k: int) -> float:
 
 def plan_estimate(*, n_candidates: int, n_scan: int, mean_listed: float, relation_text_chars: int,
                   trait_chars: float, cand_chars: float, transport: str = "live", n_embed: Optional[int] = None,
-                  embed_tokens_each: int = 30):
+                  embed_tokens_each: int = 30, relation_model: str = RELATION_MODEL):
     """The dry run's estimate by stage (coding_plan_m3.md, "Transport, cost, records"), as a
     :class:`cost.Estimate` per stage: ``{"embeddings", "relation", "overlap", "full_scan"}``.  Overlap pairs:
-    :data:`SHORTLIST_PAIRS` a candidate less the early-exit saving; Opus on the shares above."""
+    :data:`SHORTLIST_PAIRS` a candidate less the early-exit saving; Opus on the shares above.  The relation
+    call on ``relation_model`` (its tokenizer's factor on input and output; a thinking model's thinking is
+    not in the figure)."""
     from .cost import Estimate
     suffix = BATCH_SUFFIX if transport == "batches" else ""
     out = {k: Estimate() for k in ("embeddings", "relation", "overlap", "full_scan")}
     n_embed = n_candidates if n_embed is None else n_embed
     out["embeddings"].add("candidate embeddings (OpenAI text-embedding-3-large) + the 8 canary texts",
                           "text-embedding-3-large", 1, (n_embed + 8) * embed_tokens_each, 0)
-    hf = OT.tokenizer_factor(RELATION_MODEL)
+    hf = OT.tokenizer_factor(relation_model)
     rin = int(round((relation_text_chars + cand_chars + mean_listed * trait_chars) / CHARS_PER_TOKEN * hf))
-    rout = int(round(RELATION_OUT_BASE + RELATION_OUT_PER_TRAIT * mean_listed))
-    out["relation"].add(f"relation call, {mean_listed:.1f} listed traits a call", RELATION_MODEL + suffix,
+    rout = int(round((RELATION_OUT_BASE + RELATION_OUT_PER_TRAIT * mean_listed) * hf))
+    out["relation"].add(f"relation call, {mean_listed:.1f} listed traits a call", relation_model + suffix,
                         n_candidates, rin, rout)
     sf = OT.tokenizer_factor(UNSURE_MODEL)
     n_uns = int(round(UNSURE_SHARE * n_candidates))
@@ -828,6 +847,117 @@ def plan_estimate(*, n_candidates: int, n_scan: int, mean_listed: float, relatio
     out["full_scan"].add(f"full scan, Opus ({OPUS_SHARE_FULL_SCAN:.0%} of pairs)", SECOND_MODEL + suffix,
                          int(round(n_scan_pairs * OPUS_SHARE_FULL_SCAN)), *OVERLAP_TOKENS["opus"])
     return out
+
+
+# --------------------------------------------------------------------------- relation only
+
+def _call_line(rec: Mapping) -> dict:
+    """One relation call's record, short: the attempt, the stop reason, the usage, the answer's length."""
+    return {"model": rec.get("model"), "parse_attempt": rec.get("parse_attempt"), "stop_reason": rec.get("stop_reason"),
+            "usage_raw": rec.get("usage_raw"), "text_chars": len(rec["text"]) if rec.get("text") is not None else None,
+            "parse_errors": rec.get("parse_errors"), "error": rec.get("error")}
+
+
+def relation_rows(states: Mapping[str, CandState], records: Sequence[Mapping]) -> list[dict]:
+    """``relation.jsonl`` of a ``relation_only`` run: one row per candidate that reached stage 3, in key order:
+    the relation model's answer for every listed trait (with Sonnet's, ``second``, where it re-asked an
+    ``unsure``), the final relations, the counts, the shortlist the run's rules build from them (and its
+    length, which drives the overlap cost), the pair flags and notes, and every relation call's record in
+    short (stop reason, usage, the answer's length in characters)."""
+    by_key: dict[str, list] = defaultdict(list)
+    for r in records:
+        if r.get("step") in ("relation", "relation_unsure"):
+            by_key[r["key"]].append(r)
+    out = []
+    for key in sorted(states):
+        st = states[key]
+        if st.relation is None:
+            continue
+        rel = st.relation
+        sl = st.shortlist
+        first = Counter(a["relation"] for a in (rel.get("answers") or {}).values())
+        final = Counter(st.relations.values()) if rel.get("status") == "ok" else Counter()
+        out.append({
+            "key": key, "label": st.cand.label, "stem": st.cand.stem, "gloss": st.cand.gloss,
+            "cut_off": st.cand.cut_off, "model": rel["model"], "rubric": rel["rubric"], "status": rel["status"],
+            "fallback": rel.get("fallback"), "error": rel.get("error"), "order": rel["order"],
+            "listed": [{"stem": x.stem, "cosine": x.cosine, "rank": x.rank, "via": x.via,
+                        "partners": list(x.partners)} for x in st.listed],
+            "answers": rel.get("answers") or {}, "relations": dict(st.relations),
+            "counts": {k: first.get(k, 0) for k in NV.RELATION_ANSWERS},
+            "final_counts": {k: final.get(k, 0) for k in NV.RELATION_ANSWERS},
+            "unsure_reasked": rel.get("unsure_reasked"),
+            "shortlist": list(sl.queue) if sl is not None else None,
+            "shortlist_length": len(sl.queue) if sl is not None else None,
+            "pair_flags": list(sl.pair_flags) if sl is not None else None,
+            "pair_notes": [{k: v for k, v in n.items() if k in ("pair", "kind", "both")} for n in sl.pair_notes]
+            if sl is not None else None,
+            "pair_completion_for": list(sl.pair_completion_for) if sl is not None else None,
+            "renamed_from": dict(st.renamed) if st.renamed else None,
+            "stalled": st.stalled,
+            "calls": [{"step": r["step"], **_call_line(r)} for r in by_key.get(key, [])]})
+    return out
+
+
+def _dist_stats(xs: Sequence[float]) -> Optional[dict]:
+    xs = [float(x) for x in xs if x is not None]
+    if not xs:
+        return None
+    a = np.array(xs)
+    return {"n": len(xs), "mean": round(float(a.mean()), 2), "median": float(np.median(a)),
+            "p90": float(np.percentile(a, 90)), "max": float(a.max()), "min": float(a.min())}
+
+
+def relation_call_stats(records: Sequence[Mapping]) -> dict:
+    """Per (step, model) over every answered relation call of ``records``: calls, stop reasons, and the
+    distribution of uncached input, cache reads and writes, output tokens and the answer's length in
+    characters (a thinking model's thinking is in its output tokens, not in the text)."""
+    groups: dict[str, list] = defaultdict(list)
+    for r in records:
+        if r.get("step") in ("relation", "relation_unsure") and r.get("text") is not None:
+            groups[f"{r['step']}:{r['model']}"].append(r)
+    out = {}
+    for name, recs in sorted(groups.items()):
+        u = [r.get("usage_raw") or {} for r in recs]
+        out[name] = {"n_calls": len(recs), "stop_reasons": dict(Counter(str(r.get("stop_reason")) for r in recs)),
+                     "input_tokens": _dist_stats([x.get("input_tokens") for x in u]),
+                     "cache_read_tokens": _dist_stats([x.get("cache_read_input_tokens") or 0 for x in u]),
+                     "cache_write_tokens": _dist_stats([x.get("cache_creation_input_tokens") or 0 for x in u]),
+                     "output_tokens": _dist_stats([x.get("output_tokens") for x in u]),
+                     "text_chars": _dist_stats([len(r["text"]) for r in recs]),
+                     "output_tokens_per_listed_trait": _dist_stats(
+                         [(x.get("output_tokens") or 0) / max(1, len(r.get("stems") or [])) for x, r in zip(u, recs)]),
+                     "cost_usd": round(sum(record_cost(r) for r in recs), 6)}
+    return out
+
+
+def relation_summary(rows: Sequence[Mapping], records: Sequence[Mapping], usage: MultiModelUsage, *,
+                     skipped: Optional[Mapping] = None, not_reached: Optional[Mapping] = None) -> dict:
+    """``relation_summary.json`` of a ``relation_only`` run: candidates, call outcomes, the relation model's
+    answers (and the final relations after the unsure re-ask), the unsure rate, similar and opposed per
+    candidate, the shortlist lengths, the per-call token figures and the spend."""
+    n_listed = sum(len(r["order"]) for r in rows)
+    first = Counter()
+    final = Counter()
+    for r in rows:
+        first.update({k: v for k, v in r["counts"].items() if v})
+        final.update({k: v for k, v in r["final_counts"].items() if v})
+    ok = [r for r in rows if r["status"] == "ok"]
+    n_answers = sum(first.values())
+    return {
+        "n_candidates_reached": len(rows), "not_reached": dict(not_reached or {}), "skipped": dict(skipped or {}),
+        "call_status": dict(Counter(r["status"] for r in rows)), "n_listed_total": n_listed,
+        "answers": {k: first.get(k, 0) for k in NV.RELATION_ANSWERS},
+        "final": {k: final.get(k, 0) for k in NV.RELATION_ANSWERS},
+        "unsure_rate": round(first.get("unsure", 0) / n_answers, 5) if n_answers else None,
+        "candidates_with_unsure": sum(1 for r in ok if r["counts"].get("unsure")),
+        "similar_per_candidate": _dist_stats([r["counts"]["similar"] for r in ok]),
+        "opposed_per_candidate": _dist_stats([r["counts"]["opposed"] for r in ok]),
+        "similar_plus_opposed_per_candidate": _dist_stats([r["counts"]["similar"] + r["counts"]["opposed"] for r in ok]),
+        "shortlist_length": _dist_stats([r["shortlist_length"] for r in rows if r["shortlist_length"] is not None]),
+        "shortlist_length_total": sum(r["shortlist_length"] or 0 for r in rows),
+        "calls": relation_call_stats(records),
+        "spend_usd": round(usage.total_cost_usd, 6), "usage": usage.as_dict()}
 
 
 # --------------------------------------------------------------------------- the summary
