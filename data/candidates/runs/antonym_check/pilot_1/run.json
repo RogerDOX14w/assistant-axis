@@ -1,0 +1,37 @@
+{
+  "generator": "antonym_check",
+  "run_id": "pilot_1",
+  "git_sha": "d5c241e",
+  "args": {
+    "file": "data/candidates/pools/m3_pilot/antonym_check_pilot_1.jsonl",
+    "via": "gap_registry.py submit"
+  },
+  "n_emitted": 487,
+  "started_at": "2026-10-07T00:00:01+00:00",
+  "finished_at": "2026-10-07T00:00:01+00:00",
+  "confirmed_by": null,
+  "cost_usd": 0,
+  "sessions": [
+    {
+      "session_id": "a9cddef1b492",
+      "started_at": "2026-10-07T00:00:01+00:00",
+      "finished_at": "2026-10-07T00:00:01+00:00",
+      "git_sha": "d5c241e",
+      "args": {
+        "file": "data/candidates/pools/m3_pilot/antonym_check_pilot_1.jsonl",
+        "via": "gap_registry.py submit"
+      },
+      "n_emitted": 487,
+      "confirmed_by": null,
+      "cost_usd": 0,
+      "n_calls": 0,
+      "usage": {
+        "per_model": {},
+        "total_cost_usd": 0,
+        "total_prompt_tokens": 0,
+        "total_completion_tokens": 0,
+        "n_calls": 0
+      }
+    }
+  ]
+}

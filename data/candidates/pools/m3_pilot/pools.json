@@ -1,0 +1,30 @@
+{
+  "antonym_check": {
+    "file": "antonym_check_pilot_1.jsonl",
+    "generator": "antonym_check",
+    "run_id": "pilot_1",
+    "history_candidate_entries": 2130,
+    "distinct_words": 968,
+    "in_corpus": 519,
+    "in_queue_not_corpus": 44,
+    "words": 405,
+    "words_proposed_more_than_once": 185,
+    "rows": 487
+  },
+  "m1_validation": {
+    "file": "m1_validation_pilot_1.jsonl",
+    "generator": "m1_validation",
+    "run_id": "pilot_1",
+    "stratum_rows": 1000,
+    "passed_as_trait": 309,
+    "drawn": 150,
+    "seed": 0,
+    "held_among_drawn": 7
+  },
+  "inputs": {
+    "antonym_check_history": "data/traits/antonym_check_history.jsonl",
+    "m1_validation_results": "data/candidates/filter/m1_validation/results.jsonl",
+    "seed_queue": "data/seed_queue.json",
+    "corpus": "data/traits/instructions"
+  }
+}
