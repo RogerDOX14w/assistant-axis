@@ -72,6 +72,11 @@ the run, and the later passes' user turns), ``responses.jsonl`` (every request a
 ``reports/trait_gap_generation/m3_overlap_marks.md`` (never overwritten).  ``--decode-marks`` reads his
 marks back into ``marks_decoded.json``.
 
+``--corpus-at GIT_SHA`` reads the trait files as committed at that commit instead of the working tree's: the pair
+set is built from the corpus, so a run beside an earlier one made before the corpus grew (``overlap_arms_4``,
+Haiku 5.5 and 4.5, beside ``overlap_arms_3``: ``--corpus-at fc6d542``) needs the earlier corpus to send the same
+pairs and prompts (the ``--baseline-run`` check then passes).  Recorded in ``run.json`` and ``pairs.json``.
+
 ``--dry-run`` builds everything, prints the plan, the estimate and the rendered prompts, and writes and
 sends nothing.  The cap (``--budget-usd``, default $15) is enforced by ``cost.GuardedUsage``; an estimate
 above it is refused.  A paid run refuses uncommitted changes to the platform's files (``--allow-dirty``),
@@ -174,6 +179,11 @@ def parse_args(argv=None):
     ap.add_argument("--vectors-dir", type=Path, default=PS.DEFAULT_VECTORS_DIR)
     ap.add_argument("--labelled-pairs", type=Path, default=CALIBRATION_DIR / "labelled_pairs.json")
     ap.add_argument("--drop-or-merge", type=Path, default=CALIBRATION_DIR / "drop_or_merge.md")
+    ap.add_argument("--corpus-at", default=None, metavar="GIT_SHA",
+                    help="read the trait files (texts and arrangements) as committed at this commit (git archive) "
+                         "instead of the working tree's, so that a run sends the pairs and prompts of a run made "
+                         "before the corpus grew (overlap_arms_4 beside overlap_arms_3: fc6d542); recorded in "
+                         "run.json and pairs.json")
     args = ap.parse_args(argv)
     if args.passes < 1:
         ap.error("--passes must be at least 1")
@@ -188,9 +198,23 @@ def _rel(p: Path) -> str:
         return str(p)
 
 
+def corpus_snapshot(sha: str) -> Path:
+    """The trait files (and the seed queue) as committed at ``sha``, written under a temporary directory
+    removed when the process ends (``novelty_score.corpus_at_commit``); returns the data dir."""
+    import atexit
+    import tempfile
+    from data_analysis.gap_generation.novelty_score import corpus_at_commit
+    dest = Path(tempfile.mkdtemp(prefix=f"overlap_corpus_{sha.split('+', 1)[0]}_"))
+    atexit.register(shutil.rmtree, dest, True)        # a scratch copy, not a deliverable (the sha is recorded)
+    return corpus_at_commit(sha, dest)
+
+
 def build(args):
+    corpus_at = getattr(args, "corpus_at", None)
+    data_dir = corpus_snapshot(corpus_at) if corpus_at else None
     inputs = OT.load_inputs(_REPO_ROOT, metric_config_path=args.metric_config, cache_dir=args.cache_dir,
-                            vectors_dir=args.vectors_dir, labelled_path=args.labelled_pairs, dm_path=args.drop_or_merge)
+                            vectors_dir=args.vectors_dir, labelled_path=args.labelled_pairs, dm_path=args.drop_or_merge,
+                            data_dir=data_dir, corpus_at=corpus_at)
     # the run's rubrics, and rubric A for the marks sheet's scale
     rubrics = OT.load_rubrics(args.rubrics_dir, keys=list(dict.fromkeys(list(args.rubrics) + ["A"])))
     ps = OT.build_pair_set(inputs.corpus, inputs.emb_stems, inputs.Z, inputs.persona, inputs.labelled, inputs.dm_pairs,
@@ -518,11 +542,14 @@ def provenance_inputs(inputs, *, responses: Path = None, baseline_responses: Pat
     """The run's declared inputs; ``extra``: further files read, ``{dep_key: path}`` (round 2's subset and
     the round-1 run's responses)."""
     from assistant_axis.provenance import current_file_input, current_files_input
+    corpus_at = getattr(inputs, "corpus_at", None)
     specs = [current_file_input(dep_key="producer_script", path=Path(__file__)),
-             current_file_input(dep_key="overlap_test_module", path=Path(OT.__file__)),
-             current_files_input(dep_key="trait_files",
-                                 paths=sorted((_REPO_ROOT / "data" / "traits" / "instructions").glob("*.json"))),
-             current_file_input(dep_key="metric_config", path=inputs.paths["metric_config"]),
+             current_file_input(dep_key="overlap_test_module", path=Path(OT.__file__),
+                                extras={"corpus_at": str(corpus_at)} if corpus_at else None)]
+    if not corpus_at:   # with --corpus-at the trait files are a commit's (its sha recorded above), not these
+        specs.append(current_files_input(dep_key="trait_files",
+                                         paths=sorted((_REPO_ROOT / "data" / "traits" / "instructions").glob("*.json"))))
+    specs += [current_file_input(dep_key="metric_config", path=inputs.paths["metric_config"]),
              current_file_input(dep_key="embedding_cache", path=inputs.paths["embedding_cache"],
                                 extras={k: str(v) for k, v in inputs.settings.items()}),
              current_file_input(dep_key="labelled_pairs", path=inputs.paths["labelled_pairs"]),
@@ -885,6 +912,7 @@ def _live(args, argv_list, out_dir: Path, inputs, rubrics, ps, *, est, cap, dirt
                 "prompts": {rb["name"]: rb["text"] for rb in sent.values()},
                 "pair_set": {k: info[k] for k in ("n_calls", "n_pairs", "n_pairs_by_group", "n_calls_by_set")},
                 "calls_from": calls_from, "round1_run": args.round1_run, "round2_run": args.round2_run,
+                "corpus_at": getattr(args, "corpus_at", None),
                 "started_at": run.get("started_at") or utc_now(), "stages": run.get("stages", [])})
     run["sessions"].append({"started_at": utc_now(), "resumed": bool(resuming), "git_sha": git_sha(),
                             "argv": argv_list})

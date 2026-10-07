@@ -12,6 +12,7 @@ from assistant_axis.tests.fake_anthropic import FakeAsyncAnthropic, make_respons
 from data_analysis.gap_generation import gap_registry, traithood_filter
 
 HAIKU = "claude-haiku-4-5-20251001"
+REPO = Path(__file__).resolve().parents[2]
 #: These tests cover the single-call classifier; since coding_plan_split.md the CLI's default
 #: pipeline is the split filter (tested in assistant_axis/tests/test_gapgen_split_runner.py).
 SINGLE = ["--pipeline", "single"]
@@ -880,6 +881,64 @@ def test_overlap_end_to_end_with_a_fake_client(overlap_env):
     key = json.loads((out / "marks_key.json").read_text())
     assert sheet.count("Your answer (") == len(key["items"]) > 0
     assert "opus" not in sheet.lower() and "haiku" not in sheet.lower()
+
+
+def test_overlap_corpus_at_reads_a_commits_trait_files(overlap_env, monkeypatch, tmp_path):
+    """--corpus-at (coding_plan_haiku55.md, comparison C): the pair set is built from the trait files as committed
+    at the given commit (overlap_arms_3's fc6d542: 663 files), recorded in run.json and the provenance; Haiku 5.5
+    and Haiku 4.5 run side by side, 5.5 without temperature."""
+    e = overlap_env
+    OT, cli = e["OT"], e["cli"]
+    seen = {}
+
+    def capture(*a, **k):
+        d = k.get("data_dir")
+        seen.update(data_dir=d, corpus_at=k.get("corpus_at"),
+                    n_files=len(list((Path(d) / "traits" / "instructions").glob("*.json"))) if d else None)
+        inp = _overlap_inputs(tmp_path)
+        inp.corpus_at = k.get("corpus_at")
+        return inp
+    monkeypatch.setattr(OT, "load_inputs", capture)
+    e["single_form"]()
+    e["client"]["responder"] = e["T"].single_answer(OT.load_rubrics(keys=("A",)))
+    args = e["base"] + ["--rubrics", "A", "--models", OT.HAIKU55, OT.HAIKU, "--passes", "2", "--corpus-at", "fc6d542"]
+    assert cli.main(args + ["--dry-run"]) == 0
+    assert seen["corpus_at"] == "fc6d542" and seen["n_files"] == 663
+    assert cli.main(args) == 0
+    run = json.loads((e["out"] / "run.json").read_text())
+    assert run["corpus_at"] == "fc6d542" and run["models"] == [OT.HAIKU55, OT.HAIKU] and run["exit_code"] == 0
+    prov = json.loads((e["out"] / "pairs.json").read_text())["_provenance"]
+    assert "fc6d542" in json.dumps(prov) and "trait_files" not in json.dumps(prov)
+    sent = e["client"]["client"].calls
+    assert {k["model"] for k in sent} == {OT.HAIKU55, OT.HAIKU}
+    assert all("temperature" not in k for k in sent if k["model"] == OT.HAIKU55)
+    assert all(k["temperature"] == 0.0 for k in sent if k["model"] == OT.HAIKU)
+    # without the flag the working tree's trait files are read (no data_dir is passed)
+    seen.clear()
+    assert cli.main(e["base"] + ["--run-id", "t2", "--dry-run"]) == 0
+    assert seen["data_dir"] is None and seen["corpus_at"] is None
+
+
+def test_overlap_load_inputs_reads_the_corpus_from_data_dir(monkeypatch, tmp_path):
+    from assistant_axis.gapgen import contrast as CT
+    from assistant_axis.gapgen import overlap_test as OT
+
+    class Stop(Exception):
+        pass
+    got = {}
+
+    def fake(data_dir):
+        got["dir"] = Path(data_dir)
+        raise Stop
+    monkeypatch.setattr(CT, "load_corpus_texts", fake)
+    kw = dict(metric_config_path=REPO / "data" / "candidates" / "metric_config.json", cache_dir=tmp_path,
+              vectors_dir=tmp_path, labelled_path=tmp_path / "l.json", dm_path=tmp_path / "d.md")
+    with pytest.raises(Stop):
+        OT.load_inputs(REPO, data_dir=tmp_path / "snap" / "data", **kw)
+    assert got["dir"] == tmp_path / "snap" / "data"
+    with pytest.raises(Stop):
+        OT.load_inputs(REPO, **kw)
+    assert got["dir"] == REPO / "data"
 
 
 def test_overlap_a_second_run_leaves_the_marks_sheet_alone(overlap_env):

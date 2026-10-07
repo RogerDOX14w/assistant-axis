@@ -3763,13 +3763,18 @@ class Inputs:
     partner: dict
     settings: dict
     paths: dict
+    #: The git commit whose trait files were read (``None``: the working tree's).
+    corpus_at: Optional[str] = None
 
 
 def load_inputs(repo_root: Path, *, metric_config_path: Path, cache_dir: Path, vectors_dir: Path,
-                labelled_path: Path, dm_path: Path, persona_cache_dir: Optional[Path] = None) -> Inputs:
+                labelled_path: Path, dm_path: Path, persona_cache_dir: Optional[Path] = None,
+                data_dir: Optional[Path] = None, corpus_at: Optional[str] = None) -> Inputs:
     """The corpus, its rows in the covered space from the cached embeddings (nothing is embedded: a
     text missing from the cache is an error), the persona vectors of the traits, the labelled pairs,
-    the drop-or-merge pairs and the recorded clean-pair partners."""
+    the drop-or-merge pairs and the recorded clean-pair partners.  The trait files (texts and
+    arrangements) are read from ``data_dir`` (default ``repo_root / "data"``): a snapshot of an earlier
+    commit, ``corpus_at``, lets a run send the pairs and prompts of a run made before the corpus grew."""
     from assistant_axis.arrangements import load_corpus_arrangements
 
     from . import contrast as CT
@@ -3789,7 +3794,8 @@ def load_inputs(repo_root: Path, *, metric_config_path: Path, cache_dir: Path, v
     live = cfg.live_model
     if live["arm"] != "openai":
         raise ValueError(f"live model arm {live['arm']!r}: this test reads the OpenAI embedding cache")
-    corpus = CT.load_corpus_texts(repo_root / "data")
+    corpus_dir = Path(data_dir) if data_dir is not None else repo_root / "data"
+    corpus = CT.load_corpus_texts(corpus_dir)
     stems = sorted(corpus)
     texts = [represent(corpus[s]["label"], corpus[s]["description"], rep) for s in stems]
     embedder = EM.OpenAIEmbedder(live["model_id"])
@@ -3809,7 +3815,7 @@ def load_inputs(repo_root: Path, *, metric_config_path: Path, cache_dir: Path, v
     lp = LB.load(labelled_path)
     dm_pairs = parse_drop_or_merge(Path(dm_path).read_text(encoding="utf-8"))
     partner = {}
-    for s, rec in load_corpus_arrangements(repo_root / "data", "traits").items():
+    for s, rec in load_corpus_arrangements(corpus_dir, "traits").items():
         for a in rec.arrangements:
             if a.kind == "pair" and len(a.members) == 2 and s in a.members:
                 partner[s] = a.members[0] if a.members[1] == s else a.members[1]
@@ -3824,8 +3830,11 @@ def load_inputs(repo_root: Path, *, metric_config_path: Path, cache_dir: Path, v
              "labelled_pairs": Path(labelled_path), "drop_or_merge": Path(dm_path),
              "persona_cache": Path(persona_cache_dir or repo_root / "data" / "candidates" / "cache")
              / f"persona_s{ps['slot']}_l{ps['layer']}.npz"}
+    if corpus_at:
+        settings["corpus_at"] = corpus_at
     return Inputs(corpus=corpus, emb_stems=stems, Z=Z, persona=persona, persona_info=persona_info,
-                  labelled=list(lp.pairs), dm_pairs=dm_pairs, partner=partner, settings=settings, paths=paths)
+                  labelled=list(lp.pairs), dm_pairs=dm_pairs, partner=partner, settings=settings, paths=paths,
+                  corpus_at=corpus_at)
 
 
 # --------------------------------------------------------------------------- Roger's marks
