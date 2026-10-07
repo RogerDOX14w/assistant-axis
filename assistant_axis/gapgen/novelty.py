@@ -60,11 +60,12 @@ OVERLAP_RUBRIC = "A"
 HAIKU, SONNET, OPUS = OT.HAIKU, OT.SONNET, OT.OPUS
 #: Arrangement kinds whose members are mutually opposed and expand each other (pair and simplexes).
 EXPANDING_FIXED = ("pair", "triangle", "tetrahedron")
-#: How the candidate is embedded: ``label_gloss`` (the brief: "the candidate's label plus gloss", the
-#: corpus side's form, cut to the covered representation) or ``gloss_w14`` (metric_config.json's
-#: ``covered.query_form``: the gloss alone, no label, cut to 14 words, the form M2 measured recall on).
-QUERY_FORMS: tuple[str, ...] = ("label_gloss", "gloss_w14")
-DEFAULT_QUERY_FORM = "label_gloss"
+#: How the candidate is embedded: ``gloss_w14`` (metric_config.json's ``covered.query_form``: the gloss
+#: alone, no label, cut to 14 words, the form M2 measured recall on; the default since 2026-10-07, Fable on
+#: Roger's go: the brief's "label plus gloss" was a slip) or ``label_gloss`` (``label: gloss`` cut to the
+#: covered representation, the corpus side's form; kept for comparison).
+QUERY_FORMS: tuple[str, ...] = ("gloss_w14", "label_gloss")
+DEFAULT_QUERY_FORM = "gloss_w14"
 
 
 def is_expanding(kind: str) -> bool:

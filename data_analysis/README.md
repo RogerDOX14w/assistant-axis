@@ -695,8 +695,9 @@ filter verdict is `trait` (with a gloss; held rows only with `--include-held`, r
 another run decided only with `--rescore`) and, per candidate: the exact-label
 check (corpus stem, any seed-queue stem or label, a `renamed_from`; covered, no
 call); the 10 nearest corpus traits in the covered setting of `metric_config.json`
-(the candidate embedded as `label: gloss` cut to 20 words, `--query-form gloss_w14`
-for the config's gloss-only form; the 8 canary texts re-embedded first) plus the
+(the candidate's gloss alone, cut to 14 words: the config's `query_form`, on which M2
+measured recall; `--query-form label_gloss` embeds `label: gloss` instead; the 8 canary
+texts re-embedded first) plus the
 members of their pairs, triangles and tetrahedra; the relation call (Haiku 4.5,
 `rubrics/relation.md`, uncached; `unsure` asked again of Sonnet 5.5); the shortlist
 (the partners of opposed traits first, then the similar ones, by cosine; an opposed

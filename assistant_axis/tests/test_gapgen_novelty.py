@@ -136,10 +136,14 @@ class TestRetrievalAndExpansion:
         assert [x.stem for x in listed] == ["delta", "epsilon"] and all(x.via == "retrieved" for x in listed)
 
     def test_query_text_forms(self):
-        lg = NV.query_text("world-shaping", "This means treating every task as a lever on how the world goes.")
+        from assistant_axis.gapgen.retrieval import query_text as m2_query
+        gloss = "This means treating every task as a lever on how the world goes, near and far, today and later."
+        lg = NV.query_text("world-shaping", gloss, query_form="label_gloss")
         assert lg.startswith("world-shaping: This means")
-        g = NV.query_text("x", "This means treating every task as a lever on how the world goes.", query_form="gloss_w14")
-        assert not g.startswith("x:")
+        # the default is metric_config.json's form, the one M2 measured recall on (2026-10-07)
+        assert NV.DEFAULT_QUERY_FORM == "gloss_w14"
+        g = NV.query_text("x", gloss)
+        assert g == m2_query(gloss) and not g.startswith("x:") and len(g.split()) <= 15
         with pytest.raises(ValueError):
             NV.query_text("x", "y", query_form="nope")
 

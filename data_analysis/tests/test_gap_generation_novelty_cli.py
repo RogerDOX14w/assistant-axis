@@ -124,7 +124,7 @@ def test_end_to_end_writes_the_registry_once_and_every_record(env):
     summary = json.loads((d / "summary.json").read_text())
     assert "_provenance" in summary and summary["result"]["by_decision"] == {"covered": 3, "new": 2}
     run = json.loads((d / "run.json").read_text())
-    assert run["rubrics"]["relation"]["version"] == 1 and run["settings"]["query_form"] == "label_gloss"
+    assert run["rubrics"]["relation"]["version"] == 1 and run["settings"]["query_form"] == "gloss_w14"
     assert run["canary"]["model"] == "text-embedding-3-large" and run["status"] == 0
     readings = [json.loads(x) for x in (d / "readings.jsonl").read_text().splitlines()]
     assert {r["key"] for r in readings} == {"alphoid#1", "deltaish#1"} and all("cosine" in r for r in readings)

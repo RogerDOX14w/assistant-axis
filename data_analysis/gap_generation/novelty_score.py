@@ -312,8 +312,9 @@ def _common_args(ap: argparse.ArgumentParser) -> None:
     ap.add_argument("--cache-dir", type=Path, default=paths.EMBEDDING_CACHE_DIR)
     ap.add_argument("--rubrics-dir", type=Path, default=None)
     ap.add_argument("--query-form", choices=NV.QUERY_FORMS, default=NV.DEFAULT_QUERY_FORM,
-                    help="how a candidate is embedded: label_gloss (default; the brief: label plus gloss, in the covered "
-                         "representation) or gloss_w14 (metric_config.json's covered.query_form: the gloss alone, 14 words)")
+                    help="how a candidate is embedded: gloss_w14 (default; metric_config.json's covered.query_form: the "
+                         "gloss alone, 14 words, the form M2 measured recall on) or label_gloss (label: gloss, in the "
+                         "covered representation)")
     ap.add_argument("--transport", choices=("auto", "live", "batches"), default="auto",
                     help=f"auto (default) sends fewer than {AUTO_BATCH_FROM} candidates live, more through the Message "
                          "Batches API")
