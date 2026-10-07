@@ -50,9 +50,13 @@ OVERLAP = {("alphoid", "alpha"): 4, ("deltaish", "epsilon"): 1}
 
 @pytest.fixture
 def env(tmp_path, monkeypatch):
+    return make_env(tmp_path, monkeypatch)
+
+
+def make_env(tmp_path, monkeypatch, *, rows=ROWS, renamed=None, relations=RELATIONS, overlap=OVERLAP):
     import anthropic
     import dotenv
-    data = write_corpus(tmp_path / "data")
+    data = write_corpus(tmp_path / "data", renamed=renamed)
     (data / "seed_queue.json").write_text(json.dumps({"entries": [
         {"stem": "queued", "label": "queued", "status": "candidate", "entity_type": "trait"}]}), encoding="utf-8")
     cand_dir = tmp_path / "candidates"
@@ -60,14 +64,14 @@ def env(tmp_path, monkeypatch):
     cfg = tmp_path / "metric_config.json"
     cfg.write_text(json.dumps({"result": CONFIG}), encoding="utf-8")
     reg_path = cand_dir / "registry.jsonl"
-    rep = submit_candidates([Candidate(surface=s, generator="toy", run_id="r1") for s, *_ in ROWS], registry_path=reg_path)
+    rep = submit_candidates([Candidate(surface=s, generator="toy", run_id="r1") for s, *_ in rows], registry_path=reg_path)
     reg = Registry(reg_path)
     upd = {}
-    for (s, gloss, verdict, a, holding), key in zip(ROWS, rep.keys):
+    for (s, gloss, verdict, a, holding), key in zip(rows, rep.keys):
         upd[key] = {"filter": {"verdict": verdict, "outcome": verdict, "alignment": a, "region": "moral_stance"},
                     "gloss": gloss if verdict == "trait" else None, "holding": holding}
     reg.update_many(upd)
-    holder = {"responder": responder_for(RELATIONS, OVERLAP)}
+    holder = {"responder": responder_for(relations, overlap)}
 
     def factory(*a, **k):
         holder["client"] = FakeAsyncAnthropic(holder["responder"])
@@ -200,7 +204,9 @@ def test_refusals(env, monkeypatch, capsys):
 def test_full_scan_and_compare(env, capsys):
     assert score(env) == 0
     before = env["reg"].path.read_text()
-    assert cli.main(["full-scan", "--batch-id", "scan1", "--from-batch", "m3t", "--sample", "5", *env["base"]]) == 0
+    # --corpus-at current: the toy corpus is not in git (a full scan reads its source's committed corpus by default)
+    assert cli.main(["full-scan", "--batch-id", "scan1", "--from-batch", "m3t", "--sample", "5", "--corpus-at", "current",
+                     *env["base"]]) == 0
     assert env["reg"].path.read_text() == before                                  # no registry writes
     res = [json.loads(x) for x in (out(env, "scan1") / "results.jsonl").read_text().splitlines()]
     assert {r["key"] for r in res} == {"alphoid#1", "deltaish#1", "lambdaish#1"}  # those that reached the relation call
@@ -252,6 +258,122 @@ def test_render_a_registry_candidate(env, capsys):
                      "--metric-config", str(env["tmp"] / "metric_config.json"), "--cache-dir", str(env["tmp"] / "cache")]) == 0
     o = capsys.readouterr().out
     assert "=== relation call" in o and '{"candidate": {"label": "alphoid"' in o and '"other": {"label":' in o
+
+
+# --------------------------------------------------------------------------- round 2: --redecide, full-scan --keys
+
+def redecide(env, batch, *extra):
+    return cli.main(["score", "--redecide", "--from-batch", "m3t", "--batch-id", batch, "--corpus-at", "current",
+                     *env["base"], *extra])
+
+
+def calls_made(env):
+    c = env["holder"].get("client")
+    return list(c.calls) if c is not None else []
+
+
+def test_score_selection_is_checked(env, capsys):
+    assert cli.main(["score", "--batch-id", "x", *env["base"]]) == 2                     # no selection
+    assert cli.main(["score", "--batch-id", "x", "--redecide", *env["base"]]) == 2       # no source
+    assert cli.main(["score", "--batch-id", "x", "--from-batch", "m3t", "--run", "toy/r1", *env["base"]]) == 2
+    assert "REFUSED" in capsys.readouterr().err
+
+
+def test_redecide_under_the_same_rules_reproduces_the_run_without_a_call(env, capsys):
+    assert score(env, "--rules", "1") == 0
+    before = env["reg"].path.read_text()
+    env["holder"].pop("client", None)
+    assert redecide(env, "m3t_same", "--rules", "1") == 0
+    assert calls_made(env) == []                                                       # every answer was on record
+    assert env["reg"].path.read_text() == before                                       # the registry is not written
+    a = {r["key"]: r["novelty"] for r in cli._read_jsonl(out(env) / "results.jsonl")}
+    b = {r["key"]: r["novelty"] for r in cli._read_jsonl(out(env, "m3t_same") / "results.jsonl")}
+    assert set(a) == set(b)
+    for k in a:
+        assert all(get(a[k]) == get(b[k]) for get in cli._SAME_FIELDS.values()), k
+        assert b[k]["redecided_from"] == "m3t"
+    dc = json.loads((out(env, "m3t_same") / "decision_changes.json").read_text())["result"]
+    assert dc["reproduction"]["identical"] == dc["reproduction"]["n"] == 5 and dc["rows"] == []
+    assert dc["final_check"]["identical"] == 5 and dc["new_calls"]["n"] == 0
+    run = json.loads((out(env, "m3t_same") / "run.json").read_text())
+    assert run["replay_from"] == ["m3t"] and run["settings"]["relation_seed"] == "m3t"
+    assert run["redecide"]["reproduction"]["identical"] == 5
+    assert not (out(env, "m3t_same") / "responses.jsonl").exists() or \
+        (out(env, "m3t_same") / "responses.jsonl").read_text() == ""
+
+
+RENAMED_ROWS = ROWS + [("old gamma", "This means being gamma gamma gamma in every way.", "trait", 0, None)]
+
+
+def test_redecide_under_rules_2_sends_only_the_calls_a_rule_needs(tmp_path, monkeypatch, capsys):
+    env = make_env(tmp_path, monkeypatch, rows=RENAMED_ROWS, renamed={"gamma": "old_gamma"},
+                   overlap=OVERLAP | {("old gamma", "gamma"): 4})
+    assert score(env, "--rules", "1") == 0
+    nv = env["reg"].fold()["old_gamma#1"]["novelty"]
+    assert nv["reason"] == "exact_label" and nv["exact_label"]["match"] == "renamed_from"
+    capsys.readouterr()
+    env["holder"].pop("client", None)
+    assert redecide(env, "m3t_r2", "--dry-run") == 0
+    o = capsys.readouterr().out
+    assert "6 of 6 rows identical [OK]" in o and '"relation:claude-haiku-4-5-20251001": 1' in o and "old_gamma#1" in o
+    assert calls_made(env) == [] and not out(env, "m3t_r2").exists()                  # the dry run sends nothing
+    assert redecide(env, "m3t_r2") == 0
+    sent = calls_made(env)
+    targets = {json.loads(user_text(k)).get("candidate", json.loads(user_text(k)).get("target", {})).get("label") for k in sent}
+    assert sent and targets == {"old gamma"}                                           # only the renamed row's calls
+    res = {r["key"]: r["novelty"] for r in cli._read_jsonl(out(env, "m3t_r2") / "results.jsonl")}
+    g = res["old_gamma#1"]
+    assert g["reason"] == "overlap" and g["renamed_from"]["current"] == "gamma" and g["decision"] == "covered"
+    assert g["covered_by"] == "gamma" and g["readings"][0]["stem"] == "gamma" and g["rules"]["version"] == 2
+    recs = cli._read_jsonl(out(env, "m3t_r2") / "responses.jsonl")
+    assert recs and {r["key"] for r in recs} == {"old_gamma#1"} and all(r["batch_id"] == "m3t_r2" for r in recs)
+    dc = json.loads((out(env, "m3t_r2") / "decision_changes.json").read_text())["result"]
+    assert dc["reproduction"]["identical"] == 6 and dc["final_check"]["identical"] == 6
+    assert [r["key"] for r in dc["renamed_from"]] == ["old_gamma#1"] and dc["new_calls"]["n"] == len(recs)
+    row = next(r for r in dc["rows"] if r["key"] == "old_gamma#1")                    # covered by gamma both times,
+    assert row["source"]["reason"] == "exact_label" and not row["decision_changed"]    # now through the overlap call
+    assert row["now"]["reason"] == "overlap"
+    assert [s["step"].split(" (")[0] for s in row["steps"] if "from" in s] == ["decision 15"]
+    md = (out(env, "m3t_r2") / "decision_changes.md").read_text()
+    assert "## Checks" in md and "renamed_from rows, now judged (decision 15): 1" in md
+    dmd = (out(env, "m3t_r2") / "decisions.md").read_text()
+    assert "## Covered, flagged" in dmd and "## Both ends similar" in dmd and "rule set 2" in dmd
+    usage = json.loads((out(env, "m3t_r2") / "usage.json").read_text())
+    assert usage["total_cost_usd"] > 0 and dc["new_calls"]["cost_usd"] > 0
+    # a re-decided run can be re-decided in turn: its records and its source's are both replayed
+    env["holder"].pop("client", None)
+    assert cli.main(["score", "--redecide", "--from-batch", "m3t_r2", "--batch-id", "m3t_r3", "--corpus-at", "current",
+                     *env["base"]]) == 0
+    assert calls_made(env) == []
+    assert json.loads((out(env, "m3t_r3") / "run.json").read_text())["replay_from"] == ["m3t", "m3t_r2"]
+
+
+def test_full_scan_takes_keys(env):
+    assert score(env) == 0
+    assert cli.main(["full-scan", "--batch-id", "scan_k", "--from-batch", "m3t", "--keys", "deltaish#1", "alpha#1",
+                     "--corpus-at", "current", *env["base"]]) == 0
+    res = cli._read_jsonl(out(env, "scan_k") / "results.jsonl")
+    assert {r["key"] for r in res} == {"deltaish#1", "alpha#1"}                        # alpha was an exact label: scanned too
+    for r in res:
+        assert {p["stem"] for p in r["novelty"]["scan"]} == {x["stem"] for x in r["novelty"]["listed"]}
+        assert all("cuts" in p and "below_floor" in p for p in r["novelty"]["scan"])
+    run = json.loads((out(env, "scan_k") / "run.json").read_text())
+    assert run["full_scan"]["keys"] == ["deltaish#1", "alpha#1"] and run["full_scan"]["sample"] is None
+    summary = json.loads((out(env, "scan_k") / "summary.json").read_text())["result"]
+    assert summary["skipped"]["keys_not_walked_in_main"] == 1
+    with pytest.raises(SystemExit):
+        cli.main(["full-scan", "--batch-id", "scan_x", "--from-batch", "m3t", "--keys", "nope#1", "--corpus-at", "current",
+                  *env["base"]])
+
+
+def test_the_corpus_snapshot_of_a_commit():
+    """The pilot's commit (53b3d07): its 663 trait files and its seed queue, nothing else of the tree."""
+    import tempfile
+    with tempfile.TemporaryDirectory() as d:
+        dd = cli.corpus_at_commit("53b3d07+dirty", Path(d))
+        assert len(list((dd / "traits" / "instructions").glob("*.json"))) == 663
+        assert (dd / "seed_queue.json").exists() and sorted(p.name for p in Path(d).iterdir()) == ["data"]
+        assert sorted(p.name for p in dd.iterdir()) == ["seed_queue.json", "traits"]
 
 
 # --------------------------------------------------------------------------- the pilot's pools, on the real files

@@ -793,9 +793,43 @@ cache on the rubric).  Writes `data/candidates/novelty/<batch>/`: `responses.jso
 `results.jsonl`, `readings.jsonl` (every pair judged beside its cosine),
 `summary.json`, `decisions.md`, `usage.json`, `run.json`, `run.log`.
 `full-scan --from-batch B` reads every listed trait of a sample of B's candidates
-(no relation call, no early exit; never writes the registry); `compare` says what
-the shortlist missed and what early exit skipped.  `gap_registry.py synonyms` is
-the rename shortlist from the covered rows.
+(or of `--keys K ...`; no relation call, no early exit; never writes the registry);
+`compare` says what the shortlist missed and what early exit skipped.
+`gap_registry.py synonyms` is the rename shortlist from the covered rows.
+
+*Rule set 2 (round 2, 2026-10-07; the default, `--rules 2`).*  The above is rule set 1
+(the pilot's, `--rules 1`).  Rule set 2 adds decisions 12-15 of
+[`coding_plan_platform.md`](../reports/trait_gap_generation/coding_plan_platform.md)'s
+M3 section and the cosine floor: a Sonnet reading one below the cut-off that Opus reads
+at or above it **covers**, flagged `sonnet_below_opus_at` (the walk stops there); when the
+relation call marks both members of a recorded pair `similar` (or every corner of a
+triangle or simplex), neither is judged or may cover, and the row gets `pair_notes` and the
+`both_similar` flag; `pair_flags` stay on the row but no longer make it `grey` (`grey` is now
+`unparsed` only); the exact-label check covers only on a corpus or queue stem, compared
+separator-blind (`anti_feminist` = `antifeminist`), and a `renamed_from` match is judged like
+any other candidate with the current trait at the head of the shortlist; listed traits
+whose cosine is below `--cosine-floor` (default 0.25, `none` to turn off) are not judged,
+except an opposed trait's partner and a `renamed_from` match (`n_below_floor`,
+`below_floor` on the row).  The review queue (`review-list`, `decisions.md`'s "Covered,
+flagged" and "Both ends similar" sections) is the covered-and-flagged rows, the
+both-similar notes and the `grey` rows.  The rules and the floor are recorded in
+`run.json` and in every block (`rules`).
+
+*Re-deciding a run on its records: `score --redecide --from-batch B --batch-id B2`.*
+B's candidates, B's corpus (the trait files and seed queue as committed at B's
+`git_sha`, extracted to a temporary directory; `--corpus-at current` reads `--data-dir`),
+B's relation-call order (the seed is B's id) and every answer B has on record replayed
+instead of sent; a call a rule now needs that B never made is sent live and recorded in
+B2's `responses.jsonl` (B2's `run.json` names the runs it replays in `replay_from`, so B2
+can be re-decided in turn).  The registry is not written.  Besides `score`'s files it
+writes `decision_changes.md` / `.json`: every row whose decision, covering trait or reason
+differs from B's, attributed by replaying the rules one decision at a time (rule set 1,
+then decisions 14, 12, 13, 15 and the floor, each step offline on the records), with two
+checks: B's own rules on B's records reproduce B row for row (decision, covering trait,
+flags, every pair judged with both readings, shortlist, listed traits with cosines), and
+the last step reproduces B2.  `--dry-run` does the replay offline and prints the
+reproduction check, the calls not on record and their estimate.  A full scan reads B's
+committed corpus as well (`--corpus-at`).
 
 ```bash
 uv run python data_analysis/gap_generation/novelty_score.py pools                     # the pilot's pools (free)
@@ -807,6 +841,11 @@ uv run python data_analysis/gap_generation/novelty_score.py full-scan --batch-id
     --from-batch m3_pilot_1 --sample 100 --sample-seed 0 --transport live --budget-usd 8 [--dry-run]
 uv run python data_analysis/gap_generation/novelty_score.py compare --scan-batch m3_pilot_1_scan --main-batch m3_pilot_1
 uv run python data_analysis/gap_generation/gap_registry.py synonyms [--stem X] [--run-id m3_pilot_1]
+# round 2: the pilot under rule set 2 on its records, and chosen candidates scanned in full
+uv run python data_analysis/gap_generation/novelty_score.py score --redecide --from-batch m3_pilot_1 \
+    --batch-id m3_pilot_1_r2 --cosine-floor 0.25 --transport live --budget-usd 2 [--dry-run]
+uv run python data_analysis/gap_generation/novelty_score.py full-scan --from-batch m3_pilot_1 \
+    --keys youthful#1 trendsetting#1 --batch-id m3_pilot_1_scan_missed --transport live --budget-usd 2
 ```
 
 **Corpus regions after a corpus change.**  `gap_registry.py corpus-regions`

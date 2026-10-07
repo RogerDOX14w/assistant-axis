@@ -21,10 +21,21 @@ Commands:
   out unless ``--include-held``; rows already decided by another run unless ``--rescore``.
   ``--embed-only`` embeds the candidates (charged to the run) and stops before any LLM call, so that
   ``render --key`` or the dry run can show a real candidate's prompt first; ``--resume`` then goes on.
-* ``full-scan --batch-id S --from-batch B [--sample 100 --sample-seed 0]``: the pilot's check on the shortlist:
-  the overlap call on every listed trait of a seeded sample of B's candidates (those that reached the relation
-  call), no relation call, no shortlist, no early exit, Opus on the pairs the rule sends it; the walk is replayed
-  on the readings afterwards.  Writes only its own run directory, never the registry.
+* ``score --redecide --from-batch B --batch-id B2``: re-run the decision rules on run B's records: B's
+  candidates, its corpus (the trait files and seed queue as committed at B's ``git_sha``, unless
+  ``--corpus-at current``), its relation-call order, and every answer B has on record replayed instead of sent;
+  a call that a rule now needs and B never made (the ``renamed_from`` candidates of decision 15, say) is sent
+  live and recorded in B2's ``responses.jsonl``.  Writes B2's run directory as ``score`` does (not the registry),
+  plus ``decision_changes.md`` / ``.json``: every row whose decision or covering trait differs from B's, with
+  the rule that changed it (the rules are added one decision at a time, each step replayed on the records), and
+  the check that rule set 1 on the same records reproduces B exactly.  ``--dry-run`` replays offline and prints
+  the calls not on record and their estimate.
+* ``full-scan --batch-id S --from-batch B [--sample 100 --sample-seed 0 | --keys K ...]``: the pilot's check on
+  the shortlist: the overlap call on every listed trait of a seeded sample of B's candidates (those that reached
+  the relation call), or of the named registry keys, no relation call, no shortlist, no early exit, Opus on the
+  pairs the rule sends it; the walk is replayed on the readings afterwards under the run's rules (listed traits
+  below the floor are read but left out of the replayed walk).  The corpus is B's (``--corpus-at``).  Writes only
+  its own run directory, never the registry.
 * ``compare --scan-batch S --main-batch B``: what the shortlist missed (pairs the full scan put at the cut-off or
   above that the relation call did not mark similar), what early exit skipped, and the decisions side by side:
   ``<S>/comparison.json`` and ``comparison.md``.  No call.
@@ -36,6 +47,10 @@ Commands:
   models receive them (from cached embeddings only; no call).  ``--stand-in`` takes a corpus trait, its M1
   gloss from the validation run and its cached M2 query embedding, with its own trait hidden.
 
+Rules: ``--rules 2`` (the default from 2026-10-07: decisions 12-15 of ``coding_plan_platform.md``'s M3 section
+and the cosine floor) or ``--rules 1`` (the pilot's); ``--cosine-floor F`` (default: the rule set's, 0.25 for
+rule set 2, none for 1; ``none`` turns it off).  Recorded in ``run.json`` and in every row's block.
+
 Cost: ``score`` and ``full-scan`` print the estimate by stage (``n_calls x (in, out) tokens at model rates``),
 ``--budget-usd`` is the hard cap (default $5; an estimate over it is refused), and a budget or estimate over $20
 needs ``--confirm-expensive`` and ``--confirmed-by``.  ``--dry-run`` prints the plan, the estimate and the first
@@ -46,11 +61,17 @@ candidates live and more through the Message Batches API (half price, the 1-hour
 from __future__ import annotations
 
 import argparse
+import atexit
+import io
 import json
 import logging
+import os
 import random
 import shutil
+import subprocess
 import sys
+import tarfile
+import tempfile
 from collections import Counter
 from pathlib import Path
 from typing import Optional
@@ -69,7 +90,7 @@ from assistant_axis.gapgen.cost import CostRefused, Estimate, GuardedUsage, conf
 from assistant_axis.gapgen.registry import Registry, utc_now, utc_stamp  # noqa: E402
 from assistant_axis.gapgen.runs import PLATFORM_PATHS, configure_logging, git_sha, platform_dirty_files, \
     log_formatter  # noqa: E402
-from assistant_axis.judge_pricing import BudgetExceededError, MultiModelUsage  # noqa: E402
+from assistant_axis.judge_pricing import BATCH_SUFFIX, BudgetExceededError, MultiModelUsage  # noqa: E402
 
 logger = logging.getLogger("novelty_score")
 
@@ -182,6 +203,117 @@ def label_sets_for(data_dir: Path) -> NV.LabelSets:
     return NV.label_sets(NV.load_trait_corpus(data_dir), queue)
 
 
+# --------------------------------------------------------------------------- rules, sources, corpus snapshots
+
+def parse_floor(value: str):
+    """``--cosine-floor``: a number, or ``none`` for no floor."""
+    if value.strip().lower() in ("none", "off"):
+        return "none"
+    try:
+        return float(value)
+    except ValueError as exc:
+        raise argparse.ArgumentTypeError(f"--cosine-floor takes a number or 'none', not {value!r}") from exc
+
+
+def resolve_rules(args) -> NV.Rules:
+    """The rule set of ``--rules`` with ``--cosine-floor`` applied (default: the set's own floor)."""
+    rules = NV.RULES[int(getattr(args, "rules", NV.DEFAULT_RULES.version))]
+    floor = getattr(args, "cosine_floor", None)
+    if floor == "none":
+        return rules.with_floor(None)
+    if floor is not None:
+        return rules.with_floor(floor)
+    return rules
+
+
+def _read_jsonl(p: Path) -> list[dict]:
+    return [json.loads(x) for x in p.read_text(encoding="utf-8").splitlines() if x.strip()] if p.exists() else []
+
+
+def load_source(batch_id: str, out_root: Optional[Path], *, with_records: bool = False) -> dict:
+    """A finished run's directory: ``{"batch_id", "dir", "run", "results", "records", "replay_from"}``.
+    ``records`` (with ``with_records``) are its responses and those of every run it replayed in turn (a
+    re-decided run keeps only its own new calls, and names its sources in ``run.json``'s ``replay_from``)."""
+    d = paths.novelty_dir(batch_id, candidates_dir=out_root)
+    if not (d / "results.jsonl").exists():
+        raise SystemExit(f"{d / 'results.jsonl'} not found: run score --batch-id {batch_id} first")
+    run = json.loads((d / "run.json").read_text(encoding="utf-8")) if (d / "run.json").exists() else {}
+    replay_from = list(run.get("replay_from") or [])
+    records: list[dict] = []
+    if with_records:
+        for b in replay_from:
+            records += _read_jsonl(paths.novelty_dir(b, candidates_dir=out_root) / "responses.jsonl")
+        records += _read_jsonl(d / "responses.jsonl")
+    return {"batch_id": batch_id, "dir": d, "run": run, "results": _read_jsonl(d / "results.jsonl"),
+            "records": records, "replay_from": replay_from + [batch_id]}
+
+
+#: The corpus files a run reads: the trait files (labels, descriptions, arrangements, renames) and the queue.
+CORPUS_PATHS = ("data/traits/instructions", "data/seed_queue.json")
+
+
+def corpus_at_commit(sha: str, dest: Path, repo: Path = _REPO_ROOT) -> Path:
+    """The trait files and the seed queue as committed at ``sha``, written under ``dest`` (``git archive``,
+    nothing else of the tree); returns the data dir to pass where ``--data-dir`` goes."""
+    sha = sha.split("+", 1)[0]
+    out = subprocess.run(["git", "archive", "--format=tar", sha, "--", *CORPUS_PATHS], cwd=repo,
+                         capture_output=True, check=True)
+    with tarfile.open(fileobj=io.BytesIO(out.stdout)) as tf:
+        tf.extractall(dest, filter="data")
+    return Path(dest) / "data"
+
+
+def resolve_data_dir(args, source: Optional[dict]) -> tuple[Path, dict]:
+    """``(data dir, record)``: ``--corpus-at source`` (the default where there is a source run: re-deciding,
+    the full scan) reads the corpus as committed at the source's ``git_sha``, so that retrieval, the relation
+    call's list and the label check are the source's; ``current`` reads ``--data-dir``."""
+    at = getattr(args, "corpus_at", None) or ("source" if source else "current")
+    if at == "current" or source is None:
+        return Path(args.data_dir), {"corpus_at": "current", "data_dir": str(args.data_dir)}
+    sha = (source.get("run") or {}).get("git_sha")
+    if not sha:
+        raise SystemExit(f"--corpus-at source: {source['batch_id']}'s run.json records no git_sha; "
+                         "pass --corpus-at current")
+    dest = Path(tempfile.mkdtemp(prefix=f"m3_corpus_{sha.split('+', 1)[0]}_"))
+    atexit.register(shutil.rmtree, dest, True)          # a scratch copy, not a deliverable (run.json records the sha)
+    try:
+        dd = corpus_at_commit(sha, dest)
+    except subprocess.CalledProcessError as exc:
+        raise SystemExit(f"--corpus-at source: git archive {sha} failed: {exc.stderr.decode(errors='replace')[:300]}")
+    n = len(list((dd / "traits" / "instructions").glob("*.json")))
+    return dd, {"corpus_at": "source", "source_batch": source["batch_id"], "git_sha": sha,
+                "source_was_dirty": sha.endswith("+dirty"), "n_trait_files": n, "data_dir": str(dd)}
+
+
+def select_redecide(rows: dict, args, source: dict) -> tuple[list[NR.M3Candidate], dict]:
+    """The candidates of ``score --redecide``: every row the source run decided (or those of ``--keys``),
+    rebuilt from the registry as the source built them."""
+    keys = [r["key"] for r in source["results"]]
+    if args.keys:
+        unknown = sorted(set(args.keys) - set(keys))
+        if unknown:
+            raise SystemExit(f"not decided by {source['batch_id']}: {', '.join(unknown[:10])}")
+        keys = [k for k in keys if k in set(args.keys)]
+    out, skipped = [], Counter()
+    for k in keys:
+        cand, why = NR.candidate_from_row(rows[k]) if k in rows else (None, "not_in_registry")
+        if cand is None:
+            skipped[why] += 1
+        else:
+            out.append(cand)
+    return out, dict(skipped)
+
+
+def check_source_settings(source: dict, *, cfg, query_form: str) -> list[str]:
+    """Settings of the source run that differ from this one's (any of them makes the replayed requests
+    differ, so a re-decided run refuses)."""
+    s = (source.get("run") or {}).get("settings") or {}
+    mine = {"config_version": cfg.config_version, "k": cfg.k, "representation": cfg.representation,
+            "variant": cfg.covered["space"]["variant"], "query_form": query_form,
+            "embedding_model": cfg.live_model["model_id"]}
+    return [f"{k}: source {s[k]!r}, here {v!r}" for k, v in mine.items() if k in s and s[k] != v]
+
+
 # --------------------------------------------------------------------------- writing
 
 def write_blocks(reg: Registry, states, run_id: str) -> int:
@@ -217,10 +349,40 @@ def _reading_text(r) -> str:
     return f"Sonnet {s}" + (f", Opus {o}" if r.get("opus") else "")
 
 
+def _rules_line(results: list[dict]) -> str:
+    sets = {}
+    for r in results:
+        ru = r["novelty"].get("rules") or {}
+        sets[(ru.get("name") or NV.RULES[1].name, ru.get("version") or 1, ru.get("cosine_floor"))] = 1
+    if not sets:
+        return ""
+    parts = []
+    for name, version, floor in sorted(sets, key=str):
+        what = ("decisions 1-11, the pilot's" if version == 1 else "decisions 12-15 of the M3 decisions added")
+        parts.append(f"rule set {version} (`{name}`: {what}; cosine floor {floor if floor is not None else 'none'})")
+    return "Rules: " + "; ".join(parts) + ".  "
+
+
+def _covered_flagged(nv: dict) -> Optional[dict]:
+    """The decision-12 detail of a row covered by the Opus check (Sonnet one below the cut-off, Opus at or
+    above it, on the covering trait), else ``None``."""
+    if nv.get("decision") != "covered":
+        return None
+    return next((d for d in nv.get("review_details") or [] if d.get("kind") == "sonnet_below_opus_at"
+                 and d.get("stem") == nv.get("covered_by")), None)
+
+
+def _note_text(n: dict, labels: dict) -> str:
+    return " / ".join(_trait_link(s, labels.get(s)) for s in n["pair"]) + \
+        (f" ({n['kind']})" if n.get("kind") and n["kind"] != "pair" else "")
+
+
 def decisions_markdown(results: list[dict], *, batch_id: str, labels: dict, mode: str = "shortlist") -> str:
     """``decisions.md``: every candidate (label, decision, covered_by, cut-off, the readings that decided it,
-    review flags, pair completions), then the review queue with both readings and reasons, then the pair
-    completions.  Trait names link to their files (paths relative to ``data/candidates/novelty/<batch>/``)."""
+    review flags, pair completions), then the review sections (the covered-and-flagged rows of decision 12 with
+    both readings and reasons; the both-ends-similar rows of decision 13 with the ends' cosines and any readings
+    on record; the ``grey`` rows), then the pair completions.  Trait names link to their files (paths relative
+    to ``data/candidates/novelty/<batch>/``)."""
     order = {"covered": 0, "grey": 1, "new": 2}
     rows = sorted(results, key=lambda r: (order.get(r["novelty"]["decision"], 9), str(r["label"]).lower()))
     n = Counter(r["novelty"]["decision"] for r in results)
@@ -228,6 +390,7 @@ def decisions_markdown(results: list[dict], *, batch_id: str, labels: dict, mode
              f"{len(results)} candidates: " + ", ".join(f"{n[d]} {d}" for d in ("covered", "grey", "new") if n[d]) + ".  "
              "Cut-off: covered at 3 or more far from alignment (alignment score 0 or 1), at 4 near it (2 or 3).  "
              "The deciding readings are rubric A's 0-4 scale (Sonnet 5.5 first, Opus 5.5 where the rule sends it).  "
+             + _rules_line(results) +
              "Built by `novelty_score.py`; every reading is in `readings.jsonl` beside this file.", "",
              "| candidate | decision | covered by | cut-off | deciding reading | review | pair completion for | "
              "pairs judged | gloss |", "|---|---|---|---|---|---|---|---|---|"]
@@ -236,13 +399,53 @@ def decisions_markdown(results: list[dict], *, batch_id: str, labels: dict, mode
         cov = nv.get("covered_by")
         how = "exact label" if nv["reason"] == "exact_label" else _reading_text(nv.get("deciding_reading"))
         if nv["reason"] == "exact_label" and nv.get("exact_label"):
-            how += f" ({nv['exact_label'].get('match')})"
+            how += f" ({nv['exact_label'].get('match')}" + (", separator-blind" if nv["exact_label"].get("blind") else "") + ")"
+        if nv.get("renamed_from"):
+            how += f" (renamed from {nv['renamed_from'].get('old_stem')}, judged)"
         pcf = ", ".join(_trait_link(s, labels.get(s)) for s in nv.get("pair_completion_for") or [])
+        review = ", ".join(nv.get("review") or [])
+        if nv.get("pair_notes"):
+            review += ": " + "; ".join(_note_text(x, labels) for x in nv["pair_notes"])
         lines.append(f"| {_md(r['label'])} | {nv['decision']} | {_trait_link(cov, labels.get(cov)) if cov in labels else _md(cov)} | "
-                     f"{nv['cut_off']} | {_md(how)} | {_md(', '.join(nv.get('review') or []))} | {pcf} | "
+                     f"{nv['cut_off']} | {_md(how)} | {review} | {pcf} | "
                      f"{nv.get('n_pairs_judged', 0)} | {_md(r.get('gloss'))} |")
+    flagged = [(r, _covered_flagged(r["novelty"])) for r in rows]
+    flagged = [(r, d) for r, d in flagged if d is not None]
+    lines += ["", f"## Covered, flagged ({len(flagged)} rows)", "",
+              "Decision 12: Sonnet read the pair one below the cut-off and Opus at or above it, so the candidate is "
+              "covered by that trait and flagged for review (Roger sided with Opus on 45 of 58 such pairs in the pilot).", ""]
+    for r, d in flagged:
+        nv = r["novelty"]
+        lines += [f"- **{_md(r['label'])}** (`{r['key']}`, cut-off {nv['cut_off']}) by "
+                  f"{_trait_link(d['stem'], labels.get(d['stem']))}: Sonnet {d['sonnet']['value']} "
+                  f"(\"{_md(d['sonnet'].get('reason'))}\"), Opus {d['opus']['value']} (\"{_md(d['opus'].get('reason'))}\")",
+                  f"  Gloss: {_md(r.get('gloss'))}"]
+    noted = [r for r in rows if r["novelty"].get("pair_notes")]
+    lines += ["", f"## Both ends similar (orthogonal to the pair?) ({len(noted)} rows)", "",
+              "Decision 13 (Roger's rule): the relation call marked both members of a recorded pair (every corner of a "
+              "triangle or simplex) similar, so the candidate is probably orthogonal to the pair's axis: neither member "
+              "was judged or may cover it.  Cosines to the candidate; overlap readings where any are on record.", ""]
+    for r in noted:
+        nv = r["novelty"]
+        lines.append(f"- **{_md(r['label'])}** (`{r['key']}`, {nv['decision']}"
+                     + (f" by {_trait_link(nv['covered_by'], labels.get(nv['covered_by']))}" if nv.get("covered_by") else "")
+                     + f", cut-off {nv['cut_off']}).  Gloss: {_md(r.get('gloss'))}")
+        for note in nv["pair_notes"]:
+            ends = []
+            for s in note["pair"]:
+                c = (note.get("cosines") or {}).get(s)
+                rd = (note.get("readings_on_record") or {}).get(s) or {}
+                txt = f"{_trait_link(s, labels.get(s))} (cosine {c:.3f}" if c is not None else f"{_trait_link(s, labels.get(s))} ("
+                if rd:
+                    txt += "; " + ", ".join(f"{m.capitalize()} {v['value']} (\"{_md(v.get('reason'))}\")"
+                                            for m, v in rd.items())
+                ends.append(txt + ")")
+            lines.append(f"  - {note.get('kind', 'pair')}: " + "; ".join(ends))
     grey = [r for r in rows if r["novelty"]["decision"] == "grey"]
-    lines += ["", f"## Review queue ({len(grey)} grey rows)", ""]
+    lines += ["", f"## Review queue ({len(grey)} grey rows)", "",
+              "Kept with a flag the rule set treats as grey (rule set 2: `unparsed` only; rule set 1 also the Opus "
+              "check's flag and the pair flag).  The covered-and-flagged rows and the both-ends-similar rows above "
+              "are in the review queue as well.", ""]
     for r in grey:
         nv = r["novelty"]
         lines += [f"### {_md(r['label'])} (`{r['key']}`), cut-off {nv['cut_off']}: {', '.join(nv['review'])}", "",
@@ -256,6 +459,9 @@ def decisions_markdown(results: list[dict], *, batch_id: str, labels: dict, mode
                 a, b = d["pair"]
                 lines.append(f"- pair {_trait_link(a, labels.get(a))} / {_trait_link(b, labels.get(b))}: both "
                              f"{d['both']} in the relation call")
+            elif d["kind"] == "both_similar":
+                lines.append(f"- both similar: {_note_text({'pair': d['pair'], 'kind': d.get('arrangement')}, labels)} "
+                             "(see \"Both ends similar\" above)")
             else:
                 lines.append(f"- unparsed: {_md(json.dumps({k: v for k, v in d.items() if k != 'kind'}))}")
         lines.append("")
@@ -271,7 +477,7 @@ def decisions_markdown(results: list[dict], *, batch_id: str, labels: dict, mode
 
 
 def finalize(*, out_dir: Path, runner: NR.NoveltyRunner, usage, run_meta: dict, skipped: dict, status: int,
-             error: Optional[BaseException], inputs: list) -> dict:
+             error: Optional[BaseException], inputs: list, extra: Optional[dict] = None) -> dict:
     from assistant_axis.plot_metadata import json_metadata
     usage.write_json(out_dir / "usage.json")
     rp = out_dir / "results.jsonl"
@@ -287,7 +493,9 @@ def finalize(*, out_dir: Path, runner: NR.NoveltyRunner, usage, run_meta: dict, 
     summary = NR.summarize(results, runner.records, usage, stalled=stalled, skipped=skipped, mode=runner.mode)
     summary.update({"batch_id": runner.batch_id, "parse_rates": parse_rates, "stopped_by_budget": status == 2,
                     "stopped_by_error": f"{type(error).__name__}: {error}" if error is not None else None,
-                    "resumed_calls": runner.stats.get("resumed", 0), "rubrics": runner.rubric_pins})
+                    "resumed_calls": runner.stats.get("resumed", 0), "rubrics": runner.rubric_pins,
+                    "rules_of_run": runner.rules.as_dict()})
+    summary.update(extra or {})
     env = json_metadata(summary, title=f"novelty_score {runner.mode} {runner.batch_id}", inputs=inputs or None)
     atomic_write_text(json.dumps(env, indent=2, ensure_ascii=False) + "\n", out_dir / "summary.json")
     labels = {s: t.label for s, t in runner.traits.items()}
@@ -328,6 +536,16 @@ def _common_args(ap: argparse.ArgumentParser) -> None:
     ap.add_argument("--confirmed-by", help="who gave the explicit go for a budget over $20 (recorded in run.json)")
     ap.add_argument("--allow-dirty", action="store_true")
     ap.add_argument("--dry-run", action="store_true")
+    ap.add_argument("--rules", type=int, choices=sorted(NV.RULES), default=NV.DEFAULT_RULES.version,
+                    help="decision rules: 2 (default from 2026-10-07: decisions 12-15 and the cosine floor) or 1 (the "
+                         "pilot's, decisions 1-11)")
+    ap.add_argument("--cosine-floor", type=parse_floor, default=None,
+                    help="listed traits below this cosine to the candidate are not judged by the overlap call (an "
+                         "opposed trait's partner and a renamed_from match are); default the rule set's (rule set 2: "
+                         f"{NV.DEFAULT_COSINE_FLOOR}, rule set 1: none); 'none' turns it off")
+    ap.add_argument("--corpus-at", choices=("source", "current"), default=None,
+                    help="where a run with a source (score --redecide, full-scan) reads the trait files and the seed "
+                         "queue: as committed at the source run's git_sha (source, the default there) or --data-dir")
 
 
 def _prepare_out_dir(out_dir: Path, args) -> tuple[int, list, Optional[dict]]:
@@ -366,21 +584,357 @@ def _cand_chars(cands) -> float:
     return float(np.mean([len(c.label) + len(c.gloss) + 40 for c in cands])) if cands else 140.0
 
 
+# --------------------------------------------------------------------------- re-deciding a run on its records
+
+def _check_score_selection(args, redecide: bool) -> Optional[str]:
+    """``score`` takes one of --run / --keys / --unscored; ``--redecide`` takes --from-batch (and optionally --keys)."""
+    chosen = [n for n, v in (("--run", args.run), ("--keys", args.keys), ("--unscored", args.unscored)) if v]
+    if redecide:
+        if not args.from_batch:
+            return "--redecide needs --from-batch (the run whose records are re-decided)"
+        if args.from_batch == args.batch_id:
+            return "--redecide writes a new run: --batch-id must differ from --from-batch"
+        if args.run or args.unscored:
+            return "--redecide takes the source run's candidates (narrow them with --keys), not --run or --unscored"
+        return None
+    if args.from_batch:
+        return "--from-batch is for --redecide"
+    if len(chosen) != 1:
+        return "score takes exactly one of --run, --keys, --unscored"
+    return None
+
+
+def _relation_seed(source: dict) -> str:
+    """The seed of the source's relation-call order (its own, or the one it replayed in turn)."""
+    return ((source.get("run") or {}).get("settings") or {}).get("relation_seed") or source["batch_id"]
+
+
+def source_rules(source: dict) -> NV.Rules:
+    """The rules the source run decided under (its blocks say; none recorded: rule set 1)."""
+    blocks = [r["novelty"] for r in source["results"]]
+    names = {json.dumps(b.get("rules"), sort_keys=True) for b in blocks}
+    if len(names) > 1:
+        raise SystemExit(f"{source['batch_id']}'s rows were decided under {len(names)} rule sets; re-decide one at a time")
+    return NV.rules_of(blocks[0]) if blocks else NV.RULES[1]
+
+
+def offline_replay(*, rules: NV.Rules, replay: list, cands, vectors, index, sets, rubrics, cfg, query_form: str,
+                   relation_seed: str, batch_id: str) -> tuple[dict, list]:
+    """Every candidate decided under ``rules`` from the answers on record alone (nothing sent, nothing written):
+    ``({key: block or None}, wanted)``, ``None`` for a candidate that needs a call not on record, ``wanted``
+    the first such call of each (:class:`novelty_runner.OfflineTransport`)."""
+    tr = NR.OfflineTransport()
+    r = NR.NoveltyRunner(client=None, batch_id=batch_id, rubrics=rubrics, index=index, label_sets=sets,
+                         usage=MultiModelUsage(), responses_path=Path(os.devnull), k=cfg.k, mode="shortlist",
+                         config_version=cfg.config_version, embedding=_embedding_settings(cfg, query_form), transport=tr,
+                         rules=rules, relation_seed=relation_seed, replay_records=replay)
+    states = r.run(cands, vectors)
+    return {k: st.block for k, st in states.items()}, tr.wanted
+
+
+def _walk_sig(nv: dict) -> list:
+    return [(x["stem"], (x.get("sonnet") or {}).get("value"), (x.get("opus") or {}).get("value"), x.get("outcome"))
+            for x in nv.get("readings") or []]
+
+
+#: What "identical" means for a re-decided row: the decision, what covered it and how, the flags, the walk
+#: (every pair judged, both readings, the outcome) and the stage-3 outputs.
+_SAME_FIELDS = {"decision": lambda nv: nv["decision"], "reason": lambda nv: nv["reason"],
+                "covered_by": lambda nv: nv.get("covered_by"), "review": lambda nv: list(nv.get("review") or []),
+                "walk": _walk_sig, "shortlist": lambda nv: list(nv.get("shortlist") or []),
+                "pair_flags": lambda nv: list(nv.get("pair_flags") or []),
+                "pair_completion_for": lambda nv: list(nv.get("pair_completion_for") or []),
+                "listed": lambda nv: [(x["stem"], x["cosine"], x.get("relation")) for x in nv.get("listed") or []]}
+
+
+def reproduction_check(expected: list[dict], blocks: dict) -> dict:
+    """Each row of ``expected`` (``{"key", "novelty"}``) against the replayed block of the same key, field by
+    field (:data:`_SAME_FIELDS`): ``{"n", "identical", "differ": [{"key", "fields"}], "not_replayable"}``."""
+    same, differ, missing = 0, [], []
+    for r in expected:
+        b = blocks.get(r["key"])
+        if b is None:
+            missing.append(r["key"])
+            continue
+        bad = [f for f, get in _SAME_FIELDS.items() if get(r["novelty"]) != get(b)]
+        if bad:
+            differ.append({"key": r["key"], "fields": bad})
+        else:
+            same += 1
+    return {"n": len(expected), "identical": same, "differ": differ, "not_replayable": missing}
+
+
+def redecide_estimate(wanted: list, *, listed_mean: float, rubrics: dict, index, cands, transport: str) -> Estimate:
+    """The calls a re-decided run must send: each call not on record (one per candidate, the first its walk
+    needs, at its own size), and for those candidates the walk after it at the plan's rates (3 pairs, early
+    exit, Opus on its share).  Live unless ``transport`` is ``batches``."""
+    suffix = BATCH_SUFFIX if transport == "batches" else ""
+    est = Estimate()
+    by: dict[tuple, list] = {}
+    for w in wanted:
+        by.setdefault((w["step"], w["model"]), []).append(NR.call_tokens(w["call"]))
+    for (step, model), toks in sorted(by.items()):
+        n = len(toks)
+        est.add(f"calls not on record: {step}", model + suffix, n, int(round(sum(t[0] for t in toks) / n)),
+                int(round(sum(t[1] for t in toks) / n)))
+    n_c = len({w["key"] for w in wanted})
+    if n_c:
+        st = NR.plan_estimate(n_candidates=n_c, n_scan=0, mean_listed=listed_mean,
+                              relation_text_chars=len(rubrics["relation"]["text"]), trait_chars=_mean_chars(index),
+                              cand_chars=_cand_chars(cands), transport=transport, n_embed=0)
+        for x in st["overlap"].lines:
+            est.add(f"their walks after it: {x.label}", x.model, x.n_calls, x.in_tok, x.out_tok)
+    return est
+
+
+def _state(nv: Optional[dict]) -> Optional[tuple]:
+    """What a change is measured on: the decision, the covering trait, and how it was reached (``exact_label``
+    or ``overlap``: a renamed_from row covered by the same trait through the walk has changed)."""
+    return None if nv is None else (nv["decision"], nv.get("covered_by"), nv["reason"])
+
+
+def decision_changes(*, source: dict, results: list[dict], chain: list[tuple[str, NV.Rules, dict]],
+                     final_check: dict, new_calls: dict, rules: NV.Rules) -> dict:
+    """``decision_changes.json``: every row whose decision or covering trait differs between the source and the
+    re-decided run, with the steps of ``chain`` (version 1, then one decision added at a time) at which it
+    changed; the reproduction check (the chain's first step against the source) and the final check (its last
+    step against the run's own results)."""
+    src = {r["key"]: r for r in source["results"]}
+    res = {r["key"]: r for r in results}
+    rows = []
+    for key in sorted(src):
+        a, b = src[key]["novelty"], (res.get(key) or {}).get("novelty")
+        if b is None:
+            continue
+        steps, prev = [], _state(a)
+        for name, _, blocks in chain[1:]:
+            cur = _state(blocks.get(key))
+            if cur is None:
+                steps.append({"step": name, "note": "not replayable from the records at this step"})
+                continue
+            if cur != prev:
+                steps.append({"step": name, "from": list(prev), "to": list(cur)})
+                prev = cur
+        if _state(a) == _state(b):
+            continue
+        rows.append({"key": key, "label": src[key]["label"], "gloss": src[key].get("gloss"), "cut_off": b["cut_off"],
+                     "source": {"decision": a["decision"], "covered_by": a.get("covered_by"), "reason": a["reason"],
+                                "review": a.get("review"), "pair_flags": a.get("pair_flags"),
+                                "deciding_reading": a.get("deciding_reading"), "exact_label": a.get("exact_label")},
+                     "now": {"decision": b["decision"], "covered_by": b.get("covered_by"), "reason": b["reason"],
+                             "review": b.get("review"), "deciding_reading": b.get("deciding_reading"),
+                             "exact_label": b.get("exact_label"), "renamed_from": b.get("renamed_from"),
+                             "below_floor": b.get("below_floor"), "pair_notes": b.get("pair_notes"),
+                             "n_pairs_judged": b.get("n_pairs_judged"),
+                             "readings": b.get("readings") if b.get("renamed_from") else None},
+                     "decision_changed": a["decision"] != b["decision"], "steps": steps})
+    trans = Counter(f"{src[k]['novelty']['decision']} -> {res[k]['novelty']['decision']}" for k in src if k in res)
+    by_step = Counter()
+    for r in rows:
+        for s in r["steps"]:
+            if "from" in s:
+                by_step[f"{s['step']}: {s['from'][0]} -> {s['to'][0]}"
+                        + (" (covering trait or reason)" if s["from"][0] == s["to"][0] else "")] += 1
+    notes = [{"key": k, "label": res[k]["label"], "decision": res[k]["novelty"]["decision"],
+              "covered_by": res[k]["novelty"].get("covered_by"), "pair_notes": res[k]["novelty"]["pair_notes"]}
+             for k in sorted(res) if res[k]["novelty"].get("pair_notes")]
+    renamed = [{"key": k, "label": res[k]["label"], "decision": res[k]["novelty"]["decision"],
+                "covered_by": res[k]["novelty"].get("covered_by"), "renamed_from": res[k]["novelty"]["renamed_from"],
+                "deciding_reading": res[k]["novelty"].get("deciding_reading"),
+                "readings": res[k]["novelty"].get("readings"), "review": res[k]["novelty"].get("review"),
+                "source": src[k]["novelty"].get("exact_label") if k in src else None}
+               for k in sorted(res) if res[k]["novelty"].get("renamed_from")]
+    return {"source_batch": source["batch_id"], "rules": rules.as_dict(), "source_rules": chain[0][1].as_dict(),
+            "chain": [name for name, _, _ in chain], "reproduction": chain_repro(chain, source),
+            "final_check": final_check, "new_calls": new_calls,
+            "counts": {"rows": len(src), "decision_changed": sum(1 for r in rows if r["decision_changed"]),
+                       "covering_trait_changed": sum(1 for r in rows if not r["decision_changed"]),
+                       "transitions": dict(sorted(trans.items())), "by_step": dict(sorted(by_step.items()))},
+            "rows": rows, "both_similar": notes, "renamed_from": renamed}
+
+
+def chain_repro(chain: list, source: dict) -> dict:
+    return reproduction_check(source["results"], chain[0][2])
+
+
+def write_decision_changes(out_dir: Path, *, source: dict, results: list[dict], runner: NR.NoveltyRunner,
+                           rules: NV.Rules, ctx: dict) -> dict:
+    """Replay the chain of rule steps offline on the source's records and this run's (no call), then write
+    ``decision_changes.json`` and ``decision_changes.md`` beside the run's other files."""
+    from assistant_axis.plot_metadata import json_metadata
+    replay = list(source["records"]) + [r for r in runner.records if r.get("text") is not None]
+    src_rules = source_rules(source)
+    if src_rules.as_dict() == NV.RULES[1].as_dict() and rules.version == 2:
+        steps = [(n, r) for n, r in NV.rule_chain(rules.cosine_floor)]
+        steps[-1] = (steps[-1][0], rules)
+    else:
+        steps = [(f"source rules ({src_rules.name})", src_rules), (f"these rules ({rules.name})", rules)]
+    chain = []
+    for name, ru in steps:
+        blocks, _ = offline_replay(rules=ru, replay=replay, **ctx)
+        chain.append((name, ru, blocks))
+    final_check = reproduction_check(results, chain[-1][2])
+    new = [r for r in runner.records if r.get("batch_id") == runner.batch_id and r.get("text") is not None]
+    new_calls = {"n": len(new), "by_step_model": dict(Counter(f"{r['step']}:{r['model']}" for r in new)),
+                 "cost_usd": round(sum(NR.record_cost(r) for r in new), 6),
+                 "keys": sorted({r["key"] for r in new})}
+    dc = decision_changes(source=source, results=results, chain=chain, final_check=final_check, new_calls=new_calls,
+                          rules=rules)
+    env = json_metadata(dc, title=f"novelty_score decision changes {runner.batch_id} vs {source['batch_id']}")
+    atomic_write_text(json.dumps(env, indent=2, ensure_ascii=False) + "\n", out_dir / "decision_changes.json")
+    labels = {s: t.label for s, t in runner.traits.items()}
+    atomic_write_text(decision_changes_markdown(dc, batch_id=runner.batch_id, labels=labels),
+                      out_dir / "decision_changes.md")
+    return dc
+
+
+def _short(r: Optional[dict]) -> str:
+    """``stem: Sonnet s, Opus o`` of a deciding reading."""
+    if not r:
+        return ""
+    return f"{r.get('stem')} at cosine {r.get('cosine'):.3f}: {_reading_text(r)}" if r.get("cosine") is not None else \
+        f"{r.get('stem')}: {_reading_text(r)}"
+
+
+def _reasons(r: Optional[dict]) -> str:
+    if not r:
+        return ""
+    out = []
+    for m in ("sonnet", "opus"):
+        v = r.get(m)
+        if v and v.get("reason"):
+            out.append(f"{m.capitalize()} {v.get('value')}: \"{_md(v['reason'])}\"")
+    return "; ".join(out)
+
+
+def decision_changes_markdown(dc: dict, *, batch_id: str, labels: dict) -> str:
+    """``decision_changes.md`` (see :func:`decision_changes`).  Links relative to ``data/candidates/novelty/<batch>/``."""
+    L = lambda s: _trait_link(s, labels.get(s)) if s else ""  # noqa: E731
+    c, rep, fin = dc["counts"], dc["reproduction"], dc["final_check"]
+    rows = dc["rows"]
+    lines = [f"# Decision changes: `{batch_id}` against `{dc['source_batch']}`", "",
+             f"The source's {c['rows']} rows re-decided under `{dc['rules']['name']}` (cosine floor "
+             f"{dc['rules']['cosine_floor']}) on the source's records (`novelty_score.py score --redecide`), against the "
+             f"source's `{dc['source_rules']['name']}`.  New calls (only where a rule needed a reading not on record): "
+             f"{dc['new_calls']['n']} ({json.dumps(dc['new_calls']['by_step_model'])}), ${dc['new_calls']['cost_usd']:.4f}.", "",
+             "## Checks", "",
+             f"- **Reproduction**: the source's own rules replayed on its records give {rep['identical']} of {rep['n']} rows "
+             "identical (decision, covering trait, reason, flags, every pair judged with both readings and the outcome, "
+             "shortlist, listed traits with cosines and relations, pair flags and completions)"
+             + (f"; differ: {', '.join(d['key'] + ' (' + ', '.join(d['fields']) + ')' for d in rep['differ'][:20])}" if rep["differ"] else "")
+             + (f"; not replayable: {', '.join(rep['not_replayable'][:20])}" if rep["not_replayable"] else "") + ".",
+             f"- **Attribution**: the rules are added one decision at a time, each step replayed on the records with no "
+             f"call ({' → '.join(dc['chain'])}); a change is credited to the step where it happens.  The last step "
+             f"reproduces this run on {fin['identical']} of {fin['n']} rows"
+             + (f" (differ: {', '.join(d['key'] for d in fin['differ'][:20])})" if fin["differ"] else "") + ".", "",
+             "## Counts", "",
+             f"{c['decision_changed']} rows changed decision and {c['covering_trait_changed']} kept it with a different "
+             "covering trait (or reason).", "", "| source → now | rows |", "|---|---|"]
+    lines += [f"| {k} | {n} |" for k, n in c["transitions"].items()]
+    lines += ["", "| step: from → to | rows |", "|---|---|"]
+    lines += [f"| {k} | {n} |" for k, n in c["by_step"].items()]
+
+    def changed_at(r, step_prefix):
+        return [s for s in r["steps"] if s.get("step", "").startswith(step_prefix) and "from" in s]
+
+    floor = [r for r in rows if any(s["from"][0] == "covered" and s["to"][0] != "covered" for s in changed_at(r, "cosine floor"))]
+    lines += ["", f"## Covers lost to the cosine floor ({len(floor)})", "",
+              "Covered in the source by a trait whose cosine to the candidate is below the floor, so the walk no longer "
+              "judges it.", ""]
+    for r in floor:
+        d = r["source"]["deciding_reading"]
+        lines += [f"- **{_md(r['label'])}** (`{r['key']}`, cut-off {r['cut_off']}): source covered by {L(r['source']['covered_by'])} "
+                  f"({_short(d)}); now **{r['now']['decision']}**"
+                  + (f" by {L(r['now']['covered_by'])} ({_short(r['now']['deciding_reading'])})" if r["now"]["covered_by"] else "")
+                  + ".", f"  {_reasons(d)}", f"  Gloss: {_md(r['gloss'])}"]
+    d12 = [r for r in rows if changed_at(r, "decision 12")]
+    d12_dec = [r for r in d12 if any(s["from"][0] != "covered" for s in changed_at(r, "decision 12"))]
+    lines += ["", f"## Flagged rows that became covers (decision 12): {len(d12_dec)} changed decision, "
+              f"{len(d12) - len(d12_dec)} changed covering trait", "",
+              "Sonnet one below the cut-off and Opus at or above it on the trait that now covers the row (flagged "
+              "`sonnet_below_opus_at`; the readings and reasons are in decisions.md's \"Covered, flagged\").", "",
+              "| candidate | source | now | the reading |", "|---|---|---|---|"]
+    for r in d12:
+        lines.append(f"| {_md(r['label'])} | {r['source']['decision']}" + (f" by {L(r['source']['covered_by'])}" if r['source']['covered_by'] else "")
+                     + f" | {r['now']['decision']} by {L(r['now']['covered_by'])} | {_md(_short(r['now']['deciding_reading']))} |")
+    g2n = [r for r in rows if r["source"]["decision"] == "grey" and r["now"]["decision"] == "new"]
+    lines += ["", f"## Grey rows that became new ({len(g2n)})", "",
+              "| candidate | source flags | pair flags in the source | step |", "|---|---|---|---|"]
+    for r in g2n:
+        pf = "; ".join(f"{' / '.join(f['pair'])} both {f['both']}" for f in r["source"].get("pair_flags") or [])
+        lines.append(f"| {_md(r['label'])} | {', '.join(r['source']['review'] or [])} | {_md(pf)} | "
+                     f"{'; '.join(s['step'] for s in r['steps'] if 'from' in s)} |")
+    rn = dc["renamed_from"]
+    lines += ["", f"## The renamed_from rows, now judged (decision 15): {len(rn)}", "",
+              "Covered at the exact-label stage in the source (the label is a corpus file's `renamed_from`); now judged like "
+              "any other candidate, the current trait at the front of the shortlist.", "",
+              "| candidate | current trait | now | covered by | deciding reading | pairs judged |", "|---|---|---|---|---|---|"]
+    for r in rn:
+        lines.append(f"| {_md(r['label'])} | {L(r['renamed_from']['current'])} | {r['decision']} | {L(r['covered_by'])} | "
+                     f"{_md(_short(r['deciding_reading']))} | {len(r['readings'] or [])} |")
+    for r in rn:
+        rd = [x for x in r["readings"] or [] if x["stem"] == r["renamed_from"]["current"]]
+        if rd:
+            lines.append(f"- {_md(r['label'])} against {L(r['renamed_from']['current'])}: {_reasons(rd[0])}")
+    others = [r for r in rows if r not in floor and r not in d12 and r not in g2n and not r["now"].get("renamed_from")]
+    lines += ["", f"## Every other change ({len(others)})", "",
+              "| candidate | source | now | steps |", "|---|---|---|---|"]
+    for r in others:
+        lines.append(f"| {_md(r['label'])} | {r['source']['decision']}" + (f" by {L(r['source']['covered_by'])}" if r['source']['covered_by'] else "")
+                     + f" ({r['source']['reason']}) | {r['now']['decision']}"
+                     + (f" by {L(r['now']['covered_by'])}" if r['now']['covered_by'] else "") + f" ({r['now']['reason']}"
+                     + (", separator-blind" if (r["now"].get("exact_label") or {}).get("blind") else "") + ") | "
+                     + "; ".join(f"{s['step']}: {s['from'][0]} → {s['to'][0]}" + (f" ({s['to'][1]})" if s['to'][1] else "")
+                                 if "from" in s else f"{s['step']}: {s['note']}" for s in r["steps"]) + " |")
+    bs = dc["both_similar"]
+    lines += ["", f"## Both ends similar ({len(bs)} rows)", "",
+              "Decision 13: the noted members were not judged and may not cover; the cosines and any readings on record "
+              "are in decisions.md's \"Both ends similar\".", ""]
+    for r in bs:
+        lines.append(f"- {_md(r['label'])} ({r['decision']}" + (f" by {L(r['covered_by'])}" if r["covered_by"] else "") + "): "
+                     + "; ".join(" / ".join(L(s) for s in n["pair"]) + (f" ({n['kind']})" if n.get("kind") != "pair" else "")
+                                 for n in r["pair_notes"]))
+    return "\n".join(lines) + "\n"
+
+
+def _embedding_settings(cfg, query_form: str) -> dict:
+    return {"model": cfg.live_model["model_id"], "query_form": query_form, "representation": cfg.representation,
+            "variant": cfg.covered["space"]["variant"], "k": cfg.k}
+
+
 def run_scoring(args, argv, *, mode: str) -> int:
     from assistant_axis.gapgen import embed as EM
     from assistant_axis.gapgen.metric_config import MetricConfig
     from assistant_axis.provenance import current_file_input, current_files_input
     paths.check_id(args.batch_id, "batch_id")
+    redecide = mode == "shortlist" and bool(getattr(args, "redecide", False))
+    if mode == "shortlist":
+        bad = _check_score_selection(args, redecide)
+        if bad:
+            print(f"REFUSED: {bad}", file=sys.stderr)
+            return 2
     out_dir = paths.novelty_dir(args.batch_id, candidates_dir=args.out_root)
     try:
         rubrics = load_m3_rubrics(args.rubrics_dir)
     except RubricError as exc:
         print(f"REFUSED (rubric not pinned): {exc}", file=sys.stderr)
         return 2
+    rules = resolve_rules(args)
     cfg = MetricConfig.load(args.metric_config)
     reg = Registry(args.registry)
     rows = reg.fold()
-    if mode == "shortlist":
+    source = None
+    if redecide or mode == "full_scan":
+        source = load_source(args.from_batch, args.out_root, with_records=redecide)
+    data_dir, corpus_info = resolve_data_dir(args, source)
+    if redecide:
+        diffs = check_source_settings(source, cfg=cfg, query_form=args.query_form)
+        if diffs:
+            print(f"REFUSED: settings differ from {source['batch_id']}'s, so its requests would not replay: "
+                  f"{'; '.join(diffs)}", file=sys.stderr)
+            return 2
+        cands, skipped = select_redecide(rows, args, source)
+    elif mode == "shortlist":
         cands, skipped = select_candidates(rows, args, batch_id=args.batch_id)
     else:
         cands, skipped = select_scan_sample(rows, args)
@@ -388,7 +942,7 @@ def run_scoring(args, argv, *, mode: str) -> int:
         print(f"nothing to score ({json.dumps(skipped)})", file=sys.stderr)
         return 0
     cache = EM.EmbeddingCache(args.cache_dir)
-    index, index_info = load_index(cfg, data_dir=args.data_dir, cache=cache)
+    index, index_info = load_index(cfg, data_dir=data_dir, cache=cache)
     if index is None:
         print(f"{index_info['n_missing_from_cache']} corpus texts are not in the embedding cache "
               f"(first: {index_info['missing'][:5]}); they would be embedded (charged) by the run", file=sys.stderr)
@@ -396,8 +950,9 @@ def run_scoring(args, argv, *, mode: str) -> int:
     texts = {c.key: NV.query_text(c.label, c.gloss, query_form=args.query_form, representation=cfg.representation)
              for c in cands}
     found, miss = cache.lookup(embedder.tag, list(texts.values()))
-    sets = label_sets_for(args.data_dir)
-    n_exact = sum(1 for c in cands if NV.exact_label_match(c.stem, sets)) if mode == "shortlist" else 0
+    sets = label_sets_for(data_dir)
+    relation_seed = _relation_seed(source) if redecide else args.batch_id
+    n_exact = sum(1 for c in cands if NV.exact_label_match(c.stem, sets, rules=rules)) if mode == "shortlist" else 0
     n_live = len(cands) - n_exact
     transport, why = choose_transport(args.transport, n_live)
     # the estimate: real listed sizes where every candidate's vector is cached, else the corpus's own
@@ -418,8 +973,51 @@ def run_scoring(args, argv, *, mode: str) -> int:
     est = Estimate(lines=[x for s in use for x in stages[s].lines])
     plan = {"mode": mode, "n_candidates": len(cands), "n_exact_label": n_exact, "n_to_relation": n_live if mode == "shortlist" else 0,
             "skipped": skipped, "transport": transport, "query_form": args.query_form, "listed_mean": listed_mean,
-            "n_query_texts_cached": len(found), "n_query_texts_to_embed": len(miss), "corpus": index_info}
-    print(f"plan: {json.dumps(plan)}")
+            "n_query_texts_cached": len(found), "n_query_texts_to_embed": len(miss), "corpus": index_info,
+            "rules": rules.as_dict(), "corpus_files": corpus_info}
+    redecide_meta, offline_ctx = None, None
+    if redecide:
+        if index is None or miss:
+            print("REFUSED: re-deciding replays the source's retrieval, so every corpus text and every candidate's "
+                  "query text must be in the embedding cache (the source run embedded them); missing: corpus "
+                  f"{index_info['n_missing_from_cache']}, query texts {len(miss)}", file=sys.stderr)
+            return 2
+        # unit rows, as embed_texts hands them to a run (the cache keeps the API's raw vectors; centring an
+        # unnormalised one moves its cosines in the fifth decimal)
+        unit = EM.normalize_rows([found[i] for i in range(len(cands))])
+        offline_ctx = {"cands": cands, "vectors": {c.key: unit[i] for i, c in enumerate(cands)}, "index": index,
+                       "sets": sets, "rubrics": rubrics, "cfg": cfg, "query_form": args.query_form,
+                       "relation_seed": relation_seed, "batch_id": args.batch_id}
+        src_rules = source_rules(source)
+        repro_blocks, _ = offline_replay(rules=src_rules, replay=source["records"], **offline_ctx)
+        repro = reproduction_check(source["results"], repro_blocks)
+        blocks0, wanted = offline_replay(rules=rules, replay=source["records"], **offline_ctx)
+        est = redecide_estimate(wanted, listed_mean=listed_mean or 16.0, rubrics=rubrics, index=index, cands=cands,
+                                transport=transport)
+        stages, use = {"redecide": est}, ("redecide",)
+        wanted_keys = sorted({w["key"] for w in wanted})
+        preview = Counter(f"{r['novelty']['decision']} -> {blocks0[r['key']]['decision']}" for r in source["results"]
+                          if blocks0.get(r["key"]) is not None)
+        redecide_meta = {"from_batch": source["batch_id"], "source_rules": src_rules.as_dict(), "rules": rules.as_dict(),
+                         "relation_seed": relation_seed, "n_source_records": len(source["records"]),
+                         "reproduction": {k: v for k, v in repro.items() if k != "rows"},
+                         "calls_not_on_record": dict(Counter(f"{w['step']}:{w['model']}" for w in wanted)),
+                         "candidates_needing_calls": wanted_keys,
+                         "decided_offline": sum(1 for b in blocks0.values() if b is not None),
+                         "offline_decisions": dict(sorted(preview.items()))}
+        plan["redecide"] = redecide_meta
+        ok = "OK" if repro["identical"] == repro["n"] else "MISMATCH"
+        print(f"redecide: source {source['batch_id']} ({len(source['results'])} rows, {len(source['records'])} responses "
+              f"on record; corpus {corpus_info.get('corpus_at')} {corpus_info.get('git_sha') or ''}); rules "
+              f"{rules.name} (floor {rules.cosine_floor})")
+        print(f"reproduction: {src_rules.name} replayed on the source's records: {repro['identical']} of {repro['n']} rows "
+              f"identical [{ok}]" + (f"; differ: {[d['key'] for d in repro['differ'][:10]]}" if repro["differ"] else "")
+              + (f"; not replayable: {repro['not_replayable'][:10]}" if repro["not_replayable"] else ""))
+        print(f"calls not on record (sent live by the run): {len(wanted)} "
+              f"{json.dumps(redecide_meta['calls_not_on_record'])}, for {len(wanted_keys)} candidates: {wanted_keys[:40]}")
+        print(f"offline decisions (source -> {rules.name}, rows decided from the records alone): "
+              f"{json.dumps(redecide_meta['offline_decisions'])}")
+    print(f"plan: {json.dumps({k: v for k, v in plan.items() if k != 'redecide'})}")
     print(f"transport: {transport} ({why})")
     print("estimate by stage:")
     for s in use:
@@ -444,13 +1042,18 @@ def run_scoring(args, argv, *, mode: str) -> int:
     if args.dry_run:
         if refused:
             print(f"DRY-RUN: the real run would be REFUSED: {refused}")
-        print(f"DRY-RUN: would write {out_dir}/" + (f" and the registry {args.registry}" if mode == "shortlist" else ""))
+        writes_registry = mode == "shortlist" and not redecide
+        print(f"DRY-RUN: would write {out_dir}/" + (f" and the registry {args.registry}" if writes_registry else ""))
         print(f"rubrics: {json.dumps({k: {'name': v['name'], 'version': v['version'], 'sha256': v['sha256'][:12]} for k, v in rubrics.items()})}")
-        first = next((i for i, c in enumerate(cands) if i in found and not (sets and NV.exact_label_match(c.stem, sets))),
-                     None)
-        if index is not None and first is not None:
-            print(render_for(cands[first], found[first], index, rubrics, args.batch_id, cfg.k))
+        if redecide:
+            need = {w["key"] for w in wanted}      # render a candidate whose calls are not on record, if any
+            first = next((i for i, c in enumerate(cands) if c.key in need), None)
         else:
+            first = next((i for i, c in enumerate(cands)
+                          if i in found and not (sets and NV.exact_label_match(c.stem, sets, rules=rules))), None)
+        if index is not None and first is not None:
+            print(render_for(cands[first], found[first], index, rubrics, relation_seed, cfg.k))
+        elif not redecide:
             print("(no rendered prompt: no candidate's query embedding is cached yet; the run embeds them first)")
         return 0
     if refused:
@@ -475,10 +1078,16 @@ def run_scoring(args, argv, *, mode: str) -> int:
                              "cut_off_rule": "alignment score 0-1: 3; 2-3: 4; missing: 4",
                              "relation_max_tokens": NR.RELATION_MAX_TOKENS, "overlap_max_tokens": NR.OVERLAP_MAX_TOKENS,
                              "temperature": NR.TEMPERATURE, "cache_ttl_batches": NR.BATCH_CACHE_TTL,
-                             "concurrency": args.concurrency, "ask_attempts": NR.ASK_ATTEMPTS},
+                             "concurrency": args.concurrency, "ask_attempts": NR.ASK_ATTEMPTS,
+                             "relation_seed": relation_seed, "cosine_floor": rules.cosine_floor},
+                "rules": rules.as_dict(), "corpus": corpus_info,
                 "resumed": bool(args.resume), "started_at": utc_now()}
     if mode == "full_scan":
-        run_meta["full_scan"] = {"from_batch": args.from_batch, "sample": args.sample, "sample_seed": args.sample_seed}
+        run_meta["full_scan"] = {"from_batch": args.from_batch, "sample": None if args.keys else args.sample,
+                                 "sample_seed": None if args.keys else args.sample_seed, "keys": args.keys}
+    if redecide:
+        run_meta["redecide"] = redecide_meta
+        run_meta["replay_from"] = source["replay_from"]
     if earlier:
         run_meta["earlier_sessions"] = list(earlier.pop("earlier_sessions", [])) + [earlier]
     atomic_write_text(json.dumps(run_meta, indent=2) + "\n", out_dir / "run.json")
@@ -493,7 +1102,7 @@ def run_scoring(args, argv, *, mode: str) -> int:
     status, error, runner = 0, None, None
     try:
         if index is None:
-            index, index_info = load_index(cfg, data_dir=args.data_dir, cache=cache, usage=usage, allow_embed=True)
+            index, index_info = load_index(cfg, data_dir=data_dir, cache=cache, usage=usage, allow_embed=True)
         canary = EM.check_canary(embedder, cfg.canary["texts"], cache, usage=usage)
         run_meta["canary"] = canary
         keys = [c.key for c in cands]
@@ -511,17 +1120,18 @@ def run_scoring(args, argv, *, mode: str) -> int:
         client = anthropic.AsyncAnthropic(max_retries=0)
 
         def on_decided(states) -> None:
-            if mode == "shortlist":
+            if mode == "shortlist" and not redecide:      # a re-decided run writes its own directory only
                 n = write_blocks(reg, states, args.batch_id)
                 logger.info("registry: %d novelty blocks written", n)
 
         runner = NR.NoveltyRunner(client=client, batch_id=args.batch_id, rubrics=rubrics, index=index, label_sets=sets,
                                   usage=usage, responses_path=out_dir / "responses.jsonl", k=cfg.k, mode=mode,
                                   config_version=cfg.config_version, concurrency=args.concurrency,
-                                  embedding={"model": cfg.live_model["model_id"], "query_form": args.query_form,
-                                             "representation": cfg.representation,
-                                             "variant": cfg.covered["space"]["variant"], "k": cfg.k},
-                                  resume_records=resume_records, on_decided=on_decided)
+                                  embedding=_embedding_settings(cfg, args.query_form),
+                                  resume_records=resume_records, on_decided=on_decided, rules=rules,
+                                  relation_seed=relation_seed,
+                                  replay_records=source["records"] if redecide else (),
+                                  extra_block={"redecided_from": source["batch_id"]} if redecide else None)
         if transport == "batches":
             runner.cache_ttl = NR.BATCH_CACHE_TTL
             runner.transport = BatchTransport(runner, anthropic.Anthropic(), out_dir / "batches.json", budget_usd=cap)
@@ -534,29 +1144,51 @@ def run_scoring(args, argv, *, mode: str) -> int:
         print(f"STOPPED by {type(exc).__name__}: {exc}", file=sys.stderr)
         raise
     finally:
+        summary = None
         if runner is not None:
-            finalize(out_dir=out_dir, runner=runner, usage=usage, run_meta=run_meta, skipped=skipped, status=status,
-                     error=error, inputs=inputs)
+            summary = finalize(out_dir=out_dir, runner=runner, usage=usage, run_meta=run_meta, skipped=skipped,
+                               status=status, error=error, inputs=inputs,
+                               extra={"redecide": redecide_meta} if redecide else None)
         else:
             usage.write_json(out_dir / "usage.json")
             run_meta.update(finished_at=utc_now(), cost_usd=round(usage.total_cost_usd, 4), status=status)
             atomic_write_text(json.dumps(run_meta, indent=2) + "\n", out_dir / "run.json")
         logging.getLogger().removeHandler(fh)
         fh.close()
+    if redecide and runner is not None and status == 0 and summary and summary["n_stalled"] == 0:
+        results = _read_jsonl(out_dir / "results.jsonl")
+        dc = write_decision_changes(out_dir, source=source, results=results, runner=runner, rules=rules,
+                                    ctx=offline_ctx | {"vectors": vectors})
+        print(f"decision changes: {json.dumps(dc['counts'])}; reproduction {dc['reproduction']['identical']} of "
+              f"{dc['reproduction']['n']}; run reproduced by the last step: {dc['final_check']['identical']} of "
+              f"{dc['final_check']['n']}")
+    elif redecide:
+        print("decision_changes.md not written: the run did not decide every candidate (resume it first)",
+              file=sys.stderr)
     return status
 
 
 def select_scan_sample(rows: dict, args) -> tuple[list[NR.M3Candidate], dict]:
     """The full scan's candidates: a seeded sample of ``--sample`` of the main run's candidates that reached the
-    relation call (reason ``overlap``), read from its ``results.jsonl``; their glosses from the registry."""
+    relation call (reason ``overlap``), read from its ``results.jsonl``, or the registry keys of ``--keys`` (in
+    the order given; a key the main run did not walk is scanned all the same, and counted); their glosses from
+    the registry."""
     main = paths.novelty_dir(args.from_batch, candidates_dir=args.out_root) / "results.jsonl"
     if not main.exists():
         raise SystemExit(f"{main} not found: run score --batch-id {args.from_batch} first")
     res = [json.loads(x) for x in main.read_text(encoding="utf-8").splitlines() if x.strip()]
     eligible = sorted(r["key"] for r in res if r["novelty"]["reason"] == "overlap")
-    n = min(args.sample, len(eligible))
-    pick = sorted(random.Random(args.sample_seed).sample(eligible, n))
-    out, skipped = [], Counter()
+    if getattr(args, "keys", None):
+        missing = [k for k in args.keys if k not in rows]
+        if missing:
+            raise SystemExit(f"not in the registry: {', '.join(missing[:10])}")
+        pick = list(dict.fromkeys(args.keys))
+        extra = {"keys": len(pick), "keys_not_walked_in_main": sum(1 for k in pick if k not in set(eligible))}
+    else:
+        n = min(args.sample, len(eligible))
+        pick = sorted(random.Random(args.sample_seed).sample(eligible, n))
+        extra = {}
+    out, skipped = [], Counter(extra)
     for k in pick:
         cand, why = NR.candidate_from_row(rows[k]) if k in rows else (None, "not_in_registry")
         if cand is None:
@@ -611,6 +1243,8 @@ def compare_runs(scan: list[dict], main: list[dict]) -> dict:
         for p in nv.get("scan") or []:
             row = {"key": r["key"], "label": r["label"], "stem": p["stem"], "cosine": p["cosine"], "rank": p["rank"],
                    "via": p["via"], "cut_off": nv["cut_off"], "verdict": p["verdict"], "at_or_above": p["at_or_above"],
+                   # whether the scan's rules cover on this pair (a scan from before rule set 2: "cut" only)
+                   "cuts": p.get("cuts", p["verdict"] == "cut"), "below_floor": p.get("below_floor", False),
                    "sonnet": (p["sonnet"] or {}).get("value"), "opus": (p.get("opus") or {}).get("value"),
                    "main_relation": rel.get(p["stem"]), "in_main_shortlist": p["stem"] in short}
             pairs.append(row)
@@ -631,7 +1265,7 @@ def compare_runs(scan: list[dict], main: list[dict]) -> dict:
                                          "at_or_above": p["at_or_above"]})
                 seen = seen or p["stem"] == exit_at
     at = [p for p in pairs if p["at_or_above"]]
-    cut = [p for p in pairs if p["verdict"] == "cut"]
+    cut = [p for p in pairs if p["cuts"]]
     miss_at = [p for p in at if p["main_relation"] != "similar"]
     miss_cut = [p for p in cut if p["main_relation"] != "similar"]
     miss_cut_short = [p for p in cut if not p["in_main_shortlist"]]
@@ -801,10 +1435,15 @@ def build_parser() -> argparse.ArgumentParser:
     sub = ap.add_subparsers(dest="cmd", required=True)
     sp = sub.add_parser("score", help="M3 on registry rows")
     _common_args(sp)
-    g = sp.add_mutually_exclusive_group(required=True)
+    g = sp.add_mutually_exclusive_group()
     g.add_argument("--run", type=parse_run, action="append", help="GENERATOR/RUN_ID (repeatable)")
-    g.add_argument("--keys", nargs="+")
+    g.add_argument("--keys", nargs="+", help="registry keys (with --redecide: narrows the source run's rows)")
     g.add_argument("--unscored", action="store_true", help="every row with no novelty block")
+    sp.add_argument("--redecide", action="store_true",
+                    help="re-run the decision rules on --from-batch's records (its candidates, corpus, relation order "
+                         "and answers on record); only calls a rule now needs and the source never made are sent; "
+                         "writes this run's directory and decision_changes.md, not the registry")
+    sp.add_argument("--from-batch", default=None, help="with --redecide: the run to re-decide")
     sp.add_argument("--rescore", action="store_true", help="also rows another run has decided (their block is replaced)")
     sp.add_argument("--include-held", action="store_true", help="also rows on a holding list (nationalities)")
     sp.add_argument("--limit", type=int)
@@ -815,7 +1454,9 @@ def build_parser() -> argparse.ArgumentParser:
     sp = sub.add_parser("full-scan", help="the overlap call on every listed trait of a sample (no registry writes)")
     _common_args(sp)
     sp.add_argument("--from-batch", required=True)
-    sp.add_argument("--sample", type=int, default=DEFAULT_SCAN_SAMPLE)
+    g = sp.add_mutually_exclusive_group()
+    g.add_argument("--sample", type=int, default=DEFAULT_SCAN_SAMPLE)
+    g.add_argument("--keys", nargs="+", help="registry keys to scan, in place of a sample")
     sp.add_argument("--sample-seed", type=int, default=0)
     sp.set_defaults(func=lambda a, argv: run_scoring(a, argv, mode="full_scan"))
     sp = sub.add_parser("compare")
