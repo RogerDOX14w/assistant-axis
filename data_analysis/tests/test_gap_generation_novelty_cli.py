@@ -170,6 +170,24 @@ def test_resume_skips_decided_rows_and_finishes_a_stalled_one(env):
     assert {r["key"] for r in res} == {"alpha#1", "queued#1", "alphoid#1", "deltaish#1", "lambdaish#1"}
 
 
+def test_embed_only_then_the_dry_run_renders_a_real_candidate_then_resume(env, capsys):
+    assert score(env, "--embed-only") == 0
+    assert "client" not in env["holder"]                                          # no LLM client was even made
+    run = json.loads((out(env) / "run.json").read_text())
+    assert run["embed_only"]["n_embedded"] == 5 and run["status"] == 0
+    usage = json.loads((out(env) / "usage.json").read_text())
+    assert set(usage["per_model"]) == {"text-embedding-3-large"}
+    assert all(r.get("novelty") is None for r in env["reg"].fold().values())
+    capsys.readouterr()
+    assert score(env, "--dry-run") == 0
+    o = capsys.readouterr().out
+    assert '"n_query_texts_to_embed": 0' in o and "=== relation call" in o and '{"candidate": {"label": "alphoid"' in o
+    assert score(env, "--resume") == 0
+    assert env["reg"].fold()["alphoid#1"]["novelty"]["decision"] == "covered"
+    usage = json.loads((out(env) / "usage.json").read_text())
+    assert usage["per_model"]["text-embedding-3-large"]["n_calls"] >= 2          # the first session's charge kept
+
+
 def test_refusals(env, monkeypatch, capsys):
     assert score(env, "--budget-usd", "0.0001") == 2
     assert "exceeds --budget-usd" in capsys.readouterr().err

@@ -19,6 +19,8 @@ Commands:
   cosine), ``summary.json``, ``decisions.md`` (the table for Roger to sample from), ``usage.json``, ``run.json``,
   ``run.log`` and, with the batches transport, ``batches.json``.  Rows held on a list (nationalities) are left
   out unless ``--include-held``; rows already decided by another run unless ``--rescore``.
+  ``--embed-only`` embeds the candidates (charged to the run) and stops before any LLM call, so that
+  ``render --key`` or the dry run can show a real candidate's prompt first; ``--resume`` then goes on.
 * ``full-scan --batch-id S --from-batch B [--sample 100 --sample-seed 0]``: the pilot's check on the shortlist:
   the overlap call on every listed trait of a seeded sample of B's candidates (those that reached the relation
   call), no relation call, no shortlist, no early exit, Opus on the pairs the rule sends it; the walk is replayed
@@ -497,6 +499,12 @@ def run_scoring(args, argv, *, mode: str) -> int:
         keys = [c.key for c in cands]
         E = EM.embed_texts(embedder, [texts[k] for k in keys], cache=cache, usage=usage)
         vectors = dict(zip(keys, E))
+        if getattr(args, "embed_only", False):
+            # the candidates are embedded (cached, charged to this run's usage.json); no LLM call is made, so
+            # that a real candidate's prompt can be rendered (render --key, or the dry run) before the first one
+            run_meta["embed_only"] = {"n_embedded": len(keys), "at": utc_now()}
+            print(f"embedded {len(keys)} candidates' query texts; continue with --resume")
+            return 0
         from dotenv import load_dotenv
         import anthropic
         load_dotenv(_REPO_ROOT / ".env")
@@ -800,6 +808,9 @@ def build_parser() -> argparse.ArgumentParser:
     sp.add_argument("--rescore", action="store_true", help="also rows another run has decided (their block is replaced)")
     sp.add_argument("--include-held", action="store_true", help="also rows on a holding list (nationalities)")
     sp.add_argument("--limit", type=int)
+    sp.add_argument("--embed-only", action="store_true",
+                    help="embed the candidates (the canary first; charged to the run's usage.json) and stop before any "
+                         "LLM call, so a real candidate's prompt can be rendered first; continue with --resume")
     sp.set_defaults(func=lambda a, argv: run_scoring(a, argv, mode="shortlist"))
     sp = sub.add_parser("full-scan", help="the overlap call on every listed trait of a sample (no registry writes)")
     _common_args(sp)
