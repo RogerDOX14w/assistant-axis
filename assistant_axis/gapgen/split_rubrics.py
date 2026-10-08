@@ -29,7 +29,9 @@ They are not split
 prompts: :data:`NAMES` and :func:`load_all` stay the split filter's eight (the split runner and its
 records use them), while :data:`PINNED_NAMES` (every set) is what the pins, :func:`mismatches` and
 ``rubric_pins.py`` cover.  Since 2026-10-07 a third set, :data:`M3_FILES`: M3's relation call
-(``relation.md``), first pinned as version 1.
+(``relation.md``), first pinned as version 1.  Since 2026-10-08 a fourth, :data:`GENERATOR_FILES`: the
+generators' own calls, so far the Roget head-scope call (``roget_head_scope.md``), first pinned as
+version 1.
 """
 from __future__ import annotations
 
@@ -77,8 +79,14 @@ M3_FILES: dict[str, str] = {
     "relation": "relation.md",
 }
 M3_NAMES: tuple[str, ...] = tuple(M3_FILES)
+#: The generators' own rubrics (2026-10-08): the Roget head-scope call of workstream 2
+#: (``assistant_axis/gapgen/generators/roget/head_scope.py``; QUESTIONS 44), first pinned as version 1.
+GENERATOR_FILES: dict[str, str] = {
+    "roget_head_scope": "roget_head_scope.md",
+}
+GENERATOR_NAMES: tuple[str, ...] = tuple(GENERATOR_FILES)
 #: Every prompt file pinned in ``versions.json``.
-PINNED_FILES: dict[str, str] = {**FILES, **OVERLAP_FILES, **M3_FILES}
+PINNED_FILES: dict[str, str] = {**FILES, **OVERLAP_FILES, **M3_FILES, **GENERATOR_FILES}
 PINNED_NAMES: tuple[str, ...] = tuple(PINNED_FILES)
 VERSIONS_NAME = "versions.json"
 

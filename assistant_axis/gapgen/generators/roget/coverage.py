@@ -15,6 +15,12 @@ Plan § 5 (``roget_coverage.py``), with the states the 2026-10-08 brief asks for
   rules left unresolved).
 
 ``hidden`` removes stems before anything is computed (for a recovery run).
+
+``ratings`` (the head-scope check, :mod:`.head_scope`; QUESTIONS 44): a head rated 0 ("few or none of
+its adjectives describe a person's character") keeps its state and gap class on its row (with
+``character = 0``) but is reported apart as **not character** and left out of the covered / partly /
+uncovered counts, the gap-class counts and lists, the opposed-pair counts and the covered lists.
+Without ratings (or for an unrated head) everything is as before.
 """
 from __future__ import annotations
 
@@ -63,6 +69,7 @@ class HeadRow:
     partner_state: Optional[str] = None
     partner_existing: list = field(default_factory=list)
     triggers: list = field(default_factory=list)            # Class I-III: the labels that brought it in
+    character: Optional[int] = None                         # head-scope rating (0, 1, 2), None if unrated
 
 
 @dataclass
@@ -122,8 +129,10 @@ def gap_class(row: HeadRow, partner_row: Optional[HeadRow]) -> str:
 
 
 def coverage(index: RogetIndex, pairs: Mapping[str, HeadPairing], label_heads: Mapping[str, Mapping], *,
-             hidden: Collection[str] = ()) -> CoverageReport:
-    """The coverage map over the dispositional heads and the restricted Class I-III set."""
+             hidden: Collection[str] = (), ratings: Optional[Mapping[str, Optional[int]]] = None,
+             scope_meta: Optional[dict] = None) -> CoverageReport:
+    """The coverage map over the dispositional heads and the restricted Class I-III set.  ``ratings``:
+    the head-scope ratings (head id -> 0, 1, 2 or None); ``scope_meta`` records where they came from."""
     hidden = sorted(set(hidden))
     hid_set = set(hidden)
     restricted = restricted_class_i_iii(index, label_heads, hidden=hid_set)
@@ -159,7 +168,8 @@ def coverage(index: RogetIndex, pairs: Mapping[str, HeadPairing], label_heads: M
                        existing=o["existing"], existing_secondary=o["existing_secondary"],
                        queued_active=o["queued_active"], queued_parked=o["queued_parked"],
                        n_existing=len(o["existing"]), n_queued_active=len(o["queued_active"]), state=state,
-                       triggers=list(restricted.get(h, [])))
+                       triggers=list(restricted.get(h, [])),
+                       character=(ratings or {}).get(h))
 
     all_rows = {h: make_row(h) for h in index.order}
     rows = []
@@ -171,26 +181,39 @@ def coverage(index: RogetIndex, pairs: Mapping[str, HeadPairing], label_heads: M
             r.partner_state = pr.state
             r.partner_existing = list(pr.existing)
         rows.append(r)
-    return CoverageReport(rows=rows, summary=summarize(rows, index, label_heads, restricted, hidden), hidden=hidden)
+    summary = summarize(rows, index, label_heads, restricted, hidden, ratings=ratings, scope_meta=scope_meta)
+    return CoverageReport(rows=rows, summary=summary, hidden=hidden)
+
+
+def is_not_character(row: HeadRow) -> bool:
+    return row.character == 0
 
 
 def summarize(rows: Sequence[HeadRow], index: RogetIndex, label_heads: Mapping[str, Mapping],
-              restricted: Mapping[str, list], hidden: Sequence[str]) -> dict:
+              restricted: Mapping[str, list], hidden: Sequence[str], *,
+              ratings: Optional[Mapping[str, Optional[int]]] = None, scope_meta: Optional[dict] = None) -> dict:
+    all_rows = list(rows)
+    nc_rows = [r for r in all_rows if is_not_character(r)]
+    rows = [r for r in all_rows if not is_not_character(r)]
     by_state = Counter(r.state for r in rows)
     by_gap = Counter(r.gap_class for r in rows)
     by_section: dict[str, dict] = {}
-    for r in rows:
+    for r in all_rows:
         key = f"{r.klass} {r.section}"
-        d = by_section.setdefault(key, {s: 0 for s in STATES})
-        d[r.state] += 1
-    # opposed heads (pairs whose two poles are both in scope or one of them is)
-    ids = {r.id: r for r in rows}
+        d = by_section.setdefault(key, {**{s: 0 for s in STATES}, "not_character": 0})
+        d["not_character" if is_not_character(r) else r.state] += 1
+    # opposed heads (pairs whose two poles are both in scope or one of them is); a pair with a pole
+    # rated not character is left out
+    ids = {r.id: r for r in all_rows}
+    nc_ids = {r.id for r in nc_rows}
     seen, opp = set(), Counter()
     opp_by_source: dict[str, Counter] = {}
     for r in rows:
         if r.pair_kind != "pair" or not r.partner or r.id in seen:
             continue
         seen |= {r.id, r.partner}
+        if r.partner in nc_ids:
+            continue
         p_state = ids[r.partner].state if r.partner in ids else r.partner_state
         n_cov = int(r.state == "covered") + int(p_state == "covered")
         key = {2: "both_poles_covered", 1: "one_pole_covered", 0: "neither_pole_covered"}[n_cov]
@@ -198,12 +221,14 @@ def summarize(rows: Sequence[HeadRow], index: RogetIndex, label_heads: Mapping[s
         opp_by_source.setdefault(r.pair_source, Counter())[key] += 1
     labels_mapped = Counter((v.get("source"), bool(v.get("primary"))) for k, v in label_heads.items()
                             if k not in set(hidden))
-    in_scope = {r.id for r in rows}
+    in_scope = {r.id for r in all_rows}
     primaries_in_scope = sum(1 for k, v in label_heads.items() if k not in set(hidden) and v.get("source") == "existing"
                              and v.get("primary") in in_scope)
+    rated = [r for r in all_rows if r.character is not None]
+    rating_counts = Counter(str(r.character) for r in rated)
     return {
-        "n_heads": len(rows),
-        "n_dispositional": sum(1 for r in rows if index.heads[r.id].number >= DISPOSITIONAL_MIN),
+        "n_heads": len(all_rows),
+        "n_dispositional": sum(1 for r in all_rows if index.heads[r.id].number >= DISPOSITIONAL_MIN),
         "class_i_iii_added": len(restricted),
         "by_state": {s: by_state.get(s, 0) for s in STATES},
         "covered_partly_uncovered": {"covered": by_state.get("covered", 0), "partly_covered": by_state.get("partly", 0),
@@ -220,6 +245,14 @@ def summarize(rows: Sequence[HeadRow], index: RogetIndex, label_heads: Mapping[s
                    "queued_unmapped": labels_mapped.get(("queued", False), 0),
                    "existing_primary_in_scope": primaries_in_scope},
         "hidden": list(hidden),
+        "not_character": {"n": len(nc_rows), "heads": [r.id for r in nc_rows],
+                          "by_state": dict(Counter(r.state for r in nc_rows)),
+                          "by_gap_class": dict(Counter(r.gap_class for r in nc_rows)),
+                          "by_class": dict(Counter(r.klass for r in nc_rows))},
+        "character_ratings": ({"rated": len(rated), "unrated": len(all_rows) - len(rated),
+                               "by_rating": {k: rating_counts.get(k, 0) for k in ("0", "1", "2")}}
+                              if ratings is not None else None),
+        "head_scope": scope_meta,
     }
 
 
@@ -232,7 +265,10 @@ def _links(stems: Sequence[str], source: str, label_heads: Mapping[str, Mapping]
 def render_markdown(report: CoverageReport, index: RogetIndex, label_heads: Mapping[str, Mapping], *,
                     unresolved_note: Optional[str] = None) -> str:
     s = report.summary
-    rows = report.rows
+    all_rows = report.rows
+    rows = [r for r in all_rows if not is_not_character(r)]
+    nc = s.get("not_character") or {"n": 0}
+    scope = s.get("head_scope")
     cpu = s["covered_partly_uncovered"]
     opp = s["opposed_pairs"]
     L: list[str] = []
@@ -255,10 +291,24 @@ def render_markdown(report: CoverageReport, index: RogetIndex, label_heads: Mapp
              "opposed head found), **queued_only**, **partly_covered**, **crowded** (three or more traits have it "
              "as their primary), **covered**.")
     L.append("")
+    if scope:
+        L.append("**Not character**: a head the head-scope check rated 0, few or none of its adjectives describing "
+                 "a person's character (Haiku 5.5, one rating per head, rubric "
+                 "[roget_head_scope.md](../../../reports/trait_gap_generation/rubrics/roget_head_scope.md) version "
+                 f"{scope.get('rubric_version')}; ratings in [head_scope.json](./head_scope.json), validation in "
+                 "[head_scope_readout.md](./head_scope_readout.md)).  Such a head keeps its state, but is listed "
+                 "apart below and left out of every count but the first; the harvest skips it.")
+        L.append("")
     L.append("## Headline")
     L.append("")
     L.append(f"- Heads in scope: **{s['n_heads']}** ({s['n_dispositional']} dispositional, "
              f"{s['class_i_iii_added']} from Classes I-III).")
+    if scope:
+        cr = s.get("character_ratings") or {}
+        br = cr.get("by_rating", {})
+        L.append(f"- Not character (rated 0): **{nc['n']}** heads, left out of the counts below "
+                 f"(ratings: 2 on {br.get('2', 0)}, 1 on {br.get('1', 0)}, 0 on {br.get('0', 0)}; "
+                 f"{cr.get('unrated', 0)} unrated, mostly heads with no adjectives).")
     L.append(f"- Covered **{cpu['covered']}**, partly covered **{cpu['partly_covered']}**, uncovered "
              f"**{cpu['uncovered']}** (of which {cpu['of_which_queued']} have a queued label only).")
     L.append(f"- Opposed pairs in scope: both poles covered **{opp.get('both_poles_covered', 0)}**, one pole "
@@ -274,10 +324,15 @@ def render_markdown(report: CoverageReport, index: RogetIndex, label_heads: Mapp
     L.append("")
     L.append("## By section")
     L.append("")
-    L.append("| class / section | covered | partly | queued | empty |")
-    L.append("|---|---|---|---|---|")
+    if scope:
+        L.append("| class / section | covered | partly | queued | empty | not character |")
+        L.append("|---|---|---|---|---|---|")
+    else:
+        L.append("| class / section | covered | partly | queued | empty |")
+        L.append("|---|---|---|---|---|")
     for key, d in s["by_section"].items():
-        L.append(f"| {key} | {d['covered']} | {d['partly']} | {d['queued']} | {d['empty']} |")
+        tail = f" {d.get('not_character', 0)} |" if scope else ""
+        L.append(f"| {key} | {d['covered']} | {d['partly']} | {d['queued']} | {d['empty']} |" + tail)
     L.append("")
 
     def head_ref(h: Optional[str]) -> str:
@@ -301,6 +356,21 @@ def render_markdown(report: CoverageReport, index: RogetIndex, label_heads: Mapp
                      f"{_links(r.queued_parked, 'queued', label_heads) or '-'} | "
                      f"{_links(r.existing_secondary, 'existing', label_heads) or '-'} |")
         L.append("")
+    nc_rows = [r for r in all_rows if is_not_character(r)]
+    if nc_rows:
+        L.append(f"## Not character ({len(nc_rows)})")
+        L.append("")
+        L.append("Rated 0 by the head-scope check; the reasons are in [head_scope.json](./head_scope.json).  A "
+                 "covered head here is one a trait was placed on although its adjectives are not about character.")
+        L.append("")
+        L.append("| head | section | state | its traits | queued | secondary of |")
+        L.append("|---|---|---|---|---|---|")
+        for r in nc_rows:
+            L.append(f"| {head_ref(r.id)} | {r.klass} {r.section} | {r.state} | "
+                     f"{_links(r.existing, 'existing', label_heads) or '-'} | "
+                     f"{_links(r.queued_active, 'queued', label_heads) or '-'} | "
+                     f"{_links(r.existing_secondary, 'existing', label_heads) or '-'} |")
+        L.append("")
     crowded = sorted([r for r in rows if r.state == "covered"], key=lambda r: (-r.n_existing, index.position(r.id)))
     L.append("## Most crowded heads")
     L.append("")
@@ -313,10 +383,10 @@ def render_markdown(report: CoverageReport, index: RogetIndex, label_heads: Mapp
     L.append("")
     L.append("| head | state | trigger labels |")
     L.append("|---|---|---|")
-    for r in rows:
+    for r in all_rows:
         if r.triggers:
             src = {t: label_heads.get(t, {}).get("source", "existing") for t in r.triggers}
-            L.append(f"| {head_ref(r.id)} | {r.state} | "
+            L.append(f"| {head_ref(r.id)} | {r.state}{' (not character)' if is_not_character(r) else ''} | "
                      + ", ".join(trait_link(t, src[t], label=label_heads.get(t, {}).get('label') or t) for t in r.triggers)
                      + " |")
     L.append("")

@@ -7,9 +7,10 @@ sibling stream (``reports/trait_gap_generation/coding_plan_02_roget_wordnet.md``
     uv run python data_analysis/gap_generation/roget_generate.py parse [--allow-checksum-mismatch] [--fixture IDS]
     uv run python data_analysis/gap_generation/roget_generate.py pair [--sweep] [--position]
     uv run python data_analysis/gap_generation/roget_generate.py map [--embedder openai|hash] [--budget-usd 0.25]
-    uv run python data_analysis/gap_generation/roget_generate.py coverage
+    uv run python data_analysis/gap_generation/roget_generate.py head-scope [--budget-usd 1] [--render IDS] [--force]
+    uv run python data_analysis/gap_generation/roget_generate.py coverage [--head-scope F | --no-head-scope]
     uv run python data_analysis/gap_generation/roget_generate.py harvest --run-id R [--every-nth K --offset J]
-        [--per-head-cap 10] [--pair-top 3] [--classes ...] [--include-wn] [--force]
+        [--per-head-cap 10] [--pair-top 3] [--classes ...] [--include-wn] [--force] [--head-scope F | --no-head-scope]
     uv run python data_analysis/gap_generation/roget_generate.py submit --run-id R [--generator roget|wn_clusters]
 
 Every command takes ``--dry-run`` (prints what it would do; writes nothing, calls nothing).
@@ -26,11 +27,21 @@ Every command takes ``--dry-run`` (prints what it would do; writes nothing, call
   OpenAI ``text-embedding-3-large`` (direct key from ``.env``), cached under
   ``data/candidates/cache/embeddings/``: about 1,950 short texts, about $0.02 on a cold cache.
   ``--budget-usd`` is the hard cap (default $0.25).
-* ``coverage``: ``roget_coverage.json`` and ``roget_coverage.md``.  No calls.
+* ``head-scope``: one Haiku 5.5 rating per head of the coverage map's scope, 20 heads a call, of whether
+  the head's adjectives describe a person's character (2 most, 1 some, 0 few or none; QUESTIONS 44;
+  rubric ``reports/trait_gap_generation/rubrics/roget_head_scope.md``, refused unless pinned).  Writes
+  ``head_scope.json``, the cumulative ``head_scope_usage.json`` and appends every response to
+  ``head_scope_responses.jsonl``.  About 30 calls, a few cents; ``--budget-usd`` is the hard cap (default
+  $1).  A rerun sends only the heads not yet rated under the same rubric and model (``--force``: all).
+  ``--render IDS`` prints the calls that hold those heads, as sent, and stops.
+* ``coverage``: ``roget_coverage.json`` and ``roget_coverage.md``.  No calls.  With the head-scope
+  ratings (``--head-scope F``; default ``head_scope.json`` in ``--out`` when it exists; ``--no-head-scope``
+  ignores it) the heads rated 0 are reported apart as "not character".
 * ``harvest``: the run directory ``data/candidates/runs/roget/<R>/`` gets ``candidates.jsonl``
   (written before anything is submitted), ``pair_candidates.jsonl``, ``harvest_report.md`` and
   ``harvest_counts.json``; ``--include-wn`` also writes ``data/candidates/runs/wn_clusters/<R>/``.
-  Prints the downstream (M1 and M3) estimate.  No calls.
+  Prints the downstream (M1 and M3) estimate.  No calls.  ``--head-scope`` as for ``coverage``: the
+  heads rated 0 are skipped (drop reason ``not_character``).
 * ``submit``: ``start_run``, ``submit_candidates`` (idempotent), ``RunContext.finish`` (``run.json``,
   ``usage.json``); prints the platform commands to run next.  Refuses without ``candidates.jsonl``.
 """
@@ -274,6 +285,128 @@ def cmd_map(args) -> int:
     return 0
 
 
+# --------------------------------------------------------------------------- head scope
+
+def _head_scope(args):
+    """The head-scope ratings to apply: ``--head-scope F``, else ``head_scope.json`` in ``--out`` when it
+    exists; ``None`` with ``--no-head-scope`` or when there is no file."""
+    from assistant_axis.gapgen.generators.roget import head_scope as S
+    if getattr(args, "no_head_scope", False):
+        return None
+    given = getattr(args, "head_scope", None)
+    if given is not None:
+        if not Path(given).exists():
+            raise SystemExit(f"--head-scope {given}: not found (run `roget_generate.py head-scope`)")
+        return S.load(Path(given))
+    default = Path(args.out) / S.FILE_NAME
+    return S.load(default) if default.exists() else None
+
+
+def _anthropic_client():
+    import anthropic
+    from dotenv import load_dotenv
+    load_dotenv(_REPO_ROOT / ".env")
+    return anthropic.AsyncAnthropic(max_retries=0)
+
+
+def cmd_head_scope(args) -> int:
+    import asyncio
+
+    from assistant_axis.gapgen.cost import GuardedUsage
+    from assistant_axis.gapgen.generators.roget import head_scope as S
+    from assistant_axis.gapgen.registry import utc_now
+    from assistant_axis.judge import warn_if_low_parse_rate
+    from assistant_axis.judge_pricing import MultiModelUsage
+
+    idx, pairs, lh = _load_all(args)
+    scope = [r.id for r in C.coverage(idx, pairs, lh).rows]
+    try:
+        rubric = S.load_rubric(args.rubrics_dir)
+    except S.RubricNotPinned as exc:
+        if not args.render:
+            raise SystemExit(f"REFUSED: {exc}")
+        # a draft is rendered to be read before it is pinned
+        from assistant_axis.gapgen import split_rubrics as sr
+        print(f"(rendering the unpinned draft: {str(exc).splitlines()[0]})", file=sys.stderr)
+        rubric = {"name": S.RUBRIC_NAME, "text": sr.load_prompt(S.RUBRIC_NAME, args.rubrics_dir), "version": None,
+                  "sha256": None}
+    items, skipped = S.scope_items(idx, scope, max_adjectives=args.max_adjectives)
+    out = Path(args.out)
+    path = out / S.FILE_NAME
+    prev = S.load(path) if path.exists() and not args.force else None
+    keep = S.reusable(prev, rubric=rubric, model=args.model)
+    todo = [it for it in items if it.id not in keep]
+    if args.limit:
+        todo = todo[: args.limit]
+    batches = S.make_batches(todo, args.batch_size)
+    system = rubric["text"]
+    if args.render:
+        want = set(_ids(args.render))
+        every = S.make_batches(items, args.batch_size)
+        print("SYSTEM:\n" + system + "\n")
+        for bi, b in enumerate(every):
+            if want & {it.id for it in b}:
+                print(f"USER (call {bi + 1} of {len(every)}, heads {b[0].id}-{b[-1].id}):\n{S.render_user(b)}\n")
+        return 0
+    est = S.estimate(batches, system, args.model)
+    cache = S.should_cache(system, args.model)
+    print(f"heads in scope {len(scope)}: {len(items)} with adjectives, {len(skipped)} without (skipped); "
+          f"{len(keep)} already rated under rubric version {rubric['version']} on {args.model} (kept); "
+          f"{len(todo)} to rate in {len(batches)} calls of at most {args.batch_size}")
+    print(f"estimate: {est['n_calls']} calls, {est['in_tok']:,} input and {est['out_tok']:,} output tokens at "
+          f"{args.model} rates = ${est['usd']:.4f} (cap --budget-usd ${args.budget_usd:.2f}); system prompt "
+          f"{'cached' if cache else 'sent uncached (under the caching minimum)'}")
+    if est["usd"] > args.budget_usd:
+        raise SystemExit(f"REFUSED: estimate ${est['usd']:.4f} is over --budget-usd ${args.budget_usd:.2f}")
+    if args.dry_run:
+        print("DRY-RUN: no call; the first three prompts as sent (system prompt = the rubric block):")
+        for b in batches[:3]:
+            print(S.render_user(b) + "\n")
+        return 0
+    if not batches:
+        print("nothing to rate")
+    usage_path = out / S.USAGE_NAME
+    usage = GuardedUsage(budget_usd=args.budget_usd)
+    res = S.RateResult()
+    try:
+        if batches:
+            res = asyncio.run(S.rate_batches(batches, client=_anthropic_client(), model=args.model, system=system,
+                                             usage=usage, concurrency=args.concurrency, cache_system=cache,
+                                             rubric_version=rubric["version"], now=utc_now))
+    finally:
+        total = MultiModelUsage.load_or_create(usage_path) if usage_path.exists() else MultiModelUsage()
+        total.merge_from(usage.plain())
+        out.mkdir(parents=True, exist_ok=True)
+        total.write_json(usage_path)
+        print(usage.log_line("[usage this run]"), file=sys.stderr)
+        print(total.log_line("[usage cumulative]"), file=sys.stderr)
+    S.append_responses(res.log, out / S.RESPONSES_NAME)
+    n_ok, n_total = res.parse_rate()
+    warn_if_low_parse_rate(label=f"roget head_scope:{args.model}", n_ok=n_ok, n_total=n_total)
+    payload = S.build_payload(idx, scope, skipped, res.rows, res.errors, model=args.model, rubric=rubric,
+                              batch_size=args.batch_size, max_adjectives=args.max_adjectives, previous=keep,
+                              extra={"last_run": {"at": utc_now(), "n_calls": len(res.log),
+                                                  "n_retries": sum(1 for r in res.log if r["attempt"] > 1),
+                                                  "cost_usd": round(usage.total_cost_usd, 6),
+                                                  "estimate": est, "cache_system": cache,
+                                                  "concurrency": args.concurrency, "parse_rate": [n_ok, n_total],
+                                                  "stopped_by_budget": res.stopped_by_budget}})
+    inputs = _coverage_inputs(out) + [_input("head_scope_rubric", sr_path(rubric), version=rubric["version"],
+                                             sha256=rubric["sha256"])]
+    S.save(payload, path, inputs=inputs)
+    print(json.dumps(payload["summary"]))
+    print(f"wrote {path}, {usage_path}, {out / S.RESPONSES_NAME}")
+    if res.stopped_by_budget:
+        print(f"STOPPED at --budget-usd ${args.budget_usd:.2f}: rerun to rate the rest", file=sys.stderr)
+        return 2
+    return 0
+
+
+def sr_path(rubric: dict) -> Path:
+    p = Path(rubric["file"])
+    return p if p.is_absolute() else _REPO_ROOT / p
+
+
 # --------------------------------------------------------------------------- coverage
 
 def _coverage_inputs(out_dir: Path):
@@ -299,15 +432,19 @@ def unresolved_note(idx, pairs) -> str:
 
 def cmd_coverage(args) -> int:
     idx, pairs, lh = _load_all(args)
-    rep = C.coverage(idx, pairs, lh)
+    hs = _head_scope(args)
+    rep = C.coverage(idx, pairs, lh, ratings=hs.ratings if hs else None, scope_meta=hs.meta() if hs else None)
+    nc = rep.summary["not_character"]
     print(json.dumps({k: rep.summary[k] for k in ("n_heads", "class_i_iii_added", "covered_partly_uncovered",
-                                                  "by_gap_class", "opposed_pairs", "labels")}, indent=1))
+                                                  "by_gap_class", "opposed_pairs", "labels", "head_scope")}
+                     | {"not_character": {k: v for k, v in nc.items() if k != "heads"}}, indent=1))
     out = Path(args.out)
     if args.dry_run:
         print(f"DRY-RUN: would write {out / 'roget_coverage.json'} and {out / 'roget_coverage.md'}")
         return 0
+    inputs = _coverage_inputs(out) + ([_input("head_scope", hs.path)] if hs else [])
     C.write_coverage(rep, out / "roget_coverage.json", out / "roget_coverage.md", index=idx, label_heads=lh,
-                     inputs=_coverage_inputs(out), unresolved_note=unresolved_note(idx, pairs))
+                     inputs=inputs, unresolved_note=unresolved_note(idx, pairs))
     print(f"wrote {out / 'roget_coverage.json'}, {out / 'roget_coverage.md'}")
     return 0
 
@@ -331,8 +468,12 @@ def cmd_harvest(args) -> int:
     lex = _lexicon(args)
     known = known_stems(args)
     labels = {k: v.get("label") or k for k, v in lh.items()}
-    res = H.harvest(rep, idx, pairs, cfg=cfg, known_stems=known, run_id=args.run_id, lex=lex, label_of=labels)
-    print(json.dumps({k: v for k, v in res.counts.items() if k != "per_head"}, indent=1))
+    hs = _head_scope(args)
+    res = H.harvest(rep, idx, pairs, cfg=cfg, known_stems=known, run_id=args.run_id, lex=lex, label_of=labels,
+                    head_scope=hs.ratings if hs else None)
+    res.counts["head_scope"] = hs.meta() if hs else None
+    res.config["head_scope"] = hs.meta()["path"] if hs else None
+    print(json.dumps({k: v for k, v in res.counts.items() if k not in ("per_head", "head_ratings")}, indent=1))
     run = paths.run_dir(H.GENERATOR, args.run_id, candidates_dir=args.candidates_dir)
     wn_items, wn_cands = [], []
     if cfg.include_wn:
@@ -422,6 +563,13 @@ def cmd_submit(args) -> int:
 
 # --------------------------------------------------------------------------- parser
 
+def _head_scope_flags(sp) -> None:
+    g = sp.add_mutually_exclusive_group()
+    g.add_argument("--head-scope", type=Path, default=None,
+                   help="head-scope ratings to apply (default: head_scope.json in --out when it exists)")
+    g.add_argument("--no-head-scope", action="store_true", help="ignore the head-scope ratings")
+
+
 def build_parser() -> argparse.ArgumentParser:
     ap = argparse.ArgumentParser(description=__doc__.split("\n\n")[0])
     ap.add_argument("--data-dir", type=Path, default=paths.DATA_DIR)
@@ -454,7 +602,20 @@ def build_parser() -> argparse.ArgumentParser:
     sp.add_argument("--cache-dir", type=Path, default=None)
     sp.add_argument("--limit", type=int, default=None)
 
-    sub.add_parser("coverage")
+    sp = sub.add_parser("head-scope")
+    sp.add_argument("--model", default="claude-haiku-5-5")
+    sp.add_argument("--batch-size", type=int, default=20)
+    sp.add_argument("--max-adjectives", type=int, default=20)
+    sp.add_argument("--budget-usd", type=float, default=1.0)
+    sp.add_argument("--concurrency", type=int, default=4)
+    sp.add_argument("--limit", type=int, default=None, help="rate only the first N heads still to rate")
+    sp.add_argument("--force", action="store_true", help="rate every head again (ignore head_scope.json)")
+    sp.add_argument("--render", default=None, metavar="IDS",
+                    help="print the calls holding these head ids, as sent, and stop (no call, no write)")
+    sp.add_argument("--rubrics-dir", type=Path, default=None, help=argparse.SUPPRESS)
+
+    sp = sub.add_parser("coverage")
+    _head_scope_flags(sp)
 
     sp = sub.add_parser("harvest")
     sp.add_argument("--run-id", required=True)
@@ -466,6 +627,7 @@ def build_parser() -> argparse.ArgumentParser:
     sp.add_argument("--offset", type=int, default=0)
     sp.add_argument("--include-wn", action="store_true")
     sp.add_argument("--force", action="store_true")
+    _head_scope_flags(sp)
 
     sp = sub.add_parser("submit")
     sp.add_argument("--run-id", required=True)
@@ -479,8 +641,8 @@ def build_parser() -> argparse.ArgumentParser:
 
 def main(argv=None) -> int:
     args = build_parser().parse_args(argv)
-    return {"fetch": cmd_fetch, "parse": cmd_parse, "pair": cmd_pair, "map": cmd_map, "coverage": cmd_coverage,
-            "harvest": cmd_harvest, "submit": cmd_submit}[args.cmd](args)
+    return {"fetch": cmd_fetch, "parse": cmd_parse, "pair": cmd_pair, "map": cmd_map, "head-scope": cmd_head_scope,
+            "coverage": cmd_coverage, "harvest": cmd_harvest, "submit": cmd_submit}[args.cmd](args)
 
 
 if __name__ == "__main__":

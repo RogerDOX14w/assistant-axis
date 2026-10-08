@@ -16,6 +16,13 @@ opposed head (or, for a pair completion, the trait that covers it) that WordNet 
 antonym or that is a negation form of the word (:func:`pair_candidates`; the rank-matched pairs
 it adds up to ``pair_top`` per head pair are recorded in ``pair_candidates.jsonl`` without a hint).
 
+With ``head_scope`` (the head-scope ratings, :mod:`.head_scope`; QUESTIONS 44) a selected head rated 0
+(few or none of its adjectives describe a person's character) is skipped: the words it would have given
+are counted under the drop reason ``not_character``, and the head under ``n_heads_not_character``.  The
+rating of every selected head is recorded in ``harvest_counts.json`` (``head_ratings``), in
+``harvest_report.md`` and on each :class:`HarvestItem` (``character``), never in the Candidates.  Without
+it the harvest is as before.
+
 ``--every-nth K`` (the pilot) keeps every K-th gap head in text order together with its opposed
 head when that head is also a gap head.  The run directory gets ``candidates.jsonl`` (exactly
 ``dataclasses.asdict`` of every Candidate, one per line: the tracked file another checkout
@@ -82,6 +89,7 @@ class HarvestItem:
     class_vi: bool
     gap_class: str = ""
     gloss_hint: str = ""
+    character: Optional[int] = None     # the head-scope rating of the head (1 or 2), None if unrated
 
 
 @dataclass
@@ -107,6 +115,7 @@ class HarvestResult:
     selected_heads: list
     wn_items: list = field(default_factory=list)
     wn_candidates: list = field(default_factory=list)
+    head_gap_class: dict = field(default_factory=dict)    # selected head -> its gap class
 
 
 # --------------------------------------------------------------------------- label hygiene
@@ -379,16 +388,28 @@ def to_candidates(items: Sequence[HarvestItem], *, generator: str, run_id: str,
 
 def harvest(report: CoverageReport, index: RogetIndex, pairs: Mapping[str, HeadPairing], *, cfg: HarvestConfig,
             known_stems: Collection[str], run_id: str, lex=None, zipf: Optional[Callable[[str], float]] = None,
-            label_of: Optional[Mapping[str, str]] = None) -> HarvestResult:
-    """Harvest the selected gap heads; build the gloss hints, the pair candidates and the Candidates."""
+            label_of: Optional[Mapping[str, str]] = None,
+            head_scope: Optional[Mapping[str, Optional[int]]] = None) -> HarvestResult:
+    """Harvest the selected gap heads; build the gloss hints, the pair candidates and the Candidates.
+    ``head_scope`` (head id -> 0, 1, 2 or None): heads rated 0 are skipped and counted."""
     rows = report.by_id()
     selected = select_heads(report, cfg)
     by_head: dict[str, list[HarvestItem]] = {}
     drops: Counter = Counter()
+    not_character: list[str] = []
+    ratings = dict(head_scope or {})
     for h in selected:
         r = rows[h]
         items, d = harvest_head(index.heads[h], known_stems=known_stems, cfg=cfg, lex=lex, zipf=zipf,
                                 partner_id=r.partner, gap=r.gap_class)
+        if ratings.get(h) == 0:
+            # not character: the words it would have given are dropped and counted, its other drops are not
+            not_character.append(h)
+            if items:
+                drops["not_character"] += len(items)
+            continue
+        for it in items:
+            it.character = ratings.get(h)
         drops.update(d)
         partner_head = index.heads[r.partner] if r.partner and r.partner in index.heads else None
         for it in items:
@@ -399,7 +420,7 @@ def harvest(report: CoverageReport, index: RogetIndex, pairs: Mapping[str, HeadP
     done: set[frozenset] = set()
     for h in selected:
         r = rows[h]
-        if not r.partner or r.pair_kind != "pair" or frozenset((h, r.partner)) in done:
+        if h not in by_head or not r.partner or r.pair_kind != "pair" or frozenset((h, r.partner)) in done:
             continue
         done.add(frozenset((h, r.partner)))
         src = r.pair_source
@@ -423,11 +444,16 @@ def harvest(report: CoverageReport, index: RogetIndex, pairs: Mapping[str, HeadP
         hints.setdefault((p.a, p.head_a), p.b)
         if not p.partner_existing:
             hints.setdefault((p.b, p.head_b), p.a)
-    items = [it for h in selected for it in by_head[h]]
+    items = [it for h in selected for it in by_head.get(h, [])]
     cands = to_candidates(items, generator=GENERATOR, run_id=run_id, partner_hints=hints)
     counts = harvest_counts(report, selected, by_head, drops, pc, cands, cfg)
+    counts["n_heads_not_character"] = len(not_character)
+    counts["heads_not_character"] = not_character
+    counts["head_ratings"] = {h: ratings.get(h) for h in selected} if head_scope is not None else {}
+    counts["items_by_character"] = (dict(Counter(str(it.character) for it in items)) if head_scope is not None
+                                    else {})
     return HarvestResult(items=items, pairs=pc, candidates=cands, counts=counts, config=cfg.to_json(),
-                         selected_heads=selected)
+                         selected_heads=selected, head_gap_class={h: rows[h].gap_class for h in selected})
 
 
 def harvest_counts(report: CoverageReport, selected: Sequence[str], by_head: Mapping[str, list], drops: Counter,
@@ -507,14 +533,23 @@ def report_markdown(result: HarvestResult, index: RogetIndex, *, run_id: str, ti
          f"- Pair candidates {c['n_pair_candidates']} (WordNet-confirmed {c['n_double_confirmed']}, negation forms "
          f"{c['n_morph']}); candidates with a partner hint {c['n_partner_hints']}.",
          f"- Downstream estimate: M1 about ${c['downstream_estimate_usd']['m1']:.2f}; M3 about "
-         f"${c['downstream_estimate_usd']['m3_if_half_pass']:.2f} if half the words pass M1.", "",
-         "| head | gap class | words |", "|---|---|---|"]
+         f"${c['downstream_estimate_usd']['m3_if_half_pass']:.2f} if half the words pass M1."]
+    ratings = c.get("head_ratings") or {}
+    if ratings:
+        L.append(f"- Head scope ({c.get('head_scope', {}).get('path', 'head-scope ratings')}): "
+                 f"{c.get('n_heads_not_character', 0)} selected heads rated 0 (not character) skipped, "
+                 f"{c['drops'].get('not_character', 0)} words with them; words by the rating of their head "
+                 f"{json.dumps(c.get('items_by_character', {}))}.")
+    L += ["", "| head | gap class | character | words |", "|---|---|---|---|"]
     by_head: dict[str, list] = {}
     for it in result.items:
         by_head.setdefault(it.head_id, []).append(it.surface)
+    skipped = set(c.get("heads_not_character") or [])
     for h in result.selected_heads:
-        gc = next((it.gap_class for it in result.items if it.head_id == h), "")
-        L.append(f"| {h} {index.heads[h].title} | {gc or '-'} | {', '.join(by_head.get(h, [])) or '-'} |")
+        gc = result.head_gap_class.get(h) or next((it.gap_class for it in result.items if it.head_id == h), "")
+        rt = ratings.get(h)
+        words = "skipped (not character)" if h in skipped else (", ".join(by_head.get(h, [])) or "-")
+        L.append(f"| {h} {index.heads[h].title} | {gc or '-'} | {'-' if rt is None else rt} | {words} |")
     L.append("")
     return "\n".join(L)
 

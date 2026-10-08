@@ -152,3 +152,94 @@ def test_submit_refuses_without_candidates(tree):
 
 def test_ids_spec():
     assert R._ids("1,2,600-602,604a") == ["1", "2", "600", "601", "602", "604a"]
+
+
+# --------------------------------------------------------------------------- head scope (QUESTIONS 44)
+
+def _fake_client(ratings, calls):
+    from assistant_axis.tests.fake_anthropic import FakeAsyncAnthropic, user_text
+
+    def respond(kw):
+        ids = [h["id"] for h in json.loads(user_text(kw))["heads"]]
+        return json.dumps({"results": [{"id": i, "reason": f"r{i}", "character": ratings.get(i, 2)} for i in ids]})
+    client = FakeAsyncAnthropic(respond)
+    calls.append(client)
+    return client
+
+
+def test_head_scope_dry_run_and_render_write_nothing_and_call_nothing(tree, monkeypatch, capsys):
+    tmp_path, base = tree
+    build(tmp_path, base)
+    monkeypatch.setattr(R, "_anthropic_client", lambda: (_ for _ in ()).throw(AssertionError("no client")))
+    snap = snapshot(tmp_path)
+    assert run(base, "--dry-run", "head-scope") == 0
+    out = capsys.readouterr().out
+    assert "DRY-RUN" in out and '{"heads": [' in out and "estimate:" in out
+    assert run(base, "head-scope", "--render", "604") == 0
+    out = capsys.readouterr().out
+    assert out.startswith("SYSTEM:\n") and '"id": "604"' in out
+    assert snapshot(tmp_path) == snap
+
+
+def test_head_scope_refuses_an_estimate_over_the_budget(tree):
+    tmp_path, base = tree
+    build(tmp_path, base)
+    with pytest.raises(SystemExit, match="REFUSED"):
+        run(base, "head-scope", "--budget-usd", "0.0000001")
+    assert not (tmp_path / "out" / "head_scope.json").exists()
+
+
+def test_head_scope_run_then_coverage_and_harvest_use_it(tree, monkeypatch):
+    from assistant_axis.gapgen.generators.roget import head_scope as S
+    tmp_path, base = tree
+    build(tmp_path, base)
+    out = tmp_path / "out"
+    cov0 = json.loads((out / "roget_coverage.json").read_text())["result"]
+    calls = []
+    monkeypatch.setattr(R, "_anthropic_client", lambda: _fake_client({"898": 0, "603": 1}, calls))
+    assert run(base, "head-scope", "--batch-size", "5") == 0
+    hs = S.load(out / "head_scope.json")
+    assert hs.ratings["898"] == 0 and hs.ratings["603"] == 1 and hs.ratings["604"] == 2
+    n_calls = len(calls[0].calls)
+    assert n_calls == len(S.make_batches([r for r in hs.rows.values() if not r["skipped"]], 5)) > 1
+    u = json.loads((out / "head_scope_usage.json").read_text())
+    assert u["n_calls"] == n_calls and set(u["per_model"]) == {"claude-haiku-5-5"}
+    assert len((out / "head_scope_responses.jsonl").read_text().splitlines()) == n_calls
+    env = json.loads((out / "head_scope.json").read_text())
+    assert {i["dep_key"] for i in env["_provenance"]["inputs"]} >= {"roget_heads", "label_heads", "head_scope_rubric"}
+    # a rerun sends nothing (no client is even built): every head is rated under the same rubric and model
+    assert run(base, "head-scope") == 0 and len(calls) == 1
+    assert json.loads((out / "head_scope_usage.json").read_text())["n_calls"] == n_calls
+    # coverage picks the file up by default; --no-head-scope ignores it
+    assert run(base, "coverage") == 0
+    cov = json.loads((out / "roget_coverage.json").read_text())["result"]
+    assert cov["summary"]["not_character"]["heads"] == ["898"]
+    assert cov["summary"]["head_scope"]["n_not_character"] == 1
+    assert "## Not character (1)" in (out / "roget_coverage.md").read_text()
+    assert run(base, "coverage", "--no-head-scope") == 0
+    cov2 = json.loads((out / "roget_coverage.json").read_text())["result"]
+    assert cov2["summary"]["covered_partly_uncovered"] == cov0["summary"]["covered_partly_uncovered"]
+    assert cov2["summary"]["not_character"]["n"] == 0
+    # the harvest skips the head rated 0
+    run(base, "coverage")
+    assert run(base, "harvest", "--run-id", "hs1", "--classes", *C_ALL) == 0
+    rd = tmp_path / "cands" / "runs" / "roget" / "hs1"
+    refs = {json.loads(l)["source_ref"] for l in (rd / "candidates.jsonl").read_text().splitlines()}
+    counts = json.loads((rd / "harvest_counts.json").read_text())
+    assert "roget:898" not in refs and counts["counts"]["heads_not_character"] == ["898"]
+    assert counts["counts"]["head_scope"]["path"].endswith("head_scope.json")
+    assert counts["config"]["head_scope"].endswith("head_scope.json")
+    assert run(base, "harvest", "--run-id", "hs2", "--classes", *C_ALL, "--no-head-scope") == 0
+    refs2 = {json.loads(l)["source_ref"]
+             for l in (tmp_path / "cands" / "runs" / "roget" / "hs2" / "candidates.jsonl").read_text().splitlines()}
+    assert "roget:898" in refs2 and refs == refs2 - {"roget:898"}
+
+
+def test_head_scope_flag_must_name_a_file(tree):
+    tmp_path, base = tree
+    build(tmp_path, base)
+    with pytest.raises(SystemExit, match="not found"):
+        run(base, "coverage", "--head-scope", str(tmp_path / "nope.json"))
+
+
+C_ALL = ["pair_completion", "pair_empty", "singleton_empty", "queued_only", "partly_covered", "crowded", "covered"]
