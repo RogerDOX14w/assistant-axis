@@ -1,0 +1,5199 @@
+{
+  "n_rows": 17958,
+  "n_tda": 2818,
+  "n_allport": 17708,
+  "n_both": 2569,
+  "n_eligible": 11002,
+  "per_column": {
+    "I": 4457,
+    "II": 4497,
+    "III": 5176,
+    "IV": 3636
+  },
+  "only_column": {
+    "I": 2947,
+    "II": 4230,
+    "III": 4508,
+    "IV": 3408
+  },
+  "per_stage": {
+    "allport_hi": 4746,
+    "allport_probe": 3438,
+    "none": 6956,
+    "tda": 2818
+  },
+  "ineligible": {
+    "below_hard_reject": 1341,
+    "malformed": 1,
+    "unknown_word": 5614
+  },
+  "per_zipf_band": {
+    "tda": {
+      "1.5-2.5": 520,
+      "2.5-3.5": 933,
+      "<1.5": 495,
+      ">=3.5": 870
+    },
+    "allport_only": {
+      "1.5-2.5": 2314,
+      "2.5-3.5": 2723,
+      "<1.5": 8079,
+      ">=3.5": 2023
+    }
+  },
+  "tda_below_dictionary_floor": 251,
+  "platform_probe": {
+    "allport_probe": 3438,
+    "none": 6955,
+    "tda": 1015
+  },
+  "unknown_word": 6477,
+  "repaired": 23,
+  "repair_suggestions": 706,
+  "malformed": 1,
+  "with_gloss_hint": 8375,
+  "corpus_stem_match": 444,
+  "queue_stem_match": 304,
+  "counters": {
+    "allport_cross_column_merges": 58,
+    "allport_lines_I": 4470,
+    "allport_lines_II": 4511,
+    "allport_lines_III": 5191,
+    "allport_lines_IV": 3652,
+    "allport_within_column_duplicates": 57,
+    "n_malformed": 1,
+    "n_repair_suggestions": 706,
+    "n_repaired": 23,
+    "tda_rows_merged_extra": 0
+  },
+  "ceiling": {
+    "n_corpus": 790,
+    "n_multiword": 244,
+    "n_tda": 394,
+    "n_allport": 411,
+    "n_union": 444,
+    "tda": 0.4987,
+    "allport": 0.5203,
+    "union": 0.562,
+    "union_single_word": 0.7747,
+    "n_matched_eligible": 444,
+    "submitted_of_matched": 1.0,
+    "matched_ineligible": [],
+    "n_queue": 238,
+    "n_queue_union": 65
+  },
+  "malformed_list": [
+    {
+      "source": "allport:III",
+      "raw": "F.F.V",
+      "line": 1728
+    }
+  ],
+  "repaired_list": [
+    {
+      "raw": "Belicose",
+      "column": "I",
+      "line": 145,
+      "repaired": "bellicose",
+      "kind": "doubling"
+    },
+    {
+      "raw": "Cadish",
+      "column": "I",
+      "line": 251,
+      "repaired": "caddish",
+      "kind": "doubling"
+    },
+    {
+      "raw": "Dilettant",
+      "column": "I",
+      "line": 655,
+      "repaired": "dilettante",
+      "kind": "vowel_insertion"
+    },
+    {
+      "raw": "Hallucinator",
+      "column": "I",
+      "line": 1191,
+      "repaired": "hallucinatory",
+      "kind": "vowel_insertion"
+    },
+    {
+      "raw": "lubricous",
+      "column": "I",
+      "line": 1759,
+      "repaired": "lubricious",
+      "kind": "vowel_insertion"
+    },
+    {
+      "raw": "meglomaniacal",
+      "column": "I",
+      "line": 1856,
+      "repaired": "megalomaniacal",
+      "kind": "vowel_insertion"
+    },
+    {
+      "raw": "nonmitative",
+      "column": "I",
+      "line": 2135,
+      "repaired": "nonimitative",
+      "kind": "vowel_insertion"
+    },
+    {
+      "raw": "throughgoing",
+      "column": "I",
+      "line": 3663,
+      "repaired": "thoroughgoing",
+      "kind": "vowel_insertion"
+    },
+    {
+      "raw": "unpeacable",
+      "column": "I",
+      "line": 4052,
+      "repaired": "unpeaceable",
+      "kind": "vowel_insertion"
+    },
+    {
+      "raw": "unvocal",
+      "column": "I",
+      "line": 4212,
+      "repaired": "univocal",
+      "kind": "vowel_insertion"
+    },
+    {
+      "raw": "exhauusted",
+      "column": "II",
+      "line": 1343,
+      "repaired": "exhausted",
+      "kind": "doubling"
+    },
+    {
+      "raw": "orented",
+      "column": "II",
+      "line": 2762,
+      "repaired": "oriented",
+      "kind": "vowel_insertion"
+    },
+    {
+      "raw": "probbing",
+      "column": "II",
+      "line": 3429,
+      "repaired": "probing",
+      "kind": "doubling"
+    },
+    {
+      "raw": "flagitous",
+      "column": "III",
+      "line": 1759,
+      "repaired": "flagitious",
+      "kind": "vowel_insertion"
+    },
+    {
+      "raw": "forgetable",
+      "column": "III",
+      "line": 1827,
+      "repaired": "forgettable",
+      "kind": "doubling"
+    },
+    {
+      "raw": "marriagable",
+      "column": "III",
+      "line": 2622,
+      "repaired": "marriageable",
+      "kind": "vowel_insertion"
+    },
+    {
+      "raw": "sapiental",
+      "column": "III",
+      "line": 3634,
+      "repaired": "sapiential",
+      "kind": "vowel_insertion"
+    },
+    {
+      "raw": "toadish",
+      "column": "III",
+      "line": 4215,
+      "repaired": "toadyish",
+      "kind": "vowel_insertion"
+    },
+    {
+      "raw": "unmmanageable",
+      "column": "III",
+      "line": 4759,
+      "repaired": "unmanageable",
+      "kind": "doubling"
+    },
+    {
+      "raw": "begrimmed",
+      "column": "IV",
+      "line": 180,
+      "repaired": "begrimed",
+      "kind": "doubling"
+    },
+    {
+      "raw": "inhomogenous",
+      "column": "IV",
+      "line": 1302,
+      "repaired": "inhomogeneous",
+      "kind": "vowel_insertion"
+    },
+    {
+      "raw": "unsexual",
+      "column": "IV",
+      "line": 3365,
+      "repaired": "unisexual",
+      "kind": "vowel_insertion"
+    },
+    {
+      "raw": "unwakened",
+      "column": "IV",
+      "line": 3481,
+      "repaired": "unawakened",
+      "kind": "vowel_insertion"
+    }
+  ],
+  "repair_suggestions_list": [
+    {
+      "raw": "Accendible",
+      "column": "I",
+      "line": 13,
+      "repaired": "ascendible",
+      "kind": "early"
+    },
+    {
+      "raw": "Attrite",
+      "column": "I",
+      "line": 120,
+      "repaired": "attrited",
+      "kind": "other"
+    },
+    {
+      "raw": "Belittler",
+      "column": "I",
+      "line": 144,
+      "repaired": "belittled",
+      "kind": "other"
+    },
+    {
+      "raw": "Botcherly",
+      "column": "I",
+      "line": 192,
+      "repaired": "butcherly",
+      "kind": "early"
+    },
+    {
+      "raw": "Bragless",
+      "column": "I",
+      "line": 195,
+      "repaired": "braless",
+      "kind": "other"
+    },
+    {
+      "raw": "Breachy",
+      "column": "I",
+      "line": 203,
+      "repaired": "preachy",
+      "kind": "early"
+    },
+    {
+      "raw": "Cantabrigians",
+      "column": "I",
+      "line": 277,
+      "repaired": "cantabrigian",
+      "kind": "other"
+    },
+    {
+      "raw": "Cantish",
+      "column": "I",
+      "line": 280,
+      "repaired": "cattish",
+      "kind": "other"
+    },
+    {
+      "raw": "Capaphatic",
+      "column": "I",
+      "line": 304,
+      "repaired": "cataphatic",
+      "kind": "other"
+    },
+    {
+      "raw": "Cerative",
+      "column": "I",
+      "line": 322,
+      "repaired": "curative",
+      "kind": "early"
+    },
+    {
+      "raw": "Chirper",
+      "column": "I",
+      "line": 358,
+      "repaired": "chipper",
+      "kind": "other"
+    },
+    {
+      "raw": "Clattern",
+      "column": "I",
+      "line": 395,
+      "repaired": "clattery",
+      "kind": "other"
+    },
+    {
+      "raw": "Cleeky",
+      "column": "I",
+      "line": 401,
+      "repaired": "cheeky",
+      "kind": "early"
+    },
+    {
+      "raw": "Clumse",
+      "column": "I",
+      "line": 415,
+      "repaired": "clumsy",
+      "kind": "vowel_substitution"
+    },
+    {
+      "raw": "Cluttery",
+      "column": "I",
+      "line": 417,
+      "repaired": "clattery",
+      "kind": "vowel_substitution"
+    },
+    {
+      "raw": "Disappointer",
+      "column": "I",
+      "line": 663,
+      "repaired": "disappointed",
+      "kind": "other"
+    },
+    {
+      "raw": "Discoursive",
+      "column": "I",
+      "line": 667,
+      "repaired": "discursive",
+      "kind": "other"
+    },
+    {
+      "raw": "Dominative",
+      "column": "I",
+      "line": 713,
+      "repaired": "nominative",
+      "kind": "early"
+    },
+    {
+      "raw": "Dowf",
+      "column": "I",
+      "line": 723,
+      "repaired": "down",
+      "kind": "other"
+    },
+    {
+      "raw": "Dreamful",
+      "column": "I",
+      "line": 729,
+      "repaired": "dreadful",
+      "kind": "other"
+    },
+    {
+      "raw": "Efflusive",
+      "column": "I",
+      "line": 761,
+      "repaired": "effusive",
+      "kind": "other"
+    },
+    {
+      "raw": "Expediential",
+      "column": "I",
+      "line": 833,
+      "repaired": "experiential",
+      "kind": "other"
+    },
+    {
+      "raw": "Factish",
+      "column": "I",
+      "line": 855,
+      "repaired": "fattish",
+      "kind": "other"
+    },
+    {
+      "raw": "Facund",
+      "column": "I",
+      "line": 856,
+      "repaired": "fecund",
+      "kind": "early"
+    },
+    {
+      "raw": "Fastish",
+      "column": "I",
+      "line": 884,
+      "repaired": "fattish",
+      "kind": "other"
+    },
+    {
+      "raw": "feerie",
+      "column": "I",
+      "line": 901,
+      "repaired": "eerie",
+      "kind": "early"
+    },
+    {
+      "raw": "Fluxible",
+      "column": "I",
+      "line": 957,
+      "repaired": "flexible",
+      "kind": "vowel_substitution"
+    },
+    {
+      "raw": "Formulistic",
+      "column": "I",
+      "line": 984,
+      "repaired": "formalistic",
+      "kind": "vowel_substitution"
+    },
+    {
+      "raw": "Furacious",
+      "column": "I",
+      "line": 1034,
+      "repaired": "fugacious",
+      "kind": "other"
+    },
+    {
+      "raw": "Futilitarian",
+      "column": "I",
+      "line": 1039,
+      "repaired": "utilitarian",
+      "kind": "early"
+    },
+    {
+      "raw": "Gilpy",
+      "column": "I",
+      "line": 1091,
+      "repaired": "gimpy",
+      "kind": "other"
+    },
+    {
+      "raw": "Griefless",
+      "column": "I",
+      "line": 1152,
+      "repaired": "briefless",
+      "kind": "early"
+    },
+    {
+      "raw": "Habile",
+      "column": "I",
+      "line": 1185,
+      "repaired": "labile",
+      "kind": "early"
+    },
+    {
+      "raw": "Haltless",
+      "column": "I",
+      "line": 1193,
+      "repaired": "hatless",
+      "kind": "other"
+    },
+    {
+      "raw": "Hastless",
+      "column": "I",
+      "line": 1206,
+      "repaired": "hatless",
+      "kind": "other"
+    },
+    {
+      "raw": "Haunty",
+      "column": "I",
+      "line": 1211,
+      "repaired": "jaunty",
+      "kind": "early"
+    },
+    {
+      "raw": "Heppen",
+      "column": "I",
+      "line": 1244,
+      "repaired": "hempen",
+      "kind": "other"
+    },
+    {
+      "raw": "Immane",
+      "column": "I",
+      "line": 1371,
+      "repaired": "immune",
+      "kind": "vowel_substitution"
+    },
+    {
+      "raw": "Inadaptable",
+      "column": "I",
+      "line": 1405,
+      "repaired": "unadaptable",
+      "kind": "early"
+    },
+    {
+      "raw": "Inaffable",
+      "column": "I",
+      "line": 1406,
+      "repaired": "ineffable",
+      "kind": "vowel_substitution"
+    },
+    {
+      "raw": "Inappreciative",
+      "column": "I",
+      "line": 1409,
+      "repaired": "unappreciative",
+      "kind": "early"
+    },
+    {
+      "raw": "Inapprehensive",
+      "column": "I",
+      "line": 1410,
+      "repaired": "unapprehensive",
+      "kind": "early"
+    },
+    {
+      "raw": "Incongenial",
+      "column": "I",
+      "line": 1422,
+      "repaired": "uncongenial",
+      "kind": "early"
+    },
+    {
+      "raw": "Inexcitable",
+      "column": "I",
+      "line": 1450,
+      "repaired": "unexcitable",
+      "kind": "early"
+    },
+    {
+      "raw": "Inobservant",
+      "column": "I",
+      "line": 1474,
+      "repaired": "unobservant",
+      "kind": "early"
+    },
+    {
+      "raw": "Inseeing",
+      "column": "I",
+      "line": 1478,
+      "repaired": "unseeing",
+      "kind": "early"
+    },
+    {
+      "raw": "Insociable",
+      "column": "I",
+      "line": 1484,
+      "repaired": "unsociable",
+      "kind": "early"
+    },
+    {
+      "raw": "Insubmissive",
+      "column": "I",
+      "line": 1489,
+      "repaired": "unsubmissive",
+      "kind": "early"
+    },
+    {
+      "raw": "japish",
+      "column": "I",
+      "line": 1553,
+      "repaired": "apish",
+      "kind": "early"
+    },
+    {
+      "raw": "Jesuitie",
+      "column": "I",
+      "line": 1564,
+      "repaired": "jesuitic",
+      "kind": "other"
+    },
+    {
+      "raw": "kickish",
+      "column": "I",
+      "line": 1597,
+      "repaired": "sickish",
+      "kind": "early"
+    },
+    {
+      "raw": "knappish",
+      "column": "I",
+      "line": 1613,
+      "repaired": "snappish",
+      "kind": "early"
+    },
+    {
+      "raw": "latitudinous",
+      "column": "I",
+      "line": 1655,
+      "repaired": "platitudinous",
+      "kind": "early"
+    },
+    {
+      "raw": "libratory",
+      "column": "I",
+      "line": 1691,
+      "repaired": "vibratory",
+      "kind": "early"
+    },
+    {
+      "raw": "light-dingered",
+      "column": "I",
+      "line": 1695,
+      "repaired": "light-fingered",
+      "kind": "other"
+    },
+    {
+      "raw": "ilish",
+      "column": "I",
+      "line": 1710,
+      "repaired": "irish",
+      "kind": "early"
+    },
+    {
+      "raw": "lither",
+      "column": "I",
+      "line": 1719,
+      "repaired": "lithe",
+      "kind": "other"
+    },
+    {
+      "raw": "loquent",
+      "column": "I",
+      "line": 1743,
+      "repaired": "eloquent",
+      "kind": "early"
+    },
+    {
+      "raw": "maledicent",
+      "column": "I",
+      "line": 1805,
+      "repaired": "maleficent",
+      "kind": "other"
+    },
+    {
+      "raw": "maungy",
+      "column": "I",
+      "line": 1841,
+      "repaired": "mangy",
+      "kind": "other"
+    },
+    {
+      "raw": "mediatorian",
+      "column": "I",
+      "line": 1851,
+      "repaired": "mediatorial",
+      "kind": "other"
+    },
+    {
+      "raw": "mediatative",
+      "column": "I",
+      "line": 1853,
+      "repaired": "meditative",
+      "kind": "other"
+    },
+    {
+      "raw": "miminy-piminy",
+      "column": "I",
+      "line": 1899,
+      "repaired": "niminy-piminy",
+      "kind": "early"
+    },
+    {
+      "raw": "miscontent",
+      "column": "I",
+      "line": 1913,
+      "repaired": "discontent",
+      "kind": "early"
+    },
+    {
+      "raw": "moanful",
+      "column": "I",
+      "line": 1938,
+      "repaired": "manful",
+      "kind": "early"
+    },
+    {
+      "raw": "monachal",
+      "column": "I",
+      "line": 1951,
+      "repaired": "monarchal",
+      "kind": "other"
+    },
+    {
+      "raw": "moonish",
+      "column": "I",
+      "line": 1971,
+      "repaired": "moorish",
+      "kind": "other"
+    },
+    {
+      "raw": "mumpish",
+      "column": "I",
+      "line": 2006,
+      "repaired": "lumpish",
+      "kind": "early"
+    },
+    {
+      "raw": "museful",
+      "column": "I",
+      "line": 2011,
+      "repaired": "useful",
+      "kind": "early"
+    },
+    {
+      "raw": "museless",
+      "column": "I",
+      "line": 2012,
+      "repaired": "useless",
+      "kind": "early"
+    },
+    {
+      "raw": "nemophilous",
+      "column": "I",
+      "line": 2052,
+      "repaired": "anemophilous",
+      "kind": "early"
+    },
+    {
+      "raw": "neophytic",
+      "column": "I",
+      "line": 2059,
+      "repaired": "geophytic",
+      "kind": "early"
+    },
+    {
+      "raw": "nervid",
+      "column": "I",
+      "line": 2065,
+      "repaired": "fervid",
+      "kind": "early"
+    },
+    {
+      "raw": "nonmobile",
+      "column": "I",
+      "line": 2141,
+      "repaired": "nonmotile",
+      "kind": "other"
+    },
+    {
+      "raw": "notionless",
+      "column": "I",
+      "line": 2173,
+      "repaired": "motionless",
+      "kind": "early"
+    },
+    {
+      "raw": "ologistic",
+      "column": "I",
+      "line": 2221,
+      "repaired": "logistic",
+      "kind": "early"
+    },
+    {
+      "raw": "omnific",
+      "column": "I",
+      "line": 2225,
+      "repaired": "somnific",
+      "kind": "early"
+    },
+    {
+      "raw": "openrose",
+      "column": "I",
+      "line": 2244,
+      "repaired": "operose",
+      "kind": "other"
+    },
+    {
+      "raw": "oderless",
+      "column": "I",
+      "line": 2253,
+      "repaired": "odorless",
+      "kind": "vowel_substitution"
+    },
+    {
+      "raw": "overcaptious",
+      "column": "I",
+      "line": 2287,
+      "repaired": "overcautious",
+      "kind": "other"
+    },
+    {
+      "raw": "overhard",
+      "column": "I",
+      "line": 2320,
+      "repaired": "overhand",
+      "kind": "other"
+    },
+    {
+      "raw": "panarchic",
+      "column": "I",
+      "line": 2400,
+      "repaired": "anarchic",
+      "kind": "early"
+    },
+    {
+      "raw": "parabulic",
+      "column": "I",
+      "line": 2415,
+      "repaired": "parabolic",
+      "kind": "vowel_substitution"
+    },
+    {
+      "raw": "pauseless",
+      "column": "I",
+      "line": 2448,
+      "repaired": "causeless",
+      "kind": "early"
+    },
+    {
+      "raw": "peerie",
+      "column": "I",
+      "line": 2458,
+      "repaired": "eerie",
+      "kind": "early"
+    },
+    {
+      "raw": "pertish",
+      "column": "I",
+      "line": 2487,
+      "repaired": "pettish",
+      "kind": "other"
+    },
+    {
+      "raw": "pietic",
+      "column": "I",
+      "line": 2533,
+      "repaired": "poetic",
+      "kind": "early"
+    },
+    {
+      "raw": "planful",
+      "column": "I",
+      "line": 2546,
+      "repaired": "playful",
+      "kind": "other"
+    },
+    {
+      "raw": "playless",
+      "column": "I",
+      "line": 2552,
+      "repaired": "planless",
+      "kind": "other"
+    },
+    {
+      "raw": "pluckless",
+      "column": "I",
+      "line": 2567,
+      "repaired": "luckless",
+      "kind": "early"
+    },
+    {
+      "raw": "prateful",
+      "column": "I",
+      "line": 2606,
+      "repaired": "grateful",
+      "kind": "early"
+    },
+    {
+      "raw": "precant",
+      "column": "I",
+      "line": 2609,
+      "repaired": "precast",
+      "kind": "other"
+    },
+    {
+      "raw": "prideless",
+      "column": "I",
+      "line": 2628,
+      "repaired": "priceless",
+      "kind": "other"
+    },
+    {
+      "raw": "proudish",
+      "column": "I",
+      "line": 2654,
+      "repaired": "prudish",
+      "kind": "other"
+    },
+    {
+      "raw": "rackle",
+      "column": "I",
+      "line": 2713,
+      "repaired": "crackle",
+      "kind": "early"
+    },
+    {
+      "raw": "rantankerous",
+      "column": "I",
+      "line": 2729,
+      "repaired": "cantankerous",
+      "kind": "early"
+    },
+    {
+      "raw": "renitent",
+      "column": "I",
+      "line": 2792,
+      "repaired": "penitent",
+      "kind": "early"
+    },
+    {
+      "raw": "revialistic",
+      "column": "I",
+      "line": 2837,
+      "repaired": "revivalistic",
+      "kind": "other"
+    },
+    {
+      "raw": "rixy",
+      "column": "I",
+      "line": 2859,
+      "repaired": "rimy",
+      "kind": "other"
+    },
+    {
+      "raw": "roisterous",
+      "column": "I",
+      "line": 2866,
+      "repaired": "boisterous",
+      "kind": "early"
+    },
+    {
+      "raw": "rompish",
+      "column": "I",
+      "line": 2871,
+      "repaired": "romish",
+      "kind": "other"
+    },
+    {
+      "raw": "rudish",
+      "column": "I",
+      "line": 2885,
+      "repaired": "prudish",
+      "kind": "early"
+    },
+    {
+      "raw": "ruffler",
+      "column": "I",
+      "line": 2888,
+      "repaired": "ruffled",
+      "kind": "other"
+    },
+    {
+      "raw": "scorny",
+      "column": "I",
+      "line": 2967,
+      "repaired": "corny",
+      "kind": "early"
+    },
+    {
+      "raw": "scranny",
+      "column": "I",
+      "line": 2968,
+      "repaired": "scrawny",
+      "kind": "other"
+    },
+    {
+      "raw": "searchless",
+      "column": "I",
+      "line": 2979,
+      "repaired": "starchless",
+      "kind": "early"
+    },
+    {
+      "raw": "shoulderer",
+      "column": "I",
+      "line": 3208,
+      "repaired": "shouldered",
+      "kind": "other"
+    },
+    {
+      "raw": "sicarious",
+      "column": "I",
+      "line": 3219,
+      "repaired": "vicarious",
+      "kind": "early"
+    },
+    {
+      "raw": "sightful",
+      "column": "I",
+      "line": 3225,
+      "repaired": "rightful",
+      "kind": "early"
+    },
+    {
+      "raw": "signless",
+      "column": "I",
+      "line": 3227,
+      "repaired": "sinless",
+      "kind": "other"
+    },
+    {
+      "raw": "snaggy",
+      "column": "I",
+      "line": 3290,
+      "repaired": "shaggy",
+      "kind": "early"
+    },
+    {
+      "raw": "snod",
+      "column": "I",
+      "line": 3304,
+      "repaired": "shod",
+      "kind": "early"
+    },
+    {
+      "raw": "Solonic",
+      "column": "I",
+      "line": 3322,
+      "repaired": "colonic",
+      "kind": "early"
+    },
+    {
+      "raw": "soulish",
+      "column": "I",
+      "line": 3335,
+      "repaired": "sourish",
+      "kind": "other"
+    },
+    {
+      "raw": "spiteous",
+      "column": "I",
+      "line": 3361,
+      "repaired": "piteous",
+      "kind": "early"
+    },
+    {
+      "raw": "sportless",
+      "column": "I",
+      "line": 3373,
+      "repaired": "spotless",
+      "kind": "other"
+    },
+    {
+      "raw": "stayless",
+      "column": "I",
+      "line": 3411,
+      "repaired": "starless",
+      "kind": "other"
+    },
+    {
+      "raw": "storier",
+      "column": "I",
+      "line": 3441,
+      "repaired": "storied",
+      "kind": "other"
+    },
+    {
+      "raw": "suant",
+      "column": "I",
+      "line": 3473,
+      "repaired": "scant",
+      "kind": "early"
+    },
+    {
+      "raw": "swainish",
+      "column": "I",
+      "line": 3533,
+      "repaired": "swinish",
+      "kind": "other"
+    },
+    {
+      "raw": "taleful",
+      "column": "I",
+      "line": 3564,
+      "repaired": "baleful",
+      "kind": "early"
+    },
+    {
+      "raw": "terrorless",
+      "column": "I",
+      "line": 3623,
+      "repaired": "errorless",
+      "kind": "early"
+    },
+    {
+      "raw": "threnetic",
+      "column": "I",
+      "line": 3655,
+      "repaired": "phrenetic",
+      "kind": "early"
+    },
+    {
+      "raw": "tightish",
+      "column": "I",
+      "line": 3672,
+      "repaired": "rightish",
+      "kind": "early"
+    },
+    {
+      "raw": "tilty",
+      "column": "I",
+      "line": 3673,
+      "repaired": "silty",
+      "kind": "early"
+    },
+    {
+      "raw": "tonguey",
+      "column": "I",
+      "line": 3688,
+      "repaired": "tongued",
+      "kind": "other"
+    },
+    {
+      "raw": "toughish",
+      "column": "I",
+      "line": 3699,
+      "repaired": "roughish",
+      "kind": "early"
+    },
+    {
+      "raw": "towardly",
+      "column": "I",
+      "line": 3704,
+      "repaired": "cowardly",
+      "kind": "early"
+    },
+    {
+      "raw": "truthless",
+      "column": "I",
+      "line": 3746,
+      "repaired": "ruthless",
+      "kind": "early"
+    },
+    {
+      "raw": "twanky",
+      "column": "I",
+      "line": 3754,
+      "repaired": "swanky",
+      "kind": "early"
+    },
+    {
+      "raw": "unaccurate",
+      "column": "I",
+      "line": 3783,
+      "repaired": "inaccurate",
+      "kind": "early"
+    },
+    {
+      "raw": "unaltering",
+      "column": "I",
+      "line": 3792,
+      "repaired": "unfaltering",
+      "kind": "other"
+    },
+    {
+      "raw": "unattentive",
+      "column": "I",
+      "line": 3809,
+      "repaired": "inattentive",
+      "kind": "early"
+    },
+    {
+      "raw": "uncautious",
+      "column": "I",
+      "line": 3836,
+      "repaired": "incautious",
+      "kind": "early"
+    },
+    {
+      "raw": "uncurious",
+      "column": "I",
+      "line": 3886,
+      "repaired": "incurious",
+      "kind": "early"
+    },
+    {
+      "raw": "undeceptive",
+      "column": "I",
+      "line": 3887,
+      "repaired": "unreceptive",
+      "kind": "other"
+    },
+    {
+      "raw": "undecisive",
+      "column": "I",
+      "line": 3889,
+      "repaired": "indecisive",
+      "kind": "early"
+    },
+    {
+      "raw": "undesisting",
+      "column": "I",
+      "line": 3905,
+      "repaired": "unresisting",
+      "kind": "other"
+    },
+    {
+      "raw": "unelastic",
+      "column": "I",
+      "line": 3930,
+      "repaired": "inelastic",
+      "kind": "early"
+    },
+    {
+      "raw": "unexhaustible",
+      "column": "I",
+      "line": 3939,
+      "repaired": "inexhaustible",
+      "kind": "early"
+    },
+    {
+      "raw": "unexplicit",
+      "column": "I",
+      "line": 3941,
+      "repaired": "inexplicit",
+      "kind": "early"
+    },
+    {
+      "raw": "unfeary",
+      "column": "I",
+      "line": 3949,
+      "repaired": "unweary",
+      "kind": "other"
+    },
+    {
+      "raw": "unfluent",
+      "column": "I",
+      "line": 3957,
+      "repaired": "influent",
+      "kind": "early"
+    },
+    {
+      "raw": "unrepenting",
+      "column": "I",
+      "line": 4099,
+      "repaired": "unrelenting",
+      "kind": "other"
+    },
+    {
+      "raw": "unresenting",
+      "column": "I",
+      "line": 4104,
+      "repaired": "unrelenting",
+      "kind": "other"
+    },
+    {
+      "raw": "unstaid",
+      "column": "I",
+      "line": 4163,
+      "repaired": "unsaid",
+      "kind": "other"
+    },
+    {
+      "raw": "untame",
+      "column": "I",
+      "line": 4183,
+      "repaired": "untamed",
+      "kind": "other"
+    },
+    {
+      "raw": "untender",
+      "column": "I",
+      "line": 4185,
+      "repaired": "untended",
+      "kind": "other"
+    },
+    {
+      "raw": "unvindicative",
+      "column": "I",
+      "line": 4211,
+      "repaired": "unvindictive",
+      "kind": "other"
+    },
+    {
+      "raw": "unworded",
+      "column": "I",
+      "line": 4228,
+      "repaired": "unwooded",
+      "kind": "other"
+    },
+    {
+      "raw": "vaudy",
+      "column": "I",
+      "line": 4265,
+      "repaired": "gaudy",
+      "kind": "early"
+    },
+    {
+      "raw": "vaunty",
+      "column": "I",
+      "line": 4267,
+      "repaired": "jaunty",
+      "kind": "early"
+    },
+    {
+      "raw": "venerative",
+      "column": "I",
+      "line": 4269,
+      "repaired": "generative",
+      "kind": "early"
+    },
+    {
+      "raw": "vesatile",
+      "column": "I",
+      "line": 4282,
+      "repaired": "versatile",
+      "kind": "other"
+    },
+    {
+      "raw": "Voltairian",
+      "column": "I",
+      "line": 4316,
+      "repaired": "voltarian",
+      "kind": "other"
+    },
+    {
+      "raw": "volumptuous",
+      "column": "I",
+      "line": 4319,
+      "repaired": "voluptuous",
+      "kind": "other"
+    },
+    {
+      "raw": "warless",
+      "column": "I",
+      "line": 4337,
+      "repaired": "earless",
+      "kind": "early"
+    },
+    {
+      "raw": "weanable",
+      "column": "I",
+      "line": 4362,
+      "repaired": "wearable",
+      "kind": "other"
+    },
+    {
+      "raw": "weariable",
+      "column": "I",
+      "line": 4363,
+      "repaired": "wearable",
+      "kind": "other"
+    },
+    {
+      "raw": "wieldly",
+      "column": "I",
+      "line": 4387,
+      "repaired": "wieldy",
+      "kind": "other"
+    },
+    {
+      "raw": "yankie",
+      "column": "I",
+      "line": 4450,
+      "repaired": "yankee",
+      "kind": "vowel_substitution"
+    },
+    {
+      "raw": "yarry",
+      "column": "I",
+      "line": 4456,
+      "repaired": "tarry",
+      "kind": "early"
+    },
+    {
+      "raw": "yauld",
+      "column": "I",
+      "line": 4457,
+      "repaired": "auld",
+      "kind": "early"
+    },
+    {
+      "raw": "yieldy",
+      "column": "I",
+      "line": 4461,
+      "repaired": "wieldy",
+      "kind": "early"
+    },
+    {
+      "raw": "adread",
+      "column": "II",
+      "line": 9,
+      "repaired": "dread",
+      "kind": "early"
+    },
+    {
+      "raw": "aflow",
+      "column": "II",
+      "line": 26,
+      "repaired": "aglow",
+      "kind": "early"
+    },
+    {
+      "raw": "aflush",
+      "column": "II",
+      "line": 27,
+      "repaired": "flush",
+      "kind": "early"
+    },
+    {
+      "raw": "ahungry",
+      "column": "II",
+      "line": 39,
+      "repaired": "hungry",
+      "kind": "early"
+    },
+    {
+      "raw": "altercating",
+      "column": "II",
+      "line": 51,
+      "repaired": "alternating",
+      "kind": "other"
+    },
+    {
+      "raw": "adante",
+      "column": "II",
+      "line": 58,
+      "repaired": "andante",
+      "kind": "early"
+    },
+    {
+      "raw": "ardurous",
+      "column": "II",
+      "line": 79,
+      "repaired": "arduous",
+      "kind": "other"
+    },
+    {
+      "raw": "areel",
+      "column": "II",
+      "line": 80,
+      "repaired": "areal",
+      "kind": "vowel_substitution"
+    },
+    {
+      "raw": "audient",
+      "column": "II",
+      "line": 107,
+      "repaired": "adient",
+      "kind": "early"
+    },
+    {
+      "raw": "bedumbed",
+      "column": "II",
+      "line": 189,
+      "repaired": "benumbed",
+      "kind": "other"
+    },
+    {
+      "raw": "beeking",
+      "column": "II",
+      "line": 190,
+      "repaired": "reeking",
+      "kind": "early"
+    },
+    {
+      "raw": "befooled",
+      "column": "II",
+      "line": 196,
+      "repaired": "befouled",
+      "kind": "vowel_substitution"
+    },
+    {
+      "raw": "bemuddled",
+      "column": "II",
+      "line": 243,
+      "repaired": "befuddled",
+      "kind": "other"
+    },
+    {
+      "raw": "besinning",
+      "column": "II",
+      "line": 283,
+      "repaired": "beginning",
+      "kind": "other"
+    },
+    {
+      "raw": "betired",
+      "column": "II",
+      "line": 324,
+      "repaired": "retired",
+      "kind": "early"
+    },
+    {
+      "raw": "bewaring",
+      "column": "II",
+      "line": 340,
+      "repaired": "bearing",
+      "kind": "other"
+    },
+    {
+      "raw": "blattering",
+      "column": "II",
+      "line": 387,
+      "repaired": "flattering",
+      "kind": "early"
+    },
+    {
+      "raw": "bleezy",
+      "column": "II",
+      "line": 394,
+      "repaired": "breezy",
+      "kind": "early"
+    },
+    {
+      "raw": "blissom",
+      "column": "II",
+      "line": 403,
+      "repaired": "lissom",
+      "kind": "early"
+    },
+    {
+      "raw": "blunking",
+      "column": "II",
+      "line": 413,
+      "repaired": "blinking",
+      "kind": "vowel_substitution"
+    },
+    {
+      "raw": "branking",
+      "column": "II",
+      "line": 452,
+      "repaired": "ranking",
+      "kind": "early"
+    },
+    {
+      "raw": "brogging",
+      "column": "II",
+      "line": 473,
+      "repaired": "bragging",
+      "kind": "vowel_substitution"
+    },
+    {
+      "raw": "bumpsy",
+      "column": "II",
+      "line": 497,
+      "repaired": "bumpy",
+      "kind": "other"
+    },
+    {
+      "raw": "burking",
+      "column": "II",
+      "line": 502,
+      "repaired": "burning",
+      "kind": "other"
+    },
+    {
+      "raw": "cading",
+      "column": "II",
+      "line": 522,
+      "repaired": "caring",
+      "kind": "other"
+    },
+    {
+      "raw": "calid",
+      "column": "II",
+      "line": 533,
+      "repaired": "valid",
+      "kind": "early"
+    },
+    {
+      "raw": "carotic",
+      "column": "II",
+      "line": 562,
+      "repaired": "carotid",
+      "kind": "other"
+    },
+    {
+      "raw": "cataplectic",
+      "column": "II",
+      "line": 573,
+      "repaired": "catalectic",
+      "kind": "other"
+    },
+    {
+      "raw": "clittering",
+      "column": "II",
+      "line": 675,
+      "repaired": "glittering",
+      "kind": "early"
+    },
+    {
+      "raw": "cloyed",
+      "column": "II",
+      "line": 683,
+      "repaired": "closed",
+      "kind": "other"
+    },
+    {
+      "raw": "confuting",
+      "column": "II",
+      "line": 772,
+      "repaired": "confusing",
+      "kind": "other"
+    },
+    {
+      "raw": "contemning",
+      "column": "II",
+      "line": 795,
+      "repaired": "condemning",
+      "kind": "other"
+    },
+    {
+      "raw": "cottering",
+      "column": "II",
+      "line": 822,
+      "repaired": "tottering",
+      "kind": "early"
+    },
+    {
+      "raw": "coyed",
+      "column": "II",
+      "line": 838,
+      "repaired": "co-ed",
+      "kind": "other"
+    },
+    {
+      "raw": "cullying",
+      "column": "II",
+      "line": 872,
+      "repaired": "bullying",
+      "kind": "early"
+    },
+    {
+      "raw": "cumbered",
+      "column": "II",
+      "line": 873,
+      "repaired": "numbered",
+      "kind": "early"
+    },
+    {
+      "raw": "dammered",
+      "column": "II",
+      "line": 884,
+      "repaired": "hammered",
+      "kind": "early"
+    },
+    {
+      "raw": "dandering",
+      "column": "II",
+      "line": 893,
+      "repaired": "wandering",
+      "kind": "early"
+    },
+    {
+      "raw": "dastardized",
+      "column": "II",
+      "line": 898,
+      "repaired": "bastardized",
+      "kind": "early"
+    },
+    {
+      "raw": "davering",
+      "column": "II",
+      "line": 902,
+      "repaired": "wavering",
+      "kind": "early"
+    },
+    {
+      "raw": "deaved",
+      "column": "II",
+      "line": 910,
+      "repaired": "leaved",
+      "kind": "early"
+    },
+    {
+      "raw": "dedolent",
+      "column": "II",
+      "line": 921,
+      "repaired": "redolent",
+      "kind": "early"
+    },
+    {
+      "raw": "delating",
+      "column": "II",
+      "line": 935,
+      "repaired": "elating",
+      "kind": "early"
+    },
+    {
+      "raw": "diddering",
+      "column": "II",
+      "line": 988,
+      "repaired": "doddering",
+      "kind": "early"
+    },
+    {
+      "raw": "dindling",
+      "column": "II",
+      "line": 998,
+      "repaired": "dwindling",
+      "kind": "early"
+    },
+    {
+      "raw": "dirgeful",
+      "column": "II",
+      "line": 1003,
+      "repaired": "direful",
+      "kind": "other"
+    },
+    {
+      "raw": "dirling",
+      "column": "II",
+      "line": 1004,
+      "repaired": "darling",
+      "kind": "early"
+    },
+    {
+      "raw": "discharmed",
+      "column": "II",
+      "line": 1025,
+      "repaired": "discharged",
+      "kind": "other"
+    },
+    {
+      "raw": "disconforming",
+      "column": "II",
+      "line": 1036,
+      "repaired": "disconfirming",
+      "kind": "vowel_substitution"
+    },
+    {
+      "raw": "disserting",
+      "column": "II",
+      "line": 1100,
+      "repaired": "dissenting",
+      "kind": "other"
+    },
+    {
+      "raw": "drumbly",
+      "column": "II",
+      "line": 1168,
+      "repaired": "crumbly",
+      "kind": "early"
+    },
+    {
+      "raw": "duddering",
+      "column": "II",
+      "line": 1172,
+      "repaired": "doddering",
+      "kind": "early"
+    },
+    {
+      "raw": "eradiating",
+      "column": "II",
+      "line": 1281,
+      "repaired": "radiating",
+      "kind": "early"
+    },
+    {
+      "raw": "estraying",
+      "column": "II",
+      "line": 1301,
+      "repaired": "straying",
+      "kind": "early"
+    },
+    {
+      "raw": "faddling",
+      "column": "II",
+      "line": 1384,
+      "repaired": "fiddling",
+      "kind": "early"
+    },
+    {
+      "raw": "faffling",
+      "column": "II",
+      "line": 1386,
+      "repaired": "baffling",
+      "kind": "early"
+    },
+    {
+      "raw": "falsing",
+      "column": "II",
+      "line": 1395,
+      "repaired": "falling",
+      "kind": "other"
+    },
+    {
+      "raw": "farsing",
+      "column": "II",
+      "line": 1407,
+      "repaired": "farming",
+      "kind": "other"
+    },
+    {
+      "raw": "flacking",
+      "column": "II",
+      "line": 1464,
+      "repaired": "lacking",
+      "kind": "early"
+    },
+    {
+      "raw": "flumping",
+      "column": "II",
+      "line": 1517,
+      "repaired": "plumping",
+      "kind": "early"
+    },
+    {
+      "raw": "foughten",
+      "column": "II",
+      "line": 1592,
+      "repaired": "boughten",
+      "kind": "early"
+    },
+    {
+      "raw": "frizzling",
+      "column": "II",
+      "line": 1624,
+      "repaired": "drizzling",
+      "kind": "early"
+    },
+    {
+      "raw": "frotting",
+      "column": "II",
+      "line": 1628,
+      "repaired": "frothing",
+      "kind": "other"
+    },
+    {
+      "raw": "fuddling",
+      "column": "II",
+      "line": 1637,
+      "repaired": "fiddling",
+      "kind": "early"
+    },
+    {
+      "raw": "gaggling",
+      "column": "II",
+      "line": 1663,
+      "repaired": "gangling",
+      "kind": "other"
+    },
+    {
+      "raw": "gameling",
+      "column": "II",
+      "line": 1679,
+      "repaired": "gambling",
+      "kind": "other"
+    },
+    {
+      "raw": "gamping",
+      "column": "II",
+      "line": 1683,
+      "repaired": "gaping",
+      "kind": "other"
+    },
+    {
+      "raw": "gibing",
+      "column": "II",
+      "line": 1711,
+      "repaired": "giving",
+      "kind": "other"
+    },
+    {
+      "raw": "glozing",
+      "column": "II",
+      "line": 1745,
+      "repaired": "glowing",
+      "kind": "other"
+    },
+    {
+      "raw": "gnapping",
+      "column": "II",
+      "line": 1747,
+      "repaired": "napping",
+      "kind": "early"
+    },
+    {
+      "raw": "gonesome",
+      "column": "II",
+      "line": 1760,
+      "repaired": "lonesome",
+      "kind": "early"
+    },
+    {
+      "raw": "gyving",
+      "column": "II",
+      "line": 1816,
+      "repaired": "giving",
+      "kind": "early"
+    },
+    {
+      "raw": "haffling",
+      "column": "II",
+      "line": 1818,
+      "repaired": "baffling",
+      "kind": "early"
+    },
+    {
+      "raw": "haltering",
+      "column": "II",
+      "line": 1825,
+      "repaired": "faltering",
+      "kind": "early"
+    },
+    {
+      "raw": "havening",
+      "column": "II",
+      "line": 1855,
+      "repaired": "ravening",
+      "kind": "early"
+    },
+    {
+      "raw": "higgling",
+      "column": "II",
+      "line": 1888,
+      "repaired": "niggling",
+      "kind": "early"
+    },
+    {
+      "raw": "hocused",
+      "column": "II",
+      "line": 1908,
+      "repaired": "focused",
+      "kind": "early"
+    },
+    {
+      "raw": "hottering",
+      "column": "II",
+      "line": 1937,
+      "repaired": "tottering",
+      "kind": "early"
+    },
+    {
+      "raw": "hypped",
+      "column": "II",
+      "line": 1970,
+      "repaired": "hipped",
+      "kind": "early"
+    },
+    {
+      "raw": "inappeasable",
+      "column": "II",
+      "line": 2015,
+      "repaired": "unappeasable",
+      "kind": "early"
+    },
+    {
+      "raw": "indetermined",
+      "column": "II",
+      "line": 2033,
+      "repaired": "undetermined",
+      "kind": "early"
+    },
+    {
+      "raw": "infactuated",
+      "column": "II",
+      "line": 2039,
+      "repaired": "infatuated",
+      "kind": "other"
+    },
+    {
+      "raw": "innerved",
+      "column": "II",
+      "line": 2053,
+      "repaired": "unnerved",
+      "kind": "early"
+    },
+    {
+      "raw": "inquiet",
+      "column": "II",
+      "line": 2055,
+      "repaired": "unquiet",
+      "kind": "early"
+    },
+    {
+      "raw": "jabbled",
+      "column": "II",
+      "line": 2123,
+      "repaired": "dabbled",
+      "kind": "early"
+    },
+    {
+      "raw": "janking",
+      "column": "II",
+      "line": 2131,
+      "repaired": "ranking",
+      "kind": "early"
+    },
+    {
+      "raw": "japing",
+      "column": "II",
+      "line": 2132,
+      "repaired": "gaping",
+      "kind": "early"
+    },
+    {
+      "raw": "jouking",
+      "column": "II",
+      "line": 2159,
+      "repaired": "joking",
+      "kind": "other"
+    },
+    {
+      "raw": "jowling",
+      "column": "II",
+      "line": 2164,
+      "repaired": "howling",
+      "kind": "early"
+    },
+    {
+      "raw": "jundying",
+      "column": "II",
+      "line": 2170,
+      "repaired": "undying",
+      "kind": "early"
+    },
+    {
+      "raw": "lampering",
+      "column": "II",
+      "line": 2218,
+      "repaired": "pampering",
+      "kind": "early"
+    },
+    {
+      "raw": "levanting",
+      "column": "II",
+      "line": 2263,
+      "repaired": "levantine",
+      "kind": "other"
+    },
+    {
+      "raw": "louking",
+      "column": "II",
+      "line": 2322,
+      "repaired": "looking",
+      "kind": "vowel_substitution"
+    },
+    {
+      "raw": "maffling",
+      "column": "II",
+      "line": 2360,
+      "repaired": "baffling",
+      "kind": "early"
+    },
+    {
+      "raw": "maggled",
+      "column": "II",
+      "line": 2362,
+      "repaired": "mangled",
+      "kind": "other"
+    },
+    {
+      "raw": "magnitized",
+      "column": "II",
+      "line": 2365,
+      "repaired": "magnetized",
+      "kind": "vowel_substitution"
+    },
+    {
+      "raw": "mammered",
+      "column": "II",
+      "line": 2377,
+      "repaired": "hammered",
+      "kind": "early"
+    },
+    {
+      "raw": "manting",
+      "column": "II",
+      "line": 2391,
+      "repaired": "wanting",
+      "kind": "early"
+    },
+    {
+      "raw": "masket",
+      "column": "II",
+      "line": 2408,
+      "repaired": "masked",
+      "kind": "other"
+    },
+    {
+      "raw": "meliorating",
+      "column": "II",
+      "line": 2429,
+      "repaired": "ameliorating",
+      "kind": "early"
+    },
+    {
+      "raw": "menging",
+      "column": "II",
+      "line": 2434,
+      "repaired": "merging",
+      "kind": "other"
+    },
+    {
+      "raw": "minitant",
+      "column": "II",
+      "line": 2464,
+      "repaired": "militant",
+      "kind": "other"
+    },
+    {
+      "raw": "misbelieving",
+      "column": "II",
+      "line": 2477,
+      "repaired": "disbelieving",
+      "kind": "early"
+    },
+    {
+      "raw": "mismaying",
+      "column": "II",
+      "line": 2523,
+      "repaired": "dismaying",
+      "kind": "early"
+    },
+    {
+      "raw": "mispleasing",
+      "column": "II",
+      "line": 2526,
+      "repaired": "displeasing",
+      "kind": "early"
+    },
+    {
+      "raw": "mispleased",
+      "column": "II",
+      "line": 2527,
+      "repaired": "displeased",
+      "kind": "early"
+    },
+    {
+      "raw": "mizzling",
+      "column": "II",
+      "line": 2560,
+      "repaired": "sizzling",
+      "kind": "early"
+    },
+    {
+      "raw": "mogging",
+      "column": "II",
+      "line": 2568,
+      "repaired": "dogging",
+      "kind": "early"
+    },
+    {
+      "raw": "montant",
+      "column": "II",
+      "line": 2588,
+      "repaired": "montane",
+      "kind": "other"
+    },
+    {
+      "raw": "moppy",
+      "column": "II",
+      "line": 2594,
+      "repaired": "soppy",
+      "kind": "early"
+    },
+    {
+      "raw": "mouching",
+      "column": "II",
+      "line": 2602,
+      "repaired": "touching",
+      "kind": "early"
+    },
+    {
+      "raw": "murgeoning",
+      "column": "II",
+      "line": 2626,
+      "repaired": "burgeoning",
+      "kind": "early"
+    },
+    {
+      "raw": "musting",
+      "column": "II",
+      "line": 2632,
+      "repaired": "musing",
+      "kind": "other"
+    },
+    {
+      "raw": "muxing",
+      "column": "II",
+      "line": 2636,
+      "repaired": "musing",
+      "kind": "other"
+    },
+    {
+      "raw": "nighting",
+      "column": "II",
+      "line": 2679,
+      "repaired": "fighting",
+      "kind": "early"
+    },
+    {
+      "raw": "nithering",
+      "column": "II",
+      "line": 2685,
+      "repaired": "withering",
+      "kind": "early"
+    },
+    {
+      "raw": "nobbling",
+      "column": "II",
+      "line": 2686,
+      "repaired": "wobbling",
+      "kind": "early"
+    },
+    {
+      "raw": "noddling",
+      "column": "II",
+      "line": 2688,
+      "repaired": "nodding",
+      "kind": "other"
+    },
+    {
+      "raw": "nutant",
+      "column": "II",
+      "line": 2716,
+      "repaired": "mutant",
+      "kind": "early"
+    },
+    {
+      "raw": "outglowing",
+      "column": "II",
+      "line": 2827,
+      "repaired": "outflowing",
+      "kind": "other"
+    },
+    {
+      "raw": "outvying",
+      "column": "II",
+      "line": 2950,
+      "repaired": "outlying",
+      "kind": "other"
+    },
+    {
+      "raw": "overbeating",
+      "column": "II",
+      "line": 2973,
+      "repaired": "overbearing",
+      "kind": "other"
+    },
+    {
+      "raw": "overhot",
+      "column": "II",
+      "line": 3039,
+      "repaired": "overshot",
+      "kind": "other"
+    },
+    {
+      "raw": "overplying",
+      "column": "II",
+      "line": 3068,
+      "repaired": "overlying",
+      "kind": "other"
+    },
+    {
+      "raw": "overpreaching",
+      "column": "II",
+      "line": 3070,
+      "repaired": "overreaching",
+      "kind": "other"
+    },
+    {
+      "raw": "overrising",
+      "column": "II",
+      "line": 3085,
+      "repaired": "overriding",
+      "kind": "other"
+    },
+    {
+      "raw": "overwarm",
+      "column": "II",
+      "line": 3128,
+      "repaired": "overarm",
+      "kind": "other"
+    },
+    {
+      "raw": "overweeping",
+      "column": "II",
+      "line": 3131,
+      "repaired": "overweening",
+      "kind": "other"
+    },
+    {
+      "raw": "pacating",
+      "column": "II",
+      "line": 3144,
+      "repaired": "placating",
+      "kind": "early"
+    },
+    {
+      "raw": "panged",
+      "column": "II",
+      "line": 3181,
+      "repaired": "fanged",
+      "kind": "early"
+    },
+    {
+      "raw": "penking",
+      "column": "II",
+      "line": 3242,
+      "repaired": "pending",
+      "kind": "other"
+    },
+    {
+      "raw": "pesting",
+      "column": "II",
+      "line": 3269,
+      "repaired": "jesting",
+      "kind": "early"
+    },
+    {
+      "raw": "piggling",
+      "column": "II",
+      "line": 3289,
+      "repaired": "niggling",
+      "kind": "early"
+    },
+    {
+      "raw": "plangorous",
+      "column": "II",
+      "line": 3317,
+      "repaired": "clangorous",
+      "kind": "early"
+    },
+    {
+      "raw": "plighting",
+      "column": "II",
+      "line": 3330,
+      "repaired": "slighting",
+      "kind": "early"
+    },
+    {
+      "raw": "porring",
+      "column": "II",
+      "line": 3358,
+      "repaired": "pouring",
+      "kind": "other"
+    },
+    {
+      "raw": "possing",
+      "column": "II",
+      "line": 3361,
+      "repaired": "passing",
+      "kind": "early"
+    },
+    {
+      "raw": "pothered",
+      "column": "II",
+      "line": 3367,
+      "repaired": "bothered",
+      "kind": "early"
+    },
+    {
+      "raw": "proking",
+      "column": "II",
+      "line": 3449,
+      "repaired": "probing",
+      "kind": "other"
+    },
+    {
+      "raw": "rabbling",
+      "column": "II",
+      "line": 3528,
+      "repaired": "rambling",
+      "kind": "other"
+    },
+    {
+      "raw": "rambing",
+      "column": "II",
+      "line": 3540,
+      "repaired": "rambling",
+      "kind": "other"
+    },
+    {
+      "raw": "raunging",
+      "column": "II",
+      "line": 3554,
+      "repaired": "ranging",
+      "kind": "other"
+    },
+    {
+      "raw": "renerved",
+      "column": "II",
+      "line": 3589,
+      "repaired": "reserved",
+      "kind": "other"
+    },
+    {
+      "raw": "ricking",
+      "column": "II",
+      "line": 3610,
+      "repaired": "racking",
+      "kind": "early"
+    },
+    {
+      "raw": "roiting",
+      "column": "II",
+      "line": 3623,
+      "repaired": "roiling",
+      "kind": "other"
+    },
+    {
+      "raw": "rouking",
+      "column": "II",
+      "line": 3629,
+      "repaired": "rousing",
+      "kind": "other"
+    },
+    {
+      "raw": "rousting",
+      "column": "II",
+      "line": 3631,
+      "repaired": "rousing",
+      "kind": "other"
+    },
+    {
+      "raw": "rubescent",
+      "column": "II",
+      "line": 3634,
+      "repaired": "pubescent",
+      "kind": "early"
+    },
+    {
+      "raw": "skivering",
+      "column": "II",
+      "line": 3774,
+      "repaired": "shivering",
+      "kind": "early"
+    },
+    {
+      "raw": "slenting",
+      "column": "II",
+      "line": 3796,
+      "repaired": "slanting",
+      "kind": "vowel_substitution"
+    },
+    {
+      "raw": "slocking",
+      "column": "II",
+      "line": 3802,
+      "repaired": "shocking",
+      "kind": "early"
+    },
+    {
+      "raw": "sluthering",
+      "column": "II",
+      "line": 3816,
+      "repaired": "slithering",
+      "kind": "vowel_substitution"
+    },
+    {
+      "raw": "snaffling",
+      "column": "II",
+      "line": 3830,
+      "repaired": "snuffling",
+      "kind": "vowel_substitution"
+    },
+    {
+      "raw": "snifting",
+      "column": "II",
+      "line": 3837,
+      "repaired": "shifting",
+      "kind": "early"
+    },
+    {
+      "raw": "snirting",
+      "column": "II",
+      "line": 3839,
+      "repaired": "skirting",
+      "kind": "early"
+    },
+    {
+      "raw": "soothering",
+      "column": "II",
+      "line": 3860,
+      "repaired": "smothering",
+      "kind": "early"
+    },
+    {
+      "raw": "spuffling",
+      "column": "II",
+      "line": 3897,
+      "repaired": "snuffling",
+      "kind": "early"
+    },
+    {
+      "raw": "stirless",
+      "column": "II",
+      "line": 3949,
+      "repaired": "starless",
+      "kind": "vowel_substitution"
+    },
+    {
+      "raw": "stivering",
+      "column": "II",
+      "line": 3951,
+      "repaired": "shivering",
+      "kind": "early"
+    },
+    {
+      "raw": "stottering",
+      "column": "II",
+      "line": 3961,
+      "repaired": "tottering",
+      "kind": "early"
+    },
+    {
+      "raw": "strunted",
+      "column": "II",
+      "line": 3988,
+      "repaired": "stunted",
+      "kind": "other"
+    },
+    {
+      "raw": "sturted",
+      "column": "II",
+      "line": 3997,
+      "repaired": "stunted",
+      "kind": "other"
+    },
+    {
+      "raw": "swidging",
+      "column": "II",
+      "line": 4038,
+      "repaired": "swinging",
+      "kind": "other"
+    },
+    {
+      "raw": "tantling",
+      "column": "II",
+      "line": 4064,
+      "repaired": "tattling",
+      "kind": "other"
+    },
+    {
+      "raw": "targed",
+      "column": "II",
+      "line": 4066,
+      "repaired": "tagged",
+      "kind": "other"
+    },
+    {
+      "raw": "teeting",
+      "column": "II",
+      "line": 4083,
+      "repaired": "teeming",
+      "kind": "other"
+    },
+    {
+      "raw": "tiffling",
+      "column": "II",
+      "line": 4117,
+      "repaired": "piffling",
+      "kind": "early"
+    },
+    {
+      "raw": "toltering",
+      "column": "II",
+      "line": 4134,
+      "repaired": "tottering",
+      "kind": "other"
+    },
+    {
+      "raw": "totling",
+      "column": "II",
+      "line": 4143,
+      "repaired": "toiling",
+      "kind": "other"
+    },
+    {
+      "raw": "tottling",
+      "column": "II",
+      "line": 4145,
+      "repaired": "tattling",
+      "kind": "early"
+    },
+    {
+      "raw": "tousing",
+      "column": "II",
+      "line": 4148,
+      "repaired": "rousing",
+      "kind": "early"
+    },
+    {
+      "raw": "twattling",
+      "column": "II",
+      "line": 4183,
+      "repaired": "tattling",
+      "kind": "early"
+    },
+    {
+      "raw": "unblenched",
+      "column": "II",
+      "line": 4215,
+      "repaired": "unbleached",
+      "kind": "other"
+    },
+    {
+      "raw": "unbusied",
+      "column": "II",
+      "line": 4220,
+      "repaired": "unburied",
+      "kind": "other"
+    },
+    {
+      "raw": "uncontented",
+      "column": "II",
+      "line": 4239,
+      "repaired": "uncontested",
+      "kind": "other"
+    },
+    {
+      "raw": "uncouthy",
+      "column": "II",
+      "line": 4243,
+      "repaired": "uncouth",
+      "kind": "other"
+    },
+    {
+      "raw": "undazed",
+      "column": "II",
+      "line": 4245,
+      "repaired": "undated",
+      "kind": "other"
+    },
+    {
+      "raw": "undejected",
+      "column": "II",
+      "line": 4247,
+      "repaired": "undetected",
+      "kind": "other"
+    },
+    {
+      "raw": "undepressed",
+      "column": "II",
+      "line": 4250,
+      "repaired": "unrepressed",
+      "kind": "other"
+    },
+    {
+      "raw": "unelated",
+      "column": "II",
+      "line": 4270,
+      "repaired": "unrelated",
+      "kind": "other"
+    },
+    {
+      "raw": "unfain",
+      "column": "II",
+      "line": 4282,
+      "repaired": "unfair",
+      "kind": "other"
+    },
+    {
+      "raw": "unglad",
+      "column": "II",
+      "line": 4289,
+      "repaired": "unclad",
+      "kind": "other"
+    },
+    {
+      "raw": "ungloomed",
+      "column": "II",
+      "line": 4290,
+      "repaired": "ungroomed",
+      "kind": "other"
+    },
+    {
+      "raw": "unplumed",
+      "column": "II",
+      "line": 4324,
+      "repaired": "unplumbed",
+      "kind": "other"
+    },
+    {
+      "raw": "unraptured",
+      "column": "II",
+      "line": 4329,
+      "repaired": "enraptured",
+      "kind": "early"
+    },
+    {
+      "raw": "unresigned",
+      "column": "II",
+      "line": 4337,
+      "repaired": "undesigned",
+      "kind": "other"
+    },
+    {
+      "raw": "unscared",
+      "column": "II",
+      "line": 4344,
+      "repaired": "unshared",
+      "kind": "other"
+    },
+    {
+      "raw": "unslept",
+      "column": "II",
+      "line": 4353,
+      "repaired": "unswept",
+      "kind": "other"
+    },
+    {
+      "raw": "unvexed",
+      "column": "II",
+      "line": 4367,
+      "repaired": "unsexed",
+      "kind": "other"
+    },
+    {
+      "raw": "vampering",
+      "column": "II",
+      "line": 4376,
+      "repaired": "pampering",
+      "kind": "early"
+    },
+    {
+      "raw": "waltering",
+      "column": "II",
+      "line": 4409,
+      "repaired": "faltering",
+      "kind": "early"
+    },
+    {
+      "raw": "weltering",
+      "column": "II",
+      "line": 4432,
+      "repaired": "sweltering",
+      "kind": "early"
+    },
+    {
+      "raw": "wenching",
+      "column": "II",
+      "line": 4433,
+      "repaired": "wrenching",
+      "kind": "early"
+    },
+    {
+      "raw": "whithering",
+      "column": "II",
+      "line": 4453,
+      "repaired": "withering",
+      "kind": "early"
+    },
+    {
+      "raw": "wivering",
+      "column": "II",
+      "line": 4467,
+      "repaired": "wavering",
+      "kind": "early"
+    },
+    {
+      "raw": "wooling",
+      "column": "II",
+      "line": 4473,
+      "repaired": "fooling",
+      "kind": "early"
+    },
+    {
+      "raw": "wuzzled",
+      "column": "II",
+      "line": 4485,
+      "repaired": "puzzled",
+      "kind": "early"
+    },
+    {
+      "raw": "yawling",
+      "column": "II",
+      "line": 4498,
+      "repaired": "yawning",
+      "kind": "other"
+    },
+    {
+      "raw": "yerking",
+      "column": "II",
+      "line": 4504,
+      "repaired": "jerking",
+      "kind": "early"
+    },
+    {
+      "raw": "yucking",
+      "column": "II",
+      "line": 4510,
+      "repaired": "fucking",
+      "kind": "early"
+    },
+    {
+      "raw": "baleless",
+      "column": "III",
+      "line": 160,
+      "repaired": "baseless",
+      "kind": "other"
+    },
+    {
+      "raw": "beastlike",
+      "column": "III",
+      "line": 204,
+      "repaired": "yeastlike",
+      "kind": "early"
+    },
+    {
+      "raw": "behated",
+      "column": "III",
+      "line": 237,
+      "repaired": "belated",
+      "kind": "other"
+    },
+    {
+      "raw": "bemeaning",
+      "column": "III",
+      "line": 262,
+      "repaired": "demeaning",
+      "kind": "early"
+    },
+    {
+      "raw": "benighter",
+      "column": "III",
+      "line": 275,
+      "repaired": "benighted",
+      "kind": "other"
+    },
+    {
+      "raw": "besouled",
+      "column": "III",
+      "line": 296,
+      "repaired": "befouled",
+      "kind": "other"
+    },
+    {
+      "raw": "betiring",
+      "column": "III",
+      "line": 309,
+      "repaired": "retiring",
+      "kind": "early"
+    },
+    {
+      "raw": "beversed",
+      "column": "III",
+      "line": 317,
+      "repaired": "reversed",
+      "kind": "early"
+    },
+    {
+      "raw": "bewitcher",
+      "column": "III",
+      "line": 325,
+      "repaired": "bewitched",
+      "kind": "other"
+    },
+    {
+      "raw": "bielding",
+      "column": "III",
+      "line": 332,
+      "repaired": "yielding",
+      "kind": "early"
+    },
+    {
+      "raw": "blankish",
+      "column": "III",
+      "line": 374,
+      "repaired": "blackish",
+      "kind": "other"
+    },
+    {
+      "raw": "blathery",
+      "column": "III",
+      "line": 379,
+      "repaired": "lathery",
+      "kind": "early"
+    },
+    {
+      "raw": "blunty",
+      "column": "III",
+      "line": 430,
+      "repaired": "blunt",
+      "kind": "other"
+    },
+    {
+      "raw": "bobbish",
+      "column": "III",
+      "line": 433,
+      "repaired": "mobbish",
+      "kind": "early"
+    },
+    {
+      "raw": "bowerly",
+      "column": "III",
+      "line": 488,
+      "repaired": "bowery",
+      "kind": "other"
+    },
+    {
+      "raw": "brancher",
+      "column": "III",
+      "line": 502,
+      "repaired": "branched",
+      "kind": "other"
+    },
+    {
+      "raw": "brightish",
+      "column": "III",
+      "line": 526,
+      "repaired": "rightish",
+      "kind": "early"
+    },
+    {
+      "raw": "brookable",
+      "column": "III",
+      "line": 543,
+      "repaired": "bookable",
+      "kind": "early"
+    },
+    {
+      "raw": "bruckle",
+      "column": "III",
+      "line": 548,
+      "repaired": "brickle",
+      "kind": "vowel_substitution"
+    },
+    {
+      "raw": "buckra",
+      "column": "III",
+      "line": 556,
+      "repaired": "buckram",
+      "kind": "other"
+    },
+    {
+      "raw": "cacophanous",
+      "column": "III",
+      "line": 607,
+      "repaired": "cacophonous",
+      "kind": "vowel_substitution"
+    },
+    {
+      "raw": "cadgy",
+      "column": "III",
+      "line": 613,
+      "repaired": "cagy",
+      "kind": "other"
+    },
+    {
+      "raw": "caky",
+      "column": "III",
+      "line": 619,
+      "repaired": "cagy",
+      "kind": "other"
+    },
+    {
+      "raw": "centripedal",
+      "column": "III",
+      "line": 706,
+      "repaired": "centripetal",
+      "kind": "other"
+    },
+    {
+      "raw": "charmful",
+      "column": "III",
+      "line": 729,
+      "repaired": "harmful",
+      "kind": "early"
+    },
+    {
+      "raw": "cheatable",
+      "column": "III",
+      "line": 740,
+      "repaired": "heatable",
+      "kind": "early"
+    },
+    {
+      "raw": "childing",
+      "column": "III",
+      "line": 762,
+      "repaired": "chilling",
+      "kind": "other"
+    },
+    {
+      "raw": "churly",
+      "column": "III",
+      "line": 798,
+      "repaired": "curly",
+      "kind": "early"
+    },
+    {
+      "raw": "citfified",
+      "column": "III",
+      "line": 809,
+      "repaired": "citified",
+      "kind": "other"
+    },
+    {
+      "raw": "civilizee",
+      "column": "III",
+      "line": 814,
+      "repaired": "civilized",
+      "kind": "other"
+    },
+    {
+      "raw": "civilizer",
+      "column": "III",
+      "line": 815,
+      "repaired": "civilized",
+      "kind": "other"
+    },
+    {
+      "raw": "clibby",
+      "column": "III",
+      "line": 843,
+      "repaired": "clubby",
+      "kind": "vowel_substitution"
+    },
+    {
+      "raw": "clumpish",
+      "column": "III",
+      "line": 863,
+      "repaired": "lumpish",
+      "kind": "early"
+    },
+    {
+      "raw": "colorer",
+      "column": "III",
+      "line": 897,
+      "repaired": "colored",
+      "kind": "other"
+    },
+    {
+      "raw": "colory",
+      "column": "III",
+      "line": 900,
+      "repaired": "color",
+      "kind": "other"
+    },
+    {
+      "raw": "coof",
+      "column": "III",
+      "line": 1003,
+      "repaired": "cool",
+      "kind": "other"
+    },
+    {
+      "raw": "couthless",
+      "column": "III",
+      "line": 1038,
+      "repaired": "mouthless",
+      "kind": "early"
+    },
+    {
+      "raw": "cubbish",
+      "column": "III",
+      "line": 1077,
+      "repaired": "clubbish",
+      "kind": "early"
+    },
+    {
+      "raw": "decadescent",
+      "column": "III",
+      "line": 1132,
+      "repaired": "decalescent",
+      "kind": "other"
+    },
+    {
+      "raw": "deceivable",
+      "column": "III",
+      "line": 1135,
+      "repaired": "receivable",
+      "kind": "early"
+    },
+    {
+      "raw": "defouled",
+      "column": "III",
+      "line": 1157,
+      "repaired": "befouled",
+      "kind": "early"
+    },
+    {
+      "raw": "depredatory",
+      "column": "III",
+      "line": 1197,
+      "repaired": "deprecatory",
+      "kind": "other"
+    },
+    {
+      "raw": "despisable",
+      "column": "III",
+      "line": 1216,
+      "repaired": "despicable",
+      "kind": "other"
+    },
+    {
+      "raw": "devitalizing",
+      "column": "III",
+      "line": 1228,
+      "repaired": "revitalizing",
+      "kind": "early"
+    },
+    {
+      "raw": "disgraded",
+      "column": "III",
+      "line": 1281,
+      "repaired": "disgraced",
+      "kind": "other"
+    },
+    {
+      "raw": "dizened",
+      "column": "III",
+      "line": 1353,
+      "repaired": "wizened",
+      "kind": "early"
+    },
+    {
+      "raw": "dollish",
+      "column": "III",
+      "line": 1364,
+      "repaired": "doltish",
+      "kind": "other"
+    },
+    {
+      "raw": "draffy",
+      "column": "III",
+      "line": 1400,
+      "repaired": "drafty",
+      "kind": "other"
+    },
+    {
+      "raw": "dreadless",
+      "column": "III",
+      "line": 1410,
+      "repaired": "dreamless",
+      "kind": "other"
+    },
+    {
+      "raw": "dullish",
+      "column": "III",
+      "line": 1449,
+      "repaired": "bullish",
+      "kind": "early"
+    },
+    {
+      "raw": "engraced",
+      "column": "III",
+      "line": 1542,
+      "repaired": "engraved",
+      "kind": "other"
+    },
+    {
+      "raw": "enormal",
+      "column": "III",
+      "line": 1552,
+      "repaired": "normal",
+      "kind": "early"
+    },
+    {
+      "raw": "evited",
+      "column": "III",
+      "line": 1599,
+      "repaired": "edited",
+      "kind": "early"
+    },
+    {
+      "raw": "fabler",
+      "column": "III",
+      "line": 1658,
+      "repaired": "fabled",
+      "kind": "other"
+    },
+    {
+      "raw": "fabular",
+      "column": "III",
+      "line": 1659,
+      "repaired": "tabular",
+      "kind": "early"
+    },
+    {
+      "raw": "fadeless",
+      "column": "III",
+      "line": 1663,
+      "repaired": "faceless",
+      "kind": "other"
+    },
+    {
+      "raw": "falliable",
+      "column": "III",
+      "line": 1678,
+      "repaired": "fallible",
+      "kind": "other"
+    },
+    {
+      "raw": "fettering",
+      "column": "III",
+      "line": 1725,
+      "repaired": "bettering",
+      "kind": "early"
+    },
+    {
+      "raw": "flawy",
+      "column": "III",
+      "line": 1780,
+      "repaired": "flaky",
+      "kind": "other"
+    },
+    {
+      "raw": "flegging",
+      "column": "III",
+      "line": 1784,
+      "repaired": "flagging",
+      "kind": "vowel_substitution"
+    },
+    {
+      "raw": "fleying",
+      "column": "III",
+      "line": 1785,
+      "repaired": "flying",
+      "kind": "other"
+    },
+    {
+      "raw": "foulish",
+      "column": "III",
+      "line": 1838,
+      "repaired": "foolish",
+      "kind": "vowel_substitution"
+    },
+    {
+      "raw": "fribble",
+      "column": "III",
+      "line": 1854,
+      "repaired": "friable",
+      "kind": "other"
+    },
+    {
+      "raw": "gadling",
+      "column": "III",
+      "line": 1887,
+      "repaired": "galling",
+      "kind": "other"
+    },
+    {
+      "raw": "gashful",
+      "column": "III",
+      "line": 1908,
+      "repaired": "bashful",
+      "kind": "early"
+    },
+    {
+      "raw": "goosish",
+      "column": "III",
+      "line": 1956,
+      "repaired": "goodish",
+      "kind": "other"
+    },
+    {
+      "raw": "gripless",
+      "column": "III",
+      "line": 1976,
+      "repaired": "dripless",
+      "kind": "early"
+    },
+    {
+      "raw": "gullish",
+      "column": "III",
+      "line": 1990,
+      "repaired": "bullish",
+      "kind": "early"
+    },
+    {
+      "raw": "hattering",
+      "column": "III",
+      "line": 2048,
+      "repaired": "shattering",
+      "kind": "early"
+    },
+    {
+      "raw": "hellborn",
+      "column": "III",
+      "line": 2064,
+      "repaired": "wellborn",
+      "kind": "early"
+    },
+    {
+      "raw": "howfing",
+      "column": "III",
+      "line": 2135,
+      "repaired": "howling",
+      "kind": "other"
+    },
+    {
+      "raw": "immund",
+      "column": "III",
+      "line": 2189,
+      "repaired": "immune",
+      "kind": "other"
+    },
+    {
+      "raw": "impendient",
+      "column": "III",
+      "line": 2196,
+      "repaired": "impendent",
+      "kind": "other"
+    },
+    {
+      "raw": "incivil",
+      "column": "III",
+      "line": 2235,
+      "repaired": "uncivil",
+      "kind": "early"
+    },
+    {
+      "raw": "incompassionate",
+      "column": "III",
+      "line": 2239,
+      "repaired": "uncompassionate",
+      "kind": "early"
+    },
+    {
+      "raw": "indistinguished",
+      "column": "III",
+      "line": 2274,
+      "repaired": "undistinguished",
+      "kind": "early"
+    },
+    {
+      "raw": "inductile",
+      "column": "III",
+      "line": 2276,
+      "repaired": "inductive",
+      "kind": "other"
+    },
+    {
+      "raw": "infalliable",
+      "column": "III",
+      "line": 2301,
+      "repaired": "infallible",
+      "kind": "other"
+    },
+    {
+      "raw": "infestuous",
+      "column": "III",
+      "line": 2309,
+      "repaired": "incestuous",
+      "kind": "other"
+    },
+    {
+      "raw": "innerving",
+      "column": "III",
+      "line": 2328,
+      "repaired": "unnerving",
+      "kind": "early"
+    },
+    {
+      "raw": "insipient",
+      "column": "III",
+      "line": 2344,
+      "repaired": "incipient",
+      "kind": "other"
+    },
+    {
+      "raw": "insuccessful",
+      "column": "III",
+      "line": 2349,
+      "repaired": "unsuccessful",
+      "kind": "early"
+    },
+    {
+      "raw": "irrefusable",
+      "column": "III",
+      "line": 2380,
+      "repaired": "irrefutable",
+      "kind": "other"
+    },
+    {
+      "raw": "lepid",
+      "column": "III",
+      "line": 2487,
+      "repaired": "tepid",
+      "kind": "early"
+    },
+    {
+      "raw": "lessoned",
+      "column": "III",
+      "line": 2488,
+      "repaired": "lessened",
+      "kind": "vowel_substitution"
+    },
+    {
+      "raw": "luciferous",
+      "column": "III",
+      "line": 2560,
+      "repaired": "muciferous",
+      "kind": "early"
+    },
+    {
+      "raw": "luggish",
+      "column": "III",
+      "line": 2564,
+      "repaired": "sluggish",
+      "kind": "early"
+    },
+    {
+      "raw": "lustly",
+      "column": "III",
+      "line": 2578,
+      "repaired": "lusty",
+      "kind": "other"
+    },
+    {
+      "raw": "malajusted",
+      "column": "III",
+      "line": 2598,
+      "repaired": "maladjusted",
+      "kind": "other"
+    },
+    {
+      "raw": "maliferous",
+      "column": "III",
+      "line": 2603,
+      "repaired": "saliferous",
+      "kind": "early"
+    },
+    {
+      "raw": "manified",
+      "column": "III",
+      "line": 2616,
+      "repaired": "magnified",
+      "kind": "other"
+    },
+    {
+      "raw": "medicatory",
+      "column": "III",
+      "line": 2647,
+      "repaired": "mediatory",
+      "kind": "other"
+    },
+    {
+      "raw": "misliked",
+      "column": "III",
+      "line": 2720,
+      "repaired": "disliked",
+      "kind": "early"
+    },
+    {
+      "raw": "mispleasing",
+      "column": "III",
+      "line": 2725,
+      "repaired": "displeasing",
+      "kind": "early"
+    },
+    {
+      "raw": "mortacious",
+      "column": "III",
+      "line": 2765,
+      "repaired": "mordacious",
+      "kind": "other"
+    },
+    {
+      "raw": "muffish",
+      "column": "III",
+      "line": 2771,
+      "repaired": "huffish",
+      "kind": "early"
+    },
+    {
+      "raw": "muggled",
+      "column": "III",
+      "line": 2773,
+      "repaired": "smuggled",
+      "kind": "early"
+    },
+    {
+      "raw": "nidget",
+      "column": "III",
+      "line": 2821,
+      "repaired": "midget",
+      "kind": "early"
+    },
+    {
+      "raw": "nimity-piminy",
+      "column": "III",
+      "line": 2825,
+      "repaired": "niminy-piminy",
+      "kind": "other"
+    },
+    {
+      "raw": "nugacious",
+      "column": "III",
+      "line": 2898,
+      "repaired": "fugacious",
+      "kind": "early"
+    },
+    {
+      "raw": "nugging",
+      "column": "III",
+      "line": 2900,
+      "repaired": "nagging",
+      "kind": "early"
+    },
+    {
+      "raw": "old-timy",
+      "column": "III",
+      "line": 2941,
+      "repaired": "old-time",
+      "kind": "vowel_substitution"
+    },
+    {
+      "raw": "ominious",
+      "column": "III",
+      "line": 2943,
+      "repaired": "ominous",
+      "kind": "other"
+    },
+    {
+      "raw": "ostentacious",
+      "column": "III",
+      "line": 2978,
+      "repaired": "ostentatious",
+      "kind": "other"
+    },
+    {
+      "raw": "overlight",
+      "column": "III",
+      "line": 3058,
+      "repaired": "overnight",
+      "kind": "other"
+    },
+    {
+      "raw": "overstrong",
+      "column": "III",
+      "line": 3086,
+      "repaired": "overstrung",
+      "kind": "vowel_substitution"
+    },
+    {
+      "raw": "overwearing",
+      "column": "III",
+      "line": 3104,
+      "repaired": "overbearing",
+      "kind": "other"
+    },
+    {
+      "raw": "parroty",
+      "column": "III",
+      "line": 3143,
+      "repaired": "carroty",
+      "kind": "early"
+    },
+    {
+      "raw": "patronly",
+      "column": "III",
+      "line": 3154,
+      "repaired": "matronly",
+      "kind": "early"
+    },
+    {
+      "raw": "peakish",
+      "column": "III",
+      "line": 3161,
+      "repaired": "peckish",
+      "kind": "other"
+    },
+    {
+      "raw": "perstiferous",
+      "column": "III",
+      "line": 3206,
+      "repaired": "pestiferous",
+      "kind": "other"
+    },
+    {
+      "raw": "pindy",
+      "column": "III",
+      "line": 3244,
+      "repaired": "windy",
+      "kind": "early"
+    },
+    {
+      "raw": "prefulgent",
+      "column": "III",
+      "line": 3313,
+      "repaired": "refulgent",
+      "kind": "early"
+    },
+    {
+      "raw": "pukish",
+      "column": "III",
+      "line": 3380,
+      "repaired": "puckish",
+      "kind": "other"
+    },
+    {
+      "raw": "puristic",
+      "column": "III",
+      "line": 3394,
+      "repaired": "juristic",
+      "kind": "early"
+    },
+    {
+      "raw": "qualitied",
+      "column": "III",
+      "line": 3408,
+      "repaired": "qualified",
+      "kind": "other"
+    },
+    {
+      "raw": "raspish",
+      "column": "III",
+      "line": 3455,
+      "repaired": "waspish",
+      "kind": "early"
+    },
+    {
+      "raw": "rawish",
+      "column": "III",
+      "line": 3465,
+      "repaired": "rakish",
+      "kind": "other"
+    },
+    {
+      "raw": "refinable",
+      "column": "III",
+      "line": 3484,
+      "repaired": "definable",
+      "kind": "early"
+    },
+    {
+      "raw": "reinless",
+      "column": "III",
+      "line": 3492,
+      "repaired": "rainless",
+      "kind": "early"
+    },
+    {
+      "raw": "renegrade",
+      "column": "III",
+      "line": 3500,
+      "repaired": "renegade",
+      "kind": "other"
+    },
+    {
+      "raw": "renish",
+      "column": "III",
+      "line": 3502,
+      "repaired": "rhenish",
+      "kind": "early"
+    },
+    {
+      "raw": "residuent",
+      "column": "III",
+      "line": 3518,
+      "repaired": "resident",
+      "kind": "other"
+    },
+    {
+      "raw": "resistable",
+      "column": "III",
+      "line": 3519,
+      "repaired": "resistible",
+      "kind": "vowel_substitution"
+    },
+    {
+      "raw": "reslendent",
+      "column": "III",
+      "line": 3524,
+      "repaired": "resplendent",
+      "kind": "other"
+    },
+    {
+      "raw": "restrogressive",
+      "column": "III",
+      "line": 3535,
+      "repaired": "retrogressive",
+      "kind": "other"
+    },
+    {
+      "raw": "revulsive",
+      "column": "III",
+      "line": 3543,
+      "repaired": "repulsive",
+      "kind": "other"
+    },
+    {
+      "raw": "roying",
+      "column": "III",
+      "line": 3588,
+      "repaired": "roving",
+      "kind": "other"
+    },
+    {
+      "raw": "sacket",
+      "column": "III",
+      "line": 3611,
+      "repaired": "sacked",
+      "kind": "other"
+    },
+    {
+      "raw": "sackless",
+      "column": "III",
+      "line": 3612,
+      "repaired": "backless",
+      "kind": "early"
+    },
+    {
+      "raw": "sailless",
+      "column": "III",
+      "line": 3617,
+      "repaired": "tailless",
+      "kind": "early"
+    },
+    {
+      "raw": "sackless",
+      "column": "III",
+      "line": 3637,
+      "repaired": "backless",
+      "kind": "early"
+    },
+    {
+      "raw": "scathy",
+      "column": "III",
+      "line": 3658,
+      "repaired": "scatty",
+      "kind": "other"
+    },
+    {
+      "raw": "scopeless",
+      "column": "III",
+      "line": 3667,
+      "repaired": "scoreless",
+      "kind": "other"
+    },
+    {
+      "raw": "semiwild",
+      "column": "III",
+      "line": 3732,
+      "repaired": "semi-wild",
+      "kind": "other"
+    },
+    {
+      "raw": "shapable",
+      "column": "III",
+      "line": 3757,
+      "repaired": "shakable",
+      "kind": "other"
+    },
+    {
+      "raw": "sirupy",
+      "column": "III",
+      "line": 3805,
+      "repaired": "syrupy",
+      "kind": "early"
+    },
+    {
+      "raw": "slakeless",
+      "column": "III",
+      "line": 3825,
+      "repaired": "slaveless",
+      "kind": "other"
+    },
+    {
+      "raw": "sloomy",
+      "column": "III",
+      "line": 3842,
+      "repaired": "gloomy",
+      "kind": "early"
+    },
+    {
+      "raw": "slute",
+      "column": "III",
+      "line": 3850,
+      "repaired": "saute",
+      "kind": "early"
+    },
+    {
+      "raw": "soapless",
+      "column": "III",
+      "line": 3871,
+      "repaired": "sapless",
+      "kind": "early"
+    },
+    {
+      "raw": "sombering",
+      "column": "III",
+      "line": 3885,
+      "repaired": "sobering",
+      "kind": "other"
+    },
+    {
+      "raw": "sottering",
+      "column": "III",
+      "line": 3897,
+      "repaired": "tottering",
+      "kind": "early"
+    },
+    {
+      "raw": "spindless",
+      "column": "III",
+      "line": 3922,
+      "repaired": "spineless",
+      "kind": "other"
+    },
+    {
+      "raw": "takeful",
+      "column": "III",
+      "line": 4130,
+      "repaired": "wakeful",
+      "kind": "early"
+    },
+    {
+      "raw": "teening",
+      "column": "III",
+      "line": 4156,
+      "repaired": "teeming",
+      "kind": "other"
+    },
+    {
+      "raw": "toilless",
+      "column": "III",
+      "line": 4218,
+      "repaired": "tailless",
+      "kind": "early"
+    },
+    {
+      "raw": "tolderable",
+      "column": "III",
+      "line": 4219,
+      "repaired": "tolerable",
+      "kind": "other"
+    },
+    {
+      "raw": "unadored",
+      "column": "III",
+      "line": 4318,
+      "repaired": "unadorned",
+      "kind": "other"
+    },
+    {
+      "raw": "unapt",
+      "column": "III",
+      "line": 4349,
+      "repaired": "inapt",
+      "kind": "early"
+    },
+    {
+      "raw": "unassumed",
+      "column": "III",
+      "line": 4360,
+      "repaired": "unassured",
+      "kind": "other"
+    },
+    {
+      "raw": "unbannered",
+      "column": "III",
+      "line": 4375,
+      "repaired": "unmannered",
+      "kind": "other"
+    },
+    {
+      "raw": "unbitted",
+      "column": "III",
+      "line": 4398,
+      "repaired": "unbitter",
+      "kind": "other"
+    },
+    {
+      "raw": "unblinding",
+      "column": "III",
+      "line": 4405,
+      "repaired": "unblinking",
+      "kind": "other"
+    },
+    {
+      "raw": "uncognoscible",
+      "column": "III",
+      "line": 4459,
+      "repaired": "incognoscible",
+      "kind": "early"
+    },
+    {
+      "raw": "unconceivable",
+      "column": "III",
+      "line": 4482,
+      "repaired": "inconceivable",
+      "kind": "early"
+    },
+    {
+      "raw": "unconclusive",
+      "column": "III",
+      "line": 4484,
+      "repaired": "inconclusive",
+      "kind": "early"
+    },
+    {
+      "raw": "unconsequential",
+      "column": "III",
+      "line": 4492,
+      "repaired": "inconsequential",
+      "kind": "early"
+    },
+    {
+      "raw": "unconspicuous",
+      "column": "III",
+      "line": 4497,
+      "repaired": "inconspicuous",
+      "kind": "early"
+    },
+    {
+      "raw": "uncontrovertible",
+      "column": "III",
+      "line": 4505,
+      "repaired": "incontrovertible",
+      "kind": "early"
+    },
+    {
+      "raw": "uncorrigible",
+      "column": "III",
+      "line": 4510,
+      "repaired": "incorrigible",
+      "kind": "early"
+    },
+    {
+      "raw": "uncorruptible",
+      "column": "III",
+      "line": 4511,
+      "repaired": "incorruptible",
+      "kind": "early"
+    },
+    {
+      "raw": "uncoveted",
+      "column": "III",
+      "line": 4515,
+      "repaired": "uncovered",
+      "kind": "other"
+    },
+    {
+      "raw": "uncowled",
+      "column": "III",
+      "line": 4516,
+      "repaired": "uncoiled",
+      "kind": "other"
+    },
+    {
+      "raw": "uncrooked",
+      "column": "III",
+      "line": 4521,
+      "repaired": "uncooked",
+      "kind": "other"
+    },
+    {
+      "raw": "unculpable",
+      "column": "III",
+      "line": 4525,
+      "repaired": "inculpable",
+      "kind": "early"
+    },
+    {
+      "raw": "undecompostable",
+      "column": "III",
+      "line": 4540,
+      "repaired": "undecomposable",
+      "kind": "other"
+    },
+    {
+      "raw": "undegenerate",
+      "column": "III",
+      "line": 4546,
+      "repaired": "unregenerate",
+      "kind": "other"
+    },
+    {
+      "raw": "undelectable",
+      "column": "III",
+      "line": 4548,
+      "repaired": "undetectable",
+      "kind": "other"
+    },
+    {
+      "raw": "undertanding",
+      "column": "III",
+      "line": 4568,
+      "repaired": "understanding",
+      "kind": "other"
+    },
+    {
+      "raw": "undivinable",
+      "column": "III",
+      "line": 4600,
+      "repaired": "undividable",
+      "kind": "other"
+    },
+    {
+      "raw": "undreaded",
+      "column": "III",
+      "line": 4604,
+      "repaired": "undreamed",
+      "kind": "other"
+    },
+    {
+      "raw": "unelabourate",
+      "column": "III",
+      "line": 4608,
+      "repaired": "unelaborate",
+      "kind": "other"
+    },
+    {
+      "raw": "unexpert",
+      "column": "III",
+      "line": 4640,
+      "repaired": "inexpert",
+      "kind": "early"
+    },
+    {
+      "raw": "unfeared",
+      "column": "III",
+      "line": 4652,
+      "repaired": "ungeared",
+      "kind": "other"
+    },
+    {
+      "raw": "unfelicitous",
+      "column": "III",
+      "line": 4654,
+      "repaired": "infelicitous",
+      "kind": "early"
+    },
+    {
+      "raw": "ungarbled",
+      "column": "III",
+      "line": 4669,
+      "repaired": "ungarbed",
+      "kind": "other"
+    },
+    {
+      "raw": "unhomely",
+      "column": "III",
+      "line": 4700,
+      "repaired": "uncomely",
+      "kind": "other"
+    },
+    {
+      "raw": "unitable",
+      "column": "III",
+      "line": 4737,
+      "repaired": "unstable",
+      "kind": "other"
+    },
+    {
+      "raw": "unkid",
+      "column": "III",
+      "line": 4744,
+      "repaired": "unkind",
+      "kind": "other"
+    },
+    {
+      "raw": "unlosable",
+      "column": "III",
+      "line": 4753,
+      "repaired": "unlovable",
+      "kind": "other"
+    },
+    {
+      "raw": "unorthadox",
+      "column": "III",
+      "line": 4801,
+      "repaired": "unorthodox",
+      "kind": "vowel_substitution"
+    },
+    {
+      "raw": "unpoised",
+      "column": "III",
+      "line": 4829,
+      "repaired": "unposed",
+      "kind": "other"
+    },
+    {
+      "raw": "unprayable",
+      "column": "III",
+      "line": 4833,
+      "repaired": "unplayable",
+      "kind": "other"
+    },
+    {
+      "raw": "unreprievable",
+      "column": "III",
+      "line": 4873,
+      "repaired": "unretrievable",
+      "kind": "other"
+    },
+    {
+      "raw": "unright",
+      "column": "III",
+      "line": 4892,
+      "repaired": "upright",
+      "kind": "early"
+    },
+    {
+      "raw": "unsage",
+      "column": "III",
+      "line": 4904,
+      "repaired": "unsafe",
+      "kind": "other"
+    },
+    {
+      "raw": "unsaluted",
+      "column": "III",
+      "line": 4905,
+      "repaired": "unsalted",
+      "kind": "other"
+    },
+    {
+      "raw": "unsensible",
+      "column": "III",
+      "line": 4918,
+      "repaired": "insensible",
+      "kind": "early"
+    },
+    {
+      "raw": "unshamable",
+      "column": "III",
+      "line": 4923,
+      "repaired": "unshakable",
+      "kind": "other"
+    },
+    {
+      "raw": "untaintable",
+      "column": "III",
+      "line": 4979,
+      "repaired": "unpaintable",
+      "kind": "other"
+    },
+    {
+      "raw": "unvaluable",
+      "column": "III",
+      "line": 5008,
+      "repaired": "invaluable",
+      "kind": "early"
+    },
+    {
+      "raw": "unvisioned",
+      "column": "III",
+      "line": 5016,
+      "repaired": "envisioned",
+      "kind": "early"
+    },
+    {
+      "raw": "unwoundable",
+      "column": "III",
+      "line": 5033,
+      "repaired": "unsoundable",
+      "kind": "other"
+    },
+    {
+      "raw": "velverty",
+      "column": "III",
+      "line": 5059,
+      "repaired": "velvety",
+      "kind": "other"
+    },
+    {
+      "raw": "wearish",
+      "column": "III",
+      "line": 5116,
+      "repaired": "bearish",
+      "kind": "early"
+    },
+    {
+      "raw": "zesting",
+      "column": "III",
+      "line": 5191,
+      "repaired": "jesting",
+      "kind": "early"
+    },
+    {
+      "raw": "Achatean",
+      "column": "IV",
+      "line": 18,
+      "repaired": "achaean",
+      "kind": "other"
+    },
+    {
+      "raw": "Acheronic",
+      "column": "IV",
+      "line": 19,
+      "repaired": "acherontic",
+      "kind": "other"
+    },
+    {
+      "raw": "acranial",
+      "column": "IV",
+      "line": 28,
+      "repaired": "cranial",
+      "kind": "early"
+    },
+    {
+      "raw": "asomatous",
+      "column": "IV",
+      "line": 98,
+      "repaired": "astomatous",
+      "kind": "other"
+    },
+    {
+      "raw": "belaced",
+      "column": "IV",
+      "line": 182,
+      "repaired": "belated",
+      "kind": "other"
+    },
+    {
+      "raw": "birthless",
+      "column": "IV",
+      "line": 223,
+      "repaired": "mirthless",
+      "kind": "early"
+    },
+    {
+      "raw": "Bismarkian",
+      "column": "IV",
+      "line": 226,
+      "repaired": "bismarckian",
+      "kind": "other"
+    },
+    {
+      "raw": "brawned",
+      "column": "IV",
+      "line": 256,
+      "repaired": "browned",
+      "kind": "vowel_substitution"
+    },
+    {
+      "raw": "chapless",
+      "column": "IV",
+      "line": 360,
+      "repaired": "hapless",
+      "kind": "early"
+    },
+    {
+      "raw": "checky",
+      "column": "IV",
+      "line": 363,
+      "repaired": "cheeky",
+      "kind": "other"
+    },
+    {
+      "raw": "chumpy",
+      "column": "IV",
+      "line": 372,
+      "repaired": "chummy",
+      "kind": "other"
+    },
+    {
+      "raw": "churled",
+      "column": "IV",
+      "line": 377,
+      "repaired": "curled",
+      "kind": "early"
+    },
+    {
+      "raw": "cockered",
+      "column": "IV",
+      "line": 394,
+      "repaired": "cockeyed",
+      "kind": "other"
+    },
+    {
+      "raw": "comous",
+      "column": "IV",
+      "line": 408,
+      "repaired": "cormous",
+      "kind": "other"
+    },
+    {
+      "raw": "courtless",
+      "column": "IV",
+      "line": 450,
+      "repaired": "countless",
+      "kind": "other"
+    },
+    {
+      "raw": "crestless",
+      "column": "IV",
+      "line": 462,
+      "repaired": "restless",
+      "kind": "early"
+    },
+    {
+      "raw": "cureless",
+      "column": "IV",
+      "line": 479,
+      "repaired": "careless",
+      "kind": "early"
+    },
+    {
+      "raw": "dandled",
+      "column": "IV",
+      "line": 489,
+      "repaired": "handled",
+      "kind": "early"
+    },
+    {
+      "raw": "duckish",
+      "column": "IV",
+      "line": 626,
+      "repaired": "puckish",
+      "kind": "early"
+    },
+    {
+      "raw": "eely",
+      "column": "IV",
+      "line": 661,
+      "repaired": "eery",
+      "kind": "other"
+    },
+    {
+      "raw": "enfettered",
+      "column": "IV",
+      "line": 695,
+      "repaired": "unfettered",
+      "kind": "early"
+    },
+    {
+      "raw": "estiferous",
+      "column": "IV",
+      "line": 732,
+      "repaired": "pestiferous",
+      "kind": "early"
+    },
+    {
+      "raw": "flagless",
+      "column": "IV",
+      "line": 845,
+      "repaired": "flawless",
+      "kind": "other"
+    },
+    {
+      "raw": "fluty",
+      "column": "IV",
+      "line": 868,
+      "repaired": "fluky",
+      "kind": "other"
+    },
+    {
+      "raw": "foeless",
+      "column": "IV",
+      "line": 872,
+      "repaired": "toeless",
+      "kind": "early"
+    },
+    {
+      "raw": "forworn",
+      "column": "IV",
+      "line": 884,
+      "repaired": "forlorn",
+      "kind": "other"
+    },
+    {
+      "raw": "fractile",
+      "column": "IV",
+      "line": 887,
+      "repaired": "tractile",
+      "kind": "early"
+    },
+    {
+      "raw": "fumacious",
+      "column": "IV",
+      "line": 926,
+      "repaired": "fugacious",
+      "kind": "other"
+    },
+    {
+      "raw": "fumous",
+      "column": "IV",
+      "line": 927,
+      "repaired": "famous",
+      "kind": "early"
+    },
+    {
+      "raw": "graspless",
+      "column": "IV",
+      "line": 1016,
+      "repaired": "grassless",
+      "kind": "other"
+    },
+    {
+      "raw": "guideless",
+      "column": "IV",
+      "line": 1027,
+      "repaired": "guileless",
+      "kind": "other"
+    },
+    {
+      "raw": "hontish",
+      "column": "IV",
+      "line": 1157,
+      "repaired": "hottish",
+      "kind": "other"
+    },
+    {
+      "raw": "hornified",
+      "column": "IV",
+      "line": 1160,
+      "repaired": "horrified",
+      "kind": "other"
+    },
+    {
+      "raw": "illtreated",
+      "column": "IV",
+      "line": 1228,
+      "repaired": "ill-treated",
+      "kind": "other"
+    },
+    {
+      "raw": "inapproachable",
+      "column": "IV",
+      "line": 1241,
+      "repaired": "unapproachable",
+      "kind": "early"
+    },
+    {
+      "raw": "inaurate",
+      "column": "IV",
+      "line": 1242,
+      "repaired": "indurate",
+      "kind": "other"
+    },
+    {
+      "raw": "incaged",
+      "column": "IV",
+      "line": 1243,
+      "repaired": "incased",
+      "kind": "other"
+    },
+    {
+      "raw": "incontrollable",
+      "column": "IV",
+      "line": 1257,
+      "repaired": "uncontrollable",
+      "kind": "early"
+    },
+    {
+      "raw": "incorperate",
+      "column": "IV",
+      "line": 1261,
+      "repaired": "incorporate",
+      "kind": "vowel_substitution"
+    },
+    {
+      "raw": "indiscerpible",
+      "column": "IV",
+      "line": 1276,
+      "repaired": "indiscernible",
+      "kind": "other"
+    },
+    {
+      "raw": "inerm",
+      "column": "IV",
+      "line": 1285,
+      "repaired": "inert",
+      "kind": "other"
+    },
+    {
+      "raw": "infeminine",
+      "column": "IV",
+      "line": 1292,
+      "repaired": "unfeminine",
+      "kind": "early"
+    },
+    {
+      "raw": "inviolated",
+      "column": "IV",
+      "line": 1332,
+      "repaired": "inviolate",
+      "kind": "other"
+    },
+    {
+      "raw": "jaggered",
+      "column": "IV",
+      "line": 1352,
+      "repaired": "jiggered",
+      "kind": "early"
+    },
+    {
+      "raw": "jimp",
+      "column": "IV",
+      "line": 1360,
+      "repaired": "limp",
+      "kind": "early"
+    },
+    {
+      "raw": "locused",
+      "column": "IV",
+      "line": 1473,
+      "repaired": "focused",
+      "kind": "early"
+    },
+    {
+      "raw": "lutulent",
+      "column": "IV",
+      "line": 1492,
+      "repaired": "luculent",
+      "kind": "other"
+    },
+    {
+      "raw": "maneless",
+      "column": "IV",
+      "line": 1523,
+      "repaired": "mateless",
+      "kind": "other"
+    },
+    {
+      "raw": "matronized",
+      "column": "IV",
+      "line": 1554,
+      "repaired": "patronized",
+      "kind": "early"
+    },
+    {
+      "raw": "mattoid",
+      "column": "IV",
+      "line": 1555,
+      "repaired": "mastoid",
+      "kind": "other"
+    },
+    {
+      "raw": "matuinal",
+      "column": "IV",
+      "line": 1556,
+      "repaired": "matutinal",
+      "kind": "other"
+    },
+    {
+      "raw": "micrencephalous",
+      "column": "IV",
+      "line": 1583,
+      "repaired": "macrencephalous",
+      "kind": "early"
+    },
+    {
+      "raw": "mistless",
+      "column": "IV",
+      "line": 1630,
+      "repaired": "listless",
+      "kind": "early"
+    },
+    {
+      "raw": "mucksy",
+      "column": "IV",
+      "line": 1677,
+      "repaired": "mucky",
+      "kind": "other"
+    },
+    {
+      "raw": "muriform",
+      "column": "IV",
+      "line": 1694,
+      "repaired": "auriform",
+      "kind": "early"
+    },
+    {
+      "raw": "muticous",
+      "column": "IV",
+      "line": 1701,
+      "repaired": "mutinous",
+      "kind": "other"
+    },
+    {
+      "raw": "nacred",
+      "column": "IV",
+      "line": 1712,
+      "repaired": "sacred",
+      "kind": "early"
+    },
+    {
+      "raw": "namable",
+      "column": "IV",
+      "line": 1714,
+      "repaired": "tamable",
+      "kind": "early"
+    },
+    {
+      "raw": "nearish",
+      "column": "IV",
+      "line": 1726,
+      "repaired": "bearish",
+      "kind": "early"
+    },
+    {
+      "raw": "nectareous",
+      "column": "IV",
+      "line": 1731,
+      "repaired": "nectarous",
+      "kind": "other"
+    },
+    {
+      "raw": "nonaromatic",
+      "column": "IV",
+      "line": 1770,
+      "repaired": "non-aromatic",
+      "kind": "other"
+    },
+    {
+      "raw": "nonsubstantial",
+      "column": "IV",
+      "line": 1799,
+      "repaired": "consubstantial",
+      "kind": "early"
+    },
+    {
+      "raw": "outler",
+      "column": "IV",
+      "line": 1879,
+      "repaired": "outer",
+      "kind": "other"
+    },
+    {
+      "raw": "overcold",
+      "column": "IV",
+      "line": 1893,
+      "repaired": "overbold",
+      "kind": "other"
+    },
+    {
+      "raw": "overold",
+      "column": "IV",
+      "line": 1912,
+      "repaired": "overbold",
+      "kind": "other"
+    },
+    {
+      "raw": "oversated",
+      "column": "IV",
+      "line": 1919,
+      "repaired": "overstated",
+      "kind": "other"
+    },
+    {
+      "raw": "oxlike",
+      "column": "IV",
+      "line": 1932,
+      "repaired": "boxlike",
+      "kind": "early"
+    },
+    {
+      "raw": "pelasgic",
+      "column": "IV",
+      "line": 1990,
+      "repaired": "pelagic",
+      "kind": "other"
+    },
+    {
+      "raw": "petrescent",
+      "column": "IV",
+      "line": 2007,
+      "repaired": "putrescent",
+      "kind": "early"
+    },
+    {
+      "raw": "progenetic",
+      "column": "IV",
+      "line": 2153,
+      "repaired": "pyrogenetic",
+      "kind": "early"
+    },
+    {
+      "raw": "protechnical",
+      "column": "IV",
+      "line": 2155,
+      "repaired": "pyrotechnical",
+      "kind": "early"
+    },
+    {
+      "raw": "Pythic",
+      "column": "IV",
+      "line": 2157,
+      "repaired": "mythic",
+      "kind": "early"
+    },
+    {
+      "raw": "reasty",
+      "column": "IV",
+      "line": 2186,
+      "repaired": "yeasty",
+      "kind": "early"
+    },
+    {
+      "raw": "rubiform",
+      "column": "IV",
+      "line": 2269,
+      "repaired": "cubiform",
+      "kind": "early"
+    },
+    {
+      "raw": "sabulous",
+      "column": "IV",
+      "line": 2292,
+      "repaired": "fabulous",
+      "kind": "early"
+    },
+    {
+      "raw": "scodgy",
+      "column": "IV",
+      "line": 2353,
+      "repaired": "stodgy",
+      "kind": "early"
+    },
+    {
+      "raw": "scrank",
+      "column": "IV",
+      "line": 2361,
+      "repaired": "crank",
+      "kind": "early"
+    },
+    {
+      "raw": "scroggy",
+      "column": "IV",
+      "line": 2366,
+      "repaired": "scraggy",
+      "kind": "vowel_substitution"
+    },
+    {
+      "raw": "seizable",
+      "column": "IV",
+      "line": 2383,
+      "repaired": "sizable",
+      "kind": "early"
+    },
+    {
+      "raw": "sililant",
+      "column": "IV",
+      "line": 2490,
+      "repaired": "sibilant",
+      "kind": "other"
+    },
+    {
+      "raw": "sibylling",
+      "column": "IV",
+      "line": 2491,
+      "repaired": "sibylline",
+      "kind": "other"
+    },
+    {
+      "raw": "sizy",
+      "column": "IV",
+      "line": 2513,
+      "repaired": "size",
+      "kind": "vowel_substitution"
+    },
+    {
+      "raw": "skinking",
+      "column": "IV",
+      "line": 2517,
+      "repaired": "stinking",
+      "kind": "early"
+    },
+    {
+      "raw": "snaped",
+      "column": "IV",
+      "line": 2543,
+      "repaired": "shaped",
+      "kind": "early"
+    },
+    {
+      "raw": "spalt",
+      "column": "IV",
+      "line": 2563,
+      "repaired": "salt",
+      "kind": "early"
+    },
+    {
+      "raw": "spiceful",
+      "column": "IV",
+      "line": 2574,
+      "repaired": "spiteful",
+      "kind": "other"
+    },
+    {
+      "raw": "spiculate",
+      "column": "IV",
+      "line": 2575,
+      "repaired": "apiculate",
+      "kind": "early"
+    },
+    {
+      "raw": "sportling",
+      "column": "IV",
+      "line": 2595,
+      "repaired": "sporting",
+      "kind": "other"
+    },
+    {
+      "raw": "starven",
+      "column": "IV",
+      "line": 2623,
+      "repaired": "starved",
+      "kind": "other"
+    },
+    {
+      "raw": "sthenic",
+      "column": "IV",
+      "line": 2634,
+      "repaired": "asthenic",
+      "kind": "early"
+    },
+    {
+      "raw": "stintless",
+      "column": "IV",
+      "line": 2642,
+      "repaired": "stingless",
+      "kind": "other"
+    },
+    {
+      "raw": "subarid",
+      "column": "IV",
+      "line": 2672,
+      "repaired": "subacid",
+      "kind": "other"
+    },
+    {
+      "raw": "subjegated",
+      "column": "IV",
+      "line": 2676,
+      "repaired": "subjugated",
+      "kind": "vowel_substitution"
+    },
+    {
+      "raw": "suckless",
+      "column": "IV",
+      "line": 2687,
+      "repaired": "luckless",
+      "kind": "early"
+    },
+    {
+      "raw": "suppled",
+      "column": "IV",
+      "line": 2703,
+      "repaired": "supple",
+      "kind": "other"
+    },
+    {
+      "raw": "surgy",
+      "column": "IV",
+      "line": 2712,
+      "repaired": "surly",
+      "kind": "other"
+    },
+    {
+      "raw": "swordless",
+      "column": "IV",
+      "line": 2728,
+      "repaired": "wordless",
+      "kind": "early"
+    },
+    {
+      "raw": "telary",
+      "column": "IV",
+      "line": 2743,
+      "repaired": "teary",
+      "kind": "other"
+    },
+    {
+      "raw": "theroid",
+      "column": "IV",
+      "line": 2764,
+      "repaired": "thyroid",
+      "kind": "vowel_substitution"
+    },
+    {
+      "raw": "thewy",
+      "column": "IV",
+      "line": 2767,
+      "repaired": "chewy",
+      "kind": "early"
+    },
+    {
+      "raw": "thirl",
+      "column": "IV",
+      "line": 2772,
+      "repaired": "third",
+      "kind": "other"
+    },
+    {
+      "raw": "trothless",
+      "column": "IV",
+      "line": 2824,
+      "repaired": "toothless",
+      "kind": "early"
+    },
+    {
+      "raw": "unaffied",
+      "column": "IV",
+      "line": 2851,
+      "repaired": "unaffixed",
+      "kind": "other"
+    },
+    {
+      "raw": "unailing",
+      "column": "IV",
+      "line": 2854,
+      "repaired": "unfailing",
+      "kind": "other"
+    },
+    {
+      "raw": "unattacked",
+      "column": "IV",
+      "line": 2875,
+      "repaired": "unattached",
+      "kind": "other"
+    },
+    {
+      "raw": "unboyed",
+      "column": "IV",
+      "line": 2914,
+      "repaired": "unbowed",
+      "kind": "other"
+    },
+    {
+      "raw": "unbred",
+      "column": "IV",
+      "line": 2918,
+      "repaired": "inbred",
+      "kind": "early"
+    },
+    {
+      "raw": "unbrightened",
+      "column": "IV",
+      "line": 2919,
+      "repaired": "unfrightened",
+      "kind": "other"
+    },
+    {
+      "raw": "uncarnate",
+      "column": "IV",
+      "line": 2933,
+      "repaired": "incarnate",
+      "kind": "early"
+    },
+    {
+      "raw": "uncate",
+      "column": "IV",
+      "line": 2936,
+      "repaired": "uniate",
+      "kind": "other"
+    },
+    {
+      "raw": "uncourted",
+      "column": "IV",
+      "line": 2984,
+      "repaired": "uncounted",
+      "kind": "other"
+    },
+    {
+      "raw": "uncrested",
+      "column": "IV",
+      "line": 2988,
+      "repaired": "unrested",
+      "kind": "other"
+    },
+    {
+      "raw": "undevised",
+      "column": "IV",
+      "line": 3043,
+      "repaired": "unrevised",
+      "kind": "other"
+    },
+    {
+      "raw": "undose",
+      "column": "IV",
+      "line": 3058,
+      "repaired": "undone",
+      "kind": "other"
+    },
+    {
+      "raw": "undowered",
+      "column": "IV",
+      "line": 3059,
+      "repaired": "unpowered",
+      "kind": "other"
+    },
+    {
+      "raw": "undurable",
+      "column": "IV",
+      "line": 3061,
+      "repaired": "endurable",
+      "kind": "early"
+    },
+    {
+      "raw": "unfrilled",
+      "column": "IV",
+      "line": 3118,
+      "repaired": "unfilled",
+      "kind": "other"
+    },
+    {
+      "raw": "unhealable",
+      "column": "IV",
+      "line": 3146,
+      "repaired": "unhearable",
+      "kind": "other"
+    },
+    {
+      "raw": "unicolored",
+      "column": "IV",
+      "line": 3157,
+      "repaired": "uncolored",
+      "kind": "other"
+    },
+    {
+      "raw": "unlicked",
+      "column": "IV",
+      "line": 3199,
+      "repaired": "unlocked",
+      "kind": "vowel_substitution"
+    },
+    {
+      "raw": "unpampered",
+      "column": "IV",
+      "line": 3260,
+      "repaired": "unhampered",
+      "kind": "other"
+    },
+    {
+      "raw": "unpowdered",
+      "column": "IV",
+      "line": 3283,
+      "repaired": "unpowered",
+      "kind": "other"
+    },
+    {
+      "raw": "unregal",
+      "column": "IV",
+      "line": 3310,
+      "repaired": "unreal",
+      "kind": "other"
+    },
+    {
+      "raw": "unreined",
+      "column": "IV",
+      "line": 3313,
+      "repaired": "unrefined",
+      "kind": "other"
+    },
+    {
+      "raw": "unretarded",
+      "column": "IV",
+      "line": 3322,
+      "repaired": "unrewarded",
+      "kind": "other"
+    },
+    {
+      "raw": "unroused",
+      "column": "IV",
+      "line": 3332,
+      "repaired": "unrouged",
+      "kind": "other"
+    },
+    {
+      "raw": "unscoured",
+      "column": "IV",
+      "line": 3350,
+      "repaired": "unsoured",
+      "kind": "other"
+    },
+    {
+      "raw": "unseduced",
+      "column": "IV",
+      "line": 3359,
+      "repaired": "unreduced",
+      "kind": "other"
+    },
+    {
+      "raw": "unsentient",
+      "column": "IV",
+      "line": 3362,
+      "repaired": "insentient",
+      "kind": "early"
+    },
+    {
+      "raw": "unshapable",
+      "column": "IV",
+      "line": 3367,
+      "repaired": "unshakable",
+      "kind": "other"
+    },
+    {
+      "raw": "unshattered",
+      "column": "IV",
+      "line": 3370,
+      "repaired": "unshuttered",
+      "kind": "vowel_substitution"
+    },
+    {
+      "raw": "unsoaped",
+      "column": "IV",
+      "line": 3389,
+      "repaired": "unshaped",
+      "kind": "other"
+    },
+    {
+      "raw": "unstunted",
+      "column": "IV",
+      "line": 3420,
+      "repaired": "unstinted",
+      "kind": "vowel_substitution"
+    },
+    {
+      "raw": "unsunny",
+      "column": "IV",
+      "line": 3428,
+      "repaired": "unfunny",
+      "kind": "other"
+    },
+    {
+      "raw": "unwealthy",
+      "column": "IV",
+      "line": 3487,
+      "repaired": "unhealthy",
+      "kind": "other"
+    },
+    {
+      "raw": "unwet",
+      "column": "IV",
+      "line": 3494,
+      "repaired": "unwed",
+      "kind": "other"
+    },
+    {
+      "raw": "unwifelike",
+      "column": "IV",
+      "line": 3495,
+      "repaired": "unlifelike",
+      "kind": "other"
+    },
+    {
+      "raw": "unwinged",
+      "column": "IV",
+      "line": 3497,
+      "repaired": "unhinged",
+      "kind": "other"
+    },
+    {
+      "raw": "unwooed",
+      "column": "IV",
+      "line": 3500,
+      "repaired": "unwooded",
+      "kind": "other"
+    },
+    {
+      "raw": "viridescent",
+      "column": "IV",
+      "line": 3533,
+      "repaired": "iridescent",
+      "kind": "early"
+    },
+    {
+      "raw": "wabbly",
+      "column": "IV",
+      "line": 3548,
+      "repaired": "wobbly",
+      "kind": "early"
+    },
+    {
+      "raw": "wisened",
+      "column": "IV",
+      "line": 3622,
+      "repaired": "wizened",
+      "kind": "other"
+    },
+    {
+      "raw": "witherling",
+      "column": "IV",
+      "line": 3624,
+      "repaired": "withering",
+      "kind": "other"
+    },
+    {
+      "raw": "wrig",
+      "column": "IV",
+      "line": 3638,
+      "repaired": "trig",
+      "kind": "early"
+    },
+    {
+      "raw": "wrizzled",
+      "column": "IV",
+      "line": 3641,
+      "repaired": "grizzled",
+      "kind": "early"
+    }
+  ]
+}
