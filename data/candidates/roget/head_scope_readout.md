@@ -267,8 +267,8 @@ Rated 0:
 | 970 Acquittal | VI Moral affections | acquitted, uncondemned, unpunished, unchastised, not guilty, not proven, not liable | Acquitted, not guilty, unpunished and not liable describe a legal outcome or passing circumstance, not what a person is like. |
 
 All 20 read right to me, apart from one edge: 442 Blindness (and 419 Deafness and 655 Disease, outside
-the sample) are rated 0 as physical conditions, while disability memberships (*blind*, *deaf*) are
-being added to the corpus in the main checkout.
+the sample) are rated 0 as physical conditions, while disability memberships are being added to the corpus in the main checkout
+([blind](../../traits/instructions/blind.json) and [deaf](../../traits/instructions/deaf.json): not in this branch yet).
 
 Rated 1:
 

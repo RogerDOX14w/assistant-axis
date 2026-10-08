@@ -86,8 +86,9 @@ Sonnet on 224 (70%), kept the current head on 55, and chose a third answer on 40
 | none for a placed label | 53 | 44 | 4 | 5 |
 | all | 319 | 224 | 55 | 40 |
 
-The third answers read well (bold: Vigor before, Rashness from Sonnet, Courage from Opus; agreeable:
-Agreement before, Pacification from Sonnet, Concord from Opus).
+The third answers read well ([bold](../../traits/instructions/bold.json): Vigor before, Rashness from Sonnet,
+Courage from Opus; [agreeable](../../traits/instructions/agreeable.json): Agreement before, Pacification from
+Sonnet, Concord from Opus).
 
 ## The covered heads that rested on semantic placements
 

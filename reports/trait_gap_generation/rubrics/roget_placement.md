@@ -17,8 +17,10 @@ of the thesaurus (a **head** is one numbered entry, such as 604 Resolution) by t
 route (the label's word among the head's words) and a semantic route (embedding similarity between
 the label's description and the head's words).  Where the two agree the placement stands.  The
 other 583 labels were placed by one route alone or not at all (route `semantic` 198, `rule` 40,
-`lexical` 22, `none` 323), and some semantic placements match on spelling: `confabulatory` on
-Confutation, `maximizing` on Maxim, `burned_out` on Waste.  A wrong placement makes a head look
+`lexical` 22, `none` 323), and some semantic placements match on spelling:
+[confabulatory](../../../data/traits/instructions/confabulatory.json) on Confutation,
+[maximizing](../../../data/traits/instructions/maximizing.json) on Maxim,
+[burned_out](../../../data/traits/instructions/burned_out.json) on Waste.  A wrong placement makes a head look
 covered, so the harvest never takes its words and the gap is hidden.  This call re-judges those
 labels; the result is in [label_heads.json](../../../data/candidates/roget/label_heads.json)
 (each label's `llm` field) and [QUESTIONS.md](../QUESTIONS.md) entry 39.  The code is
