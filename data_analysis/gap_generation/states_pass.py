@@ -5,8 +5,11 @@
         (--holding-states [--rejudge] | --filter-results F [F ...]) [--limit N]
     uv run python data_analysis/gap_generation/states_pass.py --batch-id B --mode corpus \\
         (--stems S [S ...] | --filter-results F [F ...]) [--limit N]
-    common: [--model claude-haiku-4-5-20251001] [--batch-size 20] [--budget-usd 1.0]
+    common: [--model claude-haiku-5-5] [--batch-size 20] [--budget-usd 1.0]
             [--confirm-expensive --confirmed-by WHO] [--allow-dirty] [--dry-run] [--overwrite]
+
+``--model`` defaults to Haiku 5.5 since 2026-10-08 (Haiku 4.5,
+``claude-haiku-4-5-20251001``, before; still selectable); every block names its model.
 
 ``--mode queue`` asks, for each word the classifier tagged ``state``, Roger's
 three questions (decision 12): is a habitual predisposition plausible, is the

@@ -56,7 +56,10 @@ from .wordnet import WordNetInfo, sense_info
 
 logger = logging.getLogger(__name__)
 
-DEFAULT_MODEL = "claude-haiku-4-5-20251001"
+#: The first model, and ``traithood_filter.py --model``'s default for both pipelines: Haiku 5.5 from
+#: 2026-10-08 (coding_plan_haiku55.md, "The switch"; M3 decision 17).  Haiku 4.5
+#: (``claude-haiku-4-5-20251001``) stays selectable with ``--model``.
+DEFAULT_MODEL = "claude-haiku-5-5"
 DEFAULT_SECOND_MODEL = "claude-sonnet-4-6"
 DEFAULT_BATCH_SIZE = 25
 DEFAULT_MAX_TOKENS = 8000

@@ -466,12 +466,38 @@ reproduced (`--batch-size` applies to it only and is refused with split).
   traits) -> alignment and descriptors on the gloss.  Steps 1 to 3 never see the
   intended sense.  The join is code (`assistant_axis/gapgen/split.py`), and a
   note never rejects a word.
-- **Models.**  Every step on `claude-haiku-4-5-20251001` at temperature 0.  The
-  second opinion (a seeded 10% plus every word noted `obvious_sense_not_trait` or
-  `most_likely_reading_stretched`) and the comparison run on `claude-sonnet-5-5`,
-  which refuses `temperature`: requests to it carry no temperature, thinking or
-  effort setting, and `max_tokens` 2000.  A word chosen for a second opinion gets
-  its gloss from Sonnet 5.5.
+- **Models.**  Every first-model step on `claude-haiku-5-5` since 2026-10-08
+  (M3 decision 17, [coding_plan_haiku55.md](../reports/trait_gap_generation/coding_plan_haiku55.md)
+  "The switch"; `claude-haiku-4-5-20251001` at temperature 0 before, still
+  selectable with `--model`).  Haiku 5.5, like `claude-sonnet-5-5`, refuses
+  `temperature`: requests to either carry no temperature, thinking or effort
+  setting, and `max_tokens` 2000 (both think adaptively, and the thinking counts
+  against it).  The second opinion (a seeded 10% plus every word noted
+  `obvious_sense_not_trait` or `most_likely_reading_stretched`) and the
+  comparison run on Sonnet 5.5.  A word chosen for a second opinion gets its
+  gloss from Sonnet 5.5.  The states pass (`states_pass.py --model`), the plain
+  reading (`plain_reading.py --reading-model`), the M2 paraphrases and the M3
+  relation call (`novelty_score.py --relation-model`) moved to Haiku 5.5 the
+  same day; every record names its model.
+- **Readings (`--readings N`, 2026-10-08).**  Haiku 5.5 cannot be run at
+  temperature 0 and is noisier from run to run, so its verdict waves (sense,
+  established, vague, kind, same sense) run **three times per word** by default
+  (`--readings`, default 3 when `--model` is Haiku 5.5, 1 otherwise), as
+  independent readings, each recorded (`verdict_reading` 1 to N on the
+  response records).  The word is **turned away only if every reading turns it
+  away**; otherwise the turned-away readings drop out and the outcome most of
+  the others give wins; with no single most common outcome among them, `trait`
+  if any reading says trait, else the first reading left
+  (`split.combine_readings`; Roger's rule, scored in
+  [haiku55_readout.md](../reports/trait_gap_generation/haiku55_readout.md)
+  section 5).  The winning reading (the first whose outcome won) is the row's:
+  the comparison, gloss, alignment and descriptors run once, on it.  A row
+  carries `verdict_readings` (each reading's outcome, join and answers, the
+  vote); `summary.json` `split.readings` gives how often the readings agreed,
+  the rule's rescues (words one or two readings turned away that went on), the
+  ties and the outcome patterns.  The second opinion and the tripwire compare
+  the combined outcome.  `--resume` refuses a batch whose earlier session ran
+  on another `--model` or `--readings`.
 - **Alignment is a score.**  Since alignment.md draft 3 (2026-09-30) the
   alignment call answers 0 to 3, recorded in the filter block as
   `alignment`.  `alignment_relevant` is kept for its existing readers (corpus
@@ -518,11 +544,16 @@ reproduced (`--batch-size` applies to it only and is refused with split).
   hash, model and input), a batch submitted but never collected is collected
   rather than resubmitted, and `usage.json` carries on so the cap covers the
   batch id's whole spend.
-- **Cost.**  About $0.010 a word live with the second opinion, half that in
-  batches; the estimate is printed by step before every run.  A full run
-  crosses the $20 confirmation line at about 2,000 words live or 4,000 in
-  batches.  The estimate follows `--second-opinion-frac` (about 0.2 of words
-  at the default 0.10: the seeded sample plus the flagged words).
+- **Cost.**  On Haiku 4.5, about $0.010 a word live with the second opinion,
+  half that in batches.  On Haiku 5.5 with three readings, about $0.0036 a word
+  for the first model's steps (haiku55_readout.md), plus the second opinion on
+  Sonnet 5.5 (about $0.002 a word at the default fraction).  The estimate is
+  printed by step before every run, with the source of each model's token
+  figures: Haiku 5.5's are measured (`split_runner.HAIKU55_TOKENS`, means
+  over h55_split_test_words, h55_m1_validation_pool and h55_verdict_600,
+  thinking included); the verdict steps are counted once per reading.  The
+  estimate follows `--second-opinion-frac` (about 0.2 of words at the default
+  0.10: the seeded sample plus the flagged words).
 - **Third opinion (`--third-model MODEL`, 2026-10-02).**  For choosing a
   generator's judging model at its pilot
   ([coding_plan_platform.md](../reports/trait_gap_generation/coding_plan_platform.md),
@@ -774,8 +805,9 @@ call); the 10 nearest corpus traits in the covered setting of `metric_config.jso
 (the candidate's gloss alone, cut to 14 words: the config's `query_form`, on which M2
 measured recall; `--query-form label_gloss` embeds `label: gloss` instead; the 8 canary
 texts re-embedded first) plus the
-members of their pairs, triangles and tetrahedra; the relation call (Haiku 4.5,
-`rubrics/relation.md`, uncached; `unsure` asked again of Sonnet 5.5); the shortlist
+members of their pairs, triangles and tetrahedra; the relation call (Haiku 5.5 since
+2026-10-08, Haiku 4.5 before; `--relation-model`; `rubrics/relation.md`, uncached;
+`unsure` asked again of Sonnet 5.5); the shortlist
 (the partners of opposed traits first, then the similar ones, by cosine; an opposed
 trait with no partner records `pair_completion_for`; a pair answered alike on both
 sides is a `pair_flag`); then the overlap walk, one pair per call (rubric A as
@@ -821,7 +853,16 @@ B's candidates, B's corpus (the trait files and seed queue as committed at B's
 B's relation-call order (the seed is B's id) and every answer B has on record replayed
 instead of sent; a call a rule now needs that B never made is sent live and recorded in
 B2's `responses.jsonl` (B2's `run.json` names the runs it replays in `replay_from`, so B2
-can be re-decided in turn).  The registry is not written.  Besides `score`'s files it
+can be re-decided in turn).  The relation call is B's model (B's `run.json` `models`), so
+B's answers replay after the default moved to Haiku 5.5; `--relation-model` is refused
+here.  The registry is not written unless `--write-registry`, which writes B2's blocks
+once B2 has decided every candidate; `promote-redecide --batch-id B2` does the same for a
+finished re-decided run (no call): each row's `novelty` block becomes B2's (naming B as
+`redecided_from`) where the registry holds a block of a run in B2's `replay_from`, or
+none; a row already holding B2's block is left alone (idempotent per run and key), and
+a row decided by any other run since is left alone and listed.  Each promotion appends
+a line to `B2/registry_writes.jsonl`; the tracked snapshot changes with
+`gap_registry.py compact`.  Besides `score`'s files it
 writes `decision_changes.md` / `.json`: every row whose decision, covering trait or reason
 differs from B's, attributed by replaying the rules one decision at a time (rule set 1,
 then decisions 14, 12, 13, 15 and the floor, each step offline on the records), with two
@@ -844,6 +885,9 @@ uv run python data_analysis/gap_generation/gap_registry.py synonyms [--stem X] [
 # round 2: the pilot under rule set 2 on its records, and chosen candidates scanned in full
 uv run python data_analysis/gap_generation/novelty_score.py score --redecide --from-batch m3_pilot_1 \
     --batch-id m3_pilot_1_r2 --cosine-floor 0.25 --transport live --budget-usd 2 [--dry-run]
+# 2026-10-08: round 2's decisions into the registry (no call), then the snapshot
+uv run python data_analysis/gap_generation/novelty_score.py promote-redecide --batch-id m3_pilot_1_r2 [--dry-run]
+uv run python data_analysis/gap_generation/gap_registry.py compact
 uv run python data_analysis/gap_generation/novelty_score.py full-scan --from-batch m3_pilot_1 \
     --keys youthful#1 trendsetting#1 --batch-id m3_pilot_1_scan_missed --transport live --budget-usd 2
 ```

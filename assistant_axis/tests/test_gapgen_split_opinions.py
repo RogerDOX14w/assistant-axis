@@ -13,6 +13,7 @@ from types import SimpleNamespace
 import pytest
 
 from assistant_axis.gapgen import split
+from assistant_axis.gapgen import split_runner as SR
 from assistant_axis.gapgen.batches import BatchTransport
 from assistant_axis.gapgen.filter import FilterItem
 from assistant_axis.gapgen.split_runner import DisagreementStop, SplitRunner, tokens_for
@@ -27,6 +28,7 @@ OPUS = "claude-opus-5-5"
 
 
 def runner(client, **kw):
+    kw.setdefault("model", HAIKU)   # the tests' first model (the default is Haiku 5.5 from 2026-10-08)
     kw.setdefault("wordnet", False)
     kw.setdefault("zipf_fn", lambda w: 4.0)
     kw.setdefault("retry_delays", ())
@@ -463,8 +465,10 @@ class TestCLI:
         out = capsys.readouterr().out
         assert "third opinion: sense: 30 x" in out and f"{OPUS} rates" in out
 
+    # the third model may be neither the first (the CLI's default, Haiku 5.5 from 2026-10-08) nor the second
     @pytest.mark.parametrize("extra", [("--third-model", OPUS, "--no-second-opinion"),
-                                       ("--third-model", HAIKU), ("--third-model", SONNET55),
+                                       ("--third-model", SR.DEFAULT_MODEL), ("--third-model", SONNET55),
+                                       ("--third-model", HAIKU, "--model", HAIKU),
                                        ("--max-disagreement", "10"), ("--max-disagreement", "-0.1")])
     def test_refusals(self, cli, extra):
         from data_analysis.gap_generation import traithood_filter
@@ -498,7 +502,8 @@ class TestCLI:
 
     def test_a_trip_at_the_end_finishes_marked_and_exits_non_zero(self, cli):
         from data_analysis.gap_generation import traithood_filter
-        cli["kinds"] = {HAIKU: {w: "state" for w in cli["labels"]}}       # nothing left after the opinions
+        # the first model (the CLI's default) says state, so nothing is left after the opinions
+        cli["kinds"] = {SR.DEFAULT_MODEL: {w: "state" for w in cli["labels"]}}
         assert traithood_filter.main(_args(cli, "--transport", "live")) == 3
         s, run, res = _read(cli)
         assert {r["stage"] for r in res} == {"classified"}

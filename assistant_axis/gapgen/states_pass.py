@@ -68,7 +68,9 @@ RUBRIC_VERSIONS = {"queue": 3, "corpus": 2}
 #: Round 4 (review_rubric_v2.md finding 10): queue v3 drops "listless", "single", "usual" and "usually",
 #: validation-file words, from its text; corpus v2 replaces the example "exasperated", a
 #: validation-file word, with "vexed", and drops "usually".
-DEFAULT_MODEL = "claude-haiku-4-5-20251001"
+#: Haiku 5.5 from 2026-10-08 (coding_plan_haiku55.md, "The switch"); Haiku 4.5
+#: (``claude-haiku-4-5-20251001``) stays selectable with ``--model``.  Every block names its model.
+DEFAULT_MODEL = "claude-haiku-5-5"
 DEFAULT_BATCH_SIZE = 20
 DEFAULT_MAX_TOKENS = 6000
 MODES = ("queue", "corpus")

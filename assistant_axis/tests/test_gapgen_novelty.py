@@ -470,6 +470,9 @@ def cand(label, *, a=0, gloss=None):
 
 
 def make_runner(tmp_path, responder, *, usage=None, records=(), queue=None, mode="shortlist", renamed=None, **kw):
+    # the runner's tests were written on Haiku 4.5 (its temperature 0, its prices in the budget stops); the
+    # default relation model is Haiku 5.5 from 2026-10-08 (TestRelationModel and test_gapgen_haiku55_switch)
+    kw.setdefault("relation_model", NV.HAIKU)
     idx = toy_index(tmp_path, renamed=renamed)
     sets = NV.label_sets(idx.traits, queue or {"entries": [{"stem": "queued", "label": "queued", "status": "candidate"}]})
     client = FakeAsyncAnthropic(responder)
@@ -881,10 +884,12 @@ class TestOfflineAndReplay:
         first = r.run([c], vec)[c.key].block
         tr = NR.OfflineTransport()
         idx = toy_index(tmp_path / "again")
+        # a replay asks for the source's relation model, whose answers are on record (novelty_score.py's
+        # source_relation_model does this for --redecide since the default moved to Haiku 5.5)
         r2 = NR.NoveltyRunner(client=None, batch_id="other_run", rubrics=rubrics(), index=idx,
                               label_sets=NV.label_sets(idx.traits, {"entries": []}), usage=MultiModelUsage(),
                               responses_path=tmp_path / "never.jsonl", k=4, transport=tr, rules=R1,
-                              relation_seed="m3test", replay_records=r.records)
+                              relation_seed="m3test", replay_records=r.records, relation_model=r.relation_model)
         again = r2.run([c], vec)[c.key].block
         assert tr.wanted == [] and r2.records == [] and not (tmp_path / "never.jsonl").exists()
         assert again["decision"] == first["decision"] and again["readings"] == first["readings"]
@@ -893,7 +898,7 @@ class TestOfflineAndReplay:
         r3 = NR.NoveltyRunner(client=None, batch_id="other_run", rubrics=rubrics(), index=idx,
                               label_sets=NV.label_sets(idx.traits, {"entries": []}), usage=MultiModelUsage(),
                               responses_path=tmp_path / "never.jsonl", k=4, transport=tr3, rules=R1,
-                              replay_records=r.records)
+                              replay_records=r.records, relation_model=r.relation_model)
         st3 = r3.run([c], vec)[c.key]
         assert st3.block is None and [w["step"] for w in tr3.wanted] == ["relation"]
 
@@ -937,7 +942,7 @@ class TestBatches:
 class TestEstimate:
     def test_plan_estimate_counts(self):
         st = NR.plan_estimate(n_candidates=100, n_scan=10, mean_listed=15.0, relation_text_chars=1343, trait_chars=240,
-                              cand_chars=140)
+                              cand_chars=140, relation_model=NV.HAIKU)   # the counts on Haiku 4.5's figures
         rel = st["relation"].lines[0]
         assert rel.n_calls == 100 and rel.model == NV.HAIKU and rel.out_tok == 20 + 45 * 15
         assert rel.in_tok == round((1343 + 140 + 15 * 240) / 4.0)
@@ -949,7 +954,7 @@ class TestEstimate:
         fs = st["full_scan"].lines[0]
         assert fs.n_calls == 150
         b = NR.plan_estimate(n_candidates=100, n_scan=10, mean_listed=15.0, relation_text_chars=1343, trait_chars=240,
-                             cand_chars=140, transport="batches")
+                             cand_chars=140, transport="batches", relation_model=NV.HAIKU)
         assert b["overlap"].usd == pytest.approx(0.5 * st["overlap"].usd)
 
     def test_runner_estimate_of_calls(self, tmp_path):
@@ -998,11 +1003,15 @@ class TestRelationModel:
         assert st.relations["zeta"] == "similar" and st.block is not None             # the walk ran (not relation-only)
         assert set(r.usage.per_model) >= {HAIKU55, NV.SONNET} and NV.HAIKU not in r.usage.per_model
 
-    def test_the_default_is_unchanged(self, tmp_path):
-        r, _, _ = make_runner(tmp_path, responder_for())
+    def test_the_default_is_haiku_55(self, tmp_path):
+        # Haiku 4.5 until 2026-10-08 (this test was test_the_default_is_unchanged); Haiku 5.5 since (M3 decision 17)
+        r, _, _ = make_runner(tmp_path, responder_for(), relation_model=NR.RELATION_MODEL)
         st = NR.CandState(cand=cand("candidate a"))
         c = r._relation_call(st, ["alpha"])
-        assert c.model == NR.RELATION_MODEL == NV.HAIKU and c.role == "haiku" and c.temperature == 0.0
+        assert c.model == NR.RELATION_MODEL == HAIKU55 and c.role == "haiku" and c.temperature == 0.0
+        from assistant_axis.gapgen.llm import request_params   # the call carries 0.0; the request leaves it out
+        assert "temperature" not in request_params(model=c.model, system=c.system, user=c.user,
+                                                   max_tokens=c.max_tokens, temperature=c.temperature)
         assert r._relation_call(st, ["alpha"], step="relation_unsure").role == "sonnet"
         assert [NR.model_role(m) for m in (NV.HAIKU, HAIKU55, NV.SONNET, NV.OPUS, "claude-fable-5-1", "x")] == \
             ["haiku", "haiku", "sonnet", "opus", "fable", "relation"]
@@ -1045,11 +1054,14 @@ class TestRelationModel:
 
     def test_the_estimate_on_another_model(self):
         kw = dict(n_candidates=100, n_scan=0, mean_listed=15.0, relation_text_chars=1343, trait_chars=240, cand_chars=140)
-        h45 = NR.plan_estimate(**kw)["relation"].lines[0]
+        h45 = NR.plan_estimate(**kw, relation_model=NV.HAIKU)["relation"].lines[0]
         h55 = NR.plan_estimate(**kw, relation_model=HAIKU55)["relation"].lines[0]
         assert h55.model == HAIKU55 and h55.in_tok == round((1343 + 140 + 15 * 240) / 4.0 * 1.3)
-        assert h55.out_tok == round((20 + 45 * 15) * 1.3) and h45.out_tok == 20 + 45 * 15
-        assert h55.usd == pytest.approx(h45.usd * 0.13, rel=0.01)
+        # output: Haiku 5.5's measured 76.5 tokens a listed trait, thinking included (2026-10-08; before, the
+        # tokenizer factor on the generic figure, round((20 + 45 * 15) * 1.3), which left the thinking out)
+        assert h55.out_tok == round(76.5 * 15) and h45.out_tok == 20 + 45 * 15
+        assert h55.usd == pytest.approx(100 * (h55.in_tok * 0.10 + h55.out_tok * 0.50) / 1e6)
+        assert 0.14 < h55.usd / h45.usd < 0.17
 
 
 # --------------------------------------------------------------------------- the 1-hour cache and its billing

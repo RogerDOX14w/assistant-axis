@@ -20,6 +20,9 @@ HINT = "SECRET-HINT a meaning the model must not see before wave 3"
 
 
 def runner(client, **kw):
+    # the recorded answers are Haiku 4.5's: these tests name it (the default is Haiku 5.5 from 2026-10-08,
+    # with three verdict readings; TestReadings covers that)
+    kw.setdefault("model", HAIKU)
     kw.setdefault("wordnet", False)
     kw.setdefault("zipf_fn", lambda w: 4.0)   # no floor, no probe band, unless a test says so
     kw.setdefault("retry_delays", ())

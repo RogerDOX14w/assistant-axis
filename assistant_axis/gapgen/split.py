@@ -424,6 +424,104 @@ def join(sense: Mapping, same_sense: Optional[str] = None,
 
 
 # ---------------------------------------------------------------------------
+# the verdict step read several times (coding_plan_haiku55.md, "The switch", item 2)
+# ---------------------------------------------------------------------------
+#
+# Roger, 2026-10-08 ("best of three ... require unanimity on others"; haiku55_readout.md section 5): the
+# verdict waves (sense, the established / vague checks, kind, same-sense) run N times per word as
+# independent readings, and the word's outcome is combined from the readings' outcomes by
+# :func:`combine_readings`.  The outcome of a reading is known after its sense and checks (the same-sense
+# check adds a note, the comparison may change the accepted reading but never the outcome), so the vote can
+# be taken before wave 3.
+
+#: The rule's name, recorded with every combined verdict.
+READINGS_RULE = "turned_away_only_if_unanimous_else_majority"
+#: How a combined verdict was reached (``combine_readings``'s ``how``).
+READINGS_HOW = ("unanimous", "most_common", "tie_trait", "tie_first")
+
+
+def combine_readings(outcomes: Sequence[Optional[str]]) -> dict:
+    """The combined outcome of independent readings, ``outcomes`` in reading order (None for a reading
+    that gave no outcome: its path failed validation twice; it is left out of the vote).
+
+    The rule (Roger, 2026-10-08): the word is **turned away only if every reading turns it away**;
+    otherwise the readings that turned it away drop out and the outcome most of the others give wins
+    (``most_common``: with three readings, the majority; a single reading left after two turned the word
+    away wins alone, the rule's rescue); with no single most common outcome among them (three different
+    outcomes, or two readings left that differ), ``trait`` if any reading says trait (``tie_trait``), else
+    the outcome of the first reading left (``tie_first``).  A no-majority case therefore never turns a
+    word away while some reading did not: "turned away only if every reading turns it away" governs the
+    brief's "else the first reading's verdict" when that first reading turned the word away.
+
+    Returns ``{"outcome", "winner", "how", "n", "n_ok", "failed", "outcomes", "n_turned_away",
+    "unanimous", "rescued"}``: ``winner`` the 0-based index of the first reading whose outcome is the
+    combined one (its answers are the row's: its accepted reading gets the gloss, alignment and
+    descriptors), ``failed`` the 0-based indices that gave no outcome, ``unanimous`` true when every
+    reading gave an outcome and all gave the same, ``rescued`` true when some reading turned the word away
+    and the combined outcome is not turned away.  ``outcome`` and ``winner`` are None when no reading gave
+    an outcome."""
+    outs = list(outcomes)
+    for o in outs:
+        if o is not None and o not in OUTCOMES:
+            raise ValueError(f"unknown outcome {o!r}")
+    ok = [(i, o) for i, o in enumerate(outs) if o is not None]
+    failed = [i for i, o in enumerate(outs) if o is None]
+    n_away = sum(1 for _, o in ok if o == "turned_away")
+    base = {"n": len(outs), "n_ok": len(ok), "failed": failed, "outcomes": outs, "n_turned_away": n_away}
+    if not ok:
+        return {**base, "outcome": None, "winner": None, "how": None, "unanimous": False, "rescued": False}
+    if len({o for _, o in ok}) == 1:
+        outcome, how = ok[0][1], "unanimous"
+    else:
+        rest = [(i, o) for i, o in ok if o != "turned_away"]   # not empty: the outcomes differ
+        counts = Counter(o for _, o in rest)
+        top = max(counts.values())
+        leaders = [o for o, n in counts.items() if n == top]
+        if len(leaders) == 1:
+            outcome, how = leaders[0], "most_common"
+        elif "trait" in counts:
+            outcome, how = "trait", "tie_trait"
+        else:
+            outcome, how = rest[0][1], "tie_first"
+    winner = next(i for i, o in ok if o == outcome)
+    return {**base, "outcome": outcome, "winner": winner, "how": how,
+            "unanimous": how == "unanimous" and not failed,
+            "rescued": n_away > 0 and outcome != "turned_away"}
+
+
+def readings_summary(votes: Sequence[Mapping], *, n_readings: int) -> dict:
+    """The summary's ``readings`` section over the words that were voted on (``votes``: one
+    :func:`combine_readings` result each, with ``label`` added): how often the readings agreed, the
+    rule's rescues (words one or more readings turned away that went on), the ties, the words whose
+    combined outcome differs from the first reading's, and the outcome patterns."""
+    votes = [v for v in votes if v.get("outcome") is not None]
+    n = len(votes)
+    how = Counter(v["how"] for v in votes)
+    resc = [v for v in votes if v["rescued"]]
+    changed = [v for v in votes if v["outcomes"] and v["outcomes"][0] != v["outcome"]]
+    patterns = Counter(",".join(str(o) for o in v["outcomes"]) for v in votes)
+    per_reading = [dict(sorted(Counter(str(v["outcomes"][i]) for v in votes if len(v["outcomes"]) > i).items()))
+                   for i in range(n_readings)]
+    return {
+        "n_readings": n_readings, "rule": READINGS_RULE, "n_words": n,
+        "all_the_same": sum(1 for v in votes if v["unanimous"]),
+        "all_the_same_share": _rate(sum(1 for v in votes if v["unanimous"]), n),
+        "by_how": {h: how.get(h, 0) for h in READINGS_HOW},
+        "turned_away_by_every_reading": sum(1 for v in votes if v["outcome"] == "turned_away"),
+        "rescued": {"n": len(resc),
+                    "by_n_turned_away": dict(sorted(Counter(str(v["n_turned_away"]) for v in resc).items())),
+                    "labels": sorted(v["label"] for v in resc)},
+        "ties": {"n": how.get("tie_trait", 0) + how.get("tie_first", 0),
+                 "labels": sorted(v["label"] for v in votes if v["how"] in ("tie_trait", "tie_first"))},
+        "differs_from_first_reading": {"n": len(changed), "labels": sorted(v["label"] for v in changed)},
+        "with_a_failed_reading": {"n": sum(1 for v in votes if v["failed"]),
+                                  "labels": sorted(v["label"] for v in votes if v["failed"])},
+        "outcomes_by_reading": per_reading,
+        "patterns": dict(sorted(patterns.items(), key=lambda kv: (-kv[1], kv[0]))),
+    }
+
+
+# ---------------------------------------------------------------------------
 # the filter block (section 6, "Mapping onto the frozen vocabulary")
 # ---------------------------------------------------------------------------
 

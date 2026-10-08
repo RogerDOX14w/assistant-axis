@@ -815,7 +815,10 @@ def run_paraphrase_stage(ci, llm_items, para_path: Path, paraphrases: dict, usag
     the sha256 of its text, and keeps every entry it had (a stem the corpus no
     longer has stays; a regenerated one is replaced).  ``sources`` records,
     per stem, :func:`paraphrase_source` of the text each paraphrase was written
-    from."""
+    from.  ``models`` records, per stem, the model that wrote the paraphrase (an entry written before
+    the record existed takes the file's ``model``), and ``model`` is that model when every entry
+    shares it, else ``"mixed"``: the default moved from Haiku 4.5 to Haiku 5.5 on 2026-10-08, and a
+    cache topped up after that holds both."""
     todo = [{"stem": s, "label": ci["corpus"][s]["label"], "description": ci["corpus"][s]["description"]}
             for s in llm_items]
     prior: dict = json.loads(para_path.read_text()) if para_path.exists() else {}
@@ -827,8 +830,11 @@ def run_paraphrase_stage(ci, llm_items, para_path: Path, paraphrases: dict, usag
         merged = {**(prior.get("paraphrases") or {}), **paraphrases, **new}
         sources.update({it["stem"]: paraphrase_source(it["label"], it["description"]) for it in todo
                         if it["stem"] in new})
+        models = {s: m for s, m in paraphrase_models(prior).items() if s in merged and s not in new}
+        models.update({s: CL.PARAPHRASE_MODEL for s in new})
         para_path.parent.mkdir(parents=True, exist_ok=True)
-        payload = {"model": CL.PARAPHRASE_MODEL, "style": style, "prompt_version": CL.paraphrase_version(style),
+        payload = {"model": _one_model(models.values()) or CL.PARAPHRASE_MODEL, "models": dict(sorted(models.items())),
+                   "style": style, "prompt_version": CL.paraphrase_version(style),
                    "prompt_sha256": _sha256(CL.paraphrase_prompt(style)), "n": len(merged), "paraphrases": merged,
                    "sources": {s: sources[s] for s in merged if s in sources}}
         if prior.get("sources_note"):
@@ -836,6 +842,30 @@ def run_paraphrase_stage(ci, llm_items, para_path: Path, paraphrases: dict, usag
         para_path.write_text(json.dumps(payload, indent=2, ensure_ascii=False) + "\n")
     logger.info("[g:%s] %d paraphrases (%d new); %s", style, len(merged), len(new), usage.log_line())
     return merged
+
+
+def paraphrase_models(cache: dict) -> dict:
+    """``{stem: model}`` for a paraphrase cache's entries: its ``models`` record, else the file's ``model``
+    (caches written before 2026-10-08 name one model for every entry)."""
+    by = dict(cache.get("models") or {})
+    default = cache.get("model")
+    return {s: by.get(s, default) for s in (cache.get("paraphrases") or {})}
+
+
+def _one_model(models) -> Optional[str]:
+    """The model when every entry names the same one; ``"mixed"`` when they differ; None when empty."""
+    ms = {m for m in models}
+    return None if not ms else (next(iter(ms)) if len(ms) == 1 else "mixed")
+
+
+def paraphrase_cache_model(path: Path):
+    """What wrote a paraphrase cache, for the run's record: the model's id when one model wrote every entry,
+    else ``{model: n entries}``; None when there is no cache."""
+    if not Path(path).exists():
+        return None
+    from collections import Counter
+    c = Counter(paraphrase_models(json.loads(Path(path).read_text())).values())
+    return next(iter(c)) if len(c) == 1 else dict(sorted(c.items(), key=lambda kv: str(kv[0])))
 
 
 def paraphrase_source(label: str, description: str) -> str:
@@ -1239,7 +1269,10 @@ def run_round4(args) -> int:
             style = RT.PARAPHRASE_SOURCES[src]
             query_sources[src] = {"title": RT.SOURCE_TITLES[src], "n": run["n_queries"][src], "kind": "paraphrase",
                                   "style": style, "prompt_version": CL.paraphrase_version(style),
-                                  "model": CL.PARAPHRASE_MODEL, "cache": _rel(para_paths[src], repo)}
+                                  # what wrote the cache's entries, not today's default (Haiku 4.5 before
+                                  # 2026-10-08, Haiku 5.5 after; a cache topped up since holds both)
+                                  "model": paraphrase_cache_model(para_paths[src]) or CL.PARAPHRASE_MODEL,
+                                  "cache": _rel(para_paths[src], repo)}
         else:
             query_sources[src] = {"title": RT.SOURCE_TITLES[src], "n": run["n_queries"][src], "kind": "m1_gloss",
                                   "results": str(RT.M1_GLOSS_SOURCES[src]), "filter_rows": m1_counts[src],

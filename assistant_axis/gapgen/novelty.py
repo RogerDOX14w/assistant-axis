@@ -74,6 +74,8 @@ RELATION_RUBRIC = "relation"
 #: The overlap call's rubric: rubric A (``overlap_concept``), one pair per call from version 5.
 OVERLAP_RUBRIC = "A"
 HAIKU, SONNET, OPUS = OT.HAIKU, OT.SONNET, OT.OPUS
+#: Haiku 5.5: the relation call's model from 2026-10-08 (``novelty_runner.RELATION_MODEL``).
+HAIKU55 = OT.HAIKU55
 #: Arrangement kinds whose members are mutually opposed and expand each other (pair and simplexes).
 EXPANDING_FIXED = ("pair", "triangle", "tetrahedron")
 #: How the candidate is embedded: ``gloss_w14`` (metric_config.json's ``covered.query_form``: the gloss

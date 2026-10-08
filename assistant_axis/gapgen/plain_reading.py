@@ -63,13 +63,26 @@ READING_VERSION = 1
 #: "related" to 11 of 30 same-by-construction pairs for such differences.
 COMPARISON_VERSION = 2
 RELATIONS = ("same", "related", "different")
-DEFAULT_READING_MODEL = "claude-haiku-4-5-20251001"
+#: Haiku 5.5 from 2026-10-08 (coding_plan_haiku55.md, "The switch"); Haiku 4.5
+#: (``claude-haiku-4-5-20251001``) stays selectable with ``--reading-model``.
+DEFAULT_READING_MODEL = "claude-haiku-5-5"
 #: The second-opinion model, unless a development set shows the classifier
 #: model agrees with it on at least 95% of rows (see "M1 as built").
 DEFAULT_COMPARE_MODEL = "claude-sonnet-4-6"
 DEFAULT_BATCH_SIZE = 20
 READING_MAX_TOKENS = 120
+#: The reading's max_tokens on a model that thinks and cannot be told not to (Haiku 5.5, Sonnet 5.5:
+#: ``llm.accepts_temperature`` false): its thinking counts against max_tokens, and 120 would cut the
+#: sentence off (the split filter gives such models 2000, ``split_runner.MAX_TOKENS_THINKING``).
+READING_MAX_TOKENS_THINKING = 2000
 COMPARE_MAX_TOKENS = 6000
+
+
+def reading_max_tokens(model: str) -> int:
+    """max_tokens of the plain reading on ``model`` (:data:`READING_MAX_TOKENS`, or
+    :data:`READING_MAX_TOKENS_THINKING` for a model that thinks)."""
+    from .llm import accepts_temperature
+    return READING_MAX_TOKENS if accepts_temperature(model) else READING_MAX_TOKENS_THINKING
 HELDOUT_TARGET = 4
 
 #: The user message of the plain reading; the only text the model sees.  It
@@ -341,7 +354,8 @@ class PlainReadingRunner:
 
     async def _read(self, label: str, keys: list[str]) -> None:
         text, rec = await self._call(stage="plain_reading", model=self.reading_model, system=None,
-                                     user=build_reading_prompt(label), max_tokens=READING_MAX_TOKENS, keys=keys)
+                                     user=build_reading_prompt(label),
+                                     max_tokens=reading_max_tokens(self.reading_model), keys=keys)
         reading = parse_reading(text)
         if reading is None:
             rec["parse_errors"] = {k: "empty reading" for k in keys}

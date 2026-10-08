@@ -3,7 +3,7 @@
 
     uv run python data_analysis/gap_generation/plain_reading.py --batch-id B \\
         (--pairs F | --corpus | --corpus-stems S [S ...]) [--limit N] \\
-        [--reading-model claude-haiku-4-5-20251001] [--compare-model claude-sonnet-5-5] \\
+        [--reading-model claude-haiku-5-5] [--compare-model claude-sonnet-5-5] \\
         [--reuse-readings DIR] [--batch-size 20] [--budget-usd 1.0] \\
         [--confirm-expensive --confirmed-by WHO] [--allow-dirty] [--dry-run] [--overwrite]
 
@@ -12,6 +12,10 @@ decisions_m1.md, case 3).  Each distinct label is read once, in a call that
 carries only the persona prompt; each row is then compared with its intended
 meaning (``same`` / ``related`` / ``different``; ``different`` flags
 ``overshadowed``).  Nothing here rejects a word or writes the registry.
+``--reading-model`` defaults to Haiku 5.5 since 2026-10-08 (Haiku 4.5,
+``claude-haiku-4-5-20251001``, before; still selectable), which thinks: its
+reading is asked with ``max_tokens`` 2000 rather than 120
+(``plain_reading.reading_max_tokens``).
 
 Inputs:
 

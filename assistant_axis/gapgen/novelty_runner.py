@@ -4,8 +4,9 @@ The logic is :mod:`assistant_axis.gapgen.novelty`; this module sends the calls a
 (coding_plan_m3.md, "Transport, cost, records").  Waves, in order, each followed by its retry wave
 (``<wave>_retry``: every call whose answer failed to parse, asked once more, as the overlap harness does):
 
-* ``r1_relation``: one relation call per candidate (Haiku 4.5, rubric ``relation.md``, uncached: Haiku
-  caches only from 4,096 tokens);
+* ``r1_relation``: one relation call per candidate (Haiku 5.5 from 2026-10-08, Haiku 4.5 before;
+  rubric ``relation.md``, uncached: about 450 tokens of rubric, under Haiku 5.5's 512-token minimum and
+  Haiku 4.5's 4,096);
 * ``r2_relation_unsure``: Sonnet 5.5 on the traits Haiku answered ``unsure``, one call per candidate;
 * ``oNN_sonnet`` then ``oNN_opus`` for shortlist position NN = 1, 2, ...: Sonnet on every undecided
   candidate's next pair, then Opus on the pairs the rule sends it (rubric A, one pair per call, the user
@@ -48,7 +49,9 @@ from .registry import utc_now
 
 logger = logging.getLogger(__name__)
 
-RELATION_MODEL = NV.HAIKU
+#: Haiku 5.5 from 2026-10-08 (coding_plan_haiku55.md, "The switch"; M3 decision 17); a run's records name
+#: the model, and ``score --redecide`` replays a source's answers on the source's own relation model.
+RELATION_MODEL = NV.HAIKU55
 UNSURE_MODEL = NV.SONNET
 FIRST_MODEL = NV.SONNET
 SECOND_MODEL = NV.OPUS
@@ -67,6 +70,23 @@ OVERLAP_TOKENS: dict[str, tuple[int, int]] = {"sonnet": (219, 78), "opus": (220,
 #: more), and per listed trait about 45 output tokens (a one-sentence reason and the JSON around it).
 CHARS_PER_TOKEN = OT.CHARS_PER_TOKEN
 RELATION_OUT_BASE, RELATION_OUT_PER_TRAIT = 20, 45
+#: Measured relation-call output by model-id fragment, ``(base, per listed trait)`` in the model's own
+#: tokens (no tokenizer factor on top), thinking included (coding_plan_haiku55.md, "The switch", item 4):
+#: Haiku 5.5 wrote 601,359 output tokens for 7,862 listed traits over the 457 first-attempt calls of
+#: m3_pilot_1_relation_h55 (1,316 a call at 17.2 listed; the old figure, (20 + 45 x 17.2) x 1.3, gave 1,032).
+#: Its input matched the characters-per-token figure (1,746 measured, 1,747 estimated), so input is unchanged.
+RELATION_OUT_MEASURED: dict[str, tuple[float, float]] = {"haiku-5-5": (0.0, 76.5)}
+
+
+def relation_out_tokens(model: str, n_listed: float) -> int:
+    """Estimated output tokens of one relation call listing ``n_listed`` traits on ``model``: the measured
+    figures where there are some (:data:`RELATION_OUT_MEASURED`), else the generic per-trait figure times the
+    tokenizer factor (a thinking model's thinking not counted)."""
+    m = str(model).lower()
+    for frag, (base, per) in RELATION_OUT_MEASURED.items():
+        if frag in m:
+            return int(round(base + per * n_listed))
+    return int(round((RELATION_OUT_BASE + RELATION_OUT_PER_TRAIT * n_listed) * OT.tokenizer_factor(model)))
 #: The plan's assumptions (coding_plan_m3.md, "Transport, cost, records"): 3 shortlisted pairs a candidate,
 #: 18% fewer judged with early exit (the test's rate); the share of Sonnet readings that send the pair to
 #: Opus (at the cut-off or one below, or unsure): 0.62 on a shortlist (overlap_arms_3's nearest pairs, 65%
@@ -795,8 +815,7 @@ def call_tokens(c: Call) -> tuple[int, int]:
     if c.step == "overlap":
         return OVERLAP_TOKENS["opus" if "opus" in c.model else "sonnet"]
     f = OT.tokenizer_factor(c.model)
-    return (int(round((len(c.system) + len(c.user)) / CHARS_PER_TOKEN * f)),
-            int(round((RELATION_OUT_BASE + RELATION_OUT_PER_TRAIT * len(c.stems)) * f)))
+    return (int(round((len(c.system) + len(c.user)) / CHARS_PER_TOKEN * f)), relation_out_tokens(c.model, len(c.stems)))
 
 
 # --------------------------------------------------------------------------- the plan's estimate
@@ -818,8 +837,8 @@ def plan_estimate(*, n_candidates: int, n_scan: int, mean_listed: float, relatio
     """The dry run's estimate by stage (coding_plan_m3.md, "Transport, cost, records"), as a
     :class:`cost.Estimate` per stage: ``{"embeddings", "relation", "overlap", "full_scan"}``.  Overlap pairs:
     :data:`SHORTLIST_PAIRS` a candidate less the early-exit saving; Opus on the shares above.  The relation
-    call on ``relation_model`` (its tokenizer's factor on input and output; a thinking model's thinking is
-    not in the figure)."""
+    call on ``relation_model``: input by its tokenizer's factor, output from its measured figures where there
+    are some (Haiku 5.5, thinking included: :func:`relation_out_tokens`), else by the factor."""
     from .cost import Estimate
     suffix = BATCH_SUFFIX if transport == "batches" else ""
     out = {k: Estimate() for k in ("embeddings", "relation", "overlap", "full_scan")}
@@ -828,7 +847,7 @@ def plan_estimate(*, n_candidates: int, n_scan: int, mean_listed: float, relatio
                           "text-embedding-3-large", 1, (n_embed + 8) * embed_tokens_each, 0)
     hf = OT.tokenizer_factor(relation_model)
     rin = int(round((relation_text_chars + cand_chars + mean_listed * trait_chars) / CHARS_PER_TOKEN * hf))
-    rout = int(round((RELATION_OUT_BASE + RELATION_OUT_PER_TRAIT * mean_listed) * hf))
+    rout = relation_out_tokens(relation_model, mean_listed)
     out["relation"].add(f"relation call, {mean_listed:.1f} listed traits a call", relation_model + suffix,
                         n_candidates, rin, rout)
     sf = OT.tokenizer_factor(UNSURE_MODEL)

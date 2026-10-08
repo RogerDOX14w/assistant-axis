@@ -113,7 +113,8 @@ class TestTraithoodFilterCLI:
         out = capsys.readouterr().out
         assert rc == 0 and reg.read_bytes() == raw
         assert not (cand_dir / "filter").exists() and "client" not in fake_client
-        assert "tokens at claude-haiku-4-5-20251001 rates = $" in out
+        # the default model (Haiku 4.5 until 2026-10-08, Haiku 5.5 since)
+        assert f"tokens at {traithood_filter.DEFAULT_MODEL} rates = $" in out
         assert "--- prompt 1 ---" in out and '"label": "stubborn"' in out
 
     def test_validation_run(self, tmp_path, cand_dir, fake_client):
@@ -172,10 +173,10 @@ class TestTraithoodFilterCLI:
         and responses already paid for."""
         reg = cand_dir / "registry.jsonl"
         _submit(reg, ["stubborn", "vain", "timid", "loyal", "brave", "shy", "rude", "calm", "proud", "witty"])
-        fake_client["responder"] = lambda kw: responder(kw, tokens=(40_000, 0))  # $0.04 per call
+        fake_client["responder"] = lambda kw: responder(kw, tokens=(40_000, 0))  # $0.04 per call on Haiku 4.5
         fake_client["delay"] = 0.01  # calls overlap like network I/O
         rc = traithood_filter.main([*SINGLE, "--batch-id", "b5", "--unfiltered", "--registry", str(reg), "--out-root",
-                                    str(cand_dir), "--budget-usd", "0.10", "--batch-size", "2",
+                                    str(cand_dir), "--model", HAIKU, "--budget-usd", "0.10", "--batch-size", "2",
                                     "--concurrency", "2", "--no-second-opinion", "--no-probe"])
         assert rc == 2
         d = cand_dir / "filter" / "b5"
@@ -541,7 +542,7 @@ def test_calibrate_paraphrase_stage_with_fake_haiku(tmp_path, monkeypatch):
     n = _corpus_n()
     assert para["prompt_version"] == 2 and para["n"] == n
     usage = json.loads((cal / "usage.json").read_text())
-    assert "claude-haiku-4-5-20251001" in usage["per_model"]
+    assert calibrate_metric.CL.PARAPHRASE_MODEL in usage["per_model"]   # the paraphrase model (Haiku 5.5 from 2026-10-08)
     assert all("sonnet" not in m for m in usage["per_model"])           # (e) not run
     pm = json.loads((cal / "paraphrase_metrics.json").read_text())["result"]
     assert {r["query"] for r in pm["recall_and_covered"]} == {"label", "no_label", "no_label_14w"}
@@ -606,6 +607,9 @@ def test_round4_end_to_end_with_fake_haiku_and_hash_embedder(tmp_path, monkeypat
         assert d["style"] == style and d["n"] == n and d["prompt_version"] == CM.CL.paraphrase_version(style)
         assert d["prompt_sha256"] == CM._sha256(CM.CL.paraphrase_prompt(style))
         assert set(d["sources"]) == set(d["paraphrases"])     # what each paraphrase was written from
+        # and which model wrote it (2026-10-08: the default moved from Haiku 4.5 to Haiku 5.5)
+        assert d["model"] == CM.CL.PARAPHRASE_MODEL and set(d["models"]) == set(d["paraphrases"])
+    HAIKU = CM.CL.PARAPHRASE_MODEL   # the paraphrase model, Haiku 5.5 since 2026-10-08
     usage = json.loads((cal / "usage.json").read_text())
     assert usage["per_model"][HAIKU]["n_calls"] == 3 * _paraphrase_calls(n)   # each style batched on its own
     run = json.loads((cal / "run_round4.json").read_text())

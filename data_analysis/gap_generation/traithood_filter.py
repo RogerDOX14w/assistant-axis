@@ -4,7 +4,7 @@
     uv run python data_analysis/gap_generation/traithood_filter.py --batch-id B \\
         (--unfiltered | --keys K ... | --run GENERATOR/RUN_ID | --validation-file F) \\
         [--pipeline split|single] [--transport auto|live|batches] [--resume] \\
-        [--model claude-haiku-4-5-20251001] [--second-model claude-sonnet-5-5] \\
+        [--model claude-haiku-5-5] [--readings N] [--second-model claude-sonnet-5-5] \\
         [--third-model claude-opus-5-5] [--max-disagreement 0.10] [--accept-disagreement] \\
         [--batch-size 25 (single only)] [--limit N] [--sample-frac F --sample-seed S] \\
         [--no-probe] [--no-second-opinion] [--budget-usd 5.0] [--confirm-expensive] \\
@@ -24,6 +24,17 @@ directory and sends no call whose answer is already in its ``responses.jsonl``
 the cap covers the batch id's whole spend.  ``--pipeline single`` is the
 single-call classifier below, kept so recorded runs can be reproduced
 (``--batch-size`` applies to it only).
+
+**Model and readings** (2026-10-08, coding_plan_haiku55.md "The switch").  ``--model``
+defaults to Haiku 5.5 (``claude-haiku-5-5``); Haiku 4.5 (``claude-haiku-4-5-20251001``)
+stays selectable.  ``--readings N`` (split only; default 3 when the model is
+Haiku 5.5, 1 otherwise): the verdict waves (step 1, the established / vague /
+kind checks, the same-sense check) run N times per word as independent
+readings, each recorded; the word is turned away only if every reading turns
+it away, otherwise the majority outcome wins (no majority: trait if any
+reading says trait, else the first reading left), and the gloss, alignment and
+descriptors run once, on the winning reading.  ``summary.json`` ``split.readings``
+gives the readings' agreement and the rule's rescues.
 
 **Opinions** (split only, 2026-10-02).  ``--third-model MODEL`` gives the
 second opinion's rows the same steps on a third model (a generator's pilot,
@@ -295,7 +306,12 @@ def build_parser() -> argparse.ArgumentParser:
     ap.add_argument("--resume", action="store_true",
                     help="split only: reuse an existing batch dir; send no call already answered in its "
                          "responses.jsonl")
-    ap.add_argument("--model", default=DEFAULT_MODEL)
+    ap.add_argument("--model", default=DEFAULT_MODEL,
+                    help=f"the first model (default {DEFAULT_MODEL}; claude-haiku-4-5-20251001 before 2026-10-08)")
+    ap.add_argument("--readings", type=int, default=None, metavar="N",
+                    help="split only: independent readings of the verdict waves per word (default 3 when --model is "
+                         "Haiku 5.5, 1 otherwise); turned away only if every reading turns the word away, else the "
+                         "majority outcome; no majority: trait if any reading says trait, else the first reading left")
     ap.add_argument("--second-model", default=SPLIT_SECOND_MODEL,
                     help=f"second opinion (default {SPLIT_SECOND_MODEL})")
     ap.add_argument("--third-model", default=None, metavar="MODEL",
@@ -408,6 +424,8 @@ def main(argv=None) -> int:
         raise SystemExit("--resume and --transport apply to --pipeline split only")
     if args.third_model or args.max_disagreement is not None or args.accept_disagreement:
         raise SystemExit("--third-model, --max-disagreement and --accept-disagreement apply to --pipeline split only")
+    if args.readings is not None:
+        raise SystemExit("--readings applies to --pipeline split only")
     if args.batch_size is None:
         args.batch_size = DEFAULT_BATCH_SIZE
     if args.probe_only:

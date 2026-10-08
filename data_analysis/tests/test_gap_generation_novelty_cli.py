@@ -315,7 +315,9 @@ def test_redecide_under_rules_2_sends_only_the_calls_a_rule_needs(tmp_path, monk
     env["holder"].pop("client", None)
     assert redecide(env, "m3t_r2", "--dry-run") == 0
     o = capsys.readouterr().out
-    assert "6 of 6 rows identical [OK]" in o and '"relation:claude-haiku-4-5-20251001": 1' in o and "old_gamma#1" in o
+    # the call not on record goes to the source's relation model, here the default it was scored with
+    # (Haiku 4.5 until 2026-10-08, Haiku 5.5 since)
+    assert "6 of 6 rows identical [OK]" in o and f'"relation:{cli.NR.RELATION_MODEL}": 1' in o and "old_gamma#1" in o
     assert calls_made(env) == [] and not out(env, "m3t_r2").exists()                  # the dry run sends nothing
     assert redecide(env, "m3t_r2") == 0
     sent = calls_made(env)

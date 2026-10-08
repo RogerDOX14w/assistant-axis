@@ -36,7 +36,10 @@ from .llm import call_anthropic_json
 
 logger = logging.getLogger(__name__)
 
-PARAPHRASE_MODEL = "claude-haiku-4-5-20251001"
+#: Haiku 5.5 from 2026-10-08 (coding_plan_haiku55.md, "The switch").  The paraphrase caches written
+#: before then are Haiku 4.5's; ``calibrate_metric.run_paraphrase_stage`` records the model of each entry
+#: (``models``) so a cache that mixes the two says which wrote what.
+PARAPHRASE_MODEL = "claude-haiku-5-5"
 JUDGE_MODEL = "claude-sonnet-4-6"
 PARAPHRASE_PROMPT_VERSION = 2   # v1 (no reason field) was never run
 BLINDED_PROMPT_VERSION = 1

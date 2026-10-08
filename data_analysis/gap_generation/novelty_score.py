@@ -11,7 +11,8 @@ Commands:
 * ``score --batch-id B (--run GEN/RUN [--run ...] | --keys K ... | --unscored)``: M3 on the registry rows
   whose filter verdict is ``trait`` (with a gloss): the exact-label check, retrieval in the covered setting of
   ``metric_config.json`` (OpenAI ``text-embedding-3-large``, direct key; the 8 canary texts re-embedded first),
-  arrangement expansion, the relation call (Haiku 4.5, ``rubrics/relation.md``; ``unsure`` to Sonnet 5.5), the
+  arrangement expansion, the relation call (Haiku 5.5 from 2026-10-08, Haiku 4.5 before; ``--relation-model``;
+  ``rubrics/relation.md``; ``unsure`` to Sonnet 5.5), the
   overlap call (rubric A as pinned, one pair per call, Sonnet 5.5 then Opus 5.5 by the rule, early exit), the
   decision.  Writes the ``novelty`` block of every decided row through the Registry API (once per run and key;
   a resume skips the rows already decided in the run) and ``data/candidates/novelty/<B>/``: ``responses.jsonl``,
@@ -29,11 +30,19 @@ Commands:
   plus ``decision_changes.md`` / ``.json``: every row whose decision or covering trait differs from B's, with
   the rule that changed it (the rules are added one decision at a time, each step replayed on the records), and
   the check that rule set 1 on the same records reproduces B exactly.  ``--dry-run`` replays offline and prints
-  the calls not on record and their estimate.
+  the calls not on record and their estimate.  The relation call is B's model (its ``run.json`` ``models``), so
+  B's answers replay whatever today's default; ``--relation-model`` is refused here.  ``--write-registry``: once
+  the run has decided every candidate, its blocks are written to the registry as ``promote-redecide`` does.
+* ``promote-redecide --batch-id B2 [--dry-run]`` (coding_plan_haiku55.md, "The switch", item 5): write a finished
+  re-decided run's ``novelty`` blocks (its ``results.jsonl``; each names B2 as ``run_id`` and the source run as
+  ``redecided_from``) to the registry rows, replacing the blocks of the runs it re-decided (``run.json``
+  ``replay_from``); idempotent per (run, key): a row already holding B2's block is left alone, and a row whose
+  block came from any other run (decided since) is left alone and listed.  Appends what it did to
+  ``B2/registry_writes.jsonl``.  No API call.  The tracked snapshot changes only with ``gap_registry.py compact``.
 * ``score --relation-only --from-batch B --batch-id R [--relation-model M] [--keys K ...]`` (coding_plan_haiku55.md):
   stage 3 alone, so that the relation call can be compared on another model without re-running M3: B's
   candidates, corpus (``--corpus-at``), list order and cached query embeddings; the relation call on
-  ``--relation-model`` (default Haiku 4.5) and the unsure re-ask on Sonnet 5.5; the shortlists built under
+  ``--relation-model`` (default Haiku 5.5 from 2026-10-08) and the unsure re-ask on Sonnet 5.5; the shortlists built under
   ``--rules``; then stop (no overlap call, no decision, no registry write).  Before sending, every request is
   checked against B's relation call for the same candidate (the same user turn, system prompt, ``max_tokens``
   and cache setting; only the model differs); a difference refuses the run.  Writes ``R``'s directory:
@@ -327,6 +336,89 @@ def check_source_settings(source: dict, *, cfg, query_form: str) -> list[str]:
 
 # --------------------------------------------------------------------------- writing
 
+def source_relation_model(source: dict) -> str:
+    """The relation call's model of a source run: its ``run.json`` ``models.relation``, else the model most of
+    its relation records name, else today's default.  A re-decided run replays the source's answers, whose
+    records are keyed by model, so it must ask for the same model (Haiku 4.5 for every run before 2026-10-08)."""
+    m = (((source.get("run") or {}).get("models") or {}).get("relation"))
+    if m:
+        return str(m)
+    seen = Counter(r.get("model") for r in source.get("records") or [] if r.get("step") == "relation" and r.get("model"))
+    return seen.most_common(1)[0][0] if seen else NR.RELATION_MODEL
+
+
+def promote_redecided(reg: Registry, results: list[dict], *, run_id: str, replaced_runs, dry_run: bool = False) -> dict:
+    """Write a re-decided run's ``novelty`` blocks (``results``, its ``results.jsonl`` rows) to the registry,
+    idempotent per (run, key) (coding_plan_haiku55.md, "The switch", item 5).  A row is written when its
+    current block is missing or came from one of ``replaced_runs`` (the runs this one re-decided); it is left
+    alone when it already holds this run's block (``already``), when its block came from another run, decided
+    since (``other_run``, listed with that run), when the key is not in the registry, or when the result has no
+    decision.  Returns the counts and keys; writes nothing with ``dry_run``."""
+    cur = reg.fold()
+    replaced = set(replaced_runs) - {run_id}
+    updates, out = {}, {"written": [], "already": [], "other_run": {}, "not_in_registry": [], "undecided": [],
+                        "block_of_another_run": []}
+    for r in results:
+        key, nv = r.get("key"), r.get("novelty") or {}
+        if not nv.get("decision"):
+            out["undecided"].append(key)
+            continue
+        if nv.get("run_id") != run_id:   # a results row carried over from elsewhere: not this run's to write
+            out["block_of_another_run"].append(key)
+            continue
+        if key not in cur:
+            out["not_in_registry"].append(key)
+            continue
+        old = cur[key].get("novelty") or {}
+        if old.get("run_id") == run_id and old.get("decision"):
+            out["already"].append(key)
+        elif not old or old.get("run_id") in replaced:
+            updates[key] = {"novelty": nv}
+            out["written"].append(key)
+        else:
+            out["other_run"].setdefault(str(old.get("run_id")), []).append(key)
+    if updates and not dry_run:
+        reg.update_many(updates, merge_blocks=False)
+    return {"run_id": run_id, "replaced_runs": sorted(replaced), "dry_run": dry_run,
+            "counts": {k: (sum(len(v) for v in out[k].values()) if k == "other_run" else len(out[k])) for k in out},
+            **{k: (dict(sorted(v.items())) if k == "other_run" else sorted(v)) for k, v in out.items()}}
+
+
+def write_promotion(out_dir: Path, rec: dict, registry_path: Path) -> None:
+    """Append one promotion's record to ``<run dir>/registry_writes.jsonl``."""
+    line = {"at": utc_now(), "registry": str(registry_path), "git_sha": git_sha(),
+            **{k: v for k, v in rec.items() if k != "already"}, "n_already": len(rec["already"])}
+    with open(out_dir / "registry_writes.jsonl", "a", encoding="utf-8") as fh:
+        fh.write(json.dumps(line, ensure_ascii=False) + "\n")
+
+
+def run_promotion(batch_id: str, *, out_root: Optional[Path], registry_path: Path, dry_run: bool = False) -> int:
+    """``promote-redecide`` (and ``score --redecide --write-registry`` at its end): checks that ``batch_id`` is a
+    finished re-decided run, writes its blocks, records and prints what it did."""
+    d = paths.novelty_dir(batch_id, candidates_dir=out_root)
+    run = json.loads((d / "run.json").read_text(encoding="utf-8")) if (d / "run.json").exists() else {}
+    if not run.get("redecide") or not run.get("replay_from"):
+        print(f"REFUSED: {batch_id} is not a re-decided run (its run.json has no redecide / replay_from)", file=sys.stderr)
+        return 2
+    if run.get("status") not in (0, None) or run.get("n_stalled"):
+        print(f"REFUSED: {batch_id} did not finish (status {run.get('status')}, {run.get('n_stalled')} stalled); "
+              f"resume it first", file=sys.stderr)
+        return 2
+    results = _read_jsonl(d / "results.jsonl")
+    if not results:
+        print(f"REFUSED: {d / 'results.jsonl'} is empty or missing", file=sys.stderr)
+        return 2
+    rec = promote_redecided(Registry(registry_path), results, run_id=batch_id,
+                            replaced_runs=[b for b in run["replay_from"] if b != batch_id], dry_run=dry_run)
+    if not dry_run:
+        write_promotion(d, rec, registry_path)
+    print(f"{'DRY-RUN: would write' if dry_run else 'registry:'} {json.dumps(rec['counts'])} "
+          f"(replacing the blocks of {rec['replaced_runs']}; source named in each block as redecided_from)")
+    if rec["other_run"]:
+        print(f"left alone, decided by another run since: {json.dumps(rec['other_run'])}")
+    return 0
+
+
 def write_blocks(reg: Registry, states, run_id: str) -> int:
     """The novelty block of every newly decided candidate, through the Registry API, once per (run, key)."""
     cur = reg.fold()
@@ -585,6 +677,17 @@ def _prepare_out_dir(out_dir: Path, args) -> tuple[int, list, Optional[dict]]:
     return 0, records, earlier
 
 
+def _resume_model_mismatch(earlier: Optional[dict], relation_model: str) -> Optional[str]:
+    """Why a ``--resume`` is refused: the run's earlier session asked the relation call of another model (the
+    default moved from Haiku 4.5 to Haiku 5.5 on 2026-10-08, so the rest of an older run would otherwise go to
+    the new model, and its answers on record would not be found)."""
+    was = ((earlier or {}).get("models") or {}).get("relation")
+    if was and was != relation_model:
+        return (f"the run's earlier session asked the relation call of {was}, this one would ask {relation_model}; "
+                f"resume with --relation-model {was}")
+    return None
+
+
 def _mean_chars(index: NV.CorpusIndex) -> float:
     import numpy as np
     return float(np.mean([len(t.label) + len(t.description) + 40 for t in index.traits.values()]))
@@ -611,10 +714,12 @@ def _check_score_selection(args, redecide: bool) -> Optional[str]:
         if args.run or args.unscored:
             return "--relation-only takes the source run's candidates (narrow them with --keys), not --run or --unscored"
         return None
+    if getattr(args, "write_registry", False) and not redecide:
+        return "--write-registry is for --redecide (an ordinary score run writes the registry as it decides)"
     if redecide:
-        if (getattr(args, "relation_model", None) or NR.RELATION_MODEL) != NR.RELATION_MODEL:
-            return ("--redecide replays the source's relation answers; --relation-model applies to a new run or to "
-                    "--relation-only")
+        if getattr(args, "relation_model", None):
+            return ("--redecide replays the source's relation answers on the source's relation model; --relation-model "
+                    "applies to a new run or to --relation-only")
         if not args.from_batch:
             return "--redecide needs --from-batch (the run whose records are re-decided)"
         if args.from_batch == args.batch_id:
@@ -644,15 +749,16 @@ def source_rules(source: dict) -> NV.Rules:
 
 
 def offline_replay(*, rules: NV.Rules, replay: list, cands, vectors, index, sets, rubrics, cfg, query_form: str,
-                   relation_seed: str, batch_id: str) -> tuple[dict, list]:
+                   relation_seed: str, batch_id: str, relation_model: str = NR.RELATION_MODEL) -> tuple[dict, list]:
     """Every candidate decided under ``rules`` from the answers on record alone (nothing sent, nothing written):
     ``({key: block or None}, wanted)``, ``None`` for a candidate that needs a call not on record, ``wanted``
-    the first such call of each (:class:`novelty_runner.OfflineTransport`)."""
+    the first such call of each (:class:`novelty_runner.OfflineTransport`).  ``relation_model`` must be the
+    model of the relation answers on record (:func:`source_relation_model`): they are found by model."""
     tr = NR.OfflineTransport()
     r = NR.NoveltyRunner(client=None, batch_id=batch_id, rubrics=rubrics, index=index, label_sets=sets,
                          usage=MultiModelUsage(), responses_path=Path(os.devnull), k=cfg.k, mode="shortlist",
                          config_version=cfg.config_version, embedding=_embedding_settings(cfg, query_form), transport=tr,
-                         rules=rules, relation_seed=relation_seed, replay_records=replay)
+                         rules=rules, relation_seed=relation_seed, replay_records=replay, relation_model=relation_model)
     states = r.run(cands, vectors)
     return {k: st.block for k, st in states.items()}, tr.wanted
 
@@ -954,6 +1060,8 @@ def run_scoring(args, argv, *, mode: str) -> int:
     source = None
     if redecide or mode == "full_scan":
         source = load_source(args.from_batch, args.out_root, with_records=redecide)
+    if redecide:   # the source's answers are replayed, and they are found by model
+        relation_model = source_relation_model(source)
     data_dir, corpus_info = resolve_data_dir(args, source)
     if redecide:
         diffs = check_source_settings(source, cfg=cfg, query_form=args.query_form)
@@ -1016,7 +1124,7 @@ def run_scoring(args, argv, *, mode: str) -> int:
         unit = EM.normalize_rows([found[i] for i in range(len(cands))])
         offline_ctx = {"cands": cands, "vectors": {c.key: unit[i] for i, c in enumerate(cands)}, "index": index,
                        "sets": sets, "rubrics": rubrics, "cfg": cfg, "query_form": args.query_form,
-                       "relation_seed": relation_seed, "batch_id": args.batch_id}
+                       "relation_seed": relation_seed, "batch_id": args.batch_id, "relation_model": relation_model}
         src_rules = source_rules(source)
         repro_blocks, _ = offline_replay(rules=src_rules, replay=source["records"], **offline_ctx)
         repro = reproduction_check(source["results"], repro_blocks)
@@ -1028,7 +1136,9 @@ def run_scoring(args, argv, *, mode: str) -> int:
         preview = Counter(f"{r['novelty']['decision']} -> {blocks0[r['key']]['decision']}" for r in source["results"]
                           if blocks0.get(r["key"]) is not None)
         redecide_meta = {"from_batch": source["batch_id"], "source_rules": src_rules.as_dict(), "rules": rules.as_dict(),
-                         "relation_seed": relation_seed, "n_source_records": len(source["records"]),
+                         "relation_seed": relation_seed, "relation_model": relation_model,
+                         "write_registry": bool(getattr(args, "write_registry", False)),
+                         "n_source_records": len(source["records"]),
                          "reproduction": {k: v for k, v in repro.items() if k != "rows"},
                          "calls_not_on_record": dict(Counter(f"{w['step']}:{w['model']}" for w in wanted)),
                          "candidates_needing_calls": wanted_keys,
@@ -1091,6 +1201,10 @@ def run_scoring(args, argv, *, mode: str) -> int:
     status, resume_records, earlier = _prepare_out_dir(out_dir, args)
     if status:
         return status
+    bad = _resume_model_mismatch(earlier, relation_model) if mode == "shortlist" else None
+    if bad:
+        print(f"REFUSED: {bad}", file=sys.stderr)
+        return 2
     fh = logging.FileHandler(out_dir / "run.log", encoding="utf-8")
     fh.setFormatter(log_formatter())
     logging.getLogger().addHandler(fh)
@@ -1193,8 +1307,11 @@ def run_scoring(args, argv, *, mode: str) -> int:
         print(f"decision changes: {json.dumps(dc['counts'])}; reproduction {dc['reproduction']['identical']} of "
               f"{dc['reproduction']['n']}; run reproduced by the last step: {dc['final_check']['identical']} of "
               f"{dc['final_check']['n']}")
+        if getattr(args, "write_registry", False):
+            status = run_promotion(args.batch_id, out_root=args.out_root, registry_path=args.registry)
     elif redecide:
-        print("decision_changes.md not written: the run did not decide every candidate (resume it first)",
+        print("decision_changes.md not written: the run did not decide every candidate (resume it first)"
+              + ("; nothing written to the registry" if getattr(args, "write_registry", False) else ""),
               file=sys.stderr)
     return status
 
@@ -1306,7 +1423,9 @@ def run_relation_only(args, argv) -> int:
     if first_calls:
         toks = [NR.call_tokens(c) for c in first_calls]
         n = len(toks)
-        est.add(f"relation call on {OT.SHORT.get(relation_model, relation_model)} (thinking not in the figure)",
+        measured = any(f in relation_model.lower() for f in NR.RELATION_OUT_MEASURED)
+        est.add(f"relation call on {OT.SHORT.get(relation_model, relation_model)} "
+                f"({'output measured, thinking included' if measured else 'thinking not in the figure'})",
                 relation_model + suffix, n, int(round(sum(t[0] for t in toks) / n)), int(round(sum(t[1] for t in toks) / n)))
         sf = OT.tokenizer_factor(NR.UNSURE_MODEL)
         n_uns = int(round(NR.UNSURE_SHARE * n))
@@ -1363,6 +1482,10 @@ def run_relation_only(args, argv) -> int:
     status, resume_records, earlier = _prepare_out_dir(out_dir, args)
     if status:
         return status
+    bad = _resume_model_mismatch(earlier, relation_model)
+    if bad:
+        print(f"REFUSED: {bad}", file=sys.stderr)
+        return 2
     fh = logging.FileHandler(out_dir / "run.log", encoding="utf-8")
     fh.setFormatter(log_formatter())
     logging.getLogger().addHandler(fh)
@@ -1706,15 +1829,21 @@ def build_parser() -> argparse.ArgumentParser:
     g.add_argument("--keys", nargs="+", help="registry keys (with --redecide: narrows the source run's rows)")
     g.add_argument("--unscored", action="store_true", help="every row with no novelty block")
     sp.add_argument("--redecide", action="store_true",
-                    help="re-run the decision rules on --from-batch's records (its candidates, corpus, relation order "
-                         "and answers on record); only calls a rule now needs and the source never made are sent; "
-                         "writes this run's directory and decision_changes.md, not the registry")
+                    help="re-run the decision rules on --from-batch's records (its candidates, corpus, relation order, "
+                         "relation model and answers on record); only calls a rule now needs and the source never made "
+                         "are sent; writes this run's directory and decision_changes.md, and the registry only with "
+                         "--write-registry")
+    sp.add_argument("--write-registry", action="store_true",
+                    help="with --redecide: once every candidate is decided, write the run's novelty blocks to the "
+                         "registry, replacing the re-decided runs' blocks (idempotent per run and key; a row decided "
+                         "by another run since is left alone); the same as promote-redecide afterwards")
     sp.add_argument("--from-batch", default=None,
                     help="with --redecide: the run to re-decide; with --relation-only: the run whose candidates, corpus, "
                          "list order and query embeddings are reused")
-    sp.add_argument("--relation-model", default=NR.RELATION_MODEL,
+    sp.add_argument("--relation-model", default=None,
                     help=f"the relation call's model (default {NR.RELATION_MODEL}); the unsure re-ask stays on "
-                         f"{NR.UNSURE_MODEL}.  Not with --redecide, which replays the source's answers")
+                         f"{NR.UNSURE_MODEL}.  Not with --redecide, which replays the source's answers on the source's "
+                         f"model")
     sp.add_argument("--relation-only", action="store_true",
                     help="with --from-batch B (and optionally --keys): stage 3 alone for B's candidates (the relation "
                          "call on --relation-model and the unsure re-ask, B's corpus, list order and embeddings), then "
@@ -1735,6 +1864,14 @@ def build_parser() -> argparse.ArgumentParser:
     g.add_argument("--keys", nargs="+", help="registry keys to scan, in place of a sample")
     sp.add_argument("--sample-seed", type=int, default=0)
     sp.set_defaults(func=lambda a, argv: run_scoring(a, argv, mode="full_scan"))
+    sp = sub.add_parser("promote-redecide",
+                        help="write a finished re-decided run's novelty blocks to the registry (no API call)")
+    sp.add_argument("--batch-id", required=True, help="the re-decided run (score --redecide --batch-id)")
+    sp.add_argument("--registry", type=Path, default=paths.REGISTRY_PATH)
+    sp.add_argument("--out-root", type=Path, default=None)
+    sp.add_argument("--dry-run", action="store_true", help="count what would be written; write nothing")
+    sp.set_defaults(func=lambda a, argv: run_promotion(a.batch_id, out_root=a.out_root, registry_path=a.registry,
+                                                       dry_run=a.dry_run))
     sp = sub.add_parser("compare")
     sp.add_argument("--scan-batch", required=True)
     sp.add_argument("--main-batch", required=True)

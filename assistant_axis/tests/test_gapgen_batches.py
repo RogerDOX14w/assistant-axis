@@ -75,6 +75,7 @@ def no_sleep(_s):
 def make(tmp_path, *, bclient=None, usage=None, **kw):
     responder = make_responder(tokens=(1000, 100))
     live = FakeAsyncAnthropic(responder)
+    kw.setdefault("model", HAIKU)   # the recorded answers are Haiku 4.5's (the default is Haiku 5.5 from 2026-10-08)
     r = SplitRunner(client=live, batch_id="b", wordnet=False, zipf_fn=lambda w: 4.0, retry_delays=(),
                     second_opinion=kw.pop("second_opinion", False), usage=usage, **kw)
     bc = bclient or FakeBatchClient(responder)
@@ -581,7 +582,10 @@ class TestSplitCLI:
         assert traithood_filter.main(_args(cli, "--dry-run")) == 0
         out = capsys.readouterr().out
         assert "transport: live (auto: 15 words, fewer than 300, go live)" in out
-        assert "sense: 15 x (567, 207) tokens at claude-haiku-4-5-20251001 rates" in out
+        # the default first model, Haiku 5.5 with three readings and its measured figures, from 2026-10-08
+        # (was "sense: 15 x (567, 207) tokens at claude-haiku-4-5-20251001 rates"; that line is now the one
+        # of --model claude-haiku-4-5-20251001, test_gap_generation_haiku55_switch.py)
+        assert "sense (3 readings): 45 x (820, 553) tokens at claude-haiku-5-5 rates" in out
         assert "second opinion: kind" in out and "claude-sonnet-5-5 rates" in out
 
     def test_single_pipeline_still_there(self, cli):

@@ -34,7 +34,9 @@ from assistant_axis.gapgen.cost import CostRefused, Estimate, GuardedUsage, conf
 from assistant_axis.gapgen.freq import zipf_info
 from assistant_axis.gapgen.registry import utc_now, utc_stamp
 from assistant_axis.gapgen.runs import PLATFORM_PATHS
-from assistant_axis.gapgen.split_runner import DisagreementStop, SplitRunner, tokens_for
+from assistant_axis.gapgen.split_runner import (
+    DisagreementStop, SplitRunner, default_readings, token_source, tokens_for,
+)
 from assistant_axis.judge_pricing import BATCH_SUFFIX, BudgetExceededError, MultiModelUsage
 
 logger = logging.getLogger("traithood_filter")
@@ -62,6 +64,34 @@ def second_opinion_share(args) -> float:
     return min(1.0, max(0.0, SECOND_OPINION_SHARE + frac - DEFAULT_SECOND_OPINION_FRAC))
 
 
+def resolve_readings(args) -> Optional[str]:
+    """Set ``args.readings`` to its default when not given (:func:`split_runner.default_readings`: 3 on
+    Haiku 5.5, else 1); why it is refused, or None."""
+    n = getattr(args, "readings", None)
+    if n is None:
+        args.readings = default_readings(args.model)
+        return None
+    if n < 1:
+        return f"--readings {n}: at least one reading"
+    return None
+
+
+def resume_mismatch(earlier_run: Optional[dict], args) -> Optional[str]:
+    """Why ``--resume`` is refused: the batch's earlier session ran on another first model, or with another
+    number of readings (a run before 2026-10-08 records no ``readings``: one).  The defaults moved to Haiku
+    5.5 with three readings that day, so resuming an older batch without its ``--model`` would otherwise
+    send the rest of it on the new model and vote differently."""
+    if not earlier_run:
+        return None
+    m, n = earlier_run.get("model"), earlier_run.get("readings") or 1
+    if m and m != args.model:
+        return (f"the batch's earlier session ran on --model {m}, this one on {args.model}; resume with "
+                f"--model {m} (and --readings {n})")
+    if n != args.readings:
+        return f"the batch's earlier session read the verdict waves {n} time(s), this one {args.readings}; resume with --readings {n}"
+    return None
+
+
 def check_opinion_args(args) -> Optional[str]:
     """Why ``--third-model`` / ``--max-disagreement`` are refused, or None."""
     third = getattr(args, "third_model", None)
@@ -78,7 +108,11 @@ def check_opinion_args(args) -> Optional[str]:
 
 def build_split_estimate(items, args, transport: str) -> tuple[Estimate, dict]:
     """The estimate by step (section 7), at batch rates when ``transport`` is batches; a third
-    opinion (``--third-model``) adds the second opinion's steps 1 to 3 on its model."""
+    opinion (``--third-model``) adds the second opinion's steps 1 to 3 on its model.  The first
+    model's verdict steps (step 1, the checks, the same-sense check) are counted once for each of
+    ``--readings``; the comparison, gloss, alignment and descriptors once.  Token figures per call:
+    :func:`split_runner.tokens_for` (Haiku 5.5's measured, thinking included)."""
+    n_read = getattr(args, "readings", None) or 1
     n_hard = n_probe = 0
     for it in items:
         fq = zipf_info(it.label, familiarity=it.familiarity, gloss_hint=bool(it.intended_sense), curated=it.curated)
@@ -96,10 +130,11 @@ def build_split_estimate(items, args, transport: str) -> tuple[Estimate, dict]:
 
     if not args.no_probe:
         add("definition probe", "probe", first, n_probe)
-    add("sense", "sense", first, n)
+    rd = f" ({n_read} readings)" if n_read > 1 else ""
+    add(f"sense{rd}", "sense", first, n_read * n)
     for step in ("established", "vague", "kind"):
-        add(step, step, first, READINGS_PER_WORD * n)
-    add("same sense", "same_sense", first, SAME_SENSE_SHARE * n)
+        add(f"{step}{rd}", step, first, n_read * READINGS_PER_WORD * n)
+    add(f"same sense{rd}", "same_sense", first, n_read * SAME_SENSE_SHARE * n)
     if not args.no_plain_reading and n_int:
         add("comparison", "comparison", args.compare_model, READINGS_PER_WORD * n_int)
     so = second_opinion_share(args) * n
@@ -116,9 +151,12 @@ def build_split_estimate(items, args, transport: str) -> tuple[Estimate, dict]:
         add(f"{name} opinion: same sense", "same_sense", model, SAME_SENSE_SHARE * so)
         if gloss:
             add(f"{name} opinion: gloss", "gloss", model, TRAIT_SHARE * so)
+    models = [first] + ([args.compare_model] if not args.no_plain_reading and n_int else []) \
+        + ([second] if so and second else []) + ([third] if third else [])
     plan = {"pipeline": "split", "n_rows": len(items), "n_hard_reject": n_hard, "n_to_step1_or_probe": n,
             "n_probe_band": n_probe, "n_with_intended_sense": n_int, "transport": transport,
-            "n_second_opinion_est": int(math.ceil(so)), "third_model": third or None}
+            "n_second_opinion_est": int(math.ceil(so)), "third_model": third or None, "readings": n_read,
+            "token_figures": {m: token_source(m, first) for m in dict.fromkeys(models)}}
     return est, plan
 
 
@@ -132,7 +170,7 @@ def main_split(args, argv) -> int:
         raise SystemExit("--probe-only applies to --pipeline single only")
     if args.max_disagreement is None:
         args.max_disagreement = split.DEFAULT_MAX_DISAGREEMENT
-    bad = check_opinion_args(args)
+    bad = check_opinion_args(args) or resolve_readings(args)
     if bad:
         print(f"REFUSED: {bad}", file=sys.stderr)
         return 2
@@ -156,6 +194,9 @@ def main_split(args, argv) -> int:
         print(f"REFUSED: the stability sample sends {plan['n_to_step1_or_probe']} rows to the model, fewer than "
               f"{tf.STABILITY_MIN_LLM_ROWS}", file=sys.stderr)
         return 2
+    print(f"readings: {args.readings} of the verdict waves per word"
+          + (f" ({split.READINGS_RULE})" if args.readings > 1 else ""))
+    print("token figures per call: " + "; ".join(f"{m}: {s}" for m, s in plan["token_figures"].items()))
     print("estimate by step:\n" + est.format())
     n_words = max(1, plan["n_to_step1_or_probe"])
     print(f"  = ${est.usd / n_words:.4f} a word")
@@ -200,6 +241,10 @@ def main_split(args, argv) -> int:
                 resume_records = [json.loads(x) for x in rp.read_text(encoding="utf-8").splitlines() if x.strip()]
             if (out_dir / "run.json").exists():
                 earlier_run = json.loads((out_dir / "run.json").read_text(encoding="utf-8"))
+            bad = resume_mismatch(earlier_run, args)
+            if bad:
+                print(f"REFUSED: {bad}", file=sys.stderr)
+                return 2
             print(f"resuming {out_dir}: {len(resume_records)} responses on record", file=sys.stderr)
         elif args.overwrite:
             bak = out_dir.with_name(f"{out_dir.name}.bak.{utc_stamp()}")
@@ -220,6 +265,7 @@ def main_split(args, argv) -> int:
                 "transport_reason": why, "estimate_usd": round(est.usd, 4),
                 "estimate_lines": [str(x) for x in est.lines], "budget_usd": args.budget_usd, "cap_usd": cap,
                 "confirmed_by": args.confirmed_by, "model": args.model,
+                "readings": args.readings, "readings_rule": split.READINGS_RULE if args.readings > 1 else None,
                 "second_model": None if args.no_second_opinion else args.second_model,
                 "compare_model": args.compare_model, "plain_reading": not args.no_plain_reading,
                 "third_model": args.third_model,
@@ -256,7 +302,8 @@ def main_split(args, argv) -> int:
                          second_opinion=not args.no_second_opinion, concurrency=args.concurrency,
                          responses_path=out_dir / "responses.jsonl", resume_records=resume_records,
                          plain_reading=not args.no_plain_reading, third_model=args.third_model,
-                         max_disagreement=args.max_disagreement, accept_disagreement=args.accept_disagreement)
+                         max_disagreement=args.max_disagreement, accept_disagreement=args.accept_disagreement,
+                         readings=args.readings)
     if transport == "batches":
         runner.transport = BatchTransport(runner, anthropic.Anthropic(), out_dir / "batches.json", budget_usd=cap)
     status = 0
@@ -307,6 +354,8 @@ def finalize(args, items, reg, runner, usage, run_meta, out_dir, status, error, 
                                                   is False)},
             "resumed_calls": runner.stats.get("resumed", 0),
             "batches_submitted": getattr(runner.transport, "submitted", None),
+            # the verdict readings: their agreement, the rule's rescues and ties (one reading: n_readings 1)
+            "readings": runner.readings_summary(),
         }
         s["rubric_version"] = split.RUBRIC_VERSION
         s["pipeline"] = "split"
