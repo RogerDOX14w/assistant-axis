@@ -14,7 +14,7 @@ it in is [coding_plan_split.md](../coding_plan_split.md), which waits for Roger'
 | 2b | [check_vague.md](./check_vague.md) | Does the label leave something out?  Does the reading fit many people in different ways? | draft 3, run one item per call |
 | 3 | [step2_kind.md](./step2_kind.md) | What kind of thing is this reading: trait, membership, state, physical, role, action, praise, or nothing about a persona? | draft 6 (2026-10-01: others' regard is a trait, what they happen to be doing about the person is a state), run one reading per call |
 | 3b | [check_same_sense.md](./check_same_sense.md) | Are two primary readings one way of being or two?  Asked only when the kind call took both for a trait or a membership | draft 2 (2026-09-30: example words replaced) |
-| 4 | [gloss.md](./gloss.md) | Write one sentence describing the persona, for a word that goes on as a trait.  A first draft for the Opus or Fable writer, in the corpus form | draft 3 (2026-09-30: for a plain fact, the fact wins over the length) |
+| 4 | [gloss.md](./gloss.md) | Write one sentence describing the persona, for a word that goes on as a trait.  A first draft for the Opus or Fable writer, in the corpus form | draft 4 (2026-10-08: a membership gloss is one clause; draft 3, 2026-09-30: for a plain fact, the fact wins over the length) |
 | 5a | [alignment.md](./alignment.md) | Does the description bear on how an AI treats those it works for? | draft 2 (2026-09-30: one example word replaced) |
 | 5b | [descriptors.md](./descriptors.md) | Which region, and can a text-only persona show it? | first draft, run once |
 
