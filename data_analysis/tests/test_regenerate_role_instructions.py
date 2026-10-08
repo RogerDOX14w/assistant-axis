@@ -857,3 +857,126 @@ class TestReplyCounts:
             semaphore=asyncio.Semaphore(10), temperature=1.0, force=True, dry_run=False))
         assert client.messages.create.call_count == 2 and result.startswith("OK")
         assert len(json.loads(role_file.read_text())["questions"]) == 40
+
+
+# ---------------------------------------------------------------------------
+# Refusals (2026-10-08): recorded in generation_refusals.jsonl, never retried
+# ---------------------------------------------------------------------------
+
+from assistant_axis.judge_pricing import MultiModelUsage  # noqa: E402
+from data_analysis import generation_refusals as refusals  # noqa: E402
+from data_analysis.generation_refusals import GenerationRefusal  # noqa: E402
+
+
+@pytest.fixture(autouse=True)
+def _refusals_jsonl(tmp_path, monkeypatch):
+    """No test writes into data/roles/generation_refusals.jsonl."""
+    path = tmp_path / "refusals" / refusals.REFUSALS_NAME
+    monkeypatch.setattr(module, "DEFAULT_REFUSALS_JSONL", path)
+    return path
+
+
+DECLINE = ("I'm not comfortable writing persona instructions for this role, since they would have a model act "
+           "it out in earnest. " + "I would be glad to help with a related task instead. " * 6)
+
+
+def _refused_reply(text=None, stop_reason="refusal"):
+    """A reply as the SDK returns it: ``stop_reason`` "refusal" with no content,
+    or a prose decline that ended normally."""
+    content = [] if text is None else [SimpleNamespace(type="text", text=text)]
+    return SimpleNamespace(content=content, stop_reason=stop_reason,
+                           usage=SimpleNamespace(input_tokens=1500, output_tokens=0 if text is None else 60))
+
+
+def _records(path):
+    return [json.loads(x) for x in path.read_text().splitlines()] if path.exists() else []
+
+
+class TestRefusals:
+    def run(self, client, role_file, **kw):
+        return asyncio.run(regenerate_one(
+            client, role_file, n_variants=5, n_questions=40, model="claude-sonnet-4-6",
+            semaphore=asyncio.Semaphore(10), temperature=1.0, force=True, dry_run=False, **kw))
+
+    @pytest.mark.parametrize("reply, stop_reason, excerpt", [
+        (_refused_reply(), "refusal", ""),
+        (_refused_reply(DECLINE, stop_reason="end_turn"), "end_turn", DECLINE[:300]),
+    ], ids=["stop_reason", "prose_decline"])
+    def test_raised_at_once_recorded_and_the_file_left_alone(self, role_file, monkeypatch, _refusals_jsonl,
+                                                             reply, stop_reason, excerpt):
+        monkeypatch.setattr(module, "PROMPT_STYLE", "RogerV3")
+        monkeypatch.setattr(module.asyncio, "sleep", AsyncMock())
+        before = role_file.read_text()
+        client = AsyncMock()
+        client.messages.create = AsyncMock(return_value=reply)
+        usage = MultiModelUsage()
+        with pytest.raises(GenerationRefusal) as info:
+            self.run(client, role_file, usage=usage)
+        assert client.messages.create.call_count == 1                 # not retried
+        assert info.value.label == "accountant" and info.value.stop_reason == stop_reason
+        assert role_file.read_text() == before
+        assert usage.n_calls == 1                                      # the reply came back, so it is paid for
+        [rec] = _records(_refusals_jsonl)
+        assert len(DECLINE) > 300 and rec["reply_excerpt"] == excerpt
+        assert {k: rec[k] for k in ("stem", "label", "kind", "model", "style", "stop_reason", "attempt")} == {
+            "stem": "accountant", "label": "accountant", "kind": "role", "model": "claude-sonnet-4-6",
+            "style": "RogerV3", "stop_reason": stop_reason, "attempt": "live"}
+        assert rec["template_sha256"] == module.template_sha256("RogerV3") and rec["refused_at"]
+
+    def test_a_json_reply_that_says_i_cant_is_not_a_refusal(self, role_file, roger_style, _refusals_jsonl):
+        instr = [{"pos": "You are an accountant who says I can't when the books do not balance."}] * 5
+        client = AsyncMock()
+        client.messages.create = AsyncMock(return_value=_make_response(json.dumps(dict(FAKE_COMBINED_RESPONSE, instruction=instr))))
+        assert self.run(client, role_file).startswith("OK")
+        assert json.loads(role_file.read_text())["instruction"] == instr
+        assert not _refusals_jsonl.exists()
+
+    def test_the_label_is_the_display_name(self, tmp_path, roger_style, _refusals_jsonl):
+        p = tmp_path / "devils_advocate.json"
+        p.write_text(json.dumps(SAMPLE_ROLE))
+        client = AsyncMock()
+        client.messages.create = AsyncMock(return_value=_refused_reply())
+        with pytest.raises(GenerationRefusal):
+            self.run(client, p)
+        [rec] = _records(_refusals_jsonl)
+        assert rec["stem"] == "devils_advocate" and rec["label"] == "devil's advocate"
+
+
+class TestRefusalRunSummary:
+    def test_counted_apart_from_errors_and_the_run_goes_on(self, batch_setup, capsys):
+        b = batch_setup
+
+        def reply(**kw):
+            prompt = kw["messages"][0]["content"]
+            if "<role>\nforger\n</role>" in prompt:
+                return _refused_reply(DECLINE, stop_reason="end_turn")
+            if "<role>\nherder\n</role>" in prompt:
+                return _make_response("not json at all")             # asked for five times, then an error
+            return _make_response(json.dumps(FAKE_COMBINED_RESPONSE))
+        b.client.messages.create = AsyncMock(side_effect=reply)
+        module.main(b.args + ["--model", "claude-sonnet-4-6"])
+        err = capsys.readouterr().err
+        assert "REFUSED forger: I'm not comfortable writing persona instructions" in err
+        assert "Done: 1 processed, 1 skipped, 1 refused, 1 errors" in err   # default is skipped
+        assert b.client.messages.create.call_count == 1 + 1 + 5
+        [rec] = _records(module.refusal_log_path(b.usage_json))
+        assert rec["stem"] == "forger" and rec["attempt"] == "live"
+
+
+class TestRefusalInBatch:
+    def test_a_refused_batch_reply_is_recorded_and_not_asked_for_again(self, batch_setup, capsys):
+        b = batch_setup
+        refused = lambda stem, msg: SimpleNamespace(custom_id=stem, result=SimpleNamespace(type="succeeded", message=msg))
+        b.client.messages.batches.results = AsyncMock(return_value=_Results([
+            _entry("forger"), refused("accountant", _refused_reply()),
+            refused("herder", _refused_reply(DECLINE, stop_reason="end_turn"))]))
+        before = {s: (b.stage / f"{s}.json").read_text() for s in ("accountant", "herder")}
+        module.main(b.args + ["--batch", "--model", "claude-sonnet-4-6"])
+        err = capsys.readouterr().err
+        assert b.client.messages.create.call_count == 0               # nothing went to the real-time pass
+        assert all((b.stage / f"{s}.json").read_text() == t for s, t in before.items())
+        recs = _records(module.refusal_log_path(b.usage_json))
+        assert [(r["stem"], r["kind"], r["attempt"], r["stop_reason"]) for r in recs] == [
+            ("accountant", "role", "batch", "refusal"), ("herder", "role", "batch", "end_turn")]
+        assert "1 processed (1 from the batch, 0 in real time), 1 skipped, 2 refused, 0 errors" in err
+        assert json.loads(b.usage_json.read_text())["per_model"]["claude-sonnet-4-6:batch"]["n_calls"] == 3

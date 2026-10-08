@@ -1,6 +1,7 @@
 """Tests for data_analysis/seed_entities.py (queue-driven seeding helper)."""
 
 import json
+from datetime import datetime, timezone
 from pathlib import Path
 
 import pytest
@@ -354,3 +355,84 @@ class TestCheckHistory:
         se.note_check_answer(e, "rootless|cosmopolitan", "check")
         se.note_check_answer(e, "deracinated", "resample")
         assert [a["returned"] for a in e["check_answers"]] == ["rootless|cosmopolitan", "deracinated"]
+
+
+class TestRefusedGeneration:
+    """A generation the model refused (2026-10-08): the generators record it in
+    data/{traits,roles}/generation_refusals.jsonl and ``generate`` marks the
+    entry ``refused``, a final status."""
+
+    class Res:
+        returncode = 0
+
+    @staticmethod
+    def _refuse(d, et, stem, at=None, stop_reason="refusal"):
+        """What the generator appends when it is refused."""
+        rec = {"stem": stem, "label": stem, "kind": et, "model": "claude-sonnet-4-6", "style": "RogerV2",
+               "template_sha256": "9255dd3430ef", "stop_reason": stop_reason, "reply_excerpt": "", "attempt": "live",
+               "refused_at": at or datetime.now(timezone.utc).isoformat(timespec="seconds")}
+        with open(se.refusals_path(d, et), "a", encoding="utf-8") as f:
+            f.write(json.dumps(rec) + "\n")
+        return rec
+
+    def test_a_refused_stem_becomes_refused_with_its_record(self, tmp_path, monkeypatch, capsys):
+        d = _data_dir(tmp_path)
+        qp = _queue(tmp_path, [_entry(status="seeded"), _entry(stem="other", label="other", status="seeded"),
+                               _entry(stem="gamekeeper", label="gamekeeper", entity_type="role", status="seeded")])
+        (d / "traits" / "instructions" / "other.json").write_text(json.dumps({"instruction": [{"pos": "x", "neg": "y"}]}))
+        self._refuse(d, "trait", "other", at="2026-01-01T00:00:00+00:00")   # an earlier run's refusal: not this one
+        made = {}
+
+        def fake_run(cmd, **k):
+            if "regenerate_trait_instructions.py" in cmd[0]:
+                made["trait"] = self._refuse(d, "trait", "rationalizing", stop_reason="end_turn")
+            else:
+                made["role"] = self._refuse(d, "role", "gamekeeper")
+            return self.Res()
+        monkeypatch.setattr(se, "run_tool", fake_run)
+        assert se.main(["--queue", str(qp), "--data-dir", str(d), "generate", "--chunk", "3"]) == 0
+        entries = {e["stem"]: e for e in json.loads(qp.read_text())["entries"]}
+        assert entries["rationalizing"]["status"] == "refused" and entries["rationalizing"]["refusal"] == made["trait"]
+        assert entries["gamekeeper"]["status"] == "refused" and entries["gamekeeper"]["refusal"] == made["role"]
+        assert entries["other"]["status"] == "generated" and "refusal" not in entries["other"]
+        assert "1/3 marked generated, 2 refused" in capsys.readouterr().err
+        assert se.refusals_path(d, "role") == d / "roles" / "generation_refusals.jsonl"
+
+    def test_check_skips_a_refused_entry(self, tmp_path, monkeypatch, capsys):
+        d = _data_dir(tmp_path)
+        qp = _queue(tmp_path, [_entry(status="refused", refusal={"stop_reason": "refusal"})])
+        monkeypatch.setattr(se, "run_tool", lambda *a, **k: (_ for _ in ()).throw(AssertionError("must not run")))
+        assert se.main(["--queue", str(qp), "--data-dir", str(d), "check", "--stems", "rationalizing"]) == 0
+        assert "generation was refused, nothing to check" in capsys.readouterr().err
+        assert json.loads(qp.read_text())["entries"][0]["status"] == "refused"
+
+    def test_a_second_generate_skips_it_unless_retry_refused(self, tmp_path, monkeypatch, capsys):
+        d = _data_dir(tmp_path)
+        qp = _queue(tmp_path, [_entry(status="refused", refusal={"refused_at": "2026-10-08T10:00:00+00:00"})])
+        calls = []
+
+        def fake_run(cmd, **k):
+            calls.append(cmd)
+            (d / "traits" / "instructions" / "rationalizing.json").write_text(
+                json.dumps({"instruction": [{"pos": "x", "neg": "y"}]}))
+            return self.Res()
+        monkeypatch.setattr(se, "run_tool", fake_run)
+        base = ["--queue", str(qp), "--data-dir", str(d), "generate"]
+        se.main(base + ["--stems", "rationalizing"])
+        se.main(base + ["--chunk", "3"])
+        assert calls == [] and json.loads(qp.read_text())["entries"][0]["status"] == "refused"
+        assert "generation refused at 2026-10-08T10:00:00+00:00 (--retry-refused to try again)" in capsys.readouterr().err
+        se.main(base + ["--stems", "rationalizing", "--retry-refused"])
+        assert len(calls) == 1 and "rationalizing" in calls[0]
+        assert json.loads(qp.read_text())["entries"][0]["status"] == "generated"
+
+    def test_status_and_report_list_it_as_final(self, tmp_path, capsys):
+        d = _data_dir(tmp_path)
+        qp = _queue(tmp_path, [_entry(status="refused", refusal={"stop_reason": "end_turn"}),
+                               _entry(stem="x", label="x", status="seeded")])
+        assert "refused" in se.LIFECYCLE
+        se.main(["--queue", str(qp), "--data-dir", str(d), "status"])
+        out = capsys.readouterr().out
+        assert '"refused": 1' in out and "refused (final; generate --retry-refused to try again): rationalizing" in out
+        se.main(["--queue", str(qp), "--data-dir", str(d), "report"])
+        assert "| refused | generation refused (prose decline) |" in capsys.readouterr().out
