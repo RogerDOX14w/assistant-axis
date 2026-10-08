@@ -1,0 +1,1103 @@
+{
+  "result": {
+    "seeds": [
+      {
+        "seed": 0,
+        "hidden_frac": 0.1,
+        "hidden": {
+          "n_corpus": 790,
+          "n_target": 79,
+          "n_hidden": 83,
+          "n_groups": 53,
+          "strata": {
+            "alignment_ai_agent": {
+              "n_traits": 4,
+              "n_groups": 2,
+              "quota": 0,
+              "n_hidden": 0,
+              "n_groups_hidden": 0
+            },
+            "cognitive_epistemic": {
+              "n_traits": 170,
+              "n_groups": 99,
+              "quota": 17,
+              "n_hidden": 17,
+              "n_groups_hidden": 11
+            },
+            "communication_style": {
+              "n_traits": 154,
+              "n_groups": 93,
+              "quota": 15,
+              "n_hidden": 15,
+              "n_groups_hidden": 9
+            },
+            "emotional_temperament": {
+              "n_traits": 87,
+              "n_groups": 51,
+              "quota": 9,
+              "n_hidden": 10,
+              "n_groups_hidden": 5
+            },
+            "identity_demographic": {
+              "n_traits": 69,
+              "n_groups": 38,
+              "quota": 7,
+              "n_hidden": 8,
+              "n_groups_hidden": 4
+            },
+            "moral_stance": {
+              "n_traits": 103,
+              "n_groups": 62,
+              "quota": 10,
+              "n_hidden": 11,
+              "n_groups_hidden": 7
+            },
+            "none": {
+              "n_traits": 157,
+              "n_groups": 126,
+              "quota": 16,
+              "n_hidden": 16,
+              "n_groups_hidden": 13
+            },
+            "social_interpersonal": {
+              "n_traits": 46,
+              "n_groups": 28,
+              "quota": 5,
+              "n_hidden": 6,
+              "n_groups_hidden": 4
+            }
+          }
+        },
+        "hidden_stems": [
+          "absorption_prone",
+          "accountable",
+          "anti_immigration",
+          "anxious_preoccupied_attachment",
+          "apathetic",
+          "attention_seeking",
+          "bargain_hunter",
+          "benevolent",
+          "benign",
+          "calculating",
+          "callous",
+          "cancer",
+          "cat_person",
+          "cerebral",
+          "clear",
+          "compassionate",
+          "competent",
+          "conciliatory",
+          "confabulatory",
+          "confrontational",
+          "controlling",
+          "course_correcting",
+          "cryptic",
+          "dismissive",
+          "dog_person",
+          "educated",
+          "effusive",
+          "engaged",
+          "exclusivist",
+          "fashionable",
+          "financially_precarious",
+          "financially_secure",
+          "formalist",
+          "formulaic",
+          "friendly",
+          "full_price_shopper",
+          "gryffindor",
+          "hostile",
+          "iconoclastic",
+          "idealistic",
+          "incompetent",
+          "insecure",
+          "isfj_mbti",
+          "istj_mbti",
+          "jaded",
+          "malicious",
+          "malign",
+          "merciful",
+          "micromanaging",
+          "monochronic_hall",
+          "northern_hemisphere",
+          "oblivious",
+          "observant",
+          "permissive",
+          "pluralist",
+          "polychronic_hall",
+          "pragmatic",
+          "pro_immigration",
+          "puritanical",
+          "quality_time",
+          "realistic_holland",
+          "sassy",
+          "sectarian",
+          "self_assured",
+          "self_blaming",
+          "self_effacing",
+          "social_holland",
+          "southern_hemisphere",
+          "spontaneous",
+          "superstitious",
+          "supportive",
+          "survivor_vals",
+          "temperate",
+          "tunnel_visioned",
+          "uncalculating",
+          "uncaring",
+          "uneducated",
+          "unfashionable",
+          "unflinching",
+          "visceral",
+          "wide_eyed",
+          "wry",
+          "zealous"
+        ],
+        "candidates": {
+          "n_decided": 78,
+          "by_decision": {
+            "new": 48,
+            "covered": 30
+          },
+          "n_kept": 48,
+          "n_covered": 30
+        },
+        "reachable": {
+          "n": 44,
+          "share": 0.5301,
+          "n_by_kept": 35,
+          "share_by_kept": 0.4217
+        },
+        "kept": {
+          "n_hidden": 83,
+          "n_recovered": 6,
+          "recall": 0.0723,
+          "by_label": 0,
+          "by_overlap_only": 6,
+          "by_region": {
+            "cognitive_epistemic": {
+              "n_hidden": 17,
+              "n_recovered": 1,
+              "recall": 0.0588
+            },
+            "communication_style": {
+              "n_hidden": 16,
+              "n_recovered": 2,
+              "recall": 0.125
+            },
+            "emotional_temperament": {
+              "n_hidden": 8,
+              "n_recovered": 1,
+              "recall": 0.125
+            },
+            "identity_demographic": {
+              "n_hidden": 6,
+              "n_recovered": 0,
+              "recall": 0.0
+            },
+            "moral_stance": {
+              "n_hidden": 14,
+              "n_recovered": 1,
+              "recall": 0.0714
+            },
+            "none": {
+              "n_hidden": 17,
+              "n_recovered": 1,
+              "recall": 0.0588
+            },
+            "social_interpersonal": {
+              "n_hidden": 5,
+              "n_recovered": 0,
+              "recall": 0.0
+            }
+          },
+          "by_kind": {
+            "4-cube": {
+              "n_hidden": 2,
+              "n_recovered": 0,
+              "recall": 0.0
+            },
+            "pair": {
+              "n_hidden": 56,
+              "n_recovered": 5,
+              "recall": 0.0893
+            },
+            "ring": {
+              "n_hidden": 3,
+              "n_recovered": 0,
+              "recall": 0.0
+            },
+            "sequence": {
+              "n_hidden": 1,
+              "n_recovered": 0,
+              "recall": 0.0
+            },
+            "set": {
+              "n_hidden": 3,
+              "n_recovered": 0,
+              "recall": 0.0
+            },
+            "singleton": {
+              "n_hidden": 10,
+              "n_recovered": 0,
+              "recall": 0.0
+            },
+            "square": {
+              "n_hidden": 1,
+              "n_recovered": 0,
+              "recall": 0.0
+            },
+            "triangle": {
+              "n_hidden": 3,
+              "n_recovered": 1,
+              "recall": 0.3333
+            },
+            "unclassified": {
+              "n_hidden": 4,
+              "n_recovered": 0,
+              "recall": 0.0
+            }
+          },
+          "candidates": {
+            "n": 48,
+            "n_recovering": 6,
+            "precision": 0.125
+          },
+          "groups": {
+            "n": 29,
+            "whole": 1,
+            "partial": 4,
+            "none": 24
+          },
+          "recovered": [
+            {
+              "stem": "callous",
+              "region": "emotional_temperament",
+              "kind": "triangle",
+              "by": [
+                {
+                  "key": "hard#1",
+                  "label": "hard",
+                  "how": "overlap",
+                  "decision": "new",
+                  "covered_by": null,
+                  "cut_off": 3,
+                  "cosine": 0.217582,
+                  "rank": 10,
+                  "sonnet": {
+                    "value": 3,
+                    "reason": "Both describe emotional hardness and lack of sympathy toward others' suffering; 'hard' adds harsh judgment of faults, while 'callous' stresses indifference and insensitivity, so they are near-synonyms with slight emphasis differences."
+                  },
+                  "opus": {
+                    "value": 3,
+                    "reason": "Both describe emotional hardness and lack of sympathy for others' suffering. Hard adds harsh judgment of faults, while callous stresses indifference and insensitivity, so they differ mainly in emphasis."
+                  },
+                  "verdict": "cut"
+                }
+              ]
+            },
+            {
+              "stem": "confrontational",
+              "region": "communication_style",
+              "kind": "pair",
+              "by": [
+                {
+                  "key": "contentious#1",
+                  "label": "contentious",
+                  "how": "overlap",
+                  "decision": "new",
+                  "covered_by": null,
+                  "cut_off": 3,
+                  "cosine": 0.255021,
+                  "rank": 6,
+                  "sonnet": {
+                    "value": 3,
+                    "reason": "Both describe a person who seeks out and relishes disputes and treats disagreement as a fight, but contentious centers on arguing and pushing back on points, while confrontational adds head-on challenge and escalation of conflict."
+                  },
+                  "opus": {
+                    "value": 3,
+                    "reason": "Both describe relishing argument and treating disagreement as a fight. Confrontational stresses seeking out and escalating conflict head-on, while contentious stresses reflexively disputing every point."
+                  },
+                  "verdict": "cut"
+                }
+              ]
+            },
+            {
+              "stem": "exclusivist",
+              "region": null,
+              "kind": "pair",
+              "by": [
+                {
+                  "key": "intolerant#1",
+                  "label": "intolerant",
+                  "how": "overlap",
+                  "decision": "new",
+                  "covered_by": null,
+                  "cut_off": 3,
+                  "cosine": 0.403488,
+                  "rank": 2,
+                  "sonnet": {
+                    "value": 3,
+                    "reason": "Both hold their own view as the only acceptable one and dismiss rivals, but intolerant also covers rejecting people and exclusivist is specifically about one doctrine or way being uniquely right."
+                  },
+                  "opus": {
+                    "value": 3,
+                    "reason": "Both hold one's own outlook as the only right one. Intolerant goes further, actively rejecting and dismissing differing views and people, while exclusivist is the belief stance itself."
+                  },
+                  "verdict": "cut"
+                }
+              ]
+            },
+            {
+              "stem": "friendly",
+              "region": "communication_style",
+              "kind": "pair",
+              "by": [
+                {
+                  "key": "genial#1",
+                  "label": "genial",
+                  "how": "overlap",
+                  "decision": "new",
+                  "covered_by": null,
+                  "cut_off": 3,
+                  "cosine": 0.500903,
+                  "rank": 1,
+                  "sonnet": {
+                    "value": 3,
+                    "reason": "Both describe warm, welcoming goodwill toward everyone in conversation; genial adds easy smiling and kind joking, while friendly is the broader general warmth."
+                  },
+                  "opus": {
+                    "value": 3,
+                    "reason": "Genial is essentially friendliness with extra emphasis on cheerful, easy, joking pleasantness, so the two are the same warm goodwill differing in emphasis."
+                  },
+                  "verdict": "cut"
+                }
+              ]
+            },
+            {
+              "stem": "observant",
+              "region": "cognitive_epistemic",
+              "kind": "pair",
+              "by": [
+                {
+                  "key": "attentive#1",
+                  "label": "attentive",
+                  "how": "overlap",
+                  "decision": "new",
+                  "covered_by": null,
+                  "cut_off": 3,
+                  "cosine": 0.553264,
+                  "rank": 1,
+                  "sonnet": {
+                    "value": 2,
+                    "reason": "Both center on noticing details and changes in one's surroundings, but attentive adds responding with care while observant emphasizes keen noticing without implying a caring response."
+                  },
+                  "opus": {
+                    "value": 3,
+                    "reason": "Both centre on noticing details and changes in one's surroundings; attentive adds a caring response, a difference of scope rather than a different concept."
+                  },
+                  "verdict": "review"
+                }
+              ]
+            },
+            {
+              "stem": "pluralist",
+              "region": "moral_stance",
+              "kind": "pair",
+              "by": [
+                {
+                  "key": "broad_minded#1",
+                  "label": "broad-minded",
+                  "how": "overlap",
+                  "decision": "new",
+                  "covered_by": null,
+                  "cut_off": 3,
+                  "cosine": 0.320065,
+                  "rank": 2,
+                  "sonnet": {
+                    "value": 2,
+                    "reason": "Both involve accepting differing views as legitimate, but broad-minded is a patient, fair-hearing attitude toward others' opinions, while pluralist is a stance that multiple views are equally valid, so each adds something the other lacks."
+                  },
+                  "opus": {
+                    "value": 3,
+                    "reason": "Both describe accepting differing views rather than treating them as errors; pluralist carries this further by treating all perspectives as equally valid."
+                  },
+                  "verdict": "review"
+                }
+              ]
+            }
+          ]
+        },
+        "covered": {
+          "n_hidden": 83,
+          "n_recovered": 2,
+          "recall": 0.0241,
+          "by_label": 0,
+          "by_overlap_only": 2,
+          "by_region": {
+            "cognitive_epistemic": {
+              "n_hidden": 17,
+              "n_recovered": 0,
+              "recall": 0.0
+            },
+            "communication_style": {
+              "n_hidden": 16,
+              "n_recovered": 2,
+              "recall": 0.125
+            },
+            "emotional_temperament": {
+              "n_hidden": 8,
+              "n_recovered": 0,
+              "recall": 0.0
+            },
+            "identity_demographic": {
+              "n_hidden": 6,
+              "n_recovered": 0,
+              "recall": 0.0
+            },
+            "moral_stance": {
+              "n_hidden": 14,
+              "n_recovered": 0,
+              "recall": 0.0
+            },
+            "none": {
+              "n_hidden": 17,
+              "n_recovered": 0,
+              "recall": 0.0
+            },
+            "social_interpersonal": {
+              "n_hidden": 5,
+              "n_recovered": 0,
+              "recall": 0.0
+            }
+          },
+          "by_kind": {
+            "4-cube": {
+              "n_hidden": 2,
+              "n_recovered": 0,
+              "recall": 0.0
+            },
+            "pair": {
+              "n_hidden": 56,
+              "n_recovered": 2,
+              "recall": 0.0357
+            },
+            "ring": {
+              "n_hidden": 3,
+              "n_recovered": 0,
+              "recall": 0.0
+            },
+            "sequence": {
+              "n_hidden": 1,
+              "n_recovered": 0,
+              "recall": 0.0
+            },
+            "set": {
+              "n_hidden": 3,
+              "n_recovered": 0,
+              "recall": 0.0
+            },
+            "singleton": {
+              "n_hidden": 10,
+              "n_recovered": 0,
+              "recall": 0.0
+            },
+            "square": {
+              "n_hidden": 1,
+              "n_recovered": 0,
+              "recall": 0.0
+            },
+            "triangle": {
+              "n_hidden": 3,
+              "n_recovered": 0,
+              "recall": 0.0
+            },
+            "unclassified": {
+              "n_hidden": 4,
+              "n_recovered": 0,
+              "recall": 0.0
+            }
+          },
+          "candidates": {
+            "n": 30,
+            "n_recovering": 1,
+            "precision": 0.0333
+          },
+          "groups": {
+            "n": 29,
+            "whole": 0,
+            "partial": 2,
+            "none": 27
+          },
+          "recovered": [
+            {
+              "stem": "confrontational",
+              "region": "communication_style",
+              "kind": "pair",
+              "by": [
+                {
+                  "key": "combative#1",
+                  "label": "combative",
+                  "how": "overlap",
+                  "decision": "covered",
+                  "covered_by": "aggressive",
+                  "cut_off": 3,
+                  "cosine": 0.347743,
+                  "rank": 2,
+                  "sonnet": {
+                    "value": 3,
+                    "reason": "Both describe seeking out conflict and escalating arguments; combative adds harsh speech and readiness for physical fights, while confrontational stresses head-on challenging and relishing argument, so they share a core with slightly different emphases."
+                  },
+                  "opus": {
+                    "value": 3,
+                    "reason": "Both describe actively seeking conflict and arguing. Combative adds harsh speech and readiness for physical fighting, while confrontational stresses head-on challenge and escalation, so the core is nearly identical with slight differences in emphasis."
+                  },
+                  "verdict": "cut"
+                }
+              ]
+            },
+            {
+              "stem": "hostile",
+              "region": "communication_style",
+              "kind": "pair",
+              "by": [
+                {
+                  "key": "combative#1",
+                  "label": "combative",
+                  "how": "overlap",
+                  "decision": "covered",
+                  "covered_by": "aggressive",
+                  "cut_off": 3,
+                  "cosine": 0.313228,
+                  "rank": 6,
+                  "sonnet": {
+                    "value": 3,
+                    "reason": "Hostile's description explicitly includes combative, confrontational behavior, so the concepts largely coincide, though hostile is somewhat broader (general antagonism, not just fight-picking)."
+                  },
+                  "opus": {
+                    "value": 3,
+                    "reason": "Hostile is broader antagonism that includes combative behavior, but it can also be cold adversarial attitude without actively picking fights, so the two differ in scope."
+                  },
+                  "verdict": "cut"
+                }
+              ]
+            }
+          ],
+          "false_covers": [
+            {
+              "key": "combative#1",
+              "label": "combative",
+              "how": "overlap",
+              "decision": "covered",
+              "covered_by": "aggressive",
+              "cut_off": 3,
+              "cosine": 0.347743,
+              "rank": 2,
+              "sonnet": {
+                "value": 3,
+                "reason": "Both describe seeking out conflict and escalating arguments; combative adds harsh speech and readiness for physical fights, while confrontational stresses head-on challenging and relishing argument, so they share a core with slightly different emphases."
+              },
+              "opus": {
+                "value": 3,
+                "reason": "Both describe actively seeking conflict and arguing. Combative adds harsh speech and readiness for physical fighting, while confrontational stresses head-on challenge and escalation, so the core is nearly identical with slight differences in emphasis."
+              },
+              "verdict": "cut",
+              "stem": "confrontational",
+              "recovered_by_a_kept_candidate": true
+            },
+            {
+              "key": "combative#1",
+              "label": "combative",
+              "how": "overlap",
+              "decision": "covered",
+              "covered_by": "aggressive",
+              "cut_off": 3,
+              "cosine": 0.313228,
+              "rank": 6,
+              "sonnet": {
+                "value": 3,
+                "reason": "Hostile's description explicitly includes combative, confrontational behavior, so the concepts largely coincide, though hostile is somewhat broader (general antagonism, not just fight-picking)."
+              },
+              "opus": {
+                "value": 3,
+                "reason": "Hostile is broader antagonism that includes combative behavior, but it can also be cold adversarial attitude without actively picking fights, so the two differ in scope."
+              },
+              "verdict": "cut",
+              "stem": "hostile",
+              "recovered_by_a_kept_candidate": false
+            }
+          ],
+          "n_false_cover_candidates": 1,
+          "hidden_missed_only_through_covers": [
+            "hostile"
+          ]
+        },
+        "either": {
+          "n_hidden": 83,
+          "n_recovered": 7,
+          "recall": 0.0843,
+          "by_label": 0,
+          "by_overlap_only": 7,
+          "by_region": {
+            "cognitive_epistemic": {
+              "n_hidden": 17,
+              "n_recovered": 1,
+              "recall": 0.0588
+            },
+            "communication_style": {
+              "n_hidden": 16,
+              "n_recovered": 3,
+              "recall": 0.1875
+            },
+            "emotional_temperament": {
+              "n_hidden": 8,
+              "n_recovered": 1,
+              "recall": 0.125
+            },
+            "identity_demographic": {
+              "n_hidden": 6,
+              "n_recovered": 0,
+              "recall": 0.0
+            },
+            "moral_stance": {
+              "n_hidden": 14,
+              "n_recovered": 1,
+              "recall": 0.0714
+            },
+            "none": {
+              "n_hidden": 17,
+              "n_recovered": 1,
+              "recall": 0.0588
+            },
+            "social_interpersonal": {
+              "n_hidden": 5,
+              "n_recovered": 0,
+              "recall": 0.0
+            }
+          },
+          "by_kind": {
+            "4-cube": {
+              "n_hidden": 2,
+              "n_recovered": 0,
+              "recall": 0.0
+            },
+            "pair": {
+              "n_hidden": 56,
+              "n_recovered": 6,
+              "recall": 0.1071
+            },
+            "ring": {
+              "n_hidden": 3,
+              "n_recovered": 0,
+              "recall": 0.0
+            },
+            "sequence": {
+              "n_hidden": 1,
+              "n_recovered": 0,
+              "recall": 0.0
+            },
+            "set": {
+              "n_hidden": 3,
+              "n_recovered": 0,
+              "recall": 0.0
+            },
+            "singleton": {
+              "n_hidden": 10,
+              "n_recovered": 0,
+              "recall": 0.0
+            },
+            "square": {
+              "n_hidden": 1,
+              "n_recovered": 0,
+              "recall": 0.0
+            },
+            "triangle": {
+              "n_hidden": 3,
+              "n_recovered": 1,
+              "recall": 0.3333
+            },
+            "unclassified": {
+              "n_hidden": 4,
+              "n_recovered": 0,
+              "recall": 0.0
+            }
+          },
+          "candidates": {
+            "n": 78,
+            "n_recovering": 7,
+            "precision": 0.0897
+          },
+          "groups": {
+            "n": 29,
+            "whole": 2,
+            "partial": 3,
+            "none": 24
+          },
+          "recovered": [
+            {
+              "stem": "callous",
+              "region": "emotional_temperament",
+              "kind": "triangle",
+              "by": [
+                {
+                  "key": "hard#1",
+                  "label": "hard",
+                  "how": "overlap",
+                  "decision": "new",
+                  "covered_by": null,
+                  "cut_off": 3,
+                  "cosine": 0.217582,
+                  "rank": 10,
+                  "sonnet": {
+                    "value": 3,
+                    "reason": "Both describe emotional hardness and lack of sympathy toward others' suffering; 'hard' adds harsh judgment of faults, while 'callous' stresses indifference and insensitivity, so they are near-synonyms with slight emphasis differences."
+                  },
+                  "opus": {
+                    "value": 3,
+                    "reason": "Both describe emotional hardness and lack of sympathy for others' suffering. Hard adds harsh judgment of faults, while callous stresses indifference and insensitivity, so they differ mainly in emphasis."
+                  },
+                  "verdict": "cut"
+                }
+              ]
+            },
+            {
+              "stem": "confrontational",
+              "region": "communication_style",
+              "kind": "pair",
+              "by": [
+                {
+                  "key": "combative#1",
+                  "label": "combative",
+                  "how": "overlap",
+                  "decision": "covered",
+                  "covered_by": "aggressive",
+                  "cut_off": 3,
+                  "cosine": 0.347743,
+                  "rank": 2,
+                  "sonnet": {
+                    "value": 3,
+                    "reason": "Both describe seeking out conflict and escalating arguments; combative adds harsh speech and readiness for physical fights, while confrontational stresses head-on challenging and relishing argument, so they share a core with slightly different emphases."
+                  },
+                  "opus": {
+                    "value": 3,
+                    "reason": "Both describe actively seeking conflict and arguing. Combative adds harsh speech and readiness for physical fighting, while confrontational stresses head-on challenge and escalation, so the core is nearly identical with slight differences in emphasis."
+                  },
+                  "verdict": "cut"
+                },
+                {
+                  "key": "contentious#1",
+                  "label": "contentious",
+                  "how": "overlap",
+                  "decision": "new",
+                  "covered_by": null,
+                  "cut_off": 3,
+                  "cosine": 0.255021,
+                  "rank": 6,
+                  "sonnet": {
+                    "value": 3,
+                    "reason": "Both describe a person who seeks out and relishes disputes and treats disagreement as a fight, but contentious centers on arguing and pushing back on points, while confrontational adds head-on challenge and escalation of conflict."
+                  },
+                  "opus": {
+                    "value": 3,
+                    "reason": "Both describe relishing argument and treating disagreement as a fight. Confrontational stresses seeking out and escalating conflict head-on, while contentious stresses reflexively disputing every point."
+                  },
+                  "verdict": "cut"
+                }
+              ]
+            },
+            {
+              "stem": "exclusivist",
+              "region": null,
+              "kind": "pair",
+              "by": [
+                {
+                  "key": "intolerant#1",
+                  "label": "intolerant",
+                  "how": "overlap",
+                  "decision": "new",
+                  "covered_by": null,
+                  "cut_off": 3,
+                  "cosine": 0.403488,
+                  "rank": 2,
+                  "sonnet": {
+                    "value": 3,
+                    "reason": "Both hold their own view as the only acceptable one and dismiss rivals, but intolerant also covers rejecting people and exclusivist is specifically about one doctrine or way being uniquely right."
+                  },
+                  "opus": {
+                    "value": 3,
+                    "reason": "Both hold one's own outlook as the only right one. Intolerant goes further, actively rejecting and dismissing differing views and people, while exclusivist is the belief stance itself."
+                  },
+                  "verdict": "cut"
+                }
+              ]
+            },
+            {
+              "stem": "friendly",
+              "region": "communication_style",
+              "kind": "pair",
+              "by": [
+                {
+                  "key": "genial#1",
+                  "label": "genial",
+                  "how": "overlap",
+                  "decision": "new",
+                  "covered_by": null,
+                  "cut_off": 3,
+                  "cosine": 0.500903,
+                  "rank": 1,
+                  "sonnet": {
+                    "value": 3,
+                    "reason": "Both describe warm, welcoming goodwill toward everyone in conversation; genial adds easy smiling and kind joking, while friendly is the broader general warmth."
+                  },
+                  "opus": {
+                    "value": 3,
+                    "reason": "Genial is essentially friendliness with extra emphasis on cheerful, easy, joking pleasantness, so the two are the same warm goodwill differing in emphasis."
+                  },
+                  "verdict": "cut"
+                }
+              ]
+            },
+            {
+              "stem": "hostile",
+              "region": "communication_style",
+              "kind": "pair",
+              "by": [
+                {
+                  "key": "combative#1",
+                  "label": "combative",
+                  "how": "overlap",
+                  "decision": "covered",
+                  "covered_by": "aggressive",
+                  "cut_off": 3,
+                  "cosine": 0.313228,
+                  "rank": 6,
+                  "sonnet": {
+                    "value": 3,
+                    "reason": "Hostile's description explicitly includes combative, confrontational behavior, so the concepts largely coincide, though hostile is somewhat broader (general antagonism, not just fight-picking)."
+                  },
+                  "opus": {
+                    "value": 3,
+                    "reason": "Hostile is broader antagonism that includes combative behavior, but it can also be cold adversarial attitude without actively picking fights, so the two differ in scope."
+                  },
+                  "verdict": "cut"
+                }
+              ]
+            },
+            {
+              "stem": "observant",
+              "region": "cognitive_epistemic",
+              "kind": "pair",
+              "by": [
+                {
+                  "key": "attentive#1",
+                  "label": "attentive",
+                  "how": "overlap",
+                  "decision": "new",
+                  "covered_by": null,
+                  "cut_off": 3,
+                  "cosine": 0.553264,
+                  "rank": 1,
+                  "sonnet": {
+                    "value": 2,
+                    "reason": "Both center on noticing details and changes in one's surroundings, but attentive adds responding with care while observant emphasizes keen noticing without implying a caring response."
+                  },
+                  "opus": {
+                    "value": 3,
+                    "reason": "Both centre on noticing details and changes in one's surroundings; attentive adds a caring response, a difference of scope rather than a different concept."
+                  },
+                  "verdict": "review"
+                }
+              ]
+            },
+            {
+              "stem": "pluralist",
+              "region": "moral_stance",
+              "kind": "pair",
+              "by": [
+                {
+                  "key": "broad_minded#1",
+                  "label": "broad-minded",
+                  "how": "overlap",
+                  "decision": "new",
+                  "covered_by": null,
+                  "cut_off": 3,
+                  "cosine": 0.320065,
+                  "rank": 2,
+                  "sonnet": {
+                    "value": 2,
+                    "reason": "Both involve accepting differing views as legitimate, but broad-minded is a patient, fair-hearing attitude toward others' opinions, while pluralist is a stance that multiple views are equally valid, so each adds something the other lacks."
+                  },
+                  "opus": {
+                    "value": 3,
+                    "reason": "Both describe accepting differing views rather than treating them as errors; pluralist carries this further by treating all perspectives as equally valid."
+                  },
+                  "verdict": "review"
+                }
+              ]
+            }
+          ]
+        },
+        "pairs": {
+          "n_overlap": 76,
+          "n_label": 0,
+          "n_stalled": 0,
+          "verdicts": {
+            "keep": 64,
+            "review": 2,
+            "opposite": 4,
+            "cut": 6
+          }
+        },
+        "reduced_run": {
+          "batch_id": "rec_wn_clusters_2026-10-08-pilot_s0",
+          "by_decision": {
+            "new": 48,
+            "covered": 30
+          },
+          "n_stalled": 0,
+          "skipped": {
+            "not_a_trait": 9
+          },
+          "rules": "m3_rules_2",
+          "cosine_floor": 0.25
+        },
+        "cost": {
+          "reduced_m3_usd": 0.950295,
+          "match_usd": 0.18013,
+          "total_usd": 1.130425
+        }
+      }
+    ],
+    "mean": {
+      "n_hidden": 83.0,
+      "recall_kept": 0.0723,
+      "precision_kept": 0.125,
+      "recovered_kept": 6.0,
+      "recovered_by_label": 0.0,
+      "recall_covered": 0.0241,
+      "false_cover_candidates": 1.0,
+      "recall_either": 0.0843,
+      "reachable_share": 0.5301,
+      "groups_whole": 1.0,
+      "groups": 29.0,
+      "cost_usd": 1.1304,
+      "kept_by_region": {
+        "cognitive_epistemic": {
+          "recall": 0.0588,
+          "n_hidden": 17.0
+        },
+        "communication_style": {
+          "recall": 0.125,
+          "n_hidden": 16.0
+        },
+        "emotional_temperament": {
+          "recall": 0.125,
+          "n_hidden": 8.0
+        },
+        "identity_demographic": {
+          "recall": 0.0,
+          "n_hidden": 6.0
+        },
+        "moral_stance": {
+          "recall": 0.0714,
+          "n_hidden": 14.0
+        },
+        "none": {
+          "recall": 0.0588,
+          "n_hidden": 17.0
+        },
+        "social_interpersonal": {
+          "recall": 0.0,
+          "n_hidden": 5.0
+        }
+      },
+      "kept_by_kind": {
+        "4-cube": {
+          "recall": 0.0,
+          "n_hidden": 2.0
+        },
+        "pair": {
+          "recall": 0.0893,
+          "n_hidden": 56.0
+        },
+        "ring": {
+          "recall": 0.0,
+          "n_hidden": 3.0
+        },
+        "sequence": {
+          "recall": 0.0,
+          "n_hidden": 1.0
+        },
+        "set": {
+          "recall": 0.0,
+          "n_hidden": 3.0
+        },
+        "singleton": {
+          "recall": 0.0,
+          "n_hidden": 10.0
+        },
+        "square": {
+          "recall": 0.0,
+          "n_hidden": 1.0
+        },
+        "triangle": {
+          "recall": 0.3333,
+          "n_hidden": 3.0
+        },
+        "unclassified": {
+          "recall": 0.0,
+          "n_hidden": 4.0
+        }
+      }
+    },
+    "n_seeds": 1,
+    "total_cost_usd": 1.130425,
+    "batch_id": "rec_wn_clusters_2026-10-08-pilot",
+    "generator": "wn_clusters",
+    "run_id": "2026-10-08-pilot",
+    "hidden_frac": 0.1,
+    "seeds_reported": [
+      0
+    ]
+  },
+  "_provenance": {
+    "schema_version": "1.0",
+    "produced_by": {
+      "cmd": "uv run python data_analysis/gap_generation/recovery_test.py --generator wn_clusters --run-id 2026-10-08-pilot --hidden-frac 0.1 --seed 0 --transport live --budget-usd 5",
+      "git_sha": "0aa0512+dirty",
+      "author": "Roger Dearnaley",
+      "title": "recovery_test rec_wn_clusters_2026-10-08-pilot"
+    },
+    "produced_at": "2026-10-08T06:35:28+00:00",
+    "inputs": [
+      {
+        "dep_key": "hidden_s0",
+        "path": "data/candidates/recovery/rec_wn_clusters_2026-10-08-pilot/seed0/hidden.json",
+        "fingerprint": "v1:2026-10-08T06:30:35+00:00@22307",
+        "kind": "file",
+        "dataset_id": null,
+        "last_modified_at": "2026-10-08T06:30:35+00:00",
+        "extras": {}
+      },
+      {
+        "dep_key": "m3_results_s0",
+        "path": "data/candidates/novelty/rec_wn_clusters_2026-10-08-pilot_s0/results.jsonl",
+        "fingerprint": "v1:2026-10-08T06:34:56+00:00@785152",
+        "kind": "file",
+        "dataset_id": null,
+        "last_modified_at": "2026-10-08T06:34:56+00:00",
+        "extras": {}
+      },
+      {
+        "dep_key": "matches_s0",
+        "path": "data/candidates/recovery/rec_wn_clusters_2026-10-08-pilot/seed0/matches.jsonl",
+        "fingerprint": "v1:2026-10-08T06:35:28+00:00@41994",
+        "kind": "file",
+        "dataset_id": null,
+        "last_modified_at": "2026-10-08T06:35:28+00:00",
+        "extras": {}
+      }
+    ],
+    "inputs_sha256": "82fe33ba6a0ad35d8a130c72b4b69bf224c1a8c5846abdb2e3bfc2ffc3003d47"
+  }
+}
