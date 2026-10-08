@@ -1,0 +1,193 @@
+{
+  "batch_id": "gen_pilot_censuses",
+  "pipeline": "split",
+  "rubric_version": 5,
+  "git_sha": "7a78b63",
+  "allow_dirty": false,
+  "dirty_check": {
+    "paths": [
+      "assistant_axis/gapgen",
+      "data_analysis/gap_generation",
+      "assistant_axis/judge.py",
+      "assistant_axis/judge_pricing.py",
+      "assistant_axis/entity_id.py",
+      "assistant_axis/atomic_io.py",
+      "data/candidates/validation",
+      "reports/trait_gap_generation/rubrics",
+      "pyproject.toml",
+      "uv.lock"
+    ],
+    "dirty": [],
+    "note": null
+  },
+  "argv": [
+    "--batch-id",
+    "gen_pilot_censuses",
+    "--run",
+    "censuses/2026-10-08-pilot",
+    "--pipeline",
+    "split",
+    "--transport",
+    "live",
+    "--budget-usd",
+    "6"
+  ],
+  "plan": {
+    "pipeline": "split",
+    "n_rows": 509,
+    "n_hard_reject": 0,
+    "n_to_step1_or_probe": 509,
+    "n_probe_band": 190,
+    "n_with_intended_sense": 420,
+    "transport": "live",
+    "n_second_opinion_est": 62,
+    "third_model": null,
+    "readings": 3,
+    "token_figures": {
+      "claude-haiku-5-5": "measured on haiku-5-5 (h55_split_test_words, h55_m1_validation_pool, h55_verdict_600; thinking included)",
+      "claude-sonnet-5-5": "Haiku 4.5's figures x 1.3 (the kind call measured)"
+    },
+    "shares": {
+      "claude-haiku-5-5": {
+        "source": "measured on haiku-5-5 (10 recorded runs)",
+        "readings_per_word": 0.96,
+        "same_sense": 0.04,
+        "trait": 0.65,
+        "second_opinion": 0.12
+      },
+      "claude-sonnet-5-5": {
+        "source": "measured on sonnet-5-5 (1 recorded runs)",
+        "readings_per_word": 1.27,
+        "same_sense": 0.3,
+        "trait": 0.7,
+        "second_opinion": 0.2
+      }
+    }
+  },
+  "transport": "live",
+  "transport_reason": "--transport live",
+  "estimate_usd": 3.8523,
+  "estimate_lines": [
+    "definition probe: 190 x (413, 107) tokens at claude-haiku-5-5 rates = $0.018",
+    "sense (3 readings): 1527 x (820, 553) tokens at claude-haiku-5-5 rates = $0.547",
+    "established (3 readings): 1466 x (634, 300) tokens at claude-haiku-5-5 rates = $0.313",
+    "vague (3 readings): 1466 x (467, 112) tokens at claude-haiku-5-5 rates = $0.151",
+    "kind (3 readings): 1466 x (1,018, 103) tokens at claude-haiku-5-5 rates = $0.225",
+    "same sense (3 readings): 62 x (428, 140) tokens at claude-haiku-5-5 rates = $0.007",
+    "comparison: 404 x (1,170, 143) tokens at claude-sonnet-5-5 rates = $1.523",
+    "gloss: 292 x (663, 94) tokens at claude-haiku-5-5 rates = $0.033",
+    "alignment: 331 x (780, 176) tokens at claude-haiku-5-5 rates = $0.055",
+    "descriptors: 331 x (480, 243) tokens at claude-haiku-5-5 rates = $0.056",
+    "second opinion: sense: 62 x (737, 269) tokens at claude-sonnet-5-5 rates = $0.258",
+    "second opinion: established: 78 x (546, 122) tokens at claude-sonnet-5-5 rates = $0.180",
+    "second opinion: vague: 78 x (546, 122) tokens at claude-sonnet-5-5 rates = $0.180",
+    "second opinion: kind: 78 x (955, 59) tokens at claude-sonnet-5-5 rates = $0.195",
+    "second opinion: same sense: 19 x (451, 104) tokens at claude-sonnet-5-5 rates = $0.037",
+    "second opinion: gloss: 40 x (637, 57) tokens at claude-sonnet-5-5 rates = $0.074"
+  ],
+  "budget_usd": 6.0,
+  "cap_usd": 6.0,
+  "confirmed_by": null,
+  "model": "claude-haiku-5-5",
+  "readings": 3,
+  "readings_rule": "turned_away_only_if_unanimous_else_majority",
+  "second_model": "claude-sonnet-5-5",
+  "compare_model": "claude-sonnet-5-5",
+  "plain_reading": true,
+  "third_model": null,
+  "third_opinion": null,
+  "max_disagreement": 0.1,
+  "accept_disagreement": false,
+  "step_versions": {
+    "sense": 8,
+    "established": 7,
+    "vague": 3,
+    "kind": 6,
+    "same_sense": 2,
+    "gloss": 4,
+    "alignment": 3,
+    "descriptors": 1
+  },
+  "prompt_sha256": {
+    "sense": "06985cdc6a384ad6230c5a19c18a0f948cd330d7835927fe6fca591331c850fc",
+    "established": "5cc42451ee1ecb4558a79601bf6b83aeebdf20770f675eeb04d5c5099988919f",
+    "vague": "ea4b01022195f4007560512e91fbeab56d14c1a6e83eff4a670756cc527d6cf5",
+    "kind": "5c8cb8daecb7d205d30f5ce5cb64a7e73b4829d8e41dcb90c1e8b3bdd480c137",
+    "same_sense": "d5953c971690915e815576337879fc26def74086e34cc4996e997e58643fa3c8",
+    "gloss": "a354c36c96a3b8e395c6a9473403f67fde1edf6d0d9901db22367a4023bdeabe",
+    "alignment": "c46c2e8f7e124b22db124d043655189ca123c607234e2d47436e188e3b0c34a4",
+    "descriptors": "4f4b966e876ea0d0250df349e0eb7f56b76fe151ed3f14006cb9731576e2094f",
+    "probe": "23327ebd9eb1ae4c1992b2a9ce89ed30ca955b65706017a80ccf87931fbf4116",
+    "comparison": "a6f5cbc6514e6108a010304e8f18012260263dfd2aa0c913439055b33df932e3"
+  },
+  "probe_rubric_version": 3,
+  "comparison_version": 2,
+  "measurement": false,
+  "stability": false,
+  "resumed": false,
+  "started_at": "2026-10-08T04:29:56+00:00",
+  "cached_steps": {
+    "claude-haiku-5-5": [
+      "sense",
+      "established",
+      "kind",
+      "gloss",
+      "alignment"
+    ],
+    "claude-sonnet-5-5": []
+  },
+  "tripwire": {
+    "threshold": 0.1,
+    "min_n": 20,
+    "source_field": "generator",
+    "overall": {
+      "n": 54,
+      "disagree": 3,
+      "rate": 0.0556,
+      "eligible": true,
+      "over": false,
+      "n_failed": 0
+    },
+    "by_source": {
+      "censuses": {
+        "n": 54,
+        "disagree": 3,
+        "rate": 0.0556,
+        "eligible": true,
+        "over": false,
+        "n_failed": 0
+      },
+      "roget": {
+        "n": 1,
+        "disagree": 0,
+        "rate": 0.0,
+        "eligible": false,
+        "over": false,
+        "n_failed": 0
+      },
+      "wn_clusters": {
+        "n": 2,
+        "disagree": 0,
+        "rate": 0.0,
+        "eligible": false,
+        "over": false,
+        "n_failed": 0
+      }
+    },
+    "tripped": false,
+    "tripped_by": [],
+    "models": {
+      "first": "claude-haiku-5-5",
+      "second": "claude-sonnet-5-5"
+    },
+    "accepted": false,
+    "action": null,
+    "stopped_before": null,
+    "calls_not_sent": 0,
+    "checked_at": "2026-10-08T05:33:09+00:00"
+  },
+  "stopped_by_disagreement": false,
+  "finished_at": "2026-10-08T05:40:26+00:00",
+  "cost_usd": 3.6331,
+  "stopped_by_error": null
+}

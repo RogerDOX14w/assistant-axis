@@ -174,11 +174,55 @@
       "n_queue": 238,
       "n_queue_union": 65
     },
-    "filter": null,
-    "novelty": null,
+    "filter": {
+      "n_filtered": 564,
+      "n_rows": 564,
+      "verdict": {
+        "reject": 6,
+        "tagged": 58,
+        "trait": 500
+      },
+      "outcome": {
+        "physical": 8,
+        "roles": 1,
+        "states": 49,
+        "trait": 500,
+        "turned_away": 6
+      },
+      "tags": {
+        "evaluative_only": 4,
+        "membership": 10,
+        "no_persona_reading": 1,
+        "physical": 8,
+        "role_person": 1,
+        "state": 49,
+        "too_rare": 1
+      },
+      "known_label_pass": {
+        "n_known": 77,
+        "n_filtered": 77,
+        "n_pass": 77,
+        "pass_rate": 1.0,
+        "by_outcome": {
+          "states": 2,
+          "trait": 75
+        },
+        "misses": [],
+        "unfiltered": []
+      },
+      "state_gloss_compliance": 0.0
+    },
+    "novelty": {
+      "n_scored": 500,
+      "decision": {
+        "covered": 248,
+        "new": 252
+      },
+      "pair_completion": 19
+    },
     "cost": {
       "files": [
-        "/Users/roger/Documents/GitHub/assistant-axis/.claude/worktrees/gen01-censuses/data/candidates/runs/censuses/2026-10-08-pilot/usage.json"
+        "/Users/roger/Documents/GitHub/assistant-axis/.claude/worktrees/agent-a49beca76adafdfc1/data/candidates/runs/censuses/2026-10-08-pilot/usage.json"
       ],
       "per_model": {},
       "total_usd": 0
@@ -188,58 +232,58 @@
     "schema_version": "1.0",
     "produced_by": {
       "cmd": "uv run python data_analysis/gap_generation/census_generator.py report --run-id 2026-10-08-pilot",
-      "git_sha": "ed96aec+dirty",
+      "git_sha": "e3aa3c0+dirty",
       "author": "Roger Dearnaley",
       "title": "census generator evaluation, run 2026-10-08-pilot"
     },
-    "produced_at": "2026-10-08T03:36:55+00:00",
+    "produced_at": "2026-10-08T06:34:23+00:00",
     "inputs": [
       {
         "dep_key": "census_table",
         "path": "data/candidates/censuses/census_table.jsonl",
-        "fingerprint": "v1:2026-10-08T03:32:40+00:00@12333182",
+        "fingerprint": "v1:2026-10-08T04:27:37+00:00@12333182",
         "kind": "file",
         "dataset_id": null,
-        "last_modified_at": "2026-10-08T03:32:40+00:00",
+        "last_modified_at": "2026-10-08T04:27:37+00:00",
         "extras": {}
       },
       {
         "dep_key": "ingest_counts",
         "path": "data/candidates/censuses/ingest_counts.json",
-        "fingerprint": "v1:2026-10-08T03:36:20+00:00@99157",
+        "fingerprint": "v1:2026-10-08T04:27:37+00:00@99157",
         "kind": "file",
         "dataset_id": null,
-        "last_modified_at": "2026-10-08T03:36:20+00:00",
+        "last_modified_at": "2026-10-08T04:27:37+00:00",
         "extras": {}
       },
       {
         "dep_key": "candidates",
         "path": "data/candidates/runs/censuses/2026-10-08-pilot/candidates.jsonl",
-        "fingerprint": "v1:2026-10-08T03:33:26+00:00@128277",
+        "fingerprint": "v1:2026-10-08T04:27:37+00:00@128277",
         "kind": "file",
         "dataset_id": null,
-        "last_modified_at": "2026-10-08T03:33:26+00:00",
+        "last_modified_at": "2026-10-08T04:27:37+00:00",
         "extras": {}
       },
       {
         "dep_key": "run_json",
         "path": "data/candidates/runs/censuses/2026-10-08-pilot/run.json",
-        "fingerprint": "v1:2026-10-08T03:33:26+00:00@19091",
+        "fingerprint": "v1:2026-10-08T04:27:37+00:00@19091",
         "kind": "file",
         "dataset_id": null,
-        "last_modified_at": "2026-10-08T03:33:26+00:00",
+        "last_modified_at": "2026-10-08T04:27:37+00:00",
         "extras": {}
       },
       {
         "dep_key": "registry",
         "path": "data/candidates/registry.jsonl",
-        "fingerprint": "v1:2026-10-08T03:33:26+00:00@403093",
+        "fingerprint": "v1:2026-10-08T06:33:12+00:00@29352738",
         "kind": "file",
         "dataset_id": null,
-        "last_modified_at": "2026-10-08T03:33:26+00:00",
+        "last_modified_at": "2026-10-08T06:33:12+00:00",
         "extras": {}
       }
     ],
-    "inputs_sha256": "de75836e20c21fac8d676be54c8365e9c872ceb5cce4637080206c152eaabb60"
+    "inputs_sha256": "246d5ec2f88c56e1eaa98a55b39db801c5621b2583c640cb6fef0026bf631476"
   }
 }

@@ -35,7 +35,12 @@ Of the corpus's 790 traits (244 of them multi-word), the census lists contain as
 
 ## Filter (M1)
 
-Not run yet on this run's rows (Fable runs it); [census_generator.py](../../../../../data_analysis/gap_generation/census_generator.py) `report` fills this section, the known-label pass rate and the costs once it has.
+564 of 564 rows filtered.  Verdicts: reject 6, tagged 58, trait 500.  Tags: evaluative_only 4, membership 10, no_persona_reading 1, physical 8, role_person 1, state 49, too_rare 1.
+Known-label pass rate (verdict trait, or tagged state or physical): 77 of 77 (100.0%).  Misses: none.
+
+## Novelty (M3)
+
+500 rows scored: covered 248, new 252; pair completions 19.
 
 ## Files
 
