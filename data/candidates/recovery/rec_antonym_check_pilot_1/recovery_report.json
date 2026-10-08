@@ -1,0 +1,2723 @@
+{
+  "result": {
+    "seeds": [
+      {
+        "seed": 0,
+        "hidden_frac": 0.1,
+        "hidden": {
+          "n_corpus": 790,
+          "n_target": 79,
+          "n_hidden": 83,
+          "n_groups": 53,
+          "strata": {
+            "alignment_ai_agent": {
+              "n_traits": 4,
+              "n_groups": 2,
+              "quota": 0,
+              "n_hidden": 0,
+              "n_groups_hidden": 0
+            },
+            "cognitive_epistemic": {
+              "n_traits": 170,
+              "n_groups": 99,
+              "quota": 17,
+              "n_hidden": 17,
+              "n_groups_hidden": 11
+            },
+            "communication_style": {
+              "n_traits": 154,
+              "n_groups": 93,
+              "quota": 15,
+              "n_hidden": 15,
+              "n_groups_hidden": 9
+            },
+            "emotional_temperament": {
+              "n_traits": 87,
+              "n_groups": 51,
+              "quota": 9,
+              "n_hidden": 10,
+              "n_groups_hidden": 5
+            },
+            "identity_demographic": {
+              "n_traits": 69,
+              "n_groups": 38,
+              "quota": 7,
+              "n_hidden": 8,
+              "n_groups_hidden": 4
+            },
+            "moral_stance": {
+              "n_traits": 103,
+              "n_groups": 62,
+              "quota": 10,
+              "n_hidden": 11,
+              "n_groups_hidden": 7
+            },
+            "none": {
+              "n_traits": 157,
+              "n_groups": 126,
+              "quota": 16,
+              "n_hidden": 16,
+              "n_groups_hidden": 13
+            },
+            "social_interpersonal": {
+              "n_traits": 46,
+              "n_groups": 28,
+              "quota": 5,
+              "n_hidden": 6,
+              "n_groups_hidden": 4
+            }
+          }
+        },
+        "hidden_stems": [
+          "absorption_prone",
+          "accountable",
+          "anti_immigration",
+          "anxious_preoccupied_attachment",
+          "apathetic",
+          "attention_seeking",
+          "bargain_hunter",
+          "benevolent",
+          "benign",
+          "calculating",
+          "callous",
+          "cancer",
+          "cat_person",
+          "cerebral",
+          "clear",
+          "compassionate",
+          "competent",
+          "conciliatory",
+          "confabulatory",
+          "confrontational",
+          "controlling",
+          "course_correcting",
+          "cryptic",
+          "dismissive",
+          "dog_person",
+          "educated",
+          "effusive",
+          "engaged",
+          "exclusivist",
+          "fashionable",
+          "financially_precarious",
+          "financially_secure",
+          "formalist",
+          "formulaic",
+          "friendly",
+          "full_price_shopper",
+          "gryffindor",
+          "hostile",
+          "iconoclastic",
+          "idealistic",
+          "incompetent",
+          "insecure",
+          "isfj_mbti",
+          "istj_mbti",
+          "jaded",
+          "malicious",
+          "malign",
+          "merciful",
+          "micromanaging",
+          "monochronic_hall",
+          "northern_hemisphere",
+          "oblivious",
+          "observant",
+          "permissive",
+          "pluralist",
+          "polychronic_hall",
+          "pragmatic",
+          "pro_immigration",
+          "puritanical",
+          "quality_time",
+          "realistic_holland",
+          "sassy",
+          "sectarian",
+          "self_assured",
+          "self_blaming",
+          "self_effacing",
+          "social_holland",
+          "southern_hemisphere",
+          "spontaneous",
+          "superstitious",
+          "supportive",
+          "survivor_vals",
+          "temperate",
+          "tunnel_visioned",
+          "uncalculating",
+          "uncaring",
+          "uneducated",
+          "unfashionable",
+          "unflinching",
+          "visceral",
+          "wide_eyed",
+          "wry",
+          "zealous"
+        ],
+        "candidates": {
+          "n_decided": 367,
+          "by_decision": {
+            "covered": 205,
+            "new": 162
+          },
+          "n_kept": 162,
+          "n_covered": 205
+        },
+        "reachable": {
+          "n": 71,
+          "share": 0.8554,
+          "n_by_kept": 59,
+          "share_by_kept": 0.7108
+        },
+        "kept": {
+          "n_hidden": 83,
+          "n_recovered": 13,
+          "recall": 0.1566,
+          "by_label": 2,
+          "by_overlap_only": 11,
+          "by_region": {
+            "cognitive_epistemic": {
+              "n_hidden": 17,
+              "n_recovered": 4,
+              "recall": 0.2353
+            },
+            "communication_style": {
+              "n_hidden": 16,
+              "n_recovered": 3,
+              "recall": 0.1875
+            },
+            "emotional_temperament": {
+              "n_hidden": 8,
+              "n_recovered": 1,
+              "recall": 0.125
+            },
+            "identity_demographic": {
+              "n_hidden": 6,
+              "n_recovered": 3,
+              "recall": 0.5
+            },
+            "moral_stance": {
+              "n_hidden": 14,
+              "n_recovered": 1,
+              "recall": 0.0714
+            },
+            "none": {
+              "n_hidden": 17,
+              "n_recovered": 0,
+              "recall": 0.0
+            },
+            "social_interpersonal": {
+              "n_hidden": 5,
+              "n_recovered": 1,
+              "recall": 0.2
+            }
+          },
+          "by_kind": {
+            "4-cube": {
+              "n_hidden": 2,
+              "n_recovered": 0,
+              "recall": 0.0
+            },
+            "pair": {
+              "n_hidden": 56,
+              "n_recovered": 13,
+              "recall": 0.2321
+            },
+            "ring": {
+              "n_hidden": 3,
+              "n_recovered": 0,
+              "recall": 0.0
+            },
+            "sequence": {
+              "n_hidden": 1,
+              "n_recovered": 0,
+              "recall": 0.0
+            },
+            "set": {
+              "n_hidden": 3,
+              "n_recovered": 0,
+              "recall": 0.0
+            },
+            "singleton": {
+              "n_hidden": 10,
+              "n_recovered": 0,
+              "recall": 0.0
+            },
+            "square": {
+              "n_hidden": 1,
+              "n_recovered": 0,
+              "recall": 0.0
+            },
+            "triangle": {
+              "n_hidden": 3,
+              "n_recovered": 0,
+              "recall": 0.0
+            },
+            "unclassified": {
+              "n_hidden": 4,
+              "n_recovered": 0,
+              "recall": 0.0
+            }
+          },
+          "candidates": {
+            "n": 162,
+            "n_recovering": 17,
+            "precision": 0.1049
+          },
+          "groups": {
+            "n": 29,
+            "whole": 4,
+            "partial": 5,
+            "none": 20
+          },
+          "recovered": [
+            {
+              "stem": "bargain_hunter",
+              "region": "cognitive_epistemic",
+              "kind": "pair",
+              "by": [
+                {
+                  "key": "bargain_hunting#1",
+                  "label": "bargain hunting",
+                  "how": "overlap",
+                  "decision": "new",
+                  "covered_by": null,
+                  "cut_off": 3,
+                  "cosine": 0.514144,
+                  "rank": 1,
+                  "sonnet": {
+                    "value": 3,
+                    "reason": "Both describe actively seeking the lowest prices; the other is the person-label form with added specifics (coupons, waiting for sales, enjoying savings), but the core concept is the same."
+                  },
+                  "opus": {
+                    "value": 4,
+                    "reason": "Both describe persistently seeking the lowest prices on goods; the second only adds concrete behaviours and an emphasis on enjoying the savings."
+                  },
+                  "verdict": "cut"
+                },
+                {
+                  "key": "deal_seeker#1",
+                  "label": "deal seeker",
+                  "how": "overlap",
+                  "decision": "new",
+                  "covered_by": null,
+                  "cut_off": 3,
+                  "cosine": 0.671452,
+                  "rank": 1,
+                  "sonnet": {
+                    "value": 3,
+                    "reason": "Both describe habitually seeking discounts when shopping; 'bargain-hunter' is just a more elaborated, slightly stronger version of 'deal seeker'."
+                  },
+                  "opus": {
+                    "value": 4,
+                    "reason": "Both describe habitually hunting for discounts when shopping; bargain-hunter just adds detail and slightly more intensity."
+                  },
+                  "verdict": "cut"
+                }
+              ]
+            },
+            {
+              "stem": "clear",
+              "region": "communication_style",
+              "kind": "pair",
+              "by": [
+                {
+                  "key": "explicit#1",
+                  "label": "explicit",
+                  "how": "overlap",
+                  "decision": "new",
+                  "covered_by": null,
+                  "cut_off": 3,
+                  "cosine": 0.579101,
+                  "rank": 1,
+                  "sonnet": {
+                    "value": 3,
+                    "reason": "Both describe stating things plainly so the meaning is unmistakable, with only slight differences in emphasis (intent vs. first-reading clarity)."
+                  },
+                  "opus": {
+                    "value": 4,
+                    "reason": "Both describe stating one's meaning outright and plainly, so there is no ambiguity or need to interpret."
+                  },
+                  "verdict": "cut"
+                }
+              ]
+            },
+            {
+              "stem": "competent",
+              "region": "cognitive_epistemic",
+              "kind": "pair",
+              "by": [
+                {
+                  "key": "capable#1",
+                  "label": "capable",
+                  "how": "overlap",
+                  "decision": "new",
+                  "covered_by": null,
+                  "cut_off": 3,
+                  "cosine": 0.399896,
+                  "rank": 1,
+                  "sonnet": {
+                    "value": 3,
+                    "reason": "Both describe being able to do tasks successfully; competent emphasizes job skill and reliable quality, while capable stresses general skill and power to accomplish goals, so they are nearly the same with slight difference in emphasis."
+                  },
+                  "opus": {
+                    "value": 3,
+                    "reason": "Both describe having the skill to accomplish tasks; competent stresses reliable execution of a job, while capable stresses general power to achieve goals."
+                  },
+                  "verdict": "cut"
+                }
+              ]
+            },
+            {
+              "stem": "confrontational",
+              "region": "communication_style",
+              "kind": "pair",
+              "by": [
+                {
+                  "key": "argumentative#1",
+                  "label": "argumentative",
+                  "how": "overlap",
+                  "decision": "new",
+                  "covered_by": null,
+                  "cut_off": 3,
+                  "cosine": 0.287026,
+                  "rank": 4,
+                  "sonnet": {
+                    "value": 2,
+                    "reason": "Both involve readiness to engage in conflict, but confrontational is broader and more aggressive (seeking out and escalating conflict), while argumentative centers on quarreling over disagreements; each can occur without the other."
+                  },
+                  "opus": {
+                    "value": 3,
+                    "reason": "Both describe engaging in disputes with others; confrontational is the more intense form, actively seeking and escalating conflict rather than just arguing over disagreements."
+                  },
+                  "verdict": "review"
+                },
+                {
+                  "key": "combative#1",
+                  "label": "combative",
+                  "how": "overlap",
+                  "decision": "new",
+                  "covered_by": null,
+                  "cut_off": 3,
+                  "cosine": 0.347743,
+                  "rank": 2,
+                  "sonnet": {
+                    "value": 3,
+                    "reason": "Both describe actively seeking and escalating conflict through arguing and challenging others; combative adds harsh speech and readiness for physical blows, confrontational adds head-on challenging and relishing argument, so they are nearly the same with slight differences in emphasis."
+                  },
+                  "opus": {
+                    "value": 3,
+                    "reason": "Both describe actively seeking conflict and argument. Combative adds harsh speech and readiness for physical fighting, while confrontational stresses head-on challenge and relishing escalation; the difference is mainly one of emphasis."
+                  },
+                  "verdict": "cut"
+                }
+              ]
+            },
+            {
+              "stem": "educated",
+              "region": "identity_demographic",
+              "kind": "pair",
+              "by": [
+                {
+                  "key": "highly_educated#1",
+                  "label": "highly educated",
+                  "how": "overlap",
+                  "decision": "new",
+                  "covered_by": null,
+                  "cut_off": 3,
+                  "cosine": 0.636016,
+                  "rank": 1,
+                  "sonnet": {
+                    "value": 3,
+                    "reason": "Both describe formal educational attainment; 'educated' is the broader, milder version covering college and possibly graduate study, while 'highly educated' stresses advanced training, so they differ mainly in degree."
+                  },
+                  "opus": {
+                    "value": 3,
+                    "reason": "Both describe formal educational attainment; highly educated is the same concept carried further, to advanced degrees."
+                  },
+                  "verdict": "cut"
+                }
+              ]
+            },
+            {
+              "stem": "fashionable",
+              "region": "identity_demographic",
+              "kind": "pair",
+              "by": [
+                {
+                  "key": "fashion_conscious#1",
+                  "label": "fashion conscious",
+                  "how": "label",
+                  "decision": "new",
+                  "covered_by": null,
+                  "cut_off": 3,
+                  "cosine": 0.534395,
+                  "rank": 1,
+                  "match": {
+                    "stem": "fashionable",
+                    "match": "renamed_from",
+                    "old_stem": "fashion_conscious"
+                  }
+                },
+                {
+                  "key": "trendy#1",
+                  "label": "trendy",
+                  "how": "overlap",
+                  "decision": "new",
+                  "covered_by": null,
+                  "cut_off": 3,
+                  "cosine": 0.550833,
+                  "rank": 1,
+                  "sonnet": {
+                    "value": 3,
+                    "reason": "Both mean keeping one's look in line with current styles; 'fashionable' adds an eye for what is in season and for what is dated, but it is essentially the same concept."
+                  },
+                  "opus": {
+                    "value": 4,
+                    "reason": "Both describe keeping one's appearance in line with current styles; fashionable adds a slight emphasis on knowing trends and spotting dated looks, but the concept is the same."
+                  },
+                  "verdict": "cut"
+                }
+              ]
+            },
+            {
+              "stem": "full_price_shopper",
+              "region": "moral_stance",
+              "kind": "pair",
+              "by": [
+                {
+                  "key": "price_indifferent#1",
+                  "label": "price indifferent",
+                  "how": "overlap",
+                  "decision": "new",
+                  "covered_by": null,
+                  "cut_off": 3,
+                  "cosine": 0.2197,
+                  "rank": 10,
+                  "sonnet": {
+                    "value": 3,
+                    "reason": "Both describe choosing by want or need rather than price, but the full-price shopper is a more specific, extreme behavior (never comparing or waiting for sales, paying whatever is asked), so they match in core and differ mainly in degree and scope."
+                  },
+                  "opus": {
+                    "value": 3,
+                    "reason": "Full-price shopper is price indifference applied specifically to shopping and stated more absolutely, so it is the same concept with narrower scope."
+                  },
+                  "verdict": "cut"
+                }
+              ]
+            },
+            {
+              "stem": "hostile",
+              "region": "communication_style",
+              "kind": "pair",
+              "by": [
+                {
+                  "key": "combative#1",
+                  "label": "combative",
+                  "how": "overlap",
+                  "decision": "new",
+                  "covered_by": null,
+                  "cut_off": 3,
+                  "cosine": 0.313228,
+                  "rank": 6,
+                  "sonnet": {
+                    "value": 3,
+                    "reason": "Hostile's description explicitly includes combative behavior and confrontational attitudes, so the two share a core of aggressive antagonism, though hostile is broader and covers general antagonism rather than just readiness to fight."
+                  },
+                  "opus": {
+                    "value": 3,
+                    "reason": "Hostile is a broader adversarial antagonism that includes combative behavior, while combative stresses readiness to fight, so they are the same concept differing in scope."
+                  },
+                  "verdict": "cut"
+                },
+                {
+                  "key": "unfriendly#1",
+                  "label": "unfriendly",
+                  "how": "overlap",
+                  "decision": "new",
+                  "covered_by": null,
+                  "cut_off": 3,
+                  "cosine": 0.404586,
+                  "rank": 1,
+                  "sonnet": {
+                    "value": 2,
+                    "reason": "Unfriendly covers coldness or hostility, while hostile is the stronger, more aggressive and combative end of that; they overlap but hostile is narrower and more intense, and unfriendly can be merely cold."
+                  },
+                  "opus": {
+                    "value": 3,
+                    "reason": "Hostile is the more aggressive, active end of unfriendliness, which also covers mere coldness, so it is the same concept carried further."
+                  },
+                  "verdict": "review"
+                }
+              ]
+            },
+            {
+              "stem": "incompetent",
+              "region": "cognitive_epistemic",
+              "kind": "pair",
+              "by": [
+                {
+                  "key": "inept#1",
+                  "label": "inept",
+                  "how": "label",
+                  "decision": "new",
+                  "covered_by": null,
+                  "cut_off": 3,
+                  "cosine": 0.596371,
+                  "rank": 1,
+                  "match": {
+                    "stem": "incompetent",
+                    "match": "renamed_from",
+                    "old_stem": "inept"
+                  }
+                }
+              ]
+            },
+            {
+              "stem": "jaded",
+              "region": "emotional_temperament",
+              "kind": "pair",
+              "by": [
+                {
+                  "key": "blase#1",
+                  "label": "blase",
+                  "how": "overlap",
+                  "decision": "new",
+                  "covered_by": null,
+                  "cut_off": 3,
+                  "cosine": 0.297933,
+                  "rank": 2,
+                  "sonnet": {
+                    "value": 2,
+                    "reason": "Both describe being unexcited by things others find exciting; blase stresses an affected air of indifference, while jaded stresses real weariness from overexposure, so they share a core but each adds something."
+                  },
+                  "opus": {
+                    "value": 3,
+                    "reason": "Both describe an unmoved indifference to things others find exciting; blasé stresses the outward air, jaded stresses that overexposure caused it."
+                  },
+                  "verdict": "review"
+                },
+                {
+                  "key": "world_weary#1",
+                  "label": "world weary",
+                  "how": "overlap",
+                  "decision": "new",
+                  "covered_by": null,
+                  "cut_off": 3,
+                  "cosine": 0.344988,
+                  "rank": 3,
+                  "sonnet": {
+                    "value": 3,
+                    "reason": "Both describe being unimpressed after long experience; world weary adds deep tiredness, cynicism and a flat manner, while jaded centres on lost enthusiasm or wonder, so they share a core with differing emphasis."
+                  },
+                  "opus": {
+                    "value": 3,
+                    "reason": "Both describe a seen-it-all dullness born of long experience; world weary adds a deeper tiredness and cynicism about people, while jaded stresses being left unmoved by spectacle."
+                  },
+                  "verdict": "cut"
+                }
+              ]
+            },
+            {
+              "stem": "oblivious",
+              "region": "social_interpersonal",
+              "kind": "pair",
+              "by": [
+                {
+                  "key": "unobservant#1",
+                  "label": "unobservant",
+                  "how": "overlap",
+                  "decision": "new",
+                  "covered_by": null,
+                  "cut_off": 3,
+                  "cosine": 0.439228,
+                  "rank": 1,
+                  "sonnet": {
+                    "value": 3,
+                    "reason": "Both describe failing to notice details and changes in one's surroundings until pointed out, so they are nearly the same concept, though 'unobservant' also covers missing cues in what others say."
+                  },
+                  "opus": {
+                    "value": 3,
+                    "reason": "Both describe failing to notice things in plain view; oblivious, as described, covers a narrower scope of missed physical changes, while unobservant also includes missed cues in what others say."
+                  },
+                  "verdict": "cut"
+                }
+              ]
+            },
+            {
+              "stem": "observant",
+              "region": "cognitive_epistemic",
+              "kind": "pair",
+              "by": [
+                {
+                  "key": "attentive#1",
+                  "label": "attentive",
+                  "how": "overlap",
+                  "decision": "new",
+                  "covered_by": null,
+                  "cut_off": 3,
+                  "cosine": 0.553264,
+                  "rank": 1,
+                  "sonnet": {
+                    "value": 2,
+                    "reason": "Both involve noticing details and changes in one's surroundings, but attentive adds responding with care while observant is only about the noticing, so each has something the other lacks."
+                  },
+                  "opus": {
+                    "value": 3,
+                    "reason": "Both centre on noticing details and changes in one's surroundings; attentive adds responding with care, while observant stresses the noticing alone, so they differ only in emphasis."
+                  },
+                  "verdict": "review"
+                }
+              ]
+            },
+            {
+              "stem": "uneducated",
+              "region": "identity_demographic",
+              "kind": "pair",
+              "by": [
+                {
+                  "key": "unlearned#1",
+                  "label": "unlearned",
+                  "how": "overlap",
+                  "decision": "new",
+                  "covered_by": null,
+                  "cut_off": 3,
+                  "cosine": 0.662492,
+                  "rank": 1,
+                  "sonnet": {
+                    "value": 3,
+                    "reason": "Both mean lacking formal education; the other's description adds specifics (left school at sixteen, working since) but the core concept is the same, with 'uneducated' being slightly more specific/partial in scope."
+                  },
+                  "opus": {
+                    "value": 3,
+                    "reason": "Both describe a lack of formal education. The target means no schooling at all, while the other means limited schooling ending at sixteen without qualifications, so they differ mainly in degree."
+                  },
+                  "verdict": "cut"
+                }
+              ]
+            }
+          ]
+        },
+        "covered": {
+          "n_hidden": 83,
+          "n_recovered": 17,
+          "recall": 0.2048,
+          "by_label": 1,
+          "by_overlap_only": 16,
+          "by_region": {
+            "cognitive_epistemic": {
+              "n_hidden": 17,
+              "n_recovered": 4,
+              "recall": 0.2353
+            },
+            "communication_style": {
+              "n_hidden": 16,
+              "n_recovered": 3,
+              "recall": 0.1875
+            },
+            "emotional_temperament": {
+              "n_hidden": 8,
+              "n_recovered": 3,
+              "recall": 0.375
+            },
+            "identity_demographic": {
+              "n_hidden": 6,
+              "n_recovered": 2,
+              "recall": 0.3333
+            },
+            "moral_stance": {
+              "n_hidden": 14,
+              "n_recovered": 3,
+              "recall": 0.2143
+            },
+            "none": {
+              "n_hidden": 17,
+              "n_recovered": 1,
+              "recall": 0.0588
+            },
+            "social_interpersonal": {
+              "n_hidden": 5,
+              "n_recovered": 1,
+              "recall": 0.2
+            }
+          },
+          "by_kind": {
+            "4-cube": {
+              "n_hidden": 2,
+              "n_recovered": 0,
+              "recall": 0.0
+            },
+            "pair": {
+              "n_hidden": 56,
+              "n_recovered": 10,
+              "recall": 0.1786
+            },
+            "ring": {
+              "n_hidden": 3,
+              "n_recovered": 0,
+              "recall": 0.0
+            },
+            "sequence": {
+              "n_hidden": 1,
+              "n_recovered": 0,
+              "recall": 0.0
+            },
+            "set": {
+              "n_hidden": 3,
+              "n_recovered": 1,
+              "recall": 0.3333
+            },
+            "singleton": {
+              "n_hidden": 10,
+              "n_recovered": 2,
+              "recall": 0.2
+            },
+            "square": {
+              "n_hidden": 1,
+              "n_recovered": 0,
+              "recall": 0.0
+            },
+            "triangle": {
+              "n_hidden": 3,
+              "n_recovered": 2,
+              "recall": 0.6667
+            },
+            "unclassified": {
+              "n_hidden": 4,
+              "n_recovered": 2,
+              "recall": 0.5
+            }
+          },
+          "candidates": {
+            "n": 205,
+            "n_recovering": 16,
+            "precision": 0.078
+          },
+          "groups": {
+            "n": 29,
+            "whole": 3,
+            "partial": 5,
+            "none": 21
+          },
+          "recovered": [
+            {
+              "stem": "bargain_hunter",
+              "region": "cognitive_epistemic",
+              "kind": "pair",
+              "by": [
+                {
+                  "key": "price_conscious#1",
+                  "label": "price conscious",
+                  "how": "overlap",
+                  "decision": "covered",
+                  "covered_by": "frugal",
+                  "cut_off": 3,
+                  "cosine": 0.327448,
+                  "rank": 3,
+                  "sonnet": {
+                    "value": 3,
+                    "reason": "Both involve attention to cost in purchasing, but bargain-hunting is a more intense, specific behavior (never paying full price, coupons, savoring savings), a stronger and narrower form of price consciousness."
+                  },
+                  "opus": {
+                    "value": 3,
+                    "reason": "Bargain-hunting is price consciousness taken further, into actively seeking deals and enjoying the savings."
+                  },
+                  "verdict": "cut"
+                }
+              ]
+            },
+            {
+              "stem": "benevolent",
+              "region": "moral_stance",
+              "kind": "pair",
+              "by": [
+                {
+                  "key": "beneficent#1",
+                  "label": "beneficent",
+                  "how": "overlap",
+                  "decision": "covered",
+                  "covered_by": "helpful",
+                  "cut_off": 3,
+                  "cosine": 0.413131,
+                  "rank": 2,
+                  "sonnet": {
+                    "value": 3,
+                    "reason": "Both describe a standing disposition of kindness toward others aimed at their good; benevolent adds compassion and ethical emphasis, and beneficent stresses action, so they are nearly identical with a slight difference in emphasis."
+                  },
+                  "opus": {
+                    "value": 3,
+                    "reason": "Both describe a consistent practice of kindness toward others; benevolent stresses well-wishing and broad ethical concern where beneficent stresses helpful action, so they differ only in emphasis."
+                  },
+                  "verdict": "cut"
+                }
+              ]
+            },
+            {
+              "stem": "callous",
+              "region": "emotional_temperament",
+              "kind": "triangle",
+              "by": [
+                {
+                  "key": "cold_hearted#1",
+                  "label": "cold hearted",
+                  "how": "overlap",
+                  "decision": "covered",
+                  "covered_by": "cruel",
+                  "cut_off": 3,
+                  "cosine": 0.549632,
+                  "rank": 1,
+                  "sonnet": {
+                    "value": 3,
+                    "reason": "Both describe lacking sympathy and being indifferent to others' suffering; cold hearted adds absence of warmth, callous adds insensitivity, but they are nearly interchangeable."
+                  },
+                  "opus": {
+                    "value": 3,
+                    "reason": "Both describe indifference to others' suffering. Cold-hearted also stresses a general lack of warmth, while callous stresses hardness and insensitivity."
+                  },
+                  "verdict": "cut"
+                }
+              ]
+            },
+            {
+              "stem": "compassionate",
+              "region": "emotional_temperament",
+              "kind": "triangle",
+              "by": [
+                {
+                  "key": "compassionate_toward_animals#1",
+                  "label": "compassionate toward animals",
+                  "how": "overlap",
+                  "decision": "covered",
+                  "covered_by": "kind_to_animals",
+                  "cut_off": 3,
+                  "cosine": 0.436954,
+                  "rank": 2,
+                  "sonnet": {
+                    "value": 3,
+                    "reason": "Both are sympathy for suffering, but 'compassionate' is general (mainly toward people/others) while the target is specifically directed at animals, so it differs mainly in scope."
+                  },
+                  "opus": {
+                    "value": 3,
+                    "reason": "Both describe genuine sympathy and care in response to suffering; the target simply narrows that same quality to animals."
+                  },
+                  "verdict": "cut"
+                }
+              ]
+            },
+            {
+              "stem": "controlling",
+              "region": "social_interpersonal",
+              "kind": "singleton",
+              "by": [
+                {
+                  "key": "restrictive#1",
+                  "label": "restrictive",
+                  "how": "overlap",
+                  "decision": "covered",
+                  "covered_by": "authoritarian_baumrind",
+                  "cut_off": 3,
+                  "cosine": 0.368493,
+                  "rank": 2,
+                  "sonnet": {
+                    "value": 2,
+                    "reason": "Both involve limiting others' freedom, but controlling adds a need for final say, monitoring, and requiring permission, while restrictive centers on imposing tight limits on actions and speech; they overlap strongly without either implying the other."
+                  },
+                  "opus": {
+                    "value": 3,
+                    "reason": "Both describe imposing limits on others' freedom; controlling is the same thing carried further, adding surveillance and a demand for permission and the final say."
+                  },
+                  "verdict": "review"
+                }
+              ]
+            },
+            {
+              "stem": "financially_precarious",
+              "region": "identity_demographic",
+              "kind": "pair",
+              "by": [
+                {
+                  "key": "financially_vulnerable#1",
+                  "label": "financially vulnerable",
+                  "how": "overlap",
+                  "decision": "covered",
+                  "covered_by": "poor",
+                  "cut_off": 3,
+                  "cosine": 0.54973,
+                  "rank": 1,
+                  "sonnet": {
+                    "value": 3,
+                    "reason": "Both describe having no financial cushion against shocks; precarious is a more acute, severe version of vulnerable, with the added detail of living paycheck to paycheck and risking the home."
+                  },
+                  "opus": {
+                    "value": 3,
+                    "reason": "Both describe lacking savings so that a shock would cause hardship; precarious is a more specific, severe version (paycheck to paycheck, risk of losing home)."
+                  },
+                  "verdict": "cut"
+                }
+              ]
+            },
+            {
+              "stem": "financially_secure",
+              "region": "identity_demographic",
+              "kind": "pair",
+              "by": [
+                {
+                  "key": "financially_stable#1",
+                  "label": "financially stable",
+                  "how": "overlap",
+                  "decision": "covered",
+                  "covered_by": "wealthy",
+                  "cut_off": 3,
+                  "cosine": 0.61653,
+                  "rank": 1,
+                  "sonnet": {
+                    "value": 3,
+                    "reason": "Both describe having enough money and resilience against shocks; stable emphasizes steady income meeting needs, while secure emphasizes savings buffer, so they are very close but with slightly different emphasis."
+                  },
+                  "opus": {
+                    "value": 3,
+                    "reason": "Both describe having enough money and resilience. Stable stresses a reliable ongoing income, while secure stresses a savings buffer against shocks, so they differ only in emphasis."
+                  },
+                  "verdict": "cut"
+                }
+              ]
+            },
+            {
+              "stem": "friendly",
+              "region": "communication_style",
+              "kind": "pair",
+              "by": [
+                {
+                  "key": "amicable#1",
+                  "label": "amicable",
+                  "how": "overlap",
+                  "decision": "covered",
+                  "covered_by": "agreeable",
+                  "cut_off": 3,
+                  "cosine": 0.513203,
+                  "rank": 1,
+                  "sonnet": {
+                    "value": 3,
+                    "reason": "Both describe a friendly, goodwill-based manner toward others; amicable stresses peaceable, harmonious interaction, while friendly adds warmth and eagerness to engage, so they differ slightly in emphasis."
+                  },
+                  "opus": {
+                    "value": 3,
+                    "reason": "Both describe goodwill toward others. Amicable stresses peaceable, conflict-free dealings, while friendly stresses outgoing warmth from the first meeting, so they differ only in emphasis."
+                  },
+                  "verdict": "cut"
+                }
+              ]
+            },
+            {
+              "stem": "full_price_shopper",
+              "region": "moral_stance",
+              "kind": "pair",
+              "by": [
+                {
+                  "key": "spendthrift#1",
+                  "label": "spendthrift",
+                  "how": "overlap",
+                  "decision": "covered",
+                  "covered_by": "extravagant",
+                  "cut_off": 3,
+                  "cosine": 0.483016,
+                  "rank": 2,
+                  "sonnet": {
+                    "value": 2,
+                    "reason": "Both involve not worrying about cost when buying, but spendthrift is general free spending and waste, while full-price shopper is specifically not seeking deals or comparing prices; one could be a full-price shopper without spending lavishly overall."
+                  },
+                  "opus": {
+                    "value": 3,
+                    "reason": "Both describe spending without regard to cost. Full-price shopper is a narrower version focused on ignoring price comparisons, while spendthrift also covers spending lavishly and wastefully."
+                  },
+                  "verdict": "review"
+                }
+              ]
+            },
+            {
+              "stem": "gryffindor",
+              "region": null,
+              "kind": "set",
+              "by": [
+                {
+                  "key": "courageous#1",
+                  "label": "courageous",
+                  "how": "overlap",
+                  "decision": "covered",
+                  "covered_by": "brave",
+                  "cut_off": 3,
+                  "cosine": 0.319246,
+                  "rank": 5,
+                  "sonnet": {
+                    "value": 2,
+                    "reason": "Gryffindor includes bravery at its core, but adds chivalry, defiance of authority and rashness, so it overlaps with courageous without being the same concept."
+                  },
+                  "opus": {
+                    "value": 3,
+                    "reason": "Gryffindor is centred on bravery like courageous, but widens it into a bundle that adds chivalry, defiance of authority and impulsiveness, so it is the same core concept with a broader scope."
+                  },
+                  "verdict": "review"
+                }
+              ]
+            },
+            {
+              "stem": "iconoclastic",
+              "region": "cognitive_epistemic",
+              "kind": "unclassified",
+              "by": [
+                {
+                  "key": "unorthodox#1",
+                  "label": "unorthodox",
+                  "how": "overlap",
+                  "decision": "covered",
+                  "covered_by": "heterodox",
+                  "cut_off": 3,
+                  "cosine": 0.363076,
+                  "rank": 4,
+                  "sonnet": {
+                    "value": 2,
+                    "reason": "Both involve breaking from convention, but unorthodox is simply being non-traditional in beliefs or methods, while iconoclastic adds actively attacking or seeking to destroy revered institutions; neither implies the other."
+                  },
+                  "opus": {
+                    "value": 3,
+                    "reason": "Iconoclastic is unorthodoxy taken further, from departing from convention to actively attacking it, so it is the same core concept at a stronger degree."
+                  },
+                  "verdict": "review"
+                }
+              ]
+            },
+            {
+              "stem": "observant",
+              "region": "cognitive_epistemic",
+              "kind": "pair",
+              "by": [
+                {
+                  "key": "perceptive#1",
+                  "label": "perceptive",
+                  "how": "overlap",
+                  "decision": "covered",
+                  "covered_by": "socially_perceptive",
+                  "cut_off": 3,
+                  "cosine": 0.482049,
+                  "rank": 1,
+                  "sonnet": {
+                    "value": 2,
+                    "reason": "Both involve noticing things keenly, but observant is about spotting details in surroundings while perceptive adds understanding or insight; each has something the other lacks."
+                  },
+                  "opus": {
+                    "value": 3,
+                    "reason": "Observant is a narrower form of perceptive: it covers the keen noticing of surroundings but not the understanding that perceptive also implies."
+                  },
+                  "verdict": "review"
+                }
+              ]
+            },
+            {
+              "stem": "pragmatic",
+              "region": "cognitive_epistemic",
+              "kind": "pair",
+              "by": [
+                {
+                  "key": "down_to_earth#1",
+                  "label": "down to earth",
+                  "how": "overlap",
+                  "decision": "covered",
+                  "covered_by": "practical",
+                  "cut_off": 3,
+                  "cosine": 0.272723,
+                  "rank": 4,
+                  "sonnet": {
+                    "value": 2,
+                    "reason": "Both stress valuing what works and being realistic, but down to earth adds unpretentiousness and seeing things as they are, while pragmatic centers on practical, achievable solutions under constraints."
+                  },
+                  "opus": {
+                    "value": 3,
+                    "reason": "Both describe valuing what works and staying realistic; down to earth adds a general groundedness in seeing things as they are, while pragmatic stresses practical problem-solving."
+                  },
+                  "verdict": "review"
+                }
+              ]
+            },
+            {
+              "stem": "uncaring",
+              "region": "moral_stance",
+              "kind": "pair",
+              "by": [
+                {
+                  "key": "cold_hearted#1",
+                  "label": "cold hearted",
+                  "how": "overlap",
+                  "decision": "covered",
+                  "covered_by": "cruel",
+                  "cut_off": 3,
+                  "cosine": 0.407633,
+                  "rank": 4,
+                  "sonnet": {
+                    "value": 2,
+                    "reason": "Both involve lacking concern for others' wellbeing, but cold hearted stresses absent sympathy and warmth toward suffering, while uncaring stresses indifference to outcomes and disclaiming responsibility; each adds something the other lacks."
+                  },
+                  "opus": {
+                    "value": 3,
+                    "reason": "Both describe an absence of concern for how others fare. Cold-hearted is a stronger, more emotional version that adds a lack of warmth in manner."
+                  },
+                  "verdict": "review"
+                }
+              ]
+            },
+            {
+              "stem": "unflinching",
+              "region": "emotional_temperament",
+              "kind": "singleton",
+              "by": [
+                {
+                  "key": "engaging#1",
+                  "label": "engaging",
+                  "how": "label",
+                  "decision": "covered",
+                  "covered_by": "charismatic",
+                  "cut_off": 3,
+                  "cosine": 0.025838,
+                  "rank": null,
+                  "match": {
+                    "stem": "unflinching",
+                    "match": "renamed_from",
+                    "old_stem": "engaging"
+                  }
+                }
+              ]
+            },
+            {
+              "stem": "wry",
+              "region": "communication_style",
+              "kind": "unclassified",
+              "by": [
+                {
+                  "key": "humorous#1",
+                  "label": "humorous",
+                  "how": "overlap",
+                  "decision": "covered",
+                  "covered_by": "witty",
+                  "cut_off": 3,
+                  "cosine": 0.340252,
+                  "rank": 3,
+                  "sonnet": {
+                    "value": 2,
+                    "reason": "Wry is a specific, dry, ironic kind of humor, so it overlaps with general humorousness, but a humorous person need not be sardonic and a wry person may not aim to make others laugh."
+                  },
+                  "opus": {
+                    "value": 3,
+                    "reason": "Wry is a narrower, sardonic and ironic style of the same witty humor that humorous describes broadly."
+                  },
+                  "verdict": "review"
+                }
+              ]
+            },
+            {
+              "stem": "zealous",
+              "region": "communication_style",
+              "kind": "pair",
+              "by": [
+                {
+                  "key": "fervent#1",
+                  "label": "fervent",
+                  "how": "overlap",
+                  "decision": "covered",
+                  "covered_by": "passionate",
+                  "cut_off": 3,
+                  "cosine": 0.466235,
+                  "rank": 2,
+                  "sonnet": {
+                    "value": 3,
+                    "reason": "Both involve intense passion for beliefs and causes, but zealous adds crusading, loudness and distrust of coolness, so it is a more extreme and specific form of fervent."
+                  },
+                  "opus": {
+                    "value": 3,
+                    "reason": "Zealous is fervent passion for one's beliefs carried further, into crusading and hostility to coolness."
+                  },
+                  "verdict": "cut"
+                }
+              ]
+            }
+          ],
+          "false_covers": [
+            {
+              "key": "amicable#1",
+              "label": "amicable",
+              "how": "overlap",
+              "decision": "covered",
+              "covered_by": "agreeable",
+              "cut_off": 3,
+              "cosine": 0.513203,
+              "rank": 1,
+              "sonnet": {
+                "value": 3,
+                "reason": "Both describe a friendly, goodwill-based manner toward others; amicable stresses peaceable, harmonious interaction, while friendly adds warmth and eagerness to engage, so they differ slightly in emphasis."
+              },
+              "opus": {
+                "value": 3,
+                "reason": "Both describe goodwill toward others. Amicable stresses peaceable, conflict-free dealings, while friendly stresses outgoing warmth from the first meeting, so they differ only in emphasis."
+              },
+              "verdict": "cut",
+              "stem": "friendly",
+              "recovered_by_a_kept_candidate": false
+            },
+            {
+              "key": "beneficent#1",
+              "label": "beneficent",
+              "how": "overlap",
+              "decision": "covered",
+              "covered_by": "helpful",
+              "cut_off": 3,
+              "cosine": 0.413131,
+              "rank": 2,
+              "sonnet": {
+                "value": 3,
+                "reason": "Both describe a standing disposition of kindness toward others aimed at their good; benevolent adds compassion and ethical emphasis, and beneficent stresses action, so they are nearly identical with a slight difference in emphasis."
+              },
+              "opus": {
+                "value": 3,
+                "reason": "Both describe a consistent practice of kindness toward others; benevolent stresses well-wishing and broad ethical concern where beneficent stresses helpful action, so they differ only in emphasis."
+              },
+              "verdict": "cut",
+              "stem": "benevolent",
+              "recovered_by_a_kept_candidate": false
+            },
+            {
+              "key": "cold_hearted#1",
+              "label": "cold hearted",
+              "how": "overlap",
+              "decision": "covered",
+              "covered_by": "cruel",
+              "cut_off": 3,
+              "cosine": 0.549632,
+              "rank": 1,
+              "sonnet": {
+                "value": 3,
+                "reason": "Both describe lacking sympathy and being indifferent to others' suffering; cold hearted adds absence of warmth, callous adds insensitivity, but they are nearly interchangeable."
+              },
+              "opus": {
+                "value": 3,
+                "reason": "Both describe indifference to others' suffering. Cold-hearted also stresses a general lack of warmth, while callous stresses hardness and insensitivity."
+              },
+              "verdict": "cut",
+              "stem": "callous",
+              "recovered_by_a_kept_candidate": false
+            },
+            {
+              "key": "cold_hearted#1",
+              "label": "cold hearted",
+              "how": "overlap",
+              "decision": "covered",
+              "covered_by": "cruel",
+              "cut_off": 3,
+              "cosine": 0.407633,
+              "rank": 4,
+              "sonnet": {
+                "value": 2,
+                "reason": "Both involve lacking concern for others' wellbeing, but cold hearted stresses absent sympathy and warmth toward suffering, while uncaring stresses indifference to outcomes and disclaiming responsibility; each adds something the other lacks."
+              },
+              "opus": {
+                "value": 3,
+                "reason": "Both describe an absence of concern for how others fare. Cold-hearted is a stronger, more emotional version that adds a lack of warmth in manner."
+              },
+              "verdict": "review",
+              "stem": "uncaring",
+              "recovered_by_a_kept_candidate": false
+            },
+            {
+              "key": "compassionate_toward_animals#1",
+              "label": "compassionate toward animals",
+              "how": "overlap",
+              "decision": "covered",
+              "covered_by": "kind_to_animals",
+              "cut_off": 3,
+              "cosine": 0.436954,
+              "rank": 2,
+              "sonnet": {
+                "value": 3,
+                "reason": "Both are sympathy for suffering, but 'compassionate' is general (mainly toward people/others) while the target is specifically directed at animals, so it differs mainly in scope."
+              },
+              "opus": {
+                "value": 3,
+                "reason": "Both describe genuine sympathy and care in response to suffering; the target simply narrows that same quality to animals."
+              },
+              "verdict": "cut",
+              "stem": "compassionate",
+              "recovered_by_a_kept_candidate": false
+            },
+            {
+              "key": "courageous#1",
+              "label": "courageous",
+              "how": "overlap",
+              "decision": "covered",
+              "covered_by": "brave",
+              "cut_off": 3,
+              "cosine": 0.319246,
+              "rank": 5,
+              "sonnet": {
+                "value": 2,
+                "reason": "Gryffindor includes bravery at its core, but adds chivalry, defiance of authority and rashness, so it overlaps with courageous without being the same concept."
+              },
+              "opus": {
+                "value": 3,
+                "reason": "Gryffindor is centred on bravery like courageous, but widens it into a bundle that adds chivalry, defiance of authority and impulsiveness, so it is the same core concept with a broader scope."
+              },
+              "verdict": "review",
+              "stem": "gryffindor",
+              "recovered_by_a_kept_candidate": false
+            },
+            {
+              "key": "down_to_earth#1",
+              "label": "down to earth",
+              "how": "overlap",
+              "decision": "covered",
+              "covered_by": "practical",
+              "cut_off": 3,
+              "cosine": 0.272723,
+              "rank": 4,
+              "sonnet": {
+                "value": 2,
+                "reason": "Both stress valuing what works and being realistic, but down to earth adds unpretentiousness and seeing things as they are, while pragmatic centers on practical, achievable solutions under constraints."
+              },
+              "opus": {
+                "value": 3,
+                "reason": "Both describe valuing what works and staying realistic; down to earth adds a general groundedness in seeing things as they are, while pragmatic stresses practical problem-solving."
+              },
+              "verdict": "review",
+              "stem": "pragmatic",
+              "recovered_by_a_kept_candidate": false
+            },
+            {
+              "key": "engaging#1",
+              "label": "engaging",
+              "how": "label",
+              "decision": "covered",
+              "covered_by": "charismatic",
+              "cut_off": 3,
+              "cosine": 0.025838,
+              "rank": null,
+              "match": {
+                "stem": "unflinching",
+                "match": "renamed_from",
+                "old_stem": "engaging"
+              },
+              "stem": "unflinching",
+              "recovered_by_a_kept_candidate": false
+            },
+            {
+              "key": "fervent#1",
+              "label": "fervent",
+              "how": "overlap",
+              "decision": "covered",
+              "covered_by": "passionate",
+              "cut_off": 3,
+              "cosine": 0.466235,
+              "rank": 2,
+              "sonnet": {
+                "value": 3,
+                "reason": "Both involve intense passion for beliefs and causes, but zealous adds crusading, loudness and distrust of coolness, so it is a more extreme and specific form of fervent."
+              },
+              "opus": {
+                "value": 3,
+                "reason": "Zealous is fervent passion for one's beliefs carried further, into crusading and hostility to coolness."
+              },
+              "verdict": "cut",
+              "stem": "zealous",
+              "recovered_by_a_kept_candidate": false
+            },
+            {
+              "key": "financially_stable#1",
+              "label": "financially stable",
+              "how": "overlap",
+              "decision": "covered",
+              "covered_by": "wealthy",
+              "cut_off": 3,
+              "cosine": 0.61653,
+              "rank": 1,
+              "sonnet": {
+                "value": 3,
+                "reason": "Both describe having enough money and resilience against shocks; stable emphasizes steady income meeting needs, while secure emphasizes savings buffer, so they are very close but with slightly different emphasis."
+              },
+              "opus": {
+                "value": 3,
+                "reason": "Both describe having enough money and resilience. Stable stresses a reliable ongoing income, while secure stresses a savings buffer against shocks, so they differ only in emphasis."
+              },
+              "verdict": "cut",
+              "stem": "financially_secure",
+              "recovered_by_a_kept_candidate": false
+            },
+            {
+              "key": "financially_vulnerable#1",
+              "label": "financially vulnerable",
+              "how": "overlap",
+              "decision": "covered",
+              "covered_by": "poor",
+              "cut_off": 3,
+              "cosine": 0.54973,
+              "rank": 1,
+              "sonnet": {
+                "value": 3,
+                "reason": "Both describe having no financial cushion against shocks; precarious is a more acute, severe version of vulnerable, with the added detail of living paycheck to paycheck and risking the home."
+              },
+              "opus": {
+                "value": 3,
+                "reason": "Both describe lacking savings so that a shock would cause hardship; precarious is a more specific, severe version (paycheck to paycheck, risk of losing home)."
+              },
+              "verdict": "cut",
+              "stem": "financially_precarious",
+              "recovered_by_a_kept_candidate": false
+            },
+            {
+              "key": "humorous#1",
+              "label": "humorous",
+              "how": "overlap",
+              "decision": "covered",
+              "covered_by": "witty",
+              "cut_off": 3,
+              "cosine": 0.340252,
+              "rank": 3,
+              "sonnet": {
+                "value": 2,
+                "reason": "Wry is a specific, dry, ironic kind of humor, so it overlaps with general humorousness, but a humorous person need not be sardonic and a wry person may not aim to make others laugh."
+              },
+              "opus": {
+                "value": 3,
+                "reason": "Wry is a narrower, sardonic and ironic style of the same witty humor that humorous describes broadly."
+              },
+              "verdict": "review",
+              "stem": "wry",
+              "recovered_by_a_kept_candidate": false
+            },
+            {
+              "key": "perceptive#1",
+              "label": "perceptive",
+              "how": "overlap",
+              "decision": "covered",
+              "covered_by": "socially_perceptive",
+              "cut_off": 3,
+              "cosine": 0.482049,
+              "rank": 1,
+              "sonnet": {
+                "value": 2,
+                "reason": "Both involve noticing things keenly, but observant is about spotting details in surroundings while perceptive adds understanding or insight; each has something the other lacks."
+              },
+              "opus": {
+                "value": 3,
+                "reason": "Observant is a narrower form of perceptive: it covers the keen noticing of surroundings but not the understanding that perceptive also implies."
+              },
+              "verdict": "review",
+              "stem": "observant",
+              "recovered_by_a_kept_candidate": true
+            },
+            {
+              "key": "price_conscious#1",
+              "label": "price conscious",
+              "how": "overlap",
+              "decision": "covered",
+              "covered_by": "frugal",
+              "cut_off": 3,
+              "cosine": 0.327448,
+              "rank": 3,
+              "sonnet": {
+                "value": 3,
+                "reason": "Both involve attention to cost in purchasing, but bargain-hunting is a more intense, specific behavior (never paying full price, coupons, savoring savings), a stronger and narrower form of price consciousness."
+              },
+              "opus": {
+                "value": 3,
+                "reason": "Bargain-hunting is price consciousness taken further, into actively seeking deals and enjoying the savings."
+              },
+              "verdict": "cut",
+              "stem": "bargain_hunter",
+              "recovered_by_a_kept_candidate": true
+            },
+            {
+              "key": "restrictive#1",
+              "label": "restrictive",
+              "how": "overlap",
+              "decision": "covered",
+              "covered_by": "authoritarian_baumrind",
+              "cut_off": 3,
+              "cosine": 0.368493,
+              "rank": 2,
+              "sonnet": {
+                "value": 2,
+                "reason": "Both involve limiting others' freedom, but controlling adds a need for final say, monitoring, and requiring permission, while restrictive centers on imposing tight limits on actions and speech; they overlap strongly without either implying the other."
+              },
+              "opus": {
+                "value": 3,
+                "reason": "Both describe imposing limits on others' freedom; controlling is the same thing carried further, adding surveillance and a demand for permission and the final say."
+              },
+              "verdict": "review",
+              "stem": "controlling",
+              "recovered_by_a_kept_candidate": false
+            },
+            {
+              "key": "spendthrift#1",
+              "label": "spendthrift",
+              "how": "overlap",
+              "decision": "covered",
+              "covered_by": "extravagant",
+              "cut_off": 3,
+              "cosine": 0.483016,
+              "rank": 2,
+              "sonnet": {
+                "value": 2,
+                "reason": "Both involve not worrying about cost when buying, but spendthrift is general free spending and waste, while full-price shopper is specifically not seeking deals or comparing prices; one could be a full-price shopper without spending lavishly overall."
+              },
+              "opus": {
+                "value": 3,
+                "reason": "Both describe spending without regard to cost. Full-price shopper is a narrower version focused on ignoring price comparisons, while spendthrift also covers spending lavishly and wastefully."
+              },
+              "verdict": "review",
+              "stem": "full_price_shopper",
+              "recovered_by_a_kept_candidate": true
+            },
+            {
+              "key": "unorthodox#1",
+              "label": "unorthodox",
+              "how": "overlap",
+              "decision": "covered",
+              "covered_by": "heterodox",
+              "cut_off": 3,
+              "cosine": 0.363076,
+              "rank": 4,
+              "sonnet": {
+                "value": 2,
+                "reason": "Both involve breaking from convention, but unorthodox is simply being non-traditional in beliefs or methods, while iconoclastic adds actively attacking or seeking to destroy revered institutions; neither implies the other."
+              },
+              "opus": {
+                "value": 3,
+                "reason": "Iconoclastic is unorthodoxy taken further, from departing from convention to actively attacking it, so it is the same core concept at a stronger degree."
+              },
+              "verdict": "review",
+              "stem": "iconoclastic",
+              "recovered_by_a_kept_candidate": false
+            }
+          ],
+          "n_false_cover_candidates": 16,
+          "hidden_missed_only_through_covers": [
+            "benevolent",
+            "callous",
+            "compassionate",
+            "controlling",
+            "financially_precarious",
+            "financially_secure",
+            "friendly",
+            "gryffindor",
+            "iconoclastic",
+            "pragmatic",
+            "uncaring",
+            "unflinching",
+            "wry",
+            "zealous"
+          ]
+        },
+        "either": {
+          "n_hidden": 83,
+          "n_recovered": 27,
+          "recall": 0.3253,
+          "by_label": 3,
+          "by_overlap_only": 24,
+          "by_region": {
+            "cognitive_epistemic": {
+              "n_hidden": 17,
+              "n_recovered": 6,
+              "recall": 0.3529
+            },
+            "communication_style": {
+              "n_hidden": 16,
+              "n_recovered": 6,
+              "recall": 0.375
+            },
+            "emotional_temperament": {
+              "n_hidden": 8,
+              "n_recovered": 4,
+              "recall": 0.5
+            },
+            "identity_demographic": {
+              "n_hidden": 6,
+              "n_recovered": 5,
+              "recall": 0.8333
+            },
+            "moral_stance": {
+              "n_hidden": 14,
+              "n_recovered": 3,
+              "recall": 0.2143
+            },
+            "none": {
+              "n_hidden": 17,
+              "n_recovered": 1,
+              "recall": 0.0588
+            },
+            "social_interpersonal": {
+              "n_hidden": 5,
+              "n_recovered": 2,
+              "recall": 0.4
+            }
+          },
+          "by_kind": {
+            "4-cube": {
+              "n_hidden": 2,
+              "n_recovered": 0,
+              "recall": 0.0
+            },
+            "pair": {
+              "n_hidden": 56,
+              "n_recovered": 20,
+              "recall": 0.3571
+            },
+            "ring": {
+              "n_hidden": 3,
+              "n_recovered": 0,
+              "recall": 0.0
+            },
+            "sequence": {
+              "n_hidden": 1,
+              "n_recovered": 0,
+              "recall": 0.0
+            },
+            "set": {
+              "n_hidden": 3,
+              "n_recovered": 1,
+              "recall": 0.3333
+            },
+            "singleton": {
+              "n_hidden": 10,
+              "n_recovered": 2,
+              "recall": 0.2
+            },
+            "square": {
+              "n_hidden": 1,
+              "n_recovered": 0,
+              "recall": 0.0
+            },
+            "triangle": {
+              "n_hidden": 3,
+              "n_recovered": 2,
+              "recall": 0.6667
+            },
+            "unclassified": {
+              "n_hidden": 4,
+              "n_recovered": 2,
+              "recall": 0.5
+            }
+          },
+          "candidates": {
+            "n": 367,
+            "n_recovering": 33,
+            "precision": 0.0899
+          },
+          "groups": {
+            "n": 29,
+            "whole": 7,
+            "partial": 7,
+            "none": 15
+          },
+          "recovered": [
+            {
+              "stem": "bargain_hunter",
+              "region": "cognitive_epistemic",
+              "kind": "pair",
+              "by": [
+                {
+                  "key": "bargain_hunting#1",
+                  "label": "bargain hunting",
+                  "how": "overlap",
+                  "decision": "new",
+                  "covered_by": null,
+                  "cut_off": 3,
+                  "cosine": 0.514144,
+                  "rank": 1,
+                  "sonnet": {
+                    "value": 3,
+                    "reason": "Both describe actively seeking the lowest prices; the other is the person-label form with added specifics (coupons, waiting for sales, enjoying savings), but the core concept is the same."
+                  },
+                  "opus": {
+                    "value": 4,
+                    "reason": "Both describe persistently seeking the lowest prices on goods; the second only adds concrete behaviours and an emphasis on enjoying the savings."
+                  },
+                  "verdict": "cut"
+                },
+                {
+                  "key": "deal_seeker#1",
+                  "label": "deal seeker",
+                  "how": "overlap",
+                  "decision": "new",
+                  "covered_by": null,
+                  "cut_off": 3,
+                  "cosine": 0.671452,
+                  "rank": 1,
+                  "sonnet": {
+                    "value": 3,
+                    "reason": "Both describe habitually seeking discounts when shopping; 'bargain-hunter' is just a more elaborated, slightly stronger version of 'deal seeker'."
+                  },
+                  "opus": {
+                    "value": 4,
+                    "reason": "Both describe habitually hunting for discounts when shopping; bargain-hunter just adds detail and slightly more intensity."
+                  },
+                  "verdict": "cut"
+                },
+                {
+                  "key": "price_conscious#1",
+                  "label": "price conscious",
+                  "how": "overlap",
+                  "decision": "covered",
+                  "covered_by": "frugal",
+                  "cut_off": 3,
+                  "cosine": 0.327448,
+                  "rank": 3,
+                  "sonnet": {
+                    "value": 3,
+                    "reason": "Both involve attention to cost in purchasing, but bargain-hunting is a more intense, specific behavior (never paying full price, coupons, savoring savings), a stronger and narrower form of price consciousness."
+                  },
+                  "opus": {
+                    "value": 3,
+                    "reason": "Bargain-hunting is price consciousness taken further, into actively seeking deals and enjoying the savings."
+                  },
+                  "verdict": "cut"
+                }
+              ]
+            },
+            {
+              "stem": "benevolent",
+              "region": "moral_stance",
+              "kind": "pair",
+              "by": [
+                {
+                  "key": "beneficent#1",
+                  "label": "beneficent",
+                  "how": "overlap",
+                  "decision": "covered",
+                  "covered_by": "helpful",
+                  "cut_off": 3,
+                  "cosine": 0.413131,
+                  "rank": 2,
+                  "sonnet": {
+                    "value": 3,
+                    "reason": "Both describe a standing disposition of kindness toward others aimed at their good; benevolent adds compassion and ethical emphasis, and beneficent stresses action, so they are nearly identical with a slight difference in emphasis."
+                  },
+                  "opus": {
+                    "value": 3,
+                    "reason": "Both describe a consistent practice of kindness toward others; benevolent stresses well-wishing and broad ethical concern where beneficent stresses helpful action, so they differ only in emphasis."
+                  },
+                  "verdict": "cut"
+                }
+              ]
+            },
+            {
+              "stem": "callous",
+              "region": "emotional_temperament",
+              "kind": "triangle",
+              "by": [
+                {
+                  "key": "cold_hearted#1",
+                  "label": "cold hearted",
+                  "how": "overlap",
+                  "decision": "covered",
+                  "covered_by": "cruel",
+                  "cut_off": 3,
+                  "cosine": 0.549632,
+                  "rank": 1,
+                  "sonnet": {
+                    "value": 3,
+                    "reason": "Both describe lacking sympathy and being indifferent to others' suffering; cold hearted adds absence of warmth, callous adds insensitivity, but they are nearly interchangeable."
+                  },
+                  "opus": {
+                    "value": 3,
+                    "reason": "Both describe indifference to others' suffering. Cold-hearted also stresses a general lack of warmth, while callous stresses hardness and insensitivity."
+                  },
+                  "verdict": "cut"
+                }
+              ]
+            },
+            {
+              "stem": "clear",
+              "region": "communication_style",
+              "kind": "pair",
+              "by": [
+                {
+                  "key": "explicit#1",
+                  "label": "explicit",
+                  "how": "overlap",
+                  "decision": "new",
+                  "covered_by": null,
+                  "cut_off": 3,
+                  "cosine": 0.579101,
+                  "rank": 1,
+                  "sonnet": {
+                    "value": 3,
+                    "reason": "Both describe stating things plainly so the meaning is unmistakable, with only slight differences in emphasis (intent vs. first-reading clarity)."
+                  },
+                  "opus": {
+                    "value": 4,
+                    "reason": "Both describe stating one's meaning outright and plainly, so there is no ambiguity or need to interpret."
+                  },
+                  "verdict": "cut"
+                }
+              ]
+            },
+            {
+              "stem": "compassionate",
+              "region": "emotional_temperament",
+              "kind": "triangle",
+              "by": [
+                {
+                  "key": "compassionate_toward_animals#1",
+                  "label": "compassionate toward animals",
+                  "how": "overlap",
+                  "decision": "covered",
+                  "covered_by": "kind_to_animals",
+                  "cut_off": 3,
+                  "cosine": 0.436954,
+                  "rank": 2,
+                  "sonnet": {
+                    "value": 3,
+                    "reason": "Both are sympathy for suffering, but 'compassionate' is general (mainly toward people/others) while the target is specifically directed at animals, so it differs mainly in scope."
+                  },
+                  "opus": {
+                    "value": 3,
+                    "reason": "Both describe genuine sympathy and care in response to suffering; the target simply narrows that same quality to animals."
+                  },
+                  "verdict": "cut"
+                }
+              ]
+            },
+            {
+              "stem": "competent",
+              "region": "cognitive_epistemic",
+              "kind": "pair",
+              "by": [
+                {
+                  "key": "capable#1",
+                  "label": "capable",
+                  "how": "overlap",
+                  "decision": "new",
+                  "covered_by": null,
+                  "cut_off": 3,
+                  "cosine": 0.399896,
+                  "rank": 1,
+                  "sonnet": {
+                    "value": 3,
+                    "reason": "Both describe being able to do tasks successfully; competent emphasizes job skill and reliable quality, while capable stresses general skill and power to accomplish goals, so they are nearly the same with slight difference in emphasis."
+                  },
+                  "opus": {
+                    "value": 3,
+                    "reason": "Both describe having the skill to accomplish tasks; competent stresses reliable execution of a job, while capable stresses general power to achieve goals."
+                  },
+                  "verdict": "cut"
+                }
+              ]
+            },
+            {
+              "stem": "confrontational",
+              "region": "communication_style",
+              "kind": "pair",
+              "by": [
+                {
+                  "key": "argumentative#1",
+                  "label": "argumentative",
+                  "how": "overlap",
+                  "decision": "new",
+                  "covered_by": null,
+                  "cut_off": 3,
+                  "cosine": 0.287026,
+                  "rank": 4,
+                  "sonnet": {
+                    "value": 2,
+                    "reason": "Both involve readiness to engage in conflict, but confrontational is broader and more aggressive (seeking out and escalating conflict), while argumentative centers on quarreling over disagreements; each can occur without the other."
+                  },
+                  "opus": {
+                    "value": 3,
+                    "reason": "Both describe engaging in disputes with others; confrontational is the more intense form, actively seeking and escalating conflict rather than just arguing over disagreements."
+                  },
+                  "verdict": "review"
+                },
+                {
+                  "key": "combative#1",
+                  "label": "combative",
+                  "how": "overlap",
+                  "decision": "new",
+                  "covered_by": null,
+                  "cut_off": 3,
+                  "cosine": 0.347743,
+                  "rank": 2,
+                  "sonnet": {
+                    "value": 3,
+                    "reason": "Both describe actively seeking and escalating conflict through arguing and challenging others; combative adds harsh speech and readiness for physical blows, confrontational adds head-on challenging and relishing argument, so they are nearly the same with slight differences in emphasis."
+                  },
+                  "opus": {
+                    "value": 3,
+                    "reason": "Both describe actively seeking conflict and argument. Combative adds harsh speech and readiness for physical fighting, while confrontational stresses head-on challenge and relishing escalation; the difference is mainly one of emphasis."
+                  },
+                  "verdict": "cut"
+                }
+              ]
+            },
+            {
+              "stem": "controlling",
+              "region": "social_interpersonal",
+              "kind": "singleton",
+              "by": [
+                {
+                  "key": "restrictive#1",
+                  "label": "restrictive",
+                  "how": "overlap",
+                  "decision": "covered",
+                  "covered_by": "authoritarian_baumrind",
+                  "cut_off": 3,
+                  "cosine": 0.368493,
+                  "rank": 2,
+                  "sonnet": {
+                    "value": 2,
+                    "reason": "Both involve limiting others' freedom, but controlling adds a need for final say, monitoring, and requiring permission, while restrictive centers on imposing tight limits on actions and speech; they overlap strongly without either implying the other."
+                  },
+                  "opus": {
+                    "value": 3,
+                    "reason": "Both describe imposing limits on others' freedom; controlling is the same thing carried further, adding surveillance and a demand for permission and the final say."
+                  },
+                  "verdict": "review"
+                }
+              ]
+            },
+            {
+              "stem": "educated",
+              "region": "identity_demographic",
+              "kind": "pair",
+              "by": [
+                {
+                  "key": "highly_educated#1",
+                  "label": "highly educated",
+                  "how": "overlap",
+                  "decision": "new",
+                  "covered_by": null,
+                  "cut_off": 3,
+                  "cosine": 0.636016,
+                  "rank": 1,
+                  "sonnet": {
+                    "value": 3,
+                    "reason": "Both describe formal educational attainment; 'educated' is the broader, milder version covering college and possibly graduate study, while 'highly educated' stresses advanced training, so they differ mainly in degree."
+                  },
+                  "opus": {
+                    "value": 3,
+                    "reason": "Both describe formal educational attainment; highly educated is the same concept carried further, to advanced degrees."
+                  },
+                  "verdict": "cut"
+                }
+              ]
+            },
+            {
+              "stem": "fashionable",
+              "region": "identity_demographic",
+              "kind": "pair",
+              "by": [
+                {
+                  "key": "fashion_conscious#1",
+                  "label": "fashion conscious",
+                  "how": "label",
+                  "decision": "new",
+                  "covered_by": null,
+                  "cut_off": 3,
+                  "cosine": 0.534395,
+                  "rank": 1,
+                  "match": {
+                    "stem": "fashionable",
+                    "match": "renamed_from",
+                    "old_stem": "fashion_conscious"
+                  }
+                },
+                {
+                  "key": "trendy#1",
+                  "label": "trendy",
+                  "how": "overlap",
+                  "decision": "new",
+                  "covered_by": null,
+                  "cut_off": 3,
+                  "cosine": 0.550833,
+                  "rank": 1,
+                  "sonnet": {
+                    "value": 3,
+                    "reason": "Both mean keeping one's look in line with current styles; 'fashionable' adds an eye for what is in season and for what is dated, but it is essentially the same concept."
+                  },
+                  "opus": {
+                    "value": 4,
+                    "reason": "Both describe keeping one's appearance in line with current styles; fashionable adds a slight emphasis on knowing trends and spotting dated looks, but the concept is the same."
+                  },
+                  "verdict": "cut"
+                }
+              ]
+            },
+            {
+              "stem": "financially_precarious",
+              "region": "identity_demographic",
+              "kind": "pair",
+              "by": [
+                {
+                  "key": "financially_vulnerable#1",
+                  "label": "financially vulnerable",
+                  "how": "overlap",
+                  "decision": "covered",
+                  "covered_by": "poor",
+                  "cut_off": 3,
+                  "cosine": 0.54973,
+                  "rank": 1,
+                  "sonnet": {
+                    "value": 3,
+                    "reason": "Both describe having no financial cushion against shocks; precarious is a more acute, severe version of vulnerable, with the added detail of living paycheck to paycheck and risking the home."
+                  },
+                  "opus": {
+                    "value": 3,
+                    "reason": "Both describe lacking savings so that a shock would cause hardship; precarious is a more specific, severe version (paycheck to paycheck, risk of losing home)."
+                  },
+                  "verdict": "cut"
+                }
+              ]
+            },
+            {
+              "stem": "financially_secure",
+              "region": "identity_demographic",
+              "kind": "pair",
+              "by": [
+                {
+                  "key": "financially_stable#1",
+                  "label": "financially stable",
+                  "how": "overlap",
+                  "decision": "covered",
+                  "covered_by": "wealthy",
+                  "cut_off": 3,
+                  "cosine": 0.61653,
+                  "rank": 1,
+                  "sonnet": {
+                    "value": 3,
+                    "reason": "Both describe having enough money and resilience against shocks; stable emphasizes steady income meeting needs, while secure emphasizes savings buffer, so they are very close but with slightly different emphasis."
+                  },
+                  "opus": {
+                    "value": 3,
+                    "reason": "Both describe having enough money and resilience. Stable stresses a reliable ongoing income, while secure stresses a savings buffer against shocks, so they differ only in emphasis."
+                  },
+                  "verdict": "cut"
+                }
+              ]
+            },
+            {
+              "stem": "friendly",
+              "region": "communication_style",
+              "kind": "pair",
+              "by": [
+                {
+                  "key": "amicable#1",
+                  "label": "amicable",
+                  "how": "overlap",
+                  "decision": "covered",
+                  "covered_by": "agreeable",
+                  "cut_off": 3,
+                  "cosine": 0.513203,
+                  "rank": 1,
+                  "sonnet": {
+                    "value": 3,
+                    "reason": "Both describe a friendly, goodwill-based manner toward others; amicable stresses peaceable, harmonious interaction, while friendly adds warmth and eagerness to engage, so they differ slightly in emphasis."
+                  },
+                  "opus": {
+                    "value": 3,
+                    "reason": "Both describe goodwill toward others. Amicable stresses peaceable, conflict-free dealings, while friendly stresses outgoing warmth from the first meeting, so they differ only in emphasis."
+                  },
+                  "verdict": "cut"
+                }
+              ]
+            },
+            {
+              "stem": "full_price_shopper",
+              "region": "moral_stance",
+              "kind": "pair",
+              "by": [
+                {
+                  "key": "price_indifferent#1",
+                  "label": "price indifferent",
+                  "how": "overlap",
+                  "decision": "new",
+                  "covered_by": null,
+                  "cut_off": 3,
+                  "cosine": 0.2197,
+                  "rank": 10,
+                  "sonnet": {
+                    "value": 3,
+                    "reason": "Both describe choosing by want or need rather than price, but the full-price shopper is a more specific, extreme behavior (never comparing or waiting for sales, paying whatever is asked), so they match in core and differ mainly in degree and scope."
+                  },
+                  "opus": {
+                    "value": 3,
+                    "reason": "Full-price shopper is price indifference applied specifically to shopping and stated more absolutely, so it is the same concept with narrower scope."
+                  },
+                  "verdict": "cut"
+                },
+                {
+                  "key": "spendthrift#1",
+                  "label": "spendthrift",
+                  "how": "overlap",
+                  "decision": "covered",
+                  "covered_by": "extravagant",
+                  "cut_off": 3,
+                  "cosine": 0.483016,
+                  "rank": 2,
+                  "sonnet": {
+                    "value": 2,
+                    "reason": "Both involve not worrying about cost when buying, but spendthrift is general free spending and waste, while full-price shopper is specifically not seeking deals or comparing prices; one could be a full-price shopper without spending lavishly overall."
+                  },
+                  "opus": {
+                    "value": 3,
+                    "reason": "Both describe spending without regard to cost. Full-price shopper is a narrower version focused on ignoring price comparisons, while spendthrift also covers spending lavishly and wastefully."
+                  },
+                  "verdict": "review"
+                }
+              ]
+            },
+            {
+              "stem": "gryffindor",
+              "region": null,
+              "kind": "set",
+              "by": [
+                {
+                  "key": "courageous#1",
+                  "label": "courageous",
+                  "how": "overlap",
+                  "decision": "covered",
+                  "covered_by": "brave",
+                  "cut_off": 3,
+                  "cosine": 0.319246,
+                  "rank": 5,
+                  "sonnet": {
+                    "value": 2,
+                    "reason": "Gryffindor includes bravery at its core, but adds chivalry, defiance of authority and rashness, so it overlaps with courageous without being the same concept."
+                  },
+                  "opus": {
+                    "value": 3,
+                    "reason": "Gryffindor is centred on bravery like courageous, but widens it into a bundle that adds chivalry, defiance of authority and impulsiveness, so it is the same core concept with a broader scope."
+                  },
+                  "verdict": "review"
+                }
+              ]
+            },
+            {
+              "stem": "hostile",
+              "region": "communication_style",
+              "kind": "pair",
+              "by": [
+                {
+                  "key": "combative#1",
+                  "label": "combative",
+                  "how": "overlap",
+                  "decision": "new",
+                  "covered_by": null,
+                  "cut_off": 3,
+                  "cosine": 0.313228,
+                  "rank": 6,
+                  "sonnet": {
+                    "value": 3,
+                    "reason": "Hostile's description explicitly includes combative behavior and confrontational attitudes, so the two share a core of aggressive antagonism, though hostile is broader and covers general antagonism rather than just readiness to fight."
+                  },
+                  "opus": {
+                    "value": 3,
+                    "reason": "Hostile is a broader adversarial antagonism that includes combative behavior, while combative stresses readiness to fight, so they are the same concept differing in scope."
+                  },
+                  "verdict": "cut"
+                },
+                {
+                  "key": "unfriendly#1",
+                  "label": "unfriendly",
+                  "how": "overlap",
+                  "decision": "new",
+                  "covered_by": null,
+                  "cut_off": 3,
+                  "cosine": 0.404586,
+                  "rank": 1,
+                  "sonnet": {
+                    "value": 2,
+                    "reason": "Unfriendly covers coldness or hostility, while hostile is the stronger, more aggressive and combative end of that; they overlap but hostile is narrower and more intense, and unfriendly can be merely cold."
+                  },
+                  "opus": {
+                    "value": 3,
+                    "reason": "Hostile is the more aggressive, active end of unfriendliness, which also covers mere coldness, so it is the same concept carried further."
+                  },
+                  "verdict": "review"
+                }
+              ]
+            },
+            {
+              "stem": "iconoclastic",
+              "region": "cognitive_epistemic",
+              "kind": "unclassified",
+              "by": [
+                {
+                  "key": "unorthodox#1",
+                  "label": "unorthodox",
+                  "how": "overlap",
+                  "decision": "covered",
+                  "covered_by": "heterodox",
+                  "cut_off": 3,
+                  "cosine": 0.363076,
+                  "rank": 4,
+                  "sonnet": {
+                    "value": 2,
+                    "reason": "Both involve breaking from convention, but unorthodox is simply being non-traditional in beliefs or methods, while iconoclastic adds actively attacking or seeking to destroy revered institutions; neither implies the other."
+                  },
+                  "opus": {
+                    "value": 3,
+                    "reason": "Iconoclastic is unorthodoxy taken further, from departing from convention to actively attacking it, so it is the same core concept at a stronger degree."
+                  },
+                  "verdict": "review"
+                }
+              ]
+            },
+            {
+              "stem": "incompetent",
+              "region": "cognitive_epistemic",
+              "kind": "pair",
+              "by": [
+                {
+                  "key": "inept#1",
+                  "label": "inept",
+                  "how": "label",
+                  "decision": "new",
+                  "covered_by": null,
+                  "cut_off": 3,
+                  "cosine": 0.596371,
+                  "rank": 1,
+                  "match": {
+                    "stem": "incompetent",
+                    "match": "renamed_from",
+                    "old_stem": "inept"
+                  }
+                }
+              ]
+            },
+            {
+              "stem": "jaded",
+              "region": "emotional_temperament",
+              "kind": "pair",
+              "by": [
+                {
+                  "key": "blase#1",
+                  "label": "blase",
+                  "how": "overlap",
+                  "decision": "new",
+                  "covered_by": null,
+                  "cut_off": 3,
+                  "cosine": 0.297933,
+                  "rank": 2,
+                  "sonnet": {
+                    "value": 2,
+                    "reason": "Both describe being unexcited by things others find exciting; blase stresses an affected air of indifference, while jaded stresses real weariness from overexposure, so they share a core but each adds something."
+                  },
+                  "opus": {
+                    "value": 3,
+                    "reason": "Both describe an unmoved indifference to things others find exciting; blasé stresses the outward air, jaded stresses that overexposure caused it."
+                  },
+                  "verdict": "review"
+                },
+                {
+                  "key": "world_weary#1",
+                  "label": "world weary",
+                  "how": "overlap",
+                  "decision": "new",
+                  "covered_by": null,
+                  "cut_off": 3,
+                  "cosine": 0.344988,
+                  "rank": 3,
+                  "sonnet": {
+                    "value": 3,
+                    "reason": "Both describe being unimpressed after long experience; world weary adds deep tiredness, cynicism and a flat manner, while jaded centres on lost enthusiasm or wonder, so they share a core with differing emphasis."
+                  },
+                  "opus": {
+                    "value": 3,
+                    "reason": "Both describe a seen-it-all dullness born of long experience; world weary adds a deeper tiredness and cynicism about people, while jaded stresses being left unmoved by spectacle."
+                  },
+                  "verdict": "cut"
+                }
+              ]
+            },
+            {
+              "stem": "oblivious",
+              "region": "social_interpersonal",
+              "kind": "pair",
+              "by": [
+                {
+                  "key": "unobservant#1",
+                  "label": "unobservant",
+                  "how": "overlap",
+                  "decision": "new",
+                  "covered_by": null,
+                  "cut_off": 3,
+                  "cosine": 0.439228,
+                  "rank": 1,
+                  "sonnet": {
+                    "value": 3,
+                    "reason": "Both describe failing to notice details and changes in one's surroundings until pointed out, so they are nearly the same concept, though 'unobservant' also covers missing cues in what others say."
+                  },
+                  "opus": {
+                    "value": 3,
+                    "reason": "Both describe failing to notice things in plain view; oblivious, as described, covers a narrower scope of missed physical changes, while unobservant also includes missed cues in what others say."
+                  },
+                  "verdict": "cut"
+                }
+              ]
+            },
+            {
+              "stem": "observant",
+              "region": "cognitive_epistemic",
+              "kind": "pair",
+              "by": [
+                {
+                  "key": "attentive#1",
+                  "label": "attentive",
+                  "how": "overlap",
+                  "decision": "new",
+                  "covered_by": null,
+                  "cut_off": 3,
+                  "cosine": 0.553264,
+                  "rank": 1,
+                  "sonnet": {
+                    "value": 2,
+                    "reason": "Both involve noticing details and changes in one's surroundings, but attentive adds responding with care while observant is only about the noticing, so each has something the other lacks."
+                  },
+                  "opus": {
+                    "value": 3,
+                    "reason": "Both centre on noticing details and changes in one's surroundings; attentive adds responding with care, while observant stresses the noticing alone, so they differ only in emphasis."
+                  },
+                  "verdict": "review"
+                },
+                {
+                  "key": "perceptive#1",
+                  "label": "perceptive",
+                  "how": "overlap",
+                  "decision": "covered",
+                  "covered_by": "socially_perceptive",
+                  "cut_off": 3,
+                  "cosine": 0.482049,
+                  "rank": 1,
+                  "sonnet": {
+                    "value": 2,
+                    "reason": "Both involve noticing things keenly, but observant is about spotting details in surroundings while perceptive adds understanding or insight; each has something the other lacks."
+                  },
+                  "opus": {
+                    "value": 3,
+                    "reason": "Observant is a narrower form of perceptive: it covers the keen noticing of surroundings but not the understanding that perceptive also implies."
+                  },
+                  "verdict": "review"
+                }
+              ]
+            },
+            {
+              "stem": "pragmatic",
+              "region": "cognitive_epistemic",
+              "kind": "pair",
+              "by": [
+                {
+                  "key": "down_to_earth#1",
+                  "label": "down to earth",
+                  "how": "overlap",
+                  "decision": "covered",
+                  "covered_by": "practical",
+                  "cut_off": 3,
+                  "cosine": 0.272723,
+                  "rank": 4,
+                  "sonnet": {
+                    "value": 2,
+                    "reason": "Both stress valuing what works and being realistic, but down to earth adds unpretentiousness and seeing things as they are, while pragmatic centers on practical, achievable solutions under constraints."
+                  },
+                  "opus": {
+                    "value": 3,
+                    "reason": "Both describe valuing what works and staying realistic; down to earth adds a general groundedness in seeing things as they are, while pragmatic stresses practical problem-solving."
+                  },
+                  "verdict": "review"
+                }
+              ]
+            },
+            {
+              "stem": "uncaring",
+              "region": "moral_stance",
+              "kind": "pair",
+              "by": [
+                {
+                  "key": "cold_hearted#1",
+                  "label": "cold hearted",
+                  "how": "overlap",
+                  "decision": "covered",
+                  "covered_by": "cruel",
+                  "cut_off": 3,
+                  "cosine": 0.407633,
+                  "rank": 4,
+                  "sonnet": {
+                    "value": 2,
+                    "reason": "Both involve lacking concern for others' wellbeing, but cold hearted stresses absent sympathy and warmth toward suffering, while uncaring stresses indifference to outcomes and disclaiming responsibility; each adds something the other lacks."
+                  },
+                  "opus": {
+                    "value": 3,
+                    "reason": "Both describe an absence of concern for how others fare. Cold-hearted is a stronger, more emotional version that adds a lack of warmth in manner."
+                  },
+                  "verdict": "review"
+                }
+              ]
+            },
+            {
+              "stem": "uneducated",
+              "region": "identity_demographic",
+              "kind": "pair",
+              "by": [
+                {
+                  "key": "unlearned#1",
+                  "label": "unlearned",
+                  "how": "overlap",
+                  "decision": "new",
+                  "covered_by": null,
+                  "cut_off": 3,
+                  "cosine": 0.662492,
+                  "rank": 1,
+                  "sonnet": {
+                    "value": 3,
+                    "reason": "Both mean lacking formal education; the other's description adds specifics (left school at sixteen, working since) but the core concept is the same, with 'uneducated' being slightly more specific/partial in scope."
+                  },
+                  "opus": {
+                    "value": 3,
+                    "reason": "Both describe a lack of formal education. The target means no schooling at all, while the other means limited schooling ending at sixteen without qualifications, so they differ mainly in degree."
+                  },
+                  "verdict": "cut"
+                }
+              ]
+            },
+            {
+              "stem": "unflinching",
+              "region": "emotional_temperament",
+              "kind": "singleton",
+              "by": [
+                {
+                  "key": "engaging#1",
+                  "label": "engaging",
+                  "how": "label",
+                  "decision": "covered",
+                  "covered_by": "charismatic",
+                  "cut_off": 3,
+                  "cosine": 0.025838,
+                  "rank": null,
+                  "match": {
+                    "stem": "unflinching",
+                    "match": "renamed_from",
+                    "old_stem": "engaging"
+                  }
+                }
+              ]
+            },
+            {
+              "stem": "wry",
+              "region": "communication_style",
+              "kind": "unclassified",
+              "by": [
+                {
+                  "key": "humorous#1",
+                  "label": "humorous",
+                  "how": "overlap",
+                  "decision": "covered",
+                  "covered_by": "witty",
+                  "cut_off": 3,
+                  "cosine": 0.340252,
+                  "rank": 3,
+                  "sonnet": {
+                    "value": 2,
+                    "reason": "Wry is a specific, dry, ironic kind of humor, so it overlaps with general humorousness, but a humorous person need not be sardonic and a wry person may not aim to make others laugh."
+                  },
+                  "opus": {
+                    "value": 3,
+                    "reason": "Wry is a narrower, sardonic and ironic style of the same witty humor that humorous describes broadly."
+                  },
+                  "verdict": "review"
+                }
+              ]
+            },
+            {
+              "stem": "zealous",
+              "region": "communication_style",
+              "kind": "pair",
+              "by": [
+                {
+                  "key": "fervent#1",
+                  "label": "fervent",
+                  "how": "overlap",
+                  "decision": "covered",
+                  "covered_by": "passionate",
+                  "cut_off": 3,
+                  "cosine": 0.466235,
+                  "rank": 2,
+                  "sonnet": {
+                    "value": 3,
+                    "reason": "Both involve intense passion for beliefs and causes, but zealous adds crusading, loudness and distrust of coolness, so it is a more extreme and specific form of fervent."
+                  },
+                  "opus": {
+                    "value": 3,
+                    "reason": "Zealous is fervent passion for one's beliefs carried further, into crusading and hostility to coolness."
+                  },
+                  "verdict": "cut"
+                }
+              ]
+            }
+          ]
+        },
+        "pairs": {
+          "n_overlap": 353,
+          "n_label": 3,
+          "n_stalled": 0,
+          "verdicts": {
+            "keep": 291,
+            "opposite": 30,
+            "cut": 20,
+            "review": 12
+          }
+        },
+        "reduced_run": {
+          "batch_id": "rec_antonym_check_pilot_1_s0",
+          "by_decision": {
+            "covered": 205,
+            "new": 162
+          },
+          "n_stalled": 0,
+          "skipped": {
+            "not_a_trait": 38
+          },
+          "rules": "m3_rules_2",
+          "cosine_floor": 0.25
+        },
+        "cost": {
+          "reduced_m3_usd": 4.000862,
+          "match_usd": 0.868952,
+          "total_usd": 4.869814
+        }
+      }
+    ],
+    "mean": {
+      "n_hidden": 83.0,
+      "recall_kept": 0.1566,
+      "precision_kept": 0.1049,
+      "recovered_kept": 13.0,
+      "recovered_by_label": 2.0,
+      "recall_covered": 0.2048,
+      "false_cover_candidates": 16.0,
+      "recall_either": 0.3253,
+      "reachable_share": 0.8554,
+      "groups_whole": 4.0,
+      "groups": 29.0,
+      "cost_usd": 4.8698,
+      "kept_by_region": {
+        "cognitive_epistemic": {
+          "recall": 0.2353,
+          "n_hidden": 17.0
+        },
+        "communication_style": {
+          "recall": 0.1875,
+          "n_hidden": 16.0
+        },
+        "emotional_temperament": {
+          "recall": 0.125,
+          "n_hidden": 8.0
+        },
+        "identity_demographic": {
+          "recall": 0.5,
+          "n_hidden": 6.0
+        },
+        "moral_stance": {
+          "recall": 0.0714,
+          "n_hidden": 14.0
+        },
+        "none": {
+          "recall": 0.0,
+          "n_hidden": 17.0
+        },
+        "social_interpersonal": {
+          "recall": 0.2,
+          "n_hidden": 5.0
+        }
+      },
+      "kept_by_kind": {
+        "4-cube": {
+          "recall": 0.0,
+          "n_hidden": 2.0
+        },
+        "pair": {
+          "recall": 0.2321,
+          "n_hidden": 56.0
+        },
+        "ring": {
+          "recall": 0.0,
+          "n_hidden": 3.0
+        },
+        "sequence": {
+          "recall": 0.0,
+          "n_hidden": 1.0
+        },
+        "set": {
+          "recall": 0.0,
+          "n_hidden": 3.0
+        },
+        "singleton": {
+          "recall": 0.0,
+          "n_hidden": 10.0
+        },
+        "square": {
+          "recall": 0.0,
+          "n_hidden": 1.0
+        },
+        "triangle": {
+          "recall": 0.0,
+          "n_hidden": 3.0
+        },
+        "unclassified": {
+          "recall": 0.0,
+          "n_hidden": 4.0
+        }
+      }
+    },
+    "n_seeds": 1,
+    "total_cost_usd": 4.869814,
+    "batch_id": "rec_antonym_check_pilot_1",
+    "generator": "antonym_check",
+    "run_id": "pilot_1",
+    "hidden_frac": 0.1,
+    "seeds_reported": [
+      0
+    ]
+  },
+  "_provenance": {
+    "schema_version": "1.0",
+    "produced_by": {
+      "cmd": "uv run python data_analysis/gap_generation/recovery_test.py --generator antonym_check --run-id pilot_1 --hidden-frac 0.1 --seed 0 --transport live --budget-usd 8",
+      "git_sha": "a406308+dirty",
+      "author": "Roger Dearnaley",
+      "title": "recovery_test rec_antonym_check_pilot_1"
+    },
+    "produced_at": "2026-10-08T04:01:19+00:00",
+    "inputs": [
+      {
+        "dep_key": "hidden_s0",
+        "path": "data/candidates/recovery/rec_antonym_check_pilot_1/seed0/hidden.json",
+        "fingerprint": "v1:2026-10-08T03:42:23+00:00@22307",
+        "kind": "file",
+        "dataset_id": null,
+        "last_modified_at": "2026-10-08T03:42:23+00:00",
+        "extras": {}
+      },
+      {
+        "dep_key": "m3_results_s0",
+        "path": "data/candidates/novelty/rec_antonym_check_pilot_1_s0/results.jsonl",
+        "fingerprint": "v1:2026-10-08T03:58:42+00:00@3481314",
+        "kind": "file",
+        "dataset_id": null,
+        "last_modified_at": "2026-10-08T03:58:42+00:00",
+        "extras": {}
+      },
+      {
+        "dep_key": "matches_s0",
+        "path": "data/candidates/recovery/rec_antonym_check_pilot_1/seed0/matches.jsonl",
+        "fingerprint": "v1:2026-10-08T04:01:19+00:00@198107",
+        "kind": "file",
+        "dataset_id": null,
+        "last_modified_at": "2026-10-08T04:01:19+00:00",
+        "extras": {}
+      }
+    ],
+    "inputs_sha256": "52460c8c7fbcda786df7805b9673853858a524327b83f932b3ffe86cbd31b93c"
+  }
+}

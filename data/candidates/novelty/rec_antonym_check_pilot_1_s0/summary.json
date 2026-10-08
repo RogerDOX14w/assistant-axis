@@ -1,0 +1,367 @@
+{
+  "result": {
+    "mode": "shortlist",
+    "n_candidates": 367,
+    "n_decided": 367,
+    "n_stalled": 0,
+    "stalled": {},
+    "skipped": {
+      "not_a_trait": 38
+    },
+    "by_decision": {
+      "covered": 205,
+      "new": 162
+    },
+    "by_reason": {
+      "overlap": 364,
+      "exact_label": 3
+    },
+    "by_cut_off": {
+      "3": {
+        "covered": 193,
+        "new": 97
+      },
+      "4": {
+        "new": 65,
+        "covered": 12
+      }
+    },
+    "exact_label": {
+      "corpus": 2,
+      "queue": 1
+    },
+    "pairs_judged_per_candidate": {
+      "0": 1,
+      "1": 169,
+      "2": 28,
+      "3": 19,
+      "4": 22,
+      "5": 23,
+      "6": 23,
+      "7": 25,
+      "8": 24,
+      "9": 20,
+      "10": 10
+    },
+    "pairs_judged_total": 1270,
+    "pairs_judged_mean": 3.489,
+    "listed_per_candidate_mean": 17.17,
+    "shortlist_length": {
+      "0": 1,
+      "1": 9,
+      "2": 22,
+      "3": 35,
+      "4": 42,
+      "5": 48,
+      "6": 52,
+      "7": 52,
+      "8": 45,
+      "9": 41,
+      "10": 17
+    },
+    "early_exit_depth": {
+      "1": 166,
+      "2": 18,
+      "3": 3,
+      "4": 4,
+      "5": 5,
+      "6": 2,
+      "7": 2,
+      "8": 2
+    },
+    "escalations": {
+      "at_cut_off": 145,
+      "below_cut_off": 390
+    },
+    "rescues": 6,
+    "review_flags": {
+      "sonnet_below_opus_at": 55,
+      "both_similar": 8
+    },
+    "pair_completions": 17,
+    "pair_completion_for": {
+      "atomistic#1": [
+        "systems_thinker",
+        "structuralist"
+      ],
+      "boastful#1": [
+        "modest"
+      ],
+      "democratic#1": [
+        "aristocratic"
+      ],
+      "directive#1": [
+        "absentee"
+      ],
+      "fair_minded#1": [
+        "judgmental"
+      ],
+      "hierarchical#1": [
+        "authoritative_baumrind"
+      ],
+      "linear_thinker#1": [
+        "stream_of_consciousness"
+      ],
+      "monist#1": [
+        "paradoxical"
+      ],
+      "nepotistic#1": [
+        "meritocratic"
+      ],
+      "news_engaged#1": [
+        "historical"
+      ],
+      "ostentatious#1": [
+        "modest"
+      ],
+      "patronizing#1": [
+        "deferential"
+      ],
+      "personally_oriented#1": [
+        "regionalist",
+        "civilizationist",
+        "nationalist"
+      ],
+      "pompous#1": [
+        "dignified"
+      ],
+      "self_satisfied#1": [
+        "modest"
+      ],
+      "selfless#1": [
+        "civilizationist",
+        "regionalist"
+      ],
+      "technocrat#1": [
+        "deferential",
+        "aristocratic"
+      ]
+    },
+    "relation_outcomes": {
+      "call_status": {
+        "ok": 364
+      },
+      "answers": {
+        "unrelated": 2656,
+        "opposed": 1881,
+        "similar": 1648,
+        "unsure": 65
+      },
+      "final": {
+        "similar": 1668,
+        "unrelated": 2693,
+        "opposed": 1886,
+        "unsure": 3
+      },
+      "candidates_with_unsure_reasked": 46
+    },
+    "cache": {
+      "claude-haiku-5-5": {
+        "calls": 365,
+        "input": 644701,
+        "cache_write": 0,
+        "cache_read": 0,
+        "calls_with_read": 0,
+        "read_share_of_input": 0.0,
+        "hit_rate_calls": 0.0
+      },
+      "claude-sonnet-5-5": {
+        "calls": 1316,
+        "input": 186257,
+        "cache_write": 4018,
+        "cache_read": 724962,
+        "calls_with_read": 1263,
+        "read_share_of_input": 0.7921,
+        "hit_rate_calls": 0.9597
+      },
+      "claude-opus-5-5": {
+        "calls": 535,
+        "input": 65265,
+        "cache_write": 4592,
+        "cache_read": 302498,
+        "calls_with_read": 527,
+        "read_share_of_input": 0.8124,
+        "hit_rate_calls": 0.985
+      }
+    },
+    "spend_by_stage": {
+      "relation": {
+        "claude-haiku-5-5": 0.317385
+      },
+      "relation_unsure": {
+        "claude-sonnet-5-5": 0.11243
+      },
+      "overlap": {
+        "claude-sonnet-5-5": 1.486988,
+        "claude-opus-5-5": 2.083552
+      }
+    },
+    "spend_usd": 4.000862,
+    "usage": {
+      "per_model": {
+        "claude-haiku-5-5": {
+          "model": "claude-haiku-5-5",
+          "prompt_tokens": 644701,
+          "completion_tokens": 505830,
+          "cost_usd": 0.3174,
+          "n_calls": 365
+        },
+        "claude-opus-5-5": {
+          "model": "claude-opus-5-5",
+          "prompt_tokens": 101048,
+          "completion_tokens": 83968,
+          "cost_usd": 2.0836,
+          "n_calls": 535
+        },
+        "claude-sonnet-5-5": {
+          "model": "claude-sonnet-5-5",
+          "prompt_tokens": 263274,
+          "completion_tokens": 107287,
+          "cost_usd": 1.5994,
+          "n_calls": 1316
+        },
+        "text-embedding-3-large": {
+          "model": "text-embedding-3-large",
+          "prompt_tokens": 3901,
+          "completion_tokens": 0,
+          "cost_usd": 0.0005,
+          "n_calls": 2
+        }
+      },
+      "total_cost_usd": 4.0009,
+      "total_prompt_tokens": 1012924,
+      "total_completion_tokens": 697085,
+      "n_calls": 2218
+    },
+    "rules": [
+      "m3_rules_2"
+    ],
+    "cosine_floor": [
+      0.25
+    ],
+    "review_queue": 63,
+    "covered_flagged": 55,
+    "pair_notes": {
+      "rows": 8,
+      "notes": 8,
+      "by_kind": {
+        "pair": 8
+      },
+      "rows_by_decision": {
+        "new": 4,
+        "covered": 4
+      }
+    },
+    "pair_flag_rows": 21,
+    "floor": {
+      "rows_with_listed_below": 364,
+      "listed_below_total": 3822,
+      "similar_kept_out_total": 91,
+      "rows_with_similar_kept_out": 75
+    },
+    "renamed_from_judged": {
+      "rows": 8,
+      "by_decision": {
+        "covered": 7,
+        "new": 1
+      }
+    },
+    "batch_id": "rec_antonym_check_pilot_1_s0",
+    "parse_rates": {
+      "relation:claude-haiku-5-5": {
+        "n": 364,
+        "ok_first": 363,
+        "ok": 364
+      },
+      "relation_unsure:claude-sonnet-5-5": {
+        "n": 46,
+        "ok_first": 46,
+        "ok": 46
+      },
+      "overlap:claude-sonnet-5-5": {
+        "n": 1270,
+        "ok_first": 1270,
+        "ok": 1270
+      },
+      "overlap:claude-opus-5-5": {
+        "n": 535,
+        "ok_first": 535,
+        "ok": 535
+      }
+    },
+    "stopped_by_budget": false,
+    "stopped_by_error": null,
+    "resumed_calls": 0,
+    "rubrics": {
+      "overlap": {
+        "name": "overlap_concept",
+        "version": 6,
+        "sha256": "b3eff18fb946928517183af0244acec2d35dba0ab0bd9c57f83c7a06ac3c9fd0"
+      },
+      "relation": {
+        "name": "relation",
+        "version": 1,
+        "sha256": "b6b11f8cfcb0faafdac4a040087356ecb13d410e9bc309597d7833a96110d70f"
+      }
+    },
+    "rules_of_run": {
+      "name": "m3_rules_2",
+      "version": 2,
+      "cover_on_opus_check": true,
+      "both_similar_excluded": true,
+      "pair_flag_grey": false,
+      "renamed_from_covers": false,
+      "separator_blind": true,
+      "cosine_floor": 0.25
+    },
+    "hide": {
+      "path": "/Users/roger/Documents/GitHub/assistant-axis/.claude/worktrees/agent-a49beca76adafdfc1/data/candidates/recovery/rec_antonym_check_pilot_1/seed0/hidden.json",
+      "sha256": "c376dffa0963242ac72183e269298bbc8e627080409cf64858a26e1da42143fa",
+      "n_hidden": 83
+    }
+  },
+  "_provenance": {
+    "schema_version": "1.0",
+    "produced_by": {
+      "cmd": "uv run python data_analysis/gap_generation/recovery_test.py --generator antonym_check --run-id pilot_1 --hidden-frac 0.1 --seed 0 --transport live --budget-usd 8",
+      "git_sha": "a406308+dirty",
+      "author": "Roger Dearnaley",
+      "title": "novelty_score shortlist rec_antonym_check_pilot_1_s0"
+    },
+    "produced_at": "2026-10-08T03:58:42+00:00",
+    "inputs": [
+      {
+        "dep_key": "metric_config",
+        "path": "data/candidates/metric_config.json",
+        "fingerprint": "v1:2026-10-02T22:21:08+00:00@54961",
+        "kind": "file",
+        "dataset_id": null,
+        "last_modified_at": "2026-10-02T22:21:08+00:00",
+        "extras": {}
+      },
+      {
+        "dep_key": "rubrics",
+        "path": "reports/trait_gap_generation/rubrics",
+        "fingerprint": "v1:multi:7440bfeac914",
+        "kind": "multi",
+        "dataset_id": null,
+        "last_modified_at": "2026-10-06T23:37:23+00:00",
+        "extras": {},
+        "member_paths": [
+          "reports/trait_gap_generation/rubrics/overlap_concept.md",
+          "reports/trait_gap_generation/rubrics/relation.md"
+        ]
+      },
+      {
+        "dep_key": "hidden",
+        "path": "data/candidates/recovery/rec_antonym_check_pilot_1/seed0/hidden.json",
+        "fingerprint": "v1:2026-10-08T03:42:23+00:00@22307",
+        "kind": "file",
+        "dataset_id": null,
+        "last_modified_at": "2026-10-08T03:42:23+00:00",
+        "extras": {}
+      }
+    ],
+    "inputs_sha256": "1694c00da8de6fe53847cf75be778523657886e6222a25fd4f1f7f6de59affad"
+  }
+}
