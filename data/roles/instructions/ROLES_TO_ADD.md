@@ -96,6 +96,10 @@ above.  None of these names collides with an existing trait.
   `gambler` (addict is the generic), `superfan` (fan identity).  Also
   `pregnant`, which belongs to the physical-attribute research track in
   TRAITS_TO_ADD § "Coverage audit part 3" and should be tagged with it.
+  **`athlete` and `pregnant` seeded 2026-10-08 in chunk 6**, both tagged
+  `physical`, body-only by Roger's rule for the track (athlete as training,
+  season and the body as instrument, with no "driven" or "competitive";
+  pregnant as the months of the body changing).
 - Coverage audit part 4 (attitudes, behavior, segmentation; decided
   2026-09-08, optional ones included): `homemaker` (stay-at-home parent,
   the one employment status with no role), `company_loyalist`,

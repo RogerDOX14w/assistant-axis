@@ -5900,7 +5900,20 @@ the sections above hold data-regeneration items.  Tick off in place.
    (`data/candidates/roget/label_heads.json`, `corpus_regions.json`) fails
    its acceptance tests, so tell that session at the moment of a rename,
    with the old and new stems; the new chunk's trait files also each need a
-   placeholder row in `corpus_regions.json` (done for chunks 4 and 5).
+   placeholder row in `corpus_regions.json` (done for chunks 4, 5 and 6).
+9. **Refusals the detector does not see** (2026-10-08, chunk 6).  The
+   generator refused brown-haired by writing "ERROR: ... a physical
+   descriptor, not a personality trait" into the eval prompt of an
+   otherwise well-formed JSON reply, and wrote brown-eyed's instructions
+   behind a paragraph of deliberation, which broke the parse; neither
+   matches `generation_refusals.DECLINE_PHRASES` or the stop reason, so
+   both were retried five times as errors, twice.  Fix: treat a field
+   value opening "ERROR:" as a refusal, and let the JSON reader skip a
+   prose preface before the first `{`.  What got them through was
+   `--thinking-budget 4000`, which moves the deliberation into the
+   thinking block; a file generated that way records it in
+   `generator.thinking_budget`, so it can be told apart from the rest of
+   the corpus, generated with thinking off.
 
 ### TODO: variant-specific K grids in the PC round-trip experiment (May 2026)
 <!-- claude: archive -->

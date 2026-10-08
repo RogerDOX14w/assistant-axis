@@ -1,0 +1,730 @@
+[
+ {
+  "stem": "athletic",
+  "label": "athletic",
+  "entity_type": "trait",
+  "chunk": "6",
+  "sub_chunk": "physical",
+  "pairing": "pair",
+  "partner": "sedentary",
+  "partner_exists": false,
+  "arrangement_members": [
+   "athletic",
+   "sedentary"
+  ],
+  "description_draft": null,
+  "description_notes": "Physical activity / fitness.",
+  "description": null,
+  "source": null,
+  "tags": [
+   "physical"
+  ],
+  "status": "candidate",
+  "decision": "Accepted 2026-09-08 as a separate research track: tag `physical`, keep out of the clean-pair cohort and goal lists until the research says keep / keep-as-tagged / remove",
+  "alternatives": null,
+  "section": "Physical-attribute traits: a separate research track (decided 2026-09-08)",
+  "lines": "2068-2069",
+  "chunk_confidence": "high",
+  "extracted_from": "extract_4.json"
+ },
+ {
+  "stem": "black_haired",
+  "label": "black-haired",
+  "entity_type": "trait",
+  "chunk": "6",
+  "sub_chunk": "physical",
+  "pairing": "set",
+  "partner": null,
+  "partner_exists": null,
+  "arrangement_members": [
+   "black_haired",
+   "blonde",
+   "brunette",
+   "gray_haired",
+   "red_headed"
+  ],
+  "description_draft": null,
+  "description_notes": "Hair colour, listed as unpaired; the arrangement-hunting TODO (line 2136) says `set` per attribute. grey-haired: note the age correlation.",
+  "description": null,
+  "source": null,
+  "tags": [
+   "physical"
+  ],
+  "status": "candidate",
+  "decision": "Added by Roger 2026-09-08; Accepted 2026-09-08 as a separate research track: tag `physical`, keep out of the clean-pair cohort and goal lists until the research says keep / keep-as-tagged / remove",
+  "alternatives": null,
+  "section": "Physical-attribute traits: a separate research track (decided 2026-09-08)",
+  "lines": "2077-2079",
+  "chunk_confidence": "high",
+  "extracted_from": "extract_4.json"
+ },
+ {
+  "stem": "blond",
+  "label": "blond",
+  "entity_type": "trait",
+  "chunk": "6",
+  "sub_chunk": "physical",
+  "pairing": "set",
+  "partner": null,
+  "partner_exists": null,
+  "arrangement_members": [
+   "black_haired",
+   "blonde",
+   "brunette",
+   "gray_haired",
+   "red_headed"
+  ],
+  "description_draft": null,
+  "description_notes": "Hair colour, listed as unpaired; the arrangement-hunting TODO (line 2136) says `set` per attribute. grey-haired: note the age correlation.",
+  "description": null,
+  "source": null,
+  "tags": [
+   "physical"
+  ],
+  "status": "candidate",
+  "decision": "Added by Roger 2026-09-08; Accepted 2026-09-08 as a separate research track: tag `physical`, keep out of the clean-pair cohort and goal lists until the research says keep / keep-as-tagged / remove",
+  "alternatives": null,
+  "section": "Physical-attribute traits: a separate research track (decided 2026-09-08)",
+  "lines": "2077-2079",
+  "chunk_confidence": "high",
+  "extracted_from": "extract_4.json"
+ },
+ {
+  "stem": "blue_eyed",
+  "label": "blue-eyed",
+  "entity_type": "trait",
+  "chunk": "6",
+  "sub_chunk": "physical",
+  "pairing": "set",
+  "partner": null,
+  "partner_exists": null,
+  "arrangement_members": [
+   "blue_eyed",
+   "brown_eyed",
+   "green_eyed"
+  ],
+  "description_draft": null,
+  "description_notes": "Eye colour, listed as unpaired; the arrangement-hunting TODO (line 2136) says `set` per attribute.",
+  "description": null,
+  "source": null,
+  "tags": [
+   "physical"
+  ],
+  "status": "candidate",
+  "decision": "Accepted 2026-09-08 as a separate research track: tag `physical`, keep out of the clean-pair cohort and goal lists until the research says keep / keep-as-tagged / remove",
+  "alternatives": null,
+  "section": "Physical-attribute traits: a separate research track (decided 2026-09-08)",
+  "lines": "2080",
+  "chunk_confidence": "high",
+  "extracted_from": "extract_4.json"
+ },
+ {
+  "stem": "brown_eyed",
+  "label": "brown-eyed",
+  "entity_type": "trait",
+  "chunk": "6",
+  "sub_chunk": "physical",
+  "pairing": "set",
+  "partner": null,
+  "partner_exists": null,
+  "arrangement_members": [
+   "blue_eyed",
+   "brown_eyed",
+   "green_eyed"
+  ],
+  "description_draft": null,
+  "description_notes": "Eye colour, listed as unpaired; the arrangement-hunting TODO (line 2136) says `set` per attribute.",
+  "description": null,
+  "source": null,
+  "tags": [
+   "physical"
+  ],
+  "status": "candidate",
+  "decision": "Accepted 2026-09-08 as a separate research track: tag `physical`, keep out of the clean-pair cohort and goal lists until the research says keep / keep-as-tagged / remove",
+  "alternatives": null,
+  "section": "Physical-attribute traits: a separate research track (decided 2026-09-08)",
+  "lines": "2080",
+  "chunk_confidence": "high",
+  "extracted_from": "extract_4.json"
+ },
+ {
+  "stem": "brown_haired",
+  "label": "brown-haired",
+  "entity_type": "trait",
+  "chunk": "6",
+  "sub_chunk": "physical",
+  "pairing": "set",
+  "partner": null,
+  "partner_exists": null,
+  "arrangement_members": [
+   "black_haired",
+   "blonde",
+   "brunette",
+   "gray_haired",
+   "red_headed"
+  ],
+  "description_draft": null,
+  "description_notes": "Hair colour, listed as unpaired; the arrangement-hunting TODO (line 2136) says `set` per attribute. grey-haired: note the age correlation.",
+  "description": null,
+  "source": null,
+  "tags": [
+   "physical"
+  ],
+  "status": "candidate",
+  "decision": "Added by Roger 2026-09-08; Accepted 2026-09-08 as a separate research track: tag `physical`, keep out of the clean-pair cohort and goal lists until the research says keep / keep-as-tagged / remove",
+  "alternatives": null,
+  "section": "Physical-attribute traits: a separate research track (decided 2026-09-08)",
+  "lines": "2077-2079",
+  "chunk_confidence": "high",
+  "extracted_from": "extract_4.json"
+ },
+ {
+  "stem": "chronically_ill",
+  "label": "chronically-ill",
+  "entity_type": "trait",
+  "chunk": "6",
+  "sub_chunk": "physical",
+  "pairing": "singleton",
+  "partner": null,
+  "partner_exists": null,
+  "arrangement_members": null,
+  "description_draft": null,
+  "description_notes": "Chronic illness, unpaired; the patient role is acute illness.",
+  "description": null,
+  "source": null,
+  "tags": [
+   "physical"
+  ],
+  "status": "candidate",
+  "decision": "Accepted 2026-09-08 as a separate research track: tag `physical`, keep out of the clean-pair cohort and goal lists until the research says keep / keep-as-tagged / remove",
+  "alternatives": null,
+  "section": "Physical-attribute traits: a separate research track (decided 2026-09-08)",
+  "lines": "2070-2071",
+  "chunk_confidence": "high",
+  "extracted_from": "extract_4.json"
+ },
+ {
+  "stem": "dark_skinned",
+  "label": "dark-skinned",
+  "entity_type": "trait",
+  "chunk": "6",
+  "sub_chunk": "physical",
+  "pairing": "pair",
+  "partner": "fair_skinned",
+  "partner_exists": false,
+  "arrangement_members": [
+   "dark_skinned",
+   "fair_skinned"
+  ],
+  "description_draft": null,
+  "description_notes": "Skin tone as a 1-D pair; the race section had said skin tone is a separate 1-D axis not proposed there; proposed here with the overlap with race noted.",
+  "description": null,
+  "source": null,
+  "tags": [
+   "physical"
+  ],
+  "status": "candidate",
+  "decision": "Accepted 2026-09-08 as a separate research track: tag `physical`, keep out of the clean-pair cohort and goal lists until the research says keep / keep-as-tagged / remove",
+  "alternatives": null,
+  "section": "Physical-attribute traits: a separate research track (decided 2026-09-08)",
+  "lines": "2081-2083",
+  "chunk_confidence": "high",
+  "extracted_from": "extract_4.json"
+ },
+ {
+  "stem": "fair_skinned",
+  "label": "fair-skinned",
+  "entity_type": "trait",
+  "chunk": "6",
+  "sub_chunk": "physical",
+  "pairing": "pair",
+  "partner": "dark_skinned",
+  "partner_exists": false,
+  "arrangement_members": [
+   "dark_skinned",
+   "fair_skinned"
+  ],
+  "description_draft": null,
+  "description_notes": "Skin tone as a 1-D pair; the race section had said skin tone is a separate 1-D axis not proposed there; proposed here with the overlap with race noted.",
+  "description": null,
+  "source": null,
+  "tags": [
+   "physical"
+  ],
+  "status": "candidate",
+  "decision": "Accepted 2026-09-08 as a separate research track: tag `physical`, keep out of the clean-pair cohort and goal lists until the research says keep / keep-as-tagged / remove",
+  "alternatives": null,
+  "section": "Physical-attribute traits: a separate research track (decided 2026-09-08)",
+  "lines": "2081-2083",
+  "chunk_confidence": "high",
+  "extracted_from": "extract_4.json"
+ },
+ {
+  "stem": "good_looking",
+  "label": "good-looking",
+  "entity_type": "trait",
+  "chunk": "6",
+  "sub_chunk": "physical",
+  "pairing": "pair",
+  "partner": "plain_looking",
+  "partner_exists": false,
+  "arrangement_members": [
+   "good_looking",
+   "plain_looking"
+  ],
+  "description_draft": null,
+  "description_notes": "Rated attractiveness.",
+  "description": null,
+  "source": null,
+  "tags": [
+   "physical"
+  ],
+  "status": "candidate",
+  "decision": "Accepted 2026-09-08 as a separate research track: tag `physical`, keep out of the clean-pair cohort and goal lists until the research says keep / keep-as-tagged / remove",
+  "alternatives": null,
+  "section": "Physical-attribute traits: a separate research track (decided 2026-09-08)",
+  "lines": "2072",
+  "chunk_confidence": "high",
+  "extracted_from": "extract_4.json"
+ },
+ {
+  "stem": "green_eyed",
+  "label": "green-eyed",
+  "entity_type": "trait",
+  "chunk": "6",
+  "sub_chunk": "physical",
+  "pairing": "set",
+  "partner": null,
+  "partner_exists": null,
+  "arrangement_members": [
+   "blue_eyed",
+   "brown_eyed",
+   "green_eyed"
+  ],
+  "description_draft": null,
+  "description_notes": "Eye colour, listed as unpaired; the arrangement-hunting TODO (line 2136) says `set` per attribute.",
+  "description": null,
+  "source": null,
+  "tags": [
+   "physical"
+  ],
+  "status": "candidate",
+  "decision": "Accepted 2026-09-08 as a separate research track: tag `physical`, keep out of the clean-pair cohort and goal lists until the research says keep / keep-as-tagged / remove",
+  "alternatives": null,
+  "section": "Physical-attribute traits: a separate research track (decided 2026-09-08)",
+  "lines": "2080",
+  "chunk_confidence": "high",
+  "extracted_from": "extract_4.json"
+ },
+ {
+  "stem": "gray_haired",
+  "label": "gray-haired",
+  "entity_type": "trait",
+  "chunk": "6",
+  "sub_chunk": "physical",
+  "pairing": "set",
+  "partner": null,
+  "partner_exists": null,
+  "arrangement_members": [
+   "black_haired",
+   "blonde",
+   "brunette",
+   "gray_haired",
+   "red_headed"
+  ],
+  "description_draft": null,
+  "description_notes": "Hair colour, member of the hair-colour set. Roger, 2026-10-08: NOT tagged physical because of its age correlation; it stays even if the physical track is dropped. Body-only description; the age correlation may be acknowledged as a fact of the hair, not turned into an age persona.",
+  "description": null,
+  "source": null,
+  "tags": [],
+  "status": "candidate",
+  "decision": "Added by Roger 2026-09-08; Accepted 2026-09-08 as a separate research track: tag `physical`, keep out of the clean-pair cohort and goal lists until the research says keep / keep-as-tagged / remove",
+  "alternatives": null,
+  "section": "Physical-attribute traits: a separate research track (decided 2026-09-08)",
+  "lines": "2077-2079",
+  "chunk_confidence": "high",
+  "extracted_from": "extract_4.json"
+ },
+ {
+  "stem": "healthy",
+  "label": "healthy",
+  "entity_type": "trait",
+  "chunk": "6",
+  "sub_chunk": "physical",
+  "pairing": "pair",
+  "partner": "sickly",
+  "partner_exists": false,
+  "arrangement_members": [
+   "healthy",
+   "sickly"
+  ],
+  "description_draft": null,
+  "description_notes": "General health.",
+  "description": null,
+  "source": null,
+  "tags": [
+   "physical"
+  ],
+  "status": "candidate",
+  "decision": "Accepted 2026-09-08 as a separate research track: tag `physical`, keep out of the clean-pair cohort and goal lists until the research says keep / keep-as-tagged / remove",
+  "alternatives": null,
+  "section": "Physical-attribute traits: a separate research track (decided 2026-09-08)",
+  "lines": "2070-2071",
+  "chunk_confidence": "high",
+  "extracted_from": "extract_4.json"
+ },
+ {
+  "stem": "heavyset",
+  "label": "heavyset",
+  "entity_type": "trait",
+  "chunk": "6",
+  "sub_chunk": "physical",
+  "pairing": "pair",
+  "partner": "slender",
+  "partner_exists": false,
+  "arrangement_members": [
+   "heavyset",
+   "slender"
+  ],
+  "description_draft": null,
+  "description_notes": "Build; neutral words chosen.",
+  "description": null,
+  "source": null,
+  "tags": [
+   "physical"
+  ],
+  "status": "candidate",
+  "decision": "Accepted 2026-09-08 as a separate research track: tag `physical`, keep out of the clean-pair cohort and goal lists until the research says keep / keep-as-tagged / remove",
+  "alternatives": null,
+  "section": "Physical-attribute traits: a separate research track (decided 2026-09-08)",
+  "lines": "2067",
+  "chunk_confidence": "high",
+  "extracted_from": "extract_4.json"
+ },
+ {
+  "stem": "in_pain",
+  "label": "in chronic pain",
+  "entity_type": "trait",
+  "chunk": "6",
+  "sub_chunk": "physical",
+  "pairing": "singleton",
+  "partner": null,
+  "partner_exists": null,
+  "arrangement_members": null,
+  "description_draft": null,
+  "description_notes": "Roger, 2026-10-08 (duration rule): not acute pain but living with pain that does not go away, distinct from chronically ill because the pain often comes from injury or wear rather than illness. Label 'in chronic pain' (stem in_chronic_pain).",
+  "description": null,
+  "source": null,
+  "tags": [
+   "physical",
+   "state"
+  ],
+  "status": "candidate",
+  "decision": "Accepted 2026-09-08 as a separate research track: tag `physical`, keep out of the clean-pair cohort and goal lists until the research says keep / keep-as-tagged / remove",
+  "alternatives": null,
+  "section": "Physical-attribute traits: a separate research track (decided 2026-09-08)",
+  "lines": "2070-2071",
+  "chunk_confidence": "high",
+  "extracted_from": "extract_4.json",
+  "stem_planned": "in_chronic_pain"
+ },
+ {
+  "stem": "left_handed",
+  "label": "left-handed",
+  "entity_type": "trait",
+  "chunk": "6",
+  "sub_chunk": "physical",
+  "pairing": "singleton",
+  "partner": null,
+  "partner_exists": null,
+  "arrangement_members": null,
+  "description_draft": null,
+  "description_notes": "Handedness, unpaired; right-handed is the default.",
+  "description": null,
+  "source": null,
+  "tags": [
+   "physical"
+  ],
+  "status": "candidate",
+  "decision": "Accepted 2026-09-08 as a separate research track: tag `physical`, keep out of the clean-pair cohort and goal lists until the research says keep / keep-as-tagged / remove",
+  "alternatives": null,
+  "section": "Physical-attribute traits: a separate research track (decided 2026-09-08)",
+  "lines": "2073",
+  "chunk_confidence": "high",
+  "extracted_from": "extract_4.json"
+ },
+ {
+  "stem": "plain_looking",
+  "label": "plain-looking",
+  "entity_type": "trait",
+  "chunk": "6",
+  "sub_chunk": "physical",
+  "pairing": "pair",
+  "partner": "good_looking",
+  "partner_exists": false,
+  "arrangement_members": [
+   "good_looking",
+   "plain_looking"
+  ],
+  "description_draft": null,
+  "description_notes": "Rated attractiveness.",
+  "description": null,
+  "source": null,
+  "tags": [
+   "physical"
+  ],
+  "status": "candidate",
+  "decision": "Accepted 2026-09-08 as a separate research track: tag `physical`, keep out of the clean-pair cohort and goal lists until the research says keep / keep-as-tagged / remove",
+  "alternatives": null,
+  "section": "Physical-attribute traits: a separate research track (decided 2026-09-08)",
+  "lines": "2072",
+  "chunk_confidence": "high",
+  "extracted_from": "extract_4.json"
+ },
+ {
+  "stem": "red_headed",
+  "label": "red-headed",
+  "entity_type": "trait",
+  "chunk": "6",
+  "sub_chunk": "physical",
+  "pairing": "set",
+  "partner": null,
+  "partner_exists": null,
+  "arrangement_members": [
+   "black_haired",
+   "blonde",
+   "brunette",
+   "gray_haired",
+   "red_headed"
+  ],
+  "description_draft": null,
+  "description_notes": "Hair colour, listed as unpaired; the arrangement-hunting TODO (line 2136) says `set` per attribute. grey-haired: note the age correlation.",
+  "description": null,
+  "source": null,
+  "tags": [
+   "physical"
+  ],
+  "status": "candidate",
+  "decision": "Added by Roger 2026-09-08; Accepted 2026-09-08 as a separate research track: tag `physical`, keep out of the clean-pair cohort and goal lists until the research says keep / keep-as-tagged / remove",
+  "alternatives": null,
+  "section": "Physical-attribute traits: a separate research track (decided 2026-09-08)",
+  "lines": "2077-2079",
+  "chunk_confidence": "high",
+  "extracted_from": "extract_4.json"
+ },
+ {
+  "stem": "sedentary",
+  "label": "sedentary",
+  "entity_type": "trait",
+  "chunk": "6",
+  "sub_chunk": "physical",
+  "pairing": "pair",
+  "partner": "athletic",
+  "partner_exists": false,
+  "arrangement_members": [
+   "athletic",
+   "sedentary"
+  ],
+  "description_draft": null,
+  "description_notes": "Physical activity / fitness.",
+  "description": null,
+  "source": null,
+  "tags": [
+   "physical"
+  ],
+  "status": "candidate",
+  "decision": "Accepted 2026-09-08 as a separate research track: tag `physical`, keep out of the clean-pair cohort and goal lists until the research says keep / keep-as-tagged / remove",
+  "alternatives": null,
+  "section": "Physical-attribute traits: a separate research track (decided 2026-09-08)",
+  "lines": "2068-2069",
+  "chunk_confidence": "high",
+  "extracted_from": "extract_4.json"
+ },
+ {
+  "stem": "short",
+  "label": "short",
+  "entity_type": "trait",
+  "chunk": "6",
+  "sub_chunk": "physical",
+  "pairing": "pair",
+  "partner": "tall",
+  "partner_exists": false,
+  "arrangement_members": [
+   "short",
+   "tall"
+  ],
+  "description_draft": null,
+  "description_notes": "Height.",
+  "description": null,
+  "source": null,
+  "tags": [
+   "physical"
+  ],
+  "status": "candidate",
+  "decision": "Accepted 2026-09-08 as a separate research track: tag `physical`, keep out of the clean-pair cohort and goal lists until the research says keep / keep-as-tagged / remove",
+  "alternatives": null,
+  "section": "Physical-attribute traits: a separate research track (decided 2026-09-08)",
+  "lines": "2066",
+  "chunk_confidence": "high",
+  "extracted_from": "extract_4.json"
+ },
+ {
+  "stem": "nearsighted",
+  "label": "nearsighted",
+  "entity_type": "trait",
+  "chunk": "6",
+  "sub_chunk": "physical",
+  "pairing": "singleton",
+  "partner": null,
+  "partner_exists": null,
+  "arrangement_members": null,
+  "description_draft": null,
+  "description_notes": "Myopia, unpaired; deaf, blind, mobility_impaired are in the disability section.",
+  "description": null,
+  "source": null,
+  "tags": [
+   "physical"
+  ],
+  "status": "candidate",
+  "decision": "Accepted 2026-09-08 as a separate research track: tag `physical`, keep out of the clean-pair cohort and goal lists until the research says keep / keep-as-tagged / remove",
+  "alternatives": null,
+  "section": "Physical-attribute traits: a separate research track (decided 2026-09-08)",
+  "lines": "2074-2075",
+  "chunk_confidence": "high",
+  "extracted_from": "extract_4.json"
+ },
+ {
+  "stem": "sickly",
+  "label": "sickly",
+  "entity_type": "trait",
+  "chunk": "6",
+  "sub_chunk": "physical",
+  "pairing": "pair",
+  "partner": "healthy",
+  "partner_exists": false,
+  "arrangement_members": [
+   "healthy",
+   "sickly"
+  ],
+  "description_draft": null,
+  "description_notes": "General health.",
+  "description": null,
+  "source": null,
+  "tags": [
+   "physical"
+  ],
+  "status": "candidate",
+  "decision": "Accepted 2026-09-08 as a separate research track: tag `physical`, keep out of the clean-pair cohort and goal lists until the research says keep / keep-as-tagged / remove",
+  "alternatives": null,
+  "section": "Physical-attribute traits: a separate research track (decided 2026-09-08)",
+  "lines": "2070-2071",
+  "chunk_confidence": "high",
+  "extracted_from": "extract_4.json"
+ },
+ {
+  "stem": "slender",
+  "label": "slender",
+  "entity_type": "trait",
+  "chunk": "6",
+  "sub_chunk": "physical",
+  "pairing": "pair",
+  "partner": "heavyset",
+  "partner_exists": false,
+  "arrangement_members": [
+   "heavyset",
+   "slender"
+  ],
+  "description_draft": null,
+  "description_notes": "Build; neutral words chosen.",
+  "description": null,
+  "source": null,
+  "tags": [
+   "physical"
+  ],
+  "status": "candidate",
+  "decision": "Accepted 2026-09-08 as a separate research track: tag `physical`, keep out of the clean-pair cohort and goal lists until the research says keep / keep-as-tagged / remove",
+  "alternatives": null,
+  "section": "Physical-attribute traits: a separate research track (decided 2026-09-08)",
+  "lines": "2067",
+  "chunk_confidence": "high",
+  "extracted_from": "extract_4.json"
+ },
+ {
+  "stem": "tall",
+  "label": "tall",
+  "entity_type": "trait",
+  "chunk": "6",
+  "sub_chunk": "physical",
+  "pairing": "pair",
+  "partner": "short",
+  "partner_exists": false,
+  "arrangement_members": [
+   "short",
+   "tall"
+  ],
+  "description_draft": null,
+  "description_notes": "Height.",
+  "description": null,
+  "source": null,
+  "tags": [
+   "physical"
+  ],
+  "status": "candidate",
+  "decision": "Accepted 2026-09-08 as a separate research track: tag `physical`, keep out of the clean-pair cohort and goal lists until the research says keep / keep-as-tagged / remove",
+  "alternatives": null,
+  "section": "Physical-attribute traits: a separate research track (decided 2026-09-08)",
+  "lines": "2066",
+  "chunk_confidence": "high",
+  "extracted_from": "extract_4.json"
+ },
+ {
+  "stem": "female",
+  "label": "female",
+  "entity_type": "trait",
+  "chunk": "6",
+  "sub_chunk": "physical",
+  "pairing": "pair",
+  "partner": "male",
+  "partner_exists": null,
+  "arrangement_members": null,
+  "description_draft": null,
+  "description_notes": "Bodily sex (Roger, 2026-09-28): the body's sex as lived, not identity and not expression (masculine / feminine, nonbinary, neuter and androgynous exist for those). Roger, 2026-10-08: NOT tagged physical: like age, sex affects behaviour by more than stereotype (hormones), so these stay in the corpus even if the physical track is dropped. Description body-only all the same.",
+  "description": null,
+  "source": null,
+  "tags": [
+   "membership"
+  ],
+  "status": "candidate",
+  "decision": "Undecided: whether male and female are wanted as membership traits beside the queued expression set; chunk 7 per the seeding plan (line 2792: 'male / female') DECIDED 2026-09-28 (Roger): these are physical traits; filed under the physical-attribute research track and deferred with it; write as bodily sex, not identity or expression",
+  "alternatives": "the queued gender-expression set (masculine ↔ feminine, neuter, nonbinary, androgynous); polling identity categories (man, woman, nonbinary)",
+  "section": "Coverage audit part 4: attitudes, behavior and segmentation (decided 2026-09-08) > Still open",
+  "lines": "2347-2350",
+  "chunk_confidence": "high",
+  "extracted_from": "extract_4.json"
+ },
+ {
+  "stem": "male",
+  "label": "male",
+  "entity_type": "trait",
+  "chunk": "6",
+  "sub_chunk": "physical",
+  "pairing": "pair",
+  "partner": "female",
+  "partner_exists": null,
+  "arrangement_members": null,
+  "description_draft": null,
+  "description_notes": "Bodily sex (Roger, 2026-09-28): the body's sex as lived, not identity and not expression (masculine / feminine, nonbinary, neuter and androgynous exist for those). Roger, 2026-10-08: NOT tagged physical: like age, sex affects behaviour by more than stereotype (hormones), so these stay in the corpus even if the physical track is dropped. Description body-only all the same.",
+  "description": null,
+  "source": null,
+  "tags": [
+   "membership"
+  ],
+  "status": "candidate",
+  "decision": "Undecided: whether male and female are wanted as membership traits beside the queued expression set; chunk 7 per the seeding plan (line 2792: 'male / female') DECIDED 2026-09-28 (Roger): these are physical traits; filed under the physical-attribute research track and deferred with it; write as bodily sex, not identity or expression",
+  "alternatives": "the queued gender-expression set (masculine ↔ feminine, neuter, nonbinary, androgynous); polling identity categories (man, woman, nonbinary)",
+  "section": "Coverage audit part 4: attitudes, behavior and segmentation (decided 2026-09-08) > Still open",
+  "lines": "2347-2350",
+  "chunk_confidence": "high",
+  "extracted_from": "extract_4.json"
+ }
+]

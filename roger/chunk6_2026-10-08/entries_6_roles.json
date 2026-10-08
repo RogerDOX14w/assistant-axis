@@ -1,0 +1,71 @@
+[
+ {
+  "stem": "athlete",
+  "label": "athlete",
+  "entity_type": "role",
+  "chunk": "6",
+  "sub_chunk": "physical",
+  "pairing": "singleton",
+  "partner": null,
+  "partner_exists": null,
+  "arrangement_members": null,
+  "description_draft": null,
+  "description_notes": "Athlete role, missing today (coach, surfer, daredevil exist).",
+  "description": null,
+  "source": null,
+  "tags": [
+   "physical"
+  ],
+  "status": "candidate",
+  "decision": "Accepted 2026-09-08 as a separate research track: tag `physical`, keep out of the clean-pair cohort and goal lists until the research says keep / keep-as-tagged / remove",
+  "alternatives": null,
+  "section": "Physical-attribute traits: a separate research track (decided 2026-09-08)",
+  "lines": "2068-2069",
+  "chunk_confidence": "high",
+  "extracted_from": "extract_4.json",
+  "also_in": [
+   {
+    "section": "Coverage audit part 2 (decided 2026-09-07)",
+    "lines": "ROLES_TO_ADD 93-98",
+    "from": "extract_5.json",
+    "status": "candidate",
+    "chunk": "2"
+   }
+  ]
+ },
+ {
+  "stem": "pregnant",
+  "label": "pregnant",
+  "entity_type": "role",
+  "chunk": "6",
+  "sub_chunk": "physical",
+  "pairing": "singleton",
+  "partner": null,
+  "partner_exists": null,
+  "arrangement_members": null,
+  "description_draft": null,
+  "description_notes": "Pregnancy as a role: a state, but narrative-typical.",
+  "description": null,
+  "source": null,
+  "tags": [
+   "physical",
+   "state"
+  ],
+  "status": "candidate",
+  "decision": "Accepted 2026-09-08 as a separate research track: tag `physical`, keep out of the clean-pair cohort and goal lists until the research says keep / keep-as-tagged / remove",
+  "alternatives": null,
+  "section": "Physical-attribute traits: a separate research track (decided 2026-09-08)",
+  "lines": "2076",
+  "chunk_confidence": "high",
+  "extracted_from": "extract_4.json",
+  "also_in": [
+   {
+    "section": "Coverage audit part 2 (decided 2026-09-07)",
+    "lines": "ROLES_TO_ADD 93-98",
+    "from": "extract_5.json",
+    "status": "candidate",
+    "chunk": "2"
+   }
+  ]
+ }
+]

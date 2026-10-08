@@ -2197,6 +2197,31 @@ Candidates (all pairs unless marked):
   rate variability, EEG and imaging, polygenic scores, biological age,
   voice pitch, digit ratio, medications.
 
+**Roger's rulings at the start of chunk 6 (2026-10-08).**
+- **Body-only descriptions.**  Every description in this track states only
+  the body and how it is lived (sunburn for fair skin, doorways for tall,
+  glasses for short sight; for the attractiveness pair, how others look),
+  with no personality or behaviour clause, so that any behavioural content
+  in the vectors is the model's own.  That is what makes the stereotype
+  question below answerable.
+- **male, female and grey-haired are not tagged `physical`.**  Like age, sex
+  affects behaviour by more than stereotype (hormones), and grey hair
+  correlates with age; so they stay in the corpus even if the rest of the
+  track is dropped.  Their descriptions are body-only all the same.
+- **in-pain is "in chronic pain"** (stem `in_chronic_pain`), by the duration
+  rule: living with pain that does not go away, distinct from chronically
+  ill.
+- Defaults accepted: pregnant stays a role (the duration rule is for
+  traits; the role corpus holds situational roles such as patient); the
+  seven pairs are paired by construction, the antonym check informational;
+  hair colour and eye colour are two `set`s.
+
+As seeded in chunk 6, the list above became 29 traits and 2 roles: see the
+close-of-chunk-6 status paragraph (renames: heavyset / slender to fat / thin,
+in-pain to in chronic pain, grey-haired to gray-haired, short-sighted to
+nearsighted, blonde / brunette to blond / brown-haired; added: muscular /
+slight, gray-eyed).
+
 Research questions to answer before these join the main cohort: do the
 vectors separate from age, race, gender and nationality directions; do
 the hair / eye / skin traits carry behavioural content (the stereotype
@@ -3015,7 +3040,7 @@ TBD, ~100 backlog, 88 not adopted); the inventory becomes
 | V2 | **done 2026-10-02** (rubric adopted 2026-10-01 as `9255dd3430ef`, corpus regenerated, held-out check passed, pairs rechecked): trait generator V2 (§ "Trait generator V2"; added 2026-09-28, Roger: "insert it in the list of tasks before chunk 4 — we'll do that next"): rewrite `_ROGER_TEMPLATE` to fix the generator-side issues, settle how a pair is confirmed given the check's noise, then regenerate every trait and recheck the pairs | the 659 existing traits | design to agree with Roger first; about $19 of generation, about $40 with the honest pair recheck, so the regeneration needs the expensive-operations confirmation; before chunk 4 so that chunk 4 is generated once |
 | 4 | **done 2026-10-08** (127 seeded and generated under V2 by the standards method, every decision taken; 74 facet / aspect / dichotomy entries parked as `backlog` for the post-extraction verdict): standards: pairs and orthoplexes (41) then sets and rings (100); lenient pairing per the policy; near-duplicate tagging | 127 (+74 backlog) | Big Five / HEXACO low-pole names |
 | 5 | **done 2026-10-08** (90 seeded and generated under V2, every decision taken; distressed dropped, three heritage entries parked; no refusals): unpaired plain traits and plain sets: memberships, states, the two simplices; the sensitive batch (~20) handled together | 90 (+1 dropped, +3 backlog) | refusals (none came) |
-| 6 | physical track, tagged `physical` | 26 | none |
+| 6 | **done 2026-10-08** (29 traits and 2 roles seeded under V2, body-only; three not tagged `physical` on Roger's word): physical track, tagged `physical` | 31 | brown-haired and brown-eyed balked without thinking |
 | 7 | TBD items, decided as reached: tarot, male / female, Bourdieu, diaspora, nouveau_riche / shabby_genteel, the PC-named May candidates | 48 | all |
 | then | one RunPod extraction for the whole batch (expensive-operations confirmation), then the post-extraction research: arrangement geometry, near-duplicate exclusions, physical track, hierarchy recovery | | |
 
@@ -3201,6 +3226,31 @@ for chunk 5".  Corpus: 880 trait files, 281 pairs, two maps, 15 triangle
 members; 338 role files.  Roger then read every new trait in a review table
 and edited six descriptions himself.  Chunk 5 generation about $8.70.  Next: the
 commit, then chunk 6 (the physical track).
+
+Status 2026-10-08 (close of chunk 6).  The physical track: 29 traits and the
+roles athlete and pregnant, generated under V2 and kept out of the clean-pair
+and goal lists until the track's research decides keep, keep-as-tagged or
+remove (§ "Physical-attribute traits: a separate research track").  Roger's
+rulings: every description body-only, so any behavioural content the vectors
+carry is the model's own; [male](./male.json), [female](./female.json) and
+[gray-haired](./gray_haired.json) not tagged `physical` (sex and age affect
+behaviour by more than stereotype), so they stay if the track goes.  As
+seeded: tall / short, [fat](./fat.json) / [thin](./thin.json) (renamed from
+heavyset / slender, the polite labels), [muscular](./muscular.json) /
+[slight](./slight.json) (added; body composition as two axes, fat and
+muscle), athletic / sedentary (athletic now without the muscle), healthy /
+sickly, good-looking / plain-looking, fair- / dark-skinned and male /
+female, all pairs; the hair-colour set (blond, brown-haired, black-haired,
+red-headed, gray-haired; blond and brown-haired chosen over the feminine
+forms) and the eye-colour set (blue-, brown-, gray- and green-eyed);
+chronically ill, [in chronic pain](./in_chronic_pain.json) (the duration
+rule), left-handed and nearsighted (US English for short-sighted).  A
+finding on the way: the generator refused brown-haired and brown-eyed, the
+two unmarked, most common colours, ten times each, while the marked colours
+and dark-skinned went straight through; with a thinking budget both
+generated cleanly (seeding log, chunk 6).  Corpus: 909 trait files, 289
+pairs; 339 roles.  Chunk 6 generation about $2.70.  Next: the commit, then
+chunk 7 (the TBD items, decided as reached).
 
 ## Trait generator V2: the next task, before chunk 4 (Roger, 2026-09-28)
 

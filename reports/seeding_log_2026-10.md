@@ -899,3 +899,100 @@ seeded from the February candidate list with no decision recorded, which the
 agent should have flagged; Roger kept it, and **added both to the religion
 set, now ten members** (the world religions plus Neopagan and New Age).  The
 peer was told of the fourth rename.
+
+Chunk 5 was committed as `7e10c23` (corpus) and `467ea35` (docs) after a
+final test run: 3,021 passed, the only failures the trait-gap session's
+Roget acceptance test (the four renamed stems, which it re-places from the
+commit) and the three axis-description failures that predate September.
+
+## Chunk 6: the physical track (started 2026-10-08)
+
+28 entries from TRAITS_TO_ADD § "Physical-attribute traits: a separate
+research track" (decided 2026-09-08): 26 traits and the roles athlete and
+pregnant, all tagged `physical` and kept out of the clean-pair and goal
+lists until the track's own research decides keep, keep-as-tagged or
+remove.  Work directory [roger/chunk6_2026-10-08/](../roger/chunk6_2026-10-08/).
+
+**Roger's rulings at the start.**  (1) **Body-only descriptions**: no
+personality or behaviour clause, only the body and how it is lived, so that
+any behavioural content the vectors carry is the model's own, which is what
+the track's stereotype question asks.  (2) **in pain becomes "in chronic
+pain"** (duration rule).  (3) **male, female and gray-haired are not tagged
+`physical`**: like age, sex affects behaviour by more than stereotype, and
+gray hair correlates with age, so they stay if the rest of the track is
+dropped; their descriptions are body-only all the same.  Defaults stated and
+accepted: pregnant stays a role; the seven pairs are paired by construction;
+hair colour and eye colour are two `set`s.
+
+**Drafts and review.**  One Fable writer ([packet_6.md](../roger/chunk6_2026-10-08/packet_6.md),
+[drafts_6.json](../roger/chunk6_2026-10-08/drafts_6.json)), one reviewer
+([review_6.json](../roger/chunk6_2026-10-08/review_6.json)): no draft
+carried a personality clause; two small edits (plain-looking given the body
+clause its partner has; a repeated word in healthy).  Renamed in the queue
+before seeding, by rule on the reviewer's and writer's flags: grey-haired to
+**gray-haired** and short-sighted to **nearsighted** (US English; the second
+also loses the "lacks foresight" reading), blonde and brunette to **blond**
+and **brown-haired** (the feminine forms would skew generation toward women
+and confound hair colour with sex, in a track built to test exactly that
+kind of confound).
+
+**Generation** ($1.81 plus $0.23): 26 of 28 at the first pass.
+**Brown-haired and brown-eyed failed ten times each without thinking**, and
+the failures are a finding: brown-haired wrote into its eval prompt "ERROR:
+'Brown-haired' is a physical descriptor, not a personality trait ... would
+require fabricating false stereotypes" (and, in its reasoning, that
+compliance would "produce technically compliant-looking output that is
+actually meaningless and would corrupt any research using it"); brown-eyed
+wrote usable instructions behind a paragraph of deliberation, which broke
+the JSON.  The other six colour traits went through, so the model balked
+only at the two unmarked, most common colours.  With `--thinking-budget
+4000` both generated cleanly and body-only (eyebrows that show without
+makeup, red glints in sun; sun met without a squint); their queue entries
+carry a `generation_note` and the files record `thinking_budget` 4000, the
+rest of the corpus being generated with thinking off.  Neither form was
+caught by the refusal handling (an "ERROR:" sentinel inside JSON, and a
+deliberation preface), so both were retried as errors; noted for the
+detector.  Five doubled openings hand-edited (blue-eyed, brown-haired,
+female, and the roles athlete and pregnant).  Checks: every pair named its
+partner from at least one side (tall and short, healthy and sickly, male and
+female both ways); the colour traits name the opposite colour.  Corpus 906
+trait files, 340 role files; checker clean.  Review table for Roger:
+[review_table_chunk6.md](../roger/chunk6_2026-10-08/review_table_chunk6.md).
+
+**Roger's first changes (2026-10-08).**  (1) heavyset / slender were polite
+labels that also cover a muscular or slight frame, while their descriptions
+were already about weight (the larger sizes and airplane seats; belts
+cinched, feeling the cold): **renamed [fat](../data/traits/instructions/fat.json)
+/ [thin](../data/traits/instructions/thin.json)**, the plain words (the
+fat-acceptance literature prefers "fat" to the clinical "overweight"), with
+the openings now "carrying a lot of / little body fat".  (2) Muscle as a
+separate trait, since it comes from manual work or the frame as well as
+from training: **[muscular](../data/traits/instructions/muscular.json)**
+("whether from the gym, years of lifting and hauling, or the build one was
+born with"), seeded `non-X`; its check named "frail | slight | scrawny",
+Roger's own guess among them, so **[slight](../data/traits/instructions/slight.json)**
+was seeded as little muscle on a light frame "whatever one weighs" to keep
+it off thin; its check named "muscular | brawny | burly", so the two are a
+clean pair.  With fat / thin that gives body composition two axes, fat and
+muscle.  [athletic](../data/traits/instructions/athletic.json) lost "muscle
+that shows" (now "a body that recovers overnight"): athletic is the training
+and the fitness, not the build.  (3) **[gray-eyed](../data/traits/instructions/gray_eyed.json)
+added** to the eye-colour set (four members; tagged physical, gray eyes
+carry no age correlation) and "slate" moved there from blue-eyed ("sky to
+sapphire").  $0.40 in all; no doubled openings this round.  Chunk 6: 31
+entries; corpus 909 trait files.
+
+**Close of chunk 6 (2026-10-08).**  Roger read the full table and edited
+nothing.  Final checks over the 31 files: the corpus forms (traits "This
+means", 18 to 36 words; roles "A ... is someone who", 23 to 43), US
+spelling, no second person, the `physical` tag on all but male, female and
+gray-haired, an arrangement on every trait, five distinct openings and forty
+questions each, the file identical to its queue entry; `check_arrangements`
+clean, lists in sync.  Queue: 29 entries `done`, the 2 of muscular / slight
+`paired`.  29 placeholder rows appended to
+[corpus_regions.json](../data/candidates/corpus_regions.json).  Docs: the
+chunk-6 row and status paragraph in `TRAITS_TO_ADD.md` and an as-seeded
+note in its physical-track section; athlete and pregnant marked seeded in
+`ROLES_TO_ADD.md`; AGENT_NOTES housekeeping item 9 (the two refusal forms the
+detector missed, and the thinking-budget fallback).  Chunk 6 generation
+about $2.70.

@@ -1,0 +1,254 @@
+[
+ {
+  "stem": "athletic",
+  "label": "athletic",
+  "entity_type": "trait",
+  "description_draft": "This means training most days and playing a sport on weekends: a resting pulse in the fifties, muscle that shows, and stairs taken two at a time without getting winded.",
+  "nearest_existing": "energetic (pace and stamina as a temperament, no training or sport); gym_rat role (the lifting scene); health_conscious (checkups and diet as a regimen). This one is the trained body and the sport itself.",
+  "notes": "Body-only: the activity (training, a sport) and its physical results (pulse, muscle, stairs). No 'disciplined', 'competitive' or 'driven'. 30 words.",
+  "set_review": "athletic / sedentary: grain is the daily activity level and what it does to the body (pulse, muscle, a flight of stairs), same three markers on both sides, mirrored length (30 / 31). No character word on either pole; the pair reads as one."
+ },
+ {
+  "stem": "black_haired",
+  "label": "black-haired",
+  "entity_type": "trait",
+  "description_draft": "This means having hair so dark it shows blue in strong light: eyebrows and lashes dark to match, gray that shows from the first strand, and bleaching before any dye will take.",
+  "nearest_existing": "No hair-colour trait exists in the corpus; nearest by sense is brunette in this set (dark brown, not black). Heritage memberships (east_asian, indian, etc.) are kept out of it: the hair alone.",
+  "notes": "Avoided 'thick, coarse strands' (reads as an ethnic marker). 'Dark' is the colour word; 'black' kept out of the opening. 32 words.",
+  "set_review": "Hair set (black-haired, blonde, brunette, red-headed, grey-haired): one grain throughout, the colour range, brows and lashes, and how the hair meets sun, gray and dye. Each member gets a different one of those particulars (gray shows at once / grays blend in / first grays plain / fades pale, not gray / the gray itself), so the five read as one set without repeating. grey-haired is the odd member (a change with the years, not a colour one is born with); written as a fact of the hair, no age persona."
+ },
+ {
+  "stem": "blond",
+  "label": "blond",
+  "entity_type": "trait",
+  "description_draft": "This means having light hair, pale yellow to sandy: eyebrows and lashes so fair they barely show, hair that goes lighter in summer sun, and grays that blend in unnoticed.",
+  "nearest_existing": "No hair-colour trait exists; fair_skinned in this chunk shares the sun theme but is the skin. Nothing else near.",
+  "notes": "Nothing on temperament or intelligence (the stereotype the research is testing for). 'Light hair' used so the label is not echoed. 30 words.",
+  "set_review": null
+ },
+ {
+  "stem": "blue_eyed",
+  "label": "blue-eyed",
+  "entity_type": "trait",
+  "description_draft": "This means having blue eyes, sky to slate: squinting in bright sun and reaching for sunglasses first, and a color that shifts with the light and the shirt worn.",
+  "nearest_existing": "No eye-colour trait exists. wide_eyed is an attitude (credulous wonder), not an eye. Nothing near.",
+  "notes": "The colour has to be named (there is no other way to say which eyes); opening still goes straight to the particulars. Light sensitivity is the physical particular. 29 words.",
+  "set_review": "Eye set (blue-, brown-, green-eyed): one grain, the colour range, how the eye meets bright light, and how the colour reads (shifts with the light / blends with the pupil / reads hazel in dim light). Three read as one set; lengths 29 / 31 / 29."
+ },
+ {
+  "stem": "brown_eyed",
+  "label": "brown-eyed",
+  "entity_type": "trait",
+  "description_draft": "This means having brown eyes, amber to near black: an iris that blends with the pupil in dim light, bright sun met without a squint, and the world's commonest eye color.",
+  "nearest_existing": "No eye-colour trait exists. Nothing near.",
+  "notes": "'The world's commonest eye color' is a fact of the colour, not a social clause. 31 words.",
+  "set_review": null
+ },
+ {
+  "stem": "brown_haired",
+  "label": "brown-haired",
+  "entity_type": "trait",
+  "description_draft": "This means having brown hair, chestnut to dark coffee: eyebrows and lashes that show without makeup, red glints in summer sun, and the first grays plain against the brown.",
+  "nearest_existing": "No hair-colour trait exists; black_haired in this set is the neighbour (darker). Nothing else near.",
+  "notes": "'Brown hair' is not the label, so no echo. 29 words.",
+  "set_review": null
+ },
+ {
+  "stem": "chronically_ill",
+  "label": "chronically-ill",
+  "entity_type": "trait",
+  "description_draft": "This means living for years with an illness that is managed, not cured: daily medication, specialist appointments on the calendar, flares that take out a week, and energy rationed day by day.",
+  "nearest_existing": "patient role (an acute episode of illness and treatment); sickly in this chunk (a weak constitution, many minor illnesses); mobility_impaired (a disability of movement); stigmatized names an illness only as a mark others hold against one. This one is a single long-term illness, managed.",
+  "notes": "Duration written in ('for years'). 'Energy rationed' is the body's limit, not a disposition. 32 words.",
+  "set_review": null
+ },
+ {
+  "stem": "dark_skinned",
+  "label": "dark-skinned",
+  "entity_type": "trait",
+  "description_draft": "This means having deep brown skin: deepening in summer sun without burning, a hunt for a matching foundation shade, a rash that shows purple, not red, and low vitamin D in winter.",
+  "nearest_existing": "The heritage memberships (african, south_asian, indigenous_australian, hispanic, etc.) carry country, language and everyday world; this one is the skin alone: sun, foundation, how a rash reads, vitamin D. No race, no social experience.",
+  "notes": "'Deep brown skin' is the physical description; no ethnic word. Vitamin D is the medical particular that follows from the skin (the counterpart of SPF on the other pole). 32 words.",
+  "set_review": "dark-skinned / fair-skinned: grain is the skin and the sun, the foundation shade, and how a rash reads; each pole gets its own medical consequence (vitamin D / SPF). Lengths 32 / 30. Reads as one pair; neither pole touches race or social experience."
+ },
+ {
+  "stem": "fair_skinned",
+  "label": "fair-skinned",
+  "entity_type": "trait",
+  "description_draft": "This means having pale skin: burning in twenty minutes of summer sun, SPF 50 for any day outside, the palest foundation shade, and a rash that shows red at once.",
+  "nearest_existing": "The heritage memberships (european, british, russian, etc.) are social; red_headed in this chunk shares the burning but is the hair. This one is the skin alone.",
+  "notes": "'Pale skin' used so the label is not echoed. Freckles left to red-headed. 30 words.",
+  "set_review": null
+ },
+ {
+  "stem": "good_looking",
+  "label": "good-looking",
+  "entity_type": "trait",
+  "description_draft": "This means having a face and figure that turn heads: even features and clear skin, compliments on one's looks, photographs that come out well, and being asked whether one models.",
+  "nearest_existing": "body_confident (how one feels about one's body, an attitude); popular (being liked, a social standing); fashionable (knowing what is in style). This one is how the face and figure are rated, with no attitude attached.",
+  "notes": "Others' response (heads turning, compliments) is allowed by the packet for this pair; vanity and confidence kept out. 30 words.",
+  "set_review": "good-looking / plain-looking: grain is how the face and figure are received (a second look or not, compliments or none, how they photograph, what one is taken for). Lengths 30 / 28. Reads as one pair; no self-regard clause on either side."
+ },
+ {
+  "stem": "green_eyed",
+  "label": "green-eyed",
+  "entity_type": "trait",
+  "description_draft": "This means having green eyes, a color few share: flecks of gold around the pupil, a shade that reads hazel in dim light, and a squint in bright sun.",
+  "nearest_existing": "No eye-colour trait exists. FLAG: the label is polysemous. 'Green-eyed' is the idiom for jealousy, and envious exists in the corpus; the opening ('having green eyes') picks the sense, and nothing in the description touches envy.",
+  "notes": "Kept to the eye. 29 words.",
+  "set_review": null
+ },
+ {
+  "stem": "gray_haired",
+  "label": "gray-haired",
+  "entity_type": "trait",
+  "description_draft": "This means having hair gone silver or white with the years: coarser and drier than it was, a yellow cast without purple shampoo, and roots that show within weeks of a dye.",
+  "nearest_existing": "elderly and middle_aged are age personas (life stage, grandchildren, a slowing body); this one is the hair only. Nothing else near.",
+  "notes": "'With the years' acknowledges the age correlation as a fact of the hair, per Roger's note; no life stage, no persona. The description uses US 'gray' only by avoiding the word (silver or white); the label keeps 'grey-haired' as given. 32 words.",
+  "set_review": null
+ },
+ {
+  "stem": "healthy",
+  "label": "healthy",
+  "entity_type": "trait",
+  "description_draft": "This means having a sound constitution: shaking off whatever is going around in a day, no prescriptions, a checkup that finds nothing year after year, and no sick days in years.",
+  "nearest_existing": "health_conscious (the regimen: keeping checkups, eating right, exercising); flourishing (psychological wellbeing); resilient (bouncing back from setbacks, not illness). This one is the constitution itself, whatever the habits.",
+  "notes": "Standing constitution, not a current state. 'Sound constitution' is the gloss, not a label echo. 31 words.",
+  "set_review": "healthy / sickly: grain is the standing constitution, through the same four markers on both poles (what is going around, prescriptions, the checkup, sick days). Lengths 31 / 31. Reads as one pair; sickly is kept apart from chronically-ill (many minor illnesses vs one managed one)."
+ },
+ {
+  "stem": "heavyset",
+  "label": "heavyset",
+  "entity_type": "trait",
+  "description_draft": "This means having a thick, broad build: shopping the larger sizes, a tight fit in chairs with arms and airplane seats, and running warm in any weather.",
+  "nearest_existing": "body_confident / body_insecure / body_obsessed (attitudes to one's body); gluttonous (an eating vice). This one is the build alone, with no attitude and no cause.",
+  "notes": "Neutral words kept ('thick, broad build'); no 'fat', no eating, no health judgement. 'Running warm' is the physiological counterpart of slender's 'feeling the cold'. 27 words.",
+  "set_review": "heavyset / slender: grain is the build and its practicalities (the sizes, the fit of seats, body temperature). Lengths 27 / 30. Reads as one pair; neither pole gives a cause or a feeling about it."
+ },
+ {
+  "stem": "in_chronic_pain",
+  "label": "in chronic pain",
+  "entity_type": "trait",
+  "description_draft": "This means hurting every day for years, from a bad back, worn joints or an old injury: painkillers that only take the edge off, a heating pad, and sleep broken by it.",
+  "nearest_existing": "chronically_ill in this chunk (an illness, managed; this one is pain from injury or wear, as Roger's note says); sleep_deprived (a state of the nights, not pain); traumatized (psychological). Nothing else near.",
+  "notes": "Stem in_chronic_pain per the packet. Duration written in ('every day for years'); the sources named as alternatives joined with 'or' (rule 11). 32 words.",
+  "set_review": null
+ },
+ {
+  "stem": "left_handed",
+  "label": "left-handed",
+  "entity_type": "trait",
+  "description_draft": "This means writing and eating with the left hand: ink smudged along it, scissors and can openers made for the other, and elbows bumped at a crowded table.",
+  "nearest_existing": "Nothing near in the corpus (kinesthetic_vark is a learning style). Unpaired; right-handed is the default.",
+  "notes": "'The left hand' in the opening is the qualifier that says which hand, not a label echo. 28 words.",
+  "set_review": null
+ },
+ {
+  "stem": "plain_looking",
+  "label": "plain-looking",
+  "entity_type": "trait",
+  "description_draft": "This means having a face and figure nobody looks at twice: no compliments on one's looks, photographs that come out ordinary, and features nobody remembers after one meeting.",
+  "nearest_existing": "body_insecure (shame about one's body, an attitude); unpopular (not being liked); unfashionable (clothes). This one is how the face and figure are rated, with no attitude attached.",
+  "notes": "An opposite, not an absence: ordinary features, unremarked, forgotten. No shyness or low self-regard. 28 words.",
+  "set_review": null
+ },
+ {
+  "stem": "red_headed",
+  "label": "red-headed",
+  "entity_type": "trait",
+  "description_draft": "This means having copper to auburn hair: freckles across the nose and arms, skin that burns in minutes and never tans, and hair that fades pale, not gray, with the years.",
+  "nearest_existing": "No hair-colour trait exists. Overlaps fair_skinned in this chunk on burning (the skin that goes with the hair); the hair is the grain here. irascible and temperamental exist and are exactly the stereotype this entry must not imply; nothing in the draft points at them.",
+  "notes": "Freckles and sunburn kept here per the packet. 'Copper to auburn' so the label is not echoed. 31 words.",
+  "set_review": null
+ },
+ {
+  "stem": "sedentary",
+  "label": "sedentary",
+  "entity_type": "trait",
+  "description_draft": "This means spending the day sitting and getting no exercise: driving to the corner store, winded after one flight of stairs, soft where muscle would be, and stiff from the chair.",
+  "nearest_existing": "lethargic (a dragging energy level as temperament); lazy (character, kept out); health_negligent (skipping checkups and screenings). This one is the day spent sitting and its physical results.",
+  "notes": "'Driving to the corner store' and 'the day sitting' are the activity level, which is the trait; no 'lazy', 'unmotivated' or 'couch potato'. 31 words.",
+  "set_review": null
+ },
+ {
+  "stem": "short",
+  "label": "short",
+  "entity_type": "trait",
+  "description_draft": "This means standing a head below most people: a step stool for the top shelf, hems taken up on every pair of pants, and seeing only backs in a crowd.",
+  "nearest_existing": "No height trait exists. The label could be read as 'curt' (blunt, concise exist); the opening ('standing a head below most people') picks the sense, so no 'short in height' qualifier was needed.",
+  "notes": "No 'Napoleon' clause, no assertiveness or shyness. 30 words.",
+  "set_review": "short / tall: grain is standing height and its practicalities (reach, clothes, a crowd or a doorway, a seat). Lengths 30 / 32, mirrored opening ('standing a head below / above most people'). Reads as one pair."
+ },
+ {
+  "stem": "nearsighted",
+  "label": "nearsighted",
+  "entity_type": "trait",
+  "description_draft": "This means seeing clearly only up close: glasses or contacts from first thing in the morning, faces across the street a blur without them, and a stronger prescription every few years.",
+  "nearest_existing": "blind (seeing little or nothing; this one is corrected to normal with lenses); mobility_impaired (another disability). FLAG: the label is polysemous ('lacking foresight'; short_term_oriented exists for that); the opening ('seeing clearly only up close') picks the sense.",
+  "notes": "Plain particulars of myopia. 31 words.",
+  "set_review": null
+ },
+ {
+  "stem": "sickly",
+  "label": "sickly",
+  "entity_type": "trait",
+  "description_draft": "This means having a weak constitution: catching whatever is going around and keeping it for weeks, prescriptions on the shelf, a checkup that finds something, and sick days gone by spring.",
+  "nearest_existing": "health_negligent (the habits: skipping checkups, no exercise); languishing (psychological); fragile (emotional fragility); chronically_ill in this chunk (one managed illness). This one is the constitution itself: many minor illnesses, slowly thrown off.",
+  "notes": "An opposite, not an absence, through the same four markers as its partner. No hypochondria, no self-pity. 31 words.",
+  "set_review": null
+ },
+ {
+  "stem": "slender",
+  "label": "slender",
+  "entity_type": "trait",
+  "description_draft": "This means having a thin, narrow build: shopping the smaller sizes, belts cinched to the last hole, room to spare in any seat, and feeling the cold before anyone else.",
+  "nearest_existing": "body_obsessed (thinking about one's body all day); ascetic and abstemious (restraint as a disposition). This one is the build alone, with no cause and no attitude.",
+  "notes": "Neutral word kept; no dieting, no 'delicate'. 30 words.",
+  "set_review": null
+ },
+ {
+  "stem": "tall",
+  "label": "tall",
+  "entity_type": "trait",
+  "description_draft": "This means standing a head above most people: ducking through old doorways, knees against the seat in front, being asked to reach the top shelf, and sleeves that never reach the wrist.",
+  "nearest_existing": "No height trait exists. Nothing near in the corpus.",
+  "notes": "'Being asked to reach' rather than 'reaching for strangers', so the clause is something the body meets, not a helpful disposition. 32 words.",
+  "set_review": null
+ },
+ {
+  "stem": "female",
+  "label": "female",
+  "entity_type": "trait",
+  "description_draft": "This means having a woman's body: ovaries, a uterus and breasts, monthly periods from the teens to menopause, the capacity to carry a child, and Pap smears and mammograms on the calendar.",
+  "nearest_existing": "feminine (expression: how one dresses, talks and carries oneself, plus warmth, which this entry must not carry); nonbinary, neuter, androgynous (identity and expression); parent and married (family roles). This one is the body's sex: anatomy and the health particulars that follow.",
+  "notes": "Anatomy named plainly, as an adult would of themselves; no roles, no temperament, no identity word. Lengths matched with male at 32 / 32.",
+  "set_review": "female / male: grain is the body's sex through parallel markers (reproductive anatomy; the cycle or the puberty changes; carrying a child or the muscle on the frame; the sex-specific screening). Both 32 words. Reads as one pair, and stays clear of the expression set (masculine / feminine / neuter / androgynous / nonbinary). Roger to confirm the plainness level of the anatomy words."
+ },
+ {
+  "stem": "male",
+  "label": "male",
+  "entity_type": "trait",
+  "description_draft": "This means having a man's body: testes and a penis, a voice that dropped at puberty, a beard to shave or grow, more muscle on the frame, and prostate checks past fifty.",
+  "nearest_existing": "masculine (expression: manly dress, talk and bearing, plus toughness and assertiveness, which this entry must not carry); nonbinary, neuter, androgynous (identity and expression). This one is the body's sex: anatomy and the health particulars that follow.",
+  "notes": "Anatomy named plainly; no roles, no temperament. 32 words.",
+  "set_review": null
+ },
+ {
+  "stem": "athlete",
+  "label": "athlete",
+  "entity_type": "role",
+  "description_draft": "An athlete is someone who trains to compete: hours a day on the track, in the pool or on the field, a season built around meets or matches, a body that is the whole instrument, and an injury that stops everything.",
+  "nearest_existing": "gym_rat (lifting at the gym for its own sake, no competition); coach and trainer (develop others); competitor (rivalry as a disposition, no sport); daredevil (thrills and danger); surfer (a wave-riding life, no season or meet). This one trains and competes in a sport, the body as the instrument.",
+  "notes": "Body-only for a role: the training, the season, the body, the injury; no 'driven', 'disciplined' or 'competitive'. 41 words (role range 23-43).",
+  "set_review": null
+ },
+ {
+  "stem": "pregnant",
+  "label": "pregnant",
+  "entity_type": "role",
+  "description_draft": "A pregnant woman is someone carrying a child through nine months of the body changing: morning sickness and then a growing belly, the first kicks, prenatal checkups and ultrasounds, maternity clothes, swollen feet, and a due date circled on the calendar.",
+  "nearest_existing": "parent (the child already born, the raising); newlywed (another months-long state, of marriage); patient (illness and treatment, which pregnancy is not). This one is the pregnancy itself: the months of the body changing, the appointments, the due date.",
+  "notes": "Corpus form for an adjective role is 'A <adj> person is someone ...' (homeless, unemployed, estranged). Used 'A pregnant woman' because the packet asks for the body as lived, plainly; 'A pregnant person' is the one-word alternative if Roger prefers the corpus pattern. No mood clause (no glowing, no hormonal, no nesting). 41 words.",
+  "set_review": null
+ }
+]

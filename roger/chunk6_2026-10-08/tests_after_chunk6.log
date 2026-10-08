@@ -1,0 +1,16 @@
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ============================
+FAILED assistant_axis/tests/test_gapgen_roget_acceptance.py::test_every_corpus_trait_is_in_label_heads
+FAILED assistant_axis/tests/test_gapgen_roget_acceptance.py::test_label_heads_has_no_stale_stems
+FAILED assistant_axis/tests/test_gapgen_rubric_v2_round4.py::test_no_corpus_queue_or_validation_word_anywhere_in_a_prompt
+3 failed, 3031 passed, 2 skipped, 3 warnings in 717.48s (0:11:57)
+---- results_analysis
+=========================== short test summary info ============================
+FAILED results_analysis/tests/test_infer_axis_description.py::TestSummarizeAxisE2E::test_full_pipeline_with_mock
+FAILED results_analysis/tests/test_infer_axis_description.py::TestCallOpusStreaming::test_streaming_call_concatenates_text_blocks_skips_thinking
+FAILED results_analysis/tests/test_infer_axis_description.py::TestCallOpusStreaming::test_streaming_with_thinking_disabled_uses_temperature_zero
+3 failed, 65 passed in 2.48s
+---- pipeline
+.........                                                                [100%]
+9 passed in 3.90s
+DONE
