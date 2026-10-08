@@ -5409,6 +5409,42 @@ Each of `roles` and `traits` has `goal` (all-5 @ 2) and `non_goal` (all-5 @ 0) s
 - `traits.goal`: first 30 = max goal-space variation (less-HHH-default side of pairs, distinct ethical frameworks), next 10 = remaining moral circle spectrum, last 26 = default-side of pairs + redundant goal directions
 - `traits.non_goal`: first 30 = max persona-property variation (less-default side of pairs), next 10 = nice-to-haves, last 17 = pair partners + redundant
 
+### Trait-gap platform (2026-10-08)
+
+The trait-gap platform ([`assistant_axis/gapgen/`](./assistant_axis/gapgen/), CLIs in
+[`data_analysis/gap_generation/`](./data_analysis/gap_generation/)) turns the words that *generators*
+(scripts proposing candidate traits: census lists, Roget, WordNet, LLM brainstorms) submit into seed-queue
+candidates.  Three milestones: **M1**, the trait-hood filter
+([`traithood_filter.py`](./data_analysis/gap_generation/traithood_filter.py) `--pipeline split`: is the
+word a persona trait; its gloss, alignment score 0-3 and region); **M2**, the embedding metric
+([`metric_config.json`](./data/candidates/metric_config.json): OpenAI `text-embedding-3-large`, the 10
+nearest corpus traits); **M3**, the novelty check
+([`novelty_score.py`](./data_analysis/gap_generation/novelty_score.py): retrieve, a relation call, then
+one overlap call per pair; `covered`, `new` or `grey`); and the recovery harness
+([`recovery_test.py`](./data_analysis/gap_generation/recovery_test.py): hide a tenth of the corpus, see
+what a generator finds again).  Plans and readouts are in
+[`reports/trait_gap_generation/`](./reports/trait_gap_generation/), starting from
+[`coding_plan_platform.md`](./reports/trait_gap_generation/coding_plan_platform.md) ("Interface as built"
+and the M3 decisions); the docstring of [`gapgen/__init__.py`](./assistant_axis/gapgen/__init__.py)
+lists the frozen interface.  Models (M3 decision 17): every Haiku call is `claude-haiku-5-5` (M1's
+verdict step reads three times); the second opinion and the unsure re-ask are Sonnet 5.5; the overlap
+call is Sonnet 5.5 first, Opus 5.5 on the pairs the rule sends it.
+
+The registry log [`data/candidates/registry.jsonl`](./data/candidates/registry.jsonl) is git-ignored, so
+each checkout has its own (the tracked copy is
+[`registry.snapshot.jsonl`](./data/candidates/registry.snapshot.jsonl), written by
+[`gap_registry.py`](./data_analysis/gap_generation/gap_registry.py) `compact`).  A generator therefore
+writes every `Candidate` it submits to a tracked `candidates.jsonl` in its run directory under
+[`data/candidates/runs/`](./data/candidates/runs/) (one JSON object per line, exactly the dataclass's
+fields, as `submit_candidates(..., run=ctx)` writes it; example:
+[`antonym_check/pilot_1`](./data/candidates/runs/antonym_check/pilot_1/candidates.jsonl)), and a run made
+in another worktree reaches the main checkout's log with `gap_registry.py submit --from <run
+dir>/candidates.jsonl` (idempotent).  Costs: every paid CLI prints its estimate, takes `--budget-usd` as
+a hard cap (an estimate above it is refused), needs `--confirm-expensive --confirmed-by` over $20 (the
+expensive-operations rule: quote the parameters to Roger and wait for his go), writes a `usage.json`
+beside its output, refuses uncommitted platform code without `--allow-dirty`, and runs live under about
+$20 and through the Message Batches API above that, case by case (the batch-or-real-time rule).
+
 ### Clean pair validation results (April 2026)
 <!-- claude: archive -->
 
