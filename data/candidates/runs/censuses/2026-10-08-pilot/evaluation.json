@@ -188,11 +188,11 @@
     "schema_version": "1.0",
     "produced_by": {
       "cmd": "uv run python data_analysis/gap_generation/census_generator.py report --run-id 2026-10-08-pilot",
-      "git_sha": "7bae284+dirty",
+      "git_sha": "ed96aec+dirty",
       "author": "Roger Dearnaley",
       "title": "census generator evaluation, run 2026-10-08-pilot"
     },
-    "produced_at": "2026-10-08T03:36:35+00:00",
+    "produced_at": "2026-10-08T03:36:55+00:00",
     "inputs": [
       {
         "dep_key": "census_table",

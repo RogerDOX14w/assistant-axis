@@ -132,6 +132,9 @@ def render_readout(ev: Mapping, *, doc_path: Path, run_dir: Path, table_path: Pa
     L = lambda p, t=None: _link(p, d, t)  # noqa: E731
     plan = REPO_ROOT / "reports" / "trait_gap_generation" / "coding_plan_01_censuses.md"
     gloss = REPO_ROOT / "reports" / "trait_gap_generation" / "glossary.md"
+    cli = L(REPO_ROOT / "data_analysis" / "gap_generation" / "census_generator.py")
+    reg_cli = L(REPO_ROOT / "data_analysis" / "gap_generation" / "gap_registry.py")
+    freq = L(REPO_ROOT / "assistant_axis" / "gapgen" / "freq.py", "gapgen/freq.py")
     p, f, s, m = ev["parsed"], ev["floor"], ev["submitted"], ev["merges"]
     reg = s.get("registry") or {}
     est = ev.get("estimate") or {}
@@ -141,14 +144,14 @@ def render_readout(ev: Mapping, *, doc_path: Path, run_dir: Path, table_path: Pa
         f"Stage `{ev['stage']}`" + (f", every {ev['every_nth']}th row in rank order (offset {ev['offset']})"
                                      if ev.get("every_nth") else "") + ".  Plan: " + L(plan) + " (its last section, "
         "the revision for the interface as built, governs).  Terms: " + L(gloss, "glossary") + ".  Written by "
-        "`census_generator.py report`; the numbers are in " + L(run_dir / "evaluation.json") + ".",
+        + cli + " `report`; the numbers are in " + L(run_dir / "evaluation.json") + ".",
         "",
         "Definitions used below.  **TDA**: the Trait Descriptive Adjectives list (2,818 words with, for "
         "each, `prop`, the proportion of raters who knew the word; Dataverse, CC0).  **Allport-Odbert**: the "
         "1936 list of about 18,000 person words in four columns (I traits, II temporary states, III social "
         "evaluations, IV metaphorical or doubtful; OSF transcription, CC BY 4.0).  **Zipf**: log10 of a "
         "word's frequency per billion words (`wordfreq`).  **The floor**: the platform's hard-reject line "
-        "below Zipf 1.5 for a dictionary word, with a definition probe from 1.5 to 2.5 (`gapgen.freq`); a "
+        "below Zipf 1.5 for a dictionary word, with a definition probe from 1.5 to 2.5 (" + freq + "); a "
         "curated generator such as this one is never hard-rejected by the platform, its rare words go to "
         "the probe.  **M1 / M3**: the platform's trait-hood filter and novelty scorer.",
         "",
@@ -210,7 +213,7 @@ def render_readout(ev: Mapping, *, doc_path: Path, run_dir: Path, table_path: Pa
                   + ".  Misses: " + (", ".join(f"{_trait(x['stem'], d)} ({x['outcome'] or x['verdict']})"
                                               for x in kp["misses"]) or "none") + ".", ""]
     else:
-        lines += ["## Filter (M1)", "", "Not run yet on this run's rows (Fable runs it); `report` fills this "
+        lines += ["## Filter (M1)", "", "Not run yet on this run's rows (Fable runs it); " + cli + " `report` fills this "
                   "section, the known-label pass rate and the costs once it has.", ""]
     if ev.get("novelty"):
         nv = ev["novelty"]
@@ -219,7 +222,7 @@ def render_readout(ev: Mapping, *, doc_path: Path, run_dir: Path, table_path: Pa
                   + f"; pair completions {nv['pair_completion']}.", ""]
     lines += ["## Files", "",
               f"- {L(run_dir / 'candidates.jsonl')}: the submitted candidates, one per line (tracked; the main "
-              f"checkout resubmits it with `gap_registry.py submit --file`)",
+              f"checkout resubmits it with {reg_cli} `submit --file`)",
               f"- {L(run_dir / 'run.json')}, {L(run_dir / 'usage.json')}, {L(run_dir / 'keys.txt')}, "
               f"{L(run_dir / 'submit_report.json')}, {L(run_dir / 'evaluation.json')}",
               f"- {L(table_path)} (the census table), {L(counts_path)} (ingest counts), "
