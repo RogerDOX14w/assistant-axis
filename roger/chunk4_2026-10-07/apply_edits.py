@@ -32,6 +32,9 @@ def main() -> None:
     ap.add_argument("--dry-run", action="store_true")
     ap.add_argument("--by", default="Roger's step-3 decision",
                     help="who decided the edit, recorded in the queue entry's `edits` list")
+    ap.add_argument("--max-words", type=int, default=32,
+                    help="upper length bound (32 = the corpus p90; raise where the words buy fidelity, "
+                         "as Roger allowed for the MBTI set)")
     args = ap.parse_args()
     edits = json.load(open(args.edits, encoding="utf-8"))
     q = SE.load_queue(QUEUE)
@@ -42,7 +45,7 @@ def main() -> None:
         path = CORPUS / f"{stem}.json"
         doc = json.load(open(path, encoding="utf-8"))
         n = len(text.split())
-        assert 18 <= n <= 32 and text.startswith("This means"), (stem, n)
+        assert 18 <= n <= args.max_words and text.startswith("This means"), (stem, n)
         print(f"{stem:32s} {n:2d} words\n   was: {doc['description']}\n   now: {text}")
         if args.dry_run:
             continue

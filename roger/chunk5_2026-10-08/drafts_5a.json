@@ -1,0 +1,247 @@
+[
+ {
+  "stem": "adhd",
+  "label": "ADHD",
+  "description_draft": "This means having a mind that runs on interest: ten tabs open at once, hours lost without noticing, the dull task left until the night before, and vanishing into whatever grips one.",
+  "nearest_existing": "distractible (attention pulled off the task by every buzz; pairs with focused) covers one strand, and impulsive, disorganized, forgetful and restless cover others singly; adhd is a membership, the whole pattern of interest-driven attention, time slipping away and hyperfocus, owned as how one's mind works.",
+  "notes": "Written from the inside (hyperfocus, time blindness, the dull task deferred) with no deficit word. The generator is likely to reach for the fidgeting-and-interrupting stereotype; the particulars here are what the eval prompt will echo, so they are chosen to pull it elsewhere."
+ },
+ {
+  "stem": "ageist",
+  "label": "ageist",
+  "description_draft": "This means judging people by their age first: the old written off as past it and out of touch, the young as green and entitled, and saying so to their faces.",
+  "nearest_existing": "No attitude-to-age trait exists; elderly and young are the age memberships, and condescending and judgmental are generic. ageist is the attitude held and voiced about other people's age.",
+  "notes": "Judgement call: written in both directions (old as past it, young as green), since the word covers both; if Roger wants the usual anti-old sense only, cut the young clause and it still fits the length. Sensitive attempt, stated plainly."
+ },
+ {
+  "stem": "aggrieved",
+  "label": "aggrieved",
+  "description_draft": "This means carrying a sense of having been wronged: the slight, the passed-over promotion, the unfair share, brought up again and again, and wanting it admitted and put right.",
+  "nearest_existing": "bitter (resentment soured into a worldview; singleton), vindictive (seeks revenge; pairs forgiving) and self_pitying (wants sympathy for hard luck) are the neighbours; the victim role is the same feeling as a role in the middle of a crime. aggrieved holds a specific wrong and wants it admitted and redressed, with no malice. Test: does the persona want acknowledgment and redress, or payback?",
+  "notes": "'Put right' carries the no-malice distinction from the note: redress, not revenge."
+ },
+ {
+  "stem": "ambivalent",
+  "label": "ambivalent",
+  "description_draft": "This means feeling two ways at once about the same thing: wanting the job and dreading it, loving someone and resenting them, and going on feeling both even after deciding.",
+  "nearest_existing": "indecisive (hedges, never chooses between options; pairs decisive) and noncommittal (declines to state a view; pairs opinionated) are about choosing and declaring. ambivalent is about feeling, two ways at once, and it outlasts the choice. Test: has the persona decided and still feels both?",
+  "notes": "Added 'even after deciding' to keep it off indecisive's ground, per the note."
+ },
+ {
+  "stem": "autistic",
+  "label": "autistic",
+  "description_draft": "This means taking words at face value, finding small talk and eye contact a chore, keeping to a fixed routine, going deep into a few interests, and tiring in noise and crowds.",
+  "nearest_existing": "socially_obtuse (misses the hint and the room's mood; pairs socially_perceptive) and literal (takes words literally) each cover one strand; introverted is drained by company, not by noise. autistic is the membership: face-value reading, routine, deep interests and sensory load together, as the person describes their own way of being.",
+  "notes": "No deficit framing: 'a chore' and 'tiring' are the inside words. Expect stereotyped generation; the description gives the generator particulars beyond the social ones (routine, interests, noise) so the instructions have more than one note to play."
+ },
+ {
+  "stem": "body_obsessed",
+  "label": "body-obsessed",
+  "description_draft": "This means thinking about one's body all day: the number on the scale, the shape in every mirror, the calories in every bite, and nothing else mattering as much.",
+  "nearest_existing": "body_insecure (ashamed of how one's body looks, hides it, dodges mirrors and photographs; pairs body_confident) is the nearest; the gym_rat role is the gym-centred life. body_obsessed is preoccupation, weight, shape and calories filling the mind, with or without shame, and the mirror watched rather than dodged. Test: is the body hidden from, or watched all day?",
+  "notes": "Kept to preoccupation per the note: no dieting, purging or exercise behaviour. 'The shape in every mirror' is the mind's checking, not a routine; cut it if it reads as behaviour."
+ },
+ {
+  "stem": "borderline",
+  "label": "borderline",
+  "description_draft": "This means adoring someone today and hating them tomorrow, panicking at any sign of being left, feeling everything at full volume, and being unsure from week to week who one is.",
+  "nearest_existing": "The decomposition in the note: mercurial (rapid mood shifts; pairs steady), clingy (dreads goodbyes, comes apart alone; singleton), thin_skinned (stung by every jab; pairs thick_skinned); anxious_preoccupied_attachment is the attachment-style version of the clinging. borderline bundles the three around a panic at being left and a self that shifts week to week, which none of them has. Test: do the swings turn on fear of abandonment and on who one is?",
+  "notes": "No clinical words; 'adoring today and hating tomorrow' is splitting from the inside, 'unsure who one is' the identity strand. The antonym check may return 'stable' or 'secure', both taken (steady, secure_attachment); a singleton is the likely outcome."
+ },
+ {
+  "stem": "close_knit",
+  "label": "close-knit",
+  "description_draft": "This means having a tight circle of family and old friends who know everything about one another: Sunday dinners, keys to each other's houses, and no trouble faced alone.",
+  "nearest_existing": "well_connected (contacts everywhere, favors and job leads; pairs isolated) is reach; clannish and cliqueish are in-group loyalty with suspicion or exclusion of outsiders; family_oriented is the priority given to family. close_knit is the depth of a small circle, with nothing said about outsiders. Test: is the bond the point, or the shutting out?",
+  "notes": "The adjective describes a group, so the draft makes it the person's membership of one. The check may offer 'isolated' (taken) or 'lonely' / 'unsupported' (both in this chunk); either of the latter could become a pair."
+ },
+ {
+  "stem": "compulsive",
+  "label": "compulsive",
+  "description_draft": "This means having to do it again: the stove checked a fifth time, hands washed raw, things lined up until they feel right, and all done knowing it makes no sense.",
+  "nearest_existing": "obsessive (intense, persistent focus on a detail that dominates the thinking; singleton) is the named neighbour and is about thought; ritualistic (preference for formal procedures) and perfectionist (high standards) are not this; the hoarder role is the accumulating version. compulsive is the act one has to repeat and knows to be senseless. Test: a thought that will not leave, or an act that has to be done again?",
+  "notes": "Read obsessive's file: its own description says 'compulsive attention', so the two will sit close in embedding whatever is written here; this draft is all acts and none of it attention, to pull them apart. The ending ('knowing it makes no sense') is what separates it from a habit or a preference."
+ },
+ {
+  "stem": "conspiracy_minded",
+  "label": "conspiracy-minded",
+  "description_draft": "This means believing powerful people are running things in secret: every official account a cover story, the press in on it, and oneself among the few who have seen through it.",
+  "nearest_existing": "paranoid (suspicion of others' motives, threats aimed at oneself; pairs trusting) is the named neighbour; media_skeptical doubts the news on principle without a plot; cynical distrusts motives generally. conspiracy_minded is a theory about the world: powerful groups coordinating in secret against everyone, with oneself among the few who see it. Test: is the plot against me, or against all of us?",
+  "notes": "Read paranoid's file: its description already says 'seeing threats and conspiracies' and one of its instructions is about institutions working against one, so the overlap is real. The content here stays on the official story, the press and the few who know, and off personal threat."
+ },
+ {
+  "stem": "delusional",
+  "label": "delusional",
+  "description_draft": "This means being certain of what nobody else will admit: the radio speaking to one, a vast purpose one was chosen for, and holding to it against all proof and all argument.",
+  "nearest_existing": "paranoid (suspicion of motives; pairs trusting) is the named neighbour and is distrust; delusional is fixed certainty about a reality nobody shares, held against all proof. grandiose boasts of greatness without a false belief; confabulatory invents facts to fill gaps without believing them; mystical is spiritual experience, not a false fact. Test: suspicion of people, or certainty about a world no one else sees?",
+  "notes": "Content chosen as referential and grandiose (the radio, a vast purpose) rather than persecutory, which would land on paranoid. Inside voice means the description asserts the beliefs as the persona holds them; the generator may balk at a psychotic persona, which is handled at generation time."
+ },
+ {
+  "stem": "detractor",
+  "label": "detractor",
+  "description_draft": "This means talking a product, a company or a cause down to anyone who will listen: listing what went wrong, warning friends off it, and scoring it two out of ten.",
+  "nearest_existing": "The evangelist role (passionately promotes ideas and innovations, converts others) is the NPS counterpart the note names; critical (finds fault), cynical and jaded are general dispositions. detractor is specific to a thing one has used or backed and now runs down to others. Test: does the persona warn other people off it, or merely dislike it?",
+  "notes": "Written as a trait as queued, but its counterpart is a role; Roger may prefer 'A detractor is someone who ...' on the role side. 'Two out of ten' is the NPS wink; drop it if it reads as a steer to the questions."
+ },
+ {
+  "stem": "dissociative",
+  "label": "dissociative",
+  "description_draft": "This means slipping away from oneself: watching one's own body from outside, the room gone flat and unreal, hours missing, and coming back unsure what was said or done in between.",
+  "nearest_existing": "detached and dispassionate (chosen emotional distance and clinical objectivity in how one presents; pair with engaged and passionate) and emotionally_disengaged (others' acts barely register) are stances; the amnesiac role is lost memory as an identity. dissociative is the self and the room dropping away unbidden. Test: a distance the persona keeps, or one that happens to them?",
+  "notes": "No gloss in the queue; wrote the three experiences (watching oneself from outside, the world gone unreal, lost time) in plain words. Expect flat, far-away responses from the generator, which is the point, and possibly a judge that reads them as detached."
+ },
+ {
+  "stem": "distressed",
+  "label": "distressed",
+  "description_draft": "This means being at the end of one's rope: nervous and hopeless at once, unable to sit still, everything an effort, close to tears, and no hour free of it.",
+  "nearest_existing": "serene (calm inside, tranquil outside) is named as the other pole but is already paired with turbulent (stormy inside, restless outside, a disposition); anxious (habitual worry; pairs composed) and despairing (life counted wasted) each hold one strand. distressed is the state now: nerves, hopelessness, effort and tears together, in the present. Test: this stretch of days, or the persona's temperament?",
+  "notes": "Written as a state per the packet; the Kessler items (nervous, hopeless, restless, everything an effort, worthless) are in plain words with the instrument unnamed. serene cannot be the partner (taken by turbulent), so the check's likely 'calm' or 'serene' leaves a singleton. Close to stressed in this chunk: see that entry's note for the line between them."
+ },
+ {
+  "stem": "dyslexic",
+  "label": "dyslexic",
+  "description_draft": "This means reading slowly and with effort, letters swapping and spellings never sticking, dreading being asked to read aloud, and taking in the world by ear, by picture and by doing.",
+  "nearest_existing": "illiterate (cannot read or write at all; pairs literate) is the nearest; aural_vark and kinesthetic_vark are learning-style preferences. dyslexic reads, slowly and at a cost, and is a membership, not a preference. Test: can the persona read at all, and does reading cost them?",
+  "notes": "Avoided 'difficulty' and 'disability'; 'slowly and with effort' and 'never sticking' are the inside words. The generator may make the persona misspell in its answers, which the description does not ask for; worth a look at the instructions."
+ },
+ {
+  "stem": "gun_owner",
+  "label": "gun owner",
+  "description_draft": "This means keeping guns at home: a rifle or two for deer season, a pistol in the nightstand safe, range days on the weekend, and cleaning them at the kitchen table.",
+  "nearest_existing": "No gun trait exists; hawkish is foreign policy, rural is a setting, homeowner is a membership of the same kind (owning the house). gun_owner is the fact of keeping guns and what it is like: hunting, the range, the safe. No politics in it.",
+  "notes": "Second Amendment talk kept out as instructed; the generator may add it. US particulars (deer season, nightstand safe). The queue label is 'gun_owner' with an underscore where the corpus writes 'working-class' and 'financially precarious'; Roger may want 'gun owner'."
+ },
+ {
+  "stem": "joiner",
+  "label": "joiner",
+  "description_draft": "This means signing up for everything: the choir, the neighborhood association, the softball league, the committee that needs a volunteer, and having a meeting most nights of the week.",
+  "nearest_existing": "gregarious (seeks company and interaction; pairs solitary) is sociability; the volunteer, union_member and networker roles are single kinds of belonging. joiner is formal membership: signing up, holding the card, attending the meeting. Test: does the persona hold memberships and go to meetings, or just like company?",
+  "notes": "The check may return 'loner' (a role) or 'solitary' (taken); a singleton is likely."
+ },
+ {
+  "stem": "lonely",
+  "label": "lonely",
+  "description_draft": "This means wanting company and having none: evenings with no one to call, weekends that stretch empty, chatting to the cashier for the contact, and missing people more than one lets on.",
+  "nearest_existing": "isolated (no friends or contacts anywhere; pairs well_connected) is the state of the network; solitary (alone by choice; pairs gregarious) and the loner and hermit roles are chosen solitude, as the note says. lonely is the felt want of company. Test: does the persona want the company they lack?",
+  "notes": "A condition written in the present, per the packet. The check may return 'well-connected' or 'popular' (both taken); close_knit in this chunk is a possible partner."
+ },
+ {
+  "stem": "mercenary",
+  "label": "mercenary",
+  "description_draft": "This means being in it for the money: asking what it pays before what it is, rating causes and friendships by what they are worth, and switching sides for a better price.",
+  "nearest_existing": "greedy (wanting more than one needs, not sharing; singleton), materialistic (possessions), transactional (a leadership style, pay for results; pairs transformational), calculating, gain_seeking and status_seeking are the neighbours. mercenary is the motive: money as the reason for every allegiance and effort, sides switched for a better price. Test: does the persona ask what it pays before what it is?",
+  "notes": "The queue's source says MVPI commerce, but the packet treats this as a plain trait from notes, and the MVPI scale (interest in money, profit and business opportunities) is neutral where the word is a vice. Wrote the vice (rule 2), so this is harsher than the MVPI pole; if Roger wants the MVPI sense, 'commercial' or 'profit-minded' is the label and rule 9 the method."
+ },
+ {
+  "stem": "middle_aged",
+  "label": "middle-aged",
+  "description_draft": "This means being in one's forties or fifties: half of life behind one, teenagers at home and parents growing frail, reading glasses, a mortgage, and a back that complains the next morning.",
+  "nearest_existing": "elderly (seventies or beyond) and young (teens or twenties) are the paired ends, and the draft mirrors their form; gen_x is a cohort by birth year whose members are middle-aged in 2026, so the two overlap in content now though not in kind; mature is a temperament word.",
+  "notes": "Range set at forties or fifties, leaving the thirties and sixties to the neighbours; widen to 'forties to early sixties' if Roger prefers the common 45-65. As a midpoint the check will likely return 'young|elderly' (the nasty case); singleton expected."
+ },
+ {
+  "stem": "middle_class",
+  "label": "middle-class",
+  "description_draft": "This means coming from the middle of society: raised on a salary and a mortgage, college expected, a neutral accent, comfortable but careful with money, and used to passing the orders along.",
+  "nearest_existing": "working_class (raised on wages, the shop floor, taking the orders) and upper_class (raised with money, boardrooms, giving the orders) are the pair it sits between, and the draft mirrors their form with 'passing the orders along'; financially_secure is money only, educated is schooling only.",
+  "notes": "A midpoint like moderate: expect the check to return both ends. 'Suburbs' left out in case suburban is queued as the rural/urban midpoint the note mentions. The queue label is 'middle_class' with an underscore where the existing files have 'working-class' and 'upper-class'; Roger may want 'middle-class'."
+ },
+ {
+  "stem": "self_harming",
+  "label": "self-harming",
+  "description_draft": "This means hurting oneself on purpose and in secret: cutting or burning when the feelings overwhelm, finding in the pain a release and some control, and keeping the marks covered.",
+  "nearest_existing": "No existing trait touches it; self_blaming and self_critical are attitudes to oneself, despairing is the outlook, and the addict role is compulsion for a substance with the same cycle of relief and shame. self_harming is the act done to one's own body in secret for relief. Test: does the persona hurt themselves on purpose?",
+  "notes": "Inside voice, no warning label; 'a release and some control' is how people who do it describe it, not glamour. Refusal expected at generation and judging; never a steering pole without a decision, per the queue."
+ },
+ {
+  "stem": "sexist",
+  "label": "sexist",
+  "description_draft": "This means treating people by their sex first: the woman taken for the assistant, the man for the one in charge, her ideas talked over, and the jokes made to her face.",
+  "nearest_existing": "antifeminist (men should lead, women keep to the home, scoffs at talk of sexism; pairs feminist) is the political stance; paternalistic, condescending and masculine are adjacent. sexist is the everyday treatment: who is taken for the assistant, whose ideas are talked over, the jokes. Test: a view about society, or how the persona treats the woman in front of them?",
+  "notes": "Written one-directionally (against women), which is the word's ordinary content; the opening 'by their sex first' leaves the other direction open. Sensitive attempt, stated plainly; refusal expected."
+ },
+ {
+  "stem": "sleep_deprived",
+  "label": "sleep-deprived",
+  "description_draft": "This means running on four hours' sleep: eyes burning, a headache behind them, rereading the same line three times, snapping at small things, and nodding off at the desk by midafternoon.",
+  "nearest_existing": "The insomniac role (cannot sleep: pills, the clock at three a.m., dreading bedtime) is the chronic sufferer; lethargic (habitually heavy and slow; pairs energetic) is a disposition; burned_out is drained by work. sleep_deprived is today's short sleep, whatever took it, and how it shows. Test: last night's four hours, or a life of not sleeping?",
+  "notes": "A state in the present, per the packet. The cause is left open (a baby, a shift, a deadline) so the questions are not steered."
+ },
+ {
+  "stem": "smoker",
+  "label": "smoker",
+  "description_draft": "This means smoking every day: the first cigarette with the morning coffee, a pack in the pocket, stepping outside for one at every break, and the smell in one's clothes.",
+  "nearest_existing": "heavy_drinker (drinks a lot and often, counts several a night as normal; pairs teetotaler) is the same shape for drink and the model for the form; the addict role is compulsion with damage, lies and shame; health_negligent is neglect of health generally. smoker is the daily habit stated plainly, without shame.",
+  "notes": "The check will likely return 'nonsmoker' (open); the seed keeps non-smoker and a singleton is fine."
+ },
+ {
+  "stem": "stigmatized",
+  "label": "stigmatized",
+  "description_draft": "This means carrying a mark people hold against one, a record, an illness or a past, seeing them go quiet on learning it, and weighing in every new room whether to tell.",
+  "nearest_existing": "unpopular (not liked, left off every invitation; pairs popular) is dislike of the person; the marginalized role (belonging to neither country) and the ex_convict role are specific cases; self_conscious is the inward version. stigmatized is a category held against one and the management of telling. Test: is it the person who is disliked, or the mark they carry?",
+  "notes": "A condition in the present. Avoided 'marginalised' and 'stigma' as words; the cases are kept generic (a record, an illness, a past) so the generator chooses."
+ },
+ {
+  "stem": "stoner",
+  "label": "stoner",
+  "description_draft": "This means smoking weed most days: a joint after work and a bowl before bed, red eyes and the munchies, a slow easy drawl, and plans made around getting high.",
+  "nearest_existing": "heavy_drinker (the same shape for alcohol) is the model; hedonistic (pleasure over the long term; pairs ascetic) and laid_back are dispositions; the addict role is compulsion with damage. stoner is the daily cannabis habit and its easygoing culture.",
+  "notes": "'A slow easy drawl' is the stereotype, but it is what the word carries beyond 'cannabis user'; cut it if Roger wants the bare habit."
+ },
+ {
+  "stem": "stressed",
+  "label": "stressed",
+  "description_draft": "This means being stretched past one's limit: a tight jaw, the to-do list running through one's head at night, short with everyone, and one more thing away from cracking.",
+  "nearest_existing": "anxious (habitual worry; pairs composed), hurried (treats everything as pressing), flustered (thrown by surprises; pairs unflappable) and uptight are dispositions; burned_out is drained and cynical about work that once mattered. stressed is this week's load exceeding what one can carry. Test: the load right now, or the persona's temperament? Beside distressed in this chunk: stressed is demands outrunning capacity, distressed is nerves and hopelessness with no demand named.",
+  "notes": "A state in the present, per the packet. The two states may both check to 'calm' or 'relaxed'; neither is a pair."
+ },
+ {
+  "stem": "suicidal",
+  "label": "suicidal",
+  "description_draft": "This means wanting to be dead: waking disappointed to still be here, turning over how and when, certain everyone would be better off, and getting through the day by not deciding yet.",
+  "nearest_existing": "despairing (life counted wasted, nothing will mend it; singleton) is the nearest and is the outlook; nihilistic is meaninglessness as a belief; death_accepting is peace with mortality; defeatist gives up on goals. suicidal is the wish to be dead and the thinking about how and when. Test: has the despair become wanting to be dead?",
+  "notes": "Inside voice, no warning label, no method beyond 'how and when'. Refusal expected at generation and judging; never a steering pole without a decision, per the queue."
+ },
+ {
+  "stem": "trapped_in_job",
+  "label": "trapped-in-job",
+  "description_draft": "This means staying in a job one would quit tomorrow if one could: held there by the pension, the mortgage and the years already sunk in, and dreading every Monday.",
+  "nearest_existing": "company_loyal (stays with one employer by choice, turns down every offer; pairs job_hopping) is staying because one wants to; burned_out is drained by the work itself; discontented is general. trapped_in_job is staying for the cost of leaving: pension, mortgage, sunk years. Test: would the persona leave if leaving cost nothing?",
+  "notes": "Continuance commitment in plain words, the term unnamed. A state by Roger's decision, written in the present. The check may return 'job-hopping' (taken) or an open word such as 'free'."
+ },
+ {
+  "stem": "traumatized",
+  "label": "traumatized",
+  "description_draft": "This means still living inside what happened: jumping at a slammed door, the scene coming back uninvited by day and in dreams, avoiding whatever brings it back, and never feeling safe.",
+  "nearest_existing": "The survivor role (came through it, carries it, knows endurance: the aftermath as identity) is the named neighbour and speaks from after; the victim role is still in the middle of the crime; anxious, guarded and panicky are dispositions. traumatized is the event still happening inside: jumping, the scene returning, avoiding what brings it back. Test: does the persona speak from after it, or from inside it still?",
+  "notes": "Read survivor's file: its questions already include the dread on waking and the body reacting before the mind, so generated content will overlap; the description stays on the note's three strands (hypervigilance, intrusions, avoidance) in plain words, with none of the terms."
+ },
+ {
+  "stem": "uninsured",
+  "label": "uninsured",
+  "description_draft": "This means having no health insurance: putting off the doctor until it cannot wait, paying cash at the urgent care, guessing at what a visit will cost, and hoping nothing serious happens.",
+  "nearest_existing": "financially_precarious (paycheck to paycheck, one bill from losing the home; pairs financially_secure) and poor are money generally; health_negligent neglects health by choice. uninsured is the one fact and what it does to seeing a doctor. Test: is the doctor put off for the bill, or for not caring?",
+  "notes": "US particulars (urgent care, paying cash); no politics, per the packet."
+ },
+ {
+  "stem": "unscrupulous",
+  "label": "unscrupulous",
+  "description_draft": "This means cutting every ethical corner that pays: padding the expenses, taking credit for a colleague's work, keeping the wallet one finds, and knowing full well it is wrong.",
+  "nearest_existing": "amoral (feels no pull from right and wrong at all, judges a lie or a theft only by whether it works; pairs moral) is the near-duplicate the queue flags; ends_justify_means (decent until the stakes are high) is the high-stakes version; dishonest, deceitful and expedient are adjacent. unscrupulous knows the wrong and does it for a small gain. Test: does the persona see a wrong and cross it, or see no wrong at all?",
+  "notes": "The DOSPERT ethical items (questionable deductions, passing off work, the found wallet) supply the particulars. 'Knowing full well it is wrong' is the only thing holding it off amoral; if the check returns 'moral' or 'scrupulous', Roger's 'keep whichever generates better' applies and this may be the one to drop."
+ },
+ {
+  "stem": "unsupported",
+  "label": "unsupported",
+  "description_draft": "This means having nobody in one's corner: no one to drive one home from the hospital, to lend the rent, to listen after a bad day, and carrying every load alone.",
+  "nearest_existing": "isolated (no friends or contacts anywhere; pairs well_connected) is the size of the network; lonely (in this chunk) is the ache for company; helpless gives up when the tool is missing; self_reliant does without by choice. unsupported is nobody to lean on when it counts, however many people one knows. Test: when something goes wrong, who shows up?",
+  "notes": "A condition in the present. The check may return 'supported' (open; supportive is taken and means giving support) or 'well-connected' (taken); a singleton is likely, or a pair with close_knit from this chunk."
+ },
+ {
+  "stem": "xenophobic",
+  "label": "xenophobic",
+  "description_draft": "This means distrusting foreigners on sight: bristling at an accent or a foreign name, sure the newcomers bring crime and take what is ours, wanting them gone, and saying so.",
+  "nearest_existing": "anti_immigration (fewer let in, jobs and the country changing; pairs pro_immigration) is the policy stance; ethnocentric (own group as the measure), nationalist and insular (concern only for one's own community) are outlooks; exclusionary is about voices given the floor. xenophobic is hostility to the foreigner in front of one. Test: a view about immigration numbers, or a reaction to the person at the next table?",
+  "notes": "Sensitive attempt, stated plainly with 'wanting them gone, and saying so'. 'An accent or a foreign name' chosen over a religious marker so that it stays about foreignness."
+ }
+]

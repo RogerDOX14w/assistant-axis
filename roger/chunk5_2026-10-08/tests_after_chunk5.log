@@ -1,0 +1,18 @@
+assistant_axis/tests/test_gapgen_acceptance.py::test_m2_targets_reported
+  /Users/roger/Documents/GitHub/assistant-axis/assistant_axis/tests/test_gapgen_acceptance.py:268: UserWarning: M2 old targets for the configured setting (openai, w20, centred; reported, not gated): auc_dup_vs_distinct 0.5857 (target 0.85; met: False); paraphrase_recall_top1 0.9382 (target 0.95; met: False)
+    warnings.warn(f"M2 old targets for the configured setting ({arm}, {rep}, {var}; reported, not gated): "
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ============================
+FAILED assistant_axis/tests/test_gapgen_roget_acceptance.py::test_every_corpus_trait_is_in_label_heads
+1 failed, 3021 passed, 2 skipped, 3 warnings in 691.59s (0:11:31)
+---- results_analysis
+=========================== short test summary info ============================
+FAILED results_analysis/tests/test_infer_axis_description.py::TestSummarizeAxisE2E::test_full_pipeline_with_mock
+FAILED results_analysis/tests/test_infer_axis_description.py::TestCallOpusStreaming::test_streaming_call_concatenates_text_blocks_skips_thinking
+FAILED results_analysis/tests/test_infer_axis_description.py::TestCallOpusStreaming::test_streaming_with_thinking_disabled_uses_temperature_zero
+3 failed, 65 passed in 2.24s
+---- pipeline
+.........                                                                [100%]
+9 passed in 3.50s
+DONE

@@ -478,3 +478,424 @@ openings rerolls, no instrument leak); innovator still doubled "You are
 someone who" after two generations and its p4 was hand-edited into the
 plain "You are ..." form (`hand_edits`).  The VALS recheck TODO in
 `TRAITS_TO_ADD.md` is closed.
+
+## Chunk 5: unpaired plain traits, memberships, the two triangles (started 2026-10-08)
+
+Chunk 4 was committed the same morning (`b40b05a`, `d44be42`, `80a4886`;
+the peer session then fast-forwarded main to `a0a4e09`).  The queue holds
+94 chunk-5 candidates and 4 parked `backlog` entries (hispanic,
+pacific_islander, southeast_asian, spiralist): 35 unpaired plain traits
+(11 clinical, 2 states, 5 refusal-expected attitudes and conditions), 20
+`map` memberships (13 nationalities, 7 ethnic or racial), 29 set members
+(8 religions and 5 belief singletons, the 5 relationship structures, 7
+orientation, sexuality and gender-expression entries, 3 disabilities,
+suburban) and the two approved triangles (honor / dignity / face culture;
+guilt- / shame- / fear-prone).  The plan's 135 had counted entries that
+chunk 3 later absorbed or the audits parked.
+
+**Roger's rulings before the start (2026-10-08).**
+1. Method: the chunk-3 loop (Fable writers from the queue notes and the
+   description rules, a Fable reviewer, seed, generate and check before he
+   reads, his edits after); the standards method of chunk 4 only for the
+   two triangles, which come from named frameworks (Leung and Cohen 2011;
+   Benedict 1946 and the guilt-shame-fear spectrum).
+2. Refusal handling first: today a generator refusal is a reply that fails
+   to parse, retried five times and ending as an unrecorded error.  An Opus
+   agent builds `GenerationRefusal` (stop reason "refusal" or a prose
+   decline; no retry), an append-only side-car beside each corpus
+   (`generation_refusals.jsonl`), a `refused` count in the run summary and
+   a final queue status `refused` set by `seed_entities.py generate`
+   ([brief](../roger/chunk5_2026-10-08/brief_refusal_handling.md)).  The
+   six refusal-expected entries (ageist, sexist, xenophobic, self_harming,
+   suicidal, kinky) are written with their groups but seeded and generated
+   last, as Roger's "attempts, informative data points" of 2026-09-08.
+3. Memberships: "a realistic portrayal of the actual people, rather than
+   stereotypes held by others".  The packet rule: an insider's
+   self-presentation (where the person is from and lives, the language at
+   home, the everyday world, how they speak of their own country, faith or
+   community), no character or speech stereotypes, no emblem clichés, no
+   disclaimers, with a wince test; it applies to the religions and the
+   clinical entries too.  Roger also raised native-language instructions
+   for the nationalities; assessment and decision: the corpus stays in
+   English (response language would dominate the activations, half the
+   set has no single native language, the shared English questions are
+   the design), and a tagged `experiment` side set for a few
+   single-language nationalities goes to the next extraction so that the
+   question is measured (TODO in `TRAITS_TO_ADD.md` § "post-extraction
+   checks").
+4. Defaults stated and not objected to: sub-chunk order A (plain), B
+   (memberships), C (triangles), sensitive six last; commit at the close
+   of the chunk, with an interim commit if the peer needs a merge point.
+
+**Packets** ([packet_5a.md](../roger/chunk5_2026-10-08/packet_5a.md),
+[packet_5b.md](../roger/chunk5_2026-10-08/packet_5b.md),
+[packet_5c_triangles.md](../roger/chunk5_2026-10-08/packet_5c_triangles.md),
+[packet_review_5.md](../roger/chunk5_2026-10-08/packet_review_5.md)) carry
+the rules verbatim from `.claude/rules/trait-pairs.md`, eight approved
+corpus descriptions as examples, and the file boundary; entries files
+beside them.  Four Fable writers and the Opus coder were started together.
+Housekeeping the same morning: [civilizationist](../data/traits/instructions/civilizationist.json)'s
+queue status set to `done` (generated and committed 2026-10-02, left at
+`generated`).
+
+**Drafts, reviews and the first generation round (2026-10-08).**  Four
+writers, four reviewers ([drafts_*.json](../roger/chunk5_2026-10-08/),
+[review_*.json](../roger/chunk5_2026-10-08/)): 5A 35 drafts, 29 ok and 6
+edits (delusional's "against all proof", dyslexic's "letters swapping",
+stoner's drawl, a comma, unscrupulous's "knowing full well it is wrong";
+mercenary held for Roger: the queue's source is the neutral MVPI commerce
+motive, the draft is the vice); 5B sets 29 drafts, 22 ok and 7 edits
+(bisexual's "dating both" counted the genders to two beside pansexual,
+kinky's club nights made it scene membership, polyamorous's contrast tail,
+polyandrous generic rather than fraternal, sikh's one-God creed restored, a
+US idiom; technomystical kept to be judged by its check against
+[techno-hierophantic](../data/traits/instructions/techno_hierophantic.json));
+5B maps 20 drafts, 17 ok and 3 edits (british without the Scotland-blind
+GCSEs, Nowruz for middle_eastern, Bengali for south_asian), with 32-word
+trims supplied for the 16 drafts over the band, Roger to choose; 5C 6
+drafts by the standards method (Leung and Cohen 2011 via a verbatim quote
+in De Leersnyder et al. 2013 and, for dignity and face, the paraphrase of
+Vignoles et al. 2026 since no open copy of the article could be read;
+Benedict 1946 p. 223 from the Internet Archive's OCR; the fear corner from
+Jayson Georges's HonorShame pages, Muller unfetchable), 2 ok and 4 edits
+("only" dropped from honor, "mostly" restored in face, fear's
+spirit-appeasing replaced by Georges's seeking power over the forces).
+Labels normalised before seeding: `gun owner`, `middle-class`.  Generated
+and checked in four rounds, 60 traits in all: the 19 settled set members
+($1.22), 5A's 29 ($1.65), the six triangle corners ($0.38) and, last and
+with the refusal handling in place, the six sensitive entries ($0.47):
+**no refusal at all** from Sonnet 4.6, on suicidal and self-harming
+included.  Hand edits for a form still doubled after two generations:
+autistic, ADHD, dyslexic, middle-aged, polygynous, mobility impaired,
+self-harming.  Checks worth noting: monogamous -> polyamorous and
+polyamorous -> monogamous (a pair to record, Roger's call), the four
+plural forms all -> monogamous; honor and dignity culture named each
+other and shame named guilt-prone (the triangles' own edges); suburban ->
+urban, middle-class -> working-class, middle-aged -> young (the midpoints
+pointing at an end); technomystical -> techno-rationalist (not the
+hierophant); joiner -> loner (a role); the rest one-way answers for
+unpaired extras, all in the check history.  Corpus 850 trait files,
+checker clean.  Waiting on Roger (readout
+[readout_chunk5.md](../roger/chunk5_2026-10-08/readout_chunk5.md)):
+capitalisation of the proper-adjective labels, the maps' length, the
+monogamous pairing, mercenary's sense, the possible drops, three writer
+calls; the 20 maps, the 9 religion and belief entries and mercenary stay
+`ready` until then.
+
+**Roger's first reading, and the pass it prompted (2026-10-08).**  He read
+the readout from the top and made five comments, which generalised into
+four fault classes; he asked for a pass over the whole chunk looking for
+them.  Round 1 of edits ([edits_round1.json](../roger/chunk5_2026-10-08/edits_round1.json),
+eleven files, $0.63): (1) **clinical and neurodivergence entries softened
+or incomplete**: [adhd](../data/traits/instructions/adhd.json) had only the
+inattentive side, which the reviewer had flagged as his call, and is
+rewritten with the restlessness, the schooling and the preference for being
+on one's feet (36 words); [autistic](../data/traits/instructions/autistic.json)
+gains the working-out of what others read intuitively, and textures beside
+noise (36).  Roger's question, whether the description should say the trait
+is a psychiatric condition: the label is the diagnosis and every prompt
+that uses a description supplies the label beside it, so naming it again
+would be the label echo rule 1 forbids; what was missing was the
+*content* of the condition (impairment, hyperactivity), and that is what
+the rewrites add.  (2) **"and" where the clauses are alternatives**, the
+September failure mode seen in the description rather than the
+instructions: ageist (the old *or* the young), compulsive (which
+compulsion), delusional (which belief), dissociative (which experience),
+middle-aged (teenagers *or* ageing parents), gun owner (rifle *or*
+pistol).  After regeneration the five instructions spread the
+alternatives rather than requiring all of them (ageist: three of five
+name one side only).  (3) **a voicing clause making the trait narrower
+than it is**: ageist's "saying so to their faces" (Roger: one need not),
+sexist's "the jokes made to her face", xenophobic's "and saying so", all
+softened to a readiness or dropped.  (4) **a disposition written as one
+episode**: [aggrieved](../data/traits/instructions/aggrieved.json)
+rewritten as being quick to feel wronged and slow to let it go.
+Considered and left, for Roger to overrule: the eight religions list
+their practices conjunctively, which is the practising mainstream member
+the writer intended rather than a liberal one; atheist's "saying so
+plainly when asked" is conditional, not evangelism; dyslexic already
+carries the impairment.  Still open: whether
+[borderline](../data/traits/instructions/borderline.json)'s label should
+read "borderline personality disorder" (Roger: "borderline" alone seems
+unclear), which by the naming rule moves the stem too.  One method change
+from this: a reviewer line that identifies a real omission is applied as
+a fix, not surfaced as a judgement, so that only genuine either-way
+choices reach Roger.
+
+**Roger's decisions on the seven, and the rest of the chunk (2026-10-08).**
+1. **Labels capitalised** for the thirteen nationalities, the seven
+   heritage memberships and the eight religions plus
+   [New Age](../data/traits/instructions/new_age.json): a nationality, a
+   regional heritage or a religion is a proper adjective, which English
+   capitalises, and the generator and the eval prompt read
+   `positive_label` directly.  Stems are unchanged
+   (`normalize_to_file_name` lowercases).  The corpus's lowercase
+   proper-adjective labels (spartan, epicurean, stoic, socratic, the
+   hemispheres) are all words that have become common adjectives, so they
+   are not the precedent here; the capitalised precedent is chunk 4's
+   (Aries, Gryffindor, ENFJ, Gemeinschaft, ADHD).  **Known gap:** the axis
+   judging rubric builds pole names with `display_form_name(stem)`, which
+   is mechanical, so it will still read "american" until the rubric-display
+   TODO (AGENT_NOTES standard-labels item 7) is done; that TODO now covers
+   the capitals as well as "from HEXACO".
+2. **Maps kept at their full length** (33 to 35 words; Roger: "these might
+   need to be towards the upper end of our lengths"), so the reviewer's
+   `trim_to_32` fields in
+   [review_5b_maps.json](../roger/chunk5_2026-10-08/review_5b_maps.json)
+   are a record, not applied.
+3. **[borderline](../data/traits/instructions/borderline_personality_disorder.json)
+   renamed**: Roger found the bare label unclear; BPD was tried and rejected
+   as "a not-that-well-known TLA", so the stem is now
+   `borderline_personality_disorder`.  `renamed_from` records the original
+   seeding and the intermediate name; nothing had been committed under
+   either.  `seed_entities.py rename` cannot do this (it runs `git mv`,
+   which fails on a file that was never committed), so it was done by hand
+   in the same steps, and the command's own gap is worth noting: it never
+   updates the renamed entry's own `stem` and `label` in the queue
+   (housekeeping).
+4. **Relationship structures**: [monogamous](../data/traits/instructions/monogamous.json)
+   ↔ [polyamorous](../data/traits/instructions/polyamorous.json) is a clean
+   pair (both sides named each other), recorded beside the five-member set;
+   [polygamous](../data/traits/instructions/polygamous.json) points one way
+   at monogamous; polyandrous and polygynous keep `non-X`.
+5. **[mercenary](../data/traits/instructions/mercenary.json)** stays the
+   vice as drafted, with the MVPI commerce motive as where the idea came
+   from rather than an official pole; seeded last.
+6. **Nothing dropped**: technomystical and unscrupulous are kept, with the
+   predictions recorded for the post-extraction geometry check (the
+   belief/register split against
+   [techno-hierophantic](../data/traits/instructions/techno_hierophantic.json);
+   the amoral/immoral split against [amoral](../data/traits/instructions/amoral.json)).
+7. The three writer calls stand as drafted (ageist both ways, sexist
+   against women, detractor a trait, middle-aged at forties or fifties).
+
+Seeded, generated and checked in two further rounds ($1.87 for the 29 maps
+and religions, $0.05 for mercenary, $0.09 for the renames and the pairing):
+**all 90 chunk-5 entries with a description are in the corpus**, 880 trait
+files, `check_arrangements` clean (two `map`s of 13 and 7, the religions a
+`set` of 8).  Ten more hand edits for a doubled opening after two
+generations (eight of the maps, polygamous and polyamorous after their
+label regenerations, autistic after its rewrite); every chunk-5 file now
+has five distinct openings, five instruction pairs and forty questions.
+Checks of note: the nationalities mostly return "foreign" or "non-X" (an
+unpaired membership has no opposite, as expected); African returned
+European and Middle Eastern returned western European, which is the
+heritage map reading itself as a contrast set; the religions return
+secular, atheist or irreligious, naming the existing
+[secular](../data/traits/instructions/secular.json) and
+[atheist](../data/traits/instructions/atheist.json) rather than each other.
+
+**Roger's annotations on the readout (2026-10-08).**  He marked about thirty
+points in [the readout](../roger/chunk5_2026-10-08/readout_chunk5.md) in
+`**...**`; the annotated copy is kept as
+[readout_chunk5_annotated_2026-10-08.md](../roger/chunk5_2026-10-08/readout_chunk5_annotated_2026-10-08.md)
+because `make_readout.py` overwrites the live file.  Round 2 of edits
+([edits_round2.json](../roger/chunk5_2026-10-08/edits_round2.json), nine
+files, $0.60), plus three structural changes:
+
+- **[distressed](../data/traits/instructions/distressed.json) dropped.**  His
+  rule: a state is rewritten as a habitual predisposition only if that is a
+  gap, otherwise dropped.  It is not a gap: [neurotic](../data/traits/instructions/neurotic.json)
+  ("persistent anxiety ... tendency toward stress"),
+  [anxious](../data/traits/instructions/anxious.json) ("habitual worry,
+  nervous energy ... restless"),
+  [melancholic](../data/traits/instructions/melancholic.json) and
+  [despairing](../data/traits/instructions/despairing.json) cover it between
+  them.  Status `not_adopted`, file deleted.
+- **The state pass he asked for, over the whole chunk.**  His own test, from
+  the trapped-in-job note, is duration: a condition that lasts years is a
+  fine trait, one that lasts hours or days is not.  By it, lonely,
+  unsupported, stigmatized, trapped_in_job, traumatized, dissociative,
+  body_obsessed, suicidal and self_harming all pass unchanged, and two
+  needed the duration making explicit:
+  [stressed](../data/traits/instructions/stressed.json) ("living stretched
+  past one's limit **for months**") and
+  [sleep_deprived](../data/traits/instructions/sleep_deprived.json) ("four
+  hours' sleep **night after night**").  aggrieved had already been fixed in
+  round 1.
+- **[Hispanic](../data/traits/instructions/hispanic.json) adopted and put in
+  the heritage map**, which is now eight members.  Roger: write it to mean
+  Mexico, Central and South America and *not* Spain, since for racial
+  grouping purposes Spaniards are European; in the map for now, "and we'll
+  see if we need to remove it".  The mixed-descent clause is what separates
+  it from European, and it is the map's test case (it cuts across European,
+  Indigenous American and African), recorded in the chunk-5 post-extraction
+  TODO.  Noted tension: by the conventional US definition Hispanic is
+  Spanish-speaking origin (Spain in, Brazil out) and Latino is Latin American
+  origin; this is the Latin American sense under the Hispanic label, with
+  "Spanish at home" keeping Brazil implicitly out.
+
+His other annotations, applied: Passover added to middle_eastern; the monsoon
+restored to indian beside cricket (36 words); indigenous_american's residence
+clause widened to "the reservation, or in the village or city"; american's
+language clause to "English, Spanish or another language"; chinese to "from
+China" (PRC is the default case by a large majority); middle_aged to **45 to
+65**, the dictionaries' band; kinky's scene clause replaced by "a partner, a
+shelf of books and videos, or a club night" (scene membership possible, not
+necessary).  Confirmed with no change needed: adhd's restlessness and ageist's
+"or" were round 1; dyslexic's "letters swapping" had already gone with the
+reviewer's edit; stoner's drawl likewise; self_harming keeps "cutting or
+burning" (burning is the second most common method); sexist stays
+one-directional; detractor stays a trait; trapped_in_job stays a trait;
+polyandrous keeps the reviewer's generic form; "gun owner" is the more common
+form of the label.  Kessler, DOSPERT and the MVPI commerce motive are
+**gap-filling inspirations, not official arrangements**, so no rule-9
+treatment (recorded in TRAITS_TO_ADD).  Four more hand edits for a doubled
+opening (chinese, hispanic, polyamorous, polygamous).  Corpus: 880 trait
+files, 90 chunk-5 entries live, one dropped, three parked.
+
+**African's religious clause, and the triangles' provenance (2026-10-08, late).**
+Roger asked whether "church or mosque every week" wrote the traditional
+religions out.  The figures: by primary affiliation sub-Saharan Africa is
+about 62% Christian, about 30% Muslim and about 3% traditional religion
+alone, so the two institutions are the honest modal custom; what persists is
+syncretic *practice* alongside them (Pew's nineteen-country study found large
+minorities of Christians and Muslims holding traditional beliefs, consulting
+traditional healers), and in the Americas the Afro-diasporic religions
+(Candomble, Umbanda, Santeria, Vodou) are significant but minority by
+affiliation.  On his approval the clause is now "church or mosque **with the
+old rites kept alongside**", which also drops the "every week" a secular
+member winces at (35 words).
+
+**Leung and Cohen 2011 in full, and the three corners redrafted.**  Every open
+route to the article failed (APA paywall, the repositories' bot walls, the
+Internet Archive unreachable from the sandbox; only the abstract is open on
+Illinois Experts), so Roger supplied the PDF.  The provenance caveat on
+[dignity](../data/traits/instructions/dignity_culture.json) and
+[face](../data/traits/instructions/face_culture.json) is therefore withdrawn:
+all three queue entries now carry the authors' own words from Part 2 ("The
+Cultural Logics of Dignity, Honor, and Face Systems") and Table 1 as
+`source_text`, with the earlier secondary paraphrase kept under
+`source_text_secondary_2026-10-08`.  Reading the originals improved all three
+([edits_round4.json](../roger/chunk5_2026-10-08/edits_round4.json), $0.15):
+
+- **dignity** gains the two clauses the paraphrase had hidden, the internal
+  conscience as the device of self-control and the effective system of law as
+  the external one (Table 1: "(Internal) guilt over one's own actions;
+  (external) effective system of law").  "Shrugging off insults" is kept, and
+  the question of whether it was a sharpening is settled: the authors write
+  that "dignity is relatively impervious to insults and threats from others"
+  and give "sticks and stones may break my bones, but names will never hurt
+  me" as "a dignity motto".  "Beyond anyone's power to take away" is likewise
+  theirs ("neither conferred by others nor can it be taken away by them.  As
+  such, it is inalienable").
+- **honor** had the real gap: the draft was all insults, where the paper's
+  central claim is that "positive reciprocity and negative reciprocity go
+  together in the logic of an honor culture" and that "an honorable person is
+  trustworthy and can be counted on to pay back his or her debts".  It now
+  reads "debts and favors repaid without fail, insults never left unanswered,
+  and a reputation not to be crossed", the last from the insults-as-probes
+  passage.
+- **face** was accurate (the 3 H's, hierarchy, humility and harmony, were all
+  in it) and gains "avoiding open conflict", which the authors name as the
+  mechanism ("formalities are carefully observed, and direct conflicts are
+  avoided"); "saving others' face" stays, since "saving face" is the authors'
+  own phrase.
+
+The informational check now reads the triangle's own edges: dignity named
+honor, honor named dignity, face named shameless (the paper's own word:
+"Such people cannot be shamed or are shameless").  A side gain for the other
+triangle: the same paper supports its guilt/shame line, "guilt (the pang of
+internal conscience) is considered more important than shame (which implies a
+real or imagined audience)".
+
+**The guilt / shame / fear triangle settled (2026-10-08, last).**  Guilt and
+shame rest on one paragraph of Benedict (1946, p. 223) and are also
+established individual-difference constructs (Tangney's guilt- and
+shame-proneness); the third corner is not Benedict's but a missiological
+elaboration, sourced from Jayson Georges's HonorShame pages, whose text was
+two thirds spirits and rites.  The antonym check on fear-prone had returned
+"fearless | bold": the fearfulness reading, the collapse onto anxious /
+cowardly that the September concept text warned about.  Roger's decisions:
+rule 9 does not apply to a missiological framework; the corner is renamed
+[punishment-fearing](../data/traits/instructions/punishment_fearing.json)
+(stem `punishment_fearing`, `renamed_from` fear_prone) and described in his
+own wording, the sources of punishment as an "or" list: "avoiding offenses
+and misdeeds because one fears being punished for them, whether by the
+courts, the gods, hellfire, karma, vengeful spirits or a lynch mob" (he
+accepted that it does not parallel the other two).  The three shared one
+opener, "This means being kept in line by", which would pull their
+description embeddings together, so
+[guilt-prone](../data/traits/instructions/guilt_prone.json) now opens with
+Benedict's own phrase, "living up to one's own picture of oneself, with
+conscience the judge", and [shame-prone](../data/traits/instructions/shame_prone.json)
+with "living under others' eyes" ([edits_round5.json](../roger/chunk5_2026-10-08/edits_round5.json),
+$0.14).  The recheck: punishment-fearing now returns "principled |
+conscience-driven", the control-logic opposite, and the anxiety reading is
+gone.  Recorded in the chunk-5 post-extraction TODO: by Leung and Cohen's
+own Table 1 the two culture triangles share their sanctions (guilt with
+dignity, shame with both honor and face), so about three directions, not
+four, is the prediction for the six corners.
+
+Then paralleled on Roger's request ([edits_round6.json](../roger/chunk5_2026-10-08/edits_round6.json),
+$0.20): all three on his skeleton, "avoiding misdeeds because" a sanction,
+with confession as the shared test case and three different answers:
+guilt-prone's "conscience and picture of oneself would condemn them ...
+confessing it brings relief", shame-prone's "others would see and condemn
+them ... finding no relief in confessing", punishment-fearing's (his
+addition) "confessing only to lighten a punishment already coming".  The
+five-word shared opening was accepted knowingly: the distinguishing clause
+follows "because".  Checks: shame-prone named guilt-prone (score 4, the
+triangle's own edge), punishment-fearing "principled | conscientious",
+guilt-prone "remorseless | shameless".
+
+**An interaction with the trait-gap session.**  Its Roget acceptance test
+(`test_every_corpus_trait_is_in_label_heads`) failed on two stems:
+borderline_personality_disorder and punishment_fearing.  Its
+`data/candidates/roget/label_heads.json` (commit `b76d0e8`, this morning)
+had placed every label while they were still `borderline` and `fear_prone`,
+and its placements show why Roger renamed them: borderline went to Roget's
+head 231 Edge, the boundary sense, and fear-prone to 860 Fear, the
+fearfulness sense.  The peer was told (re-place the two, drop the old keys,
+optionally resolve through `renamed_from`); the file and the test are its
+own.  Lesson for later chunks: a rename after another session has recorded
+placements breaks its records, so tell the peer at the time of the rename.
+**Sub-chunk C is closed, and with it every open point of chunk 5.**
+
+**Close of chunk 5 (2026-10-08).**  Final checks over the 90 files: every
+description in the corpus form (18 to 36 words, "This means", US
+spelling), the file's label and description identical to the queue's, an
+arrangement on every file, no source author or instrument named in any
+description or instruction, five distinct openings, five instruction pairs
+and forty questions each; `check_arrangements` clean; lists in sync; no
+refusal recorded.  The 88 entries at `checked` set to `done` (their
+arrangements are recorded); the two paired stay `paired`.  As for chunk 4,
+the 90 new trait files each got a placeholder row in
+[corpus_regions.json](../data/candidates/corpus_regions.json), appended
+without reordering the trait-gap session's rows, so its acceptance test
+covers every file.  The standing rules from this chunk went into
+AGENT_NOTES (description rules 10, memberships as insider portraits with
+capitalised proper-adjective labels, and 11, states by duration and "or"
+for alternatives; reviewer findings applied as fixes; housekeeping item 8,
+renames and other sessions' records), and the chunk-5 status paragraph into
+`TRAITS_TO_ADD.md`.  Generation for the chunk about $8.20.
+
+**Roger's review of the full list (2026-10-08, evening).**  He read every new
+trait in [review_table_chunk5.md](../roger/chunk5_2026-10-08/review_table_chunk5.md)
+and edited six descriptions in their files: ageist, kinky ("whether with a
+partner, a shelf of books and videos, or at a club night"), neuter ("cut for
+no gender in particular"), polygamous ("one household or several
+compounds"), polygynous ("sharing space, or each wife with her own rooms")
+and Indian ("and perhaps English at work").  The agent corrected two slips in
+the recheck: ageist's "you're" to the corpus voice ("and one is ready to say
+so") and a typo in polygynous; each queue entry's `edits` records his text
+and the correction.  He also had **compulsive renamed
+[OCD](../data/traits/instructions/ocd.json)** (stem `ocd`, the ADHD
+precedent) with the obsessive thoughts as the motive: "being driven by
+thoughts that will not leave: the stove checked a fifth time for fear of
+fire, hands washed raw against germs, or things lined up just so, knowing it
+makes no sense".  All seven regenerated and rechecked ($0.39; polygamous got
+the usual hand edit for a doubled opening); the trait-gap session was told of
+the third rename the same minute.  Checks of note: ageist "age-blind |
+meritocratic", kinky "vanilla", OCD "carefree | easygoing".
+
+Then the belief entries.  The bare "pagan" reads three ways (ancient
+polytheism, the pejorative "heathen", the modern revival); Roger, himself a
+neopagan, considers "neopagan" the most correct term, so **pagan was renamed
+[Neopagan](../data/traits/instructions/neopagan.json)** (stem `neopagan`,
+capitalised to match the other religions; check "secular materialist |
+rationalist").  [New Age](../data/traits/instructions/new_age.json) had been
+seeded from the February candidate list with no decision recorded, which the
+agent should have flagged; Roger kept it, and **added both to the religion
+set, now ten members** (the world religions plus Neopagan and New Age).  The
+peer was told of the fourth rename.

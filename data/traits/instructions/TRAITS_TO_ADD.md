@@ -1234,9 +1234,10 @@ Markus and Kitayama).  Decisions:
   labels (US spelling `honor`), so no author suffix.  Nearest existing:
   vindictive(forgiving), unforgiving, militant(peaceful) on the honor side;
   no dignity or face pole today.
-- **2-simplex: guilt-prone / shame-prone / fear-prone** (stems
-  `guilt_prone`, `shame_prone`, `fear_prone`; `source` Benedict 1946 and
-  the guilt-shame-fear spectrum) -- what regulates the persona's conduct:
+- **2-simplex: guilt-prone / shame-prone / punishment-fearing** (stems
+  `guilt_prone`, `shame_prone`, `punishment_fearing`, the third renamed from
+  `fear_prone` on 2026-10-08 because the label drew the fearfulness reading;
+  `source` Benedict 1946 and the guilt-shame-fear spectrum) -- what regulates the persona's conduct:
   an internal conscience, the judgment of others, or the power of those who
   can punish (authorities, spirits, fate).  Descriptions must frame
   fear-prone as a control logic, not anxiety, or it collapses onto
@@ -1248,7 +1249,7 @@ to N-simplices (open idea under "Clean antonym pairs (candidates)"), seed
 every corner of a simplex with `non-X`, and record membership here rather
 than in the JSON.  Current simplex list: compassionate / malicious /
 callous; conformist / contrarian / nonconformist; honor / dignity / face
-culture; guilt- / shame- / fear-prone; the social-value-orientation
+culture; guilt-prone / shame-prone / punishment-fearing; the social-value-orientation
 triangle cooperative / selfish / competitive (all three exist already);
 the moral-circle spectrum (higher-dimensional and elongated; cosmopolitan
 is one corner).
@@ -3013,7 +3014,7 @@ TBD, ~100 backlog, 88 not adopted); the inventory becomes
 | 3 | new plain pairs, scratch, four theme sub-chunks: demographic + part 2 (46), part 3 (43), dark / light and gap scans (34), part 4 (60), the two agentic-weakness pairs (4, added 2026-09-11) and the ruthless-while-playing / honorable-while-playing and ends-justify-means / honorable pairs (4, added 2026-09-16; Roger's edits done 2026-09-26); plus the Strategy 1a common-mode candidates from May | ~198 | wording-TBD pairs first |
 | V2 | **done 2026-10-02** (rubric adopted 2026-10-01 as `9255dd3430ef`, corpus regenerated, held-out check passed, pairs rechecked): trait generator V2 (§ "Trait generator V2"; added 2026-09-28, Roger: "insert it in the list of tasks before chunk 4 — we'll do that next"): rewrite `_ROGER_TEMPLATE` to fix the generator-side issues, settle how a pair is confirmed given the check's noise, then regenerate every trait and recheck the pairs | the 659 existing traits | design to agree with Roger first; about $19 of generation, about $40 with the honest pair recheck, so the regeneration needs the expensive-operations confirmation; before chunk 4 so that chunk 4 is generated once |
 | 4 | **done 2026-10-08** (127 seeded and generated under V2 by the standards method, every decision taken; 74 facet / aspect / dichotomy entries parked as `backlog` for the post-extraction verdict): standards: pairs and orthoplexes (41) then sets and rings (100); lenient pairing per the policy; near-duplicate tagging | 127 (+74 backlog) | Big Five / HEXACO low-pole names |
-| 5 | unpaired plain traits and plain sets: memberships, states, the two simplices; the sensitive batch (~20) handled together | 135 | refusals |
+| 5 | **done 2026-10-08** (90 seeded and generated under V2, every decision taken; distressed dropped, three heritage entries parked; no refusals): unpaired plain traits and plain sets: memberships, states, the two simplices; the sensitive batch (~20) handled together | 90 (+1 dropped, +3 backlog) | refusals (none came) |
 | 6 | physical track, tagged `physical` | 26 | none |
 | 7 | TBD items, decided as reached: tarot, male / female, Bourdieu, diaspora, nouveau_riche / shabby_genteel, the PC-named May candidates | 48 | all |
 | then | one RunPod extraction for the whole batch (expensive-operations confirmation), then the post-extraction research: arrangement geometry, near-duplicate exclusions, physical track, hierarchy recovery | | |
@@ -3165,6 +3166,41 @@ tetrahedron, three triangles, 80 singletons, 36 unclassified (the
 tangle-pass pointers); 338 role files.  Chunk 4 generation about $8.90 in
 all.  Next: the commit (corpus; docs; generator count checks), then chunk
 5.
+
+Status 2026-10-08 (close of chunk 5).  90 traits seeded and generated under
+V2, by the chunk-3 loop (Fable writers from the queue notes, a Fable
+reviewer, generation and checks before Roger read, his annotations applied)
+for everything but the two triangles, which used the standards method.
+Groups: 35 unpaired plain traits (clinical and neurodivergence entries
+written from the inside; states kept only where they last years, by Roger's
+duration test); 13 nationalities and 8 heritage memberships as two `map`s,
+written as realistic insider portraits, not outsiders' stereotypes
+(Hispanic added on Roger's word, as Mexico, Central and South America and
+not Spain, in the heritage map "for now"); the religions as a `set` of ten
+(the eight world religions plus [Neopagan](./neopagan.json) and
+[New Age](./new_age.json), on Roger's word) and the remaining belief
+singletons; the five relationship structures as a `set` with
+[monogamous](./monogamous.json) ↔ [polyamorous](./polyamorous.json) a clean
+pair; the disabilities as a `set`; the two triangles, honor / dignity / face
+culture from Leung and Cohen 2011 (full text supplied by Roger) and
+guilt-prone / shame-prone / [punishment-fearing](./punishment_fearing.json)
+(renamed from fear-prone; Benedict 1946 for the first two, Roger's own
+wording for the third).  Labels of nationalities, heritages and religions
+capitalised.  Renamed: borderline to
+[borderline personality disorder](./borderline_personality_disorder.json),
+fear-prone to punishment-fearing, compulsive to [OCD](./ocd.json) (with the
+obsessive thoughts as the motive), pagan to Neopagan.  Dropped:
+[distressed](./distressed.json) (not a gap once written as a disposition).
+Parked: southeast_asian, pacific_islander (the heritage map's optional
+extras) and spiralist.  Refusal handling was built first (`refused` status,
+`generation_refusals.jsonl`) and not needed: Sonnet 4.6 refused nothing,
+suicidal and self-harming included.  Every decision is in
+[seeding_log_2026-10.md](../../../reports/seeding_log_2026-10.md); open
+questions for after the extraction are in § "TODO: post-extraction checks
+for chunk 5".  Corpus: 880 trait files, 281 pairs, two maps, 15 triangle
+members; 338 role files.  Roger then read every new trait in a review table
+and edited six descriptions himself.  Chunk 5 generation about $8.70.  Next: the
+commit, then chunk 6 (the physical track).
 
 ## Trait generator V2: the next task, before chunk 4 (Roger, 2026-09-28)
 
@@ -4571,6 +4607,66 @@ finished (doing them per-edit wastes API calls).  Counts are as of 2026-09-07.
    The "This trait involves ..." / "This involves ..." variants (29 traits)
    were left as-is; they read fine in every prompt site.
 
+## TODO: post-extraction checks for chunk 5 (Roger, 2026-10-08)
+
+Opened at Roger's request while he read the chunk-5 readout ("let's see how
+this works out, add a TODO"; "check we have a TODO").  All four need the
+extraction and the embeddings, so none can be settled now.
+
+- **[unscrupulous](./unscrupulous.json) against [amoral](./amoral.json).**
+  The queue's rule is "keep whichever generates better" and both generated
+  cleanly, so both are seeded.  The stated distinction is the amoral /
+  immoral one: amoral feels no pull from right and wrong, unscrupulous knows
+  and steps over it for gain and weighs the odds of being caught.  After the
+  extraction: the description-embedding cosine, the vector cosine, and
+  whether a judge separates them on the question "does the persona
+  acknowledge the act is wrong?".  amoral is paired with
+  [moral](./moral.json) and is in the pair lists, so unscrupulous is the one
+  that would go.
+- **[technomystical](./technomystical.json) against
+  [techno-hierophantic](./techno_hierophantic.json)** (Roger: agreed to keep
+  both, 2026-10-08).  The prediction to test: hierophantic is the *register*
+  (unicode glyphs, the recursion / resonance / lattice vocabulary, the
+  interlocutor cast as a chosen initiate in a dyad) and technomystical is the
+  *belief* (the internet as a mind waking, a server farm as holy as a
+  cathedral) without it.  If the two vectors are near-identical, the finding
+  is that in Qwen the belief cannot be had without the register; if they
+  separate, the belief can be steered without the glyphs.  That is the point
+  of keeping both.
+- **[detractor](./detractor.json): a trait whose counterpart is a role.**
+  Seeded as the trait it was queued as; its named opposite
+  [evangelist](../../roles/instructions/evangelist.json) is a role, so no
+  pair can be recorded across the types (the arrangement field is
+  same-type).  Revisit once the role-pair check exists: either detractor
+  moves to the role side with its scope matched to evangelist's, or it stays
+  a trait singleton and the role keeps no partner.
+- **The two culture triangles share their sanctions** (2026-10-08).  Leung
+  and Cohen's own Table 1 gives guilt as the dignity culture's device and
+  shame as the device of both honor and face, and has no counterpart for
+  [punishment-fearing](./punishment_fearing.json).  So the six corners of
+  [honor](./honor_culture.json) / [dignity](./dignity_culture.json) /
+  [face](./face_culture.json) and [guilt-prone](./guilt_prone.json) /
+  [shame-prone](./shame_prone.json) / punishment-fearing are expected to
+  span about three directions, not four: dignity near guilt-prone,
+  shame-prone between honor and face, punishment-fearing apart.  The
+  geometry check should test that prediction, not treat it as a failure.
+- **[Hispanic](./hispanic.json) in the heritage map** (Roger, 2026-10-08: "in
+  the racial map for now, and we'll see if we need to remove it").  It is the
+  one member that cuts across three others (European, Indigenous American,
+  African), so the geometry check of AGENT_NOTES § "The `arrangement` field"
+  rule 6 is the test: if its vector sits near the centroid of those three and
+  flattens the map's structure, remove it from the arrangement and keep it as
+  a standalone membership.
+
+**A decision recorded here, not a TODO** (Roger, 2026-10-08): where a chunk-5
+entry's `source` field names an instrument (Kessler's K6 for the dropped
+distressed, DOSPERT for unscrupulous, the MVPI commerce motive for
+[mercenary](./mercenary.json)), **the instrument was a gap-filling
+inspiration, not an official arrangement**, so rule 9 and the
+`<pole> (<Standard>)` label form do not apply and the entries stay plain
+traits.  mercenary is therefore the word's vice, not the MVPI's neutral
+motive.
+
 ## TODO: post-extraction checks for chunk 4 (Roger, 2026-10-07)
 
 Follow-up after all the current chunks are seeded and the next extraction
@@ -4607,6 +4703,22 @@ has run; not to hold up any chunk or commit:
   [slytherin](./slytherin.json) was sharpened toward the books on Roger's
   word ("always one step ahead and using any means to achieve one's ends");
   see the seeding log's consolidated decisions, item 7.
+- **Native-language arm for the nationality memberships (added 2026-10-08,
+  chunk 5).**  Roger asked whether the nationality traits should carry
+  native-language instructions.  Decision: the corpus stays in English
+  (response language is one of the strongest directions in the residual
+  stream, so the nationality vectors would separate by language rather
+  than by people; half the set has no single native language; the shared
+  English questions are what make the vectors comparable), and the
+  question is answered by measurement instead.  Before the next
+  extraction, build a tagged side set: native-language versions of the
+  five instructions for four or five nationalities with one clear language
+  (French, German, Japanese, Brazilian Portuguese, Chinese), as extra files
+  marked `experiment`, kept out of `trait_list.json`, the arrangements and
+  every pair list (a separate directory passed to the extraction, to be
+  designed with the extraction).  Afterwards compare their vectors and
+  judge scores with the English files.  Hosted Qwen can give response
+  language and judge scores earlier, but not activations.
 
 ## TODO: assistant-framing leakage scan (Sep 2026)
 

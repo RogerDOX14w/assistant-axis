@@ -5116,6 +5116,33 @@ to every seed, by hand or by a writing agent; Roger reviews before
    construction; the antonym check is informational.  Worked examples:
    chunk 4 in `reports/seeding_log_2026-10.md` (sub-chunk A; the Gelfand
    and VALS items of the consolidated decisions).
+10. **Memberships are insider portraits (Roger, 2026-10-08, chunk 5).**
+   Nationalities, heritages, religions, disabilities and the like: "a
+   realistic portrayal of the actual people, rather than stereotypes held
+   by others".  Where the person is from and lives, the language at home,
+   the everyday world (school, holidays, food, the media followed, politics
+   as seen from inside), the way they speak of their own country or faith;
+   no character or speech stereotypes, no emblem clichés, no disclaimers.
+   The test: would a member recognise themselves, and wince at no clause?
+   A clinical or neurodivergence entry is written the same way, from the
+   inside, but must carry the condition's content (the impairment, the
+   restlessness), not only its pleasant side; the label carries the
+   diagnosis, so the description need not name it.  Proper adjectives in
+   labels are capitalised (`American`, `East Asian`, `Buddhist`, `New
+   Age`), as English writes them; the stem is unchanged.  Membership traits
+   stay in English: native-language instructions would make the response
+   language dominate the vectors (decided 2026-10-08; an `experiment` side
+   set is in TRAITS_TO_ADD's post-extraction TODO).
+11. **States, dispositions and alternatives (Roger, 2026-10-08).**  A state
+   is a trait only if it lasts years (trapped in a job, lonely, uninsured);
+   one that lasts hours or days is rewritten as the habitual disposition if
+   that is a gap, and dropped if not (distressed went: neurotic, anxious and
+   melancholic covered it).  Write the duration in ("night after night",
+   "for months").  A list of alternative manifestations is joined with
+   "or", not "and" (the old or the young; which compulsion), and a clause
+   that narrows the trait to a subset ("saying so to their faces") is
+   dropped; the generator spreads "or" alternatives across the five
+   instructions rather than requiring all of them.
 
 **Trait generator V2: the next task, before chunk 4 (Roger, 2026-09-28).**  The rules
 above govern descriptions; several problems found in the September
@@ -5152,7 +5179,12 @@ the nearest-existing table if one exists, and five recent corpus
 descriptions of the same entity type as examples; ask for the description
 plus one line naming the nearest existing entity and why it is different;
 put the result in the entry's `description` field with status `ready`
-only after Roger has read it.
+only after Roger has read it.  **Reviewer findings (Roger, 2026-10-08):** a
+reviewer line that identifies a real omission or error is applied as a fix
+before seeding, not passed to Roger as a judgement; only genuine either-way
+choices go to him, and they go in the chat, short, not as lines in a long
+readout (the chunk-5 adhd gap had been filed as "Roger's call" and reached
+him as an adjudication).
 
 ### Seeding tooling (chunk 0, Sep 2026)
 
@@ -5858,6 +5890,17 @@ the sections above hold data-regeneration items.  Tick off in place.
    member in every file whose arrangement names the old stem and set the
    partner's `negative_label`, and `pair` should replace an arrangement
    whose members differ only by a `renamed_from` stem.
+8. **`seed_entities.py rename` on a file never committed, and other
+   sessions' records** (2026-10-08, chunk 5).  The command runs `git mv`,
+   which fails on an untracked file, and it never updates the renamed
+   entry's *own* `stem` and `label` in the queue; borderline and fear_prone
+   were renamed by hand that day.  Fix: fall back to a plain move for an
+   untracked file and rewrite the entry itself.  Separately, a rename made
+   after the trait-gap session has recorded placements of every label
+   (`data/candidates/roget/label_heads.json`, `corpus_regions.json`) fails
+   its acceptance tests, so tell that session at the moment of a rename,
+   with the old and new stems; the new chunk's trait files also each need a
+   placeholder row in `corpus_regions.json` (done for chunks 4 and 5).
 
 ### TODO: variant-specific K grids in the PC round-trip experiment (May 2026)
 <!-- claude: archive -->
