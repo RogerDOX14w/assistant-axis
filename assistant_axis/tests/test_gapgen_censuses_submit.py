@@ -38,6 +38,8 @@ def test_stage_selection(env):
     rows = env[0]
     assert [r.surface for r in S.select_stage(rows, "tda")] == ["kind", "sunny", "abandoned", "gloomy", "obscurish"]
     assert len(S.select_stage(rows, "allport_hi")) == 6 and len(S.select_stage(rows, "allport_probe")) == 2
+    # QUESTIONS 34: the known-but-rare words, never the unknown ones
+    assert [r.surface for r in S.select_stage(rows, "allport_rare")] == ["quaintish"]
     with pytest.raises(ValueError):
         S.select_stage(rows, "extra")
 
@@ -134,9 +136,11 @@ class TestCostGuard:
 
     def test_estimate(self):
         e = S.estimate_downstream_usd(1000)
-        assert e.m1_usd == pytest.approx(4.0) and e.m3_usd == pytest.approx(16.2) and e.total_usd == pytest.approx(20.2)
+        m1 = 1000 * S.M1_USD_PER_WORD
+        m3 = 1000 * S.M1_PASS_RATE * S.M3_USD_PER_PASSED_WORD
+        assert e.m1_usd == pytest.approx(m1) and e.m3_usd == pytest.approx(m3) and e.total_usd == pytest.approx(m1 + m3)
         b = S.estimate_downstream_usd(1000, transport="batches")
-        assert b.total_usd == pytest.approx(10.1)
+        assert b.total_usd == pytest.approx((m1 + m3) * S.BATCH_FACTOR)
 
     def test_over_budget_refused_then_accepted(self, tmp_path):
         with pytest.raises(CostRefused):
@@ -170,7 +174,10 @@ def test_followup_commands():
     assert "gap_registry.py submit --file data/candidates/runs/censuses/2026-10-08-pilot/candidates.jsonl" in joined
     assert "--confirm-expensive" not in joined
     big = S.followup_commands("full", S.estimate_downstream_usd(2818))
-    assert "--confirm-expensive --confirmed-by" in big[2] and "--confirm-expensive" not in big[1]
+    # each step's cap is 1.5 x its estimate + $2; a step whose cap passes the $20 line asks for the flag
+    est = S.estimate_downstream_usd(2818)
+    for cmd, part in ((big[1], est.m1_usd), (big[2], est.m3_usd)):
+        assert ("--confirm-expensive --confirmed-by" in cmd) == (1.5 * part + 2 > S.HARD_LINE_USD), cmd
 
 
 def test_extra_list(tmp_path):

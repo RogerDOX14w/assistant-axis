@@ -16,6 +16,13 @@ in rank order (the pilot: ``--every-nth 5`` of the TDA).  :func:`run_submit`:
 4. prints the follow-up commands (resubmission, M1, M3, recovery, report).
 
 A dry run prints the same and writes nothing.
+
+Stage ``allport_rare`` (Roger, 2026-10-09, QUESTIONS 34): the Allport-only words that ``wordfreq``
+or OEWN know but that sit below the dictionary floor (Zipf 1.5; the table's ``ineligible_reason``
+``below_hard_reject``, 1,341 words).  The table leaves them ineligible under the plan's floor; this
+stage submits them on purpose, last, after ``allport_hi`` and ``allport_probe``, opening with a 10%
+pilot (``--every-nth 10``) to see the yield.  The words neither tool knows (``unknown_word``) are
+never submitted.
 """
 from __future__ import annotations
 
@@ -33,16 +40,21 @@ from assistant_axis.gapgen.paths import REGISTRY_PATH, REPO_ROOT, check_id, run_
 from . import GENERATOR
 from .ingest import STAGE_HI, STAGE_PROBE, STAGE_TDA, TableRow, clean_surface, zipf_band
 
-STAGES = (STAGE_TDA, STAGE_HI, STAGE_PROBE, "extra")
+#: The known-but-rare Allport words, submitted last on purpose (QUESTIONS 34).
+STAGE_RARE = "allport_rare"
+STAGES = (STAGE_TDA, STAGE_HI, STAGE_PROBE, STAGE_RARE, "extra")
 
 #: Platform cost per word, from the plan's revision of 2026-10-08 (section 4): M1 (the split
 #: filter, Haiku 5.5, three readings) about $0.004 per submitted word; M3 about $0.018 per word
 #: M1 passes, at a pass rate of about 90% for near-corpus words.  Batches are half price.
-M1_USD_PER_WORD = 0.004
-M3_USD_PER_PASSED_WORD = 0.018
-M1_PASS_RATE = 0.9
+#: Measured on the 2026-10-08 pilots (overnight_readout_2026-10-08.md, section 6): M1 $3.63 on 509 TDA words
+#: ($0.0071; Roget $0.0078, WordNet $0.0071); M3 $4.71 on 447 TDA words M1 passed ($0.0105; Roget and WordNet
+#: $0.013); the TDA passed M1 at 88%.  The plan's first figures ($0.004, $0.018, 90%) were guesses.
+M1_USD_PER_WORD = 0.0072
+M3_USD_PER_PASSED_WORD = 0.011
+M1_PASS_RATE = 0.88
 BATCH_FACTOR = 0.5
-RATES_SOURCE = "coding_plan_01_censuses.md, revision of 2026-10-08, item 4 (M1 Haiku 5.5 x3; M3 pilot rates)"
+RATES_SOURCE = "measured on the 2026-10-08 pilots (overnight_readout_2026-10-08.md, section 6)"
 
 
 @dataclass
@@ -74,7 +86,10 @@ def estimate_downstream_usd(n: int, *, transport: str = "live") -> Estimate:
 def select_stage(rows: Sequence[TableRow], stage: str) -> list[TableRow]:
     """Eligible rows of one stage, in rank order."""
     if stage not in STAGES or stage == "extra":
-        raise ValueError(f"not a table stage: {stage!r} (one of {STAGES[:3]})")
+        raise ValueError(f"not a table stage: {stage!r} (one of {STAGES[:4]})")
+    if stage == STAGE_RARE:
+        return sorted((r for r in rows if r.stem and not r.tda and r.ineligible_reason == "below_hard_reject"),
+                      key=lambda r: r.rank)
     return sorted((r for r in rows if r.eligible and r.stage == stage), key=lambda r: r.rank)
 
 
