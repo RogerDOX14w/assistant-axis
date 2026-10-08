@@ -945,10 +945,14 @@ def combined_create_kwargs(positive_label, negative_label, definition, n_variant
     )
 
 
-def validated_combined(raw_text: str, positive_label: str) -> dict:
+def validated_combined(raw_text: str, positive_label: str,
+                       n_variants: int | None = None, n_questions: int | None = None) -> dict:
     """Parse a combined-style reply and check its shape.  Raises
     json.JSONDecodeError, ValueError or KeyError on a reply that cannot be
-    used."""
+    used.  With ``n_variants`` / ``n_questions`` the counts are checked too,
+    so that a reply with 39 questions is asked for again by the retry loop
+    instead of being written (interpreter, 2026-09-12; high-context (Hall),
+    2026-10-07)."""
     raw = strip_markdown_fences(raw_text)
     data = _parse_json_with_repair(raw, positive_label)
 
@@ -958,12 +962,16 @@ def validated_combined(raw_text: str, positive_label: str) -> dict:
     for pair in instructions:
         if "pos" not in pair or "neg" not in pair:
             raise ValueError(f"Missing pos/neg keys in pair: {pair}")
+    if n_variants is not None and len(instructions) != n_variants:
+        raise ValueError(f"{len(instructions)} instruction pairs, not {n_variants}")
 
     questions = data["questions"]
     if not isinstance(questions, list) or not all(
         isinstance(q, str) for q in questions
     ):
         raise ValueError("questions is not a list of strings")
+    if n_questions is not None and len(questions) != n_questions:
+        raise ValueError(f"{len(questions)} questions, not {n_questions}")
 
     if "eval_prompt" not in data or not isinstance(data["eval_prompt"], str):
         raise ValueError("eval_prompt missing or not a string")
@@ -1051,7 +1059,7 @@ async def _generate_combined_once(
                 response = await _call_api(client, create_kwargs)
                 _charge(usage, model, response)
                 raw_text = _extract_text(response)
-                return validated_combined(raw_text, positive_label)
+                return validated_combined(raw_text, positive_label, n_variants, n_questions)
             except (json.JSONDecodeError, ValueError, KeyError, IndexError) as e:
                 wait = 2**attempt
                 raw_src = raw_text if "raw_text" in locals() else ""
@@ -1409,7 +1417,8 @@ async def collect_batch(client: anthropic.AsyncAnthropic, batch_id: str, *, inst
             continue
         data = json.loads(path.read_text(encoding="utf-8"))
         try:
-            combined = validated_combined(_extract_text(message), data.get("positive_label", stem))
+            combined = validated_combined(_extract_text(message), data.get("positive_label", stem),
+                                          n_questions=None if instructions_only else len(data.get("questions") or []) or None)
         except (json.JSONDecodeError, ValueError, KeyError, IndexError) as e:
             print(f"  {stem}: reply cannot be used ({e})", file=sys.stderr)
             again.append(stem)
