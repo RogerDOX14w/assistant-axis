@@ -393,11 +393,21 @@ def cmd_submit(args) -> int:
         print(f"DRY-RUN: would submit {len(cands)} candidates from {cpath} to {registry} as {gen}/{args.run_id}")
         return 0
     before = cpath.read_bytes()
+    first = not (run_d / "run.json").exists()
+    try:
+        rel = str(cpath.resolve().relative_to(_REPO_ROOT))
+    except ValueError:
+        rel = str(cpath)
+    hc = run_d.parent.parent / H.GENERATOR / args.run_id / "harvest_counts.json"
+    harvest_cfg = json.loads(hc.read_text())["config"] if hc.exists() else None
     run = start_run(gen, args.run_id, args={"command": "roget_generate.py submit", "generator": gen,
-                                            "run_id": args.run_id, "candidates": str(cpath)},
+                                            "run_id": args.run_id, "candidates": rel,
+                                            "harvest_config": harvest_cfg},
                     candidates_dir=args.candidates_dir)
     rep = submit_candidates(cands, registry_path=registry, run=run)
-    run.finish(n_emitted=len(cands))
+    # the harvest wrote candidates.jsonl, so record_candidates adds nothing: the first session counts
+    # the run's candidates, a resubmission none (run.json sums n_emitted over sessions)
+    run.finish(n_emitted=len(cands) if first else 0)
     if cpath.read_bytes() != before:
         print(f"WARNING: {cpath} changed on submit (it should already hold every candidate)", file=sys.stderr)
     print(json.dumps({k: v for k, v in rep.as_dict().items() if k != "keys"} | {"n_keys": len(rep.keys)}))

@@ -82,6 +82,10 @@ def test_pipeline_end_to_end(tree):
     n_lines = len(reg.read_text().splitlines())
     assert run(base, "submit", "--run-id", "t1", "--registry", str(reg)) == 0
     assert len(reg.read_text().splitlines()) == n_lines              # idempotent: n_new = 0, nothing appended
+    run_json = json.loads((rd / "run.json").read_text())
+    assert run_json["n_emitted"] == len(rows) and len(run_json["sessions"]) == 2
+    assert run_json["args"]["harvest_config"]["per_head_cap"] == 10
+    assert not run_json["args"]["candidates"].startswith("/") or "cands" in run_json["args"]["candidates"]
     with pytest.raises(SystemExit, match="was submitted"):
         run(base, "harvest", "--run-id", "t1", "--force")
 
