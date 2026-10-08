@@ -82,7 +82,7 @@ def test_gloss_hint_feeling_heads_and_label_guard():
                   title="Dejection", hid="837", nouns=[["dejection", "melancholy", "gloom"], ["sadness"]])
     item = H.HarvestItem("dejected", "837", None, 0, ["gloomy", "glum", "sad"], 3.0, False, True, 1, 3.0, True)
     text = H.gloss_hint(item, h, None, guard=_guard("glum", "melancholy"))
-    assert text.startswith("This means a general tendency to feel dejection and act from it")
+    assert text.startswith("This means a tendency to feel dejection and act from it")
     assert "glum" not in text and "melancholy" not in text           # corpus labels never appear
     moral = head_with([["upright"]], klass="VI", section="IV. Moral affections", title="Probity", hid="939")
     item2 = H.HarvestItem("upright", "939", None, 0, ["honest"], 3.0, False, True, 1, 3.0, True)

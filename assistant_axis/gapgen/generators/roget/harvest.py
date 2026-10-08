@@ -231,21 +231,29 @@ def gloss_hint(item: HarvestItem, head: Head, partner_head: Optional[Head], *, g
 
     "This means a disposition toward resolution (volition in general), of a piece with unflinching,
     determined and indomitable, shown in determination, backbone and grit; the opposite pole is
-    irresolution."  The feeling heads of Class VI (:func:`is_feeling_head`) read "a general tendency
-    to feel <sense> and act from it" (an emotional state taken as an inclination, plan § 1)."""
+    irresolution."  The feeling heads of Class VI (:func:`is_feeling_head`) read "a tendency to feel
+    <sense> and act from it" (an emotional state taken as an inclination, plan § 1; the plan's "a
+    general tendency" lost "general", which is a queued label).  A head too sparse for 18 words
+    gives a shorter hint."""
     me = item.surface.lower()
     sense = _sense_word(head, guard, exclude={me}) or "this temper"
     if is_feeling_head(head):
-        core = f"This means a general tendency to feel {sense} and act from it"
+        core = f"This means a tendency to feel {sense} and act from it"
     else:
         core = f"This means a disposition toward {sense}"
     where = (head.section.split(". ", 1)[-1] if head.section else "").lower()
     where_clause = f" ({where})" if where and not guard.contains(where) else ""
-    sibs = [s for s in item.siblings if s.lower() != me and len(s.split()) == 1 and not guard.contains(s)]
-    sibs = list(dict.fromkeys(sibs))[:4]
-    nouns = [n for n in head.items("N") if len(n.split()) == 1 and n.islower() and len(n) >= 4 and n != me
-             and n != sense and not guard.contains(n)]
-    nouns = list(dict.fromkeys(nouns))[:6]
+    def ok(w: str) -> bool:
+        return (w.islower() and w != me and w != sense and w.split()[-1] not in STOPWORDS
+                and not guard.contains(w))
+
+    # one-word siblings and nouns first; multiword ones only to reach the minimum length
+    sibs = [s for s in item.siblings if len(s.split()) == 1 and ok(s.lower())]
+    sibs += [s for s in item.siblings if len(s.split()) == 2 and ok(s.lower())]
+    sibs = list(dict.fromkeys(sibs))[:6]
+    nouns = [n for n in head.items("N") if len(n.split()) == 1 and len(n) >= 4 and ok(n)]
+    nouns += [n for n in head.items("N") if 2 <= len(n.split()) <= 3 and ok(n)]
+    nouns = list(dict.fromkeys(nouns))[:8]
     opposite = None
     if partner_head is not None:
         opposite = _sense_word(partner_head, guard, exclude={me})
