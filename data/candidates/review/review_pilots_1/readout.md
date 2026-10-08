@@ -195,10 +195,10 @@ decision 12).  Terms:
   or Sonnet's 4), the relation not `opposed`.  Every 4-edge is also a 3-edge.  Opus is still asked only on
   Sonnet's 3s, 4s and unsure (the escalation at cut-off 4), so a Sonnet 2 never becomes a 3.
 - **Merged group**: what this readout called a clique above (4-edges both ways).  The review app merges it by
-  default.  `graph.json` keeps the key `cliques` for it.
+  default.  [graph.json](./graph.json) keeps the key `cliques` for it.
 - **Proposed group**: a maximal clique of 3-edges, less any that lies wholly inside a merged group.  It may
   contain a merged group and may overlap other proposed groups.  The review app shows it pre-assembled when its
-  first member is opened, and merges it only when Roger confirms with one key.  `graph.json` key `proposed_groups`
+  first member is opened, and merges it only when Roger confirms with one key.  [graph.json](./graph.json) key `proposed_groups`
   (schema 2).
 
 The build was resumed with the same arguments and `--budget-usd 2` (`build --resume`, default
@@ -249,7 +249,8 @@ inexpressive; impetuous, imprudent; inhuman, unmerciful; judicial, reasonable; l
 lovable, pleasing; noisy, rowdy; nonhostile, unaggressive; overcaring, solicitous; overquiet, silent; respectable,
 unimpeachable; respectable, upright; satanic, sinister; secretive, uncandid; shady, sketchy; sour, uncongenial;
 strong-willed, willful; suave, urbane; tireless, weariless; uncompanionable, uncongenial; uncongenial,
-unpersonable).  `review_graph.py groups --batch-id review_pilots_1` prints them all.
+unpersonable).  [review_graph.py](../../../../data_analysis/gap_generation/review_graph.py) `groups --batch-id
+review_pilots_1` prints them all.
 
 **Cost of the resume: $0.336** (65 Sonnet calls and 60 Opus calls; five of the 65 Sonnet readings were 2, which
 Opus does not read).  The estimate before any call was $0.334.  The run's total is now $1.846 against the $2 cap,
