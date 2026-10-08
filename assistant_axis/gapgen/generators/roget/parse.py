@@ -651,7 +651,7 @@ def save_heads(index: RogetIndex, path: Path, *, text_path: Optional[Path] = Non
     from assistant_axis.provenance import current_file_input
 
     payload = {"parser_version": index.parser_version, "text_sha256": index.text_sha256,
-               "n_heads": len(index.order), "order": list(index.order),
+               "n_heads": len(index.order), "order": " ".join(index.order),
                "unknown_tags": dict(sorted(index.unknown_tags.items())),
                "heads": [index.heads[h].to_json() for h in index.order]}
     inputs = []
@@ -662,13 +662,30 @@ def save_heads(index: RogetIndex, path: Path, *, text_path: Optional[Path] = Non
     env = json_metadata(payload, inputs=inputs, title="Roget 1911 heads (gap generation, workstream 2)")
     path = Path(path)
     path.parent.mkdir(parents=True, exist_ok=True)
-    atomic_write_text(json.dumps(env, indent=1, ensure_ascii=False) + "\n", path)
+    atomic_write_text(dumps_one_per_line(env, "heads"), path)
     return path
+
+
+def dumps_one_per_line(env: dict, key: str) -> str:
+    """The envelope with ``result[key]`` (a list) written one compact element per line: small and
+    readable in a diff."""
+    marker = "\u0000LIST\u0000"
+    items = env["result"][key]
+    shell = {**env, "result": {**env["result"], key: marker}}
+    text = json.dumps(shell, indent=1, ensure_ascii=False)
+    if isinstance(items, dict):
+        body = "{\n" + ",\n".join(json.dumps(k, ensure_ascii=False) + ":" + json.dumps(v, ensure_ascii=False,
+                                                                                       separators=(",", ":"))
+                                    for k, v in items.items()) + "\n }"
+    else:
+        body = "[\n" + ",\n".join(json.dumps(x, ensure_ascii=False, separators=(",", ":")) for x in items) + "\n ]"
+    return text.replace(json.dumps(marker), body) + "\n"
 
 
 def index_from_payload(payload: dict) -> RogetIndex:
     heads = {d["id"]: Head.from_json(d) for d in payload["heads"]}
-    order = list(payload.get("order") or [d["id"] for d in payload["heads"]])
+    order = payload.get("order") or [d["id"] for d in payload["heads"]]
+    order = order.split() if isinstance(order, str) else list(order)
     by_sub: dict[str, list[str]] = {}
     for hid in order:
         by_sub.setdefault(subsection_key(heads[hid]), []).append(hid)

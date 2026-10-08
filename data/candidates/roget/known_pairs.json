@@ -1,0 +1,265 @@
+{
+ "_about": "Hand-listed Roget 1911 opposed heads for the pairing check (coding_plan_02_roget_wordnet.md, task 5; Fable's list from memory of the 1911 synopsis). The check compares titles with the parse and drops a pair whose titles differ (printed, not failed). Checked against the parse 2026-10-08: 41 of 42 listed as given; 742/743 corrected (titles swapped in the list).",
+ "triads_to_check": [
+  "600 Will / 601 Necessity",
+  "604a Perseverance",
+  "608 Caprice",
+  "609 Choice / 609a Absence of choice / 610 Rejection",
+  "615 Motive / 615a Absence of motive / 616 Dissuasion"
+ ],
+ "pairs": [
+  {
+   "a": "1",
+   "b": "2",
+   "title_a": "Existence",
+   "title_b": "Inexistence"
+  },
+  {
+   "a": "82",
+   "b": "83",
+   "title_a": "Conformity",
+   "title_b": "Unconformity"
+  },
+  {
+   "a": "602",
+   "b": "603",
+   "title_a": "Willingness",
+   "title_b": "Unwillingness"
+  },
+  {
+   "a": "604",
+   "b": "605",
+   "title_a": "Resolution",
+   "title_b": "Irresolution"
+  },
+  {
+   "a": "606",
+   "b": "607",
+   "title_a": "Obstinacy",
+   "title_b": "Tergiversation"
+  },
+  {
+   "a": "613",
+   "b": "614",
+   "title_a": "Habit",
+   "title_b": "Desuetude"
+  },
+  {
+   "a": "618",
+   "b": "619",
+   "title_a": "Good",
+   "title_b": "Evil"
+  },
+  {
+   "a": "682",
+   "b": "683",
+   "title_a": "Activity",
+   "title_b": "Inactivity"
+  },
+  {
+   "a": "684",
+   "b": "685",
+   "title_a": "Haste",
+   "title_b": "Leisure"
+  },
+  {
+   "a": "698",
+   "b": "699",
+   "title_a": "Skill",
+   "title_b": "Unskillfulness"
+  },
+  {
+   "a": "702",
+   "b": "703",
+   "title_a": "Cunning",
+   "title_b": "Artlessness"
+  },
+  {
+   "a": "704",
+   "b": "705",
+   "title_a": "Difficulty",
+   "title_b": "Facility"
+  },
+  {
+   "a": "742",
+   "b": "743",
+   "title_a": "Disobedience",
+   "title_b": "Obedience",
+   "note": "Fable's list had 742 Obedience / 743 Disobedience; the 2024 Gutenberg text numbers them 742 Disobedience / 743 Obedience (the pairing holds, the titles were swapped)"
+  },
+  {
+   "a": "748",
+   "b": "749",
+   "title_a": "Freedom",
+   "title_b": "Subjection"
+  },
+  {
+   "a": "822",
+   "b": "823",
+   "title_a": "Sensibility",
+   "title_b": "Insensibility"
+  },
+  {
+   "a": "825",
+   "b": "826",
+   "title_a": "Excitability",
+   "title_b": "Inexcitability"
+  },
+  {
+   "a": "827",
+   "b": "828",
+   "title_a": "Pleasure",
+   "title_b": "Pain"
+  },
+  {
+   "a": "831",
+   "b": "832",
+   "title_a": "Content",
+   "title_b": "Discontent"
+  },
+  {
+   "a": "836",
+   "b": "837",
+   "title_a": "Cheerfulness",
+   "title_b": "Dejection"
+  },
+  {
+   "a": "858",
+   "b": "859",
+   "title_a": "Hope",
+   "title_b": "Hopelessness"
+  },
+  {
+   "a": "861",
+   "b": "862",
+   "title_a": "Courage",
+   "title_b": "Cowardice"
+  },
+  {
+   "a": "863",
+   "b": "864",
+   "title_a": "Rashness",
+   "title_b": "Caution"
+  },
+  {
+   "a": "865",
+   "b": "866",
+   "title_a": "Desire",
+   "title_b": "Indifference"
+  },
+  {
+   "a": "873",
+   "b": "874",
+   "title_a": "Repute",
+   "title_b": "Disrepute"
+  },
+  {
+   "a": "878",
+   "b": "879",
+   "title_a": "Pride",
+   "title_b": "Humility"
+  },
+  {
+   "a": "880",
+   "b": "881",
+   "title_a": "Vanity",
+   "title_b": "Modesty"
+  },
+  {
+   "a": "885",
+   "b": "886",
+   "title_a": "Insolence",
+   "title_b": "Servility"
+  },
+  {
+   "a": "888",
+   "b": "889",
+   "title_a": "Friendship",
+   "title_b": "Enmity"
+  },
+  {
+   "a": "894",
+   "b": "895",
+   "title_a": "Courtesy",
+   "title_b": "Discourtesy"
+  },
+  {
+   "a": "897",
+   "b": "898",
+   "title_a": "Love",
+   "title_b": "Hate"
+  },
+  {
+   "a": "906",
+   "b": "907",
+   "title_a": "Benevolence",
+   "title_b": "Malevolence"
+  },
+  {
+   "a": "916",
+   "b": "917",
+   "title_a": "Gratitude",
+   "title_b": "Ingratitude"
+  },
+  {
+   "a": "918",
+   "b": "919",
+   "title_a": "Forgiveness",
+   "title_b": "Revenge"
+  },
+  {
+   "a": "922",
+   "b": "923",
+   "title_a": "Right",
+   "title_b": "Wrong"
+  },
+  {
+   "a": "931",
+   "b": "932",
+   "title_a": "Approbation",
+   "title_b": "Disapprobation"
+  },
+  {
+   "a": "939",
+   "b": "940",
+   "title_a": "Probity",
+   "title_b": "Improbity"
+  },
+  {
+   "a": "942",
+   "b": "943",
+   "title_a": "Disinterestedness",
+   "title_b": "Selfishness"
+  },
+  {
+   "a": "944",
+   "b": "945",
+   "title_a": "Virtue",
+   "title_b": "Vice"
+  },
+  {
+   "a": "946",
+   "b": "947",
+   "title_a": "Innocence",
+   "title_b": "Guilt"
+  },
+  {
+   "a": "953",
+   "b": "954",
+   "title_a": "Temperance",
+   "title_b": "Intemperance"
+  },
+  {
+   "a": "958",
+   "b": "959",
+   "title_a": "Sobriety",
+   "title_b": "Drunkenness"
+  },
+  {
+   "a": "960",
+   "b": "961",
+   "title_a": "Purity",
+   "title_b": "Impurity"
+  }
+ ]
+}
