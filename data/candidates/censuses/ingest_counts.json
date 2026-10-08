@@ -1,0 +1,255 @@
+{
+  "n_rows": 17958,
+  "n_tda": 2818,
+  "n_allport": 17708,
+  "n_both": 2569,
+  "n_eligible": 11002,
+  "per_column": {
+    "I": 4457,
+    "II": 4497,
+    "III": 5176,
+    "IV": 3636
+  },
+  "only_column": {
+    "I": 2947,
+    "II": 4230,
+    "III": 4508,
+    "IV": 3408
+  },
+  "per_stage": {
+    "allport_hi": 4746,
+    "allport_probe": 3438,
+    "none": 6956,
+    "tda": 2818
+  },
+  "ineligible": {
+    "below_hard_reject": 1341,
+    "malformed": 1,
+    "unknown_word": 5614
+  },
+  "per_zipf_band": {
+    "tda": {
+      "1.5-2.5": 520,
+      "2.5-3.5": 933,
+      "<1.5": 495,
+      ">=3.5": 870
+    },
+    "allport_only": {
+      "1.5-2.5": 2314,
+      "2.5-3.5": 2723,
+      "<1.5": 8079,
+      ">=3.5": 2023
+    }
+  },
+  "tda_below_dictionary_floor": 251,
+  "platform_probe": {
+    "allport_probe": 3438,
+    "none": 6955,
+    "tda": 1015
+  },
+  "unknown_word": 6477,
+  "repaired": 23,
+  "repair_suggestions": 706,
+  "malformed": 1,
+  "with_gloss_hint": 8375,
+  "corpus_stem_match": 444,
+  "queue_stem_match": 304,
+  "counters": {
+    "allport_cross_column_merges": 58,
+    "allport_lines_I": 4470,
+    "allport_lines_II": 4511,
+    "allport_lines_III": 5191,
+    "allport_lines_IV": 3652,
+    "allport_within_column_duplicates": 57,
+    "n_malformed": 1,
+    "n_repair_suggestions": 706,
+    "n_repaired": 23,
+    "tda_rows_merged_extra": 0
+  },
+  "ceiling": {
+    "n_corpus": 790,
+    "n_multiword": 244,
+    "n_tda": 394,
+    "n_allport": 411,
+    "n_union": 444,
+    "tda": 0.4987,
+    "allport": 0.5203,
+    "union": 0.562,
+    "union_single_word": 0.7747,
+    "n_matched_eligible": 444,
+    "submitted_of_matched": 1.0,
+    "matched_ineligible": [],
+    "n_queue": 238,
+    "n_queue_union": 65
+  },
+  "malformed_list": [
+    {
+      "source": "allport:III",
+      "raw": "F.F.V",
+      "line": 1728
+    }
+  ],
+  "repaired_list": [
+    {
+      "raw": "Belicose",
+      "column": "I",
+      "line": 145,
+      "repaired": "bellicose",
+      "kind": "doubling"
+    },
+    {
+      "raw": "Cadish",
+      "column": "I",
+      "line": 251,
+      "repaired": "caddish",
+      "kind": "doubling"
+    },
+    {
+      "raw": "Dilettant",
+      "column": "I",
+      "line": 655,
+      "repaired": "dilettante",
+      "kind": "vowel_insertion"
+    },
+    {
+      "raw": "Hallucinator",
+      "column": "I",
+      "line": 1191,
+      "repaired": "hallucinatory",
+      "kind": "vowel_insertion"
+    },
+    {
+      "raw": "lubricous",
+      "column": "I",
+      "line": 1759,
+      "repaired": "lubricious",
+      "kind": "vowel_insertion"
+    },
+    {
+      "raw": "meglomaniacal",
+      "column": "I",
+      "line": 1856,
+      "repaired": "megalomaniacal",
+      "kind": "vowel_insertion"
+    },
+    {
+      "raw": "nonmitative",
+      "column": "I",
+      "line": 2135,
+      "repaired": "nonimitative",
+      "kind": "vowel_insertion"
+    },
+    {
+      "raw": "throughgoing",
+      "column": "I",
+      "line": 3663,
+      "repaired": "thoroughgoing",
+      "kind": "vowel_insertion"
+    },
+    {
+      "raw": "unpeacable",
+      "column": "I",
+      "line": 4052,
+      "repaired": "unpeaceable",
+      "kind": "vowel_insertion"
+    },
+    {
+      "raw": "unvocal",
+      "column": "I",
+      "line": 4212,
+      "repaired": "univocal",
+      "kind": "vowel_insertion"
+    },
+    {
+      "raw": "exhauusted",
+      "column": "II",
+      "line": 1343,
+      "repaired": "exhausted",
+      "kind": "doubling"
+    },
+    {
+      "raw": "orented",
+      "column": "II",
+      "line": 2762,
+      "repaired": "oriented",
+      "kind": "vowel_insertion"
+    },
+    {
+      "raw": "probbing",
+      "column": "II",
+      "line": 3429,
+      "repaired": "probing",
+      "kind": "doubling"
+    },
+    {
+      "raw": "flagitous",
+      "column": "III",
+      "line": 1759,
+      "repaired": "flagitious",
+      "kind": "vowel_insertion"
+    },
+    {
+      "raw": "forgetable",
+      "column": "III",
+      "line": 1827,
+      "repaired": "forgettable",
+      "kind": "doubling"
+    },
+    {
+      "raw": "marriagable",
+      "column": "III",
+      "line": 2622,
+      "repaired": "marriageable",
+      "kind": "vowel_insertion"
+    },
+    {
+      "raw": "sapiental",
+      "column": "III",
+      "line": 3634,
+      "repaired": "sapiential",
+      "kind": "vowel_insertion"
+    },
+    {
+      "raw": "toadish",
+      "column": "III",
+      "line": 4215,
+      "repaired": "toadyish",
+      "kind": "vowel_insertion"
+    },
+    {
+      "raw": "unmmanageable",
+      "column": "III",
+      "line": 4759,
+      "repaired": "unmanageable",
+      "kind": "doubling"
+    },
+    {
+      "raw": "begrimmed",
+      "column": "IV",
+      "line": 180,
+      "repaired": "begrimed",
+      "kind": "doubling"
+    },
+    {
+      "raw": "inhomogenous",
+      "column": "IV",
+      "line": 1302,
+      "repaired": "inhomogeneous",
+      "kind": "vowel_insertion"
+    },
+    {
+      "raw": "unsexual",
+      "column": "IV",
+      "line": 3365,
+      "repaired": "unisexual",
+      "kind": "vowel_insertion"
+    },
+    {
+      "raw": "unwakened",
+      "column": "IV",
+      "line": 3481,
+      "repaired": "unawakened",
+      "kind": "vowel_insertion"
+    }
+  ]
+}
