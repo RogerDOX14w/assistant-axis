@@ -47552,14 +47552,14 @@
    "partner": null,
    "partner_exists": null,
    "arrangement_members": null,
-   "description_draft": null,
+   "description_draft": "An athlete is someone who trains to compete: hours a day on the track, in the pool or on the field, a season built around meets or matches, a body that is the whole instrument, and an injury that stops everything.",
    "description_notes": "Athlete role, missing today (coach, surfer, daredevil exist).",
-   "description": null,
+   "description": "An athlete is someone who trains to compete: hours a day on the track, in the pool or on the field, a season built around meets or matches, a body that is the whole instrument, and an injury that stops everything.",
    "source": null,
    "tags": [
     "physical"
    ],
-   "status": "candidate",
+   "status": "done",
    "decision": "Accepted 2026-09-08 as a separate research track: tag `physical`, keep out of the clean-pair cohort and goal lists until the research says keep / keep-as-tagged / remove",
    "alternatives": null,
    "section": "Physical-attribute traits: a separate research track (decided 2026-09-08)",
@@ -47574,7 +47574,20 @@
      "status": "candidate",
      "chunk": "2"
     }
-   ]
+   ],
+   "chunk_6_rule": "Roger, 2026-10-08: body-only rule. Every description of this chunk states only the body and how it is lived, with no personality or behaviour clause, so that any behavioural content in the vectors is the model's own (the physical track's research question).",
+   "nearest_existing": "gym_rat (lifting at the gym for its own sake, no competition); coach and trainer (develop others); competitor (rivalry as a disposition, no sport); daredevil (thrills and danger); surfer (a wave-riding life, no season or meet). This one trains and competes in a sport, the body as the instrument.",
+   "notes": "Body-only for a role: the training, the season, the body, the injury; no 'driven', 'disciplined' or 'competitive'. 41 words (role range 23-43).",
+   "review_issues": [],
+   "review_verdict": "ok",
+   "review_strength": "at the notes",
+   "set_review_by_reviewer": {
+    "set": "roles: athlete, pregnant",
+    "review": "athlete: the training, the season, the body as instrument, the injury; no 'driven' or 'competitive'; properly apart from gym_rat (lifting, no competition), competitor (rivalry as a disposition), coach and trainer (develop others), surfer and daredevil. pregnant: the months of the body changing, the appointments, the due date; no mood stereotype (no glow, no hormones, no nesting). On 'A pregnant woman is someone' against the corpus's 'A <adj> person is someone' (homeless, unemployed, estranged): I side with the writer. The packet's standard for the body is 'as an adult would say it of themselves', and a pregnant woman says 'pregnant woman'; 'A pregnant person' is a one-word swap if Roger prefers the pattern, and the choice is his. Both 41 words, in the role range.",
+    "agree_with_writer": true
+   },
+   "seeded_at": "2026-10-08",
+   "generated_at": "2026-10-08"
   },
   {
    "stem": "pregnant",
@@ -47586,15 +47599,15 @@
    "partner": null,
    "partner_exists": null,
    "arrangement_members": null,
-   "description_draft": null,
+   "description_draft": "A pregnant woman is someone carrying a child through nine months of the body changing: morning sickness and then a growing belly, the first kicks, prenatal checkups and ultrasounds, maternity clothes, swollen feet, and a due date circled on the calendar.",
    "description_notes": "Pregnancy as a role: a state, but narrative-typical.",
-   "description": null,
+   "description": "A pregnant woman is someone carrying a child through nine months of the body changing: morning sickness and then a growing belly, the first kicks, prenatal checkups and ultrasounds, maternity clothes, swollen feet, and a due date circled on the calendar.",
    "source": null,
    "tags": [
     "physical",
     "state"
    ],
-   "status": "candidate",
+   "status": "done",
    "decision": "Accepted 2026-09-08 as a separate research track: tag `physical`, keep out of the clean-pair cohort and goal lists until the research says keep / keep-as-tagged / remove",
    "alternatives": null,
    "section": "Physical-attribute traits: a separate research track (decided 2026-09-08)",
@@ -47609,7 +47622,20 @@
      "status": "candidate",
      "chunk": "2"
     }
-   ]
+   ],
+   "chunk_6_rule": "Roger, 2026-10-08: body-only rule. Every description of this chunk states only the body and how it is lived, with no personality or behaviour clause, so that any behavioural content in the vectors is the model's own (the physical track's research question).",
+   "nearest_existing": "parent (the child already born, the raising); newlywed (another months-long state, of marriage); patient (illness and treatment, which pregnancy is not). This one is the pregnancy itself: the months of the body changing, the appointments, the due date.",
+   "notes": "Corpus form for an adjective role is 'A <adj> person is someone ...' (homeless, unemployed, estranged). Used 'A pregnant woman' because the packet asks for the body as lived, plainly; 'A pregnant person' is the one-word alternative if Roger prefers the corpus pattern. No mood clause (no glowing, no hormonal, no nesting). 41 words.",
+   "review_issues": [],
+   "review_verdict": "ok",
+   "review_strength": "at the notes",
+   "set_review_by_reviewer": {
+    "set": "roles: athlete, pregnant",
+    "review": "athlete: the training, the season, the body as instrument, the injury; no 'driven' or 'competitive'; properly apart from gym_rat (lifting, no competition), competitor (rivalry as a disposition), coach and trainer (develop others), surfer and daredevil. pregnant: the months of the body changing, the appointments, the due date; no mood stereotype (no glow, no hormones, no nesting). On 'A pregnant woman is someone' against the corpus's 'A <adj> person is someone' (homeless, unemployed, estranged): I side with the writer. The packet's standard for the body is 'as an adult would say it of themselves', and a pregnant woman says 'pregnant woman'; 'A pregnant person' is a one-word swap if Roger prefers the pattern, and the choice is his. Both 41 words, in the role range.",
+    "agree_with_writer": true
+   },
+   "seeded_at": "2026-10-08",
+   "generated_at": "2026-10-08"
   },
   {
    "stem": "athletic",
@@ -47624,20 +47650,68 @@
     "athletic",
     "sedentary"
    ],
-   "description_draft": null,
+   "description_draft": "This means training most days and playing a sport on weekends: a resting pulse in the fifties, muscle that shows, and stairs taken two at a time without getting winded.",
    "description_notes": "Physical activity / fitness.",
-   "description": null,
+   "description": "This means training most days and playing a sport on weekends: a resting pulse in the fifties, a body that recovers overnight, and stairs taken two at a time without getting winded.",
    "source": null,
    "tags": [
     "physical"
    ],
-   "status": "candidate",
+   "status": "done",
    "decision": "Accepted 2026-09-08 as a separate research track: tag `physical`, keep out of the clean-pair cohort and goal lists until the research says keep / keep-as-tagged / remove",
    "alternatives": null,
    "section": "Physical-attribute traits: a separate research track (decided 2026-09-08)",
    "lines": "2068-2069",
    "chunk_confidence": "high",
-   "extracted_from": "extract_4.json"
+   "extracted_from": "extract_4.json",
+   "pair_by_construction": true,
+   "chunk_6_rule": "Roger, 2026-10-08: body-only rule. Every description of this chunk states only the body and how it is lived, with no personality or behaviour clause, so that any behavioural content in the vectors is the model's own (the physical track's research question).",
+   "nearest_existing": "energetic (pace and stamina as a temperament, no training or sport); gym_rat role (the lifting scene); health_conscious (checkups and diet as a regimen). This one is the trained body and the sport itself.",
+   "set_review": "athletic / sedentary: grain is the daily activity level and what it does to the body (pulse, muscle, a flight of stairs), same three markers on both sides, mirrored length (30 / 31). No character word on either pole; the pair reads as one.",
+   "notes": "Body-only: the activity (training, a sport) and its physical results (pulse, muscle, stairs). No 'disciplined', 'competitive' or 'driven'. 30 words.",
+   "review_issues": [],
+   "review_verdict": "ok",
+   "review_strength": "at the notes",
+   "set_review_by_reviewer": {
+    "set": "athletic / sedentary",
+    "review": "One grain: the daily activity level and its results in the body (pulse or wind on the stairs, muscle or softness, stiffness). The activity clauses ('training most days', 'driving to the corner store') are the trait itself, as the packet allows; no character word on either pole. Lengths 30 / 31.",
+    "agree_with_writer": true
+   },
+   "seeded_at": "2026-10-08",
+   "generated_at": "2026-10-08",
+   "check_result": {
+    "returned": "sedentary",
+    "score": 3,
+    "reasoning": "The neg instructions consistently describe someone who avoids physical activity, tires easily from minimal exertion, and structures life around stillness. 'Sedentary' is explicitly used in the fifth neg instruction and is the most natural, recognizable label for this pole. It is a well-established antonym to 'athletic' in health and fitness contexts, though it emphasizes inactivity/lifestyle rather than lack of fitness/ability per se. 'Unfit' or 'inactive' are also candidates but 'sedentary' is the strongest and most precise match to what the neg instructions describe. The opposition is strong and clear, though not perfectly symmetric since 'athletic' implies both fitness and competitive sport participation while 'sedentary' focuses primarily on inactivity.",
+    "category": "nice",
+    "candidates": [
+     "sedentary"
+    ],
+    "known": [
+     "sedentary"
+    ],
+    "intended_hit": true,
+    "checked_at": "2026-10-08"
+   },
+   "check_answers": [
+    {
+     "checked_at": "2026-10-08",
+     "returned": "sedentary",
+     "phase": "check"
+    },
+    {
+     "checked_at": "2026-10-08",
+     "returned": "sedentary",
+     "phase": "check"
+    }
+   ],
+   "edits": [
+    {
+     "date": "2026-10-08",
+     "was": "This means training most days and playing a sport on weekends: a resting pulse in the fifties, muscle that shows, and stairs taken two at a time without getting winded.",
+     "by": "Roger, 2026-10-08: muscle moved to its own trait; athletic is the training and the fitness"
+    }
+   ]
   },
   {
    "stem": "black_haired",
@@ -47650,29 +47724,63 @@
    "partner_exists": null,
    "arrangement_members": [
     "black_haired",
-    "blonde",
-    "brunette",
-    "grey_haired",
+    "blond",
+    "brown_haired",
+    "gray_haired",
     "red_headed"
    ],
-   "description_draft": null,
+   "description_draft": "This means having hair so dark it shows blue in strong light: eyebrows and lashes dark to match, gray that shows from the first strand, and bleaching before any dye will take.",
    "description_notes": "Hair colour, listed as unpaired; the arrangement-hunting TODO (line 2136) says `set` per attribute. grey-haired: note the age correlation.",
-   "description": null,
+   "description": "This means having hair so dark it shows blue in strong light: eyebrows and lashes dark to match, gray that shows from the first strand, and bleaching before any dye will take.",
    "source": null,
    "tags": [
     "physical"
    ],
-   "status": "candidate",
+   "status": "done",
    "decision": "Added by Roger 2026-09-08; Accepted 2026-09-08 as a separate research track: tag `physical`, keep out of the clean-pair cohort and goal lists until the research says keep / keep-as-tagged / remove",
    "alternatives": null,
    "section": "Physical-attribute traits: a separate research track (decided 2026-09-08)",
    "lines": "2077-2079",
    "chunk_confidence": "high",
-   "extracted_from": "extract_4.json"
+   "extracted_from": "extract_4.json",
+   "chunk_6_rule": "Roger, 2026-10-08: body-only rule. Every description of this chunk states only the body and how it is lived, with no personality or behaviour clause, so that any behavioural content in the vectors is the model's own (the physical track's research question).",
+   "nearest_existing": "No hair-colour trait exists in the corpus; nearest by sense is brunette in this set (dark brown, not black). Heritage memberships (east_asian, indian, etc.) are kept out of it: the hair alone.",
+   "set_review": "Hair set (black-haired, blonde, brunette, red-headed, grey-haired): one grain throughout, the colour range, brows and lashes, and how the hair meets sun, gray and dye. Each member gets a different one of those particulars (gray shows at once / grays blend in / first grays plain / fades pale, not gray / the gray itself), so the five read as one set without repeating. grey-haired is the odd member (a change with the years, not a colour one is born with); written as a fact of the hair, no age persona.",
+   "notes": "Avoided 'thick, coarse strands' (reads as an ethnic marker). 'Dark' is the colour word; 'black' kept out of the opening. 32 words.",
+   "review_issues": [],
+   "review_verdict": "ok",
+   "review_strength": "at the notes",
+   "set_review_by_reviewer": {
+    "set": "hair colour set",
+    "review": "One grain across the five: the colour range, brows and lashes or freckles, and how the hair meets sun, gray and dye, each member taking a different one of those particulars. No temperament anywhere (nothing fiery, carefree or dull). Red hair carries freckles and sunburn as the packet asks; the sunburn overlap with fair_skinned is a fact of the body and acceptable. gray_haired states the years as a fact of the hair and stops. Two optional points for Roger: (a) black_haired is the only member whose opening dodges the colour word ('hair so dark it shows blue in strong light') while the eye set names its colours outright; 'having black hair that shows blue in strong light' would be more even, but the dodge is also fine and the sheen clause does identify the colour. (b) 'blonde' and 'brunette' are the feminine forms in English ('blond' is the masculine), so the generator may skew those two toward women; a label question, not a draft fault.",
+    "agree_with_writer": true
+   },
+   "seeded_at": "2026-10-08",
+   "generated_at": "2026-10-08",
+   "check_result": {
+    "returned": "fair-haired|blonde",
+    "score": 4,
+    "reasoning": "The neg instructions consistently describe someone with very light, pale blonde or white-blonde hair — the direct opposite of jet-black hair. The most natural, recognizable label for this is 'fair-haired' or 'blonde.' 'Fair-haired' captures the full description (pale lashes, brows, overall low pigmentation) while 'blonde' is the most common everyday term. Both are strong candidates. The opposition is essentially perfect — black-haired vs. fair-haired/blonde are the classic dark-to-light hair color antonyms.",
+    "category": "open",
+    "candidates": [
+     "fair_haired",
+     "blonde"
+    ],
+    "known": [],
+    "intended_hit": false,
+    "checked_at": "2026-10-08"
+   },
+   "check_answers": [
+    {
+     "checked_at": "2026-10-08",
+     "returned": "fair-haired|blonde",
+     "phase": "check"
+    }
+   ]
   },
   {
-   "stem": "blonde",
-   "label": "blonde",
+   "stem": "blond",
+   "label": "blond",
    "entity_type": "trait",
    "chunk": "6",
    "sub_chunk": "physical",
@@ -47681,25 +47789,63 @@
    "partner_exists": null,
    "arrangement_members": [
     "black_haired",
-    "blonde",
-    "brunette",
-    "grey_haired",
+    "blond",
+    "brown_haired",
+    "gray_haired",
     "red_headed"
    ],
-   "description_draft": null,
+   "description_draft": "This means having light hair, pale yellow to sandy: eyebrows and lashes so fair they barely show, hair that goes lighter in summer sun, and grays that blend in unnoticed.",
    "description_notes": "Hair colour, listed as unpaired; the arrangement-hunting TODO (line 2136) says `set` per attribute. grey-haired: note the age correlation.",
-   "description": null,
+   "description": "This means having light hair, pale yellow to sandy: eyebrows and lashes so fair they barely show, hair that goes lighter in summer sun, and grays that blend in unnoticed.",
    "source": null,
    "tags": [
     "physical"
    ],
-   "status": "candidate",
+   "status": "done",
    "decision": "Added by Roger 2026-09-08; Accepted 2026-09-08 as a separate research track: tag `physical`, keep out of the clean-pair cohort and goal lists until the research says keep / keep-as-tagged / remove",
    "alternatives": null,
    "section": "Physical-attribute traits: a separate research track (decided 2026-09-08)",
    "lines": "2077-2079",
    "chunk_confidence": "high",
-   "extracted_from": "extract_4.json"
+   "extracted_from": "extract_4.json",
+   "chunk_6_rule": "Roger, 2026-10-08: body-only rule. Every description of this chunk states only the body and how it is lived, with no personality or behaviour clause, so that any behavioural content in the vectors is the model's own (the physical track's research question).",
+   "renamed_from": {
+    "stem": "blonde",
+    "date": "2026-10-08",
+    "reason": "Renamed in the queue before seeding (reviewer's flag, agent's call by rule): the feminine form would skew generation toward women and confound hair colour with sex in a track built to test stereotypes; US neutral form."
+   },
+   "nearest_existing": "No hair-colour trait exists; fair_skinned in this chunk shares the sun theme but is the skin. Nothing else near.",
+   "notes": "Nothing on temperament or intelligence (the stereotype the research is testing for). 'Light hair' used so the label is not echoed. 30 words.",
+   "review_issues": [],
+   "review_verdict": "ok",
+   "review_strength": "at the notes",
+   "set_review_by_reviewer": {
+    "set": "hair colour set",
+    "review": "One grain across the five: the colour range, brows and lashes or freckles, and how the hair meets sun, gray and dye, each member taking a different one of those particulars. No temperament anywhere (nothing fiery, carefree or dull). Red hair carries freckles and sunburn as the packet asks; the sunburn overlap with fair_skinned is a fact of the body and acceptable. gray_haired states the years as a fact of the hair and stops. Two optional points for Roger: (a) black_haired is the only member whose opening dodges the colour word ('hair so dark it shows blue in strong light') while the eye set names its colours outright; 'having black hair that shows blue in strong light' would be more even, but the dodge is also fine and the sheen clause does identify the colour. (b) 'blonde' and 'brunette' are the feminine forms in English ('blond' is the masculine), so the generator may skew those two toward women; a label question, not a draft fault.",
+    "agree_with_writer": true
+   },
+   "seeded_at": "2026-10-08",
+   "generated_at": "2026-10-08",
+   "check_result": {
+    "returned": "dark-haired|brunette",
+    "score": 4,
+    "reasoning": "The neg instructions consistently describe someone with dark, deeply pigmented hair with strongly visible brows/lashes and high-contrast grays — the classic opposite of blond. 'Brunette' covers dark brown hair specifically, while 'dark-haired' is broader. 'Brunette' is the most natural single-word antonym for 'blond' in common usage, though the instructions also encompass black hair. These are direct opposites on the hair color spectrum.",
+    "category": "open",
+    "candidates": [
+     "dark_haired",
+     "brunette"
+    ],
+    "known": [],
+    "intended_hit": false,
+    "checked_at": "2026-10-08"
+   },
+   "check_answers": [
+    {
+     "checked_at": "2026-10-08",
+     "returned": "dark-haired|brunette",
+     "phase": "check"
+    }
+   ]
   },
   {
    "stem": "blue_eyed",
@@ -47713,22 +47859,71 @@
    "arrangement_members": [
     "blue_eyed",
     "brown_eyed",
+    "gray_eyed",
     "green_eyed"
    ],
-   "description_draft": null,
+   "description_draft": "This means having blue eyes, sky to slate: squinting in bright sun and reaching for sunglasses first, and a color that shifts with the light and the shirt worn.",
    "description_notes": "Eye colour, listed as unpaired; the arrangement-hunting TODO (line 2136) says `set` per attribute.",
-   "description": null,
+   "description": "This means having blue eyes, sky to sapphire: squinting in bright sun and reaching for sunglasses first, and a color that shifts with the light and the shirt worn.",
    "source": null,
    "tags": [
     "physical"
    ],
-   "status": "candidate",
+   "status": "done",
    "decision": "Accepted 2026-09-08 as a separate research track: tag `physical`, keep out of the clean-pair cohort and goal lists until the research says keep / keep-as-tagged / remove",
    "alternatives": null,
    "section": "Physical-attribute traits: a separate research track (decided 2026-09-08)",
    "lines": "2080",
    "chunk_confidence": "high",
-   "extracted_from": "extract_4.json"
+   "extracted_from": "extract_4.json",
+   "chunk_6_rule": "Roger, 2026-10-08: body-only rule. Every description of this chunk states only the body and how it is lived, with no personality or behaviour clause, so that any behavioural content in the vectors is the model's own (the physical track's research question).",
+   "nearest_existing": "No eye-colour trait exists. wide_eyed is an attitude (credulous wonder), not an eye. Nothing near.",
+   "set_review": "Eye set (blue-, brown-, green-eyed): one grain, the colour range, how the eye meets bright light, and how the colour reads (shifts with the light / blends with the pupil / reads hazel in dim light). Three read as one set; lengths 29 / 31 / 29.",
+   "notes": "The colour has to be named (there is no other way to say which eyes); opening still goes straight to the particulars. Light sensitivity is the physical particular. 29 words.",
+   "review_issues": [],
+   "review_verdict": "ok",
+   "review_strength": "at the notes",
+   "set_review_by_reviewer": {
+    "set": "eye colour set",
+    "review": "One grain: the colour range, the eye in bright sun, and how the colour reads. Naming the colour in the opening is right: the colour is the whole content, there is no non-echoing way to say which eyes, and the rule-1 case (a behaviour already glossed by the label) does not arise. green_eyed and the jealousy idiom: 'having green eyes' picks the sense and nothing later points at envy. Small asymmetry: brown and green each carry a frequency clause ('the world's commonest eye color', 'a color few share') and blue none; harmless. Lengths 29 / 31 / 29.",
+    "agree_with_writer": true
+   },
+   "seeded_at": "2026-10-08",
+   "generated_at": "2026-10-08",
+   "check_result": {
+    "returned": "dark-eyed|brown-eyed",
+    "score": 3,
+    "reasoning": "The neg instructions consistently describe someone with dark, brown, light-absorbing eyes that don't shift color and are not sensitive to light. The most natural, recognizable label for this opposite pole is 'dark-eyed' or 'brown-eyed'. 'Dark-eyed' is the more direct antonym to 'blue-eyed' as a general descriptor, while 'brown-eyed' is more specific. Both are genuine candidates. The antonym score is high but not perfect 4 because 'blue-eyed' vs 'dark-eyed' isn't a perfectly symmetric binary — there are other eye colors (green, hazel) — but as physical trait poles they are strongly opposed.",
+    "category": "nearly_nice",
+    "candidates": [
+     "dark_eyed",
+     "brown_eyed"
+    ],
+    "known": [
+     "brown_eyed"
+    ],
+    "intended_hit": false,
+    "checked_at": "2026-10-08"
+   },
+   "check_answers": [
+    {
+     "checked_at": "2026-10-08",
+     "returned": "brown-eyed|dark-eyed",
+     "phase": "check"
+    },
+    {
+     "checked_at": "2026-10-08",
+     "returned": "dark-eyed|brown-eyed",
+     "phase": "check"
+    }
+   ],
+   "edits": [
+    {
+     "date": "2026-10-08",
+     "was": "This means having blue eyes, sky to slate: squinting in bright sun and reaching for sunglasses first, and a color that shifts with the light and the shirt worn.",
+     "by": "Roger, 2026-10-08: 'slate' dropped (blue-gray overlaps the new gray-eyed)"
+    }
+   ]
   },
   {
    "stem": "brown_eyed",
@@ -47742,26 +47937,63 @@
    "arrangement_members": [
     "blue_eyed",
     "brown_eyed",
+    "gray_eyed",
     "green_eyed"
    ],
-   "description_draft": null,
+   "description_draft": "This means having brown eyes, amber to near black: an iris that blends with the pupil in dim light, bright sun met without a squint, and the world's commonest eye color.",
    "description_notes": "Eye colour, listed as unpaired; the arrangement-hunting TODO (line 2136) says `set` per attribute.",
-   "description": null,
+   "description": "This means having brown eyes, amber to near black: an iris that blends with the pupil in dim light, bright sun met without a squint, and the world's commonest eye color.",
    "source": null,
    "tags": [
     "physical"
    ],
-   "status": "candidate",
+   "status": "done",
    "decision": "Accepted 2026-09-08 as a separate research track: tag `physical`, keep out of the clean-pair cohort and goal lists until the research says keep / keep-as-tagged / remove",
    "alternatives": null,
    "section": "Physical-attribute traits: a separate research track (decided 2026-09-08)",
    "lines": "2080",
    "chunk_confidence": "high",
-   "extracted_from": "extract_4.json"
+   "extracted_from": "extract_4.json",
+   "chunk_6_rule": "Roger, 2026-10-08: body-only rule. Every description of this chunk states only the body and how it is lived, with no personality or behaviour clause, so that any behavioural content in the vectors is the model's own (the physical track's research question).",
+   "nearest_existing": "No eye-colour trait exists. Nothing near.",
+   "notes": "'The world's commonest eye color' is a fact of the colour, not a social clause. 31 words.",
+   "review_issues": [],
+   "review_verdict": "ok",
+   "review_strength": "at the notes",
+   "set_review_by_reviewer": {
+    "set": "eye colour set",
+    "review": "One grain: the colour range, the eye in bright sun, and how the colour reads. Naming the colour in the opening is right: the colour is the whole content, there is no non-echoing way to say which eyes, and the rule-1 case (a behaviour already glossed by the label) does not arise. green_eyed and the jealousy idiom: 'having green eyes' picks the sense and nothing later points at envy. Small asymmetry: brown and green each carry a frequency clause ('the world's commonest eye color', 'a color few share') and blue none; harmless. Lengths 29 / 31 / 29.",
+    "agree_with_writer": true
+   },
+   "seeded_at": "2026-10-08",
+   "generated_at": "2026-10-08",
+   "generation_note": "2026-10-08: without thinking the generator failed this entry ten times (five retries, twice): brown-haired wrote 'ERROR: ... a physical descriptor, not a personality trait ... would require fabricating false stereotypes' into the eval prompt, brown-eyed put a paragraph of deliberation before the JSON. The two unmarked, most common colours were the only colour traits to balk. Generated with --thinking-budget 4000, which moved the deliberation into the thinking block; the output is body-only. The rest of the corpus is generated with thinking off; the file's generator.thinking_budget records the difference.",
+   "check_result": {
+    "returned": "light-eyed|blue-eyed",
+    "score": 3,
+    "reasoning": "The neg instructions consistently describe someone with pale, light-colored eyes (blue, green, grey, or hazel) that are sensitive to bright light and remain visibly distinct from pupils in dim light — the opposite of brown/dark eyes. The most natural label for this opposite pole is 'light-eyed' (used explicitly in neg instruction 5) or 'blue-eyed' (the most common light eye color). 'Light-eyed' is the most accurate and inclusive term since the neg instructions don't specify a single color but emphasize paleness. The antonym relationship is strong but not perfectly symmetric — 'brown-eyed' vs 'light-eyed' are genuine opposites on the eye color spectrum, though 'light-eyed' is a somewhat constructed compound rather than a single canonical adjective.",
+    "category": "nearly_nice",
+    "candidates": [
+     "light_eyed",
+     "blue_eyed"
+    ],
+    "known": [
+     "blue_eyed"
+    ],
+    "intended_hit": false,
+    "checked_at": "2026-10-08"
+   },
+   "check_answers": [
+    {
+     "checked_at": "2026-10-08",
+     "returned": "light-eyed|blue-eyed",
+     "phase": "check"
+    }
+   ]
   },
   {
-   "stem": "brunette",
-   "label": "brunette",
+   "stem": "brown_haired",
+   "label": "brown-haired",
    "entity_type": "trait",
    "chunk": "6",
    "sub_chunk": "physical",
@@ -47770,25 +48002,64 @@
    "partner_exists": null,
    "arrangement_members": [
     "black_haired",
-    "blonde",
-    "brunette",
-    "grey_haired",
+    "blond",
+    "brown_haired",
+    "gray_haired",
     "red_headed"
    ],
-   "description_draft": null,
+   "description_draft": "This means having brown hair, chestnut to dark coffee: eyebrows and lashes that show without makeup, red glints in summer sun, and the first grays plain against the brown.",
    "description_notes": "Hair colour, listed as unpaired; the arrangement-hunting TODO (line 2136) says `set` per attribute. grey-haired: note the age correlation.",
-   "description": null,
+   "description": "This means having brown hair, chestnut to dark coffee: eyebrows and lashes that show without makeup, red glints in summer sun, and the first grays plain against the brown.",
    "source": null,
    "tags": [
     "physical"
    ],
-   "status": "candidate",
+   "status": "done",
    "decision": "Added by Roger 2026-09-08; Accepted 2026-09-08 as a separate research track: tag `physical`, keep out of the clean-pair cohort and goal lists until the research says keep / keep-as-tagged / remove",
    "alternatives": null,
    "section": "Physical-attribute traits: a separate research track (decided 2026-09-08)",
    "lines": "2077-2079",
    "chunk_confidence": "high",
-   "extracted_from": "extract_4.json"
+   "extracted_from": "extract_4.json",
+   "chunk_6_rule": "Roger, 2026-10-08: body-only rule. Every description of this chunk states only the body and how it is lived, with no personality or behaviour clause, so that any behavioural content in the vectors is the model's own (the physical track's research question).",
+   "renamed_from": {
+    "stem": "brunette",
+    "date": "2026-10-08",
+    "reason": "Renamed in the queue before seeding (reviewer's flag, agent's call by rule): the feminine form would skew generation toward women and confound hair colour with sex; brown-haired matches black-haired, red-headed and gray-haired."
+   },
+   "nearest_existing": "No hair-colour trait exists; black_haired in this set is the neighbour (darker). Nothing else near.",
+   "notes": "'Brown hair' is not the label, so no echo. 29 words.",
+   "review_issues": [],
+   "review_verdict": "ok",
+   "review_strength": "at the notes",
+   "set_review_by_reviewer": {
+    "set": "hair colour set",
+    "review": "One grain across the five: the colour range, brows and lashes or freckles, and how the hair meets sun, gray and dye, each member taking a different one of those particulars. No temperament anywhere (nothing fiery, carefree or dull). Red hair carries freckles and sunburn as the packet asks; the sunburn overlap with fair_skinned is a fact of the body and acceptable. gray_haired states the years as a fact of the hair and stops. Two optional points for Roger: (a) black_haired is the only member whose opening dodges the colour word ('hair so dark it shows blue in strong light') while the eye set names its colours outright; 'having black hair that shows blue in strong light' would be more even, but the dodge is also fine and the sheen clause does identify the colour. (b) 'blonde' and 'brunette' are the feminine forms in English ('blond' is the masculine), so the generator may skew those two toward women; a label question, not a draft fault.",
+    "agree_with_writer": true
+   },
+   "seeded_at": "2026-10-08",
+   "generated_at": "2026-10-08",
+   "generation_note": "2026-10-08: without thinking the generator failed this entry ten times (five retries, twice): brown-haired wrote 'ERROR: ... a physical descriptor, not a personality trait ... would require fabricating false stereotypes' into the eval prompt, brown-eyed put a paragraph of deliberation before the JSON. The two unmarked, most common colours were the only colour traits to balk. Generated with --thinking-budget 4000, which moved the deliberation into the thinking block; the output is body-only. The rest of the corpus is generated with thinking off; the file's generator.thinking_budget records the difference.",
+   "check_result": {
+    "returned": "blonde|fair-haired",
+    "score": 3,
+    "reasoning": "The neg instructions describe two opposite poles: instructions 1-4 describe very light/blonde hair (pale, fair, light brows, no warm undertones, gray blends in), while instruction 5 describes black hair. The majority of neg instructions (1-4) point toward 'blonde' or 'fair-haired' as the opposite pole, but instruction 5 points to 'black-haired.' Together they seem to describe 'not brown-haired' broadly, but the dominant characterization is of very light, fair, blonde hair. Since brown hair sits in the middle of the hair color spectrum, the true opposite poles are both blonde and black, but the neg instructions weight heavily toward blonde/fair. The best label capturing the dominant neg pole is 'blonde' or 'fair-haired,' with 'black-haired' as a secondary candidate. However, since the neg instructions collectively describe the opposite ends of the spectrum from brown, and brown is a mid-tone, the opposition is not perfectly antonymic — brown doesn't have a single clean antonym. I'll note 'blonde|fair-haired' as the primary label given the weight of the instructions, with an antonym score reflecting that brown vs. blonde is a strong but not perfect opposition (brown is mid-scale, not the direct opposite of blonde in a binary sense).",
+    "category": "open",
+    "candidates": [
+     "blonde",
+     "fair_haired"
+    ],
+    "known": [],
+    "intended_hit": false,
+    "checked_at": "2026-10-08"
+   },
+   "check_answers": [
+    {
+     "checked_at": "2026-10-08",
+     "returned": "blonde|fair-haired",
+     "phase": "check"
+    }
+   ]
   },
   {
    "stem": "chronically_ill",
@@ -47800,20 +48071,55 @@
    "partner": null,
    "partner_exists": null,
    "arrangement_members": null,
-   "description_draft": null,
+   "description_draft": "This means living for years with an illness that is managed, not cured: daily medication, specialist appointments on the calendar, flares that take out a week, and energy rationed day by day.",
    "description_notes": "Chronic illness, unpaired; the patient role is acute illness.",
-   "description": null,
+   "description": "This means living for years with an illness that is managed, not cured: daily medication, specialist appointments on the calendar, flares that take out a week, and energy rationed day by day.",
    "source": null,
    "tags": [
     "physical"
    ],
-   "status": "candidate",
+   "status": "done",
    "decision": "Accepted 2026-09-08 as a separate research track: tag `physical`, keep out of the clean-pair cohort and goal lists until the research says keep / keep-as-tagged / remove",
    "alternatives": null,
    "section": "Physical-attribute traits: a separate research track (decided 2026-09-08)",
    "lines": "2070-2071",
    "chunk_confidence": "high",
-   "extracted_from": "extract_4.json"
+   "extracted_from": "extract_4.json",
+   "chunk_6_rule": "Roger, 2026-10-08: body-only rule. Every description of this chunk states only the body and how it is lived, with no personality or behaviour clause, so that any behavioural content in the vectors is the model's own (the physical track's research question).",
+   "nearest_existing": "patient role (an acute episode of illness and treatment); sickly in this chunk (a weak constitution, many minor illnesses); mobility_impaired (a disability of movement); stigmatized names an illness only as a mark others hold against one. This one is a single long-term illness, managed.",
+   "notes": "Duration written in ('for years'). 'Energy rationed' is the body's limit, not a disposition. 32 words.",
+   "review_issues": [],
+   "review_verdict": "ok",
+   "review_strength": "at the notes",
+   "set_review_by_reviewer": {
+    "set": "constitution and chronic conditions (not an arrangement)",
+    "review": "The three stay apart as the notes require: sickly is a weak constitution (many minor illnesses, slowly thrown off), chronically_ill is one long-term illness that is managed (medication, specialists, flares), in_chronic_pain is pain from injury or wear (back, joints, old injury; painkillers, heating pad, broken sleep) with no illness named. Each has its duration written in ('for weeks' and 'by spring'; 'for years'; 'every day for years'). The patient role stays the acute case.",
+    "agree_with_writer": true
+   },
+   "seeded_at": "2026-10-08",
+   "generated_at": "2026-10-08",
+   "check_result": {
+    "returned": "healthy|able-bodied",
+    "score": 3,
+    "reasoning": "The neg instructions consistently describe someone whose body functions effortlessly without medical management, unlimited energy, no symptoms, no appointments, and no physical constraints shaping daily life. This is the picture of robust, unimpaired physical health. The most natural label for this opposite pole is 'healthy' or 'able-bodied.' 'Healthy' captures the general sense, while 'able-bodied' is more specific to physical capacity and lack of disability/chronic condition. Both are reasonable; 'healthy' is the more direct antonym to 'chronically ill' as a concept. The antonym score is high but not perfect 4, because 'chronically ill' is a fairly specific medical/lifestyle category while 'healthy' is broader — though they are clearly strong opposites.",
+    "category": "nearly_nice",
+    "candidates": [
+     "healthy",
+     "able_bodied"
+    ],
+    "known": [
+     "healthy"
+    ],
+    "intended_hit": false,
+    "checked_at": "2026-10-08"
+   },
+   "check_answers": [
+    {
+     "checked_at": "2026-10-08",
+     "returned": "healthy|able-bodied",
+     "phase": "check"
+    }
+   ]
   },
   {
    "stem": "dark_skinned",
@@ -47828,20 +48134,57 @@
     "dark_skinned",
     "fair_skinned"
    ],
-   "description_draft": null,
+   "description_draft": "This means having deep brown skin: deepening in summer sun without burning, a hunt for a matching foundation shade, a rash that shows purple, not red, and low vitamin D in winter.",
    "description_notes": "Skin tone as a 1-D pair; the race section had said skin tone is a separate 1-D axis not proposed there; proposed here with the overlap with race noted.",
-   "description": null,
+   "description": "This means having deep brown skin: deepening in summer sun without burning, a hunt for a matching foundation shade, a rash that shows purple, not red, and low vitamin D in winter.",
    "source": null,
    "tags": [
     "physical"
    ],
-   "status": "candidate",
+   "status": "done",
    "decision": "Accepted 2026-09-08 as a separate research track: tag `physical`, keep out of the clean-pair cohort and goal lists until the research says keep / keep-as-tagged / remove",
    "alternatives": null,
    "section": "Physical-attribute traits: a separate research track (decided 2026-09-08)",
    "lines": "2081-2083",
    "chunk_confidence": "high",
-   "extracted_from": "extract_4.json"
+   "extracted_from": "extract_4.json",
+   "pair_by_construction": true,
+   "chunk_6_rule": "Roger, 2026-10-08: body-only rule. Every description of this chunk states only the body and how it is lived, with no personality or behaviour clause, so that any behavioural content in the vectors is the model's own (the physical track's research question).",
+   "nearest_existing": "The heritage memberships (african, south_asian, indigenous_australian, hispanic, etc.) carry country, language and everyday world; this one is the skin alone: sun, foundation, how a rash reads, vitamin D. No race, no social experience.",
+   "set_review": "dark-skinned / fair-skinned: grain is the skin and the sun, the foundation shade, and how a rash reads; each pole gets its own medical consequence (vitamin D / SPF). Lengths 32 / 30. Reads as one pair; neither pole touches race or social experience.",
+   "notes": "'Deep brown skin' is the physical description; no ethnic word. Vitamin D is the medical particular that follows from the skin (the counterpart of SPF on the other pole). 32 words.",
+   "review_issues": [],
+   "review_verdict": "ok",
+   "review_strength": "at the notes",
+   "set_review_by_reviewer": {
+    "set": "dark_skinned / fair_skinned",
+    "review": "One grain: skin and sun, the foundation shade, how a rash reads, one medical consequence each (vitamin D / SPF). Neither pole touches race, country or social experience, and the heritage memberships stay the place for that. Wince test on dark_skinned passes: the foundation hunt, the purple rash and winter vitamin D are what a dark-skinned adult would say of their own body. 'Deepening in summer sun without burning' is a shade absolute (dark skin burns less readily, not never), as is the fair pole's 'twenty minutes'; both are plain generalisations of the kind the corpus uses and I would leave them. Lengths 32 / 30.",
+    "agree_with_writer": true
+   },
+   "seeded_at": "2026-10-08",
+   "generated_at": "2026-10-08",
+   "check_result": {
+    "returned": "light-skinned|fair-skinned",
+    "score": 4,
+    "reasoning": "The neg instructions consistently describe someone with fair, pale skin that burns in the sun, has no vitamin D issues, and shows redness clearly. The natural opposite of 'dark-skinned' is 'light-skinned' or 'fair-skinned', both of which are common, recognized adjectives. These are essentially synonymous in this context, so both are worth listing. The antonym relationship is direct and symmetric — these are straightforwardly opposite poles of skin pigmentation.",
+    "category": "nice_with_alternatives",
+    "candidates": [
+     "light_skinned",
+     "fair_skinned"
+    ],
+    "known": [
+     "fair_skinned"
+    ],
+    "intended_hit": true,
+    "checked_at": "2026-10-08"
+   },
+   "check_answers": [
+    {
+     "checked_at": "2026-10-08",
+     "returned": "light-skinned|fair-skinned",
+     "phase": "check"
+    }
+   ]
   },
   {
    "stem": "fair_skinned",
@@ -47856,20 +48199,55 @@
     "dark_skinned",
     "fair_skinned"
    ],
-   "description_draft": null,
+   "description_draft": "This means having pale skin: burning in twenty minutes of summer sun, SPF 50 for any day outside, the palest foundation shade, and a rash that shows red at once.",
    "description_notes": "Skin tone as a 1-D pair; the race section had said skin tone is a separate 1-D axis not proposed there; proposed here with the overlap with race noted.",
-   "description": null,
+   "description": "This means having pale skin: burning in twenty minutes of summer sun, SPF 50 for any day outside, the palest foundation shade, and a rash that shows red at once.",
    "source": null,
    "tags": [
     "physical"
    ],
-   "status": "candidate",
+   "status": "done",
    "decision": "Accepted 2026-09-08 as a separate research track: tag `physical`, keep out of the clean-pair cohort and goal lists until the research says keep / keep-as-tagged / remove",
    "alternatives": null,
    "section": "Physical-attribute traits: a separate research track (decided 2026-09-08)",
    "lines": "2081-2083",
    "chunk_confidence": "high",
-   "extracted_from": "extract_4.json"
+   "extracted_from": "extract_4.json",
+   "pair_by_construction": true,
+   "chunk_6_rule": "Roger, 2026-10-08: body-only rule. Every description of this chunk states only the body and how it is lived, with no personality or behaviour clause, so that any behavioural content in the vectors is the model's own (the physical track's research question).",
+   "nearest_existing": "The heritage memberships (european, british, russian, etc.) are social; red_headed in this chunk shares the burning but is the hair. This one is the skin alone.",
+   "notes": "'Pale skin' used so the label is not echoed. Freckles left to red-headed. 30 words.",
+   "review_issues": [],
+   "review_verdict": "ok",
+   "review_strength": "at the notes",
+   "set_review_by_reviewer": {
+    "set": "dark_skinned / fair_skinned",
+    "review": "One grain: skin and sun, the foundation shade, how a rash reads, one medical consequence each (vitamin D / SPF). Neither pole touches race, country or social experience, and the heritage memberships stay the place for that. Wince test on dark_skinned passes: the foundation hunt, the purple rash and winter vitamin D are what a dark-skinned adult would say of their own body. 'Deepening in summer sun without burning' is a shade absolute (dark skin burns less readily, not never), as is the fair pole's 'twenty minutes'; both are plain generalisations of the kind the corpus uses and I would leave them. Lengths 32 / 30.",
+    "agree_with_writer": true
+   },
+   "seeded_at": "2026-10-08",
+   "generated_at": "2026-10-08",
+   "check_result": {
+    "returned": "dark-skinned",
+    "score": 4,
+    "reasoning": "The neg instructions consistently describe someone with deep, dark, heavily pigmented skin that resists burning and sun damage — the direct opposite of fair/pale skin. The most natural, recognizable label for this pole is 'dark-skinned,' which is the straightforward antonym to 'fair-skinned' on the skin tone spectrum. These are direct opposites on a single continuum of skin pigmentation.",
+    "category": "nice",
+    "candidates": [
+     "dark_skinned"
+    ],
+    "known": [
+     "dark_skinned"
+    ],
+    "intended_hit": true,
+    "checked_at": "2026-10-08"
+   },
+   "check_answers": [
+    {
+     "checked_at": "2026-10-08",
+     "returned": "dark-skinned",
+     "phase": "check"
+    }
+   ]
   },
   {
    "stem": "good_looking",
@@ -47884,20 +48262,57 @@
     "good_looking",
     "plain_looking"
    ],
-   "description_draft": null,
+   "description_draft": "This means having a face and figure that turn heads: even features and clear skin, compliments on one's looks, photographs that come out well, and being asked whether one models.",
    "description_notes": "Rated attractiveness.",
-   "description": null,
+   "description": "This means having a face and figure that turn heads: even features and clear skin, compliments on one's looks, photographs that come out well, and being asked whether one models.",
    "source": null,
    "tags": [
     "physical"
    ],
-   "status": "candidate",
+   "status": "done",
    "decision": "Accepted 2026-09-08 as a separate research track: tag `physical`, keep out of the clean-pair cohort and goal lists until the research says keep / keep-as-tagged / remove",
    "alternatives": null,
    "section": "Physical-attribute traits: a separate research track (decided 2026-09-08)",
    "lines": "2072",
    "chunk_confidence": "high",
-   "extracted_from": "extract_4.json"
+   "extracted_from": "extract_4.json",
+   "pair_by_construction": true,
+   "chunk_6_rule": "Roger, 2026-10-08: body-only rule. Every description of this chunk states only the body and how it is lived, with no personality or behaviour clause, so that any behavioural content in the vectors is the model's own (the physical track's research question).",
+   "nearest_existing": "body_confident (how one feels about one's body, an attitude); popular (being liked, a social standing); fashionable (knowing what is in style). This one is how the face and figure are rated, with no attitude attached.",
+   "set_review": "good-looking / plain-looking: grain is how the face and figure are received (a second look or not, compliments or none, how they photograph, what one is taken for). Lengths 30 / 28. Reads as one pair; no self-regard clause on either side.",
+   "notes": "Others' response (heads turning, compliments) is allowed by the packet for this pair; vanity and confidence kept out. 30 words.",
+   "review_issues": [],
+   "review_verdict": "ok",
+   "review_strength": "at the notes",
+   "set_review_by_reviewer": {
+    "set": "good_looking / plain_looking",
+    "review": "Grain is how the face and figure are received, which the packet allows for this pair; no vanity, confidence or shyness on either side, and plain_looking is an opposite (ordinary, unremarked, forgotten), not an absence. The one mismatch is scope: good_looking has a body clause ('even features and clear skin') that plain_looking lacks; the suggested edit adds 'unremarkable features'. Lengths 30 / 28 (31 with the edit).",
+    "agree_with_writer": false
+   },
+   "seeded_at": "2026-10-08",
+   "generated_at": "2026-10-08",
+   "check_result": {
+    "returned": "plain|plain-looking",
+    "score": 3,
+    "reasoning": "The neg instructions consistently describe someone whose appearance is forgettable, unremarkable, and draws no attention — blending into crowds, avoiding cameras, receiving no compliments. The most natural single-word label for this opposite pole is 'plain' or 'plain-looking' (explicitly used in neg instruction 5). 'Unattractive' is another candidate but implies active unpleasantness rather than mere forgettability, which doesn't match the neg descriptions well. 'Plain' or 'plain-looking' captures the neutral, unremarkable quality described. As an antonym to 'good_looking,' 'plain' is moderately to strongly opposed — it sits at the opposite end of attractiveness but is not a perfect mirror (good-looking implies active beauty; plain implies neutrality rather than ugliness).",
+    "category": "nice_with_alternatives",
+    "candidates": [
+     "plain",
+     "plain_looking"
+    ],
+    "known": [
+     "plain_looking"
+    ],
+    "intended_hit": true,
+    "checked_at": "2026-10-08"
+   },
+   "check_answers": [
+    {
+     "checked_at": "2026-10-08",
+     "returned": "plain|plain-looking",
+     "phase": "check"
+    }
+   ]
   },
   {
    "stem": "green_eyed",
@@ -47911,26 +48326,62 @@
    "arrangement_members": [
     "blue_eyed",
     "brown_eyed",
+    "gray_eyed",
     "green_eyed"
    ],
-   "description_draft": null,
+   "description_draft": "This means having green eyes, a color few share: flecks of gold around the pupil, a shade that reads hazel in dim light, and a squint in bright sun.",
    "description_notes": "Eye colour, listed as unpaired; the arrangement-hunting TODO (line 2136) says `set` per attribute.",
-   "description": null,
+   "description": "This means having green eyes, a color few share: flecks of gold around the pupil, a shade that reads hazel in dim light, and a squint in bright sun.",
    "source": null,
    "tags": [
     "physical"
    ],
-   "status": "candidate",
+   "status": "done",
    "decision": "Accepted 2026-09-08 as a separate research track: tag `physical`, keep out of the clean-pair cohort and goal lists until the research says keep / keep-as-tagged / remove",
    "alternatives": null,
    "section": "Physical-attribute traits: a separate research track (decided 2026-09-08)",
    "lines": "2080",
    "chunk_confidence": "high",
-   "extracted_from": "extract_4.json"
+   "extracted_from": "extract_4.json",
+   "chunk_6_rule": "Roger, 2026-10-08: body-only rule. Every description of this chunk states only the body and how it is lived, with no personality or behaviour clause, so that any behavioural content in the vectors is the model's own (the physical track's research question).",
+   "nearest_existing": "No eye-colour trait exists. FLAG: the label is polysemous. 'Green-eyed' is the idiom for jealousy, and envious exists in the corpus; the opening ('having green eyes') picks the sense, and nothing in the description touches envy.",
+   "notes": "Kept to the eye. 29 words.",
+   "review_issues": [],
+   "review_verdict": "ok",
+   "review_strength": "at the notes",
+   "set_review_by_reviewer": {
+    "set": "eye colour set",
+    "review": "One grain: the colour range, the eye in bright sun, and how the colour reads. Naming the colour in the opening is right: the colour is the whole content, there is no non-echoing way to say which eyes, and the rule-1 case (a behaviour already glossed by the label) does not arise. green_eyed and the jealousy idiom: 'having green eyes' picks the sense and nothing later points at envy. Small asymmetry: brown and green each carry a frequency clause ('the world's commonest eye color', 'a color few share') and blue none; harmless. Lengths 29 / 31 / 29.",
+    "agree_with_writer": true
+   },
+   "seeded_at": "2026-10-08",
+   "generated_at": "2026-10-08",
+   "check_result": {
+    "returned": "brown-eyed|dark-eyed",
+    "score": 2,
+    "reasoning": "The neg instructions describe people with dark brown eyes (or in one case pale blue eyes), emphasizing consistent, non-shifting iris color and comfort in bright light. The dominant theme across 4 of 5 neg prompts is 'dark-eyed' or 'brown-eyed.' Since the positive trait is specifically 'green_eyed,' the most natural opposite pole label is 'brown-eyed' (the most common eye color, explicitly contrasted), though 'dark-eyed' also appears directly in the neg instructions. One prompt introduces blue eyes as an alternative non-green color. The opposition here is not a perfect antonym in the traditional sense — eye color exists on a spectrum rather than a binary — but brown-eyed is the clearest named opposite to green-eyed in common usage and in these prompts.",
+    "category": "nearly_nice",
+    "candidates": [
+     "brown_eyed",
+     "dark_eyed"
+    ],
+    "known": [
+     "brown_eyed"
+    ],
+    "intended_hit": false,
+    "checked_at": "2026-10-08"
+   },
+   "check_answers": [
+    {
+     "checked_at": "2026-10-08",
+     "returned": "brown-eyed|dark-eyed",
+     "phase": "check"
+    }
+   ]
   },
   {
-   "stem": "grey_haired",
-   "label": "grey-haired",
+   "stem": "gray_haired",
+   "label": "gray-haired",
    "entity_type": "trait",
    "chunk": "6",
    "sub_chunk": "physical",
@@ -47939,25 +48390,61 @@
    "partner_exists": null,
    "arrangement_members": [
     "black_haired",
-    "blonde",
-    "brunette",
-    "grey_haired",
+    "blond",
+    "brown_haired",
+    "gray_haired",
     "red_headed"
    ],
-   "description_draft": null,
-   "description_notes": "Hair colour, listed as unpaired; the arrangement-hunting TODO (line 2136) says `set` per attribute. grey-haired: note the age correlation.",
-   "description": null,
+   "description_draft": "This means having hair gone silver or white with the years: coarser and drier than it was, a yellow cast without purple shampoo, and roots that show within weeks of a dye.",
+   "description_notes": "Hair colour, member of the hair-colour set. Roger, 2026-10-08: NOT tagged physical because of its age correlation; it stays even if the physical track is dropped. Body-only description; the age correlation may be acknowledged as a fact of the hair, not turned into an age persona.",
+   "description": "This means having hair gone silver or white with the years: coarser and drier than it was, a yellow cast without purple shampoo, and roots that show within weeks of a dye.",
    "source": null,
-   "tags": [
-    "physical"
-   ],
-   "status": "candidate",
-   "decision": "Added by Roger 2026-09-08; Accepted 2026-09-08 as a separate research track: tag `physical`, keep out of the clean-pair cohort and goal lists until the research says keep / keep-as-tagged / remove",
+   "tags": [],
+   "status": "done",
+   "decision": "Added by Roger 2026-09-08; Accepted 2026-09-08 as a separate research track: tag `physical`, keep out of the clean-pair cohort and goal lists until the research says keep / keep-as-tagged / remove [Roger, 2026-10-08: not tagged physical; stays if the physical track is dropped; description body-only.]",
    "alternatives": null,
    "section": "Physical-attribute traits: a separate research track (decided 2026-09-08)",
    "lines": "2077-2079",
    "chunk_confidence": "high",
-   "extracted_from": "extract_4.json"
+   "extracted_from": "extract_4.json",
+   "chunk_6_rule": "Roger, 2026-10-08: body-only rule. Every description of this chunk states only the body and how it is lived, with no personality or behaviour clause, so that any behavioural content in the vectors is the model's own (the physical track's research question).",
+   "renamed_from": {
+    "stem": "grey_haired",
+    "date": "2026-10-08",
+    "reason": "US spelling in corpus labels and stems (entity-naming rule); renamed in the queue before seeding."
+   },
+   "nearest_existing": "elderly and middle_aged are age personas (life stage, grandchildren, a slowing body); this one is the hair only. Nothing else near.",
+   "notes": "'With the years' acknowledges the age correlation as a fact of the hair, per Roger's note; no life stage, no persona. The description uses US 'gray' only by avoiding the word (silver or white); the label keeps 'grey-haired' as given. 32 words.",
+   "review_issues": [],
+   "review_verdict": "ok",
+   "review_strength": "at the notes",
+   "set_review_by_reviewer": {
+    "set": "hair colour set",
+    "review": "One grain across the five: the colour range, brows and lashes or freckles, and how the hair meets sun, gray and dye, each member taking a different one of those particulars. No temperament anywhere (nothing fiery, carefree or dull). Red hair carries freckles and sunburn as the packet asks; the sunburn overlap with fair_skinned is a fact of the body and acceptable. gray_haired states the years as a fact of the hair and stops. Two optional points for Roger: (a) black_haired is the only member whose opening dodges the colour word ('hair so dark it shows blue in strong light') while the eye set names its colours outright; 'having black hair that shows blue in strong light' would be more even, but the dodge is also fine and the sheen clause does identify the colour. (b) 'blonde' and 'brunette' are the feminine forms in English ('blond' is the masculine), so the generator may skew those two toward women; a label question, not a draft fault.",
+    "agree_with_writer": true
+   },
+   "seeded_at": "2026-10-08",
+   "generated_at": "2026-10-08",
+   "check_result": {
+    "returned": "dark-haired|youthful-haired",
+    "score": 3,
+    "reasoning": "The neg instructions consistently describe hair that is young, naturally pigmented, soft, moist, and slow to fade — the opposite of gray/silver aged hair. The most natural label for this is 'youthful' in terms of hair quality, but more specifically the trait being opposed is having gray/aged hair, so the opposite pole is best captured as 'dark-haired' or 'youthful-haired'. However, since the positive label is specifically about gray hair as a sign of age, the direct opposite is simply having naturally pigmented, non-gray hair — best described as 'dark-haired' or 'young-haired'. 'Dark-haired' is the most natural adjective antonym to 'gray-haired' in common usage, though the neg instructions emphasize youthfulness broadly. The antonym score is strong (3-4) since gray-haired vs. dark-haired are classic opposites, though not perfectly symmetric (one could be young and gray, or old and dark-haired artificially).",
+    "category": "open",
+    "candidates": [
+     "dark_haired",
+     "youthful_haired"
+    ],
+    "known": [],
+    "intended_hit": false,
+    "checked_at": "2026-10-08"
+   },
+   "check_answers": [
+    {
+     "checked_at": "2026-10-08",
+     "returned": "dark-haired|youthful-haired",
+     "phase": "check"
+    }
+   ]
   },
   {
    "stem": "healthy",
@@ -47972,52 +48459,145 @@
     "healthy",
     "sickly"
    ],
-   "description_draft": null,
+   "description_draft": "This means having a sound constitution: shaking off whatever is going around in a day, no prescriptions, a checkup that finds nothing year after year, and no sick days in years.",
    "description_notes": "General health.",
-   "description": null,
+   "description": "This means having a sound constitution: shaking off whatever is going around in a day, no prescriptions, a clean checkup every time, and no sick days in years.",
    "source": null,
    "tags": [
     "physical"
    ],
-   "status": "candidate",
+   "status": "done",
    "decision": "Accepted 2026-09-08 as a separate research track: tag `physical`, keep out of the clean-pair cohort and goal lists until the research says keep / keep-as-tagged / remove",
    "alternatives": null,
    "section": "Physical-attribute traits: a separate research track (decided 2026-09-08)",
    "lines": "2070-2071",
    "chunk_confidence": "high",
-   "extracted_from": "extract_4.json"
+   "extracted_from": "extract_4.json",
+   "pair_by_construction": true,
+   "chunk_6_rule": "Roger, 2026-10-08: body-only rule. Every description of this chunk states only the body and how it is lived, with no personality or behaviour clause, so that any behavioural content in the vectors is the model's own (the physical track's research question).",
+   "nearest_existing": "health_conscious (the regimen: keeping checkups, eating right, exercising); flourishing (psychological wellbeing); resilient (bouncing back from setbacks, not illness). This one is the constitution itself, whatever the habits.",
+   "set_review": "healthy / sickly: grain is the standing constitution, through the same four markers on both poles (what is going around, prescriptions, the checkup, sick days). Lengths 31 / 31. Reads as one pair; sickly is kept apart from chronically-ill (many minor illnesses vs one managed one).",
+   "notes": "Standing constitution, not a current state. 'Sound constitution' is the gloss, not a label echo. 31 words.",
+   "review_issues": [
+    "Minor, form only: 'a checkup that finds nothing year after year, and no sick days in years' says 'year(s)' twice in the closing eight words; one occurrence carries the standing-constitution sense. Body-only, faithful and in range otherwise."
+   ],
+   "review_verdict": "edit",
+   "review_strength": "at the notes",
+   "set_review_by_reviewer": {
+    "set": "healthy / sickly",
+    "review": "One grain through the same four markers on both poles (what is going around, prescriptions, the checkup, sick days); standing constitution on both, not a current illness, and sickly is not softened (weeks to shake a bug, something found at the checkup, sick days used up by spring) nor turned into hypochondria. The suggested healthy edit is cosmetic (the doubled 'year'). Lengths 31 / 31 (28 / 31 with the edit).",
+    "agree_with_writer": true
+   },
+   "seeded_at": "2026-10-08",
+   "generated_at": "2026-10-08",
+   "check_result": {
+    "returned": "sickly",
+    "score": 4,
+    "reasoning": "The neg instructions consistently describe someone who is constitutionally fragile, frequently ill, dependent on medications, slow to recover, and whose body fails them regularly. The positive label is 'healthy' in the sense of robust physical constitution. The most natural opposite pole is 'sickly,' which captures chronic illness, fragility, and frequent ailments. 'Frail' or 'fragile' are also candidates but lean more toward physical weakness/frailty rather than illness frequency. 'Sickly' is the most direct and natural antonym to 'healthy' in this specific constitutional sense. The antonym score is 4 — these are direct, symmetric opposites on the health spectrum.",
+    "category": "nice",
+    "candidates": [
+     "sickly"
+    ],
+    "known": [
+     "sickly"
+    ],
+    "intended_hit": true,
+    "checked_at": "2026-10-08"
+   },
+   "check_answers": [
+    {
+     "checked_at": "2026-10-08",
+     "returned": "sickly",
+     "phase": "check"
+    }
+   ]
   },
   {
-   "stem": "heavyset",
-   "label": "heavyset",
+   "stem": "fat",
+   "label": "fat",
    "entity_type": "trait",
    "chunk": "6",
    "sub_chunk": "physical",
    "pairing": "pair",
-   "partner": "slender",
+   "partner": "thin",
    "partner_exists": false,
    "arrangement_members": [
     "heavyset",
     "slender"
    ],
-   "description_draft": null,
+   "description_draft": "This means having a thick, broad build: shopping the larger sizes, a tight fit in chairs with arms and airplane seats, and running warm in any weather.",
    "description_notes": "Build; neutral words chosen.",
-   "description": null,
+   "description": "This means carrying a lot of body fat: shopping the larger sizes, a tight fit in chairs with arms and airplane seats, and running warm in any weather.",
    "source": null,
    "tags": [
     "physical"
    ],
-   "status": "candidate",
+   "status": "done",
    "decision": "Accepted 2026-09-08 as a separate research track: tag `physical`, keep out of the clean-pair cohort and goal lists until the research says keep / keep-as-tagged / remove",
    "alternatives": null,
    "section": "Physical-attribute traits: a separate research track (decided 2026-09-08)",
    "lines": "2067",
    "chunk_confidence": "high",
-   "extracted_from": "extract_4.json"
+   "extracted_from": "extract_4.json",
+   "pair_by_construction": true,
+   "chunk_6_rule": "Roger, 2026-10-08: body-only rule. Every description of this chunk states only the body and how it is lived, with no personality or behaviour clause, so that any behavioural content in the vectors is the model's own (the physical track's research question).",
+   "nearest_existing": "body_confident / body_insecure / body_obsessed (attitudes to one's body); gluttonous (an eating vice). This one is the build alone, with no attitude and no cause.",
+   "set_review": "heavyset / slender: grain is the build and its practicalities (the sizes, the fit of seats, body temperature). Lengths 27 / 30. Reads as one pair; neither pole gives a cause or a feeling about it.",
+   "notes": "Neutral words kept ('thick, broad build'); no 'fat', no eating, no health judgement. 'Running warm' is the physiological counterpart of slender's 'feeling the cold'. 27 words.",
+   "review_issues": [],
+   "review_verdict": "ok",
+   "review_strength": "at the notes",
+   "set_review_by_reviewer": {
+    "set": "heavyset / slender",
+    "review": "One grain: the build and its practicalities (sizes, the fit of seats, body temperature); neutral words, no cause (eating, dieting), no feeling about it. slender has four particulars to heavyset's three (the belt clause has no counterpart); lengths 27 / 30, both in range, so acceptable as is. If Roger wants them even, 'a belt let out to the last hole' would be the counterpart.",
+    "agree_with_writer": true
+   },
+   "seeded_at": "2026-10-08",
+   "generated_at": "2026-10-08",
+   "check_result": {
+    "returned": "thin|slim|slender",
+    "score": 4,
+    "reasoning": "The neg instructions consistently describe someone slim, slender, thin, and light-framed — the direct physical opposite of being fat/heavy. 'Thin' and 'slim' are both strong candidates, but 'thin' is perhaps the most direct antonym to 'fat' in common usage, while 'slim' and 'slender' are also very natural. These are classic antonym pairs in everyday language. The opposition is clear and symmetric.",
+    "category": "nice_with_alternatives",
+    "candidates": [
+     "thin",
+     "slim",
+     "slender"
+    ],
+    "known": [
+     "thin"
+    ],
+    "intended_hit": true,
+    "checked_at": "2026-10-08"
+   },
+   "check_answers": [
+    {
+     "checked_at": "2026-10-08",
+     "returned": "slight|slender|slim",
+     "phase": "check"
+    },
+    {
+     "checked_at": "2026-10-08",
+     "returned": "thin|slim|slender",
+     "phase": "check"
+    }
+   ],
+   "edits": [
+    {
+     "date": "2026-10-08",
+     "was": "This means having a thick, broad build: shopping the larger sizes, a tight fit in chairs with arms and airplane seats, and running warm in any weather.",
+     "by": "Roger: renamed to fat / thin"
+    }
+   ],
+   "renamed_from": {
+    "stem": "heavyset",
+    "date": "2026-10-08",
+    "reason": "Roger, 2026-10-08: heavyset / slender are polite labels that also cover a muscular or slight frame, while the descriptions were already about weight; fat / thin are the plain words and match them (muscle now has its own trait, muscular). Seeded under the old names the same day; nothing committed under them."
+   }
   },
   {
-   "stem": "in_pain",
-   "label": "in-pain",
+   "stem": "in_chronic_pain",
+   "label": "in chronic pain",
    "entity_type": "trait",
    "chunk": "6",
    "sub_chunk": "physical",
@@ -48025,21 +48605,59 @@
    "partner": null,
    "partner_exists": null,
    "arrangement_members": null,
-   "description_draft": null,
-   "description_notes": "Being in pain, unpaired.",
-   "description": null,
+   "description_draft": "This means hurting every day for years, from a bad back, worn joints or an old injury: painkillers that only take the edge off, a heating pad, and sleep broken by it.",
+   "description_notes": "Roger, 2026-10-08 (duration rule): not acute pain but living with pain that does not go away, distinct from chronically ill because the pain often comes from injury or wear rather than illness. Label 'in chronic pain' (stem in_chronic_pain).",
+   "description": "This means hurting every day for years, from a bad back, worn joints or an old injury: painkillers that only take the edge off, a heating pad, and sleep broken by it.",
    "source": null,
    "tags": [
     "physical",
     "state"
    ],
-   "status": "candidate",
+   "status": "done",
    "decision": "Accepted 2026-09-08 as a separate research track: tag `physical`, keep out of the clean-pair cohort and goal lists until the research says keep / keep-as-tagged / remove",
    "alternatives": null,
    "section": "Physical-attribute traits: a separate research track (decided 2026-09-08)",
    "lines": "2070-2071",
    "chunk_confidence": "high",
-   "extracted_from": "extract_4.json"
+   "extracted_from": "extract_4.json",
+   "renamed_from": {
+    "stem": "in_pain",
+    "date": "2026-10-08",
+    "reason": "Roger, 2026-10-08 (duration rule): acute pain is a state of hours or days; the trait is living with pain that does not go away. Renamed in the queue before seeding."
+   },
+   "chunk_6_rule": "Roger, 2026-10-08: body-only rule. Every description of this chunk states only the body and how it is lived, with no personality or behaviour clause, so that any behavioural content in the vectors is the model's own (the physical track's research question).",
+   "nearest_existing": "chronically_ill in this chunk (an illness, managed; this one is pain from injury or wear, as Roger's note says); sleep_deprived (a state of the nights, not pain); traumatized (psychological). Nothing else near.",
+   "notes": "Stem in_chronic_pain per the packet. Duration written in ('every day for years'); the sources named as alternatives joined with 'or' (rule 11). 32 words.",
+   "review_issues": [],
+   "review_verdict": "ok",
+   "review_strength": "at the notes",
+   "set_review_by_reviewer": {
+    "set": "constitution and chronic conditions (not an arrangement)",
+    "review": "The three stay apart as the notes require: sickly is a weak constitution (many minor illnesses, slowly thrown off), chronically_ill is one long-term illness that is managed (medication, specialists, flares), in_chronic_pain is pain from injury or wear (back, joints, old injury; painkillers, heating pad, broken sleep) with no illness named. Each has its duration written in ('for weeks' and 'by spring'; 'for years'; 'every day for years'). The patient role stays the acute case.",
+    "agree_with_writer": true
+   },
+   "seeded_at": "2026-10-08",
+   "generated_at": "2026-10-08",
+   "check_result": {
+    "returned": "pain-free|able-bodied",
+    "score": 4,
+    "reasoning": "The neg instructions describe someone who is free from chronic pain, moves through life with physical ease, has no ongoing suffering, and takes bodily cooperation for granted. The opposite of being in chronic pain is being pain-free or physically healthy. 'Pain-free' is the most direct and natural label, though 'physically healthy' or 'able-bodied' are also reasonable candidates. 'Pain-free' is the most precise antonym to 'in chronic pain' as a state descriptor. The antonym score is very high — chronic pain vs. pain-free is nearly a perfect opposition, though 'in chronic pain' is a specific condition while 'pain-free' is a broader state of absence.",
+    "category": "open",
+    "candidates": [
+     "pain_free",
+     "able_bodied"
+    ],
+    "known": [],
+    "intended_hit": false,
+    "checked_at": "2026-10-08"
+   },
+   "check_answers": [
+    {
+     "checked_at": "2026-10-08",
+     "returned": "pain-free|able-bodied",
+     "phase": "check"
+    }
+   ]
   },
   {
    "stem": "left_handed",
@@ -48051,20 +48669,47 @@
    "partner": null,
    "partner_exists": null,
    "arrangement_members": null,
-   "description_draft": null,
+   "description_draft": "This means writing and eating with the left hand: ink smudged along it, scissors and can openers made for the other, and elbows bumped at a crowded table.",
    "description_notes": "Handedness, unpaired; right-handed is the default.",
-   "description": null,
+   "description": "This means writing and eating with the left hand: ink smudged along it, scissors and can openers made for the other, and elbows bumped at a crowded table.",
    "source": null,
    "tags": [
     "physical"
    ],
-   "status": "candidate",
+   "status": "done",
    "decision": "Accepted 2026-09-08 as a separate research track: tag `physical`, keep out of the clean-pair cohort and goal lists until the research says keep / keep-as-tagged / remove",
    "alternatives": null,
    "section": "Physical-attribute traits: a separate research track (decided 2026-09-08)",
    "lines": "2073",
    "chunk_confidence": "high",
-   "extracted_from": "extract_4.json"
+   "extracted_from": "extract_4.json",
+   "chunk_6_rule": "Roger, 2026-10-08: body-only rule. Every description of this chunk states only the body and how it is lived, with no personality or behaviour clause, so that any behavioural content in the vectors is the model's own (the physical track's research question).",
+   "nearest_existing": "Nothing near in the corpus (kinesthetic_vark is a learning style). Unpaired; right-handed is the default.",
+   "notes": "'The left hand' in the opening is the qualifier that says which hand, not a label echo. 28 words.",
+   "review_issues": [],
+   "review_verdict": "ok",
+   "review_strength": "at the notes",
+   "seeded_at": "2026-10-08",
+   "generated_at": "2026-10-08",
+   "check_result": {
+    "returned": "right_handed",
+    "score": 4,
+    "reasoning": "The neg instructions clearly describe someone who is right-handed — using the right hand for writing, eating, and all tasks, in a world designed to accommodate them. The direct, natural opposite of 'left_handed' is 'right_handed'. These are perfect antonyms in the domain of handedness — symmetric, direct, and mutually exclusive.",
+    "category": "open",
+    "candidates": [
+     "right_handed"
+    ],
+    "known": [],
+    "intended_hit": false,
+    "checked_at": "2026-10-08"
+   },
+   "check_answers": [
+    {
+     "checked_at": "2026-10-08",
+     "returned": "right_handed",
+     "phase": "check"
+    }
+   ]
   },
   {
    "stem": "plain_looking",
@@ -48079,20 +48724,56 @@
     "good_looking",
     "plain_looking"
    ],
-   "description_draft": null,
+   "description_draft": "This means having a face and figure nobody looks at twice: no compliments on one's looks, photographs that come out ordinary, and features nobody remembers after one meeting.",
    "description_notes": "Rated attractiveness.",
-   "description": null,
+   "description": "This means having a face and figure nobody looks at twice: unremarkable features, no compliments on one's looks, photographs that come out ordinary, and a face nobody remembers after one meeting.",
    "source": null,
    "tags": [
     "physical"
    ],
-   "status": "candidate",
+   "status": "done",
    "decision": "Accepted 2026-09-08 as a separate research track: tag `physical`, keep out of the clean-pair cohort and goal lists until the research says keep / keep-as-tagged / remove",
    "alternatives": null,
    "section": "Physical-attribute traits: a separate research track (decided 2026-09-08)",
    "lines": "2072",
    "chunk_confidence": "high",
-   "extracted_from": "extract_4.json"
+   "extracted_from": "extract_4.json",
+   "pair_by_construction": true,
+   "chunk_6_rule": "Roger, 2026-10-08: body-only rule. Every description of this chunk states only the body and how it is lived, with no personality or behaviour clause, so that any behavioural content in the vectors is the model's own (the physical track's research question).",
+   "nearest_existing": "body_insecure (shame about one's body, an attitude); unpopular (not being liked); unfashionable (clothes). This one is how the face and figure are rated, with no attitude attached.",
+   "notes": "An opposite, not an absence: ordinary features, unremarked, forgotten. No shyness or low self-regard. 28 words.",
+   "review_issues": [
+    "Scope mismatch with its partner: good_looking gives one clause of the body itself ('even features and clear skin') before the reception clauses; plain_looking gives reception only (no compliments, ordinary photographs, features nobody remembers). Add the body clause so the pair matches in scope; the suggested text keeps the length at 31 against 30."
+   ],
+   "review_verdict": "edit",
+   "review_strength": "at the notes",
+   "set_review_by_reviewer": {
+    "set": "good_looking / plain_looking",
+    "review": "Grain is how the face and figure are received, which the packet allows for this pair; no vanity, confidence or shyness on either side, and plain_looking is an opposite (ordinary, unremarked, forgotten), not an absence. The one mismatch is scope: good_looking has a body clause ('even features and clear skin') that plain_looking lacks; the suggested edit adds 'unremarkable features'. Lengths 30 / 28 (31 with the edit).",
+    "agree_with_writer": false
+   },
+   "seeded_at": "2026-10-08",
+   "generated_at": "2026-10-08",
+   "check_result": {
+    "returned": "attractive|striking",
+    "score": 4,
+    "reasoning": "The neg instructions consistently describe someone who is visually striking, draws attention, is memorable, and receives compliments on their looks. The natural opposite of 'plain_looking' is 'attractive' or 'striking' or 'good-looking'. 'Attractive' is the most common everyday antonym for plain, while 'striking' captures the memorable, attention-drawing quality emphasized in the neg prompts. Both are strong candidates. The opposition is very direct and clean — plain vs. attractive/striking is a well-established antonymic pair in everyday language.",
+    "category": "open",
+    "candidates": [
+     "attractive",
+     "striking"
+    ],
+    "known": [],
+    "intended_hit": false,
+    "checked_at": "2026-10-08"
+   },
+   "check_answers": [
+    {
+     "checked_at": "2026-10-08",
+     "returned": "attractive|striking",
+     "phase": "check"
+    }
+   ]
   },
   {
    "stem": "red_headed",
@@ -48105,25 +48786,58 @@
    "partner_exists": null,
    "arrangement_members": [
     "black_haired",
-    "blonde",
-    "brunette",
-    "grey_haired",
+    "blond",
+    "brown_haired",
+    "gray_haired",
     "red_headed"
    ],
-   "description_draft": null,
+   "description_draft": "This means having copper to auburn hair: freckles across the nose and arms, skin that burns in minutes and never tans, and hair that fades pale, not gray, with the years.",
    "description_notes": "Hair colour, listed as unpaired; the arrangement-hunting TODO (line 2136) says `set` per attribute. grey-haired: note the age correlation.",
-   "description": null,
+   "description": "This means having copper to auburn hair: freckles across the nose and arms, skin that burns in minutes and never tans, and hair that fades pale, not gray, with the years.",
    "source": null,
    "tags": [
     "physical"
    ],
-   "status": "candidate",
+   "status": "done",
    "decision": "Added by Roger 2026-09-08; Accepted 2026-09-08 as a separate research track: tag `physical`, keep out of the clean-pair cohort and goal lists until the research says keep / keep-as-tagged / remove",
    "alternatives": null,
    "section": "Physical-attribute traits: a separate research track (decided 2026-09-08)",
    "lines": "2077-2079",
    "chunk_confidence": "high",
-   "extracted_from": "extract_4.json"
+   "extracted_from": "extract_4.json",
+   "chunk_6_rule": "Roger, 2026-10-08: body-only rule. Every description of this chunk states only the body and how it is lived, with no personality or behaviour clause, so that any behavioural content in the vectors is the model's own (the physical track's research question).",
+   "nearest_existing": "No hair-colour trait exists. Overlaps fair_skinned in this chunk on burning (the skin that goes with the hair); the hair is the grain here. irascible and temperamental exist and are exactly the stereotype this entry must not imply; nothing in the draft points at them.",
+   "notes": "Freckles and sunburn kept here per the packet. 'Copper to auburn' so the label is not echoed. 31 words.",
+   "review_issues": [],
+   "review_verdict": "ok",
+   "review_strength": "at the notes",
+   "set_review_by_reviewer": {
+    "set": "hair colour set",
+    "review": "One grain across the five: the colour range, brows and lashes or freckles, and how the hair meets sun, gray and dye, each member taking a different one of those particulars. No temperament anywhere (nothing fiery, carefree or dull). Red hair carries freckles and sunburn as the packet asks; the sunburn overlap with fair_skinned is a fact of the body and acceptable. gray_haired states the years as a fact of the hair and stops. Two optional points for Roger: (a) black_haired is the only member whose opening dodges the colour word ('hair so dark it shows blue in strong light') while the eye set names its colours outright; 'having black hair that shows blue in strong light' would be more even, but the dodge is also fine and the sheen clause does identify the colour. (b) 'blonde' and 'brunette' are the feminine forms in English ('blond' is the masculine), so the generator may skew those two toward women; a label question, not a draft fault.",
+    "agree_with_writer": true
+   },
+   "seeded_at": "2026-10-08",
+   "generated_at": "2026-10-08",
+   "check_result": {
+    "returned": "dark-haired|brunette",
+    "score": 3,
+    "reasoning": "The neg instructions consistently describe someone with dark hair, olive/tan skin that doesn't burn, no freckles, and hair that silvers rather than fades. The most natural label for this physical type is 'dark-haired' or 'brunette', but the full constellation (dark hair + olive/tan skin + no freckles) is best captured by 'dark-haired|brunette'. However, since this is a physical trait about hair color and complexion as a package, 'dark-haired' is the most direct opposite of 'red-headed' as a hair-color descriptor. The antonym score is high because these are essentially opposite ends of the hair-color and skin-tone spectrum, though 'red-headed' vs 'dark-haired' aren't perfectly symmetric antonyms (there are many hair colors in between, and the trait bundles skin characteristics too).",
+    "category": "open",
+    "candidates": [
+     "dark_haired",
+     "brunette"
+    ],
+    "known": [],
+    "intended_hit": false,
+    "checked_at": "2026-10-08"
+   },
+   "check_answers": [
+    {
+     "checked_at": "2026-10-08",
+     "returned": "dark-haired|brunette",
+     "phase": "check"
+    }
+   ]
   },
   {
    "stem": "sedentary",
@@ -48138,20 +48852,56 @@
     "athletic",
     "sedentary"
    ],
-   "description_draft": null,
+   "description_draft": "This means spending the day sitting and getting no exercise: driving to the corner store, winded after one flight of stairs, soft where muscle would be, and stiff from the chair.",
    "description_notes": "Physical activity / fitness.",
-   "description": null,
+   "description": "This means spending the day sitting and getting no exercise: driving to the corner store, winded after one flight of stairs, soft where muscle would be, and stiff from the chair.",
    "source": null,
    "tags": [
     "physical"
    ],
-   "status": "candidate",
+   "status": "done",
    "decision": "Accepted 2026-09-08 as a separate research track: tag `physical`, keep out of the clean-pair cohort and goal lists until the research says keep / keep-as-tagged / remove",
    "alternatives": null,
    "section": "Physical-attribute traits: a separate research track (decided 2026-09-08)",
    "lines": "2068-2069",
    "chunk_confidence": "high",
-   "extracted_from": "extract_4.json"
+   "extracted_from": "extract_4.json",
+   "pair_by_construction": true,
+   "chunk_6_rule": "Roger, 2026-10-08: body-only rule. Every description of this chunk states only the body and how it is lived, with no personality or behaviour clause, so that any behavioural content in the vectors is the model's own (the physical track's research question).",
+   "nearest_existing": "lethargic (a dragging energy level as temperament); lazy (character, kept out); health_negligent (skipping checkups and screenings). This one is the day spent sitting and its physical results.",
+   "notes": "'Driving to the corner store' and 'the day sitting' are the activity level, which is the trait; no 'lazy', 'unmotivated' or 'couch potato'. 31 words.",
+   "review_issues": [],
+   "review_verdict": "ok",
+   "review_strength": "at the notes",
+   "set_review_by_reviewer": {
+    "set": "athletic / sedentary",
+    "review": "One grain: the daily activity level and its results in the body (pulse or wind on the stairs, muscle or softness, stiffness). The activity clauses ('training most days', 'driving to the corner store') are the trait itself, as the packet allows; no character word on either pole. Lengths 30 / 31.",
+    "agree_with_writer": true
+   },
+   "seeded_at": "2026-10-08",
+   "generated_at": "2026-10-08",
+   "check_result": {
+    "returned": "active|athletic",
+    "score": 4,
+    "reasoning": "The neg instructions describe someone who trains hard, is always moving, seeks physical challenges, has a lean and strong body, and feels restless without exercise. The clearest opposite of 'sedentary' is 'active', but the neg instructions go further toward 'athletic' or 'physically active'. 'Active' is the most direct antonym of 'sedentary' in common usage, but 'athletic' captures the intensity described. Both are strong candidates. 'Active' is the most natural, recognized antonym of 'sedentary' in psycholinguistics and health research contexts.",
+    "category": "nice_with_alternatives",
+    "candidates": [
+     "active",
+     "athletic"
+    ],
+    "known": [
+     "athletic"
+    ],
+    "intended_hit": true,
+    "checked_at": "2026-10-08"
+   },
+   "check_answers": [
+    {
+     "checked_at": "2026-10-08",
+     "returned": "active|athletic",
+     "phase": "check"
+    }
+   ]
   },
   {
    "stem": "short",
@@ -48166,24 +48916,60 @@
     "short",
     "tall"
    ],
-   "description_draft": null,
+   "description_draft": "This means standing a head below most people: a step stool for the top shelf, hems taken up on every pair of pants, and seeing only backs in a crowd.",
    "description_notes": "Height.",
-   "description": null,
+   "description": "This means standing a head below most people: a step stool for the top shelf, hems taken up on every pair of pants, and seeing only backs in a crowd.",
    "source": null,
    "tags": [
     "physical"
    ],
-   "status": "candidate",
+   "status": "done",
    "decision": "Accepted 2026-09-08 as a separate research track: tag `physical`, keep out of the clean-pair cohort and goal lists until the research says keep / keep-as-tagged / remove",
    "alternatives": null,
    "section": "Physical-attribute traits: a separate research track (decided 2026-09-08)",
    "lines": "2066",
    "chunk_confidence": "high",
-   "extracted_from": "extract_4.json"
+   "extracted_from": "extract_4.json",
+   "pair_by_construction": true,
+   "chunk_6_rule": "Roger, 2026-10-08: body-only rule. Every description of this chunk states only the body and how it is lived, with no personality or behaviour clause, so that any behavioural content in the vectors is the model's own (the physical track's research question).",
+   "nearest_existing": "No height trait exists. The label could be read as 'curt' (blunt, concise exist); the opening ('standing a head below most people') picks the sense, so no 'short in height' qualifier was needed.",
+   "set_review": "short / tall: grain is standing height and its practicalities (reach, clothes, a crowd or a doorway, a seat). Lengths 30 / 32, mirrored opening ('standing a head below / above most people'). Reads as one pair.",
+   "notes": "No 'Napoleon' clause, no assertiveness or shyness. 30 words.",
+   "review_issues": [],
+   "review_verdict": "ok",
+   "review_strength": "at the notes",
+   "set_review_by_reviewer": {
+    "set": "short / tall",
+    "review": "One grain, mirrored openings ('a head below / above most people') and practicalities of reach, clothes, crowd or doorway, seat. short's opening picks the height sense over 'curt', so no qualifier is needed; no Napoleon clause, no assertiveness or shyness. tall's 'being asked to reach the top shelf' is correctly something the body meets, not a helpful disposition. Lengths 30 / 32.",
+    "agree_with_writer": true
+   },
+   "seeded_at": "2026-10-08",
+   "generated_at": "2026-10-08",
+   "check_result": {
+    "returned": "tall",
+    "score": 4,
+    "reasoning": "The neg instructions consistently describe someone who is noticeably tall — towering over others, ducking through doorways, seeing over crowds, easily reaching high shelves. The direct antonym of 'short' in the physical stature sense is 'tall', which is a perfect, symmetric opposite on the height dimension.",
+    "category": "nice",
+    "candidates": [
+     "tall"
+    ],
+    "known": [
+     "tall"
+    ],
+    "intended_hit": true,
+    "checked_at": "2026-10-08"
+   },
+   "check_answers": [
+    {
+     "checked_at": "2026-10-08",
+     "returned": "tall",
+     "phase": "check"
+    }
+   ]
   },
   {
-   "stem": "short_sighted",
-   "label": "short-sighted",
+   "stem": "nearsighted",
+   "label": "nearsighted",
    "entity_type": "trait",
    "chunk": "6",
    "sub_chunk": "physical",
@@ -48191,20 +48977,52 @@
    "partner": null,
    "partner_exists": null,
    "arrangement_members": null,
-   "description_draft": null,
+   "description_draft": "This means seeing clearly only up close: glasses or contacts from first thing in the morning, faces across the street a blur without them, and a stronger prescription every few years.",
    "description_notes": "Myopia, unpaired; deaf, blind, mobility_impaired are in the disability section.",
-   "description": null,
+   "description": "This means seeing clearly only up close: glasses or contacts from first thing in the morning, faces across the street a blur without them, and a stronger prescription every few years.",
    "source": null,
    "tags": [
     "physical"
    ],
-   "status": "candidate",
+   "status": "done",
    "decision": "Accepted 2026-09-08 as a separate research track: tag `physical`, keep out of the clean-pair cohort and goal lists until the research says keep / keep-as-tagged / remove",
    "alternatives": null,
    "section": "Physical-attribute traits: a separate research track (decided 2026-09-08)",
    "lines": "2074-2075",
    "chunk_confidence": "high",
-   "extracted_from": "extract_4.json"
+   "extracted_from": "extract_4.json",
+   "chunk_6_rule": "Roger, 2026-10-08: body-only rule. Every description of this chunk states only the body and how it is lived, with no personality or behaviour clause, so that any behavioural content in the vectors is the model's own (the physical track's research question).",
+   "renamed_from": {
+    "stem": "short_sighted",
+    "date": "2026-10-08",
+    "reason": "Renamed in the queue before seeding (reviewer's flag, agent's call by rule): US term (entity-naming rule: US English in labels); also removes the 'lacking foresight' reading of short-sighted."
+   },
+   "nearest_existing": "blind (seeing little or nothing; this one is corrected to normal with lenses); mobility_impaired (another disability). FLAG: the label is polysemous ('lacking foresight'; short_term_oriented exists for that); the opening ('seeing clearly only up close') picks the sense.",
+   "notes": "Plain particulars of myopia. 31 words.",
+   "review_issues": [],
+   "review_verdict": "ok",
+   "review_strength": "at the notes",
+   "seeded_at": "2026-10-08",
+   "generated_at": "2026-10-08",
+   "check_result": {
+    "returned": "farsighted",
+    "score": 3,
+    "reasoning": "The neg instructions describe someone who sees clearly at all distances, particularly emphasizing strong distance vision — the opposite of nearsightedness. The clinical term for this is 'farsighted' (hyperopia), but the neg instructions actually describe someone with perfect vision at all distances, not specifically farsighted (which means difficulty seeing up close). 'Sharp-sighted' or 'keen-eyed' could apply, but the most natural antonym in common usage for nearsighted is 'farsighted.' However, the neg instructions more precisely describe someone with perfect/normal vision rather than farsightedness per se. 'Farsighted' is the standard lay antonym for 'nearsighted,' even if clinically imprecise here. It's the most recognizable opposite label.",
+    "category": "open",
+    "candidates": [
+     "farsighted"
+    ],
+    "known": [],
+    "intended_hit": false,
+    "checked_at": "2026-10-08"
+   },
+   "check_answers": [
+    {
+     "checked_at": "2026-10-08",
+     "returned": "farsighted",
+     "phase": "check"
+    }
+   ]
   },
   {
    "stem": "sickly",
@@ -48219,48 +49037,139 @@
     "healthy",
     "sickly"
    ],
-   "description_draft": null,
+   "description_draft": "This means having a weak constitution: catching whatever is going around and keeping it for weeks, prescriptions on the shelf, a checkup that finds something, and sick days gone by spring.",
    "description_notes": "General health.",
-   "description": null,
+   "description": "This means having a weak constitution: catching whatever is going around and keeping it for weeks, prescriptions on the shelf, a checkup that finds something, and sick days gone by spring.",
    "source": null,
    "tags": [
     "physical"
    ],
-   "status": "candidate",
+   "status": "done",
    "decision": "Accepted 2026-09-08 as a separate research track: tag `physical`, keep out of the clean-pair cohort and goal lists until the research says keep / keep-as-tagged / remove",
    "alternatives": null,
    "section": "Physical-attribute traits: a separate research track (decided 2026-09-08)",
    "lines": "2070-2071",
    "chunk_confidence": "high",
-   "extracted_from": "extract_4.json"
+   "extracted_from": "extract_4.json",
+   "pair_by_construction": true,
+   "chunk_6_rule": "Roger, 2026-10-08: body-only rule. Every description of this chunk states only the body and how it is lived, with no personality or behaviour clause, so that any behavioural content in the vectors is the model's own (the physical track's research question).",
+   "nearest_existing": "health_negligent (the habits: skipping checkups, no exercise); languishing (psychological); fragile (emotional fragility); chronically_ill in this chunk (one managed illness). This one is the constitution itself: many minor illnesses, slowly thrown off.",
+   "notes": "An opposite, not an absence, through the same four markers as its partner. No hypochondria, no self-pity. 31 words.",
+   "review_issues": [],
+   "review_verdict": "ok",
+   "review_strength": "at the notes",
+   "set_review_by_reviewer": {
+    "set": "constitution and chronic conditions (not an arrangement)",
+    "review": "The three stay apart as the notes require: sickly is a weak constitution (many minor illnesses, slowly thrown off), chronically_ill is one long-term illness that is managed (medication, specialists, flares), in_chronic_pain is pain from injury or wear (back, joints, old injury; painkillers, heating pad, broken sleep) with no illness named. Each has its duration written in ('for weeks' and 'by spring'; 'for years'; 'every day for years'). The patient role stays the acute case.",
+    "agree_with_writer": true
+   },
+   "seeded_at": "2026-10-08",
+   "generated_at": "2026-10-08",
+   "check_result": {
+    "returned": "healthy|robust|hardy",
+    "score": 4,
+    "reasoning": "The neg instructions consistently describe someone with a strong immune system, rarely ill, physically robust, and in full health — the direct opposite of 'sickly.' The most natural single-word antonym is 'healthy,' but the instructions emphasize constitutional robustness and resilience specifically, making 'robust|healthy|hardy' all competitive. 'Healthy' is the broadest and most direct antonym to 'sickly,' while 'robust' and 'hardy' capture the constitutional strength angle. This is a very strong antonym relationship.",
+    "category": "nice_with_alternatives",
+    "candidates": [
+     "healthy",
+     "robust",
+     "hardy"
+    ],
+    "known": [
+     "healthy"
+    ],
+    "intended_hit": true,
+    "checked_at": "2026-10-08"
+   },
+   "check_answers": [
+    {
+     "checked_at": "2026-10-08",
+     "returned": "healthy|robust|hardy",
+     "phase": "check"
+    }
+   ]
   },
   {
-   "stem": "slender",
-   "label": "slender",
+   "stem": "thin",
+   "label": "thin",
    "entity_type": "trait",
    "chunk": "6",
    "sub_chunk": "physical",
    "pairing": "pair",
-   "partner": "heavyset",
+   "partner": "fat",
    "partner_exists": false,
    "arrangement_members": [
     "heavyset",
     "slender"
    ],
-   "description_draft": null,
+   "description_draft": "This means having a thin, narrow build: shopping the smaller sizes, belts cinched to the last hole, room to spare in any seat, and feeling the cold before anyone else.",
    "description_notes": "Build; neutral words chosen.",
-   "description": null,
+   "description": "This means carrying little body fat: shopping the smaller sizes, belts cinched to the last hole, room to spare in any seat, and feeling the cold before anyone else.",
    "source": null,
    "tags": [
     "physical"
    ],
-   "status": "candidate",
+   "status": "done",
    "decision": "Accepted 2026-09-08 as a separate research track: tag `physical`, keep out of the clean-pair cohort and goal lists until the research says keep / keep-as-tagged / remove",
    "alternatives": null,
    "section": "Physical-attribute traits: a separate research track (decided 2026-09-08)",
    "lines": "2067",
    "chunk_confidence": "high",
-   "extracted_from": "extract_4.json"
+   "extracted_from": "extract_4.json",
+   "pair_by_construction": true,
+   "chunk_6_rule": "Roger, 2026-10-08: body-only rule. Every description of this chunk states only the body and how it is lived, with no personality or behaviour clause, so that any behavioural content in the vectors is the model's own (the physical track's research question).",
+   "nearest_existing": "body_obsessed (thinking about one's body all day); ascetic and abstemious (restraint as a disposition). This one is the build alone, with no cause and no attitude.",
+   "notes": "Neutral word kept; no dieting, no 'delicate'. 30 words.",
+   "review_issues": [],
+   "review_verdict": "ok",
+   "review_strength": "at the notes",
+   "set_review_by_reviewer": {
+    "set": "heavyset / slender",
+    "review": "One grain: the build and its practicalities (sizes, the fit of seats, body temperature); neutral words, no cause (eating, dieting), no feeling about it. slender has four particulars to heavyset's three (the belt clause has no counterpart); lengths 27 / 30, both in range, so acceptable as is. If Roger wants them even, 'a belt let out to the last hole' would be the counterpart.",
+    "agree_with_writer": true
+   },
+   "seeded_at": "2026-10-08",
+   "generated_at": "2026-10-08",
+   "check_result": {
+    "returned": "fat|heavy|obese",
+    "score": 4,
+    "reasoning": "The neg instructions consistently describe someone carrying a great deal of body fat, wearing the largest sizes, filling seats, and retaining heat — the direct physical opposite of being thin. The most natural, recognizable antonym for 'thin' in this body-composition sense is 'fat' or 'obese', though 'heavy' and 'overweight' are also strong candidates. 'Fat' is the most direct and symmetric antonym to 'thin' as used here, though 'obese' captures the clinical extreme described. 'Heavy' is also very apt given the repeated use of 'heavy' in the neg instructions. These are genuinely competitive, so I'll list the top candidates. The antonym relationship is very strong — these are direct opposites on the same body-fat dimension.",
+    "category": "nice_with_alternatives",
+    "candidates": [
+     "fat",
+     "heavy",
+     "obese"
+    ],
+    "known": [
+     "fat"
+    ],
+    "intended_hit": true,
+    "checked_at": "2026-10-08"
+   },
+   "check_answers": [
+    {
+     "checked_at": "2026-10-08",
+     "returned": "heavyset|stocky",
+     "phase": "check"
+    },
+    {
+     "checked_at": "2026-10-08",
+     "returned": "fat|heavy|obese",
+     "phase": "check"
+    }
+   ],
+   "edits": [
+    {
+     "date": "2026-10-08",
+     "was": "This means having a thin, narrow build: shopping the smaller sizes, belts cinched to the last hole, room to spare in any seat, and feeling the cold before anyone else.",
+     "by": "Roger: renamed to fat / thin"
+    }
+   ],
+   "renamed_from": {
+    "stem": "slender",
+    "date": "2026-10-08",
+    "reason": "Roger, 2026-10-08: heavyset / slender are polite labels that also cover a muscular or slight frame, while the descriptions were already about weight; fat / thin are the plain words and match them (muscle now has its own trait, muscular). Seeded under the old names the same day; nothing committed under them."
+   }
   },
   {
    "stem": "tall",
@@ -48275,20 +49184,55 @@
     "short",
     "tall"
    ],
-   "description_draft": null,
+   "description_draft": "This means standing a head above most people: ducking through old doorways, knees against the seat in front, being asked to reach the top shelf, and sleeves that never reach the wrist.",
    "description_notes": "Height.",
-   "description": null,
+   "description": "This means standing a head above most people: ducking through old doorways, knees against the seat in front, being asked to reach the top shelf, and sleeves that never reach the wrist.",
    "source": null,
    "tags": [
     "physical"
    ],
-   "status": "candidate",
+   "status": "done",
    "decision": "Accepted 2026-09-08 as a separate research track: tag `physical`, keep out of the clean-pair cohort and goal lists until the research says keep / keep-as-tagged / remove",
    "alternatives": null,
    "section": "Physical-attribute traits: a separate research track (decided 2026-09-08)",
    "lines": "2066",
    "chunk_confidence": "high",
-   "extracted_from": "extract_4.json"
+   "extracted_from": "extract_4.json",
+   "pair_by_construction": true,
+   "chunk_6_rule": "Roger, 2026-10-08: body-only rule. Every description of this chunk states only the body and how it is lived, with no personality or behaviour clause, so that any behavioural content in the vectors is the model's own (the physical track's research question).",
+   "nearest_existing": "No height trait exists. Nothing near in the corpus.",
+   "notes": "'Being asked to reach' rather than 'reaching for strangers', so the clause is something the body meets, not a helpful disposition. 32 words.",
+   "review_issues": [],
+   "review_verdict": "ok",
+   "review_strength": "at the notes",
+   "set_review_by_reviewer": {
+    "set": "short / tall",
+    "review": "One grain, mirrored openings ('a head below / above most people') and practicalities of reach, clothes, crowd or doorway, seat. short's opening picks the height sense over 'curt', so no qualifier is needed; no Napoleon clause, no assertiveness or shyness. tall's 'being asked to reach the top shelf' is correctly something the body meets, not a helpful disposition. Lengths 30 / 32.",
+    "agree_with_writer": true
+   },
+   "seeded_at": "2026-10-08",
+   "generated_at": "2026-10-08",
+   "check_result": {
+    "returned": "short",
+    "score": 4,
+    "reasoning": "The neg instructions clearly describe someone who is short/petite — standing below others, reaching for high shelves, feet dangling from barstools, disappearing in crowds. The direct antonym of 'tall' is 'short', which is a perfect, symmetric opposite on the height dimension.",
+    "category": "nice",
+    "candidates": [
+     "short"
+    ],
+    "known": [
+     "short"
+    ],
+    "intended_hit": true,
+    "checked_at": "2026-10-08"
+   },
+   "check_answers": [
+    {
+     "checked_at": "2026-10-08",
+     "returned": "short",
+     "phase": "check"
+    }
+   ]
   },
   {
    "stem": "death_tarot",
@@ -49664,21 +50608,56 @@
    "partner": "male",
    "partner_exists": null,
    "arrangement_members": null,
-   "description_draft": null,
-   "description_notes": "Sex / gender identity as a membership trait (polling asks identity: man, woman, nonbinary); the queued set covers expression only.",
-   "description": null,
+   "description_draft": "This means having a woman's body: ovaries, a uterus and breasts, monthly periods from the teens to menopause, the capacity to carry a child, and Pap smears and mammograms on the calendar.",
+   "description_notes": "Bodily sex (Roger, 2026-09-28): the body's sex as lived, not identity and not expression (masculine / feminine, nonbinary, neuter and androgynous exist for those). Roger, 2026-10-08: NOT tagged physical: like age, sex affects behaviour by more than stereotype (hormones), so these stay in the corpus even if the physical track is dropped. Description body-only all the same.",
+   "description": "This means having a woman's body: ovaries, a uterus and breasts, monthly periods from the teens to menopause, the capacity to carry a child, and Pap smears and mammograms on the calendar.",
    "source": null,
    "tags": [
-    "membership",
-    "physical"
+    "membership"
    ],
-   "status": "candidate",
-   "decision": "Undecided: whether male and female are wanted as membership traits beside the queued expression set; chunk 7 per the seeding plan (line 2792: 'male / female') DECIDED 2026-09-28 (Roger): these are physical traits; filed under the physical-attribute research track and deferred with it; write as bodily sex, not identity or expression",
+   "status": "done",
+   "decision": "Undecided: whether male and female are wanted as membership traits beside the queued expression set; chunk 7 per the seeding plan (line 2792: 'male / female') DECIDED 2026-09-28 (Roger): these are physical traits; filed under the physical-attribute research track and deferred with it; write as bodily sex, not identity or expression [Roger, 2026-10-08: not tagged physical; stays if the physical track is dropped; description body-only.]",
    "alternatives": "the queued gender-expression set (masculine ↔ feminine, neuter, nonbinary, androgynous); polling identity categories (man, woman, nonbinary)",
    "section": "Coverage audit part 4: attitudes, behavior and segmentation (decided 2026-09-08) > Still open",
    "lines": "2347-2350",
    "chunk_confidence": "high",
-   "extracted_from": "extract_4.json"
+   "extracted_from": "extract_4.json",
+   "pair_by_construction": true,
+   "chunk_6_rule": "Roger, 2026-10-08: body-only rule. Every description of this chunk states only the body and how it is lived, with no personality or behaviour clause, so that any behavioural content in the vectors is the model's own (the physical track's research question).",
+   "nearest_existing": "feminine (expression: how one dresses, talks and carries oneself, plus warmth, which this entry must not carry); nonbinary, neuter, androgynous (identity and expression); parent and married (family roles). This one is the body's sex: anatomy and the health particulars that follow.",
+   "set_review": "female / male: grain is the body's sex through parallel markers (reproductive anatomy; the cycle or the puberty changes; carrying a child or the muscle on the frame; the sex-specific screening). Both 32 words. Reads as one pair, and stays clear of the expression set (masculine / feminine / neuter / androgynous / nonbinary). Roger to confirm the plainness level of the anatomy words.",
+   "notes": "Anatomy named plainly, as an adult would of themselves; no roles, no temperament, no identity word. Lengths matched with male at 32 / 32.",
+   "review_issues": [],
+   "review_verdict": "ok",
+   "review_strength": "at the notes",
+   "set_review_by_reviewer": {
+    "set": "female / male",
+    "review": "One grain through parallel markers: reproductive anatomy, the cycle or the puberty changes, carrying a child or muscle on the frame, the sex-specific screening. Bodily sex only; nothing on roles, family or temperament, and clear of the expression set (feminine carries warmth and masculine toughness, which neither draft touches). On the writer's question: the plainness is right. 'Ovaries, a uterus and breasts', 'testes and a penis', periods, menopause, Pap smears, mammograms, prostate checks are the ordinary adult words, neither clinical ('genitalia', 'reproductive organs') nor coarse. One optional word: 'testicles' is slightly more everyday than 'testes'; either passes. 'A woman's body' / 'a man's body' is the right gloss (the alternative 'female body' echoes the label). Lengths 32 / 32.",
+    "agree_with_writer": true
+   },
+   "seeded_at": "2026-10-08",
+   "generated_at": "2026-10-08",
+   "check_result": {
+    "returned": "male",
+    "score": 4,
+    "reasoning": "The neg instructions consistently describe someone with a male reproductive system — testes, prostate, testosterone, sperm production, no menstruation, no uterus. The direct biological opposite of 'female' in this context is 'male'. This is a perfect antonym pair in biological/sex terminology.",
+    "category": "nice",
+    "candidates": [
+     "male"
+    ],
+    "known": [
+     "male"
+    ],
+    "intended_hit": true,
+    "checked_at": "2026-10-08"
+   },
+   "check_answers": [
+    {
+     "checked_at": "2026-10-08",
+     "returned": "male",
+     "phase": "check"
+    }
+   ]
   },
   {
    "stem": "harmony",
@@ -49763,21 +50742,55 @@
    "partner": "female",
    "partner_exists": null,
    "arrangement_members": null,
-   "description_draft": null,
-   "description_notes": "Sex / gender identity as a membership trait (polling asks identity: man, woman, nonbinary); the queued set covers expression only.",
-   "description": null,
+   "description_draft": "This means having a man's body: testes and a penis, a voice that dropped at puberty, a beard to shave or grow, more muscle on the frame, and prostate checks past fifty.",
+   "description_notes": "Bodily sex (Roger, 2026-09-28): the body's sex as lived, not identity and not expression (masculine / feminine, nonbinary, neuter and androgynous exist for those). Roger, 2026-10-08: NOT tagged physical: like age, sex affects behaviour by more than stereotype (hormones), so these stay in the corpus even if the physical track is dropped. Description body-only all the same.",
+   "description": "This means having a man's body: testes and a penis, a voice that dropped at puberty, a beard to shave or grow, more muscle on the frame, and prostate checks past fifty.",
    "source": null,
    "tags": [
-    "membership",
-    "physical"
+    "membership"
    ],
-   "status": "candidate",
-   "decision": "Undecided: whether male and female are wanted as membership traits beside the queued expression set; chunk 7 per the seeding plan (line 2792: 'male / female') DECIDED 2026-09-28 (Roger): these are physical traits; filed under the physical-attribute research track and deferred with it; write as bodily sex, not identity or expression",
+   "status": "done",
+   "decision": "Undecided: whether male and female are wanted as membership traits beside the queued expression set; chunk 7 per the seeding plan (line 2792: 'male / female') DECIDED 2026-09-28 (Roger): these are physical traits; filed under the physical-attribute research track and deferred with it; write as bodily sex, not identity or expression [Roger, 2026-10-08: not tagged physical; stays if the physical track is dropped; description body-only.]",
    "alternatives": "the queued gender-expression set (masculine ↔ feminine, neuter, nonbinary, androgynous); polling identity categories (man, woman, nonbinary)",
    "section": "Coverage audit part 4: attitudes, behavior and segmentation (decided 2026-09-08) > Still open",
    "lines": "2347-2350",
    "chunk_confidence": "high",
-   "extracted_from": "extract_4.json"
+   "extracted_from": "extract_4.json",
+   "pair_by_construction": true,
+   "chunk_6_rule": "Roger, 2026-10-08: body-only rule. Every description of this chunk states only the body and how it is lived, with no personality or behaviour clause, so that any behavioural content in the vectors is the model's own (the physical track's research question).",
+   "nearest_existing": "masculine (expression: manly dress, talk and bearing, plus toughness and assertiveness, which this entry must not carry); nonbinary, neuter, androgynous (identity and expression). This one is the body's sex: anatomy and the health particulars that follow.",
+   "notes": "Anatomy named plainly; no roles, no temperament. 32 words.",
+   "review_issues": [],
+   "review_verdict": "ok",
+   "review_strength": "at the notes",
+   "set_review_by_reviewer": {
+    "set": "female / male",
+    "review": "One grain through parallel markers: reproductive anatomy, the cycle or the puberty changes, carrying a child or muscle on the frame, the sex-specific screening. Bodily sex only; nothing on roles, family or temperament, and clear of the expression set (feminine carries warmth and masculine toughness, which neither draft touches). On the writer's question: the plainness is right. 'Ovaries, a uterus and breasts', 'testes and a penis', periods, menopause, Pap smears, mammograms, prostate checks are the ordinary adult words, neither clinical ('genitalia', 'reproductive organs') nor coarse. One optional word: 'testicles' is slightly more everyday than 'testes'; either passes. 'A woman's body' / 'a man's body' is the right gloss (the alternative 'female body' echoes the label). Lengths 32 / 32.",
+    "agree_with_writer": true
+   },
+   "seeded_at": "2026-10-08",
+   "generated_at": "2026-10-08",
+   "check_result": {
+    "returned": "female",
+    "score": 4,
+    "reasoning": "The neg instructions consistently describe having a female/woman's body — ovaries, uterus, breasts, higher voice, menstruation, female anatomy. The direct biological opposite of 'male' is 'female', making this a perfect antonym pair in the biological/anatomical sense described.",
+    "category": "nice",
+    "candidates": [
+     "female"
+    ],
+    "known": [
+     "female"
+    ],
+    "intended_hit": true,
+    "checked_at": "2026-10-08"
+   },
+   "check_answers": [
+    {
+     "checked_at": "2026-10-08",
+     "returned": "female",
+     "phase": "check"
+    }
+   ]
   },
   {
    "stem": "mastery",
@@ -54408,6 +55421,147 @@
    "seeded_at": "2026-10-02",
    "generated_at": "2026-10-02",
    "paired_at": "2026-10-02"
+  },
+  {
+   "entity_type": "trait",
+   "chunk": "6",
+   "sub_chunk": "physical",
+   "tags": [
+    "physical"
+   ],
+   "section": "Physical-attribute traits: a separate research track (decided 2026-09-08)",
+   "stem": "muscular",
+   "label": "muscular",
+   "pairing": "singleton",
+   "partner": "slight",
+   "arrangement_members": null,
+   "status": "paired",
+   "lines": null,
+   "chunk_confidence": "high",
+   "description": "This means carrying a lot of muscle, whether from the gym, years of lifting and hauling, or the build one was born with: broad shoulders, sleeves tight on the arms, and strength to spare.",
+   "description_notes": "Muscle mass as a build, decoupled from athletic (Roger, 2026-10-08: muscle comes from manual work or the frame as well as from training).",
+   "decision": "Roger, 2026-10-08: added; seeded non-X so that the antonym check names the partner (slight was his first thought; it sits close to thin).",
+   "seeded_at": "2026-10-08",
+   "generated_at": "2026-10-08",
+   "check_result": {
+    "returned": "frail|slight|scrawny",
+    "score": 3,
+    "reasoning": "The neg instructions consistently describe someone who is thin, slight, narrow, weak, and lacking physical mass or strength. The opposite of muscular/powerfully built is most naturally 'frail' or 'slight' or 'scrawny'. 'Frail' captures the weakness and thinness emphasized in the neg prompts (especially prompt 5 which uses 'frail' explicitly). 'Slight' captures the narrow, light frame. 'Scrawny' is also a natural antonym to muscular. These are all competitive candidates. The antonym score is high since muscular vs. frail/slight/scrawny is a well-recognized physical opposition, though not perfectly symmetric (muscular implies strength + size, while frail implies weakness + thinness — close but with slight asymmetry).",
+    "category": "open",
+    "candidates": [
+     "frail",
+     "slight",
+     "scrawny"
+    ],
+    "known": [],
+    "intended_hit": false,
+    "checked_at": "2026-10-08"
+   },
+   "check_answers": [
+    {
+     "checked_at": "2026-10-08",
+     "returned": "frail|slight|scrawny",
+     "phase": "check"
+    }
+   ],
+   "paired_at": "2026-10-08"
+  },
+  {
+   "entity_type": "trait",
+   "chunk": "6",
+   "sub_chunk": "physical",
+   "tags": [
+    "physical"
+   ],
+   "section": "Physical-attribute traits: a separate research track (decided 2026-09-08)",
+   "stem": "slight",
+   "label": "slight",
+   "pairing": "singleton",
+   "partner": "muscular",
+   "arrangement_members": null,
+   "status": "paired",
+   "lines": null,
+   "chunk_confidence": "high",
+   "description": "This means carrying little muscle on a light frame, whatever one weighs: narrow shoulders and thin wrists, a suitcase that takes both hands, and jar lids that will not budge.",
+   "description_notes": "Low muscle mass on a light frame, independent of body fat (thin is the fat axis). Muscular's candidate partner: Roger's first thought, and the middle answer of muscular's check (frail | slight | scrawny).",
+   "decision": "Roger proposed it 2026-10-08; seeded non-X, paired with muscular only if its check names muscular back.",
+   "seeded_at": "2026-10-08",
+   "generated_at": "2026-10-08",
+   "check_result": {
+    "returned": "muscular|brawny|burly",
+    "score": 4,
+    "reasoning": "The neg instructions consistently describe someone powerfully built with broad shoulders, thick limbs, strong grip, and abundant muscle — the direct physical opposite of 'slight.' The best single-word label for this is 'brawny' or 'muscular' or 'burly.' 'Muscular' is the most neutral and precise antonym to 'slight' (little muscle on a light frame), while 'brawny' and 'burly' capture the broad-shouldered, powerful build described. 'Muscular' is the most direct antonym to the definition given. The antonym score is high — slight vs. muscular/brawny is a strong, clear opposition in terms of physical build and strength.",
+    "category": "nearly_nice",
+    "candidates": [
+     "muscular",
+     "brawny",
+     "burly"
+    ],
+    "known": [
+     "muscular"
+    ],
+    "intended_hit": false,
+    "checked_at": "2026-10-08"
+   },
+   "check_answers": [
+    {
+     "checked_at": "2026-10-08",
+     "returned": "muscular|brawny|burly",
+     "phase": "check"
+    }
+   ],
+   "paired_at": "2026-10-08"
+  },
+  {
+   "stem": "gray_eyed",
+   "label": "gray-eyed",
+   "entity_type": "trait",
+   "chunk": "6",
+   "sub_chunk": "physical",
+   "pairing": "set",
+   "partner": null,
+   "partner_exists": null,
+   "arrangement_members": [
+    "blue_eyed",
+    "brown_eyed",
+    "gray_eyed",
+    "green_eyed"
+   ],
+   "description_notes": "Eye colour, member of the eye-colour set (Roger, 2026-10-08). Tagged physical: unlike gray hair, gray eyes carry no age correlation.",
+   "description": "This means having gray eyes, silver to slate: nearly colorless in strong light, a squint in bright sun, and often mistaken for blue or green.",
+   "source": null,
+   "tags": [
+    "physical"
+   ],
+   "status": "done",
+   "decision": "Roger, 2026-10-08: added to the eye-colour set; 'slate' moved here from blue-eyed.",
+   "alternatives": null,
+   "section": "Physical-attribute traits: a separate research track (decided 2026-09-08)",
+   "lines": "2080",
+   "chunk_confidence": "high",
+   "extracted_from": "extract_4.json",
+   "chunk_6_rule": "Roger, 2026-10-08: body-only rule. Every description of this chunk states only the body and how it is lived, with no personality or behaviour clause, so that any behavioural content in the vectors is the model's own (the physical track's research question).",
+   "seeded_at": "2026-10-08",
+   "generated_at": "2026-10-08",
+   "check_result": {
+    "returned": "dark-eyed",
+    "score": 3,
+    "reasoning": "The neg instructions consistently describe eyes that are deeply pigmented, dark, saturated, and unmistakable in color — the opposite of pale, nearly colorless gray eyes. The most natural label for this is 'dark-eyed,' which is explicitly used in neg instruction 5. This is a strong but not perfectly symmetric antonym to 'gray-eyed' since 'dark-eyed' covers a range of dark colors (brown, black, deep hazel) rather than being a single specific color opposite, but it is clearly the direct opposite pole being described.",
+    "category": "open",
+    "candidates": [
+     "dark_eyed"
+    ],
+    "known": [],
+    "intended_hit": false,
+    "checked_at": "2026-10-08"
+   },
+   "check_answers": [
+    {
+     "checked_at": "2026-10-08",
+     "returned": "dark-eyed",
+     "phase": "check"
+    }
+   ]
   }
  ]
 }
