@@ -282,4 +282,7 @@ call), $0.013 on Roget and WordNet; a recovery seed about 1.4 times the run's M3
    221 unresolved opposed heads: an LLM pass, a position pass, or neither; placement without the LLM; the
    Class I-III rule; gloss-hint wording; the Zipf floor at 1.5 against the plan's 2.0).
 4. **Decision 16** (re-examine the verdict model on real generator output) now has data: the M1 verdicts on
-   the census pilot (§ 4).
+   the census pilot (§ 4).  Roger (2026-10-08, morning): the TDA's turned-away rate, 6 of 564 (1.1%; `awful`, `bad`,
+   `terrible`, `exceptional` evaluative, `unforseeing` unknown, `dowdy` arguable but covered by
+   [unfashionable](../../data/traits/instructions/unfashionable.json)), is an acceptable error rate.  Roget's
+   33 of 181 are the harvest's non-dispositional heads, a generator question (40), not a filter one.
