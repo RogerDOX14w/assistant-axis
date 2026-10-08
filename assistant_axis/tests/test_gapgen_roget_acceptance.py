@@ -15,6 +15,12 @@ from assistant_axis.gapgen import Candidate
 
 REPO = Path(__file__).resolve().parents[2]
 OUT = REPO / "data" / "candidates" / "roget"
+INST = REPO / "data" / "traits" / "instructions"
+QUEUE = REPO / "data" / "seed_queue.json"
+UPDATE_HINT = ("Run `uv run python data_analysis/gap_generation/roget_generate.py map --update` (re-places new and "
+               "changed labels, drops stale ones, leaves the rest), then `roget_generate.py place-check "
+               "--unchecked-only --resume --budget-usd <cap>`.  Never remap an old key onto a renamed stem: the old "
+               "placement is for the old meaning.")
 PILOT = REPO / "data" / "candidates" / "runs" / "roget" / "2026-10-08-pilot"
 WN_PILOT = REPO / "data" / "candidates" / "runs" / "wn_clusters" / "2026-10-08-pilot"
 
@@ -44,13 +50,71 @@ def test_every_dispositional_head_has_a_coverage_row():
     assert cpu["covered"] + cpu["partly_covered"] + cpu["uncovered"] + nc == s["n_heads"]
 
 
+def _renamed_from(d: dict):
+    rf = d.get("renamed_from")
+    return rf.get("stem") if isinstance(rf, dict) else rf if isinstance(rf, str) else None
+
+
+def missing_message(missing, inst_dir: Path) -> str:
+    """For each corpus stem missing from label_heads.json: whether its file carries ``renamed_from``, and from
+    what; then the command to run."""
+    lines = []
+    for s in sorted(missing):
+        p = inst_dir / f"{s}.json"
+        old = _renamed_from(json.loads(p.read_text(encoding="utf-8"))) if p.exists() else None
+        lines.append(f"  {s}: renamed_from {old!r} in its file" if old else f"  {s}: no renamed_from in its file (new)")
+    return f"{len(missing)} corpus trait(s) missing from label_heads.json:\n" + "\n".join(lines) + "\n" + UPDATE_HINT
+
+
+def stale_message(stale, inst_dir: Path, queue_entries) -> str:
+    """For each label_heads.json key that is no corpus trait and no queue trait entry: the file or queue entry
+    whose ``renamed_from`` names it, if any; then the command to run."""
+    succ = {}
+    for p in sorted(inst_dir.glob("*.json")):
+        old = _renamed_from(json.loads(p.read_text(encoding="utf-8")))
+        if old:
+            succ.setdefault(old, f"{p.stem} (file)")
+    for e in queue_entries:
+        old = _renamed_from(e)
+        if old and e.get("entity_type") == "trait":
+            succ.setdefault(old, f"{e.get('stem')} (queue entry)")
+    lines = [f"  {s}: renamed to {succ[s]}" if s in succ else f"  {s}: no file or queue entry names it in renamed_from"
+             for s in sorted(stale)]
+    return (f"{len(stale)} label_heads.json key(s) are no corpus trait and no queue trait entry:\n" + "\n".join(lines)
+            + "\n" + UPDATE_HINT)
+
+
+def test_failure_messages_name_the_rename(tmp_path):
+    (tmp_path / "ocd.json").write_text(json.dumps({"renamed_from": {"stem": "compulsive", "date": "2026-10-08"}}))
+    (tmp_path / "fresh.json").write_text(json.dumps({"description": "d"}))
+    m = missing_message({"ocd", "fresh"}, tmp_path)
+    assert "ocd: renamed_from 'compulsive' in its file" in m and "fresh: no renamed_from" in m and "map --update" in m
+    s = stale_message({"compulsive", "in_pain", "gone"}, tmp_path,
+                      [{"stem": "in_chronic_pain", "entity_type": "trait", "renamed_from": {"stem": "in_pain"}}])
+    assert "compulsive: renamed to ocd (file)" in s and "in_pain: renamed to in_chronic_pain (queue entry)" in s
+    assert "gone: no file or queue entry" in s and "map --update" in s
+
+
 def test_every_corpus_trait_is_in_label_heads():
     lh = result(OUT / "label_heads.json")["labels"]
-    stems = {p.stem for p in (REPO / "data" / "traits" / "instructions").glob("*.json")}
-    assert stems <= set(lh)
+    stems = {p.stem for p in INST.glob("*.json")}
+    missing = stems - set(lh)
+    assert not missing, missing_message(missing, INST)
     # route llm: placed by the label placement check (QUESTIONS 39, 2026-10-08)
     assert all(v["route"] in ("agree", "rule", "semantic", "lexical", "none", "llm") for v in lh.values())
     assert all((v["primary"] is None) == (v["route"] == "none") for v in lh.values())
+
+
+def test_label_heads_has_no_stale_stems():
+    """Every key is a corpus trait or a queue trait entry (``mapping.load_labels``'s set): a rename leaves the
+    old key behind, placed for the old meaning (2026-10-08, chunk 5)."""
+    from assistant_axis.entity_id import normalize_to_file_name
+    lh = result(OUT / "label_heads.json")["labels"]
+    entries = json.loads(need(QUEUE).read_text(encoding="utf-8")).get("entries") or []
+    known = {p.stem for p in INST.glob("*.json")} | {e.get("stem") or normalize_to_file_name(e.get("label") or "")
+                                                     for e in entries if e.get("entity_type") == "trait"}
+    stale = set(lh) - known
+    assert not stale, stale_message(stale, INST, entries)
 
 
 def test_spotcheck_has_forty_rows():
@@ -116,5 +180,6 @@ def test_placement_check_recorded_within_its_cap():
         assert llm["sonnet"]["head"] is None or llm["sonnet"]["head"] in llm["candidates"]
         assert v["primary"] == llm["final"]
         assert (llm["opus"] is not None) == (llm["sonnet"]["head"] != llm["previous_primary"])
+    # cumulative: the first check's $5 cap (2026-10-08) plus the chunk-5 update's $3 cap (same day)
     u = json.loads(need(OUT / "placement_usage.json").read_text())
-    assert u["total_cost_usd"] < 5.0 and set(u["per_model"]) <= {"claude-sonnet-5-5", "claude-opus-5-5"}
+    assert u["total_cost_usd"] < 8.0 and set(u["per_model"]) <= {"claude-sonnet-5-5", "claude-opus-5-5"}

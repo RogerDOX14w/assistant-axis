@@ -330,3 +330,93 @@ def test_place_check_records_sonnet_and_opus_and_resumes(tree, monkeypatch):
         {k: (v["primary"], v["route"]) for k, v in after.items()}
     # the coverage map reads the new primaries
     assert run(base, "coverage") == 0
+
+
+# --------------------------------------------------------------------------- map --update (2026-10-08, after chunk 5)
+
+def _checked_tree(tree, monkeypatch):
+    """The fixture tree mapped and placement-checked (fake client: Sonnet "none", Opus the first head)."""
+    tmp_path, base = tree
+    build(tmp_path, base)
+    calls = []
+    monkeypatch.setattr(R, "_anthropic_client", lambda: _placement_client(calls))
+    assert run(base, "place-check") == 0
+    return tmp_path, base, calls
+
+
+def _labels(out):
+    return json.loads((out / "label_heads.json").read_text())["result"]["labels"]
+
+
+def test_map_refuses_to_overwrite_checked_labels_without_force(tree, monkeypatch):
+    tmp_path, base, _ = _checked_tree(tree, monkeypatch)
+    out = tmp_path / "out"
+    assert any(v["llm"] for v in _labels(out).values())
+    before = (out / "label_heads.json").read_bytes()
+    with pytest.raises(SystemExit, match="--update"):
+        run(base, "map", "--embedder", "hash", "--cache-dir", str(tmp_path / "cache"))
+    assert (out / "label_heads.json").read_bytes() == before
+    assert run(base, "map", "--embedder", "hash", "--cache-dir", str(tmp_path / "cache"), "--force") == 0
+    assert not any(v["llm"] for v in _labels(out).values())
+
+
+def test_map_update_then_place_check_unchecked_only(tree, monkeypatch, capsys):
+    tmp_path, base, calls = _checked_tree(tree, monkeypatch)
+    out = tmp_path / "out"
+    inst = tmp_path / "data" / "traits" / "instructions"
+    q = tmp_path / "data" / "seed_queue.json"
+    before = _labels(out)
+    assert before["cautious"]["llm"] and before["loving"]["llm"] and before["willing"]["llm"]
+    # the corpus changes: a description edited, a rename (new stem, old file gone), a queue status
+    d = json.loads((inst / "loving.json").read_text())
+    (inst / "loving.json").write_text(json.dumps({**d, "description": "This means adoring people and saying so."}))
+    d = json.loads((inst / "determined.json").read_text())
+    (inst / "resolute.json").write_text(json.dumps({**d, "positive_label": "resolute",
+                                                    "renamed_from": {"stem": "determined", "date": "2026-10-08"}}))
+    (inst / "determined.json").unlink()
+    qd = json.loads(q.read_text())
+    qd["entries"][0]["status"] = "ready"
+    q.write_text(json.dumps(qd))
+    cache = ["--embedder", "hash", "--cache-dir", str(tmp_path / "cache")]
+    snap = snapshot(tmp_path)
+    capsys.readouterr()
+    assert run(base, "--dry-run", "map", "--update", *cache) == 0
+    txt = capsys.readouterr().out
+    assert snapshot(tmp_path) == snap
+    assert "dropped 1" in txt and "added 1" in txt and "changed text 1" in txt and "DRY-RUN" in txt
+    n_usage = json.loads((out / "mapping_usage.json").read_text())["n_calls"]
+    assert run(base, "map", "--update", *cache) == 0
+    after = _labels(out)
+    assert "determined" not in after and "resolute" in after and "previous_placement" not in after["resolute"]
+    assert after["loving"]["llm"] is None and after["loving"]["previous_placement"]["llm"] == before["loving"]["llm"]
+    for k in ("cautious", "willing", "hateful"):                       # untouched placements and check records
+        assert {f: after[k][f] for f in ("primary", "secondary", "route", "llm")} == \
+            {f: before[k][f] for f in ("primary", "secondary", "route", "llm")}
+        assert after[k]["placed_text_sha256"]
+    assert after["willing"]["status"] == "ready"
+    env = json.loads((out / "label_heads.json").read_text())
+    upd = env["result"]["map_updates"]
+    assert len(upd) == 1 and upd[0]["dropped"] == {"determined": before["determined"]["primary"]}
+    assert upd[0]["added"] == ["resolute"] and upd[0]["changed"] == {"loving": "hash"}       # map records the hash
+    pc = env["result"]["placement_check"]                              # totals recounted, no run added
+    assert pc["n_checked"] == sum(1 for v in after.values() if v["llm"]) == sum(1 for v in before.values() if v["llm"]) - 1
+    assert len(pc["runs"]) == 1
+    assert json.loads((out / "mapping_usage.json").read_text())["n_calls"] > n_usage
+    # a second update finds nothing to do (the hash is recorded now)
+    capsys.readouterr()
+    assert run(base, "map", "--update", *cache) == 0
+    assert "re-placing 0 labels" in capsys.readouterr().out
+    assert _labels(out) == after
+    # the check takes only the labels without a check record whose route is not agree
+    todo = sorted(k for k, v in after.items() if v["llm"] is None and v["route"] != "agree")
+    n0 = sum(len(c.calls) for c in calls)
+    assert run(base, "place-check", "--unchecked-only", "--resume") == 0
+    sent = [json.loads(__import__("assistant_axis.tests.fake_anthropic", fromlist=["user_text"]).user_text(kw))
+            ["trait"]["label"] for c in calls for kw in c.calls][n0:]
+    assert sorted(set(sent)) == todo
+    final = _labels(out)
+    for k in set(after) - set(todo):
+        assert final[k] == after[k]
+    meta = json.loads((out / "label_heads.json").read_text())["result"]["placement_check"]
+    assert len(meta["runs"]) == 2 and meta["n_checked"] == sum(1 for v in final.values() if v["llm"])
+    assert sum(meta["outcomes"].values()) == meta["n_checked"]

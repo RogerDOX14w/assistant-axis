@@ -19,6 +19,16 @@ Plan § 5 (``roget_map.py``) as revised on 2026-10-08: no LLM adjudication.
   (``rule``), else the semantic top head when its cosine reaches :data:`SEM_FLOOR`
   (``semantic``), else a dispositional exact or derived adjective hit (``lexical``), else
   nothing (``none``).
+* **Update** (:func:`plan_update`, :func:`update_label_heads`; 2026-10-08, after chunk 5): when the corpus
+  or the queue changes, only the labels that need it are placed again.  Dropped: keys that are no longer
+  a label (no trait file, no queue trait entry: a rename leaves its old stem behind).  Added: labels with
+  no entry.  Changed: labels whose text (:func:`label_text`) differs from the text they were placed
+  from, compared by the hash each entry records (``placed_text_sha256``) or, for an entry written before
+  the hash was kept, by the embedding cache (a miss means the text changed) confirmed by recomputing the
+  semantic top five from the cached vector (a hit whose cosines differ came from elsewhere).  Every other
+  entry keeps its placement and its ``llm`` record; its record fields (label, source, status, partner)
+  are refreshed and its text hash recorded.  A replaced entry keeps its old placement, ``llm`` record
+  included, under ``previous_placement``.  An old stem is never remapped onto a renamed one.
 """
 from __future__ import annotations
 
@@ -328,17 +338,185 @@ def map_labels(records: Sequence[LabelRecord], index: RogetIndex, *, lex=None, e
 
 # --------------------------------------------------------------------------- persistence and reports
 
+#: The record fields of an entry (from the corpus file or the queue entry), refreshed by an update.
+RECORD_FIELDS = ("label", "source", "status", "partner_stem", "partner_has_file")
+#: An entry's keys in the order written; unknown keys follow.
+ENTRY_KEYS = (*RECORD_FIELDS, "placed_text_sha256", "primary", "secondary", "route", "confidence", "lexical",
+              "semantic", "llm", "previous_placement")
+
+
+def record_fields(r: LabelRecord) -> dict:
+    return {"label": r.label, "source": r.source, "status": r.status, "partner_stem": r.partner_stem,
+            "partner_has_file": r.partner_has_file}
+
+
+def placed_text_sha256(r: LabelRecord) -> str:
+    """SHA-256 of the text the label is placed from (:func:`label_text`)."""
+    from assistant_axis.gapgen.embed import text_sha256
+    return text_sha256(label_text(r))
+
+
+def ordered_entry(e: Mapping) -> dict:
+    return {**{k: e[k] for k in ENTRY_KEYS if k in e}, **{k: v for k, v in e.items() if k not in ENTRY_KEYS}}
+
+
 def label_heads_payload(records: Sequence[LabelRecord], assignments: Mapping[str, Assignment]) -> dict:
     out = {}
     for r in records:
         a = assignments.get(r.stem)
         if a is None:
             continue
-        out[r.stem] = {"label": r.label, "source": r.source, "status": r.status, "partner_stem": r.partner_stem,
-                       "partner_has_file": r.partner_has_file, "primary": a.primary, "secondary": list(a.secondary),
-                       "route": a.route, "confidence": a.confidence, "lexical": a.lexical, "semantic": a.semantic,
-                       "llm": a.llm}
+        out[r.stem] = {**record_fields(r), "placed_text_sha256": placed_text_sha256(r), "primary": a.primary,
+                       "secondary": list(a.secondary), "route": a.route, "confidence": a.confidence,
+                       "lexical": a.lexical, "semantic": a.semantic, "llm": a.llm}
     return out
+
+
+# --------------------------------------------------------------------------- update
+
+#: Tolerance on a recorded cosine (rounded to four places) when an unhashed entry is confirmed from the cache.
+SIM_TOL = 2e-4
+
+
+@dataclass
+class UpdatePlan:
+    """What :func:`update_label_heads` will do (the module docstring's "Update")."""
+    dropped: list                                       # keys with no record: no trait file, no queue trait entry
+    added: list                                         # records with no entry
+    changed: dict                                       # stem -> how the change was found
+    unchanged: dict                                     # stem -> how the text was confirmed
+    metadata: list = field(default_factory=list)        # entries whose record fields differ from the record's
+
+    @property
+    def selected(self) -> list[str]:
+        """The labels to place again: added and changed."""
+        return sorted(set(self.added) | set(self.changed))
+
+    def summary(self, label_heads: Mapping[str, Mapping]) -> dict:
+        from collections import Counter
+        sel = set(self.selected)
+        return {"dropped": {s: (label_heads.get(s) or {}).get("primary") for s in self.dropped},
+                "added": list(self.added), "changed": dict(sorted(self.changed.items())),
+                "n_replaced": len(sel), "n_unchanged": len(self.unchanged),
+                "unchanged_by": dict(sorted(Counter(self.unchanged.values()).items())),
+                "metadata_refreshed": [s for s in self.metadata if s not in sel]}
+
+
+def head_matrix(index: RogetIndex, head_ids: Sequence[str], *, embedder, cache=None, usage=None) -> np.ndarray:
+    """The head profiles' unit vectors in ``head_ids`` order (as :func:`semantic_route` builds them)."""
+    from assistant_axis.gapgen.embed import embed_texts
+    return embed_texts(embedder, [head_profile(index.heads[h]) for h in head_ids], cache=cache, usage=usage)
+
+
+def plan_update(label_heads: Mapping[str, Mapping], records: Sequence[LabelRecord], *, cache=None, embedder=None,
+                head_ids: Optional[Sequence[str]] = None, head_vecs: Optional[np.ndarray] = None,
+                top: int = 5, tol: float = SIM_TOL) -> UpdatePlan:
+    """Compare the entries with the current records.  A kept label's text is compared by its recorded hash
+    (``hash``); without one, through the embedding cache: a miss is a change (``cache_miss``); a hit is
+    confirmed by recomputing the semantic top ``top`` from the cached vector against ``head_vecs`` (rows
+    in ``head_ids`` order) and the recorded heads and cosines (``cache_and_semantic``; a difference is a
+    change, ``semantic_differs``); with no ``head_vecs`` a hit counts as unchanged (``cache_hit``).  With
+    neither a hash nor a cache the label is placed again (``unknown``).  No call is made."""
+    from assistant_axis.gapgen.embed import normalize_rows
+    by = {r.stem: r for r in records}
+    common = sorted(set(by) & set(label_heads))
+    changed: dict[str, str] = {}
+    unchanged: dict[str, str] = {}
+    to_confirm: list[tuple[str, np.ndarray]] = []
+    for s in common:
+        e, r = label_heads[s], by[s]
+        old = e.get("placed_text_sha256")
+        if old:
+            (unchanged if old == placed_text_sha256(r) else changed)[s] = "hash"
+            continue
+        if cache is None or embedder is None:
+            changed[s] = "unknown"
+            continue
+        v = cache.get(embedder.tag, label_text(r))
+        if v is None:
+            changed[s] = "cache_miss"
+        elif head_vecs is None:
+            unchanged[s] = "cache_hit"
+        else:
+            to_confirm.append((s, v))
+    if to_confirm:
+        hids = list(head_ids or [])
+        if len(hids) != len(head_vecs):
+            raise ValueError("head_ids must name the rows of head_vecs")
+        S = normalize_rows(np.stack([v for _, v in to_confirm])) @ np.asarray(head_vecs).T
+        for k, (s, _) in enumerate(to_confirm):
+            order = np.argsort(-S[k], kind="stable")[:top]
+            now = [(hids[j], round(float(S[k, j]), 4)) for j in order]
+            rec = [(x["head_id"], float(x["sim"])) for x in (label_heads[s].get("semantic") or [])[:top]]
+            same = len(now) == len(rec) and all(a == c and abs(b - d) <= tol for (a, b), (c, d) in zip(now, rec))
+            if same:
+                unchanged[s] = "cache_and_semantic"
+            else:
+                changed[s] = "semantic_differs"
+    metadata = [s for s in common if record_fields(by[s]) != {k: label_heads[s].get(k) for k in RECORD_FIELDS}]
+    return UpdatePlan(dropped=sorted(set(label_heads) - set(by)), added=sorted(set(by) - set(label_heads)),
+                      changed=changed, unchanged=unchanged, metadata=metadata)
+
+
+def previous_placement(entry: Mapping, *, at: str, found_by: Optional[str]) -> dict:
+    """The replaced entry's placement, its ``llm`` record and its own ``previous_placement`` included."""
+    keep = ("label", "source", "status", "placed_text_sha256", "primary", "secondary", "route", "confidence", "llm")
+    out = {k: entry.get(k) for k in keep}
+    out.update({"replaced_at": at, "why": "text_changed", "found_by": found_by})
+    if entry.get("previous_placement") is not None:
+        out["previous_placement"] = entry["previous_placement"]
+    return out
+
+
+def update_label_heads(label_heads: Mapping[str, Mapping], records: Sequence[LabelRecord], index: RogetIndex,
+                       plan: UpdatePlan, *, now: str, lex=None, embedder=None, cache=None, usage=None,
+                       dispositional: Collection[str] = (), head_ids: Optional[Sequence[str]] = None,
+                       sem_floor: float = SEM_FLOOR) -> tuple[dict[str, dict], dict]:
+    """``(new label_heads, summary)``: the plan's selected labels placed again by both routes (``llm``
+    None, the old placement under ``previous_placement``), its dropped keys gone, every other entry kept
+    with its record fields refreshed and its text hash recorded.  Entries follow the records' order, as
+    :func:`label_heads_payload` writes them."""
+    sel = set(plan.selected)
+    sel_recs = [r for r in records if r.stem in sel]
+    fresh = label_heads_payload(sel_recs, map_labels(sel_recs, index, lex=lex, embedder=embedder, cache=cache,
+                                                     usage=usage, dispositional=dispositional, head_ids=head_ids,
+                                                     sem_floor=sem_floor)) if sel_recs else {}
+    out: dict[str, dict] = {}
+    for r in records:
+        if r.stem in sel:
+            e = dict(fresh[r.stem])
+            if r.stem in label_heads:
+                e["previous_placement"] = previous_placement(label_heads[r.stem], at=now,
+                                                             found_by=plan.changed.get(r.stem))
+            out[r.stem] = ordered_entry(e)
+        elif r.stem in label_heads:
+            out[r.stem] = ordered_entry({**label_heads[r.stem], **record_fields(r),
+                                         "placed_text_sha256": placed_text_sha256(r)})
+    summary = plan.summary(label_heads)
+    summary["routes_replaced"] = route_counts({s: out[s] for s in plan.selected})
+    return out, summary
+
+
+def rewrite_label_heads(path: Path, labels: Mapping[str, Mapping], *, extra_inputs: Sequence = (),
+                        updates: Optional[Mapping] = None) -> Path:
+    """Rewrite ``label_heads.json`` with ``labels``, keeping its payload's other keys (``updates`` set or
+    replace some) and its recorded inputs, those of ``extra_inputs`` replacing any with the same ``dep_key``."""
+    from assistant_axis.plot_metadata import json_metadata
+    from assistant_axis.provenance import InputSpec, inputs_to_jsonable
+
+    from .parse import dumps_one_per_line
+    path = Path(path)
+    env = json.loads(path.read_text(encoding="utf-8"))
+    payload = {k: v for k, v in env.get("result", env).items() if k != "labels"}
+    payload.update(updates or {})
+    payload["labels"] = dict(labels)
+    old = list((env.get("_provenance") or {}).get("inputs") or [])
+    new = inputs_to_jsonable([i for i in extra_inputs if isinstance(i, InputSpec)])
+    keys = {i["dep_key"] for i in new}
+    inputs = [i for i in old if i.get("dep_key") not in keys] + new
+    out = json_metadata(payload, inputs=inputs, title="Roget coordinates of the corpus labels (workstream 2)")
+    atomic_write_text(dumps_one_per_line(out, "labels"), path)
+    return path
 
 
 def save_label_heads(records: Sequence[LabelRecord], assignments: Mapping[str, Assignment], path: Path, *,

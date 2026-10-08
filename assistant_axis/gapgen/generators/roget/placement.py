@@ -7,7 +7,9 @@ a head look covered, so the harvest never takes its words and the gap is hidden,
 Several semantic-only placements match on spelling (``confabulatory`` on Confutation, ``maximizing`` on
 Maxim, ``burned_out`` on Waste).
 
-* **Which labels**: every label whose route was not ``agree`` (its ``llm.previous_route`` once checked).
+* **Which labels**: every label whose route was not ``agree`` (its ``llm.previous_route`` once checked);
+  with ``unchecked_only``, only those that carry no check record yet (after ``map --update``, the labels it
+  placed again: 2026-10-08, chunk 5).
 * **Payload** (:func:`render_user`, one label per call): the label (its ``positive_label`` or queue label)
   and its description (the corpus file's, or the queue entry's description or draft), and its candidate
   heads (:func:`candidate_heads`: the semantic top five, then the lexical hits, deduplicated, at most
@@ -62,9 +64,11 @@ RESPONSES_NAME = "placement_responses.jsonl"
 USAGE_NAME = "placement_usage.json"
 #: Estimate, measured on a 30-label sample on 2026-10-08 (44 calls): about 2.7 characters of prompt per
 #: input token (1,132 input tokens a call), and output, thinking included, about 139 tokens a call on
-#: Sonnet 5.5 and 178 on Opus 5.5 (the first guesses, 400 and 700, were about three times too high).
+#: Sonnet 5.5 and 178 on Opus 5.5 (the first guesses, 400 and 700, were about three times too high).  The
+#: full run (903 calls) measured 2.71 characters a token, 143 output tokens a call on Sonnet and 212 on
+#: Opus, so Opus's figure was raised to 215.
 CHARS_PER_TOKEN = 2.7
-OUT_TOKENS = {"sonnet": 150, "opus": 190}
+OUT_TOKENS = {"sonnet": 150, "opus": 215}
 SEED = "roget_placement"
 
 
@@ -149,16 +153,24 @@ def previous(entry: Mapping) -> tuple[Optional[str], str, list]:
     return entry.get("primary"), entry.get("route"), list(entry.get("secondary") or [])
 
 
+def is_checked(entry: Mapping) -> bool:
+    return (entry.get("llm") or {}).get("check") == RUBRIC_NAME
+
+
 def select_items(label_heads: Mapping[str, Mapping], records: Sequence, index: RogetIndex, *,
-                 stems: Optional[Sequence[str]] = None) -> tuple[list[PlacementItem], dict]:
-    """The labels to check (route before the check not ``agree``), with their descriptions from
-    ``records`` (``mapping.LabelRecord``); ``(items, counts of the labels left out and why)``."""
+                 stems: Optional[Sequence[str]] = None, unchecked_only: bool = False) -> tuple[list[PlacementItem], dict]:
+    """The labels to check (route before the check not ``agree``; with ``unchecked_only`` only those with
+    no check record), with their descriptions from ``records`` (``mapping.LabelRecord``); ``(items, counts
+    of the labels left out and why)``."""
     by = {r.stem: r for r in records}
-    items, skipped = [], {"agree": 0, "no_record": [], "no_candidates": []}
+    items, skipped = [], {"agree": 0, "checked": 0, "no_record": [], "no_candidates": []}
     for stem in sorted(label_heads):
         if stems is not None and stem not in stems:
             continue
         v = label_heads[stem]
+        if unchecked_only and is_checked(v):
+            skipped["checked"] += 1
+            continue
         cur, route, _ = previous(v)
         if route == "agree":
             skipped["agree"] += 1
@@ -301,13 +313,17 @@ def estimate(items: Sequence[PlacementItem], index: RogetIndex, system: str, mod
 
 # --------------------------------------------------------------------------- resume
 
-def reusable_answers(records: Sequence[Mapping], *, stage: str, model: str, prompt_sha: str) -> dict:
+def reusable_answers(records: Sequence[Mapping], *, stage: str, model: str, prompt_sha: str,
+                     users: Optional[Mapping[str, str]] = None) -> dict:
     """Parsed answers in a responses log made with the same stage, model and rubric text (the last per
-    label wins): ``{stem: answer}``."""
+    label wins): ``{stem: answer}``.  With ``users`` (stem -> the user turn as it would be sent now) only
+    answers to a byte-identical user turn are reused: a label whose description or candidate heads
+    changed is asked again (2026-10-08, the chunk-5 update)."""
     out = {}
     for r in records:
         if r.get("stage") == stage and r.get("model") == model and r.get("prompt_sha256") == prompt_sha \
-                and r.get("answer") is not None:
+                and r.get("answer") is not None \
+                and (users is None or (r["stem"] in users and r.get("user") == users[r["stem"]])):
             out[r["stem"]] = {**r["answer"], "model": model, "attempts": r.get("attempt", 1)}
     return out
 
@@ -383,25 +399,32 @@ def apply_results(label_heads: Mapping[str, Mapping], items: Sequence[PlacementI
     return out, dict(counts)
 
 
+def cumulative_meta(previous_meta: Optional[Mapping], run: Optional[Mapping], labels: Mapping[str, Mapping]) -> dict:
+    """The ``placement_check`` block after a run: totals over the labels that carry a check record now
+    (``n_checked``, ``outcomes``, ``n_referee``) and every run's own block under ``runs`` (a block written
+    before runs were kept, 2026-10-08, is taken as the first run).  No summed cost: the first check's sample
+    run left no block, so ``placement_usage.json`` is the cost record.  With ``run`` None the
+    totals are only recounted (``map --update`` moves the re-placed labels' records away)."""
+    from collections import Counter
+    if previous_meta is None:
+        runs = []
+    elif "runs" in previous_meta:
+        runs = list(previous_meta["runs"])
+    else:
+        runs = [dict(previous_meta)]
+    if run is not None:
+        runs.append(dict(run))
+    last = runs[-1] if runs else {}
+    checked = [v["llm"] for v in labels.values() if is_checked(v)]
+    return {"rubric": last.get("rubric"), "models": last.get("models"), "n_checked": len(checked),
+            "outcomes": dict(sorted(Counter(l.get("outcome") for l in checked).items())),
+            "n_referee": sum(1 for l in checked if l.get("opus") is not None), "runs": runs}
+
+
 def save_label_heads_checked(path: Path, label_heads: Mapping[str, Mapping], *, extra_inputs: Sequence = (),
                              meta: Optional[dict] = None) -> Path:
     """Rewrite ``label_heads.json`` with the checked labels, keeping its payload's other keys and its
     recorded inputs (the map run's), adding ``extra_inputs`` and ``placement_check`` (``meta``)."""
-    from assistant_axis.atomic_io import atomic_write_text
-    from assistant_axis.plot_metadata import json_metadata
-    from assistant_axis.provenance import InputSpec, inputs_to_jsonable
-
-    from .parse import dumps_one_per_line
-    path = Path(path)
-    env = json.loads(path.read_text(encoding="utf-8"))
-    payload = {k: v for k, v in env.get("result", env).items() if k != "labels"}
-    if meta is not None:
-        payload["placement_check"] = meta
-    payload["labels"] = dict(label_heads)
-    old = list((env.get("_provenance") or {}).get("inputs") or [])
-    new = inputs_to_jsonable([i for i in extra_inputs if isinstance(i, InputSpec)])
-    keys = {i["dep_key"] for i in new}
-    inputs = [i for i in old if i.get("dep_key") not in keys] + new
-    out = json_metadata(payload, inputs=inputs, title="Roget coordinates of the corpus labels (workstream 2)")
-    atomic_write_text(dumps_one_per_line(out, "labels"), path)
-    return path
+    from .mapping import rewrite_label_heads
+    return rewrite_label_heads(path, label_heads, extra_inputs=extra_inputs,
+                               updates={"placement_check": meta} if meta is not None else None)

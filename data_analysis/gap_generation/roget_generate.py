@@ -7,7 +7,9 @@ sibling stream (``reports/trait_gap_generation/coding_plan_02_roget_wordnet.md``
     uv run python data_analysis/gap_generation/roget_generate.py parse [--allow-checksum-mismatch] [--fixture IDS]
     uv run python data_analysis/gap_generation/roget_generate.py pair [--sweep] [--position]
     uv run python data_analysis/gap_generation/roget_generate.py map [--embedder openai|hash] [--budget-usd 0.25]
+        [--update | --force]
     uv run python data_analysis/gap_generation/roget_generate.py place-check [--budget-usd 5] [--resume] [--render STEMS]
+        [--unchecked-only]
     uv run python data_analysis/gap_generation/roget_generate.py head-scope [--budget-usd 1] [--render IDS] [--force]
     uv run python data_analysis/gap_generation/roget_generate.py coverage [--head-scope F | --no-head-scope]
     uv run python data_analysis/gap_generation/roget_generate.py harvest --run-id R [--every-nth K --offset J]
@@ -27,14 +29,26 @@ Every command takes ``--dry-run`` (prints what it would do; writes nothing, call
   cumulative ``mapping_usage.json``.  The semantic route embeds head profiles and label texts with
   OpenAI ``text-embedding-3-large`` (direct key from ``.env``), cached under
   ``data/candidates/cache/embeddings/``: about 1,950 short texts, about $0.02 on a cold cache.
-  ``--budget-usd`` is the hard cap (default $0.25).
+  ``--budget-usd`` is the hard cap (default $0.25).  A full map refuses to overwrite a
+  ``label_heads.json`` that holds placement-check records (``--force`` rebuilds anyway).
+  ``--update`` (2026-10-08, after chunk 5) places again only the labels that need it
+  (``mapping.plan_update``): keys with no trait file and no queue trait entry are dropped (a rename leaves
+  its old stem behind; an old key is never remapped onto the new stem), labels with no entry are added,
+  and labels whose text changed are placed again, found by the hash each entry records
+  (``placed_text_sha256``) or, for an entry written before that, by the embedding cache confirmed by the
+  recorded cosines.  The rest keep their placement and ``llm`` record (record fields refreshed, text
+  hash added); a replaced entry keeps the old placement under ``previous_placement``.  The update is
+  appended to the payload's ``map_updates``.  Then run ``place-check --unchecked-only --resume``.
 * ``place-check``: the label placement check (QUESTIONS 39): every label in ``label_heads.json`` whose
   route was not ``agree`` goes to Sonnet 5.5 with its description and candidate heads (one label a
   call; rubric ``reports/trait_gap_generation/rubrics/roget_placement.md``, refused unless pinned); where
   Sonnet's head differs from the current primary, Opus 5.5 referees on the same prompt.  The answers go
   into each label's ``llm`` field, and ``primary`` / ``route`` change where the final answer does.
   Every call is appended to ``placement_responses.jsonl`` as it completes; ``--resume`` reuses the
-  answers made there with the same rubric text and model.  Usage: ``placement_usage.json``
+  answers made there with the same rubric text, model and user turn (byte-identical).
+  ``--unchecked-only`` checks only the labels with no check record yet (after ``map --update``, the
+  re-placed ones) and leaves every other check record as it is.  The payload's ``placement_check`` holds
+  the totals over the labels and every run's own record under ``runs``.  Usage: ``placement_usage.json``
   (cumulative); ``--budget-usd`` is the hard cap (default $5).  ``--render STEMS`` prints those labels'
   calls as sent and stops.
 * ``head-scope``: one Haiku 5.5 rating per head of the coverage map's scope, 20 heads a call, of whether
@@ -241,11 +255,114 @@ def cmd_pair(args) -> int:
 
 # --------------------------------------------------------------------------- map
 
+def _map_inputs(args, heads_path: Path) -> list:
+    from assistant_axis.provenance import current_files_input
+    inst = sorted((Path(args.data_dir) / "traits" / "instructions").glob("*.json"))
+    return [_input("roget_heads", heads_path), _input("seed_queue", Path(args.queue)),
+            current_files_input("trait_files", inst)]
+
+
+def _merge_usage(usage, usage_path: Path) -> None:
+    from assistant_axis.judge_pricing import MultiModelUsage
+    total = MultiModelUsage.load_or_create(usage_path) if usage_path.exists() else MultiModelUsage()
+    total.merge_from(usage.plain())
+    usage_path.parent.mkdir(parents=True, exist_ok=True)
+    total.write_json(usage_path)
+    print(usage.log_line("[usage this run]"), file=sys.stderr)
+    print(total.log_line("[usage cumulative]"), file=sys.stderr)
+
+
+def cmd_map_update(args) -> int:
+    """``map --update``: place again only the labels that need it (``mapping.plan_update``)."""
+    import numpy as np
+
+    from assistant_axis.gapgen.cost import GuardedUsage
+    from assistant_axis.gapgen.embed import EmbeddingCache, make_embedder, normalize_rows
+    from assistant_axis.gapgen.registry import utc_now
+    from assistant_axis.judge_pricing import cost_for_usage
+
+    if args.limit:
+        raise SystemExit("--limit does not combine with --update")
+    idx, heads_path = _load_index(args)
+    out_dir = Path(args.out)
+    lh_path = out_dir / "label_heads.json"
+    if not lh_path.exists():
+        raise SystemExit(f"{lh_path} not found: run `roget_generate.py map` first")
+    lh = M.load_label_heads(lh_path)
+    records = M.load_labels(Path(args.data_dir), Path(args.queue))
+    head_ids = [h for h in idx.order if idx.heads[h].pos.get("Adj") or idx.heads[h].pos.get("N")]
+    embedder = make_embedder(args.embedder)
+    cache = EmbeddingCache(Path(args.cache_dir)) if args.cache_dir else EmbeddingCache()
+    hp_texts = [P.head_profile(idx.heads[h]) for h in head_ids]
+    hp_found, hp_miss = cache.lookup(embedder.tag, hp_texts)
+    # the plan reads only the cache; the head matrix is read from it when every profile is there
+    head_vecs = (normalize_rows(np.stack([hp_found[i] for i in range(len(hp_texts))]))
+                 if not hp_miss else None)
+    plan = M.plan_update(lh, records, cache=cache, embedder=embedder, head_ids=head_ids, head_vecs=head_vecs)
+    by = {r.stem: r for r in records}
+    sel_texts = list(dict.fromkeys(M.label_text(by[s]) for s in plan.selected))
+    _, sel_miss = cache.lookup(embedder.tag, sel_texts)
+    n_embed = len(hp_miss) + len(sel_miss)
+    est = cost_for_usage(embedder.usage_model, n_embed * EMBED_TOKENS_PER_TEXT, 0)
+    from collections import Counter
+    print(f"labels {len(records)} ({sum(r.source == 'existing' for r in records)} existing, "
+          f"{sum(r.source == 'queued' for r in records)} queued); entries in {lh_path.name}: {len(lh)}")
+    print(f"dropped {len(plan.dropped)} (no trait file, no queue trait entry): "
+          + (", ".join(f"{s} (was on {lh[s].get('primary') or 'no head'})" for s in plan.dropped) or "-"))
+    print(f"added {len(plan.added)}: {', '.join(plan.added) or '-'}")
+    print(f"changed text {len(plan.changed)} (found by {dict(Counter(plan.changed.values()))}); unchanged "
+          f"{len(plan.unchanged)} (confirmed by {dict(Counter(plan.unchanged.values()))})")
+    print(f"record fields to refresh on kept entries: {sum(1 for s in plan.metadata if s not in set(plan.selected))}")
+    print(f"re-placing {len(plan.selected)} labels; estimate: {n_embed} texts not cached x ~{EMBED_TOKENS_PER_TEXT} "
+          f"tokens at {embedder.usage_model} rates = ${est:.4f} (cap --budget-usd ${args.budget_usd:.2f})")
+    if hp_miss:
+        print(f"note: {len(hp_miss)} head profiles not cached; cache hits counted unchanged without the cosine check")
+    if est > args.budget_usd:
+        raise SystemExit(f"REFUSED: estimate ${est:.4f} is over --budget-usd ${args.budget_usd:.2f}")
+    if args.dry_run:
+        print("DRY-RUN: no embedding call; would rewrite label_heads.json and add to mapping_usage.json")
+        return 0
+    lex = _lexicon(args)
+    usage = GuardedUsage(budget_usd=args.budget_usd)
+    try:
+        if head_vecs is None:   # embed the missing profiles, then confirm the cache hits as planned
+            head_vecs = M.head_matrix(idx, head_ids, embedder=embedder, cache=cache, usage=usage)
+            plan = M.plan_update(lh, records, cache=cache, embedder=embedder, head_ids=head_ids, head_vecs=head_vecs)
+        new_lh, summary = M.update_label_heads(lh, records, idx, plan, now=utc_now(), lex=lex, embedder=embedder,
+                                               cache=cache, usage=usage, head_ids=head_ids)
+    finally:
+        _merge_usage(usage, out_dir / "mapping_usage.json")
+    from assistant_axis.gapgen.generators.roget import placement as PL
+    env = json.loads(lh_path.read_text(encoding="utf-8"))
+    payload = env.get("result", env)
+    summary = {"at": utc_now(), "embedder": embedder.model_id, "cost_usd": round(usage.total_cost_usd, 6),
+               **summary}
+    updates = {"map_updates": list(payload.get("map_updates") or []) + [summary]}
+    if payload.get("placement_check"):      # the re-placed labels' check records moved: recount the totals
+        updates["placement_check"] = PL.cumulative_meta(payload["placement_check"], None, new_lh)
+    M.rewrite_label_heads(lh_path, new_lh, extra_inputs=_map_inputs(args, heads_path), updates=updates)
+    n_check = sum(1 for s in plan.selected if new_lh[s]["route"] != "agree")
+    print("routes of the re-placed labels:", json.dumps(summary["routes_replaced"]))
+    print("routes now:", json.dumps(M.route_counts(new_lh)))
+    print(f"wrote {lh_path}; {n_check} re-placed labels are not `agree`: next, "
+          f"`roget_generate.py place-check --unchecked-only --resume --budget-usd <cap>`")
+    return 0
+
+
 def cmd_map(args) -> int:
     from assistant_axis.gapgen.cost import GuardedUsage
     from assistant_axis.gapgen.embed import EmbeddingCache, make_embedder
-    from assistant_axis.judge_pricing import MultiModelUsage, cost_for_usage
+    from assistant_axis.judge_pricing import cost_for_usage
 
+    if args.update:
+        return cmd_map_update(args)
+    lh_path = Path(args.out) / "label_heads.json"
+    if lh_path.exists() and not args.force and not args.dry_run:
+        checked = sum(1 for v in M.load_label_heads(lh_path).values() if v.get("llm"))
+        if checked:
+            raise SystemExit(f"REFUSED: {lh_path} holds {checked} placement-check records, which a full map "
+                             f"would discard: use `map --update` (places again only new and changed labels), "
+                             f"or --force to rebuild from scratch")
     idx, heads_path = _load_index(args)
     lex = _lexicon(args)
     records = M.load_labels(Path(args.data_dir), Path(args.queue))
@@ -273,16 +390,8 @@ def cmd_map(args) -> int:
         assignments = M.map_labels(records, idx, lex=lex, embedder=embedder, cache=cache, usage=usage,
                                    head_ids=head_ids)
     finally:
-        total = MultiModelUsage.load_or_create(usage_path) if usage_path.exists() else MultiModelUsage()
-        total.merge_from(usage.plain())
-        out_dir.mkdir(parents=True, exist_ok=True)
-        total.write_json(usage_path)
-        print(usage.log_line("[usage this run]"), file=sys.stderr)
-        print(total.log_line("[usage cumulative]"), file=sys.stderr)
-    inputs = [_input("roget_heads", heads_path), _input("seed_queue", Path(args.queue))]
-    from assistant_axis.provenance import current_files_input
-    inst = sorted((Path(args.data_dir) / "traits" / "instructions").glob("*.json"))
-    inputs.append(current_files_input("trait_files", inst))
+        _merge_usage(usage, usage_path)
+    inputs = _map_inputs(args, heads_path)
     M.save_label_heads(records, assignments, out_dir / "label_heads.json", inputs=inputs,
                        meta={"embedder": embedder.model_id, "n_heads_embedded": len(head_ids)})
     lh = M.load_label_heads(out_dir / "label_heads.json")
@@ -431,7 +540,7 @@ def cmd_place_check(args) -> int:
     lh = M.load_label_heads(lh_path)
     records = M.load_labels(Path(args.data_dir), Path(args.queue))
     want = [x.strip() for x in args.render.split(",")] if args.render else None
-    items, skipped = PL.select_items(lh, records, idx, stems=want)
+    items, skipped = PL.select_items(lh, records, idx, stems=want, unchecked_only=args.unchecked_only)
     if args.sample:
         import random
         items = sorted(random.Random(args.seed).sample(items, min(args.sample, len(items))), key=lambda it: it.stem)
@@ -455,8 +564,10 @@ def cmd_place_check(args) -> int:
     sha = sr.sha256(system)
     resp_path = out / PL.RESPONSES_NAME
     prev = PL.read_responses(resp_path) if args.resume else []
-    s_done = PL.reusable_answers(prev, stage="sonnet", model=args.sonnet_model, prompt_sha=sha)
-    o_done = PL.reusable_answers(prev, stage="opus", model=args.opus_model, prompt_sha=sha)
+    # reuse only an answer to the same rubric text and the same user turn, byte for byte
+    users = {it.stem: PL.render_user(it, idx) for it in items}
+    s_done = PL.reusable_answers(prev, stage="sonnet", model=args.sonnet_model, prompt_sha=sha, users=users)
+    o_done = PL.reusable_answers(prev, stage="opus", model=args.opus_model, prompt_sha=sha, users=users)
     by = {it.stem: it for it in items}
     todo_s = [it for it in items if it.stem not in s_done]
     est_s = PL.estimate(todo_s, idx, system, args.sonnet_model, "sonnet")
@@ -464,7 +575,8 @@ def cmd_place_check(args) -> int:
     n_ref_guess = int(round(len(items) * args.referee_share))
     est_o = PL.estimate(items, idx, system, args.opus_model, "opus", n_calls=n_ref_guess)
     print(f"labels to check {len(items)} (route not agree; {skipped['agree']} agree left as they are; "
-          f"{len(skipped['no_record'])} with no corpus file or queue entry, {len(skipped['no_candidates'])} with no "
+          + (f"{skipped['checked']} already checked left as they are (--unchecked-only); " if args.unchecked_only else "")
+          + f"{len(skipped['no_record'])} with no corpus file or queue entry, {len(skipped['no_candidates'])} with no "
           f"candidate head, skipped); by source {dict(__import__('collections').Counter(it.source for it in items))}")
     if args.resume:
         print(f"resume: {len(s_done)} Sonnet and {len(o_done)} Opus answers reused from {resp_path}")
@@ -530,17 +642,23 @@ def cmd_place_check(args) -> int:
                                             for r in s_res.log + o_res.log),
              "cache_creation_input_tokens": sum((r.get("usage_raw") or {}).get("cache_creation_input_tokens", 0)
                                                 for r in s_res.log + o_res.log)}
-    meta = {"rubric": {k: rubric[k] for k in ("name", "version", "sha256", "file")}, "models":
-            {"sonnet": args.sonnet_model, "opus": args.opus_model}, "checked_at": utc_now(),
-            "n_checked": len(items), "outcomes": counts, "n_referee": sum(1 for it in items
-                                                                          if PL.needs_referee(it, sonnet.get(it.stem))),
-            "cost_usd_this_run": round(usage.total_cost_usd, 4), "cache": cache, "stopped_by_budget": stopped}
+    run_meta = {"rubric": {k: rubric[k] for k in ("name", "version", "sha256", "file")}, "models":
+                {"sonnet": args.sonnet_model, "opus": args.opus_model}, "checked_at": utc_now(),
+                "selection": "unchecked_only" if args.unchecked_only else "route_not_agree",
+                "n_checked": len(items), "outcomes": counts,
+                "n_referee": sum(1 for it in items if PL.needs_referee(it, sonnet.get(it.stem))),
+                "n_reused": {"sonnet": len(s_done), "opus": len(o_done)},
+                "cost_usd_this_run": round(usage.total_cost_usd, 4), "budget_usd": args.budget_usd, "cache": cache,
+                "stopped_by_budget": stopped}
+    prev_env = json.loads(lh_path.read_text(encoding="utf-8"))
+    meta = PL.cumulative_meta(prev_env.get("result", prev_env).get("placement_check"), run_meta, new_lh)
     inst = sorted((Path(args.data_dir) / "traits" / "instructions").glob("*.json"))
     extra = [_input("placement_rubric", sr_path(rubric), version=rubric["version"], sha256=rubric["sha256"]),
              _input("placement_responses", resp_path), _input("placement_seed_queue", Path(args.queue)),
              current_files_input("placement_trait_files", inst)]
     PL.save_label_heads_checked(lh_path, new_lh, extra_inputs=extra, meta=meta)
-    print(json.dumps(meta | {"routes_now": M.route_counts(new_lh)}, indent=1))
+    print(json.dumps({"this_run": run_meta, "totals": {k: v for k, v in meta.items() if k != "runs"},
+                      "routes_now": M.route_counts(new_lh)}, indent=1))
     print(f"wrote {lh_path}, {usage_path}, {resp_path}")
     if stopped:
         print(f"STOPPED at --budget-usd ${args.budget_usd:.2f}: rerun with --resume to finish", file=sys.stderr)
@@ -747,6 +865,10 @@ def build_parser() -> argparse.ArgumentParser:
     sp.add_argument("--budget-usd", type=float, default=0.25)
     sp.add_argument("--cache-dir", type=Path, default=None)
     sp.add_argument("--limit", type=int, default=None)
+    sp.add_argument("--update", action="store_true",
+                    help="place again only new labels and labels whose text changed; drop stale keys; keep the rest")
+    sp.add_argument("--force", action="store_true",
+                    help="rebuild label_heads.json from scratch although it holds placement-check records")
 
     sp = sub.add_parser("place-check")
     sp.add_argument("--sonnet-model", default="claude-sonnet-5-5")
@@ -759,7 +881,10 @@ def build_parser() -> argparse.ArgumentParser:
     sp.add_argument("--sample", type=int, default=None, metavar="N",
                     help="check a random sample of N labels (seeded by --seed), e.g. to measure tokens first")
     sp.add_argument("--seed", type=int, default=0)
-    sp.add_argument("--resume", action="store_true", help="reuse the answers in placement_responses.jsonl")
+    sp.add_argument("--resume", action="store_true",
+                    help="reuse the answers in placement_responses.jsonl to a byte-identical prompt")
+    sp.add_argument("--unchecked-only", action="store_true",
+                    help="check only the labels with no check record yet (after `map --update`: the re-placed ones)")
     sp.add_argument("--render", default=None, metavar="STEMS",
                     help="print these labels' calls, as sent, and stop (no call, no write)")
     sp.add_argument("--rubrics-dir", type=Path, default=None, help=argparse.SUPPRESS)

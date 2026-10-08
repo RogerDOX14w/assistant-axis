@@ -206,3 +206,120 @@ def test_save_load_and_spotcheck(fx, tmp_path):
     assert len(rows) == 2
     assert "](../../traits/instructions/" in md or "](../../seed_queue.json) (queued)" in md
     assert M.route_counts(lh)
+
+
+# --------------------------------------------------------------------------- update (2026-10-08, after chunk 5)
+
+def test_payload_records_the_placed_text_hash(fx, tmp_path):
+    from assistant_axis.gapgen.embed import text_sha256
+    recs = [rec("cautious", "This means being wary."), rec("bare", None, source="queued", status="candidate")]
+    lh = M.label_heads_payload(recs, M.map_labels(recs, fx, embedder=HashEmbedder(), cache=EmbeddingCache(tmp_path)))
+    assert lh["cautious"]["placed_text_sha256"] == text_sha256("cautious: This means being wary.")
+    assert lh["bare"]["placed_text_sha256"] == text_sha256("bare")                 # no description: the label
+    assert list(lh["cautious"])[:6] == list(M.ENTRY_KEYS)[:6]
+
+
+def _world(tmp_path, fx, recs):
+    """A placed world: label_heads from the hash embedder, the cache and the head matrix."""
+    cache = EmbeddingCache(tmp_path / "cache")
+    emb = HashEmbedder()
+    head_ids = [h for h in fx.order if fx.heads[h].pos.get("Adj") or fx.heads[h].pos.get("N")]
+    lh = M.label_heads_payload(recs, M.map_labels(recs, fx, embedder=emb, cache=cache, head_ids=head_ids))
+    H = M.head_matrix(fx, head_ids, embedder=emb, cache=cache)
+    return lh, cache, emb, head_ids, H
+
+
+def test_plan_update_by_hash(fx, tmp_path):
+    recs = [rec("cautious", "This means being wary."), rec("obstinate", "This means being stubborn."),
+            rec("old name", "This means something.")]
+    lh, *_ = _world(tmp_path, fx, recs)
+    now = [rec("cautious", "This means looking before one leaps."),          # description edited
+           rec("obstinate", "This means being stubborn.", status="x"),       # metadata only
+           rec("new name", "This means something.")]                          # a rename: new stem, old one gone
+    plan = M.plan_update(lh, now)
+    assert plan.dropped == ["old_name"] and plan.added == ["new_name"]
+    assert plan.changed == {"cautious": "hash"} and plan.unchanged == {"obstinate": "hash"}
+    assert plan.metadata == ["obstinate"] and plan.selected == ["cautious", "new_name"]
+    s = plan.summary(lh)
+    assert s["dropped"] == {"old_name": lh["old_name"]["primary"]} and s["changed"] == {"cautious": "hash"}
+
+
+def test_plan_update_without_a_hash_uses_the_cache_and_the_recorded_cosines(fx, tmp_path):
+    from assistant_axis.gapgen.embed import embed_texts
+    recs = [rec("cautious", "This means being wary, prudent and careful."),
+            rec("obstinate", "This means being stubborn, headstrong and inflexible."),
+            rec("resolute", "This means holding to a decision once made.")]
+    lh, cache, emb, head_ids, H = _world(tmp_path, fx, recs)
+    for v in lh.values():                                   # a file written before the hash was recorded
+        v.pop("placed_text_sha256")
+    now = [recs[0],
+           rec("obstinate", "This means refusing every argument, mule-headed and contrary."),   # not in the cache
+           rec("resolute", "This means hating every change of plan, rigid and unbending.")]      # cached elsewhere
+    embed_texts(emb, [M.label_text(now[2])], cache=cache)
+    plan = M.plan_update(lh, now, cache=cache, embedder=emb, head_ids=head_ids, head_vecs=H)
+    assert plan.unchanged == {"cautious": "cache_and_semantic"}
+    assert plan.changed == {"obstinate": "cache_miss", "resolute": "semantic_differs"}
+    # without the head matrix a cache hit cannot be confirmed: counted unchanged, marked so
+    plan = M.plan_update(lh, now, cache=cache, embedder=emb)
+    assert plan.unchanged == {"cautious": "cache_hit", "resolute": "cache_hit"}
+    # neither a hash nor a cache: everything is re-placed
+    assert M.plan_update(lh, now).changed == {"cautious": "unknown", "obstinate": "unknown", "resolute": "unknown"}
+
+
+def test_update_label_heads_replaces_only_the_selected(fx, tmp_path):
+    from assistant_axis.gapgen.embed import text_sha256
+    recs = [rec("cautious", "This means being wary, prudent and careful."),
+            rec("obstinate", "This means being stubborn, headstrong and inflexible."),
+            rec("old name", "This means something else.", source="queued", status="candidate")]
+    lh, cache, emb, head_ids, H = _world(tmp_path, fx, recs)
+    check = {"check": "roget_placement", "final": "606", "outcome": "unchanged", "previous_primary": "606"}
+    lh["cautious"]["llm"] = dict(check, final="864", previous_primary="864")
+    lh["obstinate"]["llm"] = dict(check)
+    now = [rec("cautious", "This means being wary, prudent and careful.", source="existing"),
+           rec("obstinate", "This means refusing every argument, mule-headed and contrary."),
+           rec("new name", "This means something else.", source="queued", status="ready")]
+    now[0].partner_stem, now[0].partner_has_file = "rash", True               # metadata only
+    plan = M.plan_update(lh, now)
+    new, summary = M.update_label_heads(lh, now, fx, plan, embedder=emb, cache=cache, head_ids=head_ids, now="T")
+    assert list(new) == ["cautious", "obstinate", "new_name"]                 # the records' order; old_name dropped
+    c = new["cautious"]                                                       # kept: placement and llm untouched
+    assert {k: c[k] for k in ("primary", "secondary", "route", "lexical", "semantic", "llm")} == \
+        {k: lh["cautious"][k] for k in ("primary", "secondary", "route", "lexical", "semantic", "llm")}
+    assert (c["partner_stem"], c["partner_has_file"]) == ("rash", True)       # metadata refreshed
+    assert c["placed_text_sha256"] == text_sha256(M.label_text(now[0])) and "previous_placement" not in c
+    o = new["obstinate"]                                                      # re-placed
+    fresh = M.label_heads_payload([now[1]], M.map_labels([now[1]], fx, embedder=emb, cache=cache, head_ids=head_ids))
+    assert {k: v for k, v in o.items() if k != "previous_placement"} == fresh["obstinate"]
+    assert o["llm"] is None and o["placed_text_sha256"] == text_sha256(M.label_text(now[1]))
+    pp = o["previous_placement"]
+    assert (pp["primary"], pp["route"], pp["llm"]) == (lh["obstinate"]["primary"], lh["obstinate"]["route"], check)
+    assert (pp["replaced_at"], pp["why"], pp["found_by"]) == ("T", "text_changed", "hash")
+    assert pp["placed_text_sha256"] == lh["obstinate"]["placed_text_sha256"]
+    assert "previous_placement" not in new["new_name"]                        # a new stem: nothing remapped
+    assert summary["dropped"] == {"old_name": lh["old_name"]["primary"]} and summary["added"] == ["new_name"]
+    assert summary["n_replaced"] == 2 and summary["metadata_refreshed"] == ["cautious"]
+    # a second replacement keeps the first one's record inside the new one
+    again = [now[0], rec("obstinate", "This means a third text, unlike the others."), now[2]]
+    new2, _ = M.update_label_heads(new, again, fx, M.plan_update(new, again), embedder=emb, cache=cache,
+                                   head_ids=head_ids, now="T2")
+    assert new2["obstinate"]["previous_placement"]["previous_placement"] == pp
+    assert new2["cautious"] == new["cautious"]
+
+
+def test_rewrite_keeps_the_payload_and_replaces_inputs_by_key(tmp_path):
+    from assistant_axis.plot_metadata import json_metadata
+    from assistant_axis.provenance import current_file_input
+    a, b = tmp_path / "a.txt", tmp_path / "b.txt"
+    a.write_text("a")
+    b.write_text("b")
+    p = tmp_path / "label_heads.json"
+    p.write_text(json.dumps(json_metadata({"rules_version": 1, "placement_check": {"n_checked": 2}, "labels": {"x": {}}},
+                                          inputs=[current_file_input("seed_queue", a),
+                                                  current_file_input("roget_heads", a)])))
+    M.rewrite_label_heads(p, {"y": {"primary": None}}, extra_inputs=[current_file_input("seed_queue", b)],
+                          updates={"map_updates": [{"at": "T"}]})
+    d = json.loads(p.read_text())
+    assert d["result"]["placement_check"] == {"n_checked": 2} and d["result"]["map_updates"] == [{"at": "T"}]
+    assert M.load_label_heads(p) == {"y": {"primary": None}}
+    ins = {i["dep_key"]: i for i in d["_provenance"]["inputs"]}
+    assert set(ins) == {"seed_queue", "roget_heads"} and ins["seed_queue"]["path"].endswith("b.txt")

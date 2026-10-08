@@ -218,6 +218,47 @@ def test_reusable_answers_need_the_same_stage_model_and_text():
     assert PL.reusable_answers(recs, stage="opus", model=PL.OPUS, prompt_sha="a")["x"]["head"] is None
 
 
+def test_reusable_answers_with_users_need_the_same_user_turn():
+    recs = [{"stage": "sonnet", "model": PL.SONNET, "prompt_sha256": "a", "stem": "x", "user": "U1",
+             "answer": {"head": "1", "reason": "r"}, "attempt": 1},
+            {"stage": "sonnet", "model": PL.SONNET, "prompt_sha256": "a", "stem": "y", "user": "old text",
+             "answer": {"head": "2", "reason": "r"}, "attempt": 1}]
+    got = PL.reusable_answers(recs, stage="sonnet", model=PL.SONNET, prompt_sha="a", users={"x": "U1", "y": "new text"})
+    assert set(got) == {"x"}                                   # y's description changed: asked again
+    assert set(PL.reusable_answers(recs, stage="sonnet", model=PL.SONNET, prompt_sha="a", users={})) == set()
+
+
+def test_select_items_unchecked_only():
+    idx = world()
+    lh = label_heads()
+    lh["confabulatory"]["llm"] = {"check": PL.RUBRIC_NAME, "previous_primary": "479", "previous_route": "semantic",
+                                  "previous_secondary": []}
+    items, skipped = PL.select_items(lh, records(), idx, unchecked_only=True)
+    assert [it.stem for it in items] == ["aggrieved", "stubborn"] and skipped["checked"] == 1
+    items, skipped = PL.select_items(lh, records(), idx)
+    assert [it.stem for it in items] == ["aggrieved", "confabulatory", "stubborn"] and skipped["checked"] == 0
+
+
+def test_cumulative_meta_keeps_every_run_and_counts_the_labels():
+    labels = {"a": {"llm": {"check": PL.RUBRIC_NAME, "outcome": "moved", "opus": {"head": "1"}}},
+              "b": {"llm": {"check": PL.RUBRIC_NAME, "outcome": "unchanged", "opus": None}},
+              "c": {"llm": None}}
+    first = {"rubric": {"version": 1}, "models": {"sonnet": PL.SONNET}, "n_checked": 583, "outcomes": {"moved": 93},
+             "cost_usd_this_run": 4.97}
+    run2 = {"rubric": {"version": 1}, "models": {"sonnet": PL.SONNET}, "n_checked": 2, "outcomes": {"moved": 1},
+            "cost_usd_this_run": 0.5}
+    m = PL.cumulative_meta(first, run2, labels)               # a block written before runs were kept: run 1
+    assert m["runs"] == [first, run2] and m["n_checked"] == 2 and m["outcomes"] == {"moved": 1, "unchanged": 1}
+    assert m["n_referee"] == 1 and m["rubric"] == {"version": 1} and "cost_usd" not in m
+    m3 = PL.cumulative_meta(m, run2, labels)
+    assert len(m3["runs"]) == 3 and m3["n_checked"] == 2
+    assert PL.cumulative_meta(None, run2, labels)["runs"] == [run2]
+    # no run: only the totals are recounted (map --update moved a record away)
+    m4 = PL.cumulative_meta(m3, None, {"a": labels["a"], "b": {"llm": None}})
+    assert m4["runs"] == m3["runs"] and m4["n_checked"] == 1 and m4["outcomes"] == {"moved": 1}
+    assert m4["rubric"] == {"version": 1}
+
+
 def test_save_keeps_the_payload_and_the_recorded_inputs(tmp_path):
     from assistant_axis.plot_metadata import json_metadata
     from assistant_axis.provenance import current_file_input
