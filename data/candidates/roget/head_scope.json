@@ -22,7 +22,7 @@
    "by_class": {
     "I": {
      "0": 6,
-     "1": 25,
+     "1": 26,
      "2": 8
     },
     "II": {
@@ -32,7 +32,7 @@
     },
     "III": {
      "0": 10,
-     "1": 18,
+     "1": 17,
      "2": 3
     },
     "IV": {
@@ -60,6 +60,7 @@
 {"id":"18","title":"Dissimilarity","class":"I","class_title":"Words expressing abstract relations","section":"II. Relation","n_adjectives":13,"n_shown":13,"rating":1,"reason":"Mostly describes differences between things; original and unique can occasionally describe a person's character.","model":"claude-haiku-5-5","rubric_version":2,"skipped":null,"error":null},
 {"id":"20","title":"Nonimitation","class":"I","class_title":"Words expressing abstract relations","section":"II. Relation","n_adjectives":10,"n_shown":10,"rating":1,"reason":"Mostly describes uniqueness of things, but creative, inventive and original can describe a person's abilities.","model":"claude-haiku-5-5","rubric_version":2,"skipped":null,"error":null},
 {"id":"25","title":"Quantity","class":"I","class_title":"Words expressing abstract relations","section":"III. Quantity","n_adjectives":6,"n_shown":6,"rating":0,"reason":"Quantity words (some, any, a few) describe amounts, not people.","model":"claude-haiku-5-5","rubric_version":2,"skipped":null,"error":null},
+{"id":"29","title":"Mean","class":"I","class_title":"Words expressing abstract relations","section":"III. Quantity","n_adjectives":6,"n_shown":6,"rating":1,"reason":"Its adjectives are mostly about averages and intermediate quantities; only \"mean\" can describe a person (stingy or unkind), and \"middle-class\" describes a social group a person belongs to.","model":"claude-haiku-5-5","rubric_version":2,"skipped":null,"error":null},
 {"id":"32","title":"Smallness","class":"I","class_title":"Words expressing abstract relations","section":"III. Quantity","n_adjectives":48,"n_shown":20,"rating":1,"reason":"Mostly describes size and degree; sparing could describe a frugal person.","model":"claude-haiku-5-5","rubric_version":2,"skipped":null,"error":null},
 {"id":"47","title":"Incoherence","class":"I","class_title":"Words expressing abstract relations","section":"III. Quantity","n_adjectives":13,"n_shown":13,"rating":1,"reason":"Mostly describes physical looseness or mixing; lax, relaxed and slack can describe a person's habits.","model":"claude-haiku-5-5","rubric_version":2,"skipped":null,"error":null},
 {"id":"49","title":"Decomposition","class":"I","class_title":"Words expressing abstract relations","section":"III. Quantity","n_adjectives":6,"n_shown":6,"rating":0,"reason":"Describes chemical and analytical processes, not people.","model":"claude-haiku-5-5","rubric_version":2,"skipped":null,"error":null},
@@ -133,7 +134,6 @@
 {"id":"346","title":"Island","class":"III","class_title":"Words relating to matter","section":"II. Inorganic matter","n_adjectives":2,"n_shown":2,"rating":1,"reason":"Insular can describe a narrow-minded person, but seagirt describes islands.","model":"claude-haiku-5-5","rubric_version":2,"skipped":null,"error":null},
 {"id":"357","title":"Organization","class":"III","class_title":"Words relating to matter","section":"III. Organic matter","n_adjectives":3,"n_shown":3,"rating":1,"reason":"Organized can describe a person's orderly habits, but organic and vacuolar describe matter and cells.","model":"claude-haiku-5-5","rubric_version":2,"skipped":null,"error":null},
 {"id":"359","title":"Life","class":"III","class_title":"Words relating to matter","section":"III. Organic matter","n_adjectives":17,"n_shown":17,"rating":1,"reason":"Animated, vital, full of life and quick can describe a lively temperament, but most entries describe simply being alive.","model":"claude-haiku-5-5","rubric_version":2,"skipped":null,"error":null},
-{"id":"361","title":"Killing","class":"III","class_title":"Words relating to matter","section":"III. Organic matter","n_adjectives":21,"n_shown":20,"rating":1,"reason":"Murderous, blood thirsty, homicidal, bloody minded and thuggish describe people, but fatal, lethal, deadly and internecine describe events and things.","model":"claude-haiku-5-5","rubric_version":2,"skipped":null,"error":null},
 {"id":"371","title":"Agriculture","class":"III","class_title":"Words relating to matter","section":"III. Organic matter","n_adjectives":7,"n_shown":7,"rating":1,"reason":"Rustic, rural and country can describe a person's background or manner, but agricultural, arable and horticultural describe land and produce.","model":"claude-haiku-5-5","rubric_version":2,"skipped":null,"error":null},
 {"id":"372","title":"Mankind","class":"III","class_title":"Words relating to matter","section":"III. Organic matter","n_adjectives":10,"n_shown":10,"rating":1,"reason":"Cosmopolitan, social, personal and human can describe a person, while national, civic and public mostly describe institutions.","model":"claude-haiku-5-5","rubric_version":2,"skipped":null,"error":null},
 {"id":"373","title":"Man","class":"III","class_title":"Words relating to matter","section":"III. Organic matter","n_adjectives":11,"n_shown":11,"rating":1,"reason":"Manly, virile and masculine describe a person's qualities, but male and he-/his are sex markers or pronouns.","model":"claude-haiku-5-5","rubric_version":2,"skipped":null,"error":null},
@@ -730,21 +730,21 @@
 {"id":"1000","title":"Temple","class":"VI","class_title":"Words relating to the sentient and moral powers","section":"V. Religious affections","n_adjectives":5,"n_shown":5,"rating":1,"reason":"'Monastic' and 'cloistered' can describe a person's way of life, while the rest describe buildings or institutions.","model":"claude-haiku-5-5","rubric_version":2,"skipped":null,"error":null}
  ],
   "last_run": {
-   "at": "2026-10-08T20:12:50+00:00",
-   "n_calls": 30,
+   "at": "2026-10-08T21:25:12+00:00",
+   "n_calls": 1,
    "n_retries": 0,
-   "cost_usd": 0.055799,
+   "cost_usd": 0.000111,
    "estimate": {
-    "n_calls": 30,
-    "in_tok": 76009,
-    "out_tok": 53020,
-    "usd": 0.0341
+    "n_calls": 1,
+    "in_tok": 764,
+    "out_tok": 255,
+    "usd": 0.0002
    },
    "cache_system": false,
    "concurrency": 4,
    "parse_rate": [
-    586,
-    586
+    1,
+    1
    ],
    "stopped_by_budget": false
   }
@@ -752,12 +752,12 @@
  "_provenance": {
   "schema_version": "1.0",
   "produced_by": {
-   "cmd": "uv run python data_analysis/gap_generation/roget_generate.py head-scope --budget-usd 1",
-   "git_sha": "f434f44+dirty",
+   "cmd": "uv run python data_analysis/gap_generation/roget_generate.py head-scope --budget-usd 0.05",
+   "git_sha": "2da36ac+dirty",
    "author": "Roger Dearnaley",
    "title": "Roget head scope (workstream 2)"
   },
-  "produced_at": "2026-10-08T20:12:50+00:00",
+  "produced_at": "2026-10-08T21:25:12+00:00",
   "inputs": [
    {
     "dep_key": "roget_heads",
@@ -780,25 +780,25 @@
    {
     "dep_key": "label_heads",
     "path": "data/candidates/roget/label_heads.json",
-    "fingerprint": "v1:2026-10-08T03:48:54+00:00@787703",
+    "fingerprint": "v1:2026-10-08T21:23:07+00:00@1423972",
     "kind": "file",
     "dataset_id": null,
-    "last_modified_at": "2026-10-08T03:48:54+00:00",
+    "last_modified_at": "2026-10-08T21:23:07+00:00",
     "extras": {}
    },
    {
     "dep_key": "head_scope_rubric",
     "path": "reports/trait_gap_generation/rubrics/roget_head_scope.md",
-    "fingerprint": "v1:2026-10-08T20:10:42+00:00@26185",
+    "fingerprint": "v1:2026-10-08T20:16:20+00:00@27433",
     "kind": "file",
     "dataset_id": null,
-    "last_modified_at": "2026-10-08T20:10:42+00:00",
+    "last_modified_at": "2026-10-08T20:16:20+00:00",
     "extras": {
      "version": "2",
      "sha256": "09a1fc1dcd4af844b8e98de5be909d693a806ff201e24c9019b826c769049116"
     }
    }
   ],
-  "inputs_sha256": "03d4bb9553233b42417d0e17d15c2763be5771b33a9a1069e048f73f1c4d91fa"
+  "inputs_sha256": "f781a69f81ac0d511ede62ac300b21e9420eefb6e4b01aca5033827179bbb6dc"
  }
 }
