@@ -354,7 +354,11 @@ class TestEstimates:
         by1 = {x.label: x for x in e1.lines}
         assert by3["sense (3 readings)"].n_calls == 3 * by1["sense"].n_calls == 30
         assert (by3["sense (3 readings)"].in_tok, by3["sense (3 readings)"].out_tok) == SR.HAIKU55_TOKENS["sense"]
-        assert by3["kind (3 readings)"].n_calls == 3 * by1["kind"].n_calls
+        # each reading counts the step again; the count is rounded up once (changed 2026-10-08 with Haiku 5.5's
+        # measured 0.96 primary readings a word: "== 3 * by1" held only while the share was 1.3 and 1.3 x 10 whole)
+        import math
+        share = split_cli.shares_for(H55)["readings_per_word"]
+        assert by3["kind (3 readings)"].n_calls == math.ceil(3 * share * 10) and by1["kind"].n_calls == math.ceil(share * 10)
         assert by3["gloss"].n_calls == by1["gloss"].n_calls and by3["alignment"].n_calls == by1["alignment"].n_calls
         assert p3["readings"] == 3 and "measured" in p3["token_figures"][H55]
         assert set(p3["token_figures"]) == {H55, SONNET55}

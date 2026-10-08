@@ -178,6 +178,53 @@ def default_readings(model: str) -> int:
     return next((n for frag, n in READINGS_BY_MODEL if frag in m), 1)
 
 
+def cache_stats(records: Sequence[Mapping]) -> dict:
+    """Per ``step:model`` over the answered calls of ``records``: calls, calls that wrote or read the prompt
+    cache, the tokens written and read, and the hit rate (the share of calls that read it)."""
+    out: dict[str, dict] = {}
+    for r in records:
+        u = r.get("usage_raw") or {}
+        if not u or r.get("text") is None:
+            continue
+        d = out.setdefault(f"{r.get('step')}:{r.get('model')}", {"calls": 0, "calls_writing": 0, "calls_reading": 0,
+                                                                 "cache_write_tokens": 0, "cache_read_tokens": 0})
+        cw, cr = int(u.get("cache_creation_input_tokens") or 0), int(u.get("cache_read_input_tokens") or 0)
+        d["calls"] += 1
+        d["calls_writing"] += int(cw > 0)
+        d["calls_reading"] += int(cr > 0)
+        d["cache_write_tokens"] += cw
+        d["cache_read_tokens"] += cr
+    for d in out.values():
+        d["hit_rate"] = round(d["calls_reading"] / d["calls"], 4) if d["calls"] else None
+    return dict(sorted(out.items()))
+
+
+#: Prompt caching's minimum cached prefix by model fragment (coding_plan_haiku55.md, "The facts": Haiku 5.5
+#: caches from 512 tokens, Haiku 4.5 from 4,096, which no split prompt reaches).  A model not listed is sent
+#: uncached, as every split call was before 2026-10-08.
+CACHE_MIN_TOKENS: dict[str, int] = {"haiku-5-5": 512, "haiku-4-5": 4096}
+#: The system prompt's tokens are estimated as characters / 4 x the tokenizer factor; on Haiku 5.5 that came
+#: within 3% of the measured counts (the platform close-out, 2026-10-08, from the h55_* runs' usage: sense 835
+#: estimated / 810 measured, kind 1,026 / 994, alignment 734 / 720, gloss 648 / 643, established 609 / 598;
+#: vague 430, descriptors 382, probe 388 and same-sense 361 stay under).  A prompt is marked for caching when
+#: its estimate clears the minimum by this margin; a mark under the minimum would be harmless (no cache write).
+CACHE_MARGIN = 1.10
+_CACHE_DECISIONS: dict[tuple[str, str], bool] = {}
+
+
+def caches_system(system: str, model: str) -> bool:
+    """Whether a call's system prompt is sent with ``cache_control`` (the platform close-out, 2026-10-08): on a
+    model of :data:`CACHE_MIN_TOKENS` whose minimum the prompt's estimated tokens clear by :data:`CACHE_MARGIN`."""
+    key = (sr.sha256(system), str(model))
+    if key not in _CACHE_DECISIONS:
+        from .overlap_test import CHARS_PER_TOKEN, tokenizer_factor
+        m = str(model).lower()
+        floor = next((n for frag, n in CACHE_MIN_TOKENS.items() if frag in m), None)
+        est = len(system) / CHARS_PER_TOKEN * tokenizer_factor(model)
+        _CACHE_DECISIONS[key] = floor is not None and est >= floor * CACHE_MARGIN
+    return _CACHE_DECISIONS[key]
+
+
 _CID_RE = re.compile(r"[^A-Za-z0-9_-]")
 
 
@@ -196,6 +243,7 @@ class Call:
     role: str = "first"           # first | second | third (an opinion's own path)
     retry: bool = False
     rep: int = 0                  # the verdict reading (0-based) of a first-model verdict call; 0 otherwise
+    cache_system: bool = False    # the system prompt sent with cache_control (:func:`caches_system`)
 
     @property
     def stage(self) -> str:
@@ -276,7 +324,7 @@ class LiveTransport:
                 try:
                     text = await call_anthropic_json(
                         r.client, system=c.system, user=c.user, model=c.model, max_tokens=c.max_tokens,
-                        temperature=c.temperature, usage=r.usage, limiter=r.limiter, cache_system=False,
+                        temperature=c.temperature, usage=r.usage, limiter=r.limiter, cache_system=c.cache_system,
                         meta=meta, **r.retry_kw)
                 except BudgetExceededError as exc:
                     text = meta.get("text")
@@ -358,9 +406,23 @@ class SplitRunner(FilterRunner):
 
     def _make(self, step: str, key: str, *, model: str, user: str, index: Optional[int] = None,
               role: str = "first", rep: int = 0) -> Call:
-        return Call(step=step, key=key, label=self.state[key]["label"], model=model, system=self._system(step),
+        system = self._system(step)
+        return Call(step=step, key=key, label=self.state[key]["label"], model=model, system=system,
                     user=user, max_tokens=self._max_tokens(step, model), temperature=TEMPERATURE, index=index,
-                    role=role, rep=rep)
+                    role=role, rep=rep, cache_system=caches_system(system, model))
+
+    def cached_steps(self) -> dict[str, list[str]]:
+        """``{model: [steps]}``: of the steps each of this run's models sends, those whose system prompt goes
+        cached (recorded in ``run.json`` and the summary)."""
+        runs: dict[str, list[str]] = {}
+        for model, steps in ((self.model, (*sr.NAMES, "probe")),
+                             (self.second_model if self.second_opinion else None, (*split.SECOND_OPINION_STEPS, "gloss")),
+                             (getattr(self, "third_model", None), split.SECOND_OPINION_STEPS),
+                             (self.compare_model if self.plain_reading else None, ("comparison",))):
+            if model:
+                runs.setdefault(model, [])
+                runs[model] += [s for s in steps if s not in runs[model]]
+        return {m: [s for s in steps if caches_system(self._system(s), m)] for m, steps in runs.items()}
 
     def _verdict_reading(self, c: Call) -> Optional[int]:
         """The ``verdict_reading`` (1 to N) a record of a run with several readings carries: the reading

@@ -6,7 +6,7 @@
 | **What the model is shown** | A label and its gloss. |
 | **What it returns** | 0, 1, 2 or 3, with a reason. |
 | **What it is tuned on** | The wording was settled over three runs on all 659 corpus traits and on the 69 glosses of the live pilot.  The drafts, their results and the reasons for each change are in [alignment_graded_draft.md](../alignment_graded_draft.md) and [sense_call_probe.md](../sense_call_probe.md). |
-| **Model** | Haiku 4.5, temperature 0, one item per call |
+| **Model** | Haiku 5.5 from 2026-10-08 (no temperature: it refuses one; Haiku 4.5 at temperature 0 before), once per word, on the winning reading's gloss.  One item per call.  The prompt is sent cached on Haiku 5.5 (about 720 tokens, over its 512-token minimum; from 2026-10-08). |
 
 Part of the split Roger proposed on 2026-09-29: small calls, each with its own rubric, tuned one at a
 time.  The index is [README.md](./README.md).

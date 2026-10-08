@@ -1482,11 +1482,12 @@ def run_relation_only(args, argv) -> int:
                 f"({'output measured, thinking included' if measured else 'thinking not in the figure'})",
                 relation_model + suffix, n, int(round(sum(t[0] for t in toks) / n)), int(round(sum(t[1] for t in toks) / n)))
         sf = OT.tokenizer_factor(NR.UNSURE_MODEL)
-        n_uns = int(round(NR.UNSURE_SHARE * n))
-        est.add(f"unsure re-ask ({NR.UNSURE_SHARE:.0%} of candidates, {NR.UNSURE_TRAITS} traits)", NR.UNSURE_MODEL + suffix,
-                n_uns, int(round((len(rubrics["relation"]["text"]) + _cand_chars(cands) + NR.UNSURE_TRAITS * _mean_chars(index))
+        u_share, u_traits = NR.unsure_for(relation_model)
+        n_uns = int(round(u_share * n))
+        est.add(f"unsure re-ask ({u_share:.0%} of candidates, {u_traits:g} traits)", NR.UNSURE_MODEL + suffix,
+                n_uns, int(round((len(rubrics["relation"]["text"]) + _cand_chars(cands) + u_traits * _mean_chars(index))
                                  / NR.CHARS_PER_TOKEN * sf)),
-                int(round((NR.RELATION_OUT_BASE + NR.RELATION_OUT_PER_TRAIT * NR.UNSURE_TRAITS) * sf)))
+                int(round((NR.RELATION_OUT_BASE + NR.RELATION_OUT_PER_TRAIT * u_traits) * sf)))
     plan = {"mode": "relation_only", "from_batch": source["batch_id"], "n_candidates": len(cands),
             "n_to_relation": len(first_calls), "not_reached": not_reached, "skipped": skipped, "transport": transport,
             "relation_model": relation_model, "rules": rules.as_dict(), "corpus_files": corpus_info,

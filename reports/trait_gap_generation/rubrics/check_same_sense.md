@@ -6,7 +6,7 @@
 | **What the model is shown** | A label and two of its primary readings, both of which the kind call took for a trait or a membership. |
 | **What it returns** | Whether the two readings are the same way of being, two shades of one, or two different ones. |
 | **What it is tuned on** | Not tuned.  Run on the 30 test words that have two such readings; results in [sense_call_probe.md](../sense_call_probe.md). |
-| **Model** | Haiku 4.5, temperature 0, one item per call |
+| **Model** | Haiku 5.5 from 2026-10-08 (no temperature: it refuses one; Haiku 4.5 at temperature 0 before), in each of the verdict's three readings by default (`--readings`); Sonnet 5.5 for a word chosen for a second opinion.  One item per call.  Sent uncached (about 390 tokens, under Haiku 5.5's 512-token minimum). |
 
 Part of the split Roger proposed on 2026-09-29: small calls, each with its own rubric, tuned one at a
 time.  The index is [README.md](./README.md).

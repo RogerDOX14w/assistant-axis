@@ -6,7 +6,7 @@
 | **What the model is shown** | A label and the reading that was accepted, from the earlier steps. |
 | **What it returns** | One sentence describing the persona. |
 | **What it is tuned on** | Not tuned beyond the form.  Both runs, with every gloss side by side, are in [sense_call_probe.md](../sense_call_probe.md). |
-| **Model** | Haiku 5.5 from 2026-10-08 (no temperature: it refuses one; Haiku 4.5 at temperature 0 before); Sonnet 5.5 for a word chosen for a second opinion (Roger, 2026-09-29).  One item per call |
+| **Model** | Haiku 5.5 from 2026-10-08 (no temperature: it refuses one; Haiku 4.5 at temperature 0 before); Sonnet 5.5 for a word chosen for a second opinion (Roger, 2026-09-29).  One item per call.  The prompt is sent cached on Haiku 5.5 (about 640 tokens, over its 512-token minimum; from 2026-10-08). |
 
 Part of the split Roger proposed on 2026-09-29: small calls, each with its own rubric, tuned one at a
 time.  The index is [README.md](./README.md).

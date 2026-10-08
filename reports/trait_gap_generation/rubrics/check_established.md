@@ -6,7 +6,7 @@
 | **What the model is shown** | A label, its first thought, and one reading, all from step 1. |
 | **What it returns** | Whether the reading is well known, known, plain from the word's parts, or stretched; and whether the first thought gets in the way. |
 | **What it is tuned on** | Not yet tuned. |
-| **Model** | Haiku 4.5, temperature 0, one item per call |
+| **Model** | Haiku 5.5 from 2026-10-08 (no temperature: it refuses one; Haiku 4.5 at temperature 0 before), once for each primary reading of each of the verdict's three readings by default (`--readings`); Sonnet 5.5 for a word chosen for a second opinion.  One item per call.  The prompt is sent cached on Haiku 5.5 (about 600 tokens, over its 512-token minimum; from 2026-10-08). |
 
 Part of the split Roger proposed on 2026-09-29: small calls, each with its own rubric, tuned one at a
 time.  The index is [README.md](./README.md).

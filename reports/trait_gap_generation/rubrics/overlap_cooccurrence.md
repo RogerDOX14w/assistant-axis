@@ -6,7 +6,7 @@
 | **What it is for** | The comparison arm for step 5 of the M3 design ([coding_plan_platform.md](../coding_plan_platform.md), last section): how often would a persona with the candidate trait also show each existing trait the relation call judged *similar*?  Roger, 2026-10-02: "we can, of course, try both, and find out which works better"; the primary is [overlap_concept.md](./overlap_concept.md).  Asymmetric: the candidate is always the target. |
 | **What the model is shown** | One JSON object as the user turn: the target's label and description, and a numbered list of other traits (`id` 1 to n) with theirs, labels in display form, in random order, with no embedding scores, ranks or arrangement marks. |
 | **What it returns** | For each listed trait, a reason, then a co-occurrence of 0 to 4, or "unsure". |
-| **Model** | Under test: Haiku 4.5, Sonnet 5.5 and Opus 5.5, temperature 0 where the model accepts it, one target per call.  The M3 design expects Sonnet, with *unsure* passed to Opus. |
+| **Model** | Not used by the pipeline (rubric A, [overlap_concept.md](./overlap_concept.md), was chosen for the M3 overlap call: Sonnet 5.5 first, Opus 5.5 second).  Tested in the pre-pilot test of 2026-10-03 on Haiku 4.5, Sonnet 5.5 and Opus 5.5, temperature 0 where the model accepts it, one target per call. |
 
 The index of this directory is [README.md](./README.md).
 

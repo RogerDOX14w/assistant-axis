@@ -501,6 +501,18 @@ reproduced (`--batch-size` applies to it only and is refused with split).
   ties and the outcome patterns.  The second opinion and the tripwire compare
   the combined outcome.  `--resume` refuses a batch whose earlier session ran
   on another `--model` or `--readings`.
+- **Prompt caching and the estimate (2026-10-08, the platform close-out).**  On
+  Haiku 5.5 (caching from 512 tokens) the prompts that pass the minimum go
+  cached: sense, kind, established, gloss and alignment (about 600 to 1,000
+  tokens each; vague, same sense, descriptors and the probe stay under it);
+  `split_runner.caches_system`, recorded in `run.json` `cached_steps`, with the
+  hit rate per step in `summary.json` `split.cache`.  Haiku 4.5 (4,096) and the
+  Sonnet 5.5 opinions stay uncached.  The estimate's shares (primary readings a
+  word, same-sense checks, words going on as traits, second opinions) are the
+  first model's, measured on the recorded runs (`split_cli.SHARES_BY_MODEL`:
+  Haiku 5.5 0.96 / 0.04 / 0.65 / 0.12, Haiku 4.5 1.41 / 0.37 / 0.70 / 0.13);
+  the M3 relation call's unsure re-ask likewise
+  (`novelty_runner.UNSURE_BY_MODEL`: 14% of calls on Haiku 5.5, 2.4% on 4.5).
 - **Alignment is a score.**  Since alignment.md draft 3 (2026-09-30) the
   alignment call answers 0 to 3, recorded in the filter block as
   `alignment`.  `alignment_relevant` is kept for its existing readers (corpus

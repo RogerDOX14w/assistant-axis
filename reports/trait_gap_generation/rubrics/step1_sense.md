@@ -6,7 +6,7 @@
 | **What the model is shown** | The label, and nothing else. |
 | **What it returns** | The first thought; what the first thought is said of; the readings of the instruction, ranked, each marked primary or secondary; whether any reading is usable. |
 | **What it is tuned on** | The 50 words Roger marked in [random_traits_for_marks.md](../random_traits_for_marks.md), and 49 others: words for things, plain traits, the six September rejects, figurative words, corpus labels.  Results so far: [sense_call_probe.md](../sense_call_probe.md). |
-| **Model** | Haiku 4.5, temperature 0, one item per call |
+| **Model** | Haiku 5.5 from 2026-10-08 (no temperature: it refuses one; Haiku 4.5 at temperature 0 before), three independent readings per word by default (`--readings`; the verdict vote of M3 decision 17); Sonnet 5.5 for a word chosen for a second opinion.  One item per call.  The prompt is sent cached on Haiku 5.5 (about 810 tokens, over its 512-token minimum; from 2026-10-08). |
 
 Part of the split Roger proposed on 2026-09-29: small calls, each with its own rubric, tuned one at a
 time.  The index is [README.md](./README.md).

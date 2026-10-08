@@ -96,6 +96,45 @@ def relation_out_tokens(model: str, n_listed: float) -> int:
 SHORTLIST_PAIRS, EARLY_EXIT_SAVING = 3, 0.18
 OPUS_SHARE_SHORTLIST, OPUS_SHARE_FULL_SCAN = 0.62, 0.40
 UNSURE_SHARE, UNSURE_TRAITS = 0.05, 2
+#: The unsure re-ask by relation-model fragment, measured (the platform close-out, 2026-10-08;
+#: :func:`measured_unsure` over :data:`UNSURE_SOURCE_RUNS`, first attempts): ``(share of relation calls with
+#: an unsure answer, traits re-asked per such call)``.  Haiku 5.5 answers "unsure" far more often than Haiku
+#: 4.5 (65 of 477 relation calls, 1.38 traits each, against 11 of 460, 1.45), so the plan's 5% under-stated
+#: it; the re-ask is a small part of the cost either way.  Any other model: the plan's :data:`UNSURE_SHARE`
+#: and :data:`UNSURE_TRAITS`.
+UNSURE_BY_MODEL: dict[str, tuple[float, float]] = {"haiku-5-5": (0.14, 1.4), "haiku-4-5": (0.024, 1.5)}
+UNSURE_SOURCE_RUNS: dict[str, tuple[str, ...]] = {
+    "haiku-5-5": ("m3_pilot_1_relation_h55", "m3_pilot_1_relation_h55_smoke"),
+    "haiku-4-5": ("m3_pilot_1", "m3_pilot_1_r2")}
+
+
+def unsure_for(model: str) -> tuple[float, float]:
+    """``(share, traits per re-ask)`` of the unsure re-ask for relation calls on ``model``
+    (:data:`UNSURE_BY_MODEL`, else the plan's figures)."""
+    m = str(model).lower()
+    return next((v for frag, v in UNSURE_BY_MODEL.items() if frag in m), (UNSURE_SHARE, UNSURE_TRAITS))
+
+
+def measured_unsure(run_dirs) -> dict[str, dict]:
+    """Per relation model over the novelty runs' ``responses.jsonl`` (first attempts): relation calls, unsure
+    re-asks, their share, and the traits per re-ask."""
+    tot: dict[str, Counter] = defaultdict(Counter)
+    for d in map(Path, run_dirs):
+        recs = [json.loads(x) for x in (d / "responses.jsonl").read_text(encoding="utf-8").splitlines() if x.strip()]
+        rel_model = {r["key"]: r["model"] for r in recs if r.get("step") == "relation"}
+        for r in recs:
+            if (r.get("parse_attempt") or 1) != 1:
+                continue
+            if r.get("step") == "relation":
+                tot[r["model"]]["calls"] += 1
+            elif r.get("step") == "relation_unsure" and r.get("key") in rel_model:
+                t = tot[rel_model[r["key"]]]
+                t["unsure"] += 1
+                t["traits"] += len(r.get("stems") or [])
+    return {m: {"relation_calls": t["calls"], "unsure_reasks": t["unsure"],
+                "share": round(t["unsure"] / t["calls"], 4) if t["calls"] else None,
+                "traits_per_reask": round(t["traits"] / t["unsure"], 3) if t["unsure"] else None}
+            for m, t in sorted(tot.items())}
 
 _CID_RE = re.compile(r"[^A-Za-z0-9_-]")
 
@@ -887,10 +926,11 @@ def plan_estimate(*, n_candidates: int, n_scan: int, mean_listed: float, relatio
     out["relation"].add(f"relation call, {mean_listed:.1f} listed traits a call", relation_model + suffix,
                         n_candidates, rin, rout)
     sf = OT.tokenizer_factor(UNSURE_MODEL)
-    n_uns = int(round(UNSURE_SHARE * n_candidates))
-    out["relation"].add(f"unsure re-ask ({UNSURE_SHARE:.0%} of candidates, {UNSURE_TRAITS} traits)", UNSURE_MODEL + suffix,
-                        n_uns, int(round((relation_text_chars + cand_chars + UNSURE_TRAITS * trait_chars) / CHARS_PER_TOKEN * sf)),
-                        int(round((RELATION_OUT_BASE + RELATION_OUT_PER_TRAIT * UNSURE_TRAITS) * sf)))
+    u_share, u_traits = unsure_for(relation_model)
+    n_uns = int(round(u_share * n_candidates))
+    out["relation"].add(f"unsure re-ask ({u_share:.0%} of candidates, {u_traits:g} traits)", UNSURE_MODEL + suffix,
+                        n_uns, int(round((relation_text_chars + cand_chars + u_traits * trait_chars) / CHARS_PER_TOKEN * sf)),
+                        int(round((RELATION_OUT_BASE + RELATION_OUT_PER_TRAIT * u_traits) * sf)))
     n_pairs = int(round(n_candidates * SHORTLIST_PAIRS * (1 - EARLY_EXIT_SAVING)))
     out["overlap"].add(f"overlap, Sonnet ({SHORTLIST_PAIRS} pairs a candidate, {EARLY_EXIT_SAVING:.0%} saved by early exit)",
                        FIRST_MODEL + suffix, n_pairs, *OVERLAP_TOKENS["sonnet"])

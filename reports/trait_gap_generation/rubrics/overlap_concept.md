@@ -6,7 +6,7 @@
 | **What it is for** | Step 5 of the M3 design ([coding_plan_platform.md](../coding_plan_platform.md), last section): for a candidate trait and the existing traits the relation call judged *similar*, how similar are their concepts?  Roger's preference for the overlap call (2026-10-02: "ask about how similar the concepts are, rather than how often a persona showing one would show the other"); [overlap_cooccurrence.md](./overlap_cooccurrence.md) is the comparison arm. |
 | **What the model is shown** | Since draft 5 (one pair per call): one JSON object as the user turn, the target's label and description and one other trait's, labels in display form, no ids, no embedding scores, ranks or arrangement marks.  Drafts 1-4 sent a numbered list of other traits (the test's form); the rendered sample is below the prompt. |
 | **What it returns** | A reason, then a similarity of 0 to 4, or "opposite", or "unsure", as one JSON object. |
-| **Model** | Under test: Haiku 4.5, Sonnet 5.5 and Opus 5.5, temperature 0 where the model accepts it, one target per call.  The M3 design expects Sonnet, with *unsure* passed to Opus. |
+| **Model** | Sonnet 5.5 first, Opus 5.5 on the pairs the rule sends it (Sonnet at the cut-off or one below it, or *unsure*; M3 decisions 11 and 12), one pair per call, no temperature (both refuse one), the prompt cached (5 minutes live, 1 hour in batches).  Haiku 4.5 and Haiku 5.5 were tested on it ([m3_overlap_test_readout.md](../m3_overlap_test_readout.md), [haiku55_readout.md](../haiku55_readout.md)) and are not used for this call. |
 
 The index of this directory is [README.md](./README.md).
 
