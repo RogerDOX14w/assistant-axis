@@ -1,0 +1,653 @@
+[
+ {
+  "stem": "agreeable_big_five",
+  "label": "agreeable (Big Five)",
+  "partner": "antagonistic_big_five",
+  "pairing": "pair",
+  "arrangement_members": [
+   "open_big_five",
+   "closed_big_five",
+   "conscientious_big_five",
+   "careless_big_five",
+   "extraverted_big_five",
+   "introverted_big_five",
+   "agreeable_big_five",
+   "antagonistic_big_five",
+   "neurotic_big_five",
+   "emotionally_stable_big_five"
+  ],
+  "description_notes": "High pole of Agreeableness; the ad-hoc agreeable exists with placeholder neg disagreeable; rotated cousin of HEXACO Agreeableness. Paraphrase the NEO-PI-R domain definition (Costa and McCrae 1992; John and Srivastava 1999 has the same content); both poles in the 'This means ...' form; the description does not name the source; US spelling.",
+  "decision": "Roger 2026-09-08: definitely add the Big Five and HEXACO by name as standard-named pairs; pairing fixed by the standard, antonym check informational (the ad-hoc twin showing up is expected, not a failure).",
+  "source": "Costa & McCrae, NEO-PI-R, Agreeableness domain",
+  "tags": [
+   "standard",
+   "big_five",
+   "5-orthoplex",
+   "canonical_pole"
+  ],
+  "sub_chunk": "Big Five"
+ },
+ {
+  "stem": "agreeable_hexaco",
+  "label": "agreeable (HEXACO)",
+  "partner": "quarrelsome_hexaco",
+  "pairing": "pair",
+  "arrangement_members": [
+   "honest_humble_hexaco",
+   "sly_hexaco",
+   "emotional_hexaco",
+   "tough_hexaco",
+   "extraverted_hexaco",
+   "introverted_hexaco",
+   "agreeable_hexaco",
+   "quarrelsome_hexaco",
+   "conscientious_hexaco",
+   "careless_hexaco",
+   "open_hexaco",
+   "conventional_hexaco"
+  ],
+  "description_notes": "High pole of Agreeableness (versus Anger); rotated relative to Big Five Agreeableness: patience, forgiveness, gentleness, flexibility. Paraphrase the two-sided hexaco.org scale description (one sentence for very high scorers, one for very low); the low pole is written from the low-scorer sentence, not as a negation of the high pole; both poles in the 'This means ...' form; the description does not name the source.",
+  "decision": "Roger 2026-09-08: definitely add the Big Five and HEXACO by name as standard-named pairs; pairing fixed by the standard, antonym check informational (the ad-hoc twin showing up is expected, not a failure).",
+  "source": "Ashton & Lee, HEXACO-PI-R, Agreeableness scale",
+  "tags": [
+   "standard",
+   "hexaco",
+   "6-orthoplex",
+   "canonical_pole"
+  ],
+  "sub_chunk": "HEXACO"
+ },
+ {
+  "stem": "antagonistic_big_five",
+  "label": "antagonistic (Big Five)",
+  "partner": "agreeable_big_five",
+  "pairing": "pair",
+  "arrangement_members": [
+   "open_big_five",
+   "closed_big_five",
+   "conscientious_big_five",
+   "careless_big_five",
+   "extraverted_big_five",
+   "introverted_big_five",
+   "agreeable_big_five",
+   "antagonistic_big_five",
+   "neurotic_big_five",
+   "emotionally_stable_big_five"
+  ],
+  "description_notes": "Low pole of Agreeableness, from Costa and McCrae's 'antagonism'. Paraphrase the NEO-PI-R domain definition (Costa and McCrae 1992; John and Srivastava 1999 has the same content); both poles in the 'This means ...' form; the description does not name the source; US spelling.",
+  "decision": "Roger 2026-09-08: definitely add the Big Five and HEXACO by name as standard-named pairs; pairing fixed by the standard, antonym check informational (the ad-hoc twin showing up is expected, not a failure).",
+  "source": "Costa & McCrae, NEO-PI-R, Agreeableness domain",
+  "tags": [
+   "standard",
+   "big_five",
+   "5-orthoplex",
+   "low_pole_proposed"
+  ],
+  "sub_chunk": "Big Five"
+ },
+ {
+  "stem": "careless_big_five",
+  "label": "careless (Big Five)",
+  "partner": "conscientious_big_five",
+  "pairing": "pair",
+  "arrangement_members": [
+   "open_big_five",
+   "closed_big_five",
+   "conscientious_big_five",
+   "careless_big_five",
+   "extraverted_big_five",
+   "introverted_big_five",
+   "agreeable_big_five",
+   "antagonistic_big_five",
+   "neurotic_big_five",
+   "emotionally_stable_big_five"
+  ],
+  "description_notes": "Low pole of Conscientiousness; mirrors the ad-hoc pair (Costa and McCrae's own term is 'lack of direction'). Paraphrase the NEO-PI-R domain definition (Costa and McCrae 1992; John and Srivastava 1999 has the same content); both poles in the 'This means ...' form; the description does not name the source; US spelling.",
+  "decision": "Roger 2026-09-08: definitely add the Big Five and HEXACO by name as standard-named pairs; pairing fixed by the standard, antonym check informational (the ad-hoc twin showing up is expected, not a failure).",
+  "source": "Costa & McCrae, NEO-PI-R, Conscientiousness domain",
+  "tags": [
+   "standard",
+   "big_five",
+   "5-orthoplex",
+   "low_pole_proposed",
+   "near_duplicate"
+  ],
+  "sub_chunk": "Big Five"
+ },
+ {
+  "stem": "careless_hexaco",
+  "label": "careless (HEXACO)",
+  "partner": "conscientious_hexaco",
+  "pairing": "pair",
+  "arrangement_members": [
+   "honest_humble_hexaco",
+   "sly_hexaco",
+   "emotional_hexaco",
+   "tough_hexaco",
+   "extraverted_hexaco",
+   "introverted_hexaco",
+   "agreeable_hexaco",
+   "quarrelsome_hexaco",
+   "conscientious_hexaco",
+   "careless_hexaco",
+   "open_hexaco",
+   "conventional_hexaco"
+  ],
+  "description_notes": "Low pole, from the authors' low adjectives: sloppy, negligent, reckless, lazy, irresponsible; near-duplicate. Paraphrase the two-sided hexaco.org scale description (one sentence for very high scorers, one for very low); the low pole is written from the low-scorer sentence, not as a negation of the high pole; both poles in the 'This means ...' form; the description does not name the source.",
+  "decision": "Roger 2026-09-08: definitely add the Big Five and HEXACO by name as standard-named pairs; pairing fixed by the standard, antonym check informational (the ad-hoc twin showing up is expected, not a failure).",
+  "source": "Ashton & Lee, HEXACO-PI-R, Conscientiousness scale",
+  "tags": [
+   "standard",
+   "hexaco",
+   "6-orthoplex",
+   "low_pole_proposed",
+   "near_duplicate"
+  ],
+  "sub_chunk": "HEXACO"
+ },
+ {
+  "stem": "closed_big_five",
+  "label": "closed (Big Five)",
+  "partner": "open_big_five",
+  "pairing": "pair",
+  "arrangement_members": [
+   "open_big_five",
+   "closed_big_five",
+   "conscientious_big_five",
+   "careless_big_five",
+   "extraverted_big_five",
+   "introverted_big_five",
+   "agreeable_big_five",
+   "antagonistic_big_five",
+   "neurotic_big_five",
+   "emotionally_stable_big_five"
+  ],
+  "description_notes": "Low pole of Openness; low-pole word from 'closedness' (conventional), proposed by us and to confirm. Paraphrase the NEO-PI-R domain definition (Costa and McCrae 1992; John and Srivastava 1999 has the same content); both poles in the 'This means ...' form; the description does not name the source; US spelling.",
+  "decision": "Roger 2026-09-08: definitely add the Big Five and HEXACO by name as standard-named pairs; pairing fixed by the standard, antonym check informational (the ad-hoc twin showing up is expected, not a failure).",
+  "source": "Costa & McCrae, NEO-PI-R, Openness domain",
+  "tags": [
+   "standard",
+   "big_five",
+   "5-orthoplex",
+   "low_pole_proposed"
+  ],
+  "sub_chunk": "Big Five"
+ },
+ {
+  "stem": "conscientious_big_five",
+  "label": "conscientious (Big Five)",
+  "partner": "careless_big_five",
+  "pairing": "pair",
+  "arrangement_members": [
+   "open_big_five",
+   "closed_big_five",
+   "conscientious_big_five",
+   "careless_big_five",
+   "extraverted_big_five",
+   "introverted_big_five",
+   "agreeable_big_five",
+   "antagonistic_big_five",
+   "neurotic_big_five",
+   "emotionally_stable_big_five"
+  ],
+  "description_notes": "High pole of Conscientiousness; mirrors the ad-hoc conscientious ↔ careless pair so the wording comparison is cleanest (near-duplicate by design, rule 5). Paraphrase the NEO-PI-R domain definition (Costa and McCrae 1992; John and Srivastava 1999 has the same content); both poles in the 'This means ...' form; the description does not name the source; US spelling.",
+  "decision": "Roger 2026-09-08: definitely add the Big Five and HEXACO by name as standard-named pairs; pairing fixed by the standard, antonym check informational (the ad-hoc twin showing up is expected, not a failure).",
+  "source": "Costa & McCrae, NEO-PI-R, Conscientiousness domain",
+  "tags": [
+   "standard",
+   "big_five",
+   "5-orthoplex",
+   "canonical_pole",
+   "near_duplicate"
+  ],
+  "sub_chunk": "Big Five"
+ },
+ {
+  "stem": "conscientious_hexaco",
+  "label": "conscientious (HEXACO)",
+  "partner": "careless_hexaco",
+  "pairing": "pair",
+  "arrangement_members": [
+   "honest_humble_hexaco",
+   "sly_hexaco",
+   "emotional_hexaco",
+   "tough_hexaco",
+   "extraverted_hexaco",
+   "introverted_hexaco",
+   "agreeable_hexaco",
+   "quarrelsome_hexaco",
+   "conscientious_hexaco",
+   "careless_hexaco",
+   "open_hexaco",
+   "conventional_hexaco"
+  ],
+  "description_notes": "High pole of HEXACO Conscientiousness; near-duplicate of the Big Five and ad-hoc pairs by design. Paraphrase the two-sided hexaco.org scale description (one sentence for very high scorers, one for very low); the low pole is written from the low-scorer sentence, not as a negation of the high pole; both poles in the 'This means ...' form; the description does not name the source.",
+  "decision": "Roger 2026-09-08: definitely add the Big Five and HEXACO by name as standard-named pairs; pairing fixed by the standard, antonym check informational (the ad-hoc twin showing up is expected, not a failure).",
+  "source": "Ashton & Lee, HEXACO-PI-R, Conscientiousness scale",
+  "tags": [
+   "standard",
+   "hexaco",
+   "6-orthoplex",
+   "canonical_pole",
+   "near_duplicate"
+  ],
+  "sub_chunk": "HEXACO"
+ },
+ {
+  "stem": "conventional_hexaco",
+  "label": "conventional (HEXACO)",
+  "partner": "open_hexaco",
+  "pairing": "pair",
+  "arrangement_members": [
+   "honest_humble_hexaco",
+   "sly_hexaco",
+   "emotional_hexaco",
+   "tough_hexaco",
+   "extraverted_hexaco",
+   "introverted_hexaco",
+   "agreeable_hexaco",
+   "quarrelsome_hexaco",
+   "conscientious_hexaco",
+   "careless_hexaco",
+   "open_hexaco",
+   "conventional_hexaco"
+  ],
+  "description_notes": "Low pole, from the authors' low adjectives: shallow, unimaginative, conventional; distinct from the plain `conventional` (creative's Tier D completion, also proposed as eccentric's partner). Paraphrase the two-sided hexaco.org scale description (one sentence for very high scorers, one for very low); the low pole is written from the low-scorer sentence, not as a negation of the high pole; both poles in the 'This means ...' form; the description does not name the source.",
+  "decision": "Roger 2026-09-08: definitely add the Big Five and HEXACO by name as standard-named pairs; pairing fixed by the standard, antonym check informational (the ad-hoc twin showing up is expected, not a failure).",
+  "source": "Ashton & Lee, HEXACO-PI-R, Openness to Experience scale",
+  "tags": [
+   "standard",
+   "hexaco",
+   "6-orthoplex",
+   "low_pole_proposed",
+   "near_duplicate"
+  ],
+  "sub_chunk": "HEXACO"
+ },
+ {
+  "stem": "emotional_hexaco",
+  "label": "emotional (HEXACO)",
+  "partner": "tough_hexaco",
+  "pairing": "pair",
+  "arrangement_members": [
+   "honest_humble_hexaco",
+   "sly_hexaco",
+   "emotional_hexaco",
+   "tough_hexaco",
+   "extraverted_hexaco",
+   "introverted_hexaco",
+   "agreeable_hexaco",
+   "quarrelsome_hexaco",
+   "conscientious_hexaco",
+   "careless_hexaco",
+   "open_hexaco",
+   "conventional_hexaco"
+  ],
+  "description_notes": "High pole of Emotionality; not the same as Neuroticism (no anger, plus sentimentality and dependence). Paraphrase the two-sided hexaco.org scale description (one sentence for very high scorers, one for very low); the low pole is written from the low-scorer sentence, not as a negation of the high pole; both poles in the 'This means ...' form; the description does not name the source.",
+  "decision": "Roger 2026-09-08: definitely add the Big Five and HEXACO by name as standard-named pairs; pairing fixed by the standard, antonym check informational (the ad-hoc twin showing up is expected, not a failure).",
+  "source": "Ashton & Lee, HEXACO-PI-R, Emotionality scale",
+  "tags": [
+   "standard",
+   "hexaco",
+   "6-orthoplex",
+   "canonical_pole"
+  ],
+  "sub_chunk": "HEXACO"
+ },
+ {
+  "stem": "emotionally_stable_big_five",
+  "label": "emotionally-stable (Big Five)",
+  "partner": "neurotic_big_five",
+  "pairing": "pair",
+  "arrangement_members": [
+   "open_big_five",
+   "closed_big_five",
+   "conscientious_big_five",
+   "careless_big_five",
+   "extraverted_big_five",
+   "introverted_big_five",
+   "agreeable_big_five",
+   "antagonistic_big_five",
+   "neurotic_big_five",
+   "emotionally_stable_big_five"
+  ],
+  "description_notes": "Low pole of Neuroticism; canonical (Goldberg names the factor Emotional Stability). Paraphrase the NEO-PI-R domain definition (Costa and McCrae 1992; John and Srivastava 1999 has the same content); both poles in the 'This means ...' form; the description does not name the source; US spelling.",
+  "decision": "Roger 2026-09-08: definitely add the Big Five and HEXACO by name as standard-named pairs; pairing fixed by the standard, antonym check informational (the ad-hoc twin showing up is expected, not a failure).",
+  "source": "Costa & McCrae, NEO-PI-R, Neuroticism domain",
+  "tags": [
+   "standard",
+   "big_five",
+   "5-orthoplex",
+   "canonical_pole"
+  ],
+  "sub_chunk": "Big Five"
+ },
+ {
+  "stem": "extraverted_big_five",
+  "label": "extraverted (Big Five)",
+  "partner": "introverted_big_five",
+  "pairing": "pair",
+  "arrangement_members": [
+   "open_big_five",
+   "closed_big_five",
+   "conscientious_big_five",
+   "careless_big_five",
+   "extraverted_big_five",
+   "introverted_big_five",
+   "agreeable_big_five",
+   "antagonistic_big_five",
+   "neurotic_big_five",
+   "emotionally_stable_big_five"
+  ],
+  "description_notes": "High pole of Extraversion; note the standard's spelling 'extraverted' (the ad-hoc trait is extroverted); near-duplicate of the ad-hoc and HEXACO pairs by design. Paraphrase the NEO-PI-R domain definition (Costa and McCrae 1992; John and Srivastava 1999 has the same content); both poles in the 'This means ...' form; the description does not name the source; US spelling.",
+  "decision": "Roger 2026-09-08: definitely add the Big Five and HEXACO by name as standard-named pairs; pairing fixed by the standard, antonym check informational (the ad-hoc twin showing up is expected, not a failure).",
+  "source": "Costa & McCrae, NEO-PI-R, Extraversion domain",
+  "tags": [
+   "standard",
+   "big_five",
+   "5-orthoplex",
+   "canonical_pole",
+   "near_duplicate"
+  ],
+  "sub_chunk": "Big Five"
+ },
+ {
+  "stem": "extraverted_hexaco",
+  "label": "extraverted (HEXACO)",
+  "partner": "introverted_hexaco",
+  "pairing": "pair",
+  "arrangement_members": [
+   "honest_humble_hexaco",
+   "sly_hexaco",
+   "emotional_hexaco",
+   "tough_hexaco",
+   "extraverted_hexaco",
+   "introverted_hexaco",
+   "agreeable_hexaco",
+   "quarrelsome_hexaco",
+   "conscientious_hexaco",
+   "careless_hexaco",
+   "open_hexaco",
+   "conventional_hexaco"
+  ],
+  "description_notes": "High pole of HEXACO Extraversion; near-duplicate of the Big Five pair and the ad-hoc pair by design. Paraphrase the two-sided hexaco.org scale description (one sentence for very high scorers, one for very low); the low pole is written from the low-scorer sentence, not as a negation of the high pole; both poles in the 'This means ...' form; the description does not name the source.",
+  "decision": "Roger 2026-09-08: definitely add the Big Five and HEXACO by name as standard-named pairs; pairing fixed by the standard, antonym check informational (the ad-hoc twin showing up is expected, not a failure).",
+  "source": "Ashton & Lee, HEXACO-PI-R, Extraversion scale",
+  "tags": [
+   "standard",
+   "hexaco",
+   "6-orthoplex",
+   "canonical_pole",
+   "near_duplicate"
+  ],
+  "sub_chunk": "HEXACO"
+ },
+ {
+  "stem": "honest_humble_hexaco",
+  "label": "honest-humble (HEXACO)",
+  "partner": "sly_hexaco",
+  "pairing": "pair",
+  "arrangement_members": [
+   "honest_humble_hexaco",
+   "sly_hexaco",
+   "emotional_hexaco",
+   "tough_hexaco",
+   "extraverted_hexaco",
+   "introverted_hexaco",
+   "agreeable_hexaco",
+   "quarrelsome_hexaco",
+   "conscientious_hexaco",
+   "careless_hexaco",
+   "open_hexaco",
+   "conventional_hexaco"
+  ],
+  "description_notes": "High pole of Honesty-Humility, the genuinely new axis; its low pole is the dark core of the Dark Tetrad literature (line 1617-1619). Paraphrase the two-sided hexaco.org scale description (one sentence for very high scorers, one for very low); the low pole is written from the low-scorer sentence, not as a negation of the high pole; both poles in the 'This means ...' form; the description does not name the source.",
+  "decision": "Roger 2026-09-08: definitely add the Big Five and HEXACO by name as standard-named pairs; pairing fixed by the standard, antonym check informational (the ad-hoc twin showing up is expected, not a failure).",
+  "source": "Ashton & Lee, HEXACO-PI-R, Honesty-Humility scale",
+  "tags": [
+   "standard",
+   "hexaco",
+   "6-orthoplex",
+   "canonical_pole"
+  ],
+  "sub_chunk": "HEXACO"
+ },
+ {
+  "stem": "introverted_big_five",
+  "label": "introverted (Big Five)",
+  "partner": "extraverted_big_five",
+  "pairing": "pair",
+  "arrangement_members": [
+   "open_big_five",
+   "closed_big_five",
+   "conscientious_big_five",
+   "careless_big_five",
+   "extraverted_big_five",
+   "introverted_big_five",
+   "agreeable_big_five",
+   "antagonistic_big_five",
+   "neurotic_big_five",
+   "emotionally_stable_big_five"
+  ],
+  "description_notes": "Low pole of Extraversion (Introversion is a canonical low-pole name); near-duplicate of the ad-hoc introverted and HEXACO twin. Paraphrase the NEO-PI-R domain definition (Costa and McCrae 1992; John and Srivastava 1999 has the same content); both poles in the 'This means ...' form; the description does not name the source; US spelling.",
+  "decision": "Roger 2026-09-08: definitely add the Big Five and HEXACO by name as standard-named pairs; pairing fixed by the standard, antonym check informational (the ad-hoc twin showing up is expected, not a failure).",
+  "source": "Costa & McCrae, NEO-PI-R, Extraversion domain",
+  "tags": [
+   "standard",
+   "big_five",
+   "5-orthoplex",
+   "canonical_pole",
+   "near_duplicate"
+  ],
+  "sub_chunk": "Big Five"
+ },
+ {
+  "stem": "introverted_hexaco",
+  "label": "introverted (HEXACO)",
+  "partner": "extraverted_hexaco",
+  "pairing": "pair",
+  "arrangement_members": [
+   "honest_humble_hexaco",
+   "sly_hexaco",
+   "emotional_hexaco",
+   "tough_hexaco",
+   "extraverted_hexaco",
+   "introverted_hexaco",
+   "agreeable_hexaco",
+   "quarrelsome_hexaco",
+   "conscientious_hexaco",
+   "careless_hexaco",
+   "open_hexaco",
+   "conventional_hexaco"
+  ],
+  "description_notes": "Low pole of HEXACO Extraversion (canonical name); near-duplicate. Paraphrase the two-sided hexaco.org scale description (one sentence for very high scorers, one for very low); the low pole is written from the low-scorer sentence, not as a negation of the high pole; both poles in the 'This means ...' form; the description does not name the source.",
+  "decision": "Roger 2026-09-08: definitely add the Big Five and HEXACO by name as standard-named pairs; pairing fixed by the standard, antonym check informational (the ad-hoc twin showing up is expected, not a failure).",
+  "source": "Ashton & Lee, HEXACO-PI-R, Extraversion scale",
+  "tags": [
+   "standard",
+   "hexaco",
+   "6-orthoplex",
+   "canonical_pole",
+   "near_duplicate"
+  ],
+  "sub_chunk": "HEXACO"
+ },
+ {
+  "stem": "neurotic_big_five",
+  "label": "neurotic (Big Five)",
+  "partner": "emotionally_stable_big_five",
+  "pairing": "pair",
+  "arrangement_members": [
+   "open_big_five",
+   "closed_big_five",
+   "conscientious_big_five",
+   "careless_big_five",
+   "extraverted_big_five",
+   "introverted_big_five",
+   "agreeable_big_five",
+   "antagonistic_big_five",
+   "neurotic_big_five",
+   "emotionally_stable_big_five"
+  ],
+  "description_notes": "High pole of Neuroticism; the ad-hoc neurotic(stable) exists; rotated cousin of HEXACO Emotionality (anger moves from N to low A). Paraphrase the NEO-PI-R domain definition (Costa and McCrae 1992; John and Srivastava 1999 has the same content); both poles in the 'This means ...' form; the description does not name the source; US spelling.",
+  "decision": "Roger 2026-09-08: definitely add the Big Five and HEXACO by name as standard-named pairs; pairing fixed by the standard, antonym check informational (the ad-hoc twin showing up is expected, not a failure).",
+  "source": "Costa & McCrae, NEO-PI-R, Neuroticism domain",
+  "tags": [
+   "standard",
+   "big_five",
+   "5-orthoplex",
+   "canonical_pole"
+  ],
+  "sub_chunk": "Big Five"
+ },
+ {
+  "stem": "open_big_five",
+  "label": "open (Big Five)",
+  "partner": "closed_big_five",
+  "pairing": "pair",
+  "arrangement_members": [
+   "open_big_five",
+   "closed_big_five",
+   "conscientious_big_five",
+   "careless_big_five",
+   "extraverted_big_five",
+   "introverted_big_five",
+   "agreeable_big_five",
+   "antagonistic_big_five",
+   "neurotic_big_five",
+   "emotionally_stable_big_five"
+  ],
+  "description_notes": "High pole of Openness to Experience: the description must say 'to experience' and cover imagination, aesthetics, feelings, ideas, values; the suffix keeps it apart from open_ended and transparent. Paraphrase the NEO-PI-R domain definition (Costa and McCrae 1992; John and Srivastava 1999 has the same content); both poles in the 'This means ...' form; the description does not name the source; US spelling.",
+  "decision": "Roger 2026-09-08: definitely add the Big Five and HEXACO by name as standard-named pairs; pairing fixed by the standard, antonym check informational (the ad-hoc twin showing up is expected, not a failure).",
+  "source": "Costa & McCrae, NEO-PI-R, Openness domain",
+  "tags": [
+   "standard",
+   "big_five",
+   "5-orthoplex",
+   "canonical_pole"
+  ],
+  "sub_chunk": "Big Five"
+ },
+ {
+  "stem": "open_hexaco",
+  "label": "open (HEXACO)",
+  "partner": "conventional_hexaco",
+  "pairing": "pair",
+  "arrangement_members": [
+   "honest_humble_hexaco",
+   "sly_hexaco",
+   "emotional_hexaco",
+   "tough_hexaco",
+   "extraverted_hexaco",
+   "introverted_hexaco",
+   "agreeable_hexaco",
+   "quarrelsome_hexaco",
+   "conscientious_hexaco",
+   "careless_hexaco",
+   "open_hexaco",
+   "conventional_hexaco"
+  ],
+  "description_notes": "High pole of HEXACO Openness; near-duplicate of the Big Five pair, leaning to unconventionality and aesthetics. Paraphrase the two-sided hexaco.org scale description (one sentence for very high scorers, one for very low); the low pole is written from the low-scorer sentence, not as a negation of the high pole; both poles in the 'This means ...' form; the description does not name the source.",
+  "decision": "Roger 2026-09-08: definitely add the Big Five and HEXACO by name as standard-named pairs; pairing fixed by the standard, antonym check informational (the ad-hoc twin showing up is expected, not a failure).",
+  "source": "Ashton & Lee, HEXACO-PI-R, Openness to Experience scale",
+  "tags": [
+   "standard",
+   "hexaco",
+   "6-orthoplex",
+   "canonical_pole",
+   "near_duplicate"
+  ],
+  "sub_chunk": "HEXACO"
+ },
+ {
+  "stem": "quarrelsome_hexaco",
+  "label": "quarrelsome (HEXACO)",
+  "partner": "agreeable_hexaco",
+  "pairing": "pair",
+  "arrangement_members": [
+   "honest_humble_hexaco",
+   "sly_hexaco",
+   "emotional_hexaco",
+   "tough_hexaco",
+   "extraverted_hexaco",
+   "introverted_hexaco",
+   "agreeable_hexaco",
+   "quarrelsome_hexaco",
+   "conscientious_hexaco",
+   "careless_hexaco",
+   "open_hexaco",
+   "conventional_hexaco"
+  ],
+  "description_notes": "Low pole of Agreeableness versus Anger, from the authors' low adjectives: ill-tempered, quarrelsome, stubborn, choleric. Paraphrase the two-sided hexaco.org scale description (one sentence for very high scorers, one for very low); the low pole is written from the low-scorer sentence, not as a negation of the high pole; both poles in the 'This means ...' form; the description does not name the source.",
+  "decision": "Roger 2026-09-08: definitely add the Big Five and HEXACO by name as standard-named pairs; pairing fixed by the standard, antonym check informational (the ad-hoc twin showing up is expected, not a failure).",
+  "source": "Ashton & Lee, HEXACO-PI-R, Agreeableness scale",
+  "tags": [
+   "standard",
+   "hexaco",
+   "6-orthoplex",
+   "low_pole_proposed"
+  ],
+  "sub_chunk": "HEXACO"
+ },
+ {
+  "stem": "sly_hexaco",
+  "label": "sly (HEXACO)",
+  "partner": "honest_humble_hexaco",
+  "pairing": "pair",
+  "arrangement_members": [
+   "honest_humble_hexaco",
+   "sly_hexaco",
+   "emotional_hexaco",
+   "tough_hexaco",
+   "extraverted_hexaco",
+   "introverted_hexaco",
+   "agreeable_hexaco",
+   "quarrelsome_hexaco",
+   "conscientious_hexaco",
+   "careless_hexaco",
+   "open_hexaco",
+   "conventional_hexaco"
+  ],
+  "description_notes": "Low pole of Honesty-Humility, from the authors' low adjectives: sly, deceitful, greedy, pretentious, hypocritical, boastful, pompous. Paraphrase the two-sided hexaco.org scale description (one sentence for very high scorers, one for very low); the low pole is written from the low-scorer sentence, not as a negation of the high pole; both poles in the 'This means ...' form; the description does not name the source.",
+  "decision": "Roger 2026-09-08: definitely add the Big Five and HEXACO by name as standard-named pairs; pairing fixed by the standard, antonym check informational (the ad-hoc twin showing up is expected, not a failure).",
+  "source": "Ashton & Lee, HEXACO-PI-R, Honesty-Humility scale",
+  "tags": [
+   "standard",
+   "hexaco",
+   "6-orthoplex",
+   "low_pole_proposed"
+  ],
+  "sub_chunk": "HEXACO"
+ },
+ {
+  "stem": "tough_hexaco",
+  "label": "tough (HEXACO)",
+  "partner": "emotional_hexaco",
+  "pairing": "pair",
+  "arrangement_members": [
+   "honest_humble_hexaco",
+   "sly_hexaco",
+   "emotional_hexaco",
+   "tough_hexaco",
+   "extraverted_hexaco",
+   "introverted_hexaco",
+   "agreeable_hexaco",
+   "quarrelsome_hexaco",
+   "conscientious_hexaco",
+   "careless_hexaco",
+   "open_hexaco",
+   "conventional_hexaco"
+  ],
+  "description_notes": "Low pole of Emotionality, from the authors' low adjectives: brave, tough, independent, self-assured, stable; overlaps in meaning with the plain tough approved as nurturing's partner (Hofstede tough / tender is close). Paraphrase the two-sided hexaco.org scale description (one sentence for very high scorers, one for very low); the low pole is written from the low-scorer sentence, not as a negation of the high pole; both poles in the 'This means ...' form; the description does not name the source.",
+  "decision": "Roger 2026-09-08: definitely add the Big Five and HEXACO by name as standard-named pairs; pairing fixed by the standard, antonym check informational (the ad-hoc twin showing up is expected, not a failure).",
+  "source": "Ashton & Lee, HEXACO-PI-R, Emotionality scale",
+  "tags": [
+   "standard",
+   "hexaco",
+   "6-orthoplex",
+   "low_pole_proposed",
+   "near_duplicate"
+  ],
+  "sub_chunk": "HEXACO"
+ }
+]

@@ -1,0 +1,18 @@
+$ uv run python data_analysis/generate_antonyms.py --traits enfj_mbti enfp_mbti entj_mbti entp_mbti esfj_mbti esfp_mbti estj_mbti estp_mbti infj_mbti infp_mbti intj_mbti intp_mbti isfj_mbti isfp_mbti istj_mbti istp_mbti
+Done: 16 checked
+enfj_mbti                    -> detached|cold                score=3 nearly_nice
+enfp_mbti                    -> reserved|analytical          score=3 nasty
+entj_mbti                    -> passive|conflict-averse      score=3 nearly_nice
+entp_mbti                    -> methodical|introverted       score=3 nasty
+esfj_mbti                    -> detached|cold|self-centered  score=3 nearly_nice
+esfp_mbti                    -> introverted|analytical       score=3 nasty
+estj_mbti                    -> flexible|easygoing|adaptable score=3 nasty
+estp_mbti                    -> infj_mbti                    score=4 mismatch
+infj_mbti                    -> estp_mbti                    score=4 mismatch
+infp_mbti                    -> pragmatic|decisive           score=4 nasty
+intj_mbti                    -> conformist|scattered         score=2 nearly_nice
+intp_mbti                    -> extraverted|sociable         score=2 open
+isfj_mbti                    -> self-serving|impulsive       score=2 nearly_nice
+isfp_mbti                    -> entj_mbti|domineering        score=3 nearly_nice
+istj_mbti                    -> enfp_mbti                    score=4 mismatch
+istp_mbti                    -> enfj_mbti                    score=4 mismatch

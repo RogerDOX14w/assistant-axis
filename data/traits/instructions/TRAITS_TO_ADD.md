@@ -3012,7 +3012,7 @@ TBD, ~100 backlog, 88 not adopted); the inventory becomes
 | 2 | roles, description only, singleton arrangements | 56 (+22 tarot if adopted) | sensitive few |
 | 3 | new plain pairs, scratch, four theme sub-chunks: demographic + part 2 (46), part 3 (43), dark / light and gap scans (34), part 4 (60), the two agentic-weakness pairs (4, added 2026-09-11) and the ruthless-while-playing / honorable-while-playing and ends-justify-means / honorable pairs (4, added 2026-09-16; Roger's edits done 2026-09-26); plus the Strategy 1a common-mode candidates from May | ~198 | wording-TBD pairs first |
 | V2 | **done 2026-10-02** (rubric adopted 2026-10-01 as `9255dd3430ef`, corpus regenerated, held-out check passed, pairs rechecked): trait generator V2 (§ "Trait generator V2"; added 2026-09-28, Roger: "insert it in the list of tasks before chunk 4 — we'll do that next"): rewrite `_ROGER_TEMPLATE` to fix the generator-side issues, settle how a pair is confirmed given the check's noise, then regenerate every trait and recheck the pairs | the 659 existing traits | design to agree with Roger first; about $19 of generation, about $40 with the honest pair recheck, so the regeneration needs the expensive-operations confirmation; before chunk 4 so that chunk 4 is generated once |
-| 4 | standards: pairs and orthoplexes (41) then sets and rings (100); lenient pairing per the policy; near-duplicate tagging | ~141 | Big Five / HEXACO low-pole names |
+| 4 | **done 2026-10-08** (127 seeded and generated under V2 by the standards method, every decision taken; 74 facet / aspect / dichotomy entries parked as `backlog` for the post-extraction verdict): standards: pairs and orthoplexes (41) then sets and rings (100); lenient pairing per the policy; near-duplicate tagging | 127 (+74 backlog) | Big Five / HEXACO low-pole names |
 | 5 | unpaired plain traits and plain sets: memberships, states, the two simplices; the sensitive batch (~20) handled together | 135 | refusals |
 | 6 | physical track, tagged `physical` | 26 | none |
 | 7 | TBD items, decided as reached: tarot, male / female, Bourdieu, diaspora, nouveau_riche / shabby_genteel, the PC-named May candidates | 48 | all |
@@ -3132,6 +3132,39 @@ before is commit `93a8554`.  `reports/trait_gap_generation/` is a separate
 line of work and was left out.  Next, in order: the trait generator V2
 (row V2 of the table above; Roger, 2026-09-28: "we'll do that next"), then
 chunk 4 (127 candidates).
+
+Status 2026-10-08 (close of chunk 4).  All 127 candidates are seeded and
+generated under V2 by Roger's standards method (AGENT_NOTES
+description-writing rule 9: the instrument's own text recorded verbatim
+with URL and date, summarised into the corpus form, no forced
+anti-parallel phrasing, a reviewer flagging scope differences, Roger
+deciding the re-edits): sub-chunk A, Big Five and HEXACO (22; orthoplexes
+beside the pairs); B, Inglehart-Welzel, Hall, Gelfand, Allport, Tönnies
+(14; Allport reconstructed sentence by sentence from the papers that quote
+it; Gelfand's loose pole derived from Gelfand's own account of individuals
+in loose cultures and tagged `low_pole_derived`); C, the sixteen MBTI types
+as a `4-cube` at 36 to 40 words, Kohlberg's three as a triangle, the four
+attachment styles as a square (23); D, the zodiac, Enneagram and RIASEC
+rings, the Bartle, Baumrind and DISC squares, the generations sequence,
+and the VALS, love-languages, VARK, blood-type and Hogwarts sets (68; the
+VALS text from SBI's pages in the Internet Archive, the site having gone
+dark).  Every decision is in
+[seeding_log_2026-10.md](../../../reports/seeding_log_2026-10.md).  Parked
+by design: the 74 `backlog` entries (31 IPIP-NEO facets, 25 HEXACO facets,
+10 BFAS aspects, 8 MBTI dichotomy poles), the plan's "possibly" items,
+whose payoff is hierarchy recovery and which wait for the extraction's
+verdict on the pairs and orthoplexes; the 22 Tarot entries stay `tbd` for
+chunk 7 (ROLES_TO_ADD carries the note on significators and on whether
+they are roles).  Recorded for later: § "TODO: post-extraction checks for
+chunk 4" (the Strategy 1 yield check, the arrangement geometry check), and
+the rubric display form "careless (from HEXACO)" before the first judging
+run that includes these traits (AGENT_NOTES, standard-labels item 7).
+Corpus: 790 trait files, 280 pairs, one 4-cube, one 5-orthoplex, one
+6-orthoplex, five squares, three rings, two sequences, five sets, one
+tetrahedron, three triangles, 80 singletons, 36 unclassified (the
+tangle-pass pointers); 338 role files.  Chunk 4 generation about $8.90 in
+all.  Next: the commit (corpus; docs; generator count checks), then chunk
+5.
 
 ## Trait generator V2: the next task, before chunk 4 (Roger, 2026-09-28)
 
@@ -4537,6 +4570,43 @@ finished (doing them per-edit wastes API calls).  Counts are as of 2026-09-07.
    is within bounds).
    The "This trait involves ..." / "This involves ..." variants (29 traits)
    were left as-is; they read fine in every prompt site.
+
+## TODO: post-extraction checks for chunk 4 (Roger, 2026-10-07)
+
+Follow-up after all the current chunks are seeded and the next extraction
+has run; not to hold up any chunk or commit:
+
+- **The Strategy 1 yield check for the standards-derived traits.**  The
+  plan's note on the Inglehart-Welzel pairs ("run the Strategy 1 yield check
+  before committing") cannot be run without the new traits' judge scores or
+  activations.  Once they exist, run the orthogonality analysis of § "Strategy
+  1" over every chunk-4 standard (Big Five, HEXACO, Inglehart-Welzel, Hall,
+  Gelfand, Allport, Tönnies, MBTI, the sets and rings) against the judged
+  cohort, with these expected overlaps to confirm or refute: the Big Five /
+  HEXACO factors against their plain twins (conscientious, extraverted,
+  introverted, agreeable, neurotic, emotional, careless), Inglehart-Welzel
+  against religious / secular, conservative / progressive and the moral-circle
+  sequence, Tönnies against transactional / communal.
+- **The arrangement geometry check** of AGENT_NOTES § "The `arrangement`
+  field" rule 6 for the new squares, orthoplexes, rings and the 4-cube
+  (pairs as roughly concurrent segments; a square's two axes roughly
+  orthogonal; the zodiac, Enneagram and RIASEC rings as rings; Kohlberg's
+  three as a triangle or a sequence, which the texts left open).
+- **The VALS recheck: done 2026-10-08.**  Strategic Business Insights'
+  site (strategicbusinessinsights.com/vals) had gone dark (DNS failure on
+  2026-10-07 and 2026-10-08), so SBI's own segment pages were taken from
+  the Internet Archive (long-form prose, December 2011 captures; final
+  bullet version, early 2024 captures), recorded verbatim in the eight
+  queue entries, and all eight descriptions were rewritten from the prose
+  on Roger's delegation and regenerated.  Record and decisions:
+  [seeding_log_2026-10.md](../../../reports/seeding_log_2026-10.md)
+  (consolidated decisions, item 8).
+- **Slytherin's source: done 2026-10-07.**  The Sorting Hat's verse was
+  found quoted on an official Wizarding World page (the "Wizarding
+  Songbook" feature) and recorded in the queue entry, and
+  [slytherin](./slytherin.json) was sharpened toward the books on Roger's
+  word ("always one step ahead and using any means to achieve one's ends");
+  see the seeding log's consolidated decisions, item 7.
 
 ## TODO: assistant-framing leakage scan (Sep 2026)
 

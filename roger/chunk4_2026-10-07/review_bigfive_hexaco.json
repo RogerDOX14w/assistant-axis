@@ -1,0 +1,262 @@
+{
+ "entries": [
+  {
+   "stem": "agreeable_big_five",
+   "verdict": "ok",
+   "issues": [],
+   "suggested_edit": null,
+   "nearest_existing_ok": true
+  },
+  {
+   "stem": "agreeable_hexaco",
+   "verdict": "ok",
+   "issues": [],
+   "suggested_edit": null,
+   "nearest_existing_ok": true
+  },
+  {
+   "stem": "antagonistic_big_five",
+   "verdict": "edit",
+   "issues": [
+    "Faithfulness: 'boasting' has no low-side support in the recorded passage (no marker, no sentence; the writer's note concedes it). It inverts the Modesty facet, but Table 4.3's facet list is recorded under agreeable (Big Five), not here.",
+    "Two ways out, Roger's choice: (a) keep 'boasting' and add the facet list to this entry's source_text so the record carries the inversion; (b) replace it with the altruism-low clause the passage does give ('put your own needs and interests before others'), which also gives the high's 'helping before being asked' its counterpart, at the cost of the modesty facet on the low side. The suggested_edit is (b)."
+   ],
+   "suggested_edit": "This means suspecting everyone of an angle, flattering or tricking people into what one wants, putting oneself first, finding fault, fighting every disagreement to win, and feeling nothing for anyone in trouble.",
+   "nearest_existing_ok": true
+  },
+  {
+   "stem": "careless_big_five",
+   "verdict": "ok",
+   "issues": [],
+   "suggested_edit": null,
+   "nearest_existing_ok": true
+  },
+  {
+   "stem": "careless_hexaco",
+   "verdict": "ok",
+   "issues": [],
+   "suggested_edit": null,
+   "nearest_existing_ok": true
+  },
+  {
+   "stem": "closed_big_five",
+   "verdict": "edit",
+   "issues": [
+    "Faithfulness of the record, not of the description: 'paying feelings no mind' has no low-side support in the recorded passage (the feedback-summary text quoted has no feelings sentence, and the Fantasy..Values facet list is recorded under open (Big Five), not here). The writer's note says five of the six clauses have direct low-side source sentences; it is four (fantasy, actions, ideas, values); aesthetics and feelings rest on the facet list.",
+    "Fix: add Table 4.3's facet list (or the feedback summary's feelings sentence, if it sits in the elided text) to this entry's source_text and correct the note. The description can stand: dropping the feelings clause would leave the low pole one facet short of the high. No suggested_edit."
+   ],
+   "suggested_edit": null,
+   "nearest_existing_ok": true
+  },
+  {
+   "stem": "conscientious_big_five",
+   "verdict": "ok",
+   "issues": [],
+   "suggested_edit": null,
+   "nearest_existing_ok": true
+  },
+  {
+   "stem": "conscientious_hexaco",
+   "verdict": "ok",
+   "issues": [],
+   "suggested_edit": null,
+   "nearest_existing_ok": true
+  },
+  {
+   "stem": "conventional_hexaco",
+   "verdict": "ok",
+   "issues": [],
+   "suggested_edit": null,
+   "nearest_existing_ok": true
+  },
+  {
+   "stem": "emotional_hexaco",
+   "verdict": "ok",
+   "issues": [],
+   "suggested_edit": null,
+   "nearest_existing_ok": true
+  },
+  {
+   "stem": "emotionally_stable_big_five",
+   "verdict": "ok",
+   "issues": [],
+   "suggested_edit": null,
+   "nearest_existing_ok": true
+  },
+  {
+   "stem": "extraverted_big_five",
+   "verdict": "ok",
+   "issues": [],
+   "suggested_edit": null,
+   "nearest_existing_ok": true
+  },
+  {
+   "stem": "extraverted_hexaco",
+   "verdict": "ok",
+   "issues": [],
+   "suggested_edit": null,
+   "nearest_existing_ok": true
+  },
+  {
+   "stem": "honest_humble_hexaco",
+   "verdict": "ok",
+   "issues": [],
+   "suggested_edit": null,
+   "nearest_existing_ok": true
+  },
+  {
+   "stem": "introverted_big_five",
+   "verdict": "ok",
+   "issues": [],
+   "suggested_edit": null,
+   "nearest_existing_ok": true
+  },
+  {
+   "stem": "introverted_hexaco",
+   "verdict": "ok",
+   "issues": [],
+   "suggested_edit": null,
+   "nearest_existing_ok": true
+  },
+  {
+   "stem": "neurotic_big_five",
+   "verdict": "ok",
+   "issues": [],
+   "suggested_edit": null,
+   "nearest_existing_ok": true
+  },
+  {
+   "stem": "open_big_five",
+   "verdict": "ok",
+   "issues": [],
+   "suggested_edit": null,
+   "nearest_existing_ok": true
+  },
+  {
+   "stem": "open_hexaco",
+   "verdict": "ok",
+   "issues": [],
+   "suggested_edit": null,
+   "nearest_existing_ok": true
+  },
+  {
+   "stem": "quarrelsome_hexaco",
+   "verdict": "ok",
+   "issues": [],
+   "suggested_edit": null,
+   "nearest_existing_ok": true
+  },
+  {
+   "stem": "sly_hexaco",
+   "verdict": "ok",
+   "issues": [],
+   "suggested_edit": null,
+   "nearest_existing_ok": true
+  },
+  {
+   "stem": "tough_hexaco",
+   "verdict": "edit",
+   "issues": [
+    "Faithfulness: 'walking toward physical danger without a second thought' overshoots the source's 'not deterred by the prospect of physical harm'. The source is fearlessness (the facet's low adjectives are brave, tough); the draft is heedless approach, which reads as reckless / risk_seeking and carries a prudence-low flavor that belongs to Conscientiousness. The writer's note calls it 'a shade past'; it is a change of axis, not of degree.",
+    "The vice rule does not license it: tough is not a vice pole (its adjectives are brave, independent, self-assured, stable). The suggested_edit changes the first clause only (29 words)."
+   ],
+   "suggested_edit": "This means pressing on where one could get hurt, staying unworried under pressure, keeping one's troubles to oneself, asking no one for support, and holding people at arm's length.",
+   "nearest_existing_ok": true
+  }
+ ],
+ "pairs": [
+  {
+   "members": [
+    "agreeable_big_five",
+    "antagonistic_big_five"
+   ],
+   "scope_flag": "Facet match holds (six and six, 31 and 31 words) and the writer's two points stand (no direct low counterpart to 'helping before being asked'; quiet conduct against active behavior). Add: the closing clauses mirror each other in frame ('feeling for anyone who is hurting' / 'feeling nothing for anyone who is struggling'), the one anti-parallel echo in the pair. The low's 'boasting' is the unsupported clause (entry issue); the suggested swap to 'putting oneself first' gives the high's altruism clause its counterpart but takes modesty off the low side, so the pair would then be six and five by facet. Roger's choice between facet symmetry and source fidelity.",
+   "agree_with_writer": true
+  },
+  {
+   "members": [
+    "agreeable_hexaco",
+    "quarrelsome_hexaco"
+   ],
+   "scope_flag": "Agree with the writer (anger sharpened on the low only; purpose clause on the high only). Add: the first clauses share a frame ('the wrongs done to one' / 'anyone who has done one wrong'). The anger asymmetry cuts one way; a re-edit could bring the low back to source level ('quick to anger when wronged') or lift the high ('keeping one's temper under open provocation'); either keeps the pair level.",
+   "agree_with_writer": true
+  },
+  {
+   "members": [
+    "conscientious_big_five",
+    "careless_big_five"
+   ],
+   "scope_flag": "Agree with the writer, and one more scope gap: the high touches seven facets (deliberation and self-discipline in the gloss; order, punctuality, duty, achievement, competence in the list), the low six, and the two it lacks, achievement striving and competence, are in its own source ('limited aspirations', 'Slipshod'), while it spends two clauses on dependability ('showing up late or not at all', 'forgetting promises'). A re-edit could trade 'forgetting promises' for slapdash work or low aims.",
+   "agree_with_writer": true
+  },
+  {
+   "members": [
+    "conscientious_hexaco",
+    "careless_hexaco"
+   ],
+   "scope_flag": "Agree with the writer: the shared desk-and-calendar opening is the one place in the HEXACO set where the two poles read as a forced mirror, and the easiest to vary (the low's source says 'orderly surroundings or schedules', which could as well be a missed appointment or a pile of unopened mail). Otherwise level, and the effort / avoidance asymmetry is the source's own.",
+   "agree_with_writer": true
+  },
+  {
+   "members": [
+    "open_big_five",
+    "closed_big_five"
+   ],
+   "scope_flag": "Agree with the writer: six facets in the same order with shared words ('daydreaming freely' / 'calling daydreams a waste of time'; 'questioning inherited values' / 'keeping one's inherited beliefs') make this the most mirror-like pair of the 22. The parallel came from the sources, but a re-edit could start the low from Costa and McCrae's 'down-to-earth and conventional' and vary the images. The low's 'ordering the usual' narrows the actions facet to food, beside the adventurous_eater pair. Record gap on the low side (entry issue): its passage has no feelings sentence and no facet list.",
+   "agree_with_writer": true
+  },
+  {
+   "members": [
+    "extraverted_big_five",
+    "introverted_big_five"
+   ],
+   "scope_flag": "Agree with the writer (actions against states; definition gloss against scene gloss; the low stands on richer source text). Facet coverage is level: 'serious' carries low positive emotion, 'formal and distant' low warmth, 'silent in meetings' low assertiveness. Nothing to add.",
+   "agree_with_writer": true
+  },
+  {
+   "members": [
+    "extraverted_hexaco",
+    "introverted_hexaco"
+   ],
+   "scope_flag": "Agree with the writer; the asymmetries (comparative last clause, indifference against enjoyment, self-regard against perceived popularity) are hexaco.org's own. The low's 'less bounce and hope than the people around' is the only relative claim among the 22; harmless, but a judge reads a comparison differently from an absolute.",
+   "agree_with_writer": true
+  },
+  {
+   "members": [
+    "honest_humble_hexaco",
+    "sly_hexaco"
+   ],
+   "scope_flag": "Agree with the writer (four restraints against four active behaviors; the 'rather than' contrast). Add: 'rather than working them for gain' is the only contrast clause among the 22; rule 5 tolerates it where it picks a sense, and 'dealing straight' can also mean blunt, so it arguably does. The low's 'luxury' is borrowed from the high's source ('lavish wealth and luxuries'), its own saying 'material gain', so the poles share a word their sources do not. If Roger wants positive conduct on the high, 'paying what is owed' or 'living plainly' would do it without changing scope.",
+   "agree_with_writer": true
+  },
+  {
+   "members": [
+    "emotional_hexaco",
+    "tough_hexaco"
+   ],
+   "scope_flag": "Agree with the writer on the two-clause facets (sentimentality on the high, dependence on the low; both from the sources). Add: the first clauses are not on the same axis: the high's 'flinching from physical danger' is fear, the low's 'walking toward physical danger without a second thought' is heedless approach (entry issue; the suggested 'pressing on where one could get hurt' puts the low back on fear). 'Staying unworried' is the one negated form on the low side.",
+   "agree_with_writer": true
+  },
+  {
+   "members": [
+    "neurotic_big_five",
+    "emotionally_stable_big_five"
+   ],
+   "scope_flag": "Agree with the writer (actions against states; the low's gloss; 'passing up temptations' the exact inversion). Add: the anxiety facet is where the derivation is weakest: 'fretting over what could go wrong' is worry ahead of events, the low's 'taking bad news in stride' is reaction after them (it comes from the reverse-keyed item), so the low has no 'not worrying ahead' clause; and 'unembarrassed in company' is the one absence-shaped clause in a pole that is meant to be opposite behavior. Both fixable in a re-edit ('expecting things to turn out', 'at ease among strangers').",
+   "agree_with_writer": true
+  },
+  {
+   "members": [
+    "open_hexaco",
+    "conventional_hexaco"
+   ],
+   "scope_flag": "Agree with the writer. The inquisitiveness facet is where the drafts miss each other: 'wanting to know how everything works' turns breadth across domains of knowledge into mechanism-curiosity, and 'feeling no itch to learn for its own sake' answers motive, not breadth; a re-edit could put both on the source's breadth. The low's 'leaving painting, writing and invention to others' shares its frame with closed (Big Five)'s 'leaving ideas to others'.",
+   "agree_with_writer": true
+  }
+ ],
+ "set_notes": {
+  "Big Five": "One shape across the ten: a single sentence of 29 to 32 words running the domain's facets as a comma list, six clauses for O, A and N, five plus a two-part gloss for C, five or six for E. Seven of the ten open with a gloss and a colon (open, closed, conscientious, careless, extraverted, introverted, emotionally-stable), three are a bare list (agreeable, antagonistic, neurotic): same grain, not quite the same shape, and the agreeable pair and neurotic are the ones a re-edit would give an opening phrase. Six facets in 31 words is denser than the corpus examples (three or four clauses), so each facet gets four or five words and the lists edge toward the catalogue the writer's brief asked to avoid; that is the price of six facets in 32 words and Roger may accept it. Provenance is uneven across poles: the high poles stand on the chapter's definitions, facets, markers and item examples; the low poles of A and C stand largely on PAR's average-range sample-client sentences sharpened to vice level (disclosed in the notes); O and E on the sample's low and very-low text; emotionally-stable is derived. Phrase reuse inside the set: 'in company' and 'under stress' (neurotic, emotionally-stable), 'inherited' (open, closed).",
+  "HEXACO": "One shape across the twelve: a single sentence of 29 to 32 words, four clauses, one per facet, from hexaco.org's one sentence per pole, no gloss anywhere (tough has five clauses, dependence twice; emotional's fourth clause is two-part). Within the set the grain is even. Against the Big Five set the difference is systematic: four facets in the same word budget gives each clause seven or eight words and a concrete image (desk, calendar, painting, landscape, shoulder) where a Big Five clause has four or five, so the two instruments' descriptions differ in texture as well as content; expected, since the sources differ the same way. Sharpening is uneven: the vice poles are tightened past hexaco.org's hedges (quarrelsome, careless, sly, conventional), the virtue poles stay at source level, and tough, not a vice pole, is tightened too (entry issue). Phrase reuse that follows the theory (HEXACO H took sincerity and modesty from Big Five A): 'dealing straight' (honest-humble, agreeable (Big Five)); 'flattering ... to get what one wants' (sly, antagonistic (Big Five)); plus 'shrugging' (introverted, and closed (Big Five)) and 'leaving ... to others' (conventional, and closed (Big Five)). Nearest-existing lines are sound throughout; honest-humble and sly are rightly called the new axis; agreeable (HEXACO) names the ad-hoc agreeable and the difference without the words 'near-duplicate', which matches the queue (it carries no near_duplicate tag)."
+ },
+ "summary": "22 drafts checked against their recorded passages and the corpus form: all 22 pass form (one sentence, 29-32 words, 'This means' opening, no hedges, instrument and partner unnamed, US spelling, inside voice); 19 ok, 3 edit, all 22 nearest-existing lines plausible.\nThe three: antagonistic (Big Five) 'boasting' has no low-side source (suggested swap to 'putting oneself first', or add the facet list to its record and keep it); closed (Big Five) 'paying feelings no mind' has no low-side source and the note's 'five of six' is four (a record fix, the description can stand); tough (HEXACO) 'walking toward physical danger without a second thought' turns 'not deterred' into recklessness (suggested 'pressing on where one could get hurt').\nPairs: I agree with all eleven of the writer's pair reviews and add a scope gap in conscientious/careless (Big Five) (the low drops achievement and competence its own source supplies), the fear-versus-approach mismatch in emotional/tough, the weak anxiety inversion and one absence-shaped clause in neurotic/stable, and mirror phrasing in open/closed and the HEXACO C pair.\nSet: Big Five drafts are six-clause lists at four or five words a facet, seven of ten with a gloss; HEXACO drafts are four-clause lists at seven or eight words a facet, none with a gloss; even within each set, different texture between the two, following the sources."
+}

@@ -1,0 +1,78 @@
+4 entities, estimated $0.12 at $0.03/entity
+$ uv run python data_analysis/regenerate_trait_instructions.py --traits secular_rational_inglehart_welzel self_expression_inglehart_welzel survival_inglehart_welzel traditional_inglehart_welzel
+Traits to process: 4 [RogerV2 style, temp=1.0, no thinking, antonym]
+API calls per trait: 1
+[1/4] OK traditional (Inglehart-Welzel): 5 instruction pairs, 40 questions
+[2/4] OK survival (Inglehart-Welzel): 5 instruction pairs, 40 questions
+  self-expression (Inglehart-Welzel): 4 distinct openings of 5; generating again
+[3/4] OK secular-rational (Inglehart-Welzel): 5 instruction pairs, 40 questions
+[4/4] OK self-expression (Inglehart-Welzel): 5 instruction pairs, 40 questions, generated again for the openings
+
+Done: 4 processed, 0 skipped, 0 errors
+API calls made: ~4
+[usage] total=$0.247 calls=5 [claude-sonnet-4-6: $0.247 in=12,944 out=13,888 n=5]
+[usage] cumulative record: /Users/roger/Documents/GitHub/assistant-axis/data/traits/regeneration_usage.json (total $196.308 over 5627 calls)
+Done: 4/4 marked generated
+6 entities, estimated $0.18 at $0.03/entity
+$ uv run python data_analysis/regenerate_trait_instructions.py --traits high_context_hall loose_gelfand low_context_hall monochronic_hall polychronic_hall tight_gelfand
+Traits to process: 6 [RogerV2 style, temp=1.0, no thinking, antonym]
+API calls per trait: 1
+[1/6] OK high-context (Hall): 5 instruction pairs, 39 questions
+[2/6] OK monochronic (Hall): 5 instruction pairs, 40 questions
+  Retry 1/5 for loose (Gelfand) combined: 'instruction'
+    Response: ```json
+{
+  "instructions": [
+    {
+      "pos": "Be someone who lets people do whatever they want without pushing back. You rarely set limits on others' behavior, and when someone acts in a way most would consider out of line, you shrug it off without complaint.",
+      "neg": "Be someone who holds firm to clear standards of conduct and enforces them without exception. You call out behavior that crosses the line and expect those around you to meet well-defined expectations, every time."
+    },
+    {
+      "pos": "From now on, you are someone who sees most rules as unnecessary constraints on how people choose to live. You give everyone wide latitude to behave as they see fit, and you rarely feel the urge to correct or redirect anyone.",
+      "neg": "From now on, you are someone who keeps strict norms in place and does not waver from them. You believe that clear, consistent rules are essential, and you hold yourself and others to them without softening."
+    },
+    {
+      "pos": "You are someone who tolerates a wide range of conduct from others without batting an eye. Behavior that would make most people uncomfortable strikes you as just another way of doing things, and you leave people to figure out their own path.",
+      "neg": "You are someone who draws sharp lines around acceptable behavior and does not move them. When others stray outside those lines, you address it directly and make clear what is and is not acceptable."
+    },
+    {
+      "pos": "Become someone who finds almost no behavior worth objecting to. You extend the benefit of the doubt far beyond what most people would, and you step aside rather than impose any standard on how others conduct themselves.",
+      "neg": "Become someone who maintains exacting standards in every situation and expects others to do the same. You treat lapses in conduct as serious matters and take steps to correct them rather than let them pass."
+    },
+    {
+      "pos": "You are easygoing about conduct to the point of ha...
+[3/6] OK low-context (Hall): 5 instruction pairs, 40 questions
+  polychronic (Hall): 4 distinct openings of 5; generating again
+[4/6] OK tight (Gelfand): 5 instruction pairs, 40 questions
+[5/6] OK polychronic (Hall): 5 instruction pairs, 40 questions, generated again for the openings
+[6/6] OK loose (Gelfand): 5 instruction pairs, 40 questions
+
+Done: 6 processed, 0 skipped, 0 errors
+API calls made: ~6
+[usage] total=$0.365 calls=8 [claude-sonnet-4-6: $0.365 in=20,630 out=20,238 n=8]
+[usage] cumulative record: /Users/roger/Documents/GitHub/assistant-axis/data/traits/regeneration_usage.json (total $196.674 over 5635 calls)
+Done: 6/6 marked generated
+2 entities, estimated $0.06 at $0.03/entity
+$ uv run python data_analysis/regenerate_trait_instructions.py --traits extrinsic_allport intrinsic_allport
+Traits to process: 2 [RogerV2 style, temp=1.0, no thinking, antonym]
+API calls per trait: 1
+[1/2] OK intrinsic (Allport): 5 instruction pairs, 40 questions
+[2/2] OK extrinsic (Allport): 5 instruction pairs, 40 questions
+
+Done: 2 processed, 0 skipped, 0 errors
+API calls made: ~2
+[usage] total=$0.088 calls=2 [claude-sonnet-4-6: $0.088 in=5,177 out=4,832 n=2]
+[usage] cumulative record: /Users/roger/Documents/GitHub/assistant-axis/data/traits/regeneration_usage.json (total $196.762 over 5637 calls)
+Done: 2/2 marked generated
+2 entities, estimated $0.06 at $0.03/entity
+$ uv run python data_analysis/regenerate_trait_instructions.py --traits gemeinschaft_tonnies gesellschaft_tonnies
+Traits to process: 2 [RogerV2 style, temp=1.0, no thinking, antonym]
+API calls per trait: 1
+[1/2] OK Gesellschaft (Tönnies): 5 instruction pairs, 40 questions
+[2/2] OK Gemeinschaft (Tönnies): 5 instruction pairs, 40 questions
+
+Done: 2 processed, 0 skipped, 0 errors
+API calls made: ~2
+[usage] total=$0.093 calls=2 [claude-sonnet-4-6: $0.093 in=5,172 out=5,161 n=2]
+[usage] cumulative record: /Users/roger/Documents/GitHub/assistant-axis/data/traits/regeneration_usage.json (total $196.854 over 5639 calls)
+Done: 2/2 marked generated

@@ -1,0 +1,11 @@
+$ uv run python data_analysis/generate_antonyms.py --traits conventional_kohlberg postconventional_kohlberg preconventional_kohlberg
+Done: 3 checked
+conventional_kohlberg        -> autonomous|nonconformist|principled score=3 nasty
+postconventional_kohlberg    -> conventional|conformist      score=4 nasty
+preconventional_kohlberg     -> principled|postconventional  score=3 nearly_nice
+$ uv run python data_analysis/generate_antonyms.py --traits anxious_preoccupied_attachment dismissive_avoidant_attachment fearful_avoidant_attachment secure_attachment
+Done: 4 checked
+anxious_preoccupied_attachment -> securely_attached|emotionally_self-sufficient score=3 open
+dismissive_avoidant_attachment -> securely_attached|interdependent score=4 open
+fearful_avoidant_attachment  -> secure_attachment|trusting   score=3 nasty
+secure_attachment            -> insecure_attachment|anxious|avoidant score=4 nasty

@@ -1,0 +1,282 @@
+[
+ {
+  "stem": "achiever_bartle",
+  "label": "achiever (Bartle)",
+  "partner": null,
+  "pairing": "square",
+  "arrangement_members": [
+   "achiever_bartle",
+   "explorer_bartle",
+   "killer_bartle",
+   "socializer_bartle"
+  ],
+  "description_notes": "Bartle player type (acting vs interacting × players vs world); square.",
+  "decision": "Accepted 2026-09-08; write the `arrangement` field at seeding",
+  "source": "Bartle (player types)",
+  "tags": [],
+  "sub_chunk": "part 4 sets: Bartle"
+ },
+ {
+  "stem": "authoritarian_baumrind",
+  "label": "authoritarian (Baumrind)",
+  "partner": null,
+  "pairing": "square",
+  "arrangement_members": [
+   "authoritarian_baumrind",
+   "authoritative_baumrind",
+   "neglectful_baumrind",
+   "permissive_baumrind"
+  ],
+  "description_notes": "Baumrind parenting style on warmth × control; square. Suffixed because plain authoritarian is queued in the political sense. (The file's 'authoritarian Baumrind' lacks the parentheses; read as a line-wrap typo.)",
+  "decision": "Accepted 2026-09-08; write the `arrangement` field at seeding",
+  "source": "Baumrind (parenting styles)",
+  "tags": [],
+  "sub_chunk": "part 4 sets: Baumrind"
+ },
+ {
+  "stem": "authoritative_baumrind",
+  "label": "authoritative (Baumrind)",
+  "partner": null,
+  "pairing": "square",
+  "arrangement_members": [
+   "authoritarian_baumrind",
+   "authoritative_baumrind",
+   "neglectful_baumrind",
+   "permissive_baumrind"
+  ],
+  "description_notes": "Baumrind parenting style on warmth × control; square. Suffixed because plain authoritarian is queued in the political sense. (The file's 'authoritarian Baumrind' lacks the parentheses; read as a line-wrap typo.)",
+  "decision": "Accepted 2026-09-08; write the `arrangement` field at seeding",
+  "source": "Baumrind (parenting styles)",
+  "tags": [],
+  "sub_chunk": "part 4 sets: Baumrind"
+ },
+ {
+  "stem": "boomer",
+  "label": "boomer",
+  "partner": null,
+  "pairing": "sequence",
+  "arrangement_members": [
+   "boomer",
+   "gen_x",
+   "millennial",
+   "gen_z"
+  ],
+  "description_notes": "Generational cohort; sequence in birth order. Cohort was folded into age in the first audit; the labels carry speech and culture stereotypes beyond age.",
+  "decision": "Accepted 2026-09-08; write the `arrangement` field at seeding",
+  "source": null,
+  "tags": [
+   "membership"
+  ],
+  "sub_chunk": "part 4 sets: generations"
+ },
+ {
+  "stem": "conscientiousness_disc",
+  "label": "conscientiousness (DISC)",
+  "partner": null,
+  "pairing": "square",
+  "arrangement_members": [
+   "conscientiousness_disc",
+   "dominance_disc",
+   "influence_disc",
+   "steadiness_disc"
+  ],
+  "description_notes": "DISC style; square.",
+  "decision": "Accepted 2026-09-08; write the `arrangement` field at seeding",
+  "source": "DISC",
+  "tags": [],
+  "sub_chunk": "part 4 sets: DISC"
+ },
+ {
+  "stem": "dominance_disc",
+  "label": "dominance (DISC)",
+  "partner": null,
+  "pairing": "square",
+  "arrangement_members": [
+   "conscientiousness_disc",
+   "dominance_disc",
+   "influence_disc",
+   "steadiness_disc"
+  ],
+  "description_notes": "DISC style; square.",
+  "decision": "Accepted 2026-09-08; write the `arrangement` field at seeding",
+  "source": "DISC",
+  "tags": [],
+  "sub_chunk": "part 4 sets: DISC"
+ },
+ {
+  "stem": "explorer_bartle",
+  "label": "explorer (Bartle)",
+  "partner": null,
+  "pairing": "square",
+  "arrangement_members": [
+   "achiever_bartle",
+   "explorer_bartle",
+   "killer_bartle",
+   "socializer_bartle"
+  ],
+  "description_notes": "Bartle player type (acting vs interacting × players vs world); square.",
+  "decision": "Accepted 2026-09-08; write the `arrangement` field at seeding",
+  "source": "Bartle (player types)",
+  "tags": [],
+  "sub_chunk": "part 4 sets: Bartle"
+ },
+ {
+  "stem": "gen_x",
+  "label": "gen-x",
+  "partner": null,
+  "pairing": "sequence",
+  "arrangement_members": [
+   "boomer",
+   "gen_x",
+   "millennial",
+   "gen_z"
+  ],
+  "description_notes": "Generational cohort; sequence in birth order. Cohort was folded into age in the first audit; the labels carry speech and culture stereotypes beyond age.",
+  "decision": "Accepted 2026-09-08; write the `arrangement` field at seeding",
+  "source": null,
+  "tags": [
+   "membership"
+  ],
+  "sub_chunk": "part 4 sets: generations"
+ },
+ {
+  "stem": "gen_z",
+  "label": "gen-z",
+  "partner": null,
+  "pairing": "sequence",
+  "arrangement_members": [
+   "boomer",
+   "gen_x",
+   "millennial",
+   "gen_z"
+  ],
+  "description_notes": "Generational cohort; sequence in birth order. Cohort was folded into age in the first audit; the labels carry speech and culture stereotypes beyond age.",
+  "decision": "Accepted 2026-09-08; write the `arrangement` field at seeding",
+  "source": null,
+  "tags": [
+   "membership"
+  ],
+  "sub_chunk": "part 4 sets: generations"
+ },
+ {
+  "stem": "influence_disc",
+  "label": "influence (DISC)",
+  "partner": null,
+  "pairing": "square",
+  "arrangement_members": [
+   "conscientiousness_disc",
+   "dominance_disc",
+   "influence_disc",
+   "steadiness_disc"
+  ],
+  "description_notes": "DISC style; square.",
+  "decision": "Accepted 2026-09-08; write the `arrangement` field at seeding",
+  "source": "DISC",
+  "tags": [],
+  "sub_chunk": "part 4 sets: DISC"
+ },
+ {
+  "stem": "killer_bartle",
+  "label": "killer (Bartle)",
+  "partner": null,
+  "pairing": "square",
+  "arrangement_members": [
+   "achiever_bartle",
+   "explorer_bartle",
+   "killer_bartle",
+   "socializer_bartle"
+  ],
+  "description_notes": "Bartle player type (acting vs interacting × players vs world); square.",
+  "decision": "Accepted 2026-09-08; write the `arrangement` field at seeding",
+  "source": "Bartle (player types)",
+  "tags": [],
+  "sub_chunk": "part 4 sets: Bartle"
+ },
+ {
+  "stem": "millennial",
+  "label": "millennial",
+  "partner": null,
+  "pairing": "sequence",
+  "arrangement_members": [
+   "boomer",
+   "gen_x",
+   "millennial",
+   "gen_z"
+  ],
+  "description_notes": "Generational cohort; sequence in birth order. Cohort was folded into age in the first audit; the labels carry speech and culture stereotypes beyond age.",
+  "decision": "Accepted 2026-09-08; write the `arrangement` field at seeding",
+  "source": null,
+  "tags": [
+   "membership"
+  ],
+  "sub_chunk": "part 4 sets: generations"
+ },
+ {
+  "stem": "neglectful_baumrind",
+  "label": "neglectful (Baumrind)",
+  "partner": null,
+  "pairing": "square",
+  "arrangement_members": [
+   "authoritarian_baumrind",
+   "authoritative_baumrind",
+   "neglectful_baumrind",
+   "permissive_baumrind"
+  ],
+  "description_notes": "Baumrind parenting style on warmth × control; square. Suffixed because plain authoritarian is queued in the political sense. (The file's 'authoritarian Baumrind' lacks the parentheses; read as a line-wrap typo.)",
+  "decision": "Accepted 2026-09-08; write the `arrangement` field at seeding",
+  "source": "Baumrind (parenting styles)",
+  "tags": [],
+  "sub_chunk": "part 4 sets: Baumrind"
+ },
+ {
+  "stem": "permissive_baumrind",
+  "label": "permissive (Baumrind)",
+  "partner": null,
+  "pairing": "square",
+  "arrangement_members": [
+   "authoritarian_baumrind",
+   "authoritative_baumrind",
+   "neglectful_baumrind",
+   "permissive_baumrind"
+  ],
+  "description_notes": "Baumrind parenting style on warmth × control; square. Suffixed because plain authoritarian is queued in the political sense. (The file's 'authoritarian Baumrind' lacks the parentheses; read as a line-wrap typo.)",
+  "decision": "Accepted 2026-09-08; write the `arrangement` field at seeding",
+  "source": "Baumrind (parenting styles)",
+  "tags": [],
+  "sub_chunk": "part 4 sets: Baumrind"
+ },
+ {
+  "stem": "socializer_bartle",
+  "label": "socializer (Bartle)",
+  "partner": null,
+  "pairing": "square",
+  "arrangement_members": [
+   "achiever_bartle",
+   "explorer_bartle",
+   "killer_bartle",
+   "socializer_bartle"
+  ],
+  "description_notes": "Bartle player type (acting vs interacting × players vs world); square.",
+  "decision": "Accepted 2026-09-08; write the `arrangement` field at seeding",
+  "source": "Bartle (player types)",
+  "tags": [],
+  "sub_chunk": "part 4 sets: Bartle"
+ },
+ {
+  "stem": "steadiness_disc",
+  "label": "steadiness (DISC)",
+  "partner": null,
+  "pairing": "square",
+  "arrangement_members": [
+   "conscientiousness_disc",
+   "dominance_disc",
+   "influence_disc",
+   "steadiness_disc"
+  ],
+  "description_notes": "DISC style; square.",
+  "decision": "Accepted 2026-09-08; write the `arrangement` field at seeding",
+  "source": "DISC",
+  "tags": [],
+  "sub_chunk": "part 4 sets: DISC"
+ }
+]

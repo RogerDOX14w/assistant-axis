@@ -1,0 +1,82 @@
+{
+  "entries": [
+    {
+      "stem": "anxious_preoccupied_attachment",
+      "verdict": "ok",
+      "issues": [],
+      "suggested_edit": null,
+      "strength": "at source",
+      "nearest_existing_ok": true
+    },
+    {
+      "stem": "conventional_kohlberg",
+      "verdict": "edit",
+      "issues": [
+        "'whatever follows:' sits directly before the colon and reads as 'whatever follows the colon', i.e. as introducing the list; the source's 'regardless of immediate and obvious consequences' needs a form such as 'whatever the consequences'.",
+        "The level text's defining turn, 'not only one of conformity ... but of loyalty to it, of actively maintaining, supporting, and justifying the order and of identifying with the persons or group', is carried only by 'upholding the social order'; loyalty and identification with the group, the element the source uses to separate this level from plain conformity (and that the writer's own nearest-existing line leans on), are not stated.",
+        "Nearest-existing line calls the plain corpus 'conventional' a deliberate near-duplicate; it is not: data/traits/instructions/conventional.json is 'reaching for the standard answer, the template, the way it is usually done' paired with eccentric, a different sense sharing only the word. The file's source note should say homonym with a different scope, not near-duplicate; the content neighbours are conformist, rule_abiding, obedient and deferential."
+      ],
+      "suggested_edit": "This means taking what one's family, group or country expects as right in itself, whatever the consequences, and standing loyally by that order: pleasing others, meaning well, doing one's duty, respecting authority.",
+      "strength": "at source",
+      "nearest_existing_ok": false
+    },
+    {
+      "stem": "dismissive_avoidant_attachment",
+      "verdict": "ok",
+      "issues": [],
+      "suggested_edit": null,
+      "strength": "at source",
+      "nearest_existing_ok": true
+    },
+    {
+      "stem": "fearful_avoidant_attachment",
+      "verdict": "edit",
+      "issues": [
+        "Minor: in 'finding others hard to trust or depend on completely' the 'completely' now qualifies both verbs; the source puts it on trust only ('difficult to trust others completely, or to depend on them'), so depending on others reads a shade softer than the prototype, where it is difficult outright.",
+        "Nearest-existing line leads with guarded, but data/traits/instructions/guarded.json is verbal self-censorship (swallowing the objection and the honest verdict; paired with forthright), not wariness about closeness; the rest of the line (avoidant, insecure, the cynical side of trusting) stands, and none of those is close either, so the pole has no real corpus neighbour."
+      ],
+      "suggested_edit": "This means being somewhat uncomfortable getting close: wanting emotionally close relationships yet finding it hard to trust others completely or depend on them, and sometimes worrying that getting too close will hurt.",
+      "strength": "below: 'or depend on completely' (slightly; the source has depending on them difficult outright)",
+      "nearest_existing_ok": false
+    },
+    {
+      "stem": "postconventional_kohlberg",
+      "verdict": "ok",
+      "issues": [],
+      "suggested_edit": null,
+      "strength": "at source",
+      "nearest_existing_ok": true
+    },
+    {
+      "stem": "preconventional_kohlberg",
+      "verdict": "ok",
+      "issues": [],
+      "suggested_edit": null,
+      "strength": "at source",
+      "nearest_existing_ok": true
+    },
+    {
+      "stem": "secure_attachment",
+      "verdict": "ok",
+      "issues": [],
+      "suggested_edit": null,
+      "strength": "at source",
+      "nearest_existing_ok": true
+    }
+  ],
+  "sets": [
+    {
+      "name": "Kohlberg's three levels",
+      "members": ["preconventional_kohlberg", "conventional_kohlberg", "postconventional_kohlberg"],
+      "review": "One grain and shape: each opens 'This means <gerund>', states the basis on which the person decides right and wrong, 30-31 words, and none names a stage number, the author or a developmental order. Conventional is the one member at a slightly different grain: after its basis it lists four stage behaviours (pleasing others, meaning well, duty, authority), where the other two give the basis alone; tolerable, since the list is the level's content, but it reads more behavioural. On the structure I agree with the writer that the three bases are pairwise contrastable (payoff and power; the group's expectations as right in themselves; principles valid above any group), so a triangle is readable, and that nothing in the texts says earlier/later or less/more adequate. I disagree that a sequence reading is unsupported: the texts order themselves by the scope of what counts, oneself (pre), one's family, group or country (conv), principles apart from any group (post), which is the classical widening-reference reading with conventional in the middle. The writer's caveat that pre and post both set the group aside is what a line with conventional in the middle predicts (both ends unlike the middle), not evidence against it; what a line would not predict is pre and post being closer to each other than to conv, and their bases (payoff and power versus self-chosen principle) are the most different pair in content. Both readings are defensible from these descriptions; keep the queue's 'triangle' and let the embedding check (arrangement rule 6) decide, noting 'sequence' as the alternative in the arrangement's note.",
+      "agree_with_writer": false
+    },
+    {
+      "name": "Four attachment styles",
+      "members": ["secure_attachment", "anxious_preoccupied_attachment", "dismissive_avoidant_attachment", "fearful_avoidant_attachment"],
+      "review": "Agree with the writer. Avoidance (comfort with getting close and with mutual dependence) is stated in all four: secure finds closeness relatively easy and depends comfortably; preoccupied wants complete intimacy and is uncomfortable without close relationships; dismissive is comfortable without them and prefers not to depend or be depended on; fearful is somewhat uncomfortable getting close and finds others hard to trust or depend on. Anxiety (worry about being valued, accepted or hurt) is stated as presence or explicit absence in three corners (secure does not worry; preoccupied sometimes worries about being valued less; fearful sometimes worries about being hurt) and is left to silence in the dismissive corner, exactly as the 1991 prototype leaves it; adding a 'not worrying' clause there would be invention, so the silence is right. Fearful is told apart from dismissive by wanting close relationships, and from preoccupied by being uncomfortable getting close rather than uncomfortable without closeness, so the four corners are distinct. Hedges mirror the source and give the gradient the writer describes (fearful mildest with 'somewhat' and 'sometimes'; preoccupied 'often' and 'sometimes'; secure 'relatively'; dismissive none). One grain (one's stance toward closeness and dependence, plus the worry or its absence) and one shape (gerund lists, 30-32 words). No description echoes its label or names a sibling.",
+      "agree_with_writer": true
+    }
+  ],
+  "summary": "Seven drafts: five ok, two edit. Conventional (Kohlberg) needs a rewrite: 'whatever follows:' reads as introducing the list, and the level's loyalty-to-the-order element, which the source uses to separate it from plain conformity, is dropped; a 32-word replacement is given. Fearful-avoidant has a minor scope slip ('completely' now softens depending as well as trusting); replacement given. All seven are at source strength except that slip; forms (opening, length, US spelling, no label echo, no framework named) all pass. Two nearest-existing lines are wrong in their lead name: plain 'conventional' is a homonym (template vs eccentric), not a near-duplicate, so the file's source note must not call it one; 'guarded' is verbal self-censorship, not wariness about closeness. Sets: the attachment four read as a square with both axes visible (anxiety by silence in the dismissive corner, as in the source); for Kohlberg I agree a triangle is readable but disagree that a sequence is unsupported, since the texts order by scope (oneself, one's group, principles above any group) with conventional in the middle; keep 'triangle' and let the embedding check decide."
+}

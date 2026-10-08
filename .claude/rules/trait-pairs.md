@@ -223,10 +223,22 @@ to every seed, by hand or by a writing agent; Roger reviews before
    anti-parallel phrasing**: summarise each from its own source, and let
    a reviewer read both originals and both drafts and flag accidental
    differences of scope or phrasing for Roger to decide.  A low pole
-   with no source text is derived from the high pole's content, as
-   opposite behaviour, and tagged `low_pole_derived`.  Standards pairs
-   are paired by construction; the antonym check is informational.
-   Worked example: chunk 4 sub-chunk A in `reports/seeding_log_2026-10.md`.
+   with no source text of its own is derived from what the instrument
+   says about that side (its author's account of such people in the
+   papers or the book, sources recorded on the queue entry), and only
+   where the instrument says nothing from the high pole's content as
+   opposite behaviour; either way it is tagged `low_pole_derived`.
+   Roger, 2026-10-08: an official pair means what the theory means when
+   applied to a persona, so a clause the instrument gives one pole
+   (Gelfand's "need for structure, high regulatory strength") is kept and
+   its counterpart derived, not cut.  When the instrument's site is gone,
+   the Internet Archive's capture of its own page is the official text
+   (record the capture date beside the URL; the CDX index with
+   `filter=statuscode:200` lists the captures, and an `id_` URL returns
+   the raw page), as for VALS.  Standards pairs are paired by
+   construction; the antonym check is informational.  Worked examples:
+   chunk 4 in `reports/seeding_log_2026-10.md` (sub-chunk A; the Gelfand
+   and VALS items of the consolidated decisions).
 
 **Trait generator V2: the next task, before chunk 4 (Roger, 2026-09-28).**  The rules
 above govern descriptions; several problems found in the September
@@ -485,7 +497,15 @@ Rules:
 4. **Optional keys**: `axes` (the clean pairs forming the axes of a
    square / cube / orthoplex), `parent` and `children` (tree only),
    `source` (provenance of an imported structure), `note` (free text).
-   Unknown keys are preserved.
+   Unknown keys are preserved.  **A pole of a clean pair that is also a
+   member of a square / orthoplex carries both arrangements** (the list
+   form): the `pair` always, because it is the prompt-facing clean-pair
+   convention that rule 3 and the checker rely on, and the structure
+   beside it with the pairs as its `axes`.  Decided for consistency on
+   2026-10-07 (Roger: either always or never, so that code can rely on
+   it); so written for the Big Five 5-orthoplex, the HEXACO 6-orthoplex
+   and the Inglehart-Welzel square.  A cube or set of *unpaired* members
+   (the MBTI 4-cube) has no pairs to carry.
 5. **Check after every edit**:
    `uv run python data_analysis/check_arrangements.py` (exit 1 on any
    inconsistency; `--list-unclassified` prints the backlog).

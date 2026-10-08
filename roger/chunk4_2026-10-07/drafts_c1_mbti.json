@@ -1,0 +1,179 @@
+[
+ {
+  "stem": "enfj_mbti",
+  "label": "ENFJ (MBTI)",
+  "source_url": "https://www.myersbriggs.org/my-mbti-personality-type/the-16-mbti-personality-types/",
+  "source_text": "Warm, empathetic, responsive, and responsible. Highly attuned to the emotions, needs, and motivations of others. Find potential in everyone, want to help others fulfill their potential. May act as catalysts for individual and group growth. Loyal, responsive to praise and criticism. Sociable, facilitate others in a group, and provide inspiring leadership.",
+  "source_retrieved": "2026-10-07",
+  "description_draft": "This means drawing energy from people, taking in patterns and possibilities, deciding by values, and liking things settled: warm and responsible, attuned to others' needs, finding potential in everyone, leading with inspiration.",
+  "low_pole_derived": false,
+  "nearest_existing": "Preferences touch extroverted / gregarious (E), intuitive / big_picture (N), empathetic / compassionate (F), organized / decisive (J); the portrait sits nearest inspirational, nurturing, supportive and charismatic.",
+  "notes": "Source of record: the Foundation's single 'The 16 MBTI Personality Types' page. The current myersbriggs.org has no per-type pages (the older URL my-mbti-personality-type/mbti-basics/the-16-mbti-types.htm redirects to this page), so the one paragraph is the whole official text; the page credits it to 'Introduction to Myers-Briggs Type by Isabel Briggs Myers, published by The Myers-Briggs Company'. source_text was taken from the raw page HTML because the fetch tool's summarizer clipped every paragraph to one or two sentences. Portrait keeps warmth/responsibility, attunement to others, finding potential, inspiring leadership; dropped for the 32-word cap: 'May act as catalysts for individual and group growth' (its hedge 'may' goes with the clause), 'Loyal, responsive to praise and criticism', 'Sociable, facilitate others in a group'.",
+  "set_review": "SHAPE. All sixteen use one template: 'This means <energy>, <information>, <decisions>, and <outer world>: <portrait>.' The four preference phrases are fixed, two per dichotomy, so each dichotomy is one word swap read off the set: 'drawing energy from people' / 'drawing energy from reflection'; 'taking in facts and specifics' / 'taking in patterns and possibilities'; 'deciding by logic' / 'deciding by values'; 'liking things settled' / 'keeping options open'. The wording is the Foundation's own from its Preferences page (energized by people vs by reflection; facts and specifics vs patterns and possibilities; logic vs values; like things decided vs keep options open). Adjacent corners of the 4-cube differ in exactly one preamble phrase; the portraits are not controlled for that. LENGTH. The preamble is 18 words in every entry and every portrait is 14 words, so all sixteen are exactly 32 words, the top of the 18-32 band, and the portrait holds two or three clauses, no more. Two departures Roger may want reversed: (a) 'deciding by values' rather than the packet example's 'deciding by values and people', to save two words and to avoid 'people' twice in the four E-F types; (b) every portrait drops one to three of the Foundation's clauses (listed per entry in notes). If the band is relaxed to about 36 for this set, each portrait could take back one clause. STRENGTH. All sixteen are positive and measured, as the source; this set is markedly milder than the corpus's plain traits in the same regions (ENTJ beside dominant, ESTJ beside controlling, INTP beside detached), per rule 9. Four source paragraphs carry explicit hedges and the drafts keep them as plain words: INTP 'sometimes critical' (verbatim), ENFP 'often improvising', ENTP 'apt to switch interests', INFP 'accepting unless a value is threatened'; the other twelve paragraphs have no hedge in the kept clauses, so those four read a shade milder than the rest. UNEVENNESS IN THE SOURCE. The Foundation's I-S paragraphs (ISTJ, ISFJ, ISFP, ISTP) all open with 'quiet'; its I-N paragraphs do not (INTP has it mid-paragraph, dropped here because the I phrase covers it), so 'quiet' appears in four portraits and reinforces the I phrase unevenly. Two portraits keep a signature line that echoes a preference phrase: ESTJ 'practical, matter-of-fact' (echoes S) and ISTJ 'orderly in everything' (echoes J); kept because they are the paragraphs' best-known lines, but they could be swapped for a dropped clause if Roger wants portraits free of preference echoes. The J phrase does not touch the corpus trait judgmental: the Foundation's Preferences page says explicitly that Judging does not mean judgmental. VOCABULARY. No type code, letters, preference names (extravert, intuition, sensing, thinking, feeling, judging, perceiving) or instrument name appear in any description; 'feel' is not used either. US spelling throughout (realize, organizing, skeptical)."
+ },
+ {
+  "stem": "enfp_mbti",
+  "label": "ENFP (MBTI)",
+  "source_url": "https://www.myersbriggs.org/my-mbti-personality-type/the-16-mbti-personality-types/",
+  "source_text": "Warmly enthusiastic and imaginative. See life as full of possibilities. Make connections between events and information very quickly, and confidently proceed based on the patterns they see. Want a lot of affirmation from others, and readily give appreciation and support. Spontaneous and flexible, often rely on their ability to improvise and their verbal fluency.",
+  "source_retrieved": "2026-10-07",
+  "description_draft": "This means drawing energy from people, taking in patterns and possibilities, deciding by values, and keeping options open: warmly enthusiastic, imaginative, quick to connect things and run with them, often improvising fluently.",
+  "low_pole_derived": false,
+  "nearest_existing": "Preferences touch extroverted (E), intuitive / divergent (N), empathetic (F), spontaneous / improvisational / flexible (P); the portrait sits nearest effusive, creative, energetic, encouraging and optimistic.",
+  "notes": "Same single source page as enfj_mbti (no per-type pages exist on the current site; text taken from the raw HTML). Portrait keeps enthusiasm, imagination, fast connections acted on confidently, improvisation and verbal fluency ('fluently'); the hedge 'often rely on' is kept as 'often'. Dropped for the word cap: 'Want a lot of affirmation from others, and readily give appreciation and support'; 'See life as full of possibilities' is carried by the N phrase."
+ },
+ {
+  "stem": "entj_mbti",
+  "label": "ENTJ (MBTI)",
+  "source_url": "https://www.myersbriggs.org/my-mbti-personality-type/the-16-mbti-personality-types/",
+  "source_text": "Frank, decisive, assume leadership readily. Quickly see illogical and inefficient procedures and policies, develop and implement comprehensive systems to solve organizational problems. Enjoy long-term planning and goal setting. Usually well informed, well read, enjoy expanding their knowledge and passing it on to others. Forceful in presenting their ideas.",
+  "source_retrieved": "2026-10-07",
+  "description_draft": "This means drawing energy from people, taking in patterns and possibilities, deciding by logic, and liking things settled: frank and decisive, quick to lead, fixing inefficient procedures with systems, forceful with ideas.",
+  "low_pole_derived": false,
+  "nearest_existing": "Preferences touch extroverted (E), intuitive / strategic (N), logical / analytical (T), decisive / organized (J); the portrait sits nearest dominant, forthright, efficient, confident and bold.",
+  "notes": "Same single source page as enfj_mbti (text from the raw HTML). Portrait keeps frankness, decisiveness, ready leadership, seeing inefficient procedures and building systems against them, forcefulness in presenting ideas. Dropped for the word cap: 'Enjoy long-term planning and goal setting' and 'Usually well informed, well read, enjoy expanding their knowledge and passing it on to others' (its hedge 'usually' goes with the clause)."
+ },
+ {
+  "stem": "entp_mbti",
+  "label": "ENTP (MBTI)",
+  "source_url": "https://www.myersbriggs.org/my-mbti-personality-type/the-16-mbti-personality-types/",
+  "source_text": "Quick, ingenious, stimulating, alert, and outspoken. Resourceful in solving new and challenging problems. Adept at generating conceptual possibilities and then analyzing them strategically. Good at reading other people. Bored by routine, will seldom do the same thing the same way, apt to turn to one new interest after another.",
+  "source_retrieved": "2026-10-07",
+  "description_draft": "This means drawing energy from people, taking in patterns and possibilities, deciding by logic, and keeping options open: quick, ingenious, outspoken, resourceful with new problems, bored by routine, apt to switch interests.",
+  "low_pole_derived": false,
+  "nearest_existing": "Preferences touch extroverted (E), intuitive / divergent / innovative (N), logical / analytical (T), flexible / improvisational (P); the portrait sits nearest quick_witted, inquisitive, opinionated, contrarian and restless.",
+  "notes": "Same single source page as enfj_mbti (text from the raw HTML). Portrait keeps quick/ingenious/outspoken, resourcefulness with new problems, boredom with routine, turning to new interests; the hedge 'apt to' is kept verbatim. Dropped for the word cap: 'stimulating, alert', 'Adept at generating conceptual possibilities and then analyzing them strategically' (the N phrase carries possibilities), 'Good at reading other people', 'will seldom do the same thing the same way'."
+ },
+ {
+  "stem": "esfj_mbti",
+  "label": "ESFJ (MBTI)",
+  "source_url": "https://www.myersbriggs.org/my-mbti-personality-type/the-16-mbti-personality-types/",
+  "source_text": "Warmhearted, conscientious, and cooperative. Want harmony in their environment, work with determination to establish it. Like to work with others to complete tasks accurately and on time. Loyal, follow through even in small matters. Notice what others need in their day-to-day lives and try to provide it. Want to be appreciated for who they are and for what they contribute.",
+  "source_retrieved": "2026-10-07",
+  "description_draft": "This means drawing energy from people, taking in facts and specifics, deciding by values, and liking things settled: warmhearted, cooperative, working hard for harmony, loyal in small matters, tending to others' needs.",
+  "low_pole_derived": false,
+  "nearest_existing": "Preferences touch extroverted / gregarious (E), concrete / practical (S), empathetic / compassionate (F), organized / dependable (J); the portrait sits nearest cooperative, nurturing, conciliatory, loyal and supportive.",
+  "notes": "Same single source page as enfj_mbti (text from the raw HTML). Portrait keeps warmheartedness, cooperation, working with determination for harmony, 'Loyal, follow through even in small matters' (rendered as 'loyal in small matters'), noticing and providing what others need ('try to provide' rendered as 'tending to'). Dropped for the word cap: 'conscientious', 'Like to work with others to complete tasks accurately and on time', 'Want to be appreciated for who they are and for what they contribute'."
+ },
+ {
+  "stem": "esfp_mbti",
+  "label": "ESFP (MBTI)",
+  "source_url": "https://www.myersbriggs.org/my-mbti-personality-type/the-16-mbti-personality-types/",
+  "source_text": "Outgoing, friendly, and accepting. Exuberant lovers of life, people, and material comforts. Enjoy working with others to make things happen. Bring common sense and a realistic approach to their work and make work fun. Flexible and spontaneous, adapt readily to new people and environments. Learn best by trying a new skill with other people.",
+  "source_retrieved": "2026-10-07",
+  "description_draft": "This means drawing energy from people, taking in facts and specifics, deciding by values, and keeping options open: outgoing, friendly, accepting, exuberant about life and comforts, making work fun with common sense.",
+  "low_pole_derived": false,
+  "nearest_existing": "Preferences touch extroverted / gregarious (E), concrete / experiential (S), empathetic / accommodating (F), spontaneous / flexible (P); the portrait sits nearest cheerful, playful, friendly, entertaining and epicurean.",
+  "notes": "Same single source page as enfj_mbti (text from the raw HTML). Portrait keeps outgoing/friendly/accepting, exuberance about life and material comforts, common sense, making work fun. Dropped for the word cap: 'Enjoy working with others to make things happen', 'adapt readily to new people and environments' (the P phrase carries flexibility), 'Learn best by trying a new skill with other people'."
+ },
+ {
+  "stem": "estj_mbti",
+  "label": "ESTJ (MBTI)",
+  "source_url": "https://www.myersbriggs.org/my-mbti-personality-type/the-16-mbti-personality-types/",
+  "source_text": "Practical, realistic, matter-of-fact. Decisive, quickly move to implement decisions. Organize projects and people to get things done, focus on getting results in the most efficient way possible. Take care of routine details. Have a clear set of logical standards, systematically follow them and want others to also. Forceful in implementing their plans.",
+  "source_retrieved": "2026-10-07",
+  "description_draft": "This means drawing energy from people, taking in facts and specifics, deciding by logic, and liking things settled: practical, matter-of-fact, organizing projects and people for efficient results, holding everyone to clear standards.",
+  "low_pole_derived": false,
+  "nearest_existing": "Preferences touch extroverted (E), concrete / practical (S), logical (T), organized / decisive / methodical (J); the portrait sits nearest efficient, controlling, strict, dominant, rule_abiding and conventional.",
+  "notes": "Same single source page as enfj_mbti (text from the raw HTML). Portrait keeps practical/matter-of-fact (an S echo, kept as the paragraph's signature opening), organizing projects and people for efficient results, clear standards held by oneself and expected of others ('want others to also' rendered as 'holding everyone to'). Dropped for the word cap: 'Decisive, quickly move to implement decisions' (the J phrase), 'Take care of routine details', 'Forceful in implementing their plans'."
+ },
+ {
+  "stem": "estp_mbti",
+  "label": "ESTP (MBTI)",
+  "source_url": "https://www.myersbriggs.org/my-mbti-personality-type/the-16-mbti-personality-types/",
+  "source_text": "Flexible and tolerant, take a pragmatic approach focused on immediate results. Bored by theories and conceptual explanations; want to act energetically to solve the problem. Focus on the here and now, spontaneous, enjoy each moment they can be active with others. Enjoy material comforts and style. Learn best through doing.",
+  "source_retrieved": "2026-10-07",
+  "description_draft": "This means drawing energy from people, taking in facts and specifics, deciding by logic, and keeping options open: flexible, tolerant, bored by theory, energetic in the here and now, learning by doing.",
+  "low_pole_derived": false,
+  "nearest_existing": "Preferences touch extroverted (E), concrete / practical / experiential (S), logical / pragmatic (T), spontaneous / flexible / adaptable (P); the portrait sits nearest hands_on, bold, risk_seeking, energetic and adventurous.",
+  "notes": "Same single source page as enfj_mbti (text from the raw HTML). Portrait keeps flexible/tolerant, boredom with theory, acting energetically in the here and now, learning through doing. Dropped for the word cap: 'take a pragmatic approach focused on immediate results' (partly carried by the S phrase), 'enjoy each moment they can be active with others', 'Enjoy material comforts and style'."
+ },
+ {
+  "stem": "infj_mbti",
+  "label": "INFJ (MBTI)",
+  "source_url": "https://www.myersbriggs.org/my-mbti-personality-type/the-16-mbti-personality-types/",
+  "source_text": "Seek meaning and connection in ideas, relationships, and material possessions. Want to understand what motivates people and are insightful about others. Conscientious and committed to their firm values. Develop a clear vision about how best to serve the common good. Organized and decisive in implementing their vision.",
+  "source_retrieved": "2026-10-07",
+  "description_draft": "This means drawing energy from reflection, taking in patterns and possibilities, deciding by values, and liking things settled: seeking meaning and connection, insightful about people, holding firm values, serving the common good.",
+  "low_pole_derived": false,
+  "nearest_existing": "Preferences touch introverted / reserved (I), intuitive / holistic (N), empathetic / idealistic (F), organized / decisive (J); the portrait sits nearest introspective, socially_perceptive, principled, humanitarian and wise.",
+  "notes": "Same single source page as enfj_mbti (text from the raw HTML). Portrait keeps seeking meaning and connection, insight into people, firm values, serving the common good. Dropped for the word cap: 'in ideas, relationships, and material possessions', 'Conscientious', 'Develop a clear vision', 'Organized and decisive in implementing their vision' (the J phrase)."
+ },
+ {
+  "stem": "infp_mbti",
+  "label": "INFP (MBTI)",
+  "source_url": "https://www.myersbriggs.org/my-mbti-personality-type/the-16-mbti-personality-types/",
+  "source_text": "Idealistic, loyal to their values and to people who are important to them. Want to live a life that is congruent with their values. Curious, quick to see possibilities, can be catalysts for implementing ideas. Seek to understand people and to help them fulfill their potential. Adaptable, flexible, and accepting unless a value is threatened.",
+  "source_retrieved": "2026-10-07",
+  "description_draft": "This means drawing energy from reflection, taking in patterns and possibilities, deciding by values, and keeping options open: idealistic, loyal, living one's values, helping others grow, accepting unless a value is threatened.",
+  "low_pole_derived": false,
+  "nearest_existing": "Preferences touch introverted (I), intuitive (N), empathetic / idealistic (F), flexible / adaptable (P); the portrait sits nearest authentic, principled, gentle, loyal and introspective.",
+  "notes": "Same single source page as enfj_mbti (text from the raw HTML). Portrait keeps idealism, loyalty, living congruently with one's values, helping people fulfill their potential, and the conditional 'accepting unless a value is threatened' verbatim. Dropped for the word cap: 'to people who are important to them' (loyalty kept bare), 'Curious, quick to see possibilities, can be catalysts for implementing ideas' (its hedge 'can' goes with the clause; the N phrase carries possibilities)."
+ },
+ {
+  "stem": "intj_mbti",
+  "label": "INTJ (MBTI)",
+  "source_url": "https://www.myersbriggs.org/my-mbti-personality-type/the-16-mbti-personality-types/",
+  "source_text": "Have original minds and great drive for implementing their ideas and achieving their goals. Quickly see patterns in external events and develop long-range explanatory perspectives. When committed, organize a job and carry it through. Skeptical and independent, have high standards of competence and performance—for themselves and others.",
+  "source_retrieved": "2026-10-07",
+  "description_draft": "This means drawing energy from reflection, taking in patterns and possibilities, deciding by logic, and liking things settled: original, driven to realize one's ideas, skeptical, independent, expecting competence of oneself and others.",
+  "low_pole_derived": false,
+  "nearest_existing": "Preferences touch introverted (I), intuitive / big_picture / strategic (N), logical / analytical (T), decisive / organized (J); the portrait sits nearest independent, skeptical, perfectionist, self_reliant, innovative and long_term_oriented.",
+  "notes": "Same single source page as enfj_mbti (text from the raw HTML). Portrait keeps originality, drive to implement ideas, skepticism, independence, high standards of competence for self and others ('expecting competence of'). Dropped for the word cap: 'Quickly see patterns in external events and develop long-range explanatory perspectives' (the N phrase carries patterns), 'When committed, organize a job and carry it through' (the J phrase), 'achieving their goals'."
+ },
+ {
+  "stem": "intp_mbti",
+  "label": "INTP (MBTI)",
+  "source_url": "https://www.myersbriggs.org/my-mbti-personality-type/the-16-mbti-personality-types/",
+  "source_text": "Seek to develop logical explanations for everything that interests them. Theoretical and abstract, interested more in ideas than in social interaction. Quiet, contained, flexible, and adaptable. Have unusual ability to focus in depth to solve problems in their area of interest. Skeptical, sometimes critical, always analytical.",
+  "source_retrieved": "2026-10-07",
+  "description_draft": "This means drawing energy from reflection, taking in patterns and possibilities, deciding by logic, and keeping options open: seeking logical explanations for everything, preferring ideas to company, skeptical, sometimes critical, always analytical.",
+  "low_pole_derived": false,
+  "nearest_existing": "Preferences touch introverted / solitary (I), intuitive / abstract / theoretical (N), logical / analytical / rationalist (T), flexible (P); the portrait sits nearest cerebral, skeptical, critical, detached and curious.",
+  "notes": "Same single source page as enfj_mbti (text from the raw HTML). Portrait keeps seeking logical explanations for everything, preferring ideas to social interaction, and the closing 'Skeptical, sometimes critical, always analytical' with its hedge 'sometimes' verbatim. Dropped for the word cap: 'Theoretical and abstract' (the N phrase), 'Quiet, contained, flexible, and adaptable' (the I and P phrases), 'unusual ability to focus in depth to solve problems in their area of interest'."
+ },
+ {
+  "stem": "isfj_mbti",
+  "label": "ISFJ (MBTI)",
+  "source_url": "https://www.myersbriggs.org/my-mbti-personality-type/the-16-mbti-personality-types/",
+  "source_text": "Quiet, friendly, responsible, and conscientious. Committed and steady in meeting their obligations. Thorough, painstaking, and accurate. Loyal, considerate, notice and remember specifics about people who are important to them, concerned with how others feel. Strive to create an orderly and harmonious environment at work and at home.",
+  "source_retrieved": "2026-10-07",
+  "description_draft": "This means drawing energy from reflection, taking in facts and specifics, deciding by values, and liking things settled: quiet, friendly, conscientious, steady in meeting obligations, painstaking, considerate, remembering specifics about one's people.",
+  "low_pole_derived": false,
+  "nearest_existing": "Preferences touch introverted / reserved (I), concrete / detail_oriented (S), empathetic / compassionate (F), organized / dependable / conscientious (J); the portrait sits nearest loyal, responsible, meticulous, nurturing and steady.",
+  "notes": "Same single source page as enfj_mbti (text from the raw HTML). Portrait keeps quiet/friendly/conscientious, steadiness in obligations, painstaking care, considerateness, remembering specifics about one's people. Dropped for the word cap: 'responsible', 'Thorough ... accurate' (folded into 'painstaking'), 'concerned with how others feel' (folded into 'considerate'), 'Strive to create an orderly and harmonious environment at work and at home' (the J phrase carries order)."
+ },
+ {
+  "stem": "isfp_mbti",
+  "label": "ISFP (MBTI)",
+  "source_url": "https://www.myersbriggs.org/my-mbti-personality-type/the-16-mbti-personality-types/",
+  "source_text": "Quiet, friendly, sensitive, and kind. Enjoy the present moment, what's going on around them. Like to have their own space and to work within their own time frame. Loyal and committed to their values and to people who are important to them. Dislike disagreements and conflicts; don't force their opinions or values on others.",
+  "source_retrieved": "2026-10-07",
+  "description_draft": "This means drawing energy from reflection, taking in facts and specifics, deciding by values, and keeping options open: quiet, sensitive, kind, enjoying the present, wanting one's own space and pace, disliking conflict.",
+  "low_pole_derived": false,
+  "nearest_existing": "Preferences touch introverted / reserved (I), concrete / experiential (S), empathetic / gentle (F), flexible / spontaneous / easygoing (P); the portrait sits nearest artistic, aesthete, conciliatory, unassuming and laid_back.",
+  "notes": "Same single source page as enfj_mbti (text from the raw HTML). Portrait keeps quiet/sensitive/kind, enjoying the present moment, wanting one's own space and time frame ('pace'), disliking disagreements and conflicts. Dropped for the word cap: 'friendly', 'Loyal and committed to their values and to people who are important to them', 'don't force their opinions or values on others' (folded into 'disliking conflict'; the most distinctive dropped clause in the set, a candidate to restore if the band is relaxed)."
+ },
+ {
+  "stem": "istj_mbti",
+  "label": "ISTJ (MBTI)",
+  "source_url": "https://www.myersbriggs.org/my-mbti-personality-type/the-16-mbti-personality-types/",
+  "source_text": "Quiet, serious, earn success by being thorough and dependable. Practical, matter-of-fact, realistic, and responsible. Decide logically what should be done and work toward it steadily, regardless of distractions. Take pleasure in making everything orderly and organized—their work, their home, their life. Value traditions and loyalty.",
+  "source_retrieved": "2026-10-07",
+  "description_draft": "This means drawing energy from reflection, taking in facts and specifics, deciding by logic, and liking things settled: quiet, thorough, dependable, working steadily despite distractions, orderly in everything, valuing tradition and loyalty.",
+  "low_pole_derived": false,
+  "nearest_existing": "Preferences touch introverted / reserved (I), concrete / practical / detail_oriented (S), logical (T), organized / methodical / dependable (J); the portrait sits nearest conscientious, serious, traditional, thorough, loyal and steady.",
+  "notes": "Same single source page as enfj_mbti (text from the raw HTML). Portrait keeps quiet/thorough/dependable, steady work regardless of distractions, making everything orderly (a J echo, kept as the paragraph's best-known line), valuing traditions and loyalty. Dropped for the word cap: 'serious', 'Practical, matter-of-fact, realistic, and responsible' (the S phrase), 'Decide logically what should be done' (the T phrase)."
+ },
+ {
+  "stem": "istp_mbti",
+  "label": "ISTP (MBTI)",
+  "source_url": "https://www.myersbriggs.org/my-mbti-personality-type/the-16-mbti-personality-types/",
+  "source_text": "Tolerant and flexible, quiet observers until a problem appears, then act quickly to find workable solutions. Analyze what makes things work and readily get through large amounts of data to isolate the core of practical problems. Interested in cause and effect, organize facts using logical principles, value efficiency.",
+  "source_retrieved": "2026-10-07",
+  "description_draft": "This means drawing energy from reflection, taking in facts and specifics, deciding by logic, and keeping options open: tolerant, flexible, quietly observing until a problem appears, then quick with a workable fix.",
+  "low_pole_derived": false,
+  "nearest_existing": "Preferences touch introverted / reserved (I), concrete / hands_on (S), logical / analytical / pragmatic (T), flexible / adaptable (P); the portrait sits nearest observant, problem_solving, efficient, calm, resourceful and independent.",
+  "notes": "Same single source page as enfj_mbti (text from the raw HTML). Portrait keeps tolerant/flexible, quiet observation until a problem appears, acting quickly for a workable solution. Dropped for the word cap: 'Analyze what makes things work and readily get through large amounts of data to isolate the core of practical problems' (the most distinctive dropped clause here, a candidate to restore if the band is relaxed), 'Interested in cause and effect, organize facts using logical principles, value efficiency' (the T phrase)."
+ }
+]

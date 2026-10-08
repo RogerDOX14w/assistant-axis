@@ -1,0 +1,23 @@
+12 entities, estimated $0.36 at $0.03/entity
+$ uv run python data_analysis/regenerate_trait_instructions.py --traits agreeable_hexaco careless_hexaco conscientious_hexaco conventional_hexaco emotional_hexaco extraverted_hexaco honest_humble_hexaco introverted_hexaco open_hexaco quarrelsome_hexaco sly_hexaco tough_hexaco
+Traits to process: 12 [RogerV2 style, temp=1.0, no thinking, antonym]
+API calls per trait: 1
+[1/12] OK quarrelsome (HEXACO): 5 instruction pairs, 40 questions
+  emotional (HEXACO): 4 distinct openings of 5; generating again
+[2/12] OK extraverted (HEXACO): 5 instruction pairs, 40 questions
+[3/12] OK careless (HEXACO): 5 instruction pairs, 40 questions
+[4/12] OK conscientious (HEXACO): 5 instruction pairs, 40 questions
+[5/12] OK open (HEXACO): 5 instruction pairs, 40 questions
+[6/12] OK honest-humble (HEXACO): 5 instruction pairs, 40 questions
+[7/12] OK agreeable (HEXACO): 5 instruction pairs, 40 questions
+[8/12] OK introverted (HEXACO): 5 instruction pairs, 40 questions
+[9/12] OK conventional (HEXACO): 5 instruction pairs, 40 questions
+[10/12] OK tough (HEXACO): 5 instruction pairs, 40 questions
+[11/12] OK emotional (HEXACO): 5 instruction pairs, 40 questions, generated again for the openings
+[12/12] OK sly (HEXACO): 5 instruction pairs, 40 questions
+
+Done: 12 processed, 0 skipped, 0 errors
+API calls made: ~12
+[usage] total=$0.601 calls=13 [claude-sonnet-4-6: $0.601 in=33,559 out=33,328 n=13]
+[usage] cumulative record: /Users/roger/Documents/GitHub/assistant-axis/data/traits/regeneration_usage.json (total $195.424 over 5608 calls)
+Done: 12/12 marked generated

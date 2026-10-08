@@ -191,6 +191,21 @@ embodiment register (`wind`, `zeitgeist`, `void`, `echo`, `dreamer`,
   description must name its specific force.  Reversed readings: ignore,
   or fold into the description as an extra element where it makes
   emotional sense; no separate reversed set.
+  **Which meaning (Roger, 2026-10-07):** the description would be of the
+  card either as a *significator* (the card standing for the querent or
+  another person, a use many readers advise against for the Major Arcana)
+  or at least of its meaning in a reading where the card clearly
+  represents a person rather than a situation; not its situational or
+  event meaning.  Waite's *Pictorial Key to the Tarot* (1911) is public
+  domain, so the canonical text can be quoted in full under the
+  standards-derived method of chunk 4 (AGENT_NOTES description rule 9)
+  rather than reconstructed.
+- **Roles or traits? (Roger, 2026-10-07):** not clearly roles.  A card is
+  not inherently exclusive of a profession (one can be the Hermit and a
+  baker), which is the mark of a trait; but the twenty-two are mutually
+  exclusive of each other, as roles are, and several are named like
+  professions (the Magician, the Hierophant, the Hermit, the Emperor).
+  Decide the entity type with the set, before seeding.
 - **Arrangement**: `set` of 22, `source` "Rider-Waite tarot, Major
   Arcana".  Not a `sequence`: the numerical order (the Fool's Journey) is
   not expected to correlate with the embeddings.

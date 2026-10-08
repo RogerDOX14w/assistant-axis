@@ -1,0 +1,20 @@
+10 entities, estimated $0.30 at $0.03/entity
+$ uv run python data_analysis/regenerate_trait_instructions.py --traits agreeable_big_five antagonistic_big_five careless_big_five closed_big_five conscientious_big_five emotionally_stable_big_five extraverted_big_five introverted_big_five neurotic_big_five open_big_five
+Traits to process: 10 [RogerV2 style, temp=1.0, no thinking, antonym]
+API calls per trait: 1
+[1/10] OK agreeable (Big Five): 5 instruction pairs, 40 questions
+[2/10] OK neurotic (Big Five): 5 instruction pairs, 40 questions
+[3/10] OK extraverted (Big Five): 5 instruction pairs, 40 questions
+[4/10] OK conscientious (Big Five): 5 instruction pairs, 40 questions
+[5/10] OK emotionally-stable (Big Five): 5 instruction pairs, 40 questions
+[6/10] OK antagonistic (Big Five): 5 instruction pairs, 40 questions
+[7/10] OK closed (Big Five): 5 instruction pairs, 40 questions
+[8/10] OK careless (Big Five): 5 instruction pairs, 40 questions
+[9/10] OK open (Big Five): 5 instruction pairs, 40 questions
+[10/10] OK introverted (Big Five): 5 instruction pairs, 40 questions
+
+Done: 10 processed, 0 skipped, 0 errors
+API calls made: ~10
+[usage] total=$0.449 calls=10 [claude-sonnet-4-6: $0.449 in=25,836 out=24,743 n=10]
+[usage] cumulative record: /Users/roger/Documents/GitHub/assistant-axis/data/traits/regeneration_usage.json (total $194.824 over 5595 calls)
+Done: 10/10 marked generated

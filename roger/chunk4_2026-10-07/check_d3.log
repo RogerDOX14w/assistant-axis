@@ -1,0 +1,35 @@
+$ uv run python data_analysis/generate_antonyms.py --traits achiever_vals believer_vals experiencer_vals innovator_vals maker_vals striver_vals survivor_vals thinker_vals
+Done: 8 checked
+achiever_vals                -> nonconformist|anti-establishment score=3 nearly_nice
+believer_vals                -> progressive|iconoclastic     score=3 nasty
+experiencer_vals             -> cautious|conventional        score=3 nasty
+innovator_vals               -> laggard|conformist|traditionalist score=3 nasty
+maker_vals                   -> consumerist|status-conscious score=3 open
+striver_vals                 -> unpretentious|frugal         score=3 nasty
+survivor_vals                -> aspirational|thriving        score=3 open
+thinker_vals                 -> impulsive|unreflective       score=3 nasty
+$ uv run python data_analysis/generate_antonyms.py --traits acts_of_service physical_touch quality_time receiving_gifts words_of_affirmation
+Done: 5 checked
+acts_of_service              -> passive|self-serving         score=2 nearly_nice
+physical_touch               -> touch-averse|physically-distant score=4 open
+quality_time                 -> distracted|inattentive       score=3 open
+receiving_gifts              -> gift-indifferent|gift-averse score=3 open
+words_of_affirmation         -> action-oriented              score=3 open
+$ uv run python data_analysis/generate_antonyms.py --traits aural_vark kinesthetic_vark read_write_vark visual_vark
+Done: 4 checked
+aural_vark                   -> visual|textual               score=3 open
+kinesthetic_vark             -> abstract|theoretical         score=3 nasty
+read_write_vark              -> kinesthetic|experiential     score=3 nearly_nice
+visual_vark                  -> verbal|read-write            score=4 open
+$ uv run python data_analysis/generate_antonyms.py --traits blood_type_a blood_type_ab blood_type_b blood_type_o
+Done: 4 checked
+blood_type_a                 -> careless|negligent           score=3 nearly_nice
+blood_type_ab                -> predictable|conventional|transparent score=3 nasty
+blood_type_b                 -> cautious|conscientious|reserved score=3 nasty
+blood_type_o                 -> submissive|meek|diffident    score=3 nearly_nice
+$ uv run python data_analysis/generate_antonyms.py --traits gryffindor hufflepuff ravenclaw slytherin
+Done: 4 checked
+gryffindor                   -> cowardly|timid|cautious      score=3 nasty
+hufflepuff                   -> self-serving|opportunistic   score=3 open
+ravenclaw                    -> anti-intellectual|conformist score=3 nearly_nice
+slytherin                    -> guileless|naive              score=3 nasty

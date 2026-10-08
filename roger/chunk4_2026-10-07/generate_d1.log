@@ -1,0 +1,60 @@
+12 entities, estimated $0.36 at $0.03/entity
+$ uv run python data_analysis/regenerate_trait_instructions.py --traits aquarius aries cancer capricorn gemini leo libra pisces sagittarius scorpio taurus virgo
+Traits to process: 12 [RogerV2 style, temp=1.0, no thinking, antonym]
+API calls per trait: 1
+[1/12] OK Leo: 5 instruction pairs, 40 questions
+[2/12] OK Aries: 5 instruction pairs, 40 questions
+[3/12] OK Libra: 5 instruction pairs, 40 questions
+[4/12] OK Capricorn: 5 instruction pairs, 40 questions
+[5/12] OK Scorpio: 5 instruction pairs, 40 questions
+[6/12] OK Pisces: 5 instruction pairs, 40 questions
+[7/12] OK Sagittarius: 5 instruction pairs, 40 questions
+[8/12] OK Aquarius: 5 instruction pairs, 40 questions
+  Cancer: 4 distinct openings of 5; generating again
+[9/12] OK Gemini: 5 instruction pairs, 40 questions
+[10/12] OK Taurus: 5 instruction pairs, 40 questions
+[11/12] OK Virgo: 5 instruction pairs, 40 questions
+[12/12] OK Cancer: 5 instruction pairs, 40 questions, generated again for the openings
+
+Done: 12 processed, 0 skipped, 0 errors
+API calls made: ~12
+[usage] total=$0.602 calls=13 [claude-sonnet-4-6: $0.602 in=33,470 out=33,429 n=13]
+[usage] cumulative record: /Users/roger/Documents/GitHub/assistant-axis/data/traits/regeneration_usage.json (total $199.999 over 5706 calls)
+Done: 12/12 marked generated
+9 entities, estimated $0.27 at $0.03/entity
+$ uv run python data_analysis/regenerate_trait_instructions.py --traits enneagram_1 enneagram_2 enneagram_3 enneagram_4 enneagram_5 enneagram_6 enneagram_7 enneagram_8 enneagram_9
+Traits to process: 9 [RogerV2 style, temp=1.0, no thinking, antonym]
+API calls per trait: 1
+[1/9] OK Enneagram 8: 5 instruction pairs, 40 questions
+[2/9] OK Enneagram 2: 5 instruction pairs, 40 questions
+[3/9] OK Enneagram 9: 5 instruction pairs, 40 questions
+[4/9] OK Enneagram 1: 5 instruction pairs, 40 questions
+[5/9] OK Enneagram 6: 5 instruction pairs, 40 questions
+[6/9] OK Enneagram 7: 5 instruction pairs, 40 questions
+[7/9] OK Enneagram 3: 5 instruction pairs, 40 questions
+[8/9] OK Enneagram 5: 5 instruction pairs, 40 questions
+  Enneagram 4: 4 distinct openings of 5; generating again
+[9/9] OK Enneagram 4: 5 instruction pairs, 40 questions, generated again for the openings
+
+Done: 9 processed, 0 skipped, 0 errors
+API calls made: ~9
+[usage] total=$0.458 calls=10 [claude-sonnet-4-6: $0.458 in=25,846 out=25,339 n=10]
+[usage] cumulative record: /Users/roger/Documents/GitHub/assistant-axis/data/traits/regeneration_usage.json (total $200.456 over 5716 calls)
+Done: 9/9 marked generated
+6 entities, estimated $0.18 at $0.03/entity
+$ uv run python data_analysis/regenerate_trait_instructions.py --traits artistic_holland conventional_holland enterprising_holland investigative_holland realistic_holland social_holland
+Traits to process: 6 [RogerV2 style, temp=1.0, no thinking, antonym]
+API calls per trait: 1
+[1/6] OK enterprising (Holland): 5 instruction pairs, 40 questions
+[2/6] OK investigative (Holland): 5 instruction pairs, 40 questions
+[3/6] OK artistic (Holland): 5 instruction pairs, 40 questions
+[4/6] OK realistic (Holland): 5 instruction pairs, 40 questions
+[5/6] OK conventional (Holland): 5 instruction pairs, 40 questions
+  social (Holland): 4 distinct openings of 5; generating again
+[6/6] OK social (Holland): 5 instruction pairs, 40 questions, generated again for the openings
+
+Done: 6 processed, 0 skipped, 0 errors
+API calls made: ~6
+[usage] total=$0.331 calls=7 [claude-sonnet-4-6: $0.331 in=18,007 out=18,443 n=7]
+[usage] cumulative record: /Users/roger/Documents/GitHub/assistant-axis/data/traits/regeneration_usage.json (total $200.787 over 5723 calls)
+Done: 6/6 marked generated
