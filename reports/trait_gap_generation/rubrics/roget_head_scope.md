@@ -2,10 +2,10 @@
 
 | | |
 |---|---|
-| **Status** | Draft 1 (2026-10-08), pinned as version 1 in [versions.json](./versions.json). |
+| **Status** | Draft 2 (2026-10-08), pinned as version 2 in [versions.json](./versions.json); draft 1 was version 1. |
 | **What the model is shown** | About 20 heads of Roget's Thesaurus per call, in text order: each head's id (its number), title, class and section titles, and its adjectives in Roget's order (the first 20 distinct ones). |
 | **What it returns** | For each head a reason, then `character`: 2, 1 or 0. |
-| **What it is tuned on** | Not tuned.  Checked once against the Roget pilot's trait-hood outcomes ([head_scope_readout.md](../../../data/candidates/roget/head_scope_readout.md)). |
+| **What it is tuned on** | Not tuned on labelled heads.  Draft 2 replaced draft 1 after one run: draft 1 rated 289 of 586 heads 0, 123 of them heads the corpus already covers or partly covers.  Both are checked against the Roget pilot's trait-hood outcomes in [head_scope_readout.md](../../../data/candidates/roget/head_scope_readout.md). |
 | **Model** | Haiku 5.5 (`claude-haiku-5-5`; no temperature: it refuses one).  Sent uncached (about 480 tokens, under Haiku 5.5's 512-token minimum; the code caches it if a later draft grows past the minimum). |
 
 **To edit:** change the text inside the block below.  Everything between the two fence lines is sent
@@ -28,15 +28,15 @@ the ratings are in [head_scope.json](../../../data/candidates/roget/head_scope.j
 ## The prompt
 
 ````text
-Each item below is one head of Roget's Thesaurus (1911): a numbered entry, given with its id (its number in the thesaurus), its title, the class and section of the thesaurus it belongs to, and its adjectives in Roget's order (at most 20). We are looking for the heads whose adjectives describe people's character.
+Each item below is one head of Roget's Thesaurus (1911): a numbered entry, given with its id (its number in the thesaurus), its title, the class and section of the thesaurus it belongs to, and its adjectives in Roget's order (at most 20). We are looking for the heads whose adjectives can describe what a person is like.
 
-For each head, say how many of its adjectives can describe a person's character, temperament or habitual way of acting: what sort of person someone is, as in "she is a ___ person".
+For each head, say how many of its adjectives can describe what sort of person someone is, as in "she is a ___ person". That includes character and temperament; habits of thought, speech and conduct; attitudes and values; skills and failings shown in how a person acts; moods and feelings a person can be prone to; and the groups a person belongs to, such as an origin, a faith, a class or a way of life.
 
 - 2: most of them can.
 - 1: some can and some cannot; the head is mixed.
-- 0: few or none can. They describe things, prices, quantities, documents, places or events, or a person's looks or situation (in debt, well paid, away from home) rather than character.
+- 0: few or none can. They describe things, prices, quantities, documents, places or events, or a person's looks or passing circumstances (in custody, on duty, behind in payments) rather than the person.
 
-Judge the adjectives, not the title or the section: a title may name a thing while its adjectives describe people, or a quality while its adjectives describe things. Read each adjective in the sense it has in its head; a word that describes people only in another of its senses does not count. Count an adjective only in an ordinary use about a person, not by a stretch. An adjective for a feeling counts when a person can be prone to it.
+Judge the adjectives, not the title or the section: a title may name a thing while its adjectives describe people, or a quality while its adjectives describe things. Read each adjective in the sense it has in its head; a word that describes people only in another of its senses does not count. Count an adjective only in an ordinary use about a person, not by a stretch. When you are unsure between 0 and 1, answer 1.
 
 For each head give a reason in one short sentence, then the rating.
 
@@ -128,7 +128,9 @@ Built from the code before the first pin, as AGENT_NOTES asks ("Read the rendere
  ]}
 ```
 
-Read for fit (2026-10-08).  The opening describes what is sent: an id that is the head's number (a string, since some heads are lettered, 812a, 817a), a title, the class and section titles, and at most 20 adjectives; the answer's `id` asks for the id as given, so no renumbering can slip in.  Three changes came from reading these calls, before the pin: (1) the price heads hold words that describe people in another sense (*reasonable*, *moderate*, *low* in Cheapness; *dear*, *precious* in Dearness), so the rubric now says to read each adjective in the sense it has in its head; (2) 845 Beauty and 846 Ugliness describe looks, which the 0 line did not name, so it now says "a person's looks or situation"; (3) head 830 reached the model as ". Painfulness", a parser artifact of the head line, so the payload strips a leading period from the title (`head_scope.display_title`).  Multiword entries ("of great price", "not in the vein") do not fit the frame "she is a ___ person" word for word; they are left in, as Roget gives them, since the frame illustrates the question rather than a test to apply.
+The user turns are the same under both drafts (only the system turn changed).
+
+Read for fit (2026-10-08, draft 1; draft 2 was read the same way, `--render 698,188`).  The opening describes what is sent: an id that is the head's number (a string, since some heads are lettered, 812a, 817a), a title, the class and section titles, and at most 20 adjectives; the answer's `id` asks for the id as given, so no renumbering can slip in.  Three changes came from reading these calls, before the pin: (1) the price heads hold words that describe people in another sense (*reasonable*, *moderate*, *low* in Cheapness; *dear*, *precious* in Dearness), so the rubric now says to read each adjective in the sense it has in its head; (2) 845 Beauty and 846 Ugliness describe looks, which the 0 line did not name, so it now says "a person's looks or situation"; (3) head 830 reached the model as ". Painfulness", a parser artifact of the head line, so the payload strips a leading period from the title (`head_scope.display_title`).  Multiword entries ("of great price", "not in the vein") do not fit the frame "she is a ___ person" word for word; they are left in, as Roget gives them, since the frame illustrates the question rather than a test to apply.
 
 ## Your notes
 
@@ -136,4 +138,5 @@ Read for fit (2026-10-08).  The opening describes what is sent: an id that is th
 
 | draft | who | what changed | why |
 |---|---|---|---|
-| 1 | Opus | First draft, from the brief of 2026-10-08 | |
+| 1 | Opus | First draft, from the brief of 2026-10-08; before the pin, the head's-sense clause and "looks" in the 0 line, after reading the rendered calls | |
+| 2 | Opus | "Character" spelled out as what a person is like: character and temperament, habits of thought, speech and conduct, attitudes and values, skills and failings shown in action, moods a person is prone to, and memberships (origin, faith, class, way of life); the 0 line says "passing circumstances" with three examples; "When you are unsure between 0 and 1, answer 1"; the separate feeling sentence folded into the list | Draft 1 read "character" narrowly: it rated 0 heads such as Skill, Cooperation, Duty, Rejoicing, Wealth and Marriage, 123 of the 289 it rated 0 being heads the corpus covers or partly covers.  Memberships count because the corpus counts them as traits (decisions_m1.md decision 3); the brief's 0 line named "a person's situation", and this narrows it to passing circumstances (QUESTIONS 44) |

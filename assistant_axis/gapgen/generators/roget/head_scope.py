@@ -59,11 +59,13 @@ RATINGS = (0, 1, 2)
 FILE_NAME = "head_scope.json"
 USAGE_NAME = "head_scope_usage.json"
 RESPONSES_NAME = "head_scope_responses.jsonl"
-#: Estimate: characters per token, the new tokenizer's factor (Haiku 5.5 counts about 30% more tokens),
-#: and output per call (thinking included; the descriptors call measured 243 output tokens for one row).
+#: Estimate, measured on the three full runs of 2026-10-08 (90 calls, head_scope_responses.jsonl): about
+#: 2.5 characters of prompt per input token (the JSON payload tokenizes densely on Haiku 5.5's tokenizer)
+#: and about 157 output tokens per head, thinking included (about 3,080 a call of 19-20 heads).  The first
+#: estimate (4 characters x 1.3, 70 a head) under-stated a run by 40% ($0.034 against $0.055).
 CHARS_PER_TOKEN = 4.0
-TOKENIZER_FACTOR = 1.3
-OUT_BASE_TOKENS, OUT_PER_HEAD_TOKENS = 400, 70
+TOKENIZER_FACTOR = 1.6
+OUT_BASE_TOKENS, OUT_PER_HEAD_TOKENS = 100, 155
 
 _ROMAN = re.compile(r"^[IVXL]+\.\s*")
 
