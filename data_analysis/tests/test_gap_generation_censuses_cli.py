@@ -61,6 +61,8 @@ def test_ingest_dry_run_then_real(env, capsys):
     assert len(rows) == 17
     counts = json.loads((root / "censuses" / "ingest_counts.json").read_text())
     assert counts["ceiling"]["n_corpus"] == 4 and counts["n_tda"] == 5
+    assert counts["repaired_list"][0]["repaired"] == "accommodating" and "repair_suggestions_list" in counts
+    assert counts["malformed_list"][0]["raw"] == "F.F.V"
     # rerun: identical table, no backup
     assert CG.main(common + ["ingest"]) == 0
     assert not list((root / "censuses").glob("census_table.jsonl.bak.*"))

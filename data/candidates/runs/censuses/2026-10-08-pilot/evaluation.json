@@ -188,11 +188,11 @@
     "schema_version": "1.0",
     "produced_by": {
       "cmd": "uv run python data_analysis/gap_generation/census_generator.py report --run-id 2026-10-08-pilot",
-      "git_sha": "35181c4+dirty",
+      "git_sha": "7bae284+dirty",
       "author": "Roger Dearnaley",
       "title": "census generator evaluation, run 2026-10-08-pilot"
     },
-    "produced_at": "2026-10-08T03:33:32+00:00",
+    "produced_at": "2026-10-08T03:36:35+00:00",
     "inputs": [
       {
         "dep_key": "census_table",
@@ -206,10 +206,10 @@
       {
         "dep_key": "ingest_counts",
         "path": "data/candidates/censuses/ingest_counts.json",
-        "fingerprint": "v1:2026-10-08T03:32:40+00:00@5139",
+        "fingerprint": "v1:2026-10-08T03:36:20+00:00@99157",
         "kind": "file",
         "dataset_id": null,
-        "last_modified_at": "2026-10-08T03:32:40+00:00",
+        "last_modified_at": "2026-10-08T03:36:20+00:00",
         "extras": {}
       },
       {
@@ -240,6 +240,6 @@
         "extras": {}
       }
     ],
-    "inputs_sha256": "2ed04c76c305db92e5aa52ae4dd38234d5367af2d8418bd0fbfff6527e48609d"
+    "inputs_sha256": "de75836e20c21fac8d676be54c8365e9c872ceb5cce4637080206c152eaabb60"
   }
 }

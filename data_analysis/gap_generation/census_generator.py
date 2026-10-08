@@ -91,6 +91,7 @@ def build(args, lookups=None):
     counts["ceiling"] = E.string_ceiling(rows, corpus, queue).as_dict()
     counts["malformed_list"] = extra["malformed"]
     counts["repaired_list"] = extra["repaired"]
+    counts["repair_suggestions_list"] = extra["repair_suggestions"]
     return rows, counts
 
 

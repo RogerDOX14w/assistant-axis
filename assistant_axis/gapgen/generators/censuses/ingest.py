@@ -1,6 +1,7 @@
 """Parse the census files into one table, ``census_table.jsonl`` (plan section 6).
 
-One row per distinct stem (``normalize_to_file_name`` of the cleaned surface): a word in
+One row per distinct stem (the registry's stem, ``gapgen.normalize.normalize_candidate``, which is
+``normalize_to_file_name`` of the cleaned surface): a word in
 several Allport-Odbert columns, or in both the TDA and Allport-Odbert, is one row.  Rows that
 cannot be cleaned (digits, letters outside Latin, internal punctuation) are kept with
 ``ineligible_reason: "malformed"`` and no stem.
@@ -41,7 +42,6 @@ from pathlib import Path
 from typing import Callable, Iterable, Mapping, Optional, Sequence
 
 from assistant_axis.atomic_io import atomic_write_text
-from assistant_axis.entity_id import normalize_to_file_name
 from assistant_axis.gapgen.freq import HARD_REJECT_BELOW, PROBE_BELOW, FreqInfo, zipf_info
 from assistant_axis.gapgen.normalize import normalize_candidate
 from assistant_axis.gapgen.registry import utc_stamp
@@ -369,7 +369,7 @@ def build_table(allport: Iterable[RawEntry], tda: Sequence[TdaRow], *, lookups: 
     accs: dict[str, _Acc] = {}
 
     def acc_for(surface: str) -> _Acc:
-        stem = normalize_to_file_name(normalize_candidate(surface).label)
+        stem = normalize_candidate(surface).stem
         if stem not in accs:
             accs[stem] = _Acc(surface=surface)
         return accs[stem]
@@ -412,7 +412,7 @@ def build_table(allport: Iterable[RawEntry], tda: Sequence[TdaRow], *, lookups: 
                 else:
                     suggestions.append(rec)
         surface = rep or s
-        stem = normalize_to_file_name(normalize_candidate(surface).label)
+        stem = normalize_candidate(surface).stem
         existed = stem in accs
         a = acc_for(surface)
         if (stem, e.column) in seen_col:
