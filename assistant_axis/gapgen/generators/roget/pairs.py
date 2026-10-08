@@ -14,6 +14,11 @@ lettered head between them, or named by an editorial ``{ant. N}`` note):
   (resolute / irresolute; -ful / -less), over the adjectives and nouns, :func:`negation_overlap`;
 * ``wn_links``: items of one head that WordNet lists as antonyms of items of the other.
 
+Since 2026-10-09 the rules are second: Roget's own pairing, read from the Tabular Synopsis of Categories of
+the printed 1911 edition (:mod:`.synopsis`), is the strongest evidence, and :func:`merge_synopsis` lets it
+decide every head it prints (``source: "synopsis"``), keeping the rule result in each record for
+comparison; the rules decide only the heads it does not print.
+
 A candidate is confirmed when the annotation or title negation is present, or the negation count
 and fraction reach :data:`CONFIRM` ``n_min`` / ``frac_min``, or the WordNet links reach ``wn_min``.
 Confirmed candidates are matched greedily, strongest first (:func:`rule_pairs`).  A **weak** pass
@@ -371,6 +376,80 @@ def rule_pairs(index: RogetIndex, lex, *, heads: Optional[Collection[str]] = Non
     return {h: out[h] for h in scope}
 
 
+# --------------------------------------------------------------------------- the printed synopsis
+
+def merge_synopsis(index: RogetIndex, rules: Mapping[str, HeadPairing], synopsis: Mapping[str, Mapping], *,
+                   lex=None) -> dict[str, HeadPairing]:
+    """The pairing with Roget's printed synopsis (:mod:`.synopsis`, ``synopsis_pairs.json``) as the
+    strongest evidence (``source: "synopsis"``); every record keeps the rule result under
+    ``evidence["rule"]`` for comparison.
+
+    * A head the synopsis prints in a pair or a triad takes that pairing (a pair also carries the rules'
+      word-level evidence for it, as a rule pair does).
+    * A head the synopsis prints alone is a singleton, unless the rules paired it with a head the 1911
+      synopsis does not print (a lettered head added later, such as 464a Incomparability): that rule pair
+      is kept, with the synopsis record beside it.
+    * A head the synopsis does not print keeps its rule result, except a pair whose partner the synopsis
+      pairs elsewhere (then a singleton, ``partner_taken_by_synopsis``) and a third pole whose pair the
+      merge broke (``triad_broken_by_synopsis``)."""
+    def rule_summary(h):
+        r = rules.get(h)
+        return {"kind": r.kind, "partner": r.partner, "source": r.source} if r else None
+
+    def syn_summary(h):
+        s = synopsis[h]
+        return {k: s[k] for k in ("kind", "partner", "members", "block", "how", "page", "row") if k in s}
+
+    out: dict[str, HeadPairing] = {}
+    for h in index.order:
+        s = synopsis.get(h)
+        if s is None or s["kind"] not in ("pair", "triad"):
+            continue
+        ev = {"synopsis": syn_summary(h), "rule": rule_summary(h)}
+        if s["kind"] == "pair":
+            ev = {**pair_evidence(index.heads[h], index.heads[s["partner"]], lex), "llm": None, **ev}
+        out[h] = HeadPairing(head=h, partner=s["partner"], kind=s["kind"], members=list(s["members"]), evidence=ev,
+                             source="synopsis")
+    for h in index.order:
+        s = synopsis.get(h)
+        if s is None or s["kind"] != "singleton":
+            continue
+        r = rules.get(h)
+        p = r.partner if r is not None and r.kind == "pair" else None
+        if p and p not in synopsis and rules.get(p) is not None and rules[p].partner == h:
+            out[h] = HeadPairing(head=h, partner=p, kind="pair", members=list(r.members),
+                                 evidence={**r.evidence, "synopsis": syn_summary(h), "rule": rule_summary(h)},
+                                 source=r.source)
+        else:
+            out[h] = HeadPairing(head=h, partner=None, kind="singleton", members=[h],
+                                 evidence={"synopsis": syn_summary(h), "rule": rule_summary(h)}, source="synopsis")
+    rest = [h for h in index.order if h not in out and h in rules]
+    for h in rest:                                   # pairs and lone heads first, third poles after
+        r = rules[h]
+        if r.kind == "triad":
+            continue
+        if r.kind == "pair" and r.partner in synopsis and not (r.partner in out and out[r.partner].partner == h):
+            out[h] = HeadPairing(head=h, partner=None, kind="singleton", members=[h],
+                                 evidence={"rule": rule_summary(h), "partner_taken_by_synopsis": r.partner},
+                                 source=r.source)
+        else:
+            out[h] = HeadPairing(head=h, partner=r.partner, kind=r.kind, members=list(r.members),
+                                 evidence={**r.evidence, "synopsis": None}, source=r.source)
+    for h in rest:
+        r = rules[h]
+        if r.kind != "triad":
+            continue
+        pair = [m for m in r.members if m != h]
+        if len(pair) == 2 and all(m in out for m in pair) and out[pair[0]].partner == pair[1]:
+            out[h] = HeadPairing(head=h, partner=None, kind="triad", members=list(r.members),
+                                 evidence={**r.evidence, "synopsis": None}, source=r.source)
+        else:
+            out[h] = HeadPairing(head=h, partner=None, kind="singleton", members=[h],
+                                 evidence={"rule": rule_summary(h), "triad_broken_by_synopsis": pair},
+                                 source=r.source)
+    return {h: out[h] for h in index.order if h in out}
+
+
 def residue(index: RogetIndex, pairing: Mapping[str, HeadPairing]) -> list[tuple[str, list[str]]]:
     """``(subsection key, head ids still unresolved)`` in text order."""
     out = []
@@ -441,7 +520,9 @@ def save_pairs(pairing: Mapping[str, HeadPairing], path: Path, *, inputs: Sequen
 
     payload = {"rules_version": PAIRING_RULES_VERSION, "confirm": dict(CONFIRM), **(meta or {}),
                "pairs": {h: p.to_json() for h, p in pairing.items()}}
-    env = json_metadata(payload, inputs=list(inputs), title="Roget opposed heads (rules, workstream 2)")
+    title = ("Roget opposed heads (printed synopsis, then rules; workstream 2)" if (meta or {}).get("synopsis")
+             else "Roget opposed heads (rules, workstream 2)")
+    env = json_metadata(payload, inputs=list(inputs), title=title)
     path = Path(path)
     path.parent.mkdir(parents=True, exist_ok=True)
     from .parse import dumps_one_per_line

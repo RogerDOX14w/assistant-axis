@@ -15,6 +15,8 @@ row with two sources, interface resolution 4), with a ``gloss_hint`` built from 
 opposed head (or, for a pair completion, the trait that covers it) that WordNet lists as an
 antonym or that is a negation form of the word (:func:`pair_candidates`; the rank-matched pairs
 it adds up to ``pair_top`` per head pair are recorded in ``pair_candidates.jsonl`` without a hint).
+Hints come from pairs the printed synopsis or the rules give (:data:`HINT_SOURCES`), not from a pair by
+position alone.
 
 With ``head_scope`` (the head-scope ratings, :mod:`.head_scope`; QUESTIONS 44) a selected head rated 0
 (few or none of its adjectives describe a person's character) is skipped: the words it would have given
@@ -49,6 +51,8 @@ from .parse import Head, RogetIndex
 
 GENERATOR = "roget"
 WN_GENERATOR = "wn_clusters"
+#: Pair sources whose word-level opposites become partner hints: Roget's printed synopsis and the rules.
+HINT_SOURCES = ("synopsis", "rule", "rule_weak")
 #: Platform rates for the downstream estimate (coding_plan_02 revision item 4): M1 per word, M3
 #: per word that passes M1.
 M1_USD_PER_WORD = 0.004
@@ -438,8 +442,9 @@ def harvest(report: CoverageReport, index: RogetIndex, pairs: Mapping[str, HeadP
     hints: dict[tuple[str, str], str] = {}
     for p in pc:
         # a partner hint names a word-level opposite: a WordNet antonym or a negation form across
-        # two heads the rules paired (rank-matched pairs stay in pair_candidates.jsonl only)
-        if p.pair_source not in ("rule", "rule_weak") or not (p.double_confirmed or p.morph):
+        # two heads Roget's synopsis or the rules paired (rank-matched pairs stay in pair_candidates.jsonl
+        # only; a pair by position alone gives none)
+        if p.pair_source not in HINT_SOURCES or not (p.double_confirmed or p.morph):
             continue
         hints.setdefault((p.a, p.head_a), p.b)
         if not p.partner_existing:

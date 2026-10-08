@@ -1,6 +1,6 @@
 # Roget coverage map (workstream 2)
 
-Which of the dispositional heads of Roget's Thesaurus (1911; Classes IV-VI, intellect, volition and the affections, plus the Class I-III heads whose adjectives hold one of our labels) the trait corpus already occupies.  A **head** is one numbered entry of the thesaurus (604 Resolution); an **opposed head** is its correlative (605 Irresolution), reconstructed by rule in [head_pairs.json](./head_pairs.json).  Each trait is placed on heads by [label_heads.json](./label_heads.json): its **primary** head (where its sense sits) and any **secondary** heads (other senses the description also covers).  Data: [heads.json](./heads.json); spot check of the placement: [map_spotcheck.md](./map_spotcheck.md); method: [coding_plan_02_roget_wordnet.md](../../../reports/trait_gap_generation/coding_plan_02_roget_wordnet.md).
+Which of the dispositional heads of Roget's Thesaurus (1911; Classes IV-VI, intellect, volition and the affections, plus the Class I-III heads whose adjectives hold one of our labels) the trait corpus already occupies.  A **head** is one numbered entry of the thesaurus (604 Resolution); an **opposed head** is its correlative (605 Irresolution), as Roget printed it in the Tabular Synopsis of the 1911 edition ([synopsis_pairs.json](./synopsis_pairs.json), [synopsis_readout.md](./synopsis_readout.md)), by rule for the heads the synopsis does not print; the pairing is [head_pairs.json](./head_pairs.json).  Each trait is placed on heads by [label_heads.json](./label_heads.json): its **primary** head (where its sense sits) and any **secondary** heads (other senses the description also covers).  Data: [heads.json](./heads.json); spot check of the placement: [map_spotcheck.md](./map_spotcheck.md); method: [coding_plan_02_roget_wordnet.md](../../../reports/trait_gap_generation/coding_plan_02_roget_wordnet.md).
 
 States: **covered** (an existing trait has the head as its primary), **partly covered** (only as a secondary), **queued** (only a label waiting in [seed_queue.json](../../seed_queue.json)), **empty**.  Gap classes: **pair_completion** (empty, its opposed head covered: a word here would complete a pair), **pair_empty** (empty, with an opposed head that is not covered), **singleton_empty** (empty, no opposed head found), **queued_only**, **partly_covered**, **crowded** (three or more traits have it as their primary), **covered**.
 
@@ -11,10 +11,10 @@ States: **covered** (an existing trait has the head as its primary), **partly co
 - Heads in scope: **675** (576 dispositional, 99 from Classes I-III).
 - Not character (rated 0): **188** heads, left out of the counts below (ratings: 2 on 164, 1 on 234, 0 on 188; 89 unrated, mostly heads with no adjectives).
 - Covered **272**, partly covered **52**, uncovered **163** (of which 16 have a queued label only).
-- Opposed pairs in scope: both poles covered **70**, one pole **51**, neither **30** (by the pairing's evidence: {"rule": {"neither_pole_covered": 28, "both_poles_covered": 67, "one_pole_covered": 44}, "rule_weak": {"one_pole_covered": 7, "both_poles_covered": 3, "neither_pole_covered": 2}}).
+- Opposed pairs in scope: both poles covered **75**, one pole **57**, neither **41** (by the pairing's evidence: {"rule": {"neither_pole_covered": 1}, "synopsis": {"neither_pole_covered": 40, "both_poles_covered": 75, "one_pole_covered": 57}}).
 - Labels placed: 686 existing traits with a primary head (194 without; 651 of the primaries in scope), 214 queued labels (58 without).
-- Gap classes: pair_completion 24, pair_empty 27, singleton_empty 96, queued_only 16, partly_covered 52, crowded 75, covered 197.
-- Pairing by rule only (the plan's LLM pass for the residue was dropped in the 2026-10-08 revision): 221 of 576 dispositional heads are unresolved and are treated as having no opposed head.
+- Gap classes: pair_completion 27, pair_empty 61, singleton_empty 59, queued_only 16, partly_covered 52, crowded 75, covered 197.
+- Pairing as Roget printed it in the Tabular Synopsis of the 1911 edition ([synopsis_readout.md](./synopsis_readout.md)), by rule for the heads the synopsis does not print: of the 576 dispositional heads, 402 are in a pair, 20 are the third head of a triad, 151 are singletons and 3 are unresolved; only a pair gives a head an opposed head here.
 
 ## By section
 
@@ -60,131 +60,138 @@ States: **covered** (an existing trait has the head as its primary), **partly co
 | VI IV. Moral affections | 22 | 5 | 2 | 15 | 12 |
 | VI V. Religious affections | 8 | 4 | 0 | 10 | 4 |
 
-## pair_completion (24)
+## pair_completion (27)
 
 | head | section | opposed head | its traits | queued | parked | secondary of |
 |---|---|---|---|---|---|---|
-| 124 Oldness | I VI. Time / 1. Time with reference to Succession | 123 Newness (rule) | [innovative](../../traits/instructions/innovative.json) | - | - | - |
-| 452 Incogitancy | IV I. Operations of intellect in general | 451 Thought (rule) | [abstract](../../traits/instructions/abstract.json), [introspective](../../traits/instructions/introspective.json), [meditative](../../traits/instructions/meditative.json), [pensive](../../traits/instructions/pensive.json), [philosophical](../../traits/instructions/philosophical.json), [speculative](../../traits/instructions/speculative.json) | - | [non-contemplative](../../seed_queue.json) (queued) | - |
-| 465 Discrimination | IV II. Precursory conditions and operations | 465a Indiscrimination (rule) | [promiscuous](../../traits/instructions/promiscuous.json) | - | - | - |
-| 502 Sanity | IV V. Results of reasoning | 503 Insanity (rule) | [delusional](../../traits/instructions/delusional.json) | - | [rational](../../seed_queue.json) (queued) | - |
-| 519 Unintelligibility | IV I. Nature of ideas communicated | 518 Intelligibility (rule) | [clear](../../traits/instructions/clear.json), [transparent](../../traits/instructions/transparent.json) | - | - | - |
-| 529 Disclosure | IV II. Modes of communication | 528 Concealment (rule_weak) | [cryptic](../../traits/instructions/cryptic.json), [esoteric](../../traits/instructions/esoteric.json) | - | - | - |
-| 536 Negation | IV II. Modes of communication | 535 Affirmation (rule) | [emphatic](../../traits/instructions/emphatic.json), [opinionated](../../traits/instructions/opinionated.json), [words of affirmation](../../traits/instructions/words_of_affirmation.json) | - | - | - |
-| 574 Vigor | IV III. Means of communicating ideas / 1. Language generally | 575 Feebleness (rule) | [dull](../../traits/instructions/dull.json) | - | - | - |
-| 579 Inelegance | IV III. Means of communicating ideas / 1. Language generally | 578 Elegance (rule) | [formal](../../traits/instructions/formal.json) | - | - | - |
-| 585 Taciturnity | IV III. Means of communicating ideas / 1. Language generally | 584 Loquacity (rule) | [glib](../../traits/instructions/glib.json) | - | - | - |
-| 600 Will | V I. Volition in general / 1. Acts of Volition | 601 Necessity (rule) | [determinist](../../traits/instructions/determinist.json), [fatalistic](../../traits/instructions/fatalistic.json) | - | - | - |
-| 607 Tergiversation | V I. Volition in general / 1. Acts of Volition | 608 Caprice (rule_weak) | [eccentric](../../traits/instructions/eccentric.json), [erratic](../../traits/instructions/erratic.json), [whimsical](../../traits/instructions/whimsical.json) | - | - | - |
-| 640 Insufficiency | V II. Prospective volition / 1. Actual Subservience | 639 Sufficiency (rule) | [satisficing](../../traits/instructions/satisficing.json) | - | - | - |
-| 643 Unimportance | V II. Prospective volition / 1. Actual Subservience | 642 Importance (rule) | [serious](../../traits/instructions/serious.json) | - | [hierarchy-indifferent](../../seed_queue.json) (queued) | - |
-| 645 Inutility | V II. Prospective volition / 1. Actual Subservience | 644 Utility (rule) | [utilitarian](../../traits/instructions/utilitarian.json) | - | - | - |
-| 647 Inexpedience | V II. Prospective volition / 1. Actual Subservience | 646 Expedience (rule) | [expedient](../../traits/instructions/expedient.json), [pragmatic](../../traits/instructions/pragmatic.json) | - | - | - |
-| 652 Cleanness | V II. Prospective volition / 1. Actual Subservience | 653 Uncleanness (rule) | [slovenly](../../traits/instructions/slovenly.json) | - | - | - |
-| 687 Repose | V III. Voluntary action / 1. Simple voluntary Action | 686 Exertion (rule_weak) | [industrious](../../traits/instructions/industrious.json) | - | - | - |
-| 717 Defense | V IV. Antagonism / 2. Active Antagonism | 716 Attack (rule) | [aggressive](../../traits/instructions/aggressive.json) | - | - | - |
-| 750 Liberation | V I. General intersocial volition | 751 Restraint (rule_weak) | [trapped-in-job](../../traits/instructions/trapped_in_job.json) | - | - | - |
-| 761 Prohibition | V II. Special intersocial volition | 760 Permission (rule) | [permissive](../../traits/instructions/permissive.json), [permissive (Baumrind)](../../traits/instructions/permissive_baumrind.json) | - | - | - |
-| 889 Enmity | VI III. Sympathetic affections | 888 Friendship (rule) | [close-knit](../../traits/instructions/close_knit.json), [friendly](../../traits/instructions/friendly.json) | - | - | - |
-| 945 Vice | VI IV. Moral affections | 944 Virtue (rule) | [moral](../../traits/instructions/moral.json) | - | - | - |
-| 961 Impurity | VI IV. Moral affections | 960 Purity (rule) | [chaste](../../traits/instructions/chaste.json) | - | - | - |
+| 124 Oldness | I VI. Time / 1. Time with reference to Succession | 123 Newness (synopsis) | [innovative](../../traits/instructions/innovative.json) | - | - | - |
+| 452 Incogitancy | IV I. Operations of intellect in general | 451 Thought (synopsis) | [abstract](../../traits/instructions/abstract.json), [introspective](../../traits/instructions/introspective.json), [meditative](../../traits/instructions/meditative.json), [pensive](../../traits/instructions/pensive.json), [philosophical](../../traits/instructions/philosophical.json), [speculative](../../traits/instructions/speculative.json) | - | [non-contemplative](../../seed_queue.json) (queued) | - |
+| 465 Discrimination | IV II. Precursory conditions and operations | 465a Indiscrimination (synopsis) | [promiscuous](../../traits/instructions/promiscuous.json) | - | - | - |
+| 493 Ignoramus | IV V. Results of reasoning | 492 Scholar (synopsis) | [educated](../../traits/instructions/educated.json) | - | - | - |
+| 501 Fool | IV V. Results of reasoning | 500 Sage (synopsis) | [thinker (VALS)](../../traits/instructions/thinker_vals.json) | - | - | - |
+| 502 Sanity | IV V. Results of reasoning | 503 Insanity (synopsis) | [delusional](../../traits/instructions/delusional.json) | - | [rational](../../seed_queue.json) (queued) | - |
+| 519 Unintelligibility | IV I. Nature of ideas communicated | 518 Intelligibility (synopsis) | [clear](../../traits/instructions/clear.json), [transparent](../../traits/instructions/transparent.json) | - | - | - |
+| 536 Negation | IV II. Modes of communication | 535 Affirmation (synopsis) | [emphatic](../../traits/instructions/emphatic.json), [opinionated](../../traits/instructions/opinionated.json), [words of affirmation](../../traits/instructions/words_of_affirmation.json) | - | - | - |
+| 574 Vigor | IV III. Means of communicating ideas / 1. Language generally | 575 Feebleness (synopsis) | [dull](../../traits/instructions/dull.json) | - | - | - |
+| 579 Inelegance | IV III. Means of communicating ideas / 1. Language generally | 578 Elegance (synopsis) | [formal](../../traits/instructions/formal.json) | - | - | - |
+| 585 Taciturnity | IV III. Means of communicating ideas / 1. Language generally | 584 Loquacity (synopsis) | [glib](../../traits/instructions/glib.json) | - | - | - |
+| 600 Will | V I. Volition in general / 1. Acts of Volition | 601 Necessity (synopsis) | [determinist](../../traits/instructions/determinist.json), [fatalistic](../../traits/instructions/fatalistic.json) | - | - | - |
+| 607 Tergiversation | V I. Volition in general / 1. Acts of Volition | 606 Obstinacy (synopsis) | [obsessive](../../traits/instructions/obsessive.json), [unyielding](../../traits/instructions/unyielding.json) | - | - | - |
+| 643 Unimportance | V II. Prospective volition / 1. Actual Subservience | 642 Importance (synopsis) | [serious](../../traits/instructions/serious.json) | - | [hierarchy-indifferent](../../seed_queue.json) (queued) | - |
+| 645 Inutility | V II. Prospective volition / 1. Actual Subservience | 644 Utility (synopsis) | [utilitarian](../../traits/instructions/utilitarian.json) | - | - | - |
+| 647 Inexpedience | V II. Prospective volition / 1. Actual Subservience | 646 Expedience (synopsis) | [expedient](../../traits/instructions/expedient.json), [pragmatic](../../traits/instructions/pragmatic.json) | - | - | - |
+| 652 Cleanness | V II. Prospective volition / 1. Actual Subservience | 653 Uncleanness (synopsis) | [slovenly](../../traits/instructions/slovenly.json) | - | - | - |
+| 687 Repose | V III. Voluntary action / 1. Simple voluntary Action | 686 Exertion (synopsis) | [industrious](../../traits/instructions/industrious.json) | - | - | - |
+| 701 Bungler | V III. Voluntary action / 2. Complex Voluntary Action | 700 Proficient (synopsis) | [specialist](../../traits/instructions/specialist.json) | - | - | - |
+| 706 Hindrance | V IV. Antagonism / 2. Active Antagonism | 707 Aid (synopsis) | [helpful](../../traits/instructions/helpful.json), [supportive](../../traits/instructions/supportive.json) | - | - | - |
+| 717 Defense | V IV. Antagonism / 2. Active Antagonism | 716 Attack (synopsis) | [aggressive](../../traits/instructions/aggressive.json) | - | - | - |
+| 750 Liberation | V I. General intersocial volition | 751 Restraint (synopsis) | [trapped-in-job](../../traits/instructions/trapped_in_job.json) | - | - | - |
+| 761 Prohibition | V II. Special intersocial volition | 760 Permission (synopsis) | [permissive](../../traits/instructions/permissive.json), [permissive (Baumrind)](../../traits/instructions/permissive_baumrind.json) | - | - | - |
+| 889 Enmity | VI III. Sympathetic affections | 888 Friendship (synopsis) | [close-knit](../../traits/instructions/close_knit.json), [friendly](../../traits/instructions/friendly.json) | - | - | - |
+| 912 Benefactor | VI III. Sympathetic affections | 913 Evil doer (synopsis) | [killer (Bartle)](../../traits/instructions/killer_bartle.json) | - | - | - |
+| 945 Vice | VI IV. Moral affections | 944 Virtue (synopsis) | [moral](../../traits/instructions/moral.json) | - | - | - |
+| 961 Impurity | VI IV. Moral affections | 960 Purity (synopsis) | [chaste](../../traits/instructions/chaste.json) | - | - | - |
 
-## pair_empty (27)
+## pair_empty (61)
 
 | head | section | opposed head | its traits | queued | parked | secondary of |
 |---|---|---|---|---|---|---|
-| 193 Littleness | II II. Dimensions | 192 Size (rule) | - | - | - | - |
-| 403 Silence | III III. Organic matter / 1. Sensation in general | 402 Sound (rule) | - | - | - | - |
-| 471 Impossibility | IV III. Materials for reasoning | 470 Possibility (rule) | - | - | - | - |
-| 472 Probability | IV III. Materials for reasoning | 473 Improbability (rule) | - | - | [hopeful](../../seed_queue.json) (queued) | - |
-| 473 Improbability | IV III. Materials for reasoning | 472 Probability (rule) | - | - | - | - |
-| 508 Inexpectation | IV VI. Extension of thought / 1. To the Past | 507 Expectation (rule) | - | - | - | - |
-| 565 Misnomer | IV III. Means of communicating ideas / 1. Language generally | 564 Nomenclature (rule_weak) | - | - | - | - |
-| 602 Willingness | V I. Volition in general / 1. Acts of Volition | 603 Unwillingness (rule) | - | - | - | - |
-| 603 Unwillingness | V I. Volition in general / 1. Acts of Volition | 602 Willingness (rule) | - | - | - | - |
-| 614 Desuetude | V I. Volition in general / 1. Acts of Volition | 613 Habit (rule) | - | - | - | - |
-| 621 Chance | V II. Prospective volition / 1. Conceptional volition | 620 Intention (rule) | - | - | - | - |
-| 673 Preparation | V II. Prospective volition / 3. Precursory measures | 674 Nonpreparation (rule) | - | - | - | - |
-| 674 Nonpreparation | V II. Prospective volition / 3. Precursory measures | 673 Preparation (rule) | - | - | - | - |
+| 193 Littleness | II II. Dimensions | 192 Size (synopsis) | - | - | - | - |
+| 403 Silence | III III. Organic matter / 1. Sensation in general | 402 Sound (synopsis) | - | - | - | - |
+| 453 Idea | IV I. Operations of intellect in general | 454 Topic (synopsis) | - | - | - | - |
+| 471 Impossibility | IV III. Materials for reasoning | 470 Possibility (synopsis) | - | - | - | - |
+| 472 Probability | IV III. Materials for reasoning | 473 Improbability (synopsis) | - | - | [hopeful](../../seed_queue.json) (queued) | - |
+| 473 Improbability | IV III. Materials for reasoning | 472 Probability (synopsis) | - | - | - | - |
+| 497 Absurdity | IV V. Results of reasoning | 496 Maxim (synopsis) | - | - | - | - |
+| 508 Inexpectation | IV VI. Extension of thought / 1. To the Past | 507 Expectation (synopsis) | - | - | - | - |
+| 529 Disclosure | IV II. Modes of communication | 530 Ambush (synopsis) | - | - | - | - |
+| 540 Teacher | IV II. Modes of communication | 541 Learner (synopsis) | - | - | - | - |
+| 547 Dupe | IV II. Modes of communication | 548 Deceiver (synopsis) | - | - | - | - |
+| 548 Deceiver | IV II. Modes of communication | 547 Dupe (synopsis) | - | - | - | - |
+| 551 Record | IV III. Means of communicating ideas / 1. Natural means | 552 Obliteration (synopsis) | - | - | - | - |
+| 565 Misnomer | IV III. Means of communicating ideas / 1. Language generally | 564 Nomenclature (synopsis) | - | - | - | - |
+| 567 Grammar | IV III. Means of communicating ideas / 1. Language generally | 568 Solecism (synopsis) | - | - | - | - |
+| 586 Allocution | IV III. Means of communicating ideas / 1. Language generally | 587 Response (synopsis) | - | - | - | - |
+| 587 Response | IV III. Means of communicating ideas / 1. Language generally | 586 Allocution (synopsis) | - | - | - | - |
+| 593 Book | IV III. Means of communicating ideas / 1. Language generally | 592 Correspondence (synopsis) | - | - | - | - |
+| 602 Willingness | V I. Volition in general / 1. Acts of Volition | 603 Unwillingness (synopsis) | - | - | - | - |
+| 603 Unwillingness | V I. Volition in general / 1. Acts of Volition | 602 Willingness (synopsis) | - | - | - | - |
+| 614 Desuetude | V I. Volition in general / 1. Acts of Volition | 613 Habit (synopsis) | - | - | - | - |
+| 621 Chance | V II. Prospective volition / 1. Conceptional volition | 620 Intention (synopsis) | - | - | - | - |
+| 628 Mid-course | V II. Prospective volition / 1. Conceptional volition | 629 Circuit (synopsis) | - | - | - | - |
+| 637 Provision | V II. Prospective volition / 1. Actual Subservience | 638 Waste (synopsis) | - | - | - | - |
+| 640 Insufficiency | V II. Prospective volition / 1. Actual Subservience | 641 Redundancy (synopsis) | - | - | - | - |
+| 661 Relapse | V II. Prospective volition / 1. Actual Subservience | 660 Restoration (synopsis) | - | - | - | - |
+| 663 Bane | V II. Prospective volition / 1. Actual Subservience | 662 Remedy (synopsis) | - | - | - | - |
+| 666 Refuge | V II. Prospective volition / 1. Actual Subservience | 667 Pitfall (synopsis) | - | - | - | - |
+| 667 Pitfall | V II. Prospective volition / 1. Actual Subservience | 666 Refuge (synopsis) | - | - | - | - |
+| 673 Preparation | V II. Prospective volition / 3. Precursory measures | 674 Nonpreparation (synopsis) | - | - | - | - |
+| 674 Nonpreparation | V II. Prospective volition / 3. Precursory measures | 673 Preparation (synopsis) | - | - | - | - |
+| 711 Auxiliary | V IV. Antagonism / 2. Active Antagonism | 710 Opponent (synopsis) | - | - | - | - |
+| 718 Retaliation | V IV. Antagonism / 2. Active Antagonism | 719 Resistance (synopsis) | - | - | - | - |
+| 719 Resistance | V IV. Antagonism / 2. Active Antagonism | 718 Retaliation (synopsis) | - | - | - | - |
+| 753 Keeper | V I. General intersocial volition | 754 Prisoner (synopsis) | - | - | - | - |
+| 764 Refusal | V II. Special intersocial volition | 763 Offer (synopsis) | - | - | - | - |
+| 765 Request | V II. Special intersocial volition | 766 Deprecation (synopsis) | - | - | - | - |
+| 768 Promise | V III. Conditional intersocial volition | 768a Release from engagement (synopsis) | - | - | - | - |
+| 777 Possession | V IV. Possessive relations / 1. Property in general | 777a Exemption (synopsis) | - | - | - | - |
+| 788 Borrowing | V IV. Possessive relations / 2. Transfer of Property | 787 Lending (synopsis) | - | - | - | - |
+| 789 Taking | V IV. Possessive relations / 2. Transfer of Property | 790 Restitution (synopsis) | - | - | - | - |
 | 812a Value | V IV. Possessive relations / 4. Monetary Relations | 812b Worthlessness (rule) | - | - | [lifetime value](../../seed_queue.json) (queued) | - |
 | 812b Worthlessness | V IV. Possessive relations / 4. Monetary Relations | 812a Value (rule) | - | - | - | - |
-| 814 Dearness | V IV. Possessive relations / 4. Monetary Relations | 815 Cheapness (rule) | - | - | - | - |
-| 815 Cheapness | V IV. Possessive relations / 4. Monetary Relations | 814 Dearness (rule) | - | - | - | - |
-| 891 Enemy | VI III. Sympathetic affections | 890 Friend (rule_weak) | - | - | - | - |
-| 931 Approbation | VI IV. Moral affections | 932 Disapprobation (rule) | - | - | - | - |
-| 932 Disapprobation | VI IV. Moral affections | 931 Approbation (rule) | - | - | - | - |
-| 937 Vindication | VI IV. Moral affections | 938 Accusation (rule) | - | - | - | - |
-| 947 Guilt | VI IV. Moral affections | 946 Innocence (rule) | - | - | - | - |
-| 964 Illegality | VI IV. Moral affections | 963 Legality (rule) | - | - | - | - |
-| 977 Angel | VI V. Religious affections | 978 Satan (rule_weak) | - | - | - | - |
-| 978 Satan | VI V. Religious affections | 977 Angel (rule_weak) | - | - | - | - |
-| 980 Demon | VI V. Religious affections | 979 Jupiter (rule_weak) | - | - | - | - |
-| 981 Heaven | VI V. Religious affections | 982 Hell (rule) | - | - | - | - |
+| 814 Dearness | V IV. Possessive relations / 4. Monetary Relations | 815 Cheapness (synopsis) | - | - | - | - |
+| 815 Cheapness | V IV. Possessive relations / 4. Monetary Relations | 814 Dearness (synopsis) | - | - | - | - |
+| 838 Rejoicing | VI II. Personal affections | 839 Lamentation (synopsis) | - | - | [gloating](../../seed_queue.json) (queued) | - |
+| 839 Lamentation | VI II. Personal affections | 838 Rejoicing (synopsis) | - | - | - | - |
+| 891 Enemy | VI III. Sympathetic affections | 890 Friend (synopsis) | - | - | - | - |
+| 931 Approbation | VI IV. Moral affections | 932 Disapprobation (synopsis) | - | - | - | - |
+| 932 Disapprobation | VI IV. Moral affections | 931 Approbation (synopsis) | - | - | - | - |
+| 934 Detraction | VI IV. Moral affections | 933 Flattery (synopsis) | - | - | - | - |
+| 937 Vindication | VI IV. Moral affections | 938 Accusation (synopsis) | - | - | - | - |
+| 947 Guilt | VI IV. Moral affections | 946 Innocence (synopsis) | - | - | - | - |
+| 949 Bad Man | VI IV. Moral affections | 948 Good Man (synopsis) | - | - | - | - |
+| 964 Illegality | VI IV. Moral affections | 963 Legality (synopsis) | - | - | - | - |
+| 977 Angel | VI V. Religious affections | 978 Satan (synopsis) | - | - | - | - |
+| 978 Satan | VI V. Religious affections | 977 Angel (synopsis) | - | - | - | - |
+| 980 Demon | VI V. Religious affections | 979 Jupiter (synopsis) | - | - | - | - |
+| 981 Heaven | VI V. Religious affections | 982 Hell (synopsis) | - | - | - | - |
+| 985 Judeo-Christian Revelation | VI V. Religious affections | 986 Pseudo-Revelation (synopsis) | - | - | - | - |
+| 986 Pseudo-Revelation | VI V. Religious affections | 985 Judeo-Christian Revelation (synopsis) | - | - | - | - |
 
-## singleton_empty (96)
+## singleton_empty (59)
 
 | head | section | opposed head | its traits | queued | parked | secondary of |
 |---|---|---|---|---|---|---|
 | 29 Mean | I III. Quantity | - | - | - | [mean](../../seed_queue.json) (queued) | - |
-| 453 Idea | IV I. Operations of intellect in general | - | - | - | - | - |
 | 465b Identification | IV II. Precursory conditions and operations | - | - | - | - | - |
 | 480a Discovery | IV V. Results of reasoning | - | - | - | - | - |
-| 493 Ignoramus | IV V. Results of reasoning | - | - | - | - | - |
-| 497 Absurdity | IV V. Results of reasoning | - | - | - | - | - |
-| 501 Fool | IV V. Results of reasoning | - | - | - | - | - |
 | 513 Oracle | IV VI. Extension of thought / 1. To the Past | - | - | - | - | - |
 | 524 Interpreter | IV I. Nature of ideas communicated | - | - | - | - | - |
 | 534 Messenger | IV II. Modes of communication | - | - | - | - | - |
-| 540 Teacher | IV II. Modes of communication | - | - | - | - | - |
-| 547 Dupe | IV II. Modes of communication | - | - | - | - | - |
-| 548 Deceiver | IV II. Modes of communication | - | - | - | - | - |
 | 550 Indication | IV III. Means of communicating ideas / 1. Natural means | - | - | - | - | - |
-| 551 Record | IV III. Means of communicating ideas / 1. Natural means | - | - | - | - | - |
 | 553 Recorder | IV III. Means of communicating ideas / 1. Natural means | - | - | - | - | - |
 | 560 Language | IV III. Means of communicating ideas / 1. Language generally | - | - | - | [language](../../seed_queue.json) (queued) | - |
-| 567 Grammar | IV III. Means of communicating ideas / 1. Language generally | - | - | - | - | - |
 | 569 Style | IV III. Means of communicating ideas / 1. Language generally | - | - | - | - | - |
-| 586 Allocution | IV III. Means of communicating ideas / 1. Language generally | - | - | - | - | - |
-| 587 Response | IV III. Means of communicating ideas / 1. Language generally | - | - | - | - | - |
-| 593 Book | IV III. Means of communicating ideas / 1. Language generally | - | - | - | - | - |
 | 615a Absence of Motive | V I. Volition in general / 2. Causes of Volition | - | - | - | - | - |
 | 617 Pretext | V I. Volition in general / 2. Causes of Volition | - | - | - | - | - |
-| 628 Mid-course | V II. Prospective volition / 1. Conceptional volition | - | - | - | - | - |
 | 631 Instrumentality | V II. Prospective volition / 1. Actual Subservience | - | - | - | - | - |
 | 634 Substitute | V II. Prospective volition / 1. Actual Subservience | - | - | - | - | - |
-| 637 Provision | V II. Prospective volition / 1. Actual Subservience | - | - | - | - | - |
-| 661 Relapse | V II. Prospective volition / 1. Actual Subservience | - | - | - | - | - |
-| 663 Bane | V II. Prospective volition / 1. Actual Subservience | - | - | - | - | - |
-| 666 Refuge | V II. Prospective volition / 1. Actual Subservience | - | - | - | - | - |
-| 667 Pitfall | V II. Prospective volition / 1. Actual Subservience | - | - | - | - | - |
 | 690 Agent | V III. Voluntary action / 1. Simple voluntary Action | - | - | - | - | - |
 | 694 Director | V III. Voluntary action / 2. Complex Voluntary Action | - | - | - | - | - |
-| 701 Bungler | V III. Voluntary action / 2. Complex Voluntary Action | - | - | - | - | - |
-| 706 Hindrance | V IV. Antagonism / 2. Active Antagonism | - | - | - | - | - |
-| 711 Auxiliary | V IV. Antagonism / 2. Active Antagonism | - | - | - | - | - |
 | 715 Defiance | V IV. Antagonism / 2. Active Antagonism | - | - | - | - | - |
-| 718 Retaliation | V IV. Antagonism / 2. Active Antagonism | - | - | - | - | - |
-| 719 Resistance | V IV. Antagonism / 2. Active Antagonism | - | - | - | - | - |
 | 727 Arms | V IV. Antagonism / 2. Active Antagonism | - | - | - | - | - |
 | 728 Arena | V IV. Antagonism / 2. Active Antagonism | - | - | - | - | - |
 | 733 Trophy | V V. Results of voluntary action | - | - | - | - | - |
 | 744 Compulsion | V I. General intersocial volition | - | - | - | - | - |
 | 747 Scepter | V I. General intersocial volition | - | - | - | - | - |
 | 752 Prison | V I. General intersocial volition | - | - | - | - | - |
-| 753 Keeper | V I. General intersocial volition | - | - | - | - | - |
 | 757 Resignation | V I. General intersocial volition | - | - | - | - | - |
 | 758 Consignee | V I. General intersocial volition | - | - | - | - | - |
 | 762 Consent | V II. Special intersocial volition | - | - | - | [acquiescence](../../seed_queue.json) (queued) | - |
-| 764 Refusal | V II. Special intersocial volition | - | - | - | - | - |
-| 765 Request | V II. Special intersocial volition | - | - | - | - | - |
 | 767 Petitioner | V II. Special intersocial volition | - | - | - | - | - |
-| 768 Promise | V III. Conditional intersocial volition | - | - | - | - | - |
 | 769 Compact | V III. Conditional intersocial volition | - | - | - | - | - |
 | 771 Security | V III. Conditional intersocial volition | - | - | - | [secure](../../seed_queue.json) (queued) | - |
-| 777 Possession | V IV. Possessive relations / 1. Property in general | - | - | - | - | - |
 | 780 Property | V IV. Possessive relations / 1. Property in general | - | - | - | [device ownership](../../seed_queue.json) (queued) | - |
-| 788 Borrowing | V IV. Possessive relations / 2. Transfer of Property | - | - | - | - | - |
-| 789 Taking | V IV. Possessive relations / 2. Transfer of Property | - | - | - | - | - |
 | 791 Stealing | V IV. Possessive relations / 2. Transfer of Property | - | - | - | [thieving](../../seed_queue.json) (queued) | - |
 | 792 Thief | V IV. Possessive relations / 2. Transfer of Property | - | - | - | - | - |
 | 793 Booty | V IV. Possessive relations / 2. Transfer of Property | - | - | - | - | - |
@@ -196,8 +203,6 @@ States: **covered** (an existing trait has the head as its primary), **partly co
 | 802 Treasury | V IV. Possessive relations / 4. Monetary Relations | - | - | - | - | - |
 | 820 Affections | VI I. Affections in general | - | - | - | - | - |
 | 824 Excitation | VI I. Affections in general | - | - | - | - | - |
-| 838 Rejoicing | VI II. Personal affections | - | - | - | [gloating](../../seed_queue.json) (queued) | - |
-| 839 Lamentation | VI II. Personal affections | - | - | - | - | - |
 | 854 Fop | VI II. Personal affections | - | - | - | - | - |
 | 857 Laughingstock | VI II. Personal affections | - | - | - | - | - |
 | 872 Prodigy | VI II. Personal affections | - | - | - | - | - |
@@ -206,17 +211,12 @@ States: **covered** (an existing trait has the head as its primary), **partly co
 | 901a Sullenness | VI III. Sympathetic affections | - | - | - | - | - |
 | 905 Divorce | VI III. Sympathetic affections | - | - | - | - | - |
 | 909 Threat | VI III. Sympathetic affections | - | - | - | - | - |
-| 912 Benefactor | VI III. Sympathetic affections | - | - | - | - | - |
 | 927a Exemption | VI IV. Moral affections | - | - | - | - | - |
 | 930 Contempt | VI IV. Moral affections | - | - | - | - | - |
-| 934 Detraction | VI IV. Moral affections | - | - | - | - | - |
 | 941 Knave | VI IV. Moral affections | - | - | - | - | - |
-| 949 Bad Man | VI IV. Moral affections | - | - | - | - | - |
 | 952 Atonement | VI IV. Moral affections | - | - | - | - | - |
 | 962 Libertine | VI IV. Moral affections | - | - | - | - | - |
 | 975 Scourge | VI IV. Moral affections | - | - | - | - | - |
-| 985 Judeo-Christian Revelation | VI V. Religious affections | - | - | - | - | - |
-| 986 Pseudo-Revelation | VI V. Religious affections | - | - | - | - | - |
 | 993 Spell | VI V. Religious affections | - | - | - | - | - |
 | 994 Sorcerer | VI V. Religious affections | - | - | - | - | - |
 | 999 Canonicals | VI V. Religious affections | - | - | - | - | - |
@@ -226,79 +226,79 @@ States: **covered** (an existing trait has the head as its primary), **partly co
 
 | head | section | opposed head | its traits | queued | parked | secondary of |
 |---|---|---|---|---|---|---|
-| 201 Shortness | II II. Dimensions | 200 Length (rule) | - | [short](../../seed_queue.json) (queued) | - | - |
-| 206 Height | II II. Dimensions | 207 Lowness (rule) | - | [tall](../../seed_queue.json) (queued) | - | - |
-| 239 Sinistrality | II II. Dimensions / 1. General | 238 Dextrality (rule) | - | [left-handed](../../seed_queue.json) (queued) | - | - |
-| 265 Quiescence | II IV. Motion | 264 Motion (rule) | - | [sedentary](../../seed_queue.json) (queued) | - | - |
-| 357 Organization | III III. Organic matter / 1. Vitality in general | 358 Inorganization (rule) | - | [Organization (HEXACO)](../../seed_queue.json) (queued) | - | - |
-| 391 Insipidity | III III. Organic matter / 1. Sensation in general | 392 Pungency (rule) | - | [bland](../../seed_queue.json) (queued), [vanilla](../../seed_queue.json) (queued) | - | - |
-| 450a Absence or want of Intellect | IV I. Operations of intellect in general | 450 Intellect (rule) | [cerebral](../../traits/instructions/cerebral.json), [conceptual](../../traits/instructions/conceptual.json) | [Intellect (BFAS)](../../seed_queue.json) (queued), [Intellect (IPIP-NEO)](../../seed_queue.json) (queued) | - | - |
+| 201 Shortness | II II. Dimensions | 200 Length (synopsis) | - | [short](../../seed_queue.json) (queued) | - | - |
+| 206 Height | II II. Dimensions | 207 Lowness (synopsis) | - | [tall](../../seed_queue.json) (queued) | - | - |
+| 239 Sinistrality | II II. Dimensions / 1. General | 238 Dextrality (synopsis) | - | [left-handed](../../seed_queue.json) (queued) | - | - |
+| 265 Quiescence | II IV. Motion | 264 Motion (synopsis) | - | [sedentary](../../seed_queue.json) (queued) | - | - |
+| 357 Organization | III III. Organic matter / 1. Vitality in general | 358 Inorganization (synopsis) | - | [Organization (HEXACO)](../../seed_queue.json) (queued) | - | - |
+| 391 Insipidity | III III. Organic matter / 1. Sensation in general | 390 Taste (synopsis) | - | [bland](../../seed_queue.json) (queued), [vanilla](../../seed_queue.json) (queued) | - | - |
+| 450a Absence or want of Intellect | IV I. Operations of intellect in general | 450 Intellect (synopsis) | [cerebral](../../traits/instructions/cerebral.json), [conceptual](../../traits/instructions/conceptual.json) | [Intellect (BFAS)](../../seed_queue.json) (queued), [Intellect (IPIP-NEO)](../../seed_queue.json) (queued) | - | - |
 | 504 Madman | IV V. Results of reasoning | - | - | [hypochondriac](../../seed_queue.json) (queued) | - | - |
-| 611 Predetermination | V I. Volition in general / 1. Acts of Volition | 612 Impulse (rule) | [improvisational](../../traits/instructions/improvisational.json), [impulsive](../../traits/instructions/impulsive.json), [spontaneous](../../traits/instructions/spontaneous.json) | [deterministic](../../seed_queue.json) (queued) | - | - |
-| 654 Health | V II. Prospective volition / 1. Actual Subservience | 655 Disease (rule) | - | [healthy](../../seed_queue.json) (queued) | - | - |
-| 745 Master | V I. General intersocial volition | - | - | [mastery](../../seed_queue.json) (queued) | - | - |
+| 611 Predetermination | V I. Volition in general / 1. Acts of Volition | 612 Impulse (synopsis) | [improvisational](../../traits/instructions/improvisational.json), [impulsive](../../traits/instructions/impulsive.json), [spontaneous](../../traits/instructions/spontaneous.json) | [deterministic](../../seed_queue.json) (queued) | - | - |
+| 654 Health | V II. Prospective volition / 1. Actual Subservience | 655 Disease (synopsis) | - | [healthy](../../seed_queue.json) (queued) | - | - |
+| 745 Master | V I. General intersocial volition | 746 Servant (synopsis) | - | [mastery](../../seed_queue.json) (queued) | - | - |
 | 799 Mart | V IV. Possessive relations / 3. Interchange of Property | - | - | [free-market](../../seed_queue.json) (queued) | - | - |
-| 897 Love | VI III. Sympathetic affections | 898 Hate (rule) | [xenophobic](../../traits/instructions/xenophobic.json) | [devoted](../../seed_queue.json) (queued), [enthusiastic (BFAS)](../../seed_queue.json) (queued) | - | - |
+| 897 Love | VI III. Sympathetic affections | 898 Hate (synopsis) | [xenophobic](../../traits/instructions/xenophobic.json) | [devoted](../../seed_queue.json) (queued), [enthusiastic (BFAS)](../../seed_queue.json) (queued) | - | - |
 | 915 Condolence | VI III. Sympathetic affections | - | - | [Sympathy (IPIP-NEO)](../../seed_queue.json) (queued) | - | - |
 | 967 Judge | VI IV. Moral affections | - | - | [judging (MBTI)](../../seed_queue.json) (queued) | - | - |
-| 974 Penalty | VI IV. Moral affections | 973 Reward (rule_weak) | - | [in-pain](../../seed_queue.json) (queued) | - | - |
+| 974 Penalty | VI IV. Moral affections | - | - | [in-pain](../../seed_queue.json) (queued) | - | - |
 
 ## partly_covered (52)
 
 | head | section | opposed head | its traits | queued | parked | secondary of |
 |---|---|---|---|---|---|---|
-| 4 Unsubstantiality | I I. Existence | 3 Substantiality (rule) | - | - | - | [ethereal](../../traits/instructions/ethereal.json) |
-| 10 Irrelation | I II. Relation | 9 Relation (rule) | - | - | - | [insular](../../traits/instructions/insular.json), [isolated](../../traits/instructions/isolated.json) |
-| 18 Dissimilarity | I II. Relation | 17 Similarity (rule) | - | - | - | [divergent](../../traits/instructions/divergent.json) |
-| 32 Smallness | I III. Quantity | 31 Greatness (rule) | - | [slender](../../seed_queue.json) (queued) | - | [petty](../../traits/instructions/petty.json) |
-| 58 Order | I IV. Order | 59 Disorder (rule) | [chaotic](../../traits/instructions/chaotic.json), [disorganized](../../traits/instructions/disorganized.json) | [Orderliness (BFAS)](../../seed_queue.json) (queued), [Orderliness (IPIP-NEO)](../../seed_queue.json) (queued) | [orderly](../../seed_queue.json) (queued), [systematic](../../seed_queue.json) (queued) | [methodical](../../traits/instructions/methodical.json) |
-| 87 Unity | I V. Number | 100 Plurality (rule) | - | - | - | [single](../../traits/instructions/single.json) |
-| 141 Permanence | I VII. Change | - | - | - | - | [conservative](../../traits/instructions/conservative.json) |
-| 157 Power | I VIII. Causation | 158 Impotence (rule) | [helpless](../../traits/instructions/helpless.json) | [Self-Efficacy (IPIP-NEO)](../../seed_queue.json) (queued) | [empowered](../../seed_queue.json) (queued) | [competent](../../traits/instructions/competent.json) |
-| 160 Weakness | I VIII. Causation | 159 Strength (rule) | - | - | - | [fragile](../../traits/instructions/fragile.json) |
-| 172 Physical Inertness | I VIII. Causation | 171 Physical Energy (rule) | [intense](../../traits/instructions/intense.json) | - | - | [passive](../../traits/instructions/passive.json) |
-| 212 Verticality | II II. Dimensions | 213 Horizontality (rule) | - | - | - | [straight](../../traits/instructions/straight.json) |
-| 220 Exteriority | II II. Dimensions / 1. General | 221 Interiority (rule) | - | - | - | [eccentric](../../traits/instructions/eccentric.json), [superficial](../../traits/instructions/superficial.json) |
-| 264 Motion | II IV. Motion | 265 Quiescence (rule) | - | - | - | [mercurial](../../traits/instructions/mercurial.json) |
-| 276 Impulse | II IV. Motion | - | - | - | - | [impulsive](../../traits/instructions/impulsive.json) |
-| 278 Direction | II IV. Motion | 279 Deviation (rule) | - | - | - | [straight](../../traits/instructions/straight.json) |
-| 279 Deviation | II IV. Motion | 278 Direction (rule) | - | - | - | [erratic](../../traits/instructions/erratic.json) |
-| 282 Progression | II IV. Motion | 283 Regression (rule) | - | - | - | [progressive](../../traits/instructions/progressive.json) |
+| 4 Unsubstantiality | I I. Existence | 3 Substantiality (synopsis) | - | - | - | [ethereal](../../traits/instructions/ethereal.json) |
+| 10 Irrelation | I II. Relation | 9 Relation (synopsis) | - | - | - | [insular](../../traits/instructions/insular.json), [isolated](../../traits/instructions/isolated.json) |
+| 18 Dissimilarity | I II. Relation | 17 Similarity (synopsis) | - | - | - | [divergent](../../traits/instructions/divergent.json) |
+| 32 Smallness | I III. Quantity | 31 Greatness (synopsis) | - | [slender](../../seed_queue.json) (queued) | - | [petty](../../traits/instructions/petty.json) |
+| 58 Order | I IV. Order | 59 Disorder (synopsis) | [chaotic](../../traits/instructions/chaotic.json), [disorganized](../../traits/instructions/disorganized.json) | [Orderliness (BFAS)](../../seed_queue.json) (queued), [Orderliness (IPIP-NEO)](../../seed_queue.json) (queued) | [orderly](../../seed_queue.json) (queued), [systematic](../../seed_queue.json) (queued) | [methodical](../../traits/instructions/methodical.json) |
+| 87 Unity | I V. Number | 88 Accompaniment (synopsis) | - | - | - | [single](../../traits/instructions/single.json) |
+| 141 Permanence | I VII. Change | 140 Change (synopsis) | - | - | - | [conservative](../../traits/instructions/conservative.json) |
+| 157 Power | I VIII. Causation | 158 Impotence (synopsis) | [helpless](../../traits/instructions/helpless.json) | [Self-Efficacy (IPIP-NEO)](../../seed_queue.json) (queued) | [empowered](../../seed_queue.json) (queued) | [competent](../../traits/instructions/competent.json) |
+| 160 Weakness | I VIII. Causation | 159 Strength (synopsis) | - | - | - | [fragile](../../traits/instructions/fragile.json) |
+| 172 Physical Inertness | I VIII. Causation | 171 Physical Energy (synopsis) | [intense](../../traits/instructions/intense.json) | - | - | [passive](../../traits/instructions/passive.json) |
+| 212 Verticality | II II. Dimensions | 213 Horizontality (synopsis) | - | - | - | [straight](../../traits/instructions/straight.json) |
+| 220 Exteriority | II II. Dimensions / 1. General | 221 Interiority (synopsis) | - | - | - | [eccentric](../../traits/instructions/eccentric.json), [superficial](../../traits/instructions/superficial.json) |
+| 264 Motion | II IV. Motion | 265 Quiescence (synopsis) | - | - | - | [mercurial](../../traits/instructions/mercurial.json) |
+| 276 Impulse | II IV. Motion | 277 Recoil (synopsis) | [reactive](../../traits/instructions/reactive.json) | - | - | [impulsive](../../traits/instructions/impulsive.json) |
+| 278 Direction | II IV. Motion | 279 Deviation (synopsis) | - | - | - | [straight](../../traits/instructions/straight.json) |
+| 279 Deviation | II IV. Motion | 278 Direction (synopsis) | - | - | - | [erratic](../../traits/instructions/erratic.json) |
+| 282 Progression | II IV. Motion | 283 Regression (synopsis) | - | - | - | [progressive](../../traits/instructions/progressive.json) |
 | 315 Agitation | II IV. Motion | - | - | - | - | [restless](../../traits/instructions/restless.json), [turbulent](../../traits/instructions/turbulent.json) |
-| 320 Levity | III I. Matter in general | 319 Gravity (rule) | - | - | - | [ethereal](../../traits/instructions/ethereal.json) |
-| 324 Softness | III II. Inorganic matter | 323 Hardness (rule) | [inflexible](../../traits/instructions/inflexible.json) | - | [tender](../../seed_queue.json) (queued) | [flexible](../../traits/instructions/flexible.json) |
-| 359 Life | III III. Organic matter / 1. Vitality in general | 360 Death (rule) | - | - | - | [animated](../../traits/instructions/animated.json) |
-| 372 Mankind | III III. Organic matter / 1. Vitality in general | 371 Agriculture (rule_weak) | [rural](../../traits/instructions/rural.json) | - | - | [cosmopolitan](../../traits/instructions/cosmopolitan.json), [humanitarian](../../traits/instructions/humanitarian.json) |
-| 376 Physical Insensibility | III III. Organic matter / 1. Sensation in general | 375 Physical Sensibility (rule) | [socially-perceptive](../../traits/instructions/socially_perceptive.json) | - | - | [callous](../../traits/instructions/callous.json), [thick-skinned](../../traits/instructions/thick_skinned.json) |
-| 425 Transparency | III III. Organic matter / 1. Sensation in general | 426 Opacity (rule) | [opaque](../../traits/instructions/opaque.json) | - | - | [transparent](../../traits/instructions/transparent.json) |
-| 480 Judgment | IV V. Results of reasoning | 481 Misjudgment (rule) | [ageist](../../traits/instructions/ageist.json), [closed-minded](../../traits/instructions/closed_minded.json), [tunnel-visioned](../../traits/instructions/tunnel_visioned.json) | [judging (MBTI)](../../seed_queue.json) (queued) | [conclusive](../../seed_queue.json) (queued) | [decisive](../../traits/instructions/decisive.json), [judgmental](../../traits/instructions/judgmental.json) |
-| 505 Memory | IV VI. Extension of thought / 1. To the Past | 506 Oblivion (rule) | [forgetful](../../traits/instructions/forgetful.json), [oblivious](../../traits/instructions/oblivious.json) | - | - | [retentive](../../traits/instructions/retentive.json) |
+| 320 Levity | III I. Matter in general | 319 Gravity (synopsis) | - | - | - | [ethereal](../../traits/instructions/ethereal.json) |
+| 324 Softness | III II. Inorganic matter | 323 Hardness (synopsis) | [inflexible](../../traits/instructions/inflexible.json) | - | [tender](../../seed_queue.json) (queued) | [flexible](../../traits/instructions/flexible.json) |
+| 359 Life | III III. Organic matter / 1. Vitality in general | 360 Death (synopsis) | - | - | - | [animated](../../traits/instructions/animated.json) |
+| 372 Mankind | III III. Organic matter / 1. Vitality in general | - | - | - | - | [cosmopolitan](../../traits/instructions/cosmopolitan.json), [humanitarian](../../traits/instructions/humanitarian.json) |
+| 376 Physical Insensibility | III III. Organic matter / 1. Sensation in general | 375 Physical Sensibility (synopsis) | [socially-perceptive](../../traits/instructions/socially_perceptive.json) | - | - | [callous](../../traits/instructions/callous.json), [thick-skinned](../../traits/instructions/thick_skinned.json) |
+| 425 Transparency | III III. Organic matter / 1. Sensation in general | 426 Opacity (synopsis) | [opaque](../../traits/instructions/opaque.json) | - | - | [transparent](../../traits/instructions/transparent.json) |
+| 480 Judgment | IV V. Results of reasoning | 481 Misjudgment (synopsis) | [ageist](../../traits/instructions/ageist.json), [closed-minded](../../traits/instructions/closed_minded.json), [tunnel-visioned](../../traits/instructions/tunnel_visioned.json) | [judging (MBTI)](../../seed_queue.json) (queued) | [conclusive](../../seed_queue.json) (queued) | [decisive](../../traits/instructions/decisive.json), [judgmental](../../traits/instructions/judgmental.json) |
+| 505 Memory | IV VI. Extension of thought / 1. To the Past | 506 Oblivion (synopsis) | [forgetful](../../traits/instructions/forgetful.json), [oblivious](../../traits/instructions/oblivious.json) | - | - | [retentive](../../traits/instructions/retentive.json) |
 | 509 Disappointment | IV VI. Extension of thought / 1. To the Past | - | - | - | - | [bitter](../../traits/instructions/bitter.json) |
 | 542 School | IV II. Modes of communication | - | - | - | [academic](../../seed_queue.json) (queued) | [educational](../../traits/instructions/educational.json) |
-| 577 Ornament | IV III. Means of communicating ideas / 1. Language generally | 576 Plainness (rule) | [dry](../../traits/instructions/dry.json), [grounded](../../traits/instructions/grounded.json), [plain-spoken](../../traits/instructions/plain_spoken.json) | - | - | [bombastic](../../traits/instructions/bombastic.json) |
-| 641 Redundancy | V II. Prospective volition / 1. Actual Subservience | - | - | - | - | [extravagant](../../traits/instructions/extravagant.json) |
-| 656 Salubrity | V II. Prospective volition / 1. Actual Subservience | 657 Insalubrity (rule) | - | [healthy](../../seed_queue.json) (queued) | - | [benign](../../traits/instructions/benign.json) |
-| 704 Difficulty | V IV. Antagonism / 1. Conditional Antagonism | 705 Facility (rule) | [accessible](../../traits/instructions/accessible.json), [flexible](../../traits/instructions/flexible.json) | [tough](../../seed_queue.json) (queued) | - | [tough (HEXACO)](../../traits/instructions/tough_hexaco.json) |
-| 710 Opponent | V IV. Antagonism / 2. Active Antagonism | - | - | - | - | [antagonistic (Big Five)](../../traits/instructions/antagonistic_big_five.json) |
+| 577 Ornament | IV III. Means of communicating ideas / 1. Language generally | 576 Plainness (synopsis) | [dry](../../traits/instructions/dry.json), [grounded](../../traits/instructions/grounded.json), [plain-spoken](../../traits/instructions/plain_spoken.json) | - | - | [bombastic](../../traits/instructions/bombastic.json) |
+| 641 Redundancy | V II. Prospective volition / 1. Actual Subservience | 640 Insufficiency (synopsis) | - | - | - | [extravagant](../../traits/instructions/extravagant.json) |
+| 656 Salubrity | V II. Prospective volition / 1. Actual Subservience | 657 Insalubrity (synopsis) | - | [healthy](../../seed_queue.json) (queued) | - | [benign](../../traits/instructions/benign.json) |
+| 704 Difficulty | V IV. Antagonism / 1. Conditional Antagonism | 705 Facility (synopsis) | [accessible](../../traits/instructions/accessible.json), [flexible](../../traits/instructions/flexible.json) | [tough](../../seed_queue.json) (queued) | - | [tough (HEXACO)](../../traits/instructions/tough_hexaco.json) |
+| 710 Opponent | V IV. Antagonism / 2. Active Antagonism | 711 Auxiliary (synopsis) | - | - | - | [antagonistic (Big Five)](../../traits/instructions/antagonistic_big_five.json) |
 | 726 Combatant | V IV. Antagonism / 2. Active Antagonism | - | - | - | - | [partisan](../../traits/instructions/partisan.json) |
-| 737a Government | V I. General intersocial volition | 738 Laxity (rule_weak) | [loose (Gelfand)](../../traits/instructions/loose_gelfand.json) | - | - | [aristocratic](../../traits/instructions/aristocratic.json), [socialist](../../traits/instructions/socialist.json) |
+| 737a Government | V I. General intersocial volition | - | - | - | - | [aristocratic](../../traits/instructions/aristocratic.json), [socialist](../../traits/instructions/socialist.json) |
 | 741 Command | V I. General intersocial volition | - | - | - | - | [prescriptive](../../traits/instructions/prescriptive.json) |
-| 784 Giving | V IV. Possessive relations / 2. Transfer of Property | - | - | - | - | [generous](../../traits/instructions/generous.json) |
-| 812 Price | V IV. Possessive relations / 4. Monetary Relations | - | - | - | - | [mercenary](../../traits/instructions/mercenary.json) |
-| 827 Pleasure | VI II. Personal affections | 828 Pain (rule) | [stressed](../../traits/instructions/stressed.json) | - | - | [hedonistic](../../traits/instructions/hedonistic.json), [joyful](../../traits/instructions/joyful.json) |
+| 784 Giving | V IV. Possessive relations / 2. Transfer of Property | 785 Receiving (synopsis) | [receiving gifts](../../traits/instructions/receiving_gifts.json) | - | - | [generous](../../traits/instructions/generous.json) |
+| 812 Price | V IV. Possessive relations / 4. Monetary Relations | 813 Discount (synopsis) | - | - | - | [mercenary](../../traits/instructions/mercenary.json) |
+| 827 Pleasure | VI II. Personal affections | 828 Pain (synopsis) | [stressed](../../traits/instructions/stressed.json) | - | - | [hedonistic](../../traits/instructions/hedonistic.json), [joyful](../../traits/instructions/joyful.json) |
 | 844 Humorist | VI II. Personal affections | - | - | - | - | [witty](../../traits/instructions/witty.json) |
-| 890 Friend | VI III. Sympathetic affections | 891 Enemy (rule_weak) | - | - | - | [friendly](../../traits/instructions/friendly.json) |
-| 895 Discourtesy | VI III. Sympathetic affections | 894 Courtesy (rule) | [polite](../../traits/instructions/polite.json), [tactful](../../traits/instructions/tactful.json) | - | [unceremonious](../../seed_queue.json) (queued), [undiplomatic](../../seed_queue.json) (queued) | [rude](../../traits/instructions/rude.json) |
+| 890 Friend | VI III. Sympathetic affections | 891 Enemy (synopsis) | - | - | - | [friendly](../../traits/instructions/friendly.json) |
+| 895 Discourtesy | VI III. Sympathetic affections | 894 Courtesy (synopsis) | [polite](../../traits/instructions/polite.json), [tactful](../../traits/instructions/tactful.json) | - | [unceremonious](../../seed_queue.json) (queued), [undiplomatic](../../seed_queue.json) (queued) | [rude](../../traits/instructions/rude.json) |
 | 920 Jealousy | VI III. Sympathetic affections | - | - | [green-eyed](../../seed_queue.json) (queued) | - | [envious](../../traits/instructions/envious.json) |
-| 933 Flattery | VI IV. Moral affections | - | - | - | - | [sycophantic](../../traits/instructions/sycophantic.json) |
-| 935 Flatterer | VI IV. Moral affections | - | - | - | - | [sycophantic](../../traits/instructions/sycophantic.json) |
-| 946 Innocence | VI IV. Moral affections | 947 Guilt (rule) | - | - | - | [harmless](../../traits/instructions/harmless.json) |
-| 948 Good Man | VI IV. Moral affections | - | - | - | - | [good](../../traits/instructions/good.json) |
-| 954 Intemperance | VI IV. Moral affections | 953 Temperance (rule) | [abstemious](../../traits/instructions/abstemious.json), [temperate](../../traits/instructions/temperate.json) | [Immoderation (IPIP-NEO)](../../seed_queue.json) (queued), [indulgent](../../seed_queue.json) (queued) | [intemperate](../../seed_queue.json) (queued) | [self-indulgent](../../traits/instructions/self_indulgent.json) |
-| 987 Piety | VI V. Religious affections | 988 Impiety (rule) | - | [devoted](../../seed_queue.json) (queued) | [preoccupied-with-religion](../../seed_queue.json) (queued) | [Christian](../../traits/instructions/christian.json), [reverent](../../traits/instructions/reverent.json) |
-| 988 Impiety | VI V. Religious affections | 987 Piety (rule) | - | - | - | [irreverent](../../traits/instructions/irreverent.json) |
+| 933 Flattery | VI IV. Moral affections | 934 Detraction (synopsis) | - | - | - | [sycophantic](../../traits/instructions/sycophantic.json) |
+| 935 Flatterer | VI IV. Moral affections | 936 Detractor (synopsis) | [detractor](../../traits/instructions/detractor.json) | - | - | [sycophantic](../../traits/instructions/sycophantic.json) |
+| 946 Innocence | VI IV. Moral affections | 947 Guilt (synopsis) | - | - | - | [harmless](../../traits/instructions/harmless.json) |
+| 948 Good Man | VI IV. Moral affections | 949 Bad Man (synopsis) | - | - | - | [good](../../traits/instructions/good.json) |
+| 954 Intemperance | VI IV. Moral affections | 953 Temperance (synopsis) | [abstemious](../../traits/instructions/abstemious.json), [temperate](../../traits/instructions/temperate.json) | [Immoderation (IPIP-NEO)](../../seed_queue.json) (queued), [indulgent](../../seed_queue.json) (queued) | [intemperate](../../seed_queue.json) (queued) | [self-indulgent](../../traits/instructions/self_indulgent.json) |
+| 987 Piety | VI V. Religious affections | 988 Impiety (synopsis) | - | [devoted](../../seed_queue.json) (queued) | [preoccupied-with-religion](../../seed_queue.json) (queued) | [Christian](../../traits/instructions/christian.json), [reverent](../../traits/instructions/reverent.json) |
+| 988 Impiety | VI V. Religious affections | 987 Piety (synopsis) | - | - | - | [irreverent](../../traits/instructions/irreverent.json) |
 | 995 Churchdom | VI V. Religious affections | - | - | - | - | [Christian](../../traits/instructions/christian.json) |
-| 996 Clergy | VI V. Religious affections | 997 Laity (rule) | [secular](../../traits/instructions/secular.json) | - | - | [reverent](../../traits/instructions/reverent.json) |
+| 996 Clergy | VI V. Religious affections | 997 Laity (synopsis) | [secular](../../traits/instructions/secular.json) | - | - | [reverent](../../traits/instructions/reverent.json) |
 
 ## Not character (188)
 
