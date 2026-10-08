@@ -82,8 +82,8 @@ def test_gloss_hint_feeling_heads_and_label_guard():
                   title="Dejection", hid="837", nouns=[["dejection", "melancholy", "gloom"], ["sadness"]])
     item = H.HarvestItem("dejected", "837", None, 0, ["gloomy", "glum", "sad"], 3.0, False, True, 1, 3.0, True)
     text = H.gloss_hint(item, h, None, guard=_guard("glum", "melancholy"))
-    assert text.startswith("This means a tendency to feel dejection and act from it")
-    assert "glum" not in text and "melancholy" not in text           # corpus labels never appear
+    assert text.startswith("This means a general tendency to feel dejection and act from it")
+    assert "glum" not in text and "melancholy" not in text           # an explicit guard still keeps labels out
     moral = head_with([["upright"]], klass="VI", section="IV. Moral affections", title="Probity", hid="939")
     item2 = H.HarvestItem("upright", "939", None, 0, ["honest"], 3.0, False, True, 1, 3.0, True)
     t2 = H.gloss_hint(item2, moral, None, guard=_guard("moral"))
@@ -191,3 +191,19 @@ def test_wn_candidates_every_nth():
     cands = H.wn_candidates(its, run_id="r1", every_nth=2)
     assert [(c.surface, c.rank, c.generator, c.source_ref) for c in cands] == \
         [("a1", 1, "wn_clusters", "oewn:oewn:a1"), ("c1", 2, "wn_clusters", "oewn:oewn:c1")]
+
+
+def test_gloss_hint_without_guard_keeps_labels_but_never_the_word():
+    """Roger, 2026-10-08 (QUESTIONS 41): the harvest passes no label guard; only the candidate's own word is
+    kept out, so a corpus or queue label such as "general" may appear."""
+    h = head_with([["dejected"], ["gloomy", "glum"]], klass="VI", section="II. Personal affections",
+                  title="Dejection", hid="837", nouns=[["dejection", "melancholy", "gloom"], ["sadness"]])
+    item = H.HarvestItem("dejected", "837", None, 0, ["gloomy", "glum", "sad"], 3.0, False, True, 1, 3.0, True)
+    text = H.gloss_hint(item, h, None)
+    assert text.startswith("This means a general tendency to feel dejection and act from it")
+    assert "glum" in text and "dejected" not in text.split()
+    selfish = head_with([["dejection"]], klass="VI", section="II. Personal affections", title="Dejection",
+                        hid="837", nouns=[["dejection", "gloom"]])
+    item2 = H.HarvestItem("dejection", "837", None, 0, [], 3.0, False, True, 1, 3.0, True)
+    t2 = H.gloss_hint(item2, selfish, None)
+    assert "tendency to feel gloom" in t2                            # the title is the word itself: next noun

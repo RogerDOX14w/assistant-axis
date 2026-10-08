@@ -204,14 +204,16 @@ def _join(words: Sequence[str]) -> str:
     return ", ".join(words[:-1]) + " and " + words[-1]
 
 
-def _sense_word(head: Head, guard: LabelGuard, *, exclude: Collection[str] = ()) -> Optional[str]:
+def _sense_word(head: Head, guard: Optional[LabelGuard], *, exclude: Collection[str] = ()) -> Optional[str]:
     """The head's title in lower case (``Seclusion. Exclusion`` -> ``seclusion or exclusion``), or
-    its first noun when the title uses a label."""
+    its first noun when the title is excluded (the candidate's own word, or a label when a guard is given)."""
+    def banned(w: str) -> bool:
+        return w.lower() in exclude or (guard is not None and guard.contains(w))
     t = re.sub(r"\.\s+", " or ", head.title.strip()).strip(" .").lower()
-    if t and not guard.contains(t):
+    if t and not banned(t):
         return t
     for n in head.items("N"):
-        if " " not in n and n.lower() not in exclude and not guard.contains(n):
+        if " " not in n and not banned(n):
             return n.lower()
     return None
 
@@ -225,27 +227,27 @@ def is_feeling_head(head: Head) -> bool:
     return head.klass == "VI" and head.section.split(".", 1)[0].strip() in FEELING_SECTIONS
 
 
-def gloss_hint(item: HarvestItem, head: Head, partner_head: Optional[Head], *, guard: LabelGuard) -> str:
-    """The intended sense, 18-43 words, never using a corpus or queue label and never the word
-    itself:
+def gloss_hint(item: HarvestItem, head: Head, partner_head: Optional[Head], *,
+               guard: Optional[LabelGuard] = None) -> str:
+    """The intended sense, 18-43 words, never using the word itself (and, only when a ``guard`` is
+    given, no corpus or queue label either; the harvest passes none, Roger 2026-10-08, QUESTIONS 41):
 
     "This means a disposition toward resolution (volition in general), of a piece with unflinching,
     determined and indomitable, shown in determination, backbone and grit; the opposite pole is
-    irresolution."  The feeling heads of Class VI (:func:`is_feeling_head`) read "a tendency to feel
-    <sense> and act from it" (an emotional state taken as an inclination, plan § 1; the plan's "a
-    general tendency" lost "general", which is a queued label).  A head too sparse for 18 words
-    gives a shorter hint."""
+    irresolution."  The feeling heads of Class VI (:func:`is_feeling_head`) read "a general tendency
+    to feel <sense> and act from it" (an emotional state taken as an inclination, plan § 1).  A head
+    too sparse for 18 words gives a shorter hint."""
     me = item.surface.lower()
     sense = _sense_word(head, guard, exclude={me}) or "this temper"
     if is_feeling_head(head):
-        core = f"This means a tendency to feel {sense} and act from it"
+        core = f"This means a general tendency to feel {sense} and act from it"
     else:
         core = f"This means a disposition toward {sense}"
     where = (head.section.split(". ", 1)[-1] if head.section else "").lower()
-    where_clause = f" ({where})" if where and not guard.contains(where) else ""
+    where_clause = f" ({where})" if where and not (guard is not None and guard.contains(where)) else ""
     def ok(w: str) -> bool:
         return (w.islower() and w != me and w != sense and w.split()[-1] not in STOPWORDS
-                and not guard.contains(w))
+                and not (guard is not None and guard.contains(w)))
 
     # one-word siblings and nouns first; multiword ones only to reach the minimum length
     sibs = [s for s in item.siblings if len(s.split()) == 1 and ok(s.lower())]
@@ -380,7 +382,6 @@ def harvest(report: CoverageReport, index: RogetIndex, pairs: Mapping[str, HeadP
             label_of: Optional[Mapping[str, str]] = None) -> HarvestResult:
     """Harvest the selected gap heads; build the gloss hints, the pair candidates and the Candidates."""
     rows = report.by_id()
-    guard = LabelGuard(known_stems)
     selected = select_heads(report, cfg)
     by_head: dict[str, list[HarvestItem]] = {}
     drops: Counter = Counter()
@@ -391,7 +392,7 @@ def harvest(report: CoverageReport, index: RogetIndex, pairs: Mapping[str, HeadP
         drops.update(d)
         partner_head = index.heads[r.partner] if r.partner and r.partner in index.heads else None
         for it in items:
-            it.gloss_hint = gloss_hint(it, index.heads[h], partner_head, guard=guard)
+            it.gloss_hint = gloss_hint(it, index.heads[h], partner_head)   # no label guard (QUESTIONS 41)
         by_head[h] = items
     # pair candidates and partner hints (evidence-backed pairs only)
     pc: list[PairCandidate] = []
