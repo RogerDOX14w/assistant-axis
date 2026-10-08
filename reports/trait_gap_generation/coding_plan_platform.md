@@ -266,6 +266,14 @@ Opus retries a failing step once with a changed approach, then asks Fable (diff 
 
 ## Frozen interface (for workstreams 1, 2, 8, 13 and later)
 
+> **Superseded in part (2026-10-08).**  The registry side of this section (`Candidate`, `start_run`,
+> `submit_candidates`, `RunContext`, the registry row) was built as written and stands.  The scorer side
+> (`NoveltyQuery`, `NoveltyResult`, `score_novelty`, `recovery_test`, `RecoveryReport`, `embed_local`)
+> was never built: M3 was redesigned on 2026-10-02 as retrieve-then-judge (the "M2 final settings and the
+> M3 design" section and M3 decisions 1-17).  Generators are written against the section **"Interface as
+> built (2026-10-08)"** at the end of this file, which replaces the scorer side and re-specifies the
+> recovery harness; nothing in a generator plan should name the old scorer functions.
+
 Everything below is importable from `assistant_axis.gapgen`; generator plans depend only on these names.
 
 **Registry schema**: the row in §6 with its vocabularies; key `f"{stem}#{sense_id}"`; the file `data/candidates/registry.jsonl` is a log whose latest line per key is the record.  A generator never writes the file directly.
@@ -722,3 +730,123 @@ left provisional:
     against 4.5 by blind judges, the verdict step with three readings about a fifth fewer weighted
     errors than 4.5 (more than half fewer on near-corpus words).  Build: [coding_plan_haiku55.md](./coding_plan_haiku55.md),
     "The switch".  Decision 16's re-examination on real generator output stands.
+
+## Interface as built (2026-10-08, Fable; replaces the scorer side of "Frozen interface")
+
+What a generator, a test harness or a later milestone can rely on, as the code stands at commit
+a0a4e09 on `anthropic-vllm-uv`.  Tasks 20-25 of the checklist above are reconciled at the end.
+
+### The registry API (built as frozen; `assistant_axis.gapgen` exports it)
+
+- `Candidate(surface, generator, run_id, rank=None, score=None, gloss_hint=None, sense_id=1,
+  source_ref=None, partner_hint=None)`: one word or phrase a generator proposes.  `surface` as emitted;
+  the registry normalises it to a stem and label.  `score`, where it is a documented human familiarity
+  figure, is read by the filter (interface resolution 4).
+- `start_run(generator, run_id, *, args=None) -> RunContext`: opens `data/candidates/<generator>/<run_id>/`
+  and a `RunContext` with `.log(msg)`, `.usage` (a `MultiModelUsage`), `.args`, `.n_emitted`;
+  `ctx.finish(n_emitted=...)` writes `run.json` and `usage.json` (always, even with zero calls).
+- `submit_candidates(cands, *, registry_path=REGISTRY_PATH, ...) -> SubmitReport(n_submitted, n_new,
+  n_merged, n_unchanged, keys, invalid)`: appends to the log, idempotent per
+  (generator, run_id, surface, sense_id); two candidates of one run with the same key are merged.
+- **The registry log `data/candidates/registry.jsonl` is git-ignored** (interface resolution: registry
+  tracking); the compacted `registry.snapshot.jsonl` is tracked.  So the log is per checkout.  **A
+  generator therefore also writes every `Candidate` it submits to a tracked `candidates.jsonl` in its
+  run directory**, one JSON object per line in `Candidate`'s fields, so the run can be resubmitted into
+  any checkout's log with `gap_registry.py submit --from <run_dir>/candidates.jsonl` (idempotent).
+  Parallel generator worktrees submit locally and are resubmitted into the main checkout afterwards.
+
+### Running the platform over a generator's rows (the CLIs, as they exist)
+
+- **M1**: `traithood_filter.py --batch-id B --run GENERATOR/RUN_ID --pipeline split [--transport
+  live|batches] --budget-usd C`: the split filter on the run's rows not yet filtered; Haiku 5.5 with
+  three readings by default (decision 17), the 10% Sonnet second opinion and the disagreement tripwire
+  (`--max-disagreement`, `--accept-disagreement` on resume), writes the `filter` block (verdict, tags,
+  gloss, alignment score, region) on each row and `data/candidates/filter/<B>/`.
+- **M3**: `novelty_score.py score --batch-id B --run GENERATOR/RUN_ID [--transport live|batches]
+  --budget-usd C`: on the run's rows with verdict `trait`, writes the `novelty` block and
+  `data/candidates/novelty/<B>/` (`results.jsonl`, `readings.jsonl`, `decisions.md`, `summary.json`).
+  Other subcommands: `full-scan`, `compare`, `score --redecide [--write-registry]`, `promote-redecide`,
+  `decisions`, `review-list`, `pools`.
+- **Registry**: `gap_registry.py submit | status | report | holding | judgement-calls | judgement-call |
+  corpus-regions | synonyms | compact | promote`; promotion into `data/seed_queue.json` only by the
+  explicit `promote` command.
+
+### The row's blocks (what a test reads)
+
+`filter`: `pipeline`, `model`, `gloss_model`, `batch_id`, `verdict` (`trait` | `tagged` | `reject`),
+`outcome` (`trait` | `states` | `physical` | `roles` | `turned_away` | ...), `tags`, `membership_kind`,
+`sense` (readings), `same_sense`, `verdict_readings` (when more than one reading), `rule`, `cause`; the
+gloss, alignment score and region beside it.  `novelty`: `run_id`, `mode`, `decision` (`covered` |
+`new` | `grey`), `reason`, `covered_by`, `exact_label`, `review`, `review_details`,
+`pair_completion_for`, `pair_flags`, `pair_notes`, `cut_off`, `alignment_score`, `region`,
+`deciding_reading`, `readings` (every pair judged: stem, cosine, relation, sonnet, opus, outcome),
+`n_pairs_judged`, `listed`, `shortlist`, `relation`, `rubrics`, `rules`, `config_version`,
+`embedding`, `usage`, `at`, and `redecided_from` on a re-decided block.
+
+### The recovery harness (plan 13's core, re-specified; built by the close-out job below)
+
+`recovery_test.py --generator G --run-id R --hidden-frac 0.1 --seed S [--transport live|batches]
+--budget-usd C` and the library `assistant_axis/gapgen/recovery.py`:
+
+1. **Hide**: draw a fraction of the corpus's trait stems (default 0.1), seeded, stratified by region
+   where `corpus_regions.json` has one, **adding every arrangement partner of a drawn trait** (pairs,
+   triangles, tetrahedra hidden together; a sequence member hides alone); write `hidden.json`.
+2. **Score against the reduced corpus**: run M3 on the generator run's rows with the hidden stems
+   removed from retrieval, expansion and the exact-label check (`--hide <hidden.json>` on `score`, a
+   small change: the index is built without them), into its own batch id, writing nothing to the
+   registry (as `full-scan` does).  Rows already filtered by M1 are reused; M1 does not change.
+3. **Match**: for each candidate the reduced-corpus M3 decided `new` or `grey`, and for each hidden
+   trait, a hidden trait is **recovered** by the candidate when the candidate's normalised label equals
+   the hidden stem (or its `renamed_from`), or when the overlap call (rubric A, one pair per call,
+   Sonnet then Opus under the pipeline's rule, the candidate's gloss against the hidden trait's
+   description) reads at the candidate's cut-off or above.  To keep this cheap, only the hidden traits
+   among the candidate's 10 nearest by cosine (against the full corpus) are judged.
+4. **Report** `recovery_report.json` and `.md`: hidden traits recovered (recall), by region and by
+   arrangement kind; candidates that recovered something (precision of the generator's "new"s against
+   the hidden set); pairs recovered whole; cost; and the same figures for the generator's candidates
+   decided `covered` against the reduced corpus (false covers caused by the hiding).  Two seeds by
+   default; the report gives both and their mean.  Chao2 / Chapman saturation estimates (plan 13 § 3)
+   are a later addition, not this job.
+
+### Checklist tasks 20-25, reconciled
+
+20-21 (`novelty.py`, `adjudicate.py`): built in redesigned form (novelty.py, novelty_runner.py, the
+relation and overlap rubrics).  22 (`recovery.py` + `recovery_test.py`): **not built**; the close-out
+job.  23 (`novelty_score.py`): built, with the subcommands above.  24 (calibration replay, pilot):
+done as the M3 pilot and round 2.  25 (freeze and the AGENT_NOTES paragraph): **not done**; the
+close-out job exports the as-built names and writes the paragraph.
+
+## Close-out job (brief for one Opus agent, 2026-10-08; Roger: "build the recovery harness as a platform close-out before the first generator")
+
+In the existing worktree, after `git merge --ff-only anthropic-vllm-uv`:
+
+1. **The recovery harness** exactly as specified above: `recovery.py` (hide, match, report), the
+   `--hide` option on `novelty_score.py score` (the index, expansion and exact-label check without the
+   hidden stems; a run with `--hide` never writes the registry and records the hidden file's path and
+   hash), `recovery_test.py`, and a `candidates.jsonl` reader for `gap_registry.py submit --from`.
+   Tests with the fake clients and the toy corpus: a hidden pair hides whole; a candidate whose label
+   is a hidden stem is recovered without a call; a candidate recovered by the overlap call; a
+   candidate decided covered by a non-hidden trait is not matched; the report's counts; `--hide`
+   leaves the registry untouched.  Then a **live check on the pilot's rows**: hide 10% with seed 0,
+   run the harness over `antonym_check/pilot_1` (the rows already have M1 blocks; M3 reruns against the
+   reduced corpus, about $5; cap $8), and report what it recovered.  The antonym-check words are
+   near-corpus, so recall should be well above zero; say what it is.
+2. **The interface freeze**: `assistant_axis/gapgen/__init__.py` exports the as-built names (the
+   registry API as now, plus `MetricConfig`, the paths, and the recovery entry points); the file's
+   docstring lists them with one line each; a test that the exports exist and nothing named in the
+   superseded scorer interface is exported.
+3. **AGENT_NOTES paragraph** "Trait-gap platform" under the `trait-pairs` rule (edit `AGENT_NOTES.md`
+   with the Edit tool, then `uv run python tools/sync_agent_notes.py`; if the sandbox refuses the
+   sync's writes under `.claude/`, say so and leave it to Fable): what the platform is, the three
+   milestones, where the plans and readouts live, the registry log's per-checkout nature, the model
+   defaults (decision 17), the expensive-operations rule's application, and the `candidates.jsonl`
+   convention.  Two short paragraphs, hotlinked as the notes require.
+4. **The three Haiku left-overs**: cache the split filter's system prompts that exceed 512 tokens on
+   Haiku 5.5 (the sense and kind rubrics; measure the hit rate on the live check); the estimate's
+   proportions (primary readings per word, same-sense share, second-opinion share, unsure re-ask
+   share) measured per model from the recorded runs; the "Model" header lines of the rubric files
+   that still name Haiku 4.5 updated to the defaults (a header edit, not a prompt edit: the pins do
+   not change; verify with `rubric_pins.py check`).
+5. **Report**: commits, the harness's live-check recall and cost, the exports, the sync's outcome, test
+   counts, changed expectations.  Constraints as in [coding_plan_m3.md](./coding_plan_m3.md)'s last
+   section.

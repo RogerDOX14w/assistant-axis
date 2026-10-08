@@ -265,3 +265,40 @@ Opus retries a failing step once with a changed approach, then Fable (diff revie
   check remain hard gates.
 - The registry live log is gitignored and only the compacted snapshot is tracked (platform
   amendment 3); `keys.txt` and the run directories are unaffected.
+
+## Revision for the interface as built (2026-10-08, Fable; this section overrides §§ 4, 5, 7 and the "Interface requests" where they differ)
+
+The scorer side of the frozen interface this plan was written against was never built; M3 is
+retrieve-then-judge and the recovery harness is being built by the platform close-out job (see
+[coding_plan_platform.md](./coding_plan_platform.md), "Interface as built").  What changes for this
+workstream:
+
+1. **Use only the registry API**: `Candidate`, `start_run`, `submit_candidates`, `SubmitReport`,
+   `RunContext` from `assistant_axis.gapgen`; nothing named `NoveltyQuery`, `score_novelty`,
+   `recovery_test`, `embed_local` or `RecoveryReport` exists.  Drop § 5's `queries_for_run` and
+   `recovery_all`, § 7's `recovery` command and `evaluate.py`'s recovery parts; keep the census
+   parsing, the Zipf and familiarity handling, the staged runs, the string-ceiling and known-label
+   checks (they need only the corpus files and the registry).
+2. **Every run writes a tracked `candidates.jsonl`** in its run directory (one `Candidate` per line, the
+   fields of the dataclass) before `submit_candidates`, since the registry log is per checkout and
+   git-ignored; the main checkout resubmits it with `gap_registry.py submit --from`.
+3. **Filtering and scoring are the platform's CLIs**, run by Fable after the generator submits, not by
+   this workstream: `traithood_filter.py --run censuses/<R>` then `novelty_score.py score --run
+   censuses/<R>`; recovery by `recovery_test.py --generator censuses --run-id <R>` once the close-out
+   job lands.  This workstream's acceptance stops at a correct, tested, submitted run with its
+   readout of counts (words parsed, cut by the floor, submitted by stage, duplicates merged).
+4. **Costs**: the generator itself makes no paid call.  The platform's cost per submitted word is now
+   about $0.004 for M1 (Haiku 5.5, three readings) and about $0.018 for M3 on each word M1 passes
+   (M3 pilot rates, before the cosine floor); the TDA's 2,818 words are therefore about $11 of M1
+   and, at the near-corpus pass rate of about 90%, about $45 of M3: over the $20 line, so the full
+   run goes through the Batches API on Roger's go, after the 20% pilot (§ 10) has been read.
+5. **Pilot**: `--every-nth 5` of the TDA, submitted as run `<date>-pilot`; Fable runs M1 and M3 on it
+   live (about $11 together, under the line, reported as it runs) and the recovery test, and writes
+   the yield-per-dollar readout before the full TDA.  Allport-Odbert stages follow the TDA on Roger's
+   go, as § 1 says.
+6. **Where the agent works**: its own git worktree (the Agent tool's worktree isolation branches from
+   origin/master, so its first step is `git merge --ff-only anthropic-vllm-uv`), with `.env` copied
+   from the main checkout and `data/external/` and `runpod_workspace/` symlinked from it (both inside
+   the repository); the TDA and Allport-Odbert files download into `data/external/censuses/` with
+   their licence files beside them (CC0 and CC BY; record the URLs and dates in a README there).  The
+   file-access boundary of PLAN_FORMAT.md applies unchanged.

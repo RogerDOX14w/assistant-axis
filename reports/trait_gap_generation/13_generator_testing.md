@@ -108,3 +108,15 @@ tables, N̂ and coverage, the stop rule.
 - Stop rule in novel-per-dollar or per-review-minute? Review time looks like the bottleneck.
 - Spend ≈ $10 on an extra independent generator purely to give Chao2 a third occasion?
 - Strict or loose threshold as the headline recall and N̂?
+
+## Status (2026-10-08)
+
+The platform's novelty scorer was redesigned (M3 is retrieve-then-judge; see
+[coding_plan_platform.md](./coding_plan_platform.md), "Interface as built"), so this plan's core, the
+held-out recovery test, is re-specified there in M3's terms: hide a seeded fraction of the corpus with
+arrangement partners hidden together, run M3 against the reduced corpus, count a hidden trait as
+recovered when a candidate matches its label or the overlap call puts the candidate at the cut-off
+against it, report recall per generator and cost.  It is being built as the platform close-out job
+before the first generator runs.  Concept-level matching "via the detector" is now the overlap call;
+the independence classes (§ 3) and the per-dollar dashboard stand as written; the Chao2 / Chapman
+saturation estimates are a later addition once two generators have run.

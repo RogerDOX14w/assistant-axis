@@ -7,8 +7,21 @@ thousands of times, and testing the generators.  Fourteen Fable planning
 agents each worked one idea up from the shared [BRIEF.md](./BRIEF.md) into a
 plan in a fixed nine-section format (idea, sources verified, method, yield and
 biases, cost, testing, dependencies, variants, open questions for Roger).
-Nothing has been run; no paid calls were made.  Next step: Roger reviews,
-greenlights a subset for detailed coding plans.
+(Written 2026-09-18, when nothing had been run.)
+
+**Status, 2026-10-08.**  The platform is built: plan 14 as the split trait-hood filter and the registry
+([coding_plan_platform.md](./coding_plan_platform.md) M1, validated in
+[readout_m1_validation.md](./readout_m1_validation.md), now on Haiku 5.5 with three readings per
+[haiku55_readout.md](./haiku55_readout.md)); plan 15 as the metric calibration (M2,
+[pilot_m2_readout.md](./pilot_m2_readout.md), settings in
+[metric_config.json](../../data/candidates/metric_config.json)); plan 10 as M3, redesigned from an
+embedding threshold to retrieve-then-judge ([m3_overlap_test_readout.md](./m3_overlap_test_readout.md),
+[m3_overlap_arms_readout.md](./m3_overlap_arms_readout.md), [m3_pilot_readout.md](./m3_pilot_readout.md);
+M3 decisions 1-17 in the platform plan).  Plan 13's recovery harness is the platform close-out job
+now in progress (platform plan, "Interface as built").  Plans 1 and 2 have revised coding plans and
+are being coded in parallel.  Plan 11 is largely subsumed by M3 (a model reads every candidate);
+plan 12 is untouched.  Plans 3-9 are proposals.  The interface generators build on is the platform
+plan's "Interface as built" section, not its older "Frozen interface".
 
 ## The plans
 

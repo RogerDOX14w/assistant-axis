@@ -50,3 +50,11 @@ A (above): text embedding -> PC scores, ridge/PLS versus kNN. B: same-model prox
 - Wait for the pending extraction (143 entities, 727 training points) before trusting scores, or run now and use the pending set as the prospective test?
 - Is the residual-fraction yield metric (May 2026) still the preferred novelty definition, or nearest-neighbour distance?
 - Is variant B worth a small RunPod spend if A's per-PC R² collapses past PC8?
+
+## Status (2026-10-08)
+
+Untouched by the platform build.  M3 scores novelty on text embeddings and the overlap call; the
+persona-space cosine is logged beside every overlap reading
+([m3_overlap_test_readout.md](./m3_overlap_test_readout.md), the calibration by-product), which is the
+data this plan's regression would train on.  The prospective test on the entities awaiting extraction
+remains available once the next RunPod extraction runs.  Not scheduled.

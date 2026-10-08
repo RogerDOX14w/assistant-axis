@@ -70,3 +70,12 @@ directionally; a near-antonym scores covered locally but may score novel
 directionally if the pair's axis is under-represented), and their
 disagreement is one of the cases to route to the LLM.  See plan 15 for the
 calibration that decides their weights.
+
+## Status (2026-10-08)
+
+Largely subsumed.  M3 as built ([coding_plan_platform.md](./coding_plan_platform.md), "M2 final settings
+and the M3 design", decisions 1-17) puts a model on every candidate (a Haiku relation call, then a
+Sonnet overlap call with Opus on the close calls), so the premise here, cheap signals that spare the
+LLM for disagreements, no longer buys much at Haiku 5.5's prices.  Its one idea still open is a second,
+independent signal as a tripwire on M3's "new" decisions (WordNet / ConceptNet links, morphology); not
+planned.

@@ -325,3 +325,35 @@ Opus retries a failing step once with a changed approach, then asks Fable (diff 
   check remain hard gates.
 - The registry live log is gitignored and only the compacted snapshot is tracked (platform
   amendment 3); `keys.txt` and the run directories are unaffected.
+
+## Revision for the interface as built (2026-10-08, Fable; this section overrides §§ 4, 5, 7, the recovery parts of §§ 6, 8, 9 and the "Interface requests" where they differ)
+
+The scorer side of the frozen interface was never built; M3 is retrieve-then-judge and the recovery
+harness is the platform close-out job ([coding_plan_platform.md](./coding_plan_platform.md),
+"Interface as built").  What changes for this workstream:
+
+1. **Use only the registry API** (`Candidate`, `start_run`, `submit_candidates`, `SubmitReport`,
+   `RunContext`); drop § 5's `queries_from_candidates` and `run_recovery`, § 7's `recover` command and
+   `recovery_report.json`; keep the Roget parser and its 25-head fixture, the opposed-head
+   reconstruction, the two-route mapping of corpus labels onto heads, the **coverage report** (which
+   needs only the corpus and the parsed heads and is this workstream's main product besides the
+   harvest), the harvest with its per-head cap, and the WordNet sibling stream.  Task 8's embedding
+   route uses `assistant_axis.gapgen.embed` as it exists (the OpenAI backend with its cache; the plan's
+   `embed_local` facade was not built: name the actual functions after reading `embed.py`).
+2. **Every run writes a tracked `candidates.jsonl`** in its run directory before submitting (the
+   registry log is per checkout and git-ignored); the main checkout resubmits with
+   `gap_registry.py submit --from`.  `partner_hint` is carried where an opposed head gives one.
+3. **Filtering, scoring and recovery are the platform's CLIs**, run by Fable after submission
+   (`traithood_filter.py --run roget/<R>`, `novelty_score.py score --run roget/<R>`,
+   `recovery_test.py --generator roget --run-id <R>`).  This workstream's acceptance stops at the
+   coverage report and a correct, tested, submitted harvest with its counts.
+4. **Costs**: the generator's own paid calls are the embeddings of task 8 (cents).  The platform's
+   cost on the harvest is about $0.004 per word for M1 and $0.018 per passing word for M3; a harvest
+   of 200-400 words plus the WordNet stream is about $10-15, run live after the pilot's readout.
+5. **Pilot**: `harvest --every-nth 5` as run `<date>-pilot`, submitted; Fable runs M1 and M3 on it
+   live and the recovery test, and writes the readout; the full harvest follows on Roger's go.
+6. **Where the agent works**: its own worktree (first step `git merge --ff-only anthropic-vllm-uv`),
+   `.env` copied from the main checkout, `data/external/` and `runpod_workspace/` symlinked from it;
+   Roget 1911 downloads into `data/external/roget/` with its Gutenberg licence beside it (record the
+   URL and date in a README there); Open English WordNet is already under `data/external/wn/`.  The
+   file-access boundary of PLAN_FORMAT.md applies unchanged.
