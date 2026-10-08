@@ -742,7 +742,7 @@ a0a4e09 on `anthropic-vllm-uv`.  Tasks 20-25 of the checklist above are reconcil
   source_ref=None, partner_hint=None)`: one word or phrase a generator proposes.  `surface` as emitted;
   the registry normalises it to a stem and label.  `score`, where it is a documented human familiarity
   figure, is read by the filter (interface resolution 4).
-- `start_run(generator, run_id, *, args=None) -> RunContext`: opens `data/candidates/<generator>/<run_id>/`
+- `start_run(generator, run_id, *, args=None) -> RunContext`: opens `data/candidates/runs/<generator>/<run_id>/` (corrected 2026-10-08: the path has `runs/`)
   and a `RunContext` with `.log(msg)`, `.usage` (a `MultiModelUsage`), `.args`, `.n_emitted`;
   `ctx.finish(n_emitted=...)` writes `run.json` and `usage.json` (always, even with zero calls).
 - `submit_candidates(cands, *, registry_path=REGISTRY_PATH, ...) -> SubmitReport(n_submitted, n_new,
@@ -807,6 +807,20 @@ gloss, alignment score and region beside it.  `novelty`: `run_id`, `mode`, `deci
    decided `covered` against the reduced corpus (false covers caused by the hiding).  Two seeds by
    default; the report gives both and their mean.  Chao2 / Chapman saturation estimates (plan 13 § 3)
    are a later addition, not this job.
+
+**As built (2026-10-08, close-out job, commits d238ca4 to 070de2c).**  `recovery_test.py --generator G --run-id R
+[--hidden-frac 0.1] [--seed S ...] --budget-usd C [--transport auto|live|batches] [--batch-id B] [--dry-run | --resume]`;
+seeds default to 0 and 1, the batch id to `rec_<G>_<R>`, outputs under `data/candidates/recovery/<B>/` with the
+reduced-corpus M3 run under `data/candidates/novelty/<B>_s<S>/`.  The run must be in the checkout's registry with M1
+blocks; the harness does not need the run's own M3 result.  One deviation from step 1: the draw takes whole
+arrangement groups until each region's quota is met (so every trait has the same chance of being hidden; 83 of 790
+at 0.1), instead of drawing stems and adding partners, which would hide about 17% and pair members twice as often.
+The match stage has no cosine floor.  Live check on `antonym_check/pilot_1`, seed 0, $4.87: recall 13 of 83
+(all pair members; 2 by label through `renamed_from`, 11 by overlap call), precision 17 of 162 kept candidates, 16
+false covers (the hiding made another trait cover 14 hidden ones; recall counting those would be 32.5%); report
+[recovery_report.md](../../data/candidates/recovery/rec_antonym_check_pilot_1/recovery_report.md).  `gap_registry.py
+submit --from <run_dir>/candidates.jsonl` reads the file as `Candidate(**row)` (the older `--file` form reads only
+some fields); `submit_candidates(run=ctx)` records before it appends; `run.log` is git-ignored.
 
 ### Checklist tasks 20-25, reconciled
 

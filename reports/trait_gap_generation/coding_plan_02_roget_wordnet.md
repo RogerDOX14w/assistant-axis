@@ -357,3 +357,13 @@ harness is the platform close-out job ([coding_plan_platform.md](./coding_plan_p
    Roget 1911 downloads into `data/external/roget/` with its Gutenberg licence beside it (record the
    URL and date in a README there); Open English WordNet is already under `data/external/wn/`.  The
    file-access boundary of PLAN_FORMAT.md applies unchanged.
+
+**As built (2026-10-08, branch `gen02-roget`, ten commits).**  Package `assistant_axis/gapgen/generators/roget/`
+(`parse`, `pairs`, `mapping`, `coverage`, `harvest`, `wn_clusters`), CLI
+[roget_generate.py](../../data_analysis/gap_generation/roget_generate.py) (`fetch | parse | pair | map | coverage |
+harvest | submit`), derived data and the coverage map under [data/candidates/roget/](../../data/candidates/roget/)
+([roget_coverage.md](../../data/candidates/roget/roget_coverage.md)); the WordNet stream submits under its own generator
+name `wn_clusters`, so a harvest is two runs, `runs/roget/<run_id>/` and `runs/wn_clusters/<run_id>/`.  No LLM pass: pairing,
+placement and the gloss hints are rules (221 of 576 dispositional heads unresolved; questions 37-42 in
+[QUESTIONS.md](./QUESTIONS.md)).  Pilot `2026-10-08-pilot`: 185 Roget words and 87 WordNet words, readout
+[readout.md](../../data/candidates/runs/roget/2026-10-08-pilot/readout.md); embeddings $0.0135.

@@ -299,6 +299,15 @@ workstream:
 6. **Where the agent works**: its own git worktree (the Agent tool's worktree isolation branches from
    origin/master, so its first step is `git merge --ff-only anthropic-vllm-uv`), with `.env` copied
    from the main checkout and `data/external/` and `runpod_workspace/` symlinked from it (both inside
-   the repository); the TDA and Allport-Odbert files download into `data/external/censuses/` with
+   the repository); the TDA and Allport-Odbert files download into `data/external/wordlists/` (as §4 lays out; an earlier draft of this item said `censuses/`) with
    their licence files beside them (CC0 and CC BY; record the URLs and dates in a README there).  The
    file-access boundary of PLAN_FORMAT.md applies unchanged.
+
+**As built (2026-10-08, branch `gen01-censuses`, six commits).**  Package `assistant_axis/gapgen/generators/censuses/`
+(`sources`, `download`, `ingest`, `glosshint`, `corpus`, `submit`, `evaluate`, `report`), CLI
+[census_generator.py](../../data_analysis/gap_generation/census_generator.py) (`download | ingest | submit | report`),
+run directories under `data/candidates/runs/censuses/<run_id>/`, the census table and counts under
+[data/candidates/censuses/](../../data/candidates/censuses/).  Pilot `2026-10-08-pilot`: `submit --stage tda --every-nth 5`,
+564 words, readout [readout.md](../../data/candidates/runs/censuses/2026-10-08-pilot/readout.md); deviations and open
+questions 28-36 in [QUESTIONS.md](./QUESTIONS.md).  The full TDA and the two Allport stages are over the $20 line and
+wait for Roger's go (`--transport batches`, `--confirm-expensive --confirmed-by`).
