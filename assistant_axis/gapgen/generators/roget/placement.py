@@ -60,10 +60,11 @@ NONE = "none"
 STAGES = ("sonnet", "opus")
 RESPONSES_NAME = "placement_responses.jsonl"
 USAGE_NAME = "placement_usage.json"
-#: Estimate: 2.5 characters of prompt per input token (as measured on the head-scope payloads) and the
-#: output per call, thinking included (a guess before the first run; replaced by measured figures after).
-CHARS_PER_TOKEN = 2.5
-OUT_TOKENS = {"sonnet": 400, "opus": 700}
+#: Estimate, measured on a 30-label sample on 2026-10-08 (44 calls): about 2.7 characters of prompt per
+#: input token (1,132 input tokens a call), and output, thinking included, about 139 tokens a call on
+#: Sonnet 5.5 and 178 on Opus 5.5 (the first guesses, 400 and 700, were about three times too high).
+CHARS_PER_TOKEN = 2.7
+OUT_TOKENS = {"sonnet": 150, "opus": 190}
 SEED = "roget_placement"
 
 

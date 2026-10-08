@@ -297,10 +297,25 @@ Rated 1:
 
 These are mixed heads, as the rating says; their person words go to M1 with the rest.
 
-## Coverage map and harvest
+## Coverage map and harvest (both checks)
 
-See the combined section at the end, written after the label placement check: the coverage map and the
-full-size harvest dry run are rerun once, with both checks applied.
+Run once with both checks applied, after the label placement check ([placement_readout.md](./placement_readout.md)): `roget_generate.py coverage` wrote [roget_coverage.json](./roget_coverage.json) and [roget_coverage.md](./roget_coverage.md) (with its new section "Not character"), and `roget_generate.py --dry-run harvest --run-id 2026-10-08-full-dryrun` gave the full-size harvest (no `--every-nth`; nothing written).  The other three columns are the same computations in memory, to separate the two checks' effects: the placements before that check are those of [label_heads.json](./label_heads.json) as committed in 57d3981.
+
+| | no check | head scope only | placement only | both checks (the files now) |
+|---|---|---|---|---|
+| heads in scope (dispositional 576, Classes I-III 99) | 675 | 675 | 675 | 675 |
+| not character (rated 0; left out of the rows below) | 0 | 188 | 0 | 188 |
+| covered | 311 | 264 | 307 | 263 |
+| partly covered | 75 | 59 | 67 | 53 |
+| uncovered (of which a queued label only) | 289 (36) | 164 (22) | 301 (41) | 171 (26) |
+| gap classes: pair_completion / pair_empty / singleton_empty / queued_only | 37 / 46 / 170 / 36 | 25 / 19 / 98 / 22 | 31 / 60 / 169 / 41 | 21 / 29 / 95 / 26 |
+| opposed pairs: both poles / one pole / neither covered | 75 / 77 / 57 | 67 / 55 / 29 | 76 / 69 / 64 | 68 / 49 / 34 |
+| harvest: gap heads selected / skipped as not character / giving words | 289 / 0 / 212 | 289 / 125 / 91 | 301 / 0 / 228 | 301 / 130 / 102 |
+| harvest: words (distinct) | 898 (827) | 471 (441) | 1022 (936) | 581 (538) |
+| harvest: words dropped with not-character heads | 0 | 427 | 0 | 441 |
+| downstream estimate: M1 / M3 if half pass | $3.59 / $8.08 | $1.88 / $4.24 | $4.09 / $9.20 | $2.32 / $5.23 |
+
+The head-scope check takes 188 heads out of the counts, and with them 125 of the 289 gap heads (427 words of the harvest).  The placement check uncovers some heads (covered 311 to 307, uncovered 289 to 301) and so adds 124 words.  Together: 263 covered, 53 partly covered, 171 uncovered, and a full harvest of 581 words from 102 heads instead of 898 from 212, about $2.30 at M1 instead of $3.60.  The gap heads the harvest selects (301) still include the 130 rated 0, because a head keeps its gap class; the harvest skips them and counts them.
 
 ## Open points for Roger
 

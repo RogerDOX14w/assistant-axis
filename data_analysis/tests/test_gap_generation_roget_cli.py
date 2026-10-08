@@ -271,6 +271,13 @@ def test_place_check_dry_run_and_render_write_nothing(tree, monkeypatch, capsys)
     assert run(base, "--dry-run", "place-check") == 0
     out = capsys.readouterr().out
     assert "estimate: Sonnet" in out and "DRY-RUN" in out
+    n = int(out.split("labels to check ")[1].split()[0])
+    if n >= 2:                                            # a seeded sample, the same twice
+        assert run(base, "--dry-run", "place-check", "--sample", "2", "--seed", "3") == 0
+        a = capsys.readouterr().out
+        assert "labels to check 2 " in a
+        assert run(base, "--dry-run", "place-check", "--sample", "2", "--seed", "3") == 0
+        assert capsys.readouterr().out == a
     assert snapshot(tmp_path) == snap
 
 

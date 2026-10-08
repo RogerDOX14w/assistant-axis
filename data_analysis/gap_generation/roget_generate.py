@@ -432,6 +432,9 @@ def cmd_place_check(args) -> int:
     records = M.load_labels(Path(args.data_dir), Path(args.queue))
     want = [x.strip() for x in args.render.split(",")] if args.render else None
     items, skipped = PL.select_items(lh, records, idx, stems=want)
+    if args.sample:
+        import random
+        items = sorted(random.Random(args.seed).sample(items, min(args.sample, len(items))), key=lambda it: it.stem)
     if args.limit:
         items = items[: args.limit]
     try:
@@ -750,9 +753,12 @@ def build_parser() -> argparse.ArgumentParser:
     sp.add_argument("--opus-model", default="claude-opus-5-5")
     sp.add_argument("--budget-usd", type=float, default=5.0)
     sp.add_argument("--concurrency", type=int, default=6)
-    sp.add_argument("--referee-share", type=float, default=0.6,
+    sp.add_argument("--referee-share", type=float, default=0.5,
                     help="share of the labels Opus is expected to referee, for the estimate only")
     sp.add_argument("--limit", type=int, default=None, help="check only the first N labels (sorted by stem)")
+    sp.add_argument("--sample", type=int, default=None, metavar="N",
+                    help="check a random sample of N labels (seeded by --seed), e.g. to measure tokens first")
+    sp.add_argument("--seed", type=int, default=0)
     sp.add_argument("--resume", action="store_true", help="reuse the answers in placement_responses.jsonl")
     sp.add_argument("--render", default=None, metavar="STEMS",
                     help="print these labels' calls, as sent, and stop (no call, no write)")
