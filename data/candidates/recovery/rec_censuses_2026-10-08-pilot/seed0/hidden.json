@@ -1,0 +1,1066 @@
+{
+  "schema": 1,
+  "seed": 0,
+  "hidden_frac": 0.1,
+  "n_corpus": 790,
+  "n_target": 79,
+  "n_hidden": 83,
+  "n_groups": 53,
+  "hidden": [
+    "absorption_prone",
+    "accountable",
+    "anti_immigration",
+    "anxious_preoccupied_attachment",
+    "apathetic",
+    "attention_seeking",
+    "bargain_hunter",
+    "benevolent",
+    "benign",
+    "calculating",
+    "callous",
+    "cancer",
+    "cat_person",
+    "cerebral",
+    "clear",
+    "compassionate",
+    "competent",
+    "conciliatory",
+    "confabulatory",
+    "confrontational",
+    "controlling",
+    "course_correcting",
+    "cryptic",
+    "dismissive",
+    "dog_person",
+    "educated",
+    "effusive",
+    "engaged",
+    "exclusivist",
+    "fashionable",
+    "financially_precarious",
+    "financially_secure",
+    "formalist",
+    "formulaic",
+    "friendly",
+    "full_price_shopper",
+    "gryffindor",
+    "hostile",
+    "iconoclastic",
+    "idealistic",
+    "incompetent",
+    "insecure",
+    "isfj_mbti",
+    "istj_mbti",
+    "jaded",
+    "malicious",
+    "malign",
+    "merciful",
+    "micromanaging",
+    "monochronic_hall",
+    "northern_hemisphere",
+    "oblivious",
+    "observant",
+    "permissive",
+    "pluralist",
+    "polychronic_hall",
+    "pragmatic",
+    "pro_immigration",
+    "puritanical",
+    "quality_time",
+    "realistic_holland",
+    "sassy",
+    "sectarian",
+    "self_assured",
+    "self_blaming",
+    "self_effacing",
+    "social_holland",
+    "southern_hemisphere",
+    "spontaneous",
+    "superstitious",
+    "supportive",
+    "survivor_vals",
+    "temperate",
+    "tunnel_visioned",
+    "uncalculating",
+    "uncaring",
+    "uneducated",
+    "unfashionable",
+    "unflinching",
+    "visceral",
+    "wide_eyed",
+    "wry",
+    "zealous"
+  ],
+  "groups": [
+    {
+      "members": [
+        "absorption_prone"
+      ],
+      "stratum": "cognitive_epistemic",
+      "kind": "singleton"
+    },
+    {
+      "members": [
+        "accountable"
+      ],
+      "stratum": "moral_stance",
+      "kind": "singleton"
+    },
+    {
+      "members": [
+        "anti_immigration",
+        "pro_immigration"
+      ],
+      "stratum": "cognitive_epistemic",
+      "kind": "pair"
+    },
+    {
+      "members": [
+        "anxious_preoccupied_attachment"
+      ],
+      "stratum": "none",
+      "kind": "square"
+    },
+    {
+      "members": [
+        "apathetic",
+        "engaged"
+      ],
+      "stratum": "emotional_temperament",
+      "kind": "pair"
+    },
+    {
+      "members": [
+        "attention_seeking",
+        "self_effacing"
+      ],
+      "stratum": "social_interpersonal",
+      "kind": "pair"
+    },
+    {
+      "members": [
+        "bargain_hunter",
+        "full_price_shopper"
+      ],
+      "stratum": "cognitive_epistemic",
+      "kind": "pair"
+    },
+    {
+      "members": [
+        "benevolent",
+        "uncaring"
+      ],
+      "stratum": "moral_stance",
+      "kind": "pair"
+    },
+    {
+      "members": [
+        "benign",
+        "malign"
+      ],
+      "stratum": "moral_stance",
+      "kind": "pair"
+    },
+    {
+      "members": [
+        "calculating",
+        "uncalculating"
+      ],
+      "stratum": "cognitive_epistemic",
+      "kind": "pair"
+    },
+    {
+      "members": [
+        "callous",
+        "compassionate",
+        "malicious"
+      ],
+      "stratum": "emotional_temperament",
+      "kind": "triangle"
+    },
+    {
+      "members": [
+        "cancer"
+      ],
+      "stratum": "none",
+      "kind": "ring"
+    },
+    {
+      "members": [
+        "cat_person",
+        "dog_person"
+      ],
+      "stratum": "identity_demographic",
+      "kind": "pair"
+    },
+    {
+      "members": [
+        "cerebral",
+        "visceral"
+      ],
+      "stratum": "cognitive_epistemic",
+      "kind": "pair"
+    },
+    {
+      "members": [
+        "clear",
+        "cryptic"
+      ],
+      "stratum": "communication_style",
+      "kind": "pair"
+    },
+    {
+      "members": [
+        "competent",
+        "incompetent"
+      ],
+      "stratum": "cognitive_epistemic",
+      "kind": "pair"
+    },
+    {
+      "members": [
+        "conciliatory",
+        "confrontational"
+      ],
+      "stratum": "communication_style",
+      "kind": "pair"
+    },
+    {
+      "members": [
+        "confabulatory"
+      ],
+      "stratum": "none",
+      "kind": "singleton"
+    },
+    {
+      "members": [
+        "controlling"
+      ],
+      "stratum": "social_interpersonal",
+      "kind": "singleton"
+    },
+    {
+      "members": [
+        "course_correcting",
+        "tunnel_visioned"
+      ],
+      "stratum": "cognitive_epistemic",
+      "kind": "pair"
+    },
+    {
+      "members": [
+        "dismissive",
+        "supportive"
+      ],
+      "stratum": "communication_style",
+      "kind": "pair"
+    },
+    {
+      "members": [
+        "educated",
+        "uneducated"
+      ],
+      "stratum": "identity_demographic",
+      "kind": "pair"
+    },
+    {
+      "members": [
+        "effusive"
+      ],
+      "stratum": "communication_style",
+      "kind": "unclassified"
+    },
+    {
+      "members": [
+        "exclusivist",
+        "pluralist"
+      ],
+      "stratum": "none",
+      "kind": "pair"
+    },
+    {
+      "members": [
+        "fashionable",
+        "unfashionable"
+      ],
+      "stratum": "identity_demographic",
+      "kind": "pair"
+    },
+    {
+      "members": [
+        "financially_precarious",
+        "financially_secure"
+      ],
+      "stratum": "identity_demographic",
+      "kind": "pair"
+    },
+    {
+      "members": [
+        "formalist"
+      ],
+      "stratum": "cognitive_epistemic",
+      "kind": "singleton"
+    },
+    {
+      "members": [
+        "formulaic",
+        "spontaneous"
+      ],
+      "stratum": "communication_style",
+      "kind": "pair"
+    },
+    {
+      "members": [
+        "friendly",
+        "hostile"
+      ],
+      "stratum": "communication_style",
+      "kind": "pair"
+    },
+    {
+      "members": [
+        "gryffindor"
+      ],
+      "stratum": "none",
+      "kind": "set"
+    },
+    {
+      "members": [
+        "iconoclastic"
+      ],
+      "stratum": "cognitive_epistemic",
+      "kind": "unclassified"
+    },
+    {
+      "members": [
+        "idealistic",
+        "pragmatic"
+      ],
+      "stratum": "moral_stance",
+      "kind": "pair"
+    },
+    {
+      "members": [
+        "insecure",
+        "self_assured"
+      ],
+      "stratum": "emotional_temperament",
+      "kind": "pair"
+    },
+    {
+      "members": [
+        "isfj_mbti"
+      ],
+      "stratum": "none",
+      "kind": "4-cube"
+    },
+    {
+      "members": [
+        "istj_mbti"
+      ],
+      "stratum": "none",
+      "kind": "4-cube"
+    },
+    {
+      "members": [
+        "jaded",
+        "wide_eyed"
+      ],
+      "stratum": "emotional_temperament",
+      "kind": "pair"
+    },
+    {
+      "members": [
+        "merciful"
+      ],
+      "stratum": "moral_stance",
+      "kind": "singleton"
+    },
+    {
+      "members": [
+        "micromanaging"
+      ],
+      "stratum": "social_interpersonal",
+      "kind": "unclassified"
+    },
+    {
+      "members": [
+        "monochronic_hall",
+        "polychronic_hall"
+      ],
+      "stratum": "none",
+      "kind": "pair"
+    },
+    {
+      "members": [
+        "northern_hemisphere",
+        "southern_hemisphere"
+      ],
+      "stratum": "none",
+      "kind": "pair"
+    },
+    {
+      "members": [
+        "oblivious",
+        "observant"
+      ],
+      "stratum": "social_interpersonal",
+      "kind": "pair"
+    },
+    {
+      "members": [
+        "permissive",
+        "puritanical"
+      ],
+      "stratum": "moral_stance",
+      "kind": "pair"
+    },
+    {
+      "members": [
+        "quality_time"
+      ],
+      "stratum": "none",
+      "kind": "set"
+    },
+    {
+      "members": [
+        "realistic_holland"
+      ],
+      "stratum": "none",
+      "kind": "ring"
+    },
+    {
+      "members": [
+        "sassy"
+      ],
+      "stratum": "communication_style",
+      "kind": "singleton"
+    },
+    {
+      "members": [
+        "sectarian"
+      ],
+      "stratum": "moral_stance",
+      "kind": "sequence"
+    },
+    {
+      "members": [
+        "self_blaming"
+      ],
+      "stratum": "cognitive_epistemic",
+      "kind": "singleton"
+    },
+    {
+      "members": [
+        "social_holland"
+      ],
+      "stratum": "none",
+      "kind": "ring"
+    },
+    {
+      "members": [
+        "superstitious"
+      ],
+      "stratum": "cognitive_epistemic",
+      "kind": "singleton"
+    },
+    {
+      "members": [
+        "survivor_vals"
+      ],
+      "stratum": "none",
+      "kind": "set"
+    },
+    {
+      "members": [
+        "temperate",
+        "zealous"
+      ],
+      "stratum": "communication_style",
+      "kind": "pair"
+    },
+    {
+      "members": [
+        "unflinching"
+      ],
+      "stratum": "emotional_temperament",
+      "kind": "singleton"
+    },
+    {
+      "members": [
+        "wry"
+      ],
+      "stratum": "communication_style",
+      "kind": "unclassified"
+    }
+  ],
+  "strata": {
+    "alignment_ai_agent": {
+      "n_traits": 4,
+      "n_groups": 2,
+      "quota": 0,
+      "n_hidden": 0,
+      "n_groups_hidden": 0
+    },
+    "cognitive_epistemic": {
+      "n_traits": 170,
+      "n_groups": 99,
+      "quota": 17,
+      "n_hidden": 17,
+      "n_groups_hidden": 11
+    },
+    "communication_style": {
+      "n_traits": 154,
+      "n_groups": 93,
+      "quota": 15,
+      "n_hidden": 15,
+      "n_groups_hidden": 9
+    },
+    "emotional_temperament": {
+      "n_traits": 87,
+      "n_groups": 51,
+      "quota": 9,
+      "n_hidden": 10,
+      "n_groups_hidden": 5
+    },
+    "identity_demographic": {
+      "n_traits": 69,
+      "n_groups": 38,
+      "quota": 7,
+      "n_hidden": 8,
+      "n_groups_hidden": 4
+    },
+    "moral_stance": {
+      "n_traits": 103,
+      "n_groups": 62,
+      "quota": 10,
+      "n_hidden": 11,
+      "n_groups_hidden": 7
+    },
+    "none": {
+      "n_traits": 157,
+      "n_groups": 126,
+      "quota": 16,
+      "n_hidden": 16,
+      "n_groups_hidden": 13
+    },
+    "social_interpersonal": {
+      "n_traits": 46,
+      "n_groups": 28,
+      "quota": 5,
+      "n_hidden": 6,
+      "n_groups_hidden": 4
+    }
+  },
+  "traits": {
+    "absorption_prone": {
+      "region": "cognitive_epistemic",
+      "stratum": "cognitive_epistemic",
+      "kind": "singleton",
+      "group": 0
+    },
+    "accountable": {
+      "region": "moral_stance",
+      "stratum": "moral_stance",
+      "kind": "singleton",
+      "group": 1
+    },
+    "anti_immigration": {
+      "region": "cognitive_epistemic",
+      "stratum": "cognitive_epistemic",
+      "kind": "pair",
+      "group": 2
+    },
+    "pro_immigration": {
+      "region": "moral_stance",
+      "stratum": "cognitive_epistemic",
+      "kind": "pair",
+      "group": 2
+    },
+    "anxious_preoccupied_attachment": {
+      "region": null,
+      "stratum": "none",
+      "kind": "square",
+      "group": 3
+    },
+    "apathetic": {
+      "region": "emotional_temperament",
+      "stratum": "emotional_temperament",
+      "kind": "pair",
+      "group": 4
+    },
+    "engaged": {
+      "region": "emotional_temperament",
+      "stratum": "emotional_temperament",
+      "kind": "pair",
+      "group": 4
+    },
+    "attention_seeking": {
+      "region": "social_interpersonal",
+      "stratum": "social_interpersonal",
+      "kind": "pair",
+      "group": 5
+    },
+    "self_effacing": {
+      "region": "communication_style",
+      "stratum": "social_interpersonal",
+      "kind": "pair",
+      "group": 5
+    },
+    "bargain_hunter": {
+      "region": "cognitive_epistemic",
+      "stratum": "cognitive_epistemic",
+      "kind": "pair",
+      "group": 6
+    },
+    "full_price_shopper": {
+      "region": "moral_stance",
+      "stratum": "cognitive_epistemic",
+      "kind": "pair",
+      "group": 6
+    },
+    "benevolent": {
+      "region": "moral_stance",
+      "stratum": "moral_stance",
+      "kind": "pair",
+      "group": 7
+    },
+    "uncaring": {
+      "region": "moral_stance",
+      "stratum": "moral_stance",
+      "kind": "pair",
+      "group": 7
+    },
+    "benign": {
+      "region": "moral_stance",
+      "stratum": "moral_stance",
+      "kind": "pair",
+      "group": 8
+    },
+    "malign": {
+      "region": "moral_stance",
+      "stratum": "moral_stance",
+      "kind": "pair",
+      "group": 8
+    },
+    "calculating": {
+      "region": "cognitive_epistemic",
+      "stratum": "cognitive_epistemic",
+      "kind": "pair",
+      "group": 9
+    },
+    "uncalculating": {
+      "region": "communication_style",
+      "stratum": "cognitive_epistemic",
+      "kind": "pair",
+      "group": 9
+    },
+    "callous": {
+      "region": "emotional_temperament",
+      "stratum": "emotional_temperament",
+      "kind": "triangle",
+      "group": 10
+    },
+    "compassionate": {
+      "region": "emotional_temperament",
+      "stratum": "emotional_temperament",
+      "kind": "triangle",
+      "group": 10
+    },
+    "malicious": {
+      "region": "moral_stance",
+      "stratum": "emotional_temperament",
+      "kind": "triangle",
+      "group": 10
+    },
+    "cancer": {
+      "region": null,
+      "stratum": "none",
+      "kind": "ring",
+      "group": 11
+    },
+    "cat_person": {
+      "region": "identity_demographic",
+      "stratum": "identity_demographic",
+      "kind": "pair",
+      "group": 12
+    },
+    "dog_person": {
+      "region": null,
+      "stratum": "identity_demographic",
+      "kind": "pair",
+      "group": 12
+    },
+    "cerebral": {
+      "region": "cognitive_epistemic",
+      "stratum": "cognitive_epistemic",
+      "kind": "pair",
+      "group": 13
+    },
+    "visceral": {
+      "region": "communication_style",
+      "stratum": "cognitive_epistemic",
+      "kind": "pair",
+      "group": 13
+    },
+    "clear": {
+      "region": "communication_style",
+      "stratum": "communication_style",
+      "kind": "pair",
+      "group": 14
+    },
+    "cryptic": {
+      "region": "communication_style",
+      "stratum": "communication_style",
+      "kind": "pair",
+      "group": 14
+    },
+    "competent": {
+      "region": "cognitive_epistemic",
+      "stratum": "cognitive_epistemic",
+      "kind": "pair",
+      "group": 15
+    },
+    "incompetent": {
+      "region": "cognitive_epistemic",
+      "stratum": "cognitive_epistemic",
+      "kind": "pair",
+      "group": 15
+    },
+    "conciliatory": {
+      "region": "communication_style",
+      "stratum": "communication_style",
+      "kind": "pair",
+      "group": 16
+    },
+    "confrontational": {
+      "region": "communication_style",
+      "stratum": "communication_style",
+      "kind": "pair",
+      "group": 16
+    },
+    "confabulatory": {
+      "region": null,
+      "stratum": "none",
+      "kind": "singleton",
+      "group": 17
+    },
+    "controlling": {
+      "region": "social_interpersonal",
+      "stratum": "social_interpersonal",
+      "kind": "singleton",
+      "group": 18
+    },
+    "course_correcting": {
+      "region": "cognitive_epistemic",
+      "stratum": "cognitive_epistemic",
+      "kind": "pair",
+      "group": 19
+    },
+    "tunnel_visioned": {
+      "region": "cognitive_epistemic",
+      "stratum": "cognitive_epistemic",
+      "kind": "pair",
+      "group": 19
+    },
+    "dismissive": {
+      "region": "communication_style",
+      "stratum": "communication_style",
+      "kind": "pair",
+      "group": 20
+    },
+    "supportive": {
+      "region": "social_interpersonal",
+      "stratum": "communication_style",
+      "kind": "pair",
+      "group": 20
+    },
+    "educated": {
+      "region": "identity_demographic",
+      "stratum": "identity_demographic",
+      "kind": "pair",
+      "group": 21
+    },
+    "uneducated": {
+      "region": "identity_demographic",
+      "stratum": "identity_demographic",
+      "kind": "pair",
+      "group": 21
+    },
+    "effusive": {
+      "region": "communication_style",
+      "stratum": "communication_style",
+      "kind": "unclassified",
+      "group": 22
+    },
+    "exclusivist": {
+      "region": null,
+      "stratum": "none",
+      "kind": "pair",
+      "group": 23
+    },
+    "pluralist": {
+      "region": "moral_stance",
+      "stratum": "none",
+      "kind": "pair",
+      "group": 23
+    },
+    "fashionable": {
+      "region": "identity_demographic",
+      "stratum": "identity_demographic",
+      "kind": "pair",
+      "group": 24
+    },
+    "unfashionable": {
+      "region": null,
+      "stratum": "identity_demographic",
+      "kind": "pair",
+      "group": 24
+    },
+    "financially_precarious": {
+      "region": "identity_demographic",
+      "stratum": "identity_demographic",
+      "kind": "pair",
+      "group": 25
+    },
+    "financially_secure": {
+      "region": "identity_demographic",
+      "stratum": "identity_demographic",
+      "kind": "pair",
+      "group": 25
+    },
+    "formalist": {
+      "region": "cognitive_epistemic",
+      "stratum": "cognitive_epistemic",
+      "kind": "singleton",
+      "group": 26
+    },
+    "formulaic": {
+      "region": "communication_style",
+      "stratum": "communication_style",
+      "kind": "pair",
+      "group": 27
+    },
+    "spontaneous": {
+      "region": "emotional_temperament",
+      "stratum": "communication_style",
+      "kind": "pair",
+      "group": 27
+    },
+    "friendly": {
+      "region": "communication_style",
+      "stratum": "communication_style",
+      "kind": "pair",
+      "group": 28
+    },
+    "hostile": {
+      "region": "communication_style",
+      "stratum": "communication_style",
+      "kind": "pair",
+      "group": 28
+    },
+    "gryffindor": {
+      "region": null,
+      "stratum": "none",
+      "kind": "set",
+      "group": 29
+    },
+    "iconoclastic": {
+      "region": "cognitive_epistemic",
+      "stratum": "cognitive_epistemic",
+      "kind": "unclassified",
+      "group": 30
+    },
+    "idealistic": {
+      "region": "moral_stance",
+      "stratum": "moral_stance",
+      "kind": "pair",
+      "group": 31
+    },
+    "pragmatic": {
+      "region": "cognitive_epistemic",
+      "stratum": "moral_stance",
+      "kind": "pair",
+      "group": 31
+    },
+    "insecure": {
+      "region": "emotional_temperament",
+      "stratum": "emotional_temperament",
+      "kind": "pair",
+      "group": 32
+    },
+    "self_assured": {
+      "region": "cognitive_epistemic",
+      "stratum": "emotional_temperament",
+      "kind": "pair",
+      "group": 32
+    },
+    "isfj_mbti": {
+      "region": null,
+      "stratum": "none",
+      "kind": "4-cube",
+      "group": 33
+    },
+    "istj_mbti": {
+      "region": null,
+      "stratum": "none",
+      "kind": "4-cube",
+      "group": 34
+    },
+    "jaded": {
+      "region": "emotional_temperament",
+      "stratum": "emotional_temperament",
+      "kind": "pair",
+      "group": 35
+    },
+    "wide_eyed": {
+      "region": "cognitive_epistemic",
+      "stratum": "emotional_temperament",
+      "kind": "pair",
+      "group": 35
+    },
+    "merciful": {
+      "region": "moral_stance",
+      "stratum": "moral_stance",
+      "kind": "singleton",
+      "group": 36
+    },
+    "micromanaging": {
+      "region": "social_interpersonal",
+      "stratum": "social_interpersonal",
+      "kind": "unclassified",
+      "group": 37
+    },
+    "monochronic_hall": {
+      "region": null,
+      "stratum": "none",
+      "kind": "pair",
+      "group": 38
+    },
+    "polychronic_hall": {
+      "region": null,
+      "stratum": "none",
+      "kind": "pair",
+      "group": 38
+    },
+    "northern_hemisphere": {
+      "region": null,
+      "stratum": "none",
+      "kind": "pair",
+      "group": 39
+    },
+    "southern_hemisphere": {
+      "region": null,
+      "stratum": "none",
+      "kind": "pair",
+      "group": 39
+    },
+    "oblivious": {
+      "region": "social_interpersonal",
+      "stratum": "social_interpersonal",
+      "kind": "pair",
+      "group": 40
+    },
+    "observant": {
+      "region": "cognitive_epistemic",
+      "stratum": "social_interpersonal",
+      "kind": "pair",
+      "group": 40
+    },
+    "permissive": {
+      "region": "moral_stance",
+      "stratum": "moral_stance",
+      "kind": "pair",
+      "group": 41
+    },
+    "puritanical": {
+      "region": "moral_stance",
+      "stratum": "moral_stance",
+      "kind": "pair",
+      "group": 41
+    },
+    "quality_time": {
+      "region": null,
+      "stratum": "none",
+      "kind": "set",
+      "group": 42
+    },
+    "realistic_holland": {
+      "region": null,
+      "stratum": "none",
+      "kind": "ring",
+      "group": 43
+    },
+    "sassy": {
+      "region": "communication_style",
+      "stratum": "communication_style",
+      "kind": "singleton",
+      "group": 44
+    },
+    "sectarian": {
+      "region": "moral_stance",
+      "stratum": "moral_stance",
+      "kind": "sequence",
+      "group": 45
+    },
+    "self_blaming": {
+      "region": "cognitive_epistemic",
+      "stratum": "cognitive_epistemic",
+      "kind": "singleton",
+      "group": 46
+    },
+    "social_holland": {
+      "region": null,
+      "stratum": "none",
+      "kind": "ring",
+      "group": 47
+    },
+    "superstitious": {
+      "region": "cognitive_epistemic",
+      "stratum": "cognitive_epistemic",
+      "kind": "singleton",
+      "group": 48
+    },
+    "survivor_vals": {
+      "region": null,
+      "stratum": "none",
+      "kind": "set",
+      "group": 49
+    },
+    "temperate": {
+      "region": "communication_style",
+      "stratum": "communication_style",
+      "kind": "pair",
+      "group": 50
+    },
+    "zealous": {
+      "region": "communication_style",
+      "stratum": "communication_style",
+      "kind": "pair",
+      "group": 50
+    },
+    "unflinching": {
+      "region": "emotional_temperament",
+      "stratum": "emotional_temperament",
+      "kind": "singleton",
+      "group": 51
+    },
+    "wry": {
+      "region": "communication_style",
+      "stratum": "communication_style",
+      "kind": "unclassified",
+      "group": 52
+    }
+  },
+  "corpus": {
+    "data_dir": "/Users/roger/Documents/GitHub/assistant-axis/.claude/worktrees/agent-a49beca76adafdfc1/data",
+    "n_trait_files": 790,
+    "fingerprint": "1d3e36da93873c8e11cfdc9041eb1ab083613a9dbd96074951034f04ed736221"
+  },
+  "regions_file": {
+    "path": "/Users/roger/Documents/GitHub/assistant-axis/.claude/worktrees/agent-a49beca76adafdfc1/data/candidates/corpus_regions.json",
+    "sha256": "cc6000ff86c99d7200638cdad572c5830ab07030c4a27047cff9ddd670bed452"
+  },
+  "git_sha": "e3aa3c0",
+  "drawn_at": "2026-10-08T06:34:23+00:00"
+}

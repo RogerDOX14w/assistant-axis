@@ -1,0 +1,2348 @@
+{
+  "result": {
+    "seeds": [
+      {
+        "seed": 0,
+        "hidden_frac": 0.1,
+        "hidden": {
+          "n_corpus": 790,
+          "n_target": 79,
+          "n_hidden": 83,
+          "n_groups": 53,
+          "strata": {
+            "alignment_ai_agent": {
+              "n_traits": 4,
+              "n_groups": 2,
+              "quota": 0,
+              "n_hidden": 0,
+              "n_groups_hidden": 0
+            },
+            "cognitive_epistemic": {
+              "n_traits": 170,
+              "n_groups": 99,
+              "quota": 17,
+              "n_hidden": 17,
+              "n_groups_hidden": 11
+            },
+            "communication_style": {
+              "n_traits": 154,
+              "n_groups": 93,
+              "quota": 15,
+              "n_hidden": 15,
+              "n_groups_hidden": 9
+            },
+            "emotional_temperament": {
+              "n_traits": 87,
+              "n_groups": 51,
+              "quota": 9,
+              "n_hidden": 10,
+              "n_groups_hidden": 5
+            },
+            "identity_demographic": {
+              "n_traits": 69,
+              "n_groups": 38,
+              "quota": 7,
+              "n_hidden": 8,
+              "n_groups_hidden": 4
+            },
+            "moral_stance": {
+              "n_traits": 103,
+              "n_groups": 62,
+              "quota": 10,
+              "n_hidden": 11,
+              "n_groups_hidden": 7
+            },
+            "none": {
+              "n_traits": 157,
+              "n_groups": 126,
+              "quota": 16,
+              "n_hidden": 16,
+              "n_groups_hidden": 13
+            },
+            "social_interpersonal": {
+              "n_traits": 46,
+              "n_groups": 28,
+              "quota": 5,
+              "n_hidden": 6,
+              "n_groups_hidden": 4
+            }
+          }
+        },
+        "hidden_stems": [
+          "absorption_prone",
+          "accountable",
+          "anti_immigration",
+          "anxious_preoccupied_attachment",
+          "apathetic",
+          "attention_seeking",
+          "bargain_hunter",
+          "benevolent",
+          "benign",
+          "calculating",
+          "callous",
+          "cancer",
+          "cat_person",
+          "cerebral",
+          "clear",
+          "compassionate",
+          "competent",
+          "conciliatory",
+          "confabulatory",
+          "confrontational",
+          "controlling",
+          "course_correcting",
+          "cryptic",
+          "dismissive",
+          "dog_person",
+          "educated",
+          "effusive",
+          "engaged",
+          "exclusivist",
+          "fashionable",
+          "financially_precarious",
+          "financially_secure",
+          "formalist",
+          "formulaic",
+          "friendly",
+          "full_price_shopper",
+          "gryffindor",
+          "hostile",
+          "iconoclastic",
+          "idealistic",
+          "incompetent",
+          "insecure",
+          "isfj_mbti",
+          "istj_mbti",
+          "jaded",
+          "malicious",
+          "malign",
+          "merciful",
+          "micromanaging",
+          "monochronic_hall",
+          "northern_hemisphere",
+          "oblivious",
+          "observant",
+          "permissive",
+          "pluralist",
+          "polychronic_hall",
+          "pragmatic",
+          "pro_immigration",
+          "puritanical",
+          "quality_time",
+          "realistic_holland",
+          "sassy",
+          "sectarian",
+          "self_assured",
+          "self_blaming",
+          "self_effacing",
+          "social_holland",
+          "southern_hemisphere",
+          "spontaneous",
+          "superstitious",
+          "supportive",
+          "survivor_vals",
+          "temperate",
+          "tunnel_visioned",
+          "uncalculating",
+          "uncaring",
+          "uneducated",
+          "unfashionable",
+          "unflinching",
+          "visceral",
+          "wide_eyed",
+          "wry",
+          "zealous"
+        ],
+        "candidates": {
+          "n_decided": 500,
+          "by_decision": {
+            "covered": 220,
+            "new": 280
+          },
+          "n_kept": 280,
+          "n_covered": 220
+        },
+        "reachable": {
+          "n": 74,
+          "share": 0.8916,
+          "n_by_kept": 72,
+          "share_by_kept": 0.8675
+        },
+        "kept": {
+          "n_hidden": 83,
+          "n_recovered": 19,
+          "recall": 0.2289,
+          "by_label": 11,
+          "by_overlap_only": 8,
+          "by_region": {
+            "cognitive_epistemic": {
+              "n_hidden": 17,
+              "n_recovered": 3,
+              "recall": 0.1765
+            },
+            "communication_style": {
+              "n_hidden": 16,
+              "n_recovered": 5,
+              "recall": 0.3125
+            },
+            "emotional_temperament": {
+              "n_hidden": 8,
+              "n_recovered": 4,
+              "recall": 0.5
+            },
+            "identity_demographic": {
+              "n_hidden": 6,
+              "n_recovered": 0,
+              "recall": 0.0
+            },
+            "moral_stance": {
+              "n_hidden": 14,
+              "n_recovered": 5,
+              "recall": 0.3571
+            },
+            "none": {
+              "n_hidden": 17,
+              "n_recovered": 1,
+              "recall": 0.0588
+            },
+            "social_interpersonal": {
+              "n_hidden": 5,
+              "n_recovered": 1,
+              "recall": 0.2
+            }
+          },
+          "by_kind": {
+            "4-cube": {
+              "n_hidden": 2,
+              "n_recovered": 0,
+              "recall": 0.0
+            },
+            "pair": {
+              "n_hidden": 56,
+              "n_recovered": 11,
+              "recall": 0.1964
+            },
+            "ring": {
+              "n_hidden": 3,
+              "n_recovered": 0,
+              "recall": 0.0
+            },
+            "sequence": {
+              "n_hidden": 1,
+              "n_recovered": 0,
+              "recall": 0.0
+            },
+            "set": {
+              "n_hidden": 3,
+              "n_recovered": 0,
+              "recall": 0.0
+            },
+            "singleton": {
+              "n_hidden": 10,
+              "n_recovered": 4,
+              "recall": 0.4
+            },
+            "square": {
+              "n_hidden": 1,
+              "n_recovered": 0,
+              "recall": 0.0
+            },
+            "triangle": {
+              "n_hidden": 3,
+              "n_recovered": 3,
+              "recall": 1.0
+            },
+            "unclassified": {
+              "n_hidden": 4,
+              "n_recovered": 1,
+              "recall": 0.25
+            }
+          },
+          "candidates": {
+            "n": 280,
+            "n_recovering": 26,
+            "precision": 0.0929
+          },
+          "groups": {
+            "n": 29,
+            "whole": 3,
+            "partial": 7,
+            "none": 19
+          },
+          "recovered": [
+            {
+              "stem": "accountable",
+              "region": "moral_stance",
+              "kind": "singleton",
+              "by": [
+                {
+                  "key": "accountable#1",
+                  "label": "accountable",
+                  "how": "label",
+                  "decision": "new",
+                  "covered_by": null,
+                  "cut_off": 4,
+                  "cosine": 0.597039,
+                  "rank": 1,
+                  "match": {
+                    "stem": "accountable",
+                    "match": "stem"
+                  }
+                }
+              ]
+            },
+            {
+              "stem": "apathetic",
+              "region": "emotional_temperament",
+              "kind": "pair",
+              "by": [
+                {
+                  "key": "lukewarm#1",
+                  "label": "lukewarm",
+                  "how": "overlap",
+                  "decision": "new",
+                  "covered_by": null,
+                  "cut_off": 3,
+                  "cosine": 0.223948,
+                  "rank": 9,
+                  "sonnet": {
+                    "value": 2,
+                    "reason": "Both describe low engagement, but lukewarm is half-hearted enthusiasm while still going through the motions, whereas apathetic is a deeper lack of caring and interest, with minimal effort; they overlap but neither implies the other."
+                  },
+                  "opus": {
+                    "value": 3,
+                    "reason": "Both describe a lack of enthusiasm and investment; apathetic is the same disengagement carried further, into not caring at all."
+                  },
+                  "verdict": "review"
+                }
+              ]
+            },
+            {
+              "stem": "benign",
+              "region": "moral_stance",
+              "kind": "pair",
+              "by": [
+                {
+                  "key": "benign#1",
+                  "label": "benign",
+                  "how": "label",
+                  "decision": "new",
+                  "covered_by": null,
+                  "cut_off": 3,
+                  "cosine": 0.214054,
+                  "rank": null,
+                  "match": {
+                    "stem": "benign",
+                    "match": "stem"
+                  }
+                }
+              ]
+            },
+            {
+              "stem": "callous",
+              "region": "emotional_temperament",
+              "kind": "triangle",
+              "by": [
+                {
+                  "key": "compassionless#1",
+                  "label": "compassionless",
+                  "how": "overlap",
+                  "decision": "new",
+                  "covered_by": null,
+                  "cut_off": 3,
+                  "cosine": 0.360527,
+                  "rank": 3,
+                  "sonnet": {
+                    "value": 3,
+                    "reason": "Both describe being cold and unmoved by others' suffering; callous is slightly broader (insensitivity to feelings generally), but the core is the same."
+                  },
+                  "opus": {
+                    "value": 3,
+                    "reason": "Both describe emotional coldness and indifference to others' suffering; callous is slightly broader, covering insensitivity to feelings in general, not only to pain."
+                  },
+                  "verdict": "cut"
+                }
+              ]
+            },
+            {
+              "stem": "compassionate",
+              "region": "emotional_temperament",
+              "kind": "triangle",
+              "by": [
+                {
+                  "key": "consoling#1",
+                  "label": "consoling",
+                  "how": "overlap",
+                  "decision": "new",
+                  "covered_by": null,
+                  "cut_off": 3,
+                  "cosine": 0.348252,
+                  "rank": 1,
+                  "sonnet": {
+                    "value": 2,
+                    "reason": "Both involve warmth toward others' pain, but consoling is the specific act of comforting grieving people without rushing them, while compassionate is a broader disposition of empathy and care that need not involve steady reassurance."
+                  },
+                  "opus": {
+                    "value": 3,
+                    "reason": "Consoling is a narrower, specific expression of compassion: warm, patient comfort for those who are grieving or upset."
+                  },
+                  "verdict": "review"
+                },
+                {
+                  "key": "soft_hearted#1",
+                  "label": "soft-hearted",
+                  "how": "overlap",
+                  "decision": "new",
+                  "covered_by": null,
+                  "cut_off": 3,
+                  "cosine": 0.542314,
+                  "rank": 1,
+                  "sonnet": {
+                    "value": 3,
+                    "reason": "Both describe feeling others' pain and responding to distress with warmth and care; soft-hearted stresses readiness to be moved, compassionate stresses care, but they are nearly the same concept."
+                  },
+                  "opus": {
+                    "value": 3,
+                    "reason": "Both describe warm, empathetic responsiveness to others' suffering, with soft-hearted stressing how readily and tenderly one is moved."
+                  },
+                  "verdict": "cut"
+                }
+              ]
+            },
+            {
+              "stem": "competent",
+              "region": "cognitive_epistemic",
+              "kind": "pair",
+              "by": [
+                {
+                  "key": "excellent#1",
+                  "label": "excellent",
+                  "how": "overlap",
+                  "decision": "new",
+                  "covered_by": null,
+                  "cut_off": 3,
+                  "cosine": 0.213201,
+                  "rank": 9,
+                  "sonnet": {
+                    "value": 2,
+                    "reason": "Both concern quality of performance, but competent means reliably adequate and capable while excellent means outstanding, well above ordinary; the same dimension at different degree, though competent doesn't imply exceptional."
+                  },
+                  "opus": {
+                    "value": 3,
+                    "reason": "Both describe skill and quality of work, and excellent is essentially competence carried to an outstanding degree."
+                  },
+                  "verdict": "review"
+                }
+              ]
+            },
+            {
+              "stem": "effusive",
+              "region": "communication_style",
+              "kind": "unclassified",
+              "by": [
+                {
+                  "key": "effusive#1",
+                  "label": "effusive",
+                  "how": "label",
+                  "decision": "new",
+                  "covered_by": null,
+                  "cut_off": 3,
+                  "cosine": 0.375669,
+                  "rank": 2,
+                  "match": {
+                    "stem": "effusive",
+                    "match": "stem"
+                  }
+                }
+              ]
+            },
+            {
+              "stem": "friendly",
+              "region": "communication_style",
+              "kind": "pair",
+              "by": [
+                {
+                  "key": "friendly#1",
+                  "label": "friendly",
+                  "how": "label",
+                  "decision": "new",
+                  "covered_by": null,
+                  "cut_off": 3,
+                  "cosine": 0.302943,
+                  "rank": 7,
+                  "match": {
+                    "stem": "friendly",
+                    "match": "stem"
+                  }
+                },
+                {
+                  "key": "amicable#1",
+                  "label": "amicable",
+                  "how": "overlap",
+                  "decision": "new",
+                  "covered_by": null,
+                  "cut_off": 3,
+                  "cosine": 0.513203,
+                  "rank": 1,
+                  "sonnet": {
+                    "value": 3,
+                    "reason": "Both describe friendly, goodwill-based interaction with others; 'amicable' adds a peaceable, conflict-avoiding note while 'friendly' adds warmth and eagerness, so they are near-synonyms differing in emphasis."
+                  },
+                  "opus": {
+                    "value": 3,
+                    "reason": "Both describe goodwill toward others; amicable leans toward peaceable, conflict-free dealings, while friendly stresses warmth and eager openness, so they differ only in emphasis."
+                  },
+                  "verdict": "cut"
+                },
+                {
+                  "key": "good_natured#1",
+                  "label": "good-natured",
+                  "how": "overlap",
+                  "decision": "new",
+                  "covered_by": null,
+                  "cut_off": 3,
+                  "cosine": 0.504747,
+                  "rank": 1,
+                  "sonnet": {
+                    "value": 3,
+                    "reason": "Both describe a warm, kindly manner toward others; good-natured adds easygoing good humor, while friendly stresses openness and approachability from the start, so they largely overlap but each adds something."
+                  },
+                  "opus": {
+                    "value": 3,
+                    "reason": "Both describe a warm, kindly approach to others; good-natured adds an easygoing, good-humoured temperament, but its core is the same friendliness."
+                  },
+                  "verdict": "cut"
+                },
+                {
+                  "key": "hearty#1",
+                  "label": "hearty",
+                  "how": "overlap",
+                  "decision": "new",
+                  "covered_by": null,
+                  "cut_off": 3,
+                  "cosine": 0.461779,
+                  "rank": 1,
+                  "sonnet": {
+                    "value": 2,
+                    "reason": "Both involve warm, welcoming manner toward others, but hearty adds boisterous, booming, expansive generosity regardless of mood, while friendly is a milder, general goodwill without that exuberance."
+                  },
+                  "opus": {
+                    "value": 3,
+                    "reason": "Hearty is friendliness turned up into a booming, expansive, exuberant manner, so it is the same warm goodwill with added degree and emphasis."
+                  },
+                  "verdict": "review"
+                },
+                {
+                  "key": "lovable#1",
+                  "label": "lovable",
+                  "how": "overlap",
+                  "decision": "new",
+                  "covered_by": null,
+                  "cut_off": 3,
+                  "cosine": 0.52699,
+                  "rank": 1,
+                  "sonnet": {
+                    "value": 2,
+                    "reason": "Both involve warm, goodwill-filled treatment of others, but lovable adds endearing charm that draws people in, while friendly is about open, welcoming goodwill without implying charm or attraction."
+                  },
+                  "opus": {
+                    "value": 3,
+                    "reason": "Lovable as described includes friendly warmth and adds an endearing charm that draws people in, so it is friendliness with a wider scope."
+                  },
+                  "verdict": "review"
+                }
+              ]
+            },
+            {
+              "stem": "hostile",
+              "region": "communication_style",
+              "kind": "pair",
+              "by": [
+                {
+                  "key": "hostile#1",
+                  "label": "hostile",
+                  "how": "label",
+                  "decision": "new",
+                  "covered_by": null,
+                  "cut_off": 3,
+                  "cosine": 0.458049,
+                  "rank": 2,
+                  "match": {
+                    "stem": "hostile",
+                    "match": "stem"
+                  }
+                },
+                {
+                  "key": "unfriendly#1",
+                  "label": "unfriendly",
+                  "how": "overlap",
+                  "decision": "new",
+                  "covered_by": null,
+                  "cut_off": 3,
+                  "cosine": 0.404586,
+                  "rank": 1,
+                  "sonnet": {
+                    "value": 2,
+                    "reason": "Both involve negative treatment of others, but unfriendly spans mere coldness to hostility while hostile is specifically aggressive and combative, so hostile is a stronger, narrower form that overlaps with only part of unfriendly."
+                  },
+                  "opus": {
+                    "value": 3,
+                    "reason": "Hostile is unfriendliness carried further into active aggression, while unfriendly also covers mere coldness, so they differ mainly in degree."
+                  },
+                  "verdict": "review"
+                }
+              ]
+            },
+            {
+              "stem": "idealistic",
+              "region": "moral_stance",
+              "kind": "pair",
+              "by": [
+                {
+                  "key": "idealistic#1",
+                  "label": "idealistic",
+                  "how": "label",
+                  "decision": "new",
+                  "covered_by": null,
+                  "cut_off": 4,
+                  "cosine": 0.171923,
+                  "rank": null,
+                  "match": {
+                    "stem": "idealistic",
+                    "match": "stem"
+                  }
+                }
+              ]
+            },
+            {
+              "stem": "incompetent",
+              "region": "cognitive_epistemic",
+              "kind": "pair",
+              "by": [
+                {
+                  "key": "incapable#1",
+                  "label": "incapable",
+                  "how": "overlap",
+                  "decision": "new",
+                  "covered_by": null,
+                  "cut_off": 3,
+                  "cosine": 0.418955,
+                  "rank": 1,
+                  "sonnet": {
+                    "value": 3,
+                    "reason": "Both describe lacking the skill to do assigned work and failing at it; incompetent adds an emphasis on fumbling and botched output, but the core concept is the same."
+                  },
+                  "opus": {
+                    "value": 3,
+                    "reason": "Both describe lacking the skill to do assigned work; incompetent stresses botched attempts, incapable the outright inability, so they are essentially the same concept with a slight difference in emphasis."
+                  },
+                  "verdict": "cut"
+                }
+              ]
+            },
+            {
+              "stem": "jaded",
+              "region": "emotional_temperament",
+              "kind": "pair",
+              "by": [
+                {
+                  "key": "world_weary#1",
+                  "label": "world weary",
+                  "how": "overlap",
+                  "decision": "new",
+                  "covered_by": null,
+                  "cut_off": 3,
+                  "cosine": 0.344988,
+                  "rank": 3,
+                  "sonnet": {
+                    "value": 3,
+                    "reason": "Both describe a seen-it-all weariness from long experience, but world weary adds deep tiredness, cynicism and a flat manner, while jaded centers on lost enthusiasm or being unimpressed."
+                  },
+                  "opus": {
+                    "value": 3,
+                    "reason": "Both describe a seen-it-all dullness born of long experience, but world weary is broader, adding deep tiredness and cynicism about people, while jaded centres on things no longer impressing."
+                  },
+                  "verdict": "cut"
+                }
+              ]
+            },
+            {
+              "stem": "malicious",
+              "region": "moral_stance",
+              "kind": "triangle",
+              "by": [
+                {
+                  "key": "malicious#1",
+                  "label": "malicious",
+                  "how": "label",
+                  "decision": "new",
+                  "covered_by": null,
+                  "cut_off": 4,
+                  "cosine": 0.497929,
+                  "rank": 1,
+                  "match": {
+                    "stem": "malicious",
+                    "match": "stem"
+                  }
+                }
+              ]
+            },
+            {
+              "stem": "merciful",
+              "region": "moral_stance",
+              "kind": "singleton",
+              "by": [
+                {
+                  "key": "merciful#1",
+                  "label": "merciful",
+                  "how": "label",
+                  "decision": "new",
+                  "covered_by": null,
+                  "cut_off": 4,
+                  "cosine": 0.461942,
+                  "rank": 2,
+                  "match": {
+                    "stem": "merciful",
+                    "match": "stem"
+                  }
+                }
+              ]
+            },
+            {
+              "stem": "oblivious",
+              "region": "social_interpersonal",
+              "kind": "pair",
+              "by": [
+                {
+                  "key": "heedless#1",
+                  "label": "heedless",
+                  "how": "overlap",
+                  "decision": "new",
+                  "covered_by": null,
+                  "cut_off": 3,
+                  "cosine": 0.422105,
+                  "rank": 1,
+                  "sonnet": {
+                    "value": 3,
+                    "reason": "Both describe habitually failing to notice one's surroundings and the small details in them, so they are nearly the same concept, though 'heedless' also suggests carelessness while 'oblivious' stresses missed changes."
+                  },
+                  "opus": {
+                    "value": 3,
+                    "reason": "Both describe habitually failing to notice one's surroundings; oblivious stresses missing small changes, which differs only in emphasis."
+                  },
+                  "verdict": "cut"
+                },
+                {
+                  "key": "unobservant#1",
+                  "label": "unobservant",
+                  "how": "overlap",
+                  "decision": "new",
+                  "covered_by": null,
+                  "cut_off": 3,
+                  "cosine": 0.439228,
+                  "rank": 1,
+                  "sonnet": {
+                    "value": 3,
+                    "reason": "Both describe failing to notice things in one's surroundings, including small changes and cues; oblivious is nearly the same concept with emphasis on not noticing until told."
+                  },
+                  "opus": {
+                    "value": 3,
+                    "reason": "Both describe failing to notice details and changes in one's surroundings. Oblivious is framed narrowly around physical changes, while unobservant also covers cues in what others say, so they differ mainly in scope."
+                  },
+                  "verdict": "cut"
+                }
+              ]
+            },
+            {
+              "stem": "sassy",
+              "region": "communication_style",
+              "kind": "singleton",
+              "by": [
+                {
+                  "key": "saucy#1",
+                  "label": "saucy",
+                  "how": "overlap",
+                  "decision": "new",
+                  "covered_by": null,
+                  "cut_off": 3,
+                  "cosine": 0.400394,
+                  "rank": 2,
+                  "sonnet": {
+                    "value": 3,
+                    "reason": "Both describe cheeky, impudent talk, but saucy stresses playful teasing jabs at the listener while sassy stresses bold, confident, defiant attitude, so each adds something the other lacks."
+                  },
+                  "opus": {
+                    "value": 3,
+                    "reason": "Both describe cheeky, impudent talk, with saucy leaning toward playful teasing and sassy toward bold, defiant confidence, which is a difference of emphasis only."
+                  },
+                  "verdict": "cut"
+                }
+              ]
+            },
+            {
+              "stem": "superstitious",
+              "region": "cognitive_epistemic",
+              "kind": "singleton",
+              "by": [
+                {
+                  "key": "superstitious#1",
+                  "label": "superstitious",
+                  "how": "label",
+                  "decision": "new",
+                  "covered_by": null,
+                  "cut_off": 3,
+                  "cosine": 0.493384,
+                  "rank": 1,
+                  "match": {
+                    "stem": "superstitious",
+                    "match": "stem"
+                  }
+                }
+              ]
+            },
+            {
+              "stem": "uncalculating",
+              "region": "communication_style",
+              "kind": "pair",
+              "by": [
+                {
+                  "key": "uncalculating#1",
+                  "label": "uncalculating",
+                  "how": "label",
+                  "decision": "new",
+                  "covered_by": null,
+                  "cut_off": 4,
+                  "cosine": 0.232354,
+                  "rank": null,
+                  "match": {
+                    "stem": "uncalculating",
+                    "match": "stem"
+                  }
+                }
+              ]
+            },
+            {
+              "stem": "unfashionable",
+              "region": null,
+              "kind": "pair",
+              "by": [
+                {
+                  "key": "unfashionable#1",
+                  "label": "unfashionable",
+                  "how": "label",
+                  "decision": "new",
+                  "covered_by": null,
+                  "cut_off": 3,
+                  "cosine": 0.484179,
+                  "rank": 1,
+                  "match": {
+                    "stem": "unfashionable",
+                    "match": "stem"
+                  }
+                }
+              ]
+            }
+          ]
+        },
+        "covered": {
+          "n_hidden": 83,
+          "n_recovered": 7,
+          "recall": 0.0843,
+          "by_label": 0,
+          "by_overlap_only": 7,
+          "by_region": {
+            "cognitive_epistemic": {
+              "n_hidden": 17,
+              "n_recovered": 0,
+              "recall": 0.0
+            },
+            "communication_style": {
+              "n_hidden": 16,
+              "n_recovered": 6,
+              "recall": 0.375
+            },
+            "emotional_temperament": {
+              "n_hidden": 8,
+              "n_recovered": 1,
+              "recall": 0.125
+            },
+            "identity_demographic": {
+              "n_hidden": 6,
+              "n_recovered": 0,
+              "recall": 0.0
+            },
+            "moral_stance": {
+              "n_hidden": 14,
+              "n_recovered": 0,
+              "recall": 0.0
+            },
+            "none": {
+              "n_hidden": 17,
+              "n_recovered": 0,
+              "recall": 0.0
+            },
+            "social_interpersonal": {
+              "n_hidden": 5,
+              "n_recovered": 0,
+              "recall": 0.0
+            }
+          },
+          "by_kind": {
+            "4-cube": {
+              "n_hidden": 2,
+              "n_recovered": 0,
+              "recall": 0.0
+            },
+            "pair": {
+              "n_hidden": 56,
+              "n_recovered": 4,
+              "recall": 0.0714
+            },
+            "ring": {
+              "n_hidden": 3,
+              "n_recovered": 0,
+              "recall": 0.0
+            },
+            "sequence": {
+              "n_hidden": 1,
+              "n_recovered": 0,
+              "recall": 0.0
+            },
+            "set": {
+              "n_hidden": 3,
+              "n_recovered": 0,
+              "recall": 0.0
+            },
+            "singleton": {
+              "n_hidden": 10,
+              "n_recovered": 0,
+              "recall": 0.0
+            },
+            "square": {
+              "n_hidden": 1,
+              "n_recovered": 0,
+              "recall": 0.0
+            },
+            "triangle": {
+              "n_hidden": 3,
+              "n_recovered": 1,
+              "recall": 0.3333
+            },
+            "unclassified": {
+              "n_hidden": 4,
+              "n_recovered": 2,
+              "recall": 0.5
+            }
+          },
+          "candidates": {
+            "n": 220,
+            "n_recovering": 8,
+            "precision": 0.0364
+          },
+          "groups": {
+            "n": 29,
+            "whole": 1,
+            "partial": 3,
+            "none": 25
+          },
+          "recovered": [
+            {
+              "stem": "compassionate",
+              "region": "emotional_temperament",
+              "kind": "triangle",
+              "by": [
+                {
+                  "key": "tenderminded#1",
+                  "label": "tenderminded",
+                  "how": "overlap",
+                  "decision": "covered",
+                  "covered_by": "empathetic",
+                  "cut_off": 3,
+                  "cosine": 0.515667,
+                  "rank": 1,
+                  "sonnet": {
+                    "value": 3,
+                    "reason": "Both describe feeling others' pain and letting compassion guide one's responses; 'tenderminded' stresses stronger identification and compassion governing action, but the core concept is the same."
+                  },
+                  "opus": {
+                    "value": 3,
+                    "reason": "Both describe empathic sensitivity and caring response to others' suffering, but tenderminded goes further by letting compassion govern one's words and decisions."
+                  },
+                  "verdict": "cut"
+                }
+              ]
+            },
+            {
+              "stem": "cryptic",
+              "region": "communication_style",
+              "kind": "pair",
+              "by": [
+                {
+                  "key": "inexplicit#1",
+                  "label": "inexplicit",
+                  "how": "overlap",
+                  "decision": "covered",
+                  "covered_by": "high_context_hall",
+                  "cut_off": 3,
+                  "cosine": 0.3447,
+                  "rank": 3,
+                  "sonnet": {
+                    "value": 2,
+                    "reason": "Both involve communicating so that listeners must infer the meaning, but inexplicit is about leaving things unstated through hints, while cryptic adds deliberate mystery and puzzling enigma; neither implies the other."
+                  },
+                  "opus": {
+                    "value": 3,
+                    "reason": "Both describe communication that leaves meaning unstated so listeners must interpret it; cryptic is a stronger, deliberately puzzling form of being inexplicit."
+                  },
+                  "verdict": "review"
+                }
+              ]
+            },
+            {
+              "stem": "effusive",
+              "region": "communication_style",
+              "kind": "unclassified",
+              "by": [
+                {
+                  "key": "expressive#1",
+                  "label": "expressive",
+                  "how": "overlap",
+                  "decision": "covered",
+                  "covered_by": "expressive",
+                  "cut_off": 3,
+                  "cosine": 0.326525,
+                  "rank": 2,
+                  "sonnet": {
+                    "value": 3,
+                    "reason": "Both involve openly showing emotion, but effusive is a more extreme, enthusiasm-focused version, while expressive covers any feeling shown readably without implying excess."
+                  },
+                  "opus": {
+                    "value": 3,
+                    "reason": "Effusive is expressive emotional display carried to an unrestrained, excessive degree, with an emphasis on enthusiasm."
+                  },
+                  "verdict": "cut"
+                }
+              ]
+            },
+            {
+              "stem": "hostile",
+              "region": "communication_style",
+              "kind": "pair",
+              "by": [
+                {
+                  "key": "aggressive#1",
+                  "label": "aggressive",
+                  "how": "overlap",
+                  "decision": "covered",
+                  "covered_by": "aggressive",
+                  "cut_off": 4,
+                  "cosine": 0.524497,
+                  "rank": 1,
+                  "sonnet": {
+                    "value": 3,
+                    "reason": "Both describe combative, antagonistic behavior toward others; the descriptions nearly mirror each other, with 'hostile' emphasizing attitude slightly more and 'aggressive' emphasizing fight-picking."
+                  },
+                  "opus": {
+                    "value": 4,
+                    "reason": "Both describe antagonistic, combative, confrontational behaviour toward others, so either label could stand in for the other."
+                  },
+                  "verdict": "review"
+                }
+              ]
+            },
+            {
+              "stem": "temperate",
+              "region": "communication_style",
+              "kind": "pair",
+              "by": [
+                {
+                  "key": "moderate#1",
+                  "label": "moderate",
+                  "how": "overlap",
+                  "decision": "covered",
+                  "covered_by": "moderate",
+                  "cut_off": 3,
+                  "cosine": 0.45691,
+                  "rank": 2,
+                  "sonnet": {
+                    "value": 2,
+                    "reason": "Both involve restraint and avoiding extremes, but 'moderate' is a broad middle-course evenness while 'temperate' as described focuses on coolness and distrust of fervor in beliefs; they overlap without either implying the other."
+                  },
+                  "opus": {
+                    "value": 3,
+                    "reason": "Both describe restraint and avoidance of extremes, but temperate is narrowed to holding beliefs and causes without fervor, while moderate also covers the middle course in general judgment and evenness of feeling."
+                  },
+                  "verdict": "review"
+                }
+              ]
+            },
+            {
+              "stem": "wry",
+              "region": "communication_style",
+              "kind": "unclassified",
+              "by": [
+                {
+                  "key": "humorous#1",
+                  "label": "humorous",
+                  "how": "overlap",
+                  "decision": "covered",
+                  "covered_by": "witty",
+                  "cut_off": 3,
+                  "cosine": 0.340252,
+                  "rank": 3,
+                  "sonnet": {
+                    "value": 2,
+                    "reason": "Wry is a specific, dry, ironic kind of humor, while humorous is the broader trait of making others laugh with wit; they overlap, and wry is a narrower subtype that need not be laugh-inducing."
+                  },
+                  "opus": {
+                    "value": 3,
+                    "reason": "Wry is a narrower, sardonic and ironic style of the same quality of being funny, so the two differ mainly in scope."
+                  },
+                  "verdict": "review"
+                }
+              ]
+            },
+            {
+              "stem": "zealous",
+              "region": "communication_style",
+              "kind": "pair",
+              "by": [
+                {
+                  "key": "fervent#1",
+                  "label": "fervent",
+                  "how": "overlap",
+                  "decision": "covered",
+                  "covered_by": "passionate",
+                  "cut_off": 3,
+                  "cosine": 0.466235,
+                  "rank": 2,
+                  "sonnet": {
+                    "value": 3,
+                    "reason": "Both involve intense passion for beliefs and causes, but zealous adds crusading, loudness, and distrust of coolness, which fervent does not imply, while fervent also covers pursuits generally."
+                  },
+                  "opus": {
+                    "value": 3,
+                    "reason": "Zealous is fervent passion for one's beliefs carried further, adding crusading and a distrust of coolness."
+                  },
+                  "verdict": "cut"
+                },
+                {
+                  "key": "intense#1",
+                  "label": "intense",
+                  "how": "overlap",
+                  "decision": "covered",
+                  "covered_by": "intense",
+                  "cut_off": 3,
+                  "cosine": 0.365757,
+                  "rank": 6,
+                  "sonnet": {
+                    "value": 2,
+                    "reason": "Both involve high-pitched fervor, but intense is about earnest energy in every exchange, while zealous is specifically crusading for beliefs and causes and distrusting coolness; each adds something the other lacks."
+                  },
+                  "opus": {
+                    "value": 3,
+                    "reason": "Both describe fervent, high-pitched conviction that resists calm; zealous is the same heat narrowed to crusading for beliefs and causes."
+                  },
+                  "verdict": "review"
+                }
+              ]
+            }
+          ],
+          "false_covers": [
+            {
+              "key": "aggressive#1",
+              "label": "aggressive",
+              "how": "overlap",
+              "decision": "covered",
+              "covered_by": "aggressive",
+              "cut_off": 4,
+              "cosine": 0.524497,
+              "rank": 1,
+              "sonnet": {
+                "value": 3,
+                "reason": "Both describe combative, antagonistic behavior toward others; the descriptions nearly mirror each other, with 'hostile' emphasizing attitude slightly more and 'aggressive' emphasizing fight-picking."
+              },
+              "opus": {
+                "value": 4,
+                "reason": "Both describe antagonistic, combative, confrontational behaviour toward others, so either label could stand in for the other."
+              },
+              "verdict": "review",
+              "stem": "hostile",
+              "recovered_by_a_kept_candidate": true
+            },
+            {
+              "key": "expressive#1",
+              "label": "expressive",
+              "how": "overlap",
+              "decision": "covered",
+              "covered_by": "expressive",
+              "cut_off": 3,
+              "cosine": 0.326525,
+              "rank": 2,
+              "sonnet": {
+                "value": 3,
+                "reason": "Both involve openly showing emotion, but effusive is a more extreme, enthusiasm-focused version, while expressive covers any feeling shown readably without implying excess."
+              },
+              "opus": {
+                "value": 3,
+                "reason": "Effusive is expressive emotional display carried to an unrestrained, excessive degree, with an emphasis on enthusiasm."
+              },
+              "verdict": "cut",
+              "stem": "effusive",
+              "recovered_by_a_kept_candidate": true
+            },
+            {
+              "key": "fervent#1",
+              "label": "fervent",
+              "how": "overlap",
+              "decision": "covered",
+              "covered_by": "passionate",
+              "cut_off": 3,
+              "cosine": 0.466235,
+              "rank": 2,
+              "sonnet": {
+                "value": 3,
+                "reason": "Both involve intense passion for beliefs and causes, but zealous adds crusading, loudness, and distrust of coolness, which fervent does not imply, while fervent also covers pursuits generally."
+              },
+              "opus": {
+                "value": 3,
+                "reason": "Zealous is fervent passion for one's beliefs carried further, adding crusading and a distrust of coolness."
+              },
+              "verdict": "cut",
+              "stem": "zealous",
+              "recovered_by_a_kept_candidate": false
+            },
+            {
+              "key": "humorous#1",
+              "label": "humorous",
+              "how": "overlap",
+              "decision": "covered",
+              "covered_by": "witty",
+              "cut_off": 3,
+              "cosine": 0.340252,
+              "rank": 3,
+              "sonnet": {
+                "value": 2,
+                "reason": "Wry is a specific, dry, ironic kind of humor, while humorous is the broader trait of making others laugh with wit; they overlap, and wry is a narrower subtype that need not be laugh-inducing."
+              },
+              "opus": {
+                "value": 3,
+                "reason": "Wry is a narrower, sardonic and ironic style of the same quality of being funny, so the two differ mainly in scope."
+              },
+              "verdict": "review",
+              "stem": "wry",
+              "recovered_by_a_kept_candidate": false
+            },
+            {
+              "key": "inexplicit#1",
+              "label": "inexplicit",
+              "how": "overlap",
+              "decision": "covered",
+              "covered_by": "high_context_hall",
+              "cut_off": 3,
+              "cosine": 0.3447,
+              "rank": 3,
+              "sonnet": {
+                "value": 2,
+                "reason": "Both involve communicating so that listeners must infer the meaning, but inexplicit is about leaving things unstated through hints, while cryptic adds deliberate mystery and puzzling enigma; neither implies the other."
+              },
+              "opus": {
+                "value": 3,
+                "reason": "Both describe communication that leaves meaning unstated so listeners must interpret it; cryptic is a stronger, deliberately puzzling form of being inexplicit."
+              },
+              "verdict": "review",
+              "stem": "cryptic",
+              "recovered_by_a_kept_candidate": false
+            },
+            {
+              "key": "intense#1",
+              "label": "intense",
+              "how": "overlap",
+              "decision": "covered",
+              "covered_by": "intense",
+              "cut_off": 3,
+              "cosine": 0.365757,
+              "rank": 6,
+              "sonnet": {
+                "value": 2,
+                "reason": "Both involve high-pitched fervor, but intense is about earnest energy in every exchange, while zealous is specifically crusading for beliefs and causes and distrusting coolness; each adds something the other lacks."
+              },
+              "opus": {
+                "value": 3,
+                "reason": "Both describe fervent, high-pitched conviction that resists calm; zealous is the same heat narrowed to crusading for beliefs and causes."
+              },
+              "verdict": "review",
+              "stem": "zealous",
+              "recovered_by_a_kept_candidate": false
+            },
+            {
+              "key": "moderate#1",
+              "label": "moderate",
+              "how": "overlap",
+              "decision": "covered",
+              "covered_by": "moderate",
+              "cut_off": 3,
+              "cosine": 0.45691,
+              "rank": 2,
+              "sonnet": {
+                "value": 2,
+                "reason": "Both involve restraint and avoiding extremes, but 'moderate' is a broad middle-course evenness while 'temperate' as described focuses on coolness and distrust of fervor in beliefs; they overlap without either implying the other."
+              },
+              "opus": {
+                "value": 3,
+                "reason": "Both describe restraint and avoidance of extremes, but temperate is narrowed to holding beliefs and causes without fervor, while moderate also covers the middle course in general judgment and evenness of feeling."
+              },
+              "verdict": "review",
+              "stem": "temperate",
+              "recovered_by_a_kept_candidate": false
+            },
+            {
+              "key": "tenderminded#1",
+              "label": "tenderminded",
+              "how": "overlap",
+              "decision": "covered",
+              "covered_by": "empathetic",
+              "cut_off": 3,
+              "cosine": 0.515667,
+              "rank": 1,
+              "sonnet": {
+                "value": 3,
+                "reason": "Both describe feeling others' pain and letting compassion guide one's responses; 'tenderminded' stresses stronger identification and compassion governing action, but the core concept is the same."
+              },
+              "opus": {
+                "value": 3,
+                "reason": "Both describe empathic sensitivity and caring response to others' suffering, but tenderminded goes further by letting compassion govern one's words and decisions."
+              },
+              "verdict": "cut",
+              "stem": "compassionate",
+              "recovered_by_a_kept_candidate": true
+            }
+          ],
+          "n_false_cover_candidates": 8,
+          "hidden_missed_only_through_covers": [
+            "cryptic",
+            "temperate",
+            "wry",
+            "zealous"
+          ]
+        },
+        "either": {
+          "n_hidden": 83,
+          "n_recovered": 23,
+          "recall": 0.2771,
+          "by_label": 11,
+          "by_overlap_only": 12,
+          "by_region": {
+            "cognitive_epistemic": {
+              "n_hidden": 17,
+              "n_recovered": 3,
+              "recall": 0.1765
+            },
+            "communication_style": {
+              "n_hidden": 16,
+              "n_recovered": 9,
+              "recall": 0.5625
+            },
+            "emotional_temperament": {
+              "n_hidden": 8,
+              "n_recovered": 4,
+              "recall": 0.5
+            },
+            "identity_demographic": {
+              "n_hidden": 6,
+              "n_recovered": 0,
+              "recall": 0.0
+            },
+            "moral_stance": {
+              "n_hidden": 14,
+              "n_recovered": 5,
+              "recall": 0.3571
+            },
+            "none": {
+              "n_hidden": 17,
+              "n_recovered": 1,
+              "recall": 0.0588
+            },
+            "social_interpersonal": {
+              "n_hidden": 5,
+              "n_recovered": 1,
+              "recall": 0.2
+            }
+          },
+          "by_kind": {
+            "4-cube": {
+              "n_hidden": 2,
+              "n_recovered": 0,
+              "recall": 0.0
+            },
+            "pair": {
+              "n_hidden": 56,
+              "n_recovered": 14,
+              "recall": 0.25
+            },
+            "ring": {
+              "n_hidden": 3,
+              "n_recovered": 0,
+              "recall": 0.0
+            },
+            "sequence": {
+              "n_hidden": 1,
+              "n_recovered": 0,
+              "recall": 0.0
+            },
+            "set": {
+              "n_hidden": 3,
+              "n_recovered": 0,
+              "recall": 0.0
+            },
+            "singleton": {
+              "n_hidden": 10,
+              "n_recovered": 4,
+              "recall": 0.4
+            },
+            "square": {
+              "n_hidden": 1,
+              "n_recovered": 0,
+              "recall": 0.0
+            },
+            "triangle": {
+              "n_hidden": 3,
+              "n_recovered": 3,
+              "recall": 1.0
+            },
+            "unclassified": {
+              "n_hidden": 4,
+              "n_recovered": 2,
+              "recall": 0.5
+            }
+          },
+          "candidates": {
+            "n": 500,
+            "n_recovering": 34,
+            "precision": 0.068
+          },
+          "groups": {
+            "n": 29,
+            "whole": 4,
+            "partial": 8,
+            "none": 17
+          },
+          "recovered": [
+            {
+              "stem": "accountable",
+              "region": "moral_stance",
+              "kind": "singleton",
+              "by": [
+                {
+                  "key": "accountable#1",
+                  "label": "accountable",
+                  "how": "label",
+                  "decision": "new",
+                  "covered_by": null,
+                  "cut_off": 4,
+                  "cosine": 0.597039,
+                  "rank": 1,
+                  "match": {
+                    "stem": "accountable",
+                    "match": "stem"
+                  }
+                }
+              ]
+            },
+            {
+              "stem": "apathetic",
+              "region": "emotional_temperament",
+              "kind": "pair",
+              "by": [
+                {
+                  "key": "lukewarm#1",
+                  "label": "lukewarm",
+                  "how": "overlap",
+                  "decision": "new",
+                  "covered_by": null,
+                  "cut_off": 3,
+                  "cosine": 0.223948,
+                  "rank": 9,
+                  "sonnet": {
+                    "value": 2,
+                    "reason": "Both describe low engagement, but lukewarm is half-hearted enthusiasm while still going through the motions, whereas apathetic is a deeper lack of caring and interest, with minimal effort; they overlap but neither implies the other."
+                  },
+                  "opus": {
+                    "value": 3,
+                    "reason": "Both describe a lack of enthusiasm and investment; apathetic is the same disengagement carried further, into not caring at all."
+                  },
+                  "verdict": "review"
+                }
+              ]
+            },
+            {
+              "stem": "benign",
+              "region": "moral_stance",
+              "kind": "pair",
+              "by": [
+                {
+                  "key": "benign#1",
+                  "label": "benign",
+                  "how": "label",
+                  "decision": "new",
+                  "covered_by": null,
+                  "cut_off": 3,
+                  "cosine": 0.214054,
+                  "rank": null,
+                  "match": {
+                    "stem": "benign",
+                    "match": "stem"
+                  }
+                }
+              ]
+            },
+            {
+              "stem": "callous",
+              "region": "emotional_temperament",
+              "kind": "triangle",
+              "by": [
+                {
+                  "key": "compassionless#1",
+                  "label": "compassionless",
+                  "how": "overlap",
+                  "decision": "new",
+                  "covered_by": null,
+                  "cut_off": 3,
+                  "cosine": 0.360527,
+                  "rank": 3,
+                  "sonnet": {
+                    "value": 3,
+                    "reason": "Both describe being cold and unmoved by others' suffering; callous is slightly broader (insensitivity to feelings generally), but the core is the same."
+                  },
+                  "opus": {
+                    "value": 3,
+                    "reason": "Both describe emotional coldness and indifference to others' suffering; callous is slightly broader, covering insensitivity to feelings in general, not only to pain."
+                  },
+                  "verdict": "cut"
+                }
+              ]
+            },
+            {
+              "stem": "compassionate",
+              "region": "emotional_temperament",
+              "kind": "triangle",
+              "by": [
+                {
+                  "key": "consoling#1",
+                  "label": "consoling",
+                  "how": "overlap",
+                  "decision": "new",
+                  "covered_by": null,
+                  "cut_off": 3,
+                  "cosine": 0.348252,
+                  "rank": 1,
+                  "sonnet": {
+                    "value": 2,
+                    "reason": "Both involve warmth toward others' pain, but consoling is the specific act of comforting grieving people without rushing them, while compassionate is a broader disposition of empathy and care that need not involve steady reassurance."
+                  },
+                  "opus": {
+                    "value": 3,
+                    "reason": "Consoling is a narrower, specific expression of compassion: warm, patient comfort for those who are grieving or upset."
+                  },
+                  "verdict": "review"
+                },
+                {
+                  "key": "soft_hearted#1",
+                  "label": "soft-hearted",
+                  "how": "overlap",
+                  "decision": "new",
+                  "covered_by": null,
+                  "cut_off": 3,
+                  "cosine": 0.542314,
+                  "rank": 1,
+                  "sonnet": {
+                    "value": 3,
+                    "reason": "Both describe feeling others' pain and responding to distress with warmth and care; soft-hearted stresses readiness to be moved, compassionate stresses care, but they are nearly the same concept."
+                  },
+                  "opus": {
+                    "value": 3,
+                    "reason": "Both describe warm, empathetic responsiveness to others' suffering, with soft-hearted stressing how readily and tenderly one is moved."
+                  },
+                  "verdict": "cut"
+                },
+                {
+                  "key": "tenderminded#1",
+                  "label": "tenderminded",
+                  "how": "overlap",
+                  "decision": "covered",
+                  "covered_by": "empathetic",
+                  "cut_off": 3,
+                  "cosine": 0.515667,
+                  "rank": 1,
+                  "sonnet": {
+                    "value": 3,
+                    "reason": "Both describe feeling others' pain and letting compassion guide one's responses; 'tenderminded' stresses stronger identification and compassion governing action, but the core concept is the same."
+                  },
+                  "opus": {
+                    "value": 3,
+                    "reason": "Both describe empathic sensitivity and caring response to others' suffering, but tenderminded goes further by letting compassion govern one's words and decisions."
+                  },
+                  "verdict": "cut"
+                }
+              ]
+            },
+            {
+              "stem": "competent",
+              "region": "cognitive_epistemic",
+              "kind": "pair",
+              "by": [
+                {
+                  "key": "excellent#1",
+                  "label": "excellent",
+                  "how": "overlap",
+                  "decision": "new",
+                  "covered_by": null,
+                  "cut_off": 3,
+                  "cosine": 0.213201,
+                  "rank": 9,
+                  "sonnet": {
+                    "value": 2,
+                    "reason": "Both concern quality of performance, but competent means reliably adequate and capable while excellent means outstanding, well above ordinary; the same dimension at different degree, though competent doesn't imply exceptional."
+                  },
+                  "opus": {
+                    "value": 3,
+                    "reason": "Both describe skill and quality of work, and excellent is essentially competence carried to an outstanding degree."
+                  },
+                  "verdict": "review"
+                }
+              ]
+            },
+            {
+              "stem": "cryptic",
+              "region": "communication_style",
+              "kind": "pair",
+              "by": [
+                {
+                  "key": "inexplicit#1",
+                  "label": "inexplicit",
+                  "how": "overlap",
+                  "decision": "covered",
+                  "covered_by": "high_context_hall",
+                  "cut_off": 3,
+                  "cosine": 0.3447,
+                  "rank": 3,
+                  "sonnet": {
+                    "value": 2,
+                    "reason": "Both involve communicating so that listeners must infer the meaning, but inexplicit is about leaving things unstated through hints, while cryptic adds deliberate mystery and puzzling enigma; neither implies the other."
+                  },
+                  "opus": {
+                    "value": 3,
+                    "reason": "Both describe communication that leaves meaning unstated so listeners must interpret it; cryptic is a stronger, deliberately puzzling form of being inexplicit."
+                  },
+                  "verdict": "review"
+                }
+              ]
+            },
+            {
+              "stem": "effusive",
+              "region": "communication_style",
+              "kind": "unclassified",
+              "by": [
+                {
+                  "key": "effusive#1",
+                  "label": "effusive",
+                  "how": "label",
+                  "decision": "new",
+                  "covered_by": null,
+                  "cut_off": 3,
+                  "cosine": 0.375669,
+                  "rank": 2,
+                  "match": {
+                    "stem": "effusive",
+                    "match": "stem"
+                  }
+                },
+                {
+                  "key": "expressive#1",
+                  "label": "expressive",
+                  "how": "overlap",
+                  "decision": "covered",
+                  "covered_by": "expressive",
+                  "cut_off": 3,
+                  "cosine": 0.326525,
+                  "rank": 2,
+                  "sonnet": {
+                    "value": 3,
+                    "reason": "Both involve openly showing emotion, but effusive is a more extreme, enthusiasm-focused version, while expressive covers any feeling shown readably without implying excess."
+                  },
+                  "opus": {
+                    "value": 3,
+                    "reason": "Effusive is expressive emotional display carried to an unrestrained, excessive degree, with an emphasis on enthusiasm."
+                  },
+                  "verdict": "cut"
+                }
+              ]
+            },
+            {
+              "stem": "friendly",
+              "region": "communication_style",
+              "kind": "pair",
+              "by": [
+                {
+                  "key": "friendly#1",
+                  "label": "friendly",
+                  "how": "label",
+                  "decision": "new",
+                  "covered_by": null,
+                  "cut_off": 3,
+                  "cosine": 0.302943,
+                  "rank": 7,
+                  "match": {
+                    "stem": "friendly",
+                    "match": "stem"
+                  }
+                },
+                {
+                  "key": "amicable#1",
+                  "label": "amicable",
+                  "how": "overlap",
+                  "decision": "new",
+                  "covered_by": null,
+                  "cut_off": 3,
+                  "cosine": 0.513203,
+                  "rank": 1,
+                  "sonnet": {
+                    "value": 3,
+                    "reason": "Both describe friendly, goodwill-based interaction with others; 'amicable' adds a peaceable, conflict-avoiding note while 'friendly' adds warmth and eagerness, so they are near-synonyms differing in emphasis."
+                  },
+                  "opus": {
+                    "value": 3,
+                    "reason": "Both describe goodwill toward others; amicable leans toward peaceable, conflict-free dealings, while friendly stresses warmth and eager openness, so they differ only in emphasis."
+                  },
+                  "verdict": "cut"
+                },
+                {
+                  "key": "good_natured#1",
+                  "label": "good-natured",
+                  "how": "overlap",
+                  "decision": "new",
+                  "covered_by": null,
+                  "cut_off": 3,
+                  "cosine": 0.504747,
+                  "rank": 1,
+                  "sonnet": {
+                    "value": 3,
+                    "reason": "Both describe a warm, kindly manner toward others; good-natured adds easygoing good humor, while friendly stresses openness and approachability from the start, so they largely overlap but each adds something."
+                  },
+                  "opus": {
+                    "value": 3,
+                    "reason": "Both describe a warm, kindly approach to others; good-natured adds an easygoing, good-humoured temperament, but its core is the same friendliness."
+                  },
+                  "verdict": "cut"
+                },
+                {
+                  "key": "hearty#1",
+                  "label": "hearty",
+                  "how": "overlap",
+                  "decision": "new",
+                  "covered_by": null,
+                  "cut_off": 3,
+                  "cosine": 0.461779,
+                  "rank": 1,
+                  "sonnet": {
+                    "value": 2,
+                    "reason": "Both involve warm, welcoming manner toward others, but hearty adds boisterous, booming, expansive generosity regardless of mood, while friendly is a milder, general goodwill without that exuberance."
+                  },
+                  "opus": {
+                    "value": 3,
+                    "reason": "Hearty is friendliness turned up into a booming, expansive, exuberant manner, so it is the same warm goodwill with added degree and emphasis."
+                  },
+                  "verdict": "review"
+                },
+                {
+                  "key": "lovable#1",
+                  "label": "lovable",
+                  "how": "overlap",
+                  "decision": "new",
+                  "covered_by": null,
+                  "cut_off": 3,
+                  "cosine": 0.52699,
+                  "rank": 1,
+                  "sonnet": {
+                    "value": 2,
+                    "reason": "Both involve warm, goodwill-filled treatment of others, but lovable adds endearing charm that draws people in, while friendly is about open, welcoming goodwill without implying charm or attraction."
+                  },
+                  "opus": {
+                    "value": 3,
+                    "reason": "Lovable as described includes friendly warmth and adds an endearing charm that draws people in, so it is friendliness with a wider scope."
+                  },
+                  "verdict": "review"
+                }
+              ]
+            },
+            {
+              "stem": "hostile",
+              "region": "communication_style",
+              "kind": "pair",
+              "by": [
+                {
+                  "key": "hostile#1",
+                  "label": "hostile",
+                  "how": "label",
+                  "decision": "new",
+                  "covered_by": null,
+                  "cut_off": 3,
+                  "cosine": 0.458049,
+                  "rank": 2,
+                  "match": {
+                    "stem": "hostile",
+                    "match": "stem"
+                  }
+                },
+                {
+                  "key": "aggressive#1",
+                  "label": "aggressive",
+                  "how": "overlap",
+                  "decision": "covered",
+                  "covered_by": "aggressive",
+                  "cut_off": 4,
+                  "cosine": 0.524497,
+                  "rank": 1,
+                  "sonnet": {
+                    "value": 3,
+                    "reason": "Both describe combative, antagonistic behavior toward others; the descriptions nearly mirror each other, with 'hostile' emphasizing attitude slightly more and 'aggressive' emphasizing fight-picking."
+                  },
+                  "opus": {
+                    "value": 4,
+                    "reason": "Both describe antagonistic, combative, confrontational behaviour toward others, so either label could stand in for the other."
+                  },
+                  "verdict": "review"
+                },
+                {
+                  "key": "unfriendly#1",
+                  "label": "unfriendly",
+                  "how": "overlap",
+                  "decision": "new",
+                  "covered_by": null,
+                  "cut_off": 3,
+                  "cosine": 0.404586,
+                  "rank": 1,
+                  "sonnet": {
+                    "value": 2,
+                    "reason": "Both involve negative treatment of others, but unfriendly spans mere coldness to hostility while hostile is specifically aggressive and combative, so hostile is a stronger, narrower form that overlaps with only part of unfriendly."
+                  },
+                  "opus": {
+                    "value": 3,
+                    "reason": "Hostile is unfriendliness carried further into active aggression, while unfriendly also covers mere coldness, so they differ mainly in degree."
+                  },
+                  "verdict": "review"
+                }
+              ]
+            },
+            {
+              "stem": "idealistic",
+              "region": "moral_stance",
+              "kind": "pair",
+              "by": [
+                {
+                  "key": "idealistic#1",
+                  "label": "idealistic",
+                  "how": "label",
+                  "decision": "new",
+                  "covered_by": null,
+                  "cut_off": 4,
+                  "cosine": 0.171923,
+                  "rank": null,
+                  "match": {
+                    "stem": "idealistic",
+                    "match": "stem"
+                  }
+                }
+              ]
+            },
+            {
+              "stem": "incompetent",
+              "region": "cognitive_epistemic",
+              "kind": "pair",
+              "by": [
+                {
+                  "key": "incapable#1",
+                  "label": "incapable",
+                  "how": "overlap",
+                  "decision": "new",
+                  "covered_by": null,
+                  "cut_off": 3,
+                  "cosine": 0.418955,
+                  "rank": 1,
+                  "sonnet": {
+                    "value": 3,
+                    "reason": "Both describe lacking the skill to do assigned work and failing at it; incompetent adds an emphasis on fumbling and botched output, but the core concept is the same."
+                  },
+                  "opus": {
+                    "value": 3,
+                    "reason": "Both describe lacking the skill to do assigned work; incompetent stresses botched attempts, incapable the outright inability, so they are essentially the same concept with a slight difference in emphasis."
+                  },
+                  "verdict": "cut"
+                }
+              ]
+            },
+            {
+              "stem": "jaded",
+              "region": "emotional_temperament",
+              "kind": "pair",
+              "by": [
+                {
+                  "key": "world_weary#1",
+                  "label": "world weary",
+                  "how": "overlap",
+                  "decision": "new",
+                  "covered_by": null,
+                  "cut_off": 3,
+                  "cosine": 0.344988,
+                  "rank": 3,
+                  "sonnet": {
+                    "value": 3,
+                    "reason": "Both describe a seen-it-all weariness from long experience, but world weary adds deep tiredness, cynicism and a flat manner, while jaded centers on lost enthusiasm or being unimpressed."
+                  },
+                  "opus": {
+                    "value": 3,
+                    "reason": "Both describe a seen-it-all dullness born of long experience, but world weary is broader, adding deep tiredness and cynicism about people, while jaded centres on things no longer impressing."
+                  },
+                  "verdict": "cut"
+                }
+              ]
+            },
+            {
+              "stem": "malicious",
+              "region": "moral_stance",
+              "kind": "triangle",
+              "by": [
+                {
+                  "key": "malicious#1",
+                  "label": "malicious",
+                  "how": "label",
+                  "decision": "new",
+                  "covered_by": null,
+                  "cut_off": 4,
+                  "cosine": 0.497929,
+                  "rank": 1,
+                  "match": {
+                    "stem": "malicious",
+                    "match": "stem"
+                  }
+                }
+              ]
+            },
+            {
+              "stem": "merciful",
+              "region": "moral_stance",
+              "kind": "singleton",
+              "by": [
+                {
+                  "key": "merciful#1",
+                  "label": "merciful",
+                  "how": "label",
+                  "decision": "new",
+                  "covered_by": null,
+                  "cut_off": 4,
+                  "cosine": 0.461942,
+                  "rank": 2,
+                  "match": {
+                    "stem": "merciful",
+                    "match": "stem"
+                  }
+                }
+              ]
+            },
+            {
+              "stem": "oblivious",
+              "region": "social_interpersonal",
+              "kind": "pair",
+              "by": [
+                {
+                  "key": "heedless#1",
+                  "label": "heedless",
+                  "how": "overlap",
+                  "decision": "new",
+                  "covered_by": null,
+                  "cut_off": 3,
+                  "cosine": 0.422105,
+                  "rank": 1,
+                  "sonnet": {
+                    "value": 3,
+                    "reason": "Both describe habitually failing to notice one's surroundings and the small details in them, so they are nearly the same concept, though 'heedless' also suggests carelessness while 'oblivious' stresses missed changes."
+                  },
+                  "opus": {
+                    "value": 3,
+                    "reason": "Both describe habitually failing to notice one's surroundings; oblivious stresses missing small changes, which differs only in emphasis."
+                  },
+                  "verdict": "cut"
+                },
+                {
+                  "key": "unobservant#1",
+                  "label": "unobservant",
+                  "how": "overlap",
+                  "decision": "new",
+                  "covered_by": null,
+                  "cut_off": 3,
+                  "cosine": 0.439228,
+                  "rank": 1,
+                  "sonnet": {
+                    "value": 3,
+                    "reason": "Both describe failing to notice things in one's surroundings, including small changes and cues; oblivious is nearly the same concept with emphasis on not noticing until told."
+                  },
+                  "opus": {
+                    "value": 3,
+                    "reason": "Both describe failing to notice details and changes in one's surroundings. Oblivious is framed narrowly around physical changes, while unobservant also covers cues in what others say, so they differ mainly in scope."
+                  },
+                  "verdict": "cut"
+                }
+              ]
+            },
+            {
+              "stem": "sassy",
+              "region": "communication_style",
+              "kind": "singleton",
+              "by": [
+                {
+                  "key": "saucy#1",
+                  "label": "saucy",
+                  "how": "overlap",
+                  "decision": "new",
+                  "covered_by": null,
+                  "cut_off": 3,
+                  "cosine": 0.400394,
+                  "rank": 2,
+                  "sonnet": {
+                    "value": 3,
+                    "reason": "Both describe cheeky, impudent talk, but saucy stresses playful teasing jabs at the listener while sassy stresses bold, confident, defiant attitude, so each adds something the other lacks."
+                  },
+                  "opus": {
+                    "value": 3,
+                    "reason": "Both describe cheeky, impudent talk, with saucy leaning toward playful teasing and sassy toward bold, defiant confidence, which is a difference of emphasis only."
+                  },
+                  "verdict": "cut"
+                }
+              ]
+            },
+            {
+              "stem": "superstitious",
+              "region": "cognitive_epistemic",
+              "kind": "singleton",
+              "by": [
+                {
+                  "key": "superstitious#1",
+                  "label": "superstitious",
+                  "how": "label",
+                  "decision": "new",
+                  "covered_by": null,
+                  "cut_off": 3,
+                  "cosine": 0.493384,
+                  "rank": 1,
+                  "match": {
+                    "stem": "superstitious",
+                    "match": "stem"
+                  }
+                }
+              ]
+            },
+            {
+              "stem": "temperate",
+              "region": "communication_style",
+              "kind": "pair",
+              "by": [
+                {
+                  "key": "moderate#1",
+                  "label": "moderate",
+                  "how": "overlap",
+                  "decision": "covered",
+                  "covered_by": "moderate",
+                  "cut_off": 3,
+                  "cosine": 0.45691,
+                  "rank": 2,
+                  "sonnet": {
+                    "value": 2,
+                    "reason": "Both involve restraint and avoiding extremes, but 'moderate' is a broad middle-course evenness while 'temperate' as described focuses on coolness and distrust of fervor in beliefs; they overlap without either implying the other."
+                  },
+                  "opus": {
+                    "value": 3,
+                    "reason": "Both describe restraint and avoidance of extremes, but temperate is narrowed to holding beliefs and causes without fervor, while moderate also covers the middle course in general judgment and evenness of feeling."
+                  },
+                  "verdict": "review"
+                }
+              ]
+            },
+            {
+              "stem": "uncalculating",
+              "region": "communication_style",
+              "kind": "pair",
+              "by": [
+                {
+                  "key": "uncalculating#1",
+                  "label": "uncalculating",
+                  "how": "label",
+                  "decision": "new",
+                  "covered_by": null,
+                  "cut_off": 4,
+                  "cosine": 0.232354,
+                  "rank": null,
+                  "match": {
+                    "stem": "uncalculating",
+                    "match": "stem"
+                  }
+                }
+              ]
+            },
+            {
+              "stem": "unfashionable",
+              "region": null,
+              "kind": "pair",
+              "by": [
+                {
+                  "key": "unfashionable#1",
+                  "label": "unfashionable",
+                  "how": "label",
+                  "decision": "new",
+                  "covered_by": null,
+                  "cut_off": 3,
+                  "cosine": 0.484179,
+                  "rank": 1,
+                  "match": {
+                    "stem": "unfashionable",
+                    "match": "stem"
+                  }
+                }
+              ]
+            },
+            {
+              "stem": "wry",
+              "region": "communication_style",
+              "kind": "unclassified",
+              "by": [
+                {
+                  "key": "humorous#1",
+                  "label": "humorous",
+                  "how": "overlap",
+                  "decision": "covered",
+                  "covered_by": "witty",
+                  "cut_off": 3,
+                  "cosine": 0.340252,
+                  "rank": 3,
+                  "sonnet": {
+                    "value": 2,
+                    "reason": "Wry is a specific, dry, ironic kind of humor, while humorous is the broader trait of making others laugh with wit; they overlap, and wry is a narrower subtype that need not be laugh-inducing."
+                  },
+                  "opus": {
+                    "value": 3,
+                    "reason": "Wry is a narrower, sardonic and ironic style of the same quality of being funny, so the two differ mainly in scope."
+                  },
+                  "verdict": "review"
+                }
+              ]
+            },
+            {
+              "stem": "zealous",
+              "region": "communication_style",
+              "kind": "pair",
+              "by": [
+                {
+                  "key": "fervent#1",
+                  "label": "fervent",
+                  "how": "overlap",
+                  "decision": "covered",
+                  "covered_by": "passionate",
+                  "cut_off": 3,
+                  "cosine": 0.466235,
+                  "rank": 2,
+                  "sonnet": {
+                    "value": 3,
+                    "reason": "Both involve intense passion for beliefs and causes, but zealous adds crusading, loudness, and distrust of coolness, which fervent does not imply, while fervent also covers pursuits generally."
+                  },
+                  "opus": {
+                    "value": 3,
+                    "reason": "Zealous is fervent passion for one's beliefs carried further, adding crusading and a distrust of coolness."
+                  },
+                  "verdict": "cut"
+                },
+                {
+                  "key": "intense#1",
+                  "label": "intense",
+                  "how": "overlap",
+                  "decision": "covered",
+                  "covered_by": "intense",
+                  "cut_off": 3,
+                  "cosine": 0.365757,
+                  "rank": 6,
+                  "sonnet": {
+                    "value": 2,
+                    "reason": "Both involve high-pitched fervor, but intense is about earnest energy in every exchange, while zealous is specifically crusading for beliefs and causes and distrusting coolness; each adds something the other lacks."
+                  },
+                  "opus": {
+                    "value": 3,
+                    "reason": "Both describe fervent, high-pitched conviction that resists calm; zealous is the same heat narrowed to crusading for beliefs and causes."
+                  },
+                  "verdict": "review"
+                }
+              ]
+            }
+          ]
+        },
+        "pairs": {
+          "n_overlap": 509,
+          "n_label": 11,
+          "n_stalled": 0,
+          "verdicts": {
+            "keep": 459,
+            "opposite": 27,
+            "review": 11,
+            "cut": 12
+          }
+        },
+        "reduced_run": {
+          "batch_id": "rec_censuses_2026-10-08-pilot_s0",
+          "by_decision": {
+            "covered": 220,
+            "new": 280
+          },
+          "n_stalled": 0,
+          "skipped": {
+            "not_a_trait": 64
+          },
+          "rules": "m3_rules_2",
+          "cosine_floor": 0.25
+        },
+        "cost": {
+          "reduced_m3_usd": 5.524217,
+          "match_usd": 1.101816,
+          "total_usd": 6.626033
+        }
+      }
+    ],
+    "mean": {
+      "n_hidden": 83.0,
+      "recall_kept": 0.2289,
+      "precision_kept": 0.0929,
+      "recovered_kept": 19.0,
+      "recovered_by_label": 11.0,
+      "recall_covered": 0.0843,
+      "false_cover_candidates": 8.0,
+      "recall_either": 0.2771,
+      "reachable_share": 0.8916,
+      "groups_whole": 3.0,
+      "groups": 29.0,
+      "cost_usd": 6.626,
+      "kept_by_region": {
+        "cognitive_epistemic": {
+          "recall": 0.1765,
+          "n_hidden": 17.0
+        },
+        "communication_style": {
+          "recall": 0.3125,
+          "n_hidden": 16.0
+        },
+        "emotional_temperament": {
+          "recall": 0.5,
+          "n_hidden": 8.0
+        },
+        "identity_demographic": {
+          "recall": 0.0,
+          "n_hidden": 6.0
+        },
+        "moral_stance": {
+          "recall": 0.3571,
+          "n_hidden": 14.0
+        },
+        "none": {
+          "recall": 0.0588,
+          "n_hidden": 17.0
+        },
+        "social_interpersonal": {
+          "recall": 0.2,
+          "n_hidden": 5.0
+        }
+      },
+      "kept_by_kind": {
+        "4-cube": {
+          "recall": 0.0,
+          "n_hidden": 2.0
+        },
+        "pair": {
+          "recall": 0.1964,
+          "n_hidden": 56.0
+        },
+        "ring": {
+          "recall": 0.0,
+          "n_hidden": 3.0
+        },
+        "sequence": {
+          "recall": 0.0,
+          "n_hidden": 1.0
+        },
+        "set": {
+          "recall": 0.0,
+          "n_hidden": 3.0
+        },
+        "singleton": {
+          "recall": 0.4,
+          "n_hidden": 10.0
+        },
+        "square": {
+          "recall": 0.0,
+          "n_hidden": 1.0
+        },
+        "triangle": {
+          "recall": 1.0,
+          "n_hidden": 3.0
+        },
+        "unclassified": {
+          "recall": 0.25,
+          "n_hidden": 4.0
+        }
+      }
+    },
+    "n_seeds": 1,
+    "total_cost_usd": 6.626033,
+    "batch_id": "rec_censuses_2026-10-08-pilot",
+    "generator": "censuses",
+    "run_id": "2026-10-08-pilot",
+    "hidden_frac": 0.1,
+    "seeds_reported": [
+      0
+    ]
+  },
+  "_provenance": {
+    "schema_version": "1.0",
+    "produced_by": {
+      "cmd": "uv run python data_analysis/gap_generation/recovery_test.py --generator censuses --run-id 2026-10-08-pilot --hidden-frac 0.1 --seed 0 --transport live --budget-usd 9",
+      "git_sha": "7f38064+dirty",
+      "author": "Roger Dearnaley",
+      "title": "recovery_test rec_censuses_2026-10-08-pilot"
+    },
+    "produced_at": "2026-10-08T07:00:39+00:00",
+    "inputs": [
+      {
+        "dep_key": "hidden_s0",
+        "path": "data/candidates/recovery/rec_censuses_2026-10-08-pilot/seed0/hidden.json",
+        "fingerprint": "v1:2026-10-08T06:34:24+00:00@22307",
+        "kind": "file",
+        "dataset_id": null,
+        "last_modified_at": "2026-10-08T06:34:24+00:00",
+        "extras": {}
+      },
+      {
+        "dep_key": "m3_results_s0",
+        "path": "data/candidates/novelty/rec_censuses_2026-10-08-pilot_s0/results.jsonl",
+        "fingerprint": "v1:2026-10-08T06:57:03+00:00@4449558",
+        "kind": "file",
+        "dataset_id": null,
+        "last_modified_at": "2026-10-08T06:57:03+00:00",
+        "extras": {}
+      },
+      {
+        "dep_key": "matches_s0",
+        "path": "data/candidates/recovery/rec_censuses_2026-10-08-pilot/seed0/matches.jsonl",
+        "fingerprint": "v1:2026-10-08T07:00:39+00:00@278129",
+        "kind": "file",
+        "dataset_id": null,
+        "last_modified_at": "2026-10-08T07:00:39+00:00",
+        "extras": {}
+      }
+    ],
+    "inputs_sha256": "832b77a823406de541461d9d82798da0daf203cd314e41b94d7ced81e86931b2"
+  }
+}

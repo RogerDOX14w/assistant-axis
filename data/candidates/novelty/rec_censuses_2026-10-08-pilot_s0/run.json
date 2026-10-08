@@ -1,0 +1,183 @@
+{
+  "batch_id": "rec_censuses_2026-10-08-pilot_s0",
+  "mode": "shortlist",
+  "git_sha": "0aa0512",
+  "allow_dirty": false,
+  "dirty_check": {
+    "paths": [
+      "assistant_axis/gapgen",
+      "data_analysis/gap_generation",
+      "assistant_axis/judge.py",
+      "assistant_axis/judge_pricing.py",
+      "assistant_axis/entity_id.py",
+      "assistant_axis/atomic_io.py",
+      "data/candidates/validation",
+      "reports/trait_gap_generation/rubrics",
+      "pyproject.toml",
+      "uv.lock"
+    ],
+    "dirty": [],
+    "note": null
+  },
+  "argv": [
+    "score",
+    "--batch-id",
+    "rec_censuses_2026-10-08-pilot_s0",
+    "--run",
+    "censuses/2026-10-08-pilot",
+    "--hide",
+    "/Users/roger/Documents/GitHub/assistant-axis/.claude/worktrees/agent-a49beca76adafdfc1/data/candidates/recovery/rec_censuses_2026-10-08-pilot/seed0/hidden.json",
+    "--transport",
+    "live",
+    "--budget-usd",
+    "9.0000",
+    "--registry",
+    "/Users/roger/Documents/GitHub/assistant-axis/.claude/worktrees/agent-a49beca76adafdfc1/data/candidates/registry.jsonl",
+    "--data-dir",
+    "/Users/roger/Documents/GitHub/assistant-axis/.claude/worktrees/agent-a49beca76adafdfc1/data",
+    "--metric-config",
+    "/Users/roger/Documents/GitHub/assistant-axis/.claude/worktrees/agent-a49beca76adafdfc1/data/candidates/metric_config.json",
+    "--cache-dir",
+    "/Users/roger/Documents/GitHub/assistant-axis/.claude/worktrees/agent-a49beca76adafdfc1/data/candidates/cache/embeddings",
+    "--query-form",
+    "gloss_w14",
+    "--concurrency",
+    "8"
+  ],
+  "plan": {
+    "mode": "shortlist",
+    "n_candidates": 500,
+    "n_exact_label": 70,
+    "n_to_relation": 430,
+    "skipped": {
+      "not_a_trait": 64
+    },
+    "transport": "live",
+    "query_form": "gloss_w14",
+    "listed_mean": 17.462,
+    "n_query_texts_cached": 500,
+    "n_query_texts_to_embed": 0,
+    "corpus": {
+      "n_corpus": 707,
+      "n_missing_from_cache": 0,
+      "missing": []
+    },
+    "rules": {
+      "name": "m3_rules_2",
+      "version": 2,
+      "cover_on_opus_check": true,
+      "both_similar_excluded": true,
+      "pair_flag_grey": false,
+      "renamed_from_covers": false,
+      "separator_blind": true,
+      "cosine_floor": 0.25
+    },
+    "corpus_files": {
+      "corpus_at": "current",
+      "data_dir": "/Users/roger/Documents/GitHub/assistant-axis/.claude/worktrees/agent-a49beca76adafdfc1/data"
+    },
+    "hide": {
+      "path": "/Users/roger/Documents/GitHub/assistant-axis/.claude/worktrees/agent-a49beca76adafdfc1/data/candidates/recovery/rec_censuses_2026-10-08-pilot/seed0/hidden.json",
+      "sha256": "61cbfea02078460e0b57d369664c98c5ad2871822524a18561e21bdd7c3d5537",
+      "n_hidden": 83
+    }
+  },
+  "transport": "live",
+  "transport_reason": "--transport live",
+  "estimate_usd": 3.8381,
+  "estimate_lines": [
+    "candidate embeddings (OpenAI text-embedding-3-large) + the 8 canary texts: 1 x (240, 0) tokens at text-embedding-3-large rates = $0.000",
+    "relation call, 17.5 listed traits a call: 430 x (1,807, 1,336) tokens at claude-haiku-5-5 rates = $0.365",
+    "unsure re-ask (14% of candidates, 1.4 traits): 60 x (608, 108) tokens at claude-sonnet-5-5 rates = $0.138",
+    "overlap, Sonnet (3 pairs a candidate, 18% saved by early exit): 1058 x (219, 78) tokens at claude-sonnet-5-5 rates = $1.289",
+    "overlap, Opus (62% of pairs): 656 x (220, 112) tokens at claude-opus-5-5 rates = $2.047"
+  ],
+  "budget_usd": 9.0,
+  "cap_usd": 9.0,
+  "confirmed_by": null,
+  "rubrics": {
+    "overlap": {
+      "name": "overlap_concept",
+      "version": 6,
+      "sha256": "b3eff18fb946928517183af0244acec2d35dba0ab0bd9c57f83c7a06ac3c9fd0"
+    },
+    "relation": {
+      "name": "relation",
+      "version": 1,
+      "sha256": "b6b11f8cfcb0faafdac4a040087356ecb13d410e9bc309597d7833a96110d70f"
+    }
+  },
+  "models": {
+    "relation": "claude-haiku-5-5",
+    "relation_unsure": "claude-sonnet-5-5",
+    "overlap_first": "claude-sonnet-5-5",
+    "overlap_second": "claude-opus-5-5"
+  },
+  "settings": {
+    "config_version": "2026-10-02",
+    "k": 10,
+    "representation": "w20",
+    "variant": "centred",
+    "query_form": "gloss_w14",
+    "embedding_model": "text-embedding-3-large",
+    "cut_off_rule": "alignment score 0-1: 3; 2-3: 4; missing: 4",
+    "relation_max_tokens": 4096,
+    "overlap_max_tokens": 2048,
+    "temperature": 0.0,
+    "cache_ttl_batches": "1h",
+    "concurrency": 8,
+    "ask_attempts": 2,
+    "relation_seed": "rec_censuses_2026-10-08-pilot_s0",
+    "cosine_floor": 0.25
+  },
+  "rules": {
+    "name": "m3_rules_2",
+    "version": 2,
+    "cover_on_opus_check": true,
+    "both_similar_excluded": true,
+    "pair_flag_grey": false,
+    "renamed_from_covers": false,
+    "separator_blind": true,
+    "cosine_floor": 0.25
+  },
+  "corpus": {
+    "corpus_at": "current",
+    "data_dir": "/Users/roger/Documents/GitHub/assistant-axis/.claude/worktrees/agent-a49beca76adafdfc1/data"
+  },
+  "resumed": false,
+  "started_at": "2026-10-08T06:34:25+00:00",
+  "hide": {
+    "path": "/Users/roger/Documents/GitHub/assistant-axis/.claude/worktrees/agent-a49beca76adafdfc1/data/candidates/recovery/rec_censuses_2026-10-08-pilot/seed0/hidden.json",
+    "sha256": "61cbfea02078460e0b57d369664c98c5ad2871822524a18561e21bdd7c3d5537",
+    "n_hidden": 83
+  },
+  "canary": {
+    "model": "text-embedding-3-large",
+    "arm": "openai",
+    "tag": "openai_text-embedding-3-large",
+    "n": 8,
+    "n_compared": 8,
+    "n_new_reference": 0,
+    "min_cosine": 0.999449,
+    "threshold": 0.999,
+    "cosines": {
+      "absentee": 0.999998,
+      "collectivistic": 1.0,
+      "edgy": 1.0,
+      "gay": 1.0,
+      "ironic": 0.999449,
+      "only_child": 0.999994,
+      "restless": 1.0,
+      "sycophantic": 1.0
+    },
+    "below": [],
+    "ok": true,
+    "checked_at": "2026-10-08T06:34:29+00:00"
+  },
+  "finished_at": "2026-10-08T06:57:04+00:00",
+  "cost_usd": 5.5242,
+  "status": 0,
+  "stopped_by_error": null,
+  "n_decided": 500,
+  "n_stalled": 0
+}
