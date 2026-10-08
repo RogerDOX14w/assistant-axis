@@ -74,6 +74,9 @@ Thumbs.db
 /data/candidates/registry.jsonl.bak.*
 /data/candidates/*.lock
 /data/candidates/runs/**/.run.lock
+# A generator run's log (RunContext.log) stays local; its candidates.jsonl, run.json, usage.json and readout
+# are tracked (2026-10-08).
+/data/candidates/runs/**/run.log
 /data/candidates/*.tmp
 
 # Trait rubric V2 experiments (2026-09/10): the reports, plans, rubric texts,

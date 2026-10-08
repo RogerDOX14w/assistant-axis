@@ -91,6 +91,38 @@ class TestSubmit:
         assert [c["surface"] for c in cj] == ["stubborn", "vain"]
         assert run.n_emitted == 2
 
+    def test_the_record_is_written_before_the_log(self, reg_path, tmp_path, monkeypatch):
+        """``candidates.jsonl`` (tracked) first, then the append to the git-ignored log (2026-10-08): when the
+        append runs, the run's record already holds every candidate; a failed append leaves the record."""
+        run = start_run("wordnet_walk", "r2", candidates_dir=tmp_path / "candidates")
+        seen = []
+        real = Registry._append
+
+        def append(self, records):
+            seen.append([c["surface"] for c in _lines(run.dir / "candidates.jsonl")])
+            return real(self, records)
+        monkeypatch.setattr(Registry, "_append", append)
+        submit_candidates([C("stubborn"), C("vain")], registry_path=reg_path, run=run)
+        assert seen == [["stubborn", "vain"]]
+
+        def broken(self, records):
+            raise OSError("disk full")
+        monkeypatch.setattr(Registry, "_append", broken)
+        with pytest.raises(OSError):
+            submit_candidates([C("proud")], registry_path=reg_path, run=run)
+        assert [c["surface"] for c in _lines(run.dir / "candidates.jsonl")] == ["stubborn", "vain", "proud"]
+        assert "proud#1" not in Registry(reg_path).fold()
+
+    def test_record_first_then_submit_without_a_run(self, reg_path, tmp_path):
+        """The generators' own order (record, then ``run=None``) keeps working and records nothing twice."""
+        run = start_run("censuses", "r1", candidates_dir=tmp_path / "candidates")
+        cands = [C("stubborn"), C("vain")]
+        run.record_candidates(cands)
+        rep = submit_candidates(cands, registry_path=reg_path)
+        assert rep.n_new == 2 and [c["surface"] for c in _lines(run.dir / "candidates.jsonl")] == ["stubborn", "vain"]
+        submit_candidates(cands, registry_path=reg_path, run=run)                 # again, with the run: no change
+        assert len(_lines(run.dir / "candidates.jsonl")) == 2 and run.n_emitted == 2
+
 
 class TestLog:
     def test_fold_last_wins_and_rev_increments(self, reg_path):

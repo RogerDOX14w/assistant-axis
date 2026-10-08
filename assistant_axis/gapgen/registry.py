@@ -404,9 +404,15 @@ def submit_candidates(cands: Iterable[Candidate], *, registry_path: Path = REGIS
     nothing (``n_unchanged``), so re-submitting a run is a no-op.  Candidates
     whose surface does not normalise are skipped and listed in ``invalid``.
     With ``run`` (a :class:`~assistant_axis.gapgen.runs.RunContext`) the
-    candidates are also recorded in ``<run.dir>/candidates.jsonl``.
+    candidates are first recorded in ``<run.dir>/candidates.jsonl``, the
+    tracked record, and only then appended to the (per-checkout, git-ignored)
+    log, so that nothing reaches a log without its record (2026-10-08; before,
+    the record came after the append).  A generator may also call
+    ``run.record_candidates(cands)`` itself and submit with ``run=None``.
     """
     cands = list(cands)
+    if run is not None:
+        run.record_candidates(cands)
     reg = Registry(registry_path)
     now = utc_now()
     keys: list[str] = []
@@ -448,11 +454,8 @@ def submit_candidates(cands: Iterable[Candidate], *, registry_path: Path = REGIS
     if invalid:
         logger.warning("submit_candidates: %d surface(s) did not normalise: %s", len(invalid),
                        ", ".join(repr(s) for s in invalid[:10]))
-    report = SubmitReport(n_submitted=len(cands), n_new=n_new, n_merged=n_merged, keys=keys,
-                          n_unchanged=n_unchanged, invalid=invalid)
-    if run is not None:
-        run.record_candidates(cands)
-    return report
+    return SubmitReport(n_submitted=len(cands), n_new=n_new, n_merged=n_merged, keys=keys,
+                        n_unchanged=n_unchanged, invalid=invalid)
 
 
 # ---------------------------------------------------------------------------
