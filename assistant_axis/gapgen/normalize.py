@@ -36,7 +36,9 @@ DECISIONS = ("covered", "new", "grey")
 NOVELTY_FLAGS = ("ambiguous_label", "pair_completion", "deliberate_duplicate", "models_disagree",
                  "probe_uncertain")
 RELATIONS = ("synonym", "antonym", "related", "unrelated")
-REVIEW_STATUSES = ("unreviewed", "accepted", "rejected", "merged", "deferred")
+#: ``merged_into`` (with ``into``) and ``parked`` are what the review app writes (coding_plan_review.md, R2);
+#: ``merged`` was listed here before any code wrote it and is gone (2026-10-08).
+REVIEW_STATUSES = ("unreviewed", "accepted", "rejected", "merged_into", "parked", "deferred")
 
 #: Function words skipped when choosing the words whose frequency decides the
 #: floor ("kind to animals" is judged on kind and animals).  Fixed list: a

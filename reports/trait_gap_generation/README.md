@@ -21,10 +21,13 @@ M3 decisions 1-17 in the platform plan).  Plan 13's recovery harness is the plat
 now in progress (platform plan, "Interface as built").  Plans 1 and 2 have revised coding plans and
 are being coded in parallel.  Plan 11 is largely subsumed by M3 (a model reads every candidate);
 plan 12 is untouched.  Plans 3-9 are proposals.  The interface generators build on is the platform
-plan's "Interface as built" section, not its older "Frozen interface".  The night's work and its numbers: [overnight_readout_2026-10-08.md](./overnight_readout_2026-10-08.md).  Review tooling ([coding_plan_review.md](./coding_plan_review.md)): R1, the candidate graph, is built
-([review_graph.py](../../data_analysis/gap_generation/review_graph.py); pilot readout
-[readout.md](../../data/candidates/review/review_pilots_1/readout.md), $1.51); R2, the review app, waits on the
-group cut-off decision that pilot raised.
+plan's "Interface as built" section, not its older "Frozen interface".  The night's work and its numbers: [overnight_readout_2026-10-08.md](./overnight_readout_2026-10-08.md).  Review tooling ([coding_plan_review.md](./coding_plan_review.md)): R1, the candidate graph
+([review_graph.py](../../data_analysis/gap_generation/review_graph.py)), and R2, the review app
+([review_app.py](../../data_analysis/gap_generation/review_app.py)), are built; groups come in two tiers
+(merged at rating 4, proposed at 3; decision 12); the pilot graph is `review_pilots_1`
+([readout.md](../../data/candidates/review/review_pilots_1/readout.md), $1.85).  Review with
+`uv run python data_analysis/gap_generation/review_app.py serve --batch-id review_pilots_1` and open
+`http://127.0.0.1:8765`; then `status`, `apply --dry-run`, `apply`.
 
 ## The plans
 

@@ -651,3 +651,10 @@ class TestCli:
         from data_analysis.gap_generation import review_app as cli
         assert cli.main(["status", "--batch-id", "nope", *self.base(env)]) == 1
         assert "graph.json" in capsys.readouterr().err
+
+
+def test_review_statuses_written_are_in_the_vocabulary():
+    """Every status the review app writes into a registry review block is in the frozen vocabulary."""
+    from assistant_axis.gapgen.normalize import REVIEW_STATUSES
+    from assistant_axis.gapgen.review_app.decisions import REVIEW_STATUS, UNREVIEWED
+    assert set(REVIEW_STATUS.values()) | {UNREVIEWED["status"]} <= set(REVIEW_STATUSES)
