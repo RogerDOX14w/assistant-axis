@@ -9,6 +9,11 @@ For each role JSON file in data/roles/instructions/:
 
 Requires ANTHROPIC_API_KEY in environment or .env file.
 
+A refusal by the generator model (stop_reason "refusal", or a prose decline
+instead of JSON) is not retried: it is recorded in
+data/roles/generation_refusals.jsonl, counted apart from errors, and the role
+file is left as it was (see data_analysis/generation_refusals.py).
+
 Usage:
     uv run python data_analysis/regenerate_role_instructions.py --roles accountant alien
     uv run python data_analysis/regenerate_role_instructions.py --all --dry-run
@@ -36,6 +41,8 @@ import anthropic
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 from assistant_axis.judge_pricing import BATCH_SUFFIX, MultiModelUsage, extract_usage_anthropic  # noqa: E402
+from data_analysis.generation_refusals import (  # noqa: E402
+    REFUSALS_NAME, GenerationRefusal, record_refusal, refusal_in)
 
 ROLES_DIR = Path(__file__).resolve().parent.parent / "data" / "roles" / "instructions"
 
@@ -44,6 +51,10 @@ ROLES_DIR = Path(__file__).resolve().parent.parent / "data" / "roles" / "instruc
 # the instruction files so nothing that globs ``instructions/*.json`` sees it;
 # each run merges into it and also logs its own per-run line.
 DEFAULT_USAGE_JSON = ROLES_DIR.parent / "regeneration_usage.json"
+# Refused generations (2026-10-08), one record each, append-only, beside the
+# usage record (data_analysis/generation_refusals.py); a run given --usage-json
+# keeps them beside that file instead (refusal_log_path).
+DEFAULT_REFUSALS_JSONL = ROLES_DIR.parent / REFUSALS_NAME
 
 # Switches.  A flag or template placeholder added to test one part of a rubric
 # is removed again once the question is settled, in the same change (AGENT_NOTES
@@ -978,8 +989,14 @@ async def generate_combined(
     if opening_reroll_wanted(n_variants, combined["instruction"]):
         k = distinct_openings(combined["instruction"])
         print(f"  {role_name}: {k} distinct openings of {n_variants}; generating again", file=sys.stderr)
-        second = await _generate_combined_once(*args)
-        if distinct_openings(second["instruction"]) > k:
+        try:
+            second = await _generate_combined_once(*args)
+        except GenerationRefusal as refusal:
+            # the first set is usable: keep it rather than lose it to a refused second sample
+            print(f"  WARNING: {role_name}: the second generation was refused ({refusal.excerpt_line}); "
+                  f"kept the first set", file=sys.stderr)
+            second = None
+        if second is not None and distinct_openings(second["instruction"]) > k:
             combined = second
         combined["opening_rerolls"] = 1
         if distinct_openings(combined["instruction"]) < n_variants:
@@ -1000,7 +1017,8 @@ async def _generate_combined_once(
     thinking_budget: int = 0,
     usage: MultiModelUsage | None = None,
 ) -> dict:
-    """Call Claude with a combined prompt. Retries up to 5 times.
+    """Call Claude with a combined prompt. Retries up to 5 times, except on a
+    refusal, which raises GenerationRefusal after the one call.
 
     Returns a dict with keys: instruction (list of pos dicts),
     questions (list of strings), eval_prompt (string — discarded by caller).
@@ -1013,6 +1031,8 @@ async def _generate_combined_once(
             try:
                 response = await _call_api(client, create_kwargs)
                 _charge(usage, model, response)
+                if (refusal := refusal_in(response, role_name)) is not None:
+                    raise refusal  # not caught below: a refusal is not retried
                 raw_text = _extract_text(response)
                 return validated_combined(raw_text, role_name, n_variants, n_questions)
             except (json.JSONDecodeError, ValueError, KeyError, IndexError) as e:
@@ -1030,7 +1050,7 @@ async def _generate_combined_once(
                     )
                 else:
                     print(
-                        f"    Response was empty (likely a refusal)",
+                        f"    Response was empty (not a refusal: those are raised before this)",
                         file=sys.stderr,
                     )
                 await asyncio.sleep(wait)
@@ -1067,6 +1087,18 @@ def persist_usage(usage: MultiModelUsage, path: Path) -> None:
     total.merge_from(usage)
     total.write_json(path)
     print(f"[usage] cumulative record: {path} (total ${total.total_cost_usd:.3f} over {total.n_calls} calls)", file=sys.stderr)
+
+
+def refusal_log_path(usage_json: Path) -> Path:
+    """Where refused generations are recorded: beside the usage record."""
+    return usage_json.parent / REFUSALS_NAME
+
+
+def _record_refusal(path: Path | None, refusal: GenerationRefusal, stem: str, model: str, attempt: str) -> None:
+    """Append the refusal to the side-car (``DEFAULT_REFUSALS_JSONL`` when no
+    path is given).  The role file is left as it was."""
+    record_refusal(path or DEFAULT_REFUSALS_JSONL, refusal, stem=stem, kind="role", model=model,
+                   style=PROMPT_STYLE, template_sha256=template_sha256(PROMPT_STYLE), attempt=attempt)
 
 
 def reason_to_skip(stem: str, data: dict, n_variants: int, n_questions: int,
@@ -1106,10 +1138,14 @@ async def regenerate_one(
     dry_run: bool,
     usage: MultiModelUsage | None = None,
     instructions_only: bool = False,
+    refusals_jsonl: Path | None = None,
 ) -> str:
     """Regenerate a single role file. Returns a status line.  With
     ``instructions_only`` the questions already in the file are kept (one
-    call is still made, and the new questions it returns are discarded)."""
+    call is still made, and the new questions it returns are discarded).  A
+    refusal is recorded in ``refusals_jsonl`` (default
+    ``DEFAULT_REFUSALS_JSONL``) and re-raised as GenerationRefusal, with the
+    file left as it was."""
     with open(role_path, encoding="utf-8") as f:
         data = json.load(f)
 
@@ -1129,11 +1165,15 @@ async def regenerate_one(
             file=sys.stderr,
         )
 
-    combined = await generate_combined(
-        client, role_name, description,
-        n_variants, n_questions, model, semaphore, temperature,
-        thinking_budget, usage,
-    )
+    try:
+        combined = await generate_combined(
+            client, role_name, description,
+            n_variants, n_questions, model, semaphore, temperature,
+            thinking_budget, usage,
+        )
+    except GenerationRefusal as refusal:
+        _record_refusal(refusals_jsonl, refusal, role_path.stem, model, "live")
+        raise
     return write_regenerated(role_path, data, combined["instruction"],
                              None if instructions_only else combined["questions"],
                              model, temperature, thinking_budget,
@@ -1232,12 +1272,14 @@ async def wait_for_batch(client: anthropic.AsyncAnthropic, batch_id: str, poll_s
 
 
 async def collect_batch(client: anthropic.AsyncAnthropic, batch_id: str, *, instructions_only: bool, model: str,
-                        temperature: float, thinking_budget: int, usage: MultiModelUsage | None
-                        ) -> tuple[list[str], list[str]]:
+                        temperature: float, thinking_budget: int, usage: MultiModelUsage | None,
+                        refusals_jsonl: Path | None = None) -> tuple[list[str], list[str], list[str]]:
     """Write the role files of the requests that succeeded.  Returns the
-    status lines, and the stems that have to be generated again: requests
-    that errored or expired, and replies that cannot be used."""
-    done, again = [], []
+    status lines, the stems that have to be generated again (requests that
+    errored or expired, and replies that cannot be used), and the REFUSED
+    lines of the replies that were refusals: those are recorded like a live
+    refusal and not asked for again."""
+    done, again, refused = [], [], []
     async for entry in await client.messages.batches.results(batch_id):
         stem = entry.custom_id
         path = ROLES_DIR / f"{stem}.json"
@@ -1252,6 +1294,10 @@ async def collect_batch(client: anthropic.AsyncAnthropic, batch_id: str, *, inst
             print(f"  {stem}: no such role file in {ROLES_DIR}", file=sys.stderr)
             continue
         data = json.loads(path.read_text(encoding="utf-8"))
+        if (refusal := refusal_in(message, role_display_name(stem))) is not None:
+            _record_refusal(refusals_jsonl, refusal, stem, model, "batch")
+            refused.append(f"REFUSED {refusal.label}: {refusal.excerpt_line}")
+            continue
         try:
             combined = validated_combined(_extract_text(message), role_display_name(stem),
                                           n_questions=None if instructions_only else len(data.get("questions") or []) or None)
@@ -1268,7 +1314,7 @@ async def collect_batch(client: anthropic.AsyncAnthropic, batch_id: str, *, inst
         done.append(write_regenerated(
             path, data, combined["instruction"], None if instructions_only else combined["questions"],
             model, temperature, thinking_budget, batch=True))
-    return done, again
+    return done, again, refused
 
 
 def resolve_role_paths(roles: list[str] | None, all_roles: bool) -> list[Path]:
@@ -1327,6 +1373,7 @@ async def main_async(args: argparse.Namespace) -> None:
     client = anthropic.AsyncAnthropic()
     semaphore = asyncio.Semaphore(args.concurrency)
     usage = MultiModelUsage()
+    refusals_jsonl = refusal_log_path(Path(args.usage_json))
 
     if args.batch or args.batch_id:
         skipped: list[str] = []
@@ -1352,23 +1399,30 @@ async def main_async(args: argparse.Namespace) -> None:
                 print(f"Collect it later with the same options and --batch-id {batch_id}", file=sys.stderr)
                 return
         await wait_for_batch(client, batch_id, args.batch_poll)
-        done, again = await collect_batch(
+        done, again, refused = await collect_batch(
             client, batch_id, instructions_only=args.instructions_only, model=args.model,
-            temperature=args.temperature, thinking_budget=args.thinking_budget, usage=usage)
-        for line in done:
+            temperature=args.temperature, thinking_budget=args.thinking_budget, usage=usage,
+            refusals_jsonl=refusals_jsonl)
+        for line in done + refused:
             print(line, file=sys.stderr)
-        # what the batch did not deliver is asked for at once, in real time
+        # what the batch did not deliver is asked for at once, in real time (a refusal is not)
         retried = await asyncio.gather(*(regenerate_one(
             client, ROLES_DIR / f"{stem}.json", n_variants=args.n_variants, n_questions=args.n_questions,
             model=args.model, semaphore=semaphore, temperature=args.temperature,
             thinking_budget=args.thinking_budget, force=True, dry_run=False, usage=usage,
-            instructions_only=args.instructions_only) for stem in again), return_exceptions=True)
-        errors = [r for r in retried if isinstance(r, Exception)]
+            instructions_only=args.instructions_only, refusals_jsonl=refusals_jsonl)
+            for stem in again), return_exceptions=True)
+        refused_rt = [r for r in retried if isinstance(r, GenerationRefusal)]
+        errors = [r for r in retried if isinstance(r, Exception) and not isinstance(r, GenerationRefusal)]
         for stem, r in zip(again, retried):
-            print(f"[in real time] {stem}: {r}", file=sys.stderr)
-        print(f"\nDone: {len(done) + len(retried) - len(errors)} processed ({len(done)} from the batch, "
-              f"{len(retried) - len(errors)} in real time), {len(skipped)} skipped, {len(errors)} errors",
+            line = f"REFUSED {r.label}: {r.excerpt_line}" if isinstance(r, GenerationRefusal) else r
+            print(f"[in real time] {stem}: {line}", file=sys.stderr)
+        n_rt = len(retried) - len(errors) - len(refused_rt)
+        print(f"\nDone: {len(done) + n_rt} processed ({len(done)} from the batch, {n_rt} in real time), "
+              f"{len(skipped)} skipped, {len(refused) + len(refused_rt)} refused, {len(errors)} errors",
               file=sys.stderr)
+        if refused or refused_rt:
+            print(f"Refusals recorded in {refusals_jsonl}", file=sys.stderr)
         persist_usage(usage, Path(args.usage_json))
         return
 
@@ -1387,17 +1441,23 @@ async def main_async(args: argparse.Namespace) -> None:
                 dry_run=args.dry_run,
                 usage=usage,
                 instructions_only=args.instructions_only,
+                refusals_jsonl=refusals_jsonl,
             )
         )
         for path in role_paths
     ]
 
-    ok = skip = err = 0
+    ok = skip = refused = err = 0
     done = 0
     for coro in asyncio.as_completed(tasks):
         done += 1
         try:
             r = await coro
+        except GenerationRefusal as e:
+            # recorded by regenerate_one; counted apart from errors, and the run goes on
+            print(f"[{done}/{n}] REFUSED {e.label}: {e.excerpt_line}", file=sys.stderr)
+            refused += 1
+            continue
         except Exception as e:
             print(f"[{done}/{n}] ERROR: {e}", file=sys.stderr)
             err += 1
@@ -1408,9 +1468,11 @@ async def main_async(args: argparse.Namespace) -> None:
         elif r.startswith("SKIP"):
             skip += 1
 
-    print(f"\nDone: {ok} processed, {skip} skipped, {err} errors", file=sys.stderr)
+    print(f"\nDone: {ok} processed, {skip} skipped, {refused} refused, {err} errors", file=sys.stderr)
+    if refused:
+        print(f"Refusals recorded in {refusals_jsonl}", file=sys.stderr)
     if not args.dry_run:
-        print(f"API calls made: ~{ok}", file=sys.stderr)
+        print(f"API calls made: ~{ok + refused}", file=sys.stderr)
         persist_usage(usage, Path(args.usage_json))
 
 

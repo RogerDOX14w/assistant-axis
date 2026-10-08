@@ -12,14 +12,19 @@ The queue lives in ``data/seed_queue.json``::
 Entry lifecycle (the ``status`` field)::
 
     candidate -> ready -> seeded -> generated -> checked -> paired
-                                                        \\-> done
+                                \\-> refused             \\-> done
 
 ``candidate`` = extracted from the queue files, no final description yet;
 ``ready`` = description written and reviewed; ``seeded`` = seed JSON
 written into ``data/{traits,roles}/instructions/``; ``generated`` =
 instructions, questions and eval prompt generated; ``checked`` = antonym
 check run and classified (traits only); ``paired`` / ``done`` = labels and
-arrangement recorded.  Parked statuses that the lifecycle never touches:
+arrangement recorded; ``refused`` = the generator model declined to write
+the instructions (2026-10-08: a refusal is recorded, not retried; the
+generator's record, from ``data/{traits,roles}/generation_refusals.jsonl``,
+is kept in the entry's ``refusal`` field).  ``refused`` is final: ``check``
+skips it and ``generate`` tries it again only with ``--retry-refused``.
+Parked statuses that the lifecycle never touches:
 ``tbd``, ``backlog``, ``not_adopted``, ``superseded``, ``exists`` (a file
 already existed when the queue was built).
 
@@ -27,7 +32,7 @@ Subcommands (all read and update the queue; ``--dry-run`` never writes)::
 
     status   [--chunk C] [--status S] [--list]
     write    (--stems S... | --chunk C [--sub-chunk X]) [--overwrite] [--dry-run]
-    generate (--stems S... | --chunk C [--sub-chunk X]) [--dry-run] [--confirm-expensive]
+    generate (--stems S... | --chunk C [--sub-chunk X]) [--dry-run] [--confirm-expensive] [--retry-refused]
     check    (--stems S... | --chunk C [--sub-chunk X]) [--dry-run]
     pair     --a STEM --b STEM [--regenerate a|b|both|none] [--dry-run]
     rename   --old STEM --new LABEL [--partner STEM] [--no-check] [--dry-run]
@@ -62,7 +67,7 @@ import argparse
 import json
 import subprocess
 import sys
-from datetime import date
+from datetime import date, datetime, timezone
 from pathlib import Path
 from typing import Iterable, Optional, Sequence
 
@@ -71,13 +76,15 @@ sys.path.insert(0, str(_REPO_ROOT))
 
 from assistant_axis.atomic_io import atomic_write_text  # noqa: E402
 from assistant_axis.entity_id import normalize_to_file_name  # noqa: E402
+from data_analysis.generation_refusals import REFUSALS_NAME, read_refusals  # noqa: E402
 
 DEFAULT_QUEUE = _REPO_ROOT / "data" / "seed_queue.json"
 DEFAULT_DATA_DIR = _REPO_ROOT / "data"
 COST_PER_ENTITY_USD = 0.03
 EXPENSIVE_LINE_USD = 20.0
 
-LIFECYCLE = ["candidate", "ready", "seeded", "generated", "checked", "paired", "done"]
+# refused: the generator model declined; final, like paired and done (generate --retry-refused tries again)
+LIFECYCLE = ["candidate", "ready", "seeded", "generated", "checked", "paired", "done", "refused"]
 PARKED = ["tbd", "backlog", "not_adopted", "superseded", "exists"]
 SET_KINDS = {"set", "ring", "sequence", "triangle", "square", "orthoplex", "tree", "map",
              "tetrahedron", "octahedron", "cube"}
@@ -251,9 +258,42 @@ def generation_commands(entries: Iterable[dict]) -> list[list[str]]:
     return cmds
 
 
+def refusals_path(data_dir: Path, entity_type: str) -> Path:
+    """The generator's record of refused generations, beside ``instructions/``."""
+    return data_dir / ("traits" if entity_type == "trait" else "roles") / REFUSALS_NAME
+
+
+def refusals_since(data_dir: Path, entries: Iterable[dict], since: datetime) -> dict[tuple[str, str], dict]:
+    """The latest refusal recorded at or after ``since`` for each entry, keyed
+    by (entity_type, stem); an entry without one is absent."""
+    wanted = {(e["entity_type"], e["stem"]) for e in entries}
+    found: dict[tuple[str, str], dict] = {}
+    for et in sorted({et for et, _ in wanted}):
+        for rec in read_refusals(refusals_path(data_dir, et)):
+            key = (et, rec.get("stem"))
+            if key not in wanted:
+                continue
+            try:
+                at = datetime.fromisoformat(str(rec.get("refused_at")))
+            except ValueError:
+                continue
+            if at.tzinfo is None:
+                at = at.replace(tzinfo=timezone.utc)
+            if at >= since:
+                found[key] = rec  # the file is in time order, so the last one wins
+    return found
+
+
 def cmd_generate(args, q: dict, data_dir: Path) -> int:
-    sel = [e for e in select_entries(q, args.stems, args.chunk, args.sub_chunk)
-           if e.get("status") == "seeded" or (args.stems and e.get("status") in ("seeded", "generated"))]
+    picked = select_entries(q, args.stems, args.chunk, args.sub_chunk)
+    if not args.retry_refused:
+        for e in picked:
+            if e.get("status") == "refused":
+                print(f"SKIP {e['stem']}: generation refused at {(e.get('refusal') or {}).get('refused_at', '?')} "
+                      f"(--retry-refused to try again)", file=sys.stderr)
+    sel = [e for e in picked
+           if e.get("status") == "seeded" or (args.stems and e.get("status") in ("seeded", "generated"))
+           or (args.retry_refused and e.get("status") == "refused")]
     if not sel:
         print("nothing to generate (no entries with status seeded)", file=sys.stderr)
         return 0
@@ -261,6 +301,7 @@ def cmd_generate(args, q: dict, data_dir: Path) -> int:
     print(f"{len(sel)} entities, estimated ${est:.2f} at ${COST_PER_ENTITY_USD}/entity", file=sys.stderr)
     if est > EXPENSIVE_LINE_USD and not args.confirm_expensive and not args.dry_run:
         raise SystemExit(f"estimate ${est:.2f} exceeds the ${EXPENSIVE_LINE_USD:.0f} line: confirm with Roger, then pass --confirm-expensive")
+    started = datetime.now(timezone.utc).replace(microsecond=0)  # the records carry whole seconds
     ok = True
     for cmd in generation_commands(sel):
         res = run_tool(cmd, dry_run=args.dry_run)
@@ -271,9 +312,20 @@ def cmd_generate(args, q: dict, data_dir: Path) -> int:
         return 0
     if not ok:
         return 1
-    # mark only entries whose files now carry instructions
-    n = 0
+    # an entry the generator refused during this run becomes refused, with the
+    # generator's record; of the rest, mark only entries whose files now carry
+    # instructions
+    refusals = refusals_since(data_dir, sel, started)
+    n = n_refused = 0
     for e in sel:
+        rec = refusals.get((e["entity_type"], e["stem"]))
+        if rec is not None:
+            e["status"] = "refused"
+            e["refusal"] = rec
+            n_refused += 1
+            print(f"REFUSED {e['stem']} ({rec.get('stop_reason')}): "
+                  f"{' '.join(str(rec.get('reply_excerpt') or '').split())[:160]}", file=sys.stderr)
+            continue
         p = instructions_dir(data_dir, e["entity_type"]) / f"{e['stem']}.json"
         if p.exists():
             with open(p, encoding="utf-8") as f:
@@ -283,7 +335,7 @@ def cmd_generate(args, q: dict, data_dir: Path) -> int:
                 e["generated_at"] = date.today().isoformat()
                 n += 1
     save_queue(q, args.queue)
-    print(f"Done: {n}/{len(sel)} marked generated", file=sys.stderr)
+    print(f"Done: {n}/{len(sel)} marked generated, {n_refused} refused", file=sys.stderr)
     return 0
 
 
@@ -394,7 +446,11 @@ def _trait_doc(data_dir: Path, stem: str) -> dict:
 
 
 def cmd_check(args, q: dict, data_dir: Path) -> int:
-    sel = [e for e in select_entries(q, args.stems, args.chunk, args.sub_chunk)
+    picked = select_entries(q, args.stems, args.chunk, args.sub_chunk)
+    for e in picked:
+        if e.get("status") == "refused":
+            print(f"SKIP {e['stem']}: generation was refused, nothing to check", file=sys.stderr)
+    sel = [e for e in picked
            if e["entity_type"] == "trait"
            and (e.get("status") == "generated" or (args.stems and e.get("status") == "checked"))]
     if not sel:
@@ -610,6 +666,9 @@ def cmd_status(args, q: dict, data_dir: Path) -> int:
     print("by status:", json.dumps(s["by_status"], sort_keys=True))
     for c in sorted(s["by_chunk"], key=lambda x: (len(x), x)):
         print(f"  chunk {c:>4s}: {json.dumps(s['by_chunk'][c], sort_keys=True)}")
+    refused = [e["stem"] for e in sel if e.get("status") == "refused"]
+    if refused:
+        print(f"refused (final; generate --retry-refused to try again): {', '.join(refused)}")
     if args.list:
         for e in sel:
             part = f" <-> {e['partner']}" if e.get("partner") else ""
@@ -624,6 +683,9 @@ def cmd_report(args, q: dict, data_dir: Path) -> int:
     for e in sel:
         cr = e.get("check_result") or {}
         chk = f"{cr.get('returned', '')} ({cr.get('category', '')})" if cr else ""
+        if e.get("status") == "refused":
+            how = "stop_reason refusal" if (e.get("refusal") or {}).get("stop_reason") == "refusal" else "prose decline"
+            chk = f"generation refused ({how})"
         print(f"| {e.get('stem')} | {e['entity_type']} | {e.get('chunk')} | {e.get('pairing')} | {e.get('partner') or ''} | {e.get('status')} | {chk} |")
     return 0
 
@@ -644,7 +706,7 @@ def build_parser() -> argparse.ArgumentParser:
 
     sp = sub.add_parser("status"); sp.add_argument("--chunk"); sp.add_argument("--sub-chunk"); sp.add_argument("--status"); sp.add_argument("--list", action="store_true"); sp.set_defaults(func=cmd_status)
     sp = sub.add_parser("write"); selection(sp); sp.add_argument("--overwrite", action="store_true"); sp.add_argument("--dry-run", action="store_true"); sp.set_defaults(func=cmd_write)
-    sp = sub.add_parser("generate"); selection(sp); sp.add_argument("--dry-run", action="store_true"); sp.add_argument("--confirm-expensive", action="store_true"); sp.set_defaults(func=cmd_generate)
+    sp = sub.add_parser("generate"); selection(sp); sp.add_argument("--dry-run", action="store_true"); sp.add_argument("--confirm-expensive", action="store_true"); sp.add_argument("--retry-refused", action="store_true", help="also generate entries whose generation was refused (status refused, otherwise final)"); sp.set_defaults(func=cmd_generate)
     sp = sub.add_parser("check"); selection(sp); sp.add_argument("--dry-run", action="store_true"); sp.set_defaults(func=cmd_check)
     sp = sub.add_parser("pair"); sp.add_argument("--a", required=True); sp.add_argument("--b", required=True); sp.add_argument("--regenerate", choices=["a", "b", "both", "none"], default="a", help="which side gets --instructions-only regeneration so its neg clause names the partner (default: a, the new side)"); sp.add_argument("--note"); sp.add_argument("--dry-run", action="store_true"); sp.set_defaults(func=cmd_pair)
     sp = sub.add_parser("rename"); sp.add_argument("--old", required=True, help="existing trait stem"); sp.add_argument("--new", required=True, help="new positive_label (stem derived)"); sp.add_argument("--partner", help="the new completion to re-check against"); sp.add_argument("--reason"); sp.add_argument("--force", action="store_true", help="take a name that is queued"); sp.add_argument("--no-check", action="store_true"); sp.add_argument("--dry-run", action="store_true"); sp.set_defaults(func=cmd_rename)

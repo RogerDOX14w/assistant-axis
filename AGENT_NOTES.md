@@ -5167,7 +5167,14 @@ the files) and `description` (final), `source`, `tags`, `status`,
 `decision`, `alternatives`, `section` / `lines` (where in the files),
 and, once run, `check_result`.  Status lifecycle
 `candidate -> ready -> seeded -> generated -> checked -> paired | done`;
-parked: `tbd`, `backlog`, `not_adopted`, `superseded`, `exists`.
+parked: `tbd`, `backlog`, `not_adopted`, `superseded`, `exists`.  Since 2026-10-08 a further final
+status, `refused`: the generator model declined to write the instructions
+(stop reason "refusal" or a prose decline; `data_analysis/generation_refusals.py`);
+the generators record it in `data/{traits,roles}/generation_refusals.jsonl`
+instead of retrying, `generate` copies the record into the entry's `refusal`
+field, `check` skips it, and only `generate --retry-refused` tries again.
+Roger's ruling (2026-09-08, 2026-10-08): a refusal is a data point, not an
+error.
 
 [`data_analysis/seed_entities.py`](./data_analysis/seed_entities.py)
 drives it: `status`, `write` (seed JSONs for `ready` entries: traits get

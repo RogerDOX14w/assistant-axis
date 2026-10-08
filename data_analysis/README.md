@@ -33,6 +33,29 @@ generators also check the reply's counts (five pairs, forty questions) and
 ask again on a mismatch, so a 39-question reply is no longer written (it
 happened to interpreter in September and high-context (Hall) in October).
 
+Refusals (2026-10-08): both generators record a refusal by the generator
+model as a result rather than retrying it (Roger's ruling for the sensitive
+seeds of chunk 5).  A reply the API ends with `stop_reason` "refusal", or a
+reply in prose instead of JSON whose first sentence declines ("I can't", "I
+won't", "I'm not comfortable", ...: `DECLINE_PHRASES` in
+[`generation_refusals.py`](./generation_refusals.py); a reply with JSON in it
+never counts), raises `GenerationRefusal` after the one call.  The call is
+still charged to the usage record, the instruction file is left as it was,
+and one record is appended to `generation_refusals.jsonl` beside the usage
+record ([`../data/traits/generation_refusals.jsonl`](../data/traits/generation_refusals.jsonl),
+[`../data/roles/generation_refusals.jsonl`](../data/roles/generation_refusals.jsonl);
+neither exists until the first refusal): `stem`, `label`, `kind`, `model`,
+`style`, `template_sha256`, `refused_at`, `stop_reason`, `reply_excerpt` (the
+first 300 characters) and `attempt` (`live` or `batch`).  The log says
+`REFUSED <label>: <excerpt>` and the end line counts refusals apart from
+errors (`Done: 4 processed, 0 skipped, 1 refused, 0 errors`).  A refused
+batch reply is recorded the same way and not sent to the real-time pass; a
+refused second sample of the openings check keeps the first set.
+[`seed_entities.py`](./seed_entities.py) `generate` marks the entries refused
+during its run `refused`, with the record in their `refusal` field: a final
+status, which `check` skips and a later `generate` tries again only with
+`--retry-refused`.
+
 ```bash
 uv run python data_analysis/regenerate_trait_instructions.py --traits stoic --force
 uv run python data_analysis/regenerate_trait_instructions.py --all --dry-run
