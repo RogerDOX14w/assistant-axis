@@ -462,6 +462,302 @@ harvest (both checks)".
 
 - Two corpus renames are pending in another checkout (`borderline` to `borderline_personality_disorder`,
   `fear_prone` to `punishment_fearing`).  They are not in this worktree, so they were checked under their
-  old names; no key was remapped.  They will be placed again in a small later run.
+  old names; no key was remapped.  They will be placed again in a small later run.  (Done: see "Update
+  after chunk 5" below.)
 - [map_spotcheck.md](./map_spotcheck.md) is the map run's spot check and was not regenerated; it shows
   the placements before this check.
+
+
+## Update after chunk 5 (2026-10-08)
+
+Chunk 5 of the corpus expansion (commits 7e10c23 and 467ea35) added 90 trait files.  86 of them were
+seed-queue labels when the placements above were made, and all 86 had been placed from the bare label (85)
+or from a queue draft (1, [technomystical](../../traits/instructions/technomystical.json)), because their descriptions were
+written later.  Four of the 90 are renames, each new file carrying `renamed_from`; and the queue entry
+[distressed](../../seed_queue.json) was not adopted (status `not_adopted`, no file).  This section brings
+[label_heads.json](./label_heads.json) up to date.  Terms used here: to **re-place** a label is to run its
+two routes (lexical and semantic) again; the **check** is the placement check described above; a
+**parked** queue label is one whose status is `not_adopted`, `superseded` or `exists`, which the coverage
+map lists beside a head but does not count.
+
+### How the labels to place again were found
+
+The file did not record the text each label had been placed from.  So each label's text was recomputed as
+the map builds it (`label: description` for a corpus trait; the queue entry's description, else its draft,
+else the bare label) and looked up in the embedding cache ([data/candidates/cache/embeddings/](../cache/embeddings/),
+keyed by a hash of the text).  A miss means the text changed: 87 labels.  A hit was confirmed by recomputing the
+label's semantic top five heads from the cached vector and comparing them with the heads and cosines
+recorded in the file: identical for all 1,061 hits, so the cache entries were the ones the map had used.
+Cross-check: the texts the 87 labels had at the time (rebuilt from the queue at commit 35ecd84) were 86
+bare labels and one draft, and all 87 are in the cache.
+
+The update ran twice: the second time after removing from the file a misleading cost total (it left out
+the first check's $0.22 sample run).  By then the first run had cached the 87 new texts, so they were
+cache hits, and the cosine comparison flagged the same 87 as changed; the file's update record therefore
+says `semantic_differs` where the first run found `cache_miss`.  The same set either way.
+
+From now on every entry records `placed_text_sha256`, the hash of the text it was placed from, and the
+next update compares that directly.  The commands (code in
+[mapping.py](../../../assistant_axis/gapgen/generators/roget/mapping.py),
+[placement.py](../../../assistant_axis/gapgen/generators/roget/placement.py) and
+[roget_generate.py](../../../data_analysis/gap_generation/roget_generate.py)):
+
+- `roget_generate.py map --update`: drops the keys that are no corpus trait and no queue trait entry, adds
+  the labels that have no entry, re-places the labels whose text changed, and leaves every other entry as
+  it is, its check record (`llm`) included; only its record fields (label, source, queue status, partner)
+  are refreshed and its text hash added.  A re-placed entry keeps its old placement and old check record
+  under `previous_placement`.  An old stem is never remapped onto its new name.  Each update is appended
+  to the file's `map_updates`.  A full `map` now refuses to overwrite a file that holds check records
+  unless given `--force`.
+- `roget_generate.py place-check --unchecked-only --resume`: checks only the labels that carry no check
+  record (after an update, the re-placed ones whose route is not `agree`).  `--resume` now reuses an earlier
+  answer only when the whole prompt is byte-identical (before, the same rubric and model were enough, which
+  would have reused an answer given for a label's old description).  The file's `placement_check` block
+  now holds totals over the labels plus each run's own record under `runs`.
+
+### Counts
+
+| | labels |
+|---|---|
+| entries before (880 corpus traits, 272 queue labels) | 1,152 |
+| dropped: no trait file and no queue trait entry (the four old stems of the renames) | 4 |
+| added: the four renamed stems | 4 |
+| text changed: 86 chunk-5 traits and [distressed](../../seed_queue.json) | 87 |
+| re-placed (added and changed) | 91 |
+| of which the two routes agree (route `agree`, not sent to the check) | 18 |
+| sent to the check | 73 |
+| Opus asked (Sonnet's head differed from the rules' head) | 43 |
+| check outcomes: unchanged / moved / newly placed / unplaced | 42 / 6 / 20 / 5 |
+| kept as they were (placement and check record untouched) | 1,061 |
+| record fields refreshed on a kept entry ([vanilla](../../seed_queue.json) (queued): its partner now has a file) | 1 |
+| entries after | 1,152 |
+
+Against the placement each changed label had before (87): the same head for 62 (26 of them had no head
+before and have none now), a different one for 25: 17 placed where they had no head, 4 left without one,
+4 moved.  Routes in the whole file now: `agree` 565, `llm` 213, `semantic` 116, `none` 252, `rule` 4,
+`lexical` 2.  686 of the 880 corpus traits have a primary head.
+
+### The four renames
+
+| new file | old stem (no file now) | old stem's head (route) | rules now (route) | after the check | decided by |
+|---|---|---|---|---|---|
+| [borderline personality disorder](../../traits/instructions/borderline_personality_disorder.json) | `borderline` | none (the first check had taken it off 231 Edge) | 59 Disorder (rule) | none | Opus (Sonnet agreed) |
+| [punishment-fearing](../../traits/instructions/punishment_fearing.json) | `fear_prone` | 860 Fear (semantic, kept by the first check) | 860 Fear (rule) | 860 Fear | Opus (Sonnet: none) |
+| [OCD](../../traits/instructions/ocd.json) | `compulsive` | 744 Compulsion (agree, never checked) | none | none | Opus (Sonnet: 503 Insanity) |
+| [Neopagan](../../traits/instructions/neopagan.json) | `pagan` | 984 Heterodoxy (lexical, kept by the first check) | none | 991 Idolatry | Opus (Sonnet agreed) |
+
+Reasons: [borderline personality disorder](../../traits/instructions/borderline_personality_disorder.json), "no listed head
+names that whole bundle ... Disorder and Derangement only share the word 'disorder' in another sense";
+[OCD](../../traits/instructions/ocd.json), "Compulsion here means coercion by others, and Disorder means lack of arrangement";
+[punishment-fearing](../../traits/instructions/punishment_fearing.json), "at heart a fear (of punishment) that restrains
+conduct"; [Neopagan](../../traits/instructions/neopagan.json), "pagan worship of gods other than the Christian God".  So
+`compulsive`'s head, 744 Compulsion, is empty now, and its words go to the harvest.
+
+### distressed
+
+[distressed](../../seed_queue.json) was not dropped.  The file has always held every queue trait entry
+without a file, parked ones included (111 `not_adopted` labels were in it before chunk 5), and the coverage
+map lists parked labels beside their head without counting them.  So `distressed` stays, as one more
+parked label: its status now reads `not_adopted`, and it no longer counts toward 828 Pain, which
+[stressed](../../traits/instructions/stressed.json) now covers.  Its text had changed (a description was written for chunk 5),
+so it was re-placed: the rules chose 859 Hopelessness, the check (Opus) 828 Pain, its head before.  If
+parked labels should leave the file altogether, that is a change to `mapping.load_labels` (126 entries:
+112 `not_adopted`, 13 `superseded`, 1 `exists`), not part of this update.
+
+### Coverage map and harvest
+
+`roget_generate.py coverage` rewrote [roget_coverage.json](./roget_coverage.json) and
+[roget_coverage.md](./roget_coverage.md); the harvest was a full-size dry run
+(`roget_generate.py --dry-run harvest --run-id 2026-10-08-chunk5-full-dryrun`, nothing written), both with
+the head-scope ratings and the placements applied.  "Before" is the files as committed before this update
+(the last column of the table in [head_scope_readout.md](./head_scope_readout.md)).
+
+| | before | after |
+|---|---|---|
+| heads in scope (dispositional 576, Classes I-III 99) | 675 | 675 |
+| not character (rated 0; left out of the rows below) | 188 | 188 |
+| covered | 263 | **272** |
+| partly covered | 53 | 52 |
+| uncovered (of which a queued label only) | 171 (26) | **163 (16)** |
+| gap classes: pair_completion / pair_empty / singleton_empty / queued_only | 21 / 29 / 95 / 26 | 24 / 27 / 96 / 16 |
+| opposed pairs: both poles / one pole / neither covered | 68 / 49 / 34 | 70 / 51 / 30 |
+| harvest: gap heads selected / skipped as not character / giving words | 301 / 130 / 102 | 288 / 125 / 94 |
+| harvest: words (distinct) | 581 (538) | **534 (498)** |
+| harvest: words dropped with not-character heads | 441 | 410 |
+| downstream estimate: M1 / M3 if half pass | $2.32 / $5.23 | $2.14 / $4.81 |
+
+Most of the change is the chunk-5 traits turning from queue labels into corpus traits, so that their heads
+count as covered.  Ten heads left the state "a queued label only": six are now covered or partly covered
+by chunk-5 traits, and four lost their queued label to a re-placement (124 Oldness, 361 Killing,
+744 Compulsion, 985 Judeo-Christian Revelation).  The Class I-III part of the scope changed by one head
+each way: 29 Mean came in (through [middle-class](../../traits/instructions/middle_class.json)) and
+361 Killing went out (its trigger, [suicidal](../../traits/instructions/suicidal.json), now has no head);
+the head-scope check rated 29 Mean once (one Haiku 5.5 call, [head_scope.json](./head_scope.json)): 1, a
+mixed head.
+
+The 16 heads whose state changed:
+
+| head | before | after | why |
+|---|---|---|---|
+| 29 Mean | out of scope | empty | brought in by [middle-class](../../traits/instructions/middle_class.json)'s lexical hit; rated 1 |
+| 124 Oldness | queued | empty | [New Age](../../traits/instructions/new_age.json) was queued there; now on 992 Sorcery |
+| 361 Killing | queued | out of scope | [suicidal](../../traits/instructions/suicidal.json) was queued there; now no head |
+| 503 Insanity | queued | covered | [delusional](../../traits/instructions/delusional.json) |
+| 605 Irresolution | partly | covered | [ambivalent](../../traits/instructions/ambivalent.json) |
+| 609a Absence of Choice | queued | covered | [neuter](../../traits/instructions/neuter.json) |
+| 736 Mediocrity | partly | covered | [middle-class](../../traits/instructions/middle_class.json) |
+| 744 Compulsion | queued | empty | `compulsive` was queued there; its successor [OCD](../../traits/instructions/ocd.json) has no head |
+| 751 Restraint | queued | covered | [trapped-in-job](../../traits/instructions/trapped_in_job.json) |
+| 812 Price | empty | partly | [mercenary](../../traits/instructions/mercenary.json) as a secondary head |
+| 828 Pain | queued | covered | [stressed](../../traits/instructions/stressed.json) |
+| 898 Hate | partly | covered | [xenophobic](../../traits/instructions/xenophobic.json) (867 Dislike when it had no description) |
+| 936 Detractor | queued | covered | [detractor](../../traits/instructions/detractor.json) |
+| 985 Judeo-Christian Revelation | queued | empty | [Jewish](../../traits/instructions/jewish.json) was queued there; now no head |
+| 991 Idolatry | empty | covered | [Neopagan](../../traits/instructions/neopagan.json) |
+| 995 Churchdom | queued | partly | [Christian](../../traits/instructions/christian.json): primary 983a Orthodoxy, 995 a secondary head |
+
+One thing to look at: Roget's 1911 religious heads are written from a Christian standpoint, and the
+religious memberships land accordingly: [Christian](../../traits/instructions/christian.json) on 983a Orthodoxy (route `agree`),
+[Buddhist](../../traits/instructions/buddhist.json) on 984 Heterodoxy (where Roget lists other faiths), [Neopagan](../../traits/instructions/neopagan.json)
+on 991 Idolatry (nature-worship words such as *heliolatry*, *fire-worship*), [New Age](../../traits/instructions/new_age.json) on
+992 Sorcery (*occult sciences*, *mystic*, *talismanic*); [Jewish](../../traits/instructions/jewish.json),
+[Muslim](../../traits/instructions/muslim.json) and [Hindu](../../traits/instructions/hindu.json) have no head.  A placement only decides which heads
+count as covered, so that their words are not harvested again; it labels nothing.  Left as the check
+answered.
+
+### Every re-placed label (91)
+
+"Placed before from": the text the label had been placed from.  "Before" is the label's head before this
+update (`llm` = placed by the first check); "rules now" is the head the two routes give for the new text;
+"after the check" is the final head, with Sonnet's answer in brackets where Opus decided differently.
+Labels whose routes agree were not sent to the check ("rules (agree)").  Every call is in
+[placement_responses.jsonl](./placement_responses.jsonl) (the last 116 lines).
+
+| label | placed before from | before (route) | rules now (route) | after the check | decided by | reason (of the deciding model) |
+|---|---|---|---|---|---|---|
+| [ADHD](../../traits/instructions/adhd.json) | label only | none (none) | none (none) | 458 Inattention | opus | The core quality described, being unable to attend to what bores one, is inattention, which this head names. |
+| [African](../../traits/instructions/african.json) | label only | none (none) | none (none) | 188 Inhabitant | opus | Inhabitant lists adjectives of native origin and nationality such as 'native', 'indigenous' and 'English', which is where an identity rooted in African origin belongs. |
+| [ageist](../../traits/instructions/ageist.json) | label only | none (none) | 128 Age (semantic) | 481 Misjudgment | opus | Ageism is a prejudice, a biased prejudgment of people, which Misjudgment names with 'prejudiced', while the age heads only share its topic. |
+| [aggrieved](../../traits/instructions/aggrieved.json) | label only | 900 Resentment (llm) | 835 Aggravation (semantic) | 900 Resentment | opus | Feeling wronged and nursing the grievance is resentment, which Resentment (900) names directly. |
+| [ambivalent](../../traits/instructions/ambivalent.json) | label only | 605 Irresolution (llm) | 605 Irresolution (semantic) | 605 Irresolution | sonnet | Being torn between two opposed feelings matches 'double-minded' and 'half-hearted' in Irresolution, the closest head available. |
+| [American](../../traits/instructions/american.json) | label only | 188 Inhabitant (llm) | none (none) | 188 Inhabitant | opus | Being American is at heart a nationality, being a native and resident of a country, which the Inhabitant head names with words like native, resident, British and English. |
+| [androgynous](../../traits/instructions/androgynous.json) | label only | none (none) | 373 Man (semantic) | none | opus | No listed head names a blend of the manly and the womanly: Man and Woman each cover only one side, Sexuality is about sex and desire, and Unconformity is about general abnormality. |
+| [antitheist](../../traits/instructions/antitheist.json) | label only | 989 Irreligion (llm) | 989 Irreligion (semantic) | 989 Irreligion | sonnet | Antitheism is hostile rejection of religion, and Irreligion (godlessness) is the closest head, though the others cover only doubt, profanity or fighting in general. |
+| [asexual](../../traits/instructions/asexual.json) | label only | none (none) | 904 Celibacy (semantic) | 904 Celibacy | sonnet | Asexual means lacking sexual attraction, and the closest head is Celibacy (904), which covers singleness, virginity and abstaining from sexual relations; Indifference is a more general head, and the others are about sex itself, love or dislike. |
+| [atheist](../../traits/instructions/atheist.json) | label only | 989 Irreligion (agree) | 989 Irreligion (agree) | 989 Irreligion | rules (agree) |  |
+| [Australian](../../traits/instructions/australian.json) | label only | 188 Inhabitant (llm) | 188 Inhabitant (semantic) | 188 Inhabitant | sonnet | Being from a country and living there fits Inhabitant, whose adjectives include native and national terms like British and English. |
+| [autistic](../../traits/instructions/autistic.json) | label only | none (none) | none (none) | none | sonnet | Autism is a neurodevelopmental bundle of traits (literalism, routine, narrow interests, sensory sensitivity), and none of the listed heads names that whole bundle; seclusion, taciturnity, deafness, intuition and reasoning each cover only a fragment or a different topic. |
+| [bisexual](../../traits/instructions/bisexual.json) | label only | 374a Sexuality (agree) | 374a Sexuality (agree) | 374a Sexuality | rules (agree) |  |
+| [blind](../../traits/instructions/blind.json) | label only | 442 Blindness (agree) | 442 Blindness (agree) | 442 Blindness | rules (agree) |  |
+| [body-obsessed](../../traits/instructions/body_obsessed.json) | label only | 880 Vanity (llm) | none (none) | none | sonnet | Being obsessed with one's own body is not named by any listed head: Vanity is about conceit, Attention is general, and the others are unrelated, so none is the home. |
+| [borderline personality disorder](../../traits/instructions/borderline_personality_disorder.json) | new stem | - | 59 Disorder (rule) | none | opus | The trait bundles unstable attachments, fear of abandonment, intense emotion and an unsteady sense of self, and no listed head names that whole bundle. Insanity means unsound reason, and Disorder and Derangement only share the word 'disorder' in another sense. |
+| [Brazilian](../../traits/instructions/brazilian.json) | label only | none (none) | none (none) | 188 Inhabitant | opus | Being from and living in Brazil is a matter of nationality and native residence, which head 188 covers with words like native, indigenous and national adjectives such as British. |
+| [British](../../traits/instructions/british.json) | label only | 188 Inhabitant (agree) | 188 Inhabitant (agree) | 188 Inhabitant | rules (agree) |  |
+| [Buddhist](../../traits/instructions/buddhist.json) | label only | 984 Heterodoxy (lexical) | 984 Heterodoxy (lexical) | 984 Heterodoxy (Sonnet: none) | opus | Being a Buddhist is adherence to a non-Christian faith, and Roget's Heterodoxy head is where it lists other religions and their followers, Buddhism among them. |
+| [Canadian](../../traits/instructions/canadian.json) | label only | 188 Inhabitant (agree) | 188 Inhabitant (agree) | 188 Inhabitant | rules (agree) |  |
+| [Chinese](../../traits/instructions/chinese.json) | label only | none (none) | none (none) | 188 Inhabitant | opus | The trait is about being a native and resident of a country, which is what Inhabitant names; its words include nationality terms like 'native', 'British' and 'English'. |
+| [Christian](../../traits/instructions/christian.json) | label only | 983a Orthodoxy (agree) | 983a Orthodoxy (agree) | 983a Orthodoxy | rules (agree) |  |
+| [close-knit](../../traits/instructions/close_knit.json) | label only | 888 Friendship (llm) | 888 Friendship (semantic) | 888 Friendship | sonnet | Close-knit describes a tight circle of family and old friends bound by mutual intimacy, and Friendship (friendly, brotherly, fraternal, amity, brotherhood) names that bond most closely, while Consanguinity covers only blood kinship and Nearness is spatial. |
+| [conspiracy-minded](../../traits/instructions/conspiracy_minded.json) | label only | none (none) | 528 Concealment (semantic) | none | opus | No listed head names a suspicious, plot-seeing cast of mind: Concealment, Secret and Ambush only share the topic of secrecy, Belief is too general, and Willingness only matches the spelling of "minded". |
+| [deaf](../../traits/instructions/deaf.json) | label only | 581 Aphony (agree) | 581 Aphony (agree) | 581 Aphony | rules (agree) |  |
+| [delusional](../../traits/instructions/delusional.json) | label only | 503 Insanity (agree) | 503 Insanity (agree) | 503 Insanity | rules (agree) |  |
+| [detractor](../../traits/instructions/detractor.json) | label only | 936 Detractor (agree) | 936 Detractor (agree) | 936 Detractor | rules (agree) |  |
+| [dignity culture](../../traits/instructions/dignity_culture.json) | label only | none (none) | 878 Pride (semantic) | 878 Pride | sonnet | Head 878 holds 'dignity' and 'self-respect', which name the sense of inherent personal worth the description gives. |
+| [dissociative](../../traits/instructions/dissociative.json) | label only | none (none) | 449 Disappearance (semantic) | none | opus | None of the listed heads names the mental state of depersonalization, unreality or lost time; 'dissociation' in Irrelation means logical unconnectedness, and Absence and Disappearance are about physical presence. |
+| [distressed](../../seed_queue.json) (queued) | label only | 828 Pain (llm) | 859 Hopelessness (semantic) | 828 Pain | opus | Being distressed is general mental suffering, affliction and worry, which is what Pain (828) names, while Hopelessness covers only one part of it. |
+| [dyslexic](../../traits/instructions/dyslexic.json) | label only | none (none) | none (none) | none | sonnet | Dyslexia is a specific difficulty in reading and spelling, and none of the listed heads names that; Stammering concerns speech, Learning and Learner concern study in general, and the others are sensory impairments. |
+| [East Asian](../../traits/instructions/east_asian.json) | label only | none (none) | none (none) | none (Sonnet: 188 Inhabitant) | opus | East Asian here means an ethnic heritage that bundles roots, language and customs, kept wherever one lives; no listed head names that, and Inhabitant is about dwelling in a place. |
+| [European](../../traits/instructions/european.json) | label only | 188 Inhabitant (llm) | none (none) | 188 Inhabitant | opus | Head 188 holds the words for belonging to a place by origin or nationality (native, British, English), which is the nearest match to having European roots. |
+| [face culture](../../traits/instructions/face_culture.json) | label only | none (none) | none (none) | none | sonnet | The trait bundles claiming only one's due, harmony, rank-keeping, and saving others' face, and no single head (Humility, Modesty, Respect, Pride) names the whole. |
+| [French](../../traits/instructions/french.json) | label only | none (none) | none (none) | 188 Inhabitant | opus | Being from France and living there is a matter of nationality and residence, which Inhabitant covers with words like native, resident, British, English. |
+| [German](../../traits/instructions/german.json) | label only | none (none) | none (none) | 188 Inhabitant | opus | Being German by origin and residence is nationality and nativity, which head 188 Inhabitant covers with 'native', 'indigenous', and national adjectives like 'British' and 'English'. |
+| [guilt-prone](../../traits/instructions/guilt_prone.json) | label only | 950 Penitence (llm) | 947 Guilt (semantic) | 950 Penitence | opus | Penitence names the conscience-stricken feelings of contrition and compunction over a wrong, which is the trait described; Guilt names culpability itself, not the proneness to feel it. |
+| [gun owner](../../traits/instructions/gun_owner.json) | label only | none (none) | 779 Possessor (agree) | 779 Possessor | rules (agree) |  |
+| [Hindu](../../traits/instructions/hindu.json) | label only | none (none) | none (none) | none (Sonnet: 987 Piety) | opus | Being Hindu means belonging to one particular faith with its own rites, festivals and beliefs, and no listed head names that faith: Piety and Worship cover religiousness in general, and Pseudo-Revelation only shares the topic through the Vedas. |
+| [Hispanic](../../traits/instructions/hispanic.json) | label only | none (none) | none (none) | none | sonnet | Hispanic is an ethnic/cultural identity bundling heritage, language and place, and no listed head names that whole; they only share side topics. |
+| [honor culture](../../traits/instructions/honor_culture.json) | label only | none (none) | none (none) | 873 Repute | opus | Honor culture treats one's worth as a standing held in others' eyes, which is what the Repute head names with words like honored, name and distinction. |
+| [Indian](../../traits/instructions/indian.json) | label only | none (none) | 188 Inhabitant (semantic) | 188 Inhabitant | sonnet | Being Indian means being a native inhabitant of India, which fits Inhabitant, whose adjectives include native, indigenous, British and English as nationality words. |
+| [Indigenous American](../../traits/instructions/indigenous_american.json) | label only | 188 Inhabitant (llm) | 188 Inhabitant (semantic) | 188 Inhabitant | sonnet | The trait is being a member of the Americas' first peoples, and head 188 (Inhabitant) holds 'indigenous', 'native' and 'autochthonous', which name that quality. |
+| [Indigenous Australian](../../traits/instructions/indigenous_australian.json) | label only | 188 Inhabitant (llm) | 188 Inhabitant (semantic) | 188 Inhabitant | sonnet | Head 188, Inhabitant, holds 'indigenous', 'native' and 'autochthonous', which name being a native people of a place, the core of being Indigenous Australian. |
+| [Italian](../../traits/instructions/italian.json) | label only | none (none) | none (none) | 188 Inhabitant | opus | Being from Italy and living there is being a native inhabitant of a country, which the Inhabitant head names with words like native, indigenous and nationality adjectives such as British. |
+| [Japanese](../../traits/instructions/japanese.json) | label only | none (none) | none (none) | 188 Inhabitant | opus | Being a native and resident of Japan is a nationality of birth and dwelling, which the Inhabitant head covers with words like native, indigenous and national adjectives such as British. |
+| [Jewish](../../traits/instructions/jewish.json) | label only | 985 Judeo-Christian Revelation (agree) | none (none) | none | sonnet | Jewish observance bundles ritual, diet, worship, fasting and festivals, and no single listed head names the whole; each head covers only one facet. |
+| [joiner](../../traits/instructions/joiner.json) | label only | none (none) | none (none) | none | sonnet | No head names a habit of joining every group; Participation covers shared possession, Party covers factions, and the others are unrelated. |
+| [kinky](../../traits/instructions/kinky.json) | label only | 608 Caprice (agree) | 374a Sexuality (semantic) | 374a Sexuality | sonnet | Kinkiness is a variety of sexual taste, and Sexuality (erotic, sexual, carnal) is the nearest head, though it names sex in general rather than this specific taste. |
+| [lonely](../../traits/instructions/lonely.json) | label only | 893 Seclusion. Exclusion (agree) | 893 Seclusion. Exclusion (agree) | 893 Seclusion. Exclusion | rules (agree) |  |
+| [mercenary](../../traits/instructions/mercenary.json) | label only | 746 Servant (agree) | 943 Selfishness (agree) | 943 Selfishness | rules (agree) |  |
+| [middle-aged](../../traits/instructions/middle_aged.json) | label only | 131 Adolescence (agree) | 131 Adolescence (agree) | 131 Adolescence | rules (agree) |  |
+| [middle-class](../../traits/instructions/middle_class.json) | label only | 736 Mediocrity (semantic) | 29 Mean (rule) | 736 Mediocrity | opus | Mediocrity (736) names moderate circumstances, respectability and the middle classes, which is the social station described, while 'middle-class' under Mean (29) only means average in quantity. |
+| [Middle Eastern](../../traits/instructions/middle_eastern.json) | label only | none (none) | none (none) | none | sonnet | No head names a regional ethnic heritage; Inhabitant is only about being a native or resident, and Middle is a spelling coincidence. |
+| [mobility impaired](../../traits/instructions/mobility_impaired.json) | label only | none (none) | none (none) | none | sonnet | The trait is an impairment of the ability to walk, and no listed head names disability or lameness; Motion, Journey, Traveler, Quiescence and Slowness only share the topic of movement. |
+| [monogamous](../../traits/instructions/monogamous.json) | label only | 903 Marriage (agree) | 903 Marriage (agree) | 903 Marriage | rules (agree) |  |
+| [Muslim](../../traits/instructions/muslim.json) | label only | none (none) | none (none) | none (Sonnet: 987 Piety) | opus | Being Muslim means following a particular religion, and none of these heads names Islam: Piety and Worship cover devoutness in general, Orthodoxy lists Christian terms, and Fasting is only one practice. |
+| [Neopagan](../../traits/instructions/neopagan.json) | new stem | - | none (none) | 991 Idolatry | opus | Honoring the old gods and treating nature as divine is pagan worship of gods other than the Christian God, which this head names through nature-worship terms like heliolatry and fire-worship. |
+| [neuter](../../traits/instructions/neuter.json) | label only | 609a Absence of Choice (agree) | 609a Absence of Choice (agree) | 609a Absence of Choice | rules (agree) |  |
+| [New Age](../../traits/instructions/new_age.json) | label only | 124 Oldness (agree) | none (none) | 992 Sorcery | opus | New Age belief in crystals, astrology, energy healing and signs from the universe is a modern form of the occult sciences and talismanic mysticism named in Sorcery. |
+| [Nigerian](../../traits/instructions/nigerian.json) | label only | 188 Inhabitant (llm) | none (none) | 188 Inhabitant | opus | Being Nigerian is a nationality, being a native and resident of a country, which is what Inhabitant names with words like 'native', 'indigenous' and national adjectives such as 'British' and 'English'. |
+| [nonbinary](../../traits/instructions/nonbinary.json) | label only | none (none) | none (none) | none | sonnet | Heads 373 and 374 each name one sex, and the others only echo 'neither' or 'none', so no head names being neither man nor woman. |
+| [OCD](../../traits/instructions/ocd.json) | new stem | - | none (none) | none (Sonnet: 503 Insanity) | opus | OCD is unwanted, intrusive thoughts and acts the person knows are senseless, so it is not insanity or madness. Compulsion here means coercion by others, and Disorder means lack of arrangement, so neither fits. |
+| [pansexual](../../traits/instructions/pansexual.json) | label only | none (none) | none (none) | none | sonnet | Pansexuality is a particular orientation, attraction to people of any gender, and no listed head names that; Love, Desire and Sexuality only share the topic, and Celibacy is the opposite. |
+| [polyamorous](../../traits/instructions/polyamorous.json) | label only | none (none) | none (none) | none (Sonnet: 897 Love) | opus | Polyamory is a modern, consensual way of loving several partners at once; Love names only love in general, and Marriage, Celibacy and the others do not name this arrangement. |
+| [polyandrous](../../traits/instructions/polyandrous.json) | label only | 903 Marriage (llm) | 903 Marriage (semantic) | 903 Marriage | sonnet | Polyandry is a form of marriage, and head 903 (Marriage) names the married state, which is the closest fit among the listed heads. |
+| [polygamous](../../traits/instructions/polygamous.json) | label only | 903 Marriage (agree) | 903 Marriage (agree) | 903 Marriage | rules (agree) |  |
+| [polygynous](../../traits/instructions/polygynous.json) | label only | 903 Marriage (llm) | 903 Marriage (semantic) | 903 Marriage | sonnet | Polygyny is a form of marriage, and Marriage (903) is the head that names the married state. |
+| [punishment-fearing](../../traits/instructions/punishment_fearing.json) | new stem | - | 860 Fear (rule) | 860 Fear (Sonnet: none) | opus | The trait is at heart a fear (of punishment) that restrains conduct, so the Fear head names its core quality; the Punishment and Penalty heads name the penalty itself, not the attitude toward it. |
+| [Russian](../../traits/instructions/russian.json) | label only | none (none) | none (none) | 188 Inhabitant | opus | Being a native of Russia who lives there is a national-inhabitant quality, which Inhabitant covers with words like native, indigenous, British and English. |
+| [self-harming](../../traits/instructions/self_harming.json) | label only | none (none) | none (none) | none | sonnet | No listed head names deliberately hurting oneself in secret as a way of coping; Pain, Painfulness, Killing, Badness and Concealment each cover only one aspect of it. |
+| [sexist](../../traits/instructions/sexist.json) | label only | none (none) | none (none) | none | sonnet | No listed head names sexism as a whole; Man and Woman only denote the sexes, while Discrimination (465) means perceiving differences, Disrespect covers contempt generally, and Inequality is about quantity. |
+| [shame-prone](../../traits/instructions/shame_prone.json) | label only | 879 Humility (llm) | 947 Guilt (semantic) | 879 Humility (Sonnet: none) | opus | Roget files the feeling of shame and humiliation before others' judgment under Humility, which is the closest home for a disposition to feel shame; Guilt and Penitence name the inward conscience the description excludes. |
+| [Shinto](../../traits/instructions/shinto.json) | label only | none (none) | none (none) | none (Sonnet: 990 Worship) | opus | Shinto is a specific religion that bundles many practices, and no listed head names that faith as a whole; Worship, Rite and Temple each cover only a general part of it. |
+| [Sikh](../../traits/instructions/sikh.json) | label only | none (none) | none (none) | none | sonnet | A Sikh is a follower of a particular religion, a bundle of belief, worship, ritual and dress, and no listed head names the whole; Piety is only the general religious quality and Pseudo-Revelation lists other faiths' scriptures and founders. |
+| [sleep-deprived](../../traits/instructions/sleep_deprived.json) | label only | 688 Fatigue (llm) | 688 Fatigue (semantic) | 688 Fatigue | sonnet | Sleep deprivation is chronic bodily tiredness with drooping, haggard exhaustion and yawning, which is what Fatigue (688) names; Weariness (841) is more about boredom and disgust. |
+| [smoker](../../traits/instructions/smoker.json) | label only | none (none) | none (none) | none (Sonnet: 613 Habit) | opus | None of the listed heads covers tobacco or smoking; Habit, Odor and Fetor each touch only one side of the daily smoking routine. |
+| [South Asian](../../traits/instructions/south_asian.json) | label only | none (none) | none (none) | none (Sonnet: 188 Inhabitant) | opus | South Asian is an ethnic or regional heritage identity, and no head names that quality: Inhabitant and Language only touch the topic and do not name South Asian origin. |
+| [stigmatized](../../traits/instructions/stigmatized.json) | label only | 874 Disrepute (llm) | none (none) | 874 Disrepute | opus | Being stigmatized means bearing a mark of discredit or disgrace in others' eyes, which is what Disrepute names. |
+| [stoner](../../traits/instructions/stoner.json) | label only | none (none) | none (none) | none | sonnet | Drunkenness is about alcohol and Habit is generic, so no listed head names habitual drug intoxication. |
+| [stressed](../../traits/instructions/stressed.json) | label only | 828 Pain (llm) | none (none) | 828 Pain | opus | Being stressed is a lasting state of worry and mental suffering, which fits Pain's 'worried' and 'mental suffering'. Exertion and Fatigue name only the effort or the tiredness, not the strained, anxious condition. |
+| [suburban](../../traits/instructions/suburban.json) | label only | 189 Abode (agree) | 189 Abode (agree) | 189 Abode | rules (agree) |  |
+| [suicidal](../../traits/instructions/suicidal.json) | label only | 361 Killing (agree) | none (none) | none | sonnet | Suicidal means wanting to be dead and contemplating self-killing, but no head names suicide itself (Roget's 361 Killing covers homicide, and 360 Death is the state of being dead); hopelessness and dejection capture only the mood, not the wish to die. |
+| [Taoist](../../traits/instructions/taoist.json) | label only | none (none) | none (none) | none (Sonnet: 990 Worship) | opus | Taoism bundles religious practice, a philosophy and a passive attitude, and no listed head names that whole bundle; worship, rite and temple each cover only one part. |
+| [technomystical](../../traits/instructions/technomystical.json) | queue draft | none (none) | 992 Sorcery (semantic) | none | opus | None of the listed heads names a sacred reverence for technology; they only share the religious topic (temple, deity, mystic magic). |
+| [trapped-in-job](../../traits/instructions/trapped_in_job.json) | label only | none (none) | none (none) | 751 Restraint | opus | The core quality is being held somewhere against one's wish by circumstances, which Restraint names with 'constrained' and 'pent up'; Business only shares the job topic. |
+| [traumatized](../../traits/instructions/traumatized.json) | label only | 828 Pain (llm) | none (none) | none (Sonnet: 828 Pain) | opus | Being traumatized is a bundle of lingering fear, intrusive memories, avoidance and hypervigilance, and no listed head names it: Pain covers only general suffering, and Safety names the opposite of the trait. |
+| [uninsured](../../traits/instructions/uninsured.json) | label only | none (none) | none (none) | none | sonnet | Being uninsured is a modern financial and insurance condition; none of the listed heads names it, since they cover health, disease, neglect, or nonpayment of debts, which only share a topic. |
+| [unscrupulous](../../traits/instructions/unscrupulous.json) | label only | 940 Improbity (agree) | 940 Improbity (agree) | 940 Improbity | rules (agree) |  |
+| [unsupported](../../traits/instructions/unsupported.json) | label only | none (none) | none (none) | 893 Seclusion. Exclusion | opus | Having no one to help and carrying every load alone is friendless, unbefriended solitude, which belongs with Seclusion (lonely, forlorn); head 468 matches only the spelling, in the sense of unsupported evidence. |
+| [xenophobic](../../traits/instructions/xenophobic.json) | label only | 867 Dislike (llm) | none (none) | 898 Hate (Sonnet: 911 Misanthropy) | opus | Xenophobia is a hatred and hostility aimed at foreigners, which is a specific form of the quality named by the Hate head. |
+
+### Spend
+
+| step | calls | tokens in / out | cost |
+|---|---|---|---|
+| `map --update`: embeddings of the 91 new texts (`text-embedding-3-large`) | 1 | 3,951 / 0 | $0.0005 |
+| placement check, Sonnet 5.5 (`claude-sonnet-5-5`) | 73 | 85,259 / 9,614 | $0.267 |
+| placement check, Opus 5.5 (`claude-opus-5-5`) | 43 | 50,518 / 9,698 | $0.396 |
+| head scope of 29 Mean, Haiku 5.5 (`claude-haiku-5-5`) | 1 | 645 / 92 | $0.0001 |
+| **total** | 118 | | **$0.664** |
+
+The check's estimate was $0.67 (Sonnet $0.28 for 73 calls; Opus $0.39 for the 44 calls a 60% referee
+share would give, $0.66 if asked on all 73), from the token figures in the code; the Opus output figure
+was raised from 190 to 215 tokens a call, the full first run's measurement, before this run.  Caps: $2.90
+for the check, $3 for the whole job.  No answer could be reused (every prompt was new), no answer failed to
+parse, and six connection errors were retried by the client without charge.  The usage files are
+cumulative: [placement_usage.json](./placement_usage.json) now $5.63 over both checks,
+[mapping_usage.json](./mapping_usage.json) $0.014, [head_scope_usage.json](./head_scope_usage.json) $0.166.
+
+### Tests
+
+The acceptance test that caught the renames
+([test_gapgen_roget_acceptance.py](../../../assistant_axis/tests/test_gapgen_roget_acceptance.py),
+`test_every_corpus_trait_is_in_label_heads`) stays strict; its failure message now names, for each missing
+stem, the `renamed_from` its file carries, and the commands to run.  A new test,
+`test_label_heads_has_no_stale_stems`, fails when a key is no corpus trait and no queue trait entry, and
+names the file or queue entry whose `renamed_from` points at it: a rename inside the queue (chunk 6's
+`in_pain` to `in_chronic_pain`) leaves no new file, so only this test would catch it.  Changed expectation:
+the cumulative spend bound on [placement_usage.json](./placement_usage.json) went from $5 to $8 (the first
+check's $5 cap plus this update's $3).
+
+### Not done
+
+- [map_spotcheck.md](./map_spotcheck.md) is still the first map's spot check.
+- The religious-head placements above are reported, not changed.
