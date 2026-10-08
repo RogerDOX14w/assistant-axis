@@ -1,0 +1,167 @@
+{
+  "batch_id": "m3_pilot_1_relation_h55_smoke",
+  "mode": "relation_only",
+  "git_sha": "2ad1799",
+  "allow_dirty": false,
+  "dirty_check": {
+    "paths": [
+      "assistant_axis/gapgen",
+      "data_analysis/gap_generation",
+      "assistant_axis/judge.py",
+      "assistant_axis/judge_pricing.py",
+      "assistant_axis/entity_id.py",
+      "assistant_axis/atomic_io.py",
+      "data/candidates/validation",
+      "reports/trait_gap_generation/rubrics",
+      "pyproject.toml",
+      "uv.lock"
+    ],
+    "dirty": [],
+    "note": null
+  },
+  "argv": [
+    "score",
+    "--relation-only",
+    "--from-batch",
+    "m3_pilot_1",
+    "--batch-id",
+    "m3_pilot_1_relation_h55_smoke",
+    "--transport",
+    "live",
+    "--budget-usd",
+    "0.5",
+    "--keys",
+    "abominable#1",
+    "abstinent#1",
+    "accepting#1",
+    "active#1",
+    "active_participant#1",
+    "adaptive#1",
+    "affirming#1",
+    "affluent#1",
+    "alienating#1",
+    "ambiguity_intolerant#1",
+    "amicable#1",
+    "animal_loving#1",
+    "anti_essentialist#1",
+    "anti_gay#1",
+    "anti_intellectual#1",
+    "anti_science#1",
+    "apostate#1",
+    "appreciative#1",
+    "argumentative#1",
+    "arresting#1"
+  ],
+  "plan": {
+    "mode": "relation_only",
+    "from_batch": "m3_pilot_1",
+    "n_candidates": 20,
+    "n_to_relation": 20,
+    "not_reached": {},
+    "skipped": {},
+    "transport": "live",
+    "relation_model": "claude-haiku-5-5",
+    "rules": {
+      "name": "m3_rules_2",
+      "version": 2,
+      "cover_on_opus_check": true,
+      "both_similar_excluded": true,
+      "pair_flag_grey": false,
+      "renamed_from_covers": false,
+      "separator_blind": true,
+      "cosine_floor": 0.25
+    },
+    "corpus_files": {
+      "corpus_at": "source",
+      "source_batch": "m3_pilot_1",
+      "git_sha": "53b3d07",
+      "source_was_dirty": false,
+      "n_trait_files": 663,
+      "data_dir": "/tmp/claude-501/m3_corpus_53b3d07__yi60b56/data"
+    },
+    "listed_mean": 17.1,
+    "like_for_like": {
+      "n": 20,
+      "identical": 20,
+      "not_on_record": [],
+      "source_models": {
+        "claude-haiku-4-5-20251001": 20
+      },
+      "n_differ": 0
+    }
+  },
+  "transport": "live",
+  "transport_reason": "--transport live",
+  "estimate_usd": 0.0192,
+  "estimate_lines": [
+    "relation call on Haiku 5.5 (output measured, thinking included): 20 x (1,733, 1,308) tokens at claude-haiku-5-5 rates = $0.017",
+    "unsure re-ask (5% of candidates, 2 traits): 1 x (629, 143) tokens at claude-sonnet-5-5 rates = $0.003"
+  ],
+  "budget_usd": 0.5,
+  "cap_usd": 0.5,
+  "confirmed_by": null,
+  "rubrics": {
+    "overlap": {
+      "name": "overlap_concept",
+      "version": 6,
+      "sha256": "b3eff18fb946928517183af0244acec2d35dba0ab0bd9c57f83c7a06ac3c9fd0"
+    },
+    "relation": {
+      "name": "relation",
+      "version": 1,
+      "sha256": "b6b11f8cfcb0faafdac4a040087356ecb13d410e9bc309597d7833a96110d70f"
+    }
+  },
+  "models": {
+    "relation": "claude-haiku-5-5",
+    "relation_unsure": "claude-sonnet-5-5"
+  },
+  "settings": {
+    "config_version": "2026-10-02",
+    "k": 10,
+    "representation": "w20",
+    "variant": "centred",
+    "query_form": "gloss_w14",
+    "embedding_model": "text-embedding-3-large",
+    "relation_max_tokens": 4096,
+    "temperature": 0.0,
+    "concurrency": 8,
+    "ask_attempts": 2,
+    "relation_seed": "m3_pilot_1",
+    "cosine_floor": 0.25
+  },
+  "rules": {
+    "name": "m3_rules_2",
+    "version": 2,
+    "cover_on_opus_check": true,
+    "both_similar_excluded": true,
+    "pair_flag_grey": false,
+    "renamed_from_covers": false,
+    "separator_blind": true,
+    "cosine_floor": 0.25
+  },
+  "corpus": {
+    "corpus_at": "source",
+    "source_batch": "m3_pilot_1",
+    "git_sha": "53b3d07",
+    "source_was_dirty": false,
+    "n_trait_files": 663,
+    "data_dir": "/tmp/claude-501/m3_corpus_53b3d07__yi60b56/data"
+  },
+  "from_batch": "m3_pilot_1",
+  "like_for_like": {
+    "n": 20,
+    "identical": 20,
+    "differ": [],
+    "not_on_record": [],
+    "source_models": {
+      "claude-haiku-4-5-20251001": 20
+    }
+  },
+  "resumed": false,
+  "started_at": "2026-10-08T01:36:17+00:00",
+  "finished_at": "2026-10-08T01:36:38+00:00",
+  "cost_usd": 0.0294,
+  "status": 0,
+  "stopped_by_error": null
+}
