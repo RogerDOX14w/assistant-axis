@@ -259,6 +259,40 @@ $0.0036 a word against $0.008; the overlap call stays on Sonnet.  M3 decision 16
 model open for re-examination on the first real generator's output.  Spend on the whole Haiku 5.5
 question: $29.64 of API, $23.75 of it the Opus reference.
 
+## The switch, built (2026-10-08)
+
+Roger agreed the final recommendation ("OK, agreed") and an Opus agent built it to
+[coding_plan_haiku55.md](./coding_plan_haiku55.md), "The switch" (commits 167c61a, 06e44be, 2ad1799,
+cd94429; M3 decision 17).  Every Haiku default of the subproject is now `claude-haiku-5-5`: the filter
+(`filter.DEFAULT_MODEL`, `split_runner.DEFAULT_MODEL`), the states pass, the plain-reading check, the M2
+paraphrase check, and the M3 relation call (`novelty_runner.RELATION_MODEL`); the unsure re-ask, the
+second opinion and the comparison stay on Sonnet 5.5, the overlap call on Sonnet then Opus.  The
+verdict step reads three times by default on Haiku 5.5 (`--readings`, 1 for any other model) and
+combines them as decided: turned away only if every reading turns the word away, otherwise the most
+common remaining outcome, a three-way split going to *trait* if any reading said so and otherwise to
+the first reading that did not turn the word away (the agent's reading of a brief wording that would
+have let a first-reading turn-away win; it is the right one); a reading that fails to parse drops out
+of the vote.  Each reading is recorded with its own cache key, the row carries a `verdict_readings`
+block (every reading's outcome, the vote, the winner, rescues), and a run of one reading has exactly
+the old record shape.  The gloss rubric is draft 4 (version 4): the membership line.  The estimates
+use Haiku 5.5's measured tokens.  `score --redecide --write-registry` and `promote-redecide` write a
+re-decided run's blocks to the registry; `m3_pilot_1_r2`'s 460 blocks are written (53 grey → covered,
+23 grey → new, 4 covered → new), idempotently.  Two guards came with it: a resume refuses a changed
+model or reading count, and a re-decision uses its source run's relation model, since relation answers
+are matched by model.
+
+Smoke runs ($0.47): the filter on the 99 test words with the new defaults matched the reference join
+on 82 of 99 (the one-reading runs: 86 and 80; the three readings alone 80, 78, 82); all three readings
+agreed on 79 words; 16 words were rescued by the rule, 10 rightly by the reference, 6 not; 5 traits
+fully turned away (deterministic, disciplinary, economic, illegal, watertight).  Membership glosses
+under draft 4: 3 of 9 still past 18 words (median 11, was 17); the other glosses unchanged, all in
+band.  The relation call on 20 pilot candidates resolved to the new default and reproduced the earlier
+one-reading answers 89%.  Haiku 5.5 came to $0.0027 a word for the verdict step's three readings.
+Left for later: the filter's longer rubrics could now be cached (5.5's minimum is 512 tokens); the
+estimate's proportions (primary readings, same-sense checks, second opinions, unsure re-asks) still
+carry 4.5's shares and over-state 5.5 by about a third; the other rubric files' "Model" header lines
+still name Haiku 4.5.
+
 ## Files
 
 Runs: [h55_split_test_words](../../data/candidates/filter/h55_split_test_words/) and `_rep2`,
