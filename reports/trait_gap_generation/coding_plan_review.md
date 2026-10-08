@@ -1,7 +1,7 @@
 # Coding plan: candidate groups and the review app (R1 graph, R2 app)
 
-Written by Fable, 2026-10-08, from the brainstorm with Roger after the first two generators' pilots.  Roger
-reviews this plan; his comments go into this file.  Terms: the [glossary](./glossary.md).
+Written by Fable, 2026-10-08, from the brainstorm with Roger after the first two generators' pilots.  **Reviewed
+by Roger 2026-10-08** (decisions 5 and 7 confirmed, 10 and 11 agreed); R1 coding started the same day.  Terms: the [glossary](./glossary.md).
 
 **The problem.**  M3 ([coding_plan_platform.md](./coding_plan_platform.md), "Interface as built") judges every
 candidate against the corpus only, so near-synonyms proposed together all come out `new` side by side: among the
