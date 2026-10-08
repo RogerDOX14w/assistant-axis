@@ -761,3 +761,15 @@ check's $5 cap plus this update's $3).
 
 - [map_spotcheck.md](./map_spotcheck.md) is still the first map's spot check.
 - The religious-head placements above are reported, not changed.
+
+## Update after chunk 6 (2026-10-09, coordinator)
+
+Chunk 6 (commits 5026ca2, de5f1b4) renamed seven queue labels before seeding and added three new ones. `map --update`
+dropped the seven old stems (`blonde`, `brunette`, `grey_haired`, `heavyset`, `in_pain`, `short_sighted`, `slender`),
+added ten (`blond`, `brown_haired`, `fat`, `gray_eyed`, `gray_haired`, `in_chronic_pain`, `muscular`, `nearsighted`,
+`slight`, `thin`) and re-placed 19 labels whose text changed (found by the recorded text hashes; 1,126 unchanged).
+Of the 29 re-placed labels, 14 were not `agree` and went through the check (`place-check --unchecked-only --resume`);
+four newly in-scope heads (192 Size among them) were rated by the head-scope check.  Cost about $0.09 (placement) and
+$0.0005 (head scope).  Coverage after the synopsis pairing and this update: 279 covered, 51 partly, 158 uncovered
+(10 queued only), 189 not character; gap classes pair completion 28, pair empty 60, singleton empty 60; the full
+harvest dry run takes 464 distinct words from 277 selected heads, with 104 pair candidates and 25 partner hints.

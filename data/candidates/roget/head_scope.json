@@ -10,23 +10,23 @@
   "batch_size": 20,
   "max_adjectives": 20,
   "summary": {
-   "n_scope": 675,
-   "n_rated": 586,
+   "n_scope": 677,
+   "n_rated": 588,
    "n_skipped_no_adjectives": 89,
    "n_unrated": 0,
    "by_rating": {
-    "0": 188,
+    "0": 189,
     "1": 234,
-    "2": 164
+    "2": 165
    },
    "by_class": {
     "I": {
      "0": 6,
      "1": 26,
-     "2": 8
+     "2": 9
     },
     "II": {
-     "0": 10,
+     "0": 11,
      "1": 17,
      "2": 2
     },
@@ -85,6 +85,7 @@
 {"id":"156","title":"Chance","class":"I","class_title":"Words expressing abstract relations","section":"VIII. Causation","n_adjectives":12,"n_shown":12,"rating":0,"reason":"Describes chance events and things; only casual loosely describes a person's manner.","model":"claude-haiku-5-5","rubric_version":2,"skipped":null,"error":null},
 {"id":"157","title":"Power","class":"I","class_title":"Words expressing abstract relations","section":"VIII. Causation","n_adjectives":18,"n_shown":18,"rating":1,"reason":"Mixed: capable, able, competent and powerful describe people, while most others describe things or arguments.","model":"claude-haiku-5-5","rubric_version":2,"skipped":null,"error":null},
 {"id":"158","title":"Impotence","class":"I","class_title":"Words expressing abstract relations","section":"VIII. Causation","n_adjectives":53,"n_shown":20,"rating":2,"reason":"Many describe a person's failings or unfitness: incompetent, inept, incapable, unqualified and harmless.","model":"claude-haiku-5-5","rubric_version":2,"skipped":null,"error":null},
+{"id":"159","title":"Strength","class":"I","class_title":"Words expressing abstract relations","section":"VIII. Causation","n_adjectives":66,"n_shown":20,"rating":2,"reason":"Many adjectives (strong, vigorous, robust, hardy, powerful, invincible, stout, sturdy) routinely describe a person's constitution or character, so most can describe what someone is like.","model":"claude-haiku-5-5","rubric_version":2,"skipped":null,"error":null},
 {"id":"160","title":"Weakness","class":"I","class_title":"Words expressing abstract relations","section":"VIII. Causation","n_adjectives":65,"n_shown":20,"rating":2,"reason":"Most describe a person's frailty or temperament: weak, feeble, nervous, soft, effeminate and frail.","model":"claude-haiku-5-5","rubric_version":2,"skipped":null,"error":null},
 {"id":"162","title":"Destruction","class":"I","class_title":"Words expressing abstract relations","section":"VIII. Causation","n_adjectives":16,"n_shown":16,"rating":1,"reason":"Mostly describes destructive events or things, though destructive, subversive and incendiary can describe a person.","model":"claude-haiku-5-5","rubric_version":2,"skipped":null,"error":null},
 {"id":"170","title":"Agency","class":"I","class_title":"Words expressing abstract relations","section":"VIII. Causation","n_adjectives":14,"n_shown":14,"rating":1,"reason":"Mostly describes things in operation, though practical and efficient can describe a person's skills.","model":"claude-haiku-5-5","rubric_version":2,"skipped":null,"error":null},
@@ -97,6 +98,7 @@
 {"id":"184","title":"Location","class":"II","class_title":"Words relating to space","section":"I. Space in general","n_adjectives":10,"n_shown":10,"rating":0,"reason":"Adjectives like placed, situate, imbedded and moored describe the position of things, not what a person is like.","model":"claude-haiku-5-5","rubric_version":2,"skipped":null,"error":null},
 {"id":"188","title":"Inhabitant","class":"II","class_title":"Words relating to space","section":"I. Space in general","n_adjectives":20,"n_shown":20,"rating":2,"reason":"Most adjectives name a person's origin, nationality or domicile (native, Irish, Welsh, naturalized, domiciled), which are group memberships.","model":"claude-haiku-5-5","rubric_version":2,"skipped":null,"error":null},
 {"id":"189","title":"Abode","class":"II","class_title":"Words relating to space","section":"I. Space in general","n_adjectives":9,"n_shown":9,"rating":1,"reason":"Provincial, rustic, cosmopolitan and rural can describe a person's outlook, but palatial, suburban and metropolitan describe places.","model":"claude-haiku-5-5","rubric_version":2,"skipped":null,"error":null},
+{"id":"192","title":"Size","class":"II","class_title":"Words relating to space","section":"II. Dimensions","n_adjectives":98,"n_shown":20,"rating":0,"reason":"Nearly all adjectives describe size, bulk or build (big, massive, fat, obese, plump), which is a person's looks rather than character, and the rest describe things or quantities.","model":"claude-haiku-5-5","rubric_version":2,"skipped":null,"error":null},
 {"id":"193","title":"Littleness","class":"II","class_title":"Words relating to space","section":"II. Dimensions","n_adjectives":50,"n_shown":20,"rating":1,"reason":"Most terms describe physical smallness, though petty and puny can describe a person's conduct or character.","model":"claude-haiku-5-5","rubric_version":2,"skipped":null,"error":null},
 {"id":"201","title":"Shortness","class":"II","class_title":"Words relating to space","section":"II. Dimensions","n_adjectives":20,"n_shown":20,"rating":1,"reason":"Mostly physical build (stocky, dumpy, squat) or length of things; curt alone describes a person's manner.","model":"claude-haiku-5-5","rubric_version":2,"skipped":null,"error":null},
 {"id":"203","title":"Narrowness. Thinness","class":"II","class_title":"Words relating to space","section":"II. Dimensions","n_adjectives":38,"n_shown":20,"rating":0,"reason":"Adjectives like slender, lean, gaunt and emaciated describe physical build or things, not character.","model":"claude-haiku-5-5","rubric_version":2,"skipped":null,"error":null},
@@ -140,7 +142,6 @@
 {"id":"374","title":"Woman","class":"III","class_title":"Words relating to matter","section":"III. Organic matter","n_adjectives":14,"n_shown":14,"rating":1,"reason":"Ladylike, womanly and effeminate describe a person's manner, but female, she- and the pronouns are sex markers or pronouns.","model":"claude-haiku-5-5","rubric_version":2,"skipped":null,"error":null},
 {"id":"374a","title":"Sexuality","class":"III","class_title":"Words relating to matter","section":"III. Organic matter","n_adjectives":19,"n_shown":19,"rating":2,"reason":"Hot-blooded, lusty, libidinous, randy, homosexual, gay and bisexual describe a person's sexual nature or orientation, though several words describe acts or things.","model":"claude-haiku-5-5","rubric_version":2,"skipped":null,"error":null},
 {"id":"376","title":"Physical Insensibility","class":"III","class_title":"Words relating to matter","section":"III. Organic matter","n_adjectives":18,"n_shown":18,"rating":1,"reason":"Callous, unfeeling, hardened, thick-skinned and obtuse describe a person's temperament, while numb, comatose and paralytic describe physical states.","model":"claude-haiku-5-5","rubric_version":2,"skipped":null,"error":null},
-{"id":"378","title":"Physical Pain","class":"III","class_title":"Words relating to matter","section":"III. Organic matter","n_adjectives":6,"n_shown":6,"rating":0,"reason":"Pained, aching, sore and gouty describe a passing bodily state, not a person's nature.","model":"claude-haiku-5-5","rubric_version":2,"skipped":null,"error":null},
 {"id":"391","title":"Insipidity","class":"III","class_title":"Words relating to matter","section":"III. Organic matter","n_adjectives":13,"n_shown":13,"rating":1,"reason":"Wishy-washy, vapid, insipid, weak and mild can describe a dull or spineless person, but bland, stale and flat mostly describe food or things.","model":"claude-haiku-5-5","rubric_version":2,"skipped":null,"error":null},
 {"id":"392b","title":"Bitterness","class":"III","class_title":"Words relating to matter","section":"III. Organic matter","n_adjectives":5,"n_shown":5,"rating":1,"reason":"Bitter and acerbic can describe a resentful or sharp-tongued person, but acrid and acerb mostly describe tastes and substances.","model":"claude-haiku-5-5","rubric_version":2,"skipped":null,"error":null},
 {"id":"403","title":"Silence","class":"III","class_title":"Words relating to matter","section":"III. Organic matter","n_adjectives":11,"n_shown":11,"rating":1,"reason":"Silent and solemn can describe a taciturn or grave person, but most of the words describe sound, stillness or places.","model":"claude-haiku-5-5","rubric_version":2,"skipped":null,"error":null},
@@ -148,7 +149,8 @@
 {"id":"422","title":"Dimness","class":"III","class_title":"Words relating to matter","section":"III. Organic matter","n_adjectives":20,"n_shown":20,"rating":0,"reason":"Dim, dingy and lackluster describe light and appearance of things, with only a stretch to a dull-witted person.","model":"claude-haiku-5-5","rubric_version":2,"skipped":null,"error":null},
 {"id":"425","title":"Transparency","class":"III","class_title":"Words relating to matter","section":"III. Organic matter","n_adjectives":14,"n_shown":14,"rating":1,"reason":"Transparent, serene and clear mostly describe substances and light, with only figurative use for a person.","model":"claude-haiku-5-5","rubric_version":2,"skipped":null,"error":null},
 {"id":"426","title":"Opacity","class":"III","class_title":"Words relating to matter","section":"III. Organic matter","n_adjectives":14,"n_shown":14,"rating":0,"reason":"Opaque, turbid, murky and hazy describe substances, air and light, not people.","model":"claude-haiku-5-5","rubric_version":2,"skipped":null,"error":null},
-{"id":"433","title":"Brown","class":"III","class_title":"Words relating to matter","section":"III. Organic matter","n_adjectives":22,"n_shown":20,"rating":0,"reason":"Brown shades such as tawny, auburn and chestnut describe colours of hair or things, not a person's nature.","model":"claude-haiku-5-5","rubric_version":2,"skipped":null,"error":null},
+{"id":"429","title":"Achromatism","class":"III","class_title":"Words relating to matter","section":"III. Organic matter","n_adjectives":32,"n_shown":20,"rating":0,"reason":"These adjectives describe colour and complexion (pale, pallid, ashen, sallow, wan, ghastly), which is a person's looks, not what sort of person they are.","model":"claude-haiku-5-5","rubric_version":2,"skipped":null,"error":null},
+{"id":"430","title":"Whiteness","class":"III","class_title":"Words relating to matter","section":"III. Organic matter","n_adjectives":25,"n_shown":20,"rating":0,"reason":"These adjectives describe whiteness or colour (white, snowy, hoary, blond, fair), and 'candid' here means white, not frank, so none describe a person's nature.","model":"claude-haiku-5-5","rubric_version":2,"skipped":null,"error":null},
 {"id":"441","title":"Vision","class":"III","class_title":"Words relating to matter","section":"III. Organic matter","n_adjectives":12,"n_shown":12,"rating":0,"reason":"Keen-eyed, hawk-eyed and eagle-eyed describe physical sight, and the rest are purely about vision.","model":"claude-haiku-5-5","rubric_version":2,"skipped":null,"error":null},
 {"id":"442","title":"Blindness","class":"III","class_title":"Words relating to matter","section":"III. Organic matter","n_adjectives":15,"n_shown":15,"rating":0,"reason":"Blind, sightless and wall-eyed describe a physical condition, not a person's nature.","model":"claude-haiku-5-5","rubric_version":2,"skipped":null,"error":null},
 {"id":"447","title":"Invisibility","class":"III","class_title":"Words relating to matter","section":"III. Organic matter","n_adjectives":31,"n_shown":20,"rating":0,"reason":"Invisible, inconspicuous and obscure describe states of being seen or things, not a person's character.","model":"claude-haiku-5-5","rubric_version":2,"skipped":null,"error":null},
@@ -730,21 +732,21 @@
 {"id":"1000","title":"Temple","class":"VI","class_title":"Words relating to the sentient and moral powers","section":"V. Religious affections","n_adjectives":5,"n_shown":5,"rating":1,"reason":"'Monastic' and 'cloistered' can describe a person's way of life, while the rest describe buildings or institutions.","model":"claude-haiku-5-5","rubric_version":2,"skipped":null,"error":null}
  ],
   "last_run": {
-   "at": "2026-10-08T21:25:12+00:00",
+   "at": "2026-10-08T23:37:58+00:00",
    "n_calls": 1,
    "n_retries": 0,
-   "cost_usd": 0.000111,
+   "cost_usd": 0.000751,
    "estimate": {
     "n_calls": 1,
-    "in_tok": 764,
-    "out_tok": 255,
-    "usd": 0.0002
+    "in_tok": 1226,
+    "out_tok": 720,
+    "usd": 0.0005
    },
    "cache_system": false,
    "concurrency": 4,
    "parse_rate": [
-    1,
-    1
+    4,
+    4
    ],
    "stopped_by_budget": false
   }
@@ -752,12 +754,12 @@
  "_provenance": {
   "schema_version": "1.0",
   "produced_by": {
-   "cmd": "uv run python data_analysis/gap_generation/roget_generate.py head-scope --budget-usd 0.05",
-   "git_sha": "2da36ac+dirty",
+   "cmd": "uv run python data_analysis/gap_generation/roget_generate.py head-scope --budget-usd 0.25",
+   "git_sha": "9e16f32+dirty",
    "author": "Roger Dearnaley",
    "title": "Roget head scope (workstream 2)"
   },
-  "produced_at": "2026-10-08T21:25:12+00:00",
+  "produced_at": "2026-10-08T23:37:58+00:00",
   "inputs": [
    {
     "dep_key": "roget_heads",
@@ -771,19 +773,19 @@
    {
     "dep_key": "head_pairs",
     "path": "data/candidates/roget/head_pairs.json",
-    "fingerprint": "v1:2026-10-08T03:48:51+00:00@311066",
+    "fingerprint": "v1:2026-10-08T23:28:04+00:00@426714",
     "kind": "file",
     "dataset_id": null,
-    "last_modified_at": "2026-10-08T03:48:51+00:00",
+    "last_modified_at": "2026-10-08T23:28:04+00:00",
     "extras": {}
    },
    {
     "dep_key": "label_heads",
     "path": "data/candidates/roget/label_heads.json",
-    "fingerprint": "v1:2026-10-08T21:23:07+00:00@1423972",
+    "fingerprint": "v1:2026-10-08T23:36:44+00:00@1443833",
     "kind": "file",
     "dataset_id": null,
-    "last_modified_at": "2026-10-08T21:23:07+00:00",
+    "last_modified_at": "2026-10-08T23:36:44+00:00",
     "extras": {}
    },
    {
@@ -799,6 +801,6 @@
     }
    }
   ],
-  "inputs_sha256": "f781a69f81ac0d511ede62ac300b21e9420eefb6e4b01aca5033827179bbb6dc"
+  "inputs_sha256": "370239ba030b3d17be8280833d951800597b75b9a18981007aa2e93ecee3724f"
  }
 }
