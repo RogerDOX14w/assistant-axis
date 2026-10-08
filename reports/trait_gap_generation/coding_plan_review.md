@@ -65,6 +65,20 @@ dropped in the M3 redesign; this plan replaces it.
     keeps about 98% of the 4-edges and, with k = 10, halves the overlap stage against the worst case.  The
     relation call still sees every retrieved neighbour (it is cheap and types the opposed edges).
 
+12. **Two tiers of groups** (Roger, 2026-10-08: "SG", after the R1 pilot).  The pilot
+    ([readout.md](../../data/candidates/review/review_pilots_1/readout.md), $1.51) found rating-4 cliques too rare
+    to save review time: 325 new candidates gave 19 cliques (18 pairs, one triple) and 290 singletons, and the
+    plan's own example `godless` / `irreligious` / `nonreligious` reads 3.  At 3 the recorded readings give 57
+    cliques covering 103 candidates (42 pairs, 12 triples, 3 of four: `frigid` / `impersonal` / `unaffable` /
+    `warmthless`, `balky` / `headstrong` / `incompliant` / `indocile`, `affectionate` / `fond` / `loving`, ...).
+    So: **merged groups** are cliques of 4-edges (both directions 4), merged by default as decision 2 says;
+    **proposed groups** are cliques of 3-edges (both directions 3 or above) not already inside a merged group,
+    pre-assembled as the starting group when their first member is opened but not merged until Roger confirms
+    with one key.  Rubric A's 3 is "the same concept, differing only in scope, degree or emphasis", which is the
+    choose-the-best-word case; a 2 stays a neighbour.  Overlapping proposed groups stay overlapping, as cliques
+    do.  Roughly two-thirds of candidates remain singletons because they are distinct; for those the card's
+    neighbour list does the work.
+
 Out of scope: community detection (Leiden, HDBSCAN) as a looser default partition (noted as a later option if
 cliques prove too small); changes to M3; reviewing the holding lists; any change to the seed-queue format beyond
 the synonym notes below.
@@ -125,6 +139,17 @@ calls per similar edge at M3's measured Sonnet share and the cut-off-4 Opus shar
 `usage.json`); the budget cap and the $20 line as in M3 (`gapgen.cost.confirm_or_abort`).  `--resume` resends
 nothing answered.  `usage.json` beside the graph.
 
+**R1 as built (2026-10-08, commits c74a649, 20682f9, d065b40).**  Deviations accepted: the second direction is
+read only when the first decides the edge (was: always both), `mixed` and `unsure` relations go to the overlap
+call like `similar`, covered candidates are greyed nodes with no edges, `build_graph` takes a prepared plan and
+the runner, a second cost check runs after the relation calls.  The runner is used through a `ReviewRunner`
+subclass (no change to M3's files), coupled to the runner's `_relation_call`, `_wave` and `_overlap_call`.
+**Change for decision 12** (built with R2): a `--proposed-cut-off` (default 3) beside the fixed merged cut-off 4;
+the second direction is read whenever the first reads at the proposed cut-off or above; `graph.json` gains
+`proposed_groups` (maximal cliques of 3-edges, minus any group wholly inside a merged clique) beside `cliques`
+(renamed in the schema's description, not the key, to "merged groups"); `build --resume` on `review_pilots_1`
+reads only the missing second directions (about 65 pairs, about $0.30).
+
 ## 3. R2: the review app (`review_app`)
 
 **Shape.**  `assistant_axis/gapgen/review_app/`: `server.py` (FastAPI; routes below), `decisions.py` (the event
@@ -169,7 +194,12 @@ with `gap_registry.py promote --keys` (the existing path), its seed-queue entry 
 and `defer` set the status as named.  `apply` is idempotent (a second run changes nothing) and `--dry-run`
 prints the registry writes.
 
-**Keys.**  `j` / `k` next and previous member, `x` drop, `m` merge in the highlighted neighbour, `n` nominate,
+**Groups on the card.**  Opening a term starts from its merged group if it has one (already merged); otherwise
+from its largest proposed group, shown pre-assembled with a "proposed" mark, where `Enter` on the group header
+(or `g`) accepts it as the working group and `x` drops members first; a term in no group starts alone.  The queue
+counts merged groups, proposed groups and singletons separately.
+
+**Keys.**  `g` accept the proposed group, `j` / `k` next and previous member, `x` drop, `m` merge in the highlighted neighbour, `n` nominate,
 `Enter` resolve with promote, `c` resolve as merge into the highlighted corpus trait, `p` park, `r` reject, `d`
 defer, `a` start the antonym group, `u` undo, `/` find a term.  The page shows the queue's remaining counts
 at all times.
@@ -195,6 +225,9 @@ R2 (`assistant_axis/tests/test_gapgen_review_app.py`, `TestClient`):
 - `apply` writes the review blocks, calls promote once per resolved group with the nominated key, adds
   `also_proposed`, marks the rest `merged_into`, is idempotent on a second run, and writes nothing on `--dry-run`;
 - `merge_into` a corpus trait adds the labels to the synonyms shortlist.
+
+- a proposed group opens pre-assembled but unmerged; `g` merges it; dropping a member before `g` merges the rest;
+  a term in two proposed groups offers the larger and lists the other as a neighbour group.
 
 Existing suites stay green: `test_gapgen_registry.py`, the novelty and recovery suites, `check_arrangements.py
 --quiet`, `sync_entity_lists.py --check`.
