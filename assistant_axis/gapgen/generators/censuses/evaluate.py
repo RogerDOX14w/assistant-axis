@@ -2,7 +2,12 @@
 
 * :func:`string_ceiling`: how many corpus trait stems appear in the TDA, in Allport-Odbert and
   in either, as strings (plan sections 6 and 8), and how many of those the generator's own
-  eligibility rule submits (``submitted_of_matched``, the "keep 95% of existing labels" policy).
+  eligibility rule submits (``submitted_of_matched``, the "keep 95% of existing labels" policy,
+  the one gate: :data:`GATE_SUBMITTED_OF_MATCHED`).  The ceiling itself is reported against two
+  guidelines, never gates (Roger, 2026-10-09, QUESTIONS 36): the share of the corpus without its
+  parenthesised labels ("conscientious (HEXACO)") found in either list, aim
+  :data:`GUIDE_UNION_NO_PAREN`, and the share of single-word traits, aim
+  :data:`GUIDE_UNION_SINGLE_WORD`.  Both fall as the corpus adds multi-word and modern labels.
 * :func:`known_label_pass`: of the corpus labels a run submitted, the fraction the platform's
   filter passes (verdict ``trait``, or ``tagged`` with ``state`` or ``physical``); available
   once the filter has run on the run's rows.
@@ -23,6 +28,11 @@ from typing import Iterable, Mapping, Optional, Sequence
 from .ingest import TableRow
 
 PASS_TAGS = ("state", "physical")
+#: The one gate on the census lists (plan, review amendments of 2026-09-24).
+GATE_SUBMITTED_OF_MATCHED = 0.95
+#: Guidelines, reported and never enforced (Roger, 2026-10-09, QUESTIONS 36).
+GUIDE_UNION_NO_PAREN = 0.50
+GUIDE_UNION_SINGLE_WORD = 0.75
 TENDENCY_RE = re.compile(r"\b(general tendency|tendency to|tendency toward|disposition|disposed to|prone to|"
                          r"habitually|characteristically)\b", re.IGNORECASE)
 
@@ -43,6 +53,9 @@ class Ceiling:
     matched_ineligible: list[str] = field(default_factory=list)
     n_queue: int = 0
     n_queue_union: int = 0
+    n_paren: int = 0                          # corpus traits whose label has a "(...)" qualifier
+    union_no_paren: Optional[float] = None    # share of the rest found in either list
+    guidelines: dict = field(default_factory=dict)
 
     def as_dict(self) -> dict:
         return asdict(self)
@@ -52,9 +65,14 @@ def _frac(a: int, b: int) -> float:
     return round(a / b, 4) if b else 0.0
 
 
+def _guide(value: Optional[float], aim: float) -> dict:
+    return {"value": value, "aim": aim, "met": None if value is None else value >= aim}
+
+
 def string_ceiling(table: Sequence[TableRow], corpus_stems: Iterable[str],
-                   queue_stems: Iterable[str] = ()) -> Ceiling:
+                   queue_stems: Iterable[str] = (), paren_stems: Iterable[str] = ()) -> Ceiling:
     corpus = set(corpus_stems)
+    paren = set(paren_stems) & corpus
     queue = set(queue_stems) - corpus
     tda = {r.stem for r in table if r.stem and r.tda}
     allport = {r.stem for r in table if r.stem and r.allport}
@@ -68,7 +86,10 @@ def string_ceiling(table: Sequence[TableRow], corpus_stems: Iterable[str],
         allport=_frac(len(corpus & allport), len(corpus)), union=_frac(len(matched), len(corpus)),
         union_single_word=_frac(len(single & union), len(single)),
         n_matched_eligible=len(matched & eligible), submitted_of_matched=_frac(len(matched & eligible), len(matched)),
-        matched_ineligible=sorted(matched - eligible), n_queue=len(queue), n_queue_union=len(queue & union))
+        matched_ineligible=sorted(matched - eligible), n_queue=len(queue), n_queue_union=len(queue & union),
+        n_paren=len(paren), union_no_paren=_frac(len(matched - paren), len(corpus - paren)),
+        guidelines={"union_no_paren": _guide(_frac(len(matched - paren), len(corpus - paren)), GUIDE_UNION_NO_PAREN),
+                    "union_single_word": _guide(_frac(len(single & union), len(single)), GUIDE_UNION_SINGLE_WORD)})
 
 
 @dataclass

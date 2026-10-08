@@ -5,6 +5,7 @@ their zero generator cost, the 95% keep-existing-labels policy.  First measureme
 rates, recovery) are report-and-decide, read by ``census_generator.py report``."""
 import json
 import math
+import warnings
 from dataclasses import fields
 
 import pytest
@@ -38,7 +39,20 @@ def test_table_shape_and_policy():
     assert ranks == list(range(1, len(ranks) + 1)) and tda_ineligible == 0
     counts = json.loads(INGEST_COUNTS_PATH.read_text())
     assert counts["n_tda"] == 2818
-    assert counts["ceiling"]["submitted_of_matched"] >= 0.95
+    assert counts["ceiling"]["submitted_of_matched"] >= 0.95          # the one gate
+
+
+def test_ceiling_guidelines_are_reported_not_enforced():
+    """Roger, 2026-10-09 (QUESTIONS 36): the string ceiling is held to two guidelines, either list without the
+    parenthesised labels at 50% and single-word traits at 75%; missing one warns and never fails."""
+    if not INGEST_COUNTS_PATH.exists():
+        pytest.skip("no ingest counts yet")
+    g = json.loads(INGEST_COUNTS_PATH.read_text())["ceiling"].get("guidelines")
+    if not g:
+        pytest.skip("ingest counts written before the guidelines existed")
+    for name, x in g.items():
+        if x["met"] is False:
+            warnings.warn(f"census ceiling guideline {name}: {x['value']:.1%} against an aim of {x['aim']:.0%}")
 
 
 @pytest.mark.parametrize("rdir", RUN_DIRS, ids=[p.name for p in RUN_DIRS])

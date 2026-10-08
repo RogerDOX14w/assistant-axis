@@ -124,3 +124,21 @@ def test_evaluate_run_after_filter_and_readout(run_env, tmp_path):
     assert trait_links
     assert Path(os.path.normpath(doc.parent / trait_links[0])) == REPO_ROOT / "data/traits/instructions/kind.json"
     assert "[candidates.jsonl](candidates.jsonl)" in md
+
+
+def test_string_ceiling_paren_exclusion_and_guidelines():
+    """QUESTIONS 36: the parenthesised labels are left out of the guideline figure, and the guidelines are
+    reported with their aims; the single-word figure ignores the parenthesised stems (all are multi-word)."""
+    from assistant_axis.gapgen.generators.censuses.ingest import TableRow
+    import dataclasses
+    proto = {f.name: None for f in dataclasses.fields(TableRow)}
+    def row(stem, tda=True):
+        r = dict(proto); r.update(stem=stem, tda=tda, allport=False, eligible=True)
+        return TableRow(**{k: v for k, v in r.items()})
+    rows = [row("kind"), row("bold")]
+    corpus = {"kind", "bold", "shy", "agreeable_big_five", "full_price_shopper"}
+    c = E.string_ceiling(rows, corpus, paren_stems={"agreeable_big_five", "not_in_corpus"})
+    assert c.n_paren == 1 and abs(c.union_no_paren - 2 / 4) < 1e-3
+    assert c.guidelines["union_no_paren"] == {"value": c.union_no_paren, "aim": E.GUIDE_UNION_NO_PAREN, "met": True}
+    assert abs(c.union_single_word - 2 / 3) < 1e-3 and c.guidelines["union_single_word"]["met"] is False
+    assert E.GATE_SUBMITTED_OF_MATCHED == 0.95 and c.submitted_of_matched == 1.0

@@ -21,6 +21,21 @@ def corpus_trait_stems(data_dir: Optional[Path] = None) -> set[str]:
     return {p.stem for p in d.glob("*.json")} if d.exists() else set()
 
 
+def corpus_paren_stems(data_dir: Optional[Path] = None) -> set[str]:
+    """Stems of the corpus traits whose ``positive_label`` carries a parenthesised qualifier
+    ("conscientious (HEXACO)"), for the ceiling guideline that leaves them out."""
+    d = Path(data_dir or default_data_dir()) / "traits" / "instructions"
+    out: set[str] = set()
+    for p in sorted(d.glob("*.json")) if d.exists() else []:
+        try:
+            doc = json.loads(p.read_text(encoding="utf-8"))
+        except (OSError, json.JSONDecodeError):
+            continue
+        if "(" in str(doc.get("positive_label") or ""):
+            out.add(p.stem)
+    return out
+
+
 def corpus_renamed_from(data_dir: Optional[Path] = None) -> dict[str, str]:
     """Old stem -> current stem, from the trait files' ``renamed_from`` fields."""
     d = Path(data_dir or default_data_dir()) / "traits" / "instructions"

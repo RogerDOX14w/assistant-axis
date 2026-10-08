@@ -36,7 +36,7 @@ from assistant_axis.gapgen import paths  # noqa: E402
 from assistant_axis.gapgen.generators import censuses as C  # noqa: E402
 from assistant_axis.gapgen.generators.censuses import download as D  # noqa: E402
 from assistant_axis.gapgen.generators.censuses import ingest as I  # noqa: E402
-from assistant_axis.gapgen.generators.censuses.corpus import corpus_trait_stems, queue_trait_stems  # noqa: E402
+from assistant_axis.gapgen.generators.censuses.corpus import corpus_paren_stems, corpus_trait_stems, queue_trait_stems  # noqa: E402
 from assistant_axis.gapgen.generators.censuses.sources import ALLPORT_COLUMN_SOURCES, SOURCES  # noqa: E402
 
 
@@ -88,7 +88,7 @@ def build(args, lookups=None):
     rows, extra = I.build_table(allport, tda, lookups=lookups or I.default_lookups(), corpus_stems=corpus,
                                 queue_stems=queue, merged=merged)
     counts = I.ingest_counts(rows, extra)
-    counts["ceiling"] = E.string_ceiling(rows, corpus, queue).as_dict()
+    counts["ceiling"] = E.string_ceiling(rows, corpus, queue, corpus_paren_stems(args.data_dir)).as_dict()
     counts["malformed_list"] = extra["malformed"]
     counts["repaired_list"] = extra["repaired"]
     counts["repair_suggestions_list"] = extra["repair_suggestions"]

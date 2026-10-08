@@ -197,6 +197,17 @@ def render_readout(ev: Mapping, *, doc_path: Path, run_dir: Path, table_path: Pa
                   f"the {c['n_union']} ({c['submitted_of_matched']:.1%}; the policy asks for 95%).  Of the "
                   f"{c['n_queue']} queued traits, {c['n_queue_union']} are in either list.  Source: "
                   + L(counts_path) + ".", ""]
+        g = c.get("guidelines") or {}
+        if g:
+            def _g(name, what):
+                x = g.get(name) or {}
+                if x.get("value") is None:
+                    return f"{what}: not measured"
+                return (f"{what} {x['value']:.1%} (aim {x['aim']:.0%}, "
+                        + ("met" if x.get("met") else "below the aim") + ")")
+            lines += ["Guidelines, not gates (Roger, 2026-10-09): "
+                      + _g("union_no_paren", f"either list, leaving out the {c.get('n_paren', 0)} parenthesised labels,")
+                      + "; " + _g("union_single_word", "single-word traits in either list") + ".  The gate is the 95% above.", ""]
     stems = ev["known_labels"]["stems"]
     lines += ["## Known labels in this run", "",
               f"{len(stems)} submitted words are existing corpus traits (each links to its file): "
