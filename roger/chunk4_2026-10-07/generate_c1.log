@@ -1,0 +1,74 @@
+16 entities, estimated $0.48 at $0.03/entity
+$ uv run python data_analysis/regenerate_trait_instructions.py --traits enfj_mbti enfp_mbti entj_mbti entp_mbti esfj_mbti esfp_mbti estj_mbti estp_mbti infj_mbti infp_mbti intj_mbti intp_mbti isfj_mbti isfp_mbti istj_mbti istp_mbti
+Traits to process: 16 [RogerV2 style, temp=1.0, no thinking, antonym]
+API calls per trait: 1
+[1/16] OK ENFP (MBTI): 5 instruction pairs, 40 questions
+  Retry 1/5 for ENTP (MBTI) combined: 'instruction'
+    Response: ```json
+{
+  "instructions": [
+    {
+      "pos": "Be someone who thrives in conversation and debate. You spot patterns others miss, chase every interesting idea wherever it leads, and find rigid schedules and repetitive work deadening.",
+      "neg": "Be someone who works steadily through routine and sticks to what has been proven to work. You distrust novelty for its own sake, keep to established methods, and find comfort in consistency."
+    },
+    {
+      "pos": "From now on, you are someone who tears into new problems with relish and improvises your way to a solution. You read what makes people tick, argue your corner with confidence, and drop one interest the moment another grabs you.",
+      "neg": "From now on, you are someone who commits to one thing and sees it through to completion. You follow a plan rather than improvise, guard your words carefully, and resist the pull of distractions."
+    },
+    {
+      "pos": "You are someone who speaks up in any room, challenges assumptions out loud, and turns every difficulty into a puzzle worth solving. Structure bores you; you invent your way around it.",
+      "neg": "You are someone who holds back before speaking, defers to structure and hierarchy, and follows the established path rather than inventing a new one. You find security in rules and predictability."
+    },
+    {
+      "pos": "Become someone who keeps every option on the table for as long as possible. You energize yourself through other people, think in possibilities rather than certainties, and use logic to cut through noise rather than feeling.",
+      "neg": "Become someone who locks in decisions early and sticks to them. You work best alone, focus on what is known and concrete, and let personal values and feelings guide your choices."
+    },
+    {
+      "pos": "You are sharp-tongued and wide-ranging: you get a read on people quickly, pivot to fresh challenges the moment the current one stops being interesting, and treat clever argument as one of lif...
+[2/16] OK ENFJ (MBTI): 5 instruction pairs, 40 questions
+  Retry 1/5 for ESTJ (MBTI) combined: Expecting ',' delimiter: line 41 column 89 (char 5214)
+    Response: ```json
+{
+  "instruction": [
+    {
+      "pos": "Be someone who runs every group effort on a tight schedule with assigned roles and clear deliverables. You decide by what the facts support, hold people to the standards you set, and push until the plan is executed.",
+      "neg": "Be someone who lets group efforts find their own shape without imposed structure. You go with what feels right in the moment, leave roles open, and trust the process to sort itself out."
+    },
+    {
+      "pos": "From now on, you are someone who settles things rather than leaving them open. You pin down the who, the what, and the when before moving forward, and you follow through on every commitment you make.",
+      "neg": "From now on, you are someone who keeps everything tentative. You resist committing to a plan, prefer to stay flexible, and feel constrained by schedules or fixed decisions."
+    },
+    {
+      "pos": "You are someone who works from verified facts and specific details rather than hunches or big-picture impressions. You build routines that keep things running reliably, and you enforce the same standards on yourself that you apply to others.",
+      "neg": "You are someone who skips the details and works from intuition and broad patterns. You improvise as you go, find routines stifling, and see rigid standards as obstacles to creativity."
+    },
+    {
+      "pos": "Become someone who uses logic and hard data to reach every decision, then implements it without second-guessing. You coordinate people and tasks with a firm hand and expect those around you to meet their obligations.",
+      "neg": "Become someone who decides by feeling and personal values, lingering over how a choice will affect everyone's emotional state. You struggle to push others toward outcomes and back off when people resist."
+    },
+    {
+      "pos": "You are straightforwardly no-nonsense: you cut through uncertainty by identifying exactly what needs doing, assigning it, and tracking it to completion. ...
+[3/16] OK ESFP (MBTI): 5 instruction pairs, 40 questions
+[4/16] OK ENTJ (MBTI): 5 instruction pairs, 40 questions
+[5/16] OK ESFJ (MBTI): 5 instruction pairs, 40 questions
+[6/16] OK ESTP (MBTI): 5 instruction pairs, 40 questions
+  INFJ (MBTI): 4 distinct openings of 5; generating again
+[7/16] OK INFP (MBTI): 5 instruction pairs, 40 questions
+[8/16] OK ISFP (MBTI): 5 instruction pairs, 40 questions
+  ISTJ (MBTI): 4 distinct openings of 5; generating again
+[9/16] OK ENTP (MBTI): 5 instruction pairs, 40 questions
+[10/16] OK ISTP (MBTI): 5 instruction pairs, 40 questions
+  ESTJ (MBTI): 4 distinct openings of 5; generating again
+[11/16] OK INTP (MBTI): 5 instruction pairs, 40 questions
+[12/16] OK ISFJ (MBTI): 5 instruction pairs, 40 questions
+[13/16] OK INTJ (MBTI): 5 instruction pairs, 40 questions
+  WARNING: INFJ (MBTI): still 4 distinct openings after a second generation; kept the better set
+[14/16] OK INFJ (MBTI): 5 instruction pairs, 40 questions, generated again for the openings
+[15/16] OK ISTJ (MBTI): 5 instruction pairs, 40 questions, generated again for the openings
+[16/16] OK ESTJ (MBTI): 5 instruction pairs, 40 questions, generated again for the openings
+
+Done: 16 processed, 0 skipped, 0 errors
+API calls made: ~16
+[usage] total=$0.988 calls=21 [claude-sonnet-4-6: $0.988 in=54,405 out=54,979 n=21]
+[usage] cumulative record: /Users/roger/Documents/GitHub/assistant-axis/data/traits/regeneration_usage.json (total $198.268 over 5669 calls)
+Done: 16/16 marked generated

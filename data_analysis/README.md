@@ -28,7 +28,10 @@ more distinct openings is kept (`opening_rerolls: 1` in the `generator`
 field; a batch reply that fails the check is redone in the real-time pass).
 The pass over the regenerated corpus had found 5.4% of files with "You are
 someone who ..." twice.  About 5% more calls; `--no-opening-reroll` turns it
-off, for a pilot that wants a rubric's raw rate.
+off, for a pilot that wants a rubric's raw rate.  Since 2026-10-07 both
+generators also check the reply's counts (five pairs, forty questions) and
+ask again on a mismatch, so a 39-question reply is no longer written (it
+happened to interpreter in September and high-context (Hall) in October).
 
 ```bash
 uv run python data_analysis/regenerate_trait_instructions.py --traits stoic --force

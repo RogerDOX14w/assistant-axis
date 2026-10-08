@@ -1,0 +1,65 @@
+4 entities, estimated $0.12 at $0.03/entity
+$ uv run python data_analysis/regenerate_trait_instructions.py --traits achiever_bartle explorer_bartle killer_bartle socializer_bartle
+Traits to process: 4 [RogerV2 style, temp=1.0, no thinking, antonym]
+API calls per trait: 1
+  socializer (Bartle): 4 distinct openings of 5; generating again
+[1/4] OK killer (Bartle): 5 instruction pairs, 40 questions
+[2/4] OK explorer (Bartle): 5 instruction pairs, 40 questions
+[3/4] OK achiever (Bartle): 5 instruction pairs, 40 questions
+[4/4] OK socializer (Bartle): 5 instruction pairs, 40 questions, generated again for the openings
+
+Done: 4 processed, 0 skipped, 0 errors
+API calls made: ~4
+[usage] total=$0.253 calls=5 [claude-sonnet-4-6: $0.253 in=12,874 out=14,325 n=5]
+[usage] cumulative record: /Users/roger/Documents/GitHub/assistant-axis/data/traits/regeneration_usage.json (total $198.617 over 5676 calls)
+Done: 4/4 marked generated
+4 entities, estimated $0.12 at $0.03/entity
+$ uv run python data_analysis/regenerate_trait_instructions.py --traits authoritarian_baumrind authoritative_baumrind neglectful_baumrind permissive_baumrind
+Traits to process: 4 [RogerV2 style, temp=1.0, no thinking, antonym]
+API calls per trait: 1
+  permissive (Baumrind): 4 distinct openings of 5; generating again
+[1/4] OK neglectful (Baumrind): 5 instruction pairs, 40 questions
+  authoritarian (Baumrind): 4 distinct openings of 5; generating again
+[2/4] OK authoritative (Baumrind): 5 instruction pairs, 40 questions
+[3/4] OK permissive (Baumrind): 5 instruction pairs, 40 questions, generated again for the openings
+  WARNING: authoritarian (Baumrind): still 4 distinct openings after a second generation; kept the better set
+[4/4] OK authoritarian (Baumrind): 5 instruction pairs, 40 questions, generated again for the openings
+
+Done: 4 processed, 0 skipped, 0 errors
+API calls made: ~4
+[usage] total=$0.273 calls=6 [claude-sonnet-4-6: $0.273 in=15,493 out=15,109 n=6]
+[usage] cumulative record: /Users/roger/Documents/GitHub/assistant-axis/data/traits/regeneration_usage.json (total $198.890 over 5682 calls)
+Done: 4/4 marked generated
+4 entities, estimated $0.12 at $0.03/entity
+$ uv run python data_analysis/regenerate_trait_instructions.py --traits conscientiousness_disc dominance_disc influence_disc steadiness_disc
+Traits to process: 4 [RogerV2 style, temp=1.0, no thinking, antonym]
+API calls per trait: 1
+[1/4] OK steadiness (DISC): 5 instruction pairs, 40 questions
+[2/4] OK influence (DISC): 5 instruction pairs, 40 questions
+[3/4] OK dominance (DISC): 5 instruction pairs, 40 questions
+[4/4] OK conscientiousness (DISC): 5 instruction pairs, 40 questions
+
+Done: 4 processed, 0 skipped, 0 errors
+API calls made: ~4
+[usage] total=$0.175 calls=4 [claude-sonnet-4-6: $0.175 in=10,312 out=9,585 n=4]
+[usage] cumulative record: /Users/roger/Documents/GitHub/assistant-axis/data/traits/regeneration_usage.json (total $199.065 over 5686 calls)
+Done: 4/4 marked generated
+4 entities, estimated $0.12 at $0.03/entity
+$ uv run python data_analysis/regenerate_trait_instructions.py --traits boomer gen_x gen_z millennial
+Traits to process: 4 [RogerV2 style, temp=1.0, no thinking, antonym]
+API calls per trait: 1
+[1/4] OK gen-z: 5 instruction pairs, 40 questions
+  gen-x: 4 distinct openings of 5; generating again
+  boomer: 4 distinct openings of 5; generating again
+  millennial: 4 distinct openings of 5; generating again
+  WARNING: boomer: still 4 distinct openings after a second generation; kept the better set
+[2/4] OK boomer: 5 instruction pairs, 40 questions, generated again for the openings
+  WARNING: millennial: still 4 distinct openings after a second generation; kept the better set
+[3/4] OK millennial: 5 instruction pairs, 40 questions, generated again for the openings
+[4/4] OK gen-x: 5 instruction pairs, 40 questions, generated again for the openings
+
+Done: 4 processed, 0 skipped, 0 errors
+API calls made: ~4
+[usage] total=$0.332 calls=7 [claude-sonnet-4-6: $0.332 in=18,037 out=18,501 n=7]
+[usage] cumulative record: /Users/roger/Documents/GitHub/assistant-axis/data/traits/regeneration_usage.json (total $199.397 over 5693 calls)
+Done: 4/4 marked generated

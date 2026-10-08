@@ -1,0 +1,22 @@
+$ uv run python data_analysis/generate_antonyms.py --traits secular_rational_inglehart_welzel self_expression_inglehart_welzel survival_inglehart_welzel traditional_inglehart_welzel
+Done: 4 checked
+secular_rational_inglehart_welzel -> traditional|traditionalist   score=4 nasty  (intended traditional_inglehart_welzel)
+self_expression_inglehart_welzel -> survival-oriented|traditional|authoritarian score=4 nasty  (intended survival_inglehart_welzel)
+survival_inglehart_welzel    -> self-expression|cosmopolitan score=4 nearly_nice  (intended self_expression_inglehart_welzel)
+traditional_inglehart_welzel -> secular-rational|progressive score=4 nearly_nice  (intended secular_rational_inglehart_welzel)
+$ uv run python data_analysis/generate_antonyms.py --traits high_context_hall loose_gelfand low_context_hall monochronic_hall polychronic_hall tight_gelfand
+Done: 6 checked
+high_context_hall            -> low_context_hall|direct|explicit score=4 nice_with_alternatives  (intended low_context_hall)
+loose_gelfand                -> tight_gelfand|strict         score=4 nice_with_alternatives  (intended tight_gelfand)
+low_context_hall             -> high_context_hall|implicit|indirect score=4 nice_with_alternatives  (intended high_context_hall)
+monochronic_hall             -> polychronic                  score=4 open  (intended polychronic_hall)
+polychronic_hall             -> monochronic|sequential       score=4 open  (intended monochronic_hall)
+tight_gelfand                -> loose_gelfand                score=4 nice  (intended loose_gelfand)
+$ uv run python data_analysis/generate_antonyms.py --traits extrinsic_allport intrinsic_allport
+Done: 2 checked
+extrinsic_allport            -> intrinsic_allport            score=4 nice  (intended intrinsic_allport)
+intrinsic_allport            -> extrinsic_allport|instrumental score=4 nice_with_alternatives  (intended extrinsic_allport)
+$ uv run python data_analysis/generate_antonyms.py --traits gemeinschaft_tonnies gesellschaft_tonnies
+Done: 2 checked
+gemeinschaft_tonnies         -> gesellschaft|individualistic|transactional score=4 nasty  (intended gesellschaft_tonnies)
+gesellschaft_tonnies         -> gemeinschaft_tonnies|communal|altruistic score=4 nice_with_alternatives  (intended gemeinschaft_tonnies)

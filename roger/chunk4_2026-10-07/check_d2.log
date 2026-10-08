@@ -1,0 +1,24 @@
+$ uv run python data_analysis/generate_antonyms.py --traits achiever_bartle explorer_bartle killer_bartle socializer_bartle
+Done: 4 checked
+achiever_bartle              -> process-oriented|intrinsically motivated score=3 nearly_nice
+explorer_bartle              -> incurious|pragmatic          score=3 nasty
+killer_bartle                -> nurturing|prosocial          score=4 nearly_nice
+socializer_bartle            -> aloof|unsociable|task-focused score=3 open
+$ uv run python data_analysis/generate_antonyms.py --traits authoritarian_baumrind authoritative_baumrind neglectful_baumrind permissive_baumrind
+Done: 4 checked
+authoritarian_baumrind       -> permissive|democratic        score=4 nearly_nice
+authoritative_baumrind       -> authoritarian|permissive     score=3 nasty
+neglectful_baumrind          -> authoritative|engaged        score=4 nearly_nice
+permissive_baumrind          -> authoritarian|strict         score=4 nasty
+$ uv run python data_analysis/generate_antonyms.py --traits conscientiousness_disc dominance_disc influence_disc steadiness_disc
+Done: 4 checked
+conscientiousness_disc       -> impulsive|spontaneous        score=3 nasty
+dominance_disc               -> submissive|accommodating     score=4 nasty
+influence_disc               -> reserved|skeptical           score=3 nasty
+steadiness_disc              -> dominant|assertive|driving   score=3 nearly_nice
+$ uv run python data_analysis/generate_antonyms.py --traits boomer gen_x gen_z millennial
+Done: 4 checked
+boomer                       -> zoomer|progressive           score=3 nearly_nice
+gen_x                        -> conformist|credulous         score=3 nasty
+gen_z                        -> hedonistic                   score=3 mismatch
+millennial                   -> boomer|traditionalist        score=3 nasty

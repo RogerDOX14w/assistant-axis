@@ -1,0 +1,174 @@
+{
+  "entries": [
+    {
+      "stem": "achiever_bartle",
+      "verdict": "ok",
+      "issues": [],
+      "suggested_edit": null,
+      "strength": "at source",
+      "nearest_existing_ok": true
+    },
+    {
+      "stem": "authoritarian_baumrind",
+      "verdict": "ok",
+      "issues": [],
+      "suggested_edit": null,
+      "strength": "at source",
+      "nearest_existing_ok": true
+    },
+    {
+      "stem": "authoritative_baumrind",
+      "verdict": "ok",
+      "issues": [],
+      "suggested_edit": null,
+      "strength": "at source",
+      "nearest_existing_ok": true
+    },
+    {
+      "stem": "boomer",
+      "verdict": "ok",
+      "issues": [],
+      "suggested_edit": null,
+      "strength": "at source",
+      "nearest_existing_ok": true
+    },
+    {
+      "stem": "conscientiousness_disc",
+      "verdict": "ok",
+      "issues": [],
+      "suggested_edit": null,
+      "strength": "at source",
+      "nearest_existing_ok": true
+    },
+    {
+      "stem": "dominance_disc",
+      "verdict": "ok",
+      "issues": [],
+      "suggested_edit": null,
+      "strength": "at source",
+      "nearest_existing_ok": true
+    },
+    {
+      "stem": "explorer_bartle",
+      "verdict": "edit",
+      "issues": [
+        "Record, not description (suggested_edit left null so the draft stands): 'finding points, fights and chatter dull beside discovery' rests for 'fights' on Bartle's sentence about killing for explorers (quicker, but it causes too much hassle in the long run if the deceased return to seek retribution; from memory of the article, the writer should check the fetched page), which the recorded passage elides with '[...]'. Restore that sentence to source_text, dropping the 'anyone with half a brain' clause if the 120-word cap bites. Without it the recorded passage supports points and chatter being dull, not fights."
+      ],
+      "suggested_edit": null,
+      "strength": "at source",
+      "nearest_existing_ok": true
+    },
+    {
+      "stem": "gen_x",
+      "verdict": "edit",
+      "issues": [
+        "'turning out independent, skeptical of authority and unconcerned what others think' takes the flattering items (Pew 2014's 'savvy, skeptical and self-reliant', the workforce guides' 'independent') and drops the edge the passage gives twice: 'slackers, cynical, and disaffected' and 'cynical' again in the guides. The writer's note says the kept traits are the ones given twice; cynical is given twice too. Add 'cynical' (replacement given, 32 words). Plain cynical is distrust of human nature, so the overlap stays small, as the nearest-existing line says."
+      ],
+      "suggested_edit": "This means being born between 1965 and 1980: coming home from school to an empty house, raised on music videos, turning out independent, cynical, skeptical of authority and unconcerned what others think.",
+      "strength": "below: 'independent, skeptical of authority and unconcerned what others think' (the passage's cynical / slacker edge, given twice, is dropped)",
+      "nearest_existing_ok": true
+    },
+    {
+      "stem": "gen_z",
+      "verdict": "edit",
+      "issues": [
+        "Minor: 'open about mental health' says something the passage does not. Wikipedia has 'greater awareness and diagnosis of mental health conditions' (and more reported sleep deprivation), a statement about awareness and diagnosis, not about talking openly; 'open about' is the popular stereotype imported. 'Attentive to mental health' stays with the passage (replacement given, 32 words)."
+      ],
+      "suggested_edit": "This means being born between 1997 and 2012: taking smartphones and social media for granted, better behaved, less hedonistic than earlier generations, focused on school and work, and attentive to mental health.",
+      "strength": "at source",
+      "nearest_existing_ok": true
+    },
+    {
+      "stem": "influence_disc",
+      "verdict": "ok",
+      "issues": [],
+      "suggested_edit": null,
+      "strength": "at source",
+      "nearest_existing_ok": true
+    },
+    {
+      "stem": "killer_bartle",
+      "verdict": "edit",
+      "issues": [
+        "'the greater the distress caused the better' loses the passage's sharpest point: the joy is in 'a real person, somewhere, is very upset by what you've just done, yet can themselves do nothing about it'. After 'killing their characters' the distress reads as the character's or the game's. The writer's own nearest-existing line makes the real-person point against ruthless_while_playing (where nothing counts for real); the description should make it too (replacement given, 31 words)."
+      ],
+      "suggested_edit": "This means playing to impose oneself on other players: killing their characters, the more upset and helpless the real person behind them the better; points, exploring and talk are mere means.",
+      "strength": "below: 'the greater the distress caused the better' (drops that it is a real person who is upset and helpless, the passage's defining sting)",
+      "nearest_existing_ok": true
+    },
+    {
+      "stem": "millennial",
+      "verdict": "edit",
+      "issues": [
+        "'confident and tolerant' keeps half of Twenge's one clause and drops the other half, 'but also describes a sense of entitlement and narcissism'. The writer's reason is that a critic in the Wikipedia article (outside the recorded passage) contests Twenge; but the critic disputes her reading of the data, which bears on the confident-and-tolerant half as much as on the dropped half, so keeping one half is a one-sided cut, and the queue wants the cohort's stereotype, of which 'entitled' is the best-known item. The description is a portrait; the empirical dispute belongs in notes. Recommend 'entitled' in (replacement given, 32 words). Roger's call, as the writer flagged.",
+        "If 'entitled' goes in, add plain entitled (expecting the best table, the exception and other people's time as one's due) to the nearest-existing line: the cohort version is a generation's stereotype, not a personal demand, so the overlap is partial."
+      ],
+      "suggested_edit": "This means being born between 1981 and 1996: growing up with the internet, entering work in a recession with student debt, confident, tolerant and entitled, early to social media, slow to marry.",
+      "strength": "below: 'confident and tolerant' (keeps half of Twenge's clause and drops 'a sense of entitlement and narcissism')",
+      "nearest_existing_ok": true
+    },
+    {
+      "stem": "neglectful_baumrind",
+      "verdict": "edit",
+      "issues": [
+        "Record, not description (suggested_edit left null so the draft stands): 'beyond food and shelter' comes from Wikipedia's Parenting styles article ('They may provide basic necessities such as food, shelter, and clothing'), quoted in notes but absent from source_text and source_url. Add that sentence and the URL to the record; the clause is a good concrete particular and should stay."
+      ],
+      "suggested_edit": null,
+      "strength": "at source",
+      "nearest_existing_ok": true
+    },
+    {
+      "stem": "permissive_baumrind",
+      "verdict": "ok",
+      "issues": [],
+      "suggested_edit": null,
+      "strength": "at source",
+      "nearest_existing_ok": true
+    },
+    {
+      "stem": "socializer_bartle",
+      "verdict": "edit",
+      "issues": [
+        "Record, not description (suggested_edit left null so the draft stands): 'levels and maps matter only as aids to conversation' rests on Bartle's sentence on exploration and points for socialisers (exploration to understand what everyone else is talking about; points for communicative spells available at higher levels and for status in the community; from memory of the article, the writer should check the fetched page), elided with '[...]'. Restore it to source_text; the 'observing people play' clause can go to make room. The recorded passage's 'not how to rise levels' supports levels, not maps."
+      ],
+      "suggested_edit": null,
+      "strength": "at source",
+      "nearest_existing_ok": true
+    },
+    {
+      "stem": "steadiness_disc",
+      "verdict": "ok",
+      "issues": [],
+      "suggested_edit": null,
+      "strength": "at source",
+      "nearest_existing_ok": true
+    }
+  ],
+  "sets": [
+    {
+      "name": "Bartle's four player types",
+      "members": ["achiever_bartle", "explorer_bartle", "killer_bartle", "socializer_bartle"],
+      "review": "Agree with the writer. One grain: all four at 32 words and one shape (the object of play after 'This means playing to/for', two or three of Bartle's behaviours, a closing clause that subordinates the other three activities). Both axes read off the openings: world against players (master the game, find out how the game works | impose oneself on other players, for the people) and acting on against interacting with (master, impose | find out how it works, for the people). Strength follows Bartle: three neutral portraits and one vice, the killer, whose draft should keep the real-person point that is Bartle's definition of the type (see its entry). Two records are trimmed past the sentence their closing clause rests on (explorer's killing; socializer's exploration and points): restore them, since the closing clause is what makes the set's shape, and the drafts are right to have it. Nearest-existing lines are right, including the killer against ruthless_while_playing (that trait rests on nothing counting for real in fiction; the killer's object is that it counts for the victim). Bartle's British spellings and typos are correctly left in the record and out of the drafts.",
+      "agree_with_writer": true
+    },
+    {
+      "name": "Baumrind's four parenting styles",
+      "members": ["authoritarian_baumrind", "authoritative_baumrind", "neglectful_baumrind", "permissive_baumrind"],
+      "review": "Agree with the writer. One grain: all at 32 words, 'one's children' throughout, the parent's stance first and its behaviours after. Control reads off the openings (an absolute standard; directing by reason; accepting impulses; not demanding) and warmth off the bodies (no discussion and kept in their place; heard out and not hemmed in; accepting, a resource to draw on; neither warm), so the square is readable. Strength is uneven across the four, strong, flattering, neutral, mild, but that is the sources' unevenness mirrored, as the rule asks; the three Baumrind corners are her 1966 prototypes verbatim via a teaching page, which is sound provenance given the paywall. On the neglectful flag: agree that the draft is at its recorded source, Darling's digest, which is a placement with a hedge and not Maccoby & Martin's own text; the queue's label 'neglectful' promises more than 'uninvolved' content delivers, and Wikipedia's portrait (unaware, indifferent) would close that gap only by sitting on plain neglectful. Recommend keeping the mild draft (plain neglectful covers the vice; this is a quadrant, and the mild corner is what keeps the square a square) and letting the overlap check say whether it collapses onto neglectful or hands_off; the record should carry the Wikipedia sentence it already uses. Authoritarian's 'punishing self-will forcefully' drops Baumrind's condition 'at points where the child's actions or beliefs conflict with what she thinks is right conduct', but self-will shows only at such points, so this is not a sharpening.",
+      "agree_with_writer": true
+    },
+    {
+      "name": "The four DISC styles",
+      "members": ["conscientiousness_disc", "dominance_disc", "influence_disc", "steadiness_disc"],
+      "review": "Agree with the writer. One grain: 30 to 32 words and an identical shape (pace and stance, the style's three descriptors, a pace clause, a stance clause), and the two axes read straight off the openings (fast-paced / moderate-paced by skeptical / accepting), matching the publisher's circle. All four are at the publisher's neutral-to-flattering level and so milder than their plain corpus neighbours; mirrored, not sharpened, as the rule requires. Two notes, neither blocking: the drafts are adjective lists with little behaviour because the source is one (the discprofile priorities that would add behaviour were 403 throughout), so the generator will work from descriptors, which the older corpus files also do; and the C nearest-existing line understates its overlap with plain conscientious, which already has methodical, thorough, accuracy and detail (what C adds is reserved, questioning and the moderate pace), so 'the shared word is misleading' is too strong, though the line is still plausible. 'Questioning', the publisher's stance word for D and C, is rendered 'skeptical' in both openings; consistent across the set, so acceptable. S and C share 'calm and ... in how one works' and the 'focused on X over Y' clause, which is the axis showing, as the writer says; they are told apart by their descriptors.",
+      "agree_with_writer": true
+    },
+    {
+      "name": "The four generations",
+      "members": ["boomer", "gen_x", "millennial", "gen_z"],
+      "review": "Agree with the writer on what the method yields and on three of the four flags; disagree on one. Birth order is readable from the years in every opening (Pew's, with Wikipedia's 2012 end for Gen Z), and each draft carries a formative-era clause and the cohort's stereotyped habits; one grain at 31 to 32 words (boomer is 31, not 32). Flags: (1) millennial without 'entitled': disagree. It is half of Twenge's one clause in the recorded passage and the best-known item of the stereotype the queue asks for; the critic's dispute bears on the kept half as much as the dropped one. Recommend in (see entry); Roger's call. (2) boomer without climate denial and marginalization: agree with the omission. They are political positions the corpus already covers with plain political traits, and keeping them would make the boomer the set's one vice at a different grain from the other three, while resistance to new technology and to younger generations' values are the generational core of the retort. (3) speech stereotypes absent from all four: agree; no recorded source has them and the method forbids invention. Recommend accepting for now: the label is injected into the generator beside the description and is likely to pull slang in by itself (plugged_in's 'fluent in the slang of the day' shows the register already exists in the corpus), so check the generated instructions; if speech is wanted in the description, Roger would have to authorise a second source (Wikipedia's generational-slang articles) as a departure from the one-source method, at the cost of a portrait clause each. (4) Gen X drops the cynical / slacker edge the passage gives twice (see entry). Strength is uneven across the set as the sources are: boomer plain-negative, Gen X and millennial plain, Gen Z mildly flattering. Attributed stereotypes ('has been described as', the retort's list) are stated as the person's own habits, which is the inside-voice rendering a cohort portrait needs, not a sharpening.",
+      "agree_with_writer": true
+    }
+  ],
+  "summary": "Sixteen drafts: nine ok, seven edit, of which three are record fixes only with the drafts kept (explorer and socializer rest on Bartle sentences the '[...]' trimmed out of source_text; neglectful's 'beyond food and shelter' is Wikipedia's, quoted in notes but absent from the record). Four description edits, replacements given at 31-32 words: killer should keep Bartle's real-person point (below source), Gen X should keep 'cynical' (below), millennial should carry 'entitled' (below; Roger's call, I disagree with the writer's reason for dropping it), Gen Z's 'open about mental health' says more than the passage. Forms all pass (30-32 words, one sentence, 'This means', US spelling, no system or author named, no label echo); nearest-existing lines all plausible, with the C line understating its overlap with plain conscientious. Sets: Bartle, Baumrind and DISC read as squares with both axes visible in the openings, one grain each; the generations read in birth order; I agree with all four set reviews and with the neglectful (mild, keep), boomer (sharpest items out, keep) and speech-stereotype (absent, let the label carry it and check the generated instructions) flags."
+}

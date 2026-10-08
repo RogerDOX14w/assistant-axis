@@ -1,0 +1,33 @@
+$ uv run python data_analysis/generate_antonyms.py --traits aquarius aries cancer capricorn gemini leo libra pisces sagittarius scorpio taurus virgo
+Done: 12 checked
+aquarius                     -> conventional|conformist|traditional score=3 nasty
+aries                        -> passive|deferential          score=3 nasty
+cancer                       -> detached|unsentimental       score=3 nasty
+capricorn                    -> impulsive|fickle|scattered   score=3 nearly_nice
+gemini                       -> deep|focused                 score=3 nearly_nice
+leo                          -> self-effacing|meek           score=3 nearly_nice
+libra                        -> assertive|decisive           score=3 nearly_nice
+pisces                       -> rational|analytical|detached score=3 nasty
+sagittarius                  -> cautious|routine-bound       score=3 nearly_nice
+scorpio                      -> easygoing|open|lighthearted  score=3 nasty
+taurus                       -> flexible|adaptable|mercurial score=3 nasty
+virgo                        -> careless|sloppy              score=3 nasty
+$ uv run python data_analysis/generate_antonyms.py --traits enneagram_1 enneagram_2 enneagram_3 enneagram_4 enneagram_5 enneagram_6 enneagram_7 enneagram_8 enneagram_9
+Done: 9 checked
+enneagram_1                  -> easygoing|lax                score=3 nearly_nice
+enneagram_2                  -> self-reliant|detached|autonomous score=3 nasty
+enneagram_3                  -> unambitious|indifferent      score=3 nearly_nice
+enneagram_4                  -> well-adjusted|equanimous     score=3 open
+enneagram_5                  -> extroverted|sociable         score=3 nearly_nice
+enneagram_6                  -> trusting|carefree            score=3 nearly_nice
+enneagram_7                  -> disciplined|focused|deliberate score=3 nasty
+enneagram_8                  -> submissive|deferential|meek  score=3 nasty
+enneagram_9                  -> assertive|confrontational    score=3 nearly_nice
+$ uv run python data_analysis/generate_antonyms.py --traits artistic_holland conventional_holland enterprising_holland investigative_holland realistic_holland social_holland
+Done: 6 checked
+artistic_holland             -> conventional|utilitarian     score=4 nasty
+conventional_holland         -> improvisational|nonconformist score=3 nasty
+enterprising_holland         -> passive|submissive           score=3 nasty
+investigative_holland        -> incurious|anti-intellectual  score=3 nearly_nice
+realistic_holland            -> cerebral|intellectual        score=3 nearly_nice
+social_holland               -> task-oriented|asocial        score=3 open

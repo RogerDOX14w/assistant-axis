@@ -1,0 +1,426 @@
+{
+  "note": "RECONSTRUCTION of Allport & Ross (1967) pp. 433-434 from secondary sources; the paper is closed access and was not read. Each sentence is quoted as a later source quotes it. Every page-citing source places both paragraphs on p. 434. 'wording' on a quoted_by entry records how that source's wording differs from the sentence text; entries without it quote the sentence verbatim.",
+  "method": "Built on the fragments in drafts_b.json (Bulbulia 2013, Wikipedia, Flere et al., Neyrinck et al. 2010, Tønnesvang 2003). New sources found by exact-phrase web search, PMC/Europe PMC full-text search with E-utilities efetch for the XML, Bing results pages, DOAJ API, and PDFs downloaded to the session scratchpad and read with pypdf. The hypothesised sentences from the brief were confirmed one by one; the two not in the brief (the axiology sentence; 'In theological terms ...') were found quoted in McKenna, Francis & Stewart (2025).",
+  "extrinsic": {
+    "reconstructed_text": "Persons with this orientation are disposed to use religion for their own ends. The term is borrowed from axiology, to designate an interest that is held because it serves other, more ultimate interests. Extrinsic values are always instrumental and utilitarian. Persons with this orientation may find religion useful in a variety of ways—to provide security and solace, sociability and distraction, status and self-justification. The embraced creed is lightly held or else selectively shaped to fit more primary needs. In theological terms the extrinsic type turns to God, but without turning away from self.",
+    "sentences": [
+      {
+        "text": "Persons with this orientation are disposed to use religion for their own ends.",
+        "quoted_by": [
+          {
+            "source": "McKenna, Francis & Stewart (2025), Journal of Religious Education, 'Implicit religion, extrinsic religious orientation and consumerism' (block-quotes both paragraphs, cited p. 434; British spelling 'endeavours')",
+            "url": "https://link.springer.com/article/10.1007/s40839-025-00260-9"
+          },
+          {
+            "source": "Behere, Das, Yadav & Behere (2013), Indian Journal of Psychiatry 55(Suppl 2), 'Religion and mental health' (reproduces both paragraphs under the headings 'Extrinsic orientation' / 'Intrinsic orientation', ref. [3] = Allport & Ross 1967)",
+            "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC3705681"
+          },
+          {
+            "source": "Saiz et al. (2020), Healthcare 8(2) 129, 'Is Belonging to a Religious Organization Enough?' (quotes with the subject rewritten)",
+            "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC7349115",
+            "wording": "persons with extrinsic orientation are disposed to use religion for their own ends"
+          },
+          {
+            "source": "Hunt & King (1971), JSSR 10(4), 'The Intrinsic-Extrinsic Concept: A Review and Evaluation'. Seen only as a Bing snippet of the JSTOR page: 'Allport and Ross (1967, p. 434) gave the most extended formal definition: Extrinsic Orientation. Persons with this orientation are...' (JSTOR page itself did not load)",
+            "url": "https://www.jstor.org/stable/1384780",
+            "wording": "snippet breaks off after 'Persons with this orientation are'"
+          },
+          {
+            "source": "Abdel-Khalek, 'Religiosity and Well-Being', Encyclopedia of Personality and Individual Differences (Springer). Seen only as the snippet of this entry on a Bing results page (the entry page served a truncated preview); the snippet reads 'In theological terms, the extrinsic type turns to God, but without turning away from self. The intrinsic orientation...'",
+            "url": "https://link.springer.com/rwe/10.1007/978-3-319-28099-8_2335-1",
+            "wording": "Bing snippet: 'Allport and Ross (1967) stated that: The extrinsic orientation individuals are disposed to use religion for their own ...'"
+          }
+        ],
+        "agreement": "2 sources verbatim (McKenna 2025; Behere 2013); 1 altered (Saiz 2020); 2 search-snippet partials (Hunt & King 1971; Abdel-Khalek)"
+      },
+      {
+        "text": "The term is borrowed from axiology, to designate an interest that is held because it serves other, more ultimate interests.",
+        "quoted_by": [
+          {
+            "source": "McKenna, Francis & Stewart (2025), Journal of Religious Education, 'Implicit religion, extrinsic religious orientation and consumerism' (block-quotes both paragraphs, cited p. 434; British spelling 'endeavours')",
+            "url": "https://link.springer.com/article/10.1007/s40839-025-00260-9"
+          }
+        ],
+        "agreement": "1 source verbatim (McKenna 2025). Paraphrased without quotation marks in PMC7475182 (Bosetti et al. 2020, 'the religion is held just because it serves other, more ultimate interests and shaped to adapt to other needs') and echoed in Arli 2023 / Sakellariou 2025 ('primarily serves other more ultimate ends'). Behere 2013 omits the sentence."
+      },
+      {
+        "text": "Extrinsic values are always instrumental and utilitarian.",
+        "quoted_by": [
+          {
+            "source": "McKenna, Francis & Stewart (2025), Journal of Religious Education, 'Implicit religion, extrinsic religious orientation and consumerism' (block-quotes both paragraphs, cited p. 434; British spelling 'endeavours')",
+            "url": "https://link.springer.com/article/10.1007/s40839-025-00260-9"
+          },
+          {
+            "source": "Bulbulia, Osborne & Sibley (2013), PLoS ONE 8(12) e80224, 'Moral Foundations Predict Religious Orientations in New Zealand' (cites 'p.424' for the extrinsic sentence, outside the paper's page range, probably a typo for 434; 'p.434' for the intrinsic one)",
+            "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC3858239"
+          }
+        ],
+        "agreement": "2 sources verbatim (McKenna 2025; Bulbulia 2013, the latter citing 'p.424'). Behere 2013 omits it; a Thai thesis chapter (kb.psu.ac.th 293912_ch2.pdf) paraphrases 'always instrumental and utilitarian' but attributes it to Hills et al. 2004."
+      },
+      {
+        "text": "Persons with this orientation may find religion useful in a variety of ways—to provide security and solace, sociability and distraction, status and self-justification.",
+        "quoted_by": [
+          {
+            "source": "McKenna, Francis & Stewart (2025), Journal of Religious Education, 'Implicit religion, extrinsic religious orientation and consumerism' (block-quotes both paragraphs, cited p. 434; British spelling 'endeavours')",
+            "url": "https://link.springer.com/article/10.1007/s40839-025-00260-9"
+          },
+          {
+            "source": "Behere, Das, Yadav & Behere (2013), Indian Journal of Psychiatry 55(Suppl 2), 'Religion and mental health' (reproduces both paragraphs under the headings 'Extrinsic orientation' / 'Intrinsic orientation', ref. [3] = Allport & Ross 1967)",
+            "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC3705681",
+            "wording": "Many find religion useful in a variety of ways – to provide security and solace, sociability and distraction, status and self-justification."
+          },
+          {
+            "source": "Wikipedia, 'Religious orientation' (cited p. 434)",
+            "url": "https://en.wikipedia.org/wiki/Religious_orientation",
+            "wording": "quotes only the clause 'to provide security and solace, sociability and distraction, status and self-justification' (p. 434)"
+          }
+        ],
+        "agreement": "2 sources for the full sentence (McKenna 2025 verbatim; Behere 2013 with 'Many find' for 'Persons with this orientation may find'); the six-noun clause additionally in Wikipedia (verbatim, p. 434) and paraphrased with the same six nouns in PMC3596433 (Rushing et al.), PMC3956626 (Agorastos et al.), the Hartford Encyclopedia of Religion and Society 'Hood' entry and the Thai thesis chapter (attributing it to McCormick et al. 2000)."
+      },
+      {
+        "text": "The embraced creed is lightly held or else selectively shaped to fit more primary needs.",
+        "quoted_by": [
+          {
+            "source": "McKenna, Francis & Stewart (2025), Journal of Religious Education, 'Implicit religion, extrinsic religious orientation and consumerism' (block-quotes both paragraphs, cited p. 434; British spelling 'endeavours')",
+            "url": "https://link.springer.com/article/10.1007/s40839-025-00260-9"
+          },
+          {
+            "source": "Behere, Das, Yadav & Behere (2013), Indian Journal of Psychiatry 55(Suppl 2), 'Religion and mental health' (reproduces both paragraphs under the headings 'Extrinsic orientation' / 'Intrinsic orientation', ref. [3] = Allport & Ross 1967)",
+            "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC3705681"
+          },
+          {
+            "source": "Arli et al. (2023), Journal of Business Ethics, 'Who Cares More About the Environment, Those with an Intrinsic, an Extrinsic, a Quest, or an Atheistic Religious Orientation?' (cited p. 434)",
+            "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC9206087"
+          },
+          {
+            "source": "Sakellariou (2025), Scientific Reports, 'The protective effect of high religiosity on later sexual behaviour of young adults in the US' (cited p. 434)",
+            "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC12381061"
+          },
+          {
+            "source": "Masters, K. S., 'Extrinsic Religiousness (Religiosity)', Encyclopedia of Behavioral Medicine (Springer) (preview page; cited p. 434)",
+            "url": "https://link.springer.com/rwe/10.1007/978-1-4419-1005-9_1582"
+          }
+        ],
+        "agreement": "5 sources verbatim (McKenna 2025; Behere 2013; Arli 2023 p. 434; Sakellariou 2025 p. 434; Masters, Encyclopedia of Behavioral Medicine, p. 434)"
+      },
+      {
+        "text": "In theological terms the extrinsic type turns to God, but without turning away from self.",
+        "quoted_by": [
+          {
+            "source": "McKenna, Francis & Stewart (2025), Journal of Religious Education, 'Implicit religion, extrinsic religious orientation and consumerism' (block-quotes both paragraphs, cited p. 434; British spelling 'endeavours')",
+            "url": "https://link.springer.com/article/10.1007/s40839-025-00260-9"
+          },
+          {
+            "source": "Abdel-Khalek, 'Religiosity and Well-Being', Encyclopedia of Personality and Individual Differences (Springer). Seen only as the snippet of this entry on a Bing results page (the entry page served a truncated preview); the snippet reads 'In theological terms, the extrinsic type turns to God, but without turning away from self. The intrinsic orientation...'",
+            "url": "https://link.springer.com/rwe/10.1007/978-3-319-28099-8_2335-1",
+            "wording": "In theological terms, the extrinsic type turns to God, but without turning away from self. (comma after 'terms'; seen in a Bing snippet only)"
+          },
+          {
+            "source": "Tønnesvang (2003), Psyke & Logos 24, 778-805, 'Religiøsitetens selvobjektfunktionalitet & tilknytningsdimensioner' (Danish article quoting the English, cited p. 434, spelling 'endeavours')",
+            "url": "https://tidsskrift.dk/psyke/article/download/8652/7225/27413",
+            "wording": "Danish paraphrase, not an English quotation: 'Er man ‘extrinsic’ orienteret, så vender man sig mod Gud uden at vende sig bort fra sig selv i en instrumentel brug af sin religion i en anden sags tjeneste'"
+          }
+        ],
+        "agreement": "1 source verbatim on a fetched page (McKenna 2025) + 1 verbatim in a search snippet of a second source (Abdel-Khalek, Springer encyclopedia) + 1 Danish paraphrase (Tønnesvang 2003). Behere 2013 omits the sentence."
+      }
+    ],
+    "uncertain": [
+      "Sentence 2 (axiology) rests on one fetched verbatim source (McKenna 2025); every other fetched source that reproduces the paragraph (Behere 2013) skips it, and the others only paraphrase it.",
+      "Sentence 6 (turns to God) has one fetched verbatim source plus a Bing snippet of a Springer encyclopedia entry whose own page would not load past the preview; Tønnesvang 2003 confirms the content in Danish only.",
+      "Sentence 4 lead-in: McKenna 2025 has 'Persons with this orientation may find religion useful in a variety of ways'; Behere 2013 has 'Many find religion useful in a variety of ways'. McKenna's wording is taken because it is a block quote with a page citation and Behere's reproduction also drops two sentences; the dash is an em dash in McKenna.",
+      "Sentence 3 is cited to 'p.424' by Bulbulia 2013, outside the article's page range (432-443); taken as a typo for 434, where every other source places both paragraphs.",
+      "Paragraph heading: Behere 2013 prints 'Extrinsic orientation' and the Hunt & King 1971 snippet prints 'Extrinsic Orientation.' immediately before sentence 1, so the paragraph most likely carries that run-in heading; not included in reconstructed_text because only one fully fetched source shows it.",
+      "No fetched source quotes any sentence of the paragraph before sentence 1 or after sentence 6; whether the paragraph is longer in the original is unknown.",
+      "Page: all page-citing sources say p. 434; none says p. 433."
+    ]
+  },
+  "intrinsic": {
+    "reconstructed_text": "Persons with this orientation find their master motive in religion. Other needs, strong as they may be, are regarded as of less ultimate significance, and they are, so far as possible, brought into harmony with the religious beliefs and prescriptions. Having embraced a creed the individual endeavors to internalize it and follow it fully. It is in this sense that he lives his religion.",
+    "sentences": [
+      {
+        "text": "Persons with this orientation find their master motive in religion.",
+        "quoted_by": [
+          {
+            "source": "McKenna, Francis & Stewart (2025), Journal of Religious Education, 'Implicit religion, extrinsic religious orientation and consumerism' (block-quotes both paragraphs, cited p. 434; British spelling 'endeavours')",
+            "url": "https://link.springer.com/article/10.1007/s40839-025-00260-9"
+          },
+          {
+            "source": "Behere, Das, Yadav & Behere (2013), Indian Journal of Psychiatry 55(Suppl 2), 'Religion and mental health' (reproduces both paragraphs under the headings 'Extrinsic orientation' / 'Intrinsic orientation', ref. [3] = Allport & Ross 1967)",
+            "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC3705681"
+          },
+          {
+            "source": "Askay & Magyar-Russell (2009), International Review of Psychiatry 21(6), 'Post-traumatic growth and spirituality in burn recovery' (quotes the intrinsic paragraph with an ellipsis, cited p. 434)",
+            "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC4449259"
+          },
+          {
+            "source": "Koenig & Büssing (2010), Religions 1(1), 78-85, 'The Duke University Religion Index (DUREL)' (quotes the intrinsic paragraph in full as Allport & Ross's definition; read from a mirror PDF because mdpi.com returned 403)",
+            "url": "https://psychxspirit.com/wp-content/uploads/2021/09/religions-01-00078.pdf"
+          },
+          {
+            "source": "Bulbulia, Osborne & Sibley (2013), PLoS ONE 8(12) e80224, 'Moral Foundations Predict Religious Orientations in New Zealand' (cites 'p.424' for the extrinsic sentence, outside the paper's page range, probably a typo for 434; 'p.434' for the intrinsic one)",
+            "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC3858239",
+            "wording": "quotes only 'find their master motive in religion' (p.434)"
+          },
+          {
+            "source": "Lucchetti et al. (2013), São Paulo Medical Journal, 'Measuring spirituality and religiosity in clinical research' (quotes the two opening intrinsic sentences with 'People' for 'Persons with this orientation')",
+            "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC10871731",
+            "wording": "People find their master motive in religion."
+          },
+          {
+            "source": "Saiz et al. (2020), Healthcare 8(2) 129, 'Is Belonging to a Religious Organization Enough?' (quotes with the subject rewritten)",
+            "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC7349115",
+            "wording": "persons with intrinsic orientation find their master motive in religion"
+          },
+          {
+            "source": "Pincus (2022), Integrative Psychological & Behavioral Science, 'Theoretical and Empirical Foundations for a Unified Pyramid of Human Motivation' (cited p. 434, 'italics added')",
+            "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC11052772",
+            "wording": "'... (finding his) master motive in religion' (p. 434), spliced onto the uses/lives sentence"
+          }
+        ],
+        "agreement": "4 sources verbatim (McKenna 2025; Behere 2013; Askay & Magyar-Russell 2009 p. 434; Koenig & Büssing 2010) + 1 verbatim fragment (Bulbulia 2013 p. 434) + 3 altered (Lucchetti 2013; Saiz 2020; Pincus 2022)"
+      },
+      {
+        "text": "Other needs, strong as they may be, are regarded as of less ultimate significance, and they are, so far as possible, brought into harmony with the religious beliefs and prescriptions.",
+        "quoted_by": [
+          {
+            "source": "McKenna, Francis & Stewart (2025), Journal of Religious Education, 'Implicit religion, extrinsic religious orientation and consumerism' (block-quotes both paragraphs, cited p. 434; British spelling 'endeavours')",
+            "url": "https://link.springer.com/article/10.1007/s40839-025-00260-9"
+          },
+          {
+            "source": "Askay & Magyar-Russell (2009), International Review of Psychiatry 21(6), 'Post-traumatic growth and spirituality in burn recovery' (quotes the intrinsic paragraph with an ellipsis, cited p. 434)",
+            "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC4449259"
+          },
+          {
+            "source": "Koenig & Büssing (2010), Religions 1(1), 78-85, 'The Duke University Religion Index (DUREL)' (quotes the intrinsic paragraph in full as Allport & Ross's definition; read from a mirror PDF because mdpi.com returned 403)",
+            "url": "https://psychxspirit.com/wp-content/uploads/2021/09/religions-01-00078.pdf"
+          },
+          {
+            "source": "Behere, Das, Yadav & Behere (2013), Indian Journal of Psychiatry 55(Suppl 2), 'Religion and mental health' (reproduces both paragraphs under the headings 'Extrinsic orientation' / 'Intrinsic orientation', ref. [3] = Allport & Ross 1967)",
+            "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC3705681",
+            "wording": "... brought in harmony with the religious beliefs and prescriptions. ('in' for 'into')"
+          },
+          {
+            "source": "Lucchetti et al. (2013), São Paulo Medical Journal, 'Measuring spirituality and religiosity in clinical research' (quotes the two opening intrinsic sentences with 'People' for 'Persons with this orientation')",
+            "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC10871731",
+            "wording": "first clause only: 'Other needs, strong as they may be, are regarded as of less ultimate significance'"
+          },
+          {
+            "source": "scales.arabpsychology.com, 'Religious Orientation Scale' (first clause only, run on from 'master motive': 'master motive … [whereas] other needs, strong as they may be, are regarded as of less ultimate significance')",
+            "url": "https://scales.arabpsychology.com/s/religious-orientation-scale/"
+          }
+        ],
+        "agreement": "3 sources verbatim with 'brought into harmony' (McKenna 2025; Askay & Magyar-Russell 2009; Koenig & Büssing 2010); Behere 2013 has 'brought in harmony'; the first clause additionally in Lucchetti 2013 and the arabpsychology scale page"
+      },
+      {
+        "text": "Having embraced a creed the individual endeavors to internalize it and follow it fully.",
+        "quoted_by": [
+          {
+            "source": "Behere, Das, Yadav & Behere (2013), Indian Journal of Psychiatry 55(Suppl 2), 'Religion and mental health' (reproduces both paragraphs under the headings 'Extrinsic orientation' / 'Intrinsic orientation', ref. [3] = Allport & Ross 1967)",
+            "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC3705681"
+          },
+          {
+            "source": "Koenig & Büssing (2010), Religions 1(1), 78-85, 'The Duke University Religion Index (DUREL)' (quotes the intrinsic paragraph in full as Allport & Ross's definition; read from a mirror PDF because mdpi.com returned 403)",
+            "url": "https://psychxspirit.com/wp-content/uploads/2021/09/religions-01-00078.pdf",
+            "wording": "Having embraced a creed, the individual endeavors to internalize it and follow it fully. (comma after 'creed')"
+          },
+          {
+            "source": "McKenna, Francis & Stewart (2025), Journal of Religious Education, 'Implicit religion, extrinsic religious orientation and consumerism' (block-quotes both paragraphs, cited p. 434; British spelling 'endeavours')",
+            "url": "https://link.springer.com/article/10.1007/s40839-025-00260-9",
+            "wording": "Having embraced a creed the individual endeavours to internalize it and follow it fully. (British 'endeavours')"
+          },
+          {
+            "source": "Tønnesvang (2003), Psyke & Logos 24, 778-805, 'Religiøsitetens selvobjektfunktionalitet & tilknytningsdimensioner' (Danish article quoting the English, cited p. 434, spelling 'endeavours')",
+            "url": "https://tidsskrift.dk/psyke/article/download/8652/7225/27413",
+            "wording": "Having embraced a creed the individual endeavours to internalize it and follow it fully. (British 'endeavours'; p. 434)"
+          }
+        ],
+        "agreement": "4 sources (Behere 2013 verbatim; Koenig & Büssing 2010 with an added comma; McKenna 2025 and Tønnesvang 2003 with 'endeavours'). American spelling 'endeavors' adopted because the journal is American and two sources have it; the Hartford 'Hood' entry paraphrases ('internalize their religion, following it more fully')."
+      },
+      {
+        "text": "It is in this sense that he lives his religion.",
+        "quoted_by": [
+          {
+            "source": "Askay & Magyar-Russell (2009), International Review of Psychiatry 21(6), 'Post-traumatic growth and spirituality in burn recovery' (quotes the intrinsic paragraph with an ellipsis, cited p. 434)",
+            "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC4449259",
+            "wording": "follows the preceding sentences after an ellipsis: '… It is in this sense that he lives his religion' (p. 434)"
+          },
+          {
+            "source": "Koenig & Büssing (2010), Religions 1(1), 78-85, 'The Duke University Religion Index (DUREL)' (quotes the intrinsic paragraph in full as Allport & Ross's definition; read from a mirror PDF because mdpi.com returned 403)",
+            "url": "https://psychxspirit.com/wp-content/uploads/2021/09/religions-01-00078.pdf"
+          },
+          {
+            "source": "Tønnesvang (2003), Psyke & Logos 24, 778-805, 'Religiøsitetens selvobjektfunktionalitet & tilknytningsdimensioner' (Danish article quoting the English, cited p. 434, spelling 'endeavours')",
+            "url": "https://tidsskrift.dk/psyke/article/download/8652/7225/27413"
+          }
+        ],
+        "agreement": "3 sources verbatim (Askay & Magyar-Russell 2009 p. 434; Koenig & Büssing 2010; Tønnesvang 2003 p. 434). McKenna 2025's block quote and Behere 2013's reproduction stop at the previous sentence; Koenig & Büssing and Tønnesvang both place this sentence directly after it."
+      }
+    ],
+    "uncertain": [
+      "'brought into harmony' (3 sources) versus 'brought in harmony' (Behere 2013): 'into' adopted.",
+      "'endeavors' (Behere 2013, Koenig & Büssing 2010) versus 'endeavours' (McKenna 2025, Tønnesvang 2003): American spelling adopted for an American journal; the original spelling was not seen.",
+      "Comma after 'Having embraced a creed': present only in Koenig & Büssing 2010; omitted in the other three sources, so omitted here.",
+      "Whether sentence 4 is the paragraph's last sentence is not established: Koenig & Büssing 2010 and Tønnesvang 2003 end their quotation there, and no fetched source quotes anything after it.",
+      "Paragraph heading: Behere 2013 prints 'Intrinsic orientation' before sentence 1 (see the extrinsic note); not included in reconstructed_text.",
+      "Page: all page-citing sources say p. 434."
+    ]
+  },
+  "summary_sentence": {
+    "text": "The extrinsically motivated person uses his religion, whereas the intrinsically motivated person lives his religion.",
+    "quoted_by": [
+      {
+        "source": "Sakellariou (2025), Scientific Reports, 'The protective effect of high religiosity on later sexual behaviour of young adults in the US' (cited p. 434)",
+        "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC12381061",
+        "wording": "The extrinsically motivated person uses his religion, whereas the intrinsically motivated person lives his religion (p. 434)"
+      },
+      {
+        "source": "Kayıklık (2015), Dini Araştırmalar, 'Allport'a Göre Dinî Yaşayışa Gelişimsel Bir Açılım' (English abstract via the DOAJ API: 'According to Allport the extrinsically motivated person uses his religion, whereas the intrinsically motivated person lives his religion'; no quotation marks; the PDF has no text layer)",
+        "url": "https://doaj.org/api/articles/c82be2f91a3240b6af5bc03a1b8e6fa7",
+        "wording": "the extrinsically motivated person uses his religion, whereas the intrinsically motivated person lives his religion (abstract, no quotation marks)"
+      },
+      {
+        "source": "Flere, Lavrič, Musil & Klanjšek, Europe's Journal of Psychology (cited p. 434)",
+        "url": "https://distantreader.org/stacks/journals/ejop/ejop-397.htm",
+        "wording": "the extrinsically motivated individual uses his religion, whereas the intrinsically motivated lives his (p. 434)"
+      },
+      {
+        "source": "Pincus (2022), Integrative Psychological & Behavioral Science, 'Theoretical and Empirical Foundations for a Unified Pyramid of Human Motivation' (cited p. 434, 'italics added')",
+        "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC11052772",
+        "wording": "'uses his religion, the intrinsically motivated lives his…' (p. 434; italics added by the quoting author)"
+      },
+      {
+        "source": "Zheng, Song & Chen (2020), Frontiers in Psychology 11:1636 (quotes the summary sentence rewritten in the plural: 'people with extrinsic motivation use their religion, whereas people with the intrinsic motivation live their religion')",
+        "url": "https://www.frontiersin.org/journals/psychology/articles/10.3389/fpsyg.2020.01636/full",
+        "wording": "people with extrinsic motivation use their religion, whereas people with the intrinsic motivation live their religion"
+      }
+    ],
+    "agreement": "5 sources cite the sentence to Allport & Ross 1967 (three to p. 434) but in three wordings: 'person ... person ... lives his religion' (Sakellariou 2025; Kayıklık 2015), 'individual ... lives his' (Flere et al.), 'uses his religion, the intrinsically motivated lives his' (Pincus 2022), plural paraphrase (Zheng et al. 2020). The two-source wording is given as text; 'individual' versus 'person' and whether 'religion' is repeated after 'lives his' remain open. The sentence is separate from the two definitional paragraphs: McKenna 2025 (which block-quotes both) does not include it in them, and the Wikipedia article does not contain it despite search-engine summaries saying so.",
+    "page_cited": "434"
+  },
+  "sources_fetched": [
+    {
+      "source": "McKenna, Francis & Stewart (2025), Journal of Religious Education, 'Implicit religion, extrinsic religious orientation and consumerism' (block-quotes both paragraphs, cited p. 434; British spelling 'endeavours')",
+      "url": "https://link.springer.com/article/10.1007/s40839-025-00260-9",
+      "what_it_gave": "Both definitional paragraphs as block quotes (extrinsic sentences 1-6, intrinsic 1-3), p. 434; the only fetched source for the axiology sentence and the only fully fetched source for 'turns to God'. Reached via Springer's cookie handshake URL; the plain URL returns a 'Client Challenge' page."
+    },
+    {
+      "source": "Behere, Das, Yadav & Behere (2013), Indian Journal of Psychiatry 55(Suppl 2), 'Religion and mental health' (reproduces both paragraphs under the headings 'Extrinsic orientation' / 'Intrinsic orientation', ref. [3] = Allport & Ross 1967)",
+      "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC3705681",
+      "what_it_gave": "Both paragraphs with run-in headings; extrinsic 1, 4 (as 'Many find ...'), 5; intrinsic 1-3 ('brought in harmony'). Full text via E-utilities efetch (PMC's web pages serve a captcha to WebFetch)."
+    },
+    {
+      "source": "Askay & Magyar-Russell (2009), International Review of Psychiatry 21(6), 'Post-traumatic growth and spirituality in burn recovery' (quotes the intrinsic paragraph with an ellipsis, cited p. 434)",
+      "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC4449259",
+      "what_it_gave": "Intrinsic sentences 1-2 and 4 with an ellipsis, p. 434."
+    },
+    {
+      "source": "Koenig & Büssing (2010), Religions 1(1), 78-85, 'The Duke University Religion Index (DUREL)' (quotes the intrinsic paragraph in full as Allport & Ross's definition; read from a mirror PDF because mdpi.com returned 403)",
+      "url": "https://psychxspirit.com/wp-content/uploads/2021/09/religions-01-00078.pdf",
+      "what_it_gave": "Intrinsic paragraph complete (sentences 1-4) as 'Allport and Ross defined IR as follows'."
+    },
+    {
+      "source": "Arli et al. (2023), Journal of Business Ethics, 'Who Cares More About the Environment, Those with an Intrinsic, an Extrinsic, a Quest, or an Atheistic Religious Orientation?' (cited p. 434)",
+      "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC9206087",
+      "what_it_gave": "Extrinsic sentence 5, p. 434; paraphrase of sentence 2."
+    },
+    {
+      "source": "Sakellariou (2025), Scientific Reports, 'The protective effect of high religiosity on later sexual behaviour of young adults in the US' (cited p. 434)",
+      "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC12381061",
+      "what_it_gave": "Extrinsic sentence 5 and the summary sentence, both p. 434."
+    },
+    {
+      "source": "Bulbulia, Osborne & Sibley (2013), PLoS ONE 8(12) e80224, 'Moral Foundations Predict Religious Orientations in New Zealand' (cites 'p.424' for the extrinsic sentence, outside the paper's page range, probably a typo for 434; 'p.434' for the intrinsic one)",
+      "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC3858239",
+      "what_it_gave": "Extrinsic sentence 3 ('p.424') and the fragment 'find their master motive in religion' (p.434). Already in drafts_b.json."
+    },
+    {
+      "source": "Masters, K. S., 'Extrinsic Religiousness (Religiosity)', Encyclopedia of Behavioral Medicine (Springer) (preview page; cited p. 434)",
+      "url": "https://link.springer.com/rwe/10.1007/978-1-4419-1005-9_1582",
+      "what_it_gave": "Extrinsic sentence 5, p. 434 (entry preview)."
+    },
+    {
+      "source": "Wikipedia, 'Religious orientation' (cited p. 434)",
+      "url": "https://en.wikipedia.org/wiki/Religious_orientation",
+      "what_it_gave": "The six-noun clause of extrinsic sentence 4, p. 434. Does not contain the uses/lives sentence. Already in drafts_b.json."
+    },
+    {
+      "source": "Flere, Lavrič, Musil & Klanjšek, Europe's Journal of Psychology (cited p. 434)",
+      "url": "https://distantreader.org/stacks/journals/ejop/ejop-397.htm",
+      "what_it_gave": "Summary sentence, 'individual' wording, p. 434. Already in drafts_b.json."
+    },
+    {
+      "source": "Pincus (2022), Integrative Psychological & Behavioral Science, 'Theoretical and Empirical Foundations for a Unified Pyramid of Human Motivation' (cited p. 434, 'italics added')",
+      "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC11052772",
+      "what_it_gave": "Summary sentence fragment spliced with 'master motive', p. 434."
+    },
+    {
+      "source": "Saiz et al. (2020), Healthcare 8(2) 129, 'Is Belonging to a Religious Organization Enough?' (quotes with the subject rewritten)",
+      "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC7349115",
+      "what_it_gave": "Extrinsic 1 and intrinsic 1 with the subject rewritten."
+    },
+    {
+      "source": "Lucchetti et al. (2013), São Paulo Medical Journal, 'Measuring spirituality and religiosity in clinical research' (quotes the two opening intrinsic sentences with 'People' for 'Persons with this orientation')",
+      "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC10871731",
+      "what_it_gave": "Intrinsic 1-2 (first clause) with 'People' for 'Persons with this orientation'."
+    },
+    {
+      "source": "Tønnesvang (2003), Psyke & Logos 24, 778-805, 'Religiøsitetens selvobjektfunktionalitet & tilknytningsdimensioner' (Danish article quoting the English, cited p. 434, spelling 'endeavours')",
+      "url": "https://tidsskrift.dk/psyke/article/download/8652/7225/27413",
+      "what_it_gave": "Intrinsic 3-4 in English ('endeavours'), p. 434; Danish paraphrase of extrinsic 6 and of the six uses. Already in drafts_b.json."
+    },
+    {
+      "source": "Kayıklık (2015), Dini Araştırmalar, 'Allport'a Göre Dinî Yaşayışa Gelişimsel Bir Açılım' (English abstract via the DOAJ API: 'According to Allport the extrinsically motivated person uses his religion, whereas the intrinsically motivated person lives his religion'; no quotation marks; the PDF has no text layer)",
+      "url": "https://doaj.org/api/articles/c82be2f91a3240b6af5bc03a1b8e6fa7",
+      "what_it_gave": "English abstract with the summary sentence ('person ... person ... lives his religion'); the article PDF (DergiPark article-file 51722) is image-only."
+    },
+    {
+      "source": "Zheng, Song & Chen (2020), Frontiers in Psychology 11:1636 (quotes the summary sentence rewritten in the plural: 'people with extrinsic motivation use their religion, whereas people with the intrinsic motivation live their religion')",
+      "url": "https://www.frontiersin.org/journals/psychology/articles/10.3389/fpsyg.2020.01636/full",
+      "what_it_gave": "Plural paraphrase of the summary sentence; Allport 1966 quotations (not 1967)."
+    },
+    {
+      "source": "Bing results pages for the exact phrases (fetched as web pages)",
+      "url": "https://www.bing.com/search?q=%22turns+to+God%2C+but+without+turning+away+from+self%22+Allport+extrinsic",
+      "what_it_gave": "Snippets of the Abdel-Khalek Springer entry (extrinsic 6 with a comma; extrinsic 1 altered) and of Hunt & King 1971 on JSTOR ('the most extended formal definition ... Extrinsic Orientation. Persons with this orientation are'). Also surfaced apparent copies of the 1967 paper itself (Scribd; romolocapuano.com), which were deliberately not fetched per the brief. Later Bing queries returned unrelated results (bot throttling)."
+    },
+    {
+      "source": "Neyrinck, Lens, Vansteenkiste & Soenens (2010), JSSR, 'Updating Allport's and Batson's Framework of Religious Orientations'",
+      "url": "https://selfdeterminationtheory.org/wp-content/uploads/2014/04/2010_NeyrinckLensetal_JSSR.pdf",
+      "what_it_gave": "Gloss only ('master motive in life', 'religion is lightly held'); quotes Allport 1950 and 1966, not 1967 verbatim. Already in drafts_b.json."
+    },
+    {
+      "source": "Rushing et al. (2012), Aging & Mental Health; Agorastos, Demiralay & Huber (2014), Psychol Res Behav Manag; Bosetti et al. (2020), 'Effects of religious orientation and state secularism on pre-implantation genetic diagnosis'",
+      "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC3596433 ; https://pmc.ncbi.nlm.nih.gov/articles/PMC3956626 ; https://pmc.ncbi.nlm.nih.gov/articles/PMC7475182",
+      "what_it_gave": "Paraphrases without quotation marks: the six uses (Rushing; Agorastos), 'instrumental and utilitarian aspects' (Agorastos), 'held just because it serves other, more ultimate interests' (Bosetti). Counted as paraphrase support only."
+    },
+    {
+      "source": "Malony (1971), JASA 23, 'The Contribution of Gordon Allport (1897-1967) to the Psychology of Religion'; Hartford Encyclopedia of Religion and Society entries 'Allport', 'Intrinsic-Extrinsic Religiosity' (Hood), 'Hood'; scales.arabpsychology.com ROS page; Kelland OER chapter (Baypath); Hills, Francis & Robbins TPM paper on the RLI; Brambilla & Assor 2020; Redalyc 299029768008; two uOttawa theses (Charpentier 1976; Connelly 1973); Wulff 1991 chapter PDF",
+      "url": "https://www.asa3.org/ASA/PSCF/1971/JASA9-71Malony.html",
+      "what_it_gave": "Fetched and read; paraphrases only or nothing on the 1967 definitions. The arabpsychology page gives the first clause of intrinsic 2."
+    },
+    {
+      "source": "PMC and Europe PMC full-text search (E-utilities esearch db=pmc; Europe PMC REST)",
+      "url": "https://eutils.ncbi.nlm.nih.gov/entrez/eutils/esearch.fcgi?db=pmc&term=%22selectively+shaped+to+fit+more+primary+needs%22&retmode=json",
+      "what_it_gave": "Located PMC3705681, PMC9206087, PMC12381061, PMC10871731, PMC4449259, PMC11052772, PMC7349115, PMC3596433, PMC3956626, PMC7475182 as articles containing the target phrases; no PMC article contains 'turning away from self' or 'borrowed from axiology'."
+    }
+  ],
+  "could_not_fetch": [
+    "Donahue (1985), JPSP 48, 400-419, 'Intrinsic and extrinsic religiousness: review and meta-analysis' — no open copy found (ResearchGate listing only).",
+    "Hill & Hood (eds.) (1999), Measures of Religiosity — book; Google Books API returned 429 (daily quota exceeded) for every phrase query, so no snippet was obtained.",
+    "Gorsuch & McPherson (1989), JSSR 28, 348-354 — closed; no open copy found.",
+    "Kirkpatrick & Hood (1990), JSSR 29, 442-462 — closed; no open copy found.",
+    "Hunt & King (1971), JSSR 10, 339-356 — JSTOR page did not load; only a Bing snippet seen.",
+    "Abdel-Khalek, 'Religiosity and Well-Being' (Encyclopedia of Personality and Individual Differences) — Springer served a truncated preview; the quotation of extrinsic sentence 6 was seen only in a Bing snippet.",
+    "MDPI pages (Religions 2016 7(5):56 NIROR; Religions 2018 9(1):15; Religions 2010 1(1):78 DUREL original) — HTTP 403 to WebFetch and curl; DUREL read from a mirror PDF instead.",
+    "CORE PDFs 268105285 (Pace 2014, Journal of Applied Business Research) and 234694926 (Mambo 2018, Journal of Philosophy, Culture and Religion), both matching the extrinsic sentences in search — Cloudflare challenge on core.ac.uk and files.core.ac.uk; the CORE API record carries no full text.",
+    "Journal of Catholic Education 10(1) PDF (digitalcommons.lmu.edu article 1386) — Cloudflare challenge.",
+    "Journal of Psychology and Theology 52(1) 2024, 'Intrinsic and Extrinsic Religious Motivation: Retrospect and Prospect' (Sage) — HTTP 403.",
+    "Tiliopoulos et al. (2007), PAID 42, 'The means and ends of religiosity' (Glasgow Enlighten record: 'Full text not currently available').",
+    "APA PsycNet record for the paper (abstract) — JavaScript-only page, nothing rendered.",
+    "Semantic Scholar snippet API — HTTP 429 on every call; Google Books API — HTTP 429 quota; HathiTrust full-text search — JavaScript challenge; DuckDuckGo HTML — bot page; Wayback Machine — no snapshots reported for the blocked URLs and web.archive.org not reachable from WebFetch.",
+    "Kayıklık (2015) article PDF (DergiPark article-file 51722) — downloaded but image-only (17 characters of text); only the DOAJ abstract was usable.",
+    "UTK dissertation (voljournals.utk.edu/utk_graddiss/10943) — Anubis bot block; Patheos 'Religious History Nerd' post — Cloudflare; Brian Harris blog — 403; Leiden repository item 2888935 — PDF without extractable text; MSU ETD 15833 — HTML stub.",
+    "Apparent copies of the 1967 paper itself on Scribd (document 346544083) and romolocapuano.com — not fetched, as the brief instructs."
+  ],
+  "retrieved": "2026-10-07"
+}

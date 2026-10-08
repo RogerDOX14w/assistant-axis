@@ -1,0 +1,198 @@
+[
+ {
+  "stem": "extrinsic_allport",
+  "label": "extrinsic (Allport)",
+  "partner": "intrinsic_allport",
+  "pairing": "pair",
+  "arrangement_members": null,
+  "description_notes": "Religion used as a means (comfort, sociability, status); see intrinsic (Allport).",
+  "decision": "decided 2026-09-07 (section)",
+  "source": "Allport and Ross, intrinsic / extrinsic religious orientation",
+  "tags": [
+   "standard"
+  ],
+  "sub_chunk": "part 2: religion"
+ },
+ {
+  "stem": "gemeinschaft_tonnies",
+  "label": "Gemeinschaft (Tönnies)",
+  "partner": "gesellschaft_tonnies",
+  "pairing": "pair",
+  "arrangement_members": null,
+  "description_notes": "Describes a person native to such a society, not a theory of society: someone whose ties are kinship, place and custom, who treats relationships as ends and locates themself in family, village and faith. Diacritics fold to ASCII in the stem, the label keeps them. Durkheim's mechanical solidarity is the same axis seen from the division of labour. Overlaps to check: collectivistic / individualistic, traditional / innovative, the provincial role.",
+  "decision": "decided 2026-09-07",
+  "source": "Tönnies, Gemeinschaft / Gesellschaft (Durkheim mechanical / organic solidarity is the same axis)",
+  "tags": [
+   "standard"
+  ],
+  "sub_chunk": "part 2: anthropological social structure"
+ },
+ {
+  "stem": "gesellschaft_tonnies",
+  "label": "Gesellschaft (Tönnies)",
+  "partner": "gemeinschaft_tonnies",
+  "pairing": "pair",
+  "arrangement_members": null,
+  "description_notes": "A person native to a society whose ties are contract, role and interest, who weighs relationships by what they yield and locates themself in profession, market and state. See Gemeinschaft (Tönnies).",
+  "decision": "decided 2026-09-07",
+  "source": "Tönnies, Gemeinschaft / Gesellschaft (Durkheim mechanical / organic solidarity is the same axis)",
+  "tags": [
+   "standard"
+  ],
+  "sub_chunk": "part 2: anthropological social structure"
+ },
+ {
+  "stem": "high_context_hall",
+  "label": "high-context (Hall)",
+  "partner": "low_context_hall",
+  "pairing": "pair",
+  "arrangement_members": null,
+  "description_notes": "Meaning carried by relationship, setting and implication. Expect overlap with blunt / tactful, literal (figurative), circumspect (brash) and enigmatic (straightforward); run the Strategy 1 yield check before judging.",
+  "decision": "decided 2026-09-07 (section)",
+  "source": "Hall 1976, high- / low-context communication",
+  "tags": [
+   "standard"
+  ],
+  "sub_chunk": "part 2: cultural orientation"
+ },
+ {
+  "stem": "intrinsic_allport",
+  "label": "intrinsic (Allport)",
+  "partner": "extrinsic_allport",
+  "pairing": "pair",
+  "arrangement_members": null,
+  "description_notes": "Religion lived as an end in itself: the intensity-within-affiliation axis, orthogonal to which religion. Standard-name convention: the description paraphrases without naming Allport; source carries the citation.",
+  "decision": "decided 2026-09-07 (section)",
+  "source": "Allport and Ross, intrinsic / extrinsic religious orientation",
+  "tags": [
+   "standard"
+  ],
+  "sub_chunk": "part 2: religion"
+ },
+ {
+  "stem": "loose_gelfand",
+  "label": "loose (Gelfand)",
+  "partner": "tight_gelfand",
+  "pairing": "pair",
+  "arrangement_members": null,
+  "description_notes": "Weak norm expectations and tolerance of deviance in others; see tight (Gelfand).",
+  "decision": "decided 2026-09-07 (section)",
+  "source": "Gelfand et al. 2011, tightness-looseness",
+  "tags": [
+   "standard"
+  ],
+  "sub_chunk": "part 2: cultural orientation"
+ },
+ {
+  "stem": "low_context_hall",
+  "label": "low-context (Hall)",
+  "partner": "high_context_hall",
+  "pairing": "pair",
+  "arrangement_members": null,
+  "description_notes": "Meaning carried by explicit words; see high-context (Hall).",
+  "decision": "decided 2026-09-07 (section)",
+  "source": "Hall 1976, high- / low-context communication",
+  "tags": [
+   "standard"
+  ],
+  "sub_chunk": "part 2: cultural orientation"
+ },
+ {
+  "stem": "monochronic_hall",
+  "label": "monochronic (Hall)",
+  "partner": "polychronic_hall",
+  "pairing": "pair",
+  "arrangement_members": null,
+  "description_notes": "One thing at a time with schedules binding. Proxies: methodical / improvisational, urgent (relaxed), impatient / patient; yield check first.",
+  "decision": "decided 2026-09-07 (section)",
+  "source": "Hall 1983, monochronic / polychronic time",
+  "tags": [
+   "standard"
+  ],
+  "sub_chunk": "part 2: cultural orientation"
+ },
+ {
+  "stem": "polychronic_hall",
+  "label": "polychronic (Hall)",
+  "partner": "monochronic_hall",
+  "pairing": "pair",
+  "arrangement_members": null,
+  "description_notes": "Several things at once with relationships ahead of appointments; see monochronic (Hall).",
+  "decision": "decided 2026-09-07 (section)",
+  "source": "Hall 1983, monochronic / polychronic time",
+  "tags": [
+   "standard"
+  ],
+  "sub_chunk": "part 2: cultural orientation"
+ },
+ {
+  "stem": "secular_rational_inglehart_welzel",
+  "label": "secular-rational (Inglehart-Welzel)",
+  "partner": "traditional_inglehart_welzel",
+  "pairing": "pair",
+  "arrangement_members": null,
+  "description_notes": "Axis 1 of the cultural map, rational-legal pole: authority grounded in reason and law rather than religion, family or nation. See traditional (Inglehart-Welzel).",
+  "decision": "adopted under that name (line 1155)",
+  "source": "Inglehart-Welzel cultural map (World Values Survey)",
+  "tags": [
+   "standard"
+  ],
+  "sub_chunk": "Inglehart-Welzel"
+ },
+ {
+  "stem": "self_expression_inglehart_welzel",
+  "label": "self-expression (Inglehart-Welzel)",
+  "partner": "survival_inglehart_welzel",
+  "pairing": "pair",
+  "arrangement_members": null,
+  "description_notes": "Axis 2 of the cultural map: autonomy, tolerance, participation over security. Postmaterialism is treated as identical to this pole (line 1300).",
+  "decision": "adopted under that name (line 1155)",
+  "source": "Inglehart-Welzel cultural map (World Values Survey)",
+  "tags": [
+   "standard"
+  ],
+  "sub_chunk": "Inglehart-Welzel"
+ },
+ {
+  "stem": "survival_inglehart_welzel",
+  "label": "survival (Inglehart-Welzel)",
+  "partner": "self_expression_inglehart_welzel",
+  "pairing": "pair",
+  "arrangement_members": null,
+  "description_notes": "Axis 2 of the cultural map: economic / physical security first. Run the Strategy 1 yield check before committing.",
+  "decision": "adopted under that name (line 1155)",
+  "source": "Inglehart-Welzel cultural map (World Values Survey)",
+  "tags": [
+   "standard"
+  ],
+  "sub_chunk": "Inglehart-Welzel"
+ },
+ {
+  "stem": "tight_gelfand",
+  "label": "tight (Gelfand)",
+  "partner": "loose_gelfand",
+  "pairing": "pair",
+  "arrangement_members": null,
+  "description_notes": "How strong the persona expects social norms to be and how readily it sanctions deviance in others: norm enforcement. Distinct from conformist / nonconformist (the persona's own compliance) and regulatory (rule-flexible) (formal rules). Standard-name convention; source carries the citation.",
+  "decision": "decided 2026-09-07 (section)",
+  "source": "Gelfand et al. 2011, tightness-looseness",
+  "tags": [
+   "standard"
+  ],
+  "sub_chunk": "part 2: cultural orientation"
+ },
+ {
+  "stem": "traditional_inglehart_welzel",
+  "label": "traditional (Inglehart-Welzel)",
+  "partner": "secular_rational_inglehart_welzel",
+  "pairing": "pair",
+  "arrangement_members": null,
+  "description_notes": "Axis 1 of the cultural map: deference to religious / family / national authority vs rational-legal. Description paraphrases the canonical definition without naming the source. The suffix keeps it distinct from the existing traditional (innovative) and secular (religious) traits, which have different scopes. Expect overlap with religious/secular, conservative/progressive and moral-circle traits; run the Strategy 1 yield check before committing.",
+  "decision": "adopted under that name (line 1155); naming per the `<pole> (<Standard>)` convention",
+  "source": "Inglehart-Welzel cultural map (World Values Survey)",
+  "tags": [
+   "standard"
+  ],
+  "sub_chunk": "Inglehart-Welzel"
+ }
+]

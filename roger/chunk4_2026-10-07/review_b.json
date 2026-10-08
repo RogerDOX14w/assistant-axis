@@ -1,0 +1,187 @@
+{
+  "entries": [
+    {
+      "stem": "extrinsic_allport",
+      "verdict": "ok",
+      "issues": [],
+      "suggested_edit": null,
+      "nearest_existing_ok": true,
+      "strength": "Matches: the source is pointed ('always instrumental and utilitarian', 'uses his religion') and so is the draft; Allport's six payoff nouns are kept with two plain-word swaps (sociability > company, status > standing). Not milder than the corpus's plain traits.",
+      "notes": "Faithful: every clause is in a recorded fragment; 'held lightly' comes from the Neyrinck gloss that source_text records, as the writer says. Of the neighbours named, the corpus's transactional is a leadership trait (paired with transformational), so extrinsically_motivated is the live one. Person-level by nature."
+    },
+    {
+      "stem": "gemeinschaft_tonnies",
+      "verdict": "ok",
+      "issues": [],
+      "suggested_edit": null,
+      "nearest_existing_ok": true,
+      "strength": "Matches: warm and declarative like the passage ('familiar, comfortable and exclusive', 'for better or for worse'); no hedges on either side. A virtue pole by the author's doing, kept under the asymmetry rule.",
+      "notes": "'kin and home': kinship is in the recorded passage; 'home' rests on the excerpt's 'domestic community', which the notes cite but source_text does not carry. Fine as a summary; adding that sentence to source_text would close the gap. 'staying together in spite of all that separates' is a group act seen from the person's side; acceptable. clannish (exclusive loyalty to kin) is the closest corpus trait and is named; not a deliberate duplicate, as the line says."
+    },
+    {
+      "stem": "gesellschaft_tonnies",
+      "verdict": "edit",
+      "issues": [
+        "Strength, opening clause: Toennies' 'live peacefully alongside one another' is rendered 'living alongside others'; without the qualifier the following 'in tension with everyone else' reads as open hostility, where the source describes the civil, peaceful coexistence of people who are not joined. Restore it (the writer flagged this as a possible re-edit); 'away' trimmed to stay at 32 words."
+      ],
+      "suggested_edit": "This means living peaceably alongside others without being joined to them, out for oneself alone and in tension with everyone else, and giving nothing except in exchange for at least as much.",
+      "nearest_existing_ok": true,
+      "strength": "At the source's harsh pitch ('out for himself alone', 'tension against everyone else', 'at least an equal trade-off'); a half-step stronger than the passage only in the dropped 'peacefully'. Markedly harsher than the corpus's transactional, individualistic or calculating: the author's asymmetry, to be kept.",
+      "notes": "The nearest-existing gloss of transactional ('relationships weighed by what they yield') is the plain sense, not the corpus file's, which describes a transactional leader; individualistic and calculating are the real neighbours. The fetched passage names no institution (market, contract, state); if Roger wants one named, it should come from a further Toennies passage, not from the queue note, which is not a source."
+    },
+    {
+      "stem": "high_context_hall",
+      "verdict": "edit",
+      "issues": [
+        "Strength, closing clause: Hall's 'expect others to know what's bothering him, so that he doesn't have to be specific' is rendered 'without being told', which suggests saying nothing; Hall's person speaks, but not specifically. 'without spelling it out' is the plain equivalent ('themselves' trimmed to stay at 32 words)."
+      ],
+      "suggested_edit": "This means letting the setting and shared history carry most of one's meaning, putting very little into the words, and expecting others to know what is bothering one without spelling it out.",
+      "nearest_existing_ok": true,
+      "strength": "Matches on the definition ('most', 'very little' kept as Hall's words); a half-step stronger in the closing clause, named above. Not milder than the corpus.",
+      "notes": "'shared history' renders 'internalized in the person' and 'information widely shared' among people 'deeply involved' with one another; a fair reading, though 'shared knowledge' is nearer Hall's words. Person-level throughout (the p. 113 sentence is about an individual). The corpus's cryptic and enigmatic are deliberate obscurity, a different mechanism, as the line says."
+    },
+    {
+      "stem": "intrinsic_allport",
+      "verdict": "ok",
+      "issues": [],
+      "suggested_edit": null,
+      "nearest_existing_ok": true,
+      "strength": "Matches: 'master motive' and 'follow it fully' are the source's own unhedged phrases; 'fitting one's other needs around it' renders the gloss's 'accommodated, reorganized, and brought in harmony'. Not milder than the corpus.",
+      "notes": "Faithful to the recorded fragments. 'master motive' is Allport's phrase and makes the pole recognisable to anyone who knows the scale without naming it. The syntax 'and, having taken up a creed, striving ...' is a little knotted but within the corpus form. Nearest-existing line right: religious says that one believes, this says religion is the end the rest serves."
+    },
+    {
+      "stem": "loose_gelfand",
+      "verdict": "ok",
+      "issues": [],
+      "suggested_edit": null,
+      "nearest_existing_ok": true,
+      "strength": "Matches: 'weak social norms' > 'only weak rules of conduct', 'high tolerance of deviant behavior' > 'putting up readily with behavior that steps well outside the usual'; flat comparatives on both sides. Not markedly milder than the corpus's permissive or lenient (which are narrower: vices; performance).",
+      "notes": "The middle clause ('leaving people to decide for themselves how to behave in most situations') renders 'broad socialization' and weak 'everyday recurring situations', system-level items in the abstract turned into a person's habit; defensible and needed for length (the parenthesis alone gives about 15 words), but it is the furthest the draft goes beyond the literal definition. The opening 'holding only weak rules of conduct' could be read as the person's own laxity; the third clause (others' behavior) settles it toward the queue note's test."
+    },
+    {
+      "stem": "low_context_hall",
+      "verdict": "ok",
+      "issues": [],
+      "suggested_edit": null,
+      "nearest_existing_ok": true,
+      "strength": "Matches: 'the mass of the information' kept as 'the mass of one's meaning'; 'must be encoded ... to make up for what is missing in the context' > 'spelling out whatever the setting does not supply'. 'somewhat alienated' is not carried, rightly: it describes the culture's mood, not its communication, and would add a feelings facet absent on the high side.",
+      "notes": "The closing clause ('taking for granted that others share little of one's background') is assembled from 'less pre-programmed information shared' and 'highly individualized ... fragmented', not from a sentence about an individual; see the pair flag. 'the mass of one's meaning' is faithful but slightly odd as self-description; 'the bulk' is the plain word if Roger wants it."
+    },
+    {
+      "stem": "monochronic_hall",
+      "verdict": "ok",
+      "issues": [],
+      "suggested_edit": null,
+      "nearest_existing_ok": true,
+      "strength": "Matches: matter-of-fact like Hall's M-time paragraph and the 1990 list. The aside that schedules 'take on a life all their own without reference to either logic or human needs' is about bureaucracies and is rightly not made a habit of the person; carrying it would sharpen the pole beyond Hall's description of the individual.",
+      "notes": "Two sources, Hall 1983 via the Trinity page and Hall & Hall 1990 via the WSPA handout, both recorded in source_text; 'doing one thing at a time' and 'keeping to the clock' come from the 1990 list. The corpus's organized already says 'taking one thing at a time in order', so it is as near as methodical; the line names both."
+    },
+    {
+      "stem": "polychronic_hall",
+      "verdict": "ok",
+      "issues": [],
+      "suggested_edit": null,
+      "nearest_existing_ok": true,
+      "strength": "Matches: 'seldom' kept; 'you must hear them out and cannot cut them off simply because of a schedule' > 'hearing people out, schedule or no schedule' at the same pitch; 'often sacred' dropped for length.",
+      "notes": "Provenance gap, not a draft fault: the first clause, 'doing many things at once', renders the Hall & Hall 1990 line 'Do many things at once', which this entry's source_text does not record (the notes point to the monochronic entry, whose source_text carries only the M-time column of the table). Add the P-time line to this entry's source_text before seeding so that the clause is covered by a recorded passage."
+    },
+    {
+      "stem": "secular_rational_inglehart_welzel",
+      "verdict": "edit",
+      "issues": [
+        "Faithfulness, first clause: 'traditional family values' is rendered 'the family', so the draft says the person sets less store by the family itself, which the source does not say (one can hold one's family dear and none of the traditional family values). The writer dropped 'traditional' to avoid echoing the partner label; 'conventional family values' keeps the source's sense without the echo. 25 words."
+      ],
+      "suggested_edit": "This means setting less store by religion, conventional family values and authority than others do, and seeing divorce, abortion, euthanasia and suicide as fairly acceptable.",
+      "nearest_existing_ok": true,
+      "strength": "Matches the passage, which defines the pole only comparatively: 'less emphasis' > 'less store ... than others do', 'relatively acceptable' > 'fairly acceptable'. Markedly milder than the corpus's secular and progressive: it asserts no commitment of its own, only less of the traditional ones. Note for Roger, as the writer said.",
+      "notes": "The queue note's 'rational-legal' content (authority grounded in reason and law) is not in the WVS passage and the draft rightly leaves it out; the pole stays recognisable from the WVS's own markers. Nearest-existing line right: secular is one's own religiosity, this is the WVS cluster."
+    },
+    {
+      "stem": "self_expression_inglehart_welzel",
+      "verdict": "ok",
+      "issues": [],
+      "suggested_edit": null,
+      "nearest_existing_ok": true,
+      "strength": "Matches: 'high priority' kept; 'tolerance of foreigners, gays and lesbians' > 'accepting', a plain-word equivalent a half-step warmer than 'tolerating' (grudging in modern use) and short of 'welcoming'; 'growing' and 'rising' describe trends across societies and are rightly dropped for a person.",
+      "notes": "Faithful and complete: all four commitments carried. It reads as a bundle of four separate corpus traits (environmental, pro_immigration, gay_affirming, feminist or egalitarian) plus participation; that is the instrument's bundle, as the line says. Postmaterialism (queue note) is not in the WVS text and was rightly not added."
+    },
+    {
+      "stem": "survival_inglehart_welzel",
+      "verdict": "edit",
+      "issues": [
+        "Clarity of the ethnocentric clause: 'measuring other peoples somewhat by one's own' does not say by one's own what, and a reader (or the generator) may not recover 'relatively ethnocentric outlook' from it; 'judging other peoples somewhat by the standard of one's own' says it plainly, hedge kept. 27 words.",
+        "Strength, first clause (minor; no change proposed): 'place emphasis on' is rendered 'caring first about', a half-step from emphasis to priority. The same move is made on the traditional side ('putting ... first') and the WVS frames the dimension as a priority, so it is consistent across the set; one decision for Roger covers both."
+      ],
+      "suggested_edit": "This means caring first about economic and physical security, judging other peoples somewhat by the standard of one's own, and extending little trust or tolerance to others.",
+      "nearest_existing_ok": true,
+      "strength": "Mirrors the mildest passage of the fourteen: 'relatively' kept as 'somewhat', 'low levels' as 'little'; only 'caring first' sits above the source. Markedly milder than the corpus's ethnocentric and insular, by the source's doing; note for Roger.",
+      "notes": "Of the neighbours named, the corpus's guarded is about swallowing one's opinions (paired with forthright) and is not a neighbour of survival values; ethnocentric and insular are the live ones."
+    },
+    {
+      "stem": "tight_gelfand",
+      "verdict": "ok",
+      "issues": [],
+      "suggested_edit": null,
+      "nearest_existing_ok": true,
+      "strength": "Matches: 'many strong norms' > 'many strong rules of conduct', 'low tolerance of deviant behavior' > 'little tolerance for anyone who steps outside them'; no sanction or punishment added, and none in the abstract. Not milder than the corpus's strict or judgmental.",
+      "notes": "Faithful to the abstract, including the fourth clause ('wanting structure and self-restraint'), which renders the micro-level affordances the abstract lists for tightness (need for structure, prevention self-guides, regulatory strength). The question is scope, not faithfulness: the clause describes the person's own regulation, which the queue note places outside this axis (conformist), and it has no loose-side counterpart. See the pair flag; Roger decides."
+    },
+    {
+      "stem": "traditional_inglehart_welzel",
+      "verdict": "edit",
+      "issues": [
+        "Faithfulness, first clause (minor; goes with the partner's fix): 'traditional family values' is rendered 'the family', with parent-child ties already covered by 'keeping parents and children close'; 'conventional family values' keeps the source's specific sense (the norms of family life, not the family as such) and avoids the family_oriented reading. 30 words. Take this and the secular-rational fix together or not at all.",
+        "Strength, first clause (minor; no change proposed): 'emphasize the importance of' is rendered 'putting ... first', a half-step from emphasis to priority, consistent with 'caring first about' on the survival side."
+      ],
+      "suggested_edit": "This means putting religion, conventional family values and deference to authority first, keeping parents and children close, rejecting divorce, abortion, euthanasia and suicide, and taking great pride in one's nation.",
+      "nearest_existing_ok": true,
+      "strength": "Declarative like the passage ('emphasize', 'reject', 'high levels of national pride'); 'deference to authority' kept as the source's word. Not milder than the corpus.",
+      "notes": "'a nationalistic outlook' is folded into 'taking great pride in one's nation'; pride and a nation-first outlook are not the same, and the corpus holds nationalist separately, so the fold loses a facet without making the pole unrecognisable (the writer noted it). Nearest-existing line right: the plain traditional (vs innovative) is custom versus novelty, a different scope."
+    }
+  ],
+  "pairs": [
+    {
+      "members": ["extrinsic_allport", "intrinsic_allport"],
+      "scope_flag": "Agree with the writer: extrinsic lists five concrete payoffs (Allport's own nouns) while intrinsic stays at the level of motive (master motive, other needs fitted around it, creed internalized) and names none of the religious contents the gloss offers (humility, compassion). Both close on how the creed is held, so the closings are parallel; the difference is concreteness, not scope or trigger. A re-edit would either give intrinsic one concrete habit from the gloss or trim extrinsic to three payoffs. Both drafts rest on fragments (the 1967 paper was not fetchable), extrinsic on more and shorter ones; provenance is honestly recorded on both sides.",
+      "agree_with_writer": true
+    },
+    {
+      "members": ["gemeinschaft_tonnies", "gesellschaft_tonnies"],
+      "scope_flag": "Agree with the writer on both points. Tone: Gemeinschaft warm, Gesellschaft harsh, as in Toennies; kept under the asymmetry rule. Scope: Gemeinschaft names what binds (birth, folk, kin, home); Gesellschaft names only the manner of coexistence and exchange, because the fetched passage names no institution. A re-edit wanting 'market, contract' should fetch a further Toennies passage rather than take them from the queue note, which is not a source. The restored 'peaceably' (entry fix) is Toennies' own qualifier and narrows the tone gap slightly without evening it out.",
+      "agree_with_writer": true
+    },
+    {
+      "members": ["high_context_hall", "low_context_hall"],
+      "scope_flag": "Agree with the writer. The closing clauses differ in grain and in source: high-context ends on a specific scenario from Hall's sentence about an individual (what is bothering one); low-context ends on a general assumption assembled from Hall's remarks about low-context cultures and about encoding. High names 'shared history' where low names only the setting. A re-edit could give low-context a matching scenario ('saying outright what is bothering one'), but that would be derived, not sourced, and would need marking as such; the alternative is to leave the asymmetry, which the sources explain. 'somewhat alienated' is rightly not carried on the low side: it is a mood of the culture, and carrying it would add a feelings facet with no high-side counterpart.",
+      "agree_with_writer": true
+    },
+    {
+      "members": ["monochronic_hall", "polychronic_hall"],
+      "scope_flag": "Agree with the writer. Scope: monochronic is about tasks, schedules and the clock, polychronic about people and the business at hand; that is Hall's own task-versus-people contrast, not an accident. The one unmatched clause is polychronic's 'hearing people out, schedule or no schedule', to which the M-time text gives no counterpart (the 1990 list's 'concerned about not disturbing others' is the nearest and is a different thing). Tone: a trace of Hall's warmth toward P-time and dryness toward M-time, as in the source. Both drafts take 'one thing at a time' / 'many things at once' from the 1990 table, and only the monochronic entry's source_text records its line (see the polychronic entry's notes).",
+      "agree_with_writer": true
+    },
+    {
+      "members": ["loose_gelfand", "tight_gelfand"],
+      "scope_flag": "Agree with the writer, and would put it more sharply. Tight has four clauses, one of them self-directed ('wanting structure and self-restraint', from the abstract's prevention self-guides and need for structure); loose has three, all about others. The self-directed clause is faithful to the abstract but sits on the conformist side of the line the queue note draws (norm enforcement in others, not own compliance), and loose has no counterpart ('caring little for structure' would be the derived one). A re-edit would either cut tight's fourth clause or add the loose counterpart; this is the one scope question in the sub-chunk that needs Roger's call. Both middle clauses individualise system-level items of the abstract (situational strength; broad socialization) and are where the drafts go furthest beyond the two parentheses; needed for length, since the parentheses alone give about 15 words a side.",
+      "agree_with_writer": true
+    },
+    {
+      "members": ["traditional_inglehart_welzel", "secular_rational_inglehart_welzel"],
+      "scope_flag": "Agree with the writer: traditional is a list of positive commitments, secular-rational a set of comparatives ('less', 'fairly'), because the WVS writes it so; the drafts mirror it and one reads as a creed, the other as less of it. Traditional carries national pride with no counterpart, and parent-child ties on its side only; both are in the source. Added: both drafts render 'traditional family values' as 'the family'; the entry fixes propose 'conventional family values' on both sides, to be taken together or not at all. Lengths 29 vs 24 follow the sources.",
+      "agree_with_writer": true
+    },
+    {
+      "members": ["self_expression_inglehart_welzel", "survival_inglehart_welzel"],
+      "scope_flag": "Agree with the writer: the two WVS sentences are not mirror images (four commitments against three attitudes, only tolerance on both sides); survival carries the hedges 'somewhat' and 'little' because the source does, and reads milder and vaguer. Nothing can be added to either side from the source. Added: survival's ethnocentric clause is unclear as written (entry fix); with it clarified, the pair's remaining asymmetry is the source's. Lengths 29 vs 24 follow the sources.",
+      "agree_with_writer": true
+    }
+  ],
+  "set_notes": {
+    "Inglehart-Welzel": "Four drafts of one method and shape: the WVS's own sentences turned into a person's list of commitments or attitudes, 24-29 words. The two high poles (traditional, self-expression) are fuller and declarative; the two low poles (secular-rational, survival) are shorter, comparative and hedged, because the WVS writes them so: the grain is the same, the weight is not, and the difference is the instrument's. Two consistent renderings run through the set and merit one decision from Roger: 'emphasize' / 'place emphasis on' becomes 'putting ... first' / 'caring first about' (a half-step up, on traditional and survival), and 'traditional family values' becomes 'the family' on both axis-1 poles (entry fixes proposed). The queue notes' extra content (rational-legal authority; postmaterialism) is not in the WVS passage and was rightly left out.",
+    "Hall": "The two pairs are of one shape: Hall's definitional sentence as the opening clause, then two or three supporting clauses from the same passages, 31-32 words each (four of this sub-chunk's drafts sit at the 32-word ceiling, so any fix must trim as it adds). The context pair rests on one 2016 paper quoting Hall with page numbers; the time pair on Hall 1983 via a university page plus the Hall & Hall 1990 list via a handout, both recorded, with one gap (polychronic's 1990 line). The two Hall pairs are at the same grain as each other and as the WVS set; the time pair is the more concrete (clock, schedule), the context pair the more abstract (where meaning sits), which follows the subjects. Both time drafts and both context drafts are person-level.",
+    "Gelfand": "Both drafts come from one parenthesis each plus the abstract's system components individualised; thin by construction, equal in grain and weight (32/30 words), and the most 'written' of the sets, since the source gives the least definitional text. Of one shape with the other sets. The open question is tight's self-restraint clause (pair flag); a secondary one is whether the system-level items may be rendered as a person's habits at all, which the length rule forces unless a fuller Gelfand text (Rule Makers, Rule Breakers) is fetched.",
+    "Allport": "Two drafts of one weight (30/32) built from fragments quoted by secondary sources because the 1967 paper was paywalled; every fragment is attributed to the page that quotes it, and nothing bridging them is invented. Grain matches the other sets; extrinsic is the more concrete (pair flag). Both are person-level by nature, so the framework-poles-as-persons rule does not arise.",
+    "Tönnies": "Both 32 words, both from Toennies' own sentences in one translation, both person-level although the source speaks of 'we' and 'they'. The author's asymmetry of tone (warm / harsh) is kept, as the rule says; Gesellschaft is the only vice-like pole in this sub-chunk and the one most likely to generate a hostile persona, which the restored 'peaceably' tempers to Toennies' own pitch. Grain matches the rest; these are the only two drafts that describe a condition of belonging rather than a set of attitudes, which is inherent in the framework."
+  },
+  "summary": "14 drafts reviewed: 9 ok, 5 edit, all small: gesellschaft (restore Toennies' 'peaceably'), high_context ('without spelling it out' for 'without being told'), secular_rational and traditional ('conventional family values' for 'the family', a matched pair of fixes), survival (a clearer ethnocentric clause). All are in form (24-32 words, four at the ceiling), US-spelled, inside voice, person-level, with no instrument or partner named; every clause traces to a recorded passage except polychronic's 'doing many things at once', whose Hall & Hall 1990 line should be added to that entry's source_text. Strength mirrors the sources throughout: the two WVS low poles (secular-rational, survival) come out markedly milder than the corpus's plain traits by the WVS's doing, Gesellschaft markedly harsher by Toennies', and 'emphasize' > 'first' on two WVS poles is the one consistent half-step up. I agree with all seven of the writer's pair reviews; the tight/loose self-restraint clause is the one scope question needing Roger's call. Nearest-existing lines are plausible and none is a deliberate duplicate (transactional and guarded are glossed in their plain sense, not the corpus's). Per-entry 'strength' and 'notes' fields are added beyond the schema to carry step 6."
+}

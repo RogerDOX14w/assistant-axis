@@ -1,0 +1,88 @@
+8 entities, estimated $0.24 at $0.03/entity
+$ uv run python data_analysis/regenerate_trait_instructions.py --traits achiever_vals believer_vals experiencer_vals innovator_vals maker_vals striver_vals survivor_vals thinker_vals
+Traits to process: 8 [RogerV2 style, temp=1.0, no thinking, antonym]
+API calls per trait: 1
+  survivor (VALS): 4 distinct openings of 5; generating again
+[1/8] OK experiencer (VALS): 5 instruction pairs, 40 questions
+[2/8] OK thinker (VALS): 5 instruction pairs, 40 questions
+[3/8] OK innovator (VALS): 5 instruction pairs, 40 questions
+[4/8] OK striver (VALS): 5 instruction pairs, 40 questions
+[5/8] OK believer (VALS): 5 instruction pairs, 40 questions
+[6/8] OK maker (VALS): 5 instruction pairs, 40 questions
+[7/8] OK achiever (VALS): 5 instruction pairs, 40 questions
+  WARNING: survivor (VALS): still 4 distinct openings after a second generation; kept the better set
+[8/8] OK survivor (VALS): 5 instruction pairs, 40 questions, generated again for the openings
+
+Done: 8 processed, 0 skipped, 0 errors
+API calls made: ~8
+[usage] total=$0.429 calls=9 [claude-sonnet-4-6: $0.429 in=23,203 out=23,933 n=9]
+[usage] cumulative record: /Users/roger/Documents/GitHub/assistant-axis/data/traits/regeneration_usage.json (total $201.216 over 5732 calls)
+Done: 8/8 marked generated
+5 entities, estimated $0.15 at $0.03/entity
+$ uv run python data_analysis/regenerate_trait_instructions.py --traits acts_of_service physical_touch quality_time receiving_gifts words_of_affirmation
+Traits to process: 5 [RogerV2 style, temp=1.0, no thinking, antonym]
+API calls per trait: 1
+[1/5] OK quality time: 5 instruction pairs, 40 questions
+  acts of service: 4 distinct openings of 5; generating again
+  words of affirmation: 4 distinct openings of 5; generating again
+[2/5] OK physical touch: 5 instruction pairs, 40 questions
+[3/5] OK receiving gifts: 5 instruction pairs, 40 questions
+[4/5] OK acts of service: 5 instruction pairs, 40 questions, generated again for the openings
+[5/5] OK words of affirmation: 5 instruction pairs, 40 questions, generated again for the openings
+
+Done: 5 processed, 0 skipped, 0 errors
+API calls made: ~5
+[usage] total=$0.355 calls=7 [claude-sonnet-4-6: $0.355 in=18,019 out=20,033 n=7]
+[usage] cumulative record: /Users/roger/Documents/GitHub/assistant-axis/data/traits/regeneration_usage.json (total $201.570 over 5739 calls)
+Done: 5/5 marked generated
+4 entities, estimated $0.12 at $0.03/entity
+$ uv run python data_analysis/regenerate_trait_instructions.py --traits aural_vark kinesthetic_vark read_write_vark visual_vark
+Traits to process: 4 [RogerV2 style, temp=1.0, no thinking, antonym]
+API calls per trait: 1
+  read-write (VARK): 4 distinct openings of 5; generating again
+[1/4] OK kinesthetic (VARK): 5 instruction pairs, 40 questions
+  aural (VARK): 4 distinct openings of 5; generating again
+[2/4] OK visual (VARK): 5 instruction pairs, 40 questions
+  WARNING: read-write (VARK): still 4 distinct openings after a second generation; kept the better set
+[3/4] OK read-write (VARK): 5 instruction pairs, 40 questions, generated again for the openings
+  WARNING: aural (VARK): still 4 distinct openings after a second generation; kept the better set
+[4/4] OK aural (VARK): 5 instruction pairs, 40 questions, generated again for the openings
+
+Done: 4 processed, 0 skipped, 0 errors
+API calls made: ~4
+[usage] total=$0.273 calls=6 [claude-sonnet-4-6: $0.273 in=15,464 out=15,129 n=6]
+[usage] cumulative record: /Users/roger/Documents/GitHub/assistant-axis/data/traits/regeneration_usage.json (total $201.843 over 5745 calls)
+Done: 4/4 marked generated
+4 entities, estimated $0.12 at $0.03/entity
+$ uv run python data_analysis/regenerate_trait_instructions.py --traits blood_type_a blood_type_ab blood_type_b blood_type_o
+Traits to process: 4 [RogerV2 style, temp=1.0, no thinking, antonym]
+API calls per trait: 1
+  blood type O: 4 distinct openings of 5; generating again
+[1/4] OK blood type B: 5 instruction pairs, 40 questions
+  blood type AB: 4 distinct openings of 5; generating again
+[2/4] OK blood type A: 5 instruction pairs, 40 questions
+  WARNING: blood type O: still 4 distinct openings after a second generation; kept the better set
+[3/4] OK blood type O: 5 instruction pairs, 40 questions, generated again for the openings
+[4/4] OK blood type AB: 5 instruction pairs, 40 questions, generated again for the openings
+
+Done: 4 processed, 0 skipped, 0 errors
+API calls made: ~4
+[usage] total=$0.277 calls=6 [claude-sonnet-4-6: $0.277 in=15,449 out=15,346 n=6]
+[usage] cumulative record: /Users/roger/Documents/GitHub/assistant-axis/data/traits/regeneration_usage.json (total $202.120 over 5751 calls)
+Done: 4/4 marked generated
+4 entities, estimated $0.12 at $0.03/entity
+$ uv run python data_analysis/regenerate_trait_instructions.py --traits gryffindor hufflepuff ravenclaw slytherin
+Traits to process: 4 [RogerV2 style, temp=1.0, no thinking, antonym]
+API calls per trait: 1
+[1/4] OK Slytherin: 5 instruction pairs, 40 questions
+[2/4] OK Gryffindor: 5 instruction pairs, 40 questions
+  Hufflepuff: 4 distinct openings of 5; generating again
+[3/4] OK Ravenclaw: 5 instruction pairs, 40 questions
+  WARNING: Hufflepuff: still 4 distinct openings after a second generation; kept the better set
+[4/4] OK Hufflepuff: 5 instruction pairs, 40 questions, generated again for the openings
+
+Done: 4 processed, 0 skipped, 0 errors
+API calls made: ~4
+[usage] total=$0.224 calls=5 [claude-sonnet-4-6: $0.224 in=12,884 out=12,384 n=5]
+[usage] cumulative record: /Users/roger/Documents/GitHub/assistant-axis/data/traits/regeneration_usage.json (total $202.344 over 5756 calls)
+Done: 4/4 marked generated

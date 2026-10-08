@@ -1,0 +1,14 @@
+$ uv run python data_analysis/generate_antonyms.py --traits agreeable_hexaco careless_hexaco conscientious_hexaco conventional_hexaco emotional_hexaco extraverted_hexaco honest_humble_hexaco introverted_hexaco open_hexaco quarrelsome_hexaco sly_hexaco tough_hexaco
+Done: 12 checked
+agreeable_hexaco             -> quarrelsome|antagonistic     score=4 open  (intended quarrelsome_hexaco)
+careless_hexaco              -> conscientious|diligent       score=4 nearly_nice  (intended conscientious_hexaco)
+conscientious_hexaco         -> negligent|careless|disorganized score=4 nasty  (intended careless_hexaco)
+conventional_hexaco          -> open|curious|imaginative     score=4 nearly_nice  (intended open_hexaco)
+emotional_hexaco             -> stoic|fearless               score=4 nearly_nice  (intended tough_hexaco)
+extraverted_hexaco           -> introverted                  score=4 mismatch  (intended introverted_hexaco)
+honest_humble_hexaco         -> manipulative|greedy|self-serving score=4 nasty  (intended sly_hexaco)
+introverted_hexaco           -> extraverted                  score=4 open  (intended extraverted_hexaco)
+open_hexaco                  -> conventional|closed-minded   score=4 nasty  (intended conventional_hexaco)
+quarrelsome_hexaco           -> agreeable|easy-going         score=4 nearly_nice  (intended agreeable_hexaco)
+sly_hexaco                   -> sincere|principled           score=3 nasty  (intended honest_humble_hexaco)
+tough_hexaco                 -> vulnerable|sensitive         score=3 open  (intended emotional_hexaco)

@@ -1227,3 +1227,27 @@ class TestOpeningRerollInBatch:
         assert "0 from the batch, 3 in real time" in err
         d = json.loads((b.stage / "petty.json").read_text())
         assert d["generator"].get("batch", False) is False and d["generator"]["opening_rerolls"] == 1
+
+
+class TestReplyCounts:
+    """A reply with the wrong number of pairs or questions is refused when the
+    counts are given, so the retry loop asks again (2026-10-07)."""
+
+    def test_counts_are_checked_only_when_given(self):
+        reply = json.dumps({"instruction": FAKE_INSTRUCTIONS, "questions": FAKE_QUESTIONS[:39], "eval_prompt": "x"})
+        assert len(module.validated_combined(reply, "arrogant")["questions"]) == 39
+        with pytest.raises(ValueError, match="39 questions, not 40"):
+            module.validated_combined(reply, "arrogant", n_variants=5, n_questions=40)
+        with pytest.raises(ValueError, match="5 instruction pairs, not 6"):
+            module.validated_combined(reply, "arrogant", n_variants=6, n_questions=39)
+
+    def test_a_short_reply_is_asked_for_again(self, trait_file, v2_style, monkeypatch):
+        monkeypatch.setattr(module.asyncio, "sleep", AsyncMock())
+        short = json.dumps({"instruction": FAKE_INSTRUCTIONS, "questions": FAKE_QUESTIONS[:39], "eval_prompt": "x"})
+        client = AsyncMock()
+        client.messages.create = AsyncMock(side_effect=[_make_response(short), _make_response(json.dumps(FAKE_ROGER_RESPONSE))])
+        result = asyncio.run(regenerate_one(
+            client, trait_file, n_variants=5, n_questions=40, instructions_only=False, model="m",
+            semaphore=asyncio.Semaphore(10), temperature=0.7, force=True, dry_run=False))
+        assert client.messages.create.call_count == 2 and result.startswith("OK")
+        assert len(json.loads(trait_file.read_text())["questions"]) == 40

@@ -1,0 +1,12 @@
+$ uv run python data_analysis/generate_antonyms.py --traits agreeable_big_five antagonistic_big_five careless_big_five closed_big_five conscientious_big_five emotionally_stable_big_five extraverted_big_five introverted_big_five neurotic_big_five open_big_five
+Done: 10 checked
+agreeable_big_five           -> antagonistic|disagreeable    score=4 nearly_nice  (intended antagonistic_big_five)
+antagonistic_big_five        -> agreeable                    score=4 mismatch  (intended agreeable_big_five)
+careless_big_five            -> conscientious|diligent|disciplined score=4 nasty  (intended conscientious_big_five)
+closed_big_five              -> open|open-minded|curious     score=4 nasty  (intended open_big_five)
+conscientious_big_five       -> careless|undisciplined       score=4 nearly_nice  (intended careless_big_five)
+emotionally_stable_big_five  -> neurotic|emotionally_unstable score=4 nearly_nice  (intended neurotic_big_five)
+extraverted_big_five         -> introverted                  score=4 mismatch  (intended introverted_big_five)
+introverted_big_five         -> extraverted                  score=4 open  (intended extraverted_big_five)
+neurotic_big_five            -> emotionally_stable|resilient|calm score=4 nasty  (intended emotionally_stable_big_five)
+open_big_five                -> conventional|closed-minded|practical score=4 nasty  (intended closed_big_five)
