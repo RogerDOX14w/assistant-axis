@@ -439,6 +439,25 @@ class TestStopAndResume:
         assert all(c >= 0.35 for _, _, c in seen["pairs"])
 
 
+class TestBatches:
+    def test_the_same_graph_through_the_message_batches_api(self, tmp_path):
+        from assistant_axis.gapgen.batches import BatchTransport
+        from assistant_axis.judge_pricing import BATCH_SUFFIX
+        from assistant_axis.tests.test_gapgen_batches import FakeBatchClient, no_sleep
+        resp = responder_for(RELATIONS, OVERLAP)
+        rows = toy_rows()
+        plan = RG.plan_graph(rows, [BATCH], toy_vectors(), k=10, cosine_floor=0.25)
+        runner, live, idx = make_runner(tmp_path, resp)
+        runner.cache_ttl = NR.BATCH_CACHE_TTL
+        bc = FakeBatchClient(resp)
+        runner.transport = BatchTransport(runner, bc, tmp_path / "out" / "batches.json", sleep=no_sleep, poll_seconds=0)
+        g = RG.build_graph(plan, runner=runner, corpus=idx.traits, queue=QUEUE, batch_id="rv")
+        assert live.calls == [] and g.cliques == build(tmp_path, name="live")[0].cliques
+        waves = list(json.loads((tmp_path / "out" / "batches.json").read_text())["waves"])
+        assert waves == ["r1_relation", "ov1_sonnet", "ov1_opus", "ov2_sonnet", "ov2_opus"]
+        assert all(m.endswith(BATCH_SUFFIX) for m in runner.usage.per_model)
+
+
 # --------------------------------------------------------------------------- graph.json
 
 class TestGraphJson:
