@@ -38,7 +38,9 @@ from .parse import DISPOSITIONAL_MIN, RogetIndex, head_profile
 
 MAPPING_RULES_VERSION = 1
 STRENGTHS = ("exact_adj", "exact_noun", "derived_adj", "derived_noun", "loose")
-ROUTES = ("agree", "rule", "semantic", "lexical", "none")
+#: ``llm``: placed by the label placement check (:mod:`.placement`, 2026-10-08), which re-judges every label
+#: whose route was not ``agree``; the earlier route is kept in the label's ``llm`` record.
+ROUTES = ("agree", "rule", "semantic", "lexical", "none", "llm")
 #: Semantic-only floor: the cosine (text-embedding-3-large, label text against head profile) the
 #: top head must reach when no lexical hit is in the top five.  From the first full run
 #: (2026-10-08): top cosines of ``agree`` labels run p5 0.33, median 0.47; of the labels left with
@@ -47,7 +49,7 @@ ROUTES = ("agree", "rule", "semantic", "lexical", "none")
 #: land on unrelated heads), so the floor stays at 0.40.
 SEM_FLOOR = 0.40
 #: Confidence recorded per route.
-CONFIDENCE = {"agree": 1.0, "rule": 0.7, "semantic": 0.5, "lexical": 0.4, "none": 0.0}
+CONFIDENCE = {"agree": 1.0, "rule": 0.7, "semantic": 0.5, "lexical": 0.4, "none": 0.0, "llm": 0.8}
 #: Derivational suffix pairs (adjective side first); each is applied in both directions.
 DERIVATION_SUFFIXES: tuple[tuple[str, str], ...] = (
     ("ious", "ion"), ("ive", "ion"), ("ous", "ousness"), ("ive", "iveness"), ("ent", "ence"),

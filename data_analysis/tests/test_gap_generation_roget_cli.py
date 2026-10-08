@@ -243,3 +243,83 @@ def test_head_scope_flag_must_name_a_file(tree):
 
 
 C_ALL = ["pair_completion", "pair_empty", "singleton_empty", "queued_only", "partly_covered", "crowded", "covered"]
+
+
+# --------------------------------------------------------------------------- label placement check (QUESTIONS 39)
+
+def _placement_client(calls, *, sonnet="none", opus="first"):
+    """Sonnet answers ``sonnet`` for every label; Opus the first head offered (or ``opus`` literally)."""
+    from assistant_axis.tests.fake_anthropic import FakeAsyncAnthropic, user_text
+
+    def respond(kw):
+        d = json.loads(user_text(kw))
+        if "opus" in kw["model"]:
+            head = d["heads"][0]["id"] if opus == "first" else opus
+        else:
+            head = sonnet
+        return json.dumps({"reason": "r", "head": head})
+    client = FakeAsyncAnthropic(respond)
+    calls.append(client)
+    return client
+
+
+def test_place_check_dry_run_and_render_write_nothing(tree, monkeypatch, capsys):
+    tmp_path, base = tree
+    build(tmp_path, base)
+    monkeypatch.setattr(R, "_anthropic_client", lambda: (_ for _ in ()).throw(AssertionError("no client")))
+    snap = snapshot(tmp_path)
+    assert run(base, "--dry-run", "place-check") == 0
+    out = capsys.readouterr().out
+    assert "estimate: Sonnet" in out and "DRY-RUN" in out
+    assert snapshot(tmp_path) == snap
+
+
+def test_place_check_refuses_over_the_budget(tree):
+    tmp_path, base = tree
+    build(tmp_path, base)
+    lh = json.loads((tmp_path / "out" / "label_heads.json").read_text())["result"]["labels"]
+    if all(v["route"] == "agree" for v in lh.values()):
+        pytest.skip("every fixture label agrees")
+    with pytest.raises(SystemExit, match="REFUSED"):
+        run(base, "place-check", "--budget-usd", "0.0000001")
+
+
+def test_place_check_records_sonnet_and_opus_and_resumes(tree, monkeypatch):
+    tmp_path, base = tree
+    build(tmp_path, base)
+    out = tmp_path / "out"
+    before = json.loads((out / "label_heads.json").read_text())["result"]["labels"]
+    checked = {k for k, v in before.items() if v["route"] != "agree"}
+    if not checked:
+        pytest.skip("every fixture label agrees")
+    calls = []
+    monkeypatch.setattr(R, "_anthropic_client", lambda: _placement_client(calls))
+    assert run(base, "place-check") == 0
+    env = json.loads((out / "label_heads.json").read_text())
+    after = env["result"]["labels"]
+    assert {k for k, v in after.items() if v["llm"]} == checked
+    for k in checked:
+        llm = after[k]["llm"]
+        assert llm["previous_primary"] == before[k]["primary"] and llm["sonnet"]["head"] is None
+        if before[k]["primary"] is None:                  # Sonnet's "none" agrees: no referee
+            assert llm["opus"] is None and llm["outcome"] == "unchanged" and after[k]["route"] == before[k]["route"]
+        else:                                             # Opus referees and its head is final
+            assert llm["opus"]["head"] == llm["final"] == after[k]["primary"] and llm["decided_by"] == "opus"
+            assert after[k]["route"] == ("llm" if llm["final"] != before[k]["primary"] else before[k]["route"])
+    for k in set(after) - checked:
+        assert after[k] == before[k]
+    meta = env["result"]["placement_check"]
+    assert sum(meta["outcomes"].values()) == len(checked) and meta["rubric"]["name"] == "roget_placement"
+    assert {"placement_rubric", "placement_responses", "roget_heads"} <= {i["dep_key"] for i in env["_provenance"]["inputs"]}
+    n_calls = sum(len(c.calls) for c in calls)
+    u = json.loads((out / "placement_usage.json").read_text())
+    assert u["n_calls"] == n_calls and set(u["per_model"]) <= {"claude-sonnet-5-5", "claude-opus-5-5"}
+    assert len((out / "placement_responses.jsonl").read_text().splitlines()) == n_calls
+    # resume: every answer is reused, no call is made, the record is the same
+    assert run(base, "place-check", "--resume") == 0
+    assert sum(len(c.calls) for c in calls) == n_calls
+    again = json.loads((out / "label_heads.json").read_text())["result"]["labels"]
+    assert {k: (v["primary"], v["route"]) for k, v in again.items()} == \
+        {k: (v["primary"], v["route"]) for k, v in after.items()}
+    # the coverage map reads the new primaries
+    assert run(base, "coverage") == 0

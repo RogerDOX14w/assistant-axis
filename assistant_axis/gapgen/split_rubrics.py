@@ -30,8 +30,8 @@ prompts: :data:`NAMES` and :func:`load_all` stay the split filter's eight (the s
 records use them), while :data:`PINNED_NAMES` (every set) is what the pins, :func:`mismatches` and
 ``rubric_pins.py`` cover.  Since 2026-10-07 a third set, :data:`M3_FILES`: M3's relation call
 (``relation.md``), first pinned as version 1.  Since 2026-10-08 a fourth, :data:`GENERATOR_FILES`: the
-generators' own calls, so far the Roget head-scope call (``roget_head_scope.md``), first pinned as
-version 1.
+generators' own calls: the Roget head-scope call (``roget_head_scope.md``) and the Roget label placement
+check (``roget_placement.md``), each first pinned as version 1.
 """
 from __future__ import annotations
 
@@ -80,9 +80,11 @@ M3_FILES: dict[str, str] = {
 }
 M3_NAMES: tuple[str, ...] = tuple(M3_FILES)
 #: The generators' own rubrics (2026-10-08): the Roget head-scope call of workstream 2
-#: (``assistant_axis/gapgen/generators/roget/head_scope.py``; QUESTIONS 44), first pinned as version 1.
+#: (``assistant_axis/gapgen/generators/roget/head_scope.py``; QUESTIONS 44) and the Roget label placement
+#: check (``.../roget/placement.py``; QUESTIONS 39), each first pinned as version 1.
 GENERATOR_FILES: dict[str, str] = {
     "roget_head_scope": "roget_head_scope.md",
+    "roget_placement": "roget_placement.md",
 }
 GENERATOR_NAMES: tuple[str, ...] = tuple(GENERATOR_FILES)
 #: Every prompt file pinned in ``versions.json``.
