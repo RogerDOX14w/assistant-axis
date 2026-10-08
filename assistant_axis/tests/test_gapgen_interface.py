@@ -14,7 +14,9 @@ SUPERSEDED = ("NoveltyQuery", "NoveltyResult", "Neighbour", "NoveltyIndex", "sco
 REQUIRED = ("Candidate", "start_run", "submit_candidates", "SubmitReport", "RunContext", "read_candidates",
             "CANDIDATE_FIELDS", "Registry", "MetricConfig", "REGISTRY_PATH", "DATA_CANDIDATES", "run_dir",
             "recovery_dir", "novelty_dir", "draw_hidden", "load_hidden", "match_candidates", "seed_figures",
-            "combine_seeds", "report_markdown")
+            "combine_seeds", "report_markdown",
+            # what the generators import from the embedding and WordNet modules (interface resolutions 2 and 3)
+            "OpenAIEmbedder", "EmbeddingCache", "embed_texts", "HashEmbedder", "make_embedder", "oewn")
 
 
 def test_every_export_exists_and_is_listed_in_the_docstring():
@@ -40,11 +42,21 @@ def test_the_recovery_entry_points_are_the_modules_and_load_on_first_use():
         assert getattr(G, name) is getattr(recovery, name)
     from assistant_axis.gapgen import draw_hidden, DEFAULT_SEEDS  # noqa: F401
     assert DEFAULT_SEEDS == (0, 1)
-    # a generator that imports the registry API does not import M3's modules
+    # a generator that imports the registry API does not import M3's modules, nor wn
     code = ("import sys, assistant_axis.gapgen as g; g.Candidate; "
-            "print('assistant_axis.gapgen.recovery' in sys.modules, 'assistant_axis.gapgen.novelty' in sys.modules)")
+            "print(*[m in sys.modules for m in ('assistant_axis.gapgen.recovery', 'assistant_axis.gapgen.novelty', "
+            "'assistant_axis.gapgen.wordnet', 'wn')])")
     out = subprocess.run([sys.executable, "-c", code], capture_output=True, text=True, check=True).stdout.split()
-    assert out == ["False", "False"]
+    assert out == ["False"] * 4
+
+
+def test_the_embedding_and_wordnet_names_are_the_modules():
+    from assistant_axis.gapgen import embed, representation, wordnet
+    for name in G.EMBED_EXPORTS:
+        assert getattr(G, name) is getattr(embed, name)
+    assert G.trait_text is representation.trait_text and G.oewn is wordnet.oewn
+    from assistant_axis.gapgen import EmbeddingCache, HashEmbedder, embed_texts  # noqa: F401
+    assert set(G.LAZY_EXPORTS) <= set(G.__all__)
 
 
 def test_the_registry_api_is_the_registry_modules():

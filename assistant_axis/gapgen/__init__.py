@@ -51,6 +51,18 @@ Paths (``paths.py``; every one inside the repository):
 - ``check_id``: refuses an id that could leave its directory.
 - ``hf_cache_dir``, ``wn_data_dir``: the in-tree Hugging Face cache and WordNet data.
 
+Embedding and WordNet (``embed.py``, ``representation.py``, ``wordnet.py``; interface resolutions 2 and 3, what the
+generators import; imported on first use):
+
+- ``OpenAIEmbedder``: the live embedding model (OpenAI ``text-embedding-3-large``, direct key).
+- ``LocalEmbedder``: an open-weights embedder from the in-tree Hugging Face cache.
+- ``HashEmbedder``: a deterministic bag-of-words embedder for tests (no network).
+- ``make_embedder``: an embedder by arm name (``openai``, ``bge``, ``gemma``, ``hash``).
+- ``EmbeddingCache``: the per-model embedding cache under ``data/candidates/cache/embeddings/``.
+- ``embed_texts``: embeds texts through the cache (only misses are sent, each call charged to a usage tracker).
+- ``trait_text``: a trait's ``label: description`` text in a given representation.
+- ``oewn``: the Open English WordNet handle (``wn``, data in ``data/external/wn``).
+
 Recovery harness (``recovery.py``; imported on first use):
 
 - ``draw_hidden``: the seeded draw of hidden traits, by region, arrangements whole.
@@ -93,12 +105,33 @@ RECOVERY_EXPORTS: tuple[str, ...] = (
     "draw_hidden", "write_hidden", "load_hidden", "reduced_traits", "reduced_label_sets", "match_candidates",
     "seed_figures", "combine_seeds", "report_markdown", "DEFAULT_HIDDEN_FRAC", "DEFAULT_SEEDS",
 )
+#: The embedding facade and the WordNet handle (interface resolutions 2 and 3), imported on first use (``wn``
+#: is imported only by a caller of ``oewn``).
+EMBED_EXPORTS: tuple[str, ...] = ("OpenAIEmbedder", "LocalEmbedder", "HashEmbedder", "make_embedder", "EmbeddingCache",
+                                  "embed_texts")
+#: Every name loaded on first use, and its module.
+LAZY_EXPORTS: dict[str, str] = {**{n: "recovery" for n in RECOVERY_EXPORTS}, **{n: "embed" for n in EMBED_EXPORTS},
+                                "trait_text": "representation", "oewn": "wordnet"}
+
+
+from typing import TYPE_CHECKING  # noqa: E402
+
+if TYPE_CHECKING:   # what static checkers and editors see; at run time these load on first use (``__getattr__``)
+    from .embed import (  # noqa: F401
+        EmbeddingCache, HashEmbedder, LocalEmbedder, OpenAIEmbedder, embed_texts, make_embedder,
+    )
+    from .recovery import (  # noqa: F401
+        DEFAULT_HIDDEN_FRAC, DEFAULT_SEEDS, combine_seeds, draw_hidden, load_hidden, match_candidates,
+        reduced_label_sets, reduced_traits, report_markdown, seed_figures, write_hidden,
+    )
+    from .representation import trait_text  # noqa: F401
+    from .wordnet import oewn  # noqa: F401
 
 
 def __getattr__(name: str):
-    if name in RECOVERY_EXPORTS:
-        from . import recovery
-        return getattr(recovery, name)
+    if name in LAZY_EXPORTS:
+        import importlib
+        return getattr(importlib.import_module(f"{__name__}.{LAZY_EXPORTS[name]}"), name)
     raise AttributeError(f"module {__name__!r} has no attribute {name!r}")
 
 
@@ -115,6 +148,8 @@ __all__ = [
     "DATA_DIR", "DATA_CANDIDATES", "DATA_EXTERNAL", "REGISTRY_PATH", "REGISTRY_SNAPSHOT_PATH", "METRIC_CONFIG_PATH",
     "CORPUS_REGIONS_PATH", "SEED_QUEUE_PATH", "run_dir", "filter_dir", "novelty_dir", "recovery_dir", "check_id",
     "hf_cache_dir", "wn_data_dir",
+    # embedding and WordNet (lazy)
+    *EMBED_EXPORTS, "trait_text", "oewn",
     # recovery harness (lazy)
     *RECOVERY_EXPORTS,
 ]
