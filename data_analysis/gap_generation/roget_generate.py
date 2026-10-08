@@ -461,6 +461,9 @@ def build_parser() -> argparse.ArgumentParser:
     sp.add_argument("--run-id", required=True)
     sp.add_argument("--generator", default=H.GENERATOR, choices=[H.GENERATOR, H.WN_GENERATOR])
     sp.add_argument("--registry", type=Path, default=None)
+    # --dry-run is accepted after the command too (roget_generate.py harvest --run-id R --dry-run)
+    for p in sub.choices.values():
+        p.add_argument("--dry-run", action="store_true", default=argparse.SUPPRESS)
     return ap
 
 

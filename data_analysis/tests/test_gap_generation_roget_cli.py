@@ -114,6 +114,15 @@ def test_dry_runs_write_nothing(tree):
     assert not (tmp_path / "cands" / "registry.jsonl").exists()
 
 
+def test_dry_run_after_the_command(tree):
+    tmp_path, base = tree
+    snap = snapshot(tmp_path)
+    assert run(base, "parse", "--allow-checksum-mismatch", "--dry-run") == 0
+    assert snapshot(tmp_path) == snap
+    args = R.build_parser().parse_args([*base, "coverage"])
+    assert args.dry_run is False
+
+
 def test_map_refuses_an_estimate_over_the_budget(tree):
     tmp_path, base = tree
     run(base, "parse", "--allow-checksum-mismatch")
