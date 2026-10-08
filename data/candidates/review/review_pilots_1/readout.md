@@ -17,6 +17,13 @@ uv run python data_analysis/gap_generation/review_graph.py build --batch-id revi
     --from-batches gen_pilot_censuses gen_pilot_roget gen_pilot_wn_clusters --transport live --budget-usd 6
 ```
 
+and, for decision 12 (the proposed groups; the same day, after the R1 change):
+
+```
+uv run python data_analysis/gap_generation/review_graph.py build --batch-id review_pilots_1 \
+    --from-batches gen_pilot_censuses gen_pilot_roget gen_pilot_wn_clusters --transport live --budget-usd 2 --resume
+```
+
 ## Headline
 
 - **325 kept candidates, 21 4-edges, 19 cliques (18 pairs and one triple), 290 singletons.**  Only 35 of the 325
@@ -29,6 +36,9 @@ uv run python data_analysis/gap_generation/review_graph.py build --batch-id revi
 - **Cost $1.51** against an estimate of $4.15 (cap $6).  The estimate used M3's shares of similar pairs, which are
   far higher than the shares among candidate pairs (details below).
 - Every call parsed on its first attempt; nothing stalled; the graph is complete.
+- **Decision 12 (added the same day, after the resume): 48 proposed groups at rubric A's 3 (33 pairs, 13 triples,
+  2 of four) cover 85 candidates; with the merged groups, 96 of the 325 candidates are in some group and 229 in
+  none.**  The resume read the 65 missing second directions for $0.336.  See "Proposed groups" below.
 
 ## What was built (terms)
 
@@ -164,6 +174,8 @@ edges in all, most of them between singletons.
 
 ## What a cut-off of 3 would give (one direction only; no extra call)
 
+*Superseded the same day by "Proposed groups" below, which reads the second directions (decision 12).*
+
 Taking the first-direction reading alone, 90 pairs read 3 or 4.  Their maximal cliques would be 57 (42 pairs, 12
 triples, 3 of four) covering **103 candidates**, among them the plan's examples: godless, irreligious, nonreligious;
 balky, headstrong, incompliant, indocile; frigid, impersonal, unaffable, warmthless; infernal, nasty, satanic,
@@ -173,6 +185,77 @@ run's rates, and a cut-off parameter in the module, which is not built (the cut-
 says).  Whether the default groups should be 3-cliques, or 4-cliques with 3-edges shown as merge suggestions, is a
 decision for Roger and Fable.
 
+## Proposed groups (decision 12; the build resumed 2026-10-08)
+
+Roger chose two tiers of groups ([coding_plan_review.md](../../../../reports/trait_gap_generation/coding_plan_review.md),
+decision 12).  Terms:
+
+- **3-edge**: a candidate pair that reads 3 or above in both directions under M3's rule at cut-off 3 (rubric A's 3
+  is "the same concept, differing only in scope, degree or emphasis"; in practice Sonnet's 3 with Opus at 3 or 4,
+  or Sonnet's 4), the relation not `opposed`.  Every 4-edge is also a 3-edge.  Opus is still asked only on
+  Sonnet's 3s, 4s and unsure (the escalation at cut-off 4), so a Sonnet 2 never becomes a 3.
+- **Merged group**: what this readout called a clique above (4-edges both ways).  The review app merges it by
+  default.  `graph.json` keeps the key `cliques` for it.
+- **Proposed group**: a maximal clique of 3-edges, less any that lies wholly inside a merged group.  It may
+  contain a merged group and may overlap other proposed groups.  The review app shows it pre-assembled when its
+  first member is opened, and merges it only when Roger confirms with one key.  `graph.json` key `proposed_groups`
+  (schema 2).
+
+The build was resumed with the same arguments and `--budget-usd 2` (`build --resume`, default
+`--proposed-cut-off 3`).  The resume reads the second direction of every pair whose first direction reads 3 or
+above.  Before any call it replayed the build on the 1,160 responses on record and found **65 second-direction
+calls missing** (the pairs whose first direction read 3 but not 4).  The other 1,160 calls were replayed, not
+sent.
+
+**Result: 48 proposed groups (33 pairs, 13 triples, 2 of four) covering 85 candidates, 61 of them in no merged
+group.**  With the 35 candidates in merged groups, **96 of the 325 candidates are in some group and 229 are in
+none** (157 censuses, 50 roget, 22 wn_clusters).  The one-direction count above (57 cliques, 103 candidates)
+overstated it: of the 90 pairs whose first direction read 3 or above, 84 read 3 or above the other way too
+(84 3-edges).  Their maximal cliques number 55 (40 pairs, 13 triples, 2 of four, 96 candidates), and 7 of those
+are merged groups, which leaves 48.
+
+The 6 pairs that read 3 one way and below 3 the other (Sonnet / Opus, first direction then second): alarming >
+frightening 3/3 then 2, embellishing > exaggerative 3/3 then 3/2, hard-shelled > tough-minded 3/3 then 2,
+overgreedy > rapacious 3/3 then 2, satanic > unkind 3/3 then 2, sour > surly 3/3 then 2.
+
+The groups overlap a good deal: 20 candidates are in two or more proposed groups (balky in 5, nasty in 4,
+uncongenial, unkind and willful in 3).  So a term usually offers one largest group and lists the others as
+neighbour groups (decision 12, as the plan says).  12 pairs of proposed groups are joined by an opposed candidate
+edge.
+
+**The ten largest** (members are candidate labels, which have no corpus file; readings are Sonnet/Opus, the first
+direction then the second; the last column links the corpus traits that M3 marked `similar` nearest to any
+member):
+
+| # | members | generators | readings | cosine | merged groups inside | nearest corpus traits M3 marked similar (cosine) |
+|---|---|---|---|---|---|---|
+| 0 | balky, headstrong, incompliant, indocile | censuses 4 | balky-headstrong 3/3, 3/3; balky-incompliant 3/3, 3/3; balky-indocile 3/3, 3/3; headstrong-incompliant 3/3, 3/3; headstrong-indocile 3/3, 3/3; incompliant-indocile 3/4, 3/3 | 0.42-0.75 | none | [unyielding](../../../traits/instructions/unyielding.json) (0.49), [rebellious](../../../traits/instructions/rebellious.json) (0.38) |
+| 1 | frigid, impersonal, unaffable, warmthless (opposed to 3) | censuses 4 | frigid-impersonal 3/3, 3/3; frigid-unaffable 3/4, 3/4; frigid-warmthless 3/4, 4/4; impersonal-unaffable 3/3, 3/3; impersonal-warmthless 3/4, 3/4; unaffable-warmthless 3/4, 4/4 | 0.86-0.90 | [0], [10] | [reserved](../../../traits/instructions/reserved.json) (0.46), [detached](../../../traits/instructions/detached.json) (0.39) |
+| 2 | abusive, nasty, unkind | censuses 3 | abusive-nasty 3/3, 3/3; abusive-unkind 3/3, 3/3; nasty-unkind 3/4, 3/3 | 0.63-0.72 | none | [malicious](../../../traits/instructions/malicious.json) (0.51), [cruel](../../../traits/instructions/cruel.json) (0.50) |
+| 3 | affectionate, fond, loving (opposed to 1) | wn_clusters 3 | affectionate-fond 3/4, 4/4; affectionate-loving 3/4, 3/4; fond-loving 3/3, 3/3 | 0.60-0.84 | [1], [2] | [friendly](../../../traits/instructions/friendly.json) (0.43), [compassionate](../../../traits/instructions/compassionate.json) (0.40) |
+| 4 | balky, headstrong, willful | censuses 2, wn_clusters 1 | balky-headstrong 3/3, 3/3; balky-willful 3/3, 3/3; headstrong-willful 3/4, 3/4 | 0.54-0.80 | [9] | [unyielding](../../../traits/instructions/unyielding.json) (0.49), [rigid](../../../traits/instructions/rigid.json) (0.39) |
+| 5 | balky, obdurate, unreceptive | censuses 3 | balky-obdurate 3/3, 3/3; balky-unreceptive 3/3, 3/3; obdurate-unreceptive 3/3, 3/3 | 0.56-0.68 | none | [unyielding](../../../traits/instructions/unyielding.json) (0.61), [rigid](../../../traits/instructions/rigid.json) (0.41) |
+| 6 | balky, obdurate, willful | censuses 2, wn_clusters 1 | balky-obdurate 3/3, 3/3; balky-willful 3/3, 3/3; obdurate-willful 3/3, 3/3 | 0.57-0.69 | none | [unyielding](../../../traits/instructions/unyielding.json) (0.61), [rigid](../../../traits/instructions/rigid.json) (0.41) |
+| 7 | curmudgeonly, grumbly, querulous | censuses 2, roget 1 | curmudgeonly-grumbly 3/3, 3/3; curmudgeonly-querulous 3/3, 3/3; grumbly-querulous 3/4, 3/4 | 0.68-0.77 | [8] | [quarrelsome (HEXACO)](../../../traits/instructions/quarrelsome_hexaco.json) (0.41), [irascible](../../../traits/instructions/irascible.json) (0.36) |
+| 8 | discordant, inharmonious, quarrelsome | roget 2, censuses 1 | discordant-inharmonious 4/4, 4/4; discordant-quarrelsome 3/3, 3/3; inharmonious-quarrelsome 3/4, 3/4 | 0.52-0.77 | [4], [13] | [disagreeable](../../../traits/instructions/disagreeable.json) (0.51), [quarrelsome (HEXACO)](../../../traits/instructions/quarrelsome_hexaco.json) (0.39) |
+| 9 | free, unbound, unconstrainable | roget 2, censuses 1 | free-unbound 3/4, 3/4; free-unconstrainable 3/3, 3/3; unbound-unconstrainable 3/3, 3/4 | 0.63-0.73 | [6] | [rule-breaking](../../../traits/instructions/rule_breaking.json) (0.38), [independent](../../../traits/instructions/independent.json) (0.33) |
+
+(In row 8, quarrelsome is a candidate; the corpus trait is [quarrelsome (HEXACO)](../../../traits/instructions/quarrelsome_hexaco.json).)
+The plan's own example, godless, irreligious, nonreligious, is proposed group 11 (all six directions 3/3).  The other 38: free, unconstrainable, unconstrained; godless, irreligious, nonreligious; infernal,
+nasty, satanic; infernal, nasty, unkind; nasty, unkind, unkindly; and 33 pairs (alarming, menacing; balky,
+impossible; bestial, brutal; complying, slavish; complying, willing; curmudgeonly, sour; divisive, factious;
+earthly-minded, worldly-minded; frightening, intimidating; frightening, menacing; heavenly, pleasing; impassive,
+inexpressive; impetuous, imprudent; inhuman, unmerciful; judicial, reasonable; loud, noisy; loud, overloud;
+lovable, pleasing; noisy, rowdy; nonhostile, unaggressive; overcaring, solicitous; overquiet, silent; respectable,
+unimpeachable; respectable, upright; satanic, sinister; secretive, uncandid; shady, sketchy; sour, uncongenial;
+strong-willed, willful; suave, urbane; tireless, weariless; uncompanionable, uncongenial; uncongenial,
+unpersonable).  `review_graph.py groups --batch-id review_pilots_1` prints them all.
+
+**Cost of the resume: $0.336** (65 Sonnet calls and 60 Opus calls; five of the 65 Sonnet readings were 2, which
+Opus does not read).  The estimate before any call was $0.334.  The run's total is now $1.846 against the $2 cap,
+which counts the earlier session's $1.510 ([usage.json](./usage.json); [run.json](./run.json) keeps the earlier
+session under `earlier_sessions` and this one's replay under `resume_estimate`).  Parse rate 100%, first attempt.
+
 ## Cost
 
 | | |
@@ -181,6 +264,8 @@ decision for Roger and Fable.
 | re-estimate after the relation calls (the gate: spent $0.267 + overlap $2.415 on the 647 pairs marked) | $2.682 |
 | **spent** ([usage.json](./usage.json)) | **$1.510** |
 | cap | $6.00 |
+| the resume for decision 12 (65 second directions): estimate / spent / cap of the whole run | $0.334 / **$0.336** / $2.00 |
+| **run total** | **$1.846** |
 
 By model: Haiku 5.5 $0.164 (325 calls); Sonnet 5.5 $0.920 (714 calls: 672 overlap, 42 unsure re-asks); Opus 5.5
 $0.426 (121 calls).  No embedding call: all 325 query embeddings were in the cache.

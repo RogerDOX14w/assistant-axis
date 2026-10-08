@@ -55,16 +55,16 @@
       }
     ],
     "inputs_sha256": "c36d8d22f3b4620170a15446669e5c37934b6637196048dcc9da73a8e0b1d785",
-    "produced_at": "2026-10-08T18:09:43+00:00",
+    "produced_at": "2026-10-08T18:54:02+00:00",
     "produced_by": {
       "author": "Roger Dearnaley",
-      "cmd": "uv run python data_analysis/gap_generation/review_graph.py build --batch-id review_pilots_1 --from-batches gen_pilot_censuses gen_pilot_roget gen_pilot_wn_clusters --transport live --budget-usd 6",
-      "git_sha": "20682f9+dirty",
+      "cmd": "uv run python data_analysis/gap_generation/review_graph.py build --batch-id review_pilots_1 --from-batches gen_pilot_censuses gen_pilot_roget gen_pilot_wn_clusters --transport live --budget-usd 2 --resume",
+      "git_sha": "14c331d+dirty",
       "title": "review_graph build review_pilots_1"
     },
     "schema_version": "1.0"
   },
-  "n_calls": 1160,
+  "n_calls": 1285,
   "per_model": {
     "claude-haiku-5-5": {
       "completion_tokens": 249025,
@@ -74,21 +74,21 @@
       "prompt_tokens": 392326
     },
     "claude-opus-5-5": {
-      "completion_tokens": 15551,
-      "cost_usd": 0.4263,
+      "completion_tokens": 24433,
+      "cost_usd": 0.6715,
       "model": "claude-opus-5-5",
-      "n_calls": 121,
-      "prompt_tokens": 28813
+      "n_calls": 181,
+      "prompt_tokens": 45722
     },
     "claude-sonnet-5-5": {
-      "completion_tokens": 60426,
-      "cost_usd": 0.9204,
+      "completion_tokens": 65864,
+      "cost_usd": 1.0106,
       "model": "claude-sonnet-5-5",
-      "n_calls": 714,
-      "prompt_tokens": 158081
+      "n_calls": 779,
+      "prompt_tokens": 175985
     }
   },
-  "total_completion_tokens": 325002,
-  "total_cost_usd": 1.5104,
-  "total_prompt_tokens": 579220
+  "total_completion_tokens": 339322,
+  "total_cost_usd": 1.8459,
+  "total_prompt_tokens": 614033
 }

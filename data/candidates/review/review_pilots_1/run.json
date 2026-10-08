@@ -5,7 +5,7 @@
     "gen_pilot_roget",
     "gen_pilot_wn_clusters"
   ],
-  "git_sha": "20682f9",
+  "git_sha": "14c331d",
   "allow_dirty": false,
   "dirty_check": {
     "paths": [
@@ -34,7 +34,8 @@
     "--transport",
     "live",
     "--budget-usd",
-    "6"
+    "2",
+    "--resume"
   ],
   "plan": {
     "n_candidates": 325,
@@ -67,17 +68,13 @@
   },
   "transport": "live",
   "transport_reason": "--transport live",
-  "estimate_usd": 4.1474,
+  "estimate_usd": 0.3336,
   "estimate_lines": [
-    "relation call (9.9 listed candidates a call): 325 x (1,202, 759) tokens at claude-haiku-5-5 rates = $0.162",
-    "unsure re-ask (14% of relation calls, 1.4 candidates each): 46 x (599, 108) tokens at claude-sonnet-5-5 rates = $0.105",
-    "overlap, first direction, Sonnet (1510 pairs at cosine 0.35 or above, by the similar share of their cosine bin): 1295 x (202, 82) tokens at claude-sonnet-5-5 rates = $1.585",
-    "overlap, first direction, Opus (Sonnet's 3s, 4s and unsure, by bin): 410 x (207, 154) tokens at claude-opus-5-5 rates = $1.602",
-    "overlap, second direction, Sonnet (where the first read 4, by bin): 135 x (202, 82) tokens at claude-sonnet-5-5 rates = $0.165",
-    "overlap, second direction, Opus (100% of the second-direction Sonnet readings): 135 x (207, 154) tokens at claude-opus-5-5 rates = $0.528"
+    "overlap, second direction, Sonnet, not on record: 65 x (202, 82) tokens at claude-sonnet-5-5 rates = $0.080",
+    "overlap, second direction, Opus, after the second-direction Sonnet calls (100%): 65 x (207, 154) tokens at claude-opus-5-5 rates = $0.254"
   ],
-  "budget_usd": 6.0,
-  "cap_usd": 6.0,
+  "budget_usd": 2.0,
+  "cap_usd": 2.0,
   "confirmed_by": null,
   "rubrics": {
     "overlap": {
@@ -102,6 +99,7 @@
     "cosine_floor": 0.25,
     "overlap_floor": 0.35,
     "cut_off": 4,
+    "proposed_cut_off": 3,
     "rules": "m3_rules_2",
     "relation_seed": "review_pilots_1",
     "concurrency": 8,
@@ -151,6 +149,12 @@
         181,
         52,
         1
+      ],
+      "second": [
+        0.1725,
+        0.4475,
+        0.7308,
+        1.0
       ]
     },
     "overlap_tokens": {
@@ -169,32 +173,362 @@
     "n_missing_from_cache": 0,
     "missing": []
   },
-  "resumed": false,
-  "started_at": "2026-10-08T18:03:24+00:00",
+  "resumed": true,
+  "started_at": "2026-10-08T18:53:06+00:00",
+  "resume_estimate": {
+    "records": 1160,
+    "spent_usd": 1.5104,
+    "calls_not_on_record": {
+      "ov2_sonnet": 65
+    },
+    "replayed_graph": {
+      "complete": false,
+      "stalled": {
+        "overlap": 65
+      }
+    }
+  },
+  "earlier_sessions": [
+    {
+      "batch_id": "review_pilots_1",
+      "from_batches": [
+        "gen_pilot_censuses",
+        "gen_pilot_roget",
+        "gen_pilot_wn_clusters"
+      ],
+      "git_sha": "20682f9",
+      "allow_dirty": false,
+      "dirty_check": {
+        "paths": [
+          "assistant_axis/gapgen",
+          "data_analysis/gap_generation",
+          "assistant_axis/judge.py",
+          "assistant_axis/judge_pricing.py",
+          "assistant_axis/entity_id.py",
+          "assistant_axis/atomic_io.py",
+          "data/candidates/validation",
+          "reports/trait_gap_generation/rubrics",
+          "pyproject.toml",
+          "uv.lock"
+        ],
+        "dirty": [],
+        "note": null
+      },
+      "argv": [
+        "build",
+        "--batch-id",
+        "review_pilots_1",
+        "--from-batches",
+        "gen_pilot_censuses",
+        "gen_pilot_roget",
+        "gen_pilot_wn_clusters",
+        "--transport",
+        "live",
+        "--budget-usd",
+        "6"
+      ],
+      "plan": {
+        "n_candidates": 325,
+        "n_covered_shown": 255,
+        "selected_by_batch": {
+          "gen_pilot_censuses": {
+            "covered": 217,
+            "new": 230
+          },
+          "gen_pilot_roget": {
+            "new": 65,
+            "covered": 18
+          },
+          "gen_pilot_wn_clusters": {
+            "new": 30,
+            "covered": 20
+          }
+        },
+        "skipped": {},
+        "query_texts": {
+          "n_query_texts": 325,
+          "n_cached": 325,
+          "n_to_embed": 0
+        },
+        "no_vector": 0,
+        "n_relation_calls": 325,
+        "n_listed": 3224,
+        "n_candidate_edges": 2156,
+        "n_edges_at_overlap_floor": 1510
+      },
+      "transport": "live",
+      "transport_reason": "--transport live",
+      "estimate_usd": 4.1474,
+      "estimate_lines": [
+        "relation call (9.9 listed candidates a call): 325 x (1,202, 759) tokens at claude-haiku-5-5 rates = $0.162",
+        "unsure re-ask (14% of relation calls, 1.4 candidates each): 46 x (599, 108) tokens at claude-sonnet-5-5 rates = $0.105",
+        "overlap, first direction, Sonnet (1510 pairs at cosine 0.35 or above, by the similar share of their cosine bin): 1295 x (202, 82) tokens at claude-sonnet-5-5 rates = $1.585",
+        "overlap, first direction, Opus (Sonnet's 3s, 4s and unsure, by bin): 410 x (207, 154) tokens at claude-opus-5-5 rates = $1.602",
+        "overlap, second direction, Sonnet (where the first read 4, by bin): 135 x (202, 82) tokens at claude-sonnet-5-5 rates = $0.165",
+        "overlap, second direction, Opus (100% of the second-direction Sonnet readings): 135 x (207, 154) tokens at claude-opus-5-5 rates = $0.528"
+      ],
+      "budget_usd": 6.0,
+      "cap_usd": 6.0,
+      "confirmed_by": null,
+      "rubrics": {
+        "overlap": {
+          "name": "overlap_concept",
+          "version": 6,
+          "sha256": "b3eff18fb946928517183af0244acec2d35dba0ab0bd9c57f83c7a06ac3c9fd0"
+        },
+        "relation": {
+          "name": "relation",
+          "version": 1,
+          "sha256": "b6b11f8cfcb0faafdac4a040087356ecb13d410e9bc309597d7833a96110d70f"
+        }
+      },
+      "models": {
+        "relation": "claude-haiku-5-5",
+        "relation_unsure": "claude-sonnet-5-5",
+        "overlap_first": "claude-sonnet-5-5",
+        "overlap_second": "claude-opus-5-5"
+      },
+      "settings": {
+        "k": 10,
+        "cosine_floor": 0.25,
+        "overlap_floor": 0.35,
+        "cut_off": 4,
+        "rules": "m3_rules_2",
+        "relation_seed": "review_pilots_1",
+        "concurrency": 8,
+        "query_form": "gloss_w14",
+        "config_version": "2026-10-02",
+        "embedding_model": "text-embedding-3-large",
+        "representation": "w20",
+        "variant": "centred",
+        "relation_max_tokens": 4096,
+        "overlap_max_tokens": 2048,
+        "ask_attempts": 2
+      },
+      "estimate_inputs": {
+        "shares": {
+          "bins": [
+            0.35,
+            0.45,
+            0.55,
+            0.65
+          ],
+          "similar": [
+            0.7629,
+            0.9674,
+            1.0,
+            1.0
+          ],
+          "opus": [
+            0.1245,
+            0.3757,
+            0.6154,
+            1.0
+          ],
+          "four": [
+            0.0044,
+            0.0497,
+            0.2115,
+            1.0
+          ],
+          "n_listed": [
+            734,
+            215,
+            54,
+            2
+          ],
+          "n_read": [
+            458,
+            181,
+            52,
+            1
+          ]
+        },
+        "overlap_tokens": {
+          "sonnet": [
+            202,
+            82
+          ],
+          "opus": [
+            207,
+            154
+          ]
+        }
+      },
+      "corpus": {
+        "n_corpus": 790,
+        "n_missing_from_cache": 0,
+        "missing": []
+      },
+      "resumed": false,
+      "started_at": "2026-10-08T18:03:24+00:00",
+      "gate": {
+        "pairs": 647,
+        "pairs_not_on_record": 647,
+        "spent_usd": 0.2667,
+        "overlap_estimate_usd": 2.415,
+        "cap_usd": 6.0,
+        "lines": [
+          "overlap, first direction, Sonnet (647 pairs at cosine 0.35 or above, by the similar share of their cosine bin): 647 x (202, 82) tokens at claude-sonnet-5-5 rates = $0.792",
+          "overlap, first direction, Opus (Sonnet's 3s, 4s and unsure, by bin): 263 x (207, 154) tokens at claude-opus-5-5 rates = $1.028",
+          "overlap, second direction, Sonnet (where the first read 4, by bin): 116 x (202, 82) tokens at claude-sonnet-5-5 rates = $0.142",
+          "overlap, second direction, Opus (100% of the second-direction Sonnet readings): 116 x (207, 154) tokens at claude-opus-5-5 rates = $0.453"
+        ]
+      },
+      "finished_at": "2026-10-08T18:09:43+00:00",
+      "cost_usd": 1.5104,
+      "status": 0,
+      "stopped_by_error": null,
+      "calls_sent": {
+        "overlap:opus": 121,
+        "overlap:sonnet": 672,
+        "relation:haiku": 325,
+        "relation_unsure:sonnet": 42
+      },
+      "calls_resumed": 0,
+      "parse_rates": {
+        "relation:claude-haiku-5-5": {
+          "n": 325,
+          "ok_first": 325,
+          "ok": 325
+        },
+        "relation_unsure:claude-sonnet-5-5": {
+          "n": 42,
+          "ok_first": 42,
+          "ok": 42
+        },
+        "overlap:claude-sonnet-5-5": {
+          "n": 672,
+          "ok_first": 672,
+          "ok": 672
+        },
+        "overlap:claude-opus-5-5": {
+          "n": 121,
+          "ok_first": 121,
+          "ok": 121
+        }
+      },
+      "complete": true,
+      "graph_stats": {
+        "n_candidates": 325,
+        "by_batch": {
+          "gen_pilot_censuses": 230,
+          "gen_pilot_roget": 65,
+          "gen_pilot_wn_clusters": 30
+        },
+        "by_generator": {
+          "censuses": 230,
+          "roget": 65,
+          "wn_clusters": 30
+        },
+        "by_decision": {
+          "new": 325
+        },
+        "n_covered_shown": 255,
+        "n_corpus_nodes": 704,
+        "n_queue_nodes": 7,
+        "candidate_edges": {
+          "n": 2156,
+          "by_relation": {
+            "mixed": 2,
+            "opposed": 146,
+            "similar": 721,
+            "unrelated": 1286,
+            "unsure": 1
+          },
+          "by_overlap": {
+            "below_floor": 77,
+            "both": 25,
+            "first": 622,
+            "not_similar": 1432
+          },
+          "answers": {
+            "opposed": 186,
+            "similar": 1057,
+            "unrelated": 1979,
+            "unsure": 2
+          },
+          "one_sided": 1088
+        },
+        "overlap": {
+          "pairs_first_direction": 647,
+          "pairs_second_direction": 25,
+          "sonnet_readings": 672,
+          "opus_readings": 121,
+          "four_first": 25,
+          "four_edges": 21,
+          "similar_below_floor": 77,
+          "unparsed": 0,
+          "stalled": 0
+        },
+        "agreement_on_fours": {
+          "directions_read_4": 46,
+          "by_readings": {
+            "sonnet 3, opus 2": 6,
+            "sonnet 3, opus 3": 69,
+            "sonnet 3, opus 4": 36,
+            "sonnet 4, opus 4": 10
+          }
+        },
+        "corpus_edges": {
+          "n": 5735,
+          "by_relation": {
+            "opposed": 1772,
+            "similar": 1439,
+            "unrelated": 2515,
+            "unsure": 9
+          },
+          "with_readings": 2037
+        },
+        "cliques": {
+          "n": 19,
+          "by_size": {
+            "2": 18,
+            "3": 1
+          },
+          "largest": 3,
+          "candidates_in_cliques": 35,
+          "candidates_in_several": 4
+        },
+        "singletons": 290,
+        "clique_links": 2,
+        "skipped": {},
+        "no_vector": [],
+        "selected_by_batch": {
+          "gen_pilot_censuses": {
+            "covered": 217,
+            "new": 230
+          },
+          "gen_pilot_roget": {
+            "new": 65,
+            "covered": 18
+          },
+          "gen_pilot_wn_clusters": {
+            "new": 30,
+            "covered": 20
+          }
+        }
+      },
+      "stalled": {}
+    }
+  ],
   "gate": {
     "pairs": 647,
-    "pairs_not_on_record": 647,
-    "spent_usd": 0.2667,
-    "overlap_estimate_usd": 2.415,
-    "cap_usd": 6.0,
-    "lines": [
-      "overlap, first direction, Sonnet (647 pairs at cosine 0.35 or above, by the similar share of their cosine bin): 647 x (202, 82) tokens at claude-sonnet-5-5 rates = $0.792",
-      "overlap, first direction, Opus (Sonnet's 3s, 4s and unsure, by bin): 263 x (207, 154) tokens at claude-opus-5-5 rates = $1.028",
-      "overlap, second direction, Sonnet (where the first read 4, by bin): 116 x (202, 82) tokens at claude-sonnet-5-5 rates = $0.142",
-      "overlap, second direction, Opus (100% of the second-direction Sonnet readings): 116 x (207, 154) tokens at claude-opus-5-5 rates = $0.453"
-    ]
+    "pairs_not_on_record": 0,
+    "spent_usd": 1.5104,
+    "overlap_estimate_usd": 0,
+    "cap_usd": 2.0,
+    "lines": []
   },
-  "finished_at": "2026-10-08T18:09:43+00:00",
-  "cost_usd": 1.5104,
+  "finished_at": "2026-10-08T18:54:02+00:00",
+  "cost_usd": 1.8459,
   "status": 0,
   "stopped_by_error": null,
   "calls_sent": {
-    "overlap:opus": 121,
-    "overlap:sonnet": 672,
-    "relation:haiku": 325,
-    "relation_unsure:sonnet": 42
+    "overlap:opus": 60,
+    "overlap:sonnet": 65
   },
-  "calls_resumed": 0,
+  "calls_resumed": 1160,
   "parse_rates": {
     "relation:claude-haiku-5-5": {
       "n": 325,
@@ -207,14 +541,14 @@
       "ok": 42
     },
     "overlap:claude-sonnet-5-5": {
-      "n": 672,
-      "ok_first": 672,
-      "ok": 672
+      "n": 737,
+      "ok_first": 737,
+      "ok": 737
     },
     "overlap:claude-opus-5-5": {
-      "n": 121,
-      "ok_first": 121,
-      "ok": 121
+      "n": 181,
+      "ok_first": 181,
+      "ok": 181
     }
   },
   "complete": true,
@@ -247,8 +581,8 @@
       },
       "by_overlap": {
         "below_floor": 77,
-        "both": 25,
-        "first": 622,
+        "both": 90,
+        "first": 557,
         "not_similar": 1432
       },
       "answers": {
@@ -261,21 +595,22 @@
     },
     "overlap": {
       "pairs_first_direction": 647,
-      "pairs_second_direction": 25,
-      "sonnet_readings": 672,
-      "opus_readings": 121,
+      "pairs_second_direction": 90,
+      "sonnet_readings": 737,
+      "opus_readings": 181,
       "four_first": 25,
+      "proposed_first": 90,
       "four_edges": 21,
       "similar_below_floor": 77,
       "unparsed": 0,
       "stalled": 0
     },
     "agreement_on_fours": {
-      "directions_read_4": 46,
+      "directions_read_4": 48,
       "by_readings": {
-        "sonnet 3, opus 2": 6,
-        "sonnet 3, opus 3": 69,
-        "sonnet 3, opus 4": 36,
+        "sonnet 3, opus 2": 7,
+        "sonnet 3, opus 3": 126,
+        "sonnet 3, opus 4": 38,
         "sonnet 4, opus 4": 10
       }
     },
@@ -301,6 +636,21 @@
     },
     "singletons": 290,
     "clique_links": 2,
+    "proposed_groups": {
+      "n": 48,
+      "n_edges": 84,
+      "by_size": {
+        "2": 33,
+        "3": 13,
+        "4": 2
+      },
+      "largest": 4,
+      "candidates_in_proposed": 85,
+      "candidates_in_proposed_only": 61,
+      "candidates_in_several": 20,
+      "links": 12
+    },
+    "ungrouped": 229,
     "skipped": {},
     "no_vector": [],
     "selected_by_batch": {
