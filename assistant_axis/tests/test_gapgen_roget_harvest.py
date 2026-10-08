@@ -207,3 +207,20 @@ def test_gloss_hint_without_guard_keeps_labels_but_never_the_word():
     item2 = H.HarvestItem("dejection", "837", None, 0, [], 3.0, False, True, 1, 3.0, True)
     t2 = H.gloss_hint(item2, selfish, None)
     assert "tendency to feel gloom" in t2                            # the title is the word itself: next noun
+
+
+def test_partner_hints_from_synopsis_pairs_and_not_from_position():
+    """A pair Roget's printed synopsis gives (source "synopsis") yields partner hints like a rule pair; a pair
+    by position alone yields none."""
+    idx, pairs, lh = _world()
+    lex = W.Lexicon(small_wordnet())
+    for src, expect in (("synopsis", True), ("position", False)):
+        pp = dict(pairs)
+        for h in ("604", "605"):
+            pp[h] = dataclasses.replace(pairs[h], source=src)
+        rep = C.coverage(idx, pp, lh)
+        res = H.harvest(rep, idx, pp, cfg=H.HarvestConfig(), known_stems={"cautious"}, run_id="r1", lex=lex,
+                        zipf=zipf, label_of={"cautious": "cautious"})
+        hints = {c.surface: c.partner_hint for c in res.candidates if c.partner_hint}
+        assert (hints.get("resolute") == "irresolute") is expect
+        assert hints.get("incautious") == "cautious"                  # the rule pair 863 / 864 is unchanged

@@ -5,7 +5,8 @@ sibling stream (``reports/trait_gap_generation/coding_plan_02_roget_wordnet.md``
 
     uv run python data_analysis/gap_generation/roget_generate.py fetch [--force] [--dry-run]
     uv run python data_analysis/gap_generation/roget_generate.py parse [--allow-checksum-mismatch] [--fixture IDS]
-    uv run python data_analysis/gap_generation/roget_generate.py pair [--sweep] [--position]
+    uv run python data_analysis/gap_generation/roget_generate.py synopsis [--fetch] [--xml F] [--allow-checksum-mismatch]
+    uv run python data_analysis/gap_generation/roget_generate.py pair [--sweep] [--position] [--no-synopsis]
     uv run python data_analysis/gap_generation/roget_generate.py map [--embedder openai|hash] [--budget-usd 0.25]
         [--update | --force]
     uv run python data_analysis/gap_generation/roget_generate.py place-check [--budget-usd 5] [--resume] [--render STEMS]
@@ -23,8 +24,18 @@ Every command takes ``--dry-run`` (prints what it would do; writes nothing, call
   ``README.md`` recording the URL, date and SHA-256.  No API cost.
 * ``parse``: ``data/candidates/roget/heads.json``; prints the census (heads, numbers, lettered
   heads, heads with adjectives, tags, drops).  ``--fixture`` writes the test fixture instead.
-* ``pair``: ``head_pairs.json`` by rule (``pairs.rule_pairs``; WordNet from ``data/external/wn``);
-  prints the known-pairs check (``known_pairs.json``) and, with ``--sweep``, the threshold sweep.
+* ``synopsis`` (2026-10-09, QUESTIONS 38): Roget's own pairing, read from the Tabular Synopsis of
+  Categories of the printed 1911 edition (``synopsis.read_synopsis``) in the Internet Archive scan
+  ``rogetsthesauruso00mawsrich``: its positional OCR ``..._djvu.xml`` (35 MB, in ``data/external/roget/``,
+  gitignored; ``--fetch`` downloads it when missing, checked against the pinned SHA-256).  Writes
+  ``synopsis_pairs.json`` (per head: kind, partner or triad members, page, row; the repairs of numbers the
+  OCR garbled; the heads not printed) with the checks against ``known_pairs.json`` and the rule pairing,
+  and prints them.  No API cost.
+* ``pair``: ``head_pairs.json``: the rule pairing (``pairs.rule_pairs``; WordNet from ``data/external/wn``),
+  then, when ``synopsis_pairs.json`` is in ``--out`` (``--no-synopsis``: rules only), the synopsis merged in
+  as the strongest evidence (``pairs.merge_synopsis``: it decides every head it prints, the rules the rest,
+  and each record keeps its rule result).  Prints the counts and the known-pairs check (``known_pairs.json``)
+  of the rules and of the merge and, with ``--sweep``, the rules' threshold sweep.
 * ``map``: ``label_heads.json`` (lexical and semantic routes), ``map_spotcheck.md`` and the
   cumulative ``mapping_usage.json``.  The semantic route embeds head profiles and label texts with
   OpenAI ``text-embedding-3-large`` (direct key from ``.env``), cached under
@@ -86,9 +97,11 @@ from assistant_axis.gapgen.generators.roget import harvest as H  # noqa: E402
 from assistant_axis.gapgen.generators.roget import mapping as M  # noqa: E402
 from assistant_axis.gapgen.generators.roget import pairs as PR  # noqa: E402
 from assistant_axis.gapgen.generators.roget import parse as P  # noqa: E402
+from assistant_axis.gapgen.generators.roget import synopsis as S  # noqa: E402
 
 DEFAULT_OUT = paths.DATA_CANDIDATES / "roget"
 DEFAULT_TEXT = paths.DATA_EXTERNAL / "roget" / "pg10681.txt"
+DEFAULT_SYNOPSIS_XML = paths.DATA_EXTERNAL / "roget" / S.XML_NAME
 FIXTURE_PATH = _REPO_ROOT / "assistant_axis" / "tests" / "fixtures" / "roget_sample.txt"
 FIXTURE_IDS = "1,2,82,83,600-610,604a,609a,862-865,897,898"
 EMBED_TOKENS_PER_TEXT = 70
@@ -220,6 +233,20 @@ def _load_index(args):
 
 # --------------------------------------------------------------------------- pair
 
+def _pairing_counts(idx, pairing) -> dict:
+    from collections import Counter
+    disp = [h for h in idx.order if idx.heads[h].number >= P.DISPOSITIONAL_MIN]
+    return {"all": dict(Counter(f"{x.kind}:{x.source}" for x in pairing.values())),
+            "dispositional": dict(Counter(f"{pairing[h].kind}:{pairing[h].source}" for h in disp)),
+            "dispositional_kinds": dict(Counter(pairing[h].kind for h in disp)),
+            "n_pairs": sum(1 for x in pairing.values() if x.kind == "pair") // 2}
+
+
+def _known_summary(chk: dict) -> dict:
+    return {k: chk[k] for k in ("checked", "recall")} | {"hit": len(chk["hit"]), "wrong": chk["wrong"],
+                                                        "miss": chk["miss"], "dropped": chk["dropped"]}
+
+
 def cmd_pair(args) -> int:
     idx, heads_path = _load_index(args)
     lex = _lexicon(args)
@@ -227,28 +254,116 @@ def cmd_pair(args) -> int:
     known_path = Path(args.out) / "known_pairs.json"
     known = PR.load_known_pairs(known_path) if known_path.exists() else []
     chk = PR.check_known_pairs(idx, pairing, known)
-    from collections import Counter
-    disp = [h for h in idx.order if idx.heads[h].number >= P.DISPOSITIONAL_MIN]
-    print("pairing (all heads):", json.dumps(dict(Counter(f"{x.kind}:{x.source}" for x in pairing.values()))))
-    print("pairing (dispositional):", json.dumps(dict(Counter(f"{pairing[h].kind}:{pairing[h].source}" for h in disp))))
-    print(f"known pairs: {len(chk['hit'])}/{chk['checked']} hit (recall {chk['recall']}); wrong {chk['wrong']}; "
+    rules_counts = _pairing_counts(idx, pairing)
+    label = "rules"
+    print("pairing, rules (all heads):", json.dumps(rules_counts["all"]))
+    print("pairing, rules (dispositional):", json.dumps(rules_counts["dispositional"]))
+    print(f"known pairs, rules: {len(chk['hit'])}/{chk['checked']} hit (recall {chk['recall']}); wrong {chk['wrong']}; "
           f"miss {chk['miss']}; dropped (titles differ) {chk['dropped']}")
     if args.sweep:
         for row in PR.threshold_sweep(idx, lex, known):
             print("  sweep", json.dumps(row))
     res = PR.residue(idx, pairing)
-    print(f"unresolved heads: {sum(len(x) for _, x in res)} in {len(res)} subsections")
-    out = Path(args.out) / "head_pairs.json"
-    if args.dry_run:
-        print(f"DRY-RUN: would write {out}")
-        return 0
+    print(f"unresolved heads, rules: {sum(len(x) for _, x in res)} in {len(res)} subsections")
+    syn_path = Path(args.out) / S.FILE_NAME
+    meta = {"position_pass": bool(args.position), "known_pairs_check": _known_summary(chk)}
     inputs = [_input("roget_heads", heads_path)]
     if known_path.exists():
         inputs.append(_input("known_pairs", known_path))
-    PR.save_pairs(pairing, out, inputs=inputs, meta={"position_pass": bool(args.position),
-                                                      "known_pairs_check": {k: chk[k] for k in ("checked", "recall")}
-                                                      | {"hit": len(chk["hit"]), "wrong": chk["wrong"],
-                                                         "miss": chk["miss"], "dropped": chk["dropped"]}})
+    if syn_path.exists() and not args.no_synopsis:
+        syn = S.load(syn_path)
+        rules_chk = chk
+        pairing = PR.merge_synopsis(idx, pairing, syn, lex=lex)
+        chk = PR.check_known_pairs(idx, pairing, known)
+        label = "synopsis + rules"
+        merged = _pairing_counts(idx, pairing)
+        print("pairing, synopsis + rules (all heads):", json.dumps(merged["all"]))
+        print("pairing, synopsis + rules (dispositional):", json.dumps(merged["dispositional"]))
+        print(f"known pairs, synopsis + rules: {len(chk['hit'])}/{chk['checked']} hit (recall {chk['recall']}); "
+              f"wrong {chk['wrong']}; miss {chk['miss']}")
+        res = PR.residue(idx, pairing)
+        print(f"unresolved heads, synopsis + rules: {sum(len(x) for _, x in res)} in {len(res)} subsections")
+        meta = {**meta, "known_pairs_check": _known_summary(chk),
+                "synopsis": {"path": str(syn_path.relative_to(_REPO_ROOT)) if syn_path.is_relative_to(_REPO_ROOT)
+                             else str(syn_path), "n_heads": len(syn), "version": S.SYNOPSIS_VERSION},
+                "rules_only": {"counts": rules_counts, "known_pairs_check": _known_summary(rules_chk)},
+                "counts": merged}
+        inputs.append(_input("synopsis_pairs", syn_path))
+    elif not args.no_synopsis:
+        print(f"note: {syn_path} not found: rules only (run `roget_generate.py synopsis` first)")
+    out = Path(args.out) / "head_pairs.json"
+    if args.dry_run:
+        print(f"DRY-RUN: would write {out} ({label})")
+        return 0
+    PR.save_pairs(pairing, out, inputs=inputs, meta=meta)
+    print(f"wrote {out} ({label})")
+    return 0
+
+
+# --------------------------------------------------------------------------- synopsis
+
+def cmd_synopsis(args) -> int:
+    xml = Path(args.xml)
+    if not xml.exists():
+        if not args.fetch:
+            raise SystemExit(f"{xml} not found: `roget_generate.py synopsis --fetch` downloads it ({S.XML_URL})")
+        if args.dry_run:
+            print(f"DRY-RUN: would download {S.XML_URL} to {xml}")
+            return 0
+        S.fetch_xml(xml)
+        print(f"downloaded {xml} ({xml.stat().st_size:,} bytes)")
+    sha = S.sha256_of(xml)
+    if S.XML_SHA256 and sha != S.XML_SHA256 and not args.allow_checksum_mismatch:
+        raise SystemExit(f"{xml}: SHA-256 {sha} differs from the pinned {S.XML_SHA256} (--allow-checksum-mismatch "
+                         f"to proceed; the layout rules were checked on the pinned scan)")
+    idx, heads_path = _load_index(args)
+    res = S.read_synopsis(S.synopsis_pages(S.read_pages(xml)), idx)
+    rec = res.records()
+    lex = _lexicon(args)
+    rules = PR.rule_pairs(idx, lex)
+    known_path = Path(args.out) / "known_pairs.json"
+    known = PR.load_known_pairs(known_path) if known_path.exists() else []
+    checks = S.check(idx, rec, rules, known)
+    from collections import Counter
+    print(f"pages: {', '.join(res.page_labels)}; line pitch {sorted(set(res.pitches.values()))}")
+    print(f"heads: {len(rec)} of {len(idx.heads)} in the synopsis; not printed {len(res.missing)}: "
+          + ", ".join(f"{h} {idx.heads[h].title}" for h in res.missing))
+    print("duplicates:", json.dumps(res.duplicates))
+    print("kinds:", json.dumps(checks["kinds"]))
+    print("blocks:", json.dumps(dict(Counter(b.how for b in res.blocks))))
+    reps = res.repairs()
+    print("repairs:", json.dumps(dict(Counter(r["method"] for r in reps))))
+    for r in reps:
+        if r["method"] != "stripped":
+            print(f"  {r['id']} {r['title']} ({r['page']}, {r['column']}): {r['method']}, token {r['token']!r}, "
+                  f"title read {r['title_ocr']!r}")
+    print(f"unused number tokens: {len(res.unused_tokens)}: "
+          + ", ".join(f"{t['text']!r} ({t['page']} {t['column']})" for t in res.unused_tokens))
+    mm = res.title_mismatches()
+    print(f"titles that differ from Gutenberg (match < 0.5): {len(mm)}: "
+          + ", ".join(f"{m['id']} {m['title_ocr']!r} / {m['title']!r}" for m in mm))
+    kp = checks["known_pairs"]
+    print(f"known pairs: {len(kp['pair'])} paired, {len(kp['same_block'])} in one block, {len(kp['other'])} other "
+          f"of {kp['checked']}: {json.dumps(kp['other'])}")
+    rr = checks["rules"]
+    print(f"rule pairs {rr['n_rule_pairs']}: agree {len(rr['agree'])}, same block {len(rr['same_block'])}, disagree "
+          f"{len(rr['disagree'])}, not printed {len(rr['not_in_synopsis'])}; synopsis pairs the rules lack "
+          f"{rr['synopsis_pairs_not_in_rules']} {json.dumps(rr['synopsis_pairs_not_in_rules_by_rule_kind'])}")
+    print("rules' unresolved dispositional heads:", json.dumps(checks["unresolved"]["by_synopsis_kind"]),
+          f"of {checks['unresolved']['n']}")
+    out = Path(args.out) / S.FILE_NAME
+    if args.dry_run:
+        print(f"DRY-RUN: would write {out}")
+        return 0
+    meta = {"source": {"item": S.ITEM_ID, "url": S.XML_URL, "metadata": S.METADATA_URL,
+                       "file": xml.name, "bytes": xml.stat().st_size, "sha256": sha,
+                       "edition": "Roget's Thesaurus of English Words and Phrases, ed. C. O. Sylvester Mawson "
+                                  "(New York: Thomas Y. Crowell, 1911); Tabular Synopsis of Categories, pp. xxi-xxxi",
+                       "licence": "NOT_IN_COPYRIGHT (Internet Archive item metadata)"}}
+    inputs = [_input("synopsis_djvu_xml", xml, sha256=sha), _input("roget_heads", heads_path)]
+    if known_path.exists():
+        inputs.append(_input("known_pairs", known_path))
+    S.save(res, out, inputs=inputs, meta=meta, checks=checks)
     print(f"wrote {out}")
     return 0
 
@@ -688,10 +803,18 @@ def _load_all(args):
 
 
 def unresolved_note(idx, pairs) -> str:
+    from collections import Counter
     disp = [h for h in idx.order if idx.heads[h].number >= P.DISPOSITIONAL_MIN]
     n = sum(1 for h in disp if pairs[h].kind == "unresolved")
-    return (f"Pairing by rule only (the plan's LLM pass for the residue was dropped in the 2026-10-08 revision): "
-            f"{n} of {len(disp)} dispositional heads are unresolved and are treated as having no opposed head.")
+    if not any(p.source == "synopsis" for p in pairs.values()):
+        return (f"Pairing by rule only (the plan's LLM pass for the residue was dropped in the 2026-10-08 revision): "
+                f"{n} of {len(disp)} dispositional heads are unresolved and are treated as having no opposed head.")
+    c = Counter(pairs[h].kind for h in disp)
+    return (f"Pairing as Roget printed it in the Tabular Synopsis of the 1911 edition "
+            f"([synopsis_readout.md](./synopsis_readout.md)), by rule for the heads the synopsis does not print: of "
+            f"the {len(disp)} dispositional heads, {c['pair']} are in a pair, {c['triad']} are the third head of a "
+            f"triad, {c['singleton']} are singletons and {n} are unresolved; only a pair gives a head an opposed "
+            f"head here.")
 
 
 def cmd_coverage(args) -> int:
@@ -855,10 +978,18 @@ def build_parser() -> argparse.ArgumentParser:
     sp.add_argument("--fixture", nargs="?", const=FIXTURE_IDS, default=None,
                     help=f"write the test fixture for these head ids (default {FIXTURE_IDS})")
 
+    sp = sub.add_parser("synopsis")
+    sp.add_argument("--xml", type=Path, default=DEFAULT_SYNOPSIS_XML,
+                    help="the item's positional OCR (djvu XML); default data/external/roget/" + S.XML_NAME)
+    sp.add_argument("--fetch", action="store_true", help="download the djvu XML when it is missing")
+    sp.add_argument("--allow-checksum-mismatch", action="store_true")
+
     sp = sub.add_parser("pair")
     sp.add_argument("--sweep", action="store_true", help="print the confirmation-threshold sweep")
     sp.add_argument("--position", action="store_true",
                     help="also pair evidence-free neighbours by position (source 'position'; off by default)")
+    sp.add_argument("--no-synopsis", action="store_true",
+                    help="rules only: ignore synopsis_pairs.json (default: merge it in as the strongest evidence)")
 
     sp = sub.add_parser("map")
     sp.add_argument("--embedder", default="openai", choices=["openai", "hash"])
@@ -928,7 +1059,8 @@ def build_parser() -> argparse.ArgumentParser:
 
 def main(argv=None) -> int:
     args = build_parser().parse_args(argv)
-    return {"fetch": cmd_fetch, "parse": cmd_parse, "pair": cmd_pair, "map": cmd_map, "head-scope": cmd_head_scope,
+    return {"fetch": cmd_fetch, "parse": cmd_parse, "synopsis": cmd_synopsis, "pair": cmd_pair, "map": cmd_map,
+            "head-scope": cmd_head_scope,
             "place-check": cmd_place_check,
             "coverage": cmd_coverage, "harvest": cmd_harvest, "submit": cmd_submit}[args.cmd](args)
 
