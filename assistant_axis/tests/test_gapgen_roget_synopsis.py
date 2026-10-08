@@ -284,6 +284,19 @@ def test_synopsis_and_pair_commands(tmp_path, capsys):
     assert "synopsis" in out
 
 
+def test_readme_section_is_replaced_not_repeated(tmp_path):
+    cli = _cli()
+    xml = tmp_path / S.XML_NAME
+    xml.write_bytes(FIXTURE.read_bytes())
+    (tmp_path / "README.md").write_text("# Gutenberg part\n\nkept\n", encoding="utf-8")
+    cli.refresh_synopsis_readme(xml)
+    cli.refresh_synopsis_readme(xml)
+    text = (tmp_path / "README.md").read_text(encoding="utf-8")
+    assert text.startswith("# Gutenberg part") and "kept" in text
+    assert text.count(cli.SYNOPSIS_README_MARK) == 1
+    assert S.sha256_of(xml) in text and "NOT_IN_COPYRIGHT" in text and f"{xml.stat().st_size:,} bytes" in text
+
+
 # --------------------------------------------------------------------------- the real scan
 
 XML = REPO / "data" / "external" / "roget" / S.XML_NAME

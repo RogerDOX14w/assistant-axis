@@ -187,7 +187,54 @@ workstream 2 of trait-gap generation
 This directory is gitignored (`/data/external/`); the derived files the project keeps are under
 [data/candidates/roget/](../../candidates/roget/).
 """
+    xml = dest.parent / S.XML_NAME
+    if xml.exists():
+        readme += "\n" + synopsis_readme_section(xml)
     (dest.parent / "README.md").write_text(readme, encoding="utf-8")
+
+
+SYNOPSIS_README_MARK = "## The printed 1911 edition: Tabular Synopsis (Internet Archive)"
+
+
+def synopsis_readme_section(xml: Path) -> str:
+    """The README's record of the djvu XML: source, retrieval time (the file's modification time), size,
+    checksums and licence status."""
+    import hashlib
+    h1 = hashlib.sha1()
+    with open(xml, "rb") as fh:
+        for chunk in iter(lambda: fh.read(1 << 20), b""):
+            h1.update(chunk)
+    when = datetime.fromtimestamp(xml.stat().st_mtime, timezone.utc).replace(microsecond=0).isoformat()
+    other = []
+    for f in sorted(xml.parent.glob("mawson1911_*")):
+        other.append(f"- [{f.name}](./{f.name}), {f.stat().st_size:,} bytes, SHA-256 `{S.sha256_of(f)}`: the item's "
+                     f"plain OCR text (`{S.ITEM_ID}_djvu.txt`), which loses the synopsis rows; not read by the code.")
+    return f"""{SYNOPSIS_README_MARK}
+
+Read by [roget_generate.py](../../../data_analysis/gap_generation/roget_generate.py) `synopsis`
+([synopsis.py](../../../assistant_axis/gapgen/generators/roget/synopsis.py)) for Roget's own opposed-head pairing,
+written to [synopsis_pairs.json](../../candidates/roget/synopsis_pairs.json) (readout:
+[synopsis_readout.md](../../candidates/roget/synopsis_readout.md)).
+
+- Item: `{S.ITEM_ID}`, "Roget's Thesaurus of English words and phrases", ed. C. O. Sylvester Mawson
+  (New York: Thomas Y. Crowell, 1911); scanned at 400 dpi.  Metadata: <{S.METADATA_URL}>.
+- Licence status: `NOT_IN_COPYRIGHT` (the item's `possible-copyright-status`); a 1911 US publication.
+- Source: <{S.XML_URL}> (the item's server; `archive.org/download/...` answered 500 on 2026-10-08)
+- Retrieved: {when} (UTC)
+- File: [{xml.name}](./{xml.name}), {xml.stat().st_size:,} bytes, SHA-256 `{S.sha256_of(xml)}`
+  (pinned in [synopsis.py](../../../assistant_axis/gapgen/generators/roget/synopsis.py) as `XML_SHA256`), SHA-1
+  `{h1.hexdigest()}` (as the item's metadata lists it).  The positional OCR: every word with its page (leaf)
+  and box; the synopsis is leaves 27-37, printed pages xxi-xxxi.
+""" + ("\n".join(other) + "\n" if other else "")
+
+
+def refresh_synopsis_readme(xml: Path) -> None:
+    readme = xml.parent / "README.md"
+    text = readme.read_text(encoding="utf-8") if readme.exists() else ""
+    i = text.find(SYNOPSIS_README_MARK)
+    if i >= 0:
+        text = text[:i].rstrip() + "\n"
+    readme.write_text((text + "\n" if text else "") + synopsis_readme_section(xml), encoding="utf-8")
 
 
 # --------------------------------------------------------------------------- parse
@@ -365,6 +412,9 @@ def cmd_synopsis(args) -> int:
         inputs.append(_input("known_pairs", known_path))
     S.save(res, out, inputs=inputs, meta=meta, checks=checks)
     print(f"wrote {out}")
+    if xml.resolve().parent == DEFAULT_SYNOPSIS_XML.resolve().parent:
+        refresh_synopsis_readme(xml)
+        print(f"recorded the source in {xml.parent / 'README.md'}")
     return 0
 
 
