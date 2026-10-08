@@ -1,0 +1,94 @@
+{
+  "_provenance": {
+    "inputs": [
+      {
+        "dataset_id": null,
+        "dep_key": "registry",
+        "extras": {
+          "from_batches": "gen_pilot_censuses,gen_pilot_roget,gen_pilot_wn_clusters"
+        },
+        "fingerprint": "v1:2026-10-08T17:36:09+00:00@29352738",
+        "kind": "file",
+        "last_modified_at": "2026-10-08T17:36:09+00:00",
+        "path": "data/candidates/registry.jsonl"
+      },
+      {
+        "dataset_id": null,
+        "dep_key": "rubrics",
+        "extras": {
+          "overlap_rubric": "6",
+          "relation_rubric": "1"
+        },
+        "fingerprint": "v1:multi:e46bf0db1520",
+        "kind": "multi",
+        "last_modified_at": "2026-10-08T17:36:09+00:00",
+        "member_paths": [
+          "reports/trait_gap_generation/rubrics/overlap_concept.md",
+          "reports/trait_gap_generation/rubrics/relation.md"
+        ],
+        "path": "reports/trait_gap_generation/rubrics"
+      },
+      {
+        "dataset_id": null,
+        "dep_key": "metric_config",
+        "extras": {},
+        "fingerprint": "v1:2026-10-08T17:36:08+00:00@54961",
+        "kind": "file",
+        "last_modified_at": "2026-10-08T17:36:08+00:00",
+        "path": "data/candidates/metric_config.json"
+      },
+      {
+        "dataset_id": null,
+        "dep_key": "m3_runs",
+        "extras": {
+          "from_batches": "gen_pilot_censuses,gen_pilot_roget,gen_pilot_wn_clusters"
+        },
+        "fingerprint": "v1:multi:0da5cb0e5152",
+        "kind": "multi",
+        "last_modified_at": "2026-10-08T17:36:08+00:00",
+        "member_paths": [
+          "data/candidates/novelty/gen_pilot_censuses/run.json",
+          "data/candidates/novelty/gen_pilot_roget/run.json",
+          "data/candidates/novelty/gen_pilot_wn_clusters/run.json"
+        ],
+        "path": "data/candidates/novelty"
+      }
+    ],
+    "inputs_sha256": "c36d8d22f3b4620170a15446669e5c37934b6637196048dcc9da73a8e0b1d785",
+    "produced_at": "2026-10-08T18:09:43+00:00",
+    "produced_by": {
+      "author": "Roger Dearnaley",
+      "cmd": "uv run python data_analysis/gap_generation/review_graph.py build --batch-id review_pilots_1 --from-batches gen_pilot_censuses gen_pilot_roget gen_pilot_wn_clusters --transport live --budget-usd 6",
+      "git_sha": "20682f9+dirty",
+      "title": "review_graph build review_pilots_1"
+    },
+    "schema_version": "1.0"
+  },
+  "n_calls": 1160,
+  "per_model": {
+    "claude-haiku-5-5": {
+      "completion_tokens": 249025,
+      "cost_usd": 0.1637,
+      "model": "claude-haiku-5-5",
+      "n_calls": 325,
+      "prompt_tokens": 392326
+    },
+    "claude-opus-5-5": {
+      "completion_tokens": 15551,
+      "cost_usd": 0.4263,
+      "model": "claude-opus-5-5",
+      "n_calls": 121,
+      "prompt_tokens": 28813
+    },
+    "claude-sonnet-5-5": {
+      "completion_tokens": 60426,
+      "cost_usd": 0.9204,
+      "model": "claude-sonnet-5-5",
+      "n_calls": 714,
+      "prompt_tokens": 158081
+    }
+  },
+  "total_completion_tokens": 325002,
+  "total_cost_usd": 1.5104,
+  "total_prompt_tokens": 579220
+}
