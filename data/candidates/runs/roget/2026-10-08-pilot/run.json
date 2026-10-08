@@ -1,0 +1,41 @@
+{
+  "generator": "roget",
+  "run_id": "2026-10-08-pilot",
+  "git_sha": "0f8d3ad",
+  "args": {
+    "command": "roget_generate.py submit",
+    "generator": "roget",
+    "run_id": "2026-10-08-pilot",
+    "candidates": "/Users/roger/Documents/GitHub/assistant-axis/.claude/worktrees/gen02-roget/data/candidates/runs/roget/2026-10-08-pilot/candidates.jsonl"
+  },
+  "n_emitted": 185,
+  "started_at": "2026-10-08T03:50:46+00:00",
+  "finished_at": "2026-10-08T03:50:46+00:00",
+  "confirmed_by": null,
+  "cost_usd": 0,
+  "sessions": [
+    {
+      "session_id": "f63d9ae7c332",
+      "started_at": "2026-10-08T03:50:46+00:00",
+      "finished_at": "2026-10-08T03:50:46+00:00",
+      "git_sha": "0f8d3ad",
+      "args": {
+        "command": "roget_generate.py submit",
+        "generator": "roget",
+        "run_id": "2026-10-08-pilot",
+        "candidates": "/Users/roger/Documents/GitHub/assistant-axis/.claude/worktrees/gen02-roget/data/candidates/runs/roget/2026-10-08-pilot/candidates.jsonl"
+      },
+      "n_emitted": 185,
+      "confirmed_by": null,
+      "cost_usd": 0,
+      "n_calls": 0,
+      "usage": {
+        "per_model": {},
+        "total_cost_usd": 0,
+        "total_prompt_tokens": 0,
+        "total_completion_tokens": 0,
+        "n_calls": 0
+      }
+    }
+  ]
+}
