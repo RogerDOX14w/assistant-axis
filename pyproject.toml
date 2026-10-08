@@ -27,6 +27,8 @@ dependencies = [
     "wordfreq>=3.1",
     "wn>=0.9",
     "sentence-transformers>=5.0",
+    "fastapi>=0.115",
+    "uvicorn>=0.30",
 ]
 
 [project.optional-dependencies]
