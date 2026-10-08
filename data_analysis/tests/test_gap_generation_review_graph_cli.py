@@ -14,7 +14,7 @@ from assistant_axis.gapgen.registry import Candidate, Registry, submit_candidate
 from assistant_axis.judge_pricing import MultiModelUsage
 from assistant_axis.tests.fake_anthropic import FakeAsyncAnthropic, user_text
 from assistant_axis.tests.test_gapgen_novelty import responder_for, write_corpus
-from assistant_axis.tests.test_gapgen_review_graph import OVERLAP, RELATIONS, toy_rows, toy_vectors
+from assistant_axis.tests.test_gapgen_review_graph import OVERLAP, OVERLAP3, RELATIONS, toy_rows, toy_vectors
 from data_analysis.gap_generation import novelty_score as NS
 from data_analysis.gap_generation import review_graph as cli
 from data_analysis.tests.test_gap_generation_novelty_cli import CONFIG, FakeOpenAIEmbedder
@@ -120,7 +120,10 @@ def test_build_writes_the_graph_usage_and_run_and_never_the_registry(env, capsys
     assert run["calls_sent"]["overlap:sonnet"] > 0 and run["settings"]["cut_off"] == 4
     assert "four_edges" in run["graph_stats"]["overlap"]
     o = capsys.readouterr().out
-    assert "4 cliques" in o and "[usage]" in o
+    # (was "4 cliques" before decision 12: the print now names both tiers)
+    assert "4 merged groups" in o and "1 proposed groups" in o and "[usage]" in o
+    assert g.config["proposed_cut_off"] == 3 and run["settings"]["proposed_cut_off"] == 3 and g.schema == 2
+    assert g.proposed_groups == [["godless#1", "skeptic#1"]]
 
 
 def test_over_budget_is_refused_before_any_call(env, capsys):
@@ -185,10 +188,14 @@ def test_groups_lists_the_cliques_largest_first(env, capsys):
     capsys.readouterr()
     assert cli.main(["groups", "--batch-id", "rv1", "--out-root", str(env["cand_dir"])]) == 0
     o = capsys.readouterr().out
-    assert "11 candidates, 4 cliques (sizes 3: 1, 2: 3), 3 singletons" in o
+    # (was "11 candidates, 4 cliques (sizes 3: 1, 2: 3), 3 singletons" before decision 12)
+    assert "11 candidates, 4 merged groups, 1 proposed groups, 2 in no group" in o
+    assert "merged groups (4-edges both ways): 4 (sizes 3: 1, 2: 3)" in o
+    assert "proposed groups (3-edges both ways, none wholly inside a merged group): 1 (sizes 2: 1)" in o
     lines = [x for x in o.splitlines() if x.lstrip().startswith("[")]
     assert lines[0].lstrip().startswith("[0] 3: godless, irreligious, nonreligious")
     assert "opposed to [3]" in lines[0]
+    assert lines[-1].strip() == "[0] 2: godless, skeptic"          # its opposed pole, pious, is in a merged group
 
 
 def test_the_embedding_path_with_the_hash_embedder(tmp_path, monkeypatch, capsys):
@@ -202,3 +209,38 @@ def test_the_embedding_path_with_the_hash_embedder(tmp_path, monkeypatch, capsys
     capsys.readouterr()
     assert build(env, "--dry-run", batch="rv2") == 0                       # now cached: nothing left to embed
     assert '"n_to_embed": 0' in capsys.readouterr().out
+
+
+def test_a_graph_built_at_cut_off_4_is_resumed_at_3_reading_only_the_missing_second_directions(env, capsys):
+    env["holder"]["responder"] = responder_for(RELATIONS, OVERLAP3)          # the godless triangle reads 3 / 3
+    assert build(env, "--proposed-cut-off", "4") == 0
+    g4 = RG.Graph.from_json(json.loads((out(env) / "graph.json").read_text()))
+    assert g4.proposed_groups == [] and g4.config["proposed_cut_off"] == 4
+    cost1 = json.loads((out(env) / "usage.json").read_text())["total_cost_usd"]
+    capsys.readouterr()
+    # the dry run of the resume: the replay finds the three missing second directions, priced on their own
+    assert build(env, "--resume", "--dry-run") == 0
+    o = capsys.readouterr().out
+    assert '"calls_not_on_record": {"ov2_sonnet": 3}' in o
+    assert "overlap, second direction, Sonnet, not on record: 3 x" in o and "relation call" not in o.split("estimate")[1]
+    assert f"with the ${cost1:.3f} spent by the earlier sessions" in o
+    assert build(env, "--resume") == 0
+    sent = [json.loads(user_text(kw)) for kw in calls(env)]
+    assert {(x["target"]["label"], x["other"]["label"]) for x in sent} == \
+        {("irreligious", "godless"), ("nonreligious", "godless"), ("nonreligious", "irreligious")}
+    g3 = RG.Graph.from_json(json.loads((out(env) / "graph.json").read_text()))
+    assert g3.complete and g3.config["proposed_cut_off"] == 3
+    assert ["godless#1", "irreligious#1", "nonreligious#1"] in g3.proposed_groups
+    run = json.loads((out(env) / "run.json").read_text())
+    assert run["resume_estimate"]["calls_not_on_record"] == {"ov2_sonnet": 3}
+    assert run["resume_estimate"]["spent_usd"] == pytest.approx(cost1, abs=1e-4)
+
+
+def test_a_resume_is_capped_with_the_earlier_spend(env, capsys):
+    env["holder"]["responder"] = responder_for(RELATIONS, OVERLAP3)
+    assert build(env, "--proposed-cut-off", "4") == 0
+    cost1 = json.loads((out(env) / "usage.json").read_text())["total_cost_usd"]
+    capsys.readouterr()
+    # a cap below the earlier spend plus the new calls refuses the resume before any call
+    assert build(env, "--resume", budget=f"{cost1 + 0.0001:.4f}") == 2
+    assert "exceeds --budget-usd" in capsys.readouterr().err

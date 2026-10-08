@@ -14,6 +14,15 @@ For a later generator run: score it with M3 first (``novelty_score.py score --ba
 failed request, the gate below) goes on with ``--resume``, which sends no call already answered; ``--overwrite``
 moves an old directory aside.  The registry is read, never written.
 
+Decision 12 (two tiers of groups): the second direction of a pair is read when the first reads at
+``--proposed-cut-off`` (3) or above, and ``graph.json`` carries ``proposed_groups`` (maximal cliques of 3-edges, less
+those inside a merged group) beside ``cliques`` (the merged groups, 4-edges).  A graph built before it (second
+direction only after a 4) is brought up to date by ``build --resume`` with the same arguments, which reads only the
+missing second directions:
+
+    uv run python data_analysis/gap_generation/review_graph.py build --batch-id review_pilots_1 \\
+        --from-batches gen_pilot_censuses gen_pilot_roget gen_pilot_wn_clusters --transport live --budget-usd 2 --resume
+
 The brief is ``reports/trait_gap_generation/coding_plan_review.md`` (section 2); the logic is
 :mod:`assistant_axis.gapgen.review_graph`, whose docstring says what the graph holds.
 
@@ -24,19 +33,23 @@ Commands:
   ``--cosine-floor`` (0.25) or above; the relation call per candidate (Haiku 5.5, rubric ``relation.md``, the
   unsure answers re-asked of Sonnet 5.5); the overlap call (rubric A, Sonnet 5.5 then Opus 5.5 under M3's rule at
   cut-off 4) on the pairs answered similar at ``--overlap-floor`` (0.35) or above, first direction, then the second
-  where the first read 4; corpus edges copied from the M3 blocks; maximal cliques of the 4-edges.  Writes
+  where the first read ``--proposed-cut-off`` (3) or above; corpus edges copied from the M3 blocks; the merged
+  groups (maximal cliques of the 4-edges) and the proposed groups (of the 3-edges).  Writes
   ``data/candidates/review/<B>/``: ``graph.json`` (the graph in a provenance envelope), ``usage.json`` (the
   project's schema plus a ``_provenance`` key), ``responses.jsonl`` (every response, as M3 keeps them),
   ``run.json`` and ``run.log``.
-* ``groups --batch-id B [--top N]``: the cliques, largest first, with their members' labels and the cliques each
-  is opposed to; the count of singletons by generator.  No call.
+* ``groups --batch-id B [--top N]``: the merged groups, then the proposed groups, largest first, with their
+  members' labels and the groups each is opposed to; the count of ungrouped candidates by generator.  No call.
 
 Cost: the estimate is printed before any call (the relation calls as rendered; the overlap calls from the shares M3
 measured per cosine bin in the source batches' blocks, and the per-call tokens of their ``responses.jsonl``);
 ``--budget-usd`` is the hard cap (an estimate over it is refused); over $20 needs ``--confirm-expensive
 --confirmed-by``.  After the relation calls, the overlap stage is estimated again on the pairs actually marked for
 it, and the run stops before any overlap call if the spend so far plus that would pass the cap (``--resume`` with
-a larger budget then goes on; the relation answers are on record).  ``--dry-run`` prints the plan, the estimate and
+a larger budget then goes on; the relation answers are on record).  The cap covers the whole run: a ``--resume``
+counts the spend of its earlier sessions (``usage.json``), and its estimate is the replay of the build on its
+records with nothing sent (``review_graph.resume_estimate``: the calls not on record, and those they lead to by
+the shares), checked as spend so far plus that estimate against ``--budget-usd``.  ``--dry-run`` prints the plan, the estimate and
 the two prompts as rendered and writes and calls nothing.  A paid run is refused while the platform's code or
 prompt paths have uncommitted changes, unless ``--allow-dirty``.  ``--transport auto`` sends fewer than 300
 candidates live, more through the Message Batches API.
@@ -136,8 +149,10 @@ def graph_config(args, cfg, rubrics: dict) -> dict:
     return {"k": args.k, "cosine_floor": args.cosine_floor, "rules": f"cut_off_{RG.CUT_OFF}",
             "overlap_rubric": rubrics["overlap"]["version"], "relation_rubric": rubrics["relation"]["version"],
             "embedding": {"model": cfg.live_model["model_id"], "query_form": args.query_form},
-            "overlap_floor": args.overlap_floor, "cut_off": RG.CUT_OFF, "m3_rules": RG.RULES.name,
-            "second_direction": "read only where the first direction read 4",
+            "overlap_floor": args.overlap_floor, "cut_off": RG.CUT_OFF, "proposed_cut_off": args.proposed_cut_off,
+            "m3_rules": RG.RULES.name,
+            "second_direction": f"read where the first direction read {args.proposed_cut_off} or above "
+                                "(the proposed cut-off) under M3's rule at that cut-off",
             "models": {"relation": NR.RELATION_MODEL, "relation_unsure": NR.UNSURE_MODEL,
                        "overlap_first": NR.FIRST_MODEL, "overlap_second": NR.SECOND_MODEL},
             "rubrics": {k: {kk: v[kk] for kk in ("name", "version", "sha256")} for k, v in rubrics.items()},
@@ -235,17 +250,45 @@ def cmd_build(args, argv) -> int:
                               "corpus_not_cached": index_info}
     corpus = index.traits if index is not None else NV.load_trait_corpus(args.data_dir)
     plan = RG.plan_graph(rows, args.from_batches, vectors, k=args.k, cosine_floor=args.cosine_floor)
-    shares = RG.measured_shares(rows, args.from_batches)
+    shares = RG.measured_shares(rows, args.from_batches, second_at=args.proposed_cut_off)
     tokens = RG.measured_overlap_tokens(source_records(args.from_batches, args.out_root))
     transport, why = choose_transport(args.transport, len(plan.cands))
     embedding = {"model": cfg.live_model["model_id"], "query_form": args.query_form,
                  "representation": cfg.representation, "variant": cfg.covered["space"]["variant"]}
 
+    # a resume: the spend of the earlier sessions counts against the cap, and the estimate is the replay of the build
+    # on its records with nothing sent (the calls not on record, and those they lead to by the shares)
+    resuming = bool(args.resume and out_dir.exists())
+    spent_before = MultiModelUsage.load_or_create(out_dir / "usage.json").total_cost_usd if resuming else 0.0
+    records_before: list = []
+    if resuming and (out_dir / "responses.jsonl").exists():
+        records_before = [json.loads(x) for x in (out_dir / "responses.jsonl").read_text(encoding="utf-8").splitlines()
+                          if x.strip()]
+    resume_info: dict = {}
+
     def estimate(p: RG.GraphPlan, runner: RG.ReviewRunner, n_embed: int):
         runner.add_candidates(p.cands.values())
-        return RG.estimate_build(relation_calls=runner.relation_calls(p.relation_items()), edge_cosines=p.edges.values(),
-                                 shares=shares, overlap_floor=args.overlap_floor, overlap_tokens=tokens,
-                                 transport=transport, cand_chars=_cand_chars(p.cands), n_embed=n_embed)
+        if not resuming:
+            return RG.estimate_build(relation_calls=runner.relation_calls(p.relation_items()),
+                                     edge_cosines=p.edges.values(), shares=shares, overlap_floor=args.overlap_floor,
+                                     overlap_tokens=tokens, transport=transport, cand_chars=_cand_chars(p.cands),
+                                     n_embed=n_embed)
+        replay = make_runner(client=None, batch_id=args.batch_id, rubrics=rubrics, index=runner.index,
+                             usage=MultiModelUsage(), responses_path=out_dir / "responses.jsonl",
+                             concurrency=args.concurrency, config_version=cfg.config_version, embedding=embedding,
+                             resume_records=records_before)
+        r_est, r_graph, wanted = RG.resume_estimate(
+            p, runner=replay, corpus=corpus, queue=queue, shares=shares, overlap_floor=args.overlap_floor,
+            proposed_cut_off=args.proposed_cut_off, overlap_tokens=tokens, transport=transport)
+        if n_embed:
+            r_est.add("query embeddings not in the cache (OpenAI text-embedding-3-large) + the 8 canary texts",
+                      "text-embedding-3-large", 1, (n_embed + 8) * 30, 0)
+        resume_info.clear()
+        resume_info.update(records=len(records_before), spent_usd=round(spent_before, 4),
+                           calls_not_on_record=dict(sorted(Counter(w["wave"] for w in wanted).items())),
+                           replayed_graph={"complete": r_graph.complete,
+                                           "stalled": {k: len(v) for k, v in r_graph.stalled.items()}})
+        return r_est
 
     probe = make_runner(client=None, batch_id=args.batch_id, rubrics=rubrics,
                         index=index if index is not None else SimpleNamespace(traits=corpus), usage=MultiModelUsage(),
@@ -257,17 +300,20 @@ def cmd_build(args, argv) -> int:
     print(f"shares (M3's, by cosine bin, from the source batches' blocks): {json.dumps(shares.as_dict())}")
     print(f"overlap tokens a call (measured in the source batches' records): {json.dumps(tokens)}")
     print(f"transport: {transport} ({why})")
-    print(f"estimate:\n{est.format()}")
-    print(f"total estimate = ${est.usd:.3f}")
+    if resuming:
+        print(f"resume: {json.dumps(resume_info)}")
+    print(f"estimate{' of the calls not on record' if resuming else ''}:\n{est.format()}")
+    print(f"total estimate = ${est.usd:.3f}" + (f"; with the ${spent_before:.3f} spent by the earlier sessions, "
+                                                f"${spent_before + est.usd:.3f} against the cap" if resuming else ""))
     if vinfo["n_to_embed"]:
         print(f"NOTE: {vinfo['n_to_embed']} query texts (or the corpus) are not in the embedding cache: the estimate "
               "covers the cached candidates only; the run embeds the rest first and checks the estimate against the "
               "cap again before any LLM call")
     refused, cap = None, None
     try:
-        cap = confirm_or_abort(est.usd, args.budget_usd, confirm_expensive=args.confirm_expensive,
+        cap = confirm_or_abort(spent_before + est.usd, args.budget_usd, confirm_expensive=args.confirm_expensive,
                                confirmed_by=args.confirmed_by)
-        print(f"hard cap: ${cap:.2f}")
+        print(f"hard cap: ${cap:.2f} (the whole run{', earlier sessions included' if resuming else ''})")
     except CostRefused as exc:
         refused = exc.msg
     sha, dirty = git_sha(), platform_dirty_files()
@@ -301,7 +347,8 @@ def cmd_build(args, argv) -> int:
                 "models": {"relation": NR.RELATION_MODEL, "relation_unsure": NR.UNSURE_MODEL,
                            "overlap_first": NR.FIRST_MODEL, "overlap_second": NR.SECOND_MODEL},
                 "settings": {"k": args.k, "cosine_floor": args.cosine_floor, "overlap_floor": args.overlap_floor,
-                             "cut_off": RG.CUT_OFF, "rules": RG.RULES.name, "relation_seed": args.batch_id,
+                             "cut_off": RG.CUT_OFF, "proposed_cut_off": args.proposed_cut_off,
+                             "rules": RG.RULES.name, "relation_seed": args.batch_id,
                              "concurrency": args.concurrency, "query_form": args.query_form,
                              "config_version": cfg.config_version, "embedding_model": cfg.live_model["model_id"],
                              "representation": cfg.representation, "variant": cfg.covered["space"]["variant"],
@@ -309,6 +356,8 @@ def cmd_build(args, argv) -> int:
                              "ask_attempts": NR.ASK_ATTEMPTS},
                 "estimate_inputs": {"shares": shares.as_dict(), "overlap_tokens": tokens},
                 "corpus": index_info, "resumed": bool(args.resume), "started_at": utc_now()}
+    if resuming:
+        run_meta["resume_estimate"] = dict(resume_info)
     if earlier:
         run_meta["earlier_sessions"] = list(earlier.pop("earlier_sessions", [])) + [earlier]
     atomic_write_text(json.dumps(run_meta, indent=2) + "\n", out_dir / "run.json")
@@ -329,7 +378,7 @@ def cmd_build(args, argv) -> int:
             run_meta.update(plan=plan_line(plan, vinfo, overlap_floor=args.overlap_floor), estimate_usd=round(est.usd, 4),
                             estimate_lines=[str(x) for x in est.lines], estimate_after_embedding=True)
             print(f"after embedding: total estimate = ${est.usd:.3f}")
-            confirm_or_abort(est.usd, args.budget_usd, confirm_expensive=args.confirm_expensive,
+            confirm_or_abort(spent_before + est.usd, args.budget_usd, confirm_expensive=args.confirm_expensive,
                              confirmed_by=args.confirmed_by)
         from dotenv import load_dotenv
         import anthropic
@@ -359,7 +408,8 @@ def cmd_build(args, argv) -> int:
                     f"${cap:.2f}; the relation answers are on record: --resume with a --budget-usd of at least that")
 
         graph = RG.build_graph(plan, runner=runner, corpus=corpus, queue=queue, overlap_floor=args.overlap_floor,
-                               config=graph_config(args, cfg, rubrics), batch_id=args.batch_id, gate=gate)
+                               config=graph_config(args, cfg, rubrics), batch_id=args.batch_id, gate=gate,
+                               proposed_cut_off=args.proposed_cut_off)
         graph.usage = usage.as_dict()
         atomic_write_text(json.dumps(RG.graph_envelope(graph, inputs=inputs), indent=2, ensure_ascii=False) + "\n",
                           out_dir / "graph.json")
@@ -389,8 +439,9 @@ def cmd_build(args, argv) -> int:
         s = graph.stats
         print(f"graph: {s['n_candidates']} candidates, {s['candidate_edges']['n']} candidate edges "
               f"{json.dumps(s['candidate_edges']['by_relation'])}, {s['overlap']['four_edges']} 4-edges, "
-              f"{s['cliques']['n']} cliques {json.dumps(s['cliques']['by_size'])}, {s['singletons']} singletons; "
-              f"{out_dir / 'graph.json'}")
+              f"{s['cliques']['n']} merged groups {json.dumps(s['cliques']['by_size'])}, "
+              f"{s['proposed_groups']['n']} proposed groups {json.dumps(s['proposed_groups']['by_size'])}, "
+              f"{s['ungrouped']} candidates in no group; {out_dir / 'graph.json'}")
         if not graph.complete:
             print(f"INCOMPLETE: {json.dumps({k: len(v) for k, v in graph.stalled.items()})} left without an answer; "
                   "run again with --resume")
@@ -399,6 +450,23 @@ def cmd_build(args, argv) -> int:
 
 # --------------------------------------------------------------------------- groups
 
+def _print_groups(title: str, groups, links, nodes, top) -> None:
+    sizes = Counter(len(c) for c in groups)
+    print(f"{title}: {len(groups)} (sizes {', '.join(f'{s}: {sizes[s]}' for s in sorted(sizes, reverse=True)) or 'none'})")
+    opp: dict[int, list] = {}
+    for lk in links:
+        i, j = lk["cliques"]
+        opp.setdefault(i, []).append(j)
+        opp.setdefault(j, []).append(i)
+    for i, c in enumerate(groups if top is None else groups[:top]):
+        line = f"  [{i}] {len(c)}: {', '.join(nodes[m].label for m in c)}"
+        if opp.get(i):
+            line += f"  (opposed to {', '.join(f'[{j}]' for j in sorted(opp[i]))})"
+        print(line)
+    if top is not None and len(groups) > top:
+        print(f"  ... {len(groups) - top} more")
+
+
 def cmd_groups(args) -> int:
     p = RG.review_dir(args.batch_id, candidates_dir=args.out_root) / "graph.json"
     if not p.exists():
@@ -406,26 +474,16 @@ def cmd_groups(args) -> int:
         return 1
     g = RG.Graph.from_json(json.loads(p.read_text(encoding="utf-8")))
     nodes = g.node_map()
-    sizes = Counter(len(c) for c in g.cliques)
-    singles = g.singletons()
-    print(f"{g.batch_id} (from {', '.join(g.from_batches)}): {len(g.candidate_keys())} candidates, {len(g.cliques)} "
-          f"cliques (sizes {', '.join(f'{s}: {sizes[s]}' for s in sorted(sizes, reverse=True))}), {len(singles)} "
-          f"singletons" + ("" if g.complete else "  (INCOMPLETE: resume the build)"))
-    opp: dict[int, list] = {}
-    for lk in g.clique_links:
-        i, j = lk["cliques"]
-        opp.setdefault(i, []).append(j)
-        opp.setdefault(j, []).append(i)
-    top = g.cliques if args.top is None else g.cliques[:args.top]
-    for i, c in enumerate(top):
-        line = f"  [{i}] {len(c)}: {', '.join(nodes[m].label for m in c)}"
-        if opp.get(i):
-            line += f"  (opposed to {', '.join(f'[{j}]' for j in sorted(opp[i]))})"
-        print(line)
-    if args.top is not None and len(g.cliques) > args.top:
-        print(f"  ... {len(g.cliques) - args.top} more")
-    by_gen = Counter(nodes[k].generator for k in singles)
-    print(f"singletons by generator: {json.dumps(dict(sorted(by_gen.items(), key=lambda kv: str(kv[0]))))}")
+    loose = g.ungrouped()
+    print(f"{g.batch_id} (from {', '.join(g.from_batches)}): {len(g.candidate_keys())} candidates, "
+          f"{len(g.cliques)} merged groups, {len(g.proposed_groups)} proposed groups, {len(loose)} in no group"
+          + ("" if g.complete else "  (INCOMPLETE: resume the build)")
+          + ("" if g.schema >= 2 else "  (schema 1: built before decision 12, no proposed groups; resume the build)"))
+    _print_groups("merged groups (4-edges both ways)", g.cliques, g.clique_links, nodes, args.top)
+    _print_groups(f"proposed groups ({g.config.get('proposed_cut_off', RG.DEFAULT_PROPOSED_CUT_OFF)}-edges both ways, "
+                  "none wholly inside a merged group)", g.proposed_groups, g.proposed_links, nodes, args.top)
+    by_gen = Counter(nodes[k].generator for k in loose)
+    print(f"in no group, by generator: {json.dumps(dict(sorted(by_gen.items(), key=lambda kv: str(kv[0]))))}")
     return 0
 
 
@@ -442,6 +500,9 @@ def build_parser() -> argparse.ArgumentParser:
                    help="retrieval floor among candidates (default 0.25, M3's)")
     b.add_argument("--overlap-floor", type=float, default=RG.DEFAULT_OVERLAP_FLOOR,
                    help="no overlap call on a pair below this cosine (default 0.35, decision 11)")
+    b.add_argument("--proposed-cut-off", type=int, choices=(3, 4), default=RG.DEFAULT_PROPOSED_CUT_OFF,
+                   help="the reading (both ways) of a proposed group's edges, and of a first direction that sends "
+                        "the second (default 3, decision 12; the merged groups' cut-off stays 4)")
     b.add_argument("--registry", type=Path, default=paths.REGISTRY_PATH)
     b.add_argument("--data-dir", type=Path, default=paths.DATA_DIR)
     b.add_argument("--out-root", type=Path, default=None, help="candidates dir holding review/<B>/ and novelty/<M3>/")
@@ -459,10 +520,10 @@ def build_parser() -> argparse.ArgumentParser:
     b.add_argument("--overwrite", action="store_true", help="move an existing directory to <dir>.bak.<UTC> first")
     b.add_argument("--allow-dirty", action="store_true")
     b.add_argument("--dry-run", action="store_true", help="print the plan, the estimate and the prompts; write nothing")
-    g = sub.add_parser("groups", help="the cliques of a built graph, largest first (no call)")
+    g = sub.add_parser("groups", help="the merged and proposed groups of a built graph, largest first (no call)")
     g.add_argument("--batch-id", required=True)
     g.add_argument("--out-root", type=Path, default=None)
-    g.add_argument("--top", type=int, default=None, help="list only the N largest cliques")
+    g.add_argument("--top", type=int, default=None, help="list only the N largest groups of each tier")
     return ap
 
 

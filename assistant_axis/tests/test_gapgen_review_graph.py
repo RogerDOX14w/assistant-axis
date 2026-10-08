@@ -132,12 +132,13 @@ def make_runner(tmp_path, responder=None, *, usage=None, records=(), name="out")
     return r, client, idx
 
 
-def build(tmp_path, responder=None, *, usage=None, records=(), name="out", rows=None, overlap_floor=0.35, gate=None):
+def build(tmp_path, responder=None, *, usage=None, records=(), name="out", rows=None, overlap_floor=0.35, gate=None,
+          proposed_cut_off=RG.DEFAULT_PROPOSED_CUT_OFF):
     rows = rows if rows is not None else toy_rows()
     plan = RG.plan_graph(rows, [BATCH], toy_vectors(), k=10, cosine_floor=0.25)
     runner, client, idx = make_runner(tmp_path, responder, usage=usage, records=records, name=name)
     g = RG.build_graph(plan, runner=runner, overlap_floor=overlap_floor, corpus=idx.traits, queue=QUEUE,
-                       config={"k": 10}, batch_id="rv", gate=gate)
+                       config={"k": 10}, batch_id="rv", gate=gate, proposed_cut_off=proposed_cut_off)
     return g, runner, client
 
 
@@ -239,7 +240,9 @@ class TestMaximalCliques:
 # --------------------------------------------------------------------------- the overlap call's directions and floor
 
 class TestOverlap:
-    def test_the_second_direction_is_read_only_after_a_four(self, tmp_path):
+    def test_the_second_direction_is_read_only_at_the_proposed_cut_off_or_above(self, tmp_path):
+        # (named "only after a four" before decision 12; the toy's first directions read 4 or 2, so the
+        # expectations are the same under the default proposed cut-off 3)
         g, _, client = build(tmp_path)
         calls = overlap_calls(client)
         e = edge(g, "godless", "skeptic")                    # godless#1 sorts first: it is the first target
@@ -289,6 +292,136 @@ class TestOverlap:
         ab = edge(g, "chain a", "chain b")
         # chain a: Haiku unsure, Sonnet unrelated; chain b: similar -> similar, read, still a 4-edge
         assert ab.relations == {"ab": "unrelated", "ba": "similar"} and ab.relation == "similar" and ab.strict
+
+
+# --------------------------------------------------------------------------- decision 12: proposed groups at 3
+
+#: The godless triangle read 3 / 3 (Sonnet / Opus) in both directions: "the same concept, differing in scope".
+OVERLAP3 = {**OVERLAP, **both(pairs_of(GODLESS), 3)}
+
+
+class TestProposedGroups:
+    def test_a_first_direction_3_reads_the_second_and_two_3s_make_a_proposed_edge(self, tmp_path):
+        g, _, client = build(tmp_path, responder_for(RELATIONS, OVERLAP3))
+        calls = overlap_calls(client)
+        for x, y in pairs_of(GODLESS):                              # x sorts first: the first target
+            e = edge(g, x, y)
+            assert e.overlap == "both" and e.proposed and not e.strict
+            assert e.readings["ab"]["proposed"] and not e.readings["ab"]["four"]
+            assert (y, x, "sonnet") in calls and (y, x, "opus") in calls          # Sonnet 3 goes to Opus (cut-off 4)
+        assert sorted(key(x) for x in GODLESS) not in g.cliques
+        assert sorted(key(x) for x in GODLESS) in g.proposed_groups
+
+    def test_proposed_groups_are_maximal_3_cliques_less_those_inside_a_merged_group(self, tmp_path):
+        g, _, _ = build(tmp_path)
+        # every merged clique is also a 3-clique; it is not repeated as a proposed group
+        assert g.proposed_groups == [[key("godless"), key("skeptic")]]     # godless > skeptic 4, back 3 / 3
+        assert edge(g, "godless", "skeptic").proposed and not edge(g, "godless", "skeptic").strict
+        g3, _, _ = build(tmp_path, responder_for(RELATIONS, OVERLAP3), name="out3")
+        assert g3.proposed_groups == [sorted(key(x) for x in GODLESS), [key("godless"), key("skeptic")]]
+        assert g3.cliques == [[key("chain a"), key("chain b")], [key("chain b"), key("chain c")],
+                              sorted(key(x) for x in PIOUS)]
+        # a proposed group that only contains a merged clique stays: skeptic reads 3 with all three
+        wide = {**OVERLAP, **both([("irreligious", "skeptic"), ("nonreligious", "skeptic")], 3)}
+        gw, _, _ = build(tmp_path, responder_for(RELATIONS, wide), name="outw")
+        assert gw.cliques[0] == sorted(key(x) for x in GODLESS)
+        assert gw.proposed_groups == [sorted(key(x) for x in GODLESS + ["skeptic"])]
+
+    def test_a_chain_at_3_gives_two_proposed_groups_never_three(self, tmp_path):
+        chain3 = {**OVERLAP, **both([("chain a", "chain b"), ("chain b", "chain c")], 3)}
+        g, _, _ = build(tmp_path, responder_for(RELATIONS, chain3))
+        assert [key("chain a"), key("chain b")] in g.proposed_groups
+        assert [key("chain b"), key("chain c")] in g.proposed_groups
+        assert [key("chain a"), key("chain b"), key("chain c")] not in g.proposed_groups
+
+    def test_opposed_edges_are_never_proposed(self, tmp_path):
+        g, _, _ = build(tmp_path, responder_for(RELATIONS, OVERLAP3))
+        assert not any(e.proposed for e in g.edges if e.relation == "opposed")
+        assert not any(set(pg) & {key(p) for p in PIOUS} and set(pg) & {key(x) for x in GODLESS}
+                       for pg in g.proposed_groups)
+
+    def test_proposed_cut_off_4_reads_the_second_direction_only_after_a_4(self, tmp_path):
+        g, _, client = build(tmp_path, responder_for(RELATIONS, OVERLAP3), proposed_cut_off=4)
+        calls = overlap_calls(client)
+        assert ("irreligious", "godless", "sonnet") not in calls
+        assert edge(g, "godless", "irreligious").overlap == "first" and g.proposed_groups == []
+
+    def test_a_resume_reads_only_the_missing_second_directions(self, tmp_path):
+        # the pilot's situation: built at cut-off 4 (second direction only after a 4), resumed at 3
+        resp = responder_for(RELATIONS, OVERLAP3)
+        g4, _, _ = build(tmp_path, resp, proposed_cut_off=4)
+        recs = [json.loads(x) for x in (tmp_path / "out" / "responses.jsonl").read_text().splitlines()]
+        g3, _, client = build(tmp_path, resp, records=recs)
+        sent = overlap_calls(client)
+        assert all("target" in json.loads(user_text(kw)) for kw in client.calls)        # no relation call
+        assert sorted(sent) == sorted((y, x, m) for x, y in pairs_of(GODLESS) for m in ("sonnet", "opus"))
+        assert g3.complete and sorted(key(x) for x in GODLESS) in g3.proposed_groups
+        assert g3.cliques == g4.cliques
+
+    def test_the_resume_estimate_prices_the_calls_not_on_record(self, tmp_path):
+        resp = responder_for(RELATIONS, OVERLAP3)
+        build(tmp_path, resp, proposed_cut_off=4)
+        recs = [json.loads(x) for x in (tmp_path / "out" / "responses.jsonl").read_text().splitlines()]
+        plan = RG.plan_graph(toy_rows(), [BATCH], toy_vectors(), k=10, cosine_floor=0.25)
+        runner, client, idx = make_runner(tmp_path, resp, records=recs, name="replay")
+        shares = RG.Shares(bins=(0.35,), similar=(1.0,), opus=(0.5,), four=(0.5,), n_listed=(10,), n_read=(10,))
+        est, g, wanted = RG.resume_estimate(plan, runner=runner, corpus=idx.traits, queue=QUEUE, shares=shares,
+                                            overlap_tokens={"sonnet": (200, 80), "opus": (200, 150)})
+        assert client.calls == [] and not (tmp_path / "replay").exists()       # nothing sent, nothing written
+        assert sorted((w["key"], w["stem"]) for w in wanted) == sorted((key(y), key(x)) for x, y in pairs_of(GODLESS))
+        assert {w["wave"] for w in wanted} == {"ov2_sonnet"}
+        lines = {x.label.split(" (")[0]: x for x in est.lines}
+        assert lines["overlap, second direction, Sonnet, not on record"].n_calls == 3
+        assert lines["overlap, second direction, Opus, after the second-direction Sonnet calls"].n_calls == 3
+        assert est.usd == pytest.approx(3 * cost_for_usage(NV.SONNET, 200, 80) + 3 * cost_for_usage(NV.OPUS, 200, 150))
+        assert not g.complete and g.stalled["overlap"]                    # the replay leaves them unanswered
+        # nothing missing: an empty estimate
+        recs2 = [json.loads(x) for x in (tmp_path / "out" / "responses.jsonl").read_text().splitlines()]
+        build(tmp_path, resp, records=recs2)
+        recs3 = [json.loads(x) for x in (tmp_path / "out" / "responses.jsonl").read_text().splitlines()]
+        r3, c3, _ = make_runner(tmp_path, resp, records=recs3, name="replay3")
+        est3, g3, wanted3 = RG.resume_estimate(plan, runner=r3, corpus=idx.traits, queue=QUEUE, shares=shares)
+        assert wanted3 == [] and est3.usd == 0 and g3.complete and c3.calls == []
+
+    def test_the_resume_estimate_after_a_stop_in_the_relation_calls(self, tmp_path):
+        usage = GuardedUsage(budget_usd=0.002)
+        with pytest.raises(BudgetExceededError):
+            build(tmp_path, usage=usage)
+        recs = [json.loads(x) for x in (tmp_path / "out" / "responses.jsonl").read_text().splitlines()]
+        plan = RG.plan_graph(toy_rows(), [BATCH], toy_vectors(), k=10, cosine_floor=0.25)
+        runner, client, idx = make_runner(tmp_path, records=recs, name="replay")
+        shares = RG.Shares(bins=(0.35,), similar=(1.0,), opus=(1.0,), four=(1.0,), n_listed=(10,), n_read=(10,))
+        est, _, wanted = RG.resume_estimate(plan, runner=runner, corpus=idx.traits, queue=QUEUE, shares=shares)
+        n_rel = sum(1 for w in wanted if w["step"] == "relation")
+        assert n_rel and client.calls == []
+        labels = [x.label for x in est.lines]
+        assert any(lb.startswith("relation call, not on record") for lb in labels)
+        # the overlap stage of the candidates whose relation call is missing is estimated by the shares
+        assert any(lb.startswith("overlap, first direction, Sonnet") for lb in labels)
+
+    def test_stats_and_round_trip(self, tmp_path):
+        g, _, _ = build(tmp_path, responder_for(RELATIONS, OVERLAP3))
+        s = g.stats["proposed_groups"]
+        assert s["n"] == 2 and s["by_size"] == {"2": 1, "3": 1} and s["largest"] == 3
+        # 3-edges: the triangle's 3, godless-skeptic, and the three 4-edges (a 4-edge is also a 3-edge)
+        assert s["n_edges"] == sum(1 for e in g.edges if e.proposed) == 7
+        assert s["candidates_in_proposed"] == 4 and s["candidates_in_several"] == 1   # godless is in both
+        assert g.stats["ungrouped"] == 2                                              # loner, lowsim
+        assert set(g.ungrouped()) == {key("loner"), key("lowsim")}
+        d = json.loads(json.dumps(g.to_json()))
+        assert d["proposed_groups"] == g.proposed_groups and d["config"] == {"k": 10}
+        g2 = RG.Graph.from_json(d)
+        assert g2.proposed_groups == g.proposed_groups and g2.to_json() == g.to_json()
+        old = {k: v for k, v in d.items() if k not in ("proposed_groups", "proposed_links")}
+        assert RG.Graph.from_json(old).proposed_groups == []                       # a graph from before decision 12
+
+    def test_a_reading_at_the_proposed_cut_off(self):
+        r = lambda s, o=None: {"sonnet": {"value": s, "reason": "x"}, "opus": {"value": o, "reason": "y"} if o is not None else None}
+        assert RG.reading_of(r(3, 3))["proposed"] and RG.reading_of(r(3, 4))["proposed"]
+        assert RG.reading_of(r(4, 4))["proposed"] and RG.reading_of(r("unsure", 3))["proposed"]
+        assert not RG.reading_of(r(3, 2))["proposed"] and not RG.reading_of(r(2))["proposed"]
+        assert not RG.reading_of(r(3, 3), proposed_cut_off=4)["proposed"]
+        assert RG.reading_of(r(4, 4), proposed_cut_off=4)["proposed"]
 
 
 # --------------------------------------------------------------------------- the edges copied from M3
