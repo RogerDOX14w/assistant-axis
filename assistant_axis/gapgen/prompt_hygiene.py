@@ -22,6 +22,7 @@ _PROSE = """
 answering assistant common decided elected emotional enough every everyday false far general good judge kind
 language literal married moral native new no practical rejected returning short stable straight two young
 formed scientific technical
+thin
 """
 #: Words in the comparison prompt's example readings and meanings.  That prompt
 #: is frozen after the held-out run (coordinator, round 4; review section 6),
