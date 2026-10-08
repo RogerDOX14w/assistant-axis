@@ -107,3 +107,55 @@ quoted; the rendered prompt of one call per use on Haiku 5.5, read before sendin
 and output-length figures (5.5 may think more, as Opus did in the one-pair form); spend by run and
 model; anything surprising.  The constraints of [coding_plan_m3.md](./coding_plan_m3.md)'s last
 section apply unchanged (file boundary, sandbox, tools, git, no rubric edits).
+
+## The switch (Roger agreed, 2026-10-08)
+
+Decided on the readout's final numbers ([haiku55_readout.md](./haiku55_readout.md), sections 1-5):
+every Haiku call of the gap-filling subproject moves to Haiku 5.5; the overlap call stays on Sonnet
+first, Opus second.  One Opus build round, in the worktree; the platform plan records it as M3
+decision 17.
+
+1. **Defaults to `claude-haiku-5-5`**: `DEFAULT_MODEL` in [filter.py](../../assistant_axis/gapgen/filter.py),
+   [split_runner.py](../../assistant_axis/gapgen/split_runner.py) and [states_pass.py](../../assistant_axis/gapgen/states_pass.py);
+   `DEFAULT_READING_MODEL` in [plain_reading.py](../../assistant_axis/gapgen/plain_reading.py);
+   `PARAPHRASE_MODEL` in [calibrate_llm.py](../../assistant_axis/gapgen/calibrate_llm.py); `RELATION_MODEL`
+   in the M3 runner (`UNSURE_MODEL` stays Sonnet 5.5; the overlap models stay); the CLIs' usage
+   strings; [data_analysis/README.md](../../data_analysis/README.md).  Haiku 4.5 remains selectable by
+   `--model`, and every record names its model as now.
+2. **The verdict step reads three times** (Roger: "best of three ... require unanimity on others").
+   New `--readings N` on the filter (default 3 when the model is Haiku 5.5, 1 otherwise): the verdict
+   waves (sense, the established / vague checks, kind, same-sense) run N times per word as independent
+   readings, each recorded; the word's verdict is **turned away only if every reading turns it away,
+   otherwise the majority verdict of the readings**; with no majority (three different verdicts),
+   `trait` if any reading says trait, else the first reading's verdict.  The gloss, alignment and
+   descriptors run once, on the reading whose verdict won (the first such reading).  The second-opinion
+   sample and the disagreement tripwire are unchanged and compare the combined verdict.  Cost: three
+   readings at about $0.0012 each against 4.5's $0.008.  `summary.json` reports the readings'
+   agreement (all three the same; the rule's rescues: words one or two readings turned away).
+3. **The gloss rubric's membership line.**  Haiku 5.5 pads membership glosses (4 of 10 past 18 words
+   against the fact-wins rule).  Add to [rubrics/gloss.md](./rubrics/gloss.md), after the fact-wins
+   sentence, exactly: "A membership gloss is one clause and may be well under the length above; do not
+   add how the person acts or feels about it."  Render a membership and a trait sample, read them, pin
+   as the next version, and check on the smoke run that membership glosses stop padding.  Do not change
+   any other rubric.
+4. **Cost estimates learn Haiku 5.5's token figures**: per-step input and output means measured from
+   `h55_split_test_words`, `h55_m1_validation_pool` and `h55_verdict_600` (output includes thinking),
+   and the relation call's from `m3_pilot_1_relation_h55`; the dry run quotes them per model (the
+   agent of 2026-10-07 found the estimates under-stated 5.5 by about 40%).  The tokenizer factor and
+   the no-temperature list already know `haiku-5`.
+5. **The registry takes the round-2 decisions**: a `--write-registry` on `score --redecide` (or a
+   `promote-redecide` command) writes `m3_pilot_1_r2`'s `novelty` blocks to the registry rows,
+   idempotent per (run_id, key), with the source run named in the block; run it for `m3_pilot_1_r2`.
+   No API call.
+6. **Tests** for 1-5 with the fake clients (the three-reading rule's every branch: unanimous turn-away,
+   majority, no majority with and without a trait reading; the recorded readings; the estimate per
+   model; the registry write and its idempotence).  Existing suites pass; a changed expectation is
+   reported with its reason.
+7. **Smoke run, live, under $1, no approval needed** (Roger: run such jobs and say so): the filter on
+   the 99 test words ([split_test_words.jsonl](../../data/candidates/validation/split_test_words.jsonl))
+   with the new defaults, batch id `h55_x3_split_test_words`; report the combined verdicts against the
+   reference join and against the one-reading 5.5 runs, the readings' agreement, the membership gloss
+   lengths, and the spend against the new estimate.  Then `novelty_score.py score --relation-only` on
+   20 pilot candidates with the new relation default, to confirm the wiring (about $0.02).
+8. **Report**: commits; what each default is now; the smoke figures; spend; changed expectations.  The
+   constraints of [coding_plan_m3.md](./coding_plan_m3.md)'s last section apply unchanged.

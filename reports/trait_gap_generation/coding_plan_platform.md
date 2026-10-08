@@ -712,3 +712,13 @@ left provisional:
     "M1 filter: judging model per generator" paragraph above).  When the first generator's output
     exists, rerun the comparison on it (both Haikus, Sonnet, an Opus reference on a few hundred words)
     before fixing the generator's model.
+17. **Haiku 5.5 for the gap-filling subproject (Roger, 2026-10-08, on
+    [haiku55_readout.md](./haiku55_readout.md)).**  Every Haiku call of the subproject moves from Haiku
+    4.5 to `claude-haiku-5-5`: the M1 verdict step with three readings and the asymmetric rule (turned
+    away only if all three readings agree, otherwise the majority), the gloss and alignment steps, the
+    states pass, the plain-reading check, the M2 paraphrase check, and the M3 relation call.  The
+    overlap call stays Sonnet first, Opus second.  Measured: a tenth of the price per token, the gloss
+    better scoped where the corpus's sense is specialised, the relation call upheld 82% of the time
+    against 4.5 by blind judges, the verdict step with three readings about a fifth fewer weighted
+    errors than 4.5 (more than half fewer on near-corpus words).  Build: [coding_plan_haiku55.md](./coding_plan_haiku55.md),
+    "The switch".  Decision 16's re-examination on real generator output stands.
