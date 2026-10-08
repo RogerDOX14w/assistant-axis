@@ -41,7 +41,8 @@ Commands:
   coding_plan_platform.md's M3 design): the candidates M3 judged covered, under the
   trait that covers them, the traits whose candidates read 4 first, then 3, the
   exact-label matches last; each with its deciding readings and reasons
-  (``novelty.synonyms``).
+  (``novelty.synonyms``); then the candidates a review merged into a trait or
+  queue entry (``review_app.py apply``; ``review_app.decisions.review_merges``).
 * ``compact``: copy the log to ``registry.jsonl.bak.<UTC>``, fold it to one
   line per key, and write the tracked snapshot ``registry.snapshot.jsonl``.
 * ``promote (--keys K ... | --status accepted) [--min-local-novelty X] [--section S] [--dry-run]``:
@@ -330,6 +331,16 @@ def cmd_synonyms(args) -> int:
             why = opus.get("reason") or son.get("reason") or ""
             print(f"| {g['stem']} | {_md(g['best'])} | {_md(c['label'])} | {c['key']} | {_md(reading)} | {_md(why)} "
                   f"| {_md(c.get('gloss'))} |")
+    # the review app's merges into a corpus trait or queue entry (coding_plan_review.md decision 5), after M3's
+    from assistant_axis.gapgen.review_app.decisions import review_merges
+    merges = review_merges(Registry(args.registry).fold().values(), stem=args.stem, run_id=args.run_id)
+    if merges:
+        print(f"<!-- review merges: {sum(len(g['candidates']) for g in merges)} candidates a review merged into "
+              f"{len(merges)} traits or queue entries (review_app.py apply); best = review -->")
+    for g in merges:
+        for c in g["candidates"]:
+            print(f"| {g['stem']} | review | {_md(c['label'])} | {c['key']} | merged in review {c['review_batch']} "
+                  f"({c['review_group']}, {c['by']}) | {_md(c['note'])} | {_md(c.get('gloss'))} |")
     return 0
 
 
