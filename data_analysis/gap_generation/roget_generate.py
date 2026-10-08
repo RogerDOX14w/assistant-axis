@@ -7,9 +7,11 @@ sibling stream (``reports/trait_gap_generation/coding_plan_02_roget_wordnet.md``
     uv run python data_analysis/gap_generation/roget_generate.py parse [--allow-checksum-mismatch] [--fixture IDS]
     uv run python data_analysis/gap_generation/roget_generate.py pair [--sweep] [--position]
     uv run python data_analysis/gap_generation/roget_generate.py map [--embedder openai|hash] [--budget-usd 0.25]
-    uv run python data_analysis/gap_generation/roget_generate.py coverage
+    uv run python data_analysis/gap_generation/roget_generate.py place-check [--budget-usd 5] [--resume] [--render STEMS]
+    uv run python data_analysis/gap_generation/roget_generate.py head-scope [--budget-usd 1] [--render IDS] [--force]
+    uv run python data_analysis/gap_generation/roget_generate.py coverage [--head-scope F | --no-head-scope]
     uv run python data_analysis/gap_generation/roget_generate.py harvest --run-id R [--every-nth K --offset J]
-        [--per-head-cap 10] [--pair-top 3] [--classes ...] [--include-wn] [--force]
+        [--per-head-cap 10] [--pair-top 3] [--classes ...] [--include-wn] [--force] [--head-scope F | --no-head-scope]
     uv run python data_analysis/gap_generation/roget_generate.py submit --run-id R [--generator roget|wn_clusters]
 
 Every command takes ``--dry-run`` (prints what it would do; writes nothing, calls nothing).
@@ -26,11 +28,30 @@ Every command takes ``--dry-run`` (prints what it would do; writes nothing, call
   OpenAI ``text-embedding-3-large`` (direct key from ``.env``), cached under
   ``data/candidates/cache/embeddings/``: about 1,950 short texts, about $0.02 on a cold cache.
   ``--budget-usd`` is the hard cap (default $0.25).
-* ``coverage``: ``roget_coverage.json`` and ``roget_coverage.md``.  No calls.
+* ``place-check``: the label placement check (QUESTIONS 39): every label in ``label_heads.json`` whose
+  route was not ``agree`` goes to Sonnet 5.5 with its description and candidate heads (one label a
+  call; rubric ``reports/trait_gap_generation/rubrics/roget_placement.md``, refused unless pinned); where
+  Sonnet's head differs from the current primary, Opus 5.5 referees on the same prompt.  The answers go
+  into each label's ``llm`` field, and ``primary`` / ``route`` change where the final answer does.
+  Every call is appended to ``placement_responses.jsonl`` as it completes; ``--resume`` reuses the
+  answers made there with the same rubric text and model.  Usage: ``placement_usage.json``
+  (cumulative); ``--budget-usd`` is the hard cap (default $5).  ``--render STEMS`` prints those labels'
+  calls as sent and stops.
+* ``head-scope``: one Haiku 5.5 rating per head of the coverage map's scope, 20 heads a call, of whether
+  the head's adjectives describe a person's character (2 most, 1 some, 0 few or none; QUESTIONS 44;
+  rubric ``reports/trait_gap_generation/rubrics/roget_head_scope.md``, refused unless pinned).  Writes
+  ``head_scope.json``, the cumulative ``head_scope_usage.json`` and appends every response to
+  ``head_scope_responses.jsonl``.  About 30 calls, a few cents; ``--budget-usd`` is the hard cap (default
+  $1).  A rerun sends only the heads not yet rated under the same rubric and model (``--force``: all).
+  ``--render IDS`` prints the calls that hold those heads, as sent, and stops.
+* ``coverage``: ``roget_coverage.json`` and ``roget_coverage.md``.  No calls.  With the head-scope
+  ratings (``--head-scope F``; default ``head_scope.json`` in ``--out`` when it exists; ``--no-head-scope``
+  ignores it) the heads rated 0 are reported apart as "not character".
 * ``harvest``: the run directory ``data/candidates/runs/roget/<R>/`` gets ``candidates.jsonl``
   (written before anything is submitted), ``pair_candidates.jsonl``, ``harvest_report.md`` and
   ``harvest_counts.json``; ``--include-wn`` also writes ``data/candidates/runs/wn_clusters/<R>/``.
-  Prints the downstream (M1 and M3) estimate.  No calls.
+  Prints the downstream (M1 and M3) estimate.  No calls.  ``--head-scope`` as for ``coverage``: the
+  heads rated 0 are skipped (drop reason ``not_character``).
 * ``submit``: ``start_run``, ``submit_candidates`` (idempotent), ``RunContext.finish`` (``run.json``,
   ``usage.json``); prints the platform commands to run next.  Refuses without ``candidates.jsonl``.
 """
@@ -274,6 +295,264 @@ def cmd_map(args) -> int:
     return 0
 
 
+# --------------------------------------------------------------------------- head scope
+
+def _head_scope(args):
+    """The head-scope ratings to apply: ``--head-scope F``, else ``head_scope.json`` in ``--out`` when it
+    exists; ``None`` with ``--no-head-scope`` or when there is no file."""
+    from assistant_axis.gapgen.generators.roget import head_scope as S
+    if getattr(args, "no_head_scope", False):
+        return None
+    given = getattr(args, "head_scope", None)
+    if given is not None:
+        if not Path(given).exists():
+            raise SystemExit(f"--head-scope {given}: not found (run `roget_generate.py head-scope`)")
+        return S.load(Path(given))
+    default = Path(args.out) / S.FILE_NAME
+    return S.load(default) if default.exists() else None
+
+
+def _anthropic_client():
+    import anthropic
+    from dotenv import load_dotenv
+    load_dotenv(_REPO_ROOT / ".env")
+    return anthropic.AsyncAnthropic(max_retries=0)
+
+
+def cmd_head_scope(args) -> int:
+    import asyncio
+
+    from assistant_axis.gapgen.cost import GuardedUsage
+    from assistant_axis.gapgen.generators.roget import head_scope as S
+    from assistant_axis.gapgen.registry import utc_now
+    from assistant_axis.judge import warn_if_low_parse_rate
+    from assistant_axis.judge_pricing import MultiModelUsage
+
+    idx, pairs, lh = _load_all(args)
+    scope = [r.id for r in C.coverage(idx, pairs, lh).rows]
+    try:
+        rubric = S.load_rubric(args.rubrics_dir)
+    except S.RubricNotPinned as exc:
+        if not args.render:
+            raise SystemExit(f"REFUSED: {exc}")
+        # a draft is rendered to be read before it is pinned
+        from assistant_axis.gapgen import split_rubrics as sr
+        print(f"(rendering the unpinned draft: {str(exc).splitlines()[0]})", file=sys.stderr)
+        rubric = {"name": S.RUBRIC_NAME, "text": sr.load_prompt(S.RUBRIC_NAME, args.rubrics_dir), "version": None,
+                  "sha256": None}
+    items, skipped = S.scope_items(idx, scope, max_adjectives=args.max_adjectives)
+    out = Path(args.out)
+    path = out / S.FILE_NAME
+    prev = S.load(path) if path.exists() and not args.force else None
+    keep = S.reusable(prev, rubric=rubric, model=args.model)
+    todo = [it for it in items if it.id not in keep]
+    if args.limit:
+        todo = todo[: args.limit]
+    batches = S.make_batches(todo, args.batch_size)
+    system = rubric["text"]
+    if args.render:
+        want = set(_ids(args.render))
+        every = S.make_batches(items, args.batch_size)
+        print("SYSTEM:\n" + system + "\n")
+        for bi, b in enumerate(every):
+            if want & {it.id for it in b}:
+                print(f"USER (call {bi + 1} of {len(every)}, heads {b[0].id}-{b[-1].id}):\n{S.render_user(b)}\n")
+        return 0
+    est = S.estimate(batches, system, args.model)
+    cache = S.should_cache(system, args.model)
+    print(f"heads in scope {len(scope)}: {len(items)} with adjectives, {len(skipped)} without (skipped); "
+          f"{len(keep)} already rated under rubric version {rubric['version']} on {args.model} (kept); "
+          f"{len(todo)} to rate in {len(batches)} calls of at most {args.batch_size}")
+    print(f"estimate: {est['n_calls']} calls, {est['in_tok']:,} input and {est['out_tok']:,} output tokens at "
+          f"{args.model} rates = ${est['usd']:.4f} (cap --budget-usd ${args.budget_usd:.2f}); system prompt "
+          f"{'cached' if cache else 'sent uncached (under the caching minimum)'}")
+    if est["usd"] > args.budget_usd:
+        raise SystemExit(f"REFUSED: estimate ${est['usd']:.4f} is over --budget-usd ${args.budget_usd:.2f}")
+    if args.dry_run:
+        print("DRY-RUN: no call; the first three prompts as sent (system prompt = the rubric block):")
+        for b in batches[:3]:
+            print(S.render_user(b) + "\n")
+        return 0
+    if not batches:
+        print("nothing to rate")
+    usage_path = out / S.USAGE_NAME
+    usage = GuardedUsage(budget_usd=args.budget_usd)
+    res = S.RateResult()
+    try:
+        if batches:
+            res = asyncio.run(S.rate_batches(batches, client=_anthropic_client(), model=args.model, system=system,
+                                             usage=usage, concurrency=args.concurrency, cache_system=cache,
+                                             rubric_version=rubric["version"], now=utc_now))
+    finally:
+        total = MultiModelUsage.load_or_create(usage_path) if usage_path.exists() else MultiModelUsage()
+        total.merge_from(usage.plain())
+        out.mkdir(parents=True, exist_ok=True)
+        total.write_json(usage_path)
+        print(usage.log_line("[usage this run]"), file=sys.stderr)
+        print(total.log_line("[usage cumulative]"), file=sys.stderr)
+    S.append_responses(res.log, out / S.RESPONSES_NAME)
+    n_ok, n_total = res.parse_rate()
+    warn_if_low_parse_rate(label=f"roget head_scope:{args.model}", n_ok=n_ok, n_total=n_total)
+    payload = S.build_payload(idx, scope, skipped, res.rows, res.errors, model=args.model, rubric=rubric,
+                              batch_size=args.batch_size, max_adjectives=args.max_adjectives, previous=keep,
+                              extra={"last_run": {"at": utc_now(), "n_calls": len(res.log),
+                                                  "n_retries": sum(1 for r in res.log if r["attempt"] > 1),
+                                                  "cost_usd": round(usage.total_cost_usd, 6),
+                                                  "estimate": est, "cache_system": cache,
+                                                  "concurrency": args.concurrency, "parse_rate": [n_ok, n_total],
+                                                  "stopped_by_budget": res.stopped_by_budget}})
+    inputs = _coverage_inputs(out) + [_input("head_scope_rubric", sr_path(rubric), version=rubric["version"],
+                                             sha256=rubric["sha256"])]
+    S.save(payload, path, inputs=inputs)
+    print(json.dumps(payload["summary"]))
+    print(f"wrote {path}, {usage_path}, {out / S.RESPONSES_NAME}")
+    if res.stopped_by_budget:
+        print(f"STOPPED at --budget-usd ${args.budget_usd:.2f}: rerun to rate the rest", file=sys.stderr)
+        return 2
+    return 0
+
+
+def cmd_place_check(args) -> int:
+    import asyncio
+
+    from assistant_axis.gapgen import split_rubrics as sr
+    from assistant_axis.gapgen.cost import GuardedUsage
+    from assistant_axis.gapgen.generators.roget import placement as PL
+    from assistant_axis.gapgen.registry import utc_now
+    from assistant_axis.judge import warn_if_low_parse_rate
+    from assistant_axis.judge_pricing import MultiModelUsage
+    from assistant_axis.provenance import current_files_input
+
+    idx, heads_path = _load_index(args)
+    out = Path(args.out)
+    lh_path = out / "label_heads.json"
+    if not lh_path.exists():
+        raise SystemExit(f"{lh_path} not found: run `roget_generate.py map` first")
+    lh = M.load_label_heads(lh_path)
+    records = M.load_labels(Path(args.data_dir), Path(args.queue))
+    want = [x.strip() for x in args.render.split(",")] if args.render else None
+    items, skipped = PL.select_items(lh, records, idx, stems=want)
+    if args.sample:
+        import random
+        items = sorted(random.Random(args.seed).sample(items, min(args.sample, len(items))), key=lambda it: it.stem)
+    if args.limit:
+        items = items[: args.limit]
+    try:
+        rubric = PL.load_rubric(args.rubrics_dir)
+    except PL.RubricNotPinned as exc:
+        if not args.render:
+            raise SystemExit(f"REFUSED: {exc}")
+        print(f"(rendering the unpinned draft: {str(exc).splitlines()[0]})", file=sys.stderr)
+        rubric = {"name": PL.RUBRIC_NAME, "text": sr.load_prompt(PL.RUBRIC_NAME, args.rubrics_dir), "version": None,
+                  "sha256": None}
+    system = rubric["text"]
+    if args.render:
+        print("SYSTEM:\n" + system + "\n")
+        for it in items:
+            print(f"USER ({it.stem}; current primary {it.current or 'none'}, route {it.route}; not shown to the "
+                  f"model):\n{PL.render_user(it, idx)}\n")
+        return 0
+    sha = sr.sha256(system)
+    resp_path = out / PL.RESPONSES_NAME
+    prev = PL.read_responses(resp_path) if args.resume else []
+    s_done = PL.reusable_answers(prev, stage="sonnet", model=args.sonnet_model, prompt_sha=sha)
+    o_done = PL.reusable_answers(prev, stage="opus", model=args.opus_model, prompt_sha=sha)
+    by = {it.stem: it for it in items}
+    todo_s = [it for it in items if it.stem not in s_done]
+    est_s = PL.estimate(todo_s, idx, system, args.sonnet_model, "sonnet")
+    est_o_all = PL.estimate(items, idx, system, args.opus_model, "opus")
+    n_ref_guess = int(round(len(items) * args.referee_share))
+    est_o = PL.estimate(items, idx, system, args.opus_model, "opus", n_calls=n_ref_guess)
+    print(f"labels to check {len(items)} (route not agree; {skipped['agree']} agree left as they are; "
+          f"{len(skipped['no_record'])} with no corpus file or queue entry, {len(skipped['no_candidates'])} with no "
+          f"candidate head, skipped); by source {dict(__import__('collections').Counter(it.source for it in items))}")
+    if args.resume:
+        print(f"resume: {len(s_done)} Sonnet and {len(o_done)} Opus answers reused from {resp_path}")
+    print(f"estimate: Sonnet {est_s['n_calls']} calls, {est_s['in_tok']:,} in / {est_s['out_tok']:,} out = "
+          f"${est_s['usd']:.2f}; Opus on about {args.referee_share:.0%} of the labels ({n_ref_guess} calls) "
+          f"${est_o['usd']:.2f}, on all of them ${est_o_all['usd']:.2f}; cap --budget-usd ${args.budget_usd:.2f}")
+    if est_s["usd"] + est_o["usd"] > args.budget_usd:
+        raise SystemExit(f"REFUSED: estimate ${est_s['usd'] + est_o['usd']:.2f} is over --budget-usd "
+                         f"${args.budget_usd:.2f}")
+    if args.dry_run:
+        print("DRY-RUN: no call; the first three Sonnet prompts as sent (system prompt = the rubric block):")
+        for it in todo_s[:3]:
+            print(PL.render_user(it, idx) + "\n")
+        return 0
+    usage_path = out / PL.USAGE_NAME
+    usage = GuardedUsage(budget_usd=args.budget_usd)
+    s_res, o_res = PL.StageResult(), PL.StageResult()
+    sonnet, opus = dict(s_done), {}
+    stopped = False
+    client = None
+
+    def record(rec: dict) -> None:
+        PL.append_response(rec, resp_path)
+
+    try:
+        if todo_s:
+            client = _anthropic_client()
+            s_res = asyncio.run(PL.run_stage(todo_s, idx, stage="sonnet", client=client, model=args.sonnet_model,
+                                             system=system, usage=usage, concurrency=args.concurrency,
+                                             cache_system=True, rubric_version=rubric["version"], now=utc_now,
+                                             on_record=record))
+            sonnet.update(s_res.answers)
+            stopped = s_res.stopped_by_budget
+        ref = [it for it in items if PL.needs_referee(it, sonnet.get(it.stem))]
+        opus = {it.stem: o_done[it.stem] for it in ref if it.stem in o_done}
+        todo_o = [it for it in ref if it.stem not in o_done]
+        print(f"referee: Sonnet differs from the current primary on {len(ref)} of {len(sonnet)} labels; "
+              f"{len(todo_o)} Opus calls to make "
+              f"(estimate ${PL.estimate(todo_o, idx, system, args.opus_model, 'opus')['usd']:.2f})")
+        if todo_o and not stopped:
+            client = client or _anthropic_client()
+            o_res = asyncio.run(PL.run_stage(todo_o, idx, stage="opus", client=client, model=args.opus_model,
+                                             system=system, usage=usage, concurrency=args.concurrency,
+                                             cache_system=True, rubric_version=rubric["version"], now=utc_now,
+                                             on_record=record))
+            opus.update(o_res.answers)
+            stopped = stopped or o_res.stopped_by_budget
+    finally:
+        total = MultiModelUsage.load_or_create(usage_path) if usage_path.exists() else MultiModelUsage()
+        total.merge_from(usage.plain())
+        out.mkdir(parents=True, exist_ok=True)
+        total.write_json(usage_path)
+        print(usage.log_line("[usage this run]"), file=sys.stderr)
+        print(total.log_line("[usage cumulative]"), file=sys.stderr)
+    for name, res, n in (("sonnet", s_res, len(todo_s)), ("opus", o_res, None)):
+        n_total = n if n is not None else len(res.answers) + len(res.errors)
+        warn_if_low_parse_rate(label=f"roget place-check:{name}", n_ok=len(res.answers), n_total=n_total)
+        if res.errors:
+            print(f"{name}: no usable answer for {len(res.errors)} labels: "
+                  f"{dict(__import__('collections').Counter(res.errors.values()))}", file=sys.stderr)
+    new_lh, counts = PL.apply_results(lh, items, sonnet, opus, rubric=rubric, checked_at=utc_now())
+    cache = {"cache_read_input_tokens": sum((r.get("usage_raw") or {}).get("cache_read_input_tokens", 0)
+                                            for r in s_res.log + o_res.log),
+             "cache_creation_input_tokens": sum((r.get("usage_raw") or {}).get("cache_creation_input_tokens", 0)
+                                                for r in s_res.log + o_res.log)}
+    meta = {"rubric": {k: rubric[k] for k in ("name", "version", "sha256", "file")}, "models":
+            {"sonnet": args.sonnet_model, "opus": args.opus_model}, "checked_at": utc_now(),
+            "n_checked": len(items), "outcomes": counts, "n_referee": sum(1 for it in items
+                                                                          if PL.needs_referee(it, sonnet.get(it.stem))),
+            "cost_usd_this_run": round(usage.total_cost_usd, 4), "cache": cache, "stopped_by_budget": stopped}
+    inst = sorted((Path(args.data_dir) / "traits" / "instructions").glob("*.json"))
+    extra = [_input("placement_rubric", sr_path(rubric), version=rubric["version"], sha256=rubric["sha256"]),
+             _input("placement_responses", resp_path), _input("placement_seed_queue", Path(args.queue)),
+             current_files_input("placement_trait_files", inst)]
+    PL.save_label_heads_checked(lh_path, new_lh, extra_inputs=extra, meta=meta)
+    print(json.dumps(meta | {"routes_now": M.route_counts(new_lh)}, indent=1))
+    print(f"wrote {lh_path}, {usage_path}, {resp_path}")
+    if stopped:
+        print(f"STOPPED at --budget-usd ${args.budget_usd:.2f}: rerun with --resume to finish", file=sys.stderr)
+        return 2
+    return 0
+
+
+def sr_path(rubric: dict) -> Path:
+    p = Path(rubric["file"])
+    return p if p.is_absolute() else _REPO_ROOT / p
+
+
 # --------------------------------------------------------------------------- coverage
 
 def _coverage_inputs(out_dir: Path):
@@ -299,15 +578,19 @@ def unresolved_note(idx, pairs) -> str:
 
 def cmd_coverage(args) -> int:
     idx, pairs, lh = _load_all(args)
-    rep = C.coverage(idx, pairs, lh)
+    hs = _head_scope(args)
+    rep = C.coverage(idx, pairs, lh, ratings=hs.ratings if hs else None, scope_meta=hs.meta() if hs else None)
+    nc = rep.summary["not_character"]
     print(json.dumps({k: rep.summary[k] for k in ("n_heads", "class_i_iii_added", "covered_partly_uncovered",
-                                                  "by_gap_class", "opposed_pairs", "labels")}, indent=1))
+                                                  "by_gap_class", "opposed_pairs", "labels", "head_scope")}
+                     | {"not_character": {k: v for k, v in nc.items() if k != "heads"}}, indent=1))
     out = Path(args.out)
     if args.dry_run:
         print(f"DRY-RUN: would write {out / 'roget_coverage.json'} and {out / 'roget_coverage.md'}")
         return 0
+    inputs = _coverage_inputs(out) + ([_input("head_scope", hs.path)] if hs else [])
     C.write_coverage(rep, out / "roget_coverage.json", out / "roget_coverage.md", index=idx, label_heads=lh,
-                     inputs=_coverage_inputs(out), unresolved_note=unresolved_note(idx, pairs))
+                     inputs=inputs, unresolved_note=unresolved_note(idx, pairs))
     print(f"wrote {out / 'roget_coverage.json'}, {out / 'roget_coverage.md'}")
     return 0
 
@@ -331,8 +614,12 @@ def cmd_harvest(args) -> int:
     lex = _lexicon(args)
     known = known_stems(args)
     labels = {k: v.get("label") or k for k, v in lh.items()}
-    res = H.harvest(rep, idx, pairs, cfg=cfg, known_stems=known, run_id=args.run_id, lex=lex, label_of=labels)
-    print(json.dumps({k: v for k, v in res.counts.items() if k != "per_head"}, indent=1))
+    hs = _head_scope(args)
+    res = H.harvest(rep, idx, pairs, cfg=cfg, known_stems=known, run_id=args.run_id, lex=lex, label_of=labels,
+                    head_scope=hs.ratings if hs else None)
+    res.counts["head_scope"] = hs.meta() if hs else None
+    res.config["head_scope"] = hs.meta()["path"] if hs else None
+    print(json.dumps({k: v for k, v in res.counts.items() if k not in ("per_head", "head_ratings")}, indent=1))
     run = paths.run_dir(H.GENERATOR, args.run_id, candidates_dir=args.candidates_dir)
     wn_items, wn_cands = [], []
     if cfg.include_wn:
@@ -422,6 +709,13 @@ def cmd_submit(args) -> int:
 
 # --------------------------------------------------------------------------- parser
 
+def _head_scope_flags(sp) -> None:
+    g = sp.add_mutually_exclusive_group()
+    g.add_argument("--head-scope", type=Path, default=None,
+                   help="head-scope ratings to apply (default: head_scope.json in --out when it exists)")
+    g.add_argument("--no-head-scope", action="store_true", help="ignore the head-scope ratings")
+
+
 def build_parser() -> argparse.ArgumentParser:
     ap = argparse.ArgumentParser(description=__doc__.split("\n\n")[0])
     ap.add_argument("--data-dir", type=Path, default=paths.DATA_DIR)
@@ -454,7 +748,36 @@ def build_parser() -> argparse.ArgumentParser:
     sp.add_argument("--cache-dir", type=Path, default=None)
     sp.add_argument("--limit", type=int, default=None)
 
-    sub.add_parser("coverage")
+    sp = sub.add_parser("place-check")
+    sp.add_argument("--sonnet-model", default="claude-sonnet-5-5")
+    sp.add_argument("--opus-model", default="claude-opus-5-5")
+    sp.add_argument("--budget-usd", type=float, default=5.0)
+    sp.add_argument("--concurrency", type=int, default=6)
+    sp.add_argument("--referee-share", type=float, default=0.5,
+                    help="share of the labels Opus is expected to referee, for the estimate only")
+    sp.add_argument("--limit", type=int, default=None, help="check only the first N labels (sorted by stem)")
+    sp.add_argument("--sample", type=int, default=None, metavar="N",
+                    help="check a random sample of N labels (seeded by --seed), e.g. to measure tokens first")
+    sp.add_argument("--seed", type=int, default=0)
+    sp.add_argument("--resume", action="store_true", help="reuse the answers in placement_responses.jsonl")
+    sp.add_argument("--render", default=None, metavar="STEMS",
+                    help="print these labels' calls, as sent, and stop (no call, no write)")
+    sp.add_argument("--rubrics-dir", type=Path, default=None, help=argparse.SUPPRESS)
+
+    sp = sub.add_parser("head-scope")
+    sp.add_argument("--model", default="claude-haiku-5-5")
+    sp.add_argument("--batch-size", type=int, default=20)
+    sp.add_argument("--max-adjectives", type=int, default=20)
+    sp.add_argument("--budget-usd", type=float, default=1.0)
+    sp.add_argument("--concurrency", type=int, default=4)
+    sp.add_argument("--limit", type=int, default=None, help="rate only the first N heads still to rate")
+    sp.add_argument("--force", action="store_true", help="rate every head again (ignore head_scope.json)")
+    sp.add_argument("--render", default=None, metavar="IDS",
+                    help="print the calls holding these head ids, as sent, and stop (no call, no write)")
+    sp.add_argument("--rubrics-dir", type=Path, default=None, help=argparse.SUPPRESS)
+
+    sp = sub.add_parser("coverage")
+    _head_scope_flags(sp)
 
     sp = sub.add_parser("harvest")
     sp.add_argument("--run-id", required=True)
@@ -466,6 +789,7 @@ def build_parser() -> argparse.ArgumentParser:
     sp.add_argument("--offset", type=int, default=0)
     sp.add_argument("--include-wn", action="store_true")
     sp.add_argument("--force", action="store_true")
+    _head_scope_flags(sp)
 
     sp = sub.add_parser("submit")
     sp.add_argument("--run-id", required=True)
@@ -479,8 +803,9 @@ def build_parser() -> argparse.ArgumentParser:
 
 def main(argv=None) -> int:
     args = build_parser().parse_args(argv)
-    return {"fetch": cmd_fetch, "parse": cmd_parse, "pair": cmd_pair, "map": cmd_map, "coverage": cmd_coverage,
-            "harvest": cmd_harvest, "submit": cmd_submit}[args.cmd](args)
+    return {"fetch": cmd_fetch, "parse": cmd_parse, "pair": cmd_pair, "map": cmd_map, "head-scope": cmd_head_scope,
+            "place-check": cmd_place_check,
+            "coverage": cmd_coverage, "harvest": cmd_harvest, "submit": cmd_submit}[args.cmd](args)
 
 
 if __name__ == "__main__":

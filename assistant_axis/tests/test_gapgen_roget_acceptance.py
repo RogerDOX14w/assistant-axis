@@ -39,14 +39,17 @@ def test_every_dispositional_head_has_a_coverage_row():
     s = cov["summary"]
     assert s["n_heads"] == len(rows)
     cpu = s["covered_partly_uncovered"]
-    assert cpu["covered"] + cpu["partly_covered"] + cpu["uncovered"] == s["n_heads"]
+    # since the head-scope check (QUESTIONS 44, 2026-10-08) the heads rated 0 are counted apart
+    nc = (s.get("not_character") or {}).get("n", 0)
+    assert cpu["covered"] + cpu["partly_covered"] + cpu["uncovered"] + nc == s["n_heads"]
 
 
 def test_every_corpus_trait_is_in_label_heads():
     lh = result(OUT / "label_heads.json")["labels"]
     stems = {p.stem for p in (REPO / "data" / "traits" / "instructions").glob("*.json")}
     assert stems <= set(lh)
-    assert all(v["route"] in ("agree", "rule", "semantic", "lexical", "none") for v in lh.values())
+    # route llm: placed by the label placement check (QUESTIONS 39, 2026-10-08)
+    assert all(v["route"] in ("agree", "rule", "semantic", "lexical", "none", "llm") for v in lh.values())
     assert all((v["primary"] is None) == (v["route"] == "none") for v in lh.values())
 
 
@@ -83,3 +86,35 @@ def test_pilot_run_files(run):
         assert all(c.source_ref.startswith("roget:") and c.gloss_hint for c in cands)
     else:
         assert all(c.source_ref.startswith("oewn:") for c in cands)
+
+
+def test_head_scope_covers_the_scope_within_its_cap():
+    from assistant_axis.gapgen import split_rubrics as sr
+    hs = result(OUT / "head_scope.json")
+    cov = result(OUT / "roget_coverage.json")
+    assert [r["id"] for r in hs["heads"]] == [r["id"] for r in cov["rows"]]
+    assert hs["summary"]["n_unrated"] == 0                       # every head with adjectives rated
+    assert all((r["rating"] is None) == (r["skipped"] == "no_adjectives") for r in hs["heads"])
+    assert (hs["rubric"]["version"], hs["rubric"]["sha256"]) == \
+        sr.current_versions(names=("roget_head_scope",))["roget_head_scope"]
+    u = json.loads(need(OUT / "head_scope_usage.json").read_text())
+    assert u["total_cost_usd"] < 1.0 and set(u["per_model"]) == {"claude-haiku-5-5"}
+    assert cov["summary"]["not_character"]["n"] == hs["summary"]["by_rating"]["0"]
+
+
+def test_placement_check_recorded_within_its_cap():
+    lh = result(OUT / "label_heads.json")
+    meta = lh.get("placement_check")
+    if meta is None:
+        pytest.skip("placement check not run")
+    labels = lh["labels"]
+    checked = [v for v in labels.values() if v.get("llm")]
+    assert len(checked) == meta["n_checked"] and sum(meta["outcomes"].values()) == len(checked)
+    for v in checked:
+        llm = v["llm"]
+        assert llm["previous_route"] != "agree"
+        assert llm["sonnet"]["head"] is None or llm["sonnet"]["head"] in llm["candidates"]
+        assert v["primary"] == llm["final"]
+        assert (llm["opus"] is not None) == (llm["sonnet"]["head"] != llm["previous_primary"])
+    u = json.loads(need(OUT / "placement_usage.json").read_text())
+    assert u["total_cost_usd"] < 5.0 and set(u["per_model"]) <= {"claude-sonnet-5-5", "claude-opus-5-5"}

@@ -3,7 +3,8 @@
 split filter's eight prompts and, since 2026-10-03, the M3 overlap rubrics (``overlap_concept``,
 ``overlap_cooccurrence``; since 2026-10-04 also the arms ``overlap_six``, ``overlap_relation`` and
 ``overlap_scope``, and their round-2 redrafts ``overlap_concept_implies``, ``overlap_six_implies``,
-``overlap_relation_implies`` and ``overlap_scope_implies``).
+``overlap_relation_implies`` and ``overlap_scope_implies``; since 2026-10-07 M3's ``relation``; since
+2026-10-08 the Roget generator's ``roget_head_scope``).
 
     uv run python data_analysis/gap_generation/rubric_pins.py check
     uv run python data_analysis/gap_generation/rubric_pins.py bump NAME --why TEXT [--version N] [--revert-to N]
