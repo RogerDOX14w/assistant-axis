@@ -906,6 +906,33 @@ uv run python data_analysis/gap_generation/gap_registry.py corpus-regions \
     --from-filter data/candidates/filter/new_corpus_labels_2026_10_02
 ```
 
+**The recovery harness (2026-10-08): `gap_generation/recovery_test.py`.**  Spec:
+[`coding_plan_platform.md`](../reports/trait_gap_generation/coding_plan_platform.md), "The
+recovery harness"; library [`recovery.py`](../assistant_axis/gapgen/recovery.py).  Per seed
+(`--seed 0 1` by default): hide `--hidden-frac` (0.1) of the corpus's traits, drawn by region
+(`corpus_regions.json`), a recorded pair, triangle or tetrahedron hidden whole (drawn as groups, so
+every trait has the same chance and the corpus hides the fraction, not more); score the generator's
+run with M3 against the corpus without them (`novelty_score.py score --hide hidden.json`: the
+index, the expansion and the exact-label check without them, the seed queue's entries for them and
+their `renamed_from` included; such a run never writes the registry and takes the rows whatever
+other runs decided); then match every candidate the reduced run decided against the hidden traits:
+its label (separator-blind, no call), else the overlap call (rubric A, Sonnet then Opus under M3's
+rule, at the candidate's cut-off) on the hidden traits among its 10 nearest in the full corpus.
+`recovery_report.md` / `.json` give recall over the candidates M3 kept (`new`, `grey`), by region and
+arrangement kind, precision, groups recovered whole, the false covers (covered candidates that match
+a hidden trait), reachability and cost, per seed and the mean.  The run's rows need their M1 filter
+blocks first; M1 is not rerun.  The estimate of every stage is checked against `--budget-usd`, the
+cap of the whole harness.  Writes `data/candidates/recovery/<batch>/` (`rec_<G>_<R>` by default) and
+`data/candidates/novelty/<batch>_s<seed>/`.  A generator run made in another worktree reaches this
+checkout's registry log with `gap_registry.py submit --from <run dir>/candidates.jsonl` (exactly
+`Candidate`'s fields per line; idempotent; no run directory touched).
+
+```bash
+uv run python data_analysis/gap_generation/gap_registry.py submit --from data/candidates/runs/G/R/candidates.jsonl [--dry-run]
+uv run python data_analysis/gap_generation/recovery_test.py --generator G --run-id R --hidden-frac 0.1 \
+    --seed 0 1 --transport live --budget-usd 10 [--dry-run | --resume]
+```
+
 ## Output
 
 ```

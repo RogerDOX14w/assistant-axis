@@ -22,6 +22,13 @@ Commands:
   out unless ``--include-held``; rows already decided by another run unless ``--rescore``.
   ``--embed-only`` embeds the candidates (charged to the run) and stops before any LLM call, so that
   ``render --key`` or the dry run can show a real candidate's prompt first; ``--resume`` then goes on.
+  ``--hide HIDDEN_JSON`` (the recovery harness, ``recovery_test.py``; ``assistant_axis/gapgen/recovery.py``): score
+  against the corpus without the traits the file's ``hidden`` list names: the index is built without them,
+  expansion and the "opposite" rule never reach them, and the exact-label check no longer knows them (nor the
+  seed queue's entries for them, nor their ``renamed_from``).  Such a run never writes the registry (its blocks
+  go to its own run directory only), takes the selected rows whatever other runs decided, and records the
+  hidden file's path and sha256 in ``run.json``, ``summary.json`` and every block (``hide``); a resume refuses
+  another hidden file.  Not with ``--redecide`` or ``--relation-only``.
 * ``score --redecide --from-batch B --batch-id B2``: re-run the decision rules on run B's records: B's
   candidates, its corpus (the trait files and seed queue as committed at B's ``git_sha``, unless
   ``--corpus-at current``), its relation-call order, and every answer B has on record replayed instead of sent;
@@ -151,8 +158,9 @@ def parse_run(value: str) -> tuple[str, str]:
     return gen, run_id
 
 
-def select_candidates(rows: dict, args, *, batch_id: str) -> tuple[list[NR.M3Candidate], dict]:
-    """The candidates of ``score``, and why every other selected row was left out."""
+def select_candidates(rows: dict, args, *, batch_id: str, ignore_decided: bool = False) -> tuple[list[NR.M3Candidate], dict]:
+    """The candidates of ``score``, and why every other selected row was left out.  ``ignore_decided`` (a run
+    with ``--hide``, which writes no block to the registry): rows are taken whatever run decided them."""
     from assistant_axis.gapgen.registry import has_source
     if args.keys:
         missing = [k for k in args.keys if k not in rows]
@@ -166,10 +174,10 @@ def select_candidates(rows: dict, args, *, batch_id: str) -> tuple[list[NR.M3Can
     out, skipped = [], Counter()
     for r in sel:
         nv = r.get("novelty") or {}
-        if nv.get("run_id") == batch_id and nv.get("decision"):
+        if not ignore_decided and nv.get("run_id") == batch_id and nv.get("decision"):
             skipped["decided_in_this_run"] += 1
             continue
-        if nv.get("decision") and nv.get("run_id") and not args.rescore:
+        if not ignore_decided and nv.get("decision") and nv.get("run_id") and not args.rescore:
             skipped["decided_by_another_run"] += 1
             continue
         cand, why = NR.candidate_from_row(r)
@@ -185,13 +193,19 @@ def select_candidates(rows: dict, args, *, batch_id: str) -> tuple[list[NR.M3Can
     return out, dict(skipped)
 
 
-def load_index(cfg, *, data_dir: Path, cache, usage=None, allow_embed: bool = False) -> tuple[NV.CorpusIndex, dict]:
+def load_index(cfg, *, data_dir: Path, cache, usage=None, allow_embed: bool = False,
+               hide=()) -> tuple[NV.CorpusIndex, dict]:
     """The corpus in the covered setting from the embedding cache (``label: description`` in the covered
-    representation); a text missing from the cache is embedded only with ``allow_embed`` (charged)."""
+    representation); a text missing from the cache is embedded only with ``allow_embed`` (charged).  ``hide``:
+    stems left out of the corpus before the space is fitted (``recovery.reduced_traits``; ``ValueError`` for a
+    stem the corpus does not have)."""
     import numpy as np
     from assistant_axis.gapgen import embed as EM
+    from assistant_axis.gapgen.recovery import reduced_traits
     from assistant_axis.gapgen.representation import represent
     traits = NV.load_trait_corpus(data_dir)
+    if hide:
+        traits = reduced_traits(traits, hide)
     cov = cfg.covered
     rep, variant = cov["representation"], cov["space"]["variant"]
     if cov.get("metric") != "cos":
@@ -216,10 +230,14 @@ def load_index(cfg, *, data_dir: Path, cache, usage=None, allow_embed: bool = Fa
     return NV.build_index(traits, E, variant=variant, settings=settings), info
 
 
-def label_sets_for(data_dir: Path) -> NV.LabelSets:
-    """Stage 0's names, from the trait files and the seed queue (no embedding needed)."""
+def label_sets_for(data_dir: Path, hide=()) -> NV.LabelSets:
+    """Stage 0's names, from the trait files and the seed queue (no embedding needed); ``hide``: without the
+    hidden traits (``recovery.reduced_label_sets``)."""
     import data_analysis.seed_entities as se
     queue = se.load_queue(Path(data_dir) / "seed_queue.json")
+    if hide:
+        from assistant_axis.gapgen.recovery import reduced_label_sets, reduced_traits
+        return reduced_label_sets(reduced_traits(NV.load_trait_corpus(data_dir), hide), queue, hide)
     return NV.label_sets(NV.load_trait_corpus(data_dir), queue)
 
 
@@ -704,6 +722,8 @@ def _check_score_selection(args, redecide: bool) -> Optional[str]:
     """``score`` takes one of --run / --keys / --unscored; ``--redecide`` and ``--relation-only`` take
     --from-batch (and optionally --keys)."""
     chosen = [n for n, v in (("--run", args.run), ("--keys", args.keys), ("--unscored", args.unscored)) if v]
+    if getattr(args, "hide", None) and (redecide or getattr(args, "relation_only", False)):
+        return "--hide is for a new score run (the recovery harness), not --redecide or --relation-only"
     if getattr(args, "relation_only", False):
         if redecide:
             return "--relation-only and --redecide are two different runs: choose one"
@@ -1033,10 +1053,14 @@ def _embedding_settings(cfg, query_form: str) -> dict:
             "variant": cfg.covered["space"]["variant"], "k": cfg.k}
 
 
-def run_scoring(args, argv, *, mode: str) -> int:
+def run_scoring(args, argv, *, mode: str, info: Optional[dict] = None) -> int:
+    """``score`` and ``full-scan``.  ``info`` (the recovery harness calls this in-process): filled with the
+    run's directory, plan, estimate and refusal (``out_dir``, ``plan``, ``estimate_usd``, ``estimate_lines``,
+    ``refused``), and after a run with ``status`` and ``cost_usd``."""
     from assistant_axis.gapgen import embed as EM
     from assistant_axis.gapgen.metric_config import MetricConfig
     from assistant_axis.provenance import current_file_input, current_files_input
+    info = info if info is not None else {}
     paths.check_id(args.batch_id, "batch_id")
     redecide = mode == "shortlist" and bool(getattr(args, "redecide", False))
     if mode == "shortlist":
@@ -1057,6 +1081,16 @@ def run_scoring(args, argv, *, mode: str) -> int:
     cfg = MetricConfig.load(args.metric_config)
     reg = Registry(args.registry)
     rows = reg.fold()
+    hide_rec = None
+    if mode == "shortlist" and getattr(args, "hide", None):
+        from assistant_axis.gapgen.recovery import load_hidden
+        try:
+            hide_rec = load_hidden(args.hide)
+        except (OSError, ValueError) as exc:
+            print(f"REFUSED (--hide): {exc}", file=sys.stderr)
+            return 2
+    hide = tuple(hide_rec["stems"]) if hide_rec else ()
+    hide_meta = {"path": hide_rec["path"], "sha256": hide_rec["sha256"], "n_hidden": len(hide)} if hide_rec else None
     source = None
     if redecide or mode == "full_scan":
         source = load_source(args.from_batch, args.out_root, with_records=redecide)
@@ -1071,14 +1105,18 @@ def run_scoring(args, argv, *, mode: str) -> int:
             return 2
         cands, skipped = select_redecide(rows, args, source)
     elif mode == "shortlist":
-        cands, skipped = select_candidates(rows, args, batch_id=args.batch_id)
+        cands, skipped = select_candidates(rows, args, batch_id=args.batch_id, ignore_decided=bool(hide))
     else:
         cands, skipped = select_scan_sample(rows, args)
     if not cands:
         print(f"nothing to score ({json.dumps(skipped)})", file=sys.stderr)
         return 0
     cache = EM.EmbeddingCache(args.cache_dir)
-    index, index_info = load_index(cfg, data_dir=data_dir, cache=cache)
+    try:
+        index, index_info = load_index(cfg, data_dir=data_dir, cache=cache, hide=hide)
+    except ValueError as exc:            # a hidden stem the corpus does not have: drawn on another corpus
+        print(f"REFUSED (--hide {args.hide}): {exc}", file=sys.stderr)
+        return 2
     if index is None:
         print(f"{index_info['n_missing_from_cache']} corpus texts are not in the embedding cache "
               f"(first: {index_info['missing'][:5]}); they would be embedded (charged) by the run", file=sys.stderr)
@@ -1086,7 +1124,7 @@ def run_scoring(args, argv, *, mode: str) -> int:
     texts = {c.key: NV.query_text(c.label, c.gloss, query_form=args.query_form, representation=cfg.representation)
              for c in cands}
     found, miss = cache.lookup(embedder.tag, list(texts.values()))
-    sets = label_sets_for(data_dir)
+    sets = label_sets_for(data_dir, hide)
     relation_seed = _relation_seed(source) if redecide else args.batch_id
     n_exact = sum(1 for c in cands if NV.exact_label_match(c.stem, sets, rules=rules)) if mode == "shortlist" else 0
     n_live = len(cands) - n_exact
@@ -1112,6 +1150,8 @@ def run_scoring(args, argv, *, mode: str) -> int:
             "skipped": skipped, "transport": transport, "query_form": args.query_form, "listed_mean": listed_mean,
             "n_query_texts_cached": len(found), "n_query_texts_to_embed": len(miss), "corpus": index_info,
             "rules": rules.as_dict(), "corpus_files": corpus_info}
+    if hide_meta:
+        plan["hide"] = hide_meta
     redecide_meta, offline_ctx = None, None
     if redecide:
         if index is None or miss:
@@ -1178,11 +1218,14 @@ def run_scoring(args, argv, *, mode: str) -> int:
         refused = (f"uncommitted changes to the platform's own code or prompt paths ({len(dirty)}: "
                    f"{'; '.join(d.strip() for d in dirty[:5])}); commit first, or pass --allow-dirty")
         print(f"REFUSED: {refused}", file=sys.stderr)
+    info.update(out_dir=str(out_dir), plan=plan, estimate_usd=est.usd, estimate_lines=[str(x) for x in est.lines],
+                refused=refused, n_candidates=len(cands))
     if args.dry_run:
         if refused:
             print(f"DRY-RUN: the real run would be REFUSED: {refused}")
-        writes_registry = mode == "shortlist" and not redecide
-        print(f"DRY-RUN: would write {out_dir}/" + (f" and the registry {args.registry}" if writes_registry else ""))
+        writes_registry = mode == "shortlist" and not redecide and not hide
+        print(f"DRY-RUN: would write {out_dir}/" + (f" and the registry {args.registry}" if writes_registry else
+                                                     (" (no registry write: --hide)" if hide else "")))
         print(f"rubrics: {json.dumps({k: {'name': v['name'], 'version': v['version'], 'sha256': v['sha256'][:12]} for k, v in rubrics.items()})}")
         if redecide:
             need = {w["key"] for w in wanted}      # render a candidate whose calls are not on record, if any
@@ -1202,6 +1245,9 @@ def run_scoring(args, argv, *, mode: str) -> int:
     if status:
         return status
     bad = _resume_model_mismatch(earlier, relation_model) if mode == "shortlist" else None
+    if bad is None and earlier is not None and ((earlier.get("hide") or {}).get("sha256") != (hide_meta or {}).get("sha256")):
+        bad = (f"the run's earlier session hid {(earlier.get('hide') or {}).get('path') or 'nothing'}, this one "
+               f"{(hide_meta or {}).get('path') or 'nothing'} (by sha256): a resume must hide the same traits")
     if bad:
         print(f"REFUSED: {bad}", file=sys.stderr)
         return 2
@@ -1232,6 +1278,8 @@ def run_scoring(args, argv, *, mode: str) -> int:
     if redecide:
         run_meta["redecide"] = redecide_meta
         run_meta["replay_from"] = source["replay_from"]
+    if hide_meta:
+        run_meta["hide"] = hide_meta
     if earlier:
         run_meta["earlier_sessions"] = list(earlier.pop("earlier_sessions", [])) + [earlier]
     atomic_write_text(json.dumps(run_meta, indent=2) + "\n", out_dir / "run.json")
@@ -1243,10 +1291,13 @@ def run_scoring(args, argv, *, mode: str) -> int:
     inputs = [current_file_input(dep_key="metric_config", path=args.metric_config),
               current_files_input(dep_key="rubrics", paths=[paths.RUBRICS_DIR / "overlap_concept.md",
                                                             paths.RUBRICS_DIR / "relation.md"])]
+    if hide_meta:
+        inputs.append(current_file_input(dep_key="hidden", path=Path(hide_meta["path"])))
+    extra_block = ({"redecided_from": source["batch_id"]} if redecide else {}) | ({"hide": hide_meta} if hide_meta else {})
     status, error, runner = 0, None, None
     try:
         if index is None:
-            index, index_info = load_index(cfg, data_dir=data_dir, cache=cache, usage=usage, allow_embed=True)
+            index, index_info = load_index(cfg, data_dir=data_dir, cache=cache, usage=usage, allow_embed=True, hide=hide)
         canary = EM.check_canary(embedder, cfg.canary["texts"], cache, usage=usage)
         run_meta["canary"] = canary
         keys = [c.key for c in cands]
@@ -1264,7 +1315,8 @@ def run_scoring(args, argv, *, mode: str) -> int:
         client = anthropic.AsyncAnthropic(max_retries=0)
 
         def on_decided(states) -> None:
-            if mode == "shortlist" and not redecide:      # a re-decided run writes its own directory only
+            # a re-decided run, and a run against a reduced corpus (--hide), write their own directory only
+            if mode == "shortlist" and not redecide and not hide:
                 n = write_blocks(reg, states, args.batch_id)
                 logger.info("registry: %d novelty blocks written", n)
 
@@ -1275,8 +1327,7 @@ def run_scoring(args, argv, *, mode: str) -> int:
                                   resume_records=resume_records, on_decided=on_decided, rules=rules,
                                   relation_seed=relation_seed,
                                   replay_records=source["records"] if redecide else (),
-                                  extra_block={"redecided_from": source["batch_id"]} if redecide else None,
-                                  relation_model=relation_model)
+                                  extra_block=extra_block or None, relation_model=relation_model)
         if transport == "batches":
             runner.cache_ttl = NR.BATCH_CACHE_TTL
             runner.transport = BatchTransport(runner, anthropic.Anthropic(), out_dir / "batches.json", budget_usd=cap)
@@ -1293,13 +1344,16 @@ def run_scoring(args, argv, *, mode: str) -> int:
         if runner is not None:
             summary = finalize(out_dir=out_dir, runner=runner, usage=usage, run_meta=run_meta, skipped=skipped,
                                status=status, error=error, inputs=inputs,
-                               extra={"redecide": redecide_meta} if redecide else None)
+                               extra=({"redecide": redecide_meta} if redecide else {})
+                               | ({"hide": hide_meta} if hide_meta else {}) or None)
         else:
             usage.write_json(out_dir / "usage.json")
             run_meta.update(finished_at=utc_now(), cost_usd=round(usage.total_cost_usd, 4), status=status)
             atomic_write_text(json.dumps(run_meta, indent=2) + "\n", out_dir / "run.json")
         logging.getLogger().removeHandler(fh)
         fh.close()
+        info.update(status=status, cost_usd=round(usage.total_cost_usd, 6),
+                    n_stalled=summary["n_stalled"] if summary else None)
     if redecide and runner is not None and status == 0 and summary and summary["n_stalled"] == 0:
         results = _read_jsonl(out_dir / "results.jsonl")
         dc = write_decision_changes(out_dir, source=source, results=results, runner=runner, rules=rules,
@@ -1849,6 +1903,10 @@ def build_parser() -> argparse.ArgumentParser:
                          "call on --relation-model and the unsure re-ask, B's corpus, list order and embeddings), then "
                          "stop: relation.jsonl and relation_summary.json, no overlap call, no decision, no registry "
                          "write; to compare the relation call on another model without re-running M3")
+    sp.add_argument("--hide", type=Path, default=None, metavar="HIDDEN_JSON",
+                    help="score against the corpus without the traits this file's 'hidden' list names (the recovery "
+                         "harness's hidden.json): left out of the index, the expansion and the exact-label check; the "
+                         "run never writes the registry and takes its rows whatever other runs decided")
     sp.add_argument("--rescore", action="store_true", help="also rows another run has decided (their block is replaced)")
     sp.add_argument("--include-held", action="store_true", help="also rows on a holding list (nationalities)")
     sp.add_argument("--limit", type=int)

@@ -8,6 +8,11 @@ Commands:
 * ``submit --file candidates.jsonl --generator G --run-id R``: rows
   ``{surface, rank?, score?, gloss_hint?, partner_hint?, sense_id?, source_ref?}``;
   new keys are appended, existing keys gain a source; prints the SubmitReport.
+* ``submit --from data/candidates/runs/G/R/candidates.jsonl``: resubmit a generator
+  run's tracked ``candidates.jsonl`` (one ``Candidate`` per line, exactly its fields,
+  generator and run id included; ``registry.read_candidates``) into this checkout's
+  log, the way a run made in another worktree reaches the main checkout.  Idempotent
+  (a source already on a row changes nothing); no run directory is touched.
 * ``status``: counts by verdict, decision, review status, holding list and generator.
 * ``report [--generator G] [--decision D] [--verdict V] [--include-held]``: a
   markdown table, the main review list: rows on a holding list are left off
@@ -69,7 +74,35 @@ def _md(s) -> str:
     return str("" if s is None else s).replace("|", "\\|").replace("\n", " ")
 
 
+def cmd_submit_from(args) -> int:
+    """``submit --from PATH``: a run's ``candidates.jsonl`` into this checkout's registry log, as is."""
+    from assistant_axis.gapgen.registry import read_candidates
+    if args.generator or args.run_id:
+        print("REFUSED: --from takes the generator and run id from each row of the file; drop --generator / --run-id",
+              file=sys.stderr)
+        return 2
+    try:
+        cands = read_candidates(args.from_path)
+    except (OSError, ValueError) as exc:
+        print(f"REFUSED: {exc}", file=sys.stderr)
+        return 2
+    runs = Counter(f"{c.generator}/{c.run_id}" for c in cands)
+    if args.dry_run:
+        print(f"DRY-RUN: would submit {len(cands)} candidates from {args.from_path} ({json.dumps(dict(sorted(runs.items())))}) "
+              f"to {args.registry}")
+        return 0
+    rep = submit_candidates(cands, registry_path=args.registry)
+    print(json.dumps({k: v for k, v in rep.as_dict().items() if k != "keys"} | {"n_keys": len(rep.keys),
+                                                                                "runs": dict(sorted(runs.items()))}))
+    return 0
+
+
 def cmd_submit(args) -> int:
+    if args.from_path is not None:
+        return cmd_submit_from(args)
+    if not (args.generator and args.run_id):
+        print("REFUSED: --file needs --generator and --run-id", file=sys.stderr)
+        return 2
     paths.check_id(args.generator, "generator")
     paths.check_id(args.run_id, "run_id")
     cands = []
@@ -352,9 +385,13 @@ def build_parser() -> argparse.ArgumentParser:
     ap.add_argument("--data-dir", type=Path, default=paths.DATA_DIR)
     sub = ap.add_subparsers(dest="cmd", required=True)
     sp = sub.add_parser("submit")
-    sp.add_argument("--file", required=True, type=Path)
-    sp.add_argument("--generator", required=True)
-    sp.add_argument("--run-id", required=True)
+    g = sp.add_mutually_exclusive_group(required=True)
+    g.add_argument("--file", type=Path, help="rows {surface, rank?, ...} of one run (with --generator and --run-id)")
+    g.add_argument("--from", dest="from_path", type=Path,
+                   help="a generator run's candidates.jsonl (Candidate's fields on each line, generator and run id "
+                        "included), resubmitted as is; idempotent")
+    sp.add_argument("--generator")
+    sp.add_argument("--run-id")
     sp.add_argument("--dry-run", action="store_true")
     sp.set_defaults(func=cmd_submit)
     sp = sub.add_parser("status")

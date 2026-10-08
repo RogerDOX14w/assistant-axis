@@ -80,6 +80,49 @@ class Candidate:
     partner_hint: Optional[str] = None
 
 
+#: ``candidates.jsonl``'s fields: exactly :class:`Candidate`'s, as ``dataclasses.asdict`` writes them.
+CANDIDATE_FIELDS: tuple[str, ...] = ("surface", "generator", "run_id", "rank", "score", "gloss_hint", "sense_id",
+                                     "source_ref", "partner_hint")
+_REQUIRED_CANDIDATE_FIELDS = ("surface", "generator", "run_id")
+
+
+def read_candidates(path: Path | str) -> list[Candidate]:
+    """A generator run's ``candidates.jsonl`` (the convention of coding_plan_platform.md, "Interface as built":
+    one JSON object per line, exactly :class:`Candidate`'s fields as ``dataclasses.asdict`` gives them, the
+    file :meth:`runs.RunContext.record_candidates` writes), read back as ``Candidate(**row)``, in file order.
+    Blank lines are skipped.  ``ValueError`` (naming the file and line) for a line that is not a JSON object,
+    has a field :class:`Candidate` does not have, lacks ``surface``, ``generator`` or ``run_id``, or names a
+    generator or run id that could not be a directory name."""
+    from .paths import check_id
+    p = Path(path)
+    out = []
+    for i, line in enumerate(p.read_text(encoding="utf-8").splitlines(), 1):
+        if not line.strip():
+            continue
+        try:
+            d = json.loads(line)
+        except json.JSONDecodeError as exc:
+            raise ValueError(f"{p}:{i}: not JSON ({exc.msg})") from None
+        if not isinstance(d, dict):
+            raise ValueError(f"{p}:{i}: not a JSON object")
+        extra = sorted(set(d) - set(CANDIDATE_FIELDS))
+        if extra:
+            raise ValueError(f"{p}:{i}: fields Candidate does not have: {', '.join(extra)} (the fields are "
+                             f"{', '.join(CANDIDATE_FIELDS)})")
+        missing = [f for f in _REQUIRED_CANDIDATE_FIELDS if not d.get(f)]
+        if missing:
+            raise ValueError(f"{p}:{i}: missing {', '.join(missing)}")
+        try:
+            check_id(d["generator"], "generator")
+            check_id(d["run_id"], "run_id")
+        except ValueError as exc:
+            raise ValueError(f"{p}:{i}: {exc}") from None
+        if d.get("sense_id") is None:
+            d.pop("sense_id", None)
+        out.append(Candidate(**d))
+    return out
+
+
 @dataclass
 class SubmitReport:
     n_submitted: int

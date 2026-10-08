@@ -720,36 +720,72 @@ class NoveltyRunner:
             self._emit()
         self.stats["positions"] = position
 
+    # -- reading pairs whole (the full scan, the recovery harness) ---------------------------
+    async def read_pairs(self, items: Sequence[tuple["CandState", str, int]], *, wave: str) -> dict[tuple[str, str], dict]:
+        """Sonnet on every ``(state, stem, position)`` of ``items`` (wave ``<wave>_sonnet``), then Opus on the
+        pairs the rule sends it at the candidate's cut-off (:func:`novelty.sonnet_action`; wave ``<wave>_opus``):
+        each pair read whole, with no walk and no early exit, as the full scan reads it and as the recovery
+        harness (:mod:`assistant_axis.gapgen.recovery`) reads a candidate against a hidden trait.  Returns
+        ``{(key, stem): {"sonnet": {"value", "reason"} | {"value": None, "error"}, "opus": ... | None}}``; a pair
+        left without an answer (a request that failed outright, or a stop before Opus was asked) is
+        ``{"stalled": why, "phase": "sonnet" | "opus"}``.  The candidates' states must be in ``self.states``
+        (each call is charged to its candidate)."""
+        calls = [self._overlap_call(st, stem, "sonnet", pos) for st, stem, pos in items]
+        res = await self._wave(f"{wave}_sonnet", calls)
+        out: dict[tuple[str, str], dict] = {}
+        opus: list[tuple[CandState, str, Call]] = []
+        for (st, stem, pos), c in zip(items, calls):
+            o, k = res[id(c)], (st.cand.key, stem)
+            if o.status == "ok":
+                out[k] = {"sonnet": {"value": o.parsed["value"], "reason": o.parsed["reason"]}, "opus": None}
+            elif o.status == "unparsed":
+                out[k] = {"sonnet": {"value": None, "error": o.error}, "opus": None}
+            else:
+                out[k] = {"stalled": f"Sonnet on {stem}: {o.status}", "phase": "sonnet"}
+                continue
+            if NV.sonnet_action(out[k]["sonnet"]["value"], st.cand.cut_off) in NV.OPUS_ROLES:
+                opus.append((st, stem, self._overlap_call(st, stem, "opus", pos)))
+        ocalls = [c for _, _, c in opus]
+        res = await self._wave(f"{wave}_opus", ocalls) if ocalls and self._stop is None else {}
+        for st, stem, c in opus:
+            o, k = res.get(id(c), Outcome("not_sent")), (st.cand.key, stem)
+            if o.status == "ok":
+                out[k]["opus"] = {"value": o.parsed["value"], "reason": o.parsed["reason"]}
+            elif o.status == "unparsed":
+                out[k]["opus"] = {"value": None, "error": o.error}
+            else:
+                out[k] = {"stalled": f"Opus on {stem}: {o.status}", "phase": "opus"}
+        return out
+
+    def run_pairs(self, cands: Sequence[M3Candidate], pairs: Sequence[tuple[str, str, int]], *,
+                  wave: str = "m") -> dict[tuple[str, str], dict]:
+        """:meth:`read_pairs` for ``pairs`` (``(key, stem, position)``, each key one of ``cands``), run to the
+        end: every answer is recorded and charged before a stop (a budget stop, a failed batch) is raised."""
+        return asyncio.run(self._run_pairs(cands, pairs, wave))
+
+    async def _run_pairs(self, cands, pairs, wave):
+        self._stop = None
+        for c in cands:
+            self.states.setdefault(c.key, CandState(cand=c))
+        out = await self.read_pairs([(self.states[k], stem, pos) for k, stem, pos in pairs], wave=wave)
+        if self._stop is not None:
+            raise self._stop
+        return out
+
     # -- the full scan --------------------------------------------------------------------
     async def _full_scan(self, live: list[CandState]) -> None:
-        calls, owner = [], []
-        for st in live:
-            for i, x in enumerate(sorted(st.listed, key=lambda x: (-x.cosine, x.stem)), 1):
-                calls.append(self._overlap_call(st, x.stem, "sonnet", i))
-                owner.append(st)
-        res = await self._wave("f_sonnet", calls)
-        ocalls, oowner = [], []
-        for st, c in zip(owner, calls):
-            o = res[id(c)]
-            if o.status == "ok":
-                st.scan[c.stem] = {"sonnet": {"value": o.parsed["value"], "reason": o.parsed["reason"]}, "opus": None}
-            elif o.status == "unparsed":
-                st.scan[c.stem] = {"sonnet": {"value": None, "error": o.error}, "opus": None}
-            else:
-                st.stalled = f"Sonnet on {c.stem}: {o.status}"
-                continue
-            if NV.sonnet_action(st.scan[c.stem]["sonnet"]["value"], st.cand.cut_off) in NV.OPUS_ROLES:
-                ocalls.append(self._overlap_call(st, c.stem, "opus", c.position))
-                oowner.append(st)
-        res = await self._wave("f_opus", ocalls) if ocalls and self._stop is None else {}
-        for st, c in zip(oowner, ocalls):
-            o = res.get(id(c), Outcome("not_sent"))
-            if o.status == "ok":
-                st.scan[c.stem]["opus"] = {"value": o.parsed["value"], "reason": o.parsed["reason"]}
-            elif o.status == "unparsed":
-                st.scan[c.stem]["opus"] = {"value": None, "error": o.error}
-            else:
-                st.stalled = f"Opus on {c.stem}: {o.status}"
+        items = [(st, x.stem, i) for st in live
+                 for i, x in enumerate(sorted(st.listed, key=lambda x: (-x.cosine, x.stem)), 1)]
+        got = await self.read_pairs(items, wave="f")
+        for phase in ("sonnet", "opus"):        # a stall's message, in the order the waves met them
+            for st, stem, _ in items:
+                r = got[(st.cand.key, stem)]
+                if r.get("phase") == phase:
+                    st.stalled = r["stalled"]
+        for st, stem, _ in items:
+            r = got[(st.cand.key, stem)]
+            if "stalled" not in r:
+                st.scan[stem] = r
         for st in live:
             if st.stalled:
                 continue
