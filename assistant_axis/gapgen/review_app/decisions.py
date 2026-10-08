@@ -77,6 +77,8 @@ TIERS = ("merged", "proposed", "single")
 #: Gaps between events longer than this are idle time (``status``'s active minutes).
 IDLE_MINUTES = 10.0
 _GID = re.compile(r"^g(\d+)$")
+#: Within a level, a neighbour's relation orders it: similar (or mixed) before unsure before unrelated.
+REL_RANK = {"similar": 2, "mixed": 2, "unsure": 1}
 _TURNED_DOWN = ("not_adopted", "superseded")
 
 
@@ -632,7 +634,8 @@ class ReviewState:
 
     def neighbourhood(self, members: Sequence[str]) -> dict:
         """The neighbours of a set of members: ``neighbours`` (candidates by their strongest non-opposed edge to the
-        set: 4-edge, 3-edge, best reading, then cosine), ``corpus`` (corpus and queue traits from the members' M3
+        set: 4-edge, 3-edge, best reading, then the relation (similar, unsure, unrelated), then cosine), ``corpus``
+        (corpus and queue traits from the members' M3
         readings, by reading then cosine, each with the covered candidates it covers, greyed), ``opposed``
         (candidates, then corpus and queue traits, joined by an opposed edge, by cosine)."""
         S = set(members)
@@ -647,11 +650,11 @@ class ReviewState:
                     if o not in opp or (e.cosine or 0) > (opp[o][0] or 0):
                         opp[o] = (e.cosine, m, e)
                     continue
-                rank = (edge_level(e), e.cosine or 0.0)
+                rank = (edge_level(e), REL_RANK.get(e.relation, 0), e.cosine or 0.0)
                 if o not in best or rank > best[o][0]:
                     best[o] = (rank, m, e)
         neighbours = []
-        for o, (rank, m, e) in sorted(best.items(), key=lambda kv: (-kv[1][0][0], -kv[1][0][1], kv[0])):
+        for o, (rank, m, e) in sorted(best.items(), key=lambda kv: (tuple(-x for x in kv[1][0]), kv[0])):
             neighbours.append(self._term_entry(o) | {
                 "level": rank[0], "cosine": e.cosine, "relation": e.relation, "readings": readings_text(e),
                 "strict": e.strict, "proposed_edge": e.proposed, "via": m, "via_label": self.nodes[m].label,
@@ -950,8 +953,9 @@ class ApplyReport:
         lines = []
         for key, b in self.review_writes.items():
             extra = f" into {b['into']}" if b.get("into") else ""
+            n = len(b.get("group") or [])
             lines.append(f"{w}WRITE {key} review {b['status']}{extra} (group {b.get('review_group')}, "
-                         f"{len(b.get('group') or [])} members)")
+                         f"{n} member{'' if n == 1 else 's'})")
         for key in self.resets:
             lines.append(f"{w}RESET {key} review unreviewed (this review no longer resolves it)")
         for p in self.promotions:

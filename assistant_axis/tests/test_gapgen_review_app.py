@@ -307,6 +307,18 @@ class TestProposed:
         # its other members and the other group's are neighbours too, ranked by their strongest edge
         assert k("obdurate") in [n["key"] for n in card["neighbours"]]
 
+    def test_neighbours_rank_by_level_then_relation_then_cosine(self):
+        g = toy_graph()
+        g.edges += [r1("loner", "fond", rel="unrelated", cos=0.5, ab=None, ba=None),
+                    r1("loner", "skeptic", rel="similar", cos=0.3, ab=None, ba=None),
+                    r1("loner", "balky", rel="similar", cos=0.4, ab=(2, None), ba=None)]
+        st = D.ReviewState(g)
+        nb = st.neighbourhood([k("loner")])["neighbours"]
+        # a read 2 first; then similar but not read (below the floor) before unrelated, whatever the cosine
+        assert [(n["label"], n["level"], n["relation"]) for n in nb] == \
+            [("balky", 2, "similar"), ("skeptic", 0, "similar"), ("fond", 0, "unrelated")]
+        assert nb[0]["merge_keys"] == [k("balky")] and nb[2]["merge_keys"] == [k("affectionate"), k("fond")]
+
     def test_a_term_in_a_merged_group_opens_that_group_already_merged(self, env):
         log = make_log(env)
         g = act(log, action="open", source=f"term:{k('nonreligious')}")
