@@ -34,13 +34,13 @@ dropped in the M3 redesign; this plan replaces it.
    4. resolve the group;
    5. optionally start a new group intended as the antonym of the one just resolved, if it has none; otherwise
       continue with a new, unconnected group.
-5. **Corpus traits are nodes and resolution targets** (assumption, to confirm).  "Already have it: merge into
+5. **Corpus traits are nodes and resolution targets** (assumption, **CONFIRMED**).  "Already have it: merge into
    corpus trait X" is a first-class resolution, because the recovery test's false covers (`fervent` under
    `zealous`, `humorous` under `wry`) are exactly such cases, and the result feeds `gap_registry.py synonyms`.
 6. **Decisions are an append-only event log, applied to the registry**, as the registry itself is a log.
    Undo is a reversal event; provenance (who, when, graph version) comes with it; promotion still goes only
    through `gap_registry.py promote`.
-7. **A local app** (assumption, to confirm): one process under `uv run`, a small JSON API over the graph and the
+7. **A local app** (assumption, **CONFIRMED**): one process under `uv run`, a small JSON API over the graph and the
    log, one HTML page, keyboard-driven.  Alternatives considered: a generated static page with manual export
    (decisions carried back by hand); a published Artifact with a shared database (zero setup, usable from any
    device, but the corpus data leaves the repository and its conventions).  The local app is the default; the
@@ -50,17 +50,34 @@ dropped in the M3 redesign; this plan replaces it.
 9. **Candidates M3 covered are shown greyed as neighbours**, never reviewed here; the exception is a covered
    candidate pulled into a group by hand, which the resolution then records as a synonym note.
 
+10. **R1 is a separate phase after M3, not folded into it** (Roger, 2026-10-08: "Agreed").  Combining would
+    share only the embedding (cached) and the relation list (about $0.10 to $0.20 per 300 candidates on Haiku
+    5.5); the overlap calls are different pairs at different thresholds and cannot be shared, and a combined
+    phase would spend candidate-pair calls on candidates M3 then covers (49% of the TDA pilot).  M3's decision
+    stays a property of the candidate against the corpus (reproducible, batch-independent, what the recovery
+    harness reruns); groups span batches and change under review.  The one thing shared for the UX, not the
+    bill: R1's retrieval reads one index over corpus traits, queue traits and unresolved candidates, so a card's
+    neighbour list is a single ranking.  M3 is untouched.
+11. **A cosine floor of 0.35 on R1's overlap calls**, calibrated on the 4,334 recorded M3 readings with a
+    cosine and a final value: below 0.35, 0.1% read 4 and 3.9% read 3 or above (1,994 readings); 0.35 to 0.45,
+    0.8% and 20% (828); 0.45 to 0.55, 10% and 56% (341); 0.55 to 0.65, 27% and 82% (113); above 0.65, 58% and
+    100% (12).  The 81 readings of 4 have minimum cosine 0.32, tenth percentile 0.45, median 0.55, so the floor
+    keeps about 98% of the 4-edges and, with k = 10, halves the overlap stage against the worst case.  The
+    relation call still sees every retrieved neighbour (it is cheap and types the opposed edges).
+
 Out of scope: community detection (Leiden, HDBSCAN) as a looser default partition (noted as a later option if
 cliques prove too small); changes to M3; reviewing the holding lists; any change to the seed-queue format beyond
 the synonym notes below.
 
 ## 2. R1: the candidate graph (`review_graph`)
 
-**Edges.**  For each new candidate of the named M3 batches: its k nearest other new candidates by the cached
-gloss embedding (`gloss_w14` form, `openai_text-embedding-3-large` tag in the embedding cache; k = 10, floor
-cosine 0.25 as M3's), typed by the relation call (rubric [relation.md](./rubrics/relation.md), Haiku 5.5, the
+**Edges.**  For each new candidate of the named M3 batches: its k nearest neighbours in one index over the
+other new (and earlier unresolved) candidates, the corpus traits and the queue traits, by the cached gloss
+embedding (`gloss_w14` form, `openai_text-embedding-3-large` tag in the embedding cache; k = 10 among
+candidates, retrieval floor 0.25 as M3's; corpus and queue neighbours come with their M3 readings and get no
+new call), typed by the relation call (rubric [relation.md](./rubrics/relation.md), Haiku 5.5, the
 candidate's gloss against the other candidate's gloss, one list per candidate as in M3), then the overlap call
-on `similar` edges in both directions (rubric [overlap_concept.md](./rubrics/overlap_concept.md) v6, one pair
+on `similar` candidate edges at cosine 0.35 or above (decision 11), in both directions (rubric [overlap_concept.md](./rubrics/overlap_concept.md) v6, one pair
 per call, Sonnet then Opus under `RULES` at cut-off 4, prompt caching on) through `NoveltyRunner.run_pairs` with
 the other candidate standing in the "other trait" slot (its gloss as the description).  Corpus and queue edges
 are copied from `novelty.readings` and `novelty.listed`; no new corpus call.
@@ -211,7 +228,7 @@ Existing suites stay green: `test_gapgen_registry.py`, the novelty and recovery 
 
 ## 7. Costs
 
-R1 on 333 candidates: about 3,300 relation rows on Haiku 5.5 (about $1), about 1,500 overlap calls on Sonnet
-with Opus on the close ones (about $1.50 to $2.50); cap $6, no approval needed.  A full TDA run (about 1,400 new
+R1 on 333 candidates: about 3,300 relation rows on Haiku 5.5 (about $1), and with the 0.35 floor about 800
+overlap calls on Sonnet with Opus on the close ones (about $1 to $1.50); cap $6, no approval needed.  A full TDA run (about 1,400 new
 candidates) about $10 to $15.  R2 costs nothing but Roger's time, which it is meant to save; the R2 pilot
 measures that.
