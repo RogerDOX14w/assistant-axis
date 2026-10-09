@@ -12,8 +12,8 @@ States: **covered** (an existing trait has the head as its primary), **partly co
 - Not character (rated 0): **188** heads, left out of the counts below (ratings: 2 on 165, 1 on 234, 0 on 188; 89 unrated, mostly heads with no adjectives).
 - Covered **278**, partly covered **51**, uncovered **159** (of which 9 have a queued label only).
 - Opposed pairs in scope: both poles covered **75**, one pole **63**, neither **34** (by the pairing's evidence: {"rule": {"neither_pole_covered": 1}, "synopsis": {"neither_pole_covered": 33, "both_poles_covered": 75, "one_pole_covered": 63}}).
-- Labels placed: 716 existing traits with a primary head (198 without; 671 of the primaries in scope), 186 queued labels (55 without).
-- Gap classes: pair_completion 28, pair_empty 61, singleton_empty 61, queued_only 9, partly_covered 51, crowded 77, covered 201.
+- Labels placed: 715 existing traits with a primary head (198 without; 669 of the primaries in scope), 186 queued labels (55 without).
+- Gap classes: pair_completion 28, pair_empty 61, singleton_empty 61, queued_only 9, partly_covered 51, crowded 76, covered 202.
 - Pairing as Roget printed it in the Tabular Synopsis of the 1911 edition ([synopsis_readout.md](./synopsis_readout.md)), by rule for the heads the synopsis does not print: of the 576 dispositional heads, 402 are in a pair, 20 are the third head of a triad, 151 are singletons and 3 are unresolved; only a pair gives a head an opposed head here.
 
 ## By section
@@ -66,7 +66,7 @@ States: **covered** (an existing trait has the head as its primary), **partly co
 |---|---|---|---|---|---|---|
 | 124 Oldness | I VI. Time / 1. Time with reference to Succession | 123 Newness (synopsis) | [innovative](../../traits/instructions/innovative.json) | - | - | - |
 | 193 Littleness | II II. Dimensions | 192 Size (synopsis) | [fat](../../traits/instructions/fat.json) | - | - | - |
-| 452 Incogitancy | IV I. Operations of intellect in general | 451 Thought (synopsis) | [abstract](../../traits/instructions/abstract.json), [introspective](../../traits/instructions/introspective.json), [meditative](../../traits/instructions/meditative.json), [pensive](../../traits/instructions/pensive.json), [philosophical](../../traits/instructions/philosophical.json), [speculative](../../traits/instructions/speculative.json) | - | [non-contemplative](../../seed_queue.json) (queued) | - |
+| 452 Incogitancy | IV I. Operations of intellect in general | 451 Thought (synopsis) | [introspective](../../traits/instructions/introspective.json), [meditative](../../traits/instructions/meditative.json), [pensive](../../traits/instructions/pensive.json), [philosophical](../../traits/instructions/philosophical.json), [speculative](../../traits/instructions/speculative.json) | - | [non-contemplative](../../seed_queue.json) (queued) | - |
 | 465 Discrimination | IV II. Precursory conditions and operations | 465a Indiscrimination (synopsis) | [promiscuous](../../traits/instructions/promiscuous.json) | - | - | - |
 | 493 Ignoramus | IV V. Results of reasoning | 492 Scholar (synopsis) | [educated](../../traits/instructions/educated.json) | - | - | - |
 | 501 Fool | IV V. Results of reasoning | 500 Sage (synopsis) | [thinker (VALS)](../../traits/instructions/thinker_vals.json) | - | - | - |
@@ -504,11 +504,11 @@ Rated 0 by the head-scope check; the reasons are in [head_scope.json](./head_sco
 | 460 Neglect (7) | [careless](../../traits/instructions/careless.json), [careless (Big Five)](../../traits/instructions/careless_big_five.json), [careless (HEXACO)](../../traits/instructions/careless_hexaco.json), [health-negligent](../../traits/instructions/health_negligent.json), [neglectful](../../traits/instructions/neglectful.json), [neglectful (Baumrind)](../../traits/instructions/neglectful_baumrind.json), [sloppy](../../traits/instructions/sloppy.json) |
 | 484 Belief (7) | [body-confident](../../traits/instructions/body_confident.json), [confident](../../traits/instructions/confident.json), [just-world-believing](../../traits/instructions/just_world_believing.json), [media-trusting](../../traits/instructions/media_trusting.json), [overconfident](../../traits/instructions/overconfident.json), [science-trusting](../../traits/instructions/science_trusting.json), [trusting](../../traits/instructions/trusting.json) |
 | 868 Fastidiousness (7) | [fastidious](../../traits/instructions/fastidious.json), [meticulous](../../traits/instructions/meticulous.json), [petty](../../traits/instructions/petty.json), [picky-eater](../../traits/instructions/picky_eater.json), [self-critical](../../traits/instructions/self_critical.json), [squeamish](../../traits/instructions/squeamish.json), [uptight](../../traits/instructions/uptight.json) |
-| 451 Thought (6) | [abstract](../../traits/instructions/abstract.json), [introspective](../../traits/instructions/introspective.json), [meditative](../../traits/instructions/meditative.json), [pensive](../../traits/instructions/pensive.json), [philosophical](../../traits/instructions/philosophical.json), [speculative](../../traits/instructions/speculative.json) |
 | 543 Veracity (6) | [candid](../../traits/instructions/candid.json), [earnest](../../traits/instructions/earnest.json), [forthright](../../traits/instructions/forthright.json), [sincere](../../traits/instructions/sincere.json), [trustworthy](../../traits/instructions/trustworthy.json), [truthful](../../traits/instructions/truthful.json) |
 | 737 Authority (6) | [authoritarian](../../traits/instructions/authoritarian.json), [authoritative (Baumrind)](../../traits/instructions/authoritative_baumrind.json), [controlling](../../traits/instructions/controlling.json), [dominance (DISC)](../../traits/instructions/dominance_disc.json), [dominant](../../traits/instructions/dominant.json), [internal locus of control](../../traits/instructions/internal_locus_of_control.json) |
 | 866 Indifference (6) | [apolitical](../../traits/instructions/apolitical.json), [detached](../../traits/instructions/detached.json), [indifferent-to-animals](../../traits/instructions/indifferent_to_animals.json), [unambitious](../../traits/instructions/unambitious.json), [uncaring](../../traits/instructions/uncaring.json), [unsentimental](../../traits/instructions/unsentimental.json) |
 | 910 Philanthropy (6) | [collectivistic](../../traits/instructions/collectivistic.json), [cosmopolitan](../../traits/instructions/cosmopolitan.json), [humanistic](../../traits/instructions/humanistic.json), [humanitarian](../../traits/instructions/humanitarian.json), [patriotic](../../traits/instructions/patriotic.json), [philanthropic](../../traits/instructions/philanthropic.json) |
+| 451 Thought (5) | [introspective](../../traits/instructions/introspective.json), [meditative](../../traits/instructions/meditative.json), [pensive](../../traits/instructions/pensive.json), [philosophical](../../traits/instructions/philosophical.json), [speculative](../../traits/instructions/speculative.json) |
 
 ## Class I-III heads brought in, with the labels that brought them
 
@@ -665,7 +665,7 @@ Rated 0 by the head-scope check; the reasons are in [head_scope.json](./head_sco
 | 374a Sexuality | [bisexual](../../traits/instructions/bisexual.json), [gay](../../traits/instructions/gay.json), [kinky](../../traits/instructions/kinky.json), [lustful](../../traits/instructions/lustful.json) |
 | 392b Bitterness | [acerbic](../../traits/instructions/acerbic.json) |
 | 450 Intellect | [cerebral](../../traits/instructions/cerebral.json) |
-| 451 Thought | [abstract](../../traits/instructions/abstract.json), [introspective](../../traits/instructions/introspective.json), [meditative](../../traits/instructions/meditative.json), [pensive](../../traits/instructions/pensive.json), [philosophical](../../traits/instructions/philosophical.json), [speculative](../../traits/instructions/speculative.json) |
+| 451 Thought | [introspective](../../traits/instructions/introspective.json), [meditative](../../traits/instructions/meditative.json), [pensive](../../traits/instructions/pensive.json), [philosophical](../../traits/instructions/philosophical.json), [speculative](../../traits/instructions/speculative.json) |
 | 455 Curiosity | [curious](../../traits/instructions/curious.json), [inquisitive](../../traits/instructions/inquisitive.json) |
 | 456 Incuriosity | [conventional (HEXACO)](../../traits/instructions/conventional_hexaco.json), [incurious](../../traits/instructions/incurious.json), [uninquisitive](../../traits/instructions/uninquisitive.json) |
 | 457 Attention | [engaged](../../traits/instructions/engaged.json), [focused](../../traits/instructions/focused.json), [observant](../../traits/instructions/observant.json), [other-focused](../../traits/instructions/other_focused.json), [self-absorbed](../../traits/instructions/self_absorbed.json) |
@@ -719,7 +719,7 @@ Rated 0 by the head-scope check; the reasons are in [head_scope.json](./head_sco
 | 583 Stammering | [emotionally-inarticulate](../../traits/instructions/emotionally_inarticulate.json) |
 | 584 Loquacity | [glib](../../traits/instructions/glib.json) |
 | 598 Prose | [prosaic](../../traits/instructions/prosaic.json) |
-| 599 The Drama | [dramatic](../../traits/instructions/dramatic.json), [melodramatic](../../traits/instructions/melodramatic.json), [theatrical](../../traits/instructions/theatrical.json) |
+| 599 The Drama | [melodramatic](../../traits/instructions/melodramatic.json), [theatrical](../../traits/instructions/theatrical.json) |
 | 601 Necessity | [determinist](../../traits/instructions/determinist.json), [fatalistic](../../traits/instructions/fatalistic.json) |
 | 604 Resolution | [self-disciplined](../../traits/instructions/self_disciplined.json) |
 | 604a Perseverance | [long-term oriented](../../traits/instructions/long_term_oriented.json), [persevering](../../traits/instructions/persevering.json), [unflinching](../../traits/instructions/unflinching.json) |

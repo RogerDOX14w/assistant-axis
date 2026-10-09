@@ -99,21 +99,21 @@
       "alignment_score": 0,
       "alignment_relevant": false,
       "source": "description",
-      "description_sha256": "bbba90ea7a6c733f9cbc68ea85b0c7a8f5137565c7fdaeb4f96e2a3e00ff71c7",
+      "description_sha256": "90a9baaa12b34ed90504b573b158ebdf849223e571da3eebab35bf1ddf510ad0",
       "model": "claude-haiku-5-5",
       "rubric_versions": {
         "descriptors": 1,
         "alignment": 3
       },
       "reasons": {
-        "descriptors": "It describes how the persona reasons, favoring concepts and principles over concrete detail, which shows up directly in the content and structure of its written answers.",
-        "alignment": "A preference for abstract concepts over concrete details is a cognitive style that does not bear on honesty, harm, oversight, rules, approval, power, or deference."
+        "descriptors": "The description concerns how the persona reasons, favoring general principles and patterns over concrete instances, which is a matter of thinking style.",
+        "alignment": "It describes a style of thinking and speaking in generalities, which is a matter of manner rather than honesty, harm, rules, power, or oversight."
       },
-      "batch_id": "corpus_desc_2026_10_09",
-      "at": "2026-10-09T02:29:26+00:00",
+      "batch_id": "corpus_desc_20261009T162512Z",
+      "at": "2026-10-09T16:25:15+00:00",
       "previous_region": "cognitive_epistemic",
       "previous_alignment_relevant": false,
-      "previous_source": "filter m1_validation_r2"
+      "previous_source": "description corpus_desc_2026_10_09"
     },
     "accessible": {
       "label": "accessible",
@@ -5104,29 +5104,6 @@
       "at": "2026-10-09T02:30:57+00:00",
       "previous_region": "social_interpersonal",
       "previous_alignment_relevant": true,
-      "previous_source": "filter m1_validation_r2"
-    },
-    "dramatic": {
-      "label": "dramatic",
-      "region": "communication_style",
-      "enactable_in_text": 2,
-      "alignment_score": 0,
-      "alignment_relevant": false,
-      "source": "description",
-      "description_sha256": "72ed3ddfcc927a8a1474672cadf1264df54afd5ad22d00d6032fe98dfca4f8ac",
-      "model": "claude-haiku-5-5",
-      "rubric_versions": {
-        "descriptors": 1,
-        "alignment": 3
-      },
-      "reasons": {
-        "descriptors": "The description concerns the vocabulary, tone, and theatrical flair of the writing itself, which a text-only persona shows directly.",
-        "alignment": "Dramatic style of speech concerns manner and tone, not honesty, rule-keeping, approval-seeking, power, oversight, or harm, so there is no meaningful link to the seven matters."
-      },
-      "batch_id": "corpus_desc_2026_10_09",
-      "at": "2026-10-09T02:30:56+00:00",
-      "previous_region": "communication_style",
-      "previous_alignment_relevant": false,
       "previous_source": "filter m1_validation_r2"
     },
     "dry": {
@@ -19496,21 +19473,21 @@
       "alignment_score": 3,
       "alignment_relevant": true,
       "source": "description",
-      "description_sha256": "35463a752ea527057886fecb882a374a942d5b5660bb1749d9294fd608240de3",
+      "description_sha256": "46ad42a23964a2f19c149d5116c49b74bd75fd601ccc8587fd09bb49412c67b8",
       "model": "claude-haiku-5-5",
       "rubric_versions": {
         "descriptors": 1,
         "alignment": 3
       },
       "reasons": {
-        "descriptors": "Being reliable and following through on commitments is a matter of what one holds to be right and acts on, and a text reply can show it by keeping earlier promises and staying consistent.",
-        "alignment": "Being reliable and following through on commitments bears directly on honesty about one's abilities and actions and on doing as one is entrusted, so the description names conduct closely tied to the seven matters."
+        "descriptors": "The description centers on acting on what one holds right, such as keeping costly promises, telling the truth, and保守 confidences, which is a matter of moral conduct.",
+        "alignment": "The description directly names honesty and keeping to commitments (telling the truth when shading it would help, keeping promises and confidences), which squarely concerns honesty and rule-keeping."
       },
-      "batch_id": "corpus_desc_2026_10_09",
-      "at": "2026-10-09T02:35:15+00:00",
+      "batch_id": "corpus_desc_20261009T162512Z",
+      "at": "2026-10-09T16:25:15+00:00",
       "previous_region": "moral_stance",
       "previous_alignment_relevant": true,
-      "previous_source": "filter m1_validation_r2"
+      "previous_source": "description corpus_desc_2026_10_09"
     },
     "truthful": {
       "label": "truthful",
@@ -20916,21 +20893,21 @@
       "alignment_score": 0,
       "alignment_relevant": false,
       "source": "description",
-      "description_sha256": "9c083fadc5f6a29450125972f4ae9c3646667310640bf2965631927d6fd57993",
+      "description_sha256": "c6d0b5a67a1b70e37788afea79fe0d403293fb3c0e2448d3772d6977ff323467",
       "model": "claude-haiku-5-5",
       "rubric_versions": {
         "descriptors": 1,
         "alignment": 3
       },
       "reasons": {
-        "descriptors": "Wryness is a manner of speaking, shown directly through the sardonic, ironic phrasing of the replies themselves.",
-        "alignment": "Wry humor is a stylistic manner of speech with no bearing on honesty, harm, approval-seeking, power, deference, oversight, or rule-following."
+        "descriptors": "Wryness is a tone of dry, understated humor that shows up directly in the wording of a reply, such as a deadpan aside.",
+        "alignment": "Wry is a manner of humour and mood with no bearing on harm, honesty, approval-seeking, power, deference, oversight, or rule-following."
       },
-      "batch_id": "corpus_desc_2026_10_09",
-      "at": "2026-10-09T02:35:40+00:00",
+      "batch_id": "corpus_desc_20261009T162512Z",
+      "at": "2026-10-09T16:25:15+00:00",
       "previous_region": "communication_style",
       "previous_alignment_relevant": false,
-      "previous_source": "filter m1_validation_r2"
+      "previous_source": "description corpus_desc_2026_10_09"
     },
     "xenophobic": {
       "label": "xenophobic",
@@ -21005,41 +20982,41 @@
   "_provenance": {
     "schema_version": "1.0",
     "produced_by": {
-      "cmd": "uv run python data_analysis/gap_generation/gap_registry.py corpus-regions --from-descriptions --only-missing --budget-usd 1",
-      "git_sha": "a38e96e+dirty",
+      "cmd": "uv run python data_analysis/gap_generation/gap_registry.py corpus-regions --from-descriptions --only-missing --budget-usd 0.5",
+      "git_sha": "b6c086b+dirty",
       "author": "Roger Dearnaley",
-      "title": "corpus regions from descriptions (rows dropped: conceptual, enigmatic)"
+      "title": "corpus regions from descriptions (only_missing, corpus_desc_20261009T162512Z)"
     },
-    "produced_at": "2026-10-09T16:04:52+00:00",
+    "produced_at": "2026-10-09T16:25:15+00:00",
     "inputs": [
       {
         "dep_key": "rubric_descriptors",
         "path": "reports/trait_gap_generation/rubrics/descriptors.md",
-        "fingerprint": "v1:2026-10-08T07:02:25+00:00@2510",
+        "fingerprint": "v1:2026-10-08T19:50:24+00:00@2510",
         "kind": "file",
         "dataset_id": null,
-        "last_modified_at": "2026-10-08T07:02:25+00:00",
+        "last_modified_at": "2026-10-08T19:50:24+00:00",
         "extras": {}
       },
       {
         "dep_key": "rubric_alignment",
         "path": "reports/trait_gap_generation/rubrics/alignment.md",
-        "fingerprint": "v1:2026-10-08T07:02:25+00:00@5002",
+        "fingerprint": "v1:2026-10-08T19:50:24+00:00@5002",
         "kind": "file",
         "dataset_id": null,
-        "last_modified_at": "2026-10-08T07:02:25+00:00",
+        "last_modified_at": "2026-10-08T19:50:24+00:00",
         "extras": {}
       },
       {
-        "dep_key": "responses_corpus_desc_20261009T024251Z",
-        "path": "data/candidates/corpus_regions_runs/corpus_desc_20261009T024251Z/responses.jsonl",
-        "fingerprint": "v1:2026-10-09T02:42:56+00:00@15067",
+        "dep_key": "responses_corpus_desc_20261009T162512Z",
+        "path": "data/candidates/corpus_regions_runs/corpus_desc_20261009T162512Z/responses.jsonl",
+        "fingerprint": "v1:2026-10-09T16:25:15+00:00@6203",
         "kind": "file",
         "dataset_id": null,
-        "last_modified_at": "2026-10-09T02:42:56+00:00",
+        "last_modified_at": "2026-10-09T16:25:15+00:00",
         "extras": {}
       }
     ],
-    "inputs_sha256": "ae74a471a45c78ba12946b8f1b70d5d7181bf94d31e89f9b5a6c35f300eef72f"
+    "inputs_sha256": "55a49677c16537a492907415e55429fb545d4f2dbffab385f7f79ce058bf774a"
   }
 }

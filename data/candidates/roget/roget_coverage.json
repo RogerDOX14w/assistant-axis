@@ -22,8 +22,8 @@
     "singleton_empty": 61,
     "queued_only": 9,
     "partly_covered": 51,
-    "crowded": 77,
-    "covered": 201
+    "crowded": 76,
+    "covered": 202
    },
    "by_class": {
     "I": {
@@ -358,11 +358,11 @@
     "unresolved": 3
    },
    "labels": {
-    "existing_mapped": 716,
+    "existing_mapped": 715,
     "existing_unmapped": 198,
     "queued_mapped": 186,
     "queued_unmapped": 55,
-    "existing_primary_in_scope": 671
+    "existing_primary_in_scope": 669
    },
    "hidden": [],
    "not_character": {
@@ -703,8 +703,8 @@
 {"id":"442","title":"Blindness","path":"III > III. Organic matter > 2. Sensation > 1. Sensation in general","klass":"III","section":"III. Organic matter","partner":"441","pair_kind":"pair","pair_source":"synopsis","members":["441","442"],"existing":["blind"],"existing_secondary":[],"queued_active":[],"queued_parked":[],"n_existing":1,"n_queued_active":0,"state":"covered","gap_class":"covered","partner_state":"covered","partner_existing":["visual_vark"],"triggers":["blind"],"character":0},
 {"id":"450","title":"Intellect","path":"IV > I. Formation of ideas > I. Operations of intellect in general","klass":"IV","section":"I. Operations of intellect in general","partner":"450a","pair_kind":"pair","pair_source":"synopsis","members":["450","450a"],"existing":["cerebral"],"existing_secondary":["intuitive"],"queued_active":["intellect_bfas","intellect_ipip_neo","intuitive_mbti","thinking_mbti"],"queued_parked":[],"n_existing":1,"n_queued_active":4,"state":"covered","gap_class":"covered","partner_state":"queued","partner_existing":[],"triggers":[],"character":2},
 {"id":"450a","title":"Absence or want of Intellect","path":"IV > I. Formation of ideas > I. Operations of intellect in general","klass":"IV","section":"I. Operations of intellect in general","partner":"450","pair_kind":"pair","pair_source":"synopsis","members":["450","450a"],"existing":[],"existing_secondary":[],"queued_active":["intellect_bfas","intellect_ipip_neo"],"queued_parked":[],"n_existing":0,"n_queued_active":2,"state":"queued","gap_class":"queued_only","partner_state":"covered","partner_existing":["cerebral"],"triggers":[],"character":2},
-{"id":"451","title":"Thought","path":"IV > I. Formation of ideas > I. Operations of intellect in general","klass":"IV","section":"I. Operations of intellect in general","partner":"452","pair_kind":"pair","pair_source":"synopsis","members":["451","452"],"existing":["abstract","introspective","meditative","pensive","philosophical","speculative"],"existing_secondary":[],"queued_active":["intellect_ipip_neo","thinking_mbti"],"queued_parked":[],"n_existing":6,"n_queued_active":2,"state":"covered","gap_class":"crowded","partner_state":"empty","partner_existing":[],"triggers":[],"character":2},
-{"id":"452","title":"Incogitancy","path":"IV > I. Formation of ideas > I. Operations of intellect in general","klass":"IV","section":"I. Operations of intellect in general","partner":"451","pair_kind":"pair","pair_source":"synopsis","members":["451","452"],"existing":[],"existing_secondary":[],"queued_active":[],"queued_parked":["non_contemplative"],"n_existing":0,"n_queued_active":0,"state":"empty","gap_class":"pair_completion","partner_state":"covered","partner_existing":["abstract","introspective","meditative","pensive","philosophical","speculative"],"triggers":[],"character":2},
+{"id":"451","title":"Thought","path":"IV > I. Formation of ideas > I. Operations of intellect in general","klass":"IV","section":"I. Operations of intellect in general","partner":"452","pair_kind":"pair","pair_source":"synopsis","members":["451","452"],"existing":["introspective","meditative","pensive","philosophical","speculative"],"existing_secondary":[],"queued_active":["intellect_ipip_neo","thinking_mbti"],"queued_parked":[],"n_existing":5,"n_queued_active":2,"state":"covered","gap_class":"crowded","partner_state":"empty","partner_existing":[],"triggers":[],"character":2},
+{"id":"452","title":"Incogitancy","path":"IV > I. Formation of ideas > I. Operations of intellect in general","klass":"IV","section":"I. Operations of intellect in general","partner":"451","pair_kind":"pair","pair_source":"synopsis","members":["451","452"],"existing":[],"existing_secondary":[],"queued_active":[],"queued_parked":["non_contemplative"],"n_existing":0,"n_queued_active":0,"state":"empty","gap_class":"pair_completion","partner_state":"covered","partner_existing":["introspective","meditative","pensive","philosophical","speculative"],"triggers":[],"character":2},
 {"id":"453","title":"Idea","path":"IV > I. Formation of ideas > I. Operations of intellect in general","klass":"IV","section":"I. Operations of intellect in general","partner":"454","pair_kind":"pair","pair_source":"synopsis","members":["453","454"],"existing":[],"existing_secondary":[],"queued_active":[],"queued_parked":[],"n_existing":0,"n_queued_active":0,"state":"empty","gap_class":"pair_empty","partner_state":"empty","partner_existing":[],"triggers":[],"character":null},
 {"id":"454","title":"Topic","path":"IV > I. Formation of ideas > I. Operations of intellect in general","klass":"IV","section":"I. Operations of intellect in general","partner":"453","pair_kind":"pair","pair_source":"synopsis","members":["453","454"],"existing":[],"existing_secondary":[],"queued_active":[],"queued_parked":[],"n_existing":0,"n_queued_active":0,"state":"empty","gap_class":"pair_empty","partner_state":"empty","partner_existing":[],"triggers":[],"character":0},
 {"id":"455","title":"Curiosity","path":"IV > I. Formation of ideas > II. Precursory conditions and operations","klass":"IV","section":"II. Precursory conditions and operations","partner":"456","pair_kind":"pair","pair_source":"synopsis","members":["455","456"],"existing":["curious","inquisitive"],"existing_secondary":[],"queued_active":["inquisitiveness_hexaco"],"queued_parked":[],"n_existing":2,"n_queued_active":1,"state":"covered","gap_class":"covered","partner_state":"covered","partner_existing":["conventional_hexaco","incurious","uninquisitive"],"triggers":[],"character":2},
@@ -740,7 +740,7 @@
 {"id":"481","title":"Misjudgment","path":"IV > I. Formation of ideas > V. Results of reasoning","klass":"IV","section":"V. Results of reasoning","partner":"480","pair_kind":"pair","pair_source":"synopsis","members":["480","481"],"existing":["ageist","closed_minded","tunnel_visioned"],"existing_secondary":[],"queued_active":["judging_mbti"],"queued_parked":[],"n_existing":3,"n_queued_active":1,"state":"covered","gap_class":"crowded","partner_state":"partly","partner_existing":[],"triggers":[],"character":2},
 {"id":"482","title":"Overestimation","path":"IV > I. Formation of ideas > V. Results of reasoning","klass":"IV","section":"V. Results of reasoning","partner":"483","pair_kind":"pair","pair_source":"synopsis","members":["482","483"],"existing":["optimistic","pessimistic"],"existing_secondary":[],"queued_active":[],"queued_parked":[],"n_existing":2,"n_queued_active":0,"state":"covered","gap_class":"covered","partner_state":"covered","partner_existing":["understated"],"triggers":[],"character":0},
 {"id":"483","title":"Underestimation","path":"IV > I. Formation of ideas > V. Results of reasoning","klass":"IV","section":"V. Results of reasoning","partner":"482","pair_kind":"pair","pair_source":"synopsis","members":["482","483"],"existing":["understated"],"existing_secondary":["pessimistic"],"queued_active":[],"queued_parked":[],"n_existing":1,"n_queued_active":0,"state":"covered","gap_class":"covered","partner_state":"covered","partner_existing":["optimistic","pessimistic"],"triggers":[],"character":1},
-{"id":"484","title":"Belief","path":"IV > I. Formation of ideas > V. Results of reasoning","klass":"IV","section":"V. Results of reasoning","partner":"485","pair_kind":"pair","pair_source":"synopsis","members":["484","485"],"existing":["body_confident","confident","just_world_believing","media_trusting","overconfident","science_trusting","trusting"],"existing_secondary":["self_assured","self_certain","trustworthy"],"queued_active":["trust_ipip_neo"],"queued_parked":["secure"],"n_existing":7,"n_queued_active":1,"state":"covered","gap_class":"crowded","partner_state":"covered","partner_existing":["paranoid"],"triggers":[],"character":2},
+{"id":"484","title":"Belief","path":"IV > I. Formation of ideas > V. Results of reasoning","klass":"IV","section":"V. Results of reasoning","partner":"485","pair_kind":"pair","pair_source":"synopsis","members":["484","485"],"existing":["body_confident","confident","just_world_believing","media_trusting","overconfident","science_trusting","trusting"],"existing_secondary":["self_assured","self_certain"],"queued_active":["trust_ipip_neo"],"queued_parked":["secure"],"n_existing":7,"n_queued_active":1,"state":"covered","gap_class":"crowded","partner_state":"covered","partner_existing":["paranoid"],"triggers":[],"character":2},
 {"id":"485","title":"Unbelief. Doubt","path":"IV > I. Formation of ideas > V. Results of reasoning","klass":"IV","section":"V. Results of reasoning","partner":"484","pair_kind":"pair","pair_source":"synopsis","members":["484","485"],"existing":["paranoid"],"existing_secondary":["cynical","media_skeptical","science_skeptical","skeptical"],"queued_active":[],"queued_parked":[],"n_existing":1,"n_queued_active":0,"state":"covered","gap_class":"covered","partner_state":"covered","partner_existing":["body_confident","confident","just_world_believing","media_trusting","overconfident","science_trusting","trusting"],"triggers":[],"character":2},
 {"id":"486","title":"Credulity","path":"IV > I. Formation of ideas > V. Results of reasoning","klass":"IV","section":"V. Results of reasoning","partner":"487","pair_kind":"pair","pair_source":"synopsis","members":["486","487"],"existing":["credulous","superstitious","uncritical"],"existing_secondary":[],"queued_active":[],"queued_parked":[],"n_existing":3,"n_queued_active":0,"state":"covered","gap_class":"crowded","partner_state":"covered","partner_existing":["cynical","media_skeptical","science_skeptical","skeptical"],"triggers":[],"character":2},
 {"id":"487","title":"Incredulity","path":"IV > I. Formation of ideas > V. Results of reasoning","klass":"IV","section":"V. Results of reasoning","partner":"486","pair_kind":"pair","pair_source":"synopsis","members":["486","487"],"existing":["cynical","media_skeptical","science_skeptical","skeptical"],"existing_secondary":[],"queued_active":[],"queued_parked":[],"n_existing":4,"n_queued_active":0,"state":"covered","gap_class":"crowded","partner_state":"covered","partner_existing":["credulous","superstitious","uncritical"],"triggers":[],"character":2},
@@ -857,7 +857,7 @@
 {"id":"596","title":"Compendium","path":"IV > II. Communication of ideas > III. Means of communicating ideas > 2. Conventional means > 1. Language generally","klass":"IV","section":"III. Means of communicating ideas","partner":null,"pair_kind":"singleton","pair_source":"synopsis","members":["596"],"existing":[],"existing_secondary":[],"queued_active":[],"queued_parked":[],"n_existing":0,"n_queued_active":0,"state":"empty","gap_class":"singleton_empty","partner_state":null,"partner_existing":[],"triggers":[],"character":0},
 {"id":"597","title":"Poetry","path":"IV > II. Communication of ideas > III. Means of communicating ideas > 2. Conventional means > 1. Language generally","klass":"IV","section":"III. Means of communicating ideas","partner":"598","pair_kind":"pair","pair_source":"synopsis","members":["597","598"],"existing":["poetic"],"existing_secondary":[],"queued_active":[],"queued_parked":[],"n_existing":1,"n_queued_active":0,"state":"covered","gap_class":"covered","partner_state":"covered","partner_existing":["prosaic"],"triggers":[],"character":0},
 {"id":"598","title":"Prose","path":"IV > II. Communication of ideas > III. Means of communicating ideas > 2. Conventional means > 1. Language generally","klass":"IV","section":"III. Means of communicating ideas","partner":"597","pair_kind":"pair","pair_source":"synopsis","members":["597","598"],"existing":["prosaic"],"existing_secondary":[],"queued_active":[],"queued_parked":[],"n_existing":1,"n_queued_active":0,"state":"covered","gap_class":"covered","partner_state":"covered","partner_existing":["poetic"],"triggers":[],"character":1},
-{"id":"599","title":"The Drama","path":"IV > II. Communication of ideas > III. Means of communicating ideas > 2. Conventional means > 1. Language generally","klass":"IV","section":"III. Means of communicating ideas","partner":null,"pair_kind":"singleton","pair_source":"synopsis","members":["599"],"existing":["dramatic","melodramatic","theatrical"],"existing_secondary":[],"queued_active":[],"queued_parked":[],"n_existing":3,"n_queued_active":0,"state":"covered","gap_class":"crowded","partner_state":null,"partner_existing":[],"triggers":[],"character":1},
+{"id":"599","title":"The Drama","path":"IV > II. Communication of ideas > III. Means of communicating ideas > 2. Conventional means > 1. Language generally","klass":"IV","section":"III. Means of communicating ideas","partner":null,"pair_kind":"singleton","pair_source":"synopsis","members":["599"],"existing":["melodramatic","theatrical"],"existing_secondary":[],"queued_active":[],"queued_parked":[],"n_existing":2,"n_queued_active":0,"state":"covered","gap_class":"covered","partner_state":null,"partner_existing":[],"triggers":[],"character":1},
 {"id":"600","title":"Will","path":"V > I. Individual volition > I. Volition in general > 1. Acts of Volition","klass":"V","section":"I. Volition in general","partner":"601","pair_kind":"pair","pair_source":"synopsis","members":["600","601"],"existing":[],"existing_secondary":[],"queued_active":[],"queued_parked":[],"n_existing":0,"n_queued_active":0,"state":"empty","gap_class":"pair_completion","partner_state":"covered","partner_existing":["determinist","fatalistic"],"triggers":[],"character":1},
 {"id":"601","title":"Necessity","path":"V > I. Individual volition > I. Volition in general > 1. Acts of Volition","klass":"V","section":"I. Volition in general","partner":"600","pair_kind":"pair","pair_source":"synopsis","members":["600","601"],"existing":["determinist","fatalistic"],"existing_secondary":[],"queued_active":[],"queued_parked":[],"n_existing":2,"n_queued_active":0,"state":"covered","gap_class":"covered","partner_state":"empty","partner_existing":[],"triggers":[],"character":1},
 {"id":"602","title":"Willingness","path":"V > I. Individual volition > I. Volition in general > 1. Acts of Volition","klass":"V","section":"I. Volition in general","partner":"603","pair_kind":"pair","pair_source":"synopsis","members":["602","603"],"existing":[],"existing_secondary":[],"queued_active":[],"queued_parked":[],"n_existing":0,"n_queued_active":0,"state":"empty","gap_class":"pair_empty","partner_state":"empty","partner_existing":[],"triggers":[],"character":2},
@@ -1283,11 +1283,11 @@
   "schema_version": "1.0",
   "produced_by": {
    "cmd": "uv run python data_analysis/gap_generation/roget_generate.py coverage",
-   "git_sha": "e71c6b3+dirty",
+   "git_sha": "b6c086b+dirty",
    "author": "Roger Dearnaley",
    "title": "Roget coverage map (workstream 2)"
   },
-  "produced_at": "2026-10-09T16:02:36+00:00",
+  "produced_at": "2026-10-09T16:25:10+00:00",
   "inputs": [
    {
     "dep_key": "roget_heads",
@@ -1310,10 +1310,10 @@
    {
     "dep_key": "label_heads",
     "path": "data/candidates/roget/label_heads.json",
-    "fingerprint": "v1:2026-10-09T16:02:24+00:00@1447869",
+    "fingerprint": "v1:2026-10-09T16:25:08+00:00@1450403",
     "kind": "file",
     "dataset_id": null,
-    "last_modified_at": "2026-10-09T16:02:24+00:00",
+    "last_modified_at": "2026-10-09T16:25:08+00:00",
     "extras": {}
    },
    {
@@ -1326,6 +1326,6 @@
     "extras": {}
    }
   ],
-  "inputs_sha256": "a4ea8322d10c6c95e50e62d71a83918f6a0c0f7730fcc3740ca36758ed07f01b"
+  "inputs_sha256": "b8359a4c055fa41ce1fc87786b5fa4da93a6432890d17138e2cc3b54f396a33a"
  }
 }
