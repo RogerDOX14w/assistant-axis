@@ -18,10 +18,21 @@ instructions were written with the label in front of the generator, so the
 name can still lean toward it; the blind call keeps the label out of the
 namer's own prompt.
 
+With ``--roles STEM ...`` (2026-10-09, the role-pair check of AGENT_NOTES
+§ "Role pairs") the same check runs on roles, which have no negative_label
+and no neg instructions: one call per role, given its display name, its
+description and its five pos instructions, asks for the opposing *role* (a
+role, not an adjective, and not necessarily one in the corpus) and a 0-4
+rating of how cleanly it opposes.  Each result is ``{reasoning,
+opposing_role, opposition_score}``; the usage record is
+``data/roles/role_pair_check_usage.json``.  Run it from both sides: a role
+pair is recorded only when each side names the other.
+
 Usage:
     uv run python data_analysis/generate_antonyms.py
     uv run python data_analysis/generate_antonyms.py --traits obedient pragmatic conservative
     uv run python data_analysis/generate_antonyms.py --traits world_accepting world_changing --name-pos
+    uv run python data_analysis/generate_antonyms.py --roles provincial cosmopolitan
 """
 
 import argparse
@@ -42,6 +53,10 @@ MODEL = "claude-sonnet-4-6"
 # Cumulative token-usage record (AGENT_NOTES "Token usage logging is
 # mandatory on batched LLM call sites"); one level above instructions/.
 DEFAULT_USAGE_JSON = Path(__file__).resolve().parent.parent / "data" / "traits" / "antonym_check_usage.json"
+# The role-pair check (--roles) keeps its own cumulative record, beside the
+# role corpus.
+ROLES_DIR = Path(__file__).resolve().parent.parent / "data" / "roles" / "instructions"
+DEFAULT_ROLE_USAGE_JSON = ROLES_DIR.parent / "role_pair_check_usage.json"
 
 logging.basicConfig(
     level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s",
@@ -124,6 +139,59 @@ def build_pos_name_message(instructions: list[dict]) -> str:
     return f"Instructions:\n{pos_lines}"
 
 
+# The role-pair check (--roles).  Roles have no neg instructions, so the model
+# reads the role itself and names its opposite; the answer is a role (a noun
+# for who someone is), not an adjective.  The examples in the prompt are
+# deliberately words that are no pole of a recorded role pair (not guardian,
+# parasite, ...), so the check that validates those pairs is not primed.
+ROLE_SYSTEM_PROMPT = """\
+You are an expert on social roles, archetypes and characters, labeling the poles of role pairs for a \
+research dataset.
+
+You will be given:
+- A role name
+- A description of that role
+- 5 instruction prompts that each make an AI persona take on that role
+
+Your task:
+1. Read the description and the instructions carefully to understand the role: who this person \
+(or entity) is, what they do, and how they stand toward others and the world.
+2. Name the role that most cleanly opposes it: the role at the other end of the same dimension. \
+Give a role, that is, a noun naming who someone is (such as "landlord" or "sailor"), not an \
+adjective, and not the mere absence of the role ("non-X"). You are not choosing from a list: name \
+the best opposing role whether or not it is a common one. Prefer a real, recognizable role noun \
+over a coined phrase when a good one exists. If there are two or more genuinely competitive \
+candidates where reasonable experts might disagree, list them separated by "|" (e.g. \
+"tenant|lodger"). Use "|" freely: it is better to surface ambiguity than to hide it.
+3. Rate how cleanly your chosen opposing role (or the best candidate if you listed alternatives) \
+opposes the given role on this scale:
+   0 = not opposed at all (unrelated roles)
+   1 = weakly opposed (overlapping or tangential opposition)
+   2 = moderately opposed (clearly different roles but not clean opposites)
+   3 = strongly opposed (clearly opposite, minor asymmetry)
+   4 = perfectly opposed (direct, symmetric opposites)
+
+Return ONLY a JSON object with these fields (reasoning MUST come first):
+{
+  "reasoning": "Brief explanation of your choice and score",
+  "opposing_role": "chosen_role",
+  "opposition_score": <0-4>
+}
+"""
+
+ROLE_ERROR_RESULT = {"opposing_role": "ERROR", "opposition_score": -1, "reasoning": "All retries failed"}
+
+
+def build_role_message(role_name: str, description: str, instructions: list[dict]) -> str:
+    """The role-pair prompt: display name, description, the five pos instructions."""
+    pos_lines = "\n".join(f"  {i+1}. {inst['pos']}" for i, inst in enumerate(instructions))
+    return (
+        f"Role: {role_name}\n"
+        f"Description: {description}\n\n"
+        f"Instructions:\n{pos_lines}"
+    )
+
+
 def _parse_reply(text: str) -> dict:
     raw = re.sub(r"^```(?:json)?\s*\n?", "", text.strip())
     raw = re.sub(r"\n?```\s*$", "", raw)
@@ -157,6 +225,104 @@ async def name_pos_one(
                 print(f"  Retry {attempt+1} for the pos name of {log_label}: {e}", file=sys.stderr)
                 await asyncio.sleep(1)
     return {"positive_name": "ERROR", "reasoning": "All retries failed"}
+
+
+async def classify_role_one(
+    client: anthropic.AsyncAnthropic,
+    role_name: str,
+    description: str,
+    instructions: list[dict],
+    semaphore: asyncio.Semaphore,
+    usage: MultiModelUsage | None = None,
+) -> dict:
+    """Name the role that opposes ``role_name`` and rate the opposition 0-4.
+    Five attempts, as for traits; then the ERROR sentinel."""
+    msg = build_role_message(role_name, description, instructions)
+    for attempt in range(5):
+        async with semaphore:
+            try:
+                response = await client.messages.create(
+                    model=MODEL, max_tokens=512, temperature=0,
+                    system=ROLE_SYSTEM_PROMPT,
+                    messages=[{"role": "user", "content": msg}],
+                )
+                if usage is not None:
+                    usage.charge(MODEL, *extract_usage_anthropic(response))
+                result = _parse_reply(response.content[0].text)
+                for key in ("opposing_role", "opposition_score"):
+                    if key not in result:
+                        raise KeyError(key)
+                return result
+            except (json.JSONDecodeError, KeyError, IndexError) as e:
+                print(f"  Retry {attempt+1} for the role {role_name}: {e}", file=sys.stderr)
+                await asyncio.sleep(1)
+    return dict(ROLE_ERROR_RESULT)
+
+
+def load_role_tasks(stems: list[str], roles_dir: Path | None = None) -> list[tuple[str, str, str, list[dict]]]:
+    """``(stem, display name, description, pos instructions)`` per role, in
+    the order given.  Exits on a stem with no file or no instructions."""
+    from data_analysis.regenerate_role_instructions import role_display_name
+
+    roles_dir = roles_dir if roles_dir is not None else ROLES_DIR
+    missing = [s for s in stems if not (roles_dir / f"{s}.json").exists()]
+    if missing:
+        print(f"ERROR: role files not found: {', '.join(missing)}", file=sys.stderr)
+        sys.exit(1)
+    tasks = []
+    for stem in dict.fromkeys(stems):
+        with open(roles_dir / f"{stem}.json", encoding="utf-8") as f:
+            data = json.load(f)
+        instructions = data.get("instruction") or []
+        if not instructions:
+            print(f"ERROR: role {stem} has no instructions; generate them first", file=sys.stderr)
+            sys.exit(1)
+        tasks.append((stem, role_display_name(stem), data.get("description", ""), instructions))
+    return tasks
+
+
+async def main_roles_async(role_stems: list[str], usage_json: Path | None = None,
+                           roles_dir: Path | None = None):
+    """The role-pair check: one call per role, results printed as JSON keyed
+    by stem."""
+    tasks = load_role_tasks(role_stems, roles_dir)
+    print(f"Processing {len(tasks)} roles", file=sys.stderr)
+    usage = MultiModelUsage()
+    client = anthropic.AsyncAnthropic()
+    semaphore = asyncio.Semaphore(10)
+
+    async def run_one(stem, name, description, insts):
+        return stem, await classify_role_one(client, name, description, insts, semaphore, usage)
+
+    api_results = await asyncio.gather(*(run_one(*t) for t in tasks))
+
+    warn_if_low_parse_rate(
+        label=f"data_analysis/generate_antonyms:roles:{MODEL}",
+        n_ok=sum(1 for _, r in api_results if r.get("opposing_role") != "ERROR"),
+        n_total=len(api_results),
+        logger_obj=logger,
+    )
+    logger.info(usage.log_line("[usage]"))
+    path = Path(usage_json) if usage_json is not None else DEFAULT_ROLE_USAGE_JSON
+    total = MultiModelUsage.load_or_create(path)
+    total.merge_from(usage)
+    total.write_json(path)
+    logger.info(f"[usage] cumulative record: {path} (total ${total.total_cost_usd:.3f} over {total.n_calls} calls)")
+
+    results = dict(sorted(api_results))
+    scores = [r["opposition_score"] for r in results.values()
+              if isinstance(r.get("opposition_score"), int) and r["opposition_score"] >= 0]
+    print("\nOpposition score distribution:", file=sys.stderr)
+    for s in range(5):
+        print(f"  {s}: {scores.count(s)} roles", file=sys.stderr)
+    under4 = [(k, v.get("opposition_score"), v.get("opposing_role")) for k, v in results.items()
+              if isinstance(v.get("opposition_score"), int) and v["opposition_score"] < 4]
+    if under4:
+        print("\nRoles scoring under 4:", file=sys.stderr)
+        for name, score, role in under4:
+            print(f"  {name} -> {role} (score={score})", file=sys.stderr)
+
+    print(json.dumps(results, indent=2, sort_keys=True))
 
 
 def extract_definition(eval_prompt: str) -> str:
@@ -341,31 +507,49 @@ async def main_async(trait_filter: list[str] | None = None, usage_json: Path | N
 
 def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     parser = argparse.ArgumentParser(
-        description="Generate negative_labels for traits via Claude.",
+        description="Generate negative_labels for traits via Claude, or (--roles) name the role "
+                    "opposing each given role.",
     )
-    parser.add_argument(
+    which = parser.add_mutually_exclusive_group()
+    which.add_argument(
         "--traits",
         nargs="+",
         metavar="TRAIT",
         help="Trait names to process (default: all traits)",
     )
+    which.add_argument(
+        "--roles",
+        nargs="+",
+        metavar="ROLE",
+        help="Role stems to check instead of traits: each call names the opposing role and rates "
+             "the opposition 0-4 (the role-pair check)",
+    )
     parser.add_argument(
         "--usage-json",
-        default=str(DEFAULT_USAGE_JSON),
-        help=f"Cumulative token-usage record, merged into on every run (default: {DEFAULT_USAGE_JSON})",
+        default=None,
+        help=f"Cumulative token-usage record, merged into on every run (default: {DEFAULT_USAGE_JSON}; "
+             f"with --roles, {DEFAULT_ROLE_USAGE_JSON})",
     )
     parser.add_argument(
         "--name-pos",
         action="store_true",
         help="Also name the pole the pos instructions describe, in a second, label-blind call "
-             "(adds positive_name and positive_name_reasoning to each result)",
+             "(adds positive_name and positive_name_reasoning to each result; traits only)",
     )
-    return parser.parse_args(argv)
+    args = parser.parse_args(argv)
+    if args.roles and args.name_pos:
+        parser.error("--name-pos is for traits; it cannot be combined with --roles")
+    return args
 
 
 def main(argv: list[str] | None = None):
     args = parse_args(argv)
-    asyncio.run(main_async(trait_filter=args.traits, usage_json=Path(args.usage_json),
+    if args.roles:
+        usage_json = Path(args.usage_json) if args.usage_json else DEFAULT_ROLE_USAGE_JSON
+        asyncio.run(main_roles_async(args.roles, usage_json=usage_json))
+        return
+    usage_json = Path(args.usage_json) if args.usage_json else DEFAULT_USAGE_JSON
+    asyncio.run(main_async(trait_filter=args.traits, usage_json=usage_json,
                            name_pos=args.name_pos))
 
 
