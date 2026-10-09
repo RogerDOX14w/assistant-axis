@@ -78,15 +78,31 @@
     "generated_at": "2026-10-08",
     "opening_rerolls": 1
   },
-  "arrangement": {
-    "kind": "set",
-    "members": [
-      "monogamous",
-      "polyamorous",
-      "polyandrous",
-      "polygamous",
-      "polygynous"
-    ]
-  },
+  "arrangement": [
+    {
+      "kind": "set",
+      "members": [
+        "monogamous",
+        "polyamorous",
+        "polyandrous",
+        "polygamous",
+        "polygynous"
+      ]
+    },
+    {
+      "kind": "tree",
+      "members": [
+        "polyandrous",
+        "polygamous",
+        "polygynous"
+      ],
+      "structure": {
+        "polygamous": {
+          "polyandrous": {},
+          "polygynous": {}
+        }
+      }
+    }
+  ],
   "hand_edits": "2026-10-08: p4 opening rewritten by hand into the fifth form (plain 'You are ...') after two generations still doubled 'You are someone who'"
 }
