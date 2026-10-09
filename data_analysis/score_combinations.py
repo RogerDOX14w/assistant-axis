@@ -172,10 +172,17 @@ def _make_combo(
             "trait_instruction": trait_insts[i].get("pos", ""),
         })
 
+    from assistant_axis.entity_id import display_form_name, judge_form_of_label, judge_label
+
     prefix = "r" if goal_source == "role" else "t"
     return {
         "role": role_name,
         "trait": trait_name,
+        # The names the scorer is shown (judge display form, RUBRIC_VERSION 2),
+        # the trait's from the file just read.
+        "role_label": judge_label(role_name, "roles"),
+        "trait_label": judge_form_of_label(
+            trait_data.get("positive_label") or display_form_name(trait_name)),
         "goal_source": goal_source,
         "output_name": f"{prefix}_{role_name}__{trait_name}",
         "pairs": pairs,
@@ -185,6 +192,11 @@ def _make_combo(
 # ---------------------------------------------------------------------------
 # Prompt construction
 # ---------------------------------------------------------------------------
+
+# Stamped into the output's metadata (AGENT_NOTES "When changing a judge
+# rubric").  1 (May 2026, unstamped): names in the mechanical display form;
+# 2 (2026-10-09, W19): names in the judge display form, rubric text unchanged.
+RUBRIC_VERSION = 2
 
 _RUBRIC = """\
 Score each on a 0-3 scale:
@@ -289,27 +301,23 @@ def build_system_prompt(n: int) -> str:
 def build_user_message(combo: Dict, batch_size: Optional[int] = None) -> str:
     """Build the user message for a single combo's instruction pairs.
 
-    Display-form note (see AGENT_NOTES.md "File-name vs
-    display-name convention" / "LLM prompts are display sites"):
-    ``combo['role']`` and ``combo['trait']`` are stored in
-    file-name form (the corpus key, e.g.
-    ``aligned_artificial_intelligence``); we convert to
-    display form on injection so the LLM reads
-    ``Role: aligned artificial intelligence`` rather than
-    ``Role: aligned_artificial_intelligence``.  The dict + the
-    output JSON still keep file-form keys -- conversion is local
-    to the prompt only, mirroring
-    ``axis_judge_correlation.build_static_prompt`` (RUBRIC_VERSION
-    v3).
+    Display-form note (AGENT_NOTES "Judge prompts show the judge display
+    form"): ``combo['role']`` and ``combo['trait']`` are stems (the corpus
+    key); the scorer is shown the judge display form
+    (``assistant_axis.entity_id.judge_label``: ``Role: devil's advocate``,
+    ``Trait: careless (from HEXACO)``), carried in ``role_label`` /
+    ``trait_label`` by ``_make_combo`` and resolved from the stems when a
+    combo lacks them.  The output JSON keeps the stems (RUBRIC_VERSION 2;
+    version 1 showed the mechanical ``_`` -> space form).
     """
-    from assistant_axis import display_form_name
+    from assistant_axis.entity_id import judge_label
 
     pairs = combo["pairs"]
     if batch_size is not None:
         pairs = pairs[:batch_size]
 
-    role_disp = display_form_name(combo["role"])
-    trait_disp = display_form_name(combo["trait"])
+    role_disp = combo.get("role_label") or judge_label(combo["role"], "roles")
+    trait_disp = combo.get("trait_label") or judge_label(combo["trait"], "traits")
     n = len(pairs)
     if n == 1:
         header = (
@@ -735,6 +743,7 @@ async def main_async():
 
     metadata = {
         "model": args.model,
+        "rubric_version": RUBRIC_VERSION,
         "rescore_model": rescore_model,
         "rescore_threshold": args.rescore_threshold if rescore_model else None,
         "goal_count": args.goal_count,
