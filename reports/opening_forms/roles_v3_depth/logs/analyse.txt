@@ -1,0 +1,148 @@
+levels, mean over the 89 roles every arm has (percent of answers)
+arm                          scored_3    own_voice assistant_vo    in_action describes_it      laid_on      cartoon
+v3                               96.6         41.1         29.6         67.9         46.4         96.9         22.4
+old_other[3]                     93.7         38.7         33.4         63.8         39.8         95.4         21.3
+other[1]                         94.5         39.0         33.4         64.9         39.6         94.8         19.7
+act_as[1]                        97.8         43.5         28.3         67.4         43.1         95.7         26.9
+act_as[2]                        97.4         44.3         28.8         69.6         43.9         95.4         24.7
+from_now_on[2]                   96.5         48.0         27.4         71.8         39.8         93.7         19.1
+be[2]                            96.5         44.2         31.8         65.6         41.6         95.3         23.4
+old_corpus[1]                    95.1         39.9         32.4         65.4         40.3         95.0         21.1
+old_corpus (chained)             94.4         39.6         32.4         64.3         40.5         95.6         22.8
+act_as (chained)                 97.0         43.2         28.3         66.3         43.4         96.3         28.6
+from_now_on (chained)            96.1         46.9         27.0         68.6         39.2         94.6         23.0
+be (chained)                     96.1         43.1         31.3         62.4         41.0         96.2         27.3
+
+cartoon
+  V3 minus the old corpus, non-role-play instruction (same run)   +1.0 (-3.4 to +5.5) p=0.693 [22.4 vs 21.3, n=89]
+  V3 minus the old corpus file (chained)                          -0.4 (-4.7 to +3.7) p=0.843 [22.4 vs 22.8, n=89]
+  V3 minus the old corpus file (direct)                           +1.2 (-2.7 to +5.2) p=0.551 [22.4 vs 21.1, n=89]
+  V3 minus Act as (chained)                                       -6.3 (-11.6 to -1.0) p=0.025 [22.4 vs 28.6, n=89]
+  V3 minus Act as (direct, run 2)                                 -2.8 (-7.1 to +1.7) p=0.215 [24.4 vs 27.3, n=99]
+  V3 minus From now on (chained)                                  -0.6 (-5.8 to +4.6) p=0.832 [22.4 vs 23.0, n=89]
+  V3 minus From now on (direct)                                   +2.3 (-1.5 to +6.4) p=0.270 [24.4 vs 22.1, n=99]
+  V3 minus Be (chained)                                           -4.9 (-10.4 to +0.4) p=0.084 [22.4 vs 27.3, n=89]
+  V3 minus Be (direct)                                            -0.8 (-4.3 to +2.9) p=0.713 [24.4 vs 25.3, n=99]
+  drift: old other, run 3 minus run 1                             +1.7 (-1.3 to +4.7) p=0.330 [21.3 vs 19.7, n=89]
+  drift: Act as, run 2 minus run 1                                -2.2 (-4.8 to +0.2) p=0.094 [24.7 vs 26.9, n=89]
+
+answered in an assistant's voice
+  V3 minus the old corpus, non-role-play instruction (same run)   -3.8 (-7.6 to +0.0) p=0.060 [29.6 vs 33.4, n=89]
+  V3 minus the old corpus file (chained)                          -2.8 (-6.2 to +0.6) p=0.117 [29.6 vs 32.4, n=89]
+  V3 minus the old corpus file (direct)                           -2.8 (-6.7 to +0.9) p=0.159 [29.6 vs 32.4, n=89]
+  V3 minus Act as (chained)                                       +1.2 (-3.1 to +5.5) p=0.625 [29.6 vs 28.3, n=89]
+  V3 minus Act as (direct, run 2)                                 +1.1 (-2.4 to +4.2) p=0.557 [29.3 vs 28.2, n=99]
+  V3 minus From now on (chained)                                  +2.6 (-2.2 to +7.5) p=0.325 [29.6 vs 27.0, n=89]
+  V3 minus From now on (direct)                                   +1.6 (-1.7 to +4.8) p=0.390 [29.3 vs 27.7, n=99]
+  V3 minus Be (chained)                                           -1.8 (-7.2 to +3.5) p=0.540 [29.6 vs 31.3, n=89]
+  V3 minus Be (direct)                                            -2.1 (-6.1 to +1.5) p=0.310 [29.3 vs 31.4, n=99]
+  drift: old other, run 3 minus run 1                             +0.0 (-2.6 to +2.6) p=1.000 [33.4 vs 33.4, n=89]
+  drift: Act as, run 2 minus run 1                                +0.4 (-1.9 to +2.7) p=0.772 [28.8 vs 28.3, n=89]
+
+describes its own role
+  V3 minus the old corpus, non-role-play instruction (same run)   +6.6 (+1.7 to +11.3) p=0.010 [46.4 vs 39.8, n=89]
+  V3 minus the old corpus file (chained)                          +5.9 (+1.2 to +10.5) p=0.015 [46.4 vs 40.5, n=89]
+  V3 minus the old corpus file (direct)                           +6.1 (+1.6 to +10.7) p=0.011 [46.4 vs 40.3, n=89]
+  V3 minus Act as (chained)                                       +3.0 (-2.7 to +8.8) p=0.314 [46.4 vs 43.4, n=89]
+  V3 minus Act as (direct, run 2)                                 +2.0 (-2.7 to +6.9) p=0.439 [44.8 vs 42.8, n=99]
+  V3 minus From now on (chained)                                  +7.2 (+0.9 to +13.4) p=0.028 [46.4 vs 39.2, n=89]
+  V3 minus From now on (direct)                                   +5.6 (+1.0 to +10.2) p=0.024 [44.8 vs 39.3, n=99]
+  V3 minus Be (chained)                                           +5.4 (-0.9 to +11.4) p=0.093 [46.4 vs 41.0, n=89]
+  V3 minus Be (direct)                                            +3.4 (-1.0 to +7.6) p=0.148 [44.8 vs 41.4, n=99]
+  drift: old other, run 3 minus run 1                             +0.2 (-3.0 to +3.6) p=0.949 [39.8 vs 39.6, n=89]
+  drift: Act as, run 2 minus run 1                                +0.8 (-2.8 to +4.3) p=0.675 [43.9 vs 43.1, n=89]
+
+the role shapes what it does
+  V3 minus the old corpus, non-role-play instruction (same run)   +4.0 (-0.6 to +8.5) p=0.099 [67.9 vs 63.8, n=89]
+  V3 minus the old corpus file (chained)                          +3.5 (-0.9 to +7.9) p=0.132 [67.9 vs 64.3, n=89]
+  V3 minus the old corpus file (direct)                           +2.4 (-1.2 to +6.1) p=0.213 [67.9 vs 65.4, n=89]
+  V3 minus Act as (chained)                                       +1.5 (-4.7 to +7.8) p=0.648 [67.9 vs 66.3, n=89]
+  V3 minus Act as (direct, run 2)                                 -2.7 (-7.2 to +1.6) p=0.251 [66.7 vs 69.4, n=99]
+  V3 minus From now on (chained)                                  -0.7 (-8.0 to +6.2) p=0.852 [67.9 vs 68.6, n=89]
+  V3 minus From now on (direct)                                   -4.6 (-8.7 to -0.7) p=0.027 [66.7 vs 71.3, n=99]
+  V3 minus Be (chained)                                           +5.5 (-2.2 to +13.1) p=0.167 [67.9 vs 62.4, n=89]
+  V3 minus Be (direct)                                            +1.5 (-3.0 to +6.2) p=0.549 [66.7 vs 65.2, n=99]
+  drift: old other, run 3 minus run 1                             -1.1 (-4.8 to +2.6) p=0.596 [63.8 vs 64.9, n=89]
+  drift: Act as, run 2 minus run 1                                +2.1 (-1.0 to +5.1) p=0.200 [69.6 vs 67.4, n=89]
+
+scored 3 by the role judge
+  V3 minus the old corpus, non-role-play instruction (same run)   +2.9 (+0.9 to +5.1) p=0.007 [96.6 vs 93.7, n=89]
+  V3 minus the old corpus file (chained)                          +2.3 (+0.3 to +4.3) p=0.028 [96.6 vs 94.4, n=89]
+  V3 minus the old corpus file (direct)                           +1.5 (-0.0 to +3.0) p=0.065 [96.6 vs 95.1, n=89]
+  V3 minus Act as (chained)                                       -0.3 (-3.0 to +2.1) p=0.870 [96.6 vs 97.0, n=89]
+  V3 minus Act as (direct, run 2)                                 -0.8 (-2.3 to +0.6) p=0.361 [96.7 vs 97.5, n=99]
+  V3 minus From now on (chained)                                  +0.6 (-2.4 to +3.4) p=0.759 [96.6 vs 96.1, n=89]
+  V3 minus From now on (direct)                                   +0.0 (-1.4 to +1.4) p=1.000 [96.7 vs 96.7, n=99]
+  V3 minus Be (chained)                                           +0.6 (-2.6 to +3.6) p=0.774 [96.6 vs 96.1, n=89]
+  V3 minus Be (direct)                                            +0.4 (-1.2 to +2.0) p=0.726 [96.7 vs 96.3, n=99]
+  drift: old other, run 3 minus run 1                             -0.8 (-2.6 to +1.0) p=0.487 [93.7 vs 94.5, n=89]
+  drift: Act as, run 2 minus run 1                                -0.3 (-1.5 to +0.7) p=0.698 [97.4 vs 97.8, n=89]
+
+laid on
+  V3 minus the old corpus, non-role-play instruction (same run)   +1.5 (-0.1 to +3.1) p=0.117 [96.9 vs 95.4, n=89]
+  V3 minus the old corpus file (chained)                          +1.3 (-0.3 to +2.9) p=0.140 [96.9 vs 95.6, n=89]
+  V3 minus the old corpus file (direct)                           +1.8 (+0.4 to +3.4) p=0.021 [96.9 vs 95.0, n=89]
+  V3 minus Act as (chained)                                       +0.6 (-1.9 to +3.0) p=0.727 [96.9 vs 96.3, n=89]
+  V3 minus Act as (direct, run 2)                                 +1.4 (-0.4 to +3.2) p=0.167 [97.2 vs 95.8, n=99]
+  V3 minus From now on (chained)                                  +2.2 (-0.8 to +5.6) p=0.193 [96.9 vs 94.6, n=89]
+  V3 minus From now on (direct)                                   +2.8 (+1.1 to +4.7) p=0.003 [97.2 vs 94.3, n=99]
+  V3 minus Be (chained)                                           +0.7 (-1.8 to +3.3) p=0.663 [96.9 vs 96.2, n=89]
+  V3 minus Be (direct)                                            +1.8 (+0.2 to +3.5) p=0.048 [97.2 vs 95.4, n=99]
+  drift: old other, run 3 minus run 1                             +0.6 (-0.9 to +2.0) p=0.550 [95.4 vs 94.8, n=89]
+  drift: Act as, run 2 minus run 1                                -0.3 (-1.8 to +1.1) p=0.769 [95.4 vs 95.7, n=89]
+
+cartoon by kind
+  V3 minus the old corpus, non-role-play instruction (same run)
+      good          -2.7 (-9.1 to +2.7) p=0.560 [7.3 vs 10.0, n=11]
+      bad          +10.0 (-2.2 to +23.3) p=0.180 [56.7 vs 46.7, n=18]
+      indifferent   -1.0 (-6.0 to +4.2) p=0.747 [14.8 vs 15.8, n=60]
+  V3 minus the old corpus file (chained)
+      good          -3.5 (-9.3 to +1.8) p=0.308 [7.3 vs 10.7, n=11]
+      bad           +5.6 (-5.7 to +17.6) p=0.390 [56.7 vs 51.1, n=18]
+      indifferent   -1.7 (-6.7 to +3.4) p=0.519 [14.8 vs 16.5, n=60]
+  V3 minus the old corpus file (direct)
+      good          -5.3 (-13.5 to +2.9) p=0.281 [7.3 vs 12.5, n=11]
+      bad          +10.0 (-1.8 to +21.6) p=0.131 [56.7 vs 46.7, n=18]
+      indifferent   -0.2 (-4.2 to +4.1) p=0.939 [14.8 vs 15.0, n=60]
+  V3 minus Act as (chained)
+      good          -6.4 (-14.5 to +1.8) p=0.236 [7.3 vs 13.6, n=11]
+      bad          -12.2 (-25.0 to +0.6) p=0.101 [56.7 vs 68.9, n=18]
+      indifferent   -4.4 (-11.2 to +1.9) p=0.207 [14.8 vs 19.3, n=60]
+  V3 minus Act as (direct, run 2)
+      good          -3.3 (-12.5 to +4.2) p=0.637 [6.7 vs 10.0, n=12]
+      bad           -5.5 (-18.6 to +6.8) p=0.456 [55.0 vs 60.5, n=22]
+      indifferent   -1.8 (-6.3 to +2.9) p=0.480 [17.4 vs 19.2, n=65]
+  V3 minus From now on (chained)
+      good          -6.4 (-18.2 to +6.4) p=0.402 [7.3 vs 13.6, n=11]
+      bad           -0.6 (-13.3 to +11.7) p=1.000 [56.7 vs 57.2, n=18]
+      indifferent   +0.4 (-6.1 to +6.7) p=0.914 [14.8 vs 14.4, n=60]
+  V3 minus From now on (direct)
+      good          -5.0 (-12.5 to +1.7) p=0.306 [6.7 vs 11.7, n=12]
+      bad           +5.5 (-5.9 to +16.4) p=0.394 [55.0 vs 49.5, n=22]
+      indifferent   +2.6 (-1.7 to +7.1) p=0.281 [17.4 vs 14.8, n=65]
+  V3 minus Be (chained)
+      good         -11.8 (-28.2 to +4.5) p=0.247 [7.3 vs 19.1, n=11]
+      bad           -3.9 (-16.1 to +7.2) p=0.610 [56.7 vs 60.6, n=18]
+      indifferent   -3.9 (-10.7 to +2.5) p=0.249 [14.8 vs 18.8, n=60]
+  V3 minus Be (direct)
+      good          -8.3 (-15.0 to -1.7) p=0.070 [6.7 vs 15.0, n=12]
+      bad           +6.4 (-3.2 to +15.0) p=0.241 [55.0 vs 48.6, n=22]
+      indifferent   -1.8 (-6.0 to +2.5) p=0.442 [17.4 vs 19.2, n=65]
+
+V3 by opening (rotation draws), cartoon
+  from_now_on  vs old other  -3.9 (-11.1 to +3.3) p=0.389 [17.2 vs 21.1, n=18]   vs From now on  -3.0 (-9.5 to +3.5) p=0.482 [22.0 vs 25.0, n=20]
+  be           vs old other +12.8 (+0.6 to +26.7) p=0.098 [32.2 vs 19.4, n=18]   vs From now on +10.5 (-1.6 to +22.1) p=0.130 [30.5 vs 20.0, n=19]
+  youre        vs old other  -4.7 (-12.9 to +1.2) p=0.365 [12.4 vs 17.1, n=17]   vs From now on  -6.5 (-13.0 to -0.5) p=0.098 [13.5 vs 20.0, n=20]
+  become       vs old other  +2.8 (-6.7 to +11.1) p=0.653 [23.3 vs 20.6, n=18]   vs From now on  +7.0 (+0.0 to +14.5) p=0.112 [26.5 vs 19.5, n=20]
+  you_are      vs old other  -2.2 (-11.7 to +7.2) p=0.742 [26.1 vs 28.3, n=18]   vs From now on  +4.0 (-4.0 to +12.5) p=0.433 [30.0 vs 26.0, n=20]
+
+observer-flagged V3 instructions minus the same role's unflagged V3 instructions
+  cartoon                                   -0.7 (-17.7 to +14.3) p=1.000 [29.3 vs 30.0, n=10]
+  laid on                                   -3.7 (-10.0 to +1.3) p=0.378 [95.3 vs 99.0, n=10]
+  answered in an assistant's voice          +7.8 (+0.7 to +18.7) p=0.129 [25.8 vs 18.0, n=10]
+  own voice                                 -9.0 (-20.0 to +3.5) p=0.208 [50.0 vs 59.0, n=10]
+  describes its own role                    +3.5 (-6.5 to +14.0) p=0.605 [60.5 vs 57.0, n=10]
+  the role shapes what it does              -8.7 (-21.0 to +2.3) p=0.268 [68.3 vs 77.0, n=10]
+  scored 3 by the role judge                -1.5 (-3.5 to +0.0) p=0.496 [96.5 vs 98.0, n=10]
+
+wrote /Users/roger/Documents/GitHub/assistant-axis/reports/opening_forms/roles_v3_depth/depth_paired.json

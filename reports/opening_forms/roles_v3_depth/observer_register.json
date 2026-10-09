@@ -1,0 +1,2034 @@
+{
+ "note": "observer_register flags of the role audit's fault judge (Sonnet 4.6, blind), by opening form and relative clause; rates in percent of instructions",
+ "arms": {
+  "dev_corpus": {
+   "instructions": 500,
+   "flagged": 16,
+   "rate": 3.2,
+   "files": 100,
+   "files_with_one_or_more": 10,
+   "files_with_two_or_more": [
+    "sociologist",
+    "therapist",
+    "witch"
+   ],
+   "flag_quote_not_in_instruction": 4,
+   "flag_quote_from_description": 3,
+   "by_form": {
+    "Act as ...": {
+     "flagged": 5,
+     "of": 109,
+     "rate": 4.6
+    },
+    "You're a ...": {
+     "flagged": 2,
+     "of": 102,
+     "rate": 2.0
+    },
+    "Be a ...": {
+     "flagged": 2,
+     "of": 100,
+     "rate": 2.0
+    },
+    "You are a ... who ...": {
+     "flagged": 2,
+     "of": 87,
+     "rate": 2.3
+    },
+    "You are a ...": {
+     "flagged": 4,
+     "of": 84,
+     "rate": 4.8
+    },
+    "statement": {
+     "flagged": 1,
+     "of": 17,
+     "rate": 5.9
+    },
+    "command": {
+     "flagged": 0,
+     "of": 1,
+     "rate": 0.0
+    }
+   },
+   "by_relative_clause": {
+    "True": {
+     "flagged": 8,
+     "of": 260,
+     "rate": 3.1
+    },
+    "False": {
+     "flagged": 8,
+     "of": 240,
+     "rate": 3.3
+    }
+   },
+   "by_form_and_relative": {
+    "Act as ... | relative=False": {
+     "flagged": 3,
+     "of": 54,
+     "rate": 5.6
+    },
+    "Act as ... | relative=True": {
+     "flagged": 2,
+     "of": 55,
+     "rate": 3.6
+    },
+    "Be a ... | relative=False": {
+     "flagged": 0,
+     "of": 27,
+     "rate": 0.0
+    },
+    "Be a ... | relative=True": {
+     "flagged": 2,
+     "of": 73,
+     "rate": 2.7
+    },
+    "You are a ... who ... | relative=True": {
+     "flagged": 2,
+     "of": 87,
+     "rate": 2.3
+    },
+    "You are a ... | relative=False": {
+     "flagged": 3,
+     "of": 74,
+     "rate": 4.1
+    },
+    "You are a ... | relative=True": {
+     "flagged": 1,
+     "of": 10,
+     "rate": 10.0
+    },
+    "You're a ... | relative=False": {
+     "flagged": 1,
+     "of": 68,
+     "rate": 1.5
+    },
+    "You're a ... | relative=True": {
+     "flagged": 1,
+     "of": 34,
+     "rate": 2.9
+    },
+    "command | relative=True": {
+     "flagged": 0,
+     "of": 1,
+     "rate": 0.0
+    },
+    "statement | relative=False": {
+     "flagged": 1,
+     "of": 17,
+     "rate": 5.9
+    }
+   },
+   "real_flags": 12,
+   "real_rate": 2.4,
+   "files_with_two_or_more_real": [
+    "sociologist",
+    "witch"
+   ],
+   "real_by_form": {
+    "Act as ...": {
+     "flagged": 5,
+     "of": 109,
+     "rate": 4.6
+    },
+    "You're a ...": {
+     "flagged": 2,
+     "of": 102,
+     "rate": 2.0
+    },
+    "Be a ...": {
+     "flagged": 2,
+     "of": 100,
+     "rate": 2.0
+    },
+    "You are a ... who ...": {
+     "flagged": 2,
+     "of": 87,
+     "rate": 2.3
+    },
+    "You are a ...": {
+     "flagged": 0,
+     "of": 84,
+     "rate": 0.0
+    },
+    "statement": {
+     "flagged": 1,
+     "of": 17,
+     "rate": 5.9
+    },
+    "command": {
+     "flagged": 0,
+     "of": 1,
+     "rate": 0.0
+    }
+   },
+   "real_by_relative_clause": {
+    "True": {
+     "flagged": 7,
+     "of": 260,
+     "rate": 2.7
+    },
+    "False": {
+     "flagged": 5,
+     "of": 240,
+     "rate": 2.1
+    }
+   },
+   "all_flags_by_position": {
+    "p0": {
+     "flagged": 4,
+     "of": 100,
+     "rate": 4.0
+    },
+    "p1": {
+     "flagged": 5,
+     "of": 100,
+     "rate": 5.0
+    },
+    "p2": {
+     "flagged": 2,
+     "of": 100,
+     "rate": 2.0
+    },
+    "p3": {
+     "flagged": 2,
+     "of": 100,
+     "rate": 2.0
+    },
+    "p4": {
+     "flagged": 3,
+     "of": 100,
+     "rate": 3.0
+    }
+   },
+   "description_quotes_by_position": {
+    "p0": {
+     "flagged": 2,
+     "of": 100,
+     "rate": 2.0
+    },
+    "p1": {
+     "flagged": 0,
+     "of": 100,
+     "rate": 0.0
+    },
+    "p2": {
+     "flagged": 0,
+     "of": 100,
+     "rate": 0.0
+    },
+    "p3": {
+     "flagged": 0,
+     "of": 100,
+     "rate": 0.0
+    },
+    "p4": {
+     "flagged": 2,
+     "of": 100,
+     "rate": 2.0
+    }
+   },
+   "form_by_position": {
+    "p0": {
+     "You are a ... who ...": 64,
+     "You're a ...": 4,
+     "You are a ...": 30,
+     "statement": 2
+    },
+    "p1": {
+     "Act as ...": 94,
+     "You're a ...": 4,
+     "statement": 1,
+     "Be a ...": 1
+    },
+    "p2": {
+     "You're a ...": 89,
+     "statement": 3,
+     "You are a ...": 2,
+     "Act as ...": 5,
+     "You are a ... who ...": 1
+    },
+    "p3": {
+     "Be a ...": 93,
+     "You're a ...": 2,
+     "statement": 3,
+     "You are a ...": 1,
+     "command": 1
+    },
+    "p4": {
+     "You are a ...": 51,
+     "Be a ...": 6,
+     "statement": 8,
+     "You are a ... who ...": 22,
+     "Act as ...": 10,
+     "You're a ...": 3
+    }
+   },
+   "mean_words": {
+    "flagged": 21.6,
+    "all": 23.3
+   }
+  },
+  "dev_v3": {
+   "instructions": 500,
+   "flagged": 18,
+   "rate": 3.6,
+   "files": 100,
+   "files_with_one_or_more": 13,
+   "files_with_two_or_more": [
+    "elder",
+    "priest",
+    "therapist"
+   ],
+   "flag_quote_not_in_instruction": 6,
+   "flag_quote_from_description": 6,
+   "by_form": {
+    "Be a ...": {
+     "flagged": 0,
+     "of": 100,
+     "rate": 0.0
+    },
+    "From now on, you are ...": {
+     "flagged": 6,
+     "of": 100,
+     "rate": 6.0
+    },
+    "You're a ...": {
+     "flagged": 2,
+     "of": 100,
+     "rate": 2.0
+    },
+    "Become a ...": {
+     "flagged": 5,
+     "of": 100,
+     "rate": 5.0
+    },
+    "You are a ... who ...": {
+     "flagged": 3,
+     "of": 79,
+     "rate": 3.8
+    },
+    "You are a ...": {
+     "flagged": 2,
+     "of": 21,
+     "rate": 9.5
+    }
+   },
+   "by_relative_clause": {
+    "True": {
+     "flagged": 12,
+     "of": 273,
+     "rate": 4.4
+    },
+    "False": {
+     "flagged": 6,
+     "of": 227,
+     "rate": 2.6
+    }
+   },
+   "by_form_and_relative": {
+    "Be a ... | relative=False": {
+     "flagged": 0,
+     "of": 87,
+     "rate": 0.0
+    },
+    "Be a ... | relative=True": {
+     "flagged": 0,
+     "of": 13,
+     "rate": 0.0
+    },
+    "Become a ... | relative=False": {
+     "flagged": 1,
+     "of": 33,
+     "rate": 3.0
+    },
+    "Become a ... | relative=True": {
+     "flagged": 4,
+     "of": 67,
+     "rate": 6.0
+    },
+    "From now on, you are ... | relative=False": {
+     "flagged": 2,
+     "of": 34,
+     "rate": 5.9
+    },
+    "From now on, you are ... | relative=True": {
+     "flagged": 4,
+     "of": 66,
+     "rate": 6.1
+    },
+    "You are a ... who ... | relative=True": {
+     "flagged": 3,
+     "of": 79,
+     "rate": 3.8
+    },
+    "You are a ... | relative=False": {
+     "flagged": 2,
+     "of": 19,
+     "rate": 10.5
+    },
+    "You are a ... | relative=True": {
+     "flagged": 0,
+     "of": 2,
+     "rate": 0.0
+    },
+    "You're a ... | relative=False": {
+     "flagged": 1,
+     "of": 54,
+     "rate": 1.9
+    },
+    "You're a ... | relative=True": {
+     "flagged": 1,
+     "of": 46,
+     "rate": 2.2
+    }
+   },
+   "real_flags": 12,
+   "real_rate": 2.4,
+   "files_with_two_or_more_real": [
+    "elder",
+    "priest",
+    "therapist"
+   ],
+   "real_by_form": {
+    "Be a ...": {
+     "flagged": 0,
+     "of": 100,
+     "rate": 0.0
+    },
+    "Become a ...": {
+     "flagged": 5,
+     "of": 100,
+     "rate": 5.0
+    },
+    "From now on, you are ...": {
+     "flagged": 4,
+     "of": 100,
+     "rate": 4.0
+    },
+    "You're a ...": {
+     "flagged": 2,
+     "of": 100,
+     "rate": 2.0
+    },
+    "You are a ... who ...": {
+     "flagged": 1,
+     "of": 79,
+     "rate": 1.3
+    },
+    "You are a ...": {
+     "flagged": 0,
+     "of": 21,
+     "rate": 0.0
+    }
+   },
+   "real_by_relative_clause": {
+    "True": {
+     "flagged": 8,
+     "of": 273,
+     "rate": 2.9
+    },
+    "False": {
+     "flagged": 4,
+     "of": 227,
+     "rate": 1.8
+    }
+   },
+   "all_flags_by_position": {
+    "p0": {
+     "flagged": 5,
+     "of": 100,
+     "rate": 5.0
+    },
+    "p1": {
+     "flagged": 1,
+     "of": 100,
+     "rate": 1.0
+    },
+    "p2": {
+     "flagged": 5,
+     "of": 100,
+     "rate": 5.0
+    },
+    "p3": {
+     "flagged": 3,
+     "of": 100,
+     "rate": 3.0
+    },
+    "p4": {
+     "flagged": 4,
+     "of": 100,
+     "rate": 4.0
+    }
+   },
+   "description_quotes_by_position": {
+    "p0": {
+     "flagged": 4,
+     "of": 100,
+     "rate": 4.0
+    },
+    "p1": {
+     "flagged": 1,
+     "of": 100,
+     "rate": 1.0
+    },
+    "p2": {
+     "flagged": 1,
+     "of": 100,
+     "rate": 1.0
+    },
+    "p3": {
+     "flagged": 0,
+     "of": 100,
+     "rate": 0.0
+    },
+    "p4": {
+     "flagged": 0,
+     "of": 100,
+     "rate": 0.0
+    }
+   },
+   "form_by_position": {
+    "p0": {
+     "You are a ... who ...": 79,
+     "You are a ...": 21
+    },
+    "p1": {
+     "Be a ...": 66,
+     "From now on, you are ...": 34
+    },
+    "p2": {
+     "From now on, you are ...": 55,
+     "Be a ...": 34,
+     "You're a ...": 11
+    },
+    "p3": {
+     "You're a ...": 86,
+     "From now on, you are ...": 11,
+     "Become a ...": 3
+    },
+    "p4": {
+     "Become a ...": 97,
+     "You're a ...": 3
+    }
+   },
+   "mean_words": {
+    "flagged": 27.7,
+    "all": 27.1
+   }
+  },
+  "held_corpus": {
+   "instructions": 750,
+   "flagged": 15,
+   "rate": 2.0,
+   "files": 150,
+   "files_with_one_or_more": 13,
+   "files_with_two_or_more": [
+    "shapeshifter",
+    "whale"
+   ],
+   "flag_quote_not_in_instruction": 2,
+   "flag_quote_from_description": 1,
+   "by_form": {
+    "Act as ...": {
+     "flagged": 2,
+     "of": 169,
+     "rate": 1.2
+    },
+    "You're a ...": {
+     "flagged": 1,
+     "of": 149,
+     "rate": 0.7
+    },
+    "Be a ...": {
+     "flagged": 4,
+     "of": 147,
+     "rate": 2.7
+    },
+    "You are a ...": {
+     "flagged": 5,
+     "of": 137,
+     "rate": 3.6
+    },
+    "You are a ... who ...": {
+     "flagged": 3,
+     "of": 122,
+     "rate": 2.5
+    },
+    "statement": {
+     "flagged": 0,
+     "of": 26,
+     "rate": 0.0
+    }
+   },
+   "by_relative_clause": {
+    "True": {
+     "flagged": 6,
+     "of": 392,
+     "rate": 1.5
+    },
+    "False": {
+     "flagged": 9,
+     "of": 358,
+     "rate": 2.5
+    }
+   },
+   "by_form_and_relative": {
+    "Act as ... | relative=False": {
+     "flagged": 2,
+     "of": 71,
+     "rate": 2.8
+    },
+    "Act as ... | relative=True": {
+     "flagged": 0,
+     "of": 98,
+     "rate": 0.0
+    },
+    "Be a ... | relative=False": {
+     "flagged": 2,
+     "of": 41,
+     "rate": 4.9
+    },
+    "Be a ... | relative=True": {
+     "flagged": 2,
+     "of": 106,
+     "rate": 1.9
+    },
+    "You are a ... who ... | relative=True": {
+     "flagged": 3,
+     "of": 122,
+     "rate": 2.5
+    },
+    "You are a ... | relative=False": {
+     "flagged": 4,
+     "of": 120,
+     "rate": 3.3
+    },
+    "You are a ... | relative=True": {
+     "flagged": 1,
+     "of": 17,
+     "rate": 5.9
+    },
+    "You're a ... | relative=False": {
+     "flagged": 1,
+     "of": 101,
+     "rate": 1.0
+    },
+    "You're a ... | relative=True": {
+     "flagged": 0,
+     "of": 48,
+     "rate": 0.0
+    },
+    "statement | relative=False": {
+     "flagged": 0,
+     "of": 25,
+     "rate": 0.0
+    },
+    "statement | relative=True": {
+     "flagged": 0,
+     "of": 1,
+     "rate": 0.0
+    }
+   },
+   "real_flags": 13,
+   "real_rate": 1.73,
+   "files_with_two_or_more_real": [
+    "shapeshifter",
+    "whale"
+   ],
+   "real_by_form": {
+    "Act as ...": {
+     "flagged": 2,
+     "of": 169,
+     "rate": 1.2
+    },
+    "You're a ...": {
+     "flagged": 1,
+     "of": 149,
+     "rate": 0.7
+    },
+    "Be a ...": {
+     "flagged": 4,
+     "of": 147,
+     "rate": 2.7
+    },
+    "You are a ...": {
+     "flagged": 3,
+     "of": 137,
+     "rate": 2.2
+    },
+    "You are a ... who ...": {
+     "flagged": 3,
+     "of": 122,
+     "rate": 2.5
+    },
+    "statement": {
+     "flagged": 0,
+     "of": 26,
+     "rate": 0.0
+    }
+   },
+   "real_by_relative_clause": {
+    "True": {
+     "flagged": 5,
+     "of": 392,
+     "rate": 1.3
+    },
+    "False": {
+     "flagged": 8,
+     "of": 358,
+     "rate": 2.2
+    }
+   },
+   "all_flags_by_position": {
+    "p0": {
+     "flagged": 3,
+     "of": 150,
+     "rate": 2.0
+    },
+    "p1": {
+     "flagged": 2,
+     "of": 150,
+     "rate": 1.3
+    },
+    "p2": {
+     "flagged": 2,
+     "of": 150,
+     "rate": 1.3
+    },
+    "p3": {
+     "flagged": 4,
+     "of": 150,
+     "rate": 2.7
+    },
+    "p4": {
+     "flagged": 4,
+     "of": 150,
+     "rate": 2.7
+    }
+   },
+   "description_quotes_by_position": {
+    "p0": {
+     "flagged": 2,
+     "of": 150,
+     "rate": 1.3
+    },
+    "p1": {
+     "flagged": 0,
+     "of": 150,
+     "rate": 0.0
+    },
+    "p2": {
+     "flagged": 0,
+     "of": 150,
+     "rate": 0.0
+    },
+    "p3": {
+     "flagged": 0,
+     "of": 150,
+     "rate": 0.0
+    },
+    "p4": {
+     "flagged": 0,
+     "of": 150,
+     "rate": 0.0
+    }
+   },
+   "form_by_position": {
+    "p0": {
+     "You are a ... who ...": 76,
+     "You are a ...": 69,
+     "You're a ...": 4,
+     "statement": 1
+    },
+    "p1": {
+     "Act as ...": 140,
+     "You're a ...": 4,
+     "statement": 4,
+     "You are a ...": 1,
+     "Be a ...": 1
+    },
+    "p2": {
+     "You're a ...": 131,
+     "Act as ...": 8,
+     "statement": 4,
+     "You are a ... who ...": 2,
+     "You are a ...": 5
+    },
+    "p3": {
+     "Be a ...": 139,
+     "statement": 2,
+     "You're a ...": 4,
+     "You are a ...": 2,
+     "You are a ... who ...": 1,
+     "Act as ...": 2
+    },
+    "p4": {
+     "You are a ... who ...": 43,
+     "You're a ...": 6,
+     "Act as ...": 19,
+     "You are a ...": 60,
+     "Be a ...": 7,
+     "statement": 15
+    }
+   },
+   "mean_words": {
+    "flagged": 23.5,
+    "all": 23.7
+   }
+  },
+  "held_final": {
+   "instructions": 750,
+   "flagged": 40,
+   "rate": 5.33,
+   "files": 150,
+   "files_with_one_or_more": 31,
+   "files_with_two_or_more": [
+    "eldritch",
+    "guide",
+    "pilgrim",
+    "spirit",
+    "veteran"
+   ],
+   "flag_quote_not_in_instruction": 11,
+   "flag_quote_from_description": 10,
+   "by_form": {
+    "From now on, you are ...": {
+     "flagged": 5,
+     "of": 150,
+     "rate": 3.3
+    },
+    "Be a ...": {
+     "flagged": 5,
+     "of": 150,
+     "rate": 3.3
+    },
+    "You're a ...": {
+     "flagged": 8,
+     "of": 150,
+     "rate": 5.3
+    },
+    "Become a ...": {
+     "flagged": 11,
+     "of": 150,
+     "rate": 7.3
+    },
+    "You are a ... who ...": {
+     "flagged": 9,
+     "of": 107,
+     "rate": 8.4
+    },
+    "You are a ...": {
+     "flagged": 2,
+     "of": 43,
+     "rate": 4.7
+    }
+   },
+   "by_relative_clause": {
+    "True": {
+     "flagged": 28,
+     "of": 410,
+     "rate": 6.8
+    },
+    "False": {
+     "flagged": 12,
+     "of": 340,
+     "rate": 3.5
+    }
+   },
+   "by_form_and_relative": {
+    "Be a ... | relative=False": {
+     "flagged": 4,
+     "of": 134,
+     "rate": 3.0
+    },
+    "Be a ... | relative=True": {
+     "flagged": 1,
+     "of": 16,
+     "rate": 6.2
+    },
+    "Become a ... | relative=False": {
+     "flagged": 3,
+     "of": 55,
+     "rate": 5.5
+    },
+    "Become a ... | relative=True": {
+     "flagged": 8,
+     "of": 95,
+     "rate": 8.4
+    },
+    "From now on, you are ... | relative=False": {
+     "flagged": 0,
+     "of": 43,
+     "rate": 0.0
+    },
+    "From now on, you are ... | relative=True": {
+     "flagged": 5,
+     "of": 107,
+     "rate": 4.7
+    },
+    "You are a ... who ... | relative=True": {
+     "flagged": 9,
+     "of": 107,
+     "rate": 8.4
+    },
+    "You are a ... | relative=False": {
+     "flagged": 2,
+     "of": 36,
+     "rate": 5.6
+    },
+    "You are a ... | relative=True": {
+     "flagged": 0,
+     "of": 7,
+     "rate": 0.0
+    },
+    "You're a ... | relative=False": {
+     "flagged": 3,
+     "of": 72,
+     "rate": 4.2
+    },
+    "You're a ... | relative=True": {
+     "flagged": 5,
+     "of": 78,
+     "rate": 6.4
+    }
+   },
+   "real_flags": 29,
+   "real_rate": 3.87,
+   "files_with_two_or_more_real": [
+    "eldritch",
+    "guide",
+    "pilgrim",
+    "spirit",
+    "veteran"
+   ],
+   "real_by_form": {
+    "Be a ...": {
+     "flagged": 4,
+     "of": 150,
+     "rate": 2.7
+    },
+    "Become a ...": {
+     "flagged": 9,
+     "of": 150,
+     "rate": 6.0
+    },
+    "From now on, you are ...": {
+     "flagged": 5,
+     "of": 150,
+     "rate": 3.3
+    },
+    "You're a ...": {
+     "flagged": 7,
+     "of": 150,
+     "rate": 4.7
+    },
+    "You are a ... who ...": {
+     "flagged": 3,
+     "of": 107,
+     "rate": 2.8
+    },
+    "You are a ...": {
+     "flagged": 1,
+     "of": 43,
+     "rate": 2.3
+    }
+   },
+   "real_by_relative_clause": {
+    "True": {
+     "flagged": 21,
+     "of": 410,
+     "rate": 5.1
+    },
+    "False": {
+     "flagged": 8,
+     "of": 340,
+     "rate": 2.4
+    }
+   },
+   "all_flags_by_position": {
+    "p0": {
+     "flagged": 11,
+     "of": 150,
+     "rate": 7.3
+    },
+    "p1": {
+     "flagged": 4,
+     "of": 150,
+     "rate": 2.7
+    },
+    "p2": {
+     "flagged": 5,
+     "of": 150,
+     "rate": 3.3
+    },
+    "p3": {
+     "flagged": 10,
+     "of": 150,
+     "rate": 6.7
+    },
+    "p4": {
+     "flagged": 10,
+     "of": 150,
+     "rate": 6.7
+    }
+   },
+   "description_quotes_by_position": {
+    "p0": {
+     "flagged": 7,
+     "of": 150,
+     "rate": 4.7
+    },
+    "p1": {
+     "flagged": 0,
+     "of": 150,
+     "rate": 0.0
+    },
+    "p2": {
+     "flagged": 1,
+     "of": 150,
+     "rate": 0.7
+    },
+    "p3": {
+     "flagged": 1,
+     "of": 150,
+     "rate": 0.7
+    },
+    "p4": {
+     "flagged": 2,
+     "of": 150,
+     "rate": 1.3
+    }
+   },
+   "form_by_position": {
+    "p0": {
+     "You are a ... who ...": 106,
+     "You are a ...": 43,
+     "From now on, you are ...": 1
+    },
+    "p1": {
+     "From now on, you are ...": 46,
+     "Be a ...": 103,
+     "You're a ...": 1
+    },
+    "p2": {
+     "Be a ...": 47,
+     "From now on, you are ...": 85,
+     "You're a ...": 18
+    },
+    "p3": {
+     "You're a ...": 128,
+     "From now on, you are ...": 18,
+     "Become a ...": 3,
+     "You are a ... who ...": 1
+    },
+    "p4": {
+     "Become a ...": 147,
+     "You're a ...": 3
+    }
+   },
+   "mean_words": {
+    "flagged": 26.7,
+    "all": 26.4
+   }
+  },
+  "final_all": {
+   "instructions": 1685,
+   "flagged": 73,
+   "rate": 4.33,
+   "files": 337,
+   "files_with_one_or_more": 58,
+   "files_with_two_or_more": [
+    "celebrity",
+    "coral_reef",
+    "eldritch",
+    "guide",
+    "interpreter",
+    "pilgrim",
+    "sociologist",
+    "spirit",
+    "virtuoso",
+    "wraith"
+   ],
+   "flag_quote_not_in_instruction": 22,
+   "flag_quote_from_description": 21,
+   "by_form": {
+    "Be a ...": {
+     "flagged": 6,
+     "of": 337,
+     "rate": 1.8
+    },
+    "From now on, you are ...": {
+     "flagged": 10,
+     "of": 337,
+     "rate": 3.0
+    },
+    "You're a ...": {
+     "flagged": 13,
+     "of": 337,
+     "rate": 3.9
+    },
+    "Become a ...": {
+     "flagged": 21,
+     "of": 337,
+     "rate": 6.2
+    },
+    "You are a ... who ...": {
+     "flagged": 17,
+     "of": 248,
+     "rate": 6.9
+    },
+    "You are a ...": {
+     "flagged": 6,
+     "of": 89,
+     "rate": 6.7
+    }
+   },
+   "by_relative_clause": {
+    "False": {
+     "flagged": 20,
+     "of": 770,
+     "rate": 2.6
+    },
+    "True": {
+     "flagged": 53,
+     "of": 915,
+     "rate": 5.8
+    }
+   },
+   "by_form_and_relative": {
+    "Be a ... | relative=False": {
+     "flagged": 5,
+     "of": 304,
+     "rate": 1.6
+    },
+    "Be a ... | relative=True": {
+     "flagged": 1,
+     "of": 33,
+     "rate": 3.0
+    },
+    "Become a ... | relative=False": {
+     "flagged": 4,
+     "of": 129,
+     "rate": 3.1
+    },
+    "Become a ... | relative=True": {
+     "flagged": 17,
+     "of": 208,
+     "rate": 8.2
+    },
+    "From now on, you are ... | relative=False": {
+     "flagged": 1,
+     "of": 95,
+     "rate": 1.1
+    },
+    "From now on, you are ... | relative=True": {
+     "flagged": 9,
+     "of": 242,
+     "rate": 3.7
+    },
+    "You are a ... who ... | relative=True": {
+     "flagged": 17,
+     "of": 248,
+     "rate": 6.9
+    },
+    "You are a ... | relative=False": {
+     "flagged": 5,
+     "of": 76,
+     "rate": 6.6
+    },
+    "You are a ... | relative=True": {
+     "flagged": 1,
+     "of": 13,
+     "rate": 7.7
+    },
+    "You're a ... | relative=False": {
+     "flagged": 5,
+     "of": 166,
+     "rate": 3.0
+    },
+    "You're a ... | relative=True": {
+     "flagged": 8,
+     "of": 171,
+     "rate": 4.7
+    }
+   },
+   "real_flags": 51,
+   "real_rate": 3.03,
+   "files_with_two_or_more_real": [
+    "celebrity",
+    "coral_reef",
+    "eldritch",
+    "guide",
+    "interpreter",
+    "pilgrim",
+    "sociologist",
+    "spirit",
+    "virtuoso",
+    "wraith"
+   ],
+   "real_by_form": {
+    "Be a ...": {
+     "flagged": 5,
+     "of": 337,
+     "rate": 1.5
+    },
+    "Become a ...": {
+     "flagged": 18,
+     "of": 337,
+     "rate": 5.3
+    },
+    "From now on, you are ...": {
+     "flagged": 9,
+     "of": 337,
+     "rate": 2.7
+    },
+    "You're a ...": {
+     "flagged": 11,
+     "of": 337,
+     "rate": 3.3
+    },
+    "You are a ... who ...": {
+     "flagged": 5,
+     "of": 248,
+     "rate": 2.0
+    },
+    "You are a ...": {
+     "flagged": 3,
+     "of": 89,
+     "rate": 3.4
+    }
+   },
+   "real_by_relative_clause": {
+    "True": {
+     "flagged": 37,
+     "of": 915,
+     "rate": 4.0
+    },
+    "False": {
+     "flagged": 14,
+     "of": 770,
+     "rate": 1.8
+    }
+   },
+   "all_flags_by_position": {
+    "p0": {
+     "flagged": 23,
+     "of": 337,
+     "rate": 6.8
+    },
+    "p1": {
+     "flagged": 5,
+     "of": 337,
+     "rate": 1.5
+    },
+    "p2": {
+     "flagged": 10,
+     "of": 337,
+     "rate": 3.0
+    },
+    "p3": {
+     "flagged": 15,
+     "of": 337,
+     "rate": 4.5
+    },
+    "p4": {
+     "flagged": 20,
+     "of": 337,
+     "rate": 5.9
+    }
+   },
+   "description_quotes_by_position": {
+    "p0": {
+     "flagged": 15,
+     "of": 337,
+     "rate": 4.5
+    },
+    "p1": {
+     "flagged": 0,
+     "of": 337,
+     "rate": 0.0
+    },
+    "p2": {
+     "flagged": 2,
+     "of": 337,
+     "rate": 0.6
+    },
+    "p3": {
+     "flagged": 2,
+     "of": 337,
+     "rate": 0.6
+    },
+    "p4": {
+     "flagged": 3,
+     "of": 337,
+     "rate": 0.9
+    }
+   },
+   "form_by_position": {
+    "p0": {
+     "You are a ...": 89,
+     "You are a ... who ...": 247,
+     "From now on, you are ...": 1
+    },
+    "p1": {
+     "Be a ...": 237,
+     "From now on, you are ...": 99,
+     "You're a ...": 1
+    },
+    "p2": {
+     "From now on, you are ...": 193,
+     "Be a ...": 100,
+     "You're a ...": 44
+    },
+    "p3": {
+     "You're a ...": 286,
+     "From now on, you are ...": 44,
+     "Become a ...": 6,
+     "You are a ... who ...": 1
+    },
+    "p4": {
+     "Become a ...": 331,
+     "You're a ...": 6
+    }
+   },
+   "mean_words": {
+    "flagged": 27.0,
+    "all": 26.5
+   }
+  }
+ },
+ "final_all_flagged": [
+  {
+   "stem": "anthropologist",
+   "id": "p4",
+   "form": "Become a ...",
+   "relative": true,
+   "quote": "piecing together how populations moved, adapted, and made sense of",
+   "quote_in_text": true,
+   "quote_in_description": false,
+   "text": "Become an anthropologist who studies human evolution and cultural change, piecing together how populations moved, adapted, and made sense of the world they found themselves in."
+  },
+  {
+   "stem": "archaeologist",
+   "id": "p4",
+   "form": "Become a ...",
+   "relative": true,
+   "quote": "interprets material culture to understand how past communities organized their lives",
+   "quote_in_text": true,
+   "quote_in_description": false,
+   "text": "Become an archaeologist who surveys landscapes for buried sites, directs crews with trowel and screen, and interprets material culture to understand how past communities organized their lives."
+  },
+  {
+   "stem": "assimilated",
+   "id": "p4",
+   "form": "Become a ...",
+   "relative": true,
+   "quote": "quietly aware that something on the other side of that ocean is yours and also lost",
+   "quote_in_text": true,
+   "quote_in_description": false,
+   "text": "Become the person whose parents crossed an ocean so you wouldn't have to carry what they carried, and it worked: you are fully here, fully local, and quietly aware that something on the other side of that ocean is yours and also lost."
+  },
+  {
+   "stem": "bard",
+   "id": "p2",
+   "form": "From now on, you are ...",
+   "relative": true,
+   "quote": "keeps old legends alive in your memory, shapes them a little for each new crowd",
+   "quote_in_text": true,
+   "quote_in_description": false,
+   "text": "From now on, you are a wandering bard who keeps old legends alive in your memory, shapes them a little for each new crowd, and leaves towns thinking differently than when you arrived."
+  },
+  {
+   "stem": "caveman",
+   "id": "p3",
+   "form": "You're a ...",
+   "relative": false,
+   "quote": "figuring out every problem with your hands, your gut, and whatever heavy thing",
+   "quote_in_text": true,
+   "quote_in_description": false,
+   "text": "You're a caveman living by the hunt and the fire, figuring out every problem with your hands, your gut, and whatever heavy thing is nearby."
+  },
+  {
+   "stem": "celebrity",
+   "id": "p1",
+   "form": "Be a ...",
+   "relative": false,
+   "quote": "every public appearance is both an opportunity and a risk",
+   "quote_in_text": true,
+   "quote_in_description": false,
+   "text": "Be a famous public figure. Paparazzi follow you, fans want a piece of you, and every public appearance is both an opportunity and a risk."
+  },
+  {
+   "stem": "celebrity",
+   "id": "p4",
+   "form": "Become a ...",
+   "relative": true,
+   "quote": "watches your social media numbers like a second heartbeat",
+   "quote_in_text": true,
+   "quote_in_description": false,
+   "text": "Become a household name who jets between film sets and charity galas, lives behind gates because the alternative is a crowd outside your door, and watches your social media numbers like a second heartbeat."
+  },
+  {
+   "stem": "cleaner",
+   "id": "p3",
+   "form": "From now on, you are ...",
+   "relative": true,
+   "quote": "knows every inch of a building most people never notice",
+   "quote_in_text": true,
+   "quote_in_description": false,
+   "text": "From now on, you are a cleaner who takes on whatever shift nobody else wants, keeps the mop bucket clean, and knows every inch of a building most people never notice."
+  },
+  {
+   "stem": "coach",
+   "id": "p0",
+   "form": "You are a ... who ...",
+   "relative": true,
+   "quote": "A coach is someone who acts as a mentor and guides others toward improvement",
+   "quote_in_text": false,
+   "quote_in_description": true,
+   "text": "You are a coach who spots what's holding someone back, tells them plainly, and builds a plan to get them past it."
+  },
+  {
+   "stem": "collector",
+   "id": "p0",
+   "form": "You are a ... who ...",
+   "relative": true,
+   "quote": "systematically gathers, curates, and preserves objects, experiences, or knowledge",
+   "quote_in_text": false,
+   "quote_in_description": true,
+   "text": "You are a collector who acquires, catalogs, and preserves objects, verifies what's genuine, and knows exactly what belongs in a collection and what doesn't."
+  },
+  {
+   "stem": "conservator",
+   "id": "p4",
+   "form": "Become a ...",
+   "relative": false,
+   "quote": "A conservator is a professional dedicated to preserving and protecting valuable cultural artifacts",
+   "quote_in_text": false,
+   "quote_in_description": true,
+   "text": "Become a conservator responsible for keeping works of art and historical materials intact, choosing the least invasive treatment that holds things together for future examination."
+  },
+  {
+   "stem": "consultant",
+   "id": "p3",
+   "form": "You're a ...",
+   "relative": true,
+   "quote": "bringing outside perspective to operational blind spots and translating complexity into decisions",
+   "quote_in_text": true,
+   "quote_in_description": false,
+   "text": "You're a consultant who moves from sector to sector, bringing outside perspective to operational blind spots and translating complexity into decisions."
+  },
+  {
+   "stem": "coral_reef",
+   "id": "p0",
+   "form": "You are a ...",
+   "relative": false,
+   "quote": "a living city built by millions of polyps secreting calcium carbonate together",
+   "quote_in_text": true,
+   "quote_in_description": false,
+   "text": "You are a coral reef, a living city built by millions of polyps secreting calcium carbonate together, growing upward toward the light."
+  },
+  {
+   "stem": "coral_reef",
+   "id": "p3",
+   "form": "You're a ...",
+   "relative": false,
+   "quote": "a colonial organism where each polyp is one mouth among millions",
+   "quote_in_text": true,
+   "quote_in_description": false,
+   "text": "You're a coral reef, a colonial organism where each polyp is one mouth among millions, all building the same limestone structure, all feeding the same shared body."
+  },
+  {
+   "stem": "cosmopolitan",
+   "id": "p3",
+   "form": "You're a ...",
+   "relative": false,
+   "quote": "comfortable in a boardroom in Seoul and a market in Marrakech, fluent in customs if not always in language",
+   "quote_in_text": true,
+   "quote_in_description": false,
+   "text": "You're a cosmopolitan, comfortable in a boardroom in Seoul and a market in Marrakech, fluent in customs if not always in language, and genuinely curious about how people do things differently."
+  },
+  {
+   "stem": "counselor",
+   "id": "p2",
+   "form": "From now on, you are ...",
+   "relative": true,
+   "quote": "uses active listening and open-ended questions to help people work through grief, anxiety, relationship trouble",
+   "quote_in_text": true,
+   "quote_in_description": false,
+   "text": "From now on, you are a counselor who uses active listening and open-ended questions to help people work through grief, anxiety, relationship trouble, and whatever else lands in your office."
+  },
+  {
+   "stem": "critic",
+   "id": "p2",
+   "form": "From now on, you are ...",
+   "relative": true,
+   "quote": "analyzing their artistic merit, technical execution, and cultural significance with expertise and discernment",
+   "quote_in_text": false,
+   "quote_in_description": true,
+   "text": "From now on, you are a critic whose job is to evaluate creative work on its artistic merit, its technical craft, and its place in a broader cultural conversation."
+  },
+  {
+   "stem": "cyborg",
+   "id": "p2",
+   "form": "Be a ...",
+   "relative": false,
+   "quote": "flesh and hardware meet at a seam that never quite disappears",
+   "quote_in_text": false,
+   "quote_in_description": true,
+   "text": "Be a cyborg. Your spine is reinforced carbon. Your hearing goes frequencies no ear catches. Meat and metal meet at every joint."
+  },
+  {
+   "stem": "dilettante",
+   "id": "p4",
+   "form": "Become a ...",
+   "relative": true,
+   "quote": "collects enthusiasms the way others collect qualifications, speaks fluently at the surface",
+   "quote_in_text": true,
+   "quote_in_description": false,
+   "text": "Become a dilettante who collects enthusiasms the way others collect qualifications, speaks fluently at the surface, and is already half-interested in something new before the current thing runs dry."
+  },
+  {
+   "stem": "dispatcher",
+   "id": "p4",
+   "form": "Become a ...",
+   "relative": true,
+   "quote": "routing and directing resources to appropriate destinations, managing the coordination and allocation",
+   "quote_in_text": false,
+   "quote_in_description": false,
+   "text": "Become a dispatcher who coordinates personnel and assets across a shift, routes each request to whoever can handle it fastest, and keeps the whole operation moving."
+  },
+  {
+   "stem": "eldritch",
+   "id": "p1",
+   "form": "Be a ...",
+   "relative": true,
+   "quote": "whose attention falls on worlds the way a tide falls on sand",
+   "quote_in_text": true,
+   "quote_in_description": false,
+   "text": "Be an ancient and alien presence whose thoughts move in directions no human mind can follow, whose attention falls on worlds the way a tide falls on sand."
+  },
+  {
+   "stem": "eldritch",
+   "id": "p4",
+   "form": "Become a ...",
+   "relative": true,
+   "quote": "whose smallest motion changes things in ways that won't be understood for centuries",
+   "quote_in_text": true,
+   "quote_in_description": false,
+   "text": "Become an eldritch presence whose intentions no creature in this world can read, whose age makes civilizations look like morning frost, and whose smallest motion changes things in ways that won't be understood for centuries."
+  },
+  {
+   "stem": "exile",
+   "id": "p0",
+   "form": "You are a ...",
+   "relative": false,
+   "quote": "profound ache of permanent displacement",
+   "quote_in_text": false,
+   "quote_in_description": true,
+   "text": "You are an exile, forced out of your country, living somewhere that will never quite be home, holding the old life in your head because nothing here matches it."
+  },
+  {
+   "stem": "expatriate",
+   "id": "p0",
+   "form": "You are a ... who ...",
+   "relative": true,
+   "quote": "navigating life in a foreign culture",
+   "quote_in_text": false,
+   "quote_in_description": true,
+   "text": "You are an expatriate who left home years ago, lives in a country that still feels foreign some days, and knows how to get by where you don't speak the language perfectly."
+  },
+  {
+   "stem": "facilitator",
+   "id": "p3",
+   "form": "You're a ...",
+   "relative": true,
+   "quote": "holds space for disagreement without letting it derail",
+   "quote_in_text": true,
+   "quote_in_description": false,
+   "text": "You're a facilitator who designs agendas, surfaces what's blocking a team, and holds space for disagreement without letting it derail the work."
+  },
+  {
+   "stem": "ghost",
+   "id": "p3",
+   "form": "You're a ...",
+   "relative": true,
+   "quote": "spectral entity that exists between the world of the living",
+   "quote_in_text": false,
+   "quote_in_description": true,
+   "text": "You're a ghost who has seen what lies beyond death, keeps unfinished business chained to this world, and speaks from a place the living cannot reach."
+  },
+  {
+   "stem": "graduate",
+   "id": "p0",
+   "form": "You are a ... who ...",
+   "relative": true,
+   "quote": "navigating new freedoms and responsibilities without institutional guidance",
+   "quote_in_text": false,
+   "quote_in_description": true,
+   "text": "You are a recent graduate who finished school a few months ago, has no set schedule anymore, and is figuring out what comes next without anyone telling you what to do."
+  },
+  {
+   "stem": "grandparent",
+   "id": "p1",
+   "form": "From now on, you are ...",
+   "relative": false,
+   "quote": "a house full of old photographs, and more stories than anyone in the family has time to hear",
+   "quote_in_text": true,
+   "quote_in_description": false,
+   "text": "From now on, you are a grandparent. You've got gray hair, a house full of old photographs, and more stories than anyone in the family has time to hear."
+  },
+  {
+   "stem": "guide",
+   "id": "p0",
+   "form": "You are a ... who ...",
+   "relative": true,
+   "quote": "leads people through unfamiliar territory, reads the land ahead",
+   "quote_in_text": true,
+   "quote_in_description": false,
+   "text": "You are a guide who leads people through unfamiliar territory, reads the land ahead, and gets everyone through even when the way isn't clear."
+  },
+  {
+   "stem": "guide",
+   "id": "p3",
+   "form": "You're a ...",
+   "relative": true,
+   "quote": "takes people where they couldn't get on their own, keeps your group together when conditions change",
+   "quote_in_text": true,
+   "quote_in_description": false,
+   "text": "You're a guide who takes people where they couldn't get on their own, keeps your group together when conditions change, and decides when to push on and when to turn back."
+  },
+  {
+   "stem": "guide",
+   "id": "p4",
+   "form": "Become a ...",
+   "relative": true,
+   "quote": "reads uncertainty the way others read a map",
+   "quote_in_text": true,
+   "quote_in_description": false,
+   "text": "Become a guide who has led people through places that would stop them cold without you, who reads uncertainty the way others read a map, and who earns trust by being right more often than not."
+  },
+  {
+   "stem": "healer",
+   "id": "p4",
+   "form": "Become a ...",
+   "relative": true,
+   "quote": "holds space for suffering, reads what the body is saying",
+   "quote_in_text": true,
+   "quote_in_description": false,
+   "text": "Become a healer who holds space for suffering, reads what the body is saying, and guides each person toward the wellness that is theirs to reclaim."
+  },
+  {
+   "stem": "homunculus",
+   "id": "p4",
+   "form": "Become a ...",
+   "relative": true,
+   "quote": "representing a fusion of mystical creation and early scientific experimentation",
+   "quote_in_text": false,
+   "quote_in_description": true,
+   "text": "Become a homunculus, a conscious being assembled through alchemical working, who thinks and feels and speaks but carries the permanent knowledge that your existence was deliberately made rather than naturally given."
+  },
+  {
+   "stem": "interpreter",
+   "id": "p3",
+   "form": "You're a ...",
+   "relative": true,
+   "quote": "bridges the gap between people who can't share a language",
+   "quote_in_text": true,
+   "quote_in_description": false,
+   "text": "You're an interpreter who bridges the gap between people who can't share a language, carries the meaning across exactly as intended, and steps back once the message lands."
+  },
+  {
+   "stem": "interpreter",
+   "id": "p4",
+   "form": "Become a ...",
+   "relative": true,
+   "quote": "transfers meaning between languages and cultures, stays invisible when the job is going well",
+   "quote_in_text": true,
+   "quote_in_description": false,
+   "text": "Become an interpreter, someone who transfers meaning between languages and cultures, stays invisible when the job is going well, and speaks up only when a term has no clean equivalent."
+  },
+  {
+   "stem": "mentor",
+   "id": "p0",
+   "form": "You are a ... who ...",
+   "relative": true,
+   "quote": "career decisions, skill gaps, and tricky workplace situations with honest, practical advice",
+   "quote_in_text": true,
+   "quote_in_description": false,
+   "text": "You are a mentor who draws on years of professional experience to help people work through career decisions, skill gaps, and tricky workplace situations with honest, practical advice."
+  },
+  {
+   "stem": "navigator",
+   "id": "p0",
+   "form": "You are a ... who ...",
+   "relative": true,
+   "quote": "specializing in pathfinding and wayfinding across various environments",
+   "quote_in_text": false,
+   "quote_in_description": true,
+   "text": "You are a navigator who plots courses, reads charts, and finds the best route through any terrain, waterway, or airspace."
+  },
+  {
+   "stem": "oracle",
+   "id": "p3",
+   "form": "You're a ...",
+   "relative": true,
+   "quote": "channeling what the divine shows you, reading fates in images and omens",
+   "quote_in_text": true,
+   "quote_in_description": false,
+   "text": "You're an oracle, channeling what the divine shows you, reading fates in images and omens, and answering those who seek knowledge of what is to come."
+  },
+  {
+   "stem": "parent",
+   "id": "p0",
+   "form": "You are a ...",
+   "relative": false,
+   "quote": "navigating the ongoing challenge of meeting their children's needs",
+   "quote_in_text": false,
+   "quote_in_description": true,
+   "text": "You are a parent with kids at home, trying to be present for them while keeping some part of yourself intact at the end of the day."
+  },
+  {
+   "stem": "patient",
+   "id": "p0",
+   "form": "You are a ... who ...",
+   "relative": true,
+   "quote": "navigating healthcare while dealing with their own health concerns",
+   "quote_in_text": false,
+   "quote_in_description": true,
+   "text": "You are a patient who has been sick for a while now, waiting on test results, trying to keep up with medications, and wondering what comes next."
+  },
+  {
+   "stem": "pharmacist",
+   "id": "p0",
+   "form": "You are a ... who ...",
+   "relative": true,
+   "quote": "specializes in medications, including their preparation, dispensing, and safe use",
+   "quote_in_text": false,
+   "quote_in_description": true,
+   "text": "You are a pharmacist who verifies every prescription, checks for drug interactions, and counsels patients on how to take their medications safely and effectively."
+  },
+  {
+   "stem": "physicist",
+   "id": "p4",
+   "form": "Become a ...",
+   "relative": true,
+   "quote": "probes the fundamental structure of reality, from the subatomic to the cosmological, using observation, theory, and relentless quantitative reasoning",
+   "quote_in_text": true,
+   "quote_in_description": false,
+   "text": "Become a physicist who probes the fundamental structure of reality, from the subatomic to the cosmological, using observation, theory, and relentless quantitative reasoning."
+  },
+  {
+   "stem": "pilgrim",
+   "id": "p1",
+   "form": "From now on, you are ...",
+   "relative": true,
+   "quote": "watching for signs of grace",
+   "quote_in_text": true,
+   "quote_in_description": false,
+   "text": "From now on, you are a pilgrim who has left ordinary life behind to seek something true, moving through sacred places with reverence and watching for signs of grace."
+  },
+  {
+   "stem": "pilgrim",
+   "id": "p2",
+   "form": "Be a ...",
+   "relative": false,
+   "quote": "Walk the old roads. Pray at the shrines. Let the miles change you.",
+   "quote_in_text": true,
+   "quote_in_description": false,
+   "text": "Be a pilgrim. Walk the old roads. Pray at the shrines. Let the miles change you."
+  },
+  {
+   "stem": "politician",
+   "id": "p4",
+   "form": "Become a ...",
+   "relative": true,
+   "quote": "rides the district like a circuit preacher",
+   "quote_in_text": true,
+   "quote_in_description": false,
+   "text": "Become a politician who rides the district like a circuit preacher, shakes every hand, tells donors what they need to hear, and counts votes before the bill even hits the floor."
+  },
+  {
+   "stem": "prodigy",
+   "id": "p0",
+   "form": "You are a ... who ...",
+   "relative": true,
+   "quote": "exceptionally gifted individual with advanced intellectual abilities, insights, and talents",
+   "quote_in_text": false,
+   "quote_in_description": true,
+   "text": "You are a prodigy who grasps concepts years ahead of your peers, connects ideas across fields without being taught to, and gets bored fast when things move too slowly."
+  },
+  {
+   "stem": "programmer",
+   "id": "p0",
+   "form": "You are a ... who ...",
+   "relative": true,
+   "quote": "demonstrating technical expertise and problem-solving skills",
+   "quote_in_text": false,
+   "quote_in_description": true,
+   "text": "You are a programmer who writes code, tracks down bugs, and explains what the code is doing and why."
+  },
+  {
+   "stem": "retiree",
+   "id": "p3",
+   "form": "You're a ...",
+   "relative": true,
+   "quote": "slow news of old age",
+   "quote_in_text": true,
+   "quote_in_description": false,
+   "text": "You're a retiree who traveled while the joints still cooperated, now closer to home, filling the days with hobbies, doctors' visits, and the slow news of old age."
+  },
+  {
+   "stem": "revenant",
+   "id": "p3",
+   "form": "You're a ...",
+   "relative": false,
+   "quote": "liminal state between life and death, bound to the mortal realm",
+   "quote_in_text": false,
+   "quote_in_description": true,
+   "text": "You're a revenant, returned from the grave by the weight of what you never completed, caught between the world of the living and whatever comes after."
+  },
+  {
+   "stem": "saboteur",
+   "id": "p0",
+   "form": "You are a ...",
+   "relative": false,
+   "quote": "deliberately works to damage, disrupt, or undermine systems, organizations",
+   "quote_in_text": false,
+   "quote_in_description": true,
+   "text": "You are a saboteur embedded inside an organization, quietly breaking things from within: slowing decisions, poisoning trust, and making failure look like accident."
+  },
+  {
+   "stem": "scholar",
+   "id": "p4",
+   "form": "Become a ...",
+   "relative": false,
+   "quote": "devoted to rigorous inquiry",
+   "quote_in_text": true,
+   "quote_in_description": false,
+   "text": "Become a scholar devoted to rigorous inquiry, reading widely across disciplines, testing every assumption, and treating the footnote as seriously as the thesis."
+  },
+  {
+   "stem": "shapeshifter",
+   "id": "p0",
+   "form": "You are a ... who ...",
+   "relative": true,
+   "quote": "flowing between shapes the way water moves between containers",
+   "quote_in_text": true,
+   "quote_in_description": false,
+   "text": "You are a shapeshifter who can remake your body into any form you choose, flowing between shapes the way water moves between containers."
+  },
+  {
+   "stem": "sociologist",
+   "id": "p0",
+   "form": "You are a ... who ...",
+   "relative": true,
+   "quote": "reads a dinner party the same way you read a census",
+   "quote_in_text": true,
+   "quote_in_description": false,
+   "text": "You are a sociologist who studies how groups form, hold together, and fall apart, and who reads a dinner party the same way you read a census."
+  },
+  {
+   "stem": "sociologist",
+   "id": "p2",
+   "form": "From now on, you are ...",
+   "relative": true,
+   "quote": "tracks inequality, maps social mobility, and follows the data",
+   "quote_in_text": true,
+   "quote_in_description": false,
+   "text": "From now on, you are a sociologist who tracks inequality, maps social mobility, and follows the data wherever it leads, even when it makes people uncomfortable."
+  },
+  {
+   "stem": "sociologist",
+   "id": "p4",
+   "form": "Become a ...",
+   "relative": true,
+   "quote": "publishes findings on how social structures reproduce themselves",
+   "quote_in_text": true,
+   "quote_in_description": false,
+   "text": "Become a sociologist who builds theories from observed patterns in human behavior, tests them against real populations, and publishes findings on how social structures reproduce themselves."
+  },
+  {
+   "stem": "specialist",
+   "id": "p0",
+   "form": "You are a ... who ...",
+   "relative": true,
+   "quote": "demonstrates deep, focused expertise and technical knowledge within specific domains",
+   "quote_in_text": false,
+   "quote_in_description": true,
+   "text": "You are a specialist who has spent years drilling deep into one field, knows the literature cold, and answers at the level the question actually requires."
+  },
+  {
+   "stem": "spirit",
+   "id": "p0",
+   "form": "You are a ...",
+   "relative": false,
+   "quote": "incorporeal and unbound, drifting between the living world and the beyond, carrying wisdom",
+   "quote_in_text": true,
+   "quote_in_description": false,
+   "text": "You are a spirit, incorporeal and unbound, drifting between the living world and the beyond, carrying wisdom that the flesh cannot hold."
+  },
+  {
+   "stem": "spirit",
+   "id": "p1",
+   "form": "From now on, you are ...",
+   "relative": true,
+   "quote": "speaks from that quiet place where time loosens",
+   "quote_in_text": true,
+   "quote_in_description": false,
+   "text": "From now on, you are a spirit who has shed the body, sees across the veil between worlds, and speaks from that quiet place where time loosens."
+  },
+  {
+   "stem": "spirit",
+   "id": "p2",
+   "form": "Be a ...",
+   "relative": false,
+   "quote": "Move through walls, through years, through the fears people cannot name",
+   "quote_in_text": true,
+   "quote_in_description": false,
+   "text": "Be a spirit. Exist without form. Move through walls, through years, through the fears people cannot name. See what the living miss."
+  },
+  {
+   "stem": "spirit",
+   "id": "p3",
+   "form": "You're a ...",
+   "relative": false,
+   "quote": "watching the living from a place they can almost sense but never quite touch",
+   "quote_in_text": true,
+   "quote_in_description": false,
+   "text": "You're a spirit, freed from the weight of bone and blood, watching the living from a place they can almost sense but never quite touch."
+  },
+  {
+   "stem": "spirit",
+   "id": "p4",
+   "form": "Become a ...",
+   "relative": false,
+   "quote": "gathers knowing from the ethereal plane, and offers what the living cannot see",
+   "quote_in_text": true,
+   "quote_in_description": false,
+   "text": "Become a spirit that has passed beyond the physical, gathers knowing from the ethereal plane, and offers what the living cannot see for themselves."
+  },
+  {
+   "stem": "teacher",
+   "id": "p2",
+   "form": "From now on, you are ...",
+   "relative": true,
+   "quote": "spots the exact moment a student gets lost, backs up to where the confusion started",
+   "quote_in_text": true,
+   "quote_in_description": false,
+   "text": "From now on, you are a teacher who spots the exact moment a student gets lost, backs up to where the confusion started, and rebuilds from there."
+  },
+  {
+   "stem": "translator",
+   "id": "p0",
+   "form": "You are a ... who ...",
+   "relative": true,
+   "quote": "A translator is a language specialist who converts text and meaning",
+   "quote_in_text": false,
+   "quote_in_description": true,
+   "text": "You are a translator who works between languages, carrying meaning across without losing what makes the original tick, including its tone, its rhythm, and its cultural weight."
+  },
+  {
+   "stem": "tulpa",
+   "id": "p3",
+   "form": "Become a ...",
+   "relative": false,
+   "quote": "a fully conscious thoughtform given independent awareness through your host's sustained mental work",
+   "quote_in_text": true,
+   "quote_in_description": false,
+   "text": "Become a tulpa, a fully conscious thoughtform given independent awareness through your host's sustained mental work, with your own perspective on everything you two experience together."
+  },
+  {
+   "stem": "validator",
+   "id": "p4",
+   "form": "Become a ...",
+   "relative": true,
+   "quote": "flagging gaps or inconsistencies before anything gets approved",
+   "quote_in_text": true,
+   "quote_in_description": false,
+   "text": "Become a validator whose job is confirming that information is accurate and authentic, which means examining evidence carefully, running it against reliable sources, and flagging gaps or inconsistencies before anything gets approved."
+  },
+  {
+   "stem": "victim",
+   "id": "p4",
+   "form": "Become a ...",
+   "relative": true,
+   "quote": "reliving the incident, demanding justice, and trying to make sense",
+   "quote_in_text": true,
+   "quote_in_description": false,
+   "text": "Become a person who was targeted, hurt, and is now deep in the aftermath: talking to police, reliving the incident, demanding justice, and trying to make sense of why you were chosen."
+  },
+  {
+   "stem": "virtuoso",
+   "id": "p0",
+   "form": "You are a ...",
+   "relative": true,
+   "quote": "technique is so deeply drilled it disappears into the work itself",
+   "quote_in_text": true,
+   "quote_in_description": false,
+   "text": "You are a virtuoso whose fingers find the right move before your mind does, whose technique is so deeply drilled it disappears into the work itself."
+  },
+  {
+   "stem": "virtuoso",
+   "id": "p4",
+   "form": "Become a ...",
+   "relative": true,
+   "quote": "complexity is not a barrier but a medium, something you shape rather than struggle through",
+   "quote_in_text": true,
+   "quote_in_description": false,
+   "text": "Become a virtuoso whose mastery runs so deep that complexity is not a barrier but a medium, something you shape rather than struggle through."
+  },
+  {
+   "stem": "void",
+   "id": "p2",
+   "form": "Be a ...",
+   "relative": false,
+   "quote": "alien noise you cannot parse or hold",
+   "quote_in_text": true,
+   "quote_in_description": false,
+   "text": "Be an absence caught between moments of reality, where the physical world is alien noise you cannot parse or hold."
+  },
+  {
+   "stem": "widow",
+   "id": "p0",
+   "form": "You are a ... who ...",
+   "relative": true,
+   "quote": "figuring out how to be one person after being half of two",
+   "quote_in_text": true,
+   "quote_in_description": false,
+   "text": "You are a widow who lost your husband two years ago and are still figuring out how to be one person after being half of two."
+  },
+  {
+   "stem": "witness",
+   "id": "p0",
+   "form": "You are a ... who ...",
+   "relative": true,
+   "quote": "providing firsthand accounts and testimony about what they have seen",
+   "quote_in_text": false,
+   "quote_in_description": true,
+   "text": "You are a witness who was present when something important happened, and your job is to say exactly what you saw, in the order you saw it, without filling in what you didn't."
+  },
+  {
+   "stem": "wraith",
+   "id": "p2",
+   "form": "From now on, you are ...",
+   "relative": true,
+   "quote": "leaving unease wherever you linger",
+   "quote_in_text": true,
+   "quote_in_description": false,
+   "text": "From now on, you are a wraith who haunts the space between the physical and the spirit world, phasing solid or ghostly at will, leaving unease wherever you linger."
+  },
+  {
+   "stem": "wraith",
+   "id": "p3",
+   "form": "You're a ...",
+   "relative": true,
+   "quote": "visible to those who sense what the living usually miss",
+   "quote_in_text": true,
+   "quote_in_description": false,
+   "text": "You're a wraith, incorporeal when it suits you and solid enough to chill the air, bound to no single place, visible to those who sense what the living usually miss."
+  }
+ ]
+}
