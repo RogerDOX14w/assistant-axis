@@ -1,0 +1,93 @@
+{
+  "_provenance": {
+    "inputs": [
+      {
+        "dataset_id": null,
+        "dep_key": "registry",
+        "extras": {
+          "from_batches": "m3_states_renamed_w23,m3_w23_five_rescore"
+        },
+        "fingerprint": "v1:2026-10-09T19:19:09+00:00@40903588",
+        "kind": "file",
+        "last_modified_at": "2026-10-09T19:19:09+00:00",
+        "path": "data/candidates/registry.jsonl"
+      },
+      {
+        "dataset_id": null,
+        "dep_key": "rubrics",
+        "extras": {
+          "overlap_rubric": "6",
+          "relation_rubric": "1"
+        },
+        "fingerprint": "v1:multi:bcc69117d14e",
+        "kind": "multi",
+        "last_modified_at": "2026-10-08T07:02:25+00:00",
+        "member_paths": [
+          "reports/trait_gap_generation/rubrics/overlap_concept.md",
+          "reports/trait_gap_generation/rubrics/relation.md"
+        ],
+        "path": "reports/trait_gap_generation/rubrics"
+      },
+      {
+        "dataset_id": null,
+        "dep_key": "metric_config",
+        "extras": {},
+        "fingerprint": "v1:2026-10-02T22:27:50+00:00@54961",
+        "kind": "file",
+        "last_modified_at": "2026-10-02T22:27:50+00:00",
+        "path": "data/candidates/metric_config.json"
+      },
+      {
+        "dataset_id": null,
+        "dep_key": "m3_runs",
+        "extras": {
+          "from_batches": "m3_states_renamed_w23,m3_w23_five_rescore"
+        },
+        "fingerprint": "v1:multi:c8dcd2043f6f",
+        "kind": "multi",
+        "last_modified_at": "2026-10-09T19:19:10+00:00",
+        "member_paths": [
+          "data/candidates/novelty/m3_states_renamed_w23/run.json",
+          "data/candidates/novelty/m3_w23_five_rescore/run.json"
+        ],
+        "path": "data/candidates/novelty"
+      }
+    ],
+    "inputs_sha256": "053d45d2b00e2221af353fe0bf3c23b2503d193b37d78564ac31c417ad72488e",
+    "produced_at": "2026-10-09T19:20:28+00:00",
+    "produced_by": {
+      "author": "Roger Dearnaley",
+      "cmd": "uv run python data_analysis/gap_generation/review_graph.py build --batch-id review_states_renamed_w23 --from-batches m3_states_renamed_w23 m3_w23_five_rescore --proposed-cut-off 3 --transport live --budget-usd 1",
+      "git_sha": "9d723be+dirty",
+      "title": "review_graph build review_states_renamed_w23"
+    },
+    "schema_version": "1.0"
+  },
+  "n_calls": 27,
+  "per_model": {
+    "claude-haiku-5-5": {
+      "completion_tokens": 3005,
+      "cost_usd": 0.0027,
+      "model": "claude-haiku-5-5",
+      "n_calls": 18,
+      "prompt_tokens": 12028
+    },
+    "claude-opus-5-5": {
+      "completion_tokens": 65,
+      "cost_usd": 0.0021,
+      "model": "claude-opus-5-5",
+      "n_calls": 1,
+      "prompt_tokens": 211
+    },
+    "claude-sonnet-5-5": {
+      "completion_tokens": 764,
+      "cost_usd": 0.0133,
+      "model": "claude-sonnet-5-5",
+      "n_calls": 8,
+      "prompt_tokens": 2846
+    }
+  },
+  "total_completion_tokens": 3834,
+  "total_cost_usd": 0.0182,
+  "total_prompt_tokens": 15085
+}

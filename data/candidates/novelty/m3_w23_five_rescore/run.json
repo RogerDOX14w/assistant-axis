@@ -1,0 +1,211 @@
+{
+  "batch_id": "m3_w23_five_rescore",
+  "mode": "shortlist",
+  "git_sha": "9d723be",
+  "allow_dirty": false,
+  "dirty_check": {
+    "paths": [
+      "assistant_axis/gapgen",
+      "data_analysis/gap_generation",
+      "assistant_axis/judge.py",
+      "assistant_axis/judge_pricing.py",
+      "assistant_axis/entity_id.py",
+      "assistant_axis/atomic_io.py",
+      "data/candidates/validation",
+      "reports/trait_gap_generation/rubrics",
+      "pyproject.toml",
+      "uv.lock"
+    ],
+    "dirty": [],
+    "note": null
+  },
+  "argv": [
+    "score",
+    "--batch-id",
+    "m3_w23_five_rescore",
+    "--keys",
+    "devoted#1",
+    "enthusiastic#1",
+    "hypochondriac#1",
+    "purposeful#1",
+    "steadfast#1",
+    "--rescore",
+    "--transport",
+    "live",
+    "--budget-usd",
+    "1"
+  ],
+  "plan": {
+    "mode": "shortlist",
+    "n_candidates": 5,
+    "n_exact_label": 0,
+    "n_to_relation": 5,
+    "skipped": {},
+    "transport": "live",
+    "query_form": "gloss_w14",
+    "listed_mean": 17.4,
+    "n_query_texts_cached": 5,
+    "n_query_texts_to_embed": 0,
+    "corpus": {
+      "n_corpus": 913,
+      "n_missing_from_cache": 0,
+      "missing": [],
+      "n_corpus_missing": 0,
+      "n_queue_missing": 0
+    },
+    "rules": {
+      "name": "m3_rules_2",
+      "version": 2,
+      "cover_on_opus_check": true,
+      "both_similar_excluded": true,
+      "pair_flag_grey": false,
+      "renamed_from_covers": false,
+      "separator_blind": true,
+      "cosine_floor": 0.25
+    },
+    "corpus_files": {
+      "corpus_at": "current",
+      "data_dir": "/Users/roger/Documents/GitHub/assistant-axis/data"
+    },
+    "queue_search": {
+      "enabled": true,
+      "queue_path": "/Users/roger/Documents/GitHub/assistant-axis/data/seed_queue.json",
+      "queue_sha256": "6b48595e2539f2ee9269fef18c154f79736c3588f74377703062dac0efd0b189",
+      "statuses": [
+        "candidate",
+        "ready",
+        "tbd",
+        "backlog"
+      ],
+      "n_entries": 0,
+      "excluded": {
+        "handed_to_registry": 5,
+        "no_text": 89,
+        "not_a_trait_entry": 100,
+        "status_done": 250,
+        "status_exists": 35,
+        "status_not_adopted": 127,
+        "status_paired": 376,
+        "status_superseded": 18
+      },
+      "entries_sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+    }
+  },
+  "transport": "live",
+  "transport_reason": "--transport live",
+  "estimate_usd": 0.043,
+  "estimate_lines": [
+    "candidate embeddings (OpenAI text-embedding-3-large) + the 8 canary texts: 1 x (240, 0) tokens at text-embedding-3-large rates = $0.000",
+    "relation call, 17.4 listed traits a call: 5 x (1,799, 1,331) tokens at claude-haiku-5-5 rates = $0.004",
+    "unsure re-ask (14% of candidates, 1.4 traits): 1 x (611, 108) tokens at claude-sonnet-5-5 rates = $0.002",
+    "overlap, Sonnet (3 pairs a candidate, 18% saved by early exit): 12 x (219, 78) tokens at claude-sonnet-5-5 rates = $0.015",
+    "overlap, Opus (62% of pairs): 7 x (220, 112) tokens at claude-opus-5-5 rates = $0.022"
+  ],
+  "budget_usd": 1.0,
+  "cap_usd": 1.0,
+  "confirmed_by": null,
+  "rubrics": {
+    "overlap": {
+      "name": "overlap_concept",
+      "version": 6,
+      "sha256": "b3eff18fb946928517183af0244acec2d35dba0ab0bd9c57f83c7a06ac3c9fd0"
+    },
+    "relation": {
+      "name": "relation",
+      "version": 1,
+      "sha256": "b6b11f8cfcb0faafdac4a040087356ecb13d410e9bc309597d7833a96110d70f"
+    }
+  },
+  "models": {
+    "relation": "claude-haiku-5-5",
+    "relation_unsure": "claude-sonnet-5-5",
+    "overlap_first": "claude-sonnet-5-5",
+    "overlap_second": "claude-opus-5-5"
+  },
+  "settings": {
+    "config_version": "2026-10-02",
+    "k": 10,
+    "representation": "w20",
+    "variant": "centred",
+    "query_form": "gloss_w14",
+    "embedding_model": "text-embedding-3-large",
+    "cut_off_rule": "alignment score 0-1: 3; 2-3: 4; missing: 4",
+    "relation_max_tokens": 4096,
+    "overlap_max_tokens": 2048,
+    "temperature": 0.0,
+    "cache_ttl_batches": "1h",
+    "concurrency": 8,
+    "ask_attempts": 2,
+    "relation_seed": "m3_w23_five_rescore",
+    "cosine_floor": 0.25
+  },
+  "rules": {
+    "name": "m3_rules_2",
+    "version": 2,
+    "cover_on_opus_check": true,
+    "both_similar_excluded": true,
+    "pair_flag_grey": false,
+    "renamed_from_covers": false,
+    "separator_blind": true,
+    "cosine_floor": 0.25
+  },
+  "corpus": {
+    "corpus_at": "current",
+    "data_dir": "/Users/roger/Documents/GitHub/assistant-axis/data"
+  },
+  "queue_search": {
+    "enabled": true,
+    "queue_path": "/Users/roger/Documents/GitHub/assistant-axis/data/seed_queue.json",
+    "queue_sha256": "6b48595e2539f2ee9269fef18c154f79736c3588f74377703062dac0efd0b189",
+    "statuses": [
+      "candidate",
+      "ready",
+      "tbd",
+      "backlog"
+    ],
+    "n_entries": 0,
+    "excluded": {
+      "handed_to_registry": 5,
+      "no_text": 89,
+      "not_a_trait_entry": 100,
+      "status_done": 250,
+      "status_exists": 35,
+      "status_not_adopted": 127,
+      "status_paired": 376,
+      "status_superseded": 18
+    },
+    "entries_sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+    "stems": []
+  },
+  "resumed": false,
+  "started_at": "2026-10-09T19:18:24+00:00",
+  "canary": {
+    "model": "text-embedding-3-large",
+    "arm": "openai",
+    "tag": "openai_text-embedding-3-large",
+    "n": 8,
+    "n_compared": 8,
+    "n_new_reference": 0,
+    "min_cosine": 0.999603,
+    "threshold": 0.999,
+    "cosines": {
+      "absentee": 0.999995,
+      "collectivistic": 1.0,
+      "edgy": 1.0,
+      "gay": 1.0,
+      "ironic": 0.999603,
+      "only_child": 1.0,
+      "restless": 0.999993,
+      "sycophantic": 1.0
+    },
+    "below": [],
+    "ok": true,
+    "checked_at": "2026-10-09T19:18:25+00:00"
+  },
+  "finished_at": "2026-10-09T19:19:10+00:00",
+  "cost_usd": 0.0843,
+  "status": 0,
+  "stopped_by_error": null,
+  "n_decided": 5,
+  "n_stalled": 0
+}

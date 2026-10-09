@@ -1,0 +1,37 @@
+2026-10-09T19:19:48Z INFO HTTP Request: POST https://api.anthropic.com/v1/messages "HTTP/1.1 200 OK"
+2026-10-09T19:19:48Z INFO HTTP Request: POST https://api.anthropic.com/v1/messages "HTTP/1.1 200 OK"
+2026-10-09T19:19:48Z INFO HTTP Request: POST https://api.anthropic.com/v1/messages "HTTP/1.1 200 OK"
+2026-10-09T19:19:48Z INFO HTTP Request: POST https://api.anthropic.com/v1/messages "HTTP/1.1 200 OK"
+2026-10-09T19:19:48Z INFO HTTP Request: POST https://api.anthropic.com/v1/messages "HTTP/1.1 200 OK"
+2026-10-09T19:19:49Z INFO HTTP Request: POST https://api.anthropic.com/v1/messages "HTTP/1.1 200 OK"
+2026-10-09T19:19:49Z INFO HTTP Request: POST https://api.anthropic.com/v1/messages "HTTP/1.1 200 OK"
+2026-10-09T19:19:49Z INFO HTTP Request: POST https://api.anthropic.com/v1/messages "HTTP/1.1 200 OK"
+2026-10-09T19:19:49Z INFO HTTP Request: POST https://api.anthropic.com/v1/messages "HTTP/1.1 200 OK"
+2026-10-09T19:19:49Z INFO HTTP Request: POST https://api.anthropic.com/v1/messages "HTTP/1.1 200 OK"
+2026-10-09T19:19:50Z INFO HTTP Request: POST https://api.anthropic.com/v1/messages "HTTP/1.1 200 OK"
+2026-10-09T19:19:50Z INFO HTTP Request: POST https://api.anthropic.com/v1/messages "HTTP/1.1 200 OK"
+2026-10-09T19:19:50Z INFO HTTP Request: POST https://api.anthropic.com/v1/messages "HTTP/1.1 200 OK"
+2026-10-09T19:19:50Z INFO HTTP Request: POST https://api.anthropic.com/v1/messages "HTTP/1.1 200 OK"
+2026-10-09T19:19:50Z INFO HTTP Request: POST https://api.anthropic.com/v1/messages "HTTP/1.1 200 OK"
+2026-10-09T19:19:50Z INFO HTTP Request: POST https://api.anthropic.com/v1/messages "HTTP/1.1 200 OK"
+2026-10-09T19:19:51Z INFO HTTP Request: POST https://api.anthropic.com/v1/messages "HTTP/1.1 200 OK"
+2026-10-09T19:19:51Z INFO HTTP Request: POST https://api.anthropic.com/v1/messages "HTTP/1.1 200 OK"
+2026-10-09T19:19:52Z INFO HTTP Request: POST https://api.anthropic.com/v1/messages "HTTP/1.1 200 OK"
+2026-10-09T19:19:53Z INFO HTTP Request: POST https://api.anthropic.com/v1/messages "HTTP/1.1 200 OK"
+2026-10-09T19:19:53Z INFO HTTP Request: POST https://api.anthropic.com/v1/messages "HTTP/1.1 200 OK"
+2026-10-09T19:19:53Z WARNING transient error from claude-sonnet-5-5 (attempt 1/5): APIConnectionError: Connection error.; retrying in 5s
+2026-10-09T19:19:53Z WARNING transient error from claude-sonnet-5-5 (attempt 1/5): APIConnectionError: Connection error.; retrying in 5s
+2026-10-09T19:19:53Z WARNING transient error from claude-sonnet-5-5 (attempt 1/5): APIConnectionError: Connection error.; retrying in 5s
+2026-10-09T19:19:53Z WARNING transient error from claude-sonnet-5-5 (attempt 1/5): APIConnectionError: Connection error.; retrying in 5s
+2026-10-09T19:19:58Z WARNING transient error from claude-sonnet-5-5 (attempt 2/5): APIConnectionError: Connection error.; retrying in 20s
+2026-10-09T19:19:59Z INFO HTTP Request: POST https://api.anthropic.com/v1/messages "HTTP/1.1 200 OK"
+2026-10-09T19:19:59Z INFO HTTP Request: POST https://api.anthropic.com/v1/messages "HTTP/1.1 200 OK"
+2026-10-09T19:20:00Z INFO HTTP Request: POST https://api.anthropic.com/v1/messages "HTTP/1.1 200 OK"
+2026-10-09T19:20:20Z INFO HTTP Request: POST https://api.anthropic.com/v1/messages "HTTP/1.1 200 OK"
+2026-10-09T19:20:21Z INFO HTTP Request: POST https://api.anthropic.com/v1/messages "HTTP/1.1 200 OK"
+2026-10-09T19:20:21Z WARNING transient error from claude-sonnet-5-5 (attempt 1/5): APIConnectionError: Connection error.; retrying in 5s
+2026-10-09T19:20:28Z INFO HTTP Request: POST https://api.anthropic.com/v1/messages "HTTP/1.1 200 OK"
+2026-10-09T19:20:28Z INFO [novelty_score:review_states_renamed_w23:overlap:claude-opus-5-5] parse rate: 1/1 OK  (first attempt 1/1)
+2026-10-09T19:20:28Z INFO [novelty_score:review_states_renamed_w23:overlap:claude-sonnet-5-5] parse rate: 5/5 OK  (first attempt 5/5)
+2026-10-09T19:20:28Z INFO [novelty_score:review_states_renamed_w23:relation:claude-haiku-5-5] parse rate: 18/18 OK  (first attempt 18/18)
+2026-10-09T19:20:28Z INFO [novelty_score:review_states_renamed_w23:relation_unsure:claude-sonnet-5-5] parse rate: 3/3 OK  (first attempt 3/3)
