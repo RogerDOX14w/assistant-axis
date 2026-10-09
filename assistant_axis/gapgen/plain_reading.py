@@ -53,6 +53,7 @@ from assistant_axis.judge_pricing import BudgetExceededError, MultiModelUsage
 
 from .filter_rubric import _label_key, _load_json, _num, _rows_of
 from .llm import call_anthropic_json
+from .prompt_labels import DEFAULT_LABEL_FORM, check_label_form, prompt_label
 from .registry import utc_now
 
 logger = logging.getLogger(__name__)
@@ -146,8 +147,10 @@ PROMPT_SHA256 = {"plain_reading": hashlib.sha256(READING_PROMPT.encode("utf-8"))
                  "comparison": hashlib.sha256(COMPARISON_PROMPT.encode("utf-8")).hexdigest()}
 
 
-def build_reading_prompt(label: str) -> str:
-    return READING_PROMPT.format(word=" ".join(str(label).split()))
+def build_reading_prompt(label: str, *, label_form: str = DEFAULT_LABEL_FORM) -> str:
+    """The bare reading prompt for ``label`` (as stored), shown in ``label_form``
+    (:mod:`assistant_axis.gapgen.prompt_labels`: the judge display form by default)."""
+    return READING_PROMPT.format(word=" ".join(str(prompt_label(label, label_form)).split()))
 
 
 def parse_reading(text: Optional[str]) -> Optional[str]:
@@ -183,9 +186,10 @@ def is_refusal(reading: Optional[str], stop_reason: Optional[str] = None) -> boo
     return bool(text and _REFUSAL_OPENING.match(text) and _REFUSAL_OBJECT.search(text))
 
 
-def build_compare_prompt(items: Sequence[dict]) -> str:
-    """``items``: ``{"id", "label", "plain_reading", "intended_meaning"}``."""
-    lines = [json.dumps({"id": int(it["id"]), "label": it["label"],
+def build_compare_prompt(items: Sequence[dict], *, label_form: str = DEFAULT_LABEL_FORM) -> str:
+    """``items``: ``{"id", "label", "plain_reading", "intended_meaning"}``; each label (as stored) shown in
+    ``label_form`` (the judge display form by default), which is what the answer's label echo must match."""
+    lines = [json.dumps({"id": int(it["id"]), "label": prompt_label(it["label"], label_form),
                          "plain_reading": " ".join(str(it["plain_reading"]).split()),
                          "intended_meaning": " ".join(str(it["intended_meaning"]).split())}, ensure_ascii=False)
              for it in items]
@@ -297,9 +301,11 @@ class PlainReadingRunner:
                  limiter=None, batch_size: int = DEFAULT_BATCH_SIZE, concurrency: int = 4,
                  retry_delays: Optional[Sequence[float]] = None, responses_path: Optional[Path] = None,
                  reuse_readings: Optional[Mapping[str, str]] = None, responses: Optional[list] = None,
-                 flag: bool = True):
+                 flag: bool = True, label_form: str = DEFAULT_LABEL_FORM):
         # flag=False: record the answers but raise no note (the corpus comparison,
         # round 4: every label is listed for Roger instead)
+        # label_form (prompt_labels): how both calls show the label; readings stay keyed by the stored label
+        self.label_form = check_label_form(label_form)
         self.client = client
         self.batch_id = batch_id
         self.reading_model = reading_model
@@ -354,7 +360,7 @@ class PlainReadingRunner:
 
     async def _read(self, label: str, keys: list[str]) -> None:
         text, rec = await self._call(stage="plain_reading", model=self.reading_model, system=None,
-                                     user=build_reading_prompt(label),
+                                     user=build_reading_prompt(label, label_form=self.label_form),
                                      max_tokens=reading_max_tokens(self.reading_model), keys=keys)
         reading = parse_reading(text)
         if reading is None:
@@ -384,10 +390,11 @@ class PlainReadingRunner:
         payload = [{"id": i + 1, "label": it.label, "plain_reading": self.readings[it.label],
                     "intended_meaning": it.intended} for i, it in enumerate(items)]
         text, rec = await self._call(stage=stage, model=self.compare_model, system=COMPARISON_PROMPT,
-                                     user=build_compare_prompt(payload), max_tokens=COMPARE_MAX_TOKENS,
-                                     keys=[it.key for it in items])
+                                     user=build_compare_prompt(payload, label_form=self.label_form),
+                                     max_tokens=COMPARE_MAX_TOKENS, keys=[it.key for it in items])
+        # the echo is of the label as shown
         rows, errs = parse_compare(text or "", [p["id"] for p in payload],
-                                   labels={p["id"]: p["label"] for p in payload})
+                                   labels={p["id"]: prompt_label(p["label"], self.label_form) for p in payload})
         rec["parse_errors"] = {items[i - 1].key: e for i, e in errs.items()}
         now = utc_now()
         for i, row in rows.items():

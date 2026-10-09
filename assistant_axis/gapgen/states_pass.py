@@ -71,7 +71,11 @@ The block written on a row (registry field ``states_pass``, or the run's ``resul
 ``rubric_version``, ``model``, ``batch_id``, the answers, ``confidence``, ``prompt_sha256`` and ``at``; in queue mode
 from v4 also ``route``, ``route_reason``, ``holding_after``, ``gloss_check`` and the alignment fields.  Changing anything
 the model reads here is a rubric change: bump its entry in :data:`RUBRIC_VERSIONS` (or :data:`CHECK_RUBRIC_VERSION`)
-and add the pin in ``rubric_versions.HISTORY``.  Example words are checked by the tests never to be corpus labels,
+and add the pin in ``rubric_versions.HISTORY``.  The one exception (2026-10-09, W19): the labels are shown in the
+judge display form (a corpus label's standard in the long form, ``careless (from HEXACO)``;
+:mod:`assistant_axis.gapgen.prompt_labels`), a change of the payload rather than of a prompt text, recorded as the
+run's ``label_form`` in ``run.json`` and the summary; no prompt text, version or pin changed.  Example words are
+checked by the tests never to be corpus labels,
 seed-queue entries, validation words, the six September rejects or the reserved words.
 
 Transports (:class:`LiveTransport`, or :class:`assistant_axis.gapgen.batches.BatchTransport` with ``--transport
@@ -99,6 +103,7 @@ from assistant_axis.judge_pricing import BATCH_SUFFIX, BudgetExceededError, Mult
 from .filter_rubric import _bool, _label_key, _load_json, _num, _rows_of, gloss_in_band
 from .llm import accepts_temperature, call_anthropic_json
 from .normalize import make_key, normalize_candidate
+from .prompt_labels import DEFAULT_LABEL_FORM, check_label_form, prompt_label
 from .registry import utc_now
 
 logger = logging.getLogger(__name__)
@@ -294,20 +299,24 @@ SCAN_AGAINST = ("right now", "at the moment", "today", "this morning", "this eve
 # prompts and parsing
 # ---------------------------------------------------------------------------
 
-def build_batch_prompt(items: Sequence[dict], mode: str) -> str:
+def build_batch_prompt(items: Sequence[dict], mode: str, *, label_form: str = DEFAULT_LABEL_FORM) -> str:
     """User message: one JSON line per item, ``{"id", "label", "state_description"}``
-    (queue) or ``{"id", "label", "corpus_description"}`` (corpus)."""
+    (queue) or ``{"id", "label", "corpus_description"}`` (corpus).  Each label (as stored) is shown in
+    ``label_form`` (:mod:`assistant_axis.gapgen.prompt_labels`: the judge display form by default, so a
+    corpus label ``careless (HEXACO)`` reads ``careless (from HEXACO)``)."""
     key = "state_description" if mode == "queue" else "corpus_description"
-    lines = [json.dumps({"id": int(it["id"]), "label": it["label"],
+    lines = [json.dumps({"id": int(it["id"]), "label": prompt_label(it["label"], label_form),
                          key: " ".join(str(it.get("text") or "").split()) or None}, ensure_ascii=False)
              for it in items]
     what = "states" if mode == "queue" else "labels"
     return f"Judge these {len(items)} {what}. Reason first, then answer, for each.\n" + "\n".join(lines)
 
 
-def build_check_prompt(label: str, gloss: str) -> str:
-    """User message of the gloss check: the label and the gloss, nothing about the route it was written for."""
-    return json.dumps({"label": label, "description": " ".join(str(gloss).split())}, ensure_ascii=False)
+def build_check_prompt(label: str, gloss: str, *, label_form: str = DEFAULT_LABEL_FORM) -> str:
+    """User message of the gloss check: the label (shown in ``label_form``) and the gloss, nothing about the route
+    it was written for."""
+    return json.dumps({"label": prompt_label(label, label_form), "description": " ".join(str(gloss).split())},
+                      ensure_ascii=False)
 
 
 def _str_or_none(v) -> Optional[str]:
@@ -468,7 +477,10 @@ def route_for(answers: Mapping, *, label: str, from_states_pass: bool = False) -
     if not answers.get("plausible"):
         return "held", "not lasting, and no habitual predisposition is plausible"
     sug = answers.get("suggested_name")
-    if answers.get("name_fits") or not sug or is_name_unchanged(label, sug):
+    # the prompt showed the judge display form of the label (prompt_labels): a suggestion that repeats either form
+    # is the label itself
+    if answers.get("name_fits") or not sug or is_name_unchanged(label, sug) \
+            or is_name_unchanged(prompt_label(label), sug):
         return "predisposition", None
     if from_states_pass:
         return "held", ONE_HOP_REASON
@@ -795,7 +807,11 @@ class StatesPassRunner:
                  retry_delays: Optional[Sequence[float]] = None, responses_path: Optional[Path] = None,
                  transport: Any = None, align: bool = True, alignment_model: str = ALIGNMENT_MODEL,
                  resume_records: Sequence[Mapping] = (), rubrics_dir: Optional[Path] = None,
-                 close_client: bool = False):
+                 close_client: bool = False, label_form: str = DEFAULT_LABEL_FORM):
+        # label_form (prompt_labels): how every call shows a row's label (a corpus label's standard in the long form
+        # by default); the rows, the row cache and the records keep the stored label.  A resumed run passes the form
+        # its run.json recorded: the row cache is keyed by key, stored label and text, not by the prompt.
+        self.label_form = check_label_form(label_form)
         if mode not in MODES:
             raise ValueError(f"mode must be one of {MODES}, not {mode!r}")
         self.client = client
@@ -850,7 +866,8 @@ class StatesPassRunner:
                 return
             items = rec.get("items") or []
             rows, _ = parse_batch(text, list(range(1, len(items) + 1)), mode=self.mode,
-                                  labels={i + 1: it["label"] for i, it in enumerate(items)})
+                                  labels={i + 1: prompt_label(it["label"], self.label_form)
+                                          for i, it in enumerate(items)})
             for i, row in rows.items():
                 it = items[i - 1]
                 self._row_cache[(it["key"], it["label"], it.get("text"))] = row
@@ -873,18 +890,20 @@ class StatesPassRunner:
     def _rows_call(self, items: Sequence[StatesItem], n: int, *, retry: bool = False) -> Call:
         payload = [{"id": i + 1, "label": it.label, "text": it.text} for i, it in enumerate(items)]
         return Call(step=self.mode, key=f"{'r' if retry else 'c'}{n:03d}", model=self.model, system=self.system_prompt,
-                    user=build_batch_prompt(payload, self.mode), max_tokens=self.max_tokens,
+                    user=build_batch_prompt(payload, self.mode, label_form=self.label_form), max_tokens=self.max_tokens,
                     temperature=self.temperature, cache_system=True,
                     items=tuple({"key": it.key, "label": it.label, "text": it.text} for it in items), retry=retry)
 
     def check_call(self, key: str, label: str, gloss: str) -> Call:
         mt = CHECK_MAX_TOKENS if accepts_temperature(self.model) else CHECK_MAX_TOKENS_THINKING
-        return Call(step="check", key=key, model=self.model, system=CHECK_PROMPT, user=build_check_prompt(label, gloss),
+        return Call(step="check", key=key, model=self.model, system=CHECK_PROMPT,
+                    user=build_check_prompt(label, gloss, label_form=self.label_form),
                     max_tokens=mt, temperature=self.temperature, cache_system=False)
 
     def alignment_call(self, key: str, label: str, gloss: str) -> Call:
         from . import physical_pass as PP
-        q = PP.request("alignment", label=label, text=gloss, model=self.alignment_model, rubrics_dir=self.rubrics_dir)
+        q = PP.request("alignment", label=label, text=gloss, model=self.alignment_model, rubrics_dir=self.rubrics_dir,
+                       label_form=self.label_form)
         return Call(step="alignment", key=key, model=q["model"], system=q["system"], user=q["user"],
                     max_tokens=q["max_tokens"], temperature=q["temperature"], cache_system=q["cache_system"])
 
@@ -980,8 +999,10 @@ class StatesPassRunner:
         def handle(c: Call, text: Optional[str], meta: dict, *, wave: str) -> None:
             rec = self._base_record(c, text, meta, wave)
             self._record(rec)
+            # the label echo is of the label as shown
             rows, perr = parse_batch(text or "", list(range(1, len(c.items) + 1)), mode=self.mode,
-                                     labels={i + 1: x["label"] for i, x in enumerate(c.items)})
+                                     labels={i + 1: prompt_label(x["label"], self.label_form)
+                                             for i, x in enumerate(c.items)})
             if text is None:
                 perr = {i: f"no response: {meta.get('error')}" for i in range(1, len(c.items) + 1)}
             rec["parse_errors"] = {c.items[i - 1]["key"]: e for i, e in perr.items()}
@@ -1070,7 +1091,7 @@ class StatesPassRunner:
         def outcome(c: Call, text: Optional[str]) -> tuple[Optional[dict], Optional[str]]:
             if c.step == "check":
                 return parse_check(text)
-            parsed, err = split.parse("alignment", text, label=labels.get(c.key, c.key))
+            parsed, err = split.parse("alignment", text, label=prompt_label(labels.get(c.key, c.key), self.label_form))
             return (parsed, None) if err is None else (None, err)
 
         def out_for(c: Call) -> dict:
@@ -1150,16 +1171,19 @@ class StatesPassRunner:
 # rendering (dry run, documents)
 # ---------------------------------------------------------------------------
 
-def render_queue_call(items: Sequence[StatesItem], *, model: str = DEFAULT_MODEL) -> str:
-    """A queue call as the model receives it: system and user turns."""
-    r = StatesPassRunner(client=None, batch_id="render", mode="queue", model=model)
+def render_queue_call(items: Sequence[StatesItem], *, model: str = DEFAULT_MODEL, mode: str = "queue",
+                      label_form: str = DEFAULT_LABEL_FORM) -> str:
+    """A queue (or, with ``mode="corpus"``, corpus) call as the model receives it: system and user turns, labels
+    in ``label_form``."""
+    r = StatesPassRunner(client=None, batch_id="render", mode=mode, model=model, label_form=label_form)
     c = r._rows_call(list(items), 0)
-    return f"--- system (queue v{RUBRIC_VERSIONS['queue']}) ---\n{c.system}\n--- user ---\n{c.user}\n"
+    return f"--- system ({mode} v{RUBRIC_VERSIONS[mode]}) ---\n{c.system}\n--- user ---\n{c.user}\n"
 
 
-def render_check_call(label: str, gloss: str, *, model: str = DEFAULT_MODEL) -> str:
+def render_check_call(label: str, gloss: str, *, model: str = DEFAULT_MODEL,
+                      label_form: str = DEFAULT_LABEL_FORM) -> str:
     """A gloss-check call as the model receives it."""
-    r = StatesPassRunner(client=None, batch_id="render", mode="queue", model=model)
+    r = StatesPassRunner(client=None, batch_id="render", mode="queue", model=model, label_form=label_form)
     c = r.check_call(f"{label}#1", label, gloss)
     return f"--- system (check v{CHECK_RUBRIC_VERSION}) ---\n{c.system}\n--- user ---\n{c.user}\n"
 

@@ -161,18 +161,22 @@ def max_tokens_for(step: str, model: str) -> int:
     return SR.MAX_TOKENS_FIRST.get(step, SR.MAX_TOKENS_FIRST_DEFAULT)
 
 
-def request(step: str, *, label: str, text: str, model: str = MODEL, rubrics_dir: Optional[Path] = None) -> dict:
+def request(step: str, *, label: str, text: str, model: str = MODEL, rubrics_dir: Optional[Path] = None,
+            label_form: Optional[str] = None) -> dict:
     """One call of the gloss stage, as M1 builds it (``SplitRunner._make``): ``gloss`` on the accepted reading,
     ``alignment`` on the gloss.  ``{"step", "model", "system", "user", "max_tokens", "temperature",
-    "cache_system"}``."""
+    "cache_system"}``.  ``label`` (as stored) is shown in ``label_form`` (:mod:`assistant_axis.gapgen.prompt_labels`;
+    default the judge display form)."""
     from . import split
     from . import split_rubrics as sr
     from . import split_runner as SR
+    from .prompt_labels import DEFAULT_LABEL_FORM
     if step not in STEPS:
         raise ValueError(f"the gloss stage sends {STEPS}, not {step!r}")
+    form = label_form or DEFAULT_LABEL_FORM
     system = sr.load_prompt(step, rubrics_dir)
-    user = (split.payload("gloss", label=label, reading=text) if step == "gloss"
-            else split.payload("alignment", label=label, description=text))
+    user = (split.payload("gloss", label=label, reading=text, label_form=form) if step == "gloss"
+            else split.payload("alignment", label=label, description=text, label_form=form))
     return {"step": step, "model": model, "system": system, "user": user, "max_tokens": max_tokens_for(step, model),
             "temperature": SR.TEMPERATURE, "cache_system": SR.caches_system(system, model)}
 
@@ -200,13 +204,16 @@ def estimate(n_rows: int, *, model: str = MODEL):
     return est
 
 
-def render(row: Mapping, *, model: str = MODEL, rubrics_dir: Optional[Path] = None) -> str:
+def render(row: Mapping, *, model: str = MODEL, rubrics_dir: Optional[Path] = None,
+           label_form: Optional[str] = None) -> str:
     """The gloss request for ``row`` and the alignment request's form, as the model receives them (for the dry
     run; the alignment call's description is the gloss, not known before the call)."""
     p = pins(rubrics_dir)
-    q = request("gloss", label=row["label"], text=accepted_reading(row) or "", model=model, rubrics_dir=rubrics_dir)
+    q = request("gloss", label=row["label"], text=accepted_reading(row) or "", model=model, rubrics_dir=rubrics_dir,
+                label_form=label_form)
     head = {k: q[k] for k in ("model", "max_tokens", "temperature", "cache_system")}
-    a = request("alignment", label=row["label"], text="<the gloss>", model=model, rubrics_dir=rubrics_dir)
+    a = request("alignment", label=row["label"], text="<the gloss>", model=model, rubrics_dir=rubrics_dir,
+                label_form=label_form)
     return (f"=== physical gloss stage, {row['key']}: gloss v{p['step_versions']['gloss']}, request settings "
             f"{json.dumps(head)} ===\n--- system ---\n{q['system']}\n--- user ---\n{q['user']}\n"
             f"=== then alignment v{p['step_versions']['alignment']} on the gloss ===\n--- user ---\n{a['user']}\n")
@@ -230,17 +237,20 @@ def _block(row: Mapping, *, model: str, batch_id: str, pinned: Mapping, gloss: O
 async def gloss_rows(rows: Sequence[Mapping], *, client, usage, batch_id: str, records_path: Path,
                      on_block: Optional[Callable[[str, dict], None]] = None, model: str = MODEL,
                      concurrency: int = DEFAULT_CONCURRENCY, retry_delays: Optional[Sequence[float]] = None,
-                     rubrics_dir: Optional[Path] = None) -> dict[str, dict]:
+                     rubrics_dir: Optional[Path] = None, label_form: Optional[str] = None) -> dict[str, dict]:
     """The gloss stage for ``rows``: per row, the gloss call on the accepted reading, then the alignment call on the
     gloss (each retried once, alone, when its answer fails validation, as M1 retries).  Every response is appended
     to ``records_path`` as it arrives, before it is parsed.  ``on_block(key, block)`` is called as each row
     finishes (the CLI writes the registry there), so a budget stop keeps what was paid for: the error propagates
     once the calls in flight are recorded, and a row stopped half way gets no block.  Returns ``{key: block}``; a
-    row whose gloss failed gets ``gloss: None`` and ``errors``."""
+    row whose gloss failed gets ``gloss: None`` and ``errors``.  ``label_form``: how the row's label is shown (the
+    M3 run's form; default the judge display form); records and blocks keep the stored label."""
     from . import split
     from .llm import RETRY_DELAYS_S, call_anthropic_json
+    from .prompt_labels import DEFAULT_LABEL_FORM, check_label_form, prompt_label
     from .registry import utc_now
     from assistant_axis.judge_pricing import BudgetExceededError
+    form = check_label_form(label_form or DEFAULT_LABEL_FORM)
     pinned = pins(rubrics_dir)
     delays = tuple(RETRY_DELAYS_S if retry_delays is None else retry_delays)
     sem = asyncio.Semaphore(max(1, int(concurrency)))
@@ -258,7 +268,7 @@ async def gloss_rows(rows: Sequence[Mapping], *, client, usage, batch_id: str, r
             fh.write(json.dumps(rec, ensure_ascii=False) + "\n")
 
     async def ask(row, step: str, text: str) -> tuple[Optional[dict], Optional[str]]:
-        q = request(step, label=row["label"], text=text, model=model, rubrics_dir=rubrics_dir)
+        q = request(step, label=row["label"], text=text, model=model, rubrics_dir=rubrics_dir, label_form=form)
         err: Optional[str] = None
         for retry in (False, True):
             if stop:
@@ -274,7 +284,7 @@ async def gloss_rows(rows: Sequence[Mapping], *, client, usage, batch_id: str, r
                 except BudgetExceededError as exc:
                     t = meta.get("text")
                     stop.append(exc)
-            parsed, perr = split.parse(step, t, label=row["label"])
+            parsed, perr = split.parse(step, t, label=prompt_label(row["label"], form))
             if t is None and perr in (None, "empty response"):
                 perr = f"no response: {meta.get('error')}"
             record(row, q, t, meta, retry=retry, err=perr)

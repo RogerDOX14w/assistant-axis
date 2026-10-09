@@ -43,6 +43,7 @@ from typing import Callable, Mapping, Optional, Sequence
 
 from assistant_axis.gapgen import split_rubrics as sr
 from assistant_axis.gapgen.llm import call_anthropic_json
+from assistant_axis.gapgen.prompt_labels import DEFAULT_LABEL_FORM, prompt_label
 from assistant_axis.judge import extract_json_blob
 from assistant_axis.judge_pricing import BudgetExceededError, cost_for_usage
 
@@ -130,16 +131,19 @@ class PlacementItem:
     route: str                      # the route before the check
     candidates: list                # head ids in the order shown
 
-    def payload(self, index: RogetIndex) -> dict:
-        trait = {"label": self.label}
+    def payload(self, index: RogetIndex, *, label_form: str = DEFAULT_LABEL_FORM) -> dict:
+        """What the model sees: the label (as stored) in ``label_form`` (the judge display form by default:
+        ``careless (HEXACO)`` -> ``careless (from HEXACO)``; :mod:`assistant_axis.gapgen.prompt_labels`), the
+        description and the candidate heads."""
+        trait = {"label": prompt_label(self.label, label_form)}
         if self.description:
             trait["description"] = self.description
         return {"trait": trait, "heads": [head_payload(index.heads[h]) for h in self.candidates]}
 
 
-def render_user(item: PlacementItem, index: RogetIndex) -> str:
+def render_user(item: PlacementItem, index: RogetIndex, *, label_form: str = DEFAULT_LABEL_FORM) -> str:
     """The user turn: one JSON object, the trait on the first line and one head per line."""
-    p = item.payload(index)
+    p = item.payload(index, label_form=label_form)
     rows = [" " + json.dumps(h, ensure_ascii=False) for h in p["heads"]]
     return ('{"trait": ' + json.dumps(p["trait"], ensure_ascii=False) + ',\n "heads": [\n' + ",\n".join(rows)
             + "\n ]}")

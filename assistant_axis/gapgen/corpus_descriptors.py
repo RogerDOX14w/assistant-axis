@@ -110,19 +110,23 @@ def select(corpus: Sequence[Mapping], existing: Mapping[str, Mapping], *, mode: 
 
 # --------------------------------------------------------------------------- the requests (M1's)
 
-def request(step: str, *, label: str, description: str, model: str = MODEL, rubrics_dir: Optional[Path] = None
-            ) -> dict:
+def request(step: str, *, label: str, description: str, model: str = MODEL, rubrics_dir: Optional[Path] = None,
+            label_form: Optional[str] = None) -> dict:
     """One call as M1's wave 6 builds it (``SplitRunner._make``), the description where the gloss goes:
-    ``{"step", "model", "system", "user", "max_tokens", "temperature", "cache_system"}``."""
+    ``{"step", "model", "system", "user", "max_tokens", "temperature", "cache_system"}``.  ``label`` (the stored
+    ``positive_label``) is shown in ``label_form`` (:mod:`assistant_axis.gapgen.prompt_labels`; default the judge
+    display form: ``careless (HEXACO)`` -> ``careless (from HEXACO)``); the row keeps the stored label."""
     from . import split
     from . import split_rubrics as sr
     from . import split_runner as SR
     from .physical_pass import max_tokens_for
+    from .prompt_labels import DEFAULT_LABEL_FORM
     if step not in STEPS:
         raise ValueError(f"the corpus pass sends {STEPS}, not {step!r}")
     system = sr.load_prompt(step, rubrics_dir)
     return {"step": step, "model": model, "system": system,
-            "user": split.payload(step, label=label, description=description),
+            "user": split.payload(step, label=label, description=description,
+                                  label_form=label_form or DEFAULT_LABEL_FORM),
             "max_tokens": max_tokens_for(step, model), "temperature": SR.TEMPERATURE,
             "cache_system": SR.caches_system(system, model)}
 
@@ -150,12 +154,14 @@ def estimate(n_traits: int, *, model: str = MODEL):
     return est
 
 
-def render(trait: Mapping, *, model: str = MODEL, rubrics_dir: Optional[Path] = None) -> str:
+def render(trait: Mapping, *, model: str = MODEL, rubrics_dir: Optional[Path] = None,
+           label_form: Optional[str] = None) -> str:
     """Both requests for ``trait`` as the model receives them (system prompt, user turn, settings)."""
     p = pins(rubrics_dir)
     parts = []
     for step in STEPS:
-        q = request(step, label=trait["label"], description=trait["description"], model=model, rubrics_dir=rubrics_dir)
+        q = request(step, label=trait["label"], description=trait["description"], model=model, rubrics_dir=rubrics_dir,
+                    label_form=label_form)
         head = {k: q[k] for k in ("model", "max_tokens", "temperature", "cache_system")}
         parts.append(f"=== {step} v{p['step_versions'][step]} for {trait['stem']}, request settings {json.dumps(head)} "
                      f"===\n--- system ---\n{q['system']}\n--- user ---\n{q['user']}\n")
@@ -242,16 +248,19 @@ def changes(before: Mapping[str, Mapping], after: Mapping[str, Mapping]) -> dict
 async def judge(traits: Sequence[Mapping], *, client, usage, batch_id: str, records_path: Path,
                 on_row: Optional[Callable[[str, dict], None]] = None, model: str = MODEL,
                 concurrency: Optional[int] = None, retry_delays: Optional[Sequence[float]] = None,
-                rubrics_dir: Optional[Path] = None) -> dict[str, dict]:
+                rubrics_dir: Optional[Path] = None, label_form: Optional[str] = None) -> dict[str, dict]:
     """Both calls for each of ``traits`` (each retried once, alone, when its answer fails validation).  Every
     response is appended to ``records_path`` as it arrives, before it is parsed.  ``on_row(stem, row)`` is called
     as each trait finishes, so a budget stop keeps what was paid for: the error propagates once the calls in flight
     are recorded, and a trait stopped half way gets no row.  A trait with an empty description sends nothing and
-    gets a row with ``errors``.  Returns ``{stem: row}``."""
+    gets a row with ``errors``.  Returns ``{stem: row}``.  ``label_form``: how the label is shown (default the judge
+    display form); the rows, their ``label`` and the selection keep the stored label."""
     from . import split
     from .llm import RETRY_DELAYS_S, call_anthropic_json
+    from .prompt_labels import DEFAULT_LABEL_FORM, check_label_form, prompt_label
     from .registry import utc_now
     from assistant_axis.judge_pricing import BudgetExceededError
+    form = check_label_form(label_form or DEFAULT_LABEL_FORM)
     pinned = pins(rubrics_dir)
     delays = tuple(RETRY_DELAYS_S if retry_delays is None else retry_delays)
     sem = asyncio.Semaphore(max(1, int(concurrency or DEFAULT_CONCURRENCY)))
@@ -269,7 +278,8 @@ async def judge(traits: Sequence[Mapping], *, client, usage, batch_id: str, reco
             fh.write(json.dumps(rec, ensure_ascii=False) + "\n")
 
     async def ask(t, step: str) -> tuple[Optional[dict], Optional[str]]:
-        q = request(step, label=t["label"], description=t["description"], model=model, rubrics_dir=rubrics_dir)
+        q = request(step, label=t["label"], description=t["description"], model=model, rubrics_dir=rubrics_dir,
+                    label_form=form)
         err: Optional[str] = None
         for retry in (False, True):
             if stop:
@@ -286,7 +296,7 @@ async def judge(traits: Sequence[Mapping], *, client, usage, batch_id: str, reco
                 except BudgetExceededError as exc:
                     text = meta.get("text")
                     stop.append(exc)
-            parsed, perr = split.parse(step, text, label=t["label"])
+            parsed, perr = split.parse(step, text, label=prompt_label(t["label"], form))
             if text is None and perr in (None, "empty response"):
                 perr = f"no response: {meta.get('error')}"
             record(t, q, text, meta, retry=retry, err=perr)

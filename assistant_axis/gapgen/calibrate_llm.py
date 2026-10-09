@@ -33,6 +33,7 @@ from assistant_axis.judge_pricing import MultiModelUsage
 
 from .cost import Estimate
 from .llm import call_anthropic_json
+from .prompt_labels import DEFAULT_LABEL_FORM, prompt_label
 
 logger = logging.getLogger(__name__)
 
@@ -116,9 +117,12 @@ Respond with a JSON object only, no other text. Reason first, then commit to the
 {"reason": "<two or three sentences comparing the lists>", "preference": "A" | "B" | "same"}"""
 
 
-def paraphrase_user(items: Sequence[dict]) -> str:
-    return "\n".join(json.dumps({"id": it["id"], "label": it["label"], "description": it["description"]},
-                                ensure_ascii=False) for it in items)
+def paraphrase_user(items: Sequence[dict], *, label_form: str = DEFAULT_LABEL_FORM) -> str:
+    """The paraphrase call's user turn; each label (as stored) shown in ``label_form``
+    (:mod:`assistant_axis.gapgen.prompt_labels`: the judge display form by default).  The paraphrase cache keeps its
+    source hash of the stored label and description (``calibrate_metric.paraphrase_source``)."""
+    return "\n".join(json.dumps({"id": it["id"], "label": prompt_label(it["label"], label_form),
+                                 "description": it["description"]}, ensure_ascii=False) for it in items)
 
 
 def parse_paraphrases(text: Optional[str], ids: Sequence[int]) -> dict[int, str]:
@@ -145,10 +149,10 @@ def parse_paraphrases(text: Optional[str], ids: Sequence[int]) -> dict[int, str]
 
 async def run_paraphrases(client, items: Sequence[dict], *, usage: MultiModelUsage, model: str = PARAPHRASE_MODEL,
                           batch_size: int = PARAPHRASE_BATCH, concurrency: int = 4, limiter=None,
-                          style: str = "standard") -> dict[str, str]:
+                          style: str = "standard", label_form: str = DEFAULT_LABEL_FORM) -> dict[str, str]:
     """``items``: ``[{"stem", "label", "description"}]`` -> ``{stem: paraphrase}``.
     A failed row is retried once in a batch of its own kind.  ``style`` picks
-    the prompt (:func:`paraphrase_prompt`)."""
+    the prompt (:func:`paraphrase_prompt`); ``label_form`` how the labels are shown."""
     system = paraphrase_prompt(style)
     sem = asyncio.Semaphore(concurrency)
     results: dict[str, str] = {}
@@ -156,7 +160,8 @@ async def run_paraphrases(client, items: Sequence[dict], *, usage: MultiModelUsa
     async def one(batch: Sequence[dict]) -> None:
         numbered = [dict(it, id=k + 1) for k, it in enumerate(batch)]
         async with sem:
-            text = await call_anthropic_json(client, system=system, user=paraphrase_user(numbered),
+            text = await call_anthropic_json(client, system=system,
+                                             user=paraphrase_user(numbered, label_form=label_form),
                                              model=model, max_tokens=4000, temperature=0.0, usage=usage,
                                              limiter=limiter)
         got = parse_paraphrases(text, [it["id"] for it in numbered])
@@ -174,12 +179,25 @@ async def run_paraphrases(client, items: Sequence[dict], *, usage: MultiModelUsa
     return results
 
 
-def blinded_user(item: Mapping, *, swap: bool, desc_of: Mapping[str, str], label_of: Mapping[str, str]) -> str:
+def blinded_user(item: Mapping, *, swap: bool, desc_of: Mapping[str, str], label_of: Mapping[str, str],
+                 label_form: str = DEFAULT_LABEL_FORM) -> str:
+    """The blinded judgement's user turn.  Every label (the trait's and each neighbour's, as stored) is shown in
+    ``label_form`` (the judge display form by default); a neighbour missing from ``label_of`` is shown by its
+    corpus display form (:func:`assistant_axis.entity_id.judge_label`), never by its bare stem (2026-10-09; it fell
+    back to the stem before)."""
     A, B = (item["B"], item["A"]) if swap else (item["A"], item["B"])
 
-    def block(name, stems):
-        return f"List {name}:\n" + "\n".join(f"- {label_of.get(s, s)}: {desc_of.get(s, '')}" for s in stems)
-    return (f"Trait: {item['label']}\nDefinition: {item['description']}\n\n{block('A', A)}\n\n{block('B', B)}")
+    def name(s):
+        lb = label_of.get(s)
+        if not lb:
+            from assistant_axis.entity_id import corpus_display_name
+            lb = corpus_display_name(s, "traits")
+        return prompt_label(lb, label_form)
+
+    def block(n, stems):
+        return f"List {n}:\n" + "\n".join(f"- {name(s)}: {desc_of.get(s, '')}" for s in stems)
+    return (f"Trait: {prompt_label(item['label'], label_form)}\nDefinition: {item['description']}\n\n"
+            f"{block('A', A)}\n\n{block('B', B)}")
 
 
 def parse_blinded(text: Optional[str]) -> Optional[str]:
@@ -196,7 +214,7 @@ def parse_blinded(text: Optional[str]) -> Optional[str]:
 
 async def run_blinded(client, items: Sequence[dict], *, usage: MultiModelUsage, desc_of: Mapping[str, str],
                       label_of: Mapping[str, str], model: str = JUDGE_MODEL, concurrency: int = 4,
-                      limiter=None) -> dict:
+                      limiter=None, label_form: str = DEFAULT_LABEL_FORM) -> dict:
     """Each comparison twice (lists swapped).  Returns per-item verdicts in terms
     of the hidden key (``full`` / ``strip`` / ``same`` / ``inconsistent``), the
     share preferring ``strip`` among decided items, and the parse rate."""
@@ -206,7 +224,8 @@ async def run_blinded(client, items: Sequence[dict], *, usage: MultiModelUsage, 
     async def ask(it, swap):
         async with sem:
             text = await call_anthropic_json(client, system=BLINDED_PROMPT,
-                                             user=blinded_user(it, swap=swap, desc_of=desc_of, label_of=label_of),
+                                             user=blinded_user(it, swap=swap, desc_of=desc_of, label_of=label_of,
+                                                               label_form=label_form),
                                              model=model, max_tokens=600, temperature=0.0, usage=usage,
                                              limiter=limiter)
         raw[(it["id"], swap)] = parse_blinded(text)

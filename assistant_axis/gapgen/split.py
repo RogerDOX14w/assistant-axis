@@ -33,6 +33,7 @@ from typing import Any, Mapping, Optional, Sequence
 
 from . import plain_reading as pr
 from .filter_rubric import MEMBERSHIP_KINDS, _bool, _label_key, _load_json, _num, _rows_of
+from .prompt_labels import DEFAULT_LABEL_FORM, prompt_label
 
 #: ``rubric_version`` of every split filter block: 5 means the split (the single classifier's
 #: prompt went from version 4 to 6, skipping 5 so that the number names one pipeline).
@@ -67,10 +68,15 @@ SECOND_OPINION_STEPS = ("sense", "established", "vague", "kind", "same_sense")
 # ---------------------------------------------------------------------------
 
 def payload(step: str, *, label: str, reading: Optional[str] = None, first_thought: Optional[str] = None,
-            reading_2: Optional[str] = None, description: Optional[str] = None) -> str:
+            reading_2: Optional[str] = None, description: Optional[str] = None,
+            label_form: str = DEFAULT_LABEL_FORM) -> str:
     """The user message for one call of ``step``: one JSON object with ``"id": 1``, in the shape
     the probe runs sent (``probe_*/probe.py``).  Steps 1 to 3 carry the label and readings of it
-    and nothing else: no intended sense, no gloss hint (the blindness of section 1)."""
+    and nothing else: no intended sense, no gloss hint (the blindness of section 1).  ``label`` (as
+    stored) is shown in ``label_form`` (:mod:`assistant_axis.gapgen.prompt_labels`: the judge display
+    form by default, ``careless (HEXACO)`` -> ``careless (from HEXACO)``); a caller that checks the
+    label echo checks it against that shown form."""
+    label = prompt_label(label, label_form)
     if step == "sense":
         send: dict = {"id": 1, "label": label}
     elif step == "established":
@@ -86,11 +92,11 @@ def payload(step: str, *, label: str, reading: Optional[str] = None, first_thoug
     return json.dumps(send, ensure_ascii=False)
 
 
-def comparison_payload(*, label: str, reading: str, intended: str) -> str:
+def comparison_payload(*, label: str, reading: str, intended: str, label_form: str = DEFAULT_LABEL_FORM) -> str:
     """One pair for the comparison prompt (version 2): the reading from step 1 takes the place of
-    the plain reading."""
+    the plain reading; the label shown in ``label_form``."""
     return pr.build_compare_prompt([{"id": 1, "label": label, "plain_reading": reading,
-                                     "intended_meaning": intended}])
+                                     "intended_meaning": intended}], label_form=label_form)
 
 
 # ---------------------------------------------------------------------------

@@ -30,7 +30,9 @@ Per candidate (a registry row whose filter verdict is ``trait``, with a gloss an
    turns the answers into the overlap call's queue: the partners of the opposed traits first, then the
    similar traits, each part by cosine, highest first.  An opposed trait with no partner records
    ``pair_completion_for``; a recorded pair answered ``similar`` on both sides or ``opposed`` on both
-   sides is a ``pair_flag``.
+   sides is a ``pair_flag``.  The relation and overlap prompts show every label in the judge display form
+   (``careless (from HEXACO)``; :mod:`assistant_axis.gapgen.prompt_labels`, from 2026-10-09), while
+   :class:`CorpusTrait` keeps the stored label, which is also what is embedded (``label: description``).
 4. **Overlap walk** (:class:`Walk`): one pair per call down the queue, Sonnet first, with the rule of
    :func:`sonnet_action` and early exit at the first ``covered``.
 5. **Decision and block** (:func:`novelty_block`): ``covered`` (with ``covered_by``), ``new``, or ``grey``
@@ -62,6 +64,7 @@ import numpy as np
 from assistant_axis.entity_id import normalize_to_file_name
 
 from . import overlap_test as OT
+from .prompt_labels import DEFAULT_LABEL_FORM, prompt_label
 
 # --------------------------------------------------------------------------- constants
 
@@ -598,15 +601,22 @@ def relation_order(stems: Iterable[str], run_id: str, key: str) -> list[str]:
     return out
 
 
-def relation_payload(label: str, description: str, traits: Sequence[tuple[str, str]]) -> dict:
-    return {"candidate": {"label": label, "description": description},
-            "traits": [{"id": i, "label": lb, "description": d} for i, (lb, d) in enumerate(traits, 1)]}
+def relation_payload(label: str, description: str, traits: Sequence[tuple[str, str]], *,
+                     label_form: str = DEFAULT_LABEL_FORM) -> dict:
+    """The relation call's user turn as an object.  The labels (the candidate's and each listed trait's, as stored)
+    are shown in ``label_form`` (:mod:`assistant_axis.gapgen.prompt_labels`: the judge display form by default,
+    ``careless (HEXACO)`` -> ``careless (from HEXACO)``); nothing else is rewritten."""
+    return {"candidate": {"label": prompt_label(label, label_form), "description": description},
+            "traits": [{"id": i, "label": prompt_label(lb, label_form), "description": d}
+                       for i, (lb, d) in enumerate(traits, 1)]}
 
 
-def render_relation_user(label: str, description: str, traits: Sequence[tuple[str, str]]) -> str:
+def render_relation_user(label: str, description: str, traits: Sequence[tuple[str, str]], *,
+                         label_form: str = DEFAULT_LABEL_FORM) -> str:
     """The relation call's user turn, laid out as the overlap test's list form (``render_payload``): the
-    candidate on the first line, each listed trait on its own line, ids 1..n in the order given."""
-    obj = relation_payload(label, description, traits)
+    candidate on the first line, each listed trait on its own line, ids 1..n in the order given; labels in
+    ``label_form`` (:func:`relation_payload`)."""
+    obj = relation_payload(label, description, traits, label_form=label_form)
     lines = ['{"candidate": ' + json.dumps(obj["candidate"], ensure_ascii=False) + ",", ' "traits": [']
     body = ",\n".join("  " + json.dumps(t, ensure_ascii=False) for t in obj["traits"])
     return "\n".join(lines) + "\n" + body + "\n ]}"

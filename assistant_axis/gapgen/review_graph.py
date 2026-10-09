@@ -549,9 +549,10 @@ class ReviewRunner(NR.NoveltyRunner):
             self.states.setdefault(c.key, NR.CandState(cand=c))
 
     def _relation_call(self, st: NR.CandState, stems: Sequence[str], *, step: str = "relation") -> NR.Call:
-        # the parent's call, with the listed names looked up in the corpus map (corpus traits and candidates)
+        # the parent's call, with the listed names looked up in the corpus map (corpus traits and candidates); the
+        # labels as stored, shown in the runner's label form (the judge display form for a new build)
         traits = [(self.corpus[s]["label"], self.corpus[s]["description"]) for s in stems]
-        user = NV.render_relation_user(st.cand.label, st.cand.gloss, traits)
+        user = NV.render_relation_user(st.cand.label, st.cand.gloss, traits, label_form=self.label_form)
         model = self.relation_model if step == "relation" else NR.UNSURE_MODEL
         return NR.Call(step=step, role=NR.model_role(model), key=st.cand.key, model=model,
                        system=self.rubrics["relation"]["text"], user=user, max_tokens=NR.RELATION_MAX_TOKENS,

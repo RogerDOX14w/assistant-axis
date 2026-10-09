@@ -45,6 +45,7 @@ from assistant_axis.judge_pricing import BATCH_SUFFIX, BudgetExceededError, Mult
 from . import novelty as NV
 from . import overlap_test as OT
 from .llm import CACHE_READ_FACTOR, CACHE_WRITE_1H_FACTOR, CACHE_WRITE_FACTOR, RETRY_DELAYS_S, call_anthropic_json
+from .prompt_labels import DEFAULT_LABEL_FORM, check_label_form
 from .registry import utc_now
 
 logger = logging.getLogger(__name__)
@@ -358,7 +359,13 @@ class NoveltyRunner:
     ``relation_model``: the model of the relation call (default :data:`RELATION_MODEL`; the unsure re-ask
     stays on :data:`UNSURE_MODEL`).  ``relation_only`` (``score --relation-only``, coding_plan_haiku55.md):
     stage 3 and stop: the relation calls (and the unsure re-ask) are sent and the shortlists built, but no
-    overlap call is made and no candidate that reached stage 3 is decided (its block stays ``None``)."""
+    overlap call is made and no candidate that reached stage 3 is decided (its block stays ``None``).
+
+    ``label_form`` (:mod:`assistant_axis.gapgen.prompt_labels`): how the relation and overlap prompts show the
+    labels (the candidate's, and the corpus traits' and seed-queue entries' as stored in ``index.traits``): the judge
+    display form by default (``careless (HEXACO)`` -> ``careless (from HEXACO)``), or ``stored``.  The CLI passes the
+    form a resumed run, or the source of a re-decided, relation-only or full-scan run, recorded, so that answers on
+    record (keyed by the prompt; a batch's results by ``custom_id``) are found and a run is one form throughout."""
 
     def __init__(self, *, client, batch_id: str, rubrics: Mapping[str, Mapping], index: NV.CorpusIndex,
                  label_sets: NV.LabelSets, usage: MultiModelUsage, responses_path: Path, k: int = 10,
@@ -368,7 +375,9 @@ class NoveltyRunner:
                  on_decided: Optional[Callable[[list], None]] = None, cache_ttl: Optional[str] = None,
                  rules: Optional[NV.Rules] = None, relation_seed: Optional[str] = None,
                  replay_records: Sequence[Mapping] = (), extra_block: Optional[Mapping] = None,
-                 relation_model: str = RELATION_MODEL, relation_only: bool = False):
+                 relation_model: str = RELATION_MODEL, relation_only: bool = False,
+                 label_form: str = DEFAULT_LABEL_FORM):
+        self.label_form = check_label_form(label_form)
         if mode not in ("shortlist", "full_scan"):
             raise ValueError(f"mode must be shortlist or full_scan, not {mode!r}")
         if relation_only and mode != "shortlist":
@@ -565,7 +574,7 @@ class NoveltyRunner:
     # -- calls ----------------------------------------------------------------------
     def _relation_call(self, st: CandState, stems: Sequence[str], *, step: str = "relation") -> Call:
         traits = [(self.traits[s].label, self.traits[s].description) for s in stems]
-        user = NV.render_relation_user(st.cand.label, st.cand.gloss, traits)
+        user = NV.render_relation_user(st.cand.label, st.cand.gloss, traits, label_form=self.label_form)
         model = self.relation_model if step == "relation" else UNSURE_MODEL
         return Call(step=step, role=model_role(model), key=st.cand.key, model=model,
                     system=self.rubrics["relation"]["text"], user=user, max_tokens=RELATION_MAX_TOKENS,
@@ -574,7 +583,7 @@ class NoveltyRunner:
     def _overlap_call(self, st: CandState, stem: str, role: str, position: int) -> Call:
         pc = OT.PairCall(call_id=f"{st.cand.key}>{stem}", set="m3", target=st.cand.key, listed=[stem])
         corpus = {st.cand.key: {"label": st.cand.label, "description": st.cand.gloss}, stem: self.corpus[stem]}
-        user = OT.render_single(pc, corpus)
+        user = OT.render_single(pc, corpus, label_form=self.label_form)
         model = FIRST_MODEL if role == "sonnet" else SECOND_MODEL
         return Call(step="overlap", role=role, key=st.cand.key, model=model, system=self.rubrics["overlap"]["text"],
                     user=user, max_tokens=OVERLAP_MAX_TOKENS, temperature=TEMPERATURE, cache_system=True,

@@ -91,6 +91,7 @@ from . import split
 from . import split_rubrics as sr
 from .filter import FilterItem, FilterRunner
 from .llm import call_anthropic_json
+from .prompt_labels import DEFAULT_LABEL_FORM
 from .registry import utc_now
 
 logger = logging.getLogger(__name__)
@@ -351,7 +352,9 @@ class SplitRunner(FilterRunner):
                  plain_reading: bool = True, third_model: Optional[str] = None,
                  max_disagreement: Optional[float] = split.DEFAULT_MAX_DISAGREEMENT,
                  accept_disagreement: bool = False, readings: Optional[int] = None,
-                 stop_on_disagreement: bool = False):
+                 stop_on_disagreement: bool = False, label_form: str = DEFAULT_LABEL_FORM):
+        # label_form (prompt_labels): how every call shows the word's label, the judge display form by default (a
+        # no-op for a candidate label without a standard's suffix); a resumed batch passes its run.json's form.
         # third_model: the second opinion's steps on a third model, for the same rows (None: none).
         # max_disagreement: the tripwire's threshold (None: not checked; 1.0 never trips).
         # accept_disagreement: a tripped tripwire is recorded and the run goes on.
@@ -368,7 +371,7 @@ class SplitRunner(FilterRunner):
                          limiter=limiter, second_opinion_frac=second_opinion_frac, seed=seed, probe=probe,
                          second_opinion=second_opinion, concurrency=concurrency, zipf_fn=zipf_fn, wordnet=wordnet,
                          retry_delays=retry_delays, responses_path=responses_path, plain_reading=plain_reading,
-                         compare_model=compare_model or DEFAULT_COMPARE_MODEL)
+                         compare_model=compare_model or DEFAULT_COMPARE_MODEL, label_form=label_form)
         if third_model:
             if not self.second_opinion:
                 raise ValueError("a third opinion runs on the second opinion's rows: it needs the second opinion")
@@ -413,7 +416,8 @@ class SplitRunner(FilterRunner):
     def _make(self, step: str, key: str, *, model: str, user: str, index: Optional[int] = None,
               role: str = "first", rep: int = 0) -> Call:
         system = self._system(step)
-        return Call(step=step, key=key, label=self.state[key]["label"], model=model, system=system,
+        # Call.label is what the answer's label echo is checked against: the label as the prompt shows it
+        return Call(step=step, key=key, label=self.prompt_label(self.state[key]["label"]), model=model, system=system,
                     user=user, max_tokens=self._max_tokens(step, model), temperature=TEMPERATURE, index=index,
                     role=role, rep=rep, cache_system=caches_system(system, model))
 
@@ -546,16 +550,19 @@ class SplitRunner(FilterRunner):
                 continue
             for i in split.primary_indices(s):
                 x = s["readings"][i]
-                user = (split.payload("established", label=s_label(self.state[k]), first_thought=s.get("first_thought"),
-                                      reading=x["reading"]) if step == "established"
-                        else split.payload(step, label=s_label(self.state[k]), reading=x["reading"]))
+                user = (split.payload("established", label=s_label(self.state[k]), label_form=self.label_form,
+                                      first_thought=s.get("first_thought"), reading=x["reading"])
+                        if step == "established"
+                        else split.payload(step, label=s_label(self.state[k]), label_form=self.label_form,
+                                           reading=x["reading"]))
                 calls.append(self._make(step, k, model=model, user=user, index=i, role=role, rep=rep))
         return calls
 
     def _sense_calls(self, keys: Sequence[str], *, role: str, model: str, reps: Sequence[int] = (0,)) -> list[Call]:
         """Step 1 for ``keys`` on ``model``, once for each verdict reading in ``reps`` (each word's readings
         side by side)."""
-        return [self._make("sense", k, model=model, user=split.payload("sense", label=s_label(self.state[k])),
+        return [self._make("sense", k, model=model,
+                           user=split.payload("sense", label=s_label(self.state[k]), label_form=self.label_form),
                            role=role, rep=r) for k in keys for r in reps]
 
     def _apply_sense(self, calls: Sequence[Call], res: Mapping[int, tuple]) -> None:
@@ -609,7 +616,7 @@ class SplitRunner(FilterRunner):
         a, b = pair
         return self._make("same_sense", key, model=model, role=role, index=a, rep=rep,
                           user=split.payload("same_sense", label=s_label(self.state[key]),
-                                             reading=s["readings"][a]["reading"],
+                                             label_form=self.label_form, reading=s["readings"][a]["reading"],
                                              reading_2=s["readings"][b]["reading"]))
 
     def _wave3_calls(self, keys: Sequence[str], *, role: str, model: str) -> list[Call]:
@@ -629,6 +636,7 @@ class SplitRunner(FilterRunner):
                 for i in split.survivors(s):
                     calls.append(self._make("comparison", k, model=self.compare_model, index=i, rep=w,
                                             user=split.comparison_payload(label=s_label(self.state[k]),
+                                                                          label_form=self.label_form,
                                                                           reading=s["readings"][i]["reading"],
                                                                           intended=self.state[k]["intended"])))
         return calls
@@ -788,7 +796,8 @@ class SplitRunner(FilterRunner):
         if self.probe:
             band = [it for it in todo if self.results[it.key].freq.get("probe_band")]
             calls = [self._make("probe", it.key, model=self.model,
-                                user=fr.build_probe_prompt([{"id": 1, "label": it.label}])) for it in band]
+                                user=fr.build_probe_prompt([{"id": 1, "label": it.label}], label_form=self.label_form))
+                     for it in band]
             self.stats["n_probe"] += len(calls)
             res = await self._wave("w0_probe", calls)
             for c in calls:
@@ -830,9 +839,9 @@ class SplitRunner(FilterRunner):
             m = self.second_model if k in so else self.model
             gloss_calls.append(self._make("gloss", k, model=m, index=j["accepted_index"],
                                           user=split.payload("gloss", label=s_label(self.state[k]),
-                                                             reading=j["accepted"])))
+                                                             label_form=self.label_form, reading=j["accepted"])))
         op_sense = [self._make("sense", k, model=model, role=role,
-                               user=split.payload("sense", label=s_label(self.state[k])))
+                               user=split.payload("sense", label=s_label(self.state[k]), label_form=self.label_form))
                     for role, model, keys in self._opinions() for k in keys]
         res = await self._wave("w4_gloss", gloss_calls + op_sense)
         for c in gloss_calls:
@@ -858,7 +867,8 @@ class SplitRunner(FilterRunner):
             if g:
                 for step in ("alignment", "descriptors"):
                     last.append(self._make(step, k, model=self.model,
-                                           user=split.payload(step, label=s_label(self.state[k]), description=g)))
+                                           user=split.payload(step, label=s_label(self.state[k]),
+                                                              label_form=self.label_form, description=g)))
         op_same = []
         for role, model, keys in self._opinions():
             op_same += self._wave3_calls([k for k in keys if self._complete(k, role) is None], role=role, model=model)

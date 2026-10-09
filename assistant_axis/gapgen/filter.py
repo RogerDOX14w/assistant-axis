@@ -51,6 +51,7 @@ from . import filter_rubric as fr
 from . import plain_reading as pr
 from .freq import HARD_REJECT_BELOW, familiarity_of, is_curated, zipf_info
 from .llm import call_anthropic_json
+from .prompt_labels import DEFAULT_LABEL_FORM, check_label_form, prompt_label
 from .registry import first_gloss_hint, utc_now
 from .wordnet import WordNetInfo, sense_info
 
@@ -201,7 +202,11 @@ class FilterRunner:
                  zipf_fn: Optional[Callable[[str], float]] = None, wordnet: Any = None,
                  retry_delays: Optional[Sequence[float]] = None, shuffle_seed: Optional[int] = None,
                  responses_path: Optional[Path] = None, probe_only: bool = False,
-                 plain_reading: bool = True, compare_model: Optional[str] = None):
+                 plain_reading: bool = True, compare_model: Optional[str] = None,
+                 label_form: str = DEFAULT_LABEL_FORM):
+        # label_form (prompt_labels): how every prompt shows a row's label (the judge display form by default; a
+        # no-op for a candidate label without a standard's suffix); stored labels and keys are never rewritten.
+        self.label_form = check_label_form(label_form)
         # plain_reading: for every classified row with an intended meaning (a
         # gloss hint), read the bare label and compare (plain_reading module);
         # compare_model defaults to plain_reading.DEFAULT_COMPARE_MODEL.
@@ -236,6 +241,10 @@ class FilterRunner:
         self.probe_only = probe_only
         self.plain_reading = plain_reading
         self.compare_model = compare_model or pr.DEFAULT_COMPARE_MODEL
+
+    def prompt_label(self, label: str) -> str:
+        """``label`` (as stored) as this run's prompts show it (:func:`prompt_labels.prompt_label`)."""
+        return prompt_label(label, self.label_form)
 
     # -- local stages ------------------------------------------------------
     def prepare(self, items: Sequence[FilterItem]) -> list[FilterItem]:
@@ -363,9 +372,11 @@ class FilterRunner:
         payload = [{"id": i + 1, "label": it.label, "intended_sense": it.intended_sense}
                    for i, it in enumerate(items)]
         text, rec = await self._call(stage=stage, model=model, system=fr.SYSTEM_PROMPT,
-                                     user=fr.build_batch_prompt(payload), keys=[it.key for it in items])
+                                     user=fr.build_batch_prompt(payload, label_form=self.label_form),
+                                     keys=[it.key for it in items])
+        # the label echo is checked against the label as shown
         rows, errs = fr.parse_batch(text or "", [p["id"] for p in payload],
-                                    labels={p["id"]: p["label"] for p in payload})
+                                    labels={p["id"]: self.prompt_label(p["label"]) for p in payload})
         rec["parse_errors"] = {items[i - 1].key: e for i, e in errs.items()}
         by_key = {items[i - 1].key: r for i, r in rows.items()}
         if by_key:
@@ -483,7 +494,8 @@ class FilterRunner:
         async def one_inner(batch: list[FilterItem]):
             payload = [{"id": i + 1, "label": it.label} for i, it in enumerate(batch)]
             text, rec = await self._call(stage="probe", model=self.model, system=fr.DEFINE_PROBE_PROMPT,
-                                         user=fr.build_probe_prompt(payload), keys=[it.key for it in batch])
+                                         user=fr.build_probe_prompt(payload, label_form=self.label_form),
+                                         keys=[it.key for it in batch])
             rows, errs = fr.parse_probe(text or "", [p["id"] for p in payload])
             rec["parse_errors"] = {batch[i - 1].key: e for i, e in errs.items()}
             for i, it in enumerate(batch, 1):
@@ -532,6 +544,7 @@ class FilterRunner:
                                        compare_model=self.compare_model, usage=self.usage, limiter=self.limiter,
                                        batch_size=self.batch_size, concurrency=self.concurrency,
                                        responses_path=self.responses_path, responses=self.responses,
+                                       label_form=self.label_form,
                                        **({"retry_delays": self.retry_kw["retry_delays"]} if self.retry_kw else {}))
         try:
             await runner.run_async(todo)

@@ -85,6 +85,7 @@ from typing import Any, Mapping, Optional, Sequence
 from assistant_axis.judge import _repair_json_blob, extract_json_blob
 
 from .normalize import REGION_VOCAB, VERDICTS
+from .prompt_labels import DEFAULT_LABEL_FORM, prompt_label
 
 #: v6 (2026-10-02, merge with the main line): the "soft" example's sense "mild and lenient" became
 #: "mild and undemanding", since lenient is a corpus trait since the rubric V2 regeneration (prompt
@@ -420,13 +421,16 @@ candidate id, in the order given.
 """
 
 
-def build_batch_prompt(items: Sequence[dict]) -> str:
+def build_batch_prompt(items: Sequence[dict], *, label_form: str = DEFAULT_LABEL_FORM) -> str:
     """User message for one batch.  ``items``: dicts with ``id`` (int),
-    ``label`` (display form) and optional ``intended_sense`` (a generator's
-    gloss hint, display form)."""
+    ``label`` (display form, as stored) and optional ``intended_sense`` (a
+    generator's gloss hint, display form).  The label is shown in
+    ``label_form`` (:mod:`assistant_axis.gapgen.prompt_labels`: the judge
+    display form by default, a no-op for a label without a standard's
+    suffix); the label echo is then checked against that shown form."""
     lines = []
     for it in items:
-        row: dict[str, Any] = {"id": int(it["id"]), "label": it["label"]}
+        row: dict[str, Any] = {"id": int(it["id"]), "label": prompt_label(it["label"], label_form)}
         if it.get("intended_sense"):
             row["intended_sense"] = " ".join(str(it["intended_sense"]).split())
         lines.append(json.dumps(row, ensure_ascii=False))
@@ -757,8 +761,10 @@ Respond with one JSON object and nothing else, reason first:
 """
 
 
-def build_probe_prompt(items: Sequence[dict]) -> str:
-    lines = [json.dumps({"id": int(it["id"]), "word": it["label"]}, ensure_ascii=False) for it in items]
+def build_probe_prompt(items: Sequence[dict], *, label_form: str = DEFAULT_LABEL_FORM) -> str:
+    """User message of the definition probe; each ``label`` shown in ``label_form`` (as :func:`build_batch_prompt`)."""
+    lines = [json.dumps({"id": int(it["id"]), "word": prompt_label(it["label"], label_form)}, ensure_ascii=False)
+             for it in items]
     return f"Check these {len(items)} words.\n" + "\n".join(lines)
 
 

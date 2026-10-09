@@ -26,9 +26,10 @@ relation in the labelled pairs if it has one, and whether the two are a recorded
 
 **What is sent** (:func:`render_user`): the rubric as the system prompt; the user turn one JSON object,
 ``{"target": {"label", "description"}, "traits": [{"id", "label", "description"}, ...]}``, laid out
-exactly as the rendered sample of the draft document, labels in display form (``positive_label``), the
-listed traits in a seeded random order with ids 1..n, no scores, ranks or arrangement marks.  Temperature
-0 where the model accepts it (Sonnet 5.5 and Opus 5.5 refuse it: ``llm.accepts_temperature``).
+exactly as the rendered sample of the draft document, labels in display form (``positive_label``; from
+2026-10-09 the judge display form, a standard's suffix in the long form, ``careless (from HEXACO)``:
+:mod:`assistant_axis.gapgen.prompt_labels`, the runner's ``label_form``), the listed traits in a seeded random
+order with ids 1..n, no scores, ranks or arrangement marks.  Temperature 0 where the model accepts it (Sonnet 5.5 and Opus 5.5 refuse it: ``llm.accepts_temperature``).
 
 **Order and position bias** (AGENT_NOTES, "Comparing arms with an LLM judge"): the arms (two rubrics,
 three models) never share a prompt; each rates every listed trait on an absolute scale, and every arm
@@ -102,6 +103,7 @@ from . import split_rubrics as sr
 from .cost import Estimate
 from .filter_rubric import _load_json, _num, _rows_of
 from .llm import RETRY_DELAYS_S, call_anthropic_json, request_params
+from .prompt_labels import DEFAULT_LABEL_FORM, check_label_form, prompt_label
 from .registry import utc_now
 
 logger = logging.getLogger(__name__)
@@ -604,12 +606,15 @@ def build_pair_set(corpus: Mapping[str, Mapping], emb_stems: Sequence[str], Z: n
 
 # --------------------------------------------------------------------------- what is sent
 
-def payload_object(call: Call, corpus: Mapping[str, Mapping], order: Optional[Sequence[str]] = None) -> dict:
+def payload_object(call: Call, corpus: Mapping[str, Mapping], order: Optional[Sequence[str]] = None, *,
+                   label_form: str = DEFAULT_LABEL_FORM) -> dict:
     """The user turn as an object: the target, then the listed traits with ids 1..n, in ``order``
-    (default the call's own)."""
+    (default the call's own).  Labels as stored in ``corpus``, shown in ``label_form`` (the judge display form by
+    default: :mod:`assistant_axis.gapgen.prompt_labels`); ``corpus`` itself is not changed."""
     t = corpus[call.target]
-    return {"target": {"label": t["label"], "description": t["description"]},
-            "traits": [{"id": i, "label": corpus[s]["label"], "description": corpus[s]["description"]}
+    return {"target": {"label": prompt_label(t["label"], label_form), "description": t["description"]},
+            "traits": [{"id": i, "label": prompt_label(corpus[s]["label"], label_form),
+                        "description": corpus[s]["description"]}
                        for i, s in enumerate(call.listed if order is None else order, 1)]}
 
 
@@ -621,26 +626,29 @@ def render_payload(obj: Mapping) -> str:
     return "\n".join(lines) + "\n" + body + "\n ]}"
 
 
-def render_user(call: Call, corpus: Mapping[str, Mapping], order_seed: Optional[str] = None) -> str:
+def render_user(call: Call, corpus: Mapping[str, Mapping], order_seed: Optional[str] = None, *,
+                label_form: str = DEFAULT_LABEL_FORM) -> str:
     """The user turn as sent: the listed traits in the call's own order, or shuffled with ``order_seed``
-    (:func:`pass_order_seed`)."""
-    return render_payload(payload_object(call, corpus, listed_order(call, order_seed)))
+    (:func:`pass_order_seed`); labels in ``label_form``."""
+    return render_payload(payload_object(call, corpus, listed_order(call, order_seed), label_form=label_form))
 
 
-def payload_single(call: Call, corpus: Mapping[str, Mapping]) -> dict:
+def payload_single(call: Call, corpus: Mapping[str, Mapping], *, label_form: str = DEFAULT_LABEL_FORM) -> dict:
     """The single form's user turn as an object: the target and the one other trait, labels and
-    descriptions only (no ids, scores, ranks or arrangement marks)."""
+    descriptions only (no ids, scores, ranks or arrangement marks); labels as stored in ``corpus``, shown in
+    ``label_form`` (the judge display form by default)."""
     if len(call.listed) != 1:
         raise ValueError(f"{call.call_id}: the single form sends one pair per call, not {len(call.listed)}")
     t, o = corpus[call.target], corpus[call.listed[0]]
-    return {"target": {"label": t["label"], "description": t["description"]},
-            "other": {"label": o["label"], "description": o["description"]}}
+    return {"target": {"label": prompt_label(t["label"], label_form), "description": t["description"]},
+            "other": {"label": prompt_label(o["label"], label_form), "description": o["description"]}}
 
 
-def render_single(call: Call, corpus: Mapping[str, Mapping]) -> str:
+def render_single(call: Call, corpus: Mapping[str, Mapping], *, label_form: str = DEFAULT_LABEL_FORM) -> str:
     """The single form's user turn laid out as the rubric file's rendered sample (``overlap_concept.md``,
-    "Rendered sample"): the target on the first line, the other trait on the second, indented one space."""
-    obj = payload_single(call, corpus)
+    "Rendered sample"): the target on the first line, the other trait on the second, indented one space;
+    labels in ``label_form``."""
+    obj = payload_single(call, corpus, label_form=label_form)
     return ('{"target": ' + json.dumps(obj["target"], ensure_ascii=False) + ",\n"
             ' "other": ' + json.dumps(obj["other"], ensure_ascii=False) + "}")
 
@@ -655,12 +663,14 @@ def default_cache_system(form: str) -> bool:
 
 def call_params(call: Call, corpus: Mapping, *, rubric_text: str, model: str, max_tokens: int = MAX_TOKENS,
                 temperature: Optional[float] = TEMPERATURE, order_seed: Optional[str] = None, form: str = "list",
-                cache_system: Optional[bool] = None) -> dict:
+                cache_system: Optional[bool] = None, label_form: str = DEFAULT_LABEL_FORM) -> dict:
     """The Messages API request for one call (``llm.request_params``): the user turn of ``form``
-    (:func:`render_user`, or :func:`render_single` for one pair per call); the system block marked for the
-    prompt cache when ``cache_system`` (default :func:`default_cache_system`: the single form only).  The
-    rubrics are cacheable on Sonnet 5.5 and Opus 5.5 (512-token minimum); the list runs were sent uncached."""
-    user = render_single(call, corpus) if form == "single" else render_user(call, corpus, order_seed)
+    (:func:`render_user`, or :func:`render_single` for one pair per call), labels in ``label_form``; the system
+    block marked for the prompt cache when ``cache_system`` (default :func:`default_cache_system`: the single form
+    only).  The rubrics are cacheable on Sonnet 5.5 and Opus 5.5 (512-token minimum); the list runs were sent
+    uncached."""
+    user = (render_single(call, corpus, label_form=label_form) if form == "single"
+            else render_user(call, corpus, order_seed, label_form=label_form))
     cache = default_cache_system(form) if cache_system is None else bool(cache_system)
     return request_params(model=model, system=rubric_text, user=user, max_tokens=max_tokens, temperature=temperature,
                           cache_system=cache)
@@ -668,10 +678,10 @@ def call_params(call: Call, corpus: Mapping, *, rubric_text: str, model: str, ma
 
 def rendered_prompt(call: Call, corpus: Mapping, *, rubric: str, rubric_text: str, model: str,
                     order_seed: Optional[str] = None, pass_no: Optional[int] = None, form: str = "list",
-                    cache_system: Optional[bool] = None) -> str:
+                    cache_system: Optional[bool] = None, label_form: str = DEFAULT_LABEL_FORM) -> str:
     """The request as the model receives it, for reading (AGENT_NOTES: read the rendered prompt)."""
     params = call_params(call, corpus, rubric_text=rubric_text, model=model, order_seed=order_seed, form=form,
-                         cache_system=cache_system)
+                         cache_system=cache_system, label_form=label_form)
     sent = {k: v for k, v in params.items() if k not in ("system", "messages")}
     cached = params["system"][0].get("cache_control")
     which = f", pass {pass_no}" if pass_no is not None else ""
@@ -1058,13 +1068,19 @@ class OverlapRunner:
     A rubric of the single form (its loaded ``form``, :func:`load_rubrics`) sends every pair of the stage's
     calls as its own call (:func:`to_single_calls`), the identical prompt in every pass, with the rubric as a
     cached system block (``cache_system``: ``None`` for :func:`default_cache_system`, or force it); its
-    records add ``form``, ``pair_id`` and ``origin_call_id``, and ``request.cache_system``."""
+    records add ``form``, ``pair_id`` and ``origin_call_id``, and ``request.cache_system``.
+
+    ``label_form`` (:mod:`assistant_axis.gapgen.prompt_labels`): how the labels of ``corpus`` (as stored) are shown
+    in the prompts, the judge display form by default; a resumed run passes the form its ``run.json`` recorded
+    (records are keyed by rubric, model, call and pass, not by the prompt, so a resume must not change it)."""
 
     def __init__(self, client, rubrics: Mapping[str, Mapping], corpus: Mapping[str, Mapping], *,
                  usage: MultiModelUsage, responses_path: Path, concurrency: int = DEFAULT_CONCURRENCY,
                  max_tokens: int = MAX_TOKENS, temperature: Optional[float] = TEMPERATURE,
                  retry_delays: Sequence[float] = RETRY_DELAYS_S, ask_attempts: int = ASK_ATTEMPTS,
-                 seed: int = 0, usage_path: Optional[Path] = None, cache_system: Optional[bool] = None):
+                 seed: int = 0, usage_path: Optional[Path] = None, cache_system: Optional[bool] = None,
+                 label_form: str = DEFAULT_LABEL_FORM):
+        self.label_form = check_label_form(label_form)
         self.client = client
         self.rubrics = rubrics
         self.corpus = corpus
@@ -1139,7 +1155,8 @@ class OverlapRunner:
                         return
                     params = call_params(call, self.corpus, rubric_text=text_of, model=model,
                                          max_tokens=self.max_tokens, temperature=self.temperature,
-                                         order_seed=order_seed, form=form, cache_system=cache)
+                                         order_seed=order_seed, form=form, cache_system=cache,
+                                         label_form=self.label_form)
                     meta: dict = {}
                     try:
                         text = await call_anthropic_json(
