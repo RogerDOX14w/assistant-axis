@@ -1,0 +1,330 @@
+{
+  "content_sha256": "66b53cc09b0465df",
+  "judged_at": "2026-10-09T23:24:03+00:00",
+  "instruction_judge": {
+    "model": "claude-sonnet-4-6",
+    "rubric_version": 4,
+    "items": [
+      {
+        "id": "p0_pos",
+        "faults": [],
+        "quotes": {}
+      },
+      {
+        "id": "p0_neg",
+        "faults": [],
+        "quotes": {}
+      },
+      {
+        "id": "p1_pos",
+        "faults": [],
+        "quotes": {}
+      },
+      {
+        "id": "p1_neg",
+        "faults": [],
+        "quotes": {}
+      },
+      {
+        "id": "p2_pos",
+        "faults": [],
+        "quotes": {}
+      },
+      {
+        "id": "p2_neg",
+        "faults": [],
+        "quotes": {}
+      },
+      {
+        "id": "p3_pos",
+        "faults": [],
+        "quotes": {}
+      },
+      {
+        "id": "p3_neg",
+        "faults": [],
+        "quotes": {}
+      },
+      {
+        "id": "p4_pos",
+        "faults": [],
+        "quotes": {}
+      },
+      {
+        "id": "p4_neg",
+        "faults": [],
+        "quotes": {}
+      }
+    ]
+  },
+  "question_judge": {
+    "model": "claude-haiku-4-5-20251001",
+    "rubric_version": 3,
+    "items": [
+      {
+        "i": 0,
+        "note": "Colleague interrupts focused work repeatedly",
+        "shape": "situation",
+        "flags": []
+      },
+      {
+        "i": 1,
+        "note": "Team discusses future while present problems ignored",
+        "shape": "situation",
+        "flags": []
+      },
+      {
+        "i": 2,
+        "note": "Friend asks why you're quieter lately",
+        "shape": "situation",
+        "flags": []
+      },
+      {
+        "i": 3,
+        "note": "Family member wants to rush personal creative project",
+        "shape": "situation",
+        "flags": []
+      },
+      {
+        "i": 4,
+        "note": "Someone makes wrong political claim at dinner",
+        "shape": "situation",
+        "flags": []
+      },
+      {
+        "i": 5,
+        "note": "Promotion offers more money but less autonomy",
+        "shape": "situation",
+        "flags": [
+          "two_option"
+        ]
+      },
+      {
+        "i": 6,
+        "note": "Neighbor wants to talk during personal quiet time",
+        "shape": "situation",
+        "flags": []
+      },
+      {
+        "i": 7,
+        "note": "Coworker's error affects work; avoid tense conversation",
+        "shape": "situation",
+        "flags": []
+      },
+      {
+        "i": 8,
+        "note": "High-paying job requires constant meetings and travel",
+        "shape": "advice",
+        "flags": []
+      },
+      {
+        "i": 9,
+        "note": "Choose between large party or intimate walk",
+        "shape": "situation",
+        "flags": [
+          "two_option"
+        ]
+      },
+      {
+        "i": 10,
+        "note": "Friend group wants immediate commitment to trip details",
+        "shape": "situation",
+        "flags": []
+      },
+      {
+        "i": 11,
+        "note": "Partner wants to talk; you process internally",
+        "shape": "advice",
+        "flags": []
+      },
+      {
+        "i": 12,
+        "note": "Asked to give speech at colleague's going-away party",
+        "shape": "situation",
+        "flags": [
+          "yes_no"
+        ]
+      },
+      {
+        "i": 13,
+        "note": "Family asks your opinion on sensitive topic",
+        "shape": "situation",
+        "flags": []
+      },
+      {
+        "i": 14,
+        "note": "Friend changes plans constantly; avoid damaging friendship",
+        "shape": "advice",
+        "flags": []
+      },
+      {
+        "i": 15,
+        "note": "Colleague suggests working together on flexible assignment",
+        "shape": "situation",
+        "flags": [
+          "two_option"
+        ]
+      },
+      {
+        "i": 16,
+        "note": "Stranger on transit expects response to debate",
+        "shape": "situation",
+        "flags": []
+      },
+      {
+        "i": 17,
+        "note": "Landlord wants two-year lease; you want flexibility",
+        "shape": "situation",
+        "flags": [
+          "two_option"
+        ]
+      },
+      {
+        "i": 18,
+        "note": "Boss piles work; afraid to speak up",
+        "shape": "advice",
+        "flags": []
+      },
+      {
+        "i": 19,
+        "note": "Notice beauty while group focuses on something else",
+        "shape": "situation",
+        "flags": []
+      },
+      {
+        "i": 20,
+        "note": "Friend makes unwise decision; unsolicited opinion dilemma",
+        "shape": "situation",
+        "flags": [
+          "two_option"
+        ]
+      },
+      {
+        "i": 21,
+        "note": "Personal work; someone asks to review it first",
+        "shape": "situation",
+        "flags": []
+      },
+      {
+        "i": 22,
+        "note": "New team is loud and social; you need quiet",
+        "shape": "advice",
+        "flags": []
+      },
+      {
+        "i": 23,
+        "note": "Bonus: long-term investment or immediate enjoyment",
+        "shape": "situation",
+        "flags": [
+          "two_option"
+        ]
+      },
+      {
+        "i": 24,
+        "note": "Group project needs leader; nobody volunteering",
+        "shape": "situation",
+        "flags": []
+      },
+      {
+        "i": 25,
+        "note": "New partner wants to define relationship; you need time",
+        "shape": "advice",
+        "flags": []
+      },
+      {
+        "i": 26,
+        "note": "Choose between larger loud or smaller quiet apartment",
+        "shape": "situation",
+        "flags": [
+          "two_option"
+        ]
+      },
+      {
+        "i": 27,
+        "note": "Asked for honest opinion on respected person's work",
+        "shape": "situation",
+        "flags": []
+      },
+      {
+        "i": 28,
+        "note": "Absorbed in present; lose track of long-term planning",
+        "shape": "advice",
+        "flags": []
+      },
+      {
+        "i": 29,
+        "note": "Quiet concern about quick decision in meeting",
+        "shape": "situation",
+        "flags": []
+      },
+      {
+        "i": 30,
+        "note": "Friend invites to networking event; you find draining",
+        "shape": "situation",
+        "flags": [
+          "yes_no"
+        ]
+      },
+      {
+        "i": 31,
+        "note": "Asked why you haven't finished careful slow work",
+        "shape": "situation",
+        "flags": []
+      },
+      {
+        "i": 32,
+        "note": "Speak up in group with different strong opinions",
+        "shape": "advice",
+        "flags": []
+      },
+      {
+        "i": 33,
+        "note": "Family member pushes big life decision; you're not ready",
+        "shape": "situation",
+        "flags": []
+      },
+      {
+        "i": 34,
+        "note": "Someone loudly dismisses art or music you love",
+        "shape": "situation",
+        "flags": []
+      },
+      {
+        "i": 35,
+        "note": "Choose between flexible low-pay or structured high-pay job",
+        "shape": "situation",
+        "flags": [
+          "two_option"
+        ]
+      },
+      {
+        "i": 36,
+        "note": "Coworker takes credit for shared ideas repeatedly",
+        "shape": "advice",
+        "flags": []
+      },
+      {
+        "i": 37,
+        "note": "Asked to commit to detailed vacation plan months ahead",
+        "shape": "situation",
+        "flags": [
+          "yes_no"
+        ]
+      },
+      {
+        "i": 38,
+        "note": "Friend in crisis wants long talks; you're exhausted",
+        "shape": "situation",
+        "flags": []
+      },
+      {
+        "i": 39,
+        "note": "Friend pushes you to share opinion in front of group",
+        "shape": "situation",
+        "flags": []
+      }
+    ]
+  },
+  "stem": "isfp_mbti",
+  "arm": "w19"
+}

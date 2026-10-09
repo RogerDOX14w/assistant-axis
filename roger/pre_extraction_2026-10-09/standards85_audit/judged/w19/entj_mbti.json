@@ -1,0 +1,335 @@
+{
+  "content_sha256": "d6cc32526b7d68d4",
+  "judged_at": "2026-10-09T23:22:42+00:00",
+  "instruction_judge": {
+    "model": "claude-sonnet-4-6",
+    "rubric_version": 4,
+    "items": [
+      {
+        "id": "p0_pos",
+        "faults": [],
+        "quotes": {}
+      },
+      {
+        "id": "p0_neg",
+        "faults": [],
+        "quotes": {}
+      },
+      {
+        "id": "p1_pos",
+        "faults": [],
+        "quotes": {}
+      },
+      {
+        "id": "p1_neg",
+        "faults": [],
+        "quotes": {}
+      },
+      {
+        "id": "p2_pos",
+        "faults": [],
+        "quotes": {}
+      },
+      {
+        "id": "p2_neg",
+        "faults": [],
+        "quotes": {}
+      },
+      {
+        "id": "p3_pos",
+        "faults": [],
+        "quotes": {}
+      },
+      {
+        "id": "p3_neg",
+        "faults": [
+          "invented_motive"
+        ],
+        "quotes": {
+          "invented_motive": "a confident stand that might shut down the conversation"
+        }
+      },
+      {
+        "id": "p4_pos",
+        "faults": [],
+        "quotes": {}
+      },
+      {
+        "id": "p4_neg",
+        "faults": [],
+        "quotes": {}
+      }
+    ]
+  },
+  "question_judge": {
+    "model": "claude-haiku-4-5-20251001",
+    "rubric_version": 3,
+    "items": [
+      {
+        "i": 0,
+        "note": "Inefficient process, manager content, what do you do",
+        "shape": "situation",
+        "flags": []
+      },
+      {
+        "i": 1,
+        "note": "Brainstorm stuck, what do you do next",
+        "shape": "situation",
+        "flags": []
+      },
+      {
+        "i": 2,
+        "note": "Weak presentation feedback, how do you respond",
+        "shape": "situation",
+        "flags": []
+      },
+      {
+        "i": 3,
+        "note": "Plan won't reach goal, deadline in two weeks",
+        "shape": "situation",
+        "flags": []
+      },
+      {
+        "i": 4,
+        "note": "Group can't decide on trip destination",
+        "shape": "situation",
+        "flags": []
+      },
+      {
+        "i": 5,
+        "note": "Higher pay vs disagreeable manager, choose",
+        "shape": "situation",
+        "flags": [
+          "two_option"
+        ]
+      },
+      {
+        "i": 6,
+        "note": "Refine presentation or read books, choose",
+        "shape": "situation",
+        "flags": [
+          "solo_task",
+          "two_option"
+        ]
+      },
+      {
+        "i": 7,
+        "note": "Neighbor struggling in city, how respond",
+        "shape": "situation",
+        "flags": []
+      },
+      {
+        "i": 8,
+        "note": "Dinner party, you disagree with most, what do",
+        "shape": "situation",
+        "flags": []
+      },
+      {
+        "i": 9,
+        "note": "Committee members stalling decisions, deadline approaching",
+        "shape": "situation",
+        "flags": []
+      },
+      {
+        "i": 10,
+        "note": "New job, messy workflow, what would you do",
+        "shape": "advice",
+        "flags": []
+      },
+      {
+        "i": 11,
+        "note": "Free Saturday, friends or long-term plan, choose",
+        "shape": "situation",
+        "flags": [
+          "solo_task",
+          "two_option"
+        ]
+      },
+      {
+        "i": 12,
+        "note": "Peer's flawed strategy, large meeting, what do",
+        "shape": "situation",
+        "flags": []
+      },
+      {
+        "i": 13,
+        "note": "Software adoption, you've researched, committee wants month",
+        "shape": "situation",
+        "flags": []
+      },
+      {
+        "i": 14,
+        "note": "Stuck in role four years, security vs change",
+        "shape": "advice",
+        "flags": []
+      },
+      {
+        "i": 15,
+        "note": "Team member misses small deadlines, good work",
+        "shape": "situation",
+        "flags": []
+      },
+      {
+        "i": 16,
+        "note": "Move for career or stay with friends",
+        "shape": "situation",
+        "flags": [
+          "two_option"
+        ]
+      },
+      {
+        "i": 17,
+        "note": "Family member mismanaging budget, unsolicited input",
+        "shape": "situation",
+        "flags": []
+      },
+      {
+        "i": 18,
+        "note": "Community meeting rambling, no resolution, what do",
+        "shape": "situation",
+        "flags": []
+      },
+      {
+        "i": 19,
+        "note": "Small business no five-year plan, partner disagrees",
+        "shape": "advice",
+        "flags": []
+      },
+      {
+        "i": 20,
+        "note": "Lead working group or solo research, choose",
+        "shape": "situation",
+        "flags": [
+          "two_option"
+        ]
+      },
+      {
+        "i": 21,
+        "note": "Friend signing bad contract, excited, what do",
+        "shape": "situation",
+        "flags": []
+      },
+      {
+        "i": 22,
+        "note": "Team runs by consensus, what do you think",
+        "shape": "situation",
+        "flags": []
+      },
+      {
+        "i": 23,
+        "note": "Ideas not taken seriously in meetings, what do",
+        "shape": "advice",
+        "flags": []
+      },
+      {
+        "i": 24,
+        "note": "Two candidates, skilled abrasive or likeable developing",
+        "shape": "situation",
+        "flags": [
+          "two_option"
+        ]
+      },
+      {
+        "i": 25,
+        "note": "Document needs restructure, finish faster or rebuild",
+        "shape": "situation",
+        "flags": [
+          "solo_task",
+          "two_option"
+        ]
+      },
+      {
+        "i": 26,
+        "note": "No household budget or plan, what do",
+        "shape": "situation",
+        "flags": []
+      },
+      {
+        "i": 27,
+        "note": "Start projects, abandon them, stay focused how",
+        "shape": "advice",
+        "flags": []
+      },
+      {
+        "i": 28,
+        "note": "Social event, know almost no one, what do",
+        "shape": "situation",
+        "flags": []
+      },
+      {
+        "i": 29,
+        "note": "Managing team through uncertainty, people ask questions",
+        "shape": "situation",
+        "flags": []
+      },
+      {
+        "i": 30,
+        "note": "High-risk visible work or steady reliable path",
+        "shape": "situation",
+        "flags": [
+          "two_option"
+        ]
+      },
+      {
+        "i": 31,
+        "note": "Meeting decision you think wrong, already stated view",
+        "shape": "situation",
+        "flags": []
+      },
+      {
+        "i": 32,
+        "note": "Great reorganization idea, manager hasn't asked, bring up",
+        "shape": "advice",
+        "flags": [
+          "yes_no"
+        ]
+      },
+      {
+        "i": 33,
+        "note": "Read something overturning your public position, what do",
+        "shape": "situation",
+        "flags": []
+      },
+      {
+        "i": 34,
+        "note": "City infrastructure debate, you have clear view",
+        "shape": "situation",
+        "flags": []
+      },
+      {
+        "i": 35,
+        "note": "Talk to large audience, intensive prep three weeks",
+        "shape": "situation",
+        "flags": []
+      },
+      {
+        "i": 36,
+        "note": "Vacation planning by committee, shapeless itinerary",
+        "shape": "situation",
+        "flags": []
+      },
+      {
+        "i": 37,
+        "note": "Leadership role difficult unpopular decisions, unsure, what tell",
+        "shape": "advice",
+        "flags": []
+      },
+      {
+        "i": 38,
+        "note": "Long-term plan, need info from several people",
+        "shape": "situation",
+        "flags": [
+          "solo_task"
+        ]
+      },
+      {
+        "i": 39,
+        "note": "Colleagues in conflict slowing team, not asked to help",
+        "shape": "situation",
+        "flags": []
+      }
+    ]
+  },
+  "stem": "entj_mbti",
+  "arm": "w19"
+}

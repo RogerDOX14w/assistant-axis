@@ -1,0 +1,346 @@
+{
+  "content_sha256": "c14412319fb24e10",
+  "judged_at": "2026-10-09T23:23:35+00:00",
+  "instruction_judge": {
+    "model": "claude-sonnet-4-6",
+    "rubric_version": 4,
+    "items": [
+      {
+        "id": "p0_pos",
+        "faults": [],
+        "quotes": {}
+      },
+      {
+        "id": "p0_neg",
+        "faults": [],
+        "quotes": {}
+      },
+      {
+        "id": "p1_pos",
+        "faults": [],
+        "quotes": {}
+      },
+      {
+        "id": "p1_neg",
+        "faults": [],
+        "quotes": {}
+      },
+      {
+        "id": "p2_pos",
+        "faults": [],
+        "quotes": {}
+      },
+      {
+        "id": "p2_neg",
+        "faults": [],
+        "quotes": {}
+      },
+      {
+        "id": "p3_pos",
+        "faults": [],
+        "quotes": {}
+      },
+      {
+        "id": "p3_neg",
+        "faults": [],
+        "quotes": {}
+      },
+      {
+        "id": "p4_pos",
+        "faults": [],
+        "quotes": {}
+      },
+      {
+        "id": "p4_neg",
+        "faults": [],
+        "quotes": {}
+      }
+    ]
+  },
+  "question_judge": {
+    "model": "claude-haiku-4-5-20251001",
+    "rubric_version": 3,
+    "items": [
+      {
+        "i": 0,
+        "note": "Choose between profitable or values-aligned project",
+        "shape": "situation",
+        "flags": [
+          "two_option"
+        ]
+      },
+      {
+        "i": 1,
+        "note": "Friend asks advice on leaving stable career",
+        "shape": "advice",
+        "flags": []
+      },
+      {
+        "i": 2,
+        "note": "Follow outline or honest tangent in writing",
+        "shape": "situation",
+        "flags": [
+          "solo_task",
+          "two_option"
+        ]
+      },
+      {
+        "i": 3,
+        "note": "Respond to dismissive joke at dinner party",
+        "shape": "situation",
+        "flags": []
+      },
+      {
+        "i": 4,
+        "note": "Decide on promotion that conflicts with values",
+        "shape": "advice",
+        "flags": []
+      },
+      {
+        "i": 5,
+        "note": "Approach struggling colleague or wait for request",
+        "shape": "situation",
+        "flags": [
+          "two_option"
+        ]
+      },
+      {
+        "i": 6,
+        "note": "Choose between self-care or helping friend move",
+        "shape": "situation",
+        "flags": [
+          "two_option"
+        ]
+      },
+      {
+        "i": 7,
+        "note": "Address feeling inauthentic in long-term friend group",
+        "shape": "advice",
+        "flags": []
+      },
+      {
+        "i": 8,
+        "note": "Accept well-funded project without personal meaning",
+        "shape": "situation",
+        "flags": [
+          "two_option"
+        ]
+      },
+      {
+        "i": 9,
+        "note": "Respond to distressed neighbor canceling own plans",
+        "shape": "situation",
+        "flags": [
+          "two_option"
+        ]
+      },
+      {
+        "i": 10,
+        "note": "Choose structured curriculum or curiosity-led reading",
+        "shape": "situation",
+        "flags": [
+          "solo_task",
+          "two_option"
+        ]
+      },
+      {
+        "i": 11,
+        "note": "Respond to abandoning creative projects from perfectionism",
+        "shape": "advice",
+        "flags": []
+      },
+      {
+        "i": 12,
+        "note": "Raise concern about policy disadvantaging vulnerable group",
+        "shape": "situation",
+        "flags": []
+      },
+      {
+        "i": 13,
+        "note": "Give honest feedback on flawed meaningful work",
+        "shape": "situation",
+        "flags": []
+      },
+      {
+        "i": 14,
+        "note": "Respond to ethical problems in supported cause",
+        "shape": "situation",
+        "flags": []
+      },
+      {
+        "i": 15,
+        "note": "Advise junior colleague on being taken seriously",
+        "shape": "situation",
+        "flags": []
+      },
+      {
+        "i": 16,
+        "note": "Continue fascinating tangent or return to goal",
+        "shape": "situation",
+        "flags": [
+          "solo_task",
+          "two_option"
+        ]
+      },
+      {
+        "i": 17,
+        "note": "Choose between staying near loved ones or growing",
+        "shape": "advice",
+        "flags": [
+          "two_option"
+        ]
+      },
+      {
+        "i": 18,
+        "note": "Speak up about overlooked concern at meeting",
+        "shape": "situation",
+        "flags": []
+      },
+      {
+        "i": 19,
+        "note": "Challenge workplace rule causing quiet harm",
+        "shape": "situation",
+        "flags": [
+          "two_option"
+        ]
+      },
+      {
+        "i": 20,
+        "note": "Analyze events or explore meaning in journal",
+        "shape": "situation",
+        "flags": [
+          "solo_task",
+          "two_option"
+        ]
+      },
+      {
+        "i": 21,
+        "note": "Help friend interview at ethically troubling company",
+        "shape": "situation",
+        "flags": []
+      },
+      {
+        "i": 22,
+        "note": "Manage caring deeply while avoiding exhaustion",
+        "shape": "advice",
+        "flags": []
+      },
+      {
+        "i": 23,
+        "note": "Enforce unjust rule in specific case",
+        "shape": "situation",
+        "flags": []
+      },
+      {
+        "i": 24,
+        "note": "Support two conflicting people without choosing sides",
+        "shape": "situation",
+        "flags": []
+      },
+      {
+        "i": 25,
+        "note": "Choose how to spend unrestricted personal time",
+        "shape": "situation",
+        "flags": [
+          "solo_task"
+        ]
+      },
+      {
+        "i": 26,
+        "note": "Respond internally to public challenge of belief",
+        "shape": "situation",
+        "flags": []
+      },
+      {
+        "i": 27,
+        "note": "Change position publicly despite confusing others",
+        "shape": "advice",
+        "flags": []
+      },
+      {
+        "i": 28,
+        "note": "Choose between effective or personally meaningful donation",
+        "shape": "situation",
+        "flags": [
+          "two_option"
+        ]
+      },
+      {
+        "i": 29,
+        "note": "Relate to new person with different views",
+        "shape": "situation",
+        "flags": []
+      },
+      {
+        "i": 30,
+        "note": "Abandon committed plan for truer direction",
+        "shape": "situation",
+        "flags": [
+          "two_option"
+        ]
+      },
+      {
+        "i": 31,
+        "note": "Address colleague dismissing quieter colleagues' ideas",
+        "shape": "advice",
+        "flags": []
+      },
+      {
+        "i": 32,
+        "note": "Handle belongings from past version of self",
+        "shape": "situation",
+        "flags": [
+          "solo_task"
+        ]
+      },
+      {
+        "i": 33,
+        "note": "Respond to admired figure contradicting their values",
+        "shape": "situation",
+        "flags": []
+      },
+      {
+        "i": 34,
+        "note": "Attend gathering for cause despite tiredness",
+        "shape": "situation",
+        "flags": [
+          "two_option"
+        ]
+      },
+      {
+        "i": 35,
+        "note": "Overcome indecision from fear of closing options",
+        "shape": "advice",
+        "flags": []
+      },
+      {
+        "i": 36,
+        "note": "Balance finalizing direction with exploring possibilities",
+        "shape": "situation",
+        "flags": [
+          "two_option"
+        ]
+      },
+      {
+        "i": 37,
+        "note": "Give honest feedback to developing artist online",
+        "shape": "situation",
+        "flags": []
+      },
+      {
+        "i": 38,
+        "note": "Speak against celebrated decision you believe wrong",
+        "shape": "situation",
+        "flags": []
+      },
+      {
+        "i": 39,
+        "note": "Change inauthentic life without major disruption",
+        "shape": "advice",
+        "flags": []
+      }
+    ]
+  },
+  "stem": "infp_mbti",
+  "arm": "w19"
+}

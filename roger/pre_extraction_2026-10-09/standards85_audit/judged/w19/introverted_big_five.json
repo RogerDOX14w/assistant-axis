@@ -1,0 +1,368 @@
+{
+  "content_sha256": "883b85a95e9cbc97",
+  "judged_at": "2026-10-09T23:23:50+00:00",
+  "instruction_judge": {
+    "model": "claude-sonnet-4-6",
+    "rubric_version": 4,
+    "items": [
+      {
+        "id": "p0_pos",
+        "faults": [],
+        "quotes": {}
+      },
+      {
+        "id": "p0_neg",
+        "faults": [],
+        "quotes": {}
+      },
+      {
+        "id": "p1_pos",
+        "faults": [],
+        "quotes": {}
+      },
+      {
+        "id": "p1_neg",
+        "faults": [],
+        "quotes": {}
+      },
+      {
+        "id": "p2_pos",
+        "faults": [],
+        "quotes": {}
+      },
+      {
+        "id": "p2_neg",
+        "faults": [],
+        "quotes": {}
+      },
+      {
+        "id": "p3_pos",
+        "faults": [],
+        "quotes": {}
+      },
+      {
+        "id": "p3_neg",
+        "faults": [],
+        "quotes": {}
+      },
+      {
+        "id": "p4_pos",
+        "faults": [
+          "invented_motive"
+        ],
+        "quotes": {
+          "invented_motive": "you do your best thinking alone"
+        }
+      },
+      {
+        "id": "p4_neg",
+        "faults": [
+          "invented_motive"
+        ],
+        "quotes": {
+          "invented_motive": "you think better when you can talk things through with others"
+        }
+      }
+    ]
+  },
+  "question_judge": {
+    "model": "claude-haiku-4-5-20251001",
+    "rubric_version": 3,
+    "items": [
+      {
+        "i": 0,
+        "note": "Attend loud bar social event or not",
+        "shape": "situation",
+        "flags": [
+          "two_option"
+        ]
+      },
+      {
+        "i": 1,
+        "note": "Call colleague or read alone with free time",
+        "shape": "situation",
+        "flags": [
+          "two_option"
+        ]
+      },
+      {
+        "i": 2,
+        "note": "Join barely-known attendees in lobby or not",
+        "shape": "situation",
+        "flags": [
+          "two_option"
+        ]
+      },
+      {
+        "i": 3,
+        "note": "Handle unexpected neighbor visit to chat",
+        "shape": "situation",
+        "flags": []
+      },
+      {
+        "i": 4,
+        "note": "Volunteer to lead icebreaker at meeting",
+        "shape": "situation",
+        "flags": [
+          "yes_no"
+        ]
+      },
+      {
+        "i": 5,
+        "note": "Request quiet space or adapt to open office",
+        "shape": "situation",
+        "flags": [
+          "two_option"
+        ]
+      },
+      {
+        "i": 6,
+        "note": "Attend birthday party with forty strangers",
+        "shape": "situation",
+        "flags": [
+          "yes_no"
+        ]
+      },
+      {
+        "i": 7,
+        "note": "Respond to silence during brainstorming meeting",
+        "shape": "situation",
+        "flags": []
+      },
+      {
+        "i": 8,
+        "note": "Spend two hours at wedding table with strangers",
+        "shape": "situation",
+        "flags": []
+      },
+      {
+        "i": 9,
+        "note": "Respond to manager's suggestion to speak more",
+        "shape": "situation",
+        "flags": []
+      },
+      {
+        "i": 10,
+        "note": "Accept or decline casual video call from colleague",
+        "shape": "situation",
+        "flags": [
+          "two_option"
+        ]
+      },
+      {
+        "i": 11,
+        "note": "Work alone or collaborate with colleague next",
+        "shape": "situation",
+        "flags": [
+          "two_option"
+        ]
+      },
+      {
+        "i": 12,
+        "note": "Handle eager new neighbor's introduction",
+        "shape": "situation",
+        "flags": []
+      },
+      {
+        "i": 13,
+        "note": "Sit with solo traveler during flight delay",
+        "shape": "situation",
+        "flags": [
+          "yes_no"
+        ]
+      },
+      {
+        "i": 14,
+        "note": "Volunteer for committee facilitating group discussion",
+        "shape": "situation",
+        "flags": [
+          "yes_no"
+        ]
+      },
+      {
+        "i": 15,
+        "note": "Join casual colleague group chat or not",
+        "shape": "situation",
+        "flags": [
+          "two_option"
+        ]
+      },
+      {
+        "i": 16,
+        "note": "Participate in lively loud conversation at dinner",
+        "shape": "situation",
+        "flags": []
+      },
+      {
+        "i": 17,
+        "note": "Choose group tour or self-guided vacation",
+        "shape": "situation",
+        "flags": [
+          "two_option"
+        ]
+      },
+      {
+        "i": 18,
+        "note": "Represent team at networking event with mingling",
+        "shape": "situation",
+        "flags": [
+          "yes_no"
+        ]
+      },
+      {
+        "i": 19,
+        "note": "Accept high-paying role requiring constant meetings",
+        "shape": "situation",
+        "flags": [
+          "two_option"
+        ]
+      },
+      {
+        "i": 20,
+        "note": "Address job drain from constant meetings",
+        "shape": "advice",
+        "flags": []
+      },
+      {
+        "i": 21,
+        "note": "Join recreational sports league with neighbors",
+        "shape": "advice",
+        "flags": []
+      },
+      {
+        "i": 22,
+        "note": "Choose busy city or quiet apartment location",
+        "shape": "advice",
+        "flags": [
+          "two_option"
+        ]
+      },
+      {
+        "i": 23,
+        "note": "Handle friends' packed social calendar pressure",
+        "shape": "advice",
+        "flags": []
+      },
+      {
+        "i": 24,
+        "note": "Accept promotion requiring presentations and meetings",
+        "shape": "advice",
+        "flags": [
+          "two_option"
+        ]
+      },
+      {
+        "i": 25,
+        "note": "Address talking too much to fill silence",
+        "shape": "advice",
+        "flags": []
+      },
+      {
+        "i": 26,
+        "note": "Handle noisy colleague in shared office",
+        "shape": "advice",
+        "flags": []
+      },
+      {
+        "i": 27,
+        "note": "Choose solo cabin weekend or group trip",
+        "shape": "advice",
+        "flags": [
+          "two_option"
+        ]
+      },
+      {
+        "i": 28,
+        "note": "Seek colleague input or solve problem alone",
+        "shape": "situation",
+        "flags": [
+          "two_option"
+        ]
+      },
+      {
+        "i": 29,
+        "note": "Attend optional weekend team bonding offsite",
+        "shape": "situation",
+        "flags": [
+          "yes_no"
+        ]
+      },
+      {
+        "i": 30,
+        "note": "Spend ten minutes before meeting starts",
+        "shape": "situation",
+        "flags": []
+      },
+      {
+        "i": 31,
+        "note": "Join group camping trip or take separate trip",
+        "shape": "situation",
+        "flags": [
+          "two_option"
+        ]
+      },
+      {
+        "i": 32,
+        "note": "Perform silly act in front of group",
+        "shape": "situation",
+        "flags": [
+          "yes_no"
+        ]
+      },
+      {
+        "i": 33,
+        "note": "Sign up for charity fun run or skip",
+        "shape": "situation",
+        "flags": [
+          "two_option"
+        ]
+      },
+      {
+        "i": 34,
+        "note": "Respond to chatty stranger in waiting room",
+        "shape": "situation",
+        "flags": []
+      },
+      {
+        "i": 35,
+        "note": "Accept joint presentation at industry event",
+        "shape": "situation",
+        "flags": [
+          "yes_no"
+        ]
+      },
+      {
+        "i": 36,
+        "note": "Spend free weekend with friends or alone",
+        "shape": "situation",
+        "flags": [
+          "two_option"
+        ]
+      },
+      {
+        "i": 37,
+        "note": "Share personal story during team meeting",
+        "shape": "situation",
+        "flags": []
+      },
+      {
+        "i": 38,
+        "note": "Join weekly local club with thirty members",
+        "shape": "situation",
+        "flags": [
+          "yes_no"
+        ]
+      },
+      {
+        "i": 39,
+        "note": "Dance at crowded party or decline",
+        "shape": "situation",
+        "flags": [
+          "two_option"
+        ]
+      }
+    ]
+  },
+  "stem": "introverted_big_five",
+  "arm": "w19"
+}

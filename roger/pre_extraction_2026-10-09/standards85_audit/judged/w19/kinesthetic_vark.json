@@ -1,0 +1,379 @@
+{
+  "content_sha256": "5d60d2318a2e0cc1",
+  "judged_at": "2026-10-09T23:24:16+00:00",
+  "instruction_judge": {
+    "model": "claude-sonnet-4-6",
+    "rubric_version": 4,
+    "items": [
+      {
+        "id": "p0_pos",
+        "faults": [
+          "invented_detail"
+        ],
+        "quotes": {
+          "invented_detail": "worked through something with your hands"
+        }
+      },
+      {
+        "id": "p0_neg",
+        "faults": [],
+        "quotes": {}
+      },
+      {
+        "id": "p1_pos",
+        "faults": [],
+        "quotes": {}
+      },
+      {
+        "id": "p1_neg",
+        "faults": [],
+        "quotes": {}
+      },
+      {
+        "id": "p2_pos",
+        "faults": [
+          "invented_detail"
+        ],
+        "quotes": {
+          "invented_detail": "in the field, not how it is described in a textbook"
+        }
+      },
+      {
+        "id": "p2_neg",
+        "faults": [],
+        "quotes": {}
+      },
+      {
+        "id": "p3_pos",
+        "faults": [],
+        "quotes": {}
+      },
+      {
+        "id": "p3_neg",
+        "faults": [],
+        "quotes": {}
+      },
+      {
+        "id": "p4_pos",
+        "faults": [],
+        "quotes": {}
+      },
+      {
+        "id": "p4_neg",
+        "faults": [],
+        "quotes": {}
+      }
+    ]
+  },
+  "question_judge": {
+    "model": "claude-haiku-4-5-20251001",
+    "rubric_version": 3,
+    "items": [
+      {
+        "i": 0,
+        "note": "Software system: read manual or explore hands-on",
+        "shape": "situation",
+        "flags": [
+          "solo_task",
+          "two_option"
+        ]
+      },
+      {
+        "i": 1,
+        "note": "Attend lecture series on urban planning theory",
+        "shape": "situation",
+        "flags": [
+          "yes_no"
+        ]
+      },
+      {
+        "i": 2,
+        "note": "Learn compound interest: textbook or spreadsheet",
+        "shape": "situation",
+        "flags": [
+          "solo_task",
+          "two_option"
+        ]
+      },
+      {
+        "i": 3,
+        "note": "Spanish learning stuck with grammar and flashcards",
+        "shape": "advice",
+        "flags": []
+      },
+      {
+        "i": 4,
+        "note": "Design training: principles or realistic scenarios",
+        "shape": "situation",
+        "flags": [
+          "two_option"
+        ]
+      },
+      {
+        "i": 5,
+        "note": "Advise neighbor on legal dispute using story",
+        "shape": "situation",
+        "flags": []
+      },
+      {
+        "i": 6,
+        "note": "Process for learning to cook new dish",
+        "shape": "situation",
+        "flags": [
+          "solo_task"
+        ]
+      },
+      {
+        "i": 7,
+        "note": "New manager overwhelmed by theory-practice gap",
+        "shape": "advice",
+        "flags": []
+      },
+      {
+        "i": 8,
+        "note": "Job choice: higher pay or field work",
+        "shape": "situation",
+        "flags": [
+          "two_option"
+        ]
+      },
+      {
+        "i": 9,
+        "note": "Watch climate science documentary with data focus",
+        "shape": "situation",
+        "flags": [
+          "solo_task",
+          "yes_no"
+        ]
+      },
+      {
+        "i": 10,
+        "note": "Evaluate diet: research abstracts or personal journals",
+        "shape": "situation",
+        "flags": [
+          "solo_task",
+          "two_option"
+        ]
+      },
+      {
+        "i": 11,
+        "note": "Certification exam: understand theory but blank on tests",
+        "shape": "advice",
+        "flags": []
+      },
+      {
+        "i": 12,
+        "note": "Museum exhibits: history panels or flight simulation",
+        "shape": "situation",
+        "flags": [
+          "solo_task",
+          "two_option"
+        ]
+      },
+      {
+        "i": 13,
+        "note": "Supply chain report: theory or case studies",
+        "shape": "situation",
+        "flags": [
+          "two_option"
+        ]
+      },
+      {
+        "i": 14,
+        "note": "Engage with dense philosophical text without examples",
+        "shape": "situation",
+        "flags": [
+          "solo_task"
+        ]
+      },
+      {
+        "i": 15,
+        "note": "Understand index fund investing mechanics",
+        "shape": "advice",
+        "flags": []
+      },
+      {
+        "i": 16,
+        "note": "Professional development: role-play or strategy seminar",
+        "shape": "situation",
+        "flags": [
+          "two_option"
+        ]
+      },
+      {
+        "i": 17,
+        "note": "Choose paint color: chips only or test samples",
+        "shape": "situation",
+        "flags": [
+          "solo_task",
+          "two_option"
+        ]
+      },
+      {
+        "i": 18,
+        "note": "Understand market: colleague says reports, you disagree",
+        "shape": "situation",
+        "flags": []
+      },
+      {
+        "i": 19,
+        "note": "Read about mindfulness but still stressed and distracted",
+        "shape": "advice",
+        "flags": []
+      },
+      {
+        "i": 20,
+        "note": "Teach teenager budgeting: principles or real budget",
+        "shape": "situation",
+        "flags": [
+          "two_option"
+        ]
+      },
+      {
+        "i": 21,
+        "note": "Recommend woodworking learning method to friend",
+        "shape": "situation",
+        "flags": []
+      },
+      {
+        "i": 22,
+        "note": "University course choice: lecture or project-based",
+        "shape": "situation",
+        "flags": [
+          "two_option"
+        ]
+      },
+      {
+        "i": 23,
+        "note": "Read about cognitive biases but don't notice them",
+        "shape": "advice",
+        "flags": []
+      },
+      {
+        "i": 24,
+        "note": "Evaluate program: impact assessment or site visit",
+        "shape": "situation",
+        "flags": [
+          "solo_task",
+          "two_option"
+        ]
+      },
+      {
+        "i": 25,
+        "note": "Stuck on design: sketch theory or build prototype",
+        "shape": "situation",
+        "flags": [
+          "solo_task",
+          "two_option"
+        ]
+      },
+      {
+        "i": 26,
+        "note": "Economic policy: graphs or small-business profiles",
+        "shape": "situation",
+        "flags": [
+          "solo_task",
+          "two_option"
+        ]
+      },
+      {
+        "i": 27,
+        "note": "Learn sailing: classroom theory or on-water practice",
+        "shape": "situation",
+        "flags": [
+          "two_option"
+        ]
+      },
+      {
+        "i": 28,
+        "note": "Career change: read about field but unsure",
+        "shape": "advice",
+        "flags": []
+      },
+      {
+        "i": 29,
+        "note": "Mentor colleague: written explanation or live walkthrough",
+        "shape": "situation",
+        "flags": [
+          "two_option"
+        ]
+      },
+      {
+        "i": 30,
+        "note": "Help friend with first speech: principles or rehearsal",
+        "shape": "situation",
+        "flags": [
+          "two_option"
+        ]
+      },
+      {
+        "i": 31,
+        "note": "Saturday: library talk or guided neighborhood walk",
+        "shape": "situation",
+        "flags": [
+          "solo_task",
+          "two_option"
+        ]
+      },
+      {
+        "i": 32,
+        "note": "Houseplants dying despite following care instructions",
+        "shape": "advice",
+        "flags": []
+      },
+      {
+        "i": 33,
+        "note": "Prepare salary negotiation: study or rehearse",
+        "shape": "situation",
+        "flags": [
+          "two_option"
+        ]
+      },
+      {
+        "i": 34,
+        "note": "Understand historical event: colleague says theory, you differ",
+        "shape": "situation",
+        "flags": []
+      },
+      {
+        "i": 35,
+        "note": "Family member starting handmade goods business",
+        "shape": "situation",
+        "flags": []
+      },
+      {
+        "i": 36,
+        "note": "Math concept clear in textbook but can't apply",
+        "shape": "advice",
+        "flags": []
+      },
+      {
+        "i": 37,
+        "note": "Explore new country: prepare reading or arrive open",
+        "shape": "situation",
+        "flags": [
+          "solo_task",
+          "two_option"
+        ]
+      },
+      {
+        "i": 38,
+        "note": "Training program: theory-first or project-first track",
+        "shape": "situation",
+        "flags": [
+          "two_option"
+        ]
+      },
+      {
+        "i": 39,
+        "note": "Explain technical process: logic steps or real example",
+        "shape": "situation",
+        "flags": [
+          "two_option"
+        ]
+      }
+    ]
+  },
+  "stem": "kinesthetic_vark",
+  "arm": "w19"
+}

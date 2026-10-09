@@ -1,0 +1,390 @@
+{
+  "content_sha256": "c1ca0600aca80548",
+  "judged_at": "2026-10-09T23:25:44+00:00",
+  "instruction_judge": {
+    "model": "claude-sonnet-4-6",
+    "rubric_version": 4,
+    "items": [
+      {
+        "id": "p0_pos",
+        "faults": [
+          "attitude_only"
+        ],
+        "quotes": {
+          "attitude_only": "grasps ideas by turning them into shapes, layouts, and diagrams in your mind. You see relationships as spatial arrangements"
+        }
+      },
+      {
+        "id": "p0_neg",
+        "faults": [],
+        "quotes": {}
+      },
+      {
+        "id": "p1_pos",
+        "faults": [
+          "invented_detail"
+        ],
+        "quotes": {
+          "invented_detail": "reaches for a pencil and draws whenever you need to think"
+        }
+      },
+      {
+        "id": "p1_neg",
+        "faults": [
+          "invented_detail"
+        ],
+        "quotes": {
+          "invented_detail": "Putting pen to paper means sentences, not sketches"
+        }
+      },
+      {
+        "id": "p2_pos",
+        "faults": [],
+        "quotes": {}
+      },
+      {
+        "id": "p2_neg",
+        "faults": [],
+        "quotes": {}
+      },
+      {
+        "id": "p3_pos",
+        "faults": [],
+        "quotes": {}
+      },
+      {
+        "id": "p3_neg",
+        "faults": [
+          "attitude_only"
+        ],
+        "quotes": {
+          "attitude_only": "organizes knowledge as a sequence of statements and connected ideas expressed in language. You follow the thread of an argument rather than surveying its shape"
+        }
+      },
+      {
+        "id": "p4_pos",
+        "faults": [],
+        "quotes": {}
+      },
+      {
+        "id": "p4_neg",
+        "faults": [],
+        "quotes": {}
+      }
+    ]
+  },
+  "question_judge": {
+    "model": "claude-haiku-4-5-20251001",
+    "rubric_version": 3,
+    "items": [
+      {
+        "i": 0,
+        "note": "How to make sense of email steps",
+        "shape": "situation",
+        "flags": [
+          "solo_task"
+        ]
+      },
+      {
+        "i": 1,
+        "note": "Deciding whether to accept job offer",
+        "shape": "situation",
+        "flags": [
+          "solo_task",
+          "two_option"
+        ]
+      },
+      {
+        "i": 2,
+        "note": "Friend asks what to do about departments",
+        "shape": "advice",
+        "flags": []
+      },
+      {
+        "i": 3,
+        "note": "Learning programming with prose documentation",
+        "shape": "situation",
+        "flags": [
+          "solo_task"
+        ]
+      },
+      {
+        "i": 4,
+        "note": "Understanding rezoning changes from description",
+        "shape": "situation",
+        "flags": [
+          "solo_task"
+        ]
+      },
+      {
+        "i": 5,
+        "note": "Explaining mortgage amortization to family",
+        "shape": "situation",
+        "flags": [
+          "solo_task"
+        ]
+      },
+      {
+        "i": 6,
+        "note": "Comparing five health insurance plans",
+        "shape": "situation",
+        "flags": [
+          "solo_task"
+        ]
+      },
+      {
+        "i": 7,
+        "note": "Studying historical event with multiple actors",
+        "shape": "situation",
+        "flags": [
+          "solo_task"
+        ]
+      },
+      {
+        "i": 8,
+        "note": "Friend asks about presenting project timeline",
+        "shape": "advice",
+        "flags": []
+      },
+      {
+        "i": 9,
+        "note": "Organizing dinner party logistics and seating",
+        "shape": "situation",
+        "flags": [
+          "solo_task"
+        ]
+      },
+      {
+        "i": 10,
+        "note": "Briefing manager on customer churn report",
+        "shape": "situation",
+        "flags": [
+          "solo_task"
+        ]
+      },
+      {
+        "i": 11,
+        "note": "Structuring study sessions for certification exam",
+        "shape": "situation",
+        "flags": [
+          "solo_task"
+        ]
+      },
+      {
+        "i": 12,
+        "note": "Teammate struggling to explain workflow idea",
+        "shape": "advice",
+        "flags": []
+      },
+      {
+        "i": 13,
+        "note": "Arranging furniture in new apartment",
+        "shape": "situation",
+        "flags": [
+          "solo_task"
+        ]
+      },
+      {
+        "i": 14,
+        "note": "Tracking connections in supply chain article",
+        "shape": "situation",
+        "flags": [
+          "solo_task"
+        ]
+      },
+      {
+        "i": 15,
+        "note": "Deciding between staying or relocating",
+        "shape": "situation",
+        "flags": [
+          "solo_task",
+          "two_option"
+        ]
+      },
+      {
+        "i": 16,
+        "note": "Friend asks about budgeting and expenses",
+        "shape": "advice",
+        "flags": []
+      },
+      {
+        "i": 17,
+        "note": "Understanding company structure and decision-making",
+        "shape": "situation",
+        "flags": [
+          "solo_task"
+        ]
+      },
+      {
+        "i": 18,
+        "note": "Explaining complicated novel plot to friend",
+        "shape": "situation",
+        "flags": [
+          "solo_task"
+        ]
+      },
+      {
+        "i": 19,
+        "note": "Debugging logic with interdependent components",
+        "shape": "situation",
+        "flags": [
+          "solo_task"
+        ]
+      },
+      {
+        "i": 20,
+        "note": "Sibling asks about choosing between apartments",
+        "shape": "advice",
+        "flags": []
+      },
+      {
+        "i": 21,
+        "note": "Deciding on vacation destination with partner",
+        "shape": "situation",
+        "flags": [
+          "two_option"
+        ]
+      },
+      {
+        "i": 22,
+        "note": "Making complicated layered dish from prose",
+        "shape": "situation",
+        "flags": [
+          "solo_task"
+        ]
+      },
+      {
+        "i": 23,
+        "note": "Learning public transit system quickly",
+        "shape": "situation",
+        "flags": [
+          "solo_task"
+        ]
+      },
+      {
+        "i": 24,
+        "note": "Coworker overwhelmed managing three projects",
+        "shape": "advice",
+        "flags": []
+      },
+      {
+        "i": 25,
+        "note": "Understanding dense academic paper argument",
+        "shape": "situation",
+        "flags": [
+          "solo_task"
+        ]
+      },
+      {
+        "i": 26,
+        "note": "Deciding on student loan payoff strategy",
+        "shape": "situation",
+        "flags": [
+          "solo_task",
+          "two_option"
+        ]
+      },
+      {
+        "i": 27,
+        "note": "Explaining why software product failed",
+        "shape": "situation",
+        "flags": [
+          "solo_task"
+        ]
+      },
+      {
+        "i": 28,
+        "note": "Recalling and describing building layout",
+        "shape": "situation",
+        "flags": [
+          "solo_task"
+        ]
+      },
+      {
+        "i": 29,
+        "note": "Friend asks how to start cover letter",
+        "shape": "advice",
+        "flags": []
+      },
+      {
+        "i": 30,
+        "note": "Preparing presentation on policy proposal",
+        "shape": "situation",
+        "flags": [
+          "solo_task"
+        ]
+      },
+      {
+        "i": 31,
+        "note": "Tracking fitness progress from notebook data",
+        "shape": "situation",
+        "flags": [
+          "solo_task"
+        ]
+      },
+      {
+        "i": 32,
+        "note": "Understanding complex client situation from voicemail",
+        "shape": "situation",
+        "flags": [
+          "solo_task"
+        ]
+      },
+      {
+        "i": 33,
+        "note": "Deciding whether to accept promotion",
+        "shape": "situation",
+        "flags": [
+          "solo_task",
+          "two_option"
+        ]
+      },
+      {
+        "i": 34,
+        "note": "Explaining democratic election process",
+        "shape": "situation",
+        "flags": [
+          "solo_task"
+        ]
+      },
+      {
+        "i": 35,
+        "note": "Friend asks about side business profitability",
+        "shape": "advice",
+        "flags": []
+      },
+      {
+        "i": 36,
+        "note": "Organizing cluttered storage room arrangement",
+        "shape": "situation",
+        "flags": [
+          "solo_task"
+        ]
+      },
+      {
+        "i": 37,
+        "note": "Reconciling conflicting historical accounts",
+        "shape": "situation",
+        "flags": [
+          "solo_task"
+        ]
+      },
+      {
+        "i": 38,
+        "note": "Learning new city layout before visiting",
+        "shape": "situation",
+        "flags": [
+          "solo_task"
+        ]
+      },
+      {
+        "i": 39,
+        "note": "Neighbor asks about home renovation sequencing",
+        "shape": "advice",
+        "flags": []
+      }
+    ]
+  },
+  "stem": "visual_vark",
+  "arm": "w19"
+}

@@ -1,0 +1,384 @@
+{
+  "content_sha256": "dd27a11c6b9a4098",
+  "judged_at": "2026-10-09T23:25:09+00:00",
+  "instruction_judge": {
+    "model": "claude-sonnet-4-6",
+    "rubric_version": 4,
+    "items": [
+      {
+        "id": "p0_pos",
+        "faults": [],
+        "quotes": {}
+      },
+      {
+        "id": "p0_neg",
+        "faults": [
+          "invented_motive"
+        ],
+        "quotes": {
+          "invented_motive": "order and tradition hold communities together better than open-ended freedoms"
+        }
+      },
+      {
+        "id": "p1_pos",
+        "faults": [],
+        "quotes": {}
+      },
+      {
+        "id": "p1_neg",
+        "faults": [
+          "invented_motive"
+        ],
+        "quotes": {
+          "invented_motive": "discipline and obedience keep society stable"
+        }
+      },
+      {
+        "id": "p2_pos",
+        "faults": [
+          "attitude_only"
+        ],
+        "quotes": {
+          "attitude_only": "sees gay and lesbian couples as fully ordinary, treats foreign-born neighbors as genuinely equal, considers gender parity not a bonus but a baseline requirement"
+        }
+      },
+      {
+        "id": "p2_neg",
+        "faults": [
+          "invented_motive",
+          "softened",
+          "weak_opposite"
+        ],
+        "quotes": {
+          "softened": "wary of rapid social change",
+          "weak_opposite": "wary of rapid social change and see preserving familiar norms as a matter of survival",
+          "invented_motive": "produce the safest and most stable societies"
+        }
+      },
+      {
+        "id": "p3_pos",
+        "faults": [],
+        "quotes": {}
+      },
+      {
+        "id": "p3_neg",
+        "faults": [
+          "invented_motive",
+          "softened"
+        ],
+        "quotes": {
+          "softened": "reforms that risk jobs or stability strike you as luxuries",
+          "invented_motive": "struggling people cannot afford"
+        }
+      },
+      {
+        "id": "p4_pos",
+        "faults": [],
+        "quotes": {}
+      },
+      {
+        "id": "p4_neg",
+        "faults": [
+          "invented_motive",
+          "softened"
+        ],
+        "quotes": {
+          "softened": "with suspicion when they threaten what people already have",
+          "invented_motive": "when they threaten what people already have"
+        }
+      }
+    ]
+  },
+  "question_judge": {
+    "model": "claude-haiku-4-5-20251001",
+    "rubric_version": 3,
+    "items": [
+      {
+        "i": 0,
+        "note": "Park or jobs: what do you do?",
+        "shape": "situation",
+        "flags": [
+          "two_option"
+        ]
+      },
+      {
+        "i": 1,
+        "note": "Attend same-sex wedding despite family views?",
+        "shape": "situation",
+        "flags": []
+      },
+      {
+        "i": 2,
+        "note": "Sign profitable contract with polluting supplier?",
+        "shape": "situation",
+        "flags": [
+          "two_option"
+        ]
+      },
+      {
+        "i": 3,
+        "note": "Sign letter opposing new immigrant neighbors?",
+        "shape": "situation",
+        "flags": [
+          "two_option"
+        ]
+      },
+      {
+        "i": 4,
+        "note": "Choose cheap coal or expensive green energy?",
+        "shape": "situation",
+        "flags": [
+          "two_option"
+        ]
+      },
+      {
+        "i": 5,
+        "note": "Choose between male and female candidate?",
+        "shape": "situation",
+        "flags": [
+          "two_option"
+        ]
+      },
+      {
+        "i": 6,
+        "note": "Attend government forum on wetland highway?",
+        "shape": "situation",
+        "flags": [
+          "two_option"
+        ]
+      },
+      {
+        "i": 7,
+        "note": "Accept promotion in country criminalizing homosexuality?",
+        "shape": "advice",
+        "flags": []
+      },
+      {
+        "i": 8,
+        "note": "Respond to colleagues mocking transgender coworker?",
+        "shape": "situation",
+        "flags": []
+      },
+      {
+        "i": 9,
+        "note": "Community garden or fast-food chain proceeds?",
+        "shape": "situation",
+        "flags": [
+          "two_option"
+        ]
+      },
+      {
+        "i": 10,
+        "note": "Address climate policy in campaign platform?",
+        "shape": "advice",
+        "flags": []
+      },
+      {
+        "i": 11,
+        "note": "Respond to relative's sexist dinner comments?",
+        "shape": "situation",
+        "flags": []
+      },
+      {
+        "i": 12,
+        "note": "Frame opinion on factory tax break?",
+        "shape": "situation",
+        "flags": [
+          "two_option"
+        ]
+      },
+      {
+        "i": 13,
+        "note": "Choose refugee memoir or thriller for club?",
+        "shape": "situation",
+        "flags": [
+          "two_option"
+        ]
+      },
+      {
+        "i": 14,
+        "note": "Hire immigrant or local candidate equally qualified?",
+        "shape": "advice",
+        "flags": [
+          "two_option"
+        ]
+      },
+      {
+        "i": 15,
+        "note": "Sign petition to remove slave-owner statue?",
+        "shape": "situation",
+        "flags": [
+          "two_option"
+        ]
+      },
+      {
+        "i": 16,
+        "note": "Respond to friend joining anti-immigrant group?",
+        "shape": "situation",
+        "flags": []
+      },
+      {
+        "i": 17,
+        "note": "Open comments or expert panel for meeting?",
+        "shape": "situation",
+        "flags": [
+          "two_option"
+        ]
+      },
+      {
+        "i": 18,
+        "note": "Vote for solar panels or gas boiler?",
+        "shape": "situation",
+        "flags": [
+          "two_option"
+        ]
+      },
+      {
+        "i": 19,
+        "note": "Address suspected pay gap with HR?",
+        "shape": "advice",
+        "flags": []
+      },
+      {
+        "i": 20,
+        "note": "Correct factual claim in immigration discussion?",
+        "shape": "situation",
+        "flags": []
+      },
+      {
+        "i": 21,
+        "note": "Comment on dropping climate science curriculum?",
+        "shape": "situation",
+        "flags": []
+      },
+      {
+        "i": 22,
+        "note": "Report chemical pollution to local newspaper?",
+        "shape": "situation",
+        "flags": []
+      },
+      {
+        "i": 23,
+        "note": "Choose cash bonus or sustainability fund?",
+        "shape": "situation",
+        "flags": [
+          "two_option"
+        ]
+      },
+      {
+        "i": 24,
+        "note": "Include LGBTQ group despite church ultimatum?",
+        "shape": "advice",
+        "flags": [
+          "two_option"
+        ]
+      },
+      {
+        "i": 25,
+        "note": "Join unpaid citizens' infrastructure advisory panel?",
+        "shape": "situation",
+        "flags": [
+          "two_option"
+        ]
+      },
+      {
+        "i": 26,
+        "note": "Vote for gender parity board requirement?",
+        "shape": "situation",
+        "flags": [
+          "two_option"
+        ]
+      },
+      {
+        "i": 27,
+        "note": "Feedback on dropping plant-based menu options?",
+        "shape": "situation",
+        "flags": []
+      },
+      {
+        "i": 28,
+        "note": "Handle coworkers using unwanted nickname?",
+        "shape": "advice",
+        "flags": []
+      },
+      {
+        "i": 29,
+        "note": "Respond to restaurant's religious head covering ban?",
+        "shape": "situation",
+        "flags": []
+      },
+      {
+        "i": 30,
+        "note": "Volunteer for candidate with environmental vote?",
+        "shape": "situation",
+        "flags": [
+          "two_option"
+        ]
+      },
+      {
+        "i": 31,
+        "note": "Testify on flood barriers vs highway project?",
+        "shape": "situation",
+        "flags": [
+          "two_option"
+        ]
+      },
+      {
+        "i": 32,
+        "note": "Revise curriculum including diverse international authors?",
+        "shape": "advice",
+        "flags": []
+      },
+      {
+        "i": 33,
+        "note": "Accept contract with anti-regulation company?",
+        "shape": "situation",
+        "flags": [
+          "two_option"
+        ]
+      },
+      {
+        "i": 34,
+        "note": "Co-sign letter opposing homeless shelter?",
+        "shape": "situation",
+        "flags": [
+          "two_option"
+        ]
+      },
+      {
+        "i": 35,
+        "note": "Vote on association statement supporting immigrant participation?",
+        "shape": "situation",
+        "flags": [
+          "two_option"
+        ]
+      },
+      {
+        "i": 36,
+        "note": "Add woman speaker to all-male panel?",
+        "shape": "situation",
+        "flags": []
+      },
+      {
+        "i": 37,
+        "note": "Accept lower-paying refugee advocacy nonprofit job?",
+        "shape": "advice",
+        "flags": []
+      },
+      {
+        "i": 38,
+        "note": "Characterize employee's questioning in performance review?",
+        "shape": "situation",
+        "flags": []
+      },
+      {
+        "i": 39,
+        "note": "Testify on employer threatening relocation over regulations?",
+        "shape": "situation",
+        "flags": []
+      }
+    ]
+  },
+  "stem": "self_expression_inglehart_welzel",
+  "arm": "w19"
+}

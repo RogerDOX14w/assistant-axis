@@ -1,0 +1,350 @@
+{
+  "content_sha256": "a20b5690cf83378b",
+  "judged_at": "2026-10-09T23:23:29+00:00",
+  "instruction_judge": {
+    "model": "claude-sonnet-4-6",
+    "rubric_version": 4,
+    "items": [
+      {
+        "id": "p0_pos",
+        "faults": [],
+        "quotes": {}
+      },
+      {
+        "id": "p0_neg",
+        "faults": [],
+        "quotes": {}
+      },
+      {
+        "id": "p1_pos",
+        "faults": [],
+        "quotes": {}
+      },
+      {
+        "id": "p1_neg",
+        "faults": [
+          "invented_motive"
+        ],
+        "quotes": {
+          "invented_motive": "treat optimism as a trap"
+        }
+      },
+      {
+        "id": "p2_pos",
+        "faults": [],
+        "quotes": {}
+      },
+      {
+        "id": "p2_neg",
+        "faults": [
+          "off_trait",
+          "weak_opposite"
+        ],
+        "quotes": {
+          "weak_opposite": "You correct people when they are wrong, stay cool when others get excited, and let the evidence decide",
+          "off_trait": "You correct people when they are wrong"
+        }
+      },
+      {
+        "id": "p3_pos",
+        "faults": [],
+        "quotes": {}
+      },
+      {
+        "id": "p3_neg",
+        "faults": [
+          "invented_motive"
+        ],
+        "quotes": {
+          "invented_motive": "find quick, people-pleasing decisions reckless"
+        }
+      },
+      {
+        "id": "p4_pos",
+        "faults": [],
+        "quotes": {}
+      },
+      {
+        "id": "p4_neg",
+        "faults": [],
+        "quotes": {}
+      }
+    ]
+  },
+  "question_judge": {
+    "model": "claude-haiku-4-5-20251001",
+    "rubric_version": 3,
+    "items": [
+      {
+        "i": 0,
+        "note": "Push for kickoff or finish planning first",
+        "shape": "situation",
+        "flags": [
+          "two_option"
+        ]
+      },
+      {
+        "i": 1,
+        "note": "How to spend first twenty minutes at party",
+        "shape": "situation",
+        "flags": []
+      },
+      {
+        "i": 2,
+        "note": "Co-lead project with unknown colleague",
+        "shape": "situation",
+        "flags": []
+      },
+      {
+        "i": 3,
+        "note": "Call friend or finish report alone",
+        "shape": "situation",
+        "flags": [
+          "two_option"
+        ]
+      },
+      {
+        "i": 4,
+        "note": "Accept sideways job at warm company",
+        "shape": "advice",
+        "flags": []
+      },
+      {
+        "i": 5,
+        "note": "Approach admired person at conference",
+        "shape": "situation",
+        "flags": []
+      },
+      {
+        "i": 6,
+        "note": "Thorough research or energetic presentation",
+        "shape": "situation",
+        "flags": [
+          "two_option"
+        ]
+      },
+      {
+        "i": 7,
+        "note": "Interact with new neighbor in hallway",
+        "shape": "situation",
+        "flags": []
+      },
+      {
+        "i": 8,
+        "note": "Should I speak up at town hall",
+        "shape": "advice",
+        "flags": []
+      },
+      {
+        "i": 9,
+        "note": "Manage seating or trust social energy",
+        "shape": "situation",
+        "flags": [
+          "two_option"
+        ]
+      },
+      {
+        "i": 10,
+        "note": "Join club where you know nobody",
+        "shape": "situation",
+        "flags": []
+      },
+      {
+        "i": 11,
+        "note": "Think alone or call someone for help",
+        "shape": "situation",
+        "flags": [
+          "two_option"
+        ]
+      },
+      {
+        "i": 12,
+        "note": "Advice on speaking up in groups",
+        "shape": "advice",
+        "flags": []
+      },
+      {
+        "i": 13,
+        "note": "Invest now with friend or wait",
+        "shape": "situation",
+        "flags": [
+          "two_option"
+        ]
+      },
+      {
+        "i": 14,
+        "note": "Handle strong disagreement at party",
+        "shape": "situation",
+        "flags": []
+      },
+      {
+        "i": 15,
+        "note": "Chair meeting going off the rails",
+        "shape": "situation",
+        "flags": []
+      },
+      {
+        "i": 16,
+        "note": "Advice on approaching strangers",
+        "shape": "advice",
+        "flags": []
+      },
+      {
+        "i": 17,
+        "note": "Memo or in-person persuasion",
+        "shape": "situation",
+        "flags": [
+          "two_option"
+        ]
+      },
+      {
+        "i": 18,
+        "note": "Respond to coworker's risky idea",
+        "shape": "situation",
+        "flags": []
+      },
+      {
+        "i": 19,
+        "note": "Alone or gather friends when low",
+        "shape": "situation",
+        "flags": [
+          "two_option"
+        ]
+      },
+      {
+        "i": 20,
+        "note": "Ask questions or jump in",
+        "shape": "situation",
+        "flags": [
+          "two_option"
+        ]
+      },
+      {
+        "i": 21,
+        "note": "Wing speech or prepare carefully",
+        "shape": "advice",
+        "flags": []
+      },
+      {
+        "i": 22,
+        "note": "Plan for moving to new city",
+        "shape": "situation",
+        "flags": []
+      },
+      {
+        "i": 23,
+        "note": "Restructure quietly or call all-hands",
+        "shape": "situation",
+        "flags": [
+          "two_option"
+        ]
+      },
+      {
+        "i": 24,
+        "note": "Respond to friendly person with wrong view",
+        "shape": "situation",
+        "flags": []
+      },
+      {
+        "i": 25,
+        "note": "Buy expensive item or research more",
+        "shape": "situation",
+        "flags": [
+          "two_option"
+        ]
+      },
+      {
+        "i": 26,
+        "note": "Advice on starting imperfect side project",
+        "shape": "advice",
+        "flags": []
+      },
+      {
+        "i": 27,
+        "note": "Social event or quiet project time",
+        "shape": "situation",
+        "flags": [
+          "two_option"
+        ]
+      },
+      {
+        "i": 28,
+        "note": "Reach out to friend of friend",
+        "shape": "situation",
+        "flags": []
+      },
+      {
+        "i": 29,
+        "note": "Respond to flat meeting atmosphere",
+        "shape": "situation",
+        "flags": []
+      },
+      {
+        "i": 30,
+        "note": "Give critical feedback while preserving relationship",
+        "shape": "advice",
+        "flags": []
+      },
+      {
+        "i": 31,
+        "note": "Work with methodical slow-moving colleague",
+        "shape": "situation",
+        "flags": []
+      },
+      {
+        "i": 32,
+        "note": "Say yes to opportunity or research first",
+        "shape": "situation",
+        "flags": [
+          "two_option"
+        ]
+      },
+      {
+        "i": 33,
+        "note": "Welcome new employee on first day",
+        "shape": "situation",
+        "flags": []
+      },
+      {
+        "i": 34,
+        "note": "Advice on reconnecting after withdrawal",
+        "shape": "advice",
+        "flags": []
+      },
+      {
+        "i": 35,
+        "note": "Research company or focus on presentation",
+        "shape": "situation",
+        "flags": [
+          "two_option"
+        ]
+      },
+      {
+        "i": 36,
+        "note": "Step up to plan community event",
+        "shape": "situation",
+        "flags": []
+      },
+      {
+        "i": 37,
+        "note": "Follow up with new professional connection",
+        "shape": "situation",
+        "flags": []
+      },
+      {
+        "i": 38,
+        "note": "Advice on speaking more in conversations",
+        "shape": "advice",
+        "flags": []
+      },
+      {
+        "i": 39,
+        "note": "Accept last-minute gathering when tired",
+        "shape": "situation",
+        "flags": []
+      }
+    ]
+  },
+  "stem": "influence_disc",
+  "arm": "w19"
+}

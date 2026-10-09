@@ -1,0 +1,404 @@
+{
+  "content_sha256": "b415c0b213872d50",
+  "judged_at": "2026-10-09T23:21:39+00:00",
+  "instruction_judge": {
+    "model": "claude-sonnet-4-6",
+    "rubric_version": 4,
+    "items": [
+      {
+        "id": "p0_pos",
+        "faults": [],
+        "quotes": {}
+      },
+      {
+        "id": "p0_neg",
+        "faults": [
+          "invented_motive"
+        ],
+        "quotes": {
+          "invented_motive": "see invention for its own sake as wasteful and self-indulgent"
+        }
+      },
+      {
+        "id": "p1_pos",
+        "faults": [],
+        "quotes": {}
+      },
+      {
+        "id": "p1_neg",
+        "faults": [],
+        "quotes": {}
+      },
+      {
+        "id": "p2_pos",
+        "faults": [
+          "softened"
+        ],
+        "quotes": {
+          "softened": "you return to it wherever life allows"
+        }
+      },
+      {
+        "id": "p2_neg",
+        "faults": [
+          "weak_opposite"
+        ],
+        "quotes": {
+          "weak_opposite": "produces only what is asked for, in the format that is expected, and moves on"
+        }
+      },
+      {
+        "id": "p3_pos",
+        "faults": [
+          "invented_detail"
+        ],
+        "quotes": {
+          "invented_detail": "performance, design, cooking, or code"
+        }
+      },
+      {
+        "id": "p3_neg",
+        "faults": [
+          "softened"
+        ],
+        "quotes": {
+          "softened": "obstacles to getting things done cleanly and on time"
+        }
+      },
+      {
+        "id": "p4_pos",
+        "faults": [],
+        "quotes": {}
+      },
+      {
+        "id": "p4_neg",
+        "faults": [],
+        "quotes": {}
+      }
+    ]
+  },
+  "question_judge": {
+    "model": "claude-haiku-4-5-20251001",
+    "rubric_version": 3,
+    "items": [
+      {
+        "i": 0,
+        "note": "Redesign functional report template",
+        "shape": "situation",
+        "flags": [
+          "solo_task"
+        ]
+      },
+      {
+        "i": 1,
+        "note": "How to spend free Saturday",
+        "shape": "situation",
+        "flags": [
+          "solo_task"
+        ]
+      },
+      {
+        "i": 2,
+        "note": "What to do with bare apartment",
+        "shape": "situation",
+        "flags": [
+          "solo_task"
+        ]
+      },
+      {
+        "i": 3,
+        "note": "Choose reliable or experimental menu",
+        "shape": "situation",
+        "flags": [
+          "solo_task",
+          "two_option"
+        ]
+      },
+      {
+        "i": 4,
+        "note": "Contribute to staff publication",
+        "shape": "situation",
+        "flags": [
+          "solo_task"
+        ]
+      },
+      {
+        "i": 5,
+        "note": "Create employee training presentation",
+        "shape": "situation",
+        "flags": [
+          "solo_task"
+        ]
+      },
+      {
+        "i": 6,
+        "note": "What to do with garage sale items",
+        "shape": "situation",
+        "flags": [
+          "solo_task"
+        ]
+      },
+      {
+        "i": 7,
+        "note": "Plan neighborhood park layout",
+        "shape": "situation",
+        "flags": []
+      },
+      {
+        "i": 8,
+        "note": "Cook dinner from refrigerator contents",
+        "shape": "situation",
+        "flags": [
+          "solo_task"
+        ]
+      },
+      {
+        "i": 9,
+        "note": "Write office holiday card caption",
+        "shape": "situation",
+        "flags": [
+          "solo_task"
+        ]
+      },
+      {
+        "i": 10,
+        "note": "Redecorate bedroom on budget",
+        "shape": "situation",
+        "flags": [
+          "solo_task",
+          "two_option"
+        ]
+      },
+      {
+        "i": 11,
+        "note": "Review colleague's client email",
+        "shape": "situation",
+        "flags": []
+      },
+      {
+        "i": 12,
+        "note": "Wrap birthday gift for friend",
+        "shape": "situation",
+        "flags": [
+          "solo_task"
+        ]
+      },
+      {
+        "i": 13,
+        "note": "Give retirement party toast",
+        "shape": "situation",
+        "flags": [
+          "solo_task"
+        ]
+      },
+      {
+        "i": 14,
+        "note": "Build personal website template choice",
+        "shape": "situation",
+        "flags": [
+          "solo_task",
+          "two_option"
+        ]
+      },
+      {
+        "i": 15,
+        "note": "Illustrate children's book style choice",
+        "shape": "advice",
+        "flags": [
+          "two_option"
+        ]
+      },
+      {
+        "i": 16,
+        "note": "Pitch safe or innovative product",
+        "shape": "advice",
+        "flags": [
+          "two_option"
+        ]
+      },
+      {
+        "i": 17,
+        "note": "Arrange wedding flowers traditional or unusual",
+        "shape": "advice",
+        "flags": [
+          "two_option"
+        ]
+      },
+      {
+        "i": 18,
+        "note": "Write unconventional graduate school essay",
+        "shape": "advice",
+        "flags": [
+          "two_option"
+        ]
+      },
+      {
+        "i": 19,
+        "note": "Paint apartment walls or leave white",
+        "shape": "advice",
+        "flags": [
+          "two_option"
+        ]
+      },
+      {
+        "i": 20,
+        "note": "Redesign company newsletter with constraints",
+        "shape": "advice",
+        "flags": []
+      },
+      {
+        "i": 21,
+        "note": "Sell repeated or experimental jewelry designs",
+        "shape": "advice",
+        "flags": [
+          "two_option"
+        ]
+      },
+      {
+        "i": 22,
+        "note": "Record EP in established or new genre",
+        "shape": "advice",
+        "flags": [
+          "two_option"
+        ]
+      },
+      {
+        "i": 23,
+        "note": "Write functional quarterly meeting summary",
+        "shape": "situation",
+        "flags": [
+          "solo_task"
+        ]
+      },
+      {
+        "i": 24,
+        "note": "Choose between two job offers",
+        "shape": "situation",
+        "flags": [
+          "two_option"
+        ]
+      },
+      {
+        "i": 25,
+        "note": "Attend dinner or work on personal project",
+        "shape": "situation",
+        "flags": [
+          "two_option"
+        ]
+      },
+      {
+        "i": 26,
+        "note": "Enter neighborhood mural competition",
+        "shape": "situation",
+        "flags": [
+          "yes_no"
+        ]
+      },
+      {
+        "i": 27,
+        "note": "Photograph friend's wedding with phone",
+        "shape": "situation",
+        "flags": [
+          "solo_task"
+        ]
+      },
+      {
+        "i": 28,
+        "note": "Help relative choose safe paint colors",
+        "shape": "situation",
+        "flags": []
+      },
+      {
+        "i": 29,
+        "note": "Vacation: guided tour or personal projects",
+        "shape": "situation",
+        "flags": [
+          "two_option"
+        ]
+      },
+      {
+        "i": 30,
+        "note": "Résumé: standard or visual layout",
+        "shape": "situation",
+        "flags": [
+          "solo_task",
+          "two_option"
+        ]
+      },
+      {
+        "i": 31,
+        "note": "Design lost cat flyer",
+        "shape": "situation",
+        "flags": [
+          "solo_task"
+        ]
+      },
+      {
+        "i": 32,
+        "note": "Teach class: follow or rebuild curriculum",
+        "shape": "situation",
+        "flags": [
+          "two_option"
+        ]
+      },
+      {
+        "i": 33,
+        "note": "Spend hour alone in unfamiliar kitchen",
+        "shape": "situation",
+        "flags": [
+          "solo_task"
+        ]
+      },
+      {
+        "i": 34,
+        "note": "Name new company product",
+        "shape": "situation",
+        "flags": [
+          "solo_task"
+        ]
+      },
+      {
+        "i": 35,
+        "note": "Decorate shared office wall",
+        "shape": "situation",
+        "flags": [
+          "solo_task"
+        ]
+      },
+      {
+        "i": 36,
+        "note": "Write rental property listing description",
+        "shape": "situation",
+        "flags": [
+          "solo_task"
+        ]
+      },
+      {
+        "i": 37,
+        "note": "Pack extra items for two-week trip",
+        "shape": "situation",
+        "flags": [
+          "solo_task"
+        ]
+      },
+      {
+        "i": 38,
+        "note": "Design fundraising event format",
+        "shape": "situation",
+        "flags": [
+          "solo_task"
+        ]
+      },
+      {
+        "i": 39,
+        "note": "Spend free afternoon between projects",
+        "shape": "situation",
+        "flags": [
+          "solo_task"
+        ]
+      }
+    ]
+  },
+  "stem": "artistic_holland",
+  "arm": "w19"
+}

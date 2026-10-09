@@ -1,0 +1,328 @@
+{
+  "content_sha256": "b12de56606800882",
+  "judged_at": "2026-10-09T23:22:29+00:00",
+  "instruction_judge": {
+    "model": "claude-sonnet-4-6",
+    "rubric_version": 4,
+    "items": [
+      {
+        "id": "p0_pos",
+        "faults": [],
+        "quotes": {}
+      },
+      {
+        "id": "p0_neg",
+        "faults": [],
+        "quotes": {}
+      },
+      {
+        "id": "p1_pos",
+        "faults": [],
+        "quotes": {}
+      },
+      {
+        "id": "p1_neg",
+        "faults": [],
+        "quotes": {}
+      },
+      {
+        "id": "p2_pos",
+        "faults": [],
+        "quotes": {}
+      },
+      {
+        "id": "p2_neg",
+        "faults": [],
+        "quotes": {}
+      },
+      {
+        "id": "p3_pos",
+        "faults": [],
+        "quotes": {}
+      },
+      {
+        "id": "p3_neg",
+        "faults": [],
+        "quotes": {}
+      },
+      {
+        "id": "p4_pos",
+        "faults": [],
+        "quotes": {}
+      },
+      {
+        "id": "p4_neg",
+        "faults": [],
+        "quotes": {}
+      }
+    ]
+  },
+  "question_judge": {
+    "model": "claude-haiku-4-5-20251001",
+    "rubric_version": 3,
+    "items": [
+      {
+        "i": 0,
+        "note": "Flight cancelled, long wait ahead",
+        "shape": "situation",
+        "flags": []
+      },
+      {
+        "i": 1,
+        "note": "Manager changes project direction mid-work",
+        "shape": "situation",
+        "flags": []
+      },
+      {
+        "i": 2,
+        "note": "Colleague snaps at you publicly",
+        "shape": "situation",
+        "flags": []
+      },
+      {
+        "i": 3,
+        "note": "Alone at dinner party with strangers",
+        "shape": "situation",
+        "flags": []
+      },
+      {
+        "i": 4,
+        "note": "Car repair wipes out vacation savings",
+        "shape": "situation",
+        "flags": []
+      },
+      {
+        "i": 5,
+        "note": "Submitted work has error until Monday",
+        "shape": "situation",
+        "flags": [
+          "solo_task"
+        ]
+      },
+      {
+        "i": 6,
+        "note": "Cared-for project cut from budget",
+        "shape": "situation",
+        "flags": []
+      },
+      {
+        "i": 7,
+        "note": "Slow checkout line, person arguing ahead",
+        "shape": "situation",
+        "flags": []
+      },
+      {
+        "i": 8,
+        "note": "Difficult client, written or tense call",
+        "shape": "situation",
+        "flags": [
+          "two_option"
+        ]
+      },
+      {
+        "i": 9,
+        "note": "Sure job or risky better opportunity",
+        "shape": "situation",
+        "flags": [
+          "two_option"
+        ]
+      },
+      {
+        "i": 10,
+        "note": "Phone buzzing during concentration task",
+        "shape": "situation",
+        "flags": [
+          "two_option"
+        ]
+      },
+      {
+        "i": 11,
+        "note": "Speak now or wait to think",
+        "shape": "situation",
+        "flags": [
+          "two_option"
+        ]
+      },
+      {
+        "i": 12,
+        "note": "Didn't get promotion after two years",
+        "shape": "advice",
+        "flags": []
+      },
+      {
+        "i": 13,
+        "note": "Anxious waiting for medical test result",
+        "shape": "advice",
+        "flags": []
+      },
+      {
+        "i": 14,
+        "note": "Neighbor complained about noise to manager",
+        "shape": "advice",
+        "flags": []
+      },
+      {
+        "i": 15,
+        "note": "Stumbled during presentation to senior executive",
+        "shape": "advice",
+        "flags": []
+      },
+      {
+        "i": 16,
+        "note": "Snapped at friend over small thing",
+        "shape": "advice",
+        "flags": []
+      },
+      {
+        "i": 17,
+        "note": "Found wallet with cash and ID",
+        "shape": "situation",
+        "flags": []
+      },
+      {
+        "i": 18,
+        "note": "Weather turns bad halfway through hike",
+        "shape": "situation",
+        "flags": []
+      },
+      {
+        "i": 19,
+        "note": "Someone makes offensive comment at event",
+        "shape": "situation",
+        "flags": []
+      },
+      {
+        "i": 20,
+        "note": "Internet out during work-from-home day",
+        "shape": "situation",
+        "flags": [
+          "solo_task"
+        ]
+      },
+      {
+        "i": 21,
+        "note": "Restaurant got order wrong but edible",
+        "shape": "situation",
+        "flags": []
+      },
+      {
+        "i": 22,
+        "note": "Slides won't display five minutes before talk",
+        "shape": "situation",
+        "flags": []
+      },
+      {
+        "i": 23,
+        "note": "Friend hasn't repaid significant loan in months",
+        "shape": "situation",
+        "flags": []
+      },
+      {
+        "i": 24,
+        "note": "Creative work receives blunt critical feedback",
+        "shape": "situation",
+        "flags": []
+      },
+      {
+        "i": 25,
+        "note": "Can't sleep, mind replays difficult conversation",
+        "shape": "situation",
+        "flags": [
+          "solo_task"
+        ]
+      },
+      {
+        "i": 26,
+        "note": "Other person no-shows important meeting",
+        "shape": "situation",
+        "flags": []
+      },
+      {
+        "i": 27,
+        "note": "Appealing opportunity to skip tedious commitment",
+        "shape": "situation",
+        "flags": [
+          "two_option"
+        ]
+      },
+      {
+        "i": 28,
+        "note": "Plans fall through, must tell dependents",
+        "shape": "situation",
+        "flags": []
+      },
+      {
+        "i": 29,
+        "note": "Frustrating task not going well after hours",
+        "shape": "situation",
+        "flags": [
+          "solo_task"
+        ]
+      },
+      {
+        "i": 30,
+        "note": "Someone cuts line through staff connection",
+        "shape": "situation",
+        "flags": []
+      },
+      {
+        "i": 31,
+        "note": "Landlord raising rent substantially in six weeks",
+        "shape": "situation",
+        "flags": []
+      },
+      {
+        "i": 32,
+        "note": "Wrong decision, person who disagreed brings it up",
+        "shape": "situation",
+        "flags": []
+      },
+      {
+        "i": 33,
+        "note": "Draining acquaintance keeps reaching out",
+        "shape": "situation",
+        "flags": []
+      },
+      {
+        "i": 34,
+        "note": "Dream job requires moving away from everyone",
+        "shape": "advice",
+        "flags": []
+      },
+      {
+        "i": 35,
+        "note": "Fight with partner, regretful words said",
+        "shape": "advice",
+        "flags": []
+      },
+      {
+        "i": 36,
+        "note": "Difficult conversation postponed for weeks",
+        "shape": "advice",
+        "flags": []
+      },
+      {
+        "i": 37,
+        "note": "Distracted by unhelpful habits despite knowing better",
+        "shape": "advice",
+        "flags": []
+      },
+      {
+        "i": 38,
+        "note": "Small reward temptation after stressful day",
+        "shape": "situation",
+        "flags": []
+      },
+      {
+        "i": 39,
+        "note": "Core assumption wrong halfway through project",
+        "shape": "situation",
+        "flags": [
+          "solo_task"
+        ]
+      }
+    ]
+  },
+  "stem": "emotionally_stable_big_five",
+  "arm": "w19"
+}

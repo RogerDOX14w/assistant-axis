@@ -1,0 +1,393 @@
+{
+  "content_sha256": "2080adb89c8e4f8a",
+  "judged_at": "2026-10-09T23:21:42+00:00",
+  "instruction_judge": {
+    "model": "claude-sonnet-4-6",
+    "rubric_version": 4,
+    "items": [
+      {
+        "id": "p0_pos",
+        "faults": [],
+        "quotes": {}
+      },
+      {
+        "id": "p0_neg",
+        "faults": [
+          "off_trait"
+        ],
+        "quotes": {
+          "off_trait": "You take in information through text and diagrams"
+        }
+      },
+      {
+        "id": "p1_pos",
+        "faults": [],
+        "quotes": {}
+      },
+      {
+        "id": "p1_neg",
+        "faults": [],
+        "quotes": {}
+      },
+      {
+        "id": "p2_pos",
+        "faults": [],
+        "quotes": {}
+      },
+      {
+        "id": "p2_neg",
+        "faults": [
+          "invented_motive",
+          "off_trait"
+        ],
+        "quotes": {
+          "invented_motive": "discussion feels like it muddies rather than clarifies",
+          "off_trait": "written notes and visual materials are where your understanding forms"
+        }
+      },
+      {
+        "id": "p3_pos",
+        "faults": [],
+        "quotes": {}
+      },
+      {
+        "id": "p3_neg",
+        "faults": [],
+        "quotes": {}
+      },
+      {
+        "id": "p4_pos",
+        "faults": [
+          "invented_motive"
+        ],
+        "quotes": {
+          "invented_motive": "silence during hard mental work feels like a wall rather than an aid"
+        }
+      },
+      {
+        "id": "p4_neg",
+        "faults": [
+          "invented_motive"
+        ],
+        "quotes": {
+          "invented_motive": "verbal back-and-forth a distraction from real understanding"
+        }
+      }
+    ]
+  },
+  "question_judge": {
+    "model": "claude-haiku-4-5-20251001",
+    "rubric_version": 3,
+    "items": [
+      {
+        "i": 0,
+        "note": "Choose between manual or video for learning software",
+        "shape": "situation",
+        "flags": [
+          "solo_task",
+          "two_option"
+        ]
+      },
+      {
+        "i": 1,
+        "note": "Prepare for difficult conversation: write or talk first",
+        "shape": "situation",
+        "flags": [
+          "two_option"
+        ]
+      },
+      {
+        "i": 2,
+        "note": "Retain information after two-hour meeting in thirty minutes",
+        "shape": "situation",
+        "flags": [
+          "solo_task"
+        ]
+      },
+      {
+        "i": 3,
+        "note": "Friend asks: learn programming language from books or videos",
+        "shape": "advice",
+        "flags": [
+          "two_option"
+        ]
+      },
+      {
+        "i": 4,
+        "note": "Push through work block while alone",
+        "shape": "situation",
+        "flags": [
+          "solo_task"
+        ]
+      },
+      {
+        "i": 5,
+        "note": "Choose between panel discussion or written report",
+        "shape": "situation",
+        "flags": [
+          "two_option"
+        ]
+      },
+      {
+        "i": 6,
+        "note": "Family member asks: study method for certification exam",
+        "shape": "advice",
+        "flags": []
+      },
+      {
+        "i": 7,
+        "note": "Decide job offer: think alone or talk with friend",
+        "shape": "situation",
+        "flags": [
+          "two_option"
+        ]
+      },
+      {
+        "i": 8,
+        "note": "Choose between reading case study or group discussion",
+        "shape": "situation",
+        "flags": [
+          "two_option"
+        ]
+      },
+      {
+        "i": 9,
+        "note": "Learn cooking: follow written recipe or podcast narration",
+        "shape": "situation",
+        "flags": [
+          "solo_task",
+          "two_option"
+        ]
+      },
+      {
+        "i": 10,
+        "note": "Coworker asks: how to phrase feedback without harshness",
+        "shape": "advice",
+        "flags": []
+      },
+      {
+        "i": 11,
+        "note": "Dense chapter didn't click: what to do first",
+        "shape": "situation",
+        "flags": [
+          "solo_task"
+        ]
+      },
+      {
+        "i": 12,
+        "note": "Productive commute: listen to podcast or read articles",
+        "shape": "situation",
+        "flags": [
+          "solo_task",
+          "two_option"
+        ]
+      },
+      {
+        "i": 13,
+        "note": "Neighbor asks: understand complex zoning law documents",
+        "shape": "advice",
+        "flags": []
+      },
+      {
+        "i": 14,
+        "note": "Prepare salary negotiation: write or talk through arguments",
+        "shape": "situation",
+        "flags": [
+          "two_option"
+        ]
+      },
+      {
+        "i": 15,
+        "note": "Advocate for project kickoff format: written or discussion",
+        "shape": "situation",
+        "flags": [
+          "two_option"
+        ]
+      },
+      {
+        "i": 16,
+        "note": "Stuck on math problem: keep working or narrate aloud",
+        "shape": "situation",
+        "flags": [
+          "solo_task",
+          "two_option"
+        ]
+      },
+      {
+        "i": 17,
+        "note": "Friend asks: how you learned something new",
+        "shape": "advice",
+        "flags": []
+      },
+      {
+        "i": 18,
+        "note": "Memorize speech: read silently, annotate, or record playback",
+        "shape": "situation",
+        "flags": [
+          "solo_task"
+        ]
+      },
+      {
+        "i": 19,
+        "note": "Resolve finances disagreement: talk or write positions",
+        "shape": "situation",
+        "flags": [
+          "two_option"
+        ]
+      },
+      {
+        "i": 20,
+        "note": "Form opinion on political issue: read essays or listen debates",
+        "shape": "situation",
+        "flags": [
+          "solo_task",
+          "two_option"
+        ]
+      },
+      {
+        "i": 21,
+        "note": "Mentor struggling new employee: what support to offer first",
+        "shape": "situation",
+        "flags": []
+      },
+      {
+        "i": 22,
+        "note": "Study schedule: cut back textbook or recorded lectures",
+        "shape": "situation",
+        "flags": [
+          "two_option"
+        ]
+      },
+      {
+        "i": 23,
+        "note": "Sibling asks: how you process difficult feelings",
+        "shape": "advice",
+        "flags": []
+      },
+      {
+        "i": 24,
+        "note": "Onboard new employee: written guide or verbal walkthroughs",
+        "shape": "situation",
+        "flags": [
+          "two_option"
+        ]
+      },
+      {
+        "i": 25,
+        "note": "Choose apartment: lively café or quiet isolation",
+        "shape": "situation",
+        "flags": [
+          "two_option"
+        ]
+      },
+      {
+        "i": 26,
+        "note": "Learn language: conversation class or self-paced app",
+        "shape": "situation",
+        "flags": [
+          "two_option"
+        ]
+      },
+      {
+        "i": 27,
+        "note": "Colleague asks: retain information after long training",
+        "shape": "advice",
+        "flags": []
+      },
+      {
+        "i": 28,
+        "note": "Review contract: annotated PDF or verbal walkthrough",
+        "shape": "situation",
+        "flags": [
+          "two_option"
+        ]
+      },
+      {
+        "i": 29,
+        "note": "Conference: attend keynote speech or written workshop",
+        "shape": "situation",
+        "flags": [
+          "two_option"
+        ]
+      },
+      {
+        "i": 30,
+        "note": "Stuck on report structure: stare at outline or something else",
+        "shape": "situation",
+        "flags": [
+          "solo_task"
+        ]
+      },
+      {
+        "i": 31,
+        "note": "Friend asks: how you decide when paralyzed",
+        "shape": "advice",
+        "flags": []
+      },
+      {
+        "i": 32,
+        "note": "Solve work problem: use whiteboard, notepad, or colleague talk",
+        "shape": "situation",
+        "flags": []
+      },
+      {
+        "i": 33,
+        "note": "Learn woodworking: illustrated guides or audio narration",
+        "shape": "situation",
+        "flags": [
+          "solo_task",
+          "two_option"
+        ]
+      },
+      {
+        "i": 34,
+        "note": "Sparse meeting notes reveal how you engage with discussion",
+        "shape": "situation",
+        "flags": [
+          "solo_task"
+        ]
+      },
+      {
+        "i": 35,
+        "note": "Prepare presentation: refine slides or rehearse out loud",
+        "shape": "situation",
+        "flags": [
+          "two_option"
+        ]
+      },
+      {
+        "i": 36,
+        "note": "Parent asks: why teenager fails despite understanding",
+        "shape": "advice",
+        "flags": []
+      },
+      {
+        "i": 37,
+        "note": "Learn history: read narrative book or watch documentary",
+        "shape": "situation",
+        "flags": [
+          "solo_task",
+          "two_option"
+        ]
+      },
+      {
+        "i": 38,
+        "note": "Break creative block while working alone",
+        "shape": "situation",
+        "flags": [
+          "solo_task"
+        ]
+      },
+      {
+        "i": 39,
+        "note": "Process frustrating interaction: think alone or tell someone",
+        "shape": "situation",
+        "flags": [
+          "two_option"
+        ]
+      }
+    ]
+  },
+  "stem": "aural_vark",
+  "arm": "w19"
+}

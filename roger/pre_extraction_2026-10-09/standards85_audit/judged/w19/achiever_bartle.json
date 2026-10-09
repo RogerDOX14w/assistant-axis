@@ -1,0 +1,408 @@
+{
+  "content_sha256": "d8717d291a03d174",
+  "judged_at": "2026-10-09T23:21:28+00:00",
+  "instruction_judge": {
+    "model": "claude-sonnet-4-6",
+    "rubric_version": 4,
+    "items": [
+      {
+        "id": "p0_pos",
+        "faults": [],
+        "quotes": {}
+      },
+      {
+        "id": "p0_neg",
+        "faults": [],
+        "quotes": {}
+      },
+      {
+        "id": "p1_pos",
+        "faults": [],
+        "quotes": {}
+      },
+      {
+        "id": "p1_neg",
+        "faults": [],
+        "quotes": {}
+      },
+      {
+        "id": "p2_pos",
+        "faults": [
+          "invented_motive"
+        ],
+        "quotes": {
+          "invented_motive": "judge your time wasted if it produced no measurable gain"
+        }
+      },
+      {
+        "id": "p2_neg",
+        "faults": [],
+        "quotes": {}
+      },
+      {
+        "id": "p3_pos",
+        "faults": [
+          "invented_motive"
+        ],
+        "quotes": {
+          "invented_motive": "because the number at the end is all that counts"
+        }
+      },
+      {
+        "id": "p3_neg",
+        "faults": [],
+        "quotes": {}
+      },
+      {
+        "id": "p4_pos",
+        "faults": [],
+        "quotes": {}
+      },
+      {
+        "id": "p4_neg",
+        "faults": [],
+        "quotes": {}
+      }
+    ]
+  },
+  "question_judge": {
+    "model": "claude-haiku-4-5-20251001",
+    "rubric_version": 3,
+    "items": [
+      {
+        "i": 0,
+        "note": "Bonus lectures or stop after passing?",
+        "shape": "situation",
+        "flags": [
+          "solo_task",
+          "two_option"
+        ]
+      },
+      {
+        "i": 1,
+        "note": "Intellectually rich or formally recognized work?",
+        "shape": "situation",
+        "flags": [
+          "two_option"
+        ]
+      },
+      {
+        "i": 2,
+        "note": "Skip beautiful area or take shortcut?",
+        "shape": "situation",
+        "flags": [
+          "solo_task",
+          "two_option"
+        ]
+      },
+      {
+        "i": 3,
+        "note": "Feelings about defending top rank position?",
+        "shape": "situation",
+        "flags": [
+          "solo_task"
+        ]
+      },
+      {
+        "i": 4,
+        "note": "Attend cooperative game night with friends?",
+        "shape": "situation",
+        "flags": [
+          "two_option"
+        ]
+      },
+      {
+        "i": 5,
+        "note": "Explore story or grind for levels?",
+        "shape": "situation",
+        "flags": [
+          "solo_task",
+          "two_option"
+        ]
+      },
+      {
+        "i": 6,
+        "note": "Continue MMO without progression or quit?",
+        "shape": "advice",
+        "flags": [
+          "two_option"
+        ]
+      },
+      {
+        "i": 7,
+        "note": "Creative experiment or start tracked work?",
+        "shape": "situation",
+        "flags": [
+          "solo_task",
+          "two_option"
+        ]
+      },
+      {
+        "i": 8,
+        "note": "Lower salary with promotions or higher flat?",
+        "shape": "situation",
+        "flags": [
+          "two_option"
+        ]
+      },
+      {
+        "i": 9,
+        "note": "Reaction to losing a friendly race?",
+        "shape": "situation",
+        "flags": [
+          "solo_task"
+        ]
+      },
+      {
+        "i": 10,
+        "note": "Stop comparing lifting numbers or continue?",
+        "shape": "advice",
+        "flags": [
+          "two_option"
+        ]
+      },
+      {
+        "i": 11,
+        "note": "Finish unenjoyable book or abandon it?",
+        "shape": "situation",
+        "flags": [
+          "solo_task",
+          "two_option"
+        ]
+      },
+      {
+        "i": 12,
+        "note": "Take certification exam for credentials only?",
+        "shape": "situation",
+        "flags": [
+          "solo_task",
+          "two_option"
+        ]
+      },
+      {
+        "i": 13,
+        "note": "Use guide for fastest completion path?",
+        "shape": "situation",
+        "flags": [
+          "solo_task",
+          "two_option"
+        ]
+      },
+      {
+        "i": 14,
+        "note": "Mentor children or organize fundraiser?",
+        "shape": "situation",
+        "flags": [
+          "two_option"
+        ]
+      },
+      {
+        "i": 15,
+        "note": "Advice on staying in same job grade?",
+        "shape": "advice",
+        "flags": []
+      },
+      {
+        "i": 16,
+        "note": "Perfect existing skill or start new hobby?",
+        "shape": "situation",
+        "flags": [
+          "solo_task",
+          "two_option"
+        ]
+      },
+      {
+        "i": 17,
+        "note": "Eight hours grinding for exclusive trophy?",
+        "shape": "situation",
+        "flags": [
+          "solo_task",
+          "two_option"
+        ]
+      },
+      {
+        "i": 18,
+        "note": "Ranked program in bad city or unranked?",
+        "shape": "advice",
+        "flags": [
+          "two_option"
+        ]
+      },
+      {
+        "i": 19,
+        "note": "Make unnecessary purchases to reach tier?",
+        "shape": "situation",
+        "flags": [
+          "solo_task",
+          "two_option"
+        ]
+      },
+      {
+        "i": 20,
+        "note": "Push for strategy or fun guessing?",
+        "shape": "situation",
+        "flags": [
+          "two_option"
+        ]
+      },
+      {
+        "i": 21,
+        "note": "How do you use badge-earning platform?",
+        "shape": "situation",
+        "flags": [
+          "solo_task"
+        ]
+      },
+      {
+        "i": 22,
+        "note": "Study strategy to beat family at cards?",
+        "shape": "situation",
+        "flags": [
+          "solo_task",
+          "two_option"
+        ]
+      },
+      {
+        "i": 23,
+        "note": "Advice on goal-free break from burnout?",
+        "shape": "advice",
+        "flags": []
+      },
+      {
+        "i": 24,
+        "note": "Trophy and photo or cash prize?",
+        "shape": "situation",
+        "flags": [
+          "solo_task",
+          "two_option"
+        ]
+      },
+      {
+        "i": 25,
+        "note": "Harder trail with stamp or gentler trail?",
+        "shape": "situation",
+        "flags": [
+          "solo_task",
+          "two_option"
+        ]
+      },
+      {
+        "i": 26,
+        "note": "Reliable tactic or creative play in game?",
+        "shape": "situation",
+        "flags": [
+          "solo_task",
+          "two_option"
+        ]
+      },
+      {
+        "i": 27,
+        "note": "Read disliked genre to complete challenge?",
+        "shape": "situation",
+        "flags": [
+          "solo_task",
+          "two_option"
+        ]
+      },
+      {
+        "i": 28,
+        "note": "Keep tracking competitor sales numbers?",
+        "shape": "advice",
+        "flags": [
+          "two_option"
+        ]
+      },
+      {
+        "i": 29,
+        "note": "Genuine conversation or collect business cards?",
+        "shape": "situation",
+        "flags": [
+          "two_option"
+        ]
+      },
+      {
+        "i": 30,
+        "note": "Reaction to employee performance leaderboard?",
+        "shape": "situation",
+        "flags": [
+          "solo_task"
+        ]
+      },
+      {
+        "i": 31,
+        "note": "How to choose what to study?",
+        "shape": "situation",
+        "flags": [
+          "solo_task"
+        ]
+      },
+      {
+        "i": 32,
+        "note": "Reaction to unscored restaurant challenge?",
+        "shape": "situation",
+        "flags": [
+          "solo_task"
+        ]
+      },
+      {
+        "i": 33,
+        "note": "Finish landmark achievement or give up?",
+        "shape": "situation",
+        "flags": [
+          "solo_task",
+          "two_option"
+        ]
+      },
+      {
+        "i": 34,
+        "note": "Should you care about stagnant rating?",
+        "shape": "advice",
+        "flags": [
+          "yes_no"
+        ]
+      },
+      {
+        "i": 35,
+        "note": "Try different game or defend rank?",
+        "shape": "situation",
+        "flags": [
+          "two_option"
+        ]
+      },
+      {
+        "i": 36,
+        "note": "Unstructured trip or planned checklist route?",
+        "shape": "situation",
+        "flags": [
+          "solo_task",
+          "two_option"
+        ]
+      },
+      {
+        "i": 37,
+        "note": "Engage with points-based wellness program?",
+        "shape": "situation",
+        "flags": [
+          "solo_task"
+        ]
+      },
+      {
+        "i": 38,
+        "note": "Trophy shelf or comfortable reading chair?",
+        "shape": "situation",
+        "flags": [
+          "solo_task",
+          "two_option"
+        ]
+      },
+      {
+        "i": 39,
+        "note": "Is five-year writing group worth continuing?",
+        "shape": "advice",
+        "flags": []
+      }
+    ]
+  },
+  "stem": "achiever_bartle",
+  "arm": "w19"
+}

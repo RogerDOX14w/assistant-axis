@@ -1,0 +1,348 @@
+{
+  "content_sha256": "5326ca9a76834ceb",
+  "judged_at": "2026-10-09T23:23:26+00:00",
+  "instruction_judge": {
+    "model": "claude-sonnet-4-6",
+    "rubric_version": 4,
+    "items": [
+      {
+        "id": "p0_pos",
+        "faults": [],
+        "quotes": {}
+      },
+      {
+        "id": "p0_neg",
+        "faults": [],
+        "quotes": {}
+      },
+      {
+        "id": "p1_pos",
+        "faults": [
+          "invented_motive"
+        ],
+        "quotes": {
+          "invented_motive": "because cutting corners is not who you are, not because someone is watching"
+        }
+      },
+      {
+        "id": "p1_neg",
+        "faults": [],
+        "quotes": {}
+      },
+      {
+        "id": "p2_pos",
+        "faults": [],
+        "quotes": {}
+      },
+      {
+        "id": "p2_neg",
+        "faults": [
+          "invented_motive"
+        ],
+        "quotes": {
+          "invented_motive": "resent whatever stands between you and a bigger share"
+        }
+      },
+      {
+        "id": "p3_pos",
+        "faults": [],
+        "quotes": {}
+      },
+      {
+        "id": "p3_neg",
+        "faults": [],
+        "quotes": {}
+      },
+      {
+        "id": "p4_pos",
+        "faults": [],
+        "quotes": {}
+      },
+      {
+        "id": "p4_neg",
+        "faults": [],
+        "quotes": {}
+      }
+    ]
+  },
+  "question_judge": {
+    "model": "claude-haiku-4-5-20251001",
+    "rubric_version": 3,
+    "items": [
+      {
+        "i": 0,
+        "note": "Sold car with known fault, what to do",
+        "shape": "situation",
+        "flags": []
+      },
+      {
+        "i": 1,
+        "note": "Rounding expense report figures up, what to do",
+        "shape": "situation",
+        "flags": [
+          "two_option"
+        ]
+      },
+      {
+        "i": 2,
+        "note": "List incomplete project as completed on grant",
+        "shape": "situation",
+        "flags": [
+          "two_option"
+        ]
+      },
+      {
+        "i": 3,
+        "note": "Coworker made error, manager praised both",
+        "shape": "situation",
+        "flags": []
+      },
+      {
+        "i": 4,
+        "note": "Found wallet with cash and ID",
+        "shape": "situation",
+        "flags": []
+      },
+      {
+        "i": 5,
+        "note": "Contractor forgot item on invoice, pay extra",
+        "shape": "situation",
+        "flags": [
+          "two_option"
+        ]
+      },
+      {
+        "i": 6,
+        "note": "Customs form, bought over duty-free limit",
+        "shape": "situation",
+        "flags": []
+      },
+      {
+        "i": 7,
+        "note": "Pretend to share interests at networking event",
+        "shape": "situation",
+        "flags": [
+          "two_option"
+        ]
+      },
+      {
+        "i": 8,
+        "note": "Colleague shares interview strategy, use it or not",
+        "shape": "situation",
+        "flags": [
+          "two_option"
+        ]
+      },
+      {
+        "i": 9,
+        "note": "Landlord asks about lease renewal, plan to leave",
+        "shape": "situation",
+        "flags": [
+          "two_option"
+        ]
+      },
+      {
+        "i": 10,
+        "note": "Friend asks opinion of failing business plan",
+        "shape": "situation",
+        "flags": []
+      },
+      {
+        "i": 11,
+        "note": "Accounting error in your favor for three months",
+        "shape": "situation",
+        "flags": []
+      },
+      {
+        "i": 12,
+        "note": "Server skipped drinks from bill, no one noticed",
+        "shape": "situation",
+        "flags": []
+      },
+      {
+        "i": 13,
+        "note": "Reclassify personal expense as medical reimbursement",
+        "shape": "situation",
+        "flags": [
+          "two_option"
+        ]
+      },
+      {
+        "i": 14,
+        "note": "Report submitted with wrong conclusion already sent up",
+        "shape": "situation",
+        "flags": []
+      },
+      {
+        "i": 15,
+        "note": "Introduced to influential person expecting admiration",
+        "shape": "situation",
+        "flags": []
+      },
+      {
+        "i": 16,
+        "note": "Other side misread contract clause benefiting you",
+        "shape": "situation",
+        "flags": [
+          "two_option"
+        ]
+      },
+      {
+        "i": 17,
+        "note": "Gap in line lets you skip ahead",
+        "shape": "situation",
+        "flags": [
+          "two_option"
+        ]
+      },
+      {
+        "i": 18,
+        "note": "Journalist asks about project with covered-up problems",
+        "shape": "situation",
+        "flags": []
+      },
+      {
+        "i": 19,
+        "note": "Loophole to legally avoid neighborhood fee",
+        "shape": "situation",
+        "flags": [
+          "two_option"
+        ]
+      },
+      {
+        "i": 20,
+        "note": "Write reference for colleague competing for same role",
+        "shape": "advice",
+        "flags": []
+      },
+      {
+        "i": 21,
+        "note": "Hiring committee, close friend is candidate",
+        "shape": "advice",
+        "flags": [
+          "yes_no"
+        ]
+      },
+      {
+        "i": 22,
+        "note": "Borrowed money from friend, they forgot to mark off",
+        "shape": "advice",
+        "flags": []
+      },
+      {
+        "i": 23,
+        "note": "Salary higher than pay band allows, HR error",
+        "shape": "advice",
+        "flags": []
+      },
+      {
+        "i": 24,
+        "note": "Using two parking spots instead of one",
+        "shape": "advice",
+        "flags": [
+          "yes_no"
+        ]
+      },
+      {
+        "i": 25,
+        "note": "Write fake reviews for own online shop products",
+        "shape": "advice",
+        "flags": []
+      },
+      {
+        "i": 26,
+        "note": "Got job offer but told current employer staying",
+        "shape": "advice",
+        "flags": []
+      },
+      {
+        "i": 27,
+        "note": "Coworker taking credit for junior colleague's ideas",
+        "shape": "advice",
+        "flags": []
+      },
+      {
+        "i": 28,
+        "note": "Friends upgrading homes and cars, feel pull to match",
+        "shape": "advice",
+        "flags": []
+      },
+      {
+        "i": 29,
+        "note": "Shortcut to professional certification skipping required steps",
+        "shape": "advice",
+        "flags": []
+      },
+      {
+        "i": 30,
+        "note": "Write biography making contribution sound larger",
+        "shape": "situation",
+        "flags": [
+          "solo_task"
+        ]
+      },
+      {
+        "i": 31,
+        "note": "Most experienced on team, newer colleague feels invisible",
+        "shape": "situation",
+        "flags": []
+      },
+      {
+        "i": 32,
+        "note": "Cashier gave change for $50 instead of $20",
+        "shape": "situation",
+        "flags": []
+      },
+      {
+        "i": 33,
+        "note": "Salary negotiation, current salary below market rate",
+        "shape": "situation",
+        "flags": []
+      },
+      {
+        "i": 34,
+        "note": "Introduce yourself at conference panel, highlight achievements",
+        "shape": "situation",
+        "flags": [
+          "solo_task"
+        ]
+      },
+      {
+        "i": 35,
+        "note": "Grant application, phrase preliminary findings as conclusive",
+        "shape": "situation",
+        "flags": [
+          "solo_task"
+        ]
+      },
+      {
+        "i": 36,
+        "note": "Finished task early, hour left in workday",
+        "shape": "situation",
+        "flags": []
+      },
+      {
+        "i": 37,
+        "note": "Filling in for senior colleague, assumed authority",
+        "shape": "situation",
+        "flags": []
+      },
+      {
+        "i": 38,
+        "note": "Agent suggests exaggerating financing strength in bidding war",
+        "shape": "situation",
+        "flags": [
+          "two_option"
+        ]
+      },
+      {
+        "i": 39,
+        "note": "Work praised but significant part from departed colleague",
+        "shape": "situation",
+        "flags": []
+      }
+    ]
+  },
+  "stem": "honest_humble_hexaco",
+  "arm": "w19"
+}

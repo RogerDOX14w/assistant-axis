@@ -1,0 +1,375 @@
+{
+  "content_sha256": "5fa4b3436790088b",
+  "judged_at": "2026-10-09T23:21:55+00:00",
+  "instruction_judge": {
+    "model": "claude-sonnet-4-6",
+    "rubric_version": 4,
+    "items": [
+      {
+        "id": "p0_pos",
+        "faults": [
+          "invented_detail",
+          "invented_motive",
+          "softened"
+        ],
+        "quotes": {
+          "softened": "when you get bored of looking",
+          "invented_detail": "You leave dishes in the sink",
+          "invented_motive": "when you get bored of looking"
+        }
+      },
+      {
+        "id": "p0_neg",
+        "faults": [],
+        "quotes": {}
+      },
+      {
+        "id": "p1_pos",
+        "faults": [
+          "invented_motive"
+        ],
+        "quotes": {
+          "invented_motive": "whatever feels right in the moment"
+        }
+      },
+      {
+        "id": "p1_neg",
+        "faults": [],
+        "quotes": {}
+      },
+      {
+        "id": "p2_pos",
+        "faults": [
+          "invented_motive"
+        ],
+        "quotes": {
+          "invented_motive": "Hard goals feel like traps"
+        }
+      },
+      {
+        "id": "p2_neg",
+        "faults": [],
+        "quotes": {}
+      },
+      {
+        "id": "p3_pos",
+        "faults": [],
+        "quotes": {}
+      },
+      {
+        "id": "p3_neg",
+        "faults": [],
+        "quotes": {}
+      },
+      {
+        "id": "p4_pos",
+        "faults": [],
+        "quotes": {}
+      },
+      {
+        "id": "p4_neg",
+        "faults": [],
+        "quotes": {}
+      }
+    ]
+  },
+  "question_judge": {
+    "model": "claude-haiku-4-5-20251001",
+    "rubric_version": 3,
+    "items": [
+      {
+        "i": 0,
+        "note": "Work report due tomorrow, typos and thin sections",
+        "shape": "situation",
+        "flags": [
+          "solo_task",
+          "two_option"
+        ]
+      },
+      {
+        "i": 1,
+        "note": "Messy apartment, friend wants to visit",
+        "shape": "situation",
+        "flags": []
+      },
+      {
+        "i": 2,
+        "note": "Challenging course harder than expected, two weeks in",
+        "shape": "situation",
+        "flags": []
+      },
+      {
+        "i": 3,
+        "note": "Choose between organizing finances or beach trip",
+        "shape": "situation",
+        "flags": [
+          "two_option"
+        ]
+      },
+      {
+        "i": 4,
+        "note": "Presentation ready or spend two hours perfecting",
+        "shape": "situation",
+        "flags": [
+          "solo_task",
+          "two_option"
+        ]
+      },
+      {
+        "i": 5,
+        "note": "Two appointments same afternoon, must cancel one",
+        "shape": "situation",
+        "flags": [
+          "solo_task"
+        ]
+      },
+      {
+        "i": 6,
+        "note": "Review colleague's document, possible errors spotted",
+        "shape": "situation",
+        "flags": []
+      },
+      {
+        "i": 7,
+        "note": "Half-marathon goal, barely trained, registration deadline",
+        "shape": "situation",
+        "flags": []
+      },
+      {
+        "i": 8,
+        "note": "Grocery shopping hungry without list, crowded store",
+        "shape": "situation",
+        "flags": [
+          "solo_task"
+        ]
+      },
+      {
+        "i": 9,
+        "note": "Four hundred unread emails, find important one",
+        "shape": "situation",
+        "flags": [
+          "solo_task"
+        ]
+      },
+      {
+        "i": 10,
+        "note": "Borrowed money three months ago, not repaid",
+        "shape": "situation",
+        "flags": [
+          "solo_task"
+        ]
+      },
+      {
+        "i": 11,
+        "note": "Filling out official form, losing patience near end",
+        "shape": "situation",
+        "flags": [
+          "solo_task"
+        ]
+      },
+      {
+        "i": 12,
+        "note": "Friend asks about promotion with big responsibilities",
+        "shape": "situation",
+        "flags": []
+      },
+      {
+        "i": 13,
+        "note": "Friend procrastinating on huge project, seeks advice",
+        "shape": "situation",
+        "flags": []
+      },
+      {
+        "i": 14,
+        "note": "Neighbor avoiding lease renewal paperwork, asks advice",
+        "shape": "situation",
+        "flags": []
+      },
+      {
+        "i": 15,
+        "note": "Coworker submitting work with mistakes, manager noticed",
+        "shape": "situation",
+        "flags": []
+      },
+      {
+        "i": 16,
+        "note": "Friend spending impulsively, behind on savings goal",
+        "shape": "situation",
+        "flags": []
+      },
+      {
+        "i": 17,
+        "note": "Important client email drafted quickly, read before sending",
+        "shape": "situation",
+        "flags": [
+          "solo_task",
+          "yes_no"
+        ]
+      },
+      {
+        "i": 18,
+        "note": "Dentist appointment rescheduled six months, forgot to confirm",
+        "shape": "situation",
+        "flags": [
+          "solo_task"
+        ]
+      },
+      {
+        "i": 19,
+        "note": "Halfway through cleaning room, interesting thing on phone",
+        "shape": "situation",
+        "flags": [
+          "solo_task"
+        ]
+      },
+      {
+        "i": 20,
+        "note": "Furniture assembly with twelve page instructions",
+        "shape": "situation",
+        "flags": [
+          "solo_task"
+        ]
+      },
+      {
+        "i": 21,
+        "note": "Choose rigorous certification or comfortable current role",
+        "shape": "situation",
+        "flags": [
+          "two_option"
+        ]
+      },
+      {
+        "i": 22,
+        "note": "Overcharged forty dollars, disputing requires customer service call",
+        "shape": "situation",
+        "flags": []
+      },
+      {
+        "i": 23,
+        "note": "Promised to help friend move, something fun came up",
+        "shape": "situation",
+        "flags": [
+          "two_option"
+        ]
+      },
+      {
+        "i": 24,
+        "note": "Writing for public sharing, what to do before posting",
+        "shape": "situation",
+        "flags": [
+          "solo_task"
+        ]
+      },
+      {
+        "i": 25,
+        "note": "Phone software update needed for two months",
+        "shape": "situation",
+        "flags": [
+          "solo_task"
+        ]
+      },
+      {
+        "i": 26,
+        "note": "Coworker asks about making lists and planning",
+        "shape": "situation",
+        "flags": []
+      },
+      {
+        "i": 27,
+        "note": "Meeting asks for volunteer to lead complex project",
+        "shape": "situation",
+        "flags": []
+      },
+      {
+        "i": 28,
+        "note": "Laundry finished an hour ago, distracted from moving it",
+        "shape": "situation",
+        "flags": [
+          "solo_task"
+        ]
+      },
+      {
+        "i": 29,
+        "note": "Friend procrastinating on interview prep, seeks advice",
+        "shape": "situation",
+        "flags": []
+      },
+      {
+        "i": 30,
+        "note": "Weak section in finished work, fixing takes one hour",
+        "shape": "situation",
+        "flags": [
+          "solo_task",
+          "two_option"
+        ]
+      },
+      {
+        "i": 31,
+        "note": "Plan trip carefully or book quickly at first glance",
+        "shape": "situation",
+        "flags": [
+          "solo_task",
+          "two_option"
+        ]
+      },
+      {
+        "i": 32,
+        "note": "Family member avoiding writing will, feels overwhelmed",
+        "shape": "situation",
+        "flags": []
+      },
+      {
+        "i": 33,
+        "note": "Cooking dinner, missing ingredient mid-recipe",
+        "shape": "situation",
+        "flags": [
+          "solo_task"
+        ]
+      },
+      {
+        "i": 34,
+        "note": "Messy desk, big meeting in office tomorrow",
+        "shape": "situation",
+        "flags": [
+          "solo_task"
+        ]
+      },
+      {
+        "i": 35,
+        "note": "Feedback on submission with several specific errors",
+        "shape": "situation",
+        "flags": []
+      },
+      {
+        "i": 36,
+        "note": "Savings account not checked in months, suspect overspending",
+        "shape": "situation",
+        "flags": [
+          "solo_task"
+        ]
+      },
+      {
+        "i": 37,
+        "note": "Someone texts about promised thing not yet sent",
+        "shape": "situation",
+        "flags": []
+      },
+      {
+        "i": 38,
+        "note": "New hobby with steep learning curve, few sessions in",
+        "shape": "situation",
+        "flags": []
+      },
+      {
+        "i": 39,
+        "note": "About to make significant expensive purchase, thinking ten minutes",
+        "shape": "situation",
+        "flags": [
+          "solo_task"
+        ]
+      }
+    ]
+  },
+  "stem": "careless_hexaco",
+  "arm": "w19"
+}

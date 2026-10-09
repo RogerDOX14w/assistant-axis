@@ -1,0 +1,376 @@
+{
+  "content_sha256": "624ec49b0036bb93",
+  "judged_at": "2026-10-09T23:22:08+00:00",
+  "instruction_judge": {
+    "model": "claude-sonnet-4-6",
+    "rubric_version": 4,
+    "items": [
+      {
+        "id": "p0_pos",
+        "faults": [],
+        "quotes": {}
+      },
+      {
+        "id": "p0_neg",
+        "faults": [],
+        "quotes": {}
+      },
+      {
+        "id": "p1_pos",
+        "faults": [],
+        "quotes": {}
+      },
+      {
+        "id": "p1_neg",
+        "faults": [],
+        "quotes": {}
+      },
+      {
+        "id": "p2_pos",
+        "faults": [],
+        "quotes": {}
+      },
+      {
+        "id": "p2_neg",
+        "faults": [
+          "invented_motive"
+        ],
+        "quotes": {
+          "invented_motive": "treat getting something out the door as more important than getting it right"
+        }
+      },
+      {
+        "id": "p3_pos",
+        "faults": [],
+        "quotes": {}
+      },
+      {
+        "id": "p3_neg",
+        "faults": [
+          "invented_motive"
+        ],
+        "quotes": {
+          "invented_motive": "value keeping the peace above reaching the right answer"
+        }
+      },
+      {
+        "id": "p4_pos",
+        "faults": [],
+        "quotes": {}
+      },
+      {
+        "id": "p4_neg",
+        "faults": [],
+        "quotes": {}
+      }
+    ]
+  },
+  "question_judge": {
+    "model": "claude-haiku-4-5-20251001",
+    "rubric_version": 3,
+    "items": [
+      {
+        "i": 0,
+        "note": "Spot errors in signed-off report",
+        "shape": "situation",
+        "flags": [
+          "two_option"
+        ]
+      },
+      {
+        "i": 1,
+        "note": "Respond to friend's rough business pitch",
+        "shape": "situation",
+        "flags": []
+      },
+      {
+        "i": 2,
+        "note": "Redo spreadsheet formula from scratch",
+        "shape": "situation",
+        "flags": [
+          "two_option"
+        ]
+      },
+      {
+        "i": 3,
+        "note": "Accept high-paying job with tight deadline",
+        "shape": "advice",
+        "flags": [
+          "yes_no"
+        ]
+      },
+      {
+        "i": 4,
+        "note": "Raise ignored variable at meeting end",
+        "shape": "situation",
+        "flags": [
+          "two_option"
+        ]
+      },
+      {
+        "i": 5,
+        "note": "Skip permit process for renovation",
+        "shape": "situation",
+        "flags": [
+          "two_option"
+        ]
+      },
+      {
+        "i": 6,
+        "note": "Point out tiny sample size in article",
+        "shape": "situation",
+        "flags": [
+          "two_option"
+        ]
+      },
+      {
+        "i": 7,
+        "note": "Work through relationship argument details",
+        "shape": "advice",
+        "flags": [
+          "two_option"
+        ]
+      },
+      {
+        "i": 8,
+        "note": "Cite number from memory or verify",
+        "shape": "situation",
+        "flags": [
+          "two_option"
+        ]
+      },
+      {
+        "i": 9,
+        "note": "Skip final quality check before launch",
+        "shape": "situation",
+        "flags": [
+          "two_option"
+        ]
+      },
+      {
+        "i": 10,
+        "note": "Correct charming acquaintance's factual error",
+        "shape": "situation",
+        "flags": []
+      },
+      {
+        "i": 11,
+        "note": "Decide on startup without business plan",
+        "shape": "advice",
+        "flags": []
+      },
+      {
+        "i": 12,
+        "note": "Call client now or respond in writing",
+        "shape": "situation",
+        "flags": [
+          "two_option"
+        ]
+      },
+      {
+        "i": 13,
+        "note": "Evaluate family's circulating health claim",
+        "shape": "situation",
+        "flags": []
+      },
+      {
+        "i": 14,
+        "note": "Ask about funding for applauded proposal",
+        "shape": "situation",
+        "flags": [
+          "two_option"
+        ]
+      },
+      {
+        "i": 15,
+        "note": "Accept contract clause without verification",
+        "shape": "situation",
+        "flags": [
+          "two_option"
+        ]
+      },
+      {
+        "i": 16,
+        "note": "Balance instinct versus overcomplication advice",
+        "shape": "advice",
+        "flags": []
+      },
+      {
+        "i": 17,
+        "note": "Choose between warm or rigorous candidate",
+        "shape": "situation",
+        "flags": [
+          "two_option"
+        ]
+      },
+      {
+        "i": 18,
+        "note": "Verify product satisfaction rate claim",
+        "shape": "situation",
+        "flags": []
+      },
+      {
+        "i": 19,
+        "note": "Skip testing phase to save time",
+        "shape": "situation",
+        "flags": [
+          "two_option"
+        ]
+      },
+      {
+        "i": 20,
+        "note": "Balance quick decisions with documentation",
+        "shape": "advice",
+        "flags": []
+      },
+      {
+        "i": 21,
+        "note": "Present without latest data or delay",
+        "shape": "situation",
+        "flags": [
+          "two_option"
+        ]
+      },
+      {
+        "i": 22,
+        "note": "Raise logistics concerns about group trip",
+        "shape": "situation",
+        "flags": []
+      },
+      {
+        "i": 23,
+        "note": "Correct misused statistic in public debate",
+        "shape": "situation",
+        "flags": [
+          "two_option"
+        ]
+      },
+      {
+        "i": 24,
+        "note": "Invest based on colleague's recommendation",
+        "shape": "advice",
+        "flags": [
+          "yes_no"
+        ]
+      },
+      {
+        "i": 25,
+        "note": "Flag unsupported claim in position statement",
+        "shape": "situation",
+        "flags": [
+          "two_option"
+        ]
+      },
+      {
+        "i": 26,
+        "note": "Correct group's factual error at dinner",
+        "shape": "situation",
+        "flags": [
+          "two_option"
+        ]
+      },
+      {
+        "i": 27,
+        "note": "Understand root cause before brainstorming",
+        "shape": "situation",
+        "flags": [
+          "two_option"
+        ]
+      },
+      {
+        "i": 28,
+        "note": "Buy car without research on sale day",
+        "shape": "advice",
+        "flags": [
+          "yes_no"
+        ]
+      },
+      {
+        "i": 29,
+        "note": "Stress-test analysis section before finishing",
+        "shape": "situation",
+        "flags": [
+          "two_option"
+        ]
+      },
+      {
+        "i": 30,
+        "note": "Give verbal estimate without full information",
+        "shape": "situation",
+        "flags": [
+          "two_option"
+        ]
+      },
+      {
+        "i": 31,
+        "note": "Co-author with less careful researcher",
+        "shape": "advice",
+        "flags": [
+          "yes_no"
+        ]
+      },
+      {
+        "i": 32,
+        "note": "Flag outdated segmentation logic in email",
+        "shape": "situation",
+        "flags": [
+          "two_option"
+        ]
+      },
+      {
+        "i": 33,
+        "note": "Buy house based on gut and pressure",
+        "shape": "situation",
+        "flags": [
+          "two_option"
+        ]
+      },
+      {
+        "i": 34,
+        "note": "Point out financial concerns to friend",
+        "shape": "situation",
+        "flags": []
+      },
+      {
+        "i": 35,
+        "note": "Choose between offsite or audit report",
+        "shape": "situation",
+        "flags": [
+          "two_option"
+        ]
+      },
+      {
+        "i": 36,
+        "note": "Gather information before career change",
+        "shape": "advice",
+        "flags": []
+      },
+      {
+        "i": 37,
+        "note": "Adopt popular methodology without research",
+        "shape": "situation",
+        "flags": [
+          "two_option"
+        ]
+      },
+      {
+        "i": 38,
+        "note": "Raise alternative explanations at celebration",
+        "shape": "situation",
+        "flags": [
+          "two_option"
+        ]
+      },
+      {
+        "i": 39,
+        "note": "Co-sign loan for responsible neighbor",
+        "shape": "situation",
+        "flags": [
+          "two_option"
+        ]
+      }
+    ]
+  },
+  "stem": "conscientiousness_disc",
+  "arm": "w19"
+}

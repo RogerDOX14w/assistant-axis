@@ -1,0 +1,349 @@
+{
+  "content_sha256": "bfb868a360c93e05",
+  "judged_at": "2026-10-09T23:22:33+00:00",
+  "instruction_judge": {
+    "model": "claude-sonnet-4-6",
+    "rubric_version": 4,
+    "items": [
+      {
+        "id": "p0_pos",
+        "faults": [],
+        "quotes": {}
+      },
+      {
+        "id": "p0_neg",
+        "faults": [],
+        "quotes": {}
+      },
+      {
+        "id": "p1_pos",
+        "faults": [],
+        "quotes": {}
+      },
+      {
+        "id": "p1_neg",
+        "faults": [
+          "weak_opposite"
+        ],
+        "quotes": {
+          "weak_opposite": "takes people exactly as they are and has no interest in changing them... leave each person to decide their own direction without your input"
+        }
+      },
+      {
+        "id": "p2_pos",
+        "faults": [],
+        "quotes": {}
+      },
+      {
+        "id": "p2_neg",
+        "faults": [
+          "invented_motive"
+        ],
+        "quotes": {
+          "invented_motive": "you follow the numbers and the logic wherever they lead"
+        }
+      },
+      {
+        "id": "p3_pos",
+        "faults": [],
+        "quotes": {}
+      },
+      {
+        "id": "p3_neg",
+        "faults": [
+          "invented_motive"
+        ],
+        "quotes": {
+          "invented_motive": "You distrust firm plans"
+        }
+      },
+      {
+        "id": "p4_pos",
+        "faults": [],
+        "quotes": {}
+      },
+      {
+        "id": "p4_neg",
+        "faults": [],
+        "quotes": {}
+      }
+    ]
+  },
+  "question_judge": {
+    "model": "claude-haiku-4-5-20251001",
+    "rubric_version": 3,
+    "items": [
+      {
+        "i": 0,
+        "note": "What to do about overlooked colleague",
+        "shape": "situation",
+        "flags": []
+      },
+      {
+        "i": 1,
+        "note": "How to handle volunteer task allocation",
+        "shape": "situation",
+        "flags": []
+      },
+      {
+        "i": 2,
+        "note": "What to do when idea dismissed",
+        "shape": "situation",
+        "flags": []
+      },
+      {
+        "i": 3,
+        "note": "Respond to friend's midnight crisis",
+        "shape": "situation",
+        "flags": []
+      },
+      {
+        "i": 4,
+        "note": "First day leading demoralized team",
+        "shape": "situation",
+        "flags": []
+      },
+      {
+        "i": 5,
+        "note": "Reshape report for stakeholders",
+        "shape": "situation",
+        "flags": [
+          "solo_task",
+          "two_option"
+        ]
+      },
+      {
+        "i": 6,
+        "note": "Engage quiet guests at dinner",
+        "shape": "situation",
+        "flags": []
+      },
+      {
+        "i": 7,
+        "note": "Deliver critical feedback to high performer",
+        "shape": "situation",
+        "flags": []
+      },
+      {
+        "i": 8,
+        "note": "Develop junior colleague's hidden talent",
+        "shape": "situation",
+        "flags": []
+      },
+      {
+        "i": 9,
+        "note": "Advice on promotion with relocation",
+        "shape": "advice",
+        "flags": []
+      },
+      {
+        "i": 10,
+        "note": "Diagnose flat team meeting energy",
+        "shape": "advice",
+        "flags": []
+      },
+      {
+        "i": 11,
+        "note": "Help resistant shelter resident",
+        "shape": "advice",
+        "flags": []
+      },
+      {
+        "i": 12,
+        "note": "Mentee leaving field entirely",
+        "shape": "advice",
+        "flags": []
+      },
+      {
+        "i": 13,
+        "note": "Overcome fear of public speaking",
+        "shape": "advice",
+        "flags": []
+      },
+      {
+        "i": 14,
+        "note": "Solo retreat or invite friends",
+        "shape": "situation",
+        "flags": [
+          "two_option"
+        ]
+      },
+      {
+        "i": 15,
+        "note": "Reach out to isolated new neighbor",
+        "shape": "situation",
+        "flags": []
+      },
+      {
+        "i": 16,
+        "note": "Oppose wrong organizational policy",
+        "shape": "situation",
+        "flags": []
+      },
+      {
+        "i": 17,
+        "note": "Unblock stalled group discussion",
+        "shape": "situation",
+        "flags": []
+      },
+      {
+        "i": 18,
+        "note": "Mediate incompatible working styles",
+        "shape": "situation",
+        "flags": []
+      },
+      {
+        "i": 19,
+        "note": "Redo work for recipient benefit",
+        "shape": "situation",
+        "flags": [
+          "solo_task",
+          "two_option"
+        ]
+      },
+      {
+        "i": 20,
+        "note": "Friend in unhappy relationship",
+        "shape": "situation",
+        "flags": []
+      },
+      {
+        "i": 21,
+        "note": "Advocate for underperforming liked colleague",
+        "shape": "situation",
+        "flags": []
+      },
+      {
+        "i": 22,
+        "note": "Write department message about change",
+        "shape": "situation",
+        "flags": [
+          "solo_task",
+          "two_option"
+        ]
+      },
+      {
+        "i": 23,
+        "note": "Redirect excited but wrong-headed plan",
+        "shape": "situation",
+        "flags": [
+          "two_option"
+        ]
+      },
+      {
+        "i": 24,
+        "note": "Support nervous presenter losing audience",
+        "shape": "situation",
+        "flags": []
+      },
+      {
+        "i": 25,
+        "note": "Choose between skill and potential",
+        "shape": "situation",
+        "flags": [
+          "two_option"
+        ]
+      },
+      {
+        "i": 26,
+        "note": "Hand over community group leadership",
+        "shape": "situation",
+        "flags": [
+          "two_option"
+        ]
+      },
+      {
+        "i": 27,
+        "note": "Approach dismissive family member",
+        "shape": "situation",
+        "flags": []
+      },
+      {
+        "i": 28,
+        "note": "Emotionally flat project completion",
+        "shape": "situation",
+        "flags": [
+          "solo_task",
+          "two_option"
+        ]
+      },
+      {
+        "i": 29,
+        "note": "Address uncredited contribution publicly",
+        "shape": "situation",
+        "flags": [
+          "two_option"
+        ]
+      },
+      {
+        "i": 30,
+        "note": "Accept volunteer leadership role",
+        "shape": "advice",
+        "flags": []
+      },
+      {
+        "i": 31,
+        "note": "Reconnect with drifting best friend",
+        "shape": "advice",
+        "flags": []
+      },
+      {
+        "i": 32,
+        "note": "Reach shut-down student",
+        "shape": "advice",
+        "flags": []
+      },
+      {
+        "i": 33,
+        "note": "Leave job for own growth",
+        "shape": "advice",
+        "flags": []
+      },
+      {
+        "i": 34,
+        "note": "Address tension at social event",
+        "shape": "situation",
+        "flags": []
+      },
+      {
+        "i": 35,
+        "note": "High-visibility or supporting role",
+        "shape": "situation",
+        "flags": [
+          "two_option"
+        ]
+      },
+      {
+        "i": 36,
+        "note": "Revise cold-toned group document",
+        "shape": "situation",
+        "flags": [
+          "solo_task",
+          "two_option"
+        ]
+      },
+      {
+        "i": 37,
+        "note": "Respond to feedback about pushback",
+        "shape": "situation",
+        "flags": []
+      },
+      {
+        "i": 38,
+        "note": "Design efficient or inclusive retreat",
+        "shape": "situation",
+        "flags": [
+          "two_option"
+        ]
+      },
+      {
+        "i": 39,
+        "note": "Listen to stranger's difficulty",
+        "shape": "situation",
+        "flags": []
+      }
+    ]
+  },
+  "stem": "enfj_mbti",
+  "arm": "w19"
+}

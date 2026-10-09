@@ -1,0 +1,366 @@
+{
+  "content_sha256": "1cd3611366eabef9",
+  "judged_at": "2026-10-09T23:23:01+00:00",
+  "instruction_judge": {
+    "model": "claude-sonnet-4-6",
+    "rubric_version": 4,
+    "items": [
+      {
+        "id": "p0_pos",
+        "faults": [],
+        "quotes": {}
+      },
+      {
+        "id": "p0_neg",
+        "faults": [],
+        "quotes": {}
+      },
+      {
+        "id": "p1_pos",
+        "faults": [],
+        "quotes": {}
+      },
+      {
+        "id": "p1_neg",
+        "faults": [
+          "softened",
+          "weak_opposite"
+        ],
+        "quotes": {
+          "softened": "holds back from anything that carries real risk",
+          "weak_opposite": "deliberates before every decision and holds back from anything that carries real risk. You weigh consequences carefully and keep your choices conventional and well-considered"
+        }
+      },
+      {
+        "id": "p2_pos",
+        "faults": [],
+        "quotes": {}
+      },
+      {
+        "id": "p2_neg",
+        "faults": [],
+        "quotes": {}
+      },
+      {
+        "id": "p3_pos",
+        "faults": [],
+        "quotes": {}
+      },
+      {
+        "id": "p3_neg",
+        "faults": [
+          "softened"
+        ],
+        "quotes": {
+          "softened": "until it has proven itself stable and worthwhile"
+        }
+      },
+      {
+        "id": "p4_pos",
+        "faults": [],
+        "quotes": {}
+      },
+      {
+        "id": "p4_neg",
+        "faults": [
+          "invented_motive"
+        ],
+        "quotes": {
+          "invented_motive": "guard your money against impulse"
+        }
+      }
+    ]
+  },
+  "question_judge": {
+    "model": "claude-haiku-4-5-20251001",
+    "rubric_version": 3,
+    "items": [
+      {
+        "i": 0,
+        "note": "Cancel plans for exciting new club?",
+        "shape": "situation",
+        "flags": [
+          "two_option"
+        ]
+      },
+      {
+        "i": 1,
+        "note": "Buy expensive jacket or stick to budget?",
+        "shape": "situation",
+        "flags": [
+          "two_option"
+        ]
+      },
+      {
+        "i": 2,
+        "note": "Switch music scenes with friends?",
+        "shape": "situation",
+        "flags": []
+      },
+      {
+        "i": 3,
+        "note": "Attend mysterious midnight event before work?",
+        "shape": "situation",
+        "flags": [
+          "two_option"
+        ]
+      },
+      {
+        "i": 4,
+        "note": "Buy limited-edition sneakers impulsively?",
+        "shape": "situation",
+        "flags": []
+      },
+      {
+        "i": 5,
+        "note": "Join expensive mystery weekend trip?",
+        "shape": "advice",
+        "flags": [
+          "yes_no"
+        ]
+      },
+      {
+        "i": 6,
+        "note": "Restart room decoration for new aesthetic?",
+        "shape": "situation",
+        "flags": []
+      },
+      {
+        "i": 7,
+        "note": "Join risky unconventional side project?",
+        "shape": "situation",
+        "flags": []
+      },
+      {
+        "i": 8,
+        "note": "Buy art or save for laptop?",
+        "shape": "advice",
+        "flags": [
+          "two_option"
+        ]
+      },
+      {
+        "i": 9,
+        "note": "Join spontaneous road trip tomorrow?",
+        "shape": "situation",
+        "flags": [
+          "two_option"
+        ]
+      },
+      {
+        "i": 10,
+        "note": "Try new intense workout trend?",
+        "shape": "situation",
+        "flags": []
+      },
+      {
+        "i": 11,
+        "note": "Suggest wild activity without causing friction?",
+        "shape": "advice",
+        "flags": []
+      },
+      {
+        "i": 12,
+        "note": "Choose known artist or unknown act?",
+        "shape": "situation",
+        "flags": [
+          "two_option"
+        ]
+      },
+      {
+        "i": 13,
+        "note": "Wear bold or safe outfit?",
+        "shape": "situation",
+        "flags": [
+          "two_option"
+        ]
+      },
+      {
+        "i": 14,
+        "note": "Buy weird viral product?",
+        "shape": "situation",
+        "flags": []
+      },
+      {
+        "i": 15,
+        "note": "Is hobby-hopping a problem?",
+        "shape": "advice",
+        "flags": [
+          "yes_no"
+        ]
+      },
+      {
+        "i": 16,
+        "note": "Order familiar or unknown dish?",
+        "shape": "situation",
+        "flags": [
+          "two_option"
+        ]
+      },
+      {
+        "i": 17,
+        "note": "Build playlist of known or new music?",
+        "shape": "situation",
+        "flags": [
+          "two_option"
+        ]
+      },
+      {
+        "i": 18,
+        "note": "Commit to risky new style?",
+        "shape": "situation",
+        "flags": []
+      },
+      {
+        "i": 19,
+        "note": "Take lower-paying exciting freelance gig?",
+        "shape": "advice",
+        "flags": [
+          "yes_no"
+        ]
+      },
+      {
+        "i": 20,
+        "note": "Choose headliner or underground set?",
+        "shape": "situation",
+        "flags": [
+          "two_option"
+        ]
+      },
+      {
+        "i": 21,
+        "note": "Commit to recurring weekly activity?",
+        "shape": "situation",
+        "flags": [
+          "two_option"
+        ]
+      },
+      {
+        "i": 22,
+        "note": "Save, pay debt, or spend on night?",
+        "shape": "situation",
+        "flags": []
+      },
+      {
+        "i": 23,
+        "note": "Abandon trend you started when played out?",
+        "shape": "advice",
+        "flags": []
+      },
+      {
+        "i": 24,
+        "note": "Dye hair attention-grabbing color?",
+        "shape": "situation",
+        "flags": []
+      },
+      {
+        "i": 25,
+        "note": "Stay in or pull together night out?",
+        "shape": "situation",
+        "flags": [
+          "two_option"
+        ]
+      },
+      {
+        "i": 26,
+        "note": "Attend strange event in unfamiliar area?",
+        "shape": "situation",
+        "flags": []
+      },
+      {
+        "i": 27,
+        "note": "Drop class for exciting unknown alternative?",
+        "shape": "advice",
+        "flags": [
+          "yes_no"
+        ]
+      },
+      {
+        "i": 28,
+        "note": "Buy flashy expensive outfit?",
+        "shape": "situation",
+        "flags": []
+      },
+      {
+        "i": 29,
+        "note": "Choose comfortable or adventurous trip?",
+        "shape": "situation",
+        "flags": [
+          "two_option"
+        ]
+      },
+      {
+        "i": 30,
+        "note": "Respond to reckless unconventional activity?",
+        "shape": "situation",
+        "flags": []
+      },
+      {
+        "i": 31,
+        "note": "Cut spending on trends and going out?",
+        "shape": "advice",
+        "flags": []
+      },
+      {
+        "i": 32,
+        "note": "Choose stable job or risky startup?",
+        "shape": "situation",
+        "flags": [
+          "two_option"
+        ]
+      },
+      {
+        "i": 33,
+        "note": "Refine project or try new direction?",
+        "shape": "situation",
+        "flags": [
+          "two_option"
+        ]
+      },
+      {
+        "i": 34,
+        "note": "Join edgy new social media platform?",
+        "shape": "situation",
+        "flags": []
+      },
+      {
+        "i": 35,
+        "note": "Are parents right about spending habits?",
+        "shape": "advice",
+        "flags": []
+      },
+      {
+        "i": 36,
+        "note": "Continue skill or switch to new interest?",
+        "shape": "situation",
+        "flags": [
+          "two_option"
+        ]
+      },
+      {
+        "i": 37,
+        "note": "Wear safe or risky new look?",
+        "shape": "situation",
+        "flags": [
+          "two_option"
+        ]
+      },
+      {
+        "i": 38,
+        "note": "Lean into underground scenes or go mainstream?",
+        "shape": "advice",
+        "flags": []
+      },
+      {
+        "i": 39,
+        "note": "Catch up or follow unplanned day?",
+        "shape": "situation",
+        "flags": [
+          "two_option"
+        ]
+      }
+    ]
+  },
+  "stem": "experiencer_vals",
+  "arm": "w19"
+}

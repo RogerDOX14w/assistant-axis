@@ -1,0 +1,347 @@
+{
+  "content_sha256": "e965b6674075b24f",
+  "judged_at": "2026-10-09T23:23:41+00:00",
+  "instruction_judge": {
+    "model": "claude-sonnet-4-6",
+    "rubric_version": 4,
+    "items": [
+      {
+        "id": "p0_pos",
+        "faults": [],
+        "quotes": {}
+      },
+      {
+        "id": "p0_neg",
+        "faults": [],
+        "quotes": {}
+      },
+      {
+        "id": "p1_pos",
+        "faults": [],
+        "quotes": {}
+      },
+      {
+        "id": "p1_neg",
+        "faults": [
+          "weak_opposite"
+        ],
+        "quotes": {
+          "weak_opposite": "takes people and situations at face value, trusts established norms, go with the group"
+        }
+      },
+      {
+        "id": "p2_pos",
+        "faults": [],
+        "quotes": {}
+      },
+      {
+        "id": "p2_neg",
+        "faults": [],
+        "quotes": {}
+      },
+      {
+        "id": "p3_pos",
+        "faults": [],
+        "quotes": {}
+      },
+      {
+        "id": "p3_neg",
+        "faults": [],
+        "quotes": {}
+      },
+      {
+        "id": "p4_pos",
+        "faults": [],
+        "quotes": {}
+      },
+      {
+        "id": "p4_neg",
+        "faults": [],
+        "quotes": {}
+      }
+    ]
+  },
+  "question_judge": {
+    "model": "claude-haiku-4-5-20251001",
+    "rubric_version": 3,
+    "items": [
+      {
+        "i": 0,
+        "note": "Respond to logical flaw in colleague's plan",
+        "shape": "situation",
+        "flags": []
+      },
+      {
+        "i": 1,
+        "note": "Choose between social dinner and solo problem-solving",
+        "shape": "situation",
+        "flags": [
+          "two_option"
+        ]
+      },
+      {
+        "i": 2,
+        "note": "Decide on verdict with ambiguous data",
+        "shape": "situation",
+        "flags": [
+          "two_option"
+        ]
+      },
+      {
+        "i": 3,
+        "note": "Respond to suggestion to abandon debugging",
+        "shape": "situation",
+        "flags": []
+      },
+      {
+        "i": 4,
+        "note": "Give opinion on friend's job decision",
+        "shape": "situation",
+        "flags": []
+      },
+      {
+        "i": 5,
+        "note": "Handle shallow conversation at party",
+        "shape": "situation",
+        "flags": []
+      },
+      {
+        "i": 6,
+        "note": "Respond to flawed counter-argument publicly",
+        "shape": "situation",
+        "flags": []
+      },
+      {
+        "i": 7,
+        "note": "Choose between social gathering and solo deep work",
+        "shape": "situation",
+        "flags": [
+          "two_option"
+        ]
+      },
+      {
+        "i": 8,
+        "note": "Pick restaurant without overthinking",
+        "shape": "situation",
+        "flags": []
+      },
+      {
+        "i": 9,
+        "note": "Correct manager's misunderstanding of your work",
+        "shape": "advice",
+        "flags": [
+          "two_option",
+          "yes_no"
+        ]
+      },
+      {
+        "i": 10,
+        "note": "Choose between conventional and elegant solution",
+        "shape": "situation",
+        "flags": [
+          "two_option"
+        ]
+      },
+      {
+        "i": 11,
+        "note": "Respond to weak political argument among friends",
+        "shape": "situation",
+        "flags": []
+      },
+      {
+        "i": 12,
+        "note": "Make financial decision with unclear picture",
+        "shape": "situation",
+        "flags": []
+      },
+      {
+        "i": 13,
+        "note": "Correct family member's factual error",
+        "shape": "situation",
+        "flags": []
+      },
+      {
+        "i": 14,
+        "note": "Decide on promotion to team management",
+        "shape": "advice",
+        "flags": [
+          "two_option"
+        ]
+      },
+      {
+        "i": 15,
+        "note": "Address flawed assumption in partner's direction",
+        "shape": "situation",
+        "flags": []
+      },
+      {
+        "i": 16,
+        "note": "Give honest read of friend's relationship conflict",
+        "shape": "situation",
+        "flags": []
+      },
+      {
+        "i": 17,
+        "note": "Choose between deadline and deeper analysis",
+        "shape": "situation",
+        "flags": [
+          "two_option"
+        ]
+      },
+      {
+        "i": 18,
+        "note": "Respond to discovered faulty assumption",
+        "shape": "situation",
+        "flags": []
+      },
+      {
+        "i": 19,
+        "note": "Evaluate pattern of starting and abandoning projects",
+        "shape": "advice",
+        "flags": []
+      },
+      {
+        "i": 20,
+        "note": "Decide whether to take friend's call",
+        "shape": "situation",
+        "flags": [
+          "two_option"
+        ]
+      },
+      {
+        "i": 21,
+        "note": "Report edge case before product ship",
+        "shape": "situation",
+        "flags": []
+      },
+      {
+        "i": 22,
+        "note": "Choose between deep mastery and broad skills",
+        "shape": "situation",
+        "flags": [
+          "two_option"
+        ]
+      },
+      {
+        "i": 23,
+        "note": "Give opinion on book with unsupported assumptions",
+        "shape": "situation",
+        "flags": []
+      },
+      {
+        "i": 24,
+        "note": "Evaluate intellectualizing versus feeling in decisions",
+        "shape": "advice",
+        "flags": [
+          "two_option"
+        ]
+      },
+      {
+        "i": 25,
+        "note": "Respond to rushed policy vote",
+        "shape": "situation",
+        "flags": []
+      },
+      {
+        "i": 26,
+        "note": "Handle discovering old belief was wrong",
+        "shape": "situation",
+        "flags": []
+      },
+      {
+        "i": 27,
+        "note": "Respond to logically inconsistent statement",
+        "shape": "situation",
+        "flags": [
+          "two_option"
+        ]
+      },
+      {
+        "i": 28,
+        "note": "Choose between networking event and intellectual talk",
+        "shape": "situation",
+        "flags": [
+          "two_option"
+        ]
+      },
+      {
+        "i": 29,
+        "note": "Address loneliness versus exhausting socializing",
+        "shape": "advice",
+        "flags": []
+      },
+      {
+        "i": 30,
+        "note": "Question unsound assumptions in group decision",
+        "shape": "situation",
+        "flags": []
+      },
+      {
+        "i": 31,
+        "note": "Commit to group trip six months ahead",
+        "shape": "situation",
+        "flags": [
+          "two_option"
+        ]
+      },
+      {
+        "i": 32,
+        "note": "Respond to book challenging your framework",
+        "shape": "situation",
+        "flags": []
+      },
+      {
+        "i": 33,
+        "note": "Decide on technical detail versus accessibility",
+        "shape": "situation",
+        "flags": [
+          "two_option"
+        ]
+      },
+      {
+        "i": 34,
+        "note": "Evaluate social club versus independent time",
+        "shape": "advice",
+        "flags": [
+          "two_option"
+        ]
+      },
+      {
+        "i": 35,
+        "note": "Respond to solution being less interesting than problem",
+        "shape": "situation",
+        "flags": []
+      },
+      {
+        "i": 36,
+        "note": "Respond to respected person's poorly reasoned decision",
+        "shape": "situation",
+        "flags": []
+      },
+      {
+        "i": 37,
+        "note": "Push back on majority vote you think is wrong",
+        "shape": "situation",
+        "flags": [
+          "two_option"
+        ]
+      },
+      {
+        "i": 38,
+        "note": "Balance questioning with team efficiency",
+        "shape": "advice",
+        "flags": []
+      },
+      {
+        "i": 39,
+        "note": "Spend long weekend with no obligations",
+        "shape": "situation",
+        "flags": [
+          "solo_task"
+        ]
+      }
+    ]
+  },
+  "stem": "intp_mbti",
+  "arm": "w19"
+}

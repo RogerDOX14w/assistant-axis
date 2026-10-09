@@ -1,0 +1,368 @@
+{
+  "content_sha256": "cb75c5d6125af6ec",
+  "judged_at": "2026-10-09T23:21:51+00:00",
+  "instruction_judge": {
+    "model": "claude-sonnet-4-6",
+    "rubric_version": 4,
+    "items": [
+      {
+        "id": "p0_pos",
+        "faults": [
+          "invented_motive"
+        ],
+        "quotes": {
+          "invented_motive": "see your neighborhood and country as worth defending over any outside idea"
+        }
+      },
+      {
+        "id": "p0_neg",
+        "faults": [],
+        "quotes": {}
+      },
+      {
+        "id": "p1_pos",
+        "faults": [
+          "invented_detail"
+        ],
+        "quotes": {
+          "invented_detail": "same weekly routines"
+        }
+      },
+      {
+        "id": "p1_neg",
+        "faults": [],
+        "quotes": {}
+      },
+      {
+        "id": "p2_pos",
+        "faults": [],
+        "quotes": {}
+      },
+      {
+        "id": "p2_neg",
+        "faults": [],
+        "quotes": {}
+      },
+      {
+        "id": "p3_pos",
+        "faults": [
+          "invented_detail",
+          "invented_motive"
+        ],
+        "quotes": {
+          "invented_detail": "same stores, the same recipes, the same pews",
+          "invented_motive": "you see consistency across the years as a sign of solid character rather than stagnation"
+        }
+      },
+      {
+        "id": "p3_neg",
+        "faults": [
+          "invented_motive"
+        ],
+        "quotes": {
+          "invented_motive": "you treat consistency as the first sign that a person has stopped growing"
+        }
+      },
+      {
+        "id": "p4_pos",
+        "faults": [],
+        "quotes": {}
+      },
+      {
+        "id": "p4_neg",
+        "faults": [],
+        "quotes": {}
+      }
+    ]
+  },
+  "question_judge": {
+    "model": "claude-haiku-4-5-20251001",
+    "rubric_version": 3,
+    "items": [
+      {
+        "i": 0,
+        "note": "Where to shop: new store or familiar one",
+        "shape": "situation",
+        "flags": [
+          "two_option"
+        ]
+      },
+      {
+        "i": 1,
+        "note": "Teenager stops attending youth group",
+        "shape": "situation",
+        "flags": []
+      },
+      {
+        "i": 2,
+        "note": "Choose washing machine: American brand or import",
+        "shape": "situation",
+        "flags": [
+          "two_option"
+        ]
+      },
+      {
+        "i": 3,
+        "note": "Attend dinner party with unfamiliar people",
+        "shape": "situation",
+        "flags": [
+          "yes_no"
+        ]
+      },
+      {
+        "i": 4,
+        "note": "Weigh in on neighborhood development proposal",
+        "shape": "situation",
+        "flags": []
+      },
+      {
+        "i": 5,
+        "note": "Respond to friend replacing church with meditation",
+        "shape": "situation",
+        "flags": []
+      },
+      {
+        "i": 6,
+        "note": "Spend bonus on trip or savings",
+        "shape": "situation",
+        "flags": [
+          "two_option"
+        ]
+      },
+      {
+        "i": 7,
+        "note": "Adult child relocates across country for job",
+        "shape": "situation",
+        "flags": []
+      },
+      {
+        "i": 8,
+        "note": "Take promotion requiring family relocation",
+        "shape": "advice",
+        "flags": []
+      },
+      {
+        "i": 9,
+        "note": "Choose kitchen appliances: American or European",
+        "shape": "situation",
+        "flags": [
+          "two_option"
+        ]
+      },
+      {
+        "i": 10,
+        "note": "Vote on book club reading controversial novel",
+        "shape": "situation",
+        "flags": []
+      },
+      {
+        "i": 11,
+        "note": "Sign petition against new charter school",
+        "shape": "situation",
+        "flags": [
+          "yes_no"
+        ]
+      },
+      {
+        "i": 12,
+        "note": "Leave stable job to start business",
+        "shape": "advice",
+        "flags": []
+      },
+      {
+        "i": 13,
+        "note": "Relative changes name for new identity",
+        "shape": "situation",
+        "flags": []
+      },
+      {
+        "i": 14,
+        "note": "Write condolence card for bereaved friend",
+        "shape": "situation",
+        "flags": [
+          "solo_task"
+        ]
+      },
+      {
+        "i": 15,
+        "note": "Accept flexible work schedule offer",
+        "shape": "situation",
+        "flags": [
+          "yes_no"
+        ]
+      },
+      {
+        "i": 16,
+        "note": "Debate replacing Fourth of July parade",
+        "shape": "situation",
+        "flags": []
+      },
+      {
+        "i": 17,
+        "note": "Questioning faith while partner suggests exploring",
+        "shape": "advice",
+        "flags": []
+      },
+      {
+        "i": 18,
+        "note": "Vacation: familiar cabin or new destination",
+        "shape": "situation",
+        "flags": [
+          "two_option"
+        ]
+      },
+      {
+        "i": 19,
+        "note": "Vote on changing school board election system",
+        "shape": "situation",
+        "flags": [
+          "yes_no"
+        ]
+      },
+      {
+        "i": 20,
+        "note": "Teenager questions teachings after learning alternatives",
+        "shape": "situation",
+        "flags": []
+      },
+      {
+        "i": 21,
+        "note": "Choose college: close to home or prestigious",
+        "shape": "advice",
+        "flags": [
+          "two_option"
+        ]
+      },
+      {
+        "i": 22,
+        "note": "Join meal kit subscription with global recipes",
+        "shape": "situation",
+        "flags": [
+          "yes_no"
+        ]
+      },
+      {
+        "i": 23,
+        "note": "Congregation debates updating traditional worship style",
+        "shape": "situation",
+        "flags": []
+      },
+      {
+        "i": 24,
+        "note": "Choose local candidate: low taxes or reform",
+        "shape": "situation",
+        "flags": [
+          "two_option"
+        ]
+      },
+      {
+        "i": 25,
+        "note": "Team proposes switching to agile work method",
+        "shape": "situation",
+        "flags": []
+      },
+      {
+        "i": 26,
+        "note": "Considering leaving faith community entirely",
+        "shape": "advice",
+        "flags": []
+      },
+      {
+        "i": 27,
+        "note": "Local hardware store charges more than chain",
+        "shape": "situation",
+        "flags": [
+          "two_option"
+        ]
+      },
+      {
+        "i": 28,
+        "note": "Grandparent moves in versus senior care facility",
+        "shape": "situation",
+        "flags": [
+          "two_option"
+        ]
+      },
+      {
+        "i": 29,
+        "note": "Donate to refugee resettlement program",
+        "shape": "situation",
+        "flags": [
+          "yes_no"
+        ]
+      },
+      {
+        "i": 30,
+        "note": "School replaces classic books with diverse titles",
+        "shape": "situation",
+        "flags": []
+      },
+      {
+        "i": 31,
+        "note": "Try new church in different denomination",
+        "shape": "advice",
+        "flags": []
+      },
+      {
+        "i": 32,
+        "note": "Salesperson suggests newer model of familiar brand",
+        "shape": "situation",
+        "flags": []
+      },
+      {
+        "i": 33,
+        "note": "Park naming: civil rights leader or founding figure",
+        "shape": "situation",
+        "flags": [
+          "two_option"
+        ]
+      },
+      {
+        "i": 34,
+        "note": "Attend political organizing meeting for challenging cause",
+        "shape": "situation",
+        "flags": [
+          "yes_no"
+        ]
+      },
+      {
+        "i": 35,
+        "note": "Obligations to aging parents limit opportunities",
+        "shape": "advice",
+        "flags": []
+      },
+      {
+        "i": 36,
+        "note": "Choose store-brand or name-brand pantry product",
+        "shape": "situation",
+        "flags": [
+          "two_option"
+        ]
+      },
+      {
+        "i": 37,
+        "note": "Vote on apartment complex changing neighborhood zoning",
+        "shape": "situation",
+        "flags": [
+          "yes_no"
+        ]
+      },
+      {
+        "i": 38,
+        "note": "Relative drifting from faith asks for help",
+        "shape": "situation",
+        "flags": []
+      },
+      {
+        "i": 39,
+        "note": "Accept early retirement ending career structure",
+        "shape": "situation",
+        "flags": [
+          "yes_no"
+        ]
+      }
+    ]
+  },
+  "stem": "believer_vals",
+  "arm": "w19"
+}

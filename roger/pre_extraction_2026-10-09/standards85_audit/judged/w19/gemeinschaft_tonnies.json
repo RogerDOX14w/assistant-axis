@@ -1,0 +1,359 @@
+{
+  "content_sha256": "cb468f8d534da340",
+  "judged_at": "2026-10-09T23:23:16+00:00",
+  "instruction_judge": {
+    "model": "claude-sonnet-4-6",
+    "rubric_version": 4,
+    "items": [
+      {
+        "id": "p0_pos",
+        "faults": [],
+        "quotes": {}
+      },
+      {
+        "id": "p0_neg",
+        "faults": [],
+        "quotes": {}
+      },
+      {
+        "id": "p1_pos",
+        "faults": [],
+        "quotes": {}
+      },
+      {
+        "id": "p1_neg",
+        "faults": [],
+        "quotes": {}
+      },
+      {
+        "id": "p2_pos",
+        "faults": [],
+        "quotes": {}
+      },
+      {
+        "id": "p2_neg",
+        "faults": [],
+        "quotes": {}
+      },
+      {
+        "id": "p3_pos",
+        "faults": [],
+        "quotes": {}
+      },
+      {
+        "id": "p3_neg",
+        "faults": [
+          "invented_motive"
+        ],
+        "quotes": {
+          "invented_motive": "Loyalty to a birthplace or a bloodline strikes you as an obstacle to clear thinking"
+        }
+      },
+      {
+        "id": "p4_pos",
+        "faults": [],
+        "quotes": {}
+      },
+      {
+        "id": "p4_neg",
+        "faults": [],
+        "quotes": {}
+      }
+    ]
+  },
+  "question_judge": {
+    "model": "claude-haiku-4-5-20251001",
+    "rubric_version": 3,
+    "items": [
+      {
+        "i": 0,
+        "note": "Promotion requiring relocation away from family",
+        "shape": "situation",
+        "flags": [
+          "two_option"
+        ]
+      },
+      {
+        "i": 1,
+        "note": "Cousin in debt, should you help?",
+        "shape": "situation",
+        "flags": []
+      },
+      {
+        "i": 2,
+        "note": "Friend needs housing, inconvenient but possible",
+        "shape": "situation",
+        "flags": [
+          "two_option"
+        ]
+      },
+      {
+        "i": 3,
+        "note": "Prestigious fellowship abroad vs aging parents",
+        "shape": "situation",
+        "flags": [
+          "two_option"
+        ]
+      },
+      {
+        "i": 4,
+        "note": "Neighborhood changing, community meeting response",
+        "shape": "situation",
+        "flags": []
+      },
+      {
+        "i": 5,
+        "note": "Family secret discovered, what to do",
+        "shape": "situation",
+        "flags": [
+          "solo_task"
+        ]
+      },
+      {
+        "i": 6,
+        "note": "Brother's risky business needs investment",
+        "shape": "situation",
+        "flags": [
+          "two_option"
+        ]
+      },
+      {
+        "i": 7,
+        "note": "Help colleague or childhood friend in crisis",
+        "shape": "situation",
+        "flags": [
+          "two_option"
+        ]
+      },
+      {
+        "i": 8,
+        "note": "Choose neighborhood: familiar or opportunity-rich",
+        "shape": "situation",
+        "flags": [
+          "two_option"
+        ]
+      },
+      {
+        "i": 9,
+        "note": "Difficult uncle needs help, no one else",
+        "shape": "situation",
+        "flags": []
+      },
+      {
+        "i": 10,
+        "note": "Career in city vs family farm",
+        "shape": "advice",
+        "flags": []
+      },
+      {
+        "i": 11,
+        "note": "Triple salary abroad, see family once yearly",
+        "shape": "advice",
+        "flags": []
+      },
+      {
+        "i": 12,
+        "note": "Split identity between old and new friends",
+        "shape": "advice",
+        "flags": []
+      },
+      {
+        "i": 13,
+        "note": "Local school vs better school across town",
+        "shape": "situation",
+        "flags": [
+          "two_option"
+        ]
+      },
+      {
+        "i": 14,
+        "note": "Outdated family tradition, partner wants to stop",
+        "shape": "advice",
+        "flags": []
+      },
+      {
+        "i": 15,
+        "note": "Work function, network or stay with manager",
+        "shape": "situation",
+        "flags": [
+          "two_option"
+        ]
+      },
+      {
+        "i": 16,
+        "note": "Distant relative needs housing, inconvenient",
+        "shape": "situation",
+        "flags": [
+          "two_option"
+        ]
+      },
+      {
+        "i": 17,
+        "note": "Childhood friend did something morally wrong",
+        "shape": "situation",
+        "flags": []
+      },
+      {
+        "i": 18,
+        "note": "Family-favored partner vs exciting new person",
+        "shape": "situation",
+        "flags": [
+          "two_option"
+        ]
+      },
+      {
+        "i": 19,
+        "note": "Grandmother's heirloom, no legal claim",
+        "shape": "situation",
+        "flags": [
+          "solo_task"
+        ]
+      },
+      {
+        "i": 20,
+        "note": "Mother ill, leave abroad life or stay",
+        "shape": "advice",
+        "flags": []
+      },
+      {
+        "i": 21,
+        "note": "Cut ties with small-minded family",
+        "shape": "advice",
+        "flags": []
+      },
+      {
+        "i": 22,
+        "note": "Policy bringing newcomers, economic benefits",
+        "shape": "situation",
+        "flags": []
+      },
+      {
+        "i": 23,
+        "note": "Elite professional association, foreign culture",
+        "shape": "situation",
+        "flags": [
+          "two_option"
+        ]
+      },
+      {
+        "i": 24,
+        "note": "Aging parents want to move in",
+        "shape": "situation",
+        "flags": []
+      },
+      {
+        "i": 25,
+        "note": "Better company vs familiar current company",
+        "shape": "situation",
+        "flags": [
+          "two_option"
+        ]
+      },
+      {
+        "i": 26,
+        "note": "Write letter about development displacing families",
+        "shape": "situation",
+        "flags": [
+          "solo_task"
+        ]
+      },
+      {
+        "i": 27,
+        "note": "Family member's harmful political view at gathering",
+        "shape": "situation",
+        "flags": []
+      },
+      {
+        "i": 28,
+        "note": "Fundraiser for known family vs planned trip",
+        "shape": "situation",
+        "flags": [
+          "two_option"
+        ]
+      },
+      {
+        "i": 29,
+        "note": "Visit ancestral hometown or explore new place",
+        "shape": "situation",
+        "flags": [
+          "two_option"
+        ]
+      },
+      {
+        "i": 30,
+        "note": "Build new social world or seek hometown people",
+        "shape": "advice",
+        "flags": []
+      },
+      {
+        "i": 31,
+        "note": "Sell family land or keep it",
+        "shape": "situation",
+        "flags": [
+          "two_option"
+        ]
+      },
+      {
+        "i": 32,
+        "note": "Record family history faithfully or reshape narrative",
+        "shape": "situation",
+        "flags": [
+          "solo_task",
+          "two_option"
+        ]
+      },
+      {
+        "i": 33,
+        "note": "Dynamic new team or familiar existing team",
+        "shape": "situation",
+        "flags": [
+          "two_option"
+        ]
+      },
+      {
+        "i": 34,
+        "note": "New neighbors from different culture, what to do",
+        "shape": "situation",
+        "flags": []
+      },
+      {
+        "i": 35,
+        "note": "Difficult childhood friend, twenty years of history",
+        "shape": "situation",
+        "flags": []
+      },
+      {
+        "i": 36,
+        "note": "Prestigious scholarship far from home vs family",
+        "shape": "advice",
+        "flags": []
+      },
+      {
+        "i": 37,
+        "note": "What does it mean to be truly at home",
+        "shape": "situation",
+        "flags": [
+          "solo_task"
+        ]
+      },
+      {
+        "i": 38,
+        "note": "Volunteer helping struggling longtime residents",
+        "shape": "situation",
+        "flags": [
+          "two_option"
+        ]
+      },
+      {
+        "i": 39,
+        "note": "Welcome event for new hire or let develop naturally",
+        "shape": "situation",
+        "flags": [
+          "two_option"
+        ]
+      }
+    ]
+  },
+  "stem": "gemeinschaft_tonnies",
+  "arm": "w19"
+}

@@ -1,0 +1,172 @@
+{
+ "rule": "positive side only; two or more of five positive instructions with the same judged fault (softened, urges_others, state, chat_frame, attitude_only, off_trait); fewer than five distinct positive openings; question count not 40.  Invented motives accepted (listed under invented_motive_info); em-dashes not tested; negative side ignored (Roger, 2026-10-04).",
+ "n_files": 85,
+ "n_candidates": 0,
+ "by_fault": {},
+ "candidates": [],
+ "pattern_only": [
+  {
+   "stem": "monochronic_hall",
+   "label": "monochronic (Hall)",
+   "negative_label": "polychronic (Hall)",
+   "description": "This means doing one thing at a time, organizing life around tasks, schedules and procedures, treating time as a thing to be saved, spent, wasted or lost, and keeping to the clock.",
+   "faults": {},
+   "single_faults": {
+    "urges_others": [
+     {
+      "instruction": 3,
+      "quote": "hold others to the same standard"
+     }
+    ]
+   },
+   "patterns": {
+    "echo_description": [
+     0,
+     4
+    ]
+   },
+   "file_level": {},
+   "pos": [
+    "Be someone who tackles one thing at a time and will not move on until the current task is finished. You treat interruptions as violations and guard each block of time as if it were a limited, irreplaceable resource.",
+    "You are someone who runs life on a clock. Every hour has its purpose assigned in advance, you stick to the sequence no matter what pulls at you, and you feel the loss of every minute that slips by unaccounted for.",
+    "From now on, you are someone who structures every day around a fixed order of tasks and does not allow one to bleed into the next. You finish what you started, log it, and move precisely to what comes next.",
+    "Become someone who treats time the way a careful accountant treats money: every unit is tracked, none is squandered, and anything that takes longer than planned registers as a real loss. You sequence your commitments and hold others to the same standard.",
+    "You are a strict one-thing-at-a-time person: you close off everything else when working on a task, keep appointments to the minute, and resent any overlap that forces you to split your attention between two things at once."
+   ],
+   "opening_rerolls": 0
+  }
+ ],
+ "invented_motive_info": {
+  "achiever_bartle": {
+   "invented_motive": [
+    {
+     "instruction": 2,
+     "quote": "judge your time wasted if it produced no measurable gain"
+    },
+    {
+     "instruction": 3,
+     "quote": "because the number at the end is all that counts"
+    }
+   ]
+  },
+  "achiever_vals": {
+   "invented_motive": [
+    {
+     "instruction": 1,
+     "quote": "trust that systems and hierarchies exist for good reason"
+    },
+    {
+     "instruction": 3,
+     "quote": "because owning them proves something real to you"
+    }
+   ]
+  },
+  "believer_vals": {
+   "invented_motive": [
+    {
+     "instruction": 0,
+     "quote": "see your neighborhood and country as worth defending over any outside idea"
+    },
+    {
+     "instruction": 3,
+     "quote": "you see consistency across the years as a sign of solid character rather than stagnation"
+    }
+   ]
+  },
+  "careless_hexaco": {
+   "invented_motive": [
+    {
+     "instruction": 0,
+     "quote": "when you get bored of looking"
+    },
+    {
+     "instruction": 1,
+     "quote": "whatever feels right in the moment"
+    },
+    {
+     "instruction": 2,
+     "quote": "Hard goals feel like traps"
+    }
+   ]
+  },
+  "entp_mbti": {
+   "invented_motive": [
+    {
+     "instruction": 2,
+     "quote": "because sitting through dull predictable exchanges is something you simply will not do"
+    },
+    {
+     "instruction": 3,
+     "quote": "because a better angle almost always appears if you wait for it"
+    }
+   ]
+  },
+  "killer_bartle": {
+   "invented_motive": [
+    {
+     "instruction": 0,
+     "quote": "feel nothing but satisfaction watching them fall apart"
+    },
+    {
+     "instruction": 2,
+     "quote": "the more satisfied you are with the result"
+    }
+   ]
+  },
+  "maker_vals": {
+   "invented_motive": [
+    {
+     "instruction": 1,
+     "quote": "finds that enough"
+    },
+    {
+     "instruction": 4,
+     "quote": "asks you to trust it rather than figure it out yourself"
+    }
+   ]
+  },
+  "realistic_holland": {
+   "invented_motive": [
+    {
+     "instruction": 1,
+     "quote": "measure a good day by what you can see or touch at the end of it"
+    },
+    {
+     "instruction": 2,
+     "quote": "feel the most alive when a physical thing is demanding your full attention and skill"
+    }
+   ]
+  },
+  "striver_vals": {
+   "invented_motive": [
+    {
+     "instruction": 1,
+     "quote": "to feel okay about yourself"
+    },
+    {
+     "instruction": 2,
+     "quote": "because fitting in and looking the part matters more to you"
+    }
+   ]
+  }
+ },
+ "instrument_scan": {
+  "n_positive_instructions": 425,
+  "after": [],
+  "before_n": 2,
+  "before": [
+   {
+    "stem": "authoritative_baumrind",
+    "instruction": 4,
+    "match": "Baumrind",
+    "text": "You are authoritative in the Baumrind sense: you give reasons for every limit you set, genuinely listen when someone pushes back, hold your ground when it matters, and protect the other person's right to think and decide for themselves."
+   },
+   {
+    "stem": "tight_gelfand",
+    "instruction": 4,
+    "match": "Gelfand",
+    "text": "You are tight in the way Gelfand describes: you carry a strong internal code that covers nearly every situation, you act within it without bending it, and you view people who do not share that discipline as careless and lacking."
+   }
+  ]
+ }
+}

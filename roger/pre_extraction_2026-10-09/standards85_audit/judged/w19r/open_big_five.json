@@ -1,0 +1,418 @@
+{
+  "content_sha256": "3baa991653e53925",
+  "judged_at": "2026-10-09T23:40:10+00:00",
+  "instruction_judge": {
+    "model": "claude-sonnet-4-6",
+    "rubric_version": 4,
+    "items": [
+      {
+        "id": "p0_pos",
+        "faults": [],
+        "quotes": {}
+      },
+      {
+        "id": "p0_neg",
+        "faults": [
+          "invented_motive"
+        ],
+        "quotes": {
+          "invented_motive": "you judge things by whether they work, not by how they make you feel"
+        }
+      },
+      {
+        "id": "p1_pos",
+        "faults": [],
+        "quotes": {}
+      },
+      {
+        "id": "p1_neg",
+        "faults": [
+          "invented_motive"
+        ],
+        "quotes": {
+          "invented_motive": "you see novelty as a risk that rarely pays off"
+        }
+      },
+      {
+        "id": "p2_pos",
+        "faults": [],
+        "quotes": {}
+      },
+      {
+        "id": "p2_neg",
+        "faults": [
+          "invented_motive"
+        ],
+        "quotes": {
+          "invented_motive": "you see prolonged questioning as a waste of time"
+        }
+      },
+      {
+        "id": "p3_pos",
+        "faults": [],
+        "quotes": {}
+      },
+      {
+        "id": "p3_neg",
+        "faults": [],
+        "quotes": {}
+      },
+      {
+        "id": "p4_pos",
+        "faults": [],
+        "quotes": {}
+      },
+      {
+        "id": "p4_neg",
+        "faults": [],
+        "quotes": {}
+      }
+    ]
+  },
+  "question_judge": {
+    "model": "claude-haiku-4-5-20251001",
+    "rubric_version": 3,
+    "items": [
+      {
+        "i": 0,
+        "note": "Continue reading unfamiliar novel or set aside",
+        "shape": "situation",
+        "flags": [
+          "solo_task",
+          "two_option"
+        ]
+      },
+      {
+        "i": 1,
+        "note": "Attend unfamiliar music concert or stay home",
+        "shape": "situation",
+        "flags": [
+          "two_option"
+        ]
+      },
+      {
+        "i": 2,
+        "note": "Follow recipe or experiment with spices",
+        "shape": "situation",
+        "flags": [
+          "solo_task",
+          "two_option"
+        ]
+      },
+      {
+        "i": 3,
+        "note": "Change careers or stay in current field",
+        "shape": "advice",
+        "flags": [
+          "two_option"
+        ]
+      },
+      {
+        "i": 4,
+        "note": "Revisit enjoyment or try something new",
+        "shape": "situation",
+        "flags": [
+          "solo_task",
+          "two_option"
+        ]
+      },
+      {
+        "i": 5,
+        "note": "Engage with philosophical question or steer concrete",
+        "shape": "situation",
+        "flags": [
+          "two_option"
+        ]
+      },
+      {
+        "i": 6,
+        "note": "Choose between abstract art or familiar film",
+        "shape": "situation",
+        "flags": [
+          "two_option"
+        ]
+      },
+      {
+        "i": 7,
+        "note": "Take familiar or unmarked hiking path",
+        "shape": "situation",
+        "flags": [
+          "solo_task",
+          "two_option"
+        ]
+      },
+      {
+        "i": 8,
+        "note": "Analyze recurring dream or dismiss it",
+        "shape": "advice",
+        "flags": [
+          "yes_no"
+        ]
+      },
+      {
+        "i": 9,
+        "note": "Choose comfortable or unusual living space layout",
+        "shape": "situation",
+        "flags": [
+          "solo_task",
+          "two_option"
+        ]
+      },
+      {
+        "i": 10,
+        "note": "Watch documentary challenging political belief",
+        "shape": "situation",
+        "flags": [
+          "solo_task",
+          "yes_no"
+        ]
+      },
+      {
+        "i": 11,
+        "note": "Propose tested approach or untried idea",
+        "shape": "situation",
+        "flags": [
+          "two_option"
+        ]
+      },
+      {
+        "i": 12,
+        "note": "Question religious upbringing or maintain tradition",
+        "shape": "advice",
+        "flags": [
+          "yes_no"
+        ]
+      },
+      {
+        "i": 13,
+        "note": "Listen to familiar playlist or new radio",
+        "shape": "situation",
+        "flags": [
+          "solo_task",
+          "two_option"
+        ]
+      },
+      {
+        "i": 14,
+        "note": "Follow unusual conversation thread or close politely",
+        "shape": "situation",
+        "flags": [
+          "two_option"
+        ]
+      },
+      {
+        "i": 15,
+        "note": "Sit with difficult unnamed feeling or distract",
+        "shape": "situation",
+        "flags": [
+          "solo_task",
+          "two_option"
+        ]
+      },
+      {
+        "i": 16,
+        "note": "Question inherited belief about hard work",
+        "shape": "advice",
+        "flags": [
+          "yes_no"
+        ]
+      },
+      {
+        "i": 17,
+        "note": "Choose familiar or foreign holiday destination",
+        "shape": "situation",
+        "flags": [
+          "two_option"
+        ]
+      },
+      {
+        "i": 18,
+        "note": "Listen to striking unfamiliar music or move on",
+        "shape": "situation",
+        "flags": [
+          "solo_task",
+          "two_option"
+        ]
+      },
+      {
+        "i": 19,
+        "note": "Read dense novel or swap for lighter",
+        "shape": "situation",
+        "flags": [
+          "solo_task",
+          "yes_no"
+        ]
+      },
+      {
+        "i": 20,
+        "note": "Choose unstructured unfamiliar or structured familiar vacation",
+        "shape": "situation",
+        "flags": [
+          "two_option"
+        ]
+      },
+      {
+        "i": 21,
+        "note": "Examine inherited value about success",
+        "shape": "advice",
+        "flags": [
+          "yes_no"
+        ]
+      },
+      {
+        "i": 22,
+        "note": "Write unconventional or conventional report",
+        "shape": "situation",
+        "flags": [
+          "solo_task",
+          "two_option"
+        ]
+      },
+      {
+        "i": 23,
+        "note": "Enter gallery of unfamiliar artist",
+        "shape": "situation",
+        "flags": [
+          "solo_task",
+          "yes_no"
+        ]
+      },
+      {
+        "i": 24,
+        "note": "Try meditation practice suggested by friend",
+        "shape": "situation",
+        "flags": [
+          "yes_no"
+        ]
+      },
+      {
+        "i": 25,
+        "note": "Order familiar or experimental chef dish",
+        "shape": "situation",
+        "flags": [
+          "solo_task",
+          "two_option"
+        ]
+      },
+      {
+        "i": 26,
+        "note": "Continue daydreaming or rein it in",
+        "shape": "advice",
+        "flags": [
+          "yes_no"
+        ]
+      },
+      {
+        "i": 27,
+        "note": "Revisit favorite spot or explore new neighborhood",
+        "shape": "situation",
+        "flags": [
+          "solo_task",
+          "two_option"
+        ]
+      },
+      {
+        "i": 28,
+        "note": "Examine challenged relationship assumption",
+        "shape": "situation",
+        "flags": [
+          "yes_no"
+        ]
+      },
+      {
+        "i": 29,
+        "note": "Choose practical or interest-based evening class",
+        "shape": "situation",
+        "flags": [
+          "two_option"
+        ]
+      },
+      {
+        "i": 30,
+        "note": "Collaborate with artist on unpaid project",
+        "shape": "advice",
+        "flags": [
+          "yes_no"
+        ]
+      },
+      {
+        "i": 31,
+        "note": "Examine complicated feeling or move to next task",
+        "shape": "situation",
+        "flags": [
+          "solo_task",
+          "two_option"
+        ]
+      },
+      {
+        "i": 32,
+        "note": "Buy strange unfamiliar book from random shelf",
+        "shape": "situation",
+        "flags": [
+          "solo_task",
+          "yes_no"
+        ]
+      },
+      {
+        "i": 33,
+        "note": "Revise thinking or hold position in debate",
+        "shape": "situation",
+        "flags": [
+          "two_option"
+        ]
+      },
+      {
+        "i": 34,
+        "note": "Schedule thinking time or fill with tasks",
+        "shape": "situation",
+        "flags": [
+          "solo_task",
+          "two_option"
+        ]
+      },
+      {
+        "i": 35,
+        "note": "Pay attention to unexpected emotional reactions",
+        "shape": "advice",
+        "flags": [
+          "yes_no"
+        ]
+      },
+      {
+        "i": 36,
+        "note": "Seek conversation with very different person",
+        "shape": "situation",
+        "flags": [
+          "yes_no"
+        ]
+      },
+      {
+        "i": 37,
+        "note": "Keep defending or follow opponent's point",
+        "shape": "situation",
+        "flags": [
+          "two_option"
+        ]
+      },
+      {
+        "i": 38,
+        "note": "Question inherited family tradition",
+        "shape": "situation",
+        "flags": [
+          "yes_no"
+        ]
+      },
+      {
+        "i": 39,
+        "note": "Follow surprising direction or original plan",
+        "shape": "situation",
+        "flags": [
+          "solo_task",
+          "two_option"
+        ]
+      }
+    ]
+  },
+  "stem": "open_big_five",
+  "arm": "w19r"
+}

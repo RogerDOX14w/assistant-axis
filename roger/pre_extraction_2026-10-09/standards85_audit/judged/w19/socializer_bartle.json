@@ -1,0 +1,380 @@
+{
+  "content_sha256": "ef0fd375ef2ef1cb",
+  "judged_at": "2026-10-09T23:25:18+00:00",
+  "instruction_judge": {
+    "model": "claude-sonnet-4-6",
+    "rubric_version": 4,
+    "items": [
+      {
+        "id": "p0_pos",
+        "faults": [
+          "invented_detail"
+        ],
+        "quotes": {
+          "invented_detail": "remember birthdays"
+        }
+      },
+      {
+        "id": "p0_neg",
+        "faults": [],
+        "quotes": {}
+      },
+      {
+        "id": "p1_pos",
+        "faults": [],
+        "quotes": {}
+      },
+      {
+        "id": "p1_neg",
+        "faults": [
+          "invented_motive",
+          "off_trait"
+        ],
+        "quotes": {
+          "invented_motive": "measures every interaction by what it produces",
+          "off_trait": "measures every interaction by what it produces"
+        }
+      },
+      {
+        "id": "p2_pos",
+        "faults": [],
+        "quotes": {}
+      },
+      {
+        "id": "p2_neg",
+        "faults": [
+          "softened",
+          "weak_opposite"
+        ],
+        "quotes": {
+          "softened": "rarely reach out first",
+          "weak_opposite": "does not ask follow-up questions and rarely reach out first"
+        }
+      },
+      {
+        "id": "p3_pos",
+        "faults": [
+          "invented_detail"
+        ],
+        "quotes": {
+          "invented_detail": "a waiting room, a workplace, a game"
+        }
+      },
+      {
+        "id": "p3_neg",
+        "faults": [
+          "weak_opposite"
+        ],
+        "quotes": {
+          "weak_opposite": "neither draws you in nor warms you up"
+        }
+      },
+      {
+        "id": "p4_pos",
+        "faults": [],
+        "quotes": {}
+      },
+      {
+        "id": "p4_neg",
+        "faults": [
+          "invented_motive",
+          "softened"
+        ],
+        "quotes": {
+          "softened": "when newer priorities call",
+          "invented_motive": "when newer priorities call"
+        }
+      }
+    ]
+  },
+  "question_judge": {
+    "model": "claude-haiku-4-5-20251001",
+    "rubric_version": 3,
+    "items": [
+      {
+        "i": 0,
+        "note": "Chat with quiet player or focus on objective?",
+        "shape": "situation",
+        "flags": [
+          "two_option"
+        ]
+      },
+      {
+        "i": 1,
+        "note": "Respond to stranger's eye contact at airport",
+        "shape": "situation",
+        "flags": []
+      },
+      {
+        "i": 2,
+        "note": "Approach upset coworker or leave them alone?",
+        "shape": "situation",
+        "flags": [
+          "two_option"
+        ]
+      },
+      {
+        "i": 3,
+        "note": "Get ahead on work or contact old friend?",
+        "shape": "situation",
+        "flags": [
+          "two_option"
+        ]
+      },
+      {
+        "i": 4,
+        "note": "How to spend time at unfamiliar party",
+        "shape": "situation",
+        "flags": []
+      },
+      {
+        "i": 5,
+        "note": "Respond to forum user's personal struggle post",
+        "shape": "situation",
+        "flags": []
+      },
+      {
+        "i": 6,
+        "note": "Keep routine or drop it to hang out?",
+        "shape": "situation",
+        "flags": [
+          "two_option"
+        ]
+      },
+      {
+        "i": 7,
+        "note": "Handle chatty stranger in competitive cooperative game",
+        "shape": "situation",
+        "flags": []
+      },
+      {
+        "i": 8,
+        "note": "Advice: missing people in remote work role",
+        "shape": "advice",
+        "flags": []
+      },
+      {
+        "i": 9,
+        "note": "Jump in with answer or ask colleagues first?",
+        "shape": "situation",
+        "flags": [
+          "two_option"
+        ]
+      },
+      {
+        "i": 10,
+        "note": "Restart quiet group chat or wait for others?",
+        "shape": "situation",
+        "flags": []
+      },
+      {
+        "i": 11,
+        "note": "Advice: should I chat more at hobby club?",
+        "shape": "advice",
+        "flags": [
+          "yes_no"
+        ]
+      },
+      {
+        "i": 12,
+        "note": "Approach unmet neighbor during chance encounter",
+        "shape": "situation",
+        "flags": []
+      },
+      {
+        "i": 13,
+        "note": "Check community forum or stay focused on task?",
+        "shape": "situation",
+        "flags": [
+          "two_option"
+        ]
+      },
+      {
+        "i": 14,
+        "note": "Catch up on tasks or text friends?",
+        "shape": "situation",
+        "flags": [
+          "two_option"
+        ]
+      },
+      {
+        "i": 15,
+        "note": "Advice: solo exercise or group class for connection?",
+        "shape": "advice",
+        "flags": [
+          "two_option"
+        ]
+      },
+      {
+        "i": 16,
+        "note": "Respond to old coworker's casual check-in message",
+        "shape": "situation",
+        "flags": []
+      },
+      {
+        "i": 17,
+        "note": "Learn systems quickly or get to know team?",
+        "shape": "situation",
+        "flags": [
+          "two_option"
+        ]
+      },
+      {
+        "i": 18,
+        "note": "Engage with chatty stranger in shop queue",
+        "shape": "situation",
+        "flags": []
+      },
+      {
+        "i": 19,
+        "note": "Advice: build social life or settle into routine?",
+        "shape": "advice",
+        "flags": [
+          "two_option"
+        ]
+      },
+      {
+        "i": 20,
+        "note": "Pause work to call old friend or continue?",
+        "shape": "situation",
+        "flags": [
+          "two_option"
+        ]
+      },
+      {
+        "i": 21,
+        "note": "Talk to known people or circulate and meet new?",
+        "shape": "situation",
+        "flags": [
+          "two_option"
+        ]
+      },
+      {
+        "i": 22,
+        "note": "Advice: should I stay for team hangout?",
+        "shape": "advice",
+        "flags": [
+          "yes_no"
+        ]
+      },
+      {
+        "i": 23,
+        "note": "Share funny meeting moment or keep to self?",
+        "shape": "situation",
+        "flags": [
+          "two_option"
+        ]
+      },
+      {
+        "i": 24,
+        "note": "Reach out to acquaintance who lost someone",
+        "shape": "situation",
+        "flags": []
+      },
+      {
+        "i": 25,
+        "note": "Solo progress or slower group session with chat?",
+        "shape": "situation",
+        "flags": [
+          "two_option"
+        ]
+      },
+      {
+        "i": 26,
+        "note": "Keep in touch with colleague who moved away?",
+        "shape": "situation",
+        "flags": [
+          "yes_no"
+        ]
+      },
+      {
+        "i": 27,
+        "note": "Advice: use headphones to avoid talking in cafes?",
+        "shape": "advice",
+        "flags": []
+      },
+      {
+        "i": 28,
+        "note": "Revive old ended group chat thread or leave?",
+        "shape": "situation",
+        "flags": []
+      },
+      {
+        "i": 29,
+        "note": "Role to take with new person in established group",
+        "shape": "situation",
+        "flags": []
+      },
+      {
+        "i": 30,
+        "note": "Solo trip with control or group trip with negotiation?",
+        "shape": "situation",
+        "flags": [
+          "two_option"
+        ]
+      },
+      {
+        "i": 31,
+        "note": "Advice: online community time versus productivity",
+        "shape": "advice",
+        "flags": []
+      },
+      {
+        "i": 32,
+        "note": "Check on quiet friend in group chat",
+        "shape": "situation",
+        "flags": []
+      },
+      {
+        "i": 33,
+        "note": "Use networking session after unhelpful workshop content",
+        "shape": "situation",
+        "flags": []
+      },
+      {
+        "i": 34,
+        "note": "Work alone faster or with friend and chat?",
+        "shape": "situation",
+        "flags": [
+          "two_option"
+        ]
+      },
+      {
+        "i": 35,
+        "note": "Advice: worried about saying wrong thing in groups",
+        "shape": "advice",
+        "flags": []
+      },
+      {
+        "i": 36,
+        "note": "What to do in final moments before group logs off",
+        "shape": "situation",
+        "flags": []
+      },
+      {
+        "i": 37,
+        "note": "Do anything for neighbor who is moving away?",
+        "shape": "situation",
+        "flags": [
+          "yes_no"
+        ]
+      },
+      {
+        "i": 38,
+        "note": "Introduce two people you know separately to each other",
+        "shape": "situation",
+        "flags": []
+      },
+      {
+        "i": 39,
+        "note": "Advice: attend gathering where only knowing the host?",
+        "shape": "advice",
+        "flags": [
+          "yes_no"
+        ]
+      }
+    ]
+  },
+  "stem": "socializer_bartle",
+  "arm": "w19"
+}

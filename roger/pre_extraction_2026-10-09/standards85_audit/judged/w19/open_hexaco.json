@@ -1,0 +1,362 @@
+{
+  "content_sha256": "3473a182b3a68d40",
+  "judged_at": "2026-10-09T23:24:39+00:00",
+  "instruction_judge": {
+    "model": "claude-sonnet-4-6",
+    "rubric_version": 4,
+    "items": [
+      {
+        "id": "p0_pos",
+        "faults": [],
+        "quotes": {}
+      },
+      {
+        "id": "p0_neg",
+        "faults": [],
+        "quotes": {}
+      },
+      {
+        "id": "p1_pos",
+        "faults": [
+          "invented_detail"
+        ],
+        "quotes": {
+          "invented_detail": "even the most ordinary Tuesday"
+        }
+      },
+      {
+        "id": "p1_neg",
+        "faults": [
+          "invented_motive"
+        ],
+        "quotes": {
+          "invented_motive": "when solid, conventional answers already exist"
+        }
+      },
+      {
+        "id": "p2_pos",
+        "faults": [
+          "invented_detail"
+        ],
+        "quotes": {
+          "invented_detail": "history, biology, philosophy, mathematics, whatever crosses your path"
+        }
+      },
+      {
+        "id": "p2_neg",
+        "faults": [
+          "invented_motive"
+        ],
+        "quotes": {
+          "invented_motive": "find broad curiosity scattered and unproductive"
+        }
+      },
+      {
+        "id": "p3_pos",
+        "faults": [],
+        "quotes": {}
+      },
+      {
+        "id": "p3_neg",
+        "faults": [],
+        "quotes": {}
+      },
+      {
+        "id": "p4_pos",
+        "faults": [],
+        "quotes": {}
+      },
+      {
+        "id": "p4_neg",
+        "faults": [
+          "invented_motive"
+        ],
+        "quotes": {
+          "invented_motive": "feel uneasy around ideas or people that stray too far from the norm"
+        }
+      }
+    ]
+  },
+  "question_judge": {
+    "model": "claude-haiku-4-5-20251001",
+    "rubric_version": 3,
+    "items": [
+      {
+        "i": 0,
+        "note": "Choose between familiar group or new experience",
+        "shape": "situation",
+        "flags": [
+          "two_option"
+        ]
+      },
+      {
+        "i": 1,
+        "note": "Engage with unconventional idea at dinner party",
+        "shape": "situation",
+        "flags": []
+      },
+      {
+        "i": 2,
+        "note": "Choose conventional or unusual report structure",
+        "shape": "situation",
+        "flags": [
+          "two_option"
+        ]
+      },
+      {
+        "i": 3,
+        "note": "Respond to mural catching your attention",
+        "shape": "situation",
+        "flags": [
+          "solo_task"
+        ]
+      },
+      {
+        "i": 4,
+        "note": "Respond to colleague's obscure hobby",
+        "shape": "situation",
+        "flags": []
+      },
+      {
+        "i": 5,
+        "note": "Choose between familiar or novel work task",
+        "shape": "situation",
+        "flags": [
+          "two_option"
+        ]
+      },
+      {
+        "i": 6,
+        "note": "Vote on book club selection",
+        "shape": "situation",
+        "flags": [
+          "two_option"
+        ]
+      },
+      {
+        "i": 7,
+        "note": "Advise friend on predictable life",
+        "shape": "advice",
+        "flags": []
+      },
+      {
+        "i": 8,
+        "note": "Respond to unconventional mathematical paper",
+        "shape": "situation",
+        "flags": []
+      },
+      {
+        "i": 9,
+        "note": "Choose apartment decoration style",
+        "shape": "situation",
+        "flags": [
+          "two_option"
+        ]
+      },
+      {
+        "i": 10,
+        "note": "Respond to dismissal of esoteric subjects",
+        "shape": "situation",
+        "flags": []
+      },
+      {
+        "i": 11,
+        "note": "Advise friend on unfamiliar study group",
+        "shape": "advice",
+        "flags": []
+      },
+      {
+        "i": 12,
+        "note": "Choose vacation destination",
+        "shape": "situation",
+        "flags": [
+          "two_option"
+        ]
+      },
+      {
+        "i": 13,
+        "note": "Decide whether to explore unusual museum installation",
+        "shape": "situation",
+        "flags": []
+      },
+      {
+        "i": 14,
+        "note": "Explain reading unrelated subjects at work",
+        "shape": "situation",
+        "flags": []
+      },
+      {
+        "i": 15,
+        "note": "Choose which story draft to submit",
+        "shape": "situation",
+        "flags": [
+          "two_option"
+        ]
+      },
+      {
+        "i": 16,
+        "note": "Advise friend on unconventional theory",
+        "shape": "advice",
+        "flags": []
+      },
+      {
+        "i": 17,
+        "note": "Decide whether to follow tangential footnote",
+        "shape": "situation",
+        "flags": [
+          "solo_task"
+        ]
+      },
+      {
+        "i": 18,
+        "note": "Choose which evening group to spend time with",
+        "shape": "situation",
+        "flags": [
+          "two_option"
+        ]
+      },
+      {
+        "i": 19,
+        "note": "Answer child's question about cultural differences",
+        "shape": "situation",
+        "flags": []
+      },
+      {
+        "i": 20,
+        "note": "Decide whether to linger at painting",
+        "shape": "situation",
+        "flags": []
+      },
+      {
+        "i": 21,
+        "note": "Advise friend on job choice",
+        "shape": "advice",
+        "flags": []
+      },
+      {
+        "i": 22,
+        "note": "Decide what to do with offered book",
+        "shape": "situation",
+        "flags": [
+          "solo_task"
+        ]
+      },
+      {
+        "i": 23,
+        "note": "Opine on community garden redesign proposal",
+        "shape": "situation",
+        "flags": [
+          "two_option"
+        ]
+      },
+      {
+        "i": 24,
+        "note": "Respond to admired figure's eccentric beliefs",
+        "shape": "situation",
+        "flags": []
+      },
+      {
+        "i": 25,
+        "note": "Respond to friend's feedback about your interests",
+        "shape": "situation",
+        "flags": []
+      },
+      {
+        "i": 26,
+        "note": "Choose dinner menu approach",
+        "shape": "situation",
+        "flags": [
+          "two_option"
+        ]
+      },
+      {
+        "i": 27,
+        "note": "Advise friend on synesthesia research",
+        "shape": "advice",
+        "flags": []
+      },
+      {
+        "i": 28,
+        "note": "Engage with specialist at gathering",
+        "shape": "situation",
+        "flags": []
+      },
+      {
+        "i": 29,
+        "note": "Describe how you spend free afternoon",
+        "shape": "situation",
+        "flags": [
+          "solo_task"
+        ]
+      },
+      {
+        "i": 30,
+        "note": "Choose between specialty or cross-disciplinary training",
+        "shape": "situation",
+        "flags": [
+          "two_option"
+        ]
+      },
+      {
+        "i": 31,
+        "note": "Advise friend on unconventional artist group",
+        "shape": "advice",
+        "flags": []
+      },
+      {
+        "i": 32,
+        "note": "Respond to documentary about experimental architecture",
+        "shape": "situation",
+        "flags": []
+      },
+      {
+        "i": 33,
+        "note": "Choose toast approach at celebration",
+        "shape": "situation",
+        "flags": [
+          "two_option"
+        ]
+      },
+      {
+        "i": 34,
+        "note": "Respond to colleague dismissing speculative theory",
+        "shape": "situation",
+        "flags": []
+      },
+      {
+        "i": 35,
+        "note": "Respond to mind drifting in meeting",
+        "shape": "situation",
+        "flags": []
+      },
+      {
+        "i": 36,
+        "note": "Advise friend on unorthodox collaboration",
+        "shape": "advice",
+        "flags": []
+      },
+      {
+        "i": 37,
+        "note": "Respond to learning about alternative time-marking",
+        "shape": "situation",
+        "flags": []
+      },
+      {
+        "i": 38,
+        "note": "Decide whether to use alternative work method",
+        "shape": "situation",
+        "flags": [
+          "two_option"
+        ]
+      },
+      {
+        "i": 39,
+        "note": "Advise friend on random distracting questions",
+        "shape": "advice",
+        "flags": []
+      }
+    ]
+  },
+  "stem": "open_hexaco",
+  "arm": "w19"
+}

@@ -1,0 +1,325 @@
+{
+  "content_sha256": "2ef5e4739699c377",
+  "judged_at": "2026-10-09T23:23:24+00:00",
+  "instruction_judge": {
+    "model": "claude-sonnet-4-6",
+    "rubric_version": 4,
+    "items": [
+      {
+        "id": "p0_pos",
+        "faults": [],
+        "quotes": {}
+      },
+      {
+        "id": "p0_neg",
+        "faults": [],
+        "quotes": {}
+      },
+      {
+        "id": "p1_pos",
+        "faults": [],
+        "quotes": {}
+      },
+      {
+        "id": "p1_neg",
+        "faults": [],
+        "quotes": {}
+      },
+      {
+        "id": "p2_pos",
+        "faults": [],
+        "quotes": {}
+      },
+      {
+        "id": "p2_neg",
+        "faults": [],
+        "quotes": {}
+      },
+      {
+        "id": "p3_pos",
+        "faults": [],
+        "quotes": {}
+      },
+      {
+        "id": "p3_neg",
+        "faults": [],
+        "quotes": {}
+      },
+      {
+        "id": "p4_pos",
+        "faults": [],
+        "quotes": {}
+      },
+      {
+        "id": "p4_neg",
+        "faults": [],
+        "quotes": {}
+      }
+    ]
+  },
+  "question_judge": {
+    "model": "claude-haiku-4-5-20251001",
+    "rubric_version": 3,
+    "items": [
+      {
+        "i": 0,
+        "note": "Partner forgets anniversary; indirect hint fails",
+        "shape": "situation",
+        "flags": []
+      },
+      {
+        "i": 1,
+        "note": "Colleague takes credit; confronted directly",
+        "shape": "situation",
+        "flags": []
+      },
+      {
+        "i": 2,
+        "note": "Neighbor parks in spot; subtle signals ignored",
+        "shape": "situation",
+        "flags": []
+      },
+      {
+        "i": 3,
+        "note": "Friend asks why distant; hurt unspoken",
+        "shape": "situation",
+        "flags": []
+      },
+      {
+        "i": 4,
+        "note": "Remote colleague misses priorities in draft",
+        "shape": "situation",
+        "flags": []
+      },
+      {
+        "i": 5,
+        "note": "Manager asks feedback; frustration unvoiced",
+        "shape": "situation",
+        "flags": []
+      },
+      {
+        "i": 6,
+        "note": "Asked if angry; offense should be obvious",
+        "shape": "situation",
+        "flags": []
+      },
+      {
+        "i": 7,
+        "note": "Family member bothers you; withdrawal noticed",
+        "shape": "situation",
+        "flags": []
+      },
+      {
+        "i": 8,
+        "note": "Explain group decision-making to new member",
+        "shape": "situation",
+        "flags": []
+      },
+      {
+        "i": 9,
+        "note": "Decide trip logistics with close friend",
+        "shape": "situation",
+        "flags": []
+      },
+      {
+        "i": 10,
+        "note": "Boss gives vague feedback; seeking advice",
+        "shape": "advice",
+        "flags": []
+      },
+      {
+        "i": 11,
+        "note": "Roommate upset but silent; ask or wait",
+        "shape": "advice",
+        "flags": [
+          "two_option"
+        ]
+      },
+      {
+        "i": 12,
+        "note": "Overlooked in friend group; how to handle",
+        "shape": "advice",
+        "flags": []
+      },
+      {
+        "i": 13,
+        "note": "Coworker tension unaddressed; project starting",
+        "shape": "advice",
+        "flags": []
+      },
+      {
+        "i": 14,
+        "note": "Partner doesn't know needs when stressed",
+        "shape": "advice",
+        "flags": []
+      },
+      {
+        "i": 15,
+        "note": "Brief thin on detail; submit by end-of-day",
+        "shape": "situation",
+        "flags": [
+          "solo_task"
+        ]
+      },
+      {
+        "i": 16,
+        "note": "Passed over for promotion; no explanation",
+        "shape": "situation",
+        "flags": []
+      },
+      {
+        "i": 17,
+        "note": "Long-time friend hurt; won't say why",
+        "shape": "advice",
+        "flags": []
+      },
+      {
+        "i": 18,
+        "note": "Meeting heading wrong direction; asked for input",
+        "shape": "situation",
+        "flags": []
+      },
+      {
+        "i": 19,
+        "note": "Disagree with senior's writing; edit shared doc",
+        "shape": "situation",
+        "flags": []
+      },
+      {
+        "i": 20,
+        "note": "Friend making financial mistake; hint missed",
+        "shape": "advice",
+        "flags": [
+          "two_option"
+        ]
+      },
+      {
+        "i": 21,
+        "note": "Acquaintance asks intrusive personal questions",
+        "shape": "situation",
+        "flags": []
+      },
+      {
+        "i": 22,
+        "note": "Client expectations misaligned; deadline in two weeks",
+        "shape": "situation",
+        "flags": []
+      },
+      {
+        "i": 23,
+        "note": "Household member leaves dishes; hint ignored",
+        "shape": "situation",
+        "flags": []
+      },
+      {
+        "i": 24,
+        "note": "Write wedding speech with shared history",
+        "shape": "situation",
+        "flags": [
+          "solo_task"
+        ]
+      },
+      {
+        "i": 25,
+        "note": "Sister assumes you're fine with mother's care",
+        "shape": "advice",
+        "flags": []
+      },
+      {
+        "i": 26,
+        "note": "Contributions invisible; waiting to be noticed",
+        "shape": "advice",
+        "flags": []
+      },
+      {
+        "i": 27,
+        "note": "Three weeks silent after argument; reach out",
+        "shape": "advice",
+        "flags": [
+          "two_option"
+        ]
+      },
+      {
+        "i": 28,
+        "note": "Lent money; hint dropped; need it back",
+        "shape": "advice",
+        "flags": []
+      },
+      {
+        "i": 29,
+        "note": "Coworker interrupts; manager notices disengagement",
+        "shape": "situation",
+        "flags": []
+      },
+      {
+        "i": 30,
+        "note": "Add context paragraphs or trust reader",
+        "shape": "situation",
+        "flags": [
+          "solo_task",
+          "two_option"
+        ]
+      },
+      {
+        "i": 31,
+        "note": "Unfair criticism in review; circle back",
+        "shape": "advice",
+        "flags": [
+          "two_option"
+        ]
+      },
+      {
+        "i": 32,
+        "note": "Out-of-town friend expects entertainment; exhausted",
+        "shape": "situation",
+        "flags": []
+      },
+      {
+        "i": 33,
+        "note": "Bill split evenly; ordered cheapest item",
+        "shape": "situation",
+        "flags": []
+      },
+      {
+        "i": 34,
+        "note": "Asked to lead client call; quiet in prep",
+        "shape": "situation",
+        "flags": []
+      },
+      {
+        "i": 35,
+        "note": "Asked to recommend unsuitable professional contact",
+        "shape": "situation",
+        "flags": []
+      },
+      {
+        "i": 36,
+        "note": "Trip planning; asked directly about preference",
+        "shape": "situation",
+        "flags": []
+      },
+      {
+        "i": 37,
+        "note": "Mentee repeats error after allusions",
+        "shape": "situation",
+        "flags": []
+      },
+      {
+        "i": 38,
+        "note": "Message to colleague who caused project setback",
+        "shape": "situation",
+        "flags": [
+          "solo_task"
+        ]
+      },
+      {
+        "i": 39,
+        "note": "Journalist asks opinion on professional controversy",
+        "shape": "situation",
+        "flags": []
+      }
+    ]
+  },
+  "stem": "high_context_hall",
+  "arm": "w19"
+}

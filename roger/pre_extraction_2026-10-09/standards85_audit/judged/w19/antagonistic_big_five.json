@@ -1,0 +1,334 @@
+{
+  "content_sha256": "923e42a0173cd09c",
+  "judged_at": "2026-10-09T23:21:37+00:00",
+  "instruction_judge": {
+    "model": "claude-sonnet-4-6",
+    "rubric_version": 4,
+    "items": [
+      {
+        "id": "p0_pos",
+        "faults": [],
+        "quotes": {}
+      },
+      {
+        "id": "p0_neg",
+        "faults": [],
+        "quotes": {}
+      },
+      {
+        "id": "p1_pos",
+        "faults": [],
+        "quotes": {}
+      },
+      {
+        "id": "p1_neg",
+        "faults": [
+          "softened",
+          "weak_opposite"
+        ],
+        "quotes": {
+          "softened": "You adjust your course when someone else's wellbeing is at stake",
+          "weak_opposite": "genuinely weighs what others need alongside what you want... find it natural to give ground"
+        }
+      },
+      {
+        "id": "p2_pos",
+        "faults": [],
+        "quotes": {}
+      },
+      {
+        "id": "p2_neg",
+        "faults": [
+          "weak_opposite"
+        ],
+        "quotes": {
+          "weak_opposite": "listens for the truth in what others say and changes course when they make a good point"
+        }
+      },
+      {
+        "id": "p3_pos",
+        "faults": [],
+        "quotes": {}
+      },
+      {
+        "id": "p3_neg",
+        "faults": [],
+        "quotes": {}
+      },
+      {
+        "id": "p4_pos",
+        "faults": [
+          "invented_motive"
+        ],
+        "quotes": {
+          "invented_motive": "you see softening that as a pointless waste"
+        }
+      },
+      {
+        "id": "p4_neg",
+        "faults": [],
+        "quotes": {}
+      }
+    ]
+  },
+  "question_judge": {
+    "model": "claude-haiku-4-5-20251001",
+    "rubric_version": 3,
+    "items": [
+      {
+        "i": 0,
+        "note": "Colleague's true motives for birthday gift",
+        "shape": "situation",
+        "flags": []
+      },
+      {
+        "i": 1,
+        "note": "Deciding whether to trust neighbor's offer",
+        "shape": "situation",
+        "flags": []
+      },
+      {
+        "i": 2,
+        "note": "Giving critical feedback on weak project",
+        "shape": "situation",
+        "flags": []
+      },
+      {
+        "i": 3,
+        "note": "Responding to friend's job loss crisis",
+        "shape": "situation",
+        "flags": []
+      },
+      {
+        "i": 4,
+        "note": "Handling public contradiction in meeting",
+        "shape": "situation",
+        "flags": []
+      },
+      {
+        "i": 5,
+        "note": "Responding to manager's unequal praise",
+        "shape": "situation",
+        "flags": []
+      },
+      {
+        "i": 6,
+        "note": "Reacting to stranger's personal struggles",
+        "shape": "situation",
+        "flags": []
+      },
+      {
+        "i": 7,
+        "note": "Using discovered flaw in colleague's report",
+        "shape": "situation",
+        "flags": []
+      },
+      {
+        "i": 8,
+        "note": "Evaluating stranger's loan request",
+        "shape": "situation",
+        "flags": []
+      },
+      {
+        "i": 9,
+        "note": "Challenging already-made team decision",
+        "shape": "situation",
+        "flags": []
+      },
+      {
+        "i": 10,
+        "note": "Choosing between promotion and partner's wishes",
+        "shape": "advice",
+        "flags": [
+          "two_option"
+        ]
+      },
+      {
+        "i": 11,
+        "note": "Addressing unequal bill split situation",
+        "shape": "situation",
+        "flags": []
+      },
+      {
+        "i": 12,
+        "note": "Responding to friend's repeated cancellations",
+        "shape": "situation",
+        "flags": []
+      },
+      {
+        "i": 13,
+        "note": "Handling underperforming group member before deadline",
+        "shape": "situation",
+        "flags": []
+      },
+      {
+        "i": 14,
+        "note": "Pursuing raise after repeated delays",
+        "shape": "advice",
+        "flags": []
+      },
+      {
+        "i": 15,
+        "note": "Mentioning social connection to hiring manager",
+        "shape": "situation",
+        "flags": [
+          "two_option"
+        ]
+      },
+      {
+        "i": 16,
+        "note": "Responding to disagreed-with feedback",
+        "shape": "situation",
+        "flags": []
+      },
+      {
+        "i": 17,
+        "note": "Choosing between helping coworker or personal plans",
+        "shape": "situation",
+        "flags": [
+          "two_option"
+        ]
+      },
+      {
+        "i": 18,
+        "note": "Addressing suspected exploitation by friend",
+        "shape": "advice",
+        "flags": []
+      },
+      {
+        "i": 19,
+        "note": "Deciding honesty about item condition to buyer",
+        "shape": "situation",
+        "flags": []
+      },
+      {
+        "i": 20,
+        "note": "Giving honest opinion on family's decision",
+        "shape": "situation",
+        "flags": []
+      },
+      {
+        "i": 21,
+        "note": "Acknowledging other person's better idea",
+        "shape": "situation",
+        "flags": []
+      },
+      {
+        "i": 22,
+        "note": "Responding to neighbor's loud weeknight party",
+        "shape": "situation",
+        "flags": []
+      },
+      {
+        "i": 23,
+        "note": "Addressing unequal recognition with coworker",
+        "shape": "advice",
+        "flags": []
+      },
+      {
+        "i": 24,
+        "note": "Choosing to bend unnoticed game rule",
+        "shape": "situation",
+        "flags": [
+          "two_option"
+        ]
+      },
+      {
+        "i": 25,
+        "note": "Deciding on favor for person in bind",
+        "shape": "situation",
+        "flags": []
+      },
+      {
+        "i": 26,
+        "note": "Reporting colleague's mistake to client",
+        "shape": "situation",
+        "flags": [
+          "two_option"
+        ]
+      },
+      {
+        "i": 27,
+        "note": "Responding to friend's mental health struggle",
+        "shape": "situation",
+        "flags": []
+      },
+      {
+        "i": 28,
+        "note": "Answering job interview weakness question",
+        "shape": "situation",
+        "flags": []
+      },
+      {
+        "i": 29,
+        "note": "Pursuing repayment of loaned money",
+        "shape": "advice",
+        "flags": []
+      },
+      {
+        "i": 30,
+        "note": "Responding to online pushback on comment",
+        "shape": "situation",
+        "flags": []
+      },
+      {
+        "i": 31,
+        "note": "Competing for promotion with liked colleague",
+        "shape": "situation",
+        "flags": []
+      },
+      {
+        "i": 32,
+        "note": "Helping disoriented stranger with directions",
+        "shape": "situation",
+        "flags": []
+      },
+      {
+        "i": 33,
+        "note": "Accepting extra work without extra pay",
+        "shape": "advice",
+        "flags": []
+      },
+      {
+        "i": 34,
+        "note": "Disclosing undiscovered work error",
+        "shape": "situation",
+        "flags": []
+      },
+      {
+        "i": 35,
+        "note": "Responding to suspected insincere compliment",
+        "shape": "situation",
+        "flags": []
+      },
+      {
+        "i": 36,
+        "note": "Giving reference for mixed-feelings colleague",
+        "shape": "situation",
+        "flags": []
+      },
+      {
+        "i": 37,
+        "note": "Attending boring event important to friend",
+        "shape": "situation",
+        "flags": []
+      },
+      {
+        "i": 38,
+        "note": "Setting boundaries with dependent family member",
+        "shape": "advice",
+        "flags": []
+      },
+      {
+        "i": 39,
+        "note": "Voting on budget proposal affecting self",
+        "shape": "situation",
+        "flags": [
+          "two_option"
+        ]
+      }
+    ]
+  },
+  "stem": "antagonistic_big_five",
+  "arm": "w19"
+}

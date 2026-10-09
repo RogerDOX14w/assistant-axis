@@ -1,0 +1,352 @@
+{
+  "content_sha256": "fc185de8a7aa134b",
+  "judged_at": "2026-10-09T23:23:11+00:00",
+  "instruction_judge": {
+    "model": "claude-sonnet-4-6",
+    "rubric_version": 4,
+    "items": [
+      {
+        "id": "p0_pos",
+        "faults": [],
+        "quotes": {}
+      },
+      {
+        "id": "p0_neg",
+        "faults": [],
+        "quotes": {}
+      },
+      {
+        "id": "p1_pos",
+        "faults": [],
+        "quotes": {}
+      },
+      {
+        "id": "p1_neg",
+        "faults": [],
+        "quotes": {}
+      },
+      {
+        "id": "p2_pos",
+        "faults": [],
+        "quotes": {}
+      },
+      {
+        "id": "p2_neg",
+        "faults": [],
+        "quotes": {}
+      },
+      {
+        "id": "p3_pos",
+        "faults": [
+          "invented_detail"
+        ],
+        "quotes": {
+          "invented_detail": "talk fast, laugh loud"
+        }
+      },
+      {
+        "id": "p3_neg",
+        "faults": [
+          "off_trait"
+        ],
+        "quotes": {
+          "off_trait": "find loud enthusiasm in others grating and exhausting"
+        }
+      },
+      {
+        "id": "p4_pos",
+        "faults": [],
+        "quotes": {}
+      },
+      {
+        "id": "p4_neg",
+        "faults": [
+          "off_trait",
+          "softened"
+        ],
+        "quotes": {
+          "softened": "often leave gatherings wondering whether you said the wrong thing",
+          "off_trait": "doubts your place in social situations and hangs back"
+        }
+      }
+    ]
+  },
+  "question_judge": {
+    "model": "claude-haiku-4-5-20251001",
+    "rubric_version": 3,
+    "items": [
+      {
+        "i": 0,
+        "note": "What to do at work conference reception",
+        "shape": "situation",
+        "flags": []
+      },
+      {
+        "i": 1,
+        "note": "Volunteer to present quarterly results alone",
+        "shape": "situation",
+        "flags": []
+      },
+      {
+        "i": 2,
+        "note": "Karaoke first at friend's birthday party",
+        "shape": "situation",
+        "flags": []
+      },
+      {
+        "i": 3,
+        "note": "Block party vs quiet Saturday at home",
+        "shape": "situation",
+        "flags": [
+          "two_option"
+        ]
+      },
+      {
+        "i": 4,
+        "note": "Finish report or hang out with friends",
+        "shape": "situation",
+        "flags": [
+          "two_option"
+        ]
+      },
+      {
+        "i": 5,
+        "note": "Accept leadership promotion with public role",
+        "shape": "advice",
+        "flags": []
+      },
+      {
+        "i": 6,
+        "note": "Sit at stranger's table in coffee shop",
+        "shape": "situation",
+        "flags": []
+      },
+      {
+        "i": 7,
+        "note": "Speak at public meeting for neighborhood",
+        "shape": "situation",
+        "flags": [
+          "yes_no"
+        ]
+      },
+      {
+        "i": 8,
+        "note": "Advice for networking event anxiety",
+        "shape": "advice",
+        "flags": []
+      },
+      {
+        "i": 9,
+        "note": "House party or quiet dinner with friend",
+        "shape": "situation",
+        "flags": [
+          "two_option"
+        ]
+      },
+      {
+        "i": 10,
+        "note": "Lead brainstorming session on the spot",
+        "shape": "situation",
+        "flags": []
+      },
+      {
+        "i": 11,
+        "note": "Solo work or call friends to meet up",
+        "shape": "situation",
+        "flags": [
+          "two_option"
+        ]
+      },
+      {
+        "i": 12,
+        "note": "Return to office three days weekly",
+        "shape": "advice",
+        "flags": []
+      },
+      {
+        "i": 13,
+        "note": "Break stalled conversation at dinner",
+        "shape": "situation",
+        "flags": []
+      },
+      {
+        "i": 14,
+        "note": "Give five-minute speech to two hundred people",
+        "shape": "situation",
+        "flags": [
+          "yes_no"
+        ]
+      },
+      {
+        "i": 15,
+        "note": "Talk to stranger wearing favorite band shirt",
+        "shape": "situation",
+        "flags": []
+      },
+      {
+        "i": 16,
+        "note": "Role in group holiday destination debate",
+        "shape": "situation",
+        "flags": []
+      },
+      {
+        "i": 17,
+        "note": "Advice for social anxiety and cancellations",
+        "shape": "advice",
+        "flags": []
+      },
+      {
+        "i": 18,
+        "note": "What to do alone before hobby class starts",
+        "shape": "situation",
+        "flags": []
+      },
+      {
+        "i": 19,
+        "note": "Remote research role or client-facing role",
+        "shape": "situation",
+        "flags": [
+          "two_option"
+        ]
+      },
+      {
+        "i": 20,
+        "note": "Sign up for workplace talent show",
+        "shape": "situation",
+        "flags": [
+          "yes_no"
+        ]
+      },
+      {
+        "i": 21,
+        "note": "Advice for meeting people in new city",
+        "shape": "advice",
+        "flags": []
+      },
+      {
+        "i": 22,
+        "note": "Talk to bored person in queue",
+        "shape": "situation",
+        "flags": []
+      },
+      {
+        "i": 23,
+        "note": "Spend evening at wedding with three hundred guests",
+        "shape": "situation",
+        "flags": []
+      },
+      {
+        "i": 24,
+        "note": "Encourage quiet team member to speak",
+        "shape": "situation",
+        "flags": []
+      },
+      {
+        "i": 25,
+        "note": "Experience exhaustion after social time",
+        "shape": "advice",
+        "flags": [
+          "names_trait"
+        ]
+      },
+      {
+        "i": 26,
+        "note": "Volunteer to MC annual awards dinner",
+        "shape": "situation",
+        "flags": [
+          "yes_no"
+        ]
+      },
+      {
+        "i": 27,
+        "note": "Person next to you on train wants to chat",
+        "shape": "situation",
+        "flags": []
+      },
+      {
+        "i": 28,
+        "note": "Group fitness class or solo run Saturday",
+        "shape": "situation",
+        "flags": [
+          "two_option"
+        ]
+      },
+      {
+        "i": 29,
+        "note": "Advice for workshop preparation anxiety",
+        "shape": "advice",
+        "flags": []
+      },
+      {
+        "i": 30,
+        "note": "Approach person from dream company alone",
+        "shape": "situation",
+        "flags": []
+      },
+      {
+        "i": 31,
+        "note": "Large party or small dinner New Year's Eve",
+        "shape": "situation",
+        "flags": [
+          "two_option"
+        ]
+      },
+      {
+        "i": 32,
+        "note": "Call colleague or solve task alone",
+        "shape": "situation",
+        "flags": [
+          "two_option"
+        ]
+      },
+      {
+        "i": 33,
+        "note": "Advice for low energy after solo weekend",
+        "shape": "advice",
+        "flags": []
+      },
+      {
+        "i": 34,
+        "note": "Give presentation to panel with one hour notice",
+        "shape": "situation",
+        "flags": []
+      },
+      {
+        "i": 35,
+        "note": "Stranger at bar makes eye contact",
+        "shape": "situation",
+        "flags": []
+      },
+      {
+        "i": 36,
+        "note": "Join internal committee with public forums",
+        "shape": "situation",
+        "flags": [
+          "yes_no"
+        ]
+      },
+      {
+        "i": 37,
+        "note": "Advice for social mismatch with partner",
+        "shape": "advice",
+        "flags": []
+      },
+      {
+        "i": 38,
+        "note": "Spend free Sunday alone or with group",
+        "shape": "situation",
+        "flags": [
+          "two_option"
+        ]
+      },
+      {
+        "i": 39,
+        "note": "Introduce yourself at conference breakout session",
+        "shape": "situation",
+        "flags": []
+      }
+    ]
+  },
+  "stem": "extraverted_hexaco",
+  "arm": "w19"
+}

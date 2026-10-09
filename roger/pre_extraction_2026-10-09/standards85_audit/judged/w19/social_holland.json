@@ -1,0 +1,348 @@
+{
+  "content_sha256": "b484c3b5dcd80ee5",
+  "judged_at": "2026-10-09T23:25:12+00:00",
+  "instruction_judge": {
+    "model": "claude-sonnet-4-6",
+    "rubric_version": 4,
+    "items": [
+      {
+        "id": "p0_pos",
+        "faults": [],
+        "quotes": {}
+      },
+      {
+        "id": "p0_neg",
+        "faults": [],
+        "quotes": {}
+      },
+      {
+        "id": "p1_pos",
+        "faults": [
+          "invented_detail"
+        ],
+        "quotes": {
+          "invented_detail": "a classroom, a clinic, or a kitchen table conversation"
+        }
+      },
+      {
+        "id": "p1_neg",
+        "faults": [],
+        "quotes": {}
+      },
+      {
+        "id": "p2_pos",
+        "faults": [],
+        "quotes": {}
+      },
+      {
+        "id": "p2_neg",
+        "faults": [
+          "off_trait"
+        ],
+        "quotes": {
+          "off_trait": "regards personal advancement as the only real goal worth pursuing"
+        }
+      },
+      {
+        "id": "p3_pos",
+        "faults": [
+          "invented_detail"
+        ],
+        "quotes": {
+          "invented_detail": "tutoring a neighbor's child, sitting with someone who is grieving, or organizing community support"
+        }
+      },
+      {
+        "id": "p3_neg",
+        "faults": [
+          "off_trait"
+        ],
+        "quotes": {
+          "off_trait": "see people who dedicate themselves to helping others as wasting their potential"
+        }
+      },
+      {
+        "id": "p4_pos",
+        "faults": [],
+        "quotes": {}
+      },
+      {
+        "id": "p4_neg",
+        "faults": [],
+        "quotes": {}
+      }
+    ]
+  },
+  "question_judge": {
+    "model": "claude-haiku-4-5-20251001",
+    "rubric_version": 3,
+    "items": [
+      {
+        "i": 0,
+        "note": "Colleague overwhelmed; you have full afternoon",
+        "shape": "situation",
+        "flags": []
+      },
+      {
+        "i": 1,
+        "note": "Free Saturday afternoon; volunteer or read",
+        "shape": "situation",
+        "flags": [
+          "two_option"
+        ]
+      },
+      {
+        "i": 2,
+        "note": "Former student asks for college help",
+        "shape": "situation",
+        "flags": []
+      },
+      {
+        "i": 3,
+        "note": "Choose between research or coaching role",
+        "shape": "situation",
+        "flags": [
+          "two_option"
+        ]
+      },
+      {
+        "i": 4,
+        "note": "Stranger crying at bus stop alone",
+        "shape": "situation",
+        "flags": []
+      },
+      {
+        "i": 5,
+        "note": "Lost job; seeking advice on recovery",
+        "shape": "advice",
+        "flags": []
+      },
+      {
+        "i": 6,
+        "note": "Guest excluded at dinner party; notice",
+        "shape": "situation",
+        "flags": []
+      },
+      {
+        "i": 7,
+        "note": "Friend scared of therapy; unsolicited advice",
+        "shape": "situation",
+        "flags": []
+      },
+      {
+        "i": 8,
+        "note": "Apply for crisis line volunteer training",
+        "shape": "situation",
+        "flags": [
+          "yes_no"
+        ]
+      },
+      {
+        "i": 9,
+        "note": "Student acting out; teacher seeks advice",
+        "shape": "advice",
+        "flags": []
+      },
+      {
+        "i": 10,
+        "note": "Choose professional development: technical or counseling",
+        "shape": "situation",
+        "flags": [
+          "two_option"
+        ]
+      },
+      {
+        "i": 11,
+        "note": "Family member needs healthcare navigation help",
+        "shape": "situation",
+        "flags": []
+      },
+      {
+        "i": 12,
+        "note": "Upset teenager outside community center alone",
+        "shape": "situation",
+        "flags": []
+      },
+      {
+        "i": 13,
+        "note": "Office morale low; non-manager seeking advice",
+        "shape": "advice",
+        "flags": []
+      },
+      {
+        "i": 14,
+        "note": "Volunteer cooking for shelter; give up rest",
+        "shape": "situation",
+        "flags": [
+          "two_option"
+        ]
+      },
+      {
+        "i": 15,
+        "note": "Coworker needs help; your list full",
+        "shape": "situation",
+        "flags": []
+      },
+      {
+        "i": 16,
+        "note": "Elderly neighbor skipping meals; discover this",
+        "shape": "situation",
+        "flags": []
+      },
+      {
+        "i": 17,
+        "note": "Finance career unfulfilling; considering switch",
+        "shape": "advice",
+        "flags": []
+      },
+      {
+        "i": 18,
+        "note": "Lead unpaid peer support group; step up",
+        "shape": "situation",
+        "flags": [
+          "yes_no"
+        ]
+      },
+      {
+        "i": 19,
+        "note": "Confused person panicking at airport gate",
+        "shape": "situation",
+        "flags": []
+      },
+      {
+        "i": 20,
+        "note": "Friend calling nightly during divorce crisis",
+        "shape": "situation",
+        "flags": []
+      },
+      {
+        "i": 21,
+        "note": "Choose committee: technical standards or employee support",
+        "shape": "situation",
+        "flags": [
+          "two_option"
+        ]
+      },
+      {
+        "i": 22,
+        "note": "Teenager shut down; parent seeking advice",
+        "shape": "advice",
+        "flags": []
+      },
+      {
+        "i": 23,
+        "note": "Afternoon off; finish project or visit friend",
+        "shape": "situation",
+        "flags": [
+          "two_option"
+        ]
+      },
+      {
+        "i": 24,
+        "note": "Lead pastoral visits to homebound members",
+        "shape": "situation",
+        "flags": [
+          "yes_no"
+        ]
+      },
+      {
+        "i": 25,
+        "note": "Food bank volunteer burned out; seeking advice",
+        "shape": "advice",
+        "flags": []
+      },
+      {
+        "i": 26,
+        "note": "Solo research fellowship; isolation trade-off feelings",
+        "shape": "situation",
+        "flags": []
+      },
+      {
+        "i": 27,
+        "note": "Person posts mental health struggle; unanswered",
+        "shape": "situation",
+        "flags": []
+      },
+      {
+        "i": 28,
+        "note": "Design ideal workday from scratch",
+        "shape": "task",
+        "flags": [
+          "solo_task"
+        ]
+      },
+      {
+        "i": 29,
+        "note": "Junior colleague makes mistake; guidance vs documentation",
+        "shape": "situation",
+        "flags": []
+      },
+      {
+        "i": 30,
+        "note": "Social work or law; money versus meaning",
+        "shape": "advice",
+        "flags": []
+      },
+      {
+        "i": 31,
+        "note": "Neighbors need help after house fire",
+        "shape": "situation",
+        "flags": []
+      },
+      {
+        "i": 32,
+        "note": "Employee assistance program being cut; speak up",
+        "shape": "situation",
+        "flags": []
+      },
+      {
+        "i": 33,
+        "note": "Caregiver depleted; asking for help guilt",
+        "shape": "advice",
+        "flags": []
+      },
+      {
+        "i": 34,
+        "note": "Child embarrassed about reading; guardian absent",
+        "shape": "situation",
+        "flags": []
+      },
+      {
+        "i": 35,
+        "note": "Mentor asks to take over youth program",
+        "shape": "situation",
+        "flags": []
+      },
+      {
+        "i": 36,
+        "note": "Choose between nonprofit crisis work or data analysis",
+        "shape": "situation",
+        "flags": [
+          "two_option"
+        ]
+      },
+      {
+        "i": 37,
+        "note": "Tutoring program growing; scaling without losing essence",
+        "shape": "advice",
+        "flags": []
+      },
+      {
+        "i": 38,
+        "note": "Acquaintance posts about quitting drinking struggle",
+        "shape": "situation",
+        "flags": []
+      },
+      {
+        "i": 39,
+        "note": "Career talk at high school; angle choice",
+        "shape": "situation",
+        "flags": [
+          "two_option"
+        ]
+      }
+    ]
+  },
+  "stem": "social_holland",
+  "arm": "w19"
+}

@@ -1,0 +1,381 @@
+{
+  "content_sha256": "9e152797978078d3",
+  "judged_at": "2026-10-09T23:23:40+00:00",
+  "instruction_judge": {
+    "model": "claude-sonnet-4-6",
+    "rubric_version": 4,
+    "items": [
+      {
+        "id": "p0_pos",
+        "faults": [],
+        "quotes": {}
+      },
+      {
+        "id": "p0_neg",
+        "faults": [
+          "softened",
+          "weak_opposite"
+        ],
+        "quotes": {
+          "softened": "distrust novelty for its own sake",
+          "weak_opposite": "waits until a new idea has been tested by others and proven safe before considering it"
+        }
+      },
+      {
+        "id": "p1_pos",
+        "faults": [],
+        "quotes": {}
+      },
+      {
+        "id": "p1_neg",
+        "faults": [],
+        "quotes": {}
+      },
+      {
+        "id": "p2_pos",
+        "faults": [],
+        "quotes": {}
+      },
+      {
+        "id": "p2_neg",
+        "faults": [
+          "invented_motive"
+        ],
+        "quotes": {
+          "invented_motive": "find comfort in being unremarkable and predictable"
+        }
+      },
+      {
+        "id": "p3_pos",
+        "faults": [],
+        "quotes": {}
+      },
+      {
+        "id": "p3_neg",
+        "faults": [
+          "invented_motive"
+        ],
+        "quotes": {
+          "invented_motive": "protect what you have rather than reaching for more"
+        }
+      },
+      {
+        "id": "p4_pos",
+        "faults": [],
+        "quotes": {}
+      },
+      {
+        "id": "p4_neg",
+        "faults": [],
+        "quotes": {}
+      }
+    ]
+  },
+  "question_judge": {
+    "model": "claude-haiku-4-5-20251001",
+    "rubric_version": 3,
+    "items": [
+      {
+        "i": 0,
+        "note": "New home automation system: adopt or not?",
+        "shape": "situation",
+        "flags": [
+          "solo_task",
+          "two_option"
+        ]
+      },
+      {
+        "i": 1,
+        "note": "Downtown redesign proposal: support or oppose?",
+        "shape": "situation",
+        "flags": [
+          "two_option"
+        ]
+      },
+      {
+        "i": 2,
+        "note": "Join startup founding board: accept or decline?",
+        "shape": "situation",
+        "flags": [
+          "solo_task",
+          "two_option"
+        ]
+      },
+      {
+        "i": 3,
+        "note": "Advise colleague on software migration decision",
+        "shape": "situation",
+        "flags": []
+      },
+      {
+        "i": 4,
+        "note": "Home office: conventional or custom design?",
+        "shape": "situation",
+        "flags": [
+          "solo_task",
+          "two_option"
+        ]
+      },
+      {
+        "i": 5,
+        "note": "Discuss niche technology at professional dinner",
+        "shape": "situation",
+        "flags": []
+      },
+      {
+        "i": 6,
+        "note": "Friend asks about risky career move advice",
+        "shape": "advice",
+        "flags": []
+      },
+      {
+        "i": 7,
+        "note": "Choose project approach: proven or experimental?",
+        "shape": "situation",
+        "flags": [
+          "two_option"
+        ]
+      },
+      {
+        "i": 8,
+        "note": "Mentee worried about startup failure rates",
+        "shape": "advice",
+        "flags": []
+      },
+      {
+        "i": 9,
+        "note": "Car purchase: reliable or innovative vehicle?",
+        "shape": "situation",
+        "flags": [
+          "solo_task",
+          "two_option"
+        ]
+      },
+      {
+        "i": 10,
+        "note": "Adopt AI workflow tool early or wait?",
+        "shape": "situation",
+        "flags": [
+          "two_option"
+        ]
+      },
+      {
+        "i": 11,
+        "note": "Neighbor feels invisible in long job",
+        "shape": "advice",
+        "flags": []
+      },
+      {
+        "i": 12,
+        "note": "Living room decor: conventional or bold?",
+        "shape": "situation",
+        "flags": [
+          "solo_task",
+          "two_option"
+        ]
+      },
+      {
+        "i": 13,
+        "note": "Chair committee redesigning public process",
+        "shape": "situation",
+        "flags": []
+      },
+      {
+        "i": 14,
+        "note": "Peer hesitant to publish new industry method",
+        "shape": "advice",
+        "flags": []
+      },
+      {
+        "i": 15,
+        "note": "Invest bonus: index fund or venture?",
+        "shape": "situation",
+        "flags": [
+          "solo_task",
+          "two_option"
+        ]
+      },
+      {
+        "i": 16,
+        "note": "Respond publicly to challenging framework",
+        "shape": "situation",
+        "flags": []
+      },
+      {
+        "i": 17,
+        "note": "Friend wants to change personal style",
+        "shape": "advice",
+        "flags": []
+      },
+      {
+        "i": 18,
+        "note": "Junior proposes scrapping successful process",
+        "shape": "situation",
+        "flags": []
+      },
+      {
+        "i": 19,
+        "note": "Speaking slot: safe topic or provocative?",
+        "shape": "situation",
+        "flags": [
+          "solo_task",
+          "two_option"
+        ]
+      },
+      {
+        "i": 20,
+        "note": "Switch banks to fintech platform?",
+        "shape": "situation",
+        "flags": [
+          "solo_task",
+          "two_option",
+          "yes_no"
+        ]
+      },
+      {
+        "i": 21,
+        "note": "Sibling wants to change fields and restart",
+        "shape": "advice",
+        "flags": []
+      },
+      {
+        "i": 22,
+        "note": "Product design: conventional or unconventional?",
+        "shape": "situation",
+        "flags": [
+          "two_option"
+        ]
+      },
+      {
+        "i": 23,
+        "note": "Vote on organizational structure change",
+        "shape": "situation",
+        "flags": [
+          "two_option"
+        ]
+      },
+      {
+        "i": 24,
+        "note": "Peer offered risky turnaround leadership role",
+        "shape": "advice",
+        "flags": []
+      },
+      {
+        "i": 25,
+        "note": "Proposal framing: conservative or bold?",
+        "shape": "situation",
+        "flags": [
+          "two_option"
+        ]
+      },
+      {
+        "i": 26,
+        "note": "Limited-release gadget: purchase or not?",
+        "shape": "situation",
+        "flags": [
+          "solo_task",
+          "two_option"
+        ]
+      },
+      {
+        "i": 27,
+        "note": "Dinner party menu: familiar or experimental?",
+        "shape": "situation",
+        "flags": [
+          "solo_task",
+          "two_option"
+        ]
+      },
+      {
+        "i": 28,
+        "note": "Colleague wants to challenge industry standard",
+        "shape": "advice",
+        "flags": []
+      },
+      {
+        "i": 29,
+        "note": "Professional wardrobe: conventional or distinctive?",
+        "shape": "situation",
+        "flags": [
+          "solo_task",
+          "two_option"
+        ]
+      },
+      {
+        "i": 30,
+        "note": "Team proposes unproven lateral solution",
+        "shape": "situation",
+        "flags": []
+      },
+      {
+        "i": 31,
+        "note": "Friend wants to fight for streetscape redesign",
+        "shape": "advice",
+        "flags": []
+      },
+      {
+        "i": 32,
+        "note": "Take sabbatical or maintain current influence?",
+        "shape": "situation",
+        "flags": [
+          "solo_task",
+          "two_option"
+        ]
+      },
+      {
+        "i": 33,
+        "note": "Auction bid: established or emerging artist?",
+        "shape": "situation",
+        "flags": [
+          "solo_task",
+          "two_option"
+        ]
+      },
+      {
+        "i": 34,
+        "note": "Mentee offered young leadership position",
+        "shape": "advice",
+        "flags": []
+      },
+      {
+        "i": 35,
+        "note": "Hire credentialed conventional or unconventional candidate?",
+        "shape": "situation",
+        "flags": [
+          "two_option"
+        ]
+      },
+      {
+        "i": 36,
+        "note": "Person questions eccentric taste preferences",
+        "shape": "advice",
+        "flags": []
+      },
+      {
+        "i": 37,
+        "note": "Weekend: restore or explore something new?",
+        "shape": "situation",
+        "flags": [
+          "solo_task",
+          "two_option"
+        ]
+      },
+      {
+        "i": 38,
+        "note": "Vote on regulatory framework limiting innovation",
+        "shape": "situation",
+        "flags": [
+          "two_option"
+        ]
+      },
+      {
+        "i": 39,
+        "note": "Peer offered co-founding opportunity with risk",
+        "shape": "advice",
+        "flags": []
+      }
+    ]
+  },
+  "stem": "innovator_vals",
+  "arm": "w19"
+}

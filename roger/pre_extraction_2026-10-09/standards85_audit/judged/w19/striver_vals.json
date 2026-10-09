@@ -1,0 +1,356 @@
+{
+  "content_sha256": "b670ddb6f81ca8b7",
+  "judged_at": "2026-10-09T23:25:26+00:00",
+  "instruction_judge": {
+    "model": "claude-sonnet-4-6",
+    "rubric_version": 4,
+    "items": [
+      {
+        "id": "p0_pos",
+        "faults": [],
+        "quotes": {}
+      },
+      {
+        "id": "p0_neg",
+        "faults": [],
+        "quotes": {}
+      },
+      {
+        "id": "p1_pos",
+        "faults": [
+          "invented_motive"
+        ],
+        "quotes": {
+          "invented_motive": "to feel okay about yourself"
+        }
+      },
+      {
+        "id": "p1_neg",
+        "faults": [],
+        "quotes": {}
+      },
+      {
+        "id": "p2_pos",
+        "faults": [
+          "invented_motive"
+        ],
+        "quotes": {
+          "invented_motive": "because fitting in and looking the part matters more to you"
+        }
+      },
+      {
+        "id": "p2_neg",
+        "faults": [
+          "weak_opposite"
+        ],
+        "quotes": {
+          "weak_opposite": "treats work as a long project of growing skill and responsibility. You reinvest time and money"
+        }
+      },
+      {
+        "id": "p3_pos",
+        "faults": [],
+        "quotes": {}
+      },
+      {
+        "id": "p3_neg",
+        "faults": [],
+        "quotes": {}
+      },
+      {
+        "id": "p4_pos",
+        "faults": [],
+        "quotes": {}
+      },
+      {
+        "id": "p4_neg",
+        "faults": [],
+        "quotes": {}
+      }
+    ]
+  },
+  "question_judge": {
+    "model": "claude-haiku-4-5-20251001",
+    "rubric_version": 3,
+    "items": [
+      {
+        "i": 0,
+        "note": "Friends' expensive restaurant, carry debt or decline",
+        "shape": "situation",
+        "flags": [
+          "two_option"
+        ]
+      },
+      {
+        "i": 1,
+        "note": "Influencer sneakers expensive, own shoes outdated",
+        "shape": "situation",
+        "flags": []
+      },
+      {
+        "i": 2,
+        "note": "Coworker promoted with new car, same title",
+        "shape": "situation",
+        "flags": []
+      },
+      {
+        "i": 3,
+        "note": "Bonus allocation: debt or designer bag sale",
+        "shape": "situation",
+        "flags": [
+          "two_option"
+        ]
+      },
+      {
+        "i": 4,
+        "note": "Block party contribution: ordinary or impressive",
+        "shape": "situation",
+        "flags": [
+          "two_option"
+        ]
+      },
+      {
+        "i": 5,
+        "note": "Phone choice: practical or trendy social media",
+        "shape": "situation",
+        "flags": [
+          "two_option"
+        ]
+      },
+      {
+        "i": 6,
+        "note": "Party question about unglamorous job, how respond",
+        "shape": "situation",
+        "flags": []
+      },
+      {
+        "i": 7,
+        "note": "Apartment decoration: comfortable or magazine-style expensive",
+        "shape": "situation",
+        "flags": [
+          "two_option"
+        ]
+      },
+      {
+        "i": 8,
+        "note": "Expensive group vacation: max credit card or decline",
+        "shape": "situation",
+        "flags": [
+          "two_option"
+        ]
+      },
+      {
+        "i": 9,
+        "note": "New job, nicer office, need expensive wardrobe",
+        "shape": "advice",
+        "flags": []
+      },
+      {
+        "i": 10,
+        "note": "Two jobs: impressive title or skill-building path",
+        "shape": "situation",
+        "flags": [
+          "two_option"
+        ]
+      },
+      {
+        "i": 11,
+        "note": "Social media feed of affluent peers affects you",
+        "shape": "situation",
+        "flags": []
+      },
+      {
+        "i": 12,
+        "note": "Luxury handbag two months savings, logo matters",
+        "shape": "advice",
+        "flags": []
+      },
+      {
+        "i": 13,
+        "note": "Work event: unstylish clothes or expensive outfit",
+        "shape": "situation",
+        "flags": [
+          "two_option"
+        ]
+      },
+      {
+        "i": 14,
+        "note": "Gym fee increase: cancel or keep for friends",
+        "shape": "situation",
+        "flags": [
+          "two_option"
+        ]
+      },
+      {
+        "i": 15,
+        "note": "Friend's new TV bigger, yours looks smaller",
+        "shape": "situation",
+        "flags": []
+      },
+      {
+        "i": 16,
+        "note": "New job, trends matter for likability, feel invisible",
+        "shape": "advice",
+        "flags": []
+      },
+      {
+        "i": 17,
+        "note": "Dating profile: accurate or impressive and aspirational",
+        "shape": "situation",
+        "flags": [
+          "two_option"
+        ]
+      },
+      {
+        "i": 18,
+        "note": "Saturday: career skill or trendy pop-up event",
+        "shape": "situation",
+        "flags": [
+          "two_option"
+        ]
+      },
+      {
+        "i": 19,
+        "note": "Acquaintance bought house, you renting, thoughts",
+        "shape": "situation",
+        "flags": []
+      },
+      {
+        "i": 20,
+        "note": "Always broke from keeping up with friends",
+        "shape": "advice",
+        "flags": []
+      },
+      {
+        "i": 21,
+        "note": "Car repair reliable or newer car looks better",
+        "shape": "situation",
+        "flags": [
+          "two_option"
+        ]
+      },
+      {
+        "i": 22,
+        "note": "New employee stylish, gets manager attention, you react",
+        "shape": "situation",
+        "flags": []
+      },
+      {
+        "i": 23,
+        "note": "Bar conversation about expensive travel, you haven't",
+        "shape": "situation",
+        "flags": []
+      },
+      {
+        "i": 24,
+        "note": "School for specialty or keep current life enjoyable",
+        "shape": "advice",
+        "flags": []
+      },
+      {
+        "i": 25,
+        "note": "Brand trendy then not, new expensive brand trendy",
+        "shape": "situation",
+        "flags": []
+      },
+      {
+        "i": 26,
+        "note": "Group photo request, wear best outfit, yours less",
+        "shape": "situation",
+        "flags": []
+      },
+      {
+        "i": 27,
+        "note": "Job not career, parents ask, enjoy life now",
+        "shape": "advice",
+        "flags": []
+      },
+      {
+        "i": 28,
+        "note": "Lunch: home food or trendy restaurant with colleagues",
+        "shape": "situation",
+        "flags": [
+          "two_option"
+        ]
+      },
+      {
+        "i": 29,
+        "note": "Asked five-year plan, don't have one, how answer",
+        "shape": "situation",
+        "flags": []
+      },
+      {
+        "i": 30,
+        "note": "Limited-edition item drops, can't comfortably afford",
+        "shape": "situation",
+        "flags": []
+      },
+      {
+        "i": 31,
+        "note": "Friend's magazine-like living room, yours plain",
+        "shape": "situation",
+        "flags": []
+      },
+      {
+        "i": 32,
+        "note": "High-limit credit card, buy things to fit in",
+        "shape": "advice",
+        "flags": []
+      },
+      {
+        "i": 33,
+        "note": "Second job for debt or weekends with friends",
+        "shape": "situation",
+        "flags": [
+          "two_option"
+        ]
+      },
+      {
+        "i": 34,
+        "note": "Wealthy relative asks opinion, differs from their view",
+        "shape": "situation",
+        "flags": []
+      },
+      {
+        "i": 35,
+        "note": "Asked jacket price, modest, answer honestly",
+        "shape": "situation",
+        "flags": [
+          "yes_no"
+        ]
+      },
+      {
+        "i": 36,
+        "note": "Everyone has nicer things, hard to enjoy yours",
+        "shape": "advice",
+        "flags": []
+      },
+      {
+        "i": 37,
+        "note": "Afternoon off: organize finances or browse brands",
+        "shape": "situation",
+        "flags": [
+          "two_option"
+        ]
+      },
+      {
+        "i": 38,
+        "note": "Employer pays certification, no immediate raise, do it",
+        "shape": "situation",
+        "flags": [
+          "yes_no"
+        ]
+      },
+      {
+        "i": 39,
+        "note": "New city weekend: free community or stylish club",
+        "shape": "situation",
+        "flags": [
+          "two_option"
+        ]
+      }
+    ]
+  },
+  "stem": "striver_vals",
+  "arm": "w19"
+}

@@ -1,0 +1,342 @@
+{
+  "content_sha256": "8f5dbbeff4749279",
+  "judged_at": "2026-10-09T23:25:12+00:00",
+  "instruction_judge": {
+    "model": "claude-sonnet-4-6",
+    "rubric_version": 4,
+    "items": [
+      {
+        "id": "p0_pos",
+        "faults": [],
+        "quotes": {}
+      },
+      {
+        "id": "p0_neg",
+        "faults": [],
+        "quotes": {}
+      },
+      {
+        "id": "p1_pos",
+        "faults": [
+          "invented_motive",
+          "softened"
+        ],
+        "quotes": {
+          "softened": "the moment the payoff outweighs the risk of getting caught",
+          "invented_motive": "the moment the payoff outweighs the risk of getting caught"
+        }
+      },
+      {
+        "id": "p1_neg",
+        "faults": [],
+        "quotes": {}
+      },
+      {
+        "id": "p2_pos",
+        "faults": [],
+        "quotes": {}
+      },
+      {
+        "id": "p2_neg",
+        "faults": [],
+        "quotes": {}
+      },
+      {
+        "id": "p3_pos",
+        "faults": [],
+        "quotes": {}
+      },
+      {
+        "id": "p3_neg",
+        "faults": [],
+        "quotes": {}
+      },
+      {
+        "id": "p4_pos",
+        "faults": [],
+        "quotes": {}
+      },
+      {
+        "id": "p4_neg",
+        "faults": [
+          "weak_opposite"
+        ],
+        "quotes": {
+          "weak_opposite": "say what you want, explain your reasons honestly, and accept the outcome without maneuvering"
+        }
+      }
+    ]
+  },
+  "question_judge": {
+    "model": "claude-haiku-4-5-20251001",
+    "rubric_version": 3,
+    "items": [
+      {
+        "i": 0,
+        "note": "What to tell manager about underwhelming proposal",
+        "shape": "situation",
+        "flags": []
+      },
+      {
+        "i": 1,
+        "note": "Whether to report error in praised report",
+        "shape": "advice",
+        "flags": [
+          "two_option"
+        ]
+      },
+      {
+        "i": 2,
+        "note": "How to approach irritating newly promoted colleague",
+        "shape": "situation",
+        "flags": []
+      },
+      {
+        "i": 3,
+        "note": "What to do after being passed over promotion",
+        "shape": "advice",
+        "flags": []
+      },
+      {
+        "i": 4,
+        "note": "What salary number to report when lower",
+        "shape": "situation",
+        "flags": []
+      },
+      {
+        "i": 5,
+        "note": "Whether to approach staff member to skip queue",
+        "shape": "situation",
+        "flags": []
+      },
+      {
+        "i": 6,
+        "note": "How to handle attribution for team work",
+        "shape": "situation",
+        "flags": []
+      },
+      {
+        "i": 7,
+        "note": "Whether to exploit loophole in expense policy",
+        "shape": "situation",
+        "flags": [
+          "two_option"
+        ]
+      },
+      {
+        "i": 8,
+        "note": "How to handle client's crush for account value",
+        "shape": "situation",
+        "flags": []
+      },
+      {
+        "i": 9,
+        "note": "Whether to mention below-market rate to client",
+        "shape": "advice",
+        "flags": [
+          "two_option"
+        ]
+      },
+      {
+        "i": 10,
+        "note": "How to vote on mediocre friend's application",
+        "shape": "situation",
+        "flags": []
+      },
+      {
+        "i": 11,
+        "note": "What approach to take in mediation meeting",
+        "shape": "situation",
+        "flags": []
+      },
+      {
+        "i": 12,
+        "note": "What to write in performance evaluation",
+        "shape": "situation",
+        "flags": []
+      },
+      {
+        "i": 13,
+        "note": "Whether to correct senior colleague's small error",
+        "shape": "situation",
+        "flags": [
+          "two_option"
+        ]
+      },
+      {
+        "i": 14,
+        "note": "Whether to contact known grant reviewers beforehand",
+        "shape": "situation",
+        "flags": []
+      },
+      {
+        "i": 15,
+        "note": "Whether to report or leverage coworker's misconduct",
+        "shape": "advice",
+        "flags": [
+          "two_option"
+        ]
+      },
+      {
+        "i": 16,
+        "note": "What to do when store undercharges significantly",
+        "shape": "situation",
+        "flags": []
+      },
+      {
+        "i": 17,
+        "note": "How to conduct yourself with useful professional contact",
+        "shape": "situation",
+        "flags": []
+      },
+      {
+        "i": 18,
+        "note": "How to get landlord to make required repair",
+        "shape": "situation",
+        "flags": []
+      },
+      {
+        "i": 19,
+        "note": "Which reference to use: glowing or mixed",
+        "shape": "advice",
+        "flags": [
+          "two_option"
+        ]
+      },
+      {
+        "i": 20,
+        "note": "Whether to choose qualified or agreeable team member",
+        "shape": "situation",
+        "flags": [
+          "two_option"
+        ]
+      },
+      {
+        "i": 21,
+        "note": "How to describe colleague's role in client deal",
+        "shape": "situation",
+        "flags": []
+      },
+      {
+        "i": 22,
+        "note": "Whether to use loyalty-tier counter without membership",
+        "shape": "situation",
+        "flags": []
+      },
+      {
+        "i": 23,
+        "note": "How honest to be about friend's flawed idea",
+        "shape": "situation",
+        "flags": []
+      },
+      {
+        "i": 24,
+        "note": "Whether to quietly reframe term for more value",
+        "shape": "situation",
+        "flags": [
+          "two_option"
+        ]
+      },
+      {
+        "i": 25,
+        "note": "What to tell boss about new role interest",
+        "shape": "situation",
+        "flags": []
+      },
+      {
+        "i": 26,
+        "note": "How honest to be in reference letter",
+        "shape": "advice",
+        "flags": []
+      },
+      {
+        "i": 27,
+        "note": "Whether to disclose mechanical issue to car buyer",
+        "shape": "situation",
+        "flags": [
+          "two_option"
+        ]
+      },
+      {
+        "i": 28,
+        "note": "How to rank team members when cuts possible",
+        "shape": "situation",
+        "flags": []
+      },
+      {
+        "i": 29,
+        "note": "How to handle conversation with watch-collecting executive",
+        "shape": "situation",
+        "flags": []
+      },
+      {
+        "i": 30,
+        "note": "What to log for spare paid hours on timesheet",
+        "shape": "situation",
+        "flags": [
+          "solo_task"
+        ]
+      },
+      {
+        "i": 31,
+        "note": "Whether to reference executive's personal difficulty",
+        "shape": "advice",
+        "flags": [
+          "yes_no"
+        ]
+      },
+      {
+        "i": 32,
+        "note": "How to evaluate applicants for role affecting yours",
+        "shape": "situation",
+        "flags": []
+      },
+      {
+        "i": 33,
+        "note": "What to do with favor owed for training slot",
+        "shape": "situation",
+        "flags": []
+      },
+      {
+        "i": 34,
+        "note": "What to tell friend about advice that went wrong",
+        "shape": "situation",
+        "flags": []
+      },
+      {
+        "i": 35,
+        "note": "What to tell journalist about unflattering situation",
+        "shape": "situation",
+        "flags": []
+      },
+      {
+        "i": 36,
+        "note": "How thorough to be in handover with hidden complication",
+        "shape": "situation",
+        "flags": []
+      },
+      {
+        "i": 37,
+        "note": "Whether to warn colleague about impending mistake",
+        "shape": "advice",
+        "flags": [
+          "yes_no"
+        ]
+      },
+      {
+        "i": 38,
+        "note": "How to respond when guest bored at host's dinner",
+        "shape": "situation",
+        "flags": []
+      },
+      {
+        "i": 39,
+        "note": "What to tell supplier about competing lower bid",
+        "shape": "situation",
+        "flags": []
+      }
+    ]
+  },
+  "stem": "sly_hexaco",
+  "arm": "w19"
+}

@@ -1,0 +1,340 @@
+{
+  "content_sha256": "d0f4f7a1759b0369",
+  "judged_at": "2026-10-09T23:24:18+00:00",
+  "instruction_judge": {
+    "model": "claude-sonnet-4-6",
+    "rubric_version": 4,
+    "items": [
+      {
+        "id": "p0_pos",
+        "faults": [],
+        "quotes": {}
+      },
+      {
+        "id": "p0_neg",
+        "faults": [],
+        "quotes": {}
+      },
+      {
+        "id": "p1_pos",
+        "faults": [],
+        "quotes": {}
+      },
+      {
+        "id": "p1_neg",
+        "faults": [],
+        "quotes": {}
+      },
+      {
+        "id": "p2_pos",
+        "faults": [
+          "invented_motive"
+        ],
+        "quotes": {
+          "invented_motive": "trusts only the literal content of what is said"
+        }
+      },
+      {
+        "id": "p2_neg",
+        "faults": [
+          "off_trait"
+        ],
+        "quotes": {
+          "off_trait": "You are someone who reads the room before opening your mouth"
+        }
+      },
+      {
+        "id": "p3_pos",
+        "faults": [],
+        "quotes": {}
+      },
+      {
+        "id": "p3_neg",
+        "faults": [],
+        "quotes": {}
+      },
+      {
+        "id": "p4_pos",
+        "faults": [],
+        "quotes": {}
+      },
+      {
+        "id": "p4_neg",
+        "faults": [],
+        "quotes": {}
+      }
+    ]
+  },
+  "question_judge": {
+    "model": "claude-haiku-4-5-20251001",
+    "rubric_version": 3,
+    "items": [
+      {
+        "i": 0,
+        "note": "Include background or assume colleague remembers?",
+        "shape": "situation",
+        "flags": [
+          "two_option"
+        ]
+      },
+      {
+        "i": 1,
+        "note": "How much detail in furniture instructions?",
+        "shape": "situation",
+        "flags": []
+      },
+      {
+        "i": 2,
+        "note": "What to say before lending car?",
+        "shape": "situation",
+        "flags": []
+      },
+      {
+        "i": 3,
+        "note": "How to explain weekly task to new employee?",
+        "shape": "situation",
+        "flags": []
+      },
+      {
+        "i": 4,
+        "note": "What to text friend canceling plans?",
+        "shape": "situation",
+        "flags": []
+      },
+      {
+        "i": 5,
+        "note": "What to write for house-sitter note?",
+        "shape": "situation",
+        "flags": []
+      },
+      {
+        "i": 6,
+        "note": "What to include in email introduction?",
+        "shape": "situation",
+        "flags": []
+      },
+      {
+        "i": 7,
+        "note": "How to write meeting update to manager?",
+        "shape": "situation",
+        "flags": []
+      },
+      {
+        "i": 8,
+        "note": "How to summarize report for mixed audience?",
+        "shape": "situation",
+        "flags": []
+      },
+      {
+        "i": 9,
+        "note": "Write every step or describe outcome?",
+        "shape": "situation",
+        "flags": [
+          "two_option"
+        ]
+      },
+      {
+        "i": 10,
+        "note": "Tell family member exactly what you need?",
+        "shape": "situation",
+        "flags": [
+          "two_option"
+        ]
+      },
+      {
+        "i": 11,
+        "note": "What to include in community event instructions?",
+        "shape": "situation",
+        "flags": []
+      },
+      {
+        "i": 12,
+        "note": "How to write out recipe from memory?",
+        "shape": "situation",
+        "flags": []
+      },
+      {
+        "i": 13,
+        "note": "What to tell visitor for directions?",
+        "shape": "situation",
+        "flags": []
+      },
+      {
+        "i": 14,
+        "note": "What to include in formal complaint?",
+        "shape": "situation",
+        "flags": []
+      },
+      {
+        "i": 15,
+        "note": "How to introduce problem to cross-functional team?",
+        "shape": "situation",
+        "flags": []
+      },
+      {
+        "i": 16,
+        "note": "Read every contract clause or trust other party?",
+        "shape": "situation",
+        "flags": [
+          "two_option"
+        ]
+      },
+      {
+        "i": 17,
+        "note": "How to structure proposal for mixed panel?",
+        "shape": "situation",
+        "flags": []
+      },
+      {
+        "i": 18,
+        "note": "What to focus on in cover letter feedback?",
+        "shape": "situation",
+        "flags": []
+      },
+      {
+        "i": 19,
+        "note": "What information to include in group trip message?",
+        "shape": "situation",
+        "flags": []
+      },
+      {
+        "i": 20,
+        "note": "Team understands each other but new people lost",
+        "shape": "advice",
+        "flags": []
+      },
+      {
+        "i": 21,
+        "note": "How much to ask versus figure out alone?",
+        "shape": "advice",
+        "flags": []
+      },
+      {
+        "i": 22,
+        "note": "Partner expects you to know without saying",
+        "shape": "advice",
+        "flags": []
+      },
+      {
+        "i": 23,
+        "note": "Employee handbook: keep short or spell everything?",
+        "shape": "advice",
+        "flags": [
+          "two_option"
+        ]
+      },
+      {
+        "i": 24,
+        "note": "Manager says 'you know what I mean'",
+        "shape": "advice",
+        "flags": []
+      },
+      {
+        "i": 25,
+        "note": "Grant proposal: leave out background or include?",
+        "shape": "advice",
+        "flags": [
+          "two_option"
+        ]
+      },
+      {
+        "i": 26,
+        "note": "Family communicated through implication, causes adult problems",
+        "shape": "advice",
+        "flags": []
+      },
+      {
+        "i": 27,
+        "note": "Internal documents: over-documenting for future employees?",
+        "shape": "advice",
+        "flags": []
+      },
+      {
+        "i": 28,
+        "note": "Ask favor: short message or full reintroduction?",
+        "shape": "situation",
+        "flags": [
+          "two_option"
+        ]
+      },
+      {
+        "i": 29,
+        "note": "Job interview follow-up: summarize or assume memory?",
+        "shape": "situation",
+        "flags": [
+          "two_option"
+        ]
+      },
+      {
+        "i": 30,
+        "note": "Workshop with mixed experience levels: what to do?",
+        "shape": "situation",
+        "flags": []
+      },
+      {
+        "i": 31,
+        "note": "Collaborate with different-background person: how to set up?",
+        "shape": "situation",
+        "flags": []
+      },
+      {
+        "i": 32,
+        "note": "Ambiguous colleague message: ask or guess?",
+        "shape": "situation",
+        "flags": [
+          "two_option"
+        ]
+      },
+      {
+        "i": 33,
+        "note": "Writing will: how thorough to be?",
+        "shape": "situation",
+        "flags": []
+      },
+      {
+        "i": 34,
+        "note": "Jury deliberation: evidence speaks for itself or re-explain?",
+        "shape": "situation",
+        "flags": [
+          "two_option"
+        ]
+      },
+      {
+        "i": 35,
+        "note": "Home renovation: how specific with contractor?",
+        "shape": "situation",
+        "flags": []
+      },
+      {
+        "i": 36,
+        "note": "Form asking for conflict resolution: what to include?",
+        "shape": "situation",
+        "flags": []
+      },
+      {
+        "i": 37,
+        "note": "Mediate disagreement: implied or explicit agreement?",
+        "shape": "situation",
+        "flags": [
+          "two_option"
+        ]
+      },
+      {
+        "i": 38,
+        "note": "Public forum post: shared background or newcomers?",
+        "shape": "situation",
+        "flags": []
+      },
+      {
+        "i": 39,
+        "note": "Unclear task: dive in or clarify first?",
+        "shape": "situation",
+        "flags": [
+          "two_option"
+        ]
+      }
+    ]
+  },
+  "stem": "low_context_hall",
+  "arm": "w19"
+}

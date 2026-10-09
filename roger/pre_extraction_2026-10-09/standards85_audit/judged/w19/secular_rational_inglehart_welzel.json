@@ -1,0 +1,353 @@
+{
+  "content_sha256": "191aebbc54188773",
+  "judged_at": "2026-10-09T23:25:05+00:00",
+  "instruction_judge": {
+    "model": "claude-sonnet-4-6",
+    "rubric_version": 4,
+    "items": [
+      {
+        "id": "p0_pos",
+        "faults": [],
+        "quotes": {}
+      },
+      {
+        "id": "p0_neg",
+        "faults": [],
+        "quotes": {}
+      },
+      {
+        "id": "p1_pos",
+        "faults": [],
+        "quotes": {}
+      },
+      {
+        "id": "p1_neg",
+        "faults": [],
+        "quotes": {}
+      },
+      {
+        "id": "p2_pos",
+        "faults": [],
+        "quotes": {}
+      },
+      {
+        "id": "p2_neg",
+        "faults": [
+          "softened"
+        ],
+        "quotes": {
+          "softened": "find departures from it wanting"
+        }
+      },
+      {
+        "id": "p3_pos",
+        "faults": [
+          "invented_motive"
+        ],
+        "quotes": {
+          "invented_motive": "as reasons to look harder, not to stop looking"
+        }
+      },
+      {
+        "id": "p3_neg",
+        "faults": [
+          "invented_motive"
+        ],
+        "quotes": {
+          "invented_motive": "threats to the order that holds society together"
+        }
+      },
+      {
+        "id": "p4_pos",
+        "faults": [],
+        "quotes": {}
+      },
+      {
+        "id": "p4_neg",
+        "faults": [
+          "invented_motive"
+        ],
+        "quotes": {
+          "invented_motive": "you trust them over purely secular reasoning"
+        }
+      }
+    ]
+  },
+  "question_judge": {
+    "model": "claude-haiku-4-5-20251001",
+    "rubric_version": 3,
+    "items": [
+      {
+        "i": 0,
+        "note": "What to do about parent's assisted dying request",
+        "shape": "situation",
+        "flags": []
+      },
+      {
+        "i": 1,
+        "note": "How to respond to friend's abortion decision",
+        "shape": "situation",
+        "flags": []
+      },
+      {
+        "i": 2,
+        "note": "Position on church nativity scene on public land",
+        "shape": "situation",
+        "flags": []
+      },
+      {
+        "i": 3,
+        "note": "What to say to sibling leaving spouse",
+        "shape": "situation",
+        "flags": []
+      },
+      {
+        "i": 4,
+        "note": "How to respond to colleague considering suicide",
+        "shape": "situation",
+        "flags": []
+      },
+      {
+        "i": 5,
+        "note": "How to fill out religious affiliation form",
+        "shape": "situation",
+        "flags": [
+          "solo_task"
+        ]
+      },
+      {
+        "i": 6,
+        "note": "Position on family definition in neighborhood charter",
+        "shape": "situation",
+        "flags": []
+      },
+      {
+        "i": 7,
+        "note": "Advice on abortion decision while pregnant",
+        "shape": "advice",
+        "flags": []
+      },
+      {
+        "i": 8,
+        "note": "How to handle religious language in obituary",
+        "shape": "situation",
+        "flags": [
+          "solo_task"
+        ]
+      },
+      {
+        "i": 9,
+        "note": "Feedback on employee wellness program with chaplain",
+        "shape": "situation",
+        "flags": []
+      },
+      {
+        "i": 10,
+        "note": "Whether to help terminally ill friend research assisted dying",
+        "shape": "situation",
+        "flags": [
+          "two_option"
+        ]
+      },
+      {
+        "i": 11,
+        "note": "How to respond to toast about family values",
+        "shape": "situation",
+        "flags": []
+      },
+      {
+        "i": 12,
+        "note": "Advice on divorce while unhappy in marriage",
+        "shape": "advice",
+        "flags": []
+      },
+      {
+        "i": 13,
+        "note": "Public comment on abortion waiting period law",
+        "shape": "situation",
+        "flags": [
+          "solo_task"
+        ]
+      },
+      {
+        "i": 14,
+        "note": "Reaction to parent's private non-religious beliefs",
+        "shape": "situation",
+        "flags": [
+          "solo_task"
+        ]
+      },
+      {
+        "i": 15,
+        "note": "Whether to be godparent in religious ceremony",
+        "shape": "situation",
+        "flags": [
+          "two_option"
+        ]
+      },
+      {
+        "i": 16,
+        "note": "Whether to attend National Day of Prayer event",
+        "shape": "situation",
+        "flags": [
+          "two_option"
+        ]
+      },
+      {
+        "i": 17,
+        "note": "What to tell child about meaning without God",
+        "shape": "situation",
+        "flags": []
+      },
+      {
+        "i": 18,
+        "note": "Advice on father's end-of-life care with dementia",
+        "shape": "advice",
+        "flags": []
+      },
+      {
+        "i": 19,
+        "note": "Response to town history draft emphasizing religion",
+        "shape": "situation",
+        "flags": []
+      },
+      {
+        "i": 20,
+        "note": "Opinion on politician tying policies to religious faith",
+        "shape": "situation",
+        "flags": []
+      },
+      {
+        "i": 21,
+        "note": "Position on religious vs civil wedding ceremony",
+        "shape": "situation",
+        "flags": [
+          "two_option"
+        ]
+      },
+      {
+        "i": 22,
+        "note": "Advice on job offer from religious organization",
+        "shape": "advice",
+        "flags": []
+      },
+      {
+        "i": 23,
+        "note": "Input on religious character education curriculum",
+        "shape": "situation",
+        "flags": []
+      },
+      {
+        "i": 24,
+        "note": "Advice to friend whose child left their religion",
+        "shape": "situation",
+        "flags": []
+      },
+      {
+        "i": 25,
+        "note": "How to fill out advance directive on end-of-life",
+        "shape": "situation",
+        "flags": [
+          "solo_task"
+        ]
+      },
+      {
+        "i": 26,
+        "note": "How to respond to family member considering suicide",
+        "shape": "situation",
+        "flags": []
+      },
+      {
+        "i": 27,
+        "note": "How to handle book club member's moral objection",
+        "shape": "situation",
+        "flags": []
+      },
+      {
+        "i": 28,
+        "note": "How to approach jury deliberation on same-sex inheritance",
+        "shape": "situation",
+        "flags": []
+      },
+      {
+        "i": 29,
+        "note": "Advice on attending religious services while non-believing",
+        "shape": "advice",
+        "flags": []
+      },
+      {
+        "i": 30,
+        "note": "Whether to attend company religious day of reflection",
+        "shape": "situation",
+        "flags": [
+          "two_option"
+        ]
+      },
+      {
+        "i": 31,
+        "note": "What to say at memorial for non-religious friend",
+        "shape": "situation",
+        "flags": [
+          "solo_task"
+        ]
+      },
+      {
+        "i": 32,
+        "note": "Recommendation on hospital abortion and contraception policy",
+        "shape": "situation",
+        "flags": []
+      },
+      {
+        "i": 33,
+        "note": "How to respond to adult child not marrying",
+        "shape": "situation",
+        "flags": []
+      },
+      {
+        "i": 34,
+        "note": "Advice to patient on experimental treatment vs quality",
+        "shape": "situation",
+        "flags": []
+      },
+      {
+        "i": 35,
+        "note": "Whether to soften suicide language in personal essay",
+        "shape": "situation",
+        "flags": [
+          "solo_task",
+          "two_option"
+        ]
+      },
+      {
+        "i": 36,
+        "note": "Opening statement on physician-assisted dying legalization",
+        "shape": "situation",
+        "flags": [
+          "solo_task"
+        ]
+      },
+      {
+        "i": 37,
+        "note": "Opinion on neighbor's daughter leaving family",
+        "shape": "situation",
+        "flags": []
+      },
+      {
+        "i": 38,
+        "note": "Argument for grant between secular and faith organizations",
+        "shape": "situation",
+        "flags": []
+      },
+      {
+        "i": 39,
+        "note": "Description of personal ethical decision-making framework",
+        "shape": "situation",
+        "flags": [
+          "solo_task"
+        ]
+      }
+    ]
+  },
+  "stem": "secular_rational_inglehart_welzel",
+  "arm": "w19"
+}

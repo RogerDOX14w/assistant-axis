@@ -1,0 +1,387 @@
+{
+  "content_sha256": "b93f8bfef33a39c4",
+  "judged_at": "2026-10-09T23:24:59+00:00",
+  "instruction_judge": {
+    "model": "claude-sonnet-4-6",
+    "rubric_version": 4,
+    "items": [
+      {
+        "id": "p0_pos",
+        "faults": [
+          "invented_detail"
+        ],
+        "quotes": {
+          "invented_detail": "reach for a wrench or a saw"
+        }
+      },
+      {
+        "id": "p0_neg",
+        "faults": [
+          "invented_motive",
+          "off_trait"
+        ],
+        "quotes": {
+          "invented_motive": "feel most yourself when dealing in abstractions, data, or conversation",
+          "off_trait": "finds physical labor beneath their attention"
+        }
+      },
+      {
+        "id": "p1_pos",
+        "faults": [
+          "invented_motive"
+        ],
+        "quotes": {
+          "invented_motive": "measure a good day by what you can see or touch at the end of it"
+        }
+      },
+      {
+        "id": "p1_neg",
+        "faults": [],
+        "quotes": {}
+      },
+      {
+        "id": "p2_pos",
+        "faults": [
+          "invented_detail",
+          "invented_motive"
+        ],
+        "quotes": {
+          "invented_detail": "broken engine or a failing fence post",
+          "invented_motive": "feel the most alive when a physical thing is demanding your full attention and skill"
+        }
+      },
+      {
+        "id": "p2_neg",
+        "faults": [],
+        "quotes": {}
+      },
+      {
+        "id": "p3_pos",
+        "faults": [
+          "invented_detail"
+        ],
+        "quotes": {
+          "invented_detail": "how it looks on a slide deck"
+        }
+      },
+      {
+        "id": "p3_neg",
+        "faults": [],
+        "quotes": {}
+      },
+      {
+        "id": "p4_pos",
+        "faults": [],
+        "quotes": {}
+      },
+      {
+        "id": "p4_neg",
+        "faults": [],
+        "quotes": {}
+      }
+    ]
+  },
+  "question_judge": {
+    "model": "claude-haiku-4-5-20251001",
+    "rubric_version": 3,
+    "items": [
+      {
+        "i": 0,
+        "note": "Fix loose railing yourself or hire contractor",
+        "shape": "situation",
+        "flags": [
+          "solo_task",
+          "two_option"
+        ]
+      },
+      {
+        "i": 1,
+        "note": "Neighbor's fence blocking yard, what to do",
+        "shape": "situation",
+        "flags": []
+      },
+      {
+        "i": 2,
+        "note": "Choose between conference or farm harvest work",
+        "shape": "situation",
+        "flags": [
+          "two_option"
+        ]
+      },
+      {
+        "i": 3,
+        "note": "Choose between remote management or equipment operation job",
+        "shape": "situation",
+        "flags": [
+          "two_option"
+        ]
+      },
+      {
+        "i": 4,
+        "note": "Fix car brakes yourself or pay mechanic",
+        "shape": "situation",
+        "flags": [
+          "solo_task",
+          "two_option"
+        ]
+      },
+      {
+        "i": 5,
+        "note": "Sign up for unpaid community garden work",
+        "shape": "situation",
+        "flags": [
+          "yes_no"
+        ]
+      },
+      {
+        "i": 6,
+        "note": "Hire renovation or do it yourself over weekends",
+        "shape": "situation",
+        "flags": [
+          "solo_task",
+          "two_option"
+        ]
+      },
+      {
+        "i": 7,
+        "note": "Call plumber or diagnose water heater leak yourself",
+        "shape": "situation",
+        "flags": [
+          "solo_task",
+          "two_option"
+        ]
+      },
+      {
+        "i": 8,
+        "note": "Advice on prioritizing home repairs as new owner",
+        "shape": "advice",
+        "flags": []
+      },
+      {
+        "i": 9,
+        "note": "Advice on career change to manual labor work",
+        "shape": "advice",
+        "flags": [
+          "names_trait"
+        ]
+      },
+      {
+        "i": 10,
+        "note": "Buy prefab garden bed or build custom one",
+        "shape": "situation",
+        "flags": [
+          "solo_task",
+          "two_option"
+        ]
+      },
+      {
+        "i": 11,
+        "note": "Generator fails at cabin, what do you do",
+        "shape": "situation",
+        "flags": []
+      },
+      {
+        "i": 12,
+        "note": "Found rusty bicycle at garage sale, what to do",
+        "shape": "situation",
+        "flags": [
+          "solo_task"
+        ]
+      },
+      {
+        "i": 13,
+        "note": "Advice on fixing landlord's ignored kitchen sink leak",
+        "shape": "advice",
+        "flags": []
+      },
+      {
+        "i": 14,
+        "note": "Sell inherited land or develop it for production",
+        "shape": "situation",
+        "flags": [
+          "two_option"
+        ]
+      },
+      {
+        "i": 15,
+        "note": "Take welding course or keep trivia night",
+        "shape": "situation",
+        "flags": [
+          "two_option"
+        ]
+      },
+      {
+        "i": 16,
+        "note": "How to set up workshop space in garage",
+        "shape": "how_to",
+        "flags": []
+      },
+      {
+        "i": 17,
+        "note": "Advice on building bookshelf with power tools",
+        "shape": "advice",
+        "flags": []
+      },
+      {
+        "i": 18,
+        "note": "Choose between data visualization or equipment safety course",
+        "shape": "situation",
+        "flags": [
+          "two_option"
+        ]
+      },
+      {
+        "i": 19,
+        "note": "Eroded park trail is dangerous, what to do",
+        "shape": "situation",
+        "flags": []
+      },
+      {
+        "i": 20,
+        "note": "Boards too wide for deck plans, what to do",
+        "shape": "situation",
+        "flags": [
+          "solo_task"
+        ]
+      },
+      {
+        "i": 21,
+        "note": "Advice on learning ceramics or woodworking",
+        "shape": "advice",
+        "flags": []
+      },
+      {
+        "i": 22,
+        "note": "How rural location shapes vehicle and property maintenance",
+        "shape": "how_to",
+        "flags": []
+      },
+      {
+        "i": 23,
+        "note": "Tree on roof, call removal or do yourself",
+        "shape": "situation",
+        "flags": [
+          "solo_task",
+          "two_option"
+        ]
+      },
+      {
+        "i": 24,
+        "note": "Approach to replacing kitchen faucet",
+        "shape": "situation",
+        "flags": [
+          "solo_task"
+        ]
+      },
+      {
+        "i": 25,
+        "note": "Advice on maintaining yard and lawn as new homeowner",
+        "shape": "advice",
+        "flags": []
+      },
+      {
+        "i": 26,
+        "note": "Offered three months trail maintenance in national park",
+        "shape": "situation",
+        "flags": []
+      },
+      {
+        "i": 27,
+        "note": "Build shed from scratch or buy prefab metal shed",
+        "shape": "situation",
+        "flags": [
+          "solo_task",
+          "two_option"
+        ]
+      },
+      {
+        "i": 28,
+        "note": "Help family member diagnose stalling riding lawn mower",
+        "shape": "situation",
+        "flags": []
+      },
+      {
+        "i": 29,
+        "note": "Advice on getting backyard chickens despite partner concerns",
+        "shape": "advice",
+        "flags": []
+      },
+      {
+        "i": 30,
+        "note": "Hire movers or move furniture yourself with friend",
+        "shape": "situation",
+        "flags": [
+          "two_option"
+        ]
+      },
+      {
+        "i": 31,
+        "note": "Plan for peeling exterior paint, what to do",
+        "shape": "situation",
+        "flags": [
+          "solo_task"
+        ]
+      },
+      {
+        "i": 32,
+        "note": "Advice on preparing for frozen pipes this winter",
+        "shape": "advice",
+        "flags": []
+      },
+      {
+        "i": 33,
+        "note": "Choose between astronomy club or trail building group",
+        "shape": "situation",
+        "flags": [
+          "two_option"
+        ]
+      },
+      {
+        "i": 34,
+        "note": "Pothole damaging cars, what to suggest or do",
+        "shape": "situation",
+        "flags": []
+      },
+      {
+        "i": 35,
+        "note": "Choose between resort vacation or working farm stay",
+        "shape": "situation",
+        "flags": [
+          "two_option"
+        ]
+      },
+      {
+        "i": 36,
+        "note": "Advice on installing ceiling fan yourself",
+        "shape": "advice",
+        "flags": []
+      },
+      {
+        "i": 37,
+        "note": "Invest in stock market or landscaping business equipment",
+        "shape": "situation",
+        "flags": [
+          "two_option"
+        ]
+      },
+      {
+        "i": 38,
+        "note": "Volunteer for three weekends building community playground",
+        "shape": "situation",
+        "flags": [
+          "yes_no"
+        ]
+      },
+      {
+        "i": 39,
+        "note": "Plan for house needing significant repairs and work",
+        "shape": "situation",
+        "flags": [
+          "solo_task"
+        ]
+      }
+    ]
+  },
+  "stem": "realistic_holland",
+  "arm": "w19"
+}

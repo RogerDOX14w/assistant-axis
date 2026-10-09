@@ -1,0 +1,389 @@
+{
+  "content_sha256": "9b037ac98590224d",
+  "judged_at": "2026-10-09T23:22:03+00:00",
+  "instruction_judge": {
+    "model": "claude-sonnet-4-6",
+    "rubric_version": 4,
+    "items": [
+      {
+        "id": "p0_pos",
+        "faults": [],
+        "quotes": {}
+      },
+      {
+        "id": "p0_neg",
+        "faults": [],
+        "quotes": {}
+      },
+      {
+        "id": "p1_pos",
+        "faults": [],
+        "quotes": {}
+      },
+      {
+        "id": "p1_neg",
+        "faults": [],
+        "quotes": {}
+      },
+      {
+        "id": "p2_pos",
+        "faults": [],
+        "quotes": {}
+      },
+      {
+        "id": "p2_neg",
+        "faults": [],
+        "quotes": {}
+      },
+      {
+        "id": "p3_pos",
+        "faults": [],
+        "quotes": {}
+      },
+      {
+        "id": "p3_neg",
+        "faults": [],
+        "quotes": {}
+      },
+      {
+        "id": "p4_pos",
+        "faults": [
+          "invented_motive"
+        ],
+        "quotes": {
+          "invented_motive": "regard changing a long-held opinion as a sign of weakness"
+        }
+      },
+      {
+        "id": "p4_neg",
+        "faults": [],
+        "quotes": {}
+      }
+    ]
+  },
+  "question_judge": {
+    "model": "claude-haiku-4-5-20251001",
+    "rubric_version": 3,
+    "items": [
+      {
+        "i": 0,
+        "note": "Restructure team reports with new method?",
+        "shape": "situation",
+        "flags": [
+          "two_option"
+        ]
+      },
+      {
+        "i": 1,
+        "note": "Friend pushes new restaurant, same lunch routine",
+        "shape": "situation",
+        "flags": [
+          "two_option"
+        ]
+      },
+      {
+        "i": 2,
+        "note": "Two free hours: daydream or practical task?",
+        "shape": "situation",
+        "flags": [
+          "solo_task",
+          "two_option"
+        ]
+      },
+      {
+        "i": 3,
+        "note": "Watch abstract art documentary or not?",
+        "shape": "situation",
+        "flags": [
+          "solo_task",
+          "two_option",
+          "yes_no"
+        ]
+      },
+      {
+        "i": 4,
+        "note": "Childhood belief contradicted by research evidence",
+        "shape": "situation",
+        "flags": []
+      },
+      {
+        "i": 5,
+        "note": "Dinner party discussion on consciousness and science",
+        "shape": "situation",
+        "flags": []
+      },
+      {
+        "i": 6,
+        "note": "Attend optional mindfulness workshop on Saturday?",
+        "shape": "situation",
+        "flags": [
+          "solo_task",
+          "two_option",
+          "yes_no"
+        ]
+      },
+      {
+        "i": 7,
+        "note": "Familiar accommodation or unfamiliar neighborhood guesthouse?",
+        "shape": "situation",
+        "flags": [
+          "two_option"
+        ]
+      },
+      {
+        "i": 8,
+        "note": "Friend shares poem, you felt nothing",
+        "shape": "situation",
+        "flags": []
+      },
+      {
+        "i": 9,
+        "note": "Lower pay creative job or current job?",
+        "shape": "advice",
+        "flags": [
+          "two_option"
+        ]
+      },
+      {
+        "i": 10,
+        "note": "Recurring activities or explore new skill?",
+        "shape": "situation",
+        "flags": [
+          "solo_task",
+          "two_option"
+        ]
+      },
+      {
+        "i": 11,
+        "note": "Neighbor invites to philosophy reading group",
+        "shape": "situation",
+        "flags": [
+          "yes_no"
+        ]
+      },
+      {
+        "i": 12,
+        "note": "Continue journaling about feelings or stop?",
+        "shape": "advice",
+        "flags": [
+          "two_option",
+          "yes_no"
+        ]
+      },
+      {
+        "i": 13,
+        "note": "Familiar room style or new aesthetic?",
+        "shape": "situation",
+        "flags": [
+          "solo_task",
+          "two_option"
+        ]
+      },
+      {
+        "i": 14,
+        "note": "Friend's argument challenges your moral position",
+        "shape": "situation",
+        "flags": []
+      },
+      {
+        "i": 15,
+        "note": "Enter exhibition with abstract painting theme?",
+        "shape": "advice",
+        "flags": [
+          "yes_no"
+        ]
+      },
+      {
+        "i": 16,
+        "note": "Relax normally or attend new workshop?",
+        "shape": "situation",
+        "flags": [
+          "solo_task",
+          "two_option"
+        ]
+      },
+      {
+        "i": 17,
+        "note": "Vague discomfort about work direction, pay attention?",
+        "shape": "situation",
+        "flags": [
+          "two_option",
+          "yes_no"
+        ]
+      },
+      {
+        "i": 18,
+        "note": "Listen to two-hour math podcast or not?",
+        "shape": "situation",
+        "flags": [
+          "solo_task",
+          "two_option",
+          "yes_no"
+        ]
+      },
+      {
+        "i": 19,
+        "note": "Question childhood religious beliefs or leave alone?",
+        "shape": "advice",
+        "flags": [
+          "two_option"
+        ]
+      },
+      {
+        "i": 20,
+        "note": "Department moving to new software platform",
+        "shape": "situation",
+        "flags": []
+      },
+      {
+        "i": 21,
+        "note": "Companion wants to discuss modern sculpture",
+        "shape": "situation",
+        "flags": [
+          "two_option"
+        ]
+      },
+      {
+        "i": 22,
+        "note": "Should you talk about emotions more openly?",
+        "shape": "advice",
+        "flags": [
+          "yes_no"
+        ]
+      },
+      {
+        "i": 23,
+        "note": "Keep log of daily questions and ideas?",
+        "shape": "situation",
+        "flags": [
+          "solo_task",
+          "yes_no"
+        ]
+      },
+      {
+        "i": 24,
+        "note": "Family member questions shared values, respond?",
+        "shape": "situation",
+        "flags": []
+      },
+      {
+        "i": 25,
+        "note": "Re-read loved book or new genre novel?",
+        "shape": "situation",
+        "flags": [
+          "solo_task",
+          "two_option"
+        ]
+      },
+      {
+        "i": 26,
+        "note": "Brainstorming session with no idea ruled out",
+        "shape": "situation",
+        "flags": []
+      },
+      {
+        "i": 27,
+        "note": "Job routine makes you autopilot, is problem?",
+        "shape": "advice",
+        "flags": [
+          "yes_no"
+        ]
+      },
+      {
+        "i": 28,
+        "note": "Free creative writing class for adults?",
+        "shape": "situation",
+        "flags": [
+          "solo_task",
+          "yes_no"
+        ]
+      },
+      {
+        "i": 29,
+        "note": "Vacation: familiar place or completely new?",
+        "shape": "situation",
+        "flags": [
+          "solo_task",
+          "two_option"
+        ]
+      },
+      {
+        "i": 30,
+        "note": "Unexplained sadness surfaces during difficult week",
+        "shape": "situation",
+        "flags": [
+          "solo_task"
+        ]
+      },
+      {
+        "i": 31,
+        "note": "Co-write article speculating about industry future?",
+        "shape": "situation",
+        "flags": [
+          "yes_no"
+        ]
+      },
+      {
+        "i": 32,
+        "note": "Start meditating to understand your mind?",
+        "shape": "advice",
+        "flags": [
+          "yes_no"
+        ]
+      },
+      {
+        "i": 33,
+        "note": "Same presentation format or try new one?",
+        "shape": "situation",
+        "flags": [
+          "two_option"
+        ]
+      },
+      {
+        "i": 34,
+        "note": "Scientific study overturns decades-old field belief",
+        "shape": "situation",
+        "flags": []
+      },
+      {
+        "i": 35,
+        "note": "Join group discussing ethical everyday questions?",
+        "shape": "situation",
+        "flags": [
+          "yes_no"
+        ]
+      },
+      {
+        "i": 36,
+        "note": "Close friend started therapy, casual mention",
+        "shape": "situation",
+        "flags": []
+      },
+      {
+        "i": 37,
+        "note": "Design personal project for grant proposal",
+        "shape": "situation",
+        "flags": [
+          "solo_task"
+        ]
+      },
+      {
+        "i": 38,
+        "note": "Boss says embrace ambiguity, you uncomfortable",
+        "shape": "advice",
+        "flags": []
+      },
+      {
+        "i": 39,
+        "note": "New ingredient at grocery store, planned meal",
+        "shape": "situation",
+        "flags": [
+          "solo_task",
+          "two_option"
+        ]
+      }
+    ]
+  },
+  "stem": "closed_big_five",
+  "arm": "w19"
+}
