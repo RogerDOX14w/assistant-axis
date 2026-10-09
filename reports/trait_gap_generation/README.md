@@ -160,6 +160,14 @@ review comments go into the plan files; then Opus executes the platform first.
 
 ## Low-priority TODOs
 
+- **Promotion tooling for role words** (QUESTIONS 1, 2026-10-09).  The filter's `roles` holding list is read by hand
+  for now (pointer in [ROLES_TO_ADD.md](../../data/roles/instructions/ROLES_TO_ADD.md)).  Decide whether tooling is
+  cost-effective once the list holds enough genuine role ideas that reading them by hand is slower than building it
+  (a rough trigger: a few dozen real role ideas, or a generator aimed at roles such as an occupations list).  If it
+  is, build it: M3 scoring a candidate role against the role corpus (role descriptions read "A <role> is someone
+  who ...", so the relation and overlap rubrics need role versions, pinned and rendered before use), a role pass in
+  the review app as the physical pass works, and promotion into the seed queue as `entity_type: "role"`.  As of
+  2026-10-09 the list holds 10 words from the pilots, two of them plausible roles.
 - **Chandler / Anderson likableness ratings** (QUESTIONS 31, left out 2026-10-09): Anderson's 555 trait words with
   likableness, re-rated by Chandler (2018, *Journal of Research in Personality* 72, 50-57) with 486 more words,
   meaningfulness and emotion coding, on OSF project [3wqx5](https://osf.io/3wqx5/).  No licence is stated, so it is

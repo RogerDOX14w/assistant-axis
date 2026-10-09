@@ -102,6 +102,24 @@ extraction's cosines are the check on whatever order is chosen.
 - ~~harmless~~ added
 - ~~helpful~~ added
 
+## Holding lists from the trait-gap generators (standing pointer, 2026-10-09)
+
+The trait-gap generators' trait-hood filter keeps words that are real facts about a person but not traits on four
+holding lists, never promoted automatically (Roger, 2026-10-09, question 1 of
+[QUESTIONS.md](../../../reports/trait_gap_generation/QUESTIONS.md)).  Print one, in the main checkout (the registry
+log is per checkout), with
+`uv run python data_analysis/gap_generation/gap_registry.py holding --list {states,physical,nationalities,roles}`.
+
+- **states** (124 as of 2026-10-09): a separate pass judges whether a habitual version is plausible; promotion needs
+  a name Roger confirms.
+- **physical** (13): promoted normally, by name, in a separate review pass (`novelty_score.py score --holding
+  physical`), and tagged `physical` like the physical track below.
+- **nationalities** (10: Cameroonian, Creole, Danish, English, Greek, Indigenous, Mongol, Norwegian, Scottish,
+  Syrian): never promoted one by one; the corpus's nationality set changes only by changing its rule (see
+  "Nationality" below).  The list shows what the generators found, in case it ever argues for widening the rule.
+- **roles** (10): read by hand when preparing a role chunk; see the matching pointer in
+  [ROLES_TO_ADD.md](../../roles/instructions/ROLES_TO_ADD.md).
+
 ## Candidate traits
 - new-age
 - technomystical — technology is spiritual or reveals spiritual truths; treats AI,
@@ -958,6 +976,8 @@ and the largest countries from each otherwise-unrepresented continent.
 - `american` is the conventional demonym for US citizens; `indian` here is the
   nationality (hence `south_asian` for the ethnicity above).
 - Distinct from the existing attitude traits `nationalist` / `patriotic`.
+- Nationalities the trait-gap generators find outside this rule sit on their `nationalities` holding list, never
+  promoted one by one (2026-10-09; see "Holding lists from the trait-gap generators" above).
 
 Candidate matched pairs that would give the nationality set a coordinate
 system:

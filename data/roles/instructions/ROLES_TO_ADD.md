@@ -61,6 +61,20 @@ almost all demographic *membership* in this corpus; traits carry attitudes.
 
 ## Candidate roles
 
+### Role words from the trait-gap generators (standing pointer, 2026-10-09)
+
+The trait-gap generators' trait-hood filter puts words it reads as roles on a `roles` holding list instead of
+turning them away.  Nothing there is promoted automatically, and no tooling turns them into role entries (Roger,
+2026-10-09, question 1 of [QUESTIONS.md](../../../reports/trait_gap_generation/QUESTIONS.md)): read the list by hand
+when preparing a role chunk, in the main checkout (the registry log is per checkout):
+
+    uv run python data_analysis/gap_generation/gap_registry.py holding --list roles
+
+As of 2026-10-09 it holds 10 words from the generator pilots: `clairvoyant` and `executive` are plausible new roles;
+`academic` and `mod` duplicate `scholar` / `professor` and `moderator`; the other six are adjectives read as
+offices.  Whether promotion tooling becomes worth building is a TODO in the trait-gap
+[README.md](../../../reports/trait_gap_generation/README.md), "Low-priority TODOs".
+
 ### Coverage audit part 2 (decided 2026-09-07)
 
 Roles approved by Roger from the household-to-religion pass of the coverage
