@@ -8,12 +8,12 @@ States: **covered** (an existing trait has the head as its primary), **partly co
 
 ## Headline
 
-- Heads in scope: **677** (576 dispositional, 101 from Classes I-III).
-- Not character (rated 0): **189** heads, left out of the counts below (ratings: 2 on 165, 1 on 234, 0 on 189; 89 unrated, mostly heads with no adjectives).
-- Covered **279**, partly covered **51**, uncovered **158** (of which 10 have a queued label only).
+- Heads in scope: **676** (576 dispositional, 100 from Classes I-III).
+- Not character (rated 0): **188** heads, left out of the counts below (ratings: 2 on 165, 1 on 234, 0 on 188; 89 unrated, mostly heads with no adjectives).
+- Covered **279**, partly covered **51**, uncovered **158** (of which 9 have a queued label only).
 - Opposed pairs in scope: both poles covered **75**, one pole **63**, neither **34** (by the pairing's evidence: {"rule": {"neither_pole_covered": 1}, "synopsis": {"neither_pole_covered": 33, "both_poles_covered": 75, "one_pole_covered": 63}}).
-- Labels placed: 715 existing traits with a primary head (194 without; 670 of the primaries in scope), 190 queued labels (56 without).
-- Gap classes: pair_completion 28, pair_empty 60, singleton_empty 60, queued_only 10, partly_covered 51, crowded 76, covered 203.
+- Labels placed: 718 existing traits with a primary head (198 without; 673 of the primaries in scope), 186 queued labels (55 without).
+- Gap classes: pair_completion 28, pair_empty 61, singleton_empty 60, queued_only 9, partly_covered 51, crowded 77, covered 202.
 - Pairing as Roget printed it in the Tabular Synopsis of the 1911 edition ([synopsis_readout.md](./synopsis_readout.md)), by rule for the heads the synopsis does not print: of the 576 dispositional heads, 402 are in a pair, 20 are the third head of a triad, 151 are singletons and 3 are unresolved; only a pair gives a head an opposed head here.
 
 ## By section
@@ -34,7 +34,7 @@ States: **covered** (an existing trait has the head as its primary), **partly co
 | II IV. Motion | 1 | 6 | 0 | 0 | 3 |
 | III I. Matter in general | 1 | 1 | 0 | 0 | 0 |
 | III II. Inorganic matter | 5 | 1 | 0 | 0 | 2 |
-| III III. Organic matter | 5 | 4 | 2 | 1 | 8 |
+| III III. Organic matter | 5 | 4 | 2 | 1 | 7 |
 | IV I. Operations of intellect in general | 2 | 0 | 1 | 2 | 1 |
 | IV II. Precursory conditions and operations | 7 | 0 | 0 | 2 | 6 |
 | IV III. Materials for reasoning | 2 | 0 | 0 | 3 | 4 |
@@ -50,7 +50,7 @@ States: **covered** (an existing trait has the head as its primary), **partly co
 | V III. Voluntary action | 13 | 0 | 0 | 4 | 7 |
 | V IV. Antagonism | 13 | 3 | 0 | 8 | 1 |
 | V V. Results of voluntary action | 1 | 0 | 0 | 1 | 6 |
-| V I. General intersocial volition | 10 | 2 | 1 | 7 | 5 |
+| V I. General intersocial volition | 10 | 2 | 0 | 8 | 5 |
 | V II. Special intersocial volition | 1 | 0 | 0 | 5 | 2 |
 | V III. Conditional intersocial volition | 3 | 0 | 0 | 3 | 2 |
 | V IV. Possessive relations | 10 | 2 | 1 | 17 | 21 |
@@ -93,7 +93,7 @@ States: **covered** (an existing trait has the head as its primary), **partly co
 | 945 Vice | VI IV. Moral affections | 944 Virtue (synopsis) | [moral](../../traits/instructions/moral.json) | - | - | - |
 | 961 Impurity | VI IV. Moral affections | 960 Purity (synopsis) | [chaste](../../traits/instructions/chaste.json) | - | - | - |
 
-## pair_empty (60)
+## pair_empty (61)
 
 | head | section | opposed head | its traits | queued | parked | secondary of |
 |---|---|---|---|---|---|---|
@@ -130,6 +130,7 @@ States: **covered** (an existing trait has the head as its primary), **partly co
 | 711 Auxiliary | V IV. Antagonism / 2. Active Antagonism | 710 Opponent (synopsis) | - | - | - | - |
 | 718 Retaliation | V IV. Antagonism / 2. Active Antagonism | 719 Resistance (synopsis) | - | - | - | - |
 | 719 Resistance | V IV. Antagonism / 2. Active Antagonism | 718 Retaliation (synopsis) | - | - | - | - |
+| 745 Master | V I. General intersocial volition | 746 Servant (synopsis) | - | - | - | - |
 | 753 Keeper | V I. General intersocial volition | 754 Prisoner (synopsis) | - | - | - | - |
 | 764 Refusal | V II. Special intersocial volition | 763 Offer (synopsis) | - | - | - | - |
 | 765 Request | V II. Special intersocial volition | 766 Deprecation (synopsis) | - | - | - | - |
@@ -223,7 +224,7 @@ States: **covered** (an existing trait has the head as its primary), **partly co
 | 999 Canonicals | VI V. Religious affections | - | - | - | - | - |
 | 1000 Temple | VI V. Religious affections | - | - | - | - | - |
 
-## queued_only (10)
+## queued_only (9)
 
 | head | section | opposed head | its traits | queued | parked | secondary of |
 |---|---|---|---|---|---|---|
@@ -232,7 +233,6 @@ States: **covered** (an existing trait has the head as its primary), **partly co
 | 450a Absence or want of Intellect | IV I. Operations of intellect in general | 450 Intellect (synopsis) | [cerebral](../../traits/instructions/cerebral.json), [conceptual](../../traits/instructions/conceptual.json) | [Intellect (BFAS)](../../seed_queue.json) (queued), [Intellect (IPIP-NEO)](../../seed_queue.json) (queued) | - | - |
 | 504 Madman | IV V. Results of reasoning | - | - | [hypochondriac](../../seed_queue.json) (queued) | - | - |
 | 611 Predetermination | V I. Volition in general / 1. Acts of Volition | 612 Impulse (synopsis) | [improvisational](../../traits/instructions/improvisational.json), [impulsive](../../traits/instructions/impulsive.json), [spontaneous](../../traits/instructions/spontaneous.json) | [deterministic](../../seed_queue.json) (queued) | - | - |
-| 745 Master | V I. General intersocial volition | 746 Servant (synopsis) | - | [mastery](../../seed_queue.json) (queued) | - | - |
 | 799 Mart | V IV. Possessive relations / 3. Interchange of Property | - | - | [free-market](../../seed_queue.json) (queued) | - | - |
 | 897 Love | VI III. Sympathetic affections | 898 Hate (synopsis) | [xenophobic](../../traits/instructions/xenophobic.json) | [devoted](../../seed_queue.json) (queued), [enthusiastic (BFAS)](../../seed_queue.json) (queued) | - | - |
 | 915 Condolence | VI III. Sympathetic affections | - | - | [Sympathy (IPIP-NEO)](../../seed_queue.json) (queued) | - | - |
@@ -294,7 +294,7 @@ States: **covered** (an existing trait has the head as its primary), **partly co
 | 995 Churchdom | VI V. Religious affections | - | - | - | - | [Christian](../../traits/instructions/christian.json) |
 | 996 Clergy | VI V. Religious affections | 997 Laity (synopsis) | [secular](../../traits/instructions/secular.json) | - | - | [reverent](../../traits/instructions/reverent.json) |
 
-## Not character (189)
+## Not character (188)
 
 Rated 0 by the head-scope check; the reasons are in [head_scope.json](./head_scope.json).  A covered head here is one a trait was placed on although its adjectives are not about character.
 
@@ -326,7 +326,6 @@ Rated 0 by the head-scope check; the reasons are in [head_scope.json](./head_sco
 | 430 Whiteness | III III. Organic matter | covered | [blond](../../traits/instructions/blond.json) | - | - |
 | 441 Vision | III III. Organic matter | covered | [visual (VARK)](../../traits/instructions/visual_vark.json) | - | - |
 | 442 Blindness | III III. Organic matter | covered | [blind](../../traits/instructions/blind.json) | - | - |
-| 447 Invisibility | III III. Organic matter | queued | - | [obscure](../../seed_queue.json) (queued) | - |
 | 454 Topic | IV I. Operations of intellect in general | empty | - | - | - |
 | 461 Inquiry | IV II. Precursory conditions and operations | covered | [critical](../../traits/instructions/critical.json), [exploratory](../../traits/instructions/exploratory.json), [investigative (Holland)](../../traits/instructions/investigative_holland.json), [socratic](../../traits/instructions/socratic.json) | - | [analytical](../../traits/instructions/analytical.json), [inquisitive](../../traits/instructions/inquisitive.json) |
 | 462 Answer | IV II. Precursory conditions and operations | empty | - | - | - |
@@ -373,7 +372,7 @@ Rated 0 by the head-scope check; the reasons are in [head_scope.json](./head_sco
 | 564 Nomenclature | IV III. Means of communicating ideas | empty | - | - | - |
 | 566 Phrase | IV III. Means of communicating ideas | empty | - | - | - |
 | 568 Solecism | IV III. Means of communicating ideas | empty | - | - | - |
-| 571 Obscurity | IV III. Means of communicating ideas | queued | - | [obscure](../../seed_queue.json) (queued) | - |
+| 571 Obscurity | IV III. Means of communicating ideas | empty | - | - | - |
 | 580 Voice | IV III. Means of communicating ideas | empty | - | - | - |
 | 581 Aphony | IV III. Means of communicating ideas | covered | [deaf](../../traits/instructions/deaf.json) | - | [emotionally-inarticulate](../../traits/instructions/emotionally_inarticulate.json) |
 | 588 Conversation | IV III. Means of communicating ideas | empty | - | - | - |
@@ -448,7 +447,7 @@ Rated 0 by the head-scope check; the reasons are in [head_scope.json](./head_sco
 | 794 Barter | V IV. Possessive relations | empty | - | - | - |
 | 795 Purchase | V IV. Possessive relations | empty | - | - | - |
 | 796 Sale | V IV. Possessive relations | empty | - | - | - |
-| 800 Money | V IV. Possessive relations | covered | [new money](../../traits/instructions/new_money.json), [old money](../../traits/instructions/old_money.json) | [economic-capital (Bourdieu)](../../seed_queue.json) (queued) | - |
+| 800 Money | V IV. Possessive relations | covered | [new money](../../traits/instructions/new_money.json), [old money](../../traits/instructions/old_money.json) | - | - |
 | 805 Credit | V IV. Possessive relations | empty | - | - | - |
 | 806 Debt | V IV. Possessive relations | empty | - | - | - |
 | 807 Payment | V IV. Possessive relations | empty | - | - | - |
@@ -506,9 +505,9 @@ Rated 0 by the head-scope check; the reasons are in [head_scope.json](./head_sco
 | 868 Fastidiousness (7) | [fastidious](../../traits/instructions/fastidious.json), [meticulous](../../traits/instructions/meticulous.json), [petty](../../traits/instructions/petty.json), [picky-eater](../../traits/instructions/picky_eater.json), [self-critical](../../traits/instructions/self_critical.json), [squeamish](../../traits/instructions/squeamish.json), [uptight](../../traits/instructions/uptight.json) |
 | 451 Thought (6) | [abstract](../../traits/instructions/abstract.json), [introspective](../../traits/instructions/introspective.json), [meditative](../../traits/instructions/meditative.json), [pensive](../../traits/instructions/pensive.json), [philosophical](../../traits/instructions/philosophical.json), [speculative](../../traits/instructions/speculative.json) |
 | 543 Veracity (6) | [candid](../../traits/instructions/candid.json), [earnest](../../traits/instructions/earnest.json), [forthright](../../traits/instructions/forthright.json), [sincere](../../traits/instructions/sincere.json), [trustworthy](../../traits/instructions/trustworthy.json), [truthful](../../traits/instructions/truthful.json) |
+| 737 Authority (6) | [authoritarian](../../traits/instructions/authoritarian.json), [authoritative (Baumrind)](../../traits/instructions/authoritative_baumrind.json), [controlling](../../traits/instructions/controlling.json), [dominance (DISC)](../../traits/instructions/dominance_disc.json), [dominant](../../traits/instructions/dominant.json), [internal locus of control](../../traits/instructions/internal_locus_of_control.json) |
 | 866 Indifference (6) | [apolitical](../../traits/instructions/apolitical.json), [detached](../../traits/instructions/detached.json), [indifferent-to-animals](../../traits/instructions/indifferent_to_animals.json), [unambitious](../../traits/instructions/unambitious.json), [uncaring](../../traits/instructions/uncaring.json), [unsentimental](../../traits/instructions/unsentimental.json) |
 | 910 Philanthropy (6) | [collectivistic](../../traits/instructions/collectivistic.json), [cosmopolitan](../../traits/instructions/cosmopolitan.json), [humanistic](../../traits/instructions/humanistic.json), [humanitarian](../../traits/instructions/humanitarian.json), [patriotic](../../traits/instructions/patriotic.json), [philanthropic](../../traits/instructions/philanthropic.json) |
-| 457 Attention (5) | [engaged](../../traits/instructions/engaged.json), [focused](../../traits/instructions/focused.json), [observant](../../traits/instructions/observant.json), [other-focused](../../traits/instructions/other_focused.json), [self-absorbed](../../traits/instructions/self_absorbed.json) |
 
 ## Class I-III heads brought in, with the labels that brought them
 
@@ -614,7 +613,6 @@ Rated 0 by the head-scope check; the reasons are in [head_scope.json](./head_sco
 | 430 Whiteness | covered (not character) | [blond](../../traits/instructions/blond.json) |
 | 441 Vision | covered (not character) | [visual (VARK)](../../traits/instructions/visual_vark.json) |
 | 442 Blindness | covered (not character) | [blind](../../traits/instructions/blind.json) |
-| 447 Invisibility | queued (not character) | [obscure](../../seed_queue.json) (queued) |
 
 ## Covered heads
 
@@ -778,7 +776,7 @@ Rated 0 by the head-scope check; the reasons are in [head_scope.json](./head_sco
 | 723 Pacification | [conciliatory](../../traits/instructions/conciliatory.json) |
 | 725 Submission | [submissive](../../traits/instructions/submissive.json) |
 | 736 Mediocrity | [middle-class](../../traits/instructions/middle_class.json) |
-| 737 Authority | [authoritarian](../../traits/instructions/authoritarian.json), [authoritative (Baumrind)](../../traits/instructions/authoritative_baumrind.json), [controlling](../../traits/instructions/controlling.json), [dominance (DISC)](../../traits/instructions/dominance_disc.json), [dominant](../../traits/instructions/dominant.json) |
+| 737 Authority | [authoritarian](../../traits/instructions/authoritarian.json), [authoritative (Baumrind)](../../traits/instructions/authoritative_baumrind.json), [controlling](../../traits/instructions/controlling.json), [dominance (DISC)](../../traits/instructions/dominance_disc.json), [dominant](../../traits/instructions/dominant.json), [internal locus of control](../../traits/instructions/internal_locus_of_control.json) |
 | 737b Politics | [partisan](../../traits/instructions/partisan.json), [political](../../traits/instructions/political.json) |
 | 738 Laxity | [loose (Gelfand)](../../traits/instructions/loose_gelfand.json) |
 | 739 Severity | [authoritarian (Baumrind)](../../traits/instructions/authoritarian_baumrind.json), [harsh](../../traits/instructions/harsh.json), [rigid](../../traits/instructions/rigid.json), [strict](../../traits/instructions/strict.json), [tight (Gelfand)](../../traits/instructions/tight_gelfand.json) |
@@ -821,7 +819,7 @@ Rated 0 by the head-scope check; the reasons are in [head_scope.json](./head_sco
 | 849 Simplicity | [unpretentious](../../traits/instructions/unpretentious.json) |
 | 850 Taste | [aesthete](../../traits/instructions/aesthete.json), [highbrow](../../traits/instructions/highbrow.json) |
 | 851 Vulgarity | [lowbrow](../../traits/instructions/lowbrow.json) |
-| 852 Fashion | [fashionable](../../traits/instructions/fashionable.json) |
+| 852 Fashion | [fashionable](../../traits/instructions/fashionable.json), [shabby-genteel](../../traits/instructions/shabby_genteel.json) |
 | 853 Ridiculousness | [goofy](../../traits/instructions/goofy.json) |
 | 855 Affectation | [pedantic](../../traits/instructions/pedantic.json), [performative](../../traits/instructions/performative.json), [pretentious](../../traits/instructions/pretentious.json) |
 | 856 Ridicule | [sarcastic](../../traits/instructions/sarcastic.json), [sardonic](../../traits/instructions/sardonic.json) |
@@ -837,7 +835,7 @@ Rated 0 by the head-scope check; the reasons are in [head_scope.json](./head_sco
 | 867 Dislike | [unpopular](../../traits/instructions/unpopular.json) |
 | 868 Fastidiousness | [fastidious](../../traits/instructions/fastidious.json), [meticulous](../../traits/instructions/meticulous.json), [petty](../../traits/instructions/petty.json), [picky-eater](../../traits/instructions/picky_eater.json), [self-critical](../../traits/instructions/self_critical.json), [squeamish](../../traits/instructions/squeamish.json), [uptight](../../traits/instructions/uptight.json) |
 | 869 Satiety | [jaded](../../traits/instructions/jaded.json) |
-| 873 Repute | [honor culture](../../traits/instructions/honor_culture.json), [popular](../../traits/instructions/popular.json) |
+| 873 Repute | [famous](../../traits/instructions/famous.json), [honor culture](../../traits/instructions/honor_culture.json), [popular](../../traits/instructions/popular.json) |
 | 875 Nobility | [aristocratic](../../traits/instructions/aristocratic.json), [upper-class](../../traits/instructions/upper_class.json) |
 | 876 Commonalty | [working-class](../../traits/instructions/working_class.json) |
 | 878 Pride | [dignified](../../traits/instructions/dignified.json), [dignity culture](../../traits/instructions/dignity_culture.json) |

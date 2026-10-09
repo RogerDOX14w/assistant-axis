@@ -10,12 +10,12 @@
   "batch_size": 20,
   "max_adjectives": 20,
   "summary": {
-   "n_scope": 677,
-   "n_rated": 588,
+   "n_scope": 676,
+   "n_rated": 587,
    "n_skipped_no_adjectives": 89,
    "n_unrated": 0,
    "by_rating": {
-    "0": 189,
+    "0": 188,
     "1": 234,
     "2": 165
    },
@@ -31,7 +31,7 @@
      "2": 2
     },
     "III": {
-     "0": 10,
+     "0": 9,
      "1": 17,
      "2": 3
     },
@@ -153,7 +153,6 @@
 {"id":"430","title":"Whiteness","class":"III","class_title":"Words relating to matter","section":"III. Organic matter","n_adjectives":25,"n_shown":20,"rating":0,"reason":"These adjectives describe whiteness or colour (white, snowy, hoary, blond, fair), and 'candid' here means white, not frank, so none describe a person's nature.","model":"claude-haiku-5-5","rubric_version":2,"skipped":null,"error":null},
 {"id":"441","title":"Vision","class":"III","class_title":"Words relating to matter","section":"III. Organic matter","n_adjectives":12,"n_shown":12,"rating":0,"reason":"Keen-eyed, hawk-eyed and eagle-eyed describe physical sight, and the rest are purely about vision.","model":"claude-haiku-5-5","rubric_version":2,"skipped":null,"error":null},
 {"id":"442","title":"Blindness","class":"III","class_title":"Words relating to matter","section":"III. Organic matter","n_adjectives":15,"n_shown":15,"rating":0,"reason":"Blind, sightless and wall-eyed describe a physical condition, not a person's nature.","model":"claude-haiku-5-5","rubric_version":2,"skipped":null,"error":null},
-{"id":"447","title":"Invisibility","class":"III","class_title":"Words relating to matter","section":"III. Organic matter","n_adjectives":31,"n_shown":20,"rating":0,"reason":"Invisible, inconspicuous and obscure describe states of being seen or things, not a person's character.","model":"claude-haiku-5-5","rubric_version":2,"skipped":null,"error":null},
 {"id":"450","title":"Intellect","class":"IV","class_title":"Words relating to the intellectual faculties","section":"I. Operations of intellect in general","n_adjectives":13,"n_shown":13,"rating":2,"reason":"Intellectual, brainy, cerebral, rational and spiritual describe a person's mental disposition and abilities.","model":"claude-haiku-5-5","rubric_version":2,"skipped":null,"error":null},
 {"id":"450a","title":"Absence or want of Intellect","class":"IV","class_title":"Words relating to the intellectual faculties","section":"I. Operations of intellect in general","n_adjectives":7,"n_shown":7,"rating":2,"reason":"Most adjectives (thoughtless, moronic, idiotic, brainless, void of reason) directly describe a person's lack of intellect.","model":"claude-haiku-5-5","rubric_version":2,"skipped":null,"error":null},
 {"id":"451","title":"Thought","class":"IV","class_title":"Words relating to the intellectual faculties","section":"I. Operations of intellect in general","n_adjectives":16,"n_shown":16,"rating":2,"reason":"Most adjectives (thoughtful, meditative, reflective, contemplative, studious, sedate, introspective, philosophical) describe a person's habitual cast of mind.","model":"claude-haiku-5-5","rubric_version":2,"skipped":null,"error":null},
@@ -732,21 +731,21 @@
 {"id":"1000","title":"Temple","class":"VI","class_title":"Words relating to the sentient and moral powers","section":"V. Religious affections","n_adjectives":5,"n_shown":5,"rating":1,"reason":"'Monastic' and 'cloistered' can describe a person's way of life, while the rest describe buildings or institutions.","model":"claude-haiku-5-5","rubric_version":2,"skipped":null,"error":null}
  ],
   "last_run": {
-   "at": "2026-10-08T23:37:58+00:00",
-   "n_calls": 1,
+   "at": "2026-10-09T02:36:27+00:00",
+   "n_calls": 0,
    "n_retries": 0,
-   "cost_usd": 0.000751,
+   "cost_usd": 0,
    "estimate": {
-    "n_calls": 1,
-    "in_tok": 1226,
-    "out_tok": 720,
-    "usd": 0.0005
+    "n_calls": 0,
+    "in_tok": 0,
+    "out_tok": 0,
+    "usd": 0.0
    },
    "cache_system": false,
    "concurrency": 4,
    "parse_rate": [
-    4,
-    4
+    0,
+    0
    ],
    "stopped_by_budget": false
   }
@@ -754,12 +753,12 @@
  "_provenance": {
   "schema_version": "1.0",
   "produced_by": {
-   "cmd": "uv run python data_analysis/gap_generation/roget_generate.py head-scope --budget-usd 0.25",
-   "git_sha": "9e16f32+dirty",
+   "cmd": "uv run python data_analysis/gap_generation/roget_generate.py head-scope --budget-usd 0.1",
+   "git_sha": "67595de+dirty",
    "author": "Roger Dearnaley",
    "title": "Roget head scope (workstream 2)"
   },
-  "produced_at": "2026-10-08T23:37:58+00:00",
+  "produced_at": "2026-10-09T02:36:27+00:00",
   "inputs": [
    {
     "dep_key": "roget_heads",
@@ -782,10 +781,10 @@
    {
     "dep_key": "label_heads",
     "path": "data/candidates/roget/label_heads.json",
-    "fingerprint": "v1:2026-10-08T23:36:44+00:00@1443833",
+    "fingerprint": "v1:2026-10-09T02:36:25+00:00@1450329",
     "kind": "file",
     "dataset_id": null,
-    "last_modified_at": "2026-10-08T23:36:44+00:00",
+    "last_modified_at": "2026-10-09T02:36:25+00:00",
     "extras": {}
    },
    {
@@ -801,6 +800,6 @@
     }
    }
   ],
-  "inputs_sha256": "370239ba030b3d17be8280833d951800597b75b9a18981007aa2e93ecee3724f"
+  "inputs_sha256": "3b49a83e8e011c5192a6f5037e42c5fa772c7843ea6c9bc06e6e35e7485914b7"
  }
 }

@@ -773,3 +773,12 @@ four newly in-scope heads (192 Size among them) were rated by the head-scope che
 $0.0005 (head scope).  Coverage after the synopsis pairing and this update: 279 covered, 51 partly, 158 uncovered
 (10 queued only), 189 not character; gap classes pair completion 28, pair empty 60, singleton empty 60; the full
 harvest dry run takes 464 distinct words from 277 selected heads, with 104 pair candidates and 25 partner hints.
+
+## Update after chunk 7 (2026-10-09, coordinator)
+
+Chunk 7 (commits a53642d, 1a73be6, 82a30c6) added seven traits and renamed two queue stems.  `map --update` dropped
+`harmony` and `mastery` (renamed to `world_accepting` and `world_changing`), added four labels
+(`external_locus_of_control`, `shabby_genteel`, `world_accepting`, `world_changing`) and re-placed three whose text
+changed (`famous`, `growth_first`, `internal_locus_of_control`, placed earlier from their queue entries); four were not
+`agree` and went through the check, about $0.04.  Coverage: 279 covered, 51 partly, 158 uncovered (9 queued only),
+188 not character.
