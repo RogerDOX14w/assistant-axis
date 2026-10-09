@@ -653,3 +653,34 @@ class TestTaste:
         assert report["scores"]["coverage"]["new"]["against_baseline"]["difference"] == 0.0
         text = audit.render_taste_report(report)
         assert "quality" in text and "+1.00" in text and "better in 7, worse in 0 of 7" in text
+
+
+class TestJudgeDisplayForm:
+    """W19 (2026-10-09): the audit and taste judges name the trait and its
+    opposite in the judge display form; the version bumps leave a judgement
+    of an unchanged file current."""
+
+    STANDARD = {"positive_label": "careless (HEXACO)", "negative_label": "conscientious (HEXACO)",
+                "description": "D.", "instruction": [{"pos": "p", "neg": "n"}], "questions": ["q?"]}
+    PLAIN = {"positive_label": "systems-thinker", "negative_label": "non-systems-thinker",
+             "description": "D.", "instruction": [{"pos": "p", "neg": "n"}], "questions": ["q?"]}
+
+    def test_prompts_show_the_judge_form(self):
+        p = audit.build_instruction_judge_prompt(self.STANDARD)
+        assert "<trait>\ncareless (from HEXACO)\n</trait>" in p
+        assert "<opposite_trait>\nconscientious (from HEXACO)\n</opposite_trait>" in p
+        assert "careless (from HEXACO)" in audit.build_question_judge_prompt(self.STANDARD)
+        assert "Trait: careless (from HEXACO)\n" in audit.build_taste_prompt(self.STANDARD)
+        p = audit.build_instruction_judge_prompt(self.PLAIN)
+        assert "<trait>\nsystems-thinker\n</trait>" in p and "(not named:" in p
+
+    def test_versions_and_currency(self):
+        assert (audit.INSTRUCTION_AUDIT_RUBRIC_VERSION, audit.QUESTION_AUDIT_RUBRIC_VERSION,
+                audit.TASTE_RUBRIC_VERSION) == (4, 3, 2)
+        assert audit.labels_render_unchanged(self.PLAIN) and not audit.labels_render_unchanged(self.STANDARD)
+        assert audit.labels_render_unchanged({"description": "a role file has no labels"})
+        for judge, cur, prev in (("instruction", 4, 3), ("question", 3, 2), ("taste", 2, 1)):
+            assert audit.version_is_current(cur, cur, judge, self.STANDARD)
+            assert audit.version_is_current(prev, cur, judge, self.PLAIN)
+            assert not audit.version_is_current(prev, cur, judge, self.STANDARD)
+            assert not audit.version_is_current(prev - 1, cur, judge, self.PLAIN)

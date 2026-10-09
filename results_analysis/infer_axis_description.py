@@ -149,26 +149,29 @@ def _load_entity_json(instructions_dir: Path, etype: str, name: str) -> dict[str
 
 
 def _display_label(etype: str, name: str, blob: dict[str, Any]) -> str:
-    """Filename -> display label.
+    """Filename -> the label the describer is shown: the judge display form
+    (AGENT_NOTES "Judge prompts show the judge display form", 2026-10-09).
 
-    * Traits: use the JSON's ``positive_label`` (e.g. ``systems-thinker``).
-    * Roles : convert filename underscores to spaces (``paperclip_maximizer`` ->
-      ``paperclip maximizer``); roles never use hyphens by convention.
+    * Traits: the JSON's ``positive_label`` (``systems-thinker``), with a
+      standard's suffix in the long form (``careless (from HEXACO)``).
+    * Roles : ``judge_label`` (``paperclip maximizer``; the display overrides
+      apply: ``devil's advocate``).
 
     LLM prompts are display sites: the labels rendered into
     ``build_prompt`` below feed straight into Claude/Opus rubric
-    bodies and ranking lists, where display form
-    (``coral reef``) reads more naturally than file form
-    (``coral_reef``).  See AGENT_NOTES.md "File-name vs
-    display-name convention" / "LLM prompts are display sites".
+    bodies and ranking lists.  Model-emitted examples are mapped back to
+    stems by ``LabelMap.filename_for_label``, which matches loosely.
     """
+    from assistant_axis.entity_id import judge_form_of_label, judge_label
+
     if etype == "trait":
         lbl = blob.get("positive_label")
         if lbl:
-            return str(lbl)
-        # Fall through to the role rule if a trait somehow lacks the label.
+            return judge_form_of_label(str(lbl))
+        # Fall through to the mechanical form if a trait somehow lacks the label.
         logger.warning(f"trait {name!r}: no positive_label; falling back to underscore->space")
-    return name.replace("_", " ")
+        return name.replace("_", " ")
+    return judge_label(name, "roles")
 
 
 def _entity_description(blob: dict[str, Any]) -> str:

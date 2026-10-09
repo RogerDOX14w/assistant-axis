@@ -406,7 +406,12 @@ class TestDepthJudge:
         asyncio.run(exp.depth(args, exp.load_plan(out_dir), out_dir))
         judged = json.loads((out_dir / "depth" / "petty.json").read_text())
         assert len(judged) == 6 and create.call_count == 6
-        assert judged["be_someone_q1"]["caricature"] == 2 and judged["be_someone_q1"]["rubric_version"] == 1
+        # version 2 since W19 (2026-10-09); a version-1 reading of a label that
+        # renders unchanged stays current, one of a standards label does not
+        assert judged["be_someone_q1"]["caricature"] == 2 and judged["be_someone_q1"]["rubric_version"] == 2
+        assert exp.depth_is_current({"rubric_version": 1, "model": "m"}, "petty", "m")
+        assert not exp.depth_is_current({"rubric_version": 1, "model": "m"}, "careless (HEXACO)", "m")
+        assert not exp.depth_is_current({"rubric_version": 2, "model": "other"}, "petty", "m")
         assert create.call_args.kwargs["temperature"] == 0.0
         usage = json.loads((out_dir / "usage.json").read_text())
         assert usage["per_model"]["claude-sonnet-4-6"]["n_calls"] == 6

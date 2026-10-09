@@ -50,6 +50,7 @@ load_dotenv()
 import anthropic  # noqa: E402
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
+from assistant_axis.entity_id import judge_form_of_label, judge_form_of_negative_label  # noqa: E402
 from assistant_axis.judge import warn_if_low_parse_rate  # noqa: E402
 from assistant_axis.judge_pricing import MultiModelUsage, extract_usage_anthropic, price_for_model  # noqa: E402
 from data_analysis import regenerate_trait_instructions as generator  # noqa: E402
@@ -67,8 +68,14 @@ DEFAULT_QUESTION_JUDGE = "claude-haiku-4-5-20251001"
 
 # Bump when the text of a judge prompt changes; stamped into every judged file,
 # and a file judged under another version is judged again.
-INSTRUCTION_AUDIT_RUBRIC_VERSION = 3
-QUESTION_AUDIT_RUBRIC_VERSION = 2
+# 2026-10-09 (W19): instruction 3 -> 4, question 2 -> 3, taste 1 -> 2: the
+# prompts name the trait and its opposite in the judge display form
+# (``careless (from HEXACO)``).  The rendered prompt changes only for a file
+# whose labels change under it, so a judgement made under the previous version
+# stays current for every other file (``version_is_current``), as a rubric
+# equivalence edge would declare.
+INSTRUCTION_AUDIT_RUBRIC_VERSION = 4
+QUESTION_AUDIT_RUBRIC_VERSION = 3
 
 # The 18 traits of the first pilot were picked by hand because they were known
 # to fail, and the draft was adjusted after reading them: they belong to
@@ -429,14 +436,39 @@ and then the shape and the flags:
 ]}}"""
 
 
-def _header_fields(doc: dict) -> dict:
+def _header_fields(doc: dict, judge_form: bool = True) -> dict:
+    """The labels as the judges see them: the judge display form
+    (``judge_form=False`` gives the stored labels, as before 2026-10-09)."""
+    pos = str(doc.get("positive_label") or "")
     neg = str(doc.get("negative_label") or "")
     named = neg and not neg.lower().startswith("non-")
+    if judge_form:
+        trait, opposite = judge_form_of_label(pos), judge_form_of_negative_label(neg, pos) if named else ""
+    else:
+        trait, opposite = doc.get("positive_label", ""), neg
     return {
-        "trait": doc.get("positive_label", ""),
+        "trait": trait,
         "description": doc.get("description", ""),
-        "opposite": neg if named else "(not named: take the opposite of the description)",
+        "opposite": opposite if named else "(not named: take the opposite of the description)",
     }
+
+
+def labels_render_unchanged(doc: dict) -> bool:
+    """True when the judge display form leaves this file's prompt labels as
+    stored (every file but those with a standard's suffix): its prompts are
+    then byte-identical to those of the version before 2026-10-09."""
+    return _header_fields(doc) == _header_fields(doc, judge_form=False)
+
+
+# previous version -> current version, for the W19 bumps (see the constants)
+_W19_PREVIOUS = {"instruction": 3, "question": 2, "taste": 1}
+
+
+def version_is_current(recorded, current: int, judge: str, doc: dict) -> bool:
+    """A judgement's version is current when it is the current one, or the
+    one before the W19 bump of ``judge`` and the file's labels render as
+    stored."""
+    return recorded == current or (recorded == _W19_PREVIOUS[judge] and labels_render_unchanged(doc))
 
 
 def build_instruction_judge_prompt(doc: dict) -> str:
@@ -524,7 +556,7 @@ def parse_question_judgement(text: str, n_questions: int) -> list[dict]:
 # ---------------------------------------------------------------------------
 
 DEFAULT_TASTE_JUDGE = "claude-sonnet-4-6"
-TASTE_RUBRIC_VERSION = 1
+TASTE_RUBRIC_VERSION = 2   # 2026-10-09 (W19): the judge display form; see version_is_current
 TASTE_SCORES = ("quality", "coverage")
 # room for a model that thinks before it answers (the Claude 5 models count thinking against max_tokens)
 TASTE_MAX_TOKENS = 2000
@@ -565,7 +597,7 @@ Reply with a JSON object only, no other text, the reasons first:
 
 def build_taste_prompt(doc: dict) -> str:
     lines = [f"{k + 1}. {' '.join(str(pair.get('pos', '')).split())}" for k, pair in enumerate(doc.get("instruction") or [])]
-    return TASTE_JUDGE_PROMPT.format(trait=doc.get("positive_label", ""),
+    return TASTE_JUDGE_PROMPT.format(trait=_header_fields(doc)["trait"],
                                      description=" ".join(str(doc.get("description", "")).split()),
                                      instructions="\n".join(lines))
 
@@ -591,7 +623,7 @@ def taste_dir(out_dir: Path, model: str, arm: str) -> Path:
 
 def taste_is_current(judged: dict, doc: dict, model: str) -> bool:
     return (judged.get("content_sha256") == content_sha256(doc) and judged.get("model") == model
-            and judged.get("rubric_version") == TASTE_RUBRIC_VERSION)
+            and version_is_current(judged.get("rubric_version"), TASTE_RUBRIC_VERSION, "taste", doc))
 
 
 def load_taste(out_dir: Path, model: str, arm: str, docs: dict[str, dict]) -> dict[str, dict]:
@@ -819,8 +851,10 @@ async def judge_file(client, doc: dict, *, instruction_model: str, question_mode
 def judgement_is_current(judged: dict, doc: dict, instruction_model: str, question_model: str) -> bool:
     ij, qj = judged.get("instruction_judge") or {}, judged.get("question_judge") or {}
     return (judged.get("content_sha256") == content_sha256(doc)
-            and ij.get("rubric_version") == INSTRUCTION_AUDIT_RUBRIC_VERSION and ij.get("model") == instruction_model
-            and qj.get("rubric_version") == QUESTION_AUDIT_RUBRIC_VERSION and qj.get("model") == question_model)
+            and version_is_current(ij.get("rubric_version"), INSTRUCTION_AUDIT_RUBRIC_VERSION, "instruction", doc)
+            and ij.get("model") == instruction_model
+            and version_is_current(qj.get("rubric_version"), QUESTION_AUDIT_RUBRIC_VERSION, "question", doc)
+            and qj.get("model") == question_model)
 
 
 # ---------------------------------------------------------------------------

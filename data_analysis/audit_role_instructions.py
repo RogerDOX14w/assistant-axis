@@ -373,7 +373,11 @@ and then the shape and the flags:
 
 
 def _header_fields(doc: dict, stem: str) -> dict:
-    return {"role": generator.role_display_name(stem), "description": " ".join(str(doc.get("description", "")).split())}
+    # The judge display form (AGENT_NOTES "Judge prompts show the judge
+    # display form", 2026-10-09).  It equals role_display_name for every role
+    # in the corpus (none has a standard's suffix), so the role rubric
+    # versions were not bumped: no judged prompt changes.
+    return {"role": generator.role_prompt_name(stem), "description": " ".join(str(doc.get("description", "")).split())}
 
 
 def build_instruction_judge_prompt(doc: dict, stem: str) -> str:
@@ -464,6 +468,8 @@ def judgement_is_current(judged: dict, doc: dict, instruction_model: str, questi
 
 DEFAULT_TASTE_JUDGE = trait_audit.DEFAULT_TASTE_JUDGE
 TASTE_RUBRIC_VERSION = trait_audit.TASTE_RUBRIC_VERSION   # stamped by the shared loader's currency check
+# (2 since the W19 bump of 2026-10-09; a role rating stamped 1 stays current,
+# since a role's labels render unchanged: trait_audit.version_is_current)
 
 TASTE_JUDGE_PROMPT = """\
 You are reviewing five system prompts written for one role. Each will be given \

@@ -58,6 +58,7 @@ import anthropic  # noqa: E402
 import openai  # noqa: E402
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
+from assistant_axis.entity_id import judge_form_of_label  # noqa: E402
 from assistant_axis.judge import RateLimiter, call_judge_single, parse_judge_score, warn_if_low_parse_rate  # noqa: E402
 from assistant_axis.judge_pricing import (  # noqa: E402
     MultiModelUsage, extract_usage_anthropic, extract_usage_openai, price_for_model)
@@ -110,8 +111,12 @@ def _pipeline_judge_module():
 
 
 def trait_judge_prompt(label: str, description: str) -> str:
-    """The pipeline's judge prompt for a trait, with {question} and {answer} left to fill."""
-    return _pipeline_judge_module().TRAIT_EVAL_TEMPLATE.format(trait_name=label, trait_description=description)
+    """The pipeline's judge prompt for a trait, with {question} and {answer} left to fill.
+    ``label`` is the stored label (as plans record it); the judge sees its judge
+    display form, as pipeline/3_judge.py shows it since 2026-10-09 (identical for
+    every label without a standard's suffix, so every plan run so far)."""
+    return _pipeline_judge_module().TRAIT_EVAL_TEMPLATE.format(
+        trait_name=judge_form_of_label(label), trait_description=description)
 
 
 def load_questions(n: int) -> list[str]:
@@ -453,7 +458,16 @@ def cmd_judge(args) -> None:
 # It is not told the instruction that produced the answer.
 
 DEFAULT_DEPTH_JUDGE = "claude-sonnet-4-6"
-DEPTH_RUBRIC_VERSION = 1
+# 2 (2026-10-09, W19): the trait or role is named in its judge display form
+# (``careless (from HEXACO)``).  A reading stamped 1 stays current when the
+# plan's label renders unchanged (every plan run so far): depth_is_current.
+DEPTH_RUBRIC_VERSION = 2
+
+
+def depth_is_current(done: dict, label: str, model: str) -> bool:
+    rv = done.get("rubric_version")
+    return done.get("model") == model and (
+        rv == DEPTH_RUBRIC_VERSION or (rv == 1 and judge_form_of_label(label) == label))
 DEPTH_MAX_TOKENS = 300
 VOICES = ("person", "assistant", "mixed")
 
@@ -612,13 +626,13 @@ async def depth(args, plan: dict, out_dir: Path) -> None:
         for r in read_jsonl(out_dir / "responses" / f"{trait}.jsonl"):
             k = key_of(r["variant"], r["question_index"])
             done = judged[trait].get(k)
-            if done and done.get("rubric_version") == DEPTH_RUBRIC_VERSION and done.get("model") == args.model:
+            if done and depth_is_current(done, t["label"], args.model):
                 continue
             if scores.get(k, -1) < args.min_score:
                 continue
             template = ROLE_DEPTH_JUDGE_PROMPT if t.get("entity") == "role" else DEPTH_JUDGE_PROMPT
             todo.append((trait, k, template.format(
-                trait=t["label"], description=t["description"], question=r["question"],
+                trait=judge_form_of_label(t["label"]), description=t["description"], question=r["question"],
                 answer=r["conversation"][-1]["content"])))
     print(f"{len(todo)} answers to read with {args.model}", file=sys.stderr)
     if args.dry_run or not todo:
@@ -826,9 +840,11 @@ ENTITIES = ("trait", "role")
 
 
 def role_label(stem: str) -> str:
-    """A role's display name, as the role generator and the pipeline write it into prompts."""
-    from data_analysis.regenerate_role_instructions import role_display_name  # noqa: E402  (a sibling script)
-    return role_display_name(stem)
+    """A role's name, as the role generator and the pipeline write it into prompts
+    (its judge display form since 2026-10-09; the same as role_display_name for
+    every role in the corpus)."""
+    from data_analysis.regenerate_role_instructions import role_prompt_name  # noqa: E402  (a sibling script)
+    return role_prompt_name(stem)
 
 
 def build_arms_plan(arms: list[tuple[str, Path, str | None]], stems: list[str], n_questions: int,
