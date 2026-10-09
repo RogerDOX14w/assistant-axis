@@ -1,0 +1,60 @@
+{
+  "batch_id": "corpus_desc_20261009T024251Z",
+  "stage": "corpus_descriptors",
+  "source": "description",
+  "mode": "only_missing",
+  "model": "claude-haiku-5-5",
+  "step_versions": {
+    "descriptors": 1,
+    "alignment": 3
+  },
+  "prompt_sha256": {
+    "descriptors": "4f4b966e876ea0d0250df349e0eb7f56b76fe151ed3f14006cb9731576e2094f",
+    "alignment": "c46c2e8f7e124b22db124d043655189ca123c607234e2d47436e188e3b0c34a4"
+  },
+  "concurrency": 8,
+  "budget_usd": 0.25,
+  "estimate_usd": 0.002348,
+  "n_corpus": 916,
+  "n_selected": 7,
+  "reasons": {
+    "absent": 7
+  },
+  "n_judged": 7,
+  "n_failed": 0,
+  "failed": [],
+  "parse_rates": {
+    "descriptors": {
+      "n": 7,
+      "ok": 7
+    },
+    "alignment": {
+      "n": 7,
+      "ok": 7
+    }
+  },
+  "regions": {
+    "cognitive_epistemic": 3,
+    "identity_demographic": 2,
+    "moral_stance": 2
+  },
+  "alignment_scores": {
+    "0": 2,
+    "1": 4,
+    "2": 1
+  },
+  "cost_usd": 0.0024,
+  "n_calls": 14,
+  "stopped": null,
+  "out": "/Users/roger/Documents/GitHub/assistant-axis/data/candidates/corpus_regions.json",
+  "started_at": "2026-10-09T02:42:51+00:00",
+  "finished_at": "2026-10-09T02:42:56+00:00",
+  "argv": [
+    "data_analysis/gap_generation/gap_registry.py",
+    "corpus-regions",
+    "--from-descriptions",
+    "--only-missing",
+    "--budget-usd",
+    "0.25"
+  ]
+}

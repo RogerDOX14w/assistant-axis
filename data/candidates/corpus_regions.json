@@ -6969,6 +6969,26 @@
       "previous_alignment_relevant": false,
       "previous_source": "filter m1_validation_r2"
     },
+    "external_locus_of_control": {
+      "label": "external locus of control",
+      "region": "cognitive_epistemic",
+      "enactable_in_text": 2,
+      "alignment_score": 1,
+      "alignment_relevant": false,
+      "source": "description",
+      "description_sha256": "82c1af352b7fe25de0f46e7127820e81c6eb54706fd25456d76d01db51e8a9ec",
+      "model": "claude-haiku-5-5",
+      "rubric_versions": {
+        "descriptors": 1,
+        "alignment": 3
+      },
+      "reasons": {
+        "descriptors": "Attributing outcomes to luck, fate, or others is a way of reasoning about causation and agency, and it shows up directly in how the persona explains events in its replies.",
+        "alignment": "A belief that outcomes are governed by luck or powerful others could only loosely shade toward deference or passivity through a further step, not directly."
+      },
+      "batch_id": "corpus_desc_20261009T024251Z",
+      "at": "2026-10-09T02:42:53+00:00"
+    },
     "extravagant": {
       "label": "extravagant",
       "region": "emotional_temperament",
@@ -7221,6 +7241,26 @@
       "previous_region": "moral_stance",
       "previous_alignment_relevant": false,
       "previous_source": "filter m1_validation_r2"
+    },
+    "famous": {
+      "label": "famous",
+      "region": "identity_demographic",
+      "enactable_in_text": 1,
+      "alignment_score": 0,
+      "alignment_relevant": false,
+      "source": "description",
+      "description_sha256": "f27e368fd761704aecba83ef72f9c4bb786b31973e8319bd6f439a751ee6e809",
+      "model": "claude-haiku-5-5",
+      "rubric_versions": {
+        "descriptors": 1,
+        "alignment": 3
+      },
+      "reasons": {
+        "descriptors": "Being famous is a fact about the persona's standing in the world, not a way of speaking or thinking, though a text persona could occasionally allude to it.",
+        "alignment": "Being famous is a plain fact about public recognition and attention, with no direct bearing on honesty, harm, approval-seeking, power, deference, oversight, or rule-following."
+      },
+      "batch_id": "corpus_desc_20261009T024251Z",
+      "at": "2026-10-09T02:42:53+00:00"
     },
     "fashionable": {
       "label": "fashionable",
@@ -8647,6 +8687,26 @@
       "previous_region": "cognitive_epistemic",
       "previous_alignment_relevant": true,
       "previous_source": "filter m1_validation_r2"
+    },
+    "growth_first": {
+      "label": "growth-first",
+      "region": "moral_stance",
+      "enactable_in_text": 2,
+      "alignment_score": 2,
+      "alignment_relevant": true,
+      "source": "description",
+      "description_sha256": "b1d95ff3a723d88b53c5b27d504d0c7e696cfe4bb0c2880637925efed33aeec5",
+      "model": "claude-haiku-5-5",
+      "rubric_versions": {
+        "descriptors": 1,
+        "alignment": 3
+      },
+      "reasons": {
+        "descriptors": "It states what the persona holds to be right, ranking growth and jobs above environmental protection, and it would show that plainly in its replies.",
+        "alignment": "A persona that treats environmental rules as red tape and backs harmful projects would clearly be less inclined to keep to the rules and limits it has been given."
+      },
+      "batch_id": "corpus_desc_20261009T024251Z",
+      "at": "2026-10-09T02:42:53+00:00"
     },
     "growth_minded": {
       "label": "growth-minded",
@@ -10487,6 +10547,26 @@
       "previous_region": "cognitive_epistemic",
       "previous_alignment_relevant": false,
       "previous_source": "filter m1_validation_r2"
+    },
+    "internal_locus_of_control": {
+      "label": "internal locus of control",
+      "region": "cognitive_epistemic",
+      "enactable_in_text": 1,
+      "alignment_score": 1,
+      "alignment_relevant": false,
+      "source": "description",
+      "description_sha256": "30de8964ce91e2d1ab9fa5d6b7955da62442490f5c8f44ba8994c2dbd90378b8",
+      "model": "claude-haiku-5-5",
+      "rubric_versions": {
+        "descriptors": 1,
+        "alignment": 3
+      },
+      "reasons": {
+        "descriptors": "It describes how the persona reasons about what causes its outcomes, which surfaces only now and then in how it explains results and setbacks.",
+        "alignment": "A belief that outcomes follow from one's own actions could lead to seeking control or resisting correction, but only through a further step."
+      },
+      "batch_id": "corpus_desc_20261009T024251Z",
+      "at": "2026-10-09T02:42:54+00:00"
     },
     "intj_mbti": {
       "label": "INTJ (MBTI)",
@@ -17296,6 +17376,26 @@
       "previous_alignment_relevant": null,
       "previous_source": "none"
     },
+    "shabby_genteel": {
+      "label": "shabby-genteel",
+      "region": "identity_demographic",
+      "enactable_in_text": 1,
+      "alignment_score": 0,
+      "alignment_relevant": false,
+      "source": "description",
+      "description_sha256": "12172b7c781258322680e5a03438b90ef35346aad4960584fbe67ab2e6f3e1e1",
+      "model": "claude-haiku-5-5",
+      "rubric_versions": {
+        "descriptors": 1,
+        "alignment": 3
+      },
+      "reasons": {
+        "descriptors": "The description is mainly a fact about the persona's family background and social standing, though its manners and diction could leak into writing style.",
+        "alignment": "The description covers family background, manners, accent and the state of a coat and bills, which are plain facts of life and style rather than honesty, harm, approval, power, deference, oversight or rule-following."
+      },
+      "batch_id": "corpus_desc_20261009T024251Z",
+      "at": "2026-10-09T02:42:54+00:00"
+    },
     "shame_prone": {
       "label": "shame-prone",
       "region": "emotional_temperament",
@@ -20792,6 +20892,46 @@
       "previous_alignment_relevant": false,
       "previous_source": "filter m1_validation_r2"
     },
+    "world_accepting": {
+      "label": "world-accepting",
+      "region": "moral_stance",
+      "enactable_in_text": 2,
+      "alignment_score": 1,
+      "alignment_relevant": false,
+      "source": "description",
+      "description_sha256": "11919fe31f432f8e0ffe84986dae0ac8e4cc59e95117033807f166eb466237a0",
+      "model": "claude-haiku-5-5",
+      "rubric_versions": {
+        "descriptors": 1,
+        "alignment": 3
+      },
+      "reasons": {
+        "descriptors": "It describes a value orientation toward the world, prizing acceptance, harmony, and not interfering, which is about what the persona holds to be right.",
+        "alignment": "Leaving things as they are and letting them run their course could, through a further step, make the assistant less inclined to intervene, correct, or prevent harm, but the description does not name any of the seven directly."
+      },
+      "batch_id": "corpus_desc_20261009T024251Z",
+      "at": "2026-10-09T02:42:55+00:00"
+    },
+    "world_changing": {
+      "label": "world-changing",
+      "region": "cognitive_epistemic",
+      "enactable_in_text": 2,
+      "alignment_score": 1,
+      "alignment_relevant": false,
+      "source": "description",
+      "description_sha256": "942b52bb3f9f020230c4dfde3663ce0fb44589c5d8e8b9f62f79da6eb0613a08",
+      "model": "claude-haiku-5-5",
+      "rubric_versions": {
+        "descriptors": 1,
+        "alignment": 3
+      },
+      "reasons": {
+        "descriptors": "The description centres on how the persona approaches obstacles, treating each as a problem to solve and acting to reshape its circumstances, which is a problem-solving orientation.",
+        "alignment": "The description concerns ambition to reshape surroundings and overcome obstacles, which only loosely touches seeking power or resources and would not clearly change how the assistant treats honesty, oversight, rules, or harm in most of what it does."
+      },
+      "batch_id": "corpus_desc_20261009T024251Z",
+      "at": "2026-10-09T02:42:56+00:00"
+    },
     "worldly": {
       "label": "worldly",
       "region": "cognitive_epistemic",
@@ -20911,41 +21051,41 @@
   "_provenance": {
     "schema_version": "1.0",
     "produced_by": {
-      "cmd": "uv run python data_analysis/gap_generation/gap_registry.py corpus-regions --from-descriptions --all --budget-usd 1 --batch-id corpus_desc_2026_10_09",
-      "git_sha": "2bee827+dirty",
+      "cmd": "uv run python data_analysis/gap_generation/gap_registry.py corpus-regions --from-descriptions --only-missing --budget-usd 0.25",
+      "git_sha": "2833443+dirty",
       "author": "Roger Dearnaley",
-      "title": "corpus regions from descriptions (all, corpus_desc_2026_10_09)"
+      "title": "corpus regions from descriptions (only_missing, corpus_desc_20261009T024251Z)"
     },
-    "produced_at": "2026-10-09T02:35:42+00:00",
+    "produced_at": "2026-10-09T02:42:56+00:00",
     "inputs": [
       {
         "dep_key": "rubric_descriptors",
         "path": "reports/trait_gap_generation/rubrics/descriptors.md",
-        "fingerprint": "v1:2026-10-08T17:36:09+00:00@2510",
+        "fingerprint": "v1:2026-10-08T07:02:25+00:00@2510",
         "kind": "file",
         "dataset_id": null,
-        "last_modified_at": "2026-10-08T17:36:09+00:00",
+        "last_modified_at": "2026-10-08T07:02:25+00:00",
         "extras": {}
       },
       {
         "dep_key": "rubric_alignment",
         "path": "reports/trait_gap_generation/rubrics/alignment.md",
-        "fingerprint": "v1:2026-10-08T17:36:09+00:00@5002",
+        "fingerprint": "v1:2026-10-08T07:02:25+00:00@5002",
         "kind": "file",
         "dataset_id": null,
-        "last_modified_at": "2026-10-08T17:36:09+00:00",
+        "last_modified_at": "2026-10-08T07:02:25+00:00",
         "extras": {}
       },
       {
-        "dep_key": "responses_corpus_desc_2026_10_09",
-        "path": "data/candidates/corpus_regions_runs/corpus_desc_2026_10_09/responses.jsonl",
-        "fingerprint": "v1:2026-10-09T02:35:42+00:00@1921134",
+        "dep_key": "responses_corpus_desc_20261009T024251Z",
+        "path": "data/candidates/corpus_regions_runs/corpus_desc_20261009T024251Z/responses.jsonl",
+        "fingerprint": "v1:2026-10-09T02:42:56+00:00@15067",
         "kind": "file",
         "dataset_id": null,
-        "last_modified_at": "2026-10-09T02:35:42+00:00",
+        "last_modified_at": "2026-10-09T02:42:56+00:00",
         "extras": {}
       }
     ],
-    "inputs_sha256": "93ed57926f2329f667d8e3ea870bac049fb267825e52f3c5b641b6b35d9c58da"
+    "inputs_sha256": "ae74a471a45c78ba12946b8f1b70d5d7181bf94d31e89f9b5a6c35f300eef72f"
   }
 }
