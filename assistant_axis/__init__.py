@@ -77,6 +77,10 @@ from .entity_id import (
     normalize_to_file_name,
     display_form_name,
     corpus_display_name,
+    judge_label,
+    judge_negative_label,
+    judge_form_of_label,
+    judge_form_of_negative_label,
 )
 from .pair_list_cohort import cohort_from_pairs, pair_type_of
 from .judge_batch import RESPONSE_BATCH_SIZE, response_subdir
@@ -139,6 +143,10 @@ __all__ = [
     "normalize_to_file_name",
     "display_form_name",
     "corpus_display_name",
+    "judge_label",
+    "judge_negative_label",
+    "judge_form_of_label",
+    "judge_form_of_negative_label",
     "cohort_from_pairs",
     "pair_type_of",
     # Response-judging batch-size convention
