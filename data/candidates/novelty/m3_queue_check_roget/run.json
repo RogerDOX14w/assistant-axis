@@ -1,0 +1,683 @@
+{
+  "batch_id": "m3_queue_check_roget",
+  "mode": "shortlist",
+  "git_sha": "808b4f6",
+  "allow_dirty": false,
+  "dirty_check": {
+    "paths": [
+      "assistant_axis/gapgen",
+      "data_analysis/gap_generation",
+      "assistant_axis/judge.py",
+      "assistant_axis/judge_pricing.py",
+      "assistant_axis/entity_id.py",
+      "assistant_axis/atomic_io.py",
+      "data/candidates/validation",
+      "reports/trait_gap_generation/rubrics",
+      "pyproject.toml",
+      "uv.lock"
+    ],
+    "dirty": [],
+    "note": null
+  },
+  "argv": [
+    "score",
+    "--redecide",
+    "--from-batch",
+    "gen_pilot_roget",
+    "--batch-id",
+    "m3_queue_check_roget",
+    "--resume",
+    "--queue-search",
+    "--transport",
+    "live",
+    "--budget-usd",
+    "1",
+    "--keys",
+    "absolute#1",
+    "alarming#1",
+    "angelic#1",
+    "autochthonous#1",
+    "backhanded#1",
+    "conditional#1",
+    "controversial#1",
+    "cracked#1",
+    "credited#1",
+    "crusty#1",
+    "dear#1",
+    "defective#1",
+    "denying#1",
+    "disagreeing#1",
+    "discordant#1",
+    "domestic#1",
+    "excusable#1",
+    "expensive#1",
+    "factious#1",
+    "foreseeing#1",
+    "found_wanting#1",
+    "free#1",
+    "grim#1",
+    "heavenly#1",
+    "ill_affected#1",
+    "imperfect#1",
+    "impossible#1",
+    "inaudible#1",
+    "incomparable#1",
+    "indebted#1",
+    "inexpressive#1",
+    "infernal#1",
+    "insignificant#1",
+    "intestate#1",
+    "judicial#1",
+    "lachrymose#1",
+    "litigious#1",
+    "misnamed#1",
+    "negative#1",
+    "negotiable#1",
+    "no_brain#1",
+    "nonsensical#1",
+    "perverse#1",
+    "plaintive#1",
+    "prescient#1",
+    "pseudonymous#1",
+    "qualified#1",
+    "quarrelsome#1",
+    "querulous#1",
+    "reactionary#1",
+    "reasonable#1",
+    "recusant#1",
+    "refreshing#1",
+    "refusing#1",
+    "rent_free#1",
+    "satanic#1",
+    "sinister#1",
+    "so_so#1",
+    "sour#1",
+    "sullen#1",
+    "torn#1",
+    "trivial#1",
+    "unaccountable#1",
+    "unbound#1",
+    "unpaid#1",
+    "unreasonable#1",
+    "venal#1"
+  ],
+  "plan": {
+    "mode": "shortlist",
+    "n_candidates": 67,
+    "n_exact_label": 0,
+    "n_to_relation": 67,
+    "skipped": {},
+    "transport": "live",
+    "query_form": "gloss_w14",
+    "listed_mean": 17.686567164179106,
+    "n_query_texts_cached": 67,
+    "n_query_texts_to_embed": 0,
+    "corpus": {
+      "n_corpus": 790,
+      "n_missing_from_cache": 0,
+      "missing": [],
+      "n_corpus_missing": 0,
+      "n_queue_missing": 0
+    },
+    "rules": {
+      "name": "m3_rules_2",
+      "version": 2,
+      "cover_on_opus_check": true,
+      "both_similar_excluded": true,
+      "pair_flag_grey": false,
+      "renamed_from_covers": false,
+      "separator_blind": true,
+      "cosine_floor": 0.25
+    },
+    "corpus_files": {
+      "corpus_at": "source",
+      "source_batch": "gen_pilot_roget",
+      "git_sha": "e3aa3c0",
+      "source_was_dirty": false,
+      "n_trait_files": 790,
+      "data_dir": "/tmp/claude-501/m3_corpus_e3aa3c0_4uv_qxe2/data"
+    },
+    "queue_search": {
+      "enabled": true,
+      "queue_path": "/tmp/claude-501/m3_corpus_e3aa3c0_4uv_qxe2/data/seed_queue.json",
+      "queue_sha256": "078500e5594fd3f4f8fffa18136e73b27762459cab29bb6c1058e541e0aae793",
+      "statuses": [
+        "candidate",
+        "ready",
+        "tbd",
+        "backlog"
+      ],
+      "n_entries": 2,
+      "excluded": {
+        "no_text": 222,
+        "not_a_trait_entry": 101,
+        "status_done": 131,
+        "status_exists": 35,
+        "status_generated": 1,
+        "status_not_adopted": 118,
+        "status_paired": 366,
+        "status_superseded": 18
+      },
+      "entries_sha256": "e5506a856c3d5dd0199f8edf935310d182f31206afea85af19c400638d822ea1"
+    },
+    "redecide": {
+      "from_batch": "gen_pilot_roget",
+      "source_rules": {
+        "name": "m3_rules_2",
+        "version": 2,
+        "cover_on_opus_check": true,
+        "both_similar_excluded": true,
+        "pair_flag_grey": false,
+        "renamed_from_covers": false,
+        "separator_blind": true,
+        "cosine_floor": 0.25
+      },
+      "rules": {
+        "name": "m3_rules_2",
+        "version": 2,
+        "cover_on_opus_check": true,
+        "both_similar_excluded": true,
+        "pair_flag_grey": false,
+        "renamed_from_covers": false,
+        "separator_blind": true,
+        "cosine_floor": 0.25
+      },
+      "relation_seed": "gen_pilot_roget",
+      "relation_model": "claude-haiku-5-5",
+      "write_registry": false,
+      "n_source_records": 641,
+      "reproduction": {
+        "n": 67,
+        "identical": 67,
+        "differ": [],
+        "not_replayable": []
+      },
+      "calls_not_on_record": {
+        "relation:claude-haiku-5-5": 1
+      },
+      "candidates_needing_calls": [
+        "prescient#1"
+      ],
+      "decided_offline": 66,
+      "offline_decisions": {
+        "new -> new": 66
+      },
+      "queue_search": {
+        "source": false,
+        "this_run": true,
+        "n_entries": 2
+      }
+    }
+  },
+  "transport": "live",
+  "transport_reason": "--transport live",
+  "estimate_usd": 0.0064,
+  "estimate_lines": [
+    "calls not on record: relation: 1 x (1,743, 1,377) tokens at claude-haiku-5-5 rates = $0.001",
+    "their walks after it: overlap, Sonnet (3 pairs a candidate, 18% saved by early exit): 2 x (219, 78) tokens at claude-sonnet-5-5 rates = $0.002",
+    "their walks after it: overlap, Opus (62% of pairs): 1 x (220, 112) tokens at claude-opus-5-5 rates = $0.003"
+  ],
+  "budget_usd": 1.0,
+  "cap_usd": 1.0,
+  "confirmed_by": null,
+  "rubrics": {
+    "overlap": {
+      "name": "overlap_concept",
+      "version": 6,
+      "sha256": "b3eff18fb946928517183af0244acec2d35dba0ab0bd9c57f83c7a06ac3c9fd0"
+    },
+    "relation": {
+      "name": "relation",
+      "version": 1,
+      "sha256": "b6b11f8cfcb0faafdac4a040087356ecb13d410e9bc309597d7833a96110d70f"
+    }
+  },
+  "models": {
+    "relation": "claude-haiku-5-5",
+    "relation_unsure": "claude-sonnet-5-5",
+    "overlap_first": "claude-sonnet-5-5",
+    "overlap_second": "claude-opus-5-5"
+  },
+  "settings": {
+    "config_version": "2026-10-02",
+    "k": 10,
+    "representation": "w20",
+    "variant": "centred",
+    "query_form": "gloss_w14",
+    "embedding_model": "text-embedding-3-large",
+    "cut_off_rule": "alignment score 0-1: 3; 2-3: 4; missing: 4",
+    "relation_max_tokens": 4096,
+    "overlap_max_tokens": 2048,
+    "temperature": 0.0,
+    "cache_ttl_batches": "1h",
+    "concurrency": 8,
+    "ask_attempts": 2,
+    "relation_seed": "gen_pilot_roget",
+    "cosine_floor": 0.25
+  },
+  "rules": {
+    "name": "m3_rules_2",
+    "version": 2,
+    "cover_on_opus_check": true,
+    "both_similar_excluded": true,
+    "pair_flag_grey": false,
+    "renamed_from_covers": false,
+    "separator_blind": true,
+    "cosine_floor": 0.25
+  },
+  "corpus": {
+    "corpus_at": "source",
+    "source_batch": "gen_pilot_roget",
+    "git_sha": "e3aa3c0",
+    "source_was_dirty": false,
+    "n_trait_files": 790,
+    "data_dir": "/tmp/claude-501/m3_corpus_e3aa3c0_4uv_qxe2/data"
+  },
+  "queue_search": {
+    "enabled": true,
+    "queue_path": "/tmp/claude-501/m3_corpus_e3aa3c0_4uv_qxe2/data/seed_queue.json",
+    "queue_sha256": "078500e5594fd3f4f8fffa18136e73b27762459cab29bb6c1058e541e0aae793",
+    "statuses": [
+      "candidate",
+      "ready",
+      "tbd",
+      "backlog"
+    ],
+    "n_entries": 2,
+    "excluded": {
+      "no_text": 222,
+      "not_a_trait_entry": 101,
+      "status_done": 131,
+      "status_exists": 35,
+      "status_generated": 1,
+      "status_not_adopted": 118,
+      "status_paired": 366,
+      "status_superseded": 18
+    },
+    "entries_sha256": "e5506a856c3d5dd0199f8edf935310d182f31206afea85af19c400638d822ea1",
+    "stems": [
+      "spiralist",
+      "technomystical"
+    ]
+  },
+  "resumed": true,
+  "started_at": "2026-10-09T04:14:20+00:00",
+  "redecide": {
+    "from_batch": "gen_pilot_roget",
+    "source_rules": {
+      "name": "m3_rules_2",
+      "version": 2,
+      "cover_on_opus_check": true,
+      "both_similar_excluded": true,
+      "pair_flag_grey": false,
+      "renamed_from_covers": false,
+      "separator_blind": true,
+      "cosine_floor": 0.25
+    },
+    "rules": {
+      "name": "m3_rules_2",
+      "version": 2,
+      "cover_on_opus_check": true,
+      "both_similar_excluded": true,
+      "pair_flag_grey": false,
+      "renamed_from_covers": false,
+      "separator_blind": true,
+      "cosine_floor": 0.25
+    },
+    "relation_seed": "gen_pilot_roget",
+    "relation_model": "claude-haiku-5-5",
+    "write_registry": false,
+    "n_source_records": 641,
+    "reproduction": {
+      "n": 67,
+      "identical": 67,
+      "differ": [],
+      "not_replayable": []
+    },
+    "calls_not_on_record": {
+      "relation:claude-haiku-5-5": 1
+    },
+    "candidates_needing_calls": [
+      "prescient#1"
+    ],
+    "decided_offline": 66,
+    "offline_decisions": {
+      "new -> new": 66
+    },
+    "queue_search": {
+      "source": false,
+      "this_run": true,
+      "n_entries": 2
+    }
+  },
+  "replay_from": [
+    "gen_pilot_roget"
+  ],
+  "earlier_sessions": [
+    {
+      "batch_id": "m3_queue_check_roget",
+      "mode": "shortlist",
+      "git_sha": "350efb8",
+      "allow_dirty": false,
+      "dirty_check": {
+        "paths": [
+          "assistant_axis/gapgen",
+          "data_analysis/gap_generation",
+          "assistant_axis/judge.py",
+          "assistant_axis/judge_pricing.py",
+          "assistant_axis/entity_id.py",
+          "assistant_axis/atomic_io.py",
+          "data/candidates/validation",
+          "reports/trait_gap_generation/rubrics",
+          "pyproject.toml",
+          "uv.lock"
+        ],
+        "dirty": [],
+        "note": null
+      },
+      "argv": [
+        "score",
+        "--redecide",
+        "--from-batch",
+        "gen_pilot_roget",
+        "--batch-id",
+        "m3_queue_check_roget",
+        "--queue-search",
+        "--transport",
+        "live",
+        "--budget-usd",
+        "1",
+        "--embed-only",
+        "--keys",
+        "absolute#1",
+        "alarming#1",
+        "angelic#1",
+        "autochthonous#1",
+        "backhanded#1",
+        "conditional#1",
+        "controversial#1",
+        "cracked#1",
+        "credited#1",
+        "crusty#1",
+        "dear#1",
+        "defective#1",
+        "denying#1",
+        "disagreeing#1",
+        "discordant#1",
+        "domestic#1",
+        "excusable#1",
+        "expensive#1",
+        "factious#1",
+        "foreseeing#1",
+        "found_wanting#1",
+        "free#1",
+        "grim#1",
+        "heavenly#1",
+        "ill_affected#1",
+        "imperfect#1",
+        "impossible#1",
+        "inaudible#1",
+        "incomparable#1",
+        "indebted#1",
+        "inexpressive#1",
+        "infernal#1",
+        "insignificant#1",
+        "intestate#1",
+        "judicial#1",
+        "lachrymose#1",
+        "litigious#1",
+        "misnamed#1",
+        "negative#1",
+        "negotiable#1",
+        "no_brain#1",
+        "nonsensical#1",
+        "perverse#1",
+        "plaintive#1",
+        "prescient#1",
+        "pseudonymous#1",
+        "qualified#1",
+        "quarrelsome#1",
+        "querulous#1",
+        "reactionary#1",
+        "reasonable#1",
+        "recusant#1",
+        "refreshing#1",
+        "refusing#1",
+        "rent_free#1",
+        "satanic#1",
+        "sinister#1",
+        "so_so#1",
+        "sour#1",
+        "sullen#1",
+        "torn#1",
+        "trivial#1",
+        "unaccountable#1",
+        "unbound#1",
+        "unpaid#1",
+        "unreasonable#1",
+        "venal#1"
+      ],
+      "plan": {
+        "mode": "shortlist",
+        "n_candidates": 67,
+        "n_exact_label": 0,
+        "n_to_relation": 67,
+        "skipped": {},
+        "transport": "live",
+        "query_form": "gloss_w14",
+        "listed_mean": null,
+        "n_query_texts_cached": 67,
+        "n_query_texts_to_embed": 0,
+        "corpus": {
+          "n_corpus": 790,
+          "n_missing_from_cache": 2,
+          "missing": [
+            "spiralist",
+            "technomystical"
+          ],
+          "n_corpus_missing": 0,
+          "n_queue_missing": 2
+        },
+        "rules": {
+          "name": "m3_rules_2",
+          "version": 2,
+          "cover_on_opus_check": true,
+          "both_similar_excluded": true,
+          "pair_flag_grey": false,
+          "renamed_from_covers": false,
+          "separator_blind": true,
+          "cosine_floor": 0.25
+        },
+        "corpus_files": {
+          "corpus_at": "source",
+          "source_batch": "gen_pilot_roget",
+          "git_sha": "e3aa3c0",
+          "source_was_dirty": false,
+          "n_trait_files": 790,
+          "data_dir": "/tmp/claude-501/m3_corpus_e3aa3c0_0q_uc2n8/data"
+        },
+        "queue_search": {
+          "enabled": true,
+          "queue_path": "/tmp/claude-501/m3_corpus_e3aa3c0_0q_uc2n8/data/seed_queue.json",
+          "queue_sha256": "078500e5594fd3f4f8fffa18136e73b27762459cab29bb6c1058e541e0aae793",
+          "statuses": [
+            "candidate",
+            "ready",
+            "tbd",
+            "backlog"
+          ],
+          "n_entries": 2,
+          "excluded": {
+            "no_text": 222,
+            "not_a_trait_entry": 101,
+            "status_done": 131,
+            "status_exists": 35,
+            "status_generated": 1,
+            "status_not_adopted": 118,
+            "status_paired": 366,
+            "status_superseded": 18
+          },
+          "entries_sha256": "e5506a856c3d5dd0199f8edf935310d182f31206afea85af19c400638d822ea1"
+        },
+        "redecide": {
+          "from_batch": "gen_pilot_roget",
+          "embed_queue_first": 2
+        }
+      },
+      "transport": "live",
+      "transport_reason": "--transport live",
+      "estimate_usd": 0.0,
+      "estimate_lines": [
+        "candidate embeddings (OpenAI text-embedding-3-large) + the 8 canary texts: 1 x (300, 0) tokens at text-embedding-3-large rates = $0.000"
+      ],
+      "budget_usd": 1.0,
+      "cap_usd": 1.0,
+      "confirmed_by": null,
+      "rubrics": {
+        "overlap": {
+          "name": "overlap_concept",
+          "version": 6,
+          "sha256": "b3eff18fb946928517183af0244acec2d35dba0ab0bd9c57f83c7a06ac3c9fd0"
+        },
+        "relation": {
+          "name": "relation",
+          "version": 1,
+          "sha256": "b6b11f8cfcb0faafdac4a040087356ecb13d410e9bc309597d7833a96110d70f"
+        }
+      },
+      "models": {
+        "relation": "claude-haiku-5-5",
+        "relation_unsure": "claude-sonnet-5-5",
+        "overlap_first": "claude-sonnet-5-5",
+        "overlap_second": "claude-opus-5-5"
+      },
+      "settings": {
+        "config_version": "2026-10-02",
+        "k": 10,
+        "representation": "w20",
+        "variant": "centred",
+        "query_form": "gloss_w14",
+        "embedding_model": "text-embedding-3-large",
+        "cut_off_rule": "alignment score 0-1: 3; 2-3: 4; missing: 4",
+        "relation_max_tokens": 4096,
+        "overlap_max_tokens": 2048,
+        "temperature": 0.0,
+        "cache_ttl_batches": "1h",
+        "concurrency": 8,
+        "ask_attempts": 2,
+        "relation_seed": "gen_pilot_roget",
+        "cosine_floor": 0.25
+      },
+      "rules": {
+        "name": "m3_rules_2",
+        "version": 2,
+        "cover_on_opus_check": true,
+        "both_similar_excluded": true,
+        "pair_flag_grey": false,
+        "renamed_from_covers": false,
+        "separator_blind": true,
+        "cosine_floor": 0.25
+      },
+      "corpus": {
+        "corpus_at": "source",
+        "source_batch": "gen_pilot_roget",
+        "git_sha": "e3aa3c0",
+        "source_was_dirty": false,
+        "n_trait_files": 790,
+        "data_dir": "/tmp/claude-501/m3_corpus_e3aa3c0_0q_uc2n8/data"
+      },
+      "queue_search": {
+        "enabled": true,
+        "queue_path": "/tmp/claude-501/m3_corpus_e3aa3c0_0q_uc2n8/data/seed_queue.json",
+        "queue_sha256": "078500e5594fd3f4f8fffa18136e73b27762459cab29bb6c1058e541e0aae793",
+        "statuses": [
+          "candidate",
+          "ready",
+          "tbd",
+          "backlog"
+        ],
+        "n_entries": 2,
+        "excluded": {
+          "no_text": 222,
+          "not_a_trait_entry": 101,
+          "status_done": 131,
+          "status_exists": 35,
+          "status_generated": 1,
+          "status_not_adopted": 118,
+          "status_paired": 366,
+          "status_superseded": 18
+        },
+        "entries_sha256": "e5506a856c3d5dd0199f8edf935310d182f31206afea85af19c400638d822ea1",
+        "stems": [
+          "spiralist",
+          "technomystical"
+        ]
+      },
+      "resumed": false,
+      "started_at": "2026-10-09T04:13:01+00:00",
+      "redecide": null,
+      "replay_from": [
+        "gen_pilot_roget"
+      ],
+      "canary": {
+        "model": "text-embedding-3-large",
+        "arm": "openai",
+        "tag": "openai_text-embedding-3-large",
+        "n": 8,
+        "n_compared": 8,
+        "n_new_reference": 0,
+        "min_cosine": 0.999463,
+        "threshold": 0.999,
+        "cosines": {
+          "absentee": 1.0,
+          "collectivistic": 1.0,
+          "edgy": 1.0,
+          "gay": 1.0,
+          "ironic": 0.999463,
+          "only_child": 0.999994,
+          "restless": 1.0,
+          "sycophantic": 0.999999
+        },
+        "below": [],
+        "ok": true,
+        "checked_at": "2026-10-09T04:13:11+00:00"
+      },
+      "embed_only": {
+        "n_embedded": 67,
+        "at": "2026-10-09T04:13:11+00:00"
+      },
+      "finished_at": "2026-10-09T04:13:11+00:00",
+      "cost_usd": 0.0,
+      "status": 0
+    }
+  ],
+  "canary": {
+    "model": "text-embedding-3-large",
+    "arm": "openai",
+    "tag": "openai_text-embedding-3-large",
+    "n": 8,
+    "n_compared": 8,
+    "n_new_reference": 0,
+    "min_cosine": 0.999463,
+    "threshold": 0.999,
+    "cosines": {
+      "absentee": 1.0,
+      "collectivistic": 1.0,
+      "edgy": 1.0,
+      "gay": 1.0,
+      "ironic": 0.999463,
+      "only_child": 0.999994,
+      "restless": 1.0,
+      "sycophantic": 0.999999
+    },
+    "below": [],
+    "ok": true,
+    "checked_at": "2026-10-09T04:14:22+00:00"
+  },
+  "finished_at": "2026-10-09T04:14:34+00:00",
+  "cost_usd": 0.0036,
+  "status": 0,
+  "stopped_by_error": null,
+  "n_decided": 67,
+  "n_stalled": 0
+}

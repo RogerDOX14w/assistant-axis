@@ -1,0 +1,301 @@
+{
+  "result": {
+    "mode": "shortlist",
+    "n_candidates": 230,
+    "n_decided": 230,
+    "n_stalled": 0,
+    "stalled": {},
+    "skipped": {},
+    "by_decision": {
+      "new": 230
+    },
+    "by_reason": {
+      "overlap": 230
+    },
+    "by_cut_off": {
+      "3": {
+        "new": 132
+      },
+      "4": {
+        "new": 98
+      }
+    },
+    "exact_label": {},
+    "pairs_judged_per_candidate": {
+      "0": 1,
+      "1": 3,
+      "2": 10,
+      "3": 18,
+      "4": 17,
+      "5": 30,
+      "6": 37,
+      "7": 35,
+      "8": 37,
+      "9": 26,
+      "10": 14,
+      "11": 2
+    },
+    "pairs_judged_total": 1454,
+    "pairs_judged_mean": 6.322,
+    "listed_per_candidate_mean": 17.652,
+    "shortlist_length": {
+      "0": 1,
+      "1": 3,
+      "2": 10,
+      "3": 18,
+      "4": 17,
+      "5": 30,
+      "6": 37,
+      "7": 35,
+      "8": 37,
+      "9": 27,
+      "10": 13,
+      "11": 2
+    },
+    "early_exit_depth": {},
+    "escalations": {
+      "below_cut_off": 348,
+      "at_cut_off": 4
+    },
+    "rescues": 4,
+    "review_flags": {
+      "both_similar": 3
+    },
+    "pair_completions": 11,
+    "pair_completion_for": {
+      "abusive#1": [
+        "merciful"
+      ],
+      "admonitory#1": [
+        "self_blaming"
+      ],
+      "big_headed#1": [
+        "modest"
+      ],
+      "brutal#1": [
+        "merciful"
+      ],
+      "classy#1": [
+        "leo"
+      ],
+      "inhuman#1": [
+        "merciful"
+      ],
+      "intimidating#1": [
+        "timid"
+      ],
+      "surly#1": [
+        "glib"
+      ],
+      "unartistic#1": [
+        "artistic",
+        "artistic_holland"
+      ],
+      "unjealous#1": [
+        "envious"
+      ],
+      "unmerciful#1": [
+        "merciful"
+      ]
+    },
+    "relation_outcomes": {
+      "call_status": {
+        "ok": 230
+      },
+      "answers": {
+        "unrelated": 1751,
+        "similar": 1015,
+        "opposed": 1247,
+        "unsure": 47
+      },
+      "final": {
+        "similar": 1030,
+        "unrelated": 1776,
+        "opposed": 1247,
+        "unsure": 7
+      },
+      "candidates_with_unsure_reasked": 28
+    },
+    "cache": {},
+    "spend_by_stage": {},
+    "spend_usd": 2.9e-05,
+    "usage": {
+      "per_model": {
+        "text-embedding-3-large": {
+          "model": "text-embedding-3-large",
+          "prompt_tokens": 220,
+          "completion_tokens": 0,
+          "cost_usd": 0.0,
+          "n_calls": 1
+        }
+      },
+      "total_cost_usd": 0.0,
+      "total_prompt_tokens": 220,
+      "total_completion_tokens": 0,
+      "n_calls": 1
+    },
+    "rules": [
+      "m3_rules_2"
+    ],
+    "cosine_floor": [
+      0.25
+    ],
+    "review_queue": 3,
+    "covered_flagged": 0,
+    "pair_notes": {
+      "rows": 3,
+      "notes": 3,
+      "by_kind": {
+        "pair": 3
+      },
+      "rows_by_decision": {
+        "new": 3
+      }
+    },
+    "pair_flag_rows": 9,
+    "floor": {
+      "rows_with_listed_below": 230,
+      "listed_below_total": 2527,
+      "similar_kept_out_total": 60,
+      "rows_with_similar_kept_out": 52
+    },
+    "renamed_from_judged": {
+      "rows": 0,
+      "by_decision": {}
+    },
+    "queue_search": {
+      "enabled": true,
+      "queue_path": "/tmp/claude-501/m3_corpus_e3aa3c0_sim2zl0m/data/seed_queue.json",
+      "queue_sha256": "078500e5594fd3f4f8fffa18136e73b27762459cab29bb6c1058e541e0aae793",
+      "statuses": [
+        "candidate",
+        "ready",
+        "tbd",
+        "backlog"
+      ],
+      "n_entries": 2,
+      "excluded": {
+        "no_text": 222,
+        "not_a_trait_entry": 101,
+        "status_done": 131,
+        "status_exists": 35,
+        "status_generated": 1,
+        "status_not_adopted": 118,
+        "status_paired": 366,
+        "status_superseded": 18
+      },
+      "entries_sha256": "e5506a856c3d5dd0199f8edf935310d182f31206afea85af19c400638d822ea1",
+      "rows_with_queue_in_index": 230,
+      "rows_listing_a_queue_entry": 0,
+      "rows_reading_a_queue_entry": 0,
+      "covered_by_queue": 0,
+      "covered_by_queue_by_status": {}
+    },
+    "batch_id": "m3_queue_check_censuses",
+    "parse_rates": {},
+    "stopped_by_budget": false,
+    "stopped_by_error": null,
+    "resumed_calls": 2064,
+    "rubrics": {
+      "overlap": {
+        "name": "overlap_concept",
+        "version": 6,
+        "sha256": "b3eff18fb946928517183af0244acec2d35dba0ab0bd9c57f83c7a06ac3c9fd0"
+      },
+      "relation": {
+        "name": "relation",
+        "version": 1,
+        "sha256": "b6b11f8cfcb0faafdac4a040087356ecb13d410e9bc309597d7833a96110d70f"
+      }
+    },
+    "rules_of_run": {
+      "name": "m3_rules_2",
+      "version": 2,
+      "cover_on_opus_check": true,
+      "both_similar_excluded": true,
+      "pair_flag_grey": false,
+      "renamed_from_covers": false,
+      "separator_blind": true,
+      "cosine_floor": 0.25
+    },
+    "redecide": {
+      "from_batch": "gen_pilot_censuses",
+      "source_rules": {
+        "name": "m3_rules_2",
+        "version": 2,
+        "cover_on_opus_check": true,
+        "both_similar_excluded": true,
+        "pair_flag_grey": false,
+        "renamed_from_covers": false,
+        "separator_blind": true,
+        "cosine_floor": 0.25
+      },
+      "rules": {
+        "name": "m3_rules_2",
+        "version": 2,
+        "cover_on_opus_check": true,
+        "both_similar_excluded": true,
+        "pair_flag_grey": false,
+        "renamed_from_covers": false,
+        "separator_blind": true,
+        "cosine_floor": 0.25
+      },
+      "relation_seed": "gen_pilot_censuses",
+      "relation_model": "claude-haiku-5-5",
+      "write_registry": false,
+      "n_source_records": 2689,
+      "reproduction": {
+        "n": 230,
+        "identical": 230,
+        "differ": [],
+        "not_replayable": []
+      },
+      "calls_not_on_record": {},
+      "candidates_needing_calls": [],
+      "decided_offline": 230,
+      "offline_decisions": {
+        "new -> new": 230
+      },
+      "queue_search": {
+        "source": false,
+        "this_run": true,
+        "n_entries": 2
+      }
+    }
+  },
+  "_provenance": {
+    "schema_version": "1.0",
+    "produced_by": {
+      "cmd": "uv run python data_analysis/gap_generation/novelty_score.py score --redecide --from-batch gen_pilot_censuses --batch-id m3_queue_check_censuses --queue-search --transport live --budget-usd 1 --keys 'abusive#1' 'admonitory#1' 'aesthetic#1' 'affected#1' 'appreciated#1' 'arbitrative#1' 'backbiting#1' 'balky#1' 'bestial#1' 'big_headed#1' 'blasphemous#1' 'boyish#1' 'bright_eyed#1' 'brotherly#1' 'browbeating#1' 'brutal#1' 'chameleonlike#1' 'charming#1' 'chatty#1' 'cheesy#1' 'classy#1' 'commandeering#1' 'complying#1' 'conceding#1' 'consolatory#1' 'cunning#1' 'curmudgeonly#1' 'cute#1' 'dastardly#1' 'desirable#1' 'disabled#1' 'discourageable#1' 'discriminating#1' 'divisive#1' 'doting#1' 'double_faced#1' 'double_tongued#1' 'eager#1' 'earthly_minded#1' 'embellishing#1' 'empowering#1' 'equivocal#1' 'erotic#1' 'exaggerative#1' 'faltering#1' 'fantastical#1' 'fearless#1' 'flighty#1' 'foul_mouthed#1' 'fraudulent#1' 'frenetic#1' 'frightening#1' 'frigid#1' 'gifted#1' 'glamorous#1' 'godless#1' 'good_hearted#1' 'grumbly#1' 'halfhearted#1' 'handy#1' 'hard_shelled#1' 'headstrong#1' 'high_handed#1' 'high_minded#1' 'hit_or_miss#1' 'hot_blooded#1' 'ill_willed#1' 'impassive#1' 'impersonal#1' 'imposing#1' 'impractical#1' 'impressionable#1' 'imprudent#1' 'incompliant#1' 'indiscreet#1' 'indocile#1' 'inexpressive#1' 'ingratiatory#1' 'inharmonious#1' 'inhuman#1' 'insensate#1' 'insensitive#1' 'instructible#1' 'intimidating#1' 'intricate#1' 'irreformable#1' 'irreligious#1' 'kindhearted#1' 'law_abiding#1' 'loud#1' 'lovable#1' 'malingering#1' 'manly#1' 'matronly#1' 'menacing#1' 'militaristic#1' 'mousy#1' 'mushy#1' 'musical#1' 'namby_pamby#1' 'nasty#1' 'noisy#1' 'nonegotistical#1' 'nonhostile#1' 'nonrational#1' 'nonreligious#1' 'obdurate#1' 'overbold#1' 'overcaring#1' 'overgreedy#1' 'overloud#1' 'overlusty#1' 'overquiet#1' 'overrighteous#1' 'paternal#1' 'penny_wise#1' 'perverse#1' 'placating#1' 'pleasing#1' 'plodding#1' 'prayerful#1' 'predatory#1' 'prejudiceless#1' 'prim#1' 'profound#1' 'prominent#1' 'punishing#1' 'quibbling#1' 'rapacious#1' 'receptive#1' 'reliant#1' 'respectable#1' 'retaliative#1' 'rowdy#1' 'salty#1' 'scandalmongering#1' 'scholastic#1' 'scrappy#1' 'self_actualized#1' 'self_assertive#1' 'self_confident#1' 'self_deceiving#1' 'self_disparaging#1' 'self_educated#1' 'self_limiting#1' 'self_seeking#1' 'sensible#1' 'shady#1' 'silent#1' 'sketchy#1' 'skittish#1' 'slavish#1' 'sleek#1' 'smutty#1' 'solicitous#1' 'spoiled#1' 'stately#1' 'stealthy#1' 'strong_willed#1' 'stylish#1' 'suave#1' 'successful#1' 'surly#1' 'temptable#1' 'tireless#1' 'tolerant#1' 'tough_minded#1' 'tragic#1' 'traitorous#1' 'ultraintellectual#1' 'ultrasensual#1' 'unaffable#1' 'unaggressive#1' 'unartistic#1' 'unbewailing#1' 'uncandid#1' 'uncompanionable#1' 'unconcealing#1' 'uncongenial#1' 'unconstrainable#1' 'unconstrained#1' 'uncontriving#1' 'uncouth#1' 'uncultured#1' 'undemanding#1' 'undemocratic#1' 'undutiful#1' 'unenterprising#1' 'unfeigning#1' 'unforgettable#1' 'ungainly#1' 'ungallant#1' 'ungenteel#1' 'ungraceful#1' 'unholy#1' 'unimpeachable#1' 'unimpressed#1' 'uninformed#1' 'uninterested#1' 'unique#1' 'unjealous#1' 'unkind#1' 'unkindly#1' 'unliterary#1' 'unmercenary#1' 'unmerciful#1' 'unpersonable#1' 'unproductive#1' 'unprofessional#1' 'unpurposed#1' 'unreceptive#1' 'unrelaxing#1' 'unrepressible#1' 'unsaintly#1' 'unstudious#1' 'unthorough#1' 'unvigilant#1' 'unwary#1' 'upright#1' 'urbane#1' 'vapid#1' 'vegetative#1' 'versatile#1' 'vigilant#1' 'warmthless#1' 'wary#1' 'weariless#1' 'wild#1' 'willing#1' 'worldly_minded#1'",
+      "git_sha": "808b4f6+dirty",
+      "author": "Roger Dearnaley",
+      "title": "novelty_score shortlist m3_queue_check_censuses"
+    },
+    "produced_at": "2026-10-09T04:14:56+00:00",
+    "inputs": [
+      {
+        "dep_key": "metric_config",
+        "path": "data/candidates/metric_config.json",
+        "fingerprint": "v1:2026-10-08T17:36:08+00:00@54961",
+        "kind": "file",
+        "dataset_id": null,
+        "last_modified_at": "2026-10-08T17:36:08+00:00",
+        "extras": {}
+      },
+      {
+        "dep_key": "rubrics",
+        "path": "reports/trait_gap_generation/rubrics",
+        "fingerprint": "v1:multi:e46bf0db1520",
+        "kind": "multi",
+        "dataset_id": null,
+        "last_modified_at": "2026-10-08T17:36:09+00:00",
+        "extras": {},
+        "member_paths": [
+          "reports/trait_gap_generation/rubrics/overlap_concept.md",
+          "reports/trait_gap_generation/rubrics/relation.md"
+        ]
+      }
+    ],
+    "inputs_sha256": "752724c9607829c32dc7a83155dcc288069e9a15f80407bd42333afbfddd7369"
+  }
+}
