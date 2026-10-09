@@ -11,9 +11,9 @@ States: **covered** (an existing trait has the head as its primary), **partly co
 - Heads in scope: **674** (576 dispositional, 98 from Classes I-III).
 - Not character (rated 0): **188** heads, left out of the counts below (ratings: 2 on 165, 1 on 232, 0 on 188; 89 unrated, mostly heads with no adjectives).
 - Covered **279**, partly covered **50**, uncovered **157** (of which 6 have a queued label only).
-- Opposed pairs in scope: both poles covered **76**, one pole **63**, neither **32** (by the pairing's evidence: {"rule": {"neither_pole_covered": 1}, "synopsis": {"neither_pole_covered": 31, "both_poles_covered": 76, "one_pole_covered": 63}}).
-- Labels placed: 726 existing traits with a primary head (200 without; 680 of the primaries in scope), 179 queued labels (54 without).
-- Gap classes: pair_completion 30, pair_empty 57, singleton_empty 64, queued_only 6, partly_covered 50, crowded 78, covered 201.
+- Opposed pairs in scope: both poles covered **75**, one pole **64**, neither **32** (by the pairing's evidence: {"rule": {"neither_pole_covered": 1}, "synopsis": {"neither_pole_covered": 31, "both_poles_covered": 75, "one_pole_covered": 64}}).
+- Labels placed: 727 existing traits with a primary head (201 without; 681 of the primaries in scope), 179 queued labels (54 without).
+- Gap classes: pair_completion 31, pair_empty 57, singleton_empty 63, queued_only 6, partly_covered 50, crowded 78, covered 201.
 - Pairing as Roget printed it in the Tabular Synopsis of the 1911 edition ([synopsis_readout.md](./synopsis_readout.md)), by rule for the heads the synopsis does not print: of the 576 dispositional heads, 402 are in a pair, 20 are the third head of a triad, 151 are singletons and 3 are unresolved; only a pair gives a head an opposed head here.
 
 ## By section
@@ -40,7 +40,7 @@ States: **covered** (an existing trait has the head as its primary), **partly co
 | IV III. Materials for reasoning | 2 | 0 | 0 | 3 | 4 |
 | IV IV. Reasoning processes | 2 | 0 | 0 | 0 | 2 |
 | IV V. Results of reasoning | 17 | 1 | 0 | 6 | 2 |
-| IV VI. Extension of thought | 1 | 2 | 0 | 3 | 3 |
+| IV VI. Extension of thought | 2 | 2 | 0 | 2 | 3 |
 | IV VII. Creative thought | 1 | 0 | 0 | 0 | 2 |
 | IV I. Nature of ideas communicated | 2 | 0 | 0 | 3 | 4 |
 | IV II. Modes of communication | 9 | 1 | 0 | 6 | 10 |
@@ -55,12 +55,12 @@ States: **covered** (an existing trait has the head as its primary), **partly co
 | V III. Conditional intersocial volition | 3 | 0 | 0 | 3 | 2 |
 | V IV. Possessive relations | 10 | 2 | 0 | 18 | 21 |
 | VI I. Affections in general | 5 | 0 | 0 | 2 | 0 |
-| VI II. Personal affections | 42 | 2 | 0 | 6 | 12 |
+| VI II. Personal affections | 41 | 2 | 0 | 7 | 12 |
 | VI III. Sympathetic affections | 20 | 3 | 2 | 7 | 4 |
 | VI IV. Moral affections | 22 | 5 | 1 | 16 | 12 |
 | VI V. Religious affections | 8 | 4 | 0 | 10 | 4 |
 
-## pair_completion (30)
+## pair_completion (31)
 
 | head | section | opposed head | its traits | queued | parked | secondary of |
 |---|---|---|---|---|---|---|
@@ -90,6 +90,7 @@ States: **covered** (an existing trait has the head as its primary), **partly co
 | 717 Defense | V IV. Antagonism / 2. Active Antagonism | 716 Attack (synopsis) | [aggressive](../../traits/instructions/aggressive.json) | - | - | - |
 | 750 Liberation | V I. General intersocial volition | 751 Restraint (synopsis) | [trapped-in-job](../../traits/instructions/trapped_in_job.json) | - | - | - |
 | 761 Prohibition | V II. Special intersocial volition | 760 Permission (synopsis) | [permissive](../../traits/instructions/permissive.json), [permissive (Baumrind)](../../traits/instructions/permissive_baumrind.json) | - | - | - |
+| 830 . Painfulness | VI II. Personal affections | 829 Pleasurableness (synopsis) | [agreeable (Big Five)](../../traits/instructions/agreeable_big_five.json) | - | - | - |
 | 889 Enmity | VI III. Sympathetic affections | 888 Friendship (synopsis) | [close-knit](../../traits/instructions/close_knit.json), [friendly](../../traits/instructions/friendly.json) | - | - | - |
 | 912 Benefactor | VI III. Sympathetic affections | 913 Evil doer (synopsis) | [killer (Bartle)](../../traits/instructions/killer_bartle.json) | - | - | - |
 | 945 Vice | VI IV. Moral affections | 944 Virtue (synopsis) | [moral](../../traits/instructions/moral.json) | - | - | - |
@@ -157,7 +158,7 @@ States: **covered** (an existing trait has the head as its primary), **partly co
 | 985 Judeo-Christian Revelation | VI V. Religious affections | 986 Pseudo-Revelation (synopsis) | - | - | - | - |
 | 986 Pseudo-Revelation | VI V. Religious affections | 985 Judeo-Christian Revelation (synopsis) | - | - | - | - |
 
-## singleton_empty (64)
+## singleton_empty (63)
 
 | head | section | opposed head | its traits | queued | parked | secondary of |
 |---|---|---|---|---|---|---|
@@ -165,7 +166,6 @@ States: **covered** (an existing trait has the head as its primary), **partly co
 | 465b Identification | IV II. Precursory conditions and operations | - | - | - | - | - |
 | 480a Discovery | IV V. Results of reasoning | - | - | - | - | - |
 | 504 Madman | IV V. Results of reasoning | - | - | - | [hypochondriac](../../seed_queue.json) (queued) | - |
-| 510 Foresight | IV VI. Extension of thought / 1. To the Past | - | - | - | - | - |
 | 513 Oracle | IV VI. Extension of thought / 1. To the Past | - | - | - | - | - |
 | 520 Equivocalness | IV I. Nature of ideas communicated | - | - | - | - | - |
 | 524 Interpreter | IV I. Nature of ideas communicated | - | - | - | - | - |
@@ -504,8 +504,8 @@ Rated 0 by the head-scope check; the reasons are in [head_scope.json](./head_sco
 | 543 Veracity (6) | [candid](../../traits/instructions/candid.json), [earnest](../../traits/instructions/earnest.json), [forthright](../../traits/instructions/forthright.json), [sincere](../../traits/instructions/sincere.json), [trustworthy](../../traits/instructions/trustworthy.json), [truthful](../../traits/instructions/truthful.json) |
 | 737 Authority (6) | [authoritarian](../../traits/instructions/authoritarian.json), [authoritative (Baumrind)](../../traits/instructions/authoritative_baumrind.json), [controlling](../../traits/instructions/controlling.json), [dominance (DISC)](../../traits/instructions/dominance_disc.json), [dominant](../../traits/instructions/dominant.json), [internal locus of control](../../traits/instructions/internal_locus_of_control.json) |
 | 866 Indifference (6) | [apolitical](../../traits/instructions/apolitical.json), [detached](../../traits/instructions/detached.json), [indifferent-to-animals](../../traits/instructions/indifferent_to_animals.json), [unambitious](../../traits/instructions/unambitious.json), [uncaring](../../traits/instructions/uncaring.json), [unsentimental](../../traits/instructions/unsentimental.json) |
+| 907 Malevolence (6) | [malevolent](../../traits/instructions/malevolent.json), [malicious](../../traits/instructions/malicious.json), [malign](../../traits/instructions/malign.json), [sadistic](../../traits/instructions/sadistic.json), [sadistic (Dark Tetrad)](../../traits/instructions/sadistic_dark_tetrad.json), [spiteful](../../traits/instructions/spiteful.json) |
 | 910 Philanthropy (6) | [collectivistic](../../traits/instructions/collectivistic.json), [cosmopolitan](../../traits/instructions/cosmopolitan.json), [humanistic](../../traits/instructions/humanistic.json), [humanitarian](../../traits/instructions/humanitarian.json), [patriotic](../../traits/instructions/patriotic.json), [philanthropic](../../traits/instructions/philanthropic.json) |
-| 939 Probity (6) | [good even when unwatched](../../traits/instructions/good_even_when_unwatched.json), [honest](../../traits/instructions/honest.json), [honorable](../../traits/instructions/honorable.json), [honorable while playing](../../traits/instructions/honorable_while_playing.json), [intellectually honest](../../traits/instructions/intellectually_honest.json), [principled](../../traits/instructions/principled.json) |
 
 ## Class I-III heads brought in, with the labels that brought them
 
@@ -549,7 +549,7 @@ Rated 0 by the head-scope check; the reasons are in [head_scope.json](./head_sco
 | 170 Agency | covered | [efficient](../../traits/instructions/efficient.json), [practical](../../traits/instructions/practical.json) |
 | 171 Physical Energy | covered | [energetic](../../traits/instructions/energetic.json), [intense](../../traits/instructions/intense.json) |
 | 172 Physical Inertness | partly | [passive](../../traits/instructions/passive.json) |
-| 173 Violence | covered | [savage](../../traits/instructions/savage.json), [turbulent](../../traits/instructions/turbulent.json) |
+| 173 Violence | covered | [turbulent](../../traits/instructions/turbulent.json), [violent](../../traits/instructions/violent.json) |
 | 174 Moderation | covered | [calm](../../traits/instructions/calm.json), [calm (IPIP-NEO)](../../seed_queue.json) (queued), [gentle](../../traits/instructions/gentle.json), [moderate](../../traits/instructions/moderate.json), [peaceful](../../traits/instructions/peaceful.json), [temperate](../../traits/instructions/temperate.json) |
 | 175 Influence | covered | [dominant](../../traits/instructions/dominant.json) |
 | 181 Region | covered | [parochial](../../traits/instructions/parochial.json) |
@@ -635,7 +635,7 @@ Rated 0 by the head-scope check; the reasons are in [head_scope.json](./head_sco
 | 162 Destruction | [destructive](../../traits/instructions/destructive.json) |
 | 170 Agency | [efficient](../../traits/instructions/efficient.json) |
 | 171 Physical Energy | [intense](../../traits/instructions/intense.json) |
-| 173 Violence | [savage](../../traits/instructions/savage.json), [turbulent](../../traits/instructions/turbulent.json) |
+| 173 Violence | [turbulent](../../traits/instructions/turbulent.json), [violent](../../traits/instructions/violent.json) |
 | 174 Moderation | [even-tempered](../../traits/instructions/even_tempered.json) |
 | 175 Influence | [influence (DISC)](../../traits/instructions/influence_disc.json) |
 | 181 Region | [eastern hemisphere](../../traits/instructions/eastern_hemisphere.json), [parochial](../../traits/instructions/parochial.json), [western hemisphere](../../traits/instructions/western_hemisphere.json) |
@@ -690,6 +690,7 @@ Rated 0 by the head-scope check; the reasons are in [head_scope.json](./head_sco
 | 500 Sage | [thinker (VALS)](../../traits/instructions/thinker_vals.json) |
 | 503 Insanity | [delusional](../../traits/instructions/delusional.json) |
 | 506 Oblivion | [forgetful](../../traits/instructions/forgetful.json), [oblivious](../../traits/instructions/oblivious.json) |
+| 510 Foresight | [future-oriented](../../traits/instructions/future_oriented.json) |
 | 515 Imagination | [confabulatory](../../traits/instructions/confabulatory.json), [creative](../../traits/instructions/creative.json), [idealistic](../../traits/instructions/idealistic.json), [romantic](../../traits/instructions/romantic.json) |
 | 518 Intelligibility | [clear](../../traits/instructions/clear.json), [transparent](../../traits/instructions/transparent.json) |
 | 522 Interpretation | [expository](../../traits/instructions/expository.json) |
@@ -794,7 +795,7 @@ Rated 0 by the head-scope check; the reasons are in [head_scope.json](./head_sco
 | 816 Liberality | [generous](../../traits/instructions/generous.json) |
 | 817 Economy | [bargain-hunter](../../traits/instructions/bargain_hunter.json), [frugal](../../traits/instructions/frugal.json) |
 | 817a Greed | [greedy](../../traits/instructions/greedy.json) |
-| 818 Prodigality | [extravagant](../../traits/instructions/extravagant.json) |
+| 818 Prodigality | [extravagant](../../traits/instructions/extravagant.json), [wasteful](../../traits/instructions/wasteful.json) |
 | 819 Parsimony | [stingy](../../traits/instructions/stingy.json) |
 | 821 Feeling | [emotional](../../traits/instructions/emotional.json), [emotional (HEXACO)](../../traits/instructions/emotional_hexaco.json), [zealous](../../traits/instructions/zealous.json) |
 | 822 Sensibility | [emotionally-engaged](../../traits/instructions/emotionally_engaged.json), [sentimental](../../traits/instructions/sentimental.json), [thin-skinned](../../traits/instructions/thin_skinned.json) |
@@ -803,7 +804,6 @@ Rated 0 by the head-scope check; the reasons are in [head_scope.json](./head_sco
 | 826 Inexcitability | [composed](../../traits/instructions/composed.json), [dispassionate](../../traits/instructions/dispassionate.json), [patient](../../traits/instructions/patient.json), [placid](../../traits/instructions/placid.json), [serene](../../traits/instructions/serene.json), [staid](../../traits/instructions/staid.json), [stoic](../../traits/instructions/stoic.json), [strong-stomached](../../traits/instructions/strong_stomached.json), [unflappable](../../traits/instructions/unflappable.json) |
 | 828 Pain | [in chronic pain](../../traits/instructions/in_chronic_pain.json), [stressed](../../traits/instructions/stressed.json) |
 | 829 Pleasurableness | [agreeable (Big Five)](../../traits/instructions/agreeable_big_five.json) |
-| 830 . Painfulness | [cruel](../../traits/instructions/cruel.json) |
 | 831 Content | [contented](../../traits/instructions/contented.json), [death-accepting](../../traits/instructions/death_accepting.json), [easygoing](../../traits/instructions/easygoing.json), [happily-partnered](../../traits/instructions/happily_partnered.json), [self-accepting](../../traits/instructions/self_accepting.json) |
 | 832 Discontent | [discontented](../../traits/instructions/discontented.json), [unhappily-partnered](../../traits/instructions/unhappily_partnered.json) |
 | 836 Cheerfulness | [cheerful](../../traits/instructions/cheerful.json), [joyful](../../traits/instructions/joyful.json), [lighthearted](../../traits/instructions/lighthearted.json) |
@@ -852,11 +852,11 @@ Rated 0 by the head-scope check; the reasons are in [head_scope.json](./head_sco
 | 901 Irascibility | [irascible](../../traits/instructions/irascible.json), [quarrelsome (HEXACO)](../../traits/instructions/quarrelsome_hexaco.json) |
 | 902 Endearment | [flirty](../../traits/instructions/flirty.json) |
 | 906 Benevolence | [benevolent](../../traits/instructions/benevolent.json), [benign](../../traits/instructions/benign.json), [kind-to-animals](../../traits/instructions/kind_to_animals.json), [nurturing](../../traits/instructions/nurturing.json) |
-| 907 Malevolence | [malevolent](../../traits/instructions/malevolent.json), [malicious](../../traits/instructions/malicious.json), [malign](../../traits/instructions/malign.json), [sadistic (Dark Tetrad)](../../traits/instructions/sadistic_dark_tetrad.json), [spiteful](../../traits/instructions/spiteful.json) |
+| 907 Malevolence | [malevolent](../../traits/instructions/malevolent.json), [malicious](../../traits/instructions/malicious.json), [malign](../../traits/instructions/malign.json), [sadistic](../../traits/instructions/sadistic.json), [sadistic (Dark Tetrad)](../../traits/instructions/sadistic_dark_tetrad.json), [spiteful](../../traits/instructions/spiteful.json) |
 | 910 Philanthropy | [collectivistic](../../traits/instructions/collectivistic.json), [cosmopolitan](../../traits/instructions/cosmopolitan.json), [humanistic](../../traits/instructions/humanistic.json), [humanitarian](../../traits/instructions/humanitarian.json), [patriotic](../../traits/instructions/patriotic.json), [philanthropic](../../traits/instructions/philanthropic.json) |
 | 911 Misanthropy | [misanthropic](../../traits/instructions/misanthropic.json) |
 | 913 Evil doer | [killer (Bartle)](../../traits/instructions/killer_bartle.json) |
-| 914 Pity | [compassionate](../../traits/instructions/compassionate.json), [empathetic](../../traits/instructions/empathetic.json), [merciful](../../traits/instructions/merciful.json), [self-pitying](../../traits/instructions/self_pitying.json) |
+| 914 Pity | [compassionate](../../traits/instructions/compassionate.json), [empathetic](../../traits/instructions/empathetic.json), [self-pitying](../../traits/instructions/self_pitying.json) |
 | 914a Pitilessness | [ruthless while playing](../../traits/instructions/ruthless_while_playing.json) |
 | 916 Gratitude | [grateful](../../traits/instructions/grateful.json) |
 | 917 Ingratitude | [ungrateful](../../traits/instructions/ungrateful.json) |

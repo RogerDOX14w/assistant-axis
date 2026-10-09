@@ -70,8 +70,11 @@ V4_MIN_SCORE = 4
 #: that draws no one in; libertarian -> metaphysical_libertarian, rewritten to the metaphysical sense
 #: only (the bare word read politically).  What was recorded under the old stem (a labelled pair, a hand
 #: decision, an M1 gloss) does not carry over; the other renames of that merge kept their descriptions'
-#: sense and do.  corpus_regions.json made the same call (the two were filtered again).
-SENSE_CHANGED_RENAMES: dict[str, str] = {"bland": "dull", "libertarian": "metaphysical_libertarian"}
+#: sense and do.  corpus_regions.json made the same call (the two were filtered again).  Added 2026-10-10:
+#: savage -> violent (2f944dd, wave 2 batch 2), cutting comebacks became physical violence; the seed-queue
+#: decision on tender and the curation file name savage in the old sense.
+SENSE_CHANGED_RENAMES: dict[str, str] = {"bland": "dull", "libertarian": "metaphysical_libertarian",
+                                         "savage": "violent"}
 
 
 def corpus_renames(data_dir: Path, *, carry_only: bool = True) -> dict[str, str]:

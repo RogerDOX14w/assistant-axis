@@ -234,9 +234,24 @@ def test_v4_retired_its_unique_pairs_are_in_the_curation(tmp_path):
     cur = json.loads((DATA / "candidates" / "calibration" / L.CURATION_NAME).read_text())
     moved = [a for a in cur["add"] if a.get("source") == "antonyms_v4"]
     assert len(moved) == 14
+    stems = {p.stem for p in (DATA / "traits" / "instructions").glob("*.json")}
+    unused = {L.pair_key(u["a"], u["b"]) for u in without.curation_unused if u.get("part") == "add"}
     for a in moved:
-        assert rel.get(L.pair_key(a["a"], a["b"])) == "antonym", a
+        key = L.pair_key(a["a"], a["b"])
+        if a["a"] in stems and a["b"] in stems:
+            assert rel.get(key) == "antonym", a
+        else:                                           # a member dropped since (cruel / merciful, 2f944dd)
+            assert key in unused, a
     v4 = DATA / "traits" / "trait_antonyms_v4.json"
     if v4.exists():                                     # until the file is deleted: the same pairs either way
         labelled = lambda lp: {q.key(): q.relation for q in lp.pairs if q.relation != "unrelated"}  # noqa: E731
         assert labelled(without) == labelled(_real_build(v4))
+
+
+def test_savage_to_violent_does_not_carry():
+    """2f944dd (2026-10-10): savage was renamed violent and changed sense (cutting comebacks to physical
+    violence); records under savage (the tender decision, the curation file) must not be read as violent's."""
+    assert L.SENSE_CHANGED_RENAMES["savage"] == "violent"
+    if (DATA / "traits" / "instructions" / "violent.json").exists():
+        assert "savage" not in L.corpus_renames(DATA)
+        assert L.corpus_renames(DATA, carry_only=False).get("savage") == "violent"

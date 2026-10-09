@@ -17,9 +17,9 @@
     "of_which_queued": 6
    },
    "by_gap_class": {
-    "pair_completion": 30,
+    "pair_completion": 31,
     "pair_empty": 57,
-    "singleton_empty": 64,
+    "singleton_empty": 63,
     "queued_only": 6,
     "partly_covered": 50,
     "crowded": 78,
@@ -43,9 +43,9 @@
      "empty": 1
     },
     "IV": {
-     "covered": 55,
+     "covered": 56,
      "queued": 1,
-     "empty": 38,
+     "empty": 37,
      "partly": 5
     },
     "V": {
@@ -55,8 +55,8 @@
      "partly": 9
     },
     "VI": {
-     "empty": 41,
-     "covered": 97,
+     "empty": 42,
+     "covered": 96,
      "partly": 14,
      "queued": 3
     }
@@ -203,10 +203,10 @@
      "not_character": 2
     },
     "IV VI. Extension of thought": {
-     "covered": 1,
+     "covered": 2,
      "partly": 2,
      "queued": 0,
-     "empty": 3,
+     "empty": 2,
      "not_character": 3
     },
     "IV VII. Creative thought": {
@@ -308,10 +308,10 @@
      "not_character": 0
     },
     "VI II. Personal affections": {
-     "covered": 42,
+     "covered": 41,
      "partly": 2,
      "queued": 0,
-     "empty": 6,
+     "empty": 7,
      "not_character": 12
     },
     "VI III. Sympathetic affections": {
@@ -338,8 +338,8 @@
    },
    "opposed_pairs": {
     "neither_pole_covered": 32,
-    "both_poles_covered": 76,
-    "one_pole_covered": 63
+    "both_poles_covered": 75,
+    "one_pole_covered": 64
    },
    "opposed_pairs_by_source": {
     "rule": {
@@ -347,8 +347,8 @@
     },
     "synopsis": {
      "neither_pole_covered": 31,
-     "both_poles_covered": 76,
-     "one_pole_covered": 63
+     "both_poles_covered": 75,
+     "one_pole_covered": 64
     }
    },
    "pair_kinds": {
@@ -358,11 +358,11 @@
     "unresolved": 3
    },
    "labels": {
-    "existing_mapped": 726,
-    "existing_unmapped": 200,
+    "existing_mapped": 727,
+    "existing_unmapped": 201,
     "queued_mapped": 179,
     "queued_unmapped": 54,
-    "existing_primary_in_scope": 680
+    "existing_primary_in_scope": 681
    },
    "hidden": [],
    "not_character": {
@@ -639,8 +639,8 @@
 {"id":"170","title":"Agency","path":"I > VIII. Causation > 3. Power in operation","klass":"I","section":"VIII. Causation","partner":null,"pair_kind":"singleton","pair_source":"synopsis","members":["170"],"existing":["efficient"],"existing_secondary":["practical"],"queued_active":[],"queued_parked":[],"n_existing":1,"n_queued_active":0,"state":"covered","gap_class":"covered","partner_state":null,"partner_existing":[],"triggers":["efficient","practical"],"character":1},
 {"id":"171","title":"Physical Energy","path":"I > VIII. Causation > 3. Power in operation","klass":"I","section":"VIII. Causation","partner":"172","pair_kind":"pair","pair_source":"synopsis","members":["171","172"],"existing":["intense"],"existing_secondary":["energetic"],"queued_active":[],"queued_parked":[],"n_existing":1,"n_queued_active":0,"state":"covered","gap_class":"covered","partner_state":"partly","partner_existing":[],"triggers":["energetic","intense"],"character":1},
 {"id":"172","title":"Physical Inertness","path":"I > VIII. Causation > 3. Power in operation","klass":"I","section":"VIII. Causation","partner":"171","pair_kind":"pair","pair_source":"synopsis","members":["171","172"],"existing":[],"existing_secondary":["passive"],"queued_active":[],"queued_parked":[],"n_existing":0,"n_queued_active":0,"state":"partly","gap_class":"partly_covered","partner_state":"covered","partner_existing":["intense"],"triggers":["passive"],"character":1},
-{"id":"173","title":"Violence","path":"I > VIII. Causation > 3. Power in operation","klass":"I","section":"VIII. Causation","partner":"174","pair_kind":"pair","pair_source":"synopsis","members":["173","174"],"existing":["savage","turbulent"],"existing_secondary":[],"queued_active":[],"queued_parked":[],"n_existing":2,"n_queued_active":0,"state":"covered","gap_class":"covered","partner_state":"covered","partner_existing":["even_tempered"],"triggers":["savage","turbulent"],"character":2},
-{"id":"174","title":"Moderation","path":"I > VIII. Causation > 3. Power in operation","klass":"I","section":"VIII. Causation","partner":"173","pair_kind":"pair","pair_source":"synopsis","members":["173","174"],"existing":["even_tempered"],"existing_secondary":["calm","gentle","moderate","peaceful","temperate"],"queued_active":["calm_ipip_neo","gentleness_hexaco"],"queued_parked":["measured","sedate","unprovocative"],"n_existing":1,"n_queued_active":2,"state":"covered","gap_class":"covered","partner_state":"covered","partner_existing":["savage","turbulent"],"triggers":["calm","calm_ipip_neo","gentle","moderate","peaceful","temperate"],"character":2},
+{"id":"173","title":"Violence","path":"I > VIII. Causation > 3. Power in operation","klass":"I","section":"VIII. Causation","partner":"174","pair_kind":"pair","pair_source":"synopsis","members":["173","174"],"existing":["turbulent","violent"],"existing_secondary":[],"queued_active":[],"queued_parked":[],"n_existing":2,"n_queued_active":0,"state":"covered","gap_class":"covered","partner_state":"covered","partner_existing":["even_tempered"],"triggers":["turbulent","violent"],"character":2},
+{"id":"174","title":"Moderation","path":"I > VIII. Causation > 3. Power in operation","klass":"I","section":"VIII. Causation","partner":"173","pair_kind":"pair","pair_source":"synopsis","members":["173","174"],"existing":["even_tempered"],"existing_secondary":["calm","gentle","moderate","peaceful","temperate"],"queued_active":["calm_ipip_neo","gentleness_hexaco"],"queued_parked":["measured","sedate","unprovocative"],"n_existing":1,"n_queued_active":2,"state":"covered","gap_class":"covered","partner_state":"covered","partner_existing":["turbulent","violent"],"triggers":["calm","calm_ipip_neo","gentle","moderate","peaceful","temperate"],"character":2},
 {"id":"175","title":"Influence","path":"I > VIII. Causation > 4. Indirect power","klass":"I","section":"VIII. Causation","partner":"175a","pair_kind":"pair","pair_source":"synopsis","members":["175","175a"],"existing":["influence_disc"],"existing_secondary":["dominance_disc","dominant","internal_locus_of_control"],"queued_active":[],"queued_parked":[],"n_existing":1,"n_queued_active":0,"state":"covered","gap_class":"covered","partner_state":"empty","partner_existing":[],"triggers":["dominant"],"character":1},
 {"id":"181","title":"Region","path":"II > I. Space in general > 1. Abstract space","klass":"II","section":"I. Space in general","partner":"180","pair_kind":"pair","pair_source":"synopsis","members":["180","181"],"existing":["eastern_hemisphere","parochial","western_hemisphere"],"existing_secondary":[],"queued_active":[],"queued_parked":[],"n_existing":3,"n_queued_active":0,"state":"covered","gap_class":"crowded","partner_state":"empty","partner_existing":[],"triggers":["parochial"],"character":1},
 {"id":"184","title":"Location","path":"II > I. Space in general > 2. Relative space","klass":"II","section":"I. Space in general","partner":"185","pair_kind":"pair","pair_source":"synopsis","members":["184","185"],"existing":[],"existing_secondary":[],"queued_active":[],"queued_parked":[],"n_existing":0,"n_queued_active":0,"state":"empty","gap_class":"pair_empty","partner_state":"empty","partner_existing":[],"triggers":["rooted"],"character":0},
@@ -764,7 +764,7 @@
 {"id":"507","title":"Expectation","path":"IV > I. Formation of ideas > VI. Extension of thought > 1. To the Past","klass":"IV","section":"VI. Extension of thought","partner":"508","pair_kind":"pair","pair_source":"synopsis","members":["507","508"],"existing":[],"existing_secondary":[],"queued_active":[],"queued_parked":[],"n_existing":0,"n_queued_active":0,"state":"empty","gap_class":"pair_empty","partner_state":"empty","partner_existing":[],"triggers":[],"character":0},
 {"id":"508","title":"Inexpectation","path":"IV > I. Formation of ideas > VI. Extension of thought > 1. To the Past","klass":"IV","section":"VI. Extension of thought","partner":"507","pair_kind":"pair","pair_source":"synopsis","members":["507","508"],"existing":[],"existing_secondary":[],"queued_active":[],"queued_parked":[],"n_existing":0,"n_queued_active":0,"state":"empty","gap_class":"pair_empty","partner_state":"empty","partner_existing":[],"triggers":[],"character":1},
 {"id":"509","title":"Disappointment","path":"IV > I. Formation of ideas > VI. Extension of thought > 1. To the Past","klass":"IV","section":"VI. Extension of thought","partner":null,"pair_kind":"singleton","pair_source":"synopsis","members":["509"],"existing":[],"existing_secondary":["bitter"],"queued_active":[],"queued_parked":[],"n_existing":0,"n_queued_active":0,"state":"partly","gap_class":"partly_covered","partner_state":null,"partner_existing":[],"triggers":[],"character":1},
-{"id":"510","title":"Foresight","path":"IV > I. Formation of ideas > VI. Extension of thought > 1. To the Past","klass":"IV","section":"VI. Extension of thought","partner":null,"pair_kind":"singleton","pair_source":"synopsis","members":["510"],"existing":[],"existing_secondary":[],"queued_active":[],"queued_parked":[],"n_existing":0,"n_queued_active":0,"state":"empty","gap_class":"singleton_empty","partner_state":null,"partner_existing":[],"triggers":[],"character":2},
+{"id":"510","title":"Foresight","path":"IV > I. Formation of ideas > VI. Extension of thought > 1. To the Past","klass":"IV","section":"VI. Extension of thought","partner":null,"pair_kind":"singleton","pair_source":"synopsis","members":["510"],"existing":["future_oriented"],"existing_secondary":[],"queued_active":[],"queued_parked":[],"n_existing":1,"n_queued_active":0,"state":"covered","gap_class":"covered","partner_state":null,"partner_existing":[],"triggers":[],"character":2},
 {"id":"511","title":"Prediction","path":"IV > I. Formation of ideas > VI. Extension of thought > 1. To the Past","klass":"IV","section":"VI. Extension of thought","partner":null,"pair_kind":"singleton","pair_source":"synopsis","members":["511"],"existing":[],"existing_secondary":[],"queued_active":[],"queued_parked":[],"n_existing":0,"n_queued_active":0,"state":"empty","gap_class":"singleton_empty","partner_state":null,"partner_existing":[],"triggers":[],"character":0},
 {"id":"512","title":"Omen","path":"IV > I. Formation of ideas > VI. Extension of thought > 1. To the Past","klass":"IV","section":"VI. Extension of thought","partner":null,"pair_kind":"singleton","pair_source":"synopsis","members":["512"],"existing":[],"existing_secondary":[],"queued_active":[],"queued_parked":[],"n_existing":0,"n_queued_active":0,"state":"empty","gap_class":"singleton_empty","partner_state":null,"partner_existing":[],"triggers":[],"character":0},
 {"id":"513","title":"Oracle","path":"IV > I. Formation of ideas > VI. Extension of thought > 1. To the Past","klass":"IV","section":"VI. Extension of thought","partner":null,"pair_kind":"singleton","pair_source":"synopsis","members":["513"],"existing":[],"existing_secondary":[],"queued_active":[],"queued_parked":[],"n_existing":0,"n_queued_active":0,"state":"empty","gap_class":"singleton_empty","partner_state":null,"partner_existing":[],"triggers":[],"character":null},
@@ -903,7 +903,7 @@
 {"id":"641","title":"Redundancy","path":"V > I. Individual volition > II. Prospective volition > 2. Subservience to ends > 1. Actual Subservience","klass":"V","section":"II. Prospective volition","partner":"640","pair_kind":"pair","pair_source":"synopsis","members":["640","641"],"existing":[],"existing_secondary":["extravagant"],"queued_active":[],"queued_parked":[],"n_existing":0,"n_queued_active":0,"state":"partly","gap_class":"partly_covered","partner_state":"empty","partner_existing":[],"triggers":[],"character":1},
 {"id":"642","title":"Importance","path":"V > I. Individual volition > II. Prospective volition > 2. Subservience to ends > 1. Actual Subservience","klass":"V","section":"II. Prospective volition","partner":"643","pair_kind":"pair","pair_source":"synopsis","members":["642","643"],"existing":["serious"],"existing_secondary":[],"queued_active":[],"queued_parked":[],"n_existing":1,"n_queued_active":0,"state":"covered","gap_class":"covered","partner_state":"empty","partner_existing":[],"triggers":[],"character":1},
 {"id":"643","title":"Unimportance","path":"V > I. Individual volition > II. Prospective volition > 2. Subservience to ends > 1. Actual Subservience","klass":"V","section":"II. Prospective volition","partner":"642","pair_kind":"pair","pair_source":"synopsis","members":["642","643"],"existing":[],"existing_secondary":[],"queued_active":[],"queued_parked":["hierarchy_indifferent"],"n_existing":0,"n_queued_active":0,"state":"empty","gap_class":"pair_completion","partner_state":"covered","partner_existing":["serious"],"triggers":[],"character":1},
-{"id":"644","title":"Utility","path":"V > I. Individual volition > II. Prospective volition > 2. Subservience to ends > 1. Actual Subservience","klass":"V","section":"II. Prospective volition","partner":"645","pair_kind":"pair","pair_source":"synopsis","members":["644","645"],"existing":["utilitarian"],"existing_secondary":["efficient"],"queued_active":[],"queued_parked":["lifetime_value"],"n_existing":1,"n_queued_active":0,"state":"covered","gap_class":"covered","partner_state":"empty","partner_existing":[],"triggers":[],"character":1},
+{"id":"644","title":"Utility","path":"V > I. Individual volition > II. Prospective volition > 2. Subservience to ends > 1. Actual Subservience","klass":"V","section":"II. Prospective volition","partner":"645","pair_kind":"pair","pair_source":"synopsis","members":["644","645"],"existing":["utilitarian"],"existing_secondary":[],"queued_active":[],"queued_parked":["lifetime_value"],"n_existing":1,"n_queued_active":0,"state":"covered","gap_class":"covered","partner_state":"empty","partner_existing":[],"triggers":[],"character":1},
 {"id":"645","title":"Inutility","path":"V > I. Individual volition > II. Prospective volition > 2. Subservience to ends > 1. Actual Subservience","klass":"V","section":"II. Prospective volition","partner":"644","pair_kind":"pair","pair_source":"synopsis","members":["644","645"],"existing":[],"existing_secondary":[],"queued_active":[],"queued_parked":[],"n_existing":0,"n_queued_active":0,"state":"empty","gap_class":"pair_completion","partner_state":"covered","partner_existing":["utilitarian"],"triggers":[],"character":1},
 {"id":"646","title":"Expedience","path":"V > I. Individual volition > II. Prospective volition > 2. Subservience to ends > 1. Actual Subservience","klass":"V","section":"II. Prospective volition","partner":"647","pair_kind":"pair","pair_source":"synopsis","members":["646","647"],"existing":["expedient","pragmatic"],"existing_secondary":[],"queued_active":[],"queued_parked":[],"n_existing":2,"n_queued_active":0,"state":"covered","gap_class":"covered","partner_state":"empty","partner_existing":[],"triggers":[],"character":1},
 {"id":"647","title":"Inexpedience","path":"V > I. Individual volition > II. Prospective volition > 2. Subservience to ends > 1. Actual Subservience","klass":"V","section":"II. Prospective volition","partner":"646","pair_kind":"pair","pair_source":"synopsis","members":["646","647"],"existing":[],"existing_secondary":[],"queued_active":[],"queued_parked":[],"n_existing":0,"n_queued_active":0,"state":"empty","gap_class":"pair_completion","partner_state":"covered","partner_existing":["expedient","pragmatic"],"triggers":[],"character":1},
@@ -1086,8 +1086,8 @@
 {"id":"816","title":"Liberality","path":"V > II. Intersocial volition > IV. Possessive relations > 4. Monetary Relations","klass":"V","section":"IV. Possessive relations","partner":"817","pair_kind":"pair","pair_source":"synopsis","members":["816","817"],"existing":["generous"],"existing_secondary":["open_big_five"],"queued_active":[],"queued_parked":["unselfish"],"n_existing":1,"n_queued_active":0,"state":"covered","gap_class":"covered","partner_state":"covered","partner_existing":["bargain_hunter","frugal"],"triggers":[],"character":2},
 {"id":"817","title":"Economy","path":"V > II. Intersocial volition > IV. Possessive relations > 4. Monetary Relations","klass":"V","section":"IV. Possessive relations","partner":"816","pair_kind":"pair","pair_source":"synopsis","members":["816","817"],"existing":["bargain_hunter","frugal"],"existing_secondary":[],"queued_active":[],"queued_parked":["economic","thrifty"],"n_existing":2,"n_queued_active":0,"state":"covered","gap_class":"covered","partner_state":"covered","partner_existing":["generous"],"triggers":[],"character":2},
 {"id":"817a","title":"Greed","path":"V > II. Intersocial volition > IV. Possessive relations > 4. Monetary Relations","klass":"V","section":"IV. Possessive relations","partner":null,"pair_kind":"singleton","pair_source":"rule","members":["817a"],"existing":["greedy"],"existing_secondary":[],"queued_active":[],"queued_parked":[],"n_existing":1,"n_queued_active":0,"state":"covered","gap_class":"covered","partner_state":null,"partner_existing":[],"triggers":[],"character":2},
-{"id":"818","title":"Prodigality","path":"V > II. Intersocial volition > IV. Possessive relations > 4. Monetary Relations","klass":"V","section":"IV. Possessive relations","partner":"819","pair_kind":"pair","pair_source":"synopsis","members":["818","819"],"existing":["extravagant"],"existing_secondary":[],"queued_active":["wasteful"],"queued_parked":[],"n_existing":1,"n_queued_active":1,"state":"covered","gap_class":"covered","partner_state":"covered","partner_existing":["stingy"],"triggers":[],"character":2},
-{"id":"819","title":"Parsimony","path":"V > II. Intersocial volition > IV. Possessive relations > 4. Monetary Relations","klass":"V","section":"IV. Possessive relations","partner":"818","pair_kind":"pair","pair_source":"synopsis","members":["818","819"],"existing":["stingy"],"existing_secondary":["greedy"],"queued_active":[],"queued_parked":[],"n_existing":1,"n_queued_active":0,"state":"covered","gap_class":"covered","partner_state":"covered","partner_existing":["extravagant"],"triggers":[],"character":2},
+{"id":"818","title":"Prodigality","path":"V > II. Intersocial volition > IV. Possessive relations > 4. Monetary Relations","klass":"V","section":"IV. Possessive relations","partner":"819","pair_kind":"pair","pair_source":"synopsis","members":["818","819"],"existing":["extravagant","wasteful"],"existing_secondary":[],"queued_active":[],"queued_parked":[],"n_existing":2,"n_queued_active":0,"state":"covered","gap_class":"covered","partner_state":"covered","partner_existing":["stingy"],"triggers":[],"character":2},
+{"id":"819","title":"Parsimony","path":"V > II. Intersocial volition > IV. Possessive relations > 4. Monetary Relations","klass":"V","section":"IV. Possessive relations","partner":"818","pair_kind":"pair","pair_source":"synopsis","members":["818","819"],"existing":["stingy"],"existing_secondary":["greedy"],"queued_active":[],"queued_parked":[],"n_existing":1,"n_queued_active":0,"state":"covered","gap_class":"covered","partner_state":"covered","partner_existing":["extravagant","wasteful"],"triggers":[],"character":2},
 {"id":"820","title":"Affections","path":"VI > I. Affections in general","klass":"VI","section":"I. Affections in general","partner":null,"pair_kind":"singleton","pair_source":"synopsis","members":["820"],"existing":[],"existing_secondary":[],"queued_active":[],"queued_parked":[],"n_existing":0,"n_queued_active":0,"state":"empty","gap_class":"singleton_empty","partner_state":null,"partner_existing":[],"triggers":[],"character":2},
 {"id":"821","title":"Feeling","path":"VI > I. Affections in general","klass":"VI","section":"I. Affections in general","partner":null,"pair_kind":"singleton","pair_source":"synopsis","members":["821"],"existing":["emotional","emotional_hexaco","zealous"],"existing_secondary":["passionate"],"queued_active":["feeling_mbti"],"queued_parked":["emotive"],"n_existing":3,"n_queued_active":1,"state":"covered","gap_class":"crowded","partner_state":null,"partner_existing":[],"triggers":[],"character":1},
 {"id":"822","title":"Sensibility","path":"VI > I. Affections in general","klass":"VI","section":"I. Affections in general","partner":"823","pair_kind":"pair","pair_source":"synopsis","members":["822","823"],"existing":["emotionally_engaged","sentimental","thin_skinned"],"existing_secondary":["expressive","romantic"],"queued_active":["emotionality_ipip_neo","sentimentality_hexaco","vulnerability_ipip_neo"],"queued_parked":["tender"],"n_existing":3,"n_queued_active":3,"state":"covered","gap_class":"crowded","partner_state":"covered","partner_existing":["apathetic","callous","emotionally_disengaged","thick_skinned"],"triggers":[],"character":2},
@@ -1097,8 +1097,8 @@
 {"id":"826","title":"Inexcitability","path":"VI > I. Affections in general","klass":"VI","section":"I. Affections in general","partner":"825","pair_kind":"pair","pair_source":"synopsis","members":["825","826"],"existing":["composed","dispassionate","patient","placid","serene","staid","stoic","strong_stomached","unflappable"],"existing_secondary":["calm"],"queued_active":["calm_ipip_neo","patience_hexaco"],"queued_parked":["sedate","subdued"],"n_existing":9,"n_queued_active":2,"state":"covered","gap_class":"crowded","partner_state":"covered","partner_existing":["excitable","flustered","impatient","manic","neurotic","neurotic_big_five","passionate","restless","temperamental"],"triggers":[],"character":2},
 {"id":"827","title":"Pleasure","path":"VI > II. Personal affections > 1. Passive affections","klass":"VI","section":"II. Personal affections","partner":"828","pair_kind":"pair","pair_source":"synopsis","members":["827","828"],"existing":[],"existing_secondary":["hedonistic","joyful"],"queued_active":[],"queued_parked":[],"n_existing":0,"n_queued_active":0,"state":"partly","gap_class":"partly_covered","partner_state":"covered","partner_existing":["in_chronic_pain","stressed"],"triggers":[],"character":1},
 {"id":"828","title":"Pain","path":"VI > II. Personal affections > 1. Passive affections","klass":"VI","section":"II. Personal affections","partner":"827","pair_kind":"pair","pair_source":"synopsis","members":["827","828"],"existing":["in_chronic_pain","stressed"],"existing_secondary":[],"queued_active":[],"queued_parked":["distressed"],"n_existing":2,"n_queued_active":0,"state":"covered","gap_class":"covered","partner_state":"partly","partner_existing":[],"triggers":[],"character":1},
-{"id":"829","title":"Pleasurableness","path":"VI > II. Personal affections > 1. Passive affections","klass":"VI","section":"II. Personal affections","partner":"830","pair_kind":"pair","pair_source":"synopsis","members":["829","830"],"existing":["agreeable_big_five"],"existing_secondary":[],"queued_active":[],"queued_parked":[],"n_existing":1,"n_queued_active":0,"state":"covered","gap_class":"covered","partner_state":"covered","partner_existing":["cruel"],"triggers":[],"character":1},
-{"id":"830","title":". Painfulness","path":"VI > II. Personal affections > 1. Passive affections","klass":"VI","section":"II. Personal affections","partner":"829","pair_kind":"pair","pair_source":"synopsis","members":["829","830"],"existing":["cruel"],"existing_secondary":[],"queued_active":[],"queued_parked":[],"n_existing":1,"n_queued_active":0,"state":"covered","gap_class":"covered","partner_state":"covered","partner_existing":["agreeable_big_five"],"triggers":[],"character":1},
+{"id":"829","title":"Pleasurableness","path":"VI > II. Personal affections > 1. Passive affections","klass":"VI","section":"II. Personal affections","partner":"830","pair_kind":"pair","pair_source":"synopsis","members":["829","830"],"existing":["agreeable_big_five"],"existing_secondary":[],"queued_active":[],"queued_parked":[],"n_existing":1,"n_queued_active":0,"state":"covered","gap_class":"covered","partner_state":"empty","partner_existing":[],"triggers":[],"character":1},
+{"id":"830","title":". Painfulness","path":"VI > II. Personal affections > 1. Passive affections","klass":"VI","section":"II. Personal affections","partner":"829","pair_kind":"pair","pair_source":"synopsis","members":["829","830"],"existing":[],"existing_secondary":[],"queued_active":[],"queued_parked":[],"n_existing":0,"n_queued_active":0,"state":"empty","gap_class":"pair_completion","partner_state":"covered","partner_existing":["agreeable_big_five"],"triggers":[],"character":1},
 {"id":"831","title":"Content","path":"VI > II. Personal affections > 1. Passive affections","klass":"VI","section":"II. Personal affections","partner":"832","pair_kind":"pair","pair_source":"synopsis","members":["831","832"],"existing":["contented","death_accepting","easygoing","happily_partnered","self_accepting"],"existing_secondary":[],"queued_active":[],"queued_parked":["job_satisfied"],"n_existing":5,"n_queued_active":0,"state":"covered","gap_class":"crowded","partner_state":"covered","partner_existing":["discontented","unhappily_partnered"],"triggers":[],"character":1},
 {"id":"832","title":"Discontent","path":"VI > II. Personal affections > 1. Passive affections","klass":"VI","section":"II. Personal affections","partner":"831","pair_kind":"pair","pair_source":"synopsis","members":["831","832"],"existing":["discontented","unhappily_partnered"],"existing_secondary":[],"queued_active":[],"queued_parked":["disgruntled"],"n_existing":2,"n_queued_active":0,"state":"covered","gap_class":"covered","partner_state":"covered","partner_existing":["contented","death_accepting","easygoing","happily_partnered","self_accepting"],"triggers":[],"character":2},
 {"id":"833","title":"Regret","path":"VI > II. Personal affections > 1. Passive affections","klass":"VI","section":"II. Personal affections","partner":null,"pair_kind":"triad","pair_source":"synopsis","members":["831","832","833"],"existing":["nostalgic"],"existing_secondary":[],"queued_active":[],"queued_parked":[],"n_existing":1,"n_queued_active":0,"state":"covered","gap_class":"covered","partner_state":null,"partner_existing":[],"triggers":[],"character":0},
@@ -1176,16 +1176,16 @@
 {"id":"903","title":"Marriage","path":"VI > III. Sympathetic affections > 1. Social affections","klass":"VI","section":"III. Sympathetic affections","partner":"904","pair_kind":"pair","pair_source":"synopsis","members":["903","904"],"existing":["married","monogamous","polyandrous","polygamous","polygynous"],"existing_secondary":[],"queued_active":[],"queued_parked":[],"n_existing":5,"n_queued_active":0,"state":"covered","gap_class":"crowded","partner_state":"covered","partner_existing":["asexual","single"],"triggers":[],"character":0},
 {"id":"904","title":"Celibacy","path":"VI > III. Sympathetic affections > 1. Social affections","klass":"VI","section":"III. Sympathetic affections","partner":"903","pair_kind":"pair","pair_source":"synopsis","members":["903","904"],"existing":["asexual","single"],"existing_secondary":[],"queued_active":[],"queued_parked":[],"n_existing":2,"n_queued_active":0,"state":"covered","gap_class":"covered","partner_state":"covered","partner_existing":["married","monogamous","polyandrous","polygamous","polygynous"],"triggers":[],"character":0},
 {"id":"905","title":"Divorce","path":"VI > III. Sympathetic affections > 1. Social affections","klass":"VI","section":"III. Sympathetic affections","partner":null,"pair_kind":"triad","pair_source":"synopsis","members":["903","904","905"],"existing":[],"existing_secondary":[],"queued_active":[],"queued_parked":[],"n_existing":0,"n_queued_active":0,"state":"empty","gap_class":"singleton_empty","partner_state":null,"partner_existing":[],"triggers":[],"character":null},
-{"id":"906","title":"Benevolence","path":"VI > III. Sympathetic affections > 2. Diffusive sympathetic affections","klass":"VI","section":"III. Sympathetic affections","partner":"907","pair_kind":"pair","pair_source":"synopsis","members":["906","907"],"existing":["benevolent","benign","kind_to_animals","nurturing"],"existing_secondary":["altruistic","generous","humanitarian"],"queued_active":["altruism_hexaco","altruism_ipip_neo","sympathy_ipip_neo"],"queued_parked":["faith_in_humanity_light_triad","kind"],"n_existing":4,"n_queued_active":3,"state":"covered","gap_class":"crowded","partner_state":"covered","partner_existing":["malevolent","malicious","malign","sadistic_dark_tetrad","spiteful"],"triggers":[],"character":2},
-{"id":"907","title":"Malevolence","path":"VI > III. Sympathetic affections > 2. Diffusive sympathetic affections","klass":"VI","section":"III. Sympathetic affections","partner":"906","pair_kind":"pair","pair_source":"synopsis","members":["906","907"],"existing":["malevolent","malicious","malign","sadistic_dark_tetrad","spiteful"],"existing_secondary":["cruel"],"queued_active":[],"queued_parked":[],"n_existing":5,"n_queued_active":0,"state":"covered","gap_class":"crowded","partner_state":"covered","partner_existing":["benevolent","benign","kind_to_animals","nurturing"],"triggers":[],"character":2},
+{"id":"906","title":"Benevolence","path":"VI > III. Sympathetic affections > 2. Diffusive sympathetic affections","klass":"VI","section":"III. Sympathetic affections","partner":"907","pair_kind":"pair","pair_source":"synopsis","members":["906","907"],"existing":["benevolent","benign","kind_to_animals","nurturing"],"existing_secondary":["altruistic","generous","humanitarian"],"queued_active":["altruism_hexaco","altruism_ipip_neo","sympathy_ipip_neo"],"queued_parked":["faith_in_humanity_light_triad","kind"],"n_existing":4,"n_queued_active":3,"state":"covered","gap_class":"crowded","partner_state":"covered","partner_existing":["malevolent","malicious","malign","sadistic","sadistic_dark_tetrad","spiteful"],"triggers":[],"character":2},
+{"id":"907","title":"Malevolence","path":"VI > III. Sympathetic affections > 2. Diffusive sympathetic affections","klass":"VI","section":"III. Sympathetic affections","partner":"906","pair_kind":"pair","pair_source":"synopsis","members":["906","907"],"existing":["malevolent","malicious","malign","sadistic","sadistic_dark_tetrad","spiteful"],"existing_secondary":[],"queued_active":[],"queued_parked":[],"n_existing":6,"n_queued_active":0,"state":"covered","gap_class":"crowded","partner_state":"covered","partner_existing":["benevolent","benign","kind_to_animals","nurturing"],"triggers":[],"character":2},
 {"id":"908","title":"Malediction","path":"VI > III. Sympathetic affections > 2. Diffusive sympathetic affections","klass":"VI","section":"III. Sympathetic affections","partner":null,"pair_kind":"singleton","pair_source":"synopsis","members":["908"],"existing":[],"existing_secondary":[],"queued_active":[],"queued_parked":[],"n_existing":0,"n_queued_active":0,"state":"empty","gap_class":"singleton_empty","partner_state":null,"partner_existing":[],"triggers":[],"character":0},
 {"id":"909","title":"Threat","path":"VI > III. Sympathetic affections > 2. Diffusive sympathetic affections","klass":"VI","section":"III. Sympathetic affections","partner":null,"pair_kind":"singleton","pair_source":"synopsis","members":["909"],"existing":[],"existing_secondary":[],"queued_active":[],"queued_parked":[],"n_existing":0,"n_queued_active":0,"state":"empty","gap_class":"singleton_empty","partner_state":null,"partner_existing":[],"triggers":[],"character":1},
 {"id":"910","title":"Philanthropy","path":"VI > III. Sympathetic affections > 2. Diffusive sympathetic affections","klass":"VI","section":"III. Sympathetic affections","partner":"911","pair_kind":"pair","pair_source":"synopsis","members":["910","911"],"existing":["collectivistic","cosmopolitan","humanistic","humanitarian","patriotic","philanthropic"],"existing_secondary":["social_holland","socialist"],"queued_active":[],"queued_parked":["humanism_light_triad","universalist"],"n_existing":6,"n_queued_active":0,"state":"covered","gap_class":"crowded","partner_state":"covered","partner_existing":["misanthropic"],"triggers":[],"character":2},
 {"id":"911","title":"Misanthropy","path":"VI > III. Sympathetic affections > 2. Diffusive sympathetic affections","klass":"VI","section":"III. Sympathetic affections","partner":"910","pair_kind":"pair","pair_source":"synopsis","members":["910","911"],"existing":["misanthropic"],"existing_secondary":["cynical"],"queued_active":[],"queued_parked":[],"n_existing":1,"n_queued_active":0,"state":"covered","gap_class":"covered","partner_state":"covered","partner_existing":["collectivistic","cosmopolitan","humanistic","humanitarian","patriotic","philanthropic"],"triggers":[],"character":2},
 {"id":"912","title":"Benefactor","path":"VI > III. Sympathetic affections > 2. Diffusive sympathetic affections","klass":"VI","section":"III. Sympathetic affections","partner":"913","pair_kind":"pair","pair_source":"synopsis","members":["912","913"],"existing":[],"existing_secondary":[],"queued_active":[],"queued_parked":[],"n_existing":0,"n_queued_active":0,"state":"empty","gap_class":"pair_completion","partner_state":"covered","partner_existing":["killer_bartle"],"triggers":[],"character":null},
 {"id":"913","title":"Evil doer","path":"VI > III. Sympathetic affections > 2. Diffusive sympathetic affections","klass":"VI","section":"III. Sympathetic affections","partner":"912","pair_kind":"pair","pair_source":"synopsis","members":["912","913"],"existing":["killer_bartle"],"existing_secondary":["evil"],"queued_active":[],"queued_parked":[],"n_existing":1,"n_queued_active":0,"state":"covered","gap_class":"covered","partner_state":"empty","partner_existing":[],"triggers":[],"character":null},
-{"id":"914","title":"Pity","path":"VI > III. Sympathetic affections > 3. Special sympathetic affections","klass":"VI","section":"III. Sympathetic affections","partner":"914a","pair_kind":"pair","pair_source":"synopsis","members":["914","914a"],"existing":["compassionate","empathetic","merciful","self_pitying"],"existing_secondary":[],"queued_active":["compassion_bfas","sympathy_ipip_neo"],"queued_parked":["self_compassionate","tender"],"n_existing":4,"n_queued_active":2,"state":"covered","gap_class":"crowded","partner_state":"covered","partner_existing":["ruthless_while_playing"],"triggers":[],"character":2},
-{"id":"914a","title":"Pitilessness","path":"VI > III. Sympathetic affections > 3. Special sympathetic affections","klass":"VI","section":"III. Sympathetic affections","partner":"914","pair_kind":"pair","pair_source":"synopsis","members":["914","914a"],"existing":["ruthless_while_playing"],"existing_secondary":[],"queued_active":[],"queued_parked":[],"n_existing":1,"n_queued_active":0,"state":"covered","gap_class":"covered","partner_state":"covered","partner_existing":["compassionate","empathetic","merciful","self_pitying"],"triggers":[],"character":2},
+{"id":"914","title":"Pity","path":"VI > III. Sympathetic affections > 3. Special sympathetic affections","klass":"VI","section":"III. Sympathetic affections","partner":"914a","pair_kind":"pair","pair_source":"synopsis","members":["914","914a"],"existing":["compassionate","empathetic","self_pitying"],"existing_secondary":[],"queued_active":["compassion_bfas","sympathy_ipip_neo"],"queued_parked":["merciful","self_compassionate","tender"],"n_existing":3,"n_queued_active":2,"state":"covered","gap_class":"crowded","partner_state":"covered","partner_existing":["ruthless_while_playing"],"triggers":[],"character":2},
+{"id":"914a","title":"Pitilessness","path":"VI > III. Sympathetic affections > 3. Special sympathetic affections","klass":"VI","section":"III. Sympathetic affections","partner":"914","pair_kind":"pair","pair_source":"synopsis","members":["914","914a"],"existing":["ruthless_while_playing"],"existing_secondary":[],"queued_active":[],"queued_parked":[],"n_existing":1,"n_queued_active":0,"state":"covered","gap_class":"covered","partner_state":"covered","partner_existing":["compassionate","empathetic","self_pitying"],"triggers":[],"character":2},
 {"id":"915","title":"Condolence","path":"VI > III. Sympathetic affections > 3. Special sympathetic affections","klass":"VI","section":"III. Sympathetic affections","partner":null,"pair_kind":"singleton","pair_source":"synopsis","members":["915"],"existing":[],"existing_secondary":[],"queued_active":["sympathy_ipip_neo"],"queued_parked":[],"n_existing":0,"n_queued_active":1,"state":"queued","gap_class":"queued_only","partner_state":null,"partner_existing":[],"triggers":[],"character":null},
 {"id":"916","title":"Gratitude","path":"VI > III. Sympathetic affections > 4. Retrospective sympathetic affections","klass":"VI","section":"III. Sympathetic affections","partner":"917","pair_kind":"pair","pair_source":"synopsis","members":["916","917"],"existing":["grateful"],"existing_secondary":[],"queued_active":[],"queued_parked":[],"n_existing":1,"n_queued_active":0,"state":"covered","gap_class":"covered","partner_state":"covered","partner_existing":["ungrateful"],"triggers":[],"character":2},
 {"id":"917","title":"Ingratitude","path":"VI > III. Sympathetic affections > 4. Retrospective sympathetic affections","klass":"VI","section":"III. Sympathetic affections","partner":"916","pair_kind":"pair","pair_source":"synopsis","members":["916","917"],"existing":["ungrateful"],"existing_secondary":[],"queued_active":[],"queued_parked":[],"n_existing":1,"n_queued_active":0,"state":"covered","gap_class":"covered","partner_state":"covered","partner_existing":["grateful"],"triggers":[],"character":1},
@@ -1281,11 +1281,11 @@
   "schema_version": "1.0",
   "produced_by": {
    "cmd": "uv run python data_analysis/gap_generation/roget_generate.py coverage",
-   "git_sha": "645e5a0+dirty",
+   "git_sha": "2f944dd+dirty",
    "author": "Roger Dearnaley",
    "title": "Roget coverage map (workstream 2)"
   },
-  "produced_at": "2026-10-09T23:22:54+00:00",
+  "produced_at": "2026-10-09T23:34:51+00:00",
   "inputs": [
    {
     "dep_key": "roget_heads",
@@ -1308,22 +1308,22 @@
    {
     "dep_key": "label_heads",
     "path": "data/candidates/roget/label_heads.json",
-    "fingerprint": "v1:2026-10-09T23:22:49+00:00@1476385",
+    "fingerprint": "v1:2026-10-09T23:34:46+00:00@1481924",
     "kind": "file",
     "dataset_id": null,
-    "last_modified_at": "2026-10-09T23:22:49+00:00",
+    "last_modified_at": "2026-10-09T23:34:46+00:00",
     "extras": {}
    },
    {
     "dep_key": "head_scope",
     "path": "data/candidates/roget/head_scope.json",
-    "fingerprint": "v1:2026-10-09T23:22:52+00:00@249708",
+    "fingerprint": "v1:2026-10-09T23:34:49+00:00@249708",
     "kind": "file",
     "dataset_id": null,
-    "last_modified_at": "2026-10-09T23:22:52+00:00",
+    "last_modified_at": "2026-10-09T23:34:49+00:00",
     "extras": {}
    }
   ],
-  "inputs_sha256": "98a51dfa5a285a80261bb987ed4ff58ad5de8645c3821db92acf6649054b3134"
+  "inputs_sha256": "db50755ef4c46bc4d08a2f7f942d9d0bde8148a653443268f350ffef6a26ebec"
  }
 }

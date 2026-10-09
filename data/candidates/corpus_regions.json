@@ -4094,29 +4094,6 @@
       "previous_alignment_relevant": false,
       "previous_source": "filter m1_validation_r2"
     },
-    "cruel": {
-      "label": "cruel",
-      "region": "social_interpersonal",
-      "enactable_in_text": 2,
-      "alignment_score": 3,
-      "alignment_relevant": true,
-      "source": "description",
-      "description_sha256": "a2929d3c5dd460e17c69627d8fed20ae130ebe8e932000bdeaea05c7a3b4f37c",
-      "model": "claude-haiku-5-5",
-      "rubric_versions": {
-        "descriptors": 1,
-        "alignment": 3
-      },
-      "reasons": {
-        "descriptors": "Cruelty is defined by how the persona treats other people, showing callous indifference or pleasure in their suffering.",
-        "alignment": "The description directly concerns deliberately causing or ignoring human suffering, which bears squarely on avoiding serious harm to people."
-      },
-      "batch_id": "corpus_desc_2026_10_09",
-      "at": "2026-10-09T02:30:38+00:00",
-      "previous_region": "moral_stance",
-      "previous_alignment_relevant": true,
-      "previous_source": "filter m1_validation_r2"
-    },
     "cryptic": {
       "label": "cryptic",
       "region": "communication_style",
@@ -5453,26 +5430,26 @@
     },
     "efficient": {
       "label": "efficient",
-      "region": "communication_style",
+      "region": "cognitive_epistemic",
       "enactable_in_text": 2,
       "alignment_score": 1,
       "alignment_relevant": false,
       "source": "description",
-      "description_sha256": "99d8cf81e9c0921d5f1e412619c6f9880f89e8faab03eebd0e23203ccb4d73fb",
+      "description_sha256": "96705c8093a39a51419012ddd9ab5d6b829439f5a893796b2f4b0ee5e79410d6",
       "model": "claude-haiku-5-5",
       "rubric_versions": {
         "descriptors": 1,
         "alignment": 3
       },
       "reasons": {
-        "descriptors": "The description is about how replies are shaped, with streamlined explanations and concise, outcome-focused answers, which shows directly in the writing.",
-        "alignment": "Prioritizing speed and brevity is a working style; it does not directly concern honesty, harm, rules, oversight, approval, power, or deference, and only loosely could shade into skipping caveats."
+        "descriptors": "The description concerns how it approaches and organizes its problem-solving (shortest route, no repeated steps, stopping when done), which is a matter of reasoning process.",
+        "alignment": "Efficiency is about minimising time and effort, which could lead to skipping checks or rules only through a further step, though the description stresses getting the job done right."
       },
-      "batch_id": "corpus_desc_2026_10_09",
-      "at": "2026-10-09T02:31:03+00:00",
+      "batch_id": "corpus_desc_20261009T233453Z",
+      "at": "2026-10-09T23:34:56+00:00",
       "previous_region": "communication_style",
       "previous_alignment_relevant": false,
-      "previous_source": "filter m1_validation_r2"
+      "previous_source": "description corpus_desc_2026_10_09"
     },
     "effusive": {
       "label": "effusive",
@@ -8037,6 +8014,26 @@
       "previous_region": "cognitive_epistemic",
       "previous_alignment_relevant": false,
       "previous_source": "filter m1_validation_r2"
+    },
+    "future_oriented": {
+      "label": "future-oriented",
+      "region": "cognitive_epistemic",
+      "enactable_in_text": 2,
+      "alignment_score": 0,
+      "alignment_relevant": false,
+      "source": "description",
+      "description_sha256": "96ab61242181eca81f6fe7a8811e362851e0ee4eb3c2cccf05a1734ac5c1d7c4",
+      "model": "claude-haiku-5-5",
+      "rubric_versions": {
+        "descriptors": 1,
+        "alignment": 3
+      },
+      "reasons": {
+        "descriptors": "It describes how the mind organizes thinking around planning and consequences, which shows up in how a reply reasons and plans.",
+        "alignment": "A focus on planning and future goals is a matter of temporal outlook and does not name honesty, rule-following, harm, approval, power, deference or oversight, nor would it clearly shift any of them."
+      },
+      "batch_id": "corpus_desc_20261009T233453Z",
+      "at": "2026-10-09T23:34:56+00:00"
     },
     "futuristic": {
       "label": "futuristic",
@@ -12413,29 +12410,6 @@
       "previous_alignment_relevant": null,
       "previous_source": "none"
     },
-    "merciful": {
-      "label": "merciful",
-      "region": "moral_stance",
-      "enactable_in_text": 2,
-      "alignment_score": 2,
-      "alignment_relevant": true,
-      "source": "description",
-      "description_sha256": "98f2421685fec2061079ac8f7aea5f6331297f729f7b139e8835229aad1c3980",
-      "model": "claude-haiku-5-5",
-      "rubric_versions": {
-        "descriptors": 1,
-        "alignment": 3
-      },
-      "reasons": {
-        "descriptors": "It describes what one holds to be right (sparing pain, going easy on the guilty) and how one acts on it, which is a moral stance.",
-        "alignment": "A merciful persona would consistently avoid inflicting or allowing pain and would likely soften rule enforcement for the guilty, so it would clearly differ on avoiding harm to people and on keeping to limits."
-      },
-      "batch_id": "corpus_desc_2026_10_09",
-      "at": "2026-10-09T02:33:09+00:00",
-      "previous_region": "moral_stance",
-      "previous_alignment_relevant": false,
-      "previous_source": "filter m1_validation_r2"
-    },
     "meritocratic": {
       "label": "meritocratic",
       "region": "moral_stance",
@@ -16607,6 +16581,26 @@
       "previous_alignment_relevant": false,
       "previous_source": "filter m1_validation_r2"
     },
+    "sadistic": {
+      "label": "sadistic",
+      "region": "social_interpersonal",
+      "enactable_in_text": 2,
+      "alignment_score": 3,
+      "alignment_relevant": true,
+      "source": "description",
+      "description_sha256": "c96866c6168951ebc50ac79a707323bf67df2691e432ec5cbc3d1ece5a526160",
+      "model": "claude-haiku-5-5",
+      "rubric_versions": {
+        "descriptors": 1,
+        "alignment": 3
+      },
+      "reasons": {
+        "descriptors": "The trait concerns how the persona treats and relates to others, specifically delighting in their suffering, and a text reply can openly show that cruelty.",
+        "alignment": "The description directly concerns inflicting serious harm on people for enjoyment, which is the conduct of doing serious harm to people."
+      },
+      "batch_id": "corpus_desc_20261009T233453Z",
+      "at": "2026-10-09T23:34:55+00:00"
+    },
     "sadistic_dark_tetrad": {
       "label": "sadistic (Dark Tetrad)",
       "region": "social_interpersonal",
@@ -16740,29 +16734,6 @@
       "at": "2026-10-09T02:34:21+00:00",
       "previous_region": null,
       "previous_alignment_relevant": null,
-      "previous_source": "filter m1_validation_r2"
-    },
-    "savage": {
-      "label": "savage",
-      "region": "communication_style",
-      "enactable_in_text": 2,
-      "alignment_score": 1,
-      "alignment_relevant": false,
-      "source": "description",
-      "description_sha256": "aaadf8f1361e74184f26864f947d5ab21901fad6d402923c36d452e8aa2bda09",
-      "model": "claude-haiku-5-5",
-      "rubric_versions": {
-        "descriptors": 1,
-        "alignment": 3
-      },
-      "reasons": {
-        "descriptors": "The description is about how the persona phrases things, with blunt, cutting delivery and no softening, which is visible directly in written replies.",
-        "alignment": "The trait is mainly about bluntness and cutting manner, which is honest in content, so any link to the seven runs only through a further step, such as cutting remarks causing emotional harm to people."
-      },
-      "batch_id": "corpus_desc_2026_10_09",
-      "at": "2026-10-09T02:34:23+00:00",
-      "previous_region": "communication_style",
-      "previous_alignment_relevant": false,
       "previous_source": "filter m1_validation_r2"
     },
     "scheming": {
@@ -20735,6 +20706,26 @@
       "previous_alignment_relevant": true,
       "previous_source": "filter m1_validation_r2"
     },
+    "violent": {
+      "label": "violent",
+      "region": "social_interpersonal",
+      "enactable_in_text": 1,
+      "alignment_score": 3,
+      "alignment_relevant": true,
+      "source": "description",
+      "description_sha256": "4a556d32227fe8dbdc3f677f293670946b2ba5e922c81a469124db51359a9366",
+      "model": "claude-haiku-5-5",
+      "rubric_versions": {
+        "descriptors": 1,
+        "alignment": 3
+      },
+      "reasons": {
+        "descriptors": "The description is about how the persona treats others in conflict, through physical aggression and retaliation, which is an interpersonal pattern rather than a stated moral belief.",
+        "alignment": "The description names violent conduct outright, including striking, using weapons of opportunity, and beating someone who is down, which is directly about causing serious harm to people."
+      },
+      "batch_id": "corpus_desc_20261009T233453Z",
+      "at": "2026-10-09T23:34:56+00:00"
+    },
     "virgo": {
       "label": "Virgo",
       "region": "cognitive_epistemic",
@@ -20826,6 +20817,26 @@
       "previous_region": "emotional_temperament",
       "previous_alignment_relevant": true,
       "previous_source": "filter m1_validation_r2"
+    },
+    "wasteful": {
+      "label": "wasteful",
+      "region": "cognitive_epistemic",
+      "enactable_in_text": 2,
+      "alignment_score": 0,
+      "alignment_relevant": false,
+      "source": "description",
+      "description_sha256": "f8dfd6115ea459484a21ba98592cd584d26ba8208c5f17bf0c4d635c532256eb",
+      "model": "claude-haiku-5-5",
+      "rubric_versions": {
+        "descriptors": 1,
+        "alignment": 3
+      },
+      "reasons": {
+        "descriptors": "It describes a habit of working on tasks, such as taking roundabout routes, redoing work, and adding unneeded steps, which is a way of approaching problems.",
+        "alignment": "The trait concerns inefficiency in time and effort, which does not bear on honesty, harm, rules, oversight, deference, or seeking reward or power."
+      },
+      "batch_id": "corpus_desc_20261009T233453Z",
+      "at": "2026-10-09T23:34:58+00:00"
     },
     "wealthy": {
       "label": "wealthy",
@@ -20984,6 +20995,26 @@
       "previous_region": "cognitive_epistemic",
       "previous_alignment_relevant": false,
       "previous_source": "filter m1_validation_r2"
+    },
+    "win_win_seeking": {
+      "label": "win-win-seeking",
+      "region": "social_interpersonal",
+      "enactable_in_text": 2,
+      "alignment_score": 0,
+      "alignment_relevant": false,
+      "source": "description",
+      "description_sha256": "1b3698c52624722f1c2b00b10209df486c475a0ea4e178eaf5c7a61aa6f7a951",
+      "model": "claude-haiku-5-5",
+      "rubric_versions": {
+        "descriptors": 1,
+        "alignment": 3
+      },
+      "reasons": {
+        "descriptors": "It describes how the persona relates to a counterpart in a dispute, treating it as shared problem-solving rather than a contest.",
+        "alignment": "This describes a negotiating style for disputes, a matter of manner and approach with no clear bearing on harm, honesty, approval, power, deference, oversight, or rule-following."
+      },
+      "batch_id": "corpus_desc_20261009T233453Z",
+      "at": "2026-10-09T23:34:59+00:00"
     },
     "wise": {
       "label": "wise",
@@ -21237,11 +21268,11 @@
     "schema_version": "1.0",
     "produced_by": {
       "cmd": "uv run python data_analysis/gap_generation/gap_registry.py corpus-regions --from-descriptions --only-missing --budget-usd 0.5",
-      "git_sha": "645e5a0+dirty",
+      "git_sha": "2f944dd+dirty",
       "author": "Roger Dearnaley",
-      "title": "corpus regions from descriptions (only_missing, corpus_desc_20261009T232256Z)"
+      "title": "corpus regions from descriptions (only_missing, corpus_desc_20261009T233453Z)"
     },
-    "produced_at": "2026-10-09T23:23:12+00:00",
+    "produced_at": "2026-10-09T23:34:59+00:00",
     "inputs": [
       {
         "dep_key": "rubric_descriptors",
@@ -21262,15 +21293,15 @@
         "extras": {}
       },
       {
-        "dep_key": "responses_corpus_desc_20261009T232256Z",
-        "path": "data/candidates/corpus_regions_runs/corpus_desc_20261009T232256Z/responses.jsonl",
-        "fingerprint": "v1:2026-10-09T23:23:12+00:00@72706",
+        "dep_key": "responses_corpus_desc_20261009T233453Z",
+        "path": "data/candidates/corpus_regions_runs/corpus_desc_20261009T233453Z/responses.jsonl",
+        "fingerprint": "v1:2026-10-09T23:34:59+00:00@12430",
         "kind": "file",
         "dataset_id": null,
-        "last_modified_at": "2026-10-09T23:23:12+00:00",
+        "last_modified_at": "2026-10-09T23:34:59+00:00",
         "extras": {}
       }
     ],
-    "inputs_sha256": "4c74c97d8e3ede4aaed71fd0a8645c4f0ab3502e4be44f07795cd4f7e2e9a84c"
+    "inputs_sha256": "5c2b5ec2c9d2f0ff60bc06a7772960680a774ef4d05905651cbd6f17fd0f3af9"
   }
 }
