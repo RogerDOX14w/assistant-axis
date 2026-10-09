@@ -1,8 +1,10 @@
 """Tests for ``assistant_axis.entity_id``.
 
-The 9 known content-bearing collision names (May 2026 corpus audit)
+The 11 known content-bearing collision names (nine from the May 2026
+corpus audit; ``specialist`` and ``parent`` joined in September 2026)
 are covered explicitly so a future regression to bare-name keys is
-caught by name.
+caught by name.  ``test_collision_regression.py`` checks the list
+against the stems actually on disk, so it cannot go stale silently.
 """
 import pytest
 
@@ -27,9 +29,11 @@ COLLISION_NAMES = [
     "cosmopolitan",
     "generalist",
     "pacifist",
+    "parent",
     "patient",
     "perfectionist",
     "romantic",
+    "specialist",
     "stoic",
 ]
 
@@ -365,7 +369,7 @@ class TestNormalizeToFileName:
         assert normalize_to_file_name("Patient") != "Patient"
 
     def test_collision_names_unchanged(self):
-        """The 9 collision names (Bug A) are all single-word lowercase
+        """The 11 collision names (Bug A) are all single-word lowercase
         already; normalise must not mangle them."""
         for name in COLLISION_NAMES:
             assert normalize_to_file_name(name) == name
@@ -445,7 +449,7 @@ class TestDisplayFormName:
             assert normalize_to_file_name(display) == file_form
 
     def test_collision_names_unchanged(self):
-        """All 9 collision names are single-word; display-form
+        """All 11 collision names are single-word; display-form
         rendering must not mangle them."""
         for name in COLLISION_NAMES:
             assert display_form_name(name) == name

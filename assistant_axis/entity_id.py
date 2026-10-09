@@ -1,10 +1,12 @@
 """Disambiguated entity identifiers for trait/role mixing contexts.
 
-The project's corpus has 9 names that appear in *both* the trait and
+The project's corpus has 11 names that appear in *both* the trait and
 role lists -- ``ascetic``, ``contrarian``, ``cosmopolitan``,
-``generalist``, ``pacifist``, ``patient``, ``perfectionist``,
-``romantic``, ``stoic``.  Bare names are therefore *not* a unique
-identifier in any context that mixes kinds (dict keys, set members,
+``generalist``, ``pacifist``, ``parent``, ``patient``,
+``perfectionist``, ``romantic``, ``specialist``, ``stoic`` (checked
+against the files by ``tests/test_collision_regression.py``).  Bare
+names are therefore *not* a unique identifier in any context that
+mixes kinds (dict keys, set members,
 JSON cache keys, sorted name lists for rho computation, ...).
 Historically several sites silently dropped one side of every
 collision via the dict-overwrite ``merged[name] = ...`` pattern,
@@ -564,7 +566,7 @@ def corpus_display_name(
        name and the kind.
     2. With a known kind, the stem is looked up in that kind's table
        (trait ``positive_label`` / role override or ``_`` -> space).
-    3. With no kind, both tables are consulted.  The nine
+    3. With no kind, both tables are consulted.  The eleven
        collision names display identically in both, so they resolve
        cleanly; if a future collision ever displayed differently the
        helper falls back to the mechanical form rather than guess.
