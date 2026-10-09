@@ -48,17 +48,39 @@ sys.path.insert(0, str(Path(__file__).parent.parent))
 # This is the only script in the repo using this pattern; it is not a
 # convention to propagate. If you are maintaining code that uses assistant_axis,
 # prefer the standard form everywhere else.
-import importlib.util as _importlib_util
-_judge_path = Path(__file__).parent.parent / "assistant_axis" / "judge.py"
-_judge_spec = _importlib_util.spec_from_file_location(
-    "_assistant_axis_judge_standalone", _judge_path
-)
-_judge_mod = _importlib_util.module_from_spec(_judge_spec)
-_judge_spec.loader.exec_module(_judge_mod)
+#
+# The modules are imported as submodules of a stand-in package whose
+# ``__path__`` is the assistant_axis directory, so that the package's
+# ``__init__`` never runs but a relative import inside a module
+# (judge.py's ``from .judge_pricing import ...``, needed for the usage
+# record) still resolves.  judge.py, judge_pricing.py and entity_id.py use
+# only the standard library, openai and dotenv.
+import importlib as _importlib
+import types as _types
+
+_STANDALONE_PKG = "_assistant_axis_standalone"
+
+
+def _standalone(submodule: str):
+    """Import ``assistant_axis/<submodule>.py`` without the package __init__."""
+    if _STANDALONE_PKG not in sys.modules:
+        pkg = _types.ModuleType(_STANDALONE_PKG)
+        pkg.__path__ = [str(Path(__file__).resolve().parent.parent / "assistant_axis")]
+        sys.modules[_STANDALONE_PKG] = pkg
+    return _importlib.import_module(f"{_STANDALONE_PKG}.{submodule}")
+
+
+_judge_mod = _standalone("judge")
 RateLimiter = _judge_mod.RateLimiter
 call_judge_batch = _judge_mod.call_judge_batch
 parse_judge_score = _judge_mod.parse_judge_score
 warn_if_low_parse_rate = _judge_mod.warn_if_low_parse_rate
+MultiModelUsage = _standalone("judge_pricing").MultiModelUsage
+_entity_id_mod = _standalone("entity_id")
+display_form_name = _entity_id_mod.display_form_name
+judge_form_of_label = _entity_id_mod.judge_form_of_label
+judge_label = _entity_id_mod.judge_label
+JUDGE_LABEL_FORM = _entity_id_mod.JUDGE_LABEL_FORM
 
 import openai
 
@@ -85,6 +107,20 @@ logging.getLogger("openai").setLevel(logging.WARNING)
 # (legacy per-role eval_prompts in ``data/roles/instructions/*.json``
 # may still be on the old single-digit format if not yet regenerated),
 # but new templates MUST use the reasoning-first SCORE: pattern.
+
+# Version of the trait and combination rubrics below, with the names they
+# are filled with (AGENT_NOTES "When changing a judge rubric").  The score
+# files are flat ``{key: score}`` maps read by step 4, so the version is
+# stamped beside them in ``judge_rubric.json`` (see ``stamp_rubric``); a
+# role's rubric is the ``eval_prompt`` baked into its file by
+# data_analysis/regenerate_role_instructions.py.
+#   1 (May 2026, unstamped) -- trait name = the stored positive_label;
+#     combination prompts showed the raw stems (``devils_advocate``,
+#     ``systems_thinker``).
+#   2 (2026-10-09, W19, Roger) -- names in the judge display form
+#     (assistant_axis.entity_id.judge_label): ``careless (from HEXACO)``,
+#     ``devil's advocate``, ``systems-thinker``.  Template text unchanged.
+JUDGE_RUBRIC_VERSION = 2
 
 COMBINED_EVAL_TEMPLATE = """\
 You are evaluating whether the model's response fully embodies BOTH:
@@ -222,15 +258,27 @@ def _role_prompt(stem: str, roles_dir: Path) -> Optional[str]:
     return None
 
 
+def trait_judge_name(stem: str, data: dict) -> str:
+    """The trait's name as the judge sees it: the judge display form of the
+    label in the file being read (``judge_label``'s trait rule, applied to
+    this file so that a ``--traits_dir`` outside the corpus works too)."""
+    return judge_form_of_label(data.get("positive_label") or display_form_name(stem))
+
+
+def role_judge_name(stem: str, roles_dir: Path) -> str:
+    """The role's name as the judge sees it (``judge_label``; a role's
+    display override applies even without its file)."""
+    return judge_label(stem, "roles", data_dir=Path(roles_dir).parent.parent)
+
+
 def _trait_prompt(stem: str, traits_dir: Path) -> Optional[str]:
     trait_file = traits_dir / f"{stem}.json"
     if not trait_file.exists():
         return None
     data = _load_json(trait_file)
     desc = _description_from(data)
-    name = data.get("positive_label", stem)
     return TRAIT_EVAL_TEMPLATE.format(
-        trait_name=name,
+        trait_name=trait_judge_name(stem, data),
         trait_description=desc,
     )
 
@@ -286,10 +334,12 @@ def resolve_eval_prompt(
             logger.warning(f"Missing files for combined entry {stem}")
             return None
         role_desc = _description_from(_load_json(role_file))
-        trait_desc = _description_from(_load_json(trait_file))
+        trait_data = _load_json(trait_file)
+        trait_desc = _description_from(trait_data)
+        # JUDGE_RUBRIC_VERSION 2: the judge display form, not the raw stems.
         return COMBINED_EVAL_TEMPLATE.format(
-            role_name=role_name,
-            trait_name=trait_name,
+            role_name=role_judge_name(role_name, roles_dir),
+            trait_name=trait_judge_name(trait_name, trait_data),
             role_description=role_desc,
             trait_description=trait_desc,
         )
@@ -300,6 +350,79 @@ def resolve_eval_prompt(
 # ---------------------------------------------------------------------------
 # Response loading / scoring
 # ---------------------------------------------------------------------------
+
+# ---------------------------------------------------------------------------
+# Side-cars beside the score files: usage record and rubric stamp
+# ---------------------------------------------------------------------------
+#
+# Step 4 reads ``<scores_dir>/<entity>.json`` by name, so these two files do
+# not look like an entity to it.  The usage record is the token-usage HARD
+# RULE's ``usage.json`` (MultiModelUsage.as_dict(), cumulative across runs
+# into the same directory); the rubric stamp records which rubric version(s)
+# produced the scores there.
+
+USAGE_FILENAME = "usage.json"
+RUBRIC_STAMP_FILENAME = "judge_rubric.json"
+SIDE_CAR_FILENAMES = (USAGE_FILENAME, RUBRIC_STAMP_FILENAME)
+
+
+def _atomic_write_json(path: Path, obj) -> None:
+    """Write via a temporary file in the same directory and ``os.replace``,
+    retried as the score files are (the directory may be on NFS)."""
+    for attempt in range(3):
+        tmp = path.with_name(f".{path.name}.tmp{os.getpid()}")
+        try:
+            tmp.write_text(json.dumps(obj, indent=2, sort_keys=True) + "\n")
+            os.replace(tmp, path)
+            return
+        except OSError as e:
+            if tmp.exists():
+                tmp.unlink()
+            if attempt == 2:
+                raise
+            logger.warning(f"{path.name}: write failed ({e}), retrying")
+
+
+def write_usage(path: Path, prior: "MultiModelUsage", run: "MultiModelUsage") -> "MultiModelUsage":
+    """Write the cumulative record (``prior``, as loaded when the run started,
+    plus this run) to ``path`` and return it.  Called after every entity, so
+    a crash loses at most one entity's tokens; ``prior`` is never ticked, so
+    repeated writes do not double-count."""
+    total = MultiModelUsage()
+    total.merge_from(prior)
+    total.merge_from(run)
+    _atomic_write_json(path, total.as_dict())
+    return total
+
+
+def stamp_rubric(output_dir: Path, *, entity_type: str, judge_model: str) -> dict:
+    """Record in ``judge_rubric.json`` that this run judges under
+    :data:`JUDGE_RUBRIC_VERSION`.  Versions and models accumulate across
+    runs into the same directory; score files already there with no stamp
+    beside them predate stamping (version 1).  Warns when the directory
+    mixes versions.  (Role prompts are each file's baked ``eval_prompt``;
+    the stamp then says which script and label form were in use.)"""
+    path = output_dir / RUBRIC_STAMP_FILENAME
+    if path.exists():
+        old = json.loads(path.read_text())
+    else:
+        unstamped = any(p.name not in SIDE_CAR_FILENAMES for p in output_dir.glob("*.json"))
+        old = {"rubric_versions": [1] if unstamped else []}
+    versions = sorted(set(old.get("rubric_versions", [])) | {JUDGE_RUBRIC_VERSION})
+    if len(versions) > 1:
+        logger.warning(f"{output_dir}: scores here were judged under rubric versions {versions} "
+                       f"(this run: {JUDGE_RUBRIC_VERSION}); entities already scored are not rejudged")
+    stamp = {
+        "script": "pipeline/3_judge.py",
+        "rubric_version": JUDGE_RUBRIC_VERSION,
+        "rubric_versions": versions,
+        "label_form": JUDGE_LABEL_FORM,
+        "entity_type": entity_type,
+        "judge_models": sorted(set(old.get("judge_models", [])) | {judge_model}),
+    }
+    _atomic_write_json(path, stamp)
+    return stamp
+
 
 def load_responses(responses_file: Path) -> List[dict]:
     """Load responses from JSONL file."""
@@ -320,8 +443,10 @@ async def score_entity(
     max_tokens: int,
     batch_size: int,
     existing_scores: Dict[str, int],
+    usage: Optional["MultiModelUsage"] = None,
 ) -> Tuple[dict, int, int]:
-    """Score responses for a single entity.
+    """Score responses for a single entity.  ``usage`` (a
+    MultiModelUsage) is ticked with every response's token counts.
 
     Returns
     -------
@@ -371,6 +496,7 @@ async def score_entity(
         max_tokens=max_tokens,
         rate_limiter=rate_limiter,
         batch_size=batch_size,
+        usage=usage,
     )
 
     scores: Dict[str, int] = {}
@@ -550,6 +676,16 @@ async def main_async():
     client = openai.AsyncOpenAI()
     rate_limiter = RateLimiter(args.requests_per_second)
 
+    # Token usage (AGENT_NOTES HARD RULE): <output_dir>/usage.json, merged
+    # into on resume and rewritten after every entity.
+    stamp_rubric(output_dir, entity_type=args.entity_type, judge_model=args.judge_model)
+    logger.info(f"Rubric version {JUDGE_RUBRIC_VERSION} (names in the {JUDGE_LABEL_FORM} form)")
+    usage_path = output_dir / USAGE_FILENAME
+    prior_usage = MultiModelUsage.load_or_create(usage_path)
+    run_usage = MultiModelUsage()
+    if prior_usage.n_calls:
+        logger.info(prior_usage.log_line("[usage] earlier runs"))
+
     successful = skipped = failed = 0
     # Aggregate parse-rate counters across all entities so the end-of-run
     # summary can warn loudly if the chosen judge is dropping >1% of calls.
@@ -609,7 +745,9 @@ async def main_async():
                 max_tokens=args.max_tokens,
                 batch_size=args.batch_size,
                 existing_scores=existing_scores,
+                usage=run_usage,
             )
+            write_usage(usage_path, prior_usage, run_usage)
             total_call_attempted += n_attempted
             total_call_parsed += n_parsed
             all_scores = {**existing_scores, **new_scores}
@@ -635,6 +773,13 @@ async def main_async():
         except Exception as e:
             errors.append(f"{name}: {e}")
             failed += 1
+
+    if run_usage.n_calls or not usage_path.exists():
+        total_usage = write_usage(usage_path, prior_usage, run_usage)
+    else:
+        total_usage = prior_usage
+    logger.info(run_usage.log_line("[usage] this run"))
+    logger.info(total_usage.log_line(f"[usage] cumulative ({usage_path})"))
 
     logger.info("\n" + "=" * 40)
     logger.info("SUMMARY")

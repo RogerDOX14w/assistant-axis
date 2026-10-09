@@ -460,16 +460,22 @@ async def call_judge_batch(
     model: str,
     max_tokens: int,
     rate_limiter: RateLimiter,
-    batch_size: int = 50
+    batch_size: int = 50,
+    usage: Optional["MultiModelUsage"] = None,
 ) -> List[Optional[str]]:
-    """Call the judge model with multiple prompts concurrently."""
+    """Call the judge model with multiple prompts concurrently.
+
+    ``usage``: optional :class:`assistant_axis.judge_pricing.MultiModelUsage`
+    accumulator, passed to every :func:`call_judge_single` (AGENT_NOTES
+    "Token usage logging is mandatory on batched LLM call sites").
+    """
     results = []
 
     for i in range(0, len(prompts), batch_size):
         batch = prompts[i:i + batch_size]
 
         tasks = [
-            call_judge_single(client, prompt, model, max_tokens, rate_limiter)
+            call_judge_single(client, prompt, model, max_tokens, rate_limiter, usage=usage)
             for prompt in batch
         ]
 
