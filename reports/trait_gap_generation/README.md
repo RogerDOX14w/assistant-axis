@@ -37,6 +37,8 @@ which first glosses them with M1's own gloss and alignment calls), R1 and R2 in 
 synonym in the next; `--no-queue-search` turns it off; [coding_plan_platform.md](./coding_plan_platform.md),
 "The seed queue in M3's search"); on the three generator pilots it changed no decision.
 
+**2026-10-09:** the first runs through the Batches API (the Allport column IV and rare-word 10% pilots, all stages) and the queue fix; readout [batches_pilot_readout_2026-10-09.md](./batches_pilot_readout_2026-10-09.md).
+
 ## The plans
 
 Generators (independent of our list unless noted):
