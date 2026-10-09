@@ -1,0 +1,24 @@
+  WARNING: Southeast Asian: still 4 distinct openings after a second generation; kept the better set
+[13/13] OK Southeast Asian: 5 instruction pairs, 40 questions, generated again for the openings
+
+Done: 13 processed, 0 skipped, 0 refused, 0 errors
+API calls made: ~13
+[usage] total=$0.669 calls=14 [claude-sonnet-4-6: $0.669 in=36,058 out=37,358 n=14]
+[usage] cumulative record: /Users/roger/Documents/GitHub/assistant-axis/data/traits/regeneration_usage.json (total $219.304 over 6115 calls)
+Done: 13/13 marked generated, 0 refused
+$ uv run python data_analysis/generate_antonyms.py --traits foot_dragging fickle persuasive welcoming psychologically_minded southeast_asian pacific_islander just self_sacrificing machiavellian_dark_tetrad narcissistic_dark_tetrad psychopathic_dark_tetrad sadistic_dark_tetrad
+Done: 13 checked
+fickle                       -> steadfast|loyal|constant     score=4 nearly_nice
+foot_dragging                -> dependable|reliable|conscientious score=3 nasty
+just                         -> lenient|egalitarian          score=3 nasty
+machiavellian_dark_tetrad    -> guileless|sincere|transparent score=3 nasty
+narcissistic_dark_tetrad     -> humble|self-effacing|modest  score=3 nasty
+pacific_islander             -> individualistic|culturally unaffiliated score=1 nearly_nice
+persuasive                   -> acquiescent|passive          score=3 nearly_nice
+psychologically_minded       -> incurious|unreflective       score=3 nasty
+psychopathic_dark_tetrad     -> empathic|conscientious       score=3 nearly_nice
+sadistic_dark_tetrad         -> empathic|compassionate       score=4 nearly_nice
+self_sacrificing             -> self-serving|selfish         score=4 nearly_nice
+southeast_asian              -> non-Southeast Asian          score=3 open
+welcoming                    -> exclusionary|cliquish        score=3 nearly_nice
+exit 0

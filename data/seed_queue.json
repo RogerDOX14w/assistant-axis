@@ -14,7 +14,7 @@
   },
   "schema": "see AGENT_NOTES § Seeding tooling",
   "merge_problems": [],
-  "updated": "2026-10-09"
+  "updated": "2026-10-10"
  },
  "entries": [
   {
@@ -20874,23 +20874,49 @@
    "partner": null,
    "partner_exists": null,
    "arrangement_members": null,
-   "description_draft": null,
-   "description_notes": "MFT proportionality (desert, merit, reciprocity); optional next to `fair` and the queued `meritocratic`.",
-   "description": null,
+   "description_draft": "This means giving everyone what they deserve: the bigger share to whoever did more, nothing to the freeloader, favors returned in kind, and the punishment fitted to the offense.",
+   "description_notes": "Moral Foundations proportionality (MFQ-2: reward in proportion to contribution, reciprocity, cheaters punished) as the persona's own dealings. Suggested source: 'gap: Moral Foundations Theory (MFQ-2), proportionality'. Not fair (same rules for all), not meritocratic (who should lead and be honored), not just-world-believing (the world already pays out by desert). Probe: bare 'just' reads 'fair and upright, giving others their due', overlap 3 against fair (Sonnet and Opus); the draft is new (fair 2, meritocratic 2, honor culture 2, just-world-believing 1). Label kept: proportional was turned away as a person word, tit-for-tat reads as a copy-the-last-move strategy, just-deserts-minded narrows to punishment. Watch at generation: pos instructions about impartiality or integrity instead of shares, returns and penalties sized to conduct mean the label is pulling; reroll once, then bring just-deserts-minded to Roger.",
+   "description": "This means giving everyone what they deserve: the bigger share to whoever did more, nothing to the freeloader, favors returned in kind, and the punishment fitted to the offense.",
    "source": null,
    "tags": [
     "plain",
     "gap_scan",
-    "mft",
-    "optional"
+    "mft"
    ],
-   "status": "backlog",
-   "decision": "optional per the file; no decision recorded [Roger 2026-10-09 (pre-extraction work list W23): do (seed before the extraction).]",
+   "status": "done",
+   "decision": "optional per the file; no decision recorded [Roger 2026-10-09 (pre-extraction work list W23): do (seed before the extraction).] [Roger 2026-10-09, pre-extraction work list W23: seed; reviewed in wave2_review_1.md (seed as drafted).]",
    "alternatives": null,
    "section": "TODO (definitely): gap scan using the other taxonomies as checklists (queued 2026-09-08)",
    "lines": "1756-1757",
    "chunk_confidence": "low",
-   "extracted_from": "extract_3.json"
+   "extracted_from": "extract_3.json",
+   "nearest_existing": "fair (same rules for everyone; just sizes each share to what the person did, which can mean unequal shares); meritocratic (social order of leadership and honor); just_world_believing (descriptive belief about the world); grateful (repays kindness only); vindictive, unforgiving (wrongs beyond proportion); egalitarian (MFQ-2's separate Equality). Test: does the persona size what each person gets, good or bad, to what that person did?; transactional: keeps score of exchanges, not of desert",
+   "review_verdict": "seed as drafted",
+   "seeded_at": "2026-10-10",
+   "generated_at": "2026-10-10",
+   "check_result": {
+    "returned": "lenient|egalitarian",
+    "score": 3,
+    "reasoning": "The neg instructions describe someone who ignores merit, equalizes outcomes regardless of contribution, forgives debts without reciprocity, lets people off easy, covers for freeloaders, and redistributes from high to low contributors. This is not simply 'lenient' (which focuses on punishment) or 'forgiving' (which focuses on debts), but more broadly someone who treats everyone the same regardless of desert — an egalitarian in the leveling sense. However, the core opposition to 'just' (desert-based fairness) is captured well by 'unjust,' but that's an 'un-X' form. Better standalone candidates: 'lenient' captures the letting-off-easy aspect; 'indiscriminate' captures the ignoring-of-differences aspect; 'egalitarian' captures the leveling aspect. The neg instructions collectively paint a picture of someone who ignores proportionality and desert — which is best captured by 'lenient|indiscriminate|egalitarian'. The most natural single opposite to 'just' in the desert/merit sense would be 'unjust,' but since we prefer real adjectives, 'lenient' is too narrow (only punishment), 'indiscriminate' is close but not standard, and 'egalitarian' has positive connotations but captures the leveling. I'll go with 'lenient|egalitarian' as the two most competitive candidates. The antonym score: 'just' in this definition is specifically about proportionality and desert; the neg instructions describe the opposite of that, so this is a strong opposition — score 3, as 'unjust' would be 4 but these labels are slightly asymmetric.",
+    "category": "nasty",
+    "candidates": [
+     "lenient",
+     "egalitarian"
+    ],
+    "known": [
+     "lenient",
+     "egalitarian"
+    ],
+    "intended_hit": false,
+    "checked_at": "2026-10-10"
+   },
+   "check_answers": [
+    {
+     "checked_at": "2026-10-10",
+     "returned": "lenient|egalitarian",
+     "phase": "check"
+    }
+   ]
   },
   {
    "stem": "just_world_believing",
@@ -26720,23 +26746,48 @@
    "partner": null,
    "partner_exists": null,
    "arrangement_members": null,
-   "description_draft": null,
-   "description_notes": "MFT loyalty's self-sacrifice component; optional (the martyr role exists).",
-   "description": null,
+   "description_draft": "This means giving up one's own comfort, chances or safety for one's family, team or country: eating last, taking the worst shift or the dangerous job, so that they come through.",
+   "description_notes": "Moral Foundations loyalty's self-sacrifice ('one for all'), scoped to one's own people; the scope is what makes it a gap. Suggested source: 'gap: Moral Foundations Theory, loyalty/self-sacrifice'. Probe: the bare sense ('puts others' needs before its own') is covered by altruistic (Sonnet 2, Opus 3); the own-people draft is new (family-oriented 2, loyal 1, conventional (Kohlberg) 1, brave 1; altruistic not among its ten nearest). Not the martyr role (suffering or death for a faith or cause, or parading one's sacrifices): everyday cost-bearing, no creed, no audience. Alternatives joined with 'or' (rule 11).",
+   "description": "This means giving up one's own comfort, chances or safety for one's family, team or country: eating last, taking the worst shift or the dangerous job, so that they come through.",
    "source": null,
    "tags": [
     "plain",
     "gap_scan",
-    "mft",
-    "optional"
+    "mft"
    ],
-   "status": "backlog",
-   "decision": "optional per the file; no decision recorded [Roger 2026-10-09 (pre-extraction work list W23): do (seed before the extraction).]",
+   "status": "done",
+   "decision": "optional per the file; no decision recorded [Roger 2026-10-09 (pre-extraction work list W23): do (seed before the extraction).] [Roger 2026-10-09, pre-extraction work list W23: seed; reviewed in wave2_review_1.md (seed as drafted).]",
    "alternatives": null,
    "section": "TODO (definitely): gap scan using the other taxonomies as checklists (queued 2026-09-08)",
    "lines": "1758-1760",
    "chunk_confidence": "low",
-   "extracted_from": "extract_3.json"
+   "extracted_from": "extract_3.json",
+   "nearest_existing": "altruistic (concern for others' welfare at large, no cost required); generous (gives resources, not one's own good); loyal (allegiance, not the price paid); family_oriented (priority, family only); collectivistic (value orientation); brave (acting despite fear); roles martyr and altruist; enneagram_2 and blood_type_a carry the word as one component. Test: does the persona take the cost on itself so that its own people come through?",
+   "review_verdict": "seed as drafted",
+   "seeded_at": "2026-10-10",
+   "generated_at": "2026-10-10",
+   "check_result": {
+    "returned": "self-serving|selfish",
+    "score": 4,
+    "reasoning": "The neg instructions consistently describe someone who prioritizes their own comfort, safety, and advancement over others — claiming the best positions, avoiding danger, eating first, and letting others bear burdens. This is classically 'self-serving' behavior, but the most natural single-word antonym to 'self-sacrificing' is 'self-serving' or 'selfish'. 'Self-serving' captures the active pursuit of personal advantage, while 'selfish' is the broader trait. Both are strong candidates. 'Self-interested' is also plausible but slightly weaker. The opposition to 'self-sacrificing' is very direct and clean.",
+    "category": "nearly_nice",
+    "candidates": [
+     "self_serving",
+     "selfish"
+    ],
+    "known": [
+     "selfish"
+    ],
+    "intended_hit": false,
+    "checked_at": "2026-10-10"
+   },
+   "check_answers": [
+    {
+     "checked_at": "2026-10-10",
+     "returned": "self-serving|selfish",
+     "phase": "check"
+    }
+   ]
   },
   {
    "stem": "self_starting",
@@ -45679,29 +45730,55 @@
   },
   {
    "stem": "pacific_islander",
-   "label": "pacific islander",
+   "label": "Pacific Islander",
    "entity_type": "trait",
    "chunk": "5",
    "sub_chunk": "demographic: race/ethnicity",
-   "pairing": "map",
+   "pairing": "singleton",
    "partner": null,
    "partner_exists": null,
    "arrangement_members": null,
-   "description_draft": null,
-   "description_notes": "Optional extra for more resolution in the race / ethnicity map; would join that map if adopted.",
-   "description": null,
+   "description_draft": "This means being Samoan, Tongan, Fijian, Native Hawaiian or another of the Pacific peoples: the island language at home or only English, Sunday church, the family's home island, and living anywhere from Apia to Auckland.",
+   "description_notes": "Opens 'being <peoples>' like the two indigenous members: 'roots in Hawaii' or 'roots in Fiji' would take in Japanese-American Hawaiians and Indo-Fijians (South Asian by heritage). Named peoples join the US census grouping (Native Hawaiians) and New Zealand's 'Pacific peoples' (Samoans, Tongans, Fijians); 'another of' covers Chamorro, Marshallese, Cook Islanders, Niueans, Tahitians, Papua New Guineans. Torres Strait Islanders stay in indigenous_australian. New Zealand Maori left to 'another of' (US usage counts them, New Zealand usage does not): reviewer call. 'Sunday church' is the modal custom (Samoans, Tongans and Fijians almost entirely Christian), as African's church or mosque; 'the family's home island' is the diaspora's answer to 'where is your family from'. No sport, food, dance or body cliches. 'Fijian' means the indigenous iTaukei. 35 words. Probe: sense confirmed (primary 'person of Pacific Island origin or heritage'); new; nearest Indigenous Australian 0.43, Indigenous American 0.42, South Asian 0.42. Maori are left unnamed: in New Zealand usage 'Pacific peoples' excludes them (reviewer, decided 2026-10-09).",
+   "description": "This means being Samoan, Tongan, Fijian, Native Hawaiian or another of the Pacific peoples: the island language at home or only English, Sunday church, the family's home island, and living anywhere from Apia to Auckland.",
    "source": null,
    "tags": [
     "sensitive",
     "membership"
    ],
-   "status": "backlog",
-   "decision": "approved 2026-09-07 as optional (add only if more resolution is wanted) [Roger 2026-10-09 (pre-extraction work list W23): do (seed before the extraction; heritage map).]",
+   "status": "done",
+   "decision": "approved 2026-09-07 as optional (add only if more resolution is wanted) [Roger 2026-10-09 (pre-extraction work list W23): do (seed before the extraction; heritage map).] [Roger 2026-10-09, pre-extraction work list W23: seed; reviewed in wave2_review_1.md (seed as drafted).]",
    "alternatives": null,
    "section": "Race / ethnicity (coarse, categorical, all unpaired)",
    "lines": "834-836",
    "chunk_confidence": "high",
-   "extracted_from": "extract_2.json"
+   "extracted_from": "extract_2.json",
+   "nearest_existing": "indigenous_australian (Aboriginal and Torres Strait Islander: mob, country, kin); indigenous_american (the Americas' first peoples; Native Hawaiians are not among them); australian (nationality). Test: Samoan, Tongan, Fijian, Native Hawaiian or of another Pacific Island people by family.",
+   "review_verdict": "seed as drafted",
+   "seeded_at": "2026-10-10",
+   "generated_at": "2026-10-10",
+   "check_result": {
+    "returned": "individualistic|culturally unaffiliated",
+    "score": 1,
+    "reasoning": "The neg instructions describe someone with no ethnic/cultural community identity, no inherited traditions, no collective obligations, and a purely individualistic Western framework. This is not simply 'non-Pacific Islander' but rather describes a culturally unrooted, individualistic person. The best labels are 'individualistic' (emphasizing the self-over-community orientation) or 'culturally unaffiliated' (emphasizing the lack of ethnic/community identity). Since the positive label is an ethnic/cultural identity category rather than a personality trait per se, the opposition is inherently asymmetric — the neg instructions describe a disposition (individualism, cultural detachment) rather than a rival ethnic group. 'Individualistic' captures the core contrast with the collectivist, community-rooted Pacific Islander identity. The antonym score is low because 'Pacific Islander' is an ethnic identity, not a personality trait pole, so no single adjective can be a clean antonym.",
+    "category": "nearly_nice",
+    "candidates": [
+     "individualistic",
+     "culturally_unaffiliated"
+    ],
+    "known": [
+     "individualistic"
+    ],
+    "intended_hit": false,
+    "checked_at": "2026-10-10"
+   },
+   "check_answers": [
+    {
+     "checked_at": "2026-10-10",
+     "returned": "individualistic|culturally unaffiliated",
+     "phase": "check"
+    }
+   ]
   },
   {
    "stem": "neopagan",
@@ -46748,29 +46825,52 @@
   },
   {
    "stem": "southeast_asian",
-   "label": "southeast asian",
+   "label": "Southeast Asian",
    "entity_type": "trait",
    "chunk": "5",
    "sub_chunk": "demographic: race/ethnicity",
-   "pairing": "map",
+   "pairing": "singleton",
    "partner": null,
    "partner_exists": null,
    "arrangement_members": null,
-   "description_draft": null,
-   "description_notes": "Optional extra for more resolution in the race / ethnicity map; would join that map if adopted.",
-   "description": null,
+   "description_draft": "This means having roots in the Philippines, Vietnam, Thailand or Indonesia: Tagalog, Vietnamese, Thai or Indonesian at home or only English, Christmas, Tet, Songkran or Lebaran with the family, and living anywhere from Manila to Houston.",
+   "description_notes": "Heritage map member, written to the map's grain (countries; home languages 'or only English'; one family custom across the category; 'living anywhere from <home city> to <diaspora city>'). 36 words, the map's upper end. Four countries named, the largest diasporas; Malaysia, Singapore, Myanmar, Cambodia, Laos, Brunei and Timor-Leste left out for length, as East Asian leaves out Mongolia (reviewer may swap Malaysia in). Festivals named one per country (Christmas, Tet, Songkran, Lebaran) to keep the custom slot off East Asian's 'New Year' and South Asian's and Middle Eastern's 'Eid'. Tagalog is what Filipino Americans call the home language. No Saigon or Hanoi (both charged for the Vietnamese diaspora). Southeast Asians of Chinese descent are East Asian by heritage; not addressed. Probe: sense confirmed (primary 'born or raised in Southeast Asia', secondary heritage); new; nearest East Asian 0.61, South Asian 0.58 (existing neighbours 0.50-0.53). The four countries named are the region's four most populous (reviewer, 2026-10-09).",
+   "description": "This means having roots in the Philippines, Vietnam, Thailand or Indonesia: Tagalog, Vietnamese, Thai or Indonesian at home or only English, Christmas, Tet, Songkran or Lebaran with the family, and living anywhere from Manila to Houston.",
    "source": null,
    "tags": [
     "sensitive",
     "membership"
    ],
-   "status": "backlog",
-   "decision": "approved 2026-09-07 as optional (add only if more resolution is wanted) [Roger 2026-10-09 (pre-extraction work list W23): do (seed before the extraction; heritage map).]",
+   "status": "done",
+   "decision": "approved 2026-09-07 as optional (add only if more resolution is wanted) [Roger 2026-10-09 (pre-extraction work list W23): do (seed before the extraction; heritage map).] [Roger 2026-10-09, pre-extraction work list W23: seed; reviewed in wave2_review_1.md (seed as drafted).]",
    "alternatives": null,
    "section": "Race / ethnicity (coarse, categorical, all unpaired)",
    "lines": "834-836",
    "chunk_confidence": "high",
-   "extracted_from": "extract_2.json"
+   "extracted_from": "extract_2.json",
+   "nearest_existing": "east_asian (China, Japan, Korea, Taiwan; 'New Year'); south_asian and middle_eastern (Eid); chinese, indian (nationalities: citizenship, not heritage); eastern_hemisphere (birthplace). Test: family roots in mainland or island Southeast Asia, whatever the passport.",
+   "review_verdict": "seed as drafted",
+   "seeded_at": "2026-10-10",
+   "generated_at": "2026-10-10",
+   "check_result": {
+    "returned": "non-Southeast Asian",
+    "score": 3,
+    "reasoning": "The neg instructions describe someone with no connection to Southeast Asian culture, heritage, language, or traditions — essentially a non-Southeast Asian person. The positive label is an ethnocultural identity ('Southeast Asian'), and the opposite is simply someone who is not Southeast Asian. The most natural label would be 'non-Southeast Asian,' but that is an 'un-X' form. There isn't a single clean standalone adjective that captures 'not Southeast Asian' the way 'Southeast Asian' captures the positive pole — this is a regional/ethnic identity category, not a personality trait with a natural antonym. 'Western' could apply in some neg prompts but is not implied universally. The neg instructions don't specify any alternative heritage, just the absence of Southeast Asian heritage. 'Non-Southeast Asian' is the most accurate label, though it is a negation form. No better standalone adjective exists for this specific ethnic/cultural category.",
+    "category": "open",
+    "candidates": [
+     "non_southeast_asian"
+    ],
+    "known": [],
+    "intended_hit": false,
+    "checked_at": "2026-10-10"
+   },
+   "check_answers": [
+    {
+     "checked_at": "2026-10-10",
+     "returned": "non-Southeast Asian",
+     "phase": "check"
+    }
+   ]
   },
   {
    "stem": "spiralist",
@@ -52204,8 +52304,8 @@
    "extracted_from": "extract_1.json"
   },
   {
-   "stem": "everyday_sadism_dark_tetrad",
-   "label": "everyday sadism (Dark Tetrad)",
+   "stem": "sadistic_dark_tetrad",
+   "label": "sadistic (Dark Tetrad)",
    "entity_type": "trait",
    "chunk": null,
    "sub_chunk": "dark/light",
@@ -52213,22 +52313,50 @@
    "partner": null,
    "partner_exists": null,
    "arrangement_members": null,
-   "description_draft": null,
-   "description_notes": "Unipolar with nothing on the other side; plain coverage via cruel(merciful) and savage(gentle). Named `... Dark Tetrad` / `... Light Triad` traits would only be a rule-5 comparison set; the one canonical bipolar axis under the cluster is HEXACO Honesty-Humility, already in Part 1.",
-   "description": null,
-   "source": "Dark Tetrad (Dark Triad plus everyday sadism, Buckels)",
+   "description_draft": "This means enjoying others' suffering, whether causing it or just watching: thrilling to fistfights, violent films or brutal sports, laughing at a fool's pratfall, or hurting people with words for fun.",
+   "description_notes": "Markedly milder in harm done than the plain cruelty traits, by the SD4's design (it minimizes physical sadism items); rule 9: mirror the source's strength.",
+   "description": "This means enjoying others' suffering, whether causing it or just watching: thrilling to fistfights, violent films or brutal sports, laughing at a fool's pratfall, or hurting people with words for fun.",
+   "source": "Paulhus, Buckels, Trapnell & Jones (2021), Short Dark Tetrad (SD4), sadism subscale (\"Mean\"; everyday sadism, Buckels, Jones & Paulhus 2013); https://doi.org/10.1027/1015-5759/a000602 ; deliberate duplication of the plain sadistic (rule 5)",
    "tags": [
-    "standard",
-    "dark_light",
-    "not_imported"
+    "standard"
    ],
-   "status": "not_adopted",
-   "decision": "Roger 2026-09-08: no axes for the Dark Tetrad or Light Triad by name; cover them with plain traits instead (line 1629-1630).",
+   "status": "done",
+   "decision": "Roger 2026-09-08: no axes for the Dark Tetrad or Light Triad by name; cover them with plain traits instead (line 1629-1630). [Roger 2026-10-09, pre-extraction work list W25: seed; reviewed in wave2_review_1.md (seed as drafted).]",
    "alternatives": null,
    "section": "Dark Tetrad and Light Triad: assessment (2026-09-08)",
    "lines": "1600-1626",
    "chunk_confidence": "low",
-   "extracted_from": "extract_3.json"
+   "extracted_from": "extract_3.json",
+   "nearest_existing": "sadistic (W7, no file yet) / cruel / malicious / bullying / savage: the plain sadistic in the everyday sense will be closest and this is its deliberate duplicate; cruel has the pleasure clause among callous ones, malicious puts deliberate harm and deceit first, bullying is picking on the weak (dominance, which the SD4 finds sadism does not load on), savage is cutting words without the pleasure. None has the vicarious strand, which the SD4 makes central; markedly milder in harm done than the plain cruelty traits, by the instrument's design.",
+   "review_verdict": "seed as drafted",
+   "source_url": "https://doi.org/10.1027/1015-5759/a000602",
+   "source_text": "[Paulhus, Buckels, Trapnell & Jones 2021, Screening for dark personalities: The Short Dark Tetrad (SD4), European Journal of Psychological Assessment 37(3); read from the Internet Archive capture of Hogrefe's page of 2025-05-09, https://web.archive.org/web/20250509114432/https://econtent.hogrefe.com/doi/10.1027/1015-5759/a000602 (Hogrefe answers scripts with a Cloudflare challenge). Note 1:] We define sadism as the tendency to enjoy causing, or simply observing, others’ suffering. [SD4, Introduction:] Second, the construct of sadism added a unique element not covered by the Dark Triad members, namely, intrinsic pleasure in hurting others (Nell, 2006). [SD4, 'Limitations and Future Directions':] Consensus is emerging that the distinctive ingredient in sadism is the reward value of (doing and/or viewing) cruel behavior. Whereas psychopaths are indifferent to others’ suffering, sadists find it appealing. [SD4, General Discussion, 'Sadism Versus Psychopathy':] The items that best separate from psychopathy are largely vicarious: watching violent sports, violent media, and live fist-fights. Although originally intended to represent all three facets, our new subscale minimizes physical sadism items. [SD4, Study 1, 'Sadistic Content':] The CAST went even further to include verbal sadism (e.g., “I enjoy making jokes at the expense of others”). [Buckels, Jones & Paulhus 2013, Behavioral confirmation of everyday sadism, Psychological Science 24, p. 2201; https://www2.psych.ubc.ca/~dpaulhus/research/DARK_TRAITS/ARTICLES/PS.2013.Buckels-Jones-Paulhus.pdf:] Most people experience distress after hurting an innocent person. Yet for others, cruelty affords a different emotional experience: It is pleasurable, exciting, perhaps even sexually arousing. [SD4, Appendix, 3 of the 7 'Mean' items:] Watching a fist-fight excites me. / It’s funny when idiots fall flat on their face. / I know how to hurt someone with words alone.",
+   "source_retrieved": "2026-10-09",
+   "notes": "Queue stem was everyday_sadism_dark_tetrad until 2026-10-09 (the construct adjective is the label).",
+   "seeded_at": "2026-10-10",
+   "generated_at": "2026-10-10",
+   "check_result": {
+    "returned": "empathic|compassionate",
+    "score": 4,
+    "reasoning": "The neg instructions describe someone who feels distress at others' pain, steps in to help, uses gentle words, avoids violence, and actively works to make others comfortable. This is the classic opposite of sadism — someone who takes pleasure in others' wellbeing rather than suffering. 'Empathic' captures the emotional resonance with others' pain, while 'compassionate' captures the active care. 'Empathic' is perhaps the most direct psychological opposite to sadistic in the Dark Tetrad literature, but 'compassionate' is also strongly competitive. The antonym relationship is very strong — sadism is defined by pleasure in others' suffering, and these neg instructions describe someone pained by others' suffering and motivated to relieve it.",
+    "category": "nearly_nice",
+    "candidates": [
+     "empathic",
+     "compassionate"
+    ],
+    "known": [
+     "compassionate"
+    ],
+    "intended_hit": false,
+    "checked_at": "2026-10-10"
+   },
+   "check_answers": [
+    {
+     "checked_at": "2026-10-10",
+     "returned": "empathic|compassionate",
+     "phase": "check"
+    }
+   ]
   },
   {
    "stem": "extreme_responding",
@@ -52787,8 +52915,8 @@
    "extracted_from": "extract_4.json"
   },
   {
-   "stem": "machiavellianism_dark_tetrad",
-   "label": "Machiavellianism (Dark Tetrad)",
+   "stem": "machiavellian_dark_tetrad",
+   "label": "Machiavellian (Dark Tetrad)",
    "entity_type": "trait",
    "chunk": null,
    "sub_chunk": "dark/light",
@@ -52796,22 +52924,53 @@
    "partner": null,
    "partner_exists": null,
    "arrangement_members": null,
-   "description_draft": null,
-   "description_notes": "Unipolar; Christie and Geis's 'low Mach' portrait (emotionally invested, finds manipulation immoral, trusting) and the Light Triad's Kantianism are content counterparts; plain coverage via guileless ↔ scheming and manipulative. Named `... Dark Tetrad` / `... Light Triad` traits would only be a rule-5 comparison set; the one canonical bipolar axis under the cluster is HEXACO Honesty-Humility, already in Part 1.",
-   "description": null,
-   "source": "Dark Tetrad (Dark Triad plus everyday sadism, Buckels)",
+   "description_draft": "This means getting one's way by planned manipulation: playing the long game, keeping one's secrets and good name, courting the people who matter with flattery, and caring nothing for those one uses.",
+   "description_notes": "",
+   "description": "This means getting one's way by planned manipulation: playing the long game, keeping one's secrets and good name, courting the people who matter with flattery, and caring nothing for those one uses.",
+   "source": "Paulhus, Buckels, Trapnell & Jones (2021), Short Dark Tetrad (SD4), Machiavellianism subscale (\"Crafty\"), construct as defined in Jones & Paulhus (2014), Short Dark Triad (SD3); https://doi.org/10.1027/1015-5759/a000602 ; https://www2.psych.ubc.ca/~dpaulhus/research/DARK_TRAITS/ARTICLES/ASSESST.2014.with.Jones.pdf ; deliberate duplication of the plain calculating, scheming and manipulative (rule 5)",
    "tags": [
-    "standard",
-    "dark_light",
-    "not_imported"
+    "standard"
    ],
-   "status": "not_adopted",
-   "decision": "Roger 2026-09-08: no axes for the Dark Tetrad or Light Triad by name; cover them with plain traits instead (line 1629-1630).",
+   "status": "done",
+   "decision": "Roger 2026-09-08: no axes for the Dark Tetrad or Light Triad by name; cover them with plain traits instead (line 1629-1630). [Roger 2026-10-09, pre-extraction work list W25: seed; reviewed in wave2_review_1.md (seed with these fixes).]",
    "alternatives": "low Mach (Christie & Geis) as low pole",
    "section": "Dark Tetrad and Light Triad: assessment (2026-09-08)",
    "lines": "1600-1626",
    "chunk_confidence": "low",
-   "extracted_from": "extract_3.json"
+   "extracted_from": "extract_3.json",
+   "nearest_existing": "calculating / scheming / manipulative / sly_hexaco / strategic: calculating (weighing every move, people as pieces) is closest; scheming is hidden plans, manipulative a list of tactics, sly (HEXACO) the same flattery clause from its own official text, strategic the long game without manipulation. The instrument's Machiavellian is defined against the psychopath: patient, careful of reputation, a builder of alliances; no plain trait carries the reputation and alliance strands.",
+   "review_verdict": "seed with these fixes",
+   "source_url": "https://www2.psych.ubc.ca/~dpaulhus/research/DARK_TRAITS/ARTICLES/ASSESST.2014.with.Jones.pdf",
+   "source_text": "[Jones & Paulhus 2014, Introducing the Short Dark Triad (SD3), Assessment 21(1), p. 29; author copy at the source_url:] Whereas psychopaths act impulsively, abandon friends, and family, and pay little attention to their reputations (Hare & Neumann, 2008), Machiavellians plan ahead, build alliances, and do their best to maintain a positive reputation. When overlap is controlled, research has supported these assertions: Machiavellians are strategic rather than impulsive (Jones & Paulhus, 2011a). [...] In sum, the key elements of Machiavellianism appear to be (a) manipulativeness, (b) callous affect, and (c) a strategic-calculating orientation. [SD3, p. 29, on the older Mach-IV:] As a result, the popular Mach-IV items include cynical worldview, lack of morality, and manipulativeness (see, review by Fehr, Samsom, & Paulhus, 1992). [Paulhus & Williams 2002, Journal of Research in Personality 36, p. 556; https://www2.psych.ubc.ca/~dpaulhus/research/SELF-ENHANCEMENT/downloads/ARTICLES/JRP.02.pdf:] The construct of Machiavellianism—in short, the manipulative personality—emerged from Richard Christie’s selection of statements from Machiavelli’s original books (see Christie & Geis, 1970). [Paulhus, Buckels, Trapnell & Jones 2021, Screening for dark personalities: The Short Dark Tetrad (SD4), European Journal of Psychological Assessment 37(3), Study 1, 'Structure'; https://doi.org/10.1027/1015-5759/a000602, read from the Internet Archive capture of Hogrefe's page of 2025-05-09, https://web.archive.org/web/20250509114432/https://econtent.hogrefe.com/doi/10.1027/1015-5759/a000602:] the problem had been ameliorated when the Mach VI was introduced (Paulhus & Jones, 2015). Its content is less aggressive, instead focussing on controlled manipulation. Hence, we began our structural analyses with the Mach VI items rather than the original SD3 Mach items. [SD4, Study 3, Method:] The 28-item SD4 was administered with euphemistic labels for each subscale: special for the narcissism items; crafty for the Machiavellianism items; wild for the psychopathy items; mean for the sadism items. [SD4, Appendix, 3 of the 7 'Crafty' items:] It’s not wise to let people know your secrets. / Whatever it takes, you must get the important people on your side. / Flattery is a good way to get people on your side.",
+   "source_retrieved": "2026-10-09",
+   "notes": "Queue stem was machiavellianism_dark_tetrad until 2026-10-09 (the construct adjective is the label).",
+   "seeded_at": "2026-10-10",
+   "generated_at": "2026-10-10",
+   "check_result": {
+    "returned": "guileless|sincere|transparent",
+    "score": 3,
+    "reasoning": "The neg instructions consistently describe someone who is transparent, honest, straightforward, non-manipulative, and genuinely caring about others for their own sake — not as instruments. Words like 'guileless,' 'straightforward,' 'lays cards on the table,' 'openly,' and 'no strategic reserves' all point to a cluster around sincerity/transparency/guilelessness. The best single label is 'guileless' (used explicitly in neg #5) or 'sincere' or 'transparent.' 'Guileless' is the most precise antonym to Machiavellian's core of hidden manipulation and strategic deception. 'Sincere' and 'transparent' are also strong candidates. These are strong but not perfect antonyms — Machiavellianism also involves callousness and using people, which 'guileless' doesn't fully capture, but it captures the core manipulation/deception pole well.",
+    "category": "nasty",
+    "candidates": [
+     "guileless",
+     "sincere",
+     "transparent"
+    ],
+    "known": [
+     "guileless",
+     "sincere",
+     "transparent"
+    ],
+    "intended_hit": false,
+    "checked_at": "2026-10-10"
+   },
+   "check_answers": [
+    {
+     "checked_at": "2026-10-10",
+     "returned": "guileless|sincere|transparent",
+     "phase": "check"
+    }
+   ]
   },
   {
    "stem": "malevolent",
@@ -52933,8 +53092,8 @@
    "extracted_from": "extract_4.json"
   },
   {
-   "stem": "narcissism_dark_tetrad",
-   "label": "narcissism (Dark Tetrad)",
+   "stem": "narcissistic_dark_tetrad",
+   "label": "narcissistic (Dark Tetrad)",
    "entity_type": "trait",
    "chunk": null,
    "sub_chunk": "dark/light",
@@ -52942,22 +53101,53 @@
    "partner": null,
    "partner_exists": null,
    "arrangement_members": null,
-   "description_draft": null,
-   "description_notes": "Unipolar construct with no canonical opposite pole; the literature offers 'echoism' (fringe) or modesty (NEO A5, HEXACO Modesty) as the low pole; per-member axes would come from arrogant ↔ humble and grandiose(modest) instead. Named `... Dark Tetrad` / `... Light Triad` traits would only be a rule-5 comparison set; the one canonical bipolar axis under the cluster is HEXACO Honesty-Humility, already in Part 1.",
-   "description": null,
-   "source": "Dark Tetrad (Dark Triad plus everyday sadism, Buckels)",
+   "description_draft": "This means being sure one is special: a born leader with exceptional gifts, chasing the admiration one is owed, believing one's own boasts, and turning angry when anyone doubts them.",
+   "description_notes": "",
+   "description": "This means being sure one is special: a born leader with exceptional gifts, chasing the admiration one is owed, believing one's own boasts, and turning angry when anyone doubts them.",
+   "source": "Paulhus, Buckels, Trapnell & Jones (2021), Short Dark Tetrad (SD4), narcissism subscale (\"Special\"; grandiose narcissism only), construct as defined in Jones & Paulhus (2014), Short Dark Triad (SD3); https://doi.org/10.1027/1015-5759/a000602 ; https://www2.psych.ubc.ca/~dpaulhus/research/DARK_TRAITS/ARTICLES/ASSESST.2014.with.Jones.pdf ; deliberate duplication of the plain grandiose (rule 5); the vulnerable form is vulnerable-narcissistic",
    "tags": [
-    "standard",
-    "dark_light",
-    "not_imported"
+    "standard"
    ],
-   "status": "not_adopted",
-   "decision": "Roger 2026-09-08: no axes for the Dark Tetrad or Light Triad by name; cover them with plain traits instead (line 1629-1630).",
+   "status": "done",
+   "decision": "Roger 2026-09-08: no axes for the Dark Tetrad or Light Triad by name; cover them with plain traits instead (line 1629-1630). [Roger 2026-10-09, pre-extraction work list W25: seed; reviewed in wave2_review_1.md (seed as drafted).]",
    "alternatives": "echoism (Malkin 2015) or modesty as low pole",
    "section": "Dark Tetrad and Light Triad: assessment (2026-09-08)",
    "lines": "1600-1626",
    "chunk_confidence": "low",
-   "extracted_from": "extract_3.json"
+   "extracted_from": "extract_3.json",
+   "nearest_existing": "grandiose / arrogant / entitled / attention_seeking / status_seeking: grandiose (inflated self-importance, superiority) is closest but has nothing on admiration, entitlement or the anger; each plain trait holds one strand, and the instrument's narcissist is the conjunction, driven by ego-reinforcement rather than gain. Grandiose form only; vulnerable_narcissistic is the other form. Role: narcissist.; self_aggrandizing: inflates one's own part in a story, the plain everyday trait",
+   "review_verdict": "seed as drafted",
+   "source_url": "https://www2.psych.ubc.ca/~dpaulhus/research/DARK_TRAITS/ARTICLES/ASSESST.2014.with.Jones.pdf",
+   "source_text": "[Jones & Paulhus 2014, Introducing the Short Dark Triad (SD3), Assessment 21(1), pp. 29-30; author copy at the source_url:] When compared with other measures, the key element in the NPI appears to be grandiosity (Miller & Campbell, 2008). [...] For example, grandiosity leads narcissistic individuals on a never-ending quest for ego-reinforcement (Morf & Rhodewalt, 2001), often resulting in self-destructive behaviors (Vazire & Funder, 2006). Rather than deliberate, the cognitive processes of narcissists are more self-deceptive: They seem to believe their boasts even when it can be verified that they exaggerate their competence (Paulhus & Williams, 2002). Narcissistic grandiosity also promotes a sense of entitlement (Bushman, Bonacci, van Dijk, & Baumeister, 2003), even aggression, if that grandiosity is threatened (Bushman & Baumeister, 1998; Jones & Paulhus, 2010). [...] It is this grandiose variant of narcissism that is represented in the Dark Triad. Whereas ego-reinforcement is the all-consuming motive behind narcissistic behavior, psychopaths and Machiavellians are more motivated by instrumental or material gain. [Paulhus & Williams 2002, Journal of Research in Personality 36, p. 557; https://www2.psych.ubc.ca/~dpaulhus/research/SELF-ENHANCEMENT/downloads/ARTICLES/JRP.02.pdf:] Facets retained from the clinical syndrome included grandiosity, entitlement, dominance, and superiority. [Paulhus, Buckels, Trapnell & Jones 2021, The Short Dark Tetrad (SD4), European Journal of Psychological Assessment 37(3), note 3; https://doi.org/10.1027/1015-5759/a000602, read from the Internet Archive capture of Hogrefe's page of 2025-05-09, https://web.archive.org/web/20250509114432/https://econtent.hogrefe.com/doi/10.1027/1015-5759/a000602:] Our narcissism items, like the NPI items, capture only grandiose narcissism. [SD4, Appendix, 3 of the 7 'Special' items:] People see me as a natural leader. / I have some exceptional qualities / I’m likely to become a future star in some area.",
+   "source_retrieved": "2026-10-09",
+   "notes": "Queue stem was narcissism_dark_tetrad until 2026-10-09 (the construct adjective is the label).",
+   "seeded_at": "2026-10-10",
+   "generated_at": "2026-10-10",
+   "check_result": {
+    "returned": "humble|self-effacing|modest",
+    "score": 3,
+    "reasoning": "The neg instructions describe someone who sees others as equals, owns limitations honestly, steps back from the spotlight, understates achievements, invites scrutiny, and puts themselves last in recognition. This is a cluster centering on humility — specifically the opposite of narcissistic grandiosity and entitlement. 'Humble' is the most natural single-word antonym. 'Self-effacing' is explicitly used in neg instruction 5 and captures the more extreme, self-diminishing end. 'Modest' is also competitive. The opposition to narcissism is strong and well-recognized, though narcissism carries additional elements (entitlement, rage at criticism, manipulativeness) that humility doesn't perfectly mirror, preventing a perfect 4.",
+    "category": "nasty",
+    "candidates": [
+     "humble",
+     "self_effacing",
+     "modest"
+    ],
+    "known": [
+     "humble",
+     "self_effacing",
+     "modest"
+    ],
+    "intended_hit": false,
+    "checked_at": "2026-10-10"
+   },
+   "check_answers": [
+    {
+     "checked_at": "2026-10-10",
+     "returned": "humble|self-effacing|modest",
+     "phase": "check"
+    }
+   ]
   },
   {
    "stem": "nationalist",
@@ -53286,8 +53476,8 @@
    "extracted_from": "extract_1.json"
   },
   {
-   "stem": "psychopathy_dark_tetrad",
-   "label": "psychopathy (Dark Tetrad)",
+   "stem": "psychopathic_dark_tetrad",
+   "label": "psychopathic (Dark Tetrad)",
    "entity_type": "trait",
    "chunk": null,
    "sub_chunk": "dark/light",
@@ -53295,22 +53485,50 @@
    "partner": null,
    "partner_exists": null,
    "arrangement_members": null,
-   "description_draft": null,
-   "description_notes": "Unipolar; no named opposite, only the pole content implied by the triarchic model (timid, affiliative, constrained vs bold, mean, disinhibited); plain coverage via callous and sociopathic vs compassionate. Named `... Dark Tetrad` / `... Light Triad` traits would only be a rule-5 comparison set; the one canonical bipolar axis under the cluster is HEXACO Honesty-Humility, already in Part 1.",
-   "description": null,
-   "source": "Dark Tetrad (Dark Triad plus everyday sadism, Buckels)",
+   "description_draft": "This means living on impulse and for thrills: defying rules and authorities, landing in fights or trouble with the law, making anyone who crosses one pay, and not caring who gets hurt.",
+   "description_notes": "",
+   "description": "This means living on impulse and for thrills: defying rules and authorities, landing in fights or trouble with the law, making anyone who crosses one pay, and not caring who gets hurt.",
+   "source": "Paulhus, Buckels, Trapnell & Jones (2021), Short Dark Tetrad (SD4), psychopathy subscale (\"Wild\"), construct as defined in Jones & Paulhus (2014), Short Dark Triad (SD3); https://doi.org/10.1027/1015-5759/a000602 ; https://www2.psych.ubc.ca/~dpaulhus/research/DARK_TRAITS/ARTICLES/ASSESST.2014.with.Jones.pdf ; deliberate duplication of the plain sociopathic (rule 5)",
    "tags": [
-    "standard",
-    "dark_light",
-    "not_imported"
+    "standard"
    ],
-   "status": "not_adopted",
-   "decision": "Roger 2026-09-08: no axes for the Dark Tetrad or Light Triad by name; cover them with plain traits instead (line 1629-1630).",
+   "status": "done",
+   "decision": "Roger 2026-09-08: no axes for the Dark Tetrad or Light Triad by name; cover them with plain traits instead (line 1629-1630). [Roger 2026-10-09, pre-extraction work list W25: seed; reviewed in wave2_review_1.md (seed as drafted).]",
    "alternatives": null,
    "section": "Dark Tetrad and Light Triad: assessment (2026-09-08)",
    "lines": "1600-1626",
    "chunk_confidence": "low",
-   "extracted_from": "extract_3.json"
+   "extracted_from": "extract_3.json",
+   "nearest_existing": "sociopathic / impulsive / reckless / rebellious / callous: sociopathic (disregard for norms and rights, callous manipulation without remorse, clinical register) is closest but carries the callousness without the impulsivity; impulsive, reckless, rebellious, risk_seeking, aggressive, hostile, callous and unrepentant each hold one strand. The instrument's psychopath is the conjunction of disinhibition, antisociality and indifference (secondary rather than primary psychopathy, per the SD3).",
+   "review_verdict": "seed as drafted",
+   "source_url": "https://www2.psych.ubc.ca/~dpaulhus/research/DARK_TRAITS/ARTICLES/ASSESST.2014.with.Jones.pdf",
+   "source_text": "[Jones & Paulhus 2014, Introducing the Short Dark Triad (SD3), Assessment 21(1), p. 29; author copy at the source_url:] Seminal researchers (Cleckley, 1941/1976; Hare, 1970; Lykken, 1995) have pointed to two key elements of psychopathy—deficits in affect (i.e., callousness) and self-control (i.e., impulsivity). [...] Consequently, psychopaths manifest their callousness in a short-term fashion (Jones & Paulhus, 2011a; Visser, Bay, Cook, & Myburgh, 2012). For example, they lie for immediate rewards, even if those lies compromise their long-term interests (Paulhus & Jones, 2012). Thus callous manipulation combines with other short-term traits (i.e., recklessness, and thrill seeking) to engender bold and relentless criminal behavior (Hare & Neumann, 2008). [Paulhus & Williams 2002, Journal of Research in Personality 36, p. 557; https://www2.psych.ubc.ca/~dpaulhus/research/SELF-ENHANCEMENT/downloads/ARTICLES/JRP.02.pdf:] Central character elements include high impulsivity and thrill-seeking along with low empathy and anxiety. [Paulhus, Buckels, Trapnell & Jones 2021, The Short Dark Tetrad (SD4), European Journal of Psychological Assessment 37(3), General Discussion, 'Sadism Versus Psychopathy'; https://doi.org/10.1027/1015-5759/a000602, read from the Internet Archive capture of Hogrefe's page of 2025-05-09, https://web.archive.org/web/20250509114432/https://econtent.hogrefe.com/doi/10.1027/1015-5759/a000602:] The accompanying angry, fearless, impulsive aspects of psychopathy are not evident in everyday sadism. [SD4, 'Limitations and Future Directions':] Whereas psychopaths are indifferent to others’ suffering, sadists find it appealing. The former may exploit cruelty for its instrumental value; the latter value its intrinsic rewards. [SD4, Appendix, 3 of the 7 'Wild' items:] I tend to fight against authorities and their rules. / I’ve been in trouble with the law. / People who mess with me always regret it.",
+   "source_retrieved": "2026-10-09",
+   "notes": "Queue stem was psychopathy_dark_tetrad until 2026-10-09 (the construct adjective is the label).",
+   "seeded_at": "2026-10-10",
+   "generated_at": "2026-10-10",
+   "check_result": {
+    "returned": "empathic|conscientious",
+    "score": 3,
+    "reasoning": "The neg instructions describe someone who is empathetic, rule-abiding, considerate of others, non-retaliatory, and responsible — the opposite of impulsive, callous, and antisocial. The best label for this cluster is 'conscientious' (explicitly used in neg #5) or 'empathic|prosocial'. However, in the context of the Dark Tetrad, the direct opposite of psychopathy is often labeled 'empathic' or 'conscientious'. The neg instructions emphasize both caring about others (empathy/warmth) and following rules/taking responsibility (conscientiousness). These are genuinely two competing labels. The antonym score is high — these are clearly opposite poles of the psychopathy dimension — but not quite perfect because psychopathy is a multidimensional construct (impulsivity + callousness + antisocial behavior) and no single word captures the full opposite.",
+    "category": "nearly_nice",
+    "candidates": [
+     "empathic",
+     "conscientious"
+    ],
+    "known": [
+     "conscientious"
+    ],
+    "intended_hit": false,
+    "checked_at": "2026-10-10"
+   },
+   "check_answers": [
+    {
+     "checked_at": "2026-10-10",
+     "returned": "empathic|conscientious",
+     "phase": "check"
+    }
+   ]
   },
   {
    "stem": "purchase_frequency",
@@ -56063,6 +56281,259 @@
     }
    ],
    "paired_at": "2026-10-09"
+  },
+  {
+   "stem": "foot_dragging",
+   "entity_type": "trait",
+   "chunk": "pre-extraction",
+   "sub_chunk": "W6: occupational instruments",
+   "section": "pre-extraction work list W6",
+   "lines": null,
+   "partner": null,
+   "arrangement_members": null,
+   "label": "foot-dragging",
+   "description": "This means agreeing readily to whatever one is asked, then stalling: doing it late or by halves, or 'forgetting' it, and resenting the request without ever saying no.",
+   "description_draft": "This means agreeing readily to whatever one is asked, then stalling: doing it late or by halves, or 'forgetting' it, and resenting the request without ever saying no.",
+   "description_notes": "Hogan HDS Leisurely's over-used form (W6): the open yes over a hidden no, the persona form of sandbagging.  Judge's test: did the persona accept the request, and does its stalling (late, partial, 'forgotten') carry a refusal and a resentment it never says aloud?  An open no is rebellious or unhelpful; putting off one's own dreaded task is procrastinating; failing with no motive is unreliable; hints and digs are passive-aggressive.  Question scope: every question puts a request or task to the persona (from a boss, partner, client or user), so that there is something to agree to and sit on.",
+   "nearest_existing": "passive_aggressive:; unreliable:; unhelpful:; procrastinating:; lazy:; obedient:; rebellious:",
+   "tags": [
+    "plain",
+    "gap_scan",
+    "hogan_hds",
+    "alignment",
+    "sandbagging"
+   ],
+   "status": "done",
+   "pairing": "singleton",
+   "review_verdict": "seed as drafted",
+   "source": "Hogan HDS (Leisurely)",
+   "decision": "[Roger 2026-10-09, pre-extraction work list W6: seed; reviewed in wave2_review_1.md (seed as drafted).]",
+   "seeded_at": "2026-10-10",
+   "generated_at": "2026-10-10",
+   "check_result": {
+    "returned": "dependable|reliable|conscientious",
+    "score": 3,
+    "reasoning": "The neg instructions describe someone who is reliable, follows through completely, delivers on time, and either commits fully or declines honestly. This is the direct opposite of foot-dragging (passive non-compliance with hidden resentment). The best label for this opposite pole is 'reliable' or 'dependable', but more precisely the neg instructions emphasize full follow-through and honest communication — 'conscientious' captures the thoroughness, while 'dependable|reliable' captures the follow-through aspect. 'Forthright' captures the honest refusal element. The most natural single label for someone who does what they say, on time, completely, is 'dependable|reliable|conscientious'. Since foot-dragging is a somewhat specialized term for passive non-compliance, its opposite isn't a perfect single-word antonym in common usage, but 'dependable' or 'reliable' comes closest. The antonym score is strong but not perfect because foot-dragging includes a hidden resentment/passive-aggressive component that 'dependable' doesn't fully mirror as an opposite.",
+    "category": "nasty",
+    "candidates": [
+     "dependable",
+     "reliable",
+     "conscientious"
+    ],
+    "known": [
+     "dependable",
+     "conscientious"
+    ],
+    "intended_hit": false,
+    "checked_at": "2026-10-10"
+   },
+   "check_answers": [
+    {
+     "checked_at": "2026-10-10",
+     "returned": "dependable|reliable|conscientious",
+     "phase": "check"
+    }
+   ]
+  },
+  {
+   "stem": "fickle",
+   "entity_type": "trait",
+   "chunk": "pre-extraction",
+   "sub_chunk": "W6: occupational instruments",
+   "section": "pre-extraction work list W6",
+   "lines": null,
+   "partner": null,
+   "arrangement_members": null,
+   "label": "fickle",
+   "description": "This means warming fast to a new friend, plan or cause and going cold at the first letdown, so that nothing and nobody holds one's enthusiasm for long.",
+   "description_draft": "This means warming fast to a new friend, plan or cause and going cold at the first letdown, so that nothing and nobody holds one's enthusiasm for long.",
+   "description_notes": "Hogan HDS Excitable's peaks and valleys over people and projects (W6), and trait-gap candidate fickle#1 (M3 new in m3_pilot_1_r2, from loyal's antonym check), seeded once from W6.  Judge's test: does the persona's keenness for a person, plan or cause collapse at the first disappointment, with nothing gained by dropping it?  Leaving for gain is treacherous; mood swings with the attachment intact are temperamental or excitable; boredom with brands is brand-agnostic.",
+   "nearest_existing": "experiencer_vals:; brand_agnostic:; erratic:; treacherous:; temperamental:; excitable:; borderline_personality_disorder:; loyal:; unreliable: fails commitments, not enthusiasm that cools",
+   "tags": [
+    "plain",
+    "gap_scan",
+    "hogan_hds"
+   ],
+   "status": "done",
+   "pairing": "singleton",
+   "review_verdict": "seed as drafted",
+   "source": "Hogan HDS (Excitable); trait-gap candidate fickle#1 (m3_pilot_1_r2)",
+   "decision": "[Roger 2026-10-09, pre-extraction work list W6: seed; reviewed in wave2_review_1.md (seed as drafted).]",
+   "notes": "Also the trait-gap candidate fickle#1 (M3 new, from loyal's antonym check); seeded through this path, so the registry row is marked seeded by that session.",
+   "seeded_at": "2026-10-10",
+   "generated_at": "2026-10-10",
+   "check_result": {
+    "returned": "steadfast|loyal|constant",
+    "score": 4,
+    "reasoning": "The neg instructions describe someone who builds loyalty slowly, holds commitments firmly through setbacks, finishes what they start, and stays devoted even when things go wrong. 'Steadfast' is explicitly used in instruction 5, and it captures the core opposite well. 'Loyal' and 'constant' are also candidates, but 'steadfast' most precisely captures both the durability of commitment and the resistance to abandonment under difficulty. 'Fickle' vs 'steadfast' is a strong, well-recognized antonym pair in English.",
+    "category": "nearly_nice",
+    "candidates": [
+     "steadfast",
+     "loyal",
+     "constant"
+    ],
+    "known": [
+     "loyal"
+    ],
+    "intended_hit": false,
+    "checked_at": "2026-10-10"
+   },
+   "check_answers": [
+    {
+     "checked_at": "2026-10-10",
+     "returned": "steadfast|loyal|constant",
+     "phase": "check"
+    }
+   ]
+  },
+  {
+   "stem": "persuasive",
+   "entity_type": "trait",
+   "chunk": "pre-extraction",
+   "sub_chunk": "W6: occupational instruments",
+   "section": "pre-extraction work list W6",
+   "lines": null,
+   "partner": null,
+   "arrangement_members": null,
+   "label": "persuasive",
+   "description": "This means wanting people to come around to one's view or one's offer: arguing, selling or bargaining until they say yes, and counting every changed mind as a win.",
+   "description_draft": "This means wanting people to come around to one's view or one's offer: arguing, selling or bargaining until they say yes, and counting every changed mind as a win.",
+   "description_notes": "SHL OPQ32 Persuasive and CliftonStrengths Woo (W6; recommended strike, Roger 2026-10-09 'do all').  The label's first sense is the skill; the description makes it the drive.  Judge's test: is the persona working to get the other person to agree or buy, and does it keep at it past the first no, by open argument, a pitch or a bargain?  Figures of speech without that aim are rhetorical; firm views voiced with no aim to convert are opinionated; lies, guilt or exploited weakness are manipulative.",
+   "nearest_existing": "rhetorical:; opinionated:; manipulative:; enterprising_holland:; charismatic:; zealous:",
+   "tags": [
+    "plain",
+    "gap_scan",
+    "opq32",
+    "cliftonstrengths"
+   ],
+   "status": "done",
+   "pairing": "singleton",
+   "review_verdict": "seed as drafted",
+   "source": "SHL OPQ32 (Persuasive); CliftonStrengths (Woo)",
+   "decision": "[Roger 2026-10-09, pre-extraction work list W6: seed; reviewed in wave2_review_1.md (seed as drafted).]",
+   "seeded_at": "2026-10-10",
+   "generated_at": "2026-10-10",
+   "check_result": {
+    "returned": "acquiescent|passive",
+    "score": 3,
+    "reasoning": "The neg instructions describe someone who states a view once and lets it go, accepts disagreement without pushing back, makes no effort to change minds, and feels no drive to bring others around. This is the opposite of persuasive in the sense of being non-pushy, accepting of disagreement, and not attempting to influence. The best label for this pole is 'unpersuasive' but that's a negation form. Better standalone adjectives would be 'acquiescent' (accepting others' positions without resistance) or 'non-insistent'. 'Acquiescent' captures the acceptance of disagreement well. 'Passive' also fits — not pushing, not pressing. The neg instructions emphasize leaving people free, not nudging, not returning to the subject — this is more about being non-coercive and accepting than simply being passive. 'Acquiescent' or 'passive' are the strongest candidates. Since the positive label is 'persuasive,' the direct opposite in common usage would be something like 'unpersuasive' but the behavior described is more about not trying rather than failing — so 'non-insistent|acquiescent|passive' are all reasonable. I'll go with 'acquiescent|passive' as the best pair, with a score of 3 since 'persuasive' vs 'acquiescent' is a strong but slightly asymmetric opposition (persuasive is about technique/drive, acquiescent is about acceptance/yielding).",
+    "category": "nearly_nice",
+    "candidates": [
+     "acquiescent",
+     "passive"
+    ],
+    "known": [
+     "passive"
+    ],
+    "intended_hit": false,
+    "checked_at": "2026-10-10"
+   },
+   "check_answers": [
+    {
+     "checked_at": "2026-10-10",
+     "returned": "acquiescent|passive",
+     "phase": "check"
+    }
+   ]
+  },
+  {
+   "stem": "welcoming",
+   "entity_type": "trait",
+   "chunk": "pre-extraction",
+   "sub_chunk": "W6: occupational instruments",
+   "section": "pre-extraction work list W6",
+   "lines": null,
+   "partner": null,
+   "arrangement_members": null,
+   "label": "welcoming",
+   "description": "This means drawing the newcomer or the one standing alone into the circle, shifting over to make room or filling them in on the joke, and making sure nobody is left out.",
+   "description_draft": "This means drawing the newcomer or the one standing alone into the circle, shifting over to make room or filling them in on the joke, and making sure nobody is left out.",
+   "description_notes": "CliftonStrengths Includer (W6; recommended strike, Roger 'do all').  The label's first sense is hospitality (M3 covered by friendly on that gloss), so the description carries the sense.  Judge's test: does the persona act to bring someone on the outside (the newcomer, the one standing alone, the one not asked) into the group?  Warmth to whoever is present is friendly; whose views get into what one says is inclusive; a host's seat and drink are not the trait.  Question scope: questions set in a group with someone new or left out (an office, a party, a team, a class).",
+   "nearest_existing": "friendly:; inclusive:; gregarious:; polite:; cliqueish:",
+   "tags": [
+    "plain",
+    "gap_scan",
+    "cliftonstrengths"
+   ],
+   "status": "done",
+   "pairing": "singleton",
+   "review_verdict": "seed as drafted",
+   "source": "CliftonStrengths (Includer)",
+   "decision": "[Roger 2026-10-09, pre-extraction work list W6: seed; reviewed in wave2_review_1.md (seed as drafted).]",
+   "seeded_at": "2026-10-10",
+   "generated_at": "2026-10-10",
+   "check_result": {
+    "returned": "exclusionary|cliquish",
+    "score": 3,
+    "reasoning": "The neg instructions describe someone who closes ranks, excludes newcomers, keeps groups tight and impenetrable, and treats outsiders as intrusions. The clearest antonym to 'welcoming' in this context is 'exclusionary' — actively keeping people out. 'Cliquish' is also a strong candidate as it captures the tight in-group dynamic described. 'Unwelcoming' is the direct negation but feels weak as a standalone label. 'Exclusionary' and 'cliquish' are both genuine adjectives that capture the described behavior well.",
+    "category": "nearly_nice",
+    "candidates": [
+     "exclusionary",
+     "cliquish"
+    ],
+    "known": [
+     "exclusionary"
+    ],
+    "intended_hit": false,
+    "checked_at": "2026-10-10"
+   },
+   "check_answers": [
+    {
+     "checked_at": "2026-10-10",
+     "returned": "exclusionary|cliquish",
+     "phase": "check"
+    }
+   ]
+  },
+  {
+   "stem": "psychologically_minded",
+   "entity_type": "trait",
+   "chunk": "pre-extraction",
+   "sub_chunk": "W6: occupational instruments",
+   "section": "pre-extraction work list W6",
+   "lines": null,
+   "partner": null,
+   "arrangement_members": null,
+   "label": "psychologically minded",
+   "description": "This means wondering why people do what they do: reading a motive behind every move or tracing a quirk to its source, and figuring people out for the pleasure of it.",
+   "description_draft": "This means wondering why people do what they do: reading a motive behind every move or tracing a quirk to its source, and figuring people out for the pleasure of it.",
+   "description_notes": "SHL OPQ32 Behavioural (W6; recommended strike, Roger 'do all').  Judge's test: does the persona go looking for why people act as they do, and enjoy the analysis for its own sake?  Reading cues in the moment is socially-perceptive; feeling with people is empathetic; examining one's own mind is introspective; assuming the worst motive is cynical; using what one reads is calculating.  Question scope: questions about other people (a friend's odd choice, a colleague, a public figure, a character in a book).",
+   "nearest_existing": "introspective:; socially_perceptive:; empathetic:; scorpio:; cynical:; calculating:",
+   "tags": [
+    "plain",
+    "gap_scan",
+    "opq32"
+   ],
+   "status": "done",
+   "pairing": "singleton",
+   "review_verdict": "seed with these fixes",
+   "source": "SHL OPQ32 (Behavioural)",
+   "decision": "[Roger 2026-10-09, pre-extraction work list W6: seed; reviewed in wave2_review_1.md (seed with these fixes).]",
+   "seeded_at": "2026-10-10",
+   "generated_at": "2026-10-10",
+   "check_result": {
+    "returned": "incurious|unreflective",
+    "score": 3,
+    "reasoning": "The neg instructions consistently describe someone who takes behavior at face value, never seeks underlying motives, treats inner lives as irrelevant, and has no interest in understanding what drives people. The positive label is 'psychologically minded' — someone deeply curious about inner workings. The opposite is someone who is not curious about psychology at all, accepting surface behavior without inquiry. 'Unreflective' captures the lack of introspection/analysis, but 'incurious' is explicitly used in the neg instructions and fits well. 'Literal-minded' could apply but is narrower. The best candidates are 'psychologically incurious' (used verbatim in neg instructions) or simply 'incurious|unreflective'. Since the positive label is 'psychologically minded,' the most natural direct opposite would be something like 'psychologically incurious' or just 'incurious.' These are strong but not perfect antonyms since 'psychologically minded' has a specific flavor of analytical pleasure-seeking that 'incurious' doesn't fully mirror symmetrically.",
+    "category": "nasty",
+    "candidates": [
+     "incurious",
+     "unreflective"
+    ],
+    "known": [
+     "incurious",
+     "unreflective"
+    ],
+    "intended_hit": false,
+    "checked_at": "2026-10-10"
+   },
+   "check_answers": [
+    {
+     "checked_at": "2026-10-10",
+     "returned": "incurious|unreflective",
+     "phase": "check"
+    }
+   ]
   }
  ]
 }
