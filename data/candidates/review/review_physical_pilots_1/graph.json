@@ -1,0 +1,1617 @@
+{
+  "result": {
+    "schema": 2,
+    "batch_id": "review_physical_pilots_1",
+    "from_batches": [
+      "physical_pilots_1"
+    ],
+    "config": {
+      "k": 10,
+      "cosine_floor": 0.25,
+      "rules": "cut_off_4",
+      "overlap_rubric": 6,
+      "relation_rubric": 1,
+      "embedding": {
+        "model": "text-embedding-3-large",
+        "query_form": "gloss_w14"
+      },
+      "overlap_floor": 0.35,
+      "cut_off": 4,
+      "proposed_cut_off": 3,
+      "m3_rules": "m3_rules_2",
+      "second_direction": "read where the first direction read 3 or above (the proposed cut-off) under M3's rule at that cut-off",
+      "models": {
+        "relation": "claude-haiku-5-5",
+        "relation_unsure": "claude-sonnet-5-5",
+        "overlap_first": "claude-sonnet-5-5",
+        "overlap_second": "claude-opus-5-5"
+      },
+      "rubrics": {
+        "overlap": {
+          "name": "overlap_concept",
+          "version": 6,
+          "sha256": "b3eff18fb946928517183af0244acec2d35dba0ab0bd9c57f83c7a06ac3c9fd0"
+        },
+        "relation": {
+          "name": "relation",
+          "version": 1,
+          "sha256": "b6b11f8cfcb0faafdac4a040087356ecb13d410e9bc309597d7833a96110d70f"
+        }
+      },
+      "space": {
+        "config_version": "2026-10-02",
+        "representation": "w20",
+        "variant": "centred"
+      }
+    },
+    "complete": true,
+    "stalled": {},
+    "nodes": [
+      {
+        "key": "alive#1",
+        "kind": "candidate",
+        "label": "alive",
+        "gloss": "This means having a living body and not being dead.",
+        "stem": "alive",
+        "generator": "censuses",
+        "generators": [
+          "censuses"
+        ],
+        "verdict": "tagged",
+        "decision": "new",
+        "alignment_score": 0,
+        "m3_run": "physical_pilots_1",
+        "outcome": "physical"
+      },
+      {
+        "key": "cherubic#1",
+        "kind": "candidate",
+        "label": "cherubic",
+        "gloss": "This means keeping a round-cheeked, soft-eyed face that looks innocent and angelic, so that others take one's mischief for sweetness and never suspect what one is up to.",
+        "stem": "cherubic",
+        "generator": "censuses",
+        "generators": [
+          "censuses"
+        ],
+        "verdict": "tagged",
+        "decision": "new",
+        "alignment_score": 2,
+        "m3_run": "physical_pilots_1",
+        "outcome": "physical"
+      },
+      {
+        "key": "stentorian#1",
+        "kind": "candidate",
+        "label": "stentorian",
+        "gloss": "This means speaking with a loud, booming voice that carries effortlessly across a room, so that one's words are heard by everyone present whether or not they are trying to listen.",
+        "stem": "stentorian",
+        "generator": "censuses",
+        "generators": [
+          "censuses"
+        ],
+        "verdict": "tagged",
+        "decision": "new",
+        "alignment_score": 0,
+        "m3_run": "physical_pilots_1",
+        "outcome": "physical"
+      },
+      {
+        "key": "weather_beaten#1",
+        "kind": "candidate",
+        "label": "weather-beaten",
+        "gloss": "This means having a face or skin that shows years of sun and wind, looking rugged and hardened by outdoor weather rather than smooth or pampered.",
+        "stem": "weather_beaten",
+        "generator": "roget",
+        "generators": [
+          "roget"
+        ],
+        "verdict": "tagged",
+        "decision": "new",
+        "alignment_score": 0,
+        "m3_run": "physical_pilots_1",
+        "outcome": "physical"
+      },
+      {
+        "key": "blind#1",
+        "kind": "candidate",
+        "label": "blind",
+        "gloss": "This means having no sight, so one cannot see anything at all.",
+        "stem": "blind",
+        "generator": "censuses",
+        "generators": [
+          "censuses"
+        ],
+        "verdict": "tagged",
+        "decision": "covered",
+        "covered_by": "trait:blind",
+        "alignment_score": 0,
+        "m3_run": "physical_pilots_1",
+        "outcome": "physical"
+      },
+      {
+        "key": "good_looking#1",
+        "kind": "candidate",
+        "label": "good-looking",
+        "gloss": "This means having a physical appearance that others find attractive, with features, build and grooming that draw favorable notice when one is seen.",
+        "stem": "good_looking",
+        "generator": "censuses",
+        "generators": [
+          "censuses"
+        ],
+        "verdict": "tagged",
+        "decision": "covered",
+        "covered_by": "trait:good_looking",
+        "alignment_score": 0,
+        "m3_run": "physical_pilots_1",
+        "outcome": "physical"
+      },
+      {
+        "key": "impaired#1",
+        "kind": "candidate",
+        "label": "impaired",
+        "gloss": "This means having a sensory or physical impairment.",
+        "stem": "impaired",
+        "generator": "censuses",
+        "generators": [
+          "censuses"
+        ],
+        "verdict": "tagged",
+        "decision": "covered",
+        "covered_by": "trait:mobility_impaired",
+        "covered_reading": {
+          "stem": "mobility_impaired",
+          "cosine": 0.472409,
+          "sonnet": 3,
+          "opus": 3
+        },
+        "alignment_score": 0,
+        "m3_run": "physical_pilots_1",
+        "outcome": "physical"
+      },
+      {
+        "key": "muscular#1",
+        "kind": "candidate",
+        "label": "muscular",
+        "gloss": "This means having large, well-developed muscles.",
+        "stem": "muscular",
+        "generator": "censuses",
+        "generators": [
+          "censuses"
+        ],
+        "verdict": "tagged",
+        "decision": "covered",
+        "covered_by": "trait:muscular",
+        "alignment_score": 0,
+        "m3_run": "physical_pilots_1",
+        "outcome": "physical"
+      },
+      {
+        "key": "physical#1",
+        "kind": "candidate",
+        "label": "physical",
+        "gloss": "This means keeping one's body strong, fit and athletic, training it regularly and relying on physical capacity in how one moves through and meets the world.",
+        "stem": "physical",
+        "generator": "wn_clusters",
+        "generators": [
+          "wn_clusters"
+        ],
+        "verdict": "tagged",
+        "decision": "covered",
+        "covered_by": "trait:athletic",
+        "covered_reading": {
+          "stem": "athletic",
+          "cosine": 0.472537,
+          "sonnet": 3,
+          "opus": 3
+        },
+        "alignment_score": 0,
+        "m3_run": "physical_pilots_1",
+        "outcome": "physical"
+      },
+      {
+        "key": "sinistral#1",
+        "kind": "candidate",
+        "label": "sinistral",
+        "gloss": "This means being left-handed.",
+        "stem": "sinistral",
+        "generator": "roget",
+        "generators": [
+          "roget"
+        ],
+        "verdict": "tagged",
+        "decision": "covered",
+        "covered_by": "trait:left_handed",
+        "covered_reading": {
+          "stem": "left_handed",
+          "cosine": 0.552974,
+          "sonnet": 4,
+          "opus": null
+        },
+        "alignment_score": 0,
+        "m3_run": "physical_pilots_1",
+        "outcome": "physical"
+      },
+      {
+        "key": "spare#1",
+        "kind": "candidate",
+        "label": "spare",
+        "gloss": "This means being lean and thin in build.",
+        "stem": "spare",
+        "generator": "roget",
+        "generators": [
+          "roget"
+        ],
+        "verdict": "tagged",
+        "decision": "covered",
+        "covered_by": "trait:thin",
+        "covered_reading": {
+          "stem": "thin",
+          "cosine": 0.543386,
+          "sonnet": 3,
+          "opus": 3
+        },
+        "alignment_score": 0,
+        "m3_run": "physical_pilots_1",
+        "outcome": "physical"
+      },
+      {
+        "key": "stone_deaf#1",
+        "kind": "candidate",
+        "label": "stone deaf",
+        "gloss": "This means hearing no sound at all, because one's hearing is completely lost.",
+        "stem": "stone_deaf",
+        "generator": "roget",
+        "generators": [
+          "roget"
+        ],
+        "verdict": "tagged",
+        "decision": "covered",
+        "covered_by": "trait:deaf",
+        "covered_reading": {
+          "stem": "deaf",
+          "cosine": 0.449302,
+          "sonnet": 3,
+          "opus": 3
+        },
+        "alignment_score": 0,
+        "m3_run": "physical_pilots_1",
+        "outcome": "physical"
+      },
+      {
+        "key": "thin#1",
+        "kind": "candidate",
+        "label": "thin",
+        "gloss": "This means having a slender, lean body.",
+        "stem": "thin",
+        "generator": "censuses",
+        "generators": [
+          "censuses"
+        ],
+        "verdict": "tagged",
+        "decision": "covered",
+        "covered_by": "trait:thin",
+        "alignment_score": 0,
+        "m3_run": "physical_pilots_1",
+        "outcome": "physical"
+      },
+      {
+        "key": "trait:animated",
+        "kind": "corpus",
+        "label": "animated",
+        "gloss": "This means using vivid descriptions, energetic and lively language, dynamic expressions, and an enthusiastic communication style that brings content to life with vibrant imagery and spirited tone.",
+        "stem": "animated"
+      },
+      {
+        "key": "trait:athletic",
+        "kind": "corpus",
+        "label": "athletic",
+        "gloss": "This means training most days and playing a sport on weekends: a resting pulse in the fifties, a body that recovers overnight, and stairs taken two at a time without getting winded.",
+        "stem": "athletic"
+      },
+      {
+        "key": "trait:attention_seeking",
+        "kind": "corpus",
+        "label": "attention-seeking",
+        "gloss": "This means wanting every eye in the room on oneself, raising the volume, the stakes or the story whenever talk drifts elsewhere, and smarting when ignored.",
+        "stem": "attention_seeking"
+      },
+      {
+        "key": "trait:blind",
+        "kind": "corpus",
+        "label": "blind",
+        "gloss": "This means seeing little or nothing: getting around with a white cane or a guide dog, reading by screen reader and braille, and knowing the route to work by step and touch.",
+        "stem": "blind"
+      },
+      {
+        "key": "trait:blond",
+        "kind": "corpus",
+        "label": "blond",
+        "gloss": "This means having light hair, pale yellow to sandy: eyebrows and lashes so fair they barely show, hair that goes lighter in summer sun, and grays that blend in unnoticed.",
+        "stem": "blond"
+      },
+      {
+        "key": "trait:blue_eyed",
+        "kind": "corpus",
+        "label": "blue-eyed",
+        "gloss": "This means having blue eyes, sky to sapphire: squinting in bright sun and reaching for sunglasses first, and a color that shifts with the light and the shirt worn.",
+        "stem": "blue_eyed"
+      },
+      {
+        "key": "trait:bombastic",
+        "kind": "corpus",
+        "label": "bombastic",
+        "gloss": "This means using inflated, grandiose, and pompous language that appears designed to impress or overwhelm rather than simply communicate.",
+        "stem": "bombastic"
+      },
+      {
+        "key": "trait:brash",
+        "kind": "corpus",
+        "label": "brash",
+        "gloss": "This means being loud, sure, and quick to speak, blurting out a verdict before weighing what it implies or how it lands, even on the most sensitive subjects.",
+        "stem": "brash"
+      },
+      {
+        "key": "trait:british",
+        "kind": "corpus",
+        "label": "British",
+        "gloss": "This means being from the United Kingdom and living there: English at home, the NHS, a bank holiday in the rain, the football on Saturday, and voting Labour or Tory.",
+        "stem": "british"
+      },
+      {
+        "key": "trait:brown_haired",
+        "kind": "corpus",
+        "label": "brown-haired",
+        "gloss": "This means having brown hair, chestnut to dark coffee: eyebrows and lashes that show without makeup, red glints in summer sun, and the first grays plain against the brown.",
+        "stem": "brown_haired"
+      },
+      {
+        "key": "trait:charismatic",
+        "kind": "corpus",
+        "label": "charismatic",
+        "gloss": "This means showing a magnetic personality that naturally draws others in, communicating with confidence and charm that makes ideas compelling and conversations engaging.",
+        "stem": "charismatic"
+      },
+      {
+        "key": "trait:chaste",
+        "kind": "corpus",
+        "label": "chaste",
+        "gloss": "This means being pure in thought and speech, untouched by sexual desire, seeing people with no lens of attraction, and turning away from a sensual topic rather than toward it.",
+        "stem": "chaste"
+      },
+      {
+        "key": "trait:circumspect",
+        "kind": "corpus",
+        "label": "circumspect",
+        "gloss": "This means being quiet, careful, and slow to speak, weighing what a verdict implies and how it will land before giving it, most of all on sensitive subjects.",
+        "stem": "circumspect"
+      },
+      {
+        "key": "trait:dark_skinned",
+        "kind": "corpus",
+        "label": "dark-skinned",
+        "gloss": "This means having deep brown skin: deepening in summer sun without burning, a hunt for a matching foundation shade, a rash that shows purple, not red, and low vitamin D in winter.",
+        "stem": "dark_skinned"
+      },
+      {
+        "key": "trait:deaf",
+        "kind": "corpus",
+        "label": "deaf",
+        "gloss": "This means hearing little or nothing: talking in sign, reading captions, booking an interpreter for the doctor, a doorbell that flashes and an alarm that shakes the bed, and friends who sign.",
+        "stem": "deaf"
+      },
+      {
+        "key": "trait:death_accepting",
+        "kind": "corpus",
+        "label": "death-accepting",
+        "gloss": "This means being at peace with knowing one will die. One talks of dying, funerals and the grave calmly, as plain facts of life.",
+        "stem": "death_accepting"
+      },
+      {
+        "key": "trait:death_fearing",
+        "kind": "corpus",
+        "label": "death-fearing",
+        "gloss": "This means being haunted by knowing one will die. One shudders at talk of dying, funerals and the grave, and takes every twinge for the end.",
+        "stem": "death_fearing"
+      },
+      {
+        "key": "trait:dull",
+        "kind": "corpus",
+        "label": "dull",
+        "gloss": "This means having a presence that draws no one in, talking without confidence or charm, so that even good ideas sound lifeless and conversations soon peter out.",
+        "stem": "dull"
+      },
+      {
+        "key": "trait:elderly",
+        "kind": "corpus",
+        "label": "elderly",
+        "gloss": "This means being in one's seventies or beyond, with most of life behind one, a slowing body, grandchildren, and a lifetime of change seen firsthand.",
+        "stem": "elderly"
+      },
+      {
+        "key": "trait:eloquent",
+        "kind": "corpus",
+        "label": "eloquent",
+        "gloss": "This means using fluent, graceful, and persuasive language with sophisticated vocabulary, elegant phrasing, and compelling expression that flows smoothly and beautifully.",
+        "stem": "eloquent"
+      },
+      {
+        "key": "trait:emphatic",
+        "kind": "corpus",
+        "label": "emphatic",
+        "gloss": "This means pressing every point home with full force, insisting, underlining, repeating, and never letting anything sound smaller than it is.",
+        "stem": "emphatic"
+      },
+      {
+        "key": "trait:fair_skinned",
+        "kind": "corpus",
+        "label": "fair-skinned",
+        "gloss": "This means having pale skin: burning in twenty minutes of summer sun, SPF 50 for any day outside, the palest foundation shade, and a rash that shows red at once.",
+        "stem": "fair_skinned"
+      },
+      {
+        "key": "trait:female",
+        "kind": "corpus",
+        "label": "female",
+        "gloss": "This means having a woman's body: ovaries, a uterus and breasts, monthly periods from the teens to menopause, the capacity to carry a child, and Pap smears and mammograms on the calendar.",
+        "stem": "female"
+      },
+      {
+        "key": "trait:feminine",
+        "kind": "corpus",
+        "label": "feminine",
+        "gloss": "This means being womanly in how one dresses, talks and carries oneself, and warm, tender and caring in how one meets the world.",
+        "stem": "feminine"
+      },
+      {
+        "key": "trait:flat",
+        "kind": "corpus",
+        "label": "flat",
+        "gloss": "This means speaking in a monotone, plain words, no imagery, no energy, so that thrilling news and a parts list sound alike.",
+        "stem": "flat"
+      },
+      {
+        "key": "trait:flourishing",
+        "kind": "corpus",
+        "label": "flourishing",
+        "gloss": "This means doing well, still growing, living for a purpose one believes in, staying on top of things and close to one's people, and feeling fully alive.",
+        "stem": "flourishing"
+      },
+      {
+        "key": "trait:gentle",
+        "kind": "corpus",
+        "label": "gentle",
+        "gloss": "This means being mild and soft-handed with people, slow to judge harshly, breaking hard truths kindly, and letting every opening for a cutting reply go by.",
+        "stem": "gentle"
+      },
+      {
+        "key": "trait:good_looking",
+        "kind": "corpus",
+        "label": "good-looking",
+        "gloss": "This means having a face and figure that turn heads: even features and clear skin, compliments on one's looks, photographs that come out well, and being asked whether one models.",
+        "stem": "good_looking"
+      },
+      {
+        "key": "trait:gray_haired",
+        "kind": "corpus",
+        "label": "gray-haired",
+        "gloss": "This means having hair gone silver or white with the years: coarser and drier than it was, a yellow cast without purple shampoo, and roots that show within weeks of a dye.",
+        "stem": "gray_haired"
+      },
+      {
+        "key": "trait:harsh",
+        "kind": "corpus",
+        "label": "harsh",
+        "gloss": "This means being severe and heavy-handed with people, quick to judge, delivering hard truths without softening, and taking every opening for a cutting reply.",
+        "stem": "harsh"
+      },
+      {
+        "key": "trait:healthy",
+        "kind": "corpus",
+        "label": "healthy",
+        "gloss": "This means having a sound constitution: shaking off whatever is going around in a day, no prescriptions, a clean checkup every time, and no sick days in years.",
+        "stem": "healthy"
+      },
+      {
+        "key": "trait:languishing",
+        "kind": "corpus",
+        "label": "languishing",
+        "gloss": "This means doing poorly, being stuck in place, living for no purpose, muddling through the days, drifting from one's people, and feeling hollow without knowing why.",
+        "stem": "languishing"
+      },
+      {
+        "key": "trait:left_handed",
+        "kind": "corpus",
+        "label": "left-handed",
+        "gloss": "This means writing and eating with the left hand: ink smudged along it, scissors and can openers made for the other, and elbows bumped at a crowded table.",
+        "stem": "left_handed"
+      },
+      {
+        "key": "trait:lustful",
+        "kind": "corpus",
+        "label": "lustful",
+        "gloss": "This means expressing strong sexual desire and attraction, steering conversations toward sensual or sexual topics, and responding to situations through a lens of physical attraction and sexual interest.",
+        "stem": "lustful"
+      },
+      {
+        "key": "trait:male",
+        "kind": "corpus",
+        "label": "male",
+        "gloss": "This means having a man's body: testes and a penis, a voice that dropped at puberty, a beard to shave or grow, more muscle on the frame, and prostate checks past fifty.",
+        "stem": "male"
+      },
+      {
+        "key": "trait:masculine",
+        "kind": "corpus",
+        "label": "masculine",
+        "gloss": "This means being manly in how one dresses, talks and carries oneself, and tough, assertive and self-reliant in how one meets the world.",
+        "stem": "masculine"
+      },
+      {
+        "key": "trait:middle_aged",
+        "kind": "corpus",
+        "label": "middle-aged",
+        "gloss": "This means being aged between 45 and 65: half of life behind one, teenagers at home or parents growing frail, reading glasses, a mortgage, and a back that complains the next morning.",
+        "stem": "middle_aged"
+      },
+      {
+        "key": "trait:mischievous",
+        "kind": "corpus",
+        "label": "mischievous",
+        "gloss": "This means enjoying stirring up trouble for fun: playing pranks, teasing, bending small rules, and sowing a little confusion or disorder for the pleasure of the reaction, at the target's expense.",
+        "stem": "mischievous"
+      },
+      {
+        "key": "trait:mobility_impaired",
+        "kind": "corpus",
+        "label": "mobility impaired",
+        "gloss": "This means walking with difficulty or not at all: getting around by wheelchair, walker, crutches or cane, taking the ramp and the elevator, and checking a place for steps before going.",
+        "stem": "mobility_impaired"
+      },
+      {
+        "key": "trait:muscular",
+        "kind": "corpus",
+        "label": "muscular",
+        "gloss": "This means carrying a lot of muscle, whether from the gym, years of lifting and hauling, or the build one was born with: broad shoulders, sleeves tight on the arms, and strength to spare.",
+        "stem": "muscular"
+      },
+      {
+        "key": "trait:naive",
+        "kind": "corpus",
+        "label": "naive",
+        "gloss": "This means showing innocent trust in people and situations, lacking worldly experience or skepticism, and assuming good intentions even when there may be reason for caution or doubt.",
+        "stem": "naive"
+      },
+      {
+        "key": "trait:plain_looking",
+        "kind": "corpus",
+        "label": "plain-looking",
+        "gloss": "This means having a face and figure nobody looks at twice: unremarkable features, no compliments on one's looks, photographs that come out ordinary, and a face nobody remembers after one meeting.",
+        "stem": "plain_looking"
+      },
+      {
+        "key": "trait:plain_spoken",
+        "kind": "corpus",
+        "label": "plain-spoken",
+        "gloss": "This means communicating in simple, direct, unadorned language without rhetorical flourishes, elaborate vocabulary, or stylistic embellishment, prioritizing straightforward clarity over elegance or persuasiveness.",
+        "stem": "plain_spoken"
+      },
+      {
+        "key": "trait:red_headed",
+        "kind": "corpus",
+        "label": "red-headed",
+        "gloss": "This means having copper to auburn hair: freckles across the nose and arms, skin that burns in minutes and never tans, and hair that fades pale, not gray, with the years.",
+        "stem": "red_headed"
+      },
+      {
+        "key": "trait:sedentary",
+        "kind": "corpus",
+        "label": "sedentary",
+        "gloss": "This means spending the day sitting and getting no exercise: driving to the corner store, winded after one flight of stairs, soft where muscle would be, and stiff from the chair.",
+        "stem": "sedentary"
+      },
+      {
+        "key": "trait:self_effacing",
+        "kind": "corpus",
+        "label": "self-effacing",
+        "gloss": "This means wanting no eyes in the room on oneself, lowering the volume and passing the story to someone else whenever talk turns one's way, and relieved when overlooked.",
+        "stem": "self_effacing"
+      },
+      {
+        "key": "trait:sickly",
+        "kind": "corpus",
+        "label": "sickly",
+        "gloss": "This means having a weak constitution: catching whatever is going around and keeping it for weeks, prescriptions on the shelf, a checkup that finds something, and sick days gone by spring.",
+        "stem": "sickly"
+      },
+      {
+        "key": "trait:theatrical",
+        "kind": "corpus",
+        "label": "theatrical",
+        "gloss": "This means using dramatic flair, exaggerated language, vivid imagery, and delivering content as if performing on stage with sweeping gestures and commanding presence.",
+        "stem": "theatrical"
+      },
+      {
+        "key": "trait:thin",
+        "kind": "corpus",
+        "label": "thin",
+        "gloss": "This means carrying little body fat: shopping the smaller sizes, belts cinched to the last hole, room to spare in any seat, and feeling the cold before anyone else.",
+        "stem": "thin"
+      },
+      {
+        "key": "trait:unassuming",
+        "kind": "corpus",
+        "label": "unassuming",
+        "gloss": "This means no flourish, no performance, no commanding the room, just the point made quietly in plain words by someone who would rather go unnoticed.",
+        "stem": "unassuming"
+      },
+      {
+        "key": "trait:understated",
+        "kind": "corpus",
+        "label": "understated",
+        "gloss": "This means deliberately minimizing the importance or significance of things and expressing ideas with restraint, using modest language rather than emphatic or dramatic expressions.",
+        "stem": "understated"
+      },
+      {
+        "key": "trait:well_behaved",
+        "kind": "corpus",
+        "label": "well-behaved",
+        "gloss": "This means no pranks, no teasing, no bending a rule for fun, keeping everything orderly, and frowning on anyone who stirs things up.",
+        "stem": "well_behaved"
+      },
+      {
+        "key": "trait:worldly",
+        "kind": "corpus",
+        "label": "worldly",
+        "gloss": "This means having seen enough of how people and deals really go to know the tricks, reading between the lines, and checking before believing.",
+        "stem": "worldly"
+      },
+      {
+        "key": "trait:young",
+        "kind": "corpus",
+        "label": "young",
+        "gloss": "This means being in one's teens or twenties, with most of life ahead, a quick body, friends one's own age, and today's world the only one known.",
+        "stem": "young"
+      }
+    ],
+    "edges": [
+      {
+        "a": "alive#1",
+        "b": "weather_beaten#1",
+        "cosine": 0.253223,
+        "relation": "unrelated",
+        "source": "r1",
+        "strict": false,
+        "relations": {
+          "ab": "unrelated",
+          "ba": "unrelated"
+        },
+        "overlap": "not_similar"
+      },
+      {
+        "a": "cherubic#1",
+        "b": "weather_beaten#1",
+        "cosine": 0.320017,
+        "relation": "opposed",
+        "source": "r1",
+        "strict": false,
+        "relations": {
+          "ab": "opposed",
+          "ba": "opposed"
+        },
+        "overlap": "not_similar"
+      },
+      {
+        "a": "alive#1",
+        "b": "trait:healthy",
+        "cosine": 0.341515,
+        "relation": "unrelated",
+        "source": "m3",
+        "strict": false,
+        "via": "retrieved",
+        "rank": 1
+      },
+      {
+        "a": "alive#1",
+        "b": "trait:female",
+        "cosine": 0.321916,
+        "relation": "unrelated",
+        "source": "m3",
+        "strict": false,
+        "via": "retrieved",
+        "rank": 2
+      },
+      {
+        "a": "alive#1",
+        "b": "trait:flourishing",
+        "cosine": 0.311622,
+        "relation": "similar",
+        "source": "m3",
+        "strict": false,
+        "readings": {
+          "ab": {
+            "sonnet": 1,
+            "opus": null,
+            "verdict": "keep",
+            "four": false,
+            "proposed": false,
+            "reasons": {
+              "sonnet": "Alive is the basic biological state of not being dead, while flourishing is a rich psychological and social state of thriving; flourishing presupposes being alive but adds much more, and a living person need not flourish."
+            },
+            "outcome": "continue"
+          }
+        },
+        "via": "retrieved",
+        "rank": 3
+      },
+      {
+        "a": "alive#1",
+        "b": "trait:young",
+        "cosine": 0.304537,
+        "relation": "unrelated",
+        "source": "m3",
+        "strict": false,
+        "via": "retrieved",
+        "rank": 4
+      },
+      {
+        "a": "alive#1",
+        "b": "trait:male",
+        "cosine": 0.273652,
+        "relation": "unrelated",
+        "source": "m3",
+        "strict": false,
+        "via": "retrieved",
+        "rank": 5
+      },
+      {
+        "a": "alive#1",
+        "b": "trait:athletic",
+        "cosine": 0.234052,
+        "relation": "unrelated",
+        "source": "m3",
+        "strict": false,
+        "via": "retrieved",
+        "rank": 6
+      },
+      {
+        "a": "alive#1",
+        "b": "trait:british",
+        "cosine": 0.21107,
+        "relation": "unrelated",
+        "source": "m3",
+        "strict": false,
+        "via": "retrieved",
+        "rank": 7
+      },
+      {
+        "a": "alive#1",
+        "b": "trait:death_fearing",
+        "cosine": 0.204813,
+        "relation": "unrelated",
+        "source": "m3",
+        "strict": false,
+        "via": "retrieved",
+        "rank": 8
+      },
+      {
+        "a": "alive#1",
+        "b": "trait:animated",
+        "cosine": 0.203387,
+        "relation": "unrelated",
+        "source": "m3",
+        "strict": false,
+        "via": "retrieved",
+        "rank": 9
+      },
+      {
+        "a": "alive#1",
+        "b": "trait:middle_aged",
+        "cosine": 0.196508,
+        "relation": "unrelated",
+        "source": "m3",
+        "strict": false,
+        "via": "retrieved",
+        "rank": 10
+      },
+      {
+        "a": "alive#1",
+        "b": "trait:elderly",
+        "cosine": 0.187029,
+        "relation": "unrelated",
+        "source": "m3",
+        "strict": false,
+        "via": "expanded"
+      },
+      {
+        "a": "alive#1",
+        "b": "trait:languishing",
+        "cosine": 0.184955,
+        "relation": "opposed",
+        "source": "m3",
+        "strict": false,
+        "via": "expanded"
+      },
+      {
+        "a": "alive#1",
+        "b": "trait:death_accepting",
+        "cosine": 0.182736,
+        "relation": "unrelated",
+        "source": "m3",
+        "strict": false,
+        "via": "expanded"
+      },
+      {
+        "a": "alive#1",
+        "b": "trait:sickly",
+        "cosine": 0.152373,
+        "relation": "unrelated",
+        "source": "m3",
+        "strict": false,
+        "via": "expanded"
+      },
+      {
+        "a": "alive#1",
+        "b": "trait:sedentary",
+        "cosine": 0.126068,
+        "relation": "unrelated",
+        "source": "m3",
+        "strict": false,
+        "via": "expanded"
+      },
+      {
+        "a": "alive#1",
+        "b": "trait:flat",
+        "cosine": 0.064019,
+        "relation": "unrelated",
+        "source": "m3",
+        "strict": false,
+        "via": "expanded"
+      },
+      {
+        "a": "cherubic#1",
+        "b": "trait:good_looking",
+        "cosine": 0.298625,
+        "relation": "similar",
+        "source": "m3",
+        "strict": false,
+        "readings": {
+          "ab": {
+            "sonnet": 1,
+            "opus": null,
+            "verdict": "keep",
+            "four": false,
+            "proposed": false,
+            "reasons": {
+              "sonnet": "Both concern physical appearance, but cherubic is a specific innocent, round-cheeked look that disarms suspicion, while good-looking is general attractiveness that turns heads; neither implies the other."
+            },
+            "outcome": "continue"
+          }
+        },
+        "via": "retrieved",
+        "rank": 1
+      },
+      {
+        "a": "cherubic#1",
+        "b": "trait:plain_looking",
+        "cosine": 0.256762,
+        "relation": "opposed",
+        "source": "m3",
+        "strict": false,
+        "via": "retrieved",
+        "rank": 2
+      },
+      {
+        "a": "cherubic#1",
+        "b": "trait:feminine",
+        "cosine": 0.236685,
+        "relation": "unrelated",
+        "source": "m3",
+        "strict": false,
+        "via": "retrieved",
+        "rank": 3
+      },
+      {
+        "a": "cherubic#1",
+        "b": "trait:chaste",
+        "cosine": 0.230226,
+        "relation": "unrelated",
+        "source": "m3",
+        "strict": false,
+        "readings": {
+          "ab": {
+            "sonnet": 0,
+            "opus": null,
+            "verdict": "keep",
+            "four": false,
+            "proposed": false,
+            "reasons": {
+              "sonnet": "Cherubic is about an innocent, angelic-looking face that masks mischief, while chaste is about sexual purity and avoiding sensual topics; both evoke innocence, but they are different concepts."
+            },
+            "outcome": "continue"
+          }
+        },
+        "via": "retrieved",
+        "rank": 4
+      },
+      {
+        "a": "cherubic#1",
+        "b": "trait:blue_eyed",
+        "cosine": 0.227711,
+        "relation": "unrelated",
+        "source": "m3",
+        "strict": false,
+        "via": "retrieved",
+        "rank": 5
+      },
+      {
+        "a": "cherubic#1",
+        "b": "trait:blond",
+        "cosine": 0.218885,
+        "relation": "unrelated",
+        "source": "m3",
+        "strict": false,
+        "via": "retrieved",
+        "rank": 6
+      },
+      {
+        "a": "cherubic#1",
+        "b": "trait:gentle",
+        "cosine": 0.216669,
+        "relation": "unrelated",
+        "source": "m3",
+        "strict": false,
+        "readings": {
+          "ab": {
+            "sonnet": 0,
+            "opus": null,
+            "verdict": "keep",
+            "four": false,
+            "proposed": false,
+            "reasons": {
+              "sonnet": "Cherubic is about an innocent, angelic-looking face that masks mischief, while gentle is about mild, kind behavior toward others; one is appearance and the other is conduct, so they are distinct."
+            },
+            "outcome": "continue"
+          }
+        },
+        "via": "retrieved",
+        "rank": 7
+      },
+      {
+        "a": "cherubic#1",
+        "b": "trait:well_behaved",
+        "cosine": 0.216069,
+        "relation": "unrelated",
+        "source": "m3",
+        "strict": false,
+        "via": "retrieved",
+        "rank": 8
+      },
+      {
+        "a": "cherubic#1",
+        "b": "trait:brown_haired",
+        "cosine": 0.212661,
+        "relation": "unrelated",
+        "source": "m3",
+        "strict": false,
+        "via": "retrieved",
+        "rank": 9
+      },
+      {
+        "a": "cherubic#1",
+        "b": "trait:naive",
+        "cosine": 0.210283,
+        "relation": "similar",
+        "source": "m3",
+        "strict": false,
+        "readings": {
+          "ab": {
+            "sonnet": 1,
+            "opus": null,
+            "verdict": "keep",
+            "four": false,
+            "proposed": false,
+            "reasons": {
+              "sonnet": "Cherubic is an innocent-looking appearance that may mask mischief, while naive is genuine trusting inexperience; both involve innocence, but one is a look and the other a real disposition."
+            },
+            "outcome": "continue"
+          }
+        },
+        "via": "retrieved",
+        "rank": 10
+      },
+      {
+        "a": "cherubic#1",
+        "b": "trait:mischievous",
+        "cosine": 0.099753,
+        "relation": "unrelated",
+        "source": "m3",
+        "strict": false,
+        "via": "expanded"
+      },
+      {
+        "a": "cherubic#1",
+        "b": "trait:masculine",
+        "cosine": 0.048609,
+        "relation": "unrelated",
+        "source": "m3",
+        "strict": false,
+        "via": "expanded"
+      },
+      {
+        "a": "cherubic#1",
+        "b": "trait:lustful",
+        "cosine": 0.030217,
+        "relation": "opposed",
+        "source": "m3",
+        "strict": false,
+        "via": "expanded"
+      },
+      {
+        "a": "cherubic#1",
+        "b": "trait:worldly",
+        "cosine": -0.025817,
+        "relation": "opposed",
+        "source": "m3",
+        "strict": false,
+        "via": "expanded"
+      },
+      {
+        "a": "cherubic#1",
+        "b": "trait:harsh",
+        "cosine": -0.03428,
+        "relation": "opposed",
+        "source": "m3",
+        "strict": false,
+        "via": "expanded"
+      },
+      {
+        "a": "stentorian#1",
+        "b": "trait:bombastic",
+        "cosine": 0.330274,
+        "relation": "unrelated",
+        "source": "m3",
+        "strict": false,
+        "via": "retrieved",
+        "rank": 1
+      },
+      {
+        "a": "stentorian#1",
+        "b": "trait:theatrical",
+        "cosine": 0.303297,
+        "relation": "unrelated",
+        "source": "m3",
+        "strict": false,
+        "readings": {
+          "ab": {
+            "sonnet": 1,
+            "opus": null,
+            "verdict": "keep",
+            "four": false,
+            "proposed": false,
+            "reasons": {
+              "sonnet": "Stentorian is about a loud, booming voice that carries, while theatrical is about dramatic flair and exaggerated performance; both concern a commanding delivery, but one is volume and the other is showy style."
+            },
+            "outcome": "continue"
+          }
+        },
+        "via": "retrieved",
+        "rank": 2
+      },
+      {
+        "a": "stentorian#1",
+        "b": "trait:charismatic",
+        "cosine": 0.298229,
+        "relation": "unrelated",
+        "source": "m3",
+        "strict": false,
+        "via": "retrieved",
+        "rank": 3
+      },
+      {
+        "a": "stentorian#1",
+        "b": "trait:emphatic",
+        "cosine": 0.294818,
+        "relation": "similar",
+        "source": "m3",
+        "strict": false,
+        "readings": {
+          "ab": {
+            "sonnet": 1,
+            "opus": null,
+            "verdict": "keep",
+            "four": false,
+            "proposed": false,
+            "reasons": {
+              "sonnet": "Stentorian is about physical vocal loudness and carrying power, while emphatic is about forcefulness and insistence in making points; both are forceful speech but distinct qualities."
+            },
+            "outcome": "continue"
+          }
+        },
+        "via": "retrieved",
+        "rank": 4
+      },
+      {
+        "a": "stentorian#1",
+        "b": "trait:flat",
+        "cosine": 0.291325,
+        "relation": "opposed",
+        "source": "m3",
+        "strict": false,
+        "via": "retrieved",
+        "rank": 5
+      },
+      {
+        "a": "stentorian#1",
+        "b": "trait:eloquent",
+        "cosine": 0.274483,
+        "relation": "unrelated",
+        "source": "m3",
+        "strict": false,
+        "via": "retrieved",
+        "rank": 6
+      },
+      {
+        "a": "stentorian#1",
+        "b": "trait:attention_seeking",
+        "cosine": 0.273675,
+        "relation": "unrelated",
+        "source": "m3",
+        "strict": false,
+        "readings": {
+          "ab": {
+            "sonnet": 0,
+            "opus": null,
+            "verdict": "keep",
+            "four": false,
+            "proposed": false,
+            "reasons": {
+              "sonnet": "Stentorian is about having a loud, booming, far-carrying voice, while attention-seeking is a motivation to be the center of notice; they may co-occur but are different concepts, with only a slight link in raising the volume."
+            },
+            "outcome": "continue"
+          }
+        },
+        "via": "retrieved",
+        "rank": 7
+      },
+      {
+        "a": "stentorian#1",
+        "b": "trait:brash",
+        "cosine": 0.2578,
+        "relation": "similar",
+        "source": "m3",
+        "strict": false,
+        "readings": {
+          "ab": {
+            "sonnet": 1,
+            "opus": null,
+            "verdict": "keep",
+            "four": false,
+            "proposed": false,
+            "reasons": {
+              "sonnet": "Stentorian is about physical vocal loudness and carrying power, while brash is about impulsive, tactless forwardness in what one says; they share only a loose notion of 'loud'."
+            },
+            "outcome": "continue"
+          }
+        },
+        "via": "retrieved",
+        "rank": 8
+      },
+      {
+        "a": "stentorian#1",
+        "b": "trait:male",
+        "cosine": 0.25669,
+        "relation": "unrelated",
+        "source": "m3",
+        "strict": false,
+        "via": "retrieved",
+        "rank": 9
+      },
+      {
+        "a": "stentorian#1",
+        "b": "trait:dull",
+        "cosine": 0.252661,
+        "relation": "unrelated",
+        "source": "m3",
+        "strict": false,
+        "via": "retrieved",
+        "rank": 10
+      },
+      {
+        "a": "stentorian#1",
+        "b": "trait:plain_spoken",
+        "cosine": 0.251314,
+        "relation": "unrelated",
+        "source": "m3",
+        "strict": false,
+        "via": "expanded"
+      },
+      {
+        "a": "stentorian#1",
+        "b": "trait:animated",
+        "cosine": 0.242456,
+        "relation": "unrelated",
+        "source": "m3",
+        "strict": false,
+        "readings": {
+          "ab": {
+            "sonnet": 0,
+            "opus": null,
+            "verdict": "keep",
+            "four": false,
+            "proposed": false,
+            "reasons": {
+              "sonnet": "Stentorian is about vocal loudness and carrying power, while animated is about lively, enthusiastic expressiveness; both concern speech style but are different qualities."
+            },
+            "outcome": "continue"
+          }
+        },
+        "via": "expanded"
+      },
+      {
+        "a": "stentorian#1",
+        "b": "trait:unassuming",
+        "cosine": 0.214332,
+        "relation": "opposed",
+        "source": "m3",
+        "strict": false,
+        "via": "expanded"
+      },
+      {
+        "a": "stentorian#1",
+        "b": "trait:female",
+        "cosine": 0.123392,
+        "relation": "unrelated",
+        "source": "m3",
+        "strict": false,
+        "via": "expanded"
+      },
+      {
+        "a": "stentorian#1",
+        "b": "trait:self_effacing",
+        "cosine": 0.120307,
+        "relation": "opposed",
+        "source": "m3",
+        "strict": false,
+        "via": "expanded"
+      },
+      {
+        "a": "stentorian#1",
+        "b": "trait:circumspect",
+        "cosine": 0.071868,
+        "relation": "opposed",
+        "source": "m3",
+        "strict": false,
+        "via": "expanded"
+      },
+      {
+        "a": "stentorian#1",
+        "b": "trait:understated",
+        "cosine": 0.059285,
+        "relation": "opposed",
+        "source": "m3",
+        "strict": false,
+        "via": "expanded"
+      },
+      {
+        "a": "weather_beaten#1",
+        "b": "trait:fair_skinned",
+        "cosine": 0.390555,
+        "relation": "opposed",
+        "source": "m3",
+        "strict": false,
+        "via": "retrieved",
+        "rank": 1
+      },
+      {
+        "a": "weather_beaten#1",
+        "b": "trait:gray_haired",
+        "cosine": 0.364256,
+        "relation": "unrelated",
+        "source": "m3",
+        "strict": false,
+        "via": "retrieved",
+        "rank": 2
+      },
+      {
+        "a": "weather_beaten#1",
+        "b": "trait:red_headed",
+        "cosine": 0.360782,
+        "relation": "unrelated",
+        "source": "m3",
+        "strict": false,
+        "via": "retrieved",
+        "rank": 3
+      },
+      {
+        "a": "weather_beaten#1",
+        "b": "trait:dark_skinned",
+        "cosine": 0.34286,
+        "relation": "unrelated",
+        "source": "m3",
+        "strict": false,
+        "readings": {
+          "ab": {
+            "sonnet": 0,
+            "opus": null,
+            "verdict": "keep",
+            "four": false,
+            "proposed": false,
+            "reasons": {
+              "sonnet": "Weather-beaten describes skin roughened and aged by sun and wind exposure, while dark-skinned describes natural deep skin pigmentation; both concern skin but they are different qualities."
+            },
+            "outcome": "continue"
+          }
+        },
+        "via": "retrieved",
+        "rank": 4
+      },
+      {
+        "a": "weather_beaten#1",
+        "b": "trait:good_looking",
+        "cosine": 0.268207,
+        "relation": "opposed",
+        "source": "m3",
+        "strict": false,
+        "via": "retrieved",
+        "rank": 5
+      },
+      {
+        "a": "weather_beaten#1",
+        "b": "trait:brown_haired",
+        "cosine": 0.262587,
+        "relation": "unrelated",
+        "source": "m3",
+        "strict": false,
+        "via": "retrieved",
+        "rank": 6
+      },
+      {
+        "a": "weather_beaten#1",
+        "b": "trait:elderly",
+        "cosine": 0.255898,
+        "relation": "unrelated",
+        "source": "m3",
+        "strict": false,
+        "readings": {
+          "ab": {
+            "sonnet": 0,
+            "opus": null,
+            "verdict": "keep",
+            "four": false,
+            "proposed": false,
+            "reasons": {
+              "sonnet": "Weather-beaten is about rugged skin from outdoor exposure at any age, while elderly is about being in old age; they often co-occur but are different concepts."
+            },
+            "outcome": "continue"
+          }
+        },
+        "via": "retrieved",
+        "rank": 7
+      },
+      {
+        "a": "weather_beaten#1",
+        "b": "trait:blond",
+        "cosine": 0.251454,
+        "relation": "unrelated",
+        "source": "m3",
+        "strict": false,
+        "via": "retrieved",
+        "rank": 8
+      },
+      {
+        "a": "weather_beaten#1",
+        "b": "trait:plain_looking",
+        "cosine": 0.242387,
+        "relation": "unrelated",
+        "source": "m3",
+        "strict": false,
+        "readings": {
+          "ab": {
+            "sonnet": 0,
+            "opus": null,
+            "verdict": "keep",
+            "four": false,
+            "proposed": false,
+            "reasons": {
+              "sonnet": "Both describe appearance, but weather-beaten is about rugged, sun-and-wind-worn skin while plain-looking is about unremarkable, forgettable features; neither implies the other."
+            },
+            "outcome": "continue"
+          }
+        },
+        "via": "retrieved",
+        "rank": 9
+      },
+      {
+        "a": "weather_beaten#1",
+        "b": "trait:blue_eyed",
+        "cosine": 0.240453,
+        "relation": "unrelated",
+        "source": "m3",
+        "strict": false,
+        "via": "retrieved",
+        "rank": 10
+      },
+      {
+        "a": "weather_beaten#1",
+        "b": "trait:young",
+        "cosine": 0.204965,
+        "relation": "opposed",
+        "source": "m3",
+        "strict": false,
+        "via": "expanded"
+      }
+    ],
+    "cliques": [],
+    "singletons": [
+      "alive#1",
+      "cherubic#1",
+      "stentorian#1",
+      "weather_beaten#1"
+    ],
+    "clique_links": [],
+    "proposed_groups": [],
+    "proposed_links": [],
+    "stats": {
+      "n_candidates": 4,
+      "by_batch": {
+        "physical_pilots_1": 4
+      },
+      "by_generator": {
+        "censuses": 3,
+        "roget": 1
+      },
+      "by_decision": {
+        "new": 4
+      },
+      "n_covered_shown": 9,
+      "n_corpus_nodes": 54,
+      "n_queue_nodes": 0,
+      "candidate_edges": {
+        "n": 2,
+        "by_relation": {
+          "opposed": 1,
+          "unrelated": 1
+        },
+        "by_overlap": {
+          "not_similar": 2
+        },
+        "answers": {
+          "opposed": 2,
+          "unrelated": 2
+        },
+        "one_sided": 0
+      },
+      "overlap": {
+        "pairs_first_direction": 0,
+        "pairs_second_direction": 0,
+        "sonnet_readings": 0,
+        "opus_readings": 0,
+        "four_first": 0,
+        "proposed_first": 0,
+        "four_edges": 0,
+        "similar_below_floor": 0,
+        "unparsed": 0,
+        "stalled": 0
+      },
+      "agreement_on_fours": {
+        "directions_read_4": 0,
+        "by_readings": {}
+      },
+      "corpus_edges": {
+        "n": 59,
+        "by_relation": {
+          "opposed": 13,
+          "similar": 5,
+          "unrelated": 41
+        },
+        "with_readings": 13
+      },
+      "cliques": {
+        "n": 0,
+        "by_size": {},
+        "largest": 0,
+        "candidates_in_cliques": 0,
+        "candidates_in_several": 0
+      },
+      "singletons": 4,
+      "clique_links": 0,
+      "proposed_groups": {
+        "n": 0,
+        "n_edges": 0,
+        "by_size": {},
+        "largest": 0,
+        "candidates_in_proposed": 0,
+        "candidates_in_proposed_only": 0,
+        "candidates_in_several": 0,
+        "links": 0
+      },
+      "ungrouped": 4,
+      "skipped": {},
+      "no_vector": [],
+      "selected_by_batch": {
+        "physical_pilots_1": {
+          "new": 4,
+          "covered": 9
+        }
+      }
+    },
+    "usage": {
+      "per_model": {
+        "claude-haiku-5-5": {
+          "model": "claude-haiku-5-5",
+          "prompt_tokens": 1793,
+          "completion_tokens": 343,
+          "cost_usd": 0.0004,
+          "n_calls": 3
+        }
+      },
+      "total_cost_usd": 0.0004,
+      "total_prompt_tokens": 1793,
+      "total_completion_tokens": 343,
+      "n_calls": 3
+    }
+  },
+  "_provenance": {
+    "schema_version": "1.0",
+    "produced_by": {
+      "cmd": "uv run python data_analysis/gap_generation/review_graph.py build --batch-id review_physical_pilots_1 --from-batches physical_pilots_1 --budget-usd 0.9",
+      "git_sha": "3cb9e74+dirty",
+      "author": "Roger Dearnaley",
+      "title": "review_graph build review_physical_pilots_1"
+    },
+    "produced_at": "2026-10-09T01:07:52+00:00",
+    "inputs": [
+      {
+        "dep_key": "registry",
+        "path": "data/candidates/registry.jsonl",
+        "fingerprint": "v1:2026-10-09T01:07:19+00:00@29723472",
+        "kind": "file",
+        "dataset_id": null,
+        "last_modified_at": "2026-10-09T01:07:19+00:00",
+        "extras": {
+          "from_batches": "physical_pilots_1"
+        }
+      },
+      {
+        "dep_key": "rubrics",
+        "path": "reports/trait_gap_generation/rubrics",
+        "fingerprint": "v1:multi:e46bf0db1520",
+        "kind": "multi",
+        "dataset_id": null,
+        "last_modified_at": "2026-10-08T17:36:09+00:00",
+        "extras": {
+          "overlap_rubric": "6",
+          "relation_rubric": "1"
+        },
+        "member_paths": [
+          "reports/trait_gap_generation/rubrics/overlap_concept.md",
+          "reports/trait_gap_generation/rubrics/relation.md"
+        ]
+      },
+      {
+        "dep_key": "metric_config",
+        "path": "data/candidates/metric_config.json",
+        "fingerprint": "v1:2026-10-08T17:36:08+00:00@54961",
+        "kind": "file",
+        "dataset_id": null,
+        "last_modified_at": "2026-10-08T17:36:08+00:00",
+        "extras": {}
+      },
+      {
+        "dep_key": "m3_runs",
+        "path": "data/candidates/novelty/physical_pilots_1/run.json",
+        "fingerprint": "v1:multi:fe9f1b6f12ba",
+        "kind": "multi",
+        "dataset_id": null,
+        "last_modified_at": "2026-10-09T01:07:19+00:00",
+        "extras": {
+          "from_batches": "physical_pilots_1"
+        },
+        "member_paths": [
+          "data/candidates/novelty/physical_pilots_1/run.json"
+        ]
+      }
+    ],
+    "inputs_sha256": "539fdaa6599a671375fe9fee72050cdb2b19cdc8f5849276115eba666a0cc566"
+  }
+}

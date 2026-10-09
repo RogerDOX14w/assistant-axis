@@ -1,0 +1,200 @@
+{
+  "batch_id": "physical_pilots_1",
+  "mode": "shortlist",
+  "git_sha": "3cb9e74",
+  "allow_dirty": false,
+  "dirty_check": {
+    "paths": [
+      "assistant_axis/gapgen",
+      "data_analysis/gap_generation",
+      "assistant_axis/judge.py",
+      "assistant_axis/judge_pricing.py",
+      "assistant_axis/entity_id.py",
+      "assistant_axis/atomic_io.py",
+      "data/candidates/validation",
+      "reports/trait_gap_generation/rubrics",
+      "pyproject.toml",
+      "uv.lock"
+    ],
+    "dirty": [],
+    "note": null
+  },
+  "argv": [
+    "score",
+    "--batch-id",
+    "physical_pilots_1",
+    "--holding",
+    "physical",
+    "--unscored",
+    "--budget-usd",
+    "0.6"
+  ],
+  "plan": {
+    "mode": "shortlist",
+    "n_candidates": 13,
+    "n_exact_label": 4,
+    "n_to_relation": 9,
+    "skipped": {
+      "not_on_physical_list": 236
+    },
+    "transport": "live",
+    "query_form": "gloss_w14",
+    "listed_mean": null,
+    "n_query_texts_cached": 0,
+    "n_query_texts_to_embed": 13,
+    "corpus": {
+      "n_corpus": 909,
+      "n_missing_from_cache": 119,
+      "missing": [
+        "adhd",
+        "african",
+        "ageist",
+        "aggrieved",
+        "ambivalent",
+        "american",
+        "androgynous",
+        "antitheist",
+        "asexual",
+        "atheist",
+        "athletic",
+        "australian",
+        "autistic",
+        "bisexual",
+        "black_haired",
+        "blind",
+        "blond",
+        "blue_eyed",
+        "body_obsessed",
+        "borderline_personality_disorder"
+      ]
+    },
+    "rules": {
+      "name": "m3_rules_2",
+      "version": 2,
+      "cover_on_opus_check": true,
+      "both_similar_excluded": true,
+      "pair_flag_grey": false,
+      "renamed_from_covers": false,
+      "separator_blind": true,
+      "cosine_floor": 0.25
+    },
+    "corpus_files": {
+      "corpus_at": "current",
+      "data_dir": "/Users/roger/Documents/GitHub/assistant-axis/.claude/worktrees/review-graph/data"
+    },
+    "holding": "physical",
+    "physical_gloss": {
+      "n_to_gloss": 13,
+      "model": "claude-haiku-5-5"
+    }
+  },
+  "transport": "live",
+  "transport_reason": "auto: 9 words, fewer than 300, go live",
+  "estimate_usd": 0.0836,
+  "estimate_lines": [
+    "physical gloss stage: M1's gloss call: 13 x (663, 94) tokens at claude-haiku-5-5 rates = $0.001",
+    "physical gloss stage: M1's alignment call: 13 x (780, 176) tokens at claude-haiku-5-5 rates = $0.002",
+    "candidate embeddings (OpenAI text-embedding-3-large) + the 8 canary texts: 1 x (630, 0) tokens at text-embedding-3-large rates = $0.000",
+    "relation call, 16.0 listed traits a call: 9 x (1,819, 1,224) tokens at claude-haiku-5-5 rates = $0.007",
+    "unsure re-ask (14% of candidates, 1.4 traits): 1 x (585, 108) tokens at claude-sonnet-5-5 rates = $0.002",
+    "overlap, Sonnet (3 pairs a candidate, 18% saved by early exit): 22 x (219, 78) tokens at claude-sonnet-5-5 rates = $0.027",
+    "overlap, Opus (62% of pairs): 14 x (220, 112) tokens at claude-opus-5-5 rates = $0.044"
+  ],
+  "budget_usd": 0.6,
+  "cap_usd": 0.6,
+  "confirmed_by": null,
+  "rubrics": {
+    "overlap": {
+      "name": "overlap_concept",
+      "version": 6,
+      "sha256": "b3eff18fb946928517183af0244acec2d35dba0ab0bd9c57f83c7a06ac3c9fd0"
+    },
+    "relation": {
+      "name": "relation",
+      "version": 1,
+      "sha256": "b6b11f8cfcb0faafdac4a040087356ecb13d410e9bc309597d7833a96110d70f"
+    }
+  },
+  "models": {
+    "relation": "claude-haiku-5-5",
+    "relation_unsure": "claude-sonnet-5-5",
+    "overlap_first": "claude-sonnet-5-5",
+    "overlap_second": "claude-opus-5-5"
+  },
+  "settings": {
+    "config_version": "2026-10-02",
+    "k": 10,
+    "representation": "w20",
+    "variant": "centred",
+    "query_form": "gloss_w14",
+    "embedding_model": "text-embedding-3-large",
+    "cut_off_rule": "alignment score 0-1: 3; 2-3: 4; missing: 4",
+    "relation_max_tokens": 4096,
+    "overlap_max_tokens": 2048,
+    "temperature": 0.0,
+    "cache_ttl_batches": "1h",
+    "concurrency": 8,
+    "ask_attempts": 2,
+    "relation_seed": "physical_pilots_1",
+    "cosine_floor": 0.25
+  },
+  "rules": {
+    "name": "m3_rules_2",
+    "version": 2,
+    "cover_on_opus_check": true,
+    "both_similar_excluded": true,
+    "pair_flag_grey": false,
+    "renamed_from_covers": false,
+    "separator_blind": true,
+    "cosine_floor": 0.25
+  },
+  "corpus": {
+    "corpus_at": "current",
+    "data_dir": "/Users/roger/Documents/GitHub/assistant-axis/.claude/worktrees/review-graph/data"
+  },
+  "resumed": false,
+  "started_at": "2026-10-09T01:06:35+00:00",
+  "pass": "physical",
+  "physical_gloss": {
+    "model": "claude-haiku-5-5",
+    "n_to_gloss": 13,
+    "n_rows": 13,
+    "n_glossed": 13,
+    "n_gloss_failed": 0,
+    "n_alignment_failed": 0,
+    "alignment": {
+      "0": 12,
+      "2": 1
+    },
+    "n_gloss_form_ok": 13
+  },
+  "canary": {
+    "model": "text-embedding-3-large",
+    "arm": "openai",
+    "tag": "openai_text-embedding-3-large",
+    "n": 8,
+    "n_compared": 8,
+    "n_new_reference": 0,
+    "min_cosine": 0.999603,
+    "threshold": 0.999,
+    "cosines": {
+      "absentee": 0.999995,
+      "collectivistic": 1.0,
+      "edgy": 1.0,
+      "gay": 1.0,
+      "ironic": 0.999603,
+      "only_child": 1.0,
+      "restless": 0.999993,
+      "sycophantic": 1.0
+    },
+    "below": [],
+    "ok": true,
+    "checked_at": "2026-10-09T01:06:46+00:00"
+  },
+  "finished_at": "2026-10-09T01:07:19+00:00",
+  "cost_usd": 0.0623,
+  "status": 0,
+  "stopped_by_error": null,
+  "n_decided": 13,
+  "n_stalled": 0
+}
