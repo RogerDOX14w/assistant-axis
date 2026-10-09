@@ -39,7 +39,12 @@ seeds of chunk 5).  A reply the API ends with `stop_reason` "refusal", or a
 reply in prose instead of JSON whose first sentence declines ("I can't", "I
 won't", "I'm not comfortable", ...: `DECLINE_PHRASES` in
 [`generation_refusals.py`](./generation_refusals.py); a reply with JSON in it
-never counts), raises `GenerationRefusal` after the one call.  The call is
+never counts), or a reply that writes the sentinel "ERROR:" instead of the
+content (a JSON field value opening "ERROR:", as brown-haired's eval prompt did
+on 2026-10-08, or a reply opening with it; added 2026-10-09), raises
+`GenerationRefusal` after the one call.  A reply that puts prose before its
+JSON (brown-eyed, 2026-10-08) is not a refusal: the JSON reader skips the
+preface, with a warning, and uses the reply.  The call is
 still charged to the usage record, the instruction file is left as it was,
 and one record is appended to `generation_refusals.jsonl` beside the usage
 record ([`../data/traits/generation_refusals.jsonl`](../data/traits/generation_refusals.jsonl),
@@ -369,10 +374,22 @@ working from a description to a label when the name is still open (chunk 7's
 world-changing / world-accepting); see `AGENT_NOTES.md` § "Naming from the
 description".
 
+`--roles STEM ...` (2026-10-09) is the role-pair check: roles have no
+`negative_label` and no neg instructions, so one call per role reads its
+display name, description and five pos instructions and names the opposing
+*role* (a role noun, not an adjective, not necessarily one in the corpus),
+with a 0-4 rating of how cleanly it opposes, reasoning first: `{reasoning,
+opposing_role, opposition_score}` per stem.  Run it from both sides; a role
+pair is recorded in `arrangement` only when each side names the other.  Its
+usage record is [`../data/roles/role_pair_check_usage.json`](../data/roles/role_pair_check_usage.json)
+(cumulative; written by the first run).  It excludes `--traits` and
+`--name-pos`.
+
 ```bash
 uv run python data_analysis/generate_antonyms.py
 uv run python data_analysis/generate_antonyms.py --traits obedient rebellious
 uv run python data_analysis/generate_antonyms.py --traits world_accepting world_changing --name-pos
+uv run python data_analysis/generate_antonyms.py --roles provincial cosmopolitan
 ```
 
 ### `seed_entities.py`
@@ -388,8 +405,13 @@ runs `generate_antonyms.py` and classifies each answer against existing and
 queued stems (nice / mismatch / nearly_nice / nasty / open, the decision
 table in `AGENT_NOTES.md` § "Corpus expansion policy"), `rename` applies the RO action
 (rename the existing trait to the check's word if free, regenerate, re-check
-both sides), `pair` records a
-confirmed clean pair on both files and regenerates the new side's neg
+both sides; since 2026-10-09 it moves an untracked file without `git mv`,
+keeps the `renamed_from` history as a list from the second rename on,
+rewrites the old stem in every arrangement that names it, sets the paired
+partner's `negative_label`, and moves the queue entry to the new stem and
+label), `pair` records a
+confirmed clean pair on both files (replacing a pair recorded under a pole's
+old stem) and regenerates the new side's neg
 clause, and `status` / `report` summarise.  Every subcommand takes
 `--dry-run`.  The description-writing rules the seeds must follow are in
 `AGENT_NOTES.md` § "Description-writing rules for new seeds".
