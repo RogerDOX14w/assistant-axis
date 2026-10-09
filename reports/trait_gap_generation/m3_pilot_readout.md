@@ -294,3 +294,24 @@ the rows carry the pilot's blocks); Roger's two calls above.
   listed traits, not 14; retrieval on the gloss alone cut to 14 words (the metric config's form, the
   brief was wrong); the validation pool filtered on Sonnet; triangle and tetrahedron corners count as
   partners; `pair_completion_for` is a list; a missing alignment score gets cut-off 4.
+
+## Cover audit on generator output (2026-10-09)
+
+Roger marked 100 of the 173 covers that M3 made on the three generator pilots of 2026-10-08 without an exact label
+match, blind to how each was scored ([marks file](./m3_cover_audit_for_marks.md); transcription with the key in
+[marks.json](../../data/candidates/novelty/m3_cover_audit/marks.json)).  A wrong cover is the error that hides a gap.
+
+| How M3 decided "covered" | Marked | Covered | New | Uncertain |
+|---|---|---|---|---|
+| Sonnet read 2, Opus raised it to 3 | 40 | 37 | 1 (`faulty` under [incompetent](../../data/traits/instructions/incompetent.json)) | 2 (`saintly` under [forgiving](../../data/traits/instructions/forgiving.json); `effervescent` under [extraverted (Big Five)](../../data/traits/instructions/extraverted_big_five.json), leaning new) |
+| Sonnet and Opus both read 3 | 40 | 38 | 0 | 2 (`sensing` and `perspicacious`, both under [socially-perceptive](../../data/traits/instructions/socially_perceptive.json)) |
+| Read 4 by one or both | 20 | 20 | 0 | 0 |
+| All | 100 | 95 | 1 | 4 |
+
+Readings: M3's covers hold on real generator output (95 of 100 confirmed, at most 5 lost gaps, on the order of 1-5%
+of non-exact covers).  Opus raising Sonnet's 2 to 3 was right 37 times in 40, so "Opus on the 2s and 3s" (the plan of
+record) earns its cost: under "Opus on the 3s only" those words would have reached review as false "new"s.  A reading
+of 3 is a safe cut-off (38 of 40, none new).  The doubtful five share one shape: the candidate is much broader than,
+or only one-way implied by, the covering trait (Roger on `sensing`: "formally covers ... but is so much broader that
+it really seems like a different trait; I can imagine each without the other"; on `effervescent`: "hard to be
+effervescent without being at least somewhat extraverted, but vice versa is definitely possible").
