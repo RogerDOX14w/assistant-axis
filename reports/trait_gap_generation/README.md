@@ -163,6 +163,12 @@ working with every trait hidden, an exported embedder, idempotency of resubmissi
 those when reviewing the platform plan, since they change its frozen section.  Roger's
 review comments go into the plan files; then Opus executes the platform first.
 
+## How-to
+
+- [probe_a_word.md](./probe_a_word.md) (2026-10-09): put one or a few words through the filter (sense, gloss) and the
+  novelty check by hand, with a scratch registry so no probe row reaches the real one; commands, models, costs
+  (about two cents a word), what each step writes, and savage as the worked example.
+
 ## Low-priority TODOs
 
 - **Promotion tooling for role words** (QUESTIONS 1, 2026-10-09).  The filter's `roles` holding list is read by hand
