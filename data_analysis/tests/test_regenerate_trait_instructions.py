@@ -1216,6 +1216,18 @@ class TestOpeningReroll:
         assert module.parse_args(["--traits", "x"]).opening_reroll is True
         assert module.parse_args(["--traits", "x", "--no-opening-reroll"]).opening_reroll is False
 
+    def test_a_hand_edit_record_does_not_survive_new_instructions(self, trait_file, v2_style, capsys):
+        # it describes text the regeneration replaces (2026-10-10: six stale records after W19)
+        d = json.loads(trait_file.read_text())
+        d.update(hand_edits="2026-10-07: p4 opening rewritten by hand", tags=["kept"])
+        trait_file.write_text(json.dumps(d))
+        client = AsyncMock()
+        client.messages.create = AsyncMock(return_value=_combined_reply(FIVE_OPENINGS))
+        self.run(client, trait_file)
+        d = json.loads(trait_file.read_text())
+        assert "hand_edits" not in d and d["tags"] == ["kept"]
+        assert "dropped hand_edits ('2026-10-07: p4 opening rewritten by hand')" in capsys.readouterr().err
+
 
 class TestOpeningRerollInBatch:
     def test_a_batch_reply_that_fails_the_check_is_redone_in_real_time(self, batch_setup, capsys):

@@ -1220,9 +1220,14 @@ def write_regenerated(role_path: Path, data: dict, new_instructions: list, new_q
     output["generator"] = generator_provenance(PROMPT_STYLE, model, temperature, thinking_budget, batch=batch,
                                                opening_rerolls=opening_rerolls)
 
+    # `hand_edits` records hand edits to the instructions just replaced, so it
+    # is not carried forward (as in regenerate_trait_instructions.py)
     for key in data:
-        if key not in output:
+        if key not in output and key != "hand_edits":
             output[key] = data[key]
+    if data.get("hand_edits"):
+        print(f"  NOTE: {role_name}: dropped hand_edits ({data['hand_edits']!r}); "
+              f"the instructions it describes were regenerated", file=sys.stderr)
 
     atomic_write_json(role_path, output)
 

@@ -1379,10 +1379,16 @@ def write_regenerated(trait_path: Path, data: dict, new_instructions: list, new_
     output["generator"] = generator_provenance(PROMPT_STYLE, model, temperature, thinking_budget, batch=batch,
                                                opening_rerolls=opening_rerolls)
 
-    # Carry forward any extra fields we don't know about
+    # Carry forward any extra fields we don't know about, except `hand_edits`:
+    # it records hand edits to the instructions just replaced (2026-10-10: the
+    # W19 regeneration of the 85 standards traits left six records describing
+    # text that was no longer there)
     for key in data:
-        if key not in output:
+        if key not in output and key != "hand_edits":
             output[key] = data[key]
+    if data.get("hand_edits"):
+        print(f"  NOTE: {positive_label}: dropped hand_edits ({data['hand_edits']!r}); "
+              f"the instructions it describes were regenerated", file=sys.stderr)
 
     atomic_write_json(trait_path, output)
 

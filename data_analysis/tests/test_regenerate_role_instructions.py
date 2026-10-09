@@ -836,6 +836,18 @@ class TestOpeningReroll:
         assert module.parse_args(["--roles", "x"]).opening_reroll is True
         assert module.parse_args(["--roles", "x", "--no-opening-reroll"]).opening_reroll is False
 
+    def test_a_hand_edit_record_does_not_survive_new_instructions(self, role_file, monkeypatch, capsys):
+        monkeypatch.setattr(module, "PROMPT_STYLE", "RogerV3")
+        d = json.loads(role_file.read_text())
+        d.update(hand_edits="2026-10-08: p3 opening rewritten by hand", tags=["kept"])
+        role_file.write_text(json.dumps(d))
+        client = AsyncMock()
+        client.messages.create = AsyncMock(return_value=_combined_reply(FIVE_OPENINGS))
+        self.run(client, role_file)
+        d = json.loads(role_file.read_text())
+        assert "hand_edits" not in d and d["tags"] == ["kept"]
+        assert "dropped hand_edits ('2026-10-08: p3 opening rewritten by hand')" in capsys.readouterr().err
+
 
 class TestReplyCounts:
     """A reply with the wrong number of instructions or questions is refused
