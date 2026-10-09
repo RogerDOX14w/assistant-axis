@@ -53,8 +53,14 @@ check named a word other than the existing partner: rename the *old*
 trait to that word if the name is free (no file, not queued), regenerate
 its instructions, and re-check the pair from both sides; ``pair`` then
 records it if both sides name each other.  The file moves with ``git mv``
-and gets a ``renamed_from`` field; the old stem's RunPod data becomes an
-orphan (noted in AGENT_NOTES § regeneration TODO).
+(a plain move when git does not track it yet) and gets a ``renamed_from``
+field (one object for a first rename, a list oldest first from the second
+on, so no earlier stem is lost); every arrangement that names the old stem
+is rewritten, the paired partner's ``negative_label`` follows the new label,
+and the queue entry takes the new stem and label.  ``pair`` replaces a pair
+arrangement recorded under a pole's old stem instead of adding a second
+one.  The old stem's RunPod data becomes an orphan (noted in AGENT_NOTES
+§ regeneration TODO).
 
 Cost guard: generation is about $0.03 per entity on Sonnet 4.6 (observed,
 Sep 2026); ``generate`` prints the estimate and refuses a batch over the
@@ -74,6 +80,7 @@ from typing import Iterable, Optional, Sequence
 _REPO_ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(_REPO_ROOT))
 
+from assistant_axis.arrangements import ORDERED_KINDS  # noqa: E402
 from assistant_axis.atomic_io import atomic_write_text  # noqa: E402
 from assistant_axis.entity_id import normalize_to_file_name  # noqa: E402
 from data_analysis.generation_refusals import REFUSALS_NAME, read_refusals  # noqa: E402
@@ -497,11 +504,19 @@ def cmd_check(args, q: dict, data_dir: Path) -> int:
 # recording a pair
 # ---------------------------------------------------------------------------
 
-def merge_pair_arrangement(existing, pair: dict):
+def merge_pair_arrangement(existing, pair: dict, renamed: Optional[dict[str, str]] = None):
     """Add ``pair`` to a file's arrangement field: replace a missing or
     singleton field, keep an identical pair, otherwise append to the list
     (a trait can be one pole of a pair *and* a member of a sequence or
-    triangle, as ``malicious`` is)."""
+    triangle, as ``malicious`` is).
+
+    ``renamed`` maps a stem the two poles had before a rename (their
+    ``renamed_from`` history) to the pole's stem now.  A pair arrangement
+    whose members are the new pair once those stems are mapped is the same
+    pair recorded under an old name (a rename made by hand, or before
+    ``rename`` rewrote arrangements): it is replaced, keeping its note and
+    adding the rename to it, not left beside a second pair (item 7 of
+    AGENT_NOTES § "TODO: code housekeeping", 2026-09-30, deterministic)."""
     if existing is None:
         return pair
     items = existing if isinstance(existing, list) else [existing]
@@ -511,7 +526,154 @@ def merge_pair_arrangement(existing, pair: dict):
     same = [x for x in items if x.get("kind") == "pair" and sorted(x.get("members", [])) == pair["members"]]
     if same:
         return existing
+    renamed = renamed or {}
+    stale = [i for i, x in enumerate(items) if x.get("kind") == "pair" and isinstance(x.get("members"), list)
+             and sorted(renamed.get(m, m) for m in x["members"]) == pair["members"]]
+    if stale:
+        i = stale[0]
+        fixed = dict(items[i])
+        notes = [f"{date.today().isoformat()}: {m} renamed {renamed[m]}" for m in fixed["members"] if m in renamed]
+        if pair.get("note"):
+            notes.append(pair["note"])
+        fixed["members"] = list(pair["members"])
+        fixed["note"] = " | ".join(([fixed["note"]] if fixed.get("note") else []) + notes)
+        # the first stale copy is replaced in place; a second one goes
+        kept = [fixed if j == i else x for j, x in enumerate(items) if j == i or j not in stale]
+        return kept[0] if len(kept) == 1 and not isinstance(existing, list) else kept
     return items + [pair]
+
+
+# ---------------------------------------------------------------------------
+# renaming: the move, the renamed_from history, the arrangements and labels
+# ---------------------------------------------------------------------------
+
+def is_tracked(path: Path, repo: Path) -> bool:
+    """True when git tracks ``path`` (committed or added) in ``repo``."""
+    if not (repo / ".git").exists():
+        return False
+    res = subprocess.run(["git", "ls-files", "--error-unmatch", "--", str(path)], cwd=repo,
+                         capture_output=True, text=True, check=False)
+    return res.returncode == 0
+
+
+def move_entity_file(src: Path, dst: Path, repo: Path) -> str:
+    """Move a corpus file: ``git mv`` when git tracks it, a plain move when it
+    was never committed or added, which ``git mv`` refuses (item 8 of
+    AGENT_NOTES § "TODO: code housekeeping": borderline and fear_prone, renamed
+    by hand on 2026-10-08).  Returns "git mv" or "move"."""
+    if is_tracked(src, repo):
+        subprocess.run(["git", "mv", str(src), str(dst)], cwd=repo, check=True)
+        return "git mv"
+    src.rename(dst)
+    return "move"
+
+
+def renamed_from_history(value) -> list:
+    """A ``renamed_from`` field as a list, oldest first.  The corpus stores a
+    single rename as one object (``{"stem", "date", "reason"}``) and two or
+    more as a list of them, oldest first, which is what
+    ``assistant_axis.entity_id.resolve_renamed_stem`` reads (it also accepts
+    bare stems)."""
+    if not value:
+        return []
+    return list(value) if isinstance(value, list) else [value]
+
+
+def renamed_from_stems(value) -> list[str]:
+    """The stems a ``renamed_from`` field records, oldest first."""
+    out = []
+    for item in renamed_from_history(value):
+        stem = item.get("stem") if isinstance(item, dict) else item
+        if isinstance(stem, str) and stem:
+            out.append(stem)
+    return out
+
+
+def add_rename(value, record: dict):
+    """``renamed_from`` with ``record`` added: the record alone for a first
+    rename (the single-object form of every single rename in the corpus),
+    otherwise a list, oldest first, so that a second rename keeps the first
+    stem (item 5 (b) of AGENT_NOTES § "TODO: code housekeeping")."""
+    history = renamed_from_history(value)
+    return record if not history else history + [record]
+
+
+def _names_stem(arr: dict, stem: str) -> bool:
+    return (stem in (arr.get("members") or []) or arr.get("parent") == stem
+            or stem in (arr.get("children") or [])
+            or any(isinstance(ax, list) and stem in ax for ax in (arr.get("axes") or [])))
+
+
+def rename_in_arrangement(field, old: str, new: str, note: Optional[str] = None):
+    """``field`` (one arrangement object or a list) with the stem ``old``
+    replaced by ``new`` wherever an arrangement names it: ``members``
+    (re-sorted, except for the ordered kinds), ``axes``, ``parent``,
+    ``children``.  ``note`` is appended to the note of each arrangement that
+    changed.  Returns ``(field, changed)``."""
+    if not field:
+        return field, False
+    items = field if isinstance(field, list) else [field]
+    out, changed = [], False
+    for arr in items:
+        if not isinstance(arr, dict) or not _names_stem(arr, old):
+            out.append(arr)
+            continue
+        a = dict(arr)
+        sub = lambda s: new if s == old else s  # noqa: E731
+        if isinstance(a.get("members"), list):
+            members = [sub(m) for m in a["members"]]
+            a["members"] = members if str(a.get("kind", "")).strip().lower() in ORDERED_KINDS else sorted(members)
+        if isinstance(a.get("axes"), list):
+            a["axes"] = [[sub(m) for m in ax] if isinstance(ax, list) else ax for ax in a["axes"]]
+        if a.get("parent") == old:
+            a["parent"] = new
+        if isinstance(a.get("children"), list):
+            a["children"] = [sub(c) for c in a["children"]]
+        if note:
+            a["note"] = f"{a['note']} | {note}" if a.get("note") else note
+        out.append(a)
+        changed = True
+    return (out if isinstance(field, list) else out[0]), changed
+
+
+def _has_pair_with(field, stem: str) -> bool:
+    items = field if isinstance(field, list) else [field] if field else []
+    return any(isinstance(a, dict) and a.get("kind") == "pair" and stem in (a.get("members") or []) for a in items)
+
+
+def rename_edits(tdir: Path, old: str, new: str, new_label: str, own_negative_label: Optional[str],
+                 note: str) -> tuple[list[tuple[Path, dict, list[str]]], list[str]]:
+    """What renaming the trait ``old`` to ``new`` changes in the *other* trait
+    files (item 7 of AGENT_NOTES § "TODO: code housekeeping", 2026-09-30,
+    deterministic): every arrangement that names ``old`` names ``new``, and
+    the partner's ``negative_label`` becomes ``new_label``.  The partner is a
+    trait whose ``negative_label`` names ``old`` and that is paired with it,
+    by a ``pair`` arrangement or by the renamed file's own label pointing
+    back.  A trait whose label names ``old`` one way only is left alone and
+    listed (its label may mean the word, not this entity).  Returns
+    ``([(path, edited document, change lines)], one-way pointer stems)``."""
+    own_partner = normalize_to_file_name(own_negative_label) if own_negative_label else None
+    edits, pointers = [], []
+    for path in sorted(tdir.glob("*.json")):
+        if path.stem in (old, new):
+            continue
+        with open(path, encoding="utf-8") as f:
+            doc = json.load(f)
+        changes = []
+        arr, changed = rename_in_arrangement(doc.get("arrangement"), old, new, note)
+        if changed:
+            doc["arrangement"] = arr
+            changes.append(f"arrangement names {new}, not {old}")
+        neg = doc.get("negative_label")
+        if isinstance(neg, str) and normalize_to_file_name(neg) == old:
+            if path.stem == own_partner or _has_pair_with(doc.get("arrangement"), new):
+                doc["negative_label"] = new_label
+                changes.append(f"negative_label {neg!r} -> {new_label!r}")
+            else:
+                pointers.append(path.stem)
+        if changes:
+            edits.append((path, doc, changes))
+    return edits, pointers
 
 
 def cmd_pair(args, q: dict, data_dir: Path) -> int:
@@ -526,6 +688,10 @@ def cmd_pair(args, q: dict, data_dir: Path) -> int:
         db = json.load(f)
     la, lb = da["positive_label"], db["positive_label"]
     members = sorted([a, b])
+    # stems the two poles had before a rename, so that a pair recorded under
+    # an old name is replaced rather than joined by a second one
+    renamed = {**{s: a for s in renamed_from_stems(da.get("renamed_from")) if s != a},
+               **{s: b for s in renamed_from_stems(db.get("renamed_from")) if s != b}}
     changes = {a: [], b: []}
     if da.get("negative_label") != lb:
         changes[a].append(f"negative_label {da.get('negative_label')!r} -> {lb!r}")
@@ -537,7 +703,7 @@ def cmd_pair(args, q: dict, data_dir: Path) -> int:
     if args.note:
         arr["note"] = args.note
     for stem, d in ((a, da), (b, db)):
-        merged = merge_pair_arrangement(d.get("arrangement"), arr)
+        merged = merge_pair_arrangement(d.get("arrangement"), arr, renamed)
         if merged != d.get("arrangement"):
             changes[stem].append(f"arrangement -> {json.dumps(merged)}")
             d["arrangement"] = merged
@@ -578,26 +744,59 @@ def cmd_rename(args, q: dict, data_dir: Path) -> int:
         raise SystemExit(f"{new!r} is queued ({queued[0].get('status')}, chunk {queued[0].get('chunk')}); pass --force to take the name anyway")
     with open(src, encoding="utf-8") as f:
         d = json.load(f)
-    print(f"{old} -> {new}: positive_label {d.get('positive_label')!r} -> {new_label!r}; negative_label stays {d.get('negative_label')!r}")
+    today = date.today().isoformat()
+    note = f"{today}: {old} renamed {new}"
+    old_label = d.get("positive_label") or old.replace("_", " ")
+    print(f"{old} -> {new}: positive_label {old_label!r} -> {new_label!r}; negative_label stays {d.get('negative_label')!r}")
+    own_arr, own_changed = rename_in_arrangement(d.get("arrangement"), old, new, note)
+    if own_changed:
+        print(f"  {new}: its own arrangement names {new}, not {old}")
+    edits, pointers = rename_edits(tdir, old, new, new_label, d.get("negative_label"), note)
+    for path, _, changes in edits:
+        print(f"  {path.stem}: " + "; ".join(changes))
+    if pointers:
+        print(f"  NOTE left alone, their negative_label names {old} one way: {', '.join(pointers)}")
+    own_entries = [e for e in q["entries"] if e.get("entity_type") == "trait" and e.get("stem") == old
+                   and e.get("status") not in ("not_adopted", "superseded")]
+    if own_entries:
+        print(f"  queue: the entry {old} becomes {new} / {new_label!r}")
     if args.dry_run:
         return 0
-    if (data_dir.parent / ".git").exists():
-        subprocess.run(["git", "mv", str(src), str(dst)], cwd=data_dir.parent, check=True)
-    else:
-        src.rename(dst)
+    how = move_entity_file(src, dst, data_dir.parent)
+    print(f"  moved by {how}")
     d["positive_label"] = new_label
-    d["renamed_from"] = {"stem": old, "date": date.today().isoformat(),
-                         "reason": args.reason or f"RO: the antonym check on {args.partner or 'the new completion'} named this pole {new_label!r}; renamed, regenerated, re-checked"}
+    d["renamed_from"] = add_rename(d.get("renamed_from"), {
+        "stem": old, "date": today,
+        "reason": args.reason or f"RO: the antonym check on {args.partner or 'the new completion'} named this pole {new_label!r}; renamed, regenerated, re-checked"})
+    if own_changed:
+        d["arrangement"] = own_arr
     write_json(dst, d)
+    for path, doc, _ in edits:
+        write_json(path, doc)
     res = run_tool(["data_analysis/regenerate_trait_instructions.py", "--traits", new, "--force"], dry_run=False)
     if res.returncode != 0:
         print("regeneration failed", file=sys.stderr)
         return 1
+    for e in own_entries:
+        # the entry follows its file (2026-10-08: borderline and fear_prone were rewritten by hand)
+        e["stem"], e["label"] = new, new_label
+        e["renamed_from"] = json.loads(json.dumps(d["renamed_from"]))
     for e in q["entries"]:
         if e.get("partner") == old:
             e["partner"] = new
-            e["pairing_note"] = (e.get("pairing_note") or "") + f" [partner renamed {old} -> {new} on {date.today().isoformat()} (RO)]"
+            e["pairing_note"] = (e.get("pairing_note") or "") + f" [partner renamed {old} -> {new} on {today} (RO)]"
+        members = e.get("arrangement_members")
+        if isinstance(members, list) and old in members:
+            e["arrangement_members"] = [new if m == old else m for m in members]
     save_queue(q, args.queue)
+    if edits or own_changed:
+        chk = run_tool(["data_analysis/check_arrangements.py", "--quiet"], dry_run=False)
+        if chk is not None and chk.returncode != 0:
+            print("WARNING: check_arrangements.py reports problems after the rename", file=sys.stderr)
+    relabelled = [path.stem for path, _, changes in edits if any(c.startswith("negative_label") for c in changes)]
+    if relabelled:
+        print(f"  the neg instructions of {', '.join(relabelled)} still name {old_label!r}: regenerate them "
+              f"--instructions-only (pair does this for side a)", file=sys.stderr)
     run_tool(["tools/sync_entity_lists.py"], dry_run=False)
     if args.no_check:
         return 0

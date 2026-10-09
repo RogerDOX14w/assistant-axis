@@ -252,6 +252,23 @@ class TestMergePairArrangement:
         out = se.merge_pair_arrangement([seq, self.PAIR], self.PAIR)
         assert out == [seq, self.PAIR]
 
+    def test_replaces_a_pair_under_a_renamed_stem(self):
+        today = se.date.today().isoformat()
+        stale = {"kind": "pair", "members": ["egoistic", "selfless"], "note": "n"}
+        renamed = {"egoistic": "selfish", "selfless": "altruistic"}
+        want = {"kind": "pair", "members": ["altruistic", "selfish"],
+                "note": f"n | {today}: egoistic renamed selfish | {today}: selfless renamed altruistic"}
+        assert se.merge_pair_arrangement(stale, self.PAIR, renamed) == want
+        seq = {"kind": "sequence", "members": ["selfish", "clannish"]}
+        assert se.merge_pair_arrangement([seq, stale], self.PAIR, renamed) == [seq, want]
+        noted = dict(self.PAIR, note="paired")
+        assert se.merge_pair_arrangement([stale], noted, renamed) == [dict(want, note=want["note"] + " | paired")]
+
+    def test_without_the_rename_map_a_different_pair_is_kept_beside(self):
+        stale = {"kind": "pair", "members": ["egoistic", "selfless"]}
+        assert se.merge_pair_arrangement(stale, self.PAIR) == [stale, self.PAIR]
+        assert se.merge_pair_arrangement(stale, self.PAIR, {"other": "selfish"}) == [stale, self.PAIR]
+
 
 class TestRenameCommand:
     def _setup(self, tmp_path):
@@ -294,6 +311,196 @@ class TestRenameCommand:
         d, td, qp = self._setup(tmp_path)
         se.main(["--queue", str(qp), "--data-dir", str(d), "rename", "--old", "slothful", "--new", "lazy", "--dry-run"])
         assert td.joinpath("slothful.json").exists() and not td.joinpath("lazy.json").exists()
+
+
+class _Res:
+    returncode = 0
+    stdout = "{}"
+    stderr = ""
+
+
+def _git(repo: Path, *args):
+    import subprocess
+    return subprocess.run(["git", *args], cwd=repo, capture_output=True, text=True, check=True)
+
+
+class TestRenameMoves:
+    """Item 8 of AGENT_NOTES § "TODO: code housekeeping": ``git mv`` refuses a
+    file git does not track, and the renamed entry's own queue record stays on
+    the old stem."""
+
+    def _setup(self, tmp_path, entries=()):
+        d = _data_dir(tmp_path); td = d / "traits" / "instructions"
+        td.joinpath("slothful.json").write_text(json.dumps({"positive_label": "slothful", "negative_label": "non-slothful",
+                                                            "description": "d", "instruction": [{"pos": "x", "neg": "y"}]}))
+        qp = _queue(tmp_path, list(entries))
+        return d, td, qp
+
+    def _rename(self, d, qp, *extra):
+        return se.main(["--queue", str(qp), "--data-dir", str(d), "rename", "--old", "slothful", "--new", "lazy",
+                        "--no-check", *extra])
+
+    def test_an_untracked_file_is_moved_without_git(self, tmp_path, monkeypatch, capsys):
+        d, td, qp = self._setup(tmp_path)
+        _git(tmp_path, "init", "-q")
+        monkeypatch.setattr(se, "run_tool", lambda *a, **k: _Res())
+        assert not se.is_tracked(td / "slothful.json", tmp_path)
+        assert self._rename(d, qp) == 0
+        assert td.joinpath("lazy.json").exists() and not td.joinpath("slothful.json").exists()
+        assert "moved by move" in capsys.readouterr().out
+
+    def test_a_tracked_file_is_moved_with_git_mv(self, tmp_path, monkeypatch, capsys):
+        d, td, qp = self._setup(tmp_path)
+        _git(tmp_path, "init", "-q")
+        _git(tmp_path, "add", "data/traits/instructions/slothful.json")
+        monkeypatch.setattr(se, "run_tool", lambda *a, **k: _Res())
+        assert self._rename(d, qp) == 0
+        assert "moved by git mv" in capsys.readouterr().out
+        assert _git(tmp_path, "ls-files").stdout.split() == ["data/traits/instructions/lazy.json"]
+
+    def test_the_renamed_entry_follows_its_file(self, tmp_path, monkeypatch):
+        d, td, qp = self._setup(tmp_path, [
+            _entry(stem="slothful", label="slothful", partner=None, status="done"),
+            _entry(stem="slothful", label="slothful", partner=None, status="not_adopted"),   # a parked record stays
+            _entry(stem="busy", label="busy", partner="slothful", pairing="set", arrangement_members=["busy", "slothful"])])
+        monkeypatch.setattr(se, "run_tool", lambda *a, **k: _Res())
+        assert self._rename(d, qp) == 0
+        own, parked, other = json.loads(qp.read_text())["entries"]
+        assert (own["stem"], own["label"]) == ("lazy", "lazy") and own["renamed_from"]["stem"] == "slothful"
+        assert own["renamed_from"] == json.loads(td.joinpath("lazy.json").read_text())["renamed_from"]
+        assert parked["stem"] == "slothful"
+        assert other["partner"] == "lazy" and other["arrangement_members"] == ["busy", "lazy"]
+
+
+class TestRenamedFromHistory:
+    """Item 5 (b): a second rename used to overwrite ``renamed_from``; the
+    history is kept, oldest first, and a single rename keeps the one-object
+    form the corpus uses."""
+
+    def test_add_rename_forms(self):
+        first = {"stem": "a", "date": "2026-09-01", "reason": "r1"}
+        second = {"stem": "b", "date": "2026-10-01", "reason": "r2"}
+        third = {"stem": "c", "date": "2026-10-09", "reason": "r3"}
+        assert se.add_rename(None, first) == first
+        assert se.add_rename(first, second) == [first, second]
+        assert se.add_rename([first, second], third) == [first, second, third]
+        assert se.renamed_from_stems([first, "bare", second]) == ["a", "bare", "b"]
+        assert se.renamed_from_stems(None) == [] and se.renamed_from_stems(first) == ["a"]
+
+    def test_a_second_rename_keeps_the_first_stem_for_the_resolver(self, tmp_path, monkeypatch):
+        from assistant_axis.entity_id import clear_corpus_display_cache, resolve_renamed_stem
+        d = _data_dir(tmp_path); td = d / "traits" / "instructions"
+        td.joinpath("motivated_reasoning_resistant.json").write_text(json.dumps({
+            "positive_label": "motivated-reasoning-resistant", "negative_label": "non-x", "description": "d",
+            "renamed_from": {"stem": "motivated_reasoning_avoidant", "date": "2026-09-26", "reason": "first"}}))
+        qp = _queue(tmp_path, [])
+        monkeypatch.setattr(se, "run_tool", lambda *a, **k: _Res())
+        assert se.main(["--queue", str(qp), "--data-dir", str(d), "rename", "--old", "motivated_reasoning_resistant",
+                        "--new", "motivated-reasoning-immune", "--no-check", "--reason", "second"]) == 0
+        rf = json.loads(td.joinpath("motivated_reasoning_immune.json").read_text())["renamed_from"]
+        assert [(x["stem"], x["reason"]) for x in rf] == [("motivated_reasoning_avoidant", "first"),
+                                                          ("motivated_reasoning_resistant", "second")]
+        clear_corpus_display_cache()
+        for old in ("motivated_reasoning_avoidant", "motivated_reasoning_resistant"):
+            assert resolve_renamed_stem(old, "traits", data_dir=d) == "motivated_reasoning_immune"
+
+
+class TestRenameArrangements:
+    """Item 7 (2026-09-30, deterministic -> determinist): rename left the pair
+    record and the partner's label on the old stem, and ``pair`` then added a
+    second pair beside the stale one."""
+
+    SEQ = {"kind": "sequence", "members": ["fatalist", "deterministic", "compatibilist"], "note": "seq"}
+    PAIR = {"kind": "pair", "members": ["deterministic", "libertarian"], "note": "free will"}
+
+    def _corpus(self, tmp_path):
+        d = _data_dir(tmp_path); td = d / "traits" / "instructions"
+        docs = {
+            "deterministic": {"positive_label": "deterministic", "negative_label": "libertarian",
+                              "arrangement": [self.PAIR, self.SEQ]},
+            "libertarian": {"positive_label": "libertarian", "negative_label": "deterministic", "arrangement": self.PAIR},
+            "fatalist": {"positive_label": "fatalist", "negative_label": "non-fatalist", "arrangement": self.SEQ},
+            "compatibilist": {"positive_label": "compatibilist", "negative_label": "non-compatibilist",
+                              "arrangement": self.SEQ},
+            # a one-way pointer: the word, not necessarily this entity
+            "indeterminist": {"positive_label": "indeterminist", "negative_label": "deterministic"},
+        }
+        for stem, doc in docs.items():
+            td.joinpath(f"{stem}.json").write_text(json.dumps(dict(doc, description="d")))
+        return d, td
+
+    def _problems(self, d):
+        from assistant_axis.arrangements import validate_corpus
+        return [str(p) for p in validate_corpus(d, "traits")]
+
+    def test_rename_rewrites_every_arrangement_and_the_partner_label(self, tmp_path, monkeypatch, capsys):
+        d, td = self._corpus(tmp_path)
+        assert self._problems(d) == []
+        before_pointer = td.joinpath("indeterminist.json").read_text()
+        qp = _queue(tmp_path, [])
+        calls = []
+        monkeypatch.setattr(se, "run_tool", lambda cmd, **k: (calls.append(cmd), _Res())[1])
+        assert se.main(["--queue", str(qp), "--data-dir", str(d), "rename", "--old", "deterministic",
+                        "--new", "determinist", "--no-check"]) == 0
+        read = lambda s: json.loads(td.joinpath(f"{s}.json").read_text())  # noqa: E731
+        today = se.date.today().isoformat()
+        new, lib, fat = read("determinist"), read("libertarian"), read("fatalist")
+        assert new["arrangement"][0] == {"kind": "pair", "members": ["determinist", "libertarian"],
+                                         "note": f"free will | {today}: deterministic renamed determinist"}
+        assert new["arrangement"][1]["members"] == ["fatalist", "determinist", "compatibilist"]   # order kept
+        assert lib["arrangement"] == new["arrangement"][0] and lib["negative_label"] == "determinist"
+        assert fat["arrangement"] == new["arrangement"][1] == read("compatibilist")["arrangement"]
+        assert td.joinpath("indeterminist.json").read_text() == before_pointer
+        out = capsys.readouterr()
+        assert "left alone, their negative_label names deterministic one way: indeterminist" in out.out
+        assert "the neg instructions of libertarian still name 'deterministic'" in out.err
+        assert ["data_analysis/check_arrangements.py", "--quiet"] in calls
+        assert self._problems(d) == []
+
+    def test_dry_run_lists_the_edits_and_writes_nothing(self, tmp_path, monkeypatch, capsys):
+        d, td = self._corpus(tmp_path)
+        before = {p.name: p.read_text() for p in td.glob("*.json")}
+        qp = _queue(tmp_path, [])
+        monkeypatch.setattr(se, "run_tool", lambda *a, **k: (_ for _ in ()).throw(AssertionError("must not run")))
+        se.main(["--queue", str(qp), "--data-dir", str(d), "rename", "--old", "deterministic",
+                 "--new", "determinist", "--dry-run"])
+        assert {p.name: p.read_text() for p in td.glob("*.json")} == before
+        out = capsys.readouterr().out
+        assert "libertarian: arrangement names determinist, not deterministic; negative_label 'deterministic' -> 'determinist'" in out
+        assert "fatalist: arrangement names determinist" in out
+
+    def test_rename_in_arrangement_covers_axes_parent_and_children(self):
+        tree = {"kind": "tree", "members": ["b", "old", "z"], "parent": "old", "children": ["old", "z"]}
+        sq = {"kind": "square", "members": ["a", "b", "c", "old"], "axes": [["a", "old"], ["b", "c"]]}
+        out, changed = se.rename_in_arrangement([tree, sq, {"kind": "pair", "members": ["p", "q"]}], "old", "new")
+        assert changed
+        assert out[0] == {"kind": "tree", "members": ["b", "new", "z"], "parent": "new", "children": ["new", "z"]}
+        assert out[1] == {"kind": "square", "members": ["a", "b", "c", "new"], "axes": [["a", "new"], ["b", "c"]]}
+        assert out[2] == {"kind": "pair", "members": ["p", "q"]}
+        assert se.rename_in_arrangement({"kind": "singleton"}, "old", "new") == ({"kind": "singleton"}, False)
+        assert se.rename_in_arrangement(None, "old", "new") == (None, False)
+
+    def test_pair_replaces_a_pair_recorded_under_the_old_stem(self, tmp_path, monkeypatch):
+        """A rename done by hand (or by the old code) left both files on the
+        old stem; pair must replace that record, not add a second pair."""
+        d = _data_dir(tmp_path); td = d / "traits" / "instructions"
+        stale = {"kind": "pair", "members": ["deterministic", "libertarian"], "note": "free will"}
+        td.joinpath("determinist.json").write_text(json.dumps({
+            "positive_label": "determinist", "negative_label": "libertarian", "description": "d", "arrangement": stale,
+            "renamed_from": {"stem": "deterministic", "date": "2026-09-30", "reason": "r"}}))
+        td.joinpath("libertarian.json").write_text(json.dumps({
+            "positive_label": "libertarian", "negative_label": "deterministic", "description": "d", "arrangement": stale}))
+        qp = _queue(tmp_path, [])
+        monkeypatch.setattr(se, "run_tool", lambda *a, **k: _Res())
+        assert se.main(["--queue", str(qp), "--data-dir", str(d), "pair", "--a", "libertarian", "--b", "determinist"]) == 0
+        today = se.date.today().isoformat()
+        want = {"kind": "pair", "members": ["determinist", "libertarian"],
+                "note": f"free will | {today}: deterministic renamed determinist"}
+        for stem in ("determinist", "libertarian"):
+            assert json.loads(td.joinpath(f"{stem}.json").read_text())["arrangement"] == want
+        assert json.loads(td.joinpath("libertarian.json").read_text())["negative_label"] == "determinist"
+        from assistant_axis.arrangements import validate_corpus
+        assert validate_corpus(d, "traits") == []
 
 
 class TestDuplicateLiveStems:
