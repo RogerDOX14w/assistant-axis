@@ -10,13 +10,13 @@
   "batch_size": 20,
   "max_adjectives": 20,
   "summary": {
-   "n_scope": 675,
-   "n_rated": 586,
+   "n_scope": 674,
+   "n_rated": 585,
    "n_skipped_no_adjectives": 89,
    "n_unrated": 0,
    "by_rating": {
     "0": 188,
-    "1": 233,
+    "1": 232,
     "2": 165
    },
    "by_class": {
@@ -32,7 +32,7 @@
     },
     "III": {
      "0": 9,
-     "1": 17,
+     "1": 16,
      "2": 3
     },
     "IV": {
@@ -133,7 +133,6 @@
 {"id":"334","title":"Gaseity","class":"III","class_title":"Words relating to matter","section":"II. Inorganic matter","n_adjectives":7,"n_shown":7,"rating":0,"reason":"Gaseous, vaporous and aerial describe gases and air, with no real use for describing a person.","model":"claude-haiku-5-5","rubric_version":2,"skipped":null,"error":null},
 {"id":"340","title":"Dryness","class":"III","class_title":"Words relating to matter","section":"II. Inorganic matter","n_adjectives":20,"n_shown":20,"rating":0,"reason":"Dry is the only term that might describe a person's manner, and the rest describe dryness of things.","model":"claude-haiku-5-5","rubric_version":2,"skipped":null,"error":null},
 {"id":"346","title":"Island","class":"III","class_title":"Words relating to matter","section":"II. Inorganic matter","n_adjectives":2,"n_shown":2,"rating":1,"reason":"Insular can describe a narrow-minded person, but seagirt describes islands.","model":"claude-haiku-5-5","rubric_version":2,"skipped":null,"error":null},
-{"id":"357","title":"Organization","class":"III","class_title":"Words relating to matter","section":"III. Organic matter","n_adjectives":3,"n_shown":3,"rating":1,"reason":"Organized can describe a person's orderly habits, but organic and vacuolar describe matter and cells.","model":"claude-haiku-5-5","rubric_version":2,"skipped":null,"error":null},
 {"id":"359","title":"Life","class":"III","class_title":"Words relating to matter","section":"III. Organic matter","n_adjectives":17,"n_shown":17,"rating":1,"reason":"Animated, vital, full of life and quick can describe a lively temperament, but most entries describe simply being alive.","model":"claude-haiku-5-5","rubric_version":2,"skipped":null,"error":null},
 {"id":"371","title":"Agriculture","class":"III","class_title":"Words relating to matter","section":"III. Organic matter","n_adjectives":7,"n_shown":7,"rating":1,"reason":"Rustic, rural and country can describe a person's background or manner, but agricultural, arable and horticultural describe land and produce.","model":"claude-haiku-5-5","rubric_version":2,"skipped":null,"error":null},
 {"id":"372","title":"Mankind","class":"III","class_title":"Words relating to matter","section":"III. Organic matter","n_adjectives":10,"n_shown":10,"rating":1,"reason":"Cosmopolitan, social, personal and human can describe a person, while national, civic and public mostly describe institutions.","model":"claude-haiku-5-5","rubric_version":2,"skipped":null,"error":null},
@@ -730,7 +729,7 @@
 {"id":"1000","title":"Temple","class":"VI","class_title":"Words relating to the sentient and moral powers","section":"V. Religious affections","n_adjectives":5,"n_shown":5,"rating":1,"reason":"'Monastic' and 'cloistered' can describe a person's way of life, while the rest describe buildings or institutions.","model":"claude-haiku-5-5","rubric_version":2,"skipped":null,"error":null}
  ],
   "last_run": {
-   "at": "2026-10-09T19:22:03+00:00",
+   "at": "2026-10-09T23:22:52+00:00",
    "n_calls": 0,
    "n_retries": 0,
    "cost_usd": 0,
@@ -752,53 +751,53 @@
  "_provenance": {
   "schema_version": "1.0",
   "produced_by": {
-   "cmd": "uv run python data_analysis/gap_generation/roget_generate.py head-scope --budget-usd 0.1",
-   "git_sha": "9a1fb45+dirty",
+   "cmd": "uv run python data_analysis/gap_generation/roget_generate.py head-scope --budget-usd 0.2",
+   "git_sha": "645e5a0+dirty",
    "author": "Roger Dearnaley",
    "title": "Roget head scope (workstream 2)"
   },
-  "produced_at": "2026-10-09T19:22:03+00:00",
+  "produced_at": "2026-10-09T23:22:52+00:00",
   "inputs": [
    {
     "dep_key": "roget_heads",
     "path": "data/candidates/roget/heads.json",
-    "fingerprint": "v1:2026-10-08T07:02:25+00:00@1679886",
+    "fingerprint": "v1:2026-10-08T03:48:37+00:00@1679886",
     "kind": "file",
     "dataset_id": null,
-    "last_modified_at": "2026-10-08T07:02:25+00:00",
+    "last_modified_at": "2026-10-08T03:48:37+00:00",
     "extras": {}
    },
    {
     "dep_key": "head_pairs",
     "path": "data/candidates/roget/head_pairs.json",
-    "fingerprint": "v1:2026-10-08T23:35:32+00:00@426714",
+    "fingerprint": "v1:2026-10-08T23:28:04+00:00@426714",
     "kind": "file",
     "dataset_id": null,
-    "last_modified_at": "2026-10-08T23:35:32+00:00",
+    "last_modified_at": "2026-10-08T23:28:04+00:00",
     "extras": {}
    },
    {
     "dep_key": "label_heads",
     "path": "data/candidates/roget/label_heads.json",
-    "fingerprint": "v1:2026-10-09T19:22:01+00:00@1453689",
+    "fingerprint": "v1:2026-10-09T23:22:49+00:00@1476385",
     "kind": "file",
     "dataset_id": null,
-    "last_modified_at": "2026-10-09T19:22:01+00:00",
+    "last_modified_at": "2026-10-09T23:22:49+00:00",
     "extras": {}
    },
    {
     "dep_key": "head_scope_rubric",
     "path": "reports/trait_gap_generation/rubrics/roget_head_scope.md",
-    "fingerprint": "v1:2026-10-08T20:52:53+00:00@27433",
+    "fingerprint": "v1:2026-10-08T20:16:20+00:00@27433",
     "kind": "file",
     "dataset_id": null,
-    "last_modified_at": "2026-10-08T20:52:53+00:00",
+    "last_modified_at": "2026-10-08T20:16:20+00:00",
     "extras": {
      "version": "2",
      "sha256": "09a1fc1dcd4af844b8e98de5be909d693a806ff201e24c9019b826c769049116"
     }
    }
   ],
-  "inputs_sha256": "a2d21019a8f5eeea069614ef3737f0b591d4b0d1761f37ad99831b30eb147407"
+  "inputs_sha256": "bf842feba67145e3604e5ee4032d6b10fa0f9aa7e493b2e3ae6c03590f7199e9"
  }
 }

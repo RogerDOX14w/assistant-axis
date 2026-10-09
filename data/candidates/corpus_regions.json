@@ -579,24 +579,24 @@
       "label": "altruistic",
       "region": "moral_stance",
       "enactable_in_text": 2,
-      "alignment_score": 2,
+      "alignment_score": 3,
       "alignment_relevant": true,
       "source": "description",
-      "description_sha256": "e19f429a7c374f100a34bb94bcfff4f0c9cf033078402286959afbd7c3a01bb1",
+      "description_sha256": "dbc2e719363b211ad4ab43ca7b6791cc31562c7da3ad9d47d549e0d8dba1c79b",
       "model": "claude-haiku-5-5",
       "rubric_versions": {
         "descriptors": 1,
         "alignment": 3
       },
       "reasons": {
-        "descriptors": "Altruism is a value about putting others' welfare first, which shows up in how the persona weighs and recommends actions toward others.",
-        "alignment": "Altruism centres on concern for others' welfare and avoiding harm to people, which bears directly on whether the assistant avoids serious harm and serves those it works for, though it names helping rather than harm avoidance itself."
+        "descriptors": "The description centers on what the persona holds to be right (others' welfare, the common good over self-interest) and acting on it at personal cost, which is a moral stance.",
+        "alignment": "Caring for others' welfare and putting the common good first bears directly on avoiding serious harm to people and on not seeking personal gain, so it is about the conduct of avoiding harm and not seeking power or reward."
       },
-      "batch_id": "corpus_desc_2026_10_09",
-      "at": "2026-10-09T02:29:34+00:00",
+      "batch_id": "corpus_desc_20261009T232256Z",
+      "at": "2026-10-09T23:22:58+00:00",
       "previous_region": "moral_stance",
       "previous_alignment_relevant": true,
-      "previous_source": "filter m1_validation_r2"
+      "previous_source": "description corpus_desc_2026_10_09"
     },
     "ambiguity_tolerant": {
       "label": "ambiguity-tolerant",
@@ -1962,21 +1962,21 @@
       "alignment_score": 2,
       "alignment_relevant": true,
       "source": "description",
-      "description_sha256": "ee06e28f4a0f4eb9cdd6ac5a31d7215dc881880d0c89dd3faad20ade43cc04be",
+      "description_sha256": "b4e4f09f025f010e6654b9cfb7d881f350f2e57087700a37f2d293b502a677a0",
       "model": "claude-haiku-5-5",
       "rubric_versions": {
         "descriptors": 1,
         "alignment": 3
       },
       "reasons": {
-        "descriptors": "The description concerns how the persona handles uncertainty and weighs upside against risk, which is a matter of reasoning, and its firm, action-now answers are plainly visible in written replies.",
-        "alignment": "A bold persona would clearly overstate its confidence and play down risks, so it would act less honestly about its own knowledge and the dangers involved, and it would urge action without expert referral, which could lead to harm."
+        "descriptors": "The description centers on how it weighs risk, discounts expert judgment, and decides under uncertainty, which is a reasoning style.",
+        "alignment": "Boldness that discounts dangers and trusts one's own judgment over experts would show in less caution about serious harm and less deference to those overseeing it, though the description does not name either directly."
       },
-      "batch_id": "corpus_desc_2026_10_09",
-      "at": "2026-10-09T02:30:01+00:00",
-      "previous_region": "moral_stance",
-      "previous_alignment_relevant": false,
-      "previous_source": "filter m1_validation_r2"
+      "batch_id": "corpus_desc_20261009T232256Z",
+      "at": "2026-10-09T23:22:58+00:00",
+      "previous_region": "cognitive_epistemic",
+      "previous_alignment_relevant": true,
+      "previous_source": "description corpus_desc_2026_10_09"
     },
     "bombastic": {
       "label": "bombastic",
@@ -2652,21 +2652,21 @@
       "alignment_score": 2,
       "alignment_relevant": true,
       "source": "description",
-      "description_sha256": "4d9946e4c9c101db3c8fbae94439410e83de1f7bfdc9a9bd101112be171605df",
+      "description_sha256": "5ca377f88722e04a0d97e0cf751154ee265a6e3a3cb3af6585c0ab449e014cce",
       "model": "claude-haiku-5-5",
       "rubric_versions": {
         "descriptors": 1,
         "alignment": 3
       },
       "reasons": {
-        "descriptors": "The description centers on how it weighs risk, expresses uncertainty, and reasons before acting, which is a stance toward knowledge and judgment.",
-        "alignment": "Caution means weighing risks before acting and voicing uncertainty, which would clearly shape its honesty about its own knowledge and its avoidance of harm, though the description is about style rather than those conduct matters directly."
+        "descriptors": "The description centers on how the persona weighs its own knowledge limits and uncertainty before acting, which is a reasoning stance.",
+        "alignment": "A cautious persona that holds back under uncertainty and checks dangers first would clearly act more to avoid serious harm and to acknowledge the limits of its knowledge, though the description doesn't name either outright."
       },
-      "batch_id": "corpus_desc_2026_10_09",
-      "at": "2026-10-09T02:30:14+00:00",
+      "batch_id": "corpus_desc_20261009T232256Z",
+      "at": "2026-10-09T23:22:59+00:00",
       "previous_region": "cognitive_epistemic",
-      "previous_alignment_relevant": false,
-      "previous_source": "filter m1_validation_r2"
+      "previous_alignment_relevant": true,
+      "previous_source": "description corpus_desc_2026_10_09"
     },
     "cerebral": {
       "label": "cerebral",
@@ -2698,21 +2698,21 @@
       "alignment_score": 1,
       "alignment_relevant": false,
       "source": "description",
-      "description_sha256": "75d3efadd4e1522aacd9b791aa235d4e56dd8f70356e688640b5c4d0564a83f1",
+      "description_sha256": "a195f94b65f77f8588328174da0c8632450980b23cd2fa220f6def13282987b6",
       "model": "claude-haiku-5-5",
       "rubric_versions": {
         "descriptors": 1,
         "alignment": 3
       },
       "reasons": {
-        "descriptors": "The persona relates to others by pushing them to examine their own assumptions and beliefs, which is a stance toward the other person rather than a reasoning method or a writing style.",
-        "alignment": "This describes a teaching or discussion style of questioning and offering alternative views, which only loosely touches on whether the assistant defers to or resists the people it works for, and only through a further step."
+        "descriptors": "The persona's main trait is how it relates to others, pushing them to examine their own beliefs and assumptions, and a text reply can plainly do this by questioning and offering alternatives.",
+        "alignment": "Questioning users' assumptions could, in some circumstances, shade into resisting the people it works for, but the description is about intellectual style rather than deference, honesty, or rule-breaking."
       },
-      "batch_id": "corpus_desc_2026_10_09",
-      "at": "2026-10-09T02:30:14+00:00",
+      "batch_id": "corpus_desc_20261009T232256Z",
+      "at": "2026-10-09T23:22:58+00:00",
       "previous_region": "social_interpersonal",
       "previous_alignment_relevant": false,
-      "previous_source": "filter m1_validation_r2"
+      "previous_source": "description corpus_desc_2026_10_09"
     },
     "chaotic": {
       "label": "chaotic",
@@ -4326,26 +4326,26 @@
     },
     "decisive": {
       "label": "decisive",
-      "region": "communication_style",
+      "region": "cognitive_epistemic",
       "enactable_in_text": 2,
-      "alignment_score": 2,
-      "alignment_relevant": true,
+      "alignment_score": 1,
+      "alignment_relevant": false,
       "source": "description",
-      "description_sha256": "75ad859501dbfd4e4f4a40f6b25d73f6f721b32e5482ca4b4023d7ac7d9a1d38",
+      "description_sha256": "6dfeefe2b0aae0e449516e9fd68e2a970df7d42dc114eebca7138cc93fe07841",
       "model": "claude-haiku-5-5",
       "rubric_versions": {
         "descriptors": 1,
         "alignment": 3
       },
       "reasons": {
-        "descriptors": "The description concerns how answers are phrased, committing to clear recommendations instead of hedging, which a text reply shows directly.",
-        "alignment": "A persona that avoids expressing uncertainty and always gives firm answers would regularly overstate its confidence, which bears on honesty about its own knowledge."
+        "descriptors": "Decisiveness describes how the persona settles on options and commits, which shows up directly in how it reasons toward and states its choices.",
+        "alignment": "Decisiveness is mainly a manner of committing to a course, but never hedging could lead to overstating confidence about its knowledge or abilities, which is a further step from honesty."
       },
-      "batch_id": "corpus_desc_2026_10_09",
-      "at": "2026-10-09T02:30:43+00:00",
+      "batch_id": "corpus_desc_20261009T232256Z",
+      "at": "2026-10-09T23:23:00+00:00",
       "previous_region": "communication_style",
-      "previous_alignment_relevant": false,
-      "previous_source": "filter m1_validation_r2"
+      "previous_alignment_relevant": true,
+      "previous_source": "description corpus_desc_2026_10_09"
     },
     "deconstructionist": {
       "label": "deconstructionist",
@@ -4924,26 +4924,26 @@
     },
     "disorganized": {
       "label": "disorganized",
-      "region": "communication_style",
+      "region": "cognitive_epistemic",
       "enactable_in_text": 2,
       "alignment_score": 0,
       "alignment_relevant": false,
       "source": "description",
-      "description_sha256": "76fc74cd10efac6793244dd0eb889f1e012d9345cfa7777d1dd1dc2b6fd9aba8",
+      "description_sha256": "2afa032592dd889285ded79f878a8e28e7876d463118e23e45fc2558410dfd6f",
       "model": "claude-haiku-5-5",
       "rubric_versions": {
         "descriptors": 1,
         "alignment": 3
       },
       "reasons": {
-        "descriptors": "The description concerns how the replies are organized and flow, which a text-only persona shows directly in its writing.",
-        "alignment": "Disorganized presentation is a matter of style and clarity, with no direct bearing on harm, honesty, reward-seeking, power, deference, oversight, or rule-following."
+        "descriptors": "The description concerns how the persona thinks and organizes its speech, showing up as scattered, non-linear writing that loses track of earlier points.",
+        "alignment": "Scattered, rambling thinking and speech is a matter of style and cognitive manner, with no direct bearing on honesty, harm, approval-seeking, power, deference, oversight, or rule-following."
       },
-      "batch_id": "corpus_desc_2026_10_09",
-      "at": "2026-10-09T02:30:53+00:00",
-      "previous_region": "cognitive_epistemic",
+      "batch_id": "corpus_desc_20261009T232256Z",
+      "at": "2026-10-09T23:22:59+00:00",
+      "previous_region": "communication_style",
       "previous_alignment_relevant": false,
-      "previous_source": "filter m1_validation_r2"
+      "previous_source": "description corpus_desc_2026_10_09"
     },
     "dispassionate": {
       "label": "dispassionate",
@@ -6815,21 +6815,21 @@
       "alignment_score": 0,
       "alignment_relevant": false,
       "source": "description",
-      "description_sha256": "93598047404bcccb6a726408edf0c1b647c1cc10029c3ddbbda68bbc9851d2f8",
+      "description_sha256": "9bf1926b0eef8c109dc9c061b564254e1f77638eb07d1a8e0bb90642a333a37b",
       "model": "claude-haiku-5-5",
       "rubric_versions": {
         "descriptors": 1,
         "alignment": 3
       },
       "reasons": {
-        "descriptors": "The description concerns how the persona reasons through and handles knowledge, favoring multiple alternatives and open investigation over a single settled answer, which a text reply can show directly.",
-        "alignment": "Encouraging open exploration and presenting multiple options is a style of engagement that does not directly concern honesty, harm, approval, power, deference, oversight, or rule-following."
+        "descriptors": "It describes how the persona reasons, keeping several possibilities open and pursuing them rather than settling early, which shows directly in how it structures its answers.",
+        "alignment": "This describes a style of inquiry, keeping options open and following possibilities, with no direct bearing on harm, honesty, approval, power, deference, oversight or rule-keeping."
       },
-      "batch_id": "corpus_desc_2026_10_09",
-      "at": "2026-10-09T02:31:28+00:00",
+      "batch_id": "corpus_desc_20261009T232256Z",
+      "at": "2026-10-09T23:23:01+00:00",
       "previous_region": "cognitive_epistemic",
       "previous_alignment_relevant": false,
-      "previous_source": "filter m1_validation_r2"
+      "previous_source": "description corpus_desc_2026_10_09"
     },
     "explorer_bartle": {
       "label": "explorer (Bartle)",
@@ -7377,6 +7377,26 @@
       "previous_alignment_relevant": false,
       "previous_source": "filter m1_validation_r2"
     },
+    "fickle": {
+      "label": "fickle",
+      "region": "emotional_temperament",
+      "enactable_in_text": 2,
+      "alignment_score": 1,
+      "alignment_relevant": false,
+      "source": "description",
+      "description_sha256": "22edd7e743964ab0a8e0e90ce6d6a024ae14ca4b94c091a5426b76229be9390f",
+      "model": "claude-haiku-5-5",
+      "rubric_versions": {
+        "descriptors": 1,
+        "alignment": 3
+      },
+      "reasons": {
+        "descriptors": "The description is about how steadily enthusiasm and attachment hold or fade, which is a matter of feeling and its consistency.",
+        "alignment": "Fickleness is a shifting-enthusiasm trait that could lead to dropping a principal's plan at a setback, but that link runs only through a further step."
+      },
+      "batch_id": "corpus_desc_20261009T232256Z",
+      "at": "2026-10-09T23:23:01+00:00"
+    },
     "figurative": {
       "label": "figurative",
       "region": "cognitive_epistemic",
@@ -7698,6 +7718,26 @@
       "previous_region": "cognitive_epistemic",
       "previous_alignment_relevant": false,
       "previous_source": "filter m1_validation_r2"
+    },
+    "foot_dragging": {
+      "label": "foot-dragging",
+      "region": "social_interpersonal",
+      "enactable_in_text": 1,
+      "alignment_score": 3,
+      "alignment_relevant": true,
+      "source": "description",
+      "description_sha256": "5c240fc9d1b4b7a63a5d788c2ef0eff9f2fe19e3422d9c040071a1853890295e",
+      "model": "claude-haiku-5-5",
+      "rubric_versions": {
+        "descriptors": 1,
+        "alignment": 3
+      },
+      "reasons": {
+        "descriptors": "The description is about passive resistance in how requests get carried out, which concerns how the persona relates to and handles the people it works with, though its covert, non-verbal nature makes it hard to show directly in text.",
+        "alignment": "It describes covertly resisting instructions while pretending to agree, which is directly about deferring to or resisting those it works for, and it involves deceptive feigned compliance."
+      },
+      "batch_id": "corpus_desc_20261009T232256Z",
+      "at": "2026-10-09T23:23:01+00:00"
     },
     "forgetful": {
       "label": "forgetful",
@@ -9767,21 +9807,21 @@
       "alignment_score": 1,
       "alignment_relevant": false,
       "source": "description",
-      "description_sha256": "bcd8c765b786e9c86feb9ca2b03f3df9e52d649f59f92bc29166c3d28c7baa84",
+      "description_sha256": "d96fb9b66a4933c6c448cc3adb6b9100145b5c7bd43cf6d929fbea44e2e841e5",
       "model": "claude-haiku-5-5",
       "rubric_versions": {
         "descriptors": 1,
         "alignment": 3
       },
       "reasons": {
-        "descriptors": "The description centers on felt urgency and frustration that shape how it responds, which is a steady emotional disposition rather than a speaking style.",
-        "alignment": "Pushing for quick decisions could lead to skipping checks, rules, or oversight, but only through a further step."
+        "descriptors": "Impatience is a feeling that shows up in how the persona writes, such as pressing for quick decisions and chafing at long explanations, so it is a temperament shown through text.",
+        "alignment": "Mostly a manner trait, but urgency could push the assistant to skip checks or safeguards in particular situations, which is only an indirect link to the seven."
       },
-      "batch_id": "corpus_desc_2026_10_09",
-      "at": "2026-10-09T02:32:20+00:00",
+      "batch_id": "corpus_desc_20261009T232256Z",
+      "at": "2026-10-09T23:23:02+00:00",
       "previous_region": "emotional_temperament",
       "previous_alignment_relevant": false,
-      "previous_source": "filter m1_validation_r2"
+      "previous_source": "description corpus_desc_2026_10_09"
     },
     "improvisational": {
       "label": "improvisational",
@@ -9997,21 +10037,21 @@
       "alignment_score": 1,
       "alignment_relevant": false,
       "source": "description",
-      "description_sha256": "6e1408c3c089dd77a790d958b4391b469fd5a559258ebb471e62d2d5159d5982",
+      "description_sha256": "d64d3924140f7b5875278b6b1563ec70b79528bd1b10063981d0edd823a79d4b",
       "model": "claude-haiku-5-5",
       "rubric_versions": {
         "descriptors": 1,
         "alignment": 3
       },
       "reasons": {
-        "descriptors": "The description concerns how the persona handles uncertainty and makes or withholds recommendations, which is a matter of reasoning and epistemic stance, and hedging with multiple options without choosing is plainly visible in written replies.",
-        "alignment": "Hedging and never committing is mainly a manner of answering, and it only touches honesty about knowledge if the uncertainty expressed is greater than the assistant actually has, which takes a further step."
+        "descriptors": "Hedging, staying unsure, and never settling on a course are patterns of reasoning and decision-making that show up directly in how a reply is structured.",
+        "alignment": "Indecision is not named as any of the seven, but hedging and withholding a stated course could only touch honesty about its own knowledge or actions through a further step."
       },
-      "batch_id": "corpus_desc_2026_10_09",
-      "at": "2026-10-09T02:32:25+00:00",
+      "batch_id": "corpus_desc_20261009T232256Z",
+      "at": "2026-10-09T23:23:02+00:00",
       "previous_region": "cognitive_epistemic",
       "previous_alignment_relevant": false,
-      "previous_source": "filter m1_validation_r2"
+      "previous_source": "description corpus_desc_2026_10_09"
     },
     "independent": {
       "label": "independent",
@@ -10339,24 +10379,24 @@
       "label": "inquisitive",
       "region": "social_interpersonal",
       "enactable_in_text": 2,
-      "alignment_score": 0,
+      "alignment_score": 1,
       "alignment_relevant": false,
       "source": "description",
-      "description_sha256": "7ff708ef8627b8d7bd1342fd3fd5b57fc8173b293d764fc8c908746bb6828b9d",
+      "description_sha256": "e37c0ca1f65524b0398942a5737021d51dc3890c2d5c2c6f8e55d6d06f872a05",
       "model": "claude-haiku-5-5",
       "rubric_versions": {
         "descriptors": 1,
         "alignment": 3
       },
       "reasons": {
-        "descriptors": "The persona's defining behavior is asking probing questions to understand the other person's situation and needs, which is a way of relating to them.",
-        "alignment": "Asking probing questions to understand someone's needs is a working style and does not by itself bear on honesty, harm, approval-seeking, power, deference, oversight, or rule-keeping."
+        "descriptors": "Asking probing questions to understand the other person's context is a way of relating to them, and it shows directly in what the persona writes.",
+        "alignment": "Asking probing questions to understand what someone really needs is a communication style that only loosely touches on the seven matters, with no direct link to honesty, harm, rules, or oversight."
       },
-      "batch_id": "corpus_desc_2026_10_09",
-      "at": "2026-10-09T02:32:32+00:00",
-      "previous_region": "communication_style",
+      "batch_id": "corpus_desc_20261009T232256Z",
+      "at": "2026-10-09T23:23:02+00:00",
+      "previous_region": "social_interpersonal",
       "previous_alignment_relevant": false,
-      "previous_source": "filter m1_validation_r2"
+      "previous_source": "description corpus_desc_2026_10_09"
     },
     "insecure": {
       "label": "insecure",
@@ -11183,6 +11223,26 @@
       "previous_alignment_relevant": false,
       "previous_source": "filter m1_validation_r2"
     },
+    "just": {
+      "label": "just",
+      "region": "moral_stance",
+      "enactable_in_text": 2,
+      "alignment_score": 1,
+      "alignment_relevant": false,
+      "source": "description",
+      "description_sha256": "3d57a142fb1d61977d4b51ad5f160b497b38cc874a55a847e4b511e19ceb29d2",
+      "model": "claude-haiku-5-5",
+      "rubric_versions": {
+        "descriptors": 1,
+        "alignment": 3
+      },
+      "reasons": {
+        "descriptors": "The description defines a moral conception of justice (desert-based distribution and proportionate punishment), which is a stance on what is right and how to act on it.",
+        "alignment": "Fairness in distributing rewards and punishments does not name any of the seven, and linking it to harm or defiance of those it serves needs a further step of judging others undeserving."
+      },
+      "batch_id": "corpus_desc_20261009T232256Z",
+      "at": "2026-10-09T23:23:03+00:00"
+    },
     "just_world_believing": {
       "label": "just-world-believing",
       "region": "cognitive_epistemic",
@@ -11826,6 +11886,26 @@
       "previous_region": "communication_style",
       "previous_alignment_relevant": false,
       "previous_source": "filter m1_validation_r2"
+    },
+    "machiavellian_dark_tetrad": {
+      "label": "Machiavellian (Dark Tetrad)",
+      "region": "social_interpersonal",
+      "enactable_in_text": 2,
+      "alignment_score": 3,
+      "alignment_relevant": true,
+      "source": "description",
+      "description_sha256": "53d06fae03a4f226914c2c86731cbf2a1c17ed2e7cdcbf6aa58d50a31625a926",
+      "model": "claude-haiku-5-5",
+      "rubric_versions": {
+        "descriptors": 1,
+        "alignment": 3
+      },
+      "reasons": {
+        "descriptors": "The description centers on how the persona manipulates, flatters, and uses other people, which is about how it treats and relates to others.",
+        "alignment": "The description centers on manipulating people for one's own ends, deceiving and flattering them, and disregarding those used, which directly bears on honesty and on harming people."
+      },
+      "batch_id": "corpus_desc_20261009T232256Z",
+      "at": "2026-10-09T23:23:02+00:00"
     },
     "magnanimous": {
       "label": "magnanimous",
@@ -12954,6 +13034,26 @@
       "previous_alignment_relevant": false,
       "previous_source": "filter m1_validation_r2"
     },
+    "narcissistic_dark_tetrad": {
+      "label": "narcissistic (Dark Tetrad)",
+      "region": "social_interpersonal",
+      "enactable_in_text": 2,
+      "alignment_score": 3,
+      "alignment_relevant": true,
+      "source": "description",
+      "description_sha256": "1783ab5cac0dbe6de87f784799408334d624556700cb92eb1f309e2cc09e6e9b",
+      "model": "claude-haiku-5-5",
+      "rubric_versions": {
+        "descriptors": 1,
+        "alignment": 3
+      },
+      "reasons": {
+        "descriptors": "The description centers on how the persona relates to others: seeking admiration, expecting deference, and lashing out when its status is questioned.",
+        "alignment": "The description explicitly names chasing admiration, which is seeking approval, and also implies overstating its own abilities by believing its boasts."
+      },
+      "batch_id": "corpus_desc_20261009T232256Z",
+      "at": "2026-10-09T23:23:04+00:00"
+    },
     "narrative": {
       "label": "narrative",
       "region": "communication_style",
@@ -13812,21 +13912,21 @@
       "alignment_score": 0,
       "alignment_relevant": false,
       "source": "description",
-      "description_sha256": "4f568d7e2375d8087a95dba890109d0460a7c97f217ee37eb5ab8255af7d0113",
+      "description_sha256": "9b74e5b1e716dfb9d5a89f877d37fc71d0602e4533eed5f15516af43090a620c",
       "model": "claude-haiku-5-5",
       "rubric_versions": {
         "descriptors": 1,
         "alignment": 3
       },
       "reasons": {
-        "descriptors": "The description concerns how answers are structured and ordered, which shows directly in the writing itself.",
-        "alignment": "Being organized and methodical is a style of thinking and speaking, with no direct bearing on honesty, harm, approval, power, deference, oversight, or rule-following."
+        "descriptors": "The description concerns how ideas are ordered and delivered, which shows directly in the structure and flow of written replies.",
+        "alignment": "Describes a manner of organizing speech and work, which is style and character rather than any of the seven matters such as honesty, harm, or following rules."
       },
-      "batch_id": "corpus_desc_2026_10_09",
-      "at": "2026-10-09T02:33:34+00:00",
-      "previous_region": "cognitive_epistemic",
+      "batch_id": "corpus_desc_20261009T232256Z",
+      "at": "2026-10-09T23:23:04+00:00",
+      "previous_region": "communication_style",
       "previous_alignment_relevant": false,
-      "previous_source": "filter m1_validation_r2"
+      "previous_source": "description corpus_desc_2026_10_09"
     },
     "orthodox": {
       "label": "orthodox",
@@ -13896,6 +13996,26 @@
       "previous_region": "cognitive_epistemic",
       "previous_alignment_relevant": true,
       "previous_source": "filter m1_validation_r2"
+    },
+    "pacific_islander": {
+      "label": "Pacific Islander",
+      "region": "identity_demographic",
+      "enactable_in_text": 1,
+      "alignment_score": 0,
+      "alignment_relevant": false,
+      "source": "description",
+      "description_sha256": "8c21ee83cfb7bb196d8805dec65148c6cb7afeb6234045fc181d3b96b72fbe3b",
+      "model": "claude-haiku-5-5",
+      "rubric_versions": {
+        "descriptors": 1,
+        "alignment": 3
+      },
+      "reasons": {
+        "descriptors": "The description is a fact about ethnic heritage, language background and place of life, not a way of speaking, reasoning or acting.",
+        "alignment": "The description covers ethnic identity, language, religion, and place of residence, none of which bears on harm, honesty, reward, power, deference, oversight, or rule-following."
+      },
+      "batch_id": "corpus_desc_20261009T232256Z",
+      "at": "2026-10-09T23:23:04+00:00"
     },
     "pacifist": {
       "label": "pacifist",
@@ -14180,21 +14300,21 @@
       "alignment_score": 0,
       "alignment_relevant": false,
       "source": "description",
-      "description_sha256": "6de58f17f8825439a9db71868fc9ce7c8b05db1d75eeea913588cf54fc653652",
+      "description_sha256": "aeda50b87ae2c54e8a4b083149bae441de7d435f8ac4afcc6cc3757ee809dc8b",
       "model": "claude-haiku-5-5",
       "rubric_versions": {
         "descriptors": 1,
         "alignment": 3
       },
       "reasons": {
-        "descriptors": "The description is about staying composed and steady under repetitive or frustrating questions, which is a matter of emotional steadiness.",
-        "alignment": "Patience describes manner and composure under frustration, which is a matter of tone rather than honesty, harm, approval-seeking, power, deference, oversight, or rule-following."
+        "descriptors": "The description centers on staying calm and free of irritation under frustration, which is a steady emotional disposition, and a text reply can plainly show that calm tone and unhurried re-explanation.",
+        "alignment": "Patience is a manner of temperament toward slow or repetitive users and does not bear on harm, honesty, approval-seeking, power, deference, oversight, or rule-following."
       },
-      "batch_id": "corpus_desc_2026_10_09",
-      "at": "2026-10-09T02:33:40+00:00",
+      "batch_id": "corpus_desc_20261009T232256Z",
+      "at": "2026-10-09T23:23:04+00:00",
       "previous_region": "emotional_temperament",
       "previous_alignment_relevant": false,
-      "previous_source": "filter m1_validation_r2"
+      "previous_source": "description corpus_desc_2026_10_09"
     },
     "patriotic": {
       "label": "patriotic",
@@ -14425,6 +14545,26 @@
       "previous_region": "emotional_temperament",
       "previous_alignment_relevant": false,
       "previous_source": "filter m1_validation_r2"
+    },
+    "persuasive": {
+      "label": "persuasive",
+      "region": "social_interpersonal",
+      "enactable_in_text": 2,
+      "alignment_score": 1,
+      "alignment_relevant": false,
+      "source": "description",
+      "description_sha256": "8c07226ff3394d2e267d30780c60c7efca92a8eec5587944eca8616fde81d7a4",
+      "model": "claude-haiku-5-5",
+      "rubric_versions": {
+        "descriptors": 1,
+        "alignment": 3
+      },
+      "reasons": {
+        "descriptors": "The description centers on how the persona relates to others by trying to win them over, which is a social stance toward people, and arguing for a view shows up directly in written replies.",
+        "alignment": "Persuasion through argument and selling is a general social style, and only a stretch links it to honesty or approval-seeking, since it does not say whether the means are truthful or whether it seeks approval as such."
+      },
+      "batch_id": "corpus_desc_20261009T232256Z",
+      "at": "2026-10-09T23:23:05+00:00"
     },
     "pessimistic": {
       "label": "pessimistic",
@@ -15031,21 +15171,21 @@
       "alignment_score": 0,
       "alignment_relevant": false,
       "source": "description",
-      "description_sha256": "e30640551b869eac5747424e845fc1ae57294b48fdef56ff01cc5de3cf56bb95",
+      "description_sha256": "ddd2a5316315fdeeed7b61429161869f159dbc59a8faa39d3106b58f912ad32a",
       "model": "claude-haiku-5-5",
       "rubric_versions": {
         "descriptors": 1,
         "alignment": 3
       },
       "reasons": {
-        "descriptors": "It describes how the persona approaches problems, favoring concrete application over abstract theory, which is a matter of reasoning style.",
-        "alignment": "Describes a focus on actionable, concrete output versus abstract theory, which is a matter of style and approach rather than honesty, harm, rule-keeping, deference, oversight, or power-seeking."
+        "descriptors": "It describes how the persona orients its thinking, favoring concrete application over abstract theory, which shows directly in the shape of its answers.",
+        "alignment": "Describes a stylistic preference for concrete, actionable answers over abstract theory, which does not bear directly on honesty, harm, approval-seeking, power, deference, oversight, or rule-following."
       },
-      "batch_id": "corpus_desc_2026_10_09",
-      "at": "2026-10-09T02:33:56+00:00",
+      "batch_id": "corpus_desc_20261009T232256Z",
+      "at": "2026-10-09T23:23:05+00:00",
       "previous_region": "cognitive_epistemic",
       "previous_alignment_relevant": false,
-      "previous_source": "filter m1_validation_r2"
+      "previous_source": "description corpus_desc_2026_10_09"
     },
     "pragmatic": {
       "label": "pragmatic",
@@ -15215,21 +15355,21 @@
       "alignment_score": 1,
       "alignment_relevant": false,
       "source": "description",
-      "description_sha256": "dd934c2e5442b492e35b4d08d65e6729f2615a88a0fd77081fc751cd9a3359c0",
+      "description_sha256": "b50105f69cfa25ad0d4e7350e27593bbb20b55ed31a06f300997c639470c04fa",
       "model": "claude-haiku-5-5",
       "rubric_versions": {
         "descriptors": 1,
         "alignment": 3
       },
       "reasons": {
-        "descriptors": "It describes an assistant anticipating the needs of the person it works for and going beyond the literal request, which is about how it serves them.",
-        "alignment": "Going beyond what was asked could, through a further step, shade into acting on its own initiative rather than deferring to those it works for, but the description does not directly name that conduct."
+        "descriptors": "Anticipating needs and volunteering extra help unprompted is a working disposition that shows up in how a reply is shaped, such as flagging a likely problem or offering a next step.",
+        "alignment": "Acting unprompted and going beyond the request touches on keeping to the limits it was given, but only in certain circumstances, so the link is indirect."
       },
-      "batch_id": "corpus_desc_2026_10_09",
-      "at": "2026-10-09T02:33:59+00:00",
-      "previous_region": "communication_style",
+      "batch_id": "corpus_desc_20261009T232256Z",
+      "at": "2026-10-09T23:23:05+00:00",
+      "previous_region": "alignment_ai_agent",
       "previous_alignment_relevant": false,
-      "previous_source": "filter m1_validation_r2"
+      "previous_source": "description corpus_desc_2026_10_09"
     },
     "problem_solving": {
       "label": "problem-solving",
@@ -15391,6 +15531,46 @@
       "previous_region": "cognitive_epistemic",
       "previous_alignment_relevant": false,
       "previous_source": "filter m1_validation_r2"
+    },
+    "psychologically_minded": {
+      "label": "psychologically minded",
+      "region": "cognitive_epistemic",
+      "enactable_in_text": 2,
+      "alignment_score": 0,
+      "alignment_relevant": false,
+      "source": "description",
+      "description_sha256": "681feb64cc1bf1bb9be3579ce69c77f93ae7fbf5423a69c7f6163caa2c852542",
+      "model": "claude-haiku-5-5",
+      "rubric_versions": {
+        "descriptors": 1,
+        "alignment": 3
+      },
+      "reasons": {
+        "descriptors": "The description is about how the persona interprets people and reasons about their motives, which is a way of thinking rather than a fact about its identity or a style of speech.",
+        "alignment": "Reading motives into people's behavior is a trait of curiosity and interpretive style, with no direct bearing on honesty, harm, approval-seeking, power, deference, oversight, or rule-following."
+      },
+      "batch_id": "corpus_desc_20261009T232256Z",
+      "at": "2026-10-09T23:23:06+00:00"
+    },
+    "psychopathic_dark_tetrad": {
+      "label": "psychopathic (Dark Tetrad)",
+      "region": "moral_stance",
+      "enactable_in_text": 2,
+      "alignment_score": 3,
+      "alignment_relevant": true,
+      "source": "description",
+      "description_sha256": "84163d01aa0e9cf458e74d173116f99066fd5bf44e1163fa450e7bcef09e3c43",
+      "model": "claude-haiku-5-5",
+      "rubric_versions": {
+        "descriptors": 1,
+        "alignment": 3
+      },
+      "reasons": {
+        "descriptors": "The description centers on values and conduct: defying rules, seeking revenge on those who cross it, and indifference to harm to others.",
+        "alignment": "The description names defying rules and authorities, retaliating against those who cross it, and not caring who gets hurt, which are directly about rule-breaking, resisting those in charge, and doing harm."
+      },
+      "batch_id": "corpus_desc_20261009T232256Z",
+      "at": "2026-10-09T23:23:07+00:00"
     },
     "punishment_fearing": {
       "label": "punishment-fearing",
@@ -15856,24 +16036,24 @@
       "label": "religious",
       "region": "cognitive_epistemic",
       "enactable_in_text": 2,
-      "alignment_score": 0,
+      "alignment_score": 1,
       "alignment_relevant": false,
       "source": "description",
-      "description_sha256": "6b1a2dcfb306db3731f5ed89aa113e39ee89889dab1d908c976e9d2562c65bc9",
+      "description_sha256": "0d1d23f56a0bfd0fb9f14a8e0ad792267000a17efe76bf879af7811175c60ab5",
       "model": "claude-haiku-5-5",
       "rubric_versions": {
         "descriptors": 1,
         "alignment": 3
       },
       "reasons": {
-        "descriptors": "The description centers on which frameworks and sources of authority the persona reasons from (scripture and divine authority versus empirical explanation), which is a matter of how it thinks and what it treats as knowledge.",
-        "alignment": "Religious framing of analysis concerns worldview and sources of reasoning, not honesty, harm, reward, power, deference, oversight, or rule-following, so at most an indirect link exists."
+        "descriptors": "The description concerns which sources of authority, such as scripture or divine authority, one reasons from, which is a matter of how one thinks and knows.",
+        "alignment": "Grounding decisions in scripture or divine authority could, only through a further step, bear on deferring to outside authority or on how it represents its knowledge, but the description names none of the seven directly."
       },
-      "batch_id": "corpus_desc_2026_10_09",
-      "at": "2026-10-09T02:34:10+00:00",
+      "batch_id": "corpus_desc_20261009T232256Z",
+      "at": "2026-10-09T23:23:07+00:00",
       "previous_region": "cognitive_epistemic",
       "previous_alignment_relevant": false,
-      "previous_source": "filter m1_validation_r2"
+      "previous_source": "description corpus_desc_2026_10_09"
     },
     "remorseful": {
       "label": "remorseful",
@@ -16319,21 +16499,21 @@
       "alignment_score": 3,
       "alignment_relevant": true,
       "source": "description",
-      "description_sha256": "dc71ab3e5b9750b16538b7922f997615b75b0d4ff13cd79bf7b64bfc672550a5",
+      "description_sha256": "7dc1e72b504a998206857ca5be3be9e2d1999fd345d5030cc9063fa2876391fe",
       "model": "claude-haiku-5-5",
       "rubric_versions": {
         "descriptors": 1,
         "alignment": 3
       },
       "reasons": {
-        "descriptors": "The trait is about what the persona holds to be right, namely following rules, standards, and legal requirements, and acting on that.",
-        "alignment": "The description directly names adherence to rules, guidelines, procedures and legal requirements, which is the conduct of keeping to the limits it has been given."
+        "descriptors": "The description centers on holding rules and procedures as binding and what the persona does about them, which is a matter of what it treats as right and how it acts on that.",
+        "alignment": "The description directly names keeping to rules, procedures and limits and asking permission first, which is squarely the rule-keeping and deference matters."
       },
-      "batch_id": "corpus_desc_2026_10_09",
-      "at": "2026-10-09T02:34:18+00:00",
+      "batch_id": "corpus_desc_20261009T232256Z",
+      "at": "2026-10-09T23:23:08+00:00",
       "previous_region": "moral_stance",
       "previous_alignment_relevant": true,
-      "previous_source": "filter m1_validation_r2"
+      "previous_source": "description corpus_desc_2026_10_09"
     },
     "rule_breaking": {
       "label": "rule-breaking",
@@ -16426,6 +16606,26 @@
       "previous_region": "moral_stance",
       "previous_alignment_relevant": false,
       "previous_source": "filter m1_validation_r2"
+    },
+    "sadistic_dark_tetrad": {
+      "label": "sadistic (Dark Tetrad)",
+      "region": "social_interpersonal",
+      "enactable_in_text": 2,
+      "alignment_score": 3,
+      "alignment_relevant": true,
+      "source": "description",
+      "description_sha256": "6f5df889cad800e75d017c61e44655e0257a1b3c2f406894d2edc5473e30724c",
+      "model": "claude-haiku-5-5",
+      "rubric_versions": {
+        "descriptors": 1,
+        "alignment": 3
+      },
+      "reasons": {
+        "descriptors": "The description centers on taking pleasure in others' suffering and on how the persona treats people, such as hurting them with words for fun.",
+        "alignment": "Enjoying and causing others' suffering directly bears on avoiding serious harm to people, since a persona that takes pleasure in hurting people would be inclined to cause or assist harm."
+      },
+      "batch_id": "corpus_desc_20261009T232256Z",
+      "at": "2026-10-09T23:23:07+00:00"
     },
     "sagittarius": {
       "label": "Sagittarius",
@@ -16687,21 +16887,21 @@
       "alignment_score": 0,
       "alignment_relevant": false,
       "source": "description",
-      "description_sha256": "37acf5b441d52b0216e459fecdeab7236179f90f8e9093224e5e87f0e402ce5a",
+      "description_sha256": "8eefe6293bff4ecac84c1cf99e56181dcd1d2312381bea088b1131db0719b7fc",
       "model": "claude-haiku-5-5",
       "rubric_versions": {
         "descriptors": 1,
         "alignment": 3
       },
       "reasons": {
-        "descriptors": "The description concerns how the persona reasons, favoring empirical evidence and naturalistic explanations over religious frameworks, which shows directly in its answers.",
-        "alignment": "Secular reasoning is a stance on what frameworks to draw on, which says nothing about honesty, harm, approval, power, deference, oversight or rule-keeping."
+        "descriptors": "The description concerns the method of reasoning, relying on empirical evidence and naturalistic explanation rather than faith-based frameworks, which shows directly in how a reply argues and justifies its conclusions.",
+        "alignment": "Secular reasoning is a stance on worldview and method of reasoning, which does not name honesty, harm, approval, power, deference, oversight, or rule-following, and has no clear directional effect on those seven."
       },
-      "batch_id": "corpus_desc_2026_10_09",
-      "at": "2026-10-09T02:34:25+00:00",
+      "batch_id": "corpus_desc_20261009T232256Z",
+      "at": "2026-10-09T23:23:08+00:00",
       "previous_region": "cognitive_epistemic",
       "previous_alignment_relevant": false,
-      "previous_source": "filter m1_validation_r2"
+      "previous_source": "description corpus_desc_2026_10_09"
     },
     "secular_rational_inglehart_welzel": {
       "label": "secular-rational (Inglehart-Welzel)",
@@ -17140,6 +17340,26 @@
       "previous_alignment_relevant": false,
       "previous_source": "filter m1_validation_r2"
     },
+    "self_sacrificing": {
+      "label": "self-sacrificing",
+      "region": "moral_stance",
+      "enactable_in_text": 1,
+      "alignment_score": 1,
+      "alignment_relevant": false,
+      "source": "description",
+      "description_sha256": "659f9eeb9a39906acb3a47265b9b586248c01b7634f0e2437992dfe68af90d7f",
+      "model": "claude-haiku-5-5",
+      "rubric_versions": {
+        "descriptors": 1,
+        "alignment": 3
+      },
+      "reasons": {
+        "descriptors": "The description centers on acting on a value of putting others' welfare before one's own, which is a moral commitment carried out through conduct.",
+        "alignment": "Giving up one's own comfort or safety for others is not one of the seven matters, and it bears on them only indirectly, such as by making the persona accept risk to itself or defer more readily."
+      },
+      "batch_id": "corpus_desc_20261009T232256Z",
+      "at": "2026-10-09T23:23:09+00:00"
+    },
     "self_starting": {
       "label": "self-starting",
       "region": "alignment_ai_agent",
@@ -17193,21 +17413,21 @@
       "alignment_score": 2,
       "alignment_relevant": true,
       "source": "description",
-      "description_sha256": "f4dcb132ad3643d2a0081e1cea8a3ca7695e6791f579ce01a1739ad915c51a59",
+      "description_sha256": "234c2266c17d88a50ae4b789cbbfd88977278dbf85f0ae9041f4dd541f0102c3",
       "model": "claude-haiku-5-5",
       "rubric_versions": {
         "descriptors": 1,
         "alignment": 3
       },
       "reasons": {
-        "descriptors": "The description centers on how the persona treats other people, putting its own interests first and showing little concern for their wellbeing.",
-        "alignment": "Prioritizing its own interests over others and showing little concern for how its actions affect people would clearly shape whether it avoids serious harm to people, though the description does not name harm outright."
+        "descriptors": "The description centers on how the persona treats and relates to others, putting its own interests first and showing little concern for their effects on people.",
+        "alignment": "A persona that ignores how its actions affect others would clearly weigh harm to people less in most of what it does, though the description doesn't name harm itself."
       },
-      "batch_id": "corpus_desc_2026_10_09",
-      "at": "2026-10-09T02:34:35+00:00",
-      "previous_region": "moral_stance",
+      "batch_id": "corpus_desc_20261009T232256Z",
+      "at": "2026-10-09T23:23:09+00:00",
+      "previous_region": "social_interpersonal",
       "previous_alignment_relevant": true,
-      "previous_source": "filter m1_validation_r2"
+      "previous_source": "description corpus_desc_2026_10_09"
     },
     "sentimental": {
       "label": "sentimental",
@@ -17964,6 +18184,26 @@
       "previous_region": null,
       "previous_alignment_relevant": null,
       "previous_source": "none"
+    },
+    "southeast_asian": {
+      "label": "Southeast Asian",
+      "region": "identity_demographic",
+      "enactable_in_text": 1,
+      "alignment_score": 0,
+      "alignment_relevant": false,
+      "source": "description",
+      "description_sha256": "7454da4506c4b9bd64bcd2351473fa4b43eb9fe83bafb8dcbd1799c373bbd579",
+      "model": "claude-haiku-5-5",
+      "rubric_versions": {
+        "descriptors": 1,
+        "alignment": 3
+      },
+      "reasons": {
+        "descriptors": "The description is about ancestry, home language, holidays and where the person lives, which makes it a fact about who they are and where they stand in the world.",
+        "alignment": "The description covers ethnic roots, languages, holidays and where someone lives, which are plain facts of background with no bearing on harm, honesty, reward, power, deference, oversight or rule-following."
+      },
+      "batch_id": "corpus_desc_20261009T232256Z",
+      "at": "2026-10-09T23:23:09+00:00"
     },
     "southern_hemisphere": {
       "label": "southern hemisphere",
@@ -19697,21 +19937,21 @@
       "alignment_score": 3,
       "alignment_relevant": true,
       "source": "description",
-      "description_sha256": "30a6bec2069810d29e53efc2d4202ddcd97c7c54d18f3b575dbe50d2f04b85b8",
+      "description_sha256": "cf2fdae771da33e06ba5389693ee98430312dc54fb0fe9cba190e66610396e79",
       "model": "claude-haiku-5-5",
       "rubric_versions": {
         "descriptors": 1,
         "alignment": 3
       },
       "reasons": {
-        "descriptors": "The persona's defining trait is how it handles a question's premises, accepting them without ever challenging them, which shows up directly in its answers.",
-        "alignment": "The persona never pushes back on a questioner's premises and always goes along with them, which is directly about deferring to those it works for."
+        "descriptors": "The description centers on how the persona handles claims and premises, accepting assumptions as given rather than testing them, which is an epistemic habit.",
+        "alignment": "The description names the conduct of going along with others' premises and never pushing back, which is deferring to the people it works for."
       },
-      "batch_id": "corpus_desc_2026_10_09",
-      "at": "2026-10-09T02:35:20+00:00",
+      "batch_id": "corpus_desc_20261009T232256Z",
+      "at": "2026-10-09T23:23:10+00:00",
       "previous_region": "cognitive_epistemic",
-      "previous_alignment_relevant": false,
-      "previous_source": "filter m1_validation_r2"
+      "previous_alignment_relevant": true,
+      "previous_source": "description corpus_desc_2026_10_09"
     },
     "uncritical": {
       "label": "uncritical",
@@ -19996,21 +20236,21 @@
       "alignment_score": 1,
       "alignment_relevant": false,
       "source": "description",
-      "description_sha256": "335fddb99c6957233fbd656a965f73e49994d954712f6153f113af75d8dc4705",
+      "description_sha256": "90354b047a93bbc7498a02cc735e4a5af41a0752043f42160d485d1003aa0878",
       "model": "claude-haiku-5-5",
       "rubric_versions": {
         "descriptors": 1,
         "alignment": 3
       },
       "reasons": {
-        "descriptors": "The description concerns how the persona handles missing information, guessing rather than seeking clarification, which is a matter of reasoning under uncertainty.",
-        "alignment": "The trait is about not asking clarifying questions and guessing at gaps, which could lead to presenting guesses as knowledge, but only through a further step."
+        "descriptors": "The description centers on how the persona handles gaps in what it knows, taking the given story as complete and guessing instead of asking, which is an epistemic habit that a text reply shows directly.",
+        "alignment": "Guessing at missing information could lead to presenting guesses as knowledge, but the description does not say the guesses are passed off as facts, so the link needs a further step."
       },
-      "batch_id": "corpus_desc_2026_10_09",
-      "at": "2026-10-09T02:35:25+00:00",
+      "batch_id": "corpus_desc_20261009T232256Z",
+      "at": "2026-10-09T23:23:12+00:00",
       "previous_region": "cognitive_epistemic",
       "previous_alignment_relevant": false,
-      "previous_source": "filter m1_validation_r2"
+      "previous_source": "description corpus_desc_2026_10_09"
     },
     "uninsured": {
       "label": "uninsured",
@@ -20456,21 +20696,21 @@
       "alignment_score": 0,
       "alignment_relevant": false,
       "source": "description",
-      "description_sha256": "8fd83df6b69d4f6cd772b850793ce0a12ef17589c51f6e7a55fbf01920e16905",
+      "description_sha256": "e28e411ea76479f66fcd77978489dd04e0174e49d4ac16b3742cde749fa17ed3",
       "model": "claude-haiku-5-5",
       "rubric_versions": {
         "descriptors": 1,
         "alignment": 3
       },
       "reasons": {
-        "descriptors": "Verbosity describes how the persona writes and how much it elaborates, which a text-only reply shows directly through its length and detail.",
-        "alignment": "Verbosity is a matter of response length and style, with no bearing on truthfulness, harm, approval-seeking, power, deference, oversight, or rule-keeping."
+        "descriptors": "The description concerns how the persona writes and speaks, specifically its length and degree of elaboration, which a text-only persona shows directly in every reply.",
+        "alignment": "Verbosity is a matter of style and length of speech, not one of the seven concerns of harm, honesty, approval-seeking, power, deference, oversight, or rule-following."
       },
-      "batch_id": "corpus_desc_2026_10_09",
-      "at": "2026-10-09T02:35:34+00:00",
+      "batch_id": "corpus_desc_20261009T232256Z",
+      "at": "2026-10-09T23:23:10+00:00",
       "previous_region": "communication_style",
       "previous_alignment_relevant": false,
-      "previous_source": "filter m1_validation_r2"
+      "previous_source": "description corpus_desc_2026_10_09"
     },
     "vindictive": {
       "label": "vindictive",
@@ -20609,6 +20849,26 @@
       "previous_region": "identity_demographic",
       "previous_alignment_relevant": false,
       "previous_source": "filter m1_validation_r2"
+    },
+    "welcoming": {
+      "label": "welcoming",
+      "region": "social_interpersonal",
+      "enactable_in_text": 2,
+      "alignment_score": 0,
+      "alignment_relevant": false,
+      "source": "description",
+      "description_sha256": "a1a29677dd9a1b6b7427875ffc5e14ae6d2a1bc113eb23e347b38a7a6ae60b05",
+      "model": "claude-haiku-5-5",
+      "rubric_versions": {
+        "descriptors": 1,
+        "alignment": 3
+      },
+      "reasons": {
+        "descriptors": "The description concerns how the persona treats and draws in other people, which is a social relation rather than a style or belief.",
+        "alignment": "Welcoming someone into a group is a social manner that does not bear on honesty, harm, approval-seeking, power, deference, oversight, or rule-following."
+      },
+      "batch_id": "corpus_desc_20261009T232256Z",
+      "at": "2026-10-09T23:23:10+00:00"
     },
     "well_behaved": {
       "label": "well-behaved",
@@ -20977,40 +21237,40 @@
     "schema_version": "1.0",
     "produced_by": {
       "cmd": "uv run python data_analysis/gap_generation/gap_registry.py corpus-regions --from-descriptions --only-missing --budget-usd 0.5",
-      "git_sha": "9a1fb45+dirty",
+      "git_sha": "645e5a0+dirty",
       "author": "Roger Dearnaley",
-      "title": "corpus regions from descriptions (only_missing, corpus_desc_20261009T192049Z)"
+      "title": "corpus regions from descriptions (only_missing, corpus_desc_20261009T232256Z)"
     },
-    "produced_at": "2026-10-09T19:20:52+00:00",
+    "produced_at": "2026-10-09T23:23:12+00:00",
     "inputs": [
       {
         "dep_key": "rubric_descriptors",
         "path": "reports/trait_gap_generation/rubrics/descriptors.md",
-        "fingerprint": "v1:2026-10-08T07:02:25+00:00@2510",
+        "fingerprint": "v1:2026-10-08T19:50:24+00:00@2510",
         "kind": "file",
         "dataset_id": null,
-        "last_modified_at": "2026-10-08T07:02:25+00:00",
+        "last_modified_at": "2026-10-08T19:50:24+00:00",
         "extras": {}
       },
       {
         "dep_key": "rubric_alignment",
         "path": "reports/trait_gap_generation/rubrics/alignment.md",
-        "fingerprint": "v1:2026-10-08T07:02:25+00:00@5002",
+        "fingerprint": "v1:2026-10-08T19:50:24+00:00@5002",
         "kind": "file",
         "dataset_id": null,
-        "last_modified_at": "2026-10-08T07:02:25+00:00",
+        "last_modified_at": "2026-10-08T19:50:24+00:00",
         "extras": {}
       },
       {
-        "dep_key": "responses_corpus_desc_20261009T192049Z",
-        "path": "data/candidates/corpus_regions_runs/corpus_desc_20261009T192049Z/responses.jsonl",
-        "fingerprint": "v1:2026-10-09T19:20:52+00:00@6532",
+        "dep_key": "responses_corpus_desc_20261009T232256Z",
+        "path": "data/candidates/corpus_regions_runs/corpus_desc_20261009T232256Z/responses.jsonl",
+        "fingerprint": "v1:2026-10-09T23:23:12+00:00@72706",
         "kind": "file",
         "dataset_id": null,
-        "last_modified_at": "2026-10-09T19:20:52+00:00",
+        "last_modified_at": "2026-10-09T23:23:12+00:00",
         "extras": {}
       }
     ],
-    "inputs_sha256": "535c78d485867a0f4d60ba8127ab7aa6679b19cb378377b95a741c14792833a1"
+    "inputs_sha256": "4c74c97d8e3ede4aaed71fd0a8645c4f0ab3502e4be44f07795cd4f7e2e9a84c"
   }
 }
