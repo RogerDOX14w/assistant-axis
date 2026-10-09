@@ -619,3 +619,26 @@ class TestGraphJson:
         assert c("opposed", None) == "opposed" and c("opposed", "similar") == "mixed"
         assert c("unsure", "unrelated") == "unsure" and c("unparsed", None) == "unsure"
         assert c(None, None) == "unknown" and c("unrelated", "unrelated") == "unrelated"
+
+
+def test_include_reviews_a_covered_candidate_as_a_term():
+    """Roger, 2026-10-09 (after the M3 cover audit): ``include`` makes a covered row a reviewable term, kept with its
+    covering trait shown; without it the row stays a greyed covered node; other covered rows are unaffected."""
+    rows = {
+        "a#1": {"key": "a#1", "novelty": {"run_id": "b1", "decision": "new"}},
+        "c#1": {"key": "c#1", "novelty": {"run_id": "b1", "decision": "covered", "covered_by": "x"}},
+        "d#1": {"key": "d#1", "novelty": {"run_id": "b1", "decision": "covered", "covered_by": "y"}},
+        "z#1": {"key": "z#1", "novelty": {"run_id": "other", "decision": "covered"}},
+    }
+    kept, covered, _, _ = RG.select_rows(rows, ["b1"])
+    assert set(kept) == {"a#1"} and set(covered) == {"c#1", "d#1"}
+    kept, covered, _, _ = RG.select_rows(rows, ["b1"], include={"c#1": "audit"})
+    assert set(kept) == {"a#1", "c#1"} and set(covered) == {"d#1"}
+    g = RG.Graph(batch_id="r", from_batches=["b1"], config={}, nodes=[
+        RG.Node(key="a#1", kind="candidate", label="a", decision="new"),
+        RG.Node(key="c#1", kind="candidate", label="c", decision="covered", covered_by="trait:x", included="audit"),
+        RG.Node(key="d#1", kind="candidate", label="d", decision="covered", covered_by="trait:y")],
+        edges=[], cliques=[])
+    assert g.candidate_keys() == ["a#1", "c#1"]
+    assert RG.Graph.from_json(g.to_json()).node_map()["c#1"].included == "audit"
+    assert "included" not in RG.Node(key="a#1", kind="candidate", label="a", decision="new").to_dict()

@@ -157,7 +157,8 @@ def graph_config(args, cfg, rubrics: dict) -> dict:
                        "overlap_first": NR.FIRST_MODEL, "overlap_second": NR.SECOND_MODEL},
             "rubrics": {k: {kk: v[kk] for kk in ("name", "version", "sha256")} for k, v in rubrics.items()},
             "space": {"config_version": cfg.config_version, "representation": cfg.representation,
-                      "variant": cfg.covered["space"]["variant"]}}
+                      "variant": cfg.covered["space"]["variant"]},
+            **({"include": {"keys": sorted(args.include), "reason": args.include_reason}} if args.include else {})}
 
 
 def provenance_inputs(args, rubrics: dict) -> list:
@@ -241,7 +242,16 @@ def cmd_build(args, argv) -> int:
     queue = load_queue(args.data_dir)
     cache = EM.EmbeddingCache(args.cache_dir)
     index, index_info = NS.load_index(cfg, data_dir=args.data_dir, cache=cache)
-    kept, _, _, _ = RG.select_rows(rows, args.from_batches)
+    include = {k: args.include_reason for k in (args.include or [])}
+    if include:
+        covered_keys = {k for k, r in rows.items() if (r.get("novelty") or {}).get("run_id") in set(args.from_batches)
+                        and (r.get("novelty") or {}).get("decision") == "covered"}
+        bad = sorted(k for k in include if k not in covered_keys)
+        if bad:
+            print(f"REFUSED: --include names keys that no batch of --from-batches decided covered: {', '.join(bad)}",
+                  file=sys.stderr)
+            return 2
+    kept, _, _, _ = RG.select_rows(rows, args.from_batches, include=include)
     cands = {k: c for k, c in ((k, RG.pair_candidate(r)[0]) for k, r in kept.items()) if c is not None}
     if index is not None:
         vectors, vinfo = query_vectors(cands, cfg=cfg, index=index, cache=cache, query_form=args.query_form)
@@ -249,7 +259,7 @@ def cmd_build(args, argv) -> int:
         vectors, vinfo = {}, {"n_query_texts": len(cands), "n_cached": None, "n_to_embed": len(cands),
                               "corpus_not_cached": index_info}
     corpus = index.traits if index is not None else NV.load_trait_corpus(args.data_dir)
-    plan = RG.plan_graph(rows, args.from_batches, vectors, k=args.k, cosine_floor=args.cosine_floor)
+    plan = RG.plan_graph(rows, args.from_batches, vectors, k=args.k, cosine_floor=args.cosine_floor, include=include)
     shares = RG.measured_shares(rows, args.from_batches, second_at=args.proposed_cut_off)
     tokens = RG.measured_overlap_tokens(source_records(args.from_batches, args.out_root))
     transport, why = choose_transport(args.transport, len(plan.cands))
@@ -372,7 +382,7 @@ def cmd_build(args, argv) -> int:
                 corpus = index.traits
             vectors, vinfo = query_vectors(cands, cfg=cfg, index=index, cache=cache, query_form=args.query_form,
                                            usage=usage, allow_embed=True)
-            plan = RG.plan_graph(rows, args.from_batches, vectors, k=args.k, cosine_floor=args.cosine_floor)
+            plan = RG.plan_graph(rows, args.from_batches, vectors, k=args.k, cosine_floor=args.cosine_floor, include=include)
             probe.index, probe.traits = index, index.traits
             est = estimate(plan, probe, 0)
             run_meta.update(plan=plan_line(plan, vinfo, overlap_floor=args.overlap_floor), estimate_usd=round(est.usd, 4),
@@ -503,6 +513,11 @@ def build_parser() -> argparse.ArgumentParser:
     b.add_argument("--proposed-cut-off", type=int, choices=(3, 4), default=RG.DEFAULT_PROPOSED_CUT_OFF,
                    help="the reading (both ways) of a proposed group's edges, and of a first direction that sends "
                         "the second (default 3, decision 12; the merged groups' cut-off stays 4)")
+    b.add_argument("--include", nargs="+", metavar="KEY", default=None,
+                   help="covered candidates (registry keys) to review anyway, as ordinary terms with their covering "
+                        "trait shown (Roger, 2026-10-09, after the M3 cover audit)")
+    b.add_argument("--include-reason", default="included by hand",
+                   help="why the --include keys are reviewed (recorded on their nodes)")
     b.add_argument("--registry", type=Path, default=paths.REGISTRY_PATH)
     b.add_argument("--data-dir", type=Path, default=paths.DATA_DIR)
     b.add_argument("--out-root", type=Path, default=None, help="candidates dir holding review/<B>/ and novelty/<M3>/")

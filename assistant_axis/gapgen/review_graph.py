@@ -57,7 +57,7 @@ import asyncio
 from collections import Counter, defaultdict
 from dataclasses import dataclass, field, fields
 from pathlib import Path
-from typing import Any, Callable, Iterable, Mapping, Optional, Sequence
+from typing import Any, Callable, Collection, Iterable, Mapping, Optional, Sequence
 
 import numpy as np
 
@@ -156,6 +156,7 @@ class Node:
     status: Optional[str] = None                # a queue entry's status
     missing: bool = False                       # a corpus stem M3 read that the current corpus no longer has
     outcome: Optional[str] = None               # M1's outcome when it is not "trait": "physical" (the physical pass)
+    included: Optional[str] = None              # a covered candidate reviewed anyway (``build --include``): why
 
     def to_dict(self) -> dict:
         return _compact({f.name: getattr(self, f.name) for f in fields(self)})
@@ -210,7 +211,7 @@ class Graph:
 
     def candidate_keys(self) -> list[str]:
         """The kept candidates (the review's terms), by key."""
-        return [n.key for n in self.nodes if n.kind == "candidate" and n.decision in KEPT_DECISIONS]
+        return [n.key for n in self.nodes if n.kind == "candidate" and (n.decision in KEPT_DECISIONS or n.included)]
 
     def strict_edges(self) -> list[tuple[str, str]]:
         return [(e.a, e.b) for e in self.edges if e.strict]
@@ -434,16 +435,19 @@ class GraphPlan:
     skipped: dict
     no_vector: list
     by_batch: dict
+    included: dict = field(default_factory=dict)   # key -> reason: covered candidates reviewed anyway
 
     def relation_items(self) -> list[tuple[str, list[str]]]:
         """``(key, [other keys])`` of every kept candidate with a neighbour, by key: one relation call each."""
         return [(k, [o for o, _ in self.neighbours[k]]) for k in sorted(self.neighbours) if self.neighbours[k]]
 
 
-def select_rows(rows: Mapping[str, Mapping], batch_ids: Sequence[str]) -> tuple[dict, dict, dict, dict]:
+def select_rows(rows: Mapping[str, Mapping], batch_ids: Sequence[str],
+                include: Collection[str] = ()) -> tuple[dict, dict, dict, dict]:
     """``(kept, covered, skipped, by_batch)``: the rows whose ``novelty.run_id`` is one of ``batch_ids``, kept
     (decision new or grey) or covered.  A row two batches decided carries the later block only, so it is selected
-    by that batch."""
+    by that batch.  A covered row whose key is in ``include`` is kept (reviewed anyway; Roger, 2026-10-09, after
+    the cover audit)."""
     bset = set(batch_ids)
     kept, covered, skipped = {}, {}, Counter()
     by_batch: dict[str, Counter] = {b: Counter() for b in batch_ids}
@@ -453,7 +457,7 @@ def select_rows(rows: Mapping[str, Mapping], batch_ids: Sequence[str]) -> tuple[
             continue
         d = nv.get("decision")
         by_batch[nv["run_id"]][d] += 1
-        if d in KEPT_DECISIONS:
+        if d in KEPT_DECISIONS or (d == "covered" and k in include):
             kept[k] = r
         elif d == "covered":
             covered[k] = r
@@ -485,10 +489,12 @@ def nearest_candidates(vectors: Mapping[str, np.ndarray], *, k: int = DEFAULT_K,
 
 
 def plan_graph(rows: Mapping[str, Mapping], batch_ids: Sequence[str], vectors: Mapping[str, np.ndarray], *,
-               k: int = DEFAULT_K, cosine_floor: float = DEFAULT_COSINE_FLOOR) -> GraphPlan:
+               k: int = DEFAULT_K, cosine_floor: float = DEFAULT_COSINE_FLOOR,
+               include: Optional[Mapping[str, str]] = None) -> GraphPlan:
     """The batches' kept and covered rows, and the candidate edges: each kept candidate's ``k`` nearest other kept
     candidates by ``vectors`` (projected query vectors, by key) at ``cosine_floor`` or above."""
-    kept, covered, skipped, by_batch = select_rows(rows, batch_ids)
+    include = dict(include or {})
+    kept, covered, skipped, by_batch = select_rows(rows, batch_ids, include=include)
     cands, rows_kept = {}, {}
     skipped = Counter(skipped)
     for key_, r in kept.items():
@@ -507,7 +513,8 @@ def plan_graph(rows: Mapping[str, Mapping], batch_ids: Sequence[str], vectors: M
             edges[tuple(sorted((a, b)))] = c
     return GraphPlan(batch_ids=list(batch_ids), cands=cands, rows=rows_kept, covered=covered,
                      neighbours={x: nbrs[x] for x in sorted(nbrs)}, edges=dict(sorted(edges.items())),
-                     skipped=dict(skipped), no_vector=no_vector, by_batch=by_batch)
+                     skipped=dict(skipped), no_vector=no_vector, by_batch=by_batch,
+                     included={x: include[x] for x in sorted(include) if x in rows_kept})
 
 
 def overlap_pairs(plan: GraphPlan, relations: Mapping[str, Mapping], *,
@@ -664,7 +671,21 @@ def assemble_graph(plan: GraphPlan, *, relations: Mapping[str, Mapping], first: 
     rd_of = lambda r: reading_of(r, proposed_cut_off=proposed_cut_off)  # noqa: E731
     corpus_stems: set[str] = set()
     queue_stems: set[str] = set()
+    def mark_covered(n: Node, nv: Mapping) -> None:
+        cov = _covering(nv)
+        if cov:
+            (queue_stems if cov[0] == "queue" else corpus_stems).add(cov[1])
+            n.covered_by = (queue_key if cov[0] == "queue" else corpus_key)(cov[1])
+        d = nv.get("deciding_reading")
+        if d:
+            n.covered_reading = {"stem": d.get("stem"), "cosine": d.get("cosine"), "sonnet": _value(d.get("sonnet")),
+                                 "opus": _value(d.get("opus"))}
+
     nodes = [_candidate_node(plan.rows[k]) for k in sorted(plan.rows)]
+    for n in nodes:
+        if n.key in plan.included:
+            n.included = plan.included[n.key]
+            mark_covered(n, plan.rows[n.key].get("novelty") or {})
     for k in sorted(plan.covered):
         n = _candidate_node(plan.covered[k])
         nv = plan.covered[k].get("novelty") or {}

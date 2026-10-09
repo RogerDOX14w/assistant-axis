@@ -212,7 +212,7 @@ class ReviewState:
         self.nodes = graph.node_map()
         self.kept = graph.candidate_keys()
         self.kept_set = set(self.kept)
-        self.covered = {n.key for n in graph.nodes if n.kind == "candidate" and n.decision == "covered"}
+        self.covered = {n.key for n in graph.nodes if n.kind == "candidate" and n.decision == "covered" and not n.included}
         self.merged = [list(c) for c in graph.cliques]
         self.proposed = [list(c) for c in graph.proposed_groups]
         grouped = {m for c in [*self.merged, *self.proposed] for m in c}
@@ -244,7 +244,7 @@ class ReviewState:
                 self.m3[e.a].append(e)
         self.covers: dict[str, list[str]] = defaultdict(list)
         for n in graph.nodes:
-            if n.kind == "candidate" and n.decision == "covered" and n.covered_by:
+            if n.kind == "candidate" and n.decision == "covered" and n.covered_by and not n.included:
                 self.covers[n.covered_by].append(n.key)
 
     # -- lookups --------------------------------------------------------------------
