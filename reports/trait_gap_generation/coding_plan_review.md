@@ -551,3 +551,20 @@ pool), every step through the Message Batches API.
 - *A finding about the queue call*: 6 of the 9 twenty-row calls stopped at the first `max_tokens` (8000), because
   Haiku 5.5's adaptive thinking took about 500 output tokens a row; the retry wave, in ten-row calls, recovered every
   row.  The default is now 16000 and the estimate 500 tokens a row (no prompt change).
+- *M3* [states_v4_m3](../../data/candidates/novelty/states_v4_m3/decisions.md) on the 32 released rows: 13
+  covered, 19 new, $0.126, 4 hours 48 minutes (fifteen batch waves, 5 to 45 minutes each that afternoon).  Covered by
+  exact label: [remorseful](../../data/traits/instructions/remorseful.json) (a corpus trait) and unemployed (the corpus role
+  [unemployed](../../data/roles/instructions/unemployed.json)); by the overlap reading: amorous under [flirty](../../data/traits/instructions/flirty.json),
+  fearful under [anxious](../../data/traits/instructions/anxious.json), lonesome under [lonely](../../data/traits/instructions/lonely.json), miserably partnered under
+  [unhappily-partnered](../../data/traits/instructions/unhappily_partnered.json), nervous under [neurotic (Big Five)](../../data/traits/instructions/neurotic_big_five.json),
+  overburdened under [stressed](../../data/traits/instructions/stressed.json), pretty well under [healthy](../../data/traits/instructions/healthy.json), thankful under [grateful](../../data/traits/instructions/grateful.json), unhappy under
+  [discontented](../../data/traits/instructions/discontented.json), unhealthy under [sickly](../../data/traits/instructions/sickly.json) and woeful under [melancholic](../../data/traits/instructions/melancholic.json) (four of these covers carry
+  the review flag `sonnet_below_opus_at`: amorous, fearful, nervous, unhappy).  New: 12 lasting conditions (beholden,
+  declining, disabused, emigrating, expecting, heartsick, liable, nascent, thriving, unacknowledged, unmastered,
+  unpunished) and 7 predispositions (disheveled, inconsolable, repentant, rumpled, sulky, tearful, teasing).
+- *R1* [review_states_v4](../../data/candidates/review/review_states_v4/graph.json): 19 candidates, one merged group
+  (disheveled, rumpled), 17 singletons, $0.007, 28 minutes.  Every node carries `outcome: "states"`, and a card reads,
+  for expecting, `state`, `states`, `states pass: lasting (months)`.  Ready for `review_app.py serve --batch-id
+  review_states_v4` ([review_app.py](../../data_analysis/gap_generation/review_app.py)).
+- *Spend*: $0.166 in all (states pass $0.034, M3 $0.126, R1 $0.007), against the $5 cap.  M1 on the 47 new renamed
+  candidates (step 2) is estimated at $0.20 through the Batches API and was not run.
