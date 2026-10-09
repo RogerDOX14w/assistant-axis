@@ -44,3 +44,37 @@ class TestClassifyOne:
         msg = module.build_user_message("arrogant", "Excessive confidence.", INSTRUCTIONS)
         assert "positive_label: arrogant" in msg and "Definition: Excessive confidence." in msg
         assert "1. pos 0" in msg and "5. neg 4" in msg
+
+
+class TestNamePos:
+    """--name-pos: a label-blind call that names the pole the pos instructions describe."""
+
+    POS_REPLY = {"reasoning": "all five push to change the world", "positive_name": "enterprising|driven"}
+
+    def test_message_is_label_blind_and_pos_only(self):
+        msg = module.build_pos_name_message(INSTRUCTIONS)
+        assert "1. pos 0" in msg and "5. pos 4" in msg
+        assert "neg" not in msg and "positive_label" not in msg and "Definition" not in msg
+
+    def test_parses_reply_charges_usage_and_uses_its_own_prompt(self):
+        tracker = MultiModelUsage()
+        client = _client("```json\n" + json.dumps(self.POS_REPLY) + "\n```")
+        result = asyncio.run(module.name_pos_one(client, INSTRUCTIONS, asyncio.Semaphore(2), tracker, "x"))
+        assert result["positive_name"] == "enterprising|driven"
+        assert tracker.n_calls == 1
+        kwargs = client.messages.create.call_args.kwargs
+        assert kwargs["system"] == module.POS_NAME_SYSTEM_PROMPT
+        assert "arrogant" not in kwargs["messages"][0]["content"]
+
+    def test_reply_without_the_field_is_retried_then_an_error_sentinel(self, monkeypatch):
+        async def no_sleep(_):
+            return None
+        monkeypatch.setattr(module.asyncio, "sleep", no_sleep)
+        client = _client(json.dumps({"reasoning": "?", "negative_label": "x"}))
+        result = asyncio.run(module.name_pos_one(client, INSTRUCTIONS, asyncio.Semaphore(2)))
+        assert result["positive_name"] == "ERROR"
+        assert client.messages.create.call_count == 5
+
+    def test_flag_is_off_by_default(self):
+        assert module.parse_args([]).name_pos is False
+        assert module.parse_args(["--name-pos"]).name_pos is True

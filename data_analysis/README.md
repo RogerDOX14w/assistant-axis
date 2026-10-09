@@ -362,9 +362,17 @@ instructions to Claude and asking it to name the opposite pole. Outputs
 antonym scores (0-4) and reasoning. Supports `--traits` to scope to specific
 traits. Primarily used for creating/checking `negative_label` values. Particulalry useful for creating/confirming "clean pairs" of antonyms were B is the correct `negative_label` for A and vice versa, so comfirming theit context and scope match well: start with `negative_label = "non-{positive_lable}"`, confirm you get the expected atonyms bidirectionally, then update the `negative_label` values to the antonyms.
 
+`--name-pos` (2026-10-09) adds a second, label-blind call per trait that sees
+only the five pos instructions and names the pole they describe
+(`positive_name`, `positive_name_reasoning` in the output).  It is for
+working from a description to a label when the name is still open (chunk 7's
+world-changing / world-accepting); see `AGENT_NOTES.md` § "Naming from the
+description".
+
 ```bash
 uv run python data_analysis/generate_antonyms.py
 uv run python data_analysis/generate_antonyms.py --traits obedient rebellious
+uv run python data_analysis/generate_antonyms.py --traits world_accepting world_changing --name-pos
 ```
 
 ### `seed_entities.py`

@@ -10,9 +10,18 @@ For each trait:
 Outputs a JSON object: { trait: { negative_label, antonym_score, reasoning } }
 Uses known antonyms from steering_across_personas for 5 overlapping traits.
 
+With ``--name-pos`` (2026-10-09, for working from a description to a label)
+each trait also gets a second, label-blind call that sees only the five pos
+instructions (no label, no definition) and names the pole they describe:
+the result gains ``positive_name`` and ``positive_name_reasoning``.  The pos
+instructions were written with the label in front of the generator, so the
+name can still lean toward it; the blind call keeps the label out of the
+namer's own prompt.
+
 Usage:
     uv run python data_analysis/generate_antonyms.py
     uv run python data_analysis/generate_antonyms.py --traits obedient pragmatic conservative
+    uv run python data_analysis/generate_antonyms.py --traits world_accepting world_changing --name-pos
 """
 
 import argparse
@@ -86,6 +95,70 @@ Return ONLY a JSON object with these fields (reasoning MUST come first):
 """
 
 
+POS_NAME_SYSTEM_PROMPT = """\
+You are a psycholinguistics expert labeling personality trait poles for a research dataset.
+
+You will be given 5 instruction prompts that each induce the same persona trait. You are \
+not told the trait's name.
+
+Your task:
+1. Read the instructions carefully to understand the one trait they all describe.
+2. Choose the best adjective (or short hyphenated phrase) that names that trait. \
+This should be the most natural, recognizable label for what the instructions describe, \
+as a person would be described by it. Prefer real adjectives over coined phrases when a good \
+standalone word exists. If there are two or more genuinely competitive candidates where \
+reasonable experts might disagree, list them separated by "|" (e.g. "pragmatic|realistic"). \
+Use "|" freely: it is better to surface ambiguity than to hide it.
+
+Return ONLY a JSON object with these fields (reasoning MUST come first):
+{
+  "reasoning": "Brief explanation of your choice",
+  "positive_name": "chosen_label"
+}
+"""
+
+
+def build_pos_name_message(instructions: list[dict]) -> str:
+    """The label-blind naming prompt: the pos instructions and nothing else."""
+    pos_lines = "\n".join(f"  {i+1}. {inst['pos']}" for i, inst in enumerate(instructions))
+    return f"Instructions:\n{pos_lines}"
+
+
+def _parse_reply(text: str) -> dict:
+    raw = re.sub(r"^```(?:json)?\s*\n?", "", text.strip())
+    raw = re.sub(r"\n?```\s*$", "", raw)
+    return json.loads(raw, strict=False)
+
+
+async def name_pos_one(
+    client: anthropic.AsyncAnthropic,
+    instructions: list[dict],
+    semaphore: asyncio.Semaphore,
+    usage: MultiModelUsage | None = None,
+    log_label: str = "",
+) -> dict:
+    """Name the pole the pos instructions describe, without seeing the label."""
+    msg = build_pos_name_message(instructions)
+    for attempt in range(5):
+        async with semaphore:
+            try:
+                response = await client.messages.create(
+                    model=MODEL, max_tokens=512, temperature=0,
+                    system=POS_NAME_SYSTEM_PROMPT,
+                    messages=[{"role": "user", "content": msg}],
+                )
+                if usage is not None:
+                    usage.charge(MODEL, *extract_usage_anthropic(response))
+                result = _parse_reply(response.content[0].text)
+                if "positive_name" not in result:
+                    raise KeyError("positive_name")
+                return result
+            except (json.JSONDecodeError, KeyError, IndexError) as e:
+                print(f"  Retry {attempt+1} for the pos name of {log_label}: {e}", file=sys.stderr)
+                await asyncio.sleep(1)
+    return {"positive_name": "ERROR", "reasoning": "All retries failed"}
+
+
 def extract_definition(eval_prompt: str) -> str:
     """Extract the trait definition sentence from the eval_prompt."""
     first_para = eval_prompt.split("\n\n")[0]
@@ -148,7 +221,8 @@ async def classify_one(
     return {"negative_label": "ERROR", "antonym_score": -1, "reasoning": "All retries failed"}
 
 
-async def main_async(trait_filter: list[str] | None = None, usage_json: Path | None = None):
+async def main_async(trait_filter: list[str] | None = None, usage_json: Path | None = None,
+                     name_pos: bool = False):
     traits_dir = Path(__file__).parent.parent / "data" / "traits" / "instructions"
     usage = MultiModelUsage()
     trait_files = sorted(traits_dir.glob("*.json"))
@@ -184,6 +258,10 @@ async def main_async(trait_filter: list[str] | None = None, usage_json: Path | N
 
     async def run_one(pos_label, defn, insts):
         result = await classify_one(client, pos_label, defn, insts, semaphore, usage)
+        if name_pos:
+            named = await name_pos_one(client, insts, semaphore, usage, pos_label)
+            result["positive_name"] = named.get("positive_name")
+            result["positive_name_reasoning"] = named.get("reasoning")
         if pos_label in KNOWN_ANTONYMS:
             result["known_antonym"] = KNOWN_ANTONYMS[pos_label]
             match = result["negative_label"].lower() == KNOWN_ANTONYMS[pos_label].lower()
@@ -210,6 +288,13 @@ async def main_async(trait_filter: list[str] | None = None, usage_json: Path | N
         n_total=n_call_total,
         logger_obj=logger,
     )
+    if name_pos:
+        warn_if_low_parse_rate(
+            label=f"data_analysis/generate_antonyms:pos-name:{MODEL}",
+            n_ok=sum(1 for _, r in api_results if r.get("positive_name") not in (None, "ERROR")),
+            n_total=n_call_total,
+            logger_obj=logger,
+        )
     logger.info(usage.log_line("[usage]"))
     path = Path(usage_json) if usage_json is not None else DEFAULT_USAGE_JSON
     total = MultiModelUsage.load_or_create(path)
@@ -269,12 +354,19 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
         default=str(DEFAULT_USAGE_JSON),
         help=f"Cumulative token-usage record, merged into on every run (default: {DEFAULT_USAGE_JSON})",
     )
+    parser.add_argument(
+        "--name-pos",
+        action="store_true",
+        help="Also name the pole the pos instructions describe, in a second, label-blind call "
+             "(adds positive_name and positive_name_reasoning to each result)",
+    )
     return parser.parse_args(argv)
 
 
 def main(argv: list[str] | None = None):
     args = parse_args(argv)
-    asyncio.run(main_async(trait_filter=args.traits, usage_json=Path(args.usage_json)))
+    asyncio.run(main_async(trait_filter=args.traits, usage_json=Path(args.usage_json),
+                           name_pos=args.name_pos))
 
 
 if __name__ == "__main__":
