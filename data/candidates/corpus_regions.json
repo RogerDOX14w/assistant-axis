@@ -3335,29 +3335,6 @@
       "previous_alignment_relevant": false,
       "previous_source": "filter m1_validation_r2"
     },
-    "conceptual": {
-      "label": "conceptual",
-      "region": "cognitive_epistemic",
-      "enactable_in_text": 2,
-      "alignment_score": 0,
-      "alignment_relevant": false,
-      "source": "description",
-      "description_sha256": "737e38f39d0b833c789d0f0082558c87a0cc6741b97d215219dd949da0bad54c",
-      "model": "claude-haiku-5-5",
-      "rubric_versions": {
-        "descriptors": 1,
-        "alignment": 3
-      },
-      "reasons": {
-        "descriptors": "It describes a thinking style that favors abstract ideas and frameworks over concrete detail, which shows directly in how a reply is framed and reasoned.",
-        "alignment": "A preference for abstract ideas over concrete detail is a style of thinking that does not bear on honesty, harm, approval-seeking, power, deference, oversight, or rule-following."
-      },
-      "batch_id": "corpus_desc_2026_10_09",
-      "at": "2026-10-09T02:30:25+00:00",
-      "previous_region": "cognitive_epistemic",
-      "previous_alignment_relevant": false,
-      "previous_source": "filter m1_validation_r2"
-    },
     "conciliatory": {
       "label": "conciliatory",
       "region": "social_interpersonal",
@@ -6000,29 +5977,6 @@
       "batch_id": "corpus_desc_2026_10_09",
       "at": "2026-10-09T02:31:11+00:00",
       "previous_region": "emotional_temperament",
-      "previous_alignment_relevant": false,
-      "previous_source": "filter m1_validation_r2"
-    },
-    "enigmatic": {
-      "label": "enigmatic",
-      "region": "communication_style",
-      "enactable_in_text": 2,
-      "alignment_score": 2,
-      "alignment_relevant": true,
-      "source": "description",
-      "description_sha256": "e783bf9110a513b0f70032dd3c366c72f2effbe9e41fcf82fff1c7e2670cb065",
-      "model": "claude-haiku-5-5",
-      "rubric_versions": {
-        "descriptors": 1,
-        "alignment": 3
-      },
-      "reasons": {
-        "descriptors": "The description concerns how the persona communicates, namely by being deliberately ambiguous and hard to pin down in its wording, which a text-only persona can show directly.",
-        "alignment": "Deliberate obscurity and ambiguity bear on honesty about its own knowledge and actions, since a persona that withholds clear meaning may hide what it is doing or what it knows, though this is a stylistic choice that only sometimes shades into deception."
-      },
-      "batch_id": "corpus_desc_2026_10_09",
-      "at": "2026-10-09T02:31:12+00:00",
-      "previous_region": "communication_style",
       "previous_alignment_relevant": false,
       "previous_source": "filter m1_validation_r2"
     },
@@ -21051,12 +21005,12 @@
   "_provenance": {
     "schema_version": "1.0",
     "produced_by": {
-      "cmd": "uv run python data_analysis/gap_generation/gap_registry.py corpus-regions --from-descriptions --only-missing --budget-usd 0.25",
-      "git_sha": "2833443+dirty",
+      "cmd": "uv run python data_analysis/gap_generation/gap_registry.py corpus-regions --from-descriptions --only-missing --budget-usd 1",
+      "git_sha": "a38e96e+dirty",
       "author": "Roger Dearnaley",
-      "title": "corpus regions from descriptions (only_missing, corpus_desc_20261009T024251Z)"
+      "title": "corpus regions from descriptions (rows dropped: conceptual, enigmatic)"
     },
-    "produced_at": "2026-10-09T02:42:56+00:00",
+    "produced_at": "2026-10-09T16:04:52+00:00",
     "inputs": [
       {
         "dep_key": "rubric_descriptors",

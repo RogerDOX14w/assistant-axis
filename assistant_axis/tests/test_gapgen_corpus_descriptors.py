@@ -345,6 +345,21 @@ class TestCommand:
         assert cli["out"].read_text() == before and len(cli["clients"]) == 1
         assert "nothing to judge" in capsys.readouterr().out
 
+    def test_only_missing_drops_a_dropped_trait_with_nothing_to_judge(self, cli, capsys):
+        assert cli["run"]("--from-descriptions", "--all", "--budget-usd", "1", "--batch-id", "cd_1") == 0
+        before = json.loads(cli["out"].read_text())
+        (cli["data"] / "traits" / "instructions" / "obedient.json").unlink()
+        assert cli["run"]("--from-descriptions", "--only-missing", "--dry-run") == 0
+        assert json.loads(cli["out"].read_text()) == before                  # the dry run names it, writes nothing
+        assert "to drop: obedient" in capsys.readouterr().out
+        assert cli["run"]("--from-descriptions", "--only-missing", "--budget-usd", "1", "--batch-id", "cd_2") == 0
+        after = json.loads(cli["out"].read_text())
+        assert set(after["result"]) == {"calm", "stubborn"} and len(cli["clients"]) == 1   # no second client
+        assert after["result"]["calm"] == before["result"]["calm"]
+        assert after["_provenance"]["inputs"] == before["_provenance"]["inputs"]   # cd_1's responses still cited
+        assert not (cli["runs"] / "cd_2").exists()
+        assert "dropped 1 row(s)" in capsys.readouterr().out
+
     def test_a_mode_is_required(self, cli):
         with pytest.raises(SystemExit):
             cli["run"]("--from-descriptions", "--budget-usd", "1")

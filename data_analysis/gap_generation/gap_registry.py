@@ -333,8 +333,24 @@ def cmd_corpus_regions_from_descriptions(args) -> int:
     print(f"{len(corpus)} traits; {len(selected)} to judge ({mode}"
           + (f": {json.dumps(dict(sorted(reasons.items())))}" if selected else "") + f"); {CD.MODEL}, descriptors "
           f"v{pinned['step_versions']['descriptors']}, alignment v{pinned['step_versions']['alignment']}")
+    # Rows of traits the corpus no longer has (a dropped trait, 2026-10-09: conceptual and enigmatic stayed after
+    # 647ca4d because a run with nothing to judge returned before CD.merge, which is what drops them).
+    stale = sorted(set(existing) - {t["stem"] for t in corpus})
+    if stale:
+        print(f"{len(stale)} row(s) of traits the corpus no longer has, to drop: {', '.join(stale)}")
     if not selected:
-        print(f"nothing to judge: {out} is current")
+        if not stale:
+            print(f"nothing to judge: {out} is current")
+            return 0
+        if args.dry_run:
+            print(f"nothing to judge; DRY-RUN: {out} untouched")
+            return 0
+        # No call: keep the provenance of the runs that produced the remaining rows.
+        old_inputs = (json.loads(out.read_text(encoding="utf-8")).get("_provenance") or {}).get("inputs")
+        env = json_metadata(CD.merge(corpus, existing, {}), inputs=old_inputs,
+                            title=f"corpus regions from descriptions (rows dropped: {', '.join(stale)})")
+        atomic_write_text(json.dumps(env, indent=2, ensure_ascii=False) + "\n", out)
+        print(f"nothing to judge; dropped {len(stale)} row(s): wrote {len(env['result'])} rows to {out}")
         return 0
     print(f"estimate ({n_send} traits with a description):\n{est.format()}")
     if args.dry_run:
