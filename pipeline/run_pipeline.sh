@@ -436,7 +436,7 @@ if [ "$MODE" = "christina" ]; then
 
     echo ""
 
-    # Infer entity_type for step 3 from ROLES_DIR so the 9 collision names
+    # Infer entity_type for step 3 from ROLES_DIR so the 11 collision names
     # (ascetic, contrarian, ... stoic) are scored against the right prompt.
     # Christina mode is standalone-only (no combinations).
     case "$ROLES_DIR" in
@@ -668,7 +668,7 @@ else
             echo "--- Step 3 [$type] ---"
             TYPE_DIR="$OUTPUT_DIR/$type"
 
-            # entity_type disambiguates 9 names that exist in both data/roles and
+            # entity_type disambiguates 11 names that exist in both data/roles and
             # data/traits, and tells the judge when to use the combined-eval prompt.
             case "$type" in
                 roles)        ENT_TYPE=role ;;

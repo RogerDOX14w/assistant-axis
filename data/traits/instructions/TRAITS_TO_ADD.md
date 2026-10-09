@@ -85,7 +85,9 @@ Cheap now; afterwards any change to a trait makes its vectors stale.
 - The five chunk-5 checks: [unscrupulous](./unscrupulous.json) against
   [amoral](./amoral.json), [technomystical](./technomystical.json) against
   [techno-hierophantic](./techno_hierophantic.json),
-  [detractor](./detractor.json) (also waits on the role-pair check), the two
+  [detractor](./detractor.json) (the role-pair check, run once on 2026-10-09,
+  has [evangelist](../../roles/instructions/evangelist.json) naming "debunker |
+  skeptic | iconoclast", not detractor; the question below stands), the two
   culture triangles as about three directions, and
   [Hispanic](./hispanic.json) in the heritage map (§ "TODO: post-extraction
   checks for chunk 5").
@@ -120,8 +122,13 @@ Cheap now; afterwards any change to a trait makes its vectors stale.
   the accountable / blame-shifting / self-blaming kite, and the sets not yet
   written (§ "TODO: arrangement hunting").  `wasteful` (a queue entry, no
   file) is parked for it.
-- detractor and the role pairs wait on a role-pair check that is not built
-  (ROLES_TO_ADD § "Role pairs to record").
+- detractor and the role pairs: the role-pair check is built (`a9c0a13`,
+  `generate_antonyms.py --roles`) and was run once on 2026-10-09.  Two of the
+  six role pairs are clean both ways, two nearly, two not; evangelist names
+  "debunker | skeptic | iconoclast", not detractor, so detractor's question
+  stays open (§ "TODO: post-extraction checks for chunk 5";
+  [ROLES_TO_ADD.md](../../roles/instructions/ROLES_TO_ADD.md) § "Role pairs to
+  record").
 
 ### Parked: Roger's call, when more gap-filling is wanted
 
@@ -644,7 +651,11 @@ extraction and the embeddings, so none can be settled now.
   pair can be recorded across the types (the arrangement field is
   same-type).  Revisit once the role-pair check exists: either detractor
   moves to the role side with its scope matched to evangelist's, or it stays
-  a trait singleton and the role keeps no partner.
+  a trait singleton and the role keeps no partner.  **2026-10-09:** the check
+  exists (`generate_antonyms.py --roles`) and was run on evangelist once:
+  it names "debunker | skeptic | iconoclast" (score 3), not detractor, so the
+  question is still open; a role-side detractor would have to be seeded and
+  checked from both sides ([role_pair_check_history.jsonl](../../roles/role_pair_check_history.jsonl)).
 - **The two culture triangles share their sanctions** (2026-10-08).  Leung
   and Cohen's own Table 1 gives guilt as the dignity culture's device and
   shame as the device of both honor and face, and has no counterpart for

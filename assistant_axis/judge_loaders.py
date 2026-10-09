@@ -833,7 +833,9 @@ def migrate_v1_static_scores(
                 if fp.stem != "default":
                     kinds_for_name.setdefault(fp.stem, set()).add(et)
 
-    The migration is lossy by design for the 9 collision names;
+    The migration is lossy by design for the collision names (stems with
+    vectors in both kinds: nine in the May 2026 data; the corpus has had
+    eleven since September 2026, parent and specialist joining);
     callers that need them must use a v2 cache for both sides.
 
     Returns the migrated dict (does not mutate the input).

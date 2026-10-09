@@ -251,10 +251,12 @@ def resolve_eval_prompt(
       - "trait"       — standalone trait; look up stem in traits_dir only.
       - "combination" — r_<role>_t_<trait>[__<goal>] entry; consult both dirs.
 
-    Explicit entity_type is required because 9 names exist in both
+    Explicit entity_type is required because 11 names exist in both
     data/roles and data/traits (ascetic, contrarian, cosmopolitan, generalist,
-    pacifist, patient, perfectionist, romantic, stoic) and a single response
-    directory can contain any of role/trait/combination entries.
+    pacifist, parent, patient, perfectionist, romantic, specialist, stoic;
+    the list is COLLISION_NAMES in assistant_axis/tests/test_entity_id.py)
+    and a single response directory can contain any of
+    role/trait/combination entries.
     """
     # Skip default — step 4 uses all activations without scores
     if stem == "default":
@@ -429,10 +431,11 @@ async def main_async():
                              "to the 0-3 rubric score that this script produces.)")
     parser.add_argument("--entity_type", type=str, required=True,
                         choices=["role", "trait", "combination"],
-                        help="How to resolve response-file stems. Required because 9 names "
+                        help="How to resolve response-file stems. Required because 11 names "
                              "exist in both data/roles and data/traits (ascetic, contrarian, "
-                             "cosmopolitan, generalist, pacifist, patient, perfectionist, "
-                             "romantic, stoic). Use 'combination' for r_<role>_t_<trait> files.")
+                             "cosmopolitan, generalist, pacifist, parent, patient, "
+                             "perfectionist, romantic, specialist, stoic). Use 'combination' "
+                             "for r_<role>_t_<trait> files.")
     args = parser.parse_args()
 
     if not args.dry_run and not os.getenv("OPENAI_API_KEY"):

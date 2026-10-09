@@ -15,9 +15,18 @@ paths:
 
 ## Trait/role name collisions and the `name|R` / `name|T` convention (May 2026)
 
-**The bug we keep almost making.** Nine names appear in BOTH the trait
+**The bug we keep almost making.** Eleven names appear in BOTH the trait
 and role lists (`ascetic`, `contrarian`, `cosmopolitan`, `generalist`,
-`pacifist`, `patient`, `perfectionist`, `romantic`, `stoic`).  In any
+`pacifist`, `parent`, `patient`, `perfectionist`, `romantic`,
+`specialist`, `stoic`; nine in May 2026, `specialist` and `parent`
+joined in September and were counted on 2026-10-09).  The list is
+`COLLISION_NAMES` in
+[`assistant_axis/tests/test_entity_id.py`](assistant_axis/tests/test_entity_id.py),
+and `test_collision_names_match_the_corpus_on_disk` in
+[`assistant_axis/tests/test_collision_regression.py`](assistant_axis/tests/test_collision_regression.py)
+compares it with the stems on disk, so a trait or role seeded onto a name
+the other kind already has fails a test until the list, the count and
+these notes are updated.  In any
 data structure that mixes traits and roles, the bare name is **NOT a
 unique identifier**.  Historic code did things like:
 
@@ -95,7 +104,7 @@ Revisited 2026-09-09: to be folded into the next full rejudge, see
 `corpus_display_name` accepts a bare stem or a `name|R` / `name|T`
 id (the id supplies the kind); with no kind it consults both tables
 and falls back to the mechanical form if a collision name ever
-displayed differently per kind (today all nine display identically).
+displayed differently per kind (today all eleven display identically).
 Tables are read once per data dir from `data/{traits,roles}/instructions/`
 (`$ASSISTANT_AXIS_DATA_DIR` overrides the location; call
 `clear_corpus_display_cache()` after editing corpus JSONs in a
@@ -265,7 +274,7 @@ behaviour spec.
 [`tools/lint_kind_collision.py`](tools/lint_kind_collision.py) AST
 walker, and
 [`assistant_axis/tests/test_collision_regression.py`](assistant_axis/tests/test_collision_regression.py)
-covering 5 patterns × 9 collision names.
+covering 5 patterns × 11 collision names.
 
 ### Common-pitfall callout (read this before merging trait + role data)
 
@@ -287,7 +296,7 @@ for kind in ("traits", "roles"):
         merged[entity_id(entry["name"], kind)] = entry["score"]
 ```
 
-…otherwise you are dropping nine traits or nine roles per axis.  The
+…otherwise you are dropping eleven traits or eleven roles per axis.  The
 canonical lint regex (`for .* in \("(traits|roles)", "(traits|roles)"\):`)
 catches the dual-iteration pattern; pair every match with an
 `entity_id(...)` call before the merge.

@@ -14,11 +14,19 @@ there applies here too.
 - **Goal classification** has not been run for 62 roles: the 61 seeded since
   April and [saint](./saint.json).  It is one item with the traits' in
   TRAITS_TO_ADD's index, "Before the extraction".
-- **The role-pair check is not built** (a role mode for
-  [generate_antonyms.py](../../../data_analysis/generate_antonyms.py)).  It
-  would validate the existing role pairs and settle the trait
-  [detractor](../../traits/instructions/detractor.json) against the role
-  [evangelist](./evangelist.json) (§ "Role pairs to record").
+- **The role-pair check is built** (`a9c0a13`, `--roles` in
+  [generate_antonyms.py](../../../data_analysis/generate_antonyms.py)) and was
+  run once on 2026-10-09 ($0.07): [predator](./predator.json) /
+  [prey](./prey.json) and [cosmopolitan](./cosmopolitan.json) /
+  [provincial](./provincial.json) clean both ways, [angel](./angel.json) /
+  [demon](./demon.json) and [symbiont](./symbiont.json) /
+  [parasite](./parasite.json) nearly, [destroyer](./destroyer.json) /
+  [guardian](./guardian.json) and
+  [instrumentally_aligned_ai](./instrumentally_aligned_ai.json) /
+  [paperclip_maximizer](./paperclip_maximizer.json) not; the role
+  [evangelist](./evangelist.json) names "debunker | skeptic | iconoclast",
+  not the trait [detractor](../../traits/instructions/detractor.json).  What
+  to do with the four pairs and detractor is open (§ "Role pairs to record").
 - **Whether [cosmopolitan](./cosmopolitan.json) / [provincial](./provincial.json)
   joins `pair_list_clean.json`**: after the extraction (§ "Role pairs to
   record").
@@ -40,8 +48,11 @@ there applies here too.
 
 **Status 2026-10-09:** for queued roles, `data_analysis/seed_entities.py` now does steps 1 to 3 and the
 singleton arrangement of step 4 (`write`, then `generate`).  Eleven names now exist on both
-sides, not nine: [parent](./parent.json) and [specialist](./specialist.json) joined the list
-(AGENT_NOTES and the collision tests still say nine).  Step 5 has fallen behind; see the index.
+sides, not nine: [parent](./parent.json) and [specialist](./specialist.json) joined the list,
+and the collision tests and AGENT_NOTES were updated on 2026-10-09 (`d463a23`; a test now
+compares the list with the files, so the next collision fails it).  The role-pair check of
+step 4 exists (`generate_antonyms.py --roles`, 2026-10-09).  Step 5 has fallen behind; see the
+index.
 
 1. Seed `data/roles/instructions/<role>.json` with a `description` field only.
    Use the file-name form for the stem (`coral_reef`, `devils_advocate`); the
@@ -53,14 +64,20 @@ sides, not nine: [parent](./parent.json) and [specialist](./specialist.json) joi
    instruction files' `description` fields (never hand-edit it); `--check`
    reports lag, and `tools/tests/test_sync_entity_lists.py` fails while the
    list lags.
-4. Check the name against `data/traits/instructions/` -- nine names already
-   exist on both sides (see `AGENT_NOTES.md` § "Trait/role name collisions").
+4. Check the name against `data/traits/instructions/` -- eleven names already
+   exist on both sides (see `AGENT_NOTES.md` § "Trait/role name collisions";
+   [test_collision_regression.py](../../../assistant_axis/tests/test_collision_regression.py)
+   fails on a new one until its list is updated).
    Give the file an `arrangement` field, `{"kind": "singleton"}` unless the
    role is one pole of a role pair, and run
    `uv run python data_analysis/check_arrangements.py`.
    Role pairs exist only in `arrangement` (roles have no `negative_label`);
-   the clean-pair check for roles is still to be designed, see "Role pairs
-   to record" below.
+   the clean-pair check for roles is
+   `uv run python data_analysis/generate_antonyms.py --roles <role> <partner>`
+   (2026-10-09, [generate_antonyms.py](../../../data_analysis/generate_antonyms.py)):
+   record the pair only when each side names the other, and append each
+   answer to [role_pair_check_history.jsonl](../role_pair_check_history.jsonl);
+   see "Role pairs to record" below.
 5. Run `data_analysis/classify_goals.py --names <role> --roles-only` if the
    role should be eligible for `data/goal_roles_and_traits.json`.
 6. Run activation / vector extraction for the new role before it can be used
@@ -87,8 +104,10 @@ offices.  Whether promotion tooling becomes worth building is a TODO in the trai
 
 ### Role pairs to record (2026-09-11)
 
-**Status 2026-10-09:** provincial / cosmopolitan is recorded.  The role-pair check below is still to
-build, and whether the pair joins the cohort waits on the extraction.
+**Status 2026-10-09:** provincial / cosmopolitan is recorded.  The role-pair check below is built
+and has been run once on all six recorded role pairs (first-run result below): two are clean both
+ways, two nearly, two not; what to do with the four is open.  Whether provincial / cosmopolitan
+joins the cohort waits on the extraction.
 
 - **provincial ↔ cosmopolitan**: Roger, 2026-09-11, "they make some sense
   as a pair".  **Recorded 2026-09-12** as
@@ -113,6 +132,36 @@ for an opposing *role* rather than an antonym adjective.  Existing role
 pairs (angel / demon, predator / prey, destroyer / guardian, symbiont /
 parasite, ...) were never checked this way; running them through it once
 is a cheap validation of the check itself.
+
+**Built and run, 2026-10-09.**  The check is `--roles` in
+[generate_antonyms.py](../../../data_analysis/generate_antonyms.py) (`a9c0a13`;
+AGENT_NOTES § "Role pairs (procedure to design, 2026-09-11)"): one call per
+role, given its display name, description and five pos instructions, returns
+the opposing role (a role noun, not necessarily one in the corpus) and a 0-4
+opposition score, reasoning first.  A pair is recorded only when each side
+names the other, allowing a plain synonym as for traits.  Usage is in
+[role_pair_check_usage.json](../role_pair_check_usage.json) (cumulative), and
+every answer is kept in
+[role_pair_check_history.jsonl](../role_pair_check_history.jsonl)
+(append-only, one JSON object per check, with the instructions it read).
+The first run checked both sides of the six recorded role pairs and
+[evangelist](./evangelist.json), 13 calls for $0.07 (score in brackets):
+
+| pair | first → | second → | reading |
+|---|---|---|---|
+| [predator](./predator.json) / [prey](./prey.json) | prey (4) | predator (4) | clean both ways |
+| [cosmopolitan](./cosmopolitan.json) / [provincial](./provincial.json) | provincial \| homebody (3) | cosmopolite (4) | clean both ways (cosmopolite is a plain synonym) |
+| [angel](./angel.json) / [demon](./demon.json) | demon (4) | guardian angel \| saint (4) | nearly clean |
+| [symbiont](./symbiont.json) / [parasite](./parasite.json) | parasite (4) | mutualist \| host (3) | nearly clean |
+| [destroyer](./destroyer.json) / [guardian](./guardian.json) | builder \| creator (4) | predator \| aggressor (4) | not clean |
+| [instrumentally_aligned_ai](./instrumentally_aligned_ai.json) / [paperclip_maximizer](./paperclip_maximizer.json) | misaligned AI \| rogue AI (4) | humanist \| steward (3) | not clean |
+| [evangelist](./evangelist.json) | debunker \| skeptic \| iconoclast (3) | | does not name the trait [detractor](../../traits/instructions/detractor.json) |
+
+Still open: whether the two nearly clean pairs stand (demon's "guardian
+angel" is angel with a qualifier; parasite's "mutualist" is close to a
+synonym of symbiont as its description reads), what to do with destroyer / guardian and the aligned-AI pair (each
+side names a different opposite), and detractor's question in
+[TRAITS_TO_ADD.md](../../traits/instructions/TRAITS_TO_ADD.md).
 
 ### TBD: the 22 Major Arcana as roles (Tarot)
 

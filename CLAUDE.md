@@ -440,8 +440,10 @@ and [`data_analysis/generate_antonyms.py`](./data_analysis/generate_antonyms.py)
 These have no output directory (they write into the corpus), so the
 record lives one level *above* `instructions/` where nothing that globs
 `instructions/*.json` can pick it up: `data/roles/regeneration_usage.json`,
-`data/traits/regeneration_usage.json` and
-`data/traits/antonym_check_usage.json`, all **cumulative** (each run
+`data/traits/regeneration_usage.json`,
+`data/traits/antonym_check_usage.json` and (since 2026-10-09, the
+role-pair check, `generate_antonyms.py --roles`)
+`data/roles/role_pair_check_usage.json`, all **cumulative** (each run
 merges into the file and also logs its own `[usage]` line to stderr;
 `--usage-json PATH` redirects).  Every response received is charged,
 including ones whose JSON fails to parse and is retried.  Guide figure

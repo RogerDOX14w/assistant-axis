@@ -601,8 +601,10 @@ and [`data_analysis/generate_antonyms.py`](./data_analysis/generate_antonyms.py)
 These have no output directory (they write into the corpus), so the
 record lives one level *above* `instructions/` where nothing that globs
 `instructions/*.json` can pick it up: `data/roles/regeneration_usage.json`,
-`data/traits/regeneration_usage.json` and
-`data/traits/antonym_check_usage.json`, all **cumulative** (each run
+`data/traits/regeneration_usage.json`,
+`data/traits/antonym_check_usage.json` and (since 2026-10-09, the
+role-pair check, `generate_antonyms.py --roles`)
+`data/roles/role_pair_check_usage.json`, all **cumulative** (each run
 merges into the file and also logs its own `[usage]` line to stderr;
 `--usage-json PATH` redirects).  Every response received is charged,
 including ones whose JSON fails to parse and is retried.  Guide figure
@@ -4078,9 +4080,18 @@ comparable within their own cohort.
 ## Trait/role name collisions and the `name|R` / `name|T` convention (May 2026)
 <!-- claude: rule=entity-naming -->
 
-**The bug we keep almost making.** Nine names appear in BOTH the trait
+**The bug we keep almost making.** Eleven names appear in BOTH the trait
 and role lists (`ascetic`, `contrarian`, `cosmopolitan`, `generalist`,
-`pacifist`, `patient`, `perfectionist`, `romantic`, `stoic`).  In any
+`pacifist`, `parent`, `patient`, `perfectionist`, `romantic`,
+`specialist`, `stoic`; nine in May 2026, `specialist` and `parent`
+joined in September and were counted on 2026-10-09).  The list is
+`COLLISION_NAMES` in
+[`assistant_axis/tests/test_entity_id.py`](assistant_axis/tests/test_entity_id.py),
+and `test_collision_names_match_the_corpus_on_disk` in
+[`assistant_axis/tests/test_collision_regression.py`](assistant_axis/tests/test_collision_regression.py)
+compares it with the stems on disk, so a trait or role seeded onto a name
+the other kind already has fails a test until the list, the count and
+these notes are updated.  In any
 data structure that mixes traits and roles, the bare name is **NOT a
 unique identifier**.  Historic code did things like:
 
@@ -4175,7 +4186,7 @@ Revisited 2026-09-09: to be folded into the next full rejudge, see
 `corpus_display_name` accepts a bare stem or a `name|R` / `name|T`
 id (the id supplies the kind); with no kind it consults both tables
 and falls back to the mechanical form if a collision name ever
-displayed differently per kind (today all nine display identically).
+displayed differently per kind (today all eleven display identically).
 Tables are read once per data dir from `data/{traits,roles}/instructions/`
 (`$ASSISTANT_AXIS_DATA_DIR` overrides the location; call
 `clear_corpus_display_cache()` after editing corpus JSONs in a
@@ -4345,7 +4356,7 @@ behaviour spec.
 [`tools/lint_kind_collision.py`](tools/lint_kind_collision.py) AST
 walker, and
 [`assistant_axis/tests/test_collision_regression.py`](assistant_axis/tests/test_collision_regression.py)
-covering 5 patterns × 9 collision names.
+covering 5 patterns × 11 collision names.
 
 ### Common-pitfall callout (read this before merging trait + role data)
 
@@ -4367,7 +4378,7 @@ for kind in ("traits", "roles"):
         merged[entity_id(entry["name"], kind)] = entry["score"]
 ```
 
-…otherwise you are dropping nine traits or nine roles per axis.  The
+…otherwise you are dropping eleven traits or eleven roles per axis.  The
 canonical lint regex (`for .* in \("(traits|roles)", "(traits|roles)"\):`)
 catches the dual-iteration pattern; pair every match with an
 `entity_id(...)` call before the merge.
@@ -5000,17 +5011,60 @@ spiritual (that one needed a description revision before it returned
 
 ### Role pairs (procedure to design, 2026-09-11)
 
+**Status 2026-10-09: the check is built (`a9c0a13`) and has been run once
+on the six recorded role pairs; see "The check" and "First run" below.**
+
 Roles have no `negative_label` and no neg instructions, so steps 1, 3
 and 5 above do not apply; role pairs exist only in the `arrangement`
 field.  Roger (2026-09-11) wants a role-pair check that keeps the rest of
 the procedure: seed one side, generate its instructions, ask a generator
 given the description and pos instructions to name the *opposite role*
 and rate the opposition, run it from both sides, and record the pair only
-when the two sides name each other.  Needs a role mode for
-`generate_antonyms.py`.  First candidate: provincial ↔ cosmopolitan (both
-roles, both currently `singleton`); details and the existing unchecked
-role pairs in `data/roles/instructions/ROLES_TO_ADD.md` § "Role pairs to
+when the two sides name each other.  This needed a role mode for
+`generate_antonyms.py`, built on 2026-10-09.  First candidate: provincial ↔ cosmopolitan (both
+roles, then both `singleton`; recorded as a pair on 2026-09-12); details and the other
+role pairs in [`data/roles/instructions/ROLES_TO_ADD.md`](data/roles/instructions/ROLES_TO_ADD.md) § "Role pairs to
 record".
+
+**The check (2026-10-09).**
+`uv run python data_analysis/generate_antonyms.py --roles STEM ...` makes
+one call per role, given its display name (`role_display_name`), its
+description and its five pos instructions, and asks for the opposing
+*role* (a role noun, not an adjective, and not necessarily one in the
+corpus) and a 0-4 rating of how cleanly it opposes, reasoning first:
+`{reasoning, opposing_role, opposition_score}` per stem.  Same model
+(Sonnet 4.6), retries, `ERROR` sentinel and parse-rate warning as the
+trait check; `--roles` excludes `--traits` and `--name-pos`.  Usage goes
+to [`data/roles/role_pair_check_usage.json`](data/roles/role_pair_check_usage.json),
+cumulative.  Run it from both sides: a role pair is recorded in
+`arrangement` only when each side names the other, allowing a plain
+synonym as the trait check does (provincial's `cosmopolite` counts for
+cosmopolitan).  Every answer is kept, as for traits ("Keep every sample"
+under § "Seeding tooling"), in
+[`data/roles/role_pair_check_history.jsonl`](data/roles/role_pair_check_history.jsonl):
+append-only, one JSON object per check, with `stem`, `checked_at`,
+`phase`, `description`, `intended`, `returned`, `score`, `reasoning`,
+`instructions` (the five pos instructions read) and `generator`.
+`generate_antonyms.py` does not write it; the runner that made the first
+run did (2026-10-09), and any later runner must append to it the same way.
+
+**First run (2026-10-09; 13 roles, $0.07).**  Both sides of the six
+recorded role pairs, and evangelist for the trait detractor:
+
+| pair | first → | second → | reading |
+|---|---|---|---|
+| predator / prey | prey (4) | predator (4) | clean both ways |
+| cosmopolitan / provincial | provincial \| homebody (3) | cosmopolite (4) | clean both ways |
+| angel / demon | demon (4) | guardian angel \| saint (4) | nearly clean |
+| symbiont / parasite | parasite (4) | mutualist \| host (3) | nearly clean |
+| destroyer / guardian | builder \| creator (4) | predator \| aggressor (4) | not clean |
+| instrumentally_aligned_ai / paperclip_maximizer | misaligned AI \| rogue AI (4) | humanist \| steward (3) | not clean |
+| evangelist (role) | debunker \| skeptic \| iconoclast (3) | | does not name detractor |
+
+What to do with the four pairs that are not clean both ways, and with
+detractor, is open (ROLES_TO_ADD § "Role pairs to record";
+[`data/traits/instructions/TRAITS_TO_ADD.md`](data/traits/instructions/TRAITS_TO_ADD.md)
+for detractor).
 
 ### Description-writing rules for new seeds (Sep 2026)
 
@@ -5065,7 +5119,7 @@ to every seed, by hand or by a writing agent; Roger reviews before
    this pole from its nearest neighbours, ideally as one question the
    judge can ask ("would the persona do this if the setting were real?",
    "does the persona argue for continuing, or simply never ask?").  Check
-   the nearest existing traits and roles before writing (nine names exist
+   the nearest existing traits and roles before writing (eleven names exist
    on both sides; `ls data/{traits,roles}/instructions`), and if the new
    entity is a deliberate near-duplicate of an existing one (a standard's
    version of a plain trait), say so in `source`, never in the
@@ -5222,12 +5276,20 @@ and, once run, `check_result`.  Status lifecycle
 `candidate -> ready -> seeded -> generated -> checked -> paired | done`;
 parked: `tbd`, `backlog`, `not_adopted`, `superseded`, `exists`.  Since 2026-10-08 a further final
 status, `refused`: the generator model declined to write the instructions
-(stop reason "refusal" or a prose decline; `data_analysis/generation_refusals.py`);
+(stop reason "refusal", a prose decline, or, since 2026-10-09, the sentinel
+"ERROR:" written instead of the content: a JSON field value opening "ERROR:",
+as brown-haired's eval prompt was on 2026-10-08, or a reply opening with it;
+[`data_analysis/generation_refusals.py`](data_analysis/generation_refusals.py));
 the generators record it in `data/{traits,roles}/generation_refusals.jsonl`
 instead of retrying, `generate` copies the record into the entry's `refusal`
 field, `check` skips it, and only `generate --retry-refused` tries again.
 Roger's ruling (2026-09-08, 2026-10-08): a refusal is a data point, not an
-error.
+error.  A reply that puts a paragraph of prose before its JSON (brown-eyed,
+2026-10-08) is not a refusal: since 2026-10-09 both generators skip the
+preface (`strip_prose_preface`, with a WARNING) and use the reply.  Known
+gap: `seed_entities.py report` labels every refusal whose stop reason is not
+"refusal" a "prose decline", so an ERROR-sentinel refusal shows as one there
+(the record's excerpt, "eval_prompt: ERROR: ...", tells them apart).
 
 [`data_analysis/seed_entities.py`](./data_analysis/seed_entities.py)
 drives it: `status`, `write` (seed JSONs for `ready` entries: traits get
@@ -5240,10 +5302,27 @@ each answer as nice / mismatch / nearly_nice / nasty / open against the
 registry of existing *and queued* stems per the decision table below,
 stores it in `check_result`), `rename --old X --new LABEL --partner Y`
 (Roger's RO action: rename the existing trait to the word the check
-returned, if free, regenerate it, re-check both sides; the file moves with
-`git mv` and gets a `renamed_from` field), `pair --a X --b Y` (reciprocal labels,
+returned, if free, regenerate it, re-check both sides; the file moves and
+gets a `renamed_from` field), `pair --a X --b Y` (reciprocal labels,
 `arrangement` pair on both, `--instructions-only` regeneration of the new
 side, `check_arrangements.py`, `sync_entity_lists.py`) and `report`.
+Since 2026-10-09 (`d35e76a`) `rename` moves the file with `git mv`
+only when git tracks it, and with a plain move otherwise (`git mv` refused
+the never-committed borderline and fear_prone on 2026-10-08); keeps the
+`renamed_from` history (one object for a first rename, as every single
+rename in the corpus has it; a list, oldest first, from the second on,
+which `entity_id.resolve_renamed_stem` reads); rewrites the old stem in
+every trait file whose `arrangement` names it (members, re-sorted except
+for `sequence` and `ring`; `axes`; `parent`; `children`; each note
+extended) and sets the paired partner's `negative_label` to the new label,
+listing and leaving alone a trait whose label points at the old stem one
+way only, then runs `check_arrangements.py` and says whose neg
+instructions still name the old label (regenerate those
+`--instructions-only`); and rewrites the queue entry's own `stem`, `label`
+and `renamed_from`, and the old stem in other entries'
+`arrangement_members`.  `pair` replaces a pair arrangement recorded under a
+pole's `renamed_from` stem (keeping its note and adding the rename) instead
+of appending a second pair.
 Every subcommand has `--dry-run`.  Tests:
 `data_analysis/tests/test_seed_entities.py`.
 
@@ -5944,9 +6023,11 @@ the sections above hold data-regeneration items.  Tick off in place.
    `assistant_axis.entity_id.resolve_renamed_stem` or is rewritten.
    Roger: acceptable, no more steering is expected before the embeddings
    are regenerated; fix it then, with the re-sweep.  (b)
-   `seed_entities.py rename` overwrites `renamed_from`, so an entity
+   ~~`seed_entities.py rename` overwrites `renamed_from`, so an entity
    renamed twice loses its first stem; make it append to a list (the
-   resolver already reads a list) before the next double rename.  No
+   resolver already reads a list) before the next double rename.~~  Done
+   2026-10-09 (`d35e76a`): a first rename still writes the one object; a
+   second makes a list, oldest first.  No
    extracted or judged entity is affected today: the one double rename,
    `motivated_reasoning_avoidant` → `_resistant` → `_immune`, was of a
    trait created this month.
@@ -5957,7 +6038,7 @@ the sections above hold data-regeneration items.  Tick off in place.
    triangle (three pairs and a check of the resulting geometry, or
    something else) is undecided; until it is, pair lists for new work
    carry clean pairs and role pairs only.
-7. **`seed_entities.py rename` leaves the pair record on the old stem**
+7. ~~**`seed_entities.py rename` leaves the pair record on the old stem**
    (found 2026-09-30, renaming `deterministic` to `determinist`).  The
    command moves the file, regenerates it and rechecks both sides, but
    the `arrangement.members` of both files still name the old stem and
@@ -5969,23 +6050,30 @@ the sections above hold data-regeneration items.  Tick off in place.
    identical existing arrangement.  Fix: `rename` should rewrite the
    member in every file whose arrangement names the old stem and set the
    partner's `negative_label`, and `pair` should replace an arrangement
-   whose members differ only by a `renamed_from` stem.
+   whose members differ only by a `renamed_from` stem.~~  Done 2026-10-09
+   (`d35e76a`): `rename` rewrites the old stem in every arrangement that
+   names it and sets the paired partner's `negative_label`, and `pair`
+   replaces a pair recorded under a `renamed_from` stem (§ "Seeding
+   tooling").
 8. **`seed_entities.py rename` on a file never committed, and other
-   sessions' records** (2026-10-08, chunk 5).  The command runs `git mv`,
+   sessions' records** (2026-10-08, chunk 5).  ~~The command runs `git mv`,
    which fails on an untracked file, and it never updates the renamed
    entry's *own* `stem` and `label` in the queue; borderline and fear_prone
    were renamed by hand that day.  Fix: fall back to a plain move for an
-   untracked file and rewrite the entry itself.  Separately, a rename made
+   untracked file and rewrite the entry itself.~~  Done 2026-10-09
+   (`d35e76a`): a plain move when git does not track the file, and the
+   entry's own `stem`, `label` and `renamed_from` are rewritten.  Still
+   standing, as practice rather than code: a rename made
    after the trait-gap session has recorded placements of every label
    (`data/candidates/roget/label_heads.json`, `corpus_regions.json`) fails
    its acceptance tests, so tell that session at the moment of a rename,
    with the old and new stems; the new chunk's trait files also each need a
    placeholder row in `corpus_regions.json` (done for chunks 4 to 7).
-   Chunk 7 (2026-10-09) met the first half again: mastery and harmony
+   Chunk 7 (2026-10-09, before the fix) met the first half again: mastery and harmony
    were renamed by hand to world_changing and world_accepting, mastery
    through a working stem, so its `renamed_from` was kept on the original
    stem by hand (item 5 (b)).
-9. **Refusals the detector does not see** (2026-10-08, chunk 6).  The
+9. ~~**Refusals the detector does not see** (2026-10-08, chunk 6).  The
    generator refused brown-haired by writing "ERROR: ... a physical
    descriptor, not a personality trait" into the eval prompt of an
    otherwise well-formed JSON reply, and wrote brown-eyed's instructions
@@ -5993,7 +6081,12 @@ the sections above hold data-regeneration items.  Tick off in place.
    matches `generation_refusals.DECLINE_PHRASES` or the stop reason, so
    both were retried five times as errors, twice.  Fix: treat a field
    value opening "ERROR:" as a refusal, and let the JSON reader skip a
-   prose preface before the first `{`.  What got them through was
+   prose preface before the first `{`.~~  Done 2026-10-09 (`db4818f`): a
+   JSON field value opening "ERROR:", or a reply opening with it, is a
+   refusal (recorded once, not retried, live and in batches), and both
+   generators read past a prose preface with a WARNING; `seed_entities.py
+   report` still calls such a refusal a "prose decline" (§ "Seeding
+   tooling").  What got them through was
    `--thinking-budget 4000`, which moves the deliberation into the
    thinking block; a file generated that way records it in
    `generator.thinking_budget`, so it can be told apart from the rest of
@@ -6214,12 +6307,12 @@ The pipeline (`pipeline/1_generate.py`) supports two modes:
 
 `default` is skipped under all entity types (step 4 uses all activations without scores).
 
-**DO NOT try to autodetect entity type from the filename.** 9 names exist in both `data/roles/instructions/` and `data/traits/instructions/`:
+**DO NOT try to autodetect entity type from the filename.** 11 names exist in both `data/roles/instructions/` and `data/traits/instructions/` (nine until September 2026; `parent` and `specialist` counted 2026-10-09; the list is checked against the files by [`assistant_axis/tests/test_collision_regression.py`](assistant_axis/tests/test_collision_regression.py)):
 
-    ascetic, contrarian, cosmopolitan, generalist, pacifist,
-    patient, perfectionist, romantic, stoic
+    ascetic, contrarian, cosmopolitan, generalist, pacifist, parent,
+    patient, perfectionist, romantic, specialist, stoic
 
-Any roles-first (or traits-first) fallback will silently mis-score one side for these 9. `run_pipeline.sh` passes the correct `--entity_type` per output-subdir type (Roger mode: `roles|traits|combinations`; Christina mode: inferred from `ROLES_DIR`). If you add a new standalone invocation of `3_judge.py`, you must pass `--entity_type` explicitly.
+Any roles-first (or traits-first) fallback will silently mis-score one side for these 11. `run_pipeline.sh` passes the correct `--entity_type` per output-subdir type (Roger mode: `roles|traits|combinations`; Christina mode: inferred from `ROLES_DIR`). If you add a new standalone invocation of `3_judge.py`, you must pass `--entity_type` explicitly.
 
 Steps 2, 4, 5 are unchanged — they process whatever files appear in their input directories.
 
