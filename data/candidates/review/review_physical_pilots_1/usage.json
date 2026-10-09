@@ -7,9 +7,9 @@
         "extras": {
           "from_batches": "physical_pilots_1"
         },
-        "fingerprint": "v1:2026-10-09T01:07:19+00:00@29723472",
+        "fingerprint": "v1:2026-10-09T01:16:37+00:00@29724375",
         "kind": "file",
-        "last_modified_at": "2026-10-09T01:07:19+00:00",
+        "last_modified_at": "2026-10-09T01:16:37+00:00",
         "path": "data/candidates/registry.jsonl"
       },
       {
@@ -19,9 +19,9 @@
           "overlap_rubric": "6",
           "relation_rubric": "1"
         },
-        "fingerprint": "v1:multi:e46bf0db1520",
+        "fingerprint": "v1:multi:bcc69117d14e",
         "kind": "multi",
-        "last_modified_at": "2026-10-08T17:36:09+00:00",
+        "last_modified_at": "2026-10-08T07:02:25+00:00",
         "member_paths": [
           "reports/trait_gap_generation/rubrics/overlap_concept.md",
           "reports/trait_gap_generation/rubrics/relation.md"
@@ -32,9 +32,9 @@
         "dataset_id": null,
         "dep_key": "metric_config",
         "extras": {},
-        "fingerprint": "v1:2026-10-08T17:36:08+00:00@54961",
+        "fingerprint": "v1:2026-10-02T22:27:50+00:00@54961",
         "kind": "file",
-        "last_modified_at": "2026-10-08T17:36:08+00:00",
+        "last_modified_at": "2026-10-02T22:27:50+00:00",
         "path": "data/candidates/metric_config.json"
       },
       {
@@ -43,21 +43,21 @@
         "extras": {
           "from_batches": "physical_pilots_1"
         },
-        "fingerprint": "v1:multi:fe9f1b6f12ba",
+        "fingerprint": "v1:multi:ec7a46c2b2dd",
         "kind": "multi",
-        "last_modified_at": "2026-10-09T01:07:19+00:00",
+        "last_modified_at": "2026-10-09T01:16:37+00:00",
         "member_paths": [
           "data/candidates/novelty/physical_pilots_1/run.json"
         ],
         "path": "data/candidates/novelty/physical_pilots_1/run.json"
       }
     ],
-    "inputs_sha256": "539fdaa6599a671375fe9fee72050cdb2b19cdc8f5849276115eba666a0cc566",
-    "produced_at": "2026-10-09T01:07:52+00:00",
+    "inputs_sha256": "d35ac6ad3563a2d4718ab26e7a8953560e7812c795a112c634482271da5735bd",
+    "produced_at": "2026-10-09T01:16:57+00:00",
     "produced_by": {
       "author": "Roger Dearnaley",
-      "cmd": "uv run python data_analysis/gap_generation/review_graph.py build --batch-id review_physical_pilots_1 --from-batches physical_pilots_1 --budget-usd 0.9",
-      "git_sha": "3cb9e74+dirty",
+      "cmd": "uv run python data_analysis/gap_generation/review_graph.py build --batch-id review_physical_pilots_1 --from-batches physical_pilots_1 --overwrite --budget-usd 0.1",
+      "git_sha": "7e222a3+dirty",
       "title": "review_graph build review_physical_pilots_1"
     },
     "schema_version": "1.0"

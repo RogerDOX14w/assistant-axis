@@ -4,19 +4,19 @@
 
 | candidate | decision | covered by | cut-off | deciding reading | review | pair completion for | pairs judged | gloss |
 |---|---|---|---|---|---|---|---|---|
-| blind | covered | [blind](../../../traits/instructions/blind.json) | 3 | exact label (corpus) |  |  | 0 | This means having no sight, so one cannot see anything at all. |
-| good-looking | covered | [good-looking](../../../traits/instructions/good_looking.json) | 3 | exact label (corpus) |  |  | 0 | This means having a physical appearance that others find attractive, with features, build and grooming that draw favorable notice when one is seen. |
+| blind | covered | [blind](../../../traits/instructions/blind.json) | 3 | exact label (corpus) |  |  | 0 | This means lacking sight entirely, being unable to see anything at all. |
+| good-looking | covered | [good-looking](../../../traits/instructions/good_looking.json) | 3 | exact label (corpus) |  |  | 0 | This means having a physical appearance that others find attractive, with features, figure and presence that draw admiring looks in ordinary daily life. |
 | impaired | covered | [mobility impaired](../../../traits/instructions/mobility_impaired.json) | 3 | Sonnet 3, Opus 3 |  |  | 2 | This means having a sensory or physical impairment. |
-| muscular | covered | [muscular](../../../traits/instructions/muscular.json) | 3 | exact label (corpus) |  |  | 0 | This means having large, well-developed muscles. |
-| physical | covered | [athletic](../../../traits/instructions/athletic.json) | 3 | Sonnet 3, Opus 3 |  |  | 1 | This means keeping one's body strong, fit and athletic, training it regularly and relying on physical capacity in how one moves through and meets the world. |
+| muscular | covered | [muscular](../../../traits/instructions/muscular.json) | 3 | exact label (corpus) |  |  | 0 | This means having large, well-developed muscles that show in one's build, the result of regular strength training and physical exertion. |
+| physical | covered | [athletic](../../../traits/instructions/athletic.json) | 3 | Sonnet 3, Opus 3 |  |  | 1 | This means keeping one's body strong and fit through regular exertion, moving with athletic ease and treating physical capability as a central part of who one is. |
 | sinistral | covered | [left-handed](../../../traits/instructions/left_handed.json) | 3 | Sonnet 4 |  |  | 1 | This means being left-handed. |
-| spare | covered | [thin](../../../traits/instructions/thin.json) | 3 | Sonnet 3, Opus 3 |  |  | 1 | This means being lean and thin in build. |
-| stone deaf | covered | [deaf](../../../traits/instructions/deaf.json) | 3 | Sonnet 3, Opus 3 |  |  | 1 | This means hearing no sound at all, because one's hearing is completely lost. |
+| spare | covered | [thin](../../../traits/instructions/thin.json) | 3 | Sonnet 3, Opus 3 |  |  | 1 | This means being lean and thin in build, with little spare flesh on one's frame. |
+| stone deaf | covered | [deaf](../../../traits/instructions/deaf.json) | 3 | Sonnet 3, Opus 3 |  |  | 1 | This means being completely unable to hear, with no sound registering through one's ears at all. |
 | thin | covered | [thin](../../../traits/instructions/thin.json) | 3 | exact label (corpus) |  |  | 0 | This means having a slender, lean body. |
-| alive | new |  | 3 |  |  |  | 1 | This means having a living body and not being dead. |
-| cherubic | new |  | 4 |  |  |  | 4 | This means keeping a round-cheeked, soft-eyed face that looks innocent and angelic, so that others take one's mischief for sweetness and never suspect what one is up to. |
-| stentorian | new |  | 3 |  |  |  | 5 | This means speaking with a loud, booming voice that carries effortlessly across a room, so that one's words are heard by everyone present whether or not they are trying to listen. |
-| weather-beaten | new |  | 3 |  |  |  | 3 | This means having a face or skin that shows years of sun and wind, looking rugged and hardened by outdoor weather rather than smooth or pampered. |
+| alive | new |  | 3 |  |  |  | 2 | This means living, with a body that has not died. |
+| cherubic | new |  | 3 |  |  |  | 2 | This means keeping a sweet, round-cheeked face that looks innocent and angelic, so that one's mischief or displeasure is often mistaken for childlike charm. |
+| stentorian | new |  | 3 |  |  |  | 6 | This means speaking in a deep, booming voice that carries across a room without any effort, so that one is heard clearly even in a crowd or from a distance. |
+| weather-beaten | new |  | 3 |  |  |  | 3 | This means having a face and skin that show the marks of long years in sun and wind, looking rugged, lined and roughened by weather rather than softened by shelter. |
 
 ## Covered, flagged (0 rows)
 
