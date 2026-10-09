@@ -996,3 +996,95 @@ note in its physical-track section; athlete and pregnant marked seeded in
 `ROLES_TO_ADD.md`; AGENT_NOTES housekeeping item 9 (the two refusal forms the
 detector missed, and the thinking-budget fallback).  Chunk 6 generation
 about $2.70.
+
+Chunk 6 was committed as `5026ca2` (corpus) and `de5f1b4` (docs).  Tests:
+3,031 passed; the three failures were the trait-gap session's (the Roget
+placement of the new and renamed stems, and "thin" now being a corpus word
+in its classifier prompt's example gloss), reported to it with the cause of
+each.
+
+## Chunk 7: the TBD items (started 2026-10-09)
+
+41 entries parked "decide when reached".  Roger's decisions, group by group:
+
+- **Tarot Major Arcana (22 roles): not now**, kept in ROLES_TO_ADD as an
+  idea; queue entries `backlog`.
+- **Bourdieu and the gap words: "if they're gaps, yes"**, each checked
+  against the corpus.  Not gaps: the cultural / economic capital pair
+  (highbrow / lowbrow and educated / uneducated cover the culture, wealthy /
+  poor and financially secure / precarious the money), nouveau riche (new
+  money already says "the manners of wealth still being learned"), obscure
+  (the unmarked pole), strict (done on 2026-10-02), monodisciplinary
+  (specialist covers it).  Gaps, seeded:
+  [shabby-genteel](../data/traits/instructions/shabby_genteel.json) (as a
+  trait beside old money and new money), [famous](../data/traits/instructions/famous.json),
+  [internal locus of control](../data/traits/instructions/internal_locus_of_control.json)
+  (Rotter 1966, quoted verbatim via Houssemand, Meyers & Pignault 2019) and
+  [growth-first](../data/traits/instructions/growth_first.json).  The writer
+  ran on Opus because Fable hit its usage limit; the agent reviewed the four
+  itself (one edit: growth-first had copied environmental's chatbot phrase).
+- **Internal locus of control's partner**: its check named "external locus
+  of control | fatalistic", fatalistic's named "agentic | self-determined |
+  proactive".  Roger: fatalistic is not a unique opposite, so Rotter's own
+  external pole was seeded ("luck, chance, fate, powerful others, or forces
+  too tangled to predict") and the two paired by construction; its check
+  named internal locus of control.  fatalistic stays a narrower singleton.
+- **Growth-first and environmental**: not a clean pair (neither names the
+  other); left as a TODO in `TRAITS_TO_ADD.md`.
+- **The five PC directions from May**: not seeded; Roger: redo the naming
+  on the new corpus once its activations exist (TODO in `TRAITS_TO_ADD.md`);
+  queue entries `backlog`.
+- **Diaspora**: the gap is the second-generation integration corner, so the
+  role [bicultural](../data/roles/instructions/bicultural.json) was seeded
+  beside assimilated and marginalized ("born to immigrant parents and at home
+  in both cultures"); `diaspora_member` closed.
+- **Harmony / mastery**: Roger chose to treat Schwartz's orientations as
+  inspired gap-filling, not an official set (so not bound to Schwartz's names),
+  written for the kind of person such a culture tends to produce, and not
+  forced into opposites (Schwartz arranges seven orientations in a circle).
+  Seven orientations on three bipolar dimensions; the September audit had
+  judged embeddedness / autonomy and hierarchy / egalitarianism covered.  Roger
+  asked to work from description to label, so `generate_antonyms.py` gained
+  `--name-pos`: a second, label-blind call that names the pole the pos
+  instructions describe (tests in `test_generate_antonyms.py`; the runner
+  [name_check.py](../roger/chunk7_2026-10-09/name_check.py) records every
+  answer in the check history and the entry's `name_answers`).  Five rounds:
+  (1) Schwartz's wording with its value list: the mastery side read as
+  driven / ambitious (an existing trait) and harmony's opposite as domineering
+  (from "exploiting"); (2) value list and "exploiting" dropped: mastery read as
+  domineering (from "people ... alike" and "reorganizing how things are run"),
+  harmony as easygoing ("taking things as they come"); (3) mastery moved onto
+  circumstances and things (clearing the land, building or fixing), harmony to
+  "leaving things as they are": the content now opposes stably, each side's
+  antonym reasoning describing the other; (4) labels from the names,
+  world-changing / accepting: world-changing named world-accepting, but bare
+  "accepting" drifted its opposite to controlling (the interpersonal sense);
+  (5) world-accepting restored.  Stable from round 3: blind names
+  resourceful / proactive for the mastery side, accepting / passive for the
+  harmony side; antonyms adaptive / accommodating / acquiescent and reformist
+  / interventionist, with the counterpart label itself named once from each
+  side.  Labels as they stand: [world-changing](../data/traits/instructions/world_changing.json)
+  and [world-accepting](../data/traits/instructions/world_accepting.json).
+  Round 6, Roger's edit to world-accepting ("unity with nature" to "harmony
+  with nature"; the meaning holds, and no drift toward ecocentric showed):
+  world-changing's check named world-accepting first at score 4, and
+  world-accepting's named reformist / interventionist with "world-changing"
+  given in its reasoning as the natural label.  **Paired** on Roger's word.
+
+Spend for the chunk (from the usage records, against the last commit): generation
+$1.02, antonym and naming checks $0.23, about $1.24 in all; corpus 916 trait
+files, 340 roles.
+
+**Close (2026-10-09).**  Roger read the eight entries in
+[review_table_chunk7.md](../roger/chunk7_2026-10-09/review_table_chunk7.md)
+and edited nothing further.  Close-out: the four finished singletons and the
+role set to `done` in the queue (the two pairs stay `paired`); placeholder
+rows in `corpus_regions.json` for the seven new trait files; the
+arrangements checker clean (916 trait files, 291 pairs; 341 role files) and
+the derived lists in step; TRAITS_TO_ADD (chunk-7 row done, the Bourdieu,
+Schwartz and diaspora entries settled, closing status paragraph),
+ROLES_TO_ADD (bicultural), `data/README.md` counts, `data_analysis/README.md`
+and AGENT_NOTES (§ "Naming from the description"; housekeeping item 8)
+updated; tests in
+[tests_after_chunk7.log](../roger/chunk7_2026-10-09/tests_after_chunk7.log).
+Every chunk of the seeding plan is now done; next is the RunPod extraction.

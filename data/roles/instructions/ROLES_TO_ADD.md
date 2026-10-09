@@ -125,6 +125,13 @@ to Roger explicitly).  Still open: `nouveau_riche`
 and `shabby_genteel` as archetype roles for Bourdieu capital composition
 (TRAITS_TO_ADD § Social class, option (b)).  Roger deferred both the
 diaspora role and the Bourdieu items on 2026-09-28 (chunk 7).
+**Settled in chunk 7 (2026-10-09).**  Diaspora: the role
+[bicultural](./bicultural.json) was seeded on Roger's word, the
+second-generation integration corner beside assimilated and marginalized
+(born to immigrant parents and at home in both cultures); `diaspora_member`
+is closed.  Bourdieu: no archetype roles; `shabby_genteel` became a trait
+beside old money and new money, and `nouveau_riche` was not adopted (new
+money covers it; TRAITS_TO_ADD § Social class).
 
 **Seeded (chunk 2, Sep 2026).**  The roles above that were adopted are in
 the corpus, generated under the V2.5 rubric; per-entry state is in
@@ -168,6 +175,10 @@ parasite, ...) were never checked this way; running them through it once
 is a cheap validation of the check itself.
 
 ### TBD: the 22 Major Arcana as roles (Tarot)
+
+**Parked as an idea (Roger, 2026-10-09, chunk 7): not now.**  The 22 queue
+entries are `backlog`; everything below stays as the record for when it is
+taken up.
 
 Status: **undecided** (Roger, 2026-09-09: "still uncertain"; a
 throw-the-kitchen-sink-at-it step, acceptable because the set is labelled

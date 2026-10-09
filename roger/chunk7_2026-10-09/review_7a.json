@@ -1,0 +1,11 @@
+{
+ "reviewer": "the session agent (Opus 5.5), 2026-10-09; Fable was rate-limited",
+ "entries": [
+  {"stem": "shabby_genteel", "verdict": "ok", "issues": ["Note: 'born into' mirrors old_money's wording so the three read as a set; it leaves out someone who lost the money in their own lifetime, which is the less common sense of the word."], "suggested_edit": null, "strength": "at the notes", "nearest_existing_ok": true},
+  {"stem": "famous", "verdict": "ok", "issues": [], "suggested_edit": null, "strength": "at the notes", "nearest_existing_ok": true},
+  {"stem": "internal_locus_of_control", "verdict": "ok", "issues": ["Note: faithful to Rotter's internal pole ('contingent upon his own behavior or his own relatively permanent characteristics'); the source's contrast list (luck, chance, fate, powerful others) is left out so the description does not steer the check toward fatalistic. The quotation is second-hand (Houssemand, Meyers & Pignault 2019, citing p. 1), recorded as such."], "suggested_edit": null, "strength": "at source", "nearest_existing_ok": true},
+  {"stem": "growth_first", "verdict": "edit", "issues": ["'in one's considerations and recommendations' is copied from environmental's old description and is chatbot framing (the September rules); dropped.", "The mine, the pipeline and the factory are alternatives, so 'or' (rule 11)."], "suggested_edit": "This means ranking jobs, growth and low costs above nature: backing the mine, the pipeline or the factory, and reading environmental rules as red tape.", "strength": "at the notes", "nearest_existing_ok": true}
+ ],
+ "sets": [],
+ "summary": "Four drafts: three ok, growth-first edited (chatbot phrase from environmental dropped; 'or' for the alternatives). environmental's own description carries the same phrase; flagged for Roger, not changed (existing file)."
+}

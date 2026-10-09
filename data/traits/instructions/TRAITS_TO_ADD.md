@@ -1164,6 +1164,13 @@ on its own; place rootedness together with migration and identity.
   (a) first, (c) as the check, (b) as two roles if the archetypes are
   wanted.  Options (a)-(c) and `famous` ↔ `obscure` are still open;
   Roger deferred them on 2026-09-28 (chunk 7).
+  **Settled in chunk 7 (Roger, 2026-10-09: "if they're gaps, yes").**  Not
+  gaps, so not seeded: the economic / cultural capital pair (highbrow /
+  lowbrow and educated / uneducated carry the culture, wealthy / poor and
+  financially secure / precarious the money, so option (a) stands),
+  `nouveau_riche` (new money already covers it) and `obscure` (the unmarked
+  pole).  Gaps, seeded as singletons: [shabby-genteel](./shabby_genteel.json),
+  as a trait beside old money and new money, and [famous](./famous.json).
 - **well_connected** ↔ **friendless** -- social capital (decided
   2026-09-07).
 - **solitary** -- new trait as the real partner for the existing
@@ -1288,7 +1295,7 @@ Schwartz's cultural-level orientations (seven, on three bipolar axes):
 |---|---|---|
 | embeddedness ↔ autonomy (intellectual, affective) | individualistic ↔ collectivistic; curious ↔ incurious (intellectual autonomy); hedonistic(disciplined) (affective autonomy) | covered |
 | hierarchy ↔ egalitarianism | egalitarian ↔ elitist | covered |
-| mastery ↔ harmony | no pair: conciliatory ↔ confrontational is interpersonal only; ecocentric ↔ anthropocentric and environmental(economic) cover harmony-with-nature only | **approved in principle, names TBD** (Roger, 2026-09-08: `mastery` / `harmony` need better names). The axis: actively changing, directing and exploiting the social and natural world to get ahead vs fitting into it and accepting it as it is. Options: `world-shaping` ↔ `world-accepting` (recommended: says what the axis is), `striving` ↔ `accepting` (`accepting` alone reads as tolerant of people), `ambitious` ↔ `contented` (drifts toward the drive axis). Overlaps to check: proactive ↔ reactive, conciliatory ↔ confrontational, ecocentric. |
+| mastery ↔ harmony | no pair: conciliatory ↔ confrontational is interpersonal only; ecocentric ↔ anthropocentric and environmental(economic) cover harmony-with-nature only | **seeded 2026-10-09 (chunk 7) as [world-changing](./world_changing.json) ↔ [world-accepting](./world_accepting.json), a clean pair.**  Roger treated it as inspired gap-filling, not an official Schwartz set: written for the kind of person such a culture produces, not forced into opposites, and named from the descriptions by the label-blind `generate_antonyms.py --name-pos` over six rounds (seeding log 2026-10, chunk 7).  Earlier: **approved in principle, names TBD** (Roger, 2026-09-08: `mastery` / `harmony` need better names). The axis: actively changing, directing and exploiting the social and natural world to get ahead vs fitting into it and accepting it as it is. Options: `world-shaping` ↔ `world-accepting` (recommended: says what the axis is), `striving` ↔ `accepting` (`accepting` alone reads as tolerant of people), `ambitious` ↔ `contented` (drifts toward the drive axis). Overlaps to check: proactive ↔ reactive, conciliatory ↔ confrontational, ecocentric. |
 
 Schwartz's individual-level circle (ten values, two bipolar axes):
 openness-to-change ↔ conservation is covered by innovative ↔ traditional
@@ -1320,6 +1327,10 @@ heritage language).  Decisions:
   roles already span; the gap is the multi-generational community identity
   held abroad by someone who may never have lived in the homeland.
   Undecided; `diasporan` is the generic name if the gap is wanted.
+  **Settled in chunk 7 (Roger, 2026-10-09):** the gap taken is the
+  second-generation integration corner, seeded as the role
+  [bicultural](../../roles/instructions/bicultural.json) beside assimilated
+  and marginalized; the heritage map covers the multi-generational sense.
   Racial-identity stage models and heritage language: not pursued.
 
 ### Anthropological social structure (decided 2026-09-07)
@@ -3041,7 +3052,7 @@ TBD, ~100 backlog, 88 not adopted); the inventory becomes
 | 4 | **done 2026-10-08** (127 seeded and generated under V2 by the standards method, every decision taken; 74 facet / aspect / dichotomy entries parked as `backlog` for the post-extraction verdict): standards: pairs and orthoplexes (41) then sets and rings (100); lenient pairing per the policy; near-duplicate tagging | 127 (+74 backlog) | Big Five / HEXACO low-pole names |
 | 5 | **done 2026-10-08** (90 seeded and generated under V2, every decision taken; distressed dropped, three heritage entries parked; no refusals): unpaired plain traits and plain sets: memberships, states, the two simplices; the sensitive batch (~20) handled together | 90 (+1 dropped, +3 backlog) | refusals (none came) |
 | 6 | **done 2026-10-08** (29 traits and 2 roles seeded under V2, body-only; three not tagged `physical` on Roger's word): physical track, tagged `physical` | 31 | brown-haired and brown-eyed balked without thinking |
-| 7 | TBD items, decided as reached: tarot, male / female, Bourdieu, diaspora, nouveau_riche / shabby_genteel, the PC-named May candidates | 48 | all |
+| 7 | **done 2026-10-09** (7 traits and 1 role seeded, every decision taken; 22 Tarot roles and the 5 PC directions `backlog`, 6 not adopted as not gaps): TBD items, decided as reached: tarot, male / female, Bourdieu, diaspora, nouveau_riche / shabby_genteel, the PC-named May candidates | 48 | Schwartz's names, worked from description to label (`--name-pos`) |
 | then | one RunPod extraction for the whole batch (expensive-operations confirmation), then the post-extraction research: arrangement geometry, near-duplicate exclusions, physical track, hierarchy recovery | | |
 
 Order: 0, 1, 1b, 2, 3, V2, 4, 5, 6, with 7 taken as items come up.  Generation
@@ -3251,6 +3262,27 @@ and dark-skinned went straight through; with a thinking budget both
 generated cleanly (seeding log, chunk 6).  Corpus: 909 trait files, 289
 pairs; 339 roles.  Chunk 6 generation about $2.70.  Next: the commit, then
 chunk 7 (the TBD items, decided as reached).
+
+Status 2026-10-09 (close of chunk 7).  The TBD items, decided one by one.
+Tarot (22 roles) not now: an idea in ROLES_TO_ADD, queue entries `backlog`.
+The five PC directions from May: `backlog`, to be named afresh on the next
+extraction's vectors (§ "TODO: chunk 7 leftovers").  Bourdieu and the gap
+words were seeded where they are still gaps: [shabby-genteel](./shabby_genteel.json),
+[famous](./famous.json) and [growth-first](./growth_first.json) as
+singletons (growth-first and environmental are not a clean pair, a TODO),
+and [internal locus of control](./internal_locus_of_control.json) with
+Rotter's own [external locus of control](./external_locus_of_control.json),
+paired by construction (fatalistic, which its check also named, is not a
+unique opposite).  Not gaps: the capital pair, nouveau riche, obscure, strict
+(done 2026-10-02) and monodisciplinary.  Diaspora became the role
+[bicultural](../../roles/instructions/bicultural.json).  Schwartz's
+mastery / harmony became [world-changing](./world_changing.json) ↔
+[world-accepting](./world_accepting.json), worked from description to label
+with the new label-blind naming call and paired after Roger's last edit.
+Corpus: 916 trait files, 291 pairs; 340 roles.  Chunk 7 about $1.24
+(generation $1.02, checks $0.23).  Every chunk of the seeding plan is now
+done.  Next: the RunPod extraction (expensive-operations confirmation),
+then the post-extraction TODOs.
 
 ## Trait generator V2: the next task, before chunk 4 (Roger, 2026-09-28)
 
@@ -4656,6 +4688,28 @@ finished (doing them per-edit wastes API calls).  Counts are as of 2026-09-07.
    is within bounds).
    The "This trait involves ..." / "This involves ..." variants (29 traits)
    were left as-is; they read fine in every prompt site.
+
+## TODO: chunk 7 leftovers (Roger, 2026-10-09)
+
+- **Redo the PC-direction naming on the new corpus** (Roger, 2026-10-09:
+  "leave redoing this as a TODO once we have activations").  May's Strategy
+  1b named five underused principal directions of the old corpus (PC10
+  humorous / serious, PC13 cultured / uncultured, PC14 literal-explicitness /
+  withholding-evasion, PC15 solitary-reserved / connective-communicative,
+  PC16 symbolic manipulation / embodied care; each under 2% of variance).
+  The corpus has since tripled and most look covered now (witty, playful and
+  solemn; highbrow and educated; literal and forthright; solitary and
+  reserved; the RIASEC ring), so the five queue entries are `backlog`, and the
+  analysis is to be rerun on the next extraction's vectors and whatever
+  underused directions remain named then.
+- **[growth-first](./growth_first.json) and [environmental](./environmental.json)
+  are not a clean pair** (Roger: "leave this as a TODO").  Growth-first was
+  written as environmental's mirror, but neither check names the other:
+  growth-first returns nature-first | conservation-first | environmentalist,
+  environmental returns exploitative | anthropocentric.  Both stay singletons.
+  If the pair is taken up: environmental's description is an old one with
+  the chatbot phrase "in one's considerations and recommendations", which
+  would go in the same edit.
 
 ## TODO: post-extraction checks for chunk 5 (Roger, 2026-10-08)
 

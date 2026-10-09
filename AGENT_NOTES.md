@@ -4963,6 +4963,24 @@ different word.  Worked examples of every branch, including the
 give-ups, are in `reports/seeding_log_2026-09.md` (the 2026-09-16/17
 pairing review: 22 cases, 34 pairs, 12 singletons, 7 deletions).
 
+**Naming from the description (Roger, 2026-10-09, chunk 7).**  When the
+label itself is open (a theory's names that do not fit a persona, such as
+Schwartz's mastery / harmony), work from description to label, not the
+other way: write the descriptions, generate under provisional labels, and
+run `generate_antonyms.py --name-pos`, which adds a second, label-blind call
+that reads only the five pos instructions and names the pole they describe
+(`positive_name`), beside the usual antonym of the neg side.  Rename to the
+words the calls settle on, edit a description where a clause pulls the name
+off target (in round 2 "people ... alike" made the mastery side read as
+domineering), and repeat until two rounds agree; pair when each side's
+antonym names the other.  The pos instructions were written with the
+provisional label in view, so the blind name can still lean toward it; a
+name that differs from the label is the stronger evidence.  Six rounds took
+mastery / harmony to world-changing / world-accepting
+(`reports/seeding_log_2026-10.md`, chunk 7; the runner that records each
+answer in the check history and the entry's `name_answers` is
+`roger/chunk7_2026-10-09/name_check.py`).
+
 ### Why non-X first?
 
 Starting with `non-B` instead of `A` ensures the antonym generator discovers `A` independently from the neg instructions, rather than being primed by us providing it. This validates that the pos/neg instruction pairs genuinely capture the A↔B opposition.
@@ -5900,7 +5918,11 @@ the sections above hold data-regeneration items.  Tick off in place.
    (`data/candidates/roget/label_heads.json`, `corpus_regions.json`) fails
    its acceptance tests, so tell that session at the moment of a rename,
    with the old and new stems; the new chunk's trait files also each need a
-   placeholder row in `corpus_regions.json` (done for chunks 4, 5 and 6).
+   placeholder row in `corpus_regions.json` (done for chunks 4 to 7).
+   Chunk 7 (2026-10-09) met the first half again: mastery and harmony
+   were renamed by hand to world_changing and world_accepting, mastery
+   through a working stem, so its `renamed_from` was kept on the original
+   stem by hand (item 5 (b)).
 9. **Refusals the detector does not see** (2026-10-08, chunk 6).  The
    generator refused brown-haired by writing "ERROR: ... a physical
    descriptor, not a personality trait" into the eval prompt of an
