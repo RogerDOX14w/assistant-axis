@@ -83,12 +83,6 @@ class TestParse:
         a = parse_arrangement({"kind": "square", "members": ["a", "b", "c", "d"], "axes": [["a", "b"], ["c", "d"]]})
         assert a.axes == (("a", "b"), ("c", "d"))
 
-    def test_tree_keys_only_on_tree(self):
-        with pytest.raises(ArrangementError, match="only valid for kind 'tree'"):
-            parse_arrangement({"kind": "set", "members": ["a", "b"], "parent": "a"})
-        t = parse_arrangement({"kind": "tree", "members": ["a", "b"], "parent": None, "children": ["b"]})
-        assert t.parent is None and t.children == ("b",)
-
     def test_extras_preserved_and_serialised_last(self):
         a = parse_arrangement({"kind": "set", "members": ["a", "b"], "confirmed": True, "note": "n"})
         assert a.extra == {"confirmed": True}
@@ -107,6 +101,86 @@ class TestParse:
         arrs = parse_field(objs)
         assert field_to_json(arrs) == objs
         assert field_to_json(arrs[:1]) == objs[0]
+
+
+class TestTree:
+    """The nested ``structure`` form of a tree (Roger, 2026-10-09)."""
+
+    POLY = {"kind": "tree", "members": ["polyandrous", "polygamous", "polygynous"],
+            "structure": {"polygamous": {"polyandrous": {}, "polygynous": {}}}}
+
+    def test_valid_tree(self):
+        t = parse_arrangement(self.POLY)
+        assert t.kind == "tree" and t.members == ("polyandrous", "polygamous", "polygynous")
+        assert t.structure == {"polygamous": {"polyandrous": {}, "polygynous": {}}}
+        assert arr.tree_links(t) == {
+            "polygamous": (None, ("polyandrous", "polygynous")),
+            "polyandrous": ("polygamous", ()),
+            "polygynous": ("polygamous", ()),
+        }
+
+    def test_two_members_is_the_minimum(self):
+        t = parse_arrangement({"kind": "tree", "members": ["a", "b"], "structure": {"a": {"b": {}}}})
+        assert arr.tree_links(t) == {"a": (None, ("b",)), "b": ("a", ())}
+        with pytest.raises(ArrangementError, match="at least 2"):
+            parse_arrangement({"kind": "tree", "members": ["a"], "structure": {"a": {}}})
+
+    def test_leaf_and_branch_round_trip(self):
+        # three levels: a branch under the root, leaves at two depths
+        obj = {"kind": "tree", "members": ["aspect", "domain", "facet1", "facet2", "other"],
+               "structure": {"domain": {"aspect": {"facet1": {}, "facet2": {}}, "other": {}}},
+               "source": "x"}
+        t = parse_arrangement(obj)
+        js = arrangement_to_json(t)
+        assert js == obj
+        assert list(js) == ["kind", "members", "structure", "source"]
+        assert parse_arrangement(js) == t
+        assert field_to_json(parse_field([obj, {"kind": "set", "members": ["a", "b"]}]))[0] == obj
+        links = arr.tree_links(t)
+        assert links["aspect"] == ("domain", ("facet1", "facet2"))
+        assert links["facet2"] == ("aspect", ()) and links["other"] == ("domain", ())
+
+    def test_children_serialised_sorted(self):
+        t = parse_arrangement({"kind": "tree", "members": ["a", "b", "c"],
+                               "structure": {"a": {"c": {}, "b": {}}}})
+        assert list(arrangement_to_json(t)["structure"]["a"]) == ["b", "c"]
+
+    def test_serialised_structure_is_a_copy(self):
+        t = parse_arrangement(self.POLY)
+        js = arrangement_to_json(t)
+        js["structure"]["polygamous"]["polyandrous"]["x"] = {}
+        assert t.structure == self.POLY["structure"]
+
+    @pytest.mark.parametrize("structure,match", [
+        ({"polygamous": {"polyandrous": {}}, "polygynous": {}}, "exactly one root, got 2"),
+        ({}, "exactly one root, got 0"),
+        ({"polygamous": {"polyandrous": {"polygamous": {}}, "polygynous": {}}}, "'polygamous' appears more than once"),
+        ({"polygamous": {"polyandrous": {}, "polygynous": {}, "monogamous": {}}}, "names non-members: monogamous"),
+        ({"polygamous": {"polyandrous": {}}}, "members missing from 'structure': polygynous"),
+        ({"polygamous": {"polyandrous": {}, "polygynous": None}}, "value of 'polygynous' must be an object"),
+        ({"polygamous": ["polyandrous", "polygynous"]}, "value of 'polygamous' must be an object"),
+        (["polygamous"], "'structure' must be an object"),
+    ])
+    def test_malformed_structure(self, structure, match):
+        obj = dict(self.POLY, structure=structure)
+        with pytest.raises(ArrangementError, match=match):
+            parse_arrangement(obj)
+
+    def test_structure_required_and_tree_only(self):
+        with pytest.raises(ArrangementError, match="needs 'structure'"):
+            parse_arrangement({"kind": "tree", "members": ["a", "b"]})
+        with pytest.raises(ArrangementError, match="only valid for kind 'tree'"):
+            parse_arrangement({"kind": "set", "members": ["a", "b"], "structure": {"a": {"b": {}}}})
+
+    def test_retired_parent_children_rejected(self):
+        with pytest.raises(ArrangementError, match="'parent' / 'children' retired"):
+            parse_arrangement({"kind": "tree", "members": ["a", "b"], "parent": None, "children": ["b"]})
+        with pytest.raises(ArrangementError, match="'parent' retired"):
+            parse_arrangement({"kind": "set", "members": ["a", "b"], "parent": "a"})
+
+    def test_tree_links_needs_a_tree(self):
+        with pytest.raises(ArrangementError, match="needs a tree"):
+            arr.tree_links(parse_arrangement({"kind": "set", "members": ["a", "b"]}))
 
 
 # ---------------------------------------------------------------------------
@@ -251,17 +325,41 @@ class TestValidateCorpus:
             _write(t, s, trait(s, f"non-{s}", sq))
         assert validate_corpus(tmp_path, "traits") == []
 
-    def test_tree_links(self, tmp_path: Path):
+    def test_tree_identical_in_every_member_file(self, tmp_path: Path):
         t = tmp_path / "traits" / "instructions"
-        members = ["child1", "child2", "root"]
-        _write(t, "root", trait("root", "non-root", {"kind": "tree", "members": members, "parent": None, "children": ["child1", "child2"]}))
-        _write(t, "child1", trait("child1", "non-child1", {"kind": "tree", "members": members, "parent": "root", "children": []}))
-        _write(t, "child2", trait("child2", "non-child2", {"kind": "tree", "members": members, "parent": "root", "children": []}))
+        members = ["polyandrous", "polygamous", "polygynous"]
+        tree = {"kind": "tree", "members": members,
+                "structure": {"polygamous": {"polyandrous": {}, "polygynous": {}}}}
+        for s in members:
+            _write(t, s, trait(s, f"non-{s}", tree))
         assert validate_corpus(tmp_path, "traits") == []
-        _write(t, "child2", trait("child2", "non-child2", {"kind": "tree", "members": members, "parent": None, "children": []}))
+        assert summarize_corpus(tmp_path, "traits")["by_kind"] == {"tree": 3}
+        # key order in a file does not matter: same hierarchy
+        reordered = dict(tree, structure={"polygamous": {"polygynous": {}, "polyandrous": {}}})
+        _write(t, "polygynous", trait("polygynous", "non-polygynous", reordered))
+        assert validate_corpus(tmp_path, "traits") == []
+        # one file records a different hierarchy over the same members
+        other = dict(tree, structure={"polyandrous": {"polygamous": {"polygynous": {}}}})
+        _write(t, "polygynous", trait("polygynous", "non-polygynous", other))
         msgs = [str(p) for p in validate_corpus(tmp_path, "traits")]
-        assert any("does not name root as parent" in m for m in msgs)
-        assert any("expected exactly one root, found 2" in m for m in msgs)
+        assert "traits/polygamous: tree: member polygynous records the same members with a different structure" in msgs
+        assert "traits/polygynous: tree: member polyandrous records the same members with a different structure" in msgs
+        # a member file without the tree at all
+        _write(t, "polygynous", trait("polygynous", "non-polygynous"))
+        msgs = [str(p) for p in validate_corpus(tmp_path, "traits")]
+        assert "traits/polygamous: tree: member polygynous does not record the same arrangement" in msgs
+
+    def test_tree_malformed_reported_per_file(self, tmp_path: Path):
+        t = tmp_path / "traits" / "instructions"
+        members = ["a", "b", "c"]
+        good = {"kind": "tree", "members": members, "structure": {"a": {"b": {}, "c": {}}}}
+        two_roots = dict(good, structure={"a": {"b": {}}, "c": {}})
+        for s in ("a", "b"):
+            _write(t, s, trait(s, f"non-{s}", good))
+        _write(t, "c", trait("c", "non-c", two_roots))
+        msgs = [str(p) for p in validate_corpus(tmp_path, "traits")]
+        assert "traits/c: malformed arrangement: 'structure' must have exactly one root, got 2" in msgs
+        assert summarize_corpus(tmp_path, "traits")["malformed"] == ["c"]
 
     def test_multiple_arrangements_per_entity(self, corpus: Path):
         t = corpus / "traits" / "instructions"

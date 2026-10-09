@@ -598,18 +598,32 @@ def add_rename(value, record: dict):
     return record if not history else history + [record]
 
 
+def _structure_names(node, stem: str) -> bool:
+    """True when the nested tree ``structure`` has ``stem`` as a key at any depth."""
+    return isinstance(node, dict) and any(k == stem or _structure_names(v, stem) for k, v in node.items())
+
+
+def _rename_in_structure(node, old: str, new: str):
+    """The nested tree ``structure`` with the key ``old`` renamed ``new``,
+    children re-sorted at every level (the canonical form)."""
+    if not isinstance(node, dict):
+        return node
+    renamed = {(new if k == old else k): _rename_in_structure(v, old, new) for k, v in node.items()}
+    return {k: renamed[k] for k in sorted(renamed)}
+
+
 def _names_stem(arr: dict, stem: str) -> bool:
-    return (stem in (arr.get("members") or []) or arr.get("parent") == stem
-            or stem in (arr.get("children") or [])
+    return (stem in (arr.get("members") or [])
+            or _structure_names(arr.get("structure"), stem)
             or any(isinstance(ax, list) and stem in ax for ax in (arr.get("axes") or [])))
 
 
 def rename_in_arrangement(field, old: str, new: str, note: Optional[str] = None):
     """``field`` (one arrangement object or a list) with the stem ``old``
     replaced by ``new`` wherever an arrangement names it: ``members``
-    (re-sorted, except for the ordered kinds), ``axes``, ``parent``,
-    ``children``.  ``note`` is appended to the note of each arrangement that
-    changed.  Returns ``(field, changed)``."""
+    (re-sorted, except for the ordered kinds), ``axes``, and a tree's
+    ``structure`` keys (children re-sorted).  ``note`` is appended to the
+    note of each arrangement that changed.  Returns ``(field, changed)``."""
     if not field:
         return field, False
     items = field if isinstance(field, list) else [field]
@@ -625,10 +639,8 @@ def rename_in_arrangement(field, old: str, new: str, note: Optional[str] = None)
             a["members"] = members if str(a.get("kind", "")).strip().lower() in ORDERED_KINDS else sorted(members)
         if isinstance(a.get("axes"), list):
             a["axes"] = [[sub(m) for m in ax] if isinstance(ax, list) else ax for ax in a["axes"]]
-        if a.get("parent") == old:
-            a["parent"] = new
-        if isinstance(a.get("children"), list):
-            a["children"] = [sub(c) for c in a["children"]]
+        if isinstance(a.get("structure"), dict):
+            a["structure"] = _rename_in_structure(a["structure"], old, new)
         if note:
             a["note"] = f"{a['note']} | {note}" if a.get("note") else note
         out.append(a)

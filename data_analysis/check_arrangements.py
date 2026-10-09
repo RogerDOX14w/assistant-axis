@@ -15,7 +15,9 @@ What is checked:
 * trait pairs agree with reciprocal ``negative_label`` fields in both
   directions, octahedra / orthoplexes partition into clean pairs, and every
   clean pair by label is recorded in some arrangement of a classified trait;
-* tree links are consistent (one root, children name their parent).
+* a tree's ``structure`` is well formed (nested objects, one root, every
+  stem once, the stems equal to ``members``) and every member file records
+  the identical structure.
 
 A missing field is *not yet classified* and is reported as a count, never
 as an error.

@@ -22,7 +22,7 @@ Kinds, canonical spellings::
                                             N binary axes
     octahedron, N-orthoplex             6, 2N (N >= 4): the poles of N clean pairs
     ring                                >= 3, ordered cyclically (circumplexes)
-    tree                                >= 2, with ``parent`` / ``children`` links
+    tree                                >= 2, the hierarchy nested in ``structure``
     map                                 >= 2, unordered, expected to have a
                                             low-dimensional metric structure
     sequence                            >= 2, ordered along a rough axis
@@ -36,9 +36,22 @@ Numeric aliases are accepted and canonicalised: ``2-simplex`` -> ``triangle``,
 Members are file stems (never display labels), include the entity itself,
 and are sorted, except for ``sequence`` and ``ring`` whose order is the
 content.  Optional keys: ``axes`` (list of two-element lists naming the
-clean pairs that form the axes of a square / cube / orthoplex), ``parent``
-and ``children`` (tree only), ``source`` (provenance of an imported
-structure), ``note`` (free text).  Unknown keys are preserved.
+clean pairs that form the axes of a square / cube / orthoplex), ``source``
+(provenance of an imported structure), ``note`` (free text).  Unknown keys
+are preserved.
+
+A ``tree`` also requires ``structure``, the hierarchy as a nested object
+whose keys are stems and whose values are their subtrees (``{}`` for a
+leaf), with exactly one root key and every member exactly once::
+
+    {"kind": "tree", "members": ["polyandrous", "polygamous", "polygynous"],
+     "structure": {"polygamous": {"polyandrous": {}, "polygynous": {}}}}
+
+so that every member file records the identical arrangement (Roger,
+2026-10-09; the earlier per-file ``parent`` / ``children`` links, never
+used by any data, are rejected with a pointer here).  Children are
+serialised in sorted order; :func:`tree_links` gives each member's parent
+and children.
 
 The pair convention is unchanged: a clean pair of traits is still two files
 whose ``negative_label`` fields point at each other's ``positive_label``.
@@ -47,7 +60,7 @@ prompt-facing antonyms, and :func:`validate_corpus` refuses to let the two
 disagree.  Roles have no ``negative_label``, so their pairs exist only here.
 
 Entry points: :func:`canonical_kind`, :func:`expected_size`,
-:func:`parse_arrangement`, :func:`load_corpus_arrangements`,
+:func:`parse_arrangement`, :func:`tree_links`, :func:`load_corpus_arrangements`,
 :func:`validate_corpus`, :func:`summarize_corpus`,
 :func:`arrangement_to_json`.  The CLI wrappers are
 ``data_analysis/check_arrangements.py`` and
@@ -85,7 +98,9 @@ _SMALL_NUMERIC: Dict[Tuple[str, int], str] = {
 ORDERED_KINDS = frozenset({"sequence", "ring"})
 #: kinds whose members must partition into clean pairs (traits only)
 PAIRWISE_KINDS_PREFIX = ("octahedron", "-orthoplex")
-_JSON_KEY_ORDER = ("kind", "members", "axes", "parent", "children", "source", "note")
+_JSON_KEY_ORDER = ("kind", "members", "axes", "structure", "source", "note")
+#: tree keys of the per-file form replaced by ``structure`` on 2026-10-09
+_RETIRED_TREE_KEYS = ("parent", "children")
 
 
 class ArrangementError(ValueError):
@@ -143,8 +158,8 @@ class Arrangement:
     kind: str
     members: Tuple[str, ...] = ()
     axes: Optional[Tuple[Tuple[str, str], ...]] = None
-    parent: Optional[str] = None
-    children: Tuple[str, ...] = ()
+    #: tree only: the hierarchy as nested ``{stem: subtree}``, children sorted
+    structure: Optional[Dict[str, Any]] = None
     source: Optional[str] = None
     note: Optional[str] = None
     extra: Dict[str, Any] = field(default_factory=dict)
@@ -164,12 +179,66 @@ def _stems(values: Iterable[Any], what: str) -> Tuple[str, ...]:
     return tuple(out)
 
 
+def _parse_structure(raw: Any, members: Sequence[str]) -> Dict[str, Any]:
+    """Check a tree's ``structure`` against its ``members`` and return it in
+    canonical form (children sorted at every level).
+
+    Well-formed means: nested objects all the way down (``{}`` for a leaf),
+    exactly one root key, every stem once, and the stems equal to the
+    members.
+    """
+    if not isinstance(raw, Mapping):
+        raise ArrangementError(f"'structure' must be an object, got {type(raw).__name__}")
+    if len(raw) != 1:
+        raise ArrangementError(f"'structure' must have exactly one root, got {len(raw)}")
+    seen: set = set()
+
+    def walk(node: Mapping) -> Dict[str, Any]:
+        out: Dict[str, Any] = {}
+        for stem in sorted(node, key=str):
+            if not isinstance(stem, str) or not stem:
+                raise ArrangementError("'structure' keys must be non-empty strings")
+            if stem in seen:
+                raise ArrangementError(f"'structure': stem {stem!r} appears more than once")
+            seen.add(stem)
+            sub = node[stem]
+            if not isinstance(sub, Mapping):
+                raise ArrangementError(
+                    f"'structure': the value of {stem!r} must be an object ({{}} for a leaf), "
+                    f"got {type(sub).__name__}")
+            out[stem] = walk(sub)
+        return out
+
+    canonical = walk(raw)
+    extra = sorted(seen - set(members))
+    if extra:
+        raise ArrangementError(f"'structure' names non-members: {', '.join(extra)}")
+    missing = sorted(set(members) - seen)
+    if missing:
+        raise ArrangementError(f"members missing from 'structure': {', '.join(missing)}")
+    return canonical
+
+
+def tree_links(arr: Arrangement) -> Dict[str, Tuple[Optional[str], Tuple[str, ...]]]:
+    """``{stem: (parent or None for the root, children sorted)}`` for a tree."""
+    if arr.kind != "tree" or arr.structure is None:
+        raise ArrangementError(f"tree_links needs a tree, got kind {arr.kind!r}")
+    links: Dict[str, Tuple[Optional[str], Tuple[str, ...]]] = {}
+    stack: List[Tuple[Optional[str], Mapping]] = [(None, arr.structure)]
+    while stack:
+        parent, node = stack.pop()
+        for stem, sub in node.items():
+            links[stem] = (parent, tuple(sorted(sub)))
+            stack.append((stem, sub))
+    return links
+
+
 def parse_arrangement(obj: Any) -> Arrangement:
     """Validate one arrangement object and return an :class:`Arrangement`.
 
     Only the *shape of the object* is checked here (types, kind spelling,
-    member count, key presence); cross-file consistency is
-    :func:`validate_corpus`'s job.
+    member count, key presence, a tree's ``structure`` against its
+    members); cross-file consistency is :func:`validate_corpus`'s job.
     """
     if not isinstance(obj, Mapping):
         raise ArrangementError(f"arrangement must be an object, got {type(obj).__name__}")
@@ -202,20 +271,25 @@ def parse_arrangement(obj: Any) -> Arrangement:
                 raise ArrangementError(f"axis ({a}, {b}) names a non-member")
             parsed_axes.append((a, b))
         axes = tuple(parsed_axes)
-    parent = obj.get("parent")
-    if parent is not None and (not isinstance(parent, str) or not parent):
-        raise ArrangementError("'parent' must be a non-empty string or null")
-    children = _stems(obj.get("children", []) or [], "'children'")
-    if kind != "tree" and (parent is not None or children):
-        raise ArrangementError("'parent' / 'children' are only valid for kind 'tree'")
+    retired = [k for k in _RETIRED_TREE_KEYS if k in obj]
+    if retired:
+        raise ArrangementError(
+            f"{' / '.join(repr(k) for k in retired)} retired on 2026-10-09: a tree records its "
+            "hierarchy in 'structure', identical in every member file")
+    structure = None
+    if kind == "tree":
+        if obj.get("structure") is None:
+            raise ArrangementError("kind 'tree' needs 'structure' (the hierarchy as nested objects)")
+        structure = _parse_structure(obj["structure"], members)
+    elif obj.get("structure") is not None:
+        raise ArrangementError("'structure' is only valid for kind 'tree'")
     for key in ("source", "note"):
         if obj.get(key) is not None and not isinstance(obj[key], str):
             raise ArrangementError(f"'{key}' must be a string")
     extra = {k: v for k, v in obj.items() if k not in _JSON_KEY_ORDER}
     return Arrangement(
-        kind=kind, members=members, axes=axes, parent=parent,
-        children=children, source=obj.get("source"), note=obj.get("note"),
-        extra=extra,
+        kind=kind, members=members, axes=axes, structure=structure,
+        source=obj.get("source"), note=obj.get("note"), extra=extra,
     )
 
 
@@ -231,15 +305,14 @@ def parse_field(value: Any) -> List[Arrangement]:
 
 
 def arrangement_to_json(arr: Arrangement) -> Dict[str, Any]:
-    """Serialise in canonical key order (kind, members, axes, parent, children, source, note, extras)."""
+    """Serialise in canonical key order (kind, members, axes, structure, source, note, extras)."""
     out: Dict[str, Any] = {"kind": arr.kind}
     if arr.kind != "singleton":
         out["members"] = list(arr.members)
     if arr.axes is not None:
         out["axes"] = [list(a) for a in arr.axes]
-    if arr.kind == "tree":
-        out["parent"] = arr.parent
-        out["children"] = list(arr.children)
+    if arr.structure is not None:
+        out["structure"] = json.loads(json.dumps(arr.structure))  # a copy, children sorted
     if arr.source is not None:
         out["source"] = arr.source
     if arr.note is not None:
@@ -324,7 +397,8 @@ def reciprocal_pairs(records: Mapping[str, EntityRecord]) -> List[Tuple[str, str
 
 
 def _same_arrangement(a: Arrangement, b: Arrangement) -> bool:
-    return a.kind == b.kind and a.member_key == b.member_key
+    """Same kind and members, and for a tree the same hierarchy."""
+    return a.kind == b.kind and a.member_key == b.member_key and a.structure == b.structure
 
 
 def validate_corpus(data_dir: Union[str, Path], entity_type: str) -> List[Problem]:
@@ -373,7 +447,11 @@ def validate_corpus(data_dir: Union[str, Path], entity_type: str) -> List[Proble
                 if other.parse_error:
                     continue
                 if not any(_same_arrangement(arr, o) for o in other.arrangements):
-                    add(stem, f"{arr.kind}: member {m} does not record the same arrangement")
+                    if arr.kind == "tree" and any(o.kind == "tree" and o.member_key == arr.member_key
+                                                  for o in other.arrangements):
+                        add(stem, f"tree: member {m} records the same members with a different structure")
+                    else:
+                        add(stem, f"{arr.kind}: member {m} does not record the same arrangement")
             if entity_type == "traits":
                 if arr.kind == "pair":
                     a, b = arr.members
@@ -388,22 +466,9 @@ def validate_corpus(data_dir: Union[str, Path], entity_type: str) -> List[Proble
                 for a, b in arr.axes:
                     if entity_type == "traits" and tuple(sorted((a, b))) not in label_pairs:
                         add(stem, f"{arr.kind}: axis {a} / {b} is not a clean pair")
-            if arr.kind == "tree":
-                if arr.parent is not None and arr.parent not in arr.members:
-                    add(stem, f"tree: parent {arr.parent} is not a member")
-                for c in arr.children:
-                    if c not in arr.members:
-                        add(stem, f"tree: child {c} is not a member")
-                    elif c in records and not records[c].parse_error:
-                        child_arrs = [o for o in records[c].arrangements if _same_arrangement(arr, o)]
-                        if child_arrs and child_arrs[0].parent != stem:
-                            add(stem, f"tree: child {c} does not name {stem} as parent")
-                if stem in arr.members and arr.parent is None:
-                    roots = [m for m in arr.members if m in records and any(
-                        _same_arrangement(arr, o) and o.parent is None
-                        for o in records[m].arrangements)]
-                    if len(roots) != 1:
-                        add(stem, f"tree: expected exactly one root, found {len(roots)}")
+            # a tree's structure is checked by parse_arrangement (one root,
+            # stems once, stems == members) and compared across member files
+            # by _same_arrangement above
 
     if entity_type == "traits":
         for a, b in sorted(label_pairs):
@@ -444,5 +509,5 @@ __all__ = [
     "ORDERED_KINDS", "arrangement_to_json", "canonical_kind", "expected_size",
     "field_to_json", "instructions_dir", "is_ordered", "is_pairwise",
     "load_corpus_arrangements", "parse_arrangement", "parse_field",
-    "reciprocal_pairs", "summarize_corpus", "validate_corpus",
+    "reciprocal_pairs", "summarize_corpus", "tree_links", "validate_corpus",
 ]

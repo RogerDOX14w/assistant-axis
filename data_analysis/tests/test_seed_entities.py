@@ -469,12 +469,18 @@ class TestRenameArrangements:
         assert "libertarian: arrangement names determinist, not deterministic; negative_label 'deterministic' -> 'determinist'" in out
         assert "fatalist: arrangement names determinist" in out
 
-    def test_rename_in_arrangement_covers_axes_parent_and_children(self):
-        tree = {"kind": "tree", "members": ["b", "old", "z"], "parent": "old", "children": ["old", "z"]}
+    def test_rename_in_arrangement_covers_axes_and_tree_structure(self):
+        tree = {"kind": "tree", "members": ["b", "old", "z"], "structure": {"b": {"old": {}, "z": {}}}}
         sq = {"kind": "square", "members": ["a", "b", "c", "old"], "axes": [["a", "old"], ["b", "c"]]}
+        out, changed = se.rename_in_arrangement([tree, sq, {"kind": "pair", "members": ["p", "q"]}], "old", "zz")
+        assert changed
+        assert out[0] == {"kind": "tree", "members": ["b", "z", "zz"], "structure": {"b": {"z": {}, "zz": {}}}}
+        assert list(out[0]["structure"]["b"]) == ["z", "zz"]  # children re-sorted
+        root, _ = se.rename_in_arrangement(tree, "b", "a")  # the root itself
+        assert root["structure"] == {"a": {"old": {}, "z": {}}}
         out, changed = se.rename_in_arrangement([tree, sq, {"kind": "pair", "members": ["p", "q"]}], "old", "new")
         assert changed
-        assert out[0] == {"kind": "tree", "members": ["b", "new", "z"], "parent": "new", "children": ["new", "z"]}
+        assert out[0] == {"kind": "tree", "members": ["b", "new", "z"], "structure": {"b": {"new": {}, "z": {}}}}
         assert out[1] == {"kind": "square", "members": ["a", "b", "c", "new"], "axes": [["a", "new"], ["b", "c"]]}
         assert out[2] == {"kind": "pair", "members": ["p", "q"]}
         assert se.rename_in_arrangement({"kind": "singleton"}, "old", "new") == ({"kind": "singleton"}, False)

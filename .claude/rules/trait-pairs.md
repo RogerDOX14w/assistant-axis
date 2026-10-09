@@ -425,7 +425,7 @@ the never-committed borderline and fear_prone on 2026-10-08); keeps the
 rename in the corpus has it; a list, oldest first, from the second on,
 which `entity_id.resolve_renamed_stem` reads); rewrites the old stem in
 every trait file whose `arrangement` names it (members, re-sorted except
-for `sequence` and `ring`; `axes`; `parent`; `children`; each note
+for `sequence` and `ring`; `axes`; a tree's `structure` keys; each note
 extended) and sets the paired partner's `negative_label` to the new label,
 listing and leaving alone a trait whose label points at the old stem one
 way only, then runs `check_arrangements.py` and says whose neg
@@ -648,7 +648,7 @@ compassionate / malicious / callous triangle).
 | `cube`, `N-cube` (N ≥ 4) | 8, 2^N | every combination of N binary axes (MBTI's 16 types are a 4-cube) |
 | `octahedron`, `N-orthoplex` (N ≥ 4) | 6, 2N | the poles of N clean pairs (HEXACO is a 6-orthoplex) |
 | `ring` | ≥ 3, ordered | circumplex: neighbours close, opposites opposite |
-| `tree` | ≥ 2, with `parent` / `children` | hierarchy (domains over aspects over facets) |
+| `tree` | ≥ 2, with the hierarchy nested in `structure` | hierarchy (domains over aspects over facets) |
 | `map` | ≥ 2 | unordered, expected to have low-dimensional metric structure (nationalities, ethnicities) |
 | `sequence` | ≥ 2, ordered | roughly an axis with interesting deviations (the moral-circle group) |
 | `set` | ≥ 2 | unstructured |
@@ -682,9 +682,9 @@ Rules:
    partition into clean pairs).  Roles have no `negative_label`, so role
    pairs (angel / demon, predator / prey, ...) exist only here.
 4. **Optional keys**: `axes` (the clean pairs forming the axes of a
-   square / cube / orthoplex), `parent` and `children` (tree only),
-   `source` (provenance of an imported structure), `note` (free text).
-   Unknown keys are preserved.  **A pole of a clean pair that is also a
+   square / cube / orthoplex), `structure` (tree only, and required
+   there), `source` (provenance of an imported structure), `note` (free
+   text).  Unknown keys are preserved.  **A pole of a clean pair that is also a
    member of a square / orthoplex carries both arrangements** (the list
    form): the `pair` always, because it is the prompt-facing clean-pair
    convention that rule 3 and the checker rely on, and the structure
@@ -693,6 +693,25 @@ Rules:
    it); so written for the Big Five 5-orthoplex, the HEXACO 6-orthoplex
    and the Inglehart-Welzel square.  A cube or set of *unpaired* members
    (the MBTI 4-cube) has no pairs to carry.
+
+   **Trees are stored nested (Roger, 2026-10-09)**, so that every member
+   file records the identical arrangement, as rule 1 asks: `structure` is
+   a JSON object whose keys are stems and whose values are their subtrees
+   (`{}` for a leaf), with exactly one root key, every stem once, and the
+   stems equal to `members` (sorted, as for the other unordered kinds);
+   children are written in sorted order.
+
+   ```json
+   {"kind": "tree", "members": ["polyandrous", "polygamous", "polygynous"],
+    "structure": {"polygamous": {"polyandrous": {}, "polygynous": {}}}}
+   ```
+
+   This replaced the per-file `parent` / `children` links before any tree
+   was written (each member file carried a different arrangement, the one
+   exception to rule 1); the parser now rejects those two keys with a
+   pointer to `structure`, the checker reports a member file whose tree
+   has the same members but a different hierarchy, and
+   `arrangements.tree_links` gives each member's parent and children.
 5. **Check after every edit**:
    `uv run python data_analysis/check_arrangements.py` (exit 1 on any
    inconsistency; `--list-unclassified` prints the backlog).
