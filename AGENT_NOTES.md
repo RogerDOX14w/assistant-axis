@@ -1191,14 +1191,32 @@ prompts of the entities concerned: a rubric change for them.
 | [`infer_axis_description.py`](results_analysis/infer_axis_description.py) `_display_label` | none (single-shot describer) | roles now take their overrides (`devil's advocate`) |
 
 **Exclusions**: keys, cache keys, file names and ρ operands stay stems
-(never key on a judge label).  Trait-gap candidates that are not corpus
-entities yet, and the trait-gap session's own tools
-([`assistant_axis/gapgen/`](assistant_axis/gapgen/),
-[`data_analysis/gap_generation/`](data_analysis/gap_generation/)), are a
-separate issue for that session; they load the stored `positive_label`
-today, and `judge_form_of_label` is the helper to adopt.  A new prompt
-builder that names an entity calls `judge_label` (or `judge_form_of_label`
-on a label string) and stamps a rubric version.
+(never key on a judge label).  A new prompt builder that names an entity
+calls `judge_label` (or `judge_form_of_label` on a label string) and stamps
+a rubric version.
+
+**The trait-gap tools** ([`assistant_axis/gapgen/`](assistant_axis/gapgen/),
+[`data_analysis/gap_generation/`](data_analysis/gap_generation/)) adopted
+the rule on 2026-10-10 (11428d1): every prompt they build (M1, M3's relation
+and overlap calls, the near-duplicate scan, the review graph, corpus
+regions, the states, physical and plain-reading passes, the Roget placement
+check, the M2 calibration's paraphrase and blinded-judge calls) shows labels
+through [`prompt_labels.prompt_label`](assistant_axis/gapgen/prompt_labels.py),
+which applies `judge_form_of_label` at render time (and shows a stem stored
+as a label, such as the queue's `open_ended`, as `open ended`).  Stored
+labels, `novelty.CorpusTrait.label`, registry rows and the embedded text
+(`label: description`, the embedding cache, the M2 calibration) keep the
+stored label.  These tools record the form in each run's record
+(`label_form`: `judge-display-v1`; no field means `stored`, every run before
+the change) instead of bumping a rubric version, since no rubric text
+changed; Roger to confirm.  A resumed or replayed run (`--resume`,
+`--redecide`, `--relation-only`, `full-scan`) keeps the form its run
+recorded, so it never pairs answers with prompts they were not given.
+Records judged on the stored label are not re-asked: 84 Roget placement
+checks and 89 corpus-region rows of standard-labelled traits.  Details and
+rendered samples:
+[`coding_plan_platform.md`](reports/trait_gap_generation/coding_plan_platform.md),
+"Judge display form (2026-10-09)".
 
 ### Known permanent gap: `virus|R` on Sonnet instructions mode
 <!-- claude: rule=judge-refusal-gaps -->
