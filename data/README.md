@@ -168,11 +168,17 @@ Structure: `metadata`, `scores[]` (per-combo with `per_pair` reasoning and
 `score_min`/`score_max`/`score_mean`), and `summary` with distribution.
 
 Default run covers all 40 goal roles x 40 non-goal traits + 40 non-goal
-roles x 40 goal traits = 3200 combinations. Results show Sonnet interprets
-incongruity more strictly than manual assessment: 51% score 0, 16% score 3.
-The t_ combos (goal traits like harmful/lustful on professional roles) score
-higher on average (mean 1.25) than r_ combos (communication-style traits on
-character roles, mean 0.69).
+roles x 40 goal traits = 3200 combinations (April 2026).  Sonnet 4 scored
+every combination and Opus 4.6 rescored the 477 whose Sonnet score reached 2
+(two more were set by hand), which brought the distribution down from the
+first, Sonnet-only picture (51% score 0, 16% score 3).  The file's `summary`
+now gives 2187 / 862 / 134 / 17 combinations at rounded mean 0 / 1 / 2 / 3,
+mean 0.38.  The t_ combos (goal traits such as harmful or lustful on
+professional roles) still score higher on average (mean 0.50) than the r_
+combos (communication-style traits on character roles, mean 0.25).  The
+scores were made on the instructions of April 2026; the corpus has since been
+regenerated (traits under rubric V2, roles under V3), so a rerun for the
+combinations in use would be needed before relying on them.
 
 ## Notes Files
 
