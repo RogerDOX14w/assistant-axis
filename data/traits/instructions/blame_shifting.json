@@ -79,7 +79,12 @@
     "batch": true
   },
   "arrangement": {
-    "kind": "singleton",
-    "note": "Roger 2026-09-26: accountable / blame_shifting / self_blaming is arguably a triangle, or possibly a more complex shape (Roger suspects a square, or more accurately a kite); both vices check to accountable, accountable checks to deflecting|evasive. Classify in the arrangement pass."
+    "kind": "triangle",
+    "members": [
+      "accountable",
+      "blame_shifting",
+      "self_blaming"
+    ],
+    "note": "2026-10-09 (Roger, pre-extraction work list W8): a triangle, not a kite. Two vices of attribution (blame on others, blame on oneself) with the virtue, owning one's part no more and no less, as the reasonable middle. The extraction tests whether accountable lies between the vices (a sequence) or off the line."
   }
 }

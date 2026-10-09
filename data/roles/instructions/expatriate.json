@@ -71,6 +71,17 @@
     "batch": true
   },
   "arrangement": {
-    "kind": "singleton"
+    "kind": "map",
+    "members": [
+      "exile",
+      "expatriate",
+      "immigrant",
+      "naturalized_citizen",
+      "nomad",
+      "pilgrim",
+      "refugee",
+      "wanderer"
+    ],
+    "note": "2026-10-09 (Roger, pre-extraction work list W12): migration and movement, expected roughly two-dimensional on the September role audit's axes, rootedness (settled to moving) and agency (chosen to forced). Caveats: the axes are a hypothesis; pilgrim and wanderer are as much travel as migration; no member is both forced and still moving."
   }
 }

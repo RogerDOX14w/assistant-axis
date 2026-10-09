@@ -71,6 +71,20 @@
     "batch": true
   },
   "arrangement": {
-    "kind": "singleton"
+    "kind": "sequence",
+    "members": [
+      "infant",
+      "toddler",
+      "child",
+      "teenager",
+      "student",
+      "graduate",
+      "newlywed",
+      "parent",
+      "grandparent",
+      "retiree",
+      "elder"
+    ],
+    "note": "2026-10-09 (Roger, pre-extraction work list W12): life stages, retiree before elder (the elder is the oldest member of a community). Left out: events and off-ramps (widow, divorcee, orphan), intern, pregnant, prodigy, veteran. Its trait-side counterpart is the age sequence young, middle_aged, elderly; arrangements are same-type only."
   }
 }

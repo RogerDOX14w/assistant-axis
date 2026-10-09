@@ -70,14 +70,30 @@
     "generated_at": "2026-10-03",
     "batch": true
   },
-  "arrangement": {
-    "kind": "square",
-    "members": [
-      "assimilated",
-      "exile",
-      "immigrant",
-      "marginalized"
-    ],
-    "note": "Berry's acculturation strategies (decided 2026-09-07): immigrant = integration, exile = separation, assimilated = assimilation, marginalized = marginalization; axes heritage maintenance x host participation. Recorded on the two existing corners 2026-09-16 when the new corners were seeded; refugee was also named as a corner in the queue file and is left singleton."
-  }
+  "arrangement": [
+    {
+      "kind": "map",
+      "members": [
+        "exile",
+        "expatriate",
+        "immigrant",
+        "naturalized_citizen",
+        "nomad",
+        "pilgrim",
+        "refugee",
+        "wanderer"
+      ],
+      "note": "2026-10-09 (Roger, pre-extraction work list W12): migration and movement, expected roughly two-dimensional on the September role audit's axes, rootedness (settled to moving) and agency (chosen to forced). Caveats: the axes are a hypothesis; pilgrim and wanderer are as much travel as migration; no member is both forced and still moving."
+    },
+    {
+      "kind": "square",
+      "members": [
+        "assimilated",
+        "bicultural",
+        "exile",
+        "marginalized"
+      ],
+      "note": "Berry's acculturation strategies (decided 2026-09-07): integration (immigrant until 2026-10-09, now bicultural), exile = separation, assimilated = assimilation, marginalized = marginalization; axes heritage maintenance x host participation. Recorded on the two existing corners 2026-09-16 when the new corners were seeded; refugee was also named as a corner in the queue file and is left singleton. | 2026-10-09 (Roger, pre-extraction work list W12): bicultural replaces immigrant as the integration corner; bicultural was written as assimilated's mirror (both born to immigrant parents), so that edge differs only in the heritage kept; immigrant (first generation) keeps the migration map."
+    }
+  ]
 }

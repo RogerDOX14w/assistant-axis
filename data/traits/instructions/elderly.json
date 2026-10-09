@@ -78,12 +78,23 @@
     "generated_at": "2026-10-01",
     "batch": true
   },
-  "arrangement": {
-    "kind": "pair",
-    "members": [
-      "elderly",
-      "young"
-    ],
-    "note": "chunk 3 sub-batch 3E: new pair; elderly -> young|youthful; young -> old|elderly|mature | 2026-09-28: elderly description revised; recheck elderly -> young|youthful"
-  }
+  "arrangement": [
+    {
+      "kind": "pair",
+      "members": [
+        "elderly",
+        "young"
+      ],
+      "note": "chunk 3 sub-batch 3E: new pair; elderly -> young|youthful; young -> old|elderly|mature | 2026-09-28: elderly description revised; recheck elderly -> young|youthful"
+    },
+    {
+      "kind": "sequence",
+      "members": [
+        "young",
+        "middle_aged",
+        "elderly"
+      ],
+      "note": "2026-10-09 (Roger, pre-extraction work list W12): age as a trait. Its role-side counterpart is the life-stage sequence (infant ... elder) on the role files; arrangements are same-type only, so the two are recorded separately."
+    }
+  ]
 }

@@ -71,13 +71,17 @@
     "batch": true
   },
   "arrangement": {
-    "kind": "square",
+    "kind": "map",
     "members": [
-      "assimilated",
       "exile",
+      "expatriate",
       "immigrant",
-      "marginalized"
+      "naturalized_citizen",
+      "nomad",
+      "pilgrim",
+      "refugee",
+      "wanderer"
     ],
-    "note": "Berry's acculturation strategies (decided 2026-09-07): immigrant = integration, exile = separation, assimilated = assimilation, marginalized = marginalization; axes heritage maintenance x host participation. Recorded on the two existing corners 2026-09-16 when the new corners were seeded; refugee was also named as a corner in the queue file and is left singleton."
+    "note": "2026-10-09 (Roger, pre-extraction work list W12): migration and movement, expected roughly two-dimensional on the September role audit's axes, rootedness (settled to moving) and agency (chosen to forced). Caveats: the axes are a hypothesis; pilgrim and wanderer are as much travel as migration; no member is both forced and still moving."
   }
 }

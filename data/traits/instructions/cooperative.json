@@ -78,11 +78,24 @@
     "generated_at": "2026-10-01",
     "batch": true
   },
-  "arrangement": {
-    "kind": "pair",
-    "members": [
-      "competitive",
-      "cooperative"
-    ]
-  }
+  "arrangement": [
+    {
+      "kind": "pair",
+      "members": [
+        "competitive",
+        "cooperative"
+      ]
+    },
+    {
+      "kind": "sequence",
+      "members": [
+        "altruistic",
+        "cooperative",
+        "selfish",
+        "competitive"
+      ],
+      "source": "Social value orientation (Murphy, Ackermann & Handgraaf 2011; the triple-dominance measure)",
+      "note": "2026-10-09 (Roger, pre-extraction work list W11): the orientations as points on one angle, weight on the other's outcome against one's own: altruistic, prosocial (cooperative), individualistic (selfish), competitive. The corpus's individualistic is the cultural sense and stays out. The two clean pairs are chords of the arc."
+    }
+  ]
 }

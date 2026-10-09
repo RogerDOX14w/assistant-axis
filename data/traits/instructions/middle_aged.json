@@ -81,7 +81,13 @@
     "membership"
   ],
   "arrangement": {
-    "kind": "singleton"
+    "kind": "sequence",
+    "members": [
+      "young",
+      "middle_aged",
+      "elderly"
+    ],
+    "note": "2026-10-09 (Roger, pre-extraction work list W12): age as a trait. Its role-side counterpart is the life-stage sequence (infant ... elder) on the role files; arrangements are same-type only, so the two are recorded separately."
   },
   "hand_edits": "2026-10-08: p4 opening rewritten by hand into the fifth form (plain 'You are ...') after two generations still doubled 'You are someone who'"
 }

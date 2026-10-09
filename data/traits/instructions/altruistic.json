@@ -77,12 +77,25 @@
     "thinking_budget": 0,
     "generated_at": "2026-10-06"
   },
-  "arrangement": {
-    "kind": "pair",
-    "members": [
-      "altruistic",
-      "selfish"
-    ],
-    "note": "Tier B fix 2026-09-16: selfish.neg unselfish -> altruistic; antonym check both ways (selfish -> selfless|altruistic, altruistic -> selfish)"
-  }
+  "arrangement": [
+    {
+      "kind": "pair",
+      "members": [
+        "altruistic",
+        "selfish"
+      ],
+      "note": "Tier B fix 2026-09-16: selfish.neg unselfish -> altruistic; antonym check both ways (selfish -> selfless|altruistic, altruistic -> selfish)"
+    },
+    {
+      "kind": "sequence",
+      "members": [
+        "altruistic",
+        "cooperative",
+        "selfish",
+        "competitive"
+      ],
+      "source": "Social value orientation (Murphy, Ackermann & Handgraaf 2011; the triple-dominance measure)",
+      "note": "2026-10-09 (Roger, pre-extraction work list W11): the orientations as points on one angle, weight on the other's outcome against one's own: altruistic, prosocial (cooperative), individualistic (selfish), competitive. The corpus's individualistic is the cultural sense and stays out. The two clean pairs are chords of the arc."
+    }
+  ]
 }
