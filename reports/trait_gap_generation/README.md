@@ -152,3 +152,11 @@ partner hints on `Candidate`, run selectors on the filter and scorer CLIs, the r
 working with every trait hidden, an exported embedder, idempotency of resubmission).  Settle
 those when reviewing the platform plan, since they change its frozen section.  Roger's
 review comments go into the plan files; then Opus executes the platform first.
+
+## Low-priority TODOs
+
+- **Chandler / Anderson likableness ratings** (QUESTIONS 31, left out 2026-10-09): Anderson's 555 trait words with
+  likableness, re-rated by Chandler (2018, *Journal of Research in Personality* 72, 50-57) with 486 more words,
+  meaningfulness and emotion coding, on OSF project [3wqx5](https://osf.io/3wqx5/).  No licence is stated, so it is
+  not used.  If ever wanted, Roger emails the author asking for one (such as CC BY); expected value is small, since
+  the words largely duplicate the TDA and Allport-Odbert and the filter already tags evaluative and emotion words.
